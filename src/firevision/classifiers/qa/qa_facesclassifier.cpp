@@ -4,6 +4,7 @@
  *
  *  Generated: Wed Apr 11 16:02:33 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *             2009  Daniel Beck
  *
  *  $Id$
  *
@@ -25,22 +26,22 @@
 
 /// @cond QA
 
-#include <cams/factory.h>
-#include <classifiers/faces.h>
-#include <filters/roidraw.h>
 #include <fvutils/adapters/iplimage.h>
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/color/conversions.h>
-#include <fvutils/draw/drawer.h>
 #include <fvutils/readers/jpeg.h>
+#include <fvutils/draw/drawer.h>
+#include <classifiers/faces.h>
+#include <filters/roidraw.h>
 #include <fvwidgets/image_display.h>
 #include <utils/system/argparser.h>
+#include <utils/time/tracker.h>
+#include <cams/factory.h>
 
 #include <SDL.h>
 #include <opencv/cv.h>
 
-#include <cstdio>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace fawkes;
 
@@ -110,29 +111,32 @@ main(int argc, char **argv)
       return( -1 );
     }
 
-    printf ( "using cascade file %s\n", cascade_file );
     printf( "successfully opened camera: w=%d h=%d\n",
 	    camera->pixel_width(), camera->pixel_height() );
+
+    TimeTracker* tt = new TimeTracker();
+    unsigned int ttc_recognition = tt->add_class( "Face recognition" );
+    unsigned int loop_count = 0;
     
-    size_t buf_size = colorspace_buffer_size( YUV422_PLANAR,
-					      camera->pixel_width(),
-					      camera->pixel_height() );
- 
-    unsigned char* yuv422_planar_buffer = (unsigned char*) malloc( buf_size );
-    unsigned char* display_buffer       = (unsigned char*) malloc( buf_size );
 
     IplImage* image = cvCreateImage( cvSize( camera->pixel_width(),
 					     camera->pixel_height() ),
 				     IPL_DEPTH_8U, 3 );
 
+    IplImage* scaled_image = cvCreateImage( cvSize( camera->pixel_width() / 2,
+						    camera->pixel_height() / 2 ),
+					    IPL_DEPTH_8U, 3 );
+
     FacesClassifier *classifier = new FacesClassifier( cascade_file,
 						       camera->pixel_width(),
 						       camera->pixel_height(),
-						       image,
+						       scaled_image,
 						       1.2 /* scale factor */,
-						       2 /* num neighbours */,
+						       2 /* min neighbours */,
 						       CV_HAAR_DO_CANNY_PRUNING );
     
+    unsigned char* display_buffer = (unsigned char*) malloc( camera->buffer_size() );
+
     ImageDisplay* display = new ImageDisplay( camera->pixel_width(),
 					      camera->pixel_height(),
 					      "QA Faces Classifier" );
@@ -167,13 +171,13 @@ main(int argc, char **argv)
 	    
 	    if ( camera->buffer() != NULL )
 	    {
-	      convert( camera->colorspace(), YUV422_PLANAR,
-		       camera->buffer(), yuv422_planar_buffer,
-		       camera->pixel_width(), camera->pixel_height() );
- 	      memcpy( display_buffer, yuv422_planar_buffer, buf_size );
-	      IplImageAdapter::convert_image_bgr( yuv422_planar_buffer, image );
+	      IplImageAdapter::convert_image_bgr( camera->buffer(), image );
+	      cvResize( image, scaled_image, CV_INTER_LINEAR );
+	      memcpy( display_buffer, camera->buffer(), camera->buffer_size() );
 
+	      tt->ping_start( ttc_recognition );
 	      std::list< ROI > *rois = classifier->classify();
+	      tt->ping_end( ttc_recognition );
 	      
 	      camera->dispose_buffer();
     
@@ -182,16 +186,13 @@ main(int argc, char **argv)
 		    i != rois->rend();
 		    ++i )
 	      {
-// 		printf("ROI: start (%u, %u)  extent %u x %u\n",
-// 		       (*i).start.x, (*i).start.y,
-// 		       (*i).width, (*i).height);
-
 		if ( first ) { drawer->set_color( 127, 70, 200 ); }
-		drawer->draw_rectangle( i->start.x, i->start.y, i->width, i->height );
+		drawer->draw_rectangle( 2 * i->start.x, 2 * i->start.y, 2 * i->width, 2 * i->height );
 		if ( first ) { drawer->set_color( 30, 30, 30 ); first = false; }
 	      }
 
-	      delete rois;
+	      if ( ++loop_count % 15 == 0 ) { tt->print_to_stdout(); }
+
 	      display->show( display_buffer );
 	    }
 
@@ -214,10 +215,10 @@ main(int argc, char **argv)
     delete camera;
     delete display;
     delete drawer;
-    delete classifier;
     free( display_buffer );
-    free( yuv422_planar_buffer );
     cvReleaseImage( &image );
+    cvReleaseImage( &scaled_image );
+    delete tt;
   }
 
   else
