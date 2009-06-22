@@ -104,7 +104,7 @@ const unsigned int SonyEviD100PControl::EFFECT_STRETCH  = 8;
 SonyEviD100PControl::SonyEviD100PControl(const char *tty_port)
 {
   this->tty_port = strdup(tty_port);
-  visca = new Visca( /* non-blocking */ false );
+  visca = new ViscaControl( /* non-blocking */ false );
   opened = false;
   pan_target = 0;
   tilt_target = 0;
@@ -123,7 +123,7 @@ SonyEviD100PControl::SonyEviD100PControl(const CameraArgumentParser *cap)
 {
   tty_port = strdup(cap->cam_id().c_str());
 
-  visca = new Visca( /* non-blocking */ false );
+  visca = new ViscaControl( /* non-blocking */ false );
   opened = false;
   pan_target = 0;
   tilt_target = 0;
@@ -154,7 +154,7 @@ SonyEviD100PControl::open()
     visca->open(tty_port);
     visca->set_address(1);
     visca->clear();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     visca->close();
     e.append("Sony EviD100PControl failed");
     throw;

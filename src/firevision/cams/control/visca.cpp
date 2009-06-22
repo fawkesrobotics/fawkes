@@ -34,14 +34,14 @@
 
 #include <utils/system/console_colors.h>
 
-/** @class ViscaException <cams/control/visca.h>
+/** @class ViscaControlException <cams/control/visca.h>
  * Visca exception.
  */
 
 /** Constructor.
  * @param msg message of exception.
  */
-ViscaException::ViscaException(const char *msg)
+ViscaControlException::ViscaControlException(const char *msg)
   : Exception(msg)
 {
 }
@@ -51,35 +51,35 @@ ViscaException::ViscaException(const char *msg)
  * @param msg message prefix
  * @param _errno errno for additional error information.
  */
-ViscaException::ViscaException(const char *msg, const int _errno)
+ViscaControlException::ViscaControlException(const char *msg, const int _errno)
   : Exception(msg, _errno)
 {
 }
 
-/** @class ViscaInquiryRunningException <cams/control/visca.h>
+/** @class ViscaControlInquiryRunningException <cams/control/visca.h>
  * Visca inquire running exception.
  */
 
 /** Constructor. */
-ViscaInquiryRunningException::ViscaInquiryRunningException()
-  : Exception("Inquiry already running")
+ViscaControlInquiryRunningException::ViscaControlInquiryRunningException()
+  : ViscaControlException("Inquiry already running")
 {
 }
 
 /** Automatic white balance. */
-const unsigned int Visca::VISCA_WHITEBLANCE_AUTO      = VISCA_WB_AUTO;
+const unsigned int ViscaControl::VISCA_WHITEBLANCE_AUTO      = VISCA_WB_AUTO;
 /** Indoor white balance preset. */
-const unsigned int Visca::VISCA_WHITEBALANCE_INDOOR   = VISCA_WB_INDOOR;
+const unsigned int ViscaControl::VISCA_WHITEBALANCE_INDOOR   = VISCA_WB_INDOOR;
 /** Outdoor white balance preset. */
-const unsigned int Visca::VISCA_WHITEBALANCE_OUTDOOR  = VISCA_WB_OUTDOOR;
+const unsigned int ViscaControl::VISCA_WHITEBALANCE_OUTDOOR  = VISCA_WB_OUTDOOR;
 /** One push white balance preset. */
-const unsigned int Visca::VISCA_WHITEBALANCE_ONE_PUSH = VISCA_WB_ONE_PUSH;
+const unsigned int ViscaControl::VISCA_WHITEBALANCE_ONE_PUSH = VISCA_WB_ONE_PUSH;
 /** ATW white balance preset. */
-const unsigned int Visca::VISCA_WHITEBALANCE_ATW      = VISCA_WB_ATW;
+const unsigned int ViscaControl::VISCA_WHITEBALANCE_ATW      = VISCA_WB_ATW;
 /** Manual white balance. */
-const unsigned int Visca::VISCA_WHITEBALANCE_MANUAL   = VISCA_WB_MANUAL;
+const unsigned int ViscaControl::VISCA_WHITEBALANCE_MANUAL   = VISCA_WB_MANUAL;
 
-/** @class Visca <cams/control/visca.h>
+/** @class ViscaControl <cams/control/visca.h>
  * Visca control protocol implementation over a serial line.
  * @author Tim Niemueller
  */
@@ -88,7 +88,7 @@ const unsigned int Visca::VISCA_WHITEBALANCE_MANUAL   = VISCA_WB_MANUAL;
 /** Constructor.
  * @param blocking if true, operate in blocking mode, false to operate in non-blocking mode.
  */
-Visca::Visca(bool blocking)
+ViscaControl::ViscaControl(bool blocking)
 {
   opened = false;
   inquire = VISCA_RUNINQ_NONE;
@@ -105,17 +105,17 @@ Visca::Visca(bool blocking)
  * @param port port to open.
  */
 void
-Visca::open(const char *port) {
+ViscaControl::open(const char *port) {
 
   struct termios param;
 
   dev = ::open(port, O_CREAT | O_RDWR | O_NONBLOCK);
   if (! dev) {
-    throw ViscaException("Cannot open device", errno);
+    throw ViscaControlException("Cannot open device", errno);
   }
 
   if (tcgetattr(dev, &param) == -1) {
-    ViscaException ve("Getting the port parameters failed", errno);
+    ViscaControlException ve("Getting the port parameters failed", errno);
     ::close(dev);
     throw ve;
   }
@@ -161,7 +161,7 @@ Visca::open(const char *port) {
   param.c_cflag &= ~CSTOPB;
 
   if (tcsetattr(dev, TCSANOW, &param) != 0) {
-    ViscaException ve("Setting the port parameters failed", errno);
+    ViscaControlException ve("Setting the port parameters failed", errno);
     ::close(dev);
     throw ve;
   }
@@ -186,7 +186,7 @@ Visca::open(const char *port) {
 
 /** Close port. */
 void
-Visca::close()
+ViscaControl::close()
 {
   if (opened) {
     opened = false;
@@ -199,7 +199,7 @@ Visca::close()
  * @param num_cameras number of cameras on bus
  */
 void
-Visca::set_address(unsigned int num_cameras)
+ViscaControl::set_address(unsigned int num_cameras)
 {
   unsigned char recp_backup = recipient;
   recipient = VISCA_BUS_BROADCAST;
@@ -210,7 +210,7 @@ Visca::set_address(unsigned int num_cameras)
   try {
     send();
     recv(0);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("set_address(%u) failed", num_cameras);
     throw;
   }
@@ -221,9 +221,9 @@ Visca::set_address(unsigned int num_cameras)
 
 /** Clear */
 void
-Visca::clear()
+ViscaControl::clear()
 {
-  if (!opened)  throw ViscaException("Serial port not open");
+  if (!opened)  throw ViscaControlException("Serial port not open");
 
   obuffer[1] = 0x01;
   obuffer[2] = 0x00;
@@ -233,7 +233,7 @@ Visca::clear()
   try {
     send();
     recv(0);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("clear() failed");
     throw;
   }
@@ -242,9 +242,9 @@ Visca::clear()
 
 /** Send outbound queue. */
 void
-Visca::send()
+ViscaControl::send()
 {
-  if (!opened)  throw ViscaException("Serial port not open");
+  if (!opened)  throw ViscaControlException("Serial port not open");
 
   // Set first bit to 1
   obuffer[0] =  0x80;
@@ -255,13 +255,13 @@ Visca::send()
   ++obuffer_length;
 
   int written = write(dev, obuffer, obuffer_length);
-  //printf("Visca sent: ");
+  //printf("ViscaControl sent: ");
   //for (int i = 0; i < obuffer_length; ++i) {
   //  printf("%02X", obuffer[i]);
   //}
   //printf("\n");
   if (written < obuffer_length) {
-    throw ViscaException("Not all bytes send");
+    throw ViscaControlException("Not all bytes send");
   }
 }
 
@@ -270,7 +270,7 @@ Visca::send()
  * @return true if data is available, false otherwise
  */
 bool
-Visca::data_available()
+ViscaControl::data_available()
 {
   int num_bytes = 0;
   ioctl(dev, FIONREAD, &num_bytes);
@@ -282,11 +282,11 @@ Visca::data_available()
  * @param max_wait_ms maximum wait time in miliseconds
  */
 void
-Visca::recv(unsigned int max_wait_ms)
+ViscaControl::recv(unsigned int max_wait_ms)
 {
   try {
     recv_packet(max_wait_ms);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("Receiving failed, recv_packet() call failed");
     throw;
   }
@@ -296,7 +296,7 @@ Visca::recv(unsigned int max_wait_ms)
   while (type == VISCA_RESPONSE_ACK) {
     try {
       recv_packet(max_wait_ms);
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       e.append("Receiving failed, recv_packet() call 2 failed");
       throw;
     }
@@ -310,7 +310,7 @@ Visca::recv(unsigned int max_wait_ms)
   case VISCA_RESPONSE_ERROR:
     break;
   default:
-    throw ViscaException("Receiving failed, unexpected packet type received");
+    throw ViscaControlException("Receiving failed, unexpected packet type received");
   }
 }
 
@@ -319,12 +319,12 @@ Visca::recv(unsigned int max_wait_ms)
  * @param socket contains the socket that the ACK was received on upon return
  */
 void
-Visca::recv_ack(unsigned int *socket)
+ViscaControl::recv_ack(unsigned int *socket)
 {
   try {
     recv_packet(0);
-  } catch (ViscaException &e) {
-    throw ViscaException("recv_ack(): recv_packet() failed");
+  } catch (ViscaControlException &e) {
+    throw ViscaControlException("recv_ack(): recv_packet() failed");
   }
 
   // Get type of message
@@ -334,7 +334,7 @@ Visca::recv_ack(unsigned int *socket)
     try {
       handle_response();
       recv_packet();
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       e.append("Handling message of type %u failed", type);
       throw;
     }
@@ -354,12 +354,12 @@ Visca::recv_ack(unsigned int *socket)
  * @param socket the socket that was used to send the request.
  */
 void
-Visca::send_nonblocking(unsigned int *socket)
+ViscaControl::send_nonblocking(unsigned int *socket)
 {
   try {
     send();
     recv_ack(socket);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("Non-blocking send failed!");
     throw;
   }
@@ -369,12 +369,12 @@ Visca::send_nonblocking(unsigned int *socket)
 /** Send and wait for reply, blocking.
  */
 void
-Visca::send_with_reply()
+ViscaControl::send_with_reply()
 {
   try {
     send();
     recv();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("Sending with reply failed");
     throw;
   }
@@ -385,7 +385,7 @@ Visca::send_with_reply()
  * @param max_wait_ms maximum wait time in miliseconds
  */
 void
-Visca::recv_packet(unsigned int max_wait_ms)
+ViscaControl::recv_packet(unsigned int max_wait_ms)
 {
   // wait for message
   timeval start, now;
@@ -402,7 +402,7 @@ Visca::recv_packet(unsigned int max_wait_ms)
     diff_msec  = (now.tv_sec  - start.tv_sec) * 1000 + (now.tv_usec - start.tv_usec) / 1000;
   }
   if (num_bytes == 0) {
-    throw ViscaException("recv_packet() failed: no bytes to read");
+    throw ViscaControlException("recv_packet() failed: no bytes to read");
   }
 
   // get octets one by one
@@ -413,7 +413,7 @@ Visca::recv_packet(unsigned int max_wait_ms)
     usleep(0);
   }
   ibuffer_length = pos + 1;
-  //printf("Visca read: ");
+  //printf("ViscaControl read: ");
   //for (int i = 0; i < ibuffer_length; ++i) {
   //  printf("%02X", ibuffer[i]);
   //}
@@ -425,7 +425,7 @@ Visca::recv_packet(unsigned int max_wait_ms)
  * @param socket socket that the non-blocking operation was sent to
  */
 void
-Visca::finish_nonblocking( unsigned int socket )
+ViscaControl::finish_nonblocking( unsigned int socket )
 {
   for (unsigned int i = 0; i < VISCA_NONBLOCKING_NUM; ++i) {
     if (nonblocking_sockets[i] == socket) {
@@ -435,36 +435,36 @@ Visca::finish_nonblocking( unsigned int socket )
     }
   }
 
-  throw ViscaException("finish_nonblocking() failed: socket not found");
+  throw ViscaControlException("finish_nonblocking() failed: socket not found");
 }
 
 
 /** Handle incoming response.  */
 void
-Visca::handle_response()
+ViscaControl::handle_response()
 {
   unsigned int type = ibuffer[1] & 0xF0;
   unsigned int socket = ibuffer[1] & 0x0F;
 
   if (socket == 0) {
     // This is an inquire response, do NOT handle!
-    throw ViscaException("handle_response(): Received an inquire response, can't handle");
+    throw ViscaControlException("handle_response(): Received an inquire response, can't handle");
   }
 
   if ( type == VISCA_RESPONSE_COMPLETED ) {
     // Command has been finished
     try {
       finish_nonblocking( ibuffer[1] & 0x0F );
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       // Ignore, happens sometimes without effect
       // e.append("handle_response() failed, could not finish non-blocking");
       // throw;
     }
   } else if ( type == VISCA_RESPONSE_ERROR ) {
     finish_nonblocking( ibuffer[1] & 0x0F );
-    throw ViscaException("handle_response(): got an error message from camera");
+    throw ViscaControlException("handle_response(): got an error message from camera");
   } else {
-    ViscaException ve("Got unknown/unhandled response type");
+    ViscaControlException ve("Got unknown/unhandled response type");
     ve.append("Received message of type %u", type);
     throw ve;
   }
@@ -476,7 +476,7 @@ Visca::handle_response()
  * @param socket socket that the command was send on
  */
 void
-Visca::cancel_command( unsigned int socket )
+ViscaControl::cancel_command( unsigned int socket )
 {
   unsigned char cancel_socket = socket & 0x0000000F;
 
@@ -485,7 +485,7 @@ Visca::cancel_command( unsigned int socket )
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("cancel_command() failed");
     throw;
   }
@@ -495,14 +495,14 @@ Visca::cancel_command( unsigned int socket )
 	((ibuffer[2] == VISCA_ERROR_CANCELLED)) ) {
     return;
   } else {
-    throw ViscaException("Command could not be cancelled");
+    throw ViscaControlException("Command could not be cancelled");
   }
 }
 
 
 /** Process incoming data. */
 void
-Visca::process()
+ViscaControl::process()
 {
 
   inquire = VISCA_RUNINQ_NONE;
@@ -511,7 +511,7 @@ Visca::process()
     try {
       recv();
       handle_response();
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       // Ignore this error
       return;
     }
@@ -524,7 +524,7 @@ Visca::process()
  * @param tilt tilt
  */
 void
-Visca::setPanTilt(int pan, int tilt)
+ViscaControl::setPanTilt(int pan, int tilt)
 {
   
   // we do not to check for blocking, could not be called at
@@ -533,7 +533,7 @@ Visca::setPanTilt(int pan, int tilt)
   if ( nonblocking_running[ VISCA_NONBLOCKING_PANTILT] ) {
     cout << "Cancelling old setPanTilt" << endl;
     if (cancel_command( nonblocking_sockets[ VISCA_NONBLOCKING_PANTILT ] ) != VISCA_SUCCESS) {
-      cout << "Visca: Could not cancel old non-blocking pan/tilt command. Not setting new pan/tilt." << endl;
+      cout << "ViscaControl: Could not cancel old non-blocking pan/tilt command. Not setting new pan/tilt." << endl;
       return VISCA_E_CANCEL;
     }
     nonblocking_running[ VISCA_NONBLOCKING_PANTILT ] = false;
@@ -571,7 +571,7 @@ Visca::setPanTilt(int pan, int tilt)
     } else {
       send_with_reply();
     }
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("setPanTilt() failed");
     throw;
   }
@@ -580,10 +580,10 @@ Visca::setPanTilt(int pan, int tilt)
 
 /** Initiate a pan/tilt request, but do not wait for the reply. */
 void
-Visca::startGetPanTilt()
+ViscaControl::startGetPanTilt()
 {
 
-  if ( inquire )  throw ViscaInquiryRunningException();
+  if ( inquire )  throw ViscaControlInquiryRunningException();
 
   inquire = VISCA_RUNINQ_PANTILT;
 
@@ -594,7 +594,7 @@ Visca::startGetPanTilt()
 
   try {
     send();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("startGetPanTilt() failed");
     throw;
   }
@@ -609,19 +609,19 @@ Visca::startGetPanTilt()
  * @param tilt contains tilt upon return
  */
 void
-Visca::getPanTilt(int *pan, int *tilt)
+ViscaControl::getPanTilt(int *pan, int *tilt)
 {
 
   if ( inquire ) {
     if ( inquire != VISCA_RUNINQ_PANTILT ) {
-      throw ViscaException("Inquiry running, but it is not a pan/tilt inquiry");
+      throw ViscaControlException("Inquiry running, but it is not a pan/tilt inquiry");
     } else {
 #ifdef TIMETRACKER_VISCA
       tracker->pingStart( ttcls_pantilt_get_read );
 #endif
       try {
 	recv();
-      } catch (ViscaException &e) {
+      } catch (ViscaControlException &e) {
 	// Ignore
       }
 #ifdef TIMETRACKER_VISCA
@@ -646,7 +646,7 @@ Visca::getPanTilt(int *pan, int *tilt)
 #else
       send_with_reply();
 #endif
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       // Ignore
     }
   }
@@ -661,7 +661,7 @@ Visca::getPanTilt(int *pan, int *tilt)
     try {
       handle_response();
       recv();
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       // Ignore
     }
   }
@@ -704,7 +704,7 @@ Visca::getPanTilt(int *pan, int *tilt)
     }
 
   } else {
-    throw ViscaException("getPanTilt(): Wrong response received");
+    throw ViscaControlException("getPanTilt(): Wrong response received");
   }
 #ifdef TIMETRACKER_VISCA
   tracker->pingEnd( ttcls_pantilt_get_interpret );
@@ -717,7 +717,7 @@ Visca::getPanTilt(int *pan, int *tilt)
 
 /** Reset pan/tilt limit. */
 void
-Visca::resetPanTiltLimit()
+ViscaControl::resetPanTiltLimit()
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
@@ -740,7 +740,7 @@ Visca::resetPanTiltLimit()
     obuffer[4] = VISCA_PT_LIMITSET_SET_DL;
 
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("resetPanTiltLimit() failed");
     throw;
   }
@@ -754,7 +754,7 @@ Visca::resetPanTiltLimit()
  * @param tilt_down most down tilt value
  */
 void
-Visca::setPanTiltLimit(int pan_left, int pan_right, int tilt_up, int tilt_down)
+ViscaControl::setPanTiltLimit(int pan_left, int pan_right, int tilt_up, int tilt_down)
 {
   try {
     obuffer[1] = VISCA_COMMAND;
@@ -790,7 +790,7 @@ Visca::setPanTiltLimit(int pan_left, int pan_right, int tilt_up, int tilt_down)
     obuffer[12] = (tilt_down & 0x000f);
 
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("setPanTiltLimit() failed");
     throw;
   }
@@ -799,7 +799,7 @@ Visca::setPanTiltLimit(int pan_left, int pan_right, int tilt_up, int tilt_down)
 
 /** Reset pan/tilt. */
 void
-Visca::resetPanTilt()
+ViscaControl::resetPanTilt()
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
@@ -808,7 +808,7 @@ Visca::resetPanTilt()
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("resetPanTilt() failed");
     throw;
   }
@@ -817,7 +817,7 @@ Visca::resetPanTilt()
 
 /** Reset zoom. */
 void
-Visca::resetZoom()
+ViscaControl::resetZoom()
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -827,7 +827,7 @@ Visca::resetZoom()
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("resetZoom() failed");
     throw;
   }
@@ -838,7 +838,7 @@ Visca::resetZoom()
  * @param speed speed
  */
 void
-Visca::setZoomSpeedTele(unsigned int speed)
+ViscaControl::setZoomSpeedTele(unsigned int speed)
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -850,7 +850,7 @@ Visca::setZoomSpeedTele(unsigned int speed)
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("setZoomSpeedTele() failed");
     throw;
   }
@@ -861,7 +861,7 @@ Visca::setZoomSpeedTele(unsigned int speed)
  * @param speed speed
  */
 void
-Visca::setZoomSpeedWide(unsigned int speed)
+ViscaControl::setZoomSpeedWide(unsigned int speed)
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -873,7 +873,7 @@ Visca::setZoomSpeedWide(unsigned int speed)
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("setZoomSpeedWide() failed");
     throw;
   }
@@ -884,7 +884,7 @@ Visca::setZoomSpeedWide(unsigned int speed)
  * @param zoom zoom value
  */
 void
-Visca::setZoom(unsigned int zoom)
+ViscaControl::setZoom(unsigned int zoom)
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -899,7 +899,7 @@ Visca::setZoom(unsigned int zoom)
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("setZoom() failed");
     throw;
   }
@@ -910,7 +910,7 @@ Visca::setZoom(unsigned int zoom)
  * @param zoom contains zoom upon return.
  */
 void
-Visca::getZoom(unsigned int *zoom)
+ViscaControl::getZoom(unsigned int *zoom)
 {
   obuffer[1] = VISCA_INQUIRY;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -919,7 +919,7 @@ Visca::getZoom(unsigned int *zoom)
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("getZoom() failed");
     throw;
   }
@@ -935,7 +935,7 @@ Visca::getZoom(unsigned int *zoom)
 
     *zoom = zoom_val;
   } else {
-    throw ViscaException("getZoom(): zoom inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
+    throw ViscaControlException("getZoom(): zoom inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
   }
 
 }
@@ -945,7 +945,7 @@ Visca::getZoom(unsigned int *zoom)
  * @param enabled true to enable digital zoom, false to disable
  */
 void
-Visca::setZoomDigitalEnabled(bool enabled)
+ViscaControl::setZoomDigitalEnabled(bool enabled)
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -959,7 +959,7 @@ Visca::setZoomDigitalEnabled(bool enabled)
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("setZoomDigitalEnabled() failed");
     throw;
   }
@@ -970,7 +970,7 @@ Visca::setZoomDigitalEnabled(bool enabled)
  * @param filter filter
  */
 void
-Visca::applyEffect(unsigned char filter)
+ViscaControl::applyEffect(unsigned char filter)
 {
   obuffer[1] = VISCA_COMMAND;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -980,7 +980,7 @@ Visca::applyEffect(unsigned char filter)
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffect() failed");
     throw;
   }
@@ -989,11 +989,11 @@ Visca::applyEffect(unsigned char filter)
 
 /** Reset effects. */
 void
-Visca::resetEffect()
+ViscaControl::resetEffect()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_OFF);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("resetEffect() failed");
     throw;
   }
@@ -1002,11 +1002,11 @@ Visca::resetEffect()
 
 /** Apply pastel effect. */
 void
-Visca::applyEffectPastel()
+ViscaControl::applyEffectPastel()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_PASTEL);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectPastel() failed");
     throw;
   }
@@ -1015,11 +1015,11 @@ Visca::applyEffectPastel()
 
 /** Apply negative art effect. */
 void
-Visca::applyEffectNegArt()
+ViscaControl::applyEffectNegArt()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_NEGATIVE);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectNegArt() failed");
     throw;
   }
@@ -1028,11 +1028,11 @@ Visca::applyEffectNegArt()
 
 /** Apply sepia effect. */
 void
-Visca::applyEffectSepia()
+ViscaControl::applyEffectSepia()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_SEPIA);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectSepia() failed");
     throw;
   }
@@ -1041,11 +1041,11 @@ Visca::applyEffectSepia()
 
 /**Apply B/W effect */
 void
-Visca::applyEffectBnW()
+ViscaControl::applyEffectBnW()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_BW);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectBnW() failed");
     throw;
   }
@@ -1054,11 +1054,11 @@ Visca::applyEffectBnW()
 
 /** Apply solarize effect. */
 void
-Visca::applyEffectSolarize()
+ViscaControl::applyEffectSolarize()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_SOLARIZE);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectSolarize() failed");
     throw;
   }
@@ -1067,11 +1067,11 @@ Visca::applyEffectSolarize()
 
 /** Apply mosaic effect. */
 void
-Visca::applyEffectMosaic()
+ViscaControl::applyEffectMosaic()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_MOSAIC);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectMosaic() failed");
     throw;
   }
@@ -1080,11 +1080,11 @@ Visca::applyEffectMosaic()
 
 /** Apply slim effect. */
 void
-Visca::applyEffectSlim()
+ViscaControl::applyEffectSlim()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_SLIM);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectSlim() failed");
     throw;
   }
@@ -1093,11 +1093,11 @@ Visca::applyEffectSlim()
 
 /** Apply stretch effect. */
 void
-Visca::applyEffectStretch()
+ViscaControl::applyEffectStretch()
 {
   try {
     applyEffect(VISCA_PICTURE_EFFECT_STRETCH);
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("applyEffectStretch() failed");
     throw;
   }
@@ -1108,7 +1108,7 @@ Visca::applyEffectStretch()
  * @return white balance mode
  */
 unsigned int
-Visca::getWhiteBalanceMode()
+ViscaControl::getWhiteBalanceMode()
 {
   obuffer[1] = VISCA_INQUIRY;
   obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -1117,7 +1117,7 @@ Visca::getWhiteBalanceMode()
 
   try {
     send_with_reply();
-  } catch (ViscaException &e) {
+  } catch (ViscaControlException &e) {
     e.append("getWhiteBalanceMode() failed");
     throw;
   }
@@ -1128,7 +1128,7 @@ Visca::getWhiteBalanceMode()
     try {
       handle_response();
       recv();
-    } catch (ViscaException &e) {
+    } catch (ViscaControlException &e) {
       e.append("getWhiteBalanceMode() failed");
       throw;
     }
@@ -1138,7 +1138,7 @@ Visca::getWhiteBalanceMode()
   if ( ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
     return ibuffer[2];
   } else {
-    throw ViscaException("Did not get 'request completed' response");
+    throw ViscaControlException("Did not get 'request completed' response");
   }
 
 }

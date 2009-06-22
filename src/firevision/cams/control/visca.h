@@ -36,21 +36,21 @@
 
 #include <cstddef>
 
-class ViscaException : public fawkes::Exception
+class ViscaControlException : public fawkes::Exception
 {
  public:
-  ViscaException(const char *msg);
-  ViscaException(const char *msg, const int _errno);
+  ViscaControlException(const char *msg);
+  ViscaControlException(const char *msg, const int _errno);
 };
 
-class ViscaInquiryRunningException : public fawkes::Exception
+class ViscaControlInquiryRunningException : public ViscaControlException
 {
  public:
-  ViscaInquiryRunningException();
+  ViscaControlInquiryRunningException();
 };
 
 
-class Visca {
+class ViscaControl {
 
  public:
   static const unsigned int VISCA_WHITEBLANCE_AUTO;
@@ -60,7 +60,7 @@ class Visca {
   static const unsigned int VISCA_WHITEBALANCE_ATW;
   static const unsigned int VISCA_WHITEBALANCE_MANUAL;
 
-  Visca(bool blocking = true);
+  ViscaControl(bool blocking = true);
 
   void         open(const char *port);
   void         close();

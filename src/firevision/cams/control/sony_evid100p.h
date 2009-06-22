@@ -31,7 +31,7 @@
 #include <cams/control/effect.h>
 
 class CameraArgumentParser;
-class Visca;
+class ViscaControl;
 
 class SonyEviD100PControl
 : public CameraControlPanTilt,
@@ -120,7 +120,7 @@ class SonyEviD100PControl
   static const float TILT_STEPS_PER_RAD;
 
  private:
-  Visca *visca;
+  ViscaControl *visca;
   char  *tty_port;
   bool   opened;
 
