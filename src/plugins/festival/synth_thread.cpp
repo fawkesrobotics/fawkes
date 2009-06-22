@@ -49,6 +49,12 @@ FestivalSynthThread::FestivalSynthThread()
 void
 FestivalSynthThread::init()
 {
+  try {
+    __cfg_voice = config->get_string("/plugins/festival/voice");
+  } catch (Exception &e) {
+    __cfg_voice = "";
+  }
+
   __speechsynth_if = blackboard->open_for_writing<SpeechSynthInterface>("Festival");
 
   bbil_add_message_interface(__speechsynth_if);
@@ -60,6 +66,12 @@ FestivalSynthThread::init()
 void FestivalSynthThread::once()
 {
   festival_initialize(/* load init files */ 1, FESTIVAL_HEAP_SIZE);
+  if (__cfg_voice != "") {
+    std::string voice_cmd = "(voice_" + __cfg_voice + ")";
+    if (! festival_eval_command(voice_cmd.c_str())) {
+      logger->log_error(name(), "Failed to load voice %s", __cfg_voice.c_str());
+    }
+  }
   say("Festival speech synth loaded");
 }
 

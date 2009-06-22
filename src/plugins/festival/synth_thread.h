@@ -33,6 +33,8 @@
 #include <aspect/clock.h>
 #include <blackboard/interface_listener.h>
 
+#include <string>
+
 namespace fawkes {
   class SpeechSynthInterface;
 }
@@ -63,7 +65,7 @@ class FestivalSynthThread
  private:
   fawkes::SpeechSynthInterface   *__speechsynth_if;
 
-  
+  std::string __cfg_voice;
 };
 
 
