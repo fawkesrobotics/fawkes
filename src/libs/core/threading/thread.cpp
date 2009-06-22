@@ -25,6 +25,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/barrier.h>
 #include <core/threading/wait_condition.h>
 #include <core/threading/read_write_lock.h>
@@ -243,6 +244,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
   init_thread_key();
 
   __prepfin_conc_loop = false;
+  __coalesce_wakeups  = false;
   __op_mode = op_mode;
   __name   = strdup(name);
   __notification_listeners = new LockList<ThreadNotificationListener *>();
@@ -709,6 +711,21 @@ Thread::set_prepfin_conc_loop(bool concurrent)
 }
 
 
+/** Set wakeup coalescing.
+ * The standard behavior of multiple calls to wakeup() (before the thread actually
+ * got woken up, for instance because a loop iteration was still running) is to
+ * execute one iteration for each wakeup. When setting coalescing, multiple calls
+ * will only cause a single execution of the loop.
+ * @param coalesce true to coalesce wakeups, false to keep the original behavior
+ */
+void
+Thread::set_coalesce_wakeups(bool coalesce)
+{
+  MutexLocker lock(__sleep_mutex);
+  __coalesce_wakeups = coalesce;
+}
+
+
 /** Set name of thread.
  * If you want a more descriptive thread name you can do so by calling this method
  * in your thread's constructor, and only in the constructor.
@@ -936,7 +953,8 @@ Thread::wakeup()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_mutex->lock();
-    __pending_wakeups += 1;
+    if (__coalesce_wakeups) __pending_wakeups  = 1;
+    else                    __pending_wakeups += 1;
     if (__waiting_for_wakeup) {
       // currently waiting
       __waiting_for_wakeup = false;
@@ -1019,6 +1037,17 @@ Thread::set_delete_on_exit(bool del)
   __delete_on_exit = del;
 }
 
+
+/** Check if wakeups are pending.
+ * @return true if at least one more loop iteration has been queued (wakeup() has
+ * been called), false otherwise
+ */
+bool
+Thread::wakeup_pending()
+{
+  MutexLocker lock(__sleep_mutex);
+  return (__pending_wakeups > 0);
+}
 
 /** Set flag for the thread.
  * The first two bytes of the flags are reserved for custom usage from the outside

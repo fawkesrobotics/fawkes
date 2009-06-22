@@ -123,12 +123,15 @@ class Thread {
   virtual void run();
 
   void set_opmode(OpMode op_mode);
-  void set_prepfin_conc_loop(bool concurrent);
+  void set_prepfin_conc_loop(bool concurrent = true);
+  void set_coalesce_wakeups(bool coalesce = true);
 
   void set_name(const char *format, ...);
 
   virtual void once();
   virtual void loop();
+
+  bool         wakeup_pending();
 
   bool           finalize_prepared;
   mutable Mutex *loop_mutex;
@@ -169,6 +172,7 @@ class Thread {
 
   OpMode         __op_mode;
   bool           __prepfin_conc_loop;
+  bool           __coalesce_wakeups;
 
   uint32_t       __flags;
 
