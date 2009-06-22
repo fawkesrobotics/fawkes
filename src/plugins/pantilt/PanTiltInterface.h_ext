@@ -1,0 +1,262 @@
+
+/***************************************************************************
+ *  PanTiltInterface.h - Fawkes BlackBoard Interface - PanTiltInterface
+ *
+ *  Templated created:   Thu Oct 12 10:49:19 2006
+ *  Copyright  2009  Tim Niemueller
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+#ifndef __INTERFACES_PANTILTINTERFACE_H_
+#define __INTERFACES_PANTILTINTERFACE_H_
+
+#include <interface/interface.h>
+#include <interface/message.h>
+
+namespace fawkes {
+
+class PanTiltInterface : public Interface
+{
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(PanTiltInterface)
+ /// @endcond
+ public:
+  /* constants */
+  static const unsigned int FLAG_SUPPORTS_PAN;
+  static const unsigned int FLAG_SUPPORTS_TILT;
+  static const unsigned int ERROR_NONE;
+  static const unsigned int ERROR_UNSPECIFIC;
+  static const unsigned int ERROR_COMMUNICATION;
+  static const unsigned int ERROR_PAN_OUTOFRANGE;
+  static const unsigned int ERROR_TILT_OUTOFRANGE;
+
+ private:
+  /** Internal data storage, do NOT modify! */
+  typedef struct {
+    unsigned int flags; /**< Flags. */
+    unsigned int msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
+    unsigned int error_code; /**< Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination). */
+    float pan; /**< Current pan. */
+    float tilt; /**< Current tilt. */
+    float min_pan; /**< Minimum pan possible. */
+    float max_pan; /**< Maximum pan possible. */
+    float min_tilt; /**< Minimum tilt possible. */
+    float max_tilt; /**< Maximum tilt possible. */
+    float max_pan_velocity; /**< Maximum supported pan velocity. */
+    float max_tilt_velocity; /**< Maximum supported tilt velocity. */
+    float pan_velocity; /**< Maximum pan velocity currently reached. */
+    float tilt_velocity; /**< Maximum tilt velocity currently reached. */
+    bool final; /**< True, if the last goto command has been finished,
+      false if it is still running */
+    bool enabled; /**< Is the pan/tilt unit enabled? */
+    bool calibrated; /**< Is the pan/tilt unit calibrated? */
+  } PanTiltInterface_data_t;
+
+  PanTiltInterface_data_t *data;
+
+ public:
+  /* messages */
+  class StopMessage : public Message
+  {
+   public:
+    StopMessage();
+    ~StopMessage();
+
+    StopMessage(const StopMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class FlushMessage : public Message
+  {
+   public:
+    FlushMessage();
+    ~FlushMessage();
+
+    FlushMessage(const FlushMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class CalibrateMessage : public Message
+  {
+   public:
+    CalibrateMessage();
+    ~CalibrateMessage();
+
+    CalibrateMessage(const CalibrateMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class ParkMessage : public Message
+  {
+   public:
+    ParkMessage();
+    ~ParkMessage();
+
+    ParkMessage(const ParkMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class GotoMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float pan; /**< Current pan. */
+      float tilt; /**< Current tilt. */
+    } GotoMessage_data_t;
+
+    GotoMessage_data_t *data;
+
+   public:
+    GotoMessage(const float ini_pan, const float ini_tilt);
+    GotoMessage();
+    ~GotoMessage();
+
+    GotoMessage(const GotoMessage *m);
+    /* Methods */
+    float pan() const;
+    void set_pan(const float new_pan);
+    size_t maxlenof_pan() const;
+    float tilt() const;
+    void set_tilt(const float new_tilt);
+    size_t maxlenof_tilt() const;
+    virtual Message * clone() const;
+  };
+
+  class SetEnabledMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      bool enabled; /**< Is the pan/tilt unit enabled? */
+    } SetEnabledMessage_data_t;
+
+    SetEnabledMessage_data_t *data;
+
+   public:
+    SetEnabledMessage(const bool ini_enabled);
+    SetEnabledMessage();
+    ~SetEnabledMessage();
+
+    SetEnabledMessage(const SetEnabledMessage *m);
+    /* Methods */
+    bool is_enabled() const;
+    void set_enabled(const bool new_enabled);
+    size_t maxlenof_enabled() const;
+    virtual Message * clone() const;
+  };
+
+  class SetVelocityMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float pan_velocity; /**< Maximum pan velocity currently reached. */
+      float tilt_velocity; /**< Maximum tilt velocity currently reached. */
+    } SetVelocityMessage_data_t;
+
+    SetVelocityMessage_data_t *data;
+
+   public:
+    SetVelocityMessage(const float ini_pan_velocity, const float ini_tilt_velocity);
+    SetVelocityMessage();
+    ~SetVelocityMessage();
+
+    SetVelocityMessage(const SetVelocityMessage *m);
+    /* Methods */
+    float pan_velocity() const;
+    void set_pan_velocity(const float new_pan_velocity);
+    size_t maxlenof_pan_velocity() const;
+    float tilt_velocity() const;
+    void set_tilt_velocity(const float new_tilt_velocity);
+    size_t maxlenof_tilt_velocity() const;
+    virtual Message * clone() const;
+  };
+
+  virtual bool message_valid(const Message *message) const;
+ private:
+  PanTiltInterface();
+  ~PanTiltInterface();
+
+ public:
+  /* Methods */
+  unsigned int flags() const;
+  void set_flags(const unsigned int new_flags);
+  size_t maxlenof_flags() const;
+  float pan() const;
+  void set_pan(const float new_pan);
+  size_t maxlenof_pan() const;
+  float tilt() const;
+  void set_tilt(const float new_tilt);
+  size_t maxlenof_tilt() const;
+  unsigned int msgid() const;
+  void set_msgid(const unsigned int new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final() const;
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
+  unsigned int error_code() const;
+  void set_error_code(const unsigned int new_error_code);
+  size_t maxlenof_error_code() const;
+  bool is_enabled() const;
+  void set_enabled(const bool new_enabled);
+  size_t maxlenof_enabled() const;
+  bool is_calibrated() const;
+  void set_calibrated(const bool new_calibrated);
+  size_t maxlenof_calibrated() const;
+  float min_pan() const;
+  void set_min_pan(const float new_min_pan);
+  size_t maxlenof_min_pan() const;
+  float max_pan() const;
+  void set_max_pan(const float new_max_pan);
+  size_t maxlenof_max_pan() const;
+  float min_tilt() const;
+  void set_min_tilt(const float new_min_tilt);
+  size_t maxlenof_min_tilt() const;
+  float max_tilt() const;
+  void set_max_tilt(const float new_max_tilt);
+  size_t maxlenof_max_tilt() const;
+  float max_pan_velocity() const;
+  void set_max_pan_velocity(const float new_max_pan_velocity);
+  size_t maxlenof_max_pan_velocity() const;
+  float max_tilt_velocity() const;
+  void set_max_tilt_velocity(const float new_max_tilt_velocity);
+  size_t maxlenof_max_tilt_velocity() const;
+  float pan_velocity() const;
+  void set_pan_velocity(const float new_pan_velocity);
+  size_t maxlenof_pan_velocity() const;
+  float tilt_velocity() const;
+  void set_tilt_velocity(const float new_tilt_velocity);
+  size_t maxlenof_tilt_velocity() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
+
+};
+
+} // end namespace fawkes
+
+#endif

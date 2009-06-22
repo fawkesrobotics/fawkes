@@ -1,0 +1,163 @@
+$#include <interfaces/PanTiltInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class PanTiltInterface : public Interface
+{
+  static const unsigned int FLAG_SUPPORTS_PAN;
+  static const unsigned int FLAG_SUPPORTS_TILT;
+  static const unsigned int ERROR_NONE;
+  static const unsigned int ERROR_UNSPECIFIC;
+  static const unsigned int ERROR_COMMUNICATION;
+  static const unsigned int ERROR_PAN_OUTOFRANGE;
+  static const unsigned int ERROR_TILT_OUTOFRANGE;
+
+  class StopMessage : public Message
+  {
+    StopMessage();
+    ~StopMessage();
+
+  };
+
+  class FlushMessage : public Message
+  {
+    FlushMessage();
+    ~FlushMessage();
+
+  };
+
+  class CalibrateMessage : public Message
+  {
+    CalibrateMessage();
+    ~CalibrateMessage();
+
+  };
+
+  class ParkMessage : public Message
+  {
+    ParkMessage();
+    ~ParkMessage();
+
+  };
+
+  class GotoMessage : public Message
+  {
+    GotoMessage(float ini_pan, float ini_tilt);
+    GotoMessage();
+    ~GotoMessage();
+
+    float pan();
+    void set_pan(const float new_pan);
+    int maxlenof_pan() const;
+    float tilt();
+    void set_tilt(const float new_tilt);
+    int maxlenof_tilt() const;
+  };
+
+  class SetEnabledMessage : public Message
+  {
+    SetEnabledMessage(bool ini_enabled);
+    SetEnabledMessage();
+    ~SetEnabledMessage();
+
+    bool is_enabled();
+    void set_enabled(const bool new_enabled);
+    int maxlenof_enabled() const;
+  };
+
+  class SetVelocityMessage : public Message
+  {
+    SetVelocityMessage(float ini_pan_velocity, float ini_tilt_velocity);
+    SetVelocityMessage();
+    ~SetVelocityMessage();
+
+    float pan_velocity();
+    void set_pan_velocity(const float new_pan_velocity);
+    int maxlenof_pan_velocity() const;
+    float tilt_velocity();
+    void set_tilt_velocity(const float new_tilt_velocity);
+    int maxlenof_tilt_velocity() const;
+  };
+
+  unsigned int flags();
+  void set_flags(const unsigned int new_flags);
+  int maxlenof_flags() const;
+  float pan();
+  void set_pan(const float new_pan);
+  int maxlenof_pan() const;
+  float tilt();
+  void set_tilt(const float new_tilt);
+  int maxlenof_tilt() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  int maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  int maxlenof_final() const;
+  unsigned int error_code();
+  void set_error_code(const unsigned int new_error_code);
+  int maxlenof_error_code() const;
+  bool is_enabled();
+  void set_enabled(const bool new_enabled);
+  int maxlenof_enabled() const;
+  bool is_calibrated();
+  void set_calibrated(const bool new_calibrated);
+  int maxlenof_calibrated() const;
+  float min_pan();
+  void set_min_pan(const float new_min_pan);
+  int maxlenof_min_pan() const;
+  float max_pan();
+  void set_max_pan(const float new_max_pan);
+  int maxlenof_max_pan() const;
+  float min_tilt();
+  void set_min_tilt(const float new_min_tilt);
+  int maxlenof_min_tilt() const;
+  float max_tilt();
+  void set_max_tilt(const float new_max_tilt);
+  int maxlenof_max_tilt() const;
+  float max_pan_velocity();
+  void set_max_pan_velocity(const float new_max_pan_velocity);
+  int maxlenof_max_pan_velocity() const;
+  float max_tilt_velocity();
+  void set_max_tilt_velocity(const float new_max_tilt_velocity);
+  int maxlenof_max_tilt_velocity() const;
+  float pan_velocity();
+  void set_pan_velocity(const float new_pan_velocity);
+  int maxlenof_pan_velocity() const;
+  float tilt_velocity();
+  void set_tilt_velocity(const float new_tilt_velocity);
+  int maxlenof_tilt_velocity() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}
