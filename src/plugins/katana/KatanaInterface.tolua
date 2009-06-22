@@ -149,6 +149,9 @@ class KatanaInterface : public Interface
   bool is_enabled();
   void set_enabled(const bool new_enabled);
   int maxlenof_enabled() const;
+  bool is_calibrated();
+  void set_calibrated(const bool new_calibrated);
+  int maxlenof_calibrated() const;
   unsigned char max_velocity();
   void set_max_velocity(const unsigned char new_max_velocity);
   int maxlenof_max_velocity() const;

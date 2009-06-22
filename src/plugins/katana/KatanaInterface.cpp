@@ -105,9 +105,10 @@ KatanaInterface::KatanaInterface() : Interface()
   add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(Interface::IFT_UINT, "error_code", 1, &data->error_code);
   add_fieldinfo(Interface::IFT_BOOL, "enabled", 1, &data->enabled);
+  add_fieldinfo(Interface::IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(Interface::IFT_BYTE, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(Interface::IFT_BYTE, "num_motors", 1, &data->num_motors);
-  unsigned char tmp_hash[] = {0x7f, 0xb1, 0xc2, 0x61, 0x1d, 0x1e, 0xf2, 0x83, 0xc5, 0x1b, 0xd8, 0xd2, 0x82, 0xcb, 0x8b, 0x5b};
+  unsigned char tmp_hash[] = {0x67, 0x9b, 0x57, 0x4e, 0xb3, 0x7c, 0x64, 0x5f, 0x23, 0xd4, 0x1e, 0x8a, 0x19, 0x52, 0x5b, 0x84};
   set_hash(tmp_hash);
 }
 
@@ -118,7 +119,8 @@ KatanaInterface::~KatanaInterface()
 }
 /* Methods */
 /** Get sensor_value value.
- * ...
+ * Sensor
+    values. Use SENSOR_* indexes for accessing the values.
  * @return sensor_value value
  */
 unsigned char *
@@ -128,7 +130,8 @@ KatanaInterface::sensor_value() const
 }
 
 /** Get sensor_value value at given index.
- * ...
+ * Sensor
+    values. Use SENSOR_* indexes for accessing the values.
  * @param index index of value
  * @return sensor_value value
  * @exception Exception thrown if index is out of bounds
@@ -153,7 +156,8 @@ KatanaInterface::maxlenof_sensor_value() const
 }
 
 /** Set sensor_value value.
- * ...
+ * Sensor
+    values. Use SENSOR_* indexes for accessing the values.
  * @param new_sensor_value new sensor_value value
  */
 void
@@ -163,7 +167,8 @@ KatanaInterface::set_sensor_value(const unsigned char * new_sensor_value)
 }
 
 /** Set sensor_value value at given index.
- * ...
+ * Sensor
+    values. Use SENSOR_* indexes for accessing the values.
  * @param new_sensor_value new sensor_value value
  * @param index index for of the value
  */
@@ -487,6 +492,36 @@ void
 KatanaInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+}
+
+/** Get calibrated value.
+ * Has arm been calibrated?
+ * @return calibrated value
+ */
+bool
+KatanaInterface::is_calibrated() const
+{
+  return data->calibrated;
+}
+
+/** Get maximum length of calibrated value.
+ * @return length of calibrated value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::maxlenof_calibrated() const
+{
+  return 1;
+}
+
+/** Set calibrated value.
+ * Has arm been calibrated?
+ * @param new_calibrated new calibrated value
+ */
+void
+KatanaInterface::set_calibrated(const bool new_calibrated)
+{
+  data->calibrated = new_calibrated;
 }
 
 /** Get max_velocity value.

@@ -81,7 +81,9 @@ class KatanaInterface : public Interface
     bool final; /**< True, if the last goto command has been finished,
       false if it is still running */
     bool enabled; /**< Are motors enabled? */
-    unsigned char sensor_value[16]; /**< ... */
+    bool calibrated; /**< Has arm been calibrated? */
+    unsigned char sensor_value[16]; /**< Sensor
+    values. Use SENSOR_* indexes for accessing the values. */
     unsigned char max_velocity; /**< Maximum velocity */
     unsigned char num_motors; /**< Number of motors */
   } KatanaInterface_data_t;
@@ -290,6 +292,9 @@ class KatanaInterface : public Interface
   bool is_enabled() const;
   void set_enabled(const bool new_enabled);
   size_t maxlenof_enabled() const;
+  bool is_calibrated() const;
+  void set_calibrated(const bool new_calibrated);
+  size_t maxlenof_calibrated() const;
   unsigned char max_velocity() const;
   void set_max_velocity(const unsigned char new_max_velocity);
   size_t maxlenof_max_velocity() const;

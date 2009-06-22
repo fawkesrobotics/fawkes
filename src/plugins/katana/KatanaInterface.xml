@@ -75,7 +75,8 @@
       Katana arm.
     </comment>
 
-    <field type="byte" length="16" name="sensor_value">...</field>
+    <field type="byte" length="16" name="sensor_value">Sensor
+    values. Use SENSOR_* indexes for accessing the values.</field>
 
     <field type="float" name="x">X-Coordinate for tool position
     compared to base coordinate system.</field>
@@ -97,6 +98,7 @@
     constants otherwise (or a bit-wise combination).</field>
 
     <field type="bool" name="enabled">Are motors enabled?</field>
+    <field type="bool" name="calibrated">Has arm been calibrated?</field>
     <field type="byte" name="max_velocity">Maximum velocity</field>
     <field type="byte" name="num_motors">Number of motors</field>
   </data>

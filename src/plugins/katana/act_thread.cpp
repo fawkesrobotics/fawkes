@@ -56,8 +56,6 @@ KatanaActThread::init()
   // freed on destruction, therefore no special handling is necessary in init()
   // itself!
 
-  __calibrated           = false;
-
   __cfg_device           = config->get_string("/plugins/katana/device");
   __cfg_kni_conffile     = config->get_string("/plugins/katana/kni_conffile");
   __cfg_auto_calibrate   = config->get_bool("/plugins/katana/auto_calibrate");
@@ -274,6 +272,9 @@ KatanaActThread::loop()
       __actmot_thread->join();
       __katana_if->set_final(true);
       __katana_if->set_error_code(__actmot_thread->error_code());
+      if (__actmot_thread == __calib_thread) {
+	__katana_if->set_calibrated(true);
+      }
       __actmot_thread->reset();
       __actmot_thread = NULL;
       logger->log_debug(name(), "Motion thread collected");
@@ -316,15 +317,19 @@ KatanaActThread::loop()
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetEnabledMessage>()) {
       KatanaInterface::SetEnabledMessage *msg = __katana_if->msgq_first(msg);
 
-      if (msg->is_enabled()) {
-	logger->log_debug(name(), "Turning ON the arm");
-	__katana->switchRobotOn();
-	update_position(/* refresh */ true);
-      } else {
-	logger->log_debug(name(), "Turning OFF the arm");
-	__katana->switchRobotOff();
+      try {
+	if (msg->is_enabled()) {
+	  logger->log_debug(name(), "Turning ON the arm");
+	  __katana->switchRobotOn();
+	  update_position(/* refresh */ true);
+	} else {
+	  logger->log_debug(name(), "Turning OFF the arm");
+	  __katana->switchRobotOff();
+	}
+	__katana_if->set_enabled(msg->is_enabled());
+      } catch (/*KNI*/::Exception &e) {
+	logger->log_warn(name(), "Failed enable/disable arm: %s", e.what());
       }
-      __katana_if->set_enabled(msg->is_enabled());
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetMaxVelocityMessage>()) {
       KatanaInterface::SetMaxVelocityMessage *msg = __katana_if->msgq_first(msg);

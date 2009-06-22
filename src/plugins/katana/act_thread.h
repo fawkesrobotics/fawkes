@@ -105,8 +105,6 @@ class KatanaActThread
   float          __cfg_park_theta;
   float          __cfg_park_psi;
 
-  bool           __calibrated;
-
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
   fawkes::RefPtr<KatanaCalibrationThread>      __calib_thread;

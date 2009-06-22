@@ -22,8 +22,6 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/laser/laser_plugin.h>
-
 #include "katana_plugin.h"
 #include "act_thread.h"
 #include "sensor_thread.h"
