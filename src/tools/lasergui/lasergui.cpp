@@ -27,6 +27,7 @@
 #include <netcomm/fawkes/client.h>
 #include <blackboard/remote.h>
 #include <interfaces/Laser360Interface.h>
+#include <interfaces/Laser720Interface.h>
 
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>
@@ -58,17 +59,20 @@ class LaserGuiGtkWindow : public Gtk::Window
     refxml->get_widget("tb_lines", __tb_lines);
     refxml->get_widget("tb_points", __tb_points);
     refxml->get_widget("tb_hull", __tb_hull);
-    refxml->get_widget("tb_lowres", __tb_lowres);
+    refxml->get_widget("tb_highres", __tb_highres);
+    refxml->get_widget("tb_trimvals", __tb_trimvals);
     refxml->get_widget("tb_rotation", __tb_rotation);
     refxml->get_widget("tb_zoom_in", __tb_zoom_in);
     refxml->get_widget("tb_zoom_out", __tb_zoom_out);
+    refxml->get_widget("tb_exit", __tb_exit);
 
     __area->set_robot_drawer(&__athome_drawer);
 
     __tb_lines->set_sensitive(false);
     __tb_points->set_sensitive(false);
     __tb_hull->set_sensitive(false);
-    __tb_lowres->set_sensitive(false);
+    __tb_highres->set_sensitive(false);
+    __tb_trimvals->set_sensitive(false);
     __tb_rotation->set_sensitive(false);
     __tb_zoom_in->set_sensitive(false);
     __tb_zoom_out->set_sensitive(false);
@@ -80,8 +84,10 @@ class LaserGuiGtkWindow : public Gtk::Window
     __tb_zoom_in->signal_clicked().connect(sigc::mem_fun(*__area, &LaserDrawingArea::zoom_in));
     __tb_zoom_out->signal_clicked().connect(sigc::mem_fun(*__area, &LaserDrawingArea::zoom_out));
 
-    __tb_lowres->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_resolution_toggled));
+    __tb_highres->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_resolution_toggled));
+    __tb_trimvals->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_trimvals_toggled));
     __tb_rotation->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_rotation_toggled));
+    __tb_exit->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_exit_clicked));
 
     __connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_connect));
     __connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_disconnect));
@@ -106,10 +112,11 @@ class LaserGuiGtkWindow : public Gtk::Window
   {
     try {
       __bb = new RemoteBlackBoard(__connection_dispatcher.get_client());
-      __laser_if = __bb->open_for_reading<Laser360Interface>("Laser");
+      __laser360_if = __bb->open_for_reading<Laser360Interface>("Laser");
+      __laser720_if = NULL;
 
-      __area->set_laser_if(__laser_if);
-      __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser_if);
+      __area->set_laser360_if(__laser360_if);
+      __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser360_if);
       __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
       __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
 
@@ -119,16 +126,19 @@ class LaserGuiGtkWindow : public Gtk::Window
       __tb_lines->set_sensitive(true);
       __tb_points->set_sensitive(true);
       __tb_hull->set_sensitive(true);
-      __tb_lowres->set_sensitive(true);
+      __tb_highres->set_sensitive(true);
+      __tb_trimvals->set_sensitive(true);
       __tb_rotation->set_sensitive(true);
       __tb_zoom_in->set_sensitive(true);
       __tb_zoom_out->set_sensitive(true);
     } catch (Exception &e) {
       if ( __bb ) {
-	__bb->close(__laser_if);
+	__bb->close(__laser360_if);
+	__bb->close(__laser720_if);
 	delete __ifd;
 	delete __bb;
-	__laser_if = NULL;
+	__laser360_if = NULL;
+	__laser720_if = NULL;
 	__bb = NULL;
 	__ifd = NULL;
       }
@@ -138,19 +148,22 @@ class LaserGuiGtkWindow : public Gtk::Window
   /** Event handler for disconnected event. */
   virtual void on_disconnect()
   {
-    __area->set_laser_if(NULL);
+    __area->reset_laser_ifs();
     __area->queue_draw();
-    __bb->close(__laser_if);
+    __bb->close(__laser360_if);
+    __bb->close(__laser720_if);
     delete __bb;
     delete __ifd;
     __bb = NULL;
     __ifd = NULL;
-    __laser_if = NULL;
+    __laser360_if = NULL;
+    __laser720_if = NULL;
     __tb_connection->set_stock_id(Gtk::Stock::CONNECT);
     __tb_lines->set_sensitive(false);
     __tb_points->set_sensitive(false);
     __tb_hull->set_sensitive(false);
-    __tb_lowres->set_sensitive(false);
+    __tb_highres->set_sensitive(false);
+    __tb_trimvals->set_sensitive(false);
     __tb_rotation->set_sensitive(false);
     __tb_zoom_in->set_sensitive(false);
     __tb_zoom_out->set_sensitive(false);
@@ -168,19 +181,54 @@ class LaserGuiGtkWindow : public Gtk::Window
   }
 
 
-  /** Event handler for rotation button. */
+  /** Event handler for resolution button. */
   void on_resolution_toggled()
   {
-    if ( __tb_lowres->get_active() ) {
+    __bb->close(__laser360_if);
+    __bb->close(__laser720_if);
+    __bb->unregister_listener(__ifd);
+    delete __ifd;
+    __laser360_if = NULL;
+    __laser720_if = NULL;
+
+    if ( __tb_highres->get_active() ) {
+      __laser720_if = __bb->open_for_reading<Laser720Interface>("Laser");
+      __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser720_if);
+      __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
+      __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
+      __area->set_laser720_if(__laser720_if);
+    } else {
+      __laser360_if = __bb->open_for_reading<Laser360Interface>("Laser");
+      __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser360_if);
+      __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
+      __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
+      __area->set_laser360_if(__laser360_if);
+    }
+    __area->queue_draw();
+  }
+
+
+  /** Event handler for trim button. */
+  void on_trimvals_toggled()
+  {
+    if ( __tb_trimvals->get_active() ) {
       __area->set_resolution(3);
     } else {
       __area->set_resolution(1);
     }
   }
 
+  /** Event handler for exit button. */
+  void on_exit_clicked()
+  {
+    Gtk::Main::quit();
+  }
+
+
  private:
   BlackBoard                        *__bb;
-  Laser360Interface                 *__laser_if;
+  Laser360Interface                 *__laser360_if;
+  Laser720Interface                 *__laser720_if;
   InterfaceDispatcher               *__ifd;
 
   LaserDrawingArea                   *__area;
@@ -191,10 +239,12 @@ class LaserGuiGtkWindow : public Gtk::Window
   Gtk::RadioToolButton               *__tb_lines;
   Gtk::RadioToolButton               *__tb_points;
   Gtk::RadioToolButton               *__tb_hull;
-  Gtk::ToggleToolButton              *__tb_lowres;
+  Gtk::ToggleToolButton              *__tb_highres;
+  Gtk::ToggleToolButton              *__tb_trimvals;
   Gtk::ToggleToolButton              *__tb_rotation;
   Gtk::ToolButton                    *__tb_zoom_in;
   Gtk::ToolButton                    *__tb_zoom_out;
+  Gtk::ToolButton                    *__tb_exit;
   
 };
 

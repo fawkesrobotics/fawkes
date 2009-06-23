@@ -22,7 +22,8 @@ CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
 
-LIBS_lasergui = fawkescore fawkesblackboard fawkesinterfaces fawkesguiutils
+LIBS_lasergui = fawkescore fawkesblackboard fawkesguiutils \
+		Laser360Interface Laser720Interface
 ifeq ($(BUILD_TYPE),maemo)
   ifeq ($(HAVE_HILDONMM),1)
     OBJS_lasergui = lasergui_hildon.o

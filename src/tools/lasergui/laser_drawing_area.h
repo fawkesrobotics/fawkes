@@ -30,6 +30,7 @@
 
 namespace fawkes {
   class Laser360Interface;
+  class Laser720Interface;
   class CairoRobotDrawer;
 }
 
@@ -48,7 +49,9 @@ class LaserDrawingArea
   LaserDrawingArea(BaseObjectType* cobject,
 		   const Glib::RefPtr<Gnome::Glade::Xml>& refxml);
 
-  void set_laser_if(fawkes::Laser360Interface *laser_if);
+  void set_laser360_if(fawkes::Laser360Interface *laser_if);
+  void set_laser720_if(fawkes::Laser720Interface *laser_if);
+  void reset_laser_ifs();
   void set_robot_drawer(fawkes::CairoRobotDrawer *robot_drawer);
   void set_resolution(unsigned int resolution);
 
@@ -65,7 +68,8 @@ class LaserDrawingArea
 		     Cairo::RefPtr<Cairo::Context> &cr);
 
  private:
-  fawkes::Laser360Interface *__laser_if;
+  fawkes::Laser360Interface *__laser360_if;
+  fawkes::Laser720Interface *__laser720_if;
 
   draw_mode_t                __draw_mode;
 

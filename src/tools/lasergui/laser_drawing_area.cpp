@@ -23,6 +23,7 @@
  */
 
 #include "laser_drawing_area.h"
+#include <interfaces/Laser720Interface.h>
 #include <interfaces/Laser360Interface.h>
 #include <utils/math/angle.h>
 #include <gui_utils/robot/drawer.h>
@@ -46,7 +47,8 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
 {
   __draw_mode = MODE_LINES;
   __zoom_factor = 50;
-  __laser_if = NULL;
+  __laser360_if = NULL;
+  __laser720_if = NULL;
   __robot_drawer = NULL;
   __resolution = 1;
   __rotation = 0;
@@ -63,7 +65,8 @@ LaserDrawingArea::LaserDrawingArea()
 {
   __draw_mode = MODE_LINES;
   __zoom_factor = 50;
-  __laser_if = NULL;
+  __laser360_if = NULL;
+  __laser720_if = NULL;
   __robot_drawer = NULL;
   __resolution = 1;
   __rotation = 0;
@@ -74,14 +77,36 @@ LaserDrawingArea::LaserDrawingArea()
 #endif
 }
 
-/** Set laser interface.
+/** Set 360 degree laser interface.
  * @param laser_if laser interface
  */
 void
-LaserDrawingArea::set_laser_if(Laser360Interface *laser_if)
+LaserDrawingArea::set_laser360_if(Laser360Interface *laser_if)
 {
-  __laser_if = laser_if;
+  __laser360_if = laser_if;
+  __laser720_if = NULL;
 }
+
+
+/** Set 720 degree laser interface.
+ * @param laser_if laser interface
+ */
+void
+LaserDrawingArea::set_laser720_if(Laser720Interface *laser_if)
+{
+  __laser720_if = laser_if;
+  __laser360_if = NULL;
+}
+
+
+/** Reset laser interfaces to "no laser available". */
+void
+LaserDrawingArea::reset_laser_ifs()
+{
+  __laser360_if = NULL;
+  __laser720_if = NULL;
+}
+
 
 /** Set robot drawer.
  * @param robot_drawer new robot drawer to use
@@ -211,7 +236,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     cr->translate(xc, yc);
   
     cr->save();
-    if ( __laser_if == NULL ) {
+    if ( (__laser360_if == NULL) && (__laser720_if == NULL) ) {
       Cairo::TextExtents te;
       std::string t = "Not connected to BlackBoard";
       cr->set_source_rgb(1, 0, 0);
@@ -219,18 +244,29 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       cr->get_text_extents(t, te);
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
-    } else if ( ! __laser_if->has_writer() ) {
+    } else if ( (__laser360_if && ! __laser360_if->has_writer()) ||
+		(__laser720_if && ! __laser720_if->has_writer()) ) {
       Cairo::TextExtents te;
-      std::string t = "No writer for laser interface";
+      std::string t = "No writer for 360° laser interface";
+      if (__laser720_if) t = "No writer for 720° laser interface";
       cr->set_source_rgb(1, 0, 0);
       cr->set_font_size(20);
       cr->get_text_extents(t, te);
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
     } else {
-      __laser_if->read();
-      float *distances = __laser_if->distances();
-      size_t nd = __laser_if->maxlenof_distances();
+      float *distances = NULL;
+      size_t nd = 0;
+      if (__laser360_if) {
+	__laser360_if->read();
+	distances = __laser360_if->distances();
+	nd = __laser360_if->maxlenof_distances();
+      } else {
+	__laser720_if->read();
+	distances = __laser720_if->distances();
+	nd = __laser720_if->maxlenof_distances();
+      }
+      const float nd_factor = 360.0 / nd;
 
       cr->scale(__zoom_factor, __zoom_factor);
       cr->rotate(__rotation);
@@ -241,17 +277,17 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       if ( __draw_mode == MODE_LINES ) {
 	for (size_t i = 0; i < nd; i += __resolution) {
 	  if ( distances[i] == 0 )  continue;
-	  float anglerad = deg2rad(i);
+	  const float anglerad = deg2rad(i * nd_factor);
 	  cr->move_to(0, 0);
 	  cr->line_to(distances[i] *  sin(anglerad),
 		      distances[i] * -cos(anglerad));
 	}
 	cr->stroke();
       } else if ( __draw_mode == MODE_POINTS ) {
-	float radius = 4 / __zoom_factor;
+	const float radius = 4 / __zoom_factor;
 	for (size_t i = 0; i < nd; i += __resolution) {
 	  if ( distances[i] == 0 )  continue;
-	  float anglerad = deg2rad(i);
+	  float anglerad = deg2rad(i * nd_factor);
 	  float x = distances[i] *  sin(anglerad);
 	  float y = distances[i] * -cos(anglerad);
 	  // circles replaced by rectangles, they are a *lot* faster
@@ -265,9 +301,9 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
 	cr->move_to(0, - distances[0]);
 	for (size_t i = __resolution; i <= nd + __resolution; i += __resolution) {
 	  if ( distances[i] == 0 )  continue;
-	  float anglerad    = deg2rad(i % 360);
-	  cr->line_to(distances[i % 360] *  sin(anglerad),
-		      distances[i % 360] * -cos(anglerad));
+	  const float anglerad    = normalize_rad(deg2rad(i * nd_factor));
+	  cr->line_to(distances[i % nd] *  sin(anglerad),
+		      distances[i % nd] * -cos(anglerad));
 	}
 	cr->stroke();
       }
