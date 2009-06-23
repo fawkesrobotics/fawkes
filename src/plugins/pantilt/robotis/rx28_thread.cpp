@@ -526,10 +526,10 @@ PanTiltRX28Thread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad
   __rx28->get_angle_limits(__pan_servo_id, pan_min, pan_max);
   __rx28->get_angle_limits(__tilt_servo_id, tilt_min, tilt_max);
 
-  int pan_pos  = RobotisRX28::POS_TICKS_PER_RAD * pan_rad
+  int pan_pos  = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * pan_rad)
                  + RobotisRX28::CENTER_POSITION
                  + __pan_zero_offset;
-  int tilt_pos = RobotisRX28::POS_TICKS_PER_RAD * tilt_rad
+  int tilt_pos = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * tilt_rad)
                  + RobotisRX28::CENTER_POSITION
                  + __tilt_zero_offset;
 
