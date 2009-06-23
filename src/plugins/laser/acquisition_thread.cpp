@@ -32,6 +32,14 @@ using namespace fawkes;
  * Laser acqusition thread.
  * Interface for different laser types.
  * @author Tim Niemueller
+ *
+ * @fn void LaserAcquisitionThread::pre_init(fawkes::Configuration *config, fawkes::Logger *logger) = 0;
+ * Pre initialization.
+ * This method is called by the sensor thread for pre-initialization. After this
+ * method has been executed the methods get_distances_data_size() and
+ * get_echo_data_size() must return valid data.
+ * @param config configuration
+ * @param logger logger instance
  */
 
 /** @var fawkes::Mutex * LaserAcquisitionThread::_data_mutex

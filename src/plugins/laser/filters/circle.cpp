@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  circle_filter.cpp - Laser data circle data filter (example)
+ *  circle.cpp - Laser data circle data filter (example)
  *
  *  Created: Fri Oct 10 17:16:57 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,12 +22,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "circle_filter.h"
+#include "circle.h"
 
 #include <utils/math/angle.h>
 #include <cstdlib>
 
-/** @class LaserCircleDataFilter "circle_filter.h"
+/** @class LaserCircleDataFilter "circle.h"
  * Demonstration laser data filter.
  * Cuts off all beams that are longer than a given radius.
  * @author Tim Niemueller

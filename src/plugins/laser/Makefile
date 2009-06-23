@@ -18,8 +18,9 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_laser = fawkescore fawkesutils fawkesaspects pcan Laser360Interface
-OBJS_laser = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
+LIBS_laser = fawkescore fawkesutils fawkesaspects pcan \
+	     Laser360Interface Laser720Interface
+OBJS_laser = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
 
 ifeq ($(HAVE_LIBPCAN),1)
   PLUGINS_all = $(PLUGINDIR)/laser.so

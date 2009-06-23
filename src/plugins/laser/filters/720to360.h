@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  circle_filter.h - Laser data circle data filter (example)
+ *  720to360.h - Laser data data filter to downsample 720 to 360 values
  *
- *  Created: Fri Oct 10 17:15:34 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Jun 23 14:36:12 2009
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,21 +22,20 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_CIRCLE_FILTER_H_
-#define __PLUGINS_LASER_CIRCLE_FILTER_H_
+#ifndef __PLUGINS_LASER_FILTERS_720TO360_H_
+#define __PLUGINS_LASER_FILTERS_720TO360_H_
 
-#include "filter.h"
+#include "../filter.h"
 
-class LaserCircleDataFilter : public LaserDataFilter
+class Laser720to360DataFilter : public LaserDataFilter
 {
  public:
-  LaserCircleDataFilter(float radius);
+  Laser720to360DataFilter(bool average = false);
 
-  void     filter(const float *data, unsigned int data_size);
+  void filter(const float *data, unsigned int data_size);
 
  private:
-  float  __radius;
-  unsigned int __last_size;
+  bool __average;
 };
 
 #endif

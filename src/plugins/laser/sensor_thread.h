@@ -33,6 +33,7 @@
 
 namespace fawkes {
   class Laser360Interface;
+  class Laser720Interface;
 }
 
 class LaserAcquisitionThread;
@@ -56,10 +57,15 @@ class LaserSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::Laser360Interface *__laser_if;
+  fawkes::Laser360Interface *__laser360_if;
+  fawkes::Laser720Interface *__laser720_if;
 
   LaserAcquisitionThread *__aqt;
   LaserDataFilter        *__filter;
+
+  LaserDataFilter        *__720to360filter;
+
+  unsigned int            __num_values;
 };
 
 

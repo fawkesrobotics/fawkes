@@ -30,10 +30,10 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 
-#include <libpcan.h>
-
 namespace fawkes {
   class Mutex;
+  class Configuration;
+  class Logger;
 }
 
 class LaserAcquisitionThread
@@ -48,6 +48,9 @@ class LaserAcquisitionThread
 
   bool lock_if_new_data();
   void unlock();
+
+  virtual void   pre_init(fawkes::Configuration *config,
+			  fawkes::Logger *logger) = 0;
 
   const float *  get_distance_data();
   const float *  get_echo_data();

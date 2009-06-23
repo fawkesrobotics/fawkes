@@ -33,6 +33,104 @@
 
 using namespace fawkes;
 
+const WORD  LaseEdlAcquisitionThread::RESETLEVEL_RESET                = 0x0000;
+const WORD  LaseEdlAcquisitionThread::RESETLEVEL_RESTART              = 0x0001;
+const WORD  LaseEdlAcquisitionThread::RESETLEVEL_HALT_IDLE            = 0x0002;
+const WORD  LaseEdlAcquisitionThread::RESETLEVEL_RELOAD_VOLTSET       = 0x0010;
+const WORD  LaseEdlAcquisitionThread::CONFIGITEM_ARCNET_HISTORIC      = 0x0000;
+const WORD  LaseEdlAcquisitionThread::CONFIGITEM_RS232_RS422          = 0x0001;
+const WORD  LaseEdlAcquisitionThread::CONFIGITEM_CAN                  = 0x0002;
+const WORD  LaseEdlAcquisitionThread::CONFIGITEM_SPI                  = 0x0003;
+const WORD  LaseEdlAcquisitionThread::CONFIGITEM_ARCNET               = 0x0004;
+const WORD  LaseEdlAcquisitionThread::CONFIGITEM_GLOBAL               = 0x0010;
+const WORD  LaseEdlAcquisitionThread::CONFIGDATA_LENGTH_RS232_RS422   = 4;
+const WORD  LaseEdlAcquisitionThread::CONFIGDATA_LENGTH_CAN           = 5;
+const WORD  LaseEdlAcquisitionThread::CONFIGDATA_LENGTH_ARCNET        = 2;
+const WORD  LaseEdlAcquisitionThread::CONFIGDATA_LENGTH_GLOBAL        = 3;
+const WORD  LaseEdlAcquisitionThread::SECTOR_0                        = 0x0000;
+const WORD  LaseEdlAcquisitionThread::SECTOR_1                        = 0x0001;
+const WORD  LaseEdlAcquisitionThread::SECTOR_2                        = 0x0002;
+const WORD  LaseEdlAcquisitionThread::SECTOR_3                        = 0x0003;
+const WORD  LaseEdlAcquisitionThread::SECTOR_4                        = 0x0004;
+const WORD  LaseEdlAcquisitionThread::SECTOR_5                        = 0x0005;
+const WORD  LaseEdlAcquisitionThread::SECTOR_6                        = 0x0006;
+const WORD  LaseEdlAcquisitionThread::SECTOR_7                        = 0x0007;
+const WORD  LaseEdlAcquisitionThread::SECTORFUNC_NOT_INITIALIZED      = 0x0000;
+const WORD  LaseEdlAcquisitionThread::SECTORFUNC_NO_MEASUREMENT       = 0x0001;
+const WORD  LaseEdlAcquisitionThread::SECTORFUNC_DUMMY_MEASUREMENT    = 0x0002;
+const WORD  LaseEdlAcquisitionThread::SECTORFUNC_NORMAL_MEASUREMENT   = 0x0003;
+const WORD  LaseEdlAcquisitionThread::SECTORFUNC_REFERENCE_TARGET     = 0x0004;
+const WORD  LaseEdlAcquisitionThread::FLASH_YES                       = 0x0001;
+const WORD  LaseEdlAcquisitionThread::FLASH_NO                        = 0x0000;
+const WORD  LaseEdlAcquisitionThread::PROFILENUM_CONTINUOUS           = 0x0000;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_NUMBER            = 0x0001;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_COUNTER           = 0x0002;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_LAYER             = 0x0004;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_SECTOR            = 0x0008;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_ANGLE_STEP        = 0x0010;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_NUM_SECT_POINTS   = 0x0020;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_TIMESTAMP_START   = 0x0040;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_START_DIRECTION   = 0x0080;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_DISTANCE          = 0x0100;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_DIRECTION         = 0x0200;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_ECHO_AMPLITUDE    = 0x0400;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_TIMESTAMP_END     = 0x0800;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_END_DIRECTION     = 0x1000;
+const WORD  LaseEdlAcquisitionThread::PROFILEFORMAT_SENSOR_MODE       = 0x2000;
+
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_STATUS             = 0x0100;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_IDENTIFICATION          = 0x0101;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_STATUS                  = 0x0102;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_ERROR                   = 0x0103;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_SIGNAL                  = 0x0104;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_SIGNAL                  = 0x0105;
+const WORD  LaseEdlAcquisitionThread::CMD_REGISTER_APPLICATION        = 0x0106;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_CONFIG             = 0x0200;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_CONFIG                  = 0x0201;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_CONFIG                  = 0x0202;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_SYNC_ABS                = 0x0203;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_SYNC_REL                = 0x0204;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_SYNC_CLOCK              = 0x0205;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_ZONE                    = 0x0206;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_ZONE                    = 0x0207;
+const WORD  LaseEdlAcquisitionThread::CMD_RELEASE_ZONE                = 0x0208;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_FILTER                  = 0x0209;
+const WORD  LaseEdlAcquisitionThread::CMD_SET_FUNCTION                = 0x020A;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_FUNCTION                = 0x020B;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_MEASUREMENT        = 0x0300;
+const WORD  LaseEdlAcquisitionThread::CMD_GET_PROFILE                 = 0x0301;
+const WORD  LaseEdlAcquisitionThread::CMD_CANCEL_PROFILE              = 0x0302;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_WORKING            = 0x0400;
+const WORD  LaseEdlAcquisitionThread::CMD_DO_RESET                    = 0x0401;
+const WORD  LaseEdlAcquisitionThread::CMD_TRANS_IDLE                  = 0x0402;
+const WORD  LaseEdlAcquisitionThread::CMD_TRANS_ROTATE                = 0x0403;
+const WORD  LaseEdlAcquisitionThread::CMD_TRANS_MEASURE               = 0x0404;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_MAINTENANCE        = 0x0500;
+const WORD  LaseEdlAcquisitionThread::CMD_DO_ADJUST                   = 0x0501;
+const WORD  LaseEdlAcquisitionThread::CMD_DO_TEST                     = 0x0502;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_INTERFACE_ROUTING  = 0x0600;
+const WORD  LaseEdlAcquisitionThread::CMD_COM_ATTACH                  = 0x0601;
+const WORD  LaseEdlAcquisitionThread::CMD_COM_DETACH                  = 0x0602;
+const WORD  LaseEdlAcquisitionThread::CMD_COM_INIT                    = 0x0603;
+const WORD  LaseEdlAcquisitionThread::CMD_COM_OUTPUT                  = 0x0604;
+const WORD  LaseEdlAcquisitionThread::CMD_COM_DATA                    = 0x0605;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_FILE               = 0x0700;
+const WORD  LaseEdlAcquisitionThread::CMD_DIR                         = 0x0701;
+const WORD  LaseEdlAcquisitionThread::CMD_SAVE                        = 0x0702;
+const WORD  LaseEdlAcquisitionThread::CMD_LOAD                        = 0x0703;
+const WORD  LaseEdlAcquisitionThread::CMD_DELETE                      = 0x0704;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_MONITOR            = 0x0900;
+const WORD  LaseEdlAcquisitionThread::CMD_MONITOR_ENABLE_LOG          = 0x0801;
+const WORD  LaseEdlAcquisitionThread::CMD_MONITOR_DISABLE_LOG         = 0x0802;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_ADJUST             = 0x7E00;
+const WORD  LaseEdlAcquisitionThread::SERVICEGROUP_SPECIAL            = 0x7F00;
+const WORD  LaseEdlAcquisitionThread::CMD_SERVICE_FAILURE             = 0x7F00;
+const WORD  LaseEdlAcquisitionThread::RESPONSE_BIT                    = 0x8000;
+
+
+const float LaseEdlAcquisitionThread::DISTANCE_FACTOR                 = 256.00;
+
+
 /** @class LaseEdlAcquisitionThread "playerc_thread.h"
  * Laser acqusition thread for Lase EDL L A laser scanner.
  * This thread fetches the data from the laser.
@@ -45,39 +143,68 @@ using namespace fawkes;
 LaseEdlAcquisitionThread::LaseEdlAcquisitionThread()
   : LaserAcquisitionThread("LaseEdlAcquisitionThread")
 {
+  __pre_init_done = false;
 }
 
 
 void
-LaseEdlAcquisitionThread::init()
+LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
+				   fawkes::Logger        *logger)
 {
+  if (__pre_init_done)  return;
+
   try {
-    __cfg_use_default    = config->get_bool("/laser/use_default");
-    __cfg_set_default    = config->get_bool("/laser/set_default");
-    __cfg_rotation_freq  = config->get_uint("/laser/rotation_freq");
-    __cfg_angle_step     = config->get_uint("/laser/angle_step");
-    __cfg_max_pulse_freq = config->get_uint("/laser/max_pulse_freq");
-    __cfg_profile_format = config->get_uint("/laser/profile_format");
-    __cfg_can_id         = config->get_uint("/laser/can_id");
-    __cfg_can_id_resp    = config->get_uint("/laser/can_id_resp");
-    __cfg_sensor_id      = config->get_uint("/laser/sensor_id");
-    __cfg_sensor_id_resp = config->get_uint("/laser/sensor_id_resp");
-    __cfg_btr0btr1       = config->get_uint("/laser/btr0btr1");
-    __cfg_port           = config->get_uint("/laser/port");
-    __cfg_irq            = config->get_uint("/laser/irq");
-    __cfg_num_init_tries = config->get_uint("/laser/num_init_tries");
+    std::string canres  = config->get_string("/hardware/laser/canonical_resolution");
+    if (canres == "low") {
+      __cfg_rotation_freq = 20;
+      __cfg_angle_step    = 16;
+    } else if (canres == "high") {
+      __cfg_rotation_freq = 15;
+      __cfg_angle_step    =  8;
+    } else {
+      logger->log_error(name(), "Canonical resolution %s is invalid, must be 'low' "
+			"or 'high', trying to read raw config data");
+      throw Exception("");
+    }
+    logger->log_debug(name(), "Using canonical resolution %s, freq: %u, angle step: %u",
+		      canres.c_str(), __cfg_rotation_freq, __cfg_angle_step);
+  } catch (Exception &e) {
+    // exceptions thrown here will propagate
+    __cfg_rotation_freq  = config->get_uint("/hardware/laser/rotation_freq");
+    __cfg_angle_step     = config->get_uint("/hardware/laser/angle_step");
+  }
+
+  try {
+    __cfg_use_default    = config->get_bool("/hardware/laser/use_default");
+    __cfg_set_default    = config->get_bool("/hardware/laser/set_default");
+    __cfg_max_pulse_freq = config->get_uint("/hardware/laser/max_pulse_freq");
+    __cfg_profile_format = config->get_uint("/hardware/laser/profile_format");
+    __cfg_can_id         = config->get_uint("/hardware/laser/can_id");
+    __cfg_can_id_resp    = config->get_uint("/hardware/laser/can_id_resp");
+    __cfg_sensor_id      = config->get_uint("/hardware/laser/sensor_id");
+    __cfg_sensor_id_resp = config->get_uint("/hardware/laser/sensor_id_resp");
+    __cfg_btr0btr1       = config->get_uint("/hardware/laser/btr0btr1");
+    __cfg_port           = config->get_uint("/hardware/laser/port");
+    __cfg_irq            = config->get_uint("/hardware/laser/irq");
+    __cfg_num_init_tries = config->get_uint("/hardware/laser/num_init_tries");
+    __cfg_mount_rotation = config->get_float("/hardware/laser/mount_rotation");
 
     __min_angle_step     = calc_angle_step(__cfg_rotation_freq, __cfg_max_pulse_freq);
-    if ( __cfg_angle_step < __min_angle_step )  __cfg_angle_step = __min_angle_step;
+    if ( __cfg_angle_step < __min_angle_step ) {
+      logger->log_warn(name(), "Configured angle step %u less than required minimum "
+		       "of %u, raising to minimum", __cfg_angle_step, __min_angle_step);
+      __cfg_angle_step = __min_angle_step;
+    }
     __number_of_values = 16 * 360 / __cfg_angle_step;
 
-    if ( __number_of_values != 360 ) {
-      throw Exception("At the moment only configurations with 360 laser beams are supported");
+    if ( (__number_of_values != 360) && (__number_of_values != 720) ) {
+      throw Exception("At the moment only configurations with 360 or 720 "
+		      "laser beams are supported, but %u requested", __number_of_values);
     }
 
     _distances_size = _echoes_size = __number_of_values;
 
-    std::string interface_type = config->get_string("/laser/interface_type");
+    std::string interface_type = config->get_string("/hardware/laser/interface_type");
     if ( interface_type == "usb" ) {
       __cfg_interface_type = HW_USB;
     } else {
@@ -88,6 +215,14 @@ LaseEdlAcquisitionThread::init()
     e.append("Could not read all required config values for %s", name());
     throw;
   }
+
+  __pre_init_done = true;
+}
+
+void
+LaseEdlAcquisitionThread::init()
+{
+  pre_init(config, logger);
 
   init_bus();
 
@@ -101,16 +236,20 @@ LaseEdlAcquisitionThread::init()
 
     try {
       logger->log_debug("LaseEdlAcquisitionThread", "Resetting Laser");
-      DO_RESET(0x0002);
+      DO_RESET(RESETLEVEL_HALT_IDLE);
 
       if ( ! __cfg_use_default ) {
 	logger->log_debug("LaseEdlAcquisitionThread", "Setting configuration");
 	// set configuration (rotation and anglestep)
-	SET_CONFIG( 0x0010, 3, __cfg_sensor_id, __cfg_rotation_freq, __cfg_angle_step);
+	SET_CONFIG(CONFIGITEM_GLOBAL, CONFIGDATA_LENGTH_GLOBAL,
+		   __cfg_sensor_id, __cfg_rotation_freq, __cfg_angle_step);
 
 	// set functions (sector definition)
-	SET_FUNCTION( 0x0000, 0x0003, (16 * 360) - __cfg_angle_step, __cfg_set_default);
-	SET_FUNCTION( 0x0001, 0x0000, 0, __cfg_set_default);
+	SET_FUNCTION(SECTOR_0, SECTORFUNC_NORMAL_MEASUREMENT,
+		     (16 * 360) - __cfg_angle_step,
+		     __cfg_set_default ? FLASH_YES : FLASH_NO);
+	SET_FUNCTION(SECTOR_1, SECTORFUNC_NOT_INITIALIZED, 0,
+		     __cfg_set_default ? FLASH_YES : FLASH_NO);
       }
 
       logger->log_debug("LaseEdlAcquisitionThread", "Starting rotating");
@@ -118,12 +257,13 @@ LaseEdlAcquisitionThread::init()
       logger->log_debug("LaseEdlAcquisitionThread", "Starting measuring");
       TRANS_MEASURE();
       logger->log_debug("LaseEdlAcquisitionThread", "Enable profile retrieval");
-      GET_PROFILE(0, __cfg_profile_format);
+      GET_PROFILE(PROFILENUM_CONTINUOUS, __cfg_profile_format);
 
       break; // break for loop if initialization was successful
     } catch (Exception &e) {
       if (i < __cfg_num_init_tries) {
         logger->log_warn("LaseEdlAcquisitionThread", "Initialization, retrying %d more times", __cfg_num_init_tries - i);
+        logger->log_warn("LaseEdlAcquisitionThread", e);
       } else {
         logger->log_error("LaseEdlAcquisitionThread", "Initialization failed, giving up after %u tries", __cfg_num_init_tries);
         throw;
@@ -143,9 +283,8 @@ LaseEdlAcquisitionThread::finalize()
   free(_echoes);
   _distances = _echoes = NULL;
 
-  //TRANS_IDLE();
   logger->log_debug("LaseEdlAcquisitionThread", "Resetting laser");
-  DO_RESET(0x0002);
+  DO_RESET(RESETLEVEL_HALT_IDLE);
 }
 
 
@@ -157,7 +296,8 @@ LaseEdlAcquisitionThread::loop()
 
 
 unsigned int
-LaseEdlAcquisitionThread::calc_angle_step(unsigned int rotation_freq, unsigned int max_pulse_freq)
+LaseEdlAcquisitionThread::calc_angle_step(unsigned int rotation_freq,
+					  unsigned int max_pulse_freq)
 {
   float tmp;
   unsigned int rv;
@@ -437,7 +577,8 @@ void
 LaseEdlAcquisitionThread::process_profiles()
 {
   WORD* real_response;
-  WORD* expected_response = make_word_array( 2, 0x8301, __cfg_profile_format);
+  WORD* expected_response = make_word_array( 2, respcode(CMD_GET_PROFILE),
+					     __cfg_profile_format);
   int response_size = recv(&real_response);
   if (response_size == -1) {
     logger->log_warn("LaseEdlAcquisitionThread", "process_profiles(): recv() failed");
@@ -461,22 +602,25 @@ LaseEdlAcquisitionThread::process_profiles()
   // extract data from response
   register float dist = 0;
   register int echo = 0;
-  register int dist_index = __number_of_values / 2;
-  register int echo_index = __number_of_values / 2;
+  register int dist_index = (int)roundf(__cfg_mount_rotation * 16 / __cfg_angle_step);
+  register int echo_index = dist_index;
 
   _data_mutex->lock();
   _new_data = true;
 
   // see which data is requested
-  if (__cfg_profile_format == 0x0100) { // only distances
+  if (__cfg_profile_format == PROFILEFORMAT_DISTANCE ) {
+    // only distances
     for (int i=3; i < response_size; i++ ) {
-      dist = ((float)real_response[i]) / 256.0;
+      dist = ((float)real_response[i]) / DISTANCE_FACTOR;
       _distances[dist_index++] = dist;
       if (dist_index >= (int)__number_of_values) dist_index = 0;
     }
-  } else if (__cfg_profile_format == 0x0500 ) { // distances + echos
+
+  } else if (__cfg_profile_format == (PROFILEFORMAT_DISTANCE | PROFILEFORMAT_ECHO_AMPLITUDE) ) {
+    // distances + echos
     for (int i=3; i < response_size; ) {
-      dist = ((float)real_response[i]) / 256.0;
+      dist = ((float)real_response[i]) / DISTANCE_FACTOR;
       _distances[dist_index++] = dist;
       if (dist_index >= (int)__number_of_values) dist_index = 0;
       i++;
@@ -485,7 +629,10 @@ LaseEdlAcquisitionThread::process_profiles()
       if (echo_index >= (int)__number_of_values) echo_index = 0;
       i++;
     }
-  } else if (__cfg_profile_format == 0x0400 ) { // only echos
+
+
+  } else if (__cfg_profile_format == PROFILEFORMAT_ECHO_AMPLITUDE ) {
+    // only echos
     for (int i=3; i < response_size; i++ ) {
       echo = real_response[i];
       _echoes[echo_index++] = echo;
@@ -538,12 +685,12 @@ LaseEdlAcquisitionThread::send_and_check(WORD *command_data, int command_length,
 }
 
 void
-LaseEdlAcquisitionThread::SET_CONFIG( WORD CONFIGITEM, int k, ...)
+LaseEdlAcquisitionThread::SET_CONFIG( WORD config_item, int k, ...)
 {
   WORD *command;
   command = (WORD*)malloc( sizeof(WORD) * (2+k) );
-  command[0] = 0x0201;
-  command[1] = CONFIGITEM;
+  command[0] = CMD_SET_CONFIG;
+  command[1] = config_item;
   va_list word_list;
   va_start( word_list, k);
   for (int i=0; i<k; ++i) {
@@ -551,48 +698,53 @@ LaseEdlAcquisitionThread::SET_CONFIG( WORD CONFIGITEM, int k, ...)
   }
   va_end( word_list );
 
-  send_and_check(command, 2+k, make_word_array(2, 0x8201, 0x0000), 2);
+  send_and_check(command, 2+k, make_word_array(2, respcode(CMD_SET_CONFIG), 0x0000), 2);
 }
 
 
 void
-LaseEdlAcquisitionThread::SET_FUNCTION( WORD SECTORNUM, WORD SECTORFUNC, WORD SECTORSTOP, WORD FLASHFLAG )
+LaseEdlAcquisitionThread::SET_FUNCTION(WORD sect_num, WORD sect_func,
+				       WORD sect_stop, WORD flash )
 {
-  WORD* command = make_word_array( 5, 0x020A, SECTORNUM, SECTORFUNC, SECTORSTOP, FLASHFLAG);
-  send_and_check(command, 5, make_word_array( 2, 0x820A, SECTORNUM), 2);
+  WORD* command = make_word_array(5, CMD_SET_FUNCTION, sect_num, sect_func,
+				  sect_stop, flash);
+  send_and_check(command, 5, make_word_array(2, respcode(CMD_SET_FUNCTION), sect_num), 2);
 }
 
 
 void
-LaseEdlAcquisitionThread::GET_PROFILE( WORD PROFILENUM, WORD PROFILEFORMAT)
+LaseEdlAcquisitionThread::GET_PROFILE( WORD prof_num, WORD prof_format)
 {
-  WORD* command = make_word_array( 3, 0x0301, PROFILENUM, PROFILEFORMAT);
-  send_and_check(command, 3, make_word_array( 2, 0x8301, PROFILEFORMAT), 2);
+  WORD* command = make_word_array(3, CMD_GET_PROFILE, prof_num, prof_format);
+  send_and_check(command, 3,
+		 make_word_array(2, respcode(CMD_GET_PROFILE), prof_format), 2);
 }
 
 
 void
 LaseEdlAcquisitionThread::CANCEL_PROFILE()
 {
-  send_and_check(make_word_array(1, 0x0302), 1, make_word_array( 1, 0x8302), 1);
+  send_and_check(make_word_array(1, CMD_CANCEL_PROFILE), 1,
+		 make_word_array( 1, respcode(CMD_CANCEL_PROFILE)), 1);
 }
 
 
 void
-LaseEdlAcquisitionThread::DO_RESET(WORD RESETLEVEL)
+LaseEdlAcquisitionThread::DO_RESET(WORD reset_level)
 {
-  WORD* command = make_word_array( 2, 0x0401, RESETLEVEL);
-  send_and_check(command, 2, make_word_array(2, 0x8401, RESETLEVEL), 2);
+  WORD* command = make_word_array( 2, CMD_DO_RESET, reset_level);
+  send_and_check(command, 2, make_word_array(2, respcode(CMD_DO_RESET), reset_level), 2);
 }
 
 
 void
 LaseEdlAcquisitionThread::TRANS_IDLE()
 {
-  WORD* command = make_word_array( 1, 0x0402);
+  WORD* command = make_word_array( 1, CMD_TRANS_IDLE);
   WORD* real_response;
   int   response_size;
-  send_and_check(command, 1, make_word_array( 1, 0x8402), 1, &real_response, &response_size);
+
+  send_and_check(command, 1, make_word_array( 1, respcode(CMD_TRANS_IDLE)), 1, &real_response, &response_size);
 
   bool failed = (real_response[response_size-1] != 0x0001);
   free(real_response);
@@ -601,12 +753,12 @@ LaseEdlAcquisitionThread::TRANS_IDLE()
 
 
 void
-LaseEdlAcquisitionThread::TRANS_ROTATE(WORD REV)
+LaseEdlAcquisitionThread::TRANS_ROTATE(WORD frequency)
 {
-  WORD* command = make_word_array( 2, 0x0403, REV);
+  WORD* command = make_word_array( 2, CMD_TRANS_ROTATE, frequency);
   WORD* real_response;
   int   response_size;
-  send_and_check(command, 2, make_word_array( 1, 0x8403), 1,
+  send_and_check(command, 2, make_word_array( 1, respcode(CMD_TRANS_ROTATE)), 1,
 		 &real_response, &response_size);
 	     
   bool failed = (real_response[response_size-1] != 0x0002);
@@ -618,13 +770,15 @@ LaseEdlAcquisitionThread::TRANS_ROTATE(WORD REV)
 void
 LaseEdlAcquisitionThread::TRANS_MEASURE()
 {
-  WORD* command = make_word_array( 1, 0x0404);
+  WORD* command = make_word_array( 1, CMD_TRANS_MEASURE);
   WORD* real_response;
   int   response_size;  
-  send_and_check(command, 1, make_word_array( 1, 0x8404), 1, &real_response, &response_size);
+  send_and_check(command, 1, make_word_array( 1, respcode(CMD_TRANS_MEASURE)),
+		 1, &real_response, &response_size);
 
   bool failed = (real_response[response_size-2] != 0x0003) ||
                 (real_response[response_size-1] != 0x0000);
+  unsigned int error_code = real_response[response_size-1];
   free(real_response);
-  if ( failed )  throw Exception("Failed set trans measure");
+  if ( failed )  throw Exception("Failed set trans measure, error code %u", error_code);
 }
