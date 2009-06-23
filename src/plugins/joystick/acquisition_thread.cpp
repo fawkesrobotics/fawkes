@@ -108,7 +108,7 @@ void
 JoystickAcquisitionThread::init()
 {
   try {
-    __cfg_device_file    = config->get_string("/joystick/device_file");
+    __cfg_device_file    = config->get_string("/hardware/joystick/device_file");
 
   } catch (Exception &e) {
     e.append("Could not read all required config values for %s", name());

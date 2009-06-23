@@ -56,21 +56,21 @@ KatanaActThread::init()
   // freed on destruction, therefore no special handling is necessary in init()
   // itself!
 
-  __cfg_device           = config->get_string("/plugins/katana/device");
-  __cfg_kni_conffile     = config->get_string("/plugins/katana/kni_conffile");
-  __cfg_auto_calibrate   = config->get_bool("/plugins/katana/auto_calibrate");
-  __cfg_defmax_speed     = config->get_uint("/plugins/katana/default_max_speed");
-  __cfg_read_timeout     = config->get_uint("/plugins/katana/read_timeout_msec");
-  __cfg_write_timeout    = config->get_uint("/plugins/katana/write_timeout_msec");
-  __cfg_gripper_pollint  = config->get_uint("/plugins/katana/gripper_pollint_msec");
-  __cfg_goto_pollint     = config->get_uint("/plugins/katana/goto_pollint_msec");
+  __cfg_device           = config->get_string("/hardware/katana/device");
+  __cfg_kni_conffile     = config->get_string("/hardware/katana/kni_conffile");
+  __cfg_auto_calibrate   = config->get_bool("/hardware/katana/auto_calibrate");
+  __cfg_defmax_speed     = config->get_uint("/hardware/katana/default_max_speed");
+  __cfg_read_timeout     = config->get_uint("/hardware/katana/read_timeout_msec");
+  __cfg_write_timeout    = config->get_uint("/hardware/katana/write_timeout_msec");
+  __cfg_gripper_pollint  = config->get_uint("/hardware/katana/gripper_pollint_msec");
+  __cfg_goto_pollint     = config->get_uint("/hardware/katana/goto_pollint_msec");
 
-  __cfg_park_x           = config->get_float("/plugins/katana/park_x");
-  __cfg_park_y           = config->get_float("/plugins/katana/park_y");
-  __cfg_park_z           = config->get_float("/plugins/katana/park_z");
-  __cfg_park_phi         = config->get_float("/plugins/katana/park_phi");
-  __cfg_park_theta       = config->get_float("/plugins/katana/park_theta");
-  __cfg_park_psi         = config->get_float("/plugins/katana/park_psi");
+  __cfg_park_x           = config->get_float("/hardware/katana/park_x");
+  __cfg_park_y           = config->get_float("/hardware/katana/park_y");
+  __cfg_park_z           = config->get_float("/hardware/katana/park_z");
+  __cfg_park_phi         = config->get_float("/hardware/katana/park_phi");
+  __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
+  __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
 
   try {
     TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, __cfg_read_timeout, __cfg_write_timeout};

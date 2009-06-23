@@ -47,7 +47,7 @@ PanTiltPlugin::PanTiltPlugin(Configuration *config)
   std::set<std::string> ptus;
   std::set<std::string> ignored_ptus;
 
-  std::string prefix = "/plugins/pantilt/";
+  std::string prefix = "/hardware/pantilt/";
   std::string ptus_prefix = prefix + "ptus/";
 
   PanTiltSensorThread *sensor_thread = new PanTiltSensorThread();
