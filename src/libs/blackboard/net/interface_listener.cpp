@@ -32,6 +32,7 @@
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/component_ids.h>
+#include <utils/logging/liblogger.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -95,7 +96,12 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
   memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(),
 	 interface->datasize());
 
-  __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_CHANGED, payload, payload_size);
+  try {
+    __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_CHANGED, payload, payload_size);
+  } catch (Exception &e) {
+    LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard data, exception follows");
+    LibLogger::log_warn(bbil_name(), e);
+  }
 }
 
 
@@ -113,7 +119,12 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
   memcpy((char *)payload + sizeof(bb_imessage_msg_t), message->datachunk(),
 	 message->datasize());
 
-  __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_MESSAGE, payload, payload_size);
+  try {
+    __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_MESSAGE, payload, payload_size);
+  } catch (Exception &e) {
+    LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard message, exception follows");
+    LibLogger::log_warn(bbil_name(), e);
+  }
 
   // do not enqueue, we are fine with just sending
   return false;
@@ -129,7 +140,12 @@ BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *interface,
   esm->serial       = interface->serial();
   esm->event_serial = event_serial;
 
-  __fnh->send(__clid, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));  
+  try {
+    __fnh->send(__clid, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));  
+  } catch (Exception &e) {
+    LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard event serial, exception follows");
+    LibLogger::log_warn(bbil_name(), e);
+  }
 }
 
 
