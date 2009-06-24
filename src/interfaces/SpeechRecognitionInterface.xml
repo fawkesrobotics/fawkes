@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="SpeechRecognitionInterface" author="Tim Niemueller and Masrur Doostdar" year="2009">
+  <data>
+    <comment>
+      The interface provides access to a spech recognition facility.
+    </comment>
+    <field type="string" length="1024" name="text">
+      Last spoken string. Must be properly null-terminated.
+    </field>
+    <field type="unsigned int" name="counter">
+      Counter for messages. Increased after each new recognized string.
+    </field>
+    <field type="bool" name="processing">
+      True, if the the speech recognition is currently processing.
+    </field>
+    <field type="bool" name="enabled">
+      True, if speech processing is currently enabled, false otherwise.
+    </field>
+  </data>
+  <message name="Reset">
+    <comment>Orders the given text to be spoken.</comment>
+  </message>
+  <message name="SetEnabled">
+    <comment>Orders the given text to be spoken.</comment>
+    <ref>enabled</ref>
+  </message>
+</interface>
