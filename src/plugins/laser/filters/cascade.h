@@ -38,7 +38,9 @@ class LaserDataFilterCascade : public LaserDataFilter
   void add_filter(LaserDataFilter *filter);
   void remove_filter(LaserDataFilter *filter);
   void delete_filters();
-  bool has_filters() const;
+
+  /** Check if filters have been added to the cascade. */
+  inline bool has_filters() const { return ! __filters.empty(); }
 
   void filter(const float *data, unsigned int data_size);
 

@@ -48,6 +48,8 @@ using namespace fawkes;
 
 /** Constructor.
  * @param config configuration instance
+ * @param logger logger for informational output
+ * @param prefix configuration prefix where to log for config information
  */
 LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(fawkes::Configuration *config,
 						   fawkes::Logger *logger,

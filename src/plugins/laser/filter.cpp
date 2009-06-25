@@ -45,6 +45,14 @@
  * original values if unmodified.
  */
 
+/** @var LaserDataFilter::_filtered_data_size
+ * Size in bytes of _filtered_data.
+ */
+
+/** @var LaserDataFilter::_free_filtered_data
+ * True to have _filtered_data deleted automatically on destruction.
+ */
+
 /** Constructor. */
 LaserDataFilter::LaserDataFilter()
 {

@@ -69,10 +69,25 @@ print_usage(const char *program_name)
 	 DEFAULT_COMPARE_DISTANCE);
 }
 
-
+/** Calibrator for dead ranges.
+ * Depending how the laser is mounted parts of the range it covers might be
+ * useless data, for example if hidden behind rods. This calibrator detects
+ * those ranges and writes the information to the config suitable to be
+ * used by the LaserDeadSpotsDataFilter.
+ * @author Tim Niemueller
+ */
 class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
 {
  public:
+  /** Constructor.
+   * @param num_spots number of expected spots
+   * @param num_measurements number of measurements to take
+   * @param compare_distance distance to compare values to
+   * @param margin extra margin in degree to add around detected regions
+   * @param blackboard blackboard to register with as listener
+   * @param laser360 360 beams laser interface
+   * @param laser720 720 beams laser interface
+   */
   LaserDeadSpotCalibrator(unsigned int num_spots, unsigned int num_measurements,
 			  float compare_distance, float margin,
 			  BlackBoard *blackboard,
@@ -107,6 +122,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
     __blackboard->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
   }
 
+  /** Wait for the calibration to be finished. */
   void
   wait_finished()
   {
@@ -114,6 +130,25 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
     __finish_waitcond.wait();
   }
 
+  /** Get spots.
+   * @return vector of detected dead regions
+   */
+  std::vector<std::pair<float, float> >
+  get_dead_spots()
+  {
+    return __dead_spots;
+  }
+
+  /** Get number of spots.
+   * @return number of spots
+   */
+  unsigned int
+  num_detected_spots()
+  {
+    return __num_spots_found;
+  }
+
+ private:
   float
   calculate_median(std::vector<float> measurements)
   {
@@ -341,12 +376,6 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
     }
   }
 
-  std::vector<std::pair<float, float> >
-  get_dead_spots()
-  {
-    return __dead_spots;
-  }
-
   virtual void
   bb_interface_data_changed(Interface *interface) throw()
   {
@@ -379,12 +408,6 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
       __blackboard->unregister_listener(this);
       __finish_waitcond.wake_all();
     }
-  }
-
-  unsigned int
-  num_detected_spots()
-  {
-    return __num_spots_found;
   }
 
  private:

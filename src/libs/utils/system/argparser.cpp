@@ -318,7 +318,7 @@ ArgumentParser::parse_item_int(unsigned int index)
 
 /** Parse item as double.
  * Converts the value of the given item to a double.
- * @param argn argument name to retrieve
+ * @param index item index
  * @return value of string as double
  * @exception IllegalArgumentException thrown if the value cannot be properly
  * converted to a double

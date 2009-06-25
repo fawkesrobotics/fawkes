@@ -26,10 +26,14 @@
 
 /** @class LaserDataFilterCascade "filters/cascade.h"
  * Cascade of several laser filters to one.
+ * The filters are executed in the order they are added to the cascade.
  * @author Tim Niemueller
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param own_filters true to make the cascade own filters that are added, i.e.
+ * they are deleted if the cascade is deleted.
+ */
 LaserDataFilterCascade::LaserDataFilterCascade(bool own_filters)
 {
   _free_filtered_data = false;
@@ -37,11 +41,16 @@ LaserDataFilterCascade::LaserDataFilterCascade(bool own_filters)
 }
 
 
+/** Destructor. */
 LaserDataFilterCascade::~LaserDataFilterCascade()
 {
   if (__own_filters)  delete_filters();
 }
 
+
+/** Add a filter to the cascade.
+ * @param filter filter to add
+ */
 void
 LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 {
@@ -49,6 +58,9 @@ LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 }
 
 
+/** Remove a filter from the cascade.
+ * @param filter filter to remove
+ */
 void
 LaserDataFilterCascade::remove_filter(LaserDataFilter *filter)
 {
@@ -56,6 +68,7 @@ LaserDataFilterCascade::remove_filter(LaserDataFilter *filter)
 }
 
 
+/** Delete all filters. */
 void
 LaserDataFilterCascade::delete_filters()
 {
@@ -65,12 +78,6 @@ LaserDataFilterCascade::delete_filters()
   __filters.clear();
 }
 
-
-bool
-LaserDataFilterCascade::has_filters() const
-{
-  return ! __filters.empty();
-}
 
 void
 LaserDataFilterCascade::filter(const float *data, unsigned int data_size)
