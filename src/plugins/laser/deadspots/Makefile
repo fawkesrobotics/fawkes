@@ -1,7 +1,7 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes: Laser Plugin
+#   Makefile Build System for Fawkes: Laser Plugin Dead Spots Calibration Tool
 #                            -------------------
-#   Created on Wed Oct 08 13:39:39 2008
+#   Created on Tue Jun 23 23:28:25 2009
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
@@ -15,29 +15,14 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = deadspots
+LIBS_fflaser_deadspots = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
+			 fawkesconfig Laser360Interface Laser720Interface
+OBJS_fflaser_deadspots = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
-LIBS_laser = fawkescore fawkesutils fawkesaspects pcan \
-	     Laser360Interface Laser720Interface
-OBJS_laser = $(filter-out deadspots/%,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
-
-ifeq ($(HAVE_LIBPCAN),1)
-  PLUGINS_all = $(PLUGINDIR)/laser.so
-else
-  WARN_TARGETS += warning_pcan
-endif
-
-OBJS_all = $(OBJS_laser)
-
-ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
-
-.PHONY: warning_pcan
-warning_pcan:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Laser Plugin$(TNORMAL) (Peak Systems' libpcan not found)"
-endif
+BINS_all = $(BINDIR)/fflaser_deadspots
+OBJS_all = $(OBJS_fflaser_deadspots)
 
 include $(BASEDIR)/etc/buildsys/base.mk

@@ -39,15 +39,15 @@
 LaserCircleDataFilter::LaserCircleDataFilter(float radius)
 {
   __radius = radius;
-  __last_size = 0;
 }
 
 void
 LaserCircleDataFilter::filter(const float *data, unsigned int data_size)
 {
-  if ( data_size != __last_size ) {
+  if ( _filtered_data_size != data_size ) {
     if (_filtered_data)  free(_filtered_data);
-    _filtered_data = (float *)malloc(sizeof(float) * data_size);
+    _filtered_data      = (float *)malloc(sizeof(float) * data_size);
+    _filtered_data_size = data_size;
   }
 
   for (unsigned int i = 0; i < data_size; ++i) {

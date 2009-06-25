@@ -31,11 +31,15 @@ class LaserDataFilter
   LaserDataFilter();
   virtual ~LaserDataFilter();
 
-  virtual float *  filtered_data();
-  virtual void     filter(const float *data, unsigned int data_size)   = 0;
+  virtual float *       filtered_data();
+  virtual unsigned int  filtered_data_size();
+  virtual void          filtered_data(float *&data, unsigned int &data_size);
+  virtual void          filter(const float *data, unsigned int data_size)   = 0;
 
  protected:
-  float *_filtered_data;
+  float        *_filtered_data;
+  unsigned int  _filtered_data_size;
+  bool          _free_filtered_data;
 };
 
 

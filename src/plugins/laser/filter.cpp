@@ -48,14 +48,16 @@
 /** Constructor. */
 LaserDataFilter::LaserDataFilter()
 {
-  _filtered_data = NULL;
+  _filtered_data      = NULL;
+  _filtered_data_size = 0;
+  _free_filtered_data = true;
 }
 
 
 /** Virtual empty destructor. */
 LaserDataFilter::~LaserDataFilter()
 {
-  if (_filtered_data)  free(_filtered_data);
+  if (_filtered_data && _free_filtered_data)  free(_filtered_data);
 }
 
 
@@ -67,4 +69,26 @@ float *
 LaserDataFilter::filtered_data()
 {
   return _filtered_data;
+}
+
+
+/** Get size of filtered data array
+ * @return size of filtered data array or 0 if filter() was never called.
+ */
+unsigned int
+LaserDataFilter::filtered_data_size()
+{
+  return _filtered_data_size;
+}
+
+
+/** Get filtered data array and size.
+ * @param data upon return contains pointer to filtered data
+ * @param data_size upon return contains data size
+ */
+void
+LaserDataFilter::filtered_data(float *&data, unsigned int &data_size)
+{
+  data      = _filtered_data;
+  data_size = _filtered_data_size;
 }

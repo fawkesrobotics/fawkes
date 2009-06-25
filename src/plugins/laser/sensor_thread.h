@@ -37,7 +37,7 @@ namespace fawkes {
 }
 
 class LaserAcquisitionThread;
-class LaserDataFilter;
+class LaserDataFilterCascade;
 
 class LaserSensorThread
 : public fawkes::Thread,
@@ -61,9 +61,9 @@ class LaserSensorThread
   fawkes::Laser720Interface *__laser720_if;
 
   LaserAcquisitionThread *__aqt;
-  LaserDataFilter        *__filter;
 
-  LaserDataFilter        *__720to360filter;
+  LaserDataFilterCascade *__filters720;
+  LaserDataFilterCascade *__filters360;
 
   unsigned int            __num_values;
 };

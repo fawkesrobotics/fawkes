@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  circle.h - Laser data circle data filter (example)
+ *  cascade.h - Laser data filter cascade
  *
- *  Created: Fri Oct 10 17:15:34 2008
+ *  Created: Thu Jun 25 01:04:59 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -22,20 +22,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_CIRCLE_H_
-#define __PLUGINS_LASER_FILTERS_CIRCLE_H_
+#ifndef __PLUGINS_LASER_FILTERS_CASCADE_H_
+#define __PLUGINS_LASER_FILTERS_CASCADE_H_
 
 #include "../filter.h"
 
-class LaserCircleDataFilter : public LaserDataFilter
+#include <list>
+
+class LaserDataFilterCascade : public LaserDataFilter
 {
  public:
-  LaserCircleDataFilter(float radius);
+  LaserDataFilterCascade(bool own_filters = true);
+  ~LaserDataFilterCascade();
+
+  void add_filter(LaserDataFilter *filter);
+  void remove_filter(LaserDataFilter *filter);
+  void delete_filters();
+  bool has_filters() const;
 
   void filter(const float *data, unsigned int data_size);
 
  private:
-  float  __radius;
+  bool                                   __own_filters;
+  std::list<LaserDataFilter *>           __filters;
+  std::list<LaserDataFilter *>::iterator __fit;
 };
 
 #endif

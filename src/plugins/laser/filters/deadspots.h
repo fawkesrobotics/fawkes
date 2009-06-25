@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  circle.h - Laser data circle data filter (example)
+ *  deadspots.h - Laser data dead spots filter
  *
- *  Created: Fri Oct 10 17:15:34 2008
+ *  Created: Wed Jun 24 22:39:19 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -22,20 +22,35 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_CIRCLE_H_
-#define __PLUGINS_LASER_FILTERS_CIRCLE_H_
+#ifndef __PLUGINS_LASER_FILTERS_DEADSPOTS_H_
+#define __PLUGINS_LASER_FILTERS_DEADSPOTS_H_
 
 #include "../filter.h"
 
-class LaserCircleDataFilter : public LaserDataFilter
+#include <vector>
+#include <utility>
+#include <string>
+
+namespace fawkes {
+  class Configuration;
+  class Logger;
+}
+
+class LaserDeadSpotsDataFilter : public LaserDataFilter
 {
  public:
-  LaserCircleDataFilter(float radius);
+  LaserDeadSpotsDataFilter(fawkes::Configuration *config, fawkes::Logger *logger,
+			   std::string prefix);
+  ~LaserDeadSpotsDataFilter();
 
   void filter(const float *data, unsigned int data_size);
 
  private:
-  float  __radius;
+  fawkes::Logger *__logger;
+
+  unsigned int  __num_spots;
+  unsigned int *__dead_spots;
+  std::vector<std::pair<float, float> > __cfg_dead_spots;
 };
 
 #endif

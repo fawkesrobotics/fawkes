@@ -26,6 +26,8 @@
 #include "acquisition_thread.h"
 #include "filters/circle.h"
 #include "filters/720to360.h"
+#include "filters/deadspots.h"
+#include "filters/cascade.h"
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
@@ -48,7 +50,6 @@ LaserSensorThread::LaserSensorThread(LaserAcquisitionThread *aqt)
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
 {
   __aqt    = aqt;
-  __filter = NULL;
 }
 
 
@@ -57,21 +58,37 @@ LaserSensorThread::init()
 {
   __laser360_if = NULL;
   __laser720_if = NULL;
-  __720to360filter = NULL;
+
+  bool spots_filter = false;
+  try {
+    spots_filter = config->get_bool("/hardware/laser/use_dead_spots_filter");
+  } catch (Exception &e) {
+  }
 
   __aqt->pre_init(config, logger);
 
   __num_values = __aqt->get_distance_data_size();
+
+  __filters360 = new LaserDataFilterCascade();
+  __filters720 = new LaserDataFilterCascade();
 
   if (__num_values == 360) {
     __laser360_if = blackboard->open_for_writing<Laser360Interface>("Laser");
   } else if (__num_values == 720){
     __laser360_if = blackboard->open_for_writing<Laser360Interface>("Laser");
     __laser720_if = blackboard->open_for_writing<Laser720Interface>("Laser");
-    __720to360filter = new Laser720to360DataFilter();
+    __filters360->add_filter(new Laser720to360DataFilter());
   } else {
     throw Exception("Laser acquisition thread must produce either 360 or 720 "
 		    "distance values, but it produces %u", __aqt->get_distance_data_size());
+  }
+
+  if (spots_filter) {
+    std::string spots_prefix = "/hardware/laser/dead_spots/";
+    logger->log_debug(name(), "Setting up dead spots filter for 360° interface");
+    __filters360->add_filter(new LaserDeadSpotsDataFilter(config, logger, spots_prefix));
+    logger->log_debug(name(), "Setting up dead spots filter for 720° interface");
+    __filters720->add_filter(new LaserDeadSpotsDataFilter(config, logger, spots_prefix));
   }
 }
 
@@ -79,31 +96,32 @@ LaserSensorThread::init()
 void
 LaserSensorThread::finalize()
 {
+  delete __filters360;
+  delete __filters720;
   blackboard->close(__laser360_if);
   blackboard->close(__laser720_if);
-  delete __720to360filter;
-  delete __filter;
 }
 
 void
 LaserSensorThread::loop()
 {
   if ( __aqt->lock_if_new_data() ) {
-    if ( __filter ) {
-      __filter->filter(__aqt->get_distance_data(), __aqt->get_distance_data_size());
-      if (__num_values == 360) {
-	__laser360_if->set_distances(__filter->filtered_data());
-      } else if (__num_values == 720) {
-	__laser720_if->set_distances(__filter->filtered_data());
-      }
-    } else {
-      if (__num_values == 360) {
+    if (__num_values == 360) {
+      if (__filters360->has_filters()) {
+	__filters360->filter(__aqt->get_distance_data(), __aqt->get_distance_data_size());
+	__laser360_if->set_distances(__filters360->filtered_data());
+      } else {
 	__laser360_if->set_distances(__aqt->get_distance_data());
-      } else if (__num_values == 720) {
-	__laser720_if->set_distances(__aqt->get_distance_data());
-	__720to360filter->filter(__aqt->get_distance_data(), __aqt->get_distance_data_size());
-	__laser360_if->set_distances(__720to360filter->filtered_data());
       }
+    } else if (__num_values == 720) {
+      if (__filters720->has_filters()) {
+	__filters720->filter(__aqt->get_distance_data(), __aqt->get_distance_data_size());
+	__laser720_if->set_distances(__filters720->filtered_data());
+      } else {
+	__laser720_if->set_distances(__aqt->get_distance_data());
+      }
+      __filters360->filter(__aqt->get_distance_data(), __aqt->get_distance_data_size());
+      __laser360_if->set_distances(__filters360->filtered_data());
     }
     __laser360_if->write();
     if (__laser720_if)  __laser720_if->write();

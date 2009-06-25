@@ -39,8 +39,9 @@
  */
 Laser720to360DataFilter::Laser720to360DataFilter(bool average)
 {
-  __average      = average;
-  _filtered_data = (float *)malloc(sizeof(float) * 360);
+  __average           = average;
+  _filtered_data      = (float *)malloc(sizeof(float) * 360);
+  _filtered_data_size = 360;
 }
 
 void
