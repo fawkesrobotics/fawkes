@@ -207,8 +207,8 @@ BlackBoardNotifier::remove_listener(BlackBoardInterfaceListener *listener,
 {
   mutex->lock();
   if (events > 0) {
-    LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface listener %s queued",
-			listener->bbil_name());
+    //LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface listener %s queued",
+    //			  listener->bbil_name());
 
     BBilQueue::iterator re;
     if ( (re = find(queue.begin(), queue.end(),
@@ -278,8 +278,8 @@ BlackBoardNotifier::remove_message_listener(BlackBoardInterfaceListener *listene
 {
   __bbil_messages_mutex->lock();
   if (__bbil_messages_events > 0) {
-    LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface (message) listener %s queued",
-			listener->bbil_name());
+    //LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface (message) listener %s queued",
+    //			listener->bbil_name());
 
     BBilQueue::iterator re;
     if ( (re = find(__bbil_messages_queue.begin(), __bbil_messages_queue.end(),
