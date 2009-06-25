@@ -48,6 +48,8 @@ class HandlerAlreadyRegisteredException : public Exception
   HandlerAlreadyRegisteredException();
 };
 
+#define FAWKES_TCP_PORT 1910
+
 class FawkesNetworkClient
 {
  friend class FawkesNetworkClientSendThread;
