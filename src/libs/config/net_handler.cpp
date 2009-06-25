@@ -520,7 +520,10 @@ void
 ConfigNetworkHandler::client_disconnected(unsigned int clid)
 {
   __subscribers.lock();
-  remove(__subscribers.begin(), __subscribers.end(), clid);
+  LibLogger::log_warn("ConfigNetworkHandler",
+		      "Client %u disconnected without closing the config, removing from list of subscribers",
+		      clid);
+  __subscribers.remove(clid);
   __subscribers.unlock();
 }
 
