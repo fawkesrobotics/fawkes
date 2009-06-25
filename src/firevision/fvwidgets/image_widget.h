@@ -29,6 +29,7 @@
 #include <fvutils/color/rgb.h>
 
 #include <gtkmm.h>
+#include <libglademm/xml.h>
 
 class Camera;
 
@@ -68,10 +69,12 @@ private:
 
 public:
   ImageWidget(unsigned int width, unsigned int height);
-  ImageWidget(Camera *cam, unsigned int refresh_delay = 0, unsigned int width = 0, unsigned int height = 0);
+  ImageWidget(Camera *cam, unsigned int refresh_delay = 0);
+  ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml);
   virtual ~ImageWidget();
 
-  virtual bool show(colorspace_t colorspace, unsigned char *buffer, unsigned int width = 0, unsigned int height = 0);
+  void set_camera(Camera *cam, unsigned int refresh_delay = 0);
+  virtual void show(colorspace_t colorspace, unsigned char *buffer);
   void set_refresh_delay(unsigned int refresh_delay);
   void refresh_cam();
   unsigned int get_width() const;
@@ -82,7 +85,6 @@ public:
   bool save_image(std::string filename, Glib::ustring type) const throw();
   void save_on_refresh_cam(bool enabled, std::string path = "", Glib::ustring type = "", unsigned int img_num = 0);
   unsigned int get_image_num();
-  sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> & signal_show();
 
 private:
   void set_cam();
@@ -97,8 +99,6 @@ private:
   fawkes::Mutex   *__cam_mutex;
   bool             __cam_has_buffer;
   bool             __cam_has_timestamp;
-
-  sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> __signal_show;
 };
 
 #endif /* __FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_ */
