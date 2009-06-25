@@ -80,6 +80,9 @@ class ArgumentParser
   long int     parse_int(const char *argn);
   double       parse_float(const char *argn);
 
+  long int     parse_item_int(unsigned int index);
+  double       parse_item_float(unsigned int index);
+
   const std::vector< const char * > &    items() const;
   std::vector< const char * >::size_type num_items() const;
 

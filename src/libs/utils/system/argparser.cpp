@@ -292,6 +292,54 @@ ArgumentParser::parse_float(const char *argn)
 }
 
 
+/** Parse item as integer.
+ * Converts the value of the given item to an integer.
+ * @param index item index
+ * @return value of string as long int
+ * @exception IllegalArgumentException thrown if the value cannot be properly
+ * converted to an integer
+ * @exception Exception thrown if the argument has not been supplied
+ */
+long int
+ArgumentParser::parse_item_int(unsigned int index)
+{
+  if (index < _items.size()) {
+    char *endptr;
+    long int rv = strtol(_items[index], &endptr, 10);
+    if ( endptr[0] != 0 ) {
+      throw IllegalArgumentException("Supplied argument is not of type int");
+    }
+    return rv;
+  } else {
+    throw Exception("Value for item %u not available", index);
+  }
+}
+
+
+/** Parse item as double.
+ * Converts the value of the given item to a double.
+ * @param argn argument name to retrieve
+ * @return value of string as double
+ * @exception IllegalArgumentException thrown if the value cannot be properly
+ * converted to a double
+ * @exception Exception thrown if the argument has not been supplied
+ */
+double
+ArgumentParser::parse_item_float(unsigned int index)
+{
+  if (index < _items.size()) {
+    char *endptr;
+    double rv = strtod(_items[index], &endptr);
+    if ( endptr[0] != 0 ) {
+      throw IllegalArgumentException("Supplied argument is not of type double");
+    }
+    return rv;
+  } else {
+    throw Exception("Value for item %u not available", index);
+  }
+}
+
+
 /** Get non-option items.
  * @return pointer to vector of pointer to non-argument values. Handled internally,
  * do not free or delete!
