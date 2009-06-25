@@ -184,7 +184,7 @@ LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window> &window,
 {
   cr->save();
   cr->set_source_rgba(0, 0, 0.8, 0.2);
-  cr->rectangle(-3, -2, 6, 4);
+  cr->arc(0, 0, 1.0, 0, 2 * M_PI);
   cr->stroke();
   cr->restore();
 }

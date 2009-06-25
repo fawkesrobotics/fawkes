@@ -112,11 +112,18 @@ class LaserGuiGtkWindow : public Gtk::Window
   {
     try {
       __bb = new RemoteBlackBoard(__connection_dispatcher.get_client());
-      __laser360_if = __bb->open_for_reading<Laser360Interface>("Laser");
+      __laser360_if = NULL;
       __laser720_if = NULL;
 
-      __area->set_laser360_if(__laser360_if);
-      __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser360_if);
+      if (__tb_highres->get_active()) {
+	__laser720_if = __bb->open_for_reading<Laser720Interface>("Laser");
+	__area->set_laser720_if(__laser720_if);
+	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser720_if);
+      } else {
+	__laser360_if = __bb->open_for_reading<Laser360Interface>("Laser");
+	__area->set_laser360_if(__laser360_if);
+	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser360_if);
+      }
       __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
       __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
 
