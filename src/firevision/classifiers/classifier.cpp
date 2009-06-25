@@ -50,7 +50,10 @@
  */
 Classifier::Classifier(const char *name)
 {
-  __name = strdup(name);
+  __name  = strdup(name);
+  _src    = NULL;
+  _width  = 0;
+  _height = 0;
 }
 
 

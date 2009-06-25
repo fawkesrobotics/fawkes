@@ -28,6 +28,7 @@
 #include <core/threading/mutex.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/color/yuv.h>
+#include <fvutils/scalers/lossy.h>
 #include <cams/camera.h>
 
 #include <iomanip>
@@ -62,16 +63,25 @@ ImageWidget::ImageWidget(unsigned int width, unsigned int height)
  * Creates a new ImageWidget with a Camera as image source
  * @param cam the image source
  * @param refresh_delay if greater 0 a thread gets created that refreshes the Image every refresh_delay milliseconds
+ * @param width of the widget (if not equal to the camera width the image gets scaled)
+ * @param height of the widget (if not equal to the camera height the image gets scaled)
  */
-ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay)
+ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int width, unsigned int height)
 {
   if (!cam) throw fawkes::NullPointerException("Parameter cam may not be NULL");
 
   __cam            = cam;
   __cam_mutex      = new fawkes::Mutex;
   __cam_has_buffer = false;
-  __width          = __cam->pixel_width();
-  __height         = __cam->pixel_height();
+
+  if (width && height) {
+    __width  = width;
+    __height = height;
+  }
+  else {
+    __width  = __cam->pixel_width();
+    __height = __cam->pixel_height();
+  }
 
   try {
     fawkes::Time *time = __cam->capture_time();
@@ -222,20 +232,69 @@ ImageWidget::set_rgb(unsigned int x, unsigned int y, RGB_t rgb)
 
 /**
  * Show image from given colorspace.
+ * Warning: If width and/or height not set, it is assumed, that
+ * the given buffer has the same dimension as the widget.
  *
  * @param colorspace colorspace of the supplied buffer
  * @param buffer image buffer
+ * @param width Width of the provided buffer (may be scaled to ImageWidget dimensions)
+ * @param height Height of the provided buffer (may be scaled to ImageWidget dimensions)
+ * @return TRUE if the buffer chould be shown
  */
-void
-ImageWidget::show(colorspace_t colorspace, unsigned char *buffer)
+bool
+ImageWidget::show(colorspace_t colorspace, unsigned char *buffer, unsigned int width, unsigned int height)
 {
   try {
-    convert(colorspace, RGB, buffer, __pixbuf->get_pixels(), __width, __height);
+    if (!width || !height || (width == __width && height == __height)) {
+      convert(colorspace, RGB, buffer, __pixbuf->get_pixels(), __width, __height);
+    }
+    else {
+      unsigned char *scaled_buffer = (unsigned char *)malloc(colorspace_buffer_size(colorspace, __width, __height));
+
+      if (scaled_buffer) {
+        LossyScaler scaler;
+        scaler.set_original_buffer(buffer);
+        scaler.set_original_dimensions(width, height);
+        scaler.set_scaled_buffer(scaled_buffer);
+        scaler.set_scaled_dimensions(__width, __height);
+        scaler.scale();
+
+        convert(colorspace, RGB, scaled_buffer, __pixbuf->get_pixels(), __width, __height);
+
+        free(scaled_buffer);
+      }
+    }
+  }
+  catch (fawkes::Exception &e) {
+    printf("ImageWidget::show(): %s\n", e.what());
+    return false;
+  }
+
+  try {
     set(__pixbuf);
+    __signal_show.emit(colorspace, buffer, width, height);
+    return true;
   }
   catch (fawkes::Exception &e) {
     printf("ImageWidget::show(): Could not set the new image (%s)\n", e.what());
   }
+
+  return false;
+}
+
+
+/** Signal emits after a new buffer gets successfully shown (@see ImageWidget::show).
+ *
+ * The buffer's validity can not be guaranteed beyond the called functions
+ * scope! In case the source of the widget is a Camera, the buffer gets
+ * disposed after calling ImageWidget::show.
+ *
+ * @return The signal_show signal
+ */
+sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> &
+ImageWidget::signal_show()
+{
+  return __signal_show;
 }
 
 
@@ -269,7 +328,7 @@ ImageWidget::set_cam()
   __cam_mutex->lock();
 
   if (__cam_has_buffer) {
-    show(__cam->colorspace(), __cam->buffer());
+    show(__cam->colorspace(), __cam->buffer(), __cam->pixel_width(), __cam->pixel_height());
     __cam->flush();
     __cam_has_buffer = false;
   }

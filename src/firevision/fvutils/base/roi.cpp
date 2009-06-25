@@ -427,7 +427,7 @@ ROI::operator+=(ROI &roi)
  * @return true, if the this ROI is smaller, false otherwise
  */
 bool
-ROI::operator<(const ROI &roi)
+ROI::operator<(const ROI &roi) const
 {
   return (num_hint_points < roi.num_hint_points);
 }
@@ -438,7 +438,7 @@ ROI::operator<(const ROI &roi)
  * @return true, if the this ROI is greater, false otherwise
  */
 bool
-ROI::operator>(ROI &roi)
+ROI::operator>(const ROI &roi) const
 {
   return (num_hint_points > roi.num_hint_points);
 }
@@ -451,7 +451,7 @@ ROI::operator>(ROI &roi)
  * @return true, if ROIs are similar, false otherwise
  */
 bool
-ROI::operator==(ROI &roi)
+ROI::operator==(const ROI &roi) const
 {
   return  (start.x == roi.start.x) &&
           (start.y == roi.start.y) &&
@@ -473,7 +473,7 @@ ROI::operator==(ROI &roi)
  * @return true, if ROIs are not similar, false otherwise
  */
 bool
-ROI::operator!=(ROI &roi)
+ROI::operator!=(const ROI &roi) const
 {
   return (num_hint_points != roi.num_hint_points);
 }
@@ -484,7 +484,7 @@ ROI::operator!=(ROI &roi)
  * @return this instance
  */
 ROI&
-ROI::operator=(ROI &roi)
+ROI::operator=(const ROI &roi)
 {
   this->start.x         = roi.start.x;
   this->start.y         = roi.start.y;

@@ -160,6 +160,27 @@ main(int argc, char **argv)
     }
   }
 
+  SQLiteConfiguration *config2 = new SQLiteConfiguration(CONFDIR);
+
+  try {
+    cout << "Loading configuration for 2nd db..." << flush;
+    config2->load("qa2.db", "qa2_defaults.db");
+    cout << "done" << endl;
+  } catch (CouldNotOpenConfigException &e) {
+    cout << "failed" << endl;
+    e.print_trace();
+  }
+
+  try {
+    cout << "Copying configuration..." << flush;
+    config2->copy(config);
+    cout << "done" << endl;
+  } catch (ConfigurationException &e) {
+    cout << "failed" << endl;
+    e.print_trace();
+  }
+
+  delete config2;
   delete config;
 
   return 0;

@@ -96,11 +96,11 @@ class ROI {
   void         grow(unsigned int margin);
 
 
-  bool         operator<(const ROI &roi);
-  bool         operator>(ROI &roi);
-  bool         operator==(ROI &roi);
-  bool         operator!=(ROI &roi);
-  ROI&         operator=(ROI &roi);
+  bool         operator<(const ROI &roi) const;
+  bool         operator>(const ROI &roi) const;
+  bool         operator==(const ROI &roi) const;
+  bool         operator!=(const ROI &roi) const;
+  ROI&         operator=(const ROI &roi);
 
   unsigned int get_num_hint_points() const;
 

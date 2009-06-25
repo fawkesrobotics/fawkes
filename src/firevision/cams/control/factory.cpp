@@ -170,7 +170,7 @@ CameraControlFactory::instance(const std::type_info &typeinf, Camera *camera)
   CameraControl *c = NULL;
 
   if (typeid(CameraControlColor) == typeinf) {
-    c = dynamic_cast<CameraControlImage *>(camera);
+    c = dynamic_cast<CameraControlColor *>(camera);
 
   } else if (typeid(CameraControlImage) == typeinf) {
     c = dynamic_cast<CameraControlImage *>(camera);

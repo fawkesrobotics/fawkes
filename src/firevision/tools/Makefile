@@ -26,7 +26,11 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation)) $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/loc_viewer)) $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/fuse_viewer))
+SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation)) \
+		  $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/loc_viewer)) \
+		  $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/fuse_viewer)) \
+		  $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/naocamtest_gui)) \
+		  $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/colormap_editor))
 
 LIBS_fvshmem = $(VISION_CAM_LIBS) fawkesutils fvutils
 OBJS_fvshmem = shmem.o
