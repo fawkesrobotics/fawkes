@@ -205,7 +205,7 @@ BlackBoardNotifier::remove_listener(BlackBoardInterfaceListener *listener,
 				    Mutex *mutex, unsigned int events,
 				    BBilQueue &queue, BBilMap &ilmap)
 {
-  mutex->lock();
+  MutexLocker lock(mutex);
   if (events > 0) {
     //LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface listener %s queued",
     //			  listener->bbil_name());
@@ -220,7 +220,6 @@ BlackBoardNotifier::remove_listener(BlackBoardInterfaceListener *listener,
   } else {
     remove_listener(ilmap, listener);
   }
-  mutex->unlock();
 }
 
 
@@ -369,7 +368,7 @@ BlackBoardNotifier::remove_observer(BBioMap &iomap, BlackBoardInterfaceObserver 
 void
 BlackBoardNotifier::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  __bbio_mutex->lock();
+  MutexLocker lock(__bbio_mutex);
   if ( __bbio_events > 0) {
     BBioQueueEntry e = std::make_pair((unsigned int)0, observer);
     BBioQueue::iterator re;

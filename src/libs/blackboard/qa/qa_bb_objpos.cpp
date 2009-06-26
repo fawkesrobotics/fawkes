@@ -30,6 +30,7 @@
 #include <blackboard/local.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
+#include <netcomm/fawkes/server_thread.h>
 
 #include <interfaces/ObjectPositionInterface.h>
 
@@ -60,14 +61,18 @@ main(int argc, char **argv)
 
   LibLogger::init();
   //BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
-  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE, BLACKBOARD_MAGIC_TOKEN);
+  LocalBlackBoard *lbb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
+  BlackBoard *bb = lbb;
+  FawkesNetworkServerThread *netthread = new FawkesNetworkServerThread(1910);
+  netthread->start();
+  lbb->start_nethandler(netthread);
 
   std::list<ObjectPositionInterface *> interfaces;
 
   cout << "Opening interfaces" << endl;
-  for (int i = 1; i <= 10; ++i) {
+  for (int i = 1; i <= 15; ++i) {
     char tmp[100];
-    sprintf(tmp, "Obstacle %i", i);
+    sprintf(tmp, "legtracker Leg %i", i);
     printf("   %s\n", tmp);
     ObjectPositionInterface *iface = bb->open_for_writing<ObjectPositionInterface>(tmp);
     interfaces.push_back(iface);
@@ -88,12 +93,13 @@ main(int argc, char **argv)
       tt.ping_start(ttc_write);
       (*i)->write();
       tt.ping_end(ttc_write);
-      if ( ++u > 100 ) {
-        tt.print_to_stdout();
-        u = 0;
-      }
     }
-    sleep(1);
+    if ( ++u > 20000 ) {
+      tt.print_to_stdout();
+      tt.reset();
+      u = 0;
+    }
+    //sleep(1);
   }
 
   for (std::list<ObjectPositionInterface *>::iterator i = interfaces.begin(); i != interfaces.end(); ++i) {
