@@ -85,7 +85,11 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface,
     if ( interface == __writer ) {
       __logger->log_debug(bbil_name(), "Forwarding message");
       Message *m = message->clone();
+      m->set_hops(message->hops());
+      m->ref();
       __reader->msgq_enqueue(m);
+      message->set_id(m->id());
+      m->unref();
       return false;
     } else {
       // Don't know why we were called, let 'em enqueue
