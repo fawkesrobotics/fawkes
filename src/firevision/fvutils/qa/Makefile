@@ -45,12 +45,12 @@ LIBS_fv_qa_shmlut := fvutils
 OBJS_fv_qa_colormap := qa_colormap.o
 LIBS_fv_qa_colormap := fvutils fvwidgets
 
-ifneq ($(wildcard $(FVBASEDIR)/fvutils/recognition/forest/forest.h),)
-  OBJS_fv_qa_randomtree := qa_randomtree.o
-  LIBS_fv_qa_randomtree := fvutils
-  OBJS_all += $(OBJS_fv_qa_randomtree)
-  BINS_all += $(BINDIR)/fv_qa_randomtree
-endif
+#ifneq ($(wildcard $(FVBASEDIR)/fvutils/recognition/forest/forest.h),)
+#  OBJS_fv_qa_randomtree := qa_randomtree.o
+#  LIBS_fv_qa_randomtree := fvutils
+#  OBJS_all += $(OBJS_fv_qa_randomtree)
+#  BINS_all += $(BINDIR)/fv_qa_randomtree
+#endif
 
 OBJS_all += $(OBJS_fv_qa_camargp)		\
 	    $(OBJS_fv_qa_jpegbm)		\
