@@ -69,11 +69,14 @@ OBJS_fvshowyuv = show_yuv.o
 CFLAGS_show_yuv += $(CFLAGS_SDL)
 LDFLAGS_fvshowyuv += $(LDFLAGS_SDL)
 
+LIBS_fvcmpp = fvutils
+OBJS_fvcmpp = cmpp.o
+
 OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
-	   $(OBJS_fvshowyuv) $(OBJS_fvnet)
-BINS_all = $(BINDIR)/fvshmem
+	   $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvcmpp)
+BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvcmpp
 
 ifneq ($(realpath $(SRCDIR)/net.cpp),)
   BINS_all += $(BINDIR)/fvnet
