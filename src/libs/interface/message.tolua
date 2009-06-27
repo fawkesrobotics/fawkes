@@ -31,22 +31,10 @@ namespace fawkes {
 
 class Message : public RefCount
 {
-  typedef enum {
-    Undefined,
-    Enqueued,
-    InProgress,
-    Success,
-    Failure
-  } MessageStatus;
-
   Message(const char *type);
   Message(Message *mesg);
   Message(Message &mesg);
 
-  void              set_status(MessageStatus status);
-  MessageStatus     status() const;
-  void              set_sub_status(unsigned int sub_status);
-  unsigned int      sub_status() const;
   unsigned int      sender_id() const;
   const char *      sender_thread_name() const;
   Interface *       interface() const;

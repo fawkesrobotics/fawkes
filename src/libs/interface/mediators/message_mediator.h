@@ -3,7 +3,7 @@
  *  message_mediator.h - Fawkes BlackBoard Message Mediator
  *
  *  Created: Sun Oct 29 17:58:19 2006
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -43,13 +43,12 @@ class MessageMediator
   virtual ~MessageMediator() {}
 
   /** Transmit message.
+   * The mediator may modify the message ID of the message.
    * @param message message to transmit.
-   * @return message id for this message unique on the writing instance. The ID is
-   * zero if the message was not enqueued because the receiver directly processed it.
    * @exception BlackBoardNoWritingInstanceException thrown if there is no writing
    *instance for the transmitting interface
    */
-  virtual unsigned int transmit(Message *message)                        = 0;
+  virtual void transmit(Message *message)                        = 0;
 
 };
 

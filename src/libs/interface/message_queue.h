@@ -2,8 +2,8 @@
 /***************************************************************************
  *  message_queue.h - BlackBoard Interface message queue
  *
- *  Generated: Tue Oct 17 19:05:33 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Oct 17 19:05:33 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -88,10 +88,10 @@ class MessageQueue
   };
 
 
-  unsigned int append(Message *msg);
+  void         append(Message *msg);
   void         remove(const Message *msg);
   void         remove(const unsigned int msg_id);
-  unsigned int insert_after(const MessageIterator &it, Message *msg);
+  void         insert_after(const MessageIterator &it, Message *msg);
 
   unsigned int size() const;
 
@@ -111,11 +111,9 @@ class MessageQueue
  private:
   void remove(msg_list_t *l, msg_list_t *p);
 
-
-  msg_list_t  *list;
-  msg_list_t  *end_el;
-  Mutex       *mutex;
-  unsigned int next_msg_id;
+  msg_list_t  *__list;
+  msg_list_t  *__end_el;
+  Mutex       *__mutex;
 };
 
 

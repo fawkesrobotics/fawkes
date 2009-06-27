@@ -147,10 +147,11 @@ typedef struct {
  * This type is used to transport interface messages. This struct is always followed
  * by a data chunk of the size data_size that transports the message data.
  */
-typedef struct
-{
+ typedef struct {
   uint32_t serial;					/**< interface instance serial */
   char     msg_type[__INTERFACE_MESSAGE_TYPE_SIZE];	/**< message type */
+  uint32_t msgid;					/**< message ID */
+  uint32_t hops;					/**< number of hops this message already passed */
   uint32_t data_size;					/**< data for message */
 } bb_imessage_msg_t;
 

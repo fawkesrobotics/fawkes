@@ -2,8 +2,8 @@
 /***************************************************************************
  *  message.h - BlackBoard message
  *
- *  Generated: Sun Oct 08 00:08:10 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Oct 08 00:08:10 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -38,20 +38,7 @@ class Interface;
 class Message : public RefCount
 {
  friend class Interface;
- friend class MessageQueue;
  public:
- /** Message status.
-  * A message has a processing status. This status can have one of the following
-  * values and is global to all messages.
-  */
- typedef enum {
-   Undefined,		/**< status is undefined (message not queued) */
-   Enqueued,		/**< message has been enqueued, but not yet been processed */ 
-   InProgress,		/**< processing the message has started but is not finished, yet */
-   Success,		/**< message has been successfully processed */
-   Failure		/**< an error occured during message processing */
- } MessageStatus;
-
   Message(const char *type);
   Message(const Message *mesg);
   Message(const Message &mesg);
@@ -60,10 +47,10 @@ class Message : public RefCount
   Message &         operator=  (const Message & m);
 
   unsigned int      id() const;
-  void              set_status(MessageStatus status);
-  MessageStatus     status() const;
-  void              set_sub_status(unsigned int sub_status);
-  unsigned int      sub_status() const;
+  void              set_id(unsigned int message_id);
+  void              mark_enqueued();
+  bool              enqueued() const;
+
   unsigned int      sender_id() const;
   const char *      sender_thread_name() const;
   Interface *       interface() const;
@@ -71,6 +58,9 @@ class Message : public RefCount
 
   const void *      datachunk() const;
   unsigned int      datasize() const;
+
+  unsigned int      hops() const;
+  void              set_hops(unsigned int hops);
 
   void              set_from_chunk(const void *chunk);
 
@@ -85,17 +75,14 @@ class Message : public RefCount
     bool           is_of_type();
 
  private:
-
   void              set_interface(Interface *iface);
-  void              set_id(unsigned int message_id);
 
   unsigned int  __message_id;
+  unsigned int  __hops;
+  bool          __enqueued;
 
   unsigned int  recipient_interface_mem_serial;  
   unsigned int  sender_interface_instance_serial;  
-
-  MessageStatus  _status;
-  unsigned int   _substatus;
 
   char          *_type;
   char          *_sender_thread_name;

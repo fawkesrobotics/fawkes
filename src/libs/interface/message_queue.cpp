@@ -2,8 +2,8 @@
 /***************************************************************************
  *  message_queue.cpp - BlackBoard Interface message queue
  *
- *  Generated: Tue Oct 18 15:43:29 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Oct 18 15:43:29 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -62,10 +62,9 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
 /** Constructor. */
 MessageQueue::MessageQueue()
 {
-  list = NULL;
-  end_el = NULL;
-  next_msg_id = 1;
-  mutex = new Mutex();
+  __list = NULL;
+  __end_el = NULL;
+  __mutex = new Mutex();
 }
 
 
@@ -73,7 +72,7 @@ MessageQueue::MessageQueue()
 MessageQueue::~MessageQueue()
 {
   flush();
-  delete mutex;
+  delete __mutex;
 }
 
 
@@ -83,9 +82,9 @@ MessageQueue::~MessageQueue()
 void
 MessageQueue::flush()
 {
-  mutex->lock();
+  __mutex->lock();
   // free list elements
-  msg_list_t *l = list;
+  msg_list_t *l = __list;
   msg_list_t *next;
   while ( l ) {
     next = l->next;
@@ -93,43 +92,40 @@ MessageQueue::flush()
     free(l);
     l = next;
   }
-  list = NULL;
-  mutex->unlock();
+  __list = NULL;
+  __mutex->unlock();
 }
 
 
 /** Append message to queue.
  * @param msg Message to append
- * @return message queue id of the appended message.
  * @exception MessageAlreadyQueuedException thrown if the message has already been
  * enqueued to an interface.
  */
-unsigned int
+void
 MessageQueue::append(Message *msg)
 {
-  if ( msg->id() != 0 ) {
+  if ( msg->enqueued() != 0 ) {
     throw MessageAlreadyQueuedException();
   }
-  mutex->lock();
-  unsigned int new_msg_id = next_msg_id++;
-  msg->set_id(new_msg_id);
-  if ( list == NULL ) {
-    list = (msg_list_t *)malloc(sizeof(msg_list_t));
-    list->next = NULL;
-    list->msg = msg;
-    list->msg_id = new_msg_id;
-    end_el = list;
+  __mutex->lock();
+  msg->mark_enqueued();
+  if ( __list == NULL ) {
+    __list = (msg_list_t *)malloc(sizeof(msg_list_t));
+    __list->next = NULL;
+    __list->msg = msg;
+    __list->msg_id = msg->id();
+    __end_el = __list;
   } else {
     msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
     l->next = NULL;
     l->msg = msg;
-    l->msg_id = new_msg_id;
-    end_el->next = l;
-    end_el = l;
+    l->msg_id = msg->id();
+    __end_el->next = l;
+    __end_el = l;
   }
 
-  mutex->unlock();
-  return new_msg_id;
+  __mutex->unlock();
 }
 
 
@@ -142,30 +138,28 @@ MessageQueue::append(Message *msg)
  * @exception MessageAlreadyQueuedException thrown if the message has already been
  * enqueued to an interface.
  */
-unsigned int
+void
 MessageQueue::insert_after(const MessageIterator &it, Message *msg)
 {
-  if ( mutex->try_lock() ) {
-    mutex->unlock();
+  if ( __mutex->try_lock() ) {
+    __mutex->unlock();
     throw NotLockedException("Message queue must be locked to insert messages after iterator.");
   }
   if ( it.cur == NULL ) {
     throw NullPointerException("Cannot append message at end element.");
   }
-  if ( msg->id() != 0 ) {
+  if ( msg->enqueued() != 0 ) {
     throw MessageAlreadyQueuedException();
   }
-  unsigned int new_msg_id = next_msg_id++;
-  msg->set_id(new_msg_id);
+  msg->mark_enqueued();
   msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
   l->next = it.cur->next;
   l->msg = msg;
-  l->msg_id = new_msg_id;
+  l->msg_id = msg->id();
   it.cur->next = l;
   if ( l->next == NULL ) {
-    end_el = l;
+    __end_el = l;
   }
-  return l->msg_id;
 }
 
 
@@ -175,8 +169,8 @@ MessageQueue::insert_after(const MessageIterator &it, Message *msg)
 void
 MessageQueue::remove(const Message *msg)
 {
-  mutex->lock();
-  msg_list_t *l = list;
+  __mutex->lock();
+  msg_list_t *l = __list;
   msg_list_t *p = NULL;
   while ( l ) {
     if ( l->msg == msg ) {
@@ -187,7 +181,7 @@ MessageQueue::remove(const Message *msg)
       l = l->next;
     }
   }
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -197,8 +191,8 @@ MessageQueue::remove(const Message *msg)
 void
 MessageQueue::remove(const unsigned int msg_id)
 {
-  mutex->lock();
-  msg_list_t *l = list;
+  __mutex->lock();
+  msg_list_t *l = __list;
   msg_list_t *p = NULL;
   while ( l ) {
     if ( l->msg_id == msg_id ) {
@@ -209,7 +203,7 @@ MessageQueue::remove(const unsigned int msg_id)
       l = l->next;
     }
   }
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -220,15 +214,15 @@ MessageQueue::remove(const unsigned int msg_id)
 void
 MessageQueue::remove(msg_list_t *l, msg_list_t *p)
 {
-  if ( mutex->try_lock() ) {
-    mutex->unlock();
+  if ( __mutex->try_lock() ) {
+    __mutex->unlock();
     throw NotLockedException("Protected remove must be made safe by locking.");
   }
   if ( p ) {
     p->next = l->next;
   } else {
     // was first element
-    list = l->next;
+    __list = l->next;
   }
   l->msg->unref();
   free(l);
@@ -241,15 +235,15 @@ MessageQueue::remove(msg_list_t *l, msg_list_t *p)
 unsigned int
 MessageQueue::size() const
 {
-  mutex->lock();
+  __mutex->lock();
   unsigned int rv = 0;
-  msg_list_t *l = list;
+  msg_list_t *l = __list;
   while ( l ) {
     ++rv;
     l = l->next;
   }
 
-  mutex->unlock();
+  __mutex->unlock();
   return rv;
 }
 
@@ -260,9 +254,9 @@ MessageQueue::size() const
 bool
 MessageQueue::empty() const
 {
-  mutex->lock();
-  bool rv = ( list == NULL );
-  mutex->unlock();
+  __mutex->lock();
+  bool rv = ( __list == NULL );
+  __mutex->unlock();
   return rv;
 }
 
@@ -276,7 +270,7 @@ MessageQueue::empty() const
 void
 MessageQueue::lock()
 {
-  mutex->lock();
+  __mutex->lock();
 }
 
 
@@ -290,7 +284,7 @@ MessageQueue::lock()
 bool
 MessageQueue::try_lock()
 {
-  return mutex->try_lock();
+  return __mutex->try_lock();
 }
 
 
@@ -299,7 +293,7 @@ MessageQueue::try_lock()
 void
 MessageQueue::unlock()
 {
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -309,8 +303,8 @@ MessageQueue::unlock()
 Message *
 MessageQueue::first()
 {
-  if ( list ) {
-    return list->msg;
+  if ( __list ) {
+    return __list->msg;
   } else {
     return NULL;
   }
@@ -322,11 +316,11 @@ MessageQueue::first()
 void
 MessageQueue::pop()
 {
-  mutex->lock();
-  if ( list ) {
-    remove(list, NULL);
+  __mutex->lock();
+  if ( __list ) {
+    remove(__list, NULL);
   }
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -337,11 +331,11 @@ MessageQueue::pop()
 MessageQueue::MessageIterator
 MessageQueue::begin()
 {
-  if ( mutex->try_lock() ) {
-    mutex->unlock();
+  if ( __mutex->try_lock() ) {
+    __mutex->unlock();
     throw NotLockedException("Message queue must be locked to get begin iterator.");
   }
-  return MessageIterator(list);
+  return MessageIterator(__list);
 }
 
 
@@ -352,8 +346,8 @@ MessageQueue::begin()
 MessageQueue::MessageIterator
 MessageQueue::end()
 {
-  if ( mutex->try_lock() ) {
-    mutex->unlock();
+  if ( __mutex->try_lock() ) {
+    __mutex->unlock();
     throw NotLockedException("Message queue must be locked to get end iterator.");
   }
   return MessageIterator();

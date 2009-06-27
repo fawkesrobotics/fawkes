@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <arpa/inet.h>
 
 namespace fawkes {
 
@@ -89,10 +90,10 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
   interface->read();
 
   size_t payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
-  void *payload = malloc(payload_size);
-  bb_idata_msg_t *dm = (bb_idata_msg_t *)payload;
-  dm->serial = interface->serial();
-  dm->data_size = interface->datasize();
+  void *payload       = malloc(payload_size);
+  bb_idata_msg_t *dm  = (bb_idata_msg_t *)payload;
+  dm->serial          = htonl(interface->serial());
+  dm->data_size       = htonl(interface->datasize());
   memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(),
 	 interface->datasize());
 
@@ -113,9 +114,11 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
   size_t payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
   void *payload = calloc(1, payload_size);
   bb_imessage_msg_t *dm = (bb_imessage_msg_t *)payload;
-  dm->serial = interface->serial();
+  dm->serial = htonl(interface->serial());
   strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE);
-  dm->data_size = message->datasize();
+  dm->data_size = htonl(message->datasize());
+  dm->msgid = htonl(message->id());
+  dm->hops  = htonl(message->hops());
   memcpy((char *)payload + sizeof(bb_imessage_msg_t), message->datachunk(),
 	 message->datasize());
 
@@ -137,8 +140,8 @@ BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *interface,
 							 unsigned int event_serial)
 {
   bb_ieventserial_msg_t *esm = (bb_ieventserial_msg_t *)malloc(sizeof(bb_ieventserial_msg_t));
-  esm->serial       = interface->serial();
-  esm->event_serial = event_serial;
+  esm->serial       = htonl(interface->serial());
+  esm->event_serial = htonl(event_serial);
 
   try {
     __fnh->send(__clid, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));  

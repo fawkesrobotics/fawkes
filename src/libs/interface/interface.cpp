@@ -155,16 +155,18 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
 /** Constructor */
 Interface::Interface()
 {
-  __message_queue = new MessageQueue();
   __write_access = false;
   __info_list = NULL;
   __rwlock = NULL;
   __valid = true;
+  __next_message_id = 0;
   memset(__hash, 0, __INTERFACE_HASH_SIZE);
   memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
 
   data_ptr  = NULL;
   data_size = 0;
+
+  __message_queue = new MessageQueue();
 }
 
 
@@ -378,7 +380,7 @@ Interface::set_type_id(const char *type, const char *id)
  * @param instance_serial instance serial
  */
 void
-Interface::set_instance_serial(unsigned int instance_serial)
+Interface::set_instance_serial(unsigned short instance_serial)
 {
   __instance_serial = instance_serial;
 }
@@ -488,7 +490,7 @@ Interface::uid() const
 /** Get instance serial of interface.
  * @return instance serial of the interface.
  */
-unsigned int
+unsigned short
 Interface::serial() const
 {
   return __instance_serial;
@@ -581,11 +583,11 @@ Interface::msgq_enqueue(Message *message)
   
   if ( message_valid(message) ) {
     message->set_interface(this);
-    unsigned int msgid = __message_mediator->transmit(message);
-    if ( msgid == 0 ) {
-      // Message has been processed immediately
-      message->unref();
-    }
+    message->set_id(next_msg_id());
+    // transmit might change the message id!
+    __message_mediator->transmit(message);
+    unsigned int msgid = message->id();
+    message->unref();
     return msgid;
   } else {
     throw InterfaceInvalidMessageException(this, message);
@@ -620,11 +622,11 @@ Interface::msgq_enqueue_copy(Message *message)
   if ( message_valid(message) ) {
     Message *mcopy = message->clone();
     mcopy->set_interface(this);
-    unsigned int msgid = __message_mediator->transmit(mcopy);
-    if ( msgid == 0 ) {
-      // Message has been processed immediately
-      mcopy->unref();
-    }
+    mcopy->set_id(next_msg_id());
+    __message_mediator->transmit(mcopy);
+    unsigned int msgid = mcopy->id();
+    mcopy->unref();
+    message->set_id(msgid);
     return msgid;
   } else {
     throw InterfaceInvalidMessageException(this, message);
@@ -637,7 +639,7 @@ Interface::msgq_enqueue_copy(Message *message)
  * This can only be called on a writing interface instance.
  * @param message message to enqueue
  */
-unsigned int
+void
 Interface::msgq_append(Message *message)
 {
   if ( ! __write_access ) {
@@ -645,7 +647,7 @@ Interface::msgq_append(Message *message)
 					"reading instance of an interface (append).");
   }
 
-  return __message_queue->append(message);
+  __message_queue->append(message);
 }
 
 

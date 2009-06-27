@@ -163,6 +163,9 @@ main(int argc, char **argv)
     case Interface::IFT_STRING:
       printf("Name: %s  Type: string     Value: %s\n", fi.get_name(), fi.get_string());
       break;
+    case Interface::IFT_BYTE:
+      printf("Name: %s  Type: byte       Value: %u\n", fi.get_name(), fi.get_byte());
+      break;
     }
   }
   cout << "done" << endl;

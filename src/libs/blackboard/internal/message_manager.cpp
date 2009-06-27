@@ -59,7 +59,7 @@ BlackBoardMessageManager::~BlackBoardMessageManager()
 }
 
 
-unsigned int
+void
 BlackBoardMessageManager::transmit(Message *message)
 {
   if ( __im == NULL ) {
@@ -67,10 +67,9 @@ BlackBoardMessageManager::transmit(Message *message)
   }
   try {
     Interface *writer = __im->writer_for_mem_serial(message->recipient());
-    if ( __notifier->notify_of_message_received(writer, message) ) {
-      return writer->msgq_append(message);
-    } else {
-      return 0;
+    if (__notifier->notify_of_message_received(writer, message)) {
+      message->ref();
+      writer->msgq_append(message);
     }
   } catch (BlackBoardNoWritingInstanceException &e) {
     Interface *iface = message->interface();

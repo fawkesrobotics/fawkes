@@ -39,6 +39,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <arpa/inet.h>
 
 namespace fawkes {
 
@@ -157,15 +158,16 @@ BlackBoardNetworkHandler::loop()
     case MSG_BB_CLOSE:
       {
 	bb_iserial_msg_t *sm = msg->msg<bb_iserial_msg_t>();
-	if ( __interfaces.find(sm->serial) != __interfaces.end() ) {
+	unsigned int sm_serial = ntohl(sm->serial);
+	if ( __interfaces.find(sm_serial) != __interfaces.end() ) {
 	  bool close = false;
 	  __client_interfaces.lock();
 	  if ( __client_interfaces.find(clid) != __client_interfaces.end()) {
 	    // this client has interfaces, check if this one as well
 	    for ( __ciit = __client_interfaces[clid].begin(); __ciit != __client_interfaces[clid].end(); ++__ciit) {
-	      if ( (*__ciit)->serial() == sm->serial ) {
+	      if ( (*__ciit)->serial() == sm_serial ) {
 		close = true;
-		__serial_to_clid.erase(sm->serial);
+		__serial_to_clid.erase(sm_serial);
 		__client_interfaces[clid].erase(__ciit);
 		if ( __client_interfaces[clid].empty() ) {
 		  __client_interfaces.erase(clid);
@@ -179,21 +181,21 @@ BlackBoardNetworkHandler::loop()
 	  if ( close ) {
 	    __interfaces.lock();
 	    LibLogger::log_debug("BlackBoardNetworkHandler", "Remote %u closing interface %s",
-				 clid, __interfaces[sm->serial]->uid());
-	    delete __listeners[sm->serial];
-	    __listeners.erase(sm->serial);
-	    __bb->close(__interfaces[sm->serial]);
-	    __interfaces.erase(sm->serial);
+				 clid, __interfaces[sm_serial]->uid());
+	    delete __listeners[sm_serial];
+	    __listeners.erase(sm_serial);
+	    __bb->close(__interfaces[sm_serial]);
+	    __interfaces.erase(sm_serial);
 	    __interfaces.unlock();
 	  } else {
 	    LibLogger::log_warn("BlackBoardNetworkHandler", "Client %u tried to close "
 				"interface with serial %u, but opened by other client",
-				clid, sm->serial);
+				clid, sm_serial);
 	  }
 	} else {
 	  LibLogger::log_warn("BlackBoardNetworkHandler", "Client %u tried to close "
 			      "interface with serial %u which has not been opened",
-			      clid, sm->serial);
+			      clid, sm_serial);
 	}
 
 	//LibLogger::log_debug("BBNH", "C: interfaces: %zu  s2c: %zu  ci: %zu",
@@ -206,19 +208,20 @@ BlackBoardNetworkHandler::loop()
       {
 	void *payload = msg->payload();
 	bb_idata_msg_t *dm = (bb_idata_msg_t *)payload;
-	if ( __interfaces.find(dm->serial) != __interfaces.end() ) {
+	unsigned int dm_serial = ntohl(dm->serial);
+	if ( __interfaces.find(dm_serial) != __interfaces.end() ) {
 	
-	  if ( dm->data_size != __interfaces[dm->serial]->datasize() ) {
+	  if ( ntohl(dm->data_size) != __interfaces[dm_serial]->datasize() ) {
 	    LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Data size mismatch, "
 				 "expected %zu, but got %zu, ignoring.",
-				 __interfaces[dm->serial]->datasize(), dm->data_size);
+				 __interfaces[dm_serial]->datasize(), ntohl(dm->data_size));
 	  } else {
-	    __interfaces[dm->serial]->set_from_chunk((char *)payload + sizeof(bb_idata_msg_t));
-	    __interfaces[dm->serial]->write();
+	    __interfaces[dm_serial]->set_from_chunk((char *)payload + sizeof(bb_idata_msg_t));
+	    __interfaces[dm_serial]->write();
 	  }
 	} else {
 	  LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Interface with "
-			       "serial %u not found, ignoring.", dm->serial);
+			       "serial %u not found, ignoring.", dm_serial);
 	}
       }
       break;
@@ -227,20 +230,23 @@ BlackBoardNetworkHandler::loop()
       {
 	void *payload = msg->payload();
 	bb_imessage_msg_t *mm = (bb_imessage_msg_t *)payload;
-	if ( __interfaces.find(mm->serial) != __interfaces.end() ) {
+	unsigned int mm_serial = ntohl(mm->serial);
+	if ( __interfaces.find(mm_serial) != __interfaces.end() ) {
 
-	  if ( ! __interfaces[mm->serial]->is_writer() ) {
+	  if ( ! __interfaces[mm_serial]->is_writer() ) {
 	    try {
-	      Message *ifm = __interfaces[mm->serial]->create_message(mm->msg_type);
+	      Message *ifm = __interfaces[mm_serial]->create_message(mm->msg_type);
+	      ifm->set_id(ntohl(mm->msgid));
+	      ifm->set_hops(ntohl(mm->hops));
 
-	      if ( mm->data_size != ifm->datasize() ) {
+	      if ( ntohl(mm->data_size) != ifm->datasize() ) {
 		LibLogger::log_error("BlackBoardNetworkHandler", "MESSAGE: Data size mismatch, "
 				     "expected %zu, but got %zu, ignoring.",
-				     ifm->datasize(), mm->data_size);
+				     ifm->datasize(), ntohl(mm->data_size));
 	      } else {
 		ifm->set_from_chunk((char *)payload + sizeof(bb_imessage_msg_t));
 
-		__interfaces[mm->serial]->msgq_enqueue(ifm);
+		__interfaces[mm_serial]->msgq_enqueue(ifm);
 
 	      }
 	    } catch (Exception &e) {
@@ -254,7 +260,7 @@ BlackBoardNetworkHandler::loop()
 	  }
 	} else {
 	  LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Interface with "
-			       "serial %u not found, ignoring.", mm->serial);
+			       "serial %u not found, ignoring.", mm_serial);
 	}
       }
       break;
@@ -276,10 +282,10 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
 {
   void *payload = calloc(1, sizeof(bb_iopensucc_msg_t) + interface->datasize());
   bb_iopensucc_msg_t *osm = (bb_iopensucc_msg_t *)payload;
-  osm->serial = interface->serial();
+  osm->serial = htonl(interface->serial());
   osm->has_writer = interface->has_writer() ? 1 : 0;
-  osm->num_readers = interface->num_readers();
-  osm->data_size = interface->datasize();
+  osm->num_readers = htonl(interface->num_readers());
+  osm->data_size = htonl(interface->datasize());
 
   if ( ! interface->is_writer() ) {
     interface->read();
@@ -301,7 +307,7 @@ void
 BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int errno)
 {
   bb_iopenfail_msg_t *ofm = (bb_iopenfail_msg_t *)malloc(sizeof(bb_iopenfail_msg_t));
-  ofm->errno = errno;
+  ofm->errno = htonl(errno);
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(clid, FAWKES_CID_BLACKBOARD,
 							MSG_BB_OPEN_FAILURE, ofm,

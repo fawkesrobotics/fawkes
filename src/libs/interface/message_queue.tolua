@@ -45,10 +45,10 @@ class MessageQueue
     unsigned int      id() const;
   };
 
-  unsigned int append(Message *msg);
+  void         append(Message *msg);
   void         remove(const Message *msg);
   void         remove(const unsigned int msg_id);
-  unsigned int insert_after(const MessageIterator &it, Message *msg);
+  void         insert_after(const MessageIterator &it, Message *msg);
 
   unsigned int size() const;
 

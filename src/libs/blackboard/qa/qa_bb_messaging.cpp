@@ -67,9 +67,7 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
-				       BLACKBOARD_MAGIC_TOKEN,
-				       /* master */  true);
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
   //BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
 
   TestInterface *ti_writer;
@@ -106,12 +104,15 @@ main(int argc, char **argv)
 	 << TestInterface::TEST_CONSTANT << endl;
   }
 
+  printf("Reader instance serial: %u\n", ti_reader->serial());
+
   cout << "Harnessing message queues by excessively sending messages" << endl
        << "Press Ctrl-C to stop testing. No output means everything is fine" << endl;
   while ( ! quit ) {
     int expval = ti_reader->test_int() + 1;
     TestInterface::SetTestIntMessage *m = new TestInterface::SetTestIntMessage(expval);
-    ti_reader->msgq_enqueue(m);
+    unsigned int msgid = ti_reader->msgq_enqueue(m);
+    printf("Sent with message ID %u\n", msgid);
 
     if ( ti_writer->msgq_size() > 1 ) {
       cout << "Error, more than one message! flushing." << endl;
@@ -122,10 +123,12 @@ main(int argc, char **argv)
 
     if ( ti_writer->msgq_first() != NULL ) {
       if ( ti_writer->msgq_first_is<TestInterface::SetTestStringMessage>() ) {
-	cout << "Message improperly detected to be a SetTestStringMessage" << endl;
+	TestInterface::SetTestStringMessage *msg = ti_writer->msgq_first(msg);
+	printf("Received message of ID %u, Message improperly detected to be a SetTestStringMessage\n", msg->id());
       }
       if ( ti_writer->msgq_first_is<TestInterface::SetTestIntMessage>() ) {
 	TestInterface::SetTestIntMessage *m2 = ti_writer->msgq_first<TestInterface::SetTestIntMessage>();
+	printf("Received message with ID %u\n", m2->id());
 	ti_writer->set_test_int( m2->test_int() );
 	try {
 	  ti_writer->write();

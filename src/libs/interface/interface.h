@@ -40,6 +40,9 @@
 #define __INTERFACE_UID_SIZE __INTERFACE_TYPE_SIZE + 2 + __INTERFACE_ID_SIZE
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class RefCountRWLock;
 class InterfaceMediator;
@@ -86,7 +89,7 @@ class Interface
   const char *            type() const;
   const char *            id() const;
   const char *            uid() const;
-  unsigned int            serial() const;
+  unsigned short          serial() const;
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
@@ -230,13 +233,18 @@ class Interface
   unsigned int  data_size;
 
  private:
-  unsigned int       msgq_append(Message *message);
-  void               set_type_id(const char *type, const char *id);
-  void               set_instance_serial(unsigned int instance_serial);
-  void               set_mediators(InterfaceMediator *iface_mediator,
+  void msgq_append(Message *message);
+  void set_type_id(const char *type, const char *id);
+  void set_instance_serial(unsigned short instance_serial);
+  void set_mediators(InterfaceMediator *iface_mediator,
 				   MessageMediator *msg_mediator);
-  void               set_memory(unsigned int serial, void *real_ptr, void *data_ptr);
-  void               set_readwrite(bool write_access, RefCountRWLock *rwlock);
+  void set_memory(unsigned int serial, void *real_ptr, void *data_ptr);
+  void set_readwrite(bool write_access, RefCountRWLock *rwlock);
+
+  inline unsigned int next_msg_id()
+  {
+    return (__instance_serial << 16) | ++__next_message_id;
+  }
 
   char               __type[__INTERFACE_TYPE_SIZE + 1];
   char               __id[__INTERFACE_ID_SIZE + 1];
@@ -244,7 +252,7 @@ class Interface
   unsigned char      __hash[__INTERFACE_HASH_SIZE];
   char               __hash_printable[__INTERFACE_HASH_SIZE * 2 + 1];
 
-  unsigned int       __instance_serial;
+  unsigned short     __instance_serial;
   bool               __valid;
 
   void *             __mem_data_ptr;
@@ -257,6 +265,7 @@ class Interface
   InterfaceMediator *__interface_mediator;
   MessageMediator   *__message_mediator;
   MessageQueue      *__message_queue;
+  unsigned short     __next_message_id;
 
   interface_fieldinfo_t  *__info_list;
 };

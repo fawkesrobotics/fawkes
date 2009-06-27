@@ -65,7 +65,13 @@ class BlackBoardInterfaceProxy
   virtual void notify_of_data_change(const Interface *interface);
 
   /* MessageMediator */
-  virtual unsigned int transmit(Message *message);
+  virtual void transmit(Message *message);
+
+ private:
+  inline unsigned int next_msg_id()
+  {
+    return ((__instance_serial << 16) | __next_msg_id++);
+  }
 
  private:
   FawkesNetworkClient *__fnc;
@@ -78,7 +84,8 @@ class BlackBoardInterfaceProxy
   void                *__data_chunk;
   size_t               __data_size;
 
-  unsigned int         __instance_serial;
+  unsigned short       __instance_serial;
+  unsigned short       __next_msg_id;
   unsigned int         __num_readers;
   bool                 __has_writer;
   unsigned int         __clid;

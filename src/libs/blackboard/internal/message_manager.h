@@ -41,7 +41,7 @@ class BlackBoardMessageManager : public MessageMediator
   BlackBoardMessageManager(BlackBoardNotifier *notifier);
   ~BlackBoardMessageManager();
 
-  virtual unsigned int transmit(Message *message);
+  virtual void transmit(Message *message);
 
  private:
   BlackBoardInterfaceManager *__im;

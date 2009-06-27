@@ -2,8 +2,8 @@
 /***************************************************************************
  *  message.cpp - BlackBoard message
  *
- *  Generated: Tue Oct 17 00:52:34 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Oct 17 00:52:34 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -65,20 +65,22 @@ namespace fawkes {
 Message::Message(const char *type)
 {
   __message_id = 0;
-  data_ptr = NULL;
-  _transmit_via_iface = NULL;
+  __hops       = 0;
+  __enqueued   = false;
+  data_ptr     = NULL;
+  _sender_id   = 0;
+  _type        = strdup(type);
+
+  _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
-  recipient_interface_mem_serial = 0;
-  _status    = Undefined;
-  _substatus = 0;
+  recipient_interface_mem_serial   = 0;
+
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
     _sender_thread_name = strdup(t->name());
   } else {
     _sender_thread_name    = strdup("Unknown");
   }
-  _sender_id = 0;
-  _type      = strdup(type);
 }
 
 
@@ -88,22 +90,25 @@ Message::Message(const char *type)
 Message::Message(const Message &mesg)
 {
   __message_id = 0;
-  _transmit_via_iface = NULL;
+  __hops       = mesg.__hops;
+  __enqueued   = false;
+  data_size    = mesg.data_size;
+  data_ptr     = malloc(data_size);
+  _sender_id   = 0;
+  _type        = strdup(mesg._type);
+
+  _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
-  recipient_interface_mem_serial = 0;
-  data_size = mesg.data_size;
-  data_ptr  = malloc(data_size);
+  recipient_interface_mem_serial   = 0;
+
   memcpy(data_ptr, mesg.data_ptr, data_size);
-  _status    = Undefined;
-  _substatus = 0;
+
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
     _sender_thread_name = strdup(t->name());
   } else {
     _sender_thread_name    = strdup("Unknown");
   }
-  _sender_id = 0;
-  _type      = strdup(mesg._type);
 }
 
 
@@ -113,22 +118,23 @@ Message::Message(const Message &mesg)
 Message::Message(const Message *mesg)
 {
   __message_id = 0;
-  _transmit_via_iface = NULL;
+  __hops       = mesg->__hops;
+  __enqueued   = false;
+  data_size    = mesg->data_size;
+  data_ptr     = malloc(data_size);
+  _sender_id   = 0;
+  _type        = strdup(mesg->_type);
+  _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
-  recipient_interface_mem_serial = 0;
-  data_size = mesg->data_size;
-  data_ptr  = malloc(data_size);
+  recipient_interface_mem_serial   = 0;
   memcpy(data_ptr, mesg->data_ptr, data_size);
-  _status    = Undefined;
-  _substatus = 0;
+
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
     _sender_thread_name    = strdup(t->name());
   } else {
     _sender_thread_name    = strdup("Unknown");
   }
-  _sender_id = 0;
-  _type      = strdup(mesg->_type);
 }
 
 
@@ -150,6 +156,16 @@ Message::id() const
 }
 
 
+/** Get number of hops.
+ * @return number of hops
+ */
+unsigned int
+Message::hops() const
+{
+  return __hops;
+}
+
+
 /** Set message ID.
  * @param message_id message ID
  */
@@ -159,6 +175,33 @@ Message::set_id(unsigned int message_id)
   __message_id = message_id;
 }
 
+
+/** Set number of hops.
+ * @param hops number of hops
+ */
+void
+Message::set_hops(unsigned int hops)
+{
+  __hops=hops;
+}
+
+
+/** Mark message as being enqueued. */
+void
+Message::mark_enqueued()
+{
+  __enqueued = false;
+}
+
+
+/** Check is message has been enqueued.
+ * @return true if the message has already been enqueued, false otherwise
+ */
+bool
+Message::enqueued() const
+{
+  return __enqueued;
+}
 
 /** Get recipient memory serial.
  * @return Interface memory serial of the recipient interface.
@@ -215,51 +258,6 @@ Message::operator=  (const Message & m)
   }
 
   return *this;
-}
-
-
-/** Set the status of the message.
- * Note that this may only be called on the writer side. For efficiency in message
- * handling this is not enforced and the responsibility of the programmer to ensure
- * this.
- * @param status status of the new message.
- */
-void
-Message::set_status(Message::MessageStatus status)
-{
-  _status = status;
-}
-
-
-/** Get status of message.
- * @return message status
- */
-Message::MessageStatus
-Message::status() const
-{
-  return _status;
-}
-
-
-/** Set sub status of a message.
- * The sub status is just an unsigned int which may be defined by the application
- * as needed.
- * @param sub_status new sub status
- */
-void
-Message::set_sub_status(unsigned int sub_status)
-{
-  _substatus = sub_status;
-}
-
-
-/** Get sub status.
- * @return sub status
- */
-unsigned int
-Message::sub_status() const
-{
-  return _substatus;
 }
 
 
