@@ -431,9 +431,12 @@ PluginTreeView::append_plugin_column()
   }
 #endif
 
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 14 )
   if (description_as_tooltip)
   {
+#endif
     append_column("Plugin", m_plugin_record.name);
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 14 )
     set_tooltip_column(2);
   }
   else
@@ -442,16 +445,17 @@ PluginTreeView::append_plugin_column()
     Gtk::TreeViewColumn *tlcol = new Gtk::TreeViewColumn("Plugin", *Gtk::manage(twolines_renderer));
     append_column(*Gtk::manage(tlcol));
 
- #ifdef GLIBMM_PROPERTIES_ENABLED
+ #  ifdef GLIBMM_PROPERTIES_ENABLED
     tlcol->add_attribute(twolines_renderer->property_line1(), m_plugin_record.name);
     tlcol->add_attribute(twolines_renderer->property_line2(), m_plugin_record.description);
- #else
+ #  else
     tlcol->add_attribute(*twolines_renderer, "line1", m_plugin_record.line1);
     tlcol->add_attribute(*twolines_renderer, "line2", m_plugin_record.line2);
- #endif
+ #  endif
 
     set_tooltip_column(-1);
   }
+#endif
 
   set_headers_clickable();
   Gtk::TreeViewColumn *plugin_col = get_column(2);
