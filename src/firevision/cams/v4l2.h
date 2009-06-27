@@ -32,7 +32,7 @@
 #include <linux/videodev2.h>
 
 #include <cams/control/color.h>
-//include <cams/control/image.h>
+#include <cams/control/image.h>
 
 /* Number of buffers to use for memory mapped IO */
 #define MMAP_NUM_BUFFERS 2;
@@ -42,8 +42,8 @@ class V4L2CameraData;
 
 class V4L2Camera:
   public Camera,
-  public CameraControlColor
-  //public CameraControlImage
+  public CameraControlColor,
+  public CameraControlImage
 {
   friend class V4LCamera;
 
@@ -98,6 +98,23 @@ class V4L2Camera:
   virtual void         set_exposure(unsigned int exposure);
   virtual unsigned int gain();
   virtual void         set_gain(unsigned int gain);
+
+  virtual const char * format();
+  virtual void         set_format(const char *format);
+  virtual unsigned int width();
+  virtual unsigned int height();
+  virtual void         set_size(unsigned int width,
+                                unsigned int height);
+  virtual bool         horiz_mirror();
+  virtual bool         vert_mirror();
+  virtual void         set_horiz_mirror(bool enabled);
+  virtual void         set_vert_mirror(bool enabled);
+  virtual unsigned int fps();
+  virtual void         set_fps(unsigned int fps);
+  virtual unsigned int lens_x_corr();
+  virtual unsigned int lens_y_corr();
+  virtual void         set_lens_x_corr(unsigned int x_corr);
+  virtual void         set_lens_y_corr(unsigned int y_corr);
 
 
  protected:

@@ -152,7 +152,8 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   {
     string fmt = cap->get("format");
     if (fmt.length() != 4) throw Exception("V4L2Cam: Invalid format fourcc");
-    strncpy(_format, fmt.c_str(), 5);
+    strncpy(_format, fmt.c_str(), 4);
+    _format[4] = '\0';
   }
   else
   {
@@ -1521,6 +1522,111 @@ V4L2Camera::set_gain(unsigned int gain)
 {
   LibLogger::log_debug("V4L2Cam", "Setting gain to %u", gain);
   set_one_control("gain", V4L2_CID_GAIN, gain);
+}
+
+
+const char *
+V4L2Camera::format()
+{
+  return _format;
+}
+
+void
+V4L2Camera::set_format(const char *format)
+{
+  strncpy(_format, format, 4);
+  _format[4] = '\0';
+  select_format();
+}
+
+unsigned int
+V4L2Camera::width()
+{
+  return pixel_width();
+}
+
+unsigned int
+V4L2Camera::height()
+{
+  return pixel_height();
+}
+
+void
+V4L2Camera::set_size(unsigned int width,
+                     unsigned int height)
+{
+  _width = width;
+  _height = height;
+  select_format();
+}
+
+bool
+V4L2Camera::horiz_mirror()
+{
+  return (get_one_control("hflip", V4L2_CID_HFLIP) != 0);
+}
+
+bool
+V4L2Camera::vert_mirror()
+{
+  return (get_one_control("vflip", V4L2_CID_VFLIP) != 0);
+}
+
+void
+V4L2Camera::set_horiz_mirror(bool enabled)
+{
+  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling horizontal flip" : "disabling horizontal flip"));
+  set_one_control("hflip", V4L2_CID_HFLIP, (enabled ? 1 : 0));
+}
+
+void
+V4L2Camera::set_vert_mirror(bool enabled)
+{
+  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling vertical flip" : "disabling vertical flip"));
+  set_one_control("vflip", V4L2_CID_VFLIP, (enabled ? 1 : 0));
+}
+
+/** Get the number of frames per second that have been requested from the camera.
+ * A return value of 0 means that fps haven't been set yet through the camera.
+ * @return the currently requested fps or 0 if not set yet
+ */
+unsigned int
+V4L2Camera::fps()
+{
+  return _fps;
+}
+
+void
+V4L2Camera::set_fps(unsigned int fps)
+{
+  _fps = fps;
+  set_fps();
+}
+
+unsigned int
+V4L2Camera::lens_x_corr()
+{
+  return get_one_control("lens x", V4L2_CID_HCENTER/*_DEPRECATED*/);
+}
+
+unsigned int
+V4L2Camera::lens_y_corr()
+{
+  return get_one_control("lens y", V4L2_CID_VCENTER/*_DEPRECATED*/);
+}
+
+void
+V4L2Camera::set_lens_x_corr(unsigned int x_corr)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting horizontal lens correction to %d", x_corr);
+  set_one_control("lens x", V4L2_CID_HCENTER/*_DEPRECATED*/, x_corr);
+}
+
+void
+V4L2Camera::set_lens_y_corr(unsigned int y_corr)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting vertical lens correction to %d", y_corr);
+  set_one_control("lens x", V4L2_CID_VCENTER/*_DEPRECATED*/, y_corr);
 }
 
 

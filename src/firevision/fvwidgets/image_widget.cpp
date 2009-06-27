@@ -35,7 +35,8 @@
 
 
 /** @class ImageWidget <fvwidgets/image_widget.h>
- * This class is an image container to display fawkes cameras inside a Gtk::Window
+ * This class is an image container to display fawkes cameras (or image
+ * buffers) inside a Gtk::Container
  *
  * @author Christof Rath
  */
@@ -47,25 +48,22 @@
  */
 ImageWidget::ImageWidget(unsigned int width, unsigned int height)
 {
-  __width  = width;
-  __height = height;
-
   __cam            = NULL;
   __cam_mutex      = new fawkes::Mutex;
   __refresh_thread = NULL;
-  __cam_enabled    = false;
 
-  __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
-
-  set_size_request(__width, __height);
+  set_size(width, height);
 }
 
 /**
  * Creates a new ImageWidget with a Camera as image source
  * @param cam the image source
- * @param refresh_delay if greater 0 a thread gets created that refreshes the Image every refresh_delay milliseconds
- * @param width of the widget (if not equal to the camera width the image gets scaled)
- * @param height of the widget (if not equal to the camera height the image gets scaled)
+ * @param refresh_delay if greater 0 a thread gets created that refreshes
+ *        the Image every refresh_delay milliseconds
+ * @param width of the widget (if not equal to the camera width the image
+ *        gets scaled)
+ * @param height of the widget (if not equal to the camera height the
+ *        image gets scaled)
  */
 ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int width, unsigned int height)
 {
@@ -74,16 +72,8 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
   __cam            = cam;
   __cam_mutex      = new fawkes::Mutex;
   __cam_has_buffer = false;
-  __cam_enabled    = true;
 
-  if (width && height) {
-    __width  = width;
-    __height = height;
-  }
-  else {
-    __width  = __cam->pixel_width();
-    __height = __cam->pixel_height();
-  }
+  set_size(width, height);
 
   try {
     fawkes::Time *time = __cam->capture_time();
@@ -95,33 +85,29 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
   }
 
   __refresh_thread = new RefThread(this, refresh_delay);
-
-  __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
-
   __refresh_thread->start();
   __refresh_thread->refresh_cam();
-
-  if (refresh_delay) set_refresh_delay(refresh_delay);
-
-  set_size_request(__width, __height);
 }
 
 /**
  * Constructor that can be used to instantiate an ImageWidget as a
  * derived widget from a Glade file.
+ *
+ * Note: The ImageWidget (and its internal buffer) is set to the size
+ * as in the glade file, in case no camera is set afterwards. Use @see
+ * ImageWidget::set_size() to resize the ImageWidget afterwards.
+ *
  * @param cobject pointer to the base object
  * @param refxml the Glade XML file
  */
 ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml)
   : Gtk::Image( cobject )
 {
-  __width  = 0;
-  __height = 0;
-
   __cam            = NULL;
   __cam_mutex      = new fawkes::Mutex;
-  __cam_enabled    = false;
   __refresh_thread = NULL;
+
+  set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
 }
 
 /**
@@ -134,24 +120,19 @@ ImageWidget::~ImageWidget()
 }
 
 /** Set the camera from which the ImageWidget obtains the images.
+ *
+ * Note: The size of the ImageWidget remains untouched and the cameras
+ * image gets scaled appropriately. Use ImageWidget::set_size(0, 0) to
+ * set the widget to the size of the camera.
+ *
  * @param cam the camera
  * @param refresh_delay the delay between two refreshs in milliseconds
  */
 void
 ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
 {
-  if ( __refresh_thread ) { 
-    __refresh_thread->set_delay( refresh_delay );
-  } else {
-    __refresh_thread = new RefThread(this, refresh_delay);
-    __refresh_thread->start();
-  }
-
   __cam            = cam;
   __cam_has_buffer = false;
-  __cam_enabled    = true;
-  __width          = __cam->pixel_width();
-  __height         = __cam->pixel_height();
 
   try {
     fawkes::Time *time = __cam->capture_time();
@@ -162,33 +143,54 @@ ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
     __cam_has_timestamp = false;
   }
 
-  __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
-
-  __refresh_thread->refresh_cam();
-
-  if (refresh_delay) set_refresh_delay(refresh_delay);
-
-  set_size_request(__width, __height);
-}
-
-/**
- * En-/disable the camera.
- * @param enable if true the camera is enabled and the refresh thread
- * is start, if false the refresh thread is stopped and the camera is
- * disabled
- */
-void
-ImageWidget::enable_camera(bool enable)
-{
-  if ( !enable && __cam_enabled ) {
-    __refresh_thread->stop();
-  } else if ( __refresh_thread && enable && !__cam_enabled ) {
+  if ( __refresh_thread ) {
+    __refresh_thread->set_delay(refresh_delay);
+  } else {
+    __refresh_thread = new RefThread(this, refresh_delay);
     __refresh_thread->start();
   }
 
-  __cam_enabled = enable;
+  __refresh_thread->refresh_cam();
 }
 
+/** Sets the size of the ImageWidget.
+ * Updates the internal buffer and the size request for the ImageWidget.
+ * If width and/or height are set to 0 (and a Camera is set) the
+ * ImageWidget will be set to the camera dimensions.
+ *
+ * Note: The ImageWidget must be refreshed after changing its size!
+ *
+ * @param width The new width
+ * @param height The new height
+ */
+void
+ImageWidget::set_size(unsigned int width, unsigned int height)
+{
+  if (!width || ! height) {
+    if (__cam) {
+      width  = __cam->pixel_width();
+      height = __cam->pixel_height();
+    }
+    else {
+      throw fawkes::IllegalArgumentException("ImageWidget::set_size(): width and/or height may not be 0 if no Camera is set");
+    }
+  }
+
+  if (!__pixbuf || __width != width || __height != height) {
+    __width  = width;
+    __height = height;
+
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 16 )
+    __pixbuf.reset();
+#else
+    __pixbuf.clear();
+#endif
+
+    __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
+
+    set_size_request(__width, __height);
+  }
+}
 /**
  * Returns the image buffer width
  * @return width of the contained image
@@ -253,14 +255,16 @@ ImageWidget::set_rgb(unsigned int x, unsigned int y, RGB_t rgb)
 
 /**
  * Show image from given colorspace.
- * Warning: If width and/or height not set, it is assumed, that
- * the given buffer has the same dimension as the widget.
+ * Warning: If width and/or height not set, it is assumed, that the given
+ * buffer has the same dimension as the widget.
  *
  * @param colorspace colorspace of the supplied buffer
  * @param buffer image buffer
- * @param width Width of the provided buffer (may be scaled to ImageWidget dimensions)
- * @param height Height of the provided buffer (may be scaled to ImageWidget dimensions)
- * @return TRUE if the buffer chould be shown
+ * @param width Width of the provided buffer (may be scaled to ImageWidget
+ *        dimensions)
+ * @param height Height of the provided buffer (may be scaled to
+ *        ImageWidget dimensions)
+ * @return TRUE if the buffer chould have been shown
  */
 bool
 ImageWidget::show(colorspace_t colorspace, unsigned char *buffer, unsigned int width, unsigned int height)
@@ -304,7 +308,8 @@ ImageWidget::show(colorspace_t colorspace, unsigned char *buffer, unsigned int w
 }
 
 
-/** Signal emits after a new buffer gets successfully shown (@see ImageWidget::show).
+/** Signal emits after a new buffer gets successfully shown
+ * (see @see ImageWidget::show()).
  *
  * The buffer's validity can not be guaranteed beyond the called functions
  * scope! In case the source of the widget is a Camera, the buffer gets
@@ -337,19 +342,16 @@ ImageWidget::set_refresh_delay(unsigned int refresh_delay)
 void
 ImageWidget::refresh_cam()
 {
-  if ( __cam_enabled ) {
-    __refresh_thread->refresh_cam();
-  }
+  __refresh_thread->refresh_cam();
 }
 
 /**
- * Sets the widgets pixbuf after! (non blocking) retrieving the image over the network
+ * Sets the widgets pixbuf after (i.e. non blocking) retrieving the image
+ * over the network.
  */
 void
 ImageWidget::set_cam()
 {
-  if ( !__cam_enabled ) { return; }
-
   __cam_mutex->lock();
 
   if (__cam_has_buffer) {
@@ -364,7 +366,11 @@ ImageWidget::set_cam()
 /**
  * Saves the current content of the Image
  * @param filename of the output
- * @param type of the output (By default, "jpeg", "png", "ico" and "bmp" are possible file formats to save in, but more formats may be installed. TThe list of all writable formats can be determined by using Gdk::Pixbuf::get_formats() with Gdk::PixbufFormat::is_writable().)
+ * @param type of the output (By default, "jpeg", "png", "ico" and "bmp"
+ *        are possible file formats to save in, but more formats may be
+ *        installed. The list of all writable formats can be determined
+ *        by using Gdk::Pixbuf::get_formats() with
+ *        Gdk::PixbufFormat::is_writable().)
  */
 bool
 ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
@@ -389,7 +395,8 @@ ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
  * @param enable  enables or disables the feature
  * @param path    to save the images at
  * @param type    file type (@see ImageWidget::save_image)
- * @param img_num of which to start the numbering (actually the first image is numbered img_num + 1)
+ * @param img_num of which to start the numbering (actually the first
+ *        image is numbered img_num + 1)
  */
 void
 ImageWidget::save_on_refresh_cam(bool enable, std::string path, Glib::ustring type, unsigned int img_num)
@@ -457,7 +464,9 @@ ImageWidget::RefThread::refresh_cam()
 void
 ImageWidget::RefThread::perform_refresh()
 {
-  if (!__widget->__cam) throw fawkes::NullPointerException("Camera hasn't been given during creation");
+  if (!__widget->__cam) {
+    throw fawkes::NullPointerException("Camera hasn't been given during creation");
+  }
 
   try {
     if (__widget->__cam_mutex->try_lock()) {

@@ -38,9 +38,9 @@ class CameraControlImage : virtual public CameraControl
   virtual void         set_format(const char *format);
   virtual unsigned int width()                                         = 0;
   virtual unsigned int height()                                        = 0;
-  virtual void         size(unsigned int &width, unsigned int &height) = 0;
+  virtual void         size(unsigned int &width, unsigned int &height);
   virtual void         set_size(unsigned int width,
-				unsigned int height)                   = 0;
+                                unsigned int height)                   = 0;
   virtual bool         horiz_mirror();
   virtual bool         vert_mirror();
   virtual void         mirror(bool &horiz, bool &vert);

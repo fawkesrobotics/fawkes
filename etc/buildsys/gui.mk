@@ -22,6 +22,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/ext/gmsl
 
 PC_GTKMM        = gtkmm-2.4
+PC_GIOMM        = giomm-2.4
 PC_CAIROMM      = cairomm-1.0
 PC_GLADEMM      = libglademm-2.4
 PC_HILDONMM     = hildonmm
@@ -38,6 +39,7 @@ PKG_GTHREAD     = glib2-devel
 
 ifneq ($(PKGCONFIG),)
   HAVE_GTKMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM)'; echo $${?/1/}),1,0)
+  HAVE_GIOMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GIOMM)'; echo $${?/1/}),1,0)
   HAVE_CAIROMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_CAIROMM)'; echo $${?/1/}),1,0)
   HAVE_GLADEMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GLADEMM)'; echo $${?/1/}),1,0)
   HAVE_GCONFMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GCONFMM)'; echo $${?/1/}),1,0)
@@ -62,6 +64,13 @@ ifeq ($(HAVE_GTKMM),1)
   LDFLAGS_GTKMM    = $(shell $(PKGCONFIG) --libs '$(PC_GTKMM)')
 else
   PKG_MISSING += $(PKG_GTKMM)
+endif
+
+ifeq ($(HAVE_GIOMM),1)
+  CFLAGS_GIOMM     = -DHAVE_GIOMM $(shell $(PKGCONFIG) --cflags '$(PC_GIOMM)')
+  LDFLAGS_GIOMM    = $(shell $(PKGCONFIG) --libs '$(PC_GIOMM)')
+else
+  PKG_MISSING += $(PKG_GIOMM)
 endif
 
 ifeq ($(HAVE_CAIROMM),1)
@@ -111,9 +120,11 @@ endif
 
 # Some default warnings that may be used
 ifeq ($(OBJSSUBMAKE),1)
-.PHONY: warning_gtkmm warning_cairomm warning_glademm warning_hildonmm
+.PHONY: warning_gtkmm warning_giomm warning_cairomm warning_glademm warning_hildonmm
 warning_gtkmm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Gtk dependent GUI apps$(TNORMAL) $(ERROR_GTKMM)";
+warning_giomm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Gio dependent GUI apps$(TNORMAL) $(ERROR_GTKMM)";
 warning_cairomm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Cairo dependent GUI apps$(TNORMAL) $(ERROR_CAIROMM)";
 warning_glademm:

@@ -46,11 +46,6 @@
  * Get the current height of the image.
  * @return height in pixels
  *
- * @fn void CameraControlImage::size(unsigned int &width, unsigned int &height) = 0
- * Get the current image size.
- * @param[out] width upon return contains the width of the image
- * @param[out] height upon return contains the height of the image
- *
  * @fn void CameraControlImage::set_size(unsigned int width, unsigned int height) = 0
  * Set the image size the camera should use.
  * @param width new width of the image
@@ -90,6 +85,16 @@ CameraControlImage::set_format(const char *format)
 }
 
 
+/** Get the current image size.
+ * @param[out] width upon return contains the width of the image
+ * @param[out] height upon return contains the height of the image
+ */
+void
+CameraControlImage::size(unsigned int &width, unsigned int &height)
+{
+  width = this->width();
+  height = this->height();
+}
 
 /** Return whether the camera image is horizontally mirrored.
  * @return true if the image is horizontally mirrored
@@ -121,7 +126,8 @@ CameraControlImage::vert_mirror()
 void
 CameraControlImage::mirror(bool &horiz, bool &vert)
 {
-  throw NotImplementedException("Not implemented");
+  horiz = horiz_mirror();
+  vert = vert_mirror();
 }
 
 
@@ -155,7 +161,8 @@ CameraControlImage::set_vert_mirror(bool enabled)
 void
 CameraControlImage::set_mirror(bool horiz, bool vert)
 {
-  throw NotImplementedException("Not implemented");
+  set_horiz_mirror(horiz);
+  set_vert_mirror(vert);
 }
 
 
@@ -211,7 +218,8 @@ CameraControlImage::lens_y_corr()
 void
 CameraControlImage::lens_corr(unsigned int &x_corr, unsigned int &y_corr)
 {
-  throw NotImplementedException("Not implemented");
+  x_corr = this->lens_x_corr();
+  y_corr = this->lens_y_corr();
 }
 
 
@@ -245,5 +253,6 @@ CameraControlImage::set_lens_y_corr(unsigned int y_corr)
 void
 CameraControlImage::set_lens_corr(unsigned int x_corr, unsigned int y_corr)
 {
-  throw NotImplementedException("Not implemented");
+  set_lens_x_corr(x_corr);
+  set_lens_y_corr(y_corr);
 }
