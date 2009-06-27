@@ -1,0 +1,118 @@
+
+----------------------------------------------------------------------------
+--  ppgoto.lua - generic pathplan goto
+--
+--  Created: Tue Jun 16 10:34:23 2009
+--  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+--
+--  $Id$
+--
+----------------------------------------------------------------------------
+
+--  This program is free software; you can redistribute it and/or modify
+--  it under the terms of the GNU General Public License as published by
+--  the Free Software Foundation; either version 2 of the License, or
+--  (at your option) any later version.
+--
+--  This program is distributed in the hope that it will be useful,
+--  but WITHOUT ANY WARRANTY; without even the implied warranty of
+--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--  GNU Library General Public License for more details.
+--
+--  Read the full text in the LICENSE.GPL file in the doc directory.
+
+-- Initialize module
+module(..., skillenv.module_init)
+
+-- Crucial skill information
+name               = "ppgoto"
+fsm                = SkillHSM:new{name=name, start="PPGOTO", debug=true}
+depends_skills     = nil
+depends_interfaces = {
+   {v = "ppnavi", type = "NavigatorInterface"}
+}
+
+documentation      = [==[Pathplan goto skill.
+This skill takes you to a place using a pathplan facility. The path planning
+itself is not implemented in the skill, rather it uses the NavigatorInterface
+to instruct the appropriate component.
+
+There are several forms to call this skill:
+1. ppgoto{x=X, y=Y[, ori=ORI]}
+   This will goto the position giving in the global cartesian coordinates,
+   optionally with the given orientation. The path planner will use the plan
+   nodes to go as close to the desired position as possible and will issue a
+   relative goto to reach the final position from there.
+2. ppgoto{place=PLACE}
+   Go to the given place.
+3. ppgoto{stop=true}
+   Stop the current pathplan goto.
+
+Parameters:
+x, y:      global world cartesian coordinates of target point
+ori:       orientation of robot at destination, radian offset from forward
+           clock-wise positive
+place:     name of a place
+]==]
+
+-- Initialize as skill module
+skillenv.skill_module(...)
+
+-- States
+fsm:new_jump_state("PPGOTO")
+
+function PPGOTO:init()
+   if navigator:has_writer() then
+      if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil then
+         -- cartesian goto
+         local x = self.fsm.vars.x or self.fsm.vars[1]
+         local y = self.fsm.vars.y or self.fsm.vars[2]
+         local ori = self.fsm.vars.ori or math.atan2(y, x)
+         local m = navigator.CartesianGotoMessage:new(x, y, ori)
+         printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
+         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+      elseif self.fsm.vars.place ~= nil then
+         -- place goto
+         local place = self.fsm.vars.place
+         local m = navigator.PlaceGotoMessage:new(place)
+         printf("Sending PlaceGotoMessage(%s)", place)
+         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+      elseif self.fsm.vars.stop ~= nil then
+         local m = navigator.StopMessage:new()
+         printf("Sending StopGotoMessage")
+         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+      else
+         self.fsm.vars.param_fail = true
+      end
+   end
+   self.wait_start = 1
+end
+
+function PPGOTO:loop()
+   self.wait_start = self.wait_start + 1
+end
+
+function PPGOTO:reset()
+   --printf("ppgoto: sending stop");
+   --navigator:msgq_enqueue_copy(navigator.StopMessage:new())
+end
+
+function PPGOTO:jumpcond_paramfail()
+   return self.fsm.vars.param_fail
+end
+
+function PPGOTO:jumpcond_navifail()
+   return (self.fsm.vars.msgid == 0
+	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 2)
+	   or not navigator:has_writer()
+	   or self.failed)
+end
+
+function PPGOTO:jumpcond_navifinal()
+   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
+   return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
+end
+
+PPGOTO:add_transition(FAILED, PPGOTO.jumpcond_paramfail, "Invalid/insufficient parameters")
+PPGOTO:add_transition(FAILED, PPGOTO.jumpcond_navifail, "Navigator failure")
+PPGOTO:add_transition(FINAL, PPGOTO.jumpcond_navifinal, "Position reached")
