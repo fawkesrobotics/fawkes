@@ -65,6 +65,10 @@ class PanTiltInterface : public Interface
     float max_tilt_velocity; /**< Maximum supported tilt velocity. */
     float pan_velocity; /**< Maximum pan velocity currently reached. */
     float tilt_velocity; /**< Maximum tilt velocity currently reached. */
+    float pan_margin; /**< Margin in radians around a
+    target pan value to consider the motion as final. */
+    float tilt_margin; /**< Margin in radians around a
+    target tilt value to consider the motion as final. */
     bool final; /**< True, if the last goto command has been finished,
       false if it is still running */
     bool enabled; /**< Is the pan/tilt unit enabled? */
@@ -196,6 +200,35 @@ class PanTiltInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetMarginMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float pan_margin; /**< Margin in radians around a
+    target pan value to consider the motion as final. */
+      float tilt_margin; /**< Margin in radians around a
+    target tilt value to consider the motion as final. */
+    } SetMarginMessage_data_t;
+
+    SetMarginMessage_data_t *data;
+
+   public:
+    SetMarginMessage(const float ini_pan_margin, const float ini_tilt_margin);
+    SetMarginMessage();
+    ~SetMarginMessage();
+
+    SetMarginMessage(const SetMarginMessage *m);
+    /* Methods */
+    float pan_margin() const;
+    void set_pan_margin(const float new_pan_margin);
+    size_t maxlenof_pan_margin() const;
+    float tilt_margin() const;
+    void set_tilt_margin(const float new_tilt_margin);
+    size_t maxlenof_tilt_margin() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   PanTiltInterface();
@@ -251,6 +284,12 @@ class PanTiltInterface : public Interface
   float tilt_velocity() const;
   void set_tilt_velocity(const float new_tilt_velocity);
   size_t maxlenof_tilt_velocity() const;
+  float pan_margin() const;
+  void set_pan_margin(const float new_pan_margin);
+  size_t maxlenof_pan_margin() const;
+  float tilt_margin() const;
+  void set_tilt_margin(const float new_tilt_margin);
+  size_t maxlenof_tilt_margin() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

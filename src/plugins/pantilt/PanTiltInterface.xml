@@ -54,6 +54,11 @@
     <field type="float" name="max_tilt_velocity">Maximum supported tilt velocity.</field>
     <field type="float" name="pan_velocity">Maximum pan velocity currently reached.</field>
     <field type="float" name="tilt_velocity">Maximum tilt velocity currently reached.</field>
+
+    <field type="float" name="pan_margin">Margin in radians around a
+    target pan value to consider the motion as final.</field>
+    <field type="float" name="tilt_margin">Margin in radians around a
+    target tilt value to consider the motion as final.</field>
   </data>
   <message name="Stop">
     <comment>Stop motion immediately.</comment>
@@ -80,5 +85,10 @@
     <comment>Set maximum velocity for pan/tilt unit.</comment>
     <ref>pan_velocity</ref>
     <ref>tilt_velocity</ref>
+  </message>
+  <message name="SetMargin">
+    <comment>Set margins pan/tilt unit motions.</comment>
+    <ref>pan_margin</ref>
+    <ref>tilt_margin</ref>
   </message>
 </interface>

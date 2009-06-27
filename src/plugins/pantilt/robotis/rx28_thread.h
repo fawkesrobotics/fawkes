@@ -88,7 +88,8 @@ class PanTiltRX28Thread
   float        __cfg_pan_max;
   float        __cfg_tilt_min;
   float        __cfg_tilt_max;
-
+  float        __cfg_pan_margin;
+  float        __cfg_tilt_margin;
 
   class WorkerThread : public fawkes::Thread
   {
@@ -103,6 +104,7 @@ class PanTiltRX28Thread
     void goto_pantilt(float pan, float tilt);
     void get_pantilt(float &pan, float &tilt);
     void set_velocities(float pan_vel, float tilt_vel);
+    void set_margins(float pan_margin, float tilt_margin);
     bool is_final();
     bool is_enabled();
     void set_enabled(bool enabled);
@@ -129,6 +131,8 @@ class PanTiltRX28Thread
     int           __tilt_zero_offset;
     float         __max_pan_speed;
     float         __max_tilt_speed;
+    float         __pan_margin;
+    float         __tilt_margin;
 
     fawkes::Mutex *__move_mutex;
     bool  __move_pending;

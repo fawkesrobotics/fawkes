@@ -78,6 +78,20 @@ class PanTiltInterface : public Interface
     int maxlenof_tilt_velocity() const;
   };
 
+  class SetMarginMessage : public Message
+  {
+    SetMarginMessage(float ini_pan_margin, float ini_tilt_margin);
+    SetMarginMessage();
+    ~SetMarginMessage();
+
+    float pan_margin();
+    void set_pan_margin(const float new_pan_margin);
+    int maxlenof_pan_margin() const;
+    float tilt_margin();
+    void set_tilt_margin(const float new_tilt_margin);
+    int maxlenof_tilt_margin() const;
+  };
+
   unsigned int flags();
   void set_flags(const unsigned int new_flags);
   int maxlenof_flags() const;
@@ -126,6 +140,12 @@ class PanTiltInterface : public Interface
   float tilt_velocity();
   void set_tilt_velocity(const float new_tilt_velocity);
   int maxlenof_tilt_velocity() const;
+  float pan_margin();
+  void set_pan_margin(const float new_pan_margin);
+  int maxlenof_pan_margin() const;
+  float tilt_margin();
+  void set_tilt_margin(const float new_tilt_margin);
+  int maxlenof_tilt_margin() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

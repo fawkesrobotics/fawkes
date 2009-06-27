@@ -85,6 +85,8 @@ PanTiltRX28Thread::init()
   __cfg_pan_max          = config->get_float((__ptu_cfg_prefix + "pan_max").c_str());
   __cfg_tilt_min         = config->get_float((__ptu_cfg_prefix + "tilt_min").c_str());
   __cfg_tilt_max         = config->get_float((__ptu_cfg_prefix + "tilt_max").c_str());
+  __cfg_pan_margin       = config->get_float((__ptu_cfg_prefix + "pan_margin").c_str());
+  __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
 
   bool pan_servo_found = false, tilt_servo_found = false;
 
@@ -122,6 +124,8 @@ PanTiltRX28Thread::init()
   __pantilt_if->set_max_pan(__cfg_pan_max);
   __pantilt_if->set_min_tilt(__cfg_tilt_min);
   __pantilt_if->set_max_tilt(__cfg_tilt_max);
+  __pantilt_if->set_pan_margin(__cfg_pan_margin);
+  __pantilt_if->set_tilt_margin(__cfg_tilt_margin);
   __pantilt_if->set_max_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
   __pantilt_if->set_max_tilt_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
   __pantilt_if->set_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
@@ -233,6 +237,13 @@ PanTiltRX28Thread::loop()
 	__pantilt_if->set_pan_velocity(msg->pan_velocity());
 	__pantilt_if->set_tilt_velocity(msg->tilt_velocity());
       }
+
+    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetMarginMessage>()) {
+      PanTiltInterface::SetMarginMessage *msg = __pantilt_if->msgq_first(msg);
+
+      __wt->set_margins(msg->pan_margin(), msg->tilt_margin());
+      __pantilt_if->set_pan_margin(msg->pan_margin());
+      __pantilt_if->set_tilt_margin(msg->tilt_margin());
 
     } else {
       logger->log_warn(name(), "Unknown message received");
@@ -400,7 +411,18 @@ PanTiltRX28Thread::WorkerThread::set_velocities(float pan_vel, float tilt_vel)
     __logger->log_warn(name(), "Calculated tilt value out of bounds, min: 0  max: %u  des: %u",
 		       RobotisRX28::MAX_SPEED, (unsigned int)tilt_tmp);
   }
+}
 
+
+/** Set desired velocities.
+ * @param pan_vel pan velocity
+ * @param tilt_vel tilt velocity
+ */
+void
+PanTiltRX28Thread::WorkerThread::set_margins(float pan_margin, float tilt_margin)
+{
+  if (pan_margin  > 0.0)  __pan_margin  = pan_margin;
+  if (tilt_margin > 0.0)  __tilt_margin = tilt_margin;
 }
 
 
@@ -426,8 +448,14 @@ bool
 PanTiltRX28Thread::WorkerThread::is_final()
 {
   MutexLocker lock(__move_mutex);
+  float pan, tilt;
+  get_pantilt(pan, tilt);
+  return  ( (fabs(pan  - __target_pan)  <= __pan_margin) &&
+	    (fabs(tilt - __target_tilt) <= __tilt_margin) );
+  /*
   return (! __rx28->is_moving(__pan_servo_id) &&
 	  ! __rx28->is_moving(__tilt_servo_id));
+  */
 }
 
 

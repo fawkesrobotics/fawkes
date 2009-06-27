@@ -79,7 +79,9 @@ PanTiltInterface::PanTiltInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "max_tilt_velocity", 1, &data->max_tilt_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "pan_velocity", 1, &data->pan_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "tilt_velocity", 1, &data->tilt_velocity);
-  unsigned char tmp_hash[] = {0x4f, 0x6b, 0x2c, 0x92, 0x2b, 0x81, 0x21, 0x1e, 0x26, 0x44, 0xd9, 0x6a, 0xc5, 0x1f, 0x83, 0xcd};
+  add_fieldinfo(Interface::IFT_FLOAT, "pan_margin", 1, &data->pan_margin);
+  add_fieldinfo(Interface::IFT_FLOAT, "tilt_margin", 1, &data->tilt_margin);
+  unsigned char tmp_hash[] = {0xcc, 0x7f, 0x25, 0xdd, 0x3, 0xc0, 0x3e, 0x8d, 0xa4, 0xdb, 0xb0, 0x44, 0xd, 0xf7, 0xda, 0x26};
   set_hash(tmp_hash);
 }
 
@@ -577,6 +579,70 @@ PanTiltInterface::set_tilt_velocity(const float new_tilt_velocity)
   data->tilt_velocity = new_tilt_velocity;
 }
 
+/** Get pan_margin value.
+ * Margin in radians around a
+    target pan value to consider the motion as final.
+ * @return pan_margin value
+ */
+float
+PanTiltInterface::pan_margin() const
+{
+  return data->pan_margin;
+}
+
+/** Get maximum length of pan_margin value.
+ * @return length of pan_margin value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::maxlenof_pan_margin() const
+{
+  return 1;
+}
+
+/** Set pan_margin value.
+ * Margin in radians around a
+    target pan value to consider the motion as final.
+ * @param new_pan_margin new pan_margin value
+ */
+void
+PanTiltInterface::set_pan_margin(const float new_pan_margin)
+{
+  data->pan_margin = new_pan_margin;
+}
+
+/** Get tilt_margin value.
+ * Margin in radians around a
+    target tilt value to consider the motion as final.
+ * @return tilt_margin value
+ */
+float
+PanTiltInterface::tilt_margin() const
+{
+  return data->tilt_margin;
+}
+
+/** Get maximum length of tilt_margin value.
+ * @return length of tilt_margin value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::maxlenof_tilt_margin() const
+{
+  return 1;
+}
+
+/** Set tilt_margin value.
+ * Margin in radians around a
+    target tilt value to consider the motion as final.
+ * @param new_tilt_margin new tilt_margin value
+ */
+void
+PanTiltInterface::set_tilt_margin(const float new_tilt_margin)
+{
+  data->tilt_margin = new_tilt_margin;
+}
+
 /* =========== message create =========== */
 Message *
 PanTiltInterface::create_message(const char *type) const
@@ -595,6 +661,8 @@ PanTiltInterface::create_message(const char *type) const
     return new SetEnabledMessage();
   } else if ( strncmp("SetVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetVelocityMessage();
+  } else if ( strncmp("SetMarginMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMarginMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1092,6 +1160,127 @@ PanTiltInterface::SetVelocityMessage::clone() const
 {
   return new PanTiltInterface::SetVelocityMessage(this);
 }
+/** @class PanTiltInterface::SetMarginMessage <interfaces/PanTiltInterface.h>
+ * SetMarginMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_pan_margin initial value for pan_margin
+ * @param ini_tilt_margin initial value for tilt_margin
+ */
+PanTiltInterface::SetMarginMessage::SetMarginMessage(const float ini_pan_margin, const float ini_tilt_margin) : Message("SetMarginMessage")
+{
+  data_size = sizeof(SetMarginMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMarginMessage_data_t *)data_ptr;
+  data->pan_margin = ini_pan_margin;
+  data->tilt_margin = ini_tilt_margin;
+}
+/** Constructor */
+PanTiltInterface::SetMarginMessage::SetMarginMessage() : Message("SetMarginMessage")
+{
+  data_size = sizeof(SetMarginMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMarginMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+PanTiltInterface::SetMarginMessage::~SetMarginMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+PanTiltInterface::SetMarginMessage::SetMarginMessage(const SetMarginMessage *m) : Message("SetMarginMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMarginMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get pan_margin value.
+ * Margin in radians around a
+    target pan value to consider the motion as final.
+ * @return pan_margin value
+ */
+float
+PanTiltInterface::SetMarginMessage::pan_margin() const
+{
+  return data->pan_margin;
+}
+
+/** Get maximum length of pan_margin value.
+ * @return length of pan_margin value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::SetMarginMessage::maxlenof_pan_margin() const
+{
+  return 1;
+}
+
+/** Set pan_margin value.
+ * Margin in radians around a
+    target pan value to consider the motion as final.
+ * @param new_pan_margin new pan_margin value
+ */
+void
+PanTiltInterface::SetMarginMessage::set_pan_margin(const float new_pan_margin)
+{
+  data->pan_margin = new_pan_margin;
+}
+
+/** Get tilt_margin value.
+ * Margin in radians around a
+    target tilt value to consider the motion as final.
+ * @return tilt_margin value
+ */
+float
+PanTiltInterface::SetMarginMessage::tilt_margin() const
+{
+  return data->tilt_margin;
+}
+
+/** Get maximum length of tilt_margin value.
+ * @return length of tilt_margin value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::SetMarginMessage::maxlenof_tilt_margin() const
+{
+  return 1;
+}
+
+/** Set tilt_margin value.
+ * Margin in radians around a
+    target tilt value to consider the motion as final.
+ * @param new_tilt_margin new tilt_margin value
+ */
+void
+PanTiltInterface::SetMarginMessage::set_tilt_margin(const float new_tilt_margin)
+{
+  data->tilt_margin = new_tilt_margin;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+PanTiltInterface::SetMarginMessage::clone() const
+{
+  return new PanTiltInterface::SetMarginMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -1124,6 +1313,10 @@ PanTiltInterface::message_valid(const Message *message) const
   }
   const SetVelocityMessage *m6 = dynamic_cast<const SetVelocityMessage *>(message);
   if ( m6 != NULL ) {
+    return true;
+  }
+  const SetMarginMessage *m7 = dynamic_cast<const SetMarginMessage *>(message);
+  if ( m7 != NULL ) {
     return true;
   }
   return false;
