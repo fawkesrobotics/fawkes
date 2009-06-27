@@ -30,6 +30,7 @@
 
 #include <cstring>
 #include <cmath>
+#include <cstring>
 
 using namespace fawkes;
 
