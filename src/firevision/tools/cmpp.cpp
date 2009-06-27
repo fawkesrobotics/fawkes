@@ -78,8 +78,8 @@ int main( int argc, char** argv )
       {
 	for ( unsigned int h = 0; h < cm_height; ++h )
 	{
-	  float yuvfac = cm->deepness() / cm->depth();
-	  unsigned int y = d * yuvfac;
+	  float yuvfac = cm->deepness() / (float) cm->depth();
+	  unsigned int y = (unsigned int) (d * yuvfac);
 	  
 	  color_t cur_color = cm->determine(y, w, h);
 
@@ -97,19 +97,19 @@ int main( int argc, char** argv )
 
 	  unsigned int num_neighbours = 0;
 
-	  for ( unsigned int dd = fmax(d - tst_radius_dp, 0); 
+	  for ( unsigned int dd = (unsigned int) fmax(d - tst_radius_dp, 0); 
 		dd <= fmin( d + tst_radius_dp, cm_depth - 1);
 		++dd ) 
 	  {
-	    for ( unsigned int ww = fmax(w - tst_radius_uv, 0);
+	    for ( unsigned int ww = (unsigned int) fmax(w - tst_radius_uv, 0);
 		  ww <= fmin( w + tst_radius_uv, cm_width - 1 );
 		  ++ww )
 	    {
-	      for ( unsigned int hh = fmax(h - tst_radius_uv, 0);
+	      for ( unsigned int hh = (unsigned int) fmax(h - tst_radius_uv, 0);
 		    hh <= fmin( h + tst_radius_uv, cm_height - 1);
 		    ++hh ) 
 	      {
-		color_t cur_color = cm->determine( dd*yuvfac, ww, hh );
+		color_t cur_color = cm->determine( (unsigned int) (dd * yuvfac), ww, hh );
 		++cm_counter[ cur_color ];
 		
 		++num_neighbours;
