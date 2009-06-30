@@ -721,8 +721,14 @@ Thread::set_prepfin_conc_loop(bool concurrent)
 void
 Thread::set_coalesce_wakeups(bool coalesce)
 {
-  MutexLocker lock(__sleep_mutex);
-  __coalesce_wakeups = coalesce;
+  if ( __op_mode == OPMODE_CONTINUOUS ) {
+    // nothing is using the value, just write it
+    __coalesce_wakeups = coalesce;
+  } else {
+    // protect usage for calls to wakeup()
+    MutexLocker lock(__sleep_mutex);
+    __coalesce_wakeups = coalesce;
+  }
 }
 
 
@@ -926,12 +932,15 @@ Thread::run()
     loop_mutex->unlock();
 
     test_cancel();
-    if ( __barrier ) {
-      __barrier->wait();
-      __barrier = NULL;
-    }
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-      __sleep_mutex->lock();
+      if ( __barrier ) {
+	__barrier->wait();
+	__sleep_mutex->lock();
+	if (__pending_wakeups == 0)  __barrier = NULL;
+      } else {
+	__sleep_mutex->lock();
+      }
+
       while (__pending_wakeups == 0) {
 	__waiting_for_wakeup = true;
 	__sleep_condition->wait();
