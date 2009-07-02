@@ -198,16 +198,18 @@ bool
 InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
 {
   if (likely(__data->own_mutex))  __data->mutex->lock();
-  if ( __interrupted || __timeout ) {
-    // interrupted or timed out threads need to be reset if they should be reused
-    if (likely(__data->own_mutex))  __data->mutex->unlock();
-    return true;
-  }
 
   if ( __data->threads_left == 0 ) {
     // first to come
+    __timeout = __interrupted = false;
     __data->threads_left = _count;
     __passed_threads->clear();
+  } else {
+    if ( __interrupted || __timeout ) {
+      // interrupted or timed out threads need to be reset if they should be reused
+      if (likely(__data->own_mutex))  __data->mutex->unlock();
+      return true;
+    }
   }
   --__data->threads_left;
   try {
@@ -218,9 +220,11 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
     e.print_trace();
   }
 
-  while ( __data->threads_left && !__interrupted && !__timeout ) {
-    __timeout = ! __data->waitcond->reltimed_wait(timeout_sec, timeout_nanosec);
+  bool local_timeout = false;
+  while ( __data->threads_left && !__interrupted && !__timeout && ! local_timeout) {
+    local_timeout = ! __data->waitcond->reltimed_wait(timeout_sec, timeout_nanosec);
   }
+  if (local_timeout) __timeout = true;
   if ( __interrupted ) {
     if (likely(__data->own_mutex))  __data->mutex->unlock();
     throw InterruptedException("InterruptibleBarrier forcefully interrupted, only "
