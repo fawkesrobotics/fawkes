@@ -991,7 +991,7 @@ Thread::wakeup(Barrier *barrier)
   __sleep_mutex->lock();
   if ( ! __waiting_for_wakeup && __barrier && (__barrier != barrier)) {
     __sleep_mutex->unlock();
-    throw Exception("Thread already running with other barrier, cannot wakeup");
+    throw Exception("Thread %s already running with other barrier, cannot wakeup", __name);
   }
 
   __pending_wakeups += 1;

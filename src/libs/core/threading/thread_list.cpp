@@ -259,7 +259,9 @@ ThreadList::wakeup_and_wait(unsigned int timeout_sec, unsigned int timeout_nanos
     } else if (bad_threads.size() == 0) {
       s = "Timeout happened, but no bad threads recorded.";
     } else {
-      s = std::string("Thread ") + bad_threads.front()->name() + " did not finish in time, flagging as bad";
+      throw Exception("Thread %s did not finish in time (max %f), flagging as bad",
+		      bad_threads.front()->name(),
+		      (float)timeout_sec + (float)timeout_nanosec / 1000000000.);
     }
     unlock();
     throw Exception("%s", s.c_str());
