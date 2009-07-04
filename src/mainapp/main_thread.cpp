@@ -239,6 +239,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     __max_thread_time_usec = 30000;
     __multi_logger->log_info("FawkesMainApp", "Maximum thread time not set, assuming 30ms.");
   }
+  __max_thread_time_nanosec = __max_thread_time_usec * 1000;
 
   __time_wait = NULL;
   try {
@@ -391,15 +392,15 @@ FawkesMainThread::loop()
       __loop_start->stamp_systime();
 
       try {
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_nanosec );
       } catch (Exception &e) {
         if(__enable_looptime_warnings) {
           __multi_logger->log_error("FawkesMainThread", e);
@@ -411,21 +412,24 @@ FawkesMainThread::loop()
       __thread_manager->try_recover(__recovered_threads);
       if ( ! __recovered_threads.empty() ) {
 	// threads have been recovered!
-	std::string s;
-	if ( __recovered_threads.size() == 1 ) {
-	  s = std::string("The thread ") + __recovered_threads.front() +
-	    " could be recovered and resumes normal operation";
-	} else {
-	  s = "The following threads could be recovered and resumed normal operation: ";
-	  for (std::list<std::string>::iterator i = __recovered_threads.begin();
-	       i != __recovered_threads.end(); ++i) {
-	    s += *i + " ";
+	__multi_logger->log_error(name(), "Threads recovered %zu", __recovered_threads.size());
+	if(__enable_looptime_warnings) {
+	  if ( __recovered_threads.size() == 1 ) {
+	    __multi_logger->log_warn("FawkesMainThread", "The thread %s could be "
+				     "recovered and resumes normal operation",
+				     __recovered_threads.front().c_str());
+	  } else {
+	    std::string s;
+	    for (std::list<std::string>::iterator i = __recovered_threads.begin();
+	         i != __recovered_threads.end(); ++i) {
+	      s += *i + " ";
+	    }
+            
+	    __multi_logger->log_warn("FawkesMainThread", "The following threads could be "
+				     "recovered and resumed normal operation: %s", s.c_str());
 	  }
 	}
 	__recovered_threads.clear();
-	if(__enable_looptime_warnings) {
-	  __multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
-	}
       }
 
       if (__desired_loop_time_sec > 0) {

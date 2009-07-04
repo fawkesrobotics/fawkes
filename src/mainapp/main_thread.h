@@ -98,6 +98,7 @@ class FawkesMainThread
   unsigned int                  __desired_loop_time_usec;
   float                         __desired_loop_time_sec;
   unsigned int                  __max_thread_time_usec;
+  unsigned int                  __max_thread_time_nanosec;
   fawkes::Time                 *__loop_start;
   fawkes::Time                 *__loop_end;
   bool                          __enable_looptime_warnings;
