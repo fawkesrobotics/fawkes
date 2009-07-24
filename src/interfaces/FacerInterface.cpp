@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -57,6 +57,8 @@ FacerInterface::FacerInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "learning_done", 1, &data->learning_done);
   add_fieldinfo(IFT_UINT, "num_detections", 1, &data->num_detections);
   add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
+  add_messageinfo("LearnFaceMessage");
+  add_messageinfo("SetOpmodeMessage");
   unsigned char tmp_hash[] = {0xb0, 0x4a, 0xef, 0xf, 0xb0, 0xa3, 0x79, 0x74, 0xad, 0x39, 0x49, 0x6, 0x89, 0xb4, 0xdd, 0xad};
   set_hash(tmp_hash);
 }
@@ -264,6 +266,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_face_label) 
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
   strncpy(data->face_label, ini_face_label, 64);
+  add_fieldinfo(IFT_STRING, "face_label", 64, data->face_label);
 }
 /** Constructor */
 FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage")
@@ -272,6 +275,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "face_label", 64, data->face_label);
 }
 
 /** Destructor */

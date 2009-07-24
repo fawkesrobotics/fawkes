@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2009  Daniel Beck
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -52,6 +52,7 @@ LocalizerControlInterface::LocalizerControlInterface() : Interface()
   data      = (LocalizerControlInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "map_name", 30, data->map_name);
+  add_messageinfo("ResetMessage");
   unsigned char tmp_hash[] = {0xa4, 0xe8, 0x69, 0x11, 0x29, 0x30, 0xf2, 0xcb, 0xe5, 0xf4, 00, 0x35, 0x19, 0x58, 0x54, 0xfb};
   set_hash(tmp_hash);
 }
@@ -145,6 +146,10 @@ LocalizerControlInterface::ResetMessage::ResetMessage(const float ini_x, const f
   data->y = ini_y;
   data->ori = ini_ori;
   data->variance = ini_variance;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
+  add_fieldinfo(IFT_FLOAT, "variance", 1, &data->variance);
 }
 /** Constructor */
 LocalizerControlInterface::ResetMessage::ResetMessage() : Message("ResetMessage")
@@ -153,6 +158,10 @@ LocalizerControlInterface::ResetMessage::ResetMessage() : Message("ResetMessage"
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
+  add_fieldinfo(IFT_FLOAT, "variance", 1, &data->variance);
 }
 
 /** Destructor */

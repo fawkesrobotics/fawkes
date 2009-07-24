@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -55,6 +55,9 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
   add_fieldinfo(IFT_STRING, "graph", 8192, data->graph);
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
+  add_messageinfo("SetGraphMessage");
+  add_messageinfo("SetGraphDirectionMessage");
+  add_messageinfo("SetGraphColoredMessage");
   unsigned char tmp_hash[] = {0xcf, 0x3d, 0x2f, 0xf8, 0x80, 0x6e, 0x8f, 0xf4, 0x81, 0xa6, 0x7f, 0xd9, 0xb0, 0x29, 0xfc, 0x62};
   set_hash(tmp_hash);
 }
@@ -250,6 +253,7 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage(const char * ini_graph_f
   memset(data_ptr, 0, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
   strncpy(data->graph_fsm, ini_graph_fsm, 32);
+  add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
 }
 /** Constructor */
 SkillerDebugInterface::SetGraphMessage::SetGraphMessage() : Message("SetGraphMessage")
@@ -258,6 +262,7 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage() : Message("SetGraphMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
 }
 
 /** Destructor */
@@ -428,6 +433,7 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage(const bool
   memset(data_ptr, 0, data_size);
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
   data->graph_colored = ini_graph_colored;
+  add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
 }
 /** Constructor */
 SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage() : Message("SetGraphColoredMessage")
@@ -436,6 +442,7 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage() : Messag
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
 }
 
 /** Destructor */

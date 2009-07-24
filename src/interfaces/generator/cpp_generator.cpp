@@ -5,7 +5,7 @@
  *  Created: Thu Oct 12 02:01:27 2006
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -164,7 +164,7 @@ CppInterfaceGenerator::write_header(FILE *f, std::string filename)
 	  " *  Templated created:   Thu Oct 12 10:49:19 2006\n"
 	  " *  Copyright  %s  %s\n"
 	  " *\n"
-	  " *  $Id$\n"
+	  " *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $\n"
 	  " *\n"
 	  " ****************************************************************************/\n\n"
 	  "/*  This program is free software; you can redistribute it and/or modify\n"
@@ -221,7 +221,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 	  filename_h.c_str(), class_name.c_str(), filename_h.c_str(),
 	  class_name.c_str(), data_comment.c_str());
   write_constants_cpp(f);
-  write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields);
+  write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields, messages);
   write_methods_cpp(f, class_name, class_name, data_fields, pseudo_maps, "");
   write_basemethods_cpp(f);
   write_messages_cpp(f);
@@ -533,12 +533,14 @@ CppInterfaceGenerator::write_message_clone_method_cpp(FILE *f, std::string class
  * @param super_class name of base class
  * @param inclusion_prefix Used if class is included in another class.
  * @param fields fields
+ * @param messages messages
  */
 void
 CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 					   std::string classname, std::string super_class,
 					   std::string inclusion_prefix,
-					   std::vector<InterfaceField> fields)
+					   std::vector<InterfaceField> fields,
+					   std::vector<InterfaceMessage> messages)
 {
   fprintf(f,
 	  "/** Constructor */\n"
@@ -593,6 +595,10 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
     fprintf(f,
 	    "  data_size = 0;\n"
 	    "  data_ptr  = NULL;\n");
+  }
+
+  for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
+    fprintf(f, "  add_messageinfo(\"%s\");\n", i->getName().c_str());
   }
 
   fprintf(f, "  unsigned char tmp_hash[] = {");
@@ -672,6 +678,40 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
       }
     }
 
+    for (i = fields.begin(); i != fields.end(); ++i) {
+      const char *type = "";
+      const char *dataptr = "&";
+      bool do_print = true;
+
+      if ( i->getType() == "bool" ) {
+	type = "BOOL";
+      } else if ( i->getType() == "int" ) {
+	type = "INT";
+      } else if ( i->getType() == "unsigned int" ) {
+	type = "UINT";
+      } else if ( i->getType() == "byte" ) {
+	type = "BYTE";
+      } else if ( i->getType() == "long int" ) {
+	type = "LONGINT";
+      } else if ( i->getType() == "unsigned long int" ) {
+	type = "LONGUINT";
+      } else if ( i->getType() == "float" ) {
+	type = "FLOAT";
+      } else if ( i->getType() == "string" ) {
+	type = "STRING";
+	dataptr = "";
+      } else {
+	do_print = false;
+      }
+
+      if (do_print) {
+	fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s);\n",
+		type, i->getName().c_str(),
+		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
+		dataptr, i->getName().c_str());
+      }
+    }
+
     fprintf(f, "}\n");
   }
 
@@ -689,6 +729,40 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	    "  memset(data_ptr, 0, data_size);\n"
 	    "  data      = (%s_data_t *)data_ptr;\n",
 	    classname.c_str(), classname.c_str());
+
+    for (i = fields.begin(); i != fields.end(); ++i) {
+      const char *type = "";
+      const char *dataptr = "&";
+      bool do_print = true;
+
+      if ( i->getType() == "bool" ) {
+	type = "BOOL";
+      } else if ( i->getType() == "int" ) {
+	type = "INT";
+      } else if ( i->getType() == "unsigned int" ) {
+	type = "UINT";
+      } else if ( i->getType() == "byte" ) {
+	type = "BYTE";
+      } else if ( i->getType() == "long int" ) {
+	type = "LONGINT";
+      } else if ( i->getType() == "unsigned long int" ) {
+	type = "LONGUINT";
+      } else if ( i->getType() == "float" ) {
+	type = "FLOAT";
+      } else if ( i->getType() == "string" ) {
+	type = "STRING";
+	dataptr = "";
+      } else {
+	do_print = false;
+      }
+
+      if (do_print) {
+	fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s);\n",
+		type, i->getName().c_str(),
+		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
+		dataptr, i->getName().c_str());
+      }
+    }
 
   } else {
     fprintf(f,
@@ -1029,7 +1103,8 @@ CppInterfaceGenerator::write_h(FILE *f)
 
   fprintf(f,
 	  "#include <interface/interface.h>\n"
-	  "#include <interface/message.h>\n\n"
+	  "#include <interface/message.h>\n"
+	  "#include <interface/field_iterator.h>\n\n"
 	  "namespace fawkes {\n\n"
 	  "class %s : public Interface\n"
 	  "{\n"

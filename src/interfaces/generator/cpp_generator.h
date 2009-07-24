@@ -5,7 +5,7 @@
  *  Created: Thu Oct 12 01:59:02 2006
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
+ *  $Id: cpp_generator.h 1724 2009-01-14 00:15:32Z tim $
  *
  ****************************************************************************/
 
@@ -62,7 +62,8 @@ class CppInterfaceGenerator
   void write_ctor_dtor_h(FILE *f,  std::string /* indent space */ is,
 			 std::string classname);
   void write_ctor_dtor_cpp(FILE *f, std::string classname, std::string super_class,
-			   std::string inclusion_prefix, std::vector<InterfaceField> fields);
+			   std::string inclusion_prefix, std::vector<InterfaceField> fields,
+			   std::vector<InterfaceMessage> messages);
 
   void write_message_ctor_dtor_h(FILE *f,  std::string /* indent space */ is,
 				 std::string classname,

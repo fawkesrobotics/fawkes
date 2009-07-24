@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2007-2009  Martin Liebenberg, Daniel Beck, Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -94,6 +94,16 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
+  add_messageinfo("StopMessage");
+  add_messageinfo("TurnMessage");
+  add_messageinfo("CartesianGotoMessage");
+  add_messageinfo("PolarGotoMessage");
+  add_messageinfo("PlaceGotoMessage");
+  add_messageinfo("ObstacleMessage");
+  add_messageinfo("ResetOdometryMessage");
+  add_messageinfo("SetMaxVelocityMessage");
+  add_messageinfo("SetEscapingMessage");
+  add_messageinfo("SetSecurityDistanceMessage");
   unsigned char tmp_hash[] = {0x3b, 0x13, 0xa, 0x72, 0xc3, 0x94, 0x6d, 0xd5, 0x70, 0x21, 0x18, 0x2d, 0xcc, 0x52, 0x91, 0xa1};
   set_hash(tmp_hash);
 }
@@ -616,6 +626,8 @@ NavigatorInterface::TurnMessage::TurnMessage(const float ini_angle, const float 
   data      = (TurnMessage_data_t *)data_ptr;
   data->angle = ini_angle;
   data->velocity = ini_velocity;
+  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+  add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
 /** Constructor */
 NavigatorInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
@@ -624,6 +636,8 @@ NavigatorInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+  add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
 
 /** Destructor */
@@ -737,6 +751,9 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage(const float ini_x
   data->x = ini_x;
   data->y = ini_y;
   data->orientation = ini_orientation;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
 }
 /** Constructor */
 NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage() : Message("CartesianGotoMessage")
@@ -745,6 +762,9 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage() : Message("Cart
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CartesianGotoMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
 }
 
 /** Destructor */
@@ -886,6 +906,9 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage(const float ini_phi, cons
   data->phi = ini_phi;
   data->dist = ini_dist;
   data->orientation = ini_orientation;
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "dist", 1, &data->dist);
+  add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
 }
 /** Constructor */
 NavigatorInterface::PolarGotoMessage::PolarGotoMessage() : Message("PolarGotoMessage")
@@ -894,6 +917,9 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage() : Message("PolarGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (PolarGotoMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "dist", 1, &data->dist);
+  add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
 }
 
 /** Destructor */
@@ -1031,6 +1057,7 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const char * ini_place) :
   memset(data_ptr, 0, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
   strncpy(data->place, ini_place, 64);
+  add_fieldinfo(IFT_STRING, "place", 64, data->place);
 }
 /** Constructor */
 NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage() : Message("PlaceGotoMessage")
@@ -1039,6 +1066,7 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage() : Message("PlaceGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "place", 64, data->place);
 }
 
 /** Destructor */
@@ -1120,6 +1148,9 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage(const float ini_x, const fl
   data->x = ini_x;
   data->y = ini_y;
   data->width = ini_width;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
 }
 /** Constructor */
 NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message("ObstacleMessage")
@@ -1128,6 +1159,9 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message("ObstacleMessag
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ObstacleMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
 }
 
 /** Destructor */
@@ -1304,6 +1338,7 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const float ini
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
   data->max_velocity = ini_max_velocity;
+  add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
 }
 /** Constructor */
 NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("SetMaxVelocityMessage")
@@ -1312,6 +1347,7 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("Se
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
 }
 
 /** Destructor */
@@ -1389,6 +1425,7 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const bool ini_escapi
   memset(data_ptr, 0, data_size);
   data      = (SetEscapingMessage_data_t *)data_ptr;
   data->escaping_enabled = ini_escaping_enabled;
+  add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
 }
 /** Constructor */
 NavigatorInterface::SetEscapingMessage::SetEscapingMessage() : Message("SetEscapingMessage")
@@ -1397,6 +1434,7 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage() : Message("SetEscap
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEscapingMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
 }
 
 /** Destructor */
@@ -1480,6 +1518,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const
   memset(data_ptr, 0, data_size);
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
   data->security_distance = ini_security_distance;
+  add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
 }
 /** Constructor */
 NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage() : Message("SetSecurityDistanceMessage")
@@ -1488,6 +1527,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage() : M
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
 }
 
 /** Destructor */

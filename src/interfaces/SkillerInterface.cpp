@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -56,6 +56,12 @@ SkillerInterface::SkillerInterface() : Interface()
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
   add_fieldinfo(IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
   add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
+  add_messageinfo("ExecSkillMessage");
+  add_messageinfo("ExecSkillContinuousMessage");
+  add_messageinfo("RestartInterpreterMessage");
+  add_messageinfo("StopExecMessage");
+  add_messageinfo("AcquireControlMessage");
+  add_messageinfo("ReleaseControlMessage");
   unsigned char tmp_hash[] = {0x61, 0x7c, 0x70, 0xc4, 0x68, 0x8b, 0x8b, 0x69, 0x87, 0xc1, 0xd1, 0xe6, 0xed, 0x34, 0xb5, 0x5};
   set_hash(tmp_hash);
 }
@@ -299,6 +305,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const char * ini_skill_stri
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
   strncpy(data->skill_string, ini_skill_string, 1024);
+  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 /** Constructor */
 SkillerInterface::ExecSkillMessage::ExecSkillMessage() : Message("ExecSkillMessage")
@@ -307,6 +314,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage() : Message("ExecSkillMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 
 /** Destructor */
@@ -390,6 +398,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const c
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
   strncpy(data->skill_string, ini_skill_string, 1024);
+  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 /** Constructor */
 SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage() : Message("ExecSkillContinuousMessage")
@@ -398,6 +407,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage() : Mes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 
 /** Destructor */

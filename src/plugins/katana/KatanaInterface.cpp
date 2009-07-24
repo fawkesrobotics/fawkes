@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2009  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -108,6 +108,15 @@ KatanaInterface::KatanaInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(IFT_BYTE, "num_motors", 1, &data->num_motors);
+  add_messageinfo("StopMessage");
+  add_messageinfo("FlushMessage");
+  add_messageinfo("ParkMessage");
+  add_messageinfo("LinearGotoMessage");
+  add_messageinfo("CalibrateMessage");
+  add_messageinfo("OpenGripperMessage");
+  add_messageinfo("CloseGripperMessage");
+  add_messageinfo("SetEnabledMessage");
+  add_messageinfo("SetMaxVelocityMessage");
   unsigned char tmp_hash[] = {0x67, 0x9b, 0x57, 0x4e, 0xb3, 0x7c, 0x64, 0x5f, 0x23, 0xd4, 0x1e, 0x8a, 0x19, 0x52, 0x5b, 0x84};
   set_hash(tmp_hash);
 }
@@ -772,6 +781,12 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_x, const f
   data->phi = ini_phi;
   data->theta = ini_theta;
   data->psi = ini_psi;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
+  add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
 }
 /** Constructor */
 KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMessage")
@@ -780,6 +795,12 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
+  add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
 }
 
 /** Destructor */
@@ -1130,6 +1151,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_enabled) : 
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
   data->enabled = ini_enabled;
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 /** Constructor */
 KatanaInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMessage")
@@ -1138,6 +1160,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
 /** Destructor */
@@ -1215,6 +1238,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const unsigned cha
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
   data->max_velocity = ini_max_velocity;
+  add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
 }
 /** Constructor */
 KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("SetMaxVelocityMessage")
@@ -1223,6 +1247,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("SetMa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
 }
 
 /** Destructor */

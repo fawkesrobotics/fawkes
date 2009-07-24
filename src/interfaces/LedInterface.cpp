@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -56,6 +56,9 @@ LedInterface::LedInterface() : Interface()
   data      = (LedInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "intensity", 1, &data->intensity);
+  add_messageinfo("SetIntensityMessage");
+  add_messageinfo("TurnOnMessage");
+  add_messageinfo("TurnOffMessage");
   unsigned char tmp_hash[] = {0xd, 0x86, 0x60, 0xcd, 0xae, 0x41, 0xa5, 0xa1, 0xbc, 0xb7, 0xf, 0x9, 0x90, 00, 0x4d, 0x40};
   set_hash(tmp_hash);
 }
@@ -147,6 +150,8 @@ LedInterface::SetIntensityMessage::SetIntensityMessage(const float ini_time_sec,
   data      = (SetIntensityMessage_data_t *)data_ptr;
   data->time_sec = ini_time_sec;
   data->intensity = ini_intensity;
+  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "intensity", 1, &data->intensity);
 }
 /** Constructor */
 LedInterface::SetIntensityMessage::SetIntensityMessage() : Message("SetIntensityMessage")
@@ -155,6 +160,8 @@ LedInterface::SetIntensityMessage::SetIntensityMessage() : Message("SetIntensity
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetIntensityMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "intensity", 1, &data->intensity);
 }
 
 /** Destructor */

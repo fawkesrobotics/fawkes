@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2007  Daniel Beck
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -54,6 +54,9 @@ KickerInterface::KickerInterface() : Interface()
   add_fieldinfo(IFT_INT, "num_kicks_center", 1, &data->num_kicks_center);
   add_fieldinfo(IFT_INT, "num_kicks_right", 1, &data->num_kicks_right);
   add_fieldinfo(IFT_UINT, "current_intensity", 1, &data->current_intensity);
+  add_messageinfo("KickMessage");
+  add_messageinfo("ResetCounterMessage");
+  add_messageinfo("GuideBallMessage");
   unsigned char tmp_hash[] = {0xdc, 0xe9, 0x59, 0xc4, 0xc2, 0xd9, 0x46, 0x62, 0xd7, 0x78, 0x52, 0xb0, 0x6f, 0xb, 0x2c, 0x76};
   set_hash(tmp_hash);
 }
@@ -287,6 +290,10 @@ KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_ce
   data->center = ini_center;
   data->right = ini_right;
   data->intensity = ini_intensity;
+  add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
+  add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
+  add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
+  add_fieldinfo(IFT_UINT, "intensity", 1, &data->intensity);
 }
 /** Constructor */
 KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
@@ -295,6 +302,10 @@ KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
+  add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
+  add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
+  add_fieldinfo(IFT_UINT, "intensity", 1, &data->intensity);
 }
 
 /** Destructor */

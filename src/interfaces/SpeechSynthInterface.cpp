@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -56,6 +56,7 @@ SpeechSynthInterface::SpeechSynthInterface() : Interface()
   add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
+  add_messageinfo("SayMessage");
   unsigned char tmp_hash[] = {0xd4, 0x89, 0x24, 0x17, 0x5a, 0xb8, 0xa9, 0x8e, 0x63, 0x80, 0xb3, 0xed, 0xb7, 0xc3, 0xb5, 0x90};
   set_hash(tmp_hash);
 }
@@ -253,6 +254,7 @@ SpeechSynthInterface::SayMessage::SayMessage(const char * ini_text) : Message("S
   memset(data_ptr, 0, data_size);
   data      = (SayMessage_data_t *)data_ptr;
   strncpy(data->text, ini_text, 1024);
+  add_fieldinfo(IFT_STRING, "text", 1024, data->text);
 }
 /** Constructor */
 SpeechSynthInterface::SayMessage::SayMessage() : Message("SayMessage")
@@ -261,6 +263,7 @@ SpeechSynthInterface::SayMessage::SayMessage() : Message("SayMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SayMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "text", 1024, data->text);
 }
 
 /** Destructor */

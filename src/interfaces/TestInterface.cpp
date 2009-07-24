@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006-2007  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -60,6 +60,9 @@ TestInterface::TestInterface() : Interface()
   add_fieldinfo(IFT_UINT, "test_uint", 1, &data->test_uint);
   add_fieldinfo(IFT_LONGUINT, "test_ulint", 1, &data->test_ulint);
   add_fieldinfo(IFT_LONGINT, "test_lint", 1, &data->test_lint);
+  add_messageinfo("SetTestIntMessage");
+  add_messageinfo("SetTestStringMessage");
+  add_messageinfo("CalculateMessage");
   unsigned char tmp_hash[] = {0x69, 0xac, 0x2a, 0x88, 0xec, 0xcf, 0x7, 0x18, 0x1, 0xf7, 0xfb, 0x54, 0xc, 0xb7, 0xa2, 0x1f};
   set_hash(tmp_hash);
 }
@@ -359,6 +362,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const int ini_test_int) : Me
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
   data->test_int = ini_test_int;
+  add_fieldinfo(IFT_INT, "test_int", 1, &data->test_int);
 }
 /** Constructor */
 TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessage")
@@ -367,6 +371,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_INT, "test_int", 1, &data->test_int);
 }
 
 /** Destructor */
@@ -444,6 +449,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const char * ini_test_
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
   strncpy(data->test_string, ini_test_string, 30);
+  add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
 /** Constructor */
 TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestStringMessage")
@@ -452,6 +458,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestSt
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
 
 /** Destructor */
@@ -531,6 +538,8 @@ TestInterface::CalculateMessage::CalculateMessage(const int ini_summand, const i
   data      = (CalculateMessage_data_t *)data_ptr;
   data->summand = ini_summand;
   data->addend = ini_addend;
+  add_fieldinfo(IFT_INT, "summand", 1, &data->summand);
+  add_fieldinfo(IFT_INT, "addend", 1, &data->addend);
 }
 /** Constructor */
 TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage")
@@ -539,6 +548,8 @@ TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage"
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_INT, "summand", 1, &data->summand);
+  add_fieldinfo(IFT_INT, "addend", 1, &data->addend);
 }
 
 /** Destructor */

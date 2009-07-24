@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2009  Tim Niemueller
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -81,6 +81,14 @@ PanTiltInterface::PanTiltInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "tilt_velocity", 1, &data->tilt_velocity);
   add_fieldinfo(IFT_FLOAT, "pan_margin", 1, &data->pan_margin);
   add_fieldinfo(IFT_FLOAT, "tilt_margin", 1, &data->tilt_margin);
+  add_messageinfo("StopMessage");
+  add_messageinfo("FlushMessage");
+  add_messageinfo("CalibrateMessage");
+  add_messageinfo("ParkMessage");
+  add_messageinfo("GotoMessage");
+  add_messageinfo("SetEnabledMessage");
+  add_messageinfo("SetVelocityMessage");
+  add_messageinfo("SetMarginMessage");
   unsigned char tmp_hash[] = {0xcc, 0x7f, 0x25, 0xdd, 0x3, 0xc0, 0x3e, 0x8d, 0xa4, 0xdb, 0xb0, 0x44, 0xd, 0xf7, 0xda, 0x26};
   set_hash(tmp_hash);
 }
@@ -860,6 +868,8 @@ PanTiltInterface::GotoMessage::GotoMessage(const float ini_pan, const float ini_
   data      = (GotoMessage_data_t *)data_ptr;
   data->pan = ini_pan;
   data->tilt = ini_tilt;
+  add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
+  add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
 }
 /** Constructor */
 PanTiltInterface::GotoMessage::GotoMessage() : Message("GotoMessage")
@@ -868,6 +878,8 @@ PanTiltInterface::GotoMessage::GotoMessage() : Message("GotoMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
+  add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
 }
 
 /** Destructor */
@@ -975,6 +987,7 @@ PanTiltInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_enabled) :
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
   data->enabled = ini_enabled;
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 /** Constructor */
 PanTiltInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMessage")
@@ -983,6 +996,7 @@ PanTiltInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMe
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
 /** Destructor */
@@ -1062,6 +1076,8 @@ PanTiltInterface::SetVelocityMessage::SetVelocityMessage(const float ini_pan_vel
   data      = (SetVelocityMessage_data_t *)data_ptr;
   data->pan_velocity = ini_pan_velocity;
   data->tilt_velocity = ini_tilt_velocity;
+  add_fieldinfo(IFT_FLOAT, "pan_velocity", 1, &data->pan_velocity);
+  add_fieldinfo(IFT_FLOAT, "tilt_velocity", 1, &data->tilt_velocity);
 }
 /** Constructor */
 PanTiltInterface::SetVelocityMessage::SetVelocityMessage() : Message("SetVelocityMessage")
@@ -1070,6 +1086,8 @@ PanTiltInterface::SetVelocityMessage::SetVelocityMessage() : Message("SetVelocit
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetVelocityMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "pan_velocity", 1, &data->pan_velocity);
+  add_fieldinfo(IFT_FLOAT, "tilt_velocity", 1, &data->tilt_velocity);
 }
 
 /** Destructor */
@@ -1179,6 +1197,8 @@ PanTiltInterface::SetMarginMessage::SetMarginMessage(const float ini_pan_margin,
   data      = (SetMarginMessage_data_t *)data_ptr;
   data->pan_margin = ini_pan_margin;
   data->tilt_margin = ini_tilt_margin;
+  add_fieldinfo(IFT_FLOAT, "pan_margin", 1, &data->pan_margin);
+  add_fieldinfo(IFT_FLOAT, "tilt_margin", 1, &data->tilt_margin);
 }
 /** Constructor */
 PanTiltInterface::SetMarginMessage::SetMarginMessage() : Message("SetMarginMessage")
@@ -1187,6 +1207,8 @@ PanTiltInterface::SetMarginMessage::SetMarginMessage() : Message("SetMarginMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMarginMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "pan_margin", 1, &data->pan_margin);
+  add_fieldinfo(IFT_FLOAT, "tilt_margin", 1, &data->tilt_margin);
 }
 
 /** Destructor */

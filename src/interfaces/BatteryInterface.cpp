@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Daniel Beck
  *
- *  $Id$
+ *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
  *
  ****************************************************************************/
 
@@ -54,6 +54,8 @@ BatteryInterface::BatteryInterface() : Interface()
   add_fieldinfo(IFT_UINT, "temperature", 1, &data->temperature);
   add_fieldinfo(IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
   add_fieldinfo(IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
+  add_messageinfo("PushButtonMessage");
+  add_messageinfo("SleepMessage");
   unsigned char tmp_hash[] = {0xaf, 0x87, 0xbb, 0x32, 0x19, 0x6b, 0x9, 0x3d, 0x7a, 0x6c, 0xf0, 0x4a, 0xb0, 0xd8, 0xa, 0x1d};
   set_hash(tmp_hash);
 }
