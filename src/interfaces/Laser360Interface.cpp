@@ -50,7 +50,7 @@ Laser360Interface::Laser360Interface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (Laser360Interface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_FLOAT, "distances", 360, &data->distances);
+  add_fieldinfo(IFT_FLOAT, "distances", 360, &data->distances);
   unsigned char tmp_hash[] = {0xc4, 0x7a, 0xf3, 0xa0, 0x4, 0x6, 0x97, 0x1d, 0xdb, 0x17, 0xfe, 0x5e, 0xd0, 0x9b, 0xa, 0xa3};
   set_hash(tmp_hash);
 }

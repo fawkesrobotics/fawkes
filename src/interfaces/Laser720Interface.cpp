@@ -50,7 +50,7 @@ Laser720Interface::Laser720Interface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (Laser720Interface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_FLOAT, "distances", 720, &data->distances);
+  add_fieldinfo(IFT_FLOAT, "distances", 720, &data->distances);
   unsigned char tmp_hash[] = {0xc6, 0x5c, 0xe2, 0xcd, 0x6, 0x6c, 0xdb, 0x3f, 0x8c, 0x81, 0x78, 0xe1, 0xba, 0xf4, 0xc5, 0x17};
   set_hash(tmp_hash);
 }

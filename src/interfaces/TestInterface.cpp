@@ -52,14 +52,14 @@ TestInterface::TestInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_BOOL, "test_bool", 1, &data->test_bool);
-  add_fieldinfo(Interface::IFT_INT, "test_int", 1, &data->test_int);
-  add_fieldinfo(Interface::IFT_BYTE, "flags", 1, &data->flags);
-  add_fieldinfo(Interface::IFT_STRING, "test_string", 30, data->test_string);
-  add_fieldinfo(Interface::IFT_INT, "result", 1, &data->result);
-  add_fieldinfo(Interface::IFT_UINT, "test_uint", 1, &data->test_uint);
-  add_fieldinfo(Interface::IFT_LONGUINT, "test_ulint", 1, &data->test_ulint);
-  add_fieldinfo(Interface::IFT_LONGINT, "test_lint", 1, &data->test_lint);
+  add_fieldinfo(IFT_BOOL, "test_bool", 1, &data->test_bool);
+  add_fieldinfo(IFT_INT, "test_int", 1, &data->test_int);
+  add_fieldinfo(IFT_BYTE, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
+  add_fieldinfo(IFT_INT, "result", 1, &data->result);
+  add_fieldinfo(IFT_UINT, "test_uint", 1, &data->test_uint);
+  add_fieldinfo(IFT_LONGUINT, "test_ulint", 1, &data->test_ulint);
+  add_fieldinfo(IFT_LONGINT, "test_lint", 1, &data->test_lint);
   unsigned char tmp_hash[] = {0x69, 0xac, 0x2a, 0x88, 0xec, 0xcf, 0x7, 0x18, 0x1, 0xf7, 0xfb, 0x54, 0xc, 0xb7, 0xa2, 0x1f};
   set_hash(tmp_hash);
 }

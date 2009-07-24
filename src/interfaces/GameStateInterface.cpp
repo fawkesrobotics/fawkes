@@ -81,9 +81,9 @@ GameStateInterface::GameStateInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (GameStateInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_UINT, "game_state", 1, &data->game_state);
-  add_fieldinfo(Interface::IFT_UINT, "score_cyan", 1, &data->score_cyan);
-  add_fieldinfo(Interface::IFT_UINT, "score_magenta", 1, &data->score_magenta);
+  add_fieldinfo(IFT_UINT, "game_state", 1, &data->game_state);
+  add_fieldinfo(IFT_UINT, "score_cyan", 1, &data->score_cyan);
+  add_fieldinfo(IFT_UINT, "score_magenta", 1, &data->score_magenta);
   unsigned char tmp_hash[] = {0x1f, 0x8c, 0x58, 0x3b, 0x4d, 0xa8, 0x14, 0x3d, 0xcd, 0x36, 0xb4, 0x46, 0x68, 0xcd, 0xc, 0x45};
   set_hash(tmp_hash);
 }

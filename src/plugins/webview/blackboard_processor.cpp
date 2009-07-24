@@ -27,6 +27,7 @@
 
 #include <blackboard/blackboard.h>
 #include <interface/interface.h>
+#include <interface/field_iterator.h>
 #include <interface/interface_info.h>
 
 #include <string>
@@ -138,8 +139,8 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
 		       " <tr>\n"
 		       "  <th>Name</th><th>Type</th><th>Value</th>\n"
 		       " </tr>\n");
-	for (Interface::FieldIterator fi = iface->fields(); fi != iface->fields_end(); ++fi) {
-	  bool is_string = (fi.get_type() == Interface::IFT_STRING);
+	for (InterfaceFieldIterator fi = iface->fields(); fi != iface->fields_end(); ++fi) {
+	  bool is_string = (fi.get_type() == IFT_STRING);
 	  *r += " <tr>\n";
 	  if ( fi.get_length() > 1 ) {
 	    r->append_body("  <td>%s</td><td>%s [%zu]</td><td>%s%s%s</td>\n",

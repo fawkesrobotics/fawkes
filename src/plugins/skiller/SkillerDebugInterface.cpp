@@ -52,9 +52,9 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SkillerDebugInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "graph_fsm", 32, data->graph_fsm);
-  add_fieldinfo(Interface::IFT_STRING, "graph", 8192, data->graph);
-  add_fieldinfo(Interface::IFT_BOOL, "graph_colored", 1, &data->graph_colored);
+  add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
+  add_fieldinfo(IFT_STRING, "graph", 8192, data->graph);
+  add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
   unsigned char tmp_hash[] = {0xcf, 0x3d, 0x2f, 0xf8, 0x80, 0x6e, 0x8f, 0xf4, 0x81, 0xa6, 0x7f, 0xd9, 0xb0, 0x29, 0xfc, 0x62};
   set_hash(tmp_hash);
 }

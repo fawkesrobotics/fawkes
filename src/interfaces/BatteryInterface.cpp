@@ -49,11 +49,11 @@ BatteryInterface::BatteryInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_UINT, "current", 1, &data->current);
-  add_fieldinfo(Interface::IFT_UINT, "voltage", 1, &data->voltage);
-  add_fieldinfo(Interface::IFT_UINT, "temperature", 1, &data->temperature);
-  add_fieldinfo(Interface::IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
-  add_fieldinfo(Interface::IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
+  add_fieldinfo(IFT_UINT, "current", 1, &data->current);
+  add_fieldinfo(IFT_UINT, "voltage", 1, &data->voltage);
+  add_fieldinfo(IFT_UINT, "temperature", 1, &data->temperature);
+  add_fieldinfo(IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
+  add_fieldinfo(IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
   unsigned char tmp_hash[] = {0xaf, 0x87, 0xbb, 0x32, 0x19, 0x6b, 0x9, 0x3d, 0x7a, 0x6c, 0xf0, 0x4a, 0xb0, 0xd8, 0xa, 0x1d};
   set_hash(tmp_hash);
 }

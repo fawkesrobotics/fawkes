@@ -53,10 +53,10 @@ FacerInterface::FacerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (FacerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "face_label", 64, data->face_label);
-  add_fieldinfo(Interface::IFT_BOOL, "learning_done", 1, &data->learning_done);
-  add_fieldinfo(Interface::IFT_UINT, "num_detections", 1, &data->num_detections);
-  add_fieldinfo(Interface::IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
+  add_fieldinfo(IFT_STRING, "face_label", 64, data->face_label);
+  add_fieldinfo(IFT_BOOL, "learning_done", 1, &data->learning_done);
+  add_fieldinfo(IFT_UINT, "num_detections", 1, &data->num_detections);
+  add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
   unsigned char tmp_hash[] = {0xb0, 0x4a, 0xef, 0xf, 0xb0, 0xa3, 0x79, 0x74, 0xad, 0x39, 0x49, 0x6, 0x89, 0xb4, 0xdd, 0xad};
   set_hash(tmp_hash);
 }

@@ -52,10 +52,10 @@ SkillerInterface::SkillerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SkillerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "skill_string", 1024, data->skill_string);
-  add_fieldinfo(Interface::IFT_STRING, "error", 128, data->error);
-  add_fieldinfo(Interface::IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
-  add_fieldinfo(Interface::IFT_BOOL, "continuous", 1, &data->continuous);
+  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
+  add_fieldinfo(IFT_STRING, "error", 128, data->error);
+  add_fieldinfo(IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
+  add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   unsigned char tmp_hash[] = {0x61, 0x7c, 0x70, 0xc4, 0x68, 0x8b, 0x8b, 0x69, 0x87, 0xc1, 0xd1, 0xe6, 0xed, 0x34, 0xb5, 0x5};
   set_hash(tmp_hash);
 }

@@ -26,6 +26,8 @@
 #ifndef __INTERFACE_MESSAGE_H_
 #define __INTERFACE_MESSAGE_H_
 
+#include "field_iterator.h"
+#include "types.h"
 #include <core/utils/refcount.h>
 
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
@@ -55,6 +57,11 @@ class Message : public RefCount
   const char *      sender_thread_name() const;
   Interface *       interface() const;
   const char *      type() const;
+
+  InterfaceFieldIterator     fields();
+  InterfaceFieldIterator     fields_end();
+
+  unsigned int      num_fields() const;
 
   const void *      datachunk() const;
   unsigned int      datasize() const;
@@ -90,7 +97,14 @@ class Message : public RefCount
 
   Interface     *_transmit_via_iface;
 
+  interface_fieldinfo_t  *__fieldinfo_list;
+
+  unsigned int __num_fields;
+
  protected:
+  void add_fieldinfo(interface_fieldtype_t type, const char *name,
+		     size_t length, void *value);
+
   void         *data_ptr;
   unsigned int  data_size;
 };

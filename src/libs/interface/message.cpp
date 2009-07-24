@@ -64,9 +64,12 @@ namespace fawkes {
  */
 Message::Message(const char *type)
 {
+  __fieldinfo_list = NULL;
+
   __message_id = 0;
   __hops       = 0;
   __enqueued   = false;
+  __num_fields = 0;
   data_ptr     = NULL;
   _sender_id   = 0;
   _type        = strdup(type);
@@ -92,6 +95,7 @@ Message::Message(const Message &mesg)
   __message_id = 0;
   __hops       = mesg.__hops;
   __enqueued   = false;
+  __num_fields = mesg.__num_fields;
   data_size    = mesg.data_size;
   data_ptr     = malloc(data_size);
   _sender_id   = 0;
@@ -102,6 +106,17 @@ Message::Message(const Message &mesg)
   recipient_interface_mem_serial   = 0;
 
   memcpy(data_ptr, mesg.data_ptr, data_size);
+
+  interface_fieldinfo_t  *info_src  = mesg.__fieldinfo_list;
+  interface_fieldinfo_t **info_dest = &__fieldinfo_list;
+  while ( info_src ) {
+    interface_fieldinfo_t *new_info = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+    memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
+    *info_dest = new_info;
+
+    info_dest = &((*info_dest)->next);
+    info_src  = info_src->next;
+  }
 
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
@@ -120,6 +135,7 @@ Message::Message(const Message *mesg)
   __message_id = 0;
   __hops       = mesg->__hops;
   __enqueued   = false;
+  __num_fields = mesg->__num_fields;
   data_size    = mesg->data_size;
   data_ptr     = malloc(data_size);
   _sender_id   = 0;
@@ -127,7 +143,19 @@ Message::Message(const Message *mesg)
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial   = 0;
+
   memcpy(data_ptr, mesg->data_ptr, data_size);
+
+  interface_fieldinfo_t  *info_src  = mesg->__fieldinfo_list;
+  interface_fieldinfo_t **info_dest = &__fieldinfo_list;
+  while ( info_src ) {
+    interface_fieldinfo_t *new_info = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+    memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
+    *info_dest = new_info;
+
+    info_dest = &((*info_dest)->next);
+    info_src  = info_src->next;
+  }
 
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
@@ -143,6 +171,13 @@ Message::~Message()
 {
   free(_sender_thread_name);
   free(_type);
+
+  interface_fieldinfo_t *infol = __fieldinfo_list;
+  while ( infol ) {
+    __fieldinfo_list = __fieldinfo_list->next;
+    free(infol);
+    infol = __fieldinfo_list;
+  }
 }
 
 
@@ -314,6 +349,36 @@ Message::type() const
 }
 
 
+/** Get iterator over all fields of this interface instance.
+ * @return field iterator pointing to the very first value
+ */
+InterfaceFieldIterator
+Message::fields()
+{
+  return InterfaceFieldIterator(__fieldinfo_list);
+}
+
+
+/** Invalid iterator.
+ * @return invalid iterator reprensenting the end.
+ */
+InterfaceFieldIterator
+Message::fields_end()
+{
+  return InterfaceFieldIterator();
+}
+
+
+/** Get the number of fields in the message.
+ * @return the number of fields
+ */
+unsigned int
+Message::num_fields() const
+{
+  return __num_fields;
+}
+
+
 /** Clone this message.
  * Shall be implemented by every sub-class to return a message of proper type.
  */
@@ -321,6 +386,42 @@ Message *
 Message::clone() const
 {
   return new Message(this);
+}
+
+/** Add an entry to the info list.
+ * Never use directly, use the interface generator instead. The info list
+ * is used for introspection purposes to allow for iterating over all fields
+ * of an interface.
+ * @param type field type
+ * @param name name of the field, this is referenced, not copied
+ * @param length length of the field
+ * @param value pointer to the value in the data struct
+ */
+void
+Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
+		       size_t length, void *value)
+{
+  interface_fieldinfo_t *infol = __fieldinfo_list;
+  interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+
+  newinfo->type   = type;
+  newinfo->name   = name;
+  newinfo->length = length;
+  newinfo->value  = value;
+  newinfo->next   = NULL;
+
+  if ( infol == NULL ) {
+    // first entry
+    __fieldinfo_list = newinfo;
+  } else {
+    // append to list
+    while ( infol->next != NULL ) {
+      infol = infol->next;
+    }
+    infol->next = newinfo;
+  }
+
+  ++__num_fields;
 }
 
 } // end namespace fawkes

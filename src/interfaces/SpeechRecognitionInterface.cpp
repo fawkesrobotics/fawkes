@@ -49,10 +49,10 @@ SpeechRecognitionInterface::SpeechRecognitionInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SpeechRecognitionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "text", 1024, data->text);
-  add_fieldinfo(Interface::IFT_UINT, "counter", 1, &data->counter);
-  add_fieldinfo(Interface::IFT_BOOL, "processing", 1, &data->processing);
-  add_fieldinfo(Interface::IFT_BOOL, "enabled", 1, &data->enabled);
+  add_fieldinfo(IFT_STRING, "text", 1024, data->text);
+  add_fieldinfo(IFT_UINT, "counter", 1, &data->counter);
+  add_fieldinfo(IFT_BOOL, "processing", 1, &data->processing);
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   unsigned char tmp_hash[] = {0xf8, 0x2c, 0xa4, 0x4f, 0xef, 0xc9, 0xa1, 0x57, 0xe2, 0x9a, 0x10, 0xe, 0xa5, 0x5c, 0x62, 0x84};
   set_hash(tmp_hash);
 }

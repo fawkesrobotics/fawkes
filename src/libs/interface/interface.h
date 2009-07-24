@@ -26,11 +26,15 @@
 #ifndef __INTERFACE_H_
 #define __INTERFACE_H_
 
-#include <interface/message.h>
-#include <interface/message_queue.h>
+#include "message.h"
+#include "message_queue.h"
+#include "field_iterator.h"
 #include <core/exception.h>
 
 #include <cstddef>
+
+#include <vector>
+#include <string>
 
 #define __INTERFACE_TYPE_SIZE   32
 #define __INTERFACE_ID_SIZE     32
@@ -111,6 +115,8 @@ class Interface
   unsigned int  num_readers() const;
 
 
+  std::vector<std::string> get_message_types();
+
   unsigned int  msgq_enqueue(Message *message);
   unsigned int  msgq_enqueue_copy(Message *message);
   void          msgq_remove(Message *message);
@@ -151,75 +157,16 @@ class Interface
 
   /* Introspection */
 
-  /** Interface field type*/
-  typedef enum {
-    IFT_BOOL,		/**< boolean field */
-    IFT_INT,		/**< integer field */
-    IFT_UINT,		/**< unsigned integer field */
-    IFT_LONGINT,	/**< long int field */
-    IFT_LONGUINT,	/**< unsigned long int field */
-    IFT_FLOAT,		/**< float field */
-    IFT_STRING,		/**< string field */
-    IFT_BYTE		/**< byte field */
-  } interface_fieldtype_t;
-
-  /** Interface field info list */
-  struct interface_fieldinfo_t {
-    interface_fieldtype_t    type;	/**< type of this field */
-    const char              *name;	/**< Name of this field */
-    size_t                   length;	/**< Length of field (array, string) */
-    void                    *value;	/**< Current value of this field */
-    interface_fieldinfo_t   *next;	/**< next field, NULL if last */
+  /** Message info list */
+  struct interface_messageinfo_t {
+    const char              *type;   /**< the type of the message */
+    interface_messageinfo_t *next;   /**< the next field, NULL if last */
   };
 
-  class FieldIterator
-  {
-    friend class Interface;
-   public:
-    FieldIterator();
-    FieldIterator(const FieldIterator &fit);
-    ~FieldIterator();
-    FieldIterator &        operator++ ();        // prefix
-    FieldIterator          operator++ (int inc); // postfix
-    FieldIterator &        operator+  (unsigned int i);
-    FieldIterator &        operator+= (unsigned int i);
-    bool                   operator== (const FieldIterator & s) const;
-    bool                   operator!= (const FieldIterator & s) const;
-    const void *           operator*  () const;
-    FieldIterator &        operator=  (const FieldIterator & shmit);
+  InterfaceFieldIterator fields();
+  InterfaceFieldIterator fields_end();
 
-    interface_fieldtype_t  get_type() const;
-    const char *           get_typename() const;
-    const char *           get_name() const;
-    const void *           get_value() const;
-    const char *           get_value_string();
-    size_t                 get_length() const;
-    bool                   get_bool(unsigned int index = 0) const;
-    int                    get_int(unsigned int index = 0) const;
-    unsigned int           get_uint(unsigned int index = 0) const;
-    long int               get_longint(unsigned int index = 0) const;
-    unsigned long int      get_longuint(unsigned int index = 0) const;
-    float                  get_float(unsigned int index = 0) const;
-    unsigned char          get_byte(unsigned int index = 0) const;
-    bool *                 get_bools() const;
-    int *                  get_ints() const;
-    unsigned int *         get_uints() const;
-    long int *             get_longints() const;
-    unsigned long int *    get_longuints() const;
-    float *                get_floats() const;
-    unsigned char *        get_bytes() const;
-    const char *           get_string() const;
-
-   protected:
-    FieldIterator(const interface_fieldinfo_t *info_list);
-
-   private:
-    const interface_fieldinfo_t   *__infol;
-    char                          *__value_string;
-  };
-
-  FieldIterator fields();
-  FieldIterator fields_end();
+  unsigned int num_fields();
 
  protected:
   Interface();
@@ -228,6 +175,7 @@ class Interface
   void set_hash(unsigned char *ihash);
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
 		     size_t length, void *value);
+  void add_messageinfo(const char *name);
 
   void         *data_ptr;
   unsigned int  data_size;
@@ -267,7 +215,10 @@ class Interface
   MessageQueue      *__message_queue;
   unsigned short     __next_message_id;
 
-  interface_fieldinfo_t  *__info_list;
+  interface_fieldinfo_t   *__fieldinfo_list;
+  interface_messageinfo_t *__messageinfo_list;
+
+  unsigned int       __num_fields;
 };
 
 

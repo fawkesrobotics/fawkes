@@ -583,7 +583,7 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
       }
 
       if (do_print) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_%s, \"%s\", %u, %sdata->%s);\n",
+	fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s);\n",
 		type, i->getName().c_str(),
 		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
 		dataptr, i->getName().c_str());

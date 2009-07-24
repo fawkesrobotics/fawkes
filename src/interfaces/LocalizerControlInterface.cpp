@@ -51,7 +51,7 @@ LocalizerControlInterface::LocalizerControlInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (LocalizerControlInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "map_name", 30, data->map_name);
+  add_fieldinfo(IFT_STRING, "map_name", 30, data->map_name);
   unsigned char tmp_hash[] = {0xa4, 0xe8, 0x69, 0x11, 0x29, 0x30, 0xf2, 0xcb, 0xe5, 0xf4, 00, 0x35, 0x19, 0x58, 0x54, 0xfb};
   set_hash(tmp_hash);
 }

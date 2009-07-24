@@ -52,10 +52,10 @@ SpeechSynthInterface::SpeechSynthInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SpeechSynthInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "text", 1024, data->text);
-  add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
-  add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(Interface::IFT_FLOAT, "duration", 1, &data->duration);
+  add_fieldinfo(IFT_STRING, "text", 1024, data->text);
+  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
+  add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
   unsigned char tmp_hash[] = {0xd4, 0x89, 0x24, 0x17, 0x5a, 0xb8, 0xa9, 0x8e, 0x63, 0x80, 0xb3, 0xed, 0xb7, 0xc3, 0xb5, 0x90};
   set_hash(tmp_hash);
 }
