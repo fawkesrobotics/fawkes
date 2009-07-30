@@ -5,7 +5,7 @@
  *  Created: Wed Jul 16 10:42:49 2009
  *  Copyright  2009  Daniel Beck
  *
- *  $Id: worldmodel_plugin.h 1462 2008-10-27 15:02:00Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -151,10 +151,10 @@ EclipseAgentThread::init()
   }
 
   // load utility predicates
-  load_file( "../src/readylog/utils/logging.ecl" );
+  load_file( ECLIPSE_CODE_DIR"/utils/logging.ecl" );
 
   // load interpreter and agent
-  load_file( "../src/readylog/interpreter/dummy.ecl" );
+  load_file( ECLIPSE_CODE_DIR"/interpreter/dummy.ecl" );
 }
 
 void
