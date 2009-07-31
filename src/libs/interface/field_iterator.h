@@ -2,11 +2,11 @@
 /***************************************************************************
  *  field_iterator.h - Iterate over field of an interface or a message
  *
- *  Generated: Fri Jul 16 17:12:30 2009
+ *  Created: Fri Jul 16 17:12:30 2009
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *             2009  Daniel Beck
  *
- *  $Id: interface.h 2675 2009-06-27 18:40:27Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -27,7 +27,7 @@
 #ifndef __INTERFACE_FIELD_ITERATOR_H__
 #define __INTERFACE_FIELD_ITERATOR_H__
 
-#include "types.h"
+#include <interface/types.h>
 
 namespace fawkes {
 class Interface;

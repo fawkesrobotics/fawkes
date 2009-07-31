@@ -2,8 +2,8 @@
 /***************************************************************************
  *  interface.h - BlackBoard Interface
  *
- *  Generated: Mon Oct 09 18:34:11 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Oct 09 18:34:11 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,15 +26,12 @@
 #ifndef __INTERFACE_H_
 #define __INTERFACE_H_
 
-#include "message.h"
-#include "message_queue.h"
-#include "field_iterator.h"
+#include <interface/message.h>
+#include <interface/message_queue.h>
 #include <core/exception.h>
 
 #include <cstddef>
-
-#include <vector>
-#include <string>
+#include <list>
 
 #define __INTERFACE_TYPE_SIZE   32
 #define __INTERFACE_ID_SIZE     32
@@ -115,7 +112,7 @@ class Interface
   unsigned int  num_readers() const;
 
 
-  std::vector<std::string> get_message_types();
+  std::list<const char *> get_message_types();
 
   unsigned int  msgq_enqueue(Message *message);
   unsigned int  msgq_enqueue_copy(Message *message);

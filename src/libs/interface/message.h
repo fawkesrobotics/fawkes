@@ -26,8 +26,8 @@
 #ifndef __INTERFACE_MESSAGE_H_
 #define __INTERFACE_MESSAGE_H_
 
-#include "field_iterator.h"
-#include "types.h"
+#include <interface/field_iterator.h>
+#include <interface/types.h>
 #include <core/utils/refcount.h>
 
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
@@ -36,6 +36,7 @@ namespace fawkes {
 
 class Mutex;
 class Interface;
+class InterfaceFieldIterator;
 
 class Message : public RefCount
 {

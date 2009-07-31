@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  interface.h - BlackBoard Interface
+ *  interface.cpp - BlackBoard Interface
  *
- *  Generated: Mon Oct 09 18:54:50 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Oct 09 18:54:50 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -37,7 +37,7 @@
 
 namespace fawkes {
 
-/** @class InterfaceWriteDeniedException interface/interface.h
+/** @class InterfaceWriteDeniedException <interface/interface.h>
  * This exception is thrown if a write has been attempted on a read-only interface.
  * @see Interface::write()
  * @ingroup Exceptions
@@ -56,7 +56,7 @@ InterfaceWriteDeniedException::InterfaceWriteDeniedException(const char *type,
 {
 }
 
-/** @class InterfaceMessageEnqueueException interface/interface.h
+/** @class InterfaceMessageEnqueueException <interface/interface.h>
  * This exception is thrown if a write has been attempted on a read-only interface.
  * @see Interface::write()
  * @ingroup Exceptions
@@ -73,7 +73,7 @@ InterfaceMessageEnqueueException::InterfaceMessageEnqueueException(const char *t
 {
 }
 
-/** @class InterfaceInvalidMessageException interface/interface.h
+/** @class InterfaceInvalidMessageException <interface/interface.h>
  * This exception is thrown if a message has been queued in the interface which is
  * not recognized by the interface.
  * @ingroup Exceptions
@@ -109,7 +109,7 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
 }
 
 
-/** @class Interface interface/interface.h
+/** @class Interface <interface/interface.h>
  * Base class for all Fawkes BlackBoard interfaces.
  * Never use directly. Use interface generator to create interfaces.
  *
@@ -298,14 +298,14 @@ Interface::add_messageinfo(const char *type)
  * available for this interface.
  * @return the message types
  */
-std::vector<std::string>
+std::list<const char *>
 Interface::get_message_types()
 {
-  std::vector<std::string> types;
+  std::list<const char *> types;
   interface_messageinfo_t *cur = __messageinfo_list;
 
   while ( cur != NULL ) {
-    types.push_back(std::string(cur->type));
+    types.push_back(cur->type);
     cur = cur->next;
   }
 

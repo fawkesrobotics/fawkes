@@ -34,7 +34,7 @@
 
 namespace fawkes {
 
-/** @class MessageAlreadyQueuedException message_queue.h <interface/message_queue.h>
+/** @class MessageAlreadyQueuedException <interface/message_queue.h>
  * Message already enqueued exception.
  * This exception is thrown if you try to enqueue a message that has already
  * been enqueued in another message queue. This is an illegal operation. If you
@@ -50,7 +50,7 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
 
 
 
-/** @class MessageQueue message_queue.h <interface/message_queue.h>
+/** @class MessageQueue <interface/message_queue.h>
  * Message queue used in interfaces.
  * This message queue handles the basic messaging operations. The methods the
  * Interface provides for handling message queues are forwarded to a

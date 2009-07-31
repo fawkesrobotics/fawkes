@@ -1,12 +1,12 @@
 
 /***************************************************************************
- *  field_type.h - Field types used in the intefaces and the messages
+ *  types.h - Field types used in the intefaces and the messages
  *
- *  Generated: Fri Jul 16 17:35:43 2009
+ *  Created: Fri Jul 16 17:35:43 2009
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *             2009  Daniel Beck
  *
- *  $Id: interface.h 2675 2009-06-27 18:40:27Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -24,8 +24,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_FIELD_TYPE_H__
-#define __INTERFACE_FIELD_TYPE_H__
+#ifndef __INTERFACE_TYPES_H__
+#define __INTERFACE_TYPES_H__
 
 #include <sys/types.h>
 
@@ -54,4 +54,4 @@ struct interface_fieldinfo_t {
 
 }
 
-#endif /* __INTERFACE_FIELD_TYPE_H__ */
+#endif /* __INTERFACE_TYPES_H__ */
