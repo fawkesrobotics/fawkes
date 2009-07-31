@@ -5,7 +5,7 @@
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2008  Tim Niemueller
  *
- *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
