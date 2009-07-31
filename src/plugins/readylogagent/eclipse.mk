@@ -2,7 +2,7 @@
 #              Makefile Build System for Fawkes: ECLiPSe Config
 #                            -------------------
 #   Created on Wed Jul 15 15:40:56 2009
-#   copyright (C) 2009 by Daniel Beck, AllemaniACs RoboCup Team
+#   Copyright (C) 2009 by Daniel Beck, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -15,9 +15,9 @@
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-ECLIPSE_BINARY = eclipse
+ECLIPSE_BINARY = eclipse-clp
 
-HAVE_ECLIPSE = $(if $(shell which $(ECLIPSE_BINARY) > /dev/null; echo $${?/1/}),1,0)
+HAVE_ECLIPSE = $(if $(shell which $(ECLIPSE_BINARY) >/dev/null 2>&1; echo $${?/1/}),1,0)
 
 ifeq ($(HAVE_ECLIPSE),1)
   HOSTARCH = $(shell $(ECLIPSE_BINARY) -e "get_flag(hostarch,A),printf(\"%p\", [A])")
@@ -31,3 +31,4 @@ ifeq ($(HAVE_ECLIPSE),1)
   ECLIPSE_CFLAGS = -I$(ECLIPSE_INCDIR) -DECLIPSE_CODE_DIR=\"$(abspath $(BASEDIR)/src/plugins/readylogagent)\"
   ECLIPSE_LDFLAGS = -L$(ECLIPSE_LIBDIR) -Wl,-R$(ECLIPSE_LIBDIR)
 endif
+

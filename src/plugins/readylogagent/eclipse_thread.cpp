@@ -299,14 +299,14 @@ EclipseAgentThread::register_interface( fawkes::Interface* interface )
   // define structs for message data ------------------------------------
   // data_IntefaceType_MessageType(field1, field2, ...) -----------------
   
-  vector<string> message_types = interface->get_message_types();
-  for ( vector<string>::iterator type_iter = message_types.begin();
+  list<const char *> message_types = interface->get_message_types();
+  for ( list<const char *>::iterator type_iter = message_types.begin();
 	type_iter != message_types.end();
 	++type_iter )
   {
     // check whether struct is already defined
     char* struct_name;
-    asprintf( &struct_name, "data_%s_%s", interface->type(), type_iter->c_str() );
+    asprintf( &struct_name, "data_%s_%s", interface->type(), *type_iter );
     
     post_goal( term( EC_functor( current_struct, 2 ),
 		     EC_atom( struct_name ),
