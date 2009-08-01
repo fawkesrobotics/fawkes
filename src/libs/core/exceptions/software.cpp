@@ -2,8 +2,8 @@
 /***************************************************************************
  *  software.cpp - basic software exceptions
  *
- *  Generated: Sun Oct 29 14:19:19 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Oct 29 14:19:19 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,6 +28,9 @@
 #include <cmath>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class NullPointerException <core/exceptions/software.h>
  * A NULL pointer was supplied where not allowed.
@@ -36,11 +39,15 @@ namespace fawkes {
  * @ingroup Exceptions
  */
 /** Constructor
- * @param msg message, appended to exception, base message "NullPointerException"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NullPointerException::NullPointerException(const char *msg) throw()
-  : Exception("NullPointerException: %s", msg)
+NullPointerException::NullPointerException(const char *format, ...) throw()
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -50,11 +57,15 @@ NullPointerException::NullPointerException(const char *msg) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param msg message, appended to exception, base message "Division by zero"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-DivisionByZeroException::DivisionByZeroException(const char *msg) throw()
-  : Exception("Division by zero: %s", msg)
+DivisionByZeroException::DivisionByZeroException(const char *format, ...) throw()
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -64,7 +75,7 @@ DivisionByZeroException::DivisionByZeroException(const char *msg) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param format message format
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
 TypeMismatchException::TypeMismatchException(const char *format, ...) throw()
   : Exception()
@@ -82,7 +93,7 @@ TypeMismatchException::TypeMismatchException(const char *format, ...) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param format message format
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
 UnknownTypeException::UnknownTypeException(const char *format, ...) throw()
   : Exception()
@@ -101,12 +112,15 @@ UnknownTypeException::UnknownTypeException(const char *format, ...) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param msg informative message, appended to exception, base message is
- * "Destruction in progress"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-DestructionInProgressException::DestructionInProgressException(const char *msg) throw()
-  : Exception("Destruction in progress: %s", msg)
+DestructionInProgressException::DestructionInProgressException(const char *format, ...) throw()
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -117,12 +131,15 @@ DestructionInProgressException::DestructionInProgressException(const char *msg) 
  * @ingroup Exceptions
  */
 /** Constructor.
- * @param msg informative message, appended to exception, base message is
- * "Unsafe operation on not locked object"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NotLockedException::NotLockedException(const char *msg) throw()
-  : Exception("Unsafe operation on not locked object: %s", msg)
+NotLockedException::NotLockedException(const char *format, ...) throw()
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -133,13 +150,15 @@ NotLockedException::NotLockedException(const char *msg) throw()
  * @ingroup Exceptions
  */
 /** Constructor.
- * @param msg informative message, appended to exception, base message is
- * "Non-pointer type expected (template error?)"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *msg) throw()
-  :  Exception("Non-pointer type expected (template error?)")
+NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *format, ...) throw()
+  :  Exception()
 {
-  append(msg);
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -150,13 +169,15 @@ NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *msg
  * @ingroup Exceptions
  */
 /** Constructor.
- * @param msg informative message, appended to exception, base message is
- * "Parameter is missing"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-MissingParameterException::MissingParameterException(const char *msg) throw()
-  :  Exception("Parameter is missing")
+MissingParameterException::MissingParameterException(const char *format, ...) throw()
+  :  Exception()
 {
-  append(msg);
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -167,12 +188,15 @@ MissingParameterException::MissingParameterException(const char *msg) throw()
  * @ingroup Exceptions
  */
 /** Constructor.
- * @param msg informative message, appended to exception, base message is
- * "Illegal Argument"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-IllegalArgumentException::IllegalArgumentException(const char *msg) throw()
-  :  Exception("Illegal Argument: %s", msg)
+IllegalArgumentException::IllegalArgumentException(const char *format, ...) throw()
+  :  Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -188,9 +212,8 @@ IllegalArgumentException::IllegalArgumentException(const char *msg) throw()
  * "Out Of Bounds"
  */
 OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
-  : Exception()
+  : Exception("Out Of Bounds: %s", msg)
 {
-  append("Out Of Bounds: %s", msg);
 }
 
 /** Range constructor.
@@ -222,12 +245,15 @@ OutOfBoundsException::OutOfBoundsException(const char *msg, float val,
  * @ingroup Exceptions
  */
 /** Constructor.
- * @param msg informative message, appended to exception, base message is
- * "Access Violation"
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
-AccessViolationException::AccessViolationException(const char *msg) throw()
-  :  Exception("Access Violation: %s", msg)
+AccessViolationException::AccessViolationException(const char *format, ...) throw()
+  :  Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -238,7 +264,7 @@ AccessViolationException::AccessViolationException(const char *msg) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param format message format
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
 SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
   : Exception()
@@ -258,7 +284,7 @@ SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param format message format
+ * @param format message format, takes sprintf() parameters as variadic arguments
  */
 NotImplementedException::NotImplementedException(const char *format, ...) throw()
   : Exception()

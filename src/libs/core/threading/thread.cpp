@@ -51,7 +51,7 @@ namespace fawkes {
  * @relates Thread
  */
 
-/** @class Thread thread.h <core/threading/thread.h>
+/** @class Thread <core/threading/thread.h>
  * Thread class encapsulation of pthreads.
  * This is the base class for all threads in Fawkes. Derive this class for
  * your thread. Note that you have to set a meaningful name, as this name
@@ -961,7 +961,13 @@ void
 Thread::wakeup()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-    __sleep_mutex->lock();
+    MutexLocker lock(__sleep_mutex);
+
+    if ( __barrier ) {
+      throw Exception("Thread(%s): wakeup() cannot be called if loop is running "
+		      "with barrier already", __name);
+    }
+
     if (__coalesce_wakeups) __pending_wakeups  = 1;
     else                    __pending_wakeups += 1;
     if (__waiting_for_wakeup) {
@@ -969,7 +975,6 @@ Thread::wakeup()
       __waiting_for_wakeup = false;
       __sleep_condition->wake_all();
     }
-    __sleep_mutex->unlock();
   }
 }
 
@@ -985,12 +990,11 @@ Thread::wakeup(Barrier *barrier)
   if ( __op_mode != OPMODE_WAITFORWAKEUP )  return;
 
   if ( barrier == NULL ) {
-    throw NullPointerException(" Thread::wakeup(): barrier must not be NULL");
+    throw NullPointerException("Thread(%s)::wakeup(): barrier must not be NULL", __name);
   }
 
-  __sleep_mutex->lock();
+  MutexLocker lock(__sleep_mutex);
   if ( ! __waiting_for_wakeup && __barrier && (__barrier != barrier)) {
-    __sleep_mutex->unlock();
     throw Exception("Thread %s already running with other barrier, cannot wakeup", __name);
   }
 
@@ -1001,7 +1005,6 @@ Thread::wakeup(Barrier *barrier)
     __waiting_for_wakeup = false;
     __sleep_condition->wake_all();
   }
-  __sleep_mutex->unlock();
 }
 
 

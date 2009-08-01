@@ -2,8 +2,8 @@
 /***************************************************************************
  *  software.h - basic software exceptions
  *
- *  Generated: Wed Oct 04 18:37:35 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Oct 04 18:37:35 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -29,17 +29,19 @@
 #include <core/exception.h>
 
 namespace fawkes {
-
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class NullPointerException : public Exception {
  public:
-  NullPointerException(const char *msg) throw();
+  NullPointerException(const char *format, ...) throw();
 };
 
 
 class DivisionByZeroException : public Exception {
  public:
-  DivisionByZeroException(const char *msg) throw();
+  DivisionByZeroException(const char *format, ...) throw();
 };
 
 
@@ -57,31 +59,31 @@ class UnknownTypeException : public Exception {
 
 class DestructionInProgressException : public Exception {
  public:
-  DestructionInProgressException(const char *msg) throw();
+  DestructionInProgressException(const char *format, ...) throw();
 };
 
 
 class NotLockedException : public Exception {
  public:
-  NotLockedException(const char *msg) throw();
+  NotLockedException(const char *format, ...) throw();
 };
 
 
 class NonPointerTypeExpectedException : public Exception {
  public:
-  NonPointerTypeExpectedException(const char *msg) throw();
+  NonPointerTypeExpectedException(const char *format, ...) throw();
 };
 
 
 class MissingParameterException : public Exception {
  public:
-  MissingParameterException(const char *msg) throw();
+  MissingParameterException(const char *format, ...) throw();
 };
 
 
 class IllegalArgumentException : public Exception {
  public:
-  IllegalArgumentException(const char *msg) throw();
+  IllegalArgumentException(const char *format, ...) throw();
 };
 
 
@@ -95,7 +97,7 @@ class OutOfBoundsException : public Exception {
 
 class AccessViolationException : public Exception {
  public:
-  AccessViolationException(const char *msg) throw();
+  AccessViolationException(const char *format, ...) throw();
 };
 
 
