@@ -48,7 +48,11 @@ using namespace fawkes;
  */
 
 /** @var fawkes::ServiceSelectorCBE::m_btn_connect
- * A Gtk::Button that trigger the connection.
+ * A Gtk::Button that triggers the connection.
+ */
+
+/** @var fawkes::ServiceSelectorCBE::m_tbtn_connect
+ * A Gtk::ToolButton that triggers the connection.
  */
 
 /** @var fawkes::ServiceSelectorCBE::m_parent
@@ -78,6 +82,28 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
 
   m_cbe_services  = services;
   m_btn_connect   = connect;
+  m_tbtn_connect  = NULL;
+  m_parent        = parent;
+
+  initialize();
+}
+
+/** Construtor.
+ * @param services the combo box to hold the list of services
+ * @param connect the button to trigger the network connection
+ * @param parent the parent window. Used for error dialogs.
+ * @param service a service identifier
+ */
+ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+					Gtk::ToolButton* connect,
+					Gtk::Window* parent,
+					const char* service )
+{
+  m_service_model = new ServiceModel(service);
+
+  m_cbe_services  = services;
+  m_btn_connect   = NULL;
+  m_tbtn_connect  = connect;
   m_parent        = parent;
 
   initialize();
@@ -122,10 +148,19 @@ ServiceSelectorCBE::initialize()
     else ent->set_text("localhost");
   }
 
-  m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
-  m_btn_connect->set_label("gtk-connect");
-  m_btn_connect->set_use_stock(true);
-  m_btn_connect->grab_default();
+  if ( m_btn_connect )
+  {
+    m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
+    m_btn_connect->set_label("gtk-connect");
+    m_btn_connect->set_use_stock(true);
+    m_btn_connect->grab_default();
+  }
+  else
+  {
+    m_tbtn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
+    m_tbtn_connect->set_stock_id( Gtk::StockID("gtk-connect") );
+    m_tbtn_connect->grab_default();
+  }
 
   m_dispatcher = new ConnectionDispatcher();
   m_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_connected));
@@ -200,7 +235,10 @@ ServiceSelectorCBE::on_btn_connect_clicked()
   if (client->connected())
   {
     client->disconnect();
-    m_btn_connect->set_label("gtk-connect");
+    if ( m_btn_connect )
+    { m_btn_connect->set_label("gtk-connect"); }
+    else
+    { m_tbtn_connect->set_label("gtk-connect"); }
   }
   else
   { 
@@ -286,12 +324,18 @@ ServiceSelectorCBE::on_service_selected()
 void
 ServiceSelectorCBE::on_connected()
 {
-  m_btn_connect->set_label("gtk-disconnect");
+  if ( m_btn_connect )
+  { m_btn_connect->set_label("gtk-disconnect"); }
+  else
+  { m_tbtn_connect->set_stock_id( Gtk::StockID("gtk-disconnect") ); }
 }
 
 /** Signal handler for the connection terminated signal. */
 void
 ServiceSelectorCBE::on_disconnected()
 {
-  m_btn_connect->set_label("gtk-connect");
+  if ( m_btn_connect )
+  { m_btn_connect->set_label("gtk-connect"); }
+  else
+  { m_tbtn_connect->set_stock_id( Gtk::StockID("gtk-connect") ); }
 }

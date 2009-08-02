@@ -29,8 +29,8 @@ name               = "goto"
 fsm                = SkillHSM:new{name=name, start="GOTO"}
 depends_skills     = {"relgoto"}
 depends_interfaces = {
-   {v = "wm_pose",   id = "WM Pose",   type = "ObjectPositionInterface"},
-   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
+   {v = "pose", type = "ObjectPositionInterface"},
+   {v = "navigator", type = "NavigatorInterface"}
 }
 
 documentation      = [==[Global goto skill.
@@ -75,11 +75,11 @@ local function check_target_distance(state)
       return false
    end
 
-   local target_x_glob = state.fsm.vars.x or state.fsm.vars[1] or wm_pose:world_x()
-   local target_y_glob = state.fsm.vars.y or state.fsm.vars[2] or wm_pose:world_y()
+   local target_x_glob = state.fsm.vars.x or state.fsm.vars[1] or pose:world_x()
+   local target_y_glob = state.fsm.vars.y or state.fsm.vars[2] or pose:world_y()
    local target_ori_glob = state.fsm.vars.ori or state.fsm.vars[3] or DEFAULT_ORI
 
-   local rx, ry, rori = wm_pose:world_x(), wm_pose:world_y(), wm_pose:world_z()
+   local rx, ry, rori = pose:world_x(), pose:world_y(), pose:world_z()
 
    local global_to_local = fawkes.HomTransform:new()
    global_to_local:rotate_z( -rori )
@@ -127,13 +127,13 @@ fsm:add_transitions{
 }
 
 function GOTO:init()
-   local x   = self.fsm.vars.x   or self.fsm.vars[1] or wm_pose:world_x()
-   local y   = self.fsm.vars.y   or self.fsm.vars[2] or wm_pose:world_y()
+   local x   = self.fsm.vars.x   or self.fsm.vars[1] or pose:world_x()
+   local y   = self.fsm.vars.y   or self.fsm.vars[2] or pose:world_y()
    local ori = self.fsm.vars.ori or self.fsm.vars[3] or DEFAULT_ORI
    self.fsm.vars.margin = self.fsm.vars.margin or DEFAULT_MARGIN
    
    -- global robot pose
-   local rx, ry, rori = wm_pose:world_x(), wm_pose:world_y(), wm_pose:world_z()
+   local rx, ry, rori = pose:world_x(), pose:world_y(), pose:world_z()
 
    --printf("current pos: %.2f %.2f %.2f", rx, ry, rori)
 

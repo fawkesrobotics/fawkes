@@ -6,7 +6,7 @@ CFLAGS = -g
 LIBS_test_plugin = fawkesutils
 OBJS_test_plugin = test_plugin.o
 
-LIBS_qa_utils_plugin = fawkesutils
+LIBS_qa_utils_plugin = fawkesutils fawkesplugin
 OBJS_qa_utils_plugin = plugin.o
 
 OBJS_qa_utils_ipc_shmem = qa_ipc_shmem.o
@@ -48,6 +48,9 @@ LIBS_qa_utils_pathparser = fawkesutils
 OBJS_qa_utils_filetype = qa_filetype.o
 LIBS_qa_utils_filetype = fawkesutils
 
+OBJS_qa_utils_rcsoft_graph = qa_rcsoft_graph.o
+LIBS_qa_utils_rcsoft_graph = fawkesutils
+
 OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_plugin)			\
 		$(OBJS_qa_utils_ipc_shmem)		\
@@ -62,7 +65,8 @@ OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_timebug)		\
 		$(OBJS_qa_utils_angle)			\
 		$(OBJS_qa_utils_pathparser)		\
-		$(OBJS_qa_utils_filetype)
+		$(OBJS_qa_utils_filetype)		\
+		$(OBJS_qa_utils_rcsoft_graph)
 
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_shmem		\
@@ -76,7 +80,8 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_timebug		\
 		$(BINDIR)/qa_utils_pathparser		\
 		$(BINDIR)/qa_utils_angle		\
-		$(BINDIR)/qa_utils_filetype
+		$(BINDIR)/qa_utils_filetype		\
+		$(BINDIR)/qa_utils_rcsoft_graph
 
 ifeq ($(OS),Linux)
   BINS_all += $(BINDIR)/qa_utils_ipc_shmem_lowlevel

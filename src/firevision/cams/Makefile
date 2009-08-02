@@ -85,6 +85,11 @@ ifneq ($(HAVE_FIREWIRE_CAM),1)
     WARN_TARGETS += warning_firewire
   endif
 endif
+ifneq ($(HAVE_V4L2_CAM),1)
+  ifneq ($(HAVE_V4L2_FAIL_REASON),)
+    WARN_TARGETS += warning_v4l2
+  endif
+endif
 ifneq ($(HAVE_LEUTRON_CAM),1)
   ifeq ($(BUILD_TYPE),rcsoftx)
     WARN_TARGETS += warning_leutron
@@ -102,17 +107,18 @@ LIBS_all = $(LIBDIR)/libfvcams.so
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_firewire
+.PHONY: warning_firewire warning_leutron warning_libjpeg warning_v4l2
 warning_firewire:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)";
 
-.PHONY: warning_leutron
 warning_leutron:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No Leutron support$(TNORMAL) (install Leutron SDK)";
 
-.PHONY: warning_libjpeg
 warning_libjpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No JPEG support in file loader$(TNORMAL) (install libjpeg[-devel])";
+
+warning_v4l2:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No V4L2 support$(TNORMAL) ($(HAVE_V4L2_FAIL_REASON))";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

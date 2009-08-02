@@ -32,14 +32,18 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
+#include <sys/types.h>
 #ifdef HAVE_LIBDAEMON
 #  include <cerrno>
 #  include <cstring>
 #  include <libdaemon/dfork.h>
 #  include <libdaemon/dlog.h>
 #  include <libdaemon/dpid.h>
-#  include <sys/types.h>
 #  include <sys/stat.h>
+#  include <sys/wait.h>
 #endif
 
 using namespace std;
@@ -140,6 +144,8 @@ usage(const char *progname)
        << " -p plugins       Comma-separated list of plugins, for example " << endl
        << "                  fvbase,fvfountain,fvretriever. These plugins will be loaded" << endl
        << "                  in the given order after startup." << endl
+       << " -u user          Drop privileges as soon as possible and run as given user." << endl
+       << " -g group         Drop privileges as soon as possible and run as given group." << endl
 #ifdef HAVE_LIBDAEMON
        << " -D[pid file]     Run daemonized in the background, pid file is optional, " << endl
        << "                  defaults to /var/run/fawkes.pid, must be absolute path." << endl
@@ -246,7 +252,17 @@ fawkes_daemon_pid_file_proc()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ks");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ksu:g:");
+
+  // default user/group
+  const char *user  = NULL;
+  const char *group = NULL;
+  if (argp->has_arg("u")) {
+    user = argp->arg("u");
+  }
+  if (argp->has_arg("g")) {
+    group = argp->arg("g");
+  }
 
 #ifdef HAVE_LIBDAEMON
   pid_t pid;
@@ -282,7 +298,7 @@ main(int argc, char **argv)
 
     // Check that the daemon is not run twice a the same time
     if ((pid = daemon_pid_file_is_running()) >= 0) {
-      daemon_log(LOG_ERR, "Daemon already running on PID file %u", pid);
+      daemon_log(LOG_ERR, "Daemon already running on (PID %u)", pid);
       return 201;
     }
 
@@ -302,6 +318,32 @@ main(int argc, char **argv)
     return 202;
   }
 #endif
+
+  if (user != NULL) {
+    struct passwd *pw;
+    if (! (pw = getpwnam(user))) {
+      printf("Failed to find user %s, check -u argument.\n", user);
+      return 203;
+    }
+    int r = 0;
+    r = setresuid(pw->pw_uid, pw->pw_uid, pw->pw_uid);
+    if (r < 0) {
+      perror("Failed to drop privileges (user)");
+    }
+  }
+
+  if (group != NULL) {
+    struct group *gr;
+    if (! (gr = getgrnam(group))) {
+      printf("Failed to find group %s, check -g argument.\n", user);
+      return 204;
+    }
+    int r = 0;
+    r = setresgid(gr->gr_gid, gr->gr_gid, gr->gr_gid);
+    if (r < 0) {
+      perror("Failed to drop privileges (group)");
+    }
+  }
 
   Thread::init_main();
 

@@ -93,6 +93,9 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
   _width      = bb2->pixel_width();
   _height     = bb2->pixel_height();
 
+  _output_image_width  = _width;
+  _output_image_height = _height;
+
   create_buffers();
   try {
     setup_triclops();
@@ -120,6 +123,8 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(unsigned int width, unsigned in
 {
   _width = width;
   _height = height;
+  _output_image_width  = _width;
+  _output_image_height = _height;
   _context_file = strdup(context_file);
 
   bb2 = NULL;
@@ -260,6 +265,23 @@ TriclopsStereoProcessor::set_raw_buffer(unsigned char *raw16_buffer)
 }
 
 
+/** Set the resolution of the output images.
+ * @param width the width of the output images
+ * @param height the height of the output images
+ */
+void
+TriclopsStereoProcessor::set_output_image_size(unsigned int width, unsigned int height)
+{
+  data->err = triclopsSetResolutionAndPrepare(data->triclops, height, width, _height, _width);
+
+  if ( data->err == TriclopsErrorOk )
+  {
+    _output_image_width  = width;
+    _output_image_height = height;
+  }
+}
+
+
 /** Enable or disable subpixel interpolation
  * @param enabled true to enable, false to disable
  */
@@ -365,7 +387,6 @@ TriclopsStereoProcessor::set_disparity_mapping(bool enabled)
   triclopsSetDisparityMappingOn(data->triclops, enabled);
 }
 
-
 /** Check state of subpixel interpolation
  * @return true if enabled, false otherwise
  */
@@ -375,6 +396,26 @@ TriclopsStereoProcessor::subpixel_interpolation()
   TriclopsBool on;
   triclopsGetSubpixelInterpolation(data->triclops, &on);
   return on;
+}
+
+
+/** Get width of ouput images.
+ * @return width of output images
+ */
+unsigned int
+TriclopsStereoProcessor::output_image_width()
+{
+  return _output_image_width;
+}
+
+
+/** Get height of ouput images.
+ * @return height of output images
+ */
+unsigned int
+TriclopsStereoProcessor::output_image_height()
+{
+  return _output_image_height;
 }
 
 

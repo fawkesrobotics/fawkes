@@ -26,7 +26,7 @@
 #include <utils/system/dynamic_module/module_dl.h>
 #include <utils/system/dynamic_module/module_manager_template.h>
 #include <core/plugin.h>
-#include <utils/plugin/plugin_loader.h>
+#include <plugin/loader.h>
 
 #include <iostream>
 
@@ -55,17 +55,17 @@ test_module(Module *m)
   bool success = true;
   try {
  
-    if ( ! m->hasSymbol("plugin_factory") ) { // "plugin_factory"
+    if ( ! m->has_symbol("plugin_factory") ) { // "plugin_factory"
       cout << "Doh, symbol not found" << endl;
       success = false;
     } else {
       cout << "Yeah, we got the symbol" << endl;
 
-      PluginFactoryFunc pff = (PluginFactoryFunc)m->getSymbol("plugin_factory");
-      PluginDestroyFunc pdf = (PluginDestroyFunc)m->getSymbol("plugin_destroy");
+      PluginFactoryFunc pff = (PluginFactoryFunc)m->get_symbol("plugin_factory");
+      PluginDestroyFunc pdf = (PluginDestroyFunc)m->get_symbol("plugin_destroy");
 
       if ( (pff != NULL) && (pdf != NULL) ) {
-	Plugin *p = pff();
+	Plugin *p = pff(NULL);
 
 	success = test_plugin(p);
 
@@ -125,7 +125,7 @@ main(int argc, char **argv)
   success = true;
   cout << endl << endl << "Running ModuleManagerTemplate tests" << endl;
   ModuleManagerTemplate<ModuleDL> mm(PLUGINDIR);
-  Module *mod = mm.openModule("test_plugin.so");
+  Module *mod = mm.open_module("test_plugin.so");
   if ( mod == NULL ) {
     cout << "Failed to retrieve module from manager" << endl;
     success = false;
@@ -136,18 +136,18 @@ main(int argc, char **argv)
   success = test_module(mod);
 
   cout << "Testing ref count" << endl;
-  cout << "RefCount (should be 1): " << mod->getRefCount() << endl;
+  cout << "RefCount (should be 1): " << mod->get_ref_count() << endl;
   cout << "Retrieving module twice, again" << endl;
-  mm.openModule("test_plugin.so");
-  mm.openModule("test_plugin.so");
-  cout << "RefCount (should be 3): " << mod->getRefCount() << endl;
+  mm.open_module("test_plugin.so");
+  mm.open_module("test_plugin.so");
+  cout << "RefCount (should be 3): " << mod->get_ref_count() << endl;
   cout << "Closing module twice" << endl;
-  mm.closeModule(mod);
-  mm.closeModule(mod);
-  cout << "RefCount (should be 1): " << mod->getRefCount() << endl;
+  mm.close_module(mod);
+  mm.close_module(mod);
+  cout << "RefCount (should be 1): " << mod->get_ref_count() << endl;
   cout << "Finally closing module" << endl;
-  mm.closeModule(mod);
-  if ( mm.moduleOpened("test_plugin.so") ) {
+  mm.close_module(mod);
+  if ( mm.module_opened("test_plugin.so") ) {
     cout << "Plugin still opened, bug!" << endl;
     success = false;
   } else {
@@ -165,7 +165,7 @@ main(int argc, char **argv)
 
   success = true;
   cout << endl << endl << "Running PluginLoader tests" << endl;
-  PluginLoader *pl = new PluginLoader(PLUGINDIR);
+  PluginLoader *pl = new PluginLoader(PLUGINDIR, NULL);
 
   Plugin *p;
   try {

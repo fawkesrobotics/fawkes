@@ -49,6 +49,7 @@
 ImageWidget::ImageWidget(unsigned int width, unsigned int height)
 {
   __cam            = NULL;
+  __cam_enabled    = false;
   __cam_mutex      = new fawkes::Mutex;
   __refresh_thread = NULL;
 
@@ -70,6 +71,7 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
   if (!cam) throw fawkes::NullPointerException("Parameter cam may not be NULL");
 
   __cam            = cam;
+  __cam_enabled    = true;
   __cam_mutex      = new fawkes::Mutex;
   __cam_has_buffer = false;
 
@@ -104,10 +106,11 @@ ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml
   : Gtk::Image( cobject )
 {
   __cam            = NULL;
+  __cam_enabled    = false;
   __cam_mutex      = new fawkes::Mutex;
   __refresh_thread = NULL;
 
-  set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
+//   set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
 }
 
 /**
@@ -132,7 +135,10 @@ void
 ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
 {
   __cam            = cam;
+  __cam_enabled    = true;
   __cam_has_buffer = false;
+
+  set_size(__cam->pixel_width(), __cam->pixel_height());
 
   try {
     fawkes::Time *time = __cam->capture_time();
@@ -151,6 +157,24 @@ ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
   }
 
   __refresh_thread->refresh_cam();
+}
+
+/**
+ * En-/disable the camera.
+ * @param enable if true the camera is enabled and the refresh thread
+ * is start, if false the refresh thread is stopped and the camera is
+ * disabled
+ */
+void
+ImageWidget::enable_camera(bool enable)
+{
+  if ( !enable && __cam_enabled ) {
+    __refresh_thread->stop();
+  } else if ( __refresh_thread && enable && !__cam_enabled ) {
+    __refresh_thread->start();
+  }
+
+  __cam_enabled = enable;
 }
 
 /** Sets the size of the ImageWidget.
@@ -342,7 +366,9 @@ ImageWidget::set_refresh_delay(unsigned int refresh_delay)
 void
 ImageWidget::refresh_cam()
 {
-  __refresh_thread->refresh_cam();
+  if ( __cam_enabled ) {
+    __refresh_thread->refresh_cam();
+  }
 }
 
 /**
@@ -352,6 +378,8 @@ ImageWidget::refresh_cam()
 void
 ImageWidget::set_cam()
 {
+  if ( !__cam_enabled ) { return; }
+
   __cam_mutex->lock();
 
   if (__cam_has_buffer) {

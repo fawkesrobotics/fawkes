@@ -35,8 +35,9 @@
 
 namespace fawkes {
 
-/** @class StringConversions utils/misc/string_conversions.h
+/** @class StringConversions <utils/misc/string_conversions.h>
  * Utility class that holds string methods.
+ * @author Tim Niemueller
  */
 
 /** Convert string to all-uppercase string.
@@ -44,7 +45,7 @@ namespace fawkes {
  * @return converted string
  */
 std::string
-StringConversions::toUpper(std::string str)
+StringConversions::to_upper(std::string str)
 {
   for(unsigned int i = 0; i < str.length(); ++i) {
     str[i] = (char)toupper(str[i]);
@@ -58,7 +59,7 @@ StringConversions::toUpper(std::string str)
  * @return converted string
  */
 std::string
-StringConversions::toLower(std::string str)
+StringConversions::to_lower(std::string str)
 {
    for(unsigned int i = 0; i < str.length(); ++i) {
      str[i] = (char)tolower(str[i]);
@@ -72,7 +73,7 @@ StringConversions::toLower(std::string str)
  * @return string representation of value.
  */
 std::string
-StringConversions::toString(const unsigned int i)
+StringConversions::to_string(const unsigned int i)
 {
   char *tmp;
   std::string rv;
@@ -90,7 +91,7 @@ StringConversions::toString(const unsigned int i)
  * @return string representation of value.
  */
 std::string
-StringConversions::toString(const int i)
+StringConversions::to_string(const int i)
 {
   char *tmp;
   std::string rv;
@@ -108,7 +109,7 @@ StringConversions::toString(const int i)
  * @return string representation of value.
  */
 std::string
-StringConversions::toString(const float f)
+StringConversions::to_string(const float f)
 {
   char *tmp;
   std::string rv;
@@ -126,7 +127,7 @@ StringConversions::toString(const float f)
  * @return string representation of value.
  */
 std::string
-StringConversions::toString(const double d)
+StringConversions::to_string(const double d)
 {
   char *tmp;
   std::string rv;
@@ -144,7 +145,7 @@ StringConversions::toString(const double d)
  * @return string representation of value.
  */
 std::string
-StringConversions::toString(const bool b)
+StringConversions::to_string(const bool b)
 {
   if ( b ) {
     return std::string("true");
@@ -159,7 +160,7 @@ StringConversions::toString(const bool b)
  * @return value as represented by string
  */
 unsigned int
-StringConversions::toUInt(std::string s)
+StringConversions::to_uint(std::string s)
 {
   unsigned int l = atoll(s.c_str());
   return l;
@@ -171,7 +172,7 @@ StringConversions::toUInt(std::string s)
  * @return value as represented by string
  */
 int
-StringConversions::toInt(std::string s)
+StringConversions::to_int(std::string s)
 {
   return atoi(s.c_str());
 }
@@ -182,7 +183,7 @@ StringConversions::toInt(std::string s)
  * @return value as represented by string
  */
 float
-StringConversions::toFloat(std::string s)
+StringConversions::to_float(std::string s)
 {
   return (float)atof(s.c_str());
 }
@@ -193,7 +194,7 @@ StringConversions::toFloat(std::string s)
  * @return value as represented by string
  */
 double
-StringConversions::toDouble(std::string s)
+StringConversions::to_double(std::string s)
 {
   return atof(s.c_str());
 }
@@ -204,7 +205,7 @@ StringConversions::toDouble(std::string s)
  * @return value as represented by string
  */
 bool
-StringConversions::toBool(std::string s)
+StringConversions::to_bool(std::string s)
 {
   if ( (s == "true") ||
        (s == "yes") ||
@@ -213,6 +214,34 @@ StringConversions::toBool(std::string s)
   } else {
     return false;
   }
+}
+
+/** Trim string.
+ * Removes spaces at beginning and end of string.
+ * @param s string to trim, upon return contains trimmed string
+ */
+void
+StringConversions::trim_inplace(std::string &s)
+{
+  std::string::size_type p1 = s.find_first_not_of(' ');
+  std::string::size_type p2 = s.find_last_not_of(' ');
+  s = s.substr(p1 == std::string::npos ? 0 : p1, 
+	       p2 == std::string::npos ? s.length() - 1 : p2 - p1 + 1);
+}
+
+
+/** Trim spring.
+ * Removes spaces at beginning and end of string.
+ * @param s string to trim
+ * @return trimmed string
+ */
+std::string
+StringConversions::trim(std::string &s)
+{
+  std::string::size_type p1 = s.find_first_not_of(' ');
+  std::string::size_type p2 = s.find_last_not_of(' ');
+  return s.substr(p1 == std::string::npos ? 0 : p1, 
+		  p2 == std::string::npos ? s.length() - 1 : p2 - p1 + 1);
 }
 
 

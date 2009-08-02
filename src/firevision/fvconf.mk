@@ -109,9 +109,13 @@ HAVE_DPPTU_CTRL     = 0
 ifeq ($(OS),Linux)
   HAVE_V4L_CAM        = 1
   HAVE_V4L1_CAM       = 1
-  HAVE_V4L2_CAM       = 1
-  ifeq ($(BUILD_TYPE),naocross)
-    HAVE_NAO_CAM      = 1
+  ifneq ($(wildcard $(SYSROOT)/usr/include/linux/videodev2.h),)
+    HAVE_V4L2_CAM       = 1
+    ifeq ($(BUILD_TYPE),naocross)
+      HAVE_NAO_CAM      = 1
+    endif
+  else
+    HAVE_V4L2_FAIL_REASON = v4l2 not available, kernel too old?
   endif
 endif
 

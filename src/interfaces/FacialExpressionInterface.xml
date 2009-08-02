@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="FacialExpressionInterface" author="Bahram Maleki-Fard" year="2009">
+  <constants>
+    <enum name="brows_t">
+      <comment>Action types for moving brows</comment>
+      <item name="BROWS_DEFAULT">Reset</item>
+      <item name="BROWS_FROWN">Frown</item>
+      <item name="BROWS_LIFT">Lift</item>
+    </enum>
+    <enum name="eyes_t">
+      <comment>Action types for moving eyes</comment>
+      <item name="EYES_DEFAULT">Reset</item>
+      <item name="EYES_UP">Up</item>
+      <item name="EYES_DOWN">Down</item>
+      <item name="EYES_LEFT">Left</item>
+      <item name="EYES_RIGHT">Right</item>
+      <item name="EYES_COOL">Cool</item>
+      <item name="EYES_CROSS">Cross</item>
+      <item name="EYES_HEART">Heart</item>
+      <item name="EYES_DOLLAR">Dollar</item>
+    </enum>
+    <enum name="jowl_t">
+      <comment>Action types for moving jowl</comment>
+      <item name="JOWL_DEFAULT">Reset</item>
+      <item name="JOWL_BLUSH">Blush</item>
+      <item name="JOWL_TEARS">Tears</item>
+    </enum>
+    <enum name="mouth_t">
+      <comment>Action types for moving mouth</comment>
+      <item name="MOUTH_DEFAULT">Reset</item>
+      <item name="MOUTH_OPEN">Open</item>
+      <item name="MOUTH_CLOSE">Close</item>
+      <item name="MOUTH_SMILE">Smile</item>
+      <item name="MOUTH_SCOWL">Scowl</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      Interface to acces facial expressions on display (RCSoft)
+    </comment>
+    <field type="brows_t" name="brows_action">Type of action of brows</field>
+    <field type="eyes_t" name="eyes_action">Type of action of eyes</field>
+    <field type="jowl_t" name="jowl_action">Type of action of jown</field>
+    <field type="mouth_t" name="mouth_action">Type of action of mouth</field>
+  </data>
+  <message name="MoveBrows">
+    <comment>Move brows</comment>
+    <ref>brows_action</ref>
+  </message>
+  <message name="MoveEyes">
+    <comment>Move eyes</comment>
+    <ref>eyes_action</ref>
+  </message>
+  <message name="MoveJowl">
+    <comment>Move brows</comment>
+    <ref>jowl_action</ref>
+  </message>
+  <message name="MoveMouth">
+    <comment>Move brows</comment>
+    <ref>mouth_action</ref>
+  </message>
+</interface>

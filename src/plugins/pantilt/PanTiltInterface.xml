@@ -77,6 +77,17 @@
     <ref>pan</ref>
     <ref>tilt</ref>
   </message>
+  <message name="TimedGoto">
+    <comment>
+      Goto desired pan/tilt values in a specified time. The PTU may
+      adapt the velocities such that two positions are reached at the
+      same time.
+    </comment>
+    <field type="float" name="time_sec">Time in seconds when to reach
+    the final position.</field>
+    <ref>pan</ref>
+    <ref>tilt</ref>
+  </message>
   <message name="SetEnabled">
     <comment>Enable or disable motors/servos.</comment>
     <ref>enabled</ref>

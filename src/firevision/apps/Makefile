@@ -24,7 +24,7 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 
 ifeq ($(BUILD_TYPE),rcsoftx)
   # Stuff to be built for RCSoftX only
-  SUBDIRS += cannikin geegaw fountain pantilter
+  SUBDIRS += cannikin geegaw fountain
 else
   SUBDIRS += $(subst $(CURDIR)/,,$(wildcard base fountain retriever omni_ball omni_field omni_localizer stereo_obstacle_detection))
 endif

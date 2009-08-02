@@ -29,6 +29,7 @@
 #include "startpage_processor.h"
 #include "plugins_processor.h"
 #include "page_reply.h"
+#include "service_browse_handler.h"
 
 #include <microhttpd.h>
 
@@ -56,6 +57,7 @@ WebviewThread::WebviewThread()
     LoggerAspect(&__cache_logger)
 {
   set_prepfin_conc_loop(true);
+  
 }
 
 
@@ -97,18 +99,24 @@ WebviewThread::init()
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
 
-
   __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
 					 "_http._tcp", __cfg_port);
+  __webview_service->add_txt("fawkesver=0.1");
   service_publisher->publish_service(__webview_service);
-}
 
+  __service_browse_handler = new WebviewServiceBrowseHandler(logger, __webview_service);
+  service_browser->watch_service("_http._tcp", __service_browse_handler);
+
+  WebPageReply::set_service_browse_handler(__service_browse_handler);
+}
 
 void
 WebviewThread::finalize()
 {
   service_publisher->unpublish_service(__webview_service);
+  service_browser->unwatch_service("_http._tcp", __service_browse_handler);
   delete __webview_service;
+  delete __service_browse_handler;
 
   WebPageReply::remove_nav_entry(BLACKBOARD_URL_PREFIX);
   MHD_stop_daemon(__daemon);

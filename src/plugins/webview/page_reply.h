@@ -26,6 +26,10 @@
 #define __PLUGINS_WEBVIEW_PAGE_REPLY_H_
 
 #include "reply.h"
+#include "service_browse_handler.h"
+
+class WebviewThread;
+class WebviewServiceBrowseHandler;
 
 class WebPageReply : public StaticWebReply
 {
@@ -53,6 +57,8 @@ class WebPageReply : public StaticWebReply
   static void remove_nav_entry(std::string baseurl);
   static void set_active_baseurl(std::string baseurl);
 
+  static void set_service_browse_handler(WebviewServiceBrowseHandler *service_browse_handler);
+
  private:
   static const char *PAGE_HEADER;
   static const char *PAGE_FOOTER;
@@ -61,6 +67,8 @@ class WebPageReply : public StaticWebReply
 
   static std::map<std::string, std::string> __nav_entries;
   static std::string __current_baseurl;
+
+  static WebviewServiceBrowseHandler *__service_browser;
 };
 
 #endif

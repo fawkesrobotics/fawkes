@@ -28,6 +28,7 @@ require("fawkes.modinit")
 module(..., fawkes.modinit.module_init)
 local fsmmod = require("fawkes.fsm")
 local jsmod = require("fawkes.fsm.jumpstate")
+local wsmod = require("fawkes.fsm.waitstate")
 local sjsmod = require("skiller.skill_jumpstates")
 local subfsmjsmod = require("fawkes.fsm.subfsmjumpstate")
 
@@ -35,6 +36,7 @@ local FSM         = fsmmod.FSM
 JumpState         = jsmod.JumpState
 SkillJumpState    = sjsmod.SkillJumpState
 SubFSMJumpState   = subfsmjsmod.SubFSMJumpState
+WaitState         = wsmod.WaitState
 
 
 --- @class SkillHSM
@@ -275,6 +277,22 @@ function SkillHSM:add_transitions(trans)
 	    -- Set loop function if supplied
 	    if t.loop then s.loop = t.loop end
 
+	 elseif t.wait_sec ~= nil then -- Wait state
+	    if self.states[from] then
+	       assert(not self.states[from].skills and not self.states[from].skills
+		      and #self.states[from].subskills == 0,
+		      self.name .. ": " .. from .. " -> " .. to .. ": Wait state " ..
+		      "state cannot be generated for existing skill state " .. from)
+	       if self.debug then
+		  printf("%s: Erasing state %s and re-creating as sub-skill state",
+			 self.name, from)
+	       end
+	       self.states[from] = nil
+	    end
+	    s = WaitState:new{name=from, fsm=self, next_state=to,
+			      time_sec=t.wait_sec, labeltime=t.labeltime,
+			      closure=trans.closure}
+
 	 else -- simple jump state without any sub-skills
 	    if self.debug then
 	       printf("%s: Creating blanko from state %s (to %s)", self.name, from, to)
@@ -307,17 +325,21 @@ function SkillHSM:add_transitions(trans)
 	       printf("%s: %s -> %s, adding custom jump condition %s (desc: %s)",
 		      self.name, from, to, tostring(cond), tostring(t.desc))
 	    end
+	    --[[
 	    if self.debug then
 	       for _,at in ipairs(s.transitions) do
-		  printf("BEFORE %s transition to %s\n", s.name, at.state)
+		  printf("BEFORE %s transition to %s", s.name, at.state)
 	       end
 	    end
+	    --]]
 	    local new_t = s:add_transition(self.states[to].name, cond, t.desc)
+	    --[[
 	    if self.debug then
 	       for _,at in ipairs(s.transitions) do
-		  printf("AFTER %s transition to %s\n", s.name, at.state)
+		  printf("AFTER %s transition to %s", s.name, at.state)
 	       end
 	    end
+	    --]]
 	    if t.precond then
 	       if self.debug then
 		  printf("%s: Making transition %s -> %s a precondition",

@@ -52,7 +52,7 @@ public:
   void mark_start()
   {
     __clock->get_time(__until);
-    *__until += 30000;
+    *__until += (long int)30000;
   }
 
   void wait()

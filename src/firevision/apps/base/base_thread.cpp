@@ -292,6 +292,25 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
 }
 
 
+Camera *
+FvBaseThread::register_for_raw_camera(const char *camera_string, Thread *thread)
+{
+  Camera *camera = register_for_camera(camera_string, thread, CS_UNKNOWN);
+  CameraArgumentParser cap(camera_string);
+  try {
+    std::string id = cap.cam_type() + "." + cap.cam_id();
+    __aqts.lock();
+    if ( __aqts.find(id) != __aqts.end() ) {
+      __aqts[id]->raw_subscriber_thread = thread;
+    }
+    __aqts.unlock();
+  } catch (Exception &e) {
+    __aqts.unlock();
+    throw;
+  }
+  return camera;
+}
+
 CameraControl *
 FvBaseThread::create_camctrl(const char *camera_string)
 {
@@ -378,6 +397,10 @@ FvBaseThread::unregister_thread(Thread *thread)
 
     // Remove thread from all aqts
     __ait->second->vision_threads->remove_thread(thread);
+
+    if (__ait->second->raw_subscriber_thread == thread) {
+      __ait->second->raw_subscriber_thread = NULL;
+    }
 
     if ( __ait->second->vision_threads->has_cyclic_thread() ) {
       ++num_cyclic_threads;

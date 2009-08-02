@@ -117,6 +117,29 @@ normalize_bigmirror_rad(float angle_rad)
   }
 }
 
+
+/** Determines the distance between two angle provided as radians. 
+ * Quadrants of the angles are considered to determine really the minimal
+ * angle difference.
+ * @param angle_rad1 first angle in radian
+ * @param angle_rad2 first angle in radian
+ * @return distance between the two angles
+ */
+inline float 
+angle_distance(float angle_rad1,
+	       float angle_rad2)
+{
+  if(angle_rad2 > angle_rad1)
+    {
+      return angle_rad2 - angle_rad1 < M_PI ? angle_rad2 - angle_rad1 : - 2.0 * M_PI + angle_rad2 - angle_rad1; 
+    }
+  else
+    {
+      return angle_rad1 - angle_rad2 < M_PI ? angle_rad2 - angle_rad1 : 2.0 * M_PI - angle_rad1 + angle_rad2;   
+    }
+}
+
+
 } // end namespace fawkes
 
 #endif

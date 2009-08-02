@@ -14,25 +14,108 @@
   </constants>
   <data>
     <comment>
-      The interface provides access to the face recognition plugin (facer).
-      It provides basic status information about facer and allows for setting a specific
-      mode and access the resolut.
-      calling skills via messages. It can also be used to manually restart
-      the Lua interpreter if something is wedged.
+      The interface provides access to the face recognition plugin
+      (facer). It provides basic status information about facer and
+      allows for setting a specific mode and access the resolut.
+      calling skills via messages. It can also be used to manually
+      restart the Lua interpreter if something is wedged.
     </comment>
-    <field type="if_facer_opmode_t" name="opmode">Current opmode.</field>
-    <field type="string" length="64" name="face_label">Label of the recognized face</field>
-    <field type="bool" name="learning_done">True if opmode is learning and learning has been completed, false otherwise</field>
-    <field type="unsigned int" name="num_detections">Number of currently detected faces</field>
-    <field type="float" name="sec_since_detection">Time in seconds since the last successful detection.</field>
+    <field type="if_facer_opmode_t" name="opmode">
+      Current opmode.
+    </field>
+
+    <field type="unsigned int" name="num_identities">
+      The number of identities in the database.
+    </field>
+
+    <field type="unsigned int" name="recognized_identity">
+      The index of the recognized identity.
+    </field>
+
+    <field type="string" length="64" name="recognized_name">
+      The name of the recognized identity.
+    </field>
+
+    <field type="unsigned int" name="num_detections">
+      Number of currently detected faces.
+    </field>
+
+    <field type="unsigned int" name="num_recognitions">
+      Number of recognized faces.
+    </field>
+
+    <field type="unsigned int" name="most_likely_identity">
+      The identity that was recognized most prevalently.
+    </field>
+
+    <field type="float" name="history_ratio">
+      The ratio of the most likely identity showing up in the history
+      and the length of the history.
+    </field>
+    
+    <field type="float" name="sec_since_detection">
+      Time in seconds since the last successful detection.
+    </field>
+
+    <field type="int" name="visibility_history">
+      The number of consecutive sighting ( &lt;= 1 ) and non-sightings
+      ( &gt;= -1 ), respectively.
+    </field>
+
+    <field type="bool" name="learning_in_progress">
+      Indicates whether a new identity is currently learnt. If
+      learning is in progress only "old" faces can be recognized.
+    </field>
+
+    <field type="float" name="recording_progress">
+      Indicates the progress of recording images of a new face.
+    </field>
+
+    <field type="float" name="bearing">
+      The relative bearing to the recognized face in radians.
+    </field>
+
+    <field type="float" name="slope">
+      The relative slope to the recognized face in radians.
+    </field>
+
+    <field type="unsigned int" name="requested_index">
+      Index of the identity for which the name was requested.
+    </field>
+
+    <field type="string" length="64" name="requested_name">
+      Requested name.
+    </field>
   </data>
   <message name="LearnFace">
-    <comment>Sets opmode to OPMODE_LEARNING and will assume the given label for the face.</comment>
-    <ref>face_label</ref>
+    <comment>
+      Sets opmode to OPMODE_LEARNING and will assume the given label
+      for the face.
+    </comment>
+    <field type="string" length="64" name="name">The name assigned to the new identity.</field>
   </message>
   <message name="SetOpmode">
     <comment>Set operation mode directly.</comment>
     <ref>opmode</ref>
+  </message>
+  <message name="EnableIdentity">
+    <comment>Enable/disable identity in the database.</comment>
+    <field type="unsigned int" name="index">Index of the identity.</field>
+    <field type="bool" name="enable">En-/disable flag.</field>
+  </message>
+  <message name="SetName">
+    <comment>Assign a name to an identity.</comment>
+    <field type="unsigned int" name="index">Index of the identity.</field>
+    <field type="string" length="64" name="name">Name of the identity.</field>
+  </message>
+  <message name="GetName">
+    <comment>
+      Upon receiving such a message the processing plugin should write
+      the name corresponding to the given index into the
+      "requested_name" field and the index into the field
+      "requested_index".
+    </comment>
+    <field type="unsigned int" name="index">Index of the identity.</field>
   </message>
 </interface>
 

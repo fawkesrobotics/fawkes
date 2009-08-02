@@ -216,6 +216,8 @@ NetworkService::NetworkService(const NetworkService *s)
 
   _addr = NULL;
   _addr_size = 0;
+
+  list = s->list;
 }
 
 
@@ -241,6 +243,8 @@ NetworkService::NetworkService(const NetworkService &s)
 
   _addr = NULL;
   _addr_size = 0;
+
+  list = s.list;
 }
 
 

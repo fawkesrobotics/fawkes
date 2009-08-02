@@ -29,12 +29,16 @@ HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),
 ifeq ($(HAVE_LIBDAEMON),1)
   CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
   LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
+else
+  WARN_TARGETS += warning_libdaemon
 endif
 
 # We need Avahi CFLAGS because of includes in Avahi source, on BSD this is
 # in /usr/local/include and thus it needs extra flags
 ifeq ($(HAVE_AVAHI),1)
   CFLAGS += $(CFLAGS_AVAHI)
+else
+  WARN_TARGETS += warning_avahi
 endif
 
 LIBS_fawkes = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin fawkesaspects
@@ -42,6 +46,18 @@ OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpa
 
 OBJS_all =	$(OBJS_fawkes)
 BINS_all =	$(BINDIR)/fawkes
+
+ifeq ($(OBJSSUBMAKE),1)
+  ifneq ($(WARN_TARGETS),)
+all: $(WARN_TARGETS)
+  endif
+.PHONY: warning_libdaemon
+warning_libdaemon:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without daemonizing support$(TNORMAL) (libdaemon[-devel] not installed)"
+warning_avahi:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without mDNS-SD support$(TNORMAL) (avahi[-devel] not installed)"
+endif
+
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

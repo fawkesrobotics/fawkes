@@ -273,7 +273,7 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
   AvahiStringList *al = NULL;
   const std::list<std::string> &l = service.txt();
   for (std::list<std::string>::const_iterator j = l.begin(); j != l.end(); ++j) {
-    al = avahi_string_list_add(al, (*j).c_str());
+    al = avahi_string_list_add(al, j->c_str());
   }
   if ( avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
 					    AVAHI_PUBLISH_USE_MULTICAST,

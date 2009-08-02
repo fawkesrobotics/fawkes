@@ -42,6 +42,8 @@ class TriclopsStereoProcessor : public StereoProcessor
   TriclopsStereoProcessor(Camera *camera);
   virtual ~TriclopsStereoProcessor();
 
+  virtual unsigned int  output_image_width();
+  virtual unsigned int  output_image_height();
   virtual bool          subpixel_interpolation();
   virtual bool          edge_correlation();
   virtual bool          lowpass();
@@ -55,6 +57,7 @@ class TriclopsStereoProcessor : public StereoProcessor
   virtual unsigned char disparity_mapping_max();
   virtual bool          disparity_mapping();
 
+  virtual void          set_output_image_size(unsigned int width, unsigned int height);
   virtual void          set_subpixel_interpolation(bool enabled);
   virtual void          set_edge_correlation(bool enabled);
   virtual void          set_lowpass(bool enabled);
@@ -115,6 +118,9 @@ class TriclopsStereoProcessor : public StereoProcessor
 
   unsigned int _width;
   unsigned int _height;
+
+  unsigned int _output_image_width;
+  unsigned int _output_image_height;
 
   char  *_context_file;
 };

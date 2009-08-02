@@ -35,11 +35,11 @@ namespace fawkes {
 /** @class FacerInterface <interfaces/FacerInterface.h>
  * FacerInterface Fawkes BlackBoard Interface.
  * 
-      The interface provides access to the face recognition plugin (facer).
-      It provides basic status information about facer and allows for setting a specific
-      mode and access the resolut.
-      calling skills via messages. It can also be used to manually restart
-      the Lua interpreter if something is wedged.
+      The interface provides access to the face recognition plugin
+      (facer). It provides basic status information about facer and
+      allows for setting a specific mode and access the resolut.
+      calling skills via messages. It can also be used to manually
+      restart the Lua interpreter if something is wedged.
     
  * @ingroup FawkesInterfaces
  */
@@ -53,13 +53,27 @@ FacerInterface::FacerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (FacerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_STRING, "face_label", 64, data->face_label);
-  add_fieldinfo(IFT_BOOL, "learning_done", 1, &data->learning_done);
+  add_fieldinfo(IFT_UINT, "num_identities", 1, &data->num_identities);
+  add_fieldinfo(IFT_UINT, "recognized_identity", 1, &data->recognized_identity);
+  add_fieldinfo(IFT_STRING, "recognized_name", 64, data->recognized_name);
   add_fieldinfo(IFT_UINT, "num_detections", 1, &data->num_detections);
+  add_fieldinfo(IFT_UINT, "num_recognitions", 1, &data->num_recognitions);
+  add_fieldinfo(IFT_UINT, "most_likely_identity", 1, &data->most_likely_identity);
+  add_fieldinfo(IFT_FLOAT, "history_ratio", 1, &data->history_ratio);
   add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
+  add_fieldinfo(IFT_INT, "visibility_history", 1, &data->visibility_history);
+  add_fieldinfo(IFT_BOOL, "learning_in_progress", 1, &data->learning_in_progress);
+  add_fieldinfo(IFT_FLOAT, "recording_progress", 1, &data->recording_progress);
+  add_fieldinfo(IFT_FLOAT, "bearing", 1, &data->bearing);
+  add_fieldinfo(IFT_FLOAT, "slope", 1, &data->slope);
+  add_fieldinfo(IFT_UINT, "requested_index", 1, &data->requested_index);
+  add_fieldinfo(IFT_STRING, "requested_name", 64, data->requested_name);
   add_messageinfo("LearnFaceMessage");
   add_messageinfo("SetOpmodeMessage");
-  unsigned char tmp_hash[] = {0xb0, 0x4a, 0xef, 0xf, 0xb0, 0xa3, 0x79, 0x74, 0xad, 0x39, 0x49, 0x6, 0x89, 0xb4, 0xdd, 0xad};
+  add_messageinfo("EnableIdentityMessage");
+  add_messageinfo("SetNameMessage");
+  add_messageinfo("GetNameMessage");
+  unsigned char tmp_hash[] = {0x2b, 0x6e, 0x8c, 0x6f, 0x9d, 0x2a, 0x9a, 0x3a, 0xe, 0x4, 0x58, 0x50, 0xa4, 0x60, 0x79, 0xa6};
   set_hash(tmp_hash);
 }
 
@@ -70,7 +84,9 @@ FacerInterface::~FacerInterface()
 }
 /* Methods */
 /** Get opmode value.
- * Current opmode.
+ * 
+      Current opmode.
+    
  * @return opmode value
  */
 FacerInterface::if_facer_opmode_t
@@ -90,7 +106,9 @@ FacerInterface::maxlenof_opmode() const
 }
 
 /** Set opmode value.
- * Current opmode.
+ * 
+      Current opmode.
+    
  * @param new_opmode new opmode value
  */
 void
@@ -99,68 +117,112 @@ FacerInterface::set_opmode(const if_facer_opmode_t new_opmode)
   data->opmode = new_opmode;
 }
 
-/** Get face_label value.
- * Label of the recognized face
- * @return face_label value
+/** Get num_identities value.
+ * 
+      The number of identities in the database.
+    
+ * @return num_identities value
  */
-char *
-FacerInterface::face_label() const
+unsigned int
+FacerInterface::num_identities() const
 {
-  return data->face_label;
+  return data->num_identities;
 }
 
-/** Get maximum length of face_label value.
- * @return length of face_label value, can be length of the array or number of 
+/** Get maximum length of num_identities value.
+ * @return length of num_identities value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-FacerInterface::maxlenof_face_label() const
-{
-  return 64;
-}
-
-/** Set face_label value.
- * Label of the recognized face
- * @param new_face_label new face_label value
- */
-void
-FacerInterface::set_face_label(const char * new_face_label)
-{
-  strncpy(data->face_label, new_face_label, sizeof(data->face_label));
-}
-
-/** Get learning_done value.
- * True if opmode is learning and learning has been completed, false otherwise
- * @return learning_done value
- */
-bool
-FacerInterface::is_learning_done() const
-{
-  return data->learning_done;
-}
-
-/** Get maximum length of learning_done value.
- * @return length of learning_done value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-FacerInterface::maxlenof_learning_done() const
+FacerInterface::maxlenof_num_identities() const
 {
   return 1;
 }
 
-/** Set learning_done value.
- * True if opmode is learning and learning has been completed, false otherwise
- * @param new_learning_done new learning_done value
+/** Set num_identities value.
+ * 
+      The number of identities in the database.
+    
+ * @param new_num_identities new num_identities value
  */
 void
-FacerInterface::set_learning_done(const bool new_learning_done)
+FacerInterface::set_num_identities(const unsigned int new_num_identities)
 {
-  data->learning_done = new_learning_done;
+  data->num_identities = new_num_identities;
+}
+
+/** Get recognized_identity value.
+ * 
+      The index of the recognized identity.
+    
+ * @return recognized_identity value
+ */
+unsigned int
+FacerInterface::recognized_identity() const
+{
+  return data->recognized_identity;
+}
+
+/** Get maximum length of recognized_identity value.
+ * @return length of recognized_identity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_recognized_identity() const
+{
+  return 1;
+}
+
+/** Set recognized_identity value.
+ * 
+      The index of the recognized identity.
+    
+ * @param new_recognized_identity new recognized_identity value
+ */
+void
+FacerInterface::set_recognized_identity(const unsigned int new_recognized_identity)
+{
+  data->recognized_identity = new_recognized_identity;
+}
+
+/** Get recognized_name value.
+ * 
+      The name of the recognized identity.
+    
+ * @return recognized_name value
+ */
+char *
+FacerInterface::recognized_name() const
+{
+  return data->recognized_name;
+}
+
+/** Get maximum length of recognized_name value.
+ * @return length of recognized_name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_recognized_name() const
+{
+  return 64;
+}
+
+/** Set recognized_name value.
+ * 
+      The name of the recognized identity.
+    
+ * @param new_recognized_name new recognized_name value
+ */
+void
+FacerInterface::set_recognized_name(const char * new_recognized_name)
+{
+  strncpy(data->recognized_name, new_recognized_name, sizeof(data->recognized_name));
 }
 
 /** Get num_detections value.
- * Number of currently detected faces
+ * 
+      Number of currently detected faces.
+    
  * @return num_detections value
  */
 unsigned int
@@ -180,7 +242,9 @@ FacerInterface::maxlenof_num_detections() const
 }
 
 /** Set num_detections value.
- * Number of currently detected faces
+ * 
+      Number of currently detected faces.
+    
  * @param new_num_detections new num_detections value
  */
 void
@@ -189,8 +253,114 @@ FacerInterface::set_num_detections(const unsigned int new_num_detections)
   data->num_detections = new_num_detections;
 }
 
+/** Get num_recognitions value.
+ * 
+      Number of recognized faces.
+    
+ * @return num_recognitions value
+ */
+unsigned int
+FacerInterface::num_recognitions() const
+{
+  return data->num_recognitions;
+}
+
+/** Get maximum length of num_recognitions value.
+ * @return length of num_recognitions value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_num_recognitions() const
+{
+  return 1;
+}
+
+/** Set num_recognitions value.
+ * 
+      Number of recognized faces.
+    
+ * @param new_num_recognitions new num_recognitions value
+ */
+void
+FacerInterface::set_num_recognitions(const unsigned int new_num_recognitions)
+{
+  data->num_recognitions = new_num_recognitions;
+}
+
+/** Get most_likely_identity value.
+ * 
+      The identity that was recognized most prevalently.
+    
+ * @return most_likely_identity value
+ */
+unsigned int
+FacerInterface::most_likely_identity() const
+{
+  return data->most_likely_identity;
+}
+
+/** Get maximum length of most_likely_identity value.
+ * @return length of most_likely_identity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_most_likely_identity() const
+{
+  return 1;
+}
+
+/** Set most_likely_identity value.
+ * 
+      The identity that was recognized most prevalently.
+    
+ * @param new_most_likely_identity new most_likely_identity value
+ */
+void
+FacerInterface::set_most_likely_identity(const unsigned int new_most_likely_identity)
+{
+  data->most_likely_identity = new_most_likely_identity;
+}
+
+/** Get history_ratio value.
+ * 
+      The ratio of the most likely identity showing up in the history
+      and the length of the history.
+    
+ * @return history_ratio value
+ */
+float
+FacerInterface::history_ratio() const
+{
+  return data->history_ratio;
+}
+
+/** Get maximum length of history_ratio value.
+ * @return length of history_ratio value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_history_ratio() const
+{
+  return 1;
+}
+
+/** Set history_ratio value.
+ * 
+      The ratio of the most likely identity showing up in the history
+      and the length of the history.
+    
+ * @param new_history_ratio new history_ratio value
+ */
+void
+FacerInterface::set_history_ratio(const float new_history_ratio)
+{
+  data->history_ratio = new_history_ratio;
+}
+
 /** Get sec_since_detection value.
- * Time in seconds since the last successful detection.
+ * 
+      Time in seconds since the last successful detection.
+    
  * @return sec_since_detection value
  */
 float
@@ -210,13 +380,257 @@ FacerInterface::maxlenof_sec_since_detection() const
 }
 
 /** Set sec_since_detection value.
- * Time in seconds since the last successful detection.
+ * 
+      Time in seconds since the last successful detection.
+    
  * @param new_sec_since_detection new sec_since_detection value
  */
 void
 FacerInterface::set_sec_since_detection(const float new_sec_since_detection)
 {
   data->sec_since_detection = new_sec_since_detection;
+}
+
+/** Get visibility_history value.
+ * 
+      The number of consecutive sighting ( <= 1 ) and non-sightings
+      ( >= -1 ), respectively.
+    
+ * @return visibility_history value
+ */
+int
+FacerInterface::visibility_history() const
+{
+  return data->visibility_history;
+}
+
+/** Get maximum length of visibility_history value.
+ * @return length of visibility_history value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_visibility_history() const
+{
+  return 1;
+}
+
+/** Set visibility_history value.
+ * 
+      The number of consecutive sighting ( <= 1 ) and non-sightings
+      ( >= -1 ), respectively.
+    
+ * @param new_visibility_history new visibility_history value
+ */
+void
+FacerInterface::set_visibility_history(const int new_visibility_history)
+{
+  data->visibility_history = new_visibility_history;
+}
+
+/** Get learning_in_progress value.
+ * 
+      Indicates whether a new identity is currently learnt. If
+      learning is in progress only "old" faces can be recognized.
+    
+ * @return learning_in_progress value
+ */
+bool
+FacerInterface::is_learning_in_progress() const
+{
+  return data->learning_in_progress;
+}
+
+/** Get maximum length of learning_in_progress value.
+ * @return length of learning_in_progress value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_learning_in_progress() const
+{
+  return 1;
+}
+
+/** Set learning_in_progress value.
+ * 
+      Indicates whether a new identity is currently learnt. If
+      learning is in progress only "old" faces can be recognized.
+    
+ * @param new_learning_in_progress new learning_in_progress value
+ */
+void
+FacerInterface::set_learning_in_progress(const bool new_learning_in_progress)
+{
+  data->learning_in_progress = new_learning_in_progress;
+}
+
+/** Get recording_progress value.
+ * 
+      Indicates the progress of recording images of a new face.
+    
+ * @return recording_progress value
+ */
+float
+FacerInterface::recording_progress() const
+{
+  return data->recording_progress;
+}
+
+/** Get maximum length of recording_progress value.
+ * @return length of recording_progress value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_recording_progress() const
+{
+  return 1;
+}
+
+/** Set recording_progress value.
+ * 
+      Indicates the progress of recording images of a new face.
+    
+ * @param new_recording_progress new recording_progress value
+ */
+void
+FacerInterface::set_recording_progress(const float new_recording_progress)
+{
+  data->recording_progress = new_recording_progress;
+}
+
+/** Get bearing value.
+ * 
+      The relative bearing to the recognized face in radians.
+    
+ * @return bearing value
+ */
+float
+FacerInterface::bearing() const
+{
+  return data->bearing;
+}
+
+/** Get maximum length of bearing value.
+ * @return length of bearing value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_bearing() const
+{
+  return 1;
+}
+
+/** Set bearing value.
+ * 
+      The relative bearing to the recognized face in radians.
+    
+ * @param new_bearing new bearing value
+ */
+void
+FacerInterface::set_bearing(const float new_bearing)
+{
+  data->bearing = new_bearing;
+}
+
+/** Get slope value.
+ * 
+      The relative slope to the recognized face in radians.
+    
+ * @return slope value
+ */
+float
+FacerInterface::slope() const
+{
+  return data->slope;
+}
+
+/** Get maximum length of slope value.
+ * @return length of slope value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_slope() const
+{
+  return 1;
+}
+
+/** Set slope value.
+ * 
+      The relative slope to the recognized face in radians.
+    
+ * @param new_slope new slope value
+ */
+void
+FacerInterface::set_slope(const float new_slope)
+{
+  data->slope = new_slope;
+}
+
+/** Get requested_index value.
+ * 
+      Index of the identity for which the name was requested.
+    
+ * @return requested_index value
+ */
+unsigned int
+FacerInterface::requested_index() const
+{
+  return data->requested_index;
+}
+
+/** Get maximum length of requested_index value.
+ * @return length of requested_index value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_requested_index() const
+{
+  return 1;
+}
+
+/** Set requested_index value.
+ * 
+      Index of the identity for which the name was requested.
+    
+ * @param new_requested_index new requested_index value
+ */
+void
+FacerInterface::set_requested_index(const unsigned int new_requested_index)
+{
+  data->requested_index = new_requested_index;
+}
+
+/** Get requested_name value.
+ * 
+      Requested name.
+    
+ * @return requested_name value
+ */
+char *
+FacerInterface::requested_name() const
+{
+  return data->requested_name;
+}
+
+/** Get maximum length of requested_name value.
+ * @return length of requested_name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_requested_name() const
+{
+  return 64;
+}
+
+/** Set requested_name value.
+ * 
+      Requested name.
+    
+ * @param new_requested_name new requested_name value
+ */
+void
+FacerInterface::set_requested_name(const char * new_requested_name)
+{
+  strncpy(data->requested_name, new_requested_name, sizeof(data->requested_name));
 }
 
 /* =========== message create =========== */
@@ -227,6 +641,12 @@ FacerInterface::create_message(const char *type) const
     return new LearnFaceMessage();
   } else if ( strncmp("SetOpmodeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetOpmodeMessage();
+  } else if ( strncmp("EnableIdentityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new EnableIdentityMessage();
+  } else if ( strncmp("SetNameMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetNameMessage();
+  } else if ( strncmp("GetNameMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new GetNameMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -257,16 +677,16 @@ FacerInterface::copy_values(const Interface *other)
 
 
 /** Constructor with initial values.
- * @param ini_face_label initial value for face_label
+ * @param ini_name initial value for name
  */
-FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_face_label) : Message("LearnFaceMessage")
+FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_name) : Message("LearnFaceMessage")
 {
   data_size = sizeof(LearnFaceMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
-  strncpy(data->face_label, ini_face_label, 64);
-  add_fieldinfo(IFT_STRING, "face_label", 64, data->face_label);
+  strncpy(data->name, ini_name, 64);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
 FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage")
@@ -275,7 +695,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_STRING, "face_label", 64, data->face_label);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
 /** Destructor */
@@ -296,34 +716,34 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const LearnFaceMessage *m) : 
 }
 
 /* Methods */
-/** Get face_label value.
- * Label of the recognized face
- * @return face_label value
+/** Get name value.
+ * The name assigned to the new identity.
+ * @return name value
  */
 char *
-FacerInterface::LearnFaceMessage::face_label() const
+FacerInterface::LearnFaceMessage::name() const
 {
-  return data->face_label;
+  return data->name;
 }
 
-/** Get maximum length of face_label value.
- * @return length of face_label value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-FacerInterface::LearnFaceMessage::maxlenof_face_label() const
+FacerInterface::LearnFaceMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set face_label value.
- * Label of the recognized face
- * @param new_face_label new face_label value
+/** Set name value.
+ * The name assigned to the new identity.
+ * @param new_name new name value
  */
 void
-FacerInterface::LearnFaceMessage::set_face_label(const char * new_face_label)
+FacerInterface::LearnFaceMessage::set_name(const char * new_name)
 {
-  strncpy(data->face_label, new_face_label, sizeof(data->face_label));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Clone this message.
@@ -382,7 +802,9 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const SetOpmodeMessage *m) : 
 
 /* Methods */
 /** Get opmode value.
- * Current opmode.
+ * 
+      Current opmode.
+    
  * @return opmode value
  */
 FacerInterface::if_facer_opmode_t
@@ -402,7 +824,9 @@ FacerInterface::SetOpmodeMessage::maxlenof_opmode() const
 }
 
 /** Set opmode value.
- * Current opmode.
+ * 
+      Current opmode.
+    
  * @param new_opmode new opmode value
  */
 void
@@ -421,6 +845,335 @@ FacerInterface::SetOpmodeMessage::clone() const
 {
   return new FacerInterface::SetOpmodeMessage(this);
 }
+/** @class FacerInterface::EnableIdentityMessage <interfaces/FacerInterface.h>
+ * EnableIdentityMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_index initial value for index
+ * @param ini_enable initial value for enable
+ */
+FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const unsigned int ini_index, const bool ini_enable) : Message("EnableIdentityMessage")
+{
+  data_size = sizeof(EnableIdentityMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (EnableIdentityMessage_data_t *)data_ptr;
+  data->index = ini_index;
+  data->enable = ini_enable;
+  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
+  add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
+}
+/** Constructor */
+FacerInterface::EnableIdentityMessage::EnableIdentityMessage() : Message("EnableIdentityMessage")
+{
+  data_size = sizeof(EnableIdentityMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (EnableIdentityMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
+  add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
+}
+
+/** Destructor */
+FacerInterface::EnableIdentityMessage::~EnableIdentityMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const EnableIdentityMessage *m) : Message("EnableIdentityMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (EnableIdentityMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get index value.
+ * Index of the identity.
+ * @return index value
+ */
+unsigned int
+FacerInterface::EnableIdentityMessage::index() const
+{
+  return data->index;
+}
+
+/** Get maximum length of index value.
+ * @return length of index value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::EnableIdentityMessage::maxlenof_index() const
+{
+  return 1;
+}
+
+/** Set index value.
+ * Index of the identity.
+ * @param new_index new index value
+ */
+void
+FacerInterface::EnableIdentityMessage::set_index(const unsigned int new_index)
+{
+  data->index = new_index;
+}
+
+/** Get enable value.
+ * En-/disable flag.
+ * @return enable value
+ */
+bool
+FacerInterface::EnableIdentityMessage::is_enable() const
+{
+  return data->enable;
+}
+
+/** Get maximum length of enable value.
+ * @return length of enable value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::EnableIdentityMessage::maxlenof_enable() const
+{
+  return 1;
+}
+
+/** Set enable value.
+ * En-/disable flag.
+ * @param new_enable new enable value
+ */
+void
+FacerInterface::EnableIdentityMessage::set_enable(const bool new_enable)
+{
+  data->enable = new_enable;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+FacerInterface::EnableIdentityMessage::clone() const
+{
+  return new FacerInterface::EnableIdentityMessage(this);
+}
+/** @class FacerInterface::SetNameMessage <interfaces/FacerInterface.h>
+ * SetNameMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_index initial value for index
+ * @param ini_name initial value for name
+ */
+FacerInterface::SetNameMessage::SetNameMessage(const unsigned int ini_index, const char * ini_name) : Message("SetNameMessage")
+{
+  data_size = sizeof(SetNameMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetNameMessage_data_t *)data_ptr;
+  data->index = ini_index;
+  strncpy(data->name, ini_name, 64);
+  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
+}
+/** Constructor */
+FacerInterface::SetNameMessage::SetNameMessage() : Message("SetNameMessage")
+{
+  data_size = sizeof(SetNameMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetNameMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
+}
+
+/** Destructor */
+FacerInterface::SetNameMessage::~SetNameMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+FacerInterface::SetNameMessage::SetNameMessage(const SetNameMessage *m) : Message("SetNameMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetNameMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get index value.
+ * Index of the identity.
+ * @return index value
+ */
+unsigned int
+FacerInterface::SetNameMessage::index() const
+{
+  return data->index;
+}
+
+/** Get maximum length of index value.
+ * @return length of index value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::SetNameMessage::maxlenof_index() const
+{
+  return 1;
+}
+
+/** Set index value.
+ * Index of the identity.
+ * @param new_index new index value
+ */
+void
+FacerInterface::SetNameMessage::set_index(const unsigned int new_index)
+{
+  data->index = new_index;
+}
+
+/** Get name value.
+ * Name of the identity.
+ * @return name value
+ */
+char *
+FacerInterface::SetNameMessage::name() const
+{
+  return data->name;
+}
+
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::SetNameMessage::maxlenof_name() const
+{
+  return 64;
+}
+
+/** Set name value.
+ * Name of the identity.
+ * @param new_name new name value
+ */
+void
+FacerInterface::SetNameMessage::set_name(const char * new_name)
+{
+  strncpy(data->name, new_name, sizeof(data->name));
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+FacerInterface::SetNameMessage::clone() const
+{
+  return new FacerInterface::SetNameMessage(this);
+}
+/** @class FacerInterface::GetNameMessage <interfaces/FacerInterface.h>
+ * GetNameMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_index initial value for index
+ */
+FacerInterface::GetNameMessage::GetNameMessage(const unsigned int ini_index) : Message("GetNameMessage")
+{
+  data_size = sizeof(GetNameMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (GetNameMessage_data_t *)data_ptr;
+  data->index = ini_index;
+  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
+}
+/** Constructor */
+FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
+{
+  data_size = sizeof(GetNameMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (GetNameMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
+}
+
+/** Destructor */
+FacerInterface::GetNameMessage::~GetNameMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+FacerInterface::GetNameMessage::GetNameMessage(const GetNameMessage *m) : Message("GetNameMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (GetNameMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get index value.
+ * Index of the identity.
+ * @return index value
+ */
+unsigned int
+FacerInterface::GetNameMessage::index() const
+{
+  return data->index;
+}
+
+/** Get maximum length of index value.
+ * @return length of index value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::GetNameMessage::maxlenof_index() const
+{
+  return 1;
+}
+
+/** Set index value.
+ * Index of the identity.
+ * @param new_index new index value
+ */
+void
+FacerInterface::GetNameMessage::set_index(const unsigned int new_index)
+{
+  data->index = new_index;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+FacerInterface::GetNameMessage::clone() const
+{
+  return new FacerInterface::GetNameMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -433,6 +1186,18 @@ FacerInterface::message_valid(const Message *message) const
   }
   const SetOpmodeMessage *m1 = dynamic_cast<const SetOpmodeMessage *>(message);
   if ( m1 != NULL ) {
+    return true;
+  }
+  const EnableIdentityMessage *m2 = dynamic_cast<const EnableIdentityMessage *>(message);
+  if ( m2 != NULL ) {
+    return true;
+  }
+  const SetNameMessage *m3 = dynamic_cast<const SetNameMessage *>(message);
+  if ( m3 != NULL ) {
+    return true;
+  }
+  const GetNameMessage *m4 = dynamic_cast<const GetNameMessage *>(message);
+  if ( m4 != NULL ) {
     return true;
   }
   return false;

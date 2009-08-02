@@ -416,7 +416,7 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
     line[i] = 0;
     if ( line[0] != 0 ) {
       if ( sqlite3_exec(tdb, line, 0, 0, &errmsg) != SQLITE_OK ) {
-	ConfigurationException e("import", errmsg);
+	ConfigurationException e(errmsg, line);
 	sqlite3_free(errmsg);
 	throw e;
       }

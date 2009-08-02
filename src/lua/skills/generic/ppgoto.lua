@@ -62,25 +62,25 @@ skillenv.skill_module(...)
 fsm:new_jump_state("PPGOTO")
 
 function PPGOTO:init()
-   if navigator:has_writer() then
+   if ppnavi:has_writer() then
       if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil then
          -- cartesian goto
          local x = self.fsm.vars.x or self.fsm.vars[1]
          local y = self.fsm.vars.y or self.fsm.vars[2]
          local ori = self.fsm.vars.ori or math.atan2(y, x)
-         local m = navigator.CartesianGotoMessage:new(x, y, ori)
+         local m = ppnavi.CartesianGotoMessage:new(x, y, ori)
          printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
-         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
       elseif self.fsm.vars.place ~= nil then
          -- place goto
          local place = self.fsm.vars.place
-         local m = navigator.PlaceGotoMessage:new(place)
+         local m = ppnavi.PlaceGotoMessage:new(place)
          printf("Sending PlaceGotoMessage(%s)", place)
-         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
       elseif self.fsm.vars.stop ~= nil then
-         local m = navigator.StopMessage:new()
+         local m = ppnavi.StopMessage:new()
          printf("Sending StopGotoMessage")
-         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
       else
          self.fsm.vars.param_fail = true
       end
@@ -94,7 +94,7 @@ end
 
 function PPGOTO:reset()
    --printf("ppgoto: sending stop");
-   --navigator:msgq_enqueue_copy(navigator.StopMessage:new())
+   --ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
 end
 
 function PPGOTO:jumpcond_paramfail()
@@ -103,14 +103,14 @@ end
 
 function PPGOTO:jumpcond_navifail()
    return (self.fsm.vars.msgid == 0
-	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 2)
-	   or not navigator:has_writer()
+	   or (self.fsm.vars.msgid ~= ppnavi:msgid() and self.wait_start > 20)
+	   or not ppnavi:has_writer()
 	   or self.failed)
 end
 
 function PPGOTO:jumpcond_navifinal()
-   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
-   return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
+   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, ppnavi:msgid(), tostring(ppnavi:is_final()))
+   return self.fsm.vars.msgid == ppnavi:msgid() and ppnavi:is_final()
 end
 
 PPGOTO:add_transition(FAILED, PPGOTO.jumpcond_paramfail, "Invalid/insufficient parameters")

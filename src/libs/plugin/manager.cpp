@@ -32,7 +32,9 @@
 #include <core/threading/thread_initializer.h>
 #include <core/exception.h>
 #include <utils/logging/liblogger.h>
-#include <utils/system/fam_thread.h>
+#ifdef HAVE_INOTIFY
+#  include <utils/system/fam_thread.h>
+#endif
 #include <config/config.h>
 
 #include <algorithm>
@@ -78,21 +80,28 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 
   __config->add_change_handler(this);
 
+#ifdef HAVE_INOTIFY
   __fam_thread = new FamThread();
   RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
   fam->add_filter("^[^.].*\\.so$");
   fam->add_listener(this);
   fam->watch_dir(PLUGINDIR);
   __fam_thread->start();
+#else
+  LibLogger::log_warn("PluginManager", "File alteration monitoring not available, "
+					"cannot detect changed plugins on disk.");
+#endif
 }
 
 
 /** Destructor. */
 PluginManager::~PluginManager()
 {
+#ifdef HAVE_INOTIFY
   __fam_thread->cancel();
   __fam_thread->join();
   delete __fam_thread;
+#endif
   __config->rem_change_handler(this);
   __pinfo_cache.lock();
   __pinfo_cache.clear();

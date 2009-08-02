@@ -74,6 +74,7 @@ public:
   virtual ~ImageWidget();
 
   void set_camera(Camera *cam, unsigned int refresh_delay = 0);
+  void enable_camera(bool enable);
   void set_size(unsigned int width, unsigned int height);
   virtual bool show(colorspace_t colorspace, unsigned char *buffer, unsigned int width = 0, unsigned int height = 0);
   void set_refresh_delay(unsigned int refresh_delay);
@@ -101,6 +102,7 @@ private:
   fawkes::Mutex   *__cam_mutex;
   bool             __cam_has_buffer;
   bool             __cam_has_timestamp;
+  bool             __cam_enabled;
 
   sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> __signal_show;
 };

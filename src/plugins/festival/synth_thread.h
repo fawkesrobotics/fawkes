@@ -66,6 +66,7 @@ class FestivalSynthThread
   fawkes::SpeechSynthInterface   *__speechsynth_if;
 
   std::string __cfg_voice;
+  std::string __cfg_extra_code;
 };
 
 

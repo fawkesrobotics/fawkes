@@ -63,7 +63,7 @@ class FvAcquisitionThread
 
   void set_aqtmode(AqtMode mode);
   AqtMode aqtmode();
-  SharedMemoryCamera *  camera_instance(colorspace_t cspace, bool deep_copy);
+  Camera *  camera_instance(colorspace_t cspace, bool deep_copy);
 
   Camera *get_camera();
 
@@ -75,6 +75,9 @@ class FvAcquisitionThread
    * base thread. */
   FvAqtVisionThreads       *vision_threads;
 
+  /** Vision thread registered for raw camera access on this camera. */
+  fawkes::Thread           *raw_subscriber_thread;
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
@@ -82,9 +85,7 @@ class FvAcquisitionThread
   bool                      __enabled;
 
   Camera                   *__camera;
-
   char                     *__image_id;
-
   fawkes::Logger           *__logger;
 
   colorspace_t              __colorspace;

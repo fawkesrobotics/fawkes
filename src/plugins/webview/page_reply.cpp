@@ -23,6 +23,8 @@
  */
 
 #include "page_reply.h"
+#include <utils/system/hostinfo.h>
+#include <utils/misc/string_conversions.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -39,7 +41,7 @@
 const char *  WebPageReply::PAGE_HEADER =
   "<html>\n"
   " <head>\n"
-  "  <title>%s</title>\n"
+  "  <title>%s (%s)</title>\n"
   "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/webview.css\" />\n"
   " </head>\n"
   " <body>\n"
@@ -53,8 +55,8 @@ const char *  WebPageReply::PAGE_FOOTER =
   "</html>\n";
 
 std::map<std::string, std::string> WebPageReply::__nav_entries;
-std::string WebPageReply::__current_baseurl;
-
+std::string WebPageReply::__current_baseurl = "";
+WebviewServiceBrowseHandler * WebPageReply::__service_browser = NULL;
 
 /** Constructor.
  * @param title title of the page
@@ -80,7 +82,7 @@ WebPageReply::WebPageReply(response_code_t code)
 void
 WebPageReply::pack()
 {
-  __merged_body  = html_header(_title) + _body + PAGE_FOOTER;
+  __merged_body  = html_header(_title) + _body + html_footer();
 }
 
 std::string::size_type
@@ -106,9 +108,11 @@ WebPageReply::body()
 std::string
 WebPageReply::html_header(std::string &title)
 {
+  fawkes::HostInfo hi;
+
   std::string rv = "";
   char *s;
-  if ( asprintf(&s, PAGE_HEADER, title.c_str()) != -1 ) {
+  if ( asprintf(&s, PAGE_HEADER, title.c_str(), hi.short_name()) != -1 ) {
     rv = s;
     free(s);
   }
@@ -135,7 +139,28 @@ WebPageReply::html_header(std::string &title)
 std::string
 WebPageReply::html_footer()
 {
-  return PAGE_FOOTER;
+  std::string f = std::string("\n  <div id=\"footer\">\n")
+    + "    <hr />\n";
+  WebviewServiceBrowseHandler::ServiceList sl = __service_browser->service_list();
+  if (! sl.empty()) {
+    f += "    <div class=\"instances\"><ul>";
+    WebviewServiceBrowseHandler::ServiceList &sl = __service_browser->service_list();
+    WebviewServiceBrowseHandler::ServiceList::iterator i;
+    for (i = sl.begin(); i != sl.end(); ++i) {
+      std::string short_host = i->second->host();
+      std::string::size_type s = short_host.find(".");
+      if (s != std::string::npos)  short_host = short_host.substr(0, s);
+
+      f += std::string("<li><a href=\"http://") + i->second->host() + ":"
+	+ fawkes::StringConversions::to_string(i->second->port()) + "/\""
+	+ " title=\"" + i->first + "\">"
+	+ short_host + "</a></li>";
+    }
+    f += "</ul></div>\n";
+  }
+  f += "  </div>";
+
+  return f;
 }
 
 
@@ -167,4 +192,14 @@ void
 WebPageReply::set_active_baseurl(std::string baseurl)
 {
   __current_baseurl = baseurl;
+}
+
+
+/** Set service browser.
+ * The service browser is queried to show a list of other hosts in the footer.
+ */
+void
+WebPageReply::set_service_browse_handler(WebviewServiceBrowseHandler *service_browser)
+{
+  __service_browser = service_browser;
 }

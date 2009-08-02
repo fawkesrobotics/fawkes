@@ -69,7 +69,10 @@ class FvBaseThread
   virtual Camera *  register_for_camera(const char *camera_string,
 					fawkes::Thread *thread,
 					colorspace_t cspace = YUV422_PLANAR);
+  virtual Camera *  register_for_raw_camera(const char *camera_string,
+					    fawkes::Thread *thread);
   virtual void      unregister_thread(fawkes::Thread *thread);
+
 
   virtual CameraControl *acquire_camctrl(const char *cam_string);
   virtual void           release_camctrl(CameraControl *cc);

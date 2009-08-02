@@ -68,6 +68,7 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
   __image_id      = strdup(id);
 
   vision_threads  = new FvAqtVisionThreads(clock);
+  raw_subscriber_thread = NULL;
 
   __camera        = camera;
   __width         = __camera->pixel_width();
@@ -135,25 +136,35 @@ FvAcquisitionThread::~FvAcquisitionThread()
  * @return camera instance
  * @see SharedMemoryCamera
  */
-SharedMemoryCamera *
+Camera *
 FvAcquisitionThread::camera_instance(colorspace_t cspace, bool deep_copy)
 {
   const char *img_id = NULL;
-  char *tmp =  NULL;
-  if (__shm.find(cspace) == __shm.end()) {
-    if ( asprintf(&tmp, "%s.%zu", __image_id, __shm.size()) == -1) {
-      throw OutOfMemoryException("FvAcqThread::camera_instance(): Could not create image ID");
+
+  if (cspace == CS_UNKNOWN) {
+    if (raw_subscriber_thread) {
+      // There may be only one
+      throw Exception("Only one vision thread may access the raw camera.");
+    } else {
+      return __camera;
     }
-    img_id = tmp;
-    __shm[cspace] = new SharedMemoryImageBuffer(img_id, cspace, __width, __height);
   } else {
-    img_id = __shm[cspace]->image_id();
+    char *tmp =  NULL;
+    if (__shm.find(cspace) == __shm.end()) {
+      if ( asprintf(&tmp, "%s.%zu", __image_id, __shm.size()) == -1) {
+	throw OutOfMemoryException("FvAcqThread::camera_instance(): Could not create image ID");
+      }
+      img_id = tmp;
+      __shm[cspace] = new SharedMemoryImageBuffer(img_id, cspace, __width, __height);
+    } else {
+      img_id = __shm[cspace]->image_id();
+    }
+
+    SharedMemoryCamera *c = new SharedMemoryCamera(img_id, deep_copy);
+
+    if (tmp)  free(tmp);
+    return c;
   }
-
-  SharedMemoryCamera *c = new SharedMemoryCamera(img_id, deep_copy);
-
-  if (tmp)  free(tmp);
-  return c;
 }
 
 
@@ -243,6 +254,7 @@ FvAcquisitionThread::loop()
 
     if ( __enabled ) {
       for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
+	if (__shmit->first == CS_UNKNOWN)  continue;
 	__tt->ping_start(__ttc_lock);
 	__shmit->second->lock_for_write();
 	__tt->ping_end(__ttc_lock);
@@ -278,6 +290,7 @@ FvAcquisitionThread::loop()
     __camera->capture();
     if ( __enabled ) {
       for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
+	if (__shmit->first == CS_UNKNOWN)  continue;
 	__shmit->second->lock_for_write();
 	convert(__colorspace, __shmit->first,
 		__camera->buffer(), __shmit->second->buffer(),

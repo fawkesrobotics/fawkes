@@ -34,20 +34,23 @@ namespace fawkes {
 class StringConversions
 {
  public:
-  static std::string toUpper(std::string str);
-  static std::string toLower(std::string str);
+  static std::string to_upper(std::string str);
+  static std::string to_lower(std::string str);
 
-  static std::string toString(unsigned int i);
-  static std::string toString(int i);
-  static std::string toString(float f);
-  static std::string toString(double d);
-  static std::string toString(bool b);
+  static std::string to_string(unsigned int i);
+  static std::string to_string(int i);
+  static std::string to_string(float f);
+  static std::string to_string(double d);
+  static std::string to_string(bool b);
 
-  static unsigned int toUInt(std::string s);
-  static int          toInt(std::string s);
-  static float        toFloat(std::string s);
-  static double       toDouble(std::string s);
-  static bool         toBool(std::string s);
+  static unsigned int to_uint(std::string s);
+  static int          to_int(std::string s);
+  static float        to_float(std::string s);
+  static double       to_double(std::string s);
+  static bool         to_bool(std::string s);
+
+  static void        trim_inplace(std::string &s);
+  static std::string trim(std::string &s);
 
  private:
   // may not be instantiated!

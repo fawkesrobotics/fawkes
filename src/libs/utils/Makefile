@@ -18,14 +18,28 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/lua.mk
 
+FILTER_OUT=%_tolua.o
+
 ifneq ($(realpath $(SYSROOT)/usr/include/magic.h),)
   HAVE_LIBMAGIC = 1
 else
   ERROR_TARGETS += error_libmagic
 endif
 
+HAVE_LIBXMLPP = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBXMLPP),1)
+  CFLAGS_LIBXMLPP=$(shell $(PKGCONFIG) --cflags 'libxml++-2.6')
+  LDFLAGS_LIBXMLPP=$(shell $(PKGCONFIG) --libs 'libxml++-2.6')
+
+  CFLAGS  += $(CFLAGS_LIBXMLPP)
+  LDFLAGS += $(LDFLAGS_LIBXMLPP)
+else
+  FILTER_OUT += graph/%.o
+  WARN_TARGETS += warning_libxmlpp
+endif
+
 LIBS_libfawkesutils = stdc++ fawkescore magic $(if $(filter Linux,$(OS)),dl)
-OBJS_libfawkesutils =	$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
+OBJS_libfawkesutils =	$(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 
 CFLAGS_fawkesutils_tolua = -Wno-unused-function $(CFLAGS_LUA)
 TOLUA_fawkesutils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
@@ -46,10 +60,12 @@ endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(ERROR_TARGETS) $(WARN_TARGETS)
-.PHONY: error_libmagic
+.PHONY: error_libmagic warning_libxmlpp
 error_libmagic:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (file-devel not installed)"
 	$(SILENT)exit 1
+warning_libxmlpp:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Graph utils cannot be built$(TNORMAL) (libxml++[-devel] not installed)"
 endif
 
 $(LUALIBDIR)/fawkesutils.so: | $(LIBDIR)/libfawkesutils.so

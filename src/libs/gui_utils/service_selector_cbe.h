@@ -48,6 +48,10 @@ class ServiceSelectorCBE
 		      Gtk::Button* connect,
 		      Gtk::Window* parent,
 		      const char* service = "_fawkes._tcp" );
+  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+		      Gtk::ToolButton* connect,
+		      Gtk::Window* parent,
+		      const char* service = "_fawkes._tcp" );
   ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 		      const char* cbe_name = "cbeServices",
 		      const char* btn_name = "btnConnect",
@@ -72,6 +76,7 @@ class ServiceSelectorCBE
  protected:
   Gtk::ComboBoxEntry   *m_cbe_services;
   Gtk::Button          *m_btn_connect;
+  Gtk::ToolButton      *m_tbtn_connect;
   Gtk::Window          *m_parent;
 
   ConnectionDispatcher *m_dispatcher;

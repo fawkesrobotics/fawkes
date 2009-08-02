@@ -74,7 +74,7 @@ size_t
 DynamicFileWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_size)
 {
   if ( (fseek(__file, pos, SEEK_SET) == -1) || feof(__file) ) {
-    return -1;
+    return (size_t)-1;
   }
   return fread(buffer, 1, buf_max_size, __file);
 }

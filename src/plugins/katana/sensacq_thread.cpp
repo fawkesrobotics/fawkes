@@ -75,6 +75,8 @@ KatanaSensorAcquisitionThread::loop()
   if (__enabled) {
     try {
       __sensor_ctrl->recvDAT();
+    } catch (/*KNI*/::ParameterReadingException &e) {
+      __logger->log_warn(name(), "Failed to read parameters: %s", e.what());
     } catch (/*KNI*/::Exception &e) {
       __logger->log_warn(name(), "Updating sensor values failed: %s", e.what());
     }

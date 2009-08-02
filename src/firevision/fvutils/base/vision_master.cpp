@@ -27,7 +27,7 @@
 
 using namespace fawkes;
 
-/** @class VisionMaster vision_master.h <fvutils/base/vision_master.h>
+/** @class VisionMaster <fvutils/base/vision_master.h>
  * Vision Master.
  * The vision master shall be the entry point for vision plugins. It shall
  * allow for requesting cameras that are opened in a central place such that
@@ -60,6 +60,23 @@ using namespace fawkes;
  * of the C++ type that you may expect for the requested camera, but it may
  * have layers of indirection. For example when opening a USB camera you could
  * get a shared memory camera to share the camera (image) with multiple threads.
+ * Note that using CS_UNKNOWN shall have the similar result as using
+ * register_for_raw_camer().
+ *
+ * @fn Camera *  VisionMaster::register_for_raw_camera(const char *camera_string, Thread *thread)
+ * Register thread for camera.
+ * This will register a relation between the given thread and the camera identified
+ * by the camera string similar to register_for_camera(). However, unlike
+ * register_for_camera() this method will provide access to the raw camera
+ * implementation, without possibly proxies. Once you gathered the camera, you
+ * can dynamically cast it to the expected camera type (or use the template method
+ * instead. Raw access to a camera is only granted for a single thread.
+ * Note that you may not call capture() or dispose() on the camera, this will
+ * still be done by the vision master, as the camera may be used by other
+ * threads that registered for the camera with register_for_camera().
+ * @param camera_string camera that can be used by CameraFactory to open a
+ * camera.
+ * @param thread thread to register for this camera
  *
  * @fn void VisionMaster::unregister_thread(Thread *thread) = 0
  * Unregister a thread.

@@ -44,6 +44,7 @@ class WebStaticRequestProcessor;
 class WebBlackBoardRequestProcessor;
 class WebStartPageRequestProcessor;
 class WebPluginsRequestProcessor;
+class WebviewServiceBrowseHandler;
 
 class WebviewThread
 : public fawkes::Thread,
@@ -77,6 +78,7 @@ class WebviewThread
   WebStartPageRequestProcessor   *__startpage_processor;
   WebBlackBoardRequestProcessor  *__blackboard_processor;
   WebPluginsRequestProcessor     *__plugins_processor;
+  WebviewServiceBrowseHandler    *__service_browse_handler;
 
   unsigned int __cfg_port;
 

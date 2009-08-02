@@ -86,10 +86,11 @@ PanTiltInterface::PanTiltInterface() : Interface()
   add_messageinfo("CalibrateMessage");
   add_messageinfo("ParkMessage");
   add_messageinfo("GotoMessage");
+  add_messageinfo("TimedGotoMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetVelocityMessage");
   add_messageinfo("SetMarginMessage");
-  unsigned char tmp_hash[] = {0xcc, 0x7f, 0x25, 0xdd, 0x3, 0xc0, 0x3e, 0x8d, 0xa4, 0xdb, 0xb0, 0x44, 0xd, 0xf7, 0xda, 0x26};
+  unsigned char tmp_hash[] = {0xf1, 0x7a, 0x47, 0xde, 0x4f, 0x37, 0x5b, 0xc7, 0x75, 0x1c, 0xd6, 0x73, 0x1e, 00, 0xe9, 0x71};
   set_hash(tmp_hash);
 }
 
@@ -665,6 +666,8 @@ PanTiltInterface::create_message(const char *type) const
     return new ParkMessage();
   } else if ( strncmp("GotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new GotoMessage();
+  } else if ( strncmp("TimedGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new TimedGotoMessage();
   } else if ( strncmp("SetEnabledMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetEnabledMessage();
   } else if ( strncmp("SetVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -969,6 +972,163 @@ Message *
 PanTiltInterface::GotoMessage::clone() const
 {
   return new PanTiltInterface::GotoMessage(this);
+}
+/** @class PanTiltInterface::TimedGotoMessage <interfaces/PanTiltInterface.h>
+ * TimedGotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_time_sec initial value for time_sec
+ * @param ini_pan initial value for pan
+ * @param ini_tilt initial value for tilt
+ */
+PanTiltInterface::TimedGotoMessage::TimedGotoMessage(const float ini_time_sec, const float ini_pan, const float ini_tilt) : Message("TimedGotoMessage")
+{
+  data_size = sizeof(TimedGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TimedGotoMessage_data_t *)data_ptr;
+  data->time_sec = ini_time_sec;
+  data->pan = ini_pan;
+  data->tilt = ini_tilt;
+  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
+  add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
+}
+/** Constructor */
+PanTiltInterface::TimedGotoMessage::TimedGotoMessage() : Message("TimedGotoMessage")
+{
+  data_size = sizeof(TimedGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TimedGotoMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
+  add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
+}
+
+/** Destructor */
+PanTiltInterface::TimedGotoMessage::~TimedGotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+PanTiltInterface::TimedGotoMessage::TimedGotoMessage(const TimedGotoMessage *m) : Message("TimedGotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (TimedGotoMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get time_sec value.
+ * Time in seconds when to reach
+    the final position.
+ * @return time_sec value
+ */
+float
+PanTiltInterface::TimedGotoMessage::time_sec() const
+{
+  return data->time_sec;
+}
+
+/** Get maximum length of time_sec value.
+ * @return length of time_sec value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::TimedGotoMessage::maxlenof_time_sec() const
+{
+  return 1;
+}
+
+/** Set time_sec value.
+ * Time in seconds when to reach
+    the final position.
+ * @param new_time_sec new time_sec value
+ */
+void
+PanTiltInterface::TimedGotoMessage::set_time_sec(const float new_time_sec)
+{
+  data->time_sec = new_time_sec;
+}
+
+/** Get pan value.
+ * Current pan.
+ * @return pan value
+ */
+float
+PanTiltInterface::TimedGotoMessage::pan() const
+{
+  return data->pan;
+}
+
+/** Get maximum length of pan value.
+ * @return length of pan value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::TimedGotoMessage::maxlenof_pan() const
+{
+  return 1;
+}
+
+/** Set pan value.
+ * Current pan.
+ * @param new_pan new pan value
+ */
+void
+PanTiltInterface::TimedGotoMessage::set_pan(const float new_pan)
+{
+  data->pan = new_pan;
+}
+
+/** Get tilt value.
+ * Current tilt.
+ * @return tilt value
+ */
+float
+PanTiltInterface::TimedGotoMessage::tilt() const
+{
+  return data->tilt;
+}
+
+/** Get maximum length of tilt value.
+ * @return length of tilt value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PanTiltInterface::TimedGotoMessage::maxlenof_tilt() const
+{
+  return 1;
+}
+
+/** Set tilt value.
+ * Current tilt.
+ * @param new_tilt new tilt value
+ */
+void
+PanTiltInterface::TimedGotoMessage::set_tilt(const float new_tilt)
+{
+  data->tilt = new_tilt;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+PanTiltInterface::TimedGotoMessage::clone() const
+{
+  return new PanTiltInterface::TimedGotoMessage(this);
 }
 /** @class PanTiltInterface::SetEnabledMessage <interfaces/PanTiltInterface.h>
  * SetEnabledMessage Fawkes BlackBoard Interface Message.
@@ -1329,16 +1489,20 @@ PanTiltInterface::message_valid(const Message *message) const
   if ( m4 != NULL ) {
     return true;
   }
-  const SetEnabledMessage *m5 = dynamic_cast<const SetEnabledMessage *>(message);
+  const TimedGotoMessage *m5 = dynamic_cast<const TimedGotoMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const SetVelocityMessage *m6 = dynamic_cast<const SetVelocityMessage *>(message);
+  const SetEnabledMessage *m6 = dynamic_cast<const SetEnabledMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetMarginMessage *m7 = dynamic_cast<const SetMarginMessage *>(message);
+  const SetVelocityMessage *m7 = dynamic_cast<const SetVelocityMessage *>(message);
   if ( m7 != NULL ) {
+    return true;
+  }
+  const SetMarginMessage *m8 = dynamic_cast<const SetMarginMessage *>(message);
+  if ( m8 != NULL ) {
     return true;
   }
   return false;

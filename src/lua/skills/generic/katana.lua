@@ -81,6 +81,7 @@ fsm:add_transitions{
    {"DECIDE_MODE", "FAILED", "not katanaarm:has_writer()", precond=true, desc="no writer"},
    {"DECIDE_MODE", "TURNONOFF", "vars.enable ~= nil", precond=true, desc="enable parm"},
    {"DECIDE_MODE", "CALIBRATE", "vars.calibrate", precond=true, desc="calib parm"},
+   {"DECIDE_MODE", "VELOCITY", "vars.velocity ~= nil", desc="max velocity", precond=true},
    {"DECIDE_MODE", "GOTO", "vars.x ~= nil and vars.y ~= nil and vars.z ~= nil",
     desc="goto parms", precond=true},
    {"DECIDE_MODE", "STOP", "vars.stop", precond=true},
@@ -91,6 +92,7 @@ fsm:add_transitions{
    {"CALIBRATE", "FAILED", jc_next_msg, desc="next msg"},
    {"TURNONOFF", "CHECKERR", true},
    {"STOP", "CHECKERR", true},
+   {"VELOCITY", "CHECKERR", true},
    {"GOTO", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GOTO", "FAILED", jc_next_msg, desc="next msg"},
    {"GRIPPER", "CHECKERR", jc_arm_is_final, desc="final"},
@@ -111,6 +113,10 @@ end
 
 function STOP:init()
    katanaarm:msgq_enqueue_copy(katanaarm.StopMessage:new())
+end
+
+function VELOCITY:init()
+   katanaarm:msgq_enqueue_copy(katanaarm.SetMaxVelocityMessage:new(self.fsm.vars.velocity))
 end
 
 function PARK:init()

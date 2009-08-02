@@ -53,11 +53,57 @@ class FacerInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int num_detections; /**< Number of currently detected faces */
-    float sec_since_detection; /**< Time in seconds since the last successful detection. */
-    bool learning_done; /**< True if opmode is learning and learning has been completed, false otherwise */
-    if_facer_opmode_t opmode; /**< Current opmode. */
-    char face_label[64]; /**< Label of the recognized face */
+    unsigned int num_identities; /**< 
+      The number of identities in the database.
+     */
+    unsigned int recognized_identity; /**< 
+      The index of the recognized identity.
+     */
+    unsigned int num_detections; /**< 
+      Number of currently detected faces.
+     */
+    unsigned int num_recognitions; /**< 
+      Number of recognized faces.
+     */
+    unsigned int most_likely_identity; /**< 
+      The identity that was recognized most prevalently.
+     */
+    unsigned int requested_index; /**< 
+      Index of the identity for which the name was requested.
+     */
+    int visibility_history; /**< 
+      The number of consecutive sighting ( <= 1 ) and non-sightings
+      ( >= -1 ), respectively.
+     */
+    float history_ratio; /**< 
+      The ratio of the most likely identity showing up in the history
+      and the length of the history.
+     */
+    float sec_since_detection; /**< 
+      Time in seconds since the last successful detection.
+     */
+    float recording_progress; /**< 
+      Indicates the progress of recording images of a new face.
+     */
+    float bearing; /**< 
+      The relative bearing to the recognized face in radians.
+     */
+    float slope; /**< 
+      The relative slope to the recognized face in radians.
+     */
+    bool learning_in_progress; /**< 
+      Indicates whether a new identity is currently learnt. If
+      learning is in progress only "old" faces can be recognized.
+     */
+    if_facer_opmode_t opmode; /**< 
+      Current opmode.
+     */
+    char recognized_name[64]; /**< 
+      The name of the recognized identity.
+     */
+    char requested_name[64]; /**< 
+      Requested name.
+     */
   } FacerInterface_data_t;
 
   FacerInterface_data_t *data;
@@ -69,21 +115,21 @@ class FacerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      char face_label[64]; /**< Label of the recognized face */
+      char name[64]; /**< The name assigned to the new identity. */
     } LearnFaceMessage_data_t;
 
     LearnFaceMessage_data_t *data;
 
    public:
-    LearnFaceMessage(const char * ini_face_label);
+    LearnFaceMessage(const char * ini_name);
     LearnFaceMessage();
     ~LearnFaceMessage();
 
     LearnFaceMessage(const LearnFaceMessage *m);
     /* Methods */
-    char * face_label() const;
-    void set_face_label(const char * new_face_label);
-    size_t maxlenof_face_label() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     virtual Message * clone() const;
   };
 
@@ -92,7 +138,9 @@ class FacerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      if_facer_opmode_t opmode; /**< Current opmode. */
+      if_facer_opmode_t opmode; /**< 
+      Current opmode.
+     */
     } SetOpmodeMessage_data_t;
 
     SetOpmodeMessage_data_t *data;
@@ -110,6 +158,83 @@ class FacerInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class EnableIdentityMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      unsigned int index; /**< Index of the identity. */
+      bool enable; /**< En-/disable flag. */
+    } EnableIdentityMessage_data_t;
+
+    EnableIdentityMessage_data_t *data;
+
+   public:
+    EnableIdentityMessage(const unsigned int ini_index, const bool ini_enable);
+    EnableIdentityMessage();
+    ~EnableIdentityMessage();
+
+    EnableIdentityMessage(const EnableIdentityMessage *m);
+    /* Methods */
+    unsigned int index() const;
+    void set_index(const unsigned int new_index);
+    size_t maxlenof_index() const;
+    bool is_enable() const;
+    void set_enable(const bool new_enable);
+    size_t maxlenof_enable() const;
+    virtual Message * clone() const;
+  };
+
+  class SetNameMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      unsigned int index; /**< Index of the identity. */
+      char name[64]; /**< Name of the identity. */
+    } SetNameMessage_data_t;
+
+    SetNameMessage_data_t *data;
+
+   public:
+    SetNameMessage(const unsigned int ini_index, const char * ini_name);
+    SetNameMessage();
+    ~SetNameMessage();
+
+    SetNameMessage(const SetNameMessage *m);
+    /* Methods */
+    unsigned int index() const;
+    void set_index(const unsigned int new_index);
+    size_t maxlenof_index() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
+    virtual Message * clone() const;
+  };
+
+  class GetNameMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      unsigned int index; /**< Index of the identity. */
+    } GetNameMessage_data_t;
+
+    GetNameMessage_data_t *data;
+
+   public:
+    GetNameMessage(const unsigned int ini_index);
+    GetNameMessage();
+    ~GetNameMessage();
+
+    GetNameMessage(const GetNameMessage *m);
+    /* Methods */
+    unsigned int index() const;
+    void set_index(const unsigned int new_index);
+    size_t maxlenof_index() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   FacerInterface();
@@ -120,18 +245,51 @@ class FacerInterface : public Interface
   if_facer_opmode_t opmode() const;
   void set_opmode(const if_facer_opmode_t new_opmode);
   size_t maxlenof_opmode() const;
-  char * face_label() const;
-  void set_face_label(const char * new_face_label);
-  size_t maxlenof_face_label() const;
-  bool is_learning_done() const;
-  void set_learning_done(const bool new_learning_done);
-  size_t maxlenof_learning_done() const;
+  unsigned int num_identities() const;
+  void set_num_identities(const unsigned int new_num_identities);
+  size_t maxlenof_num_identities() const;
+  unsigned int recognized_identity() const;
+  void set_recognized_identity(const unsigned int new_recognized_identity);
+  size_t maxlenof_recognized_identity() const;
+  char * recognized_name() const;
+  void set_recognized_name(const char * new_recognized_name);
+  size_t maxlenof_recognized_name() const;
   unsigned int num_detections() const;
   void set_num_detections(const unsigned int new_num_detections);
   size_t maxlenof_num_detections() const;
+  unsigned int num_recognitions() const;
+  void set_num_recognitions(const unsigned int new_num_recognitions);
+  size_t maxlenof_num_recognitions() const;
+  unsigned int most_likely_identity() const;
+  void set_most_likely_identity(const unsigned int new_most_likely_identity);
+  size_t maxlenof_most_likely_identity() const;
+  float history_ratio() const;
+  void set_history_ratio(const float new_history_ratio);
+  size_t maxlenof_history_ratio() const;
   float sec_since_detection() const;
   void set_sec_since_detection(const float new_sec_since_detection);
   size_t maxlenof_sec_since_detection() const;
+  int visibility_history() const;
+  void set_visibility_history(const int new_visibility_history);
+  size_t maxlenof_visibility_history() const;
+  bool is_learning_in_progress() const;
+  void set_learning_in_progress(const bool new_learning_in_progress);
+  size_t maxlenof_learning_in_progress() const;
+  float recording_progress() const;
+  void set_recording_progress(const float new_recording_progress);
+  size_t maxlenof_recording_progress() const;
+  float bearing() const;
+  void set_bearing(const float new_bearing);
+  size_t maxlenof_bearing() const;
+  float slope() const;
+  void set_slope(const float new_slope);
+  size_t maxlenof_slope() const;
+  unsigned int requested_index() const;
+  void set_requested_index(const unsigned int new_requested_index);
+  size_t maxlenof_requested_index() const;
+  char * requested_name() const;
+  void set_requested_name(const char * new_requested_name);
+  size_t maxlenof_requested_name() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

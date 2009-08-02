@@ -37,6 +37,7 @@
 
 namespace fawkes {
   class PanTiltInterface;
+  class LedInterface;
 }
 
 class RobotisRX28;
@@ -65,6 +66,7 @@ class PanTiltRX28Thread
 
  private:
   fawkes::PanTiltInterface *__pantilt_if;
+  fawkes::LedInterface     *__led_if;
 
   fawkes::RefPtr<RobotisRX28> __rx28;
 
@@ -102,12 +104,15 @@ class PanTiltRX28Thread
 
     ~WorkerThread();
     void goto_pantilt(float pan, float tilt);
+    void goto_pantilt_timed(float pan, float tilt, float time_sec);
     void get_pantilt(float &pan, float &tilt);
     void set_velocities(float pan_vel, float tilt_vel);
+    void get_velocities(float &pan_vel, float &tilt_vel);
     void set_margins(float pan_margin, float tilt_margin);
     bool is_final();
     bool is_enabled();
     void set_enabled(bool enabled);
+    void set_led_enabled(bool enabled);
     void stop_motion();
     bool has_fresh_data();
 
@@ -134,7 +139,7 @@ class PanTiltRX28Thread
     float         __pan_margin;
     float         __tilt_margin;
 
-    fawkes::Mutex *__move_mutex;
+    fawkes::Mutex *__value_mutex;
     bool  __move_pending;
     float __target_pan;
     float __target_tilt;
@@ -143,6 +148,8 @@ class PanTiltRX28Thread
     bool  __velo_pending;
     unsigned int __pan_vel;
     unsigned int __tilt_vel;
+    bool  __led_enable;
+    bool  __led_disable;
 
     bool __fresh_data;
   };

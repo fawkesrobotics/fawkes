@@ -5,7 +5,7 @@
  *  Created: Thu Oct 12 02:01:27 2006
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -96,7 +96,7 @@ CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string 
     class_name = interface_name;
   }
 
-  deflector = "__INTERFACES_" + fawkes::StringConversions::toUpper(config_basename) + "_H_";
+  deflector = "__INTERFACES_" + fawkes::StringConversions::to_upper(config_basename) + "_H_";
 }
 
 
@@ -164,7 +164,7 @@ CppInterfaceGenerator::write_header(FILE *f, std::string filename)
 	  " *  Templated created:   Thu Oct 12 10:49:19 2006\n"
 	  " *  Copyright  %s  %s\n"
 	  " *\n"
-	  " *  $Id: cpp_generator.cpp 2510 2009-06-09 09:32:58Z tim $\n"
+	  " *  $Id$\n"
 	  " *\n"
 	  " ****************************************************************************/\n\n"
 	  "/*  This program is free software; you can redistribute it and/or modify\n"
@@ -672,6 +672,12 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	fprintf(f, "  strncpy(data->%s, ini_%s, %s);\n",
 		(*i).getName().c_str(), (*i).getName().c_str(),
 		(*i).getLength().c_str());
+      } else if (i->getLengthValue() > 1) {
+	fprintf(f, "  memcpy(data->%s, ini_%s, sizeof(%s) * %s);\n",
+		i->getName().c_str(), i->getName().c_str(),
+		i->getPlainAccessType().c_str(), i->getLength().c_str());
+
+
       } else {
 	fprintf(f, "  data->%s = ini_%s;\n",
 		(*i).getName().c_str(), (*i).getName().c_str());

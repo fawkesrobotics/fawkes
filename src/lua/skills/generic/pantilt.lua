@@ -26,7 +26,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "pantilt"
-fsm                = SkillHSM:new{name=name, start="DECIDE_MODE"}
+fsm                = SkillHSM:new{name=name, start="DECIDE_MODE", debug=true}
 depends_skills     = nil
 depends_interfaces = {
    {v = "ptu_RX28", id = "PanTilt RX28", type = "PanTiltInterface"},
@@ -55,6 +55,13 @@ Move PTU to the specified position.
 The angles are given in radians, pan=0 and tilt=0 is forward, pan is counter
 clockwise positive, tilt is downwards positive.
 
+pantilt{pan=..., tilt=..., time_sec=..., pan_margin=..., tilt_margin=..}
+Move PTU to specified position in requested time.
+This moves the PTU to the position and calculates the velocities such that
+the pan and tilt movements finish about at the same time. If the time is too
+short the maximum velocities will be chosen, possibly loosing the synchronized
+move. Other parameters are similar to the other goto call style.
+
 All call styles support an optional argument ptu="PTU" to define the PTU in
 question.
 ]==]
@@ -78,13 +85,18 @@ end
 --- Check if arm motion is final.
 -- @return true if motion is final, false otherwise
 function jc_ptu_is_final(state)
-   local ptu = ptu_interface(state.fsm.vars.ptu)
+  --printf("jc_ptu_is_final")
+  local ptu = ptu_interface(state.fsm.vars.ptu)
+  --printf("ptu:is_final(): " .. tostring(ptu:is_final()))
+  --printf("ptu:msgid()" .. ptu:msgid() .. ", fsm.msgid:" .. state.fsm.vars.msgid)
+  -- local ptu = ptu_interface(state.fsm.vars.ptu)
    return state.fsm.vars.msgid == ptu:msgid() and ptu:is_final()
 end
 
 --- Check if pantilt plugin skipped our message
 -- @return true if pantilt plugin skipped our message, false otherwise
 function jc_next_msg(state)
+  --printf("jc_next_msg")
    local ptu = ptu_interface(state.fsm.vars.ptu)
    return  ptu:msgid() > state.fsm.vars.msgid
 end
@@ -163,11 +175,19 @@ function CHECKERR:init()
       self.fsm:set_error("Tilt is out of range")
    end
 end
+--function CHECKERR:loop()
+--   printf("CHECKERR - loop")
+--end
 
 function GOTO:init()
    local pan, tilt = self.fsm.vars.pan, self.fsm.vars.tilt
    local ptu = ptu_interface(self.fsm.vars.ptu)
    send_max_speed()
-   local gm = ptu.GotoMessage:new(pan, tilt)
-   self.fsm.vars.msgid = ptu:msgq_enqueue_copy(gm)
+   if self.fsm.vars.time_sec then
+      local tgm = ptu.TimedGotoMessage:new(self.fsm.vars.time_sec, pan, tilt)
+      self.fsm.vars.msgid = ptu:msgq_enqueue_copy(tgm)
+   else
+      local gm = ptu.GotoMessage:new(pan, tilt)
+      self.fsm.vars.msgid = ptu:msgq_enqueue_copy(gm)
+   end
 end

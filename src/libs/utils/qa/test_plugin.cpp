@@ -35,8 +35,9 @@ class TestPlugin : public Plugin {
 
  public:
   /** Constructor, prints out info message
+   * @param config configuration instance
    */
-  TestPlugin() : Plugin("TestPlugin")
+  TestPlugin(Configuration *config) : Plugin(config)
   {
     printf("TestPlugin constructor called\n");
   }
@@ -49,26 +50,5 @@ class TestPlugin : public Plugin {
   }
 };
 
-
-/** Plugin factory function for this plugin.
- * @return an instance of TestPlugin
- */
-extern "C"
-Plugin *
-plugin_factory()
-{
-  return new TestPlugin();
-}
-
-
-/** Plugin destruction function for this plugin.
- * @param plugin The plugin that is to be destroyed. Do not use this plugin
- *        afterwards
- */
-extern "C"
-void
-plugin_destroy(Plugin *plugin)
-{
-  delete plugin;
-}
-
+PLUGIN_DESCRIPTION("Test plugin")
+EXPORT_PLUGIN(TestPlugin)

@@ -104,7 +104,7 @@ function WaitState:do_exit()
    if self.labeltime then
       self.dotattr.label = string.format("%s (0.00/%0.2f)", self.name, self.time_sec)
    end
-   JumpState.exit(self)
+   JumpState.do_exit(self)
 end
 
 function WaitState:reset()

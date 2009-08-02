@@ -81,6 +81,18 @@ h4 :link, h4 :visited, h5 :link, h5 :visited, h6 :link, h6 :visited {
 }
 .nav li.last { border-right: none }
 
+/* Instances */
+#footer hr { margin-top: 15px; margin-bottom: 5px; }
+.instances ul { font-size: 10px; list-style: none; margin: 0; text-align: right }
+.instances li {
+    /*border-right: 1px solid #d7d7d7;*/
+    display: inline;
+    padding: 0.75em;
+    white-space: nowrap;
+}
+.instances li.last { border-right: none }
+
+
 /* Header */
 #header hr { display: none }
 #header h1 { margin: 1.5em 0 -1.5em; }

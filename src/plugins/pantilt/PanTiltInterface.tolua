@@ -53,6 +53,23 @@ class PanTiltInterface : public Interface
     int maxlenof_tilt() const;
   };
 
+  class TimedGotoMessage : public Message
+  {
+    TimedGotoMessage(float ini_time_sec, float ini_pan, float ini_tilt);
+    TimedGotoMessage();
+    ~TimedGotoMessage();
+
+    float time_sec();
+    void set_time_sec(const float new_time_sec);
+    int maxlenof_time_sec() const;
+    float pan();
+    void set_pan(const float new_pan);
+    int maxlenof_pan() const;
+    float tilt();
+    void set_tilt(const float new_tilt);
+    int maxlenof_tilt() const;
+  };
+
   class SetEnabledMessage : public Message
   {
     SetEnabledMessage(bool ini_enabled);

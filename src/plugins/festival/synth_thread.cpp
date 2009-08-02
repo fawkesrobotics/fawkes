@@ -54,6 +54,11 @@ FestivalSynthThread::init()
   } catch (Exception &e) {
     __cfg_voice = "";
   }
+  try {
+    __cfg_extra_code = config->get_string("/plugins/festival/extra_code");
+  } catch (Exception &e) {
+    __cfg_extra_code = "";
+  }
 
   __speechsynth_if = blackboard->open_for_writing<SpeechSynthInterface>("Festival");
 
@@ -72,6 +77,14 @@ void FestivalSynthThread::once()
       logger->log_error(name(), "Failed to load voice %s", __cfg_voice.c_str());
     }
   }
+
+  if (__cfg_extra_code != "") {
+    logger->log_debug(name(), "Executing extra code '%s'", __cfg_extra_code.c_str());
+    if (! festival_eval_command(__cfg_extra_code.c_str())) {
+      logger->log_error(name(), "Failed to execute extra code '%s'", __cfg_extra_code.c_str());
+    }
+  }
+
   say("Festival speech synth loaded");
 }
 

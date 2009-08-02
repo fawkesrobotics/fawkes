@@ -36,7 +36,7 @@ all: $(WARN_TARGETS)
   endif
 .PHONY: warning_festival
 warning_festival:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting festival plugin$(TNORMAL) (festival[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting festival plugin$(TNORMAL) ($(FESTIVAL_ERROR))"
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

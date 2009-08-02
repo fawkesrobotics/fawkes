@@ -119,7 +119,7 @@ end
 
 function RELGOTO:jumpcond_navifail()
    return (self.fsm.vars.msgid == 0
-	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 5)
+	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 25)
 	   or not navigator:has_writer()
 	   or self.failed)
 end

@@ -53,8 +53,8 @@ OBJS_all =	$(OBJS_qa_bb_memmgr) 		\
 BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_interface	\
 		$(BINDIR)/qa_bb_messaging	\
-		$(BINDIR)/qa_bb_openall		\
 		$(BINDIR)/qa_bb_notify		\
+		$(BINDIR)/qa_bb_openall		\
 		$(BINDIR)/qa_bb_listall		\
 		$(BINDIR)/qa_bb_remote		\
 		$(BINDIR)/qa_bb_objpos

@@ -16,6 +16,8 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(LIBSRCDIR)/utils/utils.mk
 
 LIBS_libfawkesplugin = stdc++ fawkescore fawkesutils fawkesconfig $(if $(filter Linux,$(OS)),dl)
 OBJS_libfawkesplugin =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))

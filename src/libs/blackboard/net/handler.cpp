@@ -101,7 +101,13 @@ BlackBoardNetworkHandler::loop()
 	  ilist->append_interface(*i);
 	}
 
-	__nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
+	try {
+	  __nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
+	} catch (Exception &e) {
+	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent interface "
+			       "list to %u, exception follows", clid);
+	  LibLogger::log_error("BlackBoardNetworkHandler", e);
+	}
 	delete infl;
       }
       break;
@@ -298,7 +304,13 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
 							MSG_BB_OPEN_SUCCESS, payload,
 							sizeof(bb_iopensucc_msg_t) +
 							interface->datasize());
-  __nhub->send(omsg);
+  try {
+    __nhub->send(omsg);
+  } catch (Exception &e) {
+    LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent interface "
+			 "open success to %u, exception follows", clid);
+    LibLogger::log_error("BlackBoardNetworkHandler", e);
+  }
   omsg->unref();
 }
 
@@ -312,7 +324,13 @@ BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int errno
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(clid, FAWKES_CID_BLACKBOARD,
 							MSG_BB_OPEN_FAILURE, ofm,
 							sizeof(bb_iopenfail_msg_t));
-  __nhub->send(omsg);
+  try {
+    __nhub->send(omsg);
+  } catch (Exception &e) {
+    LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent interface "
+			 "open failure to %u, exception follows", clid);
+    LibLogger::log_error("BlackBoardNetworkHandler", e);
+  }
   omsg->unref();
 }
 

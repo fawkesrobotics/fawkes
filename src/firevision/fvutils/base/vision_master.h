@@ -28,6 +28,7 @@
 
 #include <fvutils/color/colorspaces.h>
 #include <cams/control/control.h>
+#include <core/utils/refptr.h>
 #include <core/exceptions/software.h>
 
 #include <typeinfo>
@@ -46,10 +47,13 @@ class VisionMaster
   virtual Camera *  register_for_camera(const char *camera_string,
 					fawkes::Thread *thread,
 					colorspace_t cspace = YUV422_PLANAR) = 0;
+  virtual Camera *  register_for_raw_camera(const char *camera_string,
+					    fawkes::Thread *thread)          = 0;
   virtual void      unregister_thread(fawkes::Thread *thread)                = 0;
 
   virtual CameraControl *acquire_camctrl(const char *cam_string)             = 0;
   virtual void           release_camctrl(CameraControl *cc)                  = 0;
+
 
  /** Retrieve a typed camera control instance.
   * Like the non-template method this class will try to instantiate the camera
@@ -94,6 +98,20 @@ class VisionMaster
     CC *
     acquire_camctrl(const char *camera_string, CC *&cc);
 
+
+  /** Get typed raw camera.
+   * Like the non-template variant this method can be used to get access to
+   * the raw camera implementation, without going through a proxy. See the other
+   * method for risks and implication of using the raw device.
+   * @param camera_string camera that can be used by CameraFactory to open a
+   * camera.
+   * @param thread thread to register for this camera
+   */
+  template <class CC>
+    CC *
+    register_for_raw_camera(const char *camera_string, fawkes::Thread *thread);
+
+
  protected:
   virtual CameraControl *acquire_camctrl(const char *cam_string,
 					 const std::type_info &typeinf) = 0;
@@ -130,6 +148,21 @@ VisionMaster::acquire_camctrl(const char *camera_string)
   } else {
     release_camctrl(tcc);
     throw fawkes::TypeMismatchException("CameraControl defined by string does "
+					"not match desired type");
+  }
+}
+
+template <class CC>
+CC *
+VisionMaster::register_for_raw_camera(const char *camera_string, fawkes::Thread *thread)
+{
+  Camera *camera = register_for_raw_camera(camera_string, thread);
+  CC *tcc = dynamic_cast<CC *>(camera);
+  if (tcc) {
+    return tcc;
+  } else {
+    unregister_thread(thread);
+    throw fawkes::TypeMismatchException("Camera defined by string does "
 					"not match desired type");
   }
 }
