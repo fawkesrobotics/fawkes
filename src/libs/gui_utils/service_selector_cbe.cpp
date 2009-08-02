@@ -197,6 +197,16 @@ ServiceSelectorCBE::get_hostname()
 }
 
 /**
+ * Returns the currently selected service name (after connect)
+ * @return the service name
+ */
+Glib::ustring
+ServiceSelectorCBE::get_name()
+{
+  return __servicename;
+}
+
+/**
  * Returns the currently used port (after connect)
  * @return the port
  */
@@ -263,11 +273,13 @@ ServiceSelectorCBE::on_btn_connect_clicked()
         }
       }
       else __port = 1910;
+      __servicename = __hostname;
     }
     else
     {
       Gtk::TreeModel::Row row = *m_cbe_services->get_active();
       __hostname = row[m_service_model->get_column_record().hostname];
+      __servicename = row[m_service_model->get_column_record().name];
       __port = row[m_service_model->get_column_record().port];
     }
 
@@ -303,7 +315,10 @@ ServiceSelectorCBE::on_service_selected()
 
   Gtk::TreeModel::Row row = *m_cbe_services->get_active();
   __hostname = row[m_service_model->get_column_record().hostname];
+  __servicename = row[m_service_model->get_column_record().name];
   __port = row[m_service_model->get_column_record().port];
+
+  m_cbe_services->get_entry()->set_text(__hostname);
 
   try
   {

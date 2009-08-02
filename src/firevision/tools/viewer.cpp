@@ -60,7 +60,7 @@ using namespace fawkes;
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-c] [-s shmem_id] [-n host[:port]/image_id] [-f file] [-v] \\\n"
+  printf("Usage: %s [-c] [-s shmem_id] [-n host[:port]/image_id] [-f file] [-o shmem_id] [-v] \\\n"
 	 "          [-d delay] [cam arg string]\n\n"
          "  -c             Start in continuous update mode\n"
 	 "  -s shmem_id    Open shared memory image with given ID\n"
@@ -70,6 +70,7 @@ print_usage(const char *program_name)
 	 "  -j             Receive JPEG images, only valid with -n\n"
 	 "  -d delay       Delay in ms before a new image is capture.\n"
 	 "  -f file        Open file loader camera with given file (image, colormap)\n"
+	 "  -o shmem_id    Output the image to a shared memory segment with given ID\n"
 	 "  -v             Verbose output on console\n"
 	 "  cam arg string Can be an arbitrary camera argument string that is understood\n"
 	 "                 by CameraFactory and the desired camera.\n",
@@ -105,7 +106,7 @@ process_gtk_events()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hs:f:n:vjcd:");
+  ArgumentParser argp(argc, argv, "hs:f:n:vjcd:o:");
   std::string title = "";
 
 #ifdef HAVE_GTKMM
@@ -113,6 +114,7 @@ main(int argc, char **argv)
 #endif
 
   Camera *cam;
+  SharedMemoryImageBuffer *buf = NULL;
   bool verbose = argp.has_arg("v");
   int delay = 0;
 
@@ -185,7 +187,6 @@ main(int argc, char **argv)
     throw Exception("Failed to initialize camera for unknown reason");
   }
 
-
   try {
     cam->open();
     cam->start();
@@ -194,6 +195,11 @@ main(int argc, char **argv)
     e.print_trace();
     delete cam;
     exit(-2);
+  }
+
+  if ( argp.has_arg("o") )
+  {
+    buf = new SharedMemoryImageBuffer(argp.arg("o"), cam->colorspace(), cam->pixel_width(), cam->pixel_height());
   }
 
   print_keys();
@@ -241,6 +247,7 @@ main(int argc, char **argv)
 	if ( event.key.keysym.sym == SDLK_SPACE ) {
 	  cam->capture();
           if (cam->buffer() != NULL ) {
+            if ( buf ) memcpy(buf->buffer(), cam->buffer(), cam->buffer_size());
 #ifdef HAVE_RECTINFO
 	    if ( rectifying ) {
 	      convert(cam->colorspace(), YUV422_PLANAR, cam->buffer(), unfiltered_buffer,

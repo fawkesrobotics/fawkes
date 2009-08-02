@@ -4,6 +4,7 @@
  *
  *  Created: Sun Apr 19 13:13:43 2009 (on way to German Open 2009)
  *  Copyright  2009  Tim Niemueller [www.niemueller.de]
+ *             2009  Tobias Kellner
  *
  *  $Id$
  *
@@ -58,6 +59,9 @@ RefBoxCommThread::init()
     __last_score_cyan    = 0xFFFFFFFF;
     __last_score_magenta = 0xFFFFFFFF;
     __last_gamestate     = -1;
+    __our_team = TEAM_NONE;
+    __our_goal_color = GOAL_BLUE;
+    __kickoff = false;
     __gamestate_modified = false;
 
     std::string  league  = config->get_string("/general/league");
@@ -67,14 +71,16 @@ RefBoxCommThread::init()
       __refboxproc = new Msl2008RefBoxProcessor(refbox_host.c_str(), refbox_port);
     } else if ( league == "SPL" ) {
       unsigned int refbox_port = config->get_uint("/refboxcomm/SPL/port");
+      __team_number = config->get_uint("/general/team_number");
+      __player_number = config->get_uint("/general/player_number");
       __refboxproc = new SplRefBoxProcessor(logger, refbox_port,
-					    TEAM_CYAN, GOAL_BLUE);
+                                            __team_number, __player_number);
     } else {
       throw Exception("League %s is not supported by refboxcomm plugin", league.c_str());
     }
     __refboxproc->set_handler(this);
     __gamestate_if = blackboard->open_for_writing<GameStateInterface>("RefBoxComm");
-    __penalty_if   = blackboard->open_for_writing<SplPenaltyInterface>("SPL Penalties");
+    __penalty_if   = blackboard->open_for_writing<SplPenaltyInterface>("SPL Penalty");
   } catch (Exception &e) {
     finalize();
     throw;
@@ -104,9 +110,23 @@ RefBoxCommThread::loop()
       msg = __gamestate_if->msgq_first<GameStateInterface::SetStateTeamMessage>();
       __gamestate_if->set_state_team(msg->state_team());
       __gamestate_modified = true;
+    } else if (__gamestate_if->msgq_first_is<GameStateInterface::SetKickoffMessage>()) {
+      GameStateInterface::SetKickoffMessage *msg;
+      msg = __gamestate_if->msgq_first<GameStateInterface::SetKickoffMessage>();
+      __gamestate_if->set_kickoff(msg->is_kickoff());
+      __gamestate_modified = true;
     }
+    __gamestate_if->msgq_pop();
   }
-
+  while (!__penalty_if->msgq_empty()) {
+    if (__penalty_if->msgq_first_is<SplPenaltyInterface::SetPenaltyMessage>()) {
+      SplPenaltyInterface::SetPenaltyMessage *msg;
+      msg = __penalty_if->msgq_first<SplPenaltyInterface::SetPenaltyMessage>();
+      __penalty_if->set_penalty(msg->penalty());
+      __gamestate_modified = true;
+    }
+    __penalty_if->msgq_pop();
+  }
   __refboxproc->refbox_process();
   if (__gamestate_modified) {
     __gamestate_if->write();
@@ -160,36 +180,55 @@ void
 RefBoxCommThread::set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,
 				fawkes::worldinfo_gamestate_goalcolor_t goal_color)
 {
-  logger->log_debug("RefBoxCommThread", "Our team: %s   Our goal: %s",
-		    worldinfo_gamestate_team_tostring(our_team),
-		    worldinfo_gamestate_goalcolor_tostring(goal_color));
+  if (our_team != __our_team)
+  {
+    logger->log_debug("RefBoxCommThread", "Team: %s",
+                      worldinfo_gamestate_team_tostring(our_team));
 
-  switch (our_team) {
-  case TEAM_CYAN:
-    __gamestate_if->set_our_team(GameStateInterface::TEAM_CYAN); break;
-  case TEAM_MAGENTA:
-    __gamestate_if->set_our_team(GameStateInterface::TEAM_MAGENTA); break;
-  default: break;
+    __our_team = our_team;
+    switch (our_team) {
+      case TEAM_CYAN:
+        __gamestate_if->set_our_team(GameStateInterface::TEAM_CYAN);
+        break;
+      case TEAM_MAGENTA:
+        __gamestate_if->set_our_team(GameStateInterface::TEAM_MAGENTA);
+        break;
+      default:
+        break;
+    }
+    __gamestate_modified = true;
   }
 
-  switch (goal_color) {
-  case GOAL_BLUE:
-    __gamestate_if->set_our_goal_color(GameStateInterface::GOAL_BLUE);   break;
-  case GOAL_YELLOW:
-    __gamestate_if->set_our_goal_color(GameStateInterface::GOAL_YELLOW); break;
+  if (goal_color != __our_goal_color)
+  {
+    logger->log_debug("RefBoxCommThread", "Our Goal: %s",
+                      worldinfo_gamestate_goalcolor_tostring(goal_color));
+    __our_goal_color = goal_color;
+    switch (goal_color)
+    {
+      case GOAL_BLUE:
+        __gamestate_if->set_our_goal_color(GameStateInterface::GOAL_BLUE);
+        break;
+      case GOAL_YELLOW:
+        __gamestate_if->set_our_goal_color(GameStateInterface::GOAL_YELLOW);
+        break;
+    }
+    __gamestate_modified = true;
   }
 }
 
 
 void
-RefBoxCommThread::set_half(fawkes::worldinfo_gamestate_half_t half)
+RefBoxCommThread::set_half(fawkes::worldinfo_gamestate_half_t half,
+                           bool kickoff)
 {
   if (half != __last_half) {
     __last_half = half;
     __gamestate_modified = true;
 
-    logger->log_debug("RefBoxCommThread", "Half time: %s",
-		      worldinfo_gamestate_half_tostring(half));
+    logger->log_debug("RefBoxCommThread", "Half time: %s (Kickoff? %s)",
+                      worldinfo_gamestate_half_tostring(half),
+                      kickoff ? "yes" : "no");
 
     switch (half) {
     case HALF_FIRST:
@@ -198,25 +237,28 @@ RefBoxCommThread::set_half(fawkes::worldinfo_gamestate_half_t half)
       __gamestate_if->set_half(GameStateInterface::HALF_SECOND); break;
     }
   }
+
+  if (kickoff != __kickoff)
+  {
+    __kickoff = kickoff;
+    __gamestate_modified = true;
+    __gamestate_if->set_kickoff(kickoff);
+  }
 }
 
 
 void
-RefBoxCommThread::add_penalty(unsigned int player, unsigned int penalty,
-			      unsigned int seconds_remaining)
+RefBoxCommThread::add_penalty(unsigned int penalty,
+                              unsigned int seconds_remaining)
 {
-  if (player < __penalty_if->maxlenof_penalty()) {
-    if ((penalty != __penalty_if->penalty(player)) ||
-	(seconds_remaining != __penalty_if->remaining(player))) {
-      __gamestate_modified = true;
-      logger->log_debug("RefBoxCommThread", "Penalty for player %u: %u (%u sec)",
-			player, penalty, seconds_remaining);
-      __penalty_if->set_penalty(player, penalty);
-      __penalty_if->set_remaining(player, seconds_remaining);
-    }
-  } else {
-    logger->log_warn("RefBoxCommThread", "Received penalty for player %u but "
-		     "maximum is %u", player, __penalty_if->maxlenof_penalty());
+  if ((penalty != __penalty_if->penalty()) ||
+      (seconds_remaining != __penalty_if->remaining()))
+  {
+    __gamestate_modified = true;
+    logger->log_debug("RefBoxCommThread", "Penalty %u (%u sec remaining)",
+                      penalty, seconds_remaining);
+    __penalty_if->set_penalty(penalty);
+    __penalty_if->set_remaining(seconds_remaining);
   }
 }
 

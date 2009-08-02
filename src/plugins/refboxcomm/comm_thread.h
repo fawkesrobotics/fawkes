@@ -62,9 +62,9 @@ class RefBoxCommThread
   virtual void set_score(unsigned int score_cyan, unsigned int score_magenta);
   virtual void set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,
 			     fawkes::worldinfo_gamestate_goalcolor_t goal_color);
-  virtual void set_half(fawkes::worldinfo_gamestate_half_t half);
-  virtual void add_penalty(unsigned int player, unsigned int penalty,
-			   unsigned int seconds_remaining);
+  virtual void set_half(fawkes::worldinfo_gamestate_half_t half, bool kickoff);
+  virtual void add_penalty(unsigned int penalty,
+                           unsigned int seconds_remaining);
 
   virtual void handle_refbox_state();
 
@@ -81,8 +81,13 @@ class RefBoxCommThread
   bool         __gamestate_modified;
   int          __last_gamestate;
   fawkes::worldinfo_gamestate_half_t  __last_half;
+  bool __kickoff;
   unsigned int __last_score_cyan;
   unsigned int __last_score_magenta;
+  fawkes::worldinfo_gamestate_team_t __our_team;
+  fawkes::worldinfo_gamestate_goalcolor_t __our_goal_color;
+  unsigned int __team_number;
+  unsigned int __player_number;
 };
 
 

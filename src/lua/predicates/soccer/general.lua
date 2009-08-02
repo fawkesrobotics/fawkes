@@ -25,7 +25,7 @@ require("fawkes.predlib")
 
 local math=math
 
---- This module provides a generic finite state machine (FSM).
+--- This module provides generic soccer predicates.
 -- @author Tim Niemueller
 module(..., fawkes.predlib.module_init)
 

@@ -82,11 +82,13 @@ GameStateInterface::GameStateInterface() : Interface()
   data      = (GameStateInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_UINT, "game_state", 1, &data->game_state);
+  add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
   add_fieldinfo(IFT_UINT, "score_cyan", 1, &data->score_cyan);
   add_fieldinfo(IFT_UINT, "score_magenta", 1, &data->score_magenta);
   add_messageinfo("SetTeamColorMessage");
+  add_messageinfo("SetKickoffMessage");
   add_messageinfo("SetStateTeamMessage");
-  unsigned char tmp_hash[] = {0x1f, 0x8c, 0x58, 0x3b, 0x4d, 0xa8, 0x14, 0x3d, 0xcd, 0x36, 0xb4, 0x46, 0x68, 0xcd, 0xc, 0x45};
+  unsigned char tmp_hash[] = {0x15, 0x3, 0x49, 0xf9, 0x8c, 0x4b, 0x6d, 0x2, 0xac, 0x6a, 0xab, 0xb6, 0xde, 0x8b, 0x31, 0x92};
   set_hash(tmp_hash);
 }
 
@@ -246,6 +248,36 @@ GameStateInterface::set_half(const if_gamestate_half_t new_half)
   data->half = new_half;
 }
 
+/** Get kickoff value.
+ * Whether we have kickoff
+ * @return kickoff value
+ */
+bool
+GameStateInterface::is_kickoff() const
+{
+  return data->kickoff;
+}
+
+/** Get maximum length of kickoff value.
+ * @return length of kickoff value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+GameStateInterface::maxlenof_kickoff() const
+{
+  return 1;
+}
+
+/** Set kickoff value.
+ * Whether we have kickoff
+ * @param new_kickoff new kickoff value
+ */
+void
+GameStateInterface::set_kickoff(const bool new_kickoff)
+{
+  data->kickoff = new_kickoff;
+}
+
 /** Get role value.
  * Current role of this robot
  * @return role value
@@ -342,6 +374,8 @@ GameStateInterface::create_message(const char *type) const
 {
   if ( strncmp("SetTeamColorMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetTeamColorMessage();
+  } else if ( strncmp("SetKickoffMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetKickoffMessage();
   } else if ( strncmp("SetStateTeamMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetStateTeamMessage();
   } else {
@@ -451,6 +485,93 @@ GameStateInterface::SetTeamColorMessage::clone() const
 {
   return new GameStateInterface::SetTeamColorMessage(this);
 }
+/** @class GameStateInterface::SetKickoffMessage <interfaces/GameStateInterface.h>
+ * SetKickoffMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_kickoff initial value for kickoff
+ */
+GameStateInterface::SetKickoffMessage::SetKickoffMessage(const bool ini_kickoff) : Message("SetKickoffMessage")
+{
+  data_size = sizeof(SetKickoffMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetKickoffMessage_data_t *)data_ptr;
+  data->kickoff = ini_kickoff;
+  add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
+}
+/** Constructor */
+GameStateInterface::SetKickoffMessage::SetKickoffMessage() : Message("SetKickoffMessage")
+{
+  data_size = sizeof(SetKickoffMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetKickoffMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
+}
+
+/** Destructor */
+GameStateInterface::SetKickoffMessage::~SetKickoffMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+GameStateInterface::SetKickoffMessage::SetKickoffMessage(const SetKickoffMessage *m) : Message("SetKickoffMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetKickoffMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get kickoff value.
+ * Whether we have kickoff
+ * @return kickoff value
+ */
+bool
+GameStateInterface::SetKickoffMessage::is_kickoff() const
+{
+  return data->kickoff;
+}
+
+/** Get maximum length of kickoff value.
+ * @return length of kickoff value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+GameStateInterface::SetKickoffMessage::maxlenof_kickoff() const
+{
+  return 1;
+}
+
+/** Set kickoff value.
+ * Whether we have kickoff
+ * @param new_kickoff new kickoff value
+ */
+void
+GameStateInterface::SetKickoffMessage::set_kickoff(const bool new_kickoff)
+{
+  data->kickoff = new_kickoff;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+GameStateInterface::SetKickoffMessage::clone() const
+{
+  return new GameStateInterface::SetKickoffMessage(this);
+}
 /** @class GameStateInterface::SetStateTeamMessage <interfaces/GameStateInterface.h>
  * SetStateTeamMessage Fawkes BlackBoard Interface Message.
  * 
@@ -546,8 +667,12 @@ GameStateInterface::message_valid(const Message *message) const
   if ( m0 != NULL ) {
     return true;
   }
-  const SetStateTeamMessage *m1 = dynamic_cast<const SetStateTeamMessage *>(message);
+  const SetKickoffMessage *m1 = dynamic_cast<const SetKickoffMessage *>(message);
   if ( m1 != NULL ) {
+    return true;
+  }
+  const SetStateTeamMessage *m2 = dynamic_cast<const SetStateTeamMessage *>(message);
+  if ( m2 != NULL ) {
     return true;
   }
   return false;

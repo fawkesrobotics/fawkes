@@ -55,6 +55,17 @@ class GameStateInterface : public Interface
     int maxlenof_our_team() const;
   };
 
+  class SetKickoffMessage : public Message
+  {
+    SetKickoffMessage(bool ini_kickoff);
+    SetKickoffMessage();
+    ~SetKickoffMessage();
+
+    bool is_kickoff();
+    void set_kickoff(const bool new_kickoff);
+    int maxlenof_kickoff() const;
+  };
+
   class SetStateTeamMessage : public Message
   {
     SetStateTeamMessage(if_gamestate_team_t ini_state_team);
@@ -81,6 +92,9 @@ class GameStateInterface : public Interface
   if_gamestate_half_t half();
   void set_half(const if_gamestate_half_t new_half);
   int maxlenof_half() const;
+  bool is_kickoff();
+  void set_kickoff(const bool new_kickoff);
+  int maxlenof_kickoff() const;
   if_gamestate_role_t role();
   void set_role(const if_gamestate_role_t new_role);
   int maxlenof_role() const;

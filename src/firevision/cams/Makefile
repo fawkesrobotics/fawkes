@@ -25,17 +25,18 @@ LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
 LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils
-OBJS_libfvcams = camera.o			\
-                 control/control.o		\
-                 control/color.o		\
-                 control/image.o		\
-                 control/pantilt.o		\
-                 control/focus.o		\
-                 control/zoom.o			\
-                 control/effect.o		\
-                 control/dummy.o		\
-                 cam_exceptions.o		\
-                 factory.o			\
+OBJS_libfvcams = camera.o          \
+                 control/control.o \
+                 control/color.o   \
+                 control/image.o   \
+                 control/pantilt.o \
+                 control/focus.o   \
+                 control/zoom.o    \
+                 control/effect.o  \
+                 control/source.o  \
+                 control/dummy.o   \
+                 cam_exceptions.o  \
+                 factory.o         \
                  control/factory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)

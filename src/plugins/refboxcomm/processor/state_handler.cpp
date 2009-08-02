@@ -46,13 +46,13 @@
  * @param our_team our team color
  * @param goal_color our goal color
  *
- * @fn void RefBoxStateHandler::set_half(fawkes::worldinfo_gamestate_half_t half) = 0
+ * @fn void RefBoxStateHandler::set_half(fawkes::worldinfo_gamestate_half_t half, bool kickoff = false) = 0
  * Set current half of the game time.
  * @param half current half
+ * @param kickoff whether we have kickoff
  *
- * @fn void RefBoxStateHandler::add_penalty(unsigned int player, unsigned int penalty, unsigned int seconds_remaining) = 0
+ * @fn void RefBoxStateHandler::add_penalty(unsigned int penalty, unsigned int seconds_remaining) = 0
  * Add penalty.
- * @param player number of the player to add the penalty for
  * @param penalty penalty code
  * @param seconds_remaining estimated time when the penalty will be lifted
  *

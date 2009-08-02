@@ -37,9 +37,10 @@ class RefBoxStateHandler
   virtual void set_score(unsigned int score_cyan, unsigned int score_magenta) = 0;
   virtual void set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,
 			     fawkes::worldinfo_gamestate_goalcolor_t goal_color) = 0;
-  virtual void set_half(fawkes::worldinfo_gamestate_half_t half)              = 0;
-  virtual void add_penalty(unsigned int player, unsigned int penalty,
-			   unsigned int seconds_remaining)                    = 0;
+  virtual void set_half(fawkes::worldinfo_gamestate_half_t half,
+                        bool kickoff = false) = 0;
+  virtual void add_penalty(unsigned int penalty,
+                           unsigned int seconds_remaining) = 0;
 
 
   virtual void handle_refbox_state() = 0;

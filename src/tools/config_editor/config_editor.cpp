@@ -90,7 +90,7 @@ FawkesConfigEditor::on_connected()
 {
   m_network_client = m_service_selector->get_network_client();
   m_trv_config->set_network_client( m_network_client );
-  m_wnd_main->set_title("Fawkes Config Editor @ " + m_service_selector->get_hostname());
+  m_wnd_main->set_title("Fawkes Config Editor @ " + m_service_selector->get_name());
 }
 
 void

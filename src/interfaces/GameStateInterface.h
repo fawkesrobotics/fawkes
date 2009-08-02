@@ -102,6 +102,7 @@ class GameStateInterface : public Interface
     unsigned int game_state; /**< Current game state */
     unsigned int score_cyan; /**< Score of team cyan */
     unsigned int score_magenta; /**< Score of team magenta */
+    bool kickoff; /**< Whether we have kickoff */
     if_gamestate_team_t state_team; /**< Team referred to by game state */
     if_gamestate_team_t our_team; /**< Our team color */
     if_gamestate_goalcolor_t our_goal_color; /**< Our own goal color */
@@ -133,6 +134,29 @@ class GameStateInterface : public Interface
     if_gamestate_team_t our_team() const;
     void set_our_team(const if_gamestate_team_t new_our_team);
     size_t maxlenof_our_team() const;
+    virtual Message * clone() const;
+  };
+
+  class SetKickoffMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      bool kickoff; /**< Whether we have kickoff */
+    } SetKickoffMessage_data_t;
+
+    SetKickoffMessage_data_t *data;
+
+   public:
+    SetKickoffMessage(const bool ini_kickoff);
+    SetKickoffMessage();
+    ~SetKickoffMessage();
+
+    SetKickoffMessage(const SetKickoffMessage *m);
+    /* Methods */
+    bool is_kickoff() const;
+    void set_kickoff(const bool new_kickoff);
+    size_t maxlenof_kickoff() const;
     virtual Message * clone() const;
   };
 
@@ -181,6 +205,9 @@ class GameStateInterface : public Interface
   if_gamestate_half_t half() const;
   void set_half(const if_gamestate_half_t new_half);
   size_t maxlenof_half() const;
+  bool is_kickoff() const;
+  void set_kickoff(const bool new_kickoff);
+  size_t maxlenof_kickoff() const;
   if_gamestate_role_t role() const;
   void set_role(const if_gamestate_role_t new_role);
   size_t maxlenof_role() const;

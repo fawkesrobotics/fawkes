@@ -33,6 +33,7 @@
 #include <cams/control/focus.h>
 #include <cams/control/pantilt.h>
 #include <cams/control/zoom.h>
+#include <cams/control/source.h>
 #include <cams/control/dummy.h>
 #include <cams/cam_exceptions.h>
 
@@ -186,6 +187,9 @@ CameraControlFactory::instance(const std::type_info &typeinf, Camera *camera)
 
   } else if (typeid(CameraControlEffect) == typeinf) {
     c = dynamic_cast<CameraControlEffect *>(camera);
+
+  } else if (typeid(CameraControlSource) == typeinf) {
+    c = dynamic_cast<CameraControlSource *>(camera);
 
   } else {
     throw UnknownCameraControlTypeException();

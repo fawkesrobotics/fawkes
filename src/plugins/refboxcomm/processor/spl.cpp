@@ -4,6 +4,7 @@
  *
  *  Created: Tue Jul 08 13:50:06 2008
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *             2009  Tobias Kellner
  *
  *  $Id$
  *
@@ -78,30 +79,22 @@ static const char    SPL_GAMECONTROL_HEADER[GCHS]  = {'R', 'G', 'm', 'e'};
 /** Constructor.
  * @param logger Logger
  * @param broadcast_port Broadcast port
- * @param our_team our initial team
- * @param our_goal our initial goal
+ * @param team_number our team number
+ * @param player_number individual player number
  */
 SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *logger,
-				       unsigned short int broadcast_port,
-				       fawkes::worldinfo_gamestate_team_t our_team,
-				       fawkes::worldinfo_gamestate_goalcolor_t our_goal)
+                                       unsigned short int broadcast_port,
+                                       unsigned int team_number,
+                                       unsigned int player_number)
 {
+  __player_number = player_number;
+  __team_number = team_number;
   __logger = logger;
   __quit = false;
   __s = new DatagramSocket(0.0000000001);
   __s->bind(broadcast_port);
 
-  for (unsigned int i = 0; i < MAX_NUM_PLAYERS; ++i) {
-    __penalties[i] = SPL_PENALTY_NONE;
-  }
-
-  switch (our_team) {
-  case TEAM_CYAN:
-    __our_team = SPL_TEAM_BLUE; break;
-  default:
-    __our_team = SPL_TEAM_RED;  break;
-  }
-  __our_goal = our_goal;
+  __penalty = SPL_PENALTY_NONE;
 }
 
 
@@ -117,48 +110,68 @@ SplRefBoxProcessor::~SplRefBoxProcessor()
 void
 SplRefBoxProcessor::process_struct(spl_gamecontrol_t *msg)
 {
+  fawkes::worldinfo_gamestate_team_t our_team;
+  //fawkes::worldinfo_gamestate_goalcolor_t our_goal;
+
+  int team_index;
+  if (msg->teams[0].team_number == __team_number) team_index = 0;
+  else if (msg->teams[1].team_number == __team_number) team_index = 1;
+  else return; //Message doesn't concern us
+
+  switch (msg->teams[team_index].team_color) {
+    case SPL_TEAM_BLUE:
+      our_team = TEAM_CYAN;
+      break;
+    case SPL_TEAM_RED:
+      our_team = TEAM_MAGENTA;
+      break;
+    default:
+      printf("Ignoring faulty packet\n");
+      return;
+  }
+
+  _rsh->set_score(msg->teams[team_index].score, msg->teams[(team_index == 1 ? 0 : 1)].score);
+  _rsh->set_team_goal(our_team, (our_team == TEAM_CYAN ? GOAL_BLUE : GOAL_YELLOW)); //blue team defends blue goal
+
+  for (unsigned int pl_num = 0; pl_num < MAX_NUM_PLAYERS; ++pl_num)
+  {
+    if ((pl_num + 1) == __player_number)
+    {
+      if ((msg->teams[team_index].players[pl_num].penalty != __penalty) ||
+          (msg->teams[team_index].players[pl_num].penalty != PENALTY_NONE))
+      {
+        __penalty = msg->teams[team_index].players[pl_num].penalty;
+        _rsh->add_penalty(__penalty,
+                          msg->teams[team_index].players[pl_num].secs_till_unpenalized);
+      }
+      break;
+    }
+  }
+
   switch (msg->state) {
   case SPL_STATE_INITIAL:
     _rsh->set_gamestate(GS_SPL_INITIAL, TEAM_BOTH);
     break;
   case SPL_STATE_READY:
-    _rsh->set_gamestate(GS_SPL_READY,
-			(msg->kick_off_team == SPL_TEAM_BLUE) ? TEAM_CYAN : TEAM_MAGENTA);
+    _rsh->set_gamestate(GS_SPL_READY, TEAM_BOTH);
     break;
   case SPL_STATE_SET:
-    _rsh->set_gamestate(GS_SPL_SET,
-			(msg->kick_off_team == SPL_TEAM_BLUE) ? TEAM_CYAN : TEAM_MAGENTA);
+    _rsh->set_gamestate(GS_SPL_SET, TEAM_BOTH);
     break;
   case SPL_STATE_PLAYING:
-    _rsh->set_gamestate(GS_SPL_PLAY,
-			(msg->kick_off_team == SPL_TEAM_BLUE) ? TEAM_CYAN : TEAM_MAGENTA);
+    _rsh->set_gamestate(GS_SPL_PLAY, TEAM_BOTH);
     break;
   case SPL_STATE_FINISHED:
     _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH);
     break;
   default:
-    _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH); break;
+    _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH);
+    break;
   }
 
-  _rsh->set_half( (msg->first_half == 1) ? HALF_FIRST : HALF_SECOND);
-
-  if (msg->teams[0].team_color == SPL_TEAM_BLUE) {
-    _rsh->set_score( msg->teams[0].score, msg->teams[1].score);
-  } else {
-    _rsh->set_score( msg->teams[1].score, msg->teams[0].score);
-  }
-
-  int oti = (msg->teams[0].team_color == __our_team) ? 0 : 1;
-  for (unsigned int i = 0; i < MAX_NUM_PLAYERS; ++i) {
-    if ( (__penalties[i] != msg->teams[oti].players[i].penalty) ||
-	 (msg->teams[oti].players[i].penalty != SPL_PENALTY_NONE) ) {
-      _rsh->add_penalty(i, msg->teams[oti].players[i].penalty,
-			msg->teams[oti].players[i].secs_till_unpenalized);
-      __penalties[i] = msg->teams[oti].players[i].penalty;
-    }
-  }
+  _rsh->set_half((msg->first_half == 1) ? HALF_FIRST : HALF_SECOND,
+                 msg->kick_off_team == team_index);
 }
-
 
 
 void

@@ -147,7 +147,7 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
 					   unsigned short int &port)
 {
   Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
-  if (__expander.get_expanded()) {
+  if (__expander.get_expanded() && !__treeview.has_focus()) {
     if ( __entry.get_text_length() > 0 ) {
       char *tmpvalue = strdup(__entry.get_text().c_str());
 
@@ -168,6 +168,8 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
 
       // evil, but Glib::Regex is only availabel in ver >= 2.14, n/a on maemo
       ipaddr = hostname;
+
+      name = hostname;
 
       free(tmpvalue);
       return;

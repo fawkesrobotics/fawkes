@@ -70,6 +70,7 @@
     <field type="if_gamestate_team_t" name="our_team">Our team color</field>
     <field type="if_gamestate_goalcolor_t" name="our_goal_color">Our own goal color</field>
     <field type="if_gamestate_half_t" name="half">Current game half</field>
+    <field type="bool" name="kickoff">Whether we have kickoff</field>
     <field type="if_gamestate_role_t" name="role">Current role of this robot</field>
     <field type="unsigned int" name="score_cyan">Score of team cyan</field>
     <field type="unsigned int" name="score_magenta">Score of team magenta</field>
@@ -77,6 +78,10 @@
   <message name="SetTeamColor">
     <comment>Set color of own team</comment>
     <ref>our_team</ref>
+  </message>
+  <message name="SetKickoff">
+    <comment>Set whether we have kickoff</comment>
+    <ref>kickoff</ref>
   </message>
   <message name="SetStateTeam">
     <comment>Set the team the playmode applies to.</comment>

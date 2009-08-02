@@ -4,6 +4,7 @@
  *
  *  Created: Tue Jul 08 13:46:19 2008
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *             2009  Tobias Kellner
  *
  *  $Id$
  *
@@ -74,8 +75,7 @@ class SplRefBoxProcessor : public RefBoxProcessor
 {
  public:
   SplRefBoxProcessor(fawkes::Logger *logger, unsigned short int broadcast_port,
-		     fawkes::worldinfo_gamestate_team_t our_team,
-		     fawkes::worldinfo_gamestate_goalcolor_t our_goal);
+                     unsigned int team_number, unsigned int player_number);
   ~SplRefBoxProcessor();
 
   void run();
@@ -91,10 +91,10 @@ class SplRefBoxProcessor : public RefBoxProcessor
   fawkes::Logger         *__logger;
 
   bool __quit;
-  std::map<unsigned int, unsigned int> __penalties;
 
-  uint8_t  __our_team;
-  fawkes::worldinfo_gamestate_goalcolor_t __our_goal;
+  uint16_t __penalty;
+  uint8_t  __team_number;
+  uint8_t  __player_number;
 };
 
 #endif

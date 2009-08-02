@@ -72,7 +72,7 @@ PluginGuiGtkWindow::~PluginGuiGtkWindow()
 void
 PluginGuiGtkWindow::on_connect()
 {
-  this->set_title(std::string("Fawkes Plugin Tool @ ") + m_service_selector->get_hostname());
+  this->set_title(std::string("Fawkes Plugin Tool @ ") + m_service_selector->get_name());
 }
 
 /** Disconnected handler. */

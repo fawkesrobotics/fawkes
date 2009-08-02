@@ -61,6 +61,7 @@ class ServiceSelectorCBE
 
   FawkesNetworkClient* get_network_client();
   Glib::ustring get_hostname();
+  Glib::ustring get_name();
   unsigned int get_port();
 
   sigc::signal<void> signal_connected();
@@ -84,6 +85,7 @@ class ServiceSelectorCBE
 
  private:
    Glib::ustring  __hostname;
+   Glib::ustring  __servicename;
    unsigned short __port;
 };
 
