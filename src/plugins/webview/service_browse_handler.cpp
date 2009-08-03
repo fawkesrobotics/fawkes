@@ -5,8 +5,6 @@
  *  Created: Thu Jul 02 18:00:20 2009 (RoboCup 2009, Graz)
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

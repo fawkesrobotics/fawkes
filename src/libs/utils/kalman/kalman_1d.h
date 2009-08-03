@@ -4,8 +4,6 @@
  *  Created: Mon Nov 10 2008
  *  Copyright  2008  Bahram Maleki-Fard
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

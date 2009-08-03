@@ -5,8 +5,6 @@
 --  Created: Thu Mar 13 16:31:29 2008 (was utils.lua in skiller)
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
---  $Id$
---
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

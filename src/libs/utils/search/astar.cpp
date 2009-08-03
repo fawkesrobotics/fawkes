@@ -5,8 +5,6 @@
  *  Generated: Mon Sep 15 18:38:00 2002
  *  Copyright  2002-2007  Stefan Jacobs, Martin Liebenberg
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

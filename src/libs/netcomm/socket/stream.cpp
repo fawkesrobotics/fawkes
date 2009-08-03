@@ -5,8 +5,6 @@
  *  Created: Fri Nov 10 10:02:54 2006 (on train to Google, Hamburg)
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

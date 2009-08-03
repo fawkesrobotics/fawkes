@@ -5,8 +5,6 @@
  *  Generated: Mon May 30 13:07:41 2005 (from FireVision)
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

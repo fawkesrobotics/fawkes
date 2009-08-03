@@ -5,8 +5,6 @@
  *  Created: Sat Sep 16 17:11:13 2006 (on train to Cologne)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

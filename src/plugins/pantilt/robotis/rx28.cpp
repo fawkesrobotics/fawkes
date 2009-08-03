@@ -5,8 +5,6 @@
  *  Created: Tue Jun 16 11:09:32 2009 (based on visca.cpp)
  *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

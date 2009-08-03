@@ -5,8 +5,6 @@
  *  Generated: Thu Jul 14 22:29:25 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: camera_tracker.h,v 2.0 2006/04/11 14:02:34 tim Exp $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

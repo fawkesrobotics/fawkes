@@ -4,8 +4,6 @@
  *  Created:  Mon Sep 22 12:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

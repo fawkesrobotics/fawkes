@@ -7,8 +7,6 @@
  *             2006       Stefan Schiffer
  *             2006       Christoph Mies
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

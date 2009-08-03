@@ -7,8 +7,6 @@
  *             2005  The cairomm Development Team
  *             2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

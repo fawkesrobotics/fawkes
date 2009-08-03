@@ -7,8 +7,6 @@
  *  Copyright  2004  Tim Niemueller
  *  niemueller@i5.informatik.rwth-aachen.de
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Created: Sun April 13 17:52:43 2008
  *  Copyright  2008  Daniel Beck
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

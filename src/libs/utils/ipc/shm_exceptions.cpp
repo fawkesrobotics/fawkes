@@ -6,8 +6,6 @@
  *  Created: Sat Nov 11 14:15:19 2006 (on train from Hamburg to Aachen)
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

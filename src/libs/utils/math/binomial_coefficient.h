@@ -5,8 +5,6 @@
  *  Generated: Sun Nov 04 17:29:46 2007 
  *  Copyright  2007  Martin Liebenberg
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -4,8 +4,6 @@
 #   Created on Wed Nov 22 00:29:31 2006 (from plugin tool)
 #   Copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
-#   $Id$
-#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify

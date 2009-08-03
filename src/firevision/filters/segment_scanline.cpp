@@ -8,8 +8,6 @@
  *  Created: Thu Jul 14 15:04:23 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

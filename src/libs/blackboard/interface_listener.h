@@ -5,8 +5,6 @@
  *  Created: Wed Nov 07 23:55:53 2007 (Saw Ella for the first time)
  *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -4,8 +4,6 @@
  *
  *  Copyright  1997-2001  H. Dietz and R. Fisher (copied form FFmpeg)
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

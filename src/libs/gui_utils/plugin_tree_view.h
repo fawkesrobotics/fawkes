@@ -7,8 +7,6 @@
  *  Copyright  2008  Daniel Beck
  *             2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: plugin_gui.h 899 2008-04-10 11:36:58Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

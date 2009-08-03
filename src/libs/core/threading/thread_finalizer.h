@@ -5,8 +5,6 @@
  *  Created: Wed May 23 14:00:57 2007 (Illuminatus day)
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Created: Wed Jan 4 2009
  *  Copyright  2009 Masrur Doostdar
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

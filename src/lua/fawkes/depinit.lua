@@ -5,8 +5,6 @@
 --  Created: Sun Mar 08 12:28:44 2009 (Wesel am Niederrhein)
 --  Copyright  2009  Tim Niemueller [www.niemueller.de]
 --
---  $Id$
---
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

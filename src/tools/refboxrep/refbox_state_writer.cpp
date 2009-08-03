@@ -5,8 +5,6 @@
  *  Created: Wed Apr 09 10:19:27 2008
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: refbox_state_writer.cpp 2032 2009-03-27 19:09:57Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

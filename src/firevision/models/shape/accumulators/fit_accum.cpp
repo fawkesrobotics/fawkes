@@ -5,8 +5,6 @@
  *  Generated: Sat Sep 10 2005 17:28:12
  *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
- *  $Id$
- *
  ****************************************************************************/
                                                                                                                                               
 /*  This program is free software; you can redistribute it and/or modify

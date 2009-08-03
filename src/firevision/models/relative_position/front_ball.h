@@ -8,8 +8,6 @@
  *                   Tim Niemueller [www.niemueller.de]
  *                   Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

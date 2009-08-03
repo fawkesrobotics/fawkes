@@ -5,8 +5,6 @@
  *  Created: Fri Jan 25 18:19:00 2008 (Just back from Hacking with Fawkes talk)
  *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

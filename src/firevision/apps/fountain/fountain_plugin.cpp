@@ -5,8 +5,6 @@
  *  Created: Fri Nov 16 11:29:48 2007 (Ella in lab for the first time)
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

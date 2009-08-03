@@ -5,8 +5,6 @@
  *  Created: Fri Jun 03 13:43:20 2005 (copied from RCSoft5 FireVision)
  *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

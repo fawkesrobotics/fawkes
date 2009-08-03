@@ -5,8 +5,6 @@
  *  Generated: Wed Jun 28 11:33:50 2006 (my brother's 18th birthday)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

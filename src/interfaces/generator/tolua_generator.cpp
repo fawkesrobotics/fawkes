@@ -5,8 +5,6 @@
  *  Created: Tue Mar 11 15:33:26 2006
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -121,8 +119,6 @@ ToLuaInterfaceGenerator::write_header(FILE *f, std::string filename)
   fprintf(f, " *  Templated created:   Thu Oct 12 10:49:19 2006\n");
   fprintf(f, " *  Copyright  %s  %s\n", year.c_str(),
 	  ((author.length() > 0) ? author.c_str() : "AllemaniACs RoboCup Team") );
-  fprintf(f, " *\n");
-  fprintf(f, " *  $Id$\n");
   fprintf(f, " *\n");
   fprintf(f, " ****************************************************************************/\n\n");
   fprintf(f, "/*\n");

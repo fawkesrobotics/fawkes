@@ -7,8 +7,6 @@
  *                   Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Generated: Sun Oct 26 10:52:59 2008 (split off cpp file)
  *  Copyright  2005-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

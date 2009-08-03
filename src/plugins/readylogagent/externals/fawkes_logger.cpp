@@ -5,8 +5,6 @@
  *  Created: Wed Jul 22 11:25:21 2009
  *  Copyright  2009  Daniel Beck
  *
- *  $Id: worldmodel_plugin.h 1462 2008-10-27 15:02:00Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Generated: Sat Apr 14 20:51:19 2007 (watching Ghostbusters)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Created: Thu Oct 12 01:59:02 2006
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: cpp_generator.h 1724 2009-01-14 00:15:32Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

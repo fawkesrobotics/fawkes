@@ -7,8 +7,6 @@
  *             2008  Graeme McPhillips
  *             2008  Stephen Marais
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

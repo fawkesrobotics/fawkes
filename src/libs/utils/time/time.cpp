@@ -6,8 +6,6 @@
  *  Copyright  2007       Daniel Beck
  *             2007-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

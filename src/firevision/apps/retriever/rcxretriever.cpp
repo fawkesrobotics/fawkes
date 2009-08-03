@@ -5,8 +5,6 @@
  *  Created: Tue Jul 15 13:38:52 2008 (RoboCup 2008, Suzhou)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: retriever_thread.cpp 1083 2008-05-21 15:34:51Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

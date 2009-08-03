@@ -5,8 +5,6 @@
  *  Created: Sat Mar 01 15:13:44 2008
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: example_barrier.cpp 210 2007-06-13 14:01:49Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

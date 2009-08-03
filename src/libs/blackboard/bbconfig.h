@@ -5,8 +5,6 @@
  *  Generated: Thu Oct 19 14:17:00 2006 (Anne's 25th Birthday)
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

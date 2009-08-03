@@ -4,8 +4,6 @@
 #   Created on Mon Jun 08 17:54:53 2009
 #   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
 #
-#   $Id$
-#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify

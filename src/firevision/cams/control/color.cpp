@@ -6,8 +6,6 @@
  *  Copyright  2009      Tobias Kellner
  *             2005-2009 Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 

@@ -5,8 +5,6 @@
  *  Created: Sun Jun 25 23:07:05 2006 (on train to Ac, father in hospital)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

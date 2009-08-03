@@ -6,8 +6,6 @@
  *  Copyright  2009  Daniel Beck
  *             2009  Stefan Schiffer
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

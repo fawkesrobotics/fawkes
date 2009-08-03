@@ -4,8 +4,6 @@
 #   Created on Sun Jun 17 17:47:54 2007 (Starbucks)
 #   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
-#   $Id$
-#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify

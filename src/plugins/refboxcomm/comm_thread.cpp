@@ -6,8 +6,6 @@
  *  Copyright  2009  Tim Niemueller [www.niemueller.de]
  *             2009  Tobias Kellner
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

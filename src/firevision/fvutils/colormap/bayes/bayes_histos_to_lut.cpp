@@ -11,8 +11,6 @@
  *             2005-2008  Tim Niemueller [www.niemueller.de]
  *             2007-2008  Daniel Beck
  *
- *  $Id$
- *
  ***************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

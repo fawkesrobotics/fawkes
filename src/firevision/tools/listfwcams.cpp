@@ -5,8 +5,6 @@
  *  Created: Tue Jul 03 11:23:25 2007 (RoboCup 2007, Atlanta)
  *  Copyright  2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

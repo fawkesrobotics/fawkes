@@ -5,8 +5,6 @@
  *  Generated: Mon Apr 21 11:49:34 2008
  *  Copyright  2008  Vaishak Belle
  *
- *  $Id$
- *
  *****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

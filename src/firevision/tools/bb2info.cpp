@@ -5,8 +5,6 @@
  *  Created: Fri Nov 02 19:03:00 2007
  *  Copyright  2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: bb2rectlut.cpp 385 2007-10-31 23:21:54Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

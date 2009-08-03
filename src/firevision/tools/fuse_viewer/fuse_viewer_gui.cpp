@@ -5,8 +5,6 @@
  *  Created: Thu Dec 18 14:16:23 2008
  *  Copyright  2008-2009  Christof Rath <c.rath@student.tugraz.at>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

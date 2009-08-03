@@ -5,8 +5,6 @@
  *  Created: Tue Apr  7 15:15:15 2009
  *  Copyright  2009  Tobias Kellner
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Created: Tue Dec 18 10:38:30 2007
  *  Copyright  2007  Tim Niemueller 
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

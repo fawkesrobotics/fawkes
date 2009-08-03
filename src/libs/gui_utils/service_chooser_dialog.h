@@ -5,8 +5,6 @@
  *  Created: Sun Oct 12 17:06:06 2008 (split from lasergui_hildon.cpp)
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: lasergui.cpp 1432 2008-10-10 16:11:00Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

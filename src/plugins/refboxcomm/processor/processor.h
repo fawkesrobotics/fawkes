@@ -5,8 +5,6 @@
  *  Created: Sun Apr 19 14:15:08 2009 (on way to German Open 2009)
  *  Copyright  2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

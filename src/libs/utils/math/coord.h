@@ -5,8 +5,6 @@
  *  Created: Wed Jul 16 19:07:37 2008 (RoboCup 2008, Suzhou)
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: angle.h 1083 2008-05-21 15:34:51Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -7,8 +7,6 @@
  *             2009       Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
  *             2009       Christof Rath <c.rath@student.tugraz.at>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

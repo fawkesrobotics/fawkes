@@ -5,8 +5,6 @@
 --  Created: Wed Sep 10 14:44:02 2008 (Cape Town UCT Trip)
 --  Copyright  2008  Tim Niemueller [http://www.niemueller.de]
 --
---  $Id$
---
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
  *  Created: Tue Nov 20 14:56:23 2007 (Ella on heat)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

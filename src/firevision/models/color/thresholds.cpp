@@ -6,8 +6,6 @@
  *  Copyright  2005  Tim Niemueller  [www.niemueller.de]
  *                   Matrin Heracles <martin.heracles@rwth-aachen.de>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

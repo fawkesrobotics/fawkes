@@ -5,8 +5,6 @@
  *  Generated: Wed Oct 11 22:24:16 2006 (Germany - Slowakia  4:1)
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

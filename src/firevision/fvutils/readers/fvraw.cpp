@@ -5,8 +5,6 @@
  *  Generated: Sun Jun 05 01:22:35 2006 (watching Terminator 2)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

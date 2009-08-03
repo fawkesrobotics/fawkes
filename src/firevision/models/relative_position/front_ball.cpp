@@ -8,8 +8,6 @@
  *             2005-2006  Tim Niemueller [www.niemueller.de]
  *             2005       Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

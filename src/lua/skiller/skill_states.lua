@@ -5,8 +5,6 @@
 --  Created: Tue Oct 07 17:38:58 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
---  $Id: fsm.lua 1311 2008-07-31 11:44:00Z tim $
---
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

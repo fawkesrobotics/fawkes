@@ -9,8 +9,6 @@
  *  Generated: Thu Jan 12 22:44:59 2006 (from FireVision)
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -5,8 +5,6 @@
 --  Created: Fri Jan 30 15:41:47 2009
 --  Copyright  2008-2009  Tim Niemueller
 --
---  $Id: relgoto.lua 1683 2009-01-06 17:22:49Z tim $
---
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

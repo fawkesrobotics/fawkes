@@ -5,8 +5,6 @@
  *  Created: Fri Jun 29 15:26:10 2007 (on flight to RoboCup 2007, Atlanta)
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

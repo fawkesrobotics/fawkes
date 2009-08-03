@@ -5,8 +5,6 @@
  *  Created: Tue Apr 01 10:15:23 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
  *
- *  $Id$
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -4,8 +4,6 @@
 #   Created on Tue Jun 16 10:27:4 2009
 #   Copyright (C) 2009 by Daniel Beck, AllemaniACs RoboCup Team
 #
-#   $Id$
-#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify

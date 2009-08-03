@@ -6,8 +6,6 @@
  *  Copyright  2009       Christpoh Schwering
  *             2008-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: refbox_state_writer.h 1083 2008-05-21 15:34:51Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
