@@ -1,0 +1,10 @@
+# Generic globs
+*~
+.deps_*
+.objs_*
+*_tolua.cpp
+
+# Specific paths
+bin/
+lib/
+plugins/
