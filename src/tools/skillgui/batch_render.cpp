@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <fnmatch.h>
+#include <libgen.h>
 
 using namespace fawkes;
 

@@ -34,7 +34,6 @@
 #include <termios.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <endian.h>
 #include <unistd.h>
 #include <cstring>
 #include <cstdlib>
@@ -195,7 +194,7 @@ RobotisRX28::open() {
   cfsetispeed(&param, B57600);
 
   param.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN);
-  param.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK | IUCLC | PARMRK);
+  param.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK | PARMRK);
 
   // turn off hardware flow control
   param.c_iflag &= ~(IXON | IXOFF | IXANY);

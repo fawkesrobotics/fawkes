@@ -24,6 +24,7 @@
 #include "gvplugin_skillgui_cairo.h"
 
 #include <cmath>
+#include <libgen.h>
 
 /** @class SkillGuiGraphDrawingArea "graph_drawing_area.h"
  * Graph drawing area.
