@@ -5,8 +5,6 @@
  *  Created: Wed Mar 18 10:40:00 2009
  *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: graph_drawing_area.cpp 2027 2009-03-27 16:58:48Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
