@@ -43,17 +43,19 @@ uncolored-quickdoc: quickdoc
 
 .PHONY: linkscripts
 linkscripts:
-	$(SILENT) for f in $$(ls $(BASEDIR)/etc/scripts); do \
-		if [ -e "$(BASEDIR)/etc/scripts/$$f" ]; then \
-			if [[ -a "$(BASEDIR)/bin/$$f" && ! -L "$(BASEDIR)/bin/$$f" ]]; then \
-				echo -e "$(INDENT_PRINT)$(TRED)--- Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
-			else \
-				echo -e "$(INDENT_PRINT)--- Linking bin/$$f -> etc/scripts/$$f"; \
-				rm -f bin/$$f; \
-				ln -s ../etc/scripts/$$f bin; \
+	$(SILENT) if [ -d $(BASEDIR)/etc/scripts ]; then \
+		for f in $$(ls $(BASEDIR)/etc/scripts); do \
+			if [ -e "$(BASEDIR)/etc/scripts/$$f" ]; then \
+				if [[ -a "$(BASEDIR)/bin/$$f" && ! -L "$(BASEDIR)/bin/$$f" ]]; then \
+					echo -e "$(INDENT_PRINT)$(TRED)--- Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
+				else \
+					echo -e "$(INDENT_PRINT)--- Linking bin/$$f -> etc/scripts/$$f"; \
+					rm -f bin/$$f; \
+					ln -s ../etc/scripts/$$f bin; \
+				fi \
 			fi \
-		fi \
-	done
+		done; \
+	fi
 
 .PHONY: license-check uncolored-license-check
 uncolored-license-check: license-check

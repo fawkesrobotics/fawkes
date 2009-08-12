@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                   Makefile Build System for Fawkes: tools
+#                   Makefile Build System for Fawkes: Tools
 #                            -------------------
 #   Created on Tue Nov 21 18:36:28 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -17,7 +17,7 @@ BASEDIR = ../..
 
 SUBDIRS = plugin logview config plugin_gui netloggui refboxrep \
 	  worldinfo_viewer config_editor lasergui skillgui \
-	  battery_monitor
+	  battery_monitor ffinfo
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
