@@ -5,6 +5,8 @@
  *  Created: Sat Mar 21 17:16:01 2009
  *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
  *
+ *  $Id: batch_render.cpp 2028 2009-03-27 17:25:04Z tim $
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -32,6 +34,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <fnmatch.h>
+#include <libgen.h>
 
 using namespace fawkes;
 

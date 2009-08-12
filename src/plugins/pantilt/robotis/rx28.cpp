@@ -5,6 +5,8 @@
  *  Created: Tue Jun 16 11:09:32 2009 (based on visca.cpp)
  *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
+ *  $Id: rx28.cpp 2584 2009-06-22 18:50:53Z tim $
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -34,7 +36,6 @@
 #include <termios.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <endian.h>
 #include <unistd.h>
 #include <cstring>
 #include <cstdlib>
@@ -195,7 +196,7 @@ RobotisRX28::open() {
   cfsetispeed(&param, B57600);
 
   param.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN);
-  param.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK | IUCLC | PARMRK);
+  param.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK | PARMRK);
 
   // turn off hardware flow control
   param.c_iflag &= ~(IXON | IXOFF | IXANY);
