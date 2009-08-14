@@ -4,7 +4,15 @@
 .objs_*
 *_tolua.cpp
 
-# Specific paths
+# Specific paths, _ variants for cross compilation environments
 bin/
+bin_*/
 lib/
+lib_*/
 plugins/
+plugins_*
+
+# Eclipse project files, some are using it...
+.cproject
+.project
+
