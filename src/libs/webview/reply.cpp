@@ -84,7 +84,7 @@ WebReply::headers() const
 }
 
 
-/** @class DynamicWebReply "reply.h"
+/** @class DynamicWebReply <webview/reply.h>
  * Dynamic web reply.
  * A reply of this type is send out in chunks, not all as a whole. It should be
  * used for payloads that can get very large, like file transfers.
@@ -130,7 +130,7 @@ DynamicWebReply::chunk_size()
 }
 
 
-/** @class StaticWebReply "reply.h"
+/** @class StaticWebReply <webview/reply.h>
  * Static web reply.
  * The static web reply is send out as a whole at once and is immediately
  * deleted after sending. Use it for regular-sized pages and content.

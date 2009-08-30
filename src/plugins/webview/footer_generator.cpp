@@ -24,7 +24,17 @@
 
 #include <utils/misc/string_conversions.h>
 
+/** @class WebviewFooterGenerator "footer_generator.h"
+ * Webview page footer.
+ * Custom page header that shows other webview instances found on the net
+ * via mDNS-SD.
+ * @author Tim Niemueller
+ */
 
+/** Constructor.
+ * @param service_browser service browser used to add links to other Webview
+ * instances.
+ */
 WebviewFooterGenerator::WebviewFooterGenerator(WebviewServiceBrowseHandler *service_browser)
 {
   __service_browser = service_browser;

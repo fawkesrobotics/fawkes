@@ -32,6 +32,18 @@ namespace fawkes {
 }
 #endif
 
+/** @class WebServer <webview/server.h>
+ * Encapsulation of the libmicrohttpd webserver.
+ * This class opens a port serving websites and calls the supplied dispatcher
+ * for requests.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param port TCP port to listen on
+ * @param dispatcher dispatcher to call for requests
+ * @param logger optional logger, used to output possible run-time problems
+ */
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 		     fawkes::Logger *logger)
 {
@@ -54,6 +66,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 }
 
 
+/** Destructor. */
 WebServer::~WebServer()
 {
   MHD_stop_daemon(__daemon);
@@ -61,7 +74,9 @@ WebServer::~WebServer()
   __dispatcher = NULL;
 }
 
-
+/** Process requests.
+ * This method waits for new requests and processes them when received.
+ */
 void
 WebServer::process()
 {

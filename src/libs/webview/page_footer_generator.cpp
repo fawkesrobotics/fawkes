@@ -27,6 +27,20 @@ namespace fawkes {
 }
 #endif
 
+/** @class WebPageFooterGenerator <webview/page_footer_generator.h>
+ * Interface for HTML footer generator.
+ * A page footer generator has the task to generate the HTML code that is
+ * appended to each standard page. This is a possible footer or navigational
+ * additions. A footer generator must also generate the closing
+ * &lt;/body&gt;&lt;/html&gt; tags.
+ * @author Tim Niemueller
+ *
+ * @fn std::string WebPageFooterGenerator::html_footer() = 0
+ * Generate HTML footer.
+ * @return footer HTML code, including &lt;/body&gt;&lt;/html&gt;
+ */
+
+/** Virtual empty destructor. */
 WebPageFooterGenerator::~WebPageFooterGenerator()
 {
 }

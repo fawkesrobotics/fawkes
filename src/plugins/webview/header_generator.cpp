@@ -27,6 +27,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+/** @class WebviewHeaderGenerator "header_generator.h"
+ * Webview page header.
+ * Custom page header that shows the logo and a navigation bar.
+ * @author Tim Niemueller
+ */
+
 /** Page header template. */
 const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "<html>\n"
@@ -39,6 +45,7 @@ const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "<a id=\"logo\" href=\"/\"/><img src=\"/static/webview.png\" alt=\"Fawkes WebView\"/></a>"
   "<hr /></div>\n";
 
+/** Constructor. */
 WebviewHeaderGenerator::WebviewHeaderGenerator()
 {
 }

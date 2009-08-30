@@ -46,6 +46,10 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+/** Constructor.
+ * @param headergen page header generator
+ * @param footergen page footer generator
+ */
 WebRequestDispatcher::WebRequestDispatcher(WebPageHeaderGenerator *headergen,
 					   WebPageFooterGenerator *footergen)
 {

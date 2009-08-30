@@ -27,6 +27,24 @@ namespace fawkes {
 }
 #endif
 
+/** @class WebPageHeaderGenerator <webview/page_header_generator.h>
+ * Interface for HTML header generator.
+ * A page header generator has the task to generate the HTML code that is
+ * prepended to each standard page. This is a possible header or navigational
+ * additions. A header generator must also generate the opening "&lt;html&gt;"
+ * tags, the &lt;head&gt; section, and the opening &lt;body&gt; tag.
+ * @author Tim Niemueller
+ *
+ * @fn std::string WebPageHeaderGenerator::html_header(std::string &title, std::string &active_baseurl) = 0
+ * Generate HTML header.
+ * @param title HTML title, must be put in &lt;title&gt; tag in &lt;head&gt;
+ * section
+ * @param active_baseurl the baseurl currently active processor (this is the
+ * baseurl a processor is registered for). This can be used for example to
+ * highlight the current section in the navigation.
+ * @return header HTML code
+ */
+
 WebPageHeaderGenerator::~WebPageHeaderGenerator()
 {
 }
