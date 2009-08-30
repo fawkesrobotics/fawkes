@@ -3,7 +3,7 @@
  *  file_reply.h - Web request file reply
  *
  *  Created: Thu Oct 23 13:47:33 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_FILE_REPLY_H_
-#define __PLUGINS_WEBVIEW_FILE_REPLY_H_
+#ifndef __LIBS_WEBVIEW_FILE_REPLY_H_
+#define __LIBS_WEBVIEW_FILE_REPLY_H_
 
-#include "reply.h"
+#include <webview/reply.h>
 #include <cstdio>
 
 class DynamicFileWebReply : public DynamicWebReply

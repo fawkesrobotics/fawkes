@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugins_processor.h - Web request processor for plugin info
+ *  header_generator.h - Generator of page header
  *
- *  Created: Thu Feb 12 12:59:25 2009
+ *  Created: Sun Aug 30 14:37:21 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,33 +20,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
+#ifndef __PLUGINS_WEBVIEW_HEADER_GENERATOR_H_
+#define __PLUGINS_WEBVIEW_HEADER_GENERATOR_H_
 
-#include <webview/request_processor.h>
+#include <webview/page_header_generator.h>
 
-namespace fawkes {
-  class PluginManager;
-}
+#include <map>
+#include <string>
 
-class WebviewPluginsRequestProcessor : public WebRequestProcessor
+class WebviewHeaderGenerator : public WebPageHeaderGenerator
 {
  public:
-  WebviewPluginsRequestProcessor(const char *baseurl,
-			     fawkes::PluginManager *manager);
-  virtual ~WebviewPluginsRequestProcessor();
+  WebviewHeaderGenerator();
 
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
+  std::string html_header(std::string &title,
+			  std::string &active_baseurl);
+
+  void add_nav_entry(std::string baseurl, std::string name);
+  void remove_nav_entry(std::string baseurl);
 
  private:
-  char *__baseurl;
-  size_t __baseurl_len;
-  fawkes::PluginManager *__manager;
+  static const char *PAGE_HEADER;
+
+  std::map<std::string, std::string> __nav_entries;
 };
 
 #endif

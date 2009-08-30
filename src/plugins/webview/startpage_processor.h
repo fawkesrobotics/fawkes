@@ -23,17 +23,17 @@
 #ifndef __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
 
-#include "request_processor.h"
+#include <webview/request_processor.h>
 
 namespace fawkes {
   class CacheLogger;
 }
 
-class WebStartPageRequestProcessor : public WebRequestProcessor
+class WebviewStartPageRequestProcessor : public WebRequestProcessor
 {
  public:
-  WebStartPageRequestProcessor(fawkes::CacheLogger *cache_logger);
-  virtual ~WebStartPageRequestProcessor();
+  WebviewStartPageRequestProcessor(fawkes::CacheLogger *cache_logger);
+  virtual ~WebviewStartPageRequestProcessor();
 
   virtual WebReply * process_request(const char *url,
 				     const char *method,

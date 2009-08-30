@@ -21,8 +21,8 @@
  */
 
 #include "plugins_processor.h"
-#include "page_reply.h"
-#include "redirect_reply.h"
+#include <webview/page_reply.h>
+#include <webview/redirect_reply.h>
 
 #include <plugin/manager.h>
 
@@ -32,7 +32,7 @@
 
 using namespace fawkes;
 
-/** @class WebPluginsRequestProcessor "plugins_processor.h"
+/** @class WebviewPluginsRequestProcessor "plugins_processor.h"
  * Plugins web request processor.
  * Provides access to plugin lists and allows for loading/unloading plugins.
  * @author Tim Niemueller
@@ -42,7 +42,7 @@ using namespace fawkes;
  * @param baseurl Base URL where processor is mounted
  * @param manager PluginManager instance
  */
-WebPluginsRequestProcessor::WebPluginsRequestProcessor(const char *baseurl,
+WebviewPluginsRequestProcessor::WebviewPluginsRequestProcessor(const char *baseurl,
 						       PluginManager *manager)
 {
   __baseurl     = strdup(baseurl);
@@ -52,14 +52,14 @@ WebPluginsRequestProcessor::WebPluginsRequestProcessor(const char *baseurl,
 
 
 /** Destructor. */
-WebPluginsRequestProcessor::~WebPluginsRequestProcessor()
+WebviewPluginsRequestProcessor::~WebviewPluginsRequestProcessor()
 {
   free(__baseurl);
 }
 
 
 WebReply *
-WebPluginsRequestProcessor::process_request(const char *url,
+WebviewPluginsRequestProcessor::process_request(const char *url,
 					       const char *method,
 					       const char *version,
 					       const char *upload_data,

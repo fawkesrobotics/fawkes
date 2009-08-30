@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_ERROR_REPLY_H_
-#define __PLUGINS_WEBVIEW_ERROR_REPLY_H_
+#ifndef __LIBS_WEBVIEW_ERROR_REPLY_H_
+#define __LIBS_WEBVIEW_ERROR_REPLY_H_
 
-#include "page_reply.h"
+#include <webview/page_reply.h>
 
 class WebErrorPageReply : public WebPageReply
 {

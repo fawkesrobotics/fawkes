@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugins_processor.h - Web request processor for plugin info
+ *  header_generator.cpp - Generator of page header
  *
- *  Created: Thu Feb 12 12:59:25 2009
+ *  Created: Sun Aug 30 14:40:26 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,33 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
+#include <webview/page_header_generator.h>
 
-#include <webview/request_processor.h>
-
-namespace fawkes {
-  class PluginManager;
-}
-
-class WebviewPluginsRequestProcessor : public WebRequestProcessor
+WebPageHeaderGenerator::~WebPageHeaderGenerator()
 {
- public:
-  WebviewPluginsRequestProcessor(const char *baseurl,
-			     fawkes::PluginManager *manager);
-  virtual ~WebviewPluginsRequestProcessor();
-
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
-
- private:
-  char *__baseurl;
-  size_t __baseurl_len;
-  fawkes::PluginManager *__manager;
-};
-
-#endif
+}

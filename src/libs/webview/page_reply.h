@@ -3,7 +3,7 @@
  *  page_reply.h - Web request reply for a normal page
  *
  *  Created: Thu Oct 23 16:13:48 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,28 +20,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_PAGE_REPLY_H_
-#define __PLUGINS_WEBVIEW_PAGE_REPLY_H_
+#ifndef __LIBS_WEBVIEW_PAGE_REPLY_H_
+#define __LIBS_WEBVIEW_PAGE_REPLY_H_
 
-#include "reply.h"
-#include "service_browse_handler.h"
+#include <webview/reply.h>
 
-class WebviewThread;
-class WebviewServiceBrowseHandler;
+class WebPageHeaderGenerator;
+class WebPageFooterGenerator;
 
 class WebPageReply : public StaticWebReply
 {
-  friend class WebRequestDispatcher;
-  friend class WebviewThread;
  public:
   WebPageReply(std::string title, std::string page = "");
 
-  static std::string html_header(std::string &title);
-  static std::string html_footer();
-
   virtual const std::string & body();
   virtual std::string::size_type body_length();
-  virtual void pack();
+  virtual void pack() { pack("", 0, 0); }
+  virtual void pack(std::string active_baseurl,
+		    WebPageHeaderGenerator *headergen,
+		    WebPageFooterGenerator *footergen);
 
  protected:
   WebPageReply(response_code_t code);
@@ -51,22 +48,10 @@ class WebPageReply : public StaticWebReply
   std::string _title;
 
  private:
-  static void add_nav_entry(std::string baseurl, std::string name);
-  static void remove_nav_entry(std::string baseurl);
-  static void set_active_baseurl(std::string baseurl);
-
-  static void set_service_browse_handler(WebviewServiceBrowseHandler *service_browse_handler);
-
- private:
   static const char *PAGE_HEADER;
   static const char *PAGE_FOOTER;
 
   std::string __merged_body;
-
-  static std::map<std::string, std::string> __nav_entries;
-  static std::string __current_baseurl;
-
-  static WebviewServiceBrowseHandler *__service_browser;
 };
 
 #endif

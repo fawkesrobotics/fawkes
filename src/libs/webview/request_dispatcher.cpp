@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "request_dispatcher.h"
-#include "request_processor.h"
-#include "page_reply.h"
-#include "error_reply.h"
+#include <webview/request_dispatcher.h>
+#include <webview/request_processor.h>
+#include <webview/page_reply.h>
+#include <webview/error_reply.h>
 
 #include <utils/logging/cache.h>
 #include <utils/misc/string_urlescape.h>
@@ -39,6 +39,14 @@
  * processor was registered for the given base url.
  * @author Tim Niemueller
  */
+
+WebRequestDispatcher::WebRequestDispatcher(WebPageHeaderGenerator *headergen,
+					   WebPageFooterGenerator *footergen)
+{
+  __page_header_generator = headergen;
+  __page_footer_generator = footergen;
+}
+
 
 /** Process request callback for libmicrohttpd.
  * @param callback_data instance of WebRequestDispatcher to call
@@ -105,7 +113,13 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 					 StaticWebReply *sreply)
 {
   struct MHD_Response *response;
-  sreply->pack();
+  WebPageReply *wpreply = dynamic_cast<WebPageReply *>(sreply);
+  if (wpreply) {
+    wpreply->pack(__active_baseurl,
+		  __page_header_generator, __page_footer_generator);
+  } else {
+    sreply->pack();
+  }
   if (sreply->body_length() > 0) {
     response = MHD_create_response_from_data(sreply->body_length(),
 					     (void*) sreply->body().c_str(),
@@ -166,7 +180,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   std::map<std::string, WebRequestProcessor *>::iterator __pit;
   for (__pit = __processors.begin(); (proc == NULL) && (__pit != __processors.end()); ++__pit) {
     if (surl.find(__pit->first) == 0) {
-      WebPageReply::set_active_baseurl(__pit->first);
+      __active_baseurl = __pit->first;
       proc = __pit->second;
     }
   }

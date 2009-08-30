@@ -21,13 +21,17 @@
  */
 
 #include "webview_thread.h"
-#include "request_dispatcher.h"
 #include "static_processor.h"
 #include "blackboard_processor.h"
 #include "startpage_processor.h"
 #include "plugins_processor.h"
-#include "page_reply.h"
 #include "service_browse_handler.h"
+#include "header_generator.h"
+#include "footer_generator.h"
+
+#include <core/version.h>
+#include <webview/request_dispatcher.h>
+#include <webview/page_reply.h>
 
 #include <microhttpd.h>
 
@@ -70,7 +74,17 @@ WebviewThread::init()
 
   __cache_logger.clear();
 
-  __dispatcher = new WebRequestDispatcher();
+  __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
+					 "_http._tcp", __cfg_port);
+  __webview_service->add_txt("fawkesver=%u.%u.%u",
+			     FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR,
+			     FAWKES_VERSION_MICRO);
+  __service_browse_handler = new WebviewServiceBrowseHandler(logger, __webview_service);
+
+  __header_gen = new WebviewHeaderGenerator();
+  __footer_gen = new WebviewFooterGenerator(__service_browse_handler);
+
+  __dispatcher = new WebRequestDispatcher(__header_gen, __footer_gen);
   __daemon = MHD_start_daemon(MHD_NO_FLAG,
 			      __cfg_port,
 			      NULL,
@@ -83,29 +97,23 @@ WebviewThread::init()
     throw Exception("Could not start microhttpd");
   }
 
-  __startpage_processor  = new WebStartPageRequestProcessor(&__cache_logger);
-  __static_processor     = new WebStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
-  __blackboard_processor = new WebBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
-  __plugins_processor    = new WebPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
+  __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
+  __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
+  __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
+  __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
   __dispatcher->add_processor("/", __startpage_processor);
   __dispatcher->add_processor(STATIC_URL_PREFIX, __static_processor);
   __dispatcher->add_processor(BLACKBOARD_URL_PREFIX, __blackboard_processor);
   __dispatcher->add_processor(PLUGINS_URL_PREFIX, __plugins_processor);
 
-  WebPageReply::add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
-  WebPageReply::add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
+  __header_gen->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
+  __header_gen->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
 
-  __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
-					 "_http._tcp", __cfg_port);
-  __webview_service->add_txt("fawkesver=0.1");
   service_publisher->publish_service(__webview_service);
-
-  __service_browse_handler = new WebviewServiceBrowseHandler(logger, __webview_service);
   service_browser->watch_service("_http._tcp", __service_browse_handler);
 
-  WebPageReply::set_service_browse_handler(__service_browse_handler);
 }
 
 void
@@ -113,16 +121,19 @@ WebviewThread::finalize()
 {
   service_publisher->unpublish_service(__webview_service);
   service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+
+  MHD_stop_daemon(__daemon);
+
   delete __webview_service;
   delete __service_browse_handler;
 
-  WebPageReply::remove_nav_entry(BLACKBOARD_URL_PREFIX);
-  MHD_stop_daemon(__daemon);
   delete __dispatcher;
   delete __static_processor;
   delete __blackboard_processor;
   delete __startpage_processor;
   delete __plugins_processor;
+  delete __footer_gen;
+  delete __header_gen;
   __daemon = NULL;
   __dispatcher = NULL;
 }

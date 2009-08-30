@@ -3,7 +3,7 @@
  *  reply.h - Web request reply
  *
  *  Created: Wed Oct 22 18:49:35 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_REPLY_H_
-#define __PLUGINS_WEBVIEW_REPLY_H_
+#ifndef __LIBS_WEBVIEW_REPLY_H_
+#define __LIBS_WEBVIEW_REPLY_H_
 
 #include <map>
 #include <string>

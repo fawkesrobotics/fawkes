@@ -23,20 +23,20 @@
 #ifndef __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 
-#include "request_processor.h"
+#include <webview/request_processor.h>
 #include <cstdlib>
 
 namespace fawkes {
   class Logger;
 }
 
-class WebStaticRequestProcessor : public WebRequestProcessor
+class WebviewStaticRequestProcessor : public WebRequestProcessor
 {
  public:
-  WebStaticRequestProcessor(const char *baseurl,
+  WebviewStaticRequestProcessor(const char *baseurl,
 			    const char *htdocs_dir,
 			    fawkes::Logger *logger);
-  virtual ~WebStaticRequestProcessor();
+  virtual ~WebviewStaticRequestProcessor();
 
   virtual WebReply * process_request(const char *url,
 				     const char *method,

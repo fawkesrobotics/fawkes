@@ -29,6 +29,8 @@
 
 struct MHD_Connection;
 class WebRequestProcessor;
+class WebPageHeaderGenerator;
+class WebPageFooterGenerator;
 class StaticWebReply;
 
 namespace fawkes {
@@ -38,6 +40,9 @@ namespace fawkes {
 class WebRequestDispatcher
 {
  public:
+  WebRequestDispatcher(WebPageHeaderGenerator *headergen = 0,
+		       WebPageFooterGenerator *footergen = 0);
+
   void add_processor(const char *url_prefix, WebRequestProcessor *processor);
   void remove_processor(const char *url_prefix);
 
@@ -69,6 +74,10 @@ class WebRequestDispatcher
 
   std::map<std::string, WebRequestProcessor *>  __processors;
   WebRequestProcessor                          *__startpage_processor;
+
+  std::string                                   __active_baseurl;
+  WebPageHeaderGenerator                       *__page_header_generator;
+  WebPageFooterGenerator                       *__page_footer_generator;
 };
 
 

@@ -21,7 +21,7 @@
  */
 
 #include "startpage_processor.h"
-#include "page_reply.h"
+#include <webview/page_reply.h>
 
 #include <utils/logging/cache.h>
 
@@ -31,7 +31,7 @@
 
 using namespace fawkes;
 
-/** @class WebStartPageRequestProcessor "startpage_processor.h"
+/** @class WebviewStartPageRequestProcessor "startpage_processor.h"
  * Web request processor for the start page.
  * @author Tim Niemueller
  */
@@ -39,25 +39,25 @@ using namespace fawkes;
 /** Constructor.
  * @param cache_logger cache logger
  */
-WebStartPageRequestProcessor::WebStartPageRequestProcessor(CacheLogger *cache_logger)
+WebviewStartPageRequestProcessor::WebviewStartPageRequestProcessor(CacheLogger *cache_logger)
 {
   __cache_logger = cache_logger;
 }
 
 
 /** Destructor. */
-WebStartPageRequestProcessor::~WebStartPageRequestProcessor()
+WebviewStartPageRequestProcessor::~WebviewStartPageRequestProcessor()
 {
 }
 
 
 WebReply *
-WebStartPageRequestProcessor::process_request(const char *url,
-					       const char *method,
-					       const char *version,
-					       const char *upload_data,
-					       size_t *upload_data_size,
-					       void **session_data)
+WebviewStartPageRequestProcessor::process_request(const char *url,
+						  const char *method,
+						  const char *version,
+						  const char *upload_data,
+						  size_t *upload_data_size,
+						  void **session_data)
 {
   if ( strncmp("/", url, 1) == 0 ) {
 

@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugins_processor.h - Web request processor for plugin info
+ *  footer_generator.h - Generator of page footer
  *
- *  Created: Thu Feb 12 12:59:25 2009
+ *  Created: Sun Aug 30 14:37:21 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,33 +20,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
+#ifndef __LIBS_WEBVIEW_PAGE_FOOTER_GENERATOR_H_
+#define __LIBS_WEBVIEW_PAGE_FOOTER_GENERATOR_H_
 
-#include <webview/request_processor.h>
+#include <string>
 
-namespace fawkes {
-  class PluginManager;
-}
-
-class WebviewPluginsRequestProcessor : public WebRequestProcessor
+class WebPageFooterGenerator
 {
  public:
-  WebviewPluginsRequestProcessor(const char *baseurl,
-			     fawkes::PluginManager *manager);
-  virtual ~WebviewPluginsRequestProcessor();
-
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
-
- private:
-  char *__baseurl;
-  size_t __baseurl_len;
-  fawkes::PluginManager *__manager;
+  virtual ~WebPageFooterGenerator();
+  virtual std::string html_footer() = 0;
 };
 
 #endif

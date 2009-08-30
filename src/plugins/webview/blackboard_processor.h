@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_WEBVIEW_BLACKBOARD_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_BLACKBOARD_PROCESSOR_H_
 
-#include "request_processor.h"
+#include <webview/request_processor.h>
 
 #include <map>
 #include <string>
@@ -33,12 +33,12 @@ namespace fawkes {
   class Interface;
 }
 
-class WebBlackBoardRequestProcessor : public WebRequestProcessor
+class WebviewBlackBoardRequestProcessor : public WebRequestProcessor
 {
  public:
-  WebBlackBoardRequestProcessor(const char *baseurl,
+  WebviewBlackBoardRequestProcessor(const char *baseurl,
 				fawkes::BlackBoard *blackboard);
-  virtual ~WebBlackBoardRequestProcessor();
+  virtual ~WebviewBlackBoardRequestProcessor();
 
   virtual WebReply * process_request(const char *url,
 				     const char *method,

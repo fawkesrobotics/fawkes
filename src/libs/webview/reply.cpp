@@ -3,7 +3,7 @@
  *  reply.cpp - Web request reply
  *
  *  Created: Thu Oct 23 12:01:05 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,13 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "reply.h"
+#include <webview/reply.h>
 
 #include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
 
-/** @class WebReply "reply.h"
+/** @class WebReply <webview/reply.h>
  * Basic web reply.
  * The base class for all web replies. Though the WebRequestDispatcher expects
  * sub-classes of StaticWebReply or DynamicWebReply.
