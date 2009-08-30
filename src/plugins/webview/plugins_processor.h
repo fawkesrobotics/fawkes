@@ -29,19 +29,19 @@ namespace fawkes {
   class PluginManager;
 }
 
-class WebviewPluginsRequestProcessor : public WebRequestProcessor
+class WebviewPluginsRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
   WebviewPluginsRequestProcessor(const char *baseurl,
 			     fawkes::PluginManager *manager);
   virtual ~WebviewPluginsRequestProcessor();
 
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
+  virtual fawkes::WebReply * process_request(const char *url,
+					     const char *method,
+					     const char *version,
+					     const char *upload_data,
+					     size_t *upload_data_size,
+					     void **session_data);
 
  private:
   char *__baseurl;

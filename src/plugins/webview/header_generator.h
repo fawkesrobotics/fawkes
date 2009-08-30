@@ -28,7 +28,7 @@
 #include <map>
 #include <string>
 
-class WebviewHeaderGenerator : public WebPageHeaderGenerator
+class WebviewHeaderGenerator : public fawkes::WebPageHeaderGenerator
 {
  public:
   WebviewHeaderGenerator();

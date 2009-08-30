@@ -29,18 +29,18 @@ namespace fawkes {
   class CacheLogger;
 }
 
-class WebviewStartPageRequestProcessor : public WebRequestProcessor
+class WebviewStartPageRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
   WebviewStartPageRequestProcessor(fawkes::CacheLogger *cache_logger);
   virtual ~WebviewStartPageRequestProcessor();
 
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
+  virtual fawkes::WebReply * process_request(const char *url,
+					     const char *method,
+					     const char *version,
+					     const char *upload_data,
+					     size_t *upload_data_size,
+					     void **session_data);
 
  private:
   fawkes::CacheLogger *__cache_logger;

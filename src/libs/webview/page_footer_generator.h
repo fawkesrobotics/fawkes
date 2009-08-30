@@ -25,11 +25,18 @@
 
 #include <string>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class WebPageFooterGenerator
 {
  public:
   virtual ~WebPageFooterGenerator();
   virtual std::string html_footer() = 0;
 };
+
+} // end namespace fawkes
 
 #endif

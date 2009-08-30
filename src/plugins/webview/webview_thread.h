@@ -35,10 +35,10 @@
 
 namespace fawkes {
   class NetworkService;
+  class WebServer;
+  class WebRequestDispatcher;
 }
 
-class WebServer;
-class WebRequestDispatcher;
 class WebviewStaticRequestProcessor;
 class WebviewBlackBoardRequestProcessor;
 class WebviewStartPageRequestProcessor;
@@ -72,8 +72,8 @@ class WebviewThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  WebServer            *__webserver;
-  WebRequestDispatcher *__dispatcher;
+  fawkes::WebServer                  *__webserver;
+  fawkes::WebRequestDispatcher       *__dispatcher;
 
   WebviewStaticRequestProcessor      *__static_processor;
   WebviewStartPageRequestProcessor   *__startpage_processor;

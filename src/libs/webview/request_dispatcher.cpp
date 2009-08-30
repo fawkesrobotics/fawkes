@@ -25,12 +25,18 @@
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
 
-#include <utils/logging/cache.h>
 #include <utils/misc/string_urlescape.h>
 
+#include <sys/types.h>
+#include <cstdarg>
 #include <microhttpd.h>
 #include <cstring>
 #include <cstdlib>
+
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class WebRequestDispatcher "request_dispatcher.h"
  * Web request dispatcher.
@@ -262,3 +268,5 @@ WebRequestDispatcher::remove_processor(const char *url_prefix)
     __processors.erase(url_prefix);
   }
 }
+
+} // end namespace fawkes

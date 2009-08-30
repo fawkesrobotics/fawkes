@@ -20,9 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "redirect_reply.h"
+#include <webview/redirect_reply.h>
 
-/** @class WebRedirectReply "redirect_reply.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class WebRedirectReply <webview/redirect_reply.h>
  * Redirect reply for webview.
  * This reply will cause an immediate redirect from the requested page
  * to the given URL. THe URL can be local as well as remote. The redirect
@@ -39,3 +44,5 @@ WebRedirectReply::WebRedirectReply(std::string url)
 {
   add_header("Location", url);
 }
+
+} // end namespace fawkes

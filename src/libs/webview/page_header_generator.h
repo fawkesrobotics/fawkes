@@ -25,6 +25,11 @@
 
 #include <string>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class WebPageHeaderGenerator
 {
  public:
@@ -34,5 +39,7 @@ class WebPageHeaderGenerator
 				  std::string &active_baseurl) = 0;
 
 };
+
+} // end namespace fawkes
 
 #endif

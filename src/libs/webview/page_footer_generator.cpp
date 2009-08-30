@@ -22,7 +22,13 @@
 
 #include <webview/page_footer_generator.h>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 WebPageFooterGenerator::~WebPageFooterGenerator()
 {
 }
 
+} // end namespace fawkes

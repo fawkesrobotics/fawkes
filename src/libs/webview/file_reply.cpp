@@ -28,6 +28,11 @@
 #include <cerrno>
 #include <sys/stat.h>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class DynamicFileWebReply <webview/file_reply.h>
  * Dynamic raw file transfer reply.
  * This dynamic file transfer reply transmits the given file with a mime type
@@ -76,3 +81,5 @@ DynamicFileWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_size)
   }
   return fread(buffer, 1, buf_max_size, __file);
 }
+
+} // end namespace fawkes

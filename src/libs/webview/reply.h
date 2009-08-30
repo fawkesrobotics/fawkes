@@ -26,6 +26,11 @@
 #include <map>
 #include <string>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class WebReply
 {
  public:
@@ -132,5 +137,7 @@ class StaticWebReply : public WebReply
   /** Body of the reply. */
   std::string _body;
 };
+
+} // end namespace fawkes
 
 #endif

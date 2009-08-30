@@ -29,7 +29,12 @@
 #include <cstring>
 #include <cstdio>
 
-/** @class WebPageReply "page_reply.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class WebPageReply <webview/page_reply.h>
  * Basic page reply.
  * This reply adds header and footer as appropriate to form a HTML document
  * with logo and navigation.
@@ -71,6 +76,14 @@ WebPageReply::WebPageReply(response_code_t code)
 }
 
 
+/** Pack web page reply.
+ * This method creates the final page by calling the header and footer generators
+ * if supplied (otherwise a standard header is chosen) and the body.
+ * @param active_baseurl the active navigation URL, can be used for instance
+ * to high-light the current section in the navigation.
+ * @param headergen header generator
+ * @param footergen footer generator
+ */
 void
 WebPageReply::pack(std::string active_baseurl,
 		   WebPageHeaderGenerator *headergen,
@@ -105,4 +118,4 @@ WebPageReply::body()
   return __merged_body;
 }
 
-
+} // end namespace fawkes

@@ -26,6 +26,11 @@
 #include <cstdarg>
 #include <cstdio>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class WebReply <webview/reply.h>
  * Basic web reply.
  * The base class for all web replies. Though the WebRequestDispatcher expects
@@ -202,3 +207,5 @@ void
 StaticWebReply::pack()
 {
 }
+
+} // end namespace fawkes

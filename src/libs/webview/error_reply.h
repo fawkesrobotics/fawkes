@@ -25,10 +25,17 @@
 
 #include <webview/page_reply.h>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class WebErrorPageReply : public WebPageReply
 {
  public:
   WebErrorPageReply(response_code_t error_code, std::string msg = "");
 };
+
+} // end namespace fawkes
 
 #endif

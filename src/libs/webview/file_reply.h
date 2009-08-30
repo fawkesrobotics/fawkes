@@ -26,6 +26,11 @@
 #include <webview/reply.h>
 #include <cstdio>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class DynamicFileWebReply : public DynamicWebReply
 {
  public:
@@ -40,5 +45,7 @@ class DynamicFileWebReply : public DynamicWebReply
   size_t  __size;
   
 };
+
+} // end namespace fawkes
 
 #endif

@@ -25,6 +25,11 @@
 
 #include <webview/reply.h>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class WebPageHeaderGenerator;
 class WebPageFooterGenerator;
 
@@ -53,5 +58,7 @@ class WebPageReply : public StaticWebReply
 
   std::string __merged_body;
 };
+
+} // end namespace fawkes
 
 #endif

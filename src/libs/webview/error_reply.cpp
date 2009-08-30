@@ -24,6 +24,11 @@
 
 #include <core/exceptions/software.h>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class WebErrorPageReply <webview/error_reply.h>
  * Static error page reply.
  * Shows a simple error page based on the given code.
@@ -220,3 +225,5 @@ WebErrorPageReply::WebErrorPageReply(response_code_t code, std::string msg)
 
   _body += "<br />\n<b>" + msg + "</b>\n";
 }
+
+} // end namespace fawkes

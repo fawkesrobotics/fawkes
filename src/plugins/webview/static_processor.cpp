@@ -34,6 +34,8 @@
 #include <cerrno>
 #include <climits>
 
+using namespace fawkes;
+
 /** @class WebviewStaticRequestProcessor "static_processor.h"
  * Static file web processor.
  * This processor provides access to static files.

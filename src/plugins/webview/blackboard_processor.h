@@ -33,19 +33,19 @@ namespace fawkes {
   class Interface;
 }
 
-class WebviewBlackBoardRequestProcessor : public WebRequestProcessor
+class WebviewBlackBoardRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
   WebviewBlackBoardRequestProcessor(const char *baseurl,
 				fawkes::BlackBoard *blackboard);
   virtual ~WebviewBlackBoardRequestProcessor();
 
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
+  virtual fawkes::WebReply * process_request(const char *url,
+					     const char *method,
+					     const char *version,
+					     const char *upload_data,
+					     size_t *upload_data_size,
+					     void **session_data);
 
  private:
   char *__baseurl;

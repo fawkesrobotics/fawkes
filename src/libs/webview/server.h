@@ -25,10 +25,14 @@
 
 #include <sys/types.h>
 
-namespace fawkes {
-  class Logger;
-}
+struct MHD_Daemon;
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class Logger;
 class WebRequestDispatcher;
 
 class WebServer {
@@ -47,5 +51,6 @@ class WebServer {
   unsigned short int    __port;
 };
 
+} // end namespace fawkes
 
 #endif

@@ -26,7 +26,11 @@
 #include <utils/logging/logger.h>
 
 #include <microhttpd.h>
-#include <cstdio>
+
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 		     fawkes::Logger *logger)
@@ -72,3 +76,5 @@ WebServer::process()
   select(max_fd + 1, &read_fd, &write_fd, &except_fd, NULL);
   MHD_run(__daemon);
 }
+
+} // end namespace fawkes

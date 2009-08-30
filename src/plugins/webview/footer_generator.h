@@ -27,7 +27,7 @@
 
 #include "service_browse_handler.h"
 
-class WebviewFooterGenerator : public WebPageFooterGenerator
+class WebviewFooterGenerator : public fawkes::WebPageFooterGenerator
 {
  public:
   WebviewFooterGenerator(WebviewServiceBrowseHandler *service_browser);

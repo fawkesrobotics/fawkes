@@ -23,12 +23,19 @@
 #ifndef __PLUGINS_WEBVIEW_REDIRECT_REPLY_H_
 #define __PLUGINS_WEBVIEW_REDIRECT_REPLY_H_
 
-#include "reply.h"
+#include <webview/reply.h>
+
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class WebRedirectReply : public StaticWebReply
 {
  public:
   WebRedirectReply(std::string url);
 };
+
+} // end namespace fawkes
 
 #endif

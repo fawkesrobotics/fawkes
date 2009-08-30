@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "request_processor.h"
+#include <webview/request_processor.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -28,7 +28,12 @@
 #include <microhttpd.h>
 #include <cstring>
 
-/** @class WebRequestProcessor "request_processor.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class WebRequestProcessor <webview/request_processor.h>
  * Abstract web request processor.
  * Interface used to define web request processor that can be registered to
  * the WebRequestDispatcher.
@@ -51,3 +56,5 @@
 WebRequestProcessor::~WebRequestProcessor()
 {
 }
+
+} // end namespace fawkes

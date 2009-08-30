@@ -30,20 +30,20 @@ namespace fawkes {
   class Logger;
 }
 
-class WebviewStaticRequestProcessor : public WebRequestProcessor
+class WebviewStaticRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
   WebviewStaticRequestProcessor(const char *baseurl,
-			    const char *htdocs_dir,
-			    fawkes::Logger *logger);
+				const char *htdocs_dir,
+				fawkes::Logger *logger);
   virtual ~WebviewStaticRequestProcessor();
 
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data);
+  virtual fawkes::WebReply * process_request(const char *url,
+					     const char *method,
+					     const char *version,
+					     const char *upload_data,
+					     size_t *upload_data_size,
+					     void **session_data);
 
  private:
   char   *__baseurl;
