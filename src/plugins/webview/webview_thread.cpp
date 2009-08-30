@@ -32,8 +32,7 @@
 #include <core/version.h>
 #include <webview/request_dispatcher.h>
 #include <webview/page_reply.h>
-
-#include <microhttpd.h>
+#include <webview/server.h>
 
 using namespace fawkes;
 
@@ -85,17 +84,7 @@ WebviewThread::init()
   __footer_gen = new WebviewFooterGenerator(__service_browse_handler);
 
   __dispatcher = new WebRequestDispatcher(__header_gen, __footer_gen);
-  __daemon = MHD_start_daemon(MHD_NO_FLAG,
-			      __cfg_port,
-			      NULL,
-			      NULL,
-			      WebRequestDispatcher::process_request_cb,
-			      (void *)__dispatcher,
-			      MHD_OPTION_END);
-
-  if ( __daemon == NULL ) {
-    throw Exception("Could not start microhttpd");
-  }
+  __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
 
   __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
   __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
@@ -122,7 +111,7 @@ WebviewThread::finalize()
   service_publisher->unpublish_service(__webview_service);
   service_browser->unwatch_service("_http._tcp", __service_browse_handler);
 
-  MHD_stop_daemon(__daemon);
+  delete __webserver;
 
   delete __webview_service;
   delete __service_browse_handler;
@@ -134,7 +123,6 @@ WebviewThread::finalize()
   delete __plugins_processor;
   delete __footer_gen;
   delete __header_gen;
-  __daemon = NULL;
   __dispatcher = NULL;
 }
 
@@ -142,13 +130,5 @@ WebviewThread::finalize()
 void
 WebviewThread::loop()
 {
-  fd_set read_fd, write_fd, except_fd;
-  int max_fd = 0;
-  FD_ZERO(&read_fd); FD_ZERO(&write_fd); FD_ZERO(&except_fd);
-  if ( MHD_get_fdset(__daemon, &read_fd, &write_fd, &except_fd, &max_fd) != MHD_YES ) {
-    logger->log_warn("WebviewThread", "Could not get microhttpd fdsets");
-    return;
-  }
-  select(max_fd + 1, &read_fd, &write_fd, &except_fd, NULL);
-  MHD_run(__daemon);
+  __webserver->process();
 }

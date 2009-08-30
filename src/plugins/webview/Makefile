@@ -20,8 +20,6 @@ include $(BASEDIR)/etc/buildsys/download.mk
 include $(LIBSRCDIR)/webview/webview.mk
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
-  LDFLAGS += $(LDFLAGS_LIBMICROHTTPD)
-  CFLAGS  += $(CFLAGS_LIBMICROHTTPD)
   LIBS_webview = fawkescore fawkesutils fawkesaspects fawkeswebview
   OBJS_webview = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
   PLUGINS_all = $(PLUGINDIR)/webview.so

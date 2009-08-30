@@ -37,6 +37,7 @@ namespace fawkes {
   class NetworkService;
 }
 
+class WebServer;
 class WebRequestDispatcher;
 class WebviewStaticRequestProcessor;
 class WebviewBlackBoardRequestProcessor;
@@ -71,7 +72,7 @@ class WebviewThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  struct MHD_Daemon    *__daemon;
+  WebServer            *__webserver;
   WebRequestDispatcher *__dispatcher;
 
   WebviewStaticRequestProcessor      *__static_processor;
