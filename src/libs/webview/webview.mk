@@ -13,9 +13,13 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard $(SYSROOT)/usr/include/microhttpd.h),)
-  HAVE_LIBMICROHTTPD=1
-  CFLAGS_LIBMICROHTTPD  = -DHAVE_LIBMICROHTTPD
-  LDFLAGS_LIBMICROHTTPD = -lmicrohttpd
+ifneq ($(PKGCONFIG),)
+  HAVE_LIBMICROHTTPD := $(if $(shell $(PKGCONFIG) --exists 'libmicrohttpd'; echo $${?/1/}),1,0)
+endif
+
+ifeq ($(HAVE_LIBMICROHTTPD),1)
+  CFLAGS_LIBMICROHTTPD  = -DHAVE_LIBMICROHTTPD $(shell $(PKGCONFIG) --cflags 'libmicrohttpd')
+  LDFLAGS_LIBMICROHTTPD = $(shell $(PKGCONFIG) --libs 'libmicrohttpd')
+  HAVE_WEBVIEW = 1
 endif
 
