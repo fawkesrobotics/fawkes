@@ -5,12 +5,15 @@
 *_tolua.cpp
 
 # Specific paths, _ variants for cross compilation environments
-bin/
-bin_*/
-lib/
-lib_*/
-plugins/
-plugins_*
+/bin/
+/bin_*/
+/cfg/*.db
+/doc/api
+/lib/
+/lib_*/
+/plugins/
+/plugins_*
+/warnings.txt
 
 # Eclipse project files, some are using it...
 .cproject
