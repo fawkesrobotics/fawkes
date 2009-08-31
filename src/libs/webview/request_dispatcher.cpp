@@ -175,16 +175,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   static int dummy;
   int ret;
 
-  if (0 != strcmp(method, "GET"))
+  if ((0 != strcmp(method, "GET")) && (0 != strcmp(method, "POST")))
     return MHD_NO; /* unexpected method */
-
-  if (&dummy != *session_data) {
-    // The first time only the headers are valid,
-    // do not respond in the first round...
-    *session_data = &dummy;
-    return MHD_YES;
-  }
-  *session_data = NULL; /* clear context pointer */
 
   WebRequestProcessor *proc = NULL;
   std::map<std::string, WebRequestProcessor *>::iterator __pit;
@@ -205,14 +197,34 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   }
 
   if (proc) {
-    struct MHD_Response *response;
-
     char *urlc = strdup(url);
     fawkes::hex_unescape(urlc);
-
-    WebReply *reply = proc->process_request(urlc, method, version, upload_data, upload_data_size, session_data);
-
+    std::string urls = urlc;
     free(urlc);
+
+    if (! proc->handles_session_data()) {
+      if ( *session_data == NULL) {
+	// The first time only the headers are valid,
+	// do not respond in the first round...
+	*session_data = &dummy;
+	return MHD_YES;
+      }
+      *session_data = NULL; /* clear context pointer */
+    } else {
+      if ( *session_data == NULL) {
+	WebReply *reply = proc->process_request(urls.c_str(), method, version, upload_data, upload_data_size, session_data);
+	if ((reply != NULL) || (*session_data == NULL)) {
+	  return MHD_NO;
+	} else {
+	  return MHD_YES;
+	}
+      }
+    }
+
+    struct MHD_Response *response;
+
+
+    WebReply *reply = proc->process_request(urls.c_str(), method, version, upload_data, upload_data_size, session_data);
 
     if ( reply ) {
       StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
@@ -234,8 +246,12 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 	delete reply;
       }
     } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, &ereply);
+      if (proc->handles_session_data()) {
+	return MHD_YES;
+      } else {
+	WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+	ret = queue_static_reply(connection, &ereply);
+      }
     }
   } else {
     WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);

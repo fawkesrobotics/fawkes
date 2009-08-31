@@ -52,9 +52,32 @@ namespace fawkes {
  * that is sent as reply, or NULL to cause a 404 (not found) error.
  */
 
+/** Constructor.
+ * @param handles_session_data set to true, if you handle the session_data
+ * field passed into process_request() by yourself. The method will then be
+ * called multiple times. On the first iteration, you must set *session_data
+ * to a non-NULL value and return NULL. Only on the second call you produce
+ * the real reply.
+ */
+WebRequestProcessor::WebRequestProcessor(bool handles_session_data)
+{
+  __handles_session_data = handles_session_data;
+}
+
 /** Virtual empty destructor. */
 WebRequestProcessor::~WebRequestProcessor()
 {
+}
+
+
+/** Check if processor handles session data by itself.
+ * Read constructor information for detailed information.
+ * @return true if the processor handles session data itself, false otherwise
+ */
+bool
+WebRequestProcessor::handles_session_data() const
+{
+  return __handles_session_data;
 }
 
 } // end namespace fawkes

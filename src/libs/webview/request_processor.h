@@ -33,6 +33,7 @@ namespace fawkes {
 class WebRequestProcessor
 {
  public:
+  WebRequestProcessor(bool handles_session_data = false);
   virtual ~WebRequestProcessor();
   virtual WebReply * process_request(const char *url,
 				     const char *method,
@@ -40,6 +41,10 @@ class WebRequestProcessor
 				     const char *upload_data,
 				     size_t *upload_data_size,
 				     void **session_data)               = 0;
+
+  bool handles_session_data() const;
+ private:
+  bool  __handles_session_data;
 
 };
 
