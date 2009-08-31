@@ -41,6 +41,7 @@ namespace fawkes {
 
 class XmlRpcRequestProcessor;
 class XmlRpcPluginMethods;
+class XmlRpcLogMethods;
 
 class XmlRpcThread
 : public fawkes::Thread,
@@ -68,6 +69,7 @@ class XmlRpcThread
 
   XmlRpcRequestProcessor       *__processor;
   XmlRpcPluginMethods          *__plugin_methods;
+  XmlRpcLogMethods             *__log_methods;
 
   unsigned int                  __cfg_port;
 

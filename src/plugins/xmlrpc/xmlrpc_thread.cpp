@@ -23,6 +23,7 @@
 #include "xmlrpc_thread.h"
 #include "xmlrpc_processor.h"
 #include "methods/plugin.h"
+#include "methods/log.h"
 
 #include <core/version.h>
 #include <webview/server.h>
@@ -66,6 +67,7 @@ XmlRpcThread::init()
 
   xmlrpc_c::registry *registry = __processor->registry();
   __plugin_methods = new XmlRpcPluginMethods(registry, plugin_manager, logger);
+  __log_methods    = new XmlRpcLogMethods(registry, &__cache_logger, logger);
 
   __dispatcher->add_processor("/", __processor);
 
