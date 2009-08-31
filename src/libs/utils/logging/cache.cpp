@@ -22,15 +22,14 @@
  */
 
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <utils/logging/cache.h>
 
 #include <cstdlib>
 #include <sys/time.h>
 #include <ctime>
 #include <cstdio>
-
-#define TIMESTR_LENGTH 200
-#define MESSAGE_LENGTH 4096
+#include <algorithm>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -81,19 +80,68 @@ CacheLogger::clear()
   mutex->unlock();
 }
 
+
+/** Get maximum number of log entries in cache.
+ * @return maximum number of cache entries
+ */
+unsigned int
+CacheLogger::size() const
+{
+  return __max_num_entries;
+}
+
+
+/** Set maximum number of log entries in cache.
+ * @param new_size new size
+ */
+void
+CacheLogger::set_size(unsigned int new_size)
+{
+  MutexLocker lock(mutex);
+  if (new_size < __num_entries) {
+    __num_entries = new_size;
+    __messages.resize(__num_entries);
+  }
+  __max_num_entries = new_size;
+}
+
+
+/** Lock cache logger, no new messages can be added.
+ * Use with care, can cause critical delays in the whole software stack!
+ */
+void
+CacheLogger::lock()
+{
+  mutex->lock();
+}
+
+/** Unlock cache logger. */
+void
+CacheLogger::unlock()
+{
+  mutex->unlock();
+}
+
 void
 CacheLogger::push_message(LogLevel ll, const char *component, const char *format, va_list va)
 {
   if (log_level <= ll ) {
+    MutexLocker lock(mutex);
     struct timeval now;
     gettimeofday(&now, NULL);
-    mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    char timestr[TIMESTR_LENGTH];
-    snprintf(timestr, TIMESTR_LENGTH, "%02d:%02d:%02d.%06ld", now_s->tm_hour,
-	     now_s->tm_min, now_s->tm_sec, now.tv_usec);
-    char msg[MESSAGE_LENGTH];
-    vsnprintf(msg, MESSAGE_LENGTH, format, va);
+    char *timestr;
+    if (asprintf(&timestr, "%02d:%02d:%02d.%06ld", now_s->tm_hour,
+		 now_s->tm_min, now_s->tm_sec, now.tv_usec) == -1) {
+      // Cannot do anything useful, drop log message
+      return;
+    }
+    char *msg;
+    if (vasprintf(&msg, format, va) == -1) {
+      // Cannot do anything useful, drop log message
+      free(timestr);
+      return;
+    }
 
     CacheEntry e;
     e.log_level = ll;
@@ -103,12 +151,14 @@ CacheLogger::push_message(LogLevel ll, const char *component, const char *format
     e.message   = msg;
     __messages.push_front(e);
 
+    free(timestr);
+    free(msg);
+
     if (__num_entries == __max_num_entries) {
       __messages.pop_back();
     } else {
       ++__num_entries;
     }
-    mutex->unlock();
   }
 }
 
@@ -116,13 +166,15 @@ void
 CacheLogger::push_message(LogLevel ll, const char *component, Exception &e)
 {
   if (log_level <= ll ) {
+    MutexLocker lock(mutex);
     struct timeval now;
     gettimeofday(&now, NULL);
-    mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    char timestr[TIMESTR_LENGTH];
-    snprintf(timestr, TIMESTR_LENGTH, "%02d:%02d:%02d.%06ld",
-	     now_s->tm_hour, now_s->tm_min, now_s->tm_sec, now.tv_usec);
+    char *timestr;
+    if (asprintf(&timestr, "%02d:%02d:%02d.%06ld", now_s->tm_hour,
+		 now_s->tm_min, now_s->tm_sec, now.tv_usec) == -1) {
+      return;
+    }
 
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       CacheEntry e;
@@ -132,14 +184,15 @@ CacheLogger::push_message(LogLevel ll, const char *component, Exception &e)
       e.timestr   = timestr;
       e.message   = std::string("[EXCEPTION] ") + *i;
       __messages.push_front(e);
-    }
-
-    if (__num_entries == __max_num_entries) {
-      __messages.pop_back();
-    } else {
       ++__num_entries;
     }
-    mutex->unlock();
+
+    free(timestr);
+
+    if (__num_entries > __max_num_entries) {
+      __num_entries = __max_num_entries;
+      __messages.resize(__max_num_entries);
+    }
   }
 }
 
@@ -232,13 +285,18 @@ CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *compo
 			  const char *format, va_list va)
 {
   if (log_level <= ll ) {
-    mutex->lock();
+    MutexLocker lock(mutex);
     localtime_r(&t->tv_sec, now_s);
-    char timestr[TIMESTR_LENGTH];
-    snprintf(timestr, TIMESTR_LENGTH, "%02d:%02d:%02d.%06ld", now_s->tm_hour,
-	     now_s->tm_min, now_s->tm_sec, t->tv_usec);
-    char msg[MESSAGE_LENGTH];
-    vsnprintf(msg, MESSAGE_LENGTH, format, va);
+    char *timestr;
+    if (asprintf(&timestr, "%02d:%02d:%02d.%06ld", now_s->tm_hour,
+		 now_s->tm_min, now_s->tm_sec, t->tv_usec) == -1) {
+      return;
+    }
+    char *msg;
+    if (vasprintf(&msg, format, va) == -1) {
+      free(timestr);
+      return;
+    }
 
     CacheEntry e;
     e.log_level = ll;
@@ -247,6 +305,9 @@ CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *compo
     e.timestr   = timestr;
     e.message   = msg;
     __messages.push_front(e);
+
+    free(timestr);
+    free(msg);
 
     if (__num_entries == __max_num_entries) {
       __messages.pop_back();
@@ -261,12 +322,13 @@ void
 CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *component, Exception &e)
 {
   if (log_level <= ll ) {
-    mutex->lock();
+    MutexLocker lock(mutex);
     localtime_r(&t->tv_sec, now_s);
-    char timestr[TIMESTR_LENGTH];
-    snprintf(timestr, TIMESTR_LENGTH,
-	     "%02d:%02d:%02d.%06ld", now_s->tm_hour,
-	     now_s->tm_min, now_s->tm_sec, t->tv_usec);
+    char *timestr;
+    if (asprintf(&timestr, "%02d:%02d:%02d.%06ld", now_s->tm_hour,
+		 now_s->tm_min, now_s->tm_sec, t->tv_usec) == -1) {
+      return;
+    }
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       CacheEntry e;
       e.log_level = ll;
@@ -275,14 +337,15 @@ CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *compo
       e.timestr   = timestr;
       e.message   = std::string("[EXCEPTION] ") + *i;
       __messages.push_front(e);
-    }
-
-    if (__num_entries == __max_num_entries) {
-      __messages.pop_back();
-    } else {
       ++__num_entries;
     }
-    mutex->unlock();
+
+    free(timestr);
+
+    if (__num_entries > __max_num_entries) {
+      __num_entries = __max_num_entries;
+      __messages.resize(__max_num_entries);
+    }
   }
 }
 
