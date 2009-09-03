@@ -16,7 +16,7 @@
 BASEDIR = ../..
 
 SUBDIRS = core utils interface netcomm blackboard config lua plugin aspect \
-	  geometry  worldinfo_utils gui_utils \
+	  geometry webview worldinfo_utils gui_utils \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
 include $(BASEDIR)/etc/buildsys/config.mk
@@ -37,3 +37,5 @@ lua: core utils blackboard config
 interfaces: core interface
 gui_utils: core netcomm plugin
 naoutils: core utils
+webview: core utils
+
