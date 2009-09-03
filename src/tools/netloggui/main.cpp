@@ -30,10 +30,10 @@ main(int argc, char **argv) {
 
   Glib::RefPtr<Gnome::Glade::Xml> refxml;
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-  refxml = Gnome::Glade::Xml::create(RESDIR"/netloggui/netloggui.glade");
+  refxml = Gnome::Glade::Xml::create(RESDIR"/guis/netloggui/netloggui.glade");
 #else
   std::auto_ptr<Gnome::Glade::XmlError> error;
-  refxml = Gnome::Glade::Xml::create(RESDIR"/netloggui/netloggui.glade", "", "", error);
+  refxml = Gnome::Glade::Xml::create(RESDIR"/guis/netloggui/netloggui.glade", "", "", error);
 #endif
 
   NetLogGuiGtkWindow *window = NULL;

@@ -487,7 +487,7 @@ main(int argc, char** argv)
    Gtk::Main kit(argc, argv);
    
    Glib::RefPtr<Gnome::Glade::Xml> refxml;
-   refxml = Gnome::Glade::Xml::create(RESDIR"/lasergui/lasergui.glade");
+   refxml = Gnome::Glade::Xml::create(RESDIR"/guis/lasergui/lasergui.glade");
 
    LaserGuiGtkWindow *window = NULL;
    refxml->get_widget_derived("wnd_lasergui", window);

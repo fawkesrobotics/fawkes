@@ -76,11 +76,11 @@ int main(int argc, char** argv)
       Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
       Glib::RefPtr<Gnome::Glade::Xml> ref_xml = 
-	Gnome::Glade::Xml::create( RESDIR"/glade/worldinfo_viewer/"
+	Gnome::Glade::Xml::create( RESDIR"/guis/worldinfo_viewer/"
 				   "worldinfo_viewer.glade" );
 #else
       std::auto_ptr<Gnome::Glade::XmlError> error;
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/worldinfo_viewer/worldinfo_viewer.glade", "", "", error);
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/guis/worldinfo_viewer/worldinfo_viewer.glade", "", "", error);
       if (error.get()) {
         throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
       }

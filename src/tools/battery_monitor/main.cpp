@@ -31,7 +31,7 @@ int main( int argc, char** argv )
   try
   {
     Gtk::Main kit( argc, argv );
-    Glib::RefPtr< Gnome::Glade::Xml > ref_xml = Gnome::Glade::Xml::create( RESDIR"/glade/battery_monitor.glade" );
+    Glib::RefPtr< Gnome::Glade::Xml > ref_xml = Gnome::Glade::Xml::create( RESDIR"/guis/battery_monitor/battery_monitor.glade" );
 
     BatteryMonitor battery_monitor( ref_xml );
 

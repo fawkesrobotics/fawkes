@@ -32,7 +32,7 @@ main(int argc, char **argv) {
 #endif
 
   Glib::RefPtr<Gnome::Glade::Xml> refxml;
-  refxml = Gnome::Glade::Xml::create(RESDIR"/skillgui/skillgui.glade");
+  refxml = Gnome::Glade::Xml::create(RESDIR"/guis/skillgui/skillgui.glade");
 
   SkillGuiGtkWindow *window = NULL;
   refxml->get_widget_derived("wnd_skillgui", window);
