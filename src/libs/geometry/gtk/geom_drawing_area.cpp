@@ -84,6 +84,7 @@ GeomDrawingArea::GeomDrawingArea( float max_x,
   m_cur_drawing_manipulator = NULL;
 }
 
+#ifdef HAVE_GLADEMM
 /** Constructor.
  * @param cobject pointer to the base object
  * @param ref_xml Glade XML file
@@ -99,6 +100,7 @@ GeomDrawingArea::GeomDrawingArea( BaseObjectType* cobject,
 
   m_cur_drawing_manipulator = NULL;
 }
+#endif
 
 /** Destructor. */
 GeomDrawingArea::~GeomDrawingArea()

@@ -44,6 +44,7 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+#ifdef HAVE_GLADEMM
 /** Constructor.
  * Special ctor to be used with Glade's get_widget_derived().
  * @param cobject Gtk C object
@@ -62,6 +63,7 @@ Throbber::Throbber(BaseObjectType* cobject,
     ctor(Gtk::IconSize(Gtk::ICON_SIZE_BUTTON));
   }
 }
+#endif
 
 
 /** Constructor.

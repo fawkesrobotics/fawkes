@@ -89,6 +89,7 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
   __refresh_thread->refresh_cam();
 }
 
+#ifdef HAVE_GLADEMM
 /**
  * Constructor that can be used to instantiate an ImageWidget as a
  * derived widget from a Glade file.
@@ -110,6 +111,7 @@ ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml
 
 //   set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
 }
+#endif
 
 /**
  * Destructor
@@ -404,7 +406,12 @@ ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
   __cam_mutex->lock();
 
   try {
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
     __pixbuf->save(filename, type);
+#else
+    std::auto_ptr<Glib::Error> error;
+    __pixbuf->save(filename, type, error);
+#endif
     __cam_mutex->unlock();
     return true;
   }

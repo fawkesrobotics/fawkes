@@ -28,7 +28,7 @@ LIBS_fvfuseviewer = fawkescore fawkesnetcomm fawkesplugin fawkesutils fawkesguiu
 OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 OBJS_all += $(OBJS_fvfuseviewer)
 
-ifeq ($(HAVE_GUI),1)
+ifeq ($(HAVE_GLADE_GUI),1)
   BINS_gui += $(BINDIR)/fvfuseviewer
 else
   ifneq ($(HAVE_AVAHI),1)

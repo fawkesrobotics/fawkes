@@ -26,7 +26,9 @@
 #define __GEOMETRY_GEOM_DRAWING_AREA_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 
 #include <vector>
 
@@ -46,7 +48,9 @@ class GeomDrawingArea : public Gtk::DrawingArea
 		   float max_y =  5.0,
 		   float min_x = -5.0,
 		   float min_y = -5.0 );
+#ifdef HAVE_GLADEMM
   GeomDrawingArea(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml);
+#endif
   virtual ~GeomDrawingArea();
 
   void clear();

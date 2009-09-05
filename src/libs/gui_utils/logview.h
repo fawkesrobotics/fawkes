@@ -25,7 +25,9 @@
 #define __LIBS_GUI_UTILS_LOGVIEW_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 
 #include <utils/logging/logger.h>
 
@@ -44,8 +46,10 @@ class LogView
  public:
   LogView();
   LogView(const char *hostname, unsigned short int port);
+#ifdef HAVE_GLADEMM
   LogView(BaseObjectType* cobject,
 	  const Glib::RefPtr<Gnome::Glade::Xml>& ref_glade);
+#endif
   ~LogView();
 
   void set_client(FawkesNetworkClient *client);
