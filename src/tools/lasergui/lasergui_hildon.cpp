@@ -25,6 +25,7 @@
 #include <gui_utils/robot/allemaniacs_athome.h>
 #include <gtkmm.h>
 #include <hildonmm.h>
+#include <libosso.h>
 
 #include <netcomm/fawkes/client.h>
 #include <blackboard/remote.h>
@@ -123,7 +124,7 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Destructor. */
   ~LaserGuiHildonWindow()
   {
-    __area.set_laser_if(NULL);
+    __area.set_laser360_if(NULL);
     if (__bb) {
       __bb->close(__laser_if);
       delete __bb;
@@ -190,7 +191,7 @@ class LaserGuiHildonWindow : public Hildon::Window
       __bb = new RemoteBlackBoard(__connection_dispatcher.get_client());
       __laser_if = __bb->open_for_reading<Laser360Interface>("Laser");
 
-      __area.set_laser_if(__laser_if);
+      __area.set_laser360_if(__laser_if);
       __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser_if);
       __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(__area, &LaserDrawingArea::queue_draw)));
       __ifd->signal_writer_removed().connect(sigc::hide(sigc::mem_fun(__area, &LaserDrawingArea::queue_draw)));
@@ -207,6 +208,7 @@ class LaserGuiHildonWindow : public Hildon::Window
       __tb_zoom_in.set_sensitive(true);
       __tb_zoom_out.set_sensitive(true);
     } catch (Exception &e) {
+      e.print_trace();
       if ( __bb ) {
 	__bb->close(__laser_if);
 	delete __ifd;
@@ -221,7 +223,7 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Event handler for disconnected event. */
   virtual void on_disconnect()
   {
-    __area.set_laser_if(NULL);
+    __area.set_laser360_if(NULL);
     __area.queue_draw();
     __bb->close(__laser_if);
     delete __bb;

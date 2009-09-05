@@ -40,6 +40,7 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
+#ifdef HAVE_GLADEMM
 /** Constructor.
  * Special ctor to be used with Glade's get_widget_derived().
  * @param cobject Gtk C object
@@ -76,6 +77,7 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
 
   Glib::RefPtr<Gdk::Window> window = get_window();
 }
+#endif
 
 /** Constructor. */
 LaserDrawingArea::LaserDrawingArea()
@@ -103,7 +105,6 @@ LaserDrawingArea::LaserDrawingArea()
   signal_button_press_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_button_press_event));
   signal_motion_notify_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_motion_notify_event));
 #endif
-
 }
 
 
