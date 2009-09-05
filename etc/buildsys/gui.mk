@@ -50,6 +50,7 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_HILDONMM)$(HAVE_HILDONFMMM),11)
+  HAVE_HILDON_GUI = 1
   CFLAGS_HILDONMM  = $(shell $(PKGCONFIG) --cflags '$(PC_HILDONMM)' '$(PC_HILDONFMMM)')
   LDFLAGS_HILDONMM = $(shell $(PKGCONFIG) --libs '$(PC_HILDONMM)' '$(PC_HILDONFMMM)')
 
