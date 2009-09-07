@@ -97,17 +97,17 @@ $(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
 $(INTERFACES_HDRS): $(IFACEDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
 
 $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
-	$(SILENT) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
+	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
   ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
 	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
 	$(if $(filter-out $(IFACEDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h)
   else
     ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
-	$(SILENT)if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
-		echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
+	if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
+		$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
 	else \
-		echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
+		$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
 		cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h; \
 		touch $(SRCDIR)/$*.cpp; \
 	fi

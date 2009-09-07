@@ -18,6 +18,7 @@ __buildsys_config_mk := 1
 
 
 ### Debugging related options
+SILENTSYMB = @
 SILENT = @
 ifeq ($(filter uncolored-%,$(MAKECMDGOALS)),)
 COLORED = 1

@@ -30,10 +30,10 @@ tracdoc: api-trac.doxygen
 uncolored-quickdoc: quickdoc
 
 %.doxygen:
-	$(SILENT) echo "--> Building documentation ($@). This may take a while..."
+	$(SILENTSYMB) echo "--> Building documentation ($@). This may take a while..."
 	$(SILENT) rm -rf doc/api
 	$(SILENT) $(DOXYGEN) doc/doxygen/$@ >/dev/null 2>&1
-	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
+	$(SILENTSYMB) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
 		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \
 		cat warnings.txt; \
 		exit 1; \
@@ -43,7 +43,7 @@ uncolored-quickdoc: quickdoc
 
 .PHONY: linkscripts
 linkscripts:
-	$(SILENT) if [ -d $(BASEDIR)/etc/scripts ]; then \
+	$(SILENTSYMB) if [ -d $(BASEDIR)/etc/scripts ]; then \
 		for f in $$(ls $(BASEDIR)/etc/scripts); do \
 			if [ -e "$(BASEDIR)/etc/scripts/$$f" ]; then \
 				if [[ -a "$(BASEDIR)/bin/$$f" && ! -L "$(BASEDIR)/bin/$$f" ]]; then \
@@ -60,7 +60,7 @@ linkscripts:
 .PHONY: license-check uncolored-license-check
 uncolored-license-check: license-check
 license-check:
-	$(SILENT)if which perl >/dev/null; then \
+	$(SILENTSYMB)if which perl >/dev/null; then \
 		perl $(BASEDIR)/etc/licscripts/find_invlic.pl src $(wildcard $(BASEDIR)/doc/headers/lichead*.*); \
 		if [ $$? = 0 ]; then \
 			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files have a proper license header.$(TNORMAL)"; \
@@ -113,5 +113,5 @@ switch-buildtype:
 	fi
 
 print-buildtype:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
 
