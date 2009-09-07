@@ -16,6 +16,7 @@
 ifndef __buildsys_config_mk_
 __buildsys_config_mk := 1
 
+include $(BASEDIR)/etc/buildsys/ext/gmsl
 
 ### Debugging related options
 SILENTSYMB = @
@@ -119,6 +120,8 @@ ifeq ($(DO_32BIT_BUILD),1)
   ARCH=i386
 endif
 
+# Required if BASEDIR != EXEC_BASEDIR
+export LD_LIBRARY_PATH=$(call merge,:, $(LIBDIRS_BASE) $(LIBDIRS))
 
 ifeq ($(COLORED),1)
 TBOLDGRAY	= \033[1;30m
