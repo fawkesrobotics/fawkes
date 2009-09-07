@@ -34,31 +34,31 @@ ARCH=$(shell uname -m)
 OS=$(shell uname -s)
 
 ### Directories
-SRCDIR ?= .
-OBJDIR = .objs_$(BUILD_TYPE)
-DEPDIR = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
-BINDIR = $(abspath $(BASEDIR)/bin)
-LIBDIR = $(abspath $(BASEDIR)/lib)
-#LIBDIR = $(abspath $(BASEDIR)/lib/$(BUILD_TYPE))
-CONFDIR = $(abspath $(BASEDIR)/cfg)
+SRCDIR   ?= .
+OBJDIR    = .objs_$(BUILD_TYPE)
+DEPDIR    = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
+BINDIR    = $(abspath $(BASEDIR)/bin)
+LIBDIR    = $(abspath $(BASEDIR)/lib)
+CONFDIR   = $(abspath $(BASEDIR)/cfg)
 PLUGINDIR = $(abspath $(BASEDIR)/plugins)
-RESDIR = $(abspath $(BASEDIR)/res)
-IFACEDIR = $(abspath $(BASEDIR)/src/interfaces)
+RESDIR    = $(abspath $(BASEDIR)/res)
+IFACEDIR  = $(abspath $(BASEDIR)/src/interfaces)
+LIBSRCDIR = $(abspath $(BASEDIR)/src/libs)
 
 # Paths at execution time, may be different if installed or deployed
-TARGET_ARCH ?= $(ARCH)
-EXEC_BASEDIR ?= $(BASEDIR)
-EXEC_BINDIR = $(abspath $(EXEC_BASEDIR)/bin)
-EXEC_LIBDIR = $(abspath $(EXEC_BASEDIR)/lib)
-EXEC_CONFDIR = $(abspath $(EXEC_BASEDIR)/cfg)
+TARGET_ARCH   ?= $(ARCH)
+EXEC_BASEDIR  ?= $(BASEDIR)
+EXEC_BINDIR    = $(abspath $(EXEC_BASEDIR)/bin)
+EXEC_LIBDIR    = $(abspath $(EXEC_BASEDIR)/lib)
+EXEC_CONFDIR   = $(abspath $(EXEC_BASEDIR)/cfg)
 EXEC_PLUGINDIR = $(abspath $(EXEC_BASEDIR)/plugins)
-EXEC_RESDIR = $(abspath $(EXEC_BASEDIR)/res)
-EXEC_IFACEDIR = $(abspath $(EXEC_BASEDIR)/src/interfaces)
+EXEC_RESDIR    = $(abspath $(EXEC_BASEDIR)/res)
+EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/src/interfaces)
 
 VPATH = $(SRCDIR)
 DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 
-### Programs used, do not mention trivial stuff like ln, rm, ls as per Makefile manual
+### Programs used, no trivial stuff like ln, rm, ls as per Makefile manual
 CC = gcc
 MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
@@ -89,11 +89,17 @@ DO_32BIT_BUILD=0
 ### CFLAGS, preprocessor, compiler and linker options
 LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
 LIBDIRS_EXEC_BASE= $(EXEC_LIBDIR) $(EXEC_LIBDIR)/interfaces
-LDFLAGS_LIBDIRS  = $(LIBDIRS_EXEC_BASE:%=-Wl,-R%) $(LIBDIRS_BASE:%=-Wl,-R%) $(LIBDIRS:%=-Wl,-R%)
+LDFLAGS_RPATH    = $(LIBDIRS_EXEC_BASE:%=-Wl,-R%) $(LIBDIRS_BASE:%=-Wl,-R%) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
-CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
-CFLAGS_BASE      = $(CFLAGS_MINIMUM) 
-LDFLAGS_BASE     = $(LIBDIRS_BASE:%=-L%) -rdynamic $(LDFLAGS_OPENMP)
+CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
+		   -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" \
+		   -DCONFDIR=\"$(EXEC_CONFDIR)\" \
+		   -DRESDIR=\"$(EXEC_RESDIR)\" -DBUILDTYPE=\"$(BUILD_TYPE)\"
+
+CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP) $(CFLAGS_DEFS)
+LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic $(LDFLAGS_OPENMP)
+CFLAGS_BASE      = $(CFLAGS_MINIMUM)
+LDFLAGS_BASE     =  $(LDFLAGS_MINIMUM) $(LDFLAGS_RPATH)
 LDFLAGS_SHARED   = -shared
 CFLAGS_OPENMP  = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-fopenmp)
 LDFLAGS_OPENMP = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-lgomp)
