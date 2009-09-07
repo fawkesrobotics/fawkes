@@ -54,6 +54,9 @@ ifeq ($(MAKECMDGOALS),clean)
   endif
 endif
 
+# If SOVER for lib was not set (SOVER_libname empty), set it to DEFAULT_SOVER
+$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%.so),$(if $(SOVER_$(subst /,_,$(L:%.so=%))),,$(eval SOVER_$(subst /,_,$(L:%.so=%)) = $(DEFAULT_SOVER))))
+
 # Dependencies
 -include $(DEPDIR)/*.d
 
@@ -88,13 +91,13 @@ clean: presubdirs subdirs
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf "$(SRCDIR)/$(OBJDIR)" ; fi
 	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf "$(DEPDIR)" ; fi
-	$(SILENT)$(foreach B,$(BINS_all),rm -rf $(B);)
-	$(SILENT)$(foreach L,$(LIBS_all),rm -rf $(L);)
-	$(SILENT)$(foreach P,$(PLUGINS_all),rm -rf $(P);)
+	$(SILENT)$(foreach B,$(BINS_all),rm -f $(B);)
+	$(SILENT)$(foreach L,$(LIBS_all),rm -f $(addsuffix *,$(L));)
+	$(SILENT)$(foreach P,$(PLUGINS_all),rm -f $(P);)
 	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
-	$(SILENT)$(foreach B,$(BINS_gui),rm -rf $(B);)
-	$(SILENT)$(foreach L,$(LIBS_gui),rm -rf $(L);)
-	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -rf $(P);)
+	$(SILENT)$(foreach B,$(BINS_gui),rm -f $(B);)
+	$(SILENT)$(foreach L,$(LIBS_gui),rm -f $(L);)
+	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -f $(P);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
@@ -174,10 +177,13 @@ $(BINDIR)/%: $$(OBJS_$$(subst /,_,$$*))
 $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
+	$(SILENT) $(CC) -o $@.$(SOVER_$(subst /,_,$*)) $(subst ..,__,$^) \
+	-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*)) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
+	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@
+	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@.$(firstword $(call split,.,$(SOVER_$(subst /,_,$*))))
 
 
 ### Check if there are special additions
