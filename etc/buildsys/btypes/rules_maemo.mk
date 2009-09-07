@@ -13,5 +13,5 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys_local/rules_fawkes.mk
+include $(BASEDIR)/etc/buildsys/btypes/rules_fawkes.mk
 

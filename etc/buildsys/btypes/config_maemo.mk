@@ -13,7 +13,7 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys_local/config_fawkes.mk
+include $(BASEDIR)/etc/buildsys/btypes/config_fawkes.mk
 
 EXEC_BASEDIR=/home/user/fawkes
 GCC_USE_OPENMP=0

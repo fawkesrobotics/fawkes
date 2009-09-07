@@ -181,8 +181,8 @@ $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 
 
 ### Check if there are special additions
-ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk),)
-include $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk
+ifneq ($(realpath $(BASEDIR)/etc/buildsys/btypes/rules_$(BUILD_TYPE).mk),)
+include $(BASEDIR)/etc/buildsys/btypes/rules_$(BUILD_TYPE).mk
 endif
 
 endif # __buildsys_rules_mk_

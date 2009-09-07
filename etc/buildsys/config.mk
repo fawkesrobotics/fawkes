@@ -24,8 +24,8 @@ COLORED = 1
 endif
 
 ### Build type
-ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk)),)
-  include $(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk)
+ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/buildtype.mk)),)
+  include $(realpath $(BASEDIR)/etc/buildsys/buildtype.mk)
 else
   BUILD_TYPE = fawkes
 endif
@@ -140,8 +140,8 @@ ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/$(CC).mk)),)
 endif
 
 ### Check if there is a build-type specific configuration
-ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk)),)
-  include $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk
+ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/btypes/config_$(BUILD_TYPE).mk)),)
+  include $(BASEDIR)/etc/buildsys/btypes/config_$(BUILD_TYPE).mk
 endif
 
 ### Check if there is a local config for this directory

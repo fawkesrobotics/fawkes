@@ -89,7 +89,7 @@ switch-buildtype:
 		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Build type $(BT) is already set$(TNORMAL)"; \
 	else \
 		echo -e "$(INDENT_PRINT)--- Switching build type from $(BUILD_TYPE) to $(BT)"; \
-		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys_local/buildtype.mk; \
+		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys/buildtype.mk; \
 		for D in $(BINDIR) $(LIBDIR) $(PLUGINDIR); do \
 			rm -rf $${D}_$(BUILD_TYPE); \
 			mv $$D $${D}_$(BUILD_TYPE); \
