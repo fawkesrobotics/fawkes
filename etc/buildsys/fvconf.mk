@@ -143,8 +143,8 @@ ifeq ($(HAVE_NAO_CAM),1)
 endif
 
 ### Check for external libraries
-IPP_DIR  = $(SYSROOT)/opt/intel/Compiler/11.0/081/ipp
-ICC_DIR  = $(SYSROOT)/opt/intel/Compiler/11.0/081/
+IPP_DIR  = $(SYSROOT)/opt/intel/Compiler/11.1/038/ipp
+ICC_DIR  = $(SYSROOT)/opt/intel/Compiler/11.1/038
 HAVE_IPP = 0
 ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   # Check versions, use first one found
@@ -165,6 +165,7 @@ ifneq ($(wildcard $(realpath $(IPP_DIR))),)
       VISION_LIBDIRS += $(ICC_DIR)/lib/$(ICC_ARCH)
       VISION_INCDIRS += $(IPP_DIR)/include
     endif
+    VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/lib
     VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/sharedlib
     VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/include
   endif

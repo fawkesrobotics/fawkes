@@ -35,7 +35,7 @@ ifeq ($(HAVE_IPP),0)
     IPPI_FILTERS += $(shell grep -rl ippi.h $(ALLFILES))
   endif
 else
-  LIBS_libfvfilters += ippi$(IPP_ARCH) ippcore$(IPP_ARCH) guide pthread
+  LIBS_libfvfilters += ippi ippcore guide pthread
 endif
 
 ifeq ($(OBJSSUBMAKE),1)

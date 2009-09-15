@@ -24,13 +24,13 @@
 # 1418: external function definition with no prior declaration
 # 1572: floating-point equality and inequality comparisons are unreliable
 
-ICC_PATH = /opt/intel/cce/10.1.008
-CC = $(ICC_PATH)/bin/icc
+ICC_PATH = /opt/intel/Compiler/11.1/038
+CC = $(ICC_PATH)/bin/ia32/icc
 
 DEFAULT_INCLUDES += -I$(ICC_PATH)/include
 LDFLAGS_LIBDIRS  += -Wl,-R$(ICC_PATH)/lib
 CFLAGS_BASE      += -wd177,383,810,869,981,1418,1572
 LDFLAGS_BASE     += -L$(ICC_PATH)/lib -lguide -lpthread
 CFLAGS_OPENMP     = -openmp
-LDFLAGS_OPENMP    = -lomp5
+LDFLAGS_OPENMP    = -lgomp
 
