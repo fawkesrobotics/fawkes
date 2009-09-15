@@ -64,7 +64,7 @@ distance(float x1, float y1, float x2, float y2)
   return sqrt( (x2-x1) * (x2-x1) + (y2-y1) * (y2-y1) );
 }
 
-/** Normalize angle in radian between -PI and PI.
+/** Normalize angle in radian between -PI (inclusive) and PI (exclusive).
  * The given angle in radians is taken as an angle on the unit circle.
  * It is then normalized into the range -PI and PI, such that it is the
  * exact same angle on the unit circle but in the usual angle range.
@@ -74,14 +74,15 @@ distance(float x1, float y1, float x2, float y2)
 inline float 
 normalize_mirror_rad(float angle_rad)
 {
-  if ( (angle_rad < -M_PI) || (angle_rad > M_PI) ) {
-    return ( angle_rad - 2 * M_PI * round(angle_rad / (2 * M_PI)) );
+  const float pi = static_cast<float>(M_PI);
+  if ( (angle_rad < -1.0f * pi) || (angle_rad >= pi) ) {
+    return ( angle_rad - 2.0f * pi * round(angle_rad / (2.0f * pi)) );
   } else {
     return angle_rad;
   }
 }
 
-/** Normalize angle in radian between 0 and 2*PI.
+/** Normalize angle in radian between 0 (inclusive) and 2*PI (exclusive).
  * The given angle in radians is taken as an angle on the unit circle.
  * It is then normalized into the range 0 and 2*PI, such that it is the
  * exact same angle on the unit circle but in the usual angle range.
@@ -91,8 +92,9 @@ normalize_mirror_rad(float angle_rad)
 inline float
 normalize_rad(float angle_rad)
 {
-  if ( (angle_rad < 0) || (angle_rad > 2 * M_PI) ) {
-    return angle_rad - 2 * M_PI * floor(angle_rad / (M_PI * 2));
+  const float twopi = static_cast<float>(2 * M_PI);
+  if ( (angle_rad < 0) || (angle_rad >= twopi) ) {
+    return angle_rad - twopi * floor(angle_rad / twopi);
   } else {
     return angle_rad;
   }
