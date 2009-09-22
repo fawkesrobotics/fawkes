@@ -34,13 +34,13 @@ namespace firevision {
 #define YUV422PA_MACROPIXEL_AT(YUV, width, x, y) ((unsigned char*)YUV + (y)*(width)*2 + ((x)-((x)%2))*2)
 
 #define YUV422_PLANAR_Y_AT(YUV, width, x, y)	\
-  *(YUV + (y) * (width) + (x));
+  *(YUV + (y) * (width) + (x))
 
 #define YUV422_PLANAR_U_AT(YUV, width, height, x, y)		\
-  *(YUV + ((width) * (height)) + (((y) * (width) + (x))/ 2));
+  *(YUV + ((width) * (height)) + (((y) * (width) + (x))/ 2))
 
 #define YUV422_PLANAR_V_AT(YUV, width, height, x, y)			\
-  *(YUV + ((width) * (height)) + (((width) * (height) + (y) * (width) + (x)) / 2)); \
+  *(YUV + ((width) * (height)) + (((width) * (height) + (y) * (width) + (x)) / 2))
 
 #define YUV422_PLANAR_YUV(YUV, width, height, x, y, yp, up, vp)		\
   {									\
