@@ -1036,10 +1036,10 @@ Firestation::image_click(GdkEventButton* event)
         memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
         memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
         MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
-                                        m_img_width,
-                                        m_img_height,
                                         m_calib_tool->center_x(),
-                                        m_calib_tool->center_y());
+                                        m_calib_tool->center_y(),
+                                        m_img_width,
+                                        m_img_height);
         draw_image();
         m_stb_status->push(m_calib_tool->get_state_description());
 	/*m_calib_tool->step(image_x, image_y);
@@ -1162,10 +1162,10 @@ Firestation::mc_show_crosshair()
 {
   if (m_img_src != SRC_NONE) {
     MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
-                                    m_img_width,
-                                    m_img_height,
                                     m_calib_tool->center_x(),
-                                    m_calib_tool->center_y());
+                                    m_calib_tool->center_y(),
+                                    m_img_width,
+                                    m_img_height);
     draw_image();
   }
 }
