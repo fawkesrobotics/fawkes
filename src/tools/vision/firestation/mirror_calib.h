@@ -49,6 +49,7 @@ class MirrorCalibTool
   MirrorCalibTool();
   ~MirrorCalibTool();
 
+  void load_mask(const char* mask_file_name);
   void push_back(const unsigned char* yuv_buffer,
                  size_t buflen,
                  int width,
@@ -133,16 +134,18 @@ class MirrorCalibTool
                        unsigned char* dst, int widt, int height);
   static void make_contrast(unsigned char* buf, size_t buflen);
   static void make_grayscale(unsigned char* buf, size_t buflen);
-  static MarkList premark(const StepResult& prev, StepResult& result,
-                          PolarAngle phi, const PixelPoint& center);
-  static MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
+  static MarkList premark(const StepResult& prev, const unsigned char* yuv_mask,
                           StepResult& result, PolarAngle phi,
                           const PixelPoint& center);
+  static MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
+                          const unsigned char* yuv_mask, StepResult& result,
+                          PolarAngle phi, const PixelPoint& center);
   static HoleList search_holes(const MarkList& premarks);
   static HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
   static MarkList determine_marks(const HoleList& holes);
-  static MarkList mark(const MarkList& premarks, StepResult& result,
-                       PolarAngle phi, const PixelPoint& center);
+  static MarkList mark(const MarkList& premarks, const unsigned char* yuv_mask,
+                       StepResult& result, PolarAngle phi,
+                       const PixelPoint& center);
 
   static PixelPoint calculate_center(const ImageList& images);
   static RealDistance calculate_real_distance(int n);
@@ -159,6 +162,7 @@ class MirrorCalibTool
   int              img_height_;
   int              img_center_x_;
   int              img_center_y_;
+  unsigned char*   img_yuv_mask_;
 
   ImageList        source_images_;
   CalibrationState state_;

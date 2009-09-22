@@ -25,6 +25,10 @@
 
 #include <core/exception.h>
 #include <utils/math/angle.h>
+
+#include <fvutils/color/yuv.h>
+#include <fvutils/readers/pnm.h>
+
 #include <filters/sobel.h>
 #include <filters/sharpen.h>
 #include <filters/median.h>
@@ -214,47 +218,31 @@ class MirrorCalibTool::CartesianImage
   const int height_;
   const PixelPoint center_;
   const PolarAngle phi_;
+  const unsigned char* mask_;
 
  public:
   CartesianImage(const StepResult& res,
                  PolarAngle phi,
-                 PixelPoint center)
+                 PixelPoint center,
+                 const unsigned char* mask = 0)
   : buf_(const_cast<unsigned char*>(res.yuv_buffer())),
     width_(res.width()),
     height_(res.height()),
     center_(center),
-    phi_(phi)
-  {
-  }
-
-  CartesianImage(StepResult& res,
-                 PolarAngle phi,
-                 PixelPoint center)
-  : buf_(res.yuv_buffer()),
-    width_(res.width()),
-    height_(res.height()),
-    center_(center),
-    phi_(phi)
+    phi_(phi),
+    mask_(mask)
   {
   }
 
   CartesianImage(const StepResult& res,
-                 PolarAngle phi)
+                 PolarAngle phi,
+                 const unsigned char* mask = 0)
   : buf_(const_cast<unsigned char*>(res.yuv_buffer())),
     width_(res.width()),
     height_(res.height()),
     center_(PixelPoint(res.width()/2, res.height()/2)),
-    phi_(phi)
-  {
-  }
-
-  CartesianImage(StepResult& res,
-                 PolarAngle phi)
-  : buf_(res.yuv_buffer()),
-    width_(res.width()),
-    height_(res.height()),
-    center_(PixelPoint(res.width()/2, res.height()/2)),
-    phi_(phi)
+    phi_(phi),
+    mask_(mask)
   {
   }
 
@@ -267,7 +255,8 @@ class MirrorCalibTool::CartesianImage
     width_(width),
     height_(height),
     center_(center),
-    phi_(phi)
+    phi_(phi),
+    mask_(0)
   {
   }
 
@@ -280,7 +269,8 @@ class MirrorCalibTool::CartesianImage
     width_(width),
     height_(height),
     center_(center),
-    phi_(phi)
+    phi_(phi),
+    mask_(0)
   {
   }
 
@@ -292,7 +282,8 @@ class MirrorCalibTool::CartesianImage
     width_(width),
     height_(height),
     center_(PixelPoint(width/2, height/2)),
-    phi_(phi)
+    phi_(phi),
+    mask_(0)
   {
   }
 
@@ -304,11 +295,13 @@ class MirrorCalibTool::CartesianImage
     width_(width),
     height_(height),
     center_(PixelPoint(width/2, height/2)),
-    phi_(phi)
+    phi_(phi),
+    mask_(0)
   {
   }
 
   inline unsigned char* buf() { return buf_; }
+  inline const unsigned char* mask() const { return mask_; }
   inline const unsigned char* buf() const { return buf_; }
   inline const PixelPoint& center() const { return center_; }
   inline const int width() const { return width_; }
@@ -348,7 +341,18 @@ class MirrorCalibTool::CartesianImage
       throw fawkes::Exception("Point p is out of image");
     }
     PixelPoint pp = to_pixel(p);
-    return buf_[width() * pp.y + pp.x];
+    const firevision::YUV_t ignr(0);
+    if (mask() == 0 ||
+        (YUV422_PLANAR_Y_AT(mask(), width(), pp.x, pp.y) != ignr.Y &&
+         YUV422_PLANAR_U_AT(mask(), width(), height(), pp.x, pp.y) != ignr.U &&
+         YUV422_PLANAR_V_AT(mask(), width(), height(), pp.x, pp.y) != ignr.V)) {
+      return YUV422_PLANAR_Y_AT(buf(), width(), pp.x, pp.y);
+    } else {
+      if (mask() != 0) {
+        printf("Ignoring (%lf,%d) = (%d,%d)\n", p.atan(), p.length(), pp.x, pp.y);
+      }
+      return 0;
+    }
   }
 
   inline int max_x() const { return max(center().x, width() - center().x); }
@@ -365,9 +369,8 @@ class MirrorCalibTool::CartesianImage
     if (!contains(p)) {
       throw fawkes::Exception("Point p is out of image");
     }
-    unsigned char* b = buf();
-    b[width() * p.y + p.x] = luma;
-    b[width() * height() + (width() * p.y + p.x) / 2] = chrominance;
+    YUV422_PLANAR_Y_AT(buf(), width(), p.x, p.y) = luma;
+    YUV422_PLANAR_U_AT(buf(), width(), height(), p.x, p.y) = chrominance;
   }
 
   void
@@ -633,7 +636,6 @@ class MirrorCalibTool::Image
     std::cout << "Image.=" << std::endl;
     if (this != &copy) {
       if (--*refcount_ == 0) {
-        printf("Deleting %p\n", (void *)yuv_buffer_);
         delete[] yuv_buffer_;
         delete refcount_;
       }
@@ -653,9 +655,7 @@ class MirrorCalibTool::Image
 
   ~Image()
   {
-    std::cout << "~Image" << std::endl;
     if (--*refcount_ == 0) {
-      printf("Deleting %p\n", (void *)yuv_buffer_);
       delete[] yuv_buffer_;
       delete refcount_;
     }
@@ -699,6 +699,7 @@ MirrorCalibTool::MirrorCalibTool()
     img_height_(0),
     img_center_x_(500),
     img_center_y_(500),
+    img_yuv_mask_(0),
     state_(CalibrationState())
 #ifdef HAVE_BULB_CREATOR
   , bulb_(0),
@@ -713,6 +714,9 @@ MirrorCalibTool::~MirrorCalibTool()
 {
   if (img_yuv_buffer_) {
     delete[] img_yuv_buffer_;
+  }
+  if (img_yuv_mask_) {
+    delete[] img_yuv_mask_;
   }
 }
 
@@ -747,6 +751,22 @@ MirrorCalibTool::PolarAngle
 MirrorCalibTool::imageRotationToRobotRelativeOrientation(PolarAngle ori)
 {
   return normalize_rad(-1.0 * (ori + deg2rad(90.0)));
+}
+
+
+void
+MirrorCalibTool::load_mask(const char* mask_file_name)
+{
+  if (img_yuv_mask_) {
+    delete[] img_yuv_mask_;
+  }
+  PNMReader reader(mask_file_name);
+  size_t size = colorspace_buffer_size(reader.colorspace(),
+                                       reader.pixel_width(),
+                                       reader.pixel_height());
+  img_yuv_mask_ = new unsigned char[size];
+  reader.set_buffer(img_yuv_mask_);
+  reader.read();
 }
 
 
@@ -895,12 +915,13 @@ MirrorCalibTool::get_state_description() const
 /** Finds the first marks. This is the first step in finding marks. */
 MirrorCalibTool::MarkList
 MirrorCalibTool::premark(const StepResult& prev,
+                         const unsigned char* yuv_mask,
                          StepResult& result,
                          PolarAngle phi,
                          const PixelPoint& center)
 {
   const ConvexPolygon empty_polygon;
-  return premark(empty_polygon, prev, result, phi, center);
+  return premark(empty_polygon, prev, yuv_mask, result, phi, center);
 }
 
 
@@ -908,12 +929,13 @@ MirrorCalibTool::premark(const StepResult& prev,
 MirrorCalibTool::MarkList
 MirrorCalibTool::premark(const ConvexPolygon& polygon,
                          const StepResult& prev,
+                         const unsigned char* yuv_mask,
                          StepResult& result,
                          PolarAngle phi,
                          const PixelPoint& center)
 {
-  const CartesianImage prev_img(prev, phi, center);
-  CartesianImage res_img(result, phi, center);
+  const CartesianImage prev_img(prev, phi, center, yuv_mask);
+  CartesianImage res_img(result, phi, center, yuv_mask);
   int width = MIN_WIDTH_OF_BIGGEST_LINE;
   MarkList premarks;
   for (PolarRadius length = 0; length < prev_img.max_radius(); length++)
@@ -1026,6 +1048,7 @@ MirrorCalibTool::determine_marks(const HoleList& holes)
 /** Sets marks between all holes. The last step of marking. */
 MirrorCalibTool::MarkList
 MirrorCalibTool::mark(const MarkList& premarks,
+                      const unsigned char* yuv_mask,
                       StepResult& result,
                       PolarAngle phi,
                       const PixelPoint& center)
@@ -1036,7 +1059,7 @@ MirrorCalibTool::mark(const MarkList& premarks,
   MarkList marks = determine_marks(holes);
   std::cout << "Found Marks: " << marks.size() << std::endl;
 
-  CartesianImage res_img(result, phi, center);
+  CartesianImage res_img(result, phi, center, yuv_mask);
   for (MarkList::const_iterator iter = marks.begin();
        iter != marks.end(); iter++)
   {
@@ -1207,8 +1230,9 @@ MirrorCalibTool::next_step()
       {
         const StepResult& prev = src_img.result(2 * ORIENTATION_COUNT - 1);
         memcpy(result.yuv_buffer(), prev.yuv_buffer(), result.buflen());
+        const unsigned char* mask = img_yuv_mask_;
         const PixelPoint center(img_center_x_, img_center_y_);
-        MarkList premarks = premark(prev, result, src_img.ori(), center);
+        MarkList premarks = premark(prev, mask, result, src_img.ori(), center);
         src_img.set_premarks(premarks);
       }
       src_img.add_result(result);
@@ -1219,9 +1243,10 @@ MirrorCalibTool::next_step()
       {
         const StepResult& orig = src_img.result(0);
         memcpy(result.yuv_buffer(), orig.yuv_buffer(), result.buflen());
+        const unsigned char* mask = img_yuv_mask_;
         const PixelPoint center(img_center_x_, img_center_y_);
-        const MarkList marks = mark(src_img.premarks(), result, src_img.ori(),
-                                    center); 
+        const MarkList marks = mark(src_img.premarks(), mask, result,
+                                    src_img.ori(), center);
         src_img.set_marks(marks);
         const PolarAngle ori = src_img.ori();
         std::cout << "Marking done for orientation "

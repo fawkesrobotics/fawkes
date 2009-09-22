@@ -259,6 +259,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_btn_mc_crosshair = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcCrosshair") );
   m_btn_mc_crosshair->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_show_crosshair) );
 
+  m_btn_mc_load_mask = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcLoadMask") );
+  m_btn_mc_load_mask->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load_mask) );
+
   m_btn_mc_start0 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart0") );
   m_btn_mc_start0->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start0) );
 
@@ -277,6 +280,8 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ent_mc_dist = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entCalibDist") );
   m_ent_mc_ori = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entCalibOri") );
 
+  // ----------------------------------------------------------------
+  m_fcd_mc_load_mask = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdMcLoadMask") );
   m_fcd_mc_save = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCalibSave") );
   m_fcd_mc_load = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCalibLoad") );
   // ----------------------------------------------------------------
@@ -1163,6 +1168,36 @@ Firestation::mc_show_crosshair()
                                     m_calib_tool->center_y());
     draw_image();
   }
+}
+
+void
+Firestation::mc_load_mask()
+{
+  m_fcd_mc_load_mask->set_transient_for(*this);
+
+  Gtk::FileFilter filter_mirror;
+  filter_mirror.set_name("Robot Mask");
+  filter_mirror.add_pattern("*.pnm");
+  m_fcd_mc_load_mask->add_filter(filter_mirror);
+
+  int result = m_fcd_mc_load_mask->run();
+
+  switch(result)
+    {
+    case Gtk::RESPONSE_OK:
+      {
+	std::string filename = m_fcd_mc_load_mask->get_filename();
+	m_calib_tool->load_mask( filename.c_str() );
+	m_op_mode = MODE_MIRROR_CALIB_EVAL;
+	break;
+      }
+    case Gtk::RESPONSE_CANCEL:
+      break;
+    default:
+      break;
+    }
+
+  m_fcd_mc_load_mask->hide();
 }
 
 void

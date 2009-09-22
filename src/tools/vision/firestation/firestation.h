@@ -133,6 +133,7 @@ class Firestation : public Gtk::Window
   firevision::hint_t ct_get_fg_object();
   void ct_object_changed();
 
+  void mc_load_mask();
   void mc_start0();
   void mc_start120();
   void mc_start240();
@@ -177,8 +178,10 @@ class Firestation : public Gtk::Window
   Gtk::SpinButton* m_spbtn_height;
 
   // mirror calibration widgets
+  Gtk::FileChooserDialog* m_fcd_mc_load_mask;
   Gtk::FileChooserDialog* m_fcd_mc_save;
   Gtk::FileChooserDialog* m_fcd_mc_load;
+  Gtk::Button* m_btn_mc_load_mask;
   Gtk::Button* m_btn_mc_start0;
   Gtk::Button* m_btn_mc_start120;
   Gtk::Button* m_btn_mc_start240;
