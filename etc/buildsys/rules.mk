@@ -55,7 +55,12 @@ ifeq ($(MAKECMDGOALS),clean)
 endif
 
 # If SOVER for lib was not set (SOVER_libname empty), set it to DEFAULT_SOVER
-$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%.so),$(if $(SOVER_$(subst /,_,$(L:%.so=%))),,$(eval SOVER_$(subst /,_,$(L:%.so=%)) = $(DEFAULT_SOVER))))
+$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%),$(if $(SOVER_$(subst /,_,$L)),,$(eval SOVER_$(subst /,_,$L) = $(DEFAULT_SOVER))))
+
+ifdef __buildsys_lua_mk_
+# Lua libraries do not set an SOVER, it's not checked anyway
+$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval NOSOVER_lua_$(subst /,_,$L)=1)))
+endif
 
 # Dependencies
 -include $(DEPDIR)/*.d
@@ -177,14 +182,15 @@ $(BINDIR)/%: $$(OBJS_$$(subst /,_,$$*))
 $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@.$(SOVER_$(subst /,_,$*)) $(subst ..,__,$^) \
-	-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*)) \
+	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(subst /,_,$*)),,.$(SOVER_$(subst /,_,$*))) $(subst ..,__,$^) \
+	$(if $(NOSOVER_$(subst /,_,$*)),,-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*))) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
-	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@
-	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@.$(firstword $(call split,.,$(SOVER_$(subst /,_,$*))))
-
+	$(if $(NOSOVER_$(subst /,_,$*)),, \
+	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@; \
+	ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@.$(firstword $(call split,.,$(SOVER_$(subst /,_,$*)))); \
+	)
 
 ### Check if there are special additions
 ifneq ($(realpath $(BASEDIR)/etc/buildsys/btypes/rules_$(BUILD_TYPE).mk),)
