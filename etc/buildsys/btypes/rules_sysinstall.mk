@@ -25,12 +25,21 @@ $(foreach P,$(LIBS_all:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),
 
 ifdef __buildsys_lua_mk_
 # Lua libraries are "inferred" and automatically installed to proper directory
-$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(subst /,_,$L) = /fawkes)))
+$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(subst /,_,$L) = $(FFLIBSUBDIR))))
 endif
 
 # Main install target
-.PHONY: install
-install: presubdirs $(subst $(LIBDIR),$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs
+.PHONY: install install_test_basedir install_config install_lua
+install: install_test_basedir presubdirs $(subst $(LIBDIR),$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_config install_lua
+
+# Only allow "make install" from basedir
+install_test_basedir:
+ifneq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
+ifeq ($(INDENT),)
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- $(TRED)Installation may only be called from $(BASEDIR)$(TNORMAL)"
+	$(SILENTSYMB)exit 1
+endif
+endif
 
 .PHONY: resdirs $(INST_RESDIRS)
 resdirs: $(INST_RESDIRS)
@@ -43,6 +52,31 @@ $(INST_RESDIRS):
 		cp -af $(RESDIR)/$@/* $(EXEC_RESDIR)/$@ || exit $$?; \
 	fi
 endif
+
+install_config:
+ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating config directory $(EXEC_CONFDIR)"
+	$(SILENT)mkdir -p $(EXEC_CONFDIR)
+	$(SILENT)for f in $$(find cfg/ ! -name '*.db' -type f); do \
+		if [ -e "$(EXEC_CONFDIR)/$${f/cfg\//}" ]; then \
+			echo -e "$(INDENT_PRINT)--- $(TYELLOW)Omitting$(TNORMAL) config file $$f, already exists"; \
+		else \
+			echo -e "$(INDENT_PRINT)--- Copying config file $$f"; \
+			install -D -m 644 $$f $(EXEC_CONFDIR)/$${f/cfg\//}; \
+		fi \
+	done
+endif
+
+install_lua:
+ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating Lua directory $(EXEC_LUADIR)"
+	$(SILENT)mkdir -p $(EXEC_LUADIR)
+	$(SILENT)for f in $$(find src/lua/ -name '*.lua'); do \
+		echo -e "$(INDENT_PRINT)--- Copying Lua file $$f"; \
+		install -D -m 644 $$f $(EXEC_LUADIR)/$${f/src\/lua\//}; \
+	done
+endif
+
 
 # uninstall target to remove files from system
 .PHONY: uninstall
