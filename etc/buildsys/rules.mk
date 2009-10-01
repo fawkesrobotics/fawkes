@@ -171,13 +171,13 @@ moc_%.cpp: %.h
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
-$(BINDIR)/%: $$(OBJS_$$(subst /,_,$$*))
+$(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
-	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
+	$(LDFLAGS_BASE) $(LDFLAGS) $(LDFLAGS_$*) \
+	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 
 $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
