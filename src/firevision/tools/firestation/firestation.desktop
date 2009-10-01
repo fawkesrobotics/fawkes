@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Firestation
+Comment=FireVision calibration, monitoring and more
+Type=Application
+Exec=firestation
+Icon=@RESDIR@/guis/firestation/firestation.svg
+Categories=Robotics;Development;Education

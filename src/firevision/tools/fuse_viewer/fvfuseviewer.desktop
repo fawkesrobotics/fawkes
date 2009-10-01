@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=FireVision Viewer
+Comment=View images from a robot over the network
+Type=Application
+Exec=fvfuseviewer
+Icon=@RESDIR@/guis/fuse_viewer/fuse.svg
+Categories=Robotics;Development;Education

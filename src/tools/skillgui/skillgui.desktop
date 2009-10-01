@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Fawkes SkillGUI
+Comment=Instruct and monitor robot behavior
+Type=Application
+Exec=skillgui
+Icon=@RESDIR@/guis/skillgui/skillgui.svg
+Categories=Robotics;Development;Education
