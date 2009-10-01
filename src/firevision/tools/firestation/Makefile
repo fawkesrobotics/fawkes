@@ -37,6 +37,7 @@ OBJS_all += $(OBJS_firestation)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_AVAHI),111)
   BINS_gui += $(BINDIR)/firestation
+  INST_RESDIRS = guis/firestation
 else
   ifneq ($(HAVE_AVAHI),1)
     WARN_TARGETS += warning_avahi

@@ -22,6 +22,7 @@ LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_libfawkesguiutils = stdc++ fawkescore fawkesnetcomm fawkesblackboard fawkesplugin
 OBJS_libfawkesguiutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+HDRS_libfawkesguiutils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 
 OBJS_all = $(OBJS_libfawkesguiutils)
 

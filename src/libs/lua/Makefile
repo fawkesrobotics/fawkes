@@ -17,7 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/lua.mk
 
 LIBS_libfawkeslua = fawkescore fawkesutils fawkesconfig fawkesblackboard $(TOLUA_LIBS)
-OBJS_libfawkeslua = $(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
+OBJS_libfawkeslua = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+HDRS_libfawkeslua = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 CFLAGS += $(CFLAGS_LUA)
 LDFLAGS_libfawkeslua += $(LDFLAGS_LUA)

@@ -34,6 +34,7 @@ OBJS_all = $(OBJS_wiv)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui = $(BINDIR)/wiv
+  INST_RESDIRS = guis/worldinfo_viewer
 else
   WARN_TARGETS += warning_wiv
 endif

@@ -19,6 +19,7 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 LIBS_libfawkesplugin = stdc++ fawkescore fawkesutils fawkesconfig $(if $(filter Linux,$(OS)),dl)
 OBJS_libfawkesplugin =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+HDRS_libfawkesplugin = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 
 OBJS_all = $(OBJS_libfawkesplugin)
 LIBS_all  = $(LIBDIR)/libfawkesplugin.so

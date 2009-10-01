@@ -28,6 +28,7 @@ OBJS_all = $(OBJS_ffbatterymon)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui = $(BINDIR)/ffbatterymon
+  INST_RESDIRS = guis/battery_monitor
 else
   WARN_TARGETS += warning_ffbatterymon
 endif

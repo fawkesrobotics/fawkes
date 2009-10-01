@@ -30,6 +30,7 @@ OBJS_all += $(OBJS_fvfuseviewer)
 
 ifeq ($(HAVE_GUI),1)
   BINS_gui += $(BINDIR)/fvfuseviewer
+  INST_RESDIRS = guis/fuse_viewer
 else
   ifneq ($(HAVE_AVAHI),1)
     WARN_TARGETS += warning_avahi

@@ -24,6 +24,7 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
   LIBS_webview = fawkescore fawkesutils fawkesaspects
   OBJS_webview = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
   PLUGINS_all = $(PLUGINDIR)/webview.so
+  INST_RESDIRS = webview
 else
   WARN_TARGETS += warning_libmicrohttpd
 endif

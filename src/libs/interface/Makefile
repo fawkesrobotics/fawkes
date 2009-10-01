@@ -20,6 +20,7 @@ include $(BASEDIR)/etc/buildsys/lua.mk
 
 LIBS_libfawkesinterface = fawkescore
 OBJS_libfawkesinterface = interface.o interface_info.o message.o message_queue.o field_iterator.o
+HDRS_libfawkesinterface = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 CFLAGS_fawkesinterface_tolua = -Wno-unused-function $(CFLAGS_LUA)
 TOLUA_fawkesinterface = $(wildcard $(SRCDIR)/*.tolua)

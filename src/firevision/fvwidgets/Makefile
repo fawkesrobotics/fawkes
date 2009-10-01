@@ -46,6 +46,7 @@ endif
 
 OBJS_libfvwidgets := $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 LIBS_libfvwidgets := fawkescore fawkesutils fvutils
+HDRS_libfvwidgets = $(patsubst %.o,%.h,$(OBJS_libfvwidgets))
 
 OBJS_all = $(OBJS_libfvwidgets)
 

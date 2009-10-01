@@ -97,6 +97,7 @@ endif
 ifneq ($(HAVE_LIBJPEG),1)
   WARN_TARGETS += warning_libjpeg
 endif
+HDRS_libfvcams = $(patsubst %.o,%.h,$(OBJS_libfvcams))
 
 OBJS_all = $(OBJS_libfvcams)
 LIBS_all = $(LIBDIR)/libfvcams.so
