@@ -24,7 +24,7 @@ GCC_USE_OPENMP=0
 DO_32BIT_BUILD=0
 
 # For x86_64 we must append 64 to lib dir
-LIBBITS=$(if $(call seq,$ARCH,x86_64),64)
+LIBBITS=$(if $(call seq,$(ARCH),x86_64),64)
 
 DESTDIR        = /usr/local
 SYSCONFDIR     = /etc/fawkes
