@@ -35,16 +35,17 @@ ARCH=$(shell uname -m)
 OS=$(shell uname -s)
 
 ### Directories
-SRCDIR   ?= .
-OBJDIR    = .objs_$(BUILD_TYPE)
-DEPDIR    = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
-BINDIR    = $(abspath $(BASEDIR)/bin)
-LIBDIR    = $(abspath $(BASEDIR)/lib)
-CONFDIR   = $(abspath $(BASEDIR)/cfg)
-PLUGINDIR = $(abspath $(BASEDIR)/plugins)
-RESDIR    = $(abspath $(BASEDIR)/res)
-IFACEDIR  = $(abspath $(BASEDIR)/src/interfaces)
-LIBSRCDIR = $(abspath $(BASEDIR)/src/libs)
+SRCDIR     ?= .
+OBJDIR      = .objs_$(BUILD_TYPE)
+DEPDIR      = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
+BINDIR      = $(abspath $(BASEDIR)/bin)
+LIBDIR      = $(abspath $(BASEDIR)/lib)
+CONFDIR     = $(abspath $(BASEDIR)/cfg)
+PLUGINDIR   = $(abspath $(BASEDIR)/plugins)
+RESDIR      = $(abspath $(BASEDIR)/res)
+LIBSRCDIR   = $(abspath $(BASEDIR)/src/libs)
+IFACEDIR    = $(abspath $(BASEDIR)/lib/interfaces)
+IFACESRCDIR = $(abspath $(BASEDIR)/src/interfaces)
 
 # Paths at execution time, may be different if installed or deployed
 TARGET_ARCH   ?= $(ARCH)
@@ -54,7 +55,7 @@ EXEC_LIBDIR    = $(abspath $(EXEC_BASEDIR)/lib)
 EXEC_CONFDIR   = $(abspath $(EXEC_BASEDIR)/cfg)
 EXEC_PLUGINDIR = $(abspath $(EXEC_BASEDIR)/plugins)
 EXEC_RESDIR    = $(abspath $(EXEC_BASEDIR)/res)
-EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/src/interfaces)
+EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/lib/interfaces)
 
 VPATH = $(SRCDIR)
 DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
@@ -99,7 +100,7 @@ LDFLAGS_RPATH    = $(LIBDIRS_EXEC_BASE:%=-Wl,-R%) $(LIBDIRS_BASE:%=-Wl,-R%) $(LI
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
 CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
 		   -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" \
-		   -DCONFDIR=\"$(EXEC_CONFDIR)\" \
+		   -DCONFDIR=\"$(EXEC_CONFDIR)\" -DIFACEDIR=\"$(EXEC_IFACEDIR)\" \
 		   -DRESDIR=\"$(EXEC_RESDIR)\" -DBUILDTYPE=\"$(BUILD_TYPE)\"
 
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP) $(CFLAGS_DEFS)
