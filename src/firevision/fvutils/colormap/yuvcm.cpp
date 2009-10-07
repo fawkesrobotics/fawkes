@@ -239,6 +239,13 @@ YuvColormap::copy_uvplane(unsigned char *uvplane, unsigned int level)
 }
 
 
+/** Adds the given colormap to this colormap.
+ * This operator takes the given colormap and compares it to this colormap. If
+ * this colormap has C_OTHER or C_BACKGROUND the value is compied from the other
+ * LUT, otherwise the value is kept as is.
+ * @param cmlt other colormap to add
+ * @return reference to this
+ */
 Colormap &
 YuvColormap::operator+=(const Colormap & cmlt)
 {

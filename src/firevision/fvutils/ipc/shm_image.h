@@ -59,7 +59,6 @@ typedef struct {
   unsigned int  flag_reserved     : 30;	/**< reserved for future use */
 } SharedMemoryImageBuffer_header_t;
 
-
 class SharedMemoryImageBufferHeader
 : public fawkes::SharedMemoryHeader
 {
@@ -81,7 +80,7 @@ class SharedMemoryImageBufferHeader
   virtual void         set(void *memptr);
   virtual void         reset();
   virtual size_t       data_size();
-  virtual bool         operator==(const fawkes::SharedMemoryHeader & s) const;
+  virtual bool         operator==(const fawkes::SharedMemoryHeader &s) const;
 
   void                 set_image_id(const char *image_id);
   colorspace_t         colorspace() const;

@@ -352,8 +352,8 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
 
 
 /** Write h file.
-          " * @param f file to write to
-          " */
+ * @param f file to write to
+ */
 void
 ToLuaInterfaceGenerator::write_toluaf(FILE *f)
 {

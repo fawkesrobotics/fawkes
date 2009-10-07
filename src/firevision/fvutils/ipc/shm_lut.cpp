@@ -450,6 +450,15 @@ SharedMemoryLookupTableHeader::reset()
 }
 
 
+/** Check for equality of headers.
+ * First checks if passed SharedMemoryHeader is an instance of
+ * SharedMemoryLookupTableHeader. If not returns false, otherwise it compares
+ * LUT ID, width, height, depth and bytes per cell. If all match returns true,
+ * false if any of them differs.
+ * @param s shared memory header to compare to
+ * @return true if the two instances identify the very same shared memory segments,
+ * false otherwise
+ */
 bool
 SharedMemoryLookupTableHeader::operator==(const SharedMemoryHeader &s) const
 {

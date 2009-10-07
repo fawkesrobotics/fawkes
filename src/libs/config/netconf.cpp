@@ -122,6 +122,13 @@ NetworkConfiguration::load(const char *name,
 }
 
 
+/** Copy all values from the given configuration.
+ * All values from the given configuration are copied. Old values are not erased
+ * so that the copied values will overwrite existing values, new values are
+ * created, but values existent in current config but not in the copie config
+ * will remain unchanged.
+ * @param copyconf configuration to copy
+ */
 void
 NetworkConfiguration::copy(Configuration *copyconf)
 {

@@ -646,9 +646,17 @@ SharedMemoryImageBufferHeader::matches(void *memptr)
   }
 }
 
-
+/** Check for equality of headers.
+ * First checks if passed SharedMemoryHeader is an instance of
+ * SharedMemoryImageBufferHeader. If not returns false, otherwise it compares
+ * image ID, colorspace, width, and height. If all match returns true, false
+ * if any of them differs.
+ * @param s shared memory header to compare to
+ * @return true if the two instances identify the very same shared memory segments,
+ * false otherwise
+ */
 bool
-SharedMemoryImageBufferHeader::operator==(const SharedMemoryHeader & s) const
+SharedMemoryImageBufferHeader::operator==(const SharedMemoryHeader &s) const
 {
   const SharedMemoryImageBufferHeader *h = dynamic_cast<const SharedMemoryImageBufferHeader *>(&s);
   if ( ! h ) {

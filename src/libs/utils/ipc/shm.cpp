@@ -102,10 +102,10 @@ namespace fawkes {
  * @return Clone instance. Remember to delete the instance.
  *
  * @fn bool SharedMemoryHeader::operator==(const SharedMemoryHeader &s) const
- * Check for equality if headers.
- * This shall be implemented that it compares the current and the given instances for
- * equality. You probably want to use dynamic_cast to cast the given instance to
- * a compatible type.
+ * Check for equality of headers.
+ * This shall be implemented that it compares the current and the given instances
+ * for equality. You probably want to use dynamic_cast to cast the given instance
+ * to a compatible type.
  * @param s shared memory header to compare to
  * @return true if the two instances identify the very same shared memory segments,
  * false otherwise

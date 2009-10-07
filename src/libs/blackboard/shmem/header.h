@@ -56,7 +56,7 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   virtual void   reset();
   virtual size_t data_size();
   virtual SharedMemoryHeader * clone() const;
-  virtual bool   operator==(const SharedMemoryHeader &s) const;
+  virtual bool   operator==(const fawkes::SharedMemoryHeader &s) const;
   chunk_list_t * free_list_head();
   chunk_list_t * alloc_list_head();
   void set_free_list_head(chunk_list_t *flh);

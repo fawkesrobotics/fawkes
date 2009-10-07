@@ -1,4 +1,5 @@
 
+
 /***************************************************************************
  *  shm.h - shared memory segment
  *
@@ -28,7 +29,6 @@
 #include <sys/types.h>
 
 namespace fawkes {
-
 
 class SharedMemoryHeader {
  public:

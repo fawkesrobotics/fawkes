@@ -116,6 +116,15 @@ BlackBoardSharedMemoryHeader::matches(void *memptr)
 }
 
 
+/** Check for equality of headers.
+ * First checks if passed SharedMemoryHeader is an instance of
+ * BlackBoardSharedMemoryHeader. If not returns false, otherwise it compares
+ * version, data size and data pointer. If all match returns true,
+ * false if any of them differs.
+ * @param s shared memory header to compare to
+ * @return true if the two instances identify the very same shared memory segments,
+ * false otherwise
+ */
 bool
 BlackBoardSharedMemoryHeader::operator==(const SharedMemoryHeader &s) const
 {

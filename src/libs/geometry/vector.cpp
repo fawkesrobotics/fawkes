@@ -29,7 +29,7 @@
 
 namespace fawkes {
 
-/** @class Vector geometry/vector.h
+/** @class Vector <geometry/vector.h>
  * A simple column vector.
  *
  * @fn float* Vector::data_ptr()
@@ -40,8 +40,15 @@ namespace fawkes {
  * Get pointer to the internal data container.
  * @return pointer to the internal data container
  *
+ * @fn friend std::ostream& Vector::operator<<(std::ostream& stream, const Vector &v)
+ * Appends the components of the Vector to the ostream.
+ * @param stream the input stream
+ * @param v the vector to be appended
+ * @return the resulting stream
+ *
  * @author Daniel Beck
  */
+
 
 /** Constructor.
  * @param size the dimension of the vector
@@ -497,9 +504,7 @@ Vector::operator*(const Vector& v) const
   return res;
 }
 
-
-/**
- * Appends the components of the Vector to the ostream
+/** Appends the components of the Vector to the ostream.
  * @param stream the input stream
  * @param v the vector to be appended
  * @return the resulting stream
