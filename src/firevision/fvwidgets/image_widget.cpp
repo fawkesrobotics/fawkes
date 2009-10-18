@@ -204,7 +204,7 @@ ImageWidget::set_size(unsigned int width, unsigned int height)
     __width  = width;
     __height = height;
 
-#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 16 )
+#if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 14 )
     __pixbuf.reset();
 #else
     __pixbuf.clear();
