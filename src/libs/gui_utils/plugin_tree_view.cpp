@@ -416,17 +416,19 @@ PluginTreeView::on_config_changed()
 void
 PluginTreeView::append_plugin_column()
 {
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 14 )
   bool description_as_tooltip = false;
-#ifdef HAVE_GCONFMM
+#  ifdef HAVE_GCONFMM
   if ( __gconf )
   {
-#  ifdef GLIBMM_EXCEPTIONS_ENABLED
+#    ifdef GLIBMM_EXCEPTIONS_ENABLED
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip");
-#  else
+#    else
     std::auto_ptr<Glib::Error> error;
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip", error);
-#  endif
+#    endif
   }
+#  endif
 #endif
 
 #if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 14 )

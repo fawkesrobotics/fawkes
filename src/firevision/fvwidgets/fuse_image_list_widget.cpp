@@ -229,8 +229,12 @@ FuseImageListWidget::set_auto_update(bool active, unsigned int interval_sec)
 
   if (m_auto_update)
     {
+#if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 14 )
       m_timeout_conn = Glib::signal_timeout().connect_seconds( sigc::mem_fun(*this, &FuseImageListWidget::on_update_timeout),
                                                                m_interval_sec);
+#else
+      m_timeout_conn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &FuseImageListWidget::on_update_timeout), m_interval_sec);
+#endif
     }
   else m_timeout_conn.disconnect();
 }
@@ -326,8 +330,12 @@ FuseImageListWidget::get_image_list()
     {
       if (m_auto_update)
         {
+#if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 14 )
           m_timeout_conn = Glib::signal_timeout().connect_seconds( sigc::mem_fun(*this, &FuseImageListWidget::on_update_timeout),
                                                                    m_interval_sec);
+#else
+          m_timeout_conn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &FuseImageListWidget::on_update_timeout), m_interval_sec);
+#endif
         }
       m_new_clients.unlock();
       return;

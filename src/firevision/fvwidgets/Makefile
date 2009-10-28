@@ -23,28 +23,32 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-ifeq ($(HAVE_SDL)$(HAVE_GUI),11)
+ifeq ($(HAVE_GUI),1)
   LIBS_gui = $(LIBDIR)/libfvwidgets.so
-  CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_SDL)
-  LDFLAGS += $(LDFLAGS_GUI) $(LDFLAGS_SDL)
+  CFLAGS  += $(CFLAGS_GUI)
+  LDFLAGS += $(LDFLAGS_GUI)
+  ifeq ($(HAVE_SDL),1)
+    CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_SDL)
+    LDFLAGS += $(LDFLAGS_GUI) $(LDFLAGS_SDL)
+  else
+    WARN_TARGETS += warning_sdl
+    FILTER_OUT_OBJS += sdl_keeper.o image_display.o
+  endif
 else
   ifneq ($(HAVE_GUI),1)
     WARN_TARGETS += warning_gui
-  endif
-  ifneq ($(HAVE_SDL),1)
-    WARN_TARGETS += warning_sdl
   endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 gui: $(WARN_TARGETS)
 warning_sdl:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting FireVision Widgets$(TNORMAL) (SDL[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting FireVision SDL Widgets$(TNORMAL) (SDL[-devel] not installed)"
 warning_gui:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting FireVision Widgets$(TNORMAL) $(GUI_ERROR)"
 endif
 
-OBJS_libfvwidgets := $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+OBJS_libfvwidgets := $(filter-out $(FILTER_OUT_OBJS),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 LIBS_libfvwidgets := fawkescore fawkesutils fvutils
 
 OBJS_all = $(OBJS_libfvwidgets)

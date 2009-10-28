@@ -202,12 +202,14 @@ daemonize(int argc, char **argv)
     }
 
   } else { // the daemon
+#ifdef DAEMON_CLOSE_ALL_AVAILABLE
     if (daemon_close_all(-1) < 0) {
       daemon_log(LOG_ERR, "Failed to close all file descriptors: %s", strerror(errno));
       // Send the error condition to the parent process
       daemon_retval_send(1);
       return -1;
     }
+#endif
 
     // Create the PID file
     if (daemon_pid_file_create() < 0) {
