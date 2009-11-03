@@ -195,7 +195,6 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
 
   __wait_mutex->lock();
   __fnc->enqueue(omsg);
-  omsg->unref();
   while (! __m ||
 	 ((__m->msgid() != MSG_BB_OPEN_SUCCESS) &&
 	  (__m->msgid() != MSG_BB_OPEN_FAILURE))) {
@@ -319,7 +318,6 @@ RemoteBlackBoard::close(Interface *interface)
 							  MSG_BB_CLOSE,
 							  sm, sizeof(bb_iserial_msg_t));
     __fnc->enqueue(omsg);
-    omsg->unref();
   }
 
   __instance_factory->delete_interface_instance(interface);
@@ -364,7 +362,6 @@ RemoteBlackBoard::list_all()
 							MSG_BB_LIST_ALL);
   __wait_mutex->lock();
   __fnc->enqueue(omsg);
-  omsg->unref();
   while (! __m ||
 	 (__m->msgid() != MSG_BB_INTERFACE_LIST)) {
     if ( __m ) {
@@ -438,10 +435,11 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
 	  __proxies[ntohl(esm->serial)]->writer_removed(ntohl(esm->event_serial));
 	}
       } else {
-	__wait_mutex->stopby();
+	__wait_mutex->lock();
 	__m = m;
 	__m->ref();
 	__wait_cond->wake_all();
+	__wait_mutex->unlock();
       }
     } catch (Exception &e) {
       // Bam, you're dead. Ok, not now, we just ignore that this shit happened...

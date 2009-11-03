@@ -297,7 +297,6 @@ BlackBoardInterfaceProxy::notify_of_data_change(const Interface *interface)
 							MSG_BB_DATA_CHANGED,
 							payload, payload_size);
   __fnc->enqueue(omsg);
-  omsg->unref();
 }
 
 
@@ -323,7 +322,6 @@ BlackBoardInterfaceProxy::transmit(Message *message)
 							MSG_BB_INTERFACE_MESSAGE,
 							payload, payload_size);
   __fnc->enqueue(omsg);
-  omsg->unref();
 }
 
 } // end namespace fawkes

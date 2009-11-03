@@ -309,7 +309,6 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
 			 "open success to %u, exception follows", clid);
     LibLogger::log_error("BlackBoardNetworkHandler", e);
   }
-  omsg->unref();
 }
 
 
@@ -329,7 +328,6 @@ BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int errno
 			 "open failure to %u, exception follows", clid);
     LibLogger::log_error("BlackBoardNetworkHandler", e);
   }
-  omsg->unref();
 }
 
 

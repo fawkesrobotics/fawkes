@@ -171,12 +171,13 @@ FuseClient::recv()
 
 
 /** Enqueue message.
+ * This method takes ownership of the passed message. You must explicitly
+ * reference it before enqueing if you want to use it afterwards.
  * @param m message to enqueue
  */
 void
 FuseClient::enqueue(FuseNetworkMessage *m)
 {
-  m->ref();
   __outbound_msgq->push_locked(m);
 }
 
@@ -206,14 +207,15 @@ FuseClient::enqueue(FUSE_message_type_t type)
 
 
 /** Enqueue message and wait for reply.
- * The wait happens atomically, use this to avoid race conditions.
+ * The wait happens atomically, use this to avoid race conditions. This method
+ * takes ownership of the passed message. You must explicitly reference it
+ * before enqueing if you want to use it afterwards.
  * @param m message to enqueue
  */
 void
 FuseClient::enqueue_and_wait(FuseNetworkMessage *m)
 {
   __recv_mutex->lock();
-  m->ref();
   __outbound_msgq->push_locked(m);
   __recv_waitcond->wait();
   __recv_mutex->unlock();

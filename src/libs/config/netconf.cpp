@@ -1287,7 +1287,6 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							    MSG_CONFIG_SUBSCRIBE);
       c->enqueue(omsg);
-      omsg->unref();
 
       // wait until all data has been received (or timeout)
       if (! __mirror_init_barrier->wait(__mirror_timeout_sec, 0)) {
@@ -1310,7 +1309,6 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 	FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							      MSG_CONFIG_UNSUBSCRIBE);
 	c->enqueue(omsg);
-	omsg->unref();
       }
 
       // delete local temporary mirror database

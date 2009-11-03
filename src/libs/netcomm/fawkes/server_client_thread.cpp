@@ -105,13 +105,14 @@ class FawkesNetworkServerClientSendThread
 
 
   /** Enqueue message to outbound queue.
-   * This enqueues the given message to the outbound queue. The message will be send
-   * in the next loop iteration.
+   * This enqueues the given message to the outbound queue. The message will
+   * be sent in the next loop iteration. This method takes ownership of the
+   * transmitted message. If you want to use the message after enqueuing you
+   * must reference it explicitly.
    * @param msg message to enqueue
    */
   void enqueue(FawkesNetworkMessage *msg)
   {
-    msg->ref();
     __outbound_mutex->lock();
     __outbound_msgq->push(msg);
     __outbound_havemore = true;

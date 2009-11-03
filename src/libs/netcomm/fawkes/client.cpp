@@ -3,7 +3,7 @@
  *  client.cpp - Fawkes network client
  *
  *  Created: Tue Nov 21 18:44:58 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -136,12 +136,19 @@ class FawkesNetworkClientSendThread : public Thread
     }
   }
 
-  /** Enqueue message to send.
+  /** Enqueue message to send and take ownership.
+   * This method takes ownership of the message. If you want to use the message
+   * after enqueing you must reference:
+   * @code
+   * message->ref();
+   * send_slave->enqueue(message);
+   * // message can now still be used
+   * @endcode
+   * Without extra referencing the message may not be used after enqueuing.
    * @param message message to send
    */
   void enqueue(FawkesNetworkMessage *message)
   {
-    message->ref();
     __outbound_mutex->lock();
     __outbound_msgq->push(message);
     __outbound_havemore = true;
@@ -540,6 +547,14 @@ FawkesNetworkClient::interrupt_connect()
 
 
 /** Enqueue message to send.
+ * This method takes ownership of the message. If you want to use the message
+ * after enqueing you must reference:
+ * @code
+ * message->ref();
+ * fawkes_network_client->enqueue(message);
+ * // message can now still be used
+ * @endcode
+ * Without extra referencing the message may not be used after enqueuing.
  * @param message message to send
  */
 void
@@ -585,7 +600,6 @@ FawkesNetworkClient::enqueue_and_wait(FawkesNetworkMessage *message,
     }
     __recv_received.erase(cid);
     __recv_mutex->unlock();
-    message->unref();
   } else {
     unsigned int cid = message->cid();
     unsigned int msgid = message->msgid();
