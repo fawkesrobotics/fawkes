@@ -27,6 +27,11 @@
 #include <models/global_position/globfromrel.h>
 #include <models/relative_position/relativepositionmodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class GlobalFromRelativePos <models/global_position/globfromrel.h>
  * Calculate global ball position based on a relative position model.
  * The relative position model must of course be tied to the ball.
@@ -114,3 +119,5 @@ GlobalFromRelativePos::get_y() const
 	   + m_pRelaModel->get_y() * cos(m_fPhi) )
          + m_fPosY;
 }
+
+} // end namespace firevision

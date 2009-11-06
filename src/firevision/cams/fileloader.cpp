@@ -46,7 +46,6 @@
 #include <cstdio>
 
 #include <sys/types.h>
-#include <dirent.h>
 
 using namespace fawkes;
 

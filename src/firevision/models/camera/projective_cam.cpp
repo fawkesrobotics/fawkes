@@ -1,7 +1,7 @@
 /***************************************************************************
  *  projective_cam.cpp - Abstract class defining a projective camera model
  *
- *  Generated: Thu May 8 15:08 2008
+ *  Created: Thu May 08 15:08:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -33,9 +33,12 @@ using namespace fawkes;
 using std::cout;
 using std::endl;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-
-/** @class AboveHorizonException projective_cam.h <models/camera/projective_cam.h>
+/** @class AboveHorizonException <models/camera/projective_cam.h>
  * The point that should be calculated lies above the horizon
  * @ingroup Exceptions
  */
@@ -276,3 +279,4 @@ ProjectiveCam::print_info (const char *name, const char *col_sep, const char *ro
   __cal.print_info("Calibration Matrix", col_sep, row_sep);
 }
 
+} // end namespace firevision

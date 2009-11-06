@@ -2,7 +2,7 @@
 /***************************************************************************
  *  grid.h - Scanline model implementation: grid
  *
- *  Generated: Sun May 08 21:54:49 2005
+ *  Created: Sun May 08 21:54:49 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -24,9 +24,14 @@
 #ifndef __FIREVISION_SCANLINE_GRID_H_
 #define __FIREVISION_SCANLINE_GRID_H_
 
-#include "models/scanlines/scanlinemodel.h"
+#include <models/scanlines/scanlinemodel.h>
 #include <fvutils/base/roi.h>
 #include <fvutils/base/types.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ScanlineGrid : public ScanlineModel
 {
@@ -74,5 +79,7 @@ class ScanlineGrid : public ScanlineModel
 
   void calc_next_coord();
 };
+
+} // end namespace firevision
 
 #endif

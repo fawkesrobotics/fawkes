@@ -26,6 +26,11 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Qualifier
 {
  public:
@@ -108,5 +113,7 @@ class YellowQualifier: public Qualifier
  private:
   static const unsigned int threshold_ = 100; 
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_

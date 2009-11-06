@@ -3,7 +3,7 @@
  *  relativepositionmodel.cpp - Abstract class defining a position model for
  *                            calculation of relative position
  *
- *  Generated: Wed Mar 21 15:54:42 2007
+ *  Created: Wed Mar 21 15:54:42 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -23,6 +23,11 @@
  */
 
 #include <models/relative_position/relativepositionmodel.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class RelativePositionModel <models/relative_position/relativepositionmodel.h>
  * Relative Position Model Interface.
@@ -145,3 +150,5 @@ void
 RelativePositionModel::get_cam_translation(float &height, float &rel_x, float &rel_y) const
 {
 }
+
+} // end namespace firevision

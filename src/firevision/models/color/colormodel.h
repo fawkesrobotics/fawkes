@@ -2,7 +2,7 @@
 /***************************************************************************
  *  colormodel.h - Abstract class defining a color model
  *
- *  Generated: Wed May 18 13:51:06 2005
+ *  Created: Wed May 18 13:51:06 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,6 +26,11 @@
 
 #include <fvutils/base/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ColorModel
 {
  public:
@@ -40,5 +45,7 @@ class ColorModel
   virtual void uv_to_image(unsigned char *yuv422_planar_buffer, unsigned int y);
 
 };
+
+} // end namespace firevision
 
 #endif

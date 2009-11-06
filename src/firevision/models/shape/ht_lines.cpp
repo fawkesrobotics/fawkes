@@ -3,7 +3,7 @@
  *  ht_lines.cpp - Implementation of a lines shape finder
  *                 with Randomized Hough Transform
  *
- *  Generated: Fri Jan 13 2006 12:42:53
+ *  Created: Fri Jan 13 12:42:53 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *                        Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -30,6 +30,11 @@
 
 using namespace std;
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 
@@ -207,3 +212,5 @@ HtLinesModel::getShapes()
 
   return rv;
 }
+
+} // end namespace firevision

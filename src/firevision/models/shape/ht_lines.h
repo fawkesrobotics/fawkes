@@ -3,7 +3,7 @@
  *  ht_lines.h - Header of lines shape model
  *               using Hough Transform
  *
- *  Generated: Fri Jan 13 2006 12:40:57
+ *  Created: Fri Jan 13 12:40:57 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -32,6 +32,11 @@
 #include <fvutils/base/types.h>
 #include <models/shape/line.h>
 #include <models/shape/accumulators/ht_accum.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ROI;
 
@@ -86,6 +91,8 @@ class HtLinesModel: public ShapeModel
   unsigned int  roi_height;
 
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_MODELS_SHAPE_HT_LINES_H_
 

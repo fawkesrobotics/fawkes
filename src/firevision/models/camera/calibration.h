@@ -3,7 +3,7 @@
  *  calibration.h - Abstract class defining a camera calibration matrix K
  *                  for a finite camera
  *
- *  Generated: Thu May 8 13:24 2008
+ *  Created: Thu May 08 13:24:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -24,22 +24,29 @@
 
 #ifndef __FIREVISION_CALIBRATION_H__
 #define __FIREVISION_CALIBRATION_H__
+
 #include <geometry/matrix.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class Calibration: public fawkes::Matrix
 {
-  public:
-    Calibration(const Calibration& cal);
-    Calibration(const fawkes::Matrix& k);
-    virtual ~Calibration();
+ public:
+  Calibration(const Calibration& cal);
+  Calibration(const fawkes::Matrix& k);
+  virtual ~Calibration();
 
-    Matrix K() const;
+  Matrix K() const;
 
-  protected:
-    Calibration();
+ protected:
+  Calibration();
 
-    Calibration& K(const fawkes::Matrix& k);
+  Calibration& K(const fawkes::Matrix& k);
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CALIBRATION_H__

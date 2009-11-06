@@ -1,7 +1,7 @@
 /***************************************************************************
  *  ccd_cam.h - Class defining a ccd camera model
  *
- *  Generated: Thu May 8 16:08 2008
+ *  Created: Thu May 08 16:08:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -22,9 +22,13 @@
 #ifndef __FIREVISION_CCD_CAM_H__
 #define __FIREVISION_CCD_CAM_H__
 
-#include "projective_cam.h"
-#include "ccd_calibration.h"
+#include <models/camera/projective_cam.h>
+#include <models/camera/ccd_calibration.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class CCDCam: public ProjectiveCam
 {
@@ -35,5 +39,7 @@ class CCDCam: public ProjectiveCam
 
     virtual ~CCDCam();
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CCD_CAM_H__

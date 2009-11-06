@@ -2,7 +2,7 @@
 /***************************************************************************
  *  radial.cpp - Implementation of the radial scanline model
  *
- *  Generated: Tue Jul 19 12:46:52 2005
+ *  Created: Tue Jul 19 12:46:52 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -29,6 +29,11 @@
 #include <cstring>
 
 using fawkes::point_t;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ScanlineRadial <models/scanlines/radial.h>
  * Radial scanlines.
@@ -322,3 +327,5 @@ ScanlineRadial::set_radius(unsigned int dead_radius, unsigned int max_radius)
 
   reset();
 }
+
+} // end namespace firevision

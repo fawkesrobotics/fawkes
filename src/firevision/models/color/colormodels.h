@@ -2,7 +2,7 @@
 /***************************************************************************
  *  colormodels.h - Inline functions for color models
  *
- *  Generated: Tue May 03 19:50:02 2005
+ *  Created: Tue May 03 19:50:02 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,6 +26,11 @@
 
 #include <fvutils/base/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /* To create a new model create a header file that contains an inline function
 for the color model.
 
@@ -39,5 +44,7 @@ typedef color_t color_classifier_func (unsigned char y, unsigned char u, unsigne
 #include "models/color/thresholds.h"
 
 #define classify(y, u, v) classify_by_thresholds((y), (u), (v))
+
+} // end namespace firevision
 
 #endif

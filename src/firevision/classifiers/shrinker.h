@@ -2,7 +2,7 @@
 /***************************************************************************
  *  shrinker.h - Header for Shrinker
  *
- *  Generated: Wed Aug 31 21:25:14 2005
+ *  Created: Wed Aug 31 21:25:14 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -24,6 +24,11 @@
 #ifndef __FIREVISION_CLASSIFIER_SHRINKER_H_
 #define __FIREVISION_CLASSIFIER_SHRINKER_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 
 class Shrinker
@@ -41,5 +46,7 @@ class Shrinker
   unsigned char *src;
 
 };
+
+} // end namespace firevision
 
 #endif

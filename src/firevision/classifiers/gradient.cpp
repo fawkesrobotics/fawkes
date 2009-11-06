@@ -28,6 +28,11 @@ using std::iterator;
 
 using fawkes::point_t;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class GradientClassifier <classifiers/gradient.h>
  * Gradient classifier.
  * Uses the difference of the current and the last value.
@@ -286,3 +291,4 @@ GradientClassifier::classify()
   return rv;
 }
 
+} // end namespace firevision

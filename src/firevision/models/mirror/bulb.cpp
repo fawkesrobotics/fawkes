@@ -41,6 +41,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Bulb <models/mirror/bulb.h>
  * Bulb mirror lookup table.
  * This mirror model is based on a LUT that will map image pixels to radial
@@ -672,3 +677,5 @@ Bulb::composeFilename(const char *format)
 
   return rv;
 }
+
+} // end namespace firevision

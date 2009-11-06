@@ -28,6 +28,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 const float FitAccum::TOO_SMALL_DELTA = 1.0e-3f;
 
 /** @class FitAccum <models/shape/accumulators/fit_accum.h>
@@ -154,3 +159,4 @@ FitAccum::getCircle(void) const
 	}
 }
 
+} // end namespace firevision

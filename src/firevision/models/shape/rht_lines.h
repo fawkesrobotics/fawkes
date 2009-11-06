@@ -3,7 +3,7 @@
  *  rht_lines.h - Header of lines shape model
  *                 using Randomized Hough Transform
  *
- *  Generated: Mon Sep 26 2005 09:48:55
+ *  Created: Mon Sep 26 2005 09:48:55
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -32,6 +32,11 @@
 #include <fvutils/base/types.h>
 #include <models/shape/line.h>
 #include <models/shape/accumulators/ht_accum.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ROI;
 
@@ -100,6 +105,8 @@ class RhtLinesModel: public ShapeModel
   float                  f_diff_sec;
 
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_MODELS_SHAPE_RHT_LINES_H_
 

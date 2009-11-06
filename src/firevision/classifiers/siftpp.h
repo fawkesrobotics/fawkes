@@ -42,6 +42,11 @@
 class fawkes::TimeTracker;
 //#endif
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SiftppClassifier : public Classifier
 {
  public:
@@ -130,5 +135,7 @@ class SiftppClassifier : public Classifier
   //#endif
 
 };
+
+} // end namespace firevision
 
 #endif

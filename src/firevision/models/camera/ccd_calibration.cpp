@@ -1,7 +1,7 @@
 /***************************************************************************
  *  ccd_calibration.cpp - Class defining a ccd camera calibration matrix K
  *
- *  Generated: Thu May 8 13:53 2008
+ *  Created: Thu May 08 13:53:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -20,9 +20,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <models/camera/ccd_calibration.h>
 
-#include "ccd_calibration.h"
 #include <cmath>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class CCDCalibration <models/camera/ccd_calibration.h>
  * A Calibration matrix for a ccd camera
@@ -85,3 +90,5 @@ CCDCalibration::CCDCalibration(const CCDCalibration& cp):
 CCDCalibration::~CCDCalibration()
 {
 }
+
+} // end namespace firevision

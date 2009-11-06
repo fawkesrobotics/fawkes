@@ -3,7 +3,7 @@
  *  relativepositionmodel.h - Abstract class defining a position model for
  *                            calculation of relative position
  *
- *  Generated: Tue May 31 13:50:12 2005
+ *  Created: Tue May 31 13:50:12 2005
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,6 +26,11 @@
 #define __FIREVISION_RELATIVEPOSITIONMODEL_H_
 
 #include <fvutils/base/types.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class RelativePositionModel
 {
@@ -61,5 +66,7 @@ class RelativePositionModel
   virtual bool          is_pos_valid() const                        = 0;
 
 };
+
+} // end namespace firevision
 
 #endif

@@ -3,7 +3,7 @@
  *  relvelo.cpp - Implementation of velocity model based on relative ball
  *                 positions and relative robot velocity
  *
- *  Generated: Tue Oct 04 15:54:27 2005
+ *  Created: Tue Oct 04 15:54:27 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -31,6 +31,11 @@
 #include <cstdlib>
 
 using namespace std;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class VelocityFromRelative <models/velocity/relvelo.h>
  * Calculate velocity from relative positions.
@@ -447,3 +452,5 @@ VelocityFromRelative::applyKalmanFilter()
 
 }
 */
+
+} // end namespace firevision

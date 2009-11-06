@@ -28,6 +28,11 @@
 
 #include <models/global_position/globalpositionmodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class RelativePositionModel;
 
 class GlobalFromRelativePos : public GlobalPositionModel
@@ -50,5 +55,7 @@ class GlobalFromRelativePos : public GlobalPositionModel
   float			 m_fPhi;
 
 };
+
+} // end namespace firevision
 
 #endif

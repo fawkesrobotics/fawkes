@@ -2,7 +2,7 @@
  *  calibration.cpp - Abstract class defining a camera calibration matrix K
  *                    for a finite camera
  *
- *  Generated: Thu May 8 13:24 2008
+ *  Created: Thu May 08 13:24:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -21,11 +21,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "calibration.h"
+#include <models/camera/calibration.h>
 #include <iostream>
 #include <core/exceptions/software.h>
 
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Calibration <models/camera/calibration.h>
  * A Calibration matrix for a finite camera.
@@ -92,3 +97,4 @@ Calibration::K(const fawkes::Matrix& k)
   return *this;
 }
 
+} // end namespace firevision

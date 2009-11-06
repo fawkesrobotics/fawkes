@@ -25,6 +25,11 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Classifier <classifiers/classifier.h>
  * Classifier to extract regions of interest.
  * The classifier finds regions of interest (ROI) by some a priori knowledge
@@ -87,3 +92,5 @@ Classifier::name() const
 {
   return __name;
 }
+
+} // end namespace firevision

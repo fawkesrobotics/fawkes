@@ -27,6 +27,7 @@
 #define __FIREVISION_CAMS_FILELOADER_H_
 
 #include <cams/camera.h>
+#include <dirent.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

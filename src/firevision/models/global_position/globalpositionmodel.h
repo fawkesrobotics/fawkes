@@ -3,7 +3,7 @@
  *  globalpositionmodel.h - Abstract class defining a position model for
  *                          calculation of global position
  *
- *  Generated: Tue May 31 13:43:22 2005
+ *  Created: Tue May 31 13:43:22 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -25,6 +25,11 @@
 #ifndef __FIREVISION_GLOBALPOSITIONMODEL_H_
 #define __FIREVISION_GLOBALPOSITIONMODEL_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class GlobalPositionModel
 {
 
@@ -42,6 +47,8 @@ class GlobalPositionModel
   virtual bool          is_pos_valid() const                                  = 0;
 
 };
+
+} // end namespace firevision
 
 #endif
 

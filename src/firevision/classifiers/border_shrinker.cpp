@@ -31,6 +31,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class BorderShrinker <classifiers/border_shrinker.h>
  * Border shrinker.
  * This shrinker makes sure that a ROI does not get too close to the image
@@ -114,3 +119,5 @@ BorderShrinker::shrink( ROI *roi )
   }
 
 }
+
+} // end namespace firevision

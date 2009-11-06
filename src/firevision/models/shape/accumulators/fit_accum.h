@@ -2,8 +2,8 @@
  *  fit_accum.h - Header for 'fitted circle' accumulator
  *                used by Fix-Point RCD Algorithm
  *
- *  Generated: Sat Sep 10 2005 17:25:55
- *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
+ *  Created: Sat Sep 10 17:25:55 2005
+ *  Copyright  2005  Hu Yuxiao <Yuxiao.Hu@rwth-aachen.de>
  *
  ****************************************************************************/
                                                                                 
@@ -21,11 +21,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
                                                                                 
-#ifndef __FIREVISION_FIT_ACCUM_H_
-#define __FIREVISION_FIT_ACCUM_H_
+#ifndef __FIREVISION_MODELS_SHAPE_ACCUMULATORS_FIT_ACCUM_H_
+#define __FIREVISION_MODELS_SHAPE_ACCUMULATORS_FIT_ACCUM_H_
 
 #include <utils/math/types.h>
 #include <fvutils/base/types.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class Circle;
 
@@ -54,4 +59,6 @@ public:
 	Circle* getCircle(void) const;
 };
 
-#endif // __FIREVISION_FIT_ACCUM_H_
+} // end namespace firevision
+
+#endif

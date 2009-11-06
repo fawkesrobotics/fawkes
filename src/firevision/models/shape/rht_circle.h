@@ -3,7 +3,7 @@
  *  rht_circle.h - Header of circle shape model
  *                 using Randomized Hough Transform
  *
- *  Generated: Tue Jun 28 2005
+ *  Created: Tue Jun 28 00:00:00 2005
  *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
  ****************************************************************************/
@@ -33,6 +33,11 @@
 #include <models/shape/circle.h>
 #include <models/shape/accumulators/ht_accum.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 
 class RhtCircleModel: public ShapeModel
@@ -61,6 +66,8 @@ class RhtCircleModel: public ShapeModel
 			   center_in_roi_t& center,
 			   float& radius);
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_RHT_CIRCLE_H_
 

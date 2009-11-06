@@ -53,6 +53,11 @@
 //#include <fvutils/writers/pnm.h>
 //#include <fvutils/writers/png.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SurfClassifier <classifiers/surf.h>
  * SURF classifier.
  *
@@ -799,3 +804,5 @@ SurfClassifier::distSquare(double *v1, double *v2, int n) {
 
   return dsq;
 }
+
+} // end namespace firevision

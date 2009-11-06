@@ -3,7 +3,7 @@
  *  rcd_circle.h - Header of circle shape model
  *                 using Random Circle Detection Algorithm
  *
- *  Generated: Thu May 16 2005
+ *  Created: Thu May 16 00:00:00 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -32,6 +32,11 @@
 #include <utils/math/types.h>
 #include <fvutils/base/types.h>
 #include <models/shape/circle.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ROI;
 
@@ -83,6 +88,8 @@ class RcdCircleModel: public ShapeModel
   float         RCD_ROI_HOLLOW_RATE;
 
 };
+
+} // end namespace firevision
 
 #endif
 

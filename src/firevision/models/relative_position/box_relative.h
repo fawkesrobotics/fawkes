@@ -3,7 +3,7 @@
  *  box_relative.h - A simple implementation of a relative position model
  *                   for boxes
  *
- *  Generated: Thu Jun 08 19:21:35 2006
+ *  Created: Thu Jun 08 19:21:35 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -28,6 +28,11 @@
 #include <models/relative_position/relativepositionmodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class BoxRelative : public RelativePositionModel
 {
@@ -106,6 +111,8 @@ private:
   void                  applyKalmanFilter();
   */
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_MODELS_RELPOS_BOX_H_
 

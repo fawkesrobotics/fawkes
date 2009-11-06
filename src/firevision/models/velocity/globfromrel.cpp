@@ -3,7 +3,7 @@
  *  globfromrel.cpp - Implementation of velocity model based on relative
  *                    ball positions and relative robot velocity
  *
- *  Generated: Fri Oct 21 11:19:03 2005
+ *  Created: Fri Oct 21 11:19:03 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -32,6 +32,11 @@
 
 using namespace std;
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class VelocityGlobalFromRelative <models/velocity/globfromrel.h>
  * Global velocity from relative velocities.
@@ -241,3 +246,5 @@ VelocityGlobalFromRelative::applyKalmanFilter()
 
 }
 */
+
+} // end namespace firevision

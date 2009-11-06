@@ -2,7 +2,7 @@
 /***************************************************************************
  *  circle.h - Header of circle shape model
  *
- *  Generated: Thu May 16 2005
+ *  Created: Thu May 16 00:00:00 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -33,6 +33,11 @@
 #include <fvutils/base/roi.h>
 #include <models/shape/shapemodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 // constants of the limits of the detected ball
 const unsigned int TBY_CIRCLE_RADIUS_MAX = 600;
 const unsigned int TBY_CIRCLE_RADIUS_MIN = 2;
@@ -61,5 +66,7 @@ class Circle : public Shape
   unsigned int          margin;
 
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_MODELS_SHAPE_CIRCLE_H_

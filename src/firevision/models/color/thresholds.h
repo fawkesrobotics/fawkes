@@ -2,7 +2,7 @@
 /**************************************************************************
  *  thresholds.h - This header defines thresholds for color classification
  *
- *  Generated: Wed May 11 11:22:00 2005
+ *  Created: Wed May 11 11:22:00 2005
  *  Copyright  2005  Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *                   Tim Niemueller  [www.niemueller.de]
  *
@@ -26,6 +26,11 @@
 #define __FIREVISION_COLORMODEL_THRESHOLDS_H_
 
 #include <models/color/colormodel.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /* The following thresholds define certain color regions in the
    two-dimensional UV-Colorspace (ignoring the Y-component).
@@ -91,7 +96,6 @@ class ColorModelThresholds : public ColorModel
 
 };
 
-
-
+} // end namespace firevision
 
 #endif

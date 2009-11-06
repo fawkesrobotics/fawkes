@@ -25,6 +25,11 @@
 #include <models/global_position/omni_global.h>
 #include <models/mirror/mirrormodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class OmniGlobal <models/global_position/omni_global.h>
  * Omni vision global position model.
  */
@@ -93,3 +98,5 @@ OmniGlobal::is_pos_valid() const
 {
   return mirror_model->isValidPoint( image_x, image_y );
 }
+
+} // end namespace firevision

@@ -3,7 +3,7 @@
  *  relvelo.h - A simple velocity model using the relative coordinates and
  *              robot velocity
  *
- *  Generated: Tue Oct 04 15:49:23 2005
+ *  Created: Tue Oct 04 15:49:23 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -31,6 +31,10 @@
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class VelocityGlobalFromRelative : public VelocityModel
 {
@@ -88,5 +92,7 @@ class VelocityGlobalFromRelative : public VelocityModel
   void                  applyKalmanFilter();
   */
 };
+
+} // end namespace firevision
 
 #endif

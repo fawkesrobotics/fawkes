@@ -2,7 +2,7 @@
 /***************************************************************************
  *  star.h - Starlike scanline model
  *
- *  Generated: Mon Nov 05 09:45:06 2007
+ *  Created: Mon Nov 05 09:45:06 2007
  *  Copyright  2007  Daniel Beck
  *
  ****************************************************************************/
@@ -27,6 +27,11 @@
 #include <models/scanlines/scanlinemodel.h>
 #include <vector>
 #include <map>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ScanlineStar : public ScanlineModel
 {
@@ -91,5 +96,7 @@ class ScanlineStar : public ScanlineModel
   Ray* m_first_ray;
   Ray* m_previous_ray;
 };
+
+} // end namespace firevision
 
 #endif /* __FIREVISION_MODELS_SCANLINES_STAR_H_ */

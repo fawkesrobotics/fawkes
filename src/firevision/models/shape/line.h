@@ -2,7 +2,7 @@
 /***************************************************************************
  *  line.h - Header of circle shape model
  *
- *  Generated: Tue Sep 27 2005 11:25:35
+ *  Created: Tue Sep 27 11:25:35 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -31,6 +31,11 @@
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
 #include <models/shape/shapemodel.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class LineShape : public Shape
 {
@@ -68,5 +73,6 @@ class LineShape : public Shape
 
 };
 
-#endif // __FIREVISION_MODELS_SHAPE_LINE_H_
+} // end namespace firevision
 
+#endif // __FIREVISION_MODELS_SHAPE_LINE_H_

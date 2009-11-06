@@ -5,7 +5,7 @@
  *                    and only returns the scanline points which are below
  *                    that very horizon
  *
- *  Generated: Fri Apr 07 04:34:08 2006
+ *  Created: Fri Apr 07 04:34:08 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *             2006       Stefan Schiffer
  *             2006       Christoph Mies
@@ -31,6 +31,11 @@
 
 #include <models/scanlines/scanlinemodel.h>
 #include <fvutils/base/types.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class CornerHorizon : public ScanlineModel
 {
@@ -100,5 +105,7 @@ class CornerHorizon : public ScanlineModel
   static const float M_PI_HALF;
 
 };
+
+} // end namespace firevision
 
 #endif

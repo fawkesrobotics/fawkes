@@ -26,6 +26,11 @@
 
 #include <classifiers/shrinker.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 
 class SquareShrinker : public Shrinker
@@ -36,5 +41,7 @@ class SquareShrinker : public Shrinker
 
   virtual void shrink( ROI *roi );
 };
+
+} // end namespace firevision
 
 #endif
