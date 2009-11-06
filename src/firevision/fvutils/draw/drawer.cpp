@@ -28,8 +28,14 @@
 #include <algorithm>
 #include <unistd.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Drawer <fvutils/draw/drawer.h>
  * Draw to an image.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -473,3 +479,4 @@ Drawer::draw_cross(unsigned int x_center, unsigned int y_center, unsigned int wi
   draw_line(x_center, a, x_center, b);
 }
 
+} // end namespace firevision

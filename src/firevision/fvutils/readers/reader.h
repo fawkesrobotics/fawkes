@@ -24,7 +24,12 @@
 #ifndef __FIREVISION_UTILS_READERS_READER_H_
 #define __FIREVISION_UTILS_READERS_READER_H_
 
-#include "fvutils/color/colorspaces.h"
+#include <fvutils/color/colorspaces.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class Reader {
 
@@ -39,6 +44,6 @@ class Reader {
 
 };
 
-
+} // end namespace firevision
 
 #endif

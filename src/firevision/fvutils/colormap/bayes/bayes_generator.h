@@ -29,6 +29,11 @@
 #include <vector>
 #include <map>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class YuvColormap;
 class BayesHistosToLut;
 
@@ -91,5 +96,7 @@ class BayesColormapGenerator : public ColormapGenerator
 
   bool *selection_mask;
 };
+
+} // end namespace firevision
 
 #endif

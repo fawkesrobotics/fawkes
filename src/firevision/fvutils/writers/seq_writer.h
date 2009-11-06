@@ -28,6 +28,11 @@
 #include <fvutils/writers/writer.h>
 #include <core/exception.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SeqWriter {
   
  public:
@@ -51,5 +56,6 @@ class SeqWriter {
 
 };
 
+} // end namespace firevision
 
 #endif /*  __FIREVISION_FVUTILS_WRITERS_SEQ_WRITER_H_ */

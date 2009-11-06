@@ -28,6 +28,11 @@
 #include <core/exceptions/software.h>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ColormapFileYuvBlock <fvutils/colormap/cmfile_yuvblock.h>
  * YUV block for colormap file.
  * @author Tim Niemueller
@@ -85,3 +90,5 @@ ColormapFileYuvBlock::range_to() const
 {
   return __header->range_to;
 }
+
+} // end namespace firevision

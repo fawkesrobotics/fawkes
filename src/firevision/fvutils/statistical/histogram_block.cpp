@@ -27,7 +27,12 @@
 
 using namespace fawkes;
 
-/** @class HistogramBlock fvutils/statistical/histogram_block.h
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class HistogramBlock <fvutils/statistical/histogram_block.h>
  * This class defines a file block for histograms. Additionally, the very basic routines
  * to acccess and manipulate data in the histograms are provided.
  * @author Daniel Beck
@@ -243,3 +248,5 @@ HistogramBlock::reset()
 {
   memset(_histogram_data, 0, _data_size);
 }
+
+} // end namespace firevision

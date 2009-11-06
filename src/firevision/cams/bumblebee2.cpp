@@ -44,6 +44,10 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Bumblebee2Camera <cams/bumblebee2.h>
  * Bumblebee2 camera.
@@ -510,3 +514,4 @@ Bumblebee2Camera::write_triclops_config_from_camera_to_file(const char *filename
   fclose( file );  
 }
 
+} // end namespace firevision

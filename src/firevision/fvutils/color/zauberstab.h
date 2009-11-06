@@ -33,6 +33,11 @@
 #include <vector>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** a "slice" is a row of consecutive pixels
    (horizontal) */
 struct ZSlice {
@@ -94,6 +99,8 @@ class Zauberstab {
   bool isSimilarUV(unsigned int u1, unsigned int u2,
                    unsigned int v1, unsigned int v2);
 };
+
+} // end namespace firevision
 
 
 #endif

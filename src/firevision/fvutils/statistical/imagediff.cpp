@@ -26,6 +26,11 @@
 
 #include <cstdlib>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ImageDiff <fvutils/statistical/imagediff.h>
  * Image difference checker.
  * @author Tim Niemueller
@@ -184,3 +189,5 @@ ImageDiff::numDifferingPixels()
   }
   return num;
 }
+
+} // end namespace firevision

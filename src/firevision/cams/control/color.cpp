@@ -26,6 +26,11 @@
 #include <cams/control/color.h>
 #include <core/exceptions/software.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlColor <cams/control/color.h>
  * Camera color control interface.
  * Some cameras feature adjustable color controls
@@ -169,3 +174,5 @@ CameraControlColor::set_auto_all(bool enabled)
     set_auto_exposure(enabled);
   } catch (NotImplementedException) {}
 }
+
+} // end namespace firevision

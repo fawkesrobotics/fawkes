@@ -24,6 +24,11 @@
 #ifndef __FIREVISION_FVUTILS_SCALERS_SCALER_H_
 #define __FIREVISION_FVUTILS_SCALERS_SCALER_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Scaler {
 
  public:
@@ -42,5 +47,7 @@ class Scaler {
   virtual float            get_scale_factor()                                     = 0;
 
 };
+
+} // end namespace firevision
 
 #endif

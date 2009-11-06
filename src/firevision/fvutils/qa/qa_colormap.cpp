@@ -34,6 +34,7 @@
 #include <cstdio>
 
 using namespace fawkes;
+using namespace firevision;
 
 #define BIGDEPTH 8
 

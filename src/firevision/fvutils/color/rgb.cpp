@@ -24,6 +24,11 @@
 
 #include <fvutils/color/rgb.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Convert RGB to RGB with alpha values.
  * This is plain C code without special optimizations.
  * @param rgb RGB source buffer
@@ -127,6 +132,4 @@ void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
   }
 }
 
-
-
-
+} // end namespace firevision

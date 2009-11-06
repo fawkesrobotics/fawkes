@@ -49,6 +49,11 @@
 
 using namespace std;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlFactory <cams/control/factory.h>
  * Camera control factory.
  * This camera control factory provides access to all camera controls in a unified way.
@@ -199,3 +204,5 @@ CameraControlFactory::instance(const std::type_info &typeinf, Camera *camera)
     throw fawkes::TypeMismatchException("Camera does not provide requested camera control");
   }
 }
+
+} // end namespace firevision

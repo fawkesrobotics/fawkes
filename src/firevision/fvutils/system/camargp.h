@@ -30,6 +30,11 @@
 #include <string>
 #include <vector>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser
 {
  public:
@@ -49,5 +54,7 @@ class CameraArgumentParser
   std::map<std::string, std::string> values;
   std::vector<std::string> args;
 };
+
+} // end namespace firevision
 
 #endif

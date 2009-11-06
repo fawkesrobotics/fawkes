@@ -28,6 +28,11 @@
 
 #include <cams/camera.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 
 class FileLoader : public Camera
@@ -87,5 +92,7 @@ class FileLoader : public Camera
   int cur_file;
   struct dirent **file_list;
 };
+
+} // end namespace firevision
 
 #endif

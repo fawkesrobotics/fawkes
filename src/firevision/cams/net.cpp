@@ -40,6 +40,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class NetworkCamera <cams/net.h>
  * Network camera.
  * Retrieve images via network (FUSE).
@@ -522,3 +527,4 @@ NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
   }
 }
 
+} // end namespace firevision

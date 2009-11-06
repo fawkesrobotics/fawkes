@@ -50,6 +50,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FileLoader <cams/fileloader.h>
  * Load images from files.
  * The file loader tries to determine the image format of the given image using
@@ -434,3 +439,4 @@ FileLoader::read_file()
   free(fn);
 }
 
+} // end namespace firevision

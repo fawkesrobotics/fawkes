@@ -28,6 +28,11 @@
 #include <fvutils/net/fuse_client_handler.h>
 #include <vector>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 class FuseClient;
 class FuseImageContent;
@@ -101,5 +106,7 @@ class NetworkCamera : public Camera, public FuseClientHandler
 
   std::vector<FUSE_imageinfo_t> __image_list;
 };
+
+} // end namespace firevision
 
 #endif

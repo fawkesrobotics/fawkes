@@ -29,16 +29,20 @@
 #include <map>
 #include <string>
 
+namespace fawkes {
+  class StreamSocket;
+}
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FuseServer;
 class FuseNetworkMessageQueue;
 class FuseNetworkMessage;
 class SharedMemoryImageBuffer;
 class SharedMemoryLookupTable;
 class JpegImageCompressor;
-
-namespace fawkes {
-  class StreamSocket;
-}
 
 class FuseServerClientThread : public fawkes::Thread
 {
@@ -80,5 +84,6 @@ class FuseServerClientThread : public fawkes::Thread
   bool __alive;
 };
 
+} // end namespace firevision
 
 #endif

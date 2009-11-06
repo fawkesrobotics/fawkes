@@ -26,6 +26,11 @@
 
 #include <fvutils/readers/reader.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class PNGReaderData;
 
 class PNGReader : public Reader {
@@ -48,5 +53,6 @@ class PNGReader : public Reader {
   unsigned char *buffer;
 };
 
+} // end namespace firevision
 
 #endif

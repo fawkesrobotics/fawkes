@@ -31,6 +31,11 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class JpegReader : public Reader {
 
  public:
@@ -55,5 +60,6 @@ class JpegReader : public Reader {
   struct jpeg_error_mgr         jerr;
 };
 
+} // end namespace firevision
 
 #endif

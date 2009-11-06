@@ -33,6 +33,11 @@
 
 #pragma pack(push,4)
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** FUSE version enum. */
 typedef enum {
   FUSE_VERSION_1 = 1,	/**< Version 1 */
@@ -184,6 +189,8 @@ typedef struct {
 typedef struct {
   fawkes::dynamic_list_t lut_list;	/**< DynamicBuffer holding a list of FUSE_lutinfo_t */
 } FUSE_lutlist_message_t;
+
+} // end namespace firevision
 
 #pragma pack(pop)
 #endif

@@ -24,6 +24,11 @@
 
 #include <cams/control/pantilt.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlPanTilt <cams/control/pantilt.h>
  * Camera pan/tilt control interface.
  * Some cameras feature an actuator to allow for panning and tilting the
@@ -149,3 +154,4 @@ CameraControlPanTilt::~CameraControlPanTilt()
 }
 
 
+} // end namespace firevision

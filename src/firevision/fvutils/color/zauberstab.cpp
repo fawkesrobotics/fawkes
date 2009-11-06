@@ -35,6 +35,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Zauberstab <fvutils/color/zauberstab.h>
  * Zaubertab selection utility.
  */
@@ -560,3 +565,5 @@ Zauberstab::getSelection()
 
   return rv;
 }
+
+} // end namespace firevision

@@ -30,7 +30,12 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/writers/writer.h>
 
-/** PNm subtype. */
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** PNM subtype. */
 typedef enum {
   PNM_PBM,		/**< PBM, B/W */
   PNM_PBM_ASCII,	/**< PBM, B/W, ASCII */
@@ -65,6 +70,6 @@ class PNMWriter : public Writer
   unsigned int   height;
 };
 
-
+} // end namespace firevision
 
 #endif

@@ -49,6 +49,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /// @cond INTERNALS
 
 class V4L1CameraData
@@ -478,3 +483,5 @@ void
 V4L1Camera::set_image_number(unsigned int n)
 {
 }
+
+} // end namespace firevision

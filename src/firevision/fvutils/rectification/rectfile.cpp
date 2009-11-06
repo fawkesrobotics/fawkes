@@ -37,6 +37,11 @@
 #  include <strfunc.h>
 #endif
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class RectificationInfoFile <fvutils/rectification/rectfile.h>
  * Rectification Info File.
  * This class provides access files that contain rectification info.
@@ -170,3 +175,4 @@ RectificationInfoFile::RectInfoBlockVector::~RectInfoBlockVector()
   }
 }
 
+} // end namespace firevision

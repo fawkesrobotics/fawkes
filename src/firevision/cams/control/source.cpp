@@ -24,12 +24,15 @@
 
 #include <cams/control/source.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlSource <cams/control/source.h>
  * Camera source control interface.
  * Some cameras have multiple image sources; with this control, it is
  * possible to switch between them.
- * In general methods might throw an NotImplementedException if a particular
- * method if not available.
  *
  * @author Tobias Kellner
  *
@@ -47,3 +50,5 @@
 CameraControlSource::~CameraControlSource()
 {
 }
+
+} // end namespace firevision

@@ -32,6 +32,11 @@
 // Magic token to identify FireVision shared memory LUTs
 #define FIREVISION_SHM_LUT_MAGIC_TOKEN "FireVision LUT"
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Shared memory lookup table header struct. */
 typedef struct {
   char      lut_id[LUT_ID_MAX_LENGTH];		/**< LUT ID */
@@ -148,5 +153,6 @@ class SharedMemoryLookupTable : public fawkes::SharedMemory
 
 };
 
+} // end namespace firevision
 
 #endif

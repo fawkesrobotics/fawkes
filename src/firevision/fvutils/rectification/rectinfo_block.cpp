@@ -28,6 +28,11 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class RectificationInfoBlock <fvutils/rectification/rectinfo_block.h>
  * Rectification info block.
  * This base class defines the basic interface to interact with rectification
@@ -119,3 +124,5 @@ RectificationInfoBlock::camera() const
   }
   return _block_header->camera;
 }
+
+} // end namespace firevision

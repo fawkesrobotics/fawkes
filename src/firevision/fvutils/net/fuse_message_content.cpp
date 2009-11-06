@@ -27,6 +27,11 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseMessageContent <fvutils/net/fuse_message_content.h>
  * FUSE message content.
  * Interface for complex FUSE network messages. Use this type if you want
@@ -116,3 +121,5 @@ FuseMessageContent::free_payload()
   _payload = NULL;
   _payload_size = 0;
 }
+
+} // end namespace firevision

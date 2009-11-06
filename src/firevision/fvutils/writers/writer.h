@@ -26,6 +26,11 @@
 
 #include <fvutils/color/colorspaces.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Writer {
 
  public:
@@ -52,6 +57,6 @@ class Writer {
   unsigned char *buffer;
 };
 
-
+} // end namespace firevision
 
 #endif

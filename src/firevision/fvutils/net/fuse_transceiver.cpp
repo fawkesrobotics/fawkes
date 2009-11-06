@@ -32,6 +32,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseNetworkTransceiver <fvutils/net/fuse_transceiver.h>
  * FUSE Network Transceiver.
  * Utility class that provides methods to send and receive messages via
@@ -116,3 +121,5 @@ FuseNetworkTransceiver::recv(StreamSocket *s, FuseNetworkMessageQueue *msgq,
   }
   msgq->unlock();
 }
+
+} // end namespace firevision

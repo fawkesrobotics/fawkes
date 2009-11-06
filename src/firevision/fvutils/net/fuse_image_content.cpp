@@ -33,6 +33,11 @@
 #include <netinet/in.h>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseImageContent <fvutils/net/fuse_image_content.h>
  * FUSE image content.
  * @ingroup FUSE
@@ -263,3 +268,5 @@ FuseImageContent::decompress(unsigned char *yuv422_planar_buffer, size_t buffer_
 	    ntohs(__header->width), ntohs(__header->height));
   }
 }
+
+} // end namespace firevision

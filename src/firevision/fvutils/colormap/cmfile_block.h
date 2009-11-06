@@ -26,6 +26,11 @@
 
 #include <fvutils/fileformat/fvfile_block.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Colormap;
 
 class ColormapFileBlock : public FireVisionDataFileBlock
@@ -41,5 +46,7 @@ class ColormapFileBlock : public FireVisionDataFileBlock
  protected:
   ColormapFileBlock(FireVisionDataFileBlock *block);
 };
+
+} // end namespace firevision
 
 #endif

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  color_object_map.cpp - Mapping between color and roi
  *
- *  Created: Mon May 16th 2008
+ *  Created: Mon May 16 00:00:00 2008
  *  Copyright  2008 Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -21,9 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "color_object_map.h"
+#include <fvutils/color/color_object_map.h>
 
-/** @class ColorObjectMap color_object_map.h <fvutils/color/color_object_map.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class ColorObjectMap <fvutils/color/color_object_map.h>
  * Color mapping class.
  * This class defines a mapping between regions of interest and @see color_t
  * values. It also provides corresponding @see YUVColor values for a color_t.
@@ -148,3 +153,5 @@ void ColorObjectMap::set_mapping(hint_t roi, color_t color)
   __color_for_hint[roi] = color;
   __hint_for_color[color] = roi;
 }
+
+} // end namespace firevision

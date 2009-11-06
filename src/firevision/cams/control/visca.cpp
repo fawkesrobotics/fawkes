@@ -3,7 +3,7 @@
  *  visca.cpp - Controller for Visca cams
  *
  *  Generated: Wed Jun 08 12:08:17 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -31,6 +31,11 @@
 #include <errno.h>
 
 #include <utils/system/console_colors.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ViscaControlException <cams/control/visca.h>
  * Visca exception.
@@ -1141,3 +1146,4 @@ ViscaControl::getWhiteBalanceMode()
 
 }
 
+} // end namespace firevision

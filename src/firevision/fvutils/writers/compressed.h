@@ -27,6 +27,11 @@
 
 #include <fvutils/writers/writer.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ImageCompressor;
 
 class CompressedImageWriter : public Writer {
@@ -47,5 +52,6 @@ class CompressedImageWriter : public Writer {
 
 };
 
+} // end namespace firevision
 
 #endif

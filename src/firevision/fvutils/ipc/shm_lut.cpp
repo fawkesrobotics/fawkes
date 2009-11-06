@@ -33,6 +33,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SharedMemoryLookupTable <fvutils/ipc/shm_lut.h>
  * Shared memory lookup table.
  */
@@ -618,3 +623,5 @@ SharedMemoryLookupTableLister::print_info(const SharedMemoryHeader *header,
 	 (SharedMemory::is_destroyed(shm_id) ? "D" : "")
 	 );
 }
+
+} // end namespace firevision

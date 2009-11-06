@@ -22,6 +22,11 @@
 #ifndef __FIREVISION_FVUTILS_CPU_MMX_H_
 #define __FIREVISION_FVUTILS_CPU_MMX_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /// @cond MMX
 
 /*
@@ -283,5 +288,7 @@ typedef        union {
 #define         punpckhqdq_r2r(regs,regd)   mmx_r2r (punpckhqdq, regs, regd)
 
 /// @endcond
+
+} // end namespace firevision
 
 #endif

@@ -25,6 +25,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class VisionMaster <fvutils/base/vision_master.h>
  * Vision Master.
  * The vision master shall be the entry point for vision plugins. It shall
@@ -126,3 +131,5 @@ using namespace fawkes;
 VisionMaster::~VisionMaster()
 {
 }
+
+} // end namespace firevision

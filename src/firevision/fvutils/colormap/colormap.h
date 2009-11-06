@@ -28,6 +28,11 @@
 #include <sys/types.h>
 #include <list>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ColormapFileBlock;
 
 class Colormap
@@ -57,5 +62,7 @@ class Colormap
 
   virtual std::list<ColormapFileBlock *>  get_blocks()                                    = 0;
 };
+
+} // end namespace firevision
 
 #endif

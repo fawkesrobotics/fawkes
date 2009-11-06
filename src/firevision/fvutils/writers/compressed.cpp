@@ -32,6 +32,11 @@
 #include <cstring>
 #include <cstdio>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CompressedImageWriter <fvutils/writers/compressed.h>
  * Writer for arbitrarily compressed images.
  * This class uses any image compressor to write compressed images to
@@ -134,3 +139,5 @@ CompressedImageWriter::set_image_compressor(ImageCompressor *ic)
     ic->set_image_buffer(cspace, buffer);
   }
 }
+
+} // end namespace firevision

@@ -29,6 +29,11 @@
 
 #include <cstdio>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FvRawReader : public Reader {
 
  public:
@@ -53,5 +58,6 @@ class FvRawReader : public Reader {
   FvRawWriter::FvRawHeader header;
 };
 
+} // end namespace firevision
 
 #endif

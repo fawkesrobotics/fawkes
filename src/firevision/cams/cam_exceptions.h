@@ -26,6 +26,11 @@
 
 #include <core/exception.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraNotOpenedException : public fawkes::Exception
 {
  public:
@@ -62,5 +67,7 @@ class UnknownCameraControlTypeException : public fawkes::Exception
  public:
   UnknownCameraControlTypeException(const char *msg = 0);
 };
+
+} // end namespace firevision
 
 #endif

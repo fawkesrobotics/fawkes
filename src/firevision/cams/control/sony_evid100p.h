@@ -28,6 +28,11 @@
 #include <cams/control/zoom.h>
 #include <cams/control/effect.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 class ViscaControl;
 
@@ -128,5 +133,7 @@ class SonyEviD100PControl
   unsigned int _effect;
 
 };
+
+} // end namespace firevision
 
 #endif

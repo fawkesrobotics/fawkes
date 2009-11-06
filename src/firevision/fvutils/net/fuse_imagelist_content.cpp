@@ -31,6 +31,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseImageListContent <fvutils/net/fuse_imagelist_content.h>
  * FUSE image list content.
  * This content provides means to send an arbitrary length list of image
@@ -150,3 +155,5 @@ FuseImageListContent::serialize()
   copy_payload(0, &__imagelist_msg, sizeof(FUSE_imagelist_message_t));
   copy_payload(sizeof(FUSE_imagelist_message_t), __list->buffer(), __list->buffer_size());
 }
+
+} // end namespace firevision

@@ -27,6 +27,11 @@
 #include <fvutils/fileformat/fvff.h>
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FireVisionDataFileBlock
 {
  public:
@@ -62,5 +67,7 @@ class FireVisionDataFileBlock
 
   size_t               __spec_header_size;
 };
+
+} // end namespace firevision
 
 #endif

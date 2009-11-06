@@ -26,7 +26,12 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 
-/** @class Camera cams/camera.h
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class Camera <cams/camera.h>
  * Camera interface for image aquiring devices in FireVision.
  *
  * In general cameras shall initiate a continuous flow of images and shall
@@ -137,3 +142,5 @@ Camera::capture_time()
 {
   throw fawkes::NotImplementedException("Timestamping not supported by this camera");
 }
+
+} // end namespace firevision

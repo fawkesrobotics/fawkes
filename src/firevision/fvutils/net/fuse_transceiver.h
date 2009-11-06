@@ -29,6 +29,11 @@
 namespace fawkes {
   class StreamSocket;
 }
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FuseNetworkMessageQueue;
 
 class FuseNetworkTransceiver
@@ -38,5 +43,7 @@ class FuseNetworkTransceiver
   static void recv(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq,
 		   unsigned int max_num_msgs = 8);
 };
+
+} // end namespace firevision
 
 #endif

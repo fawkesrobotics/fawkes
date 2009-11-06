@@ -27,6 +27,11 @@
 
 #include <cams/control/control.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraControlPanTilt : virtual public CameraControl
 {
  public:
@@ -54,5 +59,7 @@ class CameraControlPanTilt : virtual public CameraControl
                                   int tilt_up, int tilt_down)           = 0;
   virtual void reset_pan_tilt_limit()                                   = 0;
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CAMS_CONTROL_PANTILT_H_

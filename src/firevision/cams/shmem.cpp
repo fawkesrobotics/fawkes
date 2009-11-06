@@ -32,6 +32,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SharedMemoryCamera <cams/shmem.h>
  * Shared memory camera.
  * Camera to retrieve images from a shared memory segment.
@@ -294,3 +299,5 @@ SharedMemoryCamera::unlock()
 {
   __shm_buffer->unlock();
 }
+
+} // end namespace firevision

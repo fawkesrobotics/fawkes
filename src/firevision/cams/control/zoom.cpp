@@ -25,6 +25,11 @@
 #include <cams/control/zoom.h>
 #include <core/exceptions/software.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlZoom <cams/control/zoom.h>
  * Camera zoom control interface.
  * Some cameras feature zooming.
@@ -94,3 +99,5 @@ CameraControlZoom::set_zoom_digital_enabled(bool enabled)
 {
   throw NotImplementedException("Not implemented");
 }
+
+} // end namespace firevision

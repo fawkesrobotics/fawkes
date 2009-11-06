@@ -32,6 +32,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseLutListContent <fvutils/net/fuse_lutlist_content.h>
  * FUSE lookup table list content.
  * This content provides means to send an arbitrary length list of LUT
@@ -147,3 +152,5 @@ FuseLutListContent::serialize()
   copy_payload(0, &__lutlist_msg, sizeof(FUSE_lutlist_message_t));
   copy_payload(sizeof(FUSE_lutlist_message_t), __list->buffer(), __list->buffer_size());
 }
+
+} // end namespace firevision

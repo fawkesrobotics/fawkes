@@ -35,6 +35,11 @@
 // Magic token to identify FireVision shared memory images
 #define FIREVISION_SHM_IMAGE_MAGIC_TOKEN "FireVision Image"
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 // Not that there is a relation to ITPimage_packet_header_t
 /** Shared memory header struct for FireVision images. */
 typedef struct {
@@ -184,5 +189,7 @@ class SharedMemoryImageBuffer : public fawkes::SharedMemory
 
 };
 
+
+} // end namespace firevision
 
 #endif

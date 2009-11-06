@@ -33,6 +33,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class YuvColormap <fvutils/colormap/colormap.h>
  * YUV Colormap.
  * This class is the implementation of a 3D YUV colormap. The U/V planes are always
@@ -349,3 +354,5 @@ YuvColormap::plane_size() const
 {
   return __plane_size;
 }
+
+} // end namespace firevision

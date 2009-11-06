@@ -3,8 +3,8 @@
  *  histogram.cpp - Implementation of the histogram
  *
  *  Generated: Tue Jun 14 11:11:29 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
- *             2008  Daniel Beck
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
+ *             2008       Daniel Beck
  *
  ****************************************************************************/
 
@@ -38,6 +38,11 @@
 using namespace std;
 using namespace fawkes;
 
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Histogram <fvutils/statistical/histogram.h>
  * Histogram.
@@ -561,3 +566,5 @@ Histogram::get_sum() const
 
   return sum;
 }
+
+} // end namespace firevision

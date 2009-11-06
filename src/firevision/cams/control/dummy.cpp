@@ -25,6 +25,11 @@
 
 #include <cams/control/dummy.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class DummyCameraControl <cams/control/dummy.h>
  * Dummy camera control.
  * This control supports every control type, but the operations are NOOPs.
@@ -416,3 +421,4 @@ unsigned int DummyCameraControl::focus_max()
   return 0;
 }
 
+} // end namespace firevision

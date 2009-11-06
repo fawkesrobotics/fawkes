@@ -28,6 +28,11 @@
 
 #include <cstdio>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class JpegWriter : public Writer {
 
  public:
@@ -45,5 +50,6 @@ class JpegWriter : public Writer {
   FILE *outfile;
 };
 
+} // end namespace firevision
 
 #endif

@@ -36,6 +36,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FireVisionDataFile <fvutils/fileformat/fvff.h>
  * FireVision File Format for data files.
  * The FireVision File Format (FVFF) defines a generic file layout that is used
@@ -442,3 +447,5 @@ FireVisionDataFile::has_magic_token(const char *filename, unsigned short int mag
   uint16_t file_magic_token = read_magic_token(filename);
   return (htons(magic_token) == file_magic_token);
 }
+
+} // end namespace firevision

@@ -1,7 +1,7 @@
 /***************************************************************************
- *  field.cpp - Drawer for a soccer field
+ *  field_drawer.cpp - Drawer for a soccer field
  *
- *  Created:  23.09.2008
+ *  Created:  Tue Sep 23 00:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  ****************************************************************************/
@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "field_drawer.h"
+#include <fvutils/draw/field_drawer.h>
 
 #include <core/exceptions/software.h>
 #include <fvutils/base/roi.h>
@@ -32,7 +32,12 @@
 
 using namespace fawkes;
 
-/** @class FieldDrawer field_drawer.h
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class FieldDrawer <fvutils/drawer/field_drawer.h>
  * This class is used to draw a soccer field.
  *
  * @author Christof Rath
@@ -473,4 +478,4 @@ FieldDrawer::draw_lines(YUV_t color, bool draw_landscape, float scale) const
   }
 }
 
-
+} // end namespace firevision

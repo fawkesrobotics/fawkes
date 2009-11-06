@@ -27,6 +27,11 @@
 
 #include <fvutils/cpu/mmx.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
  * G = 1.164(Y - 16) - 0.813(V - 128) - 0.391(U - 128)
@@ -519,3 +524,5 @@ yuv411planar_to_rgb_mmx (const unsigned char *yuv, unsigned char *rgb,
   emms();
 }
 #endif
+
+} // end namespace firevision

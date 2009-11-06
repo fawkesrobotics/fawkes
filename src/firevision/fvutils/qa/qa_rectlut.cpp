@@ -31,6 +31,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace firevision;
 
 #define WIDTH  640
 #define HEIGHT 480

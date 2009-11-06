@@ -25,6 +25,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraNotOpenedException <cams/cam_exceptions.h>
  * Camera not opened exception.
  * Throw this exception if an operations was requested on a camera that is
@@ -114,3 +119,5 @@ UnknownCameraControlTypeException::UnknownCameraControlTypeException(const char 
 {
   append(msg);
 }
+
+} // end namespace firevision

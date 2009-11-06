@@ -38,6 +38,11 @@ extern "C" {
 #include <jerror.h>
 }
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 ///@cond INTERNALS
 
 /** JPEG error manager type. */
@@ -342,3 +347,5 @@ JpegImageCompressor::set_filename(const char *filename)
 {
   this->filename = filename;
 }
+
+} // end namespace firevision

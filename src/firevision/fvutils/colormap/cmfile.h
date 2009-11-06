@@ -30,6 +30,11 @@
 #include <string>
 #include <stdint.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Colormap;
 
 #define CMFILE_MAGIC_TOKEN  0xFF01
@@ -77,5 +82,7 @@ class ColormapFile : public FireVisionDataFile
  private:
   cmfile_header_t  *__header;
 };
+
+} // end namespace firevision
 
 #endif

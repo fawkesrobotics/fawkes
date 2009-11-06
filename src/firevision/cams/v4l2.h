@@ -35,6 +35,11 @@
 /* Number of buffers to use for memory mapped IO */
 #define MMAP_NUM_BUFFERS 2;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 class V4L2CameraData;
 
@@ -199,5 +204,7 @@ class V4L2Camera:
   bool _nao_hacks;                   ///< Nao-specific hacks (bad driver)
 
 };
+
+} // end namespace firevision
 
 #endif //__FIREVISION_CAMS_V4L2_H_

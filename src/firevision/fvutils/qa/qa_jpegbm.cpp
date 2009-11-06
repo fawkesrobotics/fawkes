@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace fawkes;
+using namespace firevision;
 
 #define IMAGE_WIDTH   500
 #define IMAGE_HEIGHT  500

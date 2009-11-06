@@ -32,6 +32,11 @@
 #include <vector>
 #include <map>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class HistogramBlock;
 
 class HistogramFile : public FireVisionDataFile
@@ -56,5 +61,8 @@ class HistogramFile : public FireVisionDataFile
  private:
   std::map<hint_t, HistogramBlock*> attached_histograms;
 };
+
+
+} // end namespace firevision
 
 #endif /* __FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_ */

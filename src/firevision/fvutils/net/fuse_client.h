@@ -33,6 +33,11 @@ namespace fawkes {
   class WaitCondition;
   class Mutex;
 }
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FuseNetworkMessageQueue;
 class FuseNetworkMessage;
 class FuseClientHandler;
@@ -84,5 +89,6 @@ class FuseClient : public fawkes::Thread {
   bool __alive;
 };
 
+} // end namespace firevision
 
 #endif

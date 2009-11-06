@@ -27,6 +27,11 @@
 #include <cams/firewire.h>
 #include <fvutils/color/bayer.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Bumblebee2CameraData;
 
 class Bumblebee2Camera : public FirewireCamera
@@ -79,5 +84,7 @@ class Bumblebee2Camera : public FirewireCamera
   unsigned char *__buffer_deinterlaced;
   unsigned char *__buffer_rgb;
 };
+
+} // end namespace firevision
 
 #endif

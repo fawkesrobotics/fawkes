@@ -1,7 +1,7 @@
 /***************************************************************************
  *  field_drawer.h - Encapsulates a soccer field
  *
- *  Created:  23.09.2008
+ *  Created:  Tue Sep 23 00:00:00 2009
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  ****************************************************************************/
@@ -22,10 +22,15 @@
 #ifndef __FVUTILS_DRAWER_FIELD_DRAWER_H__
 #define __FVUTILS_DRAWER_FIELD_DRAWER_H__
 
-#include "field.h"
+#include <fvutils/draw/field.h>
 
 #include <utils/math/types.h>
 #include <fvutils/color/yuv.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 
 class SharedMemoryImageBuffer;
@@ -81,4 +86,6 @@ private: //Members
   YUV_t __c_own_pos_est;
 };
 
-#endif /* __FVUTILS_DRAWER_FIELD_DRAWER_H__ */
+} // end namespace firevision
+
+#endif

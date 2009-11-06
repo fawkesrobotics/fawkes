@@ -31,6 +31,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseServer <fvutils/net/fuse_server.h>
  * FireVision FUSE protocol server.
  * The FuseServer will open a StreamSocket and listen on it for incoming
@@ -141,3 +146,5 @@ FuseServer::loop()
   __clients.unlock();
   __dead_clients.unlock();  
 }
+
+} // end namespace firevision

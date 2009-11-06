@@ -38,6 +38,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SharedMemoryImageBuffer <fvutils/ipc/shm_image.h>
  * Shared memory image buffer.
  * Write images to or retrieve images from a shared memory segment.
@@ -892,3 +897,5 @@ SharedMemoryImageBufferLister::print_info(const SharedMemoryHeader *header,
 	 (SharedMemory::is_destroyed(shm_id) ? "D" : "")
 	 );
 }
+
+} // end namespace firevision

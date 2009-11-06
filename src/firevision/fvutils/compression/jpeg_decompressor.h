@@ -27,6 +27,11 @@
 
 #include <fvutils/compression/imagedecompressor.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class JpegImageDecompressor : public ImageDecompressor
 {
  public:
@@ -34,5 +39,7 @@ class JpegImageDecompressor : public ImageDecompressor
 
   virtual void decompress();
 };
+
+} // end namespace firevision
 
 #endif

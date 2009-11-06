@@ -27,6 +27,11 @@
 #include <cstring>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FireVisionDataFileBlock <fvutils/fileformat/fvfile_block.h>
  * FireVision File Format data block.
  * This class describes one data block inside a FVFF file.
@@ -221,3 +226,5 @@ FireVisionDataFileBlock::data_size() const
 {
   return _data_size;
 }
+
+} // end namespace firevision

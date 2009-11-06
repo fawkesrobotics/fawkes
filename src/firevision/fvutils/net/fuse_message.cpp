@@ -30,6 +30,11 @@
 #include <cstdlib>
 #include <netinet/in.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseNetworkMessage <fvutils/net/fuse_message.h>
  * FUSE Network Message.
  * This is the basic entity for messages that are sent over the network. Either
@@ -202,3 +207,5 @@ FuseNetworkMessage::pack()
     _msg.header.payload_size = htonl(__content->payload_size());
   }
 }
+
+} // end namespace firevision

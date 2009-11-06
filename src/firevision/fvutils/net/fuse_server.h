@@ -33,6 +33,11 @@ namespace fawkes {
   class StreamSocket;
   class NetworkAcceptorThread;
 }
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FuseServerClientThread;
 
 class FuseServer
@@ -60,5 +65,6 @@ class FuseServer
   fawkes::ThreadCollector *__thread_collector;
 };
 
+} // end namespace firevision
 
 #endif

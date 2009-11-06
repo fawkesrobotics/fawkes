@@ -25,10 +25,17 @@
 #ifndef __FIREVISION_CAMERACONTROL_H_
 #define __FIREVISION_CAMERACONTROL_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraControl
 {
  public:
   virtual ~CameraControl();
 };
+
+} // end namespace firevision
 
 #endif

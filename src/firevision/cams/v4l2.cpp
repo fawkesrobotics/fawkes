@@ -45,6 +45,11 @@ using fawkes::MissingParameterException;
 using fawkes::NotImplementedException;
 using fawkes::LibLogger;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /// @cond INTERNALS
 class V4L2CameraData
 {
@@ -1974,3 +1979,5 @@ V4L2Camera::print_info()
     "=========================================================================="
     << endl;
 }
+
+} // end namespace firevision

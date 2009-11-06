@@ -30,9 +30,14 @@
 
 #include <map>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ColorObjectMap
 {
-public:
+ public:
   ~ColorObjectMap();
   static const ColorObjectMap& get_instance() { return *__singleton; }
   static YUV_t get_color(color_t color);
@@ -42,15 +47,17 @@ public:
   const hint_t get(color_t color) const
   { return __hint_for_color.find(color) != __hint_for_color.end() ? __hint_for_color.find(color)->second : __h_unknown; }
 
-  private:
-    ColorObjectMap();
-    void set_mapping(hint_t roi, color_t color);
+ private:
+  ColorObjectMap();
+  void set_mapping(hint_t roi, color_t color);
 
-    static ColorObjectMap    *__singleton;
-    std::map<hint_t, color_t> __color_for_hint;
-    std::map<color_t, hint_t> __hint_for_color;
-    color_t                   __c_other;
-    hint_t                    __h_unknown;
-  };
+  static ColorObjectMap    *__singleton;
+  std::map<hint_t, color_t> __color_for_hint;
+  std::map<color_t, hint_t> __hint_for_color;
+  color_t                   __c_other;
+  hint_t                    __h_unknown;
+};
+
+} // end namespace firevision
 
 #endif // __FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
