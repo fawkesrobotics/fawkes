@@ -29,6 +29,7 @@
 #include <cstdio>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** @class FountainThread <apps/fountain/fountain_thread.h>
  * Fountain main thread.

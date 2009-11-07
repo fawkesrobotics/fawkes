@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  morphological.h - interface for a morphological filter
+ *  morphologicalfilter.h - interface for a morphological filter
  *
  *  Created: Thu Jun 08 09:58:21 2006
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -30,6 +30,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class MorphologicalFilter : public Filter {
  public:
   MorphologicalFilter(const char *name, unsigned int max_num_buffers = 1);
@@ -53,5 +58,6 @@ class MorphologicalFilter : public Filter {
   unsigned int   se_anchor_y;
 };
 
+} // end namespace firevision
 
 #endif

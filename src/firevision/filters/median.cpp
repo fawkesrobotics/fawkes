@@ -26,6 +26,11 @@
 #include <core/exception.h>
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterMedian <filters/median.h>
  * Median filter.
  * @author Tim Niemueller
@@ -63,3 +68,5 @@ FilterMedian::apply()
   }
 
 }
+
+} // end namespace firevision

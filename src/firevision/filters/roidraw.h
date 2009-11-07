@@ -27,6 +27,11 @@
 #include <filters/filter.h>
 #include <list>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 class Drawer;
 
@@ -55,5 +60,7 @@ class FilterROIDraw : public Filter
   Drawer *__drawer;
   border_style_t __border_style;
 };
+
+} // end namespace firevision
 
 #endif

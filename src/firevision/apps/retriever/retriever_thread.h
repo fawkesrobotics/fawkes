@@ -29,12 +29,14 @@
 #include <aspect/logging.h>
 #include <aspect/vision.h>
 
-class Camera;
-class SharedMemoryImageBuffer;
-class SeqWriter;
-class ColorModelLookupTable;
 namespace fawkes {
   class TimeTracker;
+}
+namespace firevision {
+  class Camera;
+  class SharedMemoryImageBuffer;
+  class SeqWriter;
+  class ColorModelLookupTable;
 }
 
 class FvRetrieverThread
@@ -58,16 +60,16 @@ class FvRetrieverThread
   char *__id;
   char *__camera_string;
 
-  Camera *cam;
-  SharedMemoryImageBuffer *shm;
-  SeqWriter *seq_writer;
+  firevision::Camera *cam;
+  firevision::SharedMemoryImageBuffer *shm;
+  firevision::SeqWriter *seq_writer;
   fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_capture;
   unsigned int __ttc_memcpy;
   unsigned int __ttc_dispose;
 
-  ColorModelLookupTable *__cm;
+  firevision::ColorModelLookupTable *__cm;
 };
 
 

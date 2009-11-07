@@ -37,6 +37,7 @@
 
 using namespace std;
 using namespace fawkes;
+using namespace firevision;
 
 int
 main(int argc, char **argv)

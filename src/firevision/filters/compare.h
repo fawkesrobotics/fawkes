@@ -26,6 +26,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterCompare : public Filter
 {
 
@@ -37,5 +42,7 @@ class FilterCompare : public Filter
   static const unsigned int BACKGROUND;
   static const unsigned int FOREGROUND;
 };
+
+} // end namespace firevision
 
 #endif

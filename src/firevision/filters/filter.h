@@ -27,9 +27,13 @@
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Filter
 {
-
  public:
   Filter(const char *name, unsigned int max_num_buffers = 1);
   virtual ~Filter();
@@ -70,5 +74,7 @@ class Filter
   /** Orientations, one for each source image */
   orientation_t  *ori;
 };
+
+} // end namespace firevision
 
 #endif

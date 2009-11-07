@@ -29,6 +29,11 @@
 #include <cstddef>
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterDilation <filters/morphology/dilation.h>
  * Morphological dilation.
  *
@@ -152,3 +157,5 @@ FilterDilation::apply()
   }
 
 }
+
+} // end namespace firevision

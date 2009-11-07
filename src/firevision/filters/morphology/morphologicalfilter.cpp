@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  morphological.cpp - interface for a morphological filter
+ *  morphologicalfilter.cpp - interface for a morphological filter
  *
  *  Created: Tue Mar 27 23:27:46 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -24,6 +24,11 @@
 #include <filters/morphology/morphologicalfilter.h>
 
 #include <cstddef>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class MorphologicalFilter <filters/morphology/morphologicalfilter.h>
  * Morphological filter interface.
@@ -70,3 +75,5 @@ MorphologicalFilter::set_structuring_element(unsigned char *se,
   this->se_anchor_x = se_anchor_x;
   this->se_anchor_y = se_anchor_y;
 }
+
+} // end namespace firevision

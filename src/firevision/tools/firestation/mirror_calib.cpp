@@ -32,8 +32,11 @@
 
 using namespace std;
 using namespace fawkes;
+#ifdef HAVE_BULB_CREATOR
+using namespace firevision;
+#endif
 
-/** @class MirrorCalibTool tools/firestation/mirror_calib.h
+/** @class MirrorCalibTool "mirror_calib.h"
  * This class encapsulates the routines necessary for interactive mirror
  * calibration.
  */

@@ -27,6 +27,8 @@
 #include <fvutils/scalers/scaler.h>
 #include <fvutils/ipc/shm_image.h>
 
+using namespace firevision;
+
 /** @class MiniImageProducer <apps/fountain/mini_image_producer.h>
  * Mini image producer.
  * Uses a scaler to create small version of an image.

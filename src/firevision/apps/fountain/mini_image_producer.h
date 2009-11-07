@@ -23,15 +23,19 @@
 #ifndef __FIREVISION_APPS_FOUNTAIN_MINI_IMAGE_H_
 #define __FIREVISION_APPS_FOUNTAIN_MINI_IMAGE_H_
 
-class Logger;
-class Scaler;
-class SharedMemoryImageBuffer;
+namespace fawkes {
+  class Logger;
+}
+namespace firevision {
+  class Scaler;
+  class SharedMemoryImageBuffer;
+}
 
 class MiniImageProducer {
  public:
 
   MiniImageProducer(const char *orig_id, const char *mini_id,
-		    Scaler *scaler, Logger *logger);
+		    firevision::Scaler *scaler, fawkes::ogger *logger);
 
   ~MiniImageProducer();
 
@@ -39,10 +43,10 @@ class MiniImageProducer {
   void produce();
 
  private:
-  Logger *logger;
-  Scaler *scaler;
-  SharedMemoryImageBuffer *orig_shmem;
-  SharedMemoryImageBuffer *mini_shmem;
+  fawkes::Logger *logger;
+  firevision::Scaler *scaler;
+  firevision::SharedMemoryImageBuffer *orig_shmem;
+  firevision::SharedMemoryImageBuffer *mini_shmem;
 
   float scale_factor;
 

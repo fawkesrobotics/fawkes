@@ -28,6 +28,11 @@
 #include <cstddef>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterUnwarp <filters/unwarp.h>
  * Create unwarped image with given mirror model.
  * @author Tim Niemueller
@@ -135,3 +140,4 @@ FilterUnwarp::apply()
   }
 }
 
+} // end namespace firevision

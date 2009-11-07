@@ -27,6 +27,11 @@
 #include <filters/filter.h>
 #include <fvutils/base/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ColorModel;
 
 class FilterSegment : public Filter
@@ -40,5 +45,7 @@ class FilterSegment : public Filter
   ColorModel    *cm;
   color_t        what;
 };
+
+} // end namespace firevision
 
 #endif

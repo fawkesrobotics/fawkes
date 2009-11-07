@@ -26,6 +26,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class MirrorModel;
 
 class FilterUnwarp : public Filter
@@ -38,6 +43,8 @@ class FilterUnwarp : public Filter
  private:
   MirrorModel   *mm;
 };
+
+} // end namespace firevision
 
 #endif
 

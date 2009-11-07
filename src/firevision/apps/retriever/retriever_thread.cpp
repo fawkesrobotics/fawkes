@@ -33,6 +33,7 @@
 #include <cstdlib>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** @class FvRetrieverThread "retriever_thread.h"
  * FireVision retriever thread.

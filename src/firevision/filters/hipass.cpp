@@ -26,6 +26,11 @@
 
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterHipass <filters/hipass.h>
  * Hipass filter.
  */
@@ -55,3 +60,5 @@ FilterHipass::apply()
     throw fawkes::Exception("Hipass filter failed with %i\n", status);
   }
 }
+
+} // end namespace firevision

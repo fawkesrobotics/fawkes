@@ -38,6 +38,7 @@
 #include <cstdio>
 
 using namespace fawkes;
+using namespace firevision;
 
 void
 print_usage(ArgumentParser *argp)

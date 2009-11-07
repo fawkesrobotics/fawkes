@@ -26,6 +26,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterMin : public Filter
 {
  public:
@@ -33,5 +38,7 @@ class FilterMin : public Filter
 
   virtual void apply();
 };
+
+} // end namespace firevision
 
 #endif

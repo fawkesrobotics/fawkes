@@ -24,20 +24,22 @@
 #ifndef __ASPECT_VISION_MASTER_H_
 #define __ASPECT_VISION_MASTER_H_
 
-class VisionMaster;
+namespace firevision {
+  class VisionMaster;
+}
 
 namespace fawkes {
 
 class VisionMasterAspect
 {
  public:
-  VisionMasterAspect(::VisionMaster *master);
+  VisionMasterAspect(firevision::VisionMaster *master);
   virtual ~VisionMasterAspect();
 
-  ::VisionMaster *  vision_master();
+  firevision::VisionMaster *  vision_master();
 
  private:
-  ::VisionMaster *master;
+  firevision::VisionMaster *master;
 };
 
 } // end namespace fawkes

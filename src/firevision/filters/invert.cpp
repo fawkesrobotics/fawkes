@@ -27,6 +27,11 @@
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterInvert <filters/invert.h>
  * Inversion filter.
  * This will invert the given image.
@@ -122,3 +127,5 @@ FilterInvert::apply()
   }
 
 }
+
+} // end namespace firevision

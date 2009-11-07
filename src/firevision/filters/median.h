@@ -30,6 +30,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterMedian : public Filter
 {
  public:
@@ -40,5 +45,7 @@ class FilterMedian : public Filter
  private:
   unsigned int   mask_size;
 };
+
+} // end namespace firevision
 
 #endif

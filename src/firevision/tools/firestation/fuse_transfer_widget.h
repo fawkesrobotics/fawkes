@@ -28,11 +28,13 @@
 
 #include <gtkmm.h>
 
-class FuseClient;
-class YuvColormap;
+namespace firevision {
+  class FuseClient;
+  class YuvColormap;
+}
 class ColormapViewerWidget;
 
-class FuseTransferWidget : FuseClientHandler
+class FuseTransferWidget : firevision::FuseClientHandler
 {
  public:
   FuseTransferWidget();
@@ -43,7 +45,7 @@ class FuseTransferWidget : FuseClientHandler
 			     uint16_t port );
   void remove_fountain_service(const char* name);
 
-  void set_current_colormap(YuvColormap* colormap);
+  void set_current_colormap(firevision::YuvColormap* colormap);
 
   void set_upload_btn(Gtk::Button* btn_upload);
   void set_download_btn(Gtk::Button* btn_download);
@@ -59,7 +61,7 @@ class FuseTransferWidget : FuseClientHandler
 				   uint32_t remote_version) throw();
   void fuse_connection_established() throw();
   void fuse_connection_died() throw();
-  void fuse_inbound_received (FuseNetworkMessage *m) throw();
+  void fuse_inbound_received(firevision::FuseNetworkMessage *m) throw();
 
  private:
   class LutRecord : public Gtk::TreeModelColumnRecord
@@ -111,7 +113,7 @@ class FuseTransferWidget : FuseClientHandler
 
   struct ClientData
   {
-    FuseClient* client;
+    firevision::FuseClient* client;
     std::string service_name;
     std::string host_name;
     uint16_t port;
@@ -119,7 +121,7 @@ class FuseTransferWidget : FuseClientHandler
   };
 
   fawkes::LockQueue<ClientData> m_new_clients;
-  fawkes::LockQueue<FuseClient*> m_delete_clients;
+  fawkes::LockQueue<firevision::FuseClient*> m_delete_clients;
 
   ClientData m_cur_client;
 
@@ -143,9 +145,9 @@ class FuseTransferWidget : FuseClientHandler
   Glib::RefPtr<Gtk::ListStore> m_local_lut_list;
   LutRecord m_lut_record;
 
-  YuvColormap* m_current_colormap;
-  YuvColormap* m_local_colormap;
-  YuvColormap* m_remote_colormap;
+  firevision::YuvColormap* m_current_colormap;
+  firevision::YuvColormap* m_local_colormap;
+  firevision::YuvColormap* m_remote_colormap;
 };
 
 #endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_ */

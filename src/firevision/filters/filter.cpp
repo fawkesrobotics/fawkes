@@ -29,6 +29,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Filter <filters/filter.h>
  * Filter interface.
  * This class defines the general interface that filters are used with.
@@ -179,3 +184,5 @@ Filter::shrink_region(ROI *r, unsigned int n)
     r->height -= (r->start.y + r->height) - (r->image_height - (n/2));
   }
 }
+
+} // end namespace firevision

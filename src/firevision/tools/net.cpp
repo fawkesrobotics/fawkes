@@ -52,6 +52,7 @@
 #include <cstdio>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** FireVision Network Tool */
 class FireVisionNetworkTool

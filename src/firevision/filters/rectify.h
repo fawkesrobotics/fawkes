@@ -26,6 +26,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class RectificationInfoBlock;
 
 class FilterRectify : public Filter
@@ -39,6 +44,8 @@ class FilterRectify : public Filter
   RectificationInfoBlock *__rib;
   bool __mark_zeros;
 };
+
+} // end namespace firevision
 
 #endif
 

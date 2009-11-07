@@ -29,6 +29,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterMin <filters/min.h>
  * Minimum filter
  * @author Tim Niemueller
@@ -150,3 +155,5 @@ FilterMin::apply()
   }
 
 }
+
+} // end namespace firevision

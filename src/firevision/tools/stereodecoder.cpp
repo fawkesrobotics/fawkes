@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace fawkes;
+using namespace firevision;
 
 /** Interleave to YUV422 planar buffers.
  * Creates an image buffer which has both images side by side.

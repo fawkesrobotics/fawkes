@@ -71,7 +71,7 @@ VisionAspect::~VisionAspect()
  * @see VisionMaster
  */
 void
-VisionAspect::init_VisionAspect(::VisionMaster *vision_master)
+VisionAspect::init_VisionAspect(firevision::VisionMaster *vision_master)
 {
   this->vision_master = vision_master;
 }

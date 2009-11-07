@@ -42,11 +42,11 @@ class VisionAspect
   VisionAspect(VisionThreadMode mode);
   virtual ~VisionAspect();
 
-  void              init_VisionAspect(::VisionMaster *vision_master);
+  void              init_VisionAspect(firevision::VisionMaster *vision_master);
   VisionThreadMode  vision_thread_mode();
  protected:
   /** Vision master */
-  ::VisionMaster *vision_master;
+  firevision::VisionMaster *vision_master;
  private:
   VisionThreadMode __vision_thread_mode;
 };

@@ -32,6 +32,11 @@
 #include <iomanip>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ImageWidget <fvwidgets/image_widget.h>
  * This class is an image container to display fawkes cameras (or image
  * buffers) inside a Gtk::Container
@@ -593,3 +598,5 @@ ImageWidget::RefThread::get_img_num()
 {
   return __save_num;
 }
+
+} // end namespace firevision

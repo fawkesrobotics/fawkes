@@ -32,6 +32,7 @@
 
 #define M_2xPI (2*M_PI)
 using namespace fawkes;
+using namespace firevision;
 
 /** @class YuvViewerGtkWindow "yuv_viewer_gui.h"
  * Tool to show the YUV color space

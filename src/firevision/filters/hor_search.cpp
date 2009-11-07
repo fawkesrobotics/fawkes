@@ -29,6 +29,11 @@
 #include <cstddef>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterHSearch <filters/hor_search.h>
  * Search horizontally for a color change. Mark these changes with white
  * pixels, all other with black pixels.
@@ -118,3 +123,4 @@ FilterHSearch::apply()
 
 }
 
+} // end namespace firevision

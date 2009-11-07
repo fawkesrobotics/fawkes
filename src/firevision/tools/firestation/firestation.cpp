@@ -52,8 +52,9 @@
 
 using namespace std;
 using namespace fawkes;
+using namespace firevision;
 
-/** @class Firestation tools/firestation/firestation.h
+/** @class Firestation "firestation.h"
  * Control GUI for vision related stuff.
  * @author Daniel Beck
  */

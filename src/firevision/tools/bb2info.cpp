@@ -25,6 +25,7 @@
 #include <stereo/triclops.h>
 
 using namespace std;
+using namespace firevision;
 
 int
 main(int argc, char **argv)

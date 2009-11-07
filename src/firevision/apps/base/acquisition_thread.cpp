@@ -42,6 +42,7 @@
 #include <algorithm>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** @class FvAcquisitionThread "acquisition_thread.h"
  * FireVision base application acquisition thread.

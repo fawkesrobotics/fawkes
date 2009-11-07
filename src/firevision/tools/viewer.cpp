@@ -54,6 +54,7 @@
 #include <fvutils/color/conversions.h>
 
 using namespace fawkes;
+using namespace firevision;
 
 void
 print_usage(const char *program_name)

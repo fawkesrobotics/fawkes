@@ -27,6 +27,11 @@
 
 #include <filters/morphology/morphologicalfilter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterErosion;
 class FilterMax;
 class ImageDiff;
@@ -56,5 +61,7 @@ class FilterGeodesicErosion : public MorphologicalFilter
 
   unsigned int iterations;
 };
+
+} // end namespace firevision
 
 #endif

@@ -28,6 +28,11 @@
 #include <ippi.h>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterSobel <filters/sobel.h>
  * Sobel filter.
  * @author Tim Niemueller
@@ -159,3 +164,5 @@ FilterSobel::apply()
   }
 
 }
+
+} // end namespace firevision

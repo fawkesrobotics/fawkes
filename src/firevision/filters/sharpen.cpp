@@ -27,6 +27,11 @@
 
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterSharpen <filters/sharpen.h>
  * Sharpen filter.
  * @author Tim Niemueller
@@ -58,3 +63,5 @@ FilterSharpen::apply()
   }
 
 }
+
+} // end namespace firevision

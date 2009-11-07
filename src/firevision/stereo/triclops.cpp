@@ -43,6 +43,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /// @cond INTERNALS
 /** Data internal to Triclops stereo processor
  * This class exists to be able to hide the triclops stuff from the camera
@@ -1079,3 +1084,5 @@ TriclopsStereoProcessor::getall_world_xyz(float ***buffer, int hoff, int voff, i
     }
   }
 }
+
+} // end namespace firevision

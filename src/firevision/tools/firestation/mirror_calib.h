@@ -27,10 +27,12 @@
 
 #ifdef HAVE_BULB_CREATOR
 #include <models/mirror/bulb/bulb_generator.h>
-class Bulb;
-class BulbSampler;
+namespace firevision {
+  class Bulb;
+  class BulbSampler;
+}
 
-class MirrorCalibTool : public BulbGeneratorProgressHandler
+class MirrorCalibTool : public firevision::BulbGeneratorProgressHandler
 #else
 class MirrorCalibTool
 #endif
@@ -86,9 +88,9 @@ class MirrorCalibTool
   bool m_step_two;
 
 #ifdef HAVE_BULB_CREATOR
-  Bulb* m_bulb;
-  BulbSampler* m_sampler;
-  BulbGenerator* m_generator;
+  firevision::Bulb* m_bulb;
+  firevision::BulbSampler* m_sampler;
+  firevision::BulbGenerator* m_generator;
 #endif
 };
 

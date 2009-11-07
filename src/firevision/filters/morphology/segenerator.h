@@ -25,6 +25,10 @@
 #ifndef __FIREVISION_FILTERS_MORPHOLOGY_SEGENERATOR_H_
 #define __FIREVISION_FILTERS_MORPHOLOGY_SEGENERATOR_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class SEGenerator {
  private:
@@ -48,7 +52,6 @@ class SEGenerator {
 
 };
 
-
-
+} // end namespace firevision
 
 #endif
