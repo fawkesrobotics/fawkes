@@ -25,7 +25,7 @@
 
 namespace fawkes {
 
-/** @class ConfigurableAspect aspect/configurable.h
+/** @class ConfigurableAspect <aspect/configurable.h>
  * Thread aspect to access configuration data.
  * Give this aspect to your thread to gain access to the configuration.
  * This aspects defines a thread as being configurable.

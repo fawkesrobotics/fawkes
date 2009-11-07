@@ -25,7 +25,7 @@
 
 namespace fawkes {
 
-/** @class VisionAspect aspect/vision.h
+/** @class VisionAspect <aspect/vision.h>
  * Thread aspect to use in FireVision apps.
  *
  * It is guaranteed that if used properly from within plugins that

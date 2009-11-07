@@ -25,7 +25,7 @@
 
 namespace fawkes {
 
-/** @class VisionMasterAspect vision_master.h <aspect/vision_master.h>
+/** @class VisionMasterAspect <aspect/vision_master.h>
  * Vision Master Aspect.
  *
  * This aspect provides access to the vision muster. Your thread having

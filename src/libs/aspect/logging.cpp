@@ -25,7 +25,7 @@
 
 namespace fawkes {
 
-/** @class LoggingAspect aspect/logging.h
+/** @class LoggingAspect <aspect/logging.h>
  * Thread aspect to log output.
  * Give this aspect to your thread to gain access to the central log.
  * When using this thread all output should be done with the logger set
