@@ -46,6 +46,8 @@ class BarrierData
 #ifdef USE_POSIX_BARRIERS
   pthread_barrier_t barrier;
 #else
+  BarrierData() : mutex(), waitcond(&mutex), threads_left(0) {}
+
   unsigned int  threads_left;
   Mutex         mutex;
   WaitCondition waitcond;
@@ -164,7 +166,7 @@ Barrier::wait()
     barrier_data->mutex.unlock();
     barrier_data->waitcond.wake_all();
   } else {
-    barrier_data->waitcond.wait(&(barrier_data->mutex));
+    barrier_data->waitcond.wait();
     barrier_data->mutex.unlock();
   }
 
