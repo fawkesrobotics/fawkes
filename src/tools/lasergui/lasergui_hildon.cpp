@@ -34,6 +34,12 @@
 #include <gui_utils/connection_dispatcher.h>
 #include <gui_utils/service_chooser_dialog.h>
 
+#if MAEMO_VERSION_MAJOR >= 5
+#  define ICON_FORMAT "white_48x48"
+#else
+#  define ICON_FORMAT "32x32"
+#endif
+
 using namespace fawkes;
 
 /** @class LaserGuiHildonWindow "lasergui_hildon.cpp"
@@ -47,11 +53,11 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Constructor. */
   LaserGuiHildonWindow()
     : __athome_drawer(true),
-      __img_lines("lines_32x32.png"),
-      __img_points("points_32x32.png"),
-      __img_hull("hull_32x32.png"),
-      __img_lowres("lines_lowres_32x32.png"),
-      __img_rotation("rotate-90.png"),
+      __img_lines(RESDIR"/lasergui/lines_"ICON_FORMAT".png"),
+      __img_points(RESDIR"/lasergui/points_"ICON_FORMAT".png"),
+      __img_hull(RESDIR"/lasergui/hull_"ICON_FORMAT".png"),
+      __img_lowres(RESDIR"/lasergui/lines_lowres_"ICON_FORMAT".png"),
+      __img_rotation(RESDIR"/lasergui/rotate-90.png"),
       __tb_connection(Gtk::Stock::CONNECT),
       __tb_lines(__img_lines),
       __tb_points(__img_points),
@@ -67,7 +73,7 @@ class LaserGuiHildonWindow : public Hildon::Window
     __ifd = NULL;
 
     std::auto_ptr<Glib::Error> error;
-    set_icon_from_file("lines_32x32.png", error);
+    set_icon_from_file(RESDIR"/lasergui/lines_"ICON_FORMAT".png", error);
 
     add(__area);
     __area.show();
