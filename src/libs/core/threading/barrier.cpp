@@ -46,7 +46,7 @@ class BarrierData
 #ifdef USE_POSIX_BARRIERS
   pthread_barrier_t barrier;
 #else
-  BarrierData() : mutex(), waitcond(&mutex), threads_left(0) {}
+  BarrierData() : threads_left(0), mutex(), waitcond(&mutex) {}
 
   unsigned int  threads_left;
   Mutex         mutex;
