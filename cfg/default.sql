@@ -113,4 +113,7 @@ INSERT INTO "config" VALUES('/hardware/laser/num_init_tries','unsigned int',5,'N
 INSERT INTO "config" VALUES('/hardware/laser/mount_rotation','float',180,'Rotation of the laser towards front; degree');
 INSERT INTO "config" VALUES('/hardware/laser/use_dead_spots_filter','bool','1','If true, the fflaser_calibrate tool must be used to gain information about dead spots, which are then extracted with a filter');
 INSERT INTO "config" VALUES('/plugins/festival/voice','string','nitech_us_bdl_arctic_hts','Voice to use for Festival speech synth');
+INSERT INTO "config" VALUES('/fawkes/bblogger/scenario','string','qatest','Current logging scenario');
+INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/buffering','bool',1,'Enable buffering for this scenario?');
+INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/interfaces/test','string','TestInterface::BBLoggerTest',NULL);
 COMMIT;

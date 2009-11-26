@@ -29,10 +29,15 @@
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <blackboard/interface_listener.h>
+#include <core/utils/lock_queue.h>
+
+#include <cstdio>
 
 namespace fawkes {
   class BlackBoard;
   class Logger;
+  class Mutex;
+  class Time;
 }
 
 class BBLoggerThread
@@ -45,7 +50,8 @@ class BBLoggerThread
 {
  public:
   BBLoggerThread(const char *iface_uid,
-		 const char *file_pattern);
+		 const char *logdir, bool buffering,
+		 const char *scenario, fawkes::Time *start_time);
   virtual ~BBLoggerThread();
 
   virtual void init();
@@ -54,15 +60,38 @@ class BBLoggerThread
 
   virtual bool bb_interface_message_received(fawkes::Interface *interface, fawkes::Message *message) throw();
   virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+  virtual void bb_interface_writer_added(fawkes::Interface *interface,
+					 unsigned int instance_serial) throw();
+  virtual void bb_interface_writer_removed(fawkes::Interface *interface,
+					   unsigned int instance_serial) throw();
+
+ private:
+  void write_header();
+  void update_header();
+  void write_chunk(const void *chunk);
+
 
  private:
   fawkes::Interface  *__iface;
 
+  unsigned int        __num_data_items;
+  unsigned int        __session_start;
+
+  bool                __buffering;
+  size_t              __data_size;
+  char               *__scenario;
   char               *__filename;
   char               *__logdir;
   char               *__uid;
-  int                 __fd_data;
-  int                 __fd_msgs;
+  FILE               *__f_data;
+  FILE               *__f_msgs;
+
+  fawkes::Time       *__start;
+  fawkes::Time       *__now;
+
+  fawkes::Mutex      *__queue_mutex;
+  unsigned int        __act_queue;
+  fawkes::LockQueue<void *> __queues[2];
 };
 
 

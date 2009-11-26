@@ -23,7 +23,15 @@
 #include "bblogger_plugin.h"
 #include "log_thread.h"
 
+#include <utils/time/time.h>
+
 #include <set>
+
+#include <cstring>
+#include <cerrno>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace fawkes;
 
@@ -44,28 +52,59 @@ BlackBoardLoggerPlugin::BlackBoardLoggerPlugin(Configuration *config)
   std::set<std::string> ifaces;
 
   std::string prefix = "/fawkes/bblogger/";
-  std::string ifaces_prefix = prefix + "interfaces/";
+
+  std::string scenario = "";
+  try {
+    scenario = config->get_string((prefix + "scenario").c_str());
+  } catch (Exception &e) {
+    e.append("No scenario defined, configure %sscenario", prefix.c_str());
+    throw;
+  }
+
+  std::string scenario_prefix = prefix + scenario + "/";
+  std::string ifaces_prefix   = scenario_prefix + "interfaces/";
 
   std::string logdir = LOGDIR;
+  bool        buffering = true;
   try {
-    logdir = config->get_string((prefix + "logdir").c_str());
-  } catch (Exception &e) {
-    // ignored, use default set above
+    logdir = config->get_string((scenario_prefix + "logdir").c_str());
+  } catch (Exception &e) { /* ignored, use default set above */ }
+  try {
+    buffering = config->get_bool((scenario_prefix + "buffering").c_str());
+  } catch (Exception &e) { /* ignored, use default set above */ }
+
+  struct stat s;
+  int err = stat(logdir.c_str(), &s);
+  if (err != 0) {
+    char buf[1024];
+    Exception se ("Cannot access logdir %s (%s)",
+		  logdir.c_str(), strerror_r(errno, buf, 1024));
+    if (mkdir(logdir.c_str(), 0755) != 0) {
+      se.append("Failed to create log directory (%s)",
+		strerror_r(errno, buf, 1024));
+      throw se;
+    }
+  } else if ( ! S_ISDIR(s.st_mode) ) {
+    throw Exception("Logdir path %s is not a directory", logdir.c_str());
   }
+
+  // We do not have the framework clock available at this point, but for the start
+  // time of the log we are only interested in the system time anyway
+  Time start;
 
   Configuration::ValueIterator *i = config->search(ifaces_prefix.c_str());
   while (i->next()) {
 
     //printf("Adding sync thread for peer %s\n", peer.c_str());
     BBLoggerThread *log_thread = new BBLoggerThread(i->get_string().c_str(),
-						    logdir.c_str());
+						    logdir.c_str(), buffering,
+						    scenario.c_str(), &start);
     thread_list.push_back(log_thread);
   }
   delete i;
 
   if ( thread_list.empty() ) {
     throw Exception("No interfaces configured for logging, aborting");
-  } else {
   }
 }
 
