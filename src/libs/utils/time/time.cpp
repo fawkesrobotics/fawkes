@@ -43,6 +43,27 @@ namespace fawkes {
  * A class for handling time.
  * @author Daniel Beck
  * @author Tim Niemueller
+ *
+ * @fn const timeval * Time::get_timeval() const
+ * Obtain the timeval where the time is stored.
+ * @return a const pointer to the timeval where the time is stored
+ *
+ * @fn long Time::get_sec() const
+ * Get seconds.
+ * @return seconds stored in time stamp
+ *
+ * @fn long Time::get_msec() const
+ * Get milliseconds.
+ * @return milliseconds stored in time stamp
+ *
+ * @fn long Time::get_usec() const
+ * Get microseconds.
+ * @return microseconds stored in time stamp
+ *
+ * @fn void Time::get_timestamp(long &sec, long &usec) const
+ * Get time stamp.
+ * @param sec upon return contains seconds stored in time stamp
+ * @param usec upon return contains microseconds stored in time stamp
  */
 
 /** Maximum size of string returned by str() and the minimum size
@@ -157,6 +178,23 @@ Time::Time(const Time &t)
 }
 
 
+/** Copy constructor.
+ * @param t time to copy
+ */
+Time::Time(const Time *t)
+{
+  __time.tv_sec  = t->__time.tv_sec;
+  __time.tv_usec = t->__time.tv_usec;
+  __clock        = t->__clock;
+  if (t->__timestr) {
+    __timestr = (char *)malloc(TIMESTR_SIZE);
+    strncpy(__timestr, t->__timestr, TIMESTR_SIZE);
+  } else {
+    __timestr = NULL;
+  }
+}
+
+
 /** Destructor. */
 Time::~Time()
 {
@@ -194,16 +232,6 @@ long
 Time::in_usec() const
 {
   return (__time.tv_sec * 1000000 + __time.tv_usec);
-}
-
-
-/** Obtain the timeval where the time is stored.
- * @return a const pointer to the timeval where the time is stored
- */
-const timeval *
-Time::get_timeval() const
-{
-  return &__time;
 }
 
 
