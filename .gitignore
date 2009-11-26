@@ -11,6 +11,7 @@
 /doc/api
 /lib/
 /lib_*/
+/log/
 /plugins/
 /plugins_*
 /warnings.txt
