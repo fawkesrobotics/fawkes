@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <typeinfo>
+#include <regex.h>
 
 namespace fawkes {
 
@@ -934,6 +935,41 @@ unsigned int
 Interface::num_fields()
 {
   return __num_fields;
+}
+
+
+/** Parse UID to type and ID strings.
+ * Note that the returned values (type and id) must be freed once they are
+ * no longer used. Also verifies lengths of the type and id strings.
+ * @param uid UID to parse
+ * @param type upon return contains the type part of the UID, must be freed
+ * @param id upon return contains the ID part, must be freed
+ */
+void
+Interface::parse_uid(const char *uid, char **type, char **id)
+{
+  regex_t re;
+  int ec = 0;
+// Requires in parse_uid()
+#define str(s) #s
+#define xstr(s) str(s)
+  if ((ec = regcomp(&re,
+		    "^([a-zA-Z]{1," xstr(__INTERFACE_TYPE_SIZE) "})::"
+		    "([a-zA-Z_\\.-]{1," xstr(__INTERFACE_ID_SIZE) "})$",
+		    REG_EXTENDED)) != 0) {
+    char errbuf[1024];
+    regerror(ec, &re, errbuf, 1024);
+    throw Exception("Failed to created regular expression to parse UID (%s)",
+		    errbuf);
+  }
+  regmatch_t matches[3];
+  if (regexec(&re, uid, 3, matches, 0) != 0) {
+    regfree(&re);
+    throw Exception("Failed to match UID %s, format error.", uid);
+  }
+
+  *type = strndup(&(uid[matches[1].rm_so]), matches[1].rm_eo - matches[1].rm_so);
+  *id   = strndup(&(uid[matches[2].rm_so]), matches[2].rm_eo - matches[2].rm_so);
 }
 
 } // end namespace fawkes

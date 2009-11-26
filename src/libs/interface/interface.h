@@ -163,6 +163,9 @@ class Interface
 
   unsigned int num_fields();
 
+  /* Convenience */
+  static void parse_uid(const char *uid, char **type, char **id);
+
  protected:
   Interface();
   virtual bool  message_valid(const Message *message) const = 0;
