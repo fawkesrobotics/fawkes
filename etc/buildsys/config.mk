@@ -2,7 +2,7 @@
 #                      Makefile Build System for Fawkes
 #                            -------------------
 #   Created on Sun Sep 03 14:14:14 2006
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -16,7 +16,10 @@
 ifndef __buildsys_config_mk_
 __buildsys_config_mk := 1
 
-include $(BASEDIR)/etc/buildsys/ext/gmsl
+# Also update in base.mk when changing here
+BUILDSYSDIR  ?= $(abspath $(BASEDIR)/etc/buildsys)
+
+include $(BUILDSYSDIR)/ext/gmsl
 
 ### Debugging related options
 SILENTSYMB = @
@@ -26,8 +29,8 @@ COLORED = 1
 endif
 
 ### Build type
-ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/buildtype.mk)),)
-  include $(realpath $(BASEDIR)/etc/buildsys/buildtype.mk)
+ifneq ($(wildcard $(realpath $(BUILDSYSDIR)/buildtype.mk)),)
+  include $(realpath $(BUILDSYSDIR)/buildtype.mk)
 else
   BUILD_TYPE = fawkes
 endif
@@ -151,13 +154,13 @@ TGREYBG		= \033[47m
 endif
 
 ### Check if there are special config files for the chosen compiler
-ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/$(CC).mk)),)
-  include $(BASEDIR)/etc/buildsys/$(CC).mk
+ifneq ($(wildcard $(realpath $(BUILDSYSDIR)/$(CC).mk)),)
+  include $(BUILDSYSDIR)/$(CC).mk
 endif
 
 ### Check if there is a build-type specific configuration
-ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/btypes/config_$(BUILD_TYPE).mk)),)
-  include $(BASEDIR)/etc/buildsys/btypes/config_$(BUILD_TYPE).mk
+ifneq ($(wildcard $(realpath $(BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk)),)
+  include $(BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk
 endif
 
 ### Check if there is a local config for this directory

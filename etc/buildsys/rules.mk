@@ -19,7 +19,7 @@
 ifndef __buildsys_rules_mk_
 __buildsys_rules_mk := 1
 
-include $(abspath $(BASEDIR)/etc/buildsys/ext/gmsl)
+include $(abspath $(BUILDSYSDIR)/ext/gmsl)
 
 MAKE_MIN_VERSION_MAJOR=3
 MAKE_MIN_VERSION_MINOR=81
@@ -193,8 +193,8 @@ $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	)
 
 ### Check if there are special additions
-ifneq ($(realpath $(BASEDIR)/etc/buildsys/btypes/rules_$(BUILD_TYPE).mk),)
-include $(BASEDIR)/etc/buildsys/btypes/rules_$(BUILD_TYPE).mk
+ifneq ($(realpath $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
+include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
 endif
 
 endif # __buildsys_rules_mk_

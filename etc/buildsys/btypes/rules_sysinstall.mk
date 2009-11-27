@@ -13,8 +13,8 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys/btypes/rules_fawkes.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
+include $(BUILDSYSDIR)/btypes/rules_fawkes.mk
+include $(BUILDSYSDIR)/ext/gmsl
 
 # Plugins are installed to special directory
 $(foreach P,$(PLUGINS_all:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(subst /,_,$P) = $(FFLIBSUBDIR)/plugins))
@@ -29,7 +29,7 @@ $(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_
 endif
 
 # Main install target
-.PHONY: install install_test_basedir install_config install_lua
+.PHONY: install install_test_basedir install_config install_buildsys install_lua
 install: install_test_basedir presubdirs $(subst $(LIBDIR),$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_config install_lua
 
 # Only allow "make install" from basedir
@@ -66,6 +66,9 @@ ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 		fi \
 	done
 endif
+
+install_buildsys:
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating buildsys directory $(EXEC_CONFDIR)"
 
 install_lua:
 ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))

@@ -13,7 +13,7 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys/btypes/config_fawkes.mk
+include $(BUILDSYSDIR)/btypes/config_fawkes.mk
 
 # Not silent, no color
 SILENT  = @
@@ -39,18 +39,20 @@ LDFLAGS_BASE   = $(LDFLAGS_MINIMUM) -Wl,-R$(EXEC_LIBDIR)/fawkes/interfaces
 # Note: the install scripts make the assumption that FFLIBDIR, RESDIR and INCDIR
 # paths (with EXEC_ prefix) are specific to Fawkes and can be deleted completely
 # without interfering with the rest of the system!
-FFLIBSUBDIR    = fawkes
-EXEC_BASEDIR   = $(abspath $(DESTDIR))
-EXEC_CONFDIR   = $(SYSCONFDIR)
-EXEC_RESDIR    = $(EXEC_BASEDIR)/share/fawkes
-EXEC_LIBDIR    = $(EXEC_BASEDIR)/lib$(LIBBITS)
-EXEC_FFLIBDIR  = $(EXEC_LIBDIR)/$(FFLIBSUBDIR)
-EXEC_PLUGINDIR = $(EXEC_FFLIBDIR)/plugins
-EXEC_IFACEDIR  = $(EXEC_FFLIBDIR)/interfaces
-EXEC_INCDIR    = $(EXEC_BASEDIR)/include/fawkes
-EXEC_DFILEDIR  = $(EXEC_BASEDIR)/share/applications
-EXEC_LUADIR    = $(EXEC_RESDIR)/lua
-EXEC_LUALIBDIR = $(EXEC_FFLIBDIR)/lua
+FFLIBSUBDIR        = fawkes
+EXEC_BASEDIR       = $(abspath $(DESTDIR))
+EXEC_CONFDIR       = $(SYSCONFDIR)
+EXEC_RESDIR        = $(EXEC_BASEDIR)/share/fawkes
+EXEC_LIBDIR        = $(EXEC_BASEDIR)/lib$(LIBBITS)
+EXEC_FFLIBDIR      = $(EXEC_LIBDIR)/$(FFLIBSUBDIR)
+EXEC_PLUGINDIR     = $(EXEC_FFLIBDIR)/plugins
+EXEC_IFACEDIR      = $(EXEC_FFLIBDIR)/interfaces
+EXEC_INCDIR        = $(EXEC_BASEDIR)/include/fawkes
+EXEC_DFILEDIR      = $(EXEC_BASEDIR)/share/applications
+EXEC_LUADIR        = $(EXEC_RESDIR)/lua
+EXEC_LUALIBDIR     = $(EXEC_FFLIBDIR)/lua
+EXEC_BUILDSYSDIR   = $(EXEC_RESDIR)/buildsys
+EXEC_BUILDCONFDIR  = $(EXEC_BUILDSYSDIR)/conf
 
 ifneq ($(CFLAGS_EXT),)
   CFLAGS_BASE += $(CFLAGS_EXT)

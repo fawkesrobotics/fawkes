@@ -15,14 +15,17 @@
 
 .DEFAULT:
 
-include $(BASEDIR)/etc/buildsys/config.mk
+# set here to allow Makefiles w/o included config.mk to work
+BUILDSYSDIR  ?= $(abspath $(BASEDIR)/etc/buildsys)
+
+include $(BUILDSYSDIR)/config.mk
 ifneq ($(OBJDIR),$(notdir $(CURDIR)))
   ifneq (clean,$(MAKECMDGOALS))
-    include $(BASEDIR)/etc/buildsys/objsdir.mk
+    include $(BUILDSYSDIR)/objsdir.mk
   else
-    include $(BASEDIR)/etc/buildsys/rules.mk
+    include $(BUILDSYSDIR)/rules.mk
   endif
 else
-  include $(BASEDIR)/etc/buildsys/rules.mk
+  include $(BUILDSYSDIR)/rules.mk
 endif
 
