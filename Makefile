@@ -23,11 +23,10 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
 
-.PHONY: apidoc quickdoc tracdoc uncolored-quickdoc
+.PHONY: apidoc quickdoc tracdoc
 apidoc: api.doxygen
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
-uncolored-quickdoc: quickdoc
 
 %.doxygen:
 	$(SILENTSYMB) echo "--> Building documentation ($@). This may take a while..."
@@ -57,8 +56,10 @@ linkscripts:
 		done; \
 	fi
 
-.PHONY: license-check uncolored-license-check
-uncolored-license-check: license-check
+# Uncolored implicit targets
+uncolored-%: % ; @:
+
+.PHONY: license-check
 license-check:
 	$(SILENTSYMB)if which perl >/dev/null; then \
 		perl $(BASEDIR)/etc/licscripts/find_invlic.pl src $(wildcard $(BASEDIR)/doc/headers/lichead*.*); \
@@ -73,8 +74,7 @@ license-check:
 		exit 1; \
 	fi
 
-.PHONY: check uncolored-check
-uncolored-check: check
+.PHONY: check
 check: quickdoc license-check
 
 .PHONY: simple-clean
@@ -85,6 +85,7 @@ simple-clean:
 switch-buildtype:
 	$(SILENT) if [ -z "$(BT)" ]; then \
 		echo -e "$(INDENT_PRINT)$(TRED)--- Usage: make switch-buildtype BT=new_buildtype$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)$(TRED)---    or: make switch-buildtype-new_buildtype$(TNORMAL)"; \
 	elif [ "$(BUILD_TYPE)" = "$(BT)" ]; then \
 		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Build type $(BT) is already set$(TNORMAL)"; \
 	else \
@@ -111,6 +112,10 @@ switch-buildtype:
 			fi; \
 		done; \
 	fi
+
+# Easier to remember target than having to remember BT variable
+switch-buildtype-%:
+	$(SILENT)$(MAKE) --no-print-directory switch-buildtype BT=$* 
 
 print-buildtype:
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
