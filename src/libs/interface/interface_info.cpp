@@ -143,6 +143,28 @@ InterfaceInfo::serial() const
 }
 
 
+/** < operator
+ * This compares two interface infos with respect to the less than (<) relation
+ * considering the type and id of an interface.
+ * An interface info A is less than an interface info B (A < B) iff
+ * (A.type < B.type) or ((A.type == B.type) && A.id < B.id).
+ * @param ii interface info to compare this to
+ * @return true if this instance is considered less than @p ii, false otherwise
+ */
+bool
+InterfaceInfo::operator<(const InterfaceInfo &ii) const
+{
+  int td = strncmp(__type, ii.__type, __INTERFACE_TYPE_SIZE);
+  if ( td < 0 ) {
+    return true;
+  } else if (td > 0) {
+    return false;
+  } else {
+    return (strncmp(__id, ii.__id, __INTERFACE_ID_SIZE) < 0);
+  }
+}
+
+
 /** @class InterfaceInfoList <interface/interface_info.h>
  * Interface information list.
  * List with InterfaceInfo instances.
