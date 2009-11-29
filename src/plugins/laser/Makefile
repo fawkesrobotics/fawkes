@@ -18,7 +18,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 SUBDIRS = deadspots
 
-LIBS_laser = fawkescore fawkesutils fawkesaspects pcan \
+
+LIBS_laser = fawkescore fawkesutils fawkesaspects \
+	     pcan	\
+	     urg urg_connection urg_monitor urg_coordinate urg_geometry \
+	     urg_system urg_common urg_connection_sdl \
 	     Laser360Interface Laser720Interface
 OBJS_laser = $(filter-out deadspots/%,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
