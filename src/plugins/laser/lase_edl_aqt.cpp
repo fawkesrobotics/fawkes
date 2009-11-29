@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  acqusition_thread.cpp - Thread that retrieves the laser data
+ *  lase_edl_aqt.cpp - Thread that retrieves the laser data
  *
  *  Created: Wed Oct 08 13:42:32 2008
  *  Copyright  2002       Christian Fritz
@@ -130,7 +130,7 @@ const WORD  LaseEdlAcquisitionThread::RESPONSE_BIT                    = 0x8000;
 const float LaseEdlAcquisitionThread::DISTANCE_FACTOR                 = 256.00;
 
 
-/** @class LaseEdlAcquisitionThread "playerc_thread.h"
+/** @class LaseEdlAcquisitionThread "lase_edl_aqt.h"
  * Laser acqusition thread for Lase EDL L A laser scanner.
  * This thread fetches the data from the laser.
  * @author Tim Niemueller
