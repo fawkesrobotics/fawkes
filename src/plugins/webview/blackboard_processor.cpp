@@ -81,6 +81,7 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
 
     bool found_some = false;
     InterfaceInfoList *iil = __blackboard->list_all();
+    iil->sort();
     for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
       if (! found_some) {
         *r += "<table>\n";
