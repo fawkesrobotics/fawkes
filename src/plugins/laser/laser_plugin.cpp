@@ -24,6 +24,7 @@
 
 #include "sensor_thread.h"
 #include "lase_edl_aqt.h"
+#include "urg_aqt.h"
 
 using namespace fawkes;
 
@@ -40,7 +41,8 @@ using namespace fawkes;
 LaserPlugin::LaserPlugin(Configuration *config)
   : Plugin(config)
 {
-  LaseEdlAcquisitionThread *aqt = new LaseEdlAcquisitionThread();
+  //LaseEdlAcquisitionThread *aqt = new LaseEdlAcquisitionThread();
+  HokuyoUrgAcquisitionThread *aqt = new HokuyoUrgAcquisitionThread();
   thread_list.push_back(new LaserSensorThread(aqt));
   thread_list.push_back(aqt);
 }
