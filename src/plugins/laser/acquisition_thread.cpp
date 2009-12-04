@@ -24,6 +24,9 @@
 
 #include <core/threading/mutex.h>
 
+#include <cstring>
+#include <cstdlib>
+
 using namespace fawkes;
 
 /** @class LaserAcquisitionThread "acquisition_thread.h"
@@ -152,4 +155,36 @@ unsigned int
 LaserAcquisitionThread::get_echo_data_size()
 {
   return _echoes_size;
+}
+
+
+/** Allocate distances array.
+ * Call this from a laser acqusition thread implementation to properly
+ * initialize the distances array.
+ * @param num_distances number of distances to allocate the array for
+ */
+void
+LaserAcquisitionThread::alloc_distances(unsigned int num_distances)
+{
+  if (_distances)  free(_distances);
+
+  _distances_size = num_distances;
+  _distances      = (float *)malloc(sizeof(float) * _distances_size);
+  memset(_distances, 0, sizeof(float) * _distances_size);
+}
+
+
+/** Allocate echoes array.
+ * Call this from a laser acqusition thread implementation to properly
+ * initialize the echoes array.
+ * @param num_echoes number of echoes to allocate the array for
+ */
+void
+LaserAcquisitionThread::alloc_echoes(unsigned int num_echoes)
+{
+  if (_echoes)  free(_echoes);
+
+  _echoes_size = num_echoes;
+  _echoes      = (float *)malloc(sizeof(float) * _echoes_size);
+  memset(_echoes, 0, sizeof(float) * _echoes_size);
 }
