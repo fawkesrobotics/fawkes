@@ -26,6 +26,10 @@ LIBS_laser = fawkescore fawkesutils fawkesaspects \
 	     Laser360Interface Laser720Interface
 OBJS_laser = $(filter-out deadspots/%,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
+CFLAGS  += $(shell $(PKGCONFIG) --cflags 'hokuyo_aist' 'flexiport')
+LDFLAGS  = $(shell $(PKGCONFIG) --libs 'hokuyo_aist' 'flexiport')
+
+
 ifeq ($(HAVE_LIBPCAN),1)
   PLUGINS_all = $(PLUGINDIR)/laser.so
 else
