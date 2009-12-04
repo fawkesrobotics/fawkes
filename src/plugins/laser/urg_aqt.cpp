@@ -26,6 +26,7 @@
 #include <utils/time/wait.h>
 
 #include <urg/UrgCtrl.h>
+#include <urg/RangeSensorParameter.h>
 
 #include <memory>
 #include <cstdlib>
@@ -109,21 +110,22 @@ HokuyoUrgAcquisitionThread::init()
   }
 
   int scan_msec = __ctrl->scanMsec();
-  if (__device_info["PROD"] == "SOKUIKI Sensor URG-04LX-UG01(Simple-URG)") {
-    // taken from SCIP 2.0 protocol documentation
-    __first_ray     =   44;
-    __last_ray      =  725;
-    __front_ray     =  384;
-    __slit_division = 1024;
-  } else {
-    logger->log_warn(name(), "Unknown device '%s', trying to read parameters "
-		     "from config", __device_info["PROD"].c_str());
-    
+
+  try {
     __first_ray     = config->get_uint((__cfg_prefix + "first_ray").c_str());
     __last_ray      = config->get_uint((__cfg_prefix + "last_ray").c_str());
     __front_ray     = config->get_uint((__cfg_prefix + "front_ray").c_str());
     __slit_division = config->get_uint((__cfg_prefix + "slit_division").c_str());
+  } catch (Exception &e) {
+    logger->log_info(name(), "No or incomplete config data, reading from device");
+    // Get data from device
+    RangeSensorParameter p = __ctrl->parameter();
+    __first_ray     = p.area_min;
+    __last_ray      = p.area_max;
+    __front_ray     = p.area_front;
+    __slit_division = p.area_total;
   }
+
   __step_per_angle = __slit_division / 360.;
   __angle_per_step = 360. / __slit_division;
   __angular_range  = (__last_ray - __first_ray) * __angle_per_step;
