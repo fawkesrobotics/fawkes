@@ -39,7 +39,7 @@ namespace fawkes {
 class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
 {
  public:
-  HokuyoUrgAcquisitionThread();
+  HokuyoUrgAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
 
   // from LaserAcquisitionThread
   virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
@@ -55,7 +55,12 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
 
   fawkes::TimeWait *__timer;
 
+  std::string  __cfg_name;
+  std::string  __cfg_prefix;
+
   std::map<std::string, std::string> __device_info;
+
+  std::string  __cfg_device;
 
   unsigned int __first_ray;
   unsigned int __last_ray;

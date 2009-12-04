@@ -26,6 +26,9 @@
 #include "lase_edl_aqt.h"
 #include "urg_aqt.h"
 
+#include <set>
+#include <memory>
+
 using namespace fawkes;
 
 /** @class LaserPlugin "laser_plugin.h"
@@ -41,10 +44,68 @@ using namespace fawkes;
 LaserPlugin::LaserPlugin(Configuration *config)
   : Plugin(config)
 {
-  //LaseEdlAcquisitionThread *aqt = new LaseEdlAcquisitionThread();
-  HokuyoUrgAcquisitionThread *aqt = new HokuyoUrgAcquisitionThread();
-  thread_list.push_back(new LaserSensorThread(aqt));
-  thread_list.push_back(aqt);
+  std::set<std::string> configs;
+  std::set<std::string> ignored_configs;
+
+  std::string prefix = "/hardware/laser/";
+
+  std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+  while (i->next()) {
+    std::string cfg_name = std::string(i->path()).substr(prefix.length());
+    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+
+    if ( (configs.find(cfg_name) == configs.end()) &&
+	 (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
+
+      std::string cfg_prefix = prefix + cfg_name + "/";
+
+      bool active = true;
+      try {
+	active = config->get_bool((cfg_prefix + "active").c_str());
+      } catch (Exception &e) {} // ignored, assume enabled
+
+      try {
+	std::string type = config->get_string((cfg_prefix + "type").c_str());
+
+	if (active) {
+	  //printf("Adding laser acquisition thread for %s\n", cfg_name.c_str());
+	  LaserAcquisitionThread *aqt = NULL;
+	  if ( type == "urg" ) {
+	    aqt = new HokuyoUrgAcquisitionThread(cfg_name, cfg_prefix);
+
+	  } else if ( type == "lase_edl" ) {
+	    aqt = new HokuyoUrgAcquisitionThread(cfg_name, cfg_prefix);
+
+	  } else if ( type == "urg_gbx" ) {
+	    throw Exception("Not yet implemented");
+
+	  } else {
+	    throw Exception("Unknown lasertype '%s' for config %s",
+			    type.c_str(), cfg_name.c_str());
+	  }
+
+	  thread_list.push_back(aqt);
+	  thread_list.push_back(new LaserSensorThread(cfg_name, cfg_prefix, aqt));
+
+	  configs.insert(cfg_name);
+	} else {
+	//printf("Ignoring sync peer %s\n", peer.c_str());
+	  ignored_configs.insert(cfg_name);
+	}
+      } catch(Exception &e) {
+	for (ThreadList::iterator i = thread_list.begin();
+	     i != thread_list.end(); ++i) {
+	  delete *i;
+	}
+	throw;
+      }
+    }
+  }
+
+  if ( thread_list.empty() ) {
+    throw Exception("No synchronization peers configured, aborting");
+  } else {
+  }
 }
 
 

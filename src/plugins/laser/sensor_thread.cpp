@@ -43,11 +43,16 @@ using namespace fawkes;
 /** Constructor.
  * @param aqt LaserAcquisitionThread to get data from
  */
-LaserSensorThread::LaserSensorThread(LaserAcquisitionThread *aqt)
+LaserSensorThread::LaserSensorThread(std::string &cfg_name,
+				     std::string &cfg_prefix,
+				     LaserAcquisitionThread *aqt)
   : Thread("LaserSensorThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
 {
-  __aqt    = aqt;
+  set_name("LaserSensorThread(%s)", cfg_name.c_str());
+  __aqt        = aqt;
+  __cfg_name   = cfg_name;
+  __cfg_prefix = cfg_prefix;
 }
 
 
@@ -59,9 +64,8 @@ LaserSensorThread::init()
 
   bool spots_filter = false;
   try {
-    spots_filter = config->get_bool("/hardware/laser/use_dead_spots_filter");
-  } catch (Exception &e) {
-  }
+    spots_filter = config->get_bool((__cfg_prefix + "use_dead_spots_filter").c_str());
+  } catch (Exception &e) {} // ignored, assume no
 
   __aqt->pre_init(config, logger);
 
@@ -82,7 +86,7 @@ LaserSensorThread::init()
   }
 
   if (spots_filter) {
-    std::string spots_prefix = "/hardware/laser/dead_spots/";
+    std::string spots_prefix = __cfg_prefix + "dead_spots/";
     logger->log_debug(name(), "Setting up dead spots filter for 360° interface");
     __filters360->add_filter(new LaserDeadSpotsDataFilter(config, logger, spots_prefix));
     logger->log_debug(name(), "Setting up dead spots filter for 720° interface");

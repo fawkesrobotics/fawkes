@@ -46,10 +46,14 @@ using namespace fawkes;
 
 
 /** Constructor. */
-HokuyoUrgAcquisitionThread::HokuyoUrgAcquisitionThread()
+HokuyoUrgAcquisitionThread::HokuyoUrgAcquisitionThread(std::string &cfg_name,
+						       std::string &cfg_prefix)
   : LaserAcquisitionThread("HokuyoUrgAcquisitionThread")
 {
+  set_name("HokuyoURG(%s)", cfg_name.c_str());
   __pre_init_done = false;
+  __cfg_name   = cfg_name;
+  __cfg_prefix = cfg_prefix;
 }
 
 
@@ -69,9 +73,11 @@ HokuyoUrgAcquisitionThread::init()
 {
   pre_init(config, logger);
 
+  __cfg_device = config->get_bool((__cfg_prefix + "device").c_str());
+
   __ctrl = new UrgCtrl();
   std::auto_ptr<UrgCtrl> ctrl(__ctrl);
-  if ( ! __ctrl->connect("/dev/ttyACM0") ) {
+  if ( ! __ctrl->connect(__cfg_device.c_str()) ) {
     throw Exception("Connecting to URG laser failed: %s", __ctrl->what());
   }
 
@@ -110,7 +116,13 @@ HokuyoUrgAcquisitionThread::init()
     __front_ray     =  384;
     __slit_division = 1024;
   } else {
-    throw Exception("Unknown URG device");
+    logger->log_warn(name(), "Unknown device '%s', trying to read parameters "
+		     "from config", __device_info["PROD"].c_str());
+    
+    __first_ray     = config->get_uint((__cfg_prefix + "first_ray").c_str());
+    __last_ray      = config->get_uint((__cfg_prefix + "last_ray").c_str());
+    __front_ray     = config->get_uint((__cfg_prefix + "front_ray").c_str());
+    __slit_division = config->get_uint((__cfg_prefix + "slit_division").c_str());
   }
   __step_per_angle = __slit_division / 360.;
   __angle_per_step = 360. / __slit_division;

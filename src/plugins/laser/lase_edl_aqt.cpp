@@ -139,10 +139,14 @@ const float LaseEdlAcquisitionThread::DISTANCE_FACTOR                 = 256.00;
 
 
 /** Constructor. */
-LaseEdlAcquisitionThread::LaseEdlAcquisitionThread()
+LaseEdlAcquisitionThread::LaseEdlAcquisitionThread(std::string &cfg_name,
+						   std::string &cfg_prefix)
   : LaserAcquisitionThread("LaseEdlAcquisitionThread")
 {
+  set_name("LaseEDL(%s)", cfg_name.c_str());
   __pre_init_done = false;
+  __cfg_name   = cfg_name;
+  __cfg_prefix = cfg_prefix;
 }
 
 
@@ -153,7 +157,7 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
   if (__pre_init_done)  return;
 
   try {
-    std::string canres  = config->get_string("/hardware/laser/canonical_resolution");
+    std::string canres  = config->get_string((__cfg_prefix + "canonical_resolution").c_str());
     if (canres == "low") {
       __cfg_rotation_freq = 20;
       __cfg_angle_step    = 16;
@@ -169,24 +173,24 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
 		      canres.c_str(), __cfg_rotation_freq, __cfg_angle_step);
   } catch (Exception &e) {
     // exceptions thrown here will propagate
-    __cfg_rotation_freq  = config->get_uint("/hardware/laser/rotation_freq");
-    __cfg_angle_step     = config->get_uint("/hardware/laser/angle_step");
+    __cfg_rotation_freq  = config->get_uint((__cfg_prefix + "rotation_freq").c_str());
+    __cfg_angle_step     = config->get_uint((__cfg_prefix + "angle_step").c_str());
   }
 
   try {
-    __cfg_use_default    = config->get_bool("/hardware/laser/use_default");
-    __cfg_set_default    = config->get_bool("/hardware/laser/set_default");
-    __cfg_max_pulse_freq = config->get_uint("/hardware/laser/max_pulse_freq");
-    __cfg_profile_format = config->get_uint("/hardware/laser/profile_format");
-    __cfg_can_id         = config->get_uint("/hardware/laser/can_id");
-    __cfg_can_id_resp    = config->get_uint("/hardware/laser/can_id_resp");
-    __cfg_sensor_id      = config->get_uint("/hardware/laser/sensor_id");
-    __cfg_sensor_id_resp = config->get_uint("/hardware/laser/sensor_id_resp");
-    __cfg_btr0btr1       = config->get_uint("/hardware/laser/btr0btr1");
-    __cfg_port           = config->get_uint("/hardware/laser/port");
-    __cfg_irq            = config->get_uint("/hardware/laser/irq");
-    __cfg_num_init_tries = config->get_uint("/hardware/laser/num_init_tries");
-    __cfg_mount_rotation = config->get_float("/hardware/laser/mount_rotation");
+    __cfg_use_default    = config->get_bool((__cfg_prefix + "use_default").c_str());
+    __cfg_set_default    = config->get_bool((__cfg_prefix + "set_default").c_str());
+    __cfg_max_pulse_freq = config->get_uint((__cfg_prefix + "max_pulse_freq").c_str());
+    __cfg_profile_format = config->get_uint((__cfg_prefix + "profile_format").c_str());
+    __cfg_can_id         = config->get_uint((__cfg_prefix + "can_id").c_str());
+    __cfg_can_id_resp    = config->get_uint((__cfg_prefix + "can_id_resp").c_str());
+    __cfg_sensor_id      = config->get_uint((__cfg_prefix + "sensor_id").c_str());
+    __cfg_sensor_id_resp = config->get_uint((__cfg_prefix + "sensor_id_resp").c_str());
+    __cfg_btr0btr1       = config->get_uint((__cfg_prefix + "btr0btr1").c_str());
+    __cfg_port           = config->get_uint((__cfg_prefix + "port").c_str());
+    __cfg_irq            = config->get_uint((__cfg_prefix + "irq").c_str());
+    __cfg_num_init_tries = config->get_uint((__cfg_prefix + "num_init_tries").c_str());
+    __cfg_mount_rotation = config->get_float((__cfg_prefix + "mount_rotation").c_str());
 
     __min_angle_step     = calc_angle_step(__cfg_rotation_freq, __cfg_max_pulse_freq);
     if ( __cfg_angle_step < __min_angle_step ) {
@@ -203,7 +207,7 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
 
     _distances_size = _echoes_size = __number_of_values;
 
-    std::string interface_type = config->get_string("/hardware/laser/interface_type");
+    std::string interface_type = config->get_string((__cfg_prefix + "interface_type").c_str());
     if ( interface_type == "usb" ) {
       __cfg_interface_type = HW_USB;
     } else {
