@@ -25,6 +25,9 @@
 
 #include "acquisition_thread.h"
 
+#include <string>
+#include <map>
+
 namespace qrk {
   class UrgCtrl;
 }
@@ -51,6 +54,17 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   qrk::UrgCtrl *__ctrl;
 
   fawkes::TimeWait *__timer;
+
+  std::map<std::string, std::string> __device_info;
+
+  unsigned int __first_ray;
+  unsigned int __last_ray;
+  unsigned int __front_ray;
+  unsigned int __slit_division;
+  float        __step_per_angle;
+  float        __angle_per_step;
+  float        __angular_range;
+  unsigned int __offset;
 };
 
 

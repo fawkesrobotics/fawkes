@@ -77,11 +77,56 @@ HokuyoUrgAcquisitionThread::init()
 
   __ctrl->setCaptureMode(AutoCapture);
 
+  std::vector<std::string> version_info;
+  if (__ctrl->versionLines(version_info)) {
+    for (unsigned int i = 0; i < version_info.size(); ++i) {
+      std::string::size_type colon_idx      = version_info[i].find(":");
+      std::string::size_type semi_colon_idx = version_info[i].find(";");
+      if ((colon_idx == std::string::npos) ||
+	  (semi_colon_idx == std::string::npos)) {
+	logger->log_warn(name(), "Could not understand version info string '%s'",
+			 version_info[i].c_str());
+      } else {
+	std::string::size_type val_len = semi_colon_idx - colon_idx - 1;
+	std::string key   = version_info[i].substr(0, colon_idx);
+	std::string value = version_info[i].substr(colon_idx+1, val_len);
+	__device_info[key] = value;
+	logger->log_info(name(), "%s: %s", key.c_str(), value.c_str());
+      }
+    }
+  } else {
+    throw Exception("Failed retrieving version info from device: %s", __ctrl->what());
+  }
+
+  if (__device_info.find("PROD") == __device_info.end()) {
+    throw Exception("Failed to read product info for URG laser");
+  }
+
   int scan_msec = __ctrl->scanMsec();
-  logger->log_info(name(), "Need %i msec per scan", scan_msec);
+  if (__device_info["PROD"] == "SOKUIKI Sensor URG-04LX-UG01(Simple-URG)") {
+    // taken from SCIP 2.0 protocol documentation
+    __first_ray     =   44;
+    __last_ray      =  725;
+    __front_ray     =  384;
+    __slit_division = 1024;
+  } else {
+    throw Exception("Unknown URG device");
+  }
+  __step_per_angle = __slit_division / 360.;
+  __angle_per_step = 360. / __slit_division;
+  __angular_range  = (__last_ray - __first_ray) * __angle_per_step;
+
+  logger->log_info(name(), "Time per scan: %i msec", scan_msec);
+  logger->log_info(name(), "Rays range:    %u..%u, front at %u",
+		   __first_ray, __last_ray, __front_ray);
+  logger->log_info(name(), "Slit Division: %u", __slit_division);
+  logger->log_info(name(), "Step/Angle:    %f", __step_per_angle);
+  logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
+  logger->log_info(name(), "Angular Range: %f deg", __angular_range);
+
   __timer = new TimeWait(clock, scan_msec * 1000);
 
-  _distances  = (float *)malloc(sizeof(float) * __number_of_values);
+  alloc_distances(__number_of_values);
 
   ctrl.release();
 }
@@ -109,23 +154,17 @@ HokuyoUrgAcquisitionThread::loop()
   std::vector<long> values;
   int num_values = __ctrl->capture(values);
   if (num_values > 0) {
-    logger->log_debug(name(), "Captured %i values", num_values);
+    //logger->log_debug(name(), "Captured %i values", num_values);
     _data_mutex->lock();
-
-    unsigned int start = 44;
-    unsigned int end   = 725;
-    unsigned int slit_division = 1024;
-    float step_per_angle = 360. / slit_division;
-    float angular_range  = (end - start) * step_per_angle;
-    float angle_per_step = 1 / step_per_angle;
-
-    logger->log_debug(name(), "start: %u  end: %u  slitdiv: %u  s/a: %f  a/s: %f  ar: %f", start, end, slit_division, step_per_angle, angle_per_step, angular_range);
 
     _new_data = true;
     for (unsigned int a = 0; a < 360; ++a) {
-      unsigned int idx = roundf(a * angle_per_step);
-      if ( (idx >= start) && (idx <= end) ) {
-	_distances[a] = values[idx] / 1000.f;
+      unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
+      unsigned int idx = front_idx % __slit_division;
+      if ( (idx >= __first_ray) && (idx <= __last_ray) ) {
+	// 360-a: counter-clockwise -> clockwise
+	// div by 1000.f: mm -> m
+	_distances[360 - a] = values[idx] / 1000.f;
       }
     }
     _data_mutex->unlock();
