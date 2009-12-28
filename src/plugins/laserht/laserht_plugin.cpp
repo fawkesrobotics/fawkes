@@ -22,28 +22,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "laser_plugin.h"
+#include "laserht_plugin.h"
 
-#include "sensor_thread.h"
+#include "sensproc_thread.h"
 
 using namespace fawkes;
 
-/** @class LaserLinePlugin "laser_plugin.h"
- * Laser plugin for Fawkes.
- * This plugin integrates Fawkes with Laser, for example for accessing
- * a simulator.
+/** @class LaserHoughTransformPlugin "laserht_plugin.h"
+ * Laser Hough Transform plugin for Fawkes.
+ * This plugin integrates uses the Hough Transform to extract shapes from
+ * laser data.
  * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param config Fawkes configuration
  */
-LaserLinePlugin::LaserLinePlugin(Configuration *config)
+LaserHoughTransformPlugin::LaserHoughTransformPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new LaserLineSensorThread());
+  thread_list.push_back(new LaserHtSensorProcThread());
 }
 
 
-PLUGIN_DESCRIPTION("Tries to fit a line through laser readings")
-EXPORT_PLUGIN(LaserLinePlugin)
+PLUGIN_DESCRIPTION("Hough Transform on laser data to extract shapes")
+EXPORT_PLUGIN(LaserHoughTransformPlugin)
+

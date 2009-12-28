@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  sensor_thread.h - Laser thread that puses data into the interface
+ *  sensproc_thread.h - Laser HT sensor processing thread
  *
  *  Created: Sat Jul 04 21:34:36 2009 (RoboCup 2009, Graz)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASERLINE_SENSOR_THREAD_H_
-#define __PLUGINS_LASERLINE_SENSOR_THREAD_H_
+#ifndef __PLUGINS_LASERHT_SENSPROC_THREAD_H_
+#define __PLUGINS_LASERHT_SENSPROC_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -34,11 +34,11 @@
 #include <vector>
 
 namespace fawkes {
-  class Laser720Interface;
+  class Laser360Interface;
   class ObjectPositionInterface;
 }
 
-class LaserLineSensorThread
+class LaserHtSensorProcThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -46,7 +46,7 @@ class LaserLineSensorThread
   public fawkes::BlackBoardAspect
 {
  public:
-  LaserLineSensorThread();
+  LaserHtSensorProcThread();
 
   virtual void init();
   virtual void finalize();
@@ -68,7 +68,7 @@ class LaserLineSensorThread
 		float &a, float &b, float &least_square_error);
 
  private:
-  fawkes::Laser720Interface *__laser720_if;
+  fawkes::Laser360Interface *__laser360_if;
   fawkes::ObjectPositionInterface *__line_if;
 
   float __cfg_error_threshold;

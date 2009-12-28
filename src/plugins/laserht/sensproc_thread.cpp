@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  sensor_thread.cpp - Laser thread that puses data into the interface
+ *  sensproc_thread.cpp - Laser HT sensor processing thread
  *
- *  Created: Sat Jul 04 21:35:37 2009
+ *  Created: Sat Jul 04 21:35:37 2009 (RoboCup 2009, Graz)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id: sensor_thread.cpp 2627 2009-06-25 18:08:09Z tim $
@@ -22,44 +22,44 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "sensor_thread.h"
+#include "sensproc_thread.h"
 
-#include <interfaces/Laser720Interface.h>
+#include <interfaces/Laser360Interface.h>
 #include <interfaces/ObjectPositionInterface.h>
 
 #include <utils/math/angle.h>
 
 using namespace fawkes;
 
-/** @class LaserLineSensorThread "sensor_thread.h"
- * Laser sensor thread.
- * This thread integrates into the Fawkes main loop at the sensor hook and
- * publishes new data when available from the LaserAcquisitionThread.
+/** @class LaserHtSensorProcThread "sensproc_thread.h"
+ * Laser Hough Transform sensor processing thread.
+ * This thread integrates into the Fawkes main loop at the sensor processing
+ * hook and uses the Hough Transform to extract shapes.
  * @author Tim Niemueller
  */
 
 
 /** Constructor. */
-LaserLineSensorThread::LaserLineSensorThread()
-  : Thread("LaserLineSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+LaserHtSensorProcThread::LaserHtSensorProcThread()
+  : Thread("LaserHtSensorProcThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
 }
 
 
 void
-LaserLineSensorThread::init()
+LaserHtSensorProcThread::init()
 {
   //__cfg_error_threshold = config->get_float("/plugins/laserline/error_threshold");
 
-  __laser720_if = NULL;
+  __laser360_if = NULL;
   __line_if   = NULL;
   try {
-    __laser720_if = blackboard->open_for_reading<Laser720Interface>("Laser");
+    __laser360_if = blackboard->open_for_reading<Laser360Interface>("Laser");
     __line_if = blackboard->open_for_writing<ObjectPositionInterface>("LaserLine");
     __line_if->set_object_type(ObjectPositionInterface::TYPE_LINE);
   } catch (Exception &e) {
-    blackboard->close(__laser720_if);
+    blackboard->close(__laser360_if);
     blackboard->close(__line_if);
     throw;
   }
@@ -67,25 +67,25 @@ LaserLineSensorThread::init()
 
 
 void
-LaserLineSensorThread::finalize()
+LaserHtSensorProcThread::finalize()
 {
-  blackboard->close(__laser720_if);
+  blackboard->close(__laser360_if);
   blackboard->close(__line_if);
 }
 
 
 void
-LaserLineSensorThread::loop()
+LaserHtSensorProcThread::loop()
 {
-  __laser720_if->read();
-  float *distances = __laser720_if->distances();
+  __laser360_if->read();
+  float *distances = __laser360_if->distances();
 
   std::vector<laser_reading_t> readings;
 
-  for (unsigned int i = 0; i < 50; ++i) {
-    if (distances[670+i] != 0.0) {
-      float angle = deg2rad(((670 + i) * 0.5));
-      float dist  = distances[670 + i];
+  for (unsigned int i = 0; i < 30; ++i) {
+    if (distances[330+i] != 0.0) {
+      float angle = deg2rad(((330 + i) /* * 0.5 */));
+      float dist  = distances[330 + i];
       float x     = dist *  sin(angle);
       float y     = dist * -cos(angle);
       laser_reading_t l = {angle, dist, x, y};
@@ -93,7 +93,7 @@ LaserLineSensorThread::loop()
     }
 
     if (distances[i] != 0.0) {
-      float angle = deg2rad(i * 0.5);
+      float angle = deg2rad(i /* * 0.5*/);
       float dist  = distances[i];
       float x     = dist *  sin(angle);
       float y     = dist * -cos(angle);
@@ -102,6 +102,11 @@ LaserLineSensorThread::loop()
       laser_reading_t l = {angle, dist, x, y};
       readings.push_back(l);
     }
+  }
+
+  if (readings.empty()) {
+    logger->log_debug(name(), "No valid readings");
+    return;
   }
 
   float a = 0, b = 0, e = 0;
@@ -132,7 +137,7 @@ LaserLineSensorThread::loop()
 #define sqr(x) ((x) * (x))
 
 void
-LaserLineSensorThread::fit_line(const std::vector<laser_reading_t> &points,
+LaserHtSensorProcThread::fit_line(const std::vector<laser_reading_t> &points,
 				const unsigned int first_index,
 				float &a, float &b, float &least_square_error)
 {

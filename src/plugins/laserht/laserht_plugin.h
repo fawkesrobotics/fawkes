@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  laser_plugin.h - Fawkes Laser plugin
+ *  laserht_plugin.h - Fawkes Laser Hough Transform plugin
  *
- *  Created: Sat Jul 04 21:34:07 2009
+ *  Created: Sat Jul 04 21:34:07 2009 (RoboCup 2009, Graz)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id: laser_plugin.h 1486 2008-10-29 18:08:45Z tim $
@@ -22,15 +22,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASERLINE_LASER_PLUGIN_H_
-#define __PLUGINS_LASERLINE_LASER_PLUGIN_H_
+#ifndef __PLUGINS_LASERHT_LASERHT_PLUGIN_H_
+#define __PLUGINS_LASERHT_LASERHT_PLUGIN_H_
 
 #include <core/plugin.h>
 
-class LaserLinePlugin : public fawkes::Plugin
+class LaserHoughTransformPlugin : public fawkes::Plugin
 {
  public:
-  LaserLinePlugin(fawkes::Configuration *config);
+  LaserHoughTransformPlugin(fawkes::Configuration *config);
 };
 
 #endif
+
