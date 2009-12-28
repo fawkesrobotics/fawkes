@@ -25,6 +25,7 @@
 #include "sensor_thread.h"
 #include "lase_edl_aqt.h"
 #include "urg_aqt.h"
+#include "urg_gbx_aqt.h"
 
 #include <set>
 #include <memory>
@@ -65,19 +66,20 @@ LaserPlugin::LaserPlugin(Configuration *config)
       } catch (Exception &e) {} // ignored, assume enabled
 
       try {
-	std::string type = config->get_string((cfg_prefix + "type").c_str());
 
 	if (active) {
+	  std::string type = config->get_string((cfg_prefix + "type").c_str());
+
 	  //printf("Adding laser acquisition thread for %s\n", cfg_name.c_str());
 	  LaserAcquisitionThread *aqt = NULL;
 	  if ( type == "urg" ) {
 	    aqt = new HokuyoUrgAcquisitionThread(cfg_name, cfg_prefix);
 
 	  } else if ( type == "lase_edl" ) {
-	    aqt = new HokuyoUrgAcquisitionThread(cfg_name, cfg_prefix);
+	    aqt = new LaseEdlAcquisitionThread(cfg_name, cfg_prefix);
 
 	  } else if ( type == "urg_gbx" ) {
-	    throw Exception("Not yet implemented");
+	    aqt = new HokuyoUrgGbxAcquisitionThread(cfg_name, cfg_prefix);
 
 	  } else {
 	    throw Exception("Unknown lasertype '%s' for config %s",
@@ -89,7 +91,7 @@ LaserPlugin::LaserPlugin(Configuration *config)
 
 	  configs.insert(cfg_name);
 	} else {
-	//printf("Ignoring sync peer %s\n", peer.c_str());
+	  //printf("Ignoring laser config %s\n", cfg_name.c_str());
 	  ignored_configs.insert(cfg_name);
 	}
       } catch(Exception &e) {
