@@ -1,8 +1,8 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes: Laser Plugin
+#        Makefile Build System for Fawkes: Laser Hough Transform Plugin
 #                            -------------------
-#   Created on Sat Jul 04 21:37:27 2008
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Mon Dec 28 17:52:11 2009
+#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id: Makefile 2627 2009-06-25 18:08:09Z tim $
 #
@@ -18,12 +18,11 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_laserline = fawkescore fawkesutils fawkesaspects \
-	     	Laser360Interface Laser720Interface ObjectPositionInterface
-OBJS_laserline = $(filter-out deadspots/%,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+LIBS_laserht = fawkescore fawkesutils fawkesaspects \
+	       Laser360Interface Laser720Interface ObjectPositionInterface
+OBJS_laserht = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
-PLUGINS_all = $(PLUGINDIR)/laserline.so
-
-OBJS_all = $(OBJS_laserline)
+PLUGINS_all  = $(PLUGINDIR)/laserht.so
+OBJS_all     = $(OBJS_laserht)
 
 include $(BASEDIR)/etc/buildsys/base.mk
