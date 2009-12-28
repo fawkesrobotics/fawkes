@@ -74,7 +74,7 @@ HokuyoUrgAcquisitionThread::init()
 {
   pre_init(config, logger);
 
-  __cfg_device = config->get_bool((__cfg_prefix + "device").c_str());
+  __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
 
   __ctrl = new UrgCtrl();
   std::auto_ptr<UrgCtrl> ctrl(__ctrl);
@@ -138,7 +138,9 @@ HokuyoUrgAcquisitionThread::init()
   logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
   logger->log_info(name(), "Angular Range: %f deg", __angular_range);
 
-  __timer = new TimeWait(clock, scan_msec * 1000);
+  // that should be 1000 really to convert msec -> usec. But empirically
+  // the results are slightly better with 990 as factor.
+  __timer = new TimeWait(clock, scan_msec * 990);
 
   alloc_distances(__number_of_values);
 
@@ -182,6 +184,8 @@ HokuyoUrgAcquisitionThread::loop()
       }
     }
     _data_mutex->unlock();
+  //} else {
+    //logger->log_warn(name(), "No new scan available, ignoring");
   }
 
   __timer->wait();
