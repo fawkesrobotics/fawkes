@@ -33,10 +33,6 @@ namespace hokuyo_aist {
   class HokuyoData;
 }
 
-//namespace fawkes {
-//  class TimeWait;
-//}
-
 class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
 {
  public:
@@ -55,9 +51,6 @@ class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
   hokuyo_aist::HokuyoLaser *__laser;
   hokuyo_aist::HokuyoData  *__data;
 
-
-  //fawkes::TimeWait *__timer;
-
   std::string  __cfg_name;
   std::string  __cfg_prefix;
 
@@ -68,6 +61,8 @@ class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
   unsigned int __first_ray;
   unsigned int __last_ray;
   unsigned int __front_ray;
+  unsigned int __front_idx;
+  unsigned int __num_rays;
   unsigned int __slit_division;
   float        __step_per_angle;
   float        __angle_per_step;

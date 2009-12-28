@@ -23,7 +23,6 @@
 #include "urg_gbx_aqt.h"
 
 #include <core/threading/mutex.h>
-#include <utils/time/wait.h>
 
 #include <hokuyo_aist/hokuyo_aist.h>
 #include <flexiport/flexiport.h>
@@ -74,11 +73,11 @@ HokuyoUrgGbxAcquisitionThread::init()
 {
   pre_init(config, logger);
 
-  __cfg_device = config->get_bool((__cfg_prefix + "device").c_str());
+  __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
 
   __laser = new HokuyoLaser();
   std::auto_ptr<HokuyoLaser> laser(__laser);
-  std::string port_options = "type=serial:device=" + __cfg_device + ":timeout=1";
+  std::string port_options = "type=serial,device=" + __cfg_device + ",timeout=1";
   try {
     __laser->Open(port_options);
   } catch (flexiport::PortException &e) {
@@ -87,10 +86,13 @@ HokuyoUrgGbxAcquisitionThread::init()
 
   HokuyoSensorInfo info;
   __laser->GetSensorInfo(&info);
+  __data = new HokuyoData();
 
   __first_ray      = info.firstStep;
   __last_ray       = info.lastStep;
+  __num_rays       = __last_ray - __first_ray;
   __front_ray      = info.frontStep;
+  __front_idx      = __front_ray - __first_ray;
   __slit_division  = info.steps;
 
   __step_per_angle = __slit_division / 360.;
@@ -102,16 +104,16 @@ HokuyoUrgGbxAcquisitionThread::init()
   logger->log_info(name(), "FIRM: %s", info.firmware.c_str());
   logger->log_info(name(), "PROT: %s", info.protocol.c_str());
   logger->log_info(name(), "SERI: %s", info.serial.c_str());
-  logger->log_info(name(), "Rays range:    %u..%u, front at %u",
-		   __first_ray, __last_ray, __front_ray);
+  logger->log_info(name(), "Rays range:    %u..%u, front at %u (idx %u), "
+		   "%u rays total", __first_ray, __last_ray, __front_ray,
+		   __front_idx, __num_rays);
   logger->log_info(name(), "Slit Division: %u", __slit_division);
   logger->log_info(name(), "Step/Angle:    %f", __step_per_angle);
   logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
   logger->log_info(name(), "Angular Range: %f deg", __angular_range);
 
-  //__timer = new TimeWait(clock, scan_msec * 1000);
-
   alloc_distances(__number_of_values);
+  __laser->SetPower(true);
 
   laser.release();
 }
@@ -122,38 +124,51 @@ HokuyoUrgGbxAcquisitionThread::finalize()
 {
   free(_distances);
   _distances = NULL;
-  //delete __timer;
 
   logger->log_debug(name(), "Stopping laser");
   __laser->SetPower(false);
   delete __laser;
-
+  delete __data;
 }
 
 
 void
 HokuyoUrgGbxAcquisitionThread::loop()
 {
-  //__timer->mark_start();
+  // static Time ref(clock);
+  // static Time now(clock);
+  // static unsigned int scans = 0;
 
-  __laser->GetNewRanges(__data);
+  // now.stamp();
+  // if (now - &ref >= 1) {
+  //   logger->log_debug(name(), "Current: %u scans/sec", scans);
+  //   scans = 0;
+  //   ref = now;
+  // } else {
+  //   ++scans;
+  // }
+
+  try {
+    // GetNewRanges is causes scans/sec to be halfed
+    __laser->GetRanges(__data);
+  } catch (HokuyoError &he) {
+    logger->log_warn(name(), "Failed to read data: %s", he.what());
+    return;
+  }
 
   const uint32_t *ranges = __data->Ranges();
 
-  //logger->log_debug(name(), "Captured %i values", num_values);
   _data_mutex->lock();
 
   _new_data = true;
   for (unsigned int a = 0; a < 360; ++a) {
-    unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
-    unsigned int idx = front_idx % __slit_division;
-    if ( (idx >= __first_ray) && (idx <= __last_ray) ) {
+    unsigned int frontrel_idx = __front_idx + roundf(a * __step_per_angle);
+    unsigned int idx = frontrel_idx % __slit_division;
+    if ( idx <= __num_rays ) {
       // 360-a: counter-clockwise -> clockwise
       // div by 1000.f: mm -> m
       _distances[360 - a] = ranges[idx] / 1000.f;
     }
   }
   _data_mutex->unlock();
-
-//__timer->wait();
 }
