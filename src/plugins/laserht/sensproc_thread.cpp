@@ -23,11 +23,13 @@
  */
 
 #include "sensproc_thread.h"
+#include "hough_transform.h"
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/ObjectPositionInterface.h>
 
 #include <utils/math/angle.h>
+#include <utils/math/coord.h>
 
 using namespace fawkes;
 
@@ -63,6 +65,16 @@ LaserHtSensorProcThread::init()
     blackboard->close(__line_if);
     throw;
   }
+
+  __ht = new HoughTransform(2);
+
+  __num_vals   = 24;
+  __angle_step = 360 / __num_vals;
+  __r_scale    = 0.01;
+  __values = new int*[__num_vals];
+  for (unsigned int i = 0; i < __num_vals; ++i) {
+    __values[i] = new int[2];
+  }
 }
 
 
@@ -71,6 +83,12 @@ LaserHtSensorProcThread::finalize()
 {
   blackboard->close(__laser360_if);
   blackboard->close(__line_if);
+
+  delete __ht;
+  for (unsigned int i = 0; i < __num_vals; ++i) {
+    delete[] __values[i];
+  }
+  delete[] __values;
 }
 
 
@@ -79,12 +97,101 @@ LaserHtSensorProcThread::loop()
 {
   __laser360_if->read();
   float *distances = __laser360_if->distances();
+  const size_t num_dist = __laser360_if->maxlenof_distances();
 
+  __ht->reset();
+
+  for (size_t i = 0; i < num_dist; ++i) {
+    // generate candidates
+    if (distances[i] > 0) {
+      for (unsigned int j = 0; j < __num_vals; ++j) {
+	float phi   = deg2rad(i);
+	float theta = deg2rad(j * __angle_step);
+	float x, y;
+	polar2cart2d(phi, distances[i], &x, &y);
+	float r   = fabs(x * cos(theta) + y * sin(theta)) / __r_scale;
+	__values[j][0] = (int)roundf(r);
+	__values[j][1] = j * __angle_step;
+	/*
+	if (__values[j][0] == 0) {
+	  logger->log_debug(name(), "j=%zu  phi=%f  r=%f v[0]=%i  v[1]=%i",
+			    j, phi, r, __values[j][0], __values[j][1]);
+	}
+	*/
+      }
+      __ht->process(__values, __num_vals);
+    }
+  }
+
+  int max_values[2];
+  unsigned int max_count = __ht->max(max_values);
+  logger->log_debug(name(), "Max count: %u  (%i, %i)", max_count, max_values[0],
+		    max_values[1]);
+
+  float phi = deg2rad(max_values[1]);
+  float r   = max_values[0] * __r_scale;
+  float x1, y1, x2, y2;
+  polar2cart2d(phi, r, &x1, &y1);
+
+  float alpha, y_factor = 1;
+  if ( ((max_values[1] >= 0) && (max_values[1] < 90)) ||
+       (max_values[1] >= 270) ) {
+    y_factor = -1;
+    alpha = deg2rad(90 - (max_values[1] % 90));
+  } else {
+    alpha = deg2rad((max_values[1] % 90));
+  }
+  float dx   = 1 * cos(alpha);
+  float dy   = 1 * y_factor * sin(alpha);
+  x2 = x1 + dx;
+  y2 = y1 + dy;
+
+  logger->log_debug(name(), "r=%f  phi=%f  p1=(%f,%f)  p2=(%f,%f)",
+		    r, phi, x1, y1, x2, y2);
+  logger->log_debug(name(), "Tree depth: %u  num_nodes: %u\n",
+		    __ht->root()->depth(), __ht->root()->num_nodes());
+  //logger->log_debug(name(), "Line from (%f,%f) to (%f,%f)", x1, y1, x2, y2);
+
+  __line_if->set_world_x(x1);
+  __line_if->set_world_y(y1);
+
+  __line_if->set_relative_x(x2);
+  __line_if->set_relative_y(y2);
+
+  __line_if->write();
+
+  /*
+  float x[2], y[2];
+  x[0] =  1; y[0] = 1;
+  x[1] = -1; y[0] = 1;
+
+  for (unsigned int i = 0; i < 2; ++i) {
+    for (unsigned int j = 0; j < __num_vals; ++j) {
+      float theta = deg2rad(j * 20);
+      float r   = fabs(x[i] * cos(theta) + y[i] * sin(theta));
+      r *= 100.;
+      __values[j][0] = (int)roundf(r);
+      __values[j][1] = j * 20;
+      logger->log_debug(name(), "i=%u  j=%u  theta=%f  r=%f v[0]=%i  v[1]=%i",
+			i, j, theta, r, __values[j][0], __values[j][1]);
+    }
+    __ht->process(__values, __num_vals);
+  }
+
+  int max_values[2];
+  unsigned int max_count = __ht->max(max_values);
+  logger->log_debug(name(), "Max count: %u  (%i, %i)", max_count, max_values[0],
+		    max_values[1]);
+
+  logger->log_debug(name(), "Tree depth: %u  num_nodes: %u\n",
+		    __ht->root()->depth(), __ht->root()->num_nodes());
+  */
+  /*
   std::vector<laser_reading_t> readings;
 
   for (unsigned int i = 0; i < 30; ++i) {
     if (distances[330+i] != 0.0) {
-      float angle = deg2rad(((330 + i) /* * 0.5 */));
+      float angle = deg2rad(((330 + i) / * 0.5 /));
       float dist  = distances[330 + i];
       float x     = dist *  sin(angle);
       float y     = dist * -cos(angle);
@@ -93,7 +200,7 @@ LaserHtSensorProcThread::loop()
     }
 
     if (distances[i] != 0.0) {
-      float angle = deg2rad(i /* * 0.5*/);
+      float angle = deg2rad(i / * 0.5/);
       float dist  = distances[i];
       float x     = dist *  sin(angle);
       float y     = dist * -cos(angle);
@@ -132,6 +239,7 @@ LaserHtSensorProcThread::loop()
   __line_if->set_roll(e);
 
   __line_if->write();
+*/
 }
 
 #define sqr(x) ((x) * (x))

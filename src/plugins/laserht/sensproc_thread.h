@@ -37,6 +37,7 @@ namespace fawkes {
   class Laser360Interface;
   class ObjectPositionInterface;
 }
+class HoughTransform;
 
 class LaserHtSensorProcThread
 : public fawkes::Thread,
@@ -72,5 +73,11 @@ class LaserHtSensorProcThread
   fawkes::ObjectPositionInterface *__line_if;
 
   float __cfg_error_threshold;
+
+  HoughTransform *__ht;
+  unsigned int    __num_vals;
+  int           **__values;
+  int             __angle_step;
+  float           __r_scale;
 };
 #endif
