@@ -1,0 +1,158 @@
+$#include <interfaces/VisualDisplay2DInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class VisualDisplay2DInterface : public Interface
+{
+
+  typedef enum {
+    LS_SOLID,
+    LS_DASHED,
+    LS_DOTTED,
+    LS_DASH_DOTTED
+  } LineStyle;
+
+  class AddCartLineMessage : public Message
+  {
+    AddCartLineMessage(float * ini_x, float * ini_y, LineStyle ini_style, unsigned char * ini_color);
+    AddCartLineMessage();
+    ~AddCartLineMessage();
+
+    float x(int index);
+    void set_x(unsigned int index, const float new_x);
+    int maxlenof_x() const;
+    float y(int index);
+    void set_y(unsigned int index, const float new_y);
+    int maxlenof_y() const;
+    LineStyle style();
+    void set_style(const LineStyle new_style);
+    int maxlenof_style() const;
+    unsigned int color(int index);
+    void set_color(unsigned int index, const unsigned char new_color);
+    int maxlenof_color() const;
+  };
+
+  class AddCartCircleMessage : public Message
+  {
+    AddCartCircleMessage(float ini_x, float ini_y, LineStyle ini_style, unsigned char * ini_color);
+    AddCartCircleMessage();
+    ~AddCartCircleMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    LineStyle style();
+    void set_style(const LineStyle new_style);
+    int maxlenof_style() const;
+    unsigned int color(int index);
+    void set_color(unsigned int index, const unsigned char new_color);
+    int maxlenof_color() const;
+  };
+
+  class AddCartRectMessage : public Message
+  {
+    AddCartRectMessage(float ini_x, float ini_y, float ini_width, float ini_height, LineStyle ini_style, unsigned char * ini_color);
+    AddCartRectMessage();
+    ~AddCartRectMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float width();
+    void set_width(const float new_width);
+    int maxlenof_width() const;
+    float height();
+    void set_height(const float new_height);
+    int maxlenof_height() const;
+    LineStyle style();
+    void set_style(const LineStyle new_style);
+    int maxlenof_style() const;
+    unsigned int color(int index);
+    void set_color(unsigned int index, const unsigned char new_color);
+    int maxlenof_color() const;
+  };
+
+  class AddCartTextMessage : public Message
+  {
+    AddCartTextMessage(float ini_x, float ini_y, char * ini_text, unsigned int ini_size, unsigned char * ini_color);
+    AddCartTextMessage();
+    ~AddCartTextMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    char * text();
+    void set_text(const char * new_text);
+    int maxlenof_text() const;
+    unsigned int size();
+    void set_size(const unsigned int new_size);
+    int maxlenof_size() const;
+    unsigned int color(int index);
+    void set_color(unsigned int index, const unsigned char new_color);
+    int maxlenof_color() const;
+  };
+
+  class DeleteObjectMessage : public Message
+  {
+    DeleteObjectMessage(unsigned int ini_object_id);
+    DeleteObjectMessage();
+    ~DeleteObjectMessage();
+
+    unsigned int object_id();
+    void set_object_id(const unsigned int new_object_id);
+    int maxlenof_object_id() const;
+  };
+
+  class DeleteAllMessage : public Message
+  {
+    DeleteAllMessage();
+    ~DeleteAllMessage();
+
+  };
+
+  unsigned int counter();
+  void set_counter(const unsigned int new_counter);
+  int maxlenof_counter() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

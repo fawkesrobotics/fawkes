@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="VisualDisplay2DInterface" author="Tim Niemueller"
+	   year="2009">
+  <constants>
+    <enum name="LineStyle">
+      <comment>
+        Enumeration defining the possible line styles.
+      </comment>
+      <item name="LS_SOLID">Solid line.</item>
+      <item name="LS_DASHED">Dashed line.</item>
+      <item name="LS_DOTTED">Dotted line.</item>
+      <item name="LS_DASH_DOTTED">Dashed and dotted line</item>
+    </enum>
+  </constants>
+
+  <data>
+    <comment>
+      This interface provides can be used by graphing applications to
+      provide a graphing service to other components. This is intended
+      to be used for debugging purposes. Usage of the interface should
+      be optional to turn it off during a competition. 
+
+      Add* messages will add the given object permanently, so the
+      graphical display can be considered as a scenegraph. The message
+      ID is becomes the ID and can be used to delete the object using
+      the DeleteObjectMessage. With the DeleteAll message all objects
+      can be removed (shall only remove objects added by the same
+      sender, thus data drawn by other senders is not touched).
+
+      The units shall be in meters and radians. Color is given as four
+      byte RGBA value, one byte for each R, G, B and Alpha.
+    </comment>
+    <field type="unsigned int" name="counter">Field</field>
+  </data>
+
+  <message name="AddCartLine">
+    <comment>Add a line to the display. The line is defined by two
+    points in cartesian coordinates (standard Fawkes coordinate
+    system).</comment>
+    <field type="float" length="2" name="x">X coordinates of two points</field>
+    <field type="float" length="2" name="y">Y coordinates of two
+    points</field>
+    <field type="LineStyle" name="style">Style of this object.</field>
+    <field type="byte" length="4" name="color">Color in RGBA</field>
+  </message>
+
+  <message name="AddCartCircle">
+    <comment>Add a circle to the display. The circle is defined by the
+    cartesian coordinates of its center point and its radius.</comment>
+    <field type="float" name="x">X coordinate of center point</field>
+    <field type="float" name="y">Y coordinate of center point</field>
+    <field type="LineStyle" name="style">Style of this object.</field>
+    <field type="byte" length="4" name="color">Color in RGBA</field>
+  </message>
+
+  <message name="AddCartRect">
+    <comment>Add a rectangle to the display. The rectangle is defined
+    by the cartesian coordinates of its upper left corner and its
+    width and height.</comment>
+    <field type="float" name="x">X coordinate of upper left corner</field>
+    <field type="float" name="y">Y coordinate of upper left corner</field>
+    <field type="float" name="width">Width of rectangle</field>
+    <field type="float" name="height">Height of rectangle</field>
+    <field type="LineStyle" name="style">Style of this object.</field>
+    <field type="byte" length="4" name="color">Color in RGBA</field>
+  </message>
+
+  <message name="AddCartText">
+    <comment>Add a text to the display. The text is defined
+    by the cartesian coordinates of its upper left corner.</comment>
+    <field type="float" name="x">X coordinate of upper left corner</field>
+    <field type="float" name="y">Y coordinate of upper left corner</field>
+    <field type="string" length="128" name="text">Width of rectangle</field>
+    <field type="unsigned int" name="size">Font size.</field>
+    <field type="byte" length="4" name="color">Color in RGBA</field>
+  </message>
+
+  <message name="DeleteObject">
+    <comment>Delete referenced object. Deletion will fail if the
+    object was added by another sender.</comment>
+    <field type="unsigned int" name="object_id">Object ID, which is
+    the message ID of the Add* message.</field>
+  </message>
+
+  <message name="DeleteAll">
+    <comment>Delete all objects added by this sender.</comment>
+  </message>
+
+</interface>
