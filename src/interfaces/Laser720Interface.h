@@ -44,6 +44,9 @@ class Laser720Interface : public Interface
     float distances[720]; /**< 
       The distances in meter of the beams.
      */
+    bool clockwise_angle; /**< 
+      True if the angle grows clockwise.
+     */
   } Laser720Interface_data_t;
 
   Laser720Interface_data_t *data;
@@ -62,6 +65,9 @@ class Laser720Interface : public Interface
   void set_distances(unsigned int index, const float new_distances);
   void set_distances(const float * new_distances);
   size_t maxlenof_distances() const;
+  bool is_clockwise_angle() const;
+  void set_clockwise_angle(const bool new_clockwise_angle);
+  size_t maxlenof_clockwise_angle() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

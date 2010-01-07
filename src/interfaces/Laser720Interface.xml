@@ -9,6 +9,9 @@
     <field type="float" length="720" name="distances">
       The distances in meter of the beams.
     </field>
+    <field type="bool" name="clockwise_angle">
+      True if the angle grows clockwise.
+    </field>
   </data>
 </interface>
 
