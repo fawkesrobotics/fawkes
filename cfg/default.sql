@@ -98,10 +98,12 @@ INSERT INTO "config" VALUES('/hardware/katana/park_psi','float',-0.271071,'Psi p
 INSERT INTO "config" VALUES('/hardware/laser/urg/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg/type','string','urg','Configuration is for Hokuyo URG laser range finder using URG library');
 INSERT INTO "config" VALUES('/hardware/laser/urg/device','string','/dev/ttyACM0','Device file');
-INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/active','bool',1,'Enable this configuration?');
+INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/type','string','urg_gbx','Configuration is for Hokuyo URG laser range finder using the Gearbox library');
 INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/device','string','/dev/ttyACM0','Device file');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/active','bool',0,'Enable this configuration?');
+INSERT INTO "config" VALUES('/hardware/laser/lase_edl/main_sensor','bool',1,'Make this the default sensor, i.e. interface ID "Laser"?');
+INSERT INTO "config" VALUES('/hardware/laser/lase_edl/clockwise_angle','bool',1,'Reverse default angle direction to clockwise?');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/type','string','lase_edl','Configuration is for Lase EDL laser range finder');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/interface_type','string','usb','Interface type, currently only usb');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/use_default','bool',0,'Use default settings from flash?');
