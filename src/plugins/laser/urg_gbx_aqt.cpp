@@ -165,9 +165,8 @@ HokuyoUrgGbxAcquisitionThread::loop()
     unsigned int frontrel_idx = __front_idx + roundf(a * __step_per_angle);
     unsigned int idx = frontrel_idx % __slit_division;
     if ( idx <= __num_rays ) {
-      // 360-a: counter-clockwise -> clockwise
       // div by 1000.f: mm -> m
-      _distances[360 - a] = ranges[idx] / 1000.f;
+      _distances[a] = ranges[idx] / 1000.f;
     }
   }
   _data_mutex->unlock();

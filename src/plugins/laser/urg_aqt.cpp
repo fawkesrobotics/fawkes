@@ -178,9 +178,8 @@ HokuyoUrgAcquisitionThread::loop()
       unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
       unsigned int idx = front_idx % __slit_division;
       if ( (idx >= __first_ray) && (idx <= __last_ray) ) {
-	// 360-a: counter-clockwise -> clockwise
 	// div by 1000.f: mm -> m
-	_distances[360 - a] = values[idx] / 1000.f;
+	_distances[a] = values[idx] / 1000.f;
       }
     }
     _data_mutex->unlock();

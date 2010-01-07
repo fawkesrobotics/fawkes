@@ -614,32 +614,31 @@ LaseEdlAcquisitionThread::process_profiles()
   // see which data is requested
   if (__cfg_profile_format == PROFILEFORMAT_DISTANCE ) {
     // only distances
-    for (int i=3; i < response_size; i++ ) {
+    for (int i=3; i < response_size; ++i ) {
       dist = ((float)real_response[i]) / DISTANCE_FACTOR;
-      _distances[dist_index++] = dist;
-      if (dist_index >= (int)__number_of_values) dist_index = 0;
+      _distances[__number_of_values - dist_index] = dist;
+      if (++dist_index >= (int)__number_of_values) dist_index = 0;
     }
 
   } else if (__cfg_profile_format == (PROFILEFORMAT_DISTANCE | PROFILEFORMAT_ECHO_AMPLITUDE) ) {
     // distances + echos
-    for (int i=3; i < response_size; ) {
+    for (int i=3; i < response_size; ++i) {
       dist = ((float)real_response[i]) / DISTANCE_FACTOR;
-      _distances[dist_index++] = dist;
-      if (dist_index >= (int)__number_of_values) dist_index = 0;
-      i++;
+      _distances[__number_of_values - dist_index] = dist;
+      if (++dist_index >= (int)__number_of_values) dist_index = 0;
+      ++i;
       echo = real_response[i];
-      _echoes[echo_index++] = echo;
-      if (echo_index >= (int)__number_of_values) echo_index = 0;
-      i++;
+      _echoes[__number_of_values - echo_index] = echo;
+      if (++echo_index >= (int)__number_of_values) echo_index = 0;
     }
 
 
   } else if (__cfg_profile_format == PROFILEFORMAT_ECHO_AMPLITUDE ) {
     // only echos
-    for (int i=3; i < response_size; i++ ) {
+    for (int i=3; i < response_size; ++i ) {
       echo = real_response[i];
-      _echoes[echo_index++] = echo;
-      if (echo_index >= (int)__number_of_values) echo_index = 0;
+      _echoes[__number_of_values - echo_index] = echo;
+      if (++echo_index >= (int)__number_of_values) echo_index = 0;
     }
   }
 
