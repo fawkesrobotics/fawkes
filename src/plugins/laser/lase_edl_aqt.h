@@ -21,6 +21,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#ifndef HAVE_LIBPCAN
+#  error "Cannot use Lase EDL driver without libpcan"
+#endif
+
 #ifndef __PLUGINS_LASER_LASE_EDL_AQT_H_
 #define __PLUGINS_LASER_LASE_EDL_AQT_H_
 

@@ -23,9 +23,15 @@
 #include <plugins/laser/laser_plugin.h>
 
 #include "sensor_thread.h"
-#include "lase_edl_aqt.h"
-#include "urg_aqt.h"
-#include "urg_gbx_aqt.h"
+#ifdef HAVE_LIBPCAN
+#  include "lase_edl_aqt.h"
+#endif
+#ifdef HAVE_URG
+#  include "urg_aqt.h"
+#endif
+#ifdef HAVE_URG_GBX
+#  include "urg_gbx_aqt.h"
+#endif
 
 #include <set>
 #include <memory>
@@ -72,16 +78,25 @@ LaserPlugin::LaserPlugin(Configuration *config)
 
 	  //printf("Adding laser acquisition thread for %s\n", cfg_name.c_str());
 	  LaserAcquisitionThread *aqt = NULL;
+#ifdef HAVE_URG
 	  if ( type == "urg" ) {
 	    aqt = new HokuyoUrgAcquisitionThread(cfg_name, cfg_prefix);
+	  } else
+#endif
 
-	  } else if ( type == "lase_edl" ) {
+#ifdef HAVE_LIBPCAN
+	  if ( type == "lase_edl" ) {
 	    aqt = new LaseEdlAcquisitionThread(cfg_name, cfg_prefix);
+	  } else
+#endif
 
-	  } else if ( type == "urg_gbx" ) {
+#ifdef HAVE_URG_GBX
+	  if ( type == "urg_gbx" ) {
 	    aqt = new HokuyoUrgGbxAcquisitionThread(cfg_name, cfg_prefix);
+	  } else 
+#endif
 
-	  } else {
+	  {
 	    throw Exception("Unknown lasertype '%s' for config %s",
 			    type.c_str(), cfg_name.c_str());
 	  }
