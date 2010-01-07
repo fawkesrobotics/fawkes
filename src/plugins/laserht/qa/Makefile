@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 
-OBJS_qa_lineht := qa_lineht.o ../ht_accum.o
+OBJS_qa_lineht := qa_lineht.o ../hough_transform.o
 LIBS_qa_lineht := fawkescore fawkesutils
 
 OBJS_all = $(OBJS_qa_lineht)

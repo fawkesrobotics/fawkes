@@ -3,7 +3,7 @@
  *  sensproc_thread.cpp - Laser HT sensor processing thread
  *
  *  Created: Sat Jul 04 21:35:37 2009 (RoboCup 2009, Graz)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id: sensor_thread.cpp 2627 2009-06-25 18:08:09Z tim $
  *
@@ -109,12 +109,19 @@ LaserHtSensorProcThread::loop()
 	float theta = deg2rad(j * __angle_step);
 	float x, y;
 	polar2cart2d(phi, distances[i], &x, &y);
-	float r   = fabs(x * cos(theta) + y * sin(theta)) / __r_scale;
+	float r   = x * cos(theta) + y * sin(theta);
+	r /= __r_scale;
+	/*
+	if ( fabs(roundf(r)) < 0.5 ) {
+	  logger->log_warn(name(), "Small r %f phi=%f  theta=%f  x=%f  y=%f  dist=%f",
+			   r, phi, theta, x, y, distances[i]);
+	}
+	*/
 	__values[j][0] = (int)roundf(r);
 	__values[j][1] = j * __angle_step;
 	/*
-	if (__values[j][0] == 0) {
-	  logger->log_debug(name(), "j=%zu  phi=%f  r=%f v[0]=%i  v[1]=%i",
+	if ( (__values[j][0] == 0) && (__values[j][1] == 0) ) {
+	  logger->log_debug(name(), "i=%zu  j=%zu  phi=%f  r=%f v[0]=%i  v[1]=%i",
 			    j, phi, r, __values[j][0], __values[j][1]);
 	}
 	*/
@@ -124,9 +131,9 @@ LaserHtSensorProcThread::loop()
   }
 
   int max_values[2];
-  unsigned int max_count = __ht->max(max_values);
-  logger->log_debug(name(), "Max count: %u  (%i, %i)", max_count, max_values[0],
-		    max_values[1]);
+  /* unsigned int max_count = */ __ht->max(max_values);
+  //logger->log_debug(name(), "Max count: %u  (%i, %i)", max_count, max_values[0],
+  //	    max_values[1]);
 
   float phi = deg2rad(max_values[1]);
   float r   = max_values[0] * __r_scale;
@@ -146,10 +153,12 @@ LaserHtSensorProcThread::loop()
   x2 = x1 + dx;
   y2 = y1 + dy;
 
-  logger->log_debug(name(), "r=%f  phi=%f  p1=(%f,%f)  p2=(%f,%f)",
-		    r, phi, x1, y1, x2, y2);
+  /*
+  logger->log_debug(name(), "r=%f  phi=%f  mv=(%i,%i)  p1=(%f,%f)  p2=(%f,%f)",
+		    r, phi, max_values[0], max_values[1], x1, y1, x2, y2);
   logger->log_debug(name(), "Tree depth: %u  num_nodes: %u\n",
-		    __ht->root()->depth(), __ht->root()->num_nodes());
+  	    __ht->root()->depth(), __ht->root()->num_nodes());
+  */
   //logger->log_debug(name(), "Line from (%f,%f) to (%f,%f)", x1, y1, x2, y2);
 
   __line_if->set_world_x(x1);
@@ -160,32 +169,6 @@ LaserHtSensorProcThread::loop()
 
   __line_if->write();
 
-  /*
-  float x[2], y[2];
-  x[0] =  1; y[0] = 1;
-  x[1] = -1; y[0] = 1;
-
-  for (unsigned int i = 0; i < 2; ++i) {
-    for (unsigned int j = 0; j < __num_vals; ++j) {
-      float theta = deg2rad(j * 20);
-      float r   = fabs(x[i] * cos(theta) + y[i] * sin(theta));
-      r *= 100.;
-      __values[j][0] = (int)roundf(r);
-      __values[j][1] = j * 20;
-      logger->log_debug(name(), "i=%u  j=%u  theta=%f  r=%f v[0]=%i  v[1]=%i",
-			i, j, theta, r, __values[j][0], __values[j][1]);
-    }
-    __ht->process(__values, __num_vals);
-  }
-
-  int max_values[2];
-  unsigned int max_count = __ht->max(max_values);
-  logger->log_debug(name(), "Max count: %u  (%i, %i)", max_count, max_values[0],
-		    max_values[1]);
-
-  logger->log_debug(name(), "Tree depth: %u  num_nodes: %u\n",
-		    __ht->root()->depth(), __ht->root()->num_nodes());
-  */
   /*
   std::vector<laser_reading_t> readings;
 
