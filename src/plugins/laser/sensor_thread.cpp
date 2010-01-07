@@ -63,8 +63,13 @@ LaserSensorThread::init()
   __laser720_if = NULL;
 
   bool spots_filter = false;
+  bool main_sensor  = false;
+
   try {
     spots_filter = config->get_bool((__cfg_prefix + "use_dead_spots_filter").c_str());
+  } catch (Exception &e) {} // ignored, assume no
+  try {
+    main_sensor = config->get_bool((__cfg_prefix + "main_sensor").c_str());
   } catch (Exception &e) {} // ignored, assume no
 
   __aqt->pre_init(config, logger);
@@ -74,11 +79,13 @@ LaserSensorThread::init()
   __filters360 = new LaserDataFilterCascade();
   __filters720 = new LaserDataFilterCascade();
 
+  std::string if_id = main_sensor ? "Laser" : ("Laser " + __cfg_name);
+
   if (__num_values == 360) {
-    __laser360_if = blackboard->open_for_writing<Laser360Interface>("Laser");
+    __laser360_if = blackboard->open_for_writing<Laser360Interface>(if_id.c_str());
   } else if (__num_values == 720){
-    __laser360_if = blackboard->open_for_writing<Laser360Interface>("Laser");
-    __laser720_if = blackboard->open_for_writing<Laser720Interface>("Laser");
+    __laser360_if = blackboard->open_for_writing<Laser360Interface>(if_id.c_str());
+    __laser720_if = blackboard->open_for_writing<Laser720Interface>(if_id.c_str());
     __filters360->add_filter(new Laser720to360DataFilter());
   } else {
     throw Exception("Laser acquisition thread must produce either 360 or 720 "
@@ -92,6 +99,7 @@ LaserSensorThread::init()
     logger->log_debug(name(), "Setting up dead spots filter for 720° interface");
     __filters720->add_filter(new LaserDeadSpotsDataFilter(config, logger, spots_prefix));
   }
+
 }
 
 
