@@ -19,7 +19,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_laserht = fawkescore fawkesutils fawkesaspects \
-	       Laser360Interface Laser720Interface ObjectPositionInterface
+	       Laser360Interface Laser720Interface ObjectPositionInterface \
+	       VisualDisplay2DInterface
 OBJS_laserht = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 PLUGINS_all  = $(PLUGINDIR)/laserht.so

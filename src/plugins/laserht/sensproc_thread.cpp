@@ -27,9 +27,12 @@
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/ObjectPositionInterface.h>
+#include <interfaces/VisualDisplay2DInterface.h>
 
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
+
+#include <cstdlib>
 
 using namespace fawkes;
 
@@ -53,11 +56,23 @@ void
 LaserHtSensorProcThread::init()
 {
   //__cfg_error_threshold = config->get_float("/plugins/laserline/error_threshold");
+  __laser360_if = NULL;
+  __visdisp_if  = NULL;
+  __line_if     = NULL;
+
+  __cfg_num_samples    = config->get_uint("/plugins/laserht/line/num_samples");
+  __cfg_r_scale        = config->get_float("/plugins/laserht/line/r_scale");
+  __cfg_laser_ifid     = config->get_string("/plugins/laserht/laser_interface_id");
+  __cfg_enable_disp    = config->get_bool("/plugins/laserht/line/enable_display");
+  __cfg_vote_threshold = config->get_uint("/plugins/laserht/line/vote_threshold");
 
   __laser360_if = NULL;
   __line_if   = NULL;
   try {
-    __laser360_if = blackboard->open_for_reading<Laser360Interface>("Laser");
+    __laser360_if = blackboard->open_for_reading<Laser360Interface>(__cfg_laser_ifid.c_str());
+    if (__cfg_enable_disp) {
+      __visdisp_if = blackboard->open_for_reading<VisualDisplay2DInterface>("LaserGUI");
+    }
     __line_if = blackboard->open_for_writing<ObjectPositionInterface>("LaserLine");
     __line_if->set_object_type(ObjectPositionInterface::TYPE_LINE);
   } catch (Exception &e) {
@@ -68,9 +83,9 @@ LaserHtSensorProcThread::init()
 
   __ht = new HoughTransform(2);
 
-  __num_vals   = 24;
-  __angle_step = 360 / __num_vals;
-  __r_scale    = 0.01;
+  __num_vals   = __cfg_num_samples;
+  __angle_step = 180.f / __num_vals;
+  __r_scale    = __cfg_r_scale;
   __values = new int*[__num_vals];
   for (unsigned int i = 0; i < __num_vals; ++i) {
     __values[i] = new int[2];
@@ -82,6 +97,7 @@ void
 LaserHtSensorProcThread::finalize()
 {
   blackboard->close(__laser360_if);
+  blackboard->close(__visdisp_if);
   blackboard->close(__line_if);
 
   delete __ht;
@@ -89,6 +105,33 @@ LaserHtSensorProcThread::finalize()
     delete[] __values[i];
   }
   delete[] __values;
+}
+
+
+void
+LaserHtSensorProcThread::line_points_from_params(int r, int phi,
+						 float &x1, float &y1,
+						 float &x2, float &y2)
+{
+  float phi_rad  = deg2rad(phi);
+  float r_scaled = r * __r_scale;
+  float tx, ty;
+  polar2cart2d(phi_rad, r_scaled, &tx, &ty);
+  x1 = tx;
+  y1 = ty;
+
+  float alpha, y_factor = 1;
+  if ( ((phi >= 0) && (phi < 90)) ||
+       (phi >= 270) ) {
+    y_factor = -1;
+    alpha = deg2rad(90 - (phi % 90));
+  } else {
+    alpha = deg2rad((phi % 90));
+  }
+  float dx   = 1 * cos(alpha);
+  float dy   = 1 * y_factor * sin(alpha);
+  x2 = x1 + dx;
+  y2 = y1 + dy;
 }
 
 
@@ -111,55 +154,19 @@ LaserHtSensorProcThread::loop()
 	polar2cart2d(phi, distances[i], &x, &y);
 	float r   = x * cos(theta) + y * sin(theta);
 	r /= __r_scale;
-	/*
-	if ( fabs(roundf(r)) < 0.5 ) {
-	  logger->log_warn(name(), "Small r %f phi=%f  theta=%f  x=%f  y=%f  dist=%f",
-			   r, phi, theta, x, y, distances[i]);
-	}
-	*/
 	__values[j][0] = (int)roundf(r);
 	__values[j][1] = j * __angle_step;
-	/*
-	if ( (__values[j][0] == 0) && (__values[j][1] == 0) ) {
-	  logger->log_debug(name(), "i=%zu  j=%zu  phi=%f  r=%f v[0]=%i  v[1]=%i",
-			    j, phi, r, __values[j][0], __values[j][1]);
-	}
-	*/
       }
       __ht->process(__values, __num_vals);
     }
   }
 
+
   int max_values[2];
   /* unsigned int max_count = */ __ht->max(max_values);
-  //logger->log_debug(name(), "Max count: %u  (%i, %i)", max_count, max_values[0],
-  //	    max_values[1]);
 
-  float phi = deg2rad(max_values[1]);
-  float r   = max_values[0] * __r_scale;
   float x1, y1, x2, y2;
-  polar2cart2d(phi, r, &x1, &y1);
-
-  float alpha, y_factor = 1;
-  if ( ((max_values[1] >= 0) && (max_values[1] < 90)) ||
-       (max_values[1] >= 270) ) {
-    y_factor = -1;
-    alpha = deg2rad(90 - (max_values[1] % 90));
-  } else {
-    alpha = deg2rad((max_values[1] % 90));
-  }
-  float dx   = 1 * cos(alpha);
-  float dy   = 1 * y_factor * sin(alpha);
-  x2 = x1 + dx;
-  y2 = y1 + dy;
-
-  /*
-  logger->log_debug(name(), "r=%f  phi=%f  mv=(%i,%i)  p1=(%f,%f)  p2=(%f,%f)",
-		    r, phi, max_values[0], max_values[1], x1, y1, x2, y2);
-  logger->log_debug(name(), "Tree depth: %u  num_nodes: %u\n",
-  	    __ht->root()->depth(), __ht->root()->num_nodes());
-  */
-  //logger->log_debug(name(), "Line from (%f,%f) to (%f,%f)", x1, y1, x2, y2);
+  line_points_from_params(max_values[0], max_values[1], x1, y1, x2, y2);
 
   __line_if->set_world_x(x1);
   __line_if->set_world_y(y1);
@@ -169,7 +176,46 @@ LaserHtSensorProcThread::loop()
 
   __line_if->write();
 
+  try {
+    if (__cfg_enable_disp && __visdisp_if->has_writer()) {
+      __visdisp_if->msgq_enqueue(new VisualDisplay2DInterface::DeleteAllMessage());
+      float x[2] = {x1, x2};
+      float y[2] = {y1, y2};
+      unsigned char color[4] = {255, 0, 0, 255};
+      VisualDisplay2DInterface::AddCartLineMessage *lm;
+      lm = new VisualDisplay2DInterface::AddCartLineMessage(x, y,
+							    VisualDisplay2DInterface::LS_SOLID, color);
+      __visdisp_if->msgq_enqueue(lm);
+
+
+      color[0] = 0;
+      color[1] = 255;
+
+      int *values;
+      unsigned int num_v = __ht->filter(&values, __cfg_vote_threshold);
+      for (unsigned int i = 0; i < num_v; ++i) {
+	line_points_from_params(values[i * 2 + 0], values[i * 2 + 1], x1, y1, x2, y2);
+	float x[2] = {x1, x2};
+	float y[2] = {y1, y2};
+	lm = new VisualDisplay2DInterface::AddCartLineMessage(x, y, 
+							      VisualDisplay2DInterface::LS_SOLID, color);
+	__visdisp_if->msgq_enqueue(lm);
+      }
+      free(values);
+
+    }
+  } catch (Exception &e) {} // ignored
+  
+
   /*
+  __line_if->set_world_x(x1);
+  __line_if->set_world_y(y1);
+
+  __line_if->set_relative_x(x2);
+  __line_if->set_relative_y(y2);
+
+  __line_if->write();
+
   std::vector<laser_reading_t> readings;
 
   for (unsigned int i = 0; i < 30; ++i) {
