@@ -142,8 +142,8 @@ class VisualDisplay2DInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float x; /**< X coordinate of upper left corner */
-      float y; /**< Y coordinate of upper left corner */
+      float x; /**< X coordinate of lower right corner */
+      float y; /**< Y coordinate of lower right corner */
       float width; /**< Width of rectangle */
       float height; /**< Height of rectangle */
       unsigned char color[4]; /**< Color in RGBA */

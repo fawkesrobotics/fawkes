@@ -67,7 +67,7 @@ VisualDisplay2DInterface::VisualDisplay2DInterface() : Interface()
   add_messageinfo("AddCartTextMessage");
   add_messageinfo("DeleteObjectMessage");
   add_messageinfo("DeleteAllMessage");
-  unsigned char tmp_hash[] = {0x99, 0xa4, 0x90, 0x2b, 0x22, 0x37, 0xf3, 0x98, 0x45, 0xee, 0x4b, 0x8, 0xf9, 0x41, 0xcc, 0xe7};
+  unsigned char tmp_hash[] = {0x8d, 0x76, 0x71, 0x21, 0x6a, 0x10, 0xea, 0x35, 0xa8, 0x40, 0x73, 0xb4, 0x35, 0xf6, 0x8d, 0xcb};
   set_hash(tmp_hash);
 }
 
@@ -701,7 +701,7 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const AddCartRe
 
 /* Methods */
 /** Get x value.
- * X coordinate of upper left corner
+ * X coordinate of lower right corner
  * @return x value
  */
 float
@@ -721,7 +721,7 @@ VisualDisplay2DInterface::AddCartRectMessage::maxlenof_x() const
 }
 
 /** Set x value.
- * X coordinate of upper left corner
+ * X coordinate of lower right corner
  * @param new_x new x value
  */
 void
@@ -731,7 +731,7 @@ VisualDisplay2DInterface::AddCartRectMessage::set_x(const float new_x)
 }
 
 /** Get y value.
- * Y coordinate of upper left corner
+ * Y coordinate of lower right corner
  * @return y value
  */
 float
@@ -751,7 +751,7 @@ VisualDisplay2DInterface::AddCartRectMessage::maxlenof_y() const
 }
 
 /** Set y value.
- * Y coordinate of upper left corner
+ * Y coordinate of lower right corner
  * @param new_y new y value
  */
 void

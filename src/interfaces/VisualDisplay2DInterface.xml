@@ -56,10 +56,11 @@
 
   <message name="AddCartRect">
     <comment>Add a rectangle to the display. The rectangle is defined
-    by the cartesian coordinates of its upper left corner and its
-    width and height.</comment>
-    <field type="float" name="x">X coordinate of upper left corner</field>
-    <field type="float" name="y">Y coordinate of upper left corner</field>
+    by the cartesian coordinates of its lower right corner and its
+    width and height, therefore growing in accordance with the Fawkes
+    coordinate system</comment>
+    <field type="float" name="x">X coordinate of lower right corner</field>
+    <field type="float" name="y">Y coordinate of lower right corner</field>
     <field type="float" name="width">Width of rectangle</field>
     <field type="float" name="height">Height of rectangle</field>
     <field type="LineStyle" name="style">Style of this object.</field>
