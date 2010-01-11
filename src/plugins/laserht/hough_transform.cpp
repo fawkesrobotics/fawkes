@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 
 HoughTransform::HoughTransform(unsigned int num_dims)
 {
@@ -51,7 +52,6 @@ HoughTransform::process(int **values, unsigned int num_values)
     if (count > __max_count) {
       __max_count = count;
       for (unsigned int d = 0; d < __num_dims; ++d) {
-	//printf("Setting max[%u]=%u\n", d, values[i][d]);
 	__max_values[d] = values[i][d];
       }
     }
@@ -67,6 +67,14 @@ HoughTransform::max(int *values) const
   }
   return __max_count;
 }
+
+
+unsigned int
+HoughTransform::filter(int **values, unsigned int min_count)
+{
+  return __root->filter(values, min_count);
+}
+
 
 HoughTransform::Node *
 HoughTransform::root()
@@ -85,16 +93,39 @@ HoughTransform::reset()
   }
 }
 
-HoughTransform::Node::Node(unsigned int remaining_dims, int value)
+HoughTransform::Node::Node(unsigned int dims, int value)
 {
-  __remaining_dims = remaining_dims;
-  __value = value;
-  __count = 0;
-  __left = __right = __dim_next /*= __reuse_next*/ = 0;
+  __dims   = dims;
+  __value  = value;
+  __count  = 0;
+  __parent = NULL;
+  __left = __right = __dim_next = __filter_next = 0;
   //if (parent) {
   //  __reuse_next = parent->__reuse_next;
   //  parent->__reuse_next = this;
   //}
+}
+
+HoughTransform::Node::Node(Node *parent, unsigned int dims, int value)
+{
+  __parent = parent;
+  __dims   = dims;
+  __value  = value;
+  __count  = 0;
+  __left = __right = __dim_next = __filter_next = 0;
+  //if (parent) {
+  //  __reuse_next = parent->__reuse_next;
+  //  parent->__reuse_next = this;
+  //}
+}
+
+HoughTransform::Node::Node()
+{
+  __dims   = 123;
+  __value  = 0;
+  __count  = 0;
+  __parent = NULL;
+  __left = __right = __dim_next = __filter_next = 0;
 }
 
 HoughTransform::Node::~Node()
@@ -109,36 +140,29 @@ unsigned int
 HoughTransform::Node::insert(int *values)
 {
   if (values[0] == __value) {
-    if ( __remaining_dims > 1) {
+    if ( __dims > 1) {
       if (! __dim_next) {
 	//if (__reuse_next) {
 	//  __dim_next = __reuse_next;
 	//  __reuse_next = __reuse_next->__reuse_next;
 	//} else {
-	//printf("Creating new dim node for dim=%u val=%i\n",
-	//       __remaining_dims - 1, values[1]);
-	__dim_next = new Node(__remaining_dims - 1, values[1]);
+	__dim_next = new Node(this, __dims - 1, values[1]);
 	//}
       }
 
-      //printf("Inserting to dim_next, values@%p  values[1]@%p\n",
-      //	     &values[0], &values[1]);
       return __dim_next->insert(&(values[1]));
     } else {
-      //printf("Increasing count, value=%i, count=%u\n", __value, __count+1);
       return ++__count;
     }
   } else if (values[0] < __value) {
     if (! __left) {
-      __left = new Node(__remaining_dims, values[0]);
+      __left = new Node(__parent, __dims, values[0]);
     }
-    //printf("Inserting to left node %i < %i, lnv=%i\n", values[0], __value, __left->__value);
     return __left->insert(values);
   } else { // values[0] > __value
     if (! __right) {
-      __right = new Node(__remaining_dims, values[0]);
+      __right = new Node(__parent, __dims, values[0]);
     }
-    //printf("Inserting to right node %i > %i, rnv=%i\n", values[0], __value, __right->__value);
     return __right->insert(values);
   }
 }
@@ -162,4 +186,64 @@ HoughTransform::Node::depth()
   if (__right)    d = std::max(d, __right->depth());
   if (__dim_next) d = std::max(d, __dim_next->depth());
   return d + 1;
+}
+
+
+unsigned int
+HoughTransform::Node::filtered_length()
+{
+  Node *t = this;
+  // do not count first, is unused head element
+  unsigned int rv = 0;
+  while (t->__filter_next) {
+    ++rv;
+    t = t->__filter_next;
+  }
+  return rv;
+}
+
+unsigned int
+HoughTransform::Node::filter(int **values, unsigned int min_count)
+{
+  Node *filtered_root = new Node();
+  filter(filtered_root, min_count);
+  unsigned int flen = filtered_root->filtered_length();
+
+  int *fvals = (int *)calloc(flen, __dims * sizeof(int));
+  Node *t = filtered_root;
+  unsigned int f = 0;
+  while ((t = t->__filter_next) != NULL) {
+    Node *s = t;
+    for (unsigned int i = 1; i <= __dims; ++i) {
+      fvals[ __dims * (f + 1) - i ] = s->__value;
+      s = s->__parent;
+    }
+    ++f;
+  }
+
+  *values = fvals;
+  return flen;
+}
+
+
+HoughTransform::Node *
+HoughTransform::Node::filter(Node *tail, unsigned int min_count)
+{
+  if (__dims == 1) {
+    if (__count >= min_count) {
+      // add this node
+      this->__filter_next = NULL;
+      tail->__filter_next = this;
+      tail = this;
+    }
+    if (__left)   tail = __left->filter(tail, min_count);
+    if (__right)  tail = __right->filter(tail, min_count);      
+
+  } else {
+    if (__dim_next)  tail = __dim_next->filter(tail, min_count);
+    if (__left)      tail = __left->filter(tail, min_count);
+    if (__right)     tail = __right->filter(tail, min_count);
+  }
+
+  return tail;
 }

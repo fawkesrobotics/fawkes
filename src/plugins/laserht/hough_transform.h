@@ -29,7 +29,7 @@ class HoughTransform {
  private:
   class Node {
   public:
-    Node(unsigned int remaining_dims, int value = 0);
+    Node(unsigned int dims, int value = 0);
     ~Node();
 
     unsigned int insert(int *values);
@@ -37,15 +37,27 @@ class HoughTransform {
     unsigned int num_nodes();
     unsigned int depth();
 
+    unsigned int filter(int **values, unsigned int min_count);
+
   private:
-    unsigned int __remaining_dims;
+    Node(Node *parent, unsigned int dims, int value = 0);
+    Node();
+
+    Node * filter(Node *tail, unsigned int min_count);
+    unsigned int filtered_length();
+
+  private:
+    unsigned int __dims;
 
     unsigned int __count;
     int   __value;
-    
+
+    Node *__parent; // that is the "value parent", not necessarily tree parent
     Node *__left;
     Node *__right;
     Node *__dim_next;
+
+    Node *__filter_next;
 
     // for re-use (avoiding re-allocations)
     // Node *__reuse_next;
@@ -57,6 +69,8 @@ class HoughTransform {
 
   void process(int **values, unsigned int num_values);
   unsigned int max(int *values) const;
+
+  unsigned int filter(int **values, unsigned int min_count);
 
   void reset();
 
