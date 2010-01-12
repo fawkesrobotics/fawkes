@@ -168,6 +168,7 @@ LaserHtSensorProcThread::loop()
   float x1, y1, x2, y2;
   line_points_from_params(max_values[0], max_values[1], x1, y1, x2, y2);
 
+  /*
   __line_if->set_world_x(x1);
   __line_if->set_world_y(y1);
 
@@ -175,6 +176,7 @@ LaserHtSensorProcThread::loop()
   __line_if->set_relative_y(y2);
 
   __line_if->write();
+  */
 
   try {
     if (__cfg_enable_disp && __visdisp_if->has_writer()) {
@@ -202,73 +204,99 @@ LaserHtSensorProcThread::loop()
 	__visdisp_if->msgq_enqueue(lm);
       }
       free(values);
-
     }
   } catch (Exception &e) {} // ignored
-  
 
-  /*
-  __line_if->set_world_x(x1);
-  __line_if->set_world_y(y1);
 
-  __line_if->set_relative_x(x2);
-  __line_if->set_relative_y(y2);
+  // Calculate points contributing to the primary line
+  float theta  = deg2rad(max_values[1]);
+  float r_scaled = max_values[0] * __r_scale;
+  float cos_theta = cos(theta);
+  float sin_theta = sin(theta);
+  float threshold = 0.05;
+  float r_min = r_scaled - threshold;
+  float r_max = r_scaled + threshold;
 
-  __line_if->write();
+  bool  first_y_minmax = true;
+  float y_min = 0, y_max = 0;
 
   std::vector<laser_reading_t> readings;
 
-  for (unsigned int i = 0; i < 30; ++i) {
-    if (distances[330+i] != 0.0) {
-      float angle = deg2rad(((330 + i) / * 0.5 /));
-      float dist  = distances[330 + i];
-      float x     = dist *  sin(angle);
-      float y     = dist * -cos(angle);
-      laser_reading_t l = {angle, dist, x, y};
-      readings.push_back(l);
-    }
+  for (size_t i = 0; i < num_dist; ++i) {
+    // calculate r with r(theta) = x_i * cos(theta) + y_i * sin(theta)
+    if (distances[i] > 0) {
+      float x, y;
+      float phi = deg2rad(i);
+      polar2cart2d(phi, distances[i], &x, &y);
+      float r = x * cos_theta + y * sin_theta;
 
-    if (distances[i] != 0.0) {
-      float angle = deg2rad(i / * 0.5/);
-      float dist  = distances[i];
-      float x     = dist *  sin(angle);
-      float y     = dist * -cos(angle);
-      //float x     = dist *  sin(angle);
-      //float y     = dist * -cos(angle);
-      laser_reading_t l = {angle, dist, x, y};
-      readings.push_back(l);
+      // now rotate all values to have a horizontal line, otherwise
+      // line fitting could fail
+
+      // note: x_rot = x * cos_theta - y * sin_theta
+      //       y_rot = x * sin_theta + y * cos_theta
+      // AND:  sin(-alpha) = - sin(alpha)
+      //       cos(-alpha) =   cos(alpha)
+
+      // Therefore, to rotate line to horizontal position, i.e. theta=0:
+      float x_rot = r; // x * cos_theta + y * sin_theta;
+      float y_rot = y * cos_theta - x * sin_theta;
+
+      if ( (r >= r_min) && (r <= r_max) ) {
+	// valid!
+	/* generally too much, might be useful for debugging
+	if (__cfg_enable_disp && __visdisp_if->has_writer()) {
+	  float xp[2] = {0, x};
+	  float yp[2] = {0, y};
+	  unsigned char color[4] = {0, 0, 255, 255};
+	  VisualDisplay2DInterface::AddCartLineMessage *lm;
+	  lm = new VisualDisplay2DInterface::AddCartLineMessage(xp, yp, 
+								VisualDisplay2DInterface::LS_SOLID, color);
+	  __visdisp_if->msgq_enqueue(lm);
+	}
+	*/
+	laser_reading_t l = {phi, distances[i], x_rot, y_rot};
+	readings.push_back(l);
+	if (first_y_minmax) {
+	  first_y_minmax = false;
+	  y_min = y_rot;
+	  y_max = y_rot;
+	} else {
+	  if (y_rot < y_min) y_min = y_rot;
+	  if (y_rot > y_max) y_max = y_rot;
+	}
+      }
     }
   }
-
-  if (readings.empty()) {
-    logger->log_debug(name(), "No valid readings");
-    return;
-  }
+  //logger->log_debug(name(), "y_min=%f  y_max=%f", y_min, y_max);
 
   float a = 0, b = 0, e = 0;
   fit_line(readings, 0, a, b, e);
 
-  float lx = readings.front().x;
-  float ly = a * lx + b;
-  float rx = readings.back().x;
-  float ry = a * rx + b;
+  float x_min = (y_min - b) / a;
+  float x_max = (y_max - b) / a;
 
-  logger->log_debug(name(), "lx=%f  ly=%f  rx=%f  ry=%f  a=%f  b=%f  e=%f",
-		    lx, ly, rx, ry, a, b, e);
+  // rotate back
+  float x_min_rot = x_min * cos_theta - y_min * sin_theta;
+  float y_min_rot = x_min * sin_theta + y_min * cos_theta;
+  float x_max_rot = x_max * cos_theta - y_max * sin_theta;
+  float y_max_rot = x_max * sin_theta + y_max * cos_theta;
 
-  __line_if->set_world_x(-ly);
-  __line_if->set_world_y(-lx);
+  __line_if->set_world_x(x_min_rot);
+  __line_if->set_world_y(y_min_rot);
 
-  __line_if->set_relative_x(-ry);
-  __line_if->set_relative_y(-rx);
+  __line_if->set_relative_x(x_max_rot);
+  __line_if->set_relative_y(y_max_rot);
 
+  /*
   __line_if->set_slope(-a);
   __line_if->set_bearing(atan2f(-a, 1));
   __line_if->set_distance(b);
+  */
   __line_if->set_roll(e);
 
   __line_if->write();
-*/
+
 }
 
 #define sqr(x) ((x) * (x))
