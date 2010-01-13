@@ -70,7 +70,7 @@ class LaserHtSensorProcThread
 		const unsigned int first_index,
 		float &a, float &b, float &least_square_error);
 
-  void line_points_from_params(int r, int phi,
+  void line_points_from_params(float r, float phi,
 			       float &x1, float &y1, float &x2, float &y2);
 
  private:
@@ -78,13 +78,14 @@ class LaserHtSensorProcThread
   fawkes::ObjectPositionInterface *__line_if;
   fawkes::VisualDisplay2DInterface *__visdisp_if;
 
-  float __cfg_error_threshold;
-
   unsigned int __cfg_num_samples;
   unsigned int __cfg_vote_threshold;
   float        __cfg_r_scale;
   std::string  __cfg_laser_ifid;
   bool         __cfg_enable_disp;
+  float        __cfg_fitting_error_threshold;
+  float        __cfg_dist_threshold;
+  
 
   HoughTransform *__ht;
   unsigned int    __num_vals;

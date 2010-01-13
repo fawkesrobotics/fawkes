@@ -128,5 +128,7 @@ INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',1
 INSERT INTO "config" VALUES('/plugins/laserht/line/r_scale','float',0.02,'Distance scale for r parameter of line; m');
 INSERT INTO "config" VALUES('/plugins/laserht/line/enable_display','bool',1,'Enable debugging display via VisualDisplay2DInterface::LaserGUI');
 INSERT INTO "config" VALUES('/plugins/laserht/line/vote_threshold','unsigned int',50,'Minimum number of votes for a line to consider it');
+INSERT INTO "config" VALUES('/plugins/laserht/line/dist_threshold','float',0.05,'Max. distance between line found via HT and a laser reading to consider it for line fitting; m');
+INSERT INTO "config" VALUES('/plugins/laserht/line/fitting_error_threshold','float',20,'Max. error allowed in the fitting step');
 INSERT INTO "config" VALUES('/plugins/festival/voice','string','nitech_us_bdl_arctic_hts','Voice to use for Festival speech synth');
 COMMIT;
