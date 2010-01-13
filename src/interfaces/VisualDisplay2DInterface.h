@@ -48,6 +48,24 @@ class VisualDisplay2DInterface : public Interface
     LS_DASH_DOTTED /**< Dashed and dotted line */
   } LineStyle;
 
+  /** 
+        Enumeration defining the possible anchor points. They are used
+        for determining text alignment towards the reference point. The
+	point is at the appropriate position of the bounding box of
+        the text.
+       */
+  typedef enum {
+    CENTERED /**< Vertically and horitontally centered. */,
+    NORTH /**< Top and horiz. centered. */,
+    EAST /**< Right and vert. centered. */,
+    SOUTH /**< Bottom and horiz. centered. */,
+    WEST /**< Left Right . */,
+    NORTH_EAST /**< Top right. */,
+    SOUTH_EAST /**< Bottom right. */,
+    SOUTH_WEST /**< Bottom left. */,
+    NORTH_WEST /**< Top left. */
+  } Anchor;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -107,6 +125,7 @@ class VisualDisplay2DInterface : public Interface
     typedef struct {
       float x; /**< X coordinate of center point */
       float y; /**< Y coordinate of center point */
+      float radius; /**< Radius of the circle. */
       unsigned char color[4]; /**< Color in RGBA */
       LineStyle style; /**< Style of this object. */
     } AddCartCircleMessage_data_t;
@@ -114,7 +133,7 @@ class VisualDisplay2DInterface : public Interface
     AddCartCircleMessage_data_t *data;
 
    public:
-    AddCartCircleMessage(const float ini_x, const float ini_y, const LineStyle ini_style, const unsigned char * ini_color);
+    AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const unsigned char * ini_color);
     AddCartCircleMessage();
     ~AddCartCircleMessage();
 
@@ -126,6 +145,9 @@ class VisualDisplay2DInterface : public Interface
     float y() const;
     void set_y(const float new_y);
     size_t maxlenof_y() const;
+    float radius() const;
+    void set_radius(const float new_radius);
+    size_t maxlenof_radius() const;
     LineStyle style() const;
     void set_style(const LineStyle new_style);
     size_t maxlenof_style() const;
@@ -187,17 +209,19 @@ class VisualDisplay2DInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int size; /**< Font size. */
       float x; /**< X coordinate of upper left corner */
       float y; /**< Y coordinate of upper left corner */
+      float size; /**< Font size (max height in m). */
       unsigned char color[4]; /**< Color in RGBA */
       char text[128]; /**< Width of rectangle */
+      Anchor anchor; /**< Anchor which marks the
+      alignment to the given point. */
     } AddCartTextMessage_data_t;
 
     AddCartTextMessage_data_t *data;
 
    public:
-    AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const unsigned int ini_size, const unsigned char * ini_color);
+    AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const unsigned char * ini_color);
     AddCartTextMessage();
     ~AddCartTextMessage();
 
@@ -212,8 +236,11 @@ class VisualDisplay2DInterface : public Interface
     char * text() const;
     void set_text(const char * new_text);
     size_t maxlenof_text() const;
-    unsigned int size() const;
-    void set_size(const unsigned int new_size);
+    Anchor anchor() const;
+    void set_anchor(const Anchor new_anchor);
+    size_t maxlenof_anchor() const;
+    float size() const;
+    void set_size(const float new_size);
     size_t maxlenof_size() const;
     unsigned char * color() const;
     unsigned char color(unsigned int index) const;

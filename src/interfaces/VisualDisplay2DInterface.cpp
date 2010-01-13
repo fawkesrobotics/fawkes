@@ -67,7 +67,7 @@ VisualDisplay2DInterface::VisualDisplay2DInterface() : Interface()
   add_messageinfo("AddCartTextMessage");
   add_messageinfo("DeleteObjectMessage");
   add_messageinfo("DeleteAllMessage");
-  unsigned char tmp_hash[] = {0x8d, 0x76, 0x71, 0x21, 0x6a, 0x10, 0xea, 0x35, 0xa8, 0x40, 0x73, 0xb4, 0x35, 0xf6, 0x8d, 0xcb};
+  unsigned char tmp_hash[] = {0x80, 0x7d, 0xc2, 0x26, 0xa2, 0xbf, 0xfa, 0x93, 0x80, 0x78, 0x2, 0x68, 0xdd, 0x9, 0xab, 0x9f};
   set_hash(tmp_hash);
 }
 
@@ -430,10 +430,11 @@ VisualDisplay2DInterface::AddCartLineMessage::clone() const
 /** Constructor with initial values.
  * @param ini_x initial value for x
  * @param ini_y initial value for y
+ * @param ini_radius initial value for radius
  * @param ini_style initial value for style
  * @param ini_color initial value for color
  */
-VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float ini_x, const float ini_y, const LineStyle ini_style, const unsigned char * ini_color) : Message("AddCartCircleMessage")
+VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const unsigned char * ini_color) : Message("AddCartCircleMessage")
 {
   data_size = sizeof(AddCartCircleMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -441,10 +442,12 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float
   data      = (AddCartCircleMessage_data_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
+  data->radius = ini_radius;
   data->style = ini_style;
   memcpy(data->color, ini_color, sizeof(unsigned char) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -456,6 +459,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage() : Message
   data      = (AddCartCircleMessage_data_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -535,6 +539,36 @@ void
 VisualDisplay2DInterface::AddCartCircleMessage::set_y(const float new_y)
 {
   data->y = new_y;
+}
+
+/** Get radius value.
+ * Radius of the circle.
+ * @return radius value
+ */
+float
+VisualDisplay2DInterface::AddCartCircleMessage::radius() const
+{
+  return data->radius;
+}
+
+/** Get maximum length of radius value.
+ * @return length of radius value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+VisualDisplay2DInterface::AddCartCircleMessage::maxlenof_radius() const
+{
+  return 1;
+}
+
+/** Set radius value.
+ * Radius of the circle.
+ * @param new_radius new radius value
+ */
+void
+VisualDisplay2DInterface::AddCartCircleMessage::set_radius(const float new_radius)
+{
+  data->radius = new_radius;
 }
 
 /** Get style value.
@@ -929,10 +963,11 @@ VisualDisplay2DInterface::AddCartRectMessage::clone() const
  * @param ini_x initial value for x
  * @param ini_y initial value for y
  * @param ini_text initial value for text
+ * @param ini_anchor initial value for anchor
  * @param ini_size initial value for size
  * @param ini_color initial value for color
  */
-VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const unsigned int ini_size, const unsigned char * ini_color) : Message("AddCartTextMessage")
+VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const unsigned char * ini_color) : Message("AddCartTextMessage")
 {
   data_size = sizeof(AddCartTextMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -941,12 +976,13 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini
   data->x = ini_x;
   data->y = ini_y;
   strncpy(data->text, ini_text, 128);
+  data->anchor = ini_anchor;
   data->size = ini_size;
   memcpy(data->color, ini_color, sizeof(unsigned char) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
-  add_fieldinfo(IFT_UINT, "size", 1, &data->size);
+  add_fieldinfo(IFT_FLOAT, "size", 1, &data->size);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -959,7 +995,7 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage() : Message("Ad
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
-  add_fieldinfo(IFT_UINT, "size", 1, &data->size);
+  add_fieldinfo(IFT_FLOAT, "size", 1, &data->size);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -1071,11 +1107,43 @@ VisualDisplay2DInterface::AddCartTextMessage::set_text(const char * new_text)
   strncpy(data->text, new_text, sizeof(data->text));
 }
 
+/** Get anchor value.
+ * Anchor which marks the
+      alignment to the given point.
+ * @return anchor value
+ */
+VisualDisplay2DInterface::Anchor
+VisualDisplay2DInterface::AddCartTextMessage::anchor() const
+{
+  return data->anchor;
+}
+
+/** Get maximum length of anchor value.
+ * @return length of anchor value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+VisualDisplay2DInterface::AddCartTextMessage::maxlenof_anchor() const
+{
+  return 1;
+}
+
+/** Set anchor value.
+ * Anchor which marks the
+      alignment to the given point.
+ * @param new_anchor new anchor value
+ */
+void
+VisualDisplay2DInterface::AddCartTextMessage::set_anchor(const Anchor new_anchor)
+{
+  data->anchor = new_anchor;
+}
+
 /** Get size value.
- * Font size.
+ * Font size (max height in m).
  * @return size value
  */
-unsigned int
+float
 VisualDisplay2DInterface::AddCartTextMessage::size() const
 {
   return data->size;
@@ -1092,11 +1160,11 @@ VisualDisplay2DInterface::AddCartTextMessage::maxlenof_size() const
 }
 
 /** Set size value.
- * Font size.
+ * Font size (max height in m).
  * @param new_size new size value
  */
 void
-VisualDisplay2DInterface::AddCartTextMessage::set_size(const unsigned int new_size)
+VisualDisplay2DInterface::AddCartTextMessage::set_size(const float new_size)
 {
   data->size = new_size;
 }

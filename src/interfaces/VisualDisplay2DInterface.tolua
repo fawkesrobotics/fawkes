@@ -11,6 +11,18 @@ class VisualDisplay2DInterface : public Interface
     LS_DASH_DOTTED
   } LineStyle;
 
+  typedef enum {
+    CENTERED,
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+    NORTH_EAST,
+    SOUTH_EAST,
+    SOUTH_WEST,
+    NORTH_WEST
+  } Anchor;
+
   class AddCartLineMessage : public Message
   {
     AddCartLineMessage(float * ini_x, float * ini_y, LineStyle ini_style, unsigned char * ini_color);
@@ -33,7 +45,7 @@ class VisualDisplay2DInterface : public Interface
 
   class AddCartCircleMessage : public Message
   {
-    AddCartCircleMessage(float ini_x, float ini_y, LineStyle ini_style, unsigned char * ini_color);
+    AddCartCircleMessage(float ini_x, float ini_y, float ini_radius, LineStyle ini_style, unsigned char * ini_color);
     AddCartCircleMessage();
     ~AddCartCircleMessage();
 
@@ -43,6 +55,9 @@ class VisualDisplay2DInterface : public Interface
     float y();
     void set_y(const float new_y);
     int maxlenof_y() const;
+    float radius();
+    void set_radius(const float new_radius);
+    int maxlenof_radius() const;
     LineStyle style();
     void set_style(const LineStyle new_style);
     int maxlenof_style() const;
@@ -79,7 +94,7 @@ class VisualDisplay2DInterface : public Interface
 
   class AddCartTextMessage : public Message
   {
-    AddCartTextMessage(float ini_x, float ini_y, char * ini_text, unsigned int ini_size, unsigned char * ini_color);
+    AddCartTextMessage(float ini_x, float ini_y, char * ini_text, Anchor ini_anchor, float ini_size, unsigned char * ini_color);
     AddCartTextMessage();
     ~AddCartTextMessage();
 
@@ -92,8 +107,11 @@ class VisualDisplay2DInterface : public Interface
     char * text();
     void set_text(const char * new_text);
     int maxlenof_text() const;
-    unsigned int size();
-    void set_size(const unsigned int new_size);
+    Anchor anchor();
+    void set_anchor(const Anchor new_anchor);
+    int maxlenof_anchor() const;
+    float size();
+    void set_size(const float new_size);
     int maxlenof_size() const;
     unsigned int color(int index);
     void set_color(unsigned int index, const unsigned char new_color);

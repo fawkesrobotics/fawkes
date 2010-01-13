@@ -12,6 +12,23 @@
       <item name="LS_DOTTED">Dotted line.</item>
       <item name="LS_DASH_DOTTED">Dashed and dotted line</item>
     </enum>
+    <enum name="Anchor">
+      <comment>
+        Enumeration defining the possible anchor points. They are used
+        for determining text alignment towards the reference point. The
+	point is at the appropriate position of the bounding box of
+        the text.
+      </comment>
+      <item name="CENTERED">Vertically and horitontally centered.</item>
+      <item name="NORTH">Top and horiz. centered.</item>
+      <item name="EAST">Right and vert. centered.</item>
+      <item name="SOUTH">Bottom and horiz. centered.</item>
+      <item name="WEST">Left Right .</item>
+      <item name="NORTH_EAST">Top right.</item>
+      <item name="SOUTH_EAST">Bottom right.</item>
+      <item name="SOUTH_WEST">Bottom left.</item>
+      <item name="NORTH_WEST">Top left.</item>
+    </enum>
   </constants>
 
   <data>
@@ -50,6 +67,7 @@
     cartesian coordinates of its center point and its radius.</comment>
     <field type="float" name="x">X coordinate of center point</field>
     <field type="float" name="y">Y coordinate of center point</field>
+    <field type="float" name="radius">Radius of the circle.</field>
     <field type="LineStyle" name="style">Style of this object.</field>
     <field type="byte" length="4" name="color">Color in RGBA</field>
   </message>
@@ -73,7 +91,9 @@
     <field type="float" name="x">X coordinate of upper left corner</field>
     <field type="float" name="y">Y coordinate of upper left corner</field>
     <field type="string" length="128" name="text">Width of rectangle</field>
-    <field type="unsigned int" name="size">Font size.</field>
+    <field type="Anchor" name="anchor">Anchor which marks the
+      alignment to the given point.</field>
+    <field type="float" name="size">Font size (max height in m).</field>
     <field type="byte" length="4" name="color">Color in RGBA</field>
   </message>
 
