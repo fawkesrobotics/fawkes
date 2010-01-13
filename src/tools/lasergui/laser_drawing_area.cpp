@@ -363,17 +363,23 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     const float radius = 0.01;
     if (__line_if) {
       __line_if->read();
-      cr->set_source_rgb(1, 0, 0);
-      std::vector<double> dashes(1);
-      dashes[0] = 0.1;
-      cr->set_dash(dashes, 0);
-      cr->rectangle(__line_if->world_x() - radius * 0.5, __line_if->world_y() - radius * 0.5, radius, radius);
-      cr->rectangle(__line_if->relative_x() - radius * 0.5, __line_if->relative_y() - radius * 0.5, radius, radius);
-      cr->fill_preserve();
-      cr->stroke();
-      cr->move_to(__line_if->world_x(), __line_if->world_y());
-      cr->line_to(__line_if->relative_x(), __line_if->relative_y());
-      cr->stroke();
+      if (__line_if->has_writer() &&
+	  __line_if->is_valid() && __line_if->is_visible()) {
+
+	cr->set_source_rgb(1, 0, 0);
+	/*
+	std::vector<double> dashes(1);
+	dashes[0] = 0.1;
+	cr->set_dash(dashes, 0);
+	*/
+	cr->rectangle(__line_if->world_x() - radius * 0.5, __line_if->world_y() - radius * 0.5, radius, radius);
+	cr->rectangle(__line_if->relative_x() - radius * 0.5, __line_if->relative_y() - radius * 0.5, radius, radius);
+	cr->fill_preserve();
+	cr->stroke();
+	cr->move_to(__line_if->world_x(), __line_if->world_y());
+	cr->line_to(__line_if->relative_x(), __line_if->relative_y());
+	cr->stroke();
+      }
     }
     cr->restore();
   }
@@ -593,11 +599,11 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
     float* x_positions1;
     float* y_positions1;
     int* timestamps1;
-    float* x_positions2;
-    float* y_positions2;
-    unsigned int track_length1;
-    unsigned int track_length2;
-    int* timestamps2;
+    float* x_positions2 = NULL;
+    float* y_positions2 = NULL;
+    unsigned int track_length1 = 0;
+    unsigned int track_length2 = 0;
+    int* timestamps2 = NULL;
     unsigned int id;
     cr->set_font_size(0.03);
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS

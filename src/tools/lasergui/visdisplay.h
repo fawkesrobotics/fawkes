@@ -27,9 +27,7 @@
 #include <string>
 #include <map>
 
-namespace fawkes {
-  class VisualDisplay2DInterface;
-}
+#include <interfaces/VisualDisplay2DInterface.h>
 
 class VisualDisplay2D
 {
@@ -42,17 +40,10 @@ class VisualDisplay2D
   void process_messages();
   void draw(Cairo::RefPtr<Cairo::Context> cr);
 
-  enum LineStyle {
-    SOLID,
-    DASHED,
-    DOTTED,
-    DASH_DOTTED
-  };
-
   class Shape {
    public:
     Shape(unsigned int id, unsigned int owner,
-	  LineStyle line_style = SOLID,
+	  fawkes::VisualDisplay2DInterface::LineStyle line_style = fawkes::VisualDisplay2DInterface::LS_SOLID,
 	  unsigned char r = 0, unsigned char g = 0,
 	  unsigned char b = 0, unsigned char a = 0);
     virtual ~Shape();
@@ -66,7 +57,7 @@ class VisualDisplay2D
     { r = _color_r; g = _color_g; b = _color_b; a = _color_a; }
    protected:
 
-    LineStyle     _line_style;
+    fawkes::VisualDisplay2DInterface::LineStyle  _line_style;
     float         _color_r;
     float         _color_g;
     float         _color_b;
@@ -80,7 +71,7 @@ class VisualDisplay2D
    public:
     Line(float x1, float y1, float x2, float y2,
 	 unsigned int id, unsigned int owner,
-	 LineStyle line_style = SOLID,
+	 fawkes::VisualDisplay2DInterface::LineStyle line_style = fawkes::VisualDisplay2DInterface::LS_SOLID,
 	 unsigned char r = 0, unsigned char g = 0,
 	 unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
@@ -95,9 +86,9 @@ class VisualDisplay2D
    public:
     Rectangle(float x, float y, float width, float height,
 	      unsigned int id, unsigned int owner,
-	      LineStyle line_style = SOLID,
-	      unsigned char r = 0, unsigned char b = 0,
-	      unsigned char g = 0, unsigned char a = 0);
+	      fawkes::VisualDisplay2DInterface::LineStyle line_style = fawkes::VisualDisplay2DInterface::LS_SOLID,
+	      unsigned char r = 0, unsigned char g = 0,
+	      unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
     float __x;
@@ -110,9 +101,9 @@ class VisualDisplay2D
    public:
     Circle(float x, float y, float radius,
 	   unsigned int id, unsigned int owner,
-	   LineStyle line_style = SOLID,
-	   unsigned char r = 0, unsigned char b = 0,
-	   unsigned char g = 0, unsigned char a = 0);
+	   fawkes::VisualDisplay2DInterface::LineStyle line_style = fawkes::VisualDisplay2DInterface::LS_SOLID,
+	   unsigned char r = 0, unsigned char g = 0,
+	   unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
     float __x;
@@ -123,15 +114,18 @@ class VisualDisplay2D
   class Text : public Shape {
    public:
     Text(float x, float y, std::string text,
+	 fawkes::VisualDisplay2DInterface::Anchor anchor,
+	 float size,
 	 unsigned int id, unsigned int owner,
-	 LineStyle line_style = SOLID,
-	 unsigned char r = 0, unsigned char b = 0,
-	 unsigned char g = 0, unsigned char a = 0);
+	 unsigned char r = 0, unsigned char g = 0,
+	 unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
     float __x;
     float __y;
     std::string __text;
+    float __size;
+    fawkes::VisualDisplay2DInterface::Anchor __anchor;
   };
 
  private:

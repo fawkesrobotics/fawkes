@@ -54,10 +54,31 @@ VisualDisplay2D::process_messages()
       VisualDisplay2DInterface::AddCartLineMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartLineMessage>();
       __shapes[m->id()] = new Line(m->x(0), m->y(0), m->x(1), m->y(1),
 				   m->id(), m->sender_id(),
-				   (LineStyle)m->style(), m->color(0),
+				   m->style(), m->color(0),
 				   m->color(1), m->color(2), m->color(3));
-      printf("Enqueuing line %u (%f, %f) -> (%f, %f)\n", m->id(),
-	     m->x(0), m->y(0), m->x(1), m->y(1));
+
+    } else if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartRectMessage>() ) {
+      VisualDisplay2DInterface::AddCartRectMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartRectMessage>();
+      __shapes[m->id()] = new Rectangle(m->x(), m->y(), m->width(), m->height(),
+					m->id(), m->sender_id(),
+					m->style(), m->color(0),
+					m->color(1), m->color(2), m->color(3));
+
+    } else if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartCircleMessage>() ) {
+      VisualDisplay2DInterface::AddCartCircleMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartCircleMessage>();
+      __shapes[m->id()] = new Circle(m->x(), m->y(), m->radius(),
+				     m->id(), m->sender_id(),
+				     m->style(), m->color(0),
+				     m->color(1), m->color(2), m->color(3));
+
+    } else if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartTextMessage>() ) {
+      VisualDisplay2DInterface::AddCartTextMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartTextMessage>();
+      __shapes[m->id()] = new Text(m->x(), m->y(), m->text(),
+				   m->anchor(), m->size(),
+				   m->id(), m->sender_id(),
+				   m->color(0),
+				   m->color(1), m->color(2), m->color(3));
+
     } else if (__interface->msgq_first_is<VisualDisplay2DInterface::DeleteAllMessage>() ) {
       for (__sit = __shapes.begin(); __sit != __shapes.end(); ++__sit) {
 	delete __sit->second;
@@ -77,8 +98,6 @@ VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
   for (__sit = __shapes.begin(); __sit != __shapes.end(); ++__sit) {
     float r, g, b, a;
     __sit->second->color(r, g, b, a);
-    printf("Drawing shape %u, color (%f, %f, %f, %f)\n", __sit->second->id(),
-	   r, g, b, a);
     __sit->second->apply_style(cr);
     __sit->second->draw(cr);
   }
@@ -88,7 +107,7 @@ VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
 
 
 VisualDisplay2D::Shape::Shape(unsigned int id, unsigned int owner,
-			      LineStyle line_style,
+			      VisualDisplay2DInterface::LineStyle line_style,
 			      unsigned char r, unsigned char g,
 			      unsigned char b, unsigned char a)
 {
@@ -108,7 +127,7 @@ VisualDisplay2D::Shape::~Shape()
 
 VisualDisplay2D::Line::Line(float x1, float y1, float x2, float y2,
 			    unsigned int id, unsigned int owner,
-			    LineStyle line_style,
+			    VisualDisplay2DInterface::LineStyle line_style,
 			    unsigned char r, unsigned char g,
 			    unsigned char b, unsigned char a)
   : Shape(id, owner, line_style, r, g, b, a)
@@ -123,9 +142,7 @@ VisualDisplay2D::Line::Line(float x1, float y1, float x2, float y2,
 void
 VisualDisplay2D::Line::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  printf("Moving to (%f, %f)\n", __x1, __y1);
   cr->move_to(__x1, __y1);
-  printf("Line to (%f, %f)\n", __x2, __y2);
   cr->line_to(__x2, __y2);
   cr->stroke();
 }
@@ -134,7 +151,7 @@ VisualDisplay2D::Line::draw(Cairo::RefPtr<Cairo::Context> &cr)
 
 VisualDisplay2D::Rectangle::Rectangle(float x, float y, float width, float height,
 				      unsigned int id, unsigned int owner,
-				      LineStyle line_style,
+				      VisualDisplay2DInterface::LineStyle line_style,
 				      unsigned char r, unsigned char g,
 				      unsigned char b, unsigned char a)
   : Shape(id, owner, line_style, r, g, b, a)
@@ -156,7 +173,7 @@ VisualDisplay2D::Rectangle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 
 VisualDisplay2D::Circle::Circle(float x, float y, float radius,
 				unsigned int id, unsigned int owner,
-				LineStyle line_style,
+				VisualDisplay2DInterface::LineStyle line_style,
 				unsigned char r, unsigned char g,
 				unsigned char b, unsigned char a)
   : Shape(id, owner, line_style, r, g, b, a)
@@ -175,22 +192,55 @@ VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 
 
 VisualDisplay2D::Text::Text(float x, float y, std::string text,
+			    fawkes::VisualDisplay2DInterface::Anchor anchor,
+			    float size,
 			    unsigned int id, unsigned int owner,
-			    LineStyle line_style,
 			    unsigned char r, unsigned char g,
 			    unsigned char b, unsigned char a)
-  : Shape(id, owner, line_style, r, g, b, a)
+  : Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a)
 {
   __x      = x;
   __y      = y;
   __text   = text;
+  __size   = size;
+  __anchor = anchor;
 }
 
 
 void
 VisualDisplay2D::Text::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->move_to(__x, __y);
-  cr->text_path(__text);
-  cr->fill();
+  cr->save();
+  cr->scale(-1, 1);
+  cr->rotate(-0.5 * M_PI);
+  cr->set_font_size(1.36 * __size);
+
+  Cairo::TextExtents te;
+  cr->get_text_extents(__text, te);
+
+  float x = __x, y = __y;
+  switch (__anchor) {
+  case VisualDisplay2DInterface::CENTERED:
+    x = __x - te.width / 2.;  y = __y + te.height / 2.; break;
+  case VisualDisplay2DInterface::NORTH:
+    x = __x - te.width / 2.;  y = __y + te.height; break;
+  case VisualDisplay2DInterface::EAST:
+    x = __x - te.width; y = __y + te.height / 2.; break;
+  case VisualDisplay2DInterface::SOUTH:
+    x = __x - te.width / 2.; break;
+  case VisualDisplay2DInterface::WEST:
+    y = __y + te.height / 2.; break;
+  case VisualDisplay2DInterface::NORTH_EAST:
+    x = __x - te.width;  y = __y + te.height; break;
+  case VisualDisplay2DInterface::SOUTH_EAST:
+    x = __x - te.width; break;
+  case VisualDisplay2DInterface::SOUTH_WEST:
+    break;
+  case VisualDisplay2DInterface::NORTH_WEST:
+    y = __y + te.height; break;
+  }
+
+  cr->move_to(x, y);
+  cr->show_text(__text);
+  cr->restore();
 }
