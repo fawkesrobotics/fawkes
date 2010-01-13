@@ -248,23 +248,25 @@ Bumblebee2Camera::open()
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
   dc1394error_t err;
-  uint32_t value;
-  typedef struct {
-    uint32_t   presence   :  1;
-    uint32_t   reserved1  : 21;
-    uint32_t   mirror     :  1;
-    uint32_t   bayer_mono :  1;
-    uint32_t   reserved2  :  7;
-    uint32_t   data_format:  1;
-  } idf_t;
-  err = dc1394_get_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, &value );
+  typedef union {
+    uint32_t value;
+    struct {
+      uint32_t   presence   :  1;
+      uint32_t   reserved1  : 21;
+      uint32_t   mirror     :  1;
+      uint32_t   bayer_mono :  1;
+      uint32_t   reserved2  :  7;
+      uint32_t   data_format:  1;
+    } idf;
+  } idf_u;
+  idf_u value;
+  err = dc1394_get_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, &(value.value) );
   if ( err != DC1394_SUCCESS ) {
     throw Exception("Bumblebee2::open: dc1394_get_control_register(PGR_REG_DATA_FORMAT) failed\n");
   }
-  idf_t *i = (idf_t *)(void *)&value;
-  value &= PTG_Y16_Data_Format_PGR_specific;
-  i->data_format = 0;
-  err = dc1394_set_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, value );
+  value.value &= PTG_Y16_Data_Format_PGR_specific;
+  value.idf.data_format = 0;
+  err = dc1394_set_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, value.value );
   if ( err != DC1394_SUCCESS ) {
     throw Exception("Bumblebee2::open: Setting PGR-specific mode on little-endian system failed\n");
   }
