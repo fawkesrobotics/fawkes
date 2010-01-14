@@ -18,7 +18,8 @@ __fvconf_mk_ := 1
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO
+CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO \
+     SWISSRANGER
 CTRLS=EVID100P DPPTU
 
 FVBASEDIR           = $(BASEDIR)/src/firevision
@@ -52,6 +53,11 @@ HAVE_LIBPNG = $(if $(shell $(PKGCONFIG) --exists 'libpng'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_LIBPNG),1)
   CFLAGS_LIBPNG  = -DHAVE_LIBPNG $(shell $(PKGCONFIG) --cflags 'libpng')
   LDFLAGS_LIBPNG = $(shell $(PKGCONFIG) --libs 'libpng')
+endif
+
+ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
+  HAVE_SWISSRANGER_CAM   = 1
+  VISION_CAM_LIBS       += mesasr usb
 endif
 
 ifneq ($(PKGCONFIG),)
@@ -105,6 +111,8 @@ endif
 ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/shmem.h)),)
   HAVE_SHMEM_CAM      = 1
 endif
+
+
 HAVE_DPPTU_CTRL     = 0
 ifeq ($(OS),Linux)
   HAVE_V4L_CAM        = 1
