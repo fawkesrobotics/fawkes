@@ -35,8 +35,18 @@ class CameraArgumentParser;
 class SwissRangerCamera
 : public Camera
 {
-
  public:
+  typedef enum {
+    DISTANCE,
+    AMPLITUDE,
+    AMPLITUDE_GRAY,
+    AMPLITUDE_GRAY_8,
+    CONF_MAP,
+    CARTESIAN_UINT16,
+    CARTESIAN_FLOAT,
+    CARTESIAN_DOUBLE
+  } mode_t;
+
   SwissRangerCamera(const CameraArgumentParser *cap);
   virtual ~SwissRangerCamera();
 
@@ -78,18 +88,41 @@ class SwissRangerCamera
   /** Camera model, used in open to identify the camera,
    * if empty first found camera is used */
   char *__model;
-
   char *__vendor;
-
   unsigned int __vendor_id;
   unsigned int __product_id;
   unsigned int __serial;
 
+  mode_t __mode;
+  bool   __set_modfreq;
+  bool   __use_median;
+  bool   __use_denoise;
+  unsigned int __integration_time;
+  unsigned int __amplitude_threshold;
+
+  ModulationFrq __modulation_freq;
 
   unsigned int __width;
   unsigned int __height;
-  unsigned short *__buffer;
-  unsigned char *__gray_buffer;
+
+  unsigned char  *__buffer;
+  unsigned char  *__gray_buffer;
+  void           *__coord_uint16_buf;
+  float          *__coord_float_buf;
+  double         *__coord_double_buf;
+
+  short          *__xu;
+  short          *__yu;
+  unsigned short *__zu;
+
+  float          *__xf;
+  float          *__yf;
+  float          *__zf;
+
+  double         *__xd;
+  double         *__yd;
+  double         *__zd;
+
 };
 
 #endif
