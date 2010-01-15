@@ -134,7 +134,7 @@ SwissRangerCamera::open()
   __coord_uint16_buf = NULL;
   __coord_float_buf  = NULL;
   __coord_double_buf = NULL;
-  if (__mode == AMPLITUDE_GRAY_8) {
+  if ( (__mode == AMPLITUDE_GRAY_8) || (__mode == DISTANCE_GRAY_8) ) {
     __gray_buffer = (unsigned char *)malloc(__width * __height);
     __buffer = __gray_buffer;
   } else if (__mode == CARTESIAN_UINT16) {
@@ -252,8 +252,9 @@ SwissRangerCamera::capture()
     __buffer = (unsigned char *)SR_GetImage(__cam, 0);
   } else if ( (__mode == AMPLITUDE) || (__mode == AMPLITUDE_GRAY) ) {
     __buffer = (unsigned char *)SR_GetImage(__cam, 1);
-  } else if (__mode == AMPLITUDE_GRAY_8) {
-    unsigned short *buf = (unsigned short *)SR_GetImage(__cam, 1);
+  } else if ( (__mode == DISTANCE_GRAY_8) || (__mode == AMPLITUDE_GRAY_8) ) {
+    unsigned int image_num = (__mode == DISTANCE_GRAY_8) ? 0 : 1;
+    unsigned short *buf = (unsigned short *)SR_GetImage(__cam, image_num);
     // convert image
     for (unsigned int h = 0; h < __height; ++h) {
       for (unsigned int w = 0; w < __width; ++w) {
@@ -340,6 +341,7 @@ SwissRangerCamera::colorspace()
     return RAW16;
   case AMPLITUDE_GRAY:
     return MONO16;
+  case DISTANCE_GRAY_8:
   case AMPLITUDE_GRAY_8:
     return GRAY8;
   case CARTESIAN_FLOAT:
@@ -347,6 +349,8 @@ SwissRangerCamera::colorspace()
   case CARTESIAN_DOUBLE:
     return CARTESIAN_3D_DOUBLE;
   }
+
+  return RAW16;
 }
 
 
@@ -367,6 +371,7 @@ SwissRangerCamera::set_image_number(unsigned int n)
  * arguments are supported:
  * - mode=MODE where MODE is one of
  * - DISTANCE
+ * - DISTANCE_GRAY_8
  * - AMPLITUDE
  * - AMPLITUDE_GRAY
  * - AMPLITUDE_GRAY_8
@@ -410,6 +415,8 @@ SwissRangerCamera::SwissRangerCamera(const CameraArgumentParser *cap)
     string m = cap->get("mode");
     if (m == "DISTANCE") {
       __mode = DISTANCE;
+    } else if (m == "DISTANCE_GRAY_8") {
+      __mode = DISTANCE_GRAY_8;
     } else if (m == "AMPLITUDE") {
       __mode = AMPLITUDE;
     } else if (m == "AMPLITUDE_GRAY") {

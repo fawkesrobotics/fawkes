@@ -38,6 +38,7 @@ class SwissRangerCamera
  public:
   typedef enum {
     DISTANCE,
+    DISTANCE_GRAY_8,
     AMPLITUDE,
     AMPLITUDE_GRAY,
     AMPLITUDE_GRAY_8,
