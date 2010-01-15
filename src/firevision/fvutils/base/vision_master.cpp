@@ -59,7 +59,7 @@ using namespace fawkes;
  * have layers of indirection. For example when opening a USB camera you could
  * get a shared memory camera to share the camera (image) with multiple threads.
  * Note that using CS_UNKNOWN shall have the similar result as using
- * register_for_raw_camer().
+ * register_for_raw_camera().
  *
  * @fn Camera *  VisionMaster::register_for_raw_camera(const char *camera_string, Thread *thread)
  * Register thread for camera.
