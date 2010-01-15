@@ -69,6 +69,10 @@ colorspace_by_name(const char *mode)
     return BAYER_MOSAIC_BGGR;
   } else if (strcmp(mode, "RAW16") == 0) {
     return RAW16;
+  } else if (strcmp(mode, "CARTESIAN_3D_FLOAT") == 0) {
+    return CARTESIAN_3D_FLOAT;
+  } else if (strcmp(mode, "CARTESIAN_3D_DOUBLE") == 0) {
+    return CARTESIAN_3D_DOUBLE;
   } else {
     return CS_UNKNOWN;
   }
@@ -117,6 +121,10 @@ colorspace_to_string(colorspace_t colorspace)
     return "BAYER_MOSAIC_BGGR";
   case RAW16:
     return "RAW16";
+  case CARTESIAN_3D_FLOAT:
+    return "CARTESIAN_3D_FLOAT";
+  case CARTESIAN_3D_DOUBLE:
+    return "CARTESIAN_3D_DOUBLE";
   default:
     return "CS_UNKNOWN";
   }
@@ -165,6 +173,12 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
 
   case YUV422_PLANAR_QUARTER:
     return (width * height) / 2;
+
+  case CARTESIAN_3D_FLOAT:
+    return (3 * width * height * sizeof(float));
+
+  case CARTESIAN_3D_DOUBLE:
+    return (3 * width * height * sizeof(double));
 
   default:
     return 0;

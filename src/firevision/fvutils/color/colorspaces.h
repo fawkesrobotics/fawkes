@@ -55,7 +55,11 @@ typedef enum {
   YVY2                  = 21,	/**< YUV image with 4:2:2 sampling, byte order Y0 V Y1 U */
   YUV422_PLANAR_QUARTER = 22,	/**< YUV 422 image in planar format, but only quarter of the image,
 				 * used for scale-conversion target, buffer is YUV422_PLANAR formatted. */
-  COLORSPACE_N          = 23	/**< number of colorspaces */
+  CARTESIAN_3D_FLOAT    = 23,	/**< 3D coordinates, one plane for each x, y, and
+				 * z (planar), values as float in meters */
+  CARTESIAN_3D_DOUBLE   = 24,	/**< 3D coordinates, one plane for each x, y, and
+				 * z (planar), values as double in meters */
+  COLORSPACE_N          = 25	/**< number of colorspaces */
 } colorspace_t;
 
 
