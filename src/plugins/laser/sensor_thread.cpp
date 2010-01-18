@@ -42,6 +42,8 @@ using namespace fawkes;
 
 
 /** Constructor.
+ * @param cfg_name short name of configuration group
+ * @param cfg_prefix configuration path prefix
  * @param aqt LaserAcquisitionThread to get data from
  */
 LaserSensorThread::LaserSensorThread(std::string &cfg_name,

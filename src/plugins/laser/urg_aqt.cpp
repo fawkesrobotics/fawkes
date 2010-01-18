@@ -46,7 +46,10 @@ using namespace fawkes;
  */
 
 
-/** Constructor. */
+/** Constructor.
+ * @param cfg_name short name of configuration group
+ * @param cfg_prefix configuration path prefix
+ */
 HokuyoUrgAcquisitionThread::HokuyoUrgAcquisitionThread(std::string &cfg_name,
 						       std::string &cfg_prefix)
   : LaserAcquisitionThread("HokuyoUrgAcquisitionThread")

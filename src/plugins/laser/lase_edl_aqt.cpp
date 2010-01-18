@@ -138,7 +138,10 @@ const float LaseEdlAcquisitionThread::DISTANCE_FACTOR                 = 256.00;
  */
 
 
-/** Constructor. */
+/** Constructor.
+ * @param cfg_name short name of configuration group
+ * @param cfg_prefix configuration path prefix
+ */
 LaseEdlAcquisitionThread::LaseEdlAcquisitionThread(std::string &cfg_name,
 						   std::string &cfg_prefix)
   : LaserAcquisitionThread("LaseEdlAcquisitionThread")
