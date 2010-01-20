@@ -57,14 +57,14 @@ class VisualDisplay2D
     { r = _color_r; g = _color_g; b = _color_b; a = _color_a; }
    protected:
 
-    fawkes::VisualDisplay2DInterface::LineStyle  _line_style;
-    float         _color_r;
-    float         _color_g;
-    float         _color_b;
-    float         _color_a;
+    fawkes::VisualDisplay2DInterface::LineStyle  _line_style;	/**< Line style */
+    float         _color_r;	/**< red part of RGBA object color */
+    float         _color_g;	/**< green part of RGBA object color */
+    float         _color_b;	/**< blue part of RGBA object color */
+    float         _color_a;	/**< alpha part of RGBA object color */
 
-    unsigned int  _id;
-    unsigned int  _owner;
+    unsigned int  _id;		/**< Object ID */
+    unsigned int  _owner;	/**< Owner ID */
   };
 
   class Line : public Shape {

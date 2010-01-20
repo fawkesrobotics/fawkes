@@ -26,11 +26,21 @@
 
 using namespace fawkes;
 
+
+/** @class VisualDisplay2D "visdisplay.h"
+ * 2D visualization processor for VisualDisplay2DInterface.
+ * This class processes messages from the VisualDisplay2DInterface and
+ * issues appropriate drawing commands to a Cairo drawing context.
+ * @author Tim Niemueller
+ */
+
+/** Constructor. */
 VisualDisplay2D::VisualDisplay2D()
 {
   __interface = NULL;
 }
 
+/** Destructor. */
 VisualDisplay2D::~VisualDisplay2D()
 {
   for (__sit = __shapes.begin(); __sit != __shapes.end(); ++__sit) {
@@ -39,6 +49,10 @@ VisualDisplay2D::~VisualDisplay2D()
   __shapes.clear();
 }
 
+
+/** Set interface.
+ * @param interface interface to query for messages
+ */
 void
 VisualDisplay2D::set_interface(fawkes::VisualDisplay2DInterface *interface)
 {
@@ -46,6 +60,10 @@ VisualDisplay2D::set_interface(fawkes::VisualDisplay2DInterface *interface)
 }
 
 
+/** Process messages.
+ * This processes the messages and builds up the internal object
+ * representations.
+ */
 void
 VisualDisplay2D::process_messages()
 {
@@ -91,6 +109,10 @@ VisualDisplay2D::process_messages()
 }
 
 
+/** Draw objects.
+ * This draws all objects currently enqueued by process_messages().
+ * @param cr Cairo context to draw to
+ */
 void
 VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
 {
@@ -106,6 +128,54 @@ VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
 }
 
 
+/** @class VisualDisplay2D::Shape "visdisplay.h"
+ * Class representing a shape.
+ * All shapes inherit from the class and provide drawing primitives. The
+ * internal object representations are instances of shapes.
+ * @author Tim Niemueller
+ *
+ * @fn VisualDisplay2D::Shape::draw(Cairo::RefPtr<Cairo::Context> &cr)
+ * Draw shape to Cairo context.
+ * This method shall be implemented by a shape to draw itself using the
+ * provided Cairo context.
+ * @param cr reference to Cairo context. Note that this is a reference
+ * bypassing the reference pointer. This is done for efficiency and with
+ * the assumption that this method is only called by VisualDisplay2D::draw()
+ * which itself has proper refptr handling.
+ *
+ * @fn inline void VisualDisplay2D::Shape::apply_style(Cairo::RefPtr<Cairo::Context> &cr)
+ * Set style on context.
+ * This method sets the style determined by the shape to the Cairo context.
+ * @param cr reference to Cairo context. Note that this is a reference
+ * bypassing the reference pointer. This is done for efficiency and with
+ * the assumption that this method is only called by VisualDisplay2D::draw()
+ * which itself has proper refptr handling.
+ *
+ * @fn inline unsigned int VisualDisplay2D::Shape::id()
+ * Get shape ID.
+ * @return shape ID
+ *
+ * @fn inline unsigned int VisualDisplay2D::Shape::owner()
+ * Get owner ID.
+ * @return owner ID
+ *
+ * @fn inline void VisualDisplay2D::Shape::color(float &r, float &g, float &b, float &a)
+ * Get shape color.
+ * @param r upon return contains red part of RGBA color
+ * @param g upon return contains green part of RGBA color
+ * @param b upon return contains blue part of RGBA color
+ * @param a upon return contains alpha part of RGBA color
+ */
+
+/** Constructor.
+ * @param id object ID
+ * @param owner ID of the owner of the object
+ * @param line_style drawing style of lines of shapes
+ * @param r red part of RGBA color
+ * @param g green part of RGBA color
+ * @param b blue part of RGBA color
+ * @param a alpha part of RGBA color
+ */
 VisualDisplay2D::Shape::Shape(unsigned int id, unsigned int owner,
 			      VisualDisplay2DInterface::LineStyle line_style,
 			      unsigned char r, unsigned char g,
@@ -120,11 +190,32 @@ VisualDisplay2D::Shape::Shape(unsigned int id, unsigned int owner,
   _color_a    = a / 255.f;
 }
 
+
+/** Virtual empty destructor. */
 VisualDisplay2D::Shape::~Shape()
 {
 }
 
 
+/** @class VisualDisplay2D::Line "visdisplay.h"
+ * Class representing a line.
+ * Line represented by two end points in cartesian coordinates.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param x1 X coordinate of first point
+ * @param y1 Y coordinate of first point
+ * @param x2 X coordinate of second point
+ * @param y2 Y coordinate of second point
+ * @param id object ID
+ * @param owner ID of the owner of the object
+ * @param line_style drawing style of lines of shapes
+ * @param r red part of RGBA color
+ * @param g green part of RGBA color
+ * @param b blue part of RGBA color
+ * @param a alpha part of RGBA color
+ */
 VisualDisplay2D::Line::Line(float x1, float y1, float x2, float y2,
 			    unsigned int id, unsigned int owner,
 			    VisualDisplay2DInterface::LineStyle line_style,
@@ -149,6 +240,26 @@ VisualDisplay2D::Line::draw(Cairo::RefPtr<Cairo::Context> &cr)
 
 
 
+/** @class VisualDisplay2D::Rectangle "visdisplay.h"
+ * Class representing a rectangle.
+ * Rectangle represented the cartesian coordinates of the lower right corner
+ * and its width and height.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param x X coordinate of lower right point
+ * @param y Y coordinate of lower right  point
+ * @param width width of rectangle
+ * @param height height of rectangle
+ * @param id object ID
+ * @param owner ID of the owner of the object
+ * @param line_style drawing style of lines of shapes
+ * @param r red part of RGBA color
+ * @param g green part of RGBA color
+ * @param b blue part of RGBA color
+ * @param a alpha part of RGBA color
+ */
 VisualDisplay2D::Rectangle::Rectangle(float x, float y, float width, float height,
 				      unsigned int id, unsigned int owner,
 				      VisualDisplay2DInterface::LineStyle line_style,
@@ -171,6 +282,24 @@ VisualDisplay2D::Rectangle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 
 
 
+/** @class VisualDisplay2D::Circle "visdisplay.h"
+ * Class representing a circle
+ * Line represented by its center point and radius.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param x X coordinate of center point
+ * @param y Y coordinate of center point
+ * @param radius radius of the circle
+ * @param id object ID
+ * @param owner ID of the owner of the object
+ * @param line_style drawing style of lines of shapes
+ * @param r red part of RGBA color
+ * @param g green part of RGBA color
+ * @param b blue part of RGBA color
+ * @param a alpha part of RGBA color
+ */
 VisualDisplay2D::Circle::Circle(float x, float y, float radius,
 				unsigned int id, unsigned int owner,
 				VisualDisplay2DInterface::LineStyle line_style,
@@ -191,6 +320,26 @@ VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 }
 
 
+/** @class VisualDisplay2D::Text "visdisplay.h"
+ * Class representing a text object.
+ * Text is represented by a cartesian coordinate, which denotes a specific
+ * point defined by the anchor, the text itself, and a text size.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param x X coordinate of anchor point
+ * @param y Y coordinate of anchor point
+ * @param text text to display
+ * @param anchor anchor point relative to the text's bounding box
+ * @param size height of font in meters
+ * @param id object ID
+ * @param owner ID of the owner of the object
+ * @param r red part of RGBA color
+ * @param g green part of RGBA color
+ * @param b blue part of RGBA color
+ * @param a alpha part of RGBA color
+ */
 VisualDisplay2D::Text::Text(float x, float y, std::string text,
 			    fawkes::VisualDisplay2DInterface::Anchor anchor,
 			    float size,
