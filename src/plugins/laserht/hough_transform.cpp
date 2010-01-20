@@ -27,6 +27,22 @@
 #include <cstdio>
 #include <cstdlib>
 
+/** @class HoughTransform "hough_transform.h"
+ * Hough Transformation for N-dimensional representations.
+ * This class implements a generic Hough transformation, which can operate
+ * on representations of arbitrary dimension (at least in theory ignoring
+ * computational feasibility).
+ * The implementation uses a tree structure to represent the buckets in the
+ * Hough space, to reduce the amount of memory required on sparse data
+ * sets and to allow fast insertion of new samples.
+ * The code is based on ideas from a Hough transform implemented in
+ * FireVision, but eliminating some of its limitations.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param num_dims number of dimensions
+ */
 HoughTransform::HoughTransform(unsigned int num_dims)
 {
   __root = new Node(num_dims);
@@ -37,13 +53,20 @@ HoughTransform::HoughTransform(unsigned int num_dims)
   __max_values = new int[num_dims];
 }
 
+/** Destructor. */
 HoughTransform::~HoughTransform()
 {
   delete __root;
   delete[] __max_values;
 }
 
-
+/** Process some samples.
+ * @param values two dimensional array of values. The first index determines
+ * the sample index, the second index the dimension index. Thus its an
+ * array with the length of number of values of arrays with the length of
+ * the number of dimensions.
+ * @param num_values number of rows in values
+ */
 void
 HoughTransform::process(int **values, unsigned int num_values)
 {
@@ -58,7 +81,13 @@ HoughTransform::process(int **values, unsigned int num_values)
   }
 }
 
-
+/** Get maximum values.
+ * During processing the maximum values, i.e. the candidate with the
+ * maximum number of votes or the most filled bucket, is stored and can
+ * be retrieved with this method.
+ * @param values upon return contains the maximum voted values
+ * @return number of votes of the values
+ */
 unsigned int
 HoughTransform::max(int *values) const
 {
@@ -69,6 +98,15 @@ HoughTransform::max(int *values) const
 }
 
 
+/** Filter values by number of votes.
+ * This method filters all created buckets and returns only the ones which
+ * have at least @p min_count votes
+ * @param values upon return points to a newly allocated array of values with
+ * the size of number of values * number of dimensions. The memory must be
+ * freed when done by using free().
+ * @param min_count minimum number of votes required to consider a bucket
+ * @return number of values found
+ */
 unsigned int
 HoughTransform::filter(int **values, unsigned int min_count)
 {
@@ -76,12 +114,18 @@ HoughTransform::filter(int **values, unsigned int min_count)
 }
 
 
+/** Get root node.
+ * @return root node of internal tree, meant for debugging and performance
+ * evaluation
+ */
 HoughTransform::Node *
 HoughTransform::root()
 {
   return __root;
 }
 
+/** Reset Hough transform.
+ * This deletes the internal tree and creates a new empty one. */
 void
 HoughTransform::reset()
 {
@@ -93,6 +137,24 @@ HoughTransform::reset()
   }
 }
 
+/** @class HoughTransform::Node "hough_transform.h"
+ * Hough transform tree node.
+ * The nodes are used to form a tree. The tree is organized as stacked
+ * binary trees. At a certain stack level, a value of a specific dimension
+ * is stored, with the left and right sub-trees pointing to smaller or
+ * higher values respectively.
+ * Nodes with a stack level of 1 (e.g. the bottom-most level) have a field
+ * to count the number of votes (these are the bucket nodes). Nodes on
+ * higher levels have a pointer to another node on a stack level one lower
+ * than the own, which represents the next dimension of the values.
+ * @author Tim Niemueller
+ * @author Hu Yuxiao
+ */
+
+/** Constructor.
+ * @param dims number of remaining dimensions (including the own)
+ * @param value the initial value of the node
+ */
 HoughTransform::Node::Node(unsigned int dims, int value)
 {
   __dims   = dims;
@@ -106,6 +168,11 @@ HoughTransform::Node::Node(unsigned int dims, int value)
   //}
 }
 
+/** Constructor with parent node.
+ * @param parent parent node of the new node
+ * @param dims number of remaining dimensions (including the own)
+ * @param value the initial value of the node
+ */
 HoughTransform::Node::Node(Node *parent, unsigned int dims, int value)
 {
   __parent = parent;
@@ -119,15 +186,17 @@ HoughTransform::Node::Node(Node *parent, unsigned int dims, int value)
   //}
 }
 
+/** Constructor. */
 HoughTransform::Node::Node()
 {
-  __dims   = 123;
+  __dims   = 1;
   __value  = 0;
   __count  = 0;
   __parent = NULL;
   __left = __right = __dim_next = __filter_next = 0;
 }
 
+/** Destructor. */
 HoughTransform::Node::~Node()
 {
   delete __left;
@@ -136,6 +205,11 @@ HoughTransform::Node::~Node()
 }
 
 
+/** Insert new values.
+ * @param values array with new values, must be of the size of the number
+ * of dimensions
+ * @return number of votes of bucket the values have been inserted to
+ */
 unsigned int
 HoughTransform::Node::insert(int *values)
 {
@@ -168,6 +242,9 @@ HoughTransform::Node::insert(int *values)
 }
 
 
+/** Get number of nodes.
+ * @return number of nodes
+ */
 unsigned int
 HoughTransform::Node::num_nodes()
 {
@@ -178,6 +255,10 @@ HoughTransform::Node::num_nodes()
   return rv;
 }
 
+
+/** Depth of the tree.
+ * @return maximum depth of tree
+ */
 unsigned int
 HoughTransform::Node::depth()
 {
@@ -189,6 +270,9 @@ HoughTransform::Node::depth()
 }
 
 
+/** Get length of filtered list.
+ * @return length of filtered list
+ */
 unsigned int
 HoughTransform::Node::filtered_length()
 {
@@ -202,6 +286,16 @@ HoughTransform::Node::filtered_length()
   return rv;
 }
 
+
+/** Filter values by number of votes.
+ * This method filters all created buckets and returns only the ones which
+ * have at least @p min_count votes
+ * @param values upon return points to a newly allocated array of values with the
+ * size of number of values * number of dimensions. The memory must be freed
+ * when done by using free().
+ * @param min_count minimum number of votes required to consider a bucket
+ * @return number of values found
+ */
 unsigned int
 HoughTransform::Node::filter(int **values, unsigned int min_count)
 {
@@ -226,6 +320,11 @@ HoughTransform::Node::filter(int **values, unsigned int min_count)
 }
 
 
+/** Internal filter recursion function.
+ * @param tail current tail
+ * @param min_count minimum number of votes required to consider a bucket
+ * @return new tail node
+ */
 HoughTransform::Node *
 HoughTransform::Node::filter(Node *tail, unsigned int min_count)
 {
