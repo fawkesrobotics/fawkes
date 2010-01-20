@@ -3,7 +3,7 @@
  *  laser_drawing_area.cpp - Laser drawing area derived from Gtk::DrawingArea
  *
  *  Created: Thu Oct 09 18:20:21 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,9 +21,11 @@
  */
 
 #include "laser_drawing_area.h"
+#include "visdisplay.h"
 #include <interfaces/Laser720Interface.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/ObjectPositionInterface.h>
+#include <interfaces/VisualDisplay2DInterface.h>
 #include <utils/math/angle.h>
 #include <gui_utils/robot/drawer.h>
 #include <algorithm>
@@ -60,11 +62,15 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
   __l_track_if = NULL;
   __target_if = NULL;
   __switch_if = NULL;
+  __line_if   = NULL;
+  __visdisp_if = NULL;
   __robot_drawer = NULL;
   __resolution = 1;
   __rotation = 0;
   __break_drawing = false;
   __first_draw = true;
+
+  __visdisp = new VisualDisplay2D();
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
 
@@ -91,10 +97,14 @@ LaserDrawingArea::LaserDrawingArea()
   __l_track_if = NULL;
   __target_if = NULL;
   __switch_if = NULL;
+  __line_if   = NULL;
+  __visdisp_if = NULL;
   __robot_drawer = NULL;
   __resolution = 1;
   __rotation = 0;
   __break_drawing = false;
+
+  __visdisp = new VisualDisplay2D();
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
 
@@ -106,6 +116,12 @@ LaserDrawingArea::LaserDrawingArea()
 
 }
 
+
+/** Destructor. */
+LaserDrawingArea::~LaserDrawingArea()
+{
+  delete __visdisp;
+}
 
 /** Set ObjectPosition interfaces.
  * @param  l_objpos_if_persons list of objectposition interfaces for persons
@@ -179,6 +195,17 @@ void
 LaserDrawingArea::set_line_if(ObjectPositionInterface *line_if)
 {
   __line_if = line_if;
+}
+
+
+/** Set visual display interface.
+ * @param visdisp_if interface to query for drawing ops
+ */
+void
+LaserDrawingArea::set_visdisp_if(VisualDisplay2DInterface *visdisp_if)
+{
+  __visdisp_if = visdisp_if;
+  __visdisp->set_interface(__visdisp_if);
 }
 
 
@@ -317,21 +344,41 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       draw_segments(window, cr);
       draw_persons_legs(window, cr);
 
-      const float radius = 4 / __zoom_factor;
-      if (__line_if) {
-	__line_if->read();
-	cr->rectangle(-__line_if->world_y() - radius * 0.5, -__line_if->world_x() - radius * 0.5, radius, radius);
-	cr->rectangle(-__line_if->relative_y() - radius * 0.5, -__line_if->relative_x() - radius * 0.5, radius, radius);
-	cr->fill_preserve();
-	cr->stroke();
-	cr->move_to(-__line_if->world_y(), -__line_if->world_x());
-	cr->line_to(-__line_if->relative_y(), -__line_if->relative_x());
-	cr->stroke();
-      }
-
       if(__switch_if != NULL && __switch_if->has_writer()){
 	SwitchInterface::EnableSwitchMessage *esm = new SwitchInterface::EnableSwitchMessage();
 	__switch_if->msgq_enqueue(esm);
+      }
+    }
+    cr->restore();
+
+    cr->save();
+    cr->rotate(0.5 * M_PI + __rotation);
+    cr->scale(-__zoom_factor, __zoom_factor);
+    cr->set_line_width(1. / __zoom_factor);
+    if (__visdisp_if) {
+      __visdisp->process_messages();
+      __visdisp->draw(cr);
+    }
+
+    const float radius = 0.01;
+    if (__line_if) {
+      __line_if->read();
+      if (__line_if->has_writer() &&
+	  __line_if->is_valid() && __line_if->is_visible()) {
+
+	cr->set_source_rgb(1, 0, 0);
+	/*
+	std::vector<double> dashes(1);
+	dashes[0] = 0.1;
+	cr->set_dash(dashes, 0);
+	*/
+	cr->rectangle(__line_if->world_x() - radius * 0.5, __line_if->world_y() - radius * 0.5, radius, radius);
+	cr->rectangle(__line_if->relative_x() - radius * 0.5, __line_if->relative_y() - radius * 0.5, radius, radius);
+	cr->fill_preserve();
+	cr->stroke();
+	cr->move_to(__line_if->world_x(), __line_if->world_y());
+	cr->line_to(__line_if->relative_x(), __line_if->relative_y());
+	cr->stroke();
       }
     }
     cr->restore();
@@ -552,11 +599,11 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
     float* x_positions1;
     float* y_positions1;
     int* timestamps1;
-    float* x_positions2;
-    float* y_positions2;
-    unsigned int track_length1;
-    unsigned int track_length2;
-    int* timestamps2;
+    float* x_positions2 = NULL;
+    float* y_positions2 = NULL;
+    unsigned int track_length1 = 0;
+    unsigned int track_length2 = 0;
+    int* timestamps2 = NULL;
     unsigned int id;
     cr->set_font_size(0.03);
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS
