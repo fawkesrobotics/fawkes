@@ -20,6 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <fvutils/system/camargp.h>
 #include <cams/swissranger.h>
 
 int
@@ -27,7 +28,8 @@ main(int argc, char **argv)
 {
   SwissRangerCamera::print_available_cams();
 
-  SwissRangerCamera *cam = new SwissRangerCamera(0);
+  CameraArgumentParser cap("");
+  SwissRangerCamera *cam = new SwissRangerCamera(&cap);
   cam->open();
   cam->print_info();
   cam->close();
