@@ -115,5 +115,6 @@ INSERT INTO "config" VALUES('/hardware/laser/use_dead_spots_filter','bool','1','
 INSERT INTO "config" VALUES('/plugins/festival/voice','string','nitech_us_bdl_arctic_hts','Voice to use for Festival speech synth');
 INSERT INTO "config" VALUES('/fawkes/bblogger/scenario','string','qatest','Current logging scenario');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/buffering','bool',1,'Enable buffering for this scenario?');
+INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/flushing','bool',0,'Flush file stream after each chunk? Can severely influence performance, but when enabled allows real-time log watching.');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/interfaces/test','string','TestInterface::BBLoggerTest',NULL);
 COMMIT;

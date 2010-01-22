@@ -63,11 +63,12 @@ using namespace fawkes;
  * @param iface_uid interface UID which to log
  * @param logdir directory to store config files, must exist
  * @param buffering enable log buffering?
+ * @param flushing true to flush after each written chunk
  * @param scenario ID of the log scenario
  * @param start_time time to use as start time for the log
  */
 BBLoggerThread::BBLoggerThread(const char *iface_uid,
-			       const char *logdir, bool buffering,
+			       const char *logdir, bool buffering, bool flushing,
 			       const char *scenario, fawkes::Time *start_time)
   : Thread("BBLoggerThread", Thread::OPMODE_WAITFORWAKEUP),
     BlackBoardInterfaceListener("BBLoggerThread(%s)", iface_uid)
@@ -76,6 +77,7 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
   set_name("BBLoggerThread(%s)", iface_uid);
 
   __buffering   = buffering;
+  __flushing    = flushing;
   __uid         = strdup(iface_uid);
   __logdir      = strdup(logdir);
   __scenario    = strdup(scenario);
@@ -251,6 +253,7 @@ BBLoggerThread::write_chunk(const void *chunk)
   ehead.rel_time_usec = rel_time_usec;
   if ( (fwrite(&ehead, sizeof(ehead), 1, __f_data) == 1) &&
        (fwrite(chunk, __data_size, 1, __f_data) == 1) ) {
+    if (__flushing)  fflush(__f_data);
     __num_data_items += 1;
   } else {
     logger->log_warn(name(), "Failed to write chunk");

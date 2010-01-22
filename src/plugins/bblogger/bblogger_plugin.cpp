@@ -66,11 +66,15 @@ BlackBoardLoggerPlugin::BlackBoardLoggerPlugin(Configuration *config)
 
   std::string logdir = LOGDIR;
   bool        buffering = true;
+  bool        flushing = false;
   try {
     logdir = config->get_string((scenario_prefix + "logdir").c_str());
   } catch (Exception &e) { /* ignored, use default set above */ }
   try {
     buffering = config->get_bool((scenario_prefix + "buffering").c_str());
+  } catch (Exception &e) { /* ignored, use default set above */ }
+  try {
+    flushing = config->get_bool((scenario_prefix + "flushing").c_str());
   } catch (Exception &e) { /* ignored, use default set above */ }
 
   struct stat s;
@@ -97,7 +101,8 @@ BlackBoardLoggerPlugin::BlackBoardLoggerPlugin(Configuration *config)
 
     //printf("Adding sync thread for peer %s\n", peer.c_str());
     BBLoggerThread *log_thread = new BBLoggerThread(i->get_string().c_str(),
-						    logdir.c_str(), buffering,
+						    logdir.c_str(),
+						    buffering, flushing,
 						    scenario.c_str(), &start);
     thread_list.push_back(log_thread);
   }

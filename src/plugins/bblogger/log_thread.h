@@ -50,7 +50,7 @@ class BBLoggerThread
 {
  public:
   BBLoggerThread(const char *iface_uid,
-		 const char *logdir, bool buffering,
+		 const char *logdir, bool buffering, bool flushing,
 		 const char *scenario, fawkes::Time *start_time);
   virtual ~BBLoggerThread();
 
@@ -78,6 +78,7 @@ class BBLoggerThread
   unsigned int        __session_start;
 
   bool                __buffering;
+  bool                __flushing;
   size_t              __data_size;
   char               *__scenario;
   char               *__filename;
