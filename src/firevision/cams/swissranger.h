@@ -36,16 +36,20 @@ class SwissRangerCamera
 : public Camera
 {
  public:
+  /** Operation mode of the camera. */
   typedef enum {
-    DISTANCE,
-    DISTANCE_GRAY_8,
-    AMPLITUDE,
-    AMPLITUDE_GRAY,
-    AMPLITUDE_GRAY_8,
-    CONF_MAP,
-    CARTESIAN_UINT16,
-    CARTESIAN_FLOAT,
-    CARTESIAN_DOUBLE
+    DISTANCE,		/**< raw distance image, unsigned short distance values */
+    DISTANCE_GRAY_8,	/**< gray distance image, plain gray 8bpp buffer */
+    AMPLITUDE,		/**< raw amplitude image, unsigned short values */
+    AMPLITUDE_GRAY,	/**< amplitude gray image, 16bpp */
+    AMPLITUDE_GRAY_8,	/**< amplitude gray image, 8bpp */
+    CONF_MAP,		/**< confidence map, 16bpp*/
+    CARTESIAN_UINT16,	/**< Cartesian coordinates, three consecutive planes for
+			 * X, Y, Z data, each with unsigned short values (mm) */
+    CARTESIAN_FLOAT,	/**< Cartesian coordinates, three consecutive planes for
+			 * X, Y, Z data, each with float values (meters) */
+    CARTESIAN_DOUBLE	/**< Cartesian coordinates, three consecutive planes for
+			 * X, Y, Z data, each with double values (meters) */
   } mode_t;
 
   SwissRangerCamera(const CameraArgumentParser *cap);

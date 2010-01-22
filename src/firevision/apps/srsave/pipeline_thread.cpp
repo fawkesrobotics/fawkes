@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class FvSrSavePipelineThread <apps/srSave/pipeline_thread.h>
+/** @class FvSrSavePipelineThread "pipeline_thread.h"
  * SrSave vision image processing pipeline.
  * This thread implements an image processing pipeline that uses a colormodel and
  * classifier to determine regions of interest (ROI) which contain a significant

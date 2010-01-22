@@ -32,7 +32,7 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * Just adds the pipeline thread to the list of threads
+ * @param config Fawkes configuration
  */
 FvSrSavePlugin::FvSrSavePlugin(fawkes::Configuration *config)
   : Plugin(config)
