@@ -25,6 +25,8 @@
 
 #include <interface/interface.h>
 
+#include <stdint.h>
+
 #define BBLOGGER_FILE_VERSION 1
 
 #pragma pack(push,4)

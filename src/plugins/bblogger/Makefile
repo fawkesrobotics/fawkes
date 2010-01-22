@@ -15,6 +15,8 @@
 
 BASEDIR = ../../..
 
+SUBDIRS=console
+
 LIBS_bblogger = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
 OBJS_bblogger = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
