@@ -106,6 +106,7 @@ class SwissRangerCamera
   unsigned int __width;
   unsigned int __height;
 
+  size_t          __buffer_size;
   unsigned char  *__buffer;
   unsigned char  *__gray_buffer;
   void           *__coord_uint16_buf;

@@ -130,6 +130,7 @@ SwissRangerCamera::open()
     SR_SetModulationFrequency(__cam, __modulation_freq);
   }
 
+  __buffer_size      = __width * __height;
   __gray_buffer      = NULL;
   __coord_uint16_buf = NULL;
   __coord_float_buf  = NULL;
@@ -138,19 +139,22 @@ SwissRangerCamera::open()
     __gray_buffer = (unsigned char *)malloc(__width * __height);
     __buffer = __gray_buffer;
   } else if (__mode == CARTESIAN_UINT16) {
-    __coord_uint16_buf = (unsigned short *)malloc(3 * __width * __height * sizeof(unsigned short));
+    __buffer_size = 3 * __width * __height * sizeof(unsigned short);
+    __coord_uint16_buf = (unsigned short *)malloc(__buffer_size);
     __xu = (short *)__coord_uint16_buf;
     __yu = &(__xu[__width * __height]);
     __zu = (unsigned short *)&(__yu[__width * __height]);
     __buffer = (unsigned char *)__coord_uint16_buf;
   } else if (__mode == CARTESIAN_FLOAT) {
-    __coord_float_buf = (float *)malloc(3 * __width * __height * sizeof(float));
+    __buffer_size = 3 * __width * __height * sizeof(float);
+    __coord_float_buf = (float *)malloc(__buffer_size);
     __xf = __coord_float_buf;
     __yf = &(__coord_float_buf[    __width * __height]);
     __zf = &(__coord_float_buf[2 * __width * __height]);
     __buffer = (unsigned char *)__coord_float_buf;
   } else if (__mode == CARTESIAN_FLOAT) {
-    __coord_double_buf = (double *)malloc(3 * __width * __height * sizeof(double));
+    __buffer_size = 3 * __width * __height * sizeof(double);
+    __coord_double_buf = (double *)malloc(__buffer_size);
     __xd = __coord_double_buf;
     __yd = &(__coord_double_buf[    __width * __height]);
     __zd = &(__coord_double_buf[2 * __width * __height]);
@@ -266,9 +270,11 @@ SwissRangerCamera::capture()
   } else if (__mode == CARTESIAN_UINT16) {
     SR_CoordTrfUint16(__cam, __xu, __yu, __zu, 2, 2, 2);
   } else if (__mode == CARTESIAN_FLOAT) {
-    SR_CoordTrfUint16(__cam, __xu, __yu, __zu, 2, 2, 2);
-  } else if (__mode == CARTESIAN_FLOAT) {
-    SR_CoordTrfUint16(__cam, __xu, __yu, __zu, 2, 2, 2);
+    SR_CoordTrfFlt(__cam, __xf, __yf, __zf,
+		   sizeof(float), sizeof(float), sizeof(float));
+  } else if (__mode == CARTESIAN_DOUBLE) {
+    SR_CoordTrfDbl(__cam, __xd, __yd, __zd,
+		   sizeof(double), sizeof(double), sizeof(double));
   }
 }
 
@@ -283,7 +289,7 @@ unsigned char*
 SwissRangerCamera::buffer()
 {
   if ( _valid_frame_received ) {
-    return __gray_buffer;
+    return __buffer;
   } else {
     return NULL;
   }
@@ -294,7 +300,7 @@ unsigned int
 SwissRangerCamera::buffer_size()
 {
   if ( _valid_frame_received ) {
-    return 0; // FIXME
+    return __buffer_size;
   } else {
     return 0;
   }
@@ -303,8 +309,7 @@ SwissRangerCamera::buffer_size()
 void
 SwissRangerCamera::dispose_buffer()
 {
-  if ( _valid_frame_received ) {
-  }
+  _valid_frame_received = false;
 }
 
 
