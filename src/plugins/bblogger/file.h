@@ -61,7 +61,7 @@ typedef struct {
 						 * config */
   char     interface_type[BBLOG_INTERFACE_TYPE_SIZE];	/**< Interface type */
   char     interface_id[BBLOG_INTERFACE_ID_SIZE];	/**< Interface ID */
-  char     interface_hash[BBLOG_INTERFACE_HASH_SIZE];	/**< Interface Hash */
+  unsigned char interface_hash[BBLOG_INTERFACE_HASH_SIZE];	/**< Interface Hash */
   uint32_t data_size;		/**< size of one interface data block */
   uint64_t start_time_sec;	/**< Start time, timestamp seconds */
   uint64_t start_time_usec;	/**< Start time, timestamp microseconds */

@@ -101,9 +101,8 @@ print_header(FILE *f, bblog_file_header *header)
   strncpy(interface_type, header->interface_type, BBLOG_INTERFACE_TYPE_SIZE);
   strncpy(interface_id, header->interface_id, BBLOG_INTERFACE_ID_SIZE);
 
-  unsigned int *hash_array = (unsigned int*)header->interface_hash;
-  for (unsigned int i = 0; i < BBLOG_INTERFACE_HASH_SIZE / 4; ++i) {
-    sprintf(&interface_hash[i * 4], "%X", hash_array[i]);
+  for (unsigned int i = 0; i < BBLOG_INTERFACE_HASH_SIZE; ++i) {
+    snprintf(&interface_hash[i*2], 3, "%02X", header->interface_hash[i]);
   }
 
   Time t(header->start_time_sec, header->start_time_usec);
