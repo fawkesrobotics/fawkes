@@ -27,6 +27,7 @@
 
 #include <stdint.h>
 
+#define BBLOGGER_FILE_MAGIC 0xffbbffbb
 #define BBLOGGER_FILE_VERSION 1
 
 #pragma pack(push,4)
@@ -50,9 +51,10 @@
  * you must do data conversion.
  */
 typedef struct {
+  uint32_t file_magic;		/**< Magic value to identify file,
+				 * must be 0xFFBBFFBB (big endian) */
   uint32_t file_version;	/**< File version, set to BBLOGGER_FILE_VERSION on
-				 * write and verify on read, stored in network
-				 * byte order */
+				 * write and verify on read (big endian) */
   uint32_t endianess :  1;	/**< Endianess, 0 little endian, 1 big endian */
   uint32_t reserved  : 31;	/**< Reserved for future use */
   uint32_t num_data_items;	/**< Number of data items in file, if set to zero

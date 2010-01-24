@@ -68,23 +68,28 @@ print_usage(const char *program_name)
 void
 read_file_header(FILE *f, bblog_file_header *header)
 {
+  uint32_t magic;
   uint32_t version;
-  if (fread(&version, sizeof(uint32_t), 1, f) == 1) {
-    if (ntohl(version) == BBLOGGER_FILE_VERSION) {
+  if ((fread(&magic, sizeof(uint32_t), 1, f) == 1) &&
+      (fread(&version, sizeof(uint32_t), 1, f) == 1) ) {
+    if ( (ntohl(magic) == BBLOGGER_FILE_MAGIC) &&
+	 (ntohl(version) == BBLOGGER_FILE_VERSION) ) {
       rewind(f);
       if (fread(header, sizeof(bblog_file_header), 1, f) != 1) {
 	printf("Failed to read file header\n");
 	throw Exception(errno, "Failed to read file header");
       }
     } else {
-      printf("File version %u does not match supported version %u",
-	     version, BBLOGGER_FILE_VERSION);
-      throw Exception("File version %u does not match supported version %u",
-		      version, BBLOGGER_FILE_VERSION);
+      printf("File magic/version %X/%u does not match (expected %X/%u)",
+	     ntohl(magic), ntohl(version),
+	     BBLOGGER_FILE_MAGIC, BBLOGGER_FILE_VERSION);
+      throw Exception("File magic/version %X/%u does not match (expected %X/%u)",
+		      ntohl(magic), ntohl(version),
+		      BBLOGGER_FILE_VERSION, BBLOGGER_FILE_MAGIC);
     }
   } else {
-    perror("Failed to read version number from file");
-    throw Exception(errno, "Failed to read version number from file");
+    perror("Failed to read magic/version from file");
+    throw Exception(errno, "Failed to read magic/version from file");
   }
 }
 

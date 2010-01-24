@@ -196,6 +196,7 @@ BBLoggerThread::write_header()
   bblog_file_header header;
   logger->log_debug(name(), "Writing header %zu", sizeof(header));
   memset(&header, 0, sizeof(header));
+  header.file_magic   = htonl(BBLOGGER_FILE_MAGIC);
   header.file_version = htonl(BBLOGGER_FILE_VERSION);
 #if __BYTE_ORDER == __BIG_ENDIAN
   header.endianess = BBLOG_BIG_ENDIAN;
@@ -206,8 +207,7 @@ BBLoggerThread::write_header()
   strncpy(header.scenario, (const char *)__scenario, BBLOG_SCENARIO_SIZE);
   strncpy(header.interface_type, __iface->type(), BBLOG_INTERFACE_TYPE_SIZE);
   strncpy(header.interface_id, __iface->id(), BBLOG_INTERFACE_ID_SIZE);
-  strncpy(header.interface_hash, (const char *)__iface->hash(),
-	  BBLOG_INTERFACE_HASH_SIZE);
+  memcpy(header.interface_hash, __iface->hash(), BBLOG_INTERFACE_HASH_SIZE);
   header.data_size = __iface->datasize();
   long start_time_sec, start_time_usec;
   __start->get_timestamp(start_time_sec, start_time_usec);
