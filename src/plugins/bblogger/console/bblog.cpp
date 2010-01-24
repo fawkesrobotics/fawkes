@@ -121,7 +121,7 @@ print_header(FILE *f, bblog_file_header *header, const char *line_prefix = "",
   fprintf(outf,
 	  "%sFile version: %-10u  Endianess: %s Endian\n"
 	  "%s# data items: %-10u  Data size: %u bytes\n"
-	  "%sHeader size:  %zu bytes   File size: %zu bytes\n%s\n"
+	  "%sHeader size:  %zu bytes   File size: %li bytes\n%s\n"
 	  "%sScenario:   %s\n"
 	  "%sInterface:  %s::%s (%s)\n"
 	  "%sStart time: %s\n",
@@ -155,8 +155,8 @@ sanity_check(FILE *f, bblog_file_header *header)
     + header->num_data_items * header->data_size
     + header->num_data_items * sizeof(bblog_entry_header);
   if (expected_size != fs.st_size) {
-    printf("\nWARNING: file size does not match expectation. Expected %zu b,\n"
-	   "         but file has %zu b. The logger might still be running.\n"
+    printf("\nWARNING: file size does not match expectation. Expected %li b,\n"
+	   "         but file has %li b. The logger might still be running.\n"
 	   "         Otherwise use repair command to fix the file.\n",
 	   expected_size, fs.st_size);
     throw Exception("file size does not match expectation");
