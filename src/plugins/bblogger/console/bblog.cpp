@@ -90,7 +90,8 @@ read_file_header(FILE *f, bblog_file_header *header)
 
 
 void
-print_header(FILE *f, bblog_file_header *header)
+print_header(FILE *f, bblog_file_header *header, const char *line_prefix = "", 
+	     FILE *outf = stdout)
 {
   char scenario[BBLOG_SCENARIO_SIZE + 1];
   char interface_type[BBLOG_INTERFACE_TYPE_SIZE + 1];
@@ -112,16 +113,20 @@ print_header(FILE *f, bblog_file_header *header)
     throw Exception(errno, "Failed to get stat file");
   }
 
-  printf("File version: %-10u  Endianess: %s Endian\n"
-	 "# data items: %-10u  Data size: %u bytes\n"
-	 "Header size:  %zu bytes   File size: %zu bytes\n\n"
-	 "Scenario:   %s\n"
-	 "Interface:  %s::%s (%s)\n"
-	 "Start time: %s\n",
-	 htonl(header->file_version), (header->endianess == 1) ? "Big" : "Little",
-	 header->num_data_items, header->data_size,
-	 sizeof(bblog_file_header), fs.st_size,
-	 scenario, interface_type, interface_id, interface_hash, t.str());
+  fprintf(outf,
+	  "%sFile version: %-10u  Endianess: %s Endian\n"
+	  "%s# data items: %-10u  Data size: %u bytes\n"
+	  "%sHeader size:  %zu bytes   File size: %zu bytes\n%s\n"
+	  "%sScenario:   %s\n"
+	  "%sInterface:  %s::%s (%s)\n"
+	  "%sStart time: %s\n",
+	  line_prefix, htonl(header->file_version),
+	  (header->endianess == 1) ? "Big" : "Little",
+	  line_prefix, header->num_data_items, header->data_size,
+	  line_prefix, sizeof(bblog_file_header), fs.st_size, line_prefix,
+	  line_prefix, scenario,
+	  line_prefix, interface_type, interface_id, interface_hash,
+	  line_prefix, t.str());
 
 }
 
@@ -564,6 +569,95 @@ watch_file(std::string &filename)
 /// @endcond
 
 
+void
+convert_file_csv(FILE *inf, FILE *outf, bblog_file_header *header)
+{
+  char interface_type[BBLOG_INTERFACE_TYPE_SIZE + 1];
+  char interface_id[BBLOG_INTERFACE_ID_SIZE + 1];
+
+  strncpy(interface_type, header->interface_type, BBLOG_INTERFACE_TYPE_SIZE);
+  strncpy(interface_id, header->interface_id, BBLOG_INTERFACE_ID_SIZE);
+
+  BlackBoardInstanceFactory bbif;
+  Interface *iface = bbif.new_interface_instance(interface_type, interface_id);
+
+  if (memcmp(header->interface_hash, iface->hash(), BBLOG_INTERFACE_HASH_SIZE) != 0) {
+    printf("Cannot read data. Hash mismatch between local interface and\n"
+	   "log data.\n\n");
+    bbif.delete_interface_instance(iface);
+    throw Exception("Interface hash mismatch\n");
+  }
+
+  // print header row
+  fprintf(outf, "# Time relative to beginning");
+  InterfaceFieldIterator i;
+  for (i = iface->fields(); i != iface->fields_end(); ++i) {
+    fprintf(outf, ";%s (%s[%zu])",
+	    i.get_name(), i.get_typename(), i.get_length());
+  }
+  fprintf(outf, "\n");
+
+  bblog_entry_header entryh;
+  for (unsigned int i = 0; i < header->num_data_items; ++i) {
+    read_entry(inf, header, &entryh, iface, i);
+
+    fprintf(outf, "%u.%u", entryh.rel_time_sec, entryh.rel_time_usec);
+
+    InterfaceFieldIterator i;
+    for (i = iface->fields(); i != iface->fields_end(); ++i) {
+      fprintf(outf, ";%s", i.get_value_string());
+    }
+    fprintf(outf, "\n");
+  }
+
+  bbif.delete_interface_instance(iface);
+}
+
+
+int
+convert_file(std::string &infile, std::string &outfile, std::string &format)
+{
+  if (format != "csv") {
+    printf("Unsupported output format '%s'\n", format.c_str());
+    return 8;
+  }
+
+  FILE *inf = fopen(infile.c_str(), "r");
+  if (!inf) {
+    perror("Failed to open log file");
+    return 3;
+  }
+  FILE *outf = fopen(outfile.c_str(), "wx");
+  if (!outf) {
+    perror("Failed to open output file");
+    return 3;
+  }
+
+  try {
+    bblog_file_header header;
+    read_file_header(inf, &header);
+    sanity_check(inf, &header);
+    print_header(inf, &header, "# ", outf);
+
+    // Do the conversion!
+    if (format == "csv") {
+      convert_file_csv(inf, outf, &header);
+    }
+
+  } catch (Exception &e) {
+    //printf("Failed to read log file: %s\n", e.what());
+    fclose(inf);
+    fclose(outf);
+    return 4;
+  }
+
+  fclose(inf);
+  fclose(outf);
+
+  return 0;
+}
+
+
 /** BBLogger tool main.
  * @param argc argument count
  * @param argv arguments
@@ -618,6 +712,16 @@ main(int argc, char **argv)
 
   } else if (command == "repair") {
     return repair_file(file);
+
+  } else if (command == "convert") {
+    if (argp.num_items() != 4) {
+      printf("Invalid number of arguments\n");
+      print_usage(argv[0]);
+      exit(7);
+    }
+    std::string outfile = argp.items()[2];
+    std::string format = argp.items()[3];
+    return convert_file(file, outfile, format);
 
   } else {
     printf("Invalid command '%s'\n", command.c_str());
