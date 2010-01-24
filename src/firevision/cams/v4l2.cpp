@@ -1874,6 +1874,11 @@ V4L2Camera::print_info()
         cout << "ctrl_class";
         break;
 #endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,32)
+      case V4L2_CTRL_TYPE_STRING:
+        cout << "string";
+        break;
+#endif
     }
     cout << ")" << endl;
 
@@ -1943,6 +1948,11 @@ V4L2Camera::print_info()
 
       case V4L2_CTRL_TYPE_CTRL_CLASS:
         cout << "ctrl_class";
+        break;
+#endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,32)
+      case V4L2_CTRL_TYPE_STRING:
+        cout << "string";
         break;
 #endif
     }
