@@ -43,6 +43,7 @@
 #include <blackboard/local.h>
 #include <aspect/inifin.h>
 #include <plugin/manager.h>
+#include <plugin/loader.h>
 #include <plugin/net/handler.h>
 
 #include <cstdio>
@@ -320,10 +321,18 @@ FawkesMainThread::once()
   } else {
     try {
       __plugin_manager->load("default");
+    } catch (PluginLoadException &e) {
+      if (e.plugin_name() != "default") {
+	// only print if name is not default, i.e. one of the plugins that
+	// the default meta plugin
+	__multi_logger->log_error("FawkesMainThread", "Failed to load default "
+				  "plugins, exception follows");
+	__multi_logger->log_error("FawkesMainThread", e);
+      }
     } catch (Exception &e) {
-      // ignored, there is no default meta plugin set
-      __multi_logger->log_error("FawkesMainThread", "Failed to load default plugins, exception follows");
-      __multi_logger->log_error("FawkesMainThread", e);
+	__multi_logger->log_error("FawkesMainThread", "Failed to load default "
+				  "plugins, exception follows");
+	__multi_logger->log_error("FawkesMainThread", e);
     }
   }
 }

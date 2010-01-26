@@ -54,11 +54,16 @@ class PluginLoaderData
  * @param message message of exception
  */
 PluginLoadException::PluginLoadException(const char *plugin, const char *message)
-  : Exception()
+  : Exception(), __plugin_name(plugin)
 {
   append("Plugin '%s' could not be loaded: %s", plugin, message);
 }
 
+
+/** Destructor. */
+PluginLoadException::~PluginLoadException() throw()
+{
+}
 
 /** Constructor.
  * @param plugin name of the plugin that caused the exception
@@ -67,10 +72,19 @@ PluginLoadException::PluginLoadException(const char *plugin, const char *message
  */
 PluginLoadException::PluginLoadException(const char *plugin, const char *message,
 					 Exception &e)
-  : Exception()
+  : Exception(), __plugin_name(plugin)
 {
   append("Plugin '%s' could not be loaded: %s", plugin, message);
   copy_messages(e);
+}
+
+/** Get name of plugin which failed to load.
+ * @return plugin name
+ */
+std::string
+PluginLoadException::plugin_name() const
+{
+  return __plugin_name;
 }
 
 
