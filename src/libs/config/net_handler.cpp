@@ -464,7 +464,7 @@ ConfigNetworkHandler::loop()
 	      s = __config->get_default_comment(path);
 	    }
 	    size_t s_length = s.length();
-	    config_comment_msg_t *r = prepare_string_msg<config_comment_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_STRING), s_length);
+	    config_comment_msg_t *r = prepare_string_msg<config_comment_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_COMMENT), s_length);
 	    strcpy(r->s, s.c_str());
 	    __hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_COMMENT_VALUE,
 			r, sizeof(config_comment_msg_t) + s_length);
