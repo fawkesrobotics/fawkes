@@ -30,7 +30,7 @@ endif
 
 # Main install target
 .PHONY: install install_test_basedir install_config install_buildsys install_lua
-install: install_test_basedir presubdirs $(subst $(LIBDIR),$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_config install_lua
+install: install_test_basedir presubdirs $(subst $(LIBDIR),$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_buildsys install_config install_lua
 
 # Only allow "make install" from basedir
 install_test_basedir:
@@ -68,7 +68,30 @@ ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 endif
 
 install_buildsys:
+ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating buildsys directory $(EXEC_CONFDIR)"
+	$(SILENT)mkdir -p $(EXEC_BUILDSYSDIR)
+	$(SILENT)for f in $$(find $(BUILDSYSDIR) -type d -printf "%P\n"); do \
+		if [ "$$F" == "" ]; then continue; fi; \
+		mkdir -p $(BUILDSYSDIR)/$$f; \
+	done
+	$(SILENT)for f in $$(find $(BUILDSYSDIR) -type f ! -regex '.*[\~#]$$' -printf "%P\n"); do \
+		echo -e "$(INDENT_PRINT)--- Copying buildsys file $$f"; \
+		install -D -m 644 $(BUILDSYSDIR)/$$f $(EXEC_BUILDSYSDIR)/$$f; \
+	done
+	$(SILENT)echo -e "$(INDENT_PRINT)--- Setting installed build type to 'syswide'";
+	$(SILENT)sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=syswide/' $(EXEC_BUILDSYSDIR)/buildtype.mk
+	$(SILENT)echo -e "$(INDENT_PRINT)--- Setting installed EXEC_BASEDIR to '$(EXEC_BASEDIR)'";
+	$(SILENT)sed -i -e 's|^INSTALL_PREFIX\( *\)=.*$$|INSTALL_PREFIX\1= $(EXEC_BASEDIR)|' $(EXEC_BUILDSYSDIR)/btypes/config_syswide.mk
+	$(SILENT)mkdir -p $(EXEC_BUILDCONFDIR)
+	$(SILENT)find $(BUILDCONFDIR) -name '*.mk' -type f -printf "%f:%P\n" | \
+		while IFS=":" read basename relname; \
+		do \
+			echo -e "$(INDENT_PRINT)--- Copying buildsys config file $$relname"; \
+		install -D -m 644 $(BUILDCONFDIR)/$$relname $(EXEC_BUILDCONFDIR)/$$basename; \
+		done
+
+endif
 
 install_lua:
 ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
