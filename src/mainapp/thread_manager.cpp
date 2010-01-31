@@ -185,6 +185,7 @@ FawkesThreadManager::internal_remove_thread(Thread *t)
     BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
     if ( threads.find(hook) != threads.end() ) {
       threads[hook].remove_locked(t);
+      if (threads[hook].empty())  threads.erase(hook);
     }
   } else {
     untimed_threads.remove_locked(t);
