@@ -43,6 +43,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SwissRangerCamera <cams/swissranger.h>
  * SwissRanger camera.
  * This camera implementation provides access to the SwissRanger SR4000 camera
@@ -521,4 +526,6 @@ SwissRangerCamera::print_available_cams()
     }
   }
 }
+
+} // end namespace firevision
 

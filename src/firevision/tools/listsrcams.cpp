@@ -23,6 +23,8 @@
 #include <fvutils/system/camargp.h>
 #include <cams/swissranger.h>
 
+using namespace firevision;
+
 int
 main(int argc, char **argv)
 {

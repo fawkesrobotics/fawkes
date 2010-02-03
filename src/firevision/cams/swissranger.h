@@ -30,6 +30,11 @@
 // libmesasr header defining basic types and enums
 #include <definesSR.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 
 class SwissRangerCamera
@@ -130,5 +135,7 @@ class SwissRangerCamera
   double         *__zd;
 
 };
+
+} // end namespace firevision
 
 #endif
