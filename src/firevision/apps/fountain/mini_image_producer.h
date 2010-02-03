@@ -35,7 +35,7 @@ class MiniImageProducer {
  public:
 
   MiniImageProducer(const char *orig_id, const char *mini_id,
-		    firevision::Scaler *scaler, fawkes::ogger *logger);
+		    firevision::Scaler *scaler, fawkes::Logger *logger);
 
   ~MiniImageProducer();
 

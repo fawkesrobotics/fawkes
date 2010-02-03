@@ -60,9 +60,7 @@ namespace fawkes {
  * Column record object.
  */
 
-/** Constructor.
- * @param cobject pointer to base object type
- */
+/** Constructor. */
 PluginTreeView::PluginTreeView()
   : m_dispatcher(FAWKES_CID_PLUGINMANAGER)
 {

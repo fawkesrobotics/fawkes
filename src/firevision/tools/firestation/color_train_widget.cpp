@@ -84,12 +84,12 @@ ColorTrainWidget::~ColorTrainWidget()
 }
 
 /** Set the current foreground object.
- * @param object the foreground object
+ * @param fg_object the foreground object
  */
 void
-ColorTrainWidget::set_fg_object(hint_t object)
+ColorTrainWidget::set_fg_object(hint_t fg_object)
 {
-  m_fg_object = object;
+  m_fg_object = fg_object;
 }
 
 /** Set the buffer containing the image data.

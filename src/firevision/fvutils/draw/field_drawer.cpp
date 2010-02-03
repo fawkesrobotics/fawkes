@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FieldDrawer <fvutils/drawer/field_drawer.h>
+/** @class FieldDrawer <fvutils/draw/field_drawer.h>
  * This class is used to draw a soccer field.
  *
  * @author Christof Rath

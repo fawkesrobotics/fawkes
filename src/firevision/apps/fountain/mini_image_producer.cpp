@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  mini_image.cpp - mini image producer
+ *  mini_image_producer.cpp - mini image producer
  *
- *  Generated: Tue May 17 09:21:41 2006 (Automatica 2006)
+ *  Created: Tue May 17 09:21:41 2006 (Automatica 2006)
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/fountain/mini_image_producer.h>
+#include "mini_image_producer.h"
 
 #include <utils/system/console_colors.h>
 #include <utils/logging/logger.h>
@@ -29,9 +29,10 @@
 
 using namespace firevision;
 
-/** @class MiniImageProducer <apps/fountain/mini_image_producer.h>
+/** @class MiniImageProducer "mini_image_producer.h"
  * Mini image producer.
  * Uses a scaler to create small version of an image.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -41,7 +42,7 @@ using namespace firevision;
  * @param logger Logger
  */
 MiniImageProducer::MiniImageProducer(const char *orig_id, const char *mini_id,
-				     Scaler *scaler, Logger *logger)
+				     Scaler *scaler, fawkes::Logger *logger)
 {
   scale_factor = 0.25;
 
