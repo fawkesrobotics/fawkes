@@ -21,11 +21,8 @@
  */
 
 #include <tools/config_editor/config_add_dialog.h>
-#include <gui_utils/utils.h>
 
-using namespace fawkes;
-
-/** @class ConfigAddDialog tools/config_editor/config_add_dialog.h
+/** @class ConfigAddDialog "config_add_dialog.h"
  * Dialog to add a config entry
  *
  * @author Daniel Beck
@@ -56,6 +53,32 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param ent_path entry field for path
+ * @param ent_value entry field for value
+ * @param cob_bool_value combo box for bool values
+ * @param type_pages pages for different types
+ * @param cmb_type combo box for type
+ * @param chb_is_default check button for default values
+ */
+ConfigAddDialog::ConfigAddDialog(Gtk::Entry       *ent_path,
+				 Gtk::Entry       *ent_value,
+				 Gtk::ComboBox    *cob_bool_value,
+				 Gtk::Notebook    *type_pages,
+				 Gtk::ComboBox    *cmb_type,
+				 Gtk::CheckButton *chb_is_default)
+{
+  m_ent_path = ent_path;
+  m_cmb_type = cmb_type;
+  m_ent_value = ent_value;
+  m_cob_bool_value = cob_bool_value;
+  m_type_pages = type_pages;
+  m_chb_is_default = chb_is_default;
+  
+  m_cmb_type->signal_changed().connect( sigc::mem_fun( *this, &ConfigAddDialog::on_my_changed) );
+}
+
+#ifdef HAVE_GLADEMM
+/** Constructor.
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
  */
@@ -63,15 +86,16 @@ ConfigAddDialog::ConfigAddDialog( BaseObjectType* cobject,
 				  const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml )
   : Gtk::Dialog(cobject)
 {
-  m_ent_path       = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entPathAdd") );
-  m_cmb_type       = dynamic_cast<Gtk::ComboBox*>( get_widget(ref_xml, "cmbTypeAdd") );
-  m_ent_value      = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entValueAdd") );
-  m_cob_bool_value = dynamic_cast<Gtk::ComboBox*>( get_widget(ref_xml, "cmbBoolAdd") );
-  m_type_pages     = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "nbkTypesAdd") );
-  m_chb_is_default = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chbIsDefaultAdd") );
+  ref_xml->get_widget("entPathAdd", m_ent_path);
+  ref_xml->get_widget("cmbTypeAdd", m_cmb_type);
+  ref_xml->get_widget("entValueAdd", m_ent_value);
+  ref_xml->get_widget("cmbBoolAdd", m_cob_bool_value);
+  ref_xml->get_widget("nbkTypesAdd", m_type_pages);
+  ref_xml->get_widget("chbIsDefaultAdd", m_chb_is_default);
   
   m_cmb_type->signal_changed().connect( sigc::mem_fun( *this, &ConfigAddDialog::on_my_changed) );
 }
+#endif
 
 /** Destructor. */
 ConfigAddDialog::~ConfigAddDialog()

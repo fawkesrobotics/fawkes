@@ -24,13 +24,18 @@
 #define __TOOLS_CONFIG_EDITOR_CONFIG_REMOVE_DIALOG_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 
 class ConfigRemoveDialog : public Gtk::Dialog
 {
  public:
+  ConfigRemoveDialog(Gtk::Label *lbl_path, Gtk::CheckButton *chb_is_default);
+#ifdef HAVE_GLADEMM
   ConfigRemoveDialog( BaseObjectType* cobject,
 		      const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml );
+#endif
   virtual ~ConfigRemoveDialog();
 
   void init(const Glib::ustring& path, bool is_default);

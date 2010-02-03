@@ -21,11 +21,8 @@
  */
 
 #include <tools/config_editor/config_remove_dialog.h>
-#include <gui_utils/utils.h>
 
-using namespace fawkes;
-
-/** @class ConfigRemoveDialog tools/config_editor/config_remove_dialog.h
+/** @class ConfigRemoveDialog "config_remove_dialog.h"
  * Dialog to remove a config entry
  *
  * @author Daniel Beck
@@ -40,6 +37,17 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param lbl_path label of path to delete
+ * @param chb_is_default checkbutton for default value deletion
+ */
+ConfigRemoveDialog::ConfigRemoveDialog(Gtk::Label *lbl_path, Gtk::CheckButton *chb_is_default)
+{
+  m_lbl_path = lbl_path;
+  m_chb_is_default = chb_is_default;
+}
+
+#ifdef HAVE_GLADEMM
+/** Constructor.
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
  */
@@ -47,9 +55,10 @@ ConfigRemoveDialog::ConfigRemoveDialog( BaseObjectType* cobject,
 					const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml )
   : Gtk::Dialog(cobject)
 {
-  m_lbl_path = dynamic_cast<Gtk::Label*>( get_widget(ref_xml, "lblPath") );
-  m_chb_is_default = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chbIsDefaultRemove") );
+  ref_xml->get_widget("lblPath", m_lbl_path);
+  ref_xml->get_widget("chbIsDefaultRemove", m_chb_is_default);
 }
+#endif
 
 /** Destructor. */
 ConfigRemoveDialog::~ConfigRemoveDialog()

@@ -23,7 +23,6 @@
 #include "naostiffness_config_plugin.h"
 
 #include <config/config.h>
-#include <gui_utils/utils.h>
 
 using namespace fawkes;
 using std::string;
@@ -50,38 +49,38 @@ NaoStiffnessConfigDialog::NaoStiffnessConfigDialog(BaseObjectType *cobject,
                                                    const Glib::RefPtr<Gnome::Glade::Xml> &ref_xml)
   : Gtk::Dialog(cobject)
 {
-  __hy = dynamic_cast<SpinButton *>(get_widget(ref_xml, "hy"));
-  __hp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "hp"));
+  ref_xml->get_widget("hy", __hy);
+  ref_xml->get_widget("hp", __hp);
 
-  __lsp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lsp"));
-  __rsp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rsp"));
-  __lsr = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lsr"));
-  __rsr = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rsr"));
-  __ley = dynamic_cast<SpinButton *>(get_widget(ref_xml, "ley"));
-  __rey = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rey"));
-  __ler = dynamic_cast<SpinButton *>(get_widget(ref_xml, "ler"));
-  __rer = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rer"));
+  ref_xml->get_widget("lsp", __lsp);
+  ref_xml->get_widget("rsp", __rsp);
+  ref_xml->get_widget("lsr", __lsr);
+  ref_xml->get_widget("rsr", __rsr);
+  ref_xml->get_widget("ley", __ley);
+  ref_xml->get_widget("rey", __rey);
+  ref_xml->get_widget("ler", __ler);
+  ref_xml->get_widget("rer", __rer);
 
-  __lhyp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lhyp"));
-  __rhyp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rhyp"));
-  __lhr = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lhr"));
-  __rhr = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rhr"));
-  __lhp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lhp"));
-  __rhp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rhp"));
-  __lkp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lkp"));
-  __rkp = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rkp"));
-  __lar = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lar"));
-  __rar = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rar"));
-  __lap = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lap"));
-  __rap = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rap"));
+  ref_xml->get_widget("lhyp", __lhyp);
+  ref_xml->get_widget("rhyp", __rhyp);
+  ref_xml->get_widget("lhr", __lhr);
+  ref_xml->get_widget("rhr", __rhr);
+  ref_xml->get_widget("lhp", __lhp);
+  ref_xml->get_widget("rhp", __rhp);
+  ref_xml->get_widget("lkp", __lkp);
+  ref_xml->get_widget("rkp", __rkp);
+  ref_xml->get_widget("lar", __lar);
+  ref_xml->get_widget("rar", __rar);
+  ref_xml->get_widget("lap", __lap);
+  ref_xml->get_widget("rap", __rap);
 
-  __def = dynamic_cast<CheckButton *>(get_widget(ref_xml, "checkbutton_default"));
-  __lck = dynamic_cast<CheckButton *>(get_widget(ref_xml, "checkbutton_lock"));
+  ref_xml->get_widget("checkbutton_default", __def);
+  ref_xml->get_widget("checkbutton_lock", __lck);
 
   __lck->signal_toggled().connect(mem_fun(*this, &NaoStiffnessConfigDialog::on_checkbutton_lock_toggled));
   on_checkbutton_lock_toggled();
 
-  __bhv = dynamic_cast<ComboBox *>(get_widget(ref_xml, "combobox_behaviour"));
+  ref_xml->get_widget("combobox_behaviour", __bhv);
   __bhv->set_active(0);
   __bhv->get_active()->get_value(0, __cur_bhv);
   __bhv->signal_changed().connect(mem_fun(*this, &NaoStiffnessConfigDialog::on_combobox_behaviour_changed));

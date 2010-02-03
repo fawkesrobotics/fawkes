@@ -25,8 +25,6 @@
 
 #include <netcomm/dns-sd/avahi_thread.h>
 
-#include <gui_utils/utils.h>
-
 using namespace std;
 using namespace fawkes;
 
@@ -40,10 +38,10 @@ using namespace fawkes;
  */
 BatteryMonitor::BatteryMonitor( Glib::RefPtr< Gnome::Glade::Xml > ref_xml )
 {
-  m_wnd_main = dynamic_cast< Gtk::Window* >( get_widget( ref_xml, "wndMain" ) );
+  ref_xml->get_widget("wndMain", m_wnd_main);
   m_trv_battery = NULL;
   ref_xml->get_widget_derived( "trvBattery", m_trv_battery );
-  m_btn_quit = dynamic_cast< Gtk::Button* >( get_widget( ref_xml, "btnQuit" ) );
+  ref_xml->get_widget("btnQuit", m_btn_quit);
   m_btn_quit->signal_clicked().connect( sigc::mem_fun( *this, &BatteryMonitor::on_btn_quit_clicked ) );
 
   m_avahi = new AvahiThread();

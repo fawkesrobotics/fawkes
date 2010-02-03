@@ -25,7 +25,6 @@
 
 #include <blackboard/remote.h>
 #include <gui_utils/interface_dispatcher.h>
-#include <gui_utils/utils.h>
 #include <interfaces/BatteryInterface.h>
 
 #include <cstring>
@@ -81,7 +80,7 @@ BatteryMonitorTreeView::BatteryMonitorTreeView( BaseObjectType* cobject,
   append_column_numeric( "Voltage [V]", m_battery_record.voltage, "%.3f" );
   append_column_numeric( "Current [A]", m_battery_record.current, "%.3f" );
 
-  m_dlg_warning = dynamic_cast< Gtk::MessageDialog* >( get_widget( ref_xml, "dlgWarning" ) );
+  ref_xml->get_widget("dlgWarning", m_dlg_warning);
   m_dlg_warning->hide();
 
   m_trigger_update.connect( sigc::mem_fun( *this, &BatteryMonitorTreeView::update ) );

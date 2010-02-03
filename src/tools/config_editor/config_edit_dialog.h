@@ -24,12 +24,18 @@
 #define __TOOLS_CONFIG_EDITOR_CONFIG_EDIT_DIALOG_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 
 class ConfigEditDialog : public Gtk::Dialog
 {
  public:
+  ConfigEditDialog(Gtk::Entry *ent_value, Gtk::ComboBox *cob_bool_value,
+		   Gtk::Notebook *type_pages, Gtk::CheckButton *chb_is_default);
+#ifdef HAVE_GLADEMM
   ConfigEditDialog(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml);
+#endif
   virtual ~ConfigEditDialog();
 
   void init( const Glib::ustring& path, const Glib::ustring& type,

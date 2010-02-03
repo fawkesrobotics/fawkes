@@ -21,11 +21,8 @@
  */
 
 #include <tools/config_editor/config_edit_dialog.h>
-#include <gui_utils/utils.h>
 
-using namespace fawkes;
-
-/** @class ConfigEditDialog tools/config_editor/config_edit_dialog.h
+/** @class ConfigEditDialog "config_edit_dialog.h"
  * Dialog to edit a config value.
  *
  * @author Daniel Beck
@@ -52,6 +49,23 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param ent_value entry field for value
+ * @param cob_bool_value combo box for bool value
+ * @param type_pages pages for types
+ * @param chb_is_default checkbutton to mark default values
+ */     
+ConfigEditDialog::ConfigEditDialog(Gtk::Entry *ent_value, Gtk::ComboBox *cob_bool_value,
+				   Gtk::Notebook *type_pages, Gtk::CheckButton *chb_is_default)
+  : Gtk::Dialog()
+{
+  m_ent_value       = m_ent_value;
+  m_cob_bool_value  = cob_bool_value;
+  m_type_pages      = type_pages;
+  m_chb_is_default  = chb_is_default;
+}
+
+#ifdef HAVE_GLADEMM
+/** Constructor.
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
  */     
@@ -59,11 +73,12 @@ ConfigEditDialog::ConfigEditDialog( BaseObjectType* cobject,
 				    const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml )
   : Gtk::Dialog(cobject)
 {
-  m_ent_value      = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entValueEdit") );
-  m_cob_bool_value = dynamic_cast<Gtk::ComboBox*>( get_widget(ref_xml, "cmbBoolEdit") );
-  m_type_pages     = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "nbkTypesEdit") );
-  m_chb_is_default = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chbIsDefaultEdit") );
+  ref_xml->get_widget("entValueEdit", m_ent_value);
+  ref_xml->get_widget("cmbBoolEdit", m_cob_bool_value);
+  ref_xml->get_widget("nbkTypesEdit", m_type_pages);
+  ref_xml->get_widget("chbIsDefaultEdit", m_chb_is_default);
 }
+#endif
 
 /** Initialize the dialog.
  * @param path config path

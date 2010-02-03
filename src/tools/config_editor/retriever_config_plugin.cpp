@@ -24,13 +24,13 @@
 
 #include <config/config.h>
 #include <core/exceptions/software.h>
-#include <gui_utils/utils.h>
 #include <fvutils/system/camargp.h>
 
 using namespace std;
 using namespace fawkes;
+using namespace firevision;
 
-/** @class RetrieverConfigDialog tools/config_editor/retriever_config_plugin.h
+/** @class RetrieverConfigDialog "retriever_config_plugin.h"
  * Config dialog of the config editor plugin for the fvretriever.
  * @author Daniel Beck
  */
@@ -44,9 +44,9 @@ RetrieverConfigDialog::RetrieverConfigDialog( BaseObjectType* cobject,
 					      const Glib::RefPtr< Gnome::Glade::Xml >& ref_xml )
   : Gtk::Dialog( cobject )
 {
-  m_trv_cameras = dynamic_cast< Gtk::TreeView* >( get_widget( ref_xml, "trvCameras" ) );
-  m_btn_add_camera = dynamic_cast< Gtk::Button* >( get_widget( ref_xml, "btnAdd" ) );
-  m_btn_delete_camera = dynamic_cast< Gtk::Button* >( get_widget( ref_xml, "btnDelete" ) );
+  ref_xml->get_widget("trvCameras", m_trv_cameras);
+  ref_xml->get_widget("btnAdd", m_btn_add_camera);
+  ref_xml->get_widget("btnDelete", m_btn_delete_camera);
 
   m_btn_add_camera->signal_clicked().connect( sigc::mem_fun( *this, &RetrieverConfigDialog::on_add_clicked ) );
   m_btn_delete_camera->signal_clicked().connect( sigc::mem_fun( *this, &RetrieverConfigDialog::on_delete_clicked ) );

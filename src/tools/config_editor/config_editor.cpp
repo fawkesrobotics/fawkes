@@ -25,7 +25,6 @@
 #include "retriever_config_plugin.h"
 #include "naostiffness_config_plugin.h"
 
-#include <gui_utils/utils.h>
 #include <gui_utils/service_selector_cbe.h>
 #include <netcomm/fawkes/client.h>
 
@@ -47,8 +46,8 @@ using namespace fawkes;
  */
 FawkesConfigEditor::FawkesConfigEditor( Glib::RefPtr<Gnome::Glade::Xml> ref_xml )
 {
-  m_wnd_main = dynamic_cast<Gtk::Window*>( get_widget(ref_xml, "wndMain") );
-  m_btn_exit = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnExit") );
+  ref_xml->get_widget("wndMain", m_wnd_main);
+  ref_xml->get_widget("btnExit", m_btn_exit);
 
   m_trv_config = NULL;
   ref_xml->get_widget_derived("trvConfig", m_trv_config);
