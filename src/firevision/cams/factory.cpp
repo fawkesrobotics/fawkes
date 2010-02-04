@@ -54,6 +54,9 @@
 #ifdef HAVE_BUMBLEBEE2_CAM
 #include <cams/bumblebee2.h>
 #endif
+#ifdef HAVE_SWISSRANGER_CAM
+#include <cams/swissranger.h>
+#endif
 
 using namespace std;
 
@@ -62,7 +65,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraFactory factory.h <cams/factory.h>
+/** @class CameraFactory <cams/factory.h>
  * Camera factory.
  * This camera factory provides access to all cameras in a unified way. You just
  * supply a camera argument string and depending on the camera ID and compile-time
@@ -171,6 +174,15 @@ CameraFactory::instance(const CameraArgumentParser *cap)
     c = new Bumblebee2Camera(cap);
 #else
     throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "swissranger" ) {
+#ifdef HAVE_SWISSRANGER_CAM
+    c = new SwissRangerCamera(cap);
+#else
+    throw UnknownCameraTypeException("No SwissRanger support at compile time");
 #endif
   }
 

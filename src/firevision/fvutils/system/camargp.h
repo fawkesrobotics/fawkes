@@ -43,6 +43,8 @@ class CameraArgumentParser
 
   bool                                has(std::string s) const;
   std::string                         get(std::string s) const;
+  long int                            get_int(std::string s) const;
+  double                              get_float(std::string s) const;
   std::map<std::string, std::string>  parameters() const;
   std::vector<std::string>            arguments() const;
   std::string                         cam_id() const;

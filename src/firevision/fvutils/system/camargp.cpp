@@ -22,8 +22,12 @@
  */
 
 #include <fvutils/system/camargp.h>
+#include <core/exceptions/software.h>
+
+#include <cstdlib>
 
 using namespace std;
+using namespace fawkes;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -164,6 +168,54 @@ CameraArgumentParser::get(std::string s) const
     return (*(values.find(s))).second;
   } else {
     return string();
+  }
+}
+
+
+/** Get the value of the given parameter as integer.
+ * This method assumes that the value is an integer and converts it.
+ * @param s key of the parameter to retrieve
+ * @return the value of the given parameter as integer
+ * @exception IllegalArgumentException thrown if the value cannot be properly
+ * converted to an integer
+ * @exception Exception thrown if the argument has not been supplied
+ */
+long int
+CameraArgumentParser::get_int(std::string s) const
+{
+  if ( values.find(s) != values.end() ) {
+    char *endptr;
+    long int rv = strtol((*(values.find(s))).second.c_str(), &endptr, 10);
+    if ( endptr[0] != 0 ) {
+      throw IllegalArgumentException("Supplied argument is not of type int");
+    }
+    return rv;
+  } else {
+    throw Exception("Value for '%s' not available", s.c_str());
+  }
+}
+
+
+/** Get the value of the given parameter as integer.
+ * This method assumes that the value is an integer and converts it.
+ * @param s key of the parameter to retrieve
+ * @return the value of the given parameter as integer
+ * @exception IllegalArgumentException thrown if the value cannot be properly
+ * converted to an integer
+ * @exception Exception thrown if the argument has not been supplied
+ */
+double
+CameraArgumentParser::get_float(std::string s) const
+{
+  if ( values.find(s) != values.end() ) {
+    char *endptr;
+    double rv = strtod((*(values.find(s))).second.c_str(), &endptr);
+    if ( endptr[0] != 0 ) {
+      throw IllegalArgumentException("Supplied argument is not of type double");
+    }
+    return rv;
+  } else {
+    throw Exception("Value for '%s' not available", s.c_str());
   }
 }
 

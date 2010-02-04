@@ -36,6 +36,9 @@ OBJS_fvshmem = shmem.o
 LIBS_fvlistfwcams = $(VISION_CAM_LIBS) fawkesutils fvcams
 OBJS_fvlistfwcams = listfwcams.o
 
+LIBS_fvlistsrcams = $(VISION_CAM_LIBS) fawkesutils fvcams
+OBJS_fvlistsrcams = listsrcams.o
+
 LIBS_fvconverter = fvutils fvcams
 OBJS_fvconverter = converter.o
 
@@ -73,7 +76,8 @@ OBJS_fvcmpp = cmpp.o
 OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
-	   $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvcmpp)
+	   $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvcmpp) \
+	   $(OBJS_fvlistsrcams)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvcmpp
 
 ifneq ($(realpath $(SRCDIR)/net.cpp),)
@@ -101,6 +105,14 @@ ifeq ($(HAVE_FIREWIRE_CAM),1)
 else
   ifneq ($(realpath $(SRCDIR)/listfwcams.cpp),)
     WARN_TARGETS += warning_listfwcams
+  endif
+endif
+
+ifeq ($(HAVE_SWISSRANGER_CAM),1)
+  BINS_all += $(BINDIR)/fvlistsrcams
+else
+  ifneq ($(realpath $(SRCDIR)/listsrcams.cpp),)
+    WARN_TARGETS += warning_listsrcams
   endif
 endif
 
@@ -139,6 +151,8 @@ gui: $(WARN_TARGETS_GUI)
 .PHONY: $(WARN_TARGETS)
 warning_listfwcams:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building listfwcams$(TNORMAL) (no Firewire camera support)";
+warning_listsrcams:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building listsrcams$(TNORMAL) (no SwissRanger camera support)";
 warning_stereodecoder:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building stereodecoder$(TNORMAL) (no Bumblebee2 camera support)";
 warning_tricalcdisp:
