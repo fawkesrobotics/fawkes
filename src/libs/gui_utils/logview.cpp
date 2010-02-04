@@ -80,7 +80,6 @@ LogView::~LogView()
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_UNSUBSCRIBE);
     c->enqueue(msg);
-    msg->unref();
   }
   delete __connection_dispatcher;
 }
@@ -155,14 +154,12 @@ LogView::set_client(FawkesNetworkClient *client)
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_UNSUBSCRIBE);
     c->enqueue(msg);
-    msg->unref();
   }
   __connection_dispatcher->set_client(client);
   if (client && client->connected()) {
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_SUBSCRIBE);
     client->enqueue(msg);
-    msg->unref();
   }
 }
 
@@ -236,7 +233,6 @@ LogView::on_client_connected()
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_SUBSCRIBE);
     c->enqueue(msg);
-    msg->unref();
     struct timeval t;
     gettimeofday(&t, NULL);
     append_message(Logger::LL_DEBUG, t, "LogView", false, "Connected");

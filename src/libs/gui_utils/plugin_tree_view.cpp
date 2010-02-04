@@ -101,7 +101,6 @@ PluginTreeView::~PluginTreeView()
     FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_UNSUBSCRIBE_WATCH);
     m_dispatcher.get_client()->enqueue(msg);
-    msg->unref();
 
     m_dispatcher.get_client()->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   }
@@ -160,19 +159,16 @@ PluginTreeView::on_connected()
     FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_SUBSCRIBE_WATCH);
     client->enqueue(msg);
-    msg->unref();
 
     // request list of available plugins
     msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 				   MSG_PLUGIN_LIST_AVAIL);
     client->enqueue(msg);
-    msg->unref();
 
     // request list of loaded plugins
     msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 				   MSG_PLUGIN_LIST_LOADED);
     client->enqueue(msg);
-    msg->unref();
   }
   catch (Exception& e)
   {
@@ -356,7 +352,6 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
 							 MSG_PLUGIN_LOAD,
 							 m, sizeof(plugin_load_msg_t));
     m_dispatcher.get_client()->enqueue(msg);
-    msg->unref();
   }
   else
   {
@@ -367,7 +362,6 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
 							 MSG_PLUGIN_UNLOAD,
 							 m, sizeof(plugin_unload_msg_t));
     m_dispatcher.get_client()->enqueue(msg);
-    msg->unref();
   }
 }
 

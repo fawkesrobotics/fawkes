@@ -179,7 +179,6 @@ PluginTool::load()
 						       MSG_PLUGIN_LOAD,
 						       l, sizeof(plugin_load_msg_t));
   c->enqueue(msg);
-  msg->unref();
 
   while ( ! quit ) {
     c->wait(FAWKES_CID_PLUGINMANAGER);
@@ -199,7 +198,6 @@ PluginTool::unload()
 						       MSG_PLUGIN_UNLOAD,
 						       m, sizeof(plugin_unload_msg_t));
   c->enqueue(msg);
-  msg->unref();
 
   while ( ! quit ) {
     c->wait(FAWKES_CID_PLUGINMANAGER);
@@ -215,7 +213,6 @@ PluginTool::list_avail()
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 						       MSG_PLUGIN_LIST_AVAIL);
   c->enqueue(msg);
-  msg->unref();
 
   while ( ! quit ) {
     c->wait(FAWKES_CID_PLUGINMANAGER);
@@ -232,7 +229,6 @@ PluginTool::list_loaded()
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 						       MSG_PLUGIN_LIST_LOADED);
   c->enqueue(msg);
-  msg->unref();
 
   while ( ! quit ) {
     c->wait(FAWKES_CID_PLUGINMANAGER);
@@ -247,7 +243,6 @@ PluginTool::watch()
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 						       MSG_PLUGIN_SUBSCRIBE_WATCH);
   c->enqueue(msg);
-  msg->unref();
   printf("Watching for plugin events\n");
   printf("%-10s   %-40s\n", "Event", "Plugin Name/ID");
   while ( ! quit ) {
@@ -257,7 +252,6 @@ PluginTool::watch()
   // unsubscribe
   msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNSUBSCRIBE_WATCH);
   c->enqueue(msg);
-  msg->unref();
 }
 
 

@@ -122,7 +122,6 @@ main(int argc, char **argv)
 
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_EXAMPLE_PLUGIN, id, u, sizeof(unsigned int));
   c->enqueue(msg);
-  msg->unref();
 
   while ( ! r.quit ) {
     c->wait(FAWKES_CID_EXAMPLE_PLUGIN);

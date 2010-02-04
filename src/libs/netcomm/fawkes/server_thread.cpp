@@ -212,7 +212,9 @@ FawkesNetworkServerThread::force_send()
 
 
 /** Broadcast a message.
- * Method to broadcast a message to all connected clients.
+ * Method to broadcast a message to all connected clients. This method will take
+ * ownership of the passed message. If you want to use if after enqueing it you
+ * must reference it explicitly before calling this method.
  * @param msg Message to broadcast
  */
 void
@@ -220,9 +222,11 @@ FawkesNetworkServerThread::broadcast(FawkesNetworkMessage *msg)
 {
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
     if ( (*cit).second->alive() ) {
+      msg->ref();
       (*cit).second->enqueue(msg);
     }
   }
+  msg->unref();
 }
 
 
@@ -235,13 +239,13 @@ FawkesNetworkServerThread::broadcast(FawkesNetworkMessage *msg)
  * @see FawkesNetworkEmitter::broadcast()
  */
 void
-FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned short int msg_id,
-			       void *payload, unsigned int payload_size)
+FawkesNetworkServerThread::broadcast(unsigned short int component_id,
+				     unsigned short int msg_id,
+				     void *payload, unsigned int payload_size)
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id,
 						     payload, payload_size);
   broadcast(m);
-  m->unref();
 }
 
 
@@ -254,7 +258,6 @@ FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned s
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id);
   broadcast(m);
-  m->unref();
 }
 
 
@@ -263,6 +266,9 @@ FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned s
  * The client ID provided in the message is used to determine the correct
  * recipient. If no client is connected for the given client ID the message
  * shall be silently ignored.
+ * This method will take ownership of the passed message. If you want to use
+ * if after enqueing it you must reference it explicitly before calling this
+ * method.
  * Implemented Emitter interface message.
  * @param msg Message to send
  */
@@ -299,7 +305,6 @@ FawkesNetworkServerThread::send(unsigned int to_clid,
   FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id,
 						     payload, payload_size);
   send(m);
-  m->unref();
 }
 
 
@@ -319,7 +324,6 @@ FawkesNetworkServerThread::send(unsigned int to_clid,
   FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id,
 						     content);
   send(m);
-  m->unref();
 }
 
 
@@ -337,7 +341,6 @@ FawkesNetworkServerThread::send(unsigned int to_clid,
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id);
   send(m);
-  m->unref();
 }
 
 
