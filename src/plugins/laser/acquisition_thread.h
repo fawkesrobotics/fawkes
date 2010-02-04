@@ -60,6 +60,10 @@ class LaserAcquisitionThread
  protected: virtual void run() { Thread::run(); }
 
  protected:
+  void alloc_distances(unsigned int num_distances);
+  void alloc_echoes(unsigned int num_echoes);
+
+ protected:
   fawkes::Mutex    *_data_mutex;
 
   bool    _new_data;

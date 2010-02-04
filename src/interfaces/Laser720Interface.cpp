@@ -49,7 +49,8 @@ Laser720Interface::Laser720Interface() : Interface()
   data      = (Laser720Interface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "distances", 720, &data->distances);
-  unsigned char tmp_hash[] = {0xc6, 0x5c, 0xe2, 0xcd, 0x6, 0x6c, 0xdb, 0x3f, 0x8c, 0x81, 0x78, 0xe1, 0xba, 0xf4, 0xc5, 0x17};
+  add_fieldinfo(IFT_BOOL, "clockwise_angle", 1, &data->clockwise_angle);
+  unsigned char tmp_hash[] = {0x8a, 0x9, 0x94, 0x1a, 0xe4, 0x3c, 0xa5, 0xde, 0x5, 0xe7, 0x8c, 0x6e, 0x3b, 0x7f, 0x34, 0x5};
   set_hash(tmp_hash);
 }
 
@@ -125,6 +126,40 @@ Laser720Interface::set_distances(unsigned int index, const float new_distances)
   }
   data->distances[index] = new_distances;
 }
+/** Get clockwise_angle value.
+ * 
+      True if the angle grows clockwise.
+    
+ * @return clockwise_angle value
+ */
+bool
+Laser720Interface::is_clockwise_angle() const
+{
+  return data->clockwise_angle;
+}
+
+/** Get maximum length of clockwise_angle value.
+ * @return length of clockwise_angle value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Laser720Interface::maxlenof_clockwise_angle() const
+{
+  return 1;
+}
+
+/** Set clockwise_angle value.
+ * 
+      True if the angle grows clockwise.
+    
+ * @param new_clockwise_angle new clockwise_angle value
+ */
+void
+Laser720Interface::set_clockwise_angle(const bool new_clockwise_angle)
+{
+  data->clockwise_angle = new_clockwise_angle;
+}
+
 /* =========== message create =========== */
 Message *
 Laser720Interface::create_message(const char *type) const

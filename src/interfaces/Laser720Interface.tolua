@@ -7,6 +7,9 @@ class Laser720Interface : public Interface
   float distances(int index);
   void set_distances(unsigned int index, const float new_distances);
   int maxlenof_distances() const;
+  bool is_clockwise_angle();
+  void set_clockwise_angle(const bool new_clockwise_angle);
+  int maxlenof_clockwise_angle() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

@@ -29,6 +29,8 @@
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
+#include <string>
+
 namespace fawkes {
   class Laser360Interface;
   class Laser720Interface;
@@ -36,6 +38,7 @@ namespace fawkes {
 
 class LaserAcquisitionThread;
 class LaserDataFilterCascade;
+class LaserReverseAngleDataFilter;
 
 class LaserSensorThread
 : public fawkes::Thread,
@@ -45,7 +48,8 @@ class LaserSensorThread
   public fawkes::BlackBoardAspect
 {
  public:
-  LaserSensorThread(LaserAcquisitionThread *aqt);
+  LaserSensorThread(std::string &cfg_name, std::string &cfg_prefix,
+		    LaserAcquisitionThread *aqt);
 
   virtual void init();
   virtual void finalize();
@@ -63,7 +67,17 @@ class LaserSensorThread
   LaserDataFilterCascade *__filters720;
   LaserDataFilterCascade *__filters360;
 
+
+  bool                         __clockwise_angle;
+  fawkes::Laser360Interface   *__reverse360_if;
+  fawkes::Laser720Interface   *__reverse720_if;
+  LaserReverseAngleDataFilter *__reverse360;
+  LaserReverseAngleDataFilter *__reverse720;
+
   unsigned int            __num_values;
+
+  std::string             __cfg_name;
+  std::string             __cfg_prefix;
 };
 
 

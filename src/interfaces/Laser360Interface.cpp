@@ -3,7 +3,7 @@
  *  Laser360Interface.cpp - Fawkes BlackBoard Interface - Laser360Interface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2008  Tim Niemueller
+ *  Copyright  2008-2009  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -34,7 +34,10 @@ namespace fawkes {
  * Laser360Interface Fawkes BlackBoard Interface.
  * 
       This interface provides access to data of a laser scanner that produces
-      360 beams per scan.
+      360 beams per scan. The inter-beam distance is 1 deg, 0 deg is
+      "forward", i.e. in the Fawkes coordinate system pointing towards
+      the cartesian point (1,0). The direction in which the angle
+      grows is indicated by the clockwise_angle field.
     
  * @ingroup FawkesInterfaces
  */
@@ -49,7 +52,8 @@ Laser360Interface::Laser360Interface() : Interface()
   data      = (Laser360Interface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "distances", 360, &data->distances);
-  unsigned char tmp_hash[] = {0xc4, 0x7a, 0xf3, 0xa0, 0x4, 0x6, 0x97, 0x1d, 0xdb, 0x17, 0xfe, 0x5e, 0xd0, 0x9b, 0xa, 0xa3};
+  add_fieldinfo(IFT_BOOL, "clockwise_angle", 1, &data->clockwise_angle);
+  unsigned char tmp_hash[] = {0xf6, 0x3a, 0x26, 0x7b, 0x46, 0x96, 0x74, 0xad, 0x48, 0x1c, 0x32, 0x66, 0x2b, 0xfe, 0x41, 0x43};
   set_hash(tmp_hash);
 }
 
@@ -125,6 +129,40 @@ Laser360Interface::set_distances(unsigned int index, const float new_distances)
   }
   data->distances[index] = new_distances;
 }
+/** Get clockwise_angle value.
+ * 
+      True if the angle grows clockwise.
+    
+ * @return clockwise_angle value
+ */
+bool
+Laser360Interface::is_clockwise_angle() const
+{
+  return data->clockwise_angle;
+}
+
+/** Get maximum length of clockwise_angle value.
+ * @return length of clockwise_angle value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Laser360Interface::maxlenof_clockwise_angle() const
+{
+  return 1;
+}
+
+/** Set clockwise_angle value.
+ * 
+      True if the angle grows clockwise.
+    
+ * @param new_clockwise_angle new clockwise_angle value
+ */
+void
+Laser360Interface::set_clockwise_angle(const bool new_clockwise_angle)
+{
+  data->clockwise_angle = new_clockwise_angle;
+}
+
 /* =========== message create =========== */
 Message *
 Laser360Interface::create_message(const char *type) const

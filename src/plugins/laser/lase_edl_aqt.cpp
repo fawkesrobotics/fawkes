@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  acqusition_thread.cpp - Thread that retrieves the laser data
+ *  lase_edl_aqt.cpp - Thread that retrieves the laser data
  *
  *  Created: Wed Oct 08 13:42:32 2008
  *  Copyright  2002       Christian Fritz
@@ -130,7 +130,7 @@ const WORD  LaseEdlAcquisitionThread::RESPONSE_BIT                    = 0x8000;
 const float LaseEdlAcquisitionThread::DISTANCE_FACTOR                 = 256.00;
 
 
-/** @class LaseEdlAcquisitionThread "playerc_thread.h"
+/** @class LaseEdlAcquisitionThread "lase_edl_aqt.h"
  * Laser acqusition thread for Lase EDL L A laser scanner.
  * This thread fetches the data from the laser.
  * @author Tim Niemueller
@@ -138,11 +138,18 @@ const float LaseEdlAcquisitionThread::DISTANCE_FACTOR                 = 256.00;
  */
 
 
-/** Constructor. */
-LaseEdlAcquisitionThread::LaseEdlAcquisitionThread()
+/** Constructor.
+ * @param cfg_name short name of configuration group
+ * @param cfg_prefix configuration path prefix
+ */
+LaseEdlAcquisitionThread::LaseEdlAcquisitionThread(std::string &cfg_name,
+						   std::string &cfg_prefix)
   : LaserAcquisitionThread("LaseEdlAcquisitionThread")
 {
+  set_name("LaseEDL(%s)", cfg_name.c_str());
   __pre_init_done = false;
+  __cfg_name   = cfg_name;
+  __cfg_prefix = cfg_prefix;
 }
 
 
@@ -153,7 +160,7 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
   if (__pre_init_done)  return;
 
   try {
-    std::string canres  = config->get_string("/hardware/laser/canonical_resolution");
+    std::string canres  = config->get_string((__cfg_prefix + "canonical_resolution").c_str());
     if (canres == "low") {
       __cfg_rotation_freq = 20;
       __cfg_angle_step    = 16;
@@ -169,24 +176,24 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
 		      canres.c_str(), __cfg_rotation_freq, __cfg_angle_step);
   } catch (Exception &e) {
     // exceptions thrown here will propagate
-    __cfg_rotation_freq  = config->get_uint("/hardware/laser/rotation_freq");
-    __cfg_angle_step     = config->get_uint("/hardware/laser/angle_step");
+    __cfg_rotation_freq  = config->get_uint((__cfg_prefix + "rotation_freq").c_str());
+    __cfg_angle_step     = config->get_uint((__cfg_prefix + "angle_step").c_str());
   }
 
   try {
-    __cfg_use_default    = config->get_bool("/hardware/laser/use_default");
-    __cfg_set_default    = config->get_bool("/hardware/laser/set_default");
-    __cfg_max_pulse_freq = config->get_uint("/hardware/laser/max_pulse_freq");
-    __cfg_profile_format = config->get_uint("/hardware/laser/profile_format");
-    __cfg_can_id         = config->get_uint("/hardware/laser/can_id");
-    __cfg_can_id_resp    = config->get_uint("/hardware/laser/can_id_resp");
-    __cfg_sensor_id      = config->get_uint("/hardware/laser/sensor_id");
-    __cfg_sensor_id_resp = config->get_uint("/hardware/laser/sensor_id_resp");
-    __cfg_btr0btr1       = config->get_uint("/hardware/laser/btr0btr1");
-    __cfg_port           = config->get_uint("/hardware/laser/port");
-    __cfg_irq            = config->get_uint("/hardware/laser/irq");
-    __cfg_num_init_tries = config->get_uint("/hardware/laser/num_init_tries");
-    __cfg_mount_rotation = config->get_float("/hardware/laser/mount_rotation");
+    __cfg_use_default    = config->get_bool((__cfg_prefix + "use_default").c_str());
+    __cfg_set_default    = config->get_bool((__cfg_prefix + "set_default").c_str());
+    __cfg_max_pulse_freq = config->get_uint((__cfg_prefix + "max_pulse_freq").c_str());
+    __cfg_profile_format = config->get_uint((__cfg_prefix + "profile_format").c_str());
+    __cfg_can_id         = config->get_uint((__cfg_prefix + "can_id").c_str());
+    __cfg_can_id_resp    = config->get_uint((__cfg_prefix + "can_id_resp").c_str());
+    __cfg_sensor_id      = config->get_uint((__cfg_prefix + "sensor_id").c_str());
+    __cfg_sensor_id_resp = config->get_uint((__cfg_prefix + "sensor_id_resp").c_str());
+    __cfg_btr0btr1       = config->get_uint((__cfg_prefix + "btr0btr1").c_str());
+    __cfg_port           = config->get_uint((__cfg_prefix + "port").c_str());
+    __cfg_irq            = config->get_uint((__cfg_prefix + "irq").c_str());
+    __cfg_num_init_tries = config->get_uint((__cfg_prefix + "num_init_tries").c_str());
+    __cfg_mount_rotation = config->get_float((__cfg_prefix + "mount_rotation").c_str());
 
     __min_angle_step     = calc_angle_step(__cfg_rotation_freq, __cfg_max_pulse_freq);
     if ( __cfg_angle_step < __min_angle_step ) {
@@ -203,7 +210,7 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
 
     _distances_size = _echoes_size = __number_of_values;
 
-    std::string interface_type = config->get_string("/hardware/laser/interface_type");
+    std::string interface_type = config->get_string((__cfg_prefix + "interface_type").c_str());
     if ( interface_type == "usb" ) {
       __cfg_interface_type = HW_USB;
     } else {
@@ -610,32 +617,31 @@ LaseEdlAcquisitionThread::process_profiles()
   // see which data is requested
   if (__cfg_profile_format == PROFILEFORMAT_DISTANCE ) {
     // only distances
-    for (int i=3; i < response_size; i++ ) {
+    for (int i=3; i < response_size; ++i ) {
       dist = ((float)real_response[i]) / DISTANCE_FACTOR;
-      _distances[dist_index++] = dist;
-      if (dist_index >= (int)__number_of_values) dist_index = 0;
+      _distances[__number_of_values - dist_index] = dist;
+      if (++dist_index >= (int)__number_of_values) dist_index = 0;
     }
 
   } else if (__cfg_profile_format == (PROFILEFORMAT_DISTANCE | PROFILEFORMAT_ECHO_AMPLITUDE) ) {
     // distances + echos
-    for (int i=3; i < response_size; ) {
+    for (int i=3; i < response_size; ++i) {
       dist = ((float)real_response[i]) / DISTANCE_FACTOR;
-      _distances[dist_index++] = dist;
-      if (dist_index >= (int)__number_of_values) dist_index = 0;
-      i++;
+      _distances[__number_of_values - dist_index] = dist;
+      if (++dist_index >= (int)__number_of_values) dist_index = 0;
+      ++i;
       echo = real_response[i];
-      _echoes[echo_index++] = echo;
-      if (echo_index >= (int)__number_of_values) echo_index = 0;
-      i++;
+      _echoes[__number_of_values - echo_index] = echo;
+      if (++echo_index >= (int)__number_of_values) echo_index = 0;
     }
 
 
   } else if (__cfg_profile_format == PROFILEFORMAT_ECHO_AMPLITUDE ) {
     // only echos
-    for (int i=3; i < response_size; i++ ) {
+    for (int i=3; i < response_size; ++i ) {
       echo = real_response[i];
-      _echoes[echo_index++] = echo;
-      if (echo_index >= (int)__number_of_values) echo_index = 0;
+      _echoes[__number_of_values - echo_index] = echo;
+      if (++echo_index >= (int)__number_of_values) echo_index = 0;
     }
   }
 

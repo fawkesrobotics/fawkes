@@ -21,17 +21,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#ifndef HAVE_LIBPCAN
+#  error "Cannot use Lase EDL driver without libpcan"
+#endif
+
 #ifndef __PLUGINS_LASER_LASE_EDL_AQT_H_
 #define __PLUGINS_LASER_LASE_EDL_AQT_H_
 
 #include "acquisition_thread.h"
 
 #include <libpcan.h>
+#include <string>
 
 class LaseEdlAcquisitionThread : public LaserAcquisitionThread
 {
  public:
-  LaseEdlAcquisitionThread();
+  LaseEdlAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
 
   // from LaserAcquisitionThread
   virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
@@ -171,6 +176,9 @@ class LaseEdlAcquisitionThread : public LaserAcquisitionThread
  private:
   HANDLE __handle;
   bool         __pre_init_done;
+
+  std::string  __cfg_name;
+  std::string  __cfg_prefix;
 
   bool         __cfg_use_default;
   bool         __cfg_set_default;

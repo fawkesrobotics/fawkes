@@ -376,6 +376,18 @@ LaserDrawingArea::draw_beams(Glib::RefPtr<Gdk::Window> &window,
   size_t nd = __laser360_if ? __laser360_if->maxlenof_distances() : __laser720_if->maxlenof_distances();
   const float nd_factor = 360.0 / nd;
 
+  bool clockwise = __laser360_if ? __laser360_if->is_clockwise_angle() : __laser720_if->is_clockwise_angle();
+
+  float *revdists = NULL;
+  if (! clockwise) {
+    // re-arrange to clockwise
+    revdists = (float *)new float[nd];
+    for (size_t i = 0; i < nd; ++i) {
+      revdists[nd - i] = distances[i];
+    }
+    distances = revdists;
+  }
+
   cr->scale(__zoom_factor, __zoom_factor);
   cr->rotate(__rotation);
   cr->set_line_width(1. / __zoom_factor);
@@ -415,6 +427,8 @@ LaserDrawingArea::draw_beams(Glib::RefPtr<Gdk::Window> &window,
     }
     cr->stroke();
   }
+
+  if (revdists) delete[] revdists;
 }
 
 
