@@ -30,6 +30,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Image that we subtract from */
 const unsigned int FilterTophatClosing::SUBTRACTFROM = 0;
 /** Image to filter. */
@@ -87,3 +92,5 @@ FilterTophatClosing::apply()
   closing->apply();
   diff->apply();
 }
+
+} // end namespace firevision

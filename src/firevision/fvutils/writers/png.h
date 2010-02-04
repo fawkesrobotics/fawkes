@@ -24,8 +24,12 @@
 #ifndef __FIREVISION_FVUTILS_WRITERS_PNG_H_
 #define __FIREVISION_FVUTILS_WRITERS_PNG_H_
 
-
 #include <fvutils/writers/writer.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class PNGWriter : public Writer
 {
@@ -39,4 +43,7 @@ class PNGWriter : public Writer
   virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
   virtual void write();
 };
+
+} // end namespace firevision
+
 #endif

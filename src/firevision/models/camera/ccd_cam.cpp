@@ -1,7 +1,7 @@
 /***************************************************************************
  *  ccd_cam.cpp - Class defining a ccd camera model
  *
- *  Generated: Thu May 8 16:08 2008
+ *  Created: Thu May 08 16:08:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -20,12 +20,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "ccd_cam.h"
+#include <models/camera/ccd_cam.h>
 
 using namespace fawkes;
 
-/** @class CCDCam ccd_cam.h <models/camera/ccd_cam.h>
- * A class for a ccd camera model
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class CCDCam <models/camera/ccd_cam.h>
+ * A class for a ccd camera model.
  * @author Christof Rath
  */
 
@@ -64,3 +69,4 @@ CCDCam::~CCDCam()
 {
 }
 
+} // end namespace firevision

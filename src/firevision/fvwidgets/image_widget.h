@@ -1,7 +1,7 @@
 /***************************************************************************
  *  image_widget.h - Gtkmm widget to draw an image inside a Gtk::Window
  *
- *  Created:  26.11.2008
+ *  Created:  Wed Nov 26 00:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  ****************************************************************************/
@@ -29,18 +29,23 @@
 #include <gtkmm.h>
 #include <libglademm/xml.h>
 
-class Camera;
-
 namespace fawkes {
   class Mutex;
 }
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class Camera;
+
 class ImageWidget : public Gtk::Image
 {
-private:
+ private:
   class RefThread : public fawkes::Thread
   {
-  public:
+   public:
     RefThread(ImageWidget *widget, unsigned int refresh_delay);
     void set_delay(unsigned int refresh_delay);
     void save_on_refresh(bool enabled, std::string path = "", Glib::ustring type = "", unsigned int img_num = 0);
@@ -48,7 +53,7 @@ private:
     void stop();
     unsigned int get_img_num();
 
-  private:
+   private:
     void loop();
     void perform_refresh();
 
@@ -65,7 +70,7 @@ private:
     unsigned int  __save_num;
   };
 
-public:
+ public:
   ImageWidget(unsigned int width, unsigned int height);
   ImageWidget(Camera *cam, unsigned int refresh_delay = 0, unsigned int width = 0, unsigned int height = 0);
   ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml);
@@ -87,7 +92,7 @@ public:
   unsigned int get_image_num();
   sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> & signal_show();
 
-private:
+ private:
   void set_cam();
 
   unsigned int __width;
@@ -104,5 +109,7 @@ private:
 
   sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> __signal_show;
 };
+
+} // end namespace firevision
 
 #endif /* __FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_ */

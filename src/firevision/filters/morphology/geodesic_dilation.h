@@ -27,6 +27,11 @@
 
 #include <filters/morphology/morphologicalfilter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterDilation;
 class FilterMin;
 class ImageDiff;
@@ -57,5 +62,7 @@ class FilterGeodesicDilation : public MorphologicalFilter
   unsigned int    iterations;
 
 };
+
+} // end namespace firevision
 
 #endif

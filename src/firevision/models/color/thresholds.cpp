@@ -2,7 +2,7 @@
 /***************************************************************************
  *  thresholds.cpp - Implementation of a thresholds color model
  *
- *  Generated: Wed May 18 13:59:18 2005
+ *  Created: Wed May 18 13:59:18 2005
  *  Copyright  2005  Tim Niemueller  [www.niemueller.de]
  *                   Matrin Heracles <martin.heracles@rwth-aachen.de>
  *
@@ -27,6 +27,11 @@
 #include "models/color/thresholds.h"
 
 using namespace std;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ColorModelThresholds <models/color/thresholds.h>
  * Really simple thresholds-based model with some hard-coded thresholds. Was
@@ -94,3 +99,5 @@ ColorModelThresholds::print_thresholds()
        << " v_low=" << THRESHOLD_YELLOW_V_LOW
        << endl;
 }
+
+} // end namespace firevision

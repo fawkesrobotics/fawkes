@@ -3,7 +3,7 @@
  *  jpeg.cp - JPEG writer
  *
  *  Generated: Wed Jun 28 11:36:54 2006 (my brother's 18th birthday)
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -36,8 +36,14 @@ extern "C" {
 
 using namespace fawkes;
 
-/** @class JpegWriter jpeg.h <fvutils/writers/jpeg.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class JpegWriter <fvutils/writers/jpeg.h>
  * JPEG file writer.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -133,3 +139,4 @@ JpegWriter::write()
 
 }
 
+} // end namespace firevision

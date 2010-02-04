@@ -28,6 +28,7 @@
 #include <cstdio>
 
 using namespace fawkes;
+using namespace firevision;
 
 Camera *cam;
 SharedMemoryImageBuffer *shm;

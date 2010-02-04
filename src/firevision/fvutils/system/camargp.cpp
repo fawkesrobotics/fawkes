@@ -25,6 +25,11 @@
 
 using namespace std;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraArgumentParser <fvutils/system/camargp.h>
  * Camera argument parser.
  * Simple parser that will parse a camera parameter string that defines
@@ -182,3 +187,5 @@ CameraArgumentParser::parameters() const
 {
   return values;
 }
+
+} // end namespace firevision

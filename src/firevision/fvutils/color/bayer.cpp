@@ -26,6 +26,11 @@
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/rgbyuv.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /* The basic information has been taken from
  * http://www-ise.stanford.edu/~tingchen/
  */
@@ -536,3 +541,5 @@ bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *y
 
 }
 */
+
+} // end namespace firevision

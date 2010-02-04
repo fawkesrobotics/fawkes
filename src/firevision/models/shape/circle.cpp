@@ -2,7 +2,7 @@
 /***************************************************************************
  *  circle.cpp - Implementation of a circle shape finder
  *
- *  Generated: Thu May 16 2005
+ *  Created: Thu May 16 00:00:00 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -27,6 +27,11 @@
 
 using namespace std;
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Circle <models/shape/circle.h>
  * Circle shape.
@@ -130,3 +135,5 @@ Circle::isClose( unsigned int in_roi_x, unsigned int in_roi_y )
 	   (dist >= (radius - margin)) );
 
 }
+
+} // end namespace firevision

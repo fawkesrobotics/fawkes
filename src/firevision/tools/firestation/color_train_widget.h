@@ -29,9 +29,11 @@
 #include <gtkmm.h>
 
 class ColormapViewerWidget;
-class BayesColormapGenerator;
-class Zauberstab;
-class YuvColormap;
+namespace firevision {
+  class BayesColormapGenerator;
+  class Zauberstab;
+  class YuvColormap;
+}
 
 class ColorTrainWidget
 {
@@ -42,7 +44,7 @@ class ColorTrainWidget
   ColorTrainWidget(Gtk::Window* parent);
   virtual ~ColorTrainWidget();
 
-  void set_fg_object(hint_t fg_object);
+  void set_fg_object(firevision::hint_t fg_object);
 
   void set_src_buffer(unsigned char* buffer,
 		      unsigned int img_width, unsigned int img_height);
@@ -59,7 +61,7 @@ class ColorTrainWidget
   void reset_colormap();
   void load_colormap();
   void save_colormap();
-  YuvColormap* get_colormap() const;
+  firevision::YuvColormap* get_colormap() const;
 
   void draw_segmentation_result();
 
@@ -89,18 +91,18 @@ class ColorTrainWidget
 
   void reset_gui();
 
-  BayesColormapGenerator* m_generator;
-  Zauberstab* m_zauberstab;
+  firevision::BayesColormapGenerator* m_generator;
+  firevision::Zauberstab* m_zauberstab;
   ColormapViewerWidget* m_cvw;
 
-  hint_t m_fg_object;
+  firevision::hint_t m_fg_object;
 
   unsigned char* m_src_buffer;
   unsigned char* m_draw_buffer;
   unsigned int m_img_width;
   unsigned int m_img_height;
   unsigned int m_img_size;
-  colorspace_t m_img_cs;
+  firevision::colorspace_t m_img_cs;
   unsigned int m_seg_img_max_width;
   unsigned int m_seg_img_max_height;
 

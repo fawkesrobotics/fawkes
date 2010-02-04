@@ -27,6 +27,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterSum <filters/sum.h>
  * Sum filter.
  * Adds two images.
@@ -124,3 +129,5 @@ FilterSum::apply()
   }
 
 }
+
+} // end namespace firevision

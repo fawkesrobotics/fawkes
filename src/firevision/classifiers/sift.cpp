@@ -49,6 +49,11 @@ extern "C" {
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SiftClassifier <classifiers/sift.h>
  * SIFT classifier.
  *
@@ -249,3 +254,5 @@ SiftClassifier::classify()
   std::cout << "SiftClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;
   return rv;
 }
+
+} // end namespace firevision

@@ -26,6 +26,11 @@
 
 #include <models/global_position/globalpositionmodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class MirrorModel;
 
 class OmniGlobal : public GlobalPositionModel
@@ -59,5 +64,6 @@ private:
 
 };
 
-#endif
+} // end namespace firevision
 
+#endif

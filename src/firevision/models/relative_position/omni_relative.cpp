@@ -3,7 +3,7 @@
  *  omni_relative.cpp - Implementation of the relative ball model
  *                      for the omni cam
  *
- *  Generated: Thu Mar 23 22:00:15 2006
+ *  Created: Thu Mar 23 22:00:15 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -25,6 +25,11 @@
 #include <cmath>
 #include <iostream>
 #include <models/relative_position/omni_relative.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class OmniRelative <models/relative_position/omni_relative.h>
  * Omni vision relative position model.
@@ -249,3 +254,5 @@ OmniRelative::applyKalmanFilter()
 
 }
 */
+
+} // end namespace firevision

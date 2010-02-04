@@ -26,6 +26,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ShapeModel;
 class Shape;
 
@@ -42,5 +47,7 @@ class FilterShapeRemover : public Filter
   Shape *shape;
   unsigned int margin;
 };
+
+} // end namespace firevision
 
 #endif

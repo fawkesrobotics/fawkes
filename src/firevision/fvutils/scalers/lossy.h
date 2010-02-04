@@ -27,6 +27,11 @@
 
 #include <fvutils/scalers/scaler.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class LossyScaler : public Scaler {
 
  public:
@@ -57,5 +62,7 @@ class LossyScaler : public Scaler {
   float           scale_factor;
 
 };
+
+} // end namespace firevision
 
 #endif

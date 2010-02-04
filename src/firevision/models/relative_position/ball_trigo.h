@@ -26,6 +26,11 @@
 
 #include <models/relative_position/relativepositionmodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class BallTrigoRelativePos : public RelativePositionModel
 {
  public:
@@ -90,5 +95,6 @@ private:
   float                 __distance;
 };
 
-#endif
+} // end namespace firevision
 
+#endif

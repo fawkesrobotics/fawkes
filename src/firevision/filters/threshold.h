@@ -30,6 +30,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterThreshold : public Filter
 {
  public:
@@ -48,5 +53,7 @@ class FilterThreshold : public Filter
   unsigned char max_replace;
 
 };
+
+} // end namespace firevision
 
 #endif

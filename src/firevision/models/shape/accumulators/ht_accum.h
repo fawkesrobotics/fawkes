@@ -2,8 +2,8 @@
 /***************************************************************************
  *  ht_accum.h - Accumulator class for HoughTransform
  *
- *  Generated: Tue Jun 28 2005
- *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
+ *  Created: Tue Jun 28 00:00:00 2005
+ *  Copyright  2005  Hu Yuxiao <Yuxiao.Hu@rwth-aachen.de>
  *
  ****************************************************************************/
 
@@ -21,12 +21,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_HT_ACCUM_H_
-#define __FIREVISION_HT_ACCUM_H_
+#ifndef __FIREVISION_MODELS_SHAPE_ACCUMULATORS_HT_ACCUM_H_
+#define __FIREVISION_MODELS_SHAPE_ACCUMULATORS_HT_ACCUM_H_
 
 #include <stdlib.h>
 #include <ostream>
 #include <vector>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class RhtAccNode
 {
@@ -140,5 +145,6 @@ class RhtAccumulator
   std::vector< std::vector< int > > * getNodes(int min_count);
 };
 
-#endif // __FIREVISION_HT_ACCUM_H_
+} // end namespace firevision
 
+#endif

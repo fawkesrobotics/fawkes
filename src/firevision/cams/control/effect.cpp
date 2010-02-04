@@ -24,6 +24,11 @@
 
 #include <cams/control/effect.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlEffect <cams/control/effect.h>
  * Camera effect control interface.
  * Some cameras feature camera effects.
@@ -63,3 +68,5 @@ const unsigned int CameraControlEffect::EFFECT_NONE = 0;
 CameraControlEffect::~CameraControlEffect()
 {
 }
+
+} // end namespace firevision

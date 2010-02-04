@@ -26,7 +26,7 @@
 
 namespace fawkes {
 
-/** @class BlockedTimingAspect aspect/blocked_timing.h
+/** @class BlockedTimingAspect <aspect/blocked_timing.h>
  * Thread aspect to use blocked timing
  * The Fawkes main application provides basic means to synchronize all
  * running thread with respect to several given hooks (see WakeupHook).

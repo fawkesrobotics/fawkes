@@ -26,6 +26,11 @@
 
 #include <sys/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 
 class StereoProcessor
@@ -48,5 +53,7 @@ class StereoProcessor
   virtual unsigned char *  yuv_buffer()                                  = 0;
   virtual unsigned char *  auxiliary_yuv_buffer()                        = 0;
 };
+
+} // end namespace firevision
 
 #endif

@@ -33,6 +33,11 @@
 #include <cams/control/effect.h>
 #include <cams/control/focus.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Plain dummy control.
  * Does nothing, supports nothing. Use to avoid unecessary NULL checks
  */
@@ -148,5 +153,7 @@ class DummyCameraControl
   virtual unsigned int focus_max();
 
 };
+
+} // end namespace firevision
 
 #endif

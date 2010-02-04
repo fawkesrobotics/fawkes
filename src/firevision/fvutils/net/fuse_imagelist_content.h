@@ -28,6 +28,11 @@
 #include <fvutils/net/fuse_message_content.h>
 #include <sys/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FuseImageListContent : public FuseMessageContent
 {
  public:
@@ -48,5 +53,7 @@ class FuseImageListContent : public FuseMessageContent
   fawkes::DynamicBuffer  *__list;
   FUSE_imagelist_message_t __imagelist_msg;
 };
+
+} // end namespace firevision
 
 #endif

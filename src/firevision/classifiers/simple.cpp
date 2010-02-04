@@ -2,7 +2,7 @@
 /***************************************************************************
  *  simple.cpp - Implementation of a SimpleColorClassifier
  *
- *  Created: Thu May 16 2005
+ *  Created: Thu May 16 00:00:00 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -33,6 +33,11 @@
 #include <core/exceptions/software.h>
 
 #include <cstdlib>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class SimpleColorClassifier <classifiers/simple.h>
  * Simple classifier.
@@ -382,3 +387,5 @@ SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPo
   massPoint->x += roi->start.x;
   massPoint->y += roi->start.y;
 }
+
+} // end namespace firevision

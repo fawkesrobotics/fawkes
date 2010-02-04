@@ -1,7 +1,7 @@
 /***************************************************************************
  *  bulb.h - class defining a light bulb as mirror
  *
- *  Generated: Thu Jul 21 14:25:00 2005
+ *  Created: Thu Jul 21 14:25:00 2005
  *  Copyright 2005-2006 Tim Niemueller [www.niemueller.de]
  *            2005      Martin Heracles
  *
@@ -28,12 +28,16 @@
 
 #include <string>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SharedMemoryLookupTable;
 
-class Bulb : public MirrorModel {
-
+class Bulb : public MirrorModel
+{
   friend class BulbGenerator;
-
  public:
 
   // This constructor loads an existing bulb model (lut) from file "filename".
@@ -152,5 +156,7 @@ class Bulb : public MirrorModel {
 
 
 };
+
+} // end namespace firevision
 
 #endif

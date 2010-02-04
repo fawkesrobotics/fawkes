@@ -26,6 +26,7 @@
 #include <core/exceptions/software.h>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** @class FvRetrieverPlugin "fvretriever_plugin.h"
  * FireVision Retriever Plugin.

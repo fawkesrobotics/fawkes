@@ -31,6 +31,11 @@
 #include <netinet/in.h>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseLutContent <fvutils/net/fuse_lut_content.h>
  * FUSE lookup table content.
  * @ingroup FUSE
@@ -211,3 +216,5 @@ FuseLutContent::serialize()
 {
   // Nothing to do here
 }
+
+} // end namespace firevision

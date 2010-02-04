@@ -42,6 +42,11 @@
 //using namespace fawkes; 
 using namespace fawkes; 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SiftppClassifier <classifiers/siftpp.h>
  * SIFTPP classifier.
  *
@@ -446,3 +451,5 @@ SiftppClassifier::distSquare(VL::float_t *v1, VL::float_t *v2, int n) {
   //std::cout << "  dsq: '" << dsq << "'" << std::endl;
   return dsq;
 }
+
+} // end namespace firevision

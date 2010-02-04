@@ -27,6 +27,11 @@
 
 #include <cams/control/control.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraControlZoom : virtual public CameraControl
 {
  public:
@@ -41,5 +46,7 @@ class CameraControlZoom : virtual public CameraControl
   virtual void         set_zoom_speed_wide(unsigned int speed);
   virtual void         set_zoom_digital_enabled(bool enabled);
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CAMS_CONTROL_ZOOM_H_

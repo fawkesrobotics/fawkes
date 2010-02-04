@@ -27,6 +27,11 @@
 #include <fvutils/base/roi.h>
 #include <list>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 typedef std::list<ROI> ROIList;
 
 class Classifier
@@ -54,5 +59,7 @@ class Classifier
   char *__name;
 
 };
+
+} // end namespace firevision
 
 #endif

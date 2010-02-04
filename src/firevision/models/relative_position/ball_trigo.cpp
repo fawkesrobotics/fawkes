@@ -29,6 +29,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class BallTrigoRelativePos <models/relative_position/ball_trigo.h>
  * Relative ball position model for pan/tilt camera.
  * This uses basic trigonometry to calculate the position of the ball given
@@ -203,3 +208,5 @@ BallTrigoRelativePos::is_pos_valid() const
 {
   return __distance > 0; //Distance is < 0 if the ROI is above the horizon
 }
+
+} // end namespace firevision

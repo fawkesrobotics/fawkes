@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  beams.h - Scanline model implementation: beams
+ *  beams.cpp - Scanline model implementation: beams
  *
  *  Created: Tue Apr 17 21:09:46 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -27,6 +27,11 @@
 #include <cmath>
 
 using fawkes::point_t;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ScanlineBeams <models/scanlines/beams.h>
  * Raytraced beams scanline model.
@@ -264,3 +269,5 @@ ScanlineBeams::get_margin()
 {
   return offset_y;
 }
+
+} // end namespace firevision

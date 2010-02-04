@@ -28,6 +28,11 @@
 #include <string>
 #include <map>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class YuvColormap;
 class Histogram;
 
@@ -52,5 +57,6 @@ class ColormapGenerator
   virtual std::map< hint_t, Histogram *> *  get_histograms()                 = 0;
 };
 
+} // end namespace firevision
 
 #endif

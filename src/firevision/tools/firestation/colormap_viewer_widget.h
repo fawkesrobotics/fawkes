@@ -25,7 +25,9 @@
 
 #include <gtkmm.h>
 
-class Colormap;
+namespace firevision {
+  class Colormap;
+}
 
 class ColormapViewerWidget
 {
@@ -33,7 +35,7 @@ class ColormapViewerWidget
   ColormapViewerWidget();
   ~ColormapViewerWidget();
 
-  void set_colormap(Colormap* cm);
+  void set_colormap(firevision::Colormap* cm);
   void set_colormap_img(Gtk::Image* img);
   void set_layer_selector(Gtk::Scale* scl);
   
@@ -42,7 +44,7 @@ class ColormapViewerWidget
  private:
   bool on_layer_selected(Gtk::ScrollType scroll, double value);
 
-  Colormap* m_cm;
+  firevision::Colormap* m_cm;
 
   Gtk::Image* m_img_colormap;
   Gtk::Scale* m_scl_layer_selector;

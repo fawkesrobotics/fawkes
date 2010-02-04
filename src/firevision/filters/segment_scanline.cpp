@@ -33,6 +33,11 @@
 #include <cstddef>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterScanlineSegmentation <filters/segment_scanline.h>
  * Segmentation filter.
  * Visually marks pixels depending of their classification determined by the
@@ -144,3 +149,5 @@ FilterScanlineSegmentation::apply()
     ++(*slm);
   }
 }
+
+} // end namespace firevision

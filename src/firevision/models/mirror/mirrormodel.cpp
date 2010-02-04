@@ -2,7 +2,7 @@
 /***************************************************************************
  *  mirrormodel.cpp - Abstract class defining a mirror model
  *
- *  Generated: Wed Mar 21 16:32:32 2007
+ *  Created: Wed Mar 21 16:32:32 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -22,6 +22,11 @@
  */
 
 #include <models/mirror/mirrormodel.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class MirrorModel <models/mirror/mirrormodel.h>
  * Mirror model interface.
@@ -99,3 +104,5 @@
 MirrorModel::~MirrorModel()
 {
 }
+
+} // end namespace firevision

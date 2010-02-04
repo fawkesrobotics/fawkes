@@ -26,6 +26,11 @@
 
 #include <fvutils/colormap/cmfile_block.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class YuvColormap;
 
 #pragma pack(push,4)
@@ -52,5 +57,7 @@ class ColormapFileYuvBlock : public ColormapFileBlock
   unsigned int  __level;
   cmfile_yuvblock_header_t *__header;
 };
+
+} // end namespace firevision
 
 #endif

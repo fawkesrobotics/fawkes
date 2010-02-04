@@ -28,6 +28,11 @@
 #include <cstddef>
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterOr <filters/or.h>
  * Or filter.
  * @author Tim Niemueller
@@ -72,3 +77,5 @@ FilterOr::apply()
   }
 
 }
+
+} // end namespace firevision

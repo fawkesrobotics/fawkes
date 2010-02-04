@@ -41,6 +41,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseClient <fvutils/net/fuse_client.h>
  * FUSE client.
  * FUSE is the FireVision protocol to retrieve information, images and lookup
@@ -355,3 +360,5 @@ FuseClient::wait_greeting()
   }
   __greeting_mutex->unlock();
 }
+
+} // end namespace firevision

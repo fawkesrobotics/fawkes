@@ -33,6 +33,8 @@
 
 #include <SDL.h>
 
+using namespace firevision;
+
 int
 main(int argc, char **argv)
 {

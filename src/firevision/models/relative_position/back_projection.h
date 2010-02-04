@@ -19,18 +19,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef BACK_PROJECTION_H_
-#define BACK_PROJECTION_H_
+#ifndef __FIREVISION_MODELS_RELATIVE_POSITION_BACK_PROJECTION_H_
+#define __FIREVISION_MODELS_RELATIVE_POSITION_BACK_PROJECTION_H_
 
-#include "relativepositionmodel.h"
+#include <models/relative_position/relativepositionmodel.h>
 
 #include <models/camera/projective_cam.h>
 #include <utils/math/types.h>
 
-class BackProjectionPositionModel :
-  public RelativePositionModel
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class BackProjectionPositionModel : public RelativePositionModel
 {
-public:
+ public:
   BackProjectionPositionModel(ProjectiveCam &projective_cam,
                               float ball_circumference = 0.f);
 
@@ -60,7 +64,7 @@ public:
 
   virtual bool          is_pos_valid() const { return __pos_valid; }
 
-private:
+ private:
   ProjectiveCam&  __projective_cam;
 
   center_in_roi_t       __cirt_center;
@@ -76,5 +80,7 @@ private:
   float                 __distance;
   bool                  __pos_valid;
 };
+
+} // end namespace firevision
 
 #endif /* BACK_PROJECTION_H_ */

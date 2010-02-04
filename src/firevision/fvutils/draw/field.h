@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *  field.h - Encapsulates a soccer field
  *
@@ -19,13 +20,18 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_NAO_LOC_FIELD__
-#define __FIREVISION_APPS_NAO_LOC_FIELD__
+#ifndef __FVUTILS_DRAW_FIELD_H_
+#define __FVUTILS_DRAW_FIELD_H_
 
 #include "field_lines.h"
 
 #include <string>
 #include <list>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 typedef std::list<fawkes::cart_coord_2d_t> fld_line_points_t;
 
@@ -49,4 +55,6 @@ private:
   bool         __manage_lines_memory;
 };
 
-#endif /* __FIREVISION_APPS_NAO_LOC_FIELD__ */
+} // end namespace firevision
+
+#endif

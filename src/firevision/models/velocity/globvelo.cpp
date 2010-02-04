@@ -3,7 +3,7 @@
  *  globvelo.cpp - Implementation of velocity model based on global
  *                 positions
  *
- *  Generated: Mon Sep 05 17:12:48 2005
+ *  Created: Mon Sep 05 17:12:48 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,6 +26,11 @@
 #include <models/velocity/globvelo.h>
 
 #include <utils/time/time.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class VelocityFromGlobal <models/velocity/globvelo.h>
  * Velocity from global positions.
@@ -248,3 +253,5 @@ VelocityFromGlobal::applyKalmanFilter()
 
 }
 */
+
+} // end namespace firevision

@@ -33,6 +33,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class LeutronCamera <cams/leutron.h>
  * Cameras accessed through Leutron framegrabber.
  */
@@ -307,3 +312,5 @@ void
 LeutronCamera::set_image_number(unsigned int n)
 {
 }
+
+} // end namespace firevision

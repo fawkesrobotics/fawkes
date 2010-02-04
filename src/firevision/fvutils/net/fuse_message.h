@@ -31,6 +31,11 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FuseMessageContent;
 
 class FuseNetworkMessage : public fawkes::RefCount
@@ -124,5 +129,7 @@ class FuseNetworkMessage : public fawkes::RefCount
  private:
   FuseMessageContent *__content;
 };
+
+} // end namespace firevision
 
 #endif

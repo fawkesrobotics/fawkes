@@ -26,6 +26,11 @@
 #include <cstddef>
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterGauss <filters/gauss.h>
  * Gaussian filter.
  * Applies Gaussian linear filter to image (blur effect).
@@ -74,3 +79,5 @@ FilterGauss::apply()
   cout << endl;
   */
 }
+
+} // end namespace firevision

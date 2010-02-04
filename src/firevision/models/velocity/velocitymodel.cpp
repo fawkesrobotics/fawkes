@@ -2,7 +2,7 @@
 /***************************************************************************
  *  velocitymodel.cpp - Abstract class defining a velocity model
  *
- *  Generated: Thu Mar 29 17:02:09 2007
+ *  Created: Thu Mar 29 17:02:09 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -22,6 +22,11 @@
  */
 
 #include <models/velocity/velocitymodel.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class VelocityModel <models/velocity/velocitymodel.h>
  * Velocity model interface.
@@ -96,3 +101,5 @@
 VelocityModel::~VelocityModel()
 {
 }
+
+} // end namespace firevision

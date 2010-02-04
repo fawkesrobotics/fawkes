@@ -27,6 +27,11 @@
 #include <fvutils/base/types.h>
 #include <iostream>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class HistogramBlock;
 
 class Histogram
@@ -81,6 +86,6 @@ class Histogram
   unsigned int   undo_current;
 };
 
-
+} // end namespace firevision
 
 #endif

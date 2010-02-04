@@ -25,7 +25,7 @@
 
 namespace fawkes {
 
-/** @class VisionMasterAspect vision_master.h <aspect/vision_master.h>
+/** @class VisionMasterAspect <aspect/vision_master.h>
  * Vision Master Aspect.
  *
  * This aspect provides access to the vision muster. Your thread having
@@ -40,7 +40,7 @@ namespace fawkes {
 /** Constructor.
  * @param master vision master
  */
-VisionMasterAspect::VisionMasterAspect(::VisionMaster *master)
+VisionMasterAspect::VisionMasterAspect(firevision::VisionMaster *master)
 {
   this->master = master;
 }
@@ -55,7 +55,7 @@ VisionMasterAspect::~VisionMasterAspect()
 /** Get vision master.
  * @return vision master
  */
-::VisionMaster *
+firevision::VisionMaster *
 VisionMasterAspect::vision_master()
 {
   return master;

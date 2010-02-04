@@ -28,6 +28,12 @@
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/rgb.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+
 #define YUV2RGB(y, u, v, r, g, b) {\
     r = y + ((v*1436) >> 10);			\
     g = y - ((u*352 + v*731) >> 10);		\
@@ -167,5 +173,7 @@ convert_line_yuv422planar_to_rgb(const unsigned char *YUV, unsigned char *RGB,
     i += 2;
   }
 }
+
+} // end namespace firevision
 
 #endif

@@ -28,6 +28,11 @@
 #include <fvutils/fileformat/fvfile.h>
 #include <vector>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class RectificationInfoBlock;
 
 class RectificationInfoFile : public FireVisionDataFile
@@ -61,5 +66,7 @@ class RectificationInfoFile : public FireVisionDataFile
   uint64_t            _cam_guid;
   char               *_model;
 };
+
+} // end namespace firevision
 
 #endif

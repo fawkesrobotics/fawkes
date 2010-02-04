@@ -2,7 +2,7 @@
 /***************************************************************************
  *  radial.h - Scanline model implementation: radial
  *
- *  Generated: Tue Jul 19 12:05:31 2005
+ *  Created: Tue Jul 19 12:05:31 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,6 +26,11 @@
 
 #include <models/scanlines/scanlinemodel.h>
 #include <fvutils/base/types.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ScanlineRadial : public ScanlineModel
 {
@@ -83,5 +88,7 @@ class ScanlineRadial : public ScanlineModel
   int tmp_y;
 
 };
+
+} // end namespace firevision
 
 #endif

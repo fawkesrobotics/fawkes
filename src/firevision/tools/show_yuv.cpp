@@ -30,6 +30,7 @@
 #include <SDL.h>
 
 using namespace std;
+using namespace firevision;
 
 /** YUV color space demo.
  * This class fills the given buffer of the size 512x512.

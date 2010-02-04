@@ -30,6 +30,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Writer <fvutils/writers/writer.h>
  * Interface to write images.
  * The writer interface defines the general API for image writers. These
@@ -157,3 +162,5 @@ Writer::set_extension(const char *extension)
   strcat(this->filename, ".");
   strcat(filename, extension);
 }
+
+} // end namespace firevision

@@ -29,6 +29,11 @@
 
 #include <vector>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ScanlineBeams : public ScanlineModel
 {
 
@@ -80,5 +85,7 @@ class ScanlineBeams : public ScanlineModel
   unsigned int first_beam;
   unsigned int last_beam;
 };
+
+} // end namespace firevision
 
 #endif

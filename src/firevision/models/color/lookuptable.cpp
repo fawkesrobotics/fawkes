@@ -44,6 +44,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ColorModelLookupTable <models/color/lookuptable.h>
  * Color model based on a lookup table.
  * Very fast and easy implementation of a lookup table. It ignores
@@ -192,3 +197,5 @@ ColorModelLookupTable::compose_filename(const std::string format)
 {
   return ColormapFile::compose_filename(format);
 }
+
+} // end namespace firevision

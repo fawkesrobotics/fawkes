@@ -35,6 +35,11 @@
 #include <core/exception.h>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Convert image from one colorspace to another.
  * This is a convenience method for unified access to all conversion routines
  * available in FireVision.
@@ -146,5 +151,7 @@ grayscale(colorspace_t cspace,
     throw e;
   }
 }
+
+} // end namespace firevision
 
 #endif

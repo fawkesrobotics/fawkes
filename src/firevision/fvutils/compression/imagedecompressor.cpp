@@ -23,6 +23,12 @@
 
 #include <fvutils/compression/imagedecompressor.h>
 
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ImageDecompressor <fvutils/compression/imagedecompressor.h>
  * Image de-compressor interface.
  * Currently only decompressing from memory to memory is supported.
@@ -97,3 +103,5 @@ ImageDecompressor::set_decompressed_buffer(unsigned char *buf, unsigned int buf_
   _decompressed_buffer = buf;
   _decompressed_buffer_size = buf_size;
 }
+
+} // end namespace firevision

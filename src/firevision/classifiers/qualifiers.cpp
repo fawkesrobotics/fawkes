@@ -1,7 +1,8 @@
+
 /***************************************************************************
  *  qualifiers.cpp - Pixel qualifier
  *
- *  Created: Mon, 09. Jun 2008 22:54
+ *  Created: Mon Jun 09 22:54:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -19,13 +20,18 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "qualifiers.h"
+#include <classifiers/qualifiers.h>
 #include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
 
 #include <cstdlib>
 
 using fawkes::point_t;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Qualifier qualifiers.h <apps/nao_loc/qualifiers.h>
  * Abstract Qualifier for a single pixel
@@ -255,3 +261,5 @@ YellowQualifier::get(point_t pixel)
 
   return (u + v);
 }
+
+} // end namespace firevision

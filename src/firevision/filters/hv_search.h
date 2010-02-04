@@ -28,6 +28,11 @@
 #include <filters/filter.h>
 #include <models/color/colormodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ColorModel;
 
 class FilterHVSearch : public Filter
@@ -42,6 +47,8 @@ class FilterHVSearch : public Filter
   color_t        what;
 
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_FILTER_HV_SEARCH_H_
 

@@ -30,6 +30,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterLaplace : public Filter
 {
 
@@ -46,5 +51,7 @@ class FilterLaplace : public Filter
   int           *kernel;
   unsigned int   kernel_size;
 };
+
+} // end namespace firevision
 
 #endif

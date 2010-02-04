@@ -2,7 +2,7 @@
 /***************************************************************************
  *  scanlinemodel.h - Abstract class defining a scanline model
  *
- *  Generated: Tue May 03 19:50:02 2005
+ *  Created: Tue May 03 19:50:02 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -35,6 +35,11 @@
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
 #include <string>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ScanlineModel <models/scanlines/scanlinemodel.h>
  * Scanline model interface.
@@ -121,5 +126,7 @@ class ScanlineModel
    */
   virtual void          set_roi(ROI* roi = NULL) { throw fawkes::NotImplementedException("Setting ROI is not implemented."); }
 };
+
+} // end namespace firevision
 
 #endif

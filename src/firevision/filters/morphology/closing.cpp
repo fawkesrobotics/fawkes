@@ -28,6 +28,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterClosing <filters/morphology/closing.h>
  * Morphological closing.
  *
@@ -96,3 +101,5 @@ FilterClosing::apply()
   dilate->apply();
   erode->apply();
 }
+
+} // end namespace firevision

@@ -24,6 +24,11 @@
 
 #include <cams/control/focus.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlFocus <cams/control/focus.h>
  * Camera focus control interface.
  * Some cameras feature an adjustable focus.
@@ -64,3 +69,5 @@
 CameraControlFocus::~CameraControlFocus()
 {
 }
+
+} // end namespace firevision

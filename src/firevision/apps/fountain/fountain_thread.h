@@ -30,9 +30,11 @@
 #include <aspect/network.h>
 #include <aspect/thread_producer.h>
 
-class FuseServer;
 namespace fawkes {
   class NetworkService;
+}
+namespace firevision {
+  class FuseServer;
 }
 
 class FountainThread
@@ -51,7 +53,7 @@ class FountainThread
   virtual void loop();
 
  private:
-  FuseServer *__fuse_server;
+  firevision::FuseServer *__fuse_server;
   fawkes::NetworkService *__service;
 };
 

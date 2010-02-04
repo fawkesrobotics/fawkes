@@ -3,7 +3,7 @@
  *  globalpositionmodel.cpp - Abstract class defining a position model for
  *                            calculation of global position
  *
- *  Generated: Wed Mar 21 15:44:10 2007
+ *  Created: Wed Mar 21 15:44:10 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,6 +21,13 @@
  *
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
+
+#include <models/global_position/globalpositionmodel.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class GlobalPositionModel <models/global_position/globalpositionmodel.h>
  * Global Position Model Interface.
@@ -57,9 +64,9 @@
  * @author Tim Niemueller
  */
 
-#include <models/global_position/globalpositionmodel.h>
-
 /** Empty virtual destructor. */
 GlobalPositionModel::~GlobalPositionModel()
 {
 }
+
+} // end namespace firevision

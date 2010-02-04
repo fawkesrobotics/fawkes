@@ -29,6 +29,11 @@
 #include <cstdlib>
 #include <list>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FireVisionDataFile
 {
  public:
@@ -76,5 +81,6 @@ class FireVisionDataFile
   bool          __owns_blocks;
 };
 
+} // end namespace firevision
 
 #endif

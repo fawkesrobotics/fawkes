@@ -3,7 +3,7 @@
  *  rht_lines.cpp - Implementation of a lines shape finder
  *                   with Randomized Hough Transform
  *
- *  Generated: Mon Sep 26 2005 09:52:00
+ *  Created: Mon Sep 26 2005 09:52:00
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -32,6 +32,10 @@ using namespace fawkes;
 
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class RhtLinesModel <models/shape/rht_lines.h>
  * Randomized Hough-Transform line model.
@@ -229,3 +233,5 @@ RhtLinesModel::getShapes()
 
   return rv;
 }
+
+} // end namespace firevision

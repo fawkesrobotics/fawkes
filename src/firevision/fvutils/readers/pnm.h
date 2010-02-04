@@ -24,9 +24,14 @@
 #ifndef __FIREVISION_UTILS_READERS_BITMAP_H_
 #define __FIREVISION_UTILS_READERS_BITMAP_H_
 
-#include "fvutils/readers/reader.h"
+#include <fvutils/readers/reader.h>
 
 #include <cstdio>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class PNMReader : public Reader {
 
@@ -52,5 +57,7 @@ class PNMReader : public Reader {
   unsigned int m_img_height;
   unsigned int m_img_depth;
 };
+
+} // end namespace firevision
 
 #endif

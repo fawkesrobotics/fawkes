@@ -31,8 +31,9 @@
 #include <cstring>
 
 using namespace fawkes;
+using namespace firevision;
 
-/** @class FuseViewerGtkWindow fuse_viewer_gui.h  <tools/fuse_viewer/fuse_viewer_gui.h>
+/** @class FuseViewerGtkWindow "fuse_viewer_gui.h"
  * Fawkes network camera viewer.
  *
  * Currently the image refreshes 300ms after the retrieval and display of the
@@ -48,7 +49,7 @@ using namespace fawkes;
  * @param ref_xml Glade XML
  */
 FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType* cobject,
-				       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+					 const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   : Gtk::Window(cobject)
 {
   ref_xml->get_widget("swFuseList",  __image_list_scroll);

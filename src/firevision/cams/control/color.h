@@ -27,6 +27,11 @@
 
 #include <cams/control/control.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraControlColor : virtual public CameraControl
 {
  public:
@@ -63,5 +68,7 @@ class CameraControlColor : virtual public CameraControl
   virtual unsigned int gain()                                           = 0;
   virtual void         set_gain(unsigned int gain)                      = 0;
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CAMS_CONTROL_COLOR_H_

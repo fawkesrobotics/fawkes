@@ -2,7 +2,7 @@
 /***************************************************************************
  *  shapemodel.cpp - Abstract class defining a shape model
  *
- *  Generated: Wed Mar 21 17:53:39 2007
+ *  Created: Wed Mar 21 17:53:39 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *             2005       Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *             2005       Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
@@ -25,6 +25,10 @@
 
 #include <models/shape/shapemodel.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Shape <models/shape/shapemodel.h>
  * Shape interface.
@@ -78,3 +82,5 @@ Shape::~Shape()
 ShapeModel::~ShapeModel()
 {
 }
+
+} // end namespace firevision

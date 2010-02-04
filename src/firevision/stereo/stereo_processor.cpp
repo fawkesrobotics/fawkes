@@ -23,6 +23,11 @@
 
 #include <stereo/stereo_processor.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class StereoProcessor <stereo/stereo_processor.h>
  * Stereo processor interface.
  * This interface provides access to different stereo processing
@@ -107,3 +112,5 @@
 StereoProcessor::~StereoProcessor()
 {
 }
+
+} // end namespace firevision

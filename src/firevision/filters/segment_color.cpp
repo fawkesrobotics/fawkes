@@ -29,6 +29,11 @@
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterColorSegmentation <filters/segment_color.h>
  * Segmentation filter.
  * Visually marks pixels depending of their classification determined by the
@@ -161,3 +166,5 @@ FilterColorSegmentation::apply()
   }
 
 }
+
+} // end namespace firevision

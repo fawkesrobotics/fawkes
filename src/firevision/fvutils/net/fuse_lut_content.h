@@ -28,6 +28,11 @@
 #include <fvutils/net/fuse_message_content.h>
 #include <sys/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SharedMemoryLookupTable;
 
 class FuseLutContent : public FuseMessageContent
@@ -56,5 +61,7 @@ class FuseLutContent : public FuseMessageContent
   size_t         __buffer_size;
   FUSE_lut_message_header_t *__header;
 };
+
+} // end namespace firevision
 
 #endif

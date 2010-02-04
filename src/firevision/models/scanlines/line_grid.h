@@ -2,7 +2,7 @@
 /***************************************************************************
  *  line_grid.h - Scanline model implementation: line grid
  *
- *  Generated: Wen Mar 25 17:31:00 2009
+ *  Created: Wen Mar 25 17:31:00 2009
  *  Copyright  2009 Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -30,16 +30,19 @@
 
 #include <list>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 
-
-class ScanlineLineGrid :
-  public ScanlineModel
+class ScanlineLineGrid : public ScanlineModel
 {
-private:
+ private:
   typedef std::list<fawkes::point_t> point_list_t;
 
-public:
+ public:
   ScanlineLineGrid(unsigned int width, unsigned int height,
                    unsigned int offset_hor, unsigned int offset_ver,
                    ROI* roi = NULL, unsigned int gap = 0);
@@ -64,7 +67,7 @@ public:
                              unsigned int offset_hor, unsigned int offset_ver, ROI* roi = NULL);
   virtual void set_roi(ROI* roi = NULL);
 
-private:
+ private:
   unsigned int __width;
   unsigned int __height;
   unsigned int __offset_ver;
@@ -78,5 +81,7 @@ private:
 
   void calc_coords();
 };
+
+} // end namespace firevision
 
 #endif //__FIREVISION_SCANLINE_LINE_GRID_H_

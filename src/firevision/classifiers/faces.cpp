@@ -31,6 +31,11 @@
 
 #include <opencv/cv.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FacesClassifier <classifiers/faces.h>
  * Faces classifier.
  * This class provides a classifier that uses OpenCV to detect images in the given
@@ -121,3 +126,5 @@ FacesClassifier::classify()
 
   return rv;
 }
+
+} // end namespace firevision

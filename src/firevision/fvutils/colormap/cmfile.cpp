@@ -33,6 +33,11 @@
 
 #include <cstdio>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ColormapFile::ColormapBlockVector <fvutils/colormap/cmfile.h>
  * Vector of colormap blocks.
  * @author Tim Niemueller
@@ -263,3 +268,5 @@ ColormapFile::get_height()
   assert_header();
   return __header->height;
 }
+
+} // end namespace firevision

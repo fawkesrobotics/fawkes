@@ -2,7 +2,7 @@
 /***************************************************************************
  *  rcd_circle.cpp - Implementation of a circle shape finder
  *
- *  Generated: Thu May 16 2005
+ *  Created: Thu May 16 00:00:00 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *
@@ -29,6 +29,11 @@
 
 using namespace std;
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 #define TBY_GRAYSCALE
 #ifdef TBY_GRAYSCALE
@@ -369,4 +374,4 @@ void RcdCircleModel::calcCircle(
   radius	=	(float)sqrt(dx*dx+dy*dy);
 }
 
-
+} // end namespace firevision

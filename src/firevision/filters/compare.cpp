@@ -26,6 +26,11 @@
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Background image. */
 const unsigned int FilterCompare::BACKGROUND = 0;
 /** Foreground image. */
@@ -124,3 +129,5 @@ FilterCompare::apply()
   }
 
 }
+
+} // end namespace firevision

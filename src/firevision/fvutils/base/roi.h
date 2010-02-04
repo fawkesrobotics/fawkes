@@ -26,6 +26,11 @@
 
 #include <fvutils/base/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /* The values of this enum-type have to be indexed subsequently,
    beginning with 0. The last value has to be "H_SIZE = ...".
    You may add further values at the end (but before H_SIZE!)
@@ -133,5 +138,7 @@ class ROI {
   static ROI  *roi_full_image;
 
 };
+
+} // end namespace firevision
 
 #endif

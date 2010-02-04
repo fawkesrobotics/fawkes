@@ -36,6 +36,11 @@
 
 #define FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH  32
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Header for a rectification information file (rectinfo).
  * The header defines the basic parameters needed to correctly interpret the
  * following rectification file data.
@@ -174,6 +179,8 @@ typedef enum _rectinfo_camera_t {
 extern const char* rectinfo_camera_strings[];
 
 extern const char* rectinfo_type_strings[];
+
+} // end namespace firevision
 
 #pragma pack(pop)
 #endif

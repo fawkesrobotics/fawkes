@@ -1,7 +1,7 @@
 
 /***************************************************************************
- *  segenerator.h - Class that helps to create some standard structuring
- *                  elements
+ *  segenerator.cpp - Class that helps to create some standard structuring
+ *                    elements
  *
  *  Created: Wed Jun 07 11:23:03 2006
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -33,6 +33,11 @@
 
 #include <cstdlib>
 #include <cstring>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class SEGenerator <filters/morphology/segenerator.h>
  * Basic generators for structuring elements for morphological filters.
@@ -194,3 +199,5 @@ SEGenerator::drawSEbw(unsigned char *yuv422planar_buffer, unsigned char *mask, u
     }
   }
 }
+
+} // end namespace firevision

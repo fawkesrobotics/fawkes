@@ -32,6 +32,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ImageDisplay <fvwidgets/image_display.h>
  * Simple image display.
  * This is a simple thin wrapper around the SDL to display images in a standalone
@@ -154,3 +159,5 @@ ImageDisplay::loop_until_quit()
     }
   }
 }
+
+} // end namespace firevision

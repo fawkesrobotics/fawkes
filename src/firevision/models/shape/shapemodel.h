@@ -2,7 +2,7 @@
 /***************************************************************************
  *  shapemodel.h - Abstract class defining a shape model
  *
- *  Generated: Tue May 03 19:50:02 2005
+ *  Created: Tue May 03 19:50:02 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *             2005       Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *             2005       Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
@@ -29,6 +29,11 @@
 #include <string>
 #include <vector>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ROI;
 
 class Shape
@@ -51,5 +56,7 @@ public:
   virtual   Shape*	           getShape(int id) const			  = 0;
   virtual   Shape*	           getMostLikelyShape(void) const		  = 0;
 };
+
+} // end namespace firevision
 
 #endif

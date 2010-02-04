@@ -30,6 +30,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class PNMWriter <fvutils/writers/pnm.h>
  * PNM file writer.
  */
@@ -283,3 +288,5 @@ PNMWriter::calc_buffer_size()
 
   return rv;
 }
+
+} // end namespace firevision

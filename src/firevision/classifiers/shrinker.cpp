@@ -27,6 +27,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Shrinker <classifiers/shrinker.h>
  * Shrinker class to shrink ROIs.
  * This shrinker shrinks a given ROI. This is done to cope with several
@@ -166,3 +171,5 @@ Shrinker::shrink( ROI *roi )
   } // else do nothing
 
 }
+
+} // end namespace firevision

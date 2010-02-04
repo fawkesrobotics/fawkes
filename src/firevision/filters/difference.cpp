@@ -26,6 +26,11 @@
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterDifference <filters/difference.h>
  * Calculates the difference of two images.
  */
@@ -121,3 +126,5 @@ FilterDifference::apply()
   }
 
 }
+
+} // end namespace firevision

@@ -27,6 +27,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ROI <fvutils/base/roi.h>
  * Region of interest.
  * The ROI class is central to FireVision. All image processing is concentrated
@@ -562,3 +567,5 @@ ROI::full_image(unsigned int width, unsigned int height)
 
   return roi_full_image;
 }
+
+} // end namespace firevision

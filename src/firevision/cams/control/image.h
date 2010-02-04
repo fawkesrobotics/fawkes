@@ -27,6 +27,11 @@
 
 #include <cams/control/control.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraControlImage : virtual public CameraControl
 {
  public:
@@ -56,5 +61,7 @@ class CameraControlImage : virtual public CameraControl
   virtual void         set_lens_y_corr(unsigned int y_corr);
   virtual void         set_lens_corr(unsigned int x_corr, unsigned int y_corr);
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CAMS_CONTROL_IMAGE_H_

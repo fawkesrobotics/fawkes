@@ -46,9 +46,13 @@
 #include <cstdio>
 
 #include <sys/types.h>
-#include <dirent.h>
 
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class FileLoader <cams/fileloader.h>
  * Load images from files.
@@ -434,3 +438,4 @@ FileLoader::read_file()
   free(fn);
 }
 
+} // end namespace firevision

@@ -24,6 +24,11 @@
 #ifndef __FIREVISION_UTILS_BAYER_H_
 #define __FIREVISION_UTILS_BAYER_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Bayer pattern enumeration.
  * This enumeration lists the differen possible bayer patterns.
  */
@@ -42,5 +47,7 @@ void bayerGBRG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned cha
 					unsigned int width, unsigned int height);
 void bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *yuv,
 					 unsigned int width, unsigned int height);
+
+} // end namespace firevision
 
 #endif

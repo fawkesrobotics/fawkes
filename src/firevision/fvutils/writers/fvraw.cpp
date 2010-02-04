@@ -3,7 +3,7 @@
  *  fvraw.cpp - writer for FireVision raw files
  *
  *  Generated: Sat Mar 25 00:15:47 2006
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -32,12 +32,18 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** File identifier for FvRaw images. */
 const unsigned int FvRawWriter::FILE_IDENTIFIER = 0x17559358; // 16
 
-/** @class FvRawWriter fvraw.h <fvutils/writers/fvraw.h>
+/** @class FvRawWriter <fvutils/writers/fvraw.h>
  * FvRaw Writer implementation.
  * This class allows for writing FvRaw images to a file.
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
@@ -169,3 +175,5 @@ FvRawWriter::get_write_buffer()
 {
   return buffer;
 }
+
+} // end namespace firevision

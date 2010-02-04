@@ -3,7 +3,7 @@
  *  rht_circle.cpp - Implementation of a circle shape finder
  *                   with Randomized Hough Transform
  *
- *  Generated: Tue Jun 28 2005
+ *  Created: Tue Jun 28 00:00:00 2005
  *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *                   Tim Niemueller [www.niemueller.de]
  *
@@ -23,9 +23,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <models/shape/rht_circle.h>
+
 #include <cmath>
 #include <sys/time.h>
-#include "models/shape/rht_circle.h"
 
 using namespace std;
 using namespace fawkes;
@@ -37,6 +38,11 @@ using namespace fawkes;
 #define TBY_RADIUS_DIFF(x1, y1, x2, y2, r) \
 		(sqrt(((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2))-(r)*(r)))
 
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 const float RhtCircleModel::RHT_MIN_RADIUS = 40.0;
 const float RhtCircleModel::RHT_MAX_RADIUS = 500.0;
@@ -314,4 +320,4 @@ RhtCircleModel::calcCircle(
   radius	=	(float)sqrt(dx*dx+dy*dy);
 }
 
-
+} // end namespace firevision

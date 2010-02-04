@@ -39,6 +39,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FirewireCamera <cams/firewire.h>
  * Firewire camera.
  * This camera implementation allows for access to IEEE1394 cameras via
@@ -1008,3 +1013,4 @@ FirewireCamera::print_available_fwcams()
   }
 }
 
+} // end namespace firevision

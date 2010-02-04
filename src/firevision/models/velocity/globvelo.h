@@ -2,7 +2,7 @@
 /***************************************************************************
  *  globvelo.h - A simple velocity model using the global coordinates
  *
- *  Generated: Mon Sep 05 17:06:54 2005
+ *  Created: Mon Sep 05 17:06:54 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -32,6 +32,10 @@
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class VelocityFromGlobal : public VelocityModel
 {
@@ -101,5 +105,7 @@ class VelocityFromGlobal : public VelocityModel
   */
 
 };
+
+} // end namespace firevision
 
 #endif

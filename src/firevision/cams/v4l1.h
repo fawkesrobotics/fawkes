@@ -26,6 +26,11 @@
 
 #include <cams/camera.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 class V4L1CameraData;
 
@@ -80,5 +85,7 @@ class V4L1Camera : public Camera
 
 
 };
+
+} // end namespace firevision
 
 #endif

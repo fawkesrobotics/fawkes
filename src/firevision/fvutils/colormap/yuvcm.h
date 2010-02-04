@@ -29,6 +29,11 @@
 #include <sys/types.h>
 #include <fvutils/base/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SharedMemoryLookupTable;
 
 class YuvColormap : public Colormap
@@ -88,5 +93,7 @@ YuvColormap::determine(unsigned int y, unsigned int u, unsigned int v) const
 {
   return (color_t) *(__lut + (y / __depth_div) * __plane_size + (v / __height_div) * __width + (u / __width_div));
 }
+
+} // end namespace firevision
 
 #endif

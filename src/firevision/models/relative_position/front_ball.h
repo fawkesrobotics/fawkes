@@ -31,6 +31,11 @@
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FrontBallRelativePos : public RelativePositionModel
 {
  public:
@@ -119,6 +124,8 @@ private:
 
   // void                  applyKalmanFilter();
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_MODELS_RELPOS_BALL_H_
 

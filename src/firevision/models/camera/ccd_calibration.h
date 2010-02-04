@@ -2,7 +2,7 @@
 /***************************************************************************
  *  ccd_calibration.h - Class defining a ccd camera calibration matrix K
  *
- *  Generated: Thu May 8 13:53 2008
+ *  Created: Thu May 08 13:53:00 2008
  *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -24,15 +24,22 @@
 #ifndef __FIREVISION_CCD_CALIBRATION_H__
 #define __FIREVISION_CCD_CALIBRATION_H__
 
-#include "calibration.h"
+#include <models/camera/calibration.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class CCDCalibration: public Calibration
 {
-  public:
-    CCDCalibration(float ax, float ay, float x0, float y0);
-    CCDCalibration(float hor_fov, unsigned int img_width, unsigned int img_height);
-    CCDCalibration(const CCDCalibration& cp);
-    virtual ~CCDCalibration();
+ public:
+  CCDCalibration(float ax, float ay, float x0, float y0);
+  CCDCalibration(float hor_fov, unsigned int img_width, unsigned int img_height);
+  CCDCalibration(const CCDCalibration& cp);
+  virtual ~CCDCalibration();
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CCD_CALIBRATION_H__

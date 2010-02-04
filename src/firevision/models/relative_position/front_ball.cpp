@@ -32,6 +32,11 @@
 using namespace std;
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FrontBallRelativePos <models/relative_position/front_ball.h>
  * Relative ball position model for front vision.
  */
@@ -340,3 +345,5 @@ FrontBallRelativePos::applyKalmanFilter()
 
 }
 */
+
+} // end namespace firevision

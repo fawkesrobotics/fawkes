@@ -29,6 +29,11 @@
 #include <utils/time/time.h>
 #include <sys/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SharedMemoryImageBuffer;
 
 class FuseImageContent : public FuseMessageContent
@@ -63,5 +68,7 @@ class FuseImageContent : public FuseMessageContent
 
   mutable fawkes::Time  *__capture_time;
 };
+
+} // end namespace firevision
 
 #endif

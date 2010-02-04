@@ -25,6 +25,11 @@
 #ifndef __FIREVISION_UTILS_COLOR_RGB_H
 #define __FIREVISION_UTILS_COLOR_RGB_H
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 #define RGB_PIXEL_SIZE 3
 #define RGB_PIXEL_AT(RGB, width, x, y)    ((RGB_t *)(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE))
 #define RGB_CLEAR_PIXEL(RGB, width, x, y) memset(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE, 0, RGB_PIXEL_SIZE);
@@ -60,5 +65,7 @@ void bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
 
 void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
 			   unsigned int width, unsigned int height);
+
+} // end namespace firevision
 
 #endif

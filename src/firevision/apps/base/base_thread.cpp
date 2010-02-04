@@ -44,6 +44,7 @@
 #include <unistd.h>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** @class FvBaseThread "base_thread.h"
  * FireVision base thread.

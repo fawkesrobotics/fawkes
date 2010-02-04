@@ -27,6 +27,11 @@
 #include <opencv/cv.h>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class IplImageAdapter <fvutils/adapters/iplimage.h>
  * Adapter for OpenCV IplImages.
  * Conversion routines from FireVision buffers to OpenCV IplImages.
@@ -67,3 +72,5 @@ IplImageAdapter::create_image_from_roi(unsigned char *buffer, ROI *roi)
 
 }
  */
+
+} // end namespace firevision

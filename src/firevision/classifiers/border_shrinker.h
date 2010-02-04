@@ -2,7 +2,7 @@
 /***************************************************************************
  *  border_shrinker.h - Header for BorderShrinker
  *
- *  Generated: Wed Feb 15 15:00:26 2006
+ *  Created: Wed Feb 15 15:00:26 2006
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -25,6 +25,11 @@
 #define __FIREVISION_CLASSIFIER_BORDER_SHRINKER_H_
 
 #include <classifiers/shrinker.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ROI;
 
@@ -54,5 +59,7 @@ class BorderShrinker : public Shrinker
   unsigned int border_bottom;
 
 };
+
+} // end namespace firevision
 
 #endif

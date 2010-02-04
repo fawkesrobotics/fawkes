@@ -29,22 +29,22 @@
 #include <fvutils/color/colorspaces.h>
 #include <netcomm/dns-sd/avahi_thread.h>
 
-class Camera;
-class SharedMemoryImageBuffer;
-class ShmImageLister;
-class Writer;
+namespace firevision {
+  class Camera;
+  class SharedMemoryImageBuffer;
+  class ShmImageLister;
+  class Writer;
+  class FuseImageListWidget;
+}
+namespace fawkes {
+  class AvahiDispatcher;
+}
 class MirrorCalibTool;
 class ColorTrainTool;
 class ColorTrainWidget;
 class FuseTransferWidget;
-class FuseImageListWidget;
 
-namespace fawkes {
-  class AvahiDispatcher;
-}
-
-class Firestation
-: public Gtk::Window
+class Firestation : public Gtk::Window
 {
  public:
   Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
@@ -130,7 +130,7 @@ class Firestation
   void draw_image();
 
   void ct_start();
-  hint_t ct_get_fg_object();
+  firevision::hint_t ct_get_fg_object();
   void ct_object_changed();
 
   void mc_start();
@@ -187,9 +187,9 @@ class Firestation
   FuseColumnRecord m_fuse_columns;
   Glib::RefPtr<Gtk::TreeStore> m_fuse_tree_store;
 
-  SharedMemoryImageBuffer* m_shm_buffer;
-  Camera* m_camera;
-  Writer* m_img_writer;
+  firevision::SharedMemoryImageBuffer* m_shm_buffer;
+  firevision::Camera* m_camera;
+  firevision::Writer* m_img_writer;
 
   ImageSource m_img_src;
   OpMode m_op_mode;
@@ -207,7 +207,7 @@ class Firestation
   unsigned int m_max_img_width;
   unsigned int m_max_img_height;
 
-  colorspace_t m_img_cs;
+  firevision::colorspace_t m_img_cs;
   size_t m_img_size;
 
   bool m_cont_img_trans;
@@ -218,7 +218,7 @@ class Firestation
   MirrorCalibTool* m_calib_tool;
   ColorTrainWidget* m_ctw;
   FuseTransferWidget* m_ftw;
-  FuseImageListWidget* m_filw;
+  firevision::FuseImageListWidget* m_filw;
 
   fawkes::AvahiThread* m_avahi_thread;
 };

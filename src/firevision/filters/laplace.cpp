@@ -29,6 +29,11 @@
 #include <cmath>
 #include <cstdlib>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterLaplace <filters/laplace.h>
  * Laplacian filter.
  * Laplacian of Gaussian filter.
@@ -175,3 +180,5 @@ FilterLaplace::calculate_kernel(int *kernel, float sigma, unsigned int size, flo
   */
 
 }
+
+} // end namespace firevision

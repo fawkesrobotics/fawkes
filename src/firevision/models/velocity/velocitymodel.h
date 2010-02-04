@@ -2,7 +2,7 @@
 /***************************************************************************
  *  velocitymodel.h - Abstract class defining a velocity model
  *
- *  Generated: Mon Sep 05 16:59:58 2005
+ *  Created: Mon Sep 05 16:59:58 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,6 +26,11 @@
 
 #include <sys/time.h>
 #include <fvutils/base/types.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class VelocityModel
 {
@@ -73,5 +78,7 @@ class VelocityModel
   virtual coordsys_type_t getCoordinateSystem()                     = 0;
 
 };
+
+} // end namespace firevision
 
 #endif

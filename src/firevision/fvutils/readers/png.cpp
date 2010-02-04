@@ -31,6 +31,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /// @cond INTERNALS
 class PNGReaderData
 {
@@ -234,3 +239,5 @@ PNGReader::read()
   png_free(__d->png_ptr, row_pointer);
 
 }
+
+} // end namespace firevision

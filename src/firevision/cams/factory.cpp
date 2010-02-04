@@ -57,6 +57,11 @@
 
 using namespace std;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraFactory factory.h <cams/factory.h>
  * Camera factory.
  * This camera factory provides access to all cameras in a unified way. You just
@@ -207,3 +212,5 @@ CameraFactory::instance(const char *as)
     throw;
   }
 }
+
+} // end namespace firevision

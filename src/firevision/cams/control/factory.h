@@ -31,6 +31,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Camera;
 class CameraArgumentParser;
 
@@ -43,5 +48,7 @@ class CameraControlFactory
 
   static CameraControl * instance(const std::type_info &typeinf, Camera *camera);
 };
+
+} // end namespace firevision
 
 #endif

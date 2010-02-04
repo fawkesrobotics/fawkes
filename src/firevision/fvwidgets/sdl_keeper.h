@@ -26,6 +26,11 @@
 
 #include <core/threading/mutex.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class SDLKeeper
 {
  public:
@@ -40,5 +45,7 @@ class SDLKeeper
   static unsigned int  _refcount;
   static fawkes::Mutex         _mutex;
 };
+
+} // end namespace firevision
 
 #endif

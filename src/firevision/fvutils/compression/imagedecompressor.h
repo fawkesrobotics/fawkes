@@ -27,6 +27,11 @@
 #include <fvutils/color/colorspaces.h>
 #include <sys/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ImageDecompressor {
  public:
 
@@ -55,5 +60,6 @@ class ImageDecompressor {
 
 };
 
+} // end namespace firevision
 
 #endif

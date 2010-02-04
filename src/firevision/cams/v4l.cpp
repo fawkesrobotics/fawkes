@@ -42,6 +42,11 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class V4LCamera <cams/v4l.h>
  * General Video4Linux camera implementation.
  * Maintains backwards compatibility.
@@ -208,3 +213,5 @@ V4LCamera::set_image_number(unsigned int n)
 {
   if (_v4l_cam) _v4l_cam->set_image_number(n);
 }
+
+} // end namespace firevision

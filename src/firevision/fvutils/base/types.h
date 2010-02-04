@@ -27,6 +27,11 @@
 
 #include <utils/math/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Center in ROI.
  * Must be signed since the center of a ball may be out of the ROI.
  */
@@ -87,5 +92,7 @@ typedef enum {
   COORDSYS_WORLD_POLAR  = 4	/**< world polar coordinate system. Center is zero.
 				 * Center to opponent goal is zero rad. */
 } coordsys_type_t;
+
+} // end namespace firevision
 
 #endif

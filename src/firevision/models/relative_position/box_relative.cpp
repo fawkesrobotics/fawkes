@@ -2,7 +2,7 @@
 /***************************************************************************
  *  boxrelative.cpp - Implementation of the relative box position model
  *
- *  Generated: Fri Jun 03 22:56:22 2005
+ *  Created: Fri Jun 03 22:56:22 2005
  *  Copyright  2005       Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *             2005-2006  Tim Niemueller [www.niemueller.de]
  *             2005       Martin Heracles <Martin.Heracles@rwth-aachen.de>
@@ -31,6 +31,11 @@
 
 using namespace std;
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class BoxRelative <models/relative_position/box_relative.h>
  * Relative (beer) box position model.
@@ -304,3 +309,5 @@ BoxRelative::applyKalmanFilter()
 
 }
 */
+
+} // end namespace firevision

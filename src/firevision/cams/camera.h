@@ -27,6 +27,11 @@
 #include <fvutils/color/colorspaces.h>
 #include <utils/time/time.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class Camera
 {
 
@@ -56,5 +61,7 @@ class Camera
   // virtual unsigned int     number_of_images()                      = 0;
   virtual void             set_image_number(unsigned int n)        = 0;
 };
+
+} // end namespace firevision
 
 #endif

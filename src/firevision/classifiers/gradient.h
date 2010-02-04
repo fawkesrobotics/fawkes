@@ -23,11 +23,15 @@
 #ifndef __FIREVISION_CLASSIFIERS_GRADIENT_H_
 #define __FIREVISION_CLASSIFIERS_GRADIENT_H_
 
-#include "classifier.h"
-#include "qualifiers.h"
+#include <classifiers/classifier.h>
+#include <classifiers/qualifiers.h>
 
 #include <models/scanlines/grid.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class GradientClassifier: public Classifier 
 {
@@ -58,5 +62,7 @@ class GradientClassifier: public Classifier
   bool _use_falling_edge;
   bool _use_rising_edge;
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CLASSIFIERS_GRADIENT_H_

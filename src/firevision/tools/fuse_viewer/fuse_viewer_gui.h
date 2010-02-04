@@ -33,10 +33,11 @@
 #include <gtkmm.h>
 #include <libglademm/xml.h>
 
-class NetworkCamera;
-class FuseImageListWidget;
-class ImageWidget;
-
+namespace firevision {
+  class NetworkCamera;
+  class FuseImageListWidget;
+  class ImageWidget;
+}
 namespace fawkes {
   class AvahiDispatcher;
 }
@@ -73,10 +74,10 @@ private:
   fawkes::AvahiThread     *__avahi_thread;
   fawkes::AvahiDispatcher *__avahi_dispatcher;
 
-  FuseImageListWidget     *__img_list_widget;
+  firevision::FuseImageListWidget     *__img_list_widget;
 
-  ImageWidget             *__img_widget;
-  NetworkCamera           *__cam;
+  firevision::ImageWidget             *__img_widget;
+  firevision::NetworkCamera           *__cam;
 
 
   std::map<std::string, std::string> __host_service_map;

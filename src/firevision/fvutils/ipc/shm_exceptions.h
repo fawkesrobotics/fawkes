@@ -27,6 +27,11 @@
 
 #include <core/exception.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Throw if an inconsistent image was found. */
 class InconsistentImageException : public fawkes::Exception {
  public:
@@ -48,5 +53,6 @@ class InconsistentLUTException : public fawkes::Exception {
     : fawkes::Exception(msg)  {}
 };
 
+} // end namespace firevision
 
 #endif

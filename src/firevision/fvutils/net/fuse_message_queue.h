@@ -27,6 +27,11 @@
 #include <core/utils/lock_queue.h>
 #include <fvutils/net/fuse_message.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FuseNetworkMessageQueue <fvutils/net/fuse_message_queue.h>
  * A LockQueue of FuseNetworkMessage to hold messages in inbound and
  * outbound queues.
@@ -35,5 +40,7 @@
 class FuseNetworkMessageQueue : public fawkes::LockQueue<FuseNetworkMessage *>
 {
 };
+
+} // end namespace firevision
 
 #endif

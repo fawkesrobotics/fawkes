@@ -37,6 +37,7 @@
 #include <cstdlib>
 
 using namespace fawkes;
+using namespace firevision;
 
 void
 print_usage(const char *program_name)

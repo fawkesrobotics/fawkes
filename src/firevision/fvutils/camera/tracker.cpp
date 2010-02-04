@@ -2,8 +2,8 @@
 /***************************************************************************
  *  camera_tracker.cpp - Implementation of the camera tracker
  *
- *  Generated: Thu Jul 14 22:18:14 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jul 14 22:18:14 2005
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -31,7 +31,12 @@
 
 #include <cmath>
 
-/** @class CameraTracker tracker.h <fvutils/camera/tracker.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class CameraTracker <fvutils/camera/tracker.h>
  * Camera Tracker.
  * Utility class that allows for tracking and object or a world point
  * by using a camera pan/tilt unit. It is NOT meant to track an object
@@ -201,3 +206,5 @@ CameraTracker::set_world_point(float x, float y)
   world_y = y;
 }
 
+
+} // end namespace firevision

@@ -29,6 +29,11 @@
 #include <stdint.h>
 
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Header for a histogram block. */
 typedef struct _histogram_block_header_t
 {
@@ -77,5 +82,7 @@ class HistogramBlock : public FireVisionDataFileBlock
   histogram_block_header_t* _block_header;
   uint32_t* _histogram_data;
 };
+
+} // end namespace firevision
 
 #endif /* __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_ */

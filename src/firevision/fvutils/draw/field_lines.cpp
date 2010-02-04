@@ -30,7 +30,12 @@ using fawkes::field_line_t;
 using std::min;
 using std::max;
 
-/** @class FieldLines field_lines.h <nao_utils/field_lines.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class FieldLines <fvutils/draw/field_lines.h>
  * This class acts as a container for lines on a soccer field.
  *
  * @fn void FieldLines::init()
@@ -343,3 +348,5 @@ FieldLinesCityTowerSeminar::init()
   push_back(field_line_t(-0.875f, 0.f,   -0.975f,  0.f));
 }
 
+
+} // end namespace firevision

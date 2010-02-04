@@ -30,9 +30,6 @@
 
 #include <map>
 
-class SharedMemoryImageBuffer;
-class FvBaseThread;
-class FvAqtVisionThreads;
 namespace fawkes {
   class Logger;
   class Clock;
@@ -40,9 +37,13 @@ namespace fawkes {
   class TimeTracker;
 #endif
 }
+namespace firevision {
+  class SharedMemoryImageBuffer;
+}
+class FvBaseThread;
+class FvAqtVisionThreads;
 
-class FvAcquisitionThread
-: public fawkes::Thread
+class FvAcquisitionThread : public fawkes::Thread
 {
  public:
   /** Acquisition thread mode. */
@@ -53,7 +54,7 @@ class FvAcquisitionThread
 			 * for this acquisition thread. */
   } AqtMode;
 
-  FvAcquisitionThread(const char *id, Camera *camera,
+  FvAcquisitionThread(const char *id, firevision::Camera *camera,
 		      fawkes::Logger *logger, fawkes::Clock *clock);
   virtual ~FvAcquisitionThread();
 
@@ -61,9 +62,9 @@ class FvAcquisitionThread
 
   void set_aqtmode(AqtMode mode);
   AqtMode aqtmode();
-  Camera *  camera_instance(colorspace_t cspace, bool deep_copy);
+  firevision::Camera *  camera_instance(firevision::colorspace_t cspace, bool deep_copy);
 
-  Camera *get_camera();
+  firevision::Camera *get_camera();
 
   void set_vt_prepfin_hold(bool hold);
   void set_enabled(bool enabled);
@@ -82,18 +83,18 @@ class FvAcquisitionThread
  private:
   bool                      __enabled;
 
-  Camera                   *__camera;
+  firevision::Camera       *__camera;
   char                     *__image_id;
   fawkes::Logger           *__logger;
 
-  colorspace_t              __colorspace;
+  firevision::colorspace_t  __colorspace;
   unsigned int              __width;
   unsigned int              __height;
 
   AqtMode                   __mode;
 
-  std::map<colorspace_t, SharedMemoryImageBuffer *> __shm;
-  std::map<colorspace_t, SharedMemoryImageBuffer *>::iterator __shmit;
+  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *> __shm;
+  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>::iterator __shmit;
 
 #ifdef FVBASE_TIMETRACKER
   fawkes::TimeTracker *__tt;
@@ -105,6 +106,5 @@ class FvAcquisitionThread
   unsigned int __ttc_dispose;
 #endif
 };
-
 
 #endif

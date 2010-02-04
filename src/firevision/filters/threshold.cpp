@@ -31,6 +31,11 @@
 #include <cstddef>
 #include <ippi.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterThreshold <filters/threshold.h>
  * Threshold filter
  */
@@ -104,3 +109,5 @@ FilterThreshold::apply()
   }
 
 }
+
+} // end namespace firevision

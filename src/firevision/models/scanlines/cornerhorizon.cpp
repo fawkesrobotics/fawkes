@@ -2,7 +2,7 @@
 /***************************************************************************
  *  cornerhorizon.cpp - Implementation of the corner horizon
  *
- *  Generated: Fri Apr 07 04:37:25 2006
+ *  Created: Fri Apr 07 04:37:25 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *             2006       Stefan Schiffer
  *             2006       Christoph Mies
@@ -29,6 +29,11 @@
 #include <cstring>
 
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 const float CornerHorizon::M_PI_HALF = M_PI / 2.f;
 
@@ -282,3 +287,5 @@ CornerHorizon::set_pan_tilt(float pan, float tilt)
   this->pan  = pan;
   this->tilt = tilt;
 }
+
+} // end namespace firevision

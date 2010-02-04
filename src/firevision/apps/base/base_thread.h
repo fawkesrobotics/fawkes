@@ -38,10 +38,10 @@
 #include <fvutils/base/vision_master.h>
 #include <string>
 
-class FvAcquisitionThread;
 namespace fawkes {
   class Barrier;
 }
+class FvAcquisitionThread;
 
 class FvBaseThread
 : public fawkes::Thread,
@@ -52,7 +52,7 @@ class FvBaseThread
   public fawkes::ThreadProducerAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::ThreadNotificationListener,
-  public VisionMaster
+  public firevision::VisionMaster
 {
  public:
   FvBaseThread();
@@ -62,18 +62,18 @@ class FvBaseThread
   virtual void loop();
   virtual void finalize();
 
-  virtual VisionMaster *  vision_master();
+  virtual firevision::VisionMaster *  vision_master();
 
-  virtual Camera *  register_for_camera(const char *camera_string,
-					fawkes::Thread *thread,
-					colorspace_t cspace = YUV422_PLANAR);
-  virtual Camera *  register_for_raw_camera(const char *camera_string,
-					    fawkes::Thread *thread);
+  virtual firevision::Camera *  register_for_camera(const char *camera_string,
+						    fawkes::Thread *thread,
+						    firevision::colorspace_t cspace = firevision::YUV422_PLANAR);
+  virtual firevision::Camera *  register_for_raw_camera(const char *camera_string,
+							fawkes::Thread *thread);
   virtual void      unregister_thread(fawkes::Thread *thread);
 
 
-  virtual CameraControl *acquire_camctrl(const char *cam_string);
-  virtual void           release_camctrl(CameraControl *cc);
+  virtual firevision::CameraControl *acquire_camctrl(const char *cam_string);
+  virtual void                       release_camctrl(firevision::CameraControl *cc);
 
   virtual bool thread_started(fawkes::Thread *thread) throw();
   virtual bool thread_init_failed(fawkes::Thread *thread) throw();
@@ -82,19 +82,19 @@ class FvBaseThread
  protected: virtual void run() { Thread::run(); }
 
  protected:
-  virtual CameraControl *acquire_camctrl(const char *cam_string,
-					 const std::type_info &typeinf);
+  virtual firevision::CameraControl *acquire_camctrl(const char *cam_string,
+						     const std::type_info &typeinf);
 
  private:
   void cond_recreate_barrier(unsigned int num_cyclic_threads);
-  CameraControl * create_camctrl(const char *camera_string);
+  firevision::CameraControl * create_camctrl(const char *camera_string);
 
  private:
   fawkes::LockMap<std::string, FvAcquisitionThread *> __aqts;
   fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator __ait;
   unsigned int __aqt_timeout;
 
-  fawkes::LockList<CameraControl *>  __owned_controls;
+  fawkes::LockList<firevision::CameraControl *>  __owned_controls;
   fawkes::LockMap<Thread *, FvAcquisitionThread *> __started_threads;
 
   fawkes::Barrier *__aqt_barrier;

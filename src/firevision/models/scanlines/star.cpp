@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  star.h - Starlike scanline model
+ *  star.cpp - Starlike scanline model
  *
- *  Generated: Mon Nov 05 10:06:46 2007
+ *  Created: Mon Nov 05 10:06:46 2007
  *  Copyright  2007  Daniel Beck
  *
  ****************************************************************************/
@@ -28,6 +28,11 @@
 #include <cstring>
 
 using namespace fawkes;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ScanlineStar <models/scanlines/star.h>
  * Star-like arranged scanline points.
@@ -388,3 +393,5 @@ ScanlineStar::generate_scan_points()
   printf("Generated %d points in %d rays\n", num_points, num_rays);
   */
 }
+
+} // end namespace firevision

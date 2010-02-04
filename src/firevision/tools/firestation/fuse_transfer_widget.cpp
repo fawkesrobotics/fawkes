@@ -34,8 +34,9 @@
 #include <cstring>
 
 using namespace fawkes;
+using namespace firevision;
 
-/** @class FuseTransferWidget tools/firestation/fuse_transfer_widget.h
+/** @class FuseTransferWidget "fuse_transfer_widget.h"
  * This class implements the logic for a GUI that allows to transfer LUTs via FUSE.
  *
  * @author Daniel Beck

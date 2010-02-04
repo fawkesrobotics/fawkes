@@ -25,7 +25,7 @@
 
 namespace fawkes {
 
-/** @class NetworkAspect aspect/network.h
+/** @class NetworkAspect <aspect/network.h>
  * Thread aspect for network communication.
  * Give this aspect to your thread if you want to implement custom network
  * communication. With this aspect you get access to the central network name

@@ -31,6 +31,11 @@
 
 using namespace fawkes;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class PNMReader <fvutils/readers/pnm.h>
  * PNM file reader.
  *
@@ -154,3 +159,5 @@ PNMReader::read()
   fread(m_pnm_buffer, m_img_depth, m_img_width * m_img_height, m_pnmfile); 
   convert(RGB, YUV422_PLANAR, m_pnm_buffer, m_yuv_buffer, m_img_width, m_img_height);
 }
+
+} // end namespace firevision

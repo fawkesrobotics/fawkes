@@ -2,7 +2,7 @@
 /**************************************************************************
  *  lookuptable.h - This header defines a lookup table color model
  *
- *  Generated: Fri Jun 10 14:16:52 2005
+ *  Created: Fri Jun 10 14:16:52 2005
  *  Copyright  2005  Tim Niemueller  [www.niemueller.de]
  *
  ***************************************************************************/
@@ -28,6 +28,11 @@
 
 #include <fvutils/colormap/yuvcm.h>
 #include <string>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ColorModelLookupTable : public ColorModel
 {
@@ -63,5 +68,7 @@ ColorModelLookupTable::determine(unsigned int y, unsigned int u, unsigned int v)
 {
   return __colormap->determine(y, u, v);
 }
+
+} // end namespace firevision
 
 #endif

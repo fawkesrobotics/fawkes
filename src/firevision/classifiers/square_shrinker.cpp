@@ -31,6 +31,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class SquareShrinker <classifiers/square_shrinker.h>
  * Square shrinker.
  * This shrinker makes sure that a ROI is always squared.
@@ -59,3 +64,5 @@ SquareShrinker::shrink( ROI *roi )
     roi->width = roi->height;
   }
 }
+
+} // end namespace firevision

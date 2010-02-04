@@ -23,6 +23,11 @@
 
 #include <fvutils/scalers/scaler.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Scaler <fvutils/scalers/scaler.h>
  * Image scaler interface.
  * Image scalers allow for scaling images by a given factor.
@@ -70,3 +75,5 @@
 Scaler::~Scaler()
 {
 }
+
+} // end namespace firevision

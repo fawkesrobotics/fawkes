@@ -32,6 +32,11 @@
 
 #include <cstdio>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterRectify <filters/rectify.h>
  * Rectify image.
  * This filter can be used to use a rectification information block to rectify
@@ -210,3 +215,4 @@ FilterRectify::apply()
   }
 }
 
+} // end namespace firevision

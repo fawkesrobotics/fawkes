@@ -23,6 +23,11 @@
 
 #include <fvutils/colormap/cmfile_block.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class ColormapFileBlock <fvutils/colormap/cmfile_block.h>
  * FireVision data file block for colormap files.
  * @author Tim Niemueller
@@ -80,3 +85,5 @@ ColormapFileBlock::ColormapFileBlock(FireVisionDataFileBlock *block)
 ColormapFileBlock::~ColormapFileBlock()
 {
 }
+
+} // end namespace firevision

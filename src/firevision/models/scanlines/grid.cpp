@@ -2,7 +2,7 @@
 /***************************************************************************
  *  grid.cpp - Implementation of the grid scanline model
  *
- *  Generated: Tue Feb 22 10:36:39 2005
+ *  Created: Tue Feb 22 10:36:39 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -27,6 +27,11 @@
 #include <cstring>
 
 using fawkes::point_t;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ScanlineGrid <models/scanlines/grid.h>
  * Scanline Grid.
@@ -257,3 +262,5 @@ ScanlineGrid::setGridParams(unsigned int width, unsigned int height,
   setDimensions(width, height, roi);
   setOffset (offset_x, offset_y);
 }
+
+} // end namespace firevision

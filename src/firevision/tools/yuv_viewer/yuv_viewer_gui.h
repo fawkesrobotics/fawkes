@@ -30,9 +30,10 @@
 #include <fvwidgets/image_widget.h>
 #include <fvutils/color/yuv.h>
 
-
 #include <gtkmm.h>
 #include <libglademm/xml.h>
+
+using namespace firevision;
 
 class YuvViewerGtkWindow : public Gtk::Window
 {

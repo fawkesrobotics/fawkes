@@ -26,6 +26,11 @@
 
 #include <classifiers/classifier.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class ScanlineModel;
 class ColorModel;
 
@@ -72,5 +77,7 @@ class SimpleColorClassifier : public Classifier
 
   std::list<color_t> colors_of_interest;
 };
+
+} // end namespace firevision
 
 #endif

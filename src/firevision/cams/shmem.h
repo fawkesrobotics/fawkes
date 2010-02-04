@@ -28,6 +28,11 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/ipc/shm_image.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 
 class SharedMemoryCamera : public Camera
@@ -83,5 +88,7 @@ class SharedMemoryCamera : public Camera
 
   fawkes::Time *__capture_time;
 };
+
+} // end namespace firevision
 
 #endif

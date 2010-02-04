@@ -31,11 +31,17 @@
 
 #include <typeinfo>
 
-class Camera;
 namespace fawkes {
   class Thread;
   class TypeMismatchException;
 }
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class Camera;
 
 class VisionMaster
 {
@@ -164,5 +170,7 @@ VisionMaster::register_for_raw_camera(const char *camera_string, fawkes::Thread 
 					"not match desired type");
   }
 }
+
+} // end namespace firevision
 
 #endif

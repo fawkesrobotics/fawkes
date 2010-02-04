@@ -38,7 +38,9 @@
 
 #include <core/exceptions/software.h>
 
-/** @class ColorTrainWidget tools/firestation/color_train_widget.h
+using namespace firevision;
+
+/** @class ColorTrainWidget "color_train_widget.h"
  * This widget implements the complete color training process.
  *
  * @author Daniel Beck

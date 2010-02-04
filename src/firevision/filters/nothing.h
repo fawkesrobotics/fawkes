@@ -27,6 +27,11 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterNothing <filters/nothing.h>
  * A filter that does... nothing.
  * @author Tim Niemueller
@@ -40,5 +45,7 @@ class FilterNothing : public Filter
 
   virtual void apply() {}
 };
+
+} // end namespace firevision
 
 #endif

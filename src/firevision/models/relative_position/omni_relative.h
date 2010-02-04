@@ -3,7 +3,7 @@
  *  omni_ball_relative.h - A simple implementation of a relative omni
  *                         relative position model using a MirrorModel
  *
- *  Generated: Fri Jun 03 22:56:22 2005
+ *  Created: Fri Jun 03 22:56:22 2005
  *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *                   Tim Niemueller [www.niemueller.de]
  *                   Martin Heracles <Martin.Heracles@rwth-aachen.de>
@@ -31,6 +31,11 @@
 #include <models/mirror/mirrormodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class OmniRelative : public RelativePositionModel
 {
@@ -95,5 +100,6 @@ private:
   //void                  applyKalmanFilter();
 };
 
-#endif
+} // end namespace firevision
 
+#endif

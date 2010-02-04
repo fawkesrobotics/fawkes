@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  circle.cpp - Implementation of a circle shape finder
+ *  line.cpp - Implementation of a line shape finder
  *
- *  Generated: Thu May 16 2005
+ *  Created: Thu May 16 00:00:00 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
  *                   Martin Heracles <Martin.Heracles@rwth-aachen.de>
  *                   Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
@@ -30,6 +30,11 @@
 // #include <utils/geometry/point.h>
 
 using namespace std;
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class LineShape <models/shape/line.h>
  * Line shape.
@@ -207,5 +212,4 @@ LineShape::getPoints(int *x1, int *y1, int *x2, int *y2)
   *y2 = this->y2;
 }
 
-
-
+} // end namespace firevision

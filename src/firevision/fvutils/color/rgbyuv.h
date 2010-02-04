@@ -25,6 +25,11 @@
 #ifndef __FIREVISION_UTILS_COLOR_RGBYUV_H
 #define __FIREVISION_UTILS_COLOR_RGBYUV_H
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 
 #define RGB2YUV(r, g, b, y, u, v) { 				\
     y = (306*r + 601*g + 117*b)  >> 10;				\
@@ -141,6 +146,6 @@ void bgr_to_yuv422planar_plainc(const unsigned char *BGR, unsigned char *YUV,
 				unsigned int width, unsigned int height);
 
 
-
+} // end namespace firevision
 
 #endif

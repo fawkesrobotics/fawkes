@@ -30,7 +30,12 @@
 
 using namespace fawkes;
 
-/** @class JpegReader jpeg.h <fvutils/readers/jpeg.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class JpegReader <fvutils/readers/jpeg.h>
  * JPEG file reader.
  * @author Tim Niemueller
  */
@@ -132,3 +137,5 @@ JpegReader::read()
   jpeg_finish_decompress( &cinfo );
 
 }
+
+} // end namespace firevision

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  line_grid.cpp - Implementation of the line grid scanline model
  *
- *  Generated: Wed Mar 25 17:31:00 2009
+ *  Created: Wed Mar 25 17:31:00 2009
  *  Copyright  2009 Christof Rath <c.rath@student.tugraz.at>
  *
  ****************************************************************************/
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "line_grid.h"
+#include <models/scanlines/line_grid.h>
 
 #include <fvutils/base/roi.h>
 #include <fvutils/draw/drawer.h>
@@ -31,7 +31,12 @@
 
 using fawkes::point_t;
 
-/** @class ScanlineLineGrid line_grid.h <models/scanlines/line_grid.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class ScanlineLineGrid <models/scanlines/line_grid.h>
  * Grid of scan lines.
  * A grid of scan lines (i.e. horizontal and/or vertical lines) instead of only
  * points on the grid crossings.
@@ -295,3 +300,5 @@ ScanlineLineGrid::set_grid_params(unsigned int width, unsigned int height,
 
   set_dimensions(width, height, roi);
 }
+
+} // end namespace firevision

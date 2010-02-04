@@ -25,7 +25,9 @@
 #include <fvutils/scalers/lossy.h>
 #include <fvutils/color/conversions.h>
 
-/** @class ColormapViewerWidget <tools/firestation/colormap_viewer_widget.h>
+using namespace firevision;
+
+/** @class ColormapViewerWidget "colormap_viewer_widget.h"
  * Select a layer from a colormap and render it to a Gtk::Image.
  * @author Daniel Beck
  */

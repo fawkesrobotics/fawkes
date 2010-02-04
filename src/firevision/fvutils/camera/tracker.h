@@ -24,6 +24,11 @@
 #ifndef __FIREVISION_FVUTILS_CAMERA_TRACKER_H_
 #define __FIREVISION_FVUTILS_CAMERA_TRACKER_H_
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class RelativePositionModel;
 
 class CameraTracker {
@@ -68,5 +73,6 @@ class CameraTracker {
   unsigned int mode;
 };
 
+} // end namespace firevision
 
 #endif

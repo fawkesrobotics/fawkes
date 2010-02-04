@@ -27,6 +27,11 @@
 
 #include <cstddef>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterROIDraw <filters/roidraw.h>
  * ROI Drawing filter.
  * This filter visually marks the given region of interest.
@@ -149,3 +154,5 @@ FilterROIDraw::set_style(border_style_t style)
 {
   __border_style = style;
 }
+
+} // end namespace firevision

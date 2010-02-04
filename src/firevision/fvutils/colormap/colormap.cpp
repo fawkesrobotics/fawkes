@@ -26,6 +26,11 @@
 #include <fvutils/color/color_object_map.h>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class Colormap <fvutils/colormap/colormap.h>
  * Colormap interface.
  * This C++ pure virtual class describes the interface to a generic colormap. It is
@@ -152,3 +157,5 @@ Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
     vp += lwidth;
   }
 }
+
+} // end namespace firevision

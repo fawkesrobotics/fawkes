@@ -31,7 +31,12 @@
 
 using namespace fawkes;
 
-/** @class FuseImageListWidget fuse_image_list_widget.h <fvwidgets/fuse_image_list_widget.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class FuseImageListWidget <fvwidgets/fuse_image_list_widget.h>
  * This widget displays all available Fuse images in a tree view. It also can check
  * the registered host for new images, regularly.
  * @author Daniel Beck
@@ -588,3 +593,5 @@ FuseImageListWidget::on_add_host_manually()
   add_host->hide();
   delete add_host;
 }
+
+} // end namespace firevision

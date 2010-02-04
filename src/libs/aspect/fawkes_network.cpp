@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class FawkesNetworkAspect aspect/fawkes_network.h
+/** @class FawkesNetworkAspect <aspect/fawkes_network.h>
  * Thread aspect to participate in the Fawkes Network protocol.
  * Give this aspect to your thread to make use of the Fawkes network
  * protocol. The protocol is designed to transport short messages over

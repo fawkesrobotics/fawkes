@@ -29,6 +29,11 @@
 #include <cstddef>
 #include <cstring>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class FilterHVSearch <filters/hv_search.h>
  * Horizontal/vertical search filter.
  * This filter works similar to the horizontal search filter, but additionally
@@ -183,3 +188,4 @@ FilterHVSearch::apply()
   }
 }
 
+} // end namespace firevision

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  colormodel.cpp - Abstract class defining a color model
  *
- *  Generated: Wed Mar 21 18:38:17 2007
+ *  Created: Wed Mar 21 18:38:17 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -24,6 +24,11 @@
 #include <models/color/colormodel.h>
 #include <fvutils/color/color_object_map.h>
 #include <cstring>
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ColorModel <models/color/colormodel.h>
  * Color model interface.
@@ -89,3 +94,5 @@ ColorModel::uv_to_image(unsigned char *yuv422_planar_buffer, unsigned int y)
     vp += 256;
   }
 }
+
+} // end namespace firevision

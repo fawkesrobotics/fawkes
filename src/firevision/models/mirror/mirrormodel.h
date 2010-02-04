@@ -2,7 +2,7 @@
 /***************************************************************************
  *  mirrormodel.h - Abstract class defining a mirror model
  *
- *  Generated: Tue Jul 19 11:55:29 2005
+ *  Created: Tue Jul 19 11:55:29 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -26,9 +26,13 @@
 
 #include <utils/math/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class MirrorModel
 {
-
  public:
 
   virtual ~MirrorModel();
@@ -60,5 +64,7 @@ class MirrorModel
   virtual bool isValidPoint(unsigned int image_x, unsigned int image_y ) const = 0;
 
 };
+
+} // end namespace firevision
 
 #endif

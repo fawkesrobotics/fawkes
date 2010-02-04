@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "field.h"
+#include <fvutils/draw/field.h>
 
 #include <core/exceptions/software.h>
 
@@ -29,7 +29,12 @@
 
 using namespace fawkes;
 
-/** @class Field field.h </nao_fawkes/src/firevision/apps/nao_loc/field.cpp/field.h>
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class Field <fvutils/draw/field.h>
  * This class is used to describe a soccer field.
  *
  * @fn const FieldLines& Field::get_lines() const
@@ -116,3 +121,4 @@ Field::field_for_name(std::string field_name, float field_length, float field_wi
   else throw fawkes::IllegalArgumentException("Unknown field name! Please set field_name to a valid value (see field.h)");
 }
 
+} // end namespace firevision

@@ -27,6 +27,11 @@
 
 #include <filters/morphology/morphologicalfilter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterClosing;
 class FilterDifference;
 
@@ -45,5 +50,7 @@ class FilterTophatClosing : public MorphologicalFilter
   FilterClosing    *closing;
   FilterDifference *diff;
 };
+
+} // end namespace firevision
 
 #endif

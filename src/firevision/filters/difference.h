@@ -26,13 +26,19 @@
 
 #include <filters/filter.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FilterDifference : public Filter
 {
-
  public:
   FilterDifference();
 
   virtual void apply();
 };
+
+} // end namespace firevision
 
 #endif

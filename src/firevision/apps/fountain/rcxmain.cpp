@@ -42,6 +42,7 @@
 
 using namespace std;
 using namespace fawkes;
+using namespace firevision;
 
 class FountainRCSoftX : public SignalHandler
 {

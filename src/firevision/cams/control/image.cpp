@@ -26,6 +26,11 @@
 #include <cams/control/image.h>
 #include <core/exceptions/software.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** @class CameraControlImage <cams/control/image.h>
  * Camera image control interface.
  * Some cameras feature adjustable image controls
@@ -254,3 +259,5 @@ CameraControlImage::set_lens_corr(unsigned int x_corr, unsigned int y_corr)
   set_lens_x_corr(x_corr);
   set_lens_y_corr(y_corr);
 }
+
+} // end namespace firevision

@@ -27,6 +27,11 @@
 
 #include <sys/types.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Color spaces. */
 typedef enum {
   CS_UNKNOWN            =  0,	/**< Unknown color space */
@@ -63,5 +68,7 @@ size_t           colorspace_buffer_size(colorspace_t cspace, unsigned int width,
 colorspace_t     colorspace_by_name(const char *colorspace);
 const char *     colorspace_to_string(colorspace_t colorspace);
 unsigned char *  malloc_buffer(colorspace_t colorspace, unsigned int width, unsigned int height);
+
+} // end namespace firevision
 
 #endif

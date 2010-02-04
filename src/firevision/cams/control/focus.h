@@ -27,6 +27,11 @@
 
 #include <cams/control/control.h>
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraControlFocus : virtual public CameraControl
 {
  public:
@@ -39,5 +44,7 @@ class CameraControlFocus : virtual public CameraControl
   virtual unsigned int focus_min()                                      = 0;
   virtual unsigned int focus_max()                                      = 0;
 };
+
+} // end namespace firevision
 
 #endif // __FIREVISION_CAMS_CONTROL_FOCUS_H_

@@ -33,6 +33,11 @@
 
 #define FVFF_COMMENT_SIZE 256
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 /** Header for a FireVision file format file.
  * The header defines the basic parameters needed to correctly interpret the
  * following file contents.
@@ -73,6 +78,8 @@ typedef struct _fvff_block_header_t {
   uint32_t size;		/**< size in bytes of this block, does not include any headers */
   uint32_t spec_head_size;	/**< the size of the following content specific block header */
 } fvff_block_header_t;
+
+} // end namespace firevision
 
 
 #pragma pack(pop)

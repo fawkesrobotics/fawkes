@@ -53,6 +53,11 @@ namespace fawkes {
 //struct CvMemStorage;
 //typedef struct _IplImage IplImage;
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength);
 
 void loadIpoints(std::string sFileName, std::vector< surf::Ipoint >& ipts, bool bVerbose, int&);
@@ -148,5 +153,7 @@ class SurfClassifier : public Classifier
   //#endif
 
 };
+
+} // end namespace firevision
 
 #endif
