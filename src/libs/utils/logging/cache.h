@@ -94,6 +94,12 @@ class CacheLogger : public Logger
   /** Clear messages. */
   void clear();
 
+  unsigned int size() const;
+  void set_size(unsigned int new_size);
+
+  void lock();
+  void unlock();
+
  private:
   void push_message(LogLevel ll, const char *component, const char *format,
 		    va_list va);

@@ -29,6 +29,7 @@ INSERT INTO "config" VALUES('/worldinfo/max_msgs_per_recv','unsigned int','20','
 INSERT INTO "config" VALUES('/worldinfo/flush_time_sec','unsigned int','5','Time of inactivity after which the world info message sequence number is resetted; sec');
 INSERT INTO "config" VALUES('/worldinfo/multicast_loopback','bool','1','Enable loopback for multicast messages?');
 INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests; TCP port');
+INSERT INTO "config" VALUES('/xmlrpc/port','unsigned int','3008','TCP port for XML-RPC HTTP requests; TCP port');
 INSERT INTO "config" VALUES('/ballposlog/log_level','unsigned int','0','Log level for ballposlog example plugin; sum of any of debug=0, info=1, warn=2, error=4, none=8');
 INSERT INTO "config" VALUES('/skiller/skillspace','string','test','Skill space');
 INSERT INTO "config" VALUES('/skiller/watch_files','bool',1,'Watch lua files for modification and automatically reload Lua if files have been changed; true to enable');
