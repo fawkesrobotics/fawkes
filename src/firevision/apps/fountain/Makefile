@@ -22,35 +22,13 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvfountain = fawkescore fawkesutils fvutils fawkesnetcomm
-
-ifeq ($(BUILD_TYPE),rcsoftx)
-  include $(BASEDIR)/src/fawkes/netcomm/netcomm.mk
-  ifneq ($(HAVE_AVAHI),1)
-    WARN_TARGETS += warning_avahi
-  endif
-
-  ifeq ($(realpath $(QTDIR)/include),)
-    WARN_TARGETS += warning_rcxqt
-  else
-    OBJS_fvfountain  = rcxmain.o config.o
-    LIBS_fvfountain += pthread utils
-    INCDIRS         += $(QTDIR)/include
-    BINS_all         = $(BINDIR)/fvfountain
-    CFLAGS          += $(CFLAGS_AVAHI) -Wno-non-virtual-dtor
-    LDFLAGS         += $(LDFLAGS_AVAHI)
-  endif
-else
-  LIBS_fvfountain += fawkesaspects
-  OBJS_fvfountain  = fountain_thread.o fountain_plugin.o
-  PLUGINS_all      = $(PLUGINDIR)/fvfountain.so
-endif
+LIBS_fvfountain = fawkescore fawkesutils fvutils fawkesnetcomm fawkesaspects
+OBJS_fvfountain  = fountain_thread.o fountain_plugin.o
+PLUGINS_all      = $(PLUGINDIR)/fvfountain.so
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_rcxqt warning_avahi
-warning_rcxqt:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Cannot build Fountain$(TNORMAL) (qt-devel not installed)"
+.PHONY: warning_avahi
 warning_avahi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Fountain will be built without mDNS-SD$(TNORMAL) (avahi-devel not installed)"
 endif
