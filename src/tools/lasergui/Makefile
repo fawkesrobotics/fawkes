@@ -21,7 +21,7 @@ LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_lasergui = fawkescore fawkesblackboard fawkesguiutils \
 		Position2DTrackInterface Laser360Interface Laser720Interface \
-		ObjectPositionInterface SwitchInterface
+		ObjectPositionInterface SwitchInterface VisualDisplay2DInterface
 
 ifeq ($(BUILD_TYPE),maemo)
   ifeq ($(HAVE_HILDON_GUI),1)
@@ -35,7 +35,7 @@ else
   OBJS_lasergui = lasergui.o
   BUILD_LASERGUI = $(HAVE_GLADE_GUI)
 endif
-OBJS_lasergui += laser_drawing_area.o
+OBJS_lasergui += laser_drawing_area.o visdisplay.o
 OBJS_all = $(OBJS_lasergui)
 
 ifeq ($(BUILD_LASERGUI),1)

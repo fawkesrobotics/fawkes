@@ -31,6 +31,7 @@
 #include <interfaces/ObjectPositionInterface.h>
 #include <interfaces/Position2DTrackInterface.h>
 #include <interfaces/SwitchInterface.h>
+#include <interfaces/VisualDisplay2DInterface.h>
 
 
 #include <gui_utils/service_chooser_dialog.h>
@@ -142,6 +143,7 @@ class LaserGuiGtkWindow : public Gtk::Window
       __switch_if = NULL;
       __target_if = NULL;
       __line_if = NULL;
+      __visdis_if = NULL;
       
       //__laser_if = __bb->open_for_reading<Laser360Interface>("LegtrackerAveragedLaser");
 
@@ -158,6 +160,8 @@ class LaserGuiGtkWindow : public Gtk::Window
 
       __line_if = __bb->open_for_reading<ObjectPositionInterface>("LaserLine");
       __area->set_line_if(__line_if);
+      __visdis_if = __bb->open_for_writing<VisualDisplay2DInterface>("LaserGUI");
+      __area->set_visdisp_if(__visdis_if);
 
       on_legtracker_toggled();
 
@@ -182,6 +186,7 @@ class LaserGuiGtkWindow : public Gtk::Window
 	__bb->close(__laser360_if);
 	__bb->close(__laser720_if);
 	__bb->close(__line_if);
+	__bb->close(__visdis_if);
 	delete __ifd;
 	delete __bb;
 	__laser360_if = NULL;
@@ -189,6 +194,7 @@ class LaserGuiGtkWindow : public Gtk::Window
 	__bb = NULL;
 	__ifd = NULL;
 	__line_if = NULL;
+	__visdis_if = NULL;
       }
     }
   }
@@ -198,6 +204,7 @@ class LaserGuiGtkWindow : public Gtk::Window
   {
     __area->reset_laser_ifs();
     __area->set_line_if(NULL);
+    __area->set_visdisp_if(NULL);
     __area->queue_draw();
     if(__laser360_if)
       __bb->close(__laser360_if);
@@ -210,6 +217,7 @@ class LaserGuiGtkWindow : public Gtk::Window
     if(__target_if)
       __bb->close(__target_if);
     __bb->close(__line_if);
+    __bb->close(__visdis_if);
 
     std::list<ObjectPositionInterface*>::iterator objpos_if_itt;
     std::list<Position2DTrackInterface*>::iterator track_if_itt;
@@ -253,6 +261,7 @@ class LaserGuiGtkWindow : public Gtk::Window
     __laser_segmentation_if = NULL;
     __switch_if = NULL;
     __target_if = NULL;
+    __visdis_if = NULL;
     __line_if = NULL;
 
     __tb_connection->set_stock_id(Gtk::Stock::CONNECT);
@@ -458,11 +467,12 @@ class LaserGuiGtkWindow : public Gtk::Window
   std::list<ObjectPositionInterface*>* __l_objpos_if_misc;
   std::list<Position2DTrackInterface*>* __l_track_if;
 
-  ObjectPositionInterface            *__line_if;
+  ObjectPositionInterface           *__line_if;
+  VisualDisplay2DInterface          *__visdis_if;
 
-  LaserDrawingArea                   *__area;
-  AllemaniACsAtHomeCairoRobotDrawer   __athome_drawer;
-  ConnectionDispatcher                __connection_dispatcher;
+  LaserDrawingArea                  *__area;
+  AllemaniACsAtHomeCairoRobotDrawer  __athome_drawer;
+  ConnectionDispatcher               __connection_dispatcher;
 
   Gtk::ToolButton                    *__tb_connection;
   Gtk::RadioToolButton               *__tb_lines;

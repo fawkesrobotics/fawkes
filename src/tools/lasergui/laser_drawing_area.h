@@ -38,7 +38,10 @@ namespace fawkes {
   class CairoRobotDrawer;
   class LegtrackerTrackinterface;
   class SwitchInterface;
+  class VisualDisplay2DInterface;
 }
+
+class VisualDisplay2D;
 
 class LaserDrawingArea
   : public Gtk::DrawingArea
@@ -56,6 +59,7 @@ class LaserDrawingArea
   LaserDrawingArea(BaseObjectType* cobject,
 		   const Glib::RefPtr<Gnome::Glade::Xml>& refxml);
 #endif
+  ~LaserDrawingArea();
 
   void set_laser360_if(fawkes::Laser360Interface *laser_if);
   void set_laser720_if(fawkes::Laser720Interface *laser_if);
@@ -68,6 +72,7 @@ class LaserDrawingArea
 		     fawkes::ObjectPositionInterface* target_if,
 		     fawkes::SwitchInterface* switch_if);
   void set_line_if(fawkes::ObjectPositionInterface *line_if);
+  void set_visdisp_if(fawkes::VisualDisplay2DInterface *visdisp_if);
   void set_robot_drawer(fawkes::CairoRobotDrawer *robot_drawer);
   void set_resolution(unsigned int resolution);
 
@@ -123,6 +128,9 @@ class LaserDrawingArea
   double __yc;
 
   fawkes::CairoRobotDrawer  *__robot_drawer;
+
+  VisualDisplay2D           *__visdisp;
+  fawkes::VisualDisplay2DInterface  *__visdisp_if;
 };
 
 #endif
