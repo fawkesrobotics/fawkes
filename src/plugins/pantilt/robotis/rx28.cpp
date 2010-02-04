@@ -178,7 +178,7 @@ RobotisRX28::open() {
 
   struct termios param;
 
-  __fd = ::open(__device_file, O_CREAT | O_NOCTTY | O_RDWR);
+  __fd = ::open(__device_file, O_NOCTTY | O_RDWR);
   if (__fd == -1) {
     throw CouldNotOpenFileException(__device_file, errno, "Cannot open device file");
   }
@@ -315,7 +315,7 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
   //printf("Wrote %d bytes\n", written);
 
   // For some reason we have to read the shit immediately, although ECHO is off
-  read(__fd, __ibuffer, __obuffer_length);
+  int readd __attribute__((unused)) = read(__fd, __ibuffer, __obuffer_length);
   //printf("Read %d bytes\n", readb);
 
   if ( written < 0 ) {

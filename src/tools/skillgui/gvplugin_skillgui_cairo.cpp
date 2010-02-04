@@ -269,7 +269,7 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
 
   Cairo::FontWeight weight = Cairo::FONT_WEIGHT_NORMAL;
   Cairo::FontSlant slant   = Cairo::FONT_SLANT_NORMAL;
-  char *fontweight;
+  char *fontweight = NULL;
   if (obj->type == CLUSTER_OBJTYPE) {
     fontweight = agget(obj->u.sg, (char *)"fontweight");
   } else if (obj->type == ROOTGRAPH_OBJTYPE) {
@@ -283,7 +283,7 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
     weight = Cairo::FONT_WEIGHT_BOLD;
     p.x -= 8;
   }
-  char *fontslant;
+  char *fontslant = NULL;
   if (obj->type == CLUSTER_OBJTYPE) {
     fontslant = agget(obj->u.sg, (char *)"fontslant");
   } else if (obj->type == ROOTGRAPH_OBJTYPE) {

@@ -22,6 +22,7 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 #include <fvutils/writers/pnm.h>
 #include <fvutils/color/conversions.h>
 
@@ -231,7 +232,9 @@ PNMWriter::write()
     throw Exception("Could not open file for writing");
   }
 
-  fwrite(buffer_start, buffer_size, 1, fp);
+  if (fwrite(buffer_start, buffer_size, 1, fp) != 1) {
+    throw FileWriteException(filename, "Failed to write data");
+  }
   fclose(fp);
 
 }

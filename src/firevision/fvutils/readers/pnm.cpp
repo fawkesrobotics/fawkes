@@ -25,6 +25,7 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/conversions.h>
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -51,27 +52,32 @@ PNMReader::PNMReader(const char* filename)
   m_pnmfile = fopen(m_filename, "rb");
 
   if ( m_pnmfile == NULL ) 
-    {
-      throw Exception("PNMReader::ctor: cannot open PNM file");
-    }
+  {
+    throw Exception("PNMReader::ctor: cannot open PNM file");
+  }
   
   // read header
   char* line = (char*) malloc(80);
   
   // magic value
-  fgets(line, 80, m_pnmfile);
+  if (fgets(line, 80, m_pnmfile) == NULL)
+  {
+    throw FileReadException(m_filename, "Failed to read magic value");
+  }
 
   if ( strcmp("P6", line) > 0 )
-    {
-      throw Exception("PNMReader::ctor: unknown magic value");
-    }
+  {
+    throw Exception("PNMReader::ctor: unknown magic value");
+  }
 
   // comments
   do
+  {
+    if (fgets(line, 80, m_pnmfile) == NULL)
     {
-      fgets(line, 80, m_pnmfile);
+      throw FileReadException(m_filename, "Failed to read comments");
     }
-  while ( strncmp("#", line, 1) == 0);
+  } while ( strncmp("#", line, 1) == 0);
   
   // width & height
   char* tmp = (char*) malloc(10);
@@ -85,33 +91,36 @@ PNMReader::PNMReader(const char* filename)
   free(tmp);
 
   // depth
-  fgets(line, 80, m_pnmfile);
+  if (fgets(line, 80, m_pnmfile) == NULL)
+  {
+    throw FileReadException(m_filename, "Failed to read depth");
+  }
   int max = atoi(line);
   free(line);
   if ( max >= 0) 
-    { 
-      switch(max)
-	{
-	case 1:
-	  m_img_depth = 1;
-	  break;
-	  
-	case 15:
-	  m_img_depth = 2;
-	  break;
-
-	case 255:
-	  m_img_depth = 3;
-	  break;
-	  
-	default:
-	  break;
-	}
-    }
-  else
+  { 
+    switch(max)
     {
-      throw Exception("PNMReader::ctor: unknown color depth");
+    case 1:
+      m_img_depth = 1;
+      break;
+	  
+    case 15:
+      m_img_depth = 2;
+      break;
+
+    case 255:
+      m_img_depth = 3;
+      break;
+	  
+    default:
+      break;
     }
+  }
+  else
+  {
+    throw Exception("PNMReader::ctor: unknown color depth");
+  }
 
   size_t img_size = m_img_width * m_img_height * m_img_depth;
   m_pnm_buffer = (unsigned char*) malloc(img_size);
@@ -152,11 +161,14 @@ void
 PNMReader::read()
 {
   if (m_yuv_buffer == NULL)
-    {
-      throw Exception("PNMReader::read: buffer = NULL");
-    }
+  {
+    throw Exception("PNMReader::read: buffer = NULL");
+  }
 
-  fread(m_pnm_buffer, m_img_depth, m_img_width * m_img_height, m_pnmfile); 
+  if (fread(m_pnm_buffer, m_img_depth, m_img_width * m_img_height, m_pnmfile) != m_img_width * m_img_height)
+  {
+    throw fawkes::FileReadException(m_filename, "Failed to read data");
+  }
   convert(RGB, YUV422_PLANAR, m_pnm_buffer, m_yuv_buffer, m_img_width, m_img_height);
 }
 

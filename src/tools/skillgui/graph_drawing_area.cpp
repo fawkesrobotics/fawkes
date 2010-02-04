@@ -386,7 +386,10 @@ SkillGuiGraphDrawingArea::save_dotfile(const char *filename)
 {
   FILE *f = fopen(filename, "w");
   if (f) {
-    fwrite(__graph.c_str(), __graph.length(), 1, f);
+    if (fwrite(__graph.c_str(), __graph.length(), 1, f) != 1) {
+      // bang, ignored
+      printf("Failed to write dot file '%s'\n", filename);
+    }
     fclose(f);
   }
 }

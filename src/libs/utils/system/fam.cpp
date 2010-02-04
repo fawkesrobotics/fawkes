@@ -29,9 +29,9 @@
 #  include <poll.h>
 #  include <dirent.h>
 #  include <unistd.h>
-#  include <cerrno>
 #  include <cstring>
 #endif
+#include <cerrno>
 #include <cstdlib>
 
 namespace fawkes {
@@ -388,7 +388,10 @@ FileAlterationMonitor::interrupt()
   if (__interruptible) {
     __interrupted = true;
     char tmp = 0;
-    write(__pipe_fds[1], &tmp, 1);
+    if (write(__pipe_fds[1], &tmp, 1) != 1) {
+      throw Exception(errno, "Failed to interrupt file alteration monitor,"
+			     " failed to write to pipe");
+    }
   } else {
     throw Exception("Currently not interruptible");
   }

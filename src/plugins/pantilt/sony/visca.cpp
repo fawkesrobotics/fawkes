@@ -140,7 +140,7 @@ Visca::open() {
 
   struct termios param;
 
-  __fd = ::open(__device_file, O_CREAT | O_RDWR | O_NONBLOCK);
+  __fd = ::open(__device_file, O_RDWR | O_NONBLOCK);
   if (! __fd) {
     throw ViscaException("Cannot open device", errno);
   }

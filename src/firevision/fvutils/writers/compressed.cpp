@@ -23,6 +23,7 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 #include <utils/system/console_colors.h>
 
 #include <fvutils/writers/compressed.h>
@@ -114,7 +115,9 @@ CompressedImageWriter::write()
       image_compressor->set_destination_buffer( comp_buffer, comp_buffer_size );
       image_compressor->compress();
       FILE *f = fopen(filename, "wb");
-      fwrite(comp_buffer, image_compressor->compressed_size(), 1, f);
+      if (fwrite(comp_buffer, image_compressor->compressed_size(), 1, f) != 1) {
+	throw fawkes::FileWriteException(filename, "Failed to write data");
+      }
       fclose(f);
       free(comp_buffer);
     } else {

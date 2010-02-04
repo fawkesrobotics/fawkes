@@ -23,6 +23,7 @@
 #include <worldinfo_utils/data_container.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
+#include <core/exceptions/system.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
@@ -857,9 +858,11 @@ std::string
 WorldInfoDataContainer::get_game_state_string() const
 {
   char* game_state;
-  asprintf( &game_state, "%s [%s]",
-	    worldinfo_msl_gamestate_tostring((worldinfo_msl_gamestate_t)m_game_state.game_state),
-	    worldinfo_gamestate_team_tostring(m_game_state.state_team) );
+  if (asprintf( &game_state, "%s [%s]",
+		worldinfo_msl_gamestate_tostring((worldinfo_msl_gamestate_t)m_game_state.game_state),
+		worldinfo_gamestate_team_tostring(m_game_state.state_team) ) == -1) {
+    throw OutOfMemoryException("Failed to allocate game state string");
+  }
 
   string state_string(game_state);
   free(game_state);
