@@ -35,10 +35,10 @@ int main(int argc, char** argv)
     {
       Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/config_editor/config_editor.glade");
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/guis/config_editor/config_editor.glade");
 #else
       std::auto_ptr<Gnome::Glade::XmlError> error;
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/config_editor/config_editor.glade", "", "", error);
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/guis/config_editor/config_editor.glade", "", "", error);
       if (error.get()) {
         throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
       }

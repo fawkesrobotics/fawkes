@@ -47,7 +47,7 @@ namespace fawkes {
 /** Constructor.*/
 BlackBoardInstanceFactory::BlackBoardInstanceFactory()
 {
-  __mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, LIBDIR"/interfaces");
+  __mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, IFACEDIR);
 }
 
 

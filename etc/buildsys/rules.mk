@@ -2,7 +2,7 @@
 #                      Makefile Build System for Fawkes
 #                            -------------------
 #   Created on Sun Sep 03 14:14:14 2006
-#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,7 +19,7 @@
 ifndef __buildsys_rules_mk_
 __buildsys_rules_mk := 1
 
-include $(abspath $(BASEDIR)/etc/buildsys/ext/gmsl)
+include $(abspath $(BUILDSYSDIR)/ext/gmsl)
 
 MAKE_MIN_VERSION_MAJOR=3
 MAKE_MIN_VERSION_MINOR=81
@@ -54,6 +54,14 @@ ifeq ($(MAKECMDGOALS),clean)
   endif
 endif
 
+# If SOVER for lib was not set (SOVER_libname empty), set it to DEFAULT_SOVER
+$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%),$(if $(SOVER_$(subst /,_,$L)),,$(eval SOVER_$(subst /,_,$L) = $(DEFAULT_SOVER))))
+
+ifdef __buildsys_lua_mk_
+# Lua libraries do not set an SOVER, it's not checked anyway
+$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval NOSOVER_lua_$(subst /,_,$L)=1)))
+endif
+
 # Dependencies
 -include $(DEPDIR)/*.d
 
@@ -85,16 +93,16 @@ endif
 
 .PHONY: clean
 clean: presubdirs subdirs
-	$(SILENT) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf "$(SRCDIR)/$(OBJDIR)" ; fi
 	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf "$(DEPDIR)" ; fi
-	$(SILENT)$(foreach B,$(BINS_all),rm -rf $(B);)
-	$(SILENT)$(foreach L,$(LIBS_all),rm -rf $(L);)
-	$(SILENT)$(foreach P,$(PLUGINS_all),rm -rf $(P);)
+	$(SILENT)$(foreach B,$(BINS_all),rm -f $(B);)
+	$(SILENT)$(foreach L,$(LIBS_all),rm -f $(addsuffix *,$(L));)
+	$(SILENT)$(foreach P,$(PLUGINS_all),rm -f $(P);)
 	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
-	$(SILENT)$(foreach B,$(BINS_gui),rm -rf $(B);)
-	$(SILENT)$(foreach L,$(LIBS_gui),rm -rf $(L);)
-	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -rf $(P);)
+	$(SILENT)$(foreach B,$(BINS_gui),rm -f $(B);)
+	$(SILENT)$(foreach L,$(LIBS_gui),rm -f $(L);)
+	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -f $(P);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
@@ -113,7 +121,7 @@ subdirs: $(SUBDIRS)
 
 ifneq ($(PRESUBDIRS)$(SUBDIRS),)
 $(PRESUBDIRS) $(SUBDIRS):
-	$(SILENT) if [ ! -d "$(realpath $(SRCDIR)/$(@))" ]; then \
+	$(SILENTSYMB) if [ ! -d "$(realpath $(SRCDIR)/$(@))" ]; then \
 		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL) ---"; \
 		exit 1; \
 	else \
@@ -137,7 +145,7 @@ endif
 %.o: %.cpp
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C++)"
+	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C++)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -149,7 +157,7 @@ endif
 %.o: %.c
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C)"
+	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -159,30 +167,34 @@ endif
 	rm -f $(DEPFILE).td
 
 moc_%.cpp: %.h
-	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
+	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
-$(BINDIR)/%: $$(OBJS_$$(subst /,_,$$*))
+$(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
-	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
+	$(LDFLAGS_BASE) $(LDFLAGS) $(LDFLAGS_$*) \
+	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 
 $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(subst /,_,$*)),,.$(SOVER_$(subst /,_,$*))) $(subst ..,__,$^) \
+	$(if $(NOSOVER_$(subst /,_,$*)),,-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*))) \
+	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
-
+	$(if $(NOSOVER_$(subst /,_,$*)),, \
+	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@; \
+	ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@.$(firstword $(call split,.,$(SOVER_$(subst /,_,$*)))); \
+	)
 
 ### Check if there are special additions
-ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk),)
-include $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk
+ifneq ($(realpath $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
+include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
 endif
 
 endif # __buildsys_rules_mk_

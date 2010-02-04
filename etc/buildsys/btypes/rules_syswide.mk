@@ -1,8 +1,8 @@
 #*****************************************************************************
-#   Makefile Build System for Fawkes: Settings specific to Fawkes/Maemo
+#     Makefile Build System for Fawkes: Rules when installed system-wide
 #                            -------------------
-#   Created on Thu Oct 16 19:59:46 2008
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Sun Jan 31 14:52:15 2010
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,5 +13,4 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys_local/rules_fawkes.mk
-
+include $(BUILDSYSDIR)/btypes/rules_fawkes.mk

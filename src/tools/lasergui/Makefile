@@ -39,6 +39,7 @@ OBJS_all = $(OBJS_lasergui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui = $(BINDIR)/lasergui
+  INST_RESDIRS = guis/lasergui
 else
   WARN_TARGETS += warning_lasergui
 endif

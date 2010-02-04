@@ -52,8 +52,8 @@ FawkesConfigEditor::FawkesConfigEditor( Glib::RefPtr<Gnome::Glade::Xml> ref_xml 
 
   m_trv_config = NULL;
   ref_xml->get_widget_derived("trvConfig", m_trv_config);
-  m_trv_config->register_plugin( new RetrieverConfigPlugin( RESDIR"/glade/config_editor/retriever_config_plugin.glade" ) );
-  m_trv_config->register_plugin(new NaoStiffnessConfigPlugin(RESDIR"/glade/config_editor/naostiffness_config_plugin.glade"));
+  m_trv_config->register_plugin( new RetrieverConfigPlugin( RESDIR"/guis/config_editor/retriever_config_plugin.glade" ) );
+  m_trv_config->register_plugin(new NaoStiffnessConfigPlugin(RESDIR"/guis/config_editor/naostiffness_config_plugin.glade"));
 
   m_btn_exit->signal_clicked().connect( sigc::mem_fun( *this, &FawkesConfigEditor::on_btn_exit_clicked) );
 

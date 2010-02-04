@@ -42,6 +42,7 @@ endif
 
 LIBS_libfawkesnetcomm = fawkescore fawkesutils
 OBJS_libfawkesnetcomm = $(filter-out $(OMIT_OBJECTS),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
+HDRS_libfawkesnetcomm = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h $(SRCDIR)/*/*/*.h))
 
 OBJS_all = $(OBJS_libfawkesnetcomm)
 LIBS_all  = $(LIBDIR)/libfawkesnetcomm.so

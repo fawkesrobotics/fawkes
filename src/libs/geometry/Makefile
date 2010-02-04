@@ -41,6 +41,7 @@ OBJS_libfawkesgeometry = matrix.o		\
 			 spline.o		\
 			 line_segment.o		\
 			 hom_pose_2d.o
+HDRS_libfawkesgeometry = $(patsubst %.o,%.h,$(OBJS_libfawkesgeometry))
 
 CFLAGS_fawkesgeometry_tolua = -Wno-unused-function $(CFLAGS_LUA)
 TOLUA_fawkesgeometry = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)

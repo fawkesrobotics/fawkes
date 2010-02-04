@@ -63,6 +63,7 @@ OBJS_all = $(OBJS_skillgui) $(OBJS_skillgui_batch_render)
 
 ifeq ($(HAVE_GUI)$(HAVE_GRAPHVIZ),11)
   BINS_gui = $(BINDIR)/skillgui $(BINDIR)/skillgui_batch_render
+  INST_RESDIRS = guis/skillgui
 else
   WARN_TARGETS += warning_skillgui
 endif

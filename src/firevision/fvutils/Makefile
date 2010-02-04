@@ -63,6 +63,7 @@ endif
 # We are lazy in the utils...
 OBJS_libfvutils := $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 LIBS_libfvutils := fawkescore fawkesutils fawkesnetcomm $(UTILS_EXTRA_LIBS)
+HDRS_libfvutils := $(filter-out $(patsubst %.o,%.h,$(FILTER_OUT)),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h $(SRCDIR)/*/*/*.h))))
 
 OBJS_all = $(OBJS_libfvutils)
 LIBS_all = $(LIBDIR)/libfvutils.so

@@ -39,6 +39,7 @@ endif
 
 LIBS_libfawkesconfig = stdc++ fawkescore fawkesutils fawkesnetcomm
 OBJS_libfawkesconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
+HDRS_libfawkesconfig = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 CFLAGS_fawkesconfig_tolua = -Wno-unused-function $(CFLAGS_LUA)
 TOLUA_fawkesconfig = $(wildcard $(SRCDIR)/*.tolua)

@@ -25,6 +25,7 @@ OBJS_all = $(OBJS_ffnetloggui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui = $(BINDIR)/ffnetloggui
+  INST_RESDIRS = guis/netloggui
 else
   WARN_TARGETS += warning_ffnetloggui
 endif

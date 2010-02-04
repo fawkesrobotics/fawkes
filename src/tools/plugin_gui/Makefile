@@ -25,6 +25,7 @@ OBJS_all = $(OBJS_ffplugingui)
 
 ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffplugingui
+  INST_RESDIRS = guis/plugin_tool
 else
   WARN_TARGETS += warning_plugin_gui
 endif

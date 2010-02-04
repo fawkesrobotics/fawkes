@@ -54,29 +54,37 @@ _LDFLAGS_TOLUA    = $(LDFLAGS_LUA)
 
 ifneq ($(INTERFACES_all),)
   $(foreach I,$(INTERFACES_all),							\
-	$(eval LIBS_interfaces_lib$I     = $$(_LIBS_INTERFACE))			\
-	$(eval OBJS_interfaces_lib$I     = $I.o)				\
-	$(eval OBJS_all                 += $$(OBJS_interfaces_lib$I))		\
-	$(eval INTERFACES_SRCS          += $(SRCDIR)/$I.cpp)			\
-	$(eval INTERFACES_HDRS          += $(IFACEDIR)/$I.h)			\
-	$(eval INTERFACES_LIBS          += $(LIBDIR)/interfaces/lib$I.so)	\
-	$(eval INTERFACES_TOUCH         += $(SRCDIR)/$(OBJDIR)/$I.touch)		\
-	$(eval INTERFACES_OBJS          += $I.o)				\
-	$(eval LIBS_all                 += $$(LIBDIR)/interfaces/lib$I.so)	\
+	$(eval LIBS_interfaces_lib$I        = $$(_LIBS_INTERFACE))		\
+	$(eval OBJS_interfaces_lib$I        = $I.o)				\
+	$(if $(subst $(abspath $(IFACESRCDIR)),,$(abspath $(SRCDIR))),		\
+		$(eval HDRS_interfaces_lib$I = $I.h_ext)			\
+		$(eval HDR_RENAME_$I.h_ext   = $I.h)				\
+	, 									\
+		$(eval HDRS_interfaces_lib$I = $I.h)				\
+	) 									\
+	$(eval INST_LIB_SUBDIR_interfaces_lib$I   = $(FFLIBSUBDIR))		\
+	$(eval INST_HDRS_SUBDIR_interfaces_lib$I  = interfaces)			\
+	$(eval OBJS_all                    += $$(OBJS_interfaces_lib$I))	\
+	$(eval INTERFACES_SRCS             += $(SRCDIR)/$I.cpp)			\
+	$(eval INTERFACES_HDRS             += $(IFACESRCDIR)/$I.h)		\
+	$(eval INTERFACES_LIBS             += $(IFACEDIR)/lib$I.so)		\
+	$(eval INTERFACES_TOUCH            += $(SRCDIR)/$(OBJDIR)/$I.touch)	\
+	$(eval INTERFACES_OBJS             += $I.o)				\
+	$(eval LIBS_all                    += $$(IFACEDIR)/lib$I.so)		\
 										\
-	$(eval TOLUA_ALL                += $(I).tolua)				\
-	$(eval TOLUA_SRCS               += $(I)_tolua.cpp)			\
-	$(eval LIBS_lua_interfaces_$(I)  = $$(_LIBS_TOLUA) $I)			\
-	$(eval OBJS_lua_interfaces_$(I)  = $(I)_tolua.o)			\
-	$(eval CFLAGS_$(I)_tolua	 = $$(_CFLAGS_TOLUA))			\
-	$(eval LDFLAGS_lua_interfaces_$I = $$(_LDFLAGS_TOLUA))			\
-	$(eval TOLUA_$(I)                = $(I).tolua)				\
-	$(eval TOLUA_PKGPREFIX_$(I)      = interfaces_)				\
-	$(eval OBJS_all                 += $(I)_tolua.o)			\
-	$(eval LIBS_all_tolua           += $$(LUALIBDIR)/interfaces/$(I).so)	\
+	$(eval TOLUA_ALL                   += $(I).tolua)			\
+	$(eval TOLUA_SRCS                  += $(I)_tolua.cpp)			\
+	$(eval LIBS_lua_interfaces_$(I)     = $$(_LIBS_TOLUA) $I)		\
+	$(eval OBJS_lua_interfaces_$(I)     = $(I)_tolua.o)			\
+	$(eval CFLAGS_$(I)_tolua	    = $$(_CFLAGS_TOLUA))		\
+	$(eval LDFLAGS_lua_interfaces_$I    = $$(_LDFLAGS_TOLUA))		\
+	$(eval TOLUA_$(I)                   = $(I).tolua)			\
+	$(eval TOLUA_PKGPREFIX_$(I)         = interfaces_)			\
+	$(eval OBJS_all                    += $(I)_tolua.o)			\
+	$(eval LIBS_all_tolua              += $$(LUALIBDIR)/interfaces/$(I).so)	\
   )
 
-  ifeq ($(IFACEDIR),$(SRCDIR))
+  ifeq ($(IFACESRCDIR),$(SRCDIR))
     INTERFACE_GENERATOR_BUILD = 1
   else
     ifneq ($(wildcard $(BINDIR)/interface_generator),)
@@ -94,21 +102,21 @@ $(TOLUA_ALL): $(BINDIR)/interface_generator
   endif
 
 $(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
-$(INTERFACES_HDRS): $(IFACEDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
+$(INTERFACES_HDRS): $(IFACESRCDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
 
 $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
-	$(SILENT) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
+	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
   ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
 	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
-	$(if $(filter-out $(IFACEDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h)
+	$(if $(filter-out $(IFACESRCDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h)
   else
-    ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
-	$(SILENT)if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
-		echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
+    ifneq ($(abspath $(IFACESRCDIR)),$(abspath $(SRCDIR)))
+	if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
+		$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
 	else \
-		echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
-		cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h; \
+		$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
+		cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h; \
 		touch $(SRCDIR)/$*.cpp; \
 	fi
     endif
@@ -130,7 +138,7 @@ endif
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBS_all_tolua)
 
-$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.so: | $(LIBDIR)/interfaces/lib%.so
+$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.so: | $(IFACEDIR)/lib%.so
 
 else
 all: warning_tolua_wrapper

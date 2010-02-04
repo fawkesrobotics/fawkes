@@ -26,6 +26,8 @@ OBJS_libfawkesgeometrygtk = geom_drawing_area.o		\
 			    bezier_drawer.o		\
 			    spline_drawer.o		\
 			    drawing_manipulator.o
+HDRS_libfawkesgeometrygtk = $(patsubst %.o,%.h,$(OBJS_libfawkesgeometrygtk))
+INST_HDRS_SUBDIR_libfawkesgeometrygtk = geometry/gtk
 
 ifeq ($(HAVE_GUI),1)
   CFLAGS  += $(CFLAGS_GUI)

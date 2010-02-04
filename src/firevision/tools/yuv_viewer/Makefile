@@ -31,6 +31,7 @@ OBJS_all += $(OBJS_fvyuv_viewer)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui += $(BINDIR)/fvyuv_viewer
+  INST_RESDIRS = guis/yuv_viewer
 else
   WARN_TARGETS += warning_guilibs
 endif

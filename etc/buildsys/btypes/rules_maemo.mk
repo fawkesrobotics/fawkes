@@ -1,7 +1,7 @@
 #*****************************************************************************
-#   Makefile Build System for Fawkes: Config Settings specific to Fawkes
+#   Makefile Build System for Fawkes: Settings specific to Fawkes/Maemo
 #                            -------------------
-#   Created on Thu Oct 16 20:00:11 2008
+#   Created on Thu Oct 16 19:59:46 2008
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -13,8 +13,5 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys_local/config_fawkes.mk
-
-EXEC_BASEDIR=/home/user/fawkes
-GCC_USE_OPENMP=0
+include $(BASEDIR)/etc/buildsys/btypes/rules_fawkes.mk
 

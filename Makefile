@@ -23,17 +23,16 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
 
-.PHONY: apidoc quickdoc tracdoc uncolored-quickdoc
+.PHONY: apidoc quickdoc tracdoc
 apidoc: api.doxygen
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
-uncolored-quickdoc: quickdoc
 
 %.doxygen:
-	$(SILENT) echo "--> Building documentation ($@). This may take a while..."
+	$(SILENTSYMB) echo "--> Building documentation ($@). This may take a while..."
 	$(SILENT) rm -rf doc/api
 	$(SILENT) $(DOXYGEN) doc/doxygen/$@ >/dev/null 2>&1
-	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
+	$(SILENTSYMB) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
 		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \
 		cat warnings.txt; \
 		exit 1; \
@@ -43,7 +42,7 @@ uncolored-quickdoc: quickdoc
 
 .PHONY: linkscripts
 linkscripts:
-	$(SILENT) if [ -d $(BASEDIR)/etc/scripts ]; then \
+	$(SILENTSYMB) if [ -d $(BASEDIR)/etc/scripts ]; then \
 		for f in $$(ls $(BASEDIR)/etc/scripts); do \
 			if [ -e "$(BASEDIR)/etc/scripts/$$f" ]; then \
 				if [[ -a "$(BASEDIR)/bin/$$f" && ! -L "$(BASEDIR)/bin/$$f" ]]; then \
@@ -57,10 +56,12 @@ linkscripts:
 		done; \
 	fi
 
-.PHONY: license-check uncolored-license-check
-uncolored-license-check: license-check
+# Uncolored implicit targets
+uncolored-%: % ; @:
+
+.PHONY: license-check
 license-check:
-	$(SILENT)if which perl >/dev/null; then \
+	$(SILENTSYMB)if which perl >/dev/null; then \
 		perl $(BASEDIR)/etc/licscripts/find_invlic.pl src $(wildcard $(BASEDIR)/doc/headers/lichead*.*); \
 		if [ $$? = 0 ]; then \
 			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files have a proper license header.$(TNORMAL)"; \
@@ -73,8 +74,7 @@ license-check:
 		exit 1; \
 	fi
 
-.PHONY: check uncolored-check
-uncolored-check: check
+.PHONY: check
 check: quickdoc license-check
 
 .PHONY: simple-clean
@@ -85,11 +85,12 @@ simple-clean:
 switch-buildtype:
 	$(SILENT) if [ -z "$(BT)" ]; then \
 		echo -e "$(INDENT_PRINT)$(TRED)--- Usage: make switch-buildtype BT=new_buildtype$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)$(TRED)---    or: make switch-buildtype-new_buildtype$(TNORMAL)"; \
 	elif [ "$(BUILD_TYPE)" = "$(BT)" ]; then \
 		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Build type $(BT) is already set$(TNORMAL)"; \
 	else \
 		echo -e "$(INDENT_PRINT)--- Switching build type from $(BUILD_TYPE) to $(BT)"; \
-		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys_local/buildtype.mk; \
+		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys/buildtype.mk; \
 		for D in $(BINDIR) $(LIBDIR) $(PLUGINDIR); do \
 			rm -rf $${D}_$(BUILD_TYPE); \
 			mv $$D $${D}_$(BUILD_TYPE); \
@@ -112,6 +113,10 @@ switch-buildtype:
 		done; \
 	fi
 
+# Easier to remember target than having to remember BT variable
+switch-buildtype-%:
+	$(SILENT)$(MAKE) --no-print-directory switch-buildtype BT=$* 
+
 print-buildtype:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
 

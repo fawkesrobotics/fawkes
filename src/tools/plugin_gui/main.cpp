@@ -40,10 +40,10 @@ int main(int argc, char** argv)
 #endif
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade");
+    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/guis/plugin_tool/plugin_tool.glade");
 #else
     std::auto_ptr<Gnome::Glade::XmlError> error;
-    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade", "", "", error);
+    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/guis/plugin_tool/plugin_tool.glade", "", "", error);
     if (error.get()) {
       throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
     }

@@ -17,7 +17,7 @@
 
 .SUFFIXES:
 
-include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/config.mk
 
 MAKECMDGOALS ?= all
 MAKETARGET = $(MAKE) --no-print-directory --no-keep-going -C $@ \

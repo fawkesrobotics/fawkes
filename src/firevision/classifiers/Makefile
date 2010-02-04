@@ -71,6 +71,7 @@ endif
 
 OBJS_libfvclassifiers := $(patsubst %.cpp,%.o,$(filter-out $(FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 LIBS_libfvclassifiers := fvutils $(CLASSIFIER_EXTRA_LIBS)
+HDRS_libfvclassifiers = $(patsubst %.o,%.h,$(OBJS_libfvclassifiers))
 
 OBJS_all = $(OBJS_libfvclassifiers)
 LIBS_all = $(LIBDIR)/libfvclassifiers.so
