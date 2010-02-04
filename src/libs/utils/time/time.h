@@ -88,12 +88,19 @@ class Time
   Time(float sec);
   Time(Clock *clock);
   Time(const Time &t);
+  Time(const Time *t);
   ~Time();
 
   float in_sec() const;
   long  in_msec() const;
   long  in_usec() const;
-  const timeval* get_timeval() const;
+
+  const timeval * get_timeval() const { return &__time; }
+  long            get_sec() const  { return __time.tv_sec; }
+  long            get_msec() const { return __time.tv_usec * 1000; }
+  long            get_usec() const { return __time.tv_usec; }
+  void            get_timestamp(long &sec, long &usec) const
+                  { sec  = __time.tv_sec; usec = __time.tv_usec; }
 
   void set_time(const timeval* tv);
   void set_time(long int sec, long int usec);

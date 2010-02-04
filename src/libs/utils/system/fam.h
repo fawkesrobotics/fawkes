@@ -75,9 +75,11 @@ class FileAlterationMonitor
   ~FileAlterationMonitor();
 
   void watch_dir(const char *dirpath);
+  void watch_file(const char *filepath);
   void add_filter(const char *regex);
 
   void process_events(int timeout = 0);
+  void interrupt();
 
   void add_listener(FamListener *listener);
   void remove_listener(FamListener *listener);
@@ -94,6 +96,9 @@ class FileAlterationMonitor
   std::map<int, std::string> __inotify_watches;
   std::map<int, std::string>::iterator __inotify_wit;
 
+  bool __interrupted;
+  bool __interruptible;
+  int  __pipe_fds[2];
 };
 
 } // end of namespace fawkes

@@ -117,6 +117,9 @@ FileAlterationMonitor::FileAlterationMonitor()
   __inotify_buf     = (char *)malloc(__inotify_bufsize);
 #endif
 
+  __interrupted   = false;
+  __interruptible = (pipe(__pipe_fds) == 0);
+
   __regexes.clear();
 }
 
@@ -192,6 +195,27 @@ FileAlterationMonitor::watch_dir(const char *dirpath)
 #endif
 }
 
+/** Watch a file.
+ * This adds the given fileto this FAM.
+ * @param filepath path to file to add
+ */
+void
+FileAlterationMonitor::watch_file(const char *filepath)
+{
+#ifdef HAVE_INOTIFY
+  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF;
+  int iw;
+
+  //LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
+  if ( (iw = inotify_add_watch(__inotify_fd, filepath, mask)) >= 0) {
+    __inotify_watches[iw] = filepath;
+  } else {
+    throw Exception("FileAlterationMonitor",
+		    "Cannot add watch for file %s", filepath);
+  }
+#endif
+}
+
 
 /** Add a filter.
  * Filters are applied to path names that triggered an event. All
@@ -250,24 +274,35 @@ FileAlterationMonitor::process_events(int timeout)
 {
 #ifdef HAVE_INOTIFY
   // Check for inotify events
-  pollfd ipfd;
-  ipfd.fd = __inotify_fd;
-  ipfd.events = POLLIN;
-  ipfd.revents = 0;
-  int prv = poll(&ipfd, 1, timeout);
+  __interrupted = false;
+  pollfd ipfd[2];
+  ipfd[0].fd = __inotify_fd;
+  ipfd[0].events = POLLIN;
+  ipfd[0].revents = 0;
+  ipfd[1].fd = __pipe_fds[0];
+  ipfd[1].events = POLLIN;
+  ipfd[1].revents = 0;
+  int prv = poll(ipfd, 2, timeout);
   if ( prv == -1 ) {
-    LibLogger::log_error("FileAlterationMonitor",
-			 "inotify poll failed: %s (%i)",
-			 strerror(errno), errno);
-  } else while ( prv > 0 ) {
+    if ( errno != EINTR ) {
+      LibLogger::log_error("FileAlterationMonitor",
+			   "inotify poll failed: %s (%i)",
+			   strerror(errno), errno);
+    } else {
+      __interrupted = true;
+    }
+  } else while ( !__interrupted && (prv > 0) ) {
     // Our fd has an event, we can read
-    if ( ipfd.revents & POLLERR ) {      
+    if ( ipfd[0].revents & POLLERR ) {      
       LibLogger::log_error("FileAlterationMonitor", "inotify poll error");
+    } else if (__interrupted) {
+      // interrupted
+      return;
     } else {
       // must be POLLIN
       int bytes = 0, i = 0;
       if ((bytes = read(__inotify_fd, __inotify_buf, __inotify_bufsize)) != -1) {
-	while (i < bytes) {
+	while (!__interrupted && (i < bytes)) {
 	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
 	  
 	  bool valid = true;
@@ -333,13 +368,30 @@ FileAlterationMonitor::process_events(int timeout)
       }
     }
 
-    prv = poll(&ipfd, 1, 0);
+    prv = poll(ipfd, 2, 0);
   }
 #else
   LibLogger::log_error("FileAlterationMonitor",
 		       "inotify support not available, but "
 		       "process_events() was called. Ignoring.");
 #endif
+}
+
+
+/** Interrupt a running process_events().
+ * This method will interrupt e.g. a running inifinetly blocking call of
+ * process_events().
+ */
+void
+FileAlterationMonitor::interrupt()
+{
+  if (__interruptible) {
+    __interrupted = true;
+    char tmp = 0;
+    write(__pipe_fds[1], &tmp, 1);
+  } else {
+    throw Exception("Currently not interruptible");
+  }
 }
 
 
