@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  redirect_reply.h - Web request reply for a redirect
+ *  header_generator.h - Generator of page header
  *
- *  Created: Thu Feb 12 13:39:04 2009
+ *  Created: Sun Aug 30 14:37:21 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,15 +20,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_REDIRECT_REPLY_H_
-#define __PLUGINS_WEBVIEW_REDIRECT_REPLY_H_
+#ifndef __PLUGINS_WEBVIEW_HEADER_GENERATOR_H_
+#define __PLUGINS_WEBVIEW_HEADER_GENERATOR_H_
 
-#include "reply.h"
+#include <webview/page_header_generator.h>
 
-class WebRedirectReply : public StaticWebReply
+#include <map>
+#include <string>
+
+class WebviewHeaderGenerator : public fawkes::WebPageHeaderGenerator
 {
  public:
-  WebRedirectReply(std::string url);
+  WebviewHeaderGenerator();
+
+  std::string html_header(std::string &title,
+			  std::string &active_baseurl);
+
+  void add_nav_entry(std::string baseurl, std::string name);
+  void remove_nav_entry(std::string baseurl);
+
+ private:
+  static const char *PAGE_HEADER;
+
+  std::map<std::string, std::string> __nav_entries;
 };
 
 #endif

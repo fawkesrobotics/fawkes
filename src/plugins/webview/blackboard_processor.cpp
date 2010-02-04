@@ -21,7 +21,7 @@
  */
 
 #include "blackboard_processor.h"
-#include "page_reply.h"
+#include <webview/page_reply.h>
 
 #include <blackboard/blackboard.h>
 #include <interface/interface.h>
@@ -34,7 +34,7 @@
 
 using namespace fawkes;
 
-/** @class WebBlackBoardRequestProcessor "blackboard_processor.h"
+/** @class WebviewBlackBoardRequestProcessor "blackboard_processor.h"
  * BlackBoard web request processor.
  * Provides access to BlackBoard introspection features.
  * @author Tim Niemueller
@@ -44,7 +44,7 @@ using namespace fawkes;
  * @param baseurl Base URL where processor is mounted
  * @param blackboard BlackBoard instance
  */
-WebBlackBoardRequestProcessor::WebBlackBoardRequestProcessor(const char *baseurl,
+WebviewBlackBoardRequestProcessor::WebviewBlackBoardRequestProcessor(const char *baseurl,
 							     BlackBoard *blackboard)
 {
   __baseurl     = strdup(baseurl);
@@ -54,7 +54,7 @@ WebBlackBoardRequestProcessor::WebBlackBoardRequestProcessor(const char *baseurl
 
 
 /** Destructor. */
-WebBlackBoardRequestProcessor::~WebBlackBoardRequestProcessor()
+WebviewBlackBoardRequestProcessor::~WebviewBlackBoardRequestProcessor()
 {
   free(__baseurl);
   for (__ifi = __interfaces.begin(); __ifi != __interfaces.end(); ++__ifi) {
@@ -65,7 +65,7 @@ WebBlackBoardRequestProcessor::~WebBlackBoardRequestProcessor()
 
 
 WebReply *
-WebBlackBoardRequestProcessor::process_request(const char *url,
+WebviewBlackBoardRequestProcessor::process_request(const char *url,
 					       const char *method,
 					       const char *version,
 					       const char *upload_data,
@@ -81,6 +81,7 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
 
     bool found_some = false;
     InterfaceInfoList *iil = __blackboard->list_all();
+    iil->sort();
     for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
       if (! found_some) {
         *r += "<table>\n";

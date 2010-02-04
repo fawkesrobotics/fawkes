@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugins_processor.h - Web request processor for plugin info
+ *  redirect_reply.h - Web request reply for a redirect
  *
- *  Created: Thu Feb 12 12:59:25 2009
+ *  Created: Thu Feb 12 13:39:04 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,33 +20,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
+#ifndef __PLUGINS_WEBVIEW_REDIRECT_REPLY_H_
+#define __PLUGINS_WEBVIEW_REDIRECT_REPLY_H_
 
-#include <webview/request_processor.h>
+#include <webview/reply.h>
 
 namespace fawkes {
-  class PluginManager;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
 
-class WebviewPluginsRequestProcessor : public fawkes::WebRequestProcessor
+class WebRedirectReply : public StaticWebReply
 {
  public:
-  WebviewPluginsRequestProcessor(const char *baseurl,
-			     fawkes::PluginManager *manager);
-  virtual ~WebviewPluginsRequestProcessor();
-
-  virtual fawkes::WebReply * process_request(const char *url,
-					     const char *method,
-					     const char *version,
-					     const char *upload_data,
-					     size_t *upload_data_size,
-					     void **session_data);
-
- private:
-  char *__baseurl;
-  size_t __baseurl_len;
-  fawkes::PluginManager *__manager;
+  WebRedirectReply(std::string url);
 };
+
+} // end namespace fawkes
 
 #endif

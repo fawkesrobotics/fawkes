@@ -114,6 +114,8 @@ class PluginManager
 
 #ifdef HAVE_INOTIFY
   FamThread *__fam_thread;
+#else
+  void *__fam_thread;
 #endif
 };
 

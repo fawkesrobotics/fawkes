@@ -23,6 +23,7 @@
 
 #include <netcomm/service_discovery/service.h>
 #include <netcomm/utils/resolver.h>
+#include <core/exceptions/system.h>
 
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -31,6 +32,8 @@
 #include <cstddef>
 #include <cstring>
 #include <cstdlib>
+#include <cstdarg>
+#include <cstdio>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -247,12 +250,21 @@ NetworkService::NetworkService(const NetworkService &s)
 
 
 /** Add a TXT record.
- * @param txt TXT record to add, must be a "key=value" string.
+ * @param format format for TXT record to add, must be a "key=value" string,
+ * takes the same arguments as sprintf.
  */
 void
-NetworkService::add_txt(const char *txt)
+NetworkService::add_txt(const char *format, ...)
 {
-  list.push_back(txt);
+  va_list arg;
+  va_start(arg, format);
+  char *tmp;
+  if (vasprintf(&tmp, format, arg) == -1) {
+    throw OutOfMemoryException("Cannot add txt record, no memory");
+  }
+  list.push_back(tmp);
+  free(tmp);
+  va_end(arg);
 }
 
 

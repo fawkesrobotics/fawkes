@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  request_processor.h - Web request processor
+ *  footer_generator.h - Generator of page footer
  *
- *  Created: Mon Oct 13 21:58:49 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Aug 30 14:37:21 2009
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,23 +20,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
+#ifndef __PLUGINS_WEBVIEW_FOOTER_GENERATOR_H_
+#define __PLUGINS_WEBVIEW_FOOTER_GENERATOR_H_
 
-#include "reply.h"
+#include <webview/page_footer_generator.h>
 
-class WebRequestProcessor
+#include "service_browse_handler.h"
+
+class WebviewFooterGenerator : public fawkes::WebPageFooterGenerator
 {
  public:
-  virtual ~WebRequestProcessor();
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data)               = 0;
+  WebviewFooterGenerator(WebviewServiceBrowseHandler *service_browser);
 
+  std::string html_footer();
+
+ private:
+  WebviewServiceBrowseHandler *__service_browser;
 };
-
 
 #endif

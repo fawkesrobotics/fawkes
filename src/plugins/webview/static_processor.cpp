@@ -21,8 +21,8 @@
  */
 
 #include "static_processor.h"
-#include "file_reply.h"
-#include "error_reply.h"
+#include <webview/file_reply.h>
+#include <webview/error_reply.h>
 
 #include <core/exception.h>
 #include <utils/logging/logger.h>
@@ -34,7 +34,9 @@
 #include <cerrno>
 #include <climits>
 
-/** @class WebStaticRequestProcessor "static_processor.h"
+using namespace fawkes;
+
+/** @class WebviewStaticRequestProcessor "static_processor.h"
  * Static file web processor.
  * This processor provides access to static files.
  * @author Tim Niemueller
@@ -45,7 +47,7 @@
  * @param htdocs_dir directory in the file system where to look for static files
  * @param logger logger
  */
-WebStaticRequestProcessor::WebStaticRequestProcessor(const char *baseurl,
+WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(const char *baseurl,
 						     const char *htdocs_dir,
 						     fawkes::Logger *logger)
 {
@@ -58,7 +60,7 @@ WebStaticRequestProcessor::WebStaticRequestProcessor(const char *baseurl,
 }
 
 /** Destructor. */
-WebStaticRequestProcessor::~WebStaticRequestProcessor()
+WebviewStaticRequestProcessor::~WebviewStaticRequestProcessor()
 {
   free(__baseurl);
   free(__htdocs_dir);
@@ -66,7 +68,7 @@ WebStaticRequestProcessor::~WebStaticRequestProcessor()
 
 
 WebReply *
-WebStaticRequestProcessor::process_request(const char *url,
+WebviewStaticRequestProcessor::process_request(const char *url,
 					   const char *method,
 					   const char *version,
 					   const char *upload_data,

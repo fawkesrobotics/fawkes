@@ -3,7 +3,7 @@
  *  file_reply.cpp - Web request file reply
  *
  *  Created: Thu Oct 23 14:00:17 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "file_reply.h"
+#include <webview/file_reply.h>
 
 #include <core/exceptions/system.h>
 #include <utils/system/filetype.h>
@@ -28,7 +28,12 @@
 #include <cerrno>
 #include <sys/stat.h>
 
-/** @class DynamicFileWebReply "file_reply.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class DynamicFileWebReply <webview/file_reply.h>
  * Dynamic raw file transfer reply.
  * This dynamic file transfer reply transmits the given file with a mime type
  * determined with libmagic.
@@ -76,3 +81,5 @@ DynamicFileWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_size)
   }
   return fread(buffer, 1, buf_max_size, __file);
 }
+
+} // end namespace fawkes

@@ -20,17 +20,23 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "request_dispatcher.h"
-#include "request_processor.h"
-#include "page_reply.h"
-#include "error_reply.h"
+#include <webview/request_dispatcher.h>
+#include <webview/request_processor.h>
+#include <webview/page_reply.h>
+#include <webview/error_reply.h>
 
-#include <utils/logging/cache.h>
 #include <utils/misc/string_urlescape.h>
 
+#include <sys/types.h>
+#include <cstdarg>
 #include <microhttpd.h>
 #include <cstring>
 #include <cstdlib>
+
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class WebRequestDispatcher "request_dispatcher.h"
  * Web request dispatcher.
@@ -39,6 +45,18 @@
  * processor was registered for the given base url.
  * @author Tim Niemueller
  */
+
+/** Constructor.
+ * @param headergen page header generator
+ * @param footergen page footer generator
+ */
+WebRequestDispatcher::WebRequestDispatcher(WebPageHeaderGenerator *headergen,
+					   WebPageFooterGenerator *footergen)
+{
+  __page_header_generator = headergen;
+  __page_footer_generator = footergen;
+}
+
 
 /** Process request callback for libmicrohttpd.
  * @param callback_data instance of WebRequestDispatcher to call
@@ -105,7 +123,13 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 					 StaticWebReply *sreply)
 {
   struct MHD_Response *response;
-  sreply->pack();
+  WebPageReply *wpreply = dynamic_cast<WebPageReply *>(sreply);
+  if (wpreply) {
+    wpreply->pack(__active_baseurl,
+		  __page_header_generator, __page_footer_generator);
+  } else {
+    sreply->pack();
+  }
   if (sreply->body_length() > 0) {
     response = MHD_create_response_from_data(sreply->body_length(),
 					     (void*) sreply->body().c_str(),
@@ -151,22 +175,14 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   static int dummy;
   int ret;
 
-  if (0 != strcmp(method, "GET"))
+  if ((0 != strcmp(method, "GET")) && (0 != strcmp(method, "POST")))
     return MHD_NO; /* unexpected method */
-
-  if (&dummy != *session_data) {
-    // The first time only the headers are valid,
-    // do not respond in the first round...
-    *session_data = &dummy;
-    return MHD_YES;
-  }
-  *session_data = NULL; /* clear context pointer */
 
   WebRequestProcessor *proc = NULL;
   std::map<std::string, WebRequestProcessor *>::iterator __pit;
   for (__pit = __processors.begin(); (proc == NULL) && (__pit != __processors.end()); ++__pit) {
     if (surl.find(__pit->first) == 0) {
-      WebPageReply::set_active_baseurl(__pit->first);
+      __active_baseurl = __pit->first;
       proc = __pit->second;
     }
   }
@@ -181,14 +197,34 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   }
 
   if (proc) {
-    struct MHD_Response *response;
-
     char *urlc = strdup(url);
     fawkes::hex_unescape(urlc);
-
-    WebReply *reply = proc->process_request(urlc, method, version, upload_data, upload_data_size, session_data);
-
+    std::string urls = urlc;
     free(urlc);
+
+    if (! proc->handles_session_data()) {
+      if ( *session_data == NULL) {
+	// The first time only the headers are valid,
+	// do not respond in the first round...
+	*session_data = &dummy;
+	return MHD_YES;
+      }
+      *session_data = NULL; /* clear context pointer */
+    } else {
+      if ( *session_data == NULL) {
+	WebReply *reply = proc->process_request(urls.c_str(), method, version, upload_data, upload_data_size, session_data);
+	if ((reply != NULL) || (*session_data == NULL)) {
+	  return MHD_NO;
+	} else {
+	  return MHD_YES;
+	}
+      }
+    }
+
+    struct MHD_Response *response;
+
+
+    WebReply *reply = proc->process_request(urls.c_str(), method, version, upload_data, upload_data_size, session_data);
 
     if ( reply ) {
       StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
@@ -210,8 +246,12 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 	delete reply;
       }
     } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, &ereply);
+      if (proc->handles_session_data()) {
+	return MHD_YES;
+      } else {
+	WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+	ret = queue_static_reply(connection, &ereply);
+      }
     }
   } else {
     WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
@@ -248,3 +288,5 @@ WebRequestDispatcher::remove_processor(const char *url_prefix)
     __processors.erase(url_prefix);
   }
 }
+
+} // end namespace fawkes

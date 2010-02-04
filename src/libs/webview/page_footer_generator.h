@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  error_reply.h - Web request reply for an error page
+ *  footer_generator.h - Generator of page footer
  *
- *  Created: Fri Oct 24 19:55:26 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Aug 30 14:37:21 2009
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,15 +20,23 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_ERROR_REPLY_H_
-#define __PLUGINS_WEBVIEW_ERROR_REPLY_H_
+#ifndef __LIBS_WEBVIEW_PAGE_FOOTER_GENERATOR_H_
+#define __LIBS_WEBVIEW_PAGE_FOOTER_GENERATOR_H_
 
-#include "page_reply.h"
+#include <string>
 
-class WebErrorPageReply : public WebPageReply
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class WebPageFooterGenerator
 {
  public:
-  WebErrorPageReply(response_code_t error_code, std::string msg = "");
+  virtual ~WebPageFooterGenerator();
+  virtual std::string html_footer() = 0;
 };
+
+} // end namespace fawkes
 
 #endif

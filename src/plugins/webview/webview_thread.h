@@ -35,14 +35,17 @@
 
 namespace fawkes {
   class NetworkService;
+  class WebServer;
+  class WebRequestDispatcher;
 }
 
-class WebRequestDispatcher;
-class WebStaticRequestProcessor;
-class WebBlackBoardRequestProcessor;
-class WebStartPageRequestProcessor;
-class WebPluginsRequestProcessor;
+class WebviewStaticRequestProcessor;
+class WebviewBlackBoardRequestProcessor;
+class WebviewStartPageRequestProcessor;
+class WebviewPluginsRequestProcessor;
 class WebviewServiceBrowseHandler;
+class WebviewFooterGenerator;
+class WebviewHeaderGenerator;
 
 class WebviewThread
 : public fawkes::Thread,
@@ -69,14 +72,16 @@ class WebviewThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  struct MHD_Daemon    *__daemon;
-  WebRequestDispatcher *__dispatcher;
+  fawkes::WebServer                  *__webserver;
+  fawkes::WebRequestDispatcher       *__dispatcher;
 
-  WebStaticRequestProcessor      *__static_processor;
-  WebStartPageRequestProcessor   *__startpage_processor;
-  WebBlackBoardRequestProcessor  *__blackboard_processor;
-  WebPluginsRequestProcessor     *__plugins_processor;
-  WebviewServiceBrowseHandler    *__service_browse_handler;
+  WebviewStaticRequestProcessor      *__static_processor;
+  WebviewStartPageRequestProcessor   *__startpage_processor;
+  WebviewBlackBoardRequestProcessor  *__blackboard_processor;
+  WebviewPluginsRequestProcessor     *__plugins_processor;
+  WebviewServiceBrowseHandler        *__service_browse_handler;
+  WebviewHeaderGenerator             *__header_gen;
+  WebviewFooterGenerator             *__footer_gen;
 
   unsigned int __cfg_port;
 

@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  file_reply.h - Web request file reply
+ *  error_reply.h - Web request reply for an error page
  *
- *  Created: Thu Oct 23 13:47:33 2008
+ *  Created: Fri Oct 24 19:55:26 2008
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,25 +20,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_FILE_REPLY_H_
-#define __PLUGINS_WEBVIEW_FILE_REPLY_H_
+#ifndef __LIBS_WEBVIEW_ERROR_REPLY_H_
+#define __LIBS_WEBVIEW_ERROR_REPLY_H_
 
-#include "reply.h"
-#include <cstdio>
+#include <webview/page_reply.h>
 
-class DynamicFileWebReply : public DynamicWebReply
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class WebErrorPageReply : public WebPageReply
 {
  public:
-  DynamicFileWebReply(const char *filename);
-  virtual ~DynamicFileWebReply();
-
-  virtual size_t size();
-  virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
-
- private:
-  FILE   *__file;
-  size_t  __size;
-  
+  WebErrorPageReply(response_code_t error_code, std::string msg = "");
 };
+
+} // end namespace fawkes
 
 #endif

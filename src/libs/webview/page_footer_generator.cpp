@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  redirect_reply.h - Web request reply for a redirect
+ *  footer_generator.cpp - Generator of page footer
  *
- *  Created: Thu Feb 12 13:40:12 2009
+ *  Created: Sun Aug 30 14:40:26 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,22 +20,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "redirect_reply.h"
+#include <webview/page_footer_generator.h>
 
-/** @class WebRedirectReply "redirect_reply.h"
- * Redirect reply for webview.
- * This reply will cause an immediate redirect from the requested page
- * to the given URL. THe URL can be local as well as remote. The redirect
- * is done on the HTTP level with status code "moved permanently" and
- * the new URL as "Location" HTTP header.
- * @author Tim Niemueller
- */
-
-/** Constructor.
- * @param url the URL to redirect to
- */
-WebRedirectReply::WebRedirectReply(std::string url)
-  : StaticWebReply(WebReply::HTTP_MOVED_PERMANENTLY)
-{
-  add_header("Location", url);
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
+
+/** @class WebPageFooterGenerator <webview/page_footer_generator.h>
+ * Interface for HTML footer generator.
+ * A page footer generator has the task to generate the HTML code that is
+ * appended to each standard page. This is a possible footer or navigational
+ * additions. A footer generator must also generate the closing
+ * &lt;/body&gt;&lt;/html&gt; tags.
+ * @author Tim Niemueller
+ *
+ * @fn std::string WebPageFooterGenerator::html_footer() = 0
+ * Generate HTML footer.
+ * @return footer HTML code, including &lt;/body&gt;&lt;/html&gt;
+ */
+
+/** Virtual empty destructor. */
+WebPageFooterGenerator::~WebPageFooterGenerator()
+{
+}
+
+} // end namespace fawkes

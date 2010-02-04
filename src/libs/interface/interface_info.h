@@ -43,6 +43,8 @@ class InterfaceInfo
   unsigned int           num_readers() const;
   unsigned int           serial() const;
 
+  bool operator<(const InterfaceInfo &ii) const;
+
  private:
   char          *__type;
   char          *__id;

@@ -68,7 +68,7 @@ class NetworkService
   NetworkService(const NetworkService &s);
   ~NetworkService();
 
-  void                add_txt(const char *txt);
+  void                add_txt(const char *format, ...);
   void                set_txt(std::list<std::string> &txtlist);
 
   void                set_name(const char *new_name);

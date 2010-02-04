@@ -28,16 +28,23 @@
 #include <stdint.h>
 
 struct MHD_Connection;
-class WebRequestProcessor;
-class StaticWebReply;
 
 namespace fawkes {
-  class CacheLogger;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
+
+class WebRequestProcessor;
+class WebPageHeaderGenerator;
+class WebPageFooterGenerator;
+class StaticWebReply;
 
 class WebRequestDispatcher
 {
  public:
+  WebRequestDispatcher(WebPageHeaderGenerator *headergen = 0,
+		       WebPageFooterGenerator *footergen = 0);
+
   void add_processor(const char *url_prefix, WebRequestProcessor *processor);
   void remove_processor(const char *url_prefix);
 
@@ -65,11 +72,14 @@ class WebRequestDispatcher
 		      void **session_data);
 
  private:
-  fawkes::CacheLogger *__cache_logger;
-
   std::map<std::string, WebRequestProcessor *>  __processors;
   WebRequestProcessor                          *__startpage_processor;
+
+  std::string                                   __active_baseurl;
+  WebPageHeaderGenerator                       *__page_header_generator;
+  WebPageFooterGenerator                       *__page_footer_generator;
 };
 
+} // end namespace fawkes
 
 #endif

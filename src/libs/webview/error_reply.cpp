@@ -3,7 +3,7 @@
  *  error_reply.h - Web request reply for an error page
  *
  *  Created: Fri Oct 24 19:57:19 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,11 +20,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "error_reply.h"
+#include <webview/error_reply.h>
 
 #include <core/exceptions/software.h>
 
-/** @class WebErrorPageReply "error_reply.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class WebErrorPageReply <webview/error_reply.h>
  * Static error page reply.
  * Shows a simple error page based on the given code.
  * @author Tim Niemueller
@@ -220,3 +225,5 @@ WebErrorPageReply::WebErrorPageReply(response_code_t code, std::string msg)
 
   _body += "<br />\n<b>" + msg + "</b>\n";
 }
+
+} // end namespace fawkes

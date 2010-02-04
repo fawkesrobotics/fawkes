@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  startpage_processor.h - Web request processor for the start page
+ *  request_processor.h - Web request processor
  *
- *  Created: Thu Feb 12 00:09:16 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Oct 13 21:58:49 2008
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,30 +20,34 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
+#ifndef __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
+#define __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
 
-#include <webview/request_processor.h>
+#include "reply.h"
 
 namespace fawkes {
-  class CacheLogger;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
 
-class WebviewStartPageRequestProcessor : public fawkes::WebRequestProcessor
+class WebRequestProcessor
 {
  public:
-  WebviewStartPageRequestProcessor(fawkes::CacheLogger *cache_logger);
-  virtual ~WebviewStartPageRequestProcessor();
+  WebRequestProcessor(bool handles_session_data = false);
+  virtual ~WebRequestProcessor();
+  virtual WebReply * process_request(const char *url,
+				     const char *method,
+				     const char *version,
+				     const char *upload_data,
+				     size_t *upload_data_size,
+				     void **session_data)               = 0;
 
-  virtual fawkes::WebReply * process_request(const char *url,
-					     const char *method,
-					     const char *version,
-					     const char *upload_data,
-					     size_t *upload_data_size,
-					     void **session_data);
-
+  bool handles_session_data() const;
  private:
-  fawkes::CacheLogger *__cache_logger;
+  bool  __handles_session_data;
+
 };
+
+} // end namespace fawkes
 
 #endif

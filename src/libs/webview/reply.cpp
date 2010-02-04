@@ -3,7 +3,7 @@
  *  reply.cpp - Web request reply
  *
  *  Created: Thu Oct 23 12:01:05 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,13 +20,18 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "reply.h"
+#include <webview/reply.h>
 
 #include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
 
-/** @class WebReply "reply.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class WebReply <webview/reply.h>
  * Basic web reply.
  * The base class for all web replies. Though the WebRequestDispatcher expects
  * sub-classes of StaticWebReply or DynamicWebReply.
@@ -79,7 +84,7 @@ WebReply::headers() const
 }
 
 
-/** @class DynamicWebReply "reply.h"
+/** @class DynamicWebReply <webview/reply.h>
  * Dynamic web reply.
  * A reply of this type is send out in chunks, not all as a whole. It should be
  * used for payloads that can get very large, like file transfers.
@@ -125,7 +130,7 @@ DynamicWebReply::chunk_size()
 }
 
 
-/** @class StaticWebReply "reply.h"
+/** @class StaticWebReply <webview/reply.h>
  * Static web reply.
  * The static web reply is send out as a whole at once and is immediately
  * deleted after sending. Use it for regular-sized pages and content.
@@ -202,3 +207,5 @@ void
 StaticWebReply::pack()
 {
 }
+
+} // end namespace fawkes

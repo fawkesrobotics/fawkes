@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugins_processor.h - Web request processor for plugin info
+ *  file_reply.h - Web request file reply
  *
- *  Created: Thu Feb 12 12:59:25 2009
+ *  Created: Thu Oct 23 13:47:33 2008
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,33 +20,32 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
+#ifndef __LIBS_WEBVIEW_FILE_REPLY_H_
+#define __LIBS_WEBVIEW_FILE_REPLY_H_
 
-#include <webview/request_processor.h>
+#include <webview/reply.h>
+#include <cstdio>
 
 namespace fawkes {
-  class PluginManager;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
 
-class WebviewPluginsRequestProcessor : public fawkes::WebRequestProcessor
+class DynamicFileWebReply : public DynamicWebReply
 {
  public:
-  WebviewPluginsRequestProcessor(const char *baseurl,
-			     fawkes::PluginManager *manager);
-  virtual ~WebviewPluginsRequestProcessor();
+  DynamicFileWebReply(const char *filename);
+  virtual ~DynamicFileWebReply();
 
-  virtual fawkes::WebReply * process_request(const char *url,
-					     const char *method,
-					     const char *version,
-					     const char *upload_data,
-					     size_t *upload_data_size,
-					     void **session_data);
+  virtual size_t size();
+  virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
 
  private:
-  char *__baseurl;
-  size_t __baseurl_len;
-  fawkes::PluginManager *__manager;
+  FILE   *__file;
+  size_t  __size;
+  
 };
+
+} // end namespace fawkes
 
 #endif
