@@ -59,6 +59,7 @@ LogView::LogView(const char *hostname, unsigned short int port)
 }
 
 
+#ifdef HAVE_GLADEMM
 /** Constructor.
  * Special ctor to be used with Glade's get_widget_derived().
  * @param cobject Gtk C object
@@ -70,6 +71,7 @@ LogView::LogView(BaseObjectType* cobject,
 {
   ctor();
 }
+#endif
 
 
 /** Destructor. */

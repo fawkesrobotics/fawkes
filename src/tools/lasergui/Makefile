@@ -16,28 +16,29 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/gui.mk
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_lasergui = fawkescore fawkesblackboard fawkesguiutils \
 		Position2DTrackInterface Laser360Interface Laser720Interface \
 		ObjectPositionInterface SwitchInterface
 
 ifeq ($(BUILD_TYPE),maemo)
-  ifeq ($(HAVE_HILDONMM),1)
+  ifeq ($(HAVE_HILDON_GUI),1)
     OBJS_lasergui = lasergui_hildon.o
-    CFLAGS  += $(CFLAGS_HILDONMM)
-    LDFLAGS += $(LDFLAGS_HILDONMM)
+    LIBS_lasergui += osso
+    BUILD_LASERGUI = $(HAVE_GUI)
   else
-    WARN_TARGETS += warning_hildon
+    WARN_TARGETS += warning_hildonmm
   endif
 else
   OBJS_lasergui = lasergui.o
+  BUILD_LASERGUI = $(HAVE_GLADE_GUI)
 endif
 OBJS_lasergui += laser_drawing_area.o
 OBJS_all = $(OBJS_lasergui)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(BUILD_LASERGUI),1)
   BINS_gui = $(BINDIR)/lasergui
   INST_RESDIRS = guis/lasergui
 else

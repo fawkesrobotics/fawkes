@@ -62,12 +62,30 @@ namespace fawkes {
 
 /** Constructor.
  * @param cobject pointer to base object type
+ */
+PluginTreeView::PluginTreeView()
+  : m_dispatcher(FAWKES_CID_PLUGINMANAGER)
+{
+  ctor();
+}
+
+#ifdef HAVE_GLADEMM
+/** Constructor.
+ * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
  */
 PluginTreeView::PluginTreeView(BaseObjectType* cobject,
 			       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   : Gtk::TreeView(cobject),
     m_dispatcher(FAWKES_CID_PLUGINMANAGER)
+{
+  ctor();
+}
+#endif
+
+
+void
+PluginTreeView::ctor()
 {
   m_plugin_list = Gtk::ListStore::create(m_plugin_record);
   set_model(m_plugin_list);
@@ -89,8 +107,8 @@ PluginTreeView::PluginTreeView(BaseObjectType* cobject,
   m_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &PluginTreeView::on_connected));
   m_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &PluginTreeView::on_disconnected));
   m_dispatcher.signal_message_received().connect(sigc::mem_fun(*this, &PluginTreeView::on_message_received));
-}
 
+}
 
 /** Destructor. */
 PluginTreeView::~PluginTreeView()
@@ -107,7 +125,12 @@ PluginTreeView::~PluginTreeView()
 
 #ifdef HAVE_GCONFMM
   if (__gconf) {
+#  ifdef GLIBMM_EXCEPTIONS_ENABLED
     __gconf->remove_dir(__gconf_prefix);
+#  else
+    std::auto_ptr<Glib::Error> error;
+    __gconf->remove_dir(__gconf_prefix, error);
+#  endif
   }
 #endif
 }
@@ -133,10 +156,20 @@ PluginTreeView::set_gconf_prefix(Glib::ustring gconf_prefix)
   if (! __gconf) {
     __gconf = Gnome::Conf::Client::get_default_client();
   } else {
+#  ifdef GLIBMM_EXCEPTIONS_ENABLED
     __gconf->remove_dir(__gconf_prefix);
+#  else
+    std::auto_ptr<Glib::Error> error;
+    __gconf->remove_dir(__gconf_prefix, error);
+#  endif
   }
 
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   __gconf->add_dir(gconf_prefix);
+#else
+  std::auto_ptr<Glib::Error> error;
+  __gconf->add_dir(gconf_prefix, Gnome::Conf::CLIENT_PRELOAD_NONE, error);
+#endif
   __gconf_prefix = gconf_prefix;
 
   if (__gconf_connection) {
@@ -443,8 +476,8 @@ PluginTreeView::append_plugin_column()
     tlcol->add_attribute(twolines_renderer->property_line1(), m_plugin_record.name);
     tlcol->add_attribute(twolines_renderer->property_line2(), m_plugin_record.description);
  #  else
-    tlcol->add_attribute(*twolines_renderer, "line1", m_plugin_record.line1);
-    tlcol->add_attribute(*twolines_renderer, "line2", m_plugin_record.line2);
+    tlcol->add_attribute(*twolines_renderer, "line1", m_plugin_record.name);
+    tlcol->add_attribute(*twolines_renderer, "line2", m_plugin_record.description);
  #  endif
 
     set_tooltip_column(-1);

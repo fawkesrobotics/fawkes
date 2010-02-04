@@ -24,7 +24,9 @@
 #define __TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 #include <list>
 #include <interfaces/Position2DTrackInterface.h>
 #include <interfaces/SwitchInterface.h>
@@ -50,8 +52,10 @@ class LaserDrawingArea
   } draw_mode_t;
 
   LaserDrawingArea();
+#ifdef HAVE_GLADEMM
   LaserDrawingArea(BaseObjectType* cobject,
 		   const Glib::RefPtr<Gnome::Glade::Xml>& refxml);
+#endif
 
   void set_laser360_if(fawkes::Laser360Interface *laser_if);
   void set_laser720_if(fawkes::Laser720Interface *laser_if);

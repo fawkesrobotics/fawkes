@@ -24,7 +24,6 @@
 
 #include <gui_utils/service_selector_cbe.h>
 #include <gui_utils/service_model.h>
-#include <gui_utils/utils.h>
 #include <gui_utils/connection_dispatcher.h>
 #include <netcomm/fawkes/client.h>
 
@@ -107,6 +106,7 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
   initialize();
 }
 
+#ifdef HAVE_GLADEMM
 /** Constructor.
  * @param ref_xml Glade XML file
  * @param cbe_name name of the combo box
@@ -128,6 +128,7 @@ ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 
   initialize();
 }
+#endif
 
 /** Initializer method. */
 void

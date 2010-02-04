@@ -1,7 +1,7 @@
 /***************************************************************************
  *  image_widget.h - Gtkmm widget to draw an image inside a Gtk::Window
  *
- *  Created:  Wed Nov 26 00:00:00 2008
+ *  Created: Wed Nov 26 00:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  ****************************************************************************/
@@ -27,7 +27,9 @@
 #include <fvutils/color/rgb.h>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 
 namespace fawkes {
   class Mutex;
@@ -73,7 +75,9 @@ class ImageWidget : public Gtk::Image
  public:
   ImageWidget(unsigned int width, unsigned int height);
   ImageWidget(Camera *cam, unsigned int refresh_delay = 0, unsigned int width = 0, unsigned int height = 0);
+#ifdef HAVE_GLADEMM
   ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml);
+#endif
   virtual ~ImageWidget();
 
   void set_camera(Camera *cam, unsigned int refresh_delay = 0);

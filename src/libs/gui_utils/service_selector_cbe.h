@@ -28,7 +28,9 @@
 #include <netcomm/fawkes/client_handler.h>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
+#ifdef HAVE_GLADEMM
+#  include <libglademm/xml.h>
+#endif
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -50,11 +52,13 @@ class ServiceSelectorCBE
 		      Gtk::ToolButton* connect,
 		      Gtk::Window* parent,
 		      const char* service = "_fawkes._tcp" );
+#ifdef HAVE_GLADEMM
   ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 		      const char* cbe_name = "cbeServices",
 		      const char* btn_name = "btnConnect",
 		      const char* wnd_name = "wndMain",
 		      const char* service = "_fawkes._tcp" );
+#endif
   virtual ~ServiceSelectorCBE();
 
   FawkesNetworkClient* get_network_client();

@@ -47,9 +47,11 @@ else
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
+  ifneq ($(WARN_TARGETS),)
 gui: $(WARN_TARGETS)
+  endif
 
-.PHONY: $(WARN_TARGETS)
+.PHONY: warning_guilibs warning_avahi
 warning_guilibs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) $(GUI_ERROR)";
 warning_avahi:

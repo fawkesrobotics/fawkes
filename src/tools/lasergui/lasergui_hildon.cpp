@@ -25,6 +25,7 @@
 #include <gui_utils/robot/allemaniacs_athome.h>
 #include <gtkmm.h>
 #include <hildonmm.h>
+#include <libosso.h>
 
 #include <netcomm/fawkes/client.h>
 #include <blackboard/remote.h>
@@ -32,6 +33,12 @@
 #include <gui_utils/interface_dispatcher.h>
 #include <gui_utils/connection_dispatcher.h>
 #include <gui_utils/service_chooser_dialog.h>
+
+#if MAEMO_VERSION_MAJOR >= 5
+#  define ICON_FORMAT "white_48x48"
+#else
+#  define ICON_FORMAT "32x32"
+#endif
 
 using namespace fawkes;
 
@@ -46,11 +53,11 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Constructor. */
   LaserGuiHildonWindow()
     : __athome_drawer(true),
-      __img_lines("lines_32x32.png"),
-      __img_points("points_32x32.png"),
-      __img_hull("hull_32x32.png"),
-      __img_lowres("lines_lowres_32x32.png"),
-      __img_rotation("rotate-90.png"),
+      __img_lines(RESDIR"/lasergui/lines_"ICON_FORMAT".png"),
+      __img_points(RESDIR"/lasergui/points_"ICON_FORMAT".png"),
+      __img_hull(RESDIR"/lasergui/hull_"ICON_FORMAT".png"),
+      __img_lowres(RESDIR"/lasergui/lines_lowres_"ICON_FORMAT".png"),
+      __img_rotation(RESDIR"/lasergui/rotate-90.png"),
       __tb_connection(Gtk::Stock::CONNECT),
       __tb_lines(__img_lines),
       __tb_points(__img_points),
@@ -66,7 +73,7 @@ class LaserGuiHildonWindow : public Hildon::Window
     __ifd = NULL;
 
     std::auto_ptr<Glib::Error> error;
-    set_icon_from_file("lines_32x32.png", error);
+    set_icon_from_file(RESDIR"/lasergui/lines_"ICON_FORMAT".png", error);
 
     add(__area);
     __area.show();
@@ -123,7 +130,7 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Destructor. */
   ~LaserGuiHildonWindow()
   {
-    __area.set_laser_if(NULL);
+    __area.set_laser360_if(NULL);
     if (__bb) {
       __bb->close(__laser_if);
       delete __bb;
@@ -190,7 +197,7 @@ class LaserGuiHildonWindow : public Hildon::Window
       __bb = new RemoteBlackBoard(__connection_dispatcher.get_client());
       __laser_if = __bb->open_for_reading<Laser360Interface>("Laser");
 
-      __area.set_laser_if(__laser_if);
+      __area.set_laser360_if(__laser_if);
       __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser_if);
       __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(__area, &LaserDrawingArea::queue_draw)));
       __ifd->signal_writer_removed().connect(sigc::hide(sigc::mem_fun(__area, &LaserDrawingArea::queue_draw)));
@@ -207,6 +214,7 @@ class LaserGuiHildonWindow : public Hildon::Window
       __tb_zoom_in.set_sensitive(true);
       __tb_zoom_out.set_sensitive(true);
     } catch (Exception &e) {
+      e.print_trace();
       if ( __bb ) {
 	__bb->close(__laser_if);
 	delete __ifd;
@@ -221,7 +229,7 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Event handler for disconnected event. */
   virtual void on_disconnect()
   {
-    __area.set_laser_if(NULL);
+    __area.set_laser360_if(NULL);
     __area.queue_draw();
     __bb->close(__laser_if);
     delete __bb;
