@@ -26,7 +26,8 @@ DO_32BIT_BUILD=0
 # For x86_64 we must append 64 to lib dir
 LIBBITS=$(if $(call seq,$(ARCH),x86_64),64)
 
-DESTDIR        = /usr/local
+DESTDIR        =
+PREFIX         = /usr/local
 SYSCONFDIR     = /etc/fawkes
 
 # Base CFLAGS, LDFLAGS
@@ -40,7 +41,7 @@ LDFLAGS_BASE   = $(LDFLAGS_MINIMUM) -Wl,-R$(EXEC_LIBDIR)/fawkes/interfaces
 # paths (with EXEC_ prefix) are specific to Fawkes and can be deleted completely
 # without interfering with the rest of the system!
 FFLIBSUBDIR        = fawkes
-EXEC_BASEDIR       = $(abspath $(DESTDIR))
+EXEC_BASEDIR       = $(abspath $(PREFIX))
 EXEC_CONFDIR       = $(SYSCONFDIR)
 EXEC_RESDIR        = $(EXEC_BASEDIR)/share/fawkes
 EXEC_LIBDIR        = $(EXEC_BASEDIR)/lib$(LIBBITS)

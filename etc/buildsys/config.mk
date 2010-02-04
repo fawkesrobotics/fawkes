@@ -50,6 +50,7 @@ LIBSRCDIR   = $(abspath $(BASEDIR)/src/libs)
 IFACEDIR    = $(abspath $(BASEDIR)/lib/interfaces)
 IFACESRCDIR = $(abspath $(BASEDIR)/src/interfaces)
 LOGDIR      = $(abspath $(BASEDIR)/log)
+BUILDCONFDIR= $(LIBSRCDIR)
 
 # Paths at execution time, may be different if installed or deployed
 TARGET_ARCH   ?= $(ARCH)
