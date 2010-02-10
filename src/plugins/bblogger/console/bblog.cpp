@@ -650,7 +650,7 @@ convert_file(std::string &infile, std::string &outfile, std::string &format)
     }
 
   } catch (Exception &e) {
-    //printf("Failed to read log file: %s\n", e.what());
+    printf("Failed to convert log file: %s\n", e.what());
     fclose(inf);
     fclose(outf);
     return 4;
