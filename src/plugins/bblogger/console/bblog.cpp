@@ -306,7 +306,9 @@ repair_file(std::string &filename)
   if (extra_bytes != 0) {
     printf("FIXING: errorneous bytes at end of file, truncating by %zu b\n",
 	   extra_bytes);
-    ftruncate(fileno(f), fs.st_size - extra_bytes);
+    if (ftruncate(fileno(f), fs.st_size - extra_bytes) == -1) {
+      throw Exception(errno, "Failed to truncate file");
+    }
     all_entries_size -= extra_bytes;
     extra_bytes = 0;
     if (fstat(fileno(f), &fs) != 0) {

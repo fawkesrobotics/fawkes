@@ -154,7 +154,13 @@ BBLoggerThread::init()
     throw;
   }
 
-  write_header();
+  try {
+    write_header();
+  } catch (FileWriteException &e) {
+    blackboard->close(__iface);
+    fclose(__f_data);
+    throw;
+  }
 
   __now = new Time(clock);
 
@@ -213,7 +219,9 @@ BBLoggerThread::write_header()
   __start->get_timestamp(start_time_sec, start_time_usec);
   header.start_time_sec  = start_time_sec;
   header.start_time_usec = start_time_usec;
-  fwrite(&header, sizeof(header), 1, __f_data);
+  if (fwrite(&header, sizeof(header), 1, __f_data) != 1) {
+    throw FileWriteException(__filename, "Failed to write header");
+  }
   fflush(__f_data);
   logger->log_debug(name(), "flushed");
 }
