@@ -53,8 +53,9 @@ _CFLAGS_TOLUA     = -Wno-unused-function $(CFLAGS_LUA)
 _LDFLAGS_TOLUA    = $(LDFLAGS_LUA)
 
 ifneq ($(INTERFACES_all),)
-  $(foreach I,$(INTERFACES_all),							\
+  $(foreach I,$(INTERFACES_all),						\
 	$(eval LIBS_interfaces_lib$I        = $$(_LIBS_INTERFACE))		\
+	$(eval LDFLAGS_interfaces_lib$I     = )					\
 	$(eval OBJS_interfaces_lib$I        = $I.o)				\
 	$(if $(subst $(abspath $(IFACESRCDIR)),,$(abspath $(SRCDIR))),		\
 		$(eval HDRS_interfaces_lib$I = $I.h_ext)			\

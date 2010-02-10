@@ -176,7 +176,8 @@ $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) $(LDFLAGS) $(LDFLAGS_$*) \
+	$(LDFLAGS_BASE) \
+	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 
@@ -185,7 +186,8 @@ $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(subst /,_,$*)),,.$(SOVER_$(subst /,_,$*))) $(subst ..,__,$^) \
 	$(if $(NOSOVER_$(subst /,_,$*)),,-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*))) \
-	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
+	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) \
+	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
 	$(if $(NOSOVER_$(subst /,_,$*)),, \
