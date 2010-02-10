@@ -21,7 +21,7 @@
  */
 
 #include <blackboard/remote.h>
-#include <interfaces/motor.h>
+#include <interfaces/MotorInterface.h>
 
 #include <unistd.h>
 #include <cstdio>

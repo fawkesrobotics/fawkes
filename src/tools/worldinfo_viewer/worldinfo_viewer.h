@@ -30,7 +30,6 @@
 class FieldView;
 namespace fawkes {
   class WorldInfoDataContainer;
-  class BatteryInterface;
 }
 
 class WorldInfoViewer : public Gtk::Window

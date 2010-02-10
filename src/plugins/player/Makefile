@@ -21,7 +21,8 @@ include $(BASEDIR)/etc/buildsys/download.mk
 ifeq ($(HAVE_PLAYERCC),1)
   LDFLAGS += $(LDFLAGS_PLAYERCC)
   CFLAGS  += $(CFLAGS_PLAYERCC)
-  LIBS_player = fawkescore fawkesutils fawkesaspects fawkesinterfaces
+  LIBS_player = fawkescore fawkesutils fawkesaspects \
+		Laser360Interface MotorInterface ObjectPositionInterface
   OBJS_player = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
   PLUGINS_all = $(PLUGINDIR)/player.so
 else

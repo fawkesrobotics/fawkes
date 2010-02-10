@@ -25,7 +25,6 @@
 
 #include <worldinfo_utils/data_container.h>
 #include <blackboard/remote.h>
-#include <interfaces/BatteryInterface.h>
 
 #include <vector>
 #include <map>

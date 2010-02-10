@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/gui.mk
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_ffnetloggui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces fawkesguiutils
+LIBS_ffnetloggui = fawkescore fawkesutils fawkesnetcomm fawkesguiutils
 OBJS_ffnetloggui = main.o netloggui.o
 OBJS_all = $(OBJS_ffnetloggui)
 

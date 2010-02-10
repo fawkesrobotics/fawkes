@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 
-LIBS_qa_player_setmotor = fawkescore fawkesutils fawkesblackboard fawkesinterfaces
+LIBS_qa_player_setmotor = fawkescore fawkesutils fawkesblackboard MotorInterface
 OBJS_qa_player_setmotor = qa_player_setmotor.o
 BINS_all = $(BINDIR)/qa_player_setmotor
 
