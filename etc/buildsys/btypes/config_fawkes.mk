@@ -17,11 +17,7 @@ SYSROOT=
 
 # Add -DDEBUG_THREADING if you run into threading problems like deadlocks.
 # Read FawkesDebugging in the Fawkes Trac Wiki on how to use it
-CFLAGS_BASE +=	-g -fPIC \
-		-Wall -Werror -DBINDIR=\"$(EXEC_BINDIR)\" \
-		-DLIBDIR=\"$(EXEC_LIBDIR)\" -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" \
-		-DCONFDIR=\"$(EXEC_CONFDIR)\" -DRESDIR=\"$(EXEC_RESDIR)\" \
-		-DBUILDTYPE=\"$(BUILD_TYPE)\" -DLOGDIR=\"$(EXEC_LOGDIR)\"
+CFLAGS_BASE +=	-g -Wall -Werror
 
 ### Feature checks
 ifneq ($(realpath $(BASEDIR)/src/firevision),)
