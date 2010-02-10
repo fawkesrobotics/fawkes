@@ -16,8 +16,12 @@
 BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS	= bbsync webview laser skiller flite joystick katana pantilt
-	#festival luaagent player ttmainloop worldmodel xabsl readylogagent
+# base + hardware drivers + functional + integration
+SUBDIRS	= bbsync bblogger webview ttmainloop \
+	  laser flite joystick katana pantilt \
+	  skiller luaagent worldmodel laserht \
+	  player xmlrpc
+	  #festival readylogagent
 
 include $(BASEDIR)/etc/buildsys/rules.mk
 
