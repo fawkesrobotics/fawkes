@@ -25,9 +25,9 @@
 #include "motor_mapper.h"
 #include "laser_mapper.h"
 
-#include <interfaces/object.h>
-#include <interfaces/motor.h>
-#include <interfaces/laser360.h>
+#include <interfaces/ObjectPositionInterface.h>
+#include <interfaces/MotorInterface.h>
+#include <interfaces/Laser360Interface.h>
 #include <libplayerc++/playerc++.h>
 
 using namespace PlayerCc;

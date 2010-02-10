@@ -51,3 +51,5 @@ PlayerPlugin::PlayerPlugin(Configuration *config)
 
 
 EXPORT_PLUGIN(PlayerPlugin)
+PLUGIN_DESCRIPTION("Player framework adapter")
+
