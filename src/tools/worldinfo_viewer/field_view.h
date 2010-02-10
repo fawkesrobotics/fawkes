@@ -24,9 +24,6 @@
 #define __TOOL_WORLDINFO_VIEWER_FIELD_VIEW_H_
 
 #include <gtkmm/drawingarea.h>
-#include <geometry/hom_vector.h>
-#include <geometry/hom_point.h>
-#include <geometry/hom_pose.h>
 #include <map>
 
 namespace fawkes {
