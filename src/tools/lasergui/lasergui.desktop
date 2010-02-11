@@ -4,4 +4,4 @@ Comment=Visualize laser information from a robot
 Type=Application
 Exec=lasergui
 Icon=@RESDIR@/guis/lasergui/lines.svg
-Categories=Robotics;Development;Education
+Categories=Robotics;Development;Education;

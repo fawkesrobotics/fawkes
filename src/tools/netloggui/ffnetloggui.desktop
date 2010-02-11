@@ -4,4 +4,4 @@ Comment=Read log messages from robots over the network
 Type=Application
 Exec=ffnetloggui
 Icon=@RESDIR@/guis/netloggui/ffnetloggui.svg
-Categories=Robotics;Development;Education
+Categories=Robotics;Development;Education;
