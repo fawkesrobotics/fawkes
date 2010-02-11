@@ -373,12 +373,13 @@ FieldView::draw_robot( Cairo::RefPtr<Cairo::Context> context,
   context->show_text( name.c_str() );
 
   char* pos;
-  asprintf( &pos, "%.2f, %.2f [%.2f]", x, y, ori );
-  context->get_text_extents( pos, extents );
+  if (asprintf( &pos, "%.2f, %.2f [%.2f]", x, y, ori ) != -1) {
+    context->get_text_extents( pos, extents );
 
-  context->move_to(  10 * x -  extents.width/2.0  - extents.x_bearing,
-		    -10 * y - extents.height/2.0 - extents.y_bearing + 12 );
-  context->show_text( pos );
+    context->move_to(  10 * x -  extents.width/2.0  - extents.x_bearing,
+		      -10 * y - extents.height/2.0 - extents.y_bearing + 12 );
+    context->show_text( pos );
+  }
 
   context->stroke();
   context->restore();
