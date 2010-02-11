@@ -31,6 +31,7 @@
 #include <fvutils/statistical/histogram.h>
 #include <fvutils/colormap/yuvcm.h>
 #include <fvutils/colormap/cmfile.h>
+#include <core/exception.h>
 
 #include <fvutils/color/color_object_map.h>
 
@@ -496,8 +497,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	  break;
 	default:
 	  cout << "(BayesHistosToLut::calculateLutValues(): Invalid object." << endl;
-	  exit(-1);
-	  break;
+	  throw fawkes::Exception("BayesHistosToLut::calculateLutValues(): Invalid object.");
 	}
         lut->set(y_index, u_index, v_index, ColorObjectMap::get_instance().get(mostLikelyObject));
       }
