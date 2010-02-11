@@ -120,6 +120,8 @@ skillgui	Graphviz		>= 2.22			optional
 skillgui	Papyrus			>= 0.10.0		optional
 		(required for graph visualization)
 
+Player plugin	Player			>= 3.0			optional
+
 Nao Pos Viewer	freeglut		>= 2.4.0		optional
 
 $Id$
