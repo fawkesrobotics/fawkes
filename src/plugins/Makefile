@@ -25,3 +25,5 @@ SUBDIRS	= bbsync bblogger webview ttmainloop \
 
 include $(BASEDIR)/etc/buildsys/rules.mk
 
+luaagent: skiller
+
