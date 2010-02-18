@@ -38,12 +38,14 @@ typedef enum {
   IFT_LONGUINT,		/**< unsigned long int field */
   IFT_FLOAT,		/**< float field */
   IFT_STRING,		/**< string field */
-  IFT_BYTE		/**< byte field */
+  IFT_BYTE,		/**< byte field */
+  IFT_ENUM		/**< field with interface specific enum type */
 } interface_fieldtype_t;
 
 /** Interface field info list */
 struct interface_fieldinfo_t {
   interface_fieldtype_t    type;	/**< type of this field */
+  const char              *enumtype;	/**< text representation of enum type */
   const char              *name;	/**< Name of this field */
   size_t                   length;	/**< Length of field (array, string) */
   void                    *value;	/**< Current value of this field */

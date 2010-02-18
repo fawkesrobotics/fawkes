@@ -353,7 +353,7 @@ Message::type() const
 InterfaceFieldIterator
 Message::fields()
 {
-  return InterfaceFieldIterator(__fieldinfo_list);
+  return InterfaceFieldIterator(_transmit_via_iface, __fieldinfo_list);
 }
 
 

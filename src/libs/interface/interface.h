@@ -102,6 +102,7 @@ class Interface
 
   virtual Message *       create_message(const char *type) const = 0;
   virtual void            copy_values(const Interface *interface) = 0;
+  virtual const char *    enum_tostring(const char *enumtype, int val) const = 0;
 
   void          read();
   void          write();
@@ -172,7 +173,7 @@ class Interface
 
   void set_hash(unsigned char *ihash);
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
-		     size_t length, void *value);
+		     size_t length, void *value, const char *enumtype = 0);
   void add_messageinfo(const char *name);
 
   void         *data_ptr;

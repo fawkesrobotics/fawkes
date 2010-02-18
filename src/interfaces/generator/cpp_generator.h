@@ -54,6 +54,7 @@ class CppInterfaceGenerator
 
   void write_constants_cpp(FILE *f);
   void write_constants_h(FILE *f);
+  void write_enum_constants_tostring_cpp(FILE *f);
 
   void write_messages_cpp(FILE *f);
   void write_messages_h(FILE *f);
@@ -84,6 +85,7 @@ class CppInterfaceGenerator
 
   void write_create_message_method_cpp(FILE *f);
   void write_copy_value_method_cpp(FILE *f);
+  void write_enum_tostring_method_cpp(FILE *f);
   void write_basemethods_h(FILE *f, std::string is);
   void write_basemethods_cpp(FILE *f);
 

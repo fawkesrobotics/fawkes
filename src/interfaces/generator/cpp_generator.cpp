@@ -218,6 +218,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 	  class_name.c_str(), data_comment.c_str());
   write_constants_cpp(f);
   write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields, messages);
+  write_enum_constants_tostring_cpp(f);
   write_methods_cpp(f, class_name, class_name, data_fields, pseudo_maps, "");
   write_basemethods_cpp(f);
   write_messages_cpp(f);
@@ -260,6 +261,37 @@ CppInterfaceGenerator::write_constants_cpp(FILE *f)
 }
 
 
+/** Write enum constant tostring methods to cpp file.
+ * @param f file to write to
+ */
+void
+CppInterfaceGenerator::write_enum_constants_tostring_cpp(FILE *f)
+{
+  for ( vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
+    fprintf(f,
+	    "/** Convert %s constant to string.\n"
+	    " * @param value value to convert to string\n"
+	    " * @return constant value as string.\n"
+	    " */\n"
+	    "const char *\n"
+	    "%s::tostring_%s(%s value) const\n"
+	    "{\n"
+	    "  switch (value) {\n",
+	    i->getName().c_str(), class_name.c_str(), i->getName().c_str(),
+	    i->getName().c_str());
+    vector< pair<string,string> > items = (*i).getItems();
+    vector< pair<string,string> >::iterator j;
+    for (j = items.begin(); j != items.end(); ++j) {
+      fprintf(f, "  case %s: return \"%s\";\n",
+	      j->first.c_str(), j->first.c_str());
+    }
+    fprintf(f,
+	    "  default: return \"UNKNOWN\";\n"
+	    "  }\n"
+	    "}\n");
+  }
+}
+
 /** Write constants to h file
  * @param f file to write to
  */
@@ -288,7 +320,9 @@ CppInterfaceGenerator::write_constants_h(FILE *f)
 	fprintf(f, "\n");
       }
     }
-    fprintf(f, "  } %s;\n\n", (*i).getName().c_str());
+    fprintf(f, "  } %s;\n", (*i).getName().c_str());
+    fprintf(f, "  const char * tostring_%s(%s value) const;\n\n",
+	    i->getName().c_str(), i->getName().c_str());
   }
 }
 
@@ -427,6 +461,29 @@ CppInterfaceGenerator::write_copy_value_method_cpp(FILE *f)
 }
 
 
+/** Write enum_tostring() method to CPP file.
+ * @param f file to write to
+ */
+void
+CppInterfaceGenerator::write_enum_tostring_method_cpp(FILE *f)
+{
+  fprintf(f,
+	  "const char *\n"
+	  "%s::enum_tostring(const char *enumtype, int val) const\n"
+	  "{\n", class_name.c_str());
+  for ( vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
+    fprintf(f,
+	    "  if (strcmp(enumtype, \"%s\") == 0) {\n"
+	    "    return tostring_%s((%s)val);\n"
+	    "  }\n",
+	    i->getName().c_str(), i->getName().c_str(), i->getName().c_str());
+  }
+  fprintf(f,
+	  "  throw UnknownTypeException(\"Unknown enum type %%s\", enumtype);\n"
+	  "}\n\n");
+}
+
+
 /** Write base methods.
  * @param f file to write to
  */ 
@@ -435,6 +492,7 @@ CppInterfaceGenerator::write_basemethods_cpp(FILE *f)
 {
   write_create_message_method_cpp(f);
   write_copy_value_method_cpp(f);
+  write_enum_tostring_method_cpp(f);
 }
 
 
@@ -557,7 +615,7 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
     for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
       const char *type = "";
       const char *dataptr = "&";
-      bool do_print = true;
+      const char *enumtype = 0;
 
       if ( i->getType() == "bool" ) {
 	type = "BOOL";
@@ -577,15 +635,18 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	type = "STRING";
 	dataptr = "";
       } else {
-	do_print = false;
+	type = "ENUM";
+	enumtype = i->getType().c_str();
       }
 
-      if (do_print) {
-	fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s);\n",
-		type, i->getName().c_str(),
-		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
-		dataptr, i->getName().c_str());
-      }
+      fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s%s%s%s);\n",
+	      type, i->getName().c_str(),
+	      (i->getLengthValue() > 0) ? i->getLengthValue() : 1,
+	      dataptr, i->getName().c_str(),
+	      enumtype ? ", \"" : "",
+	      enumtype ? enumtype : "",
+	      enumtype ? "\"" : ""
+	      );
     }
   } else {
     fprintf(f,
@@ -1090,8 +1151,9 @@ CppInterfaceGenerator::write_basemethods_h(FILE *f, std::string is)
 {
   fprintf(f,
 	  "%svirtual Message * create_message(const char *type) const;\n\n"
-	  "%svirtual void copy_values(const Interface *other);\n",
-	  is.c_str(), is.c_str());
+	  "%svirtual void copy_values(const Interface *other);\n"
+	  "%svirtual const char * enum_tostring(const char *enumtype, int val) const;\n",
+	  is.c_str(), is.c_str(), is.c_str());
 }
 
 /** Write h file.

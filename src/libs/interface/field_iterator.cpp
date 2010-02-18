@@ -23,6 +23,7 @@
  */
 
 #include <interface/field_iterator.h>
+#include <interface/interface.h>
 
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
@@ -47,6 +48,7 @@ namespace fawkes {
  */
 InterfaceFieldIterator::InterfaceFieldIterator()
 {
+  __interface = NULL;
   __infol = NULL;
   __value_string = NULL;
 }
@@ -54,10 +56,13 @@ InterfaceFieldIterator::InterfaceFieldIterator()
 
 /** Constructor.
  * This creates an iterator pointing to the given entry of the info list.
+ * @param interface interface this field iterator is assigned to
  * @param info_list pointer to info list entry to start from
  */
-InterfaceFieldIterator::InterfaceFieldIterator(const interface_fieldinfo_t *info_list)
+  InterfaceFieldIterator::InterfaceFieldIterator(const Interface *interface,
+						 const interface_fieldinfo_t *info_list)
 {
+  __interface = interface;
   __infol = info_list;
   __value_string = NULL;
 }
@@ -222,6 +227,7 @@ InterfaceFieldIterator::get_typename() const
     case IFT_FLOAT:    return "float";
     case IFT_BYTE:     return "byte";
     case IFT_STRING:   return "string";
+    case IFT_ENUM:     return __infol->enumtype;
     default:           return "unknown";
     }
   }
@@ -313,6 +319,9 @@ InterfaceFieldIterator::get_value_string()
 	    break;
 	  case IFT_STRING:
 	    // cannot happen, caught with surrounding if statement
+
+	  case IFT_ENUM:
+	    rv = asprintf(&tmp2, "%s%s", tmp1, __interface->enum_tostring(__infol->enumtype, ((int *)__infol->value)[i]));
 	    break;
 	  }
 

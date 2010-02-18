@@ -149,6 +149,18 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * The operation will only succeed if the supplied interface is of the same
  * type as this instance.
  * @param interface interface to copy from
+ *
+ * @fn const char * Interface::enum_tostring(const char *enumtype, int val) const = 0
+ * Convert arbitrary enum value to string.
+ * Given the string representation of the enum type and the value this method
+ * returns the string representation of the specific value, or the string
+ * UNKNOWN if the value is not defined. An exception is thrown if the enum
+ * type is invalid.
+ * @param enumtype enum type as string
+ * @param val value to convert
+ * @return string representation of value
+ * @exception UnknownTypeException thrown if enumtype is not specified for
+ * interface.
  */
 
 /** Constructor */
@@ -236,19 +248,21 @@ Interface::set_hash(unsigned char *ihash)
  * @param name name of the field, this is referenced, not copied
  * @param length length of the field
  * @param value pointer to the value in the data struct
+ * @param enumtype name of the enum type, valid only if type == IFT_ENUM.
  */
 void
 Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
-			 size_t length, void *value)
+			 size_t length, void *value, const char *enumtype)
 {
   interface_fieldinfo_t *infol = __fieldinfo_list;
   interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
-  newinfo->type   = type;
-  newinfo->name   = name;
-  newinfo->length = length;
-  newinfo->value  = value;
-  newinfo->next   = NULL;
+  newinfo->type     = type;
+  newinfo->enumtype = enumtype;
+  newinfo->name     = name;
+  newinfo->length   = length;
+  newinfo->value    = value;
+  newinfo->next     = NULL;
 
   if ( infol == NULL ) {
     // first entry
@@ -914,7 +928,7 @@ Interface::msgq_pop()
 InterfaceFieldIterator
 Interface::fields()
 {
-  return InterfaceFieldIterator(__fieldinfo_list);
+  return InterfaceFieldIterator(this, __fieldinfo_list);
 }
 
 
