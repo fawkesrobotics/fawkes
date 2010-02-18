@@ -29,8 +29,8 @@ $(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_
 endif
 
 # Main install target
-.PHONY: install install_test_basedir install_config install_buildsys install_lua
-install: install_test_basedir presubdirs $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_buildsys install_config install_lua
+.PHONY: install install_test_basedir install_config install_buildsys install_lua install_apidoc
+install: install_test_basedir presubdirs $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_buildsys install_config install_lua install_apidoc
 
 # Only allow "make install" from basedir
 install_test_basedir:
@@ -103,6 +103,18 @@ ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 	done
 endif
 
+install_apidoc:
+ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating documentation directory $(DESTDIR)$(EXEC_DOCDIR)"
+	$(SILENT)if [ -d "$(DOCDIR)/api/html" ]; then \
+		mkdir -p $(DESTDIR)$(EXEC_DOCDIR); \
+		echo -e "$(INDENT_PRINT)--- Copying API documentation"; \
+		cp -ar $(DOCDIR)/api/html/* $(DESTDIR)$(EXEC_DOCDIR); \
+	else \
+		echo -e "$(INDENT_PRINT)--- $(TYELLOW)API documentation not generated, not copying$(TNORMAL)"; \
+	fi
+endif
+
 
 # uninstall target to remove files from system
 .PHONY: uninstall
@@ -137,9 +149,6 @@ ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 	$(SILENT)rm -rf $(DESTDIR)$(EXEC_INCDIR)
 endif
 
-
-
-# xargs rmdir -p; \
 
 # Library install target
 # 1. Copy library, with or without SOVER

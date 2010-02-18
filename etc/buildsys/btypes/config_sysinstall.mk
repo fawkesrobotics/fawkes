@@ -50,6 +50,7 @@ EXEC_PLUGINDIR     = $(EXEC_FFLIBDIR)/plugins
 EXEC_IFACEDIR      = $(EXEC_FFLIBDIR)/interfaces
 EXEC_INCDIR        = $(EXEC_BASEDIR)/include/fawkes
 EXEC_DFILEDIR      = $(EXEC_BASEDIR)/share/applications
+EXEC_DOCDIR        = $(EXEC_BASEDIR)/share/doc/fawkes-$(FAWKES_VERSION)
 EXEC_LUADIR        = $(EXEC_RESDIR)/lua
 EXEC_LUALIBDIR     = $(EXEC_FFLIBDIR)/lua
 EXEC_BUILDSYSDIR   = $(EXEC_RESDIR)/buildsys

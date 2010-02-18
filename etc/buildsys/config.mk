@@ -50,6 +50,7 @@ LIBSRCDIR   = $(abspath $(BASEDIR)/src/libs)
 IFACEDIR    = $(abspath $(BASEDIR)/lib/interfaces)
 IFACESRCDIR = $(abspath $(BASEDIR)/src/interfaces)
 LOGDIR      = $(abspath $(BASEDIR)/log)
+DOCDIR      = $(abspath $(BASEDIR)/doc)
 BUILDCONFDIR= $(LIBSRCDIR)
 
 # Paths at execution time, may be different if installed or deployed
@@ -62,6 +63,7 @@ EXEC_PLUGINDIR = $(abspath $(EXEC_BASEDIR)/plugins)
 EXEC_RESDIR    = $(abspath $(EXEC_BASEDIR)/res)
 EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/lib/interfaces)
 EXEC_LOGDIR    = $(abspath $(EXEC_BASEDIR)/log)
+EXEC_DOCDIR    = $(abspath $(EXEC_BASEDIR)/doc)
 
 VPATH = $(SRCDIR)
 DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
@@ -92,6 +94,7 @@ FAWKES_VERSION_MAJOR = $(lastword $(shell grep FAWKES_VERSION_MAJOR $(LIBSRCDIR)
 FAWKES_VERSION_MINOR = $(lastword $(shell grep FAWKES_VERSION_MINOR $(LIBSRCDIR)/core/version.h))
 FAWKES_VERSION_MICRO = $(lastword $(shell grep FAWKES_VERSION_MICRO $(LIBSRCDIR)/core/version.h))
 DEFAULT_SOVER        = $(FAWKES_VERSION_MAJOR).$(FAWKES_VERSION_MINOR).$(FAWKES_VERSION_MICRO)
+FAWKES_VERSION       = $(FAWKES_VERSION_MAJOR).$(FAWKES_VERSION_MINOR)$(subst .0,,.$(FAWKES_VERSION_MICRO))
 
 ### Features ###
 # If gcc is used, enable OpenMP?
