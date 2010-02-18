@@ -48,6 +48,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   data      = (HumanoidMotionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "moving", 1, &data->moving);
+  add_fieldinfo(IFT_ENUM, "supporting_leg", 1, &data->supporting_leg, "LegEnum");
   add_fieldinfo(IFT_FLOAT, "max_step_length", 1, &data->max_step_length);
   add_fieldinfo(IFT_FLOAT, "max_step_height", 1, &data->max_step_height);
   add_fieldinfo(IFT_FLOAT, "max_step_side", 1, &data->max_step_side);
@@ -85,6 +86,46 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
 HumanoidMotionInterface::~HumanoidMotionInterface()
 {
   free(data_ptr);
+}
+/** Convert LegEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+HumanoidMotionInterface::tostring_LegEnum(LegEnum value) const
+{
+  switch (value) {
+  case LEG_LEFT: return "LEG_LEFT";
+  case LEG_RIGHT: return "LEG_RIGHT";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert StandupEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+HumanoidMotionInterface::tostring_StandupEnum(StandupEnum value) const
+{
+  switch (value) {
+  case STANDUP_DETECT: return "STANDUP_DETECT";
+  case STANDUP_BACK: return "STANDUP_BACK";
+  case STANDUP_FRONT: return "STANDUP_FRONT";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert StiffnessMotionPatternEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+HumanoidMotionInterface::tostring_StiffnessMotionPatternEnum(StiffnessMotionPatternEnum value) const
+{
+  switch (value) {
+  case WALK: return "WALK";
+  case KICK: return "KICK";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get moving value.
@@ -750,6 +791,21 @@ HumanoidMotionInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(HumanoidMotionInterface_data_t));
+}
+
+const char *
+HumanoidMotionInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "LegEnum") == 0) {
+    return tostring_LegEnum((LegEnum)val);
+  }
+  if (strcmp(enumtype, "StandupEnum") == 0) {
+    return tostring_StandupEnum((StandupEnum)val);
+  }
+  if (strcmp(enumtype, "StiffnessMotionPatternEnum") == 0) {
+    return tostring_StiffnessMotionPatternEnum((StiffnessMotionPatternEnum)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

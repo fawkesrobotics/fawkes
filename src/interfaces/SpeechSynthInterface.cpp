@@ -234,6 +234,12 @@ SpeechSynthInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(SpeechSynthInterface_data_t));
 }
 
+const char *
+SpeechSynthInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class SpeechSynthInterface::SayMessage <interfaces/SpeechSynthInterface.h>
  * SayMessage Fawkes BlackBoard Interface Message.

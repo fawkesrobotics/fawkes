@@ -120,6 +120,12 @@ LocalizerControlInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(LocalizerControlInterface_data_t));
 }
 
+const char *
+LocalizerControlInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class LocalizerControlInterface::ResetMessage <interfaces/LocalizerControlInterface.h>
  * ResetMessage Fawkes BlackBoard Interface Message.

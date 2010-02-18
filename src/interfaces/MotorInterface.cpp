@@ -624,6 +624,12 @@ MotorInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(MotorInterface_data_t));
 }
 
+const char *
+MotorInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class MotorInterface::SetMotorStateMessage <interfaces/MotorInterface.h>
  * SetMotorStateMessage Fawkes BlackBoard Interface Message.

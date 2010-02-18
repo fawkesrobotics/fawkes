@@ -51,6 +51,7 @@ KickerInterface::KickerInterface() : Interface()
   add_fieldinfo(IFT_INT, "num_kicks_left", 1, &data->num_kicks_left);
   add_fieldinfo(IFT_INT, "num_kicks_center", 1, &data->num_kicks_center);
   add_fieldinfo(IFT_INT, "num_kicks_right", 1, &data->num_kicks_right);
+  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
   add_fieldinfo(IFT_UINT, "current_intensity", 1, &data->current_intensity);
   add_messageinfo("KickMessage");
   add_messageinfo("ResetCounterMessage");
@@ -63,6 +64,19 @@ KickerInterface::KickerInterface() : Interface()
 KickerInterface::~KickerInterface()
 {
   free(data_ptr);
+}
+/** Convert GuideBallSideEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+KickerInterface::tostring_GuideBallSideEnum(GuideBallSideEnum value) const
+{
+  switch (value) {
+  case GUIDE_BALL_LEFT: return "GUIDE_BALL_LEFT";
+  case GUIDE_BALL_RIGHT: return "GUIDE_BALL_RIGHT";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get num_kicks_left value.
@@ -262,6 +276,15 @@ KickerInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(KickerInterface_data_t));
+}
+
+const char *
+KickerInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "GuideBallSideEnum") == 0) {
+    return tostring_GuideBallSideEnum((GuideBallSideEnum)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

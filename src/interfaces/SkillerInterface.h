@@ -47,6 +47,7 @@ class SkillerInterface : public Interface
     S_RUNNING /**< The execution is still running. */,
     S_FAILED /**< The execution failed and cannot succeed anymore. */
   } SkillStatusEnum;
+  const char * tostring_SkillStatusEnum(SkillStatusEnum value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -197,6 +198,7 @@ class SkillerInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

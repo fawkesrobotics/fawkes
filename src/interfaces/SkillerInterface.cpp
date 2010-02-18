@@ -53,6 +53,7 @@ SkillerInterface::SkillerInterface() : Interface()
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
   add_fieldinfo(IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
+  add_fieldinfo(IFT_ENUM, "status", 1, &data->status, "SkillStatusEnum");
   add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   add_messageinfo("ExecSkillMessage");
   add_messageinfo("ExecSkillContinuousMessage");
@@ -68,6 +69,21 @@ SkillerInterface::SkillerInterface() : Interface()
 SkillerInterface::~SkillerInterface()
 {
   free(data_ptr);
+}
+/** Convert SkillStatusEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+SkillerInterface::tostring_SkillStatusEnum(SkillStatusEnum value) const
+{
+  switch (value) {
+  case S_INACTIVE: return "S_INACTIVE";
+  case S_FINAL: return "S_FINAL";
+  case S_RUNNING: return "S_RUNNING";
+  case S_FAILED: return "S_FAILED";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get skill_string value.
@@ -283,6 +299,15 @@ SkillerInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(SkillerInterface_data_t));
+}
+
+const char *
+SkillerInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "SkillStatusEnum") == 0) {
+    return tostring_SkillStatusEnum((SkillStatusEnum)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

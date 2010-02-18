@@ -52,6 +52,7 @@ class KickerInterface : public Interface
         in such a way that the right arm is erected.
        */
   } GuideBallSideEnum;
+  const char * tostring_GuideBallSideEnum(GuideBallSideEnum value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -170,6 +171,7 @@ class KickerInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

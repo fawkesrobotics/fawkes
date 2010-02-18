@@ -43,6 +43,7 @@ class HumanoidMotionInterface : public Interface
     LEG_LEFT /**< Left leg. */,
     LEG_RIGHT /**< Right leg. */
   } LegEnum;
+  const char * tostring_LegEnum(LegEnum value) const;
 
   /** From which position to standup. */
   typedef enum {
@@ -50,12 +51,14 @@ class HumanoidMotionInterface : public Interface
     STANDUP_BACK /**< Standup from lying on the back. */,
     STANDUP_FRONT /**< Standup from lying on the tummy. */
   } StandupEnum;
+  const char * tostring_StandupEnum(StandupEnum value) const;
 
   /** The motion patterns that need specific stiffness settings */
   typedef enum {
     WALK /**< The walk pattern */,
     KICK /**< The kick pattern */
   } StiffnessMotionPatternEnum;
+  const char * tostring_StiffnessMotionPatternEnum(StiffnessMotionPatternEnum value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -686,6 +689,7 @@ class HumanoidMotionInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

@@ -76,6 +76,41 @@ VisualDisplay2DInterface::~VisualDisplay2DInterface()
 {
   free(data_ptr);
 }
+/** Convert LineStyle constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+VisualDisplay2DInterface::tostring_LineStyle(LineStyle value) const
+{
+  switch (value) {
+  case LS_SOLID: return "LS_SOLID";
+  case LS_DASHED: return "LS_DASHED";
+  case LS_DOTTED: return "LS_DOTTED";
+  case LS_DASH_DOTTED: return "LS_DASH_DOTTED";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert Anchor constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+VisualDisplay2DInterface::tostring_Anchor(Anchor value) const
+{
+  switch (value) {
+  case CENTERED: return "CENTERED";
+  case NORTH: return "NORTH";
+  case EAST: return "EAST";
+  case SOUTH: return "SOUTH";
+  case WEST: return "WEST";
+  case NORTH_EAST: return "NORTH_EAST";
+  case SOUTH_EAST: return "SOUTH_EAST";
+  case SOUTH_WEST: return "SOUTH_WEST";
+  case NORTH_WEST: return "NORTH_WEST";
+  default: return "UNKNOWN";
+  }
+}
 /* Methods */
 /** Get counter value.
  * Field
@@ -142,6 +177,18 @@ VisualDisplay2DInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(VisualDisplay2DInterface_data_t));
+}
+
+const char *
+VisualDisplay2DInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "LineStyle") == 0) {
+    return tostring_LineStyle((LineStyle)val);
+  }
+  if (strcmp(enumtype, "Anchor") == 0) {
+    return tostring_Anchor((Anchor)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

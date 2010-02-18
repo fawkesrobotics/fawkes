@@ -565,6 +565,12 @@ NavigatorInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(NavigatorInterface_data_t));
 }
 
+const char *
+NavigatorInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class NavigatorInterface::StopMessage <interfaces/NavigatorInterface.h>
  * StopMessage Fawkes BlackBoard Interface Message.

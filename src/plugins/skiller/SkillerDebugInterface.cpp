@@ -52,6 +52,7 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
   add_fieldinfo(IFT_STRING, "graph", 8192, data->graph);
+  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum");
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
   add_messageinfo("SetGraphMessage");
   add_messageinfo("SetGraphDirectionMessage");
@@ -64,6 +65,21 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
 SkillerDebugInterface::~SkillerDebugInterface()
 {
   free(data_ptr);
+}
+/** Convert GraphDirectionEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+SkillerDebugInterface::tostring_GraphDirectionEnum(GraphDirectionEnum value) const
+{
+  switch (value) {
+  case GD_TOP_BOTTOM: return "GD_TOP_BOTTOM";
+  case GD_BOTTOM_TOP: return "GD_BOTTOM_TOP";
+  case GD_LEFT_RIGHT: return "GD_LEFT_RIGHT";
+  case GD_RIGHT_LEFT: return "GD_RIGHT_LEFT";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get graph_fsm value.
@@ -231,6 +247,15 @@ SkillerDebugInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(SkillerDebugInterface_data_t));
+}
+
+const char *
+SkillerDebugInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "GraphDirectionEnum") == 0) {
+    return tostring_GraphDirectionEnum((GraphDirectionEnum)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

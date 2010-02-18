@@ -183,6 +183,12 @@ Laser720Interface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(Laser720Interface_data_t));
 }
 
+const char *
+Laser720Interface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** Check if message is valid and can be enqueued.
  * @param message Message to check

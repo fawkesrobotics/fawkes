@@ -386,6 +386,12 @@ Position2DTrackInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(Position2DTrackInterface_data_t));
 }
 
+const char *
+Position2DTrackInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** Check if message is valid and can be enqueued.
  * @param message Message to check

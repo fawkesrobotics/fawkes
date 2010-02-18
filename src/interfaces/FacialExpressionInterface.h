@@ -44,6 +44,7 @@ class FacialExpressionInterface : public Interface
     BROWS_FROWN /**< Frown */,
     BROWS_LIFT /**< Lift */
   } brows_t;
+  const char * tostring_brows_t(brows_t value) const;
 
   /** Action types for moving eyes */
   typedef enum {
@@ -57,6 +58,7 @@ class FacialExpressionInterface : public Interface
     EYES_HEART /**< Heart */,
     EYES_DOLLAR /**< Dollar */
   } eyes_t;
+  const char * tostring_eyes_t(eyes_t value) const;
 
   /** Action types for moving jowl */
   typedef enum {
@@ -64,6 +66,7 @@ class FacialExpressionInterface : public Interface
     JOWL_BLUSH /**< Blush */,
     JOWL_TEARS /**< Tears */
   } jowl_t;
+  const char * tostring_jowl_t(jowl_t value) const;
 
   /** Action types for moving mouth */
   typedef enum {
@@ -73,6 +76,7 @@ class FacialExpressionInterface : public Interface
     MOUTH_SMILE /**< Smile */,
     MOUTH_SCOWL /**< Scowl */
   } mouth_t;
+  const char * tostring_mouth_t(mouth_t value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -201,6 +205,7 @@ class FacialExpressionInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

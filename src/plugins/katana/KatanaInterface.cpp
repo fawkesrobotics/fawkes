@@ -634,6 +634,12 @@ KatanaInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(KatanaInterface_data_t));
 }
 
+const char *
+KatanaInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class KatanaInterface::StopMessage <interfaces/KatanaInterface.h>
  * StopMessage Fawkes BlackBoard Interface Message.

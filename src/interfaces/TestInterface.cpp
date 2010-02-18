@@ -70,6 +70,19 @@ TestInterface::~TestInterface()
 {
   free(data_ptr);
 }
+/** Convert TestEnum constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+TestInterface::tostring_TestEnum(TestEnum value) const
+{
+  switch (value) {
+  case TEST_ENUM_1: return "TEST_ENUM_1";
+  case TEST_ENUM_2: return "TEST_ENUM_2";
+  default: return "UNKNOWN";
+  }
+}
 /* Methods */
 /** Get test_bool value.
  * Test Bool
@@ -340,6 +353,15 @@ TestInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(TestInterface_data_t));
+}
+
+const char *
+TestInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "TestEnum") == 0) {
+    return tostring_TestEnum((TestEnum)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

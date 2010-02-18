@@ -324,6 +324,12 @@ SwitchInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(SwitchInterface_data_t));
 }
 
+const char *
+SwitchInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class SwitchInterface::SetMessage <interfaces/SwitchInterface.h>
  * SetMessage Fawkes BlackBoard Interface Message.

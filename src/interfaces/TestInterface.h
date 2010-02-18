@@ -45,6 +45,7 @@ class TestInterface : public Interface
     TEST_ENUM_1 /**< Item 1 */,
     TEST_ENUM_2 /**< Item 2 */
   } TestEnum;
+  const char * tostring_TestEnum(TestEnum value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -170,6 +171,7 @@ class TestInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

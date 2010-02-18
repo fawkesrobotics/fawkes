@@ -51,6 +51,7 @@ FacerInterface::FacerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (FacerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
   add_fieldinfo(IFT_UINT, "num_identities", 1, &data->num_identities);
   add_fieldinfo(IFT_UINT, "recognized_identity", 1, &data->recognized_identity);
   add_fieldinfo(IFT_STRING, "recognized_name", 64, data->recognized_name);
@@ -79,6 +80,21 @@ FacerInterface::FacerInterface() : Interface()
 FacerInterface::~FacerInterface()
 {
   free(data_ptr);
+}
+/** Convert if_facer_opmode_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+FacerInterface::tostring_if_facer_opmode_t(if_facer_opmode_t value) const
+{
+  switch (value) {
+  case OPMODE_DISABLED: return "OPMODE_DISABLED";
+  case OPMODE_DETECTION: return "OPMODE_DETECTION";
+  case OPMODE_RECOGNITION: return "OPMODE_RECOGNITION";
+  case OPMODE_LEARNING: return "OPMODE_LEARNING";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get opmode value.
@@ -664,6 +680,15 @@ FacerInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(FacerInterface_data_t));
+}
+
+const char *
+FacerInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "if_facer_opmode_t") == 0) {
+    return tostring_if_facer_opmode_t((if_facer_opmode_t)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

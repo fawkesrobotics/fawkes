@@ -47,6 +47,10 @@ FacialExpressionInterface::FacialExpressionInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (FacialExpressionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
+  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
+  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t");
+  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t");
   add_messageinfo("MoveBrowsMessage");
   add_messageinfo("MoveEyesMessage");
   add_messageinfo("MoveJowlMessage");
@@ -59,6 +63,70 @@ FacialExpressionInterface::FacialExpressionInterface() : Interface()
 FacialExpressionInterface::~FacialExpressionInterface()
 {
   free(data_ptr);
+}
+/** Convert brows_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+FacialExpressionInterface::tostring_brows_t(brows_t value) const
+{
+  switch (value) {
+  case BROWS_DEFAULT: return "BROWS_DEFAULT";
+  case BROWS_FROWN: return "BROWS_FROWN";
+  case BROWS_LIFT: return "BROWS_LIFT";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert eyes_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+FacialExpressionInterface::tostring_eyes_t(eyes_t value) const
+{
+  switch (value) {
+  case EYES_DEFAULT: return "EYES_DEFAULT";
+  case EYES_UP: return "EYES_UP";
+  case EYES_DOWN: return "EYES_DOWN";
+  case EYES_LEFT: return "EYES_LEFT";
+  case EYES_RIGHT: return "EYES_RIGHT";
+  case EYES_COOL: return "EYES_COOL";
+  case EYES_CROSS: return "EYES_CROSS";
+  case EYES_HEART: return "EYES_HEART";
+  case EYES_DOLLAR: return "EYES_DOLLAR";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert jowl_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+FacialExpressionInterface::tostring_jowl_t(jowl_t value) const
+{
+  switch (value) {
+  case JOWL_DEFAULT: return "JOWL_DEFAULT";
+  case JOWL_BLUSH: return "JOWL_BLUSH";
+  case JOWL_TEARS: return "JOWL_TEARS";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert mouth_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+FacialExpressionInterface::tostring_mouth_t(mouth_t value) const
+{
+  switch (value) {
+  case MOUTH_DEFAULT: return "MOUTH_DEFAULT";
+  case MOUTH_OPEN: return "MOUTH_OPEN";
+  case MOUTH_CLOSE: return "MOUTH_CLOSE";
+  case MOUTH_SMILE: return "MOUTH_SMILE";
+  case MOUTH_SCOWL: return "MOUTH_SCOWL";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get brows_action value.
@@ -212,6 +280,24 @@ FacialExpressionInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(FacialExpressionInterface_data_t));
+}
+
+const char *
+FacialExpressionInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "brows_t") == 0) {
+    return tostring_brows_t((brows_t)val);
+  }
+  if (strcmp(enumtype, "eyes_t") == 0) {
+    return tostring_eyes_t((eyes_t)val);
+  }
+  if (strcmp(enumtype, "jowl_t") == 0) {
+    return tostring_jowl_t((jowl_t)val);
+  }
+  if (strcmp(enumtype, "mouth_t") == 0) {
+    return tostring_mouth_t((mouth_t)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

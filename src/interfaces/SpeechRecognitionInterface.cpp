@@ -228,6 +228,12 @@ SpeechRecognitionInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(SpeechRecognitionInterface_data_t));
 }
 
+const char *
+SpeechRecognitionInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class SpeechRecognitionInterface::ResetMessage <interfaces/SpeechRecognitionInterface.h>
  * ResetMessage Fawkes BlackBoard Interface Message.

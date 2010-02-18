@@ -80,7 +80,12 @@ GameStateInterface::GameStateInterface() : Interface()
   data      = (GameStateInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_UINT, "game_state", 1, &data->game_state);
+  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
+  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
+  add_fieldinfo(IFT_ENUM, "our_goal_color", 1, &data->our_goal_color, "if_gamestate_goalcolor_t");
+  add_fieldinfo(IFT_ENUM, "half", 1, &data->half, "if_gamestate_half_t");
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
+  add_fieldinfo(IFT_ENUM, "role", 1, &data->role, "if_gamestate_role_t");
   add_fieldinfo(IFT_UINT, "score_cyan", 1, &data->score_cyan);
   add_fieldinfo(IFT_UINT, "score_magenta", 1, &data->score_magenta);
   add_messageinfo("SetTeamColorMessage");
@@ -94,6 +99,63 @@ GameStateInterface::GameStateInterface() : Interface()
 GameStateInterface::~GameStateInterface()
 {
   free(data_ptr);
+}
+/** Convert if_gamestate_team_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+GameStateInterface::tostring_if_gamestate_team_t(if_gamestate_team_t value) const
+{
+  switch (value) {
+  case TEAM_NONE: return "TEAM_NONE";
+  case TEAM_CYAN: return "TEAM_CYAN";
+  case TEAM_MAGENTA: return "TEAM_MAGENTA";
+  case TEAM_BOTH: return "TEAM_BOTH";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert if_gamestate_goalcolor_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+GameStateInterface::tostring_if_gamestate_goalcolor_t(if_gamestate_goalcolor_t value) const
+{
+  switch (value) {
+  case GOAL_BLUE: return "GOAL_BLUE";
+  case GOAL_YELLOW: return "GOAL_YELLOW";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert if_gamestate_half_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+GameStateInterface::tostring_if_gamestate_half_t(if_gamestate_half_t value) const
+{
+  switch (value) {
+  case HALF_FIRST: return "HALF_FIRST";
+  case HALF_SECOND: return "HALF_SECOND";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert if_gamestate_role_t constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+GameStateInterface::tostring_if_gamestate_role_t(if_gamestate_role_t value) const
+{
+  switch (value) {
+  case ROLE_GOALIE: return "ROLE_GOALIE";
+  case ROLE_DEFENDER: return "ROLE_DEFENDER";
+  case ROLE_MID_LEFT: return "ROLE_MID_LEFT";
+  case ROLE_MID_RIGHT: return "ROLE_MID_RIGHT";
+  case ROLE_ATTACKER: return "ROLE_ATTACKER";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get game_state value.
@@ -395,6 +457,24 @@ GameStateInterface::copy_values(const Interface *other)
                                 type(), other->type());
   }
   memcpy(data, oi->data, sizeof(GameStateInterface_data_t));
+}
+
+const char *
+GameStateInterface::enum_tostring(const char *enumtype, int val) const
+{
+  if (strcmp(enumtype, "if_gamestate_team_t") == 0) {
+    return tostring_if_gamestate_team_t((if_gamestate_team_t)val);
+  }
+  if (strcmp(enumtype, "if_gamestate_goalcolor_t") == 0) {
+    return tostring_if_gamestate_goalcolor_t((if_gamestate_goalcolor_t)val);
+  }
+  if (strcmp(enumtype, "if_gamestate_half_t") == 0) {
+    return tostring_if_gamestate_half_t((if_gamestate_half_t)val);
+  }
+  if (strcmp(enumtype, "if_gamestate_role_t") == 0) {
+    return tostring_if_gamestate_role_t((if_gamestate_role_t)val);
+  }
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */

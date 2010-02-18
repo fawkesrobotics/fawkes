@@ -47,6 +47,7 @@ class FacerInterface : public Interface
     OPMODE_RECOGNITION /**< Facer will detect faces, and then try to recognize the most dominant face. */,
     OPMODE_LEARNING /**< Facer will gather images and learn an identity. */
   } if_facer_opmode_t;
+  const char * tostring_if_facer_opmode_t(if_facer_opmode_t value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -291,6 +292,7 @@ class FacerInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

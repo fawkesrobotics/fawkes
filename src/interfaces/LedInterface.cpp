@@ -128,6 +128,12 @@ LedInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(LedInterface_data_t));
 }
 
+const char *
+LedInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class LedInterface::SetIntensityMessage <interfaces/LedInterface.h>
  * SetIntensityMessage Fawkes BlackBoard Interface Message.

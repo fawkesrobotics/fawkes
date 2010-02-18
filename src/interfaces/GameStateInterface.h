@@ -63,6 +63,7 @@ class GameStateInterface : public Interface
     TEAM_MAGENTA /**< Magenta team */,
     TEAM_BOTH /**< Both teams */
   } if_gamestate_team_t;
+  const char * tostring_if_gamestate_team_t(if_gamestate_team_t value) const;
 
   /** 
         Enumeration defining the different teams. Keep in sync with
@@ -72,6 +73,7 @@ class GameStateInterface : public Interface
     GOAL_BLUE /**< Blue goal */,
     GOAL_YELLOW /**< Yellow goal */
   } if_gamestate_goalcolor_t;
+  const char * tostring_if_gamestate_goalcolor_t(if_gamestate_goalcolor_t value) const;
 
   /** 
         Enumeration defining the different teams. Keep in sync with
@@ -81,6 +83,7 @@ class GameStateInterface : public Interface
     HALF_FIRST /**< First half */,
     HALF_SECOND /**< Second half */
   } if_gamestate_half_t;
+  const char * tostring_if_gamestate_half_t(if_gamestate_half_t value) const;
 
   /** 
         Enumeration defining the different robot roles. Keep in sync with
@@ -93,6 +96,7 @@ class GameStateInterface : public Interface
     ROLE_MID_RIGHT /**< Midfield right */,
     ROLE_ATTACKER /**< Attacker */
   } if_gamestate_role_t;
+  const char * tostring_if_gamestate_role_t(if_gamestate_role_t value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -218,6 +222,7 @@ class GameStateInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

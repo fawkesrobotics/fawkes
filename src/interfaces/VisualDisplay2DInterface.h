@@ -47,6 +47,7 @@ class VisualDisplay2DInterface : public Interface
     LS_DOTTED /**< Dotted line. */,
     LS_DASH_DOTTED /**< Dashed and dotted line */
   } LineStyle;
+  const char * tostring_LineStyle(LineStyle value) const;
 
   /** 
         Enumeration defining the possible anchor points. They are used
@@ -65,6 +66,7 @@ class VisualDisplay2DInterface : public Interface
     SOUTH_WEST /**< Bottom left. */,
     NORTH_WEST /**< Top left. */
   } Anchor;
+  const char * tostring_Anchor(Anchor value) const;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -298,6 +300,7 @@ class VisualDisplay2DInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
 
 };
 

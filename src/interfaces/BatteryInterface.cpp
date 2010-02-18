@@ -243,6 +243,12 @@ BatteryInterface::copy_values(const Interface *other)
   memcpy(data, oi->data, sizeof(BatteryInterface_data_t));
 }
 
+const char *
+BatteryInterface::enum_tostring(const char *enumtype, int val) const
+{
+  throw UnknownTypeException("Unknown enum type %s", enumtype);
+}
+
 /* =========== messages =========== */
 /** @class BatteryInterface::PushButtonMessage <interfaces/BatteryInterface.h>
  * PushButtonMessage Fawkes BlackBoard Interface Message.
