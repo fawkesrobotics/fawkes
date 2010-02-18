@@ -38,7 +38,7 @@ include $(BASEDIR)/etc/buildsys/download.mk
 cams models filters classifiers stereo fvwidgets: fvutils
 filters: models
 apps: fvutils models cams filters classifiers stereo
-tools: apps fvutils stereo
+tools: apps fvutils stereo fvwidgets
 models: classifiers
 ifneq ($(CLASSIFIERS_DEPS),)
 classifiers: $(CLASSIFIERS_DEPS)
