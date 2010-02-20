@@ -186,10 +186,8 @@ BBLogReplayThread::init()
   if (asprintf(&__filename, "%s/%s", __logdir, __logfile_name) == -1) {
     throw OutOfMemoryException("Cannot re-generate logfile-path");
   }
-  //  printf("\n###INITIALIZE %s  - %s\n",__logfile_name,__filename);
   __f_data = fopen(__filename, "r");
   if (!__f_data) {
-    //    printf("\n error fail to open file");
     throw Exception("Failed to open log file %s",__filename);
   }
 
@@ -201,7 +199,6 @@ BBLogReplayThread::init()
 void
 BBLogReplayThread::once()
 {
-  printf("\n###ONCE\n");
   try {
     bblog_file_header header;
     read_file_header(__f_data, &header);
@@ -234,7 +231,7 @@ BBLogReplayThread::once()
       iface->write();
       //      print_entry(&entryh, iface);
       //      printf("\n");
-      logger->log_info(name(), ".");
+      //      logger->log_info(name(), ".");
     }
 
     blackboard->close(iface);
@@ -242,7 +239,7 @@ BBLogReplayThread::once()
   } catch (Exception &e) {
     printf("Failed to read log file: %s\n", e.what());
   }
-  logger->log_info(name(), "Replay of fineshed\n: %s", __filename);
+  logger->log_info(name(), "Replay fineshed for file\n: %s", __filename);
   fclose(__f_data);
   free(__filename);
 }
@@ -251,9 +248,9 @@ BBLogReplayThread::once()
 
 
 void
-BBLogReplayThread::finalize()
+BBLogReplayThread::finalize()   // wont be called??
 {
-  logger->log_info(name(), "Replay of fineshed\n: %s", __filename);
+  logger->log_info(name(), "Replay fineshed for file\n: %s", __filename);
   fclose(__f_data);
   free(__filename);
 }
