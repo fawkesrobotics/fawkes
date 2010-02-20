@@ -35,8 +35,13 @@
 
 NOEXPORT SkillGuiCairoRenderInstructor *__sgcri = NULL;
 
+#if CAIROMM_MAJOR_VERSION > 1 || (CAIROMM_MAJOR_VERSION == 1 && CAIROMM_MINO_VERSION > 8)
 NOEXPORT std::vector<double> __skillgui_cairo_render_dashed;
 NOEXPORT std::vector<double> __skillgui_cairo_render_dotted;
+#else
+NOEXPORT std::valarray<double> __skillgui_cairo_render_dashed(1);
+NOEXPORT std::valarray<double> __skillgui_cairo_render_dotted(2);
+#endif
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
 NOEXPORT fawkes::TimeTracker __tt;
@@ -151,7 +156,11 @@ skillgui_cairo_set_penstyle(Cairo::RefPtr<Cairo::Context> cairo, GVJ_t *job)
   } else if (obj->pen == PEN_DOTTED) {
     cairo->set_dash(__skillgui_cairo_render_dotted, 0.0);
   } else {
+#if CAIROMM_MAJOR_VERSION > 1 || (CAIROMM_MAJOR_VERSION == 1 && CAIROMM_MINO_VERSION > 8)
     std::vector<double> empty;
+#else
+    std::valarray<double> empty;
+#endif
     cairo->set_dash(empty, 0.0);
   }
   cairo->set_line_width(obj->penwidth);
@@ -580,9 +589,15 @@ gvplugin_skillgui_cairo_setup(GVC_t *gvc, SkillGuiCairoRenderInstructor *sgcri)
   __sgcri = sgcri;
   gvAddLibrary(gvc, &gvplugin_skillgui_cairo_LTX_library);
 
+#if CAIROMM_MAJOR_VERSION > 1 || (CAIROMM_MAJOR_VERSION == 1 && CAIROMM_MINO_VERSION > 8)
   __skillgui_cairo_render_dashed.clear();
   __skillgui_cairo_render_dashed.push_back(6.0);
   __skillgui_cairo_render_dotted.clear();
   __skillgui_cairo_render_dotted.push_back(2.0);
   __skillgui_cairo_render_dotted.push_back(6.0);
+#else
+  __skillgui_cairo_render_dashed[0] = 6.0;
+  __skillgui_cairo_render_dotted[0] = 2.0;
+  __skillgui_cairo_render_dotted[1] = 6.0;
+#endif
 }

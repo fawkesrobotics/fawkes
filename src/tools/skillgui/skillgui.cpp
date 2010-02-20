@@ -517,23 +517,29 @@ SkillGuiGtkWindow::on_skiller_data_changed()
     }
 
     lab_skillstring->set_text(__skiller_if->skill_string());
-    lab_skillstring->set_tooltip_text(__skiller_if->skill_string());
     lab_error->set_text(__skiller_if->error());
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 12 )
+    lab_skillstring->set_tooltip_text(__skiller_if->skill_string());
     lab_error->set_tooltip_text(__skiller_if->error());
+#endif
     lab_continuous->set_text(__skiller_if->is_continuous() ? "Yes" : "No");
     lab_alive->set_text(__skiller_if->has_writer() ? "Yes" : "No");
 
     if ( __skiller_if->exclusive_controller() == __skiller_if->serial() ) {
       if ( tb_controller->get_stock_id() == Gtk::Stock::NO.id ) {
 	tb_controller->set_stock_id(Gtk::Stock::YES);
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 12 )
 	tb_controller->set_tooltip_text("Release exclusive control");
+#endif
       }
       but_exec->set_sensitive(true);
       but_stop->set_sensitive(true);
     } else {
       if ( tb_controller->get_stock_id() == Gtk::Stock::YES.id ) {
 	tb_controller->set_stock_id(Gtk::Stock::NO);
+#if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 12 )
 	tb_controller->set_tooltip_text("Gain exclusive control");
+#endif
       }
       but_exec->set_sensitive(false);
       but_stop->set_sensitive(false);
@@ -555,14 +561,16 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 
       if (strcmp(__skdbg_if->graph_fsm(), "LIST") == 0) {
 	Glib::ustring list = __skdbg_if->graph();
-	Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create("\n");
-	std::list<std::string> skills = regex->split(list);
 	cb_graphlist->clear_items();
 	cb_graphlist->append_text(ACTIVE_SKILL);
 	cb_graphlist->set_active_text(ACTIVE_SKILL);
+#if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 14 )
+	Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create("\n");
+	std::list<std::string> skills = regex->split(list);
 	for (std::list<std::string>::iterator i = skills.begin(); i != skills.end(); ++i) {
 	  if (*i != "")  cb_graphlist->append_text(*i);
 	}
+#endif
 	if (__skdbg_if->has_writer()) {
 	  SkillerDebugInterface::SetGraphMessage *sgm = new SkillerDebugInterface::SetGraphMessage("ACTIVE");
 	  __skdbg_if->msgq_enqueue(sgm);
