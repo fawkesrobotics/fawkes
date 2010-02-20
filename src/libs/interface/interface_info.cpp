@@ -26,9 +26,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#ifdef __FreeBSD__
-#  include <strfunc.h>
-#endif
 
 namespace fawkes {
 

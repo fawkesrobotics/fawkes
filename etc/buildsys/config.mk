@@ -120,11 +120,8 @@ LDFLAGS_SHARED   = -shared
 CFLAGS_OPENMP  = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-fopenmp)
 LDFLAGS_OPENMP = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-lgomp)
 ifeq ($(OS),FreeBSD)
-  ifeq ($(wildcard /usr/local/include/strfunc.h),)
-    $(error libstrfunc is needed on FreeBSD, install devel/libstrfunc!)
-  endif
   DEFAULT_INCLUDES += -I/usr/local/include
-  LDFLAGS_BASE     += -L/usr/local/lib -lpthread -lstrfunc
+  LDFLAGS_BASE     += -L/usr/local/lib -lpthread
 endif
 
 ifeq ($(DO_32BIT_BUILD),1)

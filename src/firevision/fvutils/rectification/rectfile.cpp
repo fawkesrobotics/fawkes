@@ -33,9 +33,6 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <cstdlib>
-#ifdef __FreeBSD__
-#  include <strfunc.h>
-#endif
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

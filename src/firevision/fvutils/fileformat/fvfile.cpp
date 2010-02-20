@@ -30,9 +30,6 @@
 #include <cerrno>
 #include <netinet/in.h>
 #include <sys/time.h>
-#ifdef __FreeBSD__
-#  include <strfunc.h>
-#endif
 
 using namespace fawkes;
 
