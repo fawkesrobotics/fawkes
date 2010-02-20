@@ -25,6 +25,7 @@
 #include <core/exception.h>
 #include <utils/logging/logger.h>
 
+#include <sys/socket.h>
 #include <microhttpd.h>
 
 namespace fawkes {

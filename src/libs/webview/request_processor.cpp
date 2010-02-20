@@ -23,6 +23,7 @@
 #include <webview/request_processor.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <stdint.h>
 #include <cstdarg>
 #include <microhttpd.h>

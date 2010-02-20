@@ -28,6 +28,7 @@
 #include <utils/misc/string_urlescape.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <cstdarg>
 #include <microhttpd.h>
 #include <cstring>

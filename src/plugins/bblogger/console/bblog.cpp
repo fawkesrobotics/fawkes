@@ -128,7 +128,7 @@ print_header(FILE *f, bblog_file_header *header, const char *line_prefix = "",
 	  line_prefix, htonl(header->file_version),
 	  (header->endianess == 1) ? "Big" : "Little",
 	  line_prefix, header->num_data_items, header->data_size,
-	  line_prefix, sizeof(bblog_file_header), fs.st_size, line_prefix,
+	  line_prefix, sizeof(bblog_file_header), (long int)fs.st_size, line_prefix,
 	  line_prefix, scenario,
 	  line_prefix, interface_type, interface_id, interface_hash,
 	  line_prefix, t.str());
@@ -151,14 +151,14 @@ sanity_check(FILE *f, bblog_file_header *header)
     throw Exception(errno, "Failed to get stat file");
   }
 
-  off_t expected_size = sizeof(bblog_file_header)
+  long int expected_size = sizeof(bblog_file_header)
     + header->num_data_items * header->data_size
     + header->num_data_items * sizeof(bblog_entry_header);
   if (expected_size != fs.st_size) {
     printf("\nWARNING: file size does not match expectation. Expected %li b,\n"
 	   "         but file has %li b. The logger might still be running.\n"
 	   "         Otherwise use repair command to fix the file.\n",
-	   expected_size, fs.st_size);
+	   expected_size, (long int)fs.st_size);
     throw Exception("file size does not match expectation");
   }
 

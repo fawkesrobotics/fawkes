@@ -34,8 +34,13 @@
 #include <cstdio>
 #include <cerrno>
 #include <fcntl.h>
-#include <endian.h>
+#ifdef __FreeBSD__
+#  include <sys/endian.h>
+#else
+#  include <endian.h>
+#endif
 #include <arpa/inet.h>
+#include <sys/stat.h>
 #include <sys/mman.h>
 
 using namespace fawkes;
