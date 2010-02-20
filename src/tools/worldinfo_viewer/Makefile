@@ -24,16 +24,16 @@ LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 # enable for debug output
 #CFLAGS += -DDEBUG_PRINT
 
-LIBS_wiv = fawkesblackboard fawkesconfig fawkescore fawkesnetcomm fawkesutils fawkesworldinfo_utils
-OBJS_wiv = main.o			\
-	   worldinfo_viewer.o		\
-	   field_view.o			\
-	   backend_thread.o
+LIBS_ffwiviewer = fawkesblackboard fawkesconfig fawkescore fawkesnetcomm fawkesutils fawkesworldinfo_utils
+OBJS_ffwiviewer = main.o			\
+		  worldinfo_viewer.o		\
+		  field_view.o			\
+		  backend_thread.o
 
-OBJS_all = $(OBJS_wiv)
+OBJS_all = $(OBJS_ffwiviewer)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  BINS_gui = $(BINDIR)/wiv
+  BINS_gui = $(BINDIR)/ffwiviewer
   INST_RESDIRS = guis/worldinfo_viewer
 else
   WARN_TARGETS += warning_wiv
@@ -44,7 +44,7 @@ gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_wiv:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Not building wiv$(TNORMAL) $(GUI_ERROR)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Not building ffwiviewer$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
