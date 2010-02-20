@@ -28,6 +28,7 @@
 #include <core/plugin.h>
 #include <core/threading/thread_collector.h>
 #include <core/threading/thread_initializer.h>
+#include <core/threading/mutex_locker.h>
 #include <core/exception.h>
 #include <utils/logging/liblogger.h>
 #ifdef HAVE_INOTIFY
@@ -195,10 +196,12 @@ PluginManager::get_loaded_plugins()
   for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
     rv.push_back(pit->first);
   }
+  plugins.unlock();
+  __meta_plugins.lock();
   for (__mpit = __meta_plugins.begin(); __mpit != __meta_plugins.end(); ++__mpit) {
     rv.push_back(__mpit->first);
   }
-  plugins.unlock();
+  __meta_plugins.unlock();
 
   return rv;
 }
@@ -270,9 +273,10 @@ PluginManager::load(const char *plugin_list)
 	}
 	//printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
 	__meta_plugins.lock();
-	// Setting has to happen here, so that a meta plugin will not cause an endless
-	// loop if it references itself!
+	// Setting has to happen here, so that a meta plugin will not cause an
+	// endless loop if it references itself!
 	__meta_plugins[*i] = pset;
+	__meta_plugins.unlock();
 	try {
 	  LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
 	                      pset.c_str(), i->c_str());
@@ -280,11 +284,9 @@ PluginManager::load(const char *plugin_list)
 	  notify_loaded(i->c_str());
 	} catch (Exception &e) {
 	  e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
-	  __meta_plugins.erase(*i);
-	  __meta_plugins.unlock();
+	  __meta_plugins.erase_locked(*i);
 	  throw;
 	}
-	__meta_plugins.unlock();
 
 	try_real_plugin = false;
       } catch (ConfigEntryNotFoundException &e) {
@@ -312,8 +314,10 @@ PluginManager::load(const char *plugin_list)
 	}
 	plugins.unlock();
       } catch (Exception &e) {
+	MutexLocker lock(__meta_plugins.mutex());
 	if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
-	  // only throw exception if no meta plugin with that name has already been loaded
+	  // only throw exception if no meta plugin with that name has
+	  // already been loaded
 	  throw;
 	}
       }
@@ -378,9 +382,8 @@ PluginManager::unload(const char *plugin_name)
 	   (__meta_plugins.find(*i) != __meta_plugins.end()) ) {
 	continue;
       }
-      __meta_plugins.lock();
-      __meta_plugins.erase(*i);
-      __meta_plugins.unlock();
+
+      __meta_plugins.erase_locked(*i);
       LibLogger::log_info("PluginManager", "UNloading plugin %s for meta plugin %s",
 			  i->c_str(), plugin_name);
       unload(i->c_str());
