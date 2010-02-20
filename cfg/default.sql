@@ -136,4 +136,6 @@ INSERT INTO "config" VALUES('/fawkes/bblogger/scenario','string','qatest','Curre
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/buffering','bool',1,'Enable buffering for this scenario?');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/flushing','bool',0,'Flush file stream after each chunk? Can severely influence performance, but when enabled allows real-time log watching.');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/interfaces/test','string','TestInterface::BBLoggerTest',NULL);
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/scenario','string','athome',NULL);
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/athome/log/laser720','string','athome-Laser720Interface-Laser-2010-02-18-15-51-30.log',NULL);
 COMMIT;
