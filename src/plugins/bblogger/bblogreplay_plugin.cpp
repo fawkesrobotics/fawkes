@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  bblogger_replay_plugin.cpp - Fawkes BlackBoard Logger Replay Plugin
+ *  bblogreplay_plugin.cpp - Fawkes BlackBoard Log Replay Plugin
  *
  *  Created: Mi Feb 17 01:53:00 2010
  *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "bblogger_replay_plugin.h"
-#include "log_replay_thread.h"
+#include "bblogreplay_plugin.h"
+#include "logreplay_thread.h"
 
 #include <utils/time/time.h>
 
@@ -35,9 +35,9 @@
 
 using namespace fawkes;
 
-/** @class BlackBoardLoggerReplayPlugin "bblogger_plugin.h"
- * BlackBoard logger replay plugin.
- * This plugin replay one or more logfiles into interface of the local blackboard
+/** @class BlackBoardLogReplayPlugin "bblogger_plugin.h"
+ * BlackBoard log replay plugin.
+ * This plugin replay one or more logfiles into interfaces of the local blackboard
  *
  * @author Masrur Doostdar
  * @author Tim Niemueller
@@ -46,12 +46,12 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-BlackBoardLoggerReplayPlugin::BlackBoardLoggerReplayPlugin(Configuration *config)
+BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
   : Plugin(config)
 {
   std::set<std::string> ifaces;
 
-  std::string prefix = "/fawkes/bblogger_replay/";
+  std::string prefix = "/fawkes/bblogreplay/";
 
   std::string scenario = "";
   try {
@@ -83,9 +83,9 @@ BlackBoardLoggerReplayPlugin::BlackBoardLoggerReplayPlugin(Configuration *config
   while (i->next()) {
     
     //printf("Adding sync thread for peer %s\n", peer.c_str());
-    BBLoggerReplayThread *log_replay_thread = new BBLoggerReplayThread(i->get_string().c_str(),
-								       logdir.c_str(),
-								       scenario.c_str());
+    BBLogReplayThread *log_replay_thread = new BBLogReplayThread(i->get_string().c_str(),
+								 logdir.c_str(),
+								 scenario.c_str());
     thread_list.push_back(log_replay_thread);
   }
   delete i;
@@ -96,4 +96,4 @@ BlackBoardLoggerReplayPlugin::BlackBoardLoggerReplayPlugin(Configuration *config
 }
 
 PLUGIN_DESCRIPTION("Replay logfiles by writing them to BlackBoard interfaces")
-EXPORT_PLUGIN(BlackBoardLoggerReplayPlugin)
+EXPORT_PLUGIN(BlackBoardLogReplayPlugin)

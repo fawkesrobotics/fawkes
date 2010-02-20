@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  log_replay_thread.cpp - BB Logger Replay Thread
+ *  logreplay_thread.cpp - BB Log Replay Thread
  *
  *  Created: Mi Feb 17 01:53:00 2010
  *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "log_replay_thread.h"
-#include "../bblogger/file.h"
+#include "logreplay_thread.h"
+#include "file.h"
 
 #include <blackboard/blackboard.h>
 #include <utils/logging/logger.h>
@@ -43,9 +43,9 @@
 
 using namespace fawkes;
 
-/** @class BBLoggerReplayThread "log_replay_thread.h"
- * BlackBoard logger Replay thread.
- * Writes the data of the logfile into a blackboard interface, considering the timestep differences between the data.
+/** @class BBLogReplayThread "logreplay_thread.h"
+ * BlackBoard log Replay thread.
+ * Writes the data of the logfile into a blackboard interface, considering the time-step differences between the data.
  * @author Masrur Doostdar
  * @author Tim Niemueller
  */
@@ -55,17 +55,17 @@ using namespace fawkes;
  * @param logdir directory containing the logfile
  * @param scenario ID of the log scenario
  */
-BBLoggerReplayThread::BBLoggerReplayThread(const char *logfile_name,
-					   const char *logdir,
-					   const char *scenario)
-  : Thread("BBLoggerReplayThread", Thread::OPMODE_CONTINUOUS)
+BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
+				     const char *logdir,
+				     const char *scenario)
+  : Thread("BBLogReplayThread", Thread::OPMODE_CONTINUOUS)
 {
   //  set_coalesce_wakeups(true);
-  set_name("BBLoggerReplayThread(%s)", logfile_name);
+  set_name("BBLogReplayThread(%s)", logfile_name);
 
   __logfile_name= strdup(logfile_name);
   __logdir      = strdup(logdir);
-  __scenario    = strdup(scenario);
+  __scenario    = strdup(scenario); // dont need this!?
   __filename    = NULL;
   //  __queue_mutex = new Mutex();
   //  __data_size   = 0;
@@ -74,7 +74,7 @@ BBLoggerReplayThread::BBLoggerReplayThread(const char *logfile_name,
 
 
 /** Destructor. */
-BBLoggerReplayThread::~BBLoggerReplayThread()
+BBLogReplayThread::~BBLogReplayThread()
 {
   free(__logfile_name);
   free(__logdir);
@@ -84,7 +84,7 @@ BBLoggerReplayThread::~BBLoggerReplayThread()
 
 
 void
-BBLoggerReplayThread::read_file_header(FILE *f, bblog_file_header *header)
+BBLogReplayThread::read_file_header(FILE *f, bblog_file_header *header)
 {
   uint32_t magic;
   uint32_t version;
@@ -113,7 +113,7 @@ BBLoggerReplayThread::read_file_header(FILE *f, bblog_file_header *header)
 
 
 void
-BBLoggerReplayThread::sanity_check(FILE *f, bblog_file_header *header)
+BBLogReplayThread::sanity_check(FILE *f, bblog_file_header *header)
 {
   if (header->num_data_items == 0) {
     printf("\nWARNING: file does not specify number of data items. This usually\n"
@@ -153,7 +153,7 @@ BBLoggerReplayThread::sanity_check(FILE *f, bblog_file_header *header)
 
 
 void
-BBLoggerReplayThread::read_entry(FILE *f, bblog_file_header *header, bblog_entry_header *entryh,
+BBLogReplayThread::read_entry(FILE *f, bblog_file_header *header, bblog_entry_header *entryh,
 	   Interface *iface, unsigned int index, bool do_seek )
 {
   if (do_seek) {
@@ -180,7 +180,7 @@ BBLoggerReplayThread::read_entry(FILE *f, bblog_file_header *header, bblog_entry
 
 
 void
-BBLoggerReplayThread::init()
+BBLogReplayThread::init()
 {
 
   if (asprintf(&__filename, "%s/%s", __logdir, __logfile_name) == -1) {
@@ -199,7 +199,7 @@ BBLoggerReplayThread::init()
 
 
 void
-BBLoggerReplayThread::once()
+BBLogReplayThread::once()
 {
   printf("\n###ONCE\n");
   try {
@@ -251,7 +251,7 @@ BBLoggerReplayThread::once()
 
 
 void
-BBLoggerReplayThread::finalize()
+BBLogReplayThread::finalize()
 {
   logger->log_info(name(), "Replay of fineshed\n: %s", __filename);
   fclose(__f_data);

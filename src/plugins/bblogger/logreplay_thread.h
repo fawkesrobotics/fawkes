@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  log_replay_thread.h - BB Logger Replay Thread
+ *  logreplay_thread.h - BB Log Replay Thread
  *
  *  Created: Mi Feb 17 01:53:00 2010
  *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
@@ -20,16 +20,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBLOGGER_LOG_REPLAY_THREAD_H_
-#define __PLUGINS_BBLOGGER_LOG_REPLAY_THREAD_H_
-#include "../bblogger/file.h"
+#ifndef __PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
+#define __PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
+#include "file.h"
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <core/utils/lock_queue.h>
-
+ 
 #include <cstdio>
 
 namespace fawkes {
@@ -38,18 +38,17 @@ namespace fawkes {
   class Time;
 }
 
-class BBLoggerReplayThread
+class BBLogReplayThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
   public fawkes::BlackBoardAspect
-  //  public fawkes::BlackBoardInterfaceListener
 {
  public:
-  BBLoggerReplayThread(const char *logfile_name,
-		       const char *logdir, const char *scenario);
-  virtual ~BBLoggerReplayThread();
+  BBLogReplayThread(const char *logfile_name,
+		    const char *logdir, const char *scenario);
+  virtual ~BBLogReplayThread();
 
   virtual void init();
   virtual void finalize();
@@ -59,8 +58,7 @@ class BBLoggerReplayThread
  private:
   void read_file_header(FILE *f, bblog_file_header *header);
   void sanity_check(FILE *f, bblog_file_header *header);
-  void read_entry(FILE *f, bblog_file_header *header, bblog_entry_header *entryh,
-		  fawkes::Interface *iface, unsigned int index, bool do_seek = true);
+  void read_entry(FILE *f, bblog_file_header *header, bblog_entry_header *entryh,fawkes::Interface *iface, unsigned int index, bool do_seek = true);
   
   
  private:

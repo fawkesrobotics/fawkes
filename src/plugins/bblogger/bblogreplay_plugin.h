@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  bblogger_replay_plugin.h - Fawkes BlackBoard Logger Replay Plugin
+ *  bblogreplay_plugin.h - Fawkes BlackBoard Log Replay Plugin
  *
  *  Created: Mi Feb 17 01:53:00 2010
  *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
@@ -20,15 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBLOGGER_BBLOGGER_REPLAY_PLUGIN_H_
-#define __PLUGINS_BBLOGGER_BBLOGGER_REPLAY_PLUGIN_H_
+#ifndef __PLUGINS_BBLOGGER_BBLOGREPLAY_PLUGIN_H_
+#define __PLUGINS_BBLOGGER_BBLOGREPLAY_PLUGIN_H_
 
 #include <core/plugin.h>
 
-class BlackBoardLoggerReplayPlugin : public fawkes::Plugin
+class BlackBoardLogReplayPlugin : public fawkes::Plugin
 {
  public:
-  BlackBoardLoggerReplayPlugin(fawkes::Configuration *config);
+  BlackBoardLogReplayPlugin(fawkes::Configuration *config);
 };
 
 #endif
