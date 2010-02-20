@@ -88,18 +88,18 @@ ifneq ($(INTERFACES_all),)
   ifeq ($(IFACESRCDIR),$(SRCDIR))
     INTERFACE_GENERATOR_BUILD = 1
   else
-    ifneq ($(wildcard $(BINDIR)/interface_generator),)
+    ifneq ($(wildcard $(BINDIR)/ffifacegen),)
       INTERFACE_GENERATOR_BUILD = 1
     endif
   endif
 
 ifeq ($(OBJSSUBMAKE),1)
   ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
-$(INTERFACES_SRCS): $(BINDIR)/interface_generator
-$(INTERFACES_HDRS): $(BINDIR)/interface_generator
-$(INTERFACES_LIBS): | $(BINDIR)/interface_generator
-$(INTERFACES_TOUCH): $(BINDIR)/interface_generator
-$(TOLUA_ALL): $(BINDIR)/interface_generator
+$(INTERFACES_SRCS): $(BINDIR)/ffifacegen
+$(INTERFACES_HDRS): $(BINDIR)/ffifacegen
+$(INTERFACES_LIBS): | $(BINDIR)/ffifacegen
+$(INTERFACES_TOUCH): $(BINDIR)/ffifacegen
+$(TOLUA_ALL): $(BINDIR)/ffifacegen
   endif
 
 $(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
@@ -108,7 +108,7 @@ $(INTERFACES_HDRS): $(IFACESRCDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
 $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
   ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
-	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
+	$(SILENT)$(BINDIR)/ffifacegen -d $(SRCDIR) $<
 	$(if $(filter-out $(IFACESRCDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h)
   else
     ifneq ($(abspath $(IFACESRCDIR)),$(abspath $(SRCDIR)))
@@ -132,7 +132,7 @@ endif # OBJSSUBMAKE != 1
 ifneq ($(PLUGINS_all),)
 $(PLUGINS_all): | $(INTERFACES_LIBS)
 endif
-ifneq ($(filter-out $(BINDIR)/interface_generator,$(BINS_all)),)
+ifneq ($(filter-out $(BINDIR)/ffifacegen,$(BINS_all)),)
 $(BINS_all): | $(INTERFACES_LIBS)
 endif
 

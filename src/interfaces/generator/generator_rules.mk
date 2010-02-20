@@ -22,23 +22,23 @@ ifeq ($(HAVE_INTERFACE_GENERATOR),1)
     GENDIR=generator/
   endif
 
-  LIBS_interface_generator = fawkescore fawkesutils
-  LDFLAGS_interface_generator = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
+  LIBS_ffifacegen = fawkescore fawkesutils
+  LDFLAGS_ffifacegen = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
   CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
-  OBJS_interface_generator = $(GENDIR)constant.o	\
-			     $(GENDIR)cpp_generator.o	\
-			     $(GENDIR)digest.o		\
-			     $(GENDIR)enum_constant.o	\
-			     $(GENDIR)field.o		\
-			     $(GENDIR)pseudomap.o	\
-			     $(GENDIR)main.o		\
-			     $(GENDIR)message.o		\
-			     $(GENDIR)parser.o		\
-			     $(GENDIR)tolua_generator.o	\
-			     $(GENDIR)type_checker.o
+  OBJS_ffifacegen = $(GENDIR)constant.o	\
+		    $(GENDIR)cpp_generator.o	\
+		    $(GENDIR)digest.o		\
+		    $(GENDIR)enum_constant.o	\
+		    $(GENDIR)field.o		\
+		    $(GENDIR)pseudomap.o	\
+		    $(GENDIR)main.o		\
+		    $(GENDIR)message.o		\
+		    $(GENDIR)parser.o		\
+		    $(GENDIR)tolua_generator.o	\
+		    $(GENDIR)type_checker.o
 
-  OBJS_all += $(OBJS_interface_generator)
-  BINS_all += $(BINDIR)/interface_generator
+  OBJS_all += $(OBJS_ffifacegen)
+  BINS_all += $(BINDIR)/ffifacegen
 
 else
   ifneq ($(HAVE_LIBXMLPP),1)
