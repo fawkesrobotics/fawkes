@@ -57,7 +57,8 @@ using namespace fawkes;
  */
 BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
 				     const char *logdir,
-				     const char *scenario)
+				     const char *scenario,
+				     const bool loop_replay = true)
   : Thread("BBLogReplayThread", Thread::OPMODE_CONTINUOUS)
 {
   //  set_coalesce_wakeups(true);
@@ -67,6 +68,7 @@ BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
   __logdir      = strdup(logdir);
   __scenario    = strdup(scenario); // dont need this!?
   __filename    = NULL;
+  __loop_replay = loop_replay;
   //  __queue_mutex = new Mutex();
   //  __data_size   = 0;
   //  __now = NULL;
@@ -199,49 +201,60 @@ BBLogReplayThread::init()
 void
 BBLogReplayThread::once()
 {
-  try {
-    bblog_file_header header;
-    read_file_header(__f_data, &header);
-    sanity_check(__f_data, &header);
-
-    char interface_type[BBLOG_INTERFACE_TYPE_SIZE + 1];
-    char interface_id[BBLOG_INTERFACE_ID_SIZE + 1];
-
-    strncpy(interface_type, header.interface_type, BBLOG_INTERFACE_TYPE_SIZE);
-    strncpy(interface_id, header.interface_id, BBLOG_INTERFACE_ID_SIZE);
-
-
-    Interface *iface = blackboard->open_for_writing(interface_type, interface_id);
-    
-    if (memcmp(header.interface_hash, iface->hash(), BBLOG_INTERFACE_HASH_SIZE) != 0) {
-      printf("Cannot read data. Hash mismatch between local interface and\n"
-	     "log data.\n\n");
-      blackboard->close(iface);
-      throw Exception("Interface hash mismatch\n");
-    }
-
-    bblog_entry_header entryh;
-    timeval last = {0, 0};
-    for (unsigned int i = 0; i < header.num_data_items; ++i) {
-      read_entry(__f_data, &header, &entryh, iface, i);
-      timeval next = {entryh.rel_time_sec, entryh.rel_time_usec};
-      usleep(time_diff_usec(next, last));
-      last = next;
+  do{
+    try {
+      bblog_file_header header;
+      read_file_header(__f_data, &header);
+      sanity_check(__f_data, &header);
       
-      iface->write();
-      //      print_entry(&entryh, iface);
-      //      printf("\n");
-      //      logger->log_info(name(), ".");
+      char interface_type[BBLOG_INTERFACE_TYPE_SIZE + 1];
+      char interface_id[BBLOG_INTERFACE_ID_SIZE + 1];
+      
+      strncpy(interface_type, header.interface_type, BBLOG_INTERFACE_TYPE_SIZE);
+      strncpy(interface_id, header.interface_id, BBLOG_INTERFACE_ID_SIZE);
+      
+      
+      Interface *iface = blackboard->open_for_writing(interface_type, interface_id);
+      
+      if (memcmp(header.interface_hash, iface->hash(), BBLOG_INTERFACE_HASH_SIZE) != 0) {
+	printf("Cannot read data. Hash mismatch between local interface and\n"
+	       "log data.\n\n");
+	blackboard->close(iface);
+	throw Exception("Interface hash mismatch\n");
+      }
+      
+      bblog_entry_header entryh;
+      timeval last = {0, 0};
+      for (unsigned int i = 0; i < header.num_data_items; ++i) {
+	read_entry(__f_data, &header, &entryh, iface, i);
+	timeval next = {entryh.rel_time_sec, entryh.rel_time_usec};
+	usleep(time_diff_usec(next, last));
+	//	logger->log_info(name(), "timediff:%f,timeall%f",(double)time_diff_usec(next, last)/1000000,entryh.rel_time_sec + ((double) entryh.rel_time_usec/1000000));            
+	last = next;
+	
+	iface->write();
+	
+	//      print_entry(&entryh, iface);
+	//      printf("\n");
+	//      logger->log_info(name(), ".");
+      }
+      
+      blackboard->close(iface);
+      
+    } catch (Exception &e) {
+      printf("Failed to read log file: %s\n", e.what());
     }
-
-    blackboard->close(iface);
-
-  } catch (Exception &e) {
-    printf("Failed to read log file: %s\n", e.what());
+    if(!__loop_replay){
+      logger->log_info(name(), "\nReplay finished for file\n: %s", __filename);
+      fclose(__f_data);
+      free(__filename);
+    }
+    else{
+      logger->log_info(name(), "\nLooping file\n: %s", __filename);
+      rewind(__f_data);
+    }
   }
-  logger->log_info(name(), "Replay fineshed for file\n: %s", __filename);
-  fclose(__f_data);
-  free(__filename);
+  while (__loop_replay);
 }
 
 

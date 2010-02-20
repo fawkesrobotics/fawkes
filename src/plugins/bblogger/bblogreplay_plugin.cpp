@@ -63,6 +63,7 @@ BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
 
   std::string scenario_prefix = prefix + scenario + "/";
   std::string log_prefix   = scenario_prefix + "log/";
+  std::string loop_prefix   = scenario_prefix + "loop/";
 
   std::string logdir = LOGDIR;
   try {
@@ -79,13 +80,27 @@ BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
     throw Exception("Logdir path %s is not a directory", logdir.c_str());
   }
 
+  bool loop_replay = false;
+  try {
+    loop_replay = config->get_bool((scenario_prefix + std::string("loop")).c_str());
+  } catch (Exception &e) { /* ignored, use default set above */ }
+  
+
   Configuration::ValueIterator *i = config->search(log_prefix.c_str());
   while (i->next()) {
-    
-    //printf("Adding sync thread for peer %s\n", peer.c_str());
+    bool loop_replay_i = loop_replay;
+    try {
+      char * log_reference = (char*) strrchr(i->path(),'/');
+      if(log_reference != NULL){
+	log_reference++;
+	
+	loop_replay_i = config->get_bool((loop_prefix + std::string(log_reference)).c_str());
+      }
+    } catch (Exception &e) { /* ignored, use default set above */ }
     BBLogReplayThread *log_replay_thread = new BBLogReplayThread(i->get_string().c_str(),
 								 logdir.c_str(),
-								 scenario.c_str());
+								 scenario.c_str(),
+								 loop_replay_i);
     thread_list.push_back(log_replay_thread);
   }
   delete i;

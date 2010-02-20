@@ -47,7 +47,9 @@ class BBLogReplayThread
 {
  public:
   BBLogReplayThread(const char *logfile_name,
-		    const char *logdir, const char *scenario);
+		    const char *logdir, 
+		    const char *scenario,
+		    const bool loop_replay);
   virtual ~BBLogReplayThread();
 
   virtual void init();
@@ -66,7 +68,9 @@ class BBLogReplayThread
   char               *__filename;
   char               *__logdir;
   char               *__logfile_name;
+  bool               __loop_replay;
   FILE               *__f_data;
+  
 
 };
 
