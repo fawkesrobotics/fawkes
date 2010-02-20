@@ -160,7 +160,7 @@ LaserHtSensorProcThread::loop()
 	float r   = x * cos(theta) + y * sin(theta);
 	r /= __r_scale;
 	__values[j][0] = (int)roundf(r);
-	__values[j][1] = j * __angle_step;
+	__values[j][1] = (int)roundf(j * __angle_step);
       }
       __ht->process(__values, __num_vals);
     }

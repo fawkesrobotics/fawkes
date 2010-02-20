@@ -90,7 +90,7 @@ class LaserHtSensorProcThread
   HoughTransform *__ht;
   unsigned int    __num_vals;
   int           **__values;
-  int             __angle_step;
+  float           __angle_step;
   float           __r_scale;
 };
 #endif
