@@ -2,8 +2,9 @@
 /***************************************************************************
  *  bblogreplay_plugin.h - Fawkes BlackBoard Log Replay Plugin
  *
- *  Created: Mi Feb 17 01:53:00 2010
- *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Feb 17 01:53:00 2010
+ *  Copyright  2010  Tim Niemueller [www.niemueller.de]
+ *             2010  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
  *
  ****************************************************************************/
 

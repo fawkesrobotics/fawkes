@@ -53,7 +53,7 @@ main(int argc, char **argv)
   while (! quit) {
     ti->set_test_int(++i);
     ti->write();
-    usleep(10);
+    usleep(100000);
   }
 
   rbb->close(ti);

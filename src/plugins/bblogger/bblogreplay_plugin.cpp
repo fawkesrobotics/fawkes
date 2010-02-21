@@ -2,8 +2,9 @@
 /***************************************************************************
  *  bblogreplay_plugin.cpp - Fawkes BlackBoard Log Replay Plugin
  *
- *  Created: Mi Feb 17 01:53:00 2010
- *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Feb 17 01:53:00 2010
+ *  Copyright  2010  Tim Niemueller [www.niemueller.de]
+ *             2010  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
  *
  ****************************************************************************/
 
@@ -110,5 +111,6 @@ BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
   }
 }
 
-PLUGIN_DESCRIPTION("Replay logfiles by writing them to BlackBoard interfaces")
+PLUGIN_DESCRIPTION("Replay BlackBoard log files")
 EXPORT_PLUGIN(BlackBoardLogReplayPlugin)
+

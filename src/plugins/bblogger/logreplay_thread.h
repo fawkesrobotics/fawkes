@@ -2,8 +2,9 @@
 /***************************************************************************
  *  logreplay_thread.h - BB Log Replay Thread
  *
- *  Created: Mi Feb 17 01:53:00 2010
- *  Copyright  2010  Masrur Doostdar, Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Feb 17 01:53:00 2010
+ *  Copyright  2010  Tim Niemueller [www.niemueller.de]
+ *             2010  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
  *
  ****************************************************************************/
 
@@ -22,7 +23,9 @@
 
 #ifndef __PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
 #define __PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
-#include "file.h"
+
+#include "bblogfile.h"
+
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
@@ -54,24 +57,21 @@ class BBLogReplayThread
 
   virtual void init();
   virtual void finalize();
+  virtual void loop();
   virtual void once();
 
-
- private:
-  void read_file_header(FILE *f, bblog_file_header *header);
-  void sanity_check(FILE *f, bblog_file_header *header);
-  void read_entry(FILE *f, bblog_file_header *header, bblog_entry_header *entryh,fawkes::Interface *iface, unsigned int index, bool do_seek = true);
-  
-  
  private:
   char               *__scenario;
   char               *__filename;
   char               *__logdir;
   char               *__logfile_name;
-  bool               __loop_replay;
-  FILE               *__f_data;
-  
+  bool                __cfg_loop_replay;
 
+  BBLogFile          *__logfile;
+
+  fawkes::Time        __last_offset;
+  fawkes::Time        __diff;
+  fawkes::Interface  *__interface;
 };
 
 
