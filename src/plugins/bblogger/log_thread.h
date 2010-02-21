@@ -65,6 +65,9 @@ class BBLoggerThread
   virtual void bb_interface_writer_removed(fawkes::Interface *interface,
 					   unsigned int instance_serial) throw();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   void write_header();
   void update_header();
