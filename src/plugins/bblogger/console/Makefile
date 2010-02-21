@@ -16,7 +16,7 @@
 BASEDIR = ../../../..
 
 LIBS_ffbblog = fawkescore fawkesutils fawkesblackboard
-OBJS_ffbblog = bblog.o
+OBJS_ffbblog = bblog.o ../bblogfile.o
 
 OBJS_all =	$(OBJS_ffbblog)
 BINS_all =	$(BINDIR)/ffbblog
