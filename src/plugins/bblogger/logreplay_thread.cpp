@@ -54,11 +54,12 @@ using namespace fawkes;
  * @param logfile_name filename of the log to be replayed
  * @param logdir directory containing the logfile
  * @param scenario ID of the log scenario
+ * @param loop_replay specifies if the replay should be looped
  */
 BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
 				     const char *logdir,
 				     const char *scenario,
-				     const bool loop_replay = true)
+				     const bool loop_replay)
   : Thread("BBLogReplayThread", Thread::OPMODE_CONTINUOUS)
 {
   //  set_coalesce_wakeups(true);
