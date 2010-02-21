@@ -23,7 +23,10 @@ OBJS_bblogger = bblogger_plugin.o log_thread.o
 
 
 LIBS_bblogreplay = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
-OBJS_bblogreplay = bblogreplay_plugin.o logreplay_thread.o bblogfile.o
+OBJS_bblogreplay = bblogreplay_plugin.o		\
+		   logreplay_thread.o		\
+		   logreplay_bt_thread.o	\
+		   bblogfile.o
 
 
 OBJS_all    = $(OBJS_bblogger) $(OBJS_bblogreplay)
