@@ -136,8 +136,7 @@ INSERT INTO "config" VALUES('/fawkes/bblogger/scenario','string','qatest','Curre
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/buffering','bool',1,'Enable buffering for this scenario?');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/flushing','bool',0,'Flush file stream after each chunk? Can severely influence performance, but when enabled allows real-time log watching.');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/interfaces/test','string','TestInterface::BBLoggerTest',NULL);
-INSERT INTO "config" VALUES('/fawkes/bblogreplay/scenario','string','athome','specify scenario for log replay');
-INSERT INTO "config" VALUES('/fawkes/bblogreplay/athome/log/laser720','string','athome-Laser720Interface-Laser-2010-02-18-19-00-43.log','log file to be replayed if scenario specified');
-INSERT INTO "config" VALUES('/fawkes/bblogreplay/athome/loop','bool',0,'loop the replay on default for the scenario');
-INSERT INTO "config" VALUES('/fawkes/bblogreplay/athome/loop/laser720','bool',1,'loop the replay for this specific interface (path differs with path of the interface by replacing "log" with "loop"');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/scenario','string','qatest','specify scenario for log replay');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/log/qatest','string','qatest-TestInterface-BBLoggerTest-2010-02-21-15-01-15.log','log file to be replayed if scenario specified');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/loop','bool',0,'loop the replay on default for the scenario');
 COMMIT;
