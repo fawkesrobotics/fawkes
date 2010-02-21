@@ -398,6 +398,8 @@ FawkesMainThread::loop()
       }
       __loop_start->stamp_systime();
 
+      CancelState old_state;
+      set_cancel_state(CANCEL_DISABLED, &old_state);
       try {
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_nanosec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_nanosec );
@@ -409,10 +411,11 @@ FawkesMainThread::loop()
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_nanosec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_nanosec );
       } catch (Exception &e) {
-        if(__enable_looptime_warnings) {
+        if (__enable_looptime_warnings) {
           __multi_logger->log_error("FawkesMainThread", e);
         }
       }
+      set_cancel_state(old_state);
 
       test_cancel();
 
