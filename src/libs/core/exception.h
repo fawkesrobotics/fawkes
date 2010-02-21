@@ -52,6 +52,9 @@ class Exception : public std::exception {
 
   int errno() throw();
 
+  void          set_type_id(const char *id);
+  const char *  type_id() const;
+
   virtual const char* what() const throw();
 
   Exception& operator=(const Exception &exc) throw();
@@ -105,6 +108,9 @@ class Exception : public std::exception {
   Mutex           *messages_mutex;
 
   int              _errno;
+
+ private:
+  const char *__type_id;
 };
 
 
