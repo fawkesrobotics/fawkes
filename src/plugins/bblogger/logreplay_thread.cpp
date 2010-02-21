@@ -58,12 +58,16 @@ using namespace fawkes;
  * @param logdir directory containing the logfile
  * @param scenario ID of the log scenario
  * @param loop_replay specifies if the replay should be looped
+ * @param thread_name initial thread name
+ * @param th_opmode thread operation mode
  */
 BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
 				     const char *logdir,
 				     const char *scenario,
-				     const bool loop_replay)
-  : Thread("BBLogReplayThread", Thread::OPMODE_CONTINUOUS)
+				     bool loop_replay,
+				     const char *thread_name,
+				     fawkes::Thread::OpMode th_opmode)
+  : Thread(thread_name, th_opmode)
 {
   set_name("BBLogReplayThread(%s)", logfile_name);
   set_prepfin_conc_loop(true);
@@ -140,17 +144,28 @@ BBLogReplayThread::once()
   __logfile->read_next();
   __interface->write();
   __last_offset = __logfile->entry_offset();
+  __offsetdiff.set_time((long)0);
+  __last_loop.stamp();
 }
 
 void
 BBLogReplayThread::loop()
 {
   if (__logfile->has_next()) {
+
+    // check if there is time left to wait
+    __now.stamp();
+    __loopdiff = __now - __last_loop;
+    if (__loopdiff.in_sec() < __offsetdiff.in_sec()) {
+      __waittime = __offsetdiff - __loopdiff;
+      __waittime.wait();
+    }
+
     __logfile->read_next();
     __interface->write();
 
-    __diff = __logfile->entry_offset() - __last_offset;
-    __diff.wait();
+    __last_loop.stamp();
+    __offsetdiff  = __logfile->entry_offset() - __last_offset;
     __last_offset = __logfile->entry_offset();
 
   } else {
@@ -158,10 +173,12 @@ BBLogReplayThread::loop()
       logger->log_info(name(), "replay finished, looping");
       __logfile->rewind();
     } else {
-      // block
-      logger->log_info(name(), "replay finished, sleeping");
-      WaitCondition waitcond;
-      waitcond.wait();
+      if (opmode() == OPMODE_CONTINUOUS) {
+	// block
+	logger->log_info(name(), "replay finished, sleeping");
+	WaitCondition waitcond;
+	waitcond.wait();
+      } // else wait will just run once per loop
     }
   }
 }

@@ -52,13 +52,18 @@ class BBLogReplayThread
   BBLogReplayThread(const char *logfile_name,
 		    const char *logdir, 
 		    const char *scenario,
-		    const bool loop_replay);
+		    bool loop_replay,
+		    const char *thread_name = "BBLogReplayThread",
+		    fawkes::Thread::OpMode th_opmode = Thread::OPMODE_CONTINUOUS);
   virtual ~BBLogReplayThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
   virtual void once();
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
  private:
   char               *__scenario;
@@ -70,7 +75,11 @@ class BBLogReplayThread
   BBLogFile          *__logfile;
 
   fawkes::Time        __last_offset;
-  fawkes::Time        __diff;
+  fawkes::Time        __offsetdiff;
+  fawkes::Time        __loopdiff;
+  fawkes::Time        __waittime;
+  fawkes::Time        __last_loop;
+  fawkes::Time        __now;
   fawkes::Interface  *__interface;
 };
 
