@@ -596,7 +596,7 @@ convert_file_csv(FILE *inf, FILE *outf, bblog_file_header *header)
   }
 
   // print header row
-  fprintf(outf, "# Time relative to beginning");
+  fprintf(outf, "# Time relative to beginning (in sec)");
   InterfaceFieldIterator i;
   for (i = iface->fields(); i != iface->fields_end(); ++i) {
     fprintf(outf, ";%s (%s[%zu])",
@@ -608,7 +608,7 @@ convert_file_csv(FILE *inf, FILE *outf, bblog_file_header *header)
   for (unsigned int i = 0; i < header->num_data_items; ++i) {
     read_entry(inf, header, &entryh, iface, i);
 
-    fprintf(outf, "%u.%u", entryh.rel_time_sec, entryh.rel_time_usec);
+    fprintf(outf, "%f",  entryh.rel_time_sec +  (  (double) entryh.rel_time_usec / 1000000));
 
     InterfaceFieldIterator i;
     for (i = iface->fields(); i != iface->fields_end(); ++i) {
