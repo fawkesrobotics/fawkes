@@ -42,15 +42,23 @@ using namespace fawkes;
  * @param logfile_name filename of the log to be replayed
  * @param logdir directory containing the logfile
  * @param scenario ID of the log scenario
+ * @param grace_period time in seconds that desired offset and loop offset may
+ * diverge to still write the new data
  * @param loop_replay specifies if the replay should be looped
+ * @param non_blocking do not block the main loop if not enough time has elapsed
+ * to replay new data but just wait for the next cycle. This is ignored in
+ * continuous thread mode as it could cause busy waiting.
  */
 BBLogReplayBlockedTimingThread::BBLogReplayBlockedTimingThread(
 				   BlockedTimingAspect::WakeupHook hook,
 				   const char *logfile_name,
 				   const char *logdir,
 				   const char *scenario,
-				   bool loop_replay)
-  : BBLogReplayThread(logfile_name, logdir, scenario, loop_replay,
+				   float grace_period,
+				   bool loop_replay,
+				   bool non_blocking)
+  : BBLogReplayThread(logfile_name, logdir, scenario,
+		      grace_period, loop_replay, non_blocking,
 		      "BBLogReplayBTThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(hook)
 {

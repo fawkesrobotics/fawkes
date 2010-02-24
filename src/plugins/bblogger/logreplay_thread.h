@@ -52,7 +52,9 @@ class BBLogReplayThread
   BBLogReplayThread(const char *logfile_name,
 		    const char *logdir, 
 		    const char *scenario,
+		    float grace_period,
 		    bool loop_replay,
+		    bool non_blocking = false,
 		    const char *thread_name = "BBLogReplayThread",
 		    fawkes::Thread::OpMode th_opmode = Thread::OPMODE_CONTINUOUS);
   virtual ~BBLogReplayThread();
@@ -70,6 +72,8 @@ class BBLogReplayThread
   char               *__filename;
   char               *__logdir;
   char               *__logfile_name;
+  float               __cfg_grace_period;
+  bool                __cfg_non_blocking;
   bool                __cfg_loop_replay;
 
   BBLogFile          *__logfile;

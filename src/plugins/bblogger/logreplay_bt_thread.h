@@ -37,7 +37,9 @@ class BBLogReplayBlockedTimingThread
 				 const char *logfile_name,
 				 const char *logdir, 
 				 const char *scenario,
-				 bool loop_replay);
+				 float grace_period,
+				 bool loop_replay,
+				 bool non_blocking);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

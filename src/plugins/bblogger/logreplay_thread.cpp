@@ -57,14 +57,21 @@ using namespace fawkes;
  * @param logfile_name filename of the log to be replayed
  * @param logdir directory containing the logfile
  * @param scenario ID of the log scenario
+ * @param grace_period time in seconds that desired offset and loop offset may
+ * diverge to still write the new data
  * @param loop_replay specifies if the replay should be looped
+ * @param non_blocking do not block the main loop if not enough time has elapsed
+ * to replay new data but just wait for the next cycle. This is ignored in
+ * continuous thread mode as it could cause busy waiting.
  * @param thread_name initial thread name
  * @param th_opmode thread operation mode
  */
 BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
 				     const char *logdir,
 				     const char *scenario,
+				     float grace_period,
 				     bool loop_replay,
+				     bool non_blocking,
 				     const char *thread_name,
 				     fawkes::Thread::OpMode th_opmode)
   : Thread(thread_name, th_opmode)
@@ -76,7 +83,14 @@ BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
   __logdir      = strdup(logdir);
   __scenario    = strdup(scenario); // dont need this!?
   __filename    = NULL;
-  __cfg_loop_replay = loop_replay;
+  __cfg_grace_period = grace_period;
+  __cfg_loop_replay  = loop_replay;
+  if (th_opmode == OPMODE_WAITFORWAKEUP) {
+    __cfg_non_blocking = non_blocking;
+  } else {
+    // would cause busy waiting
+    __cfg_non_blocking = false;
+  }
 }
 
 
@@ -144,7 +158,11 @@ BBLogReplayThread::once()
   __logfile->read_next();
   __interface->write();
   __last_offset = __logfile->entry_offset();
-  __offsetdiff.set_time((long)0);
+  if (__logfile->has_next()) {
+    __logfile->read_next();
+    __offsetdiff  = __logfile->entry_offset() - __last_offset;
+    __last_offset = __logfile->entry_offset();
+  }
   __last_loop.stamp();
 }
 
@@ -156,13 +174,19 @@ BBLogReplayThread::loop()
     // check if there is time left to wait
     __now.stamp();
     __loopdiff = __now - __last_loop;
-    if (__loopdiff.in_sec() < __offsetdiff.in_sec()) {
-      __waittime = __offsetdiff - __loopdiff;
-      __waittime.wait();
+    if ((__offsetdiff.in_sec() - __loopdiff.in_sec()) > __cfg_grace_period) {
+      if (__cfg_non_blocking) {
+	// need to keep waiting before posting, but in non-blocking mode
+	// just wait for next loop
+	return;
+      } else {
+	__waittime = __offsetdiff - __loopdiff;
+	__waittime.wait();
+      }
     }
 
-    __logfile->read_next();
     __interface->write();
+    __logfile->read_next();
 
     __last_loop.stamp();
     __offsetdiff  = __logfile->entry_offset() - __last_offset;
