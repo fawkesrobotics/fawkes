@@ -133,10 +133,15 @@ INSERT INTO "config" VALUES('/plugins/laserht/line/dist_threshold','float',0.05,
 INSERT INTO "config" VALUES('/plugins/laserht/line/fitting_error_threshold','float',20,'Max. error allowed in the fitting step');
 INSERT INTO "config" VALUES('/plugins/festival/voice','string','nitech_us_bdl_arctic_hts','Voice to use for Festival speech synth');
 INSERT INTO "config" VALUES('/fawkes/bblogger/scenario','string','qatest','Current logging scenario');
+INSERT INTO "config" VALUES('/fawkes/bblogger/generate_replay_config','bool',1,'Automatically create a configuration for replay?');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/buffering','bool',1,'Enable buffering for this scenario?');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/flushing','bool',0,'Flush file stream after each chunk? Can severely influence performance, but when enabled allows real-time log watching.');
 INSERT INTO "config" VALUES('/fawkes/bblogger/qatest/interfaces/test','string','TestInterface::BBLoggerTest',NULL);
 INSERT INTO "config" VALUES('/fawkes/bblogreplay/scenario','string','qatest','specify scenario for log replay');
-INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/log/qatest','string','qatest-TestInterface-BBLoggerTest-2010-02-21-15-01-15.log','log file to be replayed if scenario specified');
-INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/loop','bool',0,'loop the replay on default for the scenario');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/loop','bool',0,'Loop replay by default?');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/non_blocking','bool',0,'Non-blocking replay in blocked timing mode by default?');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/grace_period','float',0.001,'Grace period for differences in offset and elapsed time to still allow replay');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/file','string','laser-Laser360Interface-Laser-2010-02-21-22-22-29.log','log file to be replayed if scenario specified');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/loop','bool',1,'loop the replay on default for the scenario');
+INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/hook','string','sensor','Hook at which to replay the log data');
 COMMIT;
