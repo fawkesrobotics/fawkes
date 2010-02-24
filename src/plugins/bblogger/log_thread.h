@@ -54,6 +54,8 @@ class BBLoggerThread
 		 const char *scenario, fawkes::Time *start_time);
   virtual ~BBLoggerThread();
 
+  const char * get_filename() const;
+
   virtual void init();
   virtual void finalize();
   virtual void loop();
@@ -87,6 +89,8 @@ class BBLoggerThread
   char               *__filename;
   char               *__logdir;
   char               *__uid;
+  char               *__type;
+  char               *__id;
   FILE               *__f_data;
   FILE               *__f_msgs;
 

@@ -26,7 +26,6 @@
 #include <blackboard/blackboard.h>
 #include <utils/logging/logger.h>
 #include <core/exceptions/system.h>
-#include <utils/misc/autofree.h>
 
 #include <memory>
 #include <cstring>
@@ -92,6 +91,19 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
   __data_size   = 0;
 
   __now = NULL;
+
+  // Parse UID
+  Interface::parse_uid(__uid, &__type, &__id);
+
+  char date[21];
+  Time now;
+  struct tm *tmp = localtime(&(now.get_timeval()->tv_sec));
+  strftime(date, 21, "%F-%H-%M-%S", tmp);
+
+  if (asprintf(&__filename, "%s/%s-%s-%s-%s.log", LOGDIR, __scenario,
+	       __type, __id, date) == -1) {
+    throw OutOfMemoryException("Cannot generate log name");
+  }
 }
 
 
@@ -99,8 +111,11 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
 BBLoggerThread::~BBLoggerThread()
 {
   free(__uid);
+  free(__type);
+  free(__id);
   free(__logdir);
   free(__scenario);
+  free(__filename);
   delete __queue_mutex;
   delete __start;
 }
@@ -120,24 +135,6 @@ BBLoggerThread::init()
   __num_data_items = 0;
   __session_start  = 0;
 
-  // Parse UID
-  char *type, *id;
-  Interface::parse_uid(__uid, &type, &id);
-
-  // Auto-destruction on Exception or func exit
-  MemAutoFree typeaf(type);
-  MemAutoFree idaf(id);
-  MemAutoFree filenameaf(__filename);
-
-  char date[21];
-  struct tm *tmp = localtime(&(clock->now().get_timeval()->tv_sec));
-  strftime(date, 21, "%F-%H-%M-%S", tmp);
-
-  if (asprintf(&__filename, "%s/%s-%s-%s-%s.log", LOGDIR, __scenario,
-	       type, id, date) == -1) {
-    throw OutOfMemoryException("Cannot generate log name");
-  }
-
   // use open because fopen does not provide O_CREAT | O_EXCL
   // open read/write because of usage of mmap
   mode_t m = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
@@ -152,7 +149,7 @@ BBLoggerThread::init()
   }
 
   try {
-    __iface = blackboard->open_for_reading(type, id);
+    __iface = blackboard->open_for_reading(__type, __id);
     __data_size = __iface->datasize();
   } catch (Exception &e) {
     fclose(__f_data);
@@ -178,7 +175,6 @@ BBLoggerThread::init()
 
   logger->log_info(name(), "Logging %s to %s", __iface->uid(), __filename);
 
-  filenameaf.release();
 }
 
 
@@ -197,9 +193,18 @@ BBLoggerThread::finalize()
   }
   delete __now;
   __now = NULL;
-  free(__filename);
 }
 
+
+/** Get filename.
+ * @return file name, valid after object instantiated, but before init() does not
+ * mean that the file has been or can actually be opened
+ */
+const char *
+BBLoggerThread::get_filename() const
+{
+  return __filename;
+}
 
 void
 BBLoggerThread::write_header()
