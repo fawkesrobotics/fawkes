@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 
-LIBS_ffbblog = fawkescore fawkesutils fawkesblackboard
+LIBS_ffbblog = fawkescore fawkesutils fawkesblackboard SwitchInterface
 OBJS_ffbblog = bblog.o ../bblogfile.o
 
 OBJS_all =	$(OBJS_ffbblog)

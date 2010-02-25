@@ -27,7 +27,9 @@
 #include <utils/time/time.h>
 #include <utils/system/fam.h>
 
+#include <blackboard/remote.h>
 #include <blackboard/internal/instance_factory.h>
+#include <interfaces/SwitchInterface.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -44,7 +46,7 @@ using namespace fawkes;
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-h] <watch|info|replay|repair> <logfile>\n"
+  printf("Usage: %s [-h] [-r host:port] <COMMAND> <logfile>\n"
 	 "       %s print <logfile> <index> [index ...]\n"
 	 "       %s convert <infile> <outfile> <format>\n"
 	 "\n"
@@ -56,6 +58,8 @@ print_usage(const char *program_name)
 	 "           <index> [index ...] is a list of indices to print\n"
          " replay    Replay log file in real-time to console\n"
 	 " repair    Repair file, i.e. properly set number of entries\n"
+	 " enable    Enable logging on a remotely running bblogger\n"
+	 " disable   Disable logging on a remotely running bblogger\n"
 	 " convert   Convert logfile to different format\n"
 	 "           <infile>  input log file\n"
 	 "           <outfile> converted output file\n"
@@ -225,6 +229,30 @@ watch_file(std::string &filename)
   return 0;  
 }
 
+
+int
+set_enabled(const char *hostname, unsigned short int port, bool enabled)
+{
+  bool rv = 0;
+
+  BlackBoard *bb = new RemoteBlackBoard(hostname, port);
+  SwitchInterface *si = bb->open_for_reading<SwitchInterface>("BBLogger");
+  if ( ! si->has_writer() ) {
+    printf("No writer exists, BBLogger not loaded?\n");
+    rv = -1;
+  } else {
+    if (enabled) {
+      si->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
+    } else {
+      si->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
+    }
+  }
+
+  bb->close(si);
+  delete bb;
+  return rv;
+}
+
 /// @endcond
 
 void
@@ -302,14 +330,16 @@ main(int argc, char **argv)
     exit(0);
   }
 
-  if (argp.num_items() < 2) {
+  std::string command, file;
+  if (argp.num_items() < 1) {
     printf("Invalid number of arguments\n");
     print_usage(argv[0]);
     exit(1);
+  } else if (argp.num_items() >= 2) {
+    file    = argp.items()[1];
   }
 
-  std::string command = argp.items()[0];
-  std::string file    = argp.items()[1];
+  command = argp.items()[0];
 
   if (command == "watch") {
     return watch_file(file);
@@ -342,6 +372,16 @@ main(int argc, char **argv)
 
   } else if (command == "repair") {
     return repair_file(file);
+
+  } else if ( (command == "enable") || (command == "disable")) {
+    char *host = strdup("localhost");
+    unsigned short int port = 1910;
+    if (argp.has_arg("r")) {
+      argp.parse_hostport("r", &host, &port);
+    }
+    int rv = set_enabled(host, port, (command == "enable"));
+    free(host);
+    return rv;
 
   } else if (command == "convert") {
     if (argp.num_items() != 4) {
