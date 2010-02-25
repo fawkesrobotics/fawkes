@@ -28,8 +28,9 @@
 class HoughTransform {
  private:
   class Node {
+    friend class HoughTransform;
   public:
-    Node(unsigned int dims, int value = 0);
+    Node(HoughTransform *ht, unsigned int dims, int value = 0);
     ~Node();
 
     unsigned int insert(int *values);
@@ -40,8 +41,15 @@ class HoughTransform {
     unsigned int filter(int **values, unsigned int min_count);
 
   private:
-    Node(Node *parent, unsigned int dims, int value = 0);
-    Node();
+    Node(HoughTransform *ht, Node *parent, unsigned int dims, int value = 0);
+    Node(HoughTransform *ht = 0);
+
+    void reinit(Node *parent, unsigned int dims, int value) {
+      __parent = parent;
+      __left = __right  = __dim_next = 0;
+      __value = value;
+      __dims = dims;
+    }    
 
     Node * filter(Node *tail, unsigned int min_count);
     unsigned int filtered_length();
@@ -52,6 +60,8 @@ class HoughTransform {
     unsigned int __count;
     int   __value;
 
+    HoughTransform *__ht;
+
     Node *__parent; // that is the "value parent", not necessarily tree parent
     Node *__left;
     Node *__right;
@@ -60,7 +70,7 @@ class HoughTransform {
     Node *__filter_next;
 
     // for re-use (avoiding re-allocations)
-    // Node *__reuse_next;
+    Node *__reuse_next;
   };
 
  public:
@@ -76,8 +86,26 @@ class HoughTransform {
 
   Node *  root();
 
+  inline Node * create_node(Node *parent, unsigned int dims, int value = 0)
+  {
+    if (__reuse_cur != 0) {
+      Node *rv = __reuse_cur;
+      rv->reinit(parent, dims, value);
+      __reuse_cur = __reuse_cur->__reuse_next;
+      return rv;
+    } else {
+      Node *rv = new Node(this, parent, dims, value);
+      __reuse_tail->__reuse_next = rv;
+      __reuse_tail = rv;
+      return rv;
+    }
+  }
+
  private:
   Node *__root;
+  Node *__reuse_head;
+  Node *__reuse_cur;
+  Node *__reuse_tail;
 
   unsigned int __num_dims;
   unsigned int __max_count;

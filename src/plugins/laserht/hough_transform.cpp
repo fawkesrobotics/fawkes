@@ -45,9 +45,13 @@
  */
 HoughTransform::HoughTransform(unsigned int num_dims)
 {
-  __root = new Node(num_dims);
+  __root = new Node(this, num_dims);
 
   __num_dims   = num_dims;
+
+  __reuse_head = new Node(this);
+  __reuse_cur  = __reuse_head;
+  __reuse_tail = __reuse_head;
 
   __max_count  = 0;
   __max_values = new int[num_dims];
@@ -56,7 +60,12 @@ HoughTransform::HoughTransform(unsigned int num_dims)
 /** Destructor. */
 HoughTransform::~HoughTransform()
 {
-  delete __root;
+  while (__reuse_head) {
+    Node *n = __reuse_head;
+    __reuse_head = __reuse_head->__reuse_next;
+    delete n;
+  }
+
   delete[] __max_values;
 }
 
@@ -129,8 +138,8 @@ HoughTransform::root()
 void
 HoughTransform::reset()
 {
-  delete __root;
-  __root = new Node(__num_dims);
+  __reuse_cur = __reuse_head;
+  __root = create_node(NULL, __num_dims);
   __max_count = 0;
   for (unsigned int d = 0; d < __num_dims; ++d) {
     __max_values[d] = 0;
@@ -155,17 +164,14 @@ HoughTransform::reset()
  * @param dims number of remaining dimensions (including the own)
  * @param value the initial value of the node
  */
-HoughTransform::Node::Node(unsigned int dims, int value)
+HoughTransform::Node::Node(HoughTransform *ht, unsigned int dims, int value)
 {
+  __ht     = ht;
   __dims   = dims;
   __value  = value;
   __count  = 0;
   __parent = NULL;
-  __left = __right = __dim_next = __filter_next = 0;
-  //if (parent) {
-  //  __reuse_next = parent->__reuse_next;
-  //  parent->__reuse_next = this;
-  //}
+  __left = __right = __dim_next = __filter_next = __reuse_next = 0;
 }
 
 /** Constructor with parent node.
@@ -173,35 +179,32 @@ HoughTransform::Node::Node(unsigned int dims, int value)
  * @param dims number of remaining dimensions (including the own)
  * @param value the initial value of the node
  */
-HoughTransform::Node::Node(Node *parent, unsigned int dims, int value)
+HoughTransform::Node::Node(HoughTransform *ht,
+			   Node *parent, unsigned int dims, int value)
 {
+  __ht     = ht;
   __parent = parent;
   __dims   = dims;
   __value  = value;
   __count  = 0;
-  __left = __right = __dim_next = __filter_next = 0;
-  //if (parent) {
-  //  __reuse_next = parent->__reuse_next;
-  //  parent->__reuse_next = this;
-  //}
+  __left = __right = __dim_next = __filter_next = __reuse_next = 0;
 }
 
 /** Constructor. */
-HoughTransform::Node::Node()
+HoughTransform::Node::Node(HoughTransform *ht)
 {
+  __ht     = ht;
   __dims   = 1;
   __value  = 0;
   __count  = 0;
   __parent = NULL;
-  __left = __right = __dim_next = __filter_next = 0;
+  __left = __right = __dim_next = __filter_next = __reuse_next = 0;
 }
 
 /** Destructor. */
 HoughTransform::Node::~Node()
 {
-  delete __left;
-  delete __right;
-  delete __dim_next;
+  // sub-nodes delete by HoughTransform
 }
 
 
@@ -216,12 +219,7 @@ HoughTransform::Node::insert(int *values)
   if (values[0] == __value) {
     if ( __dims > 1) {
       if (! __dim_next) {
-	//if (__reuse_next) {
-	//  __dim_next = __reuse_next;
-	//  __reuse_next = __reuse_next->__reuse_next;
-	//} else {
-	__dim_next = new Node(this, __dims - 1, values[1]);
-	//}
+	__dim_next = __ht->create_node(this, __dims - 1, values[1]);
       }
 
       return __dim_next->insert(&(values[1]));
@@ -230,12 +228,12 @@ HoughTransform::Node::insert(int *values)
     }
   } else if (values[0] < __value) {
     if (! __left) {
-      __left = new Node(__parent, __dims, values[0]);
+      __left = __ht->create_node(__parent, __dims, values[0]);
     }
     return __left->insert(values);
   } else { // values[0] > __value
     if (! __right) {
-      __right = new Node(__parent, __dims, values[0]);
+      __right = __ht->create_node(__parent, __dims, values[0]);
     }
     return __right->insert(values);
   }
@@ -314,6 +312,8 @@ HoughTransform::Node::filter(int **values, unsigned int min_count)
     }
     ++f;
   }
+
+  delete filtered_root;
 
   *values = fvals;
   return flen;
