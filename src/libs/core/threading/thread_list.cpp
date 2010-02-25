@@ -140,6 +140,23 @@ ThreadList::~ThreadList()
 }
 
 
+/** Assignment operator.
+ * @param tl thread list to assign
+ */
+ThreadList &
+ThreadList::operator= (const ThreadList &tl)
+{
+  LockList<Thread *>::operator=(tl);
+  __name = strdup(tl.__name);
+  __sealed = tl.__sealed;
+  __finalize_mutex = new Mutex();
+  __wnw_barrier = NULL;
+  if ( tl.__wnw_barrier != NULL )  update_barrier();
+
+  return *this;
+}
+
+
 /** Wakeup all threads in list. */
 void
 ThreadList::wakeup()
