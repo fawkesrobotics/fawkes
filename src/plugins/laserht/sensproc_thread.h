@@ -38,6 +38,7 @@ namespace fawkes {
   class Laser360Interface;
   class ObjectPositionInterface;
   class VisualDisplay2DInterface;
+  class TimeTracker;
 }
 class HoughTransform;
 
@@ -92,5 +93,14 @@ class LaserHtSensorProcThread
   int           **__values;
   float           __angle_step;
   float           __r_scale;
+
+#ifdef LASERHT_TIMETRACKER
+  fawkes::TimeTracker *__tt;
+  unsigned int __tt_loop;
+  unsigned int __ttc_reset;
+  unsigned int __ttc_process;
+  unsigned int __ttc_fitting;
+  unsigned int __ttc_total;
+#endif
 };
 #endif

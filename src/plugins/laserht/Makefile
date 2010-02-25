@@ -18,6 +18,10 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+# Uncomment the following to get timing information about the most important
+# stages.
+#CFLAGS += -DLASERHT_TIMETRACKER
+
 LIBS_laserht = fawkescore fawkesutils fawkesaspects \
 	       Laser360Interface Laser720Interface ObjectPositionInterface \
 	       VisualDisplay2DInterface
