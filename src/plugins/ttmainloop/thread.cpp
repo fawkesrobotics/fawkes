@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  wm_thread.cpp - Fawkes TimeTrackerMainLoop Plugin Thread
+ *  thread.cpp - Fawkes TimeTrackerMainLoop Plugin Thread
  *
  *  Created: Fri Jun 29 11:56:48 2007 (on flight to RoboCup 2007, Atlanta)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
@@ -24,7 +24,6 @@
 
 #include <core/exceptions/system.h>
 #include <utils/time/tracker.h>
-#include <utils/time/wait.h>
 
 using namespace fawkes;
 
@@ -51,23 +50,6 @@ TimeTrackerMainLoopThread::init()
 {
   __loop_start = new Time(clock);
   __loop_end   = new Time(clock);
-  try {
-    __max_thread_time_usec = config->get_uint("/fawkes/mainapp/max_thread_time");
-  } catch (Exception &e) {
-    __max_thread_time_usec = 30000;
-    logger->log_info("FawkesMainApp", "Maximum thread time not set, assuming 30ms.");
-  }
-
-  __time_wait = NULL;
-  try {
-    __desired_loop_time_usec = config->get_uint("/fawkes/mainapp/desired_loop_time");
-    if ( __desired_loop_time_usec > 0 ) {
-      __time_wait = new TimeWait(clock, __desired_loop_time_usec);
-    }
-  } catch (Exception &e) {
-    __desired_loop_time_usec = 0;
-    logger->log_info("FawkesMainApp", "Desired loop time not set, assuming 0");
-  }
 
   try {
     __output_interval = config->get_uint("/ttmainloop/output_interval");
@@ -111,31 +93,16 @@ TimeTrackerMainLoopThread::init()
 void
 TimeTrackerMainLoopThread::finalize()
 {
-  delete __time_wait;
   delete __tt;
 }
 
 void
 TimeTrackerMainLoopThread::loop()
 {
-  if ( ! blocked_timing_executor->timed_threads_exist() ) {
-    logger->log_debug("TimeTrackerMainLoopThread", "No threads exist, waiting");
-    try {
-      blocked_timing_executor->wait_for_timed_threads();
-      logger->log_debug("TimeTrackerMainLoopThread", "Timed threads have been "
-			"added, running main loop now");
-    } catch (InterruptedException &e) {
-      logger->log_debug("TimeTrackerMainLoopThread", "Waiting for timed threads interrupted");
-      return;
-    }
-  }
+  Thread::CancelState old_state;
+  set_cancel_state(CANCEL_DISABLED, &old_state);
 
   TIMETRACK_START(__ttc_real_loop, __ttc_full_loop, __ttc_pre_loop);
-
-  if ( __time_wait ) {
-    __time_wait->mark_start();
-  }
-  __loop_start->stamp_systime();
 
   blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
@@ -170,15 +137,9 @@ TimeTrackerMainLoopThread::loop()
   TIMETRACK_END(__ttc_netproc);
   TIMETRACK_END(__ttc_real_loop);
 
+  set_cancel_state(old_state);
+
   test_cancel();
-
-  if ( __time_wait ) {
-    __time_wait->wait_systime();
-  } else {
-    yield();
-  }
-
-  TIMETRACK_END(__ttc_full_loop);
 
   __now->stamp();
   if ( (*__now - __last_outp_time) >= __output_interval ) {
@@ -188,50 +149,4 @@ TimeTrackerMainLoopThread::loop()
     *__last_outp_time = *__now;
   }
 
-  try {
-    blocked_timing_executor->try_recover(__recovered_threads);
-    if ( ! __recovered_threads.empty() ) {
-      // threads have been recovered!
-      std::string s;
-      if ( __recovered_threads.size() == 1 ) {
-	s = std::string("The thread ") + __recovered_threads.front() +
-	  " could be recovered and resumes normal operation";
-      } else {
-	s = "The following threads could be recovered and resumed normal operation: ";
-	for (std::list<std::string>::iterator i = __recovered_threads.begin();
-	     i != __recovered_threads.end(); ++i) {
-	  s += *i + " ";
-	}
-      }
-      __recovered_threads.clear();
-      logger->log_warn("FawkesMainThread", "%s", s.c_str());
-    }
-
-    if (__desired_loop_time_sec > 0) {
-      __loop_end->stamp_systime();
-      float loop_time = *__loop_end - __loop_start;
-      if (loop_time > __desired_loop_time_sec) {
-	logger->log_warn("FawkesMainThread", "Loop time exceeded, "
-				 "desired: %f sec (%u usec),  actual: %f sec",
-				 __desired_loop_time_sec, __desired_loop_time_usec,
-				 loop_time);
-      }
-    }
-    if ( __time_wait ) {
-      __time_wait->wait_systime();
-    } else {
-      yield();
-    }
-  } catch (Exception &e) {
-    logger->log_warn("FawkesMainThread",
-			     "Exception caught while executing default main "
-			     "loop, ignoring.");
-    logger->log_warn("FawkesMainThread", e);
-  } catch (std::exception &e) {
-    logger->log_warn("FawkesMainThread",
-			     "STL Exception caught while executing default main "
-			     "loop, ignoring. (what: %s)", e.what());
-  }
-  // catch ... is not a good idea, would catch cancellation exception
-  // at least needs to be rethrown.
 }
