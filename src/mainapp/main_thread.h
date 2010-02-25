@@ -90,6 +90,7 @@ class FawkesMainThread
   FawkesThreadManager          *__thread_manager;
   fawkes::PluginManager        *__plugin_manager;
   fawkes::PluginNetworkHandler *__plugin_nethandler;
+  fawkes::Mutex                *__plugin_mutex;
   FawkesNetworkManager         *__network_manager;
 
   std::list<std::string>        __recovered_threads;

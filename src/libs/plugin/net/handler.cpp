@@ -62,13 +62,18 @@ namespace fawkes {
 /** Constructor.
  * @param manager plugin manager for the actual work
  * @param hub Fawkes network hub
+ * @param mutex mutex that will be used to protect loading and unloading of
+ * plugins.
  */
-PluginNetworkHandler::PluginNetworkHandler(PluginManager *manager, FawkesNetworkHub *hub)
+PluginNetworkHandler::PluginNetworkHandler(PluginManager *manager,
+					   FawkesNetworkHub *hub,
+					   Mutex *mutex)
   : Thread("PluginNetworkHandler", Thread::OPMODE_WAITFORWAKEUP),
     FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
 {
   __manager = manager;
   __hub = hub;
+  __mutex = mutex;
 
   __manager->add_listener(this);
   __hub->add_handler(this);
@@ -230,6 +235,7 @@ PluginNetworkHandler::send_unload_success(const char *plugin_name, unsigned int 
 void
 PluginNetworkHandler::load(const char *plugin_list, unsigned int clid)
 {
+  if (__mutex)  __mutex->lock();
   try {
     __manager->load(plugin_list);
     send_load_success(plugin_list, clid);
@@ -238,6 +244,7 @@ PluginNetworkHandler::load(const char *plugin_list, unsigned int clid)
     LibLogger::log_error("PluginNetworkHandler", e);
     send_load_failure(plugin_list, clid);
   }
+  if (__mutex)  __mutex->unlock();
 }
 
 
@@ -251,6 +258,7 @@ PluginNetworkHandler::load(const char *plugin_list, unsigned int clid)
 void
 PluginNetworkHandler::unload(const char *plugin_name, unsigned int clid)
 {
+  if (__mutex)  __mutex->lock();
   try {
     __manager->unload(plugin_name);
     send_unload_success(plugin_name, clid);
@@ -259,6 +267,7 @@ PluginNetworkHandler::unload(const char *plugin_name, unsigned int clid)
     LibLogger::log_error("PluginNetworkHandler", e);
     send_unload_failure(plugin_name, clid);
   }
+  if (__mutex)  __mutex->unlock();
 }
 
 

@@ -78,6 +78,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __mainloop_mutex    = new Mutex();
   __mainloop_barrier  = new InterruptibleBarrier(__mainloop_mutex, 2);
 
+  __plugin_mutex      = new Mutex();
+
   __argp = argp;
 
   /* Logging stuff */
@@ -225,7 +227,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __aspect_inifin->set_blocked_timing_executor(__thread_manager);
 
   __plugin_nethandler = new PluginNetworkHandler(__plugin_manager,
-						 __network_manager->hub() );
+						 __network_manager->hub(),
+						 __plugin_mutex);
   __plugin_nethandler->start();
 
   __blackboard->start_nethandler(__network_manager->hub());
@@ -301,6 +304,8 @@ FawkesMainThread::destruct()
   delete __mainloop_barrier;
   delete __mainloop_mutex;
 
+  delete __plugin_mutex;
+
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
 
@@ -342,10 +347,9 @@ FawkesMainThread::set_mainloop_thread(Thread *mainloop_thread)
 {
   loopinterrupt_antistarve_mutex->lock();
   __mainloop_mutex->lock();
-  if (mainloop_thread)  __mainloop_barrier->interrupt();
+  __mainloop_barrier->interrupt();
   __mainloop_thread = mainloop_thread;
   __mainloop_mutex->unlock();
-  __thread_manager->interrupt_timed_thread_wait();
   loopinterrupt_antistarve_mutex->unlock();
 }
 
@@ -367,36 +371,41 @@ FawkesMainThread::remove_logger(Logger *logger)
 void
 FawkesMainThread::loop()
 {
-  if (unlikely(__mainloop_thread != NULL)) {
+  if ( ! __thread_manager->timed_threads_exist() ) {
+    __multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
     try {
-      __mainloop_mutex->lock();
-      if (likely(__mainloop_thread != NULL)) {
-	__mainloop_thread->wakeup(__mainloop_barrier);
-	__mainloop_barrier->wait();
-      }
-      __mainloop_mutex->unlock();
-    } catch (Exception &e) {
-      __multi_logger->log_warn("FawkesMainThread", e);
+      __thread_manager->wait_for_timed_threads();
+      __multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
+				"running main loop now");
+    } catch (InterruptedException &e) {
+      __multi_logger->log_debug("FawkesMainThread", "Waiting for timed threads interrupted");
+      return;
     }
+  }
 
-  } else {
-    try {
-      if ( ! __thread_manager->timed_threads_exist() ) {
-	__multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
-	try {
-	  __thread_manager->wait_for_timed_threads();
-	  __multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
-				    "running main loop now");
-	} catch (InterruptedException &e) {
-	  __multi_logger->log_debug("FawkesMainThread", "Waiting for timed threads interrupted");
-	  return;
+  __plugin_mutex->lock();
+
+  try {
+    if ( __time_wait ) {
+      __time_wait->mark_start();
+    }
+    __loop_start->stamp_systime();
+      
+    CancelState old_state;
+    set_cancel_state(CANCEL_DISABLED, &old_state);
+
+    __mainloop_mutex->lock();
+
+    if (unlikely(__mainloop_thread != NULL)) {
+      try {
+	if (likely(__mainloop_thread != NULL)) {
+	  __mainloop_thread->wakeup(__mainloop_barrier);
+	  __mainloop_barrier->wait();
 	}
+      } catch (Exception &e) {
+	__multi_logger->log_warn("FawkesMainThread", e);
       }
-
-      if ( __time_wait ) {
-	__time_wait->mark_start();
-      }
-      __loop_start->stamp_systime();
+    } else {
 
       CancelState old_state;
       set_cancel_state(CANCEL_DISABLED, &old_state);
@@ -411,65 +420,69 @@ FawkesMainThread::loop()
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_nanosec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_nanosec );
       } catch (Exception &e) {
-        if (__enable_looptime_warnings) {
-          __multi_logger->log_error("FawkesMainThread", e);
-        }
-      }
-      set_cancel_state(old_state);
-
-      test_cancel();
-
-      __thread_manager->try_recover(__recovered_threads);
-      if ( ! __recovered_threads.empty() ) {
-	// threads have been recovered!
-	__multi_logger->log_error(name(), "Threads recovered %zu", __recovered_threads.size());
-	if(__enable_looptime_warnings) {
-	  if ( __recovered_threads.size() == 1 ) {
-	    __multi_logger->log_warn("FawkesMainThread", "The thread %s could be "
-				     "recovered and resumes normal operation",
-				     __recovered_threads.front().c_str());
-	  } else {
-	    std::string s;
-	    for (std::list<std::string>::iterator i = __recovered_threads.begin();
-	         i != __recovered_threads.end(); ++i) {
-	      s += *i + " ";
-	    }
-            
-	    __multi_logger->log_warn("FawkesMainThread", "The following threads could be "
-				     "recovered and resumed normal operation: %s", s.c_str());
-	  }
-	}
-	__recovered_threads.clear();
-      }
-
-      if (__desired_loop_time_sec > 0) {
-	__loop_end->stamp_systime();
-	float loop_time = *__loop_end - __loop_start;
-	if(__enable_looptime_warnings) {
-	  if (loop_time > __desired_loop_time_sec) {
-	    __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
-	        "desired: %f sec (%u usec),  actual: %f sec",
-	        __desired_loop_time_sec, __desired_loop_time_usec,
-	        loop_time);
-	  }
+	if (__enable_looptime_warnings) {
+	  __multi_logger->log_error("FawkesMainThread", e);
 	}
       }
-      if ( __time_wait ) {
-	__time_wait->wait_systime();
-      } else {
-	yield();
-      }
-    } catch (Exception &e) {
-      __multi_logger->log_warn("FawkesMainThread",
-			       "Exception caught while executing default main "
-			       "loop, ignoring.");
-      __multi_logger->log_warn("FawkesMainThread", e);
-    } catch (std::exception &e) {
-      __multi_logger->log_warn("FawkesMainThread",
-			       "STL Exception caught while executing default main "
-			       "loop, ignoring. (what: %s)", e.what());
     }
-    // catch ... is not a good idea, would catch cancellation exception
-    // at least needs to be rethrown.
+    __mainloop_mutex->unlock();
+    set_cancel_state(old_state);
+
+    test_cancel();
+
+    __thread_manager->try_recover(__recovered_threads);
+    if ( ! __recovered_threads.empty() ) {
+      // threads have been recovered!
+      __multi_logger->log_error(name(), "Threads recovered %zu", __recovered_threads.size());
+      if(__enable_looptime_warnings) {
+	if ( __recovered_threads.size() == 1 ) {
+	  __multi_logger->log_warn("FawkesMainThread", "The thread %s could be "
+				   "recovered and resumes normal operation",
+				   __recovered_threads.front().c_str());
+	} else {
+	  std::string s;
+	  for (std::list<std::string>::iterator i = __recovered_threads.begin();
+	       i != __recovered_threads.end(); ++i) {
+	    s += *i + " ";
+	  }
+          
+	  __multi_logger->log_warn("FawkesMainThread", "The following threads could be "
+				   "recovered and resumed normal operation: %s", s.c_str());
+	}
+      }
+      __recovered_threads.clear();
+    }
+
+    if (__desired_loop_time_sec > 0) {
+      __loop_end->stamp_systime();
+      float loop_time = *__loop_end - __loop_start;
+      if(__enable_looptime_warnings) {
+	if (loop_time > __desired_loop_time_sec) {
+	  __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+				   "desired: %f sec (%u usec),  actual: %f sec",
+				   __desired_loop_time_sec, __desired_loop_time_usec,
+				   loop_time);
+	}
+      }
+    }
+
+    __plugin_mutex->unlock();
+
+    if ( __time_wait ) {
+      __time_wait->wait_systime();
+    } else {
+      yield();
+    }
+  } catch (Exception &e) {
+    __multi_logger->log_warn("FawkesMainThread",
+			     "Exception caught while executing default main "
+			     "loop, ignoring.");
+    __multi_logger->log_warn("FawkesMainThread", e);
+  } catch (std::exception &e) {
+    __multi_logger->log_warn("FawkesMainThread",
+			     "STL Exception caught while executing default main "
+			     "loop, ignoring. (what: %s)", e.what());
   }
+  // catch ... is not a good idea, would catch cancellation exception
+  // at least needs to be rethrown.
 }
