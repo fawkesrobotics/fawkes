@@ -29,7 +29,9 @@
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <blackboard/interface_listener.h>
+
 #include <core/utils/lock_queue.h>
+#include <core/threading/thread_list.h>
 
 #include <cstdio>
 
@@ -38,6 +40,7 @@ namespace fawkes {
   class Logger;
   class Mutex;
   class Time;
+  class SwitchInterface;
 }
 
 class BBLoggerThread
@@ -55,6 +58,8 @@ class BBLoggerThread
   virtual ~BBLoggerThread();
 
   const char * get_filename() const;
+  void set_threadlist(fawkes::ThreadList &thread_list);
+  void set_enabled(bool enabled);
 
   virtual void init();
   virtual void finalize();
@@ -82,6 +87,7 @@ class BBLoggerThread
   unsigned int        __num_data_items;
   unsigned int        __session_start;
 
+  bool                __enabled;
   bool                __buffering;
   bool                __flushing;
   size_t              __data_size;
@@ -96,6 +102,10 @@ class BBLoggerThread
 
   fawkes::Time       *__start;
   fawkes::Time       *__now;
+
+  bool                __is_master;
+  fawkes::ThreadList  __threads;
+  fawkes::SwitchInterface *__switch_if;
 
   fawkes::Mutex      *__queue_mutex;
   unsigned int        __act_queue;

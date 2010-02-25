@@ -129,6 +129,9 @@ BlackBoardLoggerPlugin::BlackBoardLoggerPlugin(Configuration *config)
   if ( thread_list.empty() ) {
     throw Exception("No interfaces configured for logging, aborting");
   }
+
+  BBLoggerThread *bblt = dynamic_cast<BBLoggerThread *>(thread_list.front());
+  bblt->set_threadlist(thread_list);
 }
 
 PLUGIN_DESCRIPTION("Write BlackBoard interface data to files")

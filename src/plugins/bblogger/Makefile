@@ -18,7 +18,8 @@ BASEDIR = ../../..
 
 SUBDIRS=console
 
-LIBS_bblogger = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
+LIBS_bblogger = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard \
+		SwitchInterface
 OBJS_bblogger = bblogger_plugin.o log_thread.o
 
 
