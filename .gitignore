@@ -3,6 +3,7 @@
 .deps_*
 .objs_*
 *_tolua.cpp
+*_tolua.pkg
 
 # Specific paths, _ variants for cross compilation environments
 /bin/

@@ -104,6 +104,7 @@ clean: presubdirs subdirs
 	$(SILENT)$(foreach L,$(LIBS_gui),rm -f $(L);)
 	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -f $(P);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
+	$(SILENT)$(foreach E,$(CLEAN_FILES),rm -rf $(E);)
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
