@@ -46,6 +46,8 @@ class LineSegment
 
   const HomPoint& p1() const;
   const HomPoint& p2() const;
+  
+  HomPoint project(const HomPoint &p) const;
 
  protected:
   virtual void register_primitives();
