@@ -73,7 +73,8 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
 
   __visdisp = new VisualDisplay2D();
 
-  add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
+  add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
+	     Gdk::BUTTON_PRESS_MASK );
 
 #ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   signal_expose_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_expose_event));
@@ -187,6 +188,11 @@ LaserDrawingArea::reset_laser_ifs()
   __l_track_if = NULL;
   __target_if = NULL;
   __switch_if = NULL;
+
+  __xc = width / 2;
+  __yc = height / 2;
+  __zoom_factor = 50;
+
 }
 
 /** Set line interface.
