@@ -13,11 +13,15 @@
 #
 #*****************************************************************************
 
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before interface.mk)
+endif
+
 ifndef __buildsys_interface_mk_
 __buildsys_interface_mk_ := 1
 
-include $(BASEDIR)/etc/buildsys/lua.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
+include $(BUILDSYSDIR)/lua.mk
+include $(BUILDSYSDIR)/ext/gmsl
 
 ifneq ($(PKGCONFIG),)
   HAVE_LIBXMLPP   = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)

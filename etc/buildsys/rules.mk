@@ -16,6 +16,10 @@
 # see http://make.paulandlesley.org/autodep.html
 # see http://make.paulandlesley.org/rules.html
 
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before rules.mk)
+endif
+
 ifndef __buildsys_rules_mk_
 __buildsys_rules_mk := 1
 

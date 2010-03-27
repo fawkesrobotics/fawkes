@@ -13,10 +13,12 @@
 #
 #*****************************************************************************
 
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before lua.mk)
+endif
+
 ifndef __buildsys_lua_mk_
 __buildsys_lua_mk_ := 1
-
-include $(BASEDIR)/etc/buildsys/config.mk
 
 LUA_VERSION = 5.1
 

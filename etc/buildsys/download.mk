@@ -13,10 +13,12 @@
 #
 #*****************************************************************************
 
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before download.mk)
+endif
+
 ifndef __buildsys_download_mk_
 __buildsys_download_mk := 1
-
-include $(BASEDIR)/etc/buildsys/config.mk
 
 DOWNLOAD_APPS=curl wget fetch
 DOWNLOAD_APP=$(firstword $(foreach a,$(DOWNLOAD_APPS),$(shell which $a 2>/dev/null)))

@@ -15,9 +15,11 @@
 
 # see http://make.paulandlesley.org/multi-arch.html
 
-.SUFFIXES:
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before objsdir.mk)
+endif
 
-include $(BUILDSYSDIR)/config.mk
+.SUFFIXES:
 
 MAKECMDGOALS ?= all
 MAKETARGET = $(MAKE) --no-print-directory --no-keep-going -C $@ \

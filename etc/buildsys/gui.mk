@@ -13,11 +13,14 @@
 #
 #*****************************************************************************
 
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before gui.mk)
+endif
+
 ifndef __gui_mk_
 __gui_mk := 1
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
+include $(BUILDSYSDIR)/ext/gmsl
 
 PC_GTKMM        = gtkmm-2.4
 PC_GIOMM        = giomm-2.4

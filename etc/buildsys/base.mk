@@ -13,12 +13,12 @@
 #
 #*****************************************************************************
 
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before base.mk)
+endif
+
 .DEFAULT:
 
-# set here to allow Makefiles w/o included config.mk to work
-BUILDSYSDIR  ?= $(abspath $(BASEDIR)/etc/buildsys)
-
-include $(BUILDSYSDIR)/config.mk
 ifneq ($(OBJDIR),$(notdir $(CURDIR)))
   ifneq (clean,$(MAKECMDGOALS))
     include $(BUILDSYSDIR)/objsdir.mk

@@ -14,7 +14,7 @@
 #*****************************************************************************
 
 ifndef __buildsys_config_mk_
-__buildsys_config_mk := 1
+__buildsys_config_mk_ := 1
 
 # Also update in base.mk when changing here
 BUILDSYSDIR  ?= $(abspath $(BASEDIR)/etc/buildsys)
