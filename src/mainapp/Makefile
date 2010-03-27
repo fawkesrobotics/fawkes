@@ -59,5 +59,5 @@ warning_avahi:
 endif
 
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

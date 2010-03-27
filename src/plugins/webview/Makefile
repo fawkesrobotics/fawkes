@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/download.mk
+include $(BUILDSYSDIR)/download.mk
 include $(LIBSRCDIR)/webview/webview.mk
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
@@ -39,5 +39,5 @@ warning_libmicrohttpd:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting webview plugin$(TNORMAL) (libmicrohttpd not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

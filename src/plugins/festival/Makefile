@@ -37,5 +37,5 @@ warning_festival:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting festival plugin$(TNORMAL) ($(FESTIVAL_ERROR))"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

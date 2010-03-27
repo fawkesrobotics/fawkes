@@ -25,7 +25,7 @@ PLUGINS_all = $(PLUGINDIR)/pantilt.so
 OBJS_all = $(OBJS_pantilt)
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BASEDIR)/etc/buildsys/interface.mk
+include $(BUILDSYSDIR)/interface.mk
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

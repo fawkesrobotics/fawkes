@@ -24,5 +24,5 @@ HDRS_libfawkesplugin = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/
 OBJS_all = $(OBJS_libfawkesplugin)
 LIBS_all  = $(LIBDIR)/libfawkesplugin.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

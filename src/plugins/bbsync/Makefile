@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_bbsync = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
 OBJS_bbsync = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
@@ -21,5 +22,5 @@ OBJS_bbsync = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpa
 OBJS_all    = $(OBJS_bbsync)
 PLUGINS_all = $(PLUGINDIR)/bbsync.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

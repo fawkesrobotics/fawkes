@@ -32,8 +32,8 @@ CLASSIFIERS_DEPS += extlib/siftpp
 endif
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
-include $(BASEDIR)/etc/buildsys/download.mk
+include $(BUILDSYSDIR)/rules.mk
+include $(BUILDSYSDIR)/download.mk
 
 cams models filters classifiers stereo fvwidgets: fvutils
 filters: models

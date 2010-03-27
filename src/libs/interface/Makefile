@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BUILDSYSDIR)/lua.mk
 
 LIBS_libfawkesinterface = fawkescore
 OBJS_libfawkesinterface = interface.o interface_info.o message.o message_queue.o field_iterator.o
@@ -39,5 +39,5 @@ endif
 
 $(LUALIBDIR)/fawkesinterface.so: | $(LIBDIR)/libfawkesinterface.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

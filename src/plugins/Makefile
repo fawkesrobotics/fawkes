@@ -23,7 +23,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop \
 	  player xmlrpc
 	  #festival readylogagent
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+include $(BUILDSYSDIR)/rules.mk
 
 luaagent: skiller
 

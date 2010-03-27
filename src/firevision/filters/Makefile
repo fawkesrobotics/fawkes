@@ -57,5 +57,5 @@ OBJS_all = $(OBJS_libfvfilters)
 LIBS_all = $(LIBDIR)/libfvfilters.so
 
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

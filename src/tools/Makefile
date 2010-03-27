@@ -20,5 +20,5 @@ SUBDIRS = plugin logview config plugin_gui netloggui refboxrep \
 	  battery_monitor ffinfo
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+include $(BUILDSYSDIR)/rules.mk
 

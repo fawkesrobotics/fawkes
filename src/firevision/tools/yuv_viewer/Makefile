@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
-include $(BASEDIR)/etc/buildsys/gui.mk
+include $(BUILDSYSDIR)/gui.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 
 CFLAGS   = $(VISION_CFLAGS)
@@ -44,5 +44,5 @@ warning_guilibs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvyuv_viewer$(TNORMAL) $(GUI_ERROR)";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

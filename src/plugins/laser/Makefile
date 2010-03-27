@@ -74,5 +74,5 @@ warning_urg_gbx:
 
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

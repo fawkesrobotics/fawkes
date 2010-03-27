@@ -90,5 +90,5 @@ BINS_all +=	$(BINDIR)/qa_netcomm_socket_typeof		\
 		$(BINDIR)/qa_netcomm_resolver			\
 		$(BINDIR)/qa_netcomm_dynamic_buffer
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

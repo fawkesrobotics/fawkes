@@ -124,5 +124,5 @@ warning_v4l2:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No V4L2 support$(TNORMAL) ($(HAVE_V4L2_FAIL_REASON))";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

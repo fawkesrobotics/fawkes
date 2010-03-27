@@ -14,8 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BUILDSYSDIR)/lua.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
 SUBDIRS = consoletool
@@ -40,7 +41,7 @@ else
 endif
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BASEDIR)/etc/buildsys/interface.mk
+include $(BUILDSYSDIR)/interface.mk
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
@@ -53,5 +54,5 @@ warning_tolua:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (tolua++[-devel] not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

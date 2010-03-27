@@ -14,7 +14,8 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/lua.mk
 
 LIBS_libfawkeslua = fawkescore fawkesutils fawkesconfig fawkesblackboard $(TOLUA_LIBS)
 OBJS_libfawkeslua = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
@@ -47,5 +48,5 @@ warning_tolua:
 endif
 
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

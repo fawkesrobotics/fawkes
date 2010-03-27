@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_libfawkesblackboard = fawkescore fawkesutils fawkesinterface fawkesnetcomm
 OBJS_libfawkesblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
@@ -22,5 +23,5 @@ HDRS_libfawkesblackboard = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR
 OBJS_all =	$(OBJS_libfawkesblackboard)
 LIBS_all =	$(LIBDIR)/libfawkesblackboard.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

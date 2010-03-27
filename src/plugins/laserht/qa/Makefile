@@ -21,4 +21,4 @@ LIBS_qa_lineht := fawkescore fawkesutils
 OBJS_all = $(OBJS_qa_lineht)
 BINS_all = $(BINDIR)/qa_lineht
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/download.mk
+include $(BUILDSYSDIR)/download.mk
 
 ifeq ($(HAVE_FLITE)$(HAVE_ALSA),11)
   LDFLAGS += $(LDFLAGS_FLITE) $(LDFLAGS_ALSA)
@@ -46,5 +46,5 @@ warning_alsa:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting flite plugin$(TNORMAL) (alsa-lib[-devel] not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -14,8 +14,10 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/gui.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
+
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/gui.mk
+include $(BUILDSYSDIR)/ext/gmsl
 
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
@@ -47,5 +49,5 @@ warning_ffconfiggui:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building ffconfiggui$(TNORMAL) $(GUI_ERROR)";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

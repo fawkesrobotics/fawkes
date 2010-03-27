@@ -14,7 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/src/plugins/readylogagent/eclipse.mk
+include $(BASEDIR)/etc/buildsys/config.mk
 
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
@@ -42,4 +42,4 @@ warning_eclipse:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Readylog Agent Plugin$(TNORMAL) (ECLiPSe not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

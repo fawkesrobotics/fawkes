@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/download.mk
+include $(BUILDSYSDIR)/download.mk
 
 ifeq ($(HAVE_PLAYERCC),1)
   LDFLAGS += $(LDFLAGS_PLAYERCC)
@@ -40,5 +40,5 @@ warning_playercc:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting player plugin$(TNORMAL) (libplayerc++ not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

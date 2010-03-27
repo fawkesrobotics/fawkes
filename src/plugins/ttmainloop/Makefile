@@ -15,11 +15,13 @@
 
 BASEDIR = ../../..
 
+include $(BASEDIR)/etc/buildsys/config.mk
+
 LIBS_ttmainloop = fawkesaspects
 OBJS_ttmainloop = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_ttmainloop)
 PLUGINS_all = $(PLUGINDIR)/ttmainloop.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

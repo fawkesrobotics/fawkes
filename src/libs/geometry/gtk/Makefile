@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/gui.mk
+include $(BUILDSYSDIR)/gui.mk
 
 LIBS_libfawkesgeometrygtk = stdc++ fawkesgeometry
 OBJS_libfawkesgeometrygtk = geom_drawing_area.o		\
@@ -48,5 +48,5 @@ warning_geometrygtk:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Gtk drawers of the geometry library$(TNORMAL)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -34,5 +34,5 @@ endif
 
 OBJS_all    = $(OBJS_fvretriever)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

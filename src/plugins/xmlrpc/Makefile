@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/download.mk
+include $(BUILDSYSDIR)/download.mk
 include $(LIBSRCDIR)/webview/webview.mk
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
@@ -52,5 +52,5 @@ warning_libxmlrpcpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting xmlrpc plugin$(TNORMAL) (xmlrpc-c-c++ not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

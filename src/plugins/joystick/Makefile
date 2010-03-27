@@ -39,4 +39,4 @@ warning_onlylinux:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Joystick Plugin$(TNORMAL) (currently only Linux is supported)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

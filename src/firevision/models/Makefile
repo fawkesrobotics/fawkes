@@ -33,5 +33,5 @@ HDRS_libfvmodels = $(patsubst %.o,%.h,$(OBJS_libfvmodels))
 OBJS_all = $(OBJS_libfvmodels)
 LIBS_all = $(LIBDIR)/libfvmodels.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

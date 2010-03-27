@@ -39,5 +39,5 @@ warning_readline:
 endif
 
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

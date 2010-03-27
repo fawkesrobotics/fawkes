@@ -14,8 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/gui.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/gui.mk
+include $(BUILDSYSDIR)/ext/gmsl
 
 CFLAGS  += $(CFLAGS_GUI)
 LDFLAGS += $(LDFLAGS_GUI)
@@ -40,4 +41,4 @@ warning_guiutils:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building guiutils$(TNORMAL) $(GUI_ERROR)";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

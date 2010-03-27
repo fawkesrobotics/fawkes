@@ -27,5 +27,5 @@ else
   SUBDIRS += $(subst $(CURDIR)/,,$(wildcard base fountain retriever omni_ball omni_field omni_localizer stereo_obstacle_detection))
 endif
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+include $(BUILDSYSDIR)/rules.mk
 

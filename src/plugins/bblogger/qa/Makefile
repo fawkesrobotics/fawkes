@@ -21,4 +21,4 @@ BINS_all = $(BINDIR)/qa_bblogger_produce
 
 OBJS_all = $(OBJS_qa_bblogger_produce)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

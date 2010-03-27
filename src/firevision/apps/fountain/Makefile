@@ -35,5 +35,5 @@ endif
 
 OBJS_all = $(OBJS_fvfountain)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

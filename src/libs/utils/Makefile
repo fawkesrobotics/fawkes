@@ -14,7 +14,8 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/lua.mk
 
 FILTER_OUT=%_tolua.o
 
@@ -70,5 +71,5 @@ endif
 
 $(LUALIBDIR)/fawkesutils.so: | $(LIBDIR)/libfawkesutils.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

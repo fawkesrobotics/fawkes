@@ -59,5 +59,5 @@ BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_remote		\
 		$(BINDIR)/qa_bb_objpos
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

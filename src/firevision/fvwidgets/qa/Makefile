@@ -41,5 +41,5 @@ warning_sdl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting SDL QA Apps$(TNORMAL) (SDL[-devel] not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BUILDSYSDIR)/lua.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
 CFLAGS  += $(CFLAGS_LUA)
@@ -47,5 +47,5 @@ warning_tolua:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting LuaAgent Plugin$(TNORMAL) (tolua++[-devel] not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

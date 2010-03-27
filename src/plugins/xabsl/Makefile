@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/download.mk
+include $(BUILDSYSDIR)/download.mk
 
 XABSLDIR=$(abspath $(SRCDIR)/xabsl-code/)
 CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(XABSLDIR)/\"
@@ -72,4 +72,4 @@ $(PLUGINS_all): | $(LIBS_all)
 
 OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

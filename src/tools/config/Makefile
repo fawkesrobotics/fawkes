@@ -15,11 +15,13 @@
 
 BASEDIR = ../../..
 
+include $(BASEDIR)/etc/buildsys/config.mk
+
 LIBS_ffconfig = fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_ffconfig = main.o
 
 OBJS_all =	$(OBJS_ffconfig)
 BINS_all =	$(BINDIR)/ffconfig
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

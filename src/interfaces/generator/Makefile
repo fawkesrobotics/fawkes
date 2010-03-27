@@ -26,5 +26,5 @@ include $(BASEDIR)/etc/buildsys/config.mk
 CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
 
 include $(SRCDIR)/generator_rules.mk
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

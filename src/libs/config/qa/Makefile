@@ -32,5 +32,5 @@ BINS_all = $(BINDIR)/qa_config 				\
 	$(BINDIR)/qa_config_net_list_content
 #	$(BINDIR)/qa_config_change_handler
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

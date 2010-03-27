@@ -14,7 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/gui.mk
+
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/gui.mk
 
 # Set to 1 to use Pyprus instead of Cairo for rendering the graph
 USE_PAPYRUS=0
@@ -80,5 +82,5 @@ warning_skillgui:
   endif
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

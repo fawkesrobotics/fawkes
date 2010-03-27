@@ -24,10 +24,10 @@ endif
 include $(BASEDIR)/etc/buildsys/config.mk
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BASEDIR)/etc/buildsys/interface.mk
+include $(BUILDSYSDIR)/interface.mk
 
 # Interface generator stuff
 include $(SRCDIR)/generator/generator_rules.mk
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -26,4 +26,4 @@ OBJS_laserht = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildc
 PLUGINS_all  = $(PLUGINDIR)/laserht.so
 OBJS_all     = $(OBJS_laserht)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
-include $(BASEDIR)/etc/buildsys/gui.mk
+include $(BUILDSYSDIR)/gui.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 
 CFLAGS   = $(VISION_CFLAGS) $(CFLAGS_GUI)
@@ -49,5 +49,5 @@ warning_avahi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvfuseviewer$(TNORMAL) (Avahi not installed)";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

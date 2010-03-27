@@ -68,5 +68,5 @@ BINS_all += $(BINDIR)/fv_qa_camargp		\
 	    $(BINDIR)/fv_qa_colormap
 
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

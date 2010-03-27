@@ -49,7 +49,7 @@ HDRS_libfvstereo  = $(patsubst %.o,%.h,$(OBJS_libfvstereo))
 OBJS_all = $(OBJS_libfvstereo)
 LIBS_all = $(LIBDIR)/libfvstereo.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 
 triclops:
 	$(SILENT)if [ -e "$(TRICLOPS_SDK)/include/triclops.h" -a -e "$(TRICLOPS_SDK)/lib/libtriclops.a" -a -e "$(TRICLOPS_SDK)/lib/libpnmutils.a" ]; then \

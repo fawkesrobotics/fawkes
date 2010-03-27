@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 SUBDIRS=console
 
@@ -23,5 +24,5 @@ OBJS_bblogger = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(real
 OBJS_all    = $(OBJS_bblogger)
 PLUGINS_all = $(PLUGINDIR)/bblogger.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

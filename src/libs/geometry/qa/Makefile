@@ -26,5 +26,5 @@ OBJS_all =	$(OBJS_qa_hom_transform) $(OBJS_qa_vector)
 
 BINS_all =	$(BINDIR)/qa_hom_transform $(BINDIR)/qa_vector
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

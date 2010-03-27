@@ -26,5 +26,5 @@ OBJS_all    = $(OBJS_example)		\
 BINS_all    = $(BINDIR)/example_plugin_netping
 PLUGINS_all = $(PLUGINDIR)/example.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

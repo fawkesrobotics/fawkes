@@ -28,5 +28,5 @@ LIBS_fv_qa_fwcam := fvcams
 OBJS_all = $(OBJS_fv_qa_fwcam)
 BINS_all = $(BINDIR)/fv_qa_fwcam
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

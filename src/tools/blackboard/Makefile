@@ -15,6 +15,8 @@
 
 BASEDIR = ../../..
 
+include $(BASEDIR)/etc/buildsys/config.mk
+
 LIBS_bb_cleanup = fawkescore fawkesutils fawkesconfig fawkesblackboard
 OBJS_bb_cleanup = bb_cleanup.o
 
@@ -29,5 +31,5 @@ BINS_all =	$(BINDIR)/bb_cleanup	\
 		$(BINDIR)/bb_list	\
 		$(BINDIR)/bb_meminfo
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

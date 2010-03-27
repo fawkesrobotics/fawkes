@@ -30,5 +30,5 @@ INST_HDRS_SUBDIR_libfawkesaspects = aspect
 OBJS_all = $(OBJS_libfawkesaspects)
 LIBS_all  = $(LIBDIR)/libfawkesaspects.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

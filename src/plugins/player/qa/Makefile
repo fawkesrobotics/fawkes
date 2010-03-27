@@ -21,4 +21,4 @@ BINS_all = $(BINDIR)/qa_player_setmotor
 
 OBJS_all = $(OBJS_qa_player_setmotor)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

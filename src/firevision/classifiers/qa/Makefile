@@ -58,5 +58,5 @@ ifeq ($(HAVE_SIFTPP),1)
   BINS_all += $(BINDIR)/fv_qa_siftppclassifier
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -14,7 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/gui.mk
+
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/gui.mk
 
 CFLAGS  += $(CFLAGS_GUI)
 LDFLAGS += $(LDFLAGS_GUI)
@@ -38,5 +40,5 @@ warning_plugin_gui:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building ffplugingui$(TNORMAL) $(GUI_ERROR)";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

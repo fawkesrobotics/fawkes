@@ -28,5 +28,5 @@ OBJS_all =	$(OBJS_qa_interface_msgq)
 
 BINS_all =	$(BINDIR)/qa_interface_msgq
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

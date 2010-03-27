@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
-include $(BASEDIR)/etc/buildsys/gui.mk
+include $(BUILDSYSDIR)/gui.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
@@ -54,5 +54,5 @@ HDRS_libfvwidgets = $(patsubst %.o,%.h,$(OBJS_libfvwidgets))
 
 OBJS_all = $(OBJS_libfvwidgets)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BUILDSYSDIR)/lua.mk
 
 HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_OPENCV),1)
@@ -64,5 +64,5 @@ endif
 
 $(LUALIBDIR)/fawkesgeometry.so: | $(LIBDIR)/libfawkesgeometry.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

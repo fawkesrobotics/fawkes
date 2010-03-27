@@ -76,5 +76,5 @@ HDRS_libfvclassifiers = $(patsubst %.o,%.h,$(OBJS_libfvclassifiers))
 OBJS_all = $(OBJS_libfvclassifiers)
 LIBS_all = $(LIBDIR)/libfvclassifiers.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
-include $(BASEDIR)/etc/buildsys/gui.mk
+include $(BUILDSYSDIR)/gui.mk
 
 CFLAGS   += $(VISION_CFLAGS) $(CFLAGS_AVAHI)
 LDFLAGS  += $(VISION_LDFLAGS) $(LDFLAGS_AVAHI)
@@ -171,5 +171,5 @@ warning_showyuv:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvshowyuv$(TNORMAL) (SDL[-devel] not installed)";
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -15,11 +15,13 @@
 
 BASEDIR = ../../..
 
+include $(BASEDIR)/etc/buildsys/config.mk
+
 LIBS_fflogview = fawkescore fawkesutils fawkesnetcomm
 OBJS_fflogview = main.o
 
 OBJS_all =	$(OBJS_fflogview)
 BINS_all =	$(BINDIR)/fflogview
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

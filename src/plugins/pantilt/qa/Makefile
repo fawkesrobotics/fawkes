@@ -31,4 +31,4 @@ LIBS_qa_evid100p := fawkescore fawkesutils
 OBJS_all = $(OBJS_qa_rx28ptu) $(OBJS_qa_evid100p)
 BINS_all = $(BINDIR)/qa_rx28ptu $(BINDIR)/qa_evid100p
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

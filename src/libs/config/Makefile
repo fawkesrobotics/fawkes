@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BUILDSYSDIR)/lua.mk
 
 ifneq ($(HAVE_SQLITE),1)
   ERROR_TARGETS += error_sqlite
@@ -51,5 +51,5 @@ OBJS_all = $(OBJS_libfawkesconfig) $(OBJS_lua_fawkesconfig)
 
 $(LUALIBDIR)/fawkesconfig.so: | $(LIBDIR)/libfawkesconfig.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

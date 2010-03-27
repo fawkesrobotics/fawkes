@@ -40,7 +40,7 @@ endif
 OBJS_all = $(OBJS_katana)
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BASEDIR)/etc/buildsys/interface.mk
+include $(BUILDSYSDIR)/interface.mk
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
@@ -50,5 +50,5 @@ warning_kni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (KNI[-devel] not installed)"
 endif
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

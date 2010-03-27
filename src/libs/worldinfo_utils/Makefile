@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_libfawkesworldinfo_utils = stdc++ fawkesnetcomm fawkesgeometry fawkesutils
 OBJS_libfawkesworldinfo_utils = data_container.o
@@ -22,4 +23,4 @@ HDRS_libfawkesworldinfo_utils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 OBJS_all = $(OBJS_libfawkesworldinfo_utils)
 LIBS_all = $(LIBDIR)/libfawkesworldinfo_utils.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk

@@ -25,5 +25,5 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
 endif
 OBJS_all = $(OBJS_libfawkeswebview)
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

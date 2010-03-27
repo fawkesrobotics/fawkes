@@ -15,11 +15,13 @@
 
 BASEDIR = ../../..
 
+include $(BASEDIR)/etc/buildsys/config.mk
+
 LIBS_ffinfo = fawkescore
 OBJS_ffinfo = ffinfo.o
 
 OBJS_all =	$(OBJS_ffinfo)
 BINS_all =	$(BINDIR)/ffinfo
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

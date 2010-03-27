@@ -20,8 +20,8 @@ SUBDIRS = src
 TARGETS_all += linkscripts
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
-include $(BASEDIR)/etc/buildsys/lua.mk
+include $(BUILDSYSDIR)/rules.mk
+include $(BUILDSYSDIR)/lua.mk
 
 .PHONY: apidoc quickdoc tracdoc
 apidoc: api.doxygen

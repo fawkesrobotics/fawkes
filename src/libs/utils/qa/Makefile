@@ -89,5 +89,5 @@ endif
 
 PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 

@@ -47,5 +47,5 @@ HDRS_libfawkesnetcomm = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*
 OBJS_all = $(OBJS_libfawkesnetcomm)
 LIBS_all  = $(LIBDIR)/libfawkesnetcomm.so
 
-include $(BASEDIR)/etc/buildsys/base.mk
+include $(BUILDSYSDIR)/base.mk
 
