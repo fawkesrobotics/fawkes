@@ -13,13 +13,7 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard ../../etc/buildsys/config.mk),)
-  # Fawkes
-  BASEDIR = ../..
-else
-  # RCSoftX
-  BASEDIR = ../../..
-endif
+BASEDIR = ../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 

@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_qa_bblogger_produce = fawkescore fawkesutils fawkesblackboard TestInterface
 OBJS_qa_bblogger_produce = qa_bblogger_produce.o

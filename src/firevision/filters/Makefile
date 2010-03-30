@@ -14,7 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/src/firevision/fvconf.mk
+
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(FVSRCDIR)/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)

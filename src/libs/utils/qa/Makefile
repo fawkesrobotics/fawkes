@@ -1,5 +1,6 @@
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 CFLAGS = -g
 

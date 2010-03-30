@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_qa_player_setmotor = fawkescore fawkesutils fawkesblackboard MotorInterface
 OBJS_qa_player_setmotor = qa_player_setmotor.o

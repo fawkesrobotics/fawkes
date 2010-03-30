@@ -13,13 +13,10 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard ../../../etc/buildsys/config.mk),)
-  BASEDIR = ../../..
-else
-  BASEDIR = ../../../..
-endif
+BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
-CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
+CFLAGS = -g
 
 LIBS_qa_interface_msgq = fawkescore fawkesutils TestInterface
 OBJS_qa_interface_msgq = qa_interface_msgq.o

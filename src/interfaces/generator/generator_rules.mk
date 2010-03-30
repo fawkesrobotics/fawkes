@@ -13,7 +13,7 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys/interface.mk
+include $(BUILDSYSDIR)/interface.mk
 
 ifeq ($(HAVE_INTERFACE_GENERATOR),1)
   CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)

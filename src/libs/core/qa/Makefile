@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 OBJS_qa_core_mutex_count = qa_mutex_count.o
 LIBS_qa_core_mutex_count = stdc++ fawkescore

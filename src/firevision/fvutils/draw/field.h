@@ -23,7 +23,7 @@
 #ifndef __FVUTILS_DRAW_FIELD_H_
 #define __FVUTILS_DRAW_FIELD_H_
 
-#include "field_lines.h"
+#include <fvutils/draw/field_lines.h>
 
 #include <string>
 #include <list>

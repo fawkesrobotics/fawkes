@@ -16,7 +16,9 @@
 ifndef __fvconf_mk_
 __fvconf_mk_ := 1
 
-include $(BASEDIR)/etc/buildsys/config.mk
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before fvconf.mk)
+endif
 
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO \
      SWISSRANGER

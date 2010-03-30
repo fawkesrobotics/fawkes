@@ -14,7 +14,8 @@
 #*****************************************************************************
 
 BASEDIR = ../..
-include $(BASEDIR)/src/firevision/fvconf.mk
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(FVSRCDIR)/fvconf.mk
 
 SUBDIRS = fvutils cams models filters classifiers stereo fvwidgets apps tools
 

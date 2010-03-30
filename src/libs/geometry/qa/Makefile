@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 OBJS_qa_hom_transform = qa_hom_transform.o
 LIBS_qa_hom_transform = stdc++ fawkescore fawkesgeometry fawkesutils

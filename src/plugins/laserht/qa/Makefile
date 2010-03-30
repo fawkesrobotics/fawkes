@@ -14,6 +14,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 OBJS_qa_lineht := qa_lineht.o ../hough_transform.o
 LIBS_qa_lineht := fawkescore fawkesutils

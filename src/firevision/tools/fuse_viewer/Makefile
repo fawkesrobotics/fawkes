@@ -14,9 +14,10 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
-include $(BASEDIR)/src/firevision/fvconf.mk
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(FVSRCDIR)/fvconf.mk
 include $(BUILDSYSDIR)/gui.mk
-include $(LIBSRCDIR)/netcomm/netcomm.mk
+include $(BUILDCONFDIR)/netcomm/netcomm.mk
 
 CFLAGS   = $(VISION_CFLAGS) $(CFLAGS_GUI)
 LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GUI)
