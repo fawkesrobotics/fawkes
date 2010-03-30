@@ -22,14 +22,16 @@ endif
 .SUFFIXES:
 
 MAKECMDGOALS ?= all
-MAKETARGET = $(MAKE) --no-print-directory --no-keep-going -C $@ \
-                     -f $(CURDIR)/Makefile OBJSSUBMAKE=1 \
-                     SRCDIR=$(CURDIR) BASEDIR=../$(BASEDIR) $(MAKECMDGOALS)
+MAKETARGET = $(MAKE) --no-print-directory --no-keep-going -C $@ -f $(CURDIR)/Makefile OBJSSUBMAKE=1 \
+             SRCDIR=$(CURDIR) BASEDIR=../$(BASEDIR)  $(filter-out clean,$(MAKECMDGOALS))
+MAKELOOP   = for T in $(filter-out clean,$(MAKECMDGOALS)); do $(MAKETARGET) $$T; done
+MAKECLEAN  = if [ -d $@ ]; then $(MAKE) --no-print-directory --no-keep-going clean || exit $$?; fi
 
 .PHONY: $(OBJDIR)
 $(OBJDIR):
+	$(if $(filter clean,$(MAKECMDGOALS)),+@$(MAKECLEAN))
 	+@[ -d $@ ] || mkdir -p $@
-	+@$(MAKETARGET) || exit $$?
+	$(if $(filter-out clean,$(MAKECMDGOALS)),+@$(MAKETARGET) || exit $$?)
 
 % :: $(OBJDIR) ; @:
 
