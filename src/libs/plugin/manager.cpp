@@ -127,7 +127,7 @@ PluginManager::init_pinfo_cache()
   const char *file_ext = ".so";
 
   if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
-    throw Exception(errno, "Plugin directory %s could not be opened", plugin_dir);
+    throw Exception(errno, "Plugin directory %s could not be opened", PLUGINDIR);
   }
 
   for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
