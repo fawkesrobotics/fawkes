@@ -17,8 +17,6 @@ BASEDIR = .
 
 SUBDIRS = src
 
-TARGETS_all += linkscripts
-
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/rules.mk
 include $(BUILDSYSDIR)/lua.mk
@@ -38,22 +36,6 @@ tracdoc: api-trac.doxygen
 		exit 1; \
 	else \
 		echo -e "$(TGREEN)--> No warnings. Nice job.$(TNORMAL)"; \
-	fi
-
-.PHONY: linkscripts
-linkscripts:
-	$(SILENTSYMB) if [ -d $(BASEDIR)/etc/scripts ]; then \
-		for f in $$(ls $(BASEDIR)/etc/scripts); do \
-			if [ -e "$(BASEDIR)/etc/scripts/$$f" ]; then \
-				if [[ -a "$(BASEDIR)/bin/$$f" && ! -L "$(BASEDIR)/bin/$$f" ]]; then \
-					echo -e "$(INDENT_PRINT)$(TRED)--- Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
-				else \
-					echo -e "$(INDENT_PRINT)--- Linking bin/$$f -> etc/scripts/$$f"; \
-					rm -f bin/$$f; \
-					ln -s ../etc/scripts/$$f bin; \
-				fi \
-			fi \
-		done; \
 	fi
 
 # Uncolored implicit targets
