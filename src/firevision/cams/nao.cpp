@@ -25,6 +25,7 @@
 #include <cams/nao.h>
 #include <fvutils/system/camargp.h>
 #include <utils/logging/liblogger.h>
+#include <core/exceptions/software.h>
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -84,6 +85,11 @@ i2c_smbus_write_block_data(int file, __u8 command,
 }
 
 /// @endcond
+#endif
+
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
 #endif
 
 /** @class NaoCamera <cams/nao.h>
@@ -262,3 +268,6 @@ void NaoCamera::set_source(unsigned char source)
   close_dev(dev);
   init_cam(_device_name);
 }
+
+} // end namespace firevision
+

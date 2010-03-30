@@ -36,6 +36,11 @@
 #define DSPIC_SWITCH_REG 220
 #define I2C_SLAVE 0x0703
 
+namespace firevision {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class CameraArgumentParser;
 
 class NaoCamera :
@@ -62,4 +67,7 @@ class NaoCamera :
   bool  __can_switch_cam;  ///< Needs to be Nao V3 for camera switching
 };
 
+} // end namespace firevision
+
 #endif //__FIREVISION_CAMS_V4L2_H_
+
