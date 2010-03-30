@@ -21,7 +21,7 @@ $(error config.mk must be included before rules.mk)
 endif
 
 ifndef __buildsys_rules_mk_
-__buildsys_rules_mk := 1
+__buildsys_rules_mk_ := 1
 
 include $(abspath $(BUILDSYSDIR)/ext/gmsl)
 
@@ -202,7 +202,13 @@ $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 
 ### Check if there are special additions
 ifneq ($(realpath $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
-include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
+  include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
+else
+  ifneq ($(SECONDARY_BUILDSYSDIR),)
+    ifneq ($(wildcard $(SECONDARY_BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
+      include $(SECONDARY_BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
+    endif
+  endif
 endif
 
 endif # __buildsys_rules_mk_

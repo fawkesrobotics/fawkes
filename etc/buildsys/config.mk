@@ -16,46 +16,92 @@
 ifndef __buildsys_config_mk_
 __buildsys_config_mk_ := 1
 
-# Also update in base.mk when changing here
-BUILDSYSDIR  ?= $(abspath $(BASEDIR)/etc/buildsys)
+BUILDSYSDIR    ?= $(abspath $(BASEDIR)/etc/buildsys)
+FAWKES_BASEDIR  = $(BASEDIR)
+TOP_BASEDIR     = $(BASEDIR)
+
+SUBMODULE        = 0
+SUBMODULE_INTERN = 0
+SUBMODULE_EXTERN = 0
+
+# Check if we are a submodule and the secondary buildsys config has
+# not yet been included
+ifneq ($(wildcard $(BASEDIR)/../.gitmodules),)
+  ifneq ($(wildcard $(BASEDIR)/../fawkes),)
+    # this fawkes instance is indeed a sub-module!
+    SUBMODULE = 1
+    SUBMODULE_INTERN=1
+    TOP_BASEDIR = $(BASEDIR)/..
+    include $(TOP_BASEDIR)/etc/buildsys/config.mk
+  endif
+else
+  ifneq ($(wildcard $(BASEDIR)/.gitmodules),)
+    ifneq ($(wildcard $(BASEDIR)/fawkes),)
+      # this fawkes instance is indeed a sub-module!
+      SUBMODULE = 1
+      SUBMODULE_EXTERN=1
+      FAWKES_BASEDIR=$(BASEDIR)/fawkes
+    endif
+  endif
+endif
+#$(warning SUBMODULE $(SUBMODULE)  INTERN: $(SUBMODULE_INTERN)   EXTERN: $(SUBMODULE_EXTERN))
 
 include $(BUILDSYSDIR)/ext/gmsl
 
 ### Debugging related options
 SILENTSYMB = @
 SILENT = @
+ifeq ($(VERBOSE),1)
+SILENT =
+endif
 ifeq ($(filter uncolored-%,$(MAKECMDGOALS)),)
 COLORED = 1
 endif
 
 ### Build type
-ifneq ($(wildcard $(realpath $(BUILDSYSDIR)/buildtype.mk)),)
-  include $(realpath $(BUILDSYSDIR)/buildtype.mk)
+ifeq ($(SUBMODULE),1)
+  ifneq ($(wildcard $(SECONDARY_BUILDSYSDIR)/buildtype.mk),)
+    include $(SECONDARY_BUILDSYSDIR)/buildtype.mk
+  else
+    ifneq ($(wildcard $(BUILDSYSDIR)/buildtype.mk),)
+      include $(BUILDSYSDIR)/buildtype.mk
+    endif
+  endif
 else
-  BUILD_TYPE = fawkes
+  ifneq ($(wildcard $(BUILDSYSDIR)/buildtype.mk),)
+    include $(BUILDSYSDIR)/buildtype.mk
+  endif
 endif
+
+BUILD_TYPE ?= fawkes
 ARCH=$(shell uname -m)
 OS=$(shell uname -s)
 
+
 ### Directories
-SRCDIR     ?= .
-OBJDIR      = .objs_$(BUILD_TYPE)
-DEPDIR      = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
-BINDIR      = $(abspath $(BASEDIR)/bin)
-LIBDIR      = $(abspath $(BASEDIR)/lib)
-CONFDIR     = $(abspath $(BASEDIR)/cfg)
-PLUGINDIR   = $(abspath $(BASEDIR)/plugins)
-RESDIR      = $(abspath $(BASEDIR)/res)
-LIBSRCDIR   = $(abspath $(BASEDIR)/src/libs)
-IFACEDIR    = $(abspath $(BASEDIR)/lib/interfaces)
-IFACESRCDIR = $(abspath $(BASEDIR)/src/interfaces)
-LOGDIR      = $(abspath $(BASEDIR)/log)
-DOCDIR      = $(abspath $(BASEDIR)/doc)
-BUILDCONFDIR= $(LIBSRCDIR)
+SRCDIR       ?= .
+OBJDIR        = .objs_$(BUILD_TYPE)
+DEPDIR        = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
+BINDIR        = $(abspath $(TOP_BASEDIR)/bin)
+LIBDIR        = $(abspath $(TOP_BASEDIR)/lib)
+CONFDIR       = $(abspath $(TOP_BASEDIR)/cfg)
+PLUGINDIR     = $(abspath $(TOP_BASEDIR)/plugins)
+RESDIR        = $(abspath $(TOP_BASEDIR)/res)
+LIBSRCDIR     = $(abspath $(FAWKES_BASEDIR)/src/libs)
+IFACEDIR      = $(abspath $(TOP_BASEDIR)/lib/interfaces)
+IFACESRCDIR   = $(abspath $(TOP_BASEDIR)/src/interfaces)
+LOGDIR        = $(abspath $(TOP_BASEDIR)/log)
+DOCDIR        = $(abspath $(FAWKES_BASEDIR)/doc)
+FVSRCDIR      = $(abspath $(FAWKES_BASEDIR)/src/firevision)
+TOP_FVSRCDIR  = $(abspath $(TOP_BASEDIR)/src/firevision)
+BASESRCDIRS   = $(abspath $(FAWKES_BASEDIR)/src $(TOP_BASEDIR)/src)
+LIBSRCDIRS    = $(abspath $(FAWKES_BASEDIR)/src/libs $(TOP_BASEDIR)/src/libs)
+FVSRCDIRS     = $(abspath $(FAWKES_BASEDIR)/src/firevision $(TOP_BASEDIR)/src/firevision)
+BUILDCONFDIR  = $(LIBSRCDIR)
 
 # Paths at execution time, may be different if installed or deployed
 TARGET_ARCH   ?= $(ARCH)
-EXEC_BASEDIR  ?= $(BASEDIR)
+EXEC_BASEDIR  ?= $(TOP_BASEDIR)
 EXEC_BINDIR    = $(abspath $(EXEC_BASEDIR)/bin)
 EXEC_LIBDIR    = $(abspath $(EXEC_BASEDIR)/lib)
 EXEC_CONFDIR   = $(abspath $(EXEC_BASEDIR)/cfg)
@@ -64,6 +110,13 @@ EXEC_RESDIR    = $(abspath $(EXEC_BASEDIR)/res)
 EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/lib/interfaces)
 EXEC_LOGDIR    = $(abspath $(EXEC_BASEDIR)/log)
 EXEC_DOCDIR    = $(abspath $(EXEC_BASEDIR)/doc)
+
+# Some paths divert in submodule configuration
+ifeq ($(SUBMODULE_INTERN),1)
+  RESDIR      = $(abspath $(FAWKES_BASEDIR)/res)
+  EXEC_RESDIR = $(abspath $(FAWKES_BASEDIR)/res)
+  IFACESRCDIR = $(abspath $(FAWKES_BASEDIR)/src/interfaces)
+endif
 
 VPATH = $(SRCDIR)
 DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
@@ -102,11 +155,13 @@ GCC_USE_OPENMP=0
 # Build for 32 Bit, even on a 64 Bit machine
 DO_32BIT_BUILD=0
 
+COMMA := ,
+
 ### CFLAGS, preprocessor, compiler and linker options
 LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
 LIBDIRS_EXEC_BASE= $(EXEC_LIBDIR) $(EXEC_LIBDIR)/interfaces
-LDFLAGS_RPATH    = $(LIBDIRS_EXEC_BASE:%=-Wl,-R%) $(LIBDIRS_BASE:%=-Wl,-R%) $(LIBDIRS:%=-Wl,-R%)
-DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
+LDFLAGS_RPATH    = $(addprefix -Wl$(COMMA)-R,$(LIBDIRS_EXEC_BASE) $(LIBDIRS_BASE) $(LIBDIRS))
+DEFAULT_INCLUDES = $(addprefix -I,$(BASESRCDIRS) $(LIBSRCDIRS) $(FVSRCDIRS))
 CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
 		   -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" -DIFACEDIR=\"$(EXEC_IFACEDIR)\" \
 		   -DCONFDIR=\"$(EXEC_CONFDIR)\" -DLOGDIR=\"$(EXEC_LOGDIR)\" \
@@ -157,22 +212,28 @@ TGREYBG		= \033[47m
 endif
 
 ### Check if there are special config files for the chosen compiler
-ifneq ($(wildcard $(realpath $(BUILDSYSDIR)/$(CC).mk)),)
+ifneq ($(wildcard $(BUILDSYSDIR)/$(CC).mk),)
   include $(BUILDSYSDIR)/$(CC).mk
 endif
 
 ### Check if there is a build-type specific configuration
-ifneq ($(wildcard $(realpath $(BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk)),)
+ifneq ($(wildcard $(BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk),)
   include $(BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk
+else
+  ifneq ($(SECONDARY_BUILDSYSDIR),)
+    ifneq ($(wildcard $(SECONDARY_BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk),)
+      include $(SECONDARY_BUILDSYSDIR)/btypes/config_$(BUILD_TYPE).mk
+    endif
+  endif
 endif
 
 ### Check if there is a local config for this directory
 ifneq ($(SRCDIR),.)
-  ifneq ($(wildcard $(realpath $(SRCDIR)/$(notdir $(SRCDIR)).mk)),)
+  ifneq ($(wildcard $(SRCDIR)/$(notdir $(SRCDIR)).mk),)
     include $(SRCDIR)/$(notdir $(SRCDIR)).mk
   endif
 else
-  ifneq ($(wildcard $(realpath $(notdir $(CURDIR)).mk)),)
+  ifneq ($(wildcard $(notdir $(CURDIR)).mk),)
     include $(notdir $(CURDIR)).mk
   endif
 endif
