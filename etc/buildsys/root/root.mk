@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#     Makefile Build System for Fawkes: Documentation config and targets
 #                            -------------------
-#   Created on Wed Sep 06 02:39:46 2006
-#   Copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Wed Mar 31 15:20:01 2010
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,11 +13,16 @@
 #
 #*****************************************************************************
 
-BASEDIR = .
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before root.mk)
+endif
 
-SUBDIRS = src
+ifndef __buildsys_root_root_mk_
+__buildsys_parts_root_mk_ := 1
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/rules.mk
-include $(BUILDSYSDIR)/root/root.mk
+include $(BUILDSYSDIR)/root/docs.mk
+include $(BUILDSYSDIR)/root/check.mk
+include $(BUILDSYSDIR)/root/btmgmt.mk
+
+endif # __buildsys_root_root_mk_
 
