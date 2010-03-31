@@ -1,0 +1,15 @@
+
+# Customization of api.doxygen related to quickdoc target
+
+#---------------------------------------------------------------------------
+# Configuration options related to the dot tool
+#---------------------------------------------------------------------------
+
+CLASS_DIAGRAMS         = NO
+HAVE_DOT               = NO
+CLASS_GRAPH            = NO
+GROUP_GRAPHS           = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+GRAPHICAL_HIERARCHY    = NO
+DIRECTORY_GRAPH        = NO

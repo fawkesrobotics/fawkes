@@ -1,0 +1,17 @@
+
+# Customization of api.doxygen related Trac documentation
+
+#---------------------------------------------------------------------------
+# configuration options related to warning and progress messages
+#---------------------------------------------------------------------------
+
+WARN_LOGFILE           = warnings-trac.txt
+
+#---------------------------------------------------------------------------
+# configuration options related to the HTML output
+#---------------------------------------------------------------------------
+
+HTML_OUTPUT            = trac_html
+HTML_HEADER            = doc/doxygen/api_trac_header.html
+HTML_FOOTER            = doc/doxygen/api_trac_footer.html
+TREEVIEW_WIDTH         = 250

@@ -1,0 +1,11 @@
+
+# Customization of api.doxygen related to submodule documentation
+
+#---------------------------------------------------------------------------
+# configuration options related to the input files
+#---------------------------------------------------------------------------
+
+INPUT                  = fawkes/doc/doxygen \
+                         fawkes/src \
+                         src
+
