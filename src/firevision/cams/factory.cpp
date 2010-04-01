@@ -57,6 +57,9 @@
 #ifdef HAVE_SWISSRANGER_CAM
 #include <cams/swissranger.h>
 #endif
+#ifdef HAVE_PIKE_CAM
+#include <cams/pike.h>
+#endif
 
 using namespace std;
 
@@ -183,6 +186,15 @@ CameraFactory::instance(const CameraArgumentParser *cap)
     c = new SwissRangerCamera(cap);
 #else
     throw UnknownCameraTypeException("No SwissRanger support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "pike" ) {
+#ifdef HAVE_PIKE_CAM
+    c = new PikeCamera(cap);
+#else
+    throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
 #endif
   }
 

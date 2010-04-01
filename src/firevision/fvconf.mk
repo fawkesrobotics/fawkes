@@ -21,7 +21,7 @@ $(error config.mk must be included before fvconf.mk)
 endif
 
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO \
-     SWISSRANGER
+     SWISSRANGER PIKE
 CTRLS=EVID100P DPPTU
 
 FVBASEDIR           = $(BASEDIR)/src/firevision
@@ -71,6 +71,9 @@ ifeq ($(HAVE_LIBDC1394),1)
     HAVE_FIREWIRE_CAM   = 1
     ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/bumblebee2.h)),)
       HAVE_BUMBLEBEE2_CAM = 1
+    endif
+    ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/pike.h)),)
+      HAVE_PIKE_CAM = 1
     endif
   endif
   VISION_CAM_LIBS    += $(subst -l,,$(shell $(PKGCONFIG) --libs 'libdc1394-2'))

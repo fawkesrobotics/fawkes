@@ -54,6 +54,9 @@ endif
 ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
 OBJS_libfvcams += bumblebee2.o
 endif
+ifeq ($(HAVE_PIKE_CAM),1)
+OBJS_libfvcams += pike.o
+endif
 ifeq ($(HAVE_LEUTRON_CAM),1)
 OBJS_libfvcams += leutron.o
 # Leutron headers are in a bad shape...
