@@ -38,7 +38,7 @@
 
 namespace fawkes {
 
-class MulticastDatagramSocket;
+class Socket;
 class WorldInfoMessageEncryptor;
 class WorldInfoMessageDecryptor;
 class NetworkNameResolver;
@@ -52,7 +52,8 @@ class WorldInfoException : public Exception
 class WorldInfoTransceiver
 {
  public:
-  WorldInfoTransceiver(const char *addr, unsigned short port,
+  WorldInfoTransceiver(bool use_multicast,
+                       const char *addr, unsigned short port,
 		       const char *key, const char *iv,
 		       NetworkNameResolver *resolver = NULL);
   ~WorldInfoTransceiver();
@@ -101,7 +102,8 @@ class WorldInfoTransceiver
   void crypt_outbound();
   void append_outbound(uint16_t msg_type, void *msg, uint16_t msg_size);
 
-  MulticastDatagramSocket *s;
+  Socket *s;
+  bool    loop;
 
   WorldInfoMessageEncryptor *encryptor;
   WorldInfoMessageDecryptor *decryptor;
