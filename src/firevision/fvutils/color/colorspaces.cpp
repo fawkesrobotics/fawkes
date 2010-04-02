@@ -172,6 +172,7 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
     return (width * height * 2);
     
   case GRAY8:
+  case MONO8:
   case BAYER_MOSAIC_RGGB:
   case BAYER_MOSAIC_GBRG:
   case BAYER_MOSAIC_GRBG:
