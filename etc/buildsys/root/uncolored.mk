@@ -1,7 +1,7 @@
 #*****************************************************************************
-#     Makefile Build System for Fawkes: Documentation config and targets
-#                            -------------------
-#   Created on Wed Mar 31 15:20:01 2010
+#            Makefile Build System for Fawkes: uncolored-* targets
+#                              -------------------
+#   Created on Tue Apr 06 14:33:57 2010
 #   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -13,17 +13,6 @@
 #
 #*****************************************************************************
 
-ifndef __buildsys_config_mk_
-$(error config.mk must be included before root.mk)
-endif
-
-ifndef __buildsys_root_root_mk_
-__buildsys_parts_root_mk_ := 1
-
-include $(BUILDSYSDIR)/root/docs.mk
-include $(BUILDSYSDIR)/root/check.mk
-include $(BUILDSYSDIR)/root/btmgmt.mk
-include $(BUILDSYSDIR)/root/uncolored.mk
-
-endif # __buildsys_root_root_mk_
+# Uncolored implicit targets
+uncolored-%: % ; @:
 
