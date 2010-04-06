@@ -136,7 +136,7 @@ Spline::tangent(unsigned int point_index)
   unsigned int points_per_bezier = (unsigned int) rint( powf(2.0, m_num_subdivisions) ) * 3;
   unsigned int points_total = m_bezier_curves.size() * (points_per_bezier - 1) + 1;
 
-  if (point_index > points_total)
+  if (point_index >= points_total)
     { return m_bezier_curves.back().tangent_at_t(1.0); }
   else
     {
