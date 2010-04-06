@@ -57,56 +57,57 @@ namespace firevision {
 #define AVT_VERSION_INFO3_REGISTER     (0x1000018)
 
 // AVT specific data structures
-/** White balance settings data structure */
-typedef struct {
-  uint32_t abs_control  :  1;
-  uint32_t reserved     :  3;
-  uint32_t one_push     :  1;
-  uint32_t on_off       :  1;
-  uint32_t a_m_mode     :  1;
-  uint32_t ub_value     : 12;
-  uint32_t vr_value     : 12;
-  uint32_t presence_inq :  1;
-} avt_white_balance_t;
+// /** White balance settings data structure */
+// typedef struct {
+//   uint32_t abs_control  :  1;
+//   uint32_t reserved     :  3;
+//   uint32_t one_push     :  1;
+//   uint32_t on_off       :  1;
+//   uint32_t a_m_mode     :  1;
+//   uint32_t ub_value     : 12;
+//   uint32_t vr_value     : 12;
+//   uint32_t presence_inq :  1;
+// } avt_white_balance_t;
 
 /** Datastructure for the autofunction AOI */
 typedef struct {
-  uint32_t xuints         : 12;
-  uint32_t yuints         : 12;
-  uint32_t reserved3      :  1;
-  uint32_t on_off         :  1;
-  uint32_t reserved2      :  1;
-  uint32_t show_work_area :  1;
-  uint32_t reserved1      :  3;
-  uint32_t presence_inq   :  1;
+  uint32_t xuints         : 12; /**< X units of work area/pos. beginning with 0 (read only) */
+  uint32_t yuints         : 12; /**< Y units of work area/pos. beginning with 0 (read only) */
+  uint32_t reserved3      :  1; /**< Reserved. */
+  uint32_t on_off         :  1; /**< Enable/disable AOI (see note above). */
+  uint32_t reserved2      :  1; /**< Reserved. */
+  uint32_t show_work_area :  1; /**< Show work area. */
+  uint32_t reserved1      :  3; /**< Reserved. */
+  uint32_t presence_inq   :  1; /**< Indicates presence of this feature (read only). */
 } avt_autofnc_aoi_t;
 
 /** Datastructure for the position of the autofunction AOI */
 typedef struct {
-  uint32_t top  : 16;
-  uint32_t left : 16;
+  uint32_t top  : 16; /**< Work area position (top coordinate). */
+  uint32_t left : 16; /**< Work area position (left coordinate). */
 } avt_af_area_position_t;
 
 /** Datastructure for the size of the autofunction AOI */
 typedef struct {
-  uint32_t height : 16;
-  uint32_t width  : 16;
+  uint32_t height : 16; /**< Height of work area size. */
+  uint32_t width  : 16; /**< Width of work area size. */
 } avt_af_area_size_t;
 
 /** Datastructure for version information of the uC */
 typedef struct {
-  uint32_t uc_version : 16;
-  uint32_t uc_type_id : 16;
+  uint32_t uc_version : 16; /**< Bcd-coded version number. */
+  uint32_t uc_type_id : 16; /**< Always 0. */
 } avt_version_info1_t;
 
 /** Datastructure for version information of the FGPA */
 typedef struct {
-  uint32_t fpga_version   : 16;
-  uint32_t camera_type_id : 16;
+  uint32_t fpga_version   : 16; /**< Bcd-coded version number. */
+  uint32_t camera_type_id : 16; /**< See Table 122: Camera type ID list on page 267 in the technical manual (v 4.3.0). */
 } avt_version_info3_t;
 
 
 /** Constructor.
+ * @param cap Camera argument parser.
  */
 PikeCamera::PikeCamera(const CameraArgumentParser* cap)
   : FirewireCamera( cap )
@@ -126,6 +127,7 @@ PikeCamera::PikeCamera(const CameraArgumentParser* cap)
   }
 }
 
+/** Destructor. */
 PikeCamera::~PikeCamera()
 {
 }
@@ -183,7 +185,13 @@ PikeCamera::print_info()
 	  version1.uc_type_id, version1.uc_version, version3.camera_type_id, version3.fpga_version );
 }
 
-
+/** Set the area of interest (AOI) for the auto functions.
+ * @param left offset form the left image border
+ * @param top offset form the top image border
+ * @param width width of the AOI
+ * @param height height of the AOI
+ * @param show_work_area highlight the work area in the image
+ */
 bool
 PikeCamera::set_autofunction_aoi( unsigned int left,
 				  unsigned int top,
@@ -257,7 +265,11 @@ PikeCamera::set_autofunction_aoi( unsigned int left,
   return aoi.on_off;
 }
 
-
+/** Parse the autofnc_aoi parameter in the camera argument string.
+ * The format ist \<left\>x\<top\>+\<width\>x\<height\>-\<show\>. "-<show" is
+ * optional.
+ * @param aoi the parameter string of the autofnc_aoi parameter
+ */
 void
 PikeCamera::parse_set_autofnc_aoi( const char* aoi )
 {
