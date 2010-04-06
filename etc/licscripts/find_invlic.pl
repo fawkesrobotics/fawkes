@@ -2,13 +2,16 @@
 
 use File::Find;
 use Fcntl ':mode';
+use Getopt::Long;
 
-if ( scalar(@ARGV) < 2 ) {
+my @paths = ();
+GetOptions("p=s" => \@paths);
+
+if ( scalar(@ARGV) == 0 ) {
   print("Insufficient number of arguments.\n");
-  print("Usage: finclic.pl <dir_to_search> <license_file> [license_file...]\n\n");
+  print("Usage: finclic.pl -p <dir_to_search> [-p ...] <license_file> [license_file...]\n\n");
 }
 
-$DIRECTORY=shift(@ARGV);
 @LICENSES = ();
 undef $/;
 
@@ -30,7 +33,9 @@ $ok = 1;
 
 #opendir(DIR, $DIRECTORYI);
 
-find(\&check_file, $DIRECTORY);
+foreach $p (@paths) {
+  find(\&check_file, $p);
+}
 
 sub check_file()
 {
