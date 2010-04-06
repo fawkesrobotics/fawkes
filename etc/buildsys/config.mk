@@ -20,9 +20,9 @@ BUILDSYSDIR    ?= $(abspath $(BASEDIR)/etc/buildsys)
 FAWKES_BASEDIR  = $(BASEDIR)
 TOP_BASEDIR     = $(BASEDIR)
 
-SUBMODULE        = 0
-SUBMODULE_INTERN = 0
-SUBMODULE_EXTERN = 0
+SUBMODULE        =
+SUBMODULE_INTERN =
+SUBMODULE_EXTERN =
 
 # Check if we are a submodule and the secondary buildsys config has
 # not yet been included
