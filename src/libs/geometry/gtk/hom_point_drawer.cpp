@@ -38,28 +38,16 @@ namespace fawkes {
 /** Constructor.
  * @param p the HomPoint to draw
  */
-HomPointDrawer::HomPointDrawer(HomPoint& p)
-{
-  m_hom_point = &p;
-  m_point_size = 0.1;
-  m_own_point = false;
-}
-
-/** Constructor.
- * @param p the HomPoint to draw
- */
 HomPointDrawer::HomPointDrawer(const HomPoint& p)
 {
   m_hom_point = new HomPoint(p);
   m_point_size = 0.1;
-  m_own_point = true;
 }
 
 /** Destructor. */
 HomPointDrawer::~HomPointDrawer()
 {
-  if (m_own_point)
-    { delete m_hom_point; }
+  delete m_hom_point;
 }
 
 /** Set the point size with which points a drawn by this drawer.

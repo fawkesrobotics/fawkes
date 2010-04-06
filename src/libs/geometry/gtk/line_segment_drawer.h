@@ -30,10 +30,10 @@ namespace fawkes {
 
 class LineSegment;
 
- class LineSegmentDrawer : public GeomDrawer
+class LineSegmentDrawer : public GeomDrawer
 {
  public:
-  LineSegmentDrawer(LineSegment& l);
+  LineSegmentDrawer(LineSegment l);
   virtual ~LineSegmentDrawer();
 
   virtual void draw(Cairo::RefPtr<Cairo::Context>& context);

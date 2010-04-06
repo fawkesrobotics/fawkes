@@ -34,14 +34,15 @@ namespace fawkes {
 /** Constructor.
  * @param l the LineSegement to drawer
  */
-LineSegmentDrawer::LineSegmentDrawer(LineSegment& l)
+LineSegmentDrawer::LineSegmentDrawer(LineSegment l)
 {
-  m_line_segment = &l;
+  m_line_segment = new LineSegment( l );
 }
 
 /** Destructor. */
 LineSegmentDrawer::~LineSegmentDrawer()
 {
+  delete m_line_segment;
 }
 
 void
