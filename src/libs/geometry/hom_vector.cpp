@@ -109,27 +109,15 @@ HomVector::set_length(float length)
 float
 HomVector::angle_xy(const HomVector& v) const
 {
-  if ( 0.0 == length() ||
-       0.0 == v.length() )
-    { return 0.0; }
+  if ( 0.0 == length() || 0.0 == v.length() )
+  { return 0.0; }
 
-  float s = x() * v.x() + y() * v.y() + z() * v.z();
-  float l = length() * v.length();
-  float d = s / l;
+  float a = atan2f(v.y(), v.x()) - atan2f(y(), x());
 
-  if (-1.0 >= d || d >= 1.0 )
-    { return 0.0; }
+  if ( a > M_PI ) { a -= 2 * M_PI; }
+  else if ( a < -M_PI ) { a += 2 * M_PI; }
 
-  float a = acos( s / l );
-
-  HomVector n(1.0, 0.0);
-  float a1 = acos(   x() /   length() );
-  float a2 = acos( v.x() / v.length() );
-
-  if ( a == (a2 - a1) )
-    { return a; }
-  else
-    { return -a; }
+  return a;
 }
 
 } // end namespace fawkes
