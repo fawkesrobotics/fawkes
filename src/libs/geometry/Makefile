@@ -63,6 +63,7 @@ all: $(WARN_TARGETS)
 endif
 
 $(LUALIBDIR)/fawkesgeometry.so: | $(LIBDIR)/libfawkesgeometry.so
+gtk: | $(LIBDIR)/libfawkesgeometry.so
 
 include $(BUILDSYSDIR)/base.mk
 
