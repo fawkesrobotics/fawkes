@@ -25,9 +25,11 @@ CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO \
 CTRLS=EVID100P DPPTU
 
 FVBASEDIR           = $(BASEDIR)/src/firevision
+TOP_FVBASEDIR       = $(TOP_BASEDIR)/src/firevision
 FVCONFDIR           = $(EXEC_CONFDIR)/firevision
+FVLIBDIR            = $(TOP_FVBASEDIR)/libs
 FVEXTLIBDIR         = $(FVBASEDIR)/extlib
-VISION_INCDIRS      = $(realpath $(FVBASEDIR))
+VISION_INCDIRS      = $(realpath $(FVBASEDIR)) $(realpath $(FVLIBDIR))
 VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
@@ -214,7 +216,7 @@ endif
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb/*),)
+ifneq ($(wildcard $(FVLIBDIR)/bulb_calib/bulb*),)
   HAVE_BULB_CREATOR = 1
   VISION_CFLAGS += -DHAVE_BULB_CREATOR
 endif

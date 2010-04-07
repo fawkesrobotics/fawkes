@@ -26,7 +26,7 @@
 #include <geometry/hom_point.h>
 
 #ifdef HAVE_BULB_CREATOR
-#include <models/mirror/bulb/bulb_generator.h>
+#include <bulb_calib/bulb_generator.h>
 namespace firevision {
   class Bulb;
   class BulbSampler;

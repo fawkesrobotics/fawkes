@@ -23,7 +23,7 @@
 #include <tools/firestation/mirror_calib.h>
 #ifdef HAVE_BULB_CREATOR
 #include <models/mirror/bulb.h>
-#include <models/mirror/bulb/bulb_sampler.h>
+#include <bulb_calib/bulb_sampler.h>
 #endif
 #include <core/exception.h>
 #include <utils/math/angle.h>
