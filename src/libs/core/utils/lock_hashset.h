@@ -52,15 +52,15 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
   LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh);
   virtual ~LockHashSet();
 
-  void           lock();
-  bool           try_lock();
-  void           unlock();
+  void           lock() const;
+  bool           try_lock() const;
+  void           unlock() const;
   RefPtr<Mutex>  mutex() const;
 
   void           insert_locked(const KeyType& x);
 
  private:
-  RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> __mutex;
 
 };
 
@@ -103,30 +103,30 @@ LockHashSet<KeyType, HashFunction, EqualKey>::~LockHashSet()
 {}
 
 
-/** Lock list. */
+/** Lock set. */
 template <class KeyType, class HashFunction, class EqualKey>
 void
-LockHashSet<KeyType, HashFunction, EqualKey>::lock()
+LockHashSet<KeyType, HashFunction, EqualKey>::lock() const
 {
   __mutex->lock();
 }
 
 
-/** Try to lock list.
+/** Try to lock set.
  * @return true, if the lock has been aquired, false otherwise.
  */
 template <class KeyType, class HashFunction, class EqualKey>
 bool
-LockHashSet<KeyType, HashFunction, EqualKey>::try_lock()
+LockHashSet<KeyType, HashFunction, EqualKey>::try_lock() const
 {
   return __mutex->try_lock();
 }
 
 
-/** Unlock list. */
+/** Unlock set. */
 template <class KeyType, class HashFunction, class EqualKey>
 void
-LockHashSet<KeyType, HashFunction, EqualKey>::unlock()
+LockHashSet<KeyType, HashFunction, EqualKey>::unlock() const
 {
   return __mutex->unlock();
 }

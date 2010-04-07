@@ -52,13 +52,13 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
   LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh);
   virtual ~LockHashMap();
 
-  void          lock();
-  bool          try_lock();
-  void          unlock();
+  void          lock() const;
+  bool          try_lock() const;
+  void          unlock() const;
   RefPtr<Mutex> mutex() const;
 
  private:
-  RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> __mutex;
 
 };
 
@@ -104,30 +104,30 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::~LockHashMap()
 }
 
 
-/** Lock list. */
+/** Lock map. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::lock()
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::lock() const
 {
   __mutex->lock();
 }
 
 
-/** Try to lock list.
+/** Try to lock map.
  * @return true, if the lock has been aquired, false otherwise.
  */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 bool
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::try_lock()
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::try_lock() const
 {
   return __mutex->try_lock();
 }
 
 
-/** Unlock list. */
+/** Unlock map. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::unlock()
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::unlock() const
 {
   return __mutex->unlock();
 }

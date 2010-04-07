@@ -38,9 +38,9 @@ class LockList : public std::list<Type>
   LockList();
   LockList(const LockList<Type> &ll);
   virtual ~LockList();
-  virtual void  lock();
-  virtual bool  try_lock();
-  virtual void  unlock();
+  virtual void  lock() const;
+  virtual bool  try_lock() const;
+  virtual void  unlock() const;
   RefPtr<Mutex> mutex() const;
 
   void     push_back_locked(const Type& x);
@@ -50,7 +50,7 @@ class LockList : public std::list<Type>
   LockList<Type> &  operator=(const LockList<Type> &ll);
   LockList<Type> &  operator=(const std::list<Type> &l);
  private:
-  RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> __mutex;
 
 };
 
@@ -91,7 +91,7 @@ LockList<Type>::~LockList()
 /** Lock list. */
 template <typename Type>
 void
-LockList<Type>::lock()
+LockList<Type>::lock() const
 {
   __mutex->lock();
 }
@@ -102,7 +102,7 @@ LockList<Type>::lock()
  */
 template <typename Type>
 bool
-LockList<Type>::try_lock()
+LockList<Type>::try_lock() const
 {
   return __mutex->try_lock();
 }
@@ -111,7 +111,7 @@ LockList<Type>::try_lock()
 /** Unlock list. */
 template <typename Type>
 void
-LockList<Type>::unlock()
+LockList<Type>::unlock() const
 {
   return __mutex->unlock();
 }
