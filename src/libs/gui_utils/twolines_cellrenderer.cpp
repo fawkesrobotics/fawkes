@@ -48,12 +48,10 @@ namespace fawkes {
 /** Constructor. */
 TwoLinesCellRenderer::TwoLinesCellRenderer()
   : Glib::ObjectBase(typeid(TwoLinesCellRenderer)),
-    Gtk::CellRenderer()
-#ifdef GLIBMM_PROPERTIES_ENABLED
-    ,
+    Gtk::CellRenderer(),
     __property_line1(*this, "line1", ""),
-    __property_line2(*this, "line2", "")
-#endif
+    __property_line2(*this, "line2", ""),
+    __property_line2_enabled(*this, "line2_enabled", true)
 {
 }
 
@@ -62,7 +60,6 @@ TwoLinesCellRenderer::~TwoLinesCellRenderer()
 {
 }
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Get property proxy for first line.
  * @return property proxy for first line
  */
@@ -81,7 +78,16 @@ TwoLinesCellRenderer::property_line2()
 {
   return __property_line2.get_proxy();
 }
-#endif
+
+
+/** Get property proxy that indicates whether the second line is enabled.
+ * @return property proxy that indicates whether the second line is enabled
+ */
+Glib::PropertyProxy<bool>
+TwoLinesCellRenderer::property_line2_enabled()
+{
+  return __property_line2_enabled.get_proxy();
+}
 
 
 /** Get required size for cell.
@@ -98,27 +104,30 @@ TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &widget,
 				     int *x_offset, int *y_offset,
 				     int *width, int *height) const
 {
-#ifdef GLIBMM_PROPERTIES_ENABLED
   // Compute text width
   Glib::RefPtr<Pango::Layout> layout_ptr = widget.create_pango_layout(__property_line1);
   Pango::Rectangle rect = layout_ptr->get_pixel_logical_extents();
 	
   int line1_width  = property_xpad() * 2 + rect.get_width();
   int line1_height = property_ypad() * 2 + rect.get_height();
+  int line2_height;
 
-  Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
-  Glib::RefPtr<Gtk::Style> style = widget.get_style();
-  Pango::FontDescription font2 = style->get_font();
-  font2.set_size((int)roundf(Pango::SCALE_SMALL * font2.get_size()));
-  layout2->set_font_description(font2);
-  Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
-  layout2->set_ellipsize(Pango::ELLIPSIZE_END);
+  if (__property_line2_enabled.get_value()) {
+    Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
+    Glib::RefPtr<Gtk::Style> style = widget.get_style();
+    Pango::FontDescription font2 = style->get_font();
+    font2.set_size((int)roundf(Pango::SCALE_SMALL * font2.get_size()));
+    layout2->set_font_description(font2);
+    Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
+    layout2->set_ellipsize(Pango::ELLIPSIZE_END);
 
-  int line2_height = property_ypad() * 2 + rect2.get_height();
+    line2_height = property_ypad() * 2 + rect2.get_height();
+  } else {
+    line2_height = 0;
+  }
 
   if ( width )  *width  = line1_width;
   if ( height ) *height = line1_height + 4 + line2_height;    
-#endif
 }
 
 
@@ -139,7 +148,6 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
 				   const Gdk::Rectangle &expose_area,
 				   Gtk::CellRendererState flags)
 {
-#ifdef GLIBMM_PROPERTIES_ENABLED
   // Get cell size
   int x_offset = 0, y_offset = 0, width = 0, height = 0;
   get_size(widget, cell_area, x_offset, y_offset, width, height);
@@ -168,20 +176,21 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
 				    cell_area.get_y() + y_offset + 2 * property_ypad(),
 				    layout_ptr);
 
-  Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
-  Glib::RefPtr<Gtk::Style> style = widget.get_style();
-  Pango::FontDescription font2 = style->get_font();
-  font2.set_size((int)roundf(Pango::SCALE_SMALL * std::max(font2.get_size(), 8)));
-  layout2->set_font_description(font2);
-  Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
-  layout2->set_ellipsize(Pango::ELLIPSIZE_END);
-  layout2->set_width((cell_area.get_width() - property_xpad()) * Pango::SCALE);
-  widget.get_style()->paint_layout (win, text_state, true, cell_area,
-				    widget, "cellrenderertext",
-				    cell_area.get_x() + x_offset + property_xpad(),
-				    cell_area.get_y() + y_offset + property_ypad() + rect1.get_height() + 4,
-				    layout2);
-#endif
+  if (__property_line2_enabled.get_value()) {
+    Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
+    Glib::RefPtr<Gtk::Style> style = widget.get_style();
+    Pango::FontDescription font2 = style->get_font();
+    font2.set_size((int)roundf(Pango::SCALE_SMALL * std::max(font2.get_size(), 8)));
+    layout2->set_font_description(font2);
+    Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
+    layout2->set_ellipsize(Pango::ELLIPSIZE_END);
+    layout2->set_width((cell_area.get_width() - property_xpad()) * Pango::SCALE);
+    widget.get_style()->paint_layout (win, text_state, true, cell_area,
+                                      widget, "cellrenderertext",
+                                      cell_area.get_x() + x_offset + property_xpad(),
+                                      cell_area.get_y() + y_offset + property_ypad() + rect1.get_height() + 4,
+                                      layout2);
+  }
 }
 
 

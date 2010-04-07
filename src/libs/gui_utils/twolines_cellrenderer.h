@@ -35,23 +35,21 @@ class TwoLinesCellRenderer : public Gtk::CellRenderer
 {
  public:
   TwoLinesCellRenderer();
-  ~TwoLinesCellRenderer();
+  virtual ~TwoLinesCellRenderer();
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
   // Properties
   Glib::PropertyProxy<Glib::ustring> property_line1();
   Glib::PropertyProxy<Glib::ustring> property_line2();
-#endif
+  Glib::PropertyProxy<bool> property_line2_enabled();
 
  protected:
   virtual void get_size_vfunc (Gtk::Widget& widget, const Gdk::Rectangle* cell_area, int* x_offset, int* y_offset, int* width, int* height) const;
   virtual void render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState flags);
 
  private:
-#ifdef GLIBMM_PROPERTIES_ENABLED
   Glib::Property<Glib::ustring> __property_line1;
   Glib::Property<Glib::ustring> __property_line2;
-#endif
+  Glib::Property<bool>          __property_line2_enabled;
 
 };
 
