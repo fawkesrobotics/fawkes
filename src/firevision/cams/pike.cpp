@@ -266,7 +266,7 @@ PikeCamera::set_autofunction_aoi( unsigned int left,
 }
 
 /** Parse the autofnc_aoi parameter in the camera argument string.
- * The format ist \<left\>x\<top\>+\<width\>x\<height\>-\<show\>. "-<show" is
+ * The format ist \<left\>x\<top\>+\<width\>x\<height\>-\<show\>. "-\<show\>" is
  * optional.
  * @param aoi the parameter string of the autofnc_aoi parameter
  */
@@ -310,7 +310,7 @@ PikeCamera::parse_set_autofnc_aoi( const char* aoi )
     height = a.substr( 0, pos );
     show = a.substr( pos + 1 );
 
-    __aoi_show_work_area = show == "show" ? true : false;
+    __aoi_show_work_area = ( show == "show" ) ? true : false;
   }
 
   __aoi_left   = atoi( left.c_str() );
