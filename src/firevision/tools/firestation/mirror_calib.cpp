@@ -42,7 +42,7 @@ using namespace firevision;
  */
 
 float MirrorCalibTool::m_sample_dist[] = {0.5, 1.0, 1.5, 2.0, 2.5, 
-					  3.0, 3.5, 4.0, 4.5, 5.0};
+					  3.0, 3.5, 4.0};
 float MirrorCalibTool::m_sample_ori[]  = {0.0, deg2rad(45.0),
 					  deg2rad(90.0), deg2rad(135.0),
 					  deg2rad(180.0),deg2rad(225.0),
@@ -60,7 +60,7 @@ MirrorCalibTool::MirrorCalibTool()
   m_img_width = 0;
   m_img_height = 0;
 
-  m_num_dists = 10 /*num_dists*/;
+  m_num_dists = 8 /*num_dists*/;
   m_num_oris = 8 /*num_oris*/;
 
   m_sample_step = 0;
