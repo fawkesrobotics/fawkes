@@ -48,10 +48,12 @@ namespace fawkes {
 /** Constructor. */
 TwoLinesCellRenderer::TwoLinesCellRenderer()
   : Glib::ObjectBase(typeid(TwoLinesCellRenderer)),
-    Gtk::CellRenderer(),
-    __property_line1(*this, "line1", ""),
-    __property_line2(*this, "line2", ""),
-    __property_line2_enabled(*this, "line2_enabled", true)
+    Gtk::CellRenderer()
+#ifdef GLIBMM_PROPERTIES_ENABLED
+    , __property_line1(*this, "line1", "")
+    , __property_line2(*this, "line2", "")
+    , __property_line2_enabled(*this, "line2_enabled", true)
+#endif
 {
 }
 
@@ -60,6 +62,8 @@ TwoLinesCellRenderer::~TwoLinesCellRenderer()
 {
 }
 
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Get property proxy for first line.
  * @return property proxy for first line
  */
@@ -88,6 +92,7 @@ TwoLinesCellRenderer::property_line2_enabled()
 {
   return __property_line2_enabled.get_proxy();
 }
+#endif
 
 
 /** Get required size for cell.
@@ -104,6 +109,7 @@ TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &widget,
 				     int *x_offset, int *y_offset,
 				     int *width, int *height) const
 {
+#ifdef GLIBMM_PROPERTIES_ENABLED
   // Compute text width
   Glib::RefPtr<Pango::Layout> layout_ptr = widget.create_pango_layout(__property_line1);
   Pango::Rectangle rect = layout_ptr->get_pixel_logical_extents();
@@ -128,6 +134,7 @@ TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &widget,
 
   if ( width )  *width  = line1_width;
   if ( height ) *height = line1_height + 4 + line2_height;    
+#endif
 }
 
 
@@ -148,6 +155,7 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
 				   const Gdk::Rectangle &expose_area,
 				   Gtk::CellRendererState flags)
 {
+#ifdef GLIBMM_PROPERTIES_ENABLED
   // Get cell size
   int x_offset = 0, y_offset = 0, width = 0, height = 0;
   get_size(widget, cell_area, x_offset, y_offset, width, height);
@@ -191,6 +199,7 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
                                       cell_area.get_y() + y_offset + property_ypad() + rect1.get_height() + 4,
                                       layout2);
   }
+#endif
 }
 
 
