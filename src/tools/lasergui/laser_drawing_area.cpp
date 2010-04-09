@@ -189,6 +189,10 @@ LaserDrawingArea::reset_laser_ifs()
   __target_if = NULL;
   __switch_if = NULL;
 
+  Gtk::Allocation allocation = get_allocation();
+  const int width  = allocation.get_width();
+  const int height = allocation.get_height();
+
   __xc = width / 2;
   __yc = height / 2;
   __zoom_factor = 50;
