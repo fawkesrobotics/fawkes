@@ -75,7 +75,8 @@ RefBoxCommThread::init()
 #ifdef HAVE_MSL2008
       std::string  refbox_host = config->get_string("/refboxcomm/MSL/host");
       unsigned int refbox_port = config->get_uint("/refboxcomm/MSL/port");
-      __refboxproc = new Msl2008RefBoxProcessor(refbox_host.c_str(), refbox_port);
+      __refboxproc = new Msl2008RefBoxProcessor(logger,
+						refbox_host.c_str(), refbox_port);
 #else
       throw Exception("MSL2008 support not available at compile time");
 #endif

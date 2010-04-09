@@ -32,6 +32,7 @@
 
 namespace fawkes {
   class MulticastDatagramSocket;
+  class Logger;
 }
 
 namespace xmlpp {
@@ -42,7 +43,8 @@ namespace xmlpp {
 class Msl2008RefBoxProcessor : public RefBoxProcessor
 {
  public:
-  Msl2008RefBoxProcessor(const char *refbox_host, unsigned short int refbox_port);
+  Msl2008RefBoxProcessor(fawkes::Logger *logger,
+			 const char *refbox_host, unsigned short int refbox_port);
   ~Msl2008RefBoxProcessor();
 
   void run();
@@ -55,10 +57,13 @@ class Msl2008RefBoxProcessor : public RefBoxProcessor
   void reconnect();
 
  private:
+  fawkes::Logger *__logger;
   fawkes::MulticastDatagramSocket *__s;
 
   unsigned int __score_cyan;
   unsigned int __score_magenta;
+
+  const char *__name;
 
   bool __quit;
   bool __connection_died;
