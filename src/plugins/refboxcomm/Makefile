@@ -28,9 +28,9 @@ OBJS_all = $(OBJS_refboxcomm)
 PLUGINS_all = $(PLUGINDIR)/refboxcomm.so
 
 ifeq ($(HAVE_LIBXMLPP),1)
-  CFLAGS  += -DHAVE_MSL2008 $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+  CFLAGS  += -DHAVE_MSL2010 $(shell $(PKGCONFIG) --cflags libxml++-2.6)
   LDFLAGS += $(shell $(PKGCONFIG) --libs libxml++-2.6)
-  OBJS_refboxcomm += processor/msl2008.o
+  OBJS_refboxcomm += processor/msl2010.o
 else
   WARN_TARGETS += warning_libxmlpp
 endif
@@ -49,7 +49,7 @@ all: $(WARN_TARGETS)
   endif
 .PHONY: warning_libxmlpp warning_spl
 warning_libxmlpp:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting MSL2008 support$(TNORMAL) (libxml++[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting MSL2010 support$(TNORMAL) (libxml++[-devel] not installed)"
 warning_spl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting SPL support$(TNORMAL) (not building in nao environment)"
 

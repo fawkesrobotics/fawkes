@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  msl2008.cpp - Fawkes mid-size refbox 2008 protocol repeater
+ *  msl2010.cpp - Fawkes mid-size refbox 2010 protocol repeater
  *
  *  Created: Wed Apr 09 10:38:16 2008
  *  Copyright  2008  Stefan Schiffer [stefanschiffer.de]
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "msl2008.h"
+#include "msl2010.h"
 #include <netcomm/socket/datagram_multicast.h>
 #include <utils/logging/logger.h>
 
@@ -86,7 +86,7 @@ static const std::string REFBOX_CARDCOLOR_YELLOW     = "yellow";
 static const std::string REFBOX_CARDCOLOR_RED        = "red";
 
 
-/** @class Msl2008RefBoxProcessor "processor/msl2008.h"
+/** @class Msl2010RefBoxProcessor "processor/msl2010.h"
  * Mid-size league refbox repeater.
  * This class will communicate with the mid-size league refbox and derive matching
  * game states from the communiation stream and send this via the world info.
@@ -98,10 +98,10 @@ static const std::string REFBOX_CARDCOLOR_RED        = "red";
  * @param refbox_host refbox host
  * @param refbox_port refbox port
  */
-Msl2008RefBoxProcessor::Msl2008RefBoxProcessor(Logger *logger,
+Msl2010RefBoxProcessor::Msl2010RefBoxProcessor(Logger *logger,
 					       const char *refbox_host,
 					       unsigned short int refbox_port)
-  : __name("Msl2008")
+  : __name("Msl2010RefBoxProc")
 {
   __logger = logger;
   __quit = false;
@@ -119,7 +119,7 @@ Msl2008RefBoxProcessor::Msl2008RefBoxProcessor(Logger *logger,
 
 
 /** Destructor. */
-Msl2008RefBoxProcessor::~Msl2008RefBoxProcessor()
+Msl2010RefBoxProcessor::~Msl2010RefBoxProcessor()
 {
   free(__refbox_host);
   __s->close();
@@ -129,7 +129,7 @@ Msl2008RefBoxProcessor::~Msl2008RefBoxProcessor()
 
 /** Reconnect to refbox. */
 void
-Msl2008RefBoxProcessor::reconnect()
+Msl2010RefBoxProcessor::reconnect()
 {
   if ( __s ) {
     __s->close();
@@ -169,7 +169,7 @@ Msl2008RefBoxProcessor::reconnect()
 
 /** Process received string. */
 void
-Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
+Msl2010RefBoxProcessor::process_string(char *buf, size_t len)
 {
   __logger->log_info(__name, "Received\n *****\n %s \n *****", buf);
 
@@ -348,7 +348,7 @@ Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
 }
 
 void
-Msl2008RefBoxProcessor::refbox_process()
+Msl2010RefBoxProcessor::refbox_process()
 {
   short pollrv = __s->poll(0, POLL_IN);
   do {
@@ -372,7 +372,7 @@ Msl2008RefBoxProcessor::refbox_process()
 }
 
 bool
-Msl2008RefBoxProcessor::check_connection()
+Msl2010RefBoxProcessor::check_connection()
 {
   if (__connection_died) {
     reconnect();

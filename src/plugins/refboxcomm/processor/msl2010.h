@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  msl2008.h - Fawkes mid-size refbox 2008 protocol repeater
+ *  msl2010.h - Fawkes mid-size refbox 2010 protocol repeater
  *
  *  Created: Wed Apr 01 10:36:08 2009
  *  Copyright  2009  Stefan Schiffer [stefanschiffer.de]
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2008_H_
-#define __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2008_H_
+#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
+#define __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
 
 #include "processor.h"
 #include "state_handler.h"
@@ -41,12 +41,12 @@ namespace xmlpp {
   class Node;
 }
 
-class Msl2008RefBoxProcessor : public RefBoxProcessor
+class Msl2010RefBoxProcessor : public RefBoxProcessor
 {
  public:
-  Msl2008RefBoxProcessor(fawkes::Logger *logger,
+  Msl2010RefBoxProcessor(fawkes::Logger *logger,
 			 const char *refbox_host, unsigned short int refbox_port);
-  ~Msl2008RefBoxProcessor();
+  ~Msl2010RefBoxProcessor();
 
   bool check_connection();
   void refbox_process();

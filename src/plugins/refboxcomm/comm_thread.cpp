@@ -23,8 +23,8 @@
 
 #include "comm_thread.h"
 #include "processor/remotebb.h"
-#ifdef HAVE_MSL2008
-#  include "processor/msl2008.h"
+#ifdef HAVE_MSL2010
+#  include "processor/msl2010.h"
 #endif
 #ifdef HAVE_SPL
 #  include "processor/spl.h"
@@ -87,13 +87,13 @@ RefBoxCommThread::init()
       throw Exception("No valid processor defined");
     }
     if ( processor == "MSL" ) {
-#ifdef HAVE_MSL2008
+#ifdef HAVE_MSL2010
       std::string  refbox_host = config->get_string(CONFPREFIX"/MSL/host");
       unsigned int refbox_port = config->get_uint(CONFPREFIX"/MSL/port");
-      __refboxproc = new Msl2008RefBoxProcessor(logger,
+      __refboxproc = new Msl2010RefBoxProcessor(logger,
 						refbox_host.c_str(), refbox_port);
 #else
-      throw Exception("MSL2008 support not available at compile time");
+      throw Exception("MSL2010 support not available at compile time");
 #endif
     } else if ( processor == "SPL" ) {
 #ifdef HAVE_SPL
