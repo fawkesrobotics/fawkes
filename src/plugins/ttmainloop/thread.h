@@ -32,7 +32,6 @@
 
 namespace fawkes {
   class Time;
-  class TimeWait;
   class TimeTracker;
 }
 
@@ -59,12 +58,6 @@ class TimeTrackerMainLoopThread
   fawkes::Time     *__last_outp_time;
   fawkes::Time     *__now;
 
-  fawkes::TimeWait *__time_wait;
-
-  std::list<std::string>        __recovered_threads;
-  unsigned int                  __desired_loop_time_usec;
-  float                         __desired_loop_time_sec;
-  unsigned int                  __max_thread_time_usec;
   fawkes::Time                 *__loop_start;
   fawkes::Time                 *__loop_end;
 
