@@ -29,7 +29,9 @@
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <blackboard/interface_listener.h>
+
 #include <core/utils/lock_queue.h>
+#include <core/threading/thread_list.h>
 
 #include <cstdio>
 
@@ -38,6 +40,7 @@ namespace fawkes {
   class Logger;
   class Mutex;
   class Time;
+  class SwitchInterface;
 }
 
 class BBLoggerThread
@@ -54,6 +57,10 @@ class BBLoggerThread
 		 const char *scenario, fawkes::Time *start_time);
   virtual ~BBLoggerThread();
 
+  const char * get_filename() const;
+  void set_threadlist(fawkes::ThreadList &thread_list);
+  void set_enabled(bool enabled);
+
   virtual void init();
   virtual void finalize();
   virtual void loop();
@@ -64,6 +71,9 @@ class BBLoggerThread
 					 unsigned int instance_serial) throw();
   virtual void bb_interface_writer_removed(fawkes::Interface *interface,
 					   unsigned int instance_serial) throw();
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
  private:
   void write_header();
@@ -77,6 +87,7 @@ class BBLoggerThread
   unsigned int        __num_data_items;
   unsigned int        __session_start;
 
+  bool                __enabled;
   bool                __buffering;
   bool                __flushing;
   size_t              __data_size;
@@ -84,11 +95,17 @@ class BBLoggerThread
   char               *__filename;
   char               *__logdir;
   char               *__uid;
+  char               *__type;
+  char               *__id;
   FILE               *__f_data;
   FILE               *__f_msgs;
 
   fawkes::Time       *__start;
   fawkes::Time       *__now;
+
+  bool                __is_master;
+  fawkes::ThreadList  __threads;
+  fawkes::SwitchInterface *__switch_if;
 
   fawkes::Mutex      *__queue_mutex;
   unsigned int        __act_queue;

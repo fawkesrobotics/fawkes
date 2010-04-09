@@ -113,6 +113,9 @@ class ThreadList : private LockList<Thread *>
   using LockList<Thread *>::front;
   using LockList<Thread *>::back;
 
+  ThreadList &  operator=  (const ThreadList & tl);
+
+
  private:
   void notify_of_failed_init();
   void update_barrier();

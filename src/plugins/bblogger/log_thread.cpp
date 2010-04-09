@@ -26,7 +26,7 @@
 #include <blackboard/blackboard.h>
 #include <utils/logging/logger.h>
 #include <core/exceptions/system.h>
-#include <utils/misc/autofree.h>
+#include <interfaces/SwitchInterface.h>
 
 #include <memory>
 #include <cstring>
@@ -90,8 +90,23 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
   __filename    = NULL;
   __queue_mutex = new Mutex();
   __data_size   = 0;
+  __is_master   = false;
+  __enabled     = true;
 
   __now = NULL;
+
+  // Parse UID
+  Interface::parse_uid(__uid, &__type, &__id);
+
+  char date[21];
+  Time now;
+  struct tm *tmp = localtime(&(now.get_timeval()->tv_sec));
+  strftime(date, 21, "%F-%H-%M-%S", tmp);
+
+  if (asprintf(&__filename, "%s/%s-%s-%s-%s.log", LOGDIR, __scenario,
+	       __type, __id, date) == -1) {
+    throw OutOfMemoryException("Cannot generate log name");
+  }
 }
 
 
@@ -99,8 +114,11 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
 BBLoggerThread::~BBLoggerThread()
 {
   free(__uid);
+  free(__type);
+  free(__id);
   free(__logdir);
   free(__scenario);
+  free(__filename);
   delete __queue_mutex;
   delete __start;
 }
@@ -120,24 +138,6 @@ BBLoggerThread::init()
   __num_data_items = 0;
   __session_start  = 0;
 
-  // Parse UID
-  char *type, *id;
-  Interface::parse_uid(__uid, &type, &id);
-
-  // Auto-destruction on Exception or func exit
-  MemAutoFree typeaf(type);
-  MemAutoFree idaf(id);
-  MemAutoFree filenameaf(__filename);
-
-  char date[21];
-  struct tm *tmp = localtime(&(clock->now().get_timeval()->tv_sec));
-  strftime(date, 21, "%F-%H-%M-%S", tmp);
-
-  if (asprintf(&__filename, "%s/%s-%s-%s-%s.log", LOGDIR, __scenario,
-	       type, id, date) == -1) {
-    throw OutOfMemoryException("Cannot generate log name");
-  }
-
   // use open because fopen does not provide O_CREAT | O_EXCL
   // open read/write because of usage of mmap
   mode_t m = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
@@ -152,7 +152,7 @@ BBLoggerThread::init()
   }
 
   try {
-    __iface = blackboard->open_for_reading(type, id);
+    __iface = blackboard->open_for_reading(__type, __id);
     __data_size = __iface->datasize();
   } catch (Exception &e) {
     fclose(__f_data);
@@ -169,16 +169,27 @@ BBLoggerThread::init()
 
   __now = new Time(clock);
 
+  if (__is_master) {
+    try {
+      __switch_if = blackboard->open_for_writing<SwitchInterface>("BBLogger");
+      __switch_if->set_enabled(__enabled);
+      __switch_if->write();
+      bbil_add_message_interface(__switch_if);
+    } catch (Exception &e) {
+      fclose(__f_data);
+      throw;
+    }
+  }
+
   bbil_add_data_interface(__iface);
   bbil_add_writer_interface(__iface);
-  //bbil_add_message_interface(__iface);
 
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_DATA |
-				BlackBoard::BBIL_FLAG_WRITER);
+				BlackBoard::BBIL_FLAG_WRITER |
+				BlackBoard::BBIL_FLAG_MESSAGES);
 
-  logger->log_info(name(), "Logging %s to %s", __iface->uid(), __filename);
-
-  filenameaf.release();
+  logger->log_info(name(), "Logging %s to %s%s", __iface->uid(), __filename,
+		   __is_master ? " as master" : "");
 }
 
 
@@ -186,6 +197,9 @@ void
 BBLoggerThread::finalize()
 {
   blackboard->unregister_listener(this);
+  if (__is_master) {
+    blackboard->close(__switch_if);
+  }
   update_header();
   fclose(__f_data);
   for (unsigned int q = 0; q < 2; ++q) {
@@ -197,15 +211,58 @@ BBLoggerThread::finalize()
   }
   delete __now;
   __now = NULL;
-  free(__filename);
 }
 
+
+/** Get filename.
+ * @return file name, valid after object instantiated, but before init() does not
+ * mean that the file has been or can actually be opened
+ */
+const char *
+BBLoggerThread::get_filename() const
+{
+  return __filename;
+}
+
+
+/** Enable or disable logging.
+ * @param enabled true to enable logging, false to disable
+ */
+void
+BBLoggerThread::set_enabled(bool enabled)
+{
+  if (enabled && !__enabled) {
+    logger->log_info(name(), "Logging enabled",
+		     (__num_data_items - __session_start));
+    __session_start = __num_data_items;
+  } else if (!enabled && __enabled) {
+    logger->log_info(name(), "Logging disabled (wrote %u entries), flushing",
+		     (__num_data_items - __session_start));
+    update_header();
+    fflush(__f_data);
+  }
+
+  __enabled = enabled;
+}
+
+
+/** Set threadlist and master status.
+ * This copies the thread list and sets this thread as master thread.
+ * If you intend to use this method you must do so before the thread is
+ * initialized. You may only ever declare one thread as master.
+ * @param thread_list list of threads to notify on enable/disable events
+ */
+void
+BBLoggerThread::set_threadlist(fawkes::ThreadList &thread_list)
+{
+  __is_master = true;
+  __threads   = thread_list;
+}
 
 void
 BBLoggerThread::write_header()
 {
   bblog_file_header header;
-  logger->log_debug(name(), "Writing header %zu", sizeof(header));
   memset(&header, 0, sizeof(header));
   header.file_magic   = htonl(BBLOGGER_FILE_MAGIC);
   header.file_version = htonl(BBLOGGER_FILE_VERSION);
@@ -228,7 +285,6 @@ BBLoggerThread::write_header()
     throw FileWriteException(__filename, "Failed to write header");
   }
   fflush(__f_data);
-  logger->log_debug(name(), "flushed");
 }
 
 /** Updates the num_data_items field in the header. */
@@ -293,16 +349,38 @@ BBLoggerThread::loop()
 
 bool
 BBLoggerThread::bb_interface_message_received(Interface *interface,
-						     Message *message) throw()
+					      Message *message) throw()
 {
-  // just let 'em enqueue
-  return true;
+  SwitchInterface::EnableSwitchMessage *enm;
+  SwitchInterface::DisableSwitchMessage *dism;
+
+  bool enabled = true;
+  if ((enm = dynamic_cast<SwitchInterface::EnableSwitchMessage *>(message)) != NULL) {
+    enabled = true;
+  } else if ((dism = dynamic_cast<SwitchInterface::DisableSwitchMessage *>(message)) != NULL) {
+    enabled = false;
+  } else {
+    logger->log_debug(name(), "Unhandled message type: %s via %s",
+		      message->type(), interface->uid());
+  }
+
+  for (ThreadList::iterator i = __threads.begin(); i != __threads.end(); ++i) {
+    BBLoggerThread *bblt = dynamic_cast<BBLoggerThread *>(*i);
+    bblt->set_enabled(enabled);
+  }
+
+  __switch_if->set_enabled(__enabled);
+  __switch_if->write();
+
+  return false;
 }
 
 
 void
 BBLoggerThread::bb_interface_data_changed(Interface *interface) throw()
 {
+  if (!__enabled)  return;
+
   try {
     __iface->read();
 

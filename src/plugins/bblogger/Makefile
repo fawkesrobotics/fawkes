@@ -1,3 +1,4 @@
+
 #*****************************************************************************
 #         Makefile Build System for Fawkes: BlackBoard Logger Plugin
 #                            -------------------
@@ -18,11 +19,21 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 SUBDIRS=console
 
-LIBS_bblogger = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
-OBJS_bblogger = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+LIBS_bblogger = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard \
+		SwitchInterface
+OBJS_bblogger = bblogger_plugin.o log_thread.o
 
-OBJS_all    = $(OBJS_bblogger)
-PLUGINS_all = $(PLUGINDIR)/bblogger.so
+
+LIBS_bblogreplay = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
+OBJS_bblogreplay = bblogreplay_plugin.o		\
+		   logreplay_thread.o		\
+		   logreplay_bt_thread.o	\
+		   bblogfile.o
+
+
+OBJS_all    = $(OBJS_bblogger) $(OBJS_bblogreplay)
+PLUGINS_all = $(PLUGINDIR)/bblogger.so \
+	      $(PLUGINDIR)/bblogreplay.so
 
 include $(BUILDSYSDIR)/base.mk
 

@@ -189,7 +189,8 @@ InterfaceFieldIterator::operator*() const
 InterfaceFieldIterator &
 InterfaceFieldIterator::operator=(const InterfaceFieldIterator & fi)
 {
-  __infol = fi.__infol;
+  __interface = fi.__interface;
+  __infol     = fi.__infol;
 
   return *this;
 }

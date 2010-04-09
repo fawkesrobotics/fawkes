@@ -147,6 +147,7 @@ Exception::Exception(const char *format, ...) throw()
   messages_mutex = new Mutex();
 
   _errno = 0;
+  __type_id = "unknown";
 
   messages = NULL;
   messages_end = NULL;
@@ -177,6 +178,7 @@ Exception::Exception(int errno, const char *format, ...) throw()
   messages_mutex = new Mutex();
 
   _errno = errno;
+  __type_id = "unknown";
 
   messages = NULL;
   messages_end = NULL;
@@ -242,6 +244,7 @@ Exception::Exception(const Exception &exc) throw()
   messages_iterator = NULL;
 
   _errno = exc._errno;
+  __type_id = exc.__type_id;
   copy_messages(exc);
 }
 
@@ -255,6 +258,7 @@ Exception::Exception() throw()
 {
   messages_mutex = new Mutex();
   _errno = 0;
+  __type_id = "unknown";
   messages = NULL;
   messages_end = NULL;
   messages_iterator = NULL;
@@ -275,6 +279,38 @@ Exception::~Exception() throw()
   messages = NULL;
   messages_end = NULL;
   delete messages_mutex;
+}
+
+
+/** Set exception type ID.
+ * Set the type ID of this exception.
+ * @param id new type ID, note that this must be a static string which is
+ * guaranteed to exist for the whole lifetime of the exception.
+ * @see Exception::type_id()
+ */
+void
+Exception::set_type_id(const char *id)
+{
+  __type_id = id;
+}
+
+
+/** Get type ID.
+ * Exceptions can have a type ID. This can be used to avoid having to declare
+ * numerous specific exception sub-classes to different errors, if it is
+ * essential to be able to differentiate them in the exception handling code.
+ * The type ID is a free-form string. It should NOT contain any message, rather
+ * it should be a one-word internal identifier that is never leaked to the user
+ * of the software, i.e. it is not printed anywhere. Note that the ID must be
+ * a static string, which exists for the whole life time of the exception, is
+ * generally not in a dynamically allocated memory (this very exception could
+ * indicate memory shortage). This also makes it thread-safe.
+ * @return type ID
+ */
+const char *
+Exception::type_id() const
+{
+  return __type_id;
 }
 
 
