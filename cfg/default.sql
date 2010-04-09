@@ -144,4 +144,10 @@ INSERT INTO "config" VALUES('/fawkes/bblogreplay/grace_period','float',0.001,'Gr
 INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/file','string','laser-Laser360Interface-Laser-2010-02-21-22-22-29.log','log file to be replayed if scenario specified');
 INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/loop','bool',1,'loop the replay on default for the scenario');
 INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/hook','string','sensor','Hook at which to replay the log data');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/processor','string','RemoteBB','Processor to use to connect to refbox, one of MSL, SPL and RemoteBB');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/MSL/host','string','230.0.0.1','Multicast address the MSL refbox sends to');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/MSL/port','unsigned int',30000,'The UDP port the MSL refbox multicasts to');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/host','string','localhost','The host to connect to for the remote blackboard');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/port','unsigned int',1911,'Port on the remote host to connect to');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/interface_id','string','RefBoxComm','Interface of the GameStateInterface on the remote blackboard');
 COMMIT;

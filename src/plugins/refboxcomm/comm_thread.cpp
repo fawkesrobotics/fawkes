@@ -22,6 +22,7 @@
  */
 
 #include "comm_thread.h"
+#include "processor/remotebb.h"
 #ifdef HAVE_MSL2008
 #  include "processor/msl2008.h"
 #endif
@@ -33,6 +34,8 @@
 #ifdef HAVE_SPL
 #  include <interfaces/SplPenaltyInterface.h>
 #endif
+
+#define CONFPREFIX "/plugins/refboxcomm"
 
 using namespace fawkes;
 
@@ -70,19 +73,31 @@ RefBoxCommThread::init()
     __kickoff = false;
     __gamestate_modified = false;
 
-    std::string  league  = config->get_string("/general/league");
-    if ( league == "MSL" ) {
+    std::string processor = "";
+    try {
+      processor = config->get_string(CONFPREFIX"/processor");
+    } catch (Exception &e) {
+      // try to get league
+      std::string  league  = config->get_string("/general/league");
+      if (league == "MSL" || league == "SPL") {
+	processor = league;
+      }
+    }
+    if (processor == "") {
+      throw Exception("No valid processor defined");
+    }
+    if ( processor == "MSL" ) {
 #ifdef HAVE_MSL2008
-      std::string  refbox_host = config->get_string("/refboxcomm/MSL/host");
-      unsigned int refbox_port = config->get_uint("/refboxcomm/MSL/port");
+      std::string  refbox_host = config->get_string(CONFPREFIX"/MSL/host");
+      unsigned int refbox_port = config->get_uint(CONFPREFIX"/MSL/port");
       __refboxproc = new Msl2008RefBoxProcessor(logger,
 						refbox_host.c_str(), refbox_port);
 #else
       throw Exception("MSL2008 support not available at compile time");
 #endif
-    } else if ( league == "SPL" ) {
+    } else if ( processor == "SPL" ) {
 #ifdef HAVE_SPL
-      unsigned int refbox_port = config->get_uint("/refboxcomm/SPL/port");
+      unsigned int refbox_port = config->get_uint(CONFPREFIX"/SPL/port");
       __team_number = config->get_uint("/general/team_number");
       __player_number = config->get_uint("/general/player_number");
       __refboxproc = new SplRefBoxProcessor(logger, refbox_port,
@@ -90,8 +105,16 @@ RefBoxCommThread::init()
 #else
       throw Exception("SPL support not available at compile time");
 #endif
+    } else if ( processor == "RemoteBB" ) {
+      std::string  bb_host  = config->get_string(CONFPREFIX"/RemoteBB/host");
+      unsigned int bb_port  = config->get_uint(CONFPREFIX"/RemoteBB/port");
+      std::string  iface_id = config->get_string(CONFPREFIX"/RemoteBB/interface_id");
+      __refboxproc = new RemoteBlackBoardRefBoxProcessor(logger,
+							 bb_host.c_str(), bb_port,
+							 iface_id.c_str());
     } else {
-      throw Exception("League %s is not supported by refboxcomm plugin", league.c_str());
+      throw Exception("Processor %s is not supported by refboxcomm plugin",
+		      processor.c_str());
     }
     __refboxproc->set_handler(this);
     __gamestate_if = blackboard->open_for_writing<GameStateInterface>("RefBoxComm");
@@ -148,7 +171,9 @@ RefBoxCommThread::loop()
     __penalty_if->msgq_pop();
   }
 #endif
-  __refboxproc->refbox_process();
+  if (__refboxproc->check_connection()) {
+    __refboxproc->refbox_process();
+  }
   if (__gamestate_modified) {
     __gamestate_if->write();
 #ifdef HAVE_SPL

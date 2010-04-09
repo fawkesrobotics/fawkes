@@ -22,7 +22,8 @@ HAVE_SPL        = $(if $(filter nao%,$(BUILD_TYPE)),1)
 
 LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects GameStateInterface
 OBJS_refboxcomm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))) \
-		  processor/processor.o processor/state_handler.o
+		  processor/processor.o processor/state_handler.o \
+		  processor/remotebb.o
 OBJS_all = $(OBJS_refboxcomm)
 PLUGINS_all = $(PLUGINDIR)/refboxcomm.so
 
