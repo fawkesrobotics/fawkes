@@ -67,12 +67,16 @@ LaserSensorThread::init()
 
   bool spots_filter = false;
   bool main_sensor  = false;
+  __clockwise_angle = false;
 
   try {
     spots_filter = config->get_bool((__cfg_prefix + "use_dead_spots_filter").c_str());
   } catch (Exception &e) {} // ignored, assume no
   try {
     main_sensor = config->get_bool((__cfg_prefix + "main_sensor").c_str());
+  } catch (Exception &e) {} // ignored, assume no
+  try {
+    __clockwise_angle = config->get_bool((__cfg_prefix + "clockwise_angle").c_str());
   } catch (Exception &e) {} // ignored, assume no
 
   __aqt->pre_init(config, logger);

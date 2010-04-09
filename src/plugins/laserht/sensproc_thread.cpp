@@ -31,6 +31,9 @@
 
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
+#ifdef LASERHT_TIMETRACKER
+#  include <utils/time/tracker.h>
+#endif
 
 #include <cstdlib>
 
@@ -91,6 +94,15 @@ LaserHtSensorProcThread::init()
   for (unsigned int i = 0; i < __num_vals; ++i) {
     __values[i] = new int[2];
   }
+
+#ifdef LASERHT_TIMETRACKER
+  __tt          = new TimeTracker();
+  __tt_loop     = 0;
+  __ttc_reset   = __tt->add_class("Reset");
+  __ttc_process = __tt->add_class("Processing");
+  __ttc_fitting = __tt->add_class("Fitting");
+  __ttc_total   = __tt->add_class("Total");
+#endif
 }
 
 
@@ -147,7 +159,15 @@ LaserHtSensorProcThread::loop()
   float *distances = __laser360_if->distances();
   const size_t num_dist = __laser360_if->maxlenof_distances();
 
+#ifdef LASERHT_TIMETRACKER
+  __tt->ping_start(__ttc_total);
+  __tt->ping_start(__ttc_reset);
+#endif
   __ht->reset();
+#ifdef LASERHT_TIMETRACKER
+  __tt->ping_end(__ttc_reset);
+  __tt->ping_start(__ttc_process);
+#endif
 
   for (size_t i = 0; i < num_dist; ++i) {
     // generate candidates
@@ -165,6 +185,9 @@ LaserHtSensorProcThread::loop()
       __ht->process(__values, __num_vals);
     }
   }
+#ifdef LASERHT_TIMETRACKER
+  __tt->ping_end(__ttc_process);
+#endif
 
   int max_values[2];
   unsigned int max_count = __ht->max(max_values);
@@ -264,9 +287,15 @@ LaserHtSensorProcThread::loop()
       }
     }
 
+#ifdef LASERHT_TIMETRACKER
+  __tt->ping_start(__ttc_fitting);
+#endif
     // fit line through determined readings
     float a = 0, b = 0, e = 0;
     fit_line(readings, 0, a, b, e);
+#ifdef LASERHT_TIMETRACKER
+  __tt->ping_end(__ttc_fitting);
+#endif
 
     if ( e <= __cfg_fitting_error_threshold ) {
       // calculate y values of min and max point
@@ -335,6 +364,13 @@ LaserHtSensorProcThread::loop()
 
   __line_if->set_valid(true);
   __line_if->write();
+#ifdef LASERHT_TIMETRACKER
+  __tt->ping_end(__ttc_total);
+  if (++__tt_loop >= 100) {
+    __tt->print_to_stdout();
+    __tt_loop = 0;
+  }
+#endif
 }
 
 #define sqr(x) ((x) * (x))
