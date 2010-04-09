@@ -826,6 +826,7 @@ FirewireCamera::parse_set_shutter(const char *shutter)
  *   - FORMAT7_7
  * - coding=CODING, color coding for Format7, CODING is one of:
  *   - YUV422
+ *   - MONO8
  *   - MONO16
  *   - RAW16
  * - isospeed=SPEED, ISO speed, SPEED is one of:
@@ -912,6 +913,8 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
     string c = cap->get("coding");
     if ( c == "YUV422" ) {
       _format7_coding = DC1394_COLOR_CODING_YUV422;
+    } else if ( c == "MONO8" ) {
+      _format7_coding = DC1394_COLOR_CODING_MONO8;
     } else if ( c == "MONO16" ) {
       _format7_coding = DC1394_COLOR_CODING_MONO16;
     } else if ( c == "RAW16" ) {

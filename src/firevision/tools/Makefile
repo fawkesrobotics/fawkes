@@ -18,6 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(FVSRCDIR)/fvconf.mk
 include $(BUILDSYSDIR)/gui.mk
+include $(BUILDCONFDIR)/netcomm/netcomm.mk
 
 CFLAGS   += $(VISION_CFLAGS) $(CFLAGS_AVAHI)
 LDFLAGS  += $(VISION_LDFLAGS) $(LDFLAGS_AVAHI)

@@ -1008,9 +1008,10 @@ Firestation::image_click(GdkEventButton* event)
 				 image_x,
 				 image_y,
 				 y, u, v );
-	      cout << "Y: " << (unsigned int)y
-		   << " U: " << (unsigned int)u
-		   << " V: " << (unsigned int)v << endl;
+	      printf( "Y=%d  U=%d  Y=%d @ (%d, %d)\n",
+		      (unsigned int) y, (unsigned int) u, (unsigned int) v,
+		      image_x, image_y );
+
 	      break;
 	    default:
 	  cout << "Unhandled colorspace" << endl;

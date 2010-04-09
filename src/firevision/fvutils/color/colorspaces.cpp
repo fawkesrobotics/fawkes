@@ -112,6 +112,8 @@ colorspace_to_string(colorspace_t colorspace)
     return "YUV422_PLANAR_QUARTER";
   case GRAY8:
     return "GRAY8";
+  case MONO8:
+    return "MONO8";
   case RGB_WITH_ALPHA:
     return "RGB_WITH_ALPHA";
   case BGR_WITH_ALPHA:
@@ -170,6 +172,7 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
     return (width * height * 2);
     
   case GRAY8:
+  case MONO8:
   case BAYER_MOSAIC_RGGB:
   case BAYER_MOSAIC_GBRG:
   case BAYER_MOSAIC_GRBG:
