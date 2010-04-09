@@ -26,6 +26,7 @@
 #include "refbox_state_writer.h"
 #include "msl2007.h"
 #include "msl2008.h"
+#include "msl2010.h"
 #include "spl.h"
 
 #include <vector>
@@ -43,7 +44,8 @@ print_usage(const char *program_name)
 	 "  -d             Turn on debug mode (prints to stdout)\n"
 	 "  -b             Use blackboard writer instead of world info sender\n"
 	 "  -l league      Define league, may be one of\n"
-	 "                 midsize, msl2007, msl2008, spl\n"
+	 "                 midsize, msl2007, msl2008, msl2010, spl\n"
+	 "  -u             Don't use multicast in msl2010\n"
 	 "  -t team        Our team, either cyan or magenta\n"
 	 "  -g goal_color  Our goal color, either blue or yellow\n"
 	 "  -p port        UDP port to send to (default 2806)\n"
@@ -61,7 +63,7 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hdbl:t:g:p:m:k:i:");
+  ArgumentParser argp(argc, argv, "hdbul:t:g:p:m:k:i:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -149,6 +151,18 @@ main(int argc, char **argv)
   } else if ( strcmp(argp.arg("l"), "msl2008") == 0 ) {
     Msl2008RefBoxRepeater m8rr(*rss, "230.0.0.1", 30000);
     m8rr.run();
+  } else if ( strcmp(argp.arg("l"), "msl2010") == 0 ) {
+    if ( argp.has_arg("u") ) {
+      //Msl2010RefBoxRepeater m10rr(*rss, "127.0.0.1", port, false);
+      Msl2010RefBoxRepeater m10rr(*rss, "127.0.0.1", 30010, false);
+      m10rr.run();
+    } 
+    else {
+      //Msl2010RefBoxRepeater m10rr(*rss, addr, port);
+      Msl2010RefBoxRepeater m10rr(*rss, "230.0.0.1", 30000);
+      //Msl2010RefBoxRepeater m10rr(*rss, "230.0.0.1", 30010);
+      m10rr.run();
+    }
   } else if ( strcmp(argp.arg("l"), "spl") == 0 ) {
     SplRefBoxRepeater nrr(*rss, "255.255.255.0", 3838, our_team, our_goal);
     nrr.run();

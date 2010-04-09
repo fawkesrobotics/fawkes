@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_ffrefboxrep = fawkescore fawkesutils fawkesconfig fawkesnetcomm fawkesblackboard GameStateInterface
 #OBJS_ffrefboxrep = main.o refbox_state_sender.o midsize.o spl.o
-OBJS_ffrefboxrep = main.o refbox_state_writer.o refbox_state_sender.o msl2007.o msl2008.o spl.o
+OBJS_ffrefboxrep = main.o refbox_state_writer.o refbox_state_sender.o msl2007.o msl2008.o msl2010.o spl.o
 
 OBJS_all =	$(OBJS_ffrefboxrep)
 BINS_all =	$(BINDIR)/ffrefboxrep

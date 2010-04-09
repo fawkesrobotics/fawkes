@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  msl2008.cpp - Fawkes mid-size refbox 2008 protocol repeater
+ *  msl2010.cpp - Fawkes mid-size refbox 2010 protocol repeater
  *
- *  Created: Wed Apr 09 10:38:16 2008
- *  Copyright  2008  Stefan Schiffer [stefanschiffer.de]
+ *  Created: Wed Apr 01 18:41:00 2010
+ *  Copyright  2010  Stefan Schiffer [stefanschiffer.de]
  *
  ****************************************************************************/
 
@@ -20,7 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/refboxrep/msl2008.h>
+#include <tools/refboxrep/msl2010.h>
+#include <netcomm/socket/stream.h>
 #include <netcomm/socket/datagram_multicast.h>
 
 #include <cstring>
@@ -37,6 +38,9 @@ using namespace xmlpp;
 
 
 // REFBOX_CODES //////////////////////////
+
+//static const char *  REFBOX_WELCOME          = "Welcome";
+//static const char *  REFBOX_RECONNECT        = "Reconnect";
 
 static const std::string REFBOX_EVENT               = "RefboxEvent";
 static const std::string REFBOX_GAMEINFO            = "GameInfo";
@@ -84,7 +88,7 @@ static const std::string REFBOX_CARDCOLOR_YELLOW     = "yellow";
 static const std::string REFBOX_CARDCOLOR_RED        = "red";
 
 
-/** @class Msl2008RefBoxRepeater <tools/refboxrep/msl2008.h>
+/** @class Msl2010RefBoxRepeater <tools/refboxrep/msl2010.h>
  * Mid-size league refbox repeater.
  * This class will communicate with the mid-size league refbox and derive matching
  * game states from the communiation stream and send this via the world info.
@@ -95,10 +99,12 @@ static const std::string REFBOX_CARDCOLOR_RED        = "red";
  * @param rss refbox state sender
  * @param refbox_host refbox host
  * @param refbox_port refbox port
+ * @param use_multicast use multicast connection (true by default)
  */
-Msl2008RefBoxRepeater::Msl2008RefBoxRepeater(RefBoxStateSender &rss,
+Msl2010RefBoxRepeater::Msl2010RefBoxRepeater(RefBoxStateSender &rss,
 					     const char *refbox_host,
-					     unsigned short int refbox_port)
+					     unsigned short int refbox_port,
+					     const bool use_multicast )
   : __rss(rss)
 {
   __quit = false;
@@ -108,12 +114,14 @@ Msl2008RefBoxRepeater::Msl2008RefBoxRepeater(RefBoxStateSender &rss,
   __refbox_host = strdup(refbox_host);
   __refbox_port = refbox_port;
 
+  __use_multicast = use_multicast;
+
   reconnect();
 }
 
 
 /** Destructor. */
-Msl2008RefBoxRepeater::~Msl2008RefBoxRepeater()
+Msl2010RefBoxRepeater::~Msl2010RefBoxRepeater()
 {
   free(__refbox_host);
   __s->close();
@@ -123,7 +131,7 @@ Msl2008RefBoxRepeater::~Msl2008RefBoxRepeater()
 
 /** Reconnect to refbox. */
 void
-Msl2008RefBoxRepeater::reconnect()
+Msl2010RefBoxRepeater::reconnect()
 {
   if ( __s ) {
     __s->close();
@@ -132,35 +140,56 @@ Msl2008RefBoxRepeater::reconnect()
   printf("Trying to connect to refbox at %s:%u\n", __refbox_host, __refbox_port);
   do {
     try {
-      printf("Creating MulticastDatagramSocket\n");
-      __s = new MulticastDatagramSocket(__refbox_host, __refbox_port, 2.3);
-      //printf("set loop\n");
-      __s->set_loop(true); // (re)receive locally sent stuff
-      //printf("bind\n");
-      __s->bind();
-      //printf("bind done\n");
 
-      // printf("check for data availability ...\n");
-      // if ( !__s->available() ) {
-      //   printf("... nothing to receive\n");
-      // } else {
-      //   printf("... data is available!\n");
-      // }
+      if( __use_multicast ) {
+	
+	printf("Creating MulticastDatagramSocket\n");
+	__s = new MulticastDatagramSocket(__refbox_host, __refbox_port, 2.3);
+	//printf("set loop\n");
+	((MulticastDatagramSocket *)__s)->set_loop(true); // (re)receive locally sent stuff
+	//printf("bind\n");
+	((MulticastDatagramSocket *)__s)->bind();
+	//printf("bind done\n");
+
+	printf("check for data availability ...\n");
+       if ( !__s->available() ) {
+         printf("... nothing to receive\n");
+       } else {
+	 printf("... data is available!\n");
+       }
+
+      } 
+      else {
+
+	__s = new StreamSocket();
+	__s->connect(__refbox_host, __refbox_port);
+
+// 	char welcombuf[strlen(REFBOX_WELCOME) + 1];
+// 	welcombuf[strlen(REFBOX_WELCOME)] = 0;
+// 	char connectbuf[strlen(REFBOX_RECONNECT) + 1];
+// 	connectbuf[strlen(REFBOX_RECONNECT)] = 0;
+// 	__s->read(connectbuf, strlen(REFBOX_RECONNECT));
+//	printf("Received welcome string: %s\n", connectbuf);
+
+      }
 
     } catch (Exception &e) {
       delete __s;
       __s = NULL;
-      printf(".");
+      printf("%s",e.what());
+      printf("\n.");
       fflush(stdout);
       usleep(500000);
     }
   } while ( ! __s );
+
+  printf("Connected.\n");
 }
 
 
 /** Process received string. */
 void
-Msl2008RefBoxRepeater::process_string(char *buf, size_t len)
+Msl2010RefBoxRepeater::process_string(char *buf, size_t len)
 {
   printf("Received\n *****\n %s \n *****\n", buf);
 
@@ -241,29 +270,37 @@ Msl2008RefBoxRepeater::process_string(char *buf, size_t len)
 	      printf("RefBox cancelled last command\n");
  	    }
  	    else if( cnodename == REFBOX_GAMESTOP ) {
+	      printf("sending command: REFBOX_GAMESTOP\n");
  	      __rss.set_gamestate(GS_FROZEN, TEAM_BOTH);
  	    }
  	    else if( cnodename == REFBOX_GAMESTART ) {
+	      printf("sending command: REFBOX_GAMESTART\n");
  	      __rss.set_gamestate(GS_PLAY, TEAM_BOTH);
  	    }
 	    else if( cnodename == REFBOX_DROPPEDBALL ) {
+	      printf("sending command: REFBOX_DROPPEDBALL\n");
 	      __rss.set_gamestate(GS_DROP_BALL, TEAM_BOTH);
 	    }
 	    else if( cnodename == REFBOX_GOAL_AWARDED ) {
 	      // increment according to color
 	      if( cteamcolor == REFBOX_TEAMCOLOR_CYAN ) {
+		printf("sending command: REFBOX_TEAMCOLOR_CYAN\n");
 		__rss.set_score(++__score_cyan, __score_magenta);
 	      } 
 	      else if ( cteamcolor == REFBOX_TEAMCOLOR_MAGENTA ) {
+		printf("sending command: REFBOX_TEAMCOLOR_MAGENTA\n");
 		__rss.set_score(__score_cyan, ++__score_magenta);
 	      }
+	      printf("sending command: GS_FROZEN\n");
 	      __rss.set_gamestate(GS_FROZEN, TEAM_BOTH);
 	    }
 	    else if( cnodename == REFBOX_KICKOFF ) {
 	      if( cteamcolor == REFBOX_TEAMCOLOR_CYAN ) {
+		printf("sending command: GS_KICK_OFF, TEAM_CYAN\n");
 		__rss.set_gamestate(GS_KICK_OFF, TEAM_CYAN);
 	      } 
 	      else if ( cteamcolor == REFBOX_TEAMCOLOR_MAGENTA ) {
+		printf("sending command: GS_KICK_OFF, TEAM_MAGENTA\n");
 		__rss.set_gamestate(GS_KICK_OFF, TEAM_MAGENTA);
 	      }
 	    }
@@ -344,16 +381,19 @@ Msl2008RefBoxRepeater::process_string(char *buf, size_t len)
  * Reads messages from the network, processes them and calls the refbox state sender.
  */
 void
-Msl2008RefBoxRepeater::run()
+Msl2010RefBoxRepeater::run()
 {
+  //char tmpbuf[4096];
   char tmpbuf[1024];
   while ( ! __quit ) {
     size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ false);
+    //size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ true );
     if ( bytes_read == 0 ) {
       // seems that the remote has died, reconnect
       printf("Connection died, reconnecting\n");
       reconnect();
     } else {
+      printf("Received %u bytes, processing ...\n", bytes_read);
       tmpbuf[bytes_read] = '\0';
       process_string(tmpbuf, bytes_read);
     }
