@@ -34,7 +34,9 @@
 
 namespace fawkes {
   class GameStateInterface;
+#ifdef HAVE_SPL
   class SplPenaltyInterface;
+#endif
 }
 
 class RefBoxProcessor;
@@ -73,7 +75,9 @@ class RefBoxCommThread
 
  private: /* members */
   fawkes::GameStateInterface   *__gamestate_if;
+#ifdef HAVE_SPL
   fawkes::SplPenaltyInterface  *__penalty_if;
+#endif
   RefBoxProcessor              *__refboxproc;
 
   bool         __gamestate_modified;
