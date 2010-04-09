@@ -35,12 +35,13 @@ class TwoLinesCellRenderer : public Gtk::CellRenderer
 {
  public:
   TwoLinesCellRenderer();
-  ~TwoLinesCellRenderer();
+  virtual ~TwoLinesCellRenderer();
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
   // Properties
   Glib::PropertyProxy<Glib::ustring> property_line1();
   Glib::PropertyProxy<Glib::ustring> property_line2();
+  Glib::PropertyProxy<bool> property_line2_enabled();
 #endif
 
  protected:
@@ -51,8 +52,8 @@ class TwoLinesCellRenderer : public Gtk::CellRenderer
 #ifdef GLIBMM_PROPERTIES_ENABLED
   Glib::Property<Glib::ustring> __property_line1;
   Glib::Property<Glib::ustring> __property_line2;
+  Glib::Property<bool>          __property_line2_enabled;
 #endif
-
 };
 
 } // end namespace fawkes

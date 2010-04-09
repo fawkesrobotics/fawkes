@@ -41,15 +41,15 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
   LockMap(const LockMap<KeyType, ValueType, LessKey> &lm);
   virtual ~LockMap();
 
-  void           lock();
-  bool           try_lock();
-  void           unlock();
+  void           lock() const;
+  bool           try_lock() const;
+  void           unlock() const;
   RefPtr<Mutex>  mutex() const;
 
   void     erase_locked(const KeyType &key);
 
  private:
-  RefPtr<Mutex>  __mutex;
+  mutable RefPtr<Mutex>  __mutex;
 
 };
 
@@ -91,7 +91,7 @@ LockMap<KeyType, ValueType, LessKey>::~LockMap()
 /** Lock list. */
 template <typename KeyType, typename ValueType, typename LessKey>
 void
-LockMap<KeyType, ValueType, LessKey>::lock()
+LockMap<KeyType, ValueType, LessKey>::lock() const
 {
   __mutex->lock();
 }
@@ -102,7 +102,7 @@ LockMap<KeyType, ValueType, LessKey>::lock()
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 bool
-LockMap<KeyType, ValueType, LessKey>::try_lock()
+LockMap<KeyType, ValueType, LessKey>::try_lock() const
 {
   return __mutex->try_lock();
 }
@@ -111,7 +111,7 @@ LockMap<KeyType, ValueType, LessKey>::try_lock()
 /** Unlock list. */
 template <typename KeyType, typename ValueType, typename LessKey>
 void
-LockMap<KeyType, ValueType, LessKey>::unlock()
+LockMap<KeyType, ValueType, LessKey>::unlock() const
 {
   return __mutex->unlock();
 }

@@ -38,9 +38,9 @@ class LockQueue : public std::queue<Type>
   LockQueue(const LockQueue<Type> &ll);
   virtual ~LockQueue();
 
-  void           lock();
-  bool           try_lock();
-  void           unlock();
+  void           lock() const;
+  bool           try_lock() const;
+  void           unlock() const;
   RefPtr<Mutex>  mutex() const;
 
   void     push_locked(const Type& x);
@@ -51,7 +51,7 @@ class LockQueue : public std::queue<Type>
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
-  RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> __mutex;
 
 };
 
@@ -92,7 +92,7 @@ LockQueue<Type>::~LockQueue()
 /** Lock queue. */
 template <typename Type>
 void
-LockQueue<Type>::lock()
+LockQueue<Type>::lock() const
 {
   __mutex->lock();
 }
@@ -103,7 +103,7 @@ LockQueue<Type>::lock()
  */
 template <typename Type>
 bool
-LockQueue<Type>::try_lock()
+LockQueue<Type>::try_lock() const
 {
   return __mutex->try_lock();
 }
@@ -112,7 +112,7 @@ LockQueue<Type>::try_lock()
 /** Unlock list. */
 template <typename Type>
 void
-LockQueue<Type>::unlock()
+LockQueue<Type>::unlock() const
 {
   return __mutex->unlock();
 }
