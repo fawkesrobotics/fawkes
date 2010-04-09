@@ -4,6 +4,7 @@
  *
  *  Created: Wed Apr 01 10:36:08 2009
  *  Copyright  2009  Stefan Schiffer [stefanschiffer.de]
+ *             2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -46,8 +47,6 @@ class Msl2008RefBoxProcessor : public RefBoxProcessor
   Msl2008RefBoxProcessor(fawkes::Logger *logger,
 			 const char *refbox_host, unsigned short int refbox_port);
   ~Msl2008RefBoxProcessor();
-
-  void run();
 
   bool check_connection();
   void refbox_process();

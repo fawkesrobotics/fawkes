@@ -4,6 +4,7 @@
  *
  *  Created: Wed Apr 09 10:38:16 2008
  *  Copyright  2008  Stefan Schiffer [stefanschiffer.de]
+ *             2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -377,30 +378,4 @@ Msl2008RefBoxProcessor::check_connection()
     reconnect();
   }
   return ! __connection_died;
-}
-
-
-/** Run.
- * Reads messages from the network, processes them and calls the refbox state sender.
- */
-void
-Msl2008RefBoxProcessor::run()
-{
- char tmpbuf[1024];
-  while ( ! __quit ) {
-    __logger->log_debug(__name, "Reading");
-    size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ false);
-    __logger->log_debug(__name, "Read %zu bytes", bytes_read);
-    if ( bytes_read == 0 ) {
-      // seems that the remote has died, reconnect
-      __logger->log_info(__name, "Connection died, reconnecting");
-      do {
-	reconnect();
-      } while ( ! __s );
-    } else {
-      tmpbuf[bytes_read] = '\0';
-      process_string(tmpbuf, bytes_read);
-      _rsh->handle_refbox_state();
-    }
-  }
 }
