@@ -393,7 +393,7 @@ Msl2010RefBoxRepeater::run()
       printf("Connection died, reconnecting\n");
       reconnect();
     } else {
-      printf("Received %u bytes, processing ...\n", bytes_read);
+      printf("Received %zu bytes, processing ...\n", bytes_read);
       tmpbuf[bytes_read] = '\0';
       process_string(tmpbuf, bytes_read);
     }
