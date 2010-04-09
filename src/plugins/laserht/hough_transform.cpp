@@ -38,6 +38,13 @@
  * The code is based on ideas from a Hough transform implemented in
  * FireVision, but eliminating some of its limitations.
  * @author Tim Niemueller
+ *
+ * @fn inline Node * HoughTransform::create_node(Node *parent, unsigned int dims, int value = 0)
+ * Create a new node.
+ * @param parent parent node of the new node
+ * @param dims Dimensions remaining
+ * @param value initial value
+ * @return new node with given parent, dimensions, and initial value
  */
 
 /** Constructor.
