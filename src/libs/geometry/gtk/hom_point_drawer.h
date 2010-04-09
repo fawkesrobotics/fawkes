@@ -33,7 +33,6 @@ class HomPoint;
 class HomPointDrawer : public GeomDrawer
 {
  public:
-  HomPointDrawer(HomPoint& p);
   HomPointDrawer(const HomPoint& p);
   virtual ~HomPointDrawer();
 
@@ -46,7 +45,6 @@ class HomPointDrawer : public GeomDrawer
   
  private:
   fawkes::HomPoint* m_hom_point;
-  bool m_own_point;
 };
 
 } // end namespace fawkes
