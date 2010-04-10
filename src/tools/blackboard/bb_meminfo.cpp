@@ -29,6 +29,7 @@
 #include <config/sqlite.h>
 
 #include <iostream>
+#include <cstdio>
 
 using namespace std;
 using namespace fawkes;
