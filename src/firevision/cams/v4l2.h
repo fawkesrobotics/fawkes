@@ -122,6 +122,8 @@ class V4L2Camera:
 
  protected:
   V4L2Camera(const char *device_name, int dev);
+  virtual void set_one_control(const char *ctrl, unsigned int id, int value);
+  virtual int get_one_control(const char *ctrl, unsigned int id);
 
  private:
   virtual void post_open();
@@ -129,8 +131,6 @@ class V4L2Camera:
   virtual void select_format();
   virtual void set_fps();
   virtual void set_controls();
-  virtual void set_one_control(const char *ctrl, unsigned int id, int value);
-  virtual int get_one_control(const char *ctrl, unsigned int id);
   virtual void create_buffer();
   virtual void reset_cropping();
 

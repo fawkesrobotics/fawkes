@@ -282,5 +282,33 @@ void NaoCamera::set_source(unsigned char source)
   init_cam(_device_name);
 }
 
+/**
+ * Return whether auto exposure is enabled.
+ * @return true if auto exposure is enabled
+ */
+bool NaoCamera::auto_exposure()
+{
+#if NAOQI_HAVE_VERSION(1, 3)
+  return get_one_control("AEC", V4L2_CID_AUTOEXPOSURE);
+#else
+  return get_one_control("AEC", V4L2_CID_AUDIO_MUTE);
+#endif
+}
+
+/**
+ * Enable/disable auto exposure.
+ * @param enabled whether auto exposure should be enabled
+ */
+void NaoCamera::set_auto_exposure(bool enabled)
+{
+  LibLogger::log_debug("NaoCamera", (enabled ? "enabling AEC" : "disabling AEC"));
+
+#if NAOQI_HAVE_VERSION(1, 3)
+  set_one_control("AEC", V4L2_CID_AUTOEXPOSURE, (enabled ? 1 : 0));
+#else
+  set_one_control("AEC", V4L2_CID_AUDIO_MUTE, (enabled ? 1 : 0));
+#endif
+}
+
 } // end namespace firevision
 

@@ -53,6 +53,8 @@ class NaoCamera :
 
   virtual unsigned char source();
   virtual void          set_source(unsigned char source);
+  virtual bool          auto_exposure();
+  virtual void          set_auto_exposure(bool enabled);
 
  private:
   static int open_dev(const char *i2c);
