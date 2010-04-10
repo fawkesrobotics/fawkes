@@ -23,11 +23,14 @@
 #ifndef __PLUGINS_WORLDMODEL_FUSER_OBJPOS_MAJORITY_H_
 #define __PLUGINS_WORLDMODEL_FUSER_OBJPOS_MAJORITY_H_
 
+#include <cassert>
+#include <cstring>
 #include <string>
 #include <vector>
 
 #include <blackboard/interface_observer.h>
-#include <core/utils/lock_list.h>
+#include <core/utils/lock_set.h>
+#include <interfaces/ObjectPositionInterface.h>
 
 #include "fuser.h"
 
@@ -55,32 +58,52 @@ class WorldModelObjPosMajorityFuser
   virtual void fuse();
 
  private:
-  typedef fawkes::ObjectPositionInterface OPI;
-  typedef fawkes::LockList<OPI*>          OPIList;
-  typedef std::vector<OPI*>               OPIBucket;
-  typedef std::vector<OPIBucket>          OPIBuckets;
+  typedef fawkes::ObjectPositionInterface Opi;
+
+  /** Wrapper that compares by the Opi's id(). */
+  class OpiWrapper {
+   public:
+    OpiWrapper(Opi* opi) : opi_(opi) { assert(opi != NULL); }
+    operator Opi*() const { return opi_; }
+
+    bool operator == (const OpiWrapper& o) const { return cmp(o) == 0; }
+    bool operator < (const OpiWrapper& o) const { return cmp(o) < 0; }
+
+    Opi* opi() { return opi_; }
+    const Opi* opi() const { return opi_; }
+
+   private:
+    int cmp(const OpiWrapper& o) const { return strcmp(opi_->id(),
+                                                       o.opi_->id()); }
+    Opi* opi_;
+  };
+
+  typedef fawkes::LockSet<OpiWrapper> OpiSet;
+  typedef std::vector<Opi*>           OpiBucket;
+  typedef std::vector<OpiBucket>      OpiBuckets;
 
   const static float GROUP_RADIUS = 1.0f;
 
   void check();
   void copy_own_if();
-  void average(const OPIBucket& input_ifs);
+  void average(const OpiBucket& input_ifs);
 
   static float length(float x, float y, float z);
-  static float rel_length(const OPI* iface);
-  static float world_dist(const OPI* from, const OPI* to);
+  static float rel_length(const Opi* iface);
+  static float world_object_dist(const Opi* from, const Opi* to);
+  static bool same_contents(const OpiBucket& left, const OpiBucket& right);
 
-  fawkes::BlackBoard *blackboard_;
   fawkes::Logger     *logger_;
+  fawkes::BlackBoard *blackboard_;
 
   std::string own_id_;
   std::string output_id_;
 
   float self_confidence_radius_;
 
-  OPI*     own_if_;
-  OPIList  input_ifs_;
-  OPI*     output_if_;
+  Opi*   own_if_;
+  OpiSet input_ifs_;
+  Opi*   output_if_;
 };
 
 #endif
