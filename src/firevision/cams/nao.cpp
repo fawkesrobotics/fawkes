@@ -26,6 +26,7 @@
 #include <fvutils/system/camargp.h>
 #include <utils/logging/liblogger.h>
 #include <core/exceptions/software.h>
+#include <plugins/naomana/naoqi_version.h>
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -37,6 +38,13 @@
 #include <vector>
 
 using namespace fawkes;
+
+#if NAOQI_HAVE_VERSION(1, 3)
+#  define V4L2_CID_AUTOEXPOSURE           (V4L2_CID_BASE+32)
+#  define V4L2_CID_CAM_INIT               (V4L2_CID_BASE+33)
+#  define V4L2_CID_EXPOSURE_CORRECTION    (V4L2_CID_BASE+34)
+#  define V4L2_CID_AEC_ALGORITHM          (V4L2_CID_BASE+35)
+#endif
 
 #ifndef I2C_FUNC_SMBUS_READ_BYTE_DATA
 #include <linux/i2c.h>
@@ -226,13 +234,18 @@ void NaoCamera::init_cam(const char *cam)
   struct v4l2_control control;
   memset(&control, 0, sizeof(control));
 
-  control.id    = 0x980919;
+#if NAOQI_HAVE_VERSION(1, 2)
+  control.id    = V4L2_CID_CAM_INIT;
+#else
+  control.id    = V4L2_CID_GAIN;
+#endif
   control.value = 0;
 
   if (ioctl(dev, VIDIOC_S_CTRL, &control)) close_dev(dev, "Error setting other camera to default parameters");
 
   close_dev(dev);
 }
+
 /**
  * Return which cam is currently being used.
  * 1: brow-cam
