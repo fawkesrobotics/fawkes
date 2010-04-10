@@ -252,7 +252,16 @@ fawkes_daemon_pid_file_proc()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ksu:g:");
+  ArgumentParser *argp = NULL;
+  try {
+    argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ksu:g:");
+  }
+  catch (UnknownArgumentException &e) {
+    cout << endl;
+    usage(argv[0]);
+    delete argp;
+    return -1;
+  }
 
   // default user/group
   const char *user  = NULL;
