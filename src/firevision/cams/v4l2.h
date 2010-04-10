@@ -33,7 +33,7 @@
 #include <cams/control/image.h>
 
 /* Number of buffers to use for memory mapped IO */
-#define MMAP_NUM_BUFFERS 2;
+#define MMAP_NUM_BUFFERS 4;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
