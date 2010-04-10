@@ -134,6 +134,15 @@ FvRetrieverThread::init()
       ycm->set(128, u, v, C_ORANGE);
     }
   }
+
+  __cam_has_timestamp_support = true;
+  try {
+    cam->capture_time();
+  }
+  catch (NotImplementedException &e)
+  {
+    __cam_has_timestamp_support = false;
+  }
 }
 
 
@@ -162,6 +171,7 @@ FvRetrieverThread::loop()
     __tt->ping_start(__ttc_memcpy);
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
     __tt->ping_end(__ttc_memcpy);
+    if (__cam_has_timestamp_support) shm->set_capture_time(cam->capture_time());
     __tt->ping_start(__ttc_dispose);
     cam->dispose_buffer();
     __tt->ping_end(__ttc_dispose);
@@ -173,6 +183,7 @@ FvRetrieverThread::loop()
     // no time tracker
     cam->capture();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size());
+    if (__cam_has_timestamp_support) shm->set_capture_time(cam->capture_time());
     cam->dispose_buffer();
   }
 
