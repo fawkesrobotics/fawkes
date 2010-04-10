@@ -52,7 +52,11 @@ class WorldInfoException : public Exception
 class WorldInfoTransceiver
 {
  public:
-  WorldInfoTransceiver(bool use_multicast,
+  enum SocketType {
+    MULTICAST, BROADCAST
+  };
+
+  WorldInfoTransceiver(SocketType socket_type,
                        const char *addr, unsigned short port,
 		       const char *key, const char *iv,
 		       NetworkNameResolver *resolver = NULL);

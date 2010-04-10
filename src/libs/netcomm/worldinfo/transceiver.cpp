@@ -89,7 +89,7 @@ WorldInfoException::WorldInfoException(const char *msg)
 
 
 /** Constructor.
- * @param use_multicast if true, multicast is used, otherwise broadcast
+ * @param socket_type either multicast or broadcast socket
  * @param addr multicast or broadcast address to send information to and receive from
  * @param port UDP port to send information to and receive from
  * @param key encryption key
@@ -98,7 +98,7 @@ WorldInfoException::WorldInfoException(const char *msg)
  * an internal resolver will be created without mDNS support.
  * @exception OutOfMemoryException thrown if internal buffers cannot be created
  */
-WorldInfoTransceiver::WorldInfoTransceiver(bool use_multicast,
+WorldInfoTransceiver::WorldInfoTransceiver(SocketType socket_type,
                                            const char *addr, unsigned short port,
 					   const char *key, const char *iv,
 					   NetworkNameResolver *resolver) :
@@ -111,14 +111,19 @@ WorldInfoTransceiver::WorldInfoTransceiver(bool use_multicast,
   gamestate_changed( false )
 {
   try {
-    if (use_multicast) {
-      MulticastDatagramSocket* ms = new MulticastDatagramSocket(addr, port);
-      ms->bind();
-      s = ms;
-    } else {
-      BroadcastDatagramSocket* bs = new BroadcastDatagramSocket(addr, port);
-      bs->bind();
-      s = bs;
+    switch (socket_type) {
+      case MULTICAST: {
+        MulticastDatagramSocket* ms = new MulticastDatagramSocket(addr, port);
+        ms->bind();
+        s = ms;
+        break;
+      }
+      case BROADCAST: {
+        BroadcastDatagramSocket* bs = new BroadcastDatagramSocket(addr, port);
+        bs->bind();
+        s = bs;
+        break;
+      }
     }
     set_loop(false);
   } catch (SocketException &e) {

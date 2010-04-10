@@ -46,6 +46,8 @@
 #include <cstring>
 #include <netinet/in.h>
 
+#define BROADCAST_IP "172.16.35.255"
+
 using namespace fawkes;
 
 class BroadcastDatagramServerThread : public Thread
@@ -56,7 +58,7 @@ public:
   {
     i = 0;
     try {
-      s = new BroadcastDatagramSocket("172.16.35.255", port);
+      s = new BroadcastDatagramSocket(BROADCAST_IP, port);
       s->bind();
     } catch (Exception &e) {
       e.print_trace();
@@ -193,6 +195,7 @@ class BroadcastDatagramSocketQAMain : public SignalHandler
 int
 main(int argc, char **argv)
 {
+  printf("Going to broadcast to " BROADCAST_IP "\n");
   ArgumentParser argp(argc, argv, "r");
   BroadcastDatagramSocketQAMain m(argp);
   SignalManager::register_handler(SIGINT, &m);

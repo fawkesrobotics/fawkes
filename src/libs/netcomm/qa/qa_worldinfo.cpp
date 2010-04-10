@@ -49,7 +49,8 @@ public:
   {
     i = 0;
     try {
-      t = new WorldInfoTransceiver("224.16.0.1", port,
+      t = new WorldInfoTransceiver(WorldInfoTransceiver::MULTICAST,
+                                   "224.16.0.1", port,
 				   "AllemaniACsX", "DoesAnyOneCare",
 				   rs);
       t->set_loop( loop );
@@ -103,7 +104,8 @@ public:
   {
     this->max_num_msgs = max_num_msgs;
     try {
-      t = new WorldInfoTransceiver("224.16.0.1", port,
+      t = new WorldInfoTransceiver(WorldInfoTransceiver::MULTICAST,
+                                   "224.16.0.1", port,
 				   "AllemaniACs", "WorldInfoQA",
 				   rs);
       t->add_handler(this);
