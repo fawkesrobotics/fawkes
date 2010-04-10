@@ -68,6 +68,7 @@ class FvRetrieverThread
   unsigned int __ttc_capture;
   unsigned int __ttc_memcpy;
   unsigned int __ttc_dispose;
+  bool __cam_has_timestamp_support;
 
   firevision::ColorModelLookupTable *__cm;
 };
