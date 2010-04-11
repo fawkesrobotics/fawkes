@@ -59,7 +59,8 @@ SwitchInterface::SwitchInterface() : Interface()
   add_messageinfo("SetMessage");
   add_messageinfo("EnableSwitchMessage");
   add_messageinfo("DisableSwitchMessage");
-  unsigned char tmp_hash[] = {0xcb, 0xd2, 0x25, 0x8e, 0x3e, 0x18, 0xd6, 0x3a, 0xe0, 0x12, 0x73, 0x27, 0x26, 0x75, 0x95, 0x56};
+  add_messageinfo("EnableDurationMessage");
+  unsigned char tmp_hash[] = {0x23, 0x86, 0x5, 0xe0, 0x29, 0xf5, 0x17, 0x7e, 0x1e, 0x4b, 0xf1, 0xdf, 0xd9, 0xa7, 0xbe, 0x31};
   set_hash(tmp_hash);
 }
 
@@ -303,6 +304,8 @@ SwitchInterface::create_message(const char *type) const
     return new EnableSwitchMessage();
   } else if ( strncmp("DisableSwitchMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new DisableSwitchMessage();
+  } else if ( strncmp("EnableDurationMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new EnableDurationMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -542,6 +545,137 @@ SwitchInterface::DisableSwitchMessage::clone() const
 {
   return new SwitchInterface::DisableSwitchMessage(this);
 }
+/** @class SwitchInterface::EnableDurationMessage <interfaces/SwitchInterface.h>
+ * EnableDurationMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_duration initial value for duration
+ * @param ini_value initial value for value
+ */
+SwitchInterface::EnableDurationMessage::EnableDurationMessage(const float ini_duration, const float ini_value) : Message("EnableDurationMessage")
+{
+  data_size = sizeof(EnableDurationMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (EnableDurationMessage_data_t *)data_ptr;
+  data->duration = ini_duration;
+  data->value = ini_value;
+  add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
+  add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
+}
+/** Constructor */
+SwitchInterface::EnableDurationMessage::EnableDurationMessage() : Message("EnableDurationMessage")
+{
+  data_size = sizeof(EnableDurationMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (EnableDurationMessage_data_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
+  add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
+}
+
+/** Destructor */
+SwitchInterface::EnableDurationMessage::~EnableDurationMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SwitchInterface::EnableDurationMessage::EnableDurationMessage(const EnableDurationMessage *m) : Message("EnableDurationMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (EnableDurationMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get duration value.
+ * Duration in seconds for which
+    the switch should be enabled.
+ * @return duration value
+ */
+float
+SwitchInterface::EnableDurationMessage::duration() const
+{
+  return data->duration;
+}
+
+/** Get maximum length of duration value.
+ * @return length of duration value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SwitchInterface::EnableDurationMessage::maxlenof_duration() const
+{
+  return 1;
+}
+
+/** Set duration value.
+ * Duration in seconds for which
+    the switch should be enabled.
+ * @param new_duration new duration value
+ */
+void
+SwitchInterface::EnableDurationMessage::set_duration(const float new_duration)
+{
+  data->duration = new_duration;
+}
+
+/** Get value value.
+ * 
+      If switches support multiple states these can be indicated with
+      this value. For example for a switch that notes the intensity it
+      could be a value in the valid range.
+    
+ * @return value value
+ */
+float
+SwitchInterface::EnableDurationMessage::value() const
+{
+  return data->value;
+}
+
+/** Get maximum length of value value.
+ * @return length of value value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SwitchInterface::EnableDurationMessage::maxlenof_value() const
+{
+  return 1;
+}
+
+/** Set value value.
+ * 
+      If switches support multiple states these can be indicated with
+      this value. For example for a switch that notes the intensity it
+      could be a value in the valid range.
+    
+ * @param new_value new value value
+ */
+void
+SwitchInterface::EnableDurationMessage::set_value(const float new_value)
+{
+  data->value = new_value;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SwitchInterface::EnableDurationMessage::clone() const
+{
+  return new SwitchInterface::EnableDurationMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -558,6 +692,10 @@ SwitchInterface::message_valid(const Message *message) const
   }
   const DisableSwitchMessage *m2 = dynamic_cast<const DisableSwitchMessage *>(message);
   if ( m2 != NULL ) {
+    return true;
+  }
+  const EnableDurationMessage *m3 = dynamic_cast<const EnableDurationMessage *>(message);
+  if ( m3 != NULL ) {
     return true;
   }
   return false;

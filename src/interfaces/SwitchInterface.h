@@ -130,6 +130,38 @@ class SwitchInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class EnableDurationMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float duration; /**< Duration in seconds for which
+    the switch should be enabled. */
+      float value; /**< 
+      If switches support multiple states these can be indicated with
+      this value. For example for a switch that notes the intensity it
+      could be a value in the valid range.
+     */
+    } EnableDurationMessage_data_t;
+
+    EnableDurationMessage_data_t *data;
+
+   public:
+    EnableDurationMessage(const float ini_duration, const float ini_value);
+    EnableDurationMessage();
+    ~EnableDurationMessage();
+
+    EnableDurationMessage(const EnableDurationMessage *m);
+    /* Methods */
+    float duration() const;
+    void set_duration(const float new_duration);
+    size_t maxlenof_duration() const;
+    float value() const;
+    void set_value(const float new_value);
+    size_t maxlenof_value() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   SwitchInterface();
