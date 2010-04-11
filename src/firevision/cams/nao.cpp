@@ -26,7 +26,6 @@
 #include <fvutils/system/camargp.h>
 #include <utils/logging/liblogger.h>
 #include <core/exceptions/software.h>
-#include <plugins/naomana/naoqi_version.h>
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -39,12 +38,10 @@
 
 using namespace fawkes;
 
-#if NAOQI_HAVE_VERSION(1, 3)
-#  define V4L2_CID_AUTOEXPOSURE           (V4L2_CID_BASE+32)
-#  define V4L2_CID_CAM_INIT               (V4L2_CID_BASE+33)
-#  define V4L2_CID_EXPOSURE_CORRECTION    (V4L2_CID_BASE+34)
-#  define V4L2_CID_AEC_ALGORITHM          (V4L2_CID_BASE+35)
-#endif
+#define V4L2_CID_AUTOEXPOSURE           (V4L2_CID_BASE+32)
+#define V4L2_CID_CAM_INIT               (V4L2_CID_BASE+33)
+#define V4L2_CID_EXPOSURE_CORRECTION    (V4L2_CID_BASE+34)
+#define V4L2_CID_AEC_ALGORITHM          (V4L2_CID_BASE+35)
 
 #ifndef I2C_FUNC_SMBUS_READ_BYTE_DATA
 #include <linux/i2c.h>
@@ -234,11 +231,7 @@ void NaoCamera::init_cam(const char *cam)
   struct v4l2_control control;
   memset(&control, 0, sizeof(control));
 
-#if NAOQI_HAVE_VERSION(1, 2)
   control.id    = V4L2_CID_CAM_INIT;
-#else
-  control.id    = V4L2_CID_GAIN;
-#endif
   control.value = 0;
 
   if (ioctl(dev, VIDIOC_S_CTRL, &control)) close_dev(dev, "Error setting other camera to default parameters");
@@ -288,11 +281,7 @@ void NaoCamera::set_source(unsigned char source)
  */
 bool NaoCamera::auto_exposure()
 {
-#if NAOQI_HAVE_VERSION(1, 3)
   return get_one_control("AEC", V4L2_CID_AUTOEXPOSURE);
-#else
-  return get_one_control("AEC", V4L2_CID_AUDIO_MUTE);
-#endif
 }
 
 /**
@@ -303,11 +292,7 @@ void NaoCamera::set_auto_exposure(bool enabled)
 {
   LibLogger::log_debug("NaoCamera", (enabled ? "enabling AEC" : "disabling AEC"));
 
-#if NAOQI_HAVE_VERSION(1, 3)
   set_one_control("AEC", V4L2_CID_AUTOEXPOSURE, (enabled ? 1 : 0));
-#else
-  set_one_control("AEC", V4L2_CID_AUDIO_MUTE, (enabled ? 1 : 0));
-#endif
 }
 
 } // end namespace firevision
