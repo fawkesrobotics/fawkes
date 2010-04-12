@@ -643,7 +643,6 @@ V4L2Camera::select_format()
     //throw Exception(errno, "Failed to set video format");
     //}
 
-    /* According to nao cam driver source code, G/S_STD isn't supported */
     // Nao workaround (Hack alert)
     LibLogger::log_warn("V4L2Cam", "Format setting failed (driver sucks) - %d: %s", errno, strerror(errno));
     LibLogger::log_info("V4L2Cam", "Trying workaround");
@@ -733,12 +732,6 @@ V4L2Camera::select_format()
 void
 V4L2Camera::set_fps()
 {
-  if (!(_data->caps.capabilities & V4L2_CAP_TIMEPERFRAME) && !_nao_hacks)
-  {
-    LibLogger::log_warn("V4L2Cam", "FPS change not supported");
-    return;
-  }
-
   v4l2_streamparm param;
   param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   if (ioctl(_dev, VIDIOC_G_PARM, &param))
@@ -747,14 +740,18 @@ V4L2Camera::set_fps()
     throw Exception("V4L2Cam: Streaming parameter query failed");
   }
 
+  if (!(param.parm.capture.capability & V4L2_CAP_TIMEPERFRAME))
+  {
+    LibLogger::log_warn("V4L2Cam", "FPS change not supported");
+    return;
+  }
+
   param.parm.capture.timeperframe.numerator = 1;
   param.parm.capture.timeperframe.denominator = _fps;
-  param.parm.capture.capability = V4L2_CAP_TIMEPERFRAME;
   if (ioctl(_dev, VIDIOC_S_PARM, &param))
   {
-    //close();
-    //throw Exception("V4L2Cam: Streaming parameter setting failed");
-    LibLogger::log_warn("V4L2Cam", "Streaming parameter setting failed - %d: %2", errno, strerror(errno));
+    close();
+    throw Exception("V4L2Cam: Streaming parameter setting failed");
   }
   else
   {
@@ -770,98 +767,23 @@ V4L2Camera::set_fps()
 void
 V4L2Camera::set_controls()
 {
-  if (_aec != NOT_SET)
-  {
-    LibLogger::log_debug("V4L2Cam", (_aec == TRUE ? "enabling AEC" : "disabling AEC"));
-    if (!_nao_hacks) LibLogger::log_warn("V4L2Cam", "AEC toggling will only work on Nao");
+  if (_aec != NOT_SET) set_auto_exposure(_aec == TRUE);
+  if (_awb != NOT_SET) set_auto_white_balance(_awb == TRUE);
+  if (_agc != NOT_SET) set_auto_gain(_agc == TRUE);
 
-    set_one_control("AEC", V4L2_CID_AUDIO_MUTE, //<- this is why it will only work on Naos ;)
-                    (_aec == TRUE ? 1 : 0));
-  }
+  if (_h_flip != NOT_SET) set_horiz_mirror(_h_flip == TRUE);
+  if (_v_flip != NOT_SET) set_vert_mirror(_v_flip == TRUE);
 
-  if (_awb != NOT_SET)
-  {
-    LibLogger::log_debug("V4L2Cam", (_awb == TRUE ? "enabling AWB" : "disabling AWB"));
-    set_one_control("AWB", V4L2_CID_AUTO_WHITE_BALANCE, (_awb == TRUE ? 1 : 0));
-  }
-
-  if (_agc != NOT_SET)
-  {
-    LibLogger::log_debug("V4L2Cam", (_agc == TRUE ? "enabling AGC" : "disabling AGC"));
-    set_one_control("AGC", V4L2_CID_AUTOGAIN, (_agc == TRUE ? 1 : 0));
-  }
-
-  if (_h_flip != NOT_SET)
-  {
-    LibLogger::log_debug("V4L2Cam", (_h_flip == TRUE ? "enabling horizontal flip" : "disabling horizontal flip"));
-    set_one_control("hflip", V4L2_CID_HFLIP, (_h_flip == TRUE ? 1 : 0));
-  }
-
-  if (_v_flip != NOT_SET)
-  {
-    LibLogger::log_debug("V4L2Cam", (_v_flip == TRUE ? "enabling vertical flip" : "disabling vertical flip"));
-    set_one_control("vhflip", V4L2_CID_VFLIP, (_v_flip == TRUE ? 1 : 0));
-  }
-
-  if (_brightness.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting brighness to %d", _brightness.value);
-    set_one_control("brightness", V4L2_CID_BRIGHTNESS, _brightness.value);
-  }
-
-  if (_contrast.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting contrast to %d", _contrast.value);
-    set_one_control("contrast", V4L2_CID_CONTRAST, _contrast.value);
-  }
-
-  if (_saturation.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting saturation to %d", _saturation.value);
-    set_one_control("saturation", V4L2_CID_SATURATION, _saturation.value);
-  }
-
-  if (_hue.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting hue to %d", _hue.value);
-    set_one_control("hue", V4L2_CID_HUE, _hue.value);
-  }
-
-  if (_red_balance.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting red balance to %d", _red_balance.value);
-    set_one_control("red balance", V4L2_CID_RED_BALANCE, _red_balance.value);
-  }
-
-  if (_blue_balance.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting blue balance to %d", _blue_balance.value);
-    set_one_control("blue balance", V4L2_CID_BLUE_BALANCE, _blue_balance.value);
-  }
-
-  if (_exposure.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting exposure to %d", _exposure.value);
-    set_one_control("exposure", V4L2_CID_EXPOSURE, _exposure.value);
-  }
-
-  if (_gain.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting gain to %d", _gain.value);
-    set_one_control("gain", V4L2_CID_GAIN, _gain.value);
-  }
-
-  if (_lens_x.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting horizontal lens correction to %d", _lens_x.value);
-    set_one_control("lens x", V4L2_CID_HCENTER/*_DEPRECATED*/, _lens_x.value);
-  }
-
-  if (_lens_y.set)
-  {
-    LibLogger::log_debug("V4L2Cam", "Setting vertical lens correction to %d", _lens_y.value);
-    set_one_control("lens y", V4L2_CID_VCENTER/*_DEPRECATED*/, _lens_y.value);
-  }
+  if (_brightness.set)   set_brightness(_brightness.value);
+  if (_contrast.set)     set_contrast(_contrast.value);
+  if (_saturation.set)   set_saturation(_saturation.value);
+  if (_hue.set)          set_hue(_hue.value);
+  if (_red_balance.set)  set_red_balance(_red_balance.value);
+  if (_blue_balance.set) set_blue_balance(_blue_balance.value);
+  if (_exposure.set)     set_exposure(_exposure.value);
+  if (_gain.set)         set_gain(_gain.value);
+  if (_lens_x.set)       set_lens_x_corr(_lens_x.value);
+  if (_lens_y.set)       set_lens_y_corr(_lens_y.value);
 }
 
 /**
@@ -1153,7 +1075,7 @@ V4L2Camera::stop()
 
   if (!_started) return;
 
-  switch(_read_method)
+  switch (_read_method)
   {
     case READ:
       /* nothing to do here */
@@ -1282,7 +1204,7 @@ V4L2Camera::dispose_buffer()
 
   if (!_opened) return;
 
-  switch(_read_method)
+  switch (_read_method)
   {
     case READ:
       /* nothing to do here */
@@ -1296,6 +1218,8 @@ V4L2Camera::dispose_buffer()
       buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       buffer.memory = V4L2_MEMORY_MMAP;
       buffer.index = _current_buffer;
+
+      //TODO: Test if the next buffer is also the latest buffer (VIDIOC_QUERYBUF)
       if (ioctl(_dev, VIDIOC_QBUF, &buffer))
       {
         close();
@@ -1385,18 +1309,13 @@ V4L2Camera::set_auto_white_balance(bool enabled)
 bool
 V4L2Camera::auto_exposure()
 {
-  if (!_nao_hacks) LibLogger::log_warn("V4L2Cam", "AEC will only work on Nao");
-  return get_one_control("AEC", V4L2_CID_AUDIO_MUTE);
+  throw NotImplementedException("No such method in the V4L2 standard");
 }
 
 void
 V4L2Camera::set_auto_exposure(bool enabled)
 {
-  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling AEC" : "disabling AEC"));
-  if (!_nao_hacks) LibLogger::log_warn("V4L2Cam", "AEC toggling will only work on Nao");
-
-  set_one_control("AEC", V4L2_CID_AUDIO_MUTE, //<- this is why it will only work on Naos ;)
-                  (enabled ? 1 : 0));
+  throw NotImplementedException("No such method in the V4L2 standard");
 }
 
 int

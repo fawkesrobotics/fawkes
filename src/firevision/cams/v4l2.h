@@ -33,7 +33,7 @@
 #include <cams/control/image.h>
 
 /* Number of buffers to use for memory mapped IO */
-#define MMAP_NUM_BUFFERS 2;
+#define MMAP_NUM_BUFFERS 4;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -122,6 +122,8 @@ class V4L2Camera:
 
  protected:
   V4L2Camera(const char *device_name, int dev);
+  virtual void set_one_control(const char *ctrl, unsigned int id, int value);
+  virtual int get_one_control(const char *ctrl, unsigned int id);
 
  private:
   virtual void post_open();
@@ -129,8 +131,6 @@ class V4L2Camera:
   virtual void select_format();
   virtual void set_fps();
   virtual void set_controls();
-  virtual void set_one_control(const char *ctrl, unsigned int id, int value);
-  virtual int get_one_control(const char *ctrl, unsigned int id);
   virtual void create_buffer();
   virtual void reset_cropping();
 

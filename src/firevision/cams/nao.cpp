@@ -38,6 +38,11 @@
 
 using namespace fawkes;
 
+#define V4L2_CID_AUTOEXPOSURE           (V4L2_CID_BASE+32)
+#define V4L2_CID_CAM_INIT               (V4L2_CID_BASE+33)
+#define V4L2_CID_EXPOSURE_CORRECTION    (V4L2_CID_BASE+34)
+#define V4L2_CID_AEC_ALGORITHM          (V4L2_CID_BASE+35)
+
 #ifndef I2C_FUNC_SMBUS_READ_BYTE_DATA
 #include <linux/i2c.h>
 /// @cond I2C_INTERNALS
@@ -226,13 +231,14 @@ void NaoCamera::init_cam(const char *cam)
   struct v4l2_control control;
   memset(&control, 0, sizeof(control));
 
-  control.id    = 0x980919;
+  control.id    = V4L2_CID_CAM_INIT;
   control.value = 0;
 
   if (ioctl(dev, VIDIOC_S_CTRL, &control)) close_dev(dev, "Error setting other camera to default parameters");
 
   close_dev(dev);
 }
+
 /**
  * Return which cam is currently being used.
  * 1: brow-cam
@@ -267,6 +273,26 @@ void NaoCamera::set_source(unsigned char source)
   switch_to_cam_id(dev, source);
   close_dev(dev);
   init_cam(_device_name);
+}
+
+/**
+ * Return whether auto exposure is enabled.
+ * @return true if auto exposure is enabled
+ */
+bool NaoCamera::auto_exposure()
+{
+  return get_one_control("AEC", V4L2_CID_AUTOEXPOSURE);
+}
+
+/**
+ * Enable/disable auto exposure.
+ * @param enabled whether auto exposure should be enabled
+ */
+void NaoCamera::set_auto_exposure(bool enabled)
+{
+  LibLogger::log_debug("NaoCamera", (enabled ? "enabling AEC" : "disabling AEC"));
+
+  set_one_control("AEC", V4L2_CID_AUTOEXPOSURE, (enabled ? 1 : 0));
 }
 
 } // end namespace firevision

@@ -128,6 +128,7 @@ ifeq ($(OS),Linux)
     HAVE_V4L2_CAM       = 1
     ifeq ($(BUILD_TYPE),naocross)
       HAVE_NAO_CAM      = 1
+      VISION_CFLAGS    += $(NAOQI_CFLAGS)
     endif
   else
     HAVE_V4L2_FAIL_REASON = v4l2 not available, kernel too old?
