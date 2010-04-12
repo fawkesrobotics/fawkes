@@ -24,7 +24,7 @@
 # 1418: external function definition with no prior declaration
 # 1572: floating-point equality and inequality comparisons are unreliable
 
-ICC_PATH = /opt/intel/Compiler/11.1/038
+ICC_PATH = $(wildcard /opt/intel/Compiler/*/*)
 CC = $(ICC_PATH)/bin/ia32/icc
 
 DEFAULT_INCLUDES += -I$(ICC_PATH)/include

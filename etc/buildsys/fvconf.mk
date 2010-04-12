@@ -143,8 +143,8 @@ ifeq ($(HAVE_NAO_CAM),1)
 endif
 
 ### Check for external libraries
-IPP_DIR  = $(SYSROOT)/opt/intel/Compiler/11.1/038/ipp
-ICC_DIR  = $(SYSROOT)/opt/intel/Compiler/11.1/038
+ICC_DIR  = $(SYSROOT)$(wildcard /opt/intel/Compiler/*/*)
+IPP_DIR  = $(ICC_DIR)/ipp
 HAVE_IPP = 0
 ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   # Check versions, use first one found
