@@ -256,20 +256,14 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   box->set_sensitive(false);
 #endif /* HAVE_BULB_CREATOR */
 
-  m_btn_mc_crosshair = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcCrosshair") );
-  m_btn_mc_crosshair->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_show_crosshair) );
+  m_scl_mc_line = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclMcLine") );
+  m_scl_mc_line->signal_change_value().connect( sigc::mem_fun(*this, &Firestation::mc_set_line_angle) );
 
   m_btn_mc_load_mask = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcLoadMask") );
   m_btn_mc_load_mask->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load_mask) );
 
-  m_btn_mc_start0 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart0") );
-  m_btn_mc_start0->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start0) );
-
-  m_btn_mc_start120 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart120") );
-  m_btn_mc_start120->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start120) );
-
-  m_btn_mc_start240 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart240") );
-  m_btn_mc_start240->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start240) );
+  m_btn_mc_memorize = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcMemorize") );
+  m_btn_mc_memorize->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_memorize) );
 
   m_btn_mc_load = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibLoad") );
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
@@ -336,6 +330,8 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_op_mode = MODE_VIEWER;
 
   m_cont_img_trans = false;
+
+  mc_line_angle_deg = 0.0;
 
   m_max_img_width  = m_evt_image->get_width();
   m_max_img_height = m_evt_image->get_height();
@@ -566,8 +562,6 @@ Firestation::open_file()
 	m_camera = new FileLoader( filename.c_str() );
 	m_img_src = SRC_FILE;
 	post_open_img_src();
-        mc_start(i++ * 120.0);
-
 	break;
       }
 
@@ -843,6 +837,8 @@ Firestation::post_open_img_src()
       m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
       m_ctw->set_draw_buffer(m_yuv_draw_buffer);
       m_ctw->draw_segmentation_result();
+
+      mc_draw_line();
     }
   catch (Exception& e)
     {
@@ -1035,11 +1031,7 @@ Firestation::image_click(GdkEventButton* event)
         const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
         memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
         memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
-        MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
-                                        m_calib_tool->center_x(),
-                                        m_calib_tool->center_y(),
-                                        m_img_width,
-                                        m_img_height);
+        m_calib_tool->draw_mark_lines(m_yuv_draw_buffer);
         draw_image();
         m_stb_status->push(m_calib_tool->get_state_description());
 	/*m_calib_tool->step(image_x, image_y);
@@ -1156,9 +1148,8 @@ Firestation::ct_object_changed()
 	m_ctw->set_fg_object(object);
 }
 
-/** Draws a crosshair in the draw-buffer and redraws the image. */
 void
-Firestation::mc_show_crosshair()
+Firestation::mc_draw_line()
 {
   if (m_img_src != SRC_NONE) {
     MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
@@ -1168,6 +1159,22 @@ Firestation::mc_show_crosshair()
                                     m_img_height);
     draw_image();
   }
+  memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer, m_img_size);
+  MirrorCalibTool::draw_line(m_yuv_draw_buffer,
+                             mc_line_angle_deg,
+                             m_calib_tool->center_x(),
+                             m_calib_tool->center_y(),
+                             m_img_width,
+                             m_img_height);
+  draw_image();
+}
+
+bool
+Firestation::mc_set_line_angle(Gtk::ScrollType scroll, double value)
+{
+  mc_line_angle_deg = value;
+  mc_draw_line();
+  return true;
 }
 
 void
@@ -1200,28 +1207,10 @@ Firestation::mc_load_mask()
   m_fcd_mc_load_mask->hide();
 }
 
-void
-Firestation::mc_start0()
-{
-  mc_start(0.0);
-}
-
-void
-Firestation::mc_start120()
-{
-  mc_start(120.0);
-}
- 
-void
-Firestation::mc_start240()
-{
-  mc_start(240.0);
-}
- 
 /** Start the mirror calibration process. 
  *  @param ori orientation in degree. */
 void
-Firestation::mc_start(double ori)
+Firestation::mc_memorize()
 {
   /* if (m_op_mode == MODE_MIRROR_CALIB)
     {
@@ -1230,14 +1219,17 @@ Firestation::mc_start(double ori)
     }
   else */ if (m_img_src != SRC_NONE)
     {
+      double ori = mc_line_angle_deg;
       std::cout << "Starting calibration for ori = " << ori << std::endl;
-      //m_calib_tool->start(m_yuv_orig_buffer, m_img_size,
-                          //m_img_width, m_img_height, deg2rad(ori));
       m_calib_tool->push_back(m_yuv_orig_buffer, m_img_size,
                               m_img_width, m_img_height, deg2rad(ori));
       std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
       m_op_mode = MODE_MIRROR_CALIB;
       std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
+      mc_line_angle_deg += 120.0;
+      mc_line_angle_deg =
+        rad2deg(normalize_mirror_rad(deg2rad(mc_line_angle_deg)));
+      m_scl_mc_line->set_value(mc_line_angle_deg);
 #if 0
       bool show;
       float next_dist;

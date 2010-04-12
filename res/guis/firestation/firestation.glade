@@ -1115,8 +1115,8 @@ Other</property>
                   <widget class="GtkVBox" id="vbox5">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkButton" id="btnMcCrosshair">
-                        <property name="label" translatable="yes">Crosshair</property>
+                      <widget class="GtkButton" id="btnMcLoadMask">
+                        <property name="label" translatable="yes">Load Mask</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -1128,23 +1128,18 @@ Other</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
-                    <child>
-                      <widget class="GtkButton" id="btnMcLoadMask">
-                        <property name="label" translatable="yes">Load Mask</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="use_underline">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
+		    <child>
+		      <widget class="GtkHScale" id="sclMcLine">
+			<property name="width_request">150</property>
+			<property name="visible">True</property>
+			<property name="can_focus">True</property>
+			<property name="adjustment">0 -180 180 0.5 0.5 0</property>
                         <property name="position">1</property>
-                      </packing>
-                    </child>
+		      </widget>
+		    </child>
                     <child>
-                      <widget class="GtkButton" id="btnMcStart0">
-                        <property name="label" translatable="yes">Start 0°</property>
+                      <widget class="GtkButton" id="btnMcMemorize">
+                        <property name="label" translatable="yes">Memorize</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -1157,8 +1152,8 @@ Other</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="btnMcStart120">
-                        <property name="label" translatable="yes">Start 120°</property>
+                      <widget class="GtkButton" id="btnCalibLoad">
+                        <property name="label" translatable="yes">Load Bulb</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -1171,8 +1166,8 @@ Other</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="btnMcStart240">
-                        <property name="label" translatable="yes">Start 240°</property>
+                      <widget class="GtkButton" id="btnCalibSave">
+                        <property name="label" translatable="yes">Save Bulb</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -1182,34 +1177,6 @@ Other</property>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkButton" id="btnCalibLoad">
-                        <property name="label" translatable="yes">Load</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="use_underline">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkButton" id="btnCalibSave">
-                        <property name="label" translatable="yes">Save</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="use_underline">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">6</property>
                       </packing>
                     </child>
                   </widget>

@@ -43,6 +43,9 @@ class MirrorCalibTool
 #endif
 {
  public:
+  static void draw_line(unsigned char* yuv_buffer, double angle_deg,
+                        int center_x, int center_y, int width, int height);
+  void draw_mark_lines(unsigned char* yuv_buffer);
   static void draw_crosshair(unsigned char* yuv_buffer, int center_x,
                              int center_y, int width, int height);
 
@@ -150,16 +153,14 @@ class MirrorCalibTool
   static PixelPoint calculate_center(const ImageList& images);
   static RealDistance calculate_real_distance(int n);
   static PolarAnglePair find_nearest_neighbors(PolarAngle angle,
-                                               MarkMap mark_map);
+                                               const MarkMap& mark_map);
   static RealDistance interpolate(PolarRadius radius, const MarkList& marks);
   static firevision::Bulb generate(int width, int height,
-                                    const PixelPoint& center,
-                                    const MarkMap& mark_map);
+                                   const PixelPoint& center,
+                                   const MarkMap& mark_map);
 
   unsigned char*   img_yuv_buffer_;
   size_t           img_buflen_;
-  int              img_width_;
-  int              img_height_;
   int              img_center_x_;
   int              img_center_y_;
   unsigned char*   img_yuv_mask_;

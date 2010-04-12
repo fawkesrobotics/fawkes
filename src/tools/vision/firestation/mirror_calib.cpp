@@ -57,7 +57,7 @@ using namespace firevision;
 namespace {
   const unsigned int  ORIENTATION_COUNT         = (ORI_DEG_360 - ORI_DEG_0);
   const int           MARK_COUNT                = 9;
-  const int           MARK_DISTANCE             = 27;
+  const float         MARK_DISTANCE             = 29.7;
   const unsigned char DARK                      = 0;
   const unsigned char BRIGHT                    = 255;
   const unsigned char MARK_LUMA                 = 128;
@@ -627,13 +627,11 @@ class MirrorCalibTool::Image
     marks_(copy.marks_),
     refcount_(copy.refcount_)
   {
-    std::cout << "Image.Copy" << std::endl;
     ++*refcount_;
   }
 
   Image& operator=(const Image& copy)
   {
-    std::cout << "Image.=" << std::endl;
     if (this != &copy) {
       if (--*refcount_ == 0) {
         delete[] yuv_buffer_;
@@ -695,8 +693,6 @@ class MirrorCalibTool::Image
 MirrorCalibTool::MirrorCalibTool()
   : img_yuv_buffer_(0),
     img_buflen_(0),
-    img_width_(0),
-    img_height_(0),
     img_center_x_(500),
     img_center_y_(500),
     img_yuv_mask_(0),
@@ -770,6 +766,14 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
 }
 
 
+/** Store image for calibration process.
+ * @param yuv_buffer The image's yuv_buffer. It may be freeed by the caller
+ *                   immediately, the MirrorCalibTool works with a copy of it.
+ * @param buflen     The length of yuv_buffer.
+ * @param width      The width of the image.
+ * @param height     The height of the image.
+ * @param ori        The polar angle in degrees (!) where the marks are.
+ */
 void
 MirrorCalibTool::push_back(const unsigned char* yuv_buffer,
                            size_t buflen,
@@ -993,29 +997,24 @@ restart: // XXX ugly :-)
   for (unsigned int from = 0; from < biggest.size(); from++)
   {
     unsigned int to;
-    for (to = from + 1; to < biggest.size() && (to - from) < n; to++) {
-      if (biggest[to-1].size() < biggest[to].size()) {
+    for (to = from + 1; to < biggest.size(); to++) {
+      if ((to - from + 1) > n) {
+        to = from + n;
+        break;
+      }
+      if (biggest[to - 1].size() < biggest[to].size()) {
         break;
       }
     }
-    if (to - from > filtered.size()) {
+    to--; // in all three break cases, to must be decremented
+    if (to - from + 1 > filtered.size()) {
       filtered.clear();
-      for (unsigned int j = from; j < to; j++) {
+      for (unsigned int j = from; j <= to; j++) {
         filtered.push_back(biggest[j]);
       }
     }
   }
   return filtered;
-
-  /*
-  std::sort(biggest.begin(), biggest.end(), Hole::cmp_by_hole_size);
-  while (biggest.size() > n)
-  {
-    biggest.pop_back();
-  }
-  std::sort(biggest.begin(), biggest.end(), Hole::cmp_by_position);
-  printf("After first filtering, %u holes remain\n", biggest.size());
-  */
 }
 
 
@@ -1024,6 +1023,7 @@ MirrorCalibTool::MarkList
 MirrorCalibTool::determine_marks(const HoleList& holes)
 {
   HoleList biggest = filter_biggest_holes(holes, MARK_COUNT - 1);
+  std::cout << "Filtered Holes: " << biggest.size() << std::endl;
   MarkList marks;
   for (HoleList::const_iterator prev, iter = biggest.begin();
        iter != biggest.end(); iter++) {
@@ -1358,14 +1358,14 @@ MirrorCalibTool::calculate_center(const ImageList& images)
 
 /**
  * Searches the two angles in the MarkMap mark_map that are nearest to angle.
- * @param angle the reference angle to which the nearest marks are searched
- * @param mark_map the mark map
- * @return the two angles nearest to angle contained in mark_map (and therefore
- * keys to MarkLists in mark_map)
+ * @param angle The reference angle to which the nearest marks are searched.
+ * @param mark_map The mark map.
+ * @return The two angles nearest to angle contained in mark_map (and therefore
+ * keys to MarkLists in mark_map).
  */
 MirrorCalibTool::PolarAnglePair
 MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
-                                        MarkMap mark_map)
+                                        const MarkMap& mark_map)
 {
   typedef vector<PolarAngle> AngleList;
   AngleList diffs;
@@ -1375,45 +1375,26 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
     const PolarAngle mark_angle = it->first;
     const PolarAngle diff = normalize_mirror_rad(mark_angle - angle);
     diffs.push_back(diff);
-    /*
+#if 0
     std::cout << "Finding nearest neighbors: "
               << "ref="<<angle<<"="<<rad2deg(angle)<<" "
               << "to="<<mark_angle<<"="<<rad2deg(mark_angle)<<" "
               << "diff="<<diff<<"="<<rad2deg(diff) << std::endl;
-    */
+#endif
   }
   bool min1_init = false;
   AngleList::size_type min1_index = 0;
   bool min2_init = false;
   AngleList::size_type min2_index = 0;
   for (int i = 0; static_cast<AngleList::size_type>(i) < diffs.size(); i++) {
-    //std::cout << "Iteration " << (i+1) << " of " << diffs.size() << std::endl;
     if (!min1_init || abs(diffs[min1_index]) >= abs(diffs[i])) {
       min2_index = min1_index;
       min2_init  = min1_init;
       min1_index = i;
       min1_init  = true;
-      /*
-      if (min2_init) {
-        std::cout << "Finding min diffs 1: Setting min2 to "
-                  << "ref="<<angle<<"="<<rad2deg(angle)<<" "
-                  << "diff="<<diffs[min2_index]<<"="
-                  << rad2deg(diffs[min2_index]) << std::endl;
-      }
-      std::cout << "Finding min diffs 1: Setting min1 to "
-                << "ref="<<angle<<"="<<rad2deg(angle)<<" "
-                << "diff="<<diffs[min1_index]<<"="
-                << rad2deg(diffs[min1_index]) << std::endl;
-      */
     } else if (!min2_init || abs(diffs[min2_index]) >= abs(diffs[i])) {
       min2_index = i;
       min2_init  = true;
-      /*
-      std::cout << "Finding min diffs 2: Setting min2 to "
-                << "ref="<<angle<<"="<<rad2deg(angle)<<" "
-                << "diff="<<diffs[min2_index]<<"="
-                << rad2deg(diffs[min2_index]) << std::endl;
-      */
     }
   }
   if (!min1_init) {
@@ -1435,14 +1416,14 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
     }
     i++;
   }
-  /*
+#if 0
   std::cout << "Found nearest neighbor 1: "
             << "ref="<<angle<<"="<<rad2deg(angle)<<" "
             << "to="<<min1<<"="<<rad2deg(min1) << std::endl;
   std::cout << "Found nearest neighbor 2: "
             << "ref="<<angle<<"="<<rad2deg(angle)<<" "
             << "to="<<min2<<"="<<rad2deg(min2) << std::endl;
-  */
+#endif
   return PolarAnglePair(min1, min2);
 }
 
@@ -1450,12 +1431,12 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
 /**
  * Calculates the real distance to the n-th mark.
  * @param n The index of the mark, starting at 0.
- * @return the distance in centimeters.
+ * @return The distance in centimeters.
  */
 MirrorCalibTool::RealDistance
 MirrorCalibTool::calculate_real_distance(int n)
 {
-  return (n + 1) * MARK_DISTANCE;
+  return MARK_DISTANCE + (n + 1) * MARK_DISTANCE;
 }
 
 
@@ -1528,28 +1509,35 @@ MirrorCalibTool::generate(int width,
       const PolarAnglePair nearest_neighbors =
         find_nearest_neighbors(ori_to_robot, mark_map);
       const PolarAngle diff1 =
-        normalize_mirror_rad(nearest_neighbors.first - ori_to_robot);
+        abs(normalize_mirror_rad(nearest_neighbors.first - ori_to_robot));
       const PolarAngle diff2 =
-        normalize_mirror_rad(nearest_neighbors.second - ori_to_robot);
-      const PolarAngle norm = abs(diff1 - diff2);
-      const double weight1 = 1.0 - abs(diff1) / norm;
-      const double weight2 = 1.0 - abs(diff2) / norm;
+        abs(normalize_mirror_rad(nearest_neighbors.second - ori_to_robot));
+      const PolarAngle norm = diff1 + diff2;
+      assert(norm != 0.0);
+      const double weight1 = 1.0 - diff1 / norm;
+      const double weight2 = 1.0 - diff2 / norm;
 #if 0
       std::cout << "PixelPoint("<< x <<", "<< y <<")"<< std::endl;
       std::cout << "CartesianPoint("<< cp.x <<", "<< cp.y <<")"<< std::endl;
       std::cout << "Radius, Angle: " << cp.length() << " "
+                << ori_to_robot << " = "
                 << rad2deg(ori_to_robot) << std::endl;
       std::cout << "Neighbor 1: "
-                << rad2deg(normalize_mirror_rad(nearest_neighbors.first))
+                << normalize_rad(nearest_neighbors.first) << " = "
+                << rad2deg(normalize_rad(nearest_neighbors.first))
                 << std::endl;
       std::cout << "Neighbor 2: "
-                << rad2deg(normalize_mirror_rad(nearest_neighbors.second))
+                << normalize_rad(nearest_neighbors.second) << " = "
+                << rad2deg(normalize_rad(nearest_neighbors.second))
                 << std::endl;
-      std::cout << "Diff 1: " << rad2deg(diff1) << std::endl;
-      std::cout << "Diff 2: " << rad2deg(diff2) << std::endl;
-      std::cout << "Norm Factor: " << rad2deg(norm) << std::endl;
-      std::cout << "Weight 1: " << rad2deg(weight1) << std::endl;
-      std::cout << "Weight 2: " << rad2deg(weight2) << std::endl;
+      std::cout << "Diff 1: " << diff1 << " = " << rad2deg(diff1) << std::endl;
+      std::cout << "Diff 2: " << diff2 << " = " << rad2deg(diff2) << std::endl;
+      std::cout << "Norm Factor: " << norm << " = " << rad2deg(norm)
+                << std::endl;
+      std::cout << "Weight 1: " << weight1 << " = " << rad2deg(weight1)
+                << std::endl;
+      std::cout << "Weight 2: " << weight2 << " = " << rad2deg(weight2)
+                << std::endl;
 #endif
       assert(0.0 <= weight1 && weight1 <= 1.0);
       assert(0.0 <= weight2 && weight2 <= 1.0);
@@ -1610,7 +1598,7 @@ MirrorCalibTool::eval(unsigned int x, unsigned int y,
 
 
 /** Loads a calibration file.
- * @param filename name of the file containing the calibration data
+ * @param filename Name of the file containing the calibration data.
  */
 void
 MirrorCalibTool::load(const char* filename)
@@ -1622,7 +1610,7 @@ MirrorCalibTool::load(const char* filename)
 
 
 /** Saves calibration data to a file.
- * @param filename the nem of the file
+ * @param filename The name of the file.
  */
 void
 MirrorCalibTool::save(const char* filename)
@@ -1640,11 +1628,68 @@ MirrorCalibTool::save(const char* filename)
 }
 
 
+/** Draws a line from the image center in the given angle.
+ * @param yuv_buffer The in/out parameter for the image.
+ * @param angle_deg Angle of line in degrees.
+ * @param center_x X-coordinate of center point in image pixels.
+ * @param center_y Y-coordinate of center point in image pixels.
+ * @param width Width of image.
+ * @param height Height of image.
+ */
+void
+MirrorCalibTool::draw_line(unsigned char* yuv_buffer,
+                           double angle_deg,
+                           int center_x,
+                           int center_y,
+                           int width,
+                           int height)
+{
+  const PolarAngle angle = normalize_rad(deg2rad(angle_deg));
+  CartesianImage img(yuv_buffer, width, height,
+                     robotRelativeOrientationToImageRotation(0.0),
+                     PixelPoint(center_x, center_y));
+  for (PolarRadius length = 0; length < img.max_radius(); length++)
+  {
+    const CartesianPoint p(angle, length);
+    if (img.contains(p)) {
+      img.set_color(p, MARK_LUMA, MARK_CHROMINANCE);
+    }
+  }
+}
+
+
+/** Draws a crosshair with the lines in the directions of the keys of 
+ * the mark map.
+ * @param yuv_buffer The in/out parameter for the image.
+ */
+void
+MirrorCalibTool::draw_mark_lines(unsigned char* yuv_buffer)
+{
+  for (ImageList::const_iterator it = source_images_.begin();
+       it != source_images_.end(); it++)
+  {
+    const Image& src_img = *it;
+    CartesianImage img(yuv_buffer, src_img.width(), src_img.height(),
+                       src_img.ori(), PixelPoint(img_center_x_, img_center_y_));
+    for (PolarRadius length = 0; length < img.max_radius(); length++)
+    {
+      const PolarAngle angle = 0.0;
+      const CartesianPoint p(angle, length);
+      if (img.contains(p)) {
+        img.set_color(p, MARK_LUMA, MARK_CHROMINANCE);
+      }
+    }
+  }
+}
+
+
 /** Draws a crosshair in the YUV-buffer. The crosshair consists of three lines
  * from the origin (0, 0) with the angles 0 degree, 120 degrees, 240 degrees.
- * @param yuv_buffer the in/out parameter for the image
- * @param width width of image
- * @param height height of image
+ * @param yuv_buffer The in/out parameter for the image.
+ * @param center_x X-coordinate of center point in image pixels.
+ * @param center_y Y-coordinate of center point in image pixels.
+ * @param width Width of image.
+ * @param height Height of image.
  */
 void
 MirrorCalibTool::draw_crosshair(unsigned char* yuv_buffer,
@@ -1657,12 +1702,12 @@ MirrorCalibTool::draw_crosshair(unsigned char* yuv_buffer,
                                    normalize_rad(deg2rad(-120.0f)),
                                    normalize_rad(deg2rad( 120.0f)) };
   const int POSITION_COUNT = sizeof POSITIONS / sizeof(double);
+  CartesianImage img(yuv_buffer, width, height,
+                     robotRelativeOrientationToImageRotation(0.0),
+                     PixelPoint(center_x, center_y));
   for (int i = 0; i < POSITION_COUNT; i++)
   {
     const PolarAngle angle = POSITIONS[i];
-    CartesianImage img(yuv_buffer, width, height,
-                       robotRelativeOrientationToImageRotation(angle),
-                       PixelPoint(center_x, center_y));
     for (PolarRadius length = 0; length < img.max_radius(); length++)
     {
       const CartesianPoint p(angle, length);
