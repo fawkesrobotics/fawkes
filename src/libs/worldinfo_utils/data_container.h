@@ -82,6 +82,9 @@ class WorldInfoDataContainer
   // ball position
   void set_ball_pos( const char* from_host, bool visible, int visibility_history,
 		     float dist, float bearing, float slope, float* covariance );
+  void set_ball_pos_global( const char* from_host,
+			    bool visible, int visibility_history,
+			    float x, float y, float z, float* covariance );
   bool get_ball_pos_relative( const char* host, HomPolar& ball_pos );
   bool get_ball_pos_relative( const char* host, HomPolar& ball_pos,
 			      Matrix &ball_pos_cov );
@@ -133,6 +136,8 @@ class WorldInfoDataContainer
 
     void set_pos( float dist, float bearing, float slope,
 		  float* covariance = NULL );
+    void set_pos_global( float x, float y, float z,
+			 float* covariance = NULL );
     void set_visible( bool visible, int visibility_history );
     void set_velocity( float vel_x, float vel_y, float vel_z,
 		       float* covariance = NULL );
@@ -142,14 +147,17 @@ class WorldInfoDataContainer
     HomPolar  pos_relative();
     HomVector vel_relative();
     Matrix    covariance_relative();
+    HomPoint  pos_global();
     HomPoint  pos_global( float ref_x, float ref_y, float ref_theta );
     HomVector vel_global( float vel_x, float vel_y, float vel_theta,
 			  float ref_theta );
 
   private:
+    bool      m_is_global;
     HomPolar  m_rel_pos;
     HomVector m_rel_vel;
     Matrix    m_rel_cov;
+    HomPoint  m_glob_pos;
     bool      m_visible;
     int       m_visibility_history;
   };

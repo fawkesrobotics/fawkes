@@ -33,6 +33,7 @@ namespace fawkes {
 
 WorldInfoDataContainer::BallRecord::BallRecord()
 {
+  m_is_global = false;
 }
 
 WorldInfoDataContainer::BallRecord::~BallRecord()
@@ -48,6 +49,19 @@ WorldInfoDataContainer::BallRecord::set_pos( float dist,
   m_rel_pos.r(dist);
   m_rel_pos.phi(bearing);
   // TODO: slope, covariance
+}
+
+void
+WorldInfoDataContainer::BallRecord::set_pos_global( float x,
+						    float y,
+						    float z,
+						    float* covariance )
+{
+  m_is_global = true;
+  m_glob_pos.x( x );
+  m_glob_pos.y( y );
+  m_glob_pos.z( z );
+  // TODO: covarince
 }
 
 void
@@ -105,11 +119,18 @@ WorldInfoDataContainer::BallRecord::pos_global( float ref_x,
 						float ref_y,
 						float ref_theta )
 {
-  HomPoint p( m_rel_pos.x(), m_rel_pos.y() );
-  p.rotate_z( ref_theta );
-  p.x() += ref_x;
-  p.y() += ref_y;
-  return p;
+  if ( !m_is_global )
+  {
+    HomPoint p( m_rel_pos.x(), m_rel_pos.y() );
+    p.rotate_z( ref_theta );
+    p.x() += ref_x;
+    p.y() += ref_y;
+    return p;
+  }
+  else
+  {
+    return m_glob_pos;
+  }
 }
 
 HomVector
@@ -574,6 +595,47 @@ WorldInfoDataContainer::set_ball_pos( const char* host,
     {
       iter->second.set_visible( visible, visibility_history );
       iter->second.set_pos( dist, bearing, slope, covariance );
+    }
+  m_ball_positions.unlock();
+
+  m_new_data_available = true;
+}
+
+/** Set the global ball position estimation of a robot.
+ * @param host the hostname of the robot
+ * @param visible visible or not
+ * @param visibility_history visible/not visible for n iterations
+ * @param x the x-coordinte of the global ball position
+ * @param y the y-coordinte of the global ball position
+ * @param z the z-coordinte of the global ball position
+ * @param covariance covariance associated with the position estimation
+ */
+void
+WorldInfoDataContainer::set_ball_pos_global( const char* host,
+					     bool visible,
+					     int visibility_history,
+					     float x,
+					     float y,
+					     float z,
+					     float* covariance )
+{
+  BallLockMap::iterator iter;
+  unsigned int id = get_host_id( host );
+  clock_in_host( id );
+
+  m_ball_positions.lock();
+  iter = m_ball_positions.find( id );
+  if ( iter == m_ball_positions.end() )
+    {
+      BallRecord ball_record;
+      ball_record.set_visible( visible, visibility_history );
+      ball_record.set_pos_global( x, y, z, covariance );
+      m_ball_positions[ id ] = ball_record;
+    }
+  else
+    {
+      iter->second.set_visible( visible, visibility_history );
+      iter->second.set_pos_global( x, y, z, covariance );
     }
   m_ball_positions.unlock();
 

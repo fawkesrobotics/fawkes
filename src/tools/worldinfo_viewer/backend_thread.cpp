@@ -169,8 +169,16 @@ WorldInfoViewerBackendThread::global_ball_pos_rcvd( const char* from_host,
 						    float z,
 						    float* covariance )
 {
-//   m_data_container->set_ball_pos_global( from_host, visible, visibility_history,
-// 					 x, y, z, covariance );
+#ifdef DEBUG_PRINT
+  if ( visible )
+  { printf( "Received global ball data from host %s: x=%.3f y=%.3f\n",
+	    from_host, x, y ); }
+  else
+  { printf( "Received global ball not visible from host %s\n", from_host ); }
+#endif /* DEBUG_PRINT */
+  m_data_container->set_ball_pos_global( from_host, visible,
+					 visibility_history,
+					 x, y, z, covariance );
   m_signal_new_worldinfo_data();
 }
 
