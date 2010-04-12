@@ -37,6 +37,20 @@
  * pattern ID of the other robots' ObjectPositionInterfaces and (3) the
  * maximum-self-confidence-distance.
  *
+ * (1) If the own ObjectPositionInterface thinks the object is not further away
+ * than self_confidence_radius, then the own interface's data is copied to the
+ * output interface.
+ * (2) If there is an unambiguous majority of interfaces that say the object is
+ * somewhere else and this majority is averaged and the average values are
+ * copied to the output interface.
+ * Since the other interfaces probably won't agree on one exact position, they
+ * are grouped: for each interface A its group is the set of interfaces that
+ * claim the object is not further away from the position claimed by A than
+ * GROUP_RADIUS. GROUP_RADIUS is currently hard-coded to 1.0 meters.
+ * (3) If the other interfaces "cannot settle" on some position of the object,
+ * the own interface's data is considered as at least as reliable as theirs and
+ * therefore the own interface's data is copied to the output interface.
+ *
  * Like the WorldModelObjPosMajorityFuser, it registers as an observer and opens
  * any newly created interface that matches the ID of the own
  * ObjectPositionInterface or the pattern of the foreign
@@ -64,17 +78,6 @@ WorldModelObjPosMajorityFuser::WorldModelObjPosMajorityFuser(
       output_id_(output_id),
       self_confidence_radius_(self_confidence_radius)
 {
-  logger_->log_debug("WorldModelObjPosMajorityFuser",
-                     "Creating Majority fuser with self-concidence-radius %f "\
-                     "and group-radius %f.",
-                     self_confidence_radius, GROUP_RADIUS);
-  logger_->log_debug("WorldModelObjPosMajorityFuser",
-                     "Own interface: %s", own_id.c_str());
-  logger_->log_debug("WorldModelObjPosMajorityFuser",
-                     "Foreign interface pattern: %s",
-                     foreign_id_pattern.c_str());
-  logger_->log_debug("WorldModelObjPosMajorityFuser",
-                     "Output interface: %s", output_id.c_str());
   input_ifs_.clear();
   output_if_ = NULL;
   try {
@@ -212,9 +215,6 @@ WorldModelObjPosMajorityFuser::same_contents(const OpiBucket& left,
 void
 WorldModelObjPosMajorityFuser::fuse()
 {
-  logger_->log_debug("WorldModelObjPosMajorityFuser",
-                     "Fusing: %u input interfaces, having%s own interface.",
-                     input_ifs_.size(), (own_if_ != NULL ? "" : " no"));
   if (own_if_ != NULL) {
     own_if_->read();
   }
@@ -228,16 +228,11 @@ WorldModelObjPosMajorityFuser::fuse()
        ((own_if_->flags() & Opi::FLAG_HAS_RELATIVE_POLAR) &&
          own_if_->distance() <= self_confidence_radius_))) {
     // Case 1: just copy own data if the own data claims the ball is very near.
-    logger_->log_debug("WorldModelObjPosMajorityFuser",
-                       "Copy data from own interface because distance is "\
-                       "<= %f", self_confidence_radius_);
     copy_own_if();
 
   } else {
     // Case 2: group interfaces, look for a majority and average it, if there is
     // none, copy the own interface.
-    logger_->log_debug("WorldModelObjPosMajorityFuser",
-                       "Going to group interfaces and find majority");
 
     for (OpiSet::const_iterator it = input_ifs_.begin();
          it != input_ifs_.end(); ++it) {
@@ -292,16 +287,9 @@ WorldModelObjPosMajorityFuser::fuse()
     }
     if (majority.size() > 0 && unambiguous) {
       // Case 2a: calculate average of majority.
-      logger_->log_debug("WorldModelObjPosMajorityFuser",
-                         "Averaging over majority which is %s's group of "\
-                         "size %u",
-                         majority[0]->id(), majority.size());
       average(majority);
     } else {
       // Case 2b: no majority found, copy own data.
-      logger_->log_debug("WorldModelObjPosMajorityFuser",
-                         "Copy data from own interface because no majority "\
-                         "found");
       copy_own_if();
     }
   }
