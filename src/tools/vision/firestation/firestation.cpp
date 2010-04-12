@@ -25,6 +25,8 @@
 #include "color_train_widget.h"
 #include "fuse_transfer_widget.h"
 
+#include <utils/math/angle.h>
+
 #include <fvwidgets/fuse_image_list_widget.h>
 #include <gui_utils/avahi_dispatcher.h>
 
@@ -254,8 +256,17 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   box->set_sensitive(false);
 #endif /* HAVE_BULB_CREATOR */
 
-  m_btn_mc_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart") );
-  m_btn_mc_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start) );
+  m_btn_mc_crosshair = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcCrosshair") );
+  m_btn_mc_crosshair->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_show_crosshair) );
+
+  m_btn_mc_start0 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart0") );
+  m_btn_mc_start0->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start0) );
+
+  m_btn_mc_start120 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart120") );
+  m_btn_mc_start120->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start120) );
+
+  m_btn_mc_start240 = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart240") );
+  m_btn_mc_start240->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start240) );
 
   m_btn_mc_load = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibLoad") );
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
@@ -550,6 +561,7 @@ Firestation::open_file()
 	m_camera = new FileLoader( filename.c_str() );
 	m_img_src = SRC_FILE;
 	post_open_img_src();
+        mc_start(i++ * 120.0);
 
 	break;
       }
@@ -1014,7 +1026,18 @@ Firestation::image_click(GdkEventButton* event)
 
     case MODE_MIRROR_CALIB:
       {
-	m_calib_tool->step(image_x, image_y);
+        m_calib_tool->next_step();
+        const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
+        memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
+        memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
+        MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
+                                        m_img_width,
+                                        m_img_height,
+                                        m_calib_tool->center_x(),
+                                        m_calib_tool->center_y());
+        draw_image();
+        m_stb_status->push(m_calib_tool->get_state_description());
+	/*m_calib_tool->step(image_x, image_y);
 
 	bool show;
 	float next_dist;
@@ -1039,7 +1062,7 @@ Firestation::image_click(GdkEventButton* event)
 	    m_ent_mc_dist->set_text("");
 	    m_ent_mc_ori->set_text("");
 	  }
-
+          */
 	break;
       }
 
@@ -1048,7 +1071,11 @@ Firestation::image_click(GdkEventButton* event)
 	float dist;
 	float phi;
 	m_calib_tool->eval(image_x, image_y, &dist, &phi);
-	printf("Distance: %2f\t Phi: %2f\n", dist, phi);
+        phi = normalize_mirror_rad(phi);
+        printf("(%d, %d) = POLAR(%.2f deg, %.2f meters)\n",
+            image_x, image_y,
+            rad2deg(phi), dist);
+        //printf("Distance: %2f\t Phi: %2f\n", dist, phi);
 	break;
       }
 
@@ -1124,51 +1151,86 @@ Firestation::ct_object_changed()
 	m_ctw->set_fg_object(object);
 }
 
-/** Start the mirror calibration process. */
+/** Draws a crosshair in the draw-buffer and redraws the image. */
 void
-Firestation::mc_start()
+Firestation::mc_show_crosshair()
 {
-  if (m_op_mode == MODE_MIRROR_CALIB)
+  if (m_img_src != SRC_NONE) {
+    MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
+                                    m_img_width,
+                                    m_img_height,
+                                    m_calib_tool->center_x(),
+                                    m_calib_tool->center_y());
+    draw_image();
+  }
+}
+
+void
+Firestation::mc_start0()
+{
+  mc_start(0.0);
+}
+
+void
+Firestation::mc_start120()
+{
+  mc_start(120.0);
+}
+ 
+void
+Firestation::mc_start240()
+{
+  mc_start(240.0);
+}
+ 
+/** Start the mirror calibration process. 
+ *  @param ori orientation in degree. */
+void
+Firestation::mc_start(double ori)
+{
+  /* if (m_op_mode == MODE_MIRROR_CALIB)
     {
       m_op_mode = MODE_VIEWER;
       m_stb_status->push("Leaving mirror calibration mode");
     }
-  else
+  else */ if (m_img_src != SRC_NONE)
     {
-      if (m_img_src != SRC_NONE)
-	{
-	  m_calib_tool->set_img_dimensions(m_img_width, m_img_height);
-	  m_calib_tool->start();
+      std::cout << "Starting calibration for ori = " << ori << std::endl;
+      //m_calib_tool->start(m_yuv_orig_buffer, m_img_size,
+                          //m_img_width, m_img_height, deg2rad(ori));
+      m_calib_tool->push_back(m_yuv_orig_buffer, m_img_size,
+                              m_img_width, m_img_height, deg2rad(ori));
+      std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
+      m_op_mode = MODE_MIRROR_CALIB;
+      std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
+#if 0
+      bool show;
+      float next_dist;
+      float next_ori;
+      show = m_calib_tool->get_next(&next_dist, &next_ori);
 
-	  m_op_mode = MODE_MIRROR_CALIB;
+      if (show)
+        {
+          char* next_dist_char = (char*) malloc(10);
+          char* next_ori_char = (char*) malloc(10);
 
-	  bool show;
-	  float next_dist;
-	  float next_ori;
-	  show = m_calib_tool->get_next(&next_dist, &next_ori);
+          sprintf(next_dist_char, "%2f", next_dist);
+          sprintf(next_ori_char, "%2f", next_ori);
+          m_ent_mc_dist->set_text(Glib::ustring(next_dist_char));
+          m_ent_mc_ori->set_text(Glib::ustring(next_ori_char));
 
-	  if (show)
-	    {
-	      char* next_dist_char = (char*) malloc(10);
-	      char* next_ori_char = (char*) malloc(10);
+          free(next_dist_char);
+          free(next_ori_char);
+        }
+      else
+        {
+          m_ent_mc_dist->set_text("");
+          m_ent_mc_ori->set_text("");
+        }
 
-	      sprintf(next_dist_char, "%2f", next_dist);
-	      sprintf(next_ori_char, "%2f", next_ori);
-	      m_ent_mc_dist->set_text(Glib::ustring(next_dist_char));
-	      m_ent_mc_ori->set_text(Glib::ustring(next_ori_char));
-
-	      free(next_dist_char);
-	      free(next_ori_char);
-	    }
-	  else
-	    {
-	      m_ent_mc_dist->set_text("");
-	      m_ent_mc_ori->set_text("");
-	    }
-
-	  m_stb_status->push("Entering mirror calibration mode");
-	}
-    }
+      m_stb_status->push("Entering mirror calibration mode");
+#endif
+  }
 }
 
 /** Load mirror calibration data from a file. */

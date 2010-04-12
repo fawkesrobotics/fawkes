@@ -4,6 +4,7 @@
  *
  *  Created: Fri Dec 07 18:34:50 2007
  *  Copyright  2007  Daniel Beck
+ *  Copyright  2009  Christoph Schwering
  *
  ****************************************************************************/
 
@@ -24,75 +25,153 @@
 #define __FIREVISION_TOOLS_FIRESTATION_MIRROR_CALIB_H_
 
 #include <geometry/hom_point.h>
+#include <utils/math/angle.h>
 
 #ifdef HAVE_BULB_CREATOR
+#include <models/mirror/bulb.h>
 #include <bulb_calib/bulb_generator.h>
-namespace firevision {
-  class Bulb;
-  class BulbSampler;
-}
+#endif
 
-class MirrorCalibTool : public firevision::BulbGeneratorProgressHandler
-#else
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cassert>
+
 class MirrorCalibTool
+#ifdef HAVE_BULB_CREATOR
+ : public firevision::BulbGeneratorProgressHandler
 #endif
 {
  public:
+  static void draw_crosshair(unsigned char* yuv_buffer, int center_x,
+                             int center_y, int width, int height);
+
   MirrorCalibTool();
-  MirrorCalibTool(unsigned int img_width, unsigned int img_height
-		  /*, unsigned int num_dists, unsigned int num_oris*/);
   ~MirrorCalibTool();
 
-  void start();
+  void push_back(const unsigned char* yuv_buffer,
+                 size_t buflen,
+                 int width,
+                 int height,
+                 double ori);
   void abort();
-  void step(unsigned int x, unsigned int y);
-  bool get_next(float* dist, float* ori);
-  
-  void eval(unsigned int x, unsigned int y, float* x_ret, float* y_ret);
+  void next_step();
+  const unsigned char* get_last_yuv_buffer() const;
+  const char* get_state_description() const;
 
+  inline int center_x() const { return img_center_x_; }
+  inline int center_y() const { return img_center_y_; }
+
+  void eval(unsigned int x,
+            unsigned int y,
+            float* x_ret,
+            float* y_ret);
+  void setTotalSteps(unsigned int total_steps) {};
+  void setProgress(unsigned int progress) {};
+  void finished() {};
+  
   void load(const char* filename);
   void save(const char* filename);
 
-  void set_img_dimensions(unsigned int width, unsigned int height);
-
-  void set_dists(float dists[], unsigned int num_dists);
-  void set_oris(float oris[], unsigned int num_oris);
-
-  void setTotalSteps(unsigned int total_steps);
-  void setProgress(unsigned int progress);
-  void finished();
-  
  private:
-  unsigned int m_img_width;
-  unsigned int m_img_height;
+  class ConvexPolygon;
+  class StepResult;
+  typedef std::vector<StepResult> StepResultList;
+  class Point;
+  class PixelPoint;
+  class CartesianPoint;
+  class CartesianImage;
+  class Hole;
+  class HoleList;
+  class Image;
+  typedef std::vector<Hole> HoleList;
+  typedef double PolarAngle;
+  typedef int PolarRadius;
+  typedef int RealDistance;
+  typedef std::vector<PolarRadius> MarkList;
+  typedef std::map<PolarAngle, MarkList> MarkMap;
+  typedef std::pair<PolarAngle, PolarAngle> PolarAnglePair;
+  typedef std::vector<Image> ImageList;
 
-  unsigned int m_center_x;
-  unsigned int m_center_y;
+  class ConvexPolygon : public std::vector<PixelPoint> {
+   public:
+    bool contains(const CartesianImage& img, const CartesianPoint& r) const;
+    bool contains(const PixelPoint& r) const;
+  };
 
-  unsigned int m_next_x;
-  unsigned int m_next_y;
-  unsigned int m_next_ori;
+  enum StepName { SHARPENING, EDGE_DETECTION, COMBINATION, CENTERING,
+                  PRE_MARKING, FINAL_MARKING, DONE };
+  struct CalibrationState {
+    StepName              step;
+    ImageList::size_type  image_index;
+    bool                  centering_done;
+    CalibrationState()
+    : step(SHARPENING), image_index(0), centering_done(false) {};
+  };
 
-  static float m_sample_dist[];
-  static float m_sample_ori[];
+  void goto_next_state();
+  void set_last_yuv_buffer(const unsigned char* last_buf);
+  void draw_center(StepResult& result);
 
-  unsigned int m_sample_step;
-  unsigned int m_sample_dist_step;
-  unsigned int m_sample_ori_step;
-  unsigned int m_num_dists;
-  unsigned int m_num_oris;
 
-  fawkes::HomPoint m_next_sample_point;
+  static PolarAngle robotRelativeOrientationToImageRotation(PolarAngle ori);
+  static PolarAngle imageRotationToRobotRelativeOrientation(PolarAngle ori);
 
-  bool m_calib_done;
-  bool m_step_two;
+  static void apply_sobel(unsigned char* src, unsigned char* dst,
+                          int widt, int height,
+                          firevision::orientation_t ori);
+  static void apply_my_sobel(unsigned char* src, unsigned char* dst,
+                             int widt, int height,
+                             firevision::orientation_t ori);
+  static void apply_sharpen(unsigned char* src, unsigned char* dst,
+                            int widt, int height);
+  static void apply_median(unsigned char* src, unsigned char* dst,
+                           int widt, int height, int i);
+  static void apply_min(unsigned char* src, unsigned char* dst,
+                        int widt, int height);
+  static void apply_or(unsigned char* src1, unsigned char* src2,
+                       unsigned char* dst, int widt, int height);
+  static void make_contrast(unsigned char* buf, size_t buflen);
+  static void make_grayscale(unsigned char* buf, size_t buflen);
+  static MarkList premark(const StepResult& prev, StepResult& result,
+                          PolarAngle phi, const PixelPoint& center);
+  static MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
+                          StepResult& result, PolarAngle phi,
+                          const PixelPoint& center);
+  static HoleList search_holes(const MarkList& premarks);
+  static HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
+  static MarkList determine_marks(const HoleList& holes);
+  static MarkList mark(const MarkList& premarks, StepResult& result,
+                       PolarAngle phi, const PixelPoint& center);
+
+  static PixelPoint calculate_center(const ImageList& images);
+  static RealDistance calculate_real_distance(int n);
+  static PolarAnglePair find_nearest_neighbors(PolarAngle angle,
+                                               MarkMap mark_map);
+  static RealDistance interpolate(PolarRadius radius, const MarkList& marks);
+  static firevision::Bulb generate(int width, int height,
+                                    const PixelPoint& center,
+                                    const MarkMap& mark_map);
+
+  unsigned char*   img_yuv_buffer_;
+  size_t           img_buflen_;
+  int              img_width_;
+  int              img_height_;
+  int              img_center_x_;
+  int              img_center_y_;
+
+  ImageList        source_images_;
+  CalibrationState state_;
+  MarkList         premarks_;
+  MarkMap          mark_map_; /** orientations wrt robot (i.e. Y axis) */
+  
+  const unsigned char* last_yuv_buffer_;
 
 #ifdef HAVE_BULB_CREATOR
-  firevision::Bulb* m_bulb;
-  firevision::BulbSampler* m_sampler;
+  firevision::Bulb* bulb_;
   firevision::BulbGenerator* m_generator;
 #endif
 };
 
-
 #endif /*  __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_ */
+
