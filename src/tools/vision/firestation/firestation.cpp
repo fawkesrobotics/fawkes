@@ -1203,7 +1203,7 @@ Firestation::mc_load_mask()
       {
 	std::string filename = m_fcd_mc_load_mask->get_filename();
 	m_calib_tool->load_mask( filename.c_str() );
-	m_op_mode = MODE_MIRROR_CALIB_EVAL;
+	//m_op_mode = MODE_MIRROR_CALIB_EVAL;
 	break;
       }
     case Gtk::RESPONSE_CANCEL:

@@ -43,6 +43,9 @@
 #include <cstdio>
 #include <cassert>
 
+//#define FILTER_HOLES
+#define FILTER_MINI_HOLES
+
 using namespace std;
 using namespace fawkes;
 #ifdef HAVE_BULB_CREATOR
@@ -56,7 +59,7 @@ using namespace firevision;
 
 namespace {
   const unsigned int  ORIENTATION_COUNT         = (ORI_DEG_360 - ORI_DEG_0);
-  const int           MARK_COUNT                = 9;
+  const unsigned int  MARK_COUNT                = 7;
   const float         MARK_DISTANCE             = 29.7;
   const unsigned char DARK                      = 0;
   const unsigned char BRIGHT                    = 255;
@@ -381,24 +384,6 @@ class MirrorCalibTool::CartesianImage
     set_color(to_pixel(p), luma, chrominance);
   }
 
-  double
-  scale_factor(int dist) const
-  {
-    double max_dist = sqrt(width() * width() + height() * height());
-    return pow(static_cast<double>(dist) / max_dist, 3.0) * 1000 + 1;
-  }
-
-  double
-  estimated_distance(int nth_mark,
-                     int seen_mark_count) const
-  {
-    std::cout << MARK_COUNT << " / " << seen_mark_count << " = " <<
-    (static_cast<double>(MARK_COUNT)/static_cast<double>(seen_mark_count)) <<
-    std::endl;
-    return static_cast<double>(MARK_COUNT) /
-           static_cast<double>(seen_mark_count) * MARK_DISTANCE * nth_mark;
-  } 
-
   /** Returns the relative amount of BRIGHT pixels in the rectangle denoted
    * by the bottom-left (x1, y1) and the top-right (x2, y2). */
   float
@@ -563,36 +548,6 @@ class MirrorCalibTool::Hole {
   }
 
   inline PolarRadius size() const { return to_length - from_length; }
-
-  static
-  bool
-  cmp_by_hole_size(const Hole& g,
-                   const Hole& h)
-  {
-    double gg = scale_factor(g.to_length) * g.to_length -
-                scale_factor(g.from_length) * g.from_length;
-    double hh = scale_factor(h.to_length) * g.to_length -
-                scale_factor(h.from_length) * g.from_length;
-    return gg > hh;
-  }
-
-
-  static
-  bool
-  cmp_by_position(const Hole& g,
-                  const Hole& h)
-  {
-    return g.to_length < h.to_length;
-  }
-
-  static
-  double
-  scale_factor(int dist)
-  {
-    double max_dist = sqrt(500 * 500 + 500 * 500);
-    return pow(static_cast<double>(dist) / max_dist, 3.0) * 1000 + 1;
-  }
-
 }; // Hole
 
 
@@ -983,7 +938,9 @@ MirrorCalibTool::HoleList
 MirrorCalibTool::filter_biggest_holes(const HoleList& holes,
                                       unsigned int n)
 {
+#ifdef FILTER_HOLES
   HoleList biggest = holes;
+#ifdef FILTER_MINI_HOLES
 restart: // XXX ugly :-)
   for (HoleList::iterator it = biggest.begin(); it != biggest.end(); it++)
   {
@@ -992,6 +949,7 @@ restart: // XXX ugly :-)
       goto restart;
     }
   }
+#endif
 
   HoleList filtered;
   for (unsigned int from = 0; from < biggest.size(); from++)
@@ -1015,6 +973,28 @@ restart: // XXX ugly :-)
     }
   }
   return filtered;
+#else
+  HoleList biggest;
+  for (HoleList::const_iterator it = holes.begin(); it != holes.end(); ++it)
+  {
+    const Hole& hole = *it;
+#ifdef FILTER_MINI_HOLES
+    if (hole.size() < 5) {
+      // very small holes are usually false-positives
+      continue;
+    }
+#endif
+    if (biggest.size() == 1 && hole.size() > biggest.front().size()) {
+      // often the first determined hole is a part of the robot
+      //biggest.erase(biggest.begin());
+    }
+    biggest.push_back(hole);
+    if (biggest.size() == n) {
+      break;
+    }
+  }
+  return biggest;
+#endif
 }
 
 
@@ -1234,6 +1214,8 @@ MirrorCalibTool::next_step()
         const PixelPoint center(img_center_x_, img_center_y_);
         MarkList premarks = premark(prev, mask, result, src_img.ori(), center);
         src_img.set_premarks(premarks);
+        apply_sharpen(src_img.yuv_buffer(), result.yuv_buffer(),
+                      src_img.width(), src_img.height());
       }
       src_img.add_result(result);
       set_last_yuv_buffer(result.yuv_buffer());
@@ -1588,6 +1570,10 @@ MirrorCalibTool::eval(unsigned int x, unsigned int y,
                       float* dist_ret, float* ori_ret)
 {
 #ifdef HAVE_BULB_CREATOR
+  if (!bulb_) {
+    printf("No bulb loaded, cannot evaluate.\n");
+    return;
+  }
   polar_coord_2d_t coord;
   coord = bulb_->getWorldPointRelative(x, y);
 
