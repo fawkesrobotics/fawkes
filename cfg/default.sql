@@ -145,6 +145,9 @@ INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/file','strin
 INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/loop','bool',1,'loop the replay on default for the scenario');
 INSERT INTO "config" VALUES('/fawkes/bblogreplay/qatest/logs/qatest/hook','string','sensor','Hook at which to replay the log data');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/processor','string','RemoteBB','Processor to use to connect to refbox, one of MSL, SPL and RemoteBB');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/beep_on_change','bool',1,'Beep when data is received that changes the game state?');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/beep_duration','float',0.5,'Beep duration; sec');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/beep_frequency','float',2000,'Beep frequency; Hz');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/MSL/host','string','230.0.0.1','Multicast address the MSL refbox sends to');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/MSL/port','unsigned int',30000,'The UDP port the MSL refbox multicasts to');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/host','string','localhost','The host to connect to for the remote blackboard');

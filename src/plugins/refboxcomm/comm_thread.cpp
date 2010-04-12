@@ -31,6 +31,7 @@
 #endif
 
 #include <interfaces/GameStateInterface.h>
+#include <interfaces/SwitchInterface.h>
 #ifdef HAVE_SPL
 #  include <interfaces/SplPenaltyInterface.h>
 #endif
@@ -61,6 +62,7 @@ RefBoxCommThread::init()
   try {
     __refboxproc   = NULL;
     __gamestate_if = NULL;
+    __beep_if      = NULL;
 #ifdef HAVE_SPL
     __penalty_if   = NULL;
 #endif
@@ -86,6 +88,23 @@ RefBoxCommThread::init()
     if (processor == "") {
       throw Exception("No valid processor defined");
     }
+
+    __cfg_beep_on_change = true;
+    __cfg_beep_frequency = 1000.;
+    __cfg_beep_duration  = 0.5;
+    try {
+      __cfg_beep_on_change = config->get_bool(CONFPREFIX"/beep_on_change");
+    } catch (Exception &e) {} // ignored
+    try {
+      __cfg_beep_frequency = config->get_float(CONFPREFIX"/beep_frequency");
+    } catch (Exception &e) {} // ignored
+    try {
+      __cfg_beep_duration = config->get_float(CONFPREFIX"/beep_duration");
+    } catch (Exception &e) {} // ignored
+    if (__cfg_beep_on_change) {
+      __beep_if = blackboard->open_for_reading<SwitchInterface>("Beep");
+    }
+
     if ( processor == "MSL" ) {
 #ifdef HAVE_MSL2010
       std::string  refbox_host = config->get_string(CONFPREFIX"/MSL/host");
@@ -133,6 +152,7 @@ RefBoxCommThread::finalize()
 {
   delete __refboxproc;
   blackboard->close(__gamestate_if);
+  blackboard->close(__beep_if);
 #ifdef HAVE_SPL
   blackboard->close(__penalty_if);
 #endif
@@ -175,6 +195,14 @@ RefBoxCommThread::loop()
     __refboxproc->refbox_process();
   }
   if (__gamestate_modified) {
+    if (__cfg_beep_on_change && __beep_if->has_writer()) {
+      try {
+	__beep_if->msgq_enqueue(
+	 new SwitchInterface::EnableDurationMessage(__cfg_beep_duration,
+						    __cfg_beep_frequency));
+      } catch (Exception &e) {} // ignored
+    }
+
     __gamestate_if->write();
 #ifdef HAVE_SPL
     __penalty_if->write();

@@ -51,4 +51,13 @@
     <comment>For switches that support setting via software this
       message turns the switch off.</comment>
   </message>
+  <message name="EnableDuration">
+    <comment>Enable switch for a specified duration only. The value
+      can optionally be set. Note that not all SwitchInterface writers
+      must or can support this.
+    </comment>
+    <field type="float" name="duration">Duration in seconds for which
+    the switch should be enabled.</field>
+    <ref>value</ref>
+  </message>
 </interface>

@@ -32,6 +32,20 @@ class SwitchInterface : public Interface
 
   };
 
+  class EnableDurationMessage : public Message
+  {
+    EnableDurationMessage(float ini_duration, float ini_value);
+    EnableDurationMessage();
+    ~EnableDurationMessage();
+
+    float duration();
+    void set_duration(const float new_duration);
+    int maxlenof_duration() const;
+    float value();
+    void set_value(const float new_value);
+    int maxlenof_value() const;
+  };
+
   bool is_enabled();
   void set_enabled(const bool new_enabled);
   int maxlenof_enabled() const;
