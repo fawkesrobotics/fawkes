@@ -136,6 +136,7 @@ class Firestation : public Gtk::Window
   double mc_line_angle_deg;
   void mc_load_mask();
   void mc_memorize();
+  void mc_simulate_clicks();
   void mc_draw_line();
   bool mc_set_line_angle(Gtk::ScrollType scroll, double value);
   void mc_save();
@@ -182,6 +183,7 @@ class Firestation : public Gtk::Window
   Gtk::FileChooserDialog* m_fcd_mc_load;
   Gtk::Button* m_btn_mc_load_mask;
   Gtk::Button* m_btn_mc_memorize;
+  Gtk::Button* m_btn_mc_simulate_clicks;
   Gtk::Scale* m_scl_mc_line;
   Gtk::Button* m_btn_mc_load;
   Gtk::Button* m_btn_mc_save;

@@ -265,6 +265,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_btn_mc_memorize = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcMemorize") );
   m_btn_mc_memorize->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_memorize) );
 
+  m_btn_mc_simulate_clicks = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcSimulateClicks") );
+  m_btn_mc_simulate_clicks->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_simulate_clicks) );
+
   m_btn_mc_load = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibLoad") );
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
 
@@ -993,8 +996,13 @@ Firestation::image_click(GdkEventButton* event)
   unsigned int image_x;
   unsigned int image_y;
 
-  image_x = (unsigned int)rint( (event->x - offset_x) / m_scale_factor);
-  image_y = (unsigned int)rint( (event->y - offset_y) / m_scale_factor);
+  if (event != NULL) {
+    image_x = (unsigned int)rint( (event->x - offset_x) / m_scale_factor);
+    image_y = (unsigned int)rint( (event->y - offset_y) / m_scale_factor);
+  } else {
+    image_x = 0;
+    image_y = 0;
+  }
 
   if ( image_x < 0 || image_x > m_img_width ||
        image_y < 0 || image_y > m_img_height )
@@ -1207,8 +1215,7 @@ Firestation::mc_load_mask()
   m_fcd_mc_load_mask->hide();
 }
 
-/** Start the mirror calibration process. 
- *  @param ori orientation in degree. */
+/** Start the mirror calibration process. */
 void
 Firestation::mc_memorize()
 {
@@ -1257,6 +1264,19 @@ Firestation::mc_memorize()
 
       m_stb_status->push("Entering mirror calibration mode");
 #endif
+  }
+}
+
+/** Start the mirror calibration process. */
+void
+Firestation::mc_simulate_clicks()
+{
+  for (int i = 1; i <= 3; ++i) {
+    image_click(NULL); // SHARPENING
+    for (int j = 1; j <= 8; ++j) { image_click(NULL); } // EDGE_DETECTION
+    for (int j = 1; j <= 2*8; ++j) { image_click(NULL); } // COMBINATION
+    image_click(NULL); // PRE_MARKING
+    image_click(NULL); // FINAL_MARKING
   }
 }
 

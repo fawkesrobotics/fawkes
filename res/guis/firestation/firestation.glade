@@ -1152,6 +1152,20 @@ Other</property>
                       </packing>
                     </child>
                     <child>
+                      <widget class="GtkButton" id="btnMcSimulateClicks">
+                        <property name="label" translatable="yes">Simulate Clicks</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_underline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
                       <widget class="GtkButton" id="btnCalibLoad">
                         <property name="label" translatable="yes">Load Bulb</property>
                         <property name="visible">True</property>
@@ -1162,7 +1176,7 @@ Other</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -1176,7 +1190,7 @@ Other</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">4</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                   </widget>
