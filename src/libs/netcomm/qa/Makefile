@@ -84,11 +84,12 @@ BINS_all +=	$(BINDIR)/qa_netcomm_socket_typeof		\
 		$(BINDIR)/qa_netcomm_socket_stream		\
 		$(BINDIR)/qa_netcomm_socket_datagram		\
 		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\
-		$(BINDIR)/qa_netcomm_worldinfo			\
-		$(BINDIR)/qa_netcomm_worldinfo_encryption	\
-		$(BINDIR)/qa_netcomm_worldinfo_msgsizes		\
 		$(BINDIR)/qa_netcomm_resolver			\
 		$(BINDIR)/qa_netcomm_dynamic_buffer
+
+#		$(BINDIR)/qa_netcomm_worldinfo
+#		$(BINDIR)/qa_netcomm_worldinfo_encryption
+#		$(BINDIR)/qa_netcomm_worldinfo_msgsizes
 
 include $(BUILDSYSDIR)/base.mk
 

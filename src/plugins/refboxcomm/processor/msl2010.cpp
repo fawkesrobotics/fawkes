@@ -1,9 +1,10 @@
 
 /***************************************************************************
- *  msl2008.cpp - Fawkes mid-size refbox 2008 protocol repeater
+ *  msl2010.cpp - Fawkes mid-size refbox 2010 protocol repeater
  *
  *  Created: Wed Apr 09 10:38:16 2008
  *  Copyright  2008  Stefan Schiffer [stefanschiffer.de]
+ *             2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,8 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "msl2008.h"
+#include "msl2010.h"
 #include <netcomm/socket/datagram_multicast.h>
+#include <utils/logging/logger.h>
 
 #include <cstring>
 #include <cstdio>
@@ -84,7 +86,7 @@ static const std::string REFBOX_CARDCOLOR_YELLOW     = "yellow";
 static const std::string REFBOX_CARDCOLOR_RED        = "red";
 
 
-/** @class Msl2008RefBoxProcessor "processor/msl2008.h"
+/** @class Msl2010RefBoxProcessor "processor/msl2010.h"
  * Mid-size league refbox repeater.
  * This class will communicate with the mid-size league refbox and derive matching
  * game states from the communiation stream and send this via the world info.
@@ -92,12 +94,16 @@ static const std::string REFBOX_CARDCOLOR_RED        = "red";
  */
 
 /** Constructor.
+ * @param logger logger for output
  * @param refbox_host refbox host
  * @param refbox_port refbox port
  */
-Msl2008RefBoxProcessor::Msl2008RefBoxProcessor(const char *refbox_host,
+Msl2010RefBoxProcessor::Msl2010RefBoxProcessor(Logger *logger,
+					       const char *refbox_host,
 					       unsigned short int refbox_port)
+  : __name("Msl2010RefBoxProc")
 {
+  __logger = logger;
   __quit = false;
   __s = NULL;
   __score_cyan = __score_magenta = 0;
@@ -113,7 +119,7 @@ Msl2008RefBoxProcessor::Msl2008RefBoxProcessor(const char *refbox_host,
 
 
 /** Destructor. */
-Msl2008RefBoxProcessor::~Msl2008RefBoxProcessor()
+Msl2010RefBoxProcessor::~Msl2010RefBoxProcessor()
 {
   free(__refbox_host);
   __s->close();
@@ -123,15 +129,16 @@ Msl2008RefBoxProcessor::~Msl2008RefBoxProcessor()
 
 /** Reconnect to refbox. */
 void
-Msl2008RefBoxProcessor::reconnect()
+Msl2010RefBoxProcessor::reconnect()
 {
   if ( __s ) {
     __s->close();
     delete __s;
   }
-  printf("Trying to connect to refbox at %s:%u\n", __refbox_host, __refbox_port);
+  __logger->log_info(__name, "Trying to connect to refbox at %s:%u",
+		     __refbox_host, __refbox_port);
   try {
-    printf("Creating MulticastDatagramSocket\n");
+    __logger->log_info(__name, "Creating MulticastDatagramSocket");
     __s = new MulticastDatagramSocket(__refbox_host, __refbox_port, 2.3);
     //printf("set loop\n");
     __s->set_loop(true); // (re)receive locally sent stuff
@@ -151,18 +158,20 @@ Msl2008RefBoxProcessor::reconnect()
   } catch (Exception &e) {
     delete __s;
     __s = NULL;
-    printf(".");
+    //printf(".");
     fflush(stdout);
     usleep(500000);
   }
+
+  __logger->log_info(__name, "Init done");
 }
 
 
 /** Process received string. */
 void
-Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
+Msl2010RefBoxProcessor::process_string(char *buf, size_t len)
 {
-  printf("Received\n *****\n %s \n *****\n", buf);
+  __logger->log_info(__name, "Received\n *****\n %s \n *****", buf);
 
   std::istringstream iss( std::string(buf), std::istringstream::in);
 
@@ -179,19 +188,19 @@ Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
   if ( el ) {
     /// valid element
     //printf("Is valid Element\n");
-    printf("root-element name is '%s'\n", el->get_name().data() );
+    __logger->log_info(__name, "root-element name is '%s'", el->get_name().data() );
 
     const Node::NodeList nl = el->get_children();
 
     if( nl.size() == 0 ) {
-      printf("root has NO children!\n");
+      __logger->log_info(__name, "root has NO children!");
     }
     else {
       //printf("root has %u children!\n", nl.size());
 
       for (Node::NodeList::const_iterator it = nl.begin(); it != nl.end(); ++it) {
 	const Node* node = *it;
-	printf("1st level child name is '%s'\n", node->get_name().data() );
+	__logger->log_info(__name, "1st level child name is '%s'", node->get_name().data() );
 
 	//if( node->get_name().data() == REFBOX_GAMEINFO ) {
 	//
@@ -206,7 +215,7 @@ Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
 	const Node::NodeList cnl = node->get_children();
 
 	if( cnl.size() == 0 ) {
-	  printf("child has NO children!\n");
+	  __logger->log_info(__name, "child has NO children!");
 	}
 	else {
 	  //printf("child has %u children!\n", nl.size());
@@ -216,7 +225,7 @@ Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
 	    const Element* cel = dynamic_cast<const Element *>(cnode);
 	    std::string cnodename(cnode->get_name().data());
 
-	    printf("2nd level child name is '%s'\n", cnode->get_name().data() );
+	    __logger->log_info(__name, "2nd level child name is '%s'", cnode->get_name().data() );
 
 	    const Attribute* cattr;
 	    std::string cteamcolor;
@@ -238,7 +247,7 @@ Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
 
  	    if( cnodename == REFBOX_CANCEL ) {
  	      // refbox canceled last command
-	      printf("RefBox cancelled last command\n");
+	      __logger->log_info(__name, "RefBox cancelled last command");
  	    }
  	    else if( cnodename == REFBOX_GAMESTOP ) {
  	      _rsh->set_gamestate(GS_FROZEN, TEAM_BOTH);
@@ -333,54 +342,40 @@ Msl2008RefBoxProcessor::process_string(char *buf, size_t len)
   }
   else {
     // throw RefBoxParserException("root is not an element");
-    printf("root is NOT a valid element\n");
+    __logger->log_info(__name, "root is NOT a valid element");
   }
 
 }
 
 void
-Msl2008RefBoxProcessor::refbox_process()
+Msl2010RefBoxProcessor::refbox_process()
 {
-  char tmpbuf[1024];
-  size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ false);
-  if ( bytes_read == 0 ) {
-    // seems that the remote has died, reconnect
-    __connection_died = true;
-  } else {
-    tmpbuf[bytes_read] = '\0';
-    process_string(tmpbuf, bytes_read);
-  }
+  short pollrv = __s->poll(0, POLL_IN);
+  do {
+    
+    if (pollrv == POLL_ERR) {
+      __logger->log_warn(__name, "Polling socket failed");
+    } else if (pollrv & POLL_IN) {
+      char tmpbuf[1024];
+      size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ false);
+      __logger->log_debug(__name, "Read %zu bytes", bytes_read);
+      if ( bytes_read == 0 ) {
+	// seems that the remote has died, reconnect
+	__connection_died = true;
+      } else {
+	tmpbuf[bytes_read] = '\0';
+	process_string(tmpbuf, bytes_read);
+      }
+    }
+    pollrv = __s->poll(0, POLL_IN);
+  } while (pollrv & POLL_IN);
 }
 
 bool
-Msl2008RefBoxProcessor::check_connection()
+Msl2010RefBoxProcessor::check_connection()
 {
   if (__connection_died) {
     reconnect();
   }
   return ! __connection_died;
-}
-
-
-/** Run.
- * Reads messages from the network, processes them and calls the refbox state sender.
- */
-void
-Msl2008RefBoxProcessor::run()
-{
- char tmpbuf[1024];
-  while ( ! __quit ) {
-    size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ false);
-    if ( bytes_read == 0 ) {
-      // seems that the remote has died, reconnect
-      printf("Connection died, reconnecting\n");
-      do {
-	reconnect();
-      } while ( ! __s );
-    } else {
-      tmpbuf[bytes_read] = '\0';
-      process_string(tmpbuf, bytes_read);
-      _rsh->handle_refbox_state();
-    }
-  }
 }

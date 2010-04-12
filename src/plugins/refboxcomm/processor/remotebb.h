@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  msl2008.h - Fawkes mid-size refbox 2008 protocol repeater
+ *  remotebb.h - Fawkes remote blackboard processor
  *
- *  Created: Wed Apr 01 10:36:08 2009
- *  Copyright  2009  Stefan Schiffer [stefanschiffer.de]
+ *  Created: Fri Apr 09 23:58:11 2010
+ *  Copyright  2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,56 +20,46 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2008_H_
-#define __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2008_H_
+#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_REMOTEBB_H_
+#define __PLUGINS_REFBOXCOMM_PROCESSOR_REMOTEBB_H_
 
 #include "processor.h"
 #include "state_handler.h"
 
-#include <cstdlib>
-#include <string>
-#include <vector>
-
 namespace fawkes {
-  class MulticastDatagramSocket;
+  class Logger;
+  class BlackBoard;
+  class GameStateInterface;
 }
 
-namespace xmlpp {
-  class DomParser;
-  class Node;
-}
-
-class Msl2008RefBoxProcessor : public RefBoxProcessor
+class RemoteBlackBoardRefBoxProcessor : public RefBoxProcessor
 {
  public:
-  Msl2008RefBoxProcessor(const char *refbox_host, unsigned short int refbox_port);
-  ~Msl2008RefBoxProcessor();
-
-  void run();
+  RemoteBlackBoardRefBoxProcessor(fawkes::Logger *logger,
+				  const char *bb_host,
+				  unsigned short int bb_port,
+				  const char *iface_id);
+  ~RemoteBlackBoardRefBoxProcessor();
 
   bool check_connection();
   void refbox_process();
 
- private:
-  void process_string(char *buf, size_t len);
+ private: // methods
   void reconnect();
 
  private:
-  fawkes::MulticastDatagramSocket *__s;
+  fawkes::Logger     *__logger;
+  fawkes::BlackBoard *__rbb;
 
-  unsigned int __score_cyan;
-  unsigned int __score_magenta;
+  fawkes::GameStateInterface *__gamestate_if;
 
-  bool __quit;
-  bool __connection_died;
+  const char *__name;
 
-  char *__refbox_host;
-  unsigned short int __refbox_port;
+  char               *__bb_host;
+  unsigned short int  __bb_port;
+  char               *__iface_id;
 
-
-  xmlpp::DomParser *dom;
-  xmlpp::Node      *root;
-
+  bool __message_shown;
 };
 
 #endif

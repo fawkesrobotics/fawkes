@@ -22,11 +22,20 @@
  */
 
 #include "comm_thread.h"
-#include "processor/msl2008.h"
-#include "processor/spl.h"
+#include "processor/remotebb.h"
+#ifdef HAVE_MSL2010
+#  include "processor/msl2010.h"
+#endif
+#ifdef HAVE_SPL
+#  include "processor/spl.h"
+#endif
 
 #include <interfaces/GameStateInterface.h>
-#include <interfaces/SplPenaltyInterface.h>
+#ifdef HAVE_SPL
+#  include <interfaces/SplPenaltyInterface.h>
+#endif
+
+#define CONFPREFIX "/plugins/refboxcomm"
 
 using namespace fawkes;
 
@@ -52,7 +61,9 @@ RefBoxCommThread::init()
   try {
     __refboxproc   = NULL;
     __gamestate_if = NULL;
+#ifdef HAVE_SPL
     __penalty_if   = NULL;
+#endif
     __last_half    = (worldinfo_gamestate_half_t)-1;
     __last_score_cyan    = 0xFFFFFFFF;
     __last_score_magenta = 0xFFFFFFFF;
@@ -62,23 +73,54 @@ RefBoxCommThread::init()
     __kickoff = false;
     __gamestate_modified = false;
 
-    std::string  league  = config->get_string("/general/league");
-    if ( league == "MSL" ) {
-      std::string  refbox_host = config->get_string("/refboxcomm/MSL/host");
-      unsigned int refbox_port = config->get_uint("/refboxcomm/MSL/port");
-      __refboxproc = new Msl2008RefBoxProcessor(refbox_host.c_str(), refbox_port);
-    } else if ( league == "SPL" ) {
-      unsigned int refbox_port = config->get_uint("/refboxcomm/SPL/port");
+    std::string processor = "";
+    try {
+      processor = config->get_string(CONFPREFIX"/processor");
+    } catch (Exception &e) {
+      // try to get league
+      std::string  league  = config->get_string("/general/league");
+      if (league == "MSL" || league == "SPL") {
+	processor = league;
+      }
+    }
+    if (processor == "") {
+      throw Exception("No valid processor defined");
+    }
+    if ( processor == "MSL" ) {
+#ifdef HAVE_MSL2010
+      std::string  refbox_host = config->get_string(CONFPREFIX"/MSL/host");
+      unsigned int refbox_port = config->get_uint(CONFPREFIX"/MSL/port");
+      __refboxproc = new Msl2010RefBoxProcessor(logger,
+						refbox_host.c_str(), refbox_port);
+#else
+      throw Exception("MSL2010 support not available at compile time");
+#endif
+    } else if ( processor == "SPL" ) {
+#ifdef HAVE_SPL
+      unsigned int refbox_port = config->get_uint(CONFPREFIX"/SPL/port");
       __team_number = config->get_uint("/general/team_number");
       __player_number = config->get_uint("/general/player_number");
       __refboxproc = new SplRefBoxProcessor(logger, refbox_port,
                                             __team_number, __player_number);
+#else
+      throw Exception("SPL support not available at compile time");
+#endif
+    } else if ( processor == "RemoteBB" ) {
+      std::string  bb_host  = config->get_string(CONFPREFIX"/RemoteBB/host");
+      unsigned int bb_port  = config->get_uint(CONFPREFIX"/RemoteBB/port");
+      std::string  iface_id = config->get_string(CONFPREFIX"/RemoteBB/interface_id");
+      __refboxproc = new RemoteBlackBoardRefBoxProcessor(logger,
+							 bb_host.c_str(), bb_port,
+							 iface_id.c_str());
     } else {
-      throw Exception("League %s is not supported by refboxcomm plugin", league.c_str());
+      throw Exception("Processor %s is not supported by refboxcomm plugin",
+		      processor.c_str());
     }
     __refboxproc->set_handler(this);
     __gamestate_if = blackboard->open_for_writing<GameStateInterface>("RefBoxComm");
+#ifdef HAVE_SPL
     __penalty_if   = blackboard->open_for_writing<SplPenaltyInterface>("SPL Penalty");
+#endif
   } catch (Exception &e) {
     finalize();
     throw;
@@ -91,7 +133,9 @@ RefBoxCommThread::finalize()
 {
   delete __refboxproc;
   blackboard->close(__gamestate_if);
+#ifdef HAVE_SPL
   blackboard->close(__penalty_if);
+#endif
 }
 
 void
@@ -116,6 +160,7 @@ RefBoxCommThread::loop()
     }
     __gamestate_if->msgq_pop();
   }
+#ifdef HAVE_SPL
   while (!__penalty_if->msgq_empty()) {
     if (__penalty_if->msgq_first_is<SplPenaltyInterface::SetPenaltyMessage>()) {
       SplPenaltyInterface::SetPenaltyMessage *msg;
@@ -125,10 +170,15 @@ RefBoxCommThread::loop()
     }
     __penalty_if->msgq_pop();
   }
-  __refboxproc->refbox_process();
+#endif
+  if (__refboxproc->check_connection()) {
+    __refboxproc->refbox_process();
+  }
   if (__gamestate_modified) {
     __gamestate_if->write();
+#ifdef HAVE_SPL
     __penalty_if->write();
+#endif
     __gamestate_modified = false;
   }
 }
@@ -249,6 +299,7 @@ void
 RefBoxCommThread::add_penalty(unsigned int penalty,
                               unsigned int seconds_remaining)
 {
+#ifdef HAVE_SPL
   if ((penalty != __penalty_if->penalty()) ||
       (seconds_remaining != __penalty_if->remaining()))
   {
@@ -258,6 +309,7 @@ RefBoxCommThread::add_penalty(unsigned int penalty,
     __penalty_if->set_penalty(penalty);
     __penalty_if->set_remaining(seconds_remaining);
   }
+#endif
 }
 
 
