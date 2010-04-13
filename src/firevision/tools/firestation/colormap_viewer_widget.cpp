@@ -119,7 +119,7 @@ ColormapViewerWidget::draw(unsigned int layer)
 
   unsigned int cm_layer = (layer * m_cm->depth()) / m_cm->deepness();
 
-  unsigned char* colormap_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, m_cm->width() * 2, m_cm->height() * 2) );
+  unsigned char* colormap_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, m_cm->image_width(), m_cm->image_height()) );
   m_cm->to_image(colormap_buffer, cm_layer);
 
   unsigned int img_width  = (unsigned int) m_img_colormap->get_width();
@@ -131,8 +131,10 @@ ColormapViewerWidget::draw(unsigned int layer)
   // scale
   LossyScaler scaler;
   scaler.set_original_buffer(colormap_buffer);
-  scaler.set_original_dimensions(m_cm->width() * 2, m_cm->height() * 2);
+  scaler.set_original_dimensions(m_cm->image_width(), m_cm->image_height());
   scaler.set_scaled_dimensions(img_width, img_height);
+  //unsigned int scaled_width  = scaler.needed_scaled_width();
+  //unsigned int scaled_height = scaler.needed_scaled_height();
   unsigned char* scaled_colormap_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, img_width, img_height) );
   scaler.set_scaled_buffer(scaled_colormap_buffer);
   scaler.scale();
@@ -141,12 +143,13 @@ ColormapViewerWidget::draw(unsigned int layer)
   m_colormap_img_buf = (unsigned char*) malloc( colorspace_buffer_size(RGB, img_width, img_height) );
   convert(YUV422_PLANAR, RGB, scaled_colormap_buffer, m_colormap_img_buf, img_width, img_height);
 
-  Glib::RefPtr<Gdk::Pixbuf> colormap_image = Gdk::Pixbuf::create_from_data( m_colormap_img_buf,
-									    Gdk::COLORSPACE_RGB,
-									    false,
-									    8,
-									    img_width, img_height,
-									    3 * img_width);
+  Glib::RefPtr<Gdk::Pixbuf> colormap_image =
+    Gdk::Pixbuf::create_from_data( m_colormap_img_buf,
+				   Gdk::COLORSPACE_RGB,
+				   false,
+				   8,
+				   img_width, img_height,
+				   3 * img_width);
   m_img_colormap->set(colormap_image);
 
   free(colormap_buffer);
