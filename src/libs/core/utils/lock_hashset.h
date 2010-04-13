@@ -59,6 +59,9 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
 
   void           insert_locked(const KeyType& x);
 
+  LockHashSet<KeyType, HashFunction, EqualKey> &
+  operator=(const LockHashSet<KeyType, HashFunction, EqualKey> &ll);
+
  private:
   mutable RefPtr<Mutex> __mutex;
 
@@ -155,6 +158,31 @@ LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
 {
   return __mutex;
 }
+
+/** Copy values from another LockHashSet.
+ * Copies the values one by one. Both instances are locked during the copying and
+ * this instance is cleared before copying.
+ * @param ll lock hash set to copy
+ * @return reference to this instance
+ */
+template <typename KeyType, class HashFunction, class EqualKey>
+LockHashSet<KeyType, HashFunction, EqualKey> &
+LockHashSet<KeyType, HashFunction, EqualKey>::operator=(
+  const LockHashSet<KeyType, HashFunction, EqualKey> &ll)
+{
+  __mutex->lock();
+  ll.lock();
+  this->clear();
+  typename LockHashSet<KeyType, HashFunction, EqualKey>::const_iterator i;
+  for (i = ll.begin(); i != ll.end(); ++i) {
+    this->insert(*i);
+  }
+  ll.unlock();
+  __mutex->unlock();
+
+  return *this;
+}
+
 
 } // end namespace fawkes
 

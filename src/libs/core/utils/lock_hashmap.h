@@ -57,6 +57,9 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
   void          unlock() const;
   RefPtr<Mutex> mutex() const;
 
+  LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
+  operator=(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll);
+
  private:
   mutable RefPtr<Mutex> __mutex;
 
@@ -142,6 +145,31 @@ RefPtr<Mutex>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
 {
   return __mutex;
+}
+
+
+/** Copy values from another LockHashMap.
+ * Copies the values one by one. Both instances are locked during the copying and
+ * this instance is cleared before copying.
+ * @param ll hash map to copy
+ * @return reference to this instance
+ */
+template <typename KeyType, typename ValueType, class HashFunction, typename EqualKey>
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::operator=(
+  const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll)
+{
+  __mutex->lock();
+  ll.lock();
+  this->clear();
+  typename LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::const_iterator i;
+  for (i = ll.begin(); i != ll.end(); ++i) {
+    this->insert(*i);
+  }
+  ll.unlock();
+  __mutex->unlock();
+
+  return *this;
 }
 
 } // end namespace fawkes

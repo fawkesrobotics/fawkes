@@ -48,6 +48,12 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
 
   void     erase_locked(const KeyType &key);
 
+  LockMap<KeyType, ValueType, LessKey> &
+  operator=(const LockMap<KeyType, ValueType, LessKey> &ll);
+
+  LockMap<KeyType, ValueType, LessKey> &
+  operator=(const std::map<KeyType, ValueType, LessKey> &l);
+
  private:
   mutable RefPtr<Mutex>  __mutex;
 
@@ -140,6 +146,53 @@ RefPtr<Mutex>
 LockMap<KeyType, ValueType, LessKey>::mutex() const
 {
   return __mutex;
+}
+
+
+
+/** Copy values from another LockMap.
+ * Copies the values one by one. Both instances are locked during the copying and
+ * this instance is cleared before copying.
+ * @param ll map to copy
+ * @return reference to this instance
+ */
+template <typename KeyType, typename ValueType, typename LessKey>
+LockMap<KeyType, ValueType, LessKey> &
+LockMap<KeyType, ValueType, LessKey>::operator=(const LockMap<KeyType, ValueType, LessKey> &ll)
+{
+  __mutex->lock();
+  ll.lock();
+  this->clear();
+  typename LockMap<KeyType, ValueType, LessKey>::const_iterator i;
+  for (i = ll.begin(); i != ll.end(); ++i) {
+    this->insert(*i);
+  }
+  ll.unlock();
+  __mutex->unlock();
+
+  return *this;
+}
+
+
+/** Copy values from a standard map.
+ * Copies the values one by one. This instance is locked during the copying and
+ * cleared.
+ * @param l map to copy
+ * @return reference to this instance
+ */
+template <typename KeyType, typename ValueType, typename LessKey>
+LockMap<KeyType, ValueType, LessKey> &
+LockMap<KeyType, ValueType, LessKey>::operator=(const std::map<KeyType, ValueType, LessKey> &l)
+{
+  __mutex->lock();
+  this->clear();
+  typename std::map<KeyType, ValueType, LessKey>::const_iterator i;
+  for (i = l.begin(); i != l.end(); ++i) {
+    this->insert(*i);
+  }
+  __mutex->unlock();
+
+  return *this;
 }
 
 

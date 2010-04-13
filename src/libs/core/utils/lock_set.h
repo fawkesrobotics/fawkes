@@ -2,8 +2,9 @@
 /***************************************************************************
  *  lock_set.h - Lockable set
  *
- *  Created: Sat May 12 10:45:15 2007
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Apr  9 15:24:51 2010
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *             2010       Christoph Schwering
  *
  ****************************************************************************/
 
@@ -30,7 +31,6 @@
 
 namespace fawkes {
 
-
 template <typename KeyType,
           typename LessKey = std::less<KeyType> >
 class LockSet : public std::set<KeyType, LessKey>
@@ -49,6 +49,9 @@ class LockSet : public std::set<KeyType, LessKey>
 
   std::pair<iterator, bool> insert_locked(const KeyType &key);
   void erase_locked(const KeyType &key);
+
+  LockSet<KeyType, LessKey> & operator=(const LockSet<KeyType, LessKey> &ll);
+  LockSet<KeyType, LessKey> & operator=(const std::set<KeyType, LessKey> &l);
 
  private:
   mutable RefPtr<Mutex>  __mutex;
@@ -157,6 +160,52 @@ RefPtr<Mutex>
 LockSet<KeyType, LessKey>::mutex() const
 {
   return __mutex;
+}
+
+
+/** Copy values from another LockSet.
+ * Copies the values one by one. Both instances are locked during the copying and
+ * this instance is cleared before copying.
+ * @param ll lock set to copy
+ * @return reference to this instance
+ */
+template <typename KeyType, typename LessKey>
+LockSet<KeyType, LessKey> &
+LockSet<KeyType, LessKey>::operator=(const LockSet<KeyType, LessKey> &ll)
+{
+  __mutex->lock();
+  ll.lock();
+  this->clear();
+  typename LockSet<KeyType, LessKey>::const_iterator i;
+  for (i = ll.begin(); i != ll.end(); ++i) {
+    this->insert(*i);
+  }
+  ll.unlock();
+  __mutex->unlock();
+
+  return *this;
+}
+
+
+/** Copy values from a standard set.
+ * Copies the values one by one. This instance is locked during the copying and
+ * cleared.
+ * @param l set to copy
+ * @return reference to this instance
+ */
+template <typename KeyType, typename LessKey>
+LockSet<KeyType, LessKey> &
+LockSet<KeyType, LessKey>::operator=(const std::set<KeyType, LessKey> &l)
+{
+  __mutex->lock();
+  this->clear();
+  typename std::set<KeyType, LessKey>::const_iterator i;
+  for (i = l.begin(); i != l.end(); ++i) {
+    this->insert(*i);
+  }
+  __mutex->unlock();
+
+  return *this;
 }
 
 
