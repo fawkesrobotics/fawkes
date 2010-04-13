@@ -647,7 +647,6 @@ class MirrorCalibTool::Image
 /** Constructor. */
 MirrorCalibTool::MirrorCalibTool()
   : img_yuv_buffer_(0),
-    img_buflen_(0),
     img_center_x_(500),
     img_center_y_(500),
     img_yuv_mask_(0),
@@ -711,11 +710,20 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
   if (img_yuv_mask_) {
     delete[] img_yuv_mask_;
   }
+  size_t hack_size = 2 * 1000 * 1000;
+  if (!source_images_.empty()) {
+    size_t width = static_cast<size_t>(source_images_.front().width());
+    size_t height = static_cast<size_t>(source_images_.front().height());
+    hack_size = 2 * width * height;
+  }
+  img_yuv_mask_ = new unsigned char[hack_size];
   PNMReader reader(mask_file_name);
   size_t size = colorspace_buffer_size(reader.colorspace(),
                                        reader.pixel_width(),
                                        reader.pixel_height());
-  img_yuv_mask_ = new unsigned char[size];
+  if (size != hack_size) {
+    throw fawkes::Exception("Size hack didn't work. PNM-Mask has unexpected size.");
+  }
   reader.set_buffer(img_yuv_mask_);
   reader.read();
 }

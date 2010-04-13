@@ -160,7 +160,6 @@ class MirrorCalibTool
                                    const MarkMap& mark_map);
 
   unsigned char*   img_yuv_buffer_;
-  size_t           img_buflen_;
   int              img_center_x_;
   int              img_center_y_;
   unsigned char*   img_yuv_mask_;
