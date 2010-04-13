@@ -112,7 +112,9 @@ WorldModelObjPosAverageFuser::bb_interface_created(const char *type, const char 
 
     __input_ifs.push_back_locked(from_if);
   } catch (Exception &e) {
-    __blackboard->close(from_if);
+    if (from_if != NULL) {
+      __blackboard->close(from_if);
+    }
     e.print_trace();
   }
 }
