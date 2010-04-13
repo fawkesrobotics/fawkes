@@ -127,12 +127,18 @@ Colormap::~Colormap()
 void
 Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
 {
+  unsigned int iwidth  = image_width()  / 2;
+  unsigned int iheight = image_height() / 2;
+
   unsigned int lwidth  = width();
   unsigned int lheight = height();
 
+  unsigned int pixel_per_step = iheight / lheight;
+  unsigned int lines_per_step = iwidth  / lwidth;
+
   unsigned char *yp = yuv422_planar_buffer;
-  unsigned char *up = YUV422_PLANAR_U_PLANE(yuv422_planar_buffer, lwidth * 2, lheight * 2);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(yuv422_planar_buffer, lwidth * 2, lheight * 2);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(yuv422_planar_buffer, iwidth * 2, iheight * 2);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(yuv422_planar_buffer, iwidth * 2, iheight * 2);
 
   unsigned int y = level * deepness() / depth();
 
@@ -143,19 +149,43 @@ Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
       unsigned int u_index = u * deepness() / lheight;
       c = ColorObjectMap::get_color(determine(y, u_index, v_index));
 
-      *yp++ = c.Y;
-      *yp++ = c.Y;
-      *up++ = c.U;
-      *vp++ = c.V;
+      for (unsigned int p = 0; p < pixel_per_step; ++p) {
+	*yp++ = c.Y;
+	*yp++ = c.Y;
+	*up++ = c.U;
+	*vp++ = c.V;
+      }
     }
     // Double line
-    memcpy(yp, (yp - lwidth * 2), lwidth *2);
-    yp += lwidth * 2;
-    memcpy(up, (up - lwidth), lwidth);
-    memcpy(vp, (vp - lwidth), lwidth);
-    up += lwidth;
-    vp += lwidth;
+    unsigned int lines = (2 * (lines_per_step - 1)) + 1;
+    memcpy(yp, (yp - iwidth * 2), (iwidth * 2) * lines);
+    yp += (iwidth * 2) * lines;
+    memcpy(up, (up - iwidth), iwidth * lines);
+    memcpy(vp, (vp - iwidth), iwidth * lines);
+    up += iwidth * lines;
+    vp += iwidth * lines;
   }
 }
+
+/** Width of conversion image.
+ * The buffer passed into to_image() must have the returned width.
+ * @return required width for colormap visualization image
+ */
+unsigned int
+Colormap::image_width() const
+{
+  return 512;
+}
+
+/** Height of conversion image.
+ * The buffer passed into to_image() must have the returned width.
+ * @return required width for colormap visualization image
+ */
+unsigned int
+Colormap::image_height() const
+{
+  return 512;
+}
+
 
 } // end namespace firevision
