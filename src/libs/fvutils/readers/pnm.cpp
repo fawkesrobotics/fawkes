@@ -129,6 +129,7 @@ PNMReader::PNMReader(const char* filename)
 /** Destructor. */
 PNMReader::~PNMReader()
 {
+  fclose(m_pnmfile);
   free(m_filename);
   free(m_pnm_buffer);
 }
