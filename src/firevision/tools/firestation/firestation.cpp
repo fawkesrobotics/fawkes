@@ -353,6 +353,8 @@ Firestation::~Firestation()
   delete m_ftw;
   delete m_filw;
 
+  m_avahi_thread->cancel();
+  m_avahi_thread->join();
   delete m_avahi_thread;
   delete m_avahi_dispatcher;
 
@@ -393,9 +395,6 @@ Firestation::get_window() const
 void
 Firestation::exit()
 {
-  m_avahi_thread->cancel();
-  m_avahi_thread->join();
-
   if (SRC_NONE != m_img_src)
     { m_camera->close(); }
 
