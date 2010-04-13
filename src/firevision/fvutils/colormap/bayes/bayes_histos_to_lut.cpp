@@ -504,8 +504,9 @@ BayesHistosToLut::calculateLutValues( bool penalty )
     }
   }
 
-	printf("ball: %d  field: %d  line: %d  robot: %d  goal: %d  background: %d  unknown: %d\n",
-	 count_ball, count_field, count_line, count_robot, count_goal, count_background, count_unknown);
+	printf("d/w/h: %u/%u/%u  ball: %d  field: %d  line: %d  robot: %d  goal: %d  background: %d  unknown: %d\n",
+	       depth, width, height, count_ball, count_field, count_line,
+	       count_robot, count_goal, count_background, count_unknown);
 
   if ( penalty ) {
     Histogram *histo_bg   = histograms[H_BACKGROUND];

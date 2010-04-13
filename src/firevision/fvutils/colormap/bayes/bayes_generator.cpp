@@ -513,6 +513,8 @@ BayesColormapGenerator::normalize_histos()
     }
 
   // compute overall background histogram
+  Histogram *bh = new Histogram(lut_width, lut_height, lut_depth);
+  histos[H_BACKGROUND] = bh;
   for (histo_it = bg_histos.begin(); histo_it != bg_histos.end(); ++ histo_it)
     {
       hint_t cur_object = histo_it->first;
@@ -526,9 +528,6 @@ BayesColormapGenerator::normalize_histos()
       if ( (fg_sum + bg_sum) == 0 )
 	{ continue; }
 
-      Histogram *h = new Histogram(lut_width, lut_height, lut_depth);
-      histos[H_BACKGROUND] = h;
-
       norm_factor = norm_size / float(fg_sum + bg_sum);
 
       for (unsigned int x = 0; x < lut_width; ++x) {
@@ -536,7 +535,7 @@ BayesColormapGenerator::normalize_histos()
 	  for (unsigned int z = 0; z < lut_depth; ++z) {
 	    // normalize
 	    hval = (unsigned int) rint( float(bg->get_value(x, y, z)) * norm_factor);
-	    h->add(x, y, z, hval);
+	    bh->add(x, y, z, hval);
 
 	    // substract all other normalized fg histograms
 	    std::map< hint_t, Histogram * >::iterator hit;
@@ -545,7 +544,7 @@ BayesColormapGenerator::normalize_histos()
 		{ continue; }
 
 	      hval = hit->second->get_value(x, y, z);
-	      h->sub(x, y, z, hval);
+	      bh->sub(x, y, z, hval);
 	    }
 	  }
 	}
@@ -553,14 +552,13 @@ BayesColormapGenerator::normalize_histos()
     }
 
   // normalize overall background histogram
-  Histogram* h = histos[H_BACKGROUND];
-  norm_factor = (norm_size - fg_size) / float( h->get_sum() );
+  norm_factor = (norm_size - fg_size) / float( bh->get_sum() );
 
   for (unsigned int x = 0; x < lut_width; ++x) {
     for (unsigned int y = 0; y < lut_height; ++y) {
       for (unsigned int z = 0; z < lut_depth; ++z) {
- 	hval = (unsigned int) rint( float(h->get_value(x, y, z)) * norm_factor );
- 	h->set_value(x, y, z, hval);
+ 	hval = (unsigned int) rint( float(bh->get_value(x, y, z)) * norm_factor );
+ 	bh->set_value(x, y, z, hval);
       }
     }
   }
