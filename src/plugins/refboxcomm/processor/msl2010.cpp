@@ -350,12 +350,12 @@ Msl2010RefBoxProcessor::process_string(char *buf, size_t len)
 void
 Msl2010RefBoxProcessor::refbox_process()
 {
-  short pollrv = __s->poll(0, POLL_IN);
+  short pollrv = __s->poll(0, Socket::POLL_IN);
   do {
     
-    if (pollrv == POLL_ERR) {
+    if (pollrv == Socket::POLL_ERR) {
       __logger->log_warn(__name, "Polling socket failed");
-    } else if (pollrv & POLL_IN) {
+    } else if (pollrv & Socket::POLL_IN) {
       char tmpbuf[1024];
       size_t bytes_read = __s->read(tmpbuf, sizeof(tmpbuf), /* read all */ false);
       __logger->log_debug(__name, "Read %zu bytes", bytes_read);
@@ -367,8 +367,8 @@ Msl2010RefBoxProcessor::refbox_process()
 	process_string(tmpbuf, bytes_read);
       }
     }
-    pollrv = __s->poll(0, POLL_IN);
-  } while (pollrv & POLL_IN);
+    pollrv = __s->poll(0, Socket::POLL_IN);
+  } while (pollrv & Socket::POLL_IN);
 }
 
 bool
