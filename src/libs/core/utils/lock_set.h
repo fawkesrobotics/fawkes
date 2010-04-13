@@ -45,6 +45,7 @@ class LockSet : public std::set<KeyType, LessKey>
   void           unlock() const;
   RefPtr<Mutex>  mutex() const;
 
+ /** Iterator. */
   typedef typename std::set<KeyType, LessKey>::iterator iterator;
 
   std::pair<iterator, bool> insert_locked(const KeyType &key);

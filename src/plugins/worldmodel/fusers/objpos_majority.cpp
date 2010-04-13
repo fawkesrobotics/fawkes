@@ -64,6 +64,8 @@
  * @param own_id The ID of the (single) own interface.
  * @param foreign_id_pattern The pattern of the (multiple) other interfaces.
  * @param output_id The ID of the destination interface.
+ * @param self_confidence_radius radius in which to consider our perception
+ * the best
  */
 WorldModelObjPosMajorityFuser::WorldModelObjPosMajorityFuser(
     fawkes::Logger* logger,
