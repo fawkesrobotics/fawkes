@@ -352,7 +352,7 @@ class MirrorCalibTool::CartesianImage
       return YUV422_PLANAR_Y_AT(buf(), width(), pp.x, pp.y);
     } else {
       if (mask() != 0) {
-        printf("Ignoring (%lf,%d) = (%d,%d)\n", p.atan(), p.length(), pp.x, pp.y);
+        //printf("Ignoring (%lf,%d) = (%d,%d)\n", p.atan(), p.length(), pp.x, pp.y);
       }
       return 0;
     }
