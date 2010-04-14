@@ -55,6 +55,31 @@ using namespace firevision;
 /** @class MirrorCalibTool mirror_calib.h
  * This class encapsulates the routines necessary for interactive mirror
  * calibration.
+ *
+ * The input is N pairs (degree,image) and (optionally) a filter mask.
+ * The calibration runs in multiple phases:
+ * (1) Edge detection.
+ * (2) Assume center point in the middle of the image.
+ * (3) Pre-marking: Find the edges that lie at `degree' wrt. Y axis in image.
+ * (4) Final marking: Try to filter false-positive marks.
+ * (5) Centering: Average the first marks in each direction to get the `real'
+ *     center point of the mirror.
+ * (6) Again do steps (3) and (5) with the new center point.
+ * (7) Generate bulb files. The polar coordinates of each pixel are determined
+ *     as follows: 
+ *    (a) Determine the polar coordinates of the pixel.
+ *    (b) Get the two mark streams that enclose the pixel.
+ *    (c) Do linear interpolation in both mark streams to get two distances.
+ *    (d) Add the weightened distances (the nearer the pixel is to the mark
+ *        stream the higher is its weight).
+ *    (e) Now we have an estimated distance. We need to multiply the angle
+ *        with -1.0 (!!!) to consider the fact that the image is mirrored:
+ *        what looks to left from the robot on the image, is on the right of
+ *        the robot in reality!
+ *        Note that all the time we worked on the mirrored image with angles
+ *        that were correct from the perspective of the image. But to make them
+ *        correct from the perspective of the robot, we have to mirror
+ *        everything.
  */
 
 namespace {
@@ -672,9 +697,9 @@ MirrorCalibTool::~MirrorCalibTool()
 
 
 /**
- * Converts an angle relative to the robots view to the needed image rotation
- * so that the things, which lie at angle `ori' from robot's perspective, are
- * on the X axis of the image.
+ * Converts an angle wrt. the Y axis (!) to the robots view to the needed image
+ * rotation so that the things, which lie at angle `ori' wrt. the Y axis, lie
+ * on the X axis of the rotated image.
  * For example: if the marks are 120 degrees counter-clock-wise from the robot,
  * the image needs to be rotated 120 degrees clock-wise (then the marks are 
  * in front of the robot, i.e. Y axis) and then 90 degrees clock-wise
@@ -685,20 +710,19 @@ MirrorCalibTool::~MirrorCalibTool()
  * 0.0).
  */
 MirrorCalibTool::PolarAngle
-MirrorCalibTool::robotRelativeOrientationToImageRotation(PolarAngle ori)
+MirrorCalibTool::relativeOrientationToImageRotation(PolarAngle ori)
 {
   return normalize_rad(-1.0 * ori + deg2rad(-90.0));
 }
 
 
 /**
- * Converts the rotation of the image to the orientation relative to the robot's
- * view.
- * Just see the documentation of robotRelativeOrientationToImageRotation()
- * of which this is the inverse.
+ * Converts the rotation of the image to the orientation relative to the Y axis.
+ * See the documentation of relativeOrientationToImageRotation() of which this
+ * is the inverse.
  */
 MirrorCalibTool::PolarAngle
-MirrorCalibTool::imageRotationToRobotRelativeOrientation(PolarAngle ori)
+MirrorCalibTool::imageRotationToRelativeOrientation(PolarAngle ori)
 {
   return normalize_rad(-1.0 * (ori + deg2rad(90.0)));
 }
@@ -740,7 +764,9 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
  * @param buflen     The length of yuv_buffer.
  * @param width      The width of the image.
  * @param height     The height of the image.
- * @param ori        The polar angle in degrees (!) where the marks are.
+ * @param ori        The polar angle in degrees (!) relative to the Y axis of
+ *                   the image (!) where the marks are in the image (!) (not in
+ *                   in reality from the robot's perspective).
  */
 void
 MirrorCalibTool::push_back(const unsigned char* yuv_buffer,
@@ -749,7 +775,7 @@ MirrorCalibTool::push_back(const unsigned char* yuv_buffer,
                            int height,
                            double ori)
 {
-  ori = robotRelativeOrientationToImageRotation(ori);
+  ori = relativeOrientationToImageRotation(ori);
   Image src_img(yuv_buffer, buflen, width, height, ori);
   source_images_.push_back(src_img);
 }
@@ -1211,7 +1237,7 @@ MirrorCalibTool::next_step()
         img_center_y_ = center.y;
         std::cout << "Found center (" << center.x << ", "<< center.y << ")"
                   << std::endl;
-        CartesianImage img(result, robotRelativeOrientationToImageRotation(0.0),
+        CartesianImage img(result, relativeOrientationToImageRotation(0.0),
                            center);
         img.highlight_point(CartesianPoint(0, 0));
       }
@@ -1247,7 +1273,7 @@ MirrorCalibTool::next_step()
         std::cout << "Marking done for orientation "
                   << rad2deg(ori)
                   << " = "
-                  << rad2deg(imageRotationToRobotRelativeOrientation(ori))
+                  << rad2deg(imageRotationToRelativeOrientation(ori))
                   << std::endl;
       }
       src_img.add_result(result);
@@ -1267,12 +1293,12 @@ MirrorCalibTool::next_step()
           const Image& src_img = *it;
           const PolarAngle ori = src_img.ori();
           MarkList marks = src_img.marks();
-          mark_map_[imageRotationToRobotRelativeOrientation(ori)] = marks;
+          mark_map_[imageRotationToRelativeOrientation(ori)] = marks;
         }
 
         const StepResult& prev = src_img.result(0);
         const PixelPoint center(img_center_x_, img_center_y_);
-        CartesianImage img(result, robotRelativeOrientationToImageRotation(0.0),
+        CartesianImage img(result, relativeOrientationToImageRotation(0.0),
                            center);
         memcpy(result.yuv_buffer(), prev.yuv_buffer(), result.buflen());
         img.highlight_pixel(center);
@@ -1431,7 +1457,8 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
 MirrorCalibTool::RealDistance
 MirrorCalibTool::calculate_real_distance(int n)
 {
-  return MARK_DISTANCE + (n + 1) * MARK_DISTANCE;
+  return static_cast<int>(MARK_DISTANCE +
+                          static_cast<float>(n + 1) * MARK_DISTANCE);
 }
 
 
@@ -1490,7 +1517,7 @@ MirrorCalibTool::generate(int width,
 {
   const unsigned char* null_img_buf = 0;
   CartesianImage img(null_img_buf, width, height,
-                     robotRelativeOrientationToImageRotation(0.0), center);
+                     relativeOrientationToImageRotation(0.0), center);
   Bulb bulb(width, height);
   bulb.setCenter(center.x, center.y);
   bulb.setOrientation(0.0);
@@ -1547,7 +1574,10 @@ MirrorCalibTool::generate(int width,
 #endif
       const RealDistance weighted_mean_dist = dist1 * weight1 + dist2 * weight2;
       const float world_dist_in_meters      = weighted_mean_dist / 100.0f;
-      const float world_phi_rel_to_robot    = ori_to_robot;
+      const float world_phi_rel_to_robot    = -1.0f * ori_to_robot;
+      // world_phi_rel_to_robot must be multiplied with -1 because the image is
+      // mirrored: what's on the right in the image, is on the left of the robot
+      // in reality
 #if 0
       std::cout << "Dist 1: " << dist1 << std::endl;
       std::cout << "Dist 2: " << dist2 << std::endl;
@@ -1645,7 +1675,7 @@ MirrorCalibTool::draw_line(unsigned char* yuv_buffer,
 {
   const PolarAngle angle = normalize_rad(deg2rad(angle_deg));
   CartesianImage img(yuv_buffer, width, height,
-                     robotRelativeOrientationToImageRotation(0.0),
+                     relativeOrientationToImageRotation(0.0),
                      PixelPoint(center_x, center_y));
   for (PolarRadius length = 0; length < img.max_radius(); length++)
   {
@@ -1702,7 +1732,7 @@ MirrorCalibTool::draw_crosshair(unsigned char* yuv_buffer,
                                    normalize_rad(deg2rad( 120.0f)) };
   const int POSITION_COUNT = sizeof POSITIONS / sizeof(double);
   CartesianImage img(yuv_buffer, width, height,
-                     robotRelativeOrientationToImageRotation(0.0),
+                     relativeOrientationToImageRotation(0.0),
                      PixelPoint(center_x, center_y));
   for (int i = 0; i < POSITION_COUNT; i++)
   {

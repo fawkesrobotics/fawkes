@@ -1180,7 +1180,13 @@ Firestation::mc_draw_line()
 bool
 Firestation::mc_set_line_angle(Gtk::ScrollType scroll, double value)
 {
-  mc_line_angle_deg = value;
+  mc_line_angle_deg = -1.0f * value;
+  // Why -1.0f * value?
+  // We want to display angles from the robot's real-world perspective.
+  // We want to calculate with angles from the (mirrored!) image's perspective.
+  // So when the user chooses 90 degrees, he wants to look to the left from the
+  // robots perspective. But due to the mirroring, that's the right side in the
+  // image, so we take -90 degrees.
   mc_draw_line();
   return true;
 }
@@ -1230,7 +1236,6 @@ Firestation::mc_memorize()
       std::cout << "Starting calibration for ori = " << ori << std::endl;
       m_calib_tool->push_back(m_yuv_orig_buffer, m_img_size,
                               m_img_width, m_img_height, deg2rad(ori));
-      std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
       m_op_mode = MODE_MIRROR_CALIB;
       std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
       mc_line_angle_deg += 120.0;

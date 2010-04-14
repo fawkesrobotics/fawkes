@@ -118,8 +118,8 @@ class MirrorCalibTool
   void draw_center(StepResult& result);
 
 
-  static PolarAngle robotRelativeOrientationToImageRotation(PolarAngle ori);
-  static PolarAngle imageRotationToRobotRelativeOrientation(PolarAngle ori);
+  static PolarAngle relativeOrientationToImageRotation(PolarAngle ori);
+  static PolarAngle imageRotationToRelativeOrientation(PolarAngle ori);
 
   static void apply_sobel(unsigned char* src, unsigned char* dst,
                           int widt, int height,
