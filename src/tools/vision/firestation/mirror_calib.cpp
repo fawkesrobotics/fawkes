@@ -710,6 +710,7 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
   if (img_yuv_mask_) {
     delete[] img_yuv_mask_;
   }
+#if 0 // delete the enclosed code?
   size_t hack_size = 2 * 1000 * 1000;
   if (!source_images_.empty()) {
     size_t width = static_cast<size_t>(source_images_.front().width());
@@ -717,13 +718,17 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
     hack_size = 2 * width * height;
   }
   img_yuv_mask_ = new unsigned char[hack_size];
+#endif
   PNMReader reader(mask_file_name);
   size_t size = colorspace_buffer_size(reader.colorspace(),
                                        reader.pixel_width(),
                                        reader.pixel_height());
+  img_yuv_mask_ = new unsigned char[size];
+#if 0 // delete the enclosed code?
   if (size != hack_size) {
     throw fawkes::Exception("Size hack didn't work. PNM-Mask has unexpected size.");
   }
+#endif
   reader.set_buffer(img_yuv_mask_);
   reader.read();
 }
