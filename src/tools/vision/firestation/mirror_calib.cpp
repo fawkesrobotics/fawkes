@@ -1531,7 +1531,7 @@ MirrorCalibTool::generate(int width,
 #endif
       assert(0.0 <= weight1 && weight1 <= 1.0);
       assert(0.0 <= weight2 && weight2 <= 1.0);
-      assert(1.0 - 10e5 < weight1 + weight2 && weight1 + weight2 < 1.0 + 10e5);
+      assert(1.0 - 10e-5 < weight1 + weight2 && weight1 + weight2 < 1.0 + 10e-5);
       const MarkList& marks1 = mark_map.at(nearest_neighbors.first);
       const MarkList& marks2 = mark_map.at(nearest_neighbors.second);
       const RealDistance dist1 = interpolate(cp.length(), marks1);
@@ -1541,7 +1541,7 @@ MirrorCalibTool::generate(int width,
       std::cout << "Real 2 " << dist2 << std::endl;
 #endif
       const RealDistance weighted_mean_dist = dist1 * weight1 + dist2 * weight2;
-      const float world_dist_in_meters      = weighted_mean_dist / 100.0;
+      const float world_dist_in_meters      = weighted_mean_dist / 100.0f;
       const float world_phi_rel_to_robot    = ori_to_robot;
 #if 0
       std::cout << "Dist 1: " << dist1 << std::endl;
