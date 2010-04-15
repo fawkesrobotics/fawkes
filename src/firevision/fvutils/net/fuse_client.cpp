@@ -301,8 +301,6 @@ FuseClient::loop()
   while ( ! __inbound_msgq->empty() ) {
     FuseNetworkMessage *m = __inbound_msgq->front();
 
-    wake = true;
-
     if ( m->type() == FUSE_MT_GREETING ) {
       FUSE_greeting_message_t *gm = m->msg<FUSE_greeting_message_t>();
       if ( ntohl(gm->version) != FUSE_CURRENT_VERSION ) {
@@ -317,6 +315,7 @@ FuseClient::loop()
       }
     } else {
       __handler->fuse_inbound_received(m);
+      wake = true;
     }
 
     m->unref();
