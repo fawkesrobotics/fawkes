@@ -168,6 +168,63 @@ yuv422planar_quarter_to_yuv422packed(const unsigned char *planar, unsigned char 
   }
 }
 
+
+/* Convert quarter YUV422 planar buffer to plain YUV422 planar.
+ * @param quarter input buffer in YUV422_PLANAR_QUARTER
+ * @param output buffer in YUV422_PLANAR
+ * @param width width of the image (width of YUV422_PLANAR image)
+ * @param height height of the image (height of YUV422_PLANAR image)
+ */
+void
+yuv422planar_quarter_to_yuv422planar(const unsigned char *quarter,
+				     unsigned char *planar,
+				     const unsigned int width,
+				     const unsigned int height)
+{
+  volatile const unsigned char *y, *u, *v;
+  register unsigned int w, h;
+
+  const unsigned int w_h_4 = (width * height) / 4;
+  const unsigned int w_h_8 = (width * height) / 8;
+  //const unsigned int w_t_2   = width * 2;
+  const unsigned int w_b_2   = width / 2;
+  const unsigned int w_b_4   = width / 4;
+
+  unsigned char *yp, *up, *vp, t;
+  yp = planar;
+  up = YUV422_PLANAR_U_PLANE(planar, width, height);
+  vp = YUV422_PLANAR_V_PLANE(planar, width, height);
+
+  for (h = 0; h < height / 2; ++h) {
+    y  = quarter + (h * w_b_2);
+    u  = quarter + w_h_4 + (h * w_b_4);
+    v  = quarter + w_h_4 + w_h_8 + (h * w_b_4);
+
+    for (w = 0; w < w_b_4; ++w) {
+      t = *y++;
+      *yp++ = t;
+      *yp++ = t;
+      t = *y++;
+      *yp++ = t;
+      *yp++ = t;
+      t = *u++;
+      *up++ = t;
+      *up++ = t;
+      t = *v++;
+      *vp++ = t;
+      *vp++ = t;
+    }
+
+    memcpy(yp, yp - width, width);
+    memcpy(up, up - w_b_2, w_b_2);
+    memcpy(vp, vp - w_b_2, w_b_2);
+    yp += width;
+    up += w_b_2;
+    vp += w_b_2;
+  }
+
+}
+
 void
 yuv422packed_to_yuv422planar(const unsigned char *packed, unsigned char *planar,
 			     unsigned int width, unsigned int height)

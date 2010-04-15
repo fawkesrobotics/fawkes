@@ -127,6 +127,12 @@ void yuv422planar_quarter_to_yuv422packed(const unsigned char *planar,
 					  const unsigned int width,
 					  const unsigned int height);
 
+/** Convert YUV422_PLANAR_QUARTER images to YUV422_PLANAR  */
+void yuv422planar_quarter_to_yuv422planar(const unsigned char *planar,
+					  unsigned char *packed,
+					  const unsigned int width,
+					  const unsigned int height);
+
 
 /** Convert YUV422_PACKED images to YUV422_PLANAR
  */
