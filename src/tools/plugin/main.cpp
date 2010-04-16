@@ -26,8 +26,10 @@
 #include <core/threading/thread.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
+
 #include <string>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace fawkes;
 
