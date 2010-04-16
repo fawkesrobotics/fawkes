@@ -26,7 +26,7 @@
 #include <core/threading/thread.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
-
+#include <string>
 #include <cstdlib>
 
 using namespace fawkes;
@@ -34,7 +34,7 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hl:u:r:waL");
+  ArgumentParser argp(argc, argv, "hl:u:r:p:waL");
 
   if ( argp.has_arg("h") ) {
     PluginTool::print_usage(argp.program_name());
@@ -43,8 +43,18 @@ main(int argc, char **argv)
 
   Thread::init_main();
 
-  FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
-  c->connect();
+  std::string host = "localhost";
+  if ( argp.has_arg("p") ) {
+    host.assign(argp.arg("p"));
+  }
+
+  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), 1910);
+  try {
+    c->connect();
+  } catch( Exception &e ) {
+    printf("Could not connect to host: %s\n", host.c_str());
+    exit(1);
+  }
 
   PluginTool *pt = new PluginTool(&argp, c);
   SignalManager::register_handler(SIGINT, pt);
