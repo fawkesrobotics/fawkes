@@ -257,7 +257,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 #endif /* HAVE_BULB_CREATOR */
 
   m_scl_mc_line = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclMcLine") );
-  m_scl_mc_line->signal_change_value().connect( sigc::mem_fun(*this, &Firestation::mc_set_line_angle) );
+  m_scl_mc_line->signal_change_value().connect( sigc::mem_fun(*this, &Firestation::mc_on_line_angle_changed) );
 
   m_btn_mc_load_mask = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcLoadMask") );
   m_btn_mc_load_mask->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load_mask) );
@@ -1160,27 +1160,23 @@ void
 Firestation::mc_draw_line()
 {
   if (m_img_src != SRC_NONE) {
-    MirrorCalibTool::draw_crosshair(m_yuv_draw_buffer,
-                                    m_calib_tool->center_x(),
-                                    m_calib_tool->center_y(),
-                                    m_img_width,
-                                    m_img_height);
+    memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer, m_img_size);
+    MirrorCalibTool::draw_line(m_yuv_draw_buffer,
+                               mc_line_angle_deg,
+                               m_calib_tool->center_x(),
+                               m_calib_tool->center_y(),
+                               m_img_width,
+                               m_img_height);
     draw_image();
   }
-  memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer, m_img_size);
-  MirrorCalibTool::draw_line(m_yuv_draw_buffer,
-                             mc_line_angle_deg,
-                             m_calib_tool->center_x(),
-                             m_calib_tool->center_y(),
-                             m_img_width,
-                             m_img_height);
-  draw_image();
 }
 
 bool
-Firestation::mc_set_line_angle(Gtk::ScrollType scroll, double value)
+Firestation::mc_on_line_angle_changed(Gtk::ScrollType scroll, double value)
 {
   mc_line_angle_deg = -1.0f * value;
+  mc_line_angle_deg =
+    rad2deg(normalize_mirror_rad(deg2rad(mc_line_angle_deg)));
   // Why -1.0f * value?
   // We want to display angles from the robot's real-world perspective.
   // We want to calculate with angles from the (mirrored!) image's perspective.
@@ -1238,10 +1234,18 @@ Firestation::mc_memorize()
                               m_img_width, m_img_height, deg2rad(ori));
       m_op_mode = MODE_MIRROR_CALIB;
       std::cout << "Initialization for ori = " << ori << " completed" << std::endl;
-      mc_line_angle_deg += 120.0;
+
+      mc_line_angle_deg -= 120.0;
       mc_line_angle_deg =
         rad2deg(normalize_mirror_rad(deg2rad(mc_line_angle_deg)));
-      m_scl_mc_line->set_value(mc_line_angle_deg);
+      m_scl_mc_line->set_value(-1.0f * mc_line_angle_deg);
+      // Why -1.0f * mc_line_angle_deg?
+      // We want to display angles from the robot's real-world perspective.
+      // We want to calculate with angles from the (mirrored!) image's perspective.
+      // So when the user chooses 90 degrees, he wants to look to the left from the
+      // robots perspective. But due to the mirroring, that's the right side in the
+      // image, so we take -90 degrees.
+      mc_draw_line();
 #if 0
       bool show;
       float next_dist;

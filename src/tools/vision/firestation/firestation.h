@@ -138,7 +138,7 @@ class Firestation : public Gtk::Window
   void mc_memorize();
   void mc_simulate_clicks();
   void mc_draw_line();
-  bool mc_set_line_angle(Gtk::ScrollType scroll, double value);
+  bool mc_on_line_angle_changed(Gtk::ScrollType scroll, double value);
   void mc_save();
   void mc_load();
 
