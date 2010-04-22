@@ -59,6 +59,12 @@ ifeq ($(HAVE_LIBPNG),1)
   LDFLAGS_LIBPNG = $(shell $(PKGCONFIG) --libs 'libpng')
 endif
 
+HAVE_LIBV4L2 = $(if $(shell $(PKGCONFIG) --exists 'libv4l2'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBPNG),1)
+  CFLAGS_LIBV4L2  = -DHAVE_LIBV4L2 $(shell $(PKGCONFIG) --cflags 'libv4l2')
+  LDFLAGS_LIBV4L2 = $(shell $(PKGCONFIG) --libs 'libv4l2')
+endif
+
 ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
   HAVE_SWISSRANGER_CAM   = 1
   VISION_CAM_LIBS       += mesasr usb

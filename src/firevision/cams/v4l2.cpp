@@ -4,6 +4,7 @@
  *
  *  Created: Sat Jul  5 20:40:20 2008
  *  Copyright  2008  Tobias Kellner
+ *             2010  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -44,6 +45,18 @@ using fawkes::Exception;
 using fawkes::MissingParameterException;
 using fawkes::NotImplementedException;
 using fawkes::LibLogger;
+
+#ifdef HAVE_LIBV4L2
+#  include <libv4l2.h>
+#else
+#  define v4l2_fd_open(fd, flags) (fd)
+#  define v4l2_close ::close
+#  define v4l2_dup dup
+#  define v4l2_ioctl ioctl
+#  define v4l2_read read
+#  define v4l2_mmap mmap
+#  define v4l2_munmap munmap
+#endif 
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -147,7 +160,7 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   }
   else
   {
-    _read_method = UPTR;
+    _read_method = MMAP;
   }
 
 
@@ -395,7 +408,7 @@ V4L2Camera::V4L2Camera(const char *device_name, int dev)
   _dev = dev;
 
   // getting capabilities
-  if (ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
   {
     close();
     throw Exception("V4L2Cam: Could not get capabilities - probably not a v4l2 device");
@@ -421,12 +434,20 @@ V4L2Camera::open()
   if(_opened) close();
 
   _dev = ::open(_device_name, O_RDWR);
+  int libv4l2_fd = v4l2_fd_open(_dev, 0);
+  if (libv4l2_fd != -1)  _dev = libv4l2_fd;
+  /* Note the v4l2_xxx functions are designed so that if they get passed an
+     unknown fd, the will behave exactly as their regular xxx counterparts, so
+     if v4l2_fd_open fails, we continue as normal (missing the libv4l2 custom
+     cam format to normal formats conversion). Chances are big we will still
+     fail then though, as normally v4l2_fd_open only fails if the device is not
+     a v4l2 device. */ 
   if (_dev < 0) throw Exception("V4L2Cam: Could not open device");
 
   _opened = true;
 
   // getting capabilities
-  if (ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
   {
     close();
     throw Exception("V4L2Cam: Could not get capabilities - probably not a v4l2 device");
@@ -511,7 +532,7 @@ V4L2Camera::select_read_method()
         buf.memory = V4L2_MEMORY_USERPTR;
       }
 
-      if (ioctl(_dev, VIDIOC_REQBUFS, &buf))
+      if (v4l2_ioctl(_dev, VIDIOC_REQBUFS, &buf))
       {
         if (errno != EINVAL)
         {
@@ -585,7 +606,7 @@ V4L2Camera::select_format()
     /* Try to select preferred format */
     memset(&format_desc, 0, sizeof(format_desc));
     format_desc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    for (format_desc.index = 0; ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc) == 0; format_desc.index++)
+    for (format_desc.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc) == 0; format_desc.index++)
     {
       fourcc[0] = static_cast<char>(format_desc.pixelformat & 0xFF);
       fourcc[1] = static_cast<char>((format_desc.pixelformat >> 8) & 0xFF);
@@ -607,7 +628,7 @@ V4L2Camera::select_format()
     memset(&format_desc, 0, sizeof(format_desc));
     format_desc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     format_desc.index = 0;
-    if (ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc))
+    if (v4l2_ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc))
     {
       close();
       throw Exception("V4L2Cam: No image format found");
@@ -623,7 +644,7 @@ V4L2Camera::select_format()
   v4l2_format format;
   memset(&format, 0, sizeof(format));
   format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  if (ioctl(_dev, VIDIOC_G_FMT, &format))
+  if (v4l2_ioctl(_dev, VIDIOC_G_FMT, &format))
   {
     close();
     throw Exception("V4L2Cam: Format query failed");
@@ -638,7 +659,7 @@ V4L2Camera::select_format()
   if (_height)
     format.fmt.pix.height = _height;
 
-  if (ioctl(_dev, VIDIOC_S_FMT, &format))
+  if (v4l2_ioctl(_dev, VIDIOC_S_FMT, &format))
   {
     //throw Exception(errno, "Failed to set video format");
     //}
@@ -649,7 +670,7 @@ V4L2Camera::select_format()
     _nao_hacks = true;
 
     v4l2_std_id std;
-    if (ioctl(_dev, VIDIOC_G_STD, &std))
+    if (v4l2_ioctl(_dev, VIDIOC_G_STD, &std))
     {
       close();
       throw Exception("V4L2Cam: Standard query (workaround) failed");
@@ -665,7 +686,7 @@ V4L2Camera::select_format()
       _width = 640;
       _height = 480;
     }
-    if (ioctl(_dev, VIDIOC_S_STD, &std))
+    if (v4l2_ioctl(_dev, VIDIOC_S_STD, &std))
     {
       close();
       throw Exception("V4L2Cam: Standard setting (workaround) failed");
@@ -676,7 +697,7 @@ V4L2Camera::select_format()
     format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     format.fmt.pix.field       = V4L2_FIELD_ANY;
 
-    if (ioctl(_dev, VIDIOC_S_FMT, &format))
+    if (v4l2_ioctl(_dev, VIDIOC_S_FMT, &format))
     {
       close();
       throw Exception("V4L2Cam: Format setting (workaround) failed");
@@ -734,7 +755,7 @@ V4L2Camera::set_fps()
 {
   v4l2_streamparm param;
   param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  if (ioctl(_dev, VIDIOC_G_PARM, &param))
+  if (v4l2_ioctl(_dev, VIDIOC_G_PARM, &param))
   {
     close();
     throw Exception("V4L2Cam: Streaming parameter query failed");
@@ -748,7 +769,7 @@ V4L2Camera::set_fps()
 
   param.parm.capture.timeperframe.numerator = 1;
   param.parm.capture.timeperframe.denominator = _fps;
-  if (ioctl(_dev, VIDIOC_S_PARM, &param))
+  if (v4l2_ioctl(_dev, VIDIOC_S_PARM, &param))
   {
     close();
     throw Exception("V4L2Cam: Streaming parameter setting failed");
@@ -801,7 +822,7 @@ V4L2Camera::set_one_control(const char *ctrl, unsigned int id, int value)
   memset(&queryctrl, 0, sizeof(queryctrl));
   queryctrl.id = id;
 
-  if (ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
   {
     if (errno == EINVAL)
     {
@@ -822,7 +843,7 @@ V4L2Camera::set_one_control(const char *ctrl, unsigned int id, int value)
   control.id = id;
   control.value = value;
 
-  if (ioctl(_dev, VIDIOC_S_CTRL, &control))
+  if (v4l2_ioctl(_dev, VIDIOC_S_CTRL, &control))
   {
     close();
     throw Exception("V4L2Cam: %s Control setting failed", ctrl);
@@ -844,7 +865,7 @@ V4L2Camera::get_one_control(const char *ctrl, unsigned int id)
   memset(&queryctrl, 0, sizeof(queryctrl));
   queryctrl.id = id;
 
-  if (ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
   {
     if (errno == EINVAL)
     {
@@ -864,7 +885,7 @@ V4L2Camera::get_one_control(const char *ctrl, unsigned int id)
   memset(&control, 0, sizeof(control));
   control.id = id;
 
-  if (ioctl(_dev, VIDIOC_G_CTRL, &control))
+  if (v4l2_ioctl(_dev, VIDIOC_G_CTRL, &control))
   {
     close();
     throw Exception("V4L2Cam: %s Control value reading failed", ctrl);
@@ -913,7 +934,7 @@ V4L2Camera::create_buffer()
         buffer.memory = V4L2_MEMORY_MMAP;
         buffer.index = i;
 
-        if (ioctl(_dev, VIDIOC_QUERYBUF, &buffer))
+        if (v4l2_ioctl(_dev, VIDIOC_QUERYBUF, &buffer))
         {
           close();
           throw Exception("V4L2Cam: Buffer query failed");
@@ -921,7 +942,7 @@ V4L2Camera::create_buffer()
 
         _frame_buffers[i].size = buffer.length;
         _frame_buffers[i].buffer = static_cast<unsigned char *>(
-          mmap(NULL, buffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, _dev, buffer.m.offset)
+          v4l2_mmap(NULL, buffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, _dev, buffer.m.offset)
         );
         if (_frame_buffers[i].buffer == MAP_FAILED)
         {
@@ -951,7 +972,7 @@ V4L2Camera::reset_cropping()
   memset(&cropcap, 0, sizeof(cropcap));
   cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-  if (ioctl(_dev, VIDIOC_CROPCAP, &cropcap))
+  if (v4l2_ioctl(_dev, VIDIOC_CROPCAP, &cropcap))
   {
     LibLogger::log_warn("V4L2Cam", "cropcap query failed (driver sucks) - %d: %s", errno, strerror(errno));
   }
@@ -961,7 +982,7 @@ V4L2Camera::reset_cropping()
   crop.c = cropcap.defrect;
 
   /* Ignore if cropping is not supported (EINVAL). */
-  if (ioctl(_dev, VIDIOC_S_CROP, &crop) && errno != EINVAL)
+  if (v4l2_ioctl(_dev, VIDIOC_S_CROP, &crop) && errno != EINVAL)
   {
     LibLogger::log_warn("V4L2Cam", "cropping query failed (driver sucks) - %d: %s", errno, strerror(errno));
   }
@@ -973,13 +994,6 @@ V4L2Camera::close()
   //LibLogger::log_debug("V4L2Cam", "close()");
 
   if (_started) stop();
-
-  if (_opened)
-  {
-    ::close(_dev);
-    _opened = false;
-    _dev = 0;
-  }
 
   if (_frame_buffers)
   {
@@ -995,7 +1009,7 @@ V4L2Camera::close()
       {
         for (unsigned int i = 0; i < _buffers_length; ++i)
         {
-          munmap(_frame_buffers[i].buffer, _frame_buffers[i].size);
+          v4l2_munmap(_frame_buffers[i].buffer, _frame_buffers[i].size);
         }
         break;
       }
@@ -1007,6 +1021,13 @@ V4L2Camera::close()
     delete[] _frame_buffers;
     _frame_buffers = NULL;
     _current_buffer = -1;
+  }
+
+  if (_opened)
+  {
+    v4l2_close(_dev);
+    _opened = false;
+    _dev = 0;
   }
 
   if (_capture_time)
@@ -1042,7 +1063,7 @@ V4L2Camera::start()
         buffer.memory = V4L2_MEMORY_MMAP;
         buffer.index = i;
 
-        if (ioctl(_dev, VIDIOC_QBUF, &buffer))
+        if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer))
         {
           close();
           throw Exception("V4L2Cam: Enqueuing buffer failed");
@@ -1051,7 +1072,7 @@ V4L2Camera::start()
 
       /* start streaming */
       int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      if (ioctl(_dev, VIDIOC_STREAMON, &type))
+      if (v4l2_ioctl(_dev, VIDIOC_STREAMON, &type))
       {
         close();
         throw Exception("V4L2Cam: Starting stream failed");
@@ -1086,7 +1107,7 @@ V4L2Camera::stop()
     {
       /* stop streaming */
       int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      if (ioctl(_dev, VIDIOC_STREAMOFF, &type))
+      if (v4l2_ioctl(_dev, VIDIOC_STREAMOFF, &type))
       {
         close();
         throw Exception("V4L2Cam: Stopping stream failed");
@@ -1127,7 +1148,7 @@ V4L2Camera::capture()
     {
       _current_buffer = 0;
       //LibLogger::log_debug("V4L2Cam", "calling read()");
-      if (read(_dev, _frame_buffers[_current_buffer].buffer, _frame_buffers[_current_buffer].size) == -1)
+      if (v4l2_read(_dev, _frame_buffers[_current_buffer].buffer, _frame_buffers[_current_buffer].size) == -1)
       {
         //TODO: errno handling
         LibLogger::log_warn("V4L2Cam", "read() failed with code %d: %s", errno, strerror(errno));
@@ -1155,7 +1176,7 @@ V4L2Camera::capture()
       buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       buffer.memory = V4L2_MEMORY_MMAP;
 
-      if (ioctl(_dev, VIDIOC_DQBUF, &buffer))
+      if (v4l2_ioctl(_dev, VIDIOC_DQBUF, &buffer))
       {
         //TODO: errno handling -> EAGAIN, ...?
         close();
@@ -1220,7 +1241,7 @@ V4L2Camera::dispose_buffer()
       buffer.index = _current_buffer;
 
       //TODO: Test if the next buffer is also the latest buffer (VIDIOC_QUERYBUF)
-      if (ioctl(_dev, VIDIOC_QBUF, &buffer))
+      if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer))
       {
         close();
         throw Exception("V4L2Cam: Enqueuing buffer failed");
@@ -1608,7 +1629,7 @@ V4L2Camera::print_info()
   v4l2_input input;
   memset(&input, 0, sizeof(input));
 
-  for (input.index = 0; ioctl(_dev, VIDIOC_ENUMINPUT, &input) == 0; input.index++)
+  for (input.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMINPUT, &input) == 0; input.index++)
   {
     cout << "Input " << input.index << ": " << input.name << endl;
 
@@ -1641,7 +1662,7 @@ V4L2Camera::print_info()
       memset (&standard, 0, sizeof(standard));
       standard.index = 0;
 
-      for (standard.index = 0; ioctl(_dev, VIDIOC_ENUMSTD, &standard) == 0; standard.index++)
+      for (standard.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMSTD, &standard) == 0; standard.index++)
       {
         if (standard.id & input.std) cout << "  + " << standard.name << endl;
       }
@@ -1655,7 +1676,7 @@ V4L2Camera::print_info()
   v4l2_output output;
   memset (&output, 0, sizeof(output));
 
-  for (output.index = 0; ioctl(_dev, VIDIOC_ENUMOUTPUT, &output) == 0; output.index++)
+  for (output.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMOUTPUT, &output) == 0; output.index++)
   {
     cout << " + Output " << output.index << ": " << output.name << endl;
 
@@ -1688,7 +1709,7 @@ V4L2Camera::print_info()
       memset (&standard, 0, sizeof (standard));
       standard.index = 0;
 
-      for (standard.index = 0; ioctl(_dev, VIDIOC_ENUMSTD, &standard) == 0; standard.index++)
+      for (standard.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMSTD, &standard) == 0; standard.index++)
       {
         if (standard.id & output.std) cout << "  + " << standard.name << endl;
       }
@@ -1704,7 +1725,7 @@ V4L2Camera::print_info()
   format_desc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
   char fourcc[5] = "    ";
-  for (format_desc.index = 0; ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc) == 0; format_desc.index++)
+  for (format_desc.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc) == 0; format_desc.index++)
   {
     fourcc[0] = static_cast<char>(format_desc.pixelformat & 0xFF);
     fourcc[1] = static_cast<char>((format_desc.pixelformat >> 8) & 0xFF);
@@ -1736,7 +1757,7 @@ V4L2Camera::print_info()
   v4l2_format format;
   memset(&format, 0, sizeof(format));
   format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  if (ioctl(_dev, VIDIOC_G_FMT, &format)) throw Exception("V4L2Cam: Format query failed");
+  if (v4l2_ioctl(_dev, VIDIOC_G_FMT, &format)) throw Exception("V4L2Cam: Format query failed");
   fourcc[0] = static_cast<char>(format.fmt.pix.pixelformat & 0xFF);
   fourcc[1] = static_cast<char>((format.fmt.pix.pixelformat >> 8) & 0xFF);
   fourcc[2] = static_cast<char>((format.fmt.pix.pixelformat >> 16) & 0xFF);
@@ -1758,7 +1779,7 @@ V4L2Camera::print_info()
   for (queryctrl.id = V4L2_CID_BASE; queryctrl.id < V4L2_CID_LASTP1;
        queryctrl.id++)
   {
-    if (ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
+    if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
     {
       if (errno == EINVAL) continue;
 
@@ -1817,7 +1838,7 @@ V4L2Camera::print_info()
            querymenu.index <= static_cast<unsigned long int>(queryctrl.maximum);
            querymenu.index++)
       {
-        if (ioctl(_dev, VIDIOC_QUERYMENU, &querymenu))
+        if (v4l2_ioctl(_dev, VIDIOC_QUERYMENU, &querymenu))
         {
           cout << "Getting menu items failed" << endl;
           return;
@@ -1833,7 +1854,7 @@ V4L2Camera::print_info()
   cout << "Private Controls:" << endl;
   for (queryctrl.id = V4L2_CID_PRIVATE_BASE; ; queryctrl.id++)
   {
-    if (ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
+    if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
     {
       if (errno == EINVAL) break;
 
@@ -1893,7 +1914,7 @@ V4L2Camera::print_info()
            querymenu.index <= static_cast<unsigned long int>(queryctrl.maximum);
            querymenu.index++)
       {
-        if (ioctl(_dev, VIDIOC_QUERYMENU, &querymenu))
+        if (v4l2_ioctl(_dev, VIDIOC_QUERYMENU, &querymenu))
         {
           cout << "Getting menu items failed" << endl;
           return;

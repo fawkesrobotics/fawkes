@@ -86,6 +86,10 @@ endif
 ifeq ($(HAVE_SWISSRANGER_CAM),1)
 OBJS_libfvcams += swissranger.o
 endif
+ifeq ($(HAVE_LIBV4L2),1)
+CFLAGS  += $(CFLAGS_LIBV4L2)
+LDFLAGS += $(LDFLAGS_LIBV4L2)
+endif
 
 ifneq ($(HAVE_FIREWIRE_CAM),1)
   ifneq ($(realpath $(SRCDIR)/firewire.cpp),)
