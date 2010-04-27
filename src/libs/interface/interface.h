@@ -30,6 +30,8 @@
 
 #include <cstddef>
 #include <list>
+#define __STD_LIMIT_MACROS
+#include <stdint.h>
 
 #define __INTERFACE_TYPE_SIZE   32
 #define __INTERFACE_ID_SIZE     32
