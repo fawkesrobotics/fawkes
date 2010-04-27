@@ -3,34 +3,34 @@ $using namespace fawkes;
 namespace fawkes {
 class MotorInterface : public Interface
 {
-  static const unsigned int MOTOR_ENABLED;
-  static const unsigned int MOTOR_DISABLED;
-  static const unsigned int DRIVE_MODE_RPM;
-  static const unsigned int DRIVE_MODE_TRANS;
-  static const unsigned int DRIVE_MODE_ROT;
-  static const unsigned int DRIVE_MODE_TRANS_ROT;
-  static const unsigned int DRIVE_MODE_ORBIT;
-  static const unsigned int DRIVE_MODE_LINE_TRANS_ROT;
+  static const uint32_t MOTOR_ENABLED;
+  static const uint32_t MOTOR_DISABLED;
+  static const uint32_t DRIVE_MODE_RPM;
+  static const uint32_t DRIVE_MODE_TRANS;
+  static const uint32_t DRIVE_MODE_ROT;
+  static const uint32_t DRIVE_MODE_TRANS_ROT;
+  static const uint32_t DRIVE_MODE_ORBIT;
+  static const uint32_t DRIVE_MODE_LINE_TRANS_ROT;
 
   class SetMotorStateMessage : public Message
   {
-    SetMotorStateMessage(unsigned int ini_motor_state);
+    SetMotorStateMessage(uint32_t ini_motor_state);
     SetMotorStateMessage();
     ~SetMotorStateMessage();
 
-    unsigned int motor_state();
-    void set_motor_state(const unsigned int new_motor_state);
+    uint32_t motor_state();
+    void set_motor_state(const uint32_t new_motor_state);
     int maxlenof_motor_state() const;
   };
 
   class AcquireControlMessage : public Message
   {
-    AcquireControlMessage(unsigned int ini_controller, char * ini_controller_thread_name);
+    AcquireControlMessage(uint32_t ini_controller, char * ini_controller_thread_name);
     AcquireControlMessage();
     ~AcquireControlMessage();
 
-    unsigned int controller();
-    void set_controller(const unsigned int new_controller);
+    uint32_t controller();
+    void set_controller(const uint32_t new_controller);
     int maxlenof_controller() const;
     char * controller_thread_name();
     void set_controller_thread_name(const char * new_controller_thread_name);
@@ -157,20 +157,20 @@ class MotorInterface : public Interface
     int maxlenof_omega() const;
   };
 
-  unsigned int motor_state();
-  void set_motor_state(const unsigned int new_motor_state);
+  uint32_t motor_state();
+  void set_motor_state(const uint32_t new_motor_state);
   int maxlenof_motor_state() const;
-  unsigned int drive_mode();
-  void set_drive_mode(const unsigned int new_drive_mode);
+  uint32_t drive_mode();
+  void set_drive_mode(const uint32_t new_drive_mode);
   int maxlenof_drive_mode() const;
-  int right_rpm();
-  void set_right_rpm(const int new_right_rpm);
+  int32_t right_rpm();
+  void set_right_rpm(const int32_t new_right_rpm);
   int maxlenof_right_rpm() const;
-  int rear_rpm();
-  void set_rear_rpm(const int new_rear_rpm);
+  int32_t rear_rpm();
+  void set_rear_rpm(const int32_t new_rear_rpm);
   int maxlenof_rear_rpm() const;
-  int left_rpm();
-  void set_left_rpm(const int new_left_rpm);
+  int32_t left_rpm();
+  void set_left_rpm(const int32_t new_left_rpm);
   int maxlenof_left_rpm() const;
   float odometry_path_length();
   void set_odometry_path_length(const float new_odometry_path_length);
@@ -193,8 +193,8 @@ class MotorInterface : public Interface
   float omega();
   void set_omega(const float new_omega);
   int maxlenof_omega() const;
-  unsigned int controller();
-  void set_controller(const unsigned int new_controller);
+  uint32_t controller();
+  void set_controller(const uint32_t new_controller);
   int maxlenof_controller() const;
   char * controller_thread_name();
   void set_controller_thread_name(const char * new_controller_thread_name);

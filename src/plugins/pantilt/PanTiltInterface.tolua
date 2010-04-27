@@ -3,13 +3,13 @@ $using namespace fawkes;
 namespace fawkes {
 class PanTiltInterface : public Interface
 {
-  static const unsigned int FLAG_SUPPORTS_PAN;
-  static const unsigned int FLAG_SUPPORTS_TILT;
-  static const unsigned int ERROR_NONE;
-  static const unsigned int ERROR_UNSPECIFIC;
-  static const unsigned int ERROR_COMMUNICATION;
-  static const unsigned int ERROR_PAN_OUTOFRANGE;
-  static const unsigned int ERROR_TILT_OUTOFRANGE;
+  static const uint32_t FLAG_SUPPORTS_PAN;
+  static const uint32_t FLAG_SUPPORTS_TILT;
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_UNSPECIFIC;
+  static const uint32_t ERROR_COMMUNICATION;
+  static const uint32_t ERROR_PAN_OUTOFRANGE;
+  static const uint32_t ERROR_TILT_OUTOFRANGE;
 
   class StopMessage : public Message
   {
@@ -109,8 +109,8 @@ class PanTiltInterface : public Interface
     int maxlenof_tilt_margin() const;
   };
 
-  unsigned int flags();
-  void set_flags(const unsigned int new_flags);
+  uint32_t flags();
+  void set_flags(const uint32_t new_flags);
   int maxlenof_flags() const;
   float pan();
   void set_pan(const float new_pan);
@@ -118,14 +118,14 @@ class PanTiltInterface : public Interface
   float tilt();
   void set_tilt(const float new_tilt);
   int maxlenof_tilt() const;
-  unsigned int msgid();
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid();
+  void set_msgid(const uint32_t new_msgid);
   int maxlenof_msgid() const;
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
-  unsigned int error_code();
-  void set_error_code(const unsigned int new_error_code);
+  uint32_t error_code();
+  void set_error_code(const uint32_t new_error_code);
   int maxlenof_error_code() const;
   bool is_enabled();
   void set_enabled(const bool new_enabled);

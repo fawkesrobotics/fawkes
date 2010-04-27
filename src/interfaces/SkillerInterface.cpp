@@ -52,7 +52,7 @@ SkillerInterface::SkillerInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
-  add_fieldinfo(IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
+  add_fieldinfo(IFT_ENUM, "exclusive_controller", 1, &data->exclusive_controller, "uint32");
   add_fieldinfo(IFT_ENUM, "status", 1, &data->status, "SkillStatusEnum");
   add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   add_messageinfo("ExecSkillMessage");
@@ -61,7 +61,7 @@ SkillerInterface::SkillerInterface() : Interface()
   add_messageinfo("StopExecMessage");
   add_messageinfo("AcquireControlMessage");
   add_messageinfo("ReleaseControlMessage");
-  unsigned char tmp_hash[] = {0x61, 0x7c, 0x70, 0xc4, 0x68, 0x8b, 0x8b, 0x69, 0x87, 0xc1, 0xd1, 0xe6, 0xed, 0x34, 0xb5, 0x5};
+  unsigned char tmp_hash[] = {0x7c, 0x85, 0xf3, 0x24, 0xea, 0x55, 0x50, 0xa1, 0x6c, 0xdb, 0xdc, 0x4b, 0x40, 0xba, 0xa1, 0xda};
   set_hash(tmp_hash);
 }
 
@@ -164,7 +164,7 @@ SkillerInterface::set_error(const char * new_error)
     
  * @return exclusive_controller value
  */
-unsigned int
+uint32_t
 SkillerInterface::exclusive_controller() const
 {
   return data->exclusive_controller;
@@ -189,7 +189,7 @@ SkillerInterface::maxlenof_exclusive_controller() const
  * @param new_exclusive_controller new exclusive_controller value
  */
 void
-SkillerInterface::set_exclusive_controller(const unsigned int new_exclusive_controller)
+SkillerInterface::set_exclusive_controller(const uint32_t new_exclusive_controller)
 {
   data->exclusive_controller = new_exclusive_controller;
 }

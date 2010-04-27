@@ -80,7 +80,7 @@
     <field type="float" name="elbow_roll_amplitude">
       Amplitude of the elbow roll movement during walking.
     </field>
-    <field type="unsigned int" name="msgid">
+    <field type="uint32" name="msgid">
       The ID of the message that is currently being
       processed, or 0 if no message is being processed.
     </field>
@@ -118,14 +118,14 @@
   <message name="WalkStraight">
     <comment>Orders the robot to walk on a straight line.</comment>
     <field type="float" name="distance">Distance in m to walk.</field>
-    <field type="unsigned int" name="num_samples">
+    <field type="uint32" name="num_samples">
       Number of intermediate samples to use for walking.
     </field>
   </message>
   <message name="WalkSideways">
     <comment>Walk sideways.</comment>
     <field type="float" name="distance">Distance in m to walk.</field>
-    <field type="unsigned int" name="num_samples">
+    <field type="uint32" name="num_samples">
       Number of intermediate samples to use for strafing.
     </field>
   </message>
@@ -133,14 +133,14 @@
     <comment>Orders the robot to walk on an arc.</comment>
     <field type="float" name="angle">Angle in radians to turn over the way.</field>
     <field type="float" name="radius">Radius in m of the circle in m.</field>
-    <field type="unsigned int" name="num_samples">
+    <field type="uint32" name="num_samples">
       Number of intermediate samples to use for walking.
     </field>
   </message>
   <message name="Turn">
     <comment>Orders the robot to turn on the current position.</comment>
     <field type="float" name="angle">Angle in radians to turn.</field>
-    <field type="unsigned int" name="num_samples">
+    <field type="uint32" name="num_samples">
       Number of intermediate samples to use for turning.
     </field>
   </message>

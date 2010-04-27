@@ -52,27 +52,27 @@ FacerInterface::FacerInterface() : Interface()
   data      = (FacerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
-  add_fieldinfo(IFT_UINT, "num_identities", 1, &data->num_identities);
-  add_fieldinfo(IFT_UINT, "recognized_identity", 1, &data->recognized_identity);
+  add_fieldinfo(IFT_ENUM, "num_identities", 1, &data->num_identities, "uint32");
+  add_fieldinfo(IFT_ENUM, "recognized_identity", 1, &data->recognized_identity, "uint32");
   add_fieldinfo(IFT_STRING, "recognized_name", 64, data->recognized_name);
-  add_fieldinfo(IFT_UINT, "num_detections", 1, &data->num_detections);
-  add_fieldinfo(IFT_UINT, "num_recognitions", 1, &data->num_recognitions);
-  add_fieldinfo(IFT_UINT, "most_likely_identity", 1, &data->most_likely_identity);
+  add_fieldinfo(IFT_ENUM, "num_detections", 1, &data->num_detections, "uint32");
+  add_fieldinfo(IFT_ENUM, "num_recognitions", 1, &data->num_recognitions, "uint32");
+  add_fieldinfo(IFT_ENUM, "most_likely_identity", 1, &data->most_likely_identity, "uint32");
   add_fieldinfo(IFT_FLOAT, "history_ratio", 1, &data->history_ratio);
   add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
-  add_fieldinfo(IFT_INT, "visibility_history", 1, &data->visibility_history);
+  add_fieldinfo(IFT_ENUM, "visibility_history", 1, &data->visibility_history, "int32");
   add_fieldinfo(IFT_BOOL, "learning_in_progress", 1, &data->learning_in_progress);
   add_fieldinfo(IFT_FLOAT, "recording_progress", 1, &data->recording_progress);
   add_fieldinfo(IFT_FLOAT, "bearing", 1, &data->bearing);
   add_fieldinfo(IFT_FLOAT, "slope", 1, &data->slope);
-  add_fieldinfo(IFT_UINT, "requested_index", 1, &data->requested_index);
+  add_fieldinfo(IFT_ENUM, "requested_index", 1, &data->requested_index, "uint32");
   add_fieldinfo(IFT_STRING, "requested_name", 64, data->requested_name);
   add_messageinfo("LearnFaceMessage");
   add_messageinfo("SetOpmodeMessage");
   add_messageinfo("EnableIdentityMessage");
   add_messageinfo("SetNameMessage");
   add_messageinfo("GetNameMessage");
-  unsigned char tmp_hash[] = {0x2b, 0x6e, 0x8c, 0x6f, 0x9d, 0x2a, 0x9a, 0x3a, 0xe, 0x4, 0x58, 0x50, 0xa4, 0x60, 0x79, 0xa6};
+  unsigned char tmp_hash[] = {0xe1, 0x12, 0xd2, 0x51, 0x1d, 0x24, 0x1b, 0x27, 0x86, 0xce, 0x29, 0x32, 0xd6, 0x5a, 0x5e, 0xb3};
   set_hash(tmp_hash);
 }
 
@@ -137,7 +137,7 @@ FacerInterface::set_opmode(const if_facer_opmode_t new_opmode)
     
  * @return num_identities value
  */
-unsigned int
+uint32_t
 FacerInterface::num_identities() const
 {
   return data->num_identities;
@@ -160,7 +160,7 @@ FacerInterface::maxlenof_num_identities() const
  * @param new_num_identities new num_identities value
  */
 void
-FacerInterface::set_num_identities(const unsigned int new_num_identities)
+FacerInterface::set_num_identities(const uint32_t new_num_identities)
 {
   data->num_identities = new_num_identities;
 }
@@ -171,7 +171,7 @@ FacerInterface::set_num_identities(const unsigned int new_num_identities)
     
  * @return recognized_identity value
  */
-unsigned int
+uint32_t
 FacerInterface::recognized_identity() const
 {
   return data->recognized_identity;
@@ -194,7 +194,7 @@ FacerInterface::maxlenof_recognized_identity() const
  * @param new_recognized_identity new recognized_identity value
  */
 void
-FacerInterface::set_recognized_identity(const unsigned int new_recognized_identity)
+FacerInterface::set_recognized_identity(const uint32_t new_recognized_identity)
 {
   data->recognized_identity = new_recognized_identity;
 }
@@ -239,7 +239,7 @@ FacerInterface::set_recognized_name(const char * new_recognized_name)
     
  * @return num_detections value
  */
-unsigned int
+uint32_t
 FacerInterface::num_detections() const
 {
   return data->num_detections;
@@ -262,7 +262,7 @@ FacerInterface::maxlenof_num_detections() const
  * @param new_num_detections new num_detections value
  */
 void
-FacerInterface::set_num_detections(const unsigned int new_num_detections)
+FacerInterface::set_num_detections(const uint32_t new_num_detections)
 {
   data->num_detections = new_num_detections;
 }
@@ -273,7 +273,7 @@ FacerInterface::set_num_detections(const unsigned int new_num_detections)
     
  * @return num_recognitions value
  */
-unsigned int
+uint32_t
 FacerInterface::num_recognitions() const
 {
   return data->num_recognitions;
@@ -296,7 +296,7 @@ FacerInterface::maxlenof_num_recognitions() const
  * @param new_num_recognitions new num_recognitions value
  */
 void
-FacerInterface::set_num_recognitions(const unsigned int new_num_recognitions)
+FacerInterface::set_num_recognitions(const uint32_t new_num_recognitions)
 {
   data->num_recognitions = new_num_recognitions;
 }
@@ -307,7 +307,7 @@ FacerInterface::set_num_recognitions(const unsigned int new_num_recognitions)
     
  * @return most_likely_identity value
  */
-unsigned int
+uint32_t
 FacerInterface::most_likely_identity() const
 {
   return data->most_likely_identity;
@@ -330,7 +330,7 @@ FacerInterface::maxlenof_most_likely_identity() const
  * @param new_most_likely_identity new most_likely_identity value
  */
 void
-FacerInterface::set_most_likely_identity(const unsigned int new_most_likely_identity)
+FacerInterface::set_most_likely_identity(const uint32_t new_most_likely_identity)
 {
   data->most_likely_identity = new_most_likely_identity;
 }
@@ -412,7 +412,7 @@ FacerInterface::set_sec_since_detection(const float new_sec_since_detection)
     
  * @return visibility_history value
  */
-int
+int32_t
 FacerInterface::visibility_history() const
 {
   return data->visibility_history;
@@ -436,7 +436,7 @@ FacerInterface::maxlenof_visibility_history() const
  * @param new_visibility_history new visibility_history value
  */
 void
-FacerInterface::set_visibility_history(const int new_visibility_history)
+FacerInterface::set_visibility_history(const int32_t new_visibility_history)
 {
   data->visibility_history = new_visibility_history;
 }
@@ -585,7 +585,7 @@ FacerInterface::set_slope(const float new_slope)
     
  * @return requested_index value
  */
-unsigned int
+uint32_t
 FacerInterface::requested_index() const
 {
   return data->requested_index;
@@ -608,7 +608,7 @@ FacerInterface::maxlenof_requested_index() const
  * @param new_requested_index new requested_index value
  */
 void
-FacerInterface::set_requested_index(const unsigned int new_requested_index)
+FacerInterface::set_requested_index(const uint32_t new_requested_index)
 {
   data->requested_index = new_requested_index;
 }
@@ -879,7 +879,7 @@ FacerInterface::SetOpmodeMessage::clone() const
  * @param ini_index initial value for index
  * @param ini_enable initial value for enable
  */
-FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const unsigned int ini_index, const bool ini_enable) : Message("EnableIdentityMessage")
+FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const uint32_t ini_index, const bool ini_enable) : Message("EnableIdentityMessage")
 {
   data_size = sizeof(EnableIdentityMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -887,7 +887,6 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const unsigned int 
   data      = (EnableIdentityMessage_data_t *)data_ptr;
   data->index = ini_index;
   data->enable = ini_enable;
-  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
 /** Constructor */
@@ -897,7 +896,6 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage() : Message("Enable
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (EnableIdentityMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
 
@@ -923,7 +921,7 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const EnableIdentit
  * Index of the identity.
  * @return index value
  */
-unsigned int
+uint32_t
 FacerInterface::EnableIdentityMessage::index() const
 {
   return data->index;
@@ -944,7 +942,7 @@ FacerInterface::EnableIdentityMessage::maxlenof_index() const
  * @param new_index new index value
  */
 void
-FacerInterface::EnableIdentityMessage::set_index(const unsigned int new_index)
+FacerInterface::EnableIdentityMessage::set_index(const uint32_t new_index)
 {
   data->index = new_index;
 }
@@ -1000,7 +998,7 @@ FacerInterface::EnableIdentityMessage::clone() const
  * @param ini_index initial value for index
  * @param ini_name initial value for name
  */
-FacerInterface::SetNameMessage::SetNameMessage(const unsigned int ini_index, const char * ini_name) : Message("SetNameMessage")
+FacerInterface::SetNameMessage::SetNameMessage(const uint32_t ini_index, const char * ini_name) : Message("SetNameMessage")
 {
   data_size = sizeof(SetNameMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1008,7 +1006,6 @@ FacerInterface::SetNameMessage::SetNameMessage(const unsigned int ini_index, con
   data      = (SetNameMessage_data_t *)data_ptr;
   data->index = ini_index;
   strncpy(data->name, ini_name, 64);
-  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -1018,7 +1015,6 @@ FacerInterface::SetNameMessage::SetNameMessage() : Message("SetNameMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetNameMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -1044,7 +1040,7 @@ FacerInterface::SetNameMessage::SetNameMessage(const SetNameMessage *m) : Messag
  * Index of the identity.
  * @return index value
  */
-unsigned int
+uint32_t
 FacerInterface::SetNameMessage::index() const
 {
   return data->index;
@@ -1065,7 +1061,7 @@ FacerInterface::SetNameMessage::maxlenof_index() const
  * @param new_index new index value
  */
 void
-FacerInterface::SetNameMessage::set_index(const unsigned int new_index)
+FacerInterface::SetNameMessage::set_index(const uint32_t new_index)
 {
   data->index = new_index;
 }
@@ -1120,14 +1116,13 @@ FacerInterface::SetNameMessage::clone() const
 /** Constructor with initial values.
  * @param ini_index initial value for index
  */
-FacerInterface::GetNameMessage::GetNameMessage(const unsigned int ini_index) : Message("GetNameMessage")
+FacerInterface::GetNameMessage::GetNameMessage(const uint32_t ini_index) : Message("GetNameMessage")
 {
   data_size = sizeof(GetNameMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GetNameMessage_data_t *)data_ptr;
   data->index = ini_index;
-  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
 }
 /** Constructor */
 FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
@@ -1136,7 +1131,6 @@ FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GetNameMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_UINT, "index", 1, &data->index);
 }
 
 /** Destructor */
@@ -1161,7 +1155,7 @@ FacerInterface::GetNameMessage::GetNameMessage(const GetNameMessage *m) : Messag
  * Index of the identity.
  * @return index value
  */
-unsigned int
+uint32_t
 FacerInterface::GetNameMessage::index() const
 {
   return data->index;
@@ -1182,7 +1176,7 @@ FacerInterface::GetNameMessage::maxlenof_index() const
  * @param new_index new index value
  */
 void
-FacerInterface::GetNameMessage::set_index(const unsigned int new_index)
+FacerInterface::GetNameMessage::set_index(const uint32_t new_index)
 {
   data->index = new_index;
 }

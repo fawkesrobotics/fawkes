@@ -18,8 +18,8 @@ class SpeechSynthInterface : public Interface
   char * text();
   void set_text(const char * new_text);
   int maxlenof_text() const;
-  unsigned int msgid();
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid();
+  void set_msgid(const uint32_t new_msgid);
   int maxlenof_msgid() const;
   bool is_final();
   void set_final(const bool new_final);

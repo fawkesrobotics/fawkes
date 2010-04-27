@@ -3,21 +3,21 @@ $using namespace fawkes;
 namespace fawkes {
 class GameStateInterface : public Interface
 {
-  static const unsigned int GS_FROZEN;
-  static const unsigned int GS_PLAY;
-  static const unsigned int GS_KICK_OFF;
-  static const unsigned int GS_DROP_BALL;
-  static const unsigned int GS_PENALTY;
-  static const unsigned int GS_CORNER_KICK;
-  static const unsigned int GS_THROW_IN;
-  static const unsigned int GS_FREE_KICK;
-  static const unsigned int GS_GOAL_KICK;
-  static const unsigned int GS_HALF_TIME;
-  static const unsigned int GS_SPL_INITIAL;
-  static const unsigned int GS_SPL_READY;
-  static const unsigned int GS_SPL_SET;
-  static const unsigned int GS_SPL_PLAY;
-  static const unsigned int GS_SPL_FINISHED;
+  static const uint32_t GS_FROZEN;
+  static const uint32_t GS_PLAY;
+  static const uint32_t GS_KICK_OFF;
+  static const uint32_t GS_DROP_BALL;
+  static const uint32_t GS_PENALTY;
+  static const uint32_t GS_CORNER_KICK;
+  static const uint32_t GS_THROW_IN;
+  static const uint32_t GS_FREE_KICK;
+  static const uint32_t GS_GOAL_KICK;
+  static const uint32_t GS_HALF_TIME;
+  static const uint32_t GS_SPL_INITIAL;
+  static const uint32_t GS_SPL_READY;
+  static const uint32_t GS_SPL_SET;
+  static const uint32_t GS_SPL_PLAY;
+  static const uint32_t GS_SPL_FINISHED;
 
   typedef enum {
     TEAM_NONE,
@@ -77,8 +77,8 @@ class GameStateInterface : public Interface
     int maxlenof_state_team() const;
   };
 
-  unsigned int game_state();
-  void set_game_state(const unsigned int new_game_state);
+  uint32_t game_state();
+  void set_game_state(const uint32_t new_game_state);
   int maxlenof_game_state() const;
   if_gamestate_team_t state_team();
   void set_state_team(const if_gamestate_team_t new_state_team);
@@ -98,11 +98,11 @@ class GameStateInterface : public Interface
   if_gamestate_role_t role();
   void set_role(const if_gamestate_role_t new_role);
   int maxlenof_role() const;
-  unsigned int score_cyan();
-  void set_score_cyan(const unsigned int new_score_cyan);
+  uint32_t score_cyan();
+  void set_score_cyan(const uint32_t new_score_cyan);
   int maxlenof_score_cyan() const;
-  unsigned int score_magenta();
-  void set_score_magenta(const unsigned int new_score_magenta);
+  uint32_t score_magenta();
+  void set_score_magenta(const uint32_t new_score_magenta);
   int maxlenof_score_magenta() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

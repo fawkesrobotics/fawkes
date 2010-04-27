@@ -26,7 +26,7 @@
     <field type="string" length="128" name="error">
       String describing the error. Can be set by a skill when it fails.
     </field>
-    <field type="unsigned int" name="exclusive_controller">
+    <field type="uint32" name="exclusive_controller">
       Instance serial of the exclusive controller of the skiller. If this does not
       carry your instance serial your exec messages will be ignored. Aquire control with
       the AquireControlMessage. Make sure you release control before exiting.

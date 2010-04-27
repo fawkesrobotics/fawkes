@@ -37,35 +37,33 @@ class MotorInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int MOTOR_ENABLED;
-  static const unsigned int MOTOR_DISABLED;
-  static const unsigned int DRIVE_MODE_RPM;
-  static const unsigned int DRIVE_MODE_TRANS;
-  static const unsigned int DRIVE_MODE_ROT;
-  static const unsigned int DRIVE_MODE_TRANS_ROT;
-  static const unsigned int DRIVE_MODE_ORBIT;
-  static const unsigned int DRIVE_MODE_LINE_TRANS_ROT;
+  static const uint32_t MOTOR_ENABLED;
+  static const uint32_t MOTOR_DISABLED;
+  static const uint32_t DRIVE_MODE_RPM;
+  static const uint32_t DRIVE_MODE_TRANS;
+  static const uint32_t DRIVE_MODE_ROT;
+  static const uint32_t DRIVE_MODE_TRANS_ROT;
+  static const uint32_t DRIVE_MODE_ORBIT;
+  static const uint32_t DRIVE_MODE_LINE_TRANS_ROT;
 
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int motor_state; /**< 
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t motor_state; /**< 
       The current state of the motor.
      */
-    unsigned int drive_mode; /**< 
+    uint32_t drive_mode; /**< 
       The current drive mode of the motor.
      */
-    unsigned int controller; /**< 
-     The ID of the controller. The controller ID is the instance serial of the sending
-     interface. Only from this interface instance command messages are accepted.
-     */
-    int right_rpm; /**< 
+    int32_t right_rpm; /**< 
       RPM of the motor on the right front of the robot.
      */
-    int rear_rpm; /**< 
+    int32_t rear_rpm; /**< 
       RPM of motor on the rear of the robot.
      */
-    int left_rpm; /**< 
+    int32_t left_rpm; /**< 
       RPM of the motor on the left front of the robot.
      */
     float odometry_path_length; /**< 
@@ -89,6 +87,10 @@ class MotorInterface : public Interface
     float omega; /**< 
       Rotation speed of the robot in rad/s.
      */
+    uint32_t controller; /**< 
+     The ID of the controller. The controller ID is the instance serial of the sending
+     interface. Only from this interface instance command messages are accepted.
+     */
     char controller_thread_name[64]; /**< 
      The name of the controlling thread, for easier debugging. This is informative only
      and actually two threads may share an interface instance (although this should be
@@ -105,7 +107,9 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int motor_state; /**< 
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t motor_state; /**< 
       The new motor state to set. Use the MOTOR_* constants.
      */
     } SetMotorStateMessage_data_t;
@@ -113,14 +117,14 @@ class MotorInterface : public Interface
     SetMotorStateMessage_data_t *data;
 
    public:
-    SetMotorStateMessage(const unsigned int ini_motor_state);
+    SetMotorStateMessage(const uint32_t ini_motor_state);
     SetMotorStateMessage();
     ~SetMotorStateMessage();
 
     SetMotorStateMessage(const SetMotorStateMessage *m);
     /* Methods */
-    unsigned int motor_state() const;
-    void set_motor_state(const unsigned int new_motor_state);
+    uint32_t motor_state() const;
+    void set_motor_state(const uint32_t new_motor_state);
     size_t maxlenof_motor_state() const;
     virtual Message * clone() const;
   };
@@ -130,7 +134,9 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int controller; /**< 
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t controller; /**< 
      The ID of the controller. The controller ID is the instance serial of the sending
      interface. Only from this interface instance command messages are accepted.
      */
@@ -144,14 +150,14 @@ class MotorInterface : public Interface
     AcquireControlMessage_data_t *data;
 
    public:
-    AcquireControlMessage(const unsigned int ini_controller, const char * ini_controller_thread_name);
+    AcquireControlMessage(const uint32_t ini_controller, const char * ini_controller_thread_name);
     AcquireControlMessage();
     ~AcquireControlMessage();
 
     AcquireControlMessage(const AcquireControlMessage *m);
     /* Methods */
-    unsigned int controller() const;
-    void set_controller(const unsigned int new_controller);
+    uint32_t controller() const;
+    void set_controller(const uint32_t new_controller);
     size_t maxlenof_controller() const;
     char * controller_thread_name() const;
     void set_controller_thread_name(const char * new_controller_thread_name);
@@ -175,6 +181,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float front_right; /**< Rotation in RPM of the right front wheel. */
       float front_left; /**< Rotation in RPM of the left front wheel. */
       float rear; /**< Rotation in RPM of the rear wheel. */
@@ -206,6 +214,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X distance in m. */
       float y; /**< Y distance in m. */
       float phi; /**< Angle relative to current angle in rad. */
@@ -241,6 +251,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float vx; /**< Speed in X direction in m/s. */
       float vy; /**< Speed in Y direction in m/s. */
     } TransMessage_data_t;
@@ -268,6 +280,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float omega; /**< Angle rotation in rad/s. */
     } RotMessage_data_t;
 
@@ -291,6 +305,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float vx; /**< Speed in X direction in m/s. */
       float vy; /**< Speed in Y direction in m/s. */
       float omega; /**< Angle rotation in rad/s. */
@@ -322,6 +338,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float px; /**< Point's X coordinate to orbit. */
       float py; /**< Point's Y coordinate to orbit. */
       float omega; /**< Angular speed around point in rad/s. */
@@ -353,6 +371,8 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float vx; /**< Speed for translation in X direction in m/s. */
       float vy; /**< Speed for translation in Y direction in m/s. */
       float omega; /**< Rotational speed in rad/s. */
@@ -386,20 +406,20 @@ class MotorInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int motor_state() const;
-  void set_motor_state(const unsigned int new_motor_state);
+  uint32_t motor_state() const;
+  void set_motor_state(const uint32_t new_motor_state);
   size_t maxlenof_motor_state() const;
-  unsigned int drive_mode() const;
-  void set_drive_mode(const unsigned int new_drive_mode);
+  uint32_t drive_mode() const;
+  void set_drive_mode(const uint32_t new_drive_mode);
   size_t maxlenof_drive_mode() const;
-  int right_rpm() const;
-  void set_right_rpm(const int new_right_rpm);
+  int32_t right_rpm() const;
+  void set_right_rpm(const int32_t new_right_rpm);
   size_t maxlenof_right_rpm() const;
-  int rear_rpm() const;
-  void set_rear_rpm(const int new_rear_rpm);
+  int32_t rear_rpm() const;
+  void set_rear_rpm(const int32_t new_rear_rpm);
   size_t maxlenof_rear_rpm() const;
-  int left_rpm() const;
-  void set_left_rpm(const int new_left_rpm);
+  int32_t left_rpm() const;
+  void set_left_rpm(const int32_t new_left_rpm);
   size_t maxlenof_left_rpm() const;
   float odometry_path_length() const;
   void set_odometry_path_length(const float new_odometry_path_length);
@@ -422,8 +442,8 @@ class MotorInterface : public Interface
   float omega() const;
   void set_omega(const float new_omega);
   size_t maxlenof_omega() const;
-  unsigned int controller() const;
-  void set_controller(const unsigned int new_controller);
+  uint32_t controller() const;
+  void set_controller(const uint32_t new_controller);
   size_t maxlenof_controller() const;
   char * controller_thread_name() const;
   void set_controller_thread_name(const char * new_controller_thread_name);

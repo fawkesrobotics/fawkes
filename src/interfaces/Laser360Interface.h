@@ -41,6 +41,8 @@ class Laser360Interface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float distances[360]; /**< 
       The distances in meter of the beams.
      */

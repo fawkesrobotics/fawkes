@@ -3,28 +3,28 @@ $using namespace fawkes;
 namespace fawkes {
 class KatanaInterface : public Interface
 {
-  static const unsigned int SENSOR_IR_RIGHT_INNER_MIDDLE;
-  static const unsigned int SENSOR_IR_RIGHT_INNER_FRONT;
-  static const unsigned int SENSOR_RESERVED_2;
-  static const unsigned int SENSOR_COND_BOTH;
-  static const unsigned int SENSOR_IR_RIGHT_OUTER_FRONT;
-  static const unsigned int SENSOR_IR_RIGHT_BOTTOM_FRONT;
-  static const unsigned int SENSOR_FORCE_RIGHT_REAR;
-  static const unsigned int SENSOR_FORCE_RIGHT_FRONT;
-  static const unsigned int SENSOR_IR_LEFT_INNER_MIDDLE;
-  static const unsigned int SENSOR_IR_LEFT_INNER_FRONT;
-  static const unsigned int SENSOR_RESERVED_10;
-  static const unsigned int SENSOR_IR_CENTER_GRIPPER;
-  static const unsigned int SENSOR_IR_LEFT_OUTER_FRONT;
-  static const unsigned int SENSOR_IR_LEFT_BOTTOM_FRONT;
-  static const unsigned int SENSOR_FORCE_LEFT_REAR;
-  static const unsigned int SENSOR_FORCE_LEFT_FRONT;
-  static const unsigned int ERROR_NONE;
-  static const unsigned int ERROR_UNSPECIFIC;
-  static const unsigned int ERROR_CMD_START_FAILED;
-  static const unsigned int ERROR_NO_SOLUTION;
-  static const unsigned int ERROR_COMMUNICATION;
-  static const unsigned int ERROR_MOTOR_CRASHED;
+  static const uint32_t SENSOR_IR_RIGHT_INNER_MIDDLE;
+  static const uint32_t SENSOR_IR_RIGHT_INNER_FRONT;
+  static const uint32_t SENSOR_RESERVED_2;
+  static const uint32_t SENSOR_COND_BOTH;
+  static const uint32_t SENSOR_IR_RIGHT_OUTER_FRONT;
+  static const uint32_t SENSOR_IR_RIGHT_BOTTOM_FRONT;
+  static const uint32_t SENSOR_FORCE_RIGHT_REAR;
+  static const uint32_t SENSOR_FORCE_RIGHT_FRONT;
+  static const uint32_t SENSOR_IR_LEFT_INNER_MIDDLE;
+  static const uint32_t SENSOR_IR_LEFT_INNER_FRONT;
+  static const uint32_t SENSOR_RESERVED_10;
+  static const uint32_t SENSOR_IR_CENTER_GRIPPER;
+  static const uint32_t SENSOR_IR_LEFT_OUTER_FRONT;
+  static const uint32_t SENSOR_IR_LEFT_BOTTOM_FRONT;
+  static const uint32_t SENSOR_FORCE_LEFT_REAR;
+  static const uint32_t SENSOR_FORCE_LEFT_FRONT;
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_UNSPECIFIC;
+  static const uint32_t ERROR_CMD_START_FAILED;
+  static const uint32_t ERROR_NO_SOLUTION;
+  static const uint32_t ERROR_COMMUNICATION;
+  static const uint32_t ERROR_MOTOR_CRASHED;
 
   class StopMessage : public Message
   {
@@ -107,17 +107,17 @@ class KatanaInterface : public Interface
 
   class SetMaxVelocityMessage : public Message
   {
-    SetMaxVelocityMessage(unsigned char ini_max_velocity);
+    SetMaxVelocityMessage(uint8_t ini_max_velocity);
     SetMaxVelocityMessage();
     ~SetMaxVelocityMessage();
 
-    unsigned char max_velocity();
-    void set_max_velocity(const unsigned char new_max_velocity);
+    uint8_t max_velocity();
+    void set_max_velocity(const uint8_t new_max_velocity);
     int maxlenof_max_velocity() const;
   };
 
   unsigned int sensor_value(int index);
-  void set_sensor_value(unsigned int index, const unsigned char new_sensor_value);
+  void set_sensor_value(unsigned int index, const uint8_t new_sensor_value);
   int maxlenof_sensor_value() const;
   float x();
   void set_x(const float new_x);
@@ -137,14 +137,14 @@ class KatanaInterface : public Interface
   float psi();
   void set_psi(const float new_psi);
   int maxlenof_psi() const;
-  unsigned int msgid();
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid();
+  void set_msgid(const uint32_t new_msgid);
   int maxlenof_msgid() const;
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
-  unsigned int error_code();
-  void set_error_code(const unsigned int new_error_code);
+  uint32_t error_code();
+  void set_error_code(const uint32_t new_error_code);
   int maxlenof_error_code() const;
   bool is_enabled();
   void set_enabled(const bool new_enabled);
@@ -152,11 +152,11 @@ class KatanaInterface : public Interface
   bool is_calibrated();
   void set_calibrated(const bool new_calibrated);
   int maxlenof_calibrated() const;
-  unsigned char max_velocity();
-  void set_max_velocity(const unsigned char new_max_velocity);
+  uint8_t max_velocity();
+  void set_max_velocity(const uint8_t new_max_velocity);
   int maxlenof_max_velocity() const;
-  unsigned char num_motors();
-  void set_num_motors(const unsigned char new_num_motors);
+  uint8_t num_motors();
+  void set_num_motors(const uint8_t new_num_motors);
   int maxlenof_num_motors() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

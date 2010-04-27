@@ -51,11 +51,11 @@ SpeechSynthInterface::SpeechSynthInterface() : Interface()
   data      = (SpeechSynthInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
   add_messageinfo("SayMessage");
-  unsigned char tmp_hash[] = {0xd4, 0x89, 0x24, 0x17, 0x5a, 0xb8, 0xa9, 0x8e, 0x63, 0x80, 0xb3, 0xed, 0xb7, 0xc3, 0xb5, 0x90};
+  unsigned char tmp_hash[] = {0x28, 0x11, 0x46, 0x87, 0xb1, 0x65, 0x92, 0x96, 0xe6, 0x6e, 0x18, 0x8a, 0xdc, 0x8, 0xb0, 0x69};
   set_hash(tmp_hash);
 }
 
@@ -106,7 +106,7 @@ SpeechSynthInterface::set_text(const char * new_text)
     
  * @return msgid value
  */
-unsigned int
+uint32_t
 SpeechSynthInterface::msgid() const
 {
   return data->msgid;
@@ -130,7 +130,7 @@ SpeechSynthInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-SpeechSynthInterface::set_msgid(const unsigned int new_msgid)
+SpeechSynthInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
 }

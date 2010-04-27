@@ -18,14 +18,14 @@ class BatteryInterface : public Interface
 
   };
 
-  unsigned int current();
-  void set_current(const unsigned int new_current);
+  uint32_t current();
+  void set_current(const uint32_t new_current);
   int maxlenof_current() const;
-  unsigned int voltage();
-  void set_voltage(const unsigned int new_voltage);
+  uint32_t voltage();
+  void set_voltage(const uint32_t new_voltage);
   int maxlenof_voltage() const;
-  unsigned int temperature();
-  void set_temperature(const unsigned int new_temperature);
+  uint32_t temperature();
+  void set_temperature(const uint32_t new_temperature);
   int maxlenof_temperature() const;
   float absolute_soc();
   void set_absolute_soc(const float new_absolute_soc);

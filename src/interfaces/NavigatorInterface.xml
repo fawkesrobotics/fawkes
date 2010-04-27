@@ -4,38 +4,38 @@
   <constants>
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
 	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
-    <constant type="unsigned int" value="0" name="ERROR_NONE">No error.</constant>
-    <constant type="unsigned int" value="1" name="ERROR_MOTOR">Cannot
+    <constant type="uint32" value="0" name="ERROR_NONE">No error.</constant>
+    <constant type="uint32" value="1" name="ERROR_MOTOR">Cannot
       communicate with motor.</constant>
-    <constant type="unsigned int" value="2" name="ERROR_OBSTRUCTION">
+    <constant type="uint32" value="2" name="ERROR_OBSTRUCTION">
       Target cannot be reached, something is standing in the way.
     </constant>
-    <constant type="unsigned int" value="4" name="ERROR_UNKNOWN_PLACE">
+    <constant type="uint32" value="4" name="ERROR_UNKNOWN_PLACE">
       The last GotoPlaceMessages could not be processed as the given
       place is unknown.
     </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
 	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
-    <constant type="unsigned int" value="0" name="FLAG_NONE">No flags set.</constant>
-    <constant type="unsigned int" value="1" name="FLAG_CART_GOTO">
+    <constant type="uint32" value="0" name="FLAG_NONE">No flags set.</constant>
+    <constant type="uint32" value="1" name="FLAG_CART_GOTO">
       Navigator component supports cartesian goto commands.
     </constant>
-    <constant type="unsigned int" value="2" name="FLAG_POLAR_GOTO">
+    <constant type="uint32" value="2" name="FLAG_POLAR_GOTO">
       Navigator component supports polar goto commands.
     </constant>
-    <constant type="unsigned int" value="4" name="FLAG_PLACE_GOTO">
+    <constant type="uint32" value="4" name="FLAG_PLACE_GOTO">
       Navigator components supports place goto messages. Know places
       have to be communicated out of band.
     </constant>
-    <constant type="unsigned int" value="8" name="FLAG_UPDATES_DEST_DIST">
+    <constant type="uint32" value="8" name="FLAG_UPDATES_DEST_DIST">
       Navigator component updates dest_dist field with destination to
       target while moving.
     </constant>
-    <constant type="unsigned int" value="16" name="FLAG_SECURITY_DISTANCE">
+    <constant type="uint32" value="16" name="FLAG_SECURITY_DISTANCE">
       Security distance can be set at run-time.
     </constant>
-    <constant type="unsigned int" value="32" name="FLAG_ESCAPING">
+    <constant type="uint32" value="32" name="FLAG_ESCAPING">
       Navigator component supports escaping which can be enabled and disabled.
     </constant>
   </constants>
@@ -54,7 +54,7 @@
       to time and the robot's position in this system gives the odometry deltas.
     </comment>
 
-    <field type="unsigned int" name="flags">Bit-wise combination of
+    <field type="uint32" name="flags">Bit-wise combination of
     FLAG_* constants denoting navigator component features.</field>
 
     <field type="float" name="x">Current X-coordinate in the navigator coordinate system.</field>
@@ -66,11 +66,11 @@
 
     <field type="float" name="dest_dist">Distance to destination in m.</field>
 
-    <field type="unsigned int" name="msgid">The ID of the message that is currently being
+    <field type="uint32" name="msgid">The ID of the message that is currently being
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
-    <field type="unsigned int" name="error_code">Failure code set if
+    <field type="uint32" name="error_code">Failure code set if
     final is true. 0 if no error occured, an error code from ERROR_*
     constants otherwise (or a bit-wise combination).</field>
 

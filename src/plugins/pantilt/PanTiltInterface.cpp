@@ -40,19 +40,19 @@ namespace fawkes {
 
 
 /** FLAG_SUPPORTS_PAN constant */
-const unsigned int PanTiltInterface::FLAG_SUPPORTS_PAN = 1;
+const uint32_t PanTiltInterface::FLAG_SUPPORTS_PAN = 1;
 /** FLAG_SUPPORTS_TILT constant */
-const unsigned int PanTiltInterface::FLAG_SUPPORTS_TILT = 2;
+const uint32_t PanTiltInterface::FLAG_SUPPORTS_TILT = 2;
 /** ERROR_NONE constant */
-const unsigned int PanTiltInterface::ERROR_NONE = 0;
+const uint32_t PanTiltInterface::ERROR_NONE = 0;
 /** ERROR_UNSPECIFIC constant */
-const unsigned int PanTiltInterface::ERROR_UNSPECIFIC = 1;
+const uint32_t PanTiltInterface::ERROR_UNSPECIFIC = 1;
 /** ERROR_COMMUNICATION constant */
-const unsigned int PanTiltInterface::ERROR_COMMUNICATION = 2;
+const uint32_t PanTiltInterface::ERROR_COMMUNICATION = 2;
 /** ERROR_PAN_OUTOFRANGE constant */
-const unsigned int PanTiltInterface::ERROR_PAN_OUTOFRANGE = 4;
+const uint32_t PanTiltInterface::ERROR_PAN_OUTOFRANGE = 4;
 /** ERROR_TILT_OUTOFRANGE constant */
-const unsigned int PanTiltInterface::ERROR_TILT_OUTOFRANGE = 8;
+const uint32_t PanTiltInterface::ERROR_TILT_OUTOFRANGE = 8;
 
 /** Constructor */
 PanTiltInterface::PanTiltInterface() : Interface()
@@ -61,12 +61,12 @@ PanTiltInterface::PanTiltInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (PanTiltInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_ENUM, "flags", 1, &data->flags, "uint32");
   add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
   add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_UINT, "error_code", 1, &data->error_code);
+  add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "uint32");
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_FLOAT, "min_pan", 1, &data->min_pan);
@@ -88,7 +88,7 @@ PanTiltInterface::PanTiltInterface() : Interface()
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetVelocityMessage");
   add_messageinfo("SetMarginMessage");
-  unsigned char tmp_hash[] = {0xf1, 0x7a, 0x47, 0xde, 0x4f, 0x37, 0x5b, 0xc7, 0x75, 0x1c, 0xd6, 0x73, 0x1e, 00, 0xe9, 0x71};
+  unsigned char tmp_hash[] = {0x3, 0xd7, 0x3b, 0xa8, 0x9f, 0x6d, 00, 0xb9, 0xf5, 0xf2, 0x2f, 0x92, 0x25, 0x1b, 0x87, 0x8e};
   set_hash(tmp_hash);
 }
 
@@ -102,7 +102,7 @@ PanTiltInterface::~PanTiltInterface()
  * Flags.
  * @return flags value
  */
-unsigned int
+uint32_t
 PanTiltInterface::flags() const
 {
   return data->flags;
@@ -123,7 +123,7 @@ PanTiltInterface::maxlenof_flags() const
  * @param new_flags new flags value
  */
 void
-PanTiltInterface::set_flags(const unsigned int new_flags)
+PanTiltInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
 }
@@ -193,7 +193,7 @@ PanTiltInterface::set_tilt(const float new_tilt)
       processed, or 0 if no message is being processed.
  * @return msgid value
  */
-unsigned int
+uint32_t
 PanTiltInterface::msgid() const
 {
   return data->msgid;
@@ -215,7 +215,7 @@ PanTiltInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-PanTiltInterface::set_msgid(const unsigned int new_msgid)
+PanTiltInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
 }
@@ -258,7 +258,7 @@ PanTiltInterface::set_final(const bool new_final)
     constants otherwise (or a bit-wise combination).
  * @return error_code value
  */
-unsigned int
+uint32_t
 PanTiltInterface::error_code() const
 {
   return data->error_code;
@@ -281,7 +281,7 @@ PanTiltInterface::maxlenof_error_code() const
  * @param new_error_code new error_code value
  */
 void
-PanTiltInterface::set_error_code(const unsigned int new_error_code)
+PanTiltInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
 }

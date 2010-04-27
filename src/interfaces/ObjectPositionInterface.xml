@@ -4,72 +4,72 @@
   <constants>
     <!-- The range [0..1024] is reserved for standard types.
 	 The range [65535..16777216] can be used for application specific custom values. -->
-    <constant type="unsigned int" value="0" name="TYPE_OTHER">
+    <constant type="uint32" value="0" name="TYPE_OTHER">
       This constant denotes an object that cannot be denoted by any other constant.
     </constant>
-    <constant type="unsigned int" value="1" name="TYPE_BALL">
+    <constant type="uint32" value="1" name="TYPE_BALL">
       This constant denotes a ball object.
     </constant>
-    <constant type="unsigned int" value="2" name="TYPE_OPPONENT">
+    <constant type="uint32" value="2" name="TYPE_OPPONENT">
       This constant denotes an opponent robot.
     </constant>
-    <constant type="unsigned int" value="3" name="TYPE_TEAMMEMBER">
+    <constant type="uint32" value="3" name="TYPE_TEAMMEMBER">
       This constant denotes a robot of the same team.
     </constant>
-    <constant type="unsigned int" value="4" name="TYPE_LINE">
+    <constant type="uint32" value="4" name="TYPE_LINE">
       The represented object is a line. The starting point is given in world_x/y/z
       and the end point is pointed to by a vector stored in extent_x/y/z.
     </constant>
-    <constant type="unsigned int" value="5" name="TYPE_SELF">
+    <constant type="uint32" value="5" name="TYPE_SELF">
       This constant denotes my own position.
     </constant>
-    <constant type="unsigned int" value="6" name="TYPE_GOAL_BLUE">
+    <constant type="uint32" value="6" name="TYPE_GOAL_BLUE">
       This constant denotes the position of the sky-blue goal.
     </constant>
-    <constant type="unsigned int" value="7" name="TYPE_GOAL_YELLOW">
+    <constant type="uint32" value="7" name="TYPE_GOAL_YELLOW">
       This constant denotes the position of the yellow goal.
     </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
 	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
-    <constant type="unsigned int" value="0" name="FLAG_NONE">
+    <constant type="uint32" value="0" name="FLAG_NONE">
       No flags set.
     </constant>
-    <constant type="unsigned int" value="1" name="FLAG_HAS_WORLD">
+    <constant type="uint32" value="1" name="FLAG_HAS_WORLD">
       This interface has world_* fields set to valid values.
     </constant>
-    <constant type="unsigned int" value="2" name="FLAG_HAS_RELATIVE_CARTESIAN">
+    <constant type="uint32" value="2" name="FLAG_HAS_RELATIVE_CARTESIAN">
       This interface has relative_* fields set to valid values.
     </constant>
-    <constant type="unsigned int" value="4" name="FLAG_HAS_RELATIVE_POLAR">
+    <constant type="uint32" value="4" name="FLAG_HAS_RELATIVE_POLAR">
       This interface provides valid values for bearing, slope and distance.
     </constant>
-    <constant type="unsigned int" value="8" name="FLAG_HAS_EULER_ANGLES">
+    <constant type="uint32" value="8" name="FLAG_HAS_EULER_ANGLES">
       The roll/pitch/yaw values are set with Euler angles in the relative coordinate system.
     </constant>
-    <constant type="unsigned int" value="16" name="FLAG_HAS_EXTENT">
+    <constant type="uint32" value="16" name="FLAG_HAS_EXTENT">
       The extent_* fields are set with proper extent values.
     </constant>
-    <constant type="unsigned int" value="32" name="FLAG_HAS_VOLUME_EXTENT">
+    <constant type="uint32" value="32" name="FLAG_HAS_VOLUME_EXTENT">
       The extent_* fields are set with proper extent values for the volume of an
       object (opposed to the vector from the starting point in case of a line).
       This value shall only be valid if FLAG_HAS_EXTENT is set as well.
     </constant>
-    <constant type="unsigned int" value="64" name="FLAG_HAS_CIRCULAR_EXTENT">
+    <constant type="uint32" value="64" name="FLAG_HAS_CIRCULAR_EXTENT">
       Of the extent values only extent_x is set with the diameter of the object.
     </constant>
-    <constant type="unsigned int" value="128" name="FLAG_HAS_COVARIANCES">
+    <constant type="uint32" value="128" name="FLAG_HAS_COVARIANCES">
       The model provides valid covariances for the values that are provided (check
       other flags for which values are provided).
     </constant>
-    <constant type="unsigned int" value="256" name="FLAG_HAS_WORLD_VELOCITY">
+    <constant type="uint32" value="256" name="FLAG_HAS_WORLD_VELOCITY">
       Proper velocities in the cartesian world coordinate system are provided along
       the axes (world_*_velocity fields).
     </constant>
-    <constant type="unsigned int" value="512" name="FLAG_HAS_Z_AS_ORI">
+    <constant type="uint32" value="512" name="FLAG_HAS_Z_AS_ORI">
       The Z-coordinate of any coordinate is an orientation.
     </constant>
-    <constant type="unsigned int" value="1024" name="FLAG_IS_FIXED_OBJECT">
+    <constant type="uint32" value="1024" name="FLAG_IS_FIXED_OBJECT">
       This object is fixed and the world model should update its position
       according to the odometry, iff the object is not visible.
     </constant>
@@ -82,17 +82,17 @@
       known objects. You may choose not to use this for other application in which case
       the value should be other (which is also the default).
     </comment>
-    <field type="unsigned int" name="object_type">
+    <field type="uint32" name="object_type">
       Object type, use constants to define
     </field>
-    <field type="unsigned int" name="flags">
+    <field type="uint32" name="flags">
       Bit-wise concatenated fields of FLAG_* constants. Denotes features that the
       writer of this interfaces provides. Use a bit-wise OR to concatenate multiple
       flags, use a bit-wise AND to check if a flag has been set.
     </field>
     <field type="bool" name="visible">True, if object is visible.</field>
     <field type="bool" name="valid">True, if this position is valid.</field>
-    <field type="int" name="visibility_history">
+    <field type="int32" name="visibility_history">
       The visibilitiy history indicates the number of consecutive positive or negative
       sightings. If the history is negative, there have been as many negative sightings
       (object not visible) as the absolute value of the history. A positive value denotes

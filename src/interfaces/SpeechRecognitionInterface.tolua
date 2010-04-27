@@ -25,8 +25,8 @@ class SpeechRecognitionInterface : public Interface
   char * text();
   void set_text(const char * new_text);
   int maxlenof_text() const;
-  unsigned int counter();
-  void set_counter(const unsigned int new_counter);
+  uint32_t counter();
+  void set_counter(const uint32_t new_counter);
   int maxlenof_counter() const;
   bool is_processing();
   void set_processing(const bool new_processing);

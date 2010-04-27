@@ -50,27 +50,27 @@ namespace fawkes {
 
 
 /** ERROR_NONE constant */
-const unsigned int NavigatorInterface::ERROR_NONE = 0;
+const uint32_t NavigatorInterface::ERROR_NONE = 0;
 /** ERROR_MOTOR constant */
-const unsigned int NavigatorInterface::ERROR_MOTOR = 1;
+const uint32_t NavigatorInterface::ERROR_MOTOR = 1;
 /** ERROR_OBSTRUCTION constant */
-const unsigned int NavigatorInterface::ERROR_OBSTRUCTION = 2;
+const uint32_t NavigatorInterface::ERROR_OBSTRUCTION = 2;
 /** ERROR_UNKNOWN_PLACE constant */
-const unsigned int NavigatorInterface::ERROR_UNKNOWN_PLACE = 4;
+const uint32_t NavigatorInterface::ERROR_UNKNOWN_PLACE = 4;
 /** FLAG_NONE constant */
-const unsigned int NavigatorInterface::FLAG_NONE = 0;
+const uint32_t NavigatorInterface::FLAG_NONE = 0;
 /** FLAG_CART_GOTO constant */
-const unsigned int NavigatorInterface::FLAG_CART_GOTO = 1;
+const uint32_t NavigatorInterface::FLAG_CART_GOTO = 1;
 /** FLAG_POLAR_GOTO constant */
-const unsigned int NavigatorInterface::FLAG_POLAR_GOTO = 2;
+const uint32_t NavigatorInterface::FLAG_POLAR_GOTO = 2;
 /** FLAG_PLACE_GOTO constant */
-const unsigned int NavigatorInterface::FLAG_PLACE_GOTO = 4;
+const uint32_t NavigatorInterface::FLAG_PLACE_GOTO = 4;
 /** FLAG_UPDATES_DEST_DIST constant */
-const unsigned int NavigatorInterface::FLAG_UPDATES_DEST_DIST = 8;
+const uint32_t NavigatorInterface::FLAG_UPDATES_DEST_DIST = 8;
 /** FLAG_SECURITY_DISTANCE constant */
-const unsigned int NavigatorInterface::FLAG_SECURITY_DISTANCE = 16;
+const uint32_t NavigatorInterface::FLAG_SECURITY_DISTANCE = 16;
 /** FLAG_ESCAPING constant */
-const unsigned int NavigatorInterface::FLAG_ESCAPING = 32;
+const uint32_t NavigatorInterface::FLAG_ESCAPING = 32;
 
 /** Constructor */
 NavigatorInterface::NavigatorInterface() : Interface()
@@ -79,16 +79,16 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (NavigatorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_ENUM, "flags", 1, &data->flags, "uint32");
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "dest_x", 1, &data->dest_x);
   add_fieldinfo(IFT_FLOAT, "dest_y", 1, &data->dest_y);
   add_fieldinfo(IFT_FLOAT, "dest_ori", 1, &data->dest_ori);
   add_fieldinfo(IFT_FLOAT, "dest_dist", 1, &data->dest_dist);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_UINT, "error_code", 1, &data->error_code);
+  add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "uint32");
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
@@ -102,7 +102,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetMaxVelocityMessage");
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
-  unsigned char tmp_hash[] = {0x3b, 0x13, 0xa, 0x72, 0xc3, 0x94, 0x6d, 0xd5, 0x70, 0x21, 0x18, 0x2d, 0xcc, 0x52, 0x91, 0xa1};
+  unsigned char tmp_hash[] = {0x90, 0x6b, 0x4d, 0xeb, 0x52, 0x4d, 0x53, 0x73, 0x4c, 0xbc, 0x82, 0x5, 0x80, 0x81, 0xf1, 0x39};
   set_hash(tmp_hash);
 }
 
@@ -117,7 +117,7 @@ NavigatorInterface::~NavigatorInterface()
     FLAG_* constants denoting navigator component features.
  * @return flags value
  */
-unsigned int
+uint32_t
 NavigatorInterface::flags() const
 {
   return data->flags;
@@ -139,7 +139,7 @@ NavigatorInterface::maxlenof_flags() const
  * @param new_flags new flags value
  */
 void
-NavigatorInterface::set_flags(const unsigned int new_flags)
+NavigatorInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
 }
@@ -329,7 +329,7 @@ NavigatorInterface::set_dest_dist(const float new_dest_dist)
       processed, or 0 if no message is being processed.
  * @return msgid value
  */
-unsigned int
+uint32_t
 NavigatorInterface::msgid() const
 {
   return data->msgid;
@@ -351,7 +351,7 @@ NavigatorInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-NavigatorInterface::set_msgid(const unsigned int new_msgid)
+NavigatorInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
 }
@@ -394,7 +394,7 @@ NavigatorInterface::set_final(const bool new_final)
     constants otherwise (or a bit-wise combination).
  * @return error_code value
  */
-unsigned int
+uint32_t
 NavigatorInterface::error_code() const
 {
   return data->error_code;
@@ -417,7 +417,7 @@ NavigatorInterface::maxlenof_error_code() const
  * @param new_error_code new error_code value
  */
 void
-NavigatorInterface::set_error_code(const unsigned int new_error_code)
+NavigatorInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
 }

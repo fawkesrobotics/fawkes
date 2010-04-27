@@ -3,23 +3,23 @@
 <interface name="GameStateInterface" author="Tim Niemueller" year="2008">
   <constants>
     <!-- MSL game states, more generic to soccer -->
-    <constant type="unsigned int" value="0" name="GS_FROZEN">Frozen, nothing moves.</constant>
-    <constant type="unsigned int" value="1" name="GS_PLAY">Play, normal play</constant>
-    <constant type="unsigned int" value="2" name="GS_KICK_OFF">Kick off</constant>
-    <constant type="unsigned int" value="3" name="GS_DROP_BALL">Referee drops ball, both teams can wrestle for the ball</constant>
-    <constant type="unsigned int" value="4" name="GS_PENALTY">Penalty kick</constant>
-    <constant type="unsigned int" value="5" name="GS_CORNER_KICK">Corner kick</constant>
-    <constant type="unsigned int" value="6" name="GS_THROW_IN">Throw in</constant>
-    <constant type="unsigned int" value="7" name="GS_FREE_KICK">Free kick</constant>
-    <constant type="unsigned int" value="8" name="GS_GOAL_KICK">Goal kick</constant>
-    <constant type="unsigned int" value="9" name="GS_HALF_TIME">Half time</constant>
+    <constant type="uint32" value="0" name="GS_FROZEN">Frozen, nothing moves.</constant>
+    <constant type="uint32" value="1" name="GS_PLAY">Play, normal play</constant>
+    <constant type="uint32" value="2" name="GS_KICK_OFF">Kick off</constant>
+    <constant type="uint32" value="3" name="GS_DROP_BALL">Referee drops ball, both teams can wrestle for the ball</constant>
+    <constant type="uint32" value="4" name="GS_PENALTY">Penalty kick</constant>
+    <constant type="uint32" value="5" name="GS_CORNER_KICK">Corner kick</constant>
+    <constant type="uint32" value="6" name="GS_THROW_IN">Throw in</constant>
+    <constant type="uint32" value="7" name="GS_FREE_KICK">Free kick</constant>
+    <constant type="uint32" value="8" name="GS_GOAL_KICK">Goal kick</constant>
+    <constant type="uint32" value="9" name="GS_HALF_TIME">Half time</constant>
 
     <!-- SPL game states, game process state machine -->
-    <constant type="unsigned int" value="0" name="GS_SPL_INITIAL">Initial setup phase.</constant>
-    <constant type="unsigned int" value="1" name="GS_SPL_READY">Move to kick-off positions.</constant>
-    <constant type="unsigned int" value="2" name="GS_SPL_SET">Wait for kick-off.</constant>
-    <constant type="unsigned int" value="3" name="GS_SPL_PLAY">Play!</constant>
-    <constant type="unsigned int" value="4" name="GS_SPL_FINISHED">Game or Half-time is finished</constant>
+    <constant type="uint32" value="0" name="GS_SPL_INITIAL">Initial setup phase.</constant>
+    <constant type="uint32" value="1" name="GS_SPL_READY">Move to kick-off positions.</constant>
+    <constant type="uint32" value="2" name="GS_SPL_SET">Wait for kick-off.</constant>
+    <constant type="uint32" value="3" name="GS_SPL_PLAY">Play!</constant>
+    <constant type="uint32" value="4" name="GS_SPL_FINISHED">Game or Half-time is finished</constant>
 
     <enum name="if_gamestate_team_t">
       <comment>
@@ -65,15 +65,15 @@
       the WorldInfo network protocol.
       @see WorldInfoTransceiver
     </comment>
-    <field type="unsigned int" name="game_state">Current game state</field>
+    <field type="uint32" name="game_state">Current game state</field>
     <field type="if_gamestate_team_t" name="state_team">Team referred to by game state</field>
     <field type="if_gamestate_team_t" name="our_team">Our team color</field>
     <field type="if_gamestate_goalcolor_t" name="our_goal_color">Our own goal color</field>
     <field type="if_gamestate_half_t" name="half">Current game half</field>
     <field type="bool" name="kickoff">Whether we have kickoff</field>
     <field type="if_gamestate_role_t" name="role">Current role of this robot</field>
-    <field type="unsigned int" name="score_cyan">Score of team cyan</field>
-    <field type="unsigned int" name="score_magenta">Score of team magenta</field>
+    <field type="uint32" name="score_cyan">Score of team cyan</field>
+    <field type="uint32" name="score_magenta">Score of team magenta</field>
   </data>
   <message name="SetTeamColor">
     <comment>Set color of own team</comment>

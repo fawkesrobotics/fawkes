@@ -44,45 +44,45 @@ namespace fawkes {
 
 
 /** TYPE_OTHER constant */
-const unsigned int ObjectPositionInterface::TYPE_OTHER = 0;
+const uint32_t ObjectPositionInterface::TYPE_OTHER = 0;
 /** TYPE_BALL constant */
-const unsigned int ObjectPositionInterface::TYPE_BALL = 1;
+const uint32_t ObjectPositionInterface::TYPE_BALL = 1;
 /** TYPE_OPPONENT constant */
-const unsigned int ObjectPositionInterface::TYPE_OPPONENT = 2;
+const uint32_t ObjectPositionInterface::TYPE_OPPONENT = 2;
 /** TYPE_TEAMMEMBER constant */
-const unsigned int ObjectPositionInterface::TYPE_TEAMMEMBER = 3;
+const uint32_t ObjectPositionInterface::TYPE_TEAMMEMBER = 3;
 /** TYPE_LINE constant */
-const unsigned int ObjectPositionInterface::TYPE_LINE = 4;
+const uint32_t ObjectPositionInterface::TYPE_LINE = 4;
 /** TYPE_SELF constant */
-const unsigned int ObjectPositionInterface::TYPE_SELF = 5;
+const uint32_t ObjectPositionInterface::TYPE_SELF = 5;
 /** TYPE_GOAL_BLUE constant */
-const unsigned int ObjectPositionInterface::TYPE_GOAL_BLUE = 6;
+const uint32_t ObjectPositionInterface::TYPE_GOAL_BLUE = 6;
 /** TYPE_GOAL_YELLOW constant */
-const unsigned int ObjectPositionInterface::TYPE_GOAL_YELLOW = 7;
+const uint32_t ObjectPositionInterface::TYPE_GOAL_YELLOW = 7;
 /** FLAG_NONE constant */
-const unsigned int ObjectPositionInterface::FLAG_NONE = 0;
+const uint32_t ObjectPositionInterface::FLAG_NONE = 0;
 /** FLAG_HAS_WORLD constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_WORLD = 1;
+const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD = 1;
 /** FLAG_HAS_RELATIVE_CARTESIAN constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN = 2;
+const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN = 2;
 /** FLAG_HAS_RELATIVE_POLAR constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR = 4;
+const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR = 4;
 /** FLAG_HAS_EULER_ANGLES constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_EULER_ANGLES = 8;
+const uint32_t ObjectPositionInterface::FLAG_HAS_EULER_ANGLES = 8;
 /** FLAG_HAS_EXTENT constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_EXTENT = 16;
+const uint32_t ObjectPositionInterface::FLAG_HAS_EXTENT = 16;
 /** FLAG_HAS_VOLUME_EXTENT constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT = 32;
+const uint32_t ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT = 32;
 /** FLAG_HAS_CIRCULAR_EXTENT constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64;
+const uint32_t ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64;
 /** FLAG_HAS_COVARIANCES constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128;
+const uint32_t ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128;
 /** FLAG_HAS_WORLD_VELOCITY constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256;
+const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256;
 /** FLAG_HAS_Z_AS_ORI constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512;
+const uint32_t ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512;
 /** FLAG_IS_FIXED_OBJECT constant */
-const unsigned int ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024;
+const uint32_t ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024;
 
 /** Constructor */
 ObjectPositionInterface::ObjectPositionInterface() : Interface()
@@ -91,11 +91,11 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (ObjectPositionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "object_type", 1, &data->object_type);
-  add_fieldinfo(IFT_UINT, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_ENUM, "object_type", 1, &data->object_type, "uint32");
+  add_fieldinfo(IFT_ENUM, "flags", 1, &data->flags, "uint32");
   add_fieldinfo(IFT_BOOL, "visible", 1, &data->visible);
   add_fieldinfo(IFT_BOOL, "valid", 1, &data->valid);
-  add_fieldinfo(IFT_INT, "visibility_history", 1, &data->visibility_history);
+  add_fieldinfo(IFT_ENUM, "visibility_history", 1, &data->visibility_history, "int32");
   add_fieldinfo(IFT_FLOAT, "roll", 1, &data->roll);
   add_fieldinfo(IFT_FLOAT, "pitch", 1, &data->pitch);
   add_fieldinfo(IFT_FLOAT, "yaw", 1, &data->yaw);
@@ -122,7 +122,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "relative_y_velocity", 1, &data->relative_y_velocity);
   add_fieldinfo(IFT_FLOAT, "relative_z_velocity", 1, &data->relative_z_velocity);
   add_fieldinfo(IFT_FLOAT, "relative_xyz_velocity_covariance", 9, &data->relative_xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0xe6, 0x60, 0x23, 0x1b, 0xa4, 0x1a, 0x32, 0xb3, 0xed, 0x8e, 0xf8, 0x7f, 0x13, 0x1c, 0x73, 0x1f};
+  unsigned char tmp_hash[] = {0x9f, 0x72, 0x61, 0x39, 0x9a, 0xb4, 0x79, 0x4c, 0x33, 0x3, 0x3a, 0x75, 0xfc, 0xf0, 0xe5, 0x7e};
   set_hash(tmp_hash);
 }
 
@@ -138,7 +138,7 @@ ObjectPositionInterface::~ObjectPositionInterface()
     
  * @return object_type value
  */
-unsigned int
+uint32_t
 ObjectPositionInterface::object_type() const
 {
   return data->object_type;
@@ -161,7 +161,7 @@ ObjectPositionInterface::maxlenof_object_type() const
  * @param new_object_type new object_type value
  */
 void
-ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
+ObjectPositionInterface::set_object_type(const uint32_t new_object_type)
 {
   data->object_type = new_object_type;
 }
@@ -174,7 +174,7 @@ ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
     
  * @return flags value
  */
-unsigned int
+uint32_t
 ObjectPositionInterface::flags() const
 {
   return data->flags;
@@ -199,7 +199,7 @@ ObjectPositionInterface::maxlenof_flags() const
  * @param new_flags new flags value
  */
 void
-ObjectPositionInterface::set_flags(const unsigned int new_flags)
+ObjectPositionInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
 }
@@ -274,7 +274,7 @@ ObjectPositionInterface::set_valid(const bool new_valid)
     
  * @return visibility_history value
  */
-int
+int32_t
 ObjectPositionInterface::visibility_history() const
 {
   return data->visibility_history;
@@ -301,7 +301,7 @@ ObjectPositionInterface::maxlenof_visibility_history() const
  * @param new_visibility_history new visibility_history value
  */
 void
-ObjectPositionInterface::set_visibility_history(const int new_visibility_history)
+ObjectPositionInterface::set_visibility_history(const int32_t new_visibility_history)
 {
   data->visibility_history = new_visibility_history;
 }

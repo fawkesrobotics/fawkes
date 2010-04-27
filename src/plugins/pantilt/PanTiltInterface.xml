@@ -2,26 +2,26 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="PanTiltInterface" author="Tim Niemueller" year="2009">
   <constants>
-    <constant type="unsigned int" name="FLAG_SUPPORTS_PAN" value="1">
+    <constant type="uint32" name="FLAG_SUPPORTS_PAN" value="1">
       The
     </constant>
-    <constant type="unsigned int" name="FLAG_SUPPORTS_TILT" value="2">
+    <constant type="uint32" name="FLAG_SUPPORTS_TILT" value="2">
       IR reflex sensor, right finger, inner front.
     </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
 	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
-    <constant type="unsigned int" value="0" name="ERROR_NONE">No error.</constant>
-    <constant type="unsigned int" value="1" name="ERROR_UNSPECIFIC">
+    <constant type="uint32" value="0" name="ERROR_NONE">No error.</constant>
+    <constant type="uint32" value="1" name="ERROR_UNSPECIFIC">
       Some unspecified error occured.
     </constant>
-    <constant type="unsigned int" value="2" name="ERROR_COMMUNICATION">
+    <constant type="uint32" value="2" name="ERROR_COMMUNICATION">
       Communication with device failed.
     </constant>
-    <constant type="unsigned int" value="4" name="ERROR_PAN_OUTOFRANGE">
+    <constant type="uint32" value="4" name="ERROR_PAN_OUTOFRANGE">
       Desired pan is out of range.
     </constant>
-    <constant type="unsigned int" value="8" name="ERROR_TILT_OUTOFRANGE">
+    <constant type="uint32" value="8" name="ERROR_TILT_OUTOFRANGE">
       Desired tilt is out of range.
     </constant>
   </constants>
@@ -30,16 +30,16 @@
       Interface to access pan/tilt units.
     </comment>
 
-    <field type="unsigned int" name="flags">Flags.</field>
+    <field type="uint32" name="flags">Flags.</field>
 
     <field type="float" name="pan">Current pan.</field>
     <field type="float" name="tilt">Current tilt.</field>
 
-    <field type="unsigned int" name="msgid">The ID of the message that is currently being
+    <field type="uint32" name="msgid">The ID of the message that is currently being
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
-    <field type="unsigned int" name="error_code">Failure code set if
+    <field type="uint32" name="error_code">Failure code set if
     final is true. 0 if no error occured, an error code from ERROR_*
     constants otherwise (or a bit-wise combination).</field>
 

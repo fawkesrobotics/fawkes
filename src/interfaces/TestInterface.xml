@@ -2,7 +2,7 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="TestInterface" author="Tim Niemueller" year="2006-2007">
   <constants>
-    <constant type="int" value="5" name="TEST_CONSTANT">Just a test constant</constant>
+    <constant type="int32" value="5" name="TEST_CONSTANT">Just a test constant</constant>
     <constant type="float" value="1.2" name="TEST_FLOAT_CONSTANT">Another test constant</constant>
     <enum name="TestEnum">
       <comment>Demonstrating enums</comment>
@@ -14,13 +14,13 @@
     <comment>Test interface. Use this to play around. Do NOT remove any fields, as this
       interface is used by BlackBoard QA.</comment>
     <field type="bool" name="test_bool">Test Bool</field>
-    <field type="int" name="test_int">Test integer</field>
+    <field type="int32" name="test_int">Test integer</field>
     <field type="byte" name="flags">Flags spit down by the writer</field>
     <field type="string" length="30" flags="changed_indicator" validfor="5" default="testing default" name="test_string">A test sring</field>
-    <field type="int" name="result">Result of operation add operation from Calculate message.</field>
-    <field type="unsigned int" name="test_uint">Test unsigned int</field>
-    <field type="unsigned long int" name="test_ulint">Test unsigned long int</field>
-    <field type="long int" name="test_lint">Test long int</field>
+    <field type="int32" name="result">Result of operation add operation from Calculate message.</field>
+    <field type="uint32" name="test_uint">Test uint32</field>
+    <field type="uint64" name="test_ulint">Test unsigned long int</field>
+    <field type="int64" name="test_lint">Test long int</field>
   </data>
   <message name="SetTestInt">
     <comment>Set the test int to the given value.</comment>
@@ -32,7 +32,7 @@
   </message>
   <message name="Calculate">
     <comment>Adds Summand and Addend. Result is put into Result field.</comment>
-    <field type="int" name="summand">Summand</field>
-    <field type="int" name="addend">Addend</field>
+    <field type="int32" name="summand">Summand</field>
+    <field type="int32" name="addend">Addend</field>
   </message>
 </interface>

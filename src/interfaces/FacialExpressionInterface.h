@@ -81,6 +81,8 @@ class FacialExpressionInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     brows_t brows_action; /**< Type of action of brows */
     eyes_t eyes_action; /**< Type of action of eyes */
     jowl_t jowl_action; /**< Type of action of jown */
@@ -96,6 +98,8 @@ class FacialExpressionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       brows_t brows_action; /**< Type of action of brows */
     } MoveBrowsMessage_data_t;
 
@@ -119,6 +123,8 @@ class FacialExpressionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       eyes_t eyes_action; /**< Type of action of eyes */
     } MoveEyesMessage_data_t;
 
@@ -142,6 +148,8 @@ class FacialExpressionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       jowl_t jowl_action; /**< Type of action of jown */
     } MoveJowlMessage_data_t;
 
@@ -165,6 +173,8 @@ class FacialExpressionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       mouth_t mouth_action; /**< Type of action of mouth */
     } MoveMouthMessage_data_t;
 

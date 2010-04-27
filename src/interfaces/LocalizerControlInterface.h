@@ -41,6 +41,8 @@ class LocalizerControlInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char map_name[30]; /**< The name of the current
     map */
   } LocalizerControlInterface_data_t;
@@ -54,6 +56,8 @@ class LocalizerControlInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< The new initial x-coordinate. */
       float y; /**< The new initial x-coordinate. */
       float ori; /**< The new initial orientation. */

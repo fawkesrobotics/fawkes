@@ -35,76 +35,76 @@ namespace fawkes {
  * 
       This interface provides access to a joystick. It provides up to
       five axes, where each has a X and a Y value between -1.0 and 1.0.
-      Up to 32 buttons are support via an unsigned int bit field.
+      Up to 32 buttons are support via an uint32 bit field.
     
  * @ingroup FawkesInterfaces
  */
 
 
 /** BUTTON_1 constant */
-const unsigned int JoystickInterface::BUTTON_1 = 1;
+const uint32_t JoystickInterface::BUTTON_1 = 1;
 /** BUTTON_2 constant */
-const unsigned int JoystickInterface::BUTTON_2 = 2;
+const uint32_t JoystickInterface::BUTTON_2 = 2;
 /** BUTTON_3 constant */
-const unsigned int JoystickInterface::BUTTON_3 = 4;
+const uint32_t JoystickInterface::BUTTON_3 = 4;
 /** BUTTON_4 constant */
-const unsigned int JoystickInterface::BUTTON_4 = 8;
+const uint32_t JoystickInterface::BUTTON_4 = 8;
 /** BUTTON_5 constant */
-const unsigned int JoystickInterface::BUTTON_5 = 16;
+const uint32_t JoystickInterface::BUTTON_5 = 16;
 /** BUTTON_6 constant */
-const unsigned int JoystickInterface::BUTTON_6 = 32;
+const uint32_t JoystickInterface::BUTTON_6 = 32;
 /** BUTTON_7 constant */
-const unsigned int JoystickInterface::BUTTON_7 = 64;
+const uint32_t JoystickInterface::BUTTON_7 = 64;
 /** BUTTON_8 constant */
-const unsigned int JoystickInterface::BUTTON_8 = 128;
+const uint32_t JoystickInterface::BUTTON_8 = 128;
 /** BUTTON_9 constant */
-const unsigned int JoystickInterface::BUTTON_9 = 256;
+const uint32_t JoystickInterface::BUTTON_9 = 256;
 /** BUTTON_10 constant */
-const unsigned int JoystickInterface::BUTTON_10 = 512;
+const uint32_t JoystickInterface::BUTTON_10 = 512;
 /** BUTTON_11 constant */
-const unsigned int JoystickInterface::BUTTON_11 = 1024;
+const uint32_t JoystickInterface::BUTTON_11 = 1024;
 /** BUTTON_12 constant */
-const unsigned int JoystickInterface::BUTTON_12 = 2048;
+const uint32_t JoystickInterface::BUTTON_12 = 2048;
 /** BUTTON_13 constant */
-const unsigned int JoystickInterface::BUTTON_13 = 4096;
+const uint32_t JoystickInterface::BUTTON_13 = 4096;
 /** BUTTON_14 constant */
-const unsigned int JoystickInterface::BUTTON_14 = 8192;
+const uint32_t JoystickInterface::BUTTON_14 = 8192;
 /** BUTTON_15 constant */
-const unsigned int JoystickInterface::BUTTON_15 = 16384;
+const uint32_t JoystickInterface::BUTTON_15 = 16384;
 /** BUTTON_16 constant */
-const unsigned int JoystickInterface::BUTTON_16 = 32768;
+const uint32_t JoystickInterface::BUTTON_16 = 32768;
 /** BUTTON_17 constant */
-const unsigned int JoystickInterface::BUTTON_17 = 65536;
+const uint32_t JoystickInterface::BUTTON_17 = 65536;
 /** BUTTON_18 constant */
-const unsigned int JoystickInterface::BUTTON_18 = 131072;
+const uint32_t JoystickInterface::BUTTON_18 = 131072;
 /** BUTTON_19 constant */
-const unsigned int JoystickInterface::BUTTON_19 = 262144;
+const uint32_t JoystickInterface::BUTTON_19 = 262144;
 /** BUTTON_20 constant */
-const unsigned int JoystickInterface::BUTTON_20 = 524288;
+const uint32_t JoystickInterface::BUTTON_20 = 524288;
 /** BUTTON_21 constant */
-const unsigned int JoystickInterface::BUTTON_21 = 1048576;
+const uint32_t JoystickInterface::BUTTON_21 = 1048576;
 /** BUTTON_22 constant */
-const unsigned int JoystickInterface::BUTTON_22 = 2097152;
+const uint32_t JoystickInterface::BUTTON_22 = 2097152;
 /** BUTTON_23 constant */
-const unsigned int JoystickInterface::BUTTON_23 = 4194304;
+const uint32_t JoystickInterface::BUTTON_23 = 4194304;
 /** BUTTON_24 constant */
-const unsigned int JoystickInterface::BUTTON_24 = 8388608;
+const uint32_t JoystickInterface::BUTTON_24 = 8388608;
 /** BUTTON_25 constant */
-const unsigned int JoystickInterface::BUTTON_25 = 16777216;
+const uint32_t JoystickInterface::BUTTON_25 = 16777216;
 /** BUTTON_26 constant */
-const unsigned int JoystickInterface::BUTTON_26 = 33554432;
+const uint32_t JoystickInterface::BUTTON_26 = 33554432;
 /** BUTTON_27 constant */
-const unsigned int JoystickInterface::BUTTON_27 = 67108864;
+const uint32_t JoystickInterface::BUTTON_27 = 67108864;
 /** BUTTON_28 constant */
-const unsigned int JoystickInterface::BUTTON_28 = 134217728;
+const uint32_t JoystickInterface::BUTTON_28 = 134217728;
 /** BUTTON_29 constant */
-const unsigned int JoystickInterface::BUTTON_29 = 268435456;
+const uint32_t JoystickInterface::BUTTON_29 = 268435456;
 /** BUTTON_30 constant */
-const unsigned int JoystickInterface::BUTTON_30 = 536870912;
+const uint32_t JoystickInterface::BUTTON_30 = 536870912;
 /** BUTTON_31 constant */
-const unsigned int JoystickInterface::BUTTON_31 = 1073741824;
+const uint32_t JoystickInterface::BUTTON_31 = 1073741824;
 /** BUTTON_32 constant */
-const unsigned int JoystickInterface::BUTTON_32 = 2147483648U;
+const uint32_t JoystickInterface::BUTTON_32 = 2147483648;
 
 /** Constructor */
 JoystickInterface::JoystickInterface() : Interface()
@@ -115,10 +115,10 @@ JoystickInterface::JoystickInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BYTE, "num_axes", 1, &data->num_axes);
   add_fieldinfo(IFT_BYTE, "num_buttons", 1, &data->num_buttons);
-  add_fieldinfo(IFT_UINT, "pressed_buttons", 1, &data->pressed_buttons);
+  add_fieldinfo(IFT_ENUM, "pressed_buttons", 1, &data->pressed_buttons, "uint32");
   add_fieldinfo(IFT_FLOAT, "axis_x", 4, &data->axis_x);
   add_fieldinfo(IFT_FLOAT, "axis_y", 4, &data->axis_y);
-  unsigned char tmp_hash[] = {0xc1, 0x79, 0x75, 0x4e, 0x3e, 0xfa, 0x1, 0x53, 0x18, 0xb0, 0x9d, 0x9b, 0x43, 0x41, 0xa, 0x86};
+  unsigned char tmp_hash[] = {0x20, 0xe5, 0x9c, 0x19, 0x6e, 0xd2, 0xcf, 0xcc, 0xf2, 0x5d, 0x70, 0x88, 0x52, 0x66, 0x7a, 0x1e};
   set_hash(tmp_hash);
 }
 
@@ -134,7 +134,7 @@ JoystickInterface::~JoystickInterface()
     
  * @return num_axes value
  */
-unsigned char
+uint8_t
 JoystickInterface::num_axes() const
 {
   return data->num_axes;
@@ -157,7 +157,7 @@ JoystickInterface::maxlenof_num_axes() const
  * @param new_num_axes new num_axes value
  */
 void
-JoystickInterface::set_num_axes(const unsigned char new_num_axes)
+JoystickInterface::set_num_axes(const uint8_t new_num_axes)
 {
   data->num_axes = new_num_axes;
 }
@@ -168,7 +168,7 @@ JoystickInterface::set_num_axes(const unsigned char new_num_axes)
     
  * @return num_buttons value
  */
-unsigned char
+uint8_t
 JoystickInterface::num_buttons() const
 {
   return data->num_buttons;
@@ -191,7 +191,7 @@ JoystickInterface::maxlenof_num_buttons() const
  * @param new_num_buttons new num_buttons value
  */
 void
-JoystickInterface::set_num_buttons(const unsigned char new_num_buttons)
+JoystickInterface::set_num_buttons(const uint8_t new_num_buttons)
 {
   data->num_buttons = new_num_buttons;
 }
@@ -204,7 +204,7 @@ JoystickInterface::set_num_buttons(const unsigned char new_num_buttons)
     
  * @return pressed_buttons value
  */
-unsigned int
+uint32_t
 JoystickInterface::pressed_buttons() const
 {
   return data->pressed_buttons;
@@ -229,7 +229,7 @@ JoystickInterface::maxlenof_pressed_buttons() const
  * @param new_pressed_buttons new pressed_buttons value
  */
 void
-JoystickInterface::set_pressed_buttons(const unsigned int new_pressed_buttons)
+JoystickInterface::set_pressed_buttons(const uint32_t new_pressed_buttons)
 {
   data->pressed_buttons = new_pressed_buttons;
 }

@@ -37,39 +37,41 @@ class NavigatorInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int ERROR_NONE;
-  static const unsigned int ERROR_MOTOR;
-  static const unsigned int ERROR_OBSTRUCTION;
-  static const unsigned int ERROR_UNKNOWN_PLACE;
-  static const unsigned int FLAG_NONE;
-  static const unsigned int FLAG_CART_GOTO;
-  static const unsigned int FLAG_POLAR_GOTO;
-  static const unsigned int FLAG_PLACE_GOTO;
-  static const unsigned int FLAG_UPDATES_DEST_DIST;
-  static const unsigned int FLAG_SECURITY_DISTANCE;
-  static const unsigned int FLAG_ESCAPING;
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_MOTOR;
+  static const uint32_t ERROR_OBSTRUCTION;
+  static const uint32_t ERROR_UNKNOWN_PLACE;
+  static const uint32_t FLAG_NONE;
+  static const uint32_t FLAG_CART_GOTO;
+  static const uint32_t FLAG_POLAR_GOTO;
+  static const uint32_t FLAG_PLACE_GOTO;
+  static const uint32_t FLAG_UPDATES_DEST_DIST;
+  static const uint32_t FLAG_SECURITY_DISTANCE;
+  static const uint32_t FLAG_ESCAPING;
 
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int flags; /**< Bit-wise combination of
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t flags; /**< Bit-wise combination of
     FLAG_* constants denoting navigator component features. */
-    unsigned int msgid; /**< The ID of the message that is currently being
-      processed, or 0 if no message is being processed. */
-    unsigned int error_code; /**< Failure code set if
-    final is true. 0 if no error occured, an error code from ERROR_*
-    constants otherwise (or a bit-wise combination). */
     float x; /**< Current X-coordinate in the navigator coordinate system. */
     float y; /**< Current Y-coordinate in the navigator coordinate system. */
     float dest_x; /**< X-coordinate of the current destination, or 0.0 if no target has been set. */
     float dest_y; /**< Y-coordinate of the current destination, or 0.0 if no target has been set. */
     float dest_ori; /**< Orientation of the current destination, or 0.0 if no target has been set. */
     float dest_dist; /**< Distance to destination in m. */
+    uint32_t msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
+    bool final; /**< True, if the last goto command has been finished,
+      false if it is still running */
+    uint32_t error_code; /**< Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination). */
     float max_velocity; /**< Maximum velocity */
     float security_distance; /**< Security distance to
     keep to obstacles */
-    bool final; /**< True, if the last goto command has been finished,
-      false if it is still running */
     bool escaping_enabled; /**< This is used for
 	navigation components with integrated collision avoidance, to
 	check whether the navigator should stop when an obstacle
@@ -96,6 +98,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle; /**< Angle of the turn. */
       float velocity; /**< The desired turning velocity in rad/s,
       set to zero to use default value. */
@@ -124,6 +128,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-coordinate of the target, in the robot's coordinate system. */
       float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
       float orientation; /**< The orientation of the robot at the target. */
@@ -155,6 +161,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float phi; /**< Angle between the robot's front and the target. */
       float dist; /**< Distance to the target. */
       float orientation; /**< The orientation of the robot at the target. */
@@ -186,6 +194,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char place[64]; /**< Place to go to. */
     } PlaceGotoMessage_data_t;
 
@@ -209,6 +219,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-coordinate of the obstacle. */
       float y; /**< Y-coordinate of the obstacle. */
       float width; /**< Width of the obstacle. */
@@ -251,6 +263,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float max_velocity; /**< Maximum velocity */
     } SetMaxVelocityMessage_data_t;
 
@@ -274,6 +288,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool escaping_enabled; /**< This is used for
 	navigation components with integrated collision avoidance, to
 	check whether the navigator should stop when an obstacle
@@ -300,6 +316,8 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float security_distance; /**< Security distance to
     keep to obstacles */
     } SetSecurityDistanceMessage_data_t;
@@ -326,8 +344,8 @@ class NavigatorInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int flags() const;
-  void set_flags(const unsigned int new_flags);
+  uint32_t flags() const;
+  void set_flags(const uint32_t new_flags);
   size_t maxlenof_flags() const;
   float x() const;
   void set_x(const float new_x);
@@ -347,14 +365,14 @@ class NavigatorInterface : public Interface
   float dest_dist() const;
   void set_dest_dist(const float new_dest_dist);
   size_t maxlenof_dest_dist() const;
-  unsigned int msgid() const;
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
   size_t maxlenof_msgid() const;
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
-  unsigned int error_code() const;
-  void set_error_code(const unsigned int new_error_code);
+  uint32_t error_code() const;
+  void set_error_code(const uint32_t new_error_code);
   size_t maxlenof_error_code() const;
   float max_velocity() const;
   void set_max_velocity(const float new_max_velocity);

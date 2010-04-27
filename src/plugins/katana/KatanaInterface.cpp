@@ -41,49 +41,49 @@ namespace fawkes {
 
 
 /** SENSOR_IR_RIGHT_INNER_MIDDLE constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_INNER_MIDDLE = 0;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_MIDDLE = 0;
 /** SENSOR_IR_RIGHT_INNER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_INNER_FRONT = 1;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_FRONT = 1;
 /** SENSOR_RESERVED_2 constant */
-const unsigned int KatanaInterface::SENSOR_RESERVED_2 = 2;
+const uint32_t KatanaInterface::SENSOR_RESERVED_2 = 2;
 /** SENSOR_COND_BOTH constant */
-const unsigned int KatanaInterface::SENSOR_COND_BOTH = 3;
+const uint32_t KatanaInterface::SENSOR_COND_BOTH = 3;
 /** SENSOR_IR_RIGHT_OUTER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_OUTER_FRONT = 4;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_OUTER_FRONT = 4;
 /** SENSOR_IR_RIGHT_BOTTOM_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_BOTTOM_FRONT = 5;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_BOTTOM_FRONT = 5;
 /** SENSOR_FORCE_RIGHT_REAR constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_RIGHT_REAR = 6;
+const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_REAR = 6;
 /** SENSOR_FORCE_RIGHT_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_RIGHT_FRONT = 7;
+const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_FRONT = 7;
 /** SENSOR_IR_LEFT_INNER_MIDDLE constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_INNER_MIDDLE = 8;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_MIDDLE = 8;
 /** SENSOR_IR_LEFT_INNER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_INNER_FRONT = 9;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_FRONT = 9;
 /** SENSOR_RESERVED_10 constant */
-const unsigned int KatanaInterface::SENSOR_RESERVED_10 = 10;
+const uint32_t KatanaInterface::SENSOR_RESERVED_10 = 10;
 /** SENSOR_IR_CENTER_GRIPPER constant */
-const unsigned int KatanaInterface::SENSOR_IR_CENTER_GRIPPER = 11;
+const uint32_t KatanaInterface::SENSOR_IR_CENTER_GRIPPER = 11;
 /** SENSOR_IR_LEFT_OUTER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_OUTER_FRONT = 12;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_OUTER_FRONT = 12;
 /** SENSOR_IR_LEFT_BOTTOM_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_BOTTOM_FRONT = 13;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_BOTTOM_FRONT = 13;
 /** SENSOR_FORCE_LEFT_REAR constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_LEFT_REAR = 14;
+const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_REAR = 14;
 /** SENSOR_FORCE_LEFT_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_LEFT_FRONT = 15;
+const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_FRONT = 15;
 /** ERROR_NONE constant */
-const unsigned int KatanaInterface::ERROR_NONE = 0;
+const uint32_t KatanaInterface::ERROR_NONE = 0;
 /** ERROR_UNSPECIFIC constant */
-const unsigned int KatanaInterface::ERROR_UNSPECIFIC = 1;
+const uint32_t KatanaInterface::ERROR_UNSPECIFIC = 1;
 /** ERROR_CMD_START_FAILED constant */
-const unsigned int KatanaInterface::ERROR_CMD_START_FAILED = 2;
+const uint32_t KatanaInterface::ERROR_CMD_START_FAILED = 2;
 /** ERROR_NO_SOLUTION constant */
-const unsigned int KatanaInterface::ERROR_NO_SOLUTION = 4;
+const uint32_t KatanaInterface::ERROR_NO_SOLUTION = 4;
 /** ERROR_COMMUNICATION constant */
-const unsigned int KatanaInterface::ERROR_COMMUNICATION = 8;
+const uint32_t KatanaInterface::ERROR_COMMUNICATION = 8;
 /** ERROR_MOTOR_CRASHED constant */
-const unsigned int KatanaInterface::ERROR_MOTOR_CRASHED = 16;
+const uint32_t KatanaInterface::ERROR_MOTOR_CRASHED = 16;
 
 /** Constructor */
 KatanaInterface::KatanaInterface() : Interface()
@@ -99,9 +99,9 @@ KatanaInterface::KatanaInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
   add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_UINT, "error_code", 1, &data->error_code);
+  add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "uint32");
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
@@ -115,7 +115,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("CloseGripperMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetMaxVelocityMessage");
-  unsigned char tmp_hash[] = {0x67, 0x9b, 0x57, 0x4e, 0xb3, 0x7c, 0x64, 0x5f, 0x23, 0xd4, 0x1e, 0x8a, 0x19, 0x52, 0x5b, 0x84};
+  unsigned char tmp_hash[] = {0x36, 0x80, 0x78, 0x4, 0x9f, 0x14, 0x1b, 0x27, 0x38, 0x40, 0x77, 0xb6, 0xc0, 0x7, 0xe, 0x73};
   set_hash(tmp_hash);
 }
 
@@ -130,7 +130,7 @@ KatanaInterface::~KatanaInterface()
     values. Use SENSOR_* indexes for accessing the values.
  * @return sensor_value value
  */
-unsigned char *
+uint8_t *
 KatanaInterface::sensor_value() const
 {
   return data->sensor_value;
@@ -143,7 +143,7 @@ KatanaInterface::sensor_value() const
  * @return sensor_value value
  * @exception Exception thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 KatanaInterface::sensor_value(unsigned int index) const
 {
   if (index > 16) {
@@ -168,9 +168,9 @@ KatanaInterface::maxlenof_sensor_value() const
  * @param new_sensor_value new sensor_value value
  */
 void
-KatanaInterface::set_sensor_value(const unsigned char * new_sensor_value)
+KatanaInterface::set_sensor_value(const uint8_t * new_sensor_value)
 {
-  memcpy(data->sensor_value, new_sensor_value, sizeof(unsigned char) * 16);
+  memcpy(data->sensor_value, new_sensor_value, sizeof(uint8_t) * 16);
 }
 
 /** Set sensor_value value at given index.
@@ -180,7 +180,7 @@ KatanaInterface::set_sensor_value(const unsigned char * new_sensor_value)
  * @param index index for of the value
  */
 void
-KatanaInterface::set_sensor_value(unsigned int index, const unsigned char new_sensor_value)
+KatanaInterface::set_sensor_value(unsigned int index, const uint8_t new_sensor_value)
 {
   if (index > 16) {
     throw Exception("Index value %u out of bounds (0..16)", index);
@@ -378,7 +378,7 @@ KatanaInterface::set_psi(const float new_psi)
       processed, or 0 if no message is being processed.
  * @return msgid value
  */
-unsigned int
+uint32_t
 KatanaInterface::msgid() const
 {
   return data->msgid;
@@ -400,7 +400,7 @@ KatanaInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-KatanaInterface::set_msgid(const unsigned int new_msgid)
+KatanaInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
 }
@@ -443,7 +443,7 @@ KatanaInterface::set_final(const bool new_final)
     constants otherwise (or a bit-wise combination).
  * @return error_code value
  */
-unsigned int
+uint32_t
 KatanaInterface::error_code() const
 {
   return data->error_code;
@@ -466,7 +466,7 @@ KatanaInterface::maxlenof_error_code() const
  * @param new_error_code new error_code value
  */
 void
-KatanaInterface::set_error_code(const unsigned int new_error_code)
+KatanaInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
 }
@@ -535,7 +535,7 @@ KatanaInterface::set_calibrated(const bool new_calibrated)
  * Maximum velocity
  * @return max_velocity value
  */
-unsigned char
+uint8_t
 KatanaInterface::max_velocity() const
 {
   return data->max_velocity;
@@ -556,7 +556,7 @@ KatanaInterface::maxlenof_max_velocity() const
  * @param new_max_velocity new max_velocity value
  */
 void
-KatanaInterface::set_max_velocity(const unsigned char new_max_velocity)
+KatanaInterface::set_max_velocity(const uint8_t new_max_velocity)
 {
   data->max_velocity = new_max_velocity;
 }
@@ -565,7 +565,7 @@ KatanaInterface::set_max_velocity(const unsigned char new_max_velocity)
  * Number of motors
  * @return num_motors value
  */
-unsigned char
+uint8_t
 KatanaInterface::num_motors() const
 {
   return data->num_motors;
@@ -586,7 +586,7 @@ KatanaInterface::maxlenof_num_motors() const
  * @param new_num_motors new num_motors value
  */
 void
-KatanaInterface::set_num_motors(const unsigned char new_num_motors)
+KatanaInterface::set_num_motors(const uint8_t new_num_motors)
 {
   data->num_motors = new_num_motors;
 }
@@ -1235,7 +1235,7 @@ KatanaInterface::SetEnabledMessage::clone() const
 /** Constructor with initial values.
  * @param ini_max_velocity initial value for max_velocity
  */
-KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const unsigned char ini_max_velocity) : Message("SetMaxVelocityMessage")
+KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const uint8_t ini_max_velocity) : Message("SetMaxVelocityMessage")
 {
   data_size = sizeof(SetMaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1276,7 +1276,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const SetMaxVeloci
  * Maximum velocity
  * @return max_velocity value
  */
-unsigned char
+uint8_t
 KatanaInterface::SetMaxVelocityMessage::max_velocity() const
 {
   return data->max_velocity;
@@ -1297,7 +1297,7 @@ KatanaInterface::SetMaxVelocityMessage::maxlenof_max_velocity() const
  * @param new_max_velocity new max_velocity value
  */
 void
-KatanaInterface::SetMaxVelocityMessage::set_max_velocity(const unsigned char new_max_velocity)
+KatanaInterface::SetMaxVelocityMessage::set_max_velocity(const uint8_t new_max_velocity)
 {
   data->max_velocity = new_max_velocity;
 }

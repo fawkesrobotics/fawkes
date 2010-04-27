@@ -47,14 +47,14 @@ BatteryInterface::BatteryInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "current", 1, &data->current);
-  add_fieldinfo(IFT_UINT, "voltage", 1, &data->voltage);
-  add_fieldinfo(IFT_UINT, "temperature", 1, &data->temperature);
+  add_fieldinfo(IFT_ENUM, "current", 1, &data->current, "uint32");
+  add_fieldinfo(IFT_ENUM, "voltage", 1, &data->voltage, "uint32");
+  add_fieldinfo(IFT_ENUM, "temperature", 1, &data->temperature, "uint32");
   add_fieldinfo(IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
   add_fieldinfo(IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
   add_messageinfo("PushButtonMessage");
   add_messageinfo("SleepMessage");
-  unsigned char tmp_hash[] = {0xaf, 0x87, 0xbb, 0x32, 0x19, 0x6b, 0x9, 0x3d, 0x7a, 0x6c, 0xf0, 0x4a, 0xb0, 0xd8, 0xa, 0x1d};
+  unsigned char tmp_hash[] = {0x28, 0xb6, 0xbe, 0xe7, 0xf1, 0x47, 0x2, 0x12, 0x1d, 0xe3, 0x7c, 0x14, 0xe9, 0x1f, 0x24, 0x4d};
   set_hash(tmp_hash);
 }
 
@@ -68,7 +68,7 @@ BatteryInterface::~BatteryInterface()
  * Battery Current [mA]
  * @return current value
  */
-unsigned int
+uint32_t
 BatteryInterface::current() const
 {
   return data->current;
@@ -89,7 +89,7 @@ BatteryInterface::maxlenof_current() const
  * @param new_current new current value
  */
 void
-BatteryInterface::set_current(const unsigned int new_current)
+BatteryInterface::set_current(const uint32_t new_current)
 {
   data->current = new_current;
 }
@@ -98,7 +98,7 @@ BatteryInterface::set_current(const unsigned int new_current)
  * Battery Voltage [mV]
  * @return voltage value
  */
-unsigned int
+uint32_t
 BatteryInterface::voltage() const
 {
   return data->voltage;
@@ -119,7 +119,7 @@ BatteryInterface::maxlenof_voltage() const
  * @param new_voltage new voltage value
  */
 void
-BatteryInterface::set_voltage(const unsigned int new_voltage)
+BatteryInterface::set_voltage(const uint32_t new_voltage)
 {
   data->voltage = new_voltage;
 }
@@ -128,7 +128,7 @@ BatteryInterface::set_voltage(const unsigned int new_voltage)
  * Battery Temperature [°C]
  * @return temperature value
  */
-unsigned int
+uint32_t
 BatteryInterface::temperature() const
 {
   return data->temperature;
@@ -149,7 +149,7 @@ BatteryInterface::maxlenof_temperature() const
  * @param new_temperature new temperature value
  */
 void
-BatteryInterface::set_temperature(const unsigned int new_temperature)
+BatteryInterface::set_temperature(const uint32_t new_temperature)
 {
   data->temperature = new_temperature;
 }

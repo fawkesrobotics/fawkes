@@ -3,17 +3,17 @@ $using namespace fawkes;
 namespace fawkes {
 class NavigatorInterface : public Interface
 {
-  static const unsigned int ERROR_NONE;
-  static const unsigned int ERROR_MOTOR;
-  static const unsigned int ERROR_OBSTRUCTION;
-  static const unsigned int ERROR_UNKNOWN_PLACE;
-  static const unsigned int FLAG_NONE;
-  static const unsigned int FLAG_CART_GOTO;
-  static const unsigned int FLAG_POLAR_GOTO;
-  static const unsigned int FLAG_PLACE_GOTO;
-  static const unsigned int FLAG_UPDATES_DEST_DIST;
-  static const unsigned int FLAG_SECURITY_DISTANCE;
-  static const unsigned int FLAG_ESCAPING;
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_MOTOR;
+  static const uint32_t ERROR_OBSTRUCTION;
+  static const uint32_t ERROR_UNKNOWN_PLACE;
+  static const uint32_t FLAG_NONE;
+  static const uint32_t FLAG_CART_GOTO;
+  static const uint32_t FLAG_POLAR_GOTO;
+  static const uint32_t FLAG_PLACE_GOTO;
+  static const uint32_t FLAG_UPDATES_DEST_DIST;
+  static const uint32_t FLAG_SECURITY_DISTANCE;
+  static const uint32_t FLAG_ESCAPING;
 
   class StopMessage : public Message
   {
@@ -138,8 +138,8 @@ class NavigatorInterface : public Interface
     int maxlenof_security_distance() const;
   };
 
-  unsigned int flags();
-  void set_flags(const unsigned int new_flags);
+  uint32_t flags();
+  void set_flags(const uint32_t new_flags);
   int maxlenof_flags() const;
   float x();
   void set_x(const float new_x);
@@ -159,14 +159,14 @@ class NavigatorInterface : public Interface
   float dest_dist();
   void set_dest_dist(const float new_dest_dist);
   int maxlenof_dest_dist() const;
-  unsigned int msgid();
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid();
+  void set_msgid(const uint32_t new_msgid);
   int maxlenof_msgid() const;
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
-  unsigned int error_code();
-  void set_error_code(const unsigned int new_error_code);
+  uint32_t error_code();
+  void set_error_code(const uint32_t new_error_code);
   int maxlenof_error_code() const;
   float max_velocity();
   void set_max_velocity(const float new_max_velocity);

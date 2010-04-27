@@ -60,14 +60,14 @@ VisualDisplay2DInterface::VisualDisplay2DInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (VisualDisplay2DInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "counter", 1, &data->counter);
+  add_fieldinfo(IFT_ENUM, "counter", 1, &data->counter, "uint32");
   add_messageinfo("AddCartLineMessage");
   add_messageinfo("AddCartCircleMessage");
   add_messageinfo("AddCartRectMessage");
   add_messageinfo("AddCartTextMessage");
   add_messageinfo("DeleteObjectMessage");
   add_messageinfo("DeleteAllMessage");
-  unsigned char tmp_hash[] = {0x80, 0x7d, 0xc2, 0x26, 0xa2, 0xbf, 0xfa, 0x93, 0x80, 0x78, 0x2, 0x68, 0xdd, 0x9, 0xab, 0x9f};
+  unsigned char tmp_hash[] = {0xd9, 0x2, 0xad, 0xbb, 0x7a, 0x47, 0x40, 0x6a, 0x4f, 0x6d, 0xfa, 0xa, 0x20, 0x35, 0xe6, 0x1};
   set_hash(tmp_hash);
 }
 
@@ -116,7 +116,7 @@ VisualDisplay2DInterface::tostring_Anchor(Anchor value) const
  * Field
  * @return counter value
  */
-unsigned int
+uint32_t
 VisualDisplay2DInterface::counter() const
 {
   return data->counter;
@@ -137,7 +137,7 @@ VisualDisplay2DInterface::maxlenof_counter() const
  * @param new_counter new counter value
  */
 void
-VisualDisplay2DInterface::set_counter(const unsigned int new_counter)
+VisualDisplay2DInterface::set_counter(const uint32_t new_counter)
 {
   data->counter = new_counter;
 }
@@ -205,7 +205,7 @@ VisualDisplay2DInterface::enum_tostring(const char *enumtype, int val) const
  * @param ini_style initial value for style
  * @param ini_color initial value for color
  */
-VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage(const float * ini_x, const float * ini_y, const LineStyle ini_style, const unsigned char * ini_color) : Message("AddCartLineMessage")
+VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage(const float * ini_x, const float * ini_y, const LineStyle ini_style, const uint8_t * ini_color) : Message("AddCartLineMessage")
 {
   data_size = sizeof(AddCartLineMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -214,7 +214,7 @@ VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage(const float * i
   memcpy(data->x, ini_x, sizeof(float) * 2);
   memcpy(data->y, ini_y, sizeof(float) * 2);
   data->style = ini_style;
-  memcpy(data->color, ini_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 2, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 2, &data->y);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
@@ -403,7 +403,7 @@ VisualDisplay2DInterface::AddCartLineMessage::set_style(const LineStyle new_styl
  * Color in RGBA
  * @return color value
  */
-unsigned char *
+uint8_t *
 VisualDisplay2DInterface::AddCartLineMessage::color() const
 {
   return data->color;
@@ -415,7 +415,7 @@ VisualDisplay2DInterface::AddCartLineMessage::color() const
  * @return color value
  * @exception Exception thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 VisualDisplay2DInterface::AddCartLineMessage::color(unsigned int index) const
 {
   if (index > 4) {
@@ -439,9 +439,9 @@ VisualDisplay2DInterface::AddCartLineMessage::maxlenof_color() const
  * @param new_color new color value
  */
 void
-VisualDisplay2DInterface::AddCartLineMessage::set_color(const unsigned char * new_color)
+VisualDisplay2DInterface::AddCartLineMessage::set_color(const uint8_t * new_color)
 {
-  memcpy(data->color, new_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, new_color, sizeof(uint8_t) * 4);
 }
 
 /** Set color value at given index.
@@ -450,7 +450,7 @@ VisualDisplay2DInterface::AddCartLineMessage::set_color(const unsigned char * ne
  * @param index index for of the value
  */
 void
-VisualDisplay2DInterface::AddCartLineMessage::set_color(unsigned int index, const unsigned char new_color)
+VisualDisplay2DInterface::AddCartLineMessage::set_color(unsigned int index, const uint8_t new_color)
 {
   if (index > 4) {
     throw Exception("Index value %u out of bounds (0..4)", index);
@@ -481,7 +481,7 @@ VisualDisplay2DInterface::AddCartLineMessage::clone() const
  * @param ini_style initial value for style
  * @param ini_color initial value for color
  */
-VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const unsigned char * ini_color) : Message("AddCartCircleMessage")
+VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const uint8_t * ini_color) : Message("AddCartCircleMessage")
 {
   data_size = sizeof(AddCartCircleMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -491,7 +491,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float
   data->y = ini_y;
   data->radius = ini_radius;
   data->style = ini_style;
-  memcpy(data->color, ini_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
@@ -652,7 +652,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::set_style(const LineStyle new_st
  * Color in RGBA
  * @return color value
  */
-unsigned char *
+uint8_t *
 VisualDisplay2DInterface::AddCartCircleMessage::color() const
 {
   return data->color;
@@ -664,7 +664,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::color() const
  * @return color value
  * @exception Exception thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 VisualDisplay2DInterface::AddCartCircleMessage::color(unsigned int index) const
 {
   if (index > 4) {
@@ -688,9 +688,9 @@ VisualDisplay2DInterface::AddCartCircleMessage::maxlenof_color() const
  * @param new_color new color value
  */
 void
-VisualDisplay2DInterface::AddCartCircleMessage::set_color(const unsigned char * new_color)
+VisualDisplay2DInterface::AddCartCircleMessage::set_color(const uint8_t * new_color)
 {
-  memcpy(data->color, new_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, new_color, sizeof(uint8_t) * 4);
 }
 
 /** Set color value at given index.
@@ -699,7 +699,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::set_color(const unsigned char * 
  * @param index index for of the value
  */
 void
-VisualDisplay2DInterface::AddCartCircleMessage::set_color(unsigned int index, const unsigned char new_color)
+VisualDisplay2DInterface::AddCartCircleMessage::set_color(unsigned int index, const uint8_t new_color)
 {
   if (index > 4) {
     throw Exception("Index value %u out of bounds (0..4)", index);
@@ -731,7 +731,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::clone() const
  * @param ini_style initial value for style
  * @param ini_color initial value for color
  */
-VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const float ini_x, const float ini_y, const float ini_width, const float ini_height, const LineStyle ini_style, const unsigned char * ini_color) : Message("AddCartRectMessage")
+VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const float ini_x, const float ini_y, const float ini_width, const float ini_height, const LineStyle ini_style, const uint8_t * ini_color) : Message("AddCartRectMessage")
 {
   data_size = sizeof(AddCartRectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -742,7 +742,7 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const float ini
   data->width = ini_width;
   data->height = ini_height;
   data->style = ini_style;
-  memcpy(data->color, ini_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
@@ -935,7 +935,7 @@ VisualDisplay2DInterface::AddCartRectMessage::set_style(const LineStyle new_styl
  * Color in RGBA
  * @return color value
  */
-unsigned char *
+uint8_t *
 VisualDisplay2DInterface::AddCartRectMessage::color() const
 {
   return data->color;
@@ -947,7 +947,7 @@ VisualDisplay2DInterface::AddCartRectMessage::color() const
  * @return color value
  * @exception Exception thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 VisualDisplay2DInterface::AddCartRectMessage::color(unsigned int index) const
 {
   if (index > 4) {
@@ -971,9 +971,9 @@ VisualDisplay2DInterface::AddCartRectMessage::maxlenof_color() const
  * @param new_color new color value
  */
 void
-VisualDisplay2DInterface::AddCartRectMessage::set_color(const unsigned char * new_color)
+VisualDisplay2DInterface::AddCartRectMessage::set_color(const uint8_t * new_color)
 {
-  memcpy(data->color, new_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, new_color, sizeof(uint8_t) * 4);
 }
 
 /** Set color value at given index.
@@ -982,7 +982,7 @@ VisualDisplay2DInterface::AddCartRectMessage::set_color(const unsigned char * ne
  * @param index index for of the value
  */
 void
-VisualDisplay2DInterface::AddCartRectMessage::set_color(unsigned int index, const unsigned char new_color)
+VisualDisplay2DInterface::AddCartRectMessage::set_color(unsigned int index, const uint8_t new_color)
 {
   if (index > 4) {
     throw Exception("Index value %u out of bounds (0..4)", index);
@@ -1014,7 +1014,7 @@ VisualDisplay2DInterface::AddCartRectMessage::clone() const
  * @param ini_size initial value for size
  * @param ini_color initial value for color
  */
-VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const unsigned char * ini_color) : Message("AddCartTextMessage")
+VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const uint8_t * ini_color) : Message("AddCartTextMessage")
 {
   data_size = sizeof(AddCartTextMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1025,7 +1025,7 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini
   strncpy(data->text, ini_text, 128);
   data->anchor = ini_anchor;
   data->size = ini_size;
-  memcpy(data->color, ini_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
@@ -1220,7 +1220,7 @@ VisualDisplay2DInterface::AddCartTextMessage::set_size(const float new_size)
  * Color in RGBA
  * @return color value
  */
-unsigned char *
+uint8_t *
 VisualDisplay2DInterface::AddCartTextMessage::color() const
 {
   return data->color;
@@ -1232,7 +1232,7 @@ VisualDisplay2DInterface::AddCartTextMessage::color() const
  * @return color value
  * @exception Exception thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 VisualDisplay2DInterface::AddCartTextMessage::color(unsigned int index) const
 {
   if (index > 4) {
@@ -1256,9 +1256,9 @@ VisualDisplay2DInterface::AddCartTextMessage::maxlenof_color() const
  * @param new_color new color value
  */
 void
-VisualDisplay2DInterface::AddCartTextMessage::set_color(const unsigned char * new_color)
+VisualDisplay2DInterface::AddCartTextMessage::set_color(const uint8_t * new_color)
 {
-  memcpy(data->color, new_color, sizeof(unsigned char) * 4);
+  memcpy(data->color, new_color, sizeof(uint8_t) * 4);
 }
 
 /** Set color value at given index.
@@ -1267,7 +1267,7 @@ VisualDisplay2DInterface::AddCartTextMessage::set_color(const unsigned char * ne
  * @param index index for of the value
  */
 void
-VisualDisplay2DInterface::AddCartTextMessage::set_color(unsigned int index, const unsigned char new_color)
+VisualDisplay2DInterface::AddCartTextMessage::set_color(unsigned int index, const uint8_t new_color)
 {
   if (index > 4) {
     throw Exception("Index value %u out of bounds (0..4)", index);
@@ -1294,14 +1294,13 @@ VisualDisplay2DInterface::AddCartTextMessage::clone() const
 /** Constructor with initial values.
  * @param ini_object_id initial value for object_id
  */
-VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage(const unsigned int ini_object_id) : Message("DeleteObjectMessage")
+VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage(const uint32_t ini_object_id) : Message("DeleteObjectMessage")
 {
   data_size = sizeof(DeleteObjectMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
   data->object_id = ini_object_id;
-  add_fieldinfo(IFT_UINT, "object_id", 1, &data->object_id);
 }
 /** Constructor */
 VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("DeleteObjectMessage")
@@ -1310,7 +1309,6 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_UINT, "object_id", 1, &data->object_id);
 }
 
 /** Destructor */
@@ -1336,7 +1334,7 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage(const DeleteO
     the message ID of the Add* message.
  * @return object_id value
  */
-unsigned int
+uint32_t
 VisualDisplay2DInterface::DeleteObjectMessage::object_id() const
 {
   return data->object_id;
@@ -1358,7 +1356,7 @@ VisualDisplay2DInterface::DeleteObjectMessage::maxlenof_object_id() const
  * @param new_object_id new object_id value
  */
 void
-VisualDisplay2DInterface::DeleteObjectMessage::set_object_id(const unsigned int new_object_id)
+VisualDisplay2DInterface::DeleteObjectMessage::set_object_id(const uint32_t new_object_id)
 {
   data->object_id = new_object_id;
 }

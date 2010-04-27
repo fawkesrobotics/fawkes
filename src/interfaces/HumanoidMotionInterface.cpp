@@ -64,7 +64,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "shoulder_pitch_amplitude", 1, &data->shoulder_pitch_amplitude);
   add_fieldinfo(IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
   add_messageinfo("SetWalkParamsMessage");
   add_messageinfo("SetWalkArmsParamsMessage");
   add_messageinfo("StopMessage");
@@ -78,7 +78,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_messageinfo("StandupMessage");
   add_messageinfo("YawPitchHeadMessage");
   add_messageinfo("SetStiffnessParamsMessage");
-  unsigned char tmp_hash[] = {0x69, 0x80, 0xac, 0xd5, 0xa4, 0x71, 0xad, 0xe8, 0xd6, 0xdf, 0xbb, 0x13, 0xfb, 0x10, 0x28, 0xf1};
+  unsigned char tmp_hash[] = {0xee, 0x4a, 0x86, 0xce, 0x88, 0xf0, 0x83, 0xef, 0x80, 0xa, 0x8e, 0x3b, 0x3f, 0xae, 0xe3, 0x8b};
   set_hash(tmp_hash);
 }
 
@@ -713,7 +713,7 @@ HumanoidMotionInterface::set_elbow_roll_amplitude(const float new_elbow_roll_amp
     
  * @return msgid value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::msgid() const
 {
   return data->msgid;
@@ -737,7 +737,7 @@ HumanoidMotionInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-HumanoidMotionInterface::set_msgid(const unsigned int new_msgid)
+HumanoidMotionInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
 }
@@ -1543,7 +1543,7 @@ HumanoidMotionInterface::StopMessage::clone() const
  * @param ini_distance initial value for distance
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const float ini_distance, const unsigned int ini_num_samples) : Message("WalkStraightMessage")
+HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const float ini_distance, const uint32_t ini_num_samples) : Message("WalkStraightMessage")
 {
   data_size = sizeof(WalkStraightMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1552,7 +1552,6 @@ HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const float in
   data->distance = ini_distance;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage() : Message("WalkStraightMessage")
@@ -1562,7 +1561,6 @@ HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage() : Message("W
   memset(data_ptr, 0, data_size);
   data      = (WalkStraightMessage_data_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1619,7 +1617,7 @@ HumanoidMotionInterface::WalkStraightMessage::set_distance(const float new_dista
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::WalkStraightMessage::num_samples() const
 {
   return data->num_samples;
@@ -1642,7 +1640,7 @@ HumanoidMotionInterface::WalkStraightMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::WalkStraightMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::WalkStraightMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -1668,7 +1666,7 @@ HumanoidMotionInterface::WalkStraightMessage::clone() const
  * @param ini_distance initial value for distance
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const float ini_distance, const unsigned int ini_num_samples) : Message("WalkSidewaysMessage")
+HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const float ini_distance, const uint32_t ini_num_samples) : Message("WalkSidewaysMessage")
 {
   data_size = sizeof(WalkSidewaysMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1677,7 +1675,6 @@ HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const float in
   data->distance = ini_distance;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage() : Message("WalkSidewaysMessage")
@@ -1687,7 +1684,6 @@ HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage() : Message("W
   memset(data_ptr, 0, data_size);
   data      = (WalkSidewaysMessage_data_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1744,7 +1740,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::set_distance(const float new_dista
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::WalkSidewaysMessage::num_samples() const
 {
   return data->num_samples;
@@ -1767,7 +1763,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::WalkSidewaysMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::WalkSidewaysMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -1794,7 +1790,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::clone() const
  * @param ini_radius initial value for radius
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const float ini_angle, const float ini_radius, const unsigned int ini_num_samples) : Message("WalkArcMessage")
+HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const float ini_angle, const float ini_radius, const uint32_t ini_num_samples) : Message("WalkArcMessage")
 {
   data_size = sizeof(WalkArcMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1805,7 +1801,6 @@ HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const float ini_angle, c
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::WalkArcMessage::WalkArcMessage() : Message("WalkArcMessage")
@@ -1816,7 +1811,6 @@ HumanoidMotionInterface::WalkArcMessage::WalkArcMessage() : Message("WalkArcMess
   data      = (WalkArcMessage_data_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1903,7 +1897,7 @@ HumanoidMotionInterface::WalkArcMessage::set_radius(const float new_radius)
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::WalkArcMessage::num_samples() const
 {
   return data->num_samples;
@@ -1926,7 +1920,7 @@ HumanoidMotionInterface::WalkArcMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::WalkArcMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::WalkArcMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -1952,7 +1946,7 @@ HumanoidMotionInterface::WalkArcMessage::clone() const
  * @param ini_angle initial value for angle
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::TurnMessage::TurnMessage(const float ini_angle, const unsigned int ini_num_samples) : Message("TurnMessage")
+HumanoidMotionInterface::TurnMessage::TurnMessage(const float ini_angle, const uint32_t ini_num_samples) : Message("TurnMessage")
 {
   data_size = sizeof(TurnMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1961,7 +1955,6 @@ HumanoidMotionInterface::TurnMessage::TurnMessage(const float ini_angle, const u
   data->angle = ini_angle;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
@@ -1971,7 +1964,6 @@ HumanoidMotionInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -2028,7 +2020,7 @@ HumanoidMotionInterface::TurnMessage::set_angle(const float new_angle)
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::TurnMessage::num_samples() const
 {
   return data->num_samples;
@@ -2051,7 +2043,7 @@ HumanoidMotionInterface::TurnMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::TurnMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::TurnMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }

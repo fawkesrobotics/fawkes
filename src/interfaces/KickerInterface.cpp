@@ -48,15 +48,15 @@ KickerInterface::KickerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (KickerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_INT, "num_kicks_left", 1, &data->num_kicks_left);
-  add_fieldinfo(IFT_INT, "num_kicks_center", 1, &data->num_kicks_center);
-  add_fieldinfo(IFT_INT, "num_kicks_right", 1, &data->num_kicks_right);
+  add_fieldinfo(IFT_ENUM, "num_kicks_left", 1, &data->num_kicks_left, "int32");
+  add_fieldinfo(IFT_ENUM, "num_kicks_center", 1, &data->num_kicks_center, "int32");
+  add_fieldinfo(IFT_ENUM, "num_kicks_right", 1, &data->num_kicks_right, "int32");
   add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
-  add_fieldinfo(IFT_UINT, "current_intensity", 1, &data->current_intensity);
+  add_fieldinfo(IFT_ENUM, "current_intensity", 1, &data->current_intensity, "uint32");
   add_messageinfo("KickMessage");
   add_messageinfo("ResetCounterMessage");
   add_messageinfo("GuideBallMessage");
-  unsigned char tmp_hash[] = {0xdc, 0xe9, 0x59, 0xc4, 0xc2, 0xd9, 0x46, 0x62, 0xd7, 0x78, 0x52, 0xb0, 0x6f, 0xb, 0x2c, 0x76};
+  unsigned char tmp_hash[] = {0x96, 0x3d, 0x55, 0x60, 0xfd, 0x65, 0xf2, 0xfa, 0xa8, 0xfa, 0xfc, 0xaa, 0xb6, 0xfc, 0xc2, 0x81};
   set_hash(tmp_hash);
 }
 
@@ -85,7 +85,7 @@ KickerInterface::tostring_GuideBallSideEnum(GuideBallSideEnum value) const
     
  * @return num_kicks_left value
  */
-int
+int32_t
 KickerInterface::num_kicks_left() const
 {
   return data->num_kicks_left;
@@ -108,7 +108,7 @@ KickerInterface::maxlenof_num_kicks_left() const
  * @param new_num_kicks_left new num_kicks_left value
  */
 void
-KickerInterface::set_num_kicks_left(const int new_num_kicks_left)
+KickerInterface::set_num_kicks_left(const int32_t new_num_kicks_left)
 {
   data->num_kicks_left = new_num_kicks_left;
 }
@@ -119,7 +119,7 @@ KickerInterface::set_num_kicks_left(const int new_num_kicks_left)
     
  * @return num_kicks_center value
  */
-int
+int32_t
 KickerInterface::num_kicks_center() const
 {
   return data->num_kicks_center;
@@ -142,7 +142,7 @@ KickerInterface::maxlenof_num_kicks_center() const
  * @param new_num_kicks_center new num_kicks_center value
  */
 void
-KickerInterface::set_num_kicks_center(const int new_num_kicks_center)
+KickerInterface::set_num_kicks_center(const int32_t new_num_kicks_center)
 {
   data->num_kicks_center = new_num_kicks_center;
 }
@@ -153,7 +153,7 @@ KickerInterface::set_num_kicks_center(const int new_num_kicks_center)
     
  * @return num_kicks_right value
  */
-int
+int32_t
 KickerInterface::num_kicks_right() const
 {
   return data->num_kicks_right;
@@ -176,7 +176,7 @@ KickerInterface::maxlenof_num_kicks_right() const
  * @param new_num_kicks_right new num_kicks_right value
  */
 void
-KickerInterface::set_num_kicks_right(const int new_num_kicks_right)
+KickerInterface::set_num_kicks_right(const int32_t new_num_kicks_right)
 {
   data->num_kicks_right = new_num_kicks_right;
 }
@@ -219,7 +219,7 @@ KickerInterface::set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side
     
  * @return current_intensity value
  */
-unsigned int
+uint32_t
 KickerInterface::current_intensity() const
 {
   return data->current_intensity;
@@ -242,7 +242,7 @@ KickerInterface::maxlenof_current_intensity() const
  * @param new_current_intensity new current_intensity value
  */
 void
-KickerInterface::set_current_intensity(const unsigned int new_current_intensity)
+KickerInterface::set_current_intensity(const uint32_t new_current_intensity)
 {
   data->current_intensity = new_current_intensity;
 }
@@ -301,7 +301,7 @@ KickerInterface::enum_tostring(const char *enumtype, int val) const
  * @param ini_right initial value for right
  * @param ini_intensity initial value for intensity
  */
-KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_center, const bool ini_right, const unsigned int ini_intensity) : Message("KickMessage")
+KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_center, const bool ini_right, const uint32_t ini_intensity) : Message("KickMessage")
 {
   data_size = sizeof(KickMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -314,7 +314,6 @@ KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_ce
   add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
   add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
   add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
-  add_fieldinfo(IFT_UINT, "intensity", 1, &data->intensity);
 }
 /** Constructor */
 KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
@@ -326,7 +325,6 @@ KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
   add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
   add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
   add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
-  add_fieldinfo(IFT_UINT, "intensity", 1, &data->intensity);
 }
 
 /** Destructor */
@@ -441,7 +439,7 @@ KickerInterface::KickMessage::set_right(const bool new_right)
  * Intensity in the range [0..255].
  * @return intensity value
  */
-unsigned int
+uint32_t
 KickerInterface::KickMessage::intensity() const
 {
   return data->intensity;
@@ -462,7 +460,7 @@ KickerInterface::KickMessage::maxlenof_intensity() const
  * @param new_intensity new intensity value
  */
 void
-KickerInterface::KickMessage::set_intensity(const unsigned int new_intensity)
+KickerInterface::KickMessage::set_intensity(const uint32_t new_intensity)
 {
   data->intensity = new_intensity;
 }

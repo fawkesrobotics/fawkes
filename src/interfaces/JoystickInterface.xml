@@ -2,44 +2,44 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="JoystickInterface" author="Tim Niemueller" year="2008">
   <constants>
-    <constant type="unsigned int" name="BUTTON_1" value="1">Button 1</constant>
-    <constant type="unsigned int" name="BUTTON_2" value="2">Button 2</constant>
-    <constant type="unsigned int" name="BUTTON_3" value="4">Button 3</constant>
-    <constant type="unsigned int" name="BUTTON_4" value="8">Button 4</constant>
-    <constant type="unsigned int" name="BUTTON_5" value="16">Button 5</constant>
-    <constant type="unsigned int" name="BUTTON_6" value="32">Button 6</constant>
-    <constant type="unsigned int" name="BUTTON_7" value="64">Button 7</constant>
-    <constant type="unsigned int" name="BUTTON_8" value="128">Button 8</constant>
-    <constant type="unsigned int" name="BUTTON_9" value="256">Button 9</constant>
-    <constant type="unsigned int" name="BUTTON_10" value="512">Button 10</constant>
-    <constant type="unsigned int" name="BUTTON_11" value="1024">Button 11</constant>
-    <constant type="unsigned int" name="BUTTON_12" value="2048">Button 12</constant>
-    <constant type="unsigned int" name="BUTTON_13" value="4096">Button 13</constant>
-    <constant type="unsigned int" name="BUTTON_14" value="8192">Button 14</constant>
-    <constant type="unsigned int" name="BUTTON_15" value="16384">Button 15</constant>
-    <constant type="unsigned int" name="BUTTON_16" value="32768">Button 16</constant>
-    <constant type="unsigned int" name="BUTTON_17" value="65536">Button 17</constant>
-    <constant type="unsigned int" name="BUTTON_18" value="131072">Button 18</constant>
-    <constant type="unsigned int" name="BUTTON_19" value="262144">Button 19</constant>
-    <constant type="unsigned int" name="BUTTON_20" value="524288">Button 20</constant>
-    <constant type="unsigned int" name="BUTTON_21" value="1048576">Button 21</constant>
-    <constant type="unsigned int" name="BUTTON_22" value="2097152">Button 22</constant>
-    <constant type="unsigned int" name="BUTTON_23" value="4194304">Button 23</constant>
-    <constant type="unsigned int" name="BUTTON_24" value="8388608">Button 24</constant>
-    <constant type="unsigned int" name="BUTTON_25" value="16777216">Button 25</constant>
-    <constant type="unsigned int" name="BUTTON_26" value="33554432">Button 26</constant>
-    <constant type="unsigned int" name="BUTTON_27" value="67108864">Button 27</constant>
-    <constant type="unsigned int" name="BUTTON_28" value="134217728">Button 28</constant>
-    <constant type="unsigned int" name="BUTTON_29" value="268435456">Button 29</constant>
-    <constant type="unsigned int" name="BUTTON_30" value="536870912">Button 30</constant>
-    <constant type="unsigned int" name="BUTTON_31" value="1073741824">Button 31</constant>
-    <constant type="unsigned int" name="BUTTON_32" value="2147483648U">Button 32</constant>
+    <constant type="uint32" name="BUTTON_1" value="1">Button 1</constant>
+    <constant type="uint32" name="BUTTON_2" value="2">Button 2</constant>
+    <constant type="uint32" name="BUTTON_3" value="4">Button 3</constant>
+    <constant type="uint32" name="BUTTON_4" value="8">Button 4</constant>
+    <constant type="uint32" name="BUTTON_5" value="16">Button 5</constant>
+    <constant type="uint32" name="BUTTON_6" value="32">Button 6</constant>
+    <constant type="uint32" name="BUTTON_7" value="64">Button 7</constant>
+    <constant type="uint32" name="BUTTON_8" value="128">Button 8</constant>
+    <constant type="uint32" name="BUTTON_9" value="256">Button 9</constant>
+    <constant type="uint32" name="BUTTON_10" value="512">Button 10</constant>
+    <constant type="uint32" name="BUTTON_11" value="1024">Button 11</constant>
+    <constant type="uint32" name="BUTTON_12" value="2048">Button 12</constant>
+    <constant type="uint32" name="BUTTON_13" value="4096">Button 13</constant>
+    <constant type="uint32" name="BUTTON_14" value="8192">Button 14</constant>
+    <constant type="uint32" name="BUTTON_15" value="16384">Button 15</constant>
+    <constant type="uint32" name="BUTTON_16" value="32768">Button 16</constant>
+    <constant type="uint32" name="BUTTON_17" value="65536">Button 17</constant>
+    <constant type="uint32" name="BUTTON_18" value="131072">Button 18</constant>
+    <constant type="uint32" name="BUTTON_19" value="262144">Button 19</constant>
+    <constant type="uint32" name="BUTTON_20" value="524288">Button 20</constant>
+    <constant type="uint32" name="BUTTON_21" value="1048576">Button 21</constant>
+    <constant type="uint32" name="BUTTON_22" value="2097152">Button 22</constant>
+    <constant type="uint32" name="BUTTON_23" value="4194304">Button 23</constant>
+    <constant type="uint32" name="BUTTON_24" value="8388608">Button 24</constant>
+    <constant type="uint32" name="BUTTON_25" value="16777216">Button 25</constant>
+    <constant type="uint32" name="BUTTON_26" value="33554432">Button 26</constant>
+    <constant type="uint32" name="BUTTON_27" value="67108864">Button 27</constant>
+    <constant type="uint32" name="BUTTON_28" value="134217728">Button 28</constant>
+    <constant type="uint32" name="BUTTON_29" value="268435456">Button 29</constant>
+    <constant type="uint32" name="BUTTON_30" value="536870912">Button 30</constant>
+    <constant type="uint32" name="BUTTON_31" value="1073741824">Button 31</constant>
+    <constant type="uint32" name="BUTTON_32" value="2147483648">Button 32</constant>
   </constants>
   <data>
     <comment>
       This interface provides access to a joystick. It provides up to
       five axes, where each has a X and a Y value between -1.0 and 1.0.
-      Up to 32 buttons are support via an unsigned int bit field.
+      Up to 32 buttons are support via an uint32 bit field.
     </comment>
     <field type="byte" name="num_axes">
       The number of axes of this joystick
@@ -47,7 +47,7 @@
     <field type="byte" name="num_buttons">
       The number of buttons of this joystick.
     </field>
-    <field type="unsigned int" name="pressed_buttons">
+    <field type="uint32" name="pressed_buttons">
       A bit field of enabled buttons. For each currently clicked button the
       corresponding bit is set to 1. Use the BUTTON_* constants for bit-wise
       comparisons.

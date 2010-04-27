@@ -63,10 +63,10 @@ class HumanoidMotionInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int msgid; /**< 
-      The ID of the message that is currently being
-      processed, or 0 if no message is being processed.
-     */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    bool moving; /**< True if the robot is currently moving. */
+    LegEnum supporting_leg; /**< Marks the supporting leg */
     float max_step_length; /**< 
       Maximum length of a footstep in m.
      */
@@ -101,6 +101,9 @@ class HumanoidMotionInterface : public Interface
       Torso orientation in degrees in sideward direction during walking.
       This is fitted to the Nao and is possibly not applicable to other robots.
      */
+    bool arms_enabled; /**< 
+      If true the arms are controlled during walking for balancing.
+     */
     float shoulder_pitch_median; /**< 
       Median in radians of the shoulder pitch during walking.
      */
@@ -113,11 +116,10 @@ class HumanoidMotionInterface : public Interface
     float elbow_roll_amplitude; /**< 
       Amplitude of the elbow roll movement during walking.
      */
-    bool moving; /**< True if the robot is currently moving. */
-    bool arms_enabled; /**< 
-      If true the arms are controlled during walking for balancing.
+    uint32_t msgid; /**< 
+      The ID of the message that is currently being
+      processed, or 0 if no message is being processed.
      */
-    LegEnum supporting_leg; /**< Marks the supporting leg */
   } HumanoidMotionInterface_data_t;
 
   HumanoidMotionInterface_data_t *data;
@@ -129,6 +131,8 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float max_step_length; /**< 
       Maximum length of a footstep in m.
      */
@@ -212,6 +216,11 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool arms_enabled; /**< 
+      If true the arms are controlled during walking for balancing.
+     */
       float shoulder_pitch_median; /**< 
       Median in radians of the shoulder pitch during walking.
      */
@@ -223,9 +232,6 @@ class HumanoidMotionInterface : public Interface
      */
       float elbow_roll_amplitude; /**< 
       Amplitude of the elbow roll movement during walking.
-     */
-      bool arms_enabled; /**< 
-      If true the arms are controlled during walking for balancing.
      */
     } SetWalkArmsParamsMessage_data_t;
 
@@ -272,16 +278,18 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int num_samples; /**< 
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float distance; /**< Distance in m to walk. */
+      uint32_t num_samples; /**< 
       Number of intermediate samples to use for walking.
      */
-      float distance; /**< Distance in m to walk. */
     } WalkStraightMessage_data_t;
 
     WalkStraightMessage_data_t *data;
 
    public:
-    WalkStraightMessage(const float ini_distance, const unsigned int ini_num_samples);
+    WalkStraightMessage(const float ini_distance, const uint32_t ini_num_samples);
     WalkStraightMessage();
     ~WalkStraightMessage();
 
@@ -290,8 +298,8 @@ class HumanoidMotionInterface : public Interface
     float distance() const;
     void set_distance(const float new_distance);
     size_t maxlenof_distance() const;
-    unsigned int num_samples() const;
-    void set_num_samples(const unsigned int new_num_samples);
+    uint32_t num_samples() const;
+    void set_num_samples(const uint32_t new_num_samples);
     size_t maxlenof_num_samples() const;
     virtual Message * clone() const;
   };
@@ -301,16 +309,18 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int num_samples; /**< 
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float distance; /**< Distance in m to walk. */
+      uint32_t num_samples; /**< 
       Number of intermediate samples to use for strafing.
      */
-      float distance; /**< Distance in m to walk. */
     } WalkSidewaysMessage_data_t;
 
     WalkSidewaysMessage_data_t *data;
 
    public:
-    WalkSidewaysMessage(const float ini_distance, const unsigned int ini_num_samples);
+    WalkSidewaysMessage(const float ini_distance, const uint32_t ini_num_samples);
     WalkSidewaysMessage();
     ~WalkSidewaysMessage();
 
@@ -319,8 +329,8 @@ class HumanoidMotionInterface : public Interface
     float distance() const;
     void set_distance(const float new_distance);
     size_t maxlenof_distance() const;
-    unsigned int num_samples() const;
-    void set_num_samples(const unsigned int new_num_samples);
+    uint32_t num_samples() const;
+    void set_num_samples(const uint32_t new_num_samples);
     size_t maxlenof_num_samples() const;
     virtual Message * clone() const;
   };
@@ -330,17 +340,19 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int num_samples; /**< 
-      Number of intermediate samples to use for walking.
-     */
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle; /**< Angle in radians to turn over the way. */
       float radius; /**< Radius in m of the circle in m. */
+      uint32_t num_samples; /**< 
+      Number of intermediate samples to use for walking.
+     */
     } WalkArcMessage_data_t;
 
     WalkArcMessage_data_t *data;
 
    public:
-    WalkArcMessage(const float ini_angle, const float ini_radius, const unsigned int ini_num_samples);
+    WalkArcMessage(const float ini_angle, const float ini_radius, const uint32_t ini_num_samples);
     WalkArcMessage();
     ~WalkArcMessage();
 
@@ -352,8 +364,8 @@ class HumanoidMotionInterface : public Interface
     float radius() const;
     void set_radius(const float new_radius);
     size_t maxlenof_radius() const;
-    unsigned int num_samples() const;
-    void set_num_samples(const unsigned int new_num_samples);
+    uint32_t num_samples() const;
+    void set_num_samples(const uint32_t new_num_samples);
     size_t maxlenof_num_samples() const;
     virtual Message * clone() const;
   };
@@ -363,16 +375,18 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int num_samples; /**< 
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float angle; /**< Angle in radians to turn. */
+      uint32_t num_samples; /**< 
       Number of intermediate samples to use for turning.
      */
-      float angle; /**< Angle in radians to turn. */
     } TurnMessage_data_t;
 
     TurnMessage_data_t *data;
 
    public:
-    TurnMessage(const float ini_angle, const unsigned int ini_num_samples);
+    TurnMessage(const float ini_angle, const uint32_t ini_num_samples);
     TurnMessage();
     ~TurnMessage();
 
@@ -381,8 +395,8 @@ class HumanoidMotionInterface : public Interface
     float angle() const;
     void set_angle(const float new_angle);
     size_t maxlenof_angle() const;
-    unsigned int num_samples() const;
-    void set_num_samples(const unsigned int new_num_samples);
+    uint32_t num_samples() const;
+    void set_num_samples(const uint32_t new_num_samples);
     size_t maxlenof_num_samples() const;
     virtual Message * clone() const;
   };
@@ -392,8 +406,10 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float strength; /**< Kick strength */
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       LegEnum leg; /**< Leg to kick with */
+      float strength; /**< Kick strength */
     } KickMessage_data_t;
 
     KickMessage_data_t *data;
@@ -419,6 +435,8 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float time_sec; /**< Time in seconds when to reach the position. */
     } ParkMessage_data_t;
 
@@ -442,6 +460,8 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float time_sec; /**< Time in seconds when to reach the position. */
     } GetUpMessage_data_t;
 
@@ -465,6 +485,8 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       StandupEnum from_pos; /**< Position from where to standup. */
     } StandupMessage_data_t;
 
@@ -488,6 +510,8 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float yaw; /**< Desired yaw (horizontal orientation). */
       float pitch; /**< Desired pitch (vertical orientation). */
       float time_sec; /**< Time in seconds when to reach the target. */
@@ -519,6 +543,9 @@ class HumanoidMotionInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      StiffnessMotionPatternEnum motion_pattern; /**< the motion pattern to update */
       float head_yaw; /**< head_yaw */
       float head_pitch; /**< head_pitch */
       float l_shoulder_pitch; /**< l_shoulder_pitch */
@@ -541,7 +568,6 @@ class HumanoidMotionInterface : public Interface
       float r_shoulder_roll; /**< r_shoulder_roll */
       float r_elbow_yaw; /**< r_elbow_yaw */
       float r_elbow_roll; /**< r_elbow_roll */
-      StiffnessMotionPatternEnum motion_pattern; /**< the motion pattern to update */
     } SetStiffnessParamsMessage_data_t;
 
     SetStiffnessParamsMessage_data_t *data;
@@ -683,8 +709,8 @@ class HumanoidMotionInterface : public Interface
   float elbow_roll_amplitude() const;
   void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
   size_t maxlenof_elbow_roll_amplitude() const;
-  unsigned int msgid() const;
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
   size_t maxlenof_msgid() const;
   virtual Message * create_message(const char *type) const;
 

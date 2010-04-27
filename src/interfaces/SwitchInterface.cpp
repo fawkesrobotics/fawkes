@@ -53,14 +53,14 @@ SwitchInterface::SwitchInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
   add_fieldinfo(IFT_FLOAT, "history", 1, &data->history);
-  add_fieldinfo(IFT_UINT, "short_activations", 1, &data->short_activations);
-  add_fieldinfo(IFT_UINT, "long_activations", 1, &data->long_activations);
-  add_fieldinfo(IFT_UINT, "activation_count", 1, &data->activation_count);
+  add_fieldinfo(IFT_ENUM, "short_activations", 1, &data->short_activations, "uint32");
+  add_fieldinfo(IFT_ENUM, "long_activations", 1, &data->long_activations, "uint32");
+  add_fieldinfo(IFT_ENUM, "activation_count", 1, &data->activation_count, "uint32");
   add_messageinfo("SetMessage");
   add_messageinfo("EnableSwitchMessage");
   add_messageinfo("DisableSwitchMessage");
   add_messageinfo("EnableDurationMessage");
-  unsigned char tmp_hash[] = {0x23, 0x86, 0x5, 0xe0, 0x29, 0xf5, 0x17, 0x7e, 0x1e, 0x4b, 0xf1, 0xdf, 0xd9, 0xa7, 0xbe, 0x31};
+  unsigned char tmp_hash[] = {0xa7, 0xa4, 0xc, 0x19, 0x66, 0xa4, 0x87, 0x6b, 0xa9, 0x32, 0x95, 0x40, 0xc7, 0x82, 0x75, 0x6d};
   set_hash(tmp_hash);
 }
 
@@ -193,7 +193,7 @@ SwitchInterface::set_history(const float new_history)
     
  * @return short_activations value
  */
-unsigned int
+uint32_t
 SwitchInterface::short_activations() const
 {
   return data->short_activations;
@@ -217,7 +217,7 @@ SwitchInterface::maxlenof_short_activations() const
  * @param new_short_activations new short_activations value
  */
 void
-SwitchInterface::set_short_activations(const unsigned int new_short_activations)
+SwitchInterface::set_short_activations(const uint32_t new_short_activations)
 {
   data->short_activations = new_short_activations;
 }
@@ -229,7 +229,7 @@ SwitchInterface::set_short_activations(const unsigned int new_short_activations)
     
  * @return long_activations value
  */
-unsigned int
+uint32_t
 SwitchInterface::long_activations() const
 {
   return data->long_activations;
@@ -253,7 +253,7 @@ SwitchInterface::maxlenof_long_activations() const
  * @param new_long_activations new long_activations value
  */
 void
-SwitchInterface::set_long_activations(const unsigned int new_long_activations)
+SwitchInterface::set_long_activations(const uint32_t new_long_activations)
 {
   data->long_activations = new_long_activations;
 }
@@ -265,7 +265,7 @@ SwitchInterface::set_long_activations(const unsigned int new_long_activations)
     
  * @return activation_count value
  */
-unsigned int
+uint32_t
 SwitchInterface::activation_count() const
 {
   return data->activation_count;
@@ -289,7 +289,7 @@ SwitchInterface::maxlenof_activation_count() const
  * @param new_activation_count new activation_count value
  */
 void
-SwitchInterface::set_activation_count(const unsigned int new_activation_count)
+SwitchInterface::set_activation_count(const uint32_t new_activation_count)
 {
   data->activation_count = new_activation_count;
 }

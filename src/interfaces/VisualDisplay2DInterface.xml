@@ -48,7 +48,7 @@
       The units shall be in meters and radians. Color is given as four
       byte RGBA value, one byte for each R, G, B and Alpha.
     </comment>
-    <field type="unsigned int" name="counter">Field</field>
+    <field type="uint32" name="counter">Field</field>
   </data>
 
   <message name="AddCartLine">
@@ -100,7 +100,7 @@
   <message name="DeleteObject">
     <comment>Delete referenced object. Deletion will fail if the
     object was added by another sender.</comment>
-    <field type="unsigned int" name="object_id">Object ID, which is
+    <field type="uint32" name="object_id">Object ID, which is
     the message ID of the Add* message.</field>
   </message>
 

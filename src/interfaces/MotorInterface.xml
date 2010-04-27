@@ -2,29 +2,29 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="MotorInterface" author="Martin Liebenberg, Tim Niemueller" year="2007">
   <constants>
-    <constant type="unsigned int" name="MOTOR_ENABLED" value="0">
+    <constant type="uint32" name="MOTOR_ENABLED" value="0">
       Motor is enabled and sending drive commands will make the robot move.
     </constant>
-    <constant type="unsigned int" name="MOTOR_DISABLED" value="1">
+    <constant type="uint32" name="MOTOR_DISABLED" value="1">
       Motor is disabled. Sending of drive commands is accepted but the robot will NOT
       move.
     </constant>
-    <constant type="unsigned int" name="DRIVE_MODE_RPM" value="1">
+    <constant type="uint32" name="DRIVE_MODE_RPM" value="1">
       Motor drives in DriveRPM mode.
     </constant>
-    <constant type="unsigned int" name="DRIVE_MODE_TRANS" value="2">
+    <constant type="uint32" name="DRIVE_MODE_TRANS" value="2">
       Motor drives in Trans mode.
     </constant>
-    <constant type="unsigned int" name="DRIVE_MODE_ROT" value="3">
+    <constant type="uint32" name="DRIVE_MODE_ROT" value="3">
       Motor drives in Rot mode.
     </constant>
-    <constant type="unsigned int" name="DRIVE_MODE_TRANS_ROT" value="4">
+    <constant type="uint32" name="DRIVE_MODE_TRANS_ROT" value="4">
       Motor drives in TransRot mode.
     </constant>
-    <constant type="unsigned int" name="DRIVE_MODE_ORBIT" value="5">
+    <constant type="uint32" name="DRIVE_MODE_ORBIT" value="5">
       Motor drives in Orbit mode.
     </constant>
-    <constant type="unsigned int" name="DRIVE_MODE_LINE_TRANS_ROT" value="6">
+    <constant type="uint32" name="DRIVE_MODE_LINE_TRANS_ROT" value="6">
       Motor drives in LinTransRot mode.
     </constant>
   </constants>
@@ -32,19 +32,19 @@
     <comment>This interface is currently prepared best for a holonomic robot.
       It will need modifications or a split to support differential drives.
     </comment>
-    <field type="unsigned int" name="motor_state">
+    <field type="uint32" name="motor_state">
       The current state of the motor.
     </field>
-    <field type="unsigned int" name="drive_mode">
+    <field type="uint32" name="drive_mode">
       The current drive mode of the motor.
     </field>
-    <field type="int" name="right_rpm">
+    <field type="int32" name="right_rpm">
       RPM of the motor on the right front of the robot.
     </field>
-    <field type="int" name="rear_rpm">
+    <field type="int32" name="rear_rpm">
       RPM of motor on the rear of the robot.
     </field>
-    <field type="int" name="left_rpm">
+    <field type="int32" name="left_rpm">
       RPM of the motor on the left front of the robot.
     </field>
     <field type="float" name="odometry_path_length">
@@ -68,7 +68,7 @@
     <field type="float" name="omega">
       Rotation speed of the robot in rad/s.
     </field>
-    <field type="unsigned int" name="controller">
+    <field type="uint32" name="controller">
      The ID of the controller. The controller ID is the instance serial of the sending
      interface. Only from this interface instance command messages are accepted.
     </field>
@@ -80,7 +80,7 @@
   </data>
   <message name="SetMotorState">
     <comment>Sets the current motor state.</comment>
-    <field type="unsigned int" name="motor_state">
+    <field type="uint32" name="motor_state">
       The new motor state to set. Use the MOTOR_* constants.
     </field>
   </message>

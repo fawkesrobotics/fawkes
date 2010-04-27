@@ -22,18 +22,18 @@
       In these variables it is stored how often the right, center or 
       left kick have been triggered.
     </comment>
-    <field type="int" name="num_kicks_left">
+    <field type="int32" name="num_kicks_left">
       Number of Left-Kicks
     </field>
-    <field type="int" name="num_kicks_center">
+    <field type="int32" name="num_kicks_center">
       Number of Center-Kicks
     </field>
-    <field type="int" name="num_kicks_right">
+    <field type="int32" name="num_kicks_right">
       Number of Right-Kicks
     </field>
     <field type="GuideBallSideEnum" name="guide_ball_side">Side where the ball
       guidance arm is currently erected.</field>
-    <field type="unsigned int" name="current_intensity">
+    <field type="uint32" name="current_intensity">
       The currently set intensity.
     </field>
   </data>
@@ -42,7 +42,7 @@
     <field type="bool" name="left">True to kick with left kicker.</field>
     <field type="bool" name="center">True to kick with central kicker.</field>
     <field type="bool" name="right">True to kick with right kicker.</field>
-    <field type="unsigned int" name="intensity">Intensity in the range [0..255].</field>
+    <field type="uint32" name="intensity">Intensity in the range [0..255].</field>
   </message>
   <message name="ResetCounter">
     <comment>Reset the internal counter for number of kicks</comment>

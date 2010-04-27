@@ -52,15 +52,8 @@ class SkillerInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int exclusive_controller; /**< 
-      Instance serial of the exclusive controller of the skiller. If this does not
-      carry your instance serial your exec messages will be ignored. Aquire control with
-      the AquireControlMessage. Make sure you release control before exiting.
-     */
-    bool continuous; /**< 
-      True if continuous execution is in progress, false if no skill string is executed
-      at all or it is executed one-shot with ExecSkillMessage.
-     */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char skill_string[1024]; /**< 
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
@@ -68,8 +61,17 @@ class SkillerInterface : public Interface
     char error[128]; /**< 
       String describing the error. Can be set by a skill when it fails.
      */
+    uint32_t exclusive_controller; /**< 
+      Instance serial of the exclusive controller of the skiller. If this does not
+      carry your instance serial your exec messages will be ignored. Aquire control with
+      the AquireControlMessage. Make sure you release control before exiting.
+     */
     SkillStatusEnum status; /**< 
       The status of the current skill execution.
+     */
+    bool continuous; /**< 
+      True if continuous execution is in progress, false if no skill string is executed
+      at all or it is executed one-shot with ExecSkillMessage.
      */
   } SkillerInterface_data_t;
 
@@ -82,6 +84,8 @@ class SkillerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char skill_string[1024]; /**< 
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
@@ -108,6 +112,8 @@ class SkillerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char skill_string[1024]; /**< 
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
@@ -186,8 +192,8 @@ class SkillerInterface : public Interface
   char * error() const;
   void set_error(const char * new_error);
   size_t maxlenof_error() const;
-  unsigned int exclusive_controller() const;
-  void set_exclusive_controller(const unsigned int new_exclusive_controller);
+  uint32_t exclusive_controller() const;
+  void set_exclusive_controller(const uint32_t new_exclusive_controller);
   size_t maxlenof_exclusive_controller() const;
   SkillStatusEnum status() const;
   void set_status(const SkillStatusEnum new_status);
