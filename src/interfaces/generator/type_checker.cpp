@@ -23,9 +23,15 @@
 #include <interfaces/generator/type_checker.h>
 #include <interfaces/generator/exceptions.h>
 #include <core/exception.h>
+
 #include <cstdlib>
 #include <climits>
 #include <cmath>
+#include <cerrno>
+
+// request setting of INT8_MAX etc. constants
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 
 /** @class InterfaceDataTypeChecker <interfaces/generator/type_checker.h>
  * Type checker for interface types.
@@ -55,16 +61,20 @@
 bool
 InterfaceDataTypeChecker::validType(const std::string &type, std::vector<InterfaceEnumConstant> *enum_constants)
 {
-  if (  (type == "int") ||
-	(type == "long int") ||
-	(type == "unsigned int") ||
-	(type == "unsigned long int") ||
-	(type == "bool") ||
-	(type == "char") ||
-	(type == "float") ||
-	(type == "byte") ||
-	(type == "string") ||
-	(type == "double") ) {
+  if ( (type == "int8") ||
+       (type == "int16") ||
+       (type == "int32") ||
+       (type == "int64") ||
+       (type == "uint8") ||
+       (type == "uint16") ||
+       (type == "uint32") ||
+       (type == "uint64") ||
+       (type == "bool") ||
+       (type == "char") ||
+       (type == "float") ||
+       (type == "byte") ||
+       (type == "string") ||
+       (type == "double") ) {
     return true;
   } else if ( enum_constants != NULL ) {
     for (std::vector<InterfaceEnumConstant>::iterator i = enum_constants->begin(); i != enum_constants->end(); ++i) {
@@ -87,57 +97,35 @@ InterfaceDataTypeChecker::validType(const std::string &type, std::vector<Interfa
 bool
 InterfaceDataTypeChecker::validValue(const std::string &type, const std::string &value)
 {
-  if ( (type == "int") || ( type == "long int")) {
+  if (type.find("int") != std::string::npos) {
     char *endptr;
-    long int rv = strtol(value.c_str(), &endptr, 11);
-    if ((rv == LONG_MIN) || (rv == LONG_MAX)) {
-      throw fawkes::Exception("Could not convert value string '%s' to long int", value.c_str());
+    long long int rv = strtoll(value.c_str(), &endptr, 11);
+    if ( ((rv == LLONG_MIN) || (rv == LLONG_MAX)) && (errno == ERANGE) ) {
+      throw fawkes::Exception("Could not convert value string '%s' to "
+			      "long long int", value.c_str());
     }
-    return ( (endptr != NULL) && (endptr[0] == '\0'));
-  } else if (type == "unsigned int") {
-    std::string::size_type notofnumber = value.find_first_not_of("0123456789");
-    if ( notofnumber != std::string::npos ) {
-      std::string suffix = value.substr(notofnumber);
-      if ( (suffix != "U") && (suffix != "u") ) {
-        return false;
+    if ( (endptr != NULL) && (endptr[0] == '\0')) {
+      if (type == "uint8") {
+	return (rv >= 0) && ((uint8_t)rv <= UINT8_MAX);
+      } else if (type == "uint16") {
+	return (rv >= 0) && ((uint16_t)rv <= UINT16_MAX);
+      } else if (type == "uint32") {
+	return (rv >= 0) && ((uint32_t)rv <= UINT32_MAX);
+      } else if (type == "uint64") {
+	return (rv >= 0) && ((uint64_t)rv <= UINT64_MAX);
+      } else if (type == "int8") {
+	return (rv >= INT8_MIN) && (rv <= INT8_MAX);
+      } else if (type == "int16") {
+	return (rv >= INT16_MIN) && (rv <= INT16_MAX);
+      } else if (type == "int32") {
+	return (rv >= INT32_MIN) && (rv <= INT32_MAX);
+      } else if (type == "int64") {
+	return (rv >= INT64_MIN) && (rv <= INT64_MAX);
+      } else {
+	return false;
       }
-    }
-    char *endptr;
-    long int val = strtol(value.substr(0, notofnumber).c_str(), &endptr, 11);
-    if ( (endptr == NULL) || (endptr[0] != '\0') ) {
-      return false;
     } else {
-      return (val >= 0);
-    }
-  } else if (type == "unsigned long int") {
-    std::string::size_type notofnumber = value.find_first_not_of("0123456789");
-    if ( notofnumber != std::string::npos ) {
-      std::string suffix = value.substr(notofnumber);
-      if ( (suffix != "UL") && (suffix != "ul") ) {
-        return false;
-      }
-    }
-    char *endptr;
-    long int val = strtol(value.substr(0, notofnumber).c_str(), &endptr, 21);
-    if ( (endptr == NULL) || (endptr[0] != '\0') ) {
       return false;
-    } else {
-      return (val >= 0);
-    }
-  } else if (type == "byte") {
-    std::string::size_type notofnumber = value.find_first_not_of("0123456789");
-    if ( notofnumber != std::string::npos ) {
-      std::string suffix = value.substr(notofnumber);
-      if ( (suffix != "U") && (suffix != "u") ) {
-        return false;
-      }
-    }
-    char *endptr;
-    long int val = strtol(value.substr(0, notofnumber).c_str(), &endptr, 11);
-    if ( (endptr == NULL) || (endptr[0] != '\0') ) {
-      return false;
-    } else {
-      return ((val >= 0) && (val <= 255));
     }
   } else if ( type == "bool" ) {
     return ( (value == "true") ||

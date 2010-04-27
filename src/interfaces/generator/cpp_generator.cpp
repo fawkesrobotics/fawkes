@@ -126,7 +126,7 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
 				    std::vector<InterfaceField> fields)
 {
 
-  stable_sort(fields.begin(), fields.end());
+  //stable_sort(fields.begin(), fields.end());
 
   if ( fields.size() > 0 ) {
 
