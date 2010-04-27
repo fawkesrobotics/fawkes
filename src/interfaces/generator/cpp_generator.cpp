@@ -128,22 +128,21 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
 
   //stable_sort(fields.begin(), fields.end());
 
-  if ( fields.size() > 0 ) {
+  fprintf(f,
+	  "%s/** Internal data storage, do NOT modify! */\n"
+	  "%stypedef struct {\n"
+	  "%s  int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */\n"
+	  "%s  int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */\n", is.c_str(), is.c_str(), is.c_str(), is.c_str());
 
-    fprintf(f,
-	    "%s/** Internal data storage, do NOT modify! */\n"
-	    "%stypedef struct {\n", is.c_str(), is.c_str());
-
-    for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
-      fprintf(f, "%s  %s %s", is.c_str(), (*i).getStructType().c_str(), (*i).getName().c_str());
-      if ( (*i).getLength().length() > 0 ) {
-	fprintf(f, "[%s]", (*i).getLength().c_str());
-      }
-      fprintf(f, "; /**< %s */\n", (*i).getComment().c_str());
+  for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
+    fprintf(f, "%s  %s %s", is.c_str(), (*i).getStructType().c_str(), (*i).getName().c_str());
+    if ( (*i).getLength().length() > 0 ) {
+      fprintf(f, "[%s]", (*i).getLength().c_str());
     }
-
-    fprintf(f, "%s} %s;\n\n", is.c_str(), name.c_str());
+    fprintf(f, "; /**< %s */\n", (*i).getComment().c_str());
   }
+  
+  fprintf(f, "%s} %s;\n\n", is.c_str(), name.c_str());
 }
 
 
