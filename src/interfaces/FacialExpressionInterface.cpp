@@ -46,6 +46,7 @@ FacialExpressionInterface::FacialExpressionInterface() : Interface()
   data_size = sizeof(FacialExpressionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (FacialExpressionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
   add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
@@ -157,6 +158,7 @@ void
 FacialExpressionInterface::set_brows_action(const brows_t new_brows_action)
 {
   data->brows_action = new_brows_action;
+  data_changed = true;
 }
 
 /** Get eyes_action value.
@@ -187,6 +189,7 @@ void
 FacialExpressionInterface::set_eyes_action(const eyes_t new_eyes_action)
 {
   data->eyes_action = new_eyes_action;
+  data_changed = true;
 }
 
 /** Get jowl_action value.
@@ -217,6 +220,7 @@ void
 FacialExpressionInterface::set_jowl_action(const jowl_t new_jowl_action)
 {
   data->jowl_action = new_jowl_action;
+  data_changed = true;
 }
 
 /** Get mouth_action value.
@@ -247,6 +251,7 @@ void
 FacialExpressionInterface::set_mouth_action(const mouth_t new_mouth_action)
 {
   data->mouth_action = new_mouth_action;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

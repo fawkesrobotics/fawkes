@@ -62,12 +62,13 @@ MotorInterface::MotorInterface() : Interface()
   data_size = sizeof(MotorInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (MotorInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "motor_state", 1, &data->motor_state, "uint32");
-  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "uint32");
-  add_fieldinfo(IFT_ENUM, "right_rpm", 1, &data->right_rpm, "int32");
-  add_fieldinfo(IFT_ENUM, "rear_rpm", 1, &data->rear_rpm, "int32");
-  add_fieldinfo(IFT_ENUM, "left_rpm", 1, &data->left_rpm, "int32");
+  add_fieldinfo(IFT_UINT32, "motor_state", 1, &data->motor_state);
+  add_fieldinfo(IFT_UINT32, "drive_mode", 1, &data->drive_mode);
+  add_fieldinfo(IFT_INT32, "right_rpm", 1, &data->right_rpm);
+  add_fieldinfo(IFT_INT32, "rear_rpm", 1, &data->rear_rpm);
+  add_fieldinfo(IFT_INT32, "left_rpm", 1, &data->left_rpm);
   add_fieldinfo(IFT_FLOAT, "odometry_path_length", 1, &data->odometry_path_length);
   add_fieldinfo(IFT_FLOAT, "odometry_position_x", 1, &data->odometry_position_x);
   add_fieldinfo(IFT_FLOAT, "odometry_position_y", 1, &data->odometry_position_y);
@@ -75,7 +76,7 @@ MotorInterface::MotorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "vx", 1, &data->vx);
   add_fieldinfo(IFT_FLOAT, "vy", 1, &data->vy);
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
-  add_fieldinfo(IFT_ENUM, "controller", 1, &data->controller, "uint32");
+  add_fieldinfo(IFT_UINT32, "controller", 1, &data->controller);
   add_fieldinfo(IFT_STRING, "controller_thread_name", 64, data->controller_thread_name);
   add_messageinfo("SetMotorStateMessage");
   add_messageinfo("AcquireControlMessage");
@@ -129,6 +130,7 @@ void
 MotorInterface::set_motor_state(const uint32_t new_motor_state)
 {
   data->motor_state = new_motor_state;
+  data_changed = true;
 }
 
 /** Get drive_mode value.
@@ -163,6 +165,7 @@ void
 MotorInterface::set_drive_mode(const uint32_t new_drive_mode)
 {
   data->drive_mode = new_drive_mode;
+  data_changed = true;
 }
 
 /** Get right_rpm value.
@@ -197,6 +200,7 @@ void
 MotorInterface::set_right_rpm(const int32_t new_right_rpm)
 {
   data->right_rpm = new_right_rpm;
+  data_changed = true;
 }
 
 /** Get rear_rpm value.
@@ -231,6 +235,7 @@ void
 MotorInterface::set_rear_rpm(const int32_t new_rear_rpm)
 {
   data->rear_rpm = new_rear_rpm;
+  data_changed = true;
 }
 
 /** Get left_rpm value.
@@ -265,6 +270,7 @@ void
 MotorInterface::set_left_rpm(const int32_t new_left_rpm)
 {
   data->left_rpm = new_left_rpm;
+  data_changed = true;
 }
 
 /** Get odometry_path_length value.
@@ -299,6 +305,7 @@ void
 MotorInterface::set_odometry_path_length(const float new_odometry_path_length)
 {
   data->odometry_path_length = new_odometry_path_length;
+  data_changed = true;
 }
 
 /** Get odometry_position_x value.
@@ -333,6 +340,7 @@ void
 MotorInterface::set_odometry_position_x(const float new_odometry_position_x)
 {
   data->odometry_position_x = new_odometry_position_x;
+  data_changed = true;
 }
 
 /** Get odometry_position_y value.
@@ -367,6 +375,7 @@ void
 MotorInterface::set_odometry_position_y(const float new_odometry_position_y)
 {
   data->odometry_position_y = new_odometry_position_y;
+  data_changed = true;
 }
 
 /** Get odometry_orientation value.
@@ -401,6 +410,7 @@ void
 MotorInterface::set_odometry_orientation(const float new_odometry_orientation)
 {
   data->odometry_orientation = new_odometry_orientation;
+  data_changed = true;
 }
 
 /** Get vx value.
@@ -435,6 +445,7 @@ void
 MotorInterface::set_vx(const float new_vx)
 {
   data->vx = new_vx;
+  data_changed = true;
 }
 
 /** Get vy value.
@@ -469,6 +480,7 @@ void
 MotorInterface::set_vy(const float new_vy)
 {
   data->vy = new_vy;
+  data_changed = true;
 }
 
 /** Get omega value.
@@ -503,6 +515,7 @@ void
 MotorInterface::set_omega(const float new_omega)
 {
   data->omega = new_omega;
+  data_changed = true;
 }
 
 /** Get controller value.
@@ -539,6 +552,7 @@ void
 MotorInterface::set_controller(const uint32_t new_controller)
 {
   data->controller = new_controller;
+  data_changed = true;
 }
 
 /** Get controller_thread_name value.
@@ -577,6 +591,7 @@ void
 MotorInterface::set_controller_thread_name(const char * new_controller_thread_name)
 {
   strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
+  data_changed = true;
 }
 
 /* =========== message create =========== */

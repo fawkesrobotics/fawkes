@@ -46,13 +46,14 @@ Position2DTrackInterface::Position2DTrackInterface() : Interface()
   data_size = sizeof(Position2DTrackInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (Position2DTrackInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "track_x_positions", 30, &data->track_x_positions);
   add_fieldinfo(IFT_FLOAT, "track_y_positions", 30, &data->track_y_positions);
-  add_fieldinfo(IFT_ENUM, "track_timestamps", 30, &data->track_timestamps, "int32");
+  add_fieldinfo(IFT_INT32, "track_timestamps", 30, &data->track_timestamps);
   add_fieldinfo(IFT_BOOL, "valid", 1, &data->valid);
-  add_fieldinfo(IFT_ENUM, "length", 1, &data->length, "uint32");
-  add_fieldinfo(IFT_ENUM, "track_id", 1, &data->track_id, "uint32");
+  add_fieldinfo(IFT_UINT32, "length", 1, &data->length);
+  add_fieldinfo(IFT_UINT32, "track_id", 1, &data->track_id);
   unsigned char tmp_hash[] = {0xcd, 0xb8, 0x68, 0x14, 0xff, 0x3, 0xe4, 0xc4, 0x20, 0x43, 0x44, 0xb8, 0x86, 0x87, 0xa3, 0x4c};
   set_hash(tmp_hash);
 }
@@ -115,6 +116,7 @@ void
 Position2DTrackInterface::set_track_x_positions(const float * new_track_x_positions)
 {
   memcpy(data->track_x_positions, new_track_x_positions, sizeof(float) * 30);
+  data_changed = true;
 }
 
 /** Set track_x_positions value at given index.
@@ -185,6 +187,7 @@ void
 Position2DTrackInterface::set_track_y_positions(const float * new_track_y_positions)
 {
   memcpy(data->track_y_positions, new_track_y_positions, sizeof(float) * 30);
+  data_changed = true;
 }
 
 /** Set track_y_positions value at given index.
@@ -255,6 +258,7 @@ void
 Position2DTrackInterface::set_track_timestamps(const int32_t * new_track_timestamps)
 {
   memcpy(data->track_timestamps, new_track_timestamps, sizeof(int32_t) * 30);
+  data_changed = true;
 }
 
 /** Set track_timestamps value at given index.
@@ -301,6 +305,7 @@ void
 Position2DTrackInterface::set_valid(const bool new_valid)
 {
   data->valid = new_valid;
+  data_changed = true;
 }
 
 /** Get length value.
@@ -331,6 +336,7 @@ void
 Position2DTrackInterface::set_length(const uint32_t new_length)
 {
   data->length = new_length;
+  data_changed = true;
 }
 
 /** Get track_id value.
@@ -361,6 +367,7 @@ void
 Position2DTrackInterface::set_track_id(const uint32_t new_track_id)
 {
   data->track_id = new_track_id;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

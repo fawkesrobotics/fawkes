@@ -91,6 +91,7 @@ KatanaInterface::KatanaInterface() : Interface()
   data_size = sizeof(KatanaInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (KatanaInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BYTE, "sensor_value", 16, &data->sensor_value);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
@@ -99,9 +100,9 @@ KatanaInterface::KatanaInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
   add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
-  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "uint32");
+  add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
@@ -171,6 +172,7 @@ void
 KatanaInterface::set_sensor_value(const uint8_t * new_sensor_value)
 {
   memcpy(data->sensor_value, new_sensor_value, sizeof(uint8_t) * 16);
+  data_changed = true;
 }
 
 /** Set sensor_value value at given index.
@@ -217,6 +219,7 @@ void
 KatanaInterface::set_x(const float new_x)
 {
   data->x = new_x;
+  data_changed = true;
 }
 
 /** Get y value.
@@ -249,6 +252,7 @@ void
 KatanaInterface::set_y(const float new_y)
 {
   data->y = new_y;
+  data_changed = true;
 }
 
 /** Get z value.
@@ -281,6 +285,7 @@ void
 KatanaInterface::set_z(const float new_z)
 {
   data->z = new_z;
+  data_changed = true;
 }
 
 /** Get phi value.
@@ -311,6 +316,7 @@ void
 KatanaInterface::set_phi(const float new_phi)
 {
   data->phi = new_phi;
+  data_changed = true;
 }
 
 /** Get theta value.
@@ -341,6 +347,7 @@ void
 KatanaInterface::set_theta(const float new_theta)
 {
   data->theta = new_theta;
+  data_changed = true;
 }
 
 /** Get psi value.
@@ -371,6 +378,7 @@ void
 KatanaInterface::set_psi(const float new_psi)
 {
   data->psi = new_psi;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -403,6 +411,7 @@ void
 KatanaInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /** Get final value.
@@ -435,6 +444,7 @@ void
 KatanaInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
 }
 
 /** Get error_code value.
@@ -469,6 +479,7 @@ void
 KatanaInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
+  data_changed = true;
 }
 
 /** Get enabled value.
@@ -499,6 +510,7 @@ void
 KatanaInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /** Get calibrated value.
@@ -529,6 +541,7 @@ void
 KatanaInterface::set_calibrated(const bool new_calibrated)
 {
   data->calibrated = new_calibrated;
+  data_changed = true;
 }
 
 /** Get max_velocity value.
@@ -559,6 +572,7 @@ void
 KatanaInterface::set_max_velocity(const uint8_t new_max_velocity)
 {
   data->max_velocity = new_max_velocity;
+  data_changed = true;
 }
 
 /** Get num_motors value.
@@ -589,6 +603,7 @@ void
 KatanaInterface::set_num_motors(const uint8_t new_num_motors)
 {
   data->num_motors = new_num_motors;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

@@ -50,6 +50,7 @@ Laser360Interface::Laser360Interface() : Interface()
   data_size = sizeof(Laser360Interface_data_t);
   data_ptr  = malloc(data_size);
   data      = (Laser360Interface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "distances", 360, &data->distances);
   add_fieldinfo(IFT_BOOL, "clockwise_angle", 1, &data->clockwise_angle);
@@ -112,6 +113,7 @@ void
 Laser360Interface::set_distances(const float * new_distances)
 {
   memcpy(data->distances, new_distances, sizeof(float) * 360);
+  data_changed = true;
 }
 
 /** Set distances value at given index.
@@ -161,6 +163,7 @@ void
 Laser360Interface::set_clockwise_angle(const bool new_clockwise_angle)
 {
   data->clockwise_angle = new_clockwise_angle;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

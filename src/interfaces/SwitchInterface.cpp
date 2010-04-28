@@ -49,13 +49,14 @@ SwitchInterface::SwitchInterface() : Interface()
   data_size = sizeof(SwitchInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SwitchInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
   add_fieldinfo(IFT_FLOAT, "history", 1, &data->history);
-  add_fieldinfo(IFT_ENUM, "short_activations", 1, &data->short_activations, "uint32");
-  add_fieldinfo(IFT_ENUM, "long_activations", 1, &data->long_activations, "uint32");
-  add_fieldinfo(IFT_ENUM, "activation_count", 1, &data->activation_count, "uint32");
+  add_fieldinfo(IFT_UINT32, "short_activations", 1, &data->short_activations);
+  add_fieldinfo(IFT_UINT32, "long_activations", 1, &data->long_activations);
+  add_fieldinfo(IFT_UINT32, "activation_count", 1, &data->activation_count);
   add_messageinfo("SetMessage");
   add_messageinfo("EnableSwitchMessage");
   add_messageinfo("DisableSwitchMessage");
@@ -102,6 +103,7 @@ void
 SwitchInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /** Get value value.
@@ -140,6 +142,7 @@ void
 SwitchInterface::set_value(const float new_value)
 {
   data->value = new_value;
+  data_changed = true;
 }
 
 /** Get history value.
@@ -184,6 +187,7 @@ void
 SwitchInterface::set_history(const float new_history)
 {
   data->history = new_history;
+  data_changed = true;
 }
 
 /** Get short_activations value.
@@ -220,6 +224,7 @@ void
 SwitchInterface::set_short_activations(const uint32_t new_short_activations)
 {
   data->short_activations = new_short_activations;
+  data_changed = true;
 }
 
 /** Get long_activations value.
@@ -256,6 +261,7 @@ void
 SwitchInterface::set_long_activations(const uint32_t new_long_activations)
 {
   data->long_activations = new_long_activations;
+  data_changed = true;
 }
 
 /** Get activation_count value.
@@ -292,6 +298,7 @@ void
 SwitchInterface::set_activation_count(const uint32_t new_activation_count)
 {
   data->activation_count = new_activation_count;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

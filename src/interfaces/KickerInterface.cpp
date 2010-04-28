@@ -47,12 +47,13 @@ KickerInterface::KickerInterface() : Interface()
   data_size = sizeof(KickerInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (KickerInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "num_kicks_left", 1, &data->num_kicks_left, "int32");
-  add_fieldinfo(IFT_ENUM, "num_kicks_center", 1, &data->num_kicks_center, "int32");
-  add_fieldinfo(IFT_ENUM, "num_kicks_right", 1, &data->num_kicks_right, "int32");
+  add_fieldinfo(IFT_INT32, "num_kicks_left", 1, &data->num_kicks_left);
+  add_fieldinfo(IFT_INT32, "num_kicks_center", 1, &data->num_kicks_center);
+  add_fieldinfo(IFT_INT32, "num_kicks_right", 1, &data->num_kicks_right);
   add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
-  add_fieldinfo(IFT_ENUM, "current_intensity", 1, &data->current_intensity, "uint32");
+  add_fieldinfo(IFT_UINT32, "current_intensity", 1, &data->current_intensity);
   add_messageinfo("KickMessage");
   add_messageinfo("ResetCounterMessage");
   add_messageinfo("GuideBallMessage");
@@ -111,6 +112,7 @@ void
 KickerInterface::set_num_kicks_left(const int32_t new_num_kicks_left)
 {
   data->num_kicks_left = new_num_kicks_left;
+  data_changed = true;
 }
 
 /** Get num_kicks_center value.
@@ -145,6 +147,7 @@ void
 KickerInterface::set_num_kicks_center(const int32_t new_num_kicks_center)
 {
   data->num_kicks_center = new_num_kicks_center;
+  data_changed = true;
 }
 
 /** Get num_kicks_right value.
@@ -179,6 +182,7 @@ void
 KickerInterface::set_num_kicks_right(const int32_t new_num_kicks_right)
 {
   data->num_kicks_right = new_num_kicks_right;
+  data_changed = true;
 }
 
 /** Get guide_ball_side value.
@@ -211,6 +215,7 @@ void
 KickerInterface::set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side)
 {
   data->guide_ball_side = new_guide_ball_side;
+  data_changed = true;
 }
 
 /** Get current_intensity value.
@@ -245,6 +250,7 @@ void
 KickerInterface::set_current_intensity(const uint32_t new_current_intensity)
 {
   data->current_intensity = new_current_intensity;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

@@ -60,13 +60,14 @@ PanTiltInterface::PanTiltInterface() : Interface()
   data_size = sizeof(PanTiltInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (PanTiltInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "flags", 1, &data->flags, "uint32");
+  add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
   add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
-  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "uint32");
+  add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_FLOAT, "min_pan", 1, &data->min_pan);
@@ -126,6 +127,7 @@ void
 PanTiltInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
+  data_changed = true;
 }
 
 /** Get pan value.
@@ -156,6 +158,7 @@ void
 PanTiltInterface::set_pan(const float new_pan)
 {
   data->pan = new_pan;
+  data_changed = true;
 }
 
 /** Get tilt value.
@@ -186,6 +189,7 @@ void
 PanTiltInterface::set_tilt(const float new_tilt)
 {
   data->tilt = new_tilt;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -218,6 +222,7 @@ void
 PanTiltInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /** Get final value.
@@ -250,6 +255,7 @@ void
 PanTiltInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
 }
 
 /** Get error_code value.
@@ -284,6 +290,7 @@ void
 PanTiltInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
+  data_changed = true;
 }
 
 /** Get enabled value.
@@ -314,6 +321,7 @@ void
 PanTiltInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /** Get calibrated value.
@@ -344,6 +352,7 @@ void
 PanTiltInterface::set_calibrated(const bool new_calibrated)
 {
   data->calibrated = new_calibrated;
+  data_changed = true;
 }
 
 /** Get min_pan value.
@@ -374,6 +383,7 @@ void
 PanTiltInterface::set_min_pan(const float new_min_pan)
 {
   data->min_pan = new_min_pan;
+  data_changed = true;
 }
 
 /** Get max_pan value.
@@ -404,6 +414,7 @@ void
 PanTiltInterface::set_max_pan(const float new_max_pan)
 {
   data->max_pan = new_max_pan;
+  data_changed = true;
 }
 
 /** Get min_tilt value.
@@ -434,6 +445,7 @@ void
 PanTiltInterface::set_min_tilt(const float new_min_tilt)
 {
   data->min_tilt = new_min_tilt;
+  data_changed = true;
 }
 
 /** Get max_tilt value.
@@ -464,6 +476,7 @@ void
 PanTiltInterface::set_max_tilt(const float new_max_tilt)
 {
   data->max_tilt = new_max_tilt;
+  data_changed = true;
 }
 
 /** Get max_pan_velocity value.
@@ -494,6 +507,7 @@ void
 PanTiltInterface::set_max_pan_velocity(const float new_max_pan_velocity)
 {
   data->max_pan_velocity = new_max_pan_velocity;
+  data_changed = true;
 }
 
 /** Get max_tilt_velocity value.
@@ -524,6 +538,7 @@ void
 PanTiltInterface::set_max_tilt_velocity(const float new_max_tilt_velocity)
 {
   data->max_tilt_velocity = new_max_tilt_velocity;
+  data_changed = true;
 }
 
 /** Get pan_velocity value.
@@ -554,6 +569,7 @@ void
 PanTiltInterface::set_pan_velocity(const float new_pan_velocity)
 {
   data->pan_velocity = new_pan_velocity;
+  data_changed = true;
 }
 
 /** Get tilt_velocity value.
@@ -584,6 +600,7 @@ void
 PanTiltInterface::set_tilt_velocity(const float new_tilt_velocity)
 {
   data->tilt_velocity = new_tilt_velocity;
+  data_changed = true;
 }
 
 /** Get pan_margin value.
@@ -616,6 +633,7 @@ void
 PanTiltInterface::set_pan_margin(const float new_pan_margin)
 {
   data->pan_margin = new_pan_margin;
+  data_changed = true;
 }
 
 /** Get tilt_margin value.
@@ -648,6 +666,7 @@ void
 PanTiltInterface::set_tilt_margin(const float new_tilt_margin)
 {
   data->tilt_margin = new_tilt_margin;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

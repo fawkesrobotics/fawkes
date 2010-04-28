@@ -46,9 +46,10 @@ SpeechRecognitionInterface::SpeechRecognitionInterface() : Interface()
   data_size = sizeof(SpeechRecognitionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SpeechRecognitionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
-  add_fieldinfo(IFT_ENUM, "counter", 1, &data->counter, "uint32");
+  add_fieldinfo(IFT_UINT32, "counter", 1, &data->counter);
   add_fieldinfo(IFT_BOOL, "processing", 1, &data->processing);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_messageinfo("ResetMessage");
@@ -95,6 +96,7 @@ void
 SpeechRecognitionInterface::set_text(const char * new_text)
 {
   strncpy(data->text, new_text, sizeof(data->text));
+  data_changed = true;
 }
 
 /** Get counter value.
@@ -129,6 +131,7 @@ void
 SpeechRecognitionInterface::set_counter(const uint32_t new_counter)
 {
   data->counter = new_counter;
+  data_changed = true;
 }
 
 /** Get processing value.
@@ -163,6 +166,7 @@ void
 SpeechRecognitionInterface::set_processing(const bool new_processing)
 {
   data->processing = new_processing;
+  data_changed = true;
 }
 
 /** Get enabled value.
@@ -197,6 +201,7 @@ void
 SpeechRecognitionInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

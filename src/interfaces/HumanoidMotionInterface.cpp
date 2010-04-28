@@ -46,6 +46,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   data_size = sizeof(HumanoidMotionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (HumanoidMotionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "moving", 1, &data->moving);
   add_fieldinfo(IFT_ENUM, "supporting_leg", 1, &data->supporting_leg, "LegEnum");
@@ -64,7 +65,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "shoulder_pitch_amplitude", 1, &data->shoulder_pitch_amplitude);
   add_fieldinfo(IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
-  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_messageinfo("SetWalkParamsMessage");
   add_messageinfo("SetWalkArmsParamsMessage");
   add_messageinfo("StopMessage");
@@ -156,6 +157,7 @@ void
 HumanoidMotionInterface::set_moving(const bool new_moving)
 {
   data->moving = new_moving;
+  data_changed = true;
 }
 
 /** Get supporting_leg value.
@@ -186,6 +188,7 @@ void
 HumanoidMotionInterface::set_supporting_leg(const LegEnum new_supporting_leg)
 {
   data->supporting_leg = new_supporting_leg;
+  data_changed = true;
 }
 
 /** Get max_step_length value.
@@ -220,6 +223,7 @@ void
 HumanoidMotionInterface::set_max_step_length(const float new_max_step_length)
 {
   data->max_step_length = new_max_step_length;
+  data_changed = true;
 }
 
 /** Get max_step_height value.
@@ -254,6 +258,7 @@ void
 HumanoidMotionInterface::set_max_step_height(const float new_max_step_height)
 {
   data->max_step_height = new_max_step_height;
+  data_changed = true;
 }
 
 /** Get max_step_side value.
@@ -288,6 +293,7 @@ void
 HumanoidMotionInterface::set_max_step_side(const float new_max_step_side)
 {
   data->max_step_side = new_max_step_side;
+  data_changed = true;
 }
 
 /** Get max_step_turn value.
@@ -322,6 +328,7 @@ void
 HumanoidMotionInterface::set_max_step_turn(const float new_max_step_turn)
 {
   data->max_step_turn = new_max_step_turn;
+  data_changed = true;
 }
 
 /** Get zmp_offset_forward value.
@@ -356,6 +363,7 @@ void
 HumanoidMotionInterface::set_zmp_offset_forward(const float new_zmp_offset_forward)
 {
   data->zmp_offset_forward = new_zmp_offset_forward;
+  data_changed = true;
 }
 
 /** Get zmp_offset_sideward value.
@@ -390,6 +398,7 @@ void
 HumanoidMotionInterface::set_zmp_offset_sideward(const float new_zmp_offset_sideward)
 {
   data->zmp_offset_sideward = new_zmp_offset_sideward;
+  data_changed = true;
 }
 
 /** Get l_hip_roll_compensation value.
@@ -426,6 +435,7 @@ void
 HumanoidMotionInterface::set_l_hip_roll_compensation(const float new_l_hip_roll_compensation)
 {
   data->l_hip_roll_compensation = new_l_hip_roll_compensation;
+  data_changed = true;
 }
 
 /** Get r_hip_roll_compensation value.
@@ -462,6 +472,7 @@ void
 HumanoidMotionInterface::set_r_hip_roll_compensation(const float new_r_hip_roll_compensation)
 {
   data->r_hip_roll_compensation = new_r_hip_roll_compensation;
+  data_changed = true;
 }
 
 /** Get hip_height value.
@@ -498,6 +509,7 @@ void
 HumanoidMotionInterface::set_hip_height(const float new_hip_height)
 {
   data->hip_height = new_hip_height;
+  data_changed = true;
 }
 
 /** Get torso_sideward_orientation value.
@@ -534,6 +546,7 @@ void
 HumanoidMotionInterface::set_torso_sideward_orientation(const float new_torso_sideward_orientation)
 {
   data->torso_sideward_orientation = new_torso_sideward_orientation;
+  data_changed = true;
 }
 
 /** Get arms_enabled value.
@@ -568,6 +581,7 @@ void
 HumanoidMotionInterface::set_arms_enabled(const bool new_arms_enabled)
 {
   data->arms_enabled = new_arms_enabled;
+  data_changed = true;
 }
 
 /** Get shoulder_pitch_median value.
@@ -602,6 +616,7 @@ void
 HumanoidMotionInterface::set_shoulder_pitch_median(const float new_shoulder_pitch_median)
 {
   data->shoulder_pitch_median = new_shoulder_pitch_median;
+  data_changed = true;
 }
 
 /** Get shoulder_pitch_amplitude value.
@@ -636,6 +651,7 @@ void
 HumanoidMotionInterface::set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude)
 {
   data->shoulder_pitch_amplitude = new_shoulder_pitch_amplitude;
+  data_changed = true;
 }
 
 /** Get elbow_roll_median value.
@@ -670,6 +686,7 @@ void
 HumanoidMotionInterface::set_elbow_roll_median(const float new_elbow_roll_median)
 {
   data->elbow_roll_median = new_elbow_roll_median;
+  data_changed = true;
 }
 
 /** Get elbow_roll_amplitude value.
@@ -704,6 +721,7 @@ void
 HumanoidMotionInterface::set_elbow_roll_amplitude(const float new_elbow_roll_amplitude)
 {
   data->elbow_roll_amplitude = new_elbow_roll_amplitude;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -740,6 +758,7 @@ void
 HumanoidMotionInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

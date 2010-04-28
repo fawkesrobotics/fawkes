@@ -59,8 +59,9 @@ VisualDisplay2DInterface::VisualDisplay2DInterface() : Interface()
   data_size = sizeof(VisualDisplay2DInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (VisualDisplay2DInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "counter", 1, &data->counter, "uint32");
+  add_fieldinfo(IFT_UINT32, "counter", 1, &data->counter);
   add_messageinfo("AddCartLineMessage");
   add_messageinfo("AddCartCircleMessage");
   add_messageinfo("AddCartRectMessage");
@@ -140,6 +141,7 @@ void
 VisualDisplay2DInterface::set_counter(const uint32_t new_counter)
 {
   data->counter = new_counter;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

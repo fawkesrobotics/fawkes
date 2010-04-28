@@ -78,16 +78,17 @@ GameStateInterface::GameStateInterface() : Interface()
   data_size = sizeof(GameStateInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (GameStateInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "game_state", 1, &data->game_state, "uint32");
+  add_fieldinfo(IFT_UINT32, "game_state", 1, &data->game_state);
   add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
   add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
   add_fieldinfo(IFT_ENUM, "our_goal_color", 1, &data->our_goal_color, "if_gamestate_goalcolor_t");
   add_fieldinfo(IFT_ENUM, "half", 1, &data->half, "if_gamestate_half_t");
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
   add_fieldinfo(IFT_ENUM, "role", 1, &data->role, "if_gamestate_role_t");
-  add_fieldinfo(IFT_ENUM, "score_cyan", 1, &data->score_cyan, "uint32");
-  add_fieldinfo(IFT_ENUM, "score_magenta", 1, &data->score_magenta, "uint32");
+  add_fieldinfo(IFT_UINT32, "score_cyan", 1, &data->score_cyan);
+  add_fieldinfo(IFT_UINT32, "score_magenta", 1, &data->score_magenta);
   add_messageinfo("SetTeamColorMessage");
   add_messageinfo("SetKickoffMessage");
   add_messageinfo("SetStateTeamMessage");
@@ -186,6 +187,7 @@ void
 GameStateInterface::set_game_state(const uint32_t new_game_state)
 {
   data->game_state = new_game_state;
+  data_changed = true;
 }
 
 /** Get state_team value.
@@ -216,6 +218,7 @@ void
 GameStateInterface::set_state_team(const if_gamestate_team_t new_state_team)
 {
   data->state_team = new_state_team;
+  data_changed = true;
 }
 
 /** Get our_team value.
@@ -246,6 +249,7 @@ void
 GameStateInterface::set_our_team(const if_gamestate_team_t new_our_team)
 {
   data->our_team = new_our_team;
+  data_changed = true;
 }
 
 /** Get our_goal_color value.
@@ -276,6 +280,7 @@ void
 GameStateInterface::set_our_goal_color(const if_gamestate_goalcolor_t new_our_goal_color)
 {
   data->our_goal_color = new_our_goal_color;
+  data_changed = true;
 }
 
 /** Get half value.
@@ -306,6 +311,7 @@ void
 GameStateInterface::set_half(const if_gamestate_half_t new_half)
 {
   data->half = new_half;
+  data_changed = true;
 }
 
 /** Get kickoff value.
@@ -336,6 +342,7 @@ void
 GameStateInterface::set_kickoff(const bool new_kickoff)
 {
   data->kickoff = new_kickoff;
+  data_changed = true;
 }
 
 /** Get role value.
@@ -366,6 +373,7 @@ void
 GameStateInterface::set_role(const if_gamestate_role_t new_role)
 {
   data->role = new_role;
+  data_changed = true;
 }
 
 /** Get score_cyan value.
@@ -396,6 +404,7 @@ void
 GameStateInterface::set_score_cyan(const uint32_t new_score_cyan)
 {
   data->score_cyan = new_score_cyan;
+  data_changed = true;
 }
 
 /** Get score_magenta value.
@@ -426,6 +435,7 @@ void
 GameStateInterface::set_score_magenta(const uint32_t new_score_magenta)
 {
   data->score_magenta = new_score_magenta;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

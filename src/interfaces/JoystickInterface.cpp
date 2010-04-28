@@ -112,10 +112,11 @@ JoystickInterface::JoystickInterface() : Interface()
   data_size = sizeof(JoystickInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (JoystickInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BYTE, "num_axes", 1, &data->num_axes);
   add_fieldinfo(IFT_BYTE, "num_buttons", 1, &data->num_buttons);
-  add_fieldinfo(IFT_ENUM, "pressed_buttons", 1, &data->pressed_buttons, "uint32");
+  add_fieldinfo(IFT_UINT32, "pressed_buttons", 1, &data->pressed_buttons);
   add_fieldinfo(IFT_FLOAT, "axis_x", 4, &data->axis_x);
   add_fieldinfo(IFT_FLOAT, "axis_y", 4, &data->axis_y);
   unsigned char tmp_hash[] = {0x20, 0xe5, 0x9c, 0x19, 0x6e, 0xd2, 0xcf, 0xcc, 0xf2, 0x5d, 0x70, 0x88, 0x52, 0x66, 0x7a, 0x1e};
@@ -160,6 +161,7 @@ void
 JoystickInterface::set_num_axes(const uint8_t new_num_axes)
 {
   data->num_axes = new_num_axes;
+  data_changed = true;
 }
 
 /** Get num_buttons value.
@@ -194,6 +196,7 @@ void
 JoystickInterface::set_num_buttons(const uint8_t new_num_buttons)
 {
   data->num_buttons = new_num_buttons;
+  data_changed = true;
 }
 
 /** Get pressed_buttons value.
@@ -232,6 +235,7 @@ void
 JoystickInterface::set_pressed_buttons(const uint32_t new_pressed_buttons)
 {
   data->pressed_buttons = new_pressed_buttons;
+  data_changed = true;
 }
 
 /** Get axis_x value.
@@ -277,6 +281,7 @@ void
 JoystickInterface::set_axis_x(const float * new_axis_x)
 {
   memcpy(data->axis_x, new_axis_x, sizeof(float) * 4);
+  data_changed = true;
 }
 
 /** Set axis_x value at given index.
@@ -335,6 +340,7 @@ void
 JoystickInterface::set_axis_y(const float * new_axis_y)
 {
   memcpy(data->axis_y, new_axis_y, sizeof(float) * 4);
+  data_changed = true;
 }
 
 /** Set axis_y value at given index.

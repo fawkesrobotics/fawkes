@@ -49,10 +49,11 @@ SkillerInterface::SkillerInterface() : Interface()
   data_size = sizeof(SkillerInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SkillerInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
-  add_fieldinfo(IFT_ENUM, "exclusive_controller", 1, &data->exclusive_controller, "uint32");
+  add_fieldinfo(IFT_UINT32, "exclusive_controller", 1, &data->exclusive_controller);
   add_fieldinfo(IFT_ENUM, "status", 1, &data->status, "SkillStatusEnum");
   add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   add_messageinfo("ExecSkillMessage");
@@ -120,6 +121,7 @@ void
 SkillerInterface::set_skill_string(const char * new_skill_string)
 {
   strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
+  data_changed = true;
 }
 
 /** Get error value.
@@ -154,6 +156,7 @@ void
 SkillerInterface::set_error(const char * new_error)
 {
   strncpy(data->error, new_error, sizeof(data->error));
+  data_changed = true;
 }
 
 /** Get exclusive_controller value.
@@ -192,6 +195,7 @@ void
 SkillerInterface::set_exclusive_controller(const uint32_t new_exclusive_controller)
 {
   data->exclusive_controller = new_exclusive_controller;
+  data_changed = true;
 }
 
 /** Get status value.
@@ -226,6 +230,7 @@ void
 SkillerInterface::set_status(const SkillStatusEnum new_status)
 {
   data->status = new_status;
+  data_changed = true;
 }
 
 /** Get continuous value.
@@ -262,6 +267,7 @@ void
 SkillerInterface::set_continuous(const bool new_continuous)
 {
   data->continuous = new_continuous;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

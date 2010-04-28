@@ -49,6 +49,7 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   data_size = sizeof(SkillerDebugInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SkillerDebugInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
   add_fieldinfo(IFT_STRING, "graph", 8192, data->graph);
@@ -114,6 +115,7 @@ void
 SkillerDebugInterface::set_graph_fsm(const char * new_graph_fsm)
 {
   strncpy(data->graph_fsm, new_graph_fsm, sizeof(data->graph_fsm));
+  data_changed = true;
 }
 
 /** Get graph value.
@@ -148,6 +150,7 @@ void
 SkillerDebugInterface::set_graph(const char * new_graph)
 {
   strncpy(data->graph, new_graph, sizeof(data->graph));
+  data_changed = true;
 }
 
 /** Get graph_dir value.
@@ -182,6 +185,7 @@ void
 SkillerDebugInterface::set_graph_dir(const GraphDirectionEnum new_graph_dir)
 {
   data->graph_dir = new_graph_dir;
+  data_changed = true;
 }
 
 /** Get graph_colored value.
@@ -216,6 +220,7 @@ void
 SkillerDebugInterface::set_graph_colored(const bool new_graph_colored)
 {
   data->graph_colored = new_graph_colored;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

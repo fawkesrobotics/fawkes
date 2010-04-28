@@ -48,6 +48,7 @@ LocalizerControlInterface::LocalizerControlInterface() : Interface()
   data_size = sizeof(LocalizerControlInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (LocalizerControlInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "map_name", 30, data->map_name);
   add_messageinfo("ResetMessage");
@@ -91,6 +92,7 @@ void
 LocalizerControlInterface::set_map_name(const char * new_map_name)
 {
   strncpy(data->map_name, new_map_name, sizeof(data->map_name));
+  data_changed = true;
 }
 
 /* =========== message create =========== */

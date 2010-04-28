@@ -78,17 +78,18 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data_size = sizeof(NavigatorInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (NavigatorInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "flags", 1, &data->flags, "uint32");
+  add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "dest_x", 1, &data->dest_x);
   add_fieldinfo(IFT_FLOAT, "dest_y", 1, &data->dest_y);
   add_fieldinfo(IFT_FLOAT, "dest_ori", 1, &data->dest_ori);
   add_fieldinfo(IFT_FLOAT, "dest_dist", 1, &data->dest_dist);
-  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "uint32");
+  add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
@@ -142,6 +143,7 @@ void
 NavigatorInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
+  data_changed = true;
 }
 
 /** Get x value.
@@ -172,6 +174,7 @@ void
 NavigatorInterface::set_x(const float new_x)
 {
   data->x = new_x;
+  data_changed = true;
 }
 
 /** Get y value.
@@ -202,6 +205,7 @@ void
 NavigatorInterface::set_y(const float new_y)
 {
   data->y = new_y;
+  data_changed = true;
 }
 
 /** Get dest_x value.
@@ -232,6 +236,7 @@ void
 NavigatorInterface::set_dest_x(const float new_dest_x)
 {
   data->dest_x = new_dest_x;
+  data_changed = true;
 }
 
 /** Get dest_y value.
@@ -262,6 +267,7 @@ void
 NavigatorInterface::set_dest_y(const float new_dest_y)
 {
   data->dest_y = new_dest_y;
+  data_changed = true;
 }
 
 /** Get dest_ori value.
@@ -292,6 +298,7 @@ void
 NavigatorInterface::set_dest_ori(const float new_dest_ori)
 {
   data->dest_ori = new_dest_ori;
+  data_changed = true;
 }
 
 /** Get dest_dist value.
@@ -322,6 +329,7 @@ void
 NavigatorInterface::set_dest_dist(const float new_dest_dist)
 {
   data->dest_dist = new_dest_dist;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -354,6 +362,7 @@ void
 NavigatorInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /** Get final value.
@@ -386,6 +395,7 @@ void
 NavigatorInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
 }
 
 /** Get error_code value.
@@ -420,6 +430,7 @@ void
 NavigatorInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
+  data_changed = true;
 }
 
 /** Get max_velocity value.
@@ -450,6 +461,7 @@ void
 NavigatorInterface::set_max_velocity(const float new_max_velocity)
 {
   data->max_velocity = new_max_velocity;
+  data_changed = true;
 }
 
 /** Get security_distance value.
@@ -482,6 +494,7 @@ void
 NavigatorInterface::set_security_distance(const float new_security_distance)
 {
   data->security_distance = new_security_distance;
+  data_changed = true;
 }
 
 /** Get escaping_enabled value.
@@ -518,6 +531,7 @@ void
 NavigatorInterface::set_escaping_enabled(const bool new_escaping_enabled)
 {
   data->escaping_enabled = new_escaping_enabled;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

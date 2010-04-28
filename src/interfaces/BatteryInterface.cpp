@@ -46,10 +46,11 @@ BatteryInterface::BatteryInterface() : Interface()
   data_size = sizeof(BatteryInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "current", 1, &data->current, "uint32");
-  add_fieldinfo(IFT_ENUM, "voltage", 1, &data->voltage, "uint32");
-  add_fieldinfo(IFT_ENUM, "temperature", 1, &data->temperature, "uint32");
+  add_fieldinfo(IFT_UINT32, "current", 1, &data->current);
+  add_fieldinfo(IFT_UINT32, "voltage", 1, &data->voltage);
+  add_fieldinfo(IFT_UINT32, "temperature", 1, &data->temperature);
   add_fieldinfo(IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
   add_fieldinfo(IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
   add_messageinfo("PushButtonMessage");
@@ -92,6 +93,7 @@ void
 BatteryInterface::set_current(const uint32_t new_current)
 {
   data->current = new_current;
+  data_changed = true;
 }
 
 /** Get voltage value.
@@ -122,6 +124,7 @@ void
 BatteryInterface::set_voltage(const uint32_t new_voltage)
 {
   data->voltage = new_voltage;
+  data_changed = true;
 }
 
 /** Get temperature value.
@@ -152,6 +155,7 @@ void
 BatteryInterface::set_temperature(const uint32_t new_temperature)
 {
   data->temperature = new_temperature;
+  data_changed = true;
 }
 
 /** Get absolute_soc value.
@@ -182,6 +186,7 @@ void
 BatteryInterface::set_absolute_soc(const float new_absolute_soc)
 {
   data->absolute_soc = new_absolute_soc;
+  data_changed = true;
 }
 
 /** Get relative_soc value.
@@ -212,6 +217,7 @@ void
 BatteryInterface::set_relative_soc(const float new_relative_soc)
 {
   data->relative_soc = new_relative_soc;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

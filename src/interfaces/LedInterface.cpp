@@ -52,6 +52,7 @@ LedInterface::LedInterface() : Interface()
   data_size = sizeof(LedInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (LedInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "intensity", 1, &data->intensity);
   add_messageinfo("SetIntensityMessage");
@@ -95,6 +96,7 @@ void
 LedInterface::set_intensity(const float new_intensity)
 {
   data->intensity = new_intensity;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

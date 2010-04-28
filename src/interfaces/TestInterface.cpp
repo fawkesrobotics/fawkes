@@ -49,15 +49,16 @@ TestInterface::TestInterface() : Interface()
   data_size = sizeof(TestInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "test_bool", 1, &data->test_bool);
-  add_fieldinfo(IFT_ENUM, "test_int", 1, &data->test_int, "int32");
+  add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
   add_fieldinfo(IFT_BYTE, "flags", 1, &data->flags);
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
-  add_fieldinfo(IFT_ENUM, "result", 1, &data->result, "int32");
-  add_fieldinfo(IFT_ENUM, "test_uint", 1, &data->test_uint, "uint32");
-  add_fieldinfo(IFT_ENUM, "test_ulint", 1, &data->test_ulint, "uint64");
-  add_fieldinfo(IFT_ENUM, "test_lint", 1, &data->test_lint, "int64");
+  add_fieldinfo(IFT_INT32, "result", 1, &data->result);
+  add_fieldinfo(IFT_UINT32, "test_uint", 1, &data->test_uint);
+  add_fieldinfo(IFT_UINT64, "test_ulint", 1, &data->test_ulint);
+  add_fieldinfo(IFT_INT64, "test_lint", 1, &data->test_lint);
   add_messageinfo("SetTestIntMessage");
   add_messageinfo("SetTestStringMessage");
   add_messageinfo("CalculateMessage");
@@ -112,6 +113,7 @@ void
 TestInterface::set_test_bool(const bool new_test_bool)
 {
   data->test_bool = new_test_bool;
+  data_changed = true;
 }
 
 /** Get test_int value.
@@ -142,6 +144,7 @@ void
 TestInterface::set_test_int(const int32_t new_test_int)
 {
   data->test_int = new_test_int;
+  data_changed = true;
 }
 
 /** Get flags value.
@@ -172,6 +175,7 @@ void
 TestInterface::set_flags(const uint8_t new_flags)
 {
   data->flags = new_flags;
+  data_changed = true;
 }
 
 /** Get test_string value.
@@ -202,6 +206,7 @@ void
 TestInterface::set_test_string(const char * new_test_string)
 {
   strncpy(data->test_string, new_test_string, sizeof(data->test_string));
+  data_changed = true;
 }
 
 /** Get result value.
@@ -232,6 +237,7 @@ void
 TestInterface::set_result(const int32_t new_result)
 {
   data->result = new_result;
+  data_changed = true;
 }
 
 /** Get test_uint value.
@@ -262,6 +268,7 @@ void
 TestInterface::set_test_uint(const uint32_t new_test_uint)
 {
   data->test_uint = new_test_uint;
+  data_changed = true;
 }
 
 /** Get test_ulint value.
@@ -292,6 +299,7 @@ void
 TestInterface::set_test_ulint(const uint64_t new_test_ulint)
 {
   data->test_ulint = new_test_ulint;
+  data_changed = true;
 }
 
 /** Get test_lint value.
@@ -322,6 +330,7 @@ void
 TestInterface::set_test_lint(const int64_t new_test_lint)
 {
   data->test_lint = new_test_lint;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

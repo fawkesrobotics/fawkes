@@ -47,6 +47,7 @@ Laser720Interface::Laser720Interface() : Interface()
   data_size = sizeof(Laser720Interface_data_t);
   data_ptr  = malloc(data_size);
   data      = (Laser720Interface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "distances", 720, &data->distances);
   add_fieldinfo(IFT_BOOL, "clockwise_angle", 1, &data->clockwise_angle);
@@ -109,6 +110,7 @@ void
 Laser720Interface::set_distances(const float * new_distances)
 {
   memcpy(data->distances, new_distances, sizeof(float) * 720);
+  data_changed = true;
 }
 
 /** Set distances value at given index.
@@ -158,6 +160,7 @@ void
 Laser720Interface::set_clockwise_angle(const bool new_clockwise_angle)
 {
   data->clockwise_angle = new_clockwise_angle;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

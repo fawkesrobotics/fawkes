@@ -50,22 +50,23 @@ FacerInterface::FacerInterface() : Interface()
   data_size = sizeof(FacerInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (FacerInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
-  add_fieldinfo(IFT_ENUM, "num_identities", 1, &data->num_identities, "uint32");
-  add_fieldinfo(IFT_ENUM, "recognized_identity", 1, &data->recognized_identity, "uint32");
+  add_fieldinfo(IFT_UINT32, "num_identities", 1, &data->num_identities);
+  add_fieldinfo(IFT_UINT32, "recognized_identity", 1, &data->recognized_identity);
   add_fieldinfo(IFT_STRING, "recognized_name", 64, data->recognized_name);
-  add_fieldinfo(IFT_ENUM, "num_detections", 1, &data->num_detections, "uint32");
-  add_fieldinfo(IFT_ENUM, "num_recognitions", 1, &data->num_recognitions, "uint32");
-  add_fieldinfo(IFT_ENUM, "most_likely_identity", 1, &data->most_likely_identity, "uint32");
+  add_fieldinfo(IFT_UINT32, "num_detections", 1, &data->num_detections);
+  add_fieldinfo(IFT_UINT32, "num_recognitions", 1, &data->num_recognitions);
+  add_fieldinfo(IFT_UINT32, "most_likely_identity", 1, &data->most_likely_identity);
   add_fieldinfo(IFT_FLOAT, "history_ratio", 1, &data->history_ratio);
   add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
-  add_fieldinfo(IFT_ENUM, "visibility_history", 1, &data->visibility_history, "int32");
+  add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_BOOL, "learning_in_progress", 1, &data->learning_in_progress);
   add_fieldinfo(IFT_FLOAT, "recording_progress", 1, &data->recording_progress);
   add_fieldinfo(IFT_FLOAT, "bearing", 1, &data->bearing);
   add_fieldinfo(IFT_FLOAT, "slope", 1, &data->slope);
-  add_fieldinfo(IFT_ENUM, "requested_index", 1, &data->requested_index, "uint32");
+  add_fieldinfo(IFT_UINT32, "requested_index", 1, &data->requested_index);
   add_fieldinfo(IFT_STRING, "requested_name", 64, data->requested_name);
   add_messageinfo("LearnFaceMessage");
   add_messageinfo("SetOpmodeMessage");
@@ -129,6 +130,7 @@ void
 FacerInterface::set_opmode(const if_facer_opmode_t new_opmode)
 {
   data->opmode = new_opmode;
+  data_changed = true;
 }
 
 /** Get num_identities value.
@@ -163,6 +165,7 @@ void
 FacerInterface::set_num_identities(const uint32_t new_num_identities)
 {
   data->num_identities = new_num_identities;
+  data_changed = true;
 }
 
 /** Get recognized_identity value.
@@ -197,6 +200,7 @@ void
 FacerInterface::set_recognized_identity(const uint32_t new_recognized_identity)
 {
   data->recognized_identity = new_recognized_identity;
+  data_changed = true;
 }
 
 /** Get recognized_name value.
@@ -231,6 +235,7 @@ void
 FacerInterface::set_recognized_name(const char * new_recognized_name)
 {
   strncpy(data->recognized_name, new_recognized_name, sizeof(data->recognized_name));
+  data_changed = true;
 }
 
 /** Get num_detections value.
@@ -265,6 +270,7 @@ void
 FacerInterface::set_num_detections(const uint32_t new_num_detections)
 {
   data->num_detections = new_num_detections;
+  data_changed = true;
 }
 
 /** Get num_recognitions value.
@@ -299,6 +305,7 @@ void
 FacerInterface::set_num_recognitions(const uint32_t new_num_recognitions)
 {
   data->num_recognitions = new_num_recognitions;
+  data_changed = true;
 }
 
 /** Get most_likely_identity value.
@@ -333,6 +340,7 @@ void
 FacerInterface::set_most_likely_identity(const uint32_t new_most_likely_identity)
 {
   data->most_likely_identity = new_most_likely_identity;
+  data_changed = true;
 }
 
 /** Get history_ratio value.
@@ -369,6 +377,7 @@ void
 FacerInterface::set_history_ratio(const float new_history_ratio)
 {
   data->history_ratio = new_history_ratio;
+  data_changed = true;
 }
 
 /** Get sec_since_detection value.
@@ -403,6 +412,7 @@ void
 FacerInterface::set_sec_since_detection(const float new_sec_since_detection)
 {
   data->sec_since_detection = new_sec_since_detection;
+  data_changed = true;
 }
 
 /** Get visibility_history value.
@@ -439,6 +449,7 @@ void
 FacerInterface::set_visibility_history(const int32_t new_visibility_history)
 {
   data->visibility_history = new_visibility_history;
+  data_changed = true;
 }
 
 /** Get learning_in_progress value.
@@ -475,6 +486,7 @@ void
 FacerInterface::set_learning_in_progress(const bool new_learning_in_progress)
 {
   data->learning_in_progress = new_learning_in_progress;
+  data_changed = true;
 }
 
 /** Get recording_progress value.
@@ -509,6 +521,7 @@ void
 FacerInterface::set_recording_progress(const float new_recording_progress)
 {
   data->recording_progress = new_recording_progress;
+  data_changed = true;
 }
 
 /** Get bearing value.
@@ -543,6 +556,7 @@ void
 FacerInterface::set_bearing(const float new_bearing)
 {
   data->bearing = new_bearing;
+  data_changed = true;
 }
 
 /** Get slope value.
@@ -577,6 +591,7 @@ void
 FacerInterface::set_slope(const float new_slope)
 {
   data->slope = new_slope;
+  data_changed = true;
 }
 
 /** Get requested_index value.
@@ -611,6 +626,7 @@ void
 FacerInterface::set_requested_index(const uint32_t new_requested_index)
 {
   data->requested_index = new_requested_index;
+  data_changed = true;
 }
 
 /** Get requested_name value.
@@ -645,6 +661,7 @@ void
 FacerInterface::set_requested_name(const char * new_requested_name)
 {
   strncpy(data->requested_name, new_requested_name, sizeof(data->requested_name));
+  data_changed = true;
 }
 
 /* =========== message create =========== */

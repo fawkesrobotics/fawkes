@@ -49,9 +49,10 @@ SpeechSynthInterface::SpeechSynthInterface() : Interface()
   data_size = sizeof(SpeechSynthInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SpeechSynthInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
-  add_fieldinfo(IFT_ENUM, "msgid", 1, &data->msgid, "uint32");
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
   add_messageinfo("SayMessage");
@@ -97,6 +98,7 @@ void
 SpeechSynthInterface::set_text(const char * new_text)
 {
   strncpy(data->text, new_text, sizeof(data->text));
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -133,6 +135,7 @@ void
 SpeechSynthInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /** Get final value.
@@ -167,6 +170,7 @@ void
 SpeechSynthInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
 }
 
 /** Get duration value.
@@ -205,6 +209,7 @@ void
 SpeechSynthInterface::set_duration(const float new_duration)
 {
   data->duration = new_duration;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
