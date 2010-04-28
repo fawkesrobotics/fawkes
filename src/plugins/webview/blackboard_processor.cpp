@@ -27,6 +27,7 @@
 #include <interface/interface.h>
 #include <interface/field_iterator.h>
 #include <interface/interface_info.h>
+#include <utils/time/time.h>
 
 #include <string>
 #include <cstring>
@@ -129,10 +130,13 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
 		       " <tr><td><b>Serial:</b></td><td>%u</td></tr>\n"
 		       " <tr><td><b>Data size:</b></td><td>%u</td></tr>\n"
 		       " <tr><td><b>Hash:</b></td><td>%s</td></tr>\n"
+		       " <tr><td><b>Data changed:</b></td>"
+		       "<td>%s (last at %s)</td></tr>\n"
 		       "</table>\n",
 		       iface->type(), iface->id(), iface->has_writer() ? "yes" : "no",
 		       iface->num_readers(), iface->serial(),
-		       iface->datasize(), iface->hash_printable());
+		       iface->datasize(), iface->hash_printable(),
+		       iface->changed() ? "yes" : "no", iface->timestamp()->str());
 
 	r->append_body("<table>\n"
 		       " <tr>\n"
