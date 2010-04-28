@@ -27,6 +27,9 @@
 
 #include <interface/types.h>
 
+#define __STD_LIMIT_MACROS
+#include <stdint.h>
+
 namespace fawkes {
 class Interface;
 class Message;
@@ -56,35 +59,51 @@ class InterfaceFieldIterator
   const char *           get_value_string();
   size_t                 get_length() const;
   bool                   get_bool(unsigned int index = 0) const;
-  int                    get_int(unsigned int index = 0) const;
-  unsigned int           get_uint(unsigned int index = 0) const;
-  long int               get_longint(unsigned int index = 0) const;
-  unsigned long int      get_longuint(unsigned int index = 0) const;
+  int8_t                 get_int8(unsigned int index = 0) const;
+  uint8_t                get_uint8(unsigned int index = 0) const;
+  int16_t                get_int16(unsigned int index = 0) const;
+  uint16_t               get_uint16(unsigned int index = 0) const;
+  int32_t                get_int32(unsigned int index = 0) const;
+  uint32_t               get_uint32(unsigned int index = 0) const;
+  int64_t                get_int64(unsigned int index = 0) const;
+  uint64_t               get_uint64(unsigned int index = 0) const;
   float                  get_float(unsigned int index = 0) const;
-  unsigned char          get_byte(unsigned int index = 0) const;
+  uint8_t                get_byte(unsigned int index = 0) const;
   bool *                 get_bools() const;
-  int *                  get_ints() const;
-  unsigned int *         get_uints() const;
-  long int *             get_longints() const;
-  unsigned long int *    get_longuints() const;
+  int8_t *               get_int8s() const;
+  uint8_t *              get_uint8s() const;
+  int16_t *              get_int16s() const;
+  uint16_t *             get_uint16s() const;
+  int32_t *              get_int32s() const;
+  uint32_t *             get_uint32s() const;
+  int64_t *              get_int64s() const;
+  uint64_t *             get_uint64s() const;
   float *                get_floats() const;
-  unsigned char *        get_bytes() const;
+  uint8_t *              get_bytes() const;
   const char *           get_string() const;
 
   void                   set_bool(bool b, unsigned int index = 0);
-  void                   set_int(int i, unsigned int index = 0);
-  void                   set_uint(unsigned int i, unsigned int index = 0);
-  void                   set_longint(long int i, unsigned int index = 0);
-  void                   set_longuint(long unsigned int i, unsigned int index = 0);
+  void                   set_int8(int8_t i, unsigned int index = 0);
+  void                   set_uint8(uint8_t i, unsigned int index = 0);
+  void                   set_int16(int16_t i, unsigned int index = 0);
+  void                   set_uint16(uint16_t i, unsigned int index = 0);
+  void                   set_int32(int32_t i, unsigned int index = 0);
+  void                   set_uint32(uint32_t i, unsigned int index = 0);
+  void                   set_int64(int64_t i, unsigned int index = 0);
+  void                   set_uint64(uint64_t i, unsigned int index = 0);
   void                   set_float(float f, unsigned int index = 0);
-  void                   set_byte(unsigned char b, unsigned int index = 0);
+  void                   set_byte(uint8_t b, unsigned int index = 0);
   void                   set_bools(bool *b);
-  void                   set_ints(int *i);
-  void                   set_uints(unsigned int *i);
-  void                   set_longints(long int *i);
-  void                   set_longuints(long unsigned int *i);
+  void                   set_int8s(int8_t *i);
+  void                   set_uint8s(uint8_t *i);
+  void                   set_int16s(int16_t *i);
+  void                   set_uint16s(uint16_t *i);
+  void                   set_int32s(int32_t *i);
+  void                   set_uint32s(uint32_t *i);
+  void                   set_int64s(int64_t *i);
+  void                   set_uint64s(uint64_t *i);
   void                   set_floats(float *f);
-  void                   set_bytes(unsigned char* b);
+  void                   set_bytes(uint8_t* b);
   void                   set_string(const char* s);
   
  protected:
