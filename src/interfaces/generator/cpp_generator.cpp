@@ -374,7 +374,7 @@ CppInterfaceGenerator::write_messages_cpp(FILE *f)
 
     write_message_ctor_dtor_cpp(f, (*i).getName(), "Message", class_name + "::",
 				(*i).getFields());
-    write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::");
+    write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::", false);
     write_message_clone_method_cpp(f, (class_name + "::" + (*i).getName()).c_str());
   }
   fprintf(f,
@@ -607,6 +607,7 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	    "  data_size = sizeof(%s_data_t);\n"
 	    "  data_ptr  = malloc(data_size);\n"
 	    "  data      = (%s_data_t *)data_ptr;\n"
+	    "  data_ts   = (interface_data_ts_t *)data_ptr;\n"
 	    "  memset(data_ptr, 0, data_size);\n",
 	    classname.c_str(), classname.c_str());
 
@@ -618,16 +619,24 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 
       if ( i->getType() == "bool" ) {
 	type = "BOOL";
-      } else if ( i->getType() == "int" ) {
-	type = "INT";
-      } else if ( i->getType() == "unsigned int" ) {
-	type = "UINT";
+      } else if ( i->getType() == "int8" ) {
+	type = "INT8";
+      } else if ( i->getType() == "uint8" ) {
+	type = "UINT8";
+      } else if ( i->getType() == "int16" ) {
+	type = "INT16";
+      } else if ( i->getType() == "uint16" ) {
+	type = "UINT16";
+      } else if ( i->getType() == "int32" ) {
+	type = "INT32";
+      } else if ( i->getType() == "uint32" ) {
+	type = "UINT32";
+      } else if ( i->getType() == "int64" ) {
+	type = "INT64";
+      } else if ( i->getType() == "uint64" ) {
+	type = "UINT64";
       } else if ( i->getType() == "byte" ) {
 	type = "BYTE";
-      } else if ( i->getType() == "long int" ) {
-	type = "LONGINT";
-      } else if ( i->getType() == "unsigned long int" ) {
-	type = "LONGUINT";
       } else if ( i->getType() == "float" ) {
 	type = "FLOAT";
       } else if ( i->getType() == "string" ) {
@@ -874,12 +883,16 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
  * @param classname name of class (can be interface or message)
  * @param fields fields
  * @param inclusion_prefix used if class is included in another class.
+ * @param write_data_changed if true writes code that sets the interface's
+ * data_changed flag. Set to true for interface methods, false for message
+ * methods.
  */
 void
 CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 					 std::string classname,
 					 std::vector<InterfaceField> fields,
-					 std::string inclusion_prefix)
+					 std::string inclusion_prefix,
+					 bool write_data_changed)
 {
   fprintf(f, "/* Methods */\n");
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -969,7 +982,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      "  data->%s = new_%s;\n",
 	      (*i).getName().c_str(), (*i).getName().c_str());
     }
-    fprintf(f, "}\n\n");
+    fprintf(f, "%s}\n\n", write_data_changed ? "  data_changed = true;\n" : "");
 
     if ( ((*i).getType() != "string") && ((*i).getLengthValue() > 0) ) {
       fprintf(f,
@@ -1013,7 +1026,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 					 std::vector<InterfacePseudoMap> pseudo_maps,
 					 std::string inclusion_prefix)
 {
-  write_methods_cpp(f, interface_classname, classname, fields, inclusion_prefix);
+  write_methods_cpp(f, interface_classname, classname, fields,
+		    inclusion_prefix, true);
 
   for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
     fprintf(f,
