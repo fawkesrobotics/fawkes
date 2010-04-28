@@ -25,7 +25,7 @@ include $(BUILDSYSDIR)/rules.mk
 # Explicit dependencies, this is needed to have make bail out if there is any
 # error. This is also necessary for working parallel build (i.e. for dual core)
 utils: core 
-interface: core
+interface: core utils
 blackboard: core utils interface netcomm
 netcomm: core utils
 config: core netcomm utils
