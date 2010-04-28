@@ -109,6 +109,8 @@ class Time
   void set_time(const Time &t);
   void set_time(const Time *t);
 
+  void set_clock(Clock *clock);
+
   void add(float seconds);
 
   Time & stamp();
@@ -124,11 +126,15 @@ class Time
   Time & operator+=(const float sec);
   Time & operator-=(const Time& t);
   Time & operator=(const Time& t);
+  bool   operator==(const Time& t) const;
+  bool   operator==(const Time* t) const;
+  bool   operator!=(const Time& t) const;
+  bool   operator!=(const Time* t) const;
 
   void wait();
   void wait_systime();
 
-  const char * str(bool utc = false);
+  const char * str(bool utc = false) const;
   void         str_r(char *s, bool utc = false);
 
   static const unsigned int TIMESTR_SIZE;
@@ -136,7 +142,7 @@ class Time
  private:
   Clock   *__clock;
   timeval  __time;
-  char    *__timestr;
+  mutable char    *__timestr;
 };
 
 } // end namespace fawkes

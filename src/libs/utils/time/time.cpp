@@ -26,6 +26,7 @@
 #include <utils/time/clock.h>
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
 
 #include <time.h>
 #include <cmath>
@@ -302,6 +303,17 @@ Time::set_time(const Time *t)
 }
 
 
+/** Set clock for this instance.
+ * @param clock clock to use from now on
+ */
+void
+Time::set_clock(Clock *clock)
+{
+  if (clock == NULL) throw NullPointerException("Clock may not be NULL");
+  __clock = clock;
+}
+
+
 /** Add seconds.
  * The effect is equivalent to operator+=(const float sec), but this
  * can be used when the operator is not available (i.e. wrapper languages)
@@ -502,6 +514,54 @@ Time::operator=(const Time &t)
 }
 
 
+/** Check equality of times.
+ * @param t time to compare to
+ * @return true if sec and usec of both times are the same, false otherwise
+ */
+bool
+Time::operator==(const Time& t) const
+{
+  return (__time.tv_sec == t.__time.tv_sec) &&
+         (__time.tv_usec == t.__time.tv_usec);
+}
+
+
+/** Check equality of times.
+ * @param t time to compare to
+ * @return true if sec and usec of both times are the same, false otherwise
+ */
+bool
+Time::operator==(const Time* t) const
+{
+  return (__time.tv_sec == t->__time.tv_sec) &&
+         (__time.tv_usec == t->__time.tv_usec);
+}
+
+
+/** Check inequality of times.
+ * @param t time to compare to
+ * @return true if sec or usec of both times are different, false otherwise
+ */
+bool
+Time::operator!=(const Time& t) const
+{
+  return (__time.tv_sec != t.__time.tv_sec) ||
+         (__time.tv_usec != t.__time.tv_usec);
+}
+
+
+/** Check inequality of times.
+ * @param t time to compare to
+ * @return true if sec or usec of both times are different, false otherwise
+ */
+bool
+Time::operator!=(const Time* t) const
+{
+  return (__time.tv_sec != t->__time.tv_sec) ||
+         (__time.tv_usec != t->__time.tv_usec);
+}
+
+
 /** Set this time to the current time.
  * @return reference to this instance
  */
@@ -595,7 +655,7 @@ Time::wait_systime()
  * @param utc true to get type formatted in UTC, otherwise local time
  */
 const char *
-Time::str(bool utc)
+Time::str(bool utc) const
 {
   // allocate time string if not done yet
   if ( ! __timestr )  __timestr = (char *)malloc(TIMESTR_SIZE);
