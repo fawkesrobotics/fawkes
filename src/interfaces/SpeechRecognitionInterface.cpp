@@ -250,13 +250,17 @@ SpeechRecognitionInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 SpeechRecognitionInterface::ResetMessage::ResetMessage() : Message("ResetMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ResetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SpeechRecognitionInterface::ResetMessage::~ResetMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -264,8 +268,11 @@ SpeechRecognitionInterface::ResetMessage::~ResetMessage()
  */
 SpeechRecognitionInterface::ResetMessage::ResetMessage(const ResetMessage *m) : Message("ResetMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -295,6 +302,7 @@ SpeechRecognitionInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->enabled = ini_enabled;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
@@ -305,6 +313,7 @@ SpeechRecognitionInterface::SetEnabledMessage::SetEnabledMessage() : Message("Se
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
@@ -323,6 +332,7 @@ SpeechRecognitionInterface::SetEnabledMessage::SetEnabledMessage(const SetEnable
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

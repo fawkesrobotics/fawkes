@@ -725,6 +725,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_name) : Mess
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->name, ini_name, 64);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -735,6 +736,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -753,6 +755,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const LearnFaceMessage *m) : 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -812,7 +815,9 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const if_facer_opmode_t ini_o
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetOpmodeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->opmode = ini_opmode;
+  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
 }
 /** Constructor */
 FacerInterface::SetOpmodeMessage::SetOpmodeMessage() : Message("SetOpmodeMessage")
@@ -821,6 +826,8 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage() : Message("SetOpmodeMessage
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetOpmodeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
 }
 
 /** Destructor */
@@ -838,6 +845,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const SetOpmodeMessage *m) : 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetOpmodeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -902,8 +910,10 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const uint32_t ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (EnableIdentityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
   data->enable = ini_enable;
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
 /** Constructor */
@@ -913,6 +923,8 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage() : Message("Enable
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (EnableIdentityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
 
@@ -931,6 +943,7 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const EnableIdentit
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (EnableIdentityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1021,8 +1034,10 @@ FacerInterface::SetNameMessage::SetNameMessage(const uint32_t ini_index, const c
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetNameMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
   strncpy(data->name, ini_name, 64);
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -1032,6 +1047,8 @@ FacerInterface::SetNameMessage::SetNameMessage() : Message("SetNameMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetNameMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -1050,6 +1067,7 @@ FacerInterface::SetNameMessage::SetNameMessage(const SetNameMessage *m) : Messag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetNameMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1139,7 +1157,9 @@ FacerInterface::GetNameMessage::GetNameMessage(const uint32_t ini_index) : Messa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GetNameMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 /** Constructor */
 FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
@@ -1148,6 +1168,8 @@ FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GetNameMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 
 /** Destructor */
@@ -1165,6 +1187,7 @@ FacerInterface::GetNameMessage::GetNameMessage(const GetNameMessage *m) : Messag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (GetNameMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

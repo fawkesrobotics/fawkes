@@ -290,6 +290,15 @@ class VisualDisplay2DInterface : public Interface
 
   class DeleteAllMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } DeleteAllMessage_data_t;
+
+    DeleteAllMessage_data_t *data;
+
    public:
     DeleteAllMessage();
     ~DeleteAllMessage();

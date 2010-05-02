@@ -56,6 +56,15 @@ class BatteryInterface : public Interface
   /* messages */
   class PushButtonMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } PushButtonMessage_data_t;
+
+    PushButtonMessage_data_t *data;
+
    public:
     PushButtonMessage();
     ~PushButtonMessage();
@@ -67,6 +76,15 @@ class BatteryInterface : public Interface
 
   class SleepMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } SleepMessage_data_t;
+
+    SleepMessage_data_t *data;
+
    public:
     SleepMessage();
     ~SleepMessage();

@@ -333,6 +333,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const char * ini_skill_stri
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->skill_string, ini_skill_string, 1024);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
@@ -343,6 +344,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage() : Message("ExecSkillMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 
@@ -361,6 +363,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const ExecSkillMessage *m) 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -426,6 +429,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const c
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->skill_string, ini_skill_string, 1024);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
@@ -436,6 +440,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage() : Mes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 
@@ -454,6 +459,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const E
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -513,13 +519,17 @@ SkillerInterface::ExecSkillContinuousMessage::clone() const
 /** Constructor */
 SkillerInterface::RestartInterpreterMessage::RestartInterpreterMessage() : Message("RestartInterpreterMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(RestartInterpreterMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RestartInterpreterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::RestartInterpreterMessage::~RestartInterpreterMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -527,8 +537,11 @@ SkillerInterface::RestartInterpreterMessage::~RestartInterpreterMessage()
  */
 SkillerInterface::RestartInterpreterMessage::RestartInterpreterMessage(const RestartInterpreterMessage *m) : Message("RestartInterpreterMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RestartInterpreterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -552,13 +565,17 @@ SkillerInterface::RestartInterpreterMessage::clone() const
 /** Constructor */
 SkillerInterface::StopExecMessage::StopExecMessage() : Message("StopExecMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopExecMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopExecMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::StopExecMessage::~StopExecMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -566,8 +583,11 @@ SkillerInterface::StopExecMessage::~StopExecMessage()
  */
 SkillerInterface::StopExecMessage::StopExecMessage(const StopExecMessage *m) : Message("StopExecMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopExecMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -591,13 +611,17 @@ SkillerInterface::StopExecMessage::clone() const
 /** Constructor */
 SkillerInterface::AcquireControlMessage::AcquireControlMessage() : Message("AcquireControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(AcquireControlMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::AcquireControlMessage::~AcquireControlMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -605,8 +629,11 @@ SkillerInterface::AcquireControlMessage::~AcquireControlMessage()
  */
 SkillerInterface::AcquireControlMessage::AcquireControlMessage(const AcquireControlMessage *m) : Message("AcquireControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -630,13 +657,17 @@ SkillerInterface::AcquireControlMessage::clone() const
 /** Constructor */
 SkillerInterface::ReleaseControlMessage::ReleaseControlMessage() : Message("ReleaseControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ReleaseControlMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ReleaseControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::ReleaseControlMessage::~ReleaseControlMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -644,8 +675,11 @@ SkillerInterface::ReleaseControlMessage::~ReleaseControlMessage()
  */
 SkillerInterface::ReleaseControlMessage::ReleaseControlMessage(const ReleaseControlMessage *m) : Message("ReleaseControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ReleaseControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

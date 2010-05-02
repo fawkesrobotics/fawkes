@@ -662,7 +662,9 @@ MotorInterface::SetMotorStateMessage::SetMotorStateMessage(const uint32_t ini_mo
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMotorStateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->motor_state = ini_motor_state;
+  add_fieldinfo(IFT_UINT32, "motor_state", 1, &data->motor_state);
 }
 /** Constructor */
 MotorInterface::SetMotorStateMessage::SetMotorStateMessage() : Message("SetMotorStateMessage")
@@ -671,6 +673,8 @@ MotorInterface::SetMotorStateMessage::SetMotorStateMessage() : Message("SetMotor
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMotorStateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "motor_state", 1, &data->motor_state);
 }
 
 /** Destructor */
@@ -688,6 +692,7 @@ MotorInterface::SetMotorStateMessage::SetMotorStateMessage(const SetMotorStateMe
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetMotorStateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -752,8 +757,10 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage(const uint32_t ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->controller = ini_controller;
   strncpy(data->controller_thread_name, ini_controller_thread_name, 64);
+  add_fieldinfo(IFT_UINT32, "controller", 1, &data->controller);
   add_fieldinfo(IFT_STRING, "controller_thread_name", 64, data->controller_thread_name);
 }
 /** Constructor */
@@ -763,6 +770,8 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage() : Message("Acquir
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "controller", 1, &data->controller);
   add_fieldinfo(IFT_STRING, "controller_thread_name", 64, data->controller_thread_name);
 }
 
@@ -781,6 +790,7 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage(const AcquireContro
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -878,13 +888,17 @@ MotorInterface::AcquireControlMessage::clone() const
 /** Constructor */
 MotorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message("ResetOdometryMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ResetOdometryMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 MotorInterface::ResetOdometryMessage::~ResetOdometryMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -892,8 +906,11 @@ MotorInterface::ResetOdometryMessage::~ResetOdometryMessage()
  */
 MotorInterface::ResetOdometryMessage::ResetOdometryMessage(const ResetOdometryMessage *m) : Message("ResetOdometryMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -925,6 +942,7 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage(const float ini_front_right, co
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DriveRPMMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->front_right = ini_front_right;
   data->front_left = ini_front_left;
   data->rear = ini_rear;
@@ -939,6 +957,7 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message("DriveRPMMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DriveRPMMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "front_right", 1, &data->front_right);
   add_fieldinfo(IFT_FLOAT, "front_left", 1, &data->front_left);
   add_fieldinfo(IFT_FLOAT, "rear", 1, &data->rear);
@@ -959,6 +978,7 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage(const DriveRPMMessage *m) : Mes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (DriveRPMMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1081,6 +1101,7 @@ MotorInterface::GotoMessage::GotoMessage(const float ini_x, const float ini_y, c
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->phi = ini_phi;
@@ -1097,6 +1118,7 @@ MotorInterface::GotoMessage::GotoMessage() : Message("GotoMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
@@ -1118,6 +1140,7 @@ MotorInterface::GotoMessage::GotoMessage(const GotoMessage *m) : Message("GotoMe
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1268,6 +1291,7 @@ MotorInterface::TransMessage::TransMessage(const float ini_vx, const float ini_v
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->vx = ini_vx;
   data->vy = ini_vy;
   add_fieldinfo(IFT_FLOAT, "vx", 1, &data->vx);
@@ -1280,6 +1304,7 @@ MotorInterface::TransMessage::TransMessage() : Message("TransMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "vx", 1, &data->vx);
   add_fieldinfo(IFT_FLOAT, "vy", 1, &data->vy);
 }
@@ -1299,6 +1324,7 @@ MotorInterface::TransMessage::TransMessage(const TransMessage *m) : Message("Tra
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (TransMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1388,6 +1414,7 @@ MotorInterface::RotMessage::RotMessage(const float ini_omega) : Message("RotMess
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (RotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->omega = ini_omega;
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
 }
@@ -1398,6 +1425,7 @@ MotorInterface::RotMessage::RotMessage() : Message("RotMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (RotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
 }
 
@@ -1416,6 +1444,7 @@ MotorInterface::RotMessage::RotMessage(const RotMessage *m) : Message("RotMessag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (RotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1477,6 +1506,7 @@ MotorInterface::TransRotMessage::TransRotMessage(const float ini_vx, const float
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransRotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->vx = ini_vx;
   data->vy = ini_vy;
   data->omega = ini_omega;
@@ -1491,6 +1521,7 @@ MotorInterface::TransRotMessage::TransRotMessage() : Message("TransRotMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransRotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "vx", 1, &data->vx);
   add_fieldinfo(IFT_FLOAT, "vy", 1, &data->vy);
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
@@ -1511,6 +1542,7 @@ MotorInterface::TransRotMessage::TransRotMessage(const TransRotMessage *m) : Mes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (TransRotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1632,6 +1664,7 @@ MotorInterface::OrbitMessage::OrbitMessage(const float ini_px, const float ini_p
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (OrbitMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->px = ini_px;
   data->py = ini_py;
   data->omega = ini_omega;
@@ -1646,6 +1679,7 @@ MotorInterface::OrbitMessage::OrbitMessage() : Message("OrbitMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (OrbitMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "px", 1, &data->px);
   add_fieldinfo(IFT_FLOAT, "py", 1, &data->py);
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
@@ -1666,6 +1700,7 @@ MotorInterface::OrbitMessage::OrbitMessage(const OrbitMessage *m) : Message("Orb
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (OrbitMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1787,6 +1822,7 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage(const float ini_vx, const
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinTransRotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->vx = ini_vx;
   data->vy = ini_vy;
   data->omega = ini_omega;
@@ -1801,6 +1837,7 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage() : Message("LinTransRotM
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinTransRotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "vx", 1, &data->vx);
   add_fieldinfo(IFT_FLOAT, "vy", 1, &data->vy);
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
@@ -1821,6 +1858,7 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage(const LinTransRotMessage 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (LinTransRotMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

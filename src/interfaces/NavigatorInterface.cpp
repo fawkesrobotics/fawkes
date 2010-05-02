@@ -596,13 +596,17 @@ NavigatorInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 NavigatorInterface::StopMessage::StopMessage() : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 NavigatorInterface::StopMessage::~StopMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -610,8 +614,11 @@ NavigatorInterface::StopMessage::~StopMessage()
  */
 NavigatorInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -642,6 +649,7 @@ NavigatorInterface::TurnMessage::TurnMessage(const float ini_angle, const float 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->angle = ini_angle;
   data->velocity = ini_velocity;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
@@ -654,6 +662,7 @@ NavigatorInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
@@ -673,6 +682,7 @@ NavigatorInterface::TurnMessage::TurnMessage(const TurnMessage *m) : Message("Tu
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -766,6 +776,7 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage(const float ini_x
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CartesianGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->orientation = ini_orientation;
@@ -780,6 +791,7 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage() : Message("Cart
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CartesianGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
@@ -800,6 +812,7 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage(const CartesianGo
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (CartesianGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -921,6 +934,7 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage(const float ini_phi, cons
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (PolarGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->phi = ini_phi;
   data->dist = ini_dist;
   data->orientation = ini_orientation;
@@ -935,6 +949,7 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage() : Message("PolarGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (PolarGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "dist", 1, &data->dist);
   add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
@@ -955,6 +970,7 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage(const PolarGotoMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (PolarGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1074,6 +1090,7 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const char * ini_place) :
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->place, ini_place, 64);
   add_fieldinfo(IFT_STRING, "place", 64, data->place);
 }
@@ -1084,6 +1101,7 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage() : Message("PlaceGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "place", 64, data->place);
 }
 
@@ -1102,6 +1120,7 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const PlaceGotoMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1163,6 +1182,7 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage(const float ini_x, const fl
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ObstacleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->width = ini_width;
@@ -1177,6 +1197,7 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message("ObstacleMessag
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ObstacleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
@@ -1197,6 +1218,7 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage(const ObstacleMessage *m) :
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ObstacleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1310,13 +1332,17 @@ NavigatorInterface::ObstacleMessage::clone() const
 /** Constructor */
 NavigatorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message("ResetOdometryMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ResetOdometryMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 NavigatorInterface::ResetOdometryMessage::~ResetOdometryMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1324,8 +1350,11 @@ NavigatorInterface::ResetOdometryMessage::~ResetOdometryMessage()
  */
 NavigatorInterface::ResetOdometryMessage::ResetOdometryMessage(const ResetOdometryMessage *m) : Message("ResetOdometryMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1355,6 +1384,7 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const float ini
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->max_velocity = ini_max_velocity;
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
 }
@@ -1365,6 +1395,7 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("Se
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
 }
 
@@ -1383,6 +1414,7 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const SetMaxVel
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1442,6 +1474,7 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const bool ini_escapi
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEscapingMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->escaping_enabled = ini_escaping_enabled;
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
 }
@@ -1452,6 +1485,7 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage() : Message("SetEscap
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEscapingMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
 }
 
@@ -1470,6 +1504,7 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const SetEscapingMess
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetEscapingMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1535,6 +1570,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->security_distance = ini_security_distance;
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
 }
@@ -1545,6 +1581,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage() : M
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
 }
 
@@ -1563,6 +1600,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

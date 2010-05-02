@@ -666,13 +666,17 @@ KatanaInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 KatanaInterface::StopMessage::StopMessage() : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::StopMessage::~StopMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -680,8 +684,11 @@ KatanaInterface::StopMessage::~StopMessage()
  */
 KatanaInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -705,13 +712,17 @@ KatanaInterface::StopMessage::clone() const
 /** Constructor */
 KatanaInterface::FlushMessage::FlushMessage() : Message("FlushMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(FlushMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (FlushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::FlushMessage::~FlushMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -719,8 +730,11 @@ KatanaInterface::FlushMessage::~FlushMessage()
  */
 KatanaInterface::FlushMessage::FlushMessage(const FlushMessage *m) : Message("FlushMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (FlushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -744,13 +758,17 @@ KatanaInterface::FlushMessage::clone() const
 /** Constructor */
 KatanaInterface::ParkMessage::ParkMessage() : Message("ParkMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ParkMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::ParkMessage::~ParkMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -758,8 +776,11 @@ KatanaInterface::ParkMessage::~ParkMessage()
  */
 KatanaInterface::ParkMessage::ParkMessage(const ParkMessage *m) : Message("ParkMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -794,6 +815,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_x, const f
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
@@ -814,6 +836,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -837,6 +860,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const LinearGotoMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1046,13 +1070,17 @@ KatanaInterface::LinearGotoMessage::clone() const
 /** Constructor */
 KatanaInterface::CalibrateMessage::CalibrateMessage() : Message("CalibrateMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(CalibrateMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::CalibrateMessage::~CalibrateMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1060,8 +1088,11 @@ KatanaInterface::CalibrateMessage::~CalibrateMessage()
  */
 KatanaInterface::CalibrateMessage::CalibrateMessage(const CalibrateMessage *m) : Message("CalibrateMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1085,13 +1116,17 @@ KatanaInterface::CalibrateMessage::clone() const
 /** Constructor */
 KatanaInterface::OpenGripperMessage::OpenGripperMessage() : Message("OpenGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(OpenGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::OpenGripperMessage::~OpenGripperMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1099,8 +1134,11 @@ KatanaInterface::OpenGripperMessage::~OpenGripperMessage()
  */
 KatanaInterface::OpenGripperMessage::OpenGripperMessage(const OpenGripperMessage *m) : Message("OpenGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1124,13 +1162,17 @@ KatanaInterface::OpenGripperMessage::clone() const
 /** Constructor */
 KatanaInterface::CloseGripperMessage::CloseGripperMessage() : Message("CloseGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(CloseGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CloseGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::CloseGripperMessage::~CloseGripperMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1138,8 +1180,11 @@ KatanaInterface::CloseGripperMessage::~CloseGripperMessage()
  */
 KatanaInterface::CloseGripperMessage::CloseGripperMessage(const CloseGripperMessage *m) : Message("CloseGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CloseGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1169,6 +1214,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_enabled) : 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->enabled = ini_enabled;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
@@ -1179,6 +1225,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
@@ -1197,6 +1244,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage(const SetEnabledMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1256,6 +1304,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const uint8_t ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->max_velocity = ini_max_velocity;
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
 }
@@ -1266,6 +1315,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("SetMa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
 }
 
@@ -1284,6 +1334,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const SetMaxVeloci
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

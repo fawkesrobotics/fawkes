@@ -358,6 +358,7 @@ SwitchInterface::SetMessage::SetMessage(const bool ini_enabled, const float ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->enabled = ini_enabled;
   data->value = ini_value;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
@@ -370,6 +371,7 @@ SwitchInterface::SetMessage::SetMessage() : Message("SetMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
 }
@@ -389,6 +391,7 @@ SwitchInterface::SetMessage::SetMessage(const SetMessage *m) : Message("SetMessa
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -484,13 +487,17 @@ SwitchInterface::SetMessage::clone() const
 /** Constructor */
 SwitchInterface::EnableSwitchMessage::EnableSwitchMessage() : Message("EnableSwitchMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(EnableSwitchMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (EnableSwitchMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SwitchInterface::EnableSwitchMessage::~EnableSwitchMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -498,8 +505,11 @@ SwitchInterface::EnableSwitchMessage::~EnableSwitchMessage()
  */
 SwitchInterface::EnableSwitchMessage::EnableSwitchMessage(const EnableSwitchMessage *m) : Message("EnableSwitchMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (EnableSwitchMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -523,13 +533,17 @@ SwitchInterface::EnableSwitchMessage::clone() const
 /** Constructor */
 SwitchInterface::DisableSwitchMessage::DisableSwitchMessage() : Message("DisableSwitchMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(DisableSwitchMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DisableSwitchMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SwitchInterface::DisableSwitchMessage::~DisableSwitchMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -537,8 +551,11 @@ SwitchInterface::DisableSwitchMessage::~DisableSwitchMessage()
  */
 SwitchInterface::DisableSwitchMessage::DisableSwitchMessage(const DisableSwitchMessage *m) : Message("DisableSwitchMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (DisableSwitchMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -569,6 +586,7 @@ SwitchInterface::EnableDurationMessage::EnableDurationMessage(const float ini_du
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (EnableDurationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->duration = ini_duration;
   data->value = ini_value;
   add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
@@ -581,6 +599,7 @@ SwitchInterface::EnableDurationMessage::EnableDurationMessage() : Message("Enabl
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (EnableDurationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "duration", 1, &data->duration);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
 }
@@ -600,6 +619,7 @@ SwitchInterface::EnableDurationMessage::EnableDurationMessage(const EnableDurati
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (EnableDurationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

@@ -114,6 +114,15 @@ class SwitchInterface : public Interface
 
   class EnableSwitchMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } EnableSwitchMessage_data_t;
+
+    EnableSwitchMessage_data_t *data;
+
    public:
     EnableSwitchMessage();
     ~EnableSwitchMessage();
@@ -125,6 +134,15 @@ class SwitchInterface : public Interface
 
   class DisableSwitchMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } DisableSwitchMessage_data_t;
+
+    DisableSwitchMessage_data_t *data;
+
    public:
     DisableSwitchMessage();
     ~DisableSwitchMessage();

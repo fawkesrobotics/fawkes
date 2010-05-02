@@ -313,6 +313,7 @@ KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_ce
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->left = ini_left;
   data->center = ini_center;
   data->right = ini_right;
@@ -320,6 +321,7 @@ KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_ce
   add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
   add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
   add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
+  add_fieldinfo(IFT_UINT32, "intensity", 1, &data->intensity);
 }
 /** Constructor */
 KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
@@ -328,9 +330,11 @@ KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
   add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
   add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
+  add_fieldinfo(IFT_UINT32, "intensity", 1, &data->intensity);
 }
 
 /** Destructor */
@@ -348,6 +352,7 @@ KickerInterface::KickMessage::KickMessage(const KickMessage *m) : Message("KickM
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -491,13 +496,17 @@ KickerInterface::KickMessage::clone() const
 /** Constructor */
 KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message("ResetCounterMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ResetCounterMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetCounterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KickerInterface::ResetCounterMessage::~ResetCounterMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -505,8 +514,11 @@ KickerInterface::ResetCounterMessage::~ResetCounterMessage()
  */
 KickerInterface::ResetCounterMessage::ResetCounterMessage(const ResetCounterMessage *m) : Message("ResetCounterMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetCounterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -536,7 +548,9 @@ KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallSideEnum ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GuideBallMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->guide_ball_side = ini_guide_ball_side;
+  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
 }
 /** Constructor */
 KickerInterface::GuideBallMessage::GuideBallMessage() : Message("GuideBallMessage")
@@ -545,6 +559,8 @@ KickerInterface::GuideBallMessage::GuideBallMessage() : Message("GuideBallMessag
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GuideBallMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
 }
 
 /** Destructor */
@@ -562,6 +578,7 @@ KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallMessage *m) :
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (GuideBallMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

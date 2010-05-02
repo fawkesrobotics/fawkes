@@ -504,7 +504,9 @@ GameStateInterface::SetTeamColorMessage::SetTeamColorMessage(const if_gamestate_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTeamColorMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->our_team = ini_our_team;
+  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
 }
 /** Constructor */
 GameStateInterface::SetTeamColorMessage::SetTeamColorMessage() : Message("SetTeamColorMessage")
@@ -513,6 +515,8 @@ GameStateInterface::SetTeamColorMessage::SetTeamColorMessage() : Message("SetTea
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTeamColorMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
 }
 
 /** Destructor */
@@ -530,6 +534,7 @@ GameStateInterface::SetTeamColorMessage::SetTeamColorMessage(const SetTeamColorM
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetTeamColorMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -589,6 +594,7 @@ GameStateInterface::SetKickoffMessage::SetKickoffMessage(const bool ini_kickoff)
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetKickoffMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->kickoff = ini_kickoff;
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
 }
@@ -599,6 +605,7 @@ GameStateInterface::SetKickoffMessage::SetKickoffMessage() : Message("SetKickoff
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetKickoffMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
 }
 
@@ -617,6 +624,7 @@ GameStateInterface::SetKickoffMessage::SetKickoffMessage(const SetKickoffMessage
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetKickoffMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -676,7 +684,9 @@ GameStateInterface::SetStateTeamMessage::SetStateTeamMessage(const if_gamestate_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetStateTeamMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->state_team = ini_state_team;
+  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
 }
 /** Constructor */
 GameStateInterface::SetStateTeamMessage::SetStateTeamMessage() : Message("SetStateTeamMessage")
@@ -685,6 +695,8 @@ GameStateInterface::SetStateTeamMessage::SetStateTeamMessage() : Message("SetSta
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetStateTeamMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
 }
 
 /** Destructor */
@@ -702,6 +714,7 @@ GameStateInterface::SetStateTeamMessage::SetStateTeamMessage(const SetStateTeamM
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetStateTeamMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

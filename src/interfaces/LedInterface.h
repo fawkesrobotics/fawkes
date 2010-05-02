@@ -85,6 +85,15 @@ class LedInterface : public Interface
 
   class TurnOnMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } TurnOnMessage_data_t;
+
+    TurnOnMessage_data_t *data;
+
    public:
     TurnOnMessage();
     ~TurnOnMessage();
@@ -96,6 +105,15 @@ class LedInterface : public Interface
 
   class TurnOffMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } TurnOffMessage_data_t;
+
+    TurnOffMessage_data_t *data;
+
    public:
     TurnOffMessage();
     ~TurnOffMessage();

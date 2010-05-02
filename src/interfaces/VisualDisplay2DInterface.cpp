@@ -213,12 +213,14 @@ VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage(const float * i
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartLineMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   memcpy(data->x, ini_x, sizeof(float) * 2);
   memcpy(data->y, ini_y, sizeof(float) * 2);
   data->style = ini_style;
   memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
   add_fieldinfo(IFT_FLOAT, "x", 2, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 2, &data->y);
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -228,8 +230,10 @@ VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage() : Message("Ad
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartLineMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 2, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 2, &data->y);
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -248,6 +252,7 @@ VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage(const AddCartLi
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (AddCartLineMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -489,6 +494,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartCircleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->radius = ini_radius;
@@ -497,6 +503,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -506,9 +513,11 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage() : Message
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartCircleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -527,6 +536,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const AddCa
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (AddCartCircleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -739,6 +749,7 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const float ini
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartRectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->width = ini_width;
@@ -749,6 +760,7 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const float ini
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
   add_fieldinfo(IFT_FLOAT, "height", 1, &data->height);
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -758,10 +770,12 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage() : Message("Ad
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartRectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
   add_fieldinfo(IFT_FLOAT, "height", 1, &data->height);
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -780,6 +794,7 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const AddCartRe
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (AddCartRectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1022,6 +1037,7 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartTextMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   strncpy(data->text, ini_text, 128);
@@ -1031,6 +1047,7 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
+  add_fieldinfo(IFT_ENUM, "anchor", 1, &data->anchor, "Anchor");
   add_fieldinfo(IFT_FLOAT, "size", 1, &data->size);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
@@ -1041,9 +1058,11 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage() : Message("Ad
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddCartTextMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
+  add_fieldinfo(IFT_ENUM, "anchor", 1, &data->anchor, "Anchor");
   add_fieldinfo(IFT_FLOAT, "size", 1, &data->size);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
@@ -1063,6 +1082,7 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const AddCartTe
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (AddCartTextMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1302,7 +1322,9 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage(const uint32_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->object_id = ini_object_id;
+  add_fieldinfo(IFT_UINT32, "object_id", 1, &data->object_id);
 }
 /** Constructor */
 VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("DeleteObjectMessage")
@@ -1311,6 +1333,8 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "object_id", 1, &data->object_id);
 }
 
 /** Destructor */
@@ -1328,6 +1352,7 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage(const DeleteO
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1383,13 +1408,17 @@ VisualDisplay2DInterface::DeleteObjectMessage::clone() const
 /** Constructor */
 VisualDisplay2DInterface::DeleteAllMessage::DeleteAllMessage() : Message("DeleteAllMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(DeleteAllMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DeleteAllMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 VisualDisplay2DInterface::DeleteAllMessage::~DeleteAllMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1397,8 +1426,11 @@ VisualDisplay2DInterface::DeleteAllMessage::~DeleteAllMessage()
  */
 VisualDisplay2DInterface::DeleteAllMessage::DeleteAllMessage(const DeleteAllMessage *m) : Message("DeleteAllMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (DeleteAllMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

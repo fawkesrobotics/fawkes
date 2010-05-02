@@ -262,6 +262,7 @@ SpeechSynthInterface::SayMessage::SayMessage(const char * ini_text) : Message("S
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SayMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->text, ini_text, 1024);
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
 }
@@ -272,6 +273,7 @@ SpeechSynthInterface::SayMessage::SayMessage() : Message("SayMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SayMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
 }
 
@@ -290,6 +292,7 @@ SpeechSynthInterface::SayMessage::SayMessage(const SayMessage *m) : Message("Say
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SayMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

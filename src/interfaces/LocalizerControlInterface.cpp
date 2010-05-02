@@ -148,6 +148,7 @@ LocalizerControlInterface::ResetMessage::ResetMessage(const float ini_x, const f
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->ori = ini_ori;
@@ -164,6 +165,7 @@ LocalizerControlInterface::ResetMessage::ResetMessage() : Message("ResetMessage"
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
@@ -185,6 +187,7 @@ LocalizerControlInterface::ResetMessage::ResetMessage(const ResetMessage *m) : M
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

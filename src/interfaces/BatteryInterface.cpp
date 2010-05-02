@@ -266,13 +266,17 @@ BatteryInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 BatteryInterface::PushButtonMessage::PushButtonMessage() : Message("PushButtonMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(PushButtonMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (PushButtonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 BatteryInterface::PushButtonMessage::~PushButtonMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -280,8 +284,11 @@ BatteryInterface::PushButtonMessage::~PushButtonMessage()
  */
 BatteryInterface::PushButtonMessage::PushButtonMessage(const PushButtonMessage *m) : Message("PushButtonMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (PushButtonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -305,13 +312,17 @@ BatteryInterface::PushButtonMessage::clone() const
 /** Constructor */
 BatteryInterface::SleepMessage::SleepMessage() : Message("SleepMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(SleepMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SleepMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 BatteryInterface::SleepMessage::~SleepMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -319,8 +330,11 @@ BatteryInterface::SleepMessage::~SleepMessage()
  */
 BatteryInterface::SleepMessage::SleepMessage(const SleepMessage *m) : Message("SleepMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SleepMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

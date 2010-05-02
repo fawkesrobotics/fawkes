@@ -390,7 +390,9 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const int32_t ini_test_int) 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->test_int = ini_test_int;
+  add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
 }
 /** Constructor */
 TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessage")
@@ -399,6 +401,8 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
 }
 
 /** Destructor */
@@ -416,6 +420,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const SetTestIntMessage *m) 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -475,6 +480,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const char * ini_test_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->test_string, ini_test_string, 30);
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
@@ -485,6 +491,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestSt
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
 
@@ -503,6 +510,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const SetTestStringMes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -563,8 +571,11 @@ TestInterface::CalculateMessage::CalculateMessage(const int32_t ini_summand, con
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->summand = ini_summand;
   data->addend = ini_addend;
+  add_fieldinfo(IFT_INT32, "summand", 1, &data->summand);
+  add_fieldinfo(IFT_INT32, "addend", 1, &data->addend);
 }
 /** Constructor */
 TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage")
@@ -573,6 +584,9 @@ TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage"
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_INT32, "summand", 1, &data->summand);
+  add_fieldinfo(IFT_INT32, "addend", 1, &data->addend);
 }
 
 /** Destructor */
@@ -590,6 +604,7 @@ TestInterface::CalculateMessage::CalculateMessage(const CalculateMessage *m) : M
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

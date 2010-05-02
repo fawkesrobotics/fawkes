@@ -137,6 +137,15 @@ class SkillerInterface : public Interface
 
   class RestartInterpreterMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } RestartInterpreterMessage_data_t;
+
+    RestartInterpreterMessage_data_t *data;
+
    public:
     RestartInterpreterMessage();
     ~RestartInterpreterMessage();
@@ -148,6 +157,15 @@ class SkillerInterface : public Interface
 
   class StopExecMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopExecMessage_data_t;
+
+    StopExecMessage_data_t *data;
+
    public:
     StopExecMessage();
     ~StopExecMessage();
@@ -159,6 +177,15 @@ class SkillerInterface : public Interface
 
   class AcquireControlMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } AcquireControlMessage_data_t;
+
+    AcquireControlMessage_data_t *data;
+
    public:
     AcquireControlMessage();
     ~AcquireControlMessage();
@@ -170,6 +197,15 @@ class SkillerInterface : public Interface
 
   class ReleaseControlMessage : public Message
   {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ReleaseControlMessage_data_t;
+
+    ReleaseControlMessage_data_t *data;
+
    public:
     ReleaseControlMessage();
     ~ReleaseControlMessage();
