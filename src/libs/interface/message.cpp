@@ -27,12 +27,16 @@
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
+#include <utils/time/time.h>
 
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Message <interface/message.h>
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
@@ -69,8 +73,10 @@ Message::Message(const char *type)
   __enqueued   = false;
   __num_fields = 0;
   data_ptr     = NULL;
+  data_ts      = NULL;
   _sender_id   = 0;
   _type        = strdup(type);
+  __time_enqueued = new Time();
 
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
@@ -96,8 +102,10 @@ Message::Message(const Message &mesg)
   __num_fields = mesg.__num_fields;
   data_size    = mesg.data_size;
   data_ptr     = malloc(data_size);
+  data_ts      = (message_data_ts_t *)data_ptr;
   _sender_id   = 0;
   _type        = strdup(mesg._type);
+  __time_enqueued = new Time(mesg.__time_enqueued);
 
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
@@ -136,11 +144,13 @@ Message::Message(const Message *mesg)
   __num_fields = mesg->__num_fields;
   data_size    = mesg->data_size;
   data_ptr     = malloc(data_size);
+  data_ts      = (message_data_ts_t *)data_ptr;
   _sender_id   = 0;
   _type        = strdup(mesg->_type);
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial   = 0;
+  __time_enqueued = new Time(mesg->__time_enqueued);
 
   memcpy(data_ptr, mesg->data_ptr, data_size);
 
@@ -169,6 +179,7 @@ Message::~Message()
 {
   free(_sender_thread_name);
   free(_type);
+  delete __time_enqueued;
 
   interface_fieldinfo_t *infol = __fieldinfo_list;
   while ( infol ) {
@@ -223,7 +234,10 @@ Message::set_hops(unsigned int hops)
 void
 Message::mark_enqueued()
 {
-  __enqueued = false;
+  __time_enqueued->stamp();
+  __time_enqueued->get_timestamp(data_ts->timestamp_sec, data_ts->timestamp_usec);
+
+  __enqueued = true;
 }
 
 
@@ -235,6 +249,21 @@ Message::enqueued() const
 {
   return __enqueued;
 }
+
+
+/** Get time when message was enqueued.
+ * Note that this assumes synchronized clocks between sender and receiver.
+ * Problematic in this regard are remote network connections. For one the
+ * system times of the two system can diverge, for the other the clock on
+ * only one of the systems may be simulated.
+ * @return timestamp when message was enqueued.
+ */
+const Time *
+Message::time_enqueued() const
+{
+  return __time_enqueued;
+}
+
 
 /** Get recipient memory serial.
  * @return Interface memory serial of the recipient interface.
@@ -275,6 +304,7 @@ void
 Message::set_from_chunk(const void *chunk)
 {
   memcpy(data_ptr, chunk, data_size);
+  __time_enqueued->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
 }
 
 
@@ -288,6 +318,7 @@ Message::operator=  (const Message & m)
 {
   if ( data_size == m.data_size ) {
     memcpy(data_ptr, m.data_ptr, data_size);
+    __time_enqueued->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
   }
 
   return *this;
