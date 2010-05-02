@@ -100,9 +100,12 @@ class Message : public RefCount
 
   unsigned int __num_fields;
 
+ private: // methods
+  void              set_interface(Interface *iface);
+
  protected:
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
-		     size_t length, void *value);
+		     size_t length, void *value, const char *enumtype = 0);
 
   void         *data_ptr;
   unsigned int  data_size;

@@ -397,16 +397,17 @@ Message::clone() const
  */
 void
 Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
-		       size_t length, void *value)
+		       size_t length, void *value, const char *enumtype)
 {
   interface_fieldinfo_t *infol = __fieldinfo_list;
   interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
-  newinfo->type   = type;
-  newinfo->name   = name;
-  newinfo->length = length;
-  newinfo->value  = value;
-  newinfo->next   = NULL;
+  newinfo->type     = type;
+  newinfo->enumtype = enumtype;
+  newinfo->name     = name;
+  newinfo->length   = length;
+  newinfo->value    = value;
+  newinfo->next     = NULL;
 
   if ( infol == NULL ) {
     // first entry
