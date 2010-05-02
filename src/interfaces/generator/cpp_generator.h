@@ -103,6 +103,8 @@ class CppInterfaceGenerator
 
   void write_management_funcs_cpp(FILE *f);
 
+  void write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceField> &fields);
+
 
   void write_struct(FILE *f, std::string name, std::string /* indent space */ is,
 		    std::vector<InterfaceField> fields);
