@@ -33,9 +33,11 @@
 
 #include <core/threading/thread.h>
 #include <core/exceptions/system.h>
+#include <utils/time/time.h>
 
 #include <signal.h>
 #include <cstdlib>
+#include <cstdio>
 
 #include <iostream>
 #include <vector>
@@ -126,7 +128,8 @@ main(int argc, char **argv)
       }
       if ( ti_writer->msgq_first_is<TestInterface::SetTestIntMessage>() ) {
 	TestInterface::SetTestIntMessage *m2 = ti_writer->msgq_first<TestInterface::SetTestIntMessage>();
-	printf("Received message with ID %u\n", m2->id());
+	printf("Received message with ID %u (enqueue time: %s)\n", m2->id(),
+	       m2->time_enqueued()->str());
 	ti_writer->set_test_int( m2->test_int() );
 	try {
 	  ti_writer->write();

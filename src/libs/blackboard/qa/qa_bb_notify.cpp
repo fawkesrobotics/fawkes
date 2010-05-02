@@ -39,6 +39,7 @@
 
 #include <signal.h>
 #include <cstdlib>
+#include <cstdio>
 
 #include <iostream>
 #include <vector>
@@ -135,8 +136,7 @@ main(int argc, char **argv)
   Thread::init_main();
 
   //RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
-  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
-				       BLACKBOARD_MAGIC_TOKEN);
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
 
   QaBBEventListener qabbel;
 
