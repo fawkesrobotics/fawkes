@@ -36,11 +36,18 @@ typedef struct {
   unsigned int y;       /**< y coordinate */
 } point_t;
 
-/** Cartesian coordinates. */
+/** Cartesian coordinates (2D). */
 typedef struct {
   float x;      /**< x coordinate */
   float y;      /**< y coordinate */
 } cart_coord_2d_t;
+
+/** Cartesian coordinates (3D). */
+typedef struct {
+  float x;      /**< x coordinate */
+  float y;      /**< y coordinate */
+  float z;      /**< z coordinate */
+} cart_coord_3d_t;
 
 /** Polar coordinates. */
 typedef struct {

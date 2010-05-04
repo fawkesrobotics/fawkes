@@ -45,6 +45,24 @@ HomPoint::HomPoint(float x, float y, float z)
 }
 
 /** Constructor.
+ * Constructs a 2-dimensional vector from a cart_coord_2d_t struct.
+ *@param coord a structure for a 2-dimensional coordinate
+ */
+HomPoint::HomPoint(cart_coord_2d_t coord)
+  : HomCoord(coord.x, coord.y, 0.0, 1.0)
+{
+}
+
+/** Constructor.
+ * Constructs a 3-dimensional vector from a cart_coord_3d_t struct.
+ *@param coord a structure for a 3-dimensional coordinate
+ */
+HomPoint::HomPoint(cart_coord_3d_t coord)
+  : HomCoord(coord.x, coord.y, coord.z, 1.0)
+{
+}
+
+/** Constructor.
  * @param h a HomCoord
  */
 HomPoint::HomPoint(const HomCoord& h)

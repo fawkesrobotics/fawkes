@@ -25,6 +25,7 @@
 #define __GEOMETRY_HOM_POINT_H_
 
 #include <geometry/hom_coord.h>
+#include <utils/math/types.h>
 
 namespace fawkes {
 class HomVector;
@@ -33,6 +34,8 @@ class HomPoint : public HomCoord
 {
  public:
   HomPoint(float x = 0.0, float y = 0.0, float z = 0.0);
+  HomPoint(cart_coord_2d_t coord );
+  HomPoint(cart_coord_3d_t coord );
   HomPoint(const HomCoord& h);
   virtual ~HomPoint();
 
