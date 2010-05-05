@@ -29,6 +29,7 @@
 
 #include <eclipseclass.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
