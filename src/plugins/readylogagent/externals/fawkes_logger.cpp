@@ -29,6 +29,7 @@
 #include <eclipseclass.h>
 
 #include <cstring>
+#include <cstdio>
 
 int
 p_log()
