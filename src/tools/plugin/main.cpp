@@ -36,7 +36,7 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hl:u:r:p:waL");
+  ArgumentParser argp(argc, argv, "hl:u:R:waLr:");
 
   if ( argp.has_arg("h") ) {
     PluginTool::print_usage(argp.program_name());
@@ -46,11 +46,12 @@ main(int argc, char **argv)
   Thread::init_main();
 
   std::string host = "localhost";
-  if ( argp.has_arg("p") ) {
-    host.assign(argp.arg("p"));
+  unsigned short int port = 1910;
+  if ( argp.has_arg("r") ) {
+    argp.parse_hostport("r", host, port);
   }
 
-  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), 1910);
+  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
   try {
     c->connect();
   } catch( Exception &e ) {

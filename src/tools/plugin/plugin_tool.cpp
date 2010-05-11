@@ -56,9 +56,9 @@ PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
   } else if ( argp->has_arg("u") ) {
     opmode = M_UNLOAD;
     plugin_name = argp->arg("u");
-  } else if ( argp->has_arg("r") ) {
+  } else if ( argp->has_arg("R") ) {
     opmode = M_RELOAD;
-    plugin_name = argp->arg("r");
+    plugin_name = argp->arg("R");
   } else if ( argp->has_arg("w") ) {
     opmode = M_WATCH;
   } else if ( argp->has_arg("a") ) {
@@ -100,13 +100,15 @@ PluginTool::~PluginTool()
 void
 PluginTool::print_usage(const char *program_name)
 {
-    printf("Usage: %s [-l plugin/-u plugin/-w/-a/-L]\n"
+    printf("Usage: %s [-l plugin|-u plugin|-R plugin|-w|-a|-L] [-r host[:port]]\n"
 	   "  -l plugin      Load plugin with given name\n"
 	   "  -u plugin      Unload plugin with given name\n"
+	   "  -R plugin      Reload plugin with given name\n"
 	   "  -w             Watch all load/unload operations\n"
 	   "  -a             List available plugins\n"
 	   "  -L             List loaded plugins (default)\n\n"
-	   "  If called without any option list currently loaded plugins\n\n",
+	   "  -r host[:port] Remote host (and optionally port) to connect to\n\n"
+	    "  If called without any option list currently loaded plugins\n\n",
 	   program_name);
 }
 
