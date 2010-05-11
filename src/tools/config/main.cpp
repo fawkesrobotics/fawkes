@@ -209,6 +209,7 @@ print_usage(const char *program_name)
 	    << "       values exist (only available with list)" << std::endl
 	    << "  -q   Quiet. Only show important output, suitable for parsing. " << std::endl
 	    << "       (not supported for all commands yet) " << std::endl
+	    << "  -r host[:port]  Remote host (and optionally port) to connect to\n" << std::endl
 	    << std::endl;
 }
 
@@ -219,7 +220,7 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "+hcap:q");
+  ArgumentParser argp(argc, argv, "+hcar:q");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -227,8 +228,9 @@ main(int argc, char **argv)
   }
 
   std::string host = "localhost";
-  if ( argp.has_arg("p") ) {
-    host.assign(argp.arg("p"));
+  unsigned short int port = 1910;
+  if ( argp.has_arg("r") ) {
+    argp.parse_hostport("r", host, port);
   }
 
   bool quiet;
@@ -238,7 +240,7 @@ main(int argc, char **argv)
     quiet = false;
   }
 
-  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), 1910);
+  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
   try {
     c->connect();
   } catch( Exception &e ) {
