@@ -75,6 +75,7 @@ class ArgumentParser
   const char * program_name() const;
 
   bool         parse_hostport(const char *argn, char **host, unsigned short int *port);
+  bool         parse_hostport(const char *argn, std::string &host, unsigned short int &port);
   long int     parse_int(const char *argn);
   double       parse_float(const char *argn);
 
