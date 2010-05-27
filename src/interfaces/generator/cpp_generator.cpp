@@ -577,6 +577,10 @@ CppInterfaceGenerator::write_message_clone_method_cpp(FILE *f, std::string class
 	  "}\n", classname.c_str(), classname.c_str());
 }
 
+/** Write the add_fieldinfo() calls.
+ * @param f file to write to
+ * @param fields fields to write field info for
+ */
 void
 CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceField> &fields)
 {

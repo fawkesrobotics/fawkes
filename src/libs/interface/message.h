@@ -120,7 +120,7 @@ class Message : public RefCount
     int64_t timestamp_sec;	/**< time in seconds since Unix epoch */
     int64_t timestamp_usec;	/**< additional time microseconds */
   } message_data_ts_t;
-  message_data_ts_t  *data_ts;
+  message_data_ts_t  *data_ts;	/**< data timestamp aliasing pointer */
 };
 
 template <class MessageType>

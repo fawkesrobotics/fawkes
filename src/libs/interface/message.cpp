@@ -425,6 +425,7 @@ Message::clone() const
  * @param name name of the field, this is referenced, not copied
  * @param length length of the field
  * @param value pointer to the value in the data struct
+ * @param enumtype in case the type parameter is enum the name of the enum type
  */
 void
 Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
