@@ -45,24 +45,22 @@ namespace fawkes {
 const uint16_t SoccerPenaltyInterface::SPL_PENALTY_NONE = 0;
 /** SPL_PENALTY_BALL_HOLDING constant */
 const uint16_t SoccerPenaltyInterface::SPL_PENALTY_BALL_HOLDING = 1;
-/** SPL_PENALTY_GOALIE_PUSHING constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_GOALIE_PUSHING = 2;
 /** SPL_PENALTY_PLAYER_PUSHING constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING = 3;
-/** SPL_PENALTY_ILLEGAL_DEFENDER constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER = 4;
-/** SPL_PENALTY_ILLEGAL_DEFENSE constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENSE = 5;
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING = 2;
 /** SPL_PENALTY_OBSTRUCTION constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION = 6;
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION = 3;
+/** SPL_PENALTY_INACTIVE_PLAYER constant */
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_INACTIVE_PLAYER = 4;
+/** SPL_PENALTY_ILLEGAL_DEFENDER constant */
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER = 5;
+/** SPL_PENALTY_LEAVING_THE_FIELD constant */
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_LEAVING_THE_FIELD = 6;
+/** SPL_PENALTY_PLAYING_WITH_HANDS constant */
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_PLAYING_WITH_HANDS = 7;
 /** SPL_PENALTY_REQ_FOR_PICKUP constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP = 7;
-/** SPL_PENALTY_LEAVING constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_LEAVING = 8;
-/** SPL_PENALTY_DAMAGE constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_DAMAGE = 9;
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP = 8;
 /** SPL_PENALTY_MANUAL constant */
-const uint16_t SoccerPenaltyInterface::SPL_PENALTY_MANUAL = 10;
+const uint16_t SoccerPenaltyInterface::SPL_PENALTY_MANUAL = 15;
 
 /** Constructor */
 SoccerPenaltyInterface::SoccerPenaltyInterface() : Interface()
@@ -75,7 +73,7 @@ SoccerPenaltyInterface::SoccerPenaltyInterface() : Interface()
   add_fieldinfo(IFT_UINT16, "penalty", 1, &data->penalty);
   add_fieldinfo(IFT_UINT16, "remaining", 1, &data->remaining);
   add_messageinfo("SetPenaltyMessage");
-  unsigned char tmp_hash[] = {0x17, 0xe9, 0xd1, 0x5d, 0x8c, 0x34, 0x34, 0x8d, 0x7a, 0xae, 0x33, 0x15, 0x42, 0x10, 0x6f, 0x5d};
+  unsigned char tmp_hash[] = {0xa0, 0xa1, 0xf0, 0xc2, 0x4e, 0x8c, 0xd1, 0xe1, 0xaf, 0x46, 0x11, 0xe9, 0xa0, 0xc8, 0xaf, 0x5d};
   set_hash(tmp_hash);
 }
 

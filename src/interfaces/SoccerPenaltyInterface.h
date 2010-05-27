@@ -39,14 +39,13 @@ class SoccerPenaltyInterface : public Interface
   /* constants */
   static const uint16_t SPL_PENALTY_NONE;
   static const uint16_t SPL_PENALTY_BALL_HOLDING;
-  static const uint16_t SPL_PENALTY_GOALIE_PUSHING;
   static const uint16_t SPL_PENALTY_PLAYER_PUSHING;
-  static const uint16_t SPL_PENALTY_ILLEGAL_DEFENDER;
-  static const uint16_t SPL_PENALTY_ILLEGAL_DEFENSE;
   static const uint16_t SPL_PENALTY_OBSTRUCTION;
+  static const uint16_t SPL_PENALTY_INACTIVE_PLAYER;
+  static const uint16_t SPL_PENALTY_ILLEGAL_DEFENDER;
+  static const uint16_t SPL_PENALTY_LEAVING_THE_FIELD;
+  static const uint16_t SPL_PENALTY_PLAYING_WITH_HANDS;
   static const uint16_t SPL_PENALTY_REQ_FOR_PICKUP;
-  static const uint16_t SPL_PENALTY_LEAVING;
-  static const uint16_t SPL_PENALTY_DAMAGE;
   static const uint16_t SPL_PENALTY_MANUAL;
 
  private:

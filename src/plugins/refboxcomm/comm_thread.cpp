@@ -33,7 +33,7 @@
 #include <interfaces/GameStateInterface.h>
 #include <interfaces/SwitchInterface.h>
 #ifdef HAVE_SPL
-#  include <interfaces/SplPenaltyInterface.h>
+#  include <interfaces/SoccerPenaltyInterface.h>
 #endif
 
 #define CONFPREFIX "/plugins/refboxcomm"
@@ -138,7 +138,7 @@ RefBoxCommThread::init()
     __refboxproc->set_handler(this);
     __gamestate_if = blackboard->open_for_writing<GameStateInterface>("RefBoxComm");
 #ifdef HAVE_SPL
-    __penalty_if   = blackboard->open_for_writing<SplPenaltyInterface>("SPL Penalty");
+    __penalty_if   = blackboard->open_for_writing<SoccerPenaltyInterface>("SPL Penalty");
 #endif
   } catch (Exception &e) {
     finalize();
@@ -182,9 +182,9 @@ RefBoxCommThread::loop()
   }
 #ifdef HAVE_SPL
   while (!__penalty_if->msgq_empty()) {
-    if (__penalty_if->msgq_first_is<SplPenaltyInterface::SetPenaltyMessage>()) {
-      SplPenaltyInterface::SetPenaltyMessage *msg;
-      msg = __penalty_if->msgq_first<SplPenaltyInterface::SetPenaltyMessage>();
+    if (__penalty_if->msgq_first_is<SoccerPenaltyInterface::SetPenaltyMessage>()) {
+      SoccerPenaltyInterface::SetPenaltyMessage *msg;
+      msg = __penalty_if->msgq_first<SoccerPenaltyInterface::SetPenaltyMessage>();
       __penalty_if->set_penalty(msg->penalty());
       __gamestate_modified = true;
     }

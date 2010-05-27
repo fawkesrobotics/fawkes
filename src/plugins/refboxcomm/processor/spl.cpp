@@ -27,6 +27,10 @@
 #include <netcomm/socket/datagram.h>
 #include <utils/logging/logger.h>
 
+#ifdef USE_SPL_GC6
+#  include <interfaces/SoccerPenaltyInterface.h>
+#endif
+
 #include <cstring>
 #include <cstdio>
 #include <unistd.h>
@@ -37,7 +41,11 @@
 #endif
 using namespace fawkes;
 
+#ifdef USE_SPL_GC6
 static const uint32_t  SPL_STRUCT_VERSION = 6;
+#else
+static const uint32_t  SPL_STRUCT_VERSION = 7;
+#endif
 
 static const uint8_t   SPL_STATE_INITIAL  = 0;
 static const uint8_t   SPL_STATE_READY    = 1;
@@ -48,23 +56,38 @@ static const uint8_t   SPL_STATE_FINISHED = 4;
 static const uint8_t   SPL_STATE2_NORMAL       = 0;
 static const uint8_t   SPL_STATE2_PENALTYSHOOT = 1;
 
-static const uint8_t   SPL_PENALTY_NONE              =  0;
-static const uint8_t   SPL_PENALTY_BALL_HOLDING      =  1;
-static const uint8_t   SPL_PENALTY_GOALIE_PUSHING    =  2;
-static const uint8_t   SPL_PENALTY_PLAYER_PUSHING    =  3;
-static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENDER  =  4;
-static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENSE   =  5;
-static const uint8_t   SPL_PENALTY_OBSTRUCTION       =  6;
-static const uint8_t   SPL_PENALTY_REQ_FOR_PICKUP    =  7;
-static const uint8_t   SPL_PENALTY_LEAVING           =  8;
-static const uint8_t   SPL_PENALTY_DAMAGE            =  9;
-static const uint8_t   SPL_PENALTY_MANUAL            = 10;
+static const uint8_t   SPL_PENALTY_NONE               =  0;
+#ifdef USE_SPL_GC6
+static const uint8_t   SPL_PENALTY_BALL_HOLDING       =  1;
+static const uint8_t   SPL_PENALTY_GOALIE_PUSHING     =  2;
+static const uint8_t   SPL_PENALTY_PLAYER_PUSHING     =  3;
+static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENDER   =  4;
+static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENSE    =  5;
+static const uint8_t   SPL_PENALTY_OBSTRUCTION        =  6;
+static const uint8_t   SPL_PENALTY_REQ_FOR_PICKUP     =  7;
+static const uint8_t   SPL_PENALTY_LEAVING            =  8;
+static const uint8_t   SPL_PENALTY_DAMAGE             =  9;
+static const uint8_t   SPL_PENALTY_MANUAL             = 10;
+#else
+static const uint8_t   SPL_PENALTY_BALL_HOLDING       =  1;
+static const uint8_t   SPL_PENALTY_PLAYER_PUSHING     =  2;
+static const uint8_t   SPL_PENALTY_OBSTRUCTION        =  3;
+static const uint8_t   SPL_PENALTY_INACTIVE_PLAYER    =  4;
+static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENDER   =  5;
+static const uint8_t   SPL_PENALTY_LEAVING_THE_FIELD  =  6;
+static const uint8_t   SPL_PENALTY_PLAYING_WITH_HANDS =  7;
+static const uint8_t   SPL_PENALTY_REQ_FOR_PICKUP     =  8;
+static const uint8_t   SPL_PENALTY_MANUAL             = 15;
+#endif
 
 // team numbers
-static const uint8_t   SPL_TEAM_BLUE                 =  0;
-static const uint8_t   SPL_TEAM_RED                  =  1;
+static const uint8_t   SPL_TEAM_BLUE                  =  0;
+static const uint8_t   SPL_TEAM_RED                   =  1;
 
-static const char    SPL_GAMECONTROL_HEADER[GCHS]  = {'R', 'G', 'm', 'e'};
+static const uint8_t   SPL_GOAL_BLUE                  =  0;
+static const uint8_t   SPL_GOAL_YELLOW                =  1;
+
+static const char    SPL_GAMECONTROL_HEADER[SPL_HEADER_SIZE] = {'R','G','m','e'};
 
 
 /** @class SplRefBoxProcessor "processor/spl.h"
@@ -131,7 +154,7 @@ SplRefBoxProcessor::process_struct(spl_gamecontrol_t *msg)
   _rsh->set_score(msg->teams[team_index].score, msg->teams[(team_index == 1 ? 0 : 1)].score);
   _rsh->set_team_goal(our_team, (our_team == TEAM_CYAN ? GOAL_BLUE : GOAL_YELLOW)); //blue team defends blue goal
 
-  for (unsigned int pl_num = 0; pl_num < MAX_NUM_PLAYERS; ++pl_num)
+  for (unsigned int pl_num = 0; pl_num < SPL_MAX_NUM_PLAYERS; ++pl_num)
   {
     if ((pl_num + 1) == __player_number)
     {
@@ -139,6 +162,32 @@ SplRefBoxProcessor::process_struct(spl_gamecontrol_t *msg)
           (msg->teams[team_index].players[pl_num].penalty != PENALTY_NONE))
       {
         __penalty = msg->teams[team_index].players[pl_num].penalty;
+
+#ifdef USE_SPL_GC6
+	// convert GC6 codes to new GC7 codes, "closest match"
+	switch (__penalty) {
+	case SPL_PENALTY_BALL_HOLDING:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_BALL_HOLDING; break;
+	case SPL_PENALTY_GOALIE_PUSHING:
+	case SPL_PENALTY_PLAYER_PUSHING:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING; break;
+	case SPL_PENALTY_ILLEGAL_DEFENDER:
+	case SPL_PENALTY_ILLEGAL_DEFENSE:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER; break;
+	case SPL_PENALTY_OBSTRUCTION:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION; break;
+	case SPL_PENALTY_REQ_FOR_PICKUP:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP; break;
+	case SPL_PENALTY_LEAVING:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_LEAVING_THE_FIELD; break;
+	case SPL_PENALTY_DAMAGE:
+	case SPL_PENALTY_MANUAL:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_MANUAL; break;
+	default:
+	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_NONE; break;
+	}
+#endif
+
         _rsh->add_penalty(__penalty,
                           msg->teams[team_index].players[pl_num].secs_till_unpenalized);
       }
@@ -179,8 +228,8 @@ SplRefBoxProcessor::refbox_process()
     spl_gamecontrol_t ctrlmsg;
     size_t bytes_read = __s->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
     if ( bytes_read == sizeof(ctrlmsg) ) {
-      if ( (strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, GCHS) == 0) &&
-	   (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
+      if ((strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0) &&
+	  (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
 	process_struct(&ctrlmsg);
       }
     }
@@ -209,7 +258,7 @@ SplRefBoxProcessor::run()
   while ( ! __quit ) {
     size_t bytes_read = __s->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
     if ( bytes_read == sizeof(ctrlmsg) ) {
-      if ( (strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, GCHS) == 0) &&
+      if ( (strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0) &&
 	   (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
 	process_struct(&ctrlmsg);
 	_rsh->handle_refbox_state();

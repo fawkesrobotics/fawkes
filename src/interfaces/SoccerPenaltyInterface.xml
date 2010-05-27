@@ -5,15 +5,14 @@
     <!-- SPL game states -->
     <constant type="uint16" value="0" name="SPL_PENALTY_NONE">Not penalized.</constant>
     <constant type="uint16" value="1" name="SPL_PENALTY_BALL_HOLDING">Ball holding.</constant>
-    <constant type="uint16" value="2" name="SPL_PENALTY_GOALIE_PUSHING">Goalie pushing.</constant>
-    <constant type="uint16" value="3" name="SPL_PENALTY_PLAYER_PUSHING">Player pushing.</constant>
-    <constant type="uint16" value="4" name="SPL_PENALTY_ILLEGAL_DEFENDER">Illegal Defender.</constant>
-    <constant type="uint16" value="5" name="SPL_PENALTY_ILLEGAL_DEFENSE">Illegal defense.</constant>
-    <constant type="uint16" value="6" name="SPL_PENALTY_OBSTRUCTION">Path obstruction.</constant>
-    <constant type="uint16" value="7" name="SPL_PENALTY_REQ_FOR_PICKUP">Request for Pickup</constant>
-    <constant type="uint16" value="8" name="SPL_PENALTY_LEAVING">Leaving the field.</constant>
-    <constant type="uint16" value="9" name="SPL_PENALTY_DAMAGE">Robot is damaged.</constant>
-    <constant type="uint16" value="10" name="SPL_PENALTY_MANUAL">Manually penalized.</constant>
+    <constant type="uint16" value="2" name="SPL_PENALTY_PLAYER_PUSHING">Player pushing.</constant>
+    <constant type="uint16" value="3" name="SPL_PENALTY_OBSTRUCTION">Obstruction.</constant>
+    <constant type="uint16" value="4" name="SPL_PENALTY_INACTIVE_PLAYER">Inactive player.</constant>
+    <constant type="uint16" value="5" name="SPL_PENALTY_ILLEGAL_DEFENDER">Illegal defender.</constant>
+    <constant type="uint16" value="6" name="SPL_PENALTY_LEAVING_THE_FIELD">Leaving the field.</constant>
+    <constant type="uint16" value="7" name="SPL_PENALTY_PLAYING_WITH_HANDS">Playing with hands.</constant>
+    <constant type="uint16" value="8" name="SPL_PENALTY_REQ_FOR_PICKUP">Request for pickup.</constant>
+    <constant type="uint16" value="15" name="SPL_PENALTY_MANUAL">Manually penalized.</constant>
   </constants>
   <data>
     <comment>

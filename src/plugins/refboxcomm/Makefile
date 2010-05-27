@@ -38,7 +38,7 @@ endif
 
 ifeq ($(HAVE_SPL),1)
   CFLAGS += -DHAVE_SPL
-  LIBS_refboxcomm += SplPenaltyInterface
+  LIBS_refboxcomm += SoccerPenaltyInterface
   OBJS_refboxcomm += processor/spl.o
 else
   WARN_TARGETS += warning_spl
