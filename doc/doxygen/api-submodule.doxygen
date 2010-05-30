@@ -2,6 +2,6 @@
 # Configuration for full API doc generation in submodule configuration
 
 @INCLUDE_PATH = fawkes/doc/doxygen/parts
-@INCLUDE      = base.mk
-@INCLUDE      = submodule.mk
+@INCLUDE      = base.doxygen
+@INCLUDE      = submodule.doxygen
 
