@@ -36,7 +36,7 @@ INSERT INTO "config" VALUES('/skiller/skillspace','string','test','Skill space')
 INSERT INTO "config" VALUES('/skiller/watch_files','bool',1,'Watch lua files for modification and automatically reload Lua if files have been changed; true to enable');
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/navigator','string','NavigatorInterface::Navigator',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/pose','string','ObjectPositionInterface::WM Pose',NULL);
-INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/speechsynth','string','SpeechSynthInterface::Festival',NULL);
+INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/speechsynth','string','SpeechSynthInterface::Flite',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/katanaarm','string','KatanaInterface::Katana',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/ptu_RX28','string','PanTiltInterface::PanTilt RX28',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/ptu_EviD100P','string','PanTiltInterface::PanTilt EviD100P',NULL);
