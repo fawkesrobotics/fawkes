@@ -207,7 +207,7 @@ NetworkCamera::open()
     __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
 
     if ( ! __fuse_imageinfo ) {
-      throw Exception("Could not received image info. Image not available?");
+      throw Exception("Could not receive image info. Image not available?");
     }
   }
 
