@@ -340,10 +340,10 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 /** Destructor. */
 Firestation::~Firestation()
 {
-  free(m_yuv_orig_buffer);
-  free(m_yuv_draw_buffer);
-  free(m_yuv_scaled_buffer);
-  free(m_rgb_scaled_buffer);
+  if (m_yuv_orig_buffer)    free(m_yuv_orig_buffer);
+  if (m_yuv_draw_buffer)    free(m_yuv_draw_buffer);
+  if (m_yuv_scaled_buffer)  free(m_yuv_scaled_buffer);
+  if (m_rgb_scaled_buffer)  free(m_rgb_scaled_buffer);
 
   delete m_camera;
   delete m_img_writer;
@@ -353,6 +353,8 @@ Firestation::~Firestation()
   delete m_ftw;
   delete m_filw;
 
+  m_avahi_thread->cancel();
+  m_avahi_thread->join();
   delete m_avahi_thread;
   delete m_avahi_dispatcher;
 
@@ -393,9 +395,6 @@ Firestation::get_window() const
 void
 Firestation::exit()
 {
-  m_avahi_thread->cancel();
-  m_avahi_thread->join();
-
   if (SRC_NONE != m_img_src)
     { m_camera->close(); }
 
@@ -419,12 +418,6 @@ Firestation::close_camera()
   m_img_cs = CS_UNKNOWN;
 
   m_img_size = 0;
-
-  free(m_yuv_orig_buffer);
-  free(m_yuv_draw_buffer);
-
-  m_yuv_orig_buffer = 0;
-  m_yuv_draw_buffer = 0;
 
   m_img_image->clear();
   m_img_image->set("gtk-missing-image");
@@ -495,8 +488,11 @@ Firestation::update_image()
   try
     {
       m_camera->capture();
-      memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
-      memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
+      convert(m_img_cs, YUV422_PLANAR,
+	      m_camera->buffer(), m_yuv_orig_buffer,
+	      m_img_width, m_img_height);
+      memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer,
+	     colorspace_buffer_size(YUV422_PLANAR, m_img_width, m_img_height));
       m_camera->dispose_buffer();
 
       draw_image();
@@ -811,13 +807,14 @@ Firestation::post_open_img_src()
 					   m_img_width,
 					   m_img_height );
 
-      free(m_yuv_orig_buffer);
-      free(m_yuv_draw_buffer);
+      m_yuv_orig_buffer = malloc_buffer(YUV422_PLANAR, m_img_width, m_img_height);
+      m_yuv_draw_buffer = malloc_buffer(YUV422_PLANAR, m_img_width, m_img_height);
 
-      m_yuv_orig_buffer = (unsigned char*) malloc(m_img_size);
-      m_yuv_draw_buffer = (unsigned char*) malloc(m_img_size);
-      memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
-      memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
+      convert(m_img_cs, YUV422_PLANAR,
+	      m_camera->buffer(), m_yuv_orig_buffer,
+	      m_img_width, m_img_height);
+      memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer,
+	     colorspace_buffer_size(YUV422_PLANAR, m_img_width, m_img_height));
 
       m_camera->dispose_buffer();
 
@@ -891,11 +888,10 @@ Firestation::draw_image()
       m_scale_factor = scaler.get_scale_factor();
     }
 
-  free(m_rgb_scaled_buffer);
-  free(m_yuv_scaled_buffer);
-  m_yuv_scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( m_img_cs,
-									 m_scaled_img_width,
-									 m_scaled_img_height ) );
+  if (m_rgb_scaled_buffer)  free(m_rgb_scaled_buffer);
+  if (m_yuv_scaled_buffer)  free(m_yuv_scaled_buffer);
+  m_yuv_scaled_buffer = malloc_buffer(YUV422_PLANAR, m_scaled_img_width,
+				      m_scaled_img_height);
   scaler.set_scaled_buffer(m_yuv_scaled_buffer);
   scaler.scale();
 
@@ -933,7 +929,7 @@ Firestation::draw_image()
 									 m_scaled_img_width,
 									 m_scaled_img_height ) );
 
-  convert( m_img_cs, RGB,
+  convert( YUV422_PLANAR, RGB,
 	   m_yuv_scaled_buffer, m_rgb_scaled_buffer,
 	   m_scaled_img_width, m_scaled_img_height );
 
@@ -996,26 +992,18 @@ Firestation::image_click(GdkEventButton* event)
     case MODE_VIEWER:
       if (m_img_src != SRC_NONE)
 	{
-	  switch( m_img_cs )
-	    {
-	    case YUV422_PLANAR:
-	      register unsigned char y;
-	      register unsigned char u;
-	      register unsigned char v;
-	      YUV422_PLANAR_YUV( m_yuv_orig_buffer,
-				 m_img_width,
-				 m_img_height,
-				 image_x,
-				 image_y,
-				 y, u, v );
-	      printf( "Y=%d  U=%d  Y=%d @ (%d, %d)\n",
-		      (unsigned int) y, (unsigned int) u, (unsigned int) v,
-		      image_x, image_y );
-
-	      break;
-	    default:
-	  cout << "Unhandled colorspace" << endl;
-	    }
+	  register unsigned char y;
+	  register unsigned char u;
+	  register unsigned char v;
+	  YUV422_PLANAR_YUV( m_yuv_orig_buffer,
+			     m_img_width,
+			     m_img_height,
+			     image_x,
+			     image_y,
+			     y, u, v );
+	  printf( "Y=%d  U=%d  Y=%d @ (%d, %d)\n",
+		  (unsigned int) y, (unsigned int) u, (unsigned int) v,
+		  image_x, image_y );
 	}
       break;
 

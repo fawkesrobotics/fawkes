@@ -49,6 +49,8 @@ class Colormap
   virtual size_t          size()                                                          = 0;
   virtual void            to_image(unsigned char *yuv422_planar_buffer,
 				   unsigned int level = 0);
+  virtual unsigned int    image_height() const;
+  virtual unsigned int    image_width() const;
 
   virtual unsigned char * get_buffer() const                                              = 0;
 
