@@ -40,19 +40,19 @@ namespace fawkes {
 
 
 /** FLAG_SUPPORTS_PAN constant */
-const uint32_t PanTiltInterface::FLAG_SUPPORTS_PAN = 1;
+const uint32_t PanTiltInterface::FLAG_SUPPORTS_PAN = 1u;
 /** FLAG_SUPPORTS_TILT constant */
-const uint32_t PanTiltInterface::FLAG_SUPPORTS_TILT = 2;
+const uint32_t PanTiltInterface::FLAG_SUPPORTS_TILT = 2u;
 /** ERROR_NONE constant */
-const uint32_t PanTiltInterface::ERROR_NONE = 0;
+const uint32_t PanTiltInterface::ERROR_NONE = 0u;
 /** ERROR_UNSPECIFIC constant */
-const uint32_t PanTiltInterface::ERROR_UNSPECIFIC = 1;
+const uint32_t PanTiltInterface::ERROR_UNSPECIFIC = 1u;
 /** ERROR_COMMUNICATION constant */
-const uint32_t PanTiltInterface::ERROR_COMMUNICATION = 2;
+const uint32_t PanTiltInterface::ERROR_COMMUNICATION = 2u;
 /** ERROR_PAN_OUTOFRANGE constant */
-const uint32_t PanTiltInterface::ERROR_PAN_OUTOFRANGE = 4;
+const uint32_t PanTiltInterface::ERROR_PAN_OUTOFRANGE = 4u;
 /** ERROR_TILT_OUTOFRANGE constant */
-const uint32_t PanTiltInterface::ERROR_TILT_OUTOFRANGE = 8;
+const uint32_t PanTiltInterface::ERROR_TILT_OUTOFRANGE = 8u;
 
 /** Constructor */
 PanTiltInterface::PanTiltInterface() : Interface()

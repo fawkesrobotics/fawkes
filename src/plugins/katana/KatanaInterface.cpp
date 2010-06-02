@@ -41,49 +41,49 @@ namespace fawkes {
 
 
 /** SENSOR_IR_RIGHT_INNER_MIDDLE constant */
-const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_MIDDLE = 0;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_MIDDLE = 0u;
 /** SENSOR_IR_RIGHT_INNER_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_FRONT = 1;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_FRONT = 1u;
 /** SENSOR_RESERVED_2 constant */
-const uint32_t KatanaInterface::SENSOR_RESERVED_2 = 2;
+const uint32_t KatanaInterface::SENSOR_RESERVED_2 = 2u;
 /** SENSOR_COND_BOTH constant */
-const uint32_t KatanaInterface::SENSOR_COND_BOTH = 3;
+const uint32_t KatanaInterface::SENSOR_COND_BOTH = 3u;
 /** SENSOR_IR_RIGHT_OUTER_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_IR_RIGHT_OUTER_FRONT = 4;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_OUTER_FRONT = 4u;
 /** SENSOR_IR_RIGHT_BOTTOM_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_IR_RIGHT_BOTTOM_FRONT = 5;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_BOTTOM_FRONT = 5u;
 /** SENSOR_FORCE_RIGHT_REAR constant */
-const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_REAR = 6;
+const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_REAR = 6u;
 /** SENSOR_FORCE_RIGHT_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_FRONT = 7;
+const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_FRONT = 7u;
 /** SENSOR_IR_LEFT_INNER_MIDDLE constant */
-const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_MIDDLE = 8;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_MIDDLE = 8u;
 /** SENSOR_IR_LEFT_INNER_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_FRONT = 9;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_FRONT = 9u;
 /** SENSOR_RESERVED_10 constant */
-const uint32_t KatanaInterface::SENSOR_RESERVED_10 = 10;
+const uint32_t KatanaInterface::SENSOR_RESERVED_10 = 10u;
 /** SENSOR_IR_CENTER_GRIPPER constant */
-const uint32_t KatanaInterface::SENSOR_IR_CENTER_GRIPPER = 11;
+const uint32_t KatanaInterface::SENSOR_IR_CENTER_GRIPPER = 11u;
 /** SENSOR_IR_LEFT_OUTER_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_IR_LEFT_OUTER_FRONT = 12;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_OUTER_FRONT = 12u;
 /** SENSOR_IR_LEFT_BOTTOM_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_IR_LEFT_BOTTOM_FRONT = 13;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_BOTTOM_FRONT = 13u;
 /** SENSOR_FORCE_LEFT_REAR constant */
-const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_REAR = 14;
+const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_REAR = 14u;
 /** SENSOR_FORCE_LEFT_FRONT constant */
-const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_FRONT = 15;
+const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_FRONT = 15u;
 /** ERROR_NONE constant */
-const uint32_t KatanaInterface::ERROR_NONE = 0;
+const uint32_t KatanaInterface::ERROR_NONE = 0u;
 /** ERROR_UNSPECIFIC constant */
-const uint32_t KatanaInterface::ERROR_UNSPECIFIC = 1;
+const uint32_t KatanaInterface::ERROR_UNSPECIFIC = 1u;
 /** ERROR_CMD_START_FAILED constant */
-const uint32_t KatanaInterface::ERROR_CMD_START_FAILED = 2;
+const uint32_t KatanaInterface::ERROR_CMD_START_FAILED = 2u;
 /** ERROR_NO_SOLUTION constant */
-const uint32_t KatanaInterface::ERROR_NO_SOLUTION = 4;
+const uint32_t KatanaInterface::ERROR_NO_SOLUTION = 4u;
 /** ERROR_COMMUNICATION constant */
-const uint32_t KatanaInterface::ERROR_COMMUNICATION = 8;
+const uint32_t KatanaInterface::ERROR_COMMUNICATION = 8u;
 /** ERROR_MOTOR_CRASHED constant */
-const uint32_t KatanaInterface::ERROR_MOTOR_CRASHED = 16;
+const uint32_t KatanaInterface::ERROR_MOTOR_CRASHED = 16u;
 
 /** Constructor */
 KatanaInterface::KatanaInterface() : Interface()

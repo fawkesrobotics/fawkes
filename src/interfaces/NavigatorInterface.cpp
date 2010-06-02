@@ -50,27 +50,27 @@ namespace fawkes {
 
 
 /** ERROR_NONE constant */
-const uint32_t NavigatorInterface::ERROR_NONE = 0;
+const uint32_t NavigatorInterface::ERROR_NONE = 0u;
 /** ERROR_MOTOR constant */
-const uint32_t NavigatorInterface::ERROR_MOTOR = 1;
+const uint32_t NavigatorInterface::ERROR_MOTOR = 1u;
 /** ERROR_OBSTRUCTION constant */
-const uint32_t NavigatorInterface::ERROR_OBSTRUCTION = 2;
+const uint32_t NavigatorInterface::ERROR_OBSTRUCTION = 2u;
 /** ERROR_UNKNOWN_PLACE constant */
-const uint32_t NavigatorInterface::ERROR_UNKNOWN_PLACE = 4;
+const uint32_t NavigatorInterface::ERROR_UNKNOWN_PLACE = 4u;
 /** FLAG_NONE constant */
-const uint32_t NavigatorInterface::FLAG_NONE = 0;
+const uint32_t NavigatorInterface::FLAG_NONE = 0u;
 /** FLAG_CART_GOTO constant */
-const uint32_t NavigatorInterface::FLAG_CART_GOTO = 1;
+const uint32_t NavigatorInterface::FLAG_CART_GOTO = 1u;
 /** FLAG_POLAR_GOTO constant */
-const uint32_t NavigatorInterface::FLAG_POLAR_GOTO = 2;
+const uint32_t NavigatorInterface::FLAG_POLAR_GOTO = 2u;
 /** FLAG_PLACE_GOTO constant */
-const uint32_t NavigatorInterface::FLAG_PLACE_GOTO = 4;
+const uint32_t NavigatorInterface::FLAG_PLACE_GOTO = 4u;
 /** FLAG_UPDATES_DEST_DIST constant */
-const uint32_t NavigatorInterface::FLAG_UPDATES_DEST_DIST = 8;
+const uint32_t NavigatorInterface::FLAG_UPDATES_DEST_DIST = 8u;
 /** FLAG_SECURITY_DISTANCE constant */
-const uint32_t NavigatorInterface::FLAG_SECURITY_DISTANCE = 16;
+const uint32_t NavigatorInterface::FLAG_SECURITY_DISTANCE = 16u;
 /** FLAG_ESCAPING constant */
-const uint32_t NavigatorInterface::FLAG_ESCAPING = 32;
+const uint32_t NavigatorInterface::FLAG_ESCAPING = 32u;
 
 /** Constructor */
 NavigatorInterface::NavigatorInterface() : Interface()

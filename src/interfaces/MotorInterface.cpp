@@ -40,21 +40,21 @@ namespace fawkes {
 
 
 /** MOTOR_ENABLED constant */
-const uint32_t MotorInterface::MOTOR_ENABLED = 0;
+const uint32_t MotorInterface::MOTOR_ENABLED = 0u;
 /** MOTOR_DISABLED constant */
-const uint32_t MotorInterface::MOTOR_DISABLED = 1;
+const uint32_t MotorInterface::MOTOR_DISABLED = 1u;
 /** DRIVE_MODE_RPM constant */
-const uint32_t MotorInterface::DRIVE_MODE_RPM = 1;
+const uint32_t MotorInterface::DRIVE_MODE_RPM = 1u;
 /** DRIVE_MODE_TRANS constant */
-const uint32_t MotorInterface::DRIVE_MODE_TRANS = 2;
+const uint32_t MotorInterface::DRIVE_MODE_TRANS = 2u;
 /** DRIVE_MODE_ROT constant */
-const uint32_t MotorInterface::DRIVE_MODE_ROT = 3;
+const uint32_t MotorInterface::DRIVE_MODE_ROT = 3u;
 /** DRIVE_MODE_TRANS_ROT constant */
-const uint32_t MotorInterface::DRIVE_MODE_TRANS_ROT = 4;
+const uint32_t MotorInterface::DRIVE_MODE_TRANS_ROT = 4u;
 /** DRIVE_MODE_ORBIT constant */
-const uint32_t MotorInterface::DRIVE_MODE_ORBIT = 5;
+const uint32_t MotorInterface::DRIVE_MODE_ORBIT = 5u;
 /** DRIVE_MODE_LINE_TRANS_ROT constant */
-const uint32_t MotorInterface::DRIVE_MODE_LINE_TRANS_ROT = 6;
+const uint32_t MotorInterface::DRIVE_MODE_LINE_TRANS_ROT = 6u;
 
 /** Constructor */
 MotorInterface::MotorInterface() : Interface()

@@ -42,69 +42,69 @@ namespace fawkes {
 
 
 /** BUTTON_1 constant */
-const uint32_t JoystickInterface::BUTTON_1 = 1;
+const uint32_t JoystickInterface::BUTTON_1 = 1u;
 /** BUTTON_2 constant */
-const uint32_t JoystickInterface::BUTTON_2 = 2;
+const uint32_t JoystickInterface::BUTTON_2 = 2u;
 /** BUTTON_3 constant */
-const uint32_t JoystickInterface::BUTTON_3 = 4;
+const uint32_t JoystickInterface::BUTTON_3 = 4u;
 /** BUTTON_4 constant */
-const uint32_t JoystickInterface::BUTTON_4 = 8;
+const uint32_t JoystickInterface::BUTTON_4 = 8u;
 /** BUTTON_5 constant */
-const uint32_t JoystickInterface::BUTTON_5 = 16;
+const uint32_t JoystickInterface::BUTTON_5 = 16u;
 /** BUTTON_6 constant */
-const uint32_t JoystickInterface::BUTTON_6 = 32;
+const uint32_t JoystickInterface::BUTTON_6 = 32u;
 /** BUTTON_7 constant */
-const uint32_t JoystickInterface::BUTTON_7 = 64;
+const uint32_t JoystickInterface::BUTTON_7 = 64u;
 /** BUTTON_8 constant */
-const uint32_t JoystickInterface::BUTTON_8 = 128;
+const uint32_t JoystickInterface::BUTTON_8 = 128u;
 /** BUTTON_9 constant */
-const uint32_t JoystickInterface::BUTTON_9 = 256;
+const uint32_t JoystickInterface::BUTTON_9 = 256u;
 /** BUTTON_10 constant */
-const uint32_t JoystickInterface::BUTTON_10 = 512;
+const uint32_t JoystickInterface::BUTTON_10 = 512u;
 /** BUTTON_11 constant */
-const uint32_t JoystickInterface::BUTTON_11 = 1024;
+const uint32_t JoystickInterface::BUTTON_11 = 1024u;
 /** BUTTON_12 constant */
-const uint32_t JoystickInterface::BUTTON_12 = 2048;
+const uint32_t JoystickInterface::BUTTON_12 = 2048u;
 /** BUTTON_13 constant */
-const uint32_t JoystickInterface::BUTTON_13 = 4096;
+const uint32_t JoystickInterface::BUTTON_13 = 4096u;
 /** BUTTON_14 constant */
-const uint32_t JoystickInterface::BUTTON_14 = 8192;
+const uint32_t JoystickInterface::BUTTON_14 = 8192u;
 /** BUTTON_15 constant */
-const uint32_t JoystickInterface::BUTTON_15 = 16384;
+const uint32_t JoystickInterface::BUTTON_15 = 16384u;
 /** BUTTON_16 constant */
-const uint32_t JoystickInterface::BUTTON_16 = 32768;
+const uint32_t JoystickInterface::BUTTON_16 = 32768u;
 /** BUTTON_17 constant */
-const uint32_t JoystickInterface::BUTTON_17 = 65536;
+const uint32_t JoystickInterface::BUTTON_17 = 65536u;
 /** BUTTON_18 constant */
-const uint32_t JoystickInterface::BUTTON_18 = 131072;
+const uint32_t JoystickInterface::BUTTON_18 = 131072u;
 /** BUTTON_19 constant */
-const uint32_t JoystickInterface::BUTTON_19 = 262144;
+const uint32_t JoystickInterface::BUTTON_19 = 262144u;
 /** BUTTON_20 constant */
-const uint32_t JoystickInterface::BUTTON_20 = 524288;
+const uint32_t JoystickInterface::BUTTON_20 = 524288u;
 /** BUTTON_21 constant */
-const uint32_t JoystickInterface::BUTTON_21 = 1048576;
+const uint32_t JoystickInterface::BUTTON_21 = 1048576u;
 /** BUTTON_22 constant */
-const uint32_t JoystickInterface::BUTTON_22 = 2097152;
+const uint32_t JoystickInterface::BUTTON_22 = 2097152u;
 /** BUTTON_23 constant */
-const uint32_t JoystickInterface::BUTTON_23 = 4194304;
+const uint32_t JoystickInterface::BUTTON_23 = 4194304u;
 /** BUTTON_24 constant */
-const uint32_t JoystickInterface::BUTTON_24 = 8388608;
+const uint32_t JoystickInterface::BUTTON_24 = 8388608u;
 /** BUTTON_25 constant */
-const uint32_t JoystickInterface::BUTTON_25 = 16777216;
+const uint32_t JoystickInterface::BUTTON_25 = 16777216u;
 /** BUTTON_26 constant */
-const uint32_t JoystickInterface::BUTTON_26 = 33554432;
+const uint32_t JoystickInterface::BUTTON_26 = 33554432u;
 /** BUTTON_27 constant */
-const uint32_t JoystickInterface::BUTTON_27 = 67108864;
+const uint32_t JoystickInterface::BUTTON_27 = 67108864u;
 /** BUTTON_28 constant */
-const uint32_t JoystickInterface::BUTTON_28 = 134217728;
+const uint32_t JoystickInterface::BUTTON_28 = 134217728u;
 /** BUTTON_29 constant */
-const uint32_t JoystickInterface::BUTTON_29 = 268435456;
+const uint32_t JoystickInterface::BUTTON_29 = 268435456u;
 /** BUTTON_30 constant */
-const uint32_t JoystickInterface::BUTTON_30 = 536870912;
+const uint32_t JoystickInterface::BUTTON_30 = 536870912u;
 /** BUTTON_31 constant */
-const uint32_t JoystickInterface::BUTTON_31 = 1073741824;
+const uint32_t JoystickInterface::BUTTON_31 = 1073741824u;
 /** BUTTON_32 constant */
-const uint32_t JoystickInterface::BUTTON_32 = 2147483648;
+const uint32_t JoystickInterface::BUTTON_32 = 2147483648u;
 
 /** Constructor */
 JoystickInterface::JoystickInterface() : Interface()

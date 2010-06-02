@@ -42,35 +42,35 @@ namespace fawkes {
 
 
 /** GS_FROZEN constant */
-const uint32_t GameStateInterface::GS_FROZEN = 0;
+const uint32_t GameStateInterface::GS_FROZEN = 0u;
 /** GS_PLAY constant */
-const uint32_t GameStateInterface::GS_PLAY = 1;
+const uint32_t GameStateInterface::GS_PLAY = 1u;
 /** GS_KICK_OFF constant */
-const uint32_t GameStateInterface::GS_KICK_OFF = 2;
+const uint32_t GameStateInterface::GS_KICK_OFF = 2u;
 /** GS_DROP_BALL constant */
-const uint32_t GameStateInterface::GS_DROP_BALL = 3;
+const uint32_t GameStateInterface::GS_DROP_BALL = 3u;
 /** GS_PENALTY constant */
-const uint32_t GameStateInterface::GS_PENALTY = 4;
+const uint32_t GameStateInterface::GS_PENALTY = 4u;
 /** GS_CORNER_KICK constant */
-const uint32_t GameStateInterface::GS_CORNER_KICK = 5;
+const uint32_t GameStateInterface::GS_CORNER_KICK = 5u;
 /** GS_THROW_IN constant */
-const uint32_t GameStateInterface::GS_THROW_IN = 6;
+const uint32_t GameStateInterface::GS_THROW_IN = 6u;
 /** GS_FREE_KICK constant */
-const uint32_t GameStateInterface::GS_FREE_KICK = 7;
+const uint32_t GameStateInterface::GS_FREE_KICK = 7u;
 /** GS_GOAL_KICK constant */
-const uint32_t GameStateInterface::GS_GOAL_KICK = 8;
+const uint32_t GameStateInterface::GS_GOAL_KICK = 8u;
 /** GS_HALF_TIME constant */
-const uint32_t GameStateInterface::GS_HALF_TIME = 9;
+const uint32_t GameStateInterface::GS_HALF_TIME = 9u;
 /** GS_SPL_INITIAL constant */
-const uint32_t GameStateInterface::GS_SPL_INITIAL = 0;
+const uint32_t GameStateInterface::GS_SPL_INITIAL = 0u;
 /** GS_SPL_READY constant */
-const uint32_t GameStateInterface::GS_SPL_READY = 1;
+const uint32_t GameStateInterface::GS_SPL_READY = 1u;
 /** GS_SPL_SET constant */
-const uint32_t GameStateInterface::GS_SPL_SET = 2;
+const uint32_t GameStateInterface::GS_SPL_SET = 2u;
 /** GS_SPL_PLAY constant */
-const uint32_t GameStateInterface::GS_SPL_PLAY = 3;
+const uint32_t GameStateInterface::GS_SPL_PLAY = 3u;
 /** GS_SPL_FINISHED constant */
-const uint32_t GameStateInterface::GS_SPL_FINISHED = 4;
+const uint32_t GameStateInterface::GS_SPL_FINISHED = 4u;
 
 /** Constructor */
 GameStateInterface::GameStateInterface() : Interface()

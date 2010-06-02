@@ -44,45 +44,45 @@ namespace fawkes {
 
 
 /** TYPE_OTHER constant */
-const uint32_t ObjectPositionInterface::TYPE_OTHER = 0;
+const uint32_t ObjectPositionInterface::TYPE_OTHER = 0u;
 /** TYPE_BALL constant */
-const uint32_t ObjectPositionInterface::TYPE_BALL = 1;
+const uint32_t ObjectPositionInterface::TYPE_BALL = 1u;
 /** TYPE_OPPONENT constant */
-const uint32_t ObjectPositionInterface::TYPE_OPPONENT = 2;
+const uint32_t ObjectPositionInterface::TYPE_OPPONENT = 2u;
 /** TYPE_TEAMMEMBER constant */
-const uint32_t ObjectPositionInterface::TYPE_TEAMMEMBER = 3;
+const uint32_t ObjectPositionInterface::TYPE_TEAMMEMBER = 3u;
 /** TYPE_LINE constant */
-const uint32_t ObjectPositionInterface::TYPE_LINE = 4;
+const uint32_t ObjectPositionInterface::TYPE_LINE = 4u;
 /** TYPE_SELF constant */
-const uint32_t ObjectPositionInterface::TYPE_SELF = 5;
+const uint32_t ObjectPositionInterface::TYPE_SELF = 5u;
 /** TYPE_GOAL_BLUE constant */
-const uint32_t ObjectPositionInterface::TYPE_GOAL_BLUE = 6;
+const uint32_t ObjectPositionInterface::TYPE_GOAL_BLUE = 6u;
 /** TYPE_GOAL_YELLOW constant */
-const uint32_t ObjectPositionInterface::TYPE_GOAL_YELLOW = 7;
+const uint32_t ObjectPositionInterface::TYPE_GOAL_YELLOW = 7u;
 /** FLAG_NONE constant */
-const uint32_t ObjectPositionInterface::FLAG_NONE = 0;
+const uint32_t ObjectPositionInterface::FLAG_NONE = 0u;
 /** FLAG_HAS_WORLD constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD = 1;
+const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD = 1u;
 /** FLAG_HAS_RELATIVE_CARTESIAN constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN = 2;
+const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN = 2u;
 /** FLAG_HAS_RELATIVE_POLAR constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR = 4;
+const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR = 4u;
 /** FLAG_HAS_EULER_ANGLES constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_EULER_ANGLES = 8;
+const uint32_t ObjectPositionInterface::FLAG_HAS_EULER_ANGLES = 8u;
 /** FLAG_HAS_EXTENT constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_EXTENT = 16;
+const uint32_t ObjectPositionInterface::FLAG_HAS_EXTENT = 16u;
 /** FLAG_HAS_VOLUME_EXTENT constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT = 32;
+const uint32_t ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT = 32u;
 /** FLAG_HAS_CIRCULAR_EXTENT constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64;
+const uint32_t ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64u;
 /** FLAG_HAS_COVARIANCES constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128;
+const uint32_t ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128u;
 /** FLAG_HAS_WORLD_VELOCITY constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256;
+const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256u;
 /** FLAG_HAS_Z_AS_ORI constant */
-const uint32_t ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512;
+const uint32_t ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512u;
 /** FLAG_IS_FIXED_OBJECT constant */
-const uint32_t ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024;
+const uint32_t ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024u;
 
 /** Constructor */
 ObjectPositionInterface::ObjectPositionInterface() : Interface()
