@@ -249,12 +249,17 @@ void
 CppInterfaceGenerator::write_constants_cpp(FILE *f)
 {
   for ( vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
+    const char *type_suffix = "";
+    if (i->getType() == "uint32_t") {
+      type_suffix = "u";
+    }
     fprintf(f,
 	    "/** %s constant */\n"
-	    "const %s %s::%s = %s;\n",
+	    "const %s %s::%s = %s%s;\n",
 	    (*i).getName().c_str(),
 	    (*i).getType().c_str(),
-	    class_name.c_str(), (*i).getName().c_str(), (*i).getValue().c_str());
+	    class_name.c_str(), i->getName().c_str(),
+	    i->getValue().c_str(), type_suffix);
   }
   fprintf(f, "\n");
 }

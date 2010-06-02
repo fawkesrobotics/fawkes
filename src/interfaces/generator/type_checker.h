@@ -23,6 +23,8 @@
 #ifndef __INTERFACES_GENERATOR_TYPE_CHECKER_H_
 #define __INTERFACES_GENERATOR_TYPE_CHECKED_H_
 
+#define __STDC_LIMIT_MACROS
+
 #include <string>
 #include <vector>
 
