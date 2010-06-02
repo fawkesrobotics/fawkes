@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 namespace fawkes {
 
@@ -239,6 +240,45 @@ ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int
   } else {
     return false;
   }
+}
+
+
+/** Parse host:port string.
+ * The value referenced by the given argn is parsed for the pattern "host:port". If the
+ * string does not match this pattern an exception is thrown.
+ * If no port is supplied in the string (plain
+ * hostname string) the port argument is left unchanged. If the argument has not
+ * been supplied at all both values are left unchanged. Thus it is safe to put the default
+ * values into the variables before passing them to this method.
+ * @param argn argument name to retrieve
+ * @param host Upon successful return contains the hostname part
+ * @param port upon successful return contains the port part (unchanged if not supplied)
+ * @return true, if the argument was supplied, false otherwise
+ * @exception OutOfBoundsException thrown if port is not in the range [0..65535]
+ */
+bool
+ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned short int &port)
+{
+  if (_opts.count(argn) == 0) return false;
+
+  std::string tmpvalue = _opts[argn];
+
+  size_t col_idx = tmpvalue.find_last_of(':');
+  if ( col_idx == tmpvalue.npos ) {
+    host = tmpvalue;
+  }
+  else
+  {
+    host = tmpvalue.substr(0, col_idx);
+    std::string tmpport = tmpvalue.substr(col_idx + 1);
+
+    int port_num = atoi(tmpport.c_str());
+    if ( (port_num < 0) || (port_num > 0xFFFF) ) {
+      throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
+    }
+    port = port_num;
+  }
+  return true;
 }
 
 

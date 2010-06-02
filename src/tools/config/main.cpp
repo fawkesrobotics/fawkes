@@ -124,12 +124,11 @@ print_header()
   printf("--------------------------------------------------------------------------------------\n");
 }
 
-
-/** Print a line of output.
+/** Print a single value.
  * @param i config item to print.
  */
 void
-print_line(Configuration::ValueIterator *i, bool show_comment = false)
+print_value(Configuration::ValueIterator *i, bool show_comment = false)
 {
   if ( i->is_float() ) {
     printf("%s %-55s| %-8s| %-14f\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_float());
@@ -152,6 +151,25 @@ print_line(Configuration::ValueIterator *i, bool show_comment = false)
     } catch (Exception &e) {
       // maybe there is no comment, ignore it...
     }
+  }
+}
+
+/** Print a line of output.
+ * @param i config item to print.
+ */
+void
+print_line(Configuration::ValueIterator *i, bool show_comment = false)
+{
+  if ( i->is_float() ) {
+    printf("%-14f\n", i->get_float());
+  } else if ( i->is_uint() ) {
+    printf("%-14u\n", i->get_uint());
+  } else if ( i->is_int() ) {
+    printf("%-14i\n", i->get_int());
+  } else if ( i->is_bool() ) {
+    printf("%-14s\n", (i->get_bool() ? "true" : "false"));
+  } else if ( i->is_string() ) {
+    printf("%-14s\n", i->get_string().c_str());
   }
 }
 
@@ -189,6 +207,9 @@ print_usage(const char *program_name)
 	    << "  -c   Show comments (only available with list and watch cmd)" << std::endl
 	    << "  -a   Show all values, even double if default and host-specific " << std::endl
 	    << "       values exist (only available with list)" << std::endl
+	    << "  -q   Quiet. Only show important output, suitable for parsing. " << std::endl
+	    << "       (not supported for all commands yet) " << std::endl
+	    << "  -r host[:port]  Remote host (and optionally port) to connect to\n" << std::endl
 	    << std::endl;
 }
 
@@ -199,15 +220,33 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "+hca");
+  ArgumentParser argp(argc, argv, "+hcar:q");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
     exit(0);
   }
 
-  FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
-  c->connect();
+  std::string host = "localhost";
+  unsigned short int port = 1910;
+  if ( argp.has_arg("r") ) {
+    argp.parse_hostport("r", host, port);
+  }
+
+  bool quiet;
+  if ( argp.has_arg("q") ) {
+    quiet = true;
+  } else {
+    quiet = false;
+  }
+
+  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
+  try {
+    c->connect();
+  } catch( Exception &e ) {
+    printf("Could not connect to host: %s\n", host.c_str());
+    exit(1);
+  }
 
   NetworkConfiguration *netconf = new NetworkConfiguration(c);
 
@@ -219,11 +258,17 @@ main(int argc, char **argv)
     print_usage(argv[0]);
   } else if (strcmp("get", args[0]) == 0) {
     if (args.size() == 2) {
-      printf("Requesting value %s\n", args[1]);
+      if( ! quiet ) {
+	printf("Requesting value %s\n", args[1]);
+      }
       Configuration::ValueIterator *i = netconf->get_value(args[1]);
       if ( i->next() ) {
-	print_header();
-	print_line(i);
+	if( quiet ) {
+	  print_line(i);
+	} else {
+	  print_header();
+	  print_value(i);
+	}
       } else {
 	printf("No such value found!\n");
       }
@@ -445,14 +490,17 @@ main(int argc, char **argv)
     netconf->unlock();
   }
 
-
-  printf("Cleaning up... ");
+  if( ! quiet ) {
+    printf("Cleaning up... ");
+  }
   fflush(stdout);
   delete netconf;
   c->disconnect();
 
   delete c;
-  printf("done\n");
+  if( ! quiet ) {
+    printf("done\n");
+  }
 
   return 0;
 }
