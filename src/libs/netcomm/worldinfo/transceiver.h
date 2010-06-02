@@ -52,8 +52,10 @@ class WorldInfoException : public Exception
 class WorldInfoTransceiver
 {
  public:
+  /** Socket type */
   enum SocketType {
-    MULTICAST, BROADCAST
+    MULTICAST,	/**< Use multicast socket for communication */
+    BROADCAST	/**< Use broadcase socket for communication */
   };
 
   WorldInfoTransceiver(SocketType socket_type,
