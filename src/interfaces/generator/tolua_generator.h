@@ -69,6 +69,8 @@ class ToLuaInterfaceGenerator
 
   void generate();
 
+  const char * convert_type(std::string c_type);
+
  private:
   std::vector<InterfaceConstant>     constants;
   std::vector<InterfaceEnumConstant> enum_constants;

@@ -102,6 +102,69 @@ ToLuaInterfaceGenerator::~ToLuaInterfaceGenerator()
 }
 
 
+/** Convert C type to Lua type.
+ * tolua++ does not deal well with stdint types, therefore we convert them
+ * to "traditional" types.
+ * @param c_type C type to convert
+ * @return constant string of the Lua compatible type
+ */
+const char *
+ToLuaInterfaceGenerator::convert_type(std::string c_type)
+{
+  if (c_type == "uint8_t") {
+    return "unsigned char";
+  } else if (c_type == "uint16_t") {
+    return "unsigned short";
+  } else if (c_type == "uint32_t") {
+    return "unsigned int";
+  } else if (c_type == "uint64_t") {
+#if __WORDSIZE == 64
+    return "unsigned long";
+#else
+    return "unsigned long long";
+#endif
+  } else if (c_type == "int8_t") {
+    return "char";
+  } else if (c_type == "int16_t") {
+    return "short";
+  } else if (c_type == "int32_t") {
+    return "int";
+  } else if (c_type == "int64_t") {
+#if __WORDSIZE == 64
+    return "long";
+#else
+    return "long long";
+#endif
+  } else if (c_type == "uint8_t *") {
+    return "unsigned char *";
+  } else if (c_type == "uint16_t *") {
+    return "unsigned short *";
+  } else if (c_type == "uint32_t *") {
+    return "unsigned int *";
+  } else if (c_type == "uint64_t *") {
+#if __WORDSIZE == 64
+    return "unsigned long *";
+#else
+    return "unsigned long long *";
+#endif
+  } else if (c_type == "int8_t *") {
+    return "char *";
+  } else if (c_type == "int16_t *") {
+    return "short *";
+  } else if (c_type == "int32_t *") {
+    return "int *";
+  } else if (c_type == "int64_t *") {
+#if __WORDSIZE == 64
+    return "long *";
+#else
+    return "long long *";
+#endif
+  } else {
+    return c_type.c_str();
+  }
+}
+
+
 
 /** Write header to file.
  * @param f file to write to
@@ -146,7 +209,8 @@ void
 ToLuaInterfaceGenerator::write_constants_h(FILE *f)
 {
   for ( vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
-    fprintf(f, "  static const %s %s;\n", (*i).getType().c_str(), (*i).getName().c_str());
+    fprintf(f, "  static const %s %s;\n", convert_type(i->getType()),
+	    i->getName().c_str());
   }
   fprintf(f, "\n");
 
@@ -223,7 +287,7 @@ ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* inden
     i = fields.begin();
     while (i != fields.end()) {
       fprintf(f, "%s ini_%s",
-	      (*i).getAccessType().c_str(), (*i).getName().c_str());
+	      convert_type(i->getAccessType()), i->getName().c_str());
       ++i;
       if ( i != fields.end() ) {
 	fprintf(f, ", ");
@@ -298,25 +362,25 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
       fprintf(f,
 	      "%s%s %s%s(int index);\n",
 	      is.c_str(),
-	      (i->getType() == "byte") ? "unsigned int" : i->getPlainAccessType().c_str(),
+	      (i->getType() == "byte") ? "unsigned int" : convert_type(i->getPlainAccessType()),
 	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	      (*i).getName().c_str());
 
       fprintf(f,
 	      "%svoid set_%s(unsigned int index, const %s new_%s);\n",
 	      is.c_str(), (*i).getName().c_str(),
-	      (*i).getPlainAccessType().c_str(), (*i).getName().c_str());
+	      convert_type(i->getPlainAccessType()), i->getName().c_str());
     } else {
       fprintf(f,
 	      "%s%s %s%s();\n",
-	      is.c_str(), (*i).getAccessType().c_str(),
+	      is.c_str(), convert_type(i->getAccessType()),
 	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	      (*i).getName().c_str());
 
       fprintf(f,
 	      "%svoid set_%s(const %s new_%s);\n",
 	      is.c_str(), (*i).getName().c_str(),
-	      (*i).getAccessType().c_str(), (*i).getName().c_str());
+	      convert_type(i->getAccessType()), i->getName().c_str());
     }
     fprintf(f,
 	    "%sint maxlenof_%s() const;\n",
@@ -343,10 +407,10 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
     fprintf(f,
 	    "%s%s %s(%s key) const;\n"
 	    "%svoid set_%s(const %s key, const %s new_value);\n",
-	    is.c_str(), (*i).getType().c_str(),
-	    (*i).getName().c_str(), (*i).getKeyType().c_str(),
+	    is.c_str(), convert_type(i->getType()),
+	    (*i).getName().c_str(), convert_type(i->getKeyType()),
 	    is.c_str(), (*i).getName().c_str(),
-	    i->getKeyType().c_str(), i->getType().c_str());
+	    convert_type(i->getKeyType()), convert_type(i->getType()));
   }
 }
 
