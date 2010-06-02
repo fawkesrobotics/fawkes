@@ -235,7 +235,10 @@ void
 Message::mark_enqueued()
 {
   __time_enqueued->stamp();
-  __time_enqueued->get_timestamp(data_ts->timestamp_sec, data_ts->timestamp_usec);
+  long sec = 0, usec = 0;
+  __time_enqueued->get_timestamp(sec, usec);
+  data_ts->timestamp_sec  = sec;
+  data_ts->timestamp_usec = usec;
 
   __enqueued = true;
 }

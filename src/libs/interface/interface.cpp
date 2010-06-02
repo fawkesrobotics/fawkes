@@ -452,7 +452,10 @@ Interface::write()
     memcpy(__mem_data_ptr, data_ptr, data_size);
     if (data_changed) {
       if (__auto_timestamping)  __timestamp->stamp();
-      __timestamp->get_timestamp(data_ts->timestamp_sec, data_ts->timestamp_usec);
+      long sec = 0, usec = 0;
+      __timestamp->get_timestamp(sec, usec);
+      data_ts->timestamp_sec  = sec;
+      data_ts->timestamp_usec = usec;
       data_changed = false;
     }
   } else {

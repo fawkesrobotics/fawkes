@@ -314,7 +314,7 @@ InterfaceFieldIterator::get_value_string()
 	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int32_t *)__infol->value)[i]);
 	    break;
 	  case IFT_INT64:
-	    rv = asprintf(&tmp2, "%s%li", tmp1, ((int64_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%lli", tmp1, ((int64_t *)__infol->value)[i]);
 	    break;
 	  case IFT_UINT8:
 	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)__infol->value)[i]);
@@ -326,7 +326,7 @@ InterfaceFieldIterator::get_value_string()
 	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint32_t *)__infol->value)[i]);
 	    break;
 	  case IFT_UINT64:
-	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((uint64_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%llu", tmp1, ((uint64_t *)__infol->value)[i]);
 	    break;
 	  case IFT_FLOAT:
 	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
