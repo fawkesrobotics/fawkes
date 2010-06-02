@@ -29,6 +29,7 @@
 
 #include <eclipseclass.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <map>
@@ -126,7 +127,7 @@ p_write_interface()
   }
 
   // check interface type
-  char* iface_type;
+  char* iface_type = 0;
   if ( 1 != sscanf( fctor.name(), "data_%s", iface_type ) ||
        0 != strcmp( interface->type(), iface_type ) )
   {

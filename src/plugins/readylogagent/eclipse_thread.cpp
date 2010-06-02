@@ -29,6 +29,7 @@
 
 #include <eclipseclass.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -246,8 +247,7 @@ EclipseAgentThread::register_interface( fawkes::Interface* interface )
   char* struct_name;
   asprintf( &struct_name, "data_%s", interface->type() );
 
-  char* current_struct = strdup( "current_struct" );
-  post_goal( term( EC_functor( current_struct, 2 ),
+  post_goal( term( EC_functor( (char *) "current_struct", 2 ),
 		   EC_atom( struct_name ),
 		   newvar() ) );
 
@@ -297,8 +297,8 @@ EclipseAgentThread::register_interface( fawkes::Interface* interface )
   // define structs for message data ------------------------------------
   // data_IntefaceType_MessageType(field1, field2, ...) -----------------
   
-  list<const char *> message_types = interface->get_message_types();
-  for ( list<const char *>::iterator type_iter = message_types.begin();
+  std::list<const char *> message_types = interface->get_message_types();
+  for ( std::list<const char *>::iterator type_iter = message_types.begin();
 	type_iter != message_types.end();
 	++type_iter )
   {
@@ -306,7 +306,7 @@ EclipseAgentThread::register_interface( fawkes::Interface* interface )
     char* struct_name;
     asprintf( &struct_name, "data_%s_%s", interface->type(), *type_iter );
     
-    post_goal( term( EC_functor( current_struct, 2 ),
+    post_goal( term( EC_functor( (char *) "current_struct", 2 ),
 		     EC_atom( struct_name ),
 		     newvar() ) );
 
@@ -315,7 +315,7 @@ EclipseAgentThread::register_interface( fawkes::Interface* interface )
       // define name structure
       // data_InterfaceType_MessageType( field1, field2, ... )
 
-      Message* msg = interface->create_message( type_iter->c_str() );
+      Message* msg = interface->create_message( *type_iter );
 
       vector< string > fields;
       for ( InterfaceFieldIterator field_iter = msg->fields();
@@ -337,30 +337,30 @@ EclipseAgentThread::register_interface( fawkes::Interface* interface )
 	free( c );
       }
 
-      EC_word new_struct = term( EC_functor( struct_name, (int) fields.size() ), args );
-      char* local = strdup( "local" );
-      char* strct = strdup( "struct" );
-      EC_word struct_def = term( EC_functor( strct, 1 ), new_struct );
-      EC_word struct_def_local = term( EC_functor( local, 1), struct_def );
-      
-      char* call = strdup( "call" );
-      // call( struct( data_InterfaceType_MessageType(field1, field2, ...) ) )
-      post_goal( term( EC_functor( call, 1 ), struct_def_local ) );
+      if ( 0 != fields.size() )
+      {
+	EC_word new_struct = term( EC_functor( struct_name, (int) fields.size() ), args );
+	char* local = strdup( "local" );
+	char* strct = strdup( "struct" );
+	EC_word struct_def = term( EC_functor( strct, 1 ), new_struct );
+	EC_word struct_def_local = term( EC_functor( local, 1), struct_def );
 
-      // cleanup
-      free( local );
-      free( strct );
-      free( call );
+	char* call = strdup( "call" );
+	// call( struct( data_InterfaceType_MessageType(field1, field2, ...) ) )
+	post_goal( term( EC_functor( call, 1 ), struct_def_local ) );
+
+	// cleanup
+	free( local );
+	free( strct );
+	free( call );
       
-      if ( EC_succeed != ec_resume() )
-      { throw Exception( "Failed to define structure %s", struct_name ); }
+	if ( EC_succeed != ec_resume() )
+	{ throw Exception( "Failed to define structure %s", struct_name ); }
+      }
     }
     
     free( struct_name );
   }
-  
-  // cleanup
-  free( current_struct );
 
   return true;
 }

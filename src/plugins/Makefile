@@ -20,8 +20,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 SUBDIRS	= bbsync bblogger webview ttmainloop \
 	  laser flite joystick katana pantilt \
 	  skiller luaagent worldmodel laserht \
-	  refboxcomm player xmlrpc
-	  #festival readylogagent
+	  refboxcomm player xmlrpc \
+	  readylogagent
+	  #festival
 
 include $(BUILDSYSDIR)/rules.mk
 

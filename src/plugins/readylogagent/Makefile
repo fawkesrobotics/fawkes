@@ -15,6 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/readylogagent/eclipse.mk
 
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)

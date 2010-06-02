@@ -64,8 +64,12 @@ process_events(Shelf) :-
             read_result(R),
             log_info("%d + %d = %d", [N1, N2, R]),
             
-            random(R1),
-            random(R2),
+            random(F1),
+            random(F2),
+            
+            mod(F1, 100, R1),
+            mod(F2, 100, R2),
+            
             shelf_set(Shelf, 1, R1),
             shelf_set(Shelf, 2, R2),
             send_calculate_msg(R1, R2)
