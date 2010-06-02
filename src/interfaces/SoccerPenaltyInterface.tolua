@@ -1,39 +1,36 @@
-$#include <interfaces/SpeechRecognitionInterface.h>
+$#include <interfaces/SoccerPenaltyInterface.h>
 $using namespace fawkes;
 namespace fawkes {
-class SpeechRecognitionInterface : public Interface
+class SoccerPenaltyInterface : public Interface
 {
+  static const unsigned short SPL_PENALTY_NONE;
+  static const unsigned short SPL_PENALTY_BALL_HOLDING;
+  static const unsigned short SPL_PENALTY_PLAYER_PUSHING;
+  static const unsigned short SPL_PENALTY_OBSTRUCTION;
+  static const unsigned short SPL_PENALTY_INACTIVE_PLAYER;
+  static const unsigned short SPL_PENALTY_ILLEGAL_DEFENDER;
+  static const unsigned short SPL_PENALTY_LEAVING_THE_FIELD;
+  static const unsigned short SPL_PENALTY_PLAYING_WITH_HANDS;
+  static const unsigned short SPL_PENALTY_REQ_FOR_PICKUP;
+  static const unsigned short SPL_PENALTY_MANUAL;
 
-  class ResetMessage : public Message
+  class SetPenaltyMessage : public Message
   {
-    ResetMessage();
-    ~ResetMessage();
+    SetPenaltyMessage(unsigned short ini_penalty);
+    SetPenaltyMessage();
+    ~SetPenaltyMessage();
 
+    unsigned short penalty();
+    void set_penalty(const unsigned short new_penalty);
+    int maxlenof_penalty() const;
   };
 
-  class SetEnabledMessage : public Message
-  {
-    SetEnabledMessage(bool ini_enabled);
-    SetEnabledMessage();
-    ~SetEnabledMessage();
-
-    bool is_enabled();
-    void set_enabled(const bool new_enabled);
-    int maxlenof_enabled() const;
-  };
-
-  char * text();
-  void set_text(const char * new_text);
-  int maxlenof_text() const;
-  unsigned int counter();
-  void set_counter(const unsigned int new_counter);
-  int maxlenof_counter() const;
-  bool is_processing();
-  void set_processing(const bool new_processing);
-  int maxlenof_processing() const;
-  bool is_enabled();
-  void set_enabled(const bool new_enabled);
-  int maxlenof_enabled() const;
+  unsigned short penalty();
+  void set_penalty(const unsigned short new_penalty);
+  int maxlenof_penalty() const;
+  unsigned short remaining();
+  void set_remaining(const unsigned short new_remaining);
+  int maxlenof_remaining() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

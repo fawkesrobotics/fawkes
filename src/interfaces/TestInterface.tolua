@@ -3,7 +3,7 @@ $using namespace fawkes;
 namespace fawkes {
 class TestInterface : public Interface
 {
-  static const int32_t TEST_CONSTANT;
+  static const int TEST_CONSTANT;
   static const float TEST_FLOAT_CONSTANT;
 
   typedef enum {
@@ -13,12 +13,12 @@ class TestInterface : public Interface
 
   class SetTestIntMessage : public Message
   {
-    SetTestIntMessage(int32_t ini_test_int);
+    SetTestIntMessage(int ini_test_int);
     SetTestIntMessage();
     ~SetTestIntMessage();
 
-    int32_t test_int();
-    void set_test_int(const int32_t new_test_int);
+    int test_int();
+    void set_test_int(const int new_test_int);
     int maxlenof_test_int() const;
   };
 
@@ -35,41 +35,41 @@ class TestInterface : public Interface
 
   class CalculateMessage : public Message
   {
-    CalculateMessage(int32_t ini_summand, int32_t ini_addend);
+    CalculateMessage(int ini_summand, int ini_addend);
     CalculateMessage();
     ~CalculateMessage();
 
-    int32_t summand();
-    void set_summand(const int32_t new_summand);
+    int summand();
+    void set_summand(const int new_summand);
     int maxlenof_summand() const;
-    int32_t addend();
-    void set_addend(const int32_t new_addend);
+    int addend();
+    void set_addend(const int new_addend);
     int maxlenof_addend() const;
   };
 
   bool is_test_bool();
   void set_test_bool(const bool new_test_bool);
   int maxlenof_test_bool() const;
-  int32_t test_int();
-  void set_test_int(const int32_t new_test_int);
+  int test_int();
+  void set_test_int(const int new_test_int);
   int maxlenof_test_int() const;
-  uint8_t flags();
-  void set_flags(const uint8_t new_flags);
+  unsigned char flags();
+  void set_flags(const unsigned char new_flags);
   int maxlenof_flags() const;
   char * test_string();
   void set_test_string(const char * new_test_string);
   int maxlenof_test_string() const;
-  int32_t result();
-  void set_result(const int32_t new_result);
+  int result();
+  void set_result(const int new_result);
   int maxlenof_result() const;
-  uint32_t test_uint();
-  void set_test_uint(const uint32_t new_test_uint);
+  unsigned int test_uint();
+  void set_test_uint(const unsigned int new_test_uint);
   int maxlenof_test_uint() const;
-  uint64_t test_ulint();
-  void set_test_ulint(const uint64_t new_test_ulint);
+  unsigned long long test_ulint();
+  void set_test_ulint(const unsigned long long new_test_ulint);
   int maxlenof_test_ulint() const;
-  int64_t test_lint();
-  void set_test_lint(const int64_t new_test_lint);
+  long long test_lint();
+  void set_test_lint(const long long new_test_lint);
   int maxlenof_test_lint() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

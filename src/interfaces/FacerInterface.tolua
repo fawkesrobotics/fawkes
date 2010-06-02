@@ -35,12 +35,12 @@ class FacerInterface : public Interface
 
   class EnableIdentityMessage : public Message
   {
-    EnableIdentityMessage(uint32_t ini_index, bool ini_enable);
+    EnableIdentityMessage(unsigned int ini_index, bool ini_enable);
     EnableIdentityMessage();
     ~EnableIdentityMessage();
 
-    uint32_t index();
-    void set_index(const uint32_t new_index);
+    unsigned int index();
+    void set_index(const unsigned int new_index);
     int maxlenof_index() const;
     bool is_enable();
     void set_enable(const bool new_enable);
@@ -49,12 +49,12 @@ class FacerInterface : public Interface
 
   class SetNameMessage : public Message
   {
-    SetNameMessage(uint32_t ini_index, char * ini_name);
+    SetNameMessage(unsigned int ini_index, char * ini_name);
     SetNameMessage();
     ~SetNameMessage();
 
-    uint32_t index();
-    void set_index(const uint32_t new_index);
+    unsigned int index();
+    void set_index(const unsigned int new_index);
     int maxlenof_index() const;
     char * name();
     void set_name(const char * new_name);
@@ -63,35 +63,35 @@ class FacerInterface : public Interface
 
   class GetNameMessage : public Message
   {
-    GetNameMessage(uint32_t ini_index);
+    GetNameMessage(unsigned int ini_index);
     GetNameMessage();
     ~GetNameMessage();
 
-    uint32_t index();
-    void set_index(const uint32_t new_index);
+    unsigned int index();
+    void set_index(const unsigned int new_index);
     int maxlenof_index() const;
   };
 
   if_facer_opmode_t opmode();
   void set_opmode(const if_facer_opmode_t new_opmode);
   int maxlenof_opmode() const;
-  uint32_t num_identities();
-  void set_num_identities(const uint32_t new_num_identities);
+  unsigned int num_identities();
+  void set_num_identities(const unsigned int new_num_identities);
   int maxlenof_num_identities() const;
-  uint32_t recognized_identity();
-  void set_recognized_identity(const uint32_t new_recognized_identity);
+  unsigned int recognized_identity();
+  void set_recognized_identity(const unsigned int new_recognized_identity);
   int maxlenof_recognized_identity() const;
   char * recognized_name();
   void set_recognized_name(const char * new_recognized_name);
   int maxlenof_recognized_name() const;
-  uint32_t num_detections();
-  void set_num_detections(const uint32_t new_num_detections);
+  unsigned int num_detections();
+  void set_num_detections(const unsigned int new_num_detections);
   int maxlenof_num_detections() const;
-  uint32_t num_recognitions();
-  void set_num_recognitions(const uint32_t new_num_recognitions);
+  unsigned int num_recognitions();
+  void set_num_recognitions(const unsigned int new_num_recognitions);
   int maxlenof_num_recognitions() const;
-  uint32_t most_likely_identity();
-  void set_most_likely_identity(const uint32_t new_most_likely_identity);
+  unsigned int most_likely_identity();
+  void set_most_likely_identity(const unsigned int new_most_likely_identity);
   int maxlenof_most_likely_identity() const;
   float history_ratio();
   void set_history_ratio(const float new_history_ratio);
@@ -99,8 +99,8 @@ class FacerInterface : public Interface
   float sec_since_detection();
   void set_sec_since_detection(const float new_sec_since_detection);
   int maxlenof_sec_since_detection() const;
-  int32_t visibility_history();
-  void set_visibility_history(const int32_t new_visibility_history);
+  int visibility_history();
+  void set_visibility_history(const int new_visibility_history);
   int maxlenof_visibility_history() const;
   bool is_learning_in_progress();
   void set_learning_in_progress(const bool new_learning_in_progress);
@@ -114,8 +114,8 @@ class FacerInterface : public Interface
   float slope();
   void set_slope(const float new_slope);
   int maxlenof_slope() const;
-  uint32_t requested_index();
-  void set_requested_index(const uint32_t new_requested_index);
+  unsigned int requested_index();
+  void set_requested_index(const unsigned int new_requested_index);
   int maxlenof_requested_index() const;
   char * requested_name();
   void set_requested_name(const char * new_requested_name);

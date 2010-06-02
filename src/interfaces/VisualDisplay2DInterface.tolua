@@ -25,7 +25,7 @@ class VisualDisplay2DInterface : public Interface
 
   class AddCartLineMessage : public Message
   {
-    AddCartLineMessage(float * ini_x, float * ini_y, LineStyle ini_style, uint8_t * ini_color);
+    AddCartLineMessage(float * ini_x, float * ini_y, LineStyle ini_style, unsigned char * ini_color);
     AddCartLineMessage();
     ~AddCartLineMessage();
 
@@ -39,13 +39,13 @@ class VisualDisplay2DInterface : public Interface
     void set_style(const LineStyle new_style);
     int maxlenof_style() const;
     unsigned int color(int index);
-    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(unsigned int index, const unsigned char new_color);
     int maxlenof_color() const;
   };
 
   class AddCartCircleMessage : public Message
   {
-    AddCartCircleMessage(float ini_x, float ini_y, float ini_radius, LineStyle ini_style, uint8_t * ini_color);
+    AddCartCircleMessage(float ini_x, float ini_y, float ini_radius, LineStyle ini_style, unsigned char * ini_color);
     AddCartCircleMessage();
     ~AddCartCircleMessage();
 
@@ -62,13 +62,13 @@ class VisualDisplay2DInterface : public Interface
     void set_style(const LineStyle new_style);
     int maxlenof_style() const;
     unsigned int color(int index);
-    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(unsigned int index, const unsigned char new_color);
     int maxlenof_color() const;
   };
 
   class AddCartRectMessage : public Message
   {
-    AddCartRectMessage(float ini_x, float ini_y, float ini_width, float ini_height, LineStyle ini_style, uint8_t * ini_color);
+    AddCartRectMessage(float ini_x, float ini_y, float ini_width, float ini_height, LineStyle ini_style, unsigned char * ini_color);
     AddCartRectMessage();
     ~AddCartRectMessage();
 
@@ -88,13 +88,13 @@ class VisualDisplay2DInterface : public Interface
     void set_style(const LineStyle new_style);
     int maxlenof_style() const;
     unsigned int color(int index);
-    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(unsigned int index, const unsigned char new_color);
     int maxlenof_color() const;
   };
 
   class AddCartTextMessage : public Message
   {
-    AddCartTextMessage(float ini_x, float ini_y, char * ini_text, Anchor ini_anchor, float ini_size, uint8_t * ini_color);
+    AddCartTextMessage(float ini_x, float ini_y, char * ini_text, Anchor ini_anchor, float ini_size, unsigned char * ini_color);
     AddCartTextMessage();
     ~AddCartTextMessage();
 
@@ -114,18 +114,18 @@ class VisualDisplay2DInterface : public Interface
     void set_size(const float new_size);
     int maxlenof_size() const;
     unsigned int color(int index);
-    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(unsigned int index, const unsigned char new_color);
     int maxlenof_color() const;
   };
 
   class DeleteObjectMessage : public Message
   {
-    DeleteObjectMessage(uint32_t ini_object_id);
+    DeleteObjectMessage(unsigned int ini_object_id);
     DeleteObjectMessage();
     ~DeleteObjectMessage();
 
-    uint32_t object_id();
-    void set_object_id(const uint32_t new_object_id);
+    unsigned int object_id();
+    void set_object_id(const unsigned int new_object_id);
     int maxlenof_object_id() const;
   };
 
@@ -136,8 +136,8 @@ class VisualDisplay2DInterface : public Interface
 
   };
 
-  uint32_t counter();
-  void set_counter(const uint32_t new_counter);
+  unsigned int counter();
+  void set_counter(const unsigned int new_counter);
   int maxlenof_counter() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

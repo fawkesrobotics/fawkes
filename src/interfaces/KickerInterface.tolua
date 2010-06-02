@@ -11,7 +11,7 @@ class KickerInterface : public Interface
 
   class KickMessage : public Message
   {
-    KickMessage(bool ini_left, bool ini_center, bool ini_right, uint32_t ini_intensity);
+    KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity);
     KickMessage();
     ~KickMessage();
 
@@ -24,8 +24,8 @@ class KickerInterface : public Interface
     bool is_right();
     void set_right(const bool new_right);
     int maxlenof_right() const;
-    uint32_t intensity();
-    void set_intensity(const uint32_t new_intensity);
+    unsigned int intensity();
+    void set_intensity(const unsigned int new_intensity);
     int maxlenof_intensity() const;
   };
 
@@ -47,20 +47,20 @@ class KickerInterface : public Interface
     int maxlenof_guide_ball_side() const;
   };
 
-  int32_t num_kicks_left();
-  void set_num_kicks_left(const int32_t new_num_kicks_left);
+  int num_kicks_left();
+  void set_num_kicks_left(const int new_num_kicks_left);
   int maxlenof_num_kicks_left() const;
-  int32_t num_kicks_center();
-  void set_num_kicks_center(const int32_t new_num_kicks_center);
+  int num_kicks_center();
+  void set_num_kicks_center(const int new_num_kicks_center);
   int maxlenof_num_kicks_center() const;
-  int32_t num_kicks_right();
-  void set_num_kicks_right(const int32_t new_num_kicks_right);
+  int num_kicks_right();
+  void set_num_kicks_right(const int new_num_kicks_right);
   int maxlenof_num_kicks_right() const;
   GuideBallSideEnum guide_ball_side();
   void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
   int maxlenof_guide_ball_side() const;
-  uint32_t current_intensity();
-  void set_current_intensity(const uint32_t new_current_intensity);
+  unsigned int current_intensity();
+  void set_current_intensity(const unsigned int new_current_intensity);
   int maxlenof_current_intensity() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

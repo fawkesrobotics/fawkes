@@ -90,35 +90,35 @@ class HumanoidMotionInterface : public Interface
 
   class WalkStraightMessage : public Message
   {
-    WalkStraightMessage(float ini_distance, uint32_t ini_num_samples);
+    WalkStraightMessage(float ini_distance, unsigned int ini_num_samples);
     WalkStraightMessage();
     ~WalkStraightMessage();
 
     float distance();
     void set_distance(const float new_distance);
     int maxlenof_distance() const;
-    uint32_t num_samples();
-    void set_num_samples(const uint32_t new_num_samples);
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
     int maxlenof_num_samples() const;
   };
 
   class WalkSidewaysMessage : public Message
   {
-    WalkSidewaysMessage(float ini_distance, uint32_t ini_num_samples);
+    WalkSidewaysMessage(float ini_distance, unsigned int ini_num_samples);
     WalkSidewaysMessage();
     ~WalkSidewaysMessage();
 
     float distance();
     void set_distance(const float new_distance);
     int maxlenof_distance() const;
-    uint32_t num_samples();
-    void set_num_samples(const uint32_t new_num_samples);
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
     int maxlenof_num_samples() const;
   };
 
   class WalkArcMessage : public Message
   {
-    WalkArcMessage(float ini_angle, float ini_radius, uint32_t ini_num_samples);
+    WalkArcMessage(float ini_angle, float ini_radius, unsigned int ini_num_samples);
     WalkArcMessage();
     ~WalkArcMessage();
 
@@ -128,22 +128,22 @@ class HumanoidMotionInterface : public Interface
     float radius();
     void set_radius(const float new_radius);
     int maxlenof_radius() const;
-    uint32_t num_samples();
-    void set_num_samples(const uint32_t new_num_samples);
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
     int maxlenof_num_samples() const;
   };
 
   class TurnMessage : public Message
   {
-    TurnMessage(float ini_angle, uint32_t ini_num_samples);
+    TurnMessage(float ini_angle, unsigned int ini_num_samples);
     TurnMessage();
     ~TurnMessage();
 
     float angle();
     void set_angle(const float new_angle);
     int maxlenof_angle() const;
-    uint32_t num_samples();
-    void set_num_samples(const uint32_t new_num_samples);
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
     int maxlenof_num_samples() const;
   };
 
@@ -339,8 +339,8 @@ class HumanoidMotionInterface : public Interface
   float elbow_roll_amplitude();
   void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
   int maxlenof_elbow_roll_amplitude() const;
-  uint32_t msgid();
-  void set_msgid(const uint32_t new_msgid);
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
   int maxlenof_msgid() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

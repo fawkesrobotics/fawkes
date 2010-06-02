@@ -67,8 +67,8 @@ class SkillerInterface : public Interface
   char * error();
   void set_error(const char * new_error);
   int maxlenof_error() const;
-  uint32_t exclusive_controller();
-  void set_exclusive_controller(const uint32_t new_exclusive_controller);
+  unsigned int exclusive_controller();
+  void set_exclusive_controller(const unsigned int new_exclusive_controller);
   int maxlenof_exclusive_controller() const;
   SkillStatusEnum status();
   void set_status(const SkillStatusEnum new_status);
