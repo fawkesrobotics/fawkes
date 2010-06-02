@@ -71,6 +71,7 @@ class JoystickInterface : public Interface
   static const uint32_t BUTTON_32;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -89,6 +90,7 @@ class JoystickInterface : public Interface
     float axis_x[4]; /**< X values of axes */
     float axis_y[4]; /**< Y values of axes */
   } JoystickInterface_data_t;
+#pragma pack(pop)
 
   JoystickInterface_data_t *data;
 

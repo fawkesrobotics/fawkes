@@ -41,12 +41,14 @@ class LedInterface : public Interface
   static const float OFF;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float intensity; /**< Intensity value. */
   } LedInterface_data_t;
+#pragma pack(pop)
 
   LedInterface_data_t *data;
 
@@ -55,6 +57,7 @@ class LedInterface : public Interface
   class SetIntensityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -64,6 +67,7 @@ class LedInterface : public Interface
      */
       float intensity; /**< Intensity value. */
     } SetIntensityMessage_data_t;
+#pragma pack(pop)
 
     SetIntensityMessage_data_t *data;
 
@@ -86,11 +90,13 @@ class LedInterface : public Interface
   class TurnOnMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } TurnOnMessage_data_t;
+#pragma pack(pop)
 
     TurnOnMessage_data_t *data;
 
@@ -106,11 +112,13 @@ class LedInterface : public Interface
   class TurnOffMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } TurnOffMessage_data_t;
+#pragma pack(pop)
 
     TurnOffMessage_data_t *data;
 

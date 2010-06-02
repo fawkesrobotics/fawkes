@@ -50,6 +50,7 @@ class NavigatorInterface : public Interface
   static const uint32_t FLAG_ESCAPING;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -77,6 +78,7 @@ class NavigatorInterface : public Interface
 	check whether the navigator should stop when an obstacle
 	obstructs the path, or if it should escape. */
   } NavigatorInterface_data_t;
+#pragma pack(pop)
 
   NavigatorInterface_data_t *data;
 
@@ -85,11 +87,13 @@ class NavigatorInterface : public Interface
   class StopMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
+#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -105,6 +109,7 @@ class NavigatorInterface : public Interface
   class TurnMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -113,6 +118,7 @@ class NavigatorInterface : public Interface
       float velocity; /**< The desired turning velocity in rad/s,
       set to zero to use default value. */
     } TurnMessage_data_t;
+#pragma pack(pop)
 
     TurnMessage_data_t *data;
 
@@ -135,6 +141,7 @@ class NavigatorInterface : public Interface
   class CartesianGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -143,6 +150,7 @@ class NavigatorInterface : public Interface
       float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
       float orientation; /**< The orientation of the robot at the target. */
     } CartesianGotoMessage_data_t;
+#pragma pack(pop)
 
     CartesianGotoMessage_data_t *data;
 
@@ -168,6 +176,7 @@ class NavigatorInterface : public Interface
   class PolarGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -176,6 +185,7 @@ class NavigatorInterface : public Interface
       float dist; /**< Distance to the target. */
       float orientation; /**< The orientation of the robot at the target. */
     } PolarGotoMessage_data_t;
+#pragma pack(pop)
 
     PolarGotoMessage_data_t *data;
 
@@ -201,12 +211,14 @@ class NavigatorInterface : public Interface
   class PlaceGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char place[64]; /**< Place to go to. */
     } PlaceGotoMessage_data_t;
+#pragma pack(pop)
 
     PlaceGotoMessage_data_t *data;
 
@@ -226,6 +238,7 @@ class NavigatorInterface : public Interface
   class ObstacleMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -234,6 +247,7 @@ class NavigatorInterface : public Interface
       float y; /**< Y-coordinate of the obstacle. */
       float width; /**< Width of the obstacle. */
     } ObstacleMessage_data_t;
+#pragma pack(pop)
 
     ObstacleMessage_data_t *data;
 
@@ -259,11 +273,13 @@ class NavigatorInterface : public Interface
   class ResetOdometryMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ResetOdometryMessage_data_t;
+#pragma pack(pop)
 
     ResetOdometryMessage_data_t *data;
 
@@ -279,12 +295,14 @@ class NavigatorInterface : public Interface
   class SetMaxVelocityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float max_velocity; /**< Maximum velocity */
     } SetMaxVelocityMessage_data_t;
+#pragma pack(pop)
 
     SetMaxVelocityMessage_data_t *data;
 
@@ -304,6 +322,7 @@ class NavigatorInterface : public Interface
   class SetEscapingMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -313,6 +332,7 @@ class NavigatorInterface : public Interface
 	check whether the navigator should stop when an obstacle
 	obstructs the path, or if it should escape. */
     } SetEscapingMessage_data_t;
+#pragma pack(pop)
 
     SetEscapingMessage_data_t *data;
 
@@ -332,6 +352,7 @@ class NavigatorInterface : public Interface
   class SetSecurityDistanceMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -339,6 +360,7 @@ class NavigatorInterface : public Interface
       float security_distance; /**< Security distance to
     keep to obstacles */
     } SetSecurityDistanceMessage_data_t;
+#pragma pack(pop)
 
     SetSecurityDistanceMessage_data_t *data;
 

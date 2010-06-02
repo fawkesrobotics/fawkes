@@ -59,6 +59,7 @@ class ObjectPositionInterface : public Interface
   static const uint32_t FLAG_IS_FIXED_OBJECT;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -179,6 +180,7 @@ class ObjectPositionInterface : public Interface
       values last row from left to right each.
      */
   } ObjectPositionInterface_data_t;
+#pragma pack(pop)
 
   ObjectPositionInterface_data_t *data;
 

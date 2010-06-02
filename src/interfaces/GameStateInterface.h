@@ -99,6 +99,7 @@ class GameStateInterface : public Interface
   const char * tostring_if_gamestate_role_t(if_gamestate_role_t value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -113,6 +114,7 @@ class GameStateInterface : public Interface
     uint32_t score_cyan; /**< Score of team cyan */
     uint32_t score_magenta; /**< Score of team magenta */
   } GameStateInterface_data_t;
+#pragma pack(pop)
 
   GameStateInterface_data_t *data;
 
@@ -121,12 +123,14 @@ class GameStateInterface : public Interface
   class SetTeamColorMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       if_gamestate_team_t our_team; /**< Our team color */
     } SetTeamColorMessage_data_t;
+#pragma pack(pop)
 
     SetTeamColorMessage_data_t *data;
 
@@ -146,12 +150,14 @@ class GameStateInterface : public Interface
   class SetKickoffMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool kickoff; /**< Whether we have kickoff */
     } SetKickoffMessage_data_t;
+#pragma pack(pop)
 
     SetKickoffMessage_data_t *data;
 
@@ -171,12 +177,14 @@ class GameStateInterface : public Interface
   class SetStateTeamMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       if_gamestate_team_t state_team; /**< Team referred to by game state */
     } SetStateTeamMessage_data_t;
+#pragma pack(pop)
 
     SetStateTeamMessage_data_t *data;
 

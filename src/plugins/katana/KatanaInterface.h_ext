@@ -61,6 +61,7 @@ class KatanaInterface : public Interface
   static const uint32_t ERROR_MOTOR_CRASHED;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -88,6 +89,7 @@ class KatanaInterface : public Interface
     uint8_t max_velocity; /**< Maximum velocity */
     uint8_t num_motors; /**< Number of motors */
   } KatanaInterface_data_t;
+#pragma pack(pop)
 
   KatanaInterface_data_t *data;
 
@@ -96,11 +98,13 @@ class KatanaInterface : public Interface
   class StopMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
+#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -116,11 +120,13 @@ class KatanaInterface : public Interface
   class FlushMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } FlushMessage_data_t;
+#pragma pack(pop)
 
     FlushMessage_data_t *data;
 
@@ -136,11 +142,13 @@ class KatanaInterface : public Interface
   class ParkMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ParkMessage_data_t;
+#pragma pack(pop)
 
     ParkMessage_data_t *data;
 
@@ -156,6 +164,7 @@ class KatanaInterface : public Interface
   class LinearGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -170,6 +179,7 @@ class KatanaInterface : public Interface
       float theta; /**< Euler angle Theta of tool orientation. */
       float psi; /**< Euler angle Psi of tool orientation.. */
     } LinearGotoMessage_data_t;
+#pragma pack(pop)
 
     LinearGotoMessage_data_t *data;
 
@@ -204,11 +214,13 @@ class KatanaInterface : public Interface
   class CalibrateMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } CalibrateMessage_data_t;
+#pragma pack(pop)
 
     CalibrateMessage_data_t *data;
 
@@ -224,11 +236,13 @@ class KatanaInterface : public Interface
   class OpenGripperMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } OpenGripperMessage_data_t;
+#pragma pack(pop)
 
     OpenGripperMessage_data_t *data;
 
@@ -244,11 +258,13 @@ class KatanaInterface : public Interface
   class CloseGripperMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } CloseGripperMessage_data_t;
+#pragma pack(pop)
 
     CloseGripperMessage_data_t *data;
 
@@ -264,12 +280,14 @@ class KatanaInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< Are motors enabled? */
     } SetEnabledMessage_data_t;
+#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 
@@ -289,12 +307,14 @@ class KatanaInterface : public Interface
   class SetMaxVelocityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint8_t max_velocity; /**< Maximum velocity */
     } SetMaxVelocityMessage_data_t;
+#pragma pack(pop)
 
     SetMaxVelocityMessage_data_t *data;
 

@@ -69,12 +69,14 @@ class VisualDisplay2DInterface : public Interface
   const char * tostring_Anchor(Anchor value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t counter; /**< Field */
   } VisualDisplay2DInterface_data_t;
+#pragma pack(pop)
 
   VisualDisplay2DInterface_data_t *data;
 
@@ -83,6 +85,7 @@ class VisualDisplay2DInterface : public Interface
   class AddCartLineMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -93,6 +96,7 @@ class VisualDisplay2DInterface : public Interface
       LineStyle style; /**< Style of this object. */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartLineMessage_data_t;
+#pragma pack(pop)
 
     AddCartLineMessage_data_t *data;
 
@@ -127,6 +131,7 @@ class VisualDisplay2DInterface : public Interface
   class AddCartCircleMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -137,6 +142,7 @@ class VisualDisplay2DInterface : public Interface
       LineStyle style; /**< Style of this object. */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartCircleMessage_data_t;
+#pragma pack(pop)
 
     AddCartCircleMessage_data_t *data;
 
@@ -170,6 +176,7 @@ class VisualDisplay2DInterface : public Interface
   class AddCartRectMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -181,6 +188,7 @@ class VisualDisplay2DInterface : public Interface
       LineStyle style; /**< Style of this object. */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartRectMessage_data_t;
+#pragma pack(pop)
 
     AddCartRectMessage_data_t *data;
 
@@ -217,6 +225,7 @@ class VisualDisplay2DInterface : public Interface
   class AddCartTextMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -229,6 +238,7 @@ class VisualDisplay2DInterface : public Interface
       float size; /**< Font size (max height in m). */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartTextMessage_data_t;
+#pragma pack(pop)
 
     AddCartTextMessage_data_t *data;
 
@@ -265,6 +275,7 @@ class VisualDisplay2DInterface : public Interface
   class DeleteObjectMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -272,6 +283,7 @@ class VisualDisplay2DInterface : public Interface
       uint32_t object_id; /**< Object ID, which is
     the message ID of the Add* message. */
     } DeleteObjectMessage_data_t;
+#pragma pack(pop)
 
     DeleteObjectMessage_data_t *data;
 
@@ -291,11 +303,13 @@ class VisualDisplay2DInterface : public Interface
   class DeleteAllMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } DeleteAllMessage_data_t;
+#pragma pack(pop)
 
     DeleteAllMessage_data_t *data;
 

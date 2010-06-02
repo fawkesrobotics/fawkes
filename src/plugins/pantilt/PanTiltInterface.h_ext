@@ -46,6 +46,7 @@ class PanTiltInterface : public Interface
   static const uint32_t ERROR_TILT_OUTOFRANGE;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -75,6 +76,7 @@ class PanTiltInterface : public Interface
     float tilt_margin; /**< Margin in radians around a
     target tilt value to consider the motion as final. */
   } PanTiltInterface_data_t;
+#pragma pack(pop)
 
   PanTiltInterface_data_t *data;
 
@@ -83,11 +85,13 @@ class PanTiltInterface : public Interface
   class StopMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
+#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -103,11 +107,13 @@ class PanTiltInterface : public Interface
   class FlushMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } FlushMessage_data_t;
+#pragma pack(pop)
 
     FlushMessage_data_t *data;
 
@@ -123,11 +129,13 @@ class PanTiltInterface : public Interface
   class CalibrateMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } CalibrateMessage_data_t;
+#pragma pack(pop)
 
     CalibrateMessage_data_t *data;
 
@@ -143,11 +151,13 @@ class PanTiltInterface : public Interface
   class ParkMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ParkMessage_data_t;
+#pragma pack(pop)
 
     ParkMessage_data_t *data;
 
@@ -163,6 +173,7 @@ class PanTiltInterface : public Interface
   class GotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -170,6 +181,7 @@ class PanTiltInterface : public Interface
       float pan; /**< Current pan. */
       float tilt; /**< Current tilt. */
     } GotoMessage_data_t;
+#pragma pack(pop)
 
     GotoMessage_data_t *data;
 
@@ -192,6 +204,7 @@ class PanTiltInterface : public Interface
   class TimedGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -201,6 +214,7 @@ class PanTiltInterface : public Interface
       float pan; /**< Current pan. */
       float tilt; /**< Current tilt. */
     } TimedGotoMessage_data_t;
+#pragma pack(pop)
 
     TimedGotoMessage_data_t *data;
 
@@ -226,12 +240,14 @@ class PanTiltInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< Is the pan/tilt unit enabled? */
     } SetEnabledMessage_data_t;
+#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 
@@ -251,6 +267,7 @@ class PanTiltInterface : public Interface
   class SetVelocityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -258,6 +275,7 @@ class PanTiltInterface : public Interface
       float pan_velocity; /**< Maximum pan velocity currently reached. */
       float tilt_velocity; /**< Maximum tilt velocity currently reached. */
     } SetVelocityMessage_data_t;
+#pragma pack(pop)
 
     SetVelocityMessage_data_t *data;
 
@@ -280,6 +298,7 @@ class PanTiltInterface : public Interface
   class SetMarginMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -289,6 +308,7 @@ class PanTiltInterface : public Interface
       float tilt_margin; /**< Margin in radians around a
     target tilt value to consider the motion as final. */
     } SetMarginMessage_data_t;
+#pragma pack(pop)
 
     SetMarginMessage_data_t *data;
 

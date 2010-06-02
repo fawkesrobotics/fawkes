@@ -50,6 +50,7 @@ class FacerInterface : public Interface
   const char * tostring_if_facer_opmode_t(if_facer_opmode_t value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -106,6 +107,7 @@ class FacerInterface : public Interface
       Requested name.
      */
   } FacerInterface_data_t;
+#pragma pack(pop)
 
   FacerInterface_data_t *data;
 
@@ -114,12 +116,14 @@ class FacerInterface : public Interface
   class LearnFaceMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[64]; /**< The name assigned to the new identity. */
     } LearnFaceMessage_data_t;
+#pragma pack(pop)
 
     LearnFaceMessage_data_t *data;
 
@@ -139,6 +143,7 @@ class FacerInterface : public Interface
   class SetOpmodeMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -147,6 +152,7 @@ class FacerInterface : public Interface
       Current opmode.
      */
     } SetOpmodeMessage_data_t;
+#pragma pack(pop)
 
     SetOpmodeMessage_data_t *data;
 
@@ -166,6 +172,7 @@ class FacerInterface : public Interface
   class EnableIdentityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -173,6 +180,7 @@ class FacerInterface : public Interface
       uint32_t index; /**< Index of the identity. */
       bool enable; /**< En-/disable flag. */
     } EnableIdentityMessage_data_t;
+#pragma pack(pop)
 
     EnableIdentityMessage_data_t *data;
 
@@ -195,6 +203,7 @@ class FacerInterface : public Interface
   class SetNameMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -202,6 +211,7 @@ class FacerInterface : public Interface
       uint32_t index; /**< Index of the identity. */
       char name[64]; /**< Name of the identity. */
     } SetNameMessage_data_t;
+#pragma pack(pop)
 
     SetNameMessage_data_t *data;
 
@@ -224,12 +234,14 @@ class FacerInterface : public Interface
   class GetNameMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t index; /**< Index of the identity. */
     } GetNameMessage_data_t;
+#pragma pack(pop)
 
     GetNameMessage_data_t *data;
 

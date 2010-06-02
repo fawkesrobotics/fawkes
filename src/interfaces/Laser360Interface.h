@@ -39,6 +39,7 @@ class Laser360Interface : public Interface
   /* constants */
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -50,6 +51,7 @@ class Laser360Interface : public Interface
       True if the angle grows clockwise.
      */
   } Laser360Interface_data_t;
+#pragma pack(pop)
 
   Laser360Interface_data_t *data;
 

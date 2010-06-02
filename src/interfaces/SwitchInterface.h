@@ -39,6 +39,7 @@ class SwitchInterface : public Interface
   /* constants */
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -72,6 +73,7 @@ class SwitchInterface : public Interface
       happened. Can be used to decide if a change in status happened.
      */
   } SwitchInterface_data_t;
+#pragma pack(pop)
 
   SwitchInterface_data_t *data;
 
@@ -80,6 +82,7 @@ class SwitchInterface : public Interface
   class SetMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -93,6 +96,7 @@ class SwitchInterface : public Interface
       could be a value in the valid range.
      */
     } SetMessage_data_t;
+#pragma pack(pop)
 
     SetMessage_data_t *data;
 
@@ -115,11 +119,13 @@ class SwitchInterface : public Interface
   class EnableSwitchMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } EnableSwitchMessage_data_t;
+#pragma pack(pop)
 
     EnableSwitchMessage_data_t *data;
 
@@ -135,11 +141,13 @@ class SwitchInterface : public Interface
   class DisableSwitchMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } DisableSwitchMessage_data_t;
+#pragma pack(pop)
 
     DisableSwitchMessage_data_t *data;
 
@@ -155,6 +163,7 @@ class SwitchInterface : public Interface
   class EnableDurationMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
@@ -167,6 +176,7 @@ class SwitchInterface : public Interface
       could be a value in the valid range.
      */
     } EnableDurationMessage_data_t;
+#pragma pack(pop)
 
     EnableDurationMessage_data_t *data;
 
