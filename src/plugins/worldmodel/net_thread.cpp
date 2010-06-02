@@ -79,7 +79,8 @@ WorldModelNetworkThread::init()
     throw;
   }
 
-  __worldinfo_transceiver = new WorldInfoTransceiver(multicast_addr.c_str(), port,
+  __worldinfo_transceiver = new WorldInfoTransceiver(WorldInfoTransceiver::MULTICAST,
+                                                     multicast_addr.c_str(), port,
 						     encryption_key.c_str(), encryption_iv.c_str(),
 						     nnresolver);
 

@@ -29,11 +29,13 @@
 #include <netcomm/worldinfo/encrypt.h>
 #include <netcomm/worldinfo/decrypt.h>
 
+#include <netcomm/socket/datagram_broadcast.h>
 #include <netcomm/socket/datagram_multicast.h>
 #include <netcomm/utils/resolver.h>
 
 #include <utils/logging/liblogger.h>
 
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <cstdlib>
 #include <cstring>
@@ -72,7 +74,8 @@ WorldInfoException::WorldInfoException(const char *msg)
  * center of the field, X pointing towards the opponent goal, Y to the right
  * and Z downwards.
  *
- * Information is transmitted with a simple protocol via UDP Multicast packets.
+ * Information is transmitted with a simple protocol via UDP Multicast or
+ * Broadcast packets.
  *
  * A call to send() will reset all information, thus all opponents are removed
  * from the list to be sent, positions of robot and ball are marked invalid.
@@ -86,7 +89,8 @@ WorldInfoException::WorldInfoException(const char *msg)
 
 
 /** Constructor.
- * @param addr multicast address to send information to and receive from
+ * @param socket_type either multicast or broadcast socket
+ * @param addr multicast or broadcast address to send information to and receive from
  * @param port UDP port to send information to and receive from
  * @param key encryption key
  * @param iv encryption initialisation vector
@@ -94,7 +98,8 @@ WorldInfoException::WorldInfoException(const char *msg)
  * an internal resolver will be created without mDNS support.
  * @exception OutOfMemoryException thrown if internal buffers cannot be created
  */
-WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port,
+WorldInfoTransceiver::WorldInfoTransceiver(SocketType socket_type,
+                                           const char *addr, unsigned short port,
 					   const char *key, const char *iv,
 					   NetworkNameResolver *resolver) :
   pose_changed( false ),
@@ -106,8 +111,21 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
   gamestate_changed( false )
 {
   try {
-    s = new MulticastDatagramSocket(addr, port);
-    s->bind();
+    switch (socket_type) {
+      case MULTICAST: {
+        MulticastDatagramSocket* ms = new MulticastDatagramSocket(addr, port);
+        ms->bind();
+        s = ms;
+        break;
+      }
+      case BROADCAST: {
+        BroadcastDatagramSocket* bs = new BroadcastDatagramSocket(addr, port);
+        bs->bind();
+        s = bs;
+        break;
+      }
+    }
+    set_loop(false);
   } catch (SocketException &e) {
     e.append("WorldInfoTransceiver cannot instantiate socket for %s:%u", addr, port);
     throw;
@@ -187,7 +205,11 @@ WorldInfoTransceiver::~WorldInfoTransceiver()
 void
 WorldInfoTransceiver::set_loop(bool loop)
 {
-  s->set_loop( loop );
+  MulticastDatagramSocket* ms = dynamic_cast<MulticastDatagramSocket*>(s);
+  if (s) {
+    ms->set_loop( loop );
+  }
+  this->loop = loop;
 }
 
 
@@ -871,6 +893,15 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     if ( max_num_msgs != 0 )  ++num_msgs;
 
     bytes = s->recv(crypted_in_buffer, bytes, (struct sockaddr *)&from, &addr_len);
+
+    // skip message if it is looped
+    if (!loop) {
+      struct in_addr localhost;
+      ::inet_aton("127.0.0.1", &localhost);
+      if (from.sin_addr.s_addr == localhost.s_addr) {
+        continue;
+      }
+    }
 
     // decryptor decrypts to in_buffer, see constructor
     decryptor->set_crypt_buffer(crypted_in_buffer, bytes);

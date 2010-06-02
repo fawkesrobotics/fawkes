@@ -49,7 +49,7 @@ RefBoxStateSender::RefBoxStateSender(const char *addr, unsigned short port,
 {
   __debug = debug;
 
-  __transceiver = new WorldInfoTransceiver(addr, port, key, iv);
+  __transceiver = new WorldInfoTransceiver(WorldInfoTransceiver::MULTICAST, addr, port, key, iv);
   __transceiver->set_loop( true );
 
   __game_state = GS_FROZEN;

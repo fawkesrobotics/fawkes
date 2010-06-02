@@ -52,6 +52,9 @@ OBJS_qa_netcomm_socket_datagram = qa_socket_datagram.o
 LIBS_qa_netcomm_socket_datagram_multicast = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_socket_datagram_multicast = qa_socket_datagram_multicast.o
 
+LIBS_qa_netcomm_socket_datagram_broadcast = fawkesnetcomm fawkesutils
+OBJS_qa_netcomm_socket_datagram_broadcast = qa_socket_datagram_broadcast.o
+
 LIBS_qa_netcomm_worldinfo = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_worldinfo = qa_worldinfo.o
 
@@ -74,6 +77,7 @@ OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\
 		$(OBJS_qa_netcomm_socket_stream)		\
 		$(OBJS_qa_netcomm_socket_datagram)		\
 		$(OBJS_qa_netcomm_socket_datagram_multicast)	\
+		$(OBJS_qa_netcomm_socket_datagram_broadcast)	\
 		$(OBJS_qa_netcomm_worldinfo)			\
 		$(OBJS_qa_netcomm_worldinfo_encryption)		\
 		$(OBJS_qa_netcomm_worldinfo_msgsizes)		\
@@ -84,12 +88,12 @@ BINS_all +=	$(BINDIR)/qa_netcomm_socket_typeof		\
 		$(BINDIR)/qa_netcomm_socket_stream		\
 		$(BINDIR)/qa_netcomm_socket_datagram		\
 		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\
+		$(BINDIR)/qa_netcomm_socket_datagram_broadcast	\
+		$(BINDIR)/qa_netcomm_worldinfo			\
+		$(BINDIR)/qa_netcomm_worldinfo_encryption	\
+		$(BINDIR)/qa_netcomm_worldinfo_msgsizes		\
 		$(BINDIR)/qa_netcomm_resolver			\
 		$(BINDIR)/qa_netcomm_dynamic_buffer
-
-#		$(BINDIR)/qa_netcomm_worldinfo
-#		$(BINDIR)/qa_netcomm_worldinfo_encryption
-#		$(BINDIR)/qa_netcomm_worldinfo_msgsizes
 
 include $(BUILDSYSDIR)/base.mk
 

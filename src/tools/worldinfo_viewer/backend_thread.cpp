@@ -58,7 +58,8 @@ WorldInfoViewerBackendThread::WorldInfoViewerBackendThread( WorldInfoDataContain
 
   m_resolver = new NetworkNameResolver( m_avahi );
 
-  m_transceiver = new WorldInfoTransceiver( m_addr.c_str(),
+  m_transceiver = new WorldInfoTransceiver( WorldInfoTransceiver::MULTICAST,
+                                            m_addr.c_str(),
 					    m_port, 
 					    m_key.c_str(),
 					    m_iv.c_str(),
