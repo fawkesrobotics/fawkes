@@ -228,7 +228,7 @@ WorldModelThread::loop()
     HomPoint pos;
     pos.x( __wi_send_pose->world_x() );
     pos.y( __wi_send_pose->world_y() );
-    float yaw = __wi_send_pose->world_z();
+    float yaw = __wi_send_pose->yaw();
     if (__wi_send_pose->has_writer()) {
       do_send = true;
       transceiver->set_pose(pos.x(), pos.y(), yaw,
