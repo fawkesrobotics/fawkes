@@ -63,16 +63,21 @@ class MirrorCalibTool
   const unsigned char* get_last_yuv_buffer() const;
   const char* get_state_description() const;
 
-  inline int center_x() const { return img_center_x_; }
-  inline int center_y() const { return img_center_y_; }
+  inline int center_x() const { return img_center_x_; } /**< Center X accessor. */
+  inline int center_y() const { return img_center_y_; } /**< Center Y accessor. */
 
   void eval(unsigned int x,
             unsigned int y,
             float* x_ret,
             float* y_ret);
-  void setTotalSteps(unsigned int total_steps) {};
-  void setProgress(unsigned int progress) {};
-  void finished() {};
+  /** Nothing.
+   * @param total_steps */
+  virtual void setTotalSteps(unsigned int total_steps) {};
+  /** Nothing.
+   * @param progress */
+  virtual void setProgress(unsigned int progress) {};
+  /** Nothing. */
+  virtual void finished() {};
   
   void load(const char* filename);
   void save(const char* filename);
@@ -124,9 +129,6 @@ class MirrorCalibTool
   static void apply_sobel(unsigned char* src, unsigned char* dst,
                           int widt, int height,
                           firevision::orientation_t ori);
-  static void apply_my_sobel(unsigned char* src, unsigned char* dst,
-                             int widt, int height,
-                             firevision::orientation_t ori);
   static void apply_sharpen(unsigned char* src, unsigned char* dst,
                             int widt, int height);
   static void apply_median(unsigned char* src, unsigned char* dst,
