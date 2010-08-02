@@ -17,7 +17,8 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_ffbblog = fawkescore fawkesutils fawkesblackboard SwitchInterface
+LIBS_ffbblog = stdc++ fawkescore fawkesutils fawkesblackboard fawkesinterface \
+	       SwitchInterface
 OBJS_ffbblog = bblog.o ../bblogfile.o
 
 OBJS_all =	$(OBJS_ffbblog)

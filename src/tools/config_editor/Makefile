@@ -22,7 +22,7 @@ include $(BUILDSYSDIR)/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_ffconfiggui = fawkesconfig fawkesguiutils fvutils
+LIBS_ffconfiggui = stdc++ fawkescore fawkesconfig fawkesguiutils fvutils
 OBJS_ffconfiggui = main.o			\
 		   config_tree_view.o		\
 		   config_edit_dialog.o		\

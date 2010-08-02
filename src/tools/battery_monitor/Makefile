@@ -22,7 +22,9 @@ include $(BUILDSYSDIR)/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_ffbatterymon = fawkesconfig fawkesguiutils fvutils BatteryInterface
+LIBS_ffbatterymon = stdc++ fawkescore fawkesconfig fawkesnetcomm \
+		    fawkesguiutils fawkesblackboard fawkesinterface \
+		    fvutils BatteryInterface
 OBJS_ffbatterymon = 	main.o				\
 			battery_monitor_treeview.o	\
 			battery_monitor.o

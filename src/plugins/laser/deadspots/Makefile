@@ -16,8 +16,9 @@
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_fflaser_deadspots = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
-			 fawkesconfig Laser360Interface Laser720Interface
+LIBS_fflaser_deadspots = stdc++ m fawkescore fawkesutils fawkesnetcomm \
+			 fawkesblackboard fawkesinterface fawkesconfig \
+			 Laser360Interface Laser720Interface
 OBJS_fflaser_deadspots = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 BINS_all = $(BINDIR)/fflaser_deadspots

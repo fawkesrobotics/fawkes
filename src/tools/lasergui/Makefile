@@ -21,7 +21,8 @@ include $(BUILDSYSDIR)/gui.mk
 CFLAGS  += $(CFLAGS_GUI)
 LDFLAGS += $(LDFLAGS_GUI)
 
-LIBS_lasergui = fawkescore fawkesblackboard fawkesguiutils \
+LIBS_lasergui = stdc++ m fawkescore fawkesutils fawkesblackboard \
+		fawkesinterface fawkesnetcomm fawkesguiutils \
 		Position2DTrackInterface Laser360Interface Laser720Interface \
 		ObjectPositionInterface SwitchInterface VisualDisplay2DInterface
 

@@ -41,7 +41,8 @@ else
   WARN_TARGETS += warning_avahi
 endif
 
-LIBS_fawkes = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin fawkesaspects
+LIBS_fawkes = stdc++ fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
+	      fawkesconfig fawkesplugin fawkesaspects
 OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all =	$(OBJS_fawkes)

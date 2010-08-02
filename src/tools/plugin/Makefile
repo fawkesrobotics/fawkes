@@ -17,7 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_ffplugin = fawkescore fawkesutils fawkesnetcomm fawkesplugin
+LIBS_ffplugin = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesplugin
 OBJS_ffplugin = main.o	\
 		plugin_tool.o
 

@@ -25,7 +25,8 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_fvfuseviewer = fawkescore fawkesnetcomm fawkesplugin fawkesutils fawkesguiutils fvwidgets fvcams
+LIBS_fvfuseviewer = stdc++ fawkescore fawkesnetcomm fawkesplugin fawkesutils \
+		    fawkesguiutils fvwidgets fvcams
 OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 OBJS_all += $(OBJS_fvfuseviewer)
 

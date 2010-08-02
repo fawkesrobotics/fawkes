@@ -44,7 +44,8 @@ endif
 CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_GRAPHVIZ) $(CFLAGS_PAPYRUS)
 LDFLAGS += $(LDFLAGS_GUI) $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_PAPYRUS)
 
-LIBS_skillgui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesguiutils \
+LIBS_skillgui = stdc++ m fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
+		fawkesguiutils fawkesinterface \
 		SkillerInterface SkillerDebugInterface
 OBJS_skillgui = main.o skillgui.o
 
@@ -58,7 +59,7 @@ else
   OBJS_skillgui += graph_drawing_area.o gvplugin_skillgui_cairo.o
 endif
 
-LIBS_skillgui_batch_render = fawkescore fawkesutils
+LIBS_skillgui_batch_render = stdc++ m fawkescore fawkesutils
 OBJS_skillgui_batch_render = batch_render.o gvplugin_skillgui_cairo.o
 
 OBJS_all = $(OBJS_skillgui) $(OBJS_skillgui_batch_render)

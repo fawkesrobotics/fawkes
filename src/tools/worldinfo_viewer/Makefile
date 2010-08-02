@@ -24,7 +24,7 @@ LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 # enable for debug output
 #CFLAGS += -DDEBUG_PRINT
 
-LIBS_ffwiviewer = fawkesblackboard fawkesconfig fawkescore fawkesnetcomm fawkesutils fawkesworldinfo_utils
+LIBS_ffwiviewer = stdc++ fawkesblackboard fawkesconfig fawkescore fawkesnetcomm fawkesutils fawkesworldinfo_utils fawkesgeometry
 OBJS_ffwiviewer = main.o			\
 		  worldinfo_viewer.o		\
 		  field_view.o			\

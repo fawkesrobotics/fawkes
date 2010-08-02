@@ -17,7 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_ffinfo = fawkescore
+LIBS_ffinfo = stdc++ fawkescore
 OBJS_ffinfo = ffinfo.o
 
 OBJS_all =	$(OBJS_ffinfo)

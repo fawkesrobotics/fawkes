@@ -32,47 +32,50 @@ SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation)) \
 		  $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/naocamtest_gui)) \
 		  $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/colormap_editor))
 
-LIBS_fvshmem = $(VISION_CAM_LIBS) fawkesutils fvutils
+LIBS_fvshmem = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvutils
 OBJS_fvshmem = shmem.o
 
-LIBS_fvlistfwcams = $(VISION_CAM_LIBS) fawkesutils fvcams
+LIBS_fvlistfwcams = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams
 OBJS_fvlistfwcams = listfwcams.o
 
 LIBS_fvlistsrcams = $(VISION_CAM_LIBS) fawkesutils fvcams
 OBJS_fvlistsrcams = listsrcams.o
 
-LIBS_fvconverter = fvutils fvcams
+LIBS_fvconverter = stdc++ fawkescore fawkesutils fvutils fvcams
 OBJS_fvconverter = converter.o
 
-LIBS_fvstereodecoder = $(VISION_CAM_LIBS) fawkesutils fvcams
+LIBS_fvstereodecoder = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams \
+		       fvutils
 OBJS_fvstereodecoder = stereodecoder.o
 
 LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) fawkesutils fvcams fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
-LIBS_fvbb2gettric = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils
+LIBS_fvbb2gettric = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams fvutils
 OBJS_fvbb2gettric = bb2gettric.o
 
-LIBS_fvbb2rectlut = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils fvstereo
+LIBS_fvbb2rectlut = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils \
+		    fvcams fvutils fvstereo
 OBJS_fvbb2rectlut = bb2rectlut.o
 
-LIBS_fvbb2info = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils fvstereo
+LIBS_fvbb2info = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams \
+		 fvutils fvstereo
 OBJS_fvbb2info = bb2info.o
 
-LIBS_fvviewer = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils fvwidgets fvfilters
+LIBS_fvviewer = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams fvutils fvwidgets fvfilters
 OBJS_fvviewer = viewer.o
 CFLAGS_viewer    += $(CFLAGS_GTKMM) $(CFLAGS_SDL)
 LDFLAGS_fvviewer += $(LDFLAGS_GTKMM) $(LDFLAGS_SDL)
 
-LIBS_fvnet = fawkesutils fvutils
+LIBS_fvnet = stdc++ fawkescore fawkesutils fawkesnetcomm fvutils
 OBJS_fvnet = net.o
 
-LIBS_fvshowyuv = fvutils fvwidgets
+LIBS_fvshowyuv = stdc++ fvutils fvwidgets
 OBJS_fvshowyuv = show_yuv.o
 CFLAGS_show_yuv += $(CFLAGS_SDL)
 LDFLAGS_fvshowyuv += $(LDFLAGS_SDL)
 
-LIBS_fvcmpp = fvutils
+LIBS_fvcmpp = stdc++ m fawkesutils fvutils
 OBJS_fvcmpp = cmpp.o
 
 OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \

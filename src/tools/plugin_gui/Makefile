@@ -21,7 +21,7 @@ include $(BUILDSYSDIR)/gui.mk
 CFLAGS  += $(CFLAGS_GUI)
 LDFLAGS += $(LDFLAGS_GUI)
 
-LIBS_ffplugingui = fawkescore fawkesutils fawkesguiutils
+LIBS_ffplugingui = stdc++ fawkescore fawkesutils fawkesguiutils
 OBJS_ffplugingui = main.o plugin_gui.o
 OBJS_all = $(OBJS_ffplugingui)
 

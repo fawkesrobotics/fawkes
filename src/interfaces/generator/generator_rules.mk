@@ -22,7 +22,7 @@ ifeq ($(HAVE_INTERFACE_GENERATOR),1)
     GENDIR=generator/
   endif
 
-  LIBS_ffifacegen = fawkescore fawkesutils
+  LIBS_ffifacegen = stdc++ fawkescore fawkesutils
   LDFLAGS_ffifacegen = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
   CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
   OBJS_ffifacegen = $(GENDIR)constant.o	\
