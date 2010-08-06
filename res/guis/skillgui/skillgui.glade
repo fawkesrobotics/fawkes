@@ -150,6 +150,7 @@
                     <child>
                       <widget class="GtkRadioToolButton" id="tb_skiller">
                         <property name="visible">True</property>
+                        <property name="is_important">True</property>
                         <property name="label" translatable="yes">Skiller</property>
                         <property name="active">True</property>
                       </widget>
@@ -161,6 +162,7 @@
                     <child>
                       <widget class="GtkRadioToolButton" id="tb_agent">
                         <property name="visible">True</property>
+                        <property name="is_important">True</property>
                         <property name="label" translatable="yes">Agent</property>
                         <property name="group">tb_skiller</property>
                       </widget>
