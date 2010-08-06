@@ -69,10 +69,14 @@ AgentHSM = {current = nil,
 --- Create new AgentHSM.
 function AgentHSM:new(o)
    local f = FSM:new(o)
-   setmetatable(o, self)
+   setmetatable(f, self)
    self.__index = self
 
-   return o
+   f:clear_states()
+   f.exit_state = "FINAL"
+   f.fail_state = "FAILED"
+
+   return f
 end
 
 
@@ -120,6 +124,19 @@ function AgentHSM:add_transitions(trans)
 	 assert(type(from) == "string", "From states must be given by name, not as objects")
 	 assert(type(to) == "string", "To states must be given by name, not as objects")
 
+	 -- If we only get a time as timeout assume jump to normal to state
+	 if t.timeout and type(t.timeout) == "number" then
+	    t.timeout = { t.timeout, to }
+	 end
+	 if t.timeout then
+	    local timeout_to = t.timeout.to or t.timeout[2]
+	    if not self.states[timeout_to] then
+	       self.states[timeout_to] = JumpState:new{name=timeout_to, fsm=self,
+						       closure=trans.closure}
+	       self:apply_deftrans(self.states[timeout_to])
+	    end
+	 end
+
 	 local s
 	 if t.skills or t.fsm then  -- This state calls skills
 
@@ -136,7 +153,9 @@ function AgentHSM:add_transitions(trans)
 
 	    if t.skills then
 
-	       assert(t.fail_to, "Skill execution state must have fail_to state")
+	       if not t.fail_to then
+		  t.fail_to = to
+	       end
 
 	       if self.debug then
 		  printf("%s: %s -> %s/%s for skill execution of %d skill(s)",
@@ -154,7 +173,8 @@ function AgentHSM:add_transitions(trans)
 					       failure_state=t.fail_to,
 					       dotattr=t.from_dotattr,
 					       final_dotattr=t.final_dotattr,
-					       failure_dotattr=t.failure_dotattr}
+					       failure_dotattr=t.failure_dotattr,
+					       timeout=t.timeout}
 	    elseif t.fsm then -- This state executes a sub-FSM
 
 	       if self.debug then
@@ -163,7 +183,7 @@ function AgentHSM:add_transitions(trans)
 	       end
 
 	       s = SubFSMJumpState:new{name=from, fsm=self, closure=trans.closure,
-				       subfsm=t.fsm, exit_to=to}
+				       subfsm=t.fsm, exit_to=to, timeout=t.timeout}
 	    end
 	 elseif t.wait_sec ~= nil then -- Wait state
 	    if self.states[from] then
@@ -184,7 +204,7 @@ function AgentHSM:add_transitions(trans)
 	    printf("Creating simple state %s", from)
 	    if not self.states[from] then
 	       s = JumpState:new{name=from, fsm=self, closure=trans.closure,
-				 dotattr=trans.from_dotattr}
+				 dotattr=trans.from_dotattr, timeout=t.timeout}
 	    else
 	       if t.from_dotattr then
 		  local fsd = self.states[from].dotattr
@@ -204,7 +224,8 @@ function AgentHSM:add_transitions(trans)
 	    if self.debug then
 	       printf("%s: Creating blanko to state %s (from %s)", self.name, to, from)
 	    end
-	    self.states[to] = JumpState:new{name=to, fsm=self, closure=trans.closure}
+	    self.states[to] = JumpState:new{name=to, fsm=self,
+					    closure=trans.closure}
 	    self:apply_deftrans(self.states[to])
 	 else
 	    if t.to_dotattr then
@@ -246,7 +267,8 @@ function AgentHSM:add_transitions(trans)
 	 end
 
 	 if not self.states[to] then
-	    self.states[to] = JumpState:new{name=to, fsm=self, closure=trans.closure}
+	    self.states[to] = JumpState:new{name=to, fsm=self,
+					    closure=trans.closure}
 	    self:apply_deftrans(self.states[to])
 	 end
 
