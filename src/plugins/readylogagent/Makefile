@@ -40,7 +40,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_eclipse
 warning_eclipse:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Readylog Agent Plugin$(TNORMAL) (ECLiPSe not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Readylog Agent Plugin$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
