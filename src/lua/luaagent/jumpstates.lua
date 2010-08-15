@@ -53,6 +53,9 @@ AgentSkillExecJumpState = { add_transition        = JumpState.add_transition,
 			    init                  = JumpState.init,
 			    loop                  = JumpState.loop,
 			    exit                  = JumpState.exit,
+			    setup_timeout         = JumpState.setup_timeout,
+			    jumpcond_timeout      = JumpState.jumpcond_timeout,
+			    init_timeout          = JumpState.init_timeout,
 			    set_transition_labels = SkillJumpState.set_transition_labels
 			  }
 
@@ -66,6 +69,14 @@ end
 --- Fires if any called skill failed.
 function AgentSkillExecJumpState:jumpcond_failure()
    return self.skill_status == skillstati.S_FAILED
+end
+
+--- Fires if the skills are finished.
+-- @return true if the status is not S_RUNNING and not S_INACTIVE,
+-- i.e. at least one skill failed or all succeeded.
+function AgentSkillExecJumpState:jumpcond_finished()
+   return self.skill_status ~= skillstati.S_RUNNING
+      and self.skill_status ~= skillstati.S_INACTIVE
 end
 
 
@@ -87,23 +98,14 @@ function AgentSkillExecJumpState:new(o)
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.preconditions) == "table", "Preconditions for " .. o.name .. " not a table")
 
-   local skills = o.skills or {}
+   o.skills = o.skills or {}
+   o.loops  = o.loops or {}
+   o.inits  = o.inits or {}
    o.skill_queue = SkillQueue:new{name=o.name, skills=skills}
 
    o.skill_status = skillstati.S_RUNNING
 
-   if type(o.final_state) == "table" then
-      o.final_transition   = o:add_transition(o.final_state, o.jumpcond_final, "Skill(s) succeeded")
-      if o.final_dotattr then
-	 o.final_transition.dotattr = o.final_dotattr
-      end
-   end
-   if type(o.failure_state) == "table" then
-      o.failure_transition = o:add_transition(o.failure_state, o.jumpcond_failure, "Skill(s) failed")
-      if o.failure_dotattr then
-	 o.failure_transition.dotattr = o.failure_dotattr
-      end
-   end
+   o:setup_timeout()
 
    o:set_transition_labels()
 
@@ -128,10 +130,8 @@ end
 -- skill queue. The skill queue is executed and intermediate skill status
 -- is S_RUNNING.
 function AgentSkillExecJumpState:do_init()
-   local rv = { self:try_transitions(self.preconditions) }
-   if next(rv) then return unpack(rv) end
+   JumpState.do_init(self)
 
-   self:init()
    if self.args then
       self.skill_queue:set_args(self.args)
    end
@@ -153,9 +153,7 @@ end
 function AgentSkillExecJumpState:do_loop()
    self.skill_status = self.skill_queue:status()
 
-   self:loop()
-
-   return self:try_transitions()
+   return JumpState.do_loop(self)
 end
 
 
@@ -166,17 +164,22 @@ function AgentSkillExecJumpState:prepare()
       local tmpstr = self.final_state
       self.final_state        = self.fsm.states[self.final_state]
       assert(self.final_state, "Prematurely defined final state %s does not exist", tmpstr)
-      self.final_transition   = self:add_transition(self.final_state, self.jumpcond_final, "Skill(s) succeeded")
-      changed = true
    end
    if type(self.failure_state) == "string" then
       local tmpstr = self.failure_state
       printf("Setting prematurely declared failure state %s", self.failure_state)
       self.failure_state      = self.fsm.states[self.failure_state]
-      assert(self.final_state, "Prematurely defined failure state %s does not exist", tmpstr)
-      self.failure_transition = self:add_transition(self.failure_state, self.jumpcond_failure, "Skill(s) failed")
-      changed = true
+      assert(self.failure_state, "Prematurely defined failure state %s does not exist", tmpstr)
    end
+
+   local skills = (#self.skills == 1) and "Skill" or "Skills"
+   if self.final_state == self.failure_state then
+      self.transition = self:add_transition(self.final_state, self.jumpcond_finished, skills .. " finished")
+   else
+      self.final_transition   = self:add_transition(self.final_state, self.jumpcond_final, skills .. " succeeded")
+      self.failure_transition = self:add_transition(self.failure_state, self.jumpcond_failure, skills .. " failed")
+   end
+
    self:set_transition_labels()
    self.fsm:mark_changed()
 end

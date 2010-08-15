@@ -87,6 +87,9 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
   __fcd_open->add_filter(*__filter_dot);
   __fcd_open->set_filter(*__filter_dot);
 
+  add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
+	     Gdk::BUTTON_PRESS_MASK );
+
 #ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   signal_expose_event().connect(sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_expose_event));
   signal_button_press_event().connect(sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_button_press_event));

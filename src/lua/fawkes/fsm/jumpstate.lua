@@ -67,6 +67,11 @@ function JumpState:new(o)
    o.dotattr = o.dotattr or {}
    o.transitions = o.transitions or {}
    o.preconditions = {}
+   o.loops = o.loops or {}
+   o.inits = o.inits or {}
+
+   o:setup_timeout()
+
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
 
    return o
@@ -80,6 +85,9 @@ function JumpState:do_init(...)
    local rv = { self:try_transitions(self.preconditions) }
    if next(rv) then return unpack(rv) end
    self:init(...)
+   for _,i in ipairs(self.inits) do
+      i(self)
+   end
    return self:try_transitions()
 end
 
@@ -91,6 +99,9 @@ end
 -- @return new state if jump condition holds or false otherwise
 function JumpState:do_loop()
    self:loop()
+   for _,l in ipairs(self.loops) do
+      l(self)
+   end
 
    return self:try_transitions()
 end
@@ -237,6 +248,46 @@ end
 function JumpState:jumpcond_true()
    return true
 end
+
+--- Fires on timeout.
+-- @return true if the time ran out
+function JumpState:jumpcond_timeout()
+   return os.difftime(os.time(), self.timeout_start) >= self.timeout_time
+end
+
+--- Initializes timeout value.
+function JumpState:init_timeout()
+   self.timeout_start = os.time()
+end
+
+
+--- Setup timeout.
+-- If the timeout field is set, a timeout transition is added. The timeout
+-- field must be a table. Either it is an array with two values, the first
+-- being the time in seconds, the second being the state where to go to on
+-- timeout. Or it can be a table with a time and a to field representing the
+-- timeout in seconds and state to go to on timeout respectively.
+function JumpState:setup_timeout()
+   if self.timeout then
+      local timeout_time = self.timeout[1]
+      local timeout_to   = self.timeout[2]
+      if self.timeout.time then
+	 timeout_time = self.timeout.time
+	 timeout_to   = self.timeout.to
+      end
+      assert(timeout_time, "No timeout value given")
+      assert(type(timeout_time) == "number", "Timeout value must be a number")
+      assert(timeout_to, "No timeout target state given")
+      self.timeout_time = timeout_time
+      self.timeout_to   = timeout_to
+	 
+      table.insert(self.inits, self.init_timeout)
+      self.timeout_transition = self:add_transition(self.timeout_to, self.jumpcond_timeout, "Timeout (" .. self.timeout_time .. " sec)")
+      self.timeout_transition.dotattr = { style = "dashed" }
+   end
+end
+
+
 
 
 --- Checks a number of interfaces for no writer.

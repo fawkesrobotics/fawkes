@@ -70,7 +70,10 @@ void
 LuaAgentExecutionThread::init_failure_cleanup()
 {
   try {
-    if ( __skiller_if ) blackboard->close(__skiller_if);
+    if ( __skiller_if ) {
+      __skiller_if->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
+      blackboard->close(__skiller_if);
+    }
     if ( __agdbg_if )   blackboard->close(__agdbg_if);
 
     delete __lua_ifi;
