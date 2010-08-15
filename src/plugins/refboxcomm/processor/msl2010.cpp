@@ -26,6 +26,7 @@
 #include <utils/logging/logger.h>
 
 #include <string>
+#include <sstream>
 #include <cstdlib>
 #include <cstring>
 
