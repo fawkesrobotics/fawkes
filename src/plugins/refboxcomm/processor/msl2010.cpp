@@ -26,6 +26,8 @@
 #include <utils/logging/logger.h>
 
 #include <string>
+#include <cstdlib>
+#include <cstring>
 
 #include <libxml++/libxml++.h>
 // libxml++ pulls in Glib::ustring, which has a looong tail of dependent
@@ -163,8 +165,8 @@ Msl2010RefBoxProcessor::reconnect()
     delete __s;
     __s = NULL;
     //printf(".");
-    fflush(stdout);
-    usleep(500000);
+    //fflush(stdout);
+    //usleep(500000);
   }
 
   __logger->log_info(__name, "Init done");
