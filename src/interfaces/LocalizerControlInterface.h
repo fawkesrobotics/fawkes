@@ -39,11 +39,15 @@ class LocalizerControlInterface : public Interface
   /* constants */
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char map_name[30]; /**< The name of the current
     map */
   } LocalizerControlInterface_data_t;
+#pragma pack(pop)
 
   LocalizerControlInterface_data_t *data;
 
@@ -52,13 +56,17 @@ class LocalizerControlInterface : public Interface
   class ResetMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< The new initial x-coordinate. */
       float y; /**< The new initial x-coordinate. */
       float ori; /**< The new initial orientation. */
       float variance; /**< The variance for the reset position. */
     } ResetMessage_data_t;
+#pragma pack(pop)
 
     ResetMessage_data_t *data;
 

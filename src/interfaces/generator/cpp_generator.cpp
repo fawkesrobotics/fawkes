@@ -126,24 +126,25 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
 				    std::vector<InterfaceField> fields)
 {
 
-  stable_sort(fields.begin(), fields.end());
+  //stable_sort(fields.begin(), fields.end());
 
-  if ( fields.size() > 0 ) {
+  fprintf(f,
+	  "#pragma pack(push,4)\n"
+	  "%s/** Internal data storage, do NOT modify! */\n"
+	  "%stypedef struct {\n"
+	  "%s  int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */\n"
+	  "%s  int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */\n", is.c_str(), is.c_str(), is.c_str(), is.c_str());
 
-    fprintf(f,
-	    "%s/** Internal data storage, do NOT modify! */\n"
-	    "%stypedef struct {\n", is.c_str(), is.c_str());
-
-    for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
-      fprintf(f, "%s  %s %s", is.c_str(), (*i).getStructType().c_str(), (*i).getName().c_str());
-      if ( (*i).getLength().length() > 0 ) {
-	fprintf(f, "[%s]", (*i).getLength().c_str());
-      }
-      fprintf(f, "; /**< %s */\n", (*i).getComment().c_str());
+  for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
+    fprintf(f, "%s  %s %s", is.c_str(), (*i).getStructType().c_str(), (*i).getName().c_str());
+    if ( (*i).getLength().length() > 0 ) {
+      fprintf(f, "[%s]", (*i).getLength().c_str());
     }
-
-    fprintf(f, "%s} %s;\n\n", is.c_str(), name.c_str());
+    fprintf(f, "; /**< %s */\n", (*i).getComment().c_str());
   }
+  
+  fprintf(f, "%s} %s;\n"
+	  "#pragma pack(pop)\n\n", is.c_str(), name.c_str());
 }
 
 
@@ -250,12 +251,17 @@ void
 CppInterfaceGenerator::write_constants_cpp(FILE *f)
 {
   for ( vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
+    const char *type_suffix = "";
+    if (i->getType() == "uint32_t") {
+      type_suffix = "u";
+    }
     fprintf(f,
 	    "/** %s constant */\n"
-	    "const %s %s::%s = %s;\n",
+	    "const %s %s::%s = %s%s;\n",
 	    (*i).getName().c_str(),
 	    (*i).getType().c_str(),
-	    class_name.c_str(), (*i).getName().c_str(), (*i).getValue().c_str());
+	    class_name.c_str(), i->getName().c_str(),
+	    i->getValue().c_str(), type_suffix);
   }
   fprintf(f, "\n");
 }
@@ -338,13 +344,11 @@ CppInterfaceGenerator::write_messages_h(FILE *f)
     fprintf(f, "  class %s : public Message\n"
 	    "  {\n", (*i).getName().c_str());
 
-    if (i->getFields().size() > 0) {
-      fprintf(f, "   private:\n");
-      write_struct(f, (*i).getName() + "_data_t", "    ", (*i).getFields());
-      fprintf(f,
-	      "    %s_data_t *data;\n\n",
-	      (*i).getName().c_str());
-    }
+    fprintf(f, "   private:\n");
+    write_struct(f, (*i).getName() + "_data_t", "    ", (*i).getFields());
+    fprintf(f,
+	    "    %s_data_t *data;\n\n",
+	    (*i).getName().c_str());
 
     fprintf(f, "   public:\n");
     write_message_ctor_dtor_h(f, "    ", (*i).getName(), (*i).getFields());
@@ -375,7 +379,7 @@ CppInterfaceGenerator::write_messages_cpp(FILE *f)
 
     write_message_ctor_dtor_cpp(f, (*i).getName(), "Message", class_name + "::",
 				(*i).getFields());
-    write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::");
+    write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::", false);
     write_message_clone_method_cpp(f, (class_name + "::" + (*i).getName()).c_str());
   }
   fprintf(f,
@@ -580,6 +584,60 @@ CppInterfaceGenerator::write_message_clone_method_cpp(FILE *f, std::string class
 	  "}\n", classname.c_str(), classname.c_str());
 }
 
+/** Write the add_fieldinfo() calls.
+ * @param f file to write to
+ * @param fields fields to write field info for
+ */
+void
+CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceField> &fields)
+{
+  std::vector<InterfaceField>::iterator i;
+  for (i = fields.begin(); i != fields.end(); ++i) {
+    const char *type = "";
+    const char *dataptr = "&";
+    const char *enumtype = 0;
+
+    if ( i->getType() == "bool" ) {
+      type = "BOOL";
+    } else if ( i->getType() == "int8" ) {
+      type = "INT8";
+    } else if ( i->getType() == "uint8" ) {
+      type = "UINT8";
+    } else if ( i->getType() == "int16" ) {
+      type = "INT16";
+    } else if ( i->getType() == "uint16" ) {
+      type = "UINT16";
+    } else if ( i->getType() == "int32" ) {
+      type = "INT32";
+    } else if ( i->getType() == "uint32" ) {
+      type = "UINT32";
+    } else if ( i->getType() == "int64" ) {
+      type = "INT64";
+    } else if ( i->getType() == "uint64" ) {
+      type = "UINT64";
+    } else if ( i->getType() == "byte" ) {
+      type = "BYTE";
+    } else if ( i->getType() == "float" ) {
+      type = "FLOAT";
+    } else if ( i->getType() == "string" ) {
+      type = "STRING";
+      dataptr = "";
+    } else {
+      type = "ENUM";
+      enumtype = i->getType().c_str();
+    }
+
+    fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s%s%s%s);\n",
+	    type, i->getName().c_str(),
+	    (i->getLengthValue() > 0) ? i->getLengthValue() : 1,
+	    dataptr, i->getName().c_str(),
+	    enumtype ? ", \"" : "",
+	    enumtype ? enumtype : "",
+	    enumtype ? "\"" : ""
+	    );
+  }
+}
+
 
 /** Write constructor and destructor to cpp file.
  * @param f file to write to
@@ -603,56 +661,15 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	  inclusion_prefix.c_str(), classname.c_str(),
 	  classname.c_str(), super_class.c_str());
 
-  if ( fields.size() > 0 ) {
-    fprintf(f,
-	    "  data_size = sizeof(%s_data_t);\n"
-	    "  data_ptr  = malloc(data_size);\n"
-	    "  data      = (%s_data_t *)data_ptr;\n"
-	    "  memset(data_ptr, 0, data_size);\n",
-	    classname.c_str(), classname.c_str());
+  fprintf(f,
+	  "  data_size = sizeof(%s_data_t);\n"
+	  "  data_ptr  = malloc(data_size);\n"
+	  "  data      = (%s_data_t *)data_ptr;\n"
+	  "  data_ts   = (interface_data_ts_t *)data_ptr;\n"
+	  "  memset(data_ptr, 0, data_size);\n",
+	  classname.c_str(), classname.c_str());
 
-
-    for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
-      const char *type = "";
-      const char *dataptr = "&";
-      const char *enumtype = 0;
-
-      if ( i->getType() == "bool" ) {
-	type = "BOOL";
-      } else if ( i->getType() == "int" ) {
-	type = "INT";
-      } else if ( i->getType() == "unsigned int" ) {
-	type = "UINT";
-      } else if ( i->getType() == "byte" ) {
-	type = "BYTE";
-      } else if ( i->getType() == "long int" ) {
-	type = "LONGINT";
-      } else if ( i->getType() == "unsigned long int" ) {
-	type = "LONGUINT";
-      } else if ( i->getType() == "float" ) {
-	type = "FLOAT";
-      } else if ( i->getType() == "string" ) {
-	type = "STRING";
-	dataptr = "";
-      } else {
-	type = "ENUM";
-	enumtype = i->getType().c_str();
-      }
-
-      fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s%s%s%s);\n",
-	      type, i->getName().c_str(),
-	      (i->getLengthValue() > 0) ? i->getLengthValue() : 1,
-	      dataptr, i->getName().c_str(),
-	      enumtype ? ", \"" : "",
-	      enumtype ? enumtype : "",
-	      enumtype ? "\"" : ""
-	      );
-    }
-  } else {
-    fprintf(f,
-	    "  data_size = 0;\n"
-	    "  data_ptr  = NULL;\n");
-  }
+  write_add_fieldinfo_calls(f, fields);
 
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
     fprintf(f, "  add_messageinfo(\"%s\");\n", i->getName().c_str());
@@ -721,7 +738,8 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	    "  data_size = sizeof(%s_data_t);\n"
 	    "  data_ptr  = malloc(data_size);\n"
 	    "  memset(data_ptr, 0, data_size);\n"
-	    "  data      = (%s_data_t *)data_ptr;\n",
+	    "  data      = (%s_data_t *)data_ptr;\n"
+	    "  data_ts   = (message_data_ts_t *)data_ptr;\n",
 	    super_class.c_str(), classname.c_str(), classname.c_str(), classname.c_str());
     
     for (i = fields.begin(); i != fields.end(); ++i) {
@@ -741,39 +759,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
       }
     }
 
-    for (i = fields.begin(); i != fields.end(); ++i) {
-      const char *type = "";
-      const char *dataptr = "&";
-      bool do_print = true;
-
-      if ( i->getType() == "bool" ) {
-	type = "BOOL";
-      } else if ( i->getType() == "int" ) {
-	type = "INT";
-      } else if ( i->getType() == "unsigned int" ) {
-	type = "UINT";
-      } else if ( i->getType() == "byte" ) {
-	type = "BYTE";
-      } else if ( i->getType() == "long int" ) {
-	type = "LONGINT";
-      } else if ( i->getType() == "unsigned long int" ) {
-	type = "LONGUINT";
-      } else if ( i->getType() == "float" ) {
-	type = "FLOAT";
-      } else if ( i->getType() == "string" ) {
-	type = "STRING";
-	dataptr = "";
-      } else {
-	do_print = false;
-      }
-
-      if (do_print) {
-	fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s);\n",
-		type, i->getName().c_str(),
-		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
-		dataptr, i->getName().c_str());
-      }
-    }
+    write_add_fieldinfo_calls(f, fields);
 
     fprintf(f, "}\n");
   }
@@ -785,64 +771,24 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	  inclusion_prefix.c_str(), classname.c_str(),
 	  classname.c_str(), super_class.c_str(), classname.c_str());
 
-  if ( fields.size() > 0 ) {
-    fprintf(f,
-	    "  data_size = sizeof(%s_data_t);\n"
-	    "  data_ptr  = malloc(data_size);\n"
-	    "  memset(data_ptr, 0, data_size);\n"
-	    "  data      = (%s_data_t *)data_ptr;\n",
-	    classname.c_str(), classname.c_str());
+  fprintf(f,
+	  "  data_size = sizeof(%s_data_t);\n"
+	  "  data_ptr  = malloc(data_size);\n"
+	  "  memset(data_ptr, 0, data_size);\n"
+	  "  data      = (%s_data_t *)data_ptr;\n"
+	  "  data_ts   = (message_data_ts_t *)data_ptr;\n",
+	  classname.c_str(), classname.c_str());
 
-    for (i = fields.begin(); i != fields.end(); ++i) {
-      const char *type = "";
-      const char *dataptr = "&";
-      bool do_print = true;
-
-      if ( i->getType() == "bool" ) {
-	type = "BOOL";
-      } else if ( i->getType() == "int" ) {
-	type = "INT";
-      } else if ( i->getType() == "unsigned int" ) {
-	type = "UINT";
-      } else if ( i->getType() == "byte" ) {
-	type = "BYTE";
-      } else if ( i->getType() == "long int" ) {
-	type = "LONGINT";
-      } else if ( i->getType() == "unsigned long int" ) {
-	type = "LONGUINT";
-      } else if ( i->getType() == "float" ) {
-	type = "FLOAT";
-      } else if ( i->getType() == "string" ) {
-	type = "STRING";
-	dataptr = "";
-      } else {
-	do_print = false;
-      }
-
-      if (do_print) {
-	fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s);\n",
-		type, i->getName().c_str(),
-		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
-		dataptr, i->getName().c_str());
-      }
-    }
-
-  } else {
-    fprintf(f,
-	    "  data_size = 0;\n"
-	    "  data_ptr  = NULL;\n");
-  }
+  write_add_fieldinfo_calls(f, fields);
 
   fprintf(f,
 	  "}\n\n"
 	  "/** Destructor */\n"
 	  "%s%s::~%s()\n"
 	  "{\n"
-	  "%s"
+	  "  free(data_ptr);\n"
 	  "}\n\n",
-	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
-	  (fields.size() > 0) ? "  free(data_ptr);\n" : ""
-	  );
+	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str());
 
   fprintf(f,
 	  "/** Copy constructor.\n"
@@ -853,17 +799,14 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
 	  classname.c_str(), super_class.c_str(), classname.c_str());
 
-  if ( fields.size() > 0 ) {
-    fprintf(f,
-	    "  data_size = m->data_size;\n"
-	    "  data_ptr  = malloc(data_size);\n"
-	    "  memcpy(data_ptr, m->data_ptr, data_size);\n"
-	    "  data      = (%s_data_t *)data_ptr;\n", classname.c_str());
-  } else {
-    fprintf(f,
-	    "  data_size = 0;\n"
-	    "  data_ptr  = NULL;\n");
-  }
+  fprintf(f,
+	  "  data_size = m->data_size;\n"
+	  "  data_ptr  = malloc(data_size);\n"
+	  "  memcpy(data_ptr, m->data_ptr, data_size);\n"
+	  "  data      = (%s_data_t *)data_ptr;\n"
+	  "  data_ts   = (message_data_ts_t *)data_ptr;\n",
+	  classname.c_str());
+
 
   fprintf(f, "}\n\n");
 }
@@ -875,12 +818,16 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
  * @param classname name of class (can be interface or message)
  * @param fields fields
  * @param inclusion_prefix used if class is included in another class.
+ * @param write_data_changed if true writes code that sets the interface's
+ * data_changed flag. Set to true for interface methods, false for message
+ * methods.
  */
 void
 CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 					 std::string classname,
 					 std::vector<InterfaceField> fields,
-					 std::string inclusion_prefix)
+					 std::string inclusion_prefix,
+					 bool write_data_changed)
 {
   fprintf(f, "/* Methods */\n");
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -970,7 +917,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      "  data->%s = new_%s;\n",
 	      (*i).getName().c_str(), (*i).getName().c_str());
     }
-    fprintf(f, "}\n\n");
+    fprintf(f, "%s}\n\n", write_data_changed ? "  data_changed = true;\n" : "");
 
     if ( ((*i).getType() != "string") && ((*i).getLengthValue() > 0) ) {
       fprintf(f,
@@ -1014,7 +961,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 					 std::vector<InterfacePseudoMap> pseudo_maps,
 					 std::string inclusion_prefix)
 {
-  write_methods_cpp(f, interface_classname, classname, fields, inclusion_prefix);
+  write_methods_cpp(f, interface_classname, classname, fields,
+		    inclusion_prefix, true);
 
   for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
     fprintf(f,

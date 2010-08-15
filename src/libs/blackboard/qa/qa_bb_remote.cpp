@@ -36,10 +36,12 @@
 #include <core/exceptions/system.h>
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/server_thread.h>
+#include <utils/time/time.h>
 
 #include <signal.h>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 #include <iostream>
 #include <vector>
@@ -82,7 +84,7 @@ test_messaging(TestInterface *ti_reader, TestInterface *ti_writer)
       }
       if ( ti_writer->msgq_first_is<TestInterface::SetTestIntMessage>() ) {
 	TestInterface::SetTestIntMessage *m2 = ti_writer->msgq_first<TestInterface::SetTestIntMessage>();
-	printf("Received message with ID %u\n", m2->id());
+	printf("Received message with ID %u (enqueue time: %s)\n", m2->id(), m2->time_enqueued()->str());
 	ti_writer->set_test_int( m2->test_int() );
 	try {
 	  ti_writer->write();

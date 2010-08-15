@@ -2,70 +2,70 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="KatanaInterface" author="Tim Niemueller" year="2009">
   <constants>
-    <constant type="unsigned int" name="SENSOR_IR_RIGHT_INNER_MIDDLE" value="0">
+    <constant type="uint32" name="SENSOR_IR_RIGHT_INNER_MIDDLE" value="0">
       IR reflex sensor, right finger, inner middle.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_RIGHT_INNER_FRONT" value="1">
+    <constant type="uint32" name="SENSOR_IR_RIGHT_INNER_FRONT" value="1">
       IR reflex sensor, right finger, inner front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_RESERVED_2" value="2">
+    <constant type="uint32" name="SENSOR_RESERVED_2" value="2">
       Reserved for future use.
     </constant>
-    <constant type="unsigned int" name="SENSOR_COND_BOTH" value="3">
+    <constant type="uint32" name="SENSOR_COND_BOTH" value="3">
       Conductivity, both fingers, user specific.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_RIGHT_OUTER_FRONT" value="4">
+    <constant type="uint32" name="SENSOR_IR_RIGHT_OUTER_FRONT" value="4">
       IR reflex sensor, right finger, outer front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_RIGHT_BOTTOM_FRONT" value="5">
+    <constant type="uint32" name="SENSOR_IR_RIGHT_BOTTOM_FRONT" value="5">
       IR reflex sensor, right finger, bottom front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_FORCE_RIGHT_REAR" value="6">
+    <constant type="uint32" name="SENSOR_FORCE_RIGHT_REAR" value="6">
       Force sensor, right finger, rear.
     </constant>
-    <constant type="unsigned int" name="SENSOR_FORCE_RIGHT_FRONT" value="7">
+    <constant type="uint32" name="SENSOR_FORCE_RIGHT_FRONT" value="7">
       Force sensor, right finger, front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_LEFT_INNER_MIDDLE" value="8">
+    <constant type="uint32" name="SENSOR_IR_LEFT_INNER_MIDDLE" value="8">
       IR reflex sensor, left finger, inner middle.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_LEFT_INNER_FRONT" value="9">
+    <constant type="uint32" name="SENSOR_IR_LEFT_INNER_FRONT" value="9">
       IR reflex sensor, left finger, inner front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_RESERVED_10" value="10">
+    <constant type="uint32" name="SENSOR_RESERVED_10" value="10">
       Reserved for future use.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_CENTER_GRIPPER" value="11">
+    <constant type="uint32" name="SENSOR_IR_CENTER_GRIPPER" value="11">
       IR reflex sensor, center, gripper.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_LEFT_OUTER_FRONT" value="12">
+    <constant type="uint32" name="SENSOR_IR_LEFT_OUTER_FRONT" value="12">
       IR reflex sensor, left finger, outer front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_IR_LEFT_BOTTOM_FRONT" value="13">
+    <constant type="uint32" name="SENSOR_IR_LEFT_BOTTOM_FRONT" value="13">
       IR reflex sensor, left finger, bottom front.
     </constant>
-    <constant type="unsigned int" name="SENSOR_FORCE_LEFT_REAR" value="14">
+    <constant type="uint32" name="SENSOR_FORCE_LEFT_REAR" value="14">
       Force sensor, left finger, rear.
     </constant>
-    <constant type="unsigned int" name="SENSOR_FORCE_LEFT_FRONT" value="15">
+    <constant type="uint32" name="SENSOR_FORCE_LEFT_FRONT" value="15">
       Force sensor, left finger, front.
     </constant>
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
 	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
-    <constant type="unsigned int" value="0" name="ERROR_NONE">No error.</constant>
-    <constant type="unsigned int" value="1" name="ERROR_UNSPECIFIC">
+    <constant type="uint32" value="0" name="ERROR_NONE">No error.</constant>
+    <constant type="uint32" value="1" name="ERROR_UNSPECIFIC">
       Some unspecified error occured.
     </constant>
-    <constant type="unsigned int" value="2" name="ERROR_CMD_START_FAILED">
+    <constant type="uint32" value="2" name="ERROR_CMD_START_FAILED">
       Command failed to start (non-blocking operations).
     </constant>
-    <constant type="unsigned int" value="4" name="ERROR_NO_SOLUTION">
+    <constant type="uint32" value="4" name="ERROR_NO_SOLUTION">
       Solution (inverse kinematics) could not be calculated.
     </constant>
-    <constant type="unsigned int" value="8" name="ERROR_COMMUNICATION">
+    <constant type="uint32" value="8" name="ERROR_COMMUNICATION">
       Communication with arm failed (too often).
     </constant>
-    <constant type="unsigned int" value="16" name="ERROR_MOTOR_CRASHED">
+    <constant type="uint32" value="16" name="ERROR_MOTOR_CRASHED">
       Motor crashed.
     </constant>
   </constants>
@@ -89,11 +89,11 @@
     <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
     <field type="float" name="psi">Euler angle Psi of tool orientation..</field>
 
-    <field type="unsigned int" name="msgid">The ID of the message that is currently being
+    <field type="uint32" name="msgid">The ID of the message that is currently being
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
-    <field type="unsigned int" name="error_code">Failure code set if
+    <field type="uint32" name="error_code">Failure code set if
     final is true. 0 if no error occured, an error code from ERROR_*
     constants otherwise (or a bit-wise combination).</field>
 

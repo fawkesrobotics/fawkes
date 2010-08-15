@@ -69,10 +69,14 @@ class VisualDisplay2DInterface : public Interface
   const char * tostring_Anchor(Anchor value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int counter; /**< Field */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t counter; /**< Field */
   } VisualDisplay2DInterface_data_t;
+#pragma pack(pop)
 
   VisualDisplay2DInterface_data_t *data;
 
@@ -81,19 +85,23 @@ class VisualDisplay2DInterface : public Interface
   class AddCartLineMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x[2]; /**< X coordinates of two points */
       float y[2]; /**< Y coordinates of two
     points */
-      unsigned char color[4]; /**< Color in RGBA */
       LineStyle style; /**< Style of this object. */
+      uint8_t color[4]; /**< Color in RGBA */
     } AddCartLineMessage_data_t;
+#pragma pack(pop)
 
     AddCartLineMessage_data_t *data;
 
    public:
-    AddCartLineMessage(const float * ini_x, const float * ini_y, const LineStyle ini_style, const unsigned char * ini_color);
+    AddCartLineMessage(const float * ini_x, const float * ini_y, const LineStyle ini_style, const uint8_t * ini_color);
     AddCartLineMessage();
     ~AddCartLineMessage();
 
@@ -112,10 +120,10 @@ class VisualDisplay2DInterface : public Interface
     LineStyle style() const;
     void set_style(const LineStyle new_style);
     size_t maxlenof_style() const;
-    unsigned char * color() const;
-    unsigned char color(unsigned int index) const;
-    void set_color(unsigned int index, const unsigned char new_color);
-    void set_color(const unsigned char * new_color);
+    uint8_t * color() const;
+    uint8_t color(unsigned int index) const;
+    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(const uint8_t * new_color);
     size_t maxlenof_color() const;
     virtual Message * clone() const;
   };
@@ -123,19 +131,23 @@ class VisualDisplay2DInterface : public Interface
   class AddCartCircleMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X coordinate of center point */
       float y; /**< Y coordinate of center point */
       float radius; /**< Radius of the circle. */
-      unsigned char color[4]; /**< Color in RGBA */
       LineStyle style; /**< Style of this object. */
+      uint8_t color[4]; /**< Color in RGBA */
     } AddCartCircleMessage_data_t;
+#pragma pack(pop)
 
     AddCartCircleMessage_data_t *data;
 
    public:
-    AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const unsigned char * ini_color);
+    AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const uint8_t * ini_color);
     AddCartCircleMessage();
     ~AddCartCircleMessage();
 
@@ -153,10 +165,10 @@ class VisualDisplay2DInterface : public Interface
     LineStyle style() const;
     void set_style(const LineStyle new_style);
     size_t maxlenof_style() const;
-    unsigned char * color() const;
-    unsigned char color(unsigned int index) const;
-    void set_color(unsigned int index, const unsigned char new_color);
-    void set_color(const unsigned char * new_color);
+    uint8_t * color() const;
+    uint8_t color(unsigned int index) const;
+    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(const uint8_t * new_color);
     size_t maxlenof_color() const;
     virtual Message * clone() const;
   };
@@ -164,20 +176,24 @@ class VisualDisplay2DInterface : public Interface
   class AddCartRectMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X coordinate of lower right corner */
       float y; /**< Y coordinate of lower right corner */
       float width; /**< Width of rectangle */
       float height; /**< Height of rectangle */
-      unsigned char color[4]; /**< Color in RGBA */
       LineStyle style; /**< Style of this object. */
+      uint8_t color[4]; /**< Color in RGBA */
     } AddCartRectMessage_data_t;
+#pragma pack(pop)
 
     AddCartRectMessage_data_t *data;
 
    public:
-    AddCartRectMessage(const float ini_x, const float ini_y, const float ini_width, const float ini_height, const LineStyle ini_style, const unsigned char * ini_color);
+    AddCartRectMessage(const float ini_x, const float ini_y, const float ini_width, const float ini_height, const LineStyle ini_style, const uint8_t * ini_color);
     AddCartRectMessage();
     ~AddCartRectMessage();
 
@@ -198,10 +214,10 @@ class VisualDisplay2DInterface : public Interface
     LineStyle style() const;
     void set_style(const LineStyle new_style);
     size_t maxlenof_style() const;
-    unsigned char * color() const;
-    unsigned char color(unsigned int index) const;
-    void set_color(unsigned int index, const unsigned char new_color);
-    void set_color(const unsigned char * new_color);
+    uint8_t * color() const;
+    uint8_t color(unsigned int index) const;
+    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(const uint8_t * new_color);
     size_t maxlenof_color() const;
     virtual Message * clone() const;
   };
@@ -209,21 +225,25 @@ class VisualDisplay2DInterface : public Interface
   class AddCartTextMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X coordinate of upper left corner */
       float y; /**< Y coordinate of upper left corner */
-      float size; /**< Font size (max height in m). */
-      unsigned char color[4]; /**< Color in RGBA */
       char text[128]; /**< Width of rectangle */
       Anchor anchor; /**< Anchor which marks the
       alignment to the given point. */
+      float size; /**< Font size (max height in m). */
+      uint8_t color[4]; /**< Color in RGBA */
     } AddCartTextMessage_data_t;
+#pragma pack(pop)
 
     AddCartTextMessage_data_t *data;
 
    public:
-    AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const unsigned char * ini_color);
+    AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const uint8_t * ini_color);
     AddCartTextMessage();
     ~AddCartTextMessage();
 
@@ -244,10 +264,10 @@ class VisualDisplay2DInterface : public Interface
     float size() const;
     void set_size(const float new_size);
     size_t maxlenof_size() const;
-    unsigned char * color() const;
-    unsigned char color(unsigned int index) const;
-    void set_color(unsigned int index, const unsigned char new_color);
-    void set_color(const unsigned char * new_color);
+    uint8_t * color() const;
+    uint8_t color(unsigned int index) const;
+    void set_color(unsigned int index, const uint8_t new_color);
+    void set_color(const uint8_t * new_color);
     size_t maxlenof_color() const;
     virtual Message * clone() const;
   };
@@ -255,29 +275,44 @@ class VisualDisplay2DInterface : public Interface
   class DeleteObjectMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int object_id; /**< Object ID, which is
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t object_id; /**< Object ID, which is
     the message ID of the Add* message. */
     } DeleteObjectMessage_data_t;
+#pragma pack(pop)
 
     DeleteObjectMessage_data_t *data;
 
    public:
-    DeleteObjectMessage(const unsigned int ini_object_id);
+    DeleteObjectMessage(const uint32_t ini_object_id);
     DeleteObjectMessage();
     ~DeleteObjectMessage();
 
     DeleteObjectMessage(const DeleteObjectMessage *m);
     /* Methods */
-    unsigned int object_id() const;
-    void set_object_id(const unsigned int new_object_id);
+    uint32_t object_id() const;
+    void set_object_id(const uint32_t new_object_id);
     size_t maxlenof_object_id() const;
     virtual Message * clone() const;
   };
 
   class DeleteAllMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } DeleteAllMessage_data_t;
+#pragma pack(pop)
+
+    DeleteAllMessage_data_t *data;
+
    public:
     DeleteAllMessage();
     ~DeleteAllMessage();
@@ -294,8 +329,8 @@ class VisualDisplay2DInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int counter() const;
-  void set_counter(const unsigned int new_counter);
+  uint32_t counter() const;
+  void set_counter(const uint32_t new_counter);
   size_t maxlenof_counter() const;
   virtual Message * create_message(const char *type) const;
 

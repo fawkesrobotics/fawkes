@@ -37,56 +37,60 @@ class JoystickInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int BUTTON_1;
-  static const unsigned int BUTTON_2;
-  static const unsigned int BUTTON_3;
-  static const unsigned int BUTTON_4;
-  static const unsigned int BUTTON_5;
-  static const unsigned int BUTTON_6;
-  static const unsigned int BUTTON_7;
-  static const unsigned int BUTTON_8;
-  static const unsigned int BUTTON_9;
-  static const unsigned int BUTTON_10;
-  static const unsigned int BUTTON_11;
-  static const unsigned int BUTTON_12;
-  static const unsigned int BUTTON_13;
-  static const unsigned int BUTTON_14;
-  static const unsigned int BUTTON_15;
-  static const unsigned int BUTTON_16;
-  static const unsigned int BUTTON_17;
-  static const unsigned int BUTTON_18;
-  static const unsigned int BUTTON_19;
-  static const unsigned int BUTTON_20;
-  static const unsigned int BUTTON_21;
-  static const unsigned int BUTTON_22;
-  static const unsigned int BUTTON_23;
-  static const unsigned int BUTTON_24;
-  static const unsigned int BUTTON_25;
-  static const unsigned int BUTTON_26;
-  static const unsigned int BUTTON_27;
-  static const unsigned int BUTTON_28;
-  static const unsigned int BUTTON_29;
-  static const unsigned int BUTTON_30;
-  static const unsigned int BUTTON_31;
-  static const unsigned int BUTTON_32;
+  static const uint32_t BUTTON_1;
+  static const uint32_t BUTTON_2;
+  static const uint32_t BUTTON_3;
+  static const uint32_t BUTTON_4;
+  static const uint32_t BUTTON_5;
+  static const uint32_t BUTTON_6;
+  static const uint32_t BUTTON_7;
+  static const uint32_t BUTTON_8;
+  static const uint32_t BUTTON_9;
+  static const uint32_t BUTTON_10;
+  static const uint32_t BUTTON_11;
+  static const uint32_t BUTTON_12;
+  static const uint32_t BUTTON_13;
+  static const uint32_t BUTTON_14;
+  static const uint32_t BUTTON_15;
+  static const uint32_t BUTTON_16;
+  static const uint32_t BUTTON_17;
+  static const uint32_t BUTTON_18;
+  static const uint32_t BUTTON_19;
+  static const uint32_t BUTTON_20;
+  static const uint32_t BUTTON_21;
+  static const uint32_t BUTTON_22;
+  static const uint32_t BUTTON_23;
+  static const uint32_t BUTTON_24;
+  static const uint32_t BUTTON_25;
+  static const uint32_t BUTTON_26;
+  static const uint32_t BUTTON_27;
+  static const uint32_t BUTTON_28;
+  static const uint32_t BUTTON_29;
+  static const uint32_t BUTTON_30;
+  static const uint32_t BUTTON_31;
+  static const uint32_t BUTTON_32;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int pressed_buttons; /**< 
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint8_t num_axes; /**< 
+      The number of axes of this joystick
+     */
+    uint8_t num_buttons; /**< 
+      The number of buttons of this joystick.
+     */
+    uint32_t pressed_buttons; /**< 
       A bit field of enabled buttons. For each currently clicked button the
       corresponding bit is set to 1. Use the BUTTON_* constants for bit-wise
       comparisons.
      */
     float axis_x[4]; /**< X values of axes */
     float axis_y[4]; /**< Y values of axes */
-    unsigned char num_axes; /**< 
-      The number of axes of this joystick
-     */
-    unsigned char num_buttons; /**< 
-      The number of buttons of this joystick.
-     */
   } JoystickInterface_data_t;
+#pragma pack(pop)
 
   JoystickInterface_data_t *data;
 
@@ -99,14 +103,14 @@ class JoystickInterface : public Interface
 
  public:
   /* Methods */
-  unsigned char num_axes() const;
-  void set_num_axes(const unsigned char new_num_axes);
+  uint8_t num_axes() const;
+  void set_num_axes(const uint8_t new_num_axes);
   size_t maxlenof_num_axes() const;
-  unsigned char num_buttons() const;
-  void set_num_buttons(const unsigned char new_num_buttons);
+  uint8_t num_buttons() const;
+  void set_num_buttons(const uint8_t new_num_buttons);
   size_t maxlenof_num_buttons() const;
-  unsigned int pressed_buttons() const;
-  void set_pressed_buttons(const unsigned int new_pressed_buttons);
+  uint32_t pressed_buttons() const;
+  void set_pressed_buttons(const uint32_t new_pressed_buttons);
   size_t maxlenof_pressed_buttons() const;
   float * axis_x() const;
   float axis_x(unsigned int index) const;

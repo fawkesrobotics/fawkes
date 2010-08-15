@@ -35,6 +35,7 @@
 
 #include <signal.h>
 #include <cstdlib>
+#include <cstdio>
 
 #include <iostream>
 #include <vector>
@@ -60,9 +61,7 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  LocalBlackBoard *lbb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
-					     BLACKBOARD_MAGIC_TOKEN,
-					     /* master */  true);
+  LocalBlackBoard *lbb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
 
   BlackBoard *bb = lbb;
   const BlackBoardMemoryManager *mm = lbb->memory_manager();
@@ -137,34 +136,9 @@ main(int argc, char **argv)
 
 
   cout << "Iterating over reader interface.." << endl;
-  Interface::FieldIterator fi;
+  InterfaceFieldIterator fi;
   for ( fi = ti_reader->fields(); fi != ti_reader->fields_end(); ++fi) {
-    switch (fi.get_type() ) {
-    case Interface::IFT_BOOL:
-      printf("Name: %s  Type: bool       Value: %i\n", fi.get_name(), fi.get_bool());
-      break;
-    case Interface::IFT_INT:
-      printf("Name: %s  Type: int        Value: %i\n", fi.get_name(), fi.get_int());
-      break;
-    case Interface::IFT_UINT:
-      printf("Name: %s  Type: uint       Value: %u\n", fi.get_name(), fi.get_uint());
-      break;
-    case Interface::IFT_LONGINT:
-      printf("Name: %s  Type: long int   Value: %li\n", fi.get_name(), fi.get_longint());
-      break;
-    case Interface::IFT_LONGUINT:
-      printf("Name: %s  Type: long uint  Value: %lu\n", fi.get_name(), fi.get_longuint());
-      break;
-    case Interface::IFT_FLOAT:
-      printf("Name: %s  Type: float      Value: %f\n", fi.get_name(), fi.get_float());
-      break;
-    case Interface::IFT_STRING:
-      printf("Name: %s  Type: string     Value: %s\n", fi.get_name(), fi.get_string());
-      break;
-    case Interface::IFT_BYTE:
-      printf("Name: %s  Type: byte       Value: %u\n", fi.get_name(), fi.get_byte());
-      break;
-    }
+    printf("Name: %20s  Type: %10s  Value: %s\n", fi.get_name(), fi.get_typename(), fi.get_value_string());
   }
   cout << "done" << endl;
 

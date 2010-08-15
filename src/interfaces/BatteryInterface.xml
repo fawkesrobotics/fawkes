@@ -5,9 +5,9 @@
     <comment>This interface contains status information about the
     battery. In addition to this it allows to send messages which
     turn the battery on/off</comment>
-    <field type="unsigned int" name="current">Battery Current [mA]</field>
-    <field type="unsigned int" name="voltage">Battery Voltage [mV]</field>
-    <field type="unsigned int" name="temperature">Battery Temperature [°C]</field>
+    <field type="uint32" name="current">Battery Current [mA]</field>
+    <field type="uint32" name="voltage">Battery Voltage [mV]</field>
+    <field type="uint32" name="temperature">Battery Temperature [°C]</field>
     <field type="float" name="absolute_soc">Absolute state of charge [%]</field>
     <field type="float" name="relative_soc">Relative state of charge [%]</field>
   </data>

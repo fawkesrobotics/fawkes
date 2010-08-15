@@ -37,25 +37,32 @@ class PanTiltInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int FLAG_SUPPORTS_PAN;
-  static const unsigned int FLAG_SUPPORTS_TILT;
-  static const unsigned int ERROR_NONE;
-  static const unsigned int ERROR_UNSPECIFIC;
-  static const unsigned int ERROR_COMMUNICATION;
-  static const unsigned int ERROR_PAN_OUTOFRANGE;
-  static const unsigned int ERROR_TILT_OUTOFRANGE;
+  static const uint32_t FLAG_SUPPORTS_PAN;
+  static const uint32_t FLAG_SUPPORTS_TILT;
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_UNSPECIFIC;
+  static const uint32_t ERROR_COMMUNICATION;
+  static const uint32_t ERROR_PAN_OUTOFRANGE;
+  static const uint32_t ERROR_TILT_OUTOFRANGE;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int flags; /**< Flags. */
-    unsigned int msgid; /**< The ID of the message that is currently being
-      processed, or 0 if no message is being processed. */
-    unsigned int error_code; /**< Failure code set if
-    final is true. 0 if no error occured, an error code from ERROR_*
-    constants otherwise (or a bit-wise combination). */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t flags; /**< Flags. */
     float pan; /**< Current pan. */
     float tilt; /**< Current tilt. */
+    uint32_t msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
+    bool final; /**< True, if the last goto command has been finished,
+      false if it is still running */
+    uint32_t error_code; /**< Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination). */
+    bool enabled; /**< Is the pan/tilt unit enabled? */
+    bool calibrated; /**< Is the pan/tilt unit calibrated? */
     float min_pan; /**< Minimum pan possible. */
     float max_pan; /**< Maximum pan possible. */
     float min_tilt; /**< Minimum tilt possible. */
@@ -68,11 +75,8 @@ class PanTiltInterface : public Interface
     target pan value to consider the motion as final. */
     float tilt_margin; /**< Margin in radians around a
     target tilt value to consider the motion as final. */
-    bool final; /**< True, if the last goto command has been finished,
-      false if it is still running */
-    bool enabled; /**< Is the pan/tilt unit enabled? */
-    bool calibrated; /**< Is the pan/tilt unit calibrated? */
   } PanTiltInterface_data_t;
+#pragma pack(pop)
 
   PanTiltInterface_data_t *data;
 
@@ -80,6 +84,17 @@ class PanTiltInterface : public Interface
   /* messages */
   class StopMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopMessage_data_t;
+#pragma pack(pop)
+
+    StopMessage_data_t *data;
+
    public:
     StopMessage();
     ~StopMessage();
@@ -91,6 +106,17 @@ class PanTiltInterface : public Interface
 
   class FlushMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } FlushMessage_data_t;
+#pragma pack(pop)
+
+    FlushMessage_data_t *data;
+
    public:
     FlushMessage();
     ~FlushMessage();
@@ -102,6 +128,17 @@ class PanTiltInterface : public Interface
 
   class CalibrateMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } CalibrateMessage_data_t;
+#pragma pack(pop)
+
+    CalibrateMessage_data_t *data;
+
    public:
     CalibrateMessage();
     ~CalibrateMessage();
@@ -113,6 +150,17 @@ class PanTiltInterface : public Interface
 
   class ParkMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ParkMessage_data_t;
+#pragma pack(pop)
+
+    ParkMessage_data_t *data;
+
    public:
     ParkMessage();
     ~ParkMessage();
@@ -125,11 +173,15 @@ class PanTiltInterface : public Interface
   class GotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float pan; /**< Current pan. */
       float tilt; /**< Current tilt. */
     } GotoMessage_data_t;
+#pragma pack(pop)
 
     GotoMessage_data_t *data;
 
@@ -152,13 +204,17 @@ class PanTiltInterface : public Interface
   class TimedGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float time_sec; /**< Time in seconds when to reach
     the final position. */
       float pan; /**< Current pan. */
       float tilt; /**< Current tilt. */
     } TimedGotoMessage_data_t;
+#pragma pack(pop)
 
     TimedGotoMessage_data_t *data;
 
@@ -184,10 +240,14 @@ class PanTiltInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< Is the pan/tilt unit enabled? */
     } SetEnabledMessage_data_t;
+#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 
@@ -207,11 +267,15 @@ class PanTiltInterface : public Interface
   class SetVelocityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float pan_velocity; /**< Maximum pan velocity currently reached. */
       float tilt_velocity; /**< Maximum tilt velocity currently reached. */
     } SetVelocityMessage_data_t;
+#pragma pack(pop)
 
     SetVelocityMessage_data_t *data;
 
@@ -234,13 +298,17 @@ class PanTiltInterface : public Interface
   class SetMarginMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float pan_margin; /**< Margin in radians around a
     target pan value to consider the motion as final. */
       float tilt_margin; /**< Margin in radians around a
     target tilt value to consider the motion as final. */
     } SetMarginMessage_data_t;
+#pragma pack(pop)
 
     SetMarginMessage_data_t *data;
 
@@ -267,8 +335,8 @@ class PanTiltInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int flags() const;
-  void set_flags(const unsigned int new_flags);
+  uint32_t flags() const;
+  void set_flags(const uint32_t new_flags);
   size_t maxlenof_flags() const;
   float pan() const;
   void set_pan(const float new_pan);
@@ -276,14 +344,14 @@ class PanTiltInterface : public Interface
   float tilt() const;
   void set_tilt(const float new_tilt);
   size_t maxlenof_tilt() const;
-  unsigned int msgid() const;
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
   size_t maxlenof_msgid() const;
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
-  unsigned int error_code() const;
-  void set_error_code(const unsigned int new_error_code);
+  uint32_t error_code() const;
+  void set_error_code(const uint32_t new_error_code);
   size_t maxlenof_error_code() const;
   bool is_enabled() const;
   void set_enabled(const bool new_enabled);

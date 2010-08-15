@@ -37,37 +37,37 @@ class KatanaInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int SENSOR_IR_RIGHT_INNER_MIDDLE;
-  static const unsigned int SENSOR_IR_RIGHT_INNER_FRONT;
-  static const unsigned int SENSOR_RESERVED_2;
-  static const unsigned int SENSOR_COND_BOTH;
-  static const unsigned int SENSOR_IR_RIGHT_OUTER_FRONT;
-  static const unsigned int SENSOR_IR_RIGHT_BOTTOM_FRONT;
-  static const unsigned int SENSOR_FORCE_RIGHT_REAR;
-  static const unsigned int SENSOR_FORCE_RIGHT_FRONT;
-  static const unsigned int SENSOR_IR_LEFT_INNER_MIDDLE;
-  static const unsigned int SENSOR_IR_LEFT_INNER_FRONT;
-  static const unsigned int SENSOR_RESERVED_10;
-  static const unsigned int SENSOR_IR_CENTER_GRIPPER;
-  static const unsigned int SENSOR_IR_LEFT_OUTER_FRONT;
-  static const unsigned int SENSOR_IR_LEFT_BOTTOM_FRONT;
-  static const unsigned int SENSOR_FORCE_LEFT_REAR;
-  static const unsigned int SENSOR_FORCE_LEFT_FRONT;
-  static const unsigned int ERROR_NONE;
-  static const unsigned int ERROR_UNSPECIFIC;
-  static const unsigned int ERROR_CMD_START_FAILED;
-  static const unsigned int ERROR_NO_SOLUTION;
-  static const unsigned int ERROR_COMMUNICATION;
-  static const unsigned int ERROR_MOTOR_CRASHED;
+  static const uint32_t SENSOR_IR_RIGHT_INNER_MIDDLE;
+  static const uint32_t SENSOR_IR_RIGHT_INNER_FRONT;
+  static const uint32_t SENSOR_RESERVED_2;
+  static const uint32_t SENSOR_COND_BOTH;
+  static const uint32_t SENSOR_IR_RIGHT_OUTER_FRONT;
+  static const uint32_t SENSOR_IR_RIGHT_BOTTOM_FRONT;
+  static const uint32_t SENSOR_FORCE_RIGHT_REAR;
+  static const uint32_t SENSOR_FORCE_RIGHT_FRONT;
+  static const uint32_t SENSOR_IR_LEFT_INNER_MIDDLE;
+  static const uint32_t SENSOR_IR_LEFT_INNER_FRONT;
+  static const uint32_t SENSOR_RESERVED_10;
+  static const uint32_t SENSOR_IR_CENTER_GRIPPER;
+  static const uint32_t SENSOR_IR_LEFT_OUTER_FRONT;
+  static const uint32_t SENSOR_IR_LEFT_BOTTOM_FRONT;
+  static const uint32_t SENSOR_FORCE_LEFT_REAR;
+  static const uint32_t SENSOR_FORCE_LEFT_FRONT;
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_UNSPECIFIC;
+  static const uint32_t ERROR_CMD_START_FAILED;
+  static const uint32_t ERROR_NO_SOLUTION;
+  static const uint32_t ERROR_COMMUNICATION;
+  static const uint32_t ERROR_MOTOR_CRASHED;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int msgid; /**< The ID of the message that is currently being
-      processed, or 0 if no message is being processed. */
-    unsigned int error_code; /**< Failure code set if
-    final is true. 0 if no error occured, an error code from ERROR_*
-    constants otherwise (or a bit-wise combination). */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint8_t sensor_value[16]; /**< Sensor
+    values. Use SENSOR_* indexes for accessing the values. */
     float x; /**< X-Coordinate for tool position
     compared to base coordinate system. */
     float y; /**< Y-Coordinate for tool position
@@ -77,15 +77,19 @@ class KatanaInterface : public Interface
     float phi; /**< Euler angle Phi of tool orientation. */
     float theta; /**< Euler angle Theta of tool orientation. */
     float psi; /**< Euler angle Psi of tool orientation.. */
+    uint32_t msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
     bool final; /**< True, if the last goto command has been finished,
       false if it is still running */
+    uint32_t error_code; /**< Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination). */
     bool enabled; /**< Are motors enabled? */
     bool calibrated; /**< Has arm been calibrated? */
-    unsigned char sensor_value[16]; /**< Sensor
-    values. Use SENSOR_* indexes for accessing the values. */
-    unsigned char max_velocity; /**< Maximum velocity */
-    unsigned char num_motors; /**< Number of motors */
+    uint8_t max_velocity; /**< Maximum velocity */
+    uint8_t num_motors; /**< Number of motors */
   } KatanaInterface_data_t;
+#pragma pack(pop)
 
   KatanaInterface_data_t *data;
 
@@ -93,6 +97,17 @@ class KatanaInterface : public Interface
   /* messages */
   class StopMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopMessage_data_t;
+#pragma pack(pop)
+
+    StopMessage_data_t *data;
+
    public:
     StopMessage();
     ~StopMessage();
@@ -104,6 +119,17 @@ class KatanaInterface : public Interface
 
   class FlushMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } FlushMessage_data_t;
+#pragma pack(pop)
+
+    FlushMessage_data_t *data;
+
    public:
     FlushMessage();
     ~FlushMessage();
@@ -115,6 +141,17 @@ class KatanaInterface : public Interface
 
   class ParkMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ParkMessage_data_t;
+#pragma pack(pop)
+
+    ParkMessage_data_t *data;
+
    public:
     ParkMessage();
     ~ParkMessage();
@@ -127,8 +164,11 @@ class KatanaInterface : public Interface
   class LinearGotoMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-Coordinate for tool position
     compared to base coordinate system. */
       float y; /**< Y-Coordinate for tool position
@@ -139,6 +179,7 @@ class KatanaInterface : public Interface
       float theta; /**< Euler angle Theta of tool orientation. */
       float psi; /**< Euler angle Psi of tool orientation.. */
     } LinearGotoMessage_data_t;
+#pragma pack(pop)
 
     LinearGotoMessage_data_t *data;
 
@@ -172,6 +213,17 @@ class KatanaInterface : public Interface
 
   class CalibrateMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } CalibrateMessage_data_t;
+#pragma pack(pop)
+
+    CalibrateMessage_data_t *data;
+
    public:
     CalibrateMessage();
     ~CalibrateMessage();
@@ -183,6 +235,17 @@ class KatanaInterface : public Interface
 
   class OpenGripperMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } OpenGripperMessage_data_t;
+#pragma pack(pop)
+
+    OpenGripperMessage_data_t *data;
+
    public:
     OpenGripperMessage();
     ~OpenGripperMessage();
@@ -194,6 +257,17 @@ class KatanaInterface : public Interface
 
   class CloseGripperMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } CloseGripperMessage_data_t;
+#pragma pack(pop)
+
+    CloseGripperMessage_data_t *data;
+
    public:
     CloseGripperMessage();
     ~CloseGripperMessage();
@@ -206,10 +280,14 @@ class KatanaInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< Are motors enabled? */
     } SetEnabledMessage_data_t;
+#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 
@@ -229,22 +307,26 @@ class KatanaInterface : public Interface
   class SetMaxVelocityMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned char max_velocity; /**< Maximum velocity */
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint8_t max_velocity; /**< Maximum velocity */
     } SetMaxVelocityMessage_data_t;
+#pragma pack(pop)
 
     SetMaxVelocityMessage_data_t *data;
 
    public:
-    SetMaxVelocityMessage(const unsigned char ini_max_velocity);
+    SetMaxVelocityMessage(const uint8_t ini_max_velocity);
     SetMaxVelocityMessage();
     ~SetMaxVelocityMessage();
 
     SetMaxVelocityMessage(const SetMaxVelocityMessage *m);
     /* Methods */
-    unsigned char max_velocity() const;
-    void set_max_velocity(const unsigned char new_max_velocity);
+    uint8_t max_velocity() const;
+    void set_max_velocity(const uint8_t new_max_velocity);
     size_t maxlenof_max_velocity() const;
     virtual Message * clone() const;
   };
@@ -256,10 +338,10 @@ class KatanaInterface : public Interface
 
  public:
   /* Methods */
-  unsigned char * sensor_value() const;
-  unsigned char sensor_value(unsigned int index) const;
-  void set_sensor_value(unsigned int index, const unsigned char new_sensor_value);
-  void set_sensor_value(const unsigned char * new_sensor_value);
+  uint8_t * sensor_value() const;
+  uint8_t sensor_value(unsigned int index) const;
+  void set_sensor_value(unsigned int index, const uint8_t new_sensor_value);
+  void set_sensor_value(const uint8_t * new_sensor_value);
   size_t maxlenof_sensor_value() const;
   float x() const;
   void set_x(const float new_x);
@@ -279,14 +361,14 @@ class KatanaInterface : public Interface
   float psi() const;
   void set_psi(const float new_psi);
   size_t maxlenof_psi() const;
-  unsigned int msgid() const;
-  void set_msgid(const unsigned int new_msgid);
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
   size_t maxlenof_msgid() const;
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
-  unsigned int error_code() const;
-  void set_error_code(const unsigned int new_error_code);
+  uint32_t error_code() const;
+  void set_error_code(const uint32_t new_error_code);
   size_t maxlenof_error_code() const;
   bool is_enabled() const;
   void set_enabled(const bool new_enabled);
@@ -294,11 +376,11 @@ class KatanaInterface : public Interface
   bool is_calibrated() const;
   void set_calibrated(const bool new_calibrated);
   size_t maxlenof_calibrated() const;
-  unsigned char max_velocity() const;
-  void set_max_velocity(const unsigned char new_max_velocity);
+  uint8_t max_velocity() const;
+  void set_max_velocity(const uint8_t new_max_velocity);
   size_t maxlenof_max_velocity() const;
-  unsigned char num_motors() const;
-  void set_num_motors(const unsigned char new_num_motors);
+  uint8_t num_motors() const;
+  void set_num_motors(const uint8_t new_num_motors);
   size_t maxlenof_num_motors() const;
   virtual Message * create_message(const char *type) const;
 

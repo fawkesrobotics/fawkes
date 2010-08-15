@@ -36,6 +36,7 @@
 #include <signal.h>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 #include <iostream>
 #include <vector>
@@ -61,8 +62,7 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
-				       BLACKBOARD_MAGIC_TOKEN);
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
   
   TestInterface *ti_writer;
   TestInterface *ti_reader;

@@ -24,15 +24,15 @@
       absolute value) the button has not been pressed. Zero means
       "just initialized".
     </field>
-    <field type="unsigned int" name="short_activations">
+    <field type="uint32" name="short_activations">
       Number of consecutive short clicks (turned on). Can be used to recognize
       patterns of clicks. This is an optional field.
     </field>
-    <field type="unsigned int" name="long_activations">
+    <field type="uint32" name="long_activations">
       Number of consecutive short clicks (turned on). Can be used to recognize
       patterns of clicks. This is an optional field.
     </field>
-    <field type="unsigned int" name="activation_count">
+    <field type="uint32" name="activation_count">
       Number that is to be incremented whenever a short or long activation
       happened. Can be used to decide if a change in status happened.
     </field>

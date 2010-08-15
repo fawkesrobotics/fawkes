@@ -39,9 +39,15 @@ class SpeechRecognitionInterface : public Interface
   /* constants */
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int counter; /**< 
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    char text[1024]; /**< 
+      Last spoken string. Must be properly null-terminated.
+     */
+    uint32_t counter; /**< 
       Counter for messages. Increased after each new recognized string.
      */
     bool processing; /**< 
@@ -50,10 +56,8 @@ class SpeechRecognitionInterface : public Interface
     bool enabled; /**< 
       True, if speech processing is currently enabled, false otherwise.
      */
-    char text[1024]; /**< 
-      Last spoken string. Must be properly null-terminated.
-     */
   } SpeechRecognitionInterface_data_t;
+#pragma pack(pop)
 
   SpeechRecognitionInterface_data_t *data;
 
@@ -61,6 +65,17 @@ class SpeechRecognitionInterface : public Interface
   /* messages */
   class ResetMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ResetMessage_data_t;
+#pragma pack(pop)
+
+    ResetMessage_data_t *data;
+
    public:
     ResetMessage();
     ~ResetMessage();
@@ -73,12 +88,16 @@ class SpeechRecognitionInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< 
       True, if speech processing is currently enabled, false otherwise.
      */
     } SetEnabledMessage_data_t;
+#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 
@@ -105,8 +124,8 @@ class SpeechRecognitionInterface : public Interface
   char * text() const;
   void set_text(const char * new_text);
   size_t maxlenof_text() const;
-  unsigned int counter() const;
-  void set_counter(const unsigned int new_counter);
+  uint32_t counter() const;
+  void set_counter(const uint32_t new_counter);
   size_t maxlenof_counter() const;
   bool is_processing() const;
   void set_processing(const bool new_processing);

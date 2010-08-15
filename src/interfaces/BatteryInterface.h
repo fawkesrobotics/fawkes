@@ -39,14 +39,18 @@ class BatteryInterface : public Interface
   /* constants */
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int current; /**< Battery Current [mA] */
-    unsigned int voltage; /**< Battery Voltage [mV] */
-    unsigned int temperature; /**< Battery Temperature [°C] */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t current; /**< Battery Current [mA] */
+    uint32_t voltage; /**< Battery Voltage [mV] */
+    uint32_t temperature; /**< Battery Temperature [°C] */
     float absolute_soc; /**< Absolute state of charge [%] */
     float relative_soc; /**< Relative state of charge [%] */
   } BatteryInterface_data_t;
+#pragma pack(pop)
 
   BatteryInterface_data_t *data;
 
@@ -54,6 +58,17 @@ class BatteryInterface : public Interface
   /* messages */
   class PushButtonMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } PushButtonMessage_data_t;
+#pragma pack(pop)
+
+    PushButtonMessage_data_t *data;
+
    public:
     PushButtonMessage();
     ~PushButtonMessage();
@@ -65,6 +80,17 @@ class BatteryInterface : public Interface
 
   class SleepMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } SleepMessage_data_t;
+#pragma pack(pop)
+
+    SleepMessage_data_t *data;
+
    public:
     SleepMessage();
     ~SleepMessage();
@@ -81,14 +107,14 @@ class BatteryInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int current() const;
-  void set_current(const unsigned int new_current);
+  uint32_t current() const;
+  void set_current(const uint32_t new_current);
   size_t maxlenof_current() const;
-  unsigned int voltage() const;
-  void set_voltage(const unsigned int new_voltage);
+  uint32_t voltage() const;
+  void set_voltage(const uint32_t new_voltage);
   size_t maxlenof_voltage() const;
-  unsigned int temperature() const;
-  void set_temperature(const unsigned int new_temperature);
+  uint32_t temperature() const;
+  void set_temperature(const uint32_t new_temperature);
   size_t maxlenof_temperature() const;
   float absolute_soc() const;
   void set_absolute_soc(const float new_absolute_soc);

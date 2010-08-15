@@ -46,14 +46,15 @@ Position2DTrackInterface::Position2DTrackInterface() : Interface()
   data_size = sizeof(Position2DTrackInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (Position2DTrackInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "track_x_positions", 30, &data->track_x_positions);
   add_fieldinfo(IFT_FLOAT, "track_y_positions", 30, &data->track_y_positions);
-  add_fieldinfo(IFT_INT, "track_timestamps", 30, &data->track_timestamps);
+  add_fieldinfo(IFT_INT32, "track_timestamps", 30, &data->track_timestamps);
   add_fieldinfo(IFT_BOOL, "valid", 1, &data->valid);
-  add_fieldinfo(IFT_UINT, "length", 1, &data->length);
-  add_fieldinfo(IFT_UINT, "track_id", 1, &data->track_id);
-  unsigned char tmp_hash[] = {0xda, 0x9e, 0x3f, 0x1e, 0x79, 0x8e, 0x9f, 0xd6, 0xec, 0xa6, 0x1f, 0xd2, 0x53, 0x7, 0x41, 0x2d};
+  add_fieldinfo(IFT_UINT32, "length", 1, &data->length);
+  add_fieldinfo(IFT_UINT32, "track_id", 1, &data->track_id);
+  unsigned char tmp_hash[] = {0xcd, 0xb8, 0x68, 0x14, 0xff, 0x3, 0xe4, 0xc4, 0x20, 0x43, 0x44, 0xb8, 0x86, 0x87, 0xa3, 0x4c};
   set_hash(tmp_hash);
 }
 
@@ -115,6 +116,7 @@ void
 Position2DTrackInterface::set_track_x_positions(const float * new_track_x_positions)
 {
   memcpy(data->track_x_positions, new_track_x_positions, sizeof(float) * 30);
+  data_changed = true;
 }
 
 /** Set track_x_positions value at given index.
@@ -185,6 +187,7 @@ void
 Position2DTrackInterface::set_track_y_positions(const float * new_track_y_positions)
 {
   memcpy(data->track_y_positions, new_track_y_positions, sizeof(float) * 30);
+  data_changed = true;
 }
 
 /** Set track_y_positions value at given index.
@@ -210,7 +213,7 @@ Position2DTrackInterface::set_track_y_positions(unsigned int index, const float 
     
  * @return track_timestamps value
  */
-int *
+int32_t *
 Position2DTrackInterface::track_timestamps() const
 {
   return data->track_timestamps;
@@ -225,7 +228,7 @@ Position2DTrackInterface::track_timestamps() const
  * @return track_timestamps value
  * @exception Exception thrown if index is out of bounds
  */
-int
+int32_t
 Position2DTrackInterface::track_timestamps(unsigned int index) const
 {
   if (index > 30) {
@@ -252,9 +255,10 @@ Position2DTrackInterface::maxlenof_track_timestamps() const
  * @param new_track_timestamps new track_timestamps value
  */
 void
-Position2DTrackInterface::set_track_timestamps(const int * new_track_timestamps)
+Position2DTrackInterface::set_track_timestamps(const int32_t * new_track_timestamps)
 {
-  memcpy(data->track_timestamps, new_track_timestamps, sizeof(int) * 30);
+  memcpy(data->track_timestamps, new_track_timestamps, sizeof(int32_t) * 30);
+  data_changed = true;
 }
 
 /** Set track_timestamps value at given index.
@@ -266,7 +270,7 @@ Position2DTrackInterface::set_track_timestamps(const int * new_track_timestamps)
  * @param index index for of the value
  */
 void
-Position2DTrackInterface::set_track_timestamps(unsigned int index, const int new_track_timestamps)
+Position2DTrackInterface::set_track_timestamps(unsigned int index, const int32_t new_track_timestamps)
 {
   if (index > 30) {
     throw Exception("Index value %u out of bounds (0..30)", index);
@@ -301,13 +305,14 @@ void
 Position2DTrackInterface::set_valid(const bool new_valid)
 {
   data->valid = new_valid;
+  data_changed = true;
 }
 
 /** Get length value.
  * Length of the Tracks (i.e. up to which index there are valid positions).
  * @return length value
  */
-unsigned int
+uint32_t
 Position2DTrackInterface::length() const
 {
   return data->length;
@@ -328,16 +333,17 @@ Position2DTrackInterface::maxlenof_length() const
  * @param new_length new length value
  */
 void
-Position2DTrackInterface::set_length(const unsigned int new_length)
+Position2DTrackInterface::set_length(const uint32_t new_length)
 {
   data->length = new_length;
+  data_changed = true;
 }
 
 /** Get track_id value.
  * The ID of the Track.
  * @return track_id value
  */
-unsigned int
+uint32_t
 Position2DTrackInterface::track_id() const
 {
   return data->track_id;
@@ -358,9 +364,10 @@ Position2DTrackInterface::maxlenof_track_id() const
  * @param new_track_id new track_id value
  */
 void
-Position2DTrackInterface::set_track_id(const unsigned int new_track_id)
+Position2DTrackInterface::set_track_id(const uint32_t new_track_id)
 {
   data->track_id = new_track_id;
+  data_changed = true;
 }
 
 /* =========== message create =========== */

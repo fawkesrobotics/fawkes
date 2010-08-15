@@ -49,10 +49,11 @@ SkillerInterface::SkillerInterface() : Interface()
   data_size = sizeof(SkillerInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SkillerInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
-  add_fieldinfo(IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
+  add_fieldinfo(IFT_UINT32, "exclusive_controller", 1, &data->exclusive_controller);
   add_fieldinfo(IFT_ENUM, "status", 1, &data->status, "SkillStatusEnum");
   add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   add_messageinfo("ExecSkillMessage");
@@ -61,7 +62,7 @@ SkillerInterface::SkillerInterface() : Interface()
   add_messageinfo("StopExecMessage");
   add_messageinfo("AcquireControlMessage");
   add_messageinfo("ReleaseControlMessage");
-  unsigned char tmp_hash[] = {0x61, 0x7c, 0x70, 0xc4, 0x68, 0x8b, 0x8b, 0x69, 0x87, 0xc1, 0xd1, 0xe6, 0xed, 0x34, 0xb5, 0x5};
+  unsigned char tmp_hash[] = {0x7c, 0x85, 0xf3, 0x24, 0xea, 0x55, 0x50, 0xa1, 0x6c, 0xdb, 0xdc, 0x4b, 0x40, 0xba, 0xa1, 0xda};
   set_hash(tmp_hash);
 }
 
@@ -120,6 +121,7 @@ void
 SkillerInterface::set_skill_string(const char * new_skill_string)
 {
   strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
+  data_changed = true;
 }
 
 /** Get error value.
@@ -154,6 +156,7 @@ void
 SkillerInterface::set_error(const char * new_error)
 {
   strncpy(data->error, new_error, sizeof(data->error));
+  data_changed = true;
 }
 
 /** Get exclusive_controller value.
@@ -164,7 +167,7 @@ SkillerInterface::set_error(const char * new_error)
     
  * @return exclusive_controller value
  */
-unsigned int
+uint32_t
 SkillerInterface::exclusive_controller() const
 {
   return data->exclusive_controller;
@@ -189,9 +192,10 @@ SkillerInterface::maxlenof_exclusive_controller() const
  * @param new_exclusive_controller new exclusive_controller value
  */
 void
-SkillerInterface::set_exclusive_controller(const unsigned int new_exclusive_controller)
+SkillerInterface::set_exclusive_controller(const uint32_t new_exclusive_controller)
 {
   data->exclusive_controller = new_exclusive_controller;
+  data_changed = true;
 }
 
 /** Get status value.
@@ -226,6 +230,7 @@ void
 SkillerInterface::set_status(const SkillStatusEnum new_status)
 {
   data->status = new_status;
+  data_changed = true;
 }
 
 /** Get continuous value.
@@ -262,6 +267,7 @@ void
 SkillerInterface::set_continuous(const bool new_continuous)
 {
   data->continuous = new_continuous;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -327,6 +333,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const char * ini_skill_stri
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->skill_string, ini_skill_string, 1024);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
@@ -337,6 +344,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage() : Message("ExecSkillMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 
@@ -355,6 +363,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const ExecSkillMessage *m) 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -420,6 +429,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const c
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->skill_string, ini_skill_string, 1024);
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
@@ -430,6 +440,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage() : Mes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
 }
 
@@ -448,6 +459,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const E
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -507,13 +519,17 @@ SkillerInterface::ExecSkillContinuousMessage::clone() const
 /** Constructor */
 SkillerInterface::RestartInterpreterMessage::RestartInterpreterMessage() : Message("RestartInterpreterMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(RestartInterpreterMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RestartInterpreterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::RestartInterpreterMessage::~RestartInterpreterMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -521,8 +537,11 @@ SkillerInterface::RestartInterpreterMessage::~RestartInterpreterMessage()
  */
 SkillerInterface::RestartInterpreterMessage::RestartInterpreterMessage(const RestartInterpreterMessage *m) : Message("RestartInterpreterMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RestartInterpreterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -546,13 +565,17 @@ SkillerInterface::RestartInterpreterMessage::clone() const
 /** Constructor */
 SkillerInterface::StopExecMessage::StopExecMessage() : Message("StopExecMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopExecMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopExecMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::StopExecMessage::~StopExecMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -560,8 +583,11 @@ SkillerInterface::StopExecMessage::~StopExecMessage()
  */
 SkillerInterface::StopExecMessage::StopExecMessage(const StopExecMessage *m) : Message("StopExecMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopExecMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -585,13 +611,17 @@ SkillerInterface::StopExecMessage::clone() const
 /** Constructor */
 SkillerInterface::AcquireControlMessage::AcquireControlMessage() : Message("AcquireControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(AcquireControlMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::AcquireControlMessage::~AcquireControlMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -599,8 +629,11 @@ SkillerInterface::AcquireControlMessage::~AcquireControlMessage()
  */
 SkillerInterface::AcquireControlMessage::AcquireControlMessage(const AcquireControlMessage *m) : Message("AcquireControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -624,13 +657,17 @@ SkillerInterface::AcquireControlMessage::clone() const
 /** Constructor */
 SkillerInterface::ReleaseControlMessage::ReleaseControlMessage() : Message("ReleaseControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ReleaseControlMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ReleaseControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SkillerInterface::ReleaseControlMessage::~ReleaseControlMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -638,8 +675,11 @@ SkillerInterface::ReleaseControlMessage::~ReleaseControlMessage()
  */
 SkillerInterface::ReleaseControlMessage::ReleaseControlMessage(const ReleaseControlMessage *m) : Message("ReleaseControlMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ReleaseControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

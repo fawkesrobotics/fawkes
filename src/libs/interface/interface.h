@@ -30,6 +30,8 @@
 
 #include <cstddef>
 #include <list>
+#define __STD_LIMIT_MACROS
+#include <stdint.h>
 
 #define __INTERFACE_TYPE_SIZE   32
 #define __INTERFACE_ID_SIZE     32
@@ -46,6 +48,8 @@ namespace fawkes {
 class RefCountRWLock;
 class InterfaceMediator;
 class MessageMediator;
+class Time;
+class Clock;
 
 class InterfaceWriteDeniedException : public Exception
 {
@@ -110,6 +114,11 @@ class Interface
   bool          has_writer() const;
   unsigned int  num_readers() const;
 
+  bool          changed() const;
+  const Time *  timestamp() const;
+  void          set_auto_timestamping(bool enabled);
+  void          set_timestamp(const Time *t = NULL);
+  void          set_clock(Clock *clock);
 
   std::list<const char *> get_message_types();
 
@@ -178,6 +187,15 @@ class Interface
 
   void         *data_ptr;
   unsigned int  data_size;
+  bool          data_changed;
+
+  /** Timestamp data, must be present and first entries for each interface
+   * data structs! This leans on timeval struct. */
+  typedef struct {
+    int64_t timestamp_sec;	/**< time in seconds since Unix epoch */
+    int64_t timestamp_usec;	/**< additional time microseconds */
+  } interface_data_ts_t;
+  interface_data_ts_t  *data_ts;
 
  private:
   void msgq_append(Message *message);
@@ -218,6 +236,11 @@ class Interface
   interface_messageinfo_t *__messageinfo_list;
 
   unsigned int       __num_fields;
+
+  Clock             *__clock;
+  Time              *__timestamp;
+  Time              *__local_read_timestamp;
+  bool               __auto_timestamping;
 };
 
 

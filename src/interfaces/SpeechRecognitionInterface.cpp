@@ -46,14 +46,15 @@ SpeechRecognitionInterface::SpeechRecognitionInterface() : Interface()
   data_size = sizeof(SpeechRecognitionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SpeechRecognitionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
-  add_fieldinfo(IFT_UINT, "counter", 1, &data->counter);
+  add_fieldinfo(IFT_UINT32, "counter", 1, &data->counter);
   add_fieldinfo(IFT_BOOL, "processing", 1, &data->processing);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_messageinfo("ResetMessage");
   add_messageinfo("SetEnabledMessage");
-  unsigned char tmp_hash[] = {0xf8, 0x2c, 0xa4, 0x4f, 0xef, 0xc9, 0xa1, 0x57, 0xe2, 0x9a, 0x10, 0xe, 0xa5, 0x5c, 0x62, 0x84};
+  unsigned char tmp_hash[] = {0x8f, 0x5c, 0xd, 0x42, 0x1b, 0x22, 0x75, 0x3d, 0x50, 0x66, 0x70, 0x8, 0x1f, 0x47, 0xa7, 0xfd};
   set_hash(tmp_hash);
 }
 
@@ -95,6 +96,7 @@ void
 SpeechRecognitionInterface::set_text(const char * new_text)
 {
   strncpy(data->text, new_text, sizeof(data->text));
+  data_changed = true;
 }
 
 /** Get counter value.
@@ -103,7 +105,7 @@ SpeechRecognitionInterface::set_text(const char * new_text)
     
  * @return counter value
  */
-unsigned int
+uint32_t
 SpeechRecognitionInterface::counter() const
 {
   return data->counter;
@@ -126,9 +128,10 @@ SpeechRecognitionInterface::maxlenof_counter() const
  * @param new_counter new counter value
  */
 void
-SpeechRecognitionInterface::set_counter(const unsigned int new_counter)
+SpeechRecognitionInterface::set_counter(const uint32_t new_counter)
 {
   data->counter = new_counter;
+  data_changed = true;
 }
 
 /** Get processing value.
@@ -163,6 +166,7 @@ void
 SpeechRecognitionInterface::set_processing(const bool new_processing)
 {
   data->processing = new_processing;
+  data_changed = true;
 }
 
 /** Get enabled value.
@@ -197,6 +201,7 @@ void
 SpeechRecognitionInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -245,13 +250,17 @@ SpeechRecognitionInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 SpeechRecognitionInterface::ResetMessage::ResetMessage() : Message("ResetMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ResetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 SpeechRecognitionInterface::ResetMessage::~ResetMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -259,8 +268,11 @@ SpeechRecognitionInterface::ResetMessage::~ResetMessage()
  */
 SpeechRecognitionInterface::ResetMessage::ResetMessage(const ResetMessage *m) : Message("ResetMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -290,6 +302,7 @@ SpeechRecognitionInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->enabled = ini_enabled;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
@@ -300,6 +313,7 @@ SpeechRecognitionInterface::SetEnabledMessage::SetEnabledMessage() : Message("Se
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
@@ -318,6 +332,7 @@ SpeechRecognitionInterface::SetEnabledMessage::SetEnabledMessage(const SetEnable
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

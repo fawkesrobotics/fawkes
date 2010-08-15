@@ -221,10 +221,14 @@ InterfaceFieldIterator::get_typename() const
   } else {
     switch (__infol->type) {
     case IFT_BOOL:     return "bool";
-    case IFT_INT:      return "int";
-    case IFT_UINT:     return "unsigned int";
-    case IFT_LONGINT:  return "long int";
-    case IFT_LONGUINT: return "long unsigned int";
+    case IFT_INT8:     return "int8";
+    case IFT_UINT8:    return "uint8";
+    case IFT_INT16:    return "int16";
+    case IFT_UINT16:   return "uint16";
+    case IFT_INT32:    return "int32";
+    case IFT_UINT32:   return "uint32";
+    case IFT_INT64:    return "int64";
+    case IFT_UINT64:   return "uint64";
     case IFT_FLOAT:    return "float";
     case IFT_BYTE:     return "byte";
     case IFT_STRING:   return "string";
@@ -300,23 +304,43 @@ InterfaceFieldIterator::get_value_string()
 	  case IFT_BOOL:
 	    rv = asprintf(&tmp2, "%s%s", tmp1, (((bool *)__infol->value)[i]) ? "true" : "false");
 	    break;
-	  case IFT_INT:
-	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int *)__infol->value)[i]);
+	  case IFT_INT8:
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int8_t *)__infol->value)[i]);
 	    break;
-	  case IFT_UINT:
-	    rv = asprintf(&tmp2, "%s%u", tmp1, ((unsigned int *)__infol->value)[i]);
+	  case IFT_INT16:
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int16_t *)__infol->value)[i]);
 	    break;
-	  case IFT_LONGINT:
-	    rv = asprintf(&tmp2, "%s%li", tmp1, ((long int *)__infol->value)[i]);
+	  case IFT_INT32:
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int32_t *)__infol->value)[i]);
 	    break;
-	  case IFT_LONGUINT:
-	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((long unsigned int *)__infol->value)[i]);
+	  case IFT_INT64:
+#if __WORDSIZE == 64
+	    rv = asprintf(&tmp2, "%s%li", tmp1, ((int64_t *)__infol->value)[i]);
+#else
+	    rv = asprintf(&tmp2, "%s%lli", tmp1, ((int64_t *)__infol->value)[i]);
+#endif
+	    break;
+	  case IFT_UINT8:
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)__infol->value)[i]);
+	    break;
+	  case IFT_UINT16:
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint16_t *)__infol->value)[i]);
+	    break;
+	  case IFT_UINT32:
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint32_t *)__infol->value)[i]);
+	    break;
+	  case IFT_UINT64:
+#if __WORDSIZE == 64
+	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((uint64_t *)__infol->value)[i]);
+#else
+	    rv = asprintf(&tmp2, "%s%llu", tmp1, ((uint64_t *)__infol->value)[i]);
+#endif
 	    break;
 	  case IFT_FLOAT:
 	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
 	    break;
 	  case IFT_BYTE:
-	    rv = asprintf(&tmp2, "%s%u", tmp1, ((unsigned char *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)__infol->value)[i]);
 	    break;
 	  case IFT_STRING:
 	    // cannot happen, caught with surrounding if statement
@@ -389,17 +413,17 @@ InterfaceFieldIterator::get_bool(unsigned int index) const
  * @exception TypeMismatchException thrown if field is not of type int
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
-int
-InterfaceFieldIterator::get_int(unsigned int index) const
+int8_t
+InterfaceFieldIterator::get_int8(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT ) {
+  } else if ( __infol->type != IFT_INT8 ) {
     throw TypeMismatchException("Requested value is not of type int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return ((int *)__infol->value)[index];
+    return ((int8_t *)__infol->value)[index];
   }
 }
 
@@ -411,61 +435,146 @@ InterfaceFieldIterator::get_int(unsigned int index) const
  * @exception TypeMismatchException thrown if field is not of type unsigned int
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
-unsigned int
-InterfaceFieldIterator::get_uint(unsigned int index) const
+uint8_t
+InterfaceFieldIterator::get_uint8(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT ) {
+  } else if ( __infol->type != IFT_UINT8 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return ((unsigned int *)__infol->value)[index];
+    return ((uint8_t *)__infol->value)[index];
+  }
+}
+
+/** Get value of current field as integer.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+int16_t
+InterfaceFieldIterator::get_int16(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT16 ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((int16_t *)__infol->value)[index];
   }
 }
 
 
-/** Get value of current field as long integer.
+/** Get value of current field as unsigned integer.
  * @return field value
  * @param index array index (only use if field is an array)
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long int
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
-long int
-InterfaceFieldIterator::get_longint(unsigned int index) const
+uint16_t
+InterfaceFieldIterator::get_uint16(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_LONGINT ) {
-    throw TypeMismatchException("Requested value is not of type long int");
+  } else if ( __infol->type != IFT_UINT16 ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return ((long int *)__infol->value)[index];
+    return ((uint16_t *)__infol->value)[index];
+  }
+}
+
+/** Get value of current field as integer.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+int32_t
+InterfaceFieldIterator::get_int32(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT32 ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((int32_t *)__infol->value)[index];
   }
 }
 
 
-/** Get value of current field as unsigned long int.
+/** Get value of current field as unsigned integer.
  * @return field value
  * @param index array index (only use if field is an array)
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long unsigned int
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
-unsigned long int
-InterfaceFieldIterator::get_longuint(unsigned int index) const
+uint32_t
+InterfaceFieldIterator::get_uint32(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_LONGUINT ) {
-    throw TypeMismatchException("Requested value is not of type unsigned long int");
+  } else if ( __infol->type != IFT_UINT32 ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return ((unsigned long int *)__infol->value)[index];
+    return ((uint32_t *)__infol->value)[index];
+  }
+}
+
+/** Get value of current field as integer.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+int64_t
+InterfaceFieldIterator::get_int64(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT64 ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((int64_t *)__infol->value)[index];
+  }
+}
+
+
+/** Get value of current field as unsigned integer.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+uint64_t
+InterfaceFieldIterator::get_uint64(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_UINT64 ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((uint64_t *)__infol->value)[index];
   }
 }
 
@@ -499,7 +608,7 @@ InterfaceFieldIterator::get_float(unsigned int index) const
  * @exception TypeMismatchException thrown if field is not of type byte
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 InterfaceFieldIterator::get_byte(unsigned int index) const
 {
   if ( __infol == NULL ) {
@@ -509,7 +618,7 @@ InterfaceFieldIterator::get_byte(unsigned int index) const
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return ((unsigned char *)__infol->value)[index];
+    return ((uint8_t *)__infol->value)[index];
   }
 }
 
@@ -541,15 +650,15 @@ InterfaceFieldIterator::get_bools() const
  * @exception TypeMismatchException thrown if field is not of type int or field
  * is not an array (length is 1)
  */
-int *
-InterfaceFieldIterator::get_ints() const
+int8_t *
+InterfaceFieldIterator::get_int8s() const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT ) {
+  } else if ( __infol->type != IFT_INT8 ) {
     throw TypeMismatchException("Requested value is not of type int");
   } else {
-    return (int *)__infol->value;
+    return (int8_t *)__infol->value;
   }
 }
 
@@ -560,53 +669,129 @@ InterfaceFieldIterator::get_ints() const
  * @exception TypeMismatchException thrown if field is not of type unsigned int
  * or field is not an array (length is 1)
  */
-unsigned int *
-InterfaceFieldIterator::get_uints() const
+uint8_t *
+InterfaceFieldIterator::get_uint8s() const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT ) {
+  } else if ( __infol->type != IFT_UINT8 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
   } else {
-    return (unsigned int *)__infol->value;
+    return (uint8_t *)__infol->value;
   }
 }
 
 
-/** Get value of current field as long integer array.
+/** Get value of current field as integer array.
  * @return field value
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long int
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
+ */
+int16_t *
+InterfaceFieldIterator::get_int16s() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT16 ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else {
+    return (int16_t *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as unsigned integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
  * or field is not an array (length is 1)
  */
-long int *
-InterfaceFieldIterator::get_longints() const
+uint16_t *
+InterfaceFieldIterator::get_uint16s() const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_LONGINT ) {
-    throw TypeMismatchException("Requested value is not of type long int");
+  } else if ( __infol->type != IFT_UINT16 ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
   } else {
-    return (long int *)__infol->value;
+    return (uint16_t *)__infol->value;
   }
 }
 
 
-/** Get value of current field as unsigned long int array.
+/** Get value of current field as integer array.
  * @return field value
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long unsigned
- * int or field is not an array (length is 1)
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
  */
-unsigned long int *
-InterfaceFieldIterator::get_longuints() const
+int32_t *
+InterfaceFieldIterator::get_int32s() const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_LONGUINT ) {
-    throw TypeMismatchException("Requested value is not of type unsigned long int");
+  } else if ( __infol->type != IFT_INT32 ) {
+    throw TypeMismatchException("Requested value is not of type int");
   } else {
-    return (unsigned long int *)__infol->value;
+    return (int32_t *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as unsigned integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * or field is not an array (length is 1)
+ */
+uint32_t *
+InterfaceFieldIterator::get_uint32s() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_UINT32 ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
+  } else {
+    return (uint32_t *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
+ */
+int64_t *
+InterfaceFieldIterator::get_int64s() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT64 ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else {
+    return (int64_t *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as unsigned integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * or field is not an array (length is 1)
+ */
+uint64_t *
+InterfaceFieldIterator::get_uint64s() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_UINT64 ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
+  } else {
+    return (uint64_t *)__infol->value;
   }
 }
 
@@ -636,7 +821,7 @@ InterfaceFieldIterator::get_floats() const
  * @exception TypeMismatchException thrown if field is not of type byte or field
  * is not an array (length is 1)
  */
-unsigned char *
+uint8_t *
 InterfaceFieldIterator::get_bytes() const
 {
   if ( __infol == NULL ) {
@@ -644,7 +829,7 @@ InterfaceFieldIterator::get_bytes() const
   } else if ( __infol->type != IFT_BYTE ) {
     throw TypeMismatchException("Requested value is not of type float");
   } else {
-    return (unsigned char *)__infol->value;
+    return (uint8_t *)__infol->value;
   }
 }
 
@@ -698,17 +883,17 @@ InterfaceFieldIterator::set_bool(bool v, unsigned int index)
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
 void
-InterfaceFieldIterator::set_int(int v, unsigned int index)
+InterfaceFieldIterator::set_int8(int8_t v, unsigned int index)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT ) {
+  } else if ( __infol->type != IFT_INT8 ) {
     throw TypeMismatchException("Field to be written is not of type int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(int);
-    memcpy((void *) dst, &v, sizeof(int));
+    char* dst = (char *) __infol->value + index * sizeof(int8_t);
+    memcpy((void *) dst, &v, sizeof(int8_t));
   }
 }
 
@@ -721,63 +906,155 @@ InterfaceFieldIterator::set_int(int v, unsigned int index)
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
 void
-InterfaceFieldIterator::set_uint(unsigned int v, unsigned int index)
+InterfaceFieldIterator::set_uint8(uint8_t v, unsigned int index)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT ) {
+  } else if ( __infol->type != IFT_UINT8 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(unsigned int);
-    memcpy((void *) dst, &v, sizeof(unsigned int));
+    char* dst = (char *) __infol->value + index * sizeof(uint8_t);
+    memcpy((void *) dst, &v, sizeof(uint8_t));
   }
 }
 
 
-/** Set value of current field as long integer.
+/** Set value of current field as integer.
  * @param v the new value
  * @param index array index (only use if field is an array)
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long int
+ * @exception TypeMismatchException thrown if field is not of type int
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
 void
-InterfaceFieldIterator::set_longint(long int v, unsigned int index)
+InterfaceFieldIterator::set_int16(int16_t v, unsigned int index)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_LONGINT ) {
-    throw TypeMismatchException("Field to be written is not of type long int");
+  } else if ( __infol->type != IFT_INT16 ) {
+    throw TypeMismatchException("Field to be written is not of type int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(long int);
-    memcpy((void *) dst, &v, sizeof(long int));
+    char* dst = (char *) __infol->value + index * sizeof(int16_t);
+    memcpy((void *) dst, &v, sizeof(int16_t));
   }
 }
 
 
-/** Set value of current field as unsigned long integer.
+/** Set value of current field as unsigned integer.
  * @param v the new value
  * @param index array index (only use if field is an array)
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long unsigned int
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
 void
-InterfaceFieldIterator::set_longuint(long unsigned int v, unsigned int index)
+InterfaceFieldIterator::set_uint16(uint16_t v, unsigned int index)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_LONGUINT ) {
-    throw TypeMismatchException("Field to be written is not of type long unsigned int");
+  } else if ( __infol->type != IFT_UINT16 ) {
+    throw TypeMismatchException("Field to be written is not of type unsigned int");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(long unsigned int);
-    memcpy((void *) dst, &v, sizeof(long unsigned int));
+    char* dst = (char *) __infol->value + index * sizeof(uint16_t);
+    memcpy((void *) dst, &v, sizeof(uint16_t));
+  }
+}
+
+
+/** Set value of current field as integer.
+ * @param v the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_int32(int32_t v, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_INT32 ) {
+    throw TypeMismatchException("Field to be written is not of type int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    char* dst = (char *) __infol->value + index * sizeof(int32_t);
+    memcpy((void *) dst, &v, sizeof(int32_t));
+  }
+}
+
+
+/** Set value of current field as unsigned integer.
+ * @param v the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_uint32(uint32_t v, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_UINT32 ) {
+    throw TypeMismatchException("Field to be written is not of type unsigned int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    char* dst = (char *) __infol->value + index * sizeof(uint32_t);
+    memcpy((void *) dst, &v, sizeof(uint32_t));
+  }
+}
+
+
+/** Set value of current field as integer.
+ * @param v the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_int64(int64_t v, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_INT64 ) {
+    throw TypeMismatchException("Field to be written is not of type int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    char* dst = (char *) __infol->value + index * sizeof(int64_t);
+    memcpy((void *) dst, &v, sizeof(int64_t));
+  }
+}
+
+
+/** Set value of current field as unsigned integer.
+ * @param v the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_uint64(uint64_t v, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_UINT64 ) {
+    throw TypeMismatchException("Field to be written is not of type unsigned int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    char* dst = (char *) __infol->value + index * sizeof(uint64_t);
+    memcpy((void *) dst, &v, sizeof(uint64_t));
   }
 }
 
@@ -813,7 +1090,7 @@ InterfaceFieldIterator::set_float(float v, unsigned int index)
  * @exception OutOfBoundsException thrown if index is out of bounds
  */
 void
-InterfaceFieldIterator::set_byte(unsigned char v, unsigned int index)
+InterfaceFieldIterator::set_byte(uint8_t v, unsigned int index)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
@@ -822,8 +1099,8 @@ InterfaceFieldIterator::set_byte(unsigned char v, unsigned int index)
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(unsigned char);
-    memcpy((void *) dst, &v, sizeof(unsigned char ));
+    char* dst = (char *) __infol->value + index * sizeof(uint8_t);
+    memcpy((void *) dst, &v, sizeof(uint8_t));
   }
 }
 
@@ -856,16 +1133,16 @@ InterfaceFieldIterator::set_bools(bool *v)
  * is not an array (length is 1)
  */
 void
-InterfaceFieldIterator::set_ints(int *v)
+InterfaceFieldIterator::set_int8s(int8_t *v)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT ) {
+  } else if ( __infol->type != IFT_INT8 ) {
     throw TypeMismatchException("Field to be written is not of type int");
   } else if (__infol->length == 1) {
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(int));
+    memcpy(__infol->value, v, __infol->length * sizeof(int8_t));
   }
 }
 
@@ -877,58 +1154,142 @@ InterfaceFieldIterator::set_ints(int *v)
  * is not an array (length is 1)
  */
 void
-InterfaceFieldIterator::set_uints(unsigned int *v)
+InterfaceFieldIterator::set_uint8s(uint8_t *v)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT ) {
+  } else if ( __infol->type != IFT_UINT8 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
   } else if (__infol->length == 1) {
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(unsigned int));
+    memcpy(__infol->value, v, __infol->length * sizeof(uint8_t));
   }
 }
 
 
-/** Set value of current field as long integer array.
- * @param v an array of long ints
+/** Set value of current field as integer array.
+ * @param v an array of ints
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long int or field
+ * @exception TypeMismatchException thrown if field is not of type int or field
  * is not an array (length is 1)
  */
 void
-InterfaceFieldIterator::set_longints(long int *v)
+InterfaceFieldIterator::set_int16s(int16_t *v)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_LONGINT ) {
-    throw TypeMismatchException("Field to be written is not of type long int");
+  } else if ( __infol->type != IFT_INT16 ) {
+    throw TypeMismatchException("Field to be written is not of type int");
   } else if (__infol->length == 1) {
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(long int));
+    memcpy(__infol->value, v, __infol->length * sizeof(int16_t));
   }
 }
 
 
-/** Set value of current field as unsigned long integer array.
- * @param v an array of unsigned long ints
+/** Set value of current field as unsigned integer array.
+ * @param v an array of unsigned ints
  * @exception NullPointerException invalid iterator, possibly end iterator
- * @exception TypeMismatchException thrown if field is not of type long unsigned int or field
+ * @exception TypeMismatchException thrown if field is not of type unsigned int or field
  * is not an array (length is 1)
  */
 void
-InterfaceFieldIterator::set_longuints(long unsigned int *v)
+InterfaceFieldIterator::set_uint16s(uint16_t *v)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_LONGUINT ) {
-    throw TypeMismatchException("Field to be written is not of type long unsigned int");
+  } else if ( __infol->type != IFT_UINT16 ) {
+    throw TypeMismatchException("Field to be written is not of type unsigned int");
   } else if (__infol->length == 1) {
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(long unsigned int));
+    memcpy(__infol->value, v, __infol->length * sizeof(uint16_t));
+  }
+}
+
+
+/** Set value of current field as integer array.
+ * @param v an array of ints
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
+ */
+void
+InterfaceFieldIterator::set_int32s(int32_t *v)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_INT32 ) {
+    throw TypeMismatchException("Field to be written is not of type int");
+  } else if (__infol->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else {
+    memcpy(__infol->value, v, __infol->length * sizeof(int32_t));
+  }
+}
+
+
+/** Set value of current field as unsigned integer array.
+ * @param v an array of unsigned ints
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int or field
+ * is not an array (length is 1)
+ */
+void
+InterfaceFieldIterator::set_uint32s(uint32_t *v)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_UINT32 ) {
+    throw TypeMismatchException("Field to be written is not of type unsigned int");
+  } else if (__infol->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else {
+    memcpy(__infol->value, v, __infol->length * sizeof(uint32_t));
+  }
+}
+
+
+/** Set value of current field as integer array.
+ * @param v an array of ints
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
+ */
+void
+InterfaceFieldIterator::set_int64s(int64_t *v)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_INT64 ) {
+    throw TypeMismatchException("Field to be written is not of type int");
+  } else if (__infol->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else {
+    memcpy(__infol->value, v, __infol->length * sizeof(int64_t));
+  }
+}
+
+
+/** Set value of current field as unsigned integer array.
+ * @param v an array of unsigned ints
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int or field
+ * is not an array (length is 1)
+ */
+void
+InterfaceFieldIterator::set_uint64s(uint64_t *v)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_UINT64 ) {
+    throw TypeMismatchException("Field to be written is not of type unsigned int");
+  } else if (__infol->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else {
+    memcpy(__infol->value, v, __infol->length * sizeof(uint64_t));
   }
 }
 
@@ -961,7 +1322,7 @@ InterfaceFieldIterator::set_floats(float *v)
  * is not an array (length is 1)
  */
 void
-InterfaceFieldIterator::set_bytes(unsigned char *v)
+InterfaceFieldIterator::set_bytes(uint8_t *v)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot set value of end element");
@@ -970,7 +1331,7 @@ InterfaceFieldIterator::set_bytes(unsigned char *v)
   } else if (__infol->length == 1) {
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(unsigned char));
+    memcpy(__infol->value, v, __infol->length * sizeof(uint8_t));
   }
 }
 

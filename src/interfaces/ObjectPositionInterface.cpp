@@ -44,45 +44,45 @@ namespace fawkes {
 
 
 /** TYPE_OTHER constant */
-const unsigned int ObjectPositionInterface::TYPE_OTHER = 0;
+const uint32_t ObjectPositionInterface::TYPE_OTHER = 0u;
 /** TYPE_BALL constant */
-const unsigned int ObjectPositionInterface::TYPE_BALL = 1;
+const uint32_t ObjectPositionInterface::TYPE_BALL = 1u;
 /** TYPE_OPPONENT constant */
-const unsigned int ObjectPositionInterface::TYPE_OPPONENT = 2;
+const uint32_t ObjectPositionInterface::TYPE_OPPONENT = 2u;
 /** TYPE_TEAMMEMBER constant */
-const unsigned int ObjectPositionInterface::TYPE_TEAMMEMBER = 3;
+const uint32_t ObjectPositionInterface::TYPE_TEAMMEMBER = 3u;
 /** TYPE_LINE constant */
-const unsigned int ObjectPositionInterface::TYPE_LINE = 4;
+const uint32_t ObjectPositionInterface::TYPE_LINE = 4u;
 /** TYPE_SELF constant */
-const unsigned int ObjectPositionInterface::TYPE_SELF = 5;
+const uint32_t ObjectPositionInterface::TYPE_SELF = 5u;
 /** TYPE_GOAL_BLUE constant */
-const unsigned int ObjectPositionInterface::TYPE_GOAL_BLUE = 6;
+const uint32_t ObjectPositionInterface::TYPE_GOAL_BLUE = 6u;
 /** TYPE_GOAL_YELLOW constant */
-const unsigned int ObjectPositionInterface::TYPE_GOAL_YELLOW = 7;
+const uint32_t ObjectPositionInterface::TYPE_GOAL_YELLOW = 7u;
 /** FLAG_NONE constant */
-const unsigned int ObjectPositionInterface::FLAG_NONE = 0;
+const uint32_t ObjectPositionInterface::FLAG_NONE = 0u;
 /** FLAG_HAS_WORLD constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_WORLD = 1;
+const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD = 1u;
 /** FLAG_HAS_RELATIVE_CARTESIAN constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN = 2;
+const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN = 2u;
 /** FLAG_HAS_RELATIVE_POLAR constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR = 4;
+const uint32_t ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR = 4u;
 /** FLAG_HAS_EULER_ANGLES constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_EULER_ANGLES = 8;
+const uint32_t ObjectPositionInterface::FLAG_HAS_EULER_ANGLES = 8u;
 /** FLAG_HAS_EXTENT constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_EXTENT = 16;
+const uint32_t ObjectPositionInterface::FLAG_HAS_EXTENT = 16u;
 /** FLAG_HAS_VOLUME_EXTENT constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT = 32;
+const uint32_t ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT = 32u;
 /** FLAG_HAS_CIRCULAR_EXTENT constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64;
+const uint32_t ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64u;
 /** FLAG_HAS_COVARIANCES constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128;
+const uint32_t ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128u;
 /** FLAG_HAS_WORLD_VELOCITY constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256;
+const uint32_t ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256u;
 /** FLAG_HAS_Z_AS_ORI constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512;
+const uint32_t ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512u;
 /** FLAG_IS_FIXED_OBJECT constant */
-const unsigned int ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024;
+const uint32_t ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024u;
 
 /** Constructor */
 ObjectPositionInterface::ObjectPositionInterface() : Interface()
@@ -90,12 +90,13 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data_size = sizeof(ObjectPositionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (ObjectPositionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "object_type", 1, &data->object_type);
-  add_fieldinfo(IFT_UINT, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_UINT32, "object_type", 1, &data->object_type);
+  add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_fieldinfo(IFT_BOOL, "visible", 1, &data->visible);
   add_fieldinfo(IFT_BOOL, "valid", 1, &data->valid);
-  add_fieldinfo(IFT_INT, "visibility_history", 1, &data->visibility_history);
+  add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_FLOAT, "roll", 1, &data->roll);
   add_fieldinfo(IFT_FLOAT, "pitch", 1, &data->pitch);
   add_fieldinfo(IFT_FLOAT, "yaw", 1, &data->yaw);
@@ -122,7 +123,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "relative_y_velocity", 1, &data->relative_y_velocity);
   add_fieldinfo(IFT_FLOAT, "relative_z_velocity", 1, &data->relative_z_velocity);
   add_fieldinfo(IFT_FLOAT, "relative_xyz_velocity_covariance", 9, &data->relative_xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0xe6, 0x60, 0x23, 0x1b, 0xa4, 0x1a, 0x32, 0xb3, 0xed, 0x8e, 0xf8, 0x7f, 0x13, 0x1c, 0x73, 0x1f};
+  unsigned char tmp_hash[] = {0x9f, 0x72, 0x61, 0x39, 0x9a, 0xb4, 0x79, 0x4c, 0x33, 0x3, 0x3a, 0x75, 0xfc, 0xf0, 0xe5, 0x7e};
   set_hash(tmp_hash);
 }
 
@@ -138,7 +139,7 @@ ObjectPositionInterface::~ObjectPositionInterface()
     
  * @return object_type value
  */
-unsigned int
+uint32_t
 ObjectPositionInterface::object_type() const
 {
   return data->object_type;
@@ -161,9 +162,10 @@ ObjectPositionInterface::maxlenof_object_type() const
  * @param new_object_type new object_type value
  */
 void
-ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
+ObjectPositionInterface::set_object_type(const uint32_t new_object_type)
 {
   data->object_type = new_object_type;
+  data_changed = true;
 }
 
 /** Get flags value.
@@ -174,7 +176,7 @@ ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
     
  * @return flags value
  */
-unsigned int
+uint32_t
 ObjectPositionInterface::flags() const
 {
   return data->flags;
@@ -199,9 +201,10 @@ ObjectPositionInterface::maxlenof_flags() const
  * @param new_flags new flags value
  */
 void
-ObjectPositionInterface::set_flags(const unsigned int new_flags)
+ObjectPositionInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
+  data_changed = true;
 }
 
 /** Get visible value.
@@ -232,6 +235,7 @@ void
 ObjectPositionInterface::set_visible(const bool new_visible)
 {
   data->visible = new_visible;
+  data_changed = true;
 }
 
 /** Get valid value.
@@ -262,6 +266,7 @@ void
 ObjectPositionInterface::set_valid(const bool new_valid)
 {
   data->valid = new_valid;
+  data_changed = true;
 }
 
 /** Get visibility_history value.
@@ -274,7 +279,7 @@ ObjectPositionInterface::set_valid(const bool new_valid)
     
  * @return visibility_history value
  */
-int
+int32_t
 ObjectPositionInterface::visibility_history() const
 {
   return data->visibility_history;
@@ -301,9 +306,10 @@ ObjectPositionInterface::maxlenof_visibility_history() const
  * @param new_visibility_history new visibility_history value
  */
 void
-ObjectPositionInterface::set_visibility_history(const int new_visibility_history)
+ObjectPositionInterface::set_visibility_history(const int32_t new_visibility_history)
 {
   data->visibility_history = new_visibility_history;
+  data_changed = true;
 }
 
 /** Get roll value.
@@ -338,6 +344,7 @@ void
 ObjectPositionInterface::set_roll(const float new_roll)
 {
   data->roll = new_roll;
+  data_changed = true;
 }
 
 /** Get pitch value.
@@ -372,6 +379,7 @@ void
 ObjectPositionInterface::set_pitch(const float new_pitch)
 {
   data->pitch = new_pitch;
+  data_changed = true;
 }
 
 /** Get yaw value.
@@ -406,6 +414,7 @@ void
 ObjectPositionInterface::set_yaw(const float new_yaw)
 {
   data->yaw = new_yaw;
+  data_changed = true;
 }
 
 /** Get distance value.
@@ -442,6 +451,7 @@ void
 ObjectPositionInterface::set_distance(const float new_distance)
 {
   data->distance = new_distance;
+  data_changed = true;
 }
 
 /** Get bearing value.
@@ -478,6 +488,7 @@ void
 ObjectPositionInterface::set_bearing(const float new_bearing)
 {
   data->bearing = new_bearing;
+  data_changed = true;
 }
 
 /** Get slope value.
@@ -516,6 +527,7 @@ void
 ObjectPositionInterface::set_slope(const float new_slope)
 {
   data->slope = new_slope;
+  data_changed = true;
 }
 
 /** Get dbs_covariance value.
@@ -573,6 +585,7 @@ void
 ObjectPositionInterface::set_dbs_covariance(const float * new_dbs_covariance)
 {
   memcpy(data->dbs_covariance, new_dbs_covariance, sizeof(float) * 9);
+  data_changed = true;
 }
 
 /** Set dbs_covariance value at given index.
@@ -628,6 +641,7 @@ void
 ObjectPositionInterface::set_world_x(const float new_world_x)
 {
   data->world_x = new_world_x;
+  data_changed = true;
 }
 
 /** Get world_y value.
@@ -666,6 +680,7 @@ void
 ObjectPositionInterface::set_world_y(const float new_world_y)
 {
   data->world_y = new_world_y;
+  data_changed = true;
 }
 
 /** Get world_z value.
@@ -704,6 +719,7 @@ void
 ObjectPositionInterface::set_world_z(const float new_world_z)
 {
   data->world_z = new_world_z;
+  data_changed = true;
 }
 
 /** Get world_xyz_covariance value.
@@ -761,6 +777,7 @@ void
 ObjectPositionInterface::set_world_xyz_covariance(const float * new_world_xyz_covariance)
 {
   memcpy(data->world_xyz_covariance, new_world_xyz_covariance, sizeof(float) * 9);
+  data_changed = true;
 }
 
 /** Set world_xyz_covariance value at given index.
@@ -812,6 +829,7 @@ void
 ObjectPositionInterface::set_relative_x(const float new_relative_x)
 {
   data->relative_x = new_relative_x;
+  data_changed = true;
 }
 
 /** Get relative_y value.
@@ -846,6 +864,7 @@ void
 ObjectPositionInterface::set_relative_y(const float new_relative_y)
 {
   data->relative_y = new_relative_y;
+  data_changed = true;
 }
 
 /** Get relative_z value.
@@ -880,6 +899,7 @@ void
 ObjectPositionInterface::set_relative_z(const float new_relative_z)
 {
   data->relative_z = new_relative_z;
+  data_changed = true;
 }
 
 /** Get relative_xyz_covariance value.
@@ -937,6 +957,7 @@ void
 ObjectPositionInterface::set_relative_xyz_covariance(const float * new_relative_xyz_covariance)
 {
   memcpy(data->relative_xyz_covariance, new_relative_xyz_covariance, sizeof(float) * 9);
+  data_changed = true;
 }
 
 /** Set relative_xyz_covariance value at given index.
@@ -988,6 +1009,7 @@ void
 ObjectPositionInterface::set_extent_x(const float new_extent_x)
 {
   data->extent_x = new_extent_x;
+  data_changed = true;
 }
 
 /** Get extent_y value.
@@ -1022,6 +1044,7 @@ void
 ObjectPositionInterface::set_extent_y(const float new_extent_y)
 {
   data->extent_y = new_extent_y;
+  data_changed = true;
 }
 
 /** Get extent_z value.
@@ -1056,6 +1079,7 @@ void
 ObjectPositionInterface::set_extent_z(const float new_extent_z)
 {
   data->extent_z = new_extent_z;
+  data_changed = true;
 }
 
 /** Get world_x_velocity value.
@@ -1090,6 +1114,7 @@ void
 ObjectPositionInterface::set_world_x_velocity(const float new_world_x_velocity)
 {
   data->world_x_velocity = new_world_x_velocity;
+  data_changed = true;
 }
 
 /** Get world_y_velocity value.
@@ -1124,6 +1149,7 @@ void
 ObjectPositionInterface::set_world_y_velocity(const float new_world_y_velocity)
 {
   data->world_y_velocity = new_world_y_velocity;
+  data_changed = true;
 }
 
 /** Get world_z_velocity value.
@@ -1158,6 +1184,7 @@ void
 ObjectPositionInterface::set_world_z_velocity(const float new_world_z_velocity)
 {
   data->world_z_velocity = new_world_z_velocity;
+  data_changed = true;
 }
 
 /** Get world_xyz_velocity_covariance value.
@@ -1215,6 +1242,7 @@ void
 ObjectPositionInterface::set_world_xyz_velocity_covariance(const float * new_world_xyz_velocity_covariance)
 {
   memcpy(data->world_xyz_velocity_covariance, new_world_xyz_velocity_covariance, sizeof(float) * 9);
+  data_changed = true;
 }
 
 /** Set world_xyz_velocity_covariance value at given index.
@@ -1266,6 +1294,7 @@ void
 ObjectPositionInterface::set_relative_x_velocity(const float new_relative_x_velocity)
 {
   data->relative_x_velocity = new_relative_x_velocity;
+  data_changed = true;
 }
 
 /** Get relative_y_velocity value.
@@ -1300,6 +1329,7 @@ void
 ObjectPositionInterface::set_relative_y_velocity(const float new_relative_y_velocity)
 {
   data->relative_y_velocity = new_relative_y_velocity;
+  data_changed = true;
 }
 
 /** Get relative_z_velocity value.
@@ -1334,6 +1364,7 @@ void
 ObjectPositionInterface::set_relative_z_velocity(const float new_relative_z_velocity)
 {
   data->relative_z_velocity = new_relative_z_velocity;
+  data_changed = true;
 }
 
 /** Get relative_xyz_velocity_covariance value.
@@ -1391,6 +1422,7 @@ void
 ObjectPositionInterface::set_relative_xyz_velocity_covariance(const float * new_relative_xyz_velocity_covariance)
 {
   memcpy(data->relative_xyz_velocity_covariance, new_relative_xyz_velocity_covariance, sizeof(float) * 9);
+  data_changed = true;
 }
 
 /** Set relative_xyz_velocity_covariance value at given index.

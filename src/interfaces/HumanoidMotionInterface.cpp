@@ -46,6 +46,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   data_size = sizeof(HumanoidMotionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (HumanoidMotionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "moving", 1, &data->moving);
   add_fieldinfo(IFT_ENUM, "supporting_leg", 1, &data->supporting_leg, "LegEnum");
@@ -64,7 +65,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "shoulder_pitch_amplitude", 1, &data->shoulder_pitch_amplitude);
   add_fieldinfo(IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_messageinfo("SetWalkParamsMessage");
   add_messageinfo("SetWalkArmsParamsMessage");
   add_messageinfo("StopMessage");
@@ -78,7 +79,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_messageinfo("StandupMessage");
   add_messageinfo("YawPitchHeadMessage");
   add_messageinfo("SetStiffnessParamsMessage");
-  unsigned char tmp_hash[] = {0x69, 0x80, 0xac, 0xd5, 0xa4, 0x71, 0xad, 0xe8, 0xd6, 0xdf, 0xbb, 0x13, 0xfb, 0x10, 0x28, 0xf1};
+  unsigned char tmp_hash[] = {0xee, 0x4a, 0x86, 0xce, 0x88, 0xf0, 0x83, 0xef, 0x80, 0xa, 0x8e, 0x3b, 0x3f, 0xae, 0xe3, 0x8b};
   set_hash(tmp_hash);
 }
 
@@ -156,6 +157,7 @@ void
 HumanoidMotionInterface::set_moving(const bool new_moving)
 {
   data->moving = new_moving;
+  data_changed = true;
 }
 
 /** Get supporting_leg value.
@@ -186,6 +188,7 @@ void
 HumanoidMotionInterface::set_supporting_leg(const LegEnum new_supporting_leg)
 {
   data->supporting_leg = new_supporting_leg;
+  data_changed = true;
 }
 
 /** Get max_step_length value.
@@ -220,6 +223,7 @@ void
 HumanoidMotionInterface::set_max_step_length(const float new_max_step_length)
 {
   data->max_step_length = new_max_step_length;
+  data_changed = true;
 }
 
 /** Get max_step_height value.
@@ -254,6 +258,7 @@ void
 HumanoidMotionInterface::set_max_step_height(const float new_max_step_height)
 {
   data->max_step_height = new_max_step_height;
+  data_changed = true;
 }
 
 /** Get max_step_side value.
@@ -288,6 +293,7 @@ void
 HumanoidMotionInterface::set_max_step_side(const float new_max_step_side)
 {
   data->max_step_side = new_max_step_side;
+  data_changed = true;
 }
 
 /** Get max_step_turn value.
@@ -322,6 +328,7 @@ void
 HumanoidMotionInterface::set_max_step_turn(const float new_max_step_turn)
 {
   data->max_step_turn = new_max_step_turn;
+  data_changed = true;
 }
 
 /** Get zmp_offset_forward value.
@@ -356,6 +363,7 @@ void
 HumanoidMotionInterface::set_zmp_offset_forward(const float new_zmp_offset_forward)
 {
   data->zmp_offset_forward = new_zmp_offset_forward;
+  data_changed = true;
 }
 
 /** Get zmp_offset_sideward value.
@@ -390,6 +398,7 @@ void
 HumanoidMotionInterface::set_zmp_offset_sideward(const float new_zmp_offset_sideward)
 {
   data->zmp_offset_sideward = new_zmp_offset_sideward;
+  data_changed = true;
 }
 
 /** Get l_hip_roll_compensation value.
@@ -426,6 +435,7 @@ void
 HumanoidMotionInterface::set_l_hip_roll_compensation(const float new_l_hip_roll_compensation)
 {
   data->l_hip_roll_compensation = new_l_hip_roll_compensation;
+  data_changed = true;
 }
 
 /** Get r_hip_roll_compensation value.
@@ -462,6 +472,7 @@ void
 HumanoidMotionInterface::set_r_hip_roll_compensation(const float new_r_hip_roll_compensation)
 {
   data->r_hip_roll_compensation = new_r_hip_roll_compensation;
+  data_changed = true;
 }
 
 /** Get hip_height value.
@@ -498,6 +509,7 @@ void
 HumanoidMotionInterface::set_hip_height(const float new_hip_height)
 {
   data->hip_height = new_hip_height;
+  data_changed = true;
 }
 
 /** Get torso_sideward_orientation value.
@@ -534,6 +546,7 @@ void
 HumanoidMotionInterface::set_torso_sideward_orientation(const float new_torso_sideward_orientation)
 {
   data->torso_sideward_orientation = new_torso_sideward_orientation;
+  data_changed = true;
 }
 
 /** Get arms_enabled value.
@@ -568,6 +581,7 @@ void
 HumanoidMotionInterface::set_arms_enabled(const bool new_arms_enabled)
 {
   data->arms_enabled = new_arms_enabled;
+  data_changed = true;
 }
 
 /** Get shoulder_pitch_median value.
@@ -602,6 +616,7 @@ void
 HumanoidMotionInterface::set_shoulder_pitch_median(const float new_shoulder_pitch_median)
 {
   data->shoulder_pitch_median = new_shoulder_pitch_median;
+  data_changed = true;
 }
 
 /** Get shoulder_pitch_amplitude value.
@@ -636,6 +651,7 @@ void
 HumanoidMotionInterface::set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude)
 {
   data->shoulder_pitch_amplitude = new_shoulder_pitch_amplitude;
+  data_changed = true;
 }
 
 /** Get elbow_roll_median value.
@@ -670,6 +686,7 @@ void
 HumanoidMotionInterface::set_elbow_roll_median(const float new_elbow_roll_median)
 {
   data->elbow_roll_median = new_elbow_roll_median;
+  data_changed = true;
 }
 
 /** Get elbow_roll_amplitude value.
@@ -704,6 +721,7 @@ void
 HumanoidMotionInterface::set_elbow_roll_amplitude(const float new_elbow_roll_amplitude)
 {
   data->elbow_roll_amplitude = new_elbow_roll_amplitude;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -713,7 +731,7 @@ HumanoidMotionInterface::set_elbow_roll_amplitude(const float new_elbow_roll_amp
     
  * @return msgid value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::msgid() const
 {
   return data->msgid;
@@ -737,9 +755,10 @@ HumanoidMotionInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-HumanoidMotionInterface::set_msgid(const unsigned int new_msgid)
+HumanoidMotionInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -834,6 +853,7 @@ HumanoidMotionInterface::SetWalkParamsMessage::SetWalkParamsMessage(const float 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetWalkParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->max_step_length = ini_max_step_length;
   data->max_step_height = ini_max_step_height;
   data->max_step_side = ini_max_step_side;
@@ -862,6 +882,7 @@ HumanoidMotionInterface::SetWalkParamsMessage::SetWalkParamsMessage() : Message(
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetWalkParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "max_step_length", 1, &data->max_step_length);
   add_fieldinfo(IFT_FLOAT, "max_step_height", 1, &data->max_step_height);
   add_fieldinfo(IFT_FLOAT, "max_step_side", 1, &data->max_step_side);
@@ -889,6 +910,7 @@ HumanoidMotionInterface::SetWalkParamsMessage::SetWalkParamsMessage(const SetWal
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetWalkParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1270,6 +1292,7 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage(cons
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetWalkArmsParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->arms_enabled = ini_arms_enabled;
   data->shoulder_pitch_median = ini_shoulder_pitch_median;
   data->shoulder_pitch_amplitude = ini_shoulder_pitch_amplitude;
@@ -1288,6 +1311,7 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage() : 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetWalkArmsParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "arms_enabled", 1, &data->arms_enabled);
   add_fieldinfo(IFT_FLOAT, "shoulder_pitch_median", 1, &data->shoulder_pitch_median);
   add_fieldinfo(IFT_FLOAT, "shoulder_pitch_amplitude", 1, &data->shoulder_pitch_amplitude);
@@ -1310,6 +1334,7 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage(cons
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetWalkArmsParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1503,13 +1528,17 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::clone() const
 /** Constructor */
 HumanoidMotionInterface::StopMessage::StopMessage() : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 HumanoidMotionInterface::StopMessage::~StopMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1517,8 +1546,11 @@ HumanoidMotionInterface::StopMessage::~StopMessage()
  */
 HumanoidMotionInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1543,16 +1575,17 @@ HumanoidMotionInterface::StopMessage::clone() const
  * @param ini_distance initial value for distance
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const float ini_distance, const unsigned int ini_num_samples) : Message("WalkStraightMessage")
+HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const float ini_distance, const uint32_t ini_num_samples) : Message("WalkStraightMessage")
 {
   data_size = sizeof(WalkStraightMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (WalkStraightMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->distance = ini_distance;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage() : Message("WalkStraightMessage")
@@ -1561,8 +1594,9 @@ HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage() : Message("W
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (WalkStraightMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1580,6 +1614,7 @@ HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const WalkStra
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (WalkStraightMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1619,7 +1654,7 @@ HumanoidMotionInterface::WalkStraightMessage::set_distance(const float new_dista
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::WalkStraightMessage::num_samples() const
 {
   return data->num_samples;
@@ -1642,7 +1677,7 @@ HumanoidMotionInterface::WalkStraightMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::WalkStraightMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::WalkStraightMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -1668,16 +1703,17 @@ HumanoidMotionInterface::WalkStraightMessage::clone() const
  * @param ini_distance initial value for distance
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const float ini_distance, const unsigned int ini_num_samples) : Message("WalkSidewaysMessage")
+HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const float ini_distance, const uint32_t ini_num_samples) : Message("WalkSidewaysMessage")
 {
   data_size = sizeof(WalkSidewaysMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (WalkSidewaysMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->distance = ini_distance;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage() : Message("WalkSidewaysMessage")
@@ -1686,8 +1722,9 @@ HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage() : Message("W
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (WalkSidewaysMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1705,6 +1742,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const WalkSide
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (WalkSidewaysMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1744,7 +1782,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::set_distance(const float new_dista
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::WalkSidewaysMessage::num_samples() const
 {
   return data->num_samples;
@@ -1767,7 +1805,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::WalkSidewaysMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::WalkSidewaysMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -1794,18 +1832,19 @@ HumanoidMotionInterface::WalkSidewaysMessage::clone() const
  * @param ini_radius initial value for radius
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const float ini_angle, const float ini_radius, const unsigned int ini_num_samples) : Message("WalkArcMessage")
+HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const float ini_angle, const float ini_radius, const uint32_t ini_num_samples) : Message("WalkArcMessage")
 {
   data_size = sizeof(WalkArcMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (WalkArcMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->angle = ini_angle;
   data->radius = ini_radius;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::WalkArcMessage::WalkArcMessage() : Message("WalkArcMessage")
@@ -1814,9 +1853,10 @@ HumanoidMotionInterface::WalkArcMessage::WalkArcMessage() : Message("WalkArcMess
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (WalkArcMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1834,6 +1874,7 @@ HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const WalkArcMessage *m)
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (WalkArcMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1903,7 +1944,7 @@ HumanoidMotionInterface::WalkArcMessage::set_radius(const float new_radius)
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::WalkArcMessage::num_samples() const
 {
   return data->num_samples;
@@ -1926,7 +1967,7 @@ HumanoidMotionInterface::WalkArcMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::WalkArcMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::WalkArcMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -1952,16 +1993,17 @@ HumanoidMotionInterface::WalkArcMessage::clone() const
  * @param ini_angle initial value for angle
  * @param ini_num_samples initial value for num_samples
  */
-HumanoidMotionInterface::TurnMessage::TurnMessage(const float ini_angle, const unsigned int ini_num_samples) : Message("TurnMessage")
+HumanoidMotionInterface::TurnMessage::TurnMessage(const float ini_angle, const uint32_t ini_num_samples) : Message("TurnMessage")
 {
   data_size = sizeof(TurnMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->angle = ini_angle;
   data->num_samples = ini_num_samples;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 /** Constructor */
 HumanoidMotionInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
@@ -1970,8 +2012,9 @@ HumanoidMotionInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
-  add_fieldinfo(IFT_UINT, "num_samples", 1, &data->num_samples);
+  add_fieldinfo(IFT_UINT32, "num_samples", 1, &data->num_samples);
 }
 
 /** Destructor */
@@ -1989,6 +2032,7 @@ HumanoidMotionInterface::TurnMessage::TurnMessage(const TurnMessage *m) : Messag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -2028,7 +2072,7 @@ HumanoidMotionInterface::TurnMessage::set_angle(const float new_angle)
     
  * @return num_samples value
  */
-unsigned int
+uint32_t
 HumanoidMotionInterface::TurnMessage::num_samples() const
 {
   return data->num_samples;
@@ -2051,7 +2095,7 @@ HumanoidMotionInterface::TurnMessage::maxlenof_num_samples() const
  * @param new_num_samples new num_samples value
  */
 void
-HumanoidMotionInterface::TurnMessage::set_num_samples(const unsigned int new_num_samples)
+HumanoidMotionInterface::TurnMessage::set_num_samples(const uint32_t new_num_samples)
 {
   data->num_samples = new_num_samples;
 }
@@ -2083,8 +2127,10 @@ HumanoidMotionInterface::KickMessage::KickMessage(const LegEnum ini_leg, const f
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->leg = ini_leg;
   data->strength = ini_strength;
+  add_fieldinfo(IFT_ENUM, "leg", 1, &data->leg, "LegEnum");
   add_fieldinfo(IFT_FLOAT, "strength", 1, &data->strength);
 }
 /** Constructor */
@@ -2094,6 +2140,8 @@ HumanoidMotionInterface::KickMessage::KickMessage() : Message("KickMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "leg", 1, &data->leg, "LegEnum");
   add_fieldinfo(IFT_FLOAT, "strength", 1, &data->strength);
 }
 
@@ -2112,6 +2160,7 @@ HumanoidMotionInterface::KickMessage::KickMessage(const KickMessage *m) : Messag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (KickMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -2201,6 +2250,7 @@ HumanoidMotionInterface::ParkMessage::ParkMessage(const float ini_time_sec) : Me
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->time_sec = ini_time_sec;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
 }
@@ -2211,6 +2261,7 @@ HumanoidMotionInterface::ParkMessage::ParkMessage() : Message("ParkMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
 }
 
@@ -2229,6 +2280,7 @@ HumanoidMotionInterface::ParkMessage::ParkMessage(const ParkMessage *m) : Messag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -2288,6 +2340,7 @@ HumanoidMotionInterface::GetUpMessage::GetUpMessage(const float ini_time_sec) : 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GetUpMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->time_sec = ini_time_sec;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
 }
@@ -2298,6 +2351,7 @@ HumanoidMotionInterface::GetUpMessage::GetUpMessage() : Message("GetUpMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GetUpMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
 }
 
@@ -2316,6 +2370,7 @@ HumanoidMotionInterface::GetUpMessage::GetUpMessage(const GetUpMessage *m) : Mes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (GetUpMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -2375,7 +2430,9 @@ HumanoidMotionInterface::StandupMessage::StandupMessage(const StandupEnum ini_fr
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (StandupMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->from_pos = ini_from_pos;
+  add_fieldinfo(IFT_ENUM, "from_pos", 1, &data->from_pos, "StandupEnum");
 }
 /** Constructor */
 HumanoidMotionInterface::StandupMessage::StandupMessage() : Message("StandupMessage")
@@ -2384,6 +2441,8 @@ HumanoidMotionInterface::StandupMessage::StandupMessage() : Message("StandupMess
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (StandupMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "from_pos", 1, &data->from_pos, "StandupEnum");
 }
 
 /** Destructor */
@@ -2401,6 +2460,7 @@ HumanoidMotionInterface::StandupMessage::StandupMessage(const StandupMessage *m)
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (StandupMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -2462,6 +2522,7 @@ HumanoidMotionInterface::YawPitchHeadMessage::YawPitchHeadMessage(const float in
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (YawPitchHeadMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->yaw = ini_yaw;
   data->pitch = ini_pitch;
   data->time_sec = ini_time_sec;
@@ -2476,6 +2537,7 @@ HumanoidMotionInterface::YawPitchHeadMessage::YawPitchHeadMessage() : Message("Y
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (YawPitchHeadMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "yaw", 1, &data->yaw);
   add_fieldinfo(IFT_FLOAT, "pitch", 1, &data->pitch);
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
@@ -2496,6 +2558,7 @@ HumanoidMotionInterface::YawPitchHeadMessage::YawPitchHeadMessage(const YawPitch
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (YawPitchHeadMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -2637,6 +2700,7 @@ HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage(co
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetStiffnessParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->motion_pattern = ini_motion_pattern;
   data->head_yaw = ini_head_yaw;
   data->head_pitch = ini_head_pitch;
@@ -2660,6 +2724,7 @@ HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage(co
   data->r_shoulder_roll = ini_r_shoulder_roll;
   data->r_elbow_yaw = ini_r_elbow_yaw;
   data->r_elbow_roll = ini_r_elbow_roll;
+  add_fieldinfo(IFT_ENUM, "motion_pattern", 1, &data->motion_pattern, "StiffnessMotionPatternEnum");
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
   add_fieldinfo(IFT_FLOAT, "l_shoulder_pitch", 1, &data->l_shoulder_pitch);
@@ -2690,6 +2755,8 @@ HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage() 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetStiffnessParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "motion_pattern", 1, &data->motion_pattern, "StiffnessMotionPatternEnum");
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
   add_fieldinfo(IFT_FLOAT, "l_shoulder_pitch", 1, &data->l_shoulder_pitch);
@@ -2729,6 +2796,7 @@ HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage(co
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetStiffnessParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

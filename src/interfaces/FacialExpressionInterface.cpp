@@ -46,6 +46,7 @@ FacialExpressionInterface::FacialExpressionInterface() : Interface()
   data_size = sizeof(FacialExpressionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (FacialExpressionInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
   add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
@@ -157,6 +158,7 @@ void
 FacialExpressionInterface::set_brows_action(const brows_t new_brows_action)
 {
   data->brows_action = new_brows_action;
+  data_changed = true;
 }
 
 /** Get eyes_action value.
@@ -187,6 +189,7 @@ void
 FacialExpressionInterface::set_eyes_action(const eyes_t new_eyes_action)
 {
   data->eyes_action = new_eyes_action;
+  data_changed = true;
 }
 
 /** Get jowl_action value.
@@ -217,6 +220,7 @@ void
 FacialExpressionInterface::set_jowl_action(const jowl_t new_jowl_action)
 {
   data->jowl_action = new_jowl_action;
+  data_changed = true;
 }
 
 /** Get mouth_action value.
@@ -247,6 +251,7 @@ void
 FacialExpressionInterface::set_mouth_action(const mouth_t new_mouth_action)
 {
   data->mouth_action = new_mouth_action;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -317,7 +322,9 @@ FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage(const brows_t ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveBrowsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->brows_action = ini_brows_action;
+  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
 }
 /** Constructor */
 FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage() : Message("MoveBrowsMessage")
@@ -326,6 +333,8 @@ FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage() : Message("MoveB
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveBrowsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
 }
 
 /** Destructor */
@@ -343,6 +352,7 @@ FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage(const MoveBrowsMes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (MoveBrowsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -402,7 +412,9 @@ FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage(const eyes_t ini_eye
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveEyesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->eyes_action = ini_eyes_action;
+  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
 }
 /** Constructor */
 FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage() : Message("MoveEyesMessage")
@@ -411,6 +423,8 @@ FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage() : Message("MoveEye
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveEyesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
 }
 
 /** Destructor */
@@ -428,6 +442,7 @@ FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage(const MoveEyesMessag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (MoveEyesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -487,7 +502,9 @@ FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage(const jowl_t ini_jow
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveJowlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->jowl_action = ini_jowl_action;
+  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t");
 }
 /** Constructor */
 FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage() : Message("MoveJowlMessage")
@@ -496,6 +513,8 @@ FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage() : Message("MoveJow
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveJowlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t");
 }
 
 /** Destructor */
@@ -513,6 +532,7 @@ FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage(const MoveJowlMessag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (MoveJowlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -572,7 +592,9 @@ FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage(const mouth_t ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveMouthMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->mouth_action = ini_mouth_action;
+  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t");
 }
 /** Constructor */
 FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage() : Message("MoveMouthMessage")
@@ -581,6 +603,8 @@ FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage() : Message("MoveM
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (MoveMouthMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t");
 }
 
 /** Destructor */
@@ -598,6 +622,7 @@ FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage(const MoveMouthMes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (MoveMouthMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

@@ -81,7 +81,8 @@ class CppInterfaceGenerator
 			 std::string interface_classname,
 			 std::string classname,
 			 std::vector<InterfaceField> fields,
-			 std::string inclusion_prefix);
+			 std::string inclusion_prefix,
+			 bool write_data_changed);
 
   void write_create_message_method_cpp(FILE *f);
   void write_copy_value_method_cpp(FILE *f);
@@ -101,6 +102,8 @@ class CppInterfaceGenerator
 			 std::string inclusion_prefix);
 
   void write_management_funcs_cpp(FILE *f);
+
+  void write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceField> &fields);
 
 
   void write_struct(FILE *f, std::string name, std::string /* indent space */ is,

@@ -32,13 +32,17 @@ namespace fawkes {
 /** Interface field type*/
 typedef enum {
   IFT_BOOL,		/**< boolean field */
-  IFT_INT,		/**< integer field */
-  IFT_UINT,		/**< unsigned integer field */
-  IFT_LONGINT,		/**< long int field */
-  IFT_LONGUINT,		/**< unsigned long int field */
+  IFT_INT8,		/**< 8 bit integer field */
+  IFT_UINT8,		/**< 8 bit unsigned integer field */
+  IFT_INT16,		/**< 16 bit integer field */
+  IFT_UINT16,		/**< 16 bit unsigned integer field */
+  IFT_INT32,		/**< 32 bit integer field */
+  IFT_UINT32,		/**< 32 bit unsigned integer field */
+  IFT_INT64,		/**< 64 bit integer field */
+  IFT_UINT64,		/**< 64 bit unsigned integer field */
   IFT_FLOAT,		/**< float field */
   IFT_STRING,		/**< string field */
-  IFT_BYTE,		/**< byte field */
+  IFT_BYTE,		/**< byte field, alias for uint8 */
   IFT_ENUM		/**< field with interface specific enum type */
 } interface_fieldtype_t;
 

@@ -3,7 +3,7 @@
  *  message.h - BlackBoard message
  *
  *  Created: Sun Oct 08 00:08:10 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -31,10 +31,14 @@
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class Mutex;
 class Interface;
 class InterfaceFieldIterator;
+class Time;
 
 class Message : public RefCount
 {
@@ -51,6 +55,7 @@ class Message : public RefCount
   void              set_id(unsigned int message_id);
   void              mark_enqueued();
   bool              enqueued() const;
+  const Time *      time_enqueued() const;
 
   unsigned int      sender_id() const;
   const char *      sender_thread_name() const;
@@ -80,12 +85,11 @@ class Message : public RefCount
   template <class MessageType>
     bool           is_of_type();
 
- private:
-  void              set_interface(Interface *iface);
-
+ private: // fields
   unsigned int  __message_id;
   unsigned int  __hops;
   bool          __enqueued;
+  Time         *__time_enqueued;
 
   unsigned int  recipient_interface_mem_serial;  
   unsigned int  sender_interface_instance_serial;  
@@ -100,12 +104,23 @@ class Message : public RefCount
 
   unsigned int __num_fields;
 
+ private: // methods
+  void              set_interface(Interface *iface);
+
  protected:
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
-		     size_t length, void *value);
+		     size_t length, void *value, const char *enumtype = 0);
 
   void         *data_ptr;
   unsigned int  data_size;
+
+  /** Timestamp data, must be present and first entries for each interface
+   * data structs! This leans on timeval struct. */
+  typedef struct {
+    int64_t timestamp_sec;	/**< time in seconds since Unix epoch */
+    int64_t timestamp_usec;	/**< additional time microseconds */
+  } message_data_ts_t;
+  message_data_ts_t  *data_ts;	/**< data timestamp aliasing pointer */
 };
 
 template <class MessageType>

@@ -86,7 +86,7 @@ InterfacePseudoMap::getComment() const
 std::string
 InterfacePseudoMap::getKeyType() const
 {
-  return __keytype;
+  return __keytype + "_t";
 }
 
 
@@ -109,9 +109,11 @@ InterfacePseudoMap::valid()
   if (__type.length() == 0) {
     throw InterfaceGeneratorInvalidValueException("type", "string", "type must not be empty");
   }
-  if ( (__keytype != "unsigned int") && (__keytype != "int") &&
-       (__keytype != "long unsigned int") && (__keytype != "long int") ) {
-    throw InterfaceGeneratorInvalidValueException("keytype", "string", "Pseudo map keyes can only be of a numeric type");
+  if ( (__keytype != "int8") && (__keytype != "int16") &&
+       (__keytype != "int32") && (__keytype != "int64") &&
+       (__keytype != "uint8") && (__keytype != "uint16") &&
+       (__keytype != "uint32") && (__keytype != "uint64") ) {
+    throw InterfaceGeneratorInvalidValueException("keytype", "string", "Pseudo map keys can only be of a numeric type");
   }
   if (__keytype.length() == 0) {
     throw InterfaceGeneratorInvalidValueException("keytype", "string", "key type must not be empty");

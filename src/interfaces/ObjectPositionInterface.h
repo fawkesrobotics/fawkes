@@ -37,39 +37,44 @@ class ObjectPositionInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int TYPE_OTHER;
-  static const unsigned int TYPE_BALL;
-  static const unsigned int TYPE_OPPONENT;
-  static const unsigned int TYPE_TEAMMEMBER;
-  static const unsigned int TYPE_LINE;
-  static const unsigned int TYPE_SELF;
-  static const unsigned int TYPE_GOAL_BLUE;
-  static const unsigned int TYPE_GOAL_YELLOW;
-  static const unsigned int FLAG_NONE;
-  static const unsigned int FLAG_HAS_WORLD;
-  static const unsigned int FLAG_HAS_RELATIVE_CARTESIAN;
-  static const unsigned int FLAG_HAS_RELATIVE_POLAR;
-  static const unsigned int FLAG_HAS_EULER_ANGLES;
-  static const unsigned int FLAG_HAS_EXTENT;
-  static const unsigned int FLAG_HAS_VOLUME_EXTENT;
-  static const unsigned int FLAG_HAS_CIRCULAR_EXTENT;
-  static const unsigned int FLAG_HAS_COVARIANCES;
-  static const unsigned int FLAG_HAS_WORLD_VELOCITY;
-  static const unsigned int FLAG_HAS_Z_AS_ORI;
-  static const unsigned int FLAG_IS_FIXED_OBJECT;
+  static const uint32_t TYPE_OTHER;
+  static const uint32_t TYPE_BALL;
+  static const uint32_t TYPE_OPPONENT;
+  static const uint32_t TYPE_TEAMMEMBER;
+  static const uint32_t TYPE_LINE;
+  static const uint32_t TYPE_SELF;
+  static const uint32_t TYPE_GOAL_BLUE;
+  static const uint32_t TYPE_GOAL_YELLOW;
+  static const uint32_t FLAG_NONE;
+  static const uint32_t FLAG_HAS_WORLD;
+  static const uint32_t FLAG_HAS_RELATIVE_CARTESIAN;
+  static const uint32_t FLAG_HAS_RELATIVE_POLAR;
+  static const uint32_t FLAG_HAS_EULER_ANGLES;
+  static const uint32_t FLAG_HAS_EXTENT;
+  static const uint32_t FLAG_HAS_VOLUME_EXTENT;
+  static const uint32_t FLAG_HAS_CIRCULAR_EXTENT;
+  static const uint32_t FLAG_HAS_COVARIANCES;
+  static const uint32_t FLAG_HAS_WORLD_VELOCITY;
+  static const uint32_t FLAG_HAS_Z_AS_ORI;
+  static const uint32_t FLAG_IS_FIXED_OBJECT;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int object_type; /**< 
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t object_type; /**< 
       Object type, use constants to define
      */
-    unsigned int flags; /**< 
+    uint32_t flags; /**< 
       Bit-wise concatenated fields of FLAG_* constants. Denotes features that the
       writer of this interfaces provides. Use a bit-wise OR to concatenate multiple
       flags, use a bit-wise AND to check if a flag has been set.
      */
-    int visibility_history; /**< 
+    bool visible; /**< True, if object is visible. */
+    bool valid; /**< True, if this position is valid. */
+    int32_t visibility_history; /**< 
       The visibilitiy history indicates the number of consecutive positive or negative
       sightings. If the history is negative, there have been as many negative sightings
       (object not visible) as the absolute value of the history. A positive value denotes
@@ -174,9 +179,8 @@ class ObjectPositionInterface : public Interface
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
      */
-    bool visible; /**< True, if object is visible. */
-    bool valid; /**< True, if this position is valid. */
   } ObjectPositionInterface_data_t;
+#pragma pack(pop)
 
   ObjectPositionInterface_data_t *data;
 
@@ -189,11 +193,11 @@ class ObjectPositionInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int object_type() const;
-  void set_object_type(const unsigned int new_object_type);
+  uint32_t object_type() const;
+  void set_object_type(const uint32_t new_object_type);
   size_t maxlenof_object_type() const;
-  unsigned int flags() const;
-  void set_flags(const unsigned int new_flags);
+  uint32_t flags() const;
+  void set_flags(const uint32_t new_flags);
   size_t maxlenof_flags() const;
   bool is_visible() const;
   void set_visible(const bool new_visible);
@@ -201,8 +205,8 @@ class ObjectPositionInterface : public Interface
   bool is_valid() const;
   void set_valid(const bool new_valid);
   size_t maxlenof_valid() const;
-  int visibility_history() const;
-  void set_visibility_history(const int new_visibility_history);
+  int32_t visibility_history() const;
+  void set_visibility_history(const int32_t new_visibility_history);
   size_t maxlenof_visibility_history() const;
   float roll() const;
   void set_roll(const float new_roll);

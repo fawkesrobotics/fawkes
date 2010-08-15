@@ -46,15 +46,16 @@ BatteryInterface::BatteryInterface() : Interface()
   data_size = sizeof(BatteryInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "current", 1, &data->current);
-  add_fieldinfo(IFT_UINT, "voltage", 1, &data->voltage);
-  add_fieldinfo(IFT_UINT, "temperature", 1, &data->temperature);
+  add_fieldinfo(IFT_UINT32, "current", 1, &data->current);
+  add_fieldinfo(IFT_UINT32, "voltage", 1, &data->voltage);
+  add_fieldinfo(IFT_UINT32, "temperature", 1, &data->temperature);
   add_fieldinfo(IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
   add_fieldinfo(IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
   add_messageinfo("PushButtonMessage");
   add_messageinfo("SleepMessage");
-  unsigned char tmp_hash[] = {0xaf, 0x87, 0xbb, 0x32, 0x19, 0x6b, 0x9, 0x3d, 0x7a, 0x6c, 0xf0, 0x4a, 0xb0, 0xd8, 0xa, 0x1d};
+  unsigned char tmp_hash[] = {0x28, 0xb6, 0xbe, 0xe7, 0xf1, 0x47, 0x2, 0x12, 0x1d, 0xe3, 0x7c, 0x14, 0xe9, 0x1f, 0x24, 0x4d};
   set_hash(tmp_hash);
 }
 
@@ -68,7 +69,7 @@ BatteryInterface::~BatteryInterface()
  * Battery Current [mA]
  * @return current value
  */
-unsigned int
+uint32_t
 BatteryInterface::current() const
 {
   return data->current;
@@ -89,16 +90,17 @@ BatteryInterface::maxlenof_current() const
  * @param new_current new current value
  */
 void
-BatteryInterface::set_current(const unsigned int new_current)
+BatteryInterface::set_current(const uint32_t new_current)
 {
   data->current = new_current;
+  data_changed = true;
 }
 
 /** Get voltage value.
  * Battery Voltage [mV]
  * @return voltage value
  */
-unsigned int
+uint32_t
 BatteryInterface::voltage() const
 {
   return data->voltage;
@@ -119,16 +121,17 @@ BatteryInterface::maxlenof_voltage() const
  * @param new_voltage new voltage value
  */
 void
-BatteryInterface::set_voltage(const unsigned int new_voltage)
+BatteryInterface::set_voltage(const uint32_t new_voltage)
 {
   data->voltage = new_voltage;
+  data_changed = true;
 }
 
 /** Get temperature value.
  * Battery Temperature [°C]
  * @return temperature value
  */
-unsigned int
+uint32_t
 BatteryInterface::temperature() const
 {
   return data->temperature;
@@ -149,9 +152,10 @@ BatteryInterface::maxlenof_temperature() const
  * @param new_temperature new temperature value
  */
 void
-BatteryInterface::set_temperature(const unsigned int new_temperature)
+BatteryInterface::set_temperature(const uint32_t new_temperature)
 {
   data->temperature = new_temperature;
+  data_changed = true;
 }
 
 /** Get absolute_soc value.
@@ -182,6 +186,7 @@ void
 BatteryInterface::set_absolute_soc(const float new_absolute_soc)
 {
   data->absolute_soc = new_absolute_soc;
+  data_changed = true;
 }
 
 /** Get relative_soc value.
@@ -212,6 +217,7 @@ void
 BatteryInterface::set_relative_soc(const float new_relative_soc)
 {
   data->relative_soc = new_relative_soc;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -260,13 +266,17 @@ BatteryInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 BatteryInterface::PushButtonMessage::PushButtonMessage() : Message("PushButtonMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(PushButtonMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (PushButtonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 BatteryInterface::PushButtonMessage::~PushButtonMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -274,8 +284,11 @@ BatteryInterface::PushButtonMessage::~PushButtonMessage()
  */
 BatteryInterface::PushButtonMessage::PushButtonMessage(const PushButtonMessage *m) : Message("PushButtonMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (PushButtonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -299,13 +312,17 @@ BatteryInterface::PushButtonMessage::clone() const
 /** Constructor */
 BatteryInterface::SleepMessage::SleepMessage() : Message("SleepMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(SleepMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SleepMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 BatteryInterface::SleepMessage::~SleepMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -313,8 +330,11 @@ BatteryInterface::SleepMessage::~SleepMessage()
  */
 BatteryInterface::SleepMessage::SleepMessage(const SleepMessage *m) : Message("SleepMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SleepMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

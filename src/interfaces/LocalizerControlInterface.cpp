@@ -48,6 +48,7 @@ LocalizerControlInterface::LocalizerControlInterface() : Interface()
   data_size = sizeof(LocalizerControlInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (LocalizerControlInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "map_name", 30, data->map_name);
   add_messageinfo("ResetMessage");
@@ -91,6 +92,7 @@ void
 LocalizerControlInterface::set_map_name(const char * new_map_name)
 {
   strncpy(data->map_name, new_map_name, sizeof(data->map_name));
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -146,6 +148,7 @@ LocalizerControlInterface::ResetMessage::ResetMessage(const float ini_x, const f
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->ori = ini_ori;
@@ -162,6 +165,7 @@ LocalizerControlInterface::ResetMessage::ResetMessage() : Message("ResetMessage"
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
@@ -183,6 +187,7 @@ LocalizerControlInterface::ResetMessage::ResetMessage(const ResetMessage *m) : M
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (ResetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

@@ -39,7 +39,7 @@ namespace fawkes {
 
 
 /** TEST_CONSTANT constant */
-const int TestInterface::TEST_CONSTANT = 5;
+const int32_t TestInterface::TEST_CONSTANT = 5;
 /** TEST_FLOAT_CONSTANT constant */
 const float TestInterface::TEST_FLOAT_CONSTANT = 1.2;
 
@@ -49,19 +49,20 @@ TestInterface::TestInterface() : Interface()
   data_size = sizeof(TestInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "test_bool", 1, &data->test_bool);
-  add_fieldinfo(IFT_INT, "test_int", 1, &data->test_int);
+  add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
   add_fieldinfo(IFT_BYTE, "flags", 1, &data->flags);
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
-  add_fieldinfo(IFT_INT, "result", 1, &data->result);
-  add_fieldinfo(IFT_UINT, "test_uint", 1, &data->test_uint);
-  add_fieldinfo(IFT_LONGUINT, "test_ulint", 1, &data->test_ulint);
-  add_fieldinfo(IFT_LONGINT, "test_lint", 1, &data->test_lint);
+  add_fieldinfo(IFT_INT32, "result", 1, &data->result);
+  add_fieldinfo(IFT_UINT32, "test_uint", 1, &data->test_uint);
+  add_fieldinfo(IFT_UINT64, "test_ulint", 1, &data->test_ulint);
+  add_fieldinfo(IFT_INT64, "test_lint", 1, &data->test_lint);
   add_messageinfo("SetTestIntMessage");
   add_messageinfo("SetTestStringMessage");
   add_messageinfo("CalculateMessage");
-  unsigned char tmp_hash[] = {0x69, 0xac, 0x2a, 0x88, 0xec, 0xcf, 0x7, 0x18, 0x1, 0xf7, 0xfb, 0x54, 0xc, 0xb7, 0xa2, 0x1f};
+  unsigned char tmp_hash[] = {0x76, 0x67, 0x99, 0x23, 0x8, 0xa7, 0xba, 0xe0, 0x34, 0x70, 0x34, 0xf8, 0xe6, 0x99, 0x7d, 0x99};
   set_hash(tmp_hash);
 }
 
@@ -112,13 +113,14 @@ void
 TestInterface::set_test_bool(const bool new_test_bool)
 {
   data->test_bool = new_test_bool;
+  data_changed = true;
 }
 
 /** Get test_int value.
  * Test integer
  * @return test_int value
  */
-int
+int32_t
 TestInterface::test_int() const
 {
   return data->test_int;
@@ -139,16 +141,17 @@ TestInterface::maxlenof_test_int() const
  * @param new_test_int new test_int value
  */
 void
-TestInterface::set_test_int(const int new_test_int)
+TestInterface::set_test_int(const int32_t new_test_int)
 {
   data->test_int = new_test_int;
+  data_changed = true;
 }
 
 /** Get flags value.
  * Flags spit down by the writer
  * @return flags value
  */
-unsigned char
+uint8_t
 TestInterface::flags() const
 {
   return data->flags;
@@ -169,9 +172,10 @@ TestInterface::maxlenof_flags() const
  * @param new_flags new flags value
  */
 void
-TestInterface::set_flags(const unsigned char new_flags)
+TestInterface::set_flags(const uint8_t new_flags)
 {
   data->flags = new_flags;
+  data_changed = true;
 }
 
 /** Get test_string value.
@@ -202,13 +206,14 @@ void
 TestInterface::set_test_string(const char * new_test_string)
 {
   strncpy(data->test_string, new_test_string, sizeof(data->test_string));
+  data_changed = true;
 }
 
 /** Get result value.
  * Result of operation add operation from Calculate message.
  * @return result value
  */
-int
+int32_t
 TestInterface::result() const
 {
   return data->result;
@@ -229,16 +234,17 @@ TestInterface::maxlenof_result() const
  * @param new_result new result value
  */
 void
-TestInterface::set_result(const int new_result)
+TestInterface::set_result(const int32_t new_result)
 {
   data->result = new_result;
+  data_changed = true;
 }
 
 /** Get test_uint value.
- * Test unsigned int
+ * Test uint32
  * @return test_uint value
  */
-unsigned int
+uint32_t
 TestInterface::test_uint() const
 {
   return data->test_uint;
@@ -255,20 +261,21 @@ TestInterface::maxlenof_test_uint() const
 }
 
 /** Set test_uint value.
- * Test unsigned int
+ * Test uint32
  * @param new_test_uint new test_uint value
  */
 void
-TestInterface::set_test_uint(const unsigned int new_test_uint)
+TestInterface::set_test_uint(const uint32_t new_test_uint)
 {
   data->test_uint = new_test_uint;
+  data_changed = true;
 }
 
 /** Get test_ulint value.
  * Test unsigned long int
  * @return test_ulint value
  */
-unsigned long int
+uint64_t
 TestInterface::test_ulint() const
 {
   return data->test_ulint;
@@ -289,16 +296,17 @@ TestInterface::maxlenof_test_ulint() const
  * @param new_test_ulint new test_ulint value
  */
 void
-TestInterface::set_test_ulint(const unsigned long int new_test_ulint)
+TestInterface::set_test_ulint(const uint64_t new_test_ulint)
 {
   data->test_ulint = new_test_ulint;
+  data_changed = true;
 }
 
 /** Get test_lint value.
  * Test long int
  * @return test_lint value
  */
-long int
+int64_t
 TestInterface::test_lint() const
 {
   return data->test_lint;
@@ -319,9 +327,10 @@ TestInterface::maxlenof_test_lint() const
  * @param new_test_lint new test_lint value
  */
 void
-TestInterface::set_test_lint(const long int new_test_lint)
+TestInterface::set_test_lint(const int64_t new_test_lint)
 {
   data->test_lint = new_test_lint;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -375,14 +384,15 @@ TestInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor with initial values.
  * @param ini_test_int initial value for test_int
  */
-TestInterface::SetTestIntMessage::SetTestIntMessage(const int ini_test_int) : Message("SetTestIntMessage")
+TestInterface::SetTestIntMessage::SetTestIntMessage(const int32_t ini_test_int) : Message("SetTestIntMessage")
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->test_int = ini_test_int;
-  add_fieldinfo(IFT_INT, "test_int", 1, &data->test_int);
+  add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
 }
 /** Constructor */
 TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessage")
@@ -391,7 +401,8 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_INT, "test_int", 1, &data->test_int);
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
 }
 
 /** Destructor */
@@ -409,6 +420,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const SetTestIntMessage *m) 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -416,7 +428,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const SetTestIntMessage *m) 
  * Test integer
  * @return test_int value
  */
-int
+int32_t
 TestInterface::SetTestIntMessage::test_int() const
 {
   return data->test_int;
@@ -437,7 +449,7 @@ TestInterface::SetTestIntMessage::maxlenof_test_int() const
  * @param new_test_int new test_int value
  */
 void
-TestInterface::SetTestIntMessage::set_test_int(const int new_test_int)
+TestInterface::SetTestIntMessage::set_test_int(const int32_t new_test_int)
 {
   data->test_int = new_test_int;
 }
@@ -468,6 +480,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const char * ini_test_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->test_string, ini_test_string, 30);
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
@@ -478,6 +491,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestSt
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
 
@@ -496,6 +510,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const SetTestStringMes
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -550,16 +565,17 @@ TestInterface::SetTestStringMessage::clone() const
  * @param ini_summand initial value for summand
  * @param ini_addend initial value for addend
  */
-TestInterface::CalculateMessage::CalculateMessage(const int ini_summand, const int ini_addend) : Message("CalculateMessage")
+TestInterface::CalculateMessage::CalculateMessage(const int32_t ini_summand, const int32_t ini_addend) : Message("CalculateMessage")
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->summand = ini_summand;
   data->addend = ini_addend;
-  add_fieldinfo(IFT_INT, "summand", 1, &data->summand);
-  add_fieldinfo(IFT_INT, "addend", 1, &data->addend);
+  add_fieldinfo(IFT_INT32, "summand", 1, &data->summand);
+  add_fieldinfo(IFT_INT32, "addend", 1, &data->addend);
 }
 /** Constructor */
 TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage")
@@ -568,8 +584,9 @@ TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage"
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
-  add_fieldinfo(IFT_INT, "summand", 1, &data->summand);
-  add_fieldinfo(IFT_INT, "addend", 1, &data->addend);
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_INT32, "summand", 1, &data->summand);
+  add_fieldinfo(IFT_INT32, "addend", 1, &data->addend);
 }
 
 /** Destructor */
@@ -587,6 +604,7 @@ TestInterface::CalculateMessage::CalculateMessage(const CalculateMessage *m) : M
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -594,7 +612,7 @@ TestInterface::CalculateMessage::CalculateMessage(const CalculateMessage *m) : M
  * Summand
  * @return summand value
  */
-int
+int32_t
 TestInterface::CalculateMessage::summand() const
 {
   return data->summand;
@@ -615,7 +633,7 @@ TestInterface::CalculateMessage::maxlenof_summand() const
  * @param new_summand new summand value
  */
 void
-TestInterface::CalculateMessage::set_summand(const int new_summand)
+TestInterface::CalculateMessage::set_summand(const int32_t new_summand)
 {
   data->summand = new_summand;
 }
@@ -624,7 +642,7 @@ TestInterface::CalculateMessage::set_summand(const int new_summand)
  * Addend
  * @return addend value
  */
-int
+int32_t
 TestInterface::CalculateMessage::addend() const
 {
   return data->addend;
@@ -645,7 +663,7 @@ TestInterface::CalculateMessage::maxlenof_addend() const
  * @param new_addend new addend value
  */
 void
-TestInterface::CalculateMessage::set_addend(const int new_addend)
+TestInterface::CalculateMessage::set_addend(const int32_t new_addend)
 {
   data->addend = new_addend;
 }

@@ -35,6 +35,7 @@
 
 #include <signal.h>
 #include <cstdlib>
+#include <cstdio>
 
 #include <iostream>
 #include <vector>
@@ -47,9 +48,7 @@ int
 main(int argc, char **argv)
 {
   LibLogger::init();
-  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
-				       BLACKBOARD_MAGIC_TOKEN,
-				       /* master */  true);
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
 
   TestInterface *ti_writer_1;
   TestInterface *ti_writer_2;

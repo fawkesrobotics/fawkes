@@ -65,11 +65,11 @@ class TestInterface : public Interface
   unsigned int test_uint();
   void set_test_uint(const unsigned int new_test_uint);
   int maxlenof_test_uint() const;
-  unsigned long int test_ulint();
-  void set_test_ulint(const unsigned long int new_test_ulint);
+  unsigned long test_ulint();
+  void set_test_ulint(const unsigned long new_test_ulint);
   int maxlenof_test_ulint() const;
-  long int test_lint();
-  void set_test_lint(const long int new_test_lint);
+  long test_lint();
+  void set_test_lint(const long new_test_lint);
   int maxlenof_test_lint() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

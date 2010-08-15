@@ -52,7 +52,7 @@ InterfaceConstant::InterfaceConstant(const std::string &name, const std::string 
 
   this->name  = name;
   this->type  = type;
-  if ( type == "char" ) {
+  if ( type == "string" ) {
     this->value = std::string("\"") + value + "\"";
   } else {
     this->value = value;
@@ -87,7 +87,15 @@ InterfaceConstant::getValue()
 std::string
 InterfaceConstant::getType()
 {
-  return type;
+  if (type == "string") {
+    return "char *";
+  } else if (type == "byte") {
+    return "uint8_t";
+  } else if (type == "float" || type == "double" || type == "bool") {
+    return type;
+  } else {
+    return type + "_t";
+  }
 }
 
 

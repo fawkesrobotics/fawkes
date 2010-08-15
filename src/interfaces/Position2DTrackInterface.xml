@@ -14,12 +14,12 @@
       Y-Positions of the track. The first array-element is the oldest position of the track, 
       the last is the newest.
     </field>
-    <field type="int" name="track_timestamps" length="30">
+    <field type="int32" name="track_timestamps" length="30">
       Timestamps of the track. The first array-element is the oldest position of the track, 
       the last is the newest.
     </field>
     <field type="bool" name="valid">True, if this track is valid.</field>
-    <field type="unsigned int" name="length">Length of the Tracks (i.e. up to which index there are valid positions).</field>
-    <field type="unsigned int" name="track_id">The ID of the Track.</field>
+    <field type="uint32" name="length">Length of the Tracks (i.e. up to which index there are valid positions).</field>
+    <field type="uint32" name="track_id">The ID of the Track.</field>
   </data>
 </interface>

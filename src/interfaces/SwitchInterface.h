@@ -39,19 +39,13 @@ class SwitchInterface : public Interface
   /* constants */
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int short_activations; /**< 
-      Number of consecutive short clicks (turned on). Can be used to recognize
-      patterns of clicks. This is an optional field.
-     */
-    unsigned int long_activations; /**< 
-      Number of consecutive short clicks (turned on). Can be used to recognize
-      patterns of clicks. This is an optional field.
-     */
-    unsigned int activation_count; /**< 
-      Number that is to be incremented whenever a short or long activation
-      happened. Can be used to decide if a change in status happened.
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    bool enabled; /**< 
+      True if the switch is currently enabled.
      */
     float value; /**< 
       If switches support multiple states these can be indicated with
@@ -66,10 +60,20 @@ class SwitchInterface : public Interface
       absolute value) the button has not been pressed. Zero means
       "just initialized".
      */
-    bool enabled; /**< 
-      True if the switch is currently enabled.
+    uint32_t short_activations; /**< 
+      Number of consecutive short clicks (turned on). Can be used to recognize
+      patterns of clicks. This is an optional field.
+     */
+    uint32_t long_activations; /**< 
+      Number of consecutive short clicks (turned on). Can be used to recognize
+      patterns of clicks. This is an optional field.
+     */
+    uint32_t activation_count; /**< 
+      Number that is to be incremented whenever a short or long activation
+      happened. Can be used to decide if a change in status happened.
      */
   } SwitchInterface_data_t;
+#pragma pack(pop)
 
   SwitchInterface_data_t *data;
 
@@ -78,17 +82,21 @@ class SwitchInterface : public Interface
   class SetMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool enabled; /**< 
+      True if the switch is currently enabled.
+     */
       float value; /**< 
       If switches support multiple states these can be indicated with
       this value. For example for a switch that notes the intensity it
       could be a value in the valid range.
      */
-      bool enabled; /**< 
-      True if the switch is currently enabled.
-     */
     } SetMessage_data_t;
+#pragma pack(pop)
 
     SetMessage_data_t *data;
 
@@ -110,6 +118,17 @@ class SwitchInterface : public Interface
 
   class EnableSwitchMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } EnableSwitchMessage_data_t;
+#pragma pack(pop)
+
+    EnableSwitchMessage_data_t *data;
+
    public:
     EnableSwitchMessage();
     ~EnableSwitchMessage();
@@ -121,6 +140,17 @@ class SwitchInterface : public Interface
 
   class DisableSwitchMessage : public Message
   {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } DisableSwitchMessage_data_t;
+#pragma pack(pop)
+
+    DisableSwitchMessage_data_t *data;
+
    public:
     DisableSwitchMessage();
     ~DisableSwitchMessage();
@@ -133,8 +163,11 @@ class SwitchInterface : public Interface
   class EnableDurationMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float duration; /**< Duration in seconds for which
     the switch should be enabled. */
       float value; /**< 
@@ -143,6 +176,7 @@ class SwitchInterface : public Interface
       could be a value in the valid range.
      */
     } EnableDurationMessage_data_t;
+#pragma pack(pop)
 
     EnableDurationMessage_data_t *data;
 
@@ -178,14 +212,14 @@ class SwitchInterface : public Interface
   float history() const;
   void set_history(const float new_history);
   size_t maxlenof_history() const;
-  unsigned int short_activations() const;
-  void set_short_activations(const unsigned int new_short_activations);
+  uint32_t short_activations() const;
+  void set_short_activations(const uint32_t new_short_activations);
   size_t maxlenof_short_activations() const;
-  unsigned int long_activations() const;
-  void set_long_activations(const unsigned int new_long_activations);
+  uint32_t long_activations() const;
+  void set_long_activations(const uint32_t new_long_activations);
   size_t maxlenof_long_activations() const;
-  unsigned int activation_count() const;
-  void set_activation_count(const unsigned int new_activation_count);
+  uint32_t activation_count() const;
+  void set_activation_count(const uint32_t new_activation_count);
   size_t maxlenof_activation_count() const;
   virtual Message * create_message(const char *type) const;
 

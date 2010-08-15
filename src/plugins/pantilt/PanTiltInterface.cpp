@@ -40,19 +40,19 @@ namespace fawkes {
 
 
 /** FLAG_SUPPORTS_PAN constant */
-const unsigned int PanTiltInterface::FLAG_SUPPORTS_PAN = 1;
+const uint32_t PanTiltInterface::FLAG_SUPPORTS_PAN = 1u;
 /** FLAG_SUPPORTS_TILT constant */
-const unsigned int PanTiltInterface::FLAG_SUPPORTS_TILT = 2;
+const uint32_t PanTiltInterface::FLAG_SUPPORTS_TILT = 2u;
 /** ERROR_NONE constant */
-const unsigned int PanTiltInterface::ERROR_NONE = 0;
+const uint32_t PanTiltInterface::ERROR_NONE = 0u;
 /** ERROR_UNSPECIFIC constant */
-const unsigned int PanTiltInterface::ERROR_UNSPECIFIC = 1;
+const uint32_t PanTiltInterface::ERROR_UNSPECIFIC = 1u;
 /** ERROR_COMMUNICATION constant */
-const unsigned int PanTiltInterface::ERROR_COMMUNICATION = 2;
+const uint32_t PanTiltInterface::ERROR_COMMUNICATION = 2u;
 /** ERROR_PAN_OUTOFRANGE constant */
-const unsigned int PanTiltInterface::ERROR_PAN_OUTOFRANGE = 4;
+const uint32_t PanTiltInterface::ERROR_PAN_OUTOFRANGE = 4u;
 /** ERROR_TILT_OUTOFRANGE constant */
-const unsigned int PanTiltInterface::ERROR_TILT_OUTOFRANGE = 8;
+const uint32_t PanTiltInterface::ERROR_TILT_OUTOFRANGE = 8u;
 
 /** Constructor */
 PanTiltInterface::PanTiltInterface() : Interface()
@@ -60,13 +60,14 @@ PanTiltInterface::PanTiltInterface() : Interface()
   data_size = sizeof(PanTiltInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (PanTiltInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_UINT, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
   add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_UINT, "error_code", 1, &data->error_code);
+  add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_FLOAT, "min_pan", 1, &data->min_pan);
@@ -88,7 +89,7 @@ PanTiltInterface::PanTiltInterface() : Interface()
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetVelocityMessage");
   add_messageinfo("SetMarginMessage");
-  unsigned char tmp_hash[] = {0xf1, 0x7a, 0x47, 0xde, 0x4f, 0x37, 0x5b, 0xc7, 0x75, 0x1c, 0xd6, 0x73, 0x1e, 00, 0xe9, 0x71};
+  unsigned char tmp_hash[] = {0x3, 0xd7, 0x3b, 0xa8, 0x9f, 0x6d, 00, 0xb9, 0xf5, 0xf2, 0x2f, 0x92, 0x25, 0x1b, 0x87, 0x8e};
   set_hash(tmp_hash);
 }
 
@@ -102,7 +103,7 @@ PanTiltInterface::~PanTiltInterface()
  * Flags.
  * @return flags value
  */
-unsigned int
+uint32_t
 PanTiltInterface::flags() const
 {
   return data->flags;
@@ -123,9 +124,10 @@ PanTiltInterface::maxlenof_flags() const
  * @param new_flags new flags value
  */
 void
-PanTiltInterface::set_flags(const unsigned int new_flags)
+PanTiltInterface::set_flags(const uint32_t new_flags)
 {
   data->flags = new_flags;
+  data_changed = true;
 }
 
 /** Get pan value.
@@ -156,6 +158,7 @@ void
 PanTiltInterface::set_pan(const float new_pan)
 {
   data->pan = new_pan;
+  data_changed = true;
 }
 
 /** Get tilt value.
@@ -186,6 +189,7 @@ void
 PanTiltInterface::set_tilt(const float new_tilt)
 {
   data->tilt = new_tilt;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -193,7 +197,7 @@ PanTiltInterface::set_tilt(const float new_tilt)
       processed, or 0 if no message is being processed.
  * @return msgid value
  */
-unsigned int
+uint32_t
 PanTiltInterface::msgid() const
 {
   return data->msgid;
@@ -215,9 +219,10 @@ PanTiltInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-PanTiltInterface::set_msgid(const unsigned int new_msgid)
+PanTiltInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /** Get final value.
@@ -250,6 +255,7 @@ void
 PanTiltInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
 }
 
 /** Get error_code value.
@@ -258,7 +264,7 @@ PanTiltInterface::set_final(const bool new_final)
     constants otherwise (or a bit-wise combination).
  * @return error_code value
  */
-unsigned int
+uint32_t
 PanTiltInterface::error_code() const
 {
   return data->error_code;
@@ -281,9 +287,10 @@ PanTiltInterface::maxlenof_error_code() const
  * @param new_error_code new error_code value
  */
 void
-PanTiltInterface::set_error_code(const unsigned int new_error_code)
+PanTiltInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
+  data_changed = true;
 }
 
 /** Get enabled value.
@@ -314,6 +321,7 @@ void
 PanTiltInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /** Get calibrated value.
@@ -344,6 +352,7 @@ void
 PanTiltInterface::set_calibrated(const bool new_calibrated)
 {
   data->calibrated = new_calibrated;
+  data_changed = true;
 }
 
 /** Get min_pan value.
@@ -374,6 +383,7 @@ void
 PanTiltInterface::set_min_pan(const float new_min_pan)
 {
   data->min_pan = new_min_pan;
+  data_changed = true;
 }
 
 /** Get max_pan value.
@@ -404,6 +414,7 @@ void
 PanTiltInterface::set_max_pan(const float new_max_pan)
 {
   data->max_pan = new_max_pan;
+  data_changed = true;
 }
 
 /** Get min_tilt value.
@@ -434,6 +445,7 @@ void
 PanTiltInterface::set_min_tilt(const float new_min_tilt)
 {
   data->min_tilt = new_min_tilt;
+  data_changed = true;
 }
 
 /** Get max_tilt value.
@@ -464,6 +476,7 @@ void
 PanTiltInterface::set_max_tilt(const float new_max_tilt)
 {
   data->max_tilt = new_max_tilt;
+  data_changed = true;
 }
 
 /** Get max_pan_velocity value.
@@ -494,6 +507,7 @@ void
 PanTiltInterface::set_max_pan_velocity(const float new_max_pan_velocity)
 {
   data->max_pan_velocity = new_max_pan_velocity;
+  data_changed = true;
 }
 
 /** Get max_tilt_velocity value.
@@ -524,6 +538,7 @@ void
 PanTiltInterface::set_max_tilt_velocity(const float new_max_tilt_velocity)
 {
   data->max_tilt_velocity = new_max_tilt_velocity;
+  data_changed = true;
 }
 
 /** Get pan_velocity value.
@@ -554,6 +569,7 @@ void
 PanTiltInterface::set_pan_velocity(const float new_pan_velocity)
 {
   data->pan_velocity = new_pan_velocity;
+  data_changed = true;
 }
 
 /** Get tilt_velocity value.
@@ -584,6 +600,7 @@ void
 PanTiltInterface::set_tilt_velocity(const float new_tilt_velocity)
 {
   data->tilt_velocity = new_tilt_velocity;
+  data_changed = true;
 }
 
 /** Get pan_margin value.
@@ -616,6 +633,7 @@ void
 PanTiltInterface::set_pan_margin(const float new_pan_margin)
 {
   data->pan_margin = new_pan_margin;
+  data_changed = true;
 }
 
 /** Get tilt_margin value.
@@ -648,6 +666,7 @@ void
 PanTiltInterface::set_tilt_margin(const float new_tilt_margin)
 {
   data->tilt_margin = new_tilt_margin;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -710,13 +729,17 @@ PanTiltInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 PanTiltInterface::StopMessage::StopMessage() : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 PanTiltInterface::StopMessage::~StopMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -724,8 +747,11 @@ PanTiltInterface::StopMessage::~StopMessage()
  */
 PanTiltInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -749,13 +775,17 @@ PanTiltInterface::StopMessage::clone() const
 /** Constructor */
 PanTiltInterface::FlushMessage::FlushMessage() : Message("FlushMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(FlushMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (FlushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 PanTiltInterface::FlushMessage::~FlushMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -763,8 +793,11 @@ PanTiltInterface::FlushMessage::~FlushMessage()
  */
 PanTiltInterface::FlushMessage::FlushMessage(const FlushMessage *m) : Message("FlushMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (FlushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -788,13 +821,17 @@ PanTiltInterface::FlushMessage::clone() const
 /** Constructor */
 PanTiltInterface::CalibrateMessage::CalibrateMessage() : Message("CalibrateMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(CalibrateMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 PanTiltInterface::CalibrateMessage::~CalibrateMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -802,8 +839,11 @@ PanTiltInterface::CalibrateMessage::~CalibrateMessage()
  */
 PanTiltInterface::CalibrateMessage::CalibrateMessage(const CalibrateMessage *m) : Message("CalibrateMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -827,13 +867,17 @@ PanTiltInterface::CalibrateMessage::clone() const
 /** Constructor */
 PanTiltInterface::ParkMessage::ParkMessage() : Message("ParkMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ParkMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 PanTiltInterface::ParkMessage::~ParkMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -841,8 +885,11 @@ PanTiltInterface::ParkMessage::~ParkMessage()
  */
 PanTiltInterface::ParkMessage::ParkMessage(const ParkMessage *m) : Message("ParkMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -873,6 +920,7 @@ PanTiltInterface::GotoMessage::GotoMessage(const float ini_pan, const float ini_
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->pan = ini_pan;
   data->tilt = ini_tilt;
   add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
@@ -885,6 +933,7 @@ PanTiltInterface::GotoMessage::GotoMessage() : Message("GotoMessage")
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
   add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
 }
@@ -904,6 +953,7 @@ PanTiltInterface::GotoMessage::GotoMessage(const GotoMessage *m) : Message("Goto
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (GotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -995,6 +1045,7 @@ PanTiltInterface::TimedGotoMessage::TimedGotoMessage(const float ini_time_sec, c
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TimedGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->time_sec = ini_time_sec;
   data->pan = ini_pan;
   data->tilt = ini_tilt;
@@ -1009,6 +1060,7 @@ PanTiltInterface::TimedGotoMessage::TimedGotoMessage() : Message("TimedGotoMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TimedGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
   add_fieldinfo(IFT_FLOAT, "pan", 1, &data->pan);
   add_fieldinfo(IFT_FLOAT, "tilt", 1, &data->tilt);
@@ -1029,6 +1081,7 @@ PanTiltInterface::TimedGotoMessage::TimedGotoMessage(const TimedGotoMessage *m) 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (TimedGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1150,6 +1203,7 @@ PanTiltInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_enabled) :
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->enabled = ini_enabled;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
@@ -1160,6 +1214,7 @@ PanTiltInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMe
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
@@ -1178,6 +1233,7 @@ PanTiltInterface::SetEnabledMessage::SetEnabledMessage(const SetEnabledMessage *
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1238,6 +1294,7 @@ PanTiltInterface::SetVelocityMessage::SetVelocityMessage(const float ini_pan_vel
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->pan_velocity = ini_pan_velocity;
   data->tilt_velocity = ini_tilt_velocity;
   add_fieldinfo(IFT_FLOAT, "pan_velocity", 1, &data->pan_velocity);
@@ -1250,6 +1307,7 @@ PanTiltInterface::SetVelocityMessage::SetVelocityMessage() : Message("SetVelocit
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "pan_velocity", 1, &data->pan_velocity);
   add_fieldinfo(IFT_FLOAT, "tilt_velocity", 1, &data->tilt_velocity);
 }
@@ -1269,6 +1327,7 @@ PanTiltInterface::SetVelocityMessage::SetVelocityMessage(const SetVelocityMessag
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1359,6 +1418,7 @@ PanTiltInterface::SetMarginMessage::SetMarginMessage(const float ini_pan_margin,
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMarginMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->pan_margin = ini_pan_margin;
   data->tilt_margin = ini_tilt_margin;
   add_fieldinfo(IFT_FLOAT, "pan_margin", 1, &data->pan_margin);
@@ -1371,6 +1431,7 @@ PanTiltInterface::SetMarginMessage::SetMarginMessage() : Message("SetMarginMessa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMarginMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "pan_margin", 1, &data->pan_margin);
   add_fieldinfo(IFT_FLOAT, "tilt_margin", 1, &data->tilt_margin);
 }
@@ -1390,6 +1451,7 @@ PanTiltInterface::SetMarginMessage::SetMarginMessage(const SetMarginMessage *m) 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetMarginMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

@@ -41,49 +41,49 @@ namespace fawkes {
 
 
 /** SENSOR_IR_RIGHT_INNER_MIDDLE constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_INNER_MIDDLE = 0;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_MIDDLE = 0u;
 /** SENSOR_IR_RIGHT_INNER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_INNER_FRONT = 1;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_INNER_FRONT = 1u;
 /** SENSOR_RESERVED_2 constant */
-const unsigned int KatanaInterface::SENSOR_RESERVED_2 = 2;
+const uint32_t KatanaInterface::SENSOR_RESERVED_2 = 2u;
 /** SENSOR_COND_BOTH constant */
-const unsigned int KatanaInterface::SENSOR_COND_BOTH = 3;
+const uint32_t KatanaInterface::SENSOR_COND_BOTH = 3u;
 /** SENSOR_IR_RIGHT_OUTER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_OUTER_FRONT = 4;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_OUTER_FRONT = 4u;
 /** SENSOR_IR_RIGHT_BOTTOM_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_RIGHT_BOTTOM_FRONT = 5;
+const uint32_t KatanaInterface::SENSOR_IR_RIGHT_BOTTOM_FRONT = 5u;
 /** SENSOR_FORCE_RIGHT_REAR constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_RIGHT_REAR = 6;
+const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_REAR = 6u;
 /** SENSOR_FORCE_RIGHT_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_RIGHT_FRONT = 7;
+const uint32_t KatanaInterface::SENSOR_FORCE_RIGHT_FRONT = 7u;
 /** SENSOR_IR_LEFT_INNER_MIDDLE constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_INNER_MIDDLE = 8;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_MIDDLE = 8u;
 /** SENSOR_IR_LEFT_INNER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_INNER_FRONT = 9;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_INNER_FRONT = 9u;
 /** SENSOR_RESERVED_10 constant */
-const unsigned int KatanaInterface::SENSOR_RESERVED_10 = 10;
+const uint32_t KatanaInterface::SENSOR_RESERVED_10 = 10u;
 /** SENSOR_IR_CENTER_GRIPPER constant */
-const unsigned int KatanaInterface::SENSOR_IR_CENTER_GRIPPER = 11;
+const uint32_t KatanaInterface::SENSOR_IR_CENTER_GRIPPER = 11u;
 /** SENSOR_IR_LEFT_OUTER_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_OUTER_FRONT = 12;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_OUTER_FRONT = 12u;
 /** SENSOR_IR_LEFT_BOTTOM_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_IR_LEFT_BOTTOM_FRONT = 13;
+const uint32_t KatanaInterface::SENSOR_IR_LEFT_BOTTOM_FRONT = 13u;
 /** SENSOR_FORCE_LEFT_REAR constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_LEFT_REAR = 14;
+const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_REAR = 14u;
 /** SENSOR_FORCE_LEFT_FRONT constant */
-const unsigned int KatanaInterface::SENSOR_FORCE_LEFT_FRONT = 15;
+const uint32_t KatanaInterface::SENSOR_FORCE_LEFT_FRONT = 15u;
 /** ERROR_NONE constant */
-const unsigned int KatanaInterface::ERROR_NONE = 0;
+const uint32_t KatanaInterface::ERROR_NONE = 0u;
 /** ERROR_UNSPECIFIC constant */
-const unsigned int KatanaInterface::ERROR_UNSPECIFIC = 1;
+const uint32_t KatanaInterface::ERROR_UNSPECIFIC = 1u;
 /** ERROR_CMD_START_FAILED constant */
-const unsigned int KatanaInterface::ERROR_CMD_START_FAILED = 2;
+const uint32_t KatanaInterface::ERROR_CMD_START_FAILED = 2u;
 /** ERROR_NO_SOLUTION constant */
-const unsigned int KatanaInterface::ERROR_NO_SOLUTION = 4;
+const uint32_t KatanaInterface::ERROR_NO_SOLUTION = 4u;
 /** ERROR_COMMUNICATION constant */
-const unsigned int KatanaInterface::ERROR_COMMUNICATION = 8;
+const uint32_t KatanaInterface::ERROR_COMMUNICATION = 8u;
 /** ERROR_MOTOR_CRASHED constant */
-const unsigned int KatanaInterface::ERROR_MOTOR_CRASHED = 16;
+const uint32_t KatanaInterface::ERROR_MOTOR_CRASHED = 16u;
 
 /** Constructor */
 KatanaInterface::KatanaInterface() : Interface()
@@ -91,6 +91,7 @@ KatanaInterface::KatanaInterface() : Interface()
   data_size = sizeof(KatanaInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (KatanaInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BYTE, "sensor_value", 16, &data->sensor_value);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
@@ -99,9 +100,9 @@ KatanaInterface::KatanaInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
   add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
-  add_fieldinfo(IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  add_fieldinfo(IFT_UINT, "error_code", 1, &data->error_code);
+  add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_BOOL, "calibrated", 1, &data->calibrated);
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
@@ -115,7 +116,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("CloseGripperMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetMaxVelocityMessage");
-  unsigned char tmp_hash[] = {0x67, 0x9b, 0x57, 0x4e, 0xb3, 0x7c, 0x64, 0x5f, 0x23, 0xd4, 0x1e, 0x8a, 0x19, 0x52, 0x5b, 0x84};
+  unsigned char tmp_hash[] = {0x36, 0x80, 0x78, 0x4, 0x9f, 0x14, 0x1b, 0x27, 0x38, 0x40, 0x77, 0xb6, 0xc0, 0x7, 0xe, 0x73};
   set_hash(tmp_hash);
 }
 
@@ -130,7 +131,7 @@ KatanaInterface::~KatanaInterface()
     values. Use SENSOR_* indexes for accessing the values.
  * @return sensor_value value
  */
-unsigned char *
+uint8_t *
 KatanaInterface::sensor_value() const
 {
   return data->sensor_value;
@@ -143,7 +144,7 @@ KatanaInterface::sensor_value() const
  * @return sensor_value value
  * @exception Exception thrown if index is out of bounds
  */
-unsigned char
+uint8_t
 KatanaInterface::sensor_value(unsigned int index) const
 {
   if (index > 16) {
@@ -168,9 +169,10 @@ KatanaInterface::maxlenof_sensor_value() const
  * @param new_sensor_value new sensor_value value
  */
 void
-KatanaInterface::set_sensor_value(const unsigned char * new_sensor_value)
+KatanaInterface::set_sensor_value(const uint8_t * new_sensor_value)
 {
-  memcpy(data->sensor_value, new_sensor_value, sizeof(unsigned char) * 16);
+  memcpy(data->sensor_value, new_sensor_value, sizeof(uint8_t) * 16);
+  data_changed = true;
 }
 
 /** Set sensor_value value at given index.
@@ -180,7 +182,7 @@ KatanaInterface::set_sensor_value(const unsigned char * new_sensor_value)
  * @param index index for of the value
  */
 void
-KatanaInterface::set_sensor_value(unsigned int index, const unsigned char new_sensor_value)
+KatanaInterface::set_sensor_value(unsigned int index, const uint8_t new_sensor_value)
 {
   if (index > 16) {
     throw Exception("Index value %u out of bounds (0..16)", index);
@@ -217,6 +219,7 @@ void
 KatanaInterface::set_x(const float new_x)
 {
   data->x = new_x;
+  data_changed = true;
 }
 
 /** Get y value.
@@ -249,6 +252,7 @@ void
 KatanaInterface::set_y(const float new_y)
 {
   data->y = new_y;
+  data_changed = true;
 }
 
 /** Get z value.
@@ -281,6 +285,7 @@ void
 KatanaInterface::set_z(const float new_z)
 {
   data->z = new_z;
+  data_changed = true;
 }
 
 /** Get phi value.
@@ -311,6 +316,7 @@ void
 KatanaInterface::set_phi(const float new_phi)
 {
   data->phi = new_phi;
+  data_changed = true;
 }
 
 /** Get theta value.
@@ -341,6 +347,7 @@ void
 KatanaInterface::set_theta(const float new_theta)
 {
   data->theta = new_theta;
+  data_changed = true;
 }
 
 /** Get psi value.
@@ -371,6 +378,7 @@ void
 KatanaInterface::set_psi(const float new_psi)
 {
   data->psi = new_psi;
+  data_changed = true;
 }
 
 /** Get msgid value.
@@ -378,7 +386,7 @@ KatanaInterface::set_psi(const float new_psi)
       processed, or 0 if no message is being processed.
  * @return msgid value
  */
-unsigned int
+uint32_t
 KatanaInterface::msgid() const
 {
   return data->msgid;
@@ -400,9 +408,10 @@ KatanaInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-KatanaInterface::set_msgid(const unsigned int new_msgid)
+KatanaInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
+  data_changed = true;
 }
 
 /** Get final value.
@@ -435,6 +444,7 @@ void
 KatanaInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
 }
 
 /** Get error_code value.
@@ -443,7 +453,7 @@ KatanaInterface::set_final(const bool new_final)
     constants otherwise (or a bit-wise combination).
  * @return error_code value
  */
-unsigned int
+uint32_t
 KatanaInterface::error_code() const
 {
   return data->error_code;
@@ -466,9 +476,10 @@ KatanaInterface::maxlenof_error_code() const
  * @param new_error_code new error_code value
  */
 void
-KatanaInterface::set_error_code(const unsigned int new_error_code)
+KatanaInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
+  data_changed = true;
 }
 
 /** Get enabled value.
@@ -499,6 +510,7 @@ void
 KatanaInterface::set_enabled(const bool new_enabled)
 {
   data->enabled = new_enabled;
+  data_changed = true;
 }
 
 /** Get calibrated value.
@@ -529,13 +541,14 @@ void
 KatanaInterface::set_calibrated(const bool new_calibrated)
 {
   data->calibrated = new_calibrated;
+  data_changed = true;
 }
 
 /** Get max_velocity value.
  * Maximum velocity
  * @return max_velocity value
  */
-unsigned char
+uint8_t
 KatanaInterface::max_velocity() const
 {
   return data->max_velocity;
@@ -556,16 +569,17 @@ KatanaInterface::maxlenof_max_velocity() const
  * @param new_max_velocity new max_velocity value
  */
 void
-KatanaInterface::set_max_velocity(const unsigned char new_max_velocity)
+KatanaInterface::set_max_velocity(const uint8_t new_max_velocity)
 {
   data->max_velocity = new_max_velocity;
+  data_changed = true;
 }
 
 /** Get num_motors value.
  * Number of motors
  * @return num_motors value
  */
-unsigned char
+uint8_t
 KatanaInterface::num_motors() const
 {
   return data->num_motors;
@@ -586,9 +600,10 @@ KatanaInterface::maxlenof_num_motors() const
  * @param new_num_motors new num_motors value
  */
 void
-KatanaInterface::set_num_motors(const unsigned char new_num_motors)
+KatanaInterface::set_num_motors(const uint8_t new_num_motors)
 {
   data->num_motors = new_num_motors;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -651,13 +666,17 @@ KatanaInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor */
 KatanaInterface::StopMessage::StopMessage() : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::StopMessage::~StopMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -665,8 +684,11 @@ KatanaInterface::StopMessage::~StopMessage()
  */
 KatanaInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -690,13 +712,17 @@ KatanaInterface::StopMessage::clone() const
 /** Constructor */
 KatanaInterface::FlushMessage::FlushMessage() : Message("FlushMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(FlushMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (FlushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::FlushMessage::~FlushMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -704,8 +730,11 @@ KatanaInterface::FlushMessage::~FlushMessage()
  */
 KatanaInterface::FlushMessage::FlushMessage(const FlushMessage *m) : Message("FlushMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (FlushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -729,13 +758,17 @@ KatanaInterface::FlushMessage::clone() const
 /** Constructor */
 KatanaInterface::ParkMessage::ParkMessage() : Message("ParkMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(ParkMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::ParkMessage::~ParkMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -743,8 +776,11 @@ KatanaInterface::ParkMessage::~ParkMessage()
  */
 KatanaInterface::ParkMessage::ParkMessage(const ParkMessage *m) : Message("ParkMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ParkMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -779,6 +815,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_x, const f
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
@@ -799,6 +836,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -822,6 +860,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const LinearGotoMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1031,13 +1070,17 @@ KatanaInterface::LinearGotoMessage::clone() const
 /** Constructor */
 KatanaInterface::CalibrateMessage::CalibrateMessage() : Message("CalibrateMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(CalibrateMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::CalibrateMessage::~CalibrateMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1045,8 +1088,11 @@ KatanaInterface::CalibrateMessage::~CalibrateMessage()
  */
 KatanaInterface::CalibrateMessage::CalibrateMessage(const CalibrateMessage *m) : Message("CalibrateMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1070,13 +1116,17 @@ KatanaInterface::CalibrateMessage::clone() const
 /** Constructor */
 KatanaInterface::OpenGripperMessage::OpenGripperMessage() : Message("OpenGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(OpenGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::OpenGripperMessage::~OpenGripperMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1084,8 +1134,11 @@ KatanaInterface::OpenGripperMessage::~OpenGripperMessage()
  */
 KatanaInterface::OpenGripperMessage::OpenGripperMessage(const OpenGripperMessage *m) : Message("OpenGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1109,13 +1162,17 @@ KatanaInterface::OpenGripperMessage::clone() const
 /** Constructor */
 KatanaInterface::CloseGripperMessage::CloseGripperMessage() : Message("CloseGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(CloseGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CloseGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 KatanaInterface::CloseGripperMessage::~CloseGripperMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -1123,8 +1180,11 @@ KatanaInterface::CloseGripperMessage::~CloseGripperMessage()
  */
 KatanaInterface::CloseGripperMessage::CloseGripperMessage(const CloseGripperMessage *m) : Message("CloseGripperMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CloseGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1154,6 +1214,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_enabled) : 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->enabled = ini_enabled;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
@@ -1164,6 +1225,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEnabledMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
@@ -1182,6 +1244,7 @@ KatanaInterface::SetEnabledMessage::SetEnabledMessage(const SetEnabledMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1235,12 +1298,13 @@ KatanaInterface::SetEnabledMessage::clone() const
 /** Constructor with initial values.
  * @param ini_max_velocity initial value for max_velocity
  */
-KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const unsigned char ini_max_velocity) : Message("SetMaxVelocityMessage")
+KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const uint8_t ini_max_velocity) : Message("SetMaxVelocityMessage")
 {
   data_size = sizeof(SetMaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->max_velocity = ini_max_velocity;
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
 }
@@ -1251,6 +1315,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("SetMa
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BYTE, "max_velocity", 1, &data->max_velocity);
 }
 
@@ -1269,6 +1334,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const SetMaxVeloci
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -1276,7 +1342,7 @@ KatanaInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const SetMaxVeloci
  * Maximum velocity
  * @return max_velocity value
  */
-unsigned char
+uint8_t
 KatanaInterface::SetMaxVelocityMessage::max_velocity() const
 {
   return data->max_velocity;
@@ -1297,7 +1363,7 @@ KatanaInterface::SetMaxVelocityMessage::maxlenof_max_velocity() const
  * @param new_max_velocity new max_velocity value
  */
 void
-KatanaInterface::SetMaxVelocityMessage::set_max_velocity(const unsigned char new_max_velocity)
+KatanaInterface::SetMaxVelocityMessage::set_max_velocity(const uint8_t new_max_velocity)
 {
   data->max_velocity = new_max_velocity;
 }

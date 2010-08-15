@@ -48,11 +48,11 @@ class SkillerDebugInterface : public Interface
   const char * tostring_GraphDirectionEnum(GraphDirectionEnum value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    bool graph_colored; /**< 
-      True if the graph is colored, false otherwise.
-     */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char graph_fsm[32]; /**< 
       The finite state machine (FSM) the current graph has been updated for.
      */
@@ -62,7 +62,11 @@ class SkillerDebugInterface : public Interface
     GraphDirectionEnum graph_dir; /**< 
       Primary direction of current graph.
      */
+    bool graph_colored; /**< 
+      True if the graph is colored, false otherwise.
+     */
   } SkillerDebugInterface_data_t;
+#pragma pack(pop)
 
   SkillerDebugInterface_data_t *data;
 
@@ -71,12 +75,16 @@ class SkillerDebugInterface : public Interface
   class SetGraphMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char graph_fsm[32]; /**< 
       The finite state machine (FSM) the current graph has been updated for.
      */
     } SetGraphMessage_data_t;
+#pragma pack(pop)
 
     SetGraphMessage_data_t *data;
 
@@ -96,12 +104,16 @@ class SkillerDebugInterface : public Interface
   class SetGraphDirectionMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       GraphDirectionEnum graph_dir; /**< 
       Primary direction of current graph.
      */
     } SetGraphDirectionMessage_data_t;
+#pragma pack(pop)
 
     SetGraphDirectionMessage_data_t *data;
 
@@ -121,12 +133,16 @@ class SkillerDebugInterface : public Interface
   class SetGraphColoredMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool graph_colored; /**< 
       True if the graph is colored, false otherwise.
      */
     } SetGraphColoredMessage_data_t;
+#pragma pack(pop)
 
     SetGraphColoredMessage_data_t *data;
 

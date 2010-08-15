@@ -24,11 +24,11 @@
       Current opmode.
     </field>
 
-    <field type="unsigned int" name="num_identities">
+    <field type="uint32" name="num_identities">
       The number of identities in the database.
     </field>
 
-    <field type="unsigned int" name="recognized_identity">
+    <field type="uint32" name="recognized_identity">
       The index of the recognized identity.
     </field>
 
@@ -36,15 +36,15 @@
       The name of the recognized identity.
     </field>
 
-    <field type="unsigned int" name="num_detections">
+    <field type="uint32" name="num_detections">
       Number of currently detected faces.
     </field>
 
-    <field type="unsigned int" name="num_recognitions">
+    <field type="uint32" name="num_recognitions">
       Number of recognized faces.
     </field>
 
-    <field type="unsigned int" name="most_likely_identity">
+    <field type="uint32" name="most_likely_identity">
       The identity that was recognized most prevalently.
     </field>
 
@@ -57,7 +57,7 @@
       Time in seconds since the last successful detection.
     </field>
 
-    <field type="int" name="visibility_history">
+    <field type="int32" name="visibility_history">
       The number of consecutive sighting ( &lt;= 1 ) and non-sightings
       ( &gt;= -1 ), respectively.
     </field>
@@ -79,7 +79,7 @@
       The relative slope to the recognized face in radians.
     </field>
 
-    <field type="unsigned int" name="requested_index">
+    <field type="uint32" name="requested_index">
       Index of the identity for which the name was requested.
     </field>
 
@@ -100,12 +100,12 @@
   </message>
   <message name="EnableIdentity">
     <comment>Enable/disable identity in the database.</comment>
-    <field type="unsigned int" name="index">Index of the identity.</field>
+    <field type="uint32" name="index">Index of the identity.</field>
     <field type="bool" name="enable">En-/disable flag.</field>
   </message>
   <message name="SetName">
     <comment>Assign a name to an identity.</comment>
-    <field type="unsigned int" name="index">Index of the identity.</field>
+    <field type="uint32" name="index">Index of the identity.</field>
     <field type="string" length="64" name="name">Name of the identity.</field>
   </message>
   <message name="GetName">
@@ -115,7 +115,7 @@
       "requested_name" field and the index into the field
       "requested_index".
     </comment>
-    <field type="unsigned int" name="index">Index of the identity.</field>
+    <field type="uint32" name="index">Index of the identity.</field>
   </message>
 </interface>
 

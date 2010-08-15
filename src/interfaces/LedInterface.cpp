@@ -52,6 +52,7 @@ LedInterface::LedInterface() : Interface()
   data_size = sizeof(LedInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (LedInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "intensity", 1, &data->intensity);
   add_messageinfo("SetIntensityMessage");
@@ -95,6 +96,7 @@ void
 LedInterface::set_intensity(const float new_intensity)
 {
   data->intensity = new_intensity;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -152,6 +154,7 @@ LedInterface::SetIntensityMessage::SetIntensityMessage(const float ini_time_sec,
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetIntensityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->time_sec = ini_time_sec;
   data->intensity = ini_intensity;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
@@ -164,6 +167,7 @@ LedInterface::SetIntensityMessage::SetIntensityMessage() : Message("SetIntensity
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetIntensityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
   add_fieldinfo(IFT_FLOAT, "intensity", 1, &data->intensity);
 }
@@ -183,6 +187,7 @@ LedInterface::SetIntensityMessage::SetIntensityMessage(const SetIntensityMessage
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetIntensityMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -270,13 +275,17 @@ LedInterface::SetIntensityMessage::clone() const
 /** Constructor */
 LedInterface::TurnOnMessage::TurnOnMessage() : Message("TurnOnMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(TurnOnMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TurnOnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 LedInterface::TurnOnMessage::~TurnOnMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -284,8 +293,11 @@ LedInterface::TurnOnMessage::~TurnOnMessage()
  */
 LedInterface::TurnOnMessage::TurnOnMessage(const TurnOnMessage *m) : Message("TurnOnMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (TurnOnMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -309,13 +321,17 @@ LedInterface::TurnOnMessage::clone() const
 /** Constructor */
 LedInterface::TurnOffMessage::TurnOffMessage() : Message("TurnOffMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = sizeof(TurnOffMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TurnOffMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /** Destructor */
 LedInterface::TurnOffMessage::~TurnOffMessage()
 {
+  free(data_ptr);
 }
 
 /** Copy constructor.
@@ -323,8 +339,11 @@ LedInterface::TurnOffMessage::~TurnOffMessage()
  */
 LedInterface::TurnOffMessage::TurnOffMessage(const TurnOffMessage *m) : Message("TurnOffMessage")
 {
-  data_size = 0;
-  data_ptr  = NULL;
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (TurnOffMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

@@ -37,21 +37,21 @@ class GameStateInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int GS_FROZEN;
-  static const unsigned int GS_PLAY;
-  static const unsigned int GS_KICK_OFF;
-  static const unsigned int GS_DROP_BALL;
-  static const unsigned int GS_PENALTY;
-  static const unsigned int GS_CORNER_KICK;
-  static const unsigned int GS_THROW_IN;
-  static const unsigned int GS_FREE_KICK;
-  static const unsigned int GS_GOAL_KICK;
-  static const unsigned int GS_HALF_TIME;
-  static const unsigned int GS_SPL_INITIAL;
-  static const unsigned int GS_SPL_READY;
-  static const unsigned int GS_SPL_SET;
-  static const unsigned int GS_SPL_PLAY;
-  static const unsigned int GS_SPL_FINISHED;
+  static const uint32_t GS_FROZEN;
+  static const uint32_t GS_PLAY;
+  static const uint32_t GS_KICK_OFF;
+  static const uint32_t GS_DROP_BALL;
+  static const uint32_t GS_PENALTY;
+  static const uint32_t GS_CORNER_KICK;
+  static const uint32_t GS_THROW_IN;
+  static const uint32_t GS_FREE_KICK;
+  static const uint32_t GS_GOAL_KICK;
+  static const uint32_t GS_HALF_TIME;
+  static const uint32_t GS_SPL_INITIAL;
+  static const uint32_t GS_SPL_READY;
+  static const uint32_t GS_SPL_SET;
+  static const uint32_t GS_SPL_PLAY;
+  static const uint32_t GS_SPL_FINISHED;
 
   /** 
         Enumeration defining the different teams. Keep in sync with
@@ -99,18 +99,22 @@ class GameStateInterface : public Interface
   const char * tostring_if_gamestate_role_t(if_gamestate_role_t value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int game_state; /**< Current game state */
-    unsigned int score_cyan; /**< Score of team cyan */
-    unsigned int score_magenta; /**< Score of team magenta */
-    bool kickoff; /**< Whether we have kickoff */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    uint32_t game_state; /**< Current game state */
     if_gamestate_team_t state_team; /**< Team referred to by game state */
     if_gamestate_team_t our_team; /**< Our team color */
     if_gamestate_goalcolor_t our_goal_color; /**< Our own goal color */
     if_gamestate_half_t half; /**< Current game half */
+    bool kickoff; /**< Whether we have kickoff */
     if_gamestate_role_t role; /**< Current role of this robot */
+    uint32_t score_cyan; /**< Score of team cyan */
+    uint32_t score_magenta; /**< Score of team magenta */
   } GameStateInterface_data_t;
+#pragma pack(pop)
 
   GameStateInterface_data_t *data;
 
@@ -119,10 +123,14 @@ class GameStateInterface : public Interface
   class SetTeamColorMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       if_gamestate_team_t our_team; /**< Our team color */
     } SetTeamColorMessage_data_t;
+#pragma pack(pop)
 
     SetTeamColorMessage_data_t *data;
 
@@ -142,10 +150,14 @@ class GameStateInterface : public Interface
   class SetKickoffMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool kickoff; /**< Whether we have kickoff */
     } SetKickoffMessage_data_t;
+#pragma pack(pop)
 
     SetKickoffMessage_data_t *data;
 
@@ -165,10 +177,14 @@ class GameStateInterface : public Interface
   class SetStateTeamMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       if_gamestate_team_t state_team; /**< Team referred to by game state */
     } SetStateTeamMessage_data_t;
+#pragma pack(pop)
 
     SetStateTeamMessage_data_t *data;
 
@@ -192,8 +208,8 @@ class GameStateInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int game_state() const;
-  void set_game_state(const unsigned int new_game_state);
+  uint32_t game_state() const;
+  void set_game_state(const uint32_t new_game_state);
   size_t maxlenof_game_state() const;
   if_gamestate_team_t state_team() const;
   void set_state_team(const if_gamestate_team_t new_state_team);
@@ -213,11 +229,11 @@ class GameStateInterface : public Interface
   if_gamestate_role_t role() const;
   void set_role(const if_gamestate_role_t new_role);
   size_t maxlenof_role() const;
-  unsigned int score_cyan() const;
-  void set_score_cyan(const unsigned int new_score_cyan);
+  uint32_t score_cyan() const;
+  void set_score_cyan(const uint32_t new_score_cyan);
   size_t maxlenof_score_cyan() const;
-  unsigned int score_magenta() const;
-  void set_score_magenta(const unsigned int new_score_magenta);
+  uint32_t score_magenta() const;
+  void set_score_magenta(const uint32_t new_score_magenta);
   size_t maxlenof_score_magenta() const;
   virtual Message * create_message(const char *type) const;
 

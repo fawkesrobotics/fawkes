@@ -37,7 +37,7 @@ class TestInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const int TEST_CONSTANT;
+  static const int32_t TEST_CONSTANT;
   static const float TEST_FLOAT_CONSTANT;
 
   /** Demonstrating enums */
@@ -48,17 +48,21 @@ class TestInterface : public Interface
   const char * tostring_TestEnum(TestEnum value) const;
 
  private:
+#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int test_uint; /**< Test unsigned int */
-    int test_int; /**< Test integer */
-    int result; /**< Result of operation add operation from Calculate message. */
-    unsigned long int test_ulint; /**< Test unsigned long int */
-    long int test_lint; /**< Test long int */
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     bool test_bool; /**< Test Bool */
-    unsigned char flags; /**< Flags spit down by the writer */
+    int32_t test_int; /**< Test integer */
+    uint8_t flags; /**< Flags spit down by the writer */
     char test_string[30]; /**< A test sring */
+    int32_t result; /**< Result of operation add operation from Calculate message. */
+    uint32_t test_uint; /**< Test uint32 */
+    uint64_t test_ulint; /**< Test unsigned long int */
+    int64_t test_lint; /**< Test long int */
   } TestInterface_data_t;
+#pragma pack(pop)
 
   TestInterface_data_t *data;
 
@@ -67,22 +71,26 @@ class TestInterface : public Interface
   class SetTestIntMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      int test_int; /**< Test integer */
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t test_int; /**< Test integer */
     } SetTestIntMessage_data_t;
+#pragma pack(pop)
 
     SetTestIntMessage_data_t *data;
 
    public:
-    SetTestIntMessage(const int ini_test_int);
+    SetTestIntMessage(const int32_t ini_test_int);
     SetTestIntMessage();
     ~SetTestIntMessage();
 
     SetTestIntMessage(const SetTestIntMessage *m);
     /* Methods */
-    int test_int() const;
-    void set_test_int(const int new_test_int);
+    int32_t test_int() const;
+    void set_test_int(const int32_t new_test_int);
     size_t maxlenof_test_int() const;
     virtual Message * clone() const;
   };
@@ -90,10 +98,14 @@ class TestInterface : public Interface
   class SetTestStringMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char test_string[30]; /**< A test sring */
     } SetTestStringMessage_data_t;
+#pragma pack(pop)
 
     SetTestStringMessage_data_t *data;
 
@@ -113,26 +125,30 @@ class TestInterface : public Interface
   class CalculateMessage : public Message
   {
    private:
+#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      int summand; /**< Summand */
-      int addend; /**< Addend */
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t summand; /**< Summand */
+      int32_t addend; /**< Addend */
     } CalculateMessage_data_t;
+#pragma pack(pop)
 
     CalculateMessage_data_t *data;
 
    public:
-    CalculateMessage(const int ini_summand, const int ini_addend);
+    CalculateMessage(const int32_t ini_summand, const int32_t ini_addend);
     CalculateMessage();
     ~CalculateMessage();
 
     CalculateMessage(const CalculateMessage *m);
     /* Methods */
-    int summand() const;
-    void set_summand(const int new_summand);
+    int32_t summand() const;
+    void set_summand(const int32_t new_summand);
     size_t maxlenof_summand() const;
-    int addend() const;
-    void set_addend(const int new_addend);
+    int32_t addend() const;
+    void set_addend(const int32_t new_addend);
     size_t maxlenof_addend() const;
     virtual Message * clone() const;
   };
@@ -147,26 +163,26 @@ class TestInterface : public Interface
   bool is_test_bool() const;
   void set_test_bool(const bool new_test_bool);
   size_t maxlenof_test_bool() const;
-  int test_int() const;
-  void set_test_int(const int new_test_int);
+  int32_t test_int() const;
+  void set_test_int(const int32_t new_test_int);
   size_t maxlenof_test_int() const;
-  unsigned char flags() const;
-  void set_flags(const unsigned char new_flags);
+  uint8_t flags() const;
+  void set_flags(const uint8_t new_flags);
   size_t maxlenof_flags() const;
   char * test_string() const;
   void set_test_string(const char * new_test_string);
   size_t maxlenof_test_string() const;
-  int result() const;
-  void set_result(const int new_result);
+  int32_t result() const;
+  void set_result(const int32_t new_result);
   size_t maxlenof_result() const;
-  unsigned int test_uint() const;
-  void set_test_uint(const unsigned int new_test_uint);
+  uint32_t test_uint() const;
+  void set_test_uint(const uint32_t new_test_uint);
   size_t maxlenof_test_uint() const;
-  unsigned long int test_ulint() const;
-  void set_test_ulint(const unsigned long int new_test_ulint);
+  uint64_t test_ulint() const;
+  void set_test_ulint(const uint64_t new_test_ulint);
   size_t maxlenof_test_ulint() const;
-  long int test_lint() const;
-  void set_test_lint(const long int new_test_lint);
+  int64_t test_lint() const;
+  void set_test_lint(const int64_t new_test_lint);
   size_t maxlenof_test_lint() const;
   virtual Message * create_message(const char *type) const;
 

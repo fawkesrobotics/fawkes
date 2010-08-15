@@ -27,6 +27,8 @@
 #include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
+#include <utils/time/clock.h>
+#include <utils/time/time.h>
 
 #include <cstring>
 #include <cstdio>
@@ -119,6 +121,21 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * create the interface. It is used to detect incompatible versions of the same
  * interface type.
  *
+ * An interface has an internal timestamp. This timestamp indicates when the
+ * data in the interface has been modified last. The timestamp is usually
+ * automatically updated. But it some occasions the writer may choose to provide
+ * its own timestamp data. This can be useful for example for an interface
+ * providing hardware data to give the exact capture time.
+ * In the automatic case nothing has to be done manually. The timestamp is
+ * updated automatically by calling the write() method if and only if the
+ * data in the interface has actually been modified. The reader can call
+ * changed() to see if the data changed.
+ * In the non-automatic case the writer must first disable automatic timestamping
+ * using set_auto_timestamping(). Then it must provide a timestamp everytime
+ * before calling write(). Note that setting the timestamp already marks the
+ * interface as having changed. So set the timestamp only if the data has
+ * changed and the readers should see this.
+ *
  * @author Tim Niemueller
  */
 
@@ -126,8 +143,20 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * Pointer to local memory storage
  */
 
+/** @var Interface::data_ts
+ * Pointer to data casted to timestamp struct. This assumes that the very
+ * first two entries are 64 bit wide signed integers containing seconds and
+ * microseconds since the Unix epoch.
+ */
+
 /** @var Interface::data_size
  * Minimal data size to hold data storage.
+ */
+
+/** @var Interface::data_changed
+ * Indicator if data has changed.
+ * This must be set by all methods that manipulate internal data or the
+ * timestamp. Only if set to true a call to write() will update data_ts.
  */
 
 /** @fn bool Interface::message_valid(const Message *message) const = 0
@@ -173,6 +202,11 @@ Interface::Interface()
   __num_fields = 0;
   __fieldinfo_list   = NULL;
   __messageinfo_list = NULL;
+  __clock = Clock::instance();
+  __timestamp = new Time(0, 0);
+  __local_read_timestamp = new Time(0, 0);
+  __auto_timestamping = true;
+  data_changed = false;
   memset(__hash, 0, __INTERFACE_HASH_SIZE);
   memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
 
@@ -201,7 +235,8 @@ Interface::~Interface()
     __messageinfo_list = __messageinfo_list->next;
     free(minfol);
     minfol = __messageinfo_list;
-  }  
+  }
+  delete __timestamp;
 }
 
 /** Get interface hash.
@@ -392,6 +427,8 @@ Interface::read()
   __rwlock->lock_for_read();
   if ( __valid ) {
     memcpy(data_ptr, __mem_data_ptr, data_size);
+    *__local_read_timestamp = *__timestamp;
+    __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
   } else {
     __rwlock->unlock();
     throw InterfaceInvalidException(this, "read()");
@@ -413,6 +450,14 @@ Interface::write()
   __rwlock->lock_for_write();
   if ( __valid ) {
     memcpy(__mem_data_ptr, data_ptr, data_size);
+    if (data_changed) {
+      if (__auto_timestamping)  __timestamp->stamp();
+      long sec = 0, usec = 0;
+      __timestamp->get_timestamp(sec, usec);
+      data_ts->timestamp_sec  = sec;
+      data_ts->timestamp_usec = usec;
+      data_changed = false;
+    }
   } else {
     __rwlock->unlock();
     throw InterfaceInvalidException(this, "write()");
@@ -575,6 +620,73 @@ unsigned int
 Interface::mem_serial() const
 {
   return __mem_serial;
+}
+
+
+/** Get timestamp of last write.
+ * Note that you need to call read() before this provides useful information.
+ * @return timestamp of last write.
+ */
+const Time *
+Interface::timestamp() const
+{
+  return __timestamp;
+}
+
+
+/** Set timestamp.
+ * @param t time stamp to copy time from, if NULL current time is queried
+ * from clock.
+ */
+void
+Interface::set_timestamp(const Time *t)
+{
+  if (!__auto_timestamping) throw Exception("Auto timestamping enabled, cannot "
+					    "set explicit timestamp");
+  if (!__write_access) throw Exception("Timestamp can only be set on writing "
+				       "instance");
+
+  if (t) {
+    *__timestamp = t;
+  } else {
+    __timestamp->stamp();
+  }
+  data_changed = true;
+}
+
+
+/** Set clock to use for timestamping.
+ * @param clock clock to use from now on
+ */
+void
+Interface::set_clock(Clock *clock)
+{
+  __clock = clock;
+  __timestamp->set_clock(clock);
+}
+
+
+/** Enable or disable automated timestamping.
+ * @param enabled true to enable automated timestamping, false to disable
+ */
+void
+Interface::set_auto_timestamping(bool enabled)
+{
+  __auto_timestamping = enabled;
+}
+
+
+/** Check if data has been changed.
+ * Note that if the data has been modified this method will return true at least
+ * until the next call to read. From then on it will return false if the data has
+ * not been modified between the two read() calls and still true otherwise.
+ * @return true if data has been changed between the last call to read() and
+ * the one before.
+ */
+bool
+Interface::changed() const
+{
+  return (*__timestamp != __local_read_timestamp);
 }
 
 

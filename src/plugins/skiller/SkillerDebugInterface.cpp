@@ -49,6 +49,7 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   data_size = sizeof(SkillerDebugInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (SkillerDebugInterface_data_t *)data_ptr;
+  data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
   add_fieldinfo(IFT_STRING, "graph", 8192, data->graph);
@@ -114,6 +115,7 @@ void
 SkillerDebugInterface::set_graph_fsm(const char * new_graph_fsm)
 {
   strncpy(data->graph_fsm, new_graph_fsm, sizeof(data->graph_fsm));
+  data_changed = true;
 }
 
 /** Get graph value.
@@ -148,6 +150,7 @@ void
 SkillerDebugInterface::set_graph(const char * new_graph)
 {
   strncpy(data->graph, new_graph, sizeof(data->graph));
+  data_changed = true;
 }
 
 /** Get graph_dir value.
@@ -182,6 +185,7 @@ void
 SkillerDebugInterface::set_graph_dir(const GraphDirectionEnum new_graph_dir)
 {
   data->graph_dir = new_graph_dir;
+  data_changed = true;
 }
 
 /** Get graph_colored value.
@@ -216,6 +220,7 @@ void
 SkillerDebugInterface::set_graph_colored(const bool new_graph_colored)
 {
   data->graph_colored = new_graph_colored;
+  data_changed = true;
 }
 
 /* =========== message create =========== */
@@ -275,6 +280,7 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage(const char * ini_graph_f
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->graph_fsm, ini_graph_fsm, 32);
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
 }
@@ -285,6 +291,7 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage() : Message("SetGraphMes
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
 }
 
@@ -303,6 +310,7 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage(const SetGraphMessage *m
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -366,7 +374,9 @@ SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage(const 
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphDirectionMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->graph_dir = ini_graph_dir;
+  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum");
 }
 /** Constructor */
 SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage() : Message("SetGraphDirectionMessage")
@@ -375,6 +385,8 @@ SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage() : Me
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphDirectionMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum");
 }
 
 /** Destructor */
@@ -392,6 +404,7 @@ SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage(const 
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetGraphDirectionMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
@@ -455,6 +468,7 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage(const bool
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   data->graph_colored = ini_graph_colored;
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
 }
@@ -465,6 +479,7 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage() : Messag
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
 }
 
@@ -483,6 +498,7 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage(const SetG
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */

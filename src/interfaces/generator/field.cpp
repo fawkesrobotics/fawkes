@@ -87,15 +87,19 @@ InterfaceField::getAccessType() const
   } else {
     if ( length != "" ) {
       if (type == "byte") {
-	return "unsigned char *";
-      } else {
+	return "uint8_t *";
+      } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
 	return type + " *";
+      } else {
+	return type + "_t *";
       }
     } else {
       if (type == "byte") {
-	return "unsigned char";
-      } else {
+	return "uint8_t";
+      } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
 	return type;
+      } else {
+	return type + "_t";
       }
     }
   }
@@ -111,9 +115,11 @@ InterfaceField::getPlainAccessType() const
   if (type == "string") {
     return "char *";
   } else if (type == "byte") {
-    return "unsigned char";
-  } else {
+    return "uint8_t";
+  } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
     return type;
+  } else {
+    return type + "_t";
   }
 }
 
@@ -127,9 +133,11 @@ InterfaceField::getStructType() const
   if (type == "string") {
     return "char";
   } else if (type == "byte") {
-    return "unsigned char";
-  } else {
+    return "uint8_t";
+  } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
     return type;
+  } else {
+    return type + "_t";
   }
 }
 
@@ -342,11 +350,11 @@ InterfaceField::valid()
   if ( (name.length() == 0) || (name.find(" ") != std::string::npos) ) {
     throw InterfaceGeneratorInvalidValueException("name", "string", "name must not contain spaces");
   }
-  if ( (length.length() > 0) && ! InterfaceDataTypeChecker::validValue("unsigned int", length) ) {
-    throw InterfaceGeneratorInvalidValueException("length", "unsigned int", length.c_str());
+  if ( (length.length() > 0) && ! InterfaceDataTypeChecker::validValue("uint32", length) ) {
+    throw InterfaceGeneratorInvalidValueException("length", "uint32", length.c_str());
   }
-  if ( (validfor.length() > 0) && ! InterfaceDataTypeChecker::validValue("unsigned int", validfor) ) {
-    throw InterfaceGeneratorInvalidValueException("validfor", "unsigned int", validfor.c_str());
+  if ( (validfor.length() > 0) && ! InterfaceDataTypeChecker::validValue("uint32", validfor) ) {
+    throw InterfaceGeneratorInvalidValueException("validfor", "uint32", validfor.c_str());
   }
   if ( (default_value.length() > 0) &&
        ! InterfaceDataTypeChecker::validValue(type, default_value) ) {

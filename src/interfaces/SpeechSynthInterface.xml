@@ -11,7 +11,7 @@
     <field type="string" length="1024" name="text">
       Last spoken string. Must be properly null-terminated.
     </field>
-    <field type="unsigned int" name="msgid">
+    <field type="uint32" name="msgid">
       The ID of the message that is currently being processed,
       or 0 if no message is being processed.
     </field>
