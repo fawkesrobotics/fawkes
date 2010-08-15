@@ -3,8 +3,8 @@
  *  spl.h - Fawkes SPL refbox repeater
  *
  *  Created: Tue Jul 08 13:46:19 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
- *             2009  Tobias Kellner
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
+ *             2009       Tobias Kellner
  *
  ****************************************************************************/
 
@@ -36,8 +36,9 @@ namespace fawkes {
   class DatagramSocket;
 }
 
-#define GCHS 4
-#define MAX_NUM_PLAYERS 11
+#define SPL_HEADER_SIZE 4
+#define SPL_MAX_NUM_PLAYERS 11
+
 #pragma pack(push,4)
 /** SPL RefBox protocol robot info struct. */
 typedef struct {
@@ -49,16 +50,21 @@ typedef struct {
 typedef struct {
   uint8_t  team_number;           /**< unique team number */
   uint8_t  team_color;            /**< colour of the team */
+#ifdef USE_SPL_GC6
   uint16_t score;                 /**< team's score */
-  spl_robotinfo_t players[MAX_NUM_PLAYERS];       /**< the team's players */
+#else
+  uint8_t  goal_color;            /**< colour of the goal */
+  uint8_t  score;                 /**< team's score */
+#endif
+  spl_robotinfo_t players[SPL_MAX_NUM_PLAYERS];       /**< the team's players */
 } spl_teaminfo_t;
 
 /** SPL RefBox protocol game control struct. */
 typedef struct {
-  char      header[GCHS];        /**< header to identify the structure */
+  char      header[SPL_HEADER_SIZE];  /**< header to identify the structure */
   uint32_t  version;             /**< version of the data structure */
   uint8_t   players_per_team;    /**< The number of players on a team */
-  uint8_t   state;               /**< state of the game (STATE_READY, STATE_PLAYING, etc) */
+  uint8_t   state;               /**< state of the game (STATE_READY, STATE_PLAYING, etc.) */
   uint8_t   first_half;          /**< 1 = game in first half, 0 otherwise */
   uint8_t   kick_off_team;       /**< the next team to kick off */
   uint8_t   secondary_state;     /**< Extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc) */

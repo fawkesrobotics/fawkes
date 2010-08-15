@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="SoccerPenaltyInterface" author="Tim Niemueller" year="2008-2010">
+  <constants>
+    <!-- SPL game states -->
+    <constant type="uint16" value="0" name="SPL_PENALTY_NONE">Not penalized.</constant>
+    <constant type="uint16" value="1" name="SPL_PENALTY_BALL_HOLDING">Ball holding.</constant>
+    <constant type="uint16" value="2" name="SPL_PENALTY_PLAYER_PUSHING">Player pushing.</constant>
+    <constant type="uint16" value="3" name="SPL_PENALTY_OBSTRUCTION">Obstruction.</constant>
+    <constant type="uint16" value="4" name="SPL_PENALTY_INACTIVE_PLAYER">Inactive player.</constant>
+    <constant type="uint16" value="5" name="SPL_PENALTY_ILLEGAL_DEFENDER">Illegal defender.</constant>
+    <constant type="uint16" value="6" name="SPL_PENALTY_LEAVING_THE_FIELD">Leaving the field.</constant>
+    <constant type="uint16" value="7" name="SPL_PENALTY_PLAYING_WITH_HANDS">Playing with hands.</constant>
+    <constant type="uint16" value="8" name="SPL_PENALTY_REQ_FOR_PICKUP">Request for pickup.</constant>
+    <constant type="uint16" value="15" name="SPL_PENALTY_MANUAL">Manually penalized.</constant>
+  </constants>
+  <data>
+    <comment>
+      This interface stores penalization information for soccer robots.
+      Currently it contains constants used in the RoboCup Standard Platform
+      League (SPL).
+    </comment>
+    <field type="uint16" name="penalty">Current penalty code.</field>
+    <field type="uint16" name="remaining">Estimated time in seconds until the robot is unpenalized.</field>
+  </data>
+  <message name="SetPenalty">
+    <comment>Set penalty code. Can be used by the agent to override the value
+     received from the refbox.</comment>
+    <ref>penalty</ref>
+  </message>
+</interface>

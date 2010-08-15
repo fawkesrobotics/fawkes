@@ -150,6 +150,7 @@ INSERT INTO "config" VALUES('/plugins/refboxcomm/beep_duration','float',0.5,'Bee
 INSERT INTO "config" VALUES('/plugins/refboxcomm/beep_frequency','float',2000,'Beep frequency; Hz');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/MSL/host','string','230.0.0.1','Multicast address the MSL refbox sends to');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/MSL/port','unsigned int',30000,'The UDP port the MSL refbox multicasts to');
+INSERT INTO "config" VALUES('/plugins/refboxcomm/SPL/port','unsigned int',3838,NULL);
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/host','string','localhost','The host to connect to for the remote blackboard');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/port','unsigned int',1911,'Port on the remote host to connect to');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/interface_id','string','RefBoxComm','Interface of the GameStateInterface on the remote blackboard');
