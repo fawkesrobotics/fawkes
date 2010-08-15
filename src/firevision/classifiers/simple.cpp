@@ -359,7 +359,7 @@ SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPo
     for (w = 0; w < roi->width; w += 2) {
       // classify its color
       color = color_model->determine(*yp++, *up++, *vp++);
-      *yp++;
+      yp++;
       // ball pixel?
       if (color == ColorObjectMap::get_instance().get(roi->hint)) {
         // take into account its coordinates

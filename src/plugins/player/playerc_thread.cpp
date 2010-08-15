@@ -160,7 +160,7 @@ PlayerClientThread::open_player_proxies()
     std::string varname = std::string(vi->path()).substr(prefix.length());
     std::string iftype = uid.substr(0, uid.find(":"));
     long int    ifindexl = atol(uid.substr(uid.find(":") + 1).c_str());
-    if ( ifindexl > UINT32_MAX ) {
+    if ( ifindexl > (long int)UINT32_MAX ) {
       throw Exception("Player interface index is out of range (%li > %u)", ifindexl, UINT32_MAX);
     } else if ( ifindexl < 0 ) {
       throw Exception("Player interface index is out of range (%li < 0)", ifindexl);

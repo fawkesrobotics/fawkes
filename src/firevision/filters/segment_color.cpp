@@ -91,7 +91,7 @@ FilterColorSegmentation::apply()
   for (h = 0; (h < src_roi[0]->height) && (h < dst_roi->height); ++h) {
     for (w = 0; (w < src_roi[0]->width) && (w < dst_roi->width); w += 2) {
       c1 = cm->determine(*yp++, *up++, *vp++);
-      *yp++;
+      yp++;
        //c2 = cm->determine(*yp++, *up++, *vp++);
 
       switch (c1) {

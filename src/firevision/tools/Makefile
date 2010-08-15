@@ -38,7 +38,7 @@ OBJS_fvshmem = shmem.o
 LIBS_fvlistfwcams = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams
 OBJS_fvlistfwcams = listfwcams.o
 
-LIBS_fvlistsrcams = $(VISION_CAM_LIBS) fawkesutils fvcams
+LIBS_fvlistsrcams = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams
 OBJS_fvlistsrcams = listsrcams.o
 
 LIBS_fvconverter = stdc++ fawkescore fawkesutils fvutils fvcams
@@ -48,7 +48,7 @@ LIBS_fvstereodecoder = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams \
 		       fvutils
 OBJS_fvstereodecoder = stereodecoder.o
 
-LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) fawkesutils fvcams fvstereo
+LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams fvutils fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
 LIBS_fvbb2gettric = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams fvutils
