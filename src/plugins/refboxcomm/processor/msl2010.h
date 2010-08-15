@@ -27,9 +27,7 @@
 #include "processor.h"
 #include "state_handler.h"
 
-#include <cstdlib>
-#include <string>
-#include <vector>
+#include <cstddef>
 
 namespace fawkes {
   class MulticastDatagramSocket;

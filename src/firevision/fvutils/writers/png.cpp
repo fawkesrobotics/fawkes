@@ -99,8 +99,8 @@ PNGWriter::write()
   }
 
   png_structp png_ptr = png_create_write_struct
-    (PNG_LIBPNG_VER_STRING,png_voidp_NULL,
-     png_error_ptr_NULL, png_error_ptr_NULL);
+    (PNG_LIBPNG_VER_STRING,(png_voidp)NULL,
+     (png_error_ptr)NULL, (png_error_ptr)NULL);
   if (!png_ptr) {
     throw Exception("Could not create PNG write struct");
   }

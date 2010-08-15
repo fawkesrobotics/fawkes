@@ -25,14 +25,18 @@
 #include <netcomm/socket/datagram_multicast.h>
 #include <utils/logging/logger.h>
 
-#include <cstring>
-#include <cstdio>
-#include <unistd.h>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 #include <libxml++/libxml++.h>
+// libxml++ pulls in Glib::ustring, which has a looong tail of dependent
+// includes, one being <sys/signal.h>, which on FreeBSD defines POLL_IN
+// for the SIGPOLL. Since we do not use the signal in any way we simply
+// undefine the constants, such that the Socket::POLL_IN constant does
+// not get messed up.
+#ifdef __FreeBSD__
+#  undef POLL_IN
+#  undef POLL_ERR
+#endif
 
 using namespace fawkes;
 using namespace xmlpp;

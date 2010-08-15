@@ -88,7 +88,7 @@ PNGReader::setup_read(const char *filename)
   d->info_ptr = png_create_info_struct(d->png_ptr);
   if (d->info_ptr == NULL) {
     fclose(d->infile);
-    png_destroy_read_struct(&d->png_ptr, png_infopp_NULL, png_infopp_NULL);
+    png_destroy_read_struct(&d->png_ptr, (png_infopp)NULL, (png_infopp)NULL);
     throw Exception("Could not create PNG info struct");
   }
 
@@ -98,7 +98,7 @@ PNGReader::setup_read(const char *filename)
    */
   if (setjmp(png_jmpbuf(d->png_ptr))) {
     /* Free all of the memory associated with the png_ptr and info_ptr */
-    png_destroy_read_struct(&d->png_ptr, &d->info_ptr, png_infopp_NULL);
+    png_destroy_read_struct(&d->png_ptr, &d->info_ptr, (png_infopp)NULL);
     fclose(d->infile);
     /* If we get here, we had a problem reading the file */
     throw Exception("Could not read PNG file");
@@ -166,7 +166,7 @@ PNGReader::~PNGReader()
 {
   fclose( __d->infile );
   /* clean up after the read, and free any memory allocated - REQUIRED */
-  png_destroy_read_struct(&__d->png_ptr, &__d->info_ptr, png_infopp_NULL);
+  png_destroy_read_struct(&__d->png_ptr, &__d->info_ptr, (png_infopp)NULL);
 
   delete __d;
 
@@ -229,7 +229,7 @@ PNGReader::read()
 
   for (int pass = 0; pass < __d->number_passes; ++pass) {
     for (unsigned y = 0; y < lheight; ++y) {
-      png_read_rows(__d->png_ptr, &row_pointer, png_bytepp_NULL, 1);
+      png_read_rows(__d->png_ptr, &row_pointer, (png_bytepp)NULL, 1);
       convert_line_rgb_to_yuv422planar( row_pointer, buffer, lwidth, lheight, 0, y );
     }
   }
