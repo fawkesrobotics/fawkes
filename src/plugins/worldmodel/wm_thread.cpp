@@ -26,6 +26,7 @@
 #include "fusers/single_copy.h"
 #include "fusers/multi_copy.h"
 #include "fusers/objpos_average.h"
+#include "fusers/objpos_majority.h"
 
 #include <netcomm/worldinfo/transceiver.h>
 #include <utils/system/pathparser.h>
@@ -127,7 +128,21 @@ WorldModelThread::init()
 	WorldModelObjPosAverageFuser *fuser = new WorldModelObjPosAverageFuser(logger, blackboard,
 									       from_id.c_str(), to_id.c_str());
 	  __fusers.push_back(fuser);
-
+      } else if (method == "majority") {
+	// sanity checks
+	if (type != "ObjectPositionInterface") {
+	  throw Exception("Can only average interfaces of type ObjectPositionInterface");
+	}
+        std::string own_id = config->get_string((prefix + *i + "/own_id").c_str());
+        float self_confidence_radius = config->get_float((prefix + *i + "/confidence_radius").c_str());
+        logger->log_debug(name(), "Instantiating MajorityFuser for %s -> %s (type: %s)",
+                          from_id.c_str(), to_id.c_str(), type.c_str());
+        WorldModelObjPosMajorityFuser *fuser = new WorldModelObjPosMajorityFuser(logger, blackboard,
+                                                                                 own_id.c_str(),
+                                                                                 from_id.c_str(),
+                                                                                 to_id.c_str(),
+                                                                                 self_confidence_radius);
+        __fusers.push_back(fuser);
       } else {
 	throw Exception("Unknown fuse method '%s', for interface %s -> %s (type %s)",
 			method.c_str(), from_id.c_str(), to_id.c_str(), type.c_str());
