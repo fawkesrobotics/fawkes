@@ -734,13 +734,15 @@ SkillGuiGtkWindow::on_graphcolor_toggled()
       throw Exception("Not connected to Fawkes.");
     }
   } catch (Exception &e) {
+    /* Ignore for now, causes error message on startup
     Gtk::MessageDialog md(*this,
 			  Glib::ustring("Setting graph color failed: ") + e.what(),
-			  /* markup */ false,
+			  / markup / false,
 			  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			  /* modal */ true);
+			  / modal / true);
     md.set_title("Communication Failure");
     md.run();
+    */
   }
 }
 
