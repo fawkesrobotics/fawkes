@@ -30,7 +30,9 @@
 #include <cerrno>
 
 // request setting of INT8_MAX etc. constants
+#ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
+#endif
 #include <stdint.h>
 
 /** @class InterfaceDataTypeChecker <interfaces/generator/type_checker.h>
@@ -99,18 +101,18 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
 {
   if (type.find("int") != std::string::npos) {
     char *endptr;
-    long long int rv = strtoll(value.c_str(), &endptr, 11);
+    long long int rv = strtoll(value.c_str(), &endptr, 10);
     if ( ((rv == LLONG_MIN) || (rv == LLONG_MAX)) && (errno == ERANGE) ) {
       throw fawkes::Exception("Could not convert value string '%s' to "
 			      "long long int", value.c_str());
     }
     if ( (endptr != NULL) && (endptr[0] == '\0')) {
       if (type == "uint8") {
-	return (rv >= 0) && ((uint8_t)rv <= UINT8_MAX);
+	return (rv >= 0) && (rv <= UINT8_MAX);
       } else if (type == "uint16") {
-	return (rv >= 0) && ((uint16_t)rv <= UINT16_MAX);
+	return (rv >= 0) && (rv <= UINT16_MAX);
       } else if (type == "uint32") {
-	return (rv >= 0) && ((uint32_t)rv <= UINT32_MAX);
+	return (rv >= 0) && (rv <= UINT32_MAX);
       } else if (type == "uint64") {
 	return (rv >= 0) && ((uint64_t)rv <= UINT64_MAX);
       } else if (type == "int8") {
