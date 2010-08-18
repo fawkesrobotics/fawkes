@@ -66,7 +66,7 @@ class HumanoidMotionInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    bool moving; /**< True if the robot is currently moving. */
+    bool walking; /**< True if the robot is currently moving. */
     LegEnum supporting_leg; /**< Marks the supporting leg */
     float max_step_length; /**< 
       Maximum length of a footstep in m.
@@ -393,6 +393,45 @@ class HumanoidMotionInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class WalkMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float x; /**< Fraction of MaxStepX. Use negative for backwards. [-1.0 to 1.0] */
+      float y; /**< Fraction of MaxStepY. Use negative for right. [-1.0 to 1.0] */
+      float theta; /**< Fraction of MaxStepTheta. Use negative for clockwise [-1.0 to 1.0] */
+      float speed; /**< Fraction of MaxStepFrequency [0.0 to 1.0] */
+    } WalkMessage_data_t;
+#pragma pack(pop)
+
+    WalkMessage_data_t *data;
+
+   public:
+    WalkMessage(const float ini_x, const float ini_y, const float ini_theta, const float ini_speed);
+    WalkMessage();
+    ~WalkMessage();
+
+    WalkMessage(const WalkMessage *m);
+    /* Methods */
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float theta() const;
+    void set_theta(const float new_theta);
+    size_t maxlenof_theta() const;
+    float speed() const;
+    void set_speed(const float new_speed);
+    size_t maxlenof_speed() const;
+    virtual Message * clone() const;
+  };
+
   class TurnMessage : public Message
   {
    private:
@@ -695,9 +734,9 @@ class HumanoidMotionInterface : public Interface
 
  public:
   /* Methods */
-  bool is_moving() const;
-  void set_moving(const bool new_moving);
-  size_t maxlenof_moving() const;
+  bool is_walking() const;
+  void set_walking(const bool new_walking);
+  size_t maxlenof_walking() const;
   LegEnum supporting_leg() const;
   void set_supporting_leg(const LegEnum new_supporting_leg);
   size_t maxlenof_supporting_leg() const;

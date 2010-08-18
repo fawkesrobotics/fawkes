@@ -133,6 +133,26 @@ class HumanoidMotionInterface : public Interface
     int maxlenof_num_samples() const;
   };
 
+  class WalkMessage : public Message
+  {
+    WalkMessage(float ini_x, float ini_y, float ini_theta, float ini_speed);
+    WalkMessage();
+    ~WalkMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float theta();
+    void set_theta(const float new_theta);
+    int maxlenof_theta() const;
+    float speed();
+    void set_speed(const float new_speed);
+    int maxlenof_speed() const;
+  };
+
   class TurnMessage : public Message
   {
     TurnMessage(float ini_angle, unsigned int ini_num_samples);
@@ -288,9 +308,9 @@ class HumanoidMotionInterface : public Interface
     int maxlenof_r_elbow_roll() const;
   };
 
-  bool is_moving();
-  void set_moving(const bool new_moving);
-  int maxlenof_moving() const;
+  bool is_walking();
+  void set_walking(const bool new_walking);
+  int maxlenof_walking() const;
   LegEnum supporting_leg();
   void set_supporting_leg(const LegEnum new_supporting_leg);
   int maxlenof_supporting_leg() const;

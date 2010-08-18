@@ -24,7 +24,7 @@
       This interface provides acces to basic humanoid motion patterns.
     </comment>
 
-    <field type="bool" name="moving">True if the robot is currently moving.</field>
+    <field type="bool" name="walking">True if the robot is currently moving.</field>
     <field type="LegEnum" name="supporting_leg">Marks the supporting leg</field>
 
     <!-- Walk pattern config -->
@@ -136,6 +136,13 @@
     <field type="uint32" name="num_samples">
       Number of intermediate samples to use for walking.
     </field>
+  </message>
+  <message name="Walk">
+    <comment>Orders the robot to walk in the given direction (or stop if 0)</comment>
+    <field type="float" name="x">Fraction of MaxStepX. Use negative for backwards. [-1.0 to 1.0]</field>
+    <field type="float" name="y">Fraction of MaxStepY. Use negative for right. [-1.0 to 1.0]</field>
+    <field type="float" name="theta">Fraction of MaxStepTheta. Use negative for clockwise [-1.0 to 1.0]</field>
+    <field type="float" name="speed">Fraction of MaxStepFrequency [0.0 to 1.0]</field>
   </message>
   <message name="Turn">
     <comment>Orders the robot to turn on the current position.</comment>
