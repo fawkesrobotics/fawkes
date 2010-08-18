@@ -101,7 +101,7 @@ function AgentSkillExecJumpState:new(o)
    o.skills = o.skills or {}
    o.loops  = o.loops or {}
    o.inits  = o.inits or {}
-   o.skill_queue = SkillQueue:new{name=o.name, skills=skills}
+   o.skill_queue = SkillQueue:new{name=o.name, skills=o.skills}
 
    o.skill_status = skillstati.S_RUNNING
 
