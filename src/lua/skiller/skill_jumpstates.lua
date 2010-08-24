@@ -81,7 +81,8 @@ SkillJumpState = { add_transition     = JumpState.add_transition,
 		   exit               = JumpState.exit,
 		   prepare            = JumpState.prepare,
 		   add_subskill       = SkillState.add_subkill,
-		   do_exit            = SkillState.do_exit
+		   do_exit            = SkillState.do_exit,
+		   setup_timeout      = JumpState.setup_timeout
 		 }
 
 
@@ -126,6 +127,7 @@ function SkillJumpState:new(o)
    end
 
    o:set_transition_labels()
+   o:setup_timeout()
 
    return o
 end

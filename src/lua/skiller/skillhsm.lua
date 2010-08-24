@@ -208,6 +208,20 @@ function SkillHSM:add_transitions(trans)
 	 assert(type(from) == "string", "From states must be given by name, not as objects")
 	 assert(type(to) == "string", "To states must be given by name, not as objects")
 
+	 -- If we only get a time as timeout assume jump to normal to state
+	 if t.timeout and type(t.timeout) == "number" then
+	    t.timeout = { t.timeout, to }
+	 end
+	 if t.timeout then
+	    local timeout_to = t.timeout.to or t.timeout[2]
+	    printf("Adding timeout %d sec to %s", t.timeout[1], timeout_to)
+	    if not self.states[timeout_to] then
+	       self.states[timeout_to] = JumpState:new{name=timeout_to, fsm=self,
+						       closure=trans.closure}
+	       self:apply_deftrans(self.states[timeout_to])
+	    end
+	 end
+
 	 if t.skill or t.skills or t.subskills then -- Sub-skill(s)
 	    local fail_to = t.fail_to or "FAILED"
 
@@ -237,7 +251,8 @@ function SkillHSM:add_transitions(trans)
 
 	       s = SkillJumpState:new{name=from, fsm=self, skill=t.skill,
 				      final_state=to, failure_state=fail_to,
-				      args=t.args, closure=trans.closure}
+				      args=t.args, closure=trans.closure,
+				      timeout=t.timeout}
 
 	    elseif t.skills then     -- execute multiple subskills
 	       if self.debug then
@@ -255,7 +270,8 @@ function SkillHSM:add_transitions(trans)
 
 	       s = SkillJumpState:new{name=from, fsm=self, skills=t.skills,
 				      final_state=to, failure_state=fail_to,
-				      args=t.args, closure=trans.closure}
+				      args=t.args, closure=trans.closure,
+				      timeout=t.timeout}
 
 	    elseif t.subskills then -- multiple non-execute subskills, must have a loop to call them
 	       local fail_to = t.fail_to and t.fail_to.name or "FAILED"
@@ -270,7 +286,7 @@ function SkillHSM:add_transitions(trans)
 
 	       s = SkillJumpState:new{name=from, fsm=self, subskills=t.subskills,
 				      final_state=to, failure_state=fail_to,
-				      closure=trans.closure}
+				      closure=trans.closure, timeout=t.timeout}
 	    end
 	    -- Set loop function if supplied
 	    if t.loop then s.loop = t.loop end
@@ -296,7 +312,7 @@ function SkillHSM:add_transitions(trans)
 	       printf("%s: Creating blanko from state %s (to %s)", self.name, from, to)
 	    end
 	    if not self.states[from] then
-	       s = SkillJumpState:new{name=from, fsm=self, closure=trans.closure}
+	       s = JumpState:new{name=from, fsm=self, closure=trans.closure, timeout=t.timeout}
 	    elseif self.debug then
 	       printf("%s: From state %s -> %s already exists", self.name, from, to)
 	    end
