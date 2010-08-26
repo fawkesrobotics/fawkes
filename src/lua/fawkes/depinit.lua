@@ -26,7 +26,11 @@ require("fawkes.modinit")
 module(..., fawkes.modinit.module_init)
 
 
-function init_interfaces(name, dependencies, table)
+function init_interfaces(module, table)
+   local name = module.name
+   local dependencies = module.depends_interfaces
+   if not dependencies then return end
+
    assert(type(dependencies) == "table", "Type of dependencies not table")
    assert(interfaces and type(interfaces) == "table", "Interfaces not initialized")
    for _,t in ipairs(dependencies) do
