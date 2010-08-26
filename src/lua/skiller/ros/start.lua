@@ -20,9 +20,21 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("actionlib")
-
 require("fawkes.mathext")
+require("skiller.ros")
+local actjsmod   = require("skiller.ros.action_jumpstate")
+local actinitmod = require("skiller.ros.action_initializer")
+skillenv = require("skiller.skillenv")
 
+skiller.ros.init()
+skillenv.add_export("ActionJumpState", actjsmod.ActionJumpState)
+skillenv.add_module_initializer(actinitmod.init_actions)
+skillenv.init(SKILLSPACE)
+
+skiller.ros.start("say{text=\"This is a test\"}")
+
+
+--[[
 local acl = actionlib.action_client("/roundtrip", "actionlib_benchmark/Roundtrip")
 local sent_goal = false
 local goal_handle = nil
@@ -41,3 +53,4 @@ roslua.add_spinner(
 	 end
       end
    end)
+--]]

@@ -45,14 +45,16 @@ function spin()
    skillenv.reset_status()
    if sksf then
       sksf()
-      print("Status", skillenv.get_status())
-      local fsm = skillenv.get_skill_fsm("say")
-      if fsm and fsm:changed() then
-	 local graph = fsm:graph()
-	 local m = roslua.get_msgspec("skiller/Graph"):instantiate()
-	 m.values.name = "say"
-	 m.values.dotgraph = graph
-	 pub_graph:publish(m)
+      local active_skill = skillenv.get_active_skills()
+      if active_skill then
+	 local fsm = skillenv.get_skill_fsm(active_skill)
+	 if fsm and fsm:changed() then
+	    local graph = fsm:graph()
+	    local m = roslua.get_msgspec("skiller/Graph"):instantiate()
+	    m.values.name = active_skill
+	    m.values.dotgraph = graph
+	    pub_graph:publish(m)
+	 end
       end
    end
 end
