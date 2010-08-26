@@ -24,7 +24,8 @@ module(..., fawkes.modinit.register_all)
 require("fawkes.logprint")
 local skillstati = require("skiller.skillstati")
 local shsmmod    = require("skiller.skillhsm")
-local wsmod      = require("fawkes.fsm.waitstate")
+local jsmod      = require("fawkes.fsm.jumpstate")
+local subfjsmod  = require("fawkes.fsm.subfsmjumpstate")
 local depinit    = require("fawkes.depinit")
 local predlib    = require("fawkes.predlib")
 local grapher    = require("fawkes.fsm.grapher")
@@ -35,6 +36,37 @@ local active_skills = {}
 
 local skill_space      = ""
 local graphing_enabled = true
+
+local module_exports = {
+   SkillHSM          = shsmmod.SkillHSM,
+   JumpState         = shsmmod.JumpState,
+   SkillJumpState    = shsmmod.SkillJumpState,
+   SubFSMJumpState   = shsmmod.SubFSMJumpState
+}
+
+local module_initializers = {}
+
+--- Add an export for module initialization.
+-- All exports are exported to modules when they are initialized.
+-- @param key key of the export, i.e. the name with which the value will be
+-- available in the skill module
+-- @param value the value of the exported entry
+function add_export(key, value)
+   module_exports[key] = value
+end
+
+--- Add a module initializer.
+-- Module initializers are called as part of the skill_module() call in skill
+-- modules. They are called after basic initializations have been run. They
+-- can be used for example to initialize, check, and assert dependencies.
+-- @param di dependency initializer, must be a function which takes two
+-- arguments. The module m, and a table to which fields should be added (the
+-- index metatable). The initializer should not set values directly on the
+-- module.
+function add_module_initializer(di)
+   table.insert(module_initializers, di)
+end
+
 
 -- Print skill info.
 -- @param skill_entry skill entry to print
@@ -135,18 +167,21 @@ function init(skillspace)
 
    skill_env_template.interfaces = interfaces
 
-   if interfaces.writing.skiller then
-      interfaces.writing.skiller:set_error("")
-      interfaces.writing.skiller:write()
+   if interfaces and interfaces.writing then
+      if interfaces.writing.skiller then
+	 interfaces.writing.skiller:set_error("")
+	 interfaces.writing.skiller:write()
+      end
+
+      if interfaces.writing.skdbg then
+	 interfaces.writing.skdbg:set_graph_fsm("")
+	 interfaces.writing.skdbg:set_graph("")
+	 interfaces.writing.skdbg:write()
+      end
    end
 
-   if interfaces.writing.skdbg then
-      interfaces.writing.skdbg:set_graph_fsm("")
-      interfaces.writing.skdbg:set_graph("")
-      interfaces.writing.skdbg:write()
-   end
-
-   require("skills." .. SKILLSPACE)
+   local ok = pcall(require, "skills." .. SKILLSPACE)
+   if not ok then require(SKILLSPACE) end
 end
 
 --- Generate a sandbox for skill execution.
@@ -165,13 +200,19 @@ function gensandbox()
       assert(not rv[s.name], "Sandbox: Name " .. s.name .. " has already been registered")
       rv[s.name] = create_skill_functable(s)
    end
-   for n, i in pairs(interfaces.reading) do
-      assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
-      rv[n] = i
-   end
-   for n, i in pairs(interfaces.writing) do
-      assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
-      rv[n] = i
+   if interfaces then
+      if interfaces.reading then
+	 for n, i in pairs(interfaces.reading) do
+	    assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
+	    rv[n] = i
+	 end
+      end
+      if interfaces.writing then
+	 for n, i in pairs(interfaces.writing) do
+	    assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
+	    rv[n] = i
+	 end
+      end
    end
 
    return rv
@@ -548,18 +589,17 @@ end
 -- @param m module to initialize
 function module_init(m)
    fawkes.modinit.module_init(m)
-   m.SkillHSM          = shsmmod.SkillHSM
-   m.JumpState         = shsmmod.JumpState
-   m.SkillJumpState    = shsmmod.SkillJumpState
-   m.SubFSMJumpState   = shsmmod.SubFSMJumpState
-   m.WaitState         = wsmod.WaitState
+   for k, v in pairs(module_exports) do
+      m[k] = v
+   end
 end
 
 
 -- Initialize a skill module.
--- @param m table of the module to initialize
+-- @param m table or name of the module to initialize
 function skill_module(module_name)
-   local m = require(module_name)
+   local m = module_name
+   if type(module_name) == "string" then m = require(module_name) end
 
    assert(m.name and type(m.name) == "string", "Skill name not set or not a string")
    assert(m.documentation and type(m.documentation) == "string",
@@ -589,8 +629,8 @@ function skill_module(module_name)
       end
    end
 
-   if m.depends_interfaces then
-      depinit.init_interfaces(m.name, m.depends_interfaces, indextable)
+   for _, mi in ipairs(module_initializers) do
+      mi(m, indextable)
    end
 
    mt.__index    = indextable
