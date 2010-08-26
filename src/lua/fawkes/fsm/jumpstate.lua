@@ -70,8 +70,6 @@ function JumpState:new(o)
    o.loops = o.loops or {}
    o.inits = o.inits or {}
 
-   o:setup_timeout()
-
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
 
    return o
@@ -158,7 +156,7 @@ function JumpState:add_transition(state, jumpcond, description)
       local fe = { string=string, math=math, table=table,
 		   os={time=os.time, date=os.date, clock=os.clock, difftime=os.difftime},
 		   next=next, rawequal=rawequal, type=type,
-		   state=self, self=self, vars=self.fsm.vars }
+		   state=self, self=self, vars=self.fsm.vars, fsm=self.fsm }
       if self.closure then
 	 for k,v in pairs(self.closure) do fe[k] = v end
       end
@@ -261,33 +259,20 @@ function JumpState:init_timeout()
 end
 
 
---- Setup timeout.
--- If the timeout field is set, a timeout transition is added. The timeout
--- field must be a table. Either it is an array with two values, the first
--- being the time in seconds, the second being the state where to go to on
--- timeout. Or it can be a table with a time and a to field representing the
--- timeout in seconds and state to go to on timeout respectively.
-function JumpState:setup_timeout()
-   if self.timeout then
-      local timeout_time = self.timeout[1]
-      local timeout_to   = self.timeout[2]
-      if self.timeout.time then
-	 timeout_time = self.timeout.time
-	 timeout_to   = self.timeout.to
-      end
-      assert(timeout_time, "No timeout value given")
-      assert(type(timeout_time) == "number", "Timeout value must be a number")
-      assert(timeout_to, "No timeout target state given")
-      self.timeout_time = timeout_time
-      self.timeout_to   = timeout_to
+--- Setup timeout transition.
+-- @param to state to go to if the timeout expires
+-- @param time in seconds
+function JumpState:set_timeout(time, to)
+   assert(time, "No timeout value given")
+   assert(type(time) == "number", "Timeout value must be a number")
+   assert(to, "No timeout target state given")
+   self.timeout_time = time
+   self.timeout_to   = to
 	 
-      table.insert(self.inits, self.init_timeout)
-      self.timeout_transition = self:add_transition(self.timeout_to, self.jumpcond_timeout, "Timeout (" .. self.timeout_time .. " sec)")
-      self.timeout_transition.dotattr = { style = "dashed" }
-   end
+   table.insert(self.inits, self.init_timeout)
+   self.timeout_transition = self:add_transition(to, self.jumpcond_timeout, "Timeout (" .. time .. " sec)")
+   self.timeout_transition.dotattr = { style = "dashed" }
 end
-
-
 
 
 --- Checks a number of interfaces for no writer.
@@ -305,6 +290,18 @@ function JumpState:jumpcond_nowriter()
       end
    else
       printf("nowriter fail")
+   end
+   return false
+end
+
+
+--- Check if given object is an instance of FSM class.
+-- @return true if obj is an instance of FSM class
+function JumpState.is_instance(obj)
+   local mt = getmetatable(obj)
+   while mt do
+      if mt == JumpState then return true end
+      mt = getmetatable(mt)
    end
    return false
 end
