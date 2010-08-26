@@ -3,7 +3,7 @@
 --  skill_jumpstates.lua - HSM state specifically for skills
 --
 --  Created: Wed Dec 10 14:09:48 2008
---  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
 --
 ------------------------------------------------------------------------
 
@@ -21,20 +21,7 @@
 
 require("fawkes.modinit")
 
---- Jump states to build Hybrid State Machines (HSM) for skills.
--- @author Tim Niemueller
-module(..., fawkes.modinit.module_init)
-
-require("fawkes.fsm.jumpstate")
-require("skiller.skill_states")
-local skillstati = require("skiller.skillstati")
-
--- Convenience shortcuts
-local JumpState     = fawkes.fsm.jumpstate.JumpState
-local SkillState    = skiller.skill_states.SkillState
-
-
---- @class SkillJumpState
+--- SkillJumpState.
 -- Skill jump states to build up Hybrid State Machines (HSM)
 -- specifically for the use in skills. SkillJumpState (SJS) provide
 -- specific tools to deal with sub-skills. SJS may operate either a
@@ -68,23 +55,16 @@ local SkillState    = skiller.skill_states.SkillState
 -- conditions for state transitions and cannot return a state to switch
 -- to after the loop.
 -- @author Tim Niemueller
-SkillJumpState = { add_transition     = JumpState.add_transition,
-		   add_precondition   = JumpState.add_precondition,
-		   add_precond_trans  = JumpState.add_precond_trans,
-		   get_transition     = JumpState.get_transition,
-		   get_transitions    = JumpState.get_transitions,
-		   clear_transitions  = JumpState.clear_transitions,
-		   try_transitions    = JumpState.try_transitions,
-		   last_transition    = JumpState.last_transition,
-		   init               = JumpState.init,
-		   loop               = JumpState.loop,
-		   exit               = JumpState.exit,
-		   prepare            = JumpState.prepare,
-		   add_subskill       = SkillState.add_subkill,
-		   do_exit            = SkillState.do_exit,
-		   setup_timeout      = JumpState.setup_timeout
-		 }
+module(..., fawkes.modinit.module_init)
 
+require("fawkes.fsm.jumpstate")
+local skillstati = require("skiller.skillstati")
+
+-- Convenience shortcuts
+local JumpState     = fawkes.fsm.jumpstate.JumpState
+
+
+SkillJumpState = {}
 
 --- Create new state.
 -- @param o table with initializations for the object.
@@ -107,6 +87,7 @@ function SkillJumpState:new(o)
     "SkillJumpState " .. o.name .. " may only operate in a specific mode")
 
    setmetatable(o, self)
+   setmetatable(self, JumpState)
    self.__index = self
 
    o.skill_status  = skillstati.S_RUNNING
@@ -127,7 +108,6 @@ function SkillJumpState:new(o)
    end
 
    o:set_transition_labels()
-   o:setup_timeout()
 
    return o
 end
@@ -161,6 +141,14 @@ function SkillJumpState:set_transition_labels()
       end
    end
    self.fsm:mark_changed()
+end
+
+--- Add a subskill to this state.
+-- Skills which are added as subskills are automatically reset during init and
+-- exit.
+-- @param subskill subskill to add
+function SkillJumpState:add_subskill(subskill)
+   table.insert(self.subskills, subskill)
 end
 
 
@@ -204,6 +192,17 @@ function SkillJumpState:do_init()
    self:init()
 
    return self:try_transitions()
+end
+
+
+--- Execute exit routine.
+-- This resets any subskills that have been added for this state and then executes
+-- the state's exit() routine. Do not overwrite do_exit(), rather implement exit().
+function SkillJumpState:do_exit()
+   for _, s in ipairs(self.subskills) do
+      s.reset()
+   end
+   self:exit()
 end
 
 --- Execute loop.
