@@ -35,19 +35,7 @@ local JumpState     = fawkes.fsm.jumpstate.JumpState
 -- This special jump state allows for executing another FSM/HSM while the state
 -- is active. It can execute transition based on the state of the sub-FSM.
 -- @author Tim Niemueller
-SubFSMJumpState = { add_transition     = JumpState.add_transition,
-		    add_precondition   = JumpState.add_precondition,
-		    add_precond_trans  = JumpState.add_precond_trans,
-		    get_transition     = JumpState.get_transition,
-		    get_transitions    = JumpState.get_transitions,
-		    clear_transitions  = JumpState.clear_transitions,
-		    try_transitions    = JumpState.try_transitions,
-		    last_transition    = JumpState.last_transition,
-		    init               = JumpState.init,
-		    loop               = JumpState.loop,
-		    exit               = JumpState.exit,
-		    prepare            = JumpState.prepare
-		 }
+SubFSMJumpState = {}
 
 
 --- Create new state.
@@ -60,6 +48,7 @@ function SubFSMJumpState:new(o)
    assert(o.subfsm, "SubFSMJumpState " .. o.name .. " requires a sub-FSM")
    assert(not getmetatable(o), "Meta table already set for SubFSMJumpState " .. o.name)
    setmetatable(o, self)
+   setmetatable(self, JumpState)
    self.__index = self
 
    o.transitions   = o.transitions or {}
@@ -97,6 +86,7 @@ function SubFSMJumpState:do_init(...)
    local rv = { self:try_transitions(self.preconditions) }
    if next(rv) then return unpack(rv) end
    self.subfsm:reset()
+   for k, v in pairs(self.fsm.vars) do self.subfsm.vars[k] = v end
    self:init(...)
 end
 
@@ -117,4 +107,13 @@ end
 function SubFSMJumpState:reset()
    JumpState.reset(self)
    self.subfsm:reset()
+end
+
+
+--- Get string representation.
+-- @return string of the form SubFSMJumpState[FSM/State]@Current, where FSM
+-- will be replaced by the FSM's name, State by this state's name and Current
+-- by the name of the current state of the sub-FSM.
+function SubFSMJumpState:__tostring()
+   return string.format("SubFSMJumpState[%s/%s]@%s", self.fsm.name, self.name, self.fsm.current.name)
 end
