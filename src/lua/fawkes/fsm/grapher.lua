@@ -29,11 +29,13 @@ local gmod = require("fawkes.dotgraph")
 local colored_output = true
 local rankdir = "TB"
 local integrated_subfsm = true
+local params_changed = false
 
 
 --- Enable/disable colored output.
 -- @param colored true to enable colored output, false to disable
 function set_colored(colored)
+   params_changed = true
    colored_output = colored
 end
 
@@ -44,6 +46,7 @@ end
 -- documenation).
 -- @param new_rankdir new rank direction
 function set_rankdir(new_rankdir)
+   params_changed = true
    rankdir = new_rankdir
 end
 
@@ -59,6 +62,17 @@ function get_colored()
    if colored_output then return true else return false end
 end
 
+--- Check if parameters have been changed.
+-- For each call to a set method of a parameter (e.g. rankdir) this method will
+-- return true exactly once.
+-- @return true if a parameter has been changed since the last call, false otherwise
+function get_params_changed()
+   local rv = params_changed
+   params_changed = false
+   return rv
+end
+
+
 --- Enable/disable integrated sub-FSM mode.
 -- If enabled, the state employing a sub-fsm will have an edge leading to the
 -- initial node of the sub-FSM and the exit and fail states of the sub-FSM will
@@ -67,6 +81,7 @@ end
 -- the sub-FSM and direction connections to the fail_to and exit_to nodes.
 -- @param enable true to enable subgraph integration, false to disable
 function set_integrated_subfsm(integrated)
+   params_changed = true
    integrated_subfsm = integrated
 end
 
