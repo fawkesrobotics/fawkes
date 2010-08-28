@@ -23,38 +23,68 @@ module("skiller.ros", package.seeall)
 
 require("roslua")
 require("actionlib")
+require("skiller.ros.graph")
 
-local pub_graph
-local sksf
+local pub_status
 
 function init()
    roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/skiller"}
-   skiller_as = actionlib.action_server("skiller", "skiller/ExecSkill")
-   roslua.add_spinner(spin)
-   pub_graph = roslua.publisher("/skiller/graph", "skiller/Graph")
+   skiller_as = actionlib.action_server("/skiller/exec", "skiller/ExecSkill",
+					goal_cb, spin_cb, cancel_cb)
+   skiller.ros.graph.init()
 end
 
 
-function start(skillstring)
-   sksf = loadstring(skillstring)
-   local sandbox = skillenv.gensandbox()
-   setfenv(sksf, sandbox)
+function goal_cb(goal_handle, action_server)
+   printf("Starting goal %s", goal_handle.goal_id)
+   action_server:cancel_goals_before(goal_handle.goalmsg.values.header.values.stamp)
+   goal_handle.vars.skillstring = goal_handle.goalmsg.values.goal.values.skillstring
+   local ok, sksf = pcall(loadstring, goal_handle.vars.skillstring)
+   if ok then
+      skillenv.reset_all()
+      local sandbox = skillenv.gensandbox()
+      setfenv(sksf, sandbox)
+      goal_handle.vars.sksf = sksf
+      printf("Accepting goal %s", goal_handle.goal_id)
+      goal_handle:accept()
+   else
+      printf("Rejecting goal %s", goal_handle.goal_id)
+      goal_handle:reject(sksf)
+   end
 end
 
-function spin()
+
+function spin_cb(goal_handle, action_server)
    skillenv.reset_status()
-   if sksf then
-      sksf()
-      local active_skill = skillenv.get_active_skills()
-      if active_skill then
-	 local fsm = skillenv.get_skill_fsm(active_skill)
-	 if fsm and fsm:changed() then
-	    local graph = fsm:graph()
-	    local m = roslua.get_msgspec("skiller/Graph"):instantiate()
-	    m.values.name = active_skill
-	    m.values.dotgraph = graph
-	    pub_graph:publish(m)
-	 end
+   local ok, errmsg = pcall(goal_handle.vars.sksf)
+   if not ok then
+      print_error("Execution of %s failed: %s", goal_handle.vars.skillstring, errmsg)
+      local result = action_server.actspec.result_spec:instantiate()
+      result.values.errmsg = errmsg
+      goal_handle:abort(result, errmsg)
+   else
+      local running, final, failed = skillenv.get_status()
+
+      if failed > 0 then
+	 local result = action_server.actspec.result_spec:instantiate()
+	 result.values.errmsg = skillenv.get_error()
+	 print_warn("Skill execution of '%s' failed (%s)",
+		    goal_handle.vars.skillstring, result.values.errmsg)
+	 goal_handle:abort(result, result.values.errmsg)
+      elseif final > 0 and running == 0 then
+	 print_info("Skill execution of '%s' succeeded", goal_handle.vars.skillstring)
+	 local result = action_server.actspec.result_spec:instantiate()
+	 goal_handle:finish(result)
+      elseif running > 0 then
+	 -- nothing to do
       end
    end
+   skiller.ros.graph.publish()
+end
+
+
+function cancel_cb(goal_handle, action_server)
+   print_warn("Goal %s (%s) cancelled", goal_handle.goal_id, goal_handle.vars.skillstring)
+   skillenv.reset_all()
+   skiller.ros.graph.publish(true)
 end
