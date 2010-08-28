@@ -91,7 +91,7 @@ function ActionJumpState:setup_subfsm()
 
    self.subfsm:add_transitions{
       {"WAIT_SERVER", "WAIT_GOAL_ACK", "fsm.action_client:has_server()",
-       timeout={10, "FAILED"}, desc="Connected"},
+       timeout={10, "FAILED", error="no action server"}, desc="Connected"},
       action_trans("WAIT_GOAL_ACK", "PENDING"),
       action_trans("WAIT_GOAL_ACK", "ACTIVE"),
       action_trans("WAIT_GOAL_ACK", "WAIT_CANCEL_ACK"),
