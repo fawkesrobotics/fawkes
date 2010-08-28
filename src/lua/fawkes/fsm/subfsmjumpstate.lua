@@ -101,6 +101,7 @@ end
 --- Resets the sub-FSM.
 function SubFSMJumpState:do_exit()
    JumpState.do_exit(self)
+   self.fsm.error = self.subfsm.error
 end
 
 -- Resets the sub-FSM.

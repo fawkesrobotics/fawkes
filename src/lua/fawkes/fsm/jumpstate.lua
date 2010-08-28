@@ -139,7 +139,9 @@ end
 -- @param description a string representation of the jump condition, can
 -- be a plain copy of the code as string or a verbal description, used for
 -- debugging and graph generation
-function JumpState:add_transition(state, jumpcond, description)
+-- @param errmsg An optional error message which is added to the FSM errors if
+-- transition is executed
+function JumpState:add_transition(state, jumpcond, description, errmsg)
    assert(state, self.name .. ": Follow state is nil while adding '" .. tostring(description) .. "'")
    assert(state.name or type(state) == "string", self.name .. ": Follow state does not have a valid name while adding '" .. tostring(description) .. "'")
    assert(jumpcond, self.name .. ": Jump condition is nil while adding '" .. tostring(description) .. "'")
@@ -173,7 +175,8 @@ function JumpState:add_transition(state, jumpcond, description)
 
    local transition = {state       = state,
 		       jumpcond    = jc,
-		       description = description}
+		       description = description,
+		       error       = errmsg}
    table.insert(self.transitions, transition)
    return transition
 end
@@ -224,8 +227,15 @@ function JumpState:try_transitions(transtable)
       local jcfires = rv[1]
       table.remove(rv, 1)
       if jcfires then
-	 if self.fsm and self.fsm.debug then
-	    print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+	 if self.fsm then
+	    if self.fsm.debug then
+	       print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+	    end
+	    if t.error then
+	       local sep = ""
+	       if self.fsm.error ~= "" then sep = ", " end
+	       self.fsm.error = self.fsm.error .. sep .. t.error
+	    end
 	 end
 	 self.last_trans = t
 	 return t.state, unpack(rv)
@@ -262,7 +272,7 @@ end
 --- Setup timeout transition.
 -- @param to state to go to if the timeout expires
 -- @param time in seconds
-function JumpState:set_timeout(time, to)
+function JumpState:set_timeout(time, to, errmsg)
    assert(time, "No timeout value given")
    assert(type(time) == "number", "Timeout value must be a number")
    assert(to, "No timeout target state given")
@@ -270,7 +280,7 @@ function JumpState:set_timeout(time, to)
    self.timeout_to   = to
 	 
    table.insert(self.inits, self.init_timeout)
-   self.timeout_transition = self:add_transition(to, self.jumpcond_timeout, "Timeout (" .. time .. " sec)")
+   self.timeout_transition = self:add_transition(to, self.jumpcond_timeout, "Timeout (" .. time .. " sec)", errmsg)
    self.timeout_transition.dotattr = { style = "dashed" }
 end
 
