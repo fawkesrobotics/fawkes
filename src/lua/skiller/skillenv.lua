@@ -282,6 +282,24 @@ function get_status()
 end
 
 
+--- Get error string.
+-- @return string of errors that occured in active skills
+function get_error()
+   local errors={}
+   for _, active_skill in ipairs(active_skills) do
+      local fsm = skiller.skillenv.get_skill_fsm(active_skill)
+      if fsm and fsm.error and fsm.error ~= "" then
+	 table.insert(errors, active_skill .. ": " .. fsm.error)
+      else
+	 local mod = get_skill_module(active_skill)
+	 if mod and mod.errmsg and mod.errmsg ~= "" then
+	    table.insert(errors, active_skill .. ": " .. mod.ermsg)
+	 end
+      end
+   end
+   return table.concat(errors, " | ")
+end
+
 --- Get active skills.
 -- The active skills are the last executed skills which have not been resetted, yet.
 -- If the skill string executes multiple skills then the skills are listed in the
