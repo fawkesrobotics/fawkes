@@ -53,15 +53,14 @@ function SubFSMJumpState:new(o)
 
    o.transitions   = o.transitions or {}
    o.dotattr       = o.dotattr or {}
-   o.preconditions = {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
 
    if o.subfsm.exit_state and o.exit_to then
-      o.final_transition = o:add_transition(o.exit_to, o.jumpcond_fsm_done, "FSM succeeded")
+      o.final_transition = o:add_new_transition(o.exit_to, o.jumpcond_fsm_done, "FSM succeeded")
    end
    if o.subfsm.fail_state and o.fail_to then
-      o.failure_transition = o:add_transition(o.fail_to, o.jumpcond_fsm_failed, "FSM failed")
+      o.failure_transition = o:add_new_transition(o.fail_to, o.jumpcond_fsm_failed, "FSM failed")
    end
 
    return o
@@ -83,7 +82,7 @@ end
 -- preconditions, but not for regular transitions. This is done because the
 -- sub-FSM hasn't been run, yet.
 function SubFSMJumpState:do_init(...)
-   local rv = { self:try_transitions(self.preconditions) }
+   local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
    self.subfsm:reset()
    for k, v in pairs(self.fsm.vars) do self.subfsm.vars[k] = v end

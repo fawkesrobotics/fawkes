@@ -66,7 +66,6 @@ function JumpState:new(o)
 
    o.dotattr = o.dotattr or {}
    o.transitions = o.transitions or {}
-   o.preconditions = {}
    o.loops = o.loops or {}
    o.inits = o.inits or {}
 
@@ -80,7 +79,7 @@ end
 -- executed for every state for derived states. 
 -- @param ... Any parameters, passed to the init() function.
 function JumpState:do_init(...)
-   local rv = { self:try_transitions(self.preconditions) }
+   local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
    self:init(...)
    for _,i in ipairs(self.inits) do
@@ -105,35 +104,8 @@ function JumpState:do_loop()
 end
 
 
---- Add transition as precondition.
--- The given transition must already exist in the list of transitions of this
--- state. Then the transition is added to the list of preconditions. That is it
--- is checked just before init() would be run. If any of the jump conditions of
--- the precondition transition fires the transition is executed immediately and
--- the state is never run (init() and loop() are not called.
-function JumpState:add_precondition(transition)
-   local ok = false
-   for _,t in ipairs(self.transitions) do
-      if t == transition then
-	 ok = true
-	 break
-      end
-   end
-   assert(ok, "JumpState/" .. self.name .. ":add_precondition: transition has not been added via add_transition before")
-
-   table.insert(self.preconditions, transition)
-
-   return transition
-end
-
---- Add transition.
--- Adds a transition for this state. Jump conditions are executing after loop()
--- has run to check if a transition should happen. The jump condition is a
--- function whose first return value must be boolean. Iff the return value is
--- true then the condition holds/fires and the transition is executed. No further
--- jump conditions will be tried in that case. All (optional) following return
--- values are passed verbatim to the init() function of the state the transition
--- points to.
+--- Create a new transition.
+-- The transition is created, but not added.
 -- @param state state to switch to if jumpcond holds
 -- @param jumpcond jump condition function, see description above.
 -- @param description a string representation of the jump condition, can
@@ -141,7 +113,7 @@ end
 -- debugging and graph generation
 -- @param errmsg An optional error message which is added to the FSM errors if
 -- transition is executed
-function JumpState:add_transition(state, jumpcond, description, errmsg)
+function JumpState:create_transition(state, jumpcond, description, errmsg)
    assert(state, self.name .. ": Follow state is nil while adding '" .. tostring(description) .. "'")
    assert(state.name or type(state) == "string", self.name .. ": Follow state does not have a valid name while adding '" .. tostring(description) .. "'")
    assert(jumpcond, self.name .. ": Jump condition is nil while adding '" .. tostring(description) .. "'")
@@ -173,27 +145,83 @@ function JumpState:add_transition(state, jumpcond, description, errmsg)
       error(self.name .. ": type of jump condition must be function, string or boolean")
    end
 
-   local transition = {state       = state,
-		       jumpcond    = jc,
-		       description = description,
-		       error       = errmsg}
-   table.insert(self.transitions, transition)
-   return transition
+   return {state       = state,
+	   jumpcond    = jc,
+	   description = description,
+	   error       = errmsg}
 end
 
-
---- Add a transition which is also a precondition.
--- This adds a transition with the passed data. Additionally, the transition
--- is made a precondition.
+--- Add new transition.
+-- Creates and adds a transition for this state. Jump conditions are executing
+-- after loop() has run to check if a transition should happen. The jump condition
+-- is a function whose first return value must be boolean. Iff the return value is
+-- true then the condition holds/fires and the transition is executed. No further
+-- jump conditions will be tried in that case. All (optional) following return
+-- values are passed verbatim to the init() function of the state the transition
+-- points to.
 -- @param state state to switch to if jumpcond holds
 -- @param jumpcond jump condition function, see description above.
 -- @param description a string representation of the jump condition, can
 -- be a plain copy of the code as string or a verbal description, used for
 -- debugging and graph generation
-function JumpState:add_precond_trans(state, jumpcond, description)
-   local t = self:add_transition(state, jumpcond, description)
-   self:add_precondition(t)
+-- @param errmsg An optional error message which is added to the FSM errors if
+-- transition is executed
+function JumpState:add_new_transition(state, jumpcond, description, errmsg)
+   local transition = self:create_transition(state, jumpcond, description, errmsg)
+   transition.post = true
+   table.insert(self.transitions, transition)
+   return transition
 end
+
+--- Add new precondition
+-- Creates and adds a precondition for this state. Jump conditions are executing
+-- before init() is run to check if a transition should happen.
+-- @param state state to switch to if jumpcond holds
+-- @param jumpcond jump condition function, see description above.
+-- @param description a string representation of the jump condition, can
+-- be a plain copy of the code as string or a verbal description, used for
+-- debugging and graph generation
+-- @param errmsg An optional error message which is added to the FSM errors if
+-- transition is executed
+function JumpState:add_new_precondition(state, jumpcond, description, errmsg)
+   local transition = self:create_transition(state, jumpcond, description, errmsg)
+   transition.pre = true
+   table.insert(self.transitions, transition)
+   return transition
+end
+
+--- Add transition as precondition.
+-- Then the transition is added to the list of preconditions. That is it
+-- is checked just before init() would be run. If any of the jump conditions of
+-- the precondition transition fires the transition is executed immediately and
+-- the state is never run (init() and loop() are not called.
+-- @param transition transition to add
+function JumpState:add_precondition(transition)
+   transition.pre = true
+   for _, t in ipairs(self.transitions) do
+      if t == transition then return end
+   end
+   table.insert(self.transitions, transition)
+end
+
+
+
+--- Add existing transition.
+-- The given transition must already exist in the list of transitions of this
+-- state. Then the transition is added to the list of preconditions. That is it
+-- is checked just before init() would be run. If any of the jump conditions of
+-- the precondition transition fires the transition is executed immediately and
+-- the state is never run (init() and loop() are not called.
+-- @param transition transition to add
+function JumpState:add_transition(transition)
+   transition.post = true
+   for _, t in ipairs(self.transitions) do
+      if t == transition then return end
+   end
+   table.insert(self.transitions, transition)
+end
+
+
 
 
 --- Prepare the state.
@@ -202,7 +230,6 @@ end
 -- with the states name was given instead of the state object). If that fails an
 -- error is thrown.
 function JumpState:prepare()
-   assert(self.preconditions, self.name .. ": preconditions table is nil, will cause flaky results")
    for _,t in ipairs(self.transitions) do
       if type(t.state) == "string" then
 	 local name = t.state
@@ -219,26 +246,28 @@ end
 -- supplied.
 -- @return follow state or nil to stay in current state as first argument, possibly
 -- any number of additional arguments that should be passed to the follow state
-function JumpState:try_transitions(transtable)
+function JumpState:try_transitions(precond)
    local transtable = transtable or self.transitions
    --print("Trying conditions for " .. self.name)
    for _,t in ipairs(transtable) do
-      local rv = { t.jumpcond(self) }
-      local jcfires = rv[1]
-      table.remove(rv, 1)
-      if jcfires then
-	 if self.fsm then
-	    if self.fsm.debug then
-	       print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+      if t.pre and precond or t.post and not precond then
+	 local rv = { t.jumpcond(self) }
+	 local jcfires = rv[1]
+	 table.remove(rv, 1)
+	 if jcfires then
+	    if self.fsm then
+	       if self.fsm.debug then
+		  print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+	       end
+	       if t.error then
+		  local sep = ""
+		  if self.fsm.error ~= "" then sep = ", " end
+		  self.fsm.error = self.fsm.error .. sep .. t.error
+	       end
 	    end
-	    if t.error then
-	       local sep = ""
-	       if self.fsm.error ~= "" then sep = ", " end
-	       self.fsm.error = self.fsm.error .. sep .. t.error
-	    end
+	    self.last_trans = t
+	    return t.state, unpack(rv)
 	 end
-	 self.last_trans = t
-	 return t.state, unpack(rv)
       end
    end
 
@@ -280,7 +309,7 @@ function JumpState:set_timeout(time, to, errmsg)
    self.timeout_to   = to
 	 
    table.insert(self.inits, self.init_timeout)
-   self.timeout_transition = self:add_transition(to, self.jumpcond_timeout, "Timeout (" .. time .. " sec)", errmsg)
+   self.timeout_transition = self:add_new_transition(to, self.jumpcond_timeout, "Timeout ("..time.." sec)", errmsg)
    self.timeout_transition.dotattr = { style = "dashed" }
 end
 

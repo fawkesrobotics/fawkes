@@ -193,8 +193,13 @@ function HSM:add_transitions(trans)
 
 	 -- We might have no condition but still a useful transition, i.e. if a timeout is set
 	 if cond then
-	    local new_t = from:add_transition(to, cond, t.desc, t.error)
-	    if t.precond then from:add_precondition(new_t) end
+	    local new_t
+	    if t.precond_only then
+	       new_t = from:add_new_precondition(to, cond, t.desc, t.error)
+	    else
+	       new_t = from:add_new_transition(to, cond, t.desc, t.error)
+	       if t.precond then from:add_precondition(new_t) end
+	    end
 	    if t.dotattr then new_t.dotattr = t.dotattr end
 	 end
 
@@ -286,7 +291,7 @@ function HSM:apply_deftrans(state)
 	 if not exists then
 	    printf("Adding transition %s -> %s (%s, %s)", state.name, tostring(t.state),
 		   tostring(t.jumpcond), tostring(t.description))
-	    local tr = state:add_transition(t.state, t.jumpcond, t.description)
+	    local tr = state:add_new_transition(t.state, t.jumpcond, t.description)
 	    tr.deftransindex = i
 	 end
       end
