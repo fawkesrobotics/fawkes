@@ -30,7 +30,6 @@ require("actionlib")
 local action_clients = {}
 
 function init_actions(module, table)
-   local name = module.name
    local deps = module.depends_actions
    if not deps then return end
 

@@ -36,7 +36,7 @@ local SkillHSM = skiller.skillhsm.SkillHSM
 
 debug = false
 
-local function param_doc(fields, indent)
+function param_doc(fields, indent)
    local indent = indent or ""
    local rv = ""
 

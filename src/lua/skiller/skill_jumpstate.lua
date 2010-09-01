@@ -94,17 +94,16 @@ function SkillJumpState:new(o)
    o.subskills     = o.subskills or {}
    o.transitions   = o.transitions or {}
    o.dotattr       = o.dotattr or {}
-   o.preconditions = {}
    o.base_args     = o.args or {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.subskills) == "table", "Subskills for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
 
    if o.final_state then
-      o.final_transition = o:add_transition(o.final_state, o.jumpcond_skill_final)
+      o.final_transition = o:add_new_transition(o.final_state, o.jumpcond_skill_final)
    end
    if o.failure_state then
-      o.failure_transition = o:add_transition(o.failure_state, o.jumpcond_skill_failed)
+      o.failure_transition = o:add_new_transition(o.failure_state, o.jumpcond_skill_failed)
    end
 
    o:set_transition_labels()
@@ -184,7 +183,7 @@ function SkillJumpState:do_init()
    self.args = nil
 
    -- Try preconditions
-   local rv = { self:try_transitions(self.preconditions) }
+   local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
 
    self:skill_reset()
