@@ -77,8 +77,9 @@ function SkillJumpState:new(o)
 
    if o.skill or o.skills then
       assert(o.final_state, "SkillJumpState " .. o.name .. " requires success target state for sub-skill execution")
-      assert(o.failure_state, "SkillJumpState " .. o.name .. " requires failure target state for sub-skill execution")
+      o.failure_state = o.failure_state or "FAILED"
    end
+
 
    assert(not (o.skill or o.skills or o.subskills) or
        o.skill and not o.skills and not o.subskills or
@@ -115,7 +116,9 @@ function SkillJumpState:set_transition_labels()
    if self.skills and #self.skills > 0 then
       local snames = {}
       for _,s in ipairs(self.skills) do
-	 if type(s[1]) == "string" then
+	 if s[1] == nil then
+	    error("Skill entry is nil, forgot to add skill to dependencies?")
+	 elseif type(s[1]) == "string" then
 	    table.insert(snames, s[1])
 	 else
 	    table.insert(snames, s[1].name)
@@ -200,6 +203,13 @@ end
 function SkillJumpState:do_exit()
    for _, s in ipairs(self.subskills) do
       s.reset()
+   end
+   if self.skills then
+      for _, s in ipairs(self.skills) do
+	 s.args = nil
+	 s.status = skillstati.S_RUNNING
+	 s[1].reset()
+      end
    end
    self:exit()
 end
