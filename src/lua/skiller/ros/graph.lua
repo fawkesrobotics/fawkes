@@ -22,7 +22,6 @@
 module("skiller.ros.graph", package.seeall)
 
 require("roslua")
-require("skiller.skillenv")
 require("fawkes.fsm.grapher")
 
 local pub_graph
@@ -31,11 +30,11 @@ local srv_direction
 local msgspec_graph
 
 function init()
-   pub_graph = roslua.publisher("/skiller/graph", "skiller/Graph")
-   srv_direction = roslua.service("/skiller/graph/set_direction",
+   pub_graph = roslua.publisher(roslua.node_name.."/graph", "skiller/Graph")
+   srv_direction = roslua.service(roslua.node_name.."/graph/set_direction",
 				  "skiller/SetGraphDirection",
 				  set_direction)
-   srv_color = roslua.service("/skiller/graph/set_colored",
+   srv_color = roslua.service(roslua.node_name.."/graph/set_colored",
 			      "skiller/SetGraphColored",
 			      set_colored)
    msgspec_graph = roslua.get_msgspec("skiller/Graph")
@@ -75,23 +74,19 @@ local function rankdir_to_graphdir()
    end
 end
 
-function publish(force)
-   local do_publish = force
+function publish(fsm)
+   local do_publish = (fsm == nil)
 
    local m = roslua.get_msgspec("skiller/Graph"):instantiate()
    m.values.stamp = roslua.Time.now()
 
-   local active_skill = skiller.skillenv.get_active_skills()
-   if active_skill then
-      local fsm = skiller.skillenv.get_skill_fsm(active_skill)
-      if fsm and (fsm:changed() or fawkes.fsm.grapher.get_params_changed()) then
-	 local graph = fsm:graph()
-	 m.values.name      = active_skill
-	 m.values.dotgraph  = graph
-	 m.values.colored   = fawkes.fsm.grapher.get_colored()
-	 m.values.direction = rankdir_to_graphdir()
-	 do_publish = true
-      end
+   if fsm and (fsm:changed() or fawkes.fsm.grapher.get_params_changed()) then
+      local graph = fsm:graph()
+      m.values.name      = active_skill
+      m.values.dotgraph  = graph
+      m.values.colored   = fawkes.fsm.grapher.get_colored()
+      m.values.direction = rankdir_to_graphdir()
+      do_publish = true
    end
 
    if do_publish then pub_graph:publish(m) end

@@ -25,8 +25,6 @@ require("roslua")
 require("actionlib")
 require("skiller.ros.graph")
 
-local pub_status
-
 function init()
    roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/skiller"}
    skiller_as = actionlib.action_server("/skiller/exec", "skiller/ExecSkill",
@@ -79,12 +77,18 @@ function spin_cb(goal_handle, action_server)
 	 -- nothing to do
       end
    end
-   skiller.ros.graph.publish()
+
+   local active_skill = skiller.skillenv.get_active_skills()
+   local fsm
+   if active_skill then
+      fsm = skiller.skillenv.get_skill_fsm(active_skill)
+   end
+   skiller.ros.graph.publish(fsm)
 end
 
 
 function cancel_cb(goal_handle, action_server)
    print_warn("Goal %s (%s) cancelled", goal_handle.goal_id, goal_handle.vars.skillstring)
    skillenv.reset_all()
-   skiller.ros.graph.publish(true)
+   skiller.ros.graph.publish()
 end
