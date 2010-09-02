@@ -584,7 +584,7 @@ function use_skill(module_name)
 	  "skill_module() for skill " .. m.name)
    mt.__call = function(t, ...) return m.execute(...) end
 
-   printf("Trying to add skill %s", m.name)
+   --printf("Trying to add skill %s", m.name)
 
    assert(get_skill_module(m.name) == nil, "A skill with the name " .. m.name .. " already exists")
    m.wrapped_function = create_skill_wrapper_func(m)
@@ -597,7 +597,8 @@ function use_skill(module_name)
    end
 
    table.insert(skills, m)
-   printf("Successfully added skill %s to current skill space", m.name)
+   --printf("Successfully added skill %s to current skill space", m.name)
+   printf("Added skill %s", m.name)
 end
 
 
