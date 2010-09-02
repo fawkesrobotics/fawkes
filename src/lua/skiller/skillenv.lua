@@ -652,6 +652,8 @@ function skill_module(module_name)
       mi(m, indextable)
    end
 
+   indextable.__SKILLMODULE__ = true
+
    mt.__index    = indextable
    --mt.__tostring = skill_module_tostring
 
