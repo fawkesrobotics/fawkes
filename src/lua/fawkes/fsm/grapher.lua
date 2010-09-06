@@ -130,6 +130,11 @@ local function generate_dotgraph(fsm, g, subgraph_name)
       end
    end
 
+   if fsm.dotattr then
+      gmod.setvl(g, fsm.dotattr)
+   end
+
+
    -- Put the initial node always first, to have the desired output!
    assert(fsm.start and fsm.states[fsm.start], "FSM grapher: No start node set " ..
 	  "for FSM or start node not created")
