@@ -102,9 +102,11 @@ function SkillJumpState:new(o)
 
    if o.final_state then
       o.final_transition = o:add_new_transition(o.final_state, o.jumpcond_skill_final)
+      if o.fintrans_dotattr then o.final_transition.dotattr = o.fintrans_dotattr end
    end
    if o.failure_state then
       o.failure_transition = o:add_new_transition(o.failure_state, o.jumpcond_skill_failed)
+      if o.failtrans_dotattr then o.failure_transition.dotattr = o.failtrans_dotattr end
    end
 
    o:set_transition_labels()
