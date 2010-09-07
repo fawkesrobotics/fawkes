@@ -213,7 +213,9 @@ end
 -- the precondition transition fires the transition is executed immediately and
 -- the state is never run (init() and loop() are not called.
 -- @param transition transition to add
-function JumpState:add_transition(transition)
+function JumpState:add_transition(transition, toomuch)
+   assert(not toomuch, "JumpState:add_transition(): Passed too many arguments, "..
+	  "need to use add_new_transition()?")
    transition.post = true
    for _, t in ipairs(self.transitions) do
       if t == transition then return end
@@ -251,22 +253,32 @@ function JumpState:try_transitions(precond)
    --print("Trying conditions for " .. self.name)
    for _,t in ipairs(transtable) do
       if t.pre and precond or t.post and not precond then
-	 local rv = { t.jumpcond(self) }
-	 local jcfires = rv[1]
-	 table.remove(rv, 1)
-	 if jcfires then
-	    if self.fsm then
-	       if self.fsm.debug then
-		  print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
-	       end
-	       if t.error then
-		  local sep = ""
-		  if self.fsm.error ~= "" then sep = ", " end
-		  self.fsm.error = self.fsm.error .. sep .. t.error
-	       end
+	 if not t.jumpcond then
+	    if not t.state then
+	       print_error("Transition %s-> ? does have neither jump condition nor target state",
+			   self.name);
+	    else
+	       print_error("Transition %s -> %s (%s) does not have a valid jump condition",
+			   self.name, t.state.name, t.description)
 	    end
-	    self.last_trans = t
-	    return t.state, unpack(rv)
+	 else
+	    local rv = { t.jumpcond(self) }
+	    local jcfires = rv[1]
+	    table.remove(rv, 1)
+	    if jcfires then
+	       if self.fsm then
+		  if self.fsm.debug then
+		     print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+		  end
+		  if t.error then
+		     local sep = ""
+		     if self.fsm.error ~= "" then sep = ", " end
+		     self.fsm.error = self.fsm.error .. sep .. t.error
+		  end
+	       end
+	       self.last_trans = t
+	       return t.state, unpack(rv)
+	    end
 	 end
       end
    end
