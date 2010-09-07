@@ -156,4 +156,7 @@ function execute()
    if graphing_enabled then
       write_graph(agent.fsm)
    end
+   if status_publisher then
+      status_publisher(agent.fsm)
+   end
 end
