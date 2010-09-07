@@ -104,6 +104,13 @@ function register_print_funcs(m)
       m.print_error = print_error
       m.print       = print_info_unformatted
       m.printf      = printf
+   elseif _G.printf then
+      m.print_debug = _G.print_debug
+      m.print_info  = _G.print_info
+      m.print_warn  = _G.print_warn
+      m.print_error = _G.print_error
+      m.print       = _G.print
+      m.printf      = _G.printf
    else
       m.print_debug = fallback_printf
       m.print_info  = fallback_printf
