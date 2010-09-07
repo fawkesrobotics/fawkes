@@ -227,7 +227,9 @@ end
 -- @param error error message
 function FSM:set_error(error)
    self.error = error
-   print_warn("FSM %s: %s", self.name, self.error)
+   if error ~= nil and error ~= "" then
+      print_warn("FSM %s: %s", self.name, self.error)
+   end
 end
 
 
