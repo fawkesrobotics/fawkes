@@ -122,6 +122,7 @@ function ActionJumpState:setup_subfsm()
       action_trans("PREEMPTING", "PREEMPTED", "FAILED"),
       action_trans("PREEMPTING", "ABORTED", "FAILED"),
       action_trans("WAIT_RESULT", "SUCCEEDED", "FINAL"),
+      {"WAIT_RESULT", "FAILED", timeout=10}
    }
    self.WAIT_GOAL_ACK.init = WAIT_GOAL_ACK_init
 end
