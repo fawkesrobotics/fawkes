@@ -53,6 +53,7 @@ AgentSkillExecJumpState = { set_transition_labels = SkillJumpState.set_transitio
 function AgentSkillExecJumpState:new(o)
    assert(o, "AgentSkillExecJumpState requires a table as argument")
    assert(o.name, "AgentSkillExecJumpState requires a name")
+   assert(not o.skiller, "Calling with custom skiller interface no longer supported")
    assert(not getmetatable(o), "Meta table already set for object")
 
    setmetatable(o, self)
@@ -68,7 +69,7 @@ function AgentSkillExecJumpState:new(o)
    o.skills = o.skills or {}
    o.loops  = o.loops or {}
    o.inits  = o.inits or {}
-   o.skill_queue = SkillQueue:new{name=o.name, skills=skills}
+   o.skill_queue = SkillQueue:new{name=o.name, skills=o.skills}
 
    o.skill_status = skillstati.S_RUNNING
 
@@ -99,7 +100,7 @@ function AgentSkillExecJumpState:do_init()
    if self.args then
       self.skill_queue:set_args(self.args)
    end
-   self.skill_queue:execute(self.skiller)
+   self.skill_queue:execute()
    self.skill_status = skillstati.S_RUNNING
    self:set_transition_labels()
 end
@@ -111,11 +112,13 @@ function AgentSkillExecJumpState:do_exit()
    self.skill_queue:stop()
    self.skill_queue:reset()
    self:exit()
+   self.fsm.error = self.error
 end
 
 --- Execute loop.
 function AgentSkillExecJumpState:do_loop()
    self.skill_status = self.skill_queue:status()
+   self.error        = self.skill_queue:error()
 
    return JumpState.do_loop(self)
 end
@@ -124,25 +127,28 @@ end
 function AgentSkillExecJumpState:prepare()
    JumpState.prepare(self);
    if type(self.final_state) == "string" then
-      printf("Setting prematurely declared final state %s", self.failure_state)
+      --printf("Setting prematurely declared final state %s", self.final_state)
       local tmpstr = self.final_state
       self.final_state        = self.fsm.states[self.final_state]
       assert(self.final_state, "Prematurely defined final state %s does not exist", tmpstr)
    end
    if type(self.failure_state) == "string" then
       local tmpstr = self.failure_state
-      printf("Setting prematurely declared failure state %s", self.failure_state)
+      --printf("Setting prematurely declared failure state %s", self.failure_state)
       self.failure_state      = self.fsm.states[self.failure_state]
       assert(self.failure_state, "Prematurely defined failure state %s does not exist", tmpstr)
    end
 
    local skills = (#self.skills == 1) and "Skill" or "Skills"
    if self.final_state and self.failure_state and self.final_state == self.failure_state then
-      self.transition = self:add_transition(self.final_state, self.finished, skills .. " finished")
-   elseif self.final_state then
-      self.final_transition   = self:add_transition(self.final_state, self.final, skills .. " succeeded")
-   elseif self.failure_state then
-      self.failure_transition = self:add_transition(self.failure_state, self.failed, skills .. " failed")
+      self.transition = self:add_new_transition(self.final_state, self.finished, skills .. " finished")
+   else
+      if self.final_state then
+	 self.final_transition   = self:add_new_transition(self.final_state, self.final, skills .. " succeeded")
+      end
+      if self.failure_state then
+	 self.failure_transition = self:add_new_transition(self.failure_state, self.failed, skills .. " failed")
+      end
    end
 
    self:set_transition_labels()
