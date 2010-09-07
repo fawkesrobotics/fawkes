@@ -19,9 +19,12 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
+require("roslua")
 require("fawkes.mathext")
 require("luaagent.ros")
-agentenv = require("luaagent.agentenv")
 
 luaagent.ros.init()
+
+agentenv = require("luaagent.agentenv")
+
 agentenv.init(AGENT)
