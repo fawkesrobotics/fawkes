@@ -172,20 +172,21 @@ function HSM:add_transitions(trans)
 	 local from  = assert(self.states[t[1]], "Originating state does not exist for transition "..trans_string)
 	 local to    = assert(self.states[t[2]], "Destination state does not exist for transition "..trans_string)
 	 local cond  = t[3] or t.cond
+	 assert(cond or t.timeout, "You must have a condition or a timeout for transition "..trans_string)
 
 	 -- If we only get a time as timeout assume jump to normal to state
 	 if t.timeout then
 	    local timeout_to, timeout_time, timeout_err
 	    if type(t.timeout) == "number" then
 	       timeout_time = t.timeout
-	       timeout_to   = to
+	       timeout_to   = to.name
 	    else
 	       assert(type(t.timeout) == "table", "Timeout must be number or table")
 	       timeout_time = t.timeout.time or t.timeout[1]
 	       timeout_to   = t.timeout.to   or t.timeout[2]
 	       timeout_err  = t.timeout.error
 	    end
-	    assert(self.states[timeout_to], "Timeout destionation state " .. tostring(timeout_to)
+	    assert(self.states[timeout_to], "Timeout destination state " .. tostring(timeout_to)
 		   .. " does not exist for transition " .. trans_string)
 
 	    from:set_timeout(timeout_time, timeout_to, timeout_err)
