@@ -134,7 +134,6 @@ local function generate_dotgraph(fsm, g, subgraph_name)
       gmod.setvl(g, fsm.dotattr)
    end
 
-
    -- Put the initial node always first, to have the desired output!
    assert(fsm.start and fsm.states[fsm.start], "FSM grapher: No start node set " ..
 	  "for FSM or start node not created")
@@ -171,7 +170,7 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 	 end
 
 	 -- Check if this is an exit node
-	 if name == fsm.exit_state or name == fsm.fail_state then
+	 if name == fsm.exit_state or name == fsm.fail_state or name == fsm.recover_state then
 	    gmod.setv(n, "shape", "doubleoctagon")
 	    gmod.setv(n, "style", "solid,filled")
 	    gmod.setv(n, "penwidth", "1.0")
@@ -183,6 +182,8 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 		  gmod.setv(n, "fillcolor", "#ccffcc")
 	       elseif current_name == fsm.fail_state then
 		  gmod.setv(n, "fillcolor", "#ffcccc")
+	       elseif current_name == fsm.recover_state then
+		  gmod.setv(n, "fillcolor", "#ffff88")
 	       else
 		  gmod.setv(n, "fillcolor", "#ffc080")
 	       end
@@ -201,6 +202,8 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 	    if name == fsm.exit_state then
 	       gmod.setv(n, "color", "#6fdd6f") -- 80ff80
 	    elseif name == fsm.fail_state then
+	       gmod.setv(n, "color", "#ff8080")
+	    elseif name == fsm.recover_state then
 	       gmod.setv(n, "color", "#ff8080")
 	    end
 	 end
