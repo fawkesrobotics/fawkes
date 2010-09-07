@@ -24,11 +24,10 @@ require("fawkes.mathext")
 require("skiller.ros")
 local actjsmod   = require("skiller.ros.action_jumpstate")
 local actinitmod = require("skiller.ros.action_initializer")
-skillenv = require("skiller.skillenv")
 
 skiller.ros.init()
+
+skillenv = require("skiller.skillenv")
 skillenv.add_export("ActionJumpState", actjsmod.ActionJumpState)
 skillenv.add_module_initializer(actinitmod.init_actions)
 skillenv.init(SKILLSPACE)
-
---skiller.ros.start("say{text=\"This is a test\"}")

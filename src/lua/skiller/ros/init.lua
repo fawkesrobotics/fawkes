@@ -24,12 +24,14 @@ module("skiller.ros", package.seeall)
 require("roslua")
 require("actionlib")
 require("skiller.ros.graph")
+local skillenv
 
 function init()
    roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/skiller"}
    skiller_as = actionlib.action_server("/skiller/exec", "skiller/ExecSkill",
 					goal_cb, spin_cb, cancel_cb)
    skiller.ros.graph.init()
+   skillenv = require("skiller.skillenv")
 end
 
 
