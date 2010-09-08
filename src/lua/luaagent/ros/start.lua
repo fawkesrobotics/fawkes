@@ -19,12 +19,16 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("roslua")
+require("roslua.logging")
+require("fawkes.logprint")
+roslua.logging.register_print_funcs(fawkes.logprint)
+
 require("fawkes.mathext")
 require("luaagent.ros")
+require("skiller.ros.topic_initializer")
 
 luaagent.ros.init()
 
 agentenv = require("luaagent.agentenv")
-
+agentenv.add_module_initializer(skiller.ros.topic_initializer.init_topics)
 agentenv.init(AGENT)
