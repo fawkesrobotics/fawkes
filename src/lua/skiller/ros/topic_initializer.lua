@@ -1,8 +1,8 @@
 
 ------------------------------------------------------------------------
---  action_initializer.lua - Action dependency initializer
+--  topic_initializer.lua - Topic dependency initializer
 --
---  Created: Wed Aug 25 18:11:59 2010 (Intel Research Pittsburgh)
+--  Created: Wed Sep 08 18:32:47 2010 (Intel Research Pittsburgh)
 --  Copyright  2010  Tim Niemueller [www.niemueller.de]
 --
 ------------------------------------------------------------------------
@@ -25,31 +25,26 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
-require("actionlib")
-
-local action_clients = {}
-
-function init_actions(module, table)
-   local deps = module.depends_actions
+function init_topics(module, table)
+   local deps = module.depends_topics
    if not deps then return end
 
-   assert(type(deps) == "table", "Type of dependencies not table")
+   assert(type(deps) == "table", "Type of topic dependencies not table")
+
+   printf("Intializing topics on %s", module._NAME)
 
    for _,t in ipairs(deps) do
-      assert(type(t) == "table", "Non-table element in action dependencies")
-      assert(t.v, "Action dependency does not have a variable name (v) field")
-      assert(t.name, "Action dependency does not have a name field")
-      assert(t.type, "Action dependency does not have a type field")
+      assert(type(t) == "table", "Non-table element in topic dependencies")
+      assert(t.v, "Topic dependency does not have a variable name (v) field")
+      assert(t.name, "Topic dependency does not have a name field")
+      assert(t.type, "Topic dependency does not have a type field")
 
-      local id = t.name .. "::" .. t.type
-      if not action_clients[id] then
-	 local flags
-	 if t.reduced then
-	    flags = {no_feedback=true, no_cancel=true}
-	    print_debug("ActionClient %s::%s ignores feedback and cancelling", t.name, t.type)
-	 end
-	 action_clients[id] = actionlib.action_client(t.name, t.type, flags)
+      -- we do not cache those, roslua does already
+      if t.publisher then
+	 table[t.v] = roslua.publisher(t.name, t.type)
+      else
+	 printf("Registering subscriber %s::%s for %s", t.name, t.type, t.v)
+	 table[t.v] = roslua.subscriber(t.name, t.type)
       end
-      table[t.v] = action_clients[id]
    end
 end
