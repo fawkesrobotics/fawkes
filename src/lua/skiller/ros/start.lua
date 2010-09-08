@@ -19,6 +19,10 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
+require("roslua.logging")
+require("fawkes.logprint")
+roslua.logging.register_print_funcs(fawkes.logprint)
+
 require("actionlib")
 require("fawkes.mathext")
 require("skiller.ros")
