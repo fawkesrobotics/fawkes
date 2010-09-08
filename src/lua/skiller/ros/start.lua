@@ -28,10 +28,12 @@ require("fawkes.mathext")
 require("skiller.ros")
 local actjsmod   = require("skiller.ros.action_jumpstate")
 local actinitmod = require("skiller.ros.action_initializer")
+local topinitmod = require("skiller.ros.topic_initializer")
 
 skiller.ros.init()
 
 skillenv = require("skiller.skillenv")
 skillenv.add_export("ActionJumpState", actjsmod.ActionJumpState)
 skillenv.add_module_initializer(actinitmod.init_actions)
+skillenv.add_module_initializer(topinitmod.init_topics)
 skillenv.init(SKILLSPACE)
