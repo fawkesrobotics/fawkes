@@ -43,7 +43,12 @@ function init_actions(module, table)
 
       local id = t.name .. "::" .. t.type
       if not action_clients[id] then
-	 action_clients[id] = actionlib.action_client(t.name, t.type)
+	 local flags
+	 if t.reduced then
+	    flags = {no_feedback=true, no_cancel=true}
+	    print_debug("ActionClient %s::%s ignores feedback and cancelling", t.name, t.type)
+	 end
+	 action_clients[id] = actionlib.action_client(t.name, t.type, flags)
       end
       table[t.v] = action_clients[id]
    end
