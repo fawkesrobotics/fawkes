@@ -81,12 +81,12 @@ function publish(fsm)
    m.values.stamp = roslua.Time.now()
 
    if fsm and (fsm:changed() or fawkes.fsm.grapher.get_params_changed()) then
-      local graph = fsm:graph()
       if fsm.dotattr then
 	 fsm.dotattr.fontname = "Neo Sans Intel"
       else
 	 fsm.dotattr = { fontname = "Neo Sans Intel"}
       end
+      local graph = fsm:graph()
       m.values.name      = active_skill
       m.values.dotgraph  = graph
       m.values.colored   = fawkes.fsm.grapher.get_colored()
