@@ -31,8 +31,6 @@ function init_topics(module, table)
 
    assert(type(deps) == "table", "Type of topic dependencies not table")
 
-   printf("Intializing topics on %s", module._NAME)
-
    for _,t in ipairs(deps) do
       assert(type(t) == "table", "Non-table element in topic dependencies")
       assert(t.v, "Topic dependency does not have a variable name (v) field")
@@ -46,5 +44,6 @@ function init_topics(module, table)
 	 printf("Registering subscriber %s::%s for %s", t.name, t.type, t.v)
 	 table[t.v] = roslua.subscriber(t.name, t.type)
       end
+      table[t.v].latching = t.latching
    end
 end
