@@ -184,8 +184,7 @@ end
 -- This resets any subskills that have been added for this state and then executes
 -- the state's init() routine. Do not overwrite do_init(), rather implement init().
 function SkillJumpState:do_init()
-   -- If argument has been passed put them into state's args array
-   self.args = nil
+   self.args = {}
 
    -- Try preconditions
    local rv = { self:try_transitions(true) }
@@ -193,6 +192,13 @@ function SkillJumpState:do_init()
 
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
+
+   for k, v in pairs(self.fsm.vars) do self.args[k] = v end
+   if self.skills then
+      for i, s in ipairs(self.skills) do
+	 s.args = self.args
+      end
+   end
    self:init()
 
    return self:try_transitions()
@@ -212,6 +218,9 @@ function SkillJumpState:do_exit()
 	 s.status = skillstati.S_RUNNING
 	 s[1].reset()
       end
+   end
+   if self.skill then
+      self.skill.reset()
    end
    self:exit()
 end
@@ -281,7 +290,7 @@ function SkillJumpState:skill_reset()
 	 s[1].reset()
       end
    end
-   self.args = nil
+   self.args = {}
 end
 
 function SkillJumpState:reset()
