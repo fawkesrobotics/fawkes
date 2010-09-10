@@ -135,7 +135,7 @@ local function generate_node(node, indent)
       -- it's a default node
       local attrapp = generate_attrappendix(node.attr)
       if #attrapp > 0 then
-	 s = s .. indent .. "\tnode" .. attrapp .. ";\n"
+	 s = s .. indent .. "node" .. attrapp .. ";\n"
 	 -- else ignore, because default nodes are only good for setting attribs
       end
    else
@@ -147,7 +147,7 @@ local function generate_node(node, indent)
 	 end
       end
       local attrapp = generate_attrappendix(node.attr)
-      s = s .. indent .. "\t" .. sanitize_node_name(node.name) .. attrapp .. ";\n"
+      s = s .. indent .. sanitize_node_name(node.name) .. attrapp .. ";\n"
    end
 
    return s
@@ -159,11 +159,11 @@ local function generate_edge(edge, indent)
    if edge.from == "" or edge.to == "" then
       -- it's a default node
       if #attrapp > 0 then
-	 s = s .. indent .. "\tedge" .. attrapp .. ";\n"
+	 s = s .. indent .. "edge" .. attrapp .. ";\n"
 	 -- else ignore, because default nodes are only good for setting attribs
       end
    else
-      s = s .. indent .. "\t" .. sanitize_node_name(edge.from) ..
+      s = s .. indent .. sanitize_node_name(edge.from) ..
           " -> " .. sanitize_node_name(edge.to) .. attrapp .. ";\n"
    end
    return s
@@ -178,23 +178,23 @@ local function generate_graph(graph, indent)
       s = s .. indent .. "\tgraph " .. graphattr .. ";\n"
    end
 
-   s = s .. generate_node(graph.nodes[1], indent)
-   s = s .. generate_edge(graph.edges[1], indent)
+   s = s .. generate_node(graph.nodes[1], indent.."\t")
+   s = s .. generate_edge(graph.edges[1], indent.."\t")
 
 
    for i,n in ipairs(graph.nodes) do
       if i > 1 then
-	 s = s .. generate_node(n, indent)
+	 s = s .. generate_node(n, indent.."\t")
       end
    end
 
    for _,sg in ipairs(graph.subgraphs) do
-      s = s .. indent .. generate_graph(sg, indent .. "\t")
+      s = s .. generate_graph(sg, indent .. "\t")
    end
 
    for i,e in ipairs(graph.edges) do
       if i > 1 then
-	 s = s .. generate_edge(e, indent)
+	 s = s .. generate_edge(e, indent.."\t")
       end
    end
 
