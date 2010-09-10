@@ -81,6 +81,7 @@ function ActionJumpState:setup_subfsm()
 				    start="WAIT_SERVER",
 				    exit_state="FINAL", fail_state="FAILED"}
    self.subfsm.action_client = self.action_client
+   self.subfsm.graph_collapse = true
 
    self.subfsm:set_debug(self.fsm.debug)
    self.subfsm:define_states{
