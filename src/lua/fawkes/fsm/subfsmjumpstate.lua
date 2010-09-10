@@ -85,8 +85,8 @@ function SubFSMJumpState:do_init(...)
    local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
    self.subfsm:reset()
-   for k, v in pairs(self.fsm.vars) do self.subfsm.vars[k] = v end
    self:init(...)
+   for k, v in pairs(self.fsm.vars) do self.subfsm.vars[k] = v end
 end
 
 --- Execute loop.
