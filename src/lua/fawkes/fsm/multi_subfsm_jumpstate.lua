@@ -87,14 +87,20 @@ end
 --- Check if sub-FSM failed.
 -- @return true if the current state of the sub-FSM is the failure state
 function MultiSubFSMJumpState:failed()
+   local fail = false
+   local all_done = true
+   local errors = {}
    for _,s in ipairs(self.subfsms) do
       if s.current.name == s.fail_state then
-	 self.fsm.error = s.error
+	 table.insert(errors, s.error)
+	 fail = true
 	 print_warn("MultiSubFSMJumpState[%s]: %s failed (error: %s)", self.name, s.name, s.error)
-	 return true
+	 
+      elseif s.current_name ~= s.exit_state then -- and s.current_name ~= s.fail_state (we know already)
+	 all_done = false
       end
    end
-   return false
+   return fail and all_done
 end
 
 --- Init SubFSM State. Note, that this will only cause transitions for
