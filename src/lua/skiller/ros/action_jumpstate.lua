@@ -129,6 +129,11 @@ function ActionJumpState:setup_subfsm()
 end
 
 function ActionJumpState:do_exit()
+   if self.subfsm.current.name == self.subfsm.fail_state and self.subfsm.vars.goal then
+      self.subfsm.error = self.subfsm.vars.goal.status_text or ""
+      print_warn("ActionJumpState[%s %s] error: %s", self.name, self.action_client.name, self.subfsm.error)
+   end
+
    SubFSMJumpState.do_exit(self)
 
    if self.subfsm.current.name ~= self.subfsm.exit_state

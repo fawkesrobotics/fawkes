@@ -58,7 +58,7 @@ function MultiActionJumpState:setup_subfsms()
       local fsm = fawkes.hsm.HSM:new{name=self.name .. ":" .. ac.name,
 				     start="RUN_ACTION",
 				     exit_state="FINAL", fail_state="FAILED"}
-      fsm.action_client = self.action_client
+      fsm.action_client = ac
       fsm:define_states{"FINAL", "FAILED", {"RUN_ACTION", ActionJumpState, action_client=ac}}
       --fsm:add_transitions{{"RUN_ACTION", "FINAL", "fsm.disabled", precond_only=true}}
       table.insert(self.subfsms, fsm)
