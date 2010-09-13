@@ -125,7 +125,7 @@ end
 
 
 --- Check if the given state or transition was used in current trace.
--- @param sot state or transition to check
+-- @param sot state or transition to check, if a string assumed to be a state name
 -- @return two values, first is true if state/transition is included in
 -- current trace, false otherwise, second is a list of traces where the
 -- given state/transition was involved. Note that the indexes of the traces in
@@ -134,6 +134,9 @@ function FSM:traced(sot)
    if not self.tracing then return false end
 
    local traces = {}
+   if type(sot) == "string" then
+      sot = self.states[sot]
+   end
 
    for i,t in ipairs(self.trace) do
       if t.from == sot or t.transition == sot or t.to == sot then
