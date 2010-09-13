@@ -106,7 +106,9 @@ function MultiSubFSMJumpState:do_init(...)
    for _,s in ipairs(self.subfsms) do
       s:reset()
    end
+
    self:init(...)
+
    for i,s in ipairs(self.subfsms) do
       if self.fsm.vars[s.name] then
 	 for k, v in pairs(self.fsm.vars[s.name]) do s.vars[k] = v end

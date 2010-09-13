@@ -277,8 +277,6 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 
 	 local start_n = gmod.node(subgraph, subfsm_graph_name.. "_RUN_SUBFSMS")
 	 gmod.setv(start_n, "label", "RUN_SUBFSMS")
-	 local exit_n = gmod.node(subgraph, subfsm_graph_name.. "_FSMS_DONE")
-	 gmod.setv(exit_n, "label", "FSMS_DONE")
 
 	 for _,s in ipairs(state.subfsms) do
 	    local s_subgraph_name = "g" .. tostring(subfsm_num)
@@ -301,11 +299,13 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 	 local e = gmod.edge(g, state.name, subfsm_graph_name .. "_RUN_SUBFSMS")
 	 if state.exit_to then
 	    local exit_to = is_subgraph and subgraph_name .. "_" .. state.exit_to or state.exit_to
-	    gmod.edge(g, subfsm_graph_name .. "_FSMS_DONE", exit_to)
+	    local ee = gmod.edge(g, subfsm_graph_name .. "_RUN_SUBFSMS", exit_to)
+	    gmod.setv(ee, "label", "FSMs succeeded")
 	 end
 	 if state.fail_to then
 	    local fail_to = is_subgraph and subgraph_name .. "_" .. state.fail_to or state.fail_to
-	    gmod.edge(g, subfsm_graph_name .. "_FSMS_DONE", fail_to)
+	    local fe = gmod.edge(g, subfsm_graph_name .. "_RUN_SUBFSMS", fail_to)
+	    gmod.setv(fe, "label", "FSM failed")
 	 end
       end
 
