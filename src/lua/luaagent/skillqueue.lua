@@ -114,11 +114,13 @@ function SkillQueue:skill_string()
       local skill_name = s[1]
       local params = ""
       local subp = {}
-      for k,v in pairs(s) do
+      local t = s
+      if s.args then t = s.args end
+      for k,v in pairs(t) do
 	 if k ~= 1 then
 	    if type(v) == "table" then
 	       -- FSM variable
-	       assert(self.fsm, "SkillQueue: FSM not set and fsmp parameter used")
+	       assert(self.fsm, "SkillQueue: FSM not set and fsm parameter used")
 	       for k2,v2 in ipairs(v) do
 		  table.insert(subp, string.format("%s = %q", k2, self.fsm.vars[v2]))
 	       end
