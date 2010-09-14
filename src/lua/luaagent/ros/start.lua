@@ -26,9 +26,11 @@ roslua.logging.register_print_funcs(fawkes.logprint)
 require("fawkes.mathext")
 require("luaagent.ros")
 require("skiller.ros.topic_initializer")
+require("skiller.ros.service_initializer")
 
 luaagent.ros.init()
 
 agentenv = require("luaagent.agentenv")
 agentenv.add_module_initializer(skiller.ros.topic_initializer.init_topics)
+agentenv.add_module_initializer(skiller.ros.service_initializer.init_services)
 agentenv.init(AGENT)
