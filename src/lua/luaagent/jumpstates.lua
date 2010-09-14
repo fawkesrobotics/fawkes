@@ -126,6 +126,9 @@ end
 
 function AgentSkillExecJumpState:prepare()
    JumpState.prepare(self);
+   if not self.final_state and self.final_to then self.final_state = self.final_to end
+   if not self.failure_state and self.fail_to then self.failure_state = self.fail_to end
+
    if type(self.final_state) == "string" then
       --printf("Setting prematurely declared final state %s", self.final_state)
       local tmpstr = self.final_state
