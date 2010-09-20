@@ -133,13 +133,15 @@ function AgentSkillExecJumpState:prepare()
       --printf("Setting prematurely declared final state %s", self.final_state)
       local tmpstr = self.final_state
       self.final_state        = self.fsm.states[self.final_state]
-      assert(self.final_state, "Prematurely defined final state %s does not exist", tmpstr)
+      assert(self.final_state, "Prematurely defined final state "..tmpstr..
+                               " does not exist")
    end
    if type(self.failure_state) == "string" then
       local tmpstr = self.failure_state
       --printf("Setting prematurely declared failure state %s", self.failure_state)
       self.failure_state      = self.fsm.states[self.failure_state]
-      assert(self.failure_state, "Prematurely defined failure state %s does not exist", tmpstr)
+      assert(self.failure_state, "Prematurely defined failure state "..tmpstr..
+                                 " does not exist", tmpstr)
    end
 
    local skills = (#self.skills == 1) and "Skill" or "Skills"
