@@ -97,6 +97,14 @@ end
 function HSM:define_states(states)
    local export_to = states.export_to
    local closure   = states.closure
+
+   -- export already existing states
+   if export_to then
+      for name, state in pairs(self.states) do
+	 export_to[name] = state
+      end
+   end
+
    for _, s in ipairs(states) do
       local name, class
       if type(s) == "string" then
