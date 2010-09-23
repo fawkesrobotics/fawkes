@@ -139,7 +139,7 @@ function FSM:traced(sot)
    end
 
    for i,t in ipairs(self.trace) do
-      if t.from == sot or t.transition == sot or t.to == sot then
+      if t.from == sot or t.transition == sot then
 	 traces[i] = t
       end
    end
