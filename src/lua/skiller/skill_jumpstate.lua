@@ -201,6 +201,16 @@ function SkillJumpState:do_init()
    end
    self:init()
 
+   if self.skills then
+      local t = {}
+      for _, skill in ipairs(self.skills) do
+	 table.insert(t, self:skillstring(skill))
+      end
+      print_debug("%s: executing %s", self.name, table.concat(t, "; "))
+   elseif self.skill then
+      print_debug("%s: executing %s", self.name, self:skillstring(self.skill))
+   end
+
    return self:try_transitions()
 end
 
@@ -225,6 +235,17 @@ function SkillJumpState:do_exit()
    self:exit()
 end
 
+function SkillJumpState:skillstring(skill)
+   local s = skill.name .. "{"
+   local first = true
+   for k,v in pairs(self.args or self.base_args) do
+      s = s .. string.format("%s%s = %s", first and "" or ", ", k, tostring(v))
+      first = false
+   end
+   s = s .. "}"
+   return s
+end
+
 --- Execute loop.
 function SkillJumpState:do_loop()
    self:loop()
@@ -234,14 +255,7 @@ function SkillJumpState:do_loop()
    if self.skill_status == skillstati.S_RUNNING then
       if self.skill then
 	 if self.fsm.debug then
-	    local s = self.skill.name .. "{"
-	    local first = true
-	    for k,v in pairs(self.args or self.base_args) do
-	       s = s .. string.format("%s%s = %s", first and "" or ", ", k, tostring(v))
-	       first = false
-	    end
-	    s = s .. "}"
-	    printf("%s: executing %s", self.name, s)
+	    print_debug("%s: executing %s", self.name, self:skillstring(self.skill))
 	 end
 	 self.skill_status = self.skill(self.args or self.base_args)
       elseif self.skills then
