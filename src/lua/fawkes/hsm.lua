@@ -191,7 +191,7 @@ function HSM:add_transitions(trans)
 	    else
 	       assert(type(t.timeout) == "table", "Timeout must be number or table")
 	       timeout_time = t.timeout.time or t.timeout[1]
-	       timeout_to   = t.timeout.to   or t.timeout[2]
+	       timeout_to   = t.timeout.to   or t.timeout[2] or to.name
 	       timeout_err  = t.timeout.error
 	    end
 	    assert(self.states[timeout_to], "Timeout destination state " .. tostring(timeout_to)
