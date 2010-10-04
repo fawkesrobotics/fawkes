@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  motors_katana.cpp - Fawkes to OpenRAVE Katana6M180 Motors Data
+ *  katana6M180.cpp - Fawkes to OpenRAVE Katana6M180 Manipulator Data
  *
  *  Created: Thu Sep 16 14:50:34 2010
  *  Copyright  2010  Bahram Maleki-Fard, AllemaniACs RoboCup Team
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "motors_katana.h"
-#include "motors.h"
+#include "katana6M180.h"
+#include "../manipulator.h"
 
 #include <cmath>
 #include <cstdio>
@@ -31,7 +31,7 @@
 }
 #endif
 
-/** @class OpenRAVEMotorsKatana <openrave/motors_katana.h>
+/** @class OpenRAVEManipulatorKatana6M180 <openrave/motors_katana.h>
  * Class containing information about all katana6M180 motors.
  * @author Bahram Maleki-Fard
  */
@@ -40,13 +40,13 @@
  * @param count number of motors of OpenRAVE model
  * @param countDevice number of motors of real device
  */
-OpenRAVEMotorsKatana::OpenRAVEMotorsKatana(unsigned int count, unsigned int countDevice) :
-  OpenRAVEMotors( count, countDevice )
+OpenRAVEManipulatorKatana6M180::OpenRAVEManipulatorKatana6M180(unsigned int count, unsigned int countDevice) :
+  OpenRAVEManipulator( count, countDevice )
 {
 }
 
 /** Destructor. */
-OpenRAVEMotorsKatana::~OpenRAVEMotorsKatana()
+OpenRAVEManipulatorKatana6M180::~OpenRAVEManipulatorKatana6M180()
 {
 }
 
@@ -60,7 +60,7 @@ OpenRAVEMotorsKatana::~OpenRAVEMotorsKatana()
  * @return transformed angle
  */
 float
-OpenRAVEMotorsKatana::angleOR2Device(unsigned int number, float angle) const
+OpenRAVEManipulatorKatana6M180::angleOR2Device(unsigned int number, float angle) const
 {
   float _angle;
 
@@ -94,7 +94,7 @@ OpenRAVEMotorsKatana::angleOR2Device(unsigned int number, float angle) const
  * @return transformed angle
  */
 float
-OpenRAVEMotorsKatana::angleDevice2OR(unsigned int number, float angle) const
+OpenRAVEManipulatorKatana6M180::angleDevice2OR(unsigned int number, float angle) const
 {
   float _angle;
 

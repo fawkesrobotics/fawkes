@@ -1,0 +1,11 @@
+<Robot>
+  <KinBody file="katana.kinbody.xml"/>
+  <Manipulator name="arm">
+	<effector>L5</effector>
+	<base>Base</base>
+	<joints>gj1</joints>
+    <closingdirection>-1</closingdirection>
+	<Translation>0 0 0.165</Translation>
+    <iksolver>Katanaikfast 0.01</iksolver>
+  </Manipulator>
+</Robot>

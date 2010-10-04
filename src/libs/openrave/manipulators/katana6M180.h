@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  motors_katana.h - Fawkes to OpenRAVE Katana6M180 Motors Data
+ *  katana6M180.h - Fawkes to OpenRAVE Katana6M180 Manipulator Data
  *
  *  Created: Thu Sep 16 14:50:34 2010
  *  Copyright  2010  Bahram Maleki-Fard, AllemaniACs RoboCup Team
@@ -20,21 +20,21 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __OPENRAVE_MOTORS_KATANA_H_
-#define __OPENRAVE_MOTORS_KATANA_H_
+#ifndef __OPENRAVE_MANIPULATORS_KATANA6M180_H_
+#define __OPENRAVE_MANIPULATORS_KATANA6M180_H_
 
-#include "motors.h"
+#include "../manipulator.h"
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class OpenRAVEMotorsKatana : public OpenRAVEMotors
+class OpenRAVEManipulatorKatana6M180 : public OpenRAVEManipulator
 {
  public:
-  OpenRAVEMotorsKatana(unsigned int count, unsigned int countDevice);
-  virtual ~OpenRAVEMotorsKatana();
+  OpenRAVEManipulatorKatana6M180(unsigned int count, unsigned int countDevice);
+  virtual ~OpenRAVEManipulatorKatana6M180();
 
 
  private:
