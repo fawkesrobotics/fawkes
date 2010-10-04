@@ -33,7 +33,7 @@ namespace fawkes {
 #endif
 
 class Logger;
-class OpenRAVEMotors;
+class OpenRAVEManipulator;
 class OpenRAVEEnvironment;
 
 class OpenRAVERobot
@@ -45,8 +45,8 @@ class OpenRAVERobot
 
   // build/load robot parts
   virtual bool load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
-  virtual void setMotors(OpenRAVEMotors* motors);
-  virtual void updateMotors();
+  virtual void setManipulator(OpenRAVEManipulator* manip);
+  virtual void updateManipulator();
 
   //virtual void setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ);
   //virtual void setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ);
@@ -65,7 +65,7 @@ class OpenRAVERobot
   OpenRAVE::RobotBasePtr        __robot;
   std::string                   __name;
   OpenRAVE::RobotBase::ManipulatorPtr  __arm;
-  OpenRAVEMotors*	        __motors;
+  OpenRAVEManipulator*	        __manip;
   OpenRAVE::Transform*		__posCurrent;
   OpenRAVE::Transform*		__posTarget;
 

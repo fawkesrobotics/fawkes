@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  motors.h - Fawkes to OpenRAVE Motors Data
+ *  manipulator.h - Fawkes to OpenRAVE Manipulator Data
  *
  *  Created: Thu Sep 16 14:50:34 2010
  *  Copyright  2010  Bahram Maleki-Fard, AllemaniACs RoboCup Team
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __OPENRAVE_MOTORS_H_
-#define __OPENRAVE_MOTORS_H_
+#ifndef __OPENRAVE_MANIPULATOR_H_
+#define __OPENRAVE_MANIPULATOR_H_
 
 #include <vector>
 
@@ -36,11 +36,11 @@ typedef struct {
   float		angle;	  /**< radian angle */
 } motor_t;
 
-class OpenRAVEMotors
+class OpenRAVEManipulator
 {
  public:
-  OpenRAVEMotors(unsigned int count, unsigned int countDevice);
-  virtual ~OpenRAVEMotors();
+  OpenRAVEManipulator(unsigned int count, unsigned int countDevice);
+  virtual ~OpenRAVEManipulator();
 
   virtual void addMotor(unsigned int number, unsigned int numberDevice);
 

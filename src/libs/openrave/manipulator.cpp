@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  motors.cpp - Fawkes to OpenRAVE Motors Data
+ *  manipulator.cpp - Fawkes to OpenRAVE Manipulator Data
  *
  *  Created: Thu Sep 16 14:50:34 2010
  *  Copyright  2010  Bahram Maleki-Fard, AllemaniACs RoboCup Team
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "motors.h"
+#include "manipulator.h"
 
 #include <vector>
 
@@ -29,7 +29,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRAVEMotors <openrave/motors.h>
+/** @class OpenRAVEManipulator <openrave/motors.h>
  * Class containing information about all manipulator motors.
  * @author Bahram Maleki-Fard
  */
@@ -38,14 +38,14 @@ namespace fawkes {
  * @param count number of motors of OpenRAVE model
  * @param countDevice number of motors of real device
  */
-OpenRAVEMotors::OpenRAVEMotors(unsigned int count, unsigned int countDevice) :
+OpenRAVEManipulator::OpenRAVEManipulator(unsigned int count, unsigned int countDevice) :
   __cnt( count ),
   __cntDevice( countDevice )
 {
 }
 
 /** Destructor. */
-OpenRAVEMotors::~OpenRAVEMotors()
+OpenRAVEManipulator::~OpenRAVEManipulator()
 {
 }
 
@@ -55,7 +55,7 @@ OpenRAVEMotors::~OpenRAVEMotors()
  * @param numberDevice motor number of real device
  */
 void
-OpenRAVEMotors::addMotor(unsigned int number, unsigned int numberDevice)
+OpenRAVEManipulator::addMotor(unsigned int number, unsigned int numberDevice)
 {
   motor_t motor;
   motor.no = number;
@@ -73,7 +73,7 @@ OpenRAVEMotors::addMotor(unsigned int number, unsigned int numberDevice)
  * @return vector of angles
  */
 std::vector<float>
-OpenRAVEMotors::getAngles() const
+OpenRAVEManipulator::getAngles() const
 {
   std::vector<float> _angles(__cnt);
   for (unsigned int i=0; i<__motors.size(); i++) {
@@ -86,7 +86,7 @@ OpenRAVEMotors::getAngles() const
  * @return vector of angles
  */
 std::vector<float>
-OpenRAVEMotors::getAnglesDevice() const
+OpenRAVEManipulator::getAnglesDevice() const
 {
   return anglesOR2Device(getAngles());
 }
@@ -96,7 +96,7 @@ OpenRAVEMotors::getAnglesDevice() const
  * @return vector of angles
  */
 std::vector<float>
-OpenRAVEMotors::anglesOR2Device(std::vector<float> angles) const
+OpenRAVEManipulator::anglesOR2Device(std::vector<float> angles) const
 {
   std::vector<float> _angles(__cntDevice);
   for (unsigned int i=0; i<__motors.size(); i++) {
@@ -114,7 +114,7 @@ OpenRAVEMotors::anglesOR2Device(std::vector<float> angles) const
  * @param angles motor angles
  */
 void
-OpenRAVEMotors::setAngles(std::vector<float> angles)
+OpenRAVEManipulator::setAngles(std::vector<float> angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angles[__motors[i].no];
@@ -125,7 +125,7 @@ OpenRAVEMotors::setAngles(std::vector<float> angles)
  * @param angles motor angles
  */
 void
-OpenRAVEMotors::setAnglesDevice(std::vector<float> angles)
+OpenRAVEManipulator::setAnglesDevice(std::vector<float> angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angleDevice2OR(__motors[i].noDevice, angles[__motors[i].noDevice]);
@@ -141,7 +141,7 @@ OpenRAVEMotors::setAnglesDevice(std::vector<float> angles)
  * @return transformed angle
  */
 float
-OpenRAVEMotors::angleOR2Device(unsigned int number, float angle) const
+OpenRAVEManipulator::angleOR2Device(unsigned int number, float angle) const
 {
   // Transformations should be implemented in subclasses, as these depend on
   // the attached manipulator device.
@@ -154,7 +154,7 @@ OpenRAVEMotors::angleOR2Device(unsigned int number, float angle) const
  * @return transformed angle
  */
 float
-OpenRAVEMotors::angleDevice2OR(unsigned int number, float angle) const
+OpenRAVEManipulator::angleDevice2OR(unsigned int number, float angle) const
 {
   // Transformations should be implemented in subclasses, as these depend on
   // the attached manipulator device.

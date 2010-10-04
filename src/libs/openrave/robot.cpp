@@ -21,7 +21,7 @@
  */
 
 #include "robot.h"
-#include "motors.h"
+#include "manipulator.h"
 #include "environment.h"
 
 #include <openrave-core.h>
@@ -37,14 +37,14 @@ namespace fawkes {
 OpenRAVERobot::OpenRAVERobot(fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
-  __motors( 0 )
+  __manip( 0 )
 {
   init();
 }
 OpenRAVERobot::OpenRAVERobot(const std::string& filename, fawkes::OpenRAVEEnvironment* env, fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
-  __motors( 0 )
+  __manip( 0 )
 {
   init();
   this->load(filename, env);
@@ -92,20 +92,20 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
   }
 }
 
-/** Set pointer to OpenRAVEMotors object */
+/** Set pointer to OpenRAVEManipulator object */
 void
-OpenRAVERobot::setMotors(OpenRAVEMotors* motors)
+OpenRAVERobot::setManipulator(OpenRAVEManipulator* manip)
 {
-  __motors = motors;
+  __manip = manip;
 }
 
 /** Update motor values from OpenRAVE model */
 void
-OpenRAVERobot::updateMotors()
+OpenRAVERobot::updateManipulator()
 {
   std::vector<float> angles;
   __robot->GetDOFValues(angles);
-  __motors->setAngles(angles);
+  __manip->setAngles(angles);
 
   *__posCurrent = __arm->GetEndEffectorTransform();
 }
