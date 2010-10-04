@@ -23,11 +23,12 @@
 #ifndef __OPENRAVE_ENVIRONMEN_H_
 #define __OPENRAVE_ENVIRONMEN_H_
 
-#include <boost/shared_ptr.hpp>
+#include <rave/rave.h>
 #include <string>
 
 namespace OpenRAVE {
   class EnvironmentBase;
+  class RobotBase;
 }
 
 namespace fawkes {
@@ -35,11 +36,10 @@ namespace fawkes {
 }
 #endif
 
-typedef boost::shared_ptr< OpenRAVE::EnvironmentBase > EnvironmentBasePtr;
-void SetViewer(EnvironmentBasePtr penv, const std::string& viewername);
+void SetViewer(OpenRAVE::EnvironmentBasePtr penv, const std::string& viewername);
 
 class Logger;
-
+class OpenRAVERobot;
 class OpenRAVEEnvironment
 {
  public:
@@ -56,12 +56,15 @@ class OpenRAVEEnvironment
   virtual void startViewer();
 
   virtual bool addRobot(const std::string& filename);
-
+  virtual bool addRobot(OpenRAVE::RobotBasePtr robot);
+  virtual bool addRobot(OpenRAVERobot* robot);
+  //virtual RobotBasePtr getRobot() const;
+  virtual OpenRAVE::EnvironmentBasePtr getEnvPtr() const;
 
  private:
   const char*		__name;
   fawkes::Logger*	__logger;
-  EnvironmentBasePtr	__env;
+  OpenRAVE::EnvironmentBasePtr	__env;
 };
 } // end of namespace fawkes
 

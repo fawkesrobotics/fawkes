@@ -20,6 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 #include "environment.h"
+#include "robot.h"
 
 #include <openrave-core.h>
 #include <utils/logging/logger.h>
@@ -32,7 +33,7 @@ namespace fawkes {
 
 
 void
-SetViewer(EnvironmentBasePtr env, const std::string& viewername)
+SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 {
   ViewerBasePtr viewer = env->CreateViewer(viewername);
   BOOST_ASSERT(!!viewer);
@@ -116,6 +117,15 @@ OpenRAVEEnvironment::disableDebug()
   __env->SetDebugLevel(Level_Fatal);
 }
 
+/** Add a robot into the scene
+ * @param robot RobotBasePtr of robot to add
+ * @return 1 if succeeded, 0 if not able to add robot
+ */
+bool
+OpenRAVEEnvironment::addRobot(RobotBasePtr robot)
+{
+    return __env->AddRobot(robot);
+}
 
 /** Add a robot into the scene
  * @param filename path to robot's xml file
@@ -141,13 +151,21 @@ OpenRAVEEnvironment::addRobot(const std::string& filename)
       __logger->log_warn(__name, "Robot could not be loaded.");
     return 0;
   } else {
-    if(__logger)
-      __logger->log_debug(__name, "Robot loaded");
-    __env->AddRobot(robot);
-    return 1;
+    return addRobot(robot);
   }
 }
 
+bool
+OpenRAVEEnvironment::addRobot(OpenRAVERobot* robot)
+{
+    return addRobot(robot->getRobotPtr());
+}
+
+OpenRAVE::EnvironmentBasePtr
+OpenRAVEEnvironment::getEnvPtr() const
+{
+  return __env;
+}
 
 /** Starts the  qt viewer in a separate thread.
  *  Use this mainly for debugging purposes, as it uses
