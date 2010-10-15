@@ -35,7 +35,7 @@ namespace fawkes {
 void
 SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 {
-  ViewerBasePtr viewer = env->CreateViewer(viewername);
+  ViewerBasePtr viewer = RaveCreateViewer(env, viewername);
   BOOST_ASSERT(!!viewer);
 
   // attach it to the environment:
@@ -73,7 +73,7 @@ void
 OpenRAVEEnvironment::create()
 {
   try {
-    __env = CreateEnvironment(true);
+    __env = RaveCreateEnvironment();
     if(__logger)
       __logger->log_debug(__name, "Environment created");
   } catch(const openrave_exception &e) {
