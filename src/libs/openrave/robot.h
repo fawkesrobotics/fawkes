@@ -24,7 +24,7 @@
 #define __OPENRAVE_ROBOT_H
 
 #include <rave/rave.h>
-//#include <rave/geometry.h>
+#include <vector>
 
 
 namespace fawkes {
@@ -45,8 +45,11 @@ class OpenRAVERobot
 
   // build/load robot parts
   virtual bool load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
-  virtual void setManipulator(OpenRAVEManipulator* manip);
+  virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator();
+
+  // inverse kinematics related
+  virtual bool solveIK();
 
   //virtual void setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ);
   //virtual void setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ);
@@ -55,6 +58,7 @@ class OpenRAVERobot
   //virtual void solveIK(); // maybe automatically with setTarget...() ?
   //virtual bool isRunning() const;
 
+  virtual std::vector<float>* getTargetAngles();
   virtual OpenRAVE::RobotBasePtr getRobotPtr() const;
  private:
   void init();
@@ -68,6 +72,7 @@ class OpenRAVERobot
   OpenRAVEManipulator*	        __manip;
   OpenRAVE::Transform*		__posCurrent;
   OpenRAVE::Transform*		__posTarget;
+  std::vector<float>            __anglesTarget;
 
 
 

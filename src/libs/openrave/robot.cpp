@@ -94,7 +94,7 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
 
 /** Set pointer to OpenRAVEManipulator object */
 void
-OpenRAVERobot::setManipulator(OpenRAVEManipulator* manip)
+OpenRAVERobot::setManipulator(fawkes::OpenRAVEManipulator* manip)
 {
   __manip = manip;
 }
@@ -112,6 +112,18 @@ OpenRAVERobot::updateManipulator()
 
 
 
+/** Solve IK for current target position
+ * @return true if solvable, false if not
+ */
+bool
+OpenRAVERobot::solveIK()
+{
+  bool success = __arm->FindIKSolution(IkParameterization(*__posCurrent),__anglesTarget,true);
+
+  return success;
+}
+
+
 void
 OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat)
 {
@@ -119,11 +131,18 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
   __posTarget->rot = rotQuat;
 }
 
-
+/* ################### getters ##################*/
 OpenRAVE::RobotBasePtr
 OpenRAVERobot::getRobotPtr() const
 {
   return __robot;
+}
+
+
+std::vector<float>*
+OpenRAVERobot::getTargetAngles()
+{
+  return &__anglesTarget;
 }
 
 } // end of namespace fawkes
