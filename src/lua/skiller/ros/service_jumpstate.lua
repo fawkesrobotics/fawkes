@@ -96,7 +96,7 @@ function ServiceJumpState:do_exit()
    end
    if self.subfsm.current.name == self.subfsm.fail_state then
       self.subfsm.error = self.service_client.concexec_error or ""
-      print_warn("ServiceJumpState[%s %s] error: %s", self.name, self.service_client.name, self.subfsm.error)
+      print_warn("ServiceJumpState[%s %s] error: %s", self.name, self.service_client.service, self.subfsm.error)
    end
 
    SubFSMJumpState.do_exit(self)
