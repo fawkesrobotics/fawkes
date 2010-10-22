@@ -44,7 +44,6 @@ local module_exports = {
    SubFSMJumpState   = shsmmod.SubFSMJumpState
 }
 
-local module_initializers = {}
 
 --- Add an export for module initialization.
 -- All exports are exported to modules when they are initialized.
@@ -54,19 +53,6 @@ local module_initializers = {}
 function add_export(key, value)
    module_exports[key] = value
 end
-
---- Add a module initializer.
--- Module initializers are called as part of the skill_module() call in skill
--- modules. They are called after basic initializations have been run. They
--- can be used for example to initialize, check, and assert dependencies.
--- @param di dependency initializer, must be a function which takes two
--- arguments. The module m, and a table to which fields should be added (the
--- index metatable). The initializer should not set values directly on the
--- module.
-function add_module_initializer(di)
-   table.insert(module_initializers, di)
-end
-
 
 -- Print skill info.
 -- @param skill_entry skill entry to print
@@ -648,10 +634,7 @@ function skill_module(module_name)
       end
    end
 
-   for _, mi in ipairs(module_initializers) do
-      mi(m, indextable)
-   end
-
+   depinit.init_module(m, indextable)
    indextable.__SKILLMODULE__ = true
 
    mt.__index    = indextable

@@ -21,6 +21,7 @@
 
 require("roslua.logging")
 require("fawkes.logprint")
+require("fawkes.depinit")
 roslua.logging.register_print_funcs(fawkes.logprint)
 
 require("actionlib")
@@ -35,7 +36,8 @@ skiller.ros.init()
 
 skillenv = require("skiller.skillenv")
 skillenv.add_export("ActionJumpState", actjsmod.ActionJumpState)
-skillenv.add_module_initializer(actinitmod.init_actions)
-skillenv.add_module_initializer(topinitmod.init_topics)
-skillenv.add_module_initializer(srvinitmod.init_services)
+fawkes.depinit.add_module_initializer(actinitmod.init_actions)
+fawkes.depinit.add_module_initializer(topinitmod.init_topics)
+fawkes.depinit.add_module_initializer(srvinitmod.init_services)
+fawkes.depinit.add_module_initializer(srvinitmod.init_services)
 skillenv.init(SKILLSPACE)
