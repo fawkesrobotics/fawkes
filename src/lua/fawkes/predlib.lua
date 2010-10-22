@@ -33,12 +33,7 @@ local function create_newindex_func(predicates)
 
 	     local valtype = type(value)
 
-	     if key == "depends_interfaces" then
-		-- special, interface requirements
-		depinit.init_interfaces(module._NAME, value, predlibs[module._NAME].interfaces)
-		for n, i in pairs(predlibs[module._NAME].interfaces) do
-		   rawset(module, n, i)
-		end
+	     if key:match("depends_.*") then
 		rawset(module, key, value)
 	     elseif key == "predparams" or key == "setup"
 		    or valtype == "table" or valtype == "table"
@@ -63,9 +58,13 @@ local function create_newindex_func(predicates)
 end
 
 
-local function create_index_func(predicates)
+local function create_index_func(predicates, metatable)
    return function (module, predname)
-	     assert(predicates[predname], "Predicate " .. tostring(predname) .. " is not available in module " .. module._NAME)
+	     if metatable.dependencies[predname] or predname:match("depends_.*") then
+		return metatable.dependencies[predname]
+	     end
+	     assert(predicates[predname],
+		    "Predicate " .. tostring(predname) .. " is not available in module " .. module._NAME)
 
 	     local p, store_value = predicates[predname]()
 	     if store_value ~= nil then
@@ -118,13 +117,13 @@ function module_init(module)
    --fawkes.modinit.module_init(module)
 
    local predicates = {}
+   local metatable  = {}
 
-   local metatable = {
-      predicates  = predicates,
-      __index     = create_index_func(predicates),
-      __newindex  = create_newindex_func(predicates),
-      --__metatable = "MT protected for predlib"
-   }
+   metatable.predicates   = predicates
+   metatable.dependencies = {}
+   metatable.__index      = create_index_func(predicates, metatable)
+   metatable.__newindex   = create_newindex_func(predicates, metatable),
+
    setmetatable(module, metatable)
 
    if not rawget(module, "setup") then
@@ -132,4 +131,17 @@ function module_init(module)
    end
 
    predlibs[module._NAME] = {module=module, predicates=predicates, interfaces = {}}
+end
+
+-- Initialize a predicate library.
+-- @param m table or name of the module to initialize
+function setup(module_name)
+   local m = module_name
+   if type(module_name) == "string" then m = require(module_name) end
+
+   assert(m.name and type(m.name) == "string", "Skill name not set or not a string")
+   local mt = getmetatable(m)
+   assert(mt, "Predicate library not properly initialized using predlib,module_init")
+
+   depinit.init_module(m, mt.dependencies)
 end
