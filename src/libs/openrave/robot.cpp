@@ -59,8 +59,6 @@ OpenRAVERobot::~OpenRAVERobot()
 void
 OpenRAVERobot::init()
 {
-  __posCurrent = new Transform();
-  __posTarget = new Transform();
 }
 
 
@@ -86,52 +84,69 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
     return false;
   } else {
     __name = __robot->GetName();
-     __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
+    __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
     __arm = __robot->GetActiveManipulator();
+    __robot->SetActiveDOFs(__arm->GetArmIndices());
     return true;
+  }
+
+  // create planner parameters
+  try {
+    PlannerBase::PlannerParametersPtr params(new PlannerBase::PlannerParameters());
+    __plannerParams = params;
+    __plannerParams->_nMaxIterations = 4000; // max iterations before failure
+    __plannerParams->SetRobotActiveJoints(__robot); // set planning configuration space to current active dofs
+    __plannerParams->vgoalconfig.resize(__robot->GetActiveDOF());
+  } catch(const openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Robot", "Could not create PlannerParameters. Ex:%s", e.what());
+    throw;
   }
 }
 
-/** Set pointer to OpenRAVEManipulator object */
+/** Set pointer to OpenRAVEManipulator object.
+ *  Make sure this is called AFTER all manipulator settings have
+ *  been set (assures that __manipGoal has the same settings) .*/
 void
 OpenRAVERobot::setManipulator(fawkes::OpenRAVEManipulator* manip)
 {
   __manip = manip;
+  __manipGoal = new OpenRAVEManipulator(*__manip);
 }
 
-/** Update motor values from OpenRAVE model */
+/** Update motor values from OpenRAVE model.
+ * TODO: why would we need this??? */
 void
 OpenRAVERobot::updateManipulator()
 {
   std::vector<float> angles;
   __robot->GetDOFValues(angles);
   __manip->setAngles(angles);
-
-  *__posCurrent = __arm->GetEndEffectorTransform();
 }
 
-
-
-/** Solve IK for current target position
- * @return true if solvable, false if not
+/** Check IK solvability for target Transform. If solvable,
+ * then set target angles to manipulator configuration __manipGoal
+ * @param trans transformation vector
+ * @param rotQuat rotation vector; a quaternion
+ * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::solveIK()
+OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat)
 {
-  bool success = __arm->FindIKSolution(IkParameterization(*__posCurrent),__anglesTarget,true);
+  Transform target;
+  target.trans = trans;
+  target.rot = rotQuat;
+
+  bool success = __arm->FindIKSolution(IkParameterization(target),__anglesTarget,true);
+  __manipGoal->setAngles(__anglesTarget);
 
   return success;
 }
 
-
-void
-OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat)
-{
-  __posTarget->trans = trans;
-  __posTarget->rot = rotQuat;
-}
-
 /* ################### getters ##################*/
+/** Returns RobotBasePtr for uses in other classes.
+ * @return RobotBasePtr of current robot
+ */
 OpenRAVE::RobotBasePtr
 OpenRAVERobot::getRobotPtr() const
 {
@@ -145,4 +160,40 @@ OpenRAVERobot::getTargetAngles()
   return &__anglesTarget;
 }
 
+/** Updates planner parameters and return pointer to it
+ * @return PlannerParametersPtr or robot's planner params
+ */
+OpenRAVE::PlannerBase::PlannerParametersPtr
+OpenRAVERobot::getPlannerParams() const
+{
+  __plannerParams->vgoalconfig = __manipGoal->getAngles();
+  __plannerParams->vinitialconfig = __manip->getAngles();
+  return __plannerParams;
+}
+
+/** Return pointer to trajectory of motion from
+ * __manip to __manipGoal with OpenRAVE-model angle format
+ * @return pointer to trajectory
+ */
+std::vector< std::vector<float> >*
+OpenRAVERobot::getTrajectory() const
+{
+  return __traj;
+}
+
+/** Return pointer to trajectory of motion from
+ * __manip to __manipGoal with device angle format
+ * @return pointer to trajectory
+ */
+std::vector< std::vector<float> >*
+OpenRAVERobot::getTrajectoryDevice() const
+{
+  std::vector< std::vector<float> >* traj = new std::vector< std::vector<float> >();
+
+  for(unsigned int i=0; i<__traj->size(); i++) {
+    traj->push_back(__manip->anglesOR2Device(__traj->at(i)));
+  }
+
+  return traj;
+}
 } // end of namespace fawkes

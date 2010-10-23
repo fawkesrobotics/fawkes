@@ -48,30 +48,31 @@ class OpenRAVERobot
   virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator();
 
-  // inverse kinematics related
-  virtual bool solveIK();
-
   //virtual void setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ);
   //virtual void setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ);
   //virtual void setTargetEuler	 (float transX, float transY, float transZ, float phi, float theta, float psi);
 
-  //virtual void solveIK(); // maybe automatically with setTarget...() ?
-  //virtual bool isRunning() const;
-
   virtual std::vector<float>* getTargetAngles();
   virtual OpenRAVE::RobotBasePtr getRobotPtr() const;
+  virtual OpenRAVE::PlannerBase::PlannerParametersPtr getPlannerParams() const;
+  virtual std::vector< std::vector<float> >* getTrajectory() const;
+  virtual std::vector< std::vector<float> >* getTrajectoryDevice() const;
+
  private:
   void init();
-  void setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat);
+  bool setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat);
 
   fawkes::Logger*	__logger;
 
   OpenRAVE::RobotBasePtr        __robot;
   std::string                   __name;
-  OpenRAVE::RobotBase::ManipulatorPtr  __arm;
   OpenRAVEManipulator*	        __manip;
-  OpenRAVE::Transform*		__posCurrent;
-  OpenRAVE::Transform*		__posTarget;
+  OpenRAVEManipulator*	        __manipGoal;
+  OpenRAVE::RobotBase::ManipulatorPtr  __arm;
+
+  OpenRAVE::PlannerBase::PlannerParametersPtr   __plannerParams;
+  std::vector< std::vector<float> >*            __traj;
+
   std::vector<float>            __anglesTarget;
 
 
