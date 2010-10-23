@@ -72,6 +72,7 @@ OpenRAVEEnvironment::~OpenRAVEEnvironment()
 void
 OpenRAVEEnvironment::create()
 {
+  // create environment
   try {
     __env = RaveCreateEnvironment();
     if(__logger)
@@ -79,6 +80,15 @@ OpenRAVEEnvironment::create()
   } catch(const openrave_exception &e) {
     if(__logger)
       __logger->log_warn(__name, "Could not create Environment. Ex:%s", e.what());
+    throw;
+  }
+
+  // create planner
+  try {
+    __planner = RaveCreatePlanner(__env,"birrt");
+  } catch(const openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn(__name, "Could not create Planner. Ex:%s", e.what());
     throw;
   }
 }
@@ -107,14 +117,14 @@ OpenRAVEEnvironment::lock()
 void
 OpenRAVEEnvironment::enableDebug()
 {
-  __env->SetDebugLevel(Level_Debug);
+  RaveSetDebugLevel(Level_Debug);
 }
 
 /** Disable debugging messages of OpenRAVE */
 void
 OpenRAVEEnvironment::disableDebug()
 {
-  __env->SetDebugLevel(Level_Fatal);
+  RaveSetDebugLevel(Level_Fatal);
 }
 
 /** Add a robot into the scene
@@ -155,12 +165,20 @@ OpenRAVEEnvironment::addRobot(const std::string& filename)
   }
 }
 
+/** Add a robot into the scene
+ * @param robot pointer to OpenRAVERobot object of robot to add
+ * @return 1 if succeeded, 0 if not able to add robot
+ */
 bool
 OpenRAVEEnvironment::addRobot(OpenRAVERobot* robot)
 {
     return addRobot(robot->getRobotPtr());
 }
 
+
+/** Get EnvironmentBasePtr
+ * @return EnvironmentBasePtr in use
+ */
 OpenRAVE::EnvironmentBasePtr
 OpenRAVEEnvironment::getEnvPtr() const
 {
@@ -182,5 +200,42 @@ OpenRAVEEnvironment::startViewer()
     throw;
   }
 }
+
+/** Plan collision-free path for current and target manipulator
+ * configuration of a OpenRAVERobot robot.
+ * @param robot pointer to OpenRAVERobot object of robot to use
+ */
+bool
+OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
+{
+  // init planner
+  if( !__planner->InitPlan(robot->getRobotPtr(),robot->getPlannerParams()) ) {
+    if(__logger)
+      __logger->log_debug(__name, "Planner: init failed");
+    return false;
+  }
+
+  // plan path
+  boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->getRobotPtr()->GetActiveDOF()));
+  traj->Clear();
+  if( !__planner->PlanPath(traj) ) {
+    if(__logger)
+    __logger->log_warn(__name, "Planner: plan failed");
+    return false;
+  }
+
+  // re-timing the trajectory with cubic interpolation
+  traj->CalcTrajTiming(robot->getRobotPtr(),TrajectoryBase::CUBIC,true,true);
+
+  // setting robots trajectory
+  std::vector<TrajectoryBase::TPOINT> points = traj->GetPoints();
+  std::vector< std::vector<float> >* trajRobot = robot->getTrajectory();
+  for(unsigned int i=0; i<points.size(); i++) {
+    trajRobot->push_back(points[i].q);
+  }
+
+  return true;
+}
+
 
 } // end of namespace fawkes
