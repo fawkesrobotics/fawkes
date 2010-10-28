@@ -150,7 +150,7 @@ OpenRAVEEnvironment::addRobot(const std::string& filename)
     robot = __env->ReadRobotXMLFile(filename);
   } catch(const openrave_exception &e) {
     if(__logger)
-      __logger->log_warn(__name, "Robot could not be loaded. Ex:%s", e.what());
+      __logger->log_error(__name, "Robot could not be loaded. Ex:%s", e.what());
     return 0;
   }
 
@@ -158,7 +158,7 @@ OpenRAVEEnvironment::addRobot(const std::string& filename)
     // could not load robot file. Check file path, and test file itself for correct syntax and semantics
     // by loading it directly into openrave with "openrave robotfile.xml"
     if(__logger)
-      __logger->log_warn(__name, "Robot could not be loaded.");
+      __logger->log_error(__name, "Robot could not be loaded.");
     return 0;
   } else {
     return addRobot(robot);
@@ -196,7 +196,7 @@ OpenRAVEEnvironment::startViewer()
     boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
   } catch( const openrave_exception &e) {
     if(__logger)
-      __logger->log_warn(__name, "Could not load viewr. Ex:%s", e.what());
+      __logger->log_error(__name, "Could not load viewr. Ex:%s", e.what());
     throw;
   }
 }
@@ -211,8 +211,8 @@ OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
   // init planner
   if( !__planner->InitPlan(robot->getRobotPtr(),robot->getPlannerParams()) ) {
     if(__logger)
-      __logger->log_debug(__name, "Planner: init failed");
-    return false;
+      __logger->log_error(__name, "Planner: init failed");
+    return 0;
   }
 
   // plan path
@@ -220,8 +220,8 @@ OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
   traj->Clear();
   if( !__planner->PlanPath(traj) ) {
     if(__logger)
-    __logger->log_warn(__name, "Planner: plan failed");
-    return false;
+    __logger->log_error(__name, "Planner: plan failed");
+    return 0;
   }
 
   // re-timing the trajectory with cubic interpolation
@@ -230,11 +230,13 @@ OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
   // setting robots trajectory
   std::vector<TrajectoryBase::TPOINT> points = traj->GetPoints();
   std::vector< std::vector<float> >* trajRobot = robot->getTrajectory();
-  for(unsigned int i=0; i<points.size(); i++) {
-    trajRobot->push_back(points[i].q);
+  trajRobot->clear();
+
+  for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
+    trajRobot->push_back((*it).q);
   }
 
-  return true;
+  return 1;
 }
 
 

@@ -59,6 +59,7 @@ OpenRAVERobot::~OpenRAVERobot()
 void
 OpenRAVERobot::init()
 {
+  __traj = new std::vector< std::vector<float> >();
 }
 
 
@@ -74,21 +75,29 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
     __robot = env->getEnvPtr()->ReadRobotXMLFile(filename);
   } catch(const openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Robot", "Robot could not be loaded. Ex:%s", e.what());
+      __logger->log_error("OpenRAVE Robot", "Robot could not be loaded. Ex:%s", e.what());
     return 0;
   }
 
   if(!__robot) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Robot", "Robot could not be loaded.");
-    return false;
-  } else {
-    __name = __robot->GetName();
-    __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
-    __arm = __robot->GetActiveManipulator();
-    __robot->SetActiveDOFs(__arm->GetArmIndices());
-    return true;
+      __logger->log_error("OpenRAVE Robot", "Robot could not be loaded.");
+    return 0;
   }
+
+  return 1;
+}
+
+/** Set robot ready for usage.
+ *  Here: Set active DOFs and create plannerParameters.
+ * Only successful after added to environment */
+bool
+OpenRAVERobot::setReady()
+{
+  __name = __robot->GetName();
+  __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
+  __arm = __robot->GetActiveManipulator();
+  __robot->SetActiveDOFs(__arm->GetArmIndices());
 
   // create planner parameters
   try {
@@ -99,9 +108,11 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
     __plannerParams->vgoalconfig.resize(__robot->GetActiveDOF());
   } catch(const openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Robot", "Could not create PlannerParameters. Ex:%s", e.what());
-    throw;
+      __logger->log_error("OpenRAVE Robot", "Could not create PlannerParameters. Ex:%s", e.what());
+    return 0;
   }
+
+  return 1;
 }
 
 /** Set pointer to OpenRAVEManipulator object.
@@ -143,6 +154,13 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
   return success;
 }
 
+// just temporary! no IK check etc involved
+void
+OpenRAVERobot::setTargetAngles( std::vector<float>& angles )
+{
+  __manipGoal->setAngles(angles);
+}
+
 /* ################### getters ##################*/
 /** Returns RobotBasePtr for uses in other classes.
  * @return RobotBasePtr of current robot
@@ -168,6 +186,7 @@ OpenRAVERobot::getPlannerParams() const
 {
   __plannerParams->vgoalconfig = __manipGoal->getAngles();
   __plannerParams->vinitialconfig = __manip->getAngles();
+
   return __plannerParams;
 }
 

@@ -45,12 +45,14 @@ class OpenRAVERobot
 
   // build/load robot parts
   virtual bool load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
+  virtual bool setReady();
   virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator();
 
   //virtual void setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ);
   //virtual void setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ);
   //virtual void setTargetEuler	 (float transX, float transY, float transZ, float phi, float theta, float psi);
+  virtual void setTargetAngles( std::vector<float>& angles );
 
   virtual std::vector<float>* getTargetAngles();
   virtual OpenRAVE::RobotBasePtr getRobotPtr() const;
