@@ -70,40 +70,41 @@ OpenRAVEManipulator::addMotor(unsigned int number, unsigned int numberDevice)
 
 /* ########## getter ########## */
 /** Get motor angles of OpenRAVE model
- * @return vector of angles
+ * @param to target tvector of angles
  */
-std::vector<float>
-OpenRAVEManipulator::getAngles() const
+void
+OpenRAVEManipulator::getAngles(std::vector<float>& to) const
 {
-  std::vector<float> _angles(__cnt);
+  to.resize(__cnt);
   for (unsigned int i=0; i<__motors.size(); i++) {
-    _angles[__motors[i].no] = __motors[i].angle;
+    to[__motors[i].no] = __motors[i].angle;
   }
-  return _angles;
 }
 
 /** Get motor angles of real device
- * @return vector of angles
+ * @param to target vector of angles
  */
-std::vector<float>
-OpenRAVEManipulator::getAnglesDevice() const
+void
+OpenRAVEManipulator::getAnglesDevice(std::vector<float>& to) const
 {
-  return anglesOR2Device(getAngles());
+  std::vector<float> tmp;
+  getAngles(tmp);
+  to = anglesOR2Device(tmp);
 }
 
 /** Transform OpenRAVE motor angles to real device angles
- * @param angles motor angles of OpenRAVE model
+ * @param from motor angles of OpenRAVE model
  * @return vector of angles
  */
 std::vector<float>
-OpenRAVEManipulator::anglesOR2Device(std::vector<float> angles) const
+OpenRAVEManipulator::anglesOR2Device(std::vector<float>& from) const
 {
-  std::vector<float> _angles(__cntDevice);
+  std::vector<float> _to(__cntDevice);
   for (unsigned int i=0; i<__motors.size(); i++) {
-    _angles[__motors[i].noDevice] = angleOR2Device(__motors[i].noDevice, __motors[i].angle);
+    _to[__motors[i].noDevice] = angleOR2Device(__motors[i].noDevice, from[__motors[i].noDevice]);
   }
 
-  return _angles;
+  return _to;
 }
 
 
@@ -114,7 +115,7 @@ OpenRAVEManipulator::anglesOR2Device(std::vector<float> angles) const
  * @param angles motor angles
  */
 void
-OpenRAVEManipulator::setAngles(std::vector<float> angles)
+OpenRAVEManipulator::setAngles(std::vector<float>& angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angles[__motors[i].no];
@@ -125,7 +126,7 @@ OpenRAVEManipulator::setAngles(std::vector<float> angles)
  * @param angles motor angles
  */
 void
-OpenRAVEManipulator::setAnglesDevice(std::vector<float> angles)
+OpenRAVEManipulator::setAnglesDevice(std::vector<float>& angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angleDevice2OR(__motors[i].noDevice, angles[__motors[i].noDevice]);

@@ -44,12 +44,12 @@ class OpenRAVEManipulator
 
   virtual void addMotor(unsigned int number, unsigned int numberDevice);
 
-  virtual std::vector<float> anglesOR2Device(std::vector<float> angles) const;
-  virtual std::vector<float> getAngles() const; // angles of OpenRAVE model
-  virtual std::vector<float> getAnglesDevice() const; // angles of real device
+  virtual std::vector<float> anglesOR2Device(std::vector<float>& from) const;
+  virtual void getAngles(std::vector<float>& v) const; // angles of OpenRAVE model
+  virtual void getAnglesDevice(std::vector<float>& v) const; // angles of real device
 
-  virtual void setAngles(std::vector<float>);
-  virtual void setAnglesDevice(std::vector<float>);
+  virtual void setAngles(std::vector<float>& angles);
+  virtual void setAnglesDevice(std::vector<float>& angles);
 
 
  protected:

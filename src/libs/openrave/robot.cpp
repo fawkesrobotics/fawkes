@@ -172,10 +172,10 @@ OpenRAVERobot::getRobotPtr() const
 }
 
 
-std::vector<float>*
-OpenRAVERobot::getTargetAngles()
+void
+OpenRAVERobot::getTargetAngles(std::vector<float>& to)
 {
-  return &__anglesTarget;
+  to = __anglesTarget;
 }
 
 /** Updates planner parameters and return pointer to it
@@ -184,8 +184,8 @@ OpenRAVERobot::getTargetAngles()
 OpenRAVE::PlannerBase::PlannerParametersPtr
 OpenRAVERobot::getPlannerParams() const
 {
-  __plannerParams->vgoalconfig = __manipGoal->getAngles();
-  __plannerParams->vinitialconfig = __manip->getAngles();
+  __manipGoal->getAngles(__plannerParams->vgoalconfig);
+  __manip->getAngles(__plannerParams->vinitialconfig);
 
   return __plannerParams;
 }
