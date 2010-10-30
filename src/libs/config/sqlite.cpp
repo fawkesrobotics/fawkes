@@ -34,6 +34,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
+#include <unistd.h>
+#include <fnmatch.h>
 
 namespace fawkes {
 
@@ -214,21 +216,52 @@ namespace fawkes {
  * database.
  */
 
-/** Constructor.
- * @param conf_path Path where the configuration resides, maybe NULL in which case
- * the path name for the base databsae supplied to load() must be absolute path
- * names or relative to the execution directory of the surrounding program.
- */
-SQLiteConfiguration::SQLiteConfiguration(const char *conf_path)
+
+/** Constructor. */
+SQLiteConfiguration::SQLiteConfiguration()
 {
-  this->conf_path = conf_path;
   opened = false;
   mutex = new Mutex();
 
+  __sysconfdir   = NULL;
+  __userconfdir  = NULL;
   __default_file = NULL;
-  __default_dump = NULL;
+  __default_sql  = NULL;
+
 }
 
+/** Constructor.
+ * @param sysconfdir system configuration directory, will be searched for
+ * default configuration file, and system will try to create host-specific
+ * database if writable
+ * @param userconfdir user configuration directory, will be searched preferably
+ * for default configuration file, and will be used to create host-specific
+ * database if sysconfdir is not writable. This directory will be created
+ * if it does not exist during load().
+ */
+SQLiteConfiguration::SQLiteConfiguration(const char *sysconfdir,
+					 const char *userconfdir)
+{
+  opened = false;
+  mutex = new Mutex();
+
+  __sysconfdir   = strdup(sysconfdir);
+  __default_file = NULL;
+  __default_sql  = NULL;
+
+  if (userconfdir != NULL) {
+    __userconfdir  = strdup(userconfdir);
+  } else {
+    const char *homedir = getenv("HOME");
+    if (homedir == NULL) {
+      __userconfdir = strdup(sysconfdir);
+    } else {
+      if (asprintf(&__userconfdir, "%s/%s", homedir, USERDIR) == -1) {
+	__userconfdir = strdup(sysconfdir);
+      }
+    }
+  }
+}
 
 /** Destructor. */
 SQLiteConfiguration::~SQLiteConfiguration()
@@ -236,12 +269,14 @@ SQLiteConfiguration::~SQLiteConfiguration()
   if (opened) {
     opened = false;
     if ( sqlite3_close(db) == SQLITE_BUSY ) {
-      printf("Boom, we are dead, database cannot be closed because there are open handles\n");
-    } else if ( __default_dump) {
+      printf("Boom, we are dead, database cannot be closed "
+	     "because there are open handles\n");
+    }
+    if ( __default_sql ) {
       sqlite3 *tdb;
       if ( sqlite3_open(__default_file, &tdb) == SQLITE_OK ) {
 	try {
-	  dump(tdb, __default_dump);
+	  dump(tdb, __default_sql);
 	} catch (Exception &e) {
 	  e.print_trace();
 	}
@@ -252,7 +287,9 @@ SQLiteConfiguration::~SQLiteConfiguration()
 
   if (__host_file)    free(__host_file);
   if (__default_file) free(__default_file);
-  if (__default_dump) free(__default_dump);
+  if (__default_sql)  free(__default_sql);
+  if (__sysconfdir)   free(__sysconfdir);
+  if (__userconfdir)  free(__userconfdir);
   delete mutex;
 }
 
@@ -426,10 +463,9 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
 
 
 void
-SQLiteConfiguration::import_default(const char *default_dump)
+SQLiteConfiguration::import_default(const char *default_sql)
 {
-  char *tmpfile = (char *)malloc(strlen(conf_path) + strlen("/tmp_default_XXXXXX") + 1);
-  sprintf(tmpfile, "%s/tmp_default_XXXXXX", conf_path);
+  char *tmpfile = strdup(TMPDIR"/tmp_default_XXXXXX");
   tmpfile = mktemp(tmpfile);
   if ( tmpfile[0] == 0 ) {
     throw CouldNotOpenConfigException("Failed to create temp file for default DB import");
@@ -438,7 +474,7 @@ SQLiteConfiguration::import_default(const char *default_dump)
   // Import .sql file into dump database (temporary file)
   sqlite3 *dump_db;
   if ( sqlite3_open(tmpfile, &dump_db) == SQLITE_OK ) {
-    import(dump_db, default_dump);
+    import(dump_db, default_sql);
     sqlite3_close(dump_db);
   } else {
     throw CouldNotOpenConfigException("Failed to import dump file into temp DB");
@@ -538,108 +574,173 @@ SQLiteConfiguration::transaction_rollback()
   }
 }
 
+void
+SQLiteConfiguration::attach_default(const char *db_file)
+{
+  char *errmsg;
+  char *attach_sql;
+  if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, db_file) == -1 ) {
+    throw CouldNotOpenConfigException("Could not create attachment SQL");
+  }
+  if (sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK) {
+    CouldNotOpenConfigException ce(sqlite3_errmsg(db));
+    ce.append("Failed to attach default file (%s)",  db_file);
+    free(attach_sql);
+    throw ce;
+  }
+  free(attach_sql);
+}
+
 
 void
 SQLiteConfiguration::load(const char *name, const char *defaults_name,
 			  const char *tag)
 {
-  char *errmsg;
-  char *attach_sql;
-
   mutex->lock();
 
-  if ( name ) {
-    __host_file = strdup(name);
-  } else {
+  if (__default_file) free(__default_file);
+  if (__default_sql)  free(__default_sql);
+  __default_file = NULL;
+  __default_sql  = NULL;
+
+  const char *try_paths[] = {__sysconfdir, __userconfdir};
+  int try_paths_len = 2;
+
+  char *host_name;
+
+  if (name == NULL) {
     HostInfo hostinfo;
-    if ( asprintf(&__host_file, "%s.db", hostinfo.short_name()) == -1 ) {
-      __host_file = strdup(hostinfo.short_name());
-    }
-  }
-
-  if (__default_file)  free(__default_file);
-  if (__default_dump)  free(__default_dump);
-  if (defaults_name) {
-    __default_file = strdup(defaults_name);
-    if (strcmp(defaults_name, ":memory:") != 0) {
-      __default_dump = (char *)malloc(strlen(__default_file) + 5);
-      strcpy(__default_dump, __default_file);
-      strcat(__default_dump, ".sql");
+    if ( asprintf(&host_name, "%s.db", hostinfo.short_name()) == -1 ) {
+      host_name = strdup(hostinfo.short_name());
     }
   } else {
-    __default_file = strdup("default.db");
-    __default_dump = strdup("default.sql");
+    host_name = strdup(name);
   }
 
-  if ( conf_path == NULL ) {
-    conf_path = ".";
-  }
-
-  if (strcmp(__default_file, ":memory:") != 0) {
-    if ( (access(__default_file, F_OK) != 0) && (__default_file[0] != '/') ) {
-      // the given path was not found as file, add the config path
-      char *tdf = __default_file;
-      if ( asprintf(&__default_file, "%s/%s", conf_path, tdf) == -1 ) {
-	free(tdf);
-	throw CouldNotOpenConfigException("Could not create default filename");
+  // determine host file
+  if (strcmp(host_name, ":memory:") == 0) {
+    if (sqlite3_open(host_name, &db) != SQLITE_OK) {
+      CouldNotOpenConfigException ce(sqlite3_errmsg(db));
+      ce.append("Failed to open host db (memory)");
+      throw ce;
+    }
+  } else if (host_name[0] == '/') {
+    // absolute path, take as is
+    if (sqlite3_open(host_name, &db) == SQLITE_OK) {
+      __host_file = strdup(host_name);
+    } else {
+      CouldNotOpenConfigException ce(sqlite3_errmsg(db));
+      ce.append("Failed to open host db (absolute)");
+      throw ce;
+    }
+  } else {
+    // try sysconfdir and userconfdir
+    for (int i = 0; i < try_paths_len; ++i) {
+      char *path;
+      if (asprintf(&path, "%s/%s", try_paths[i], host_name) != -1) {
+	if (sqlite3_open(path, &db) == SQLITE_OK) {
+	  __host_file = path;
+	  break;
+	} else {
+	  free(path);
+	}
       }
-      free(tdf);
+    }
+    if (__host_file == NULL) {
+      CouldNotOpenConfigException ce(sqlite3_errmsg(db));
+      ce.append("Failed to open host db (paths)");
+      free(host_name);
+      throw ce;
     }
   }
 
-  if (__default_dump && (access(__default_dump, F_OK) != 0) && (__default_dump[0] != '/') ) {
-    // the given path was not found as file, add the config path
-    char *tdf = __default_dump;
-    if ( asprintf(&__default_dump, "%s/%s", conf_path, tdf) == -1 ) {
-      free(tdf);
+  if (defaults_name == NULL) {
+    defaults_name = "default.sql";
+  }
+
+  // determine default file
+  if (strcmp(defaults_name, ":memory:") == 0) {
+    try {
+      attach_default(":memory:");
+    } catch (...) {
+      free(host_name);
+      throw;
+    }
+    __default_file = strdup(":memory:");
+  } else {
+    if (defaults_name[0] == '/') {
+      // absolute path, take as is
+      __default_sql = strdup(defaults_name);
+    } else {
+      // try sysconfdir and userconfdir
+      for (int i = 0; i < try_paths_len; ++i) {
+	char *path;
+	if (asprintf(&path, "%s/%s", try_paths[i], defaults_name) != -1) {
+	  if (access(path, F_OK | R_OK) == 0) {
+	    __default_sql = path;
+	    break;
+	  } else {
+	    free(path);
+	  }
+	}
+      }
+    }
+
+    // Now go for the .db filename
+
+    // generate filename
+    char *defaults_db;
+    size_t len = strlen(defaults_name);
+    if (fnmatch("*.sql", defaults_name, FNM_PATHNAME) == 0) {
+      defaults_db = (char *)calloc(1, len); // yes, that's one byte less!
+      strncpy(defaults_db, defaults_name, len - 3);
+      strcat(defaults_db, "db");
+    } else {
+      defaults_db = (char *)calloc(1, len + 4);
+      strcpy(defaults_db, defaults_name);
+      strcat(defaults_db, ".db");
+    }
+
+    if (defaults_db[0] == '/') {
+      try {
+	attach_default(defaults_db);
+	__default_file = defaults_db;
+      } catch (...) {
+	free(host_name);
+	free(defaults_db);
+	throw;
+      }
+    } else {
+      // check directories
+      for (int i = 0; i < try_paths_len; ++i) {
+	char *path;
+	if (asprintf(&path, "%s/%s", try_paths[i], defaults_db) != -1) {
+	  try {
+	    attach_default(path);
+	    __default_file = path;
+	    break;
+	  } catch (CouldNotOpenConfigException &e) {
+	    free(path);
+	  }
+	}
+      }
+    }
+    free(defaults_db);
+
+    if (__default_file == NULL) {
+      free(host_name);
       throw CouldNotOpenConfigException("Could not create default filename");
     }
-    free(tdf);
   }
-
-  if (strcmp(__host_file, ":memory:") != 0) {
-    if ( (access(__host_file, F_OK) != 0) && (__host_file[0] != '/') ) {
-      // the given path was not found as file, add the config path
-      char *thf = __host_file;
-      if ( asprintf(&__host_file, "%s/%s", conf_path, thf) == -1 ) {
-	free(thf);
-	throw CouldNotOpenConfigException("Could not create filename");
-      }
-      free(thf);
-    }
-  }
-
-  if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, __default_file) == -1 ) {
-    free(__host_file);
-    free(__default_file);
-    if (__default_dump) free(__default_dump);
-    throw CouldNotOpenConfigException("Could not create attachment SQL");
-  }
-
-  // Now really open the config databases
-  if ( (sqlite3_open(__host_file, &db) != SQLITE_OK) ||
-       (sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
-    CouldNotOpenConfigException ce(sqlite3_errmsg(db));
-    ce.append("Failed to open host file '%s' or attaching default file (%s)",
-	      __host_file, __default_file);
-    free(attach_sql);
-    free(__host_file);
-    free(__default_file);
-    if (__default_dump) free(__default_dump);
-    sqlite3_close(db);
-    throw ce;
-  }
-  free(attach_sql);
 
   init_dbs();
 
-  if ( __default_dump && access(__default_dump, F_OK | R_OK) == 0 ) {
-    import_default(__default_dump);
-  }
-
-  mutex->unlock();
+  if ( __default_sql )  import_default(__default_sql);
+  free(host_name);
 
   opened = true;
+
+  mutex->unlock();
 }
 
 
