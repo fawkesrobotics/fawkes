@@ -126,10 +126,9 @@ usage(const char *progname)
        << "where [options] is one or more of:" << endl
        << " -h               These help instructions" << endl
        << " -C               Cleanup old BB segments" << endl
-       << " -c conffile      Mutable configuration file, created if it does not exist" << endl
+       << " -c db-file       Mutable configuration file, created if it does not exist" << endl
        << "                  if it does however it must contain valid SQLite database" << endl
-       << " -d conffile      Default configuration file, created if it does not exist" << endl
-       << "                  if it does however it must contain valid SQLite database" << endl
+       << " -d sql-file      Default configuration SQL dump file." << endl
        << " -q[qqq]          Quiet mode, -q omits debug, -qq debug and info," << endl
        << "                  -qqq omit debug, info and warn, -qqqq no output of logger" << endl
        << " -l level         Set log level directly mutually exclusive with -q" << endl
