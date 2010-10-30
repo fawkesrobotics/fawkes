@@ -85,6 +85,7 @@ DEPDIR        = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
 BINDIR        = $(abspath $(TOP_BASEDIR)/bin)
 LIBDIR        = $(abspath $(TOP_BASEDIR)/lib)
 CONFDIR       = $(abspath $(TOP_BASEDIR)/cfg)
+TMPDIR        = /tmp
 PLUGINDIR     = $(abspath $(TOP_BASEDIR)/plugins)
 RESDIR        = $(abspath $(TOP_BASEDIR)/res)
 LIBSRCDIR     = $(abspath $(FAWKES_BASEDIR)/src/libs)
@@ -105,11 +106,13 @@ EXEC_BASEDIR  ?= $(TOP_BASEDIR)
 EXEC_BINDIR    = $(abspath $(EXEC_BASEDIR)/bin)
 EXEC_LIBDIR    = $(abspath $(EXEC_BASEDIR)/lib)
 EXEC_CONFDIR   = $(abspath $(EXEC_BASEDIR)/cfg)
+EXEC_USERDIR   = .fawkes
 EXEC_PLUGINDIR = $(abspath $(EXEC_BASEDIR)/plugins)
 EXEC_RESDIR    = $(abspath $(EXEC_BASEDIR)/res)
 EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/lib/interfaces)
 EXEC_LOGDIR    = $(abspath $(EXEC_BASEDIR)/log)
 EXEC_DOCDIR    = $(abspath $(EXEC_BASEDIR)/doc)
+EXEC_TMPDIR    = /tmp
 
 # Some paths divert in submodule configuration
 ifeq ($(SUBMODULE_INTERN),1)
@@ -164,8 +167,9 @@ LDFLAGS_RPATH    = $(addprefix -Wl$(COMMA)-R,$(LIBDIRS_EXEC_BASE) $(LIBDIRS_BASE
 DEFAULT_INCLUDES = $(addprefix -I,$(BASESRCDIRS) $(LIBSRCDIRS) $(FVSRCDIRS))
 CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
 		   -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" -DIFACEDIR=\"$(EXEC_IFACEDIR)\" \
-		   -DCONFDIR=\"$(EXEC_CONFDIR)\" -DLOGDIR=\"$(EXEC_LOGDIR)\" \
-		   -DRESDIR=\"$(EXEC_RESDIR)\" -DBUILDTYPE=\"$(BUILD_TYPE)\"
+		   -DCONFDIR=\"$(EXEC_CONFDIR)\" -DUSERDIR=\"$(EXEC_USERDIR)\" \
+		   -DLOGDIR=\"$(EXEC_LOGDIR)\" -DRESDIR=\"$(EXEC_RESDIR)\" \
+		   -DTMPDIR=\"$(EXEC_TMPDIR)\" -DBUILDTYPE=\"$(BUILD_TYPE)\"
 
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP) $(CFLAGS_DEFS)
 LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic -fPIC $(LDFLAGS_OPENMP)
