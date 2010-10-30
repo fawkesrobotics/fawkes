@@ -158,6 +158,8 @@ class SQLiteConfiguration : public Configuration
 
   SQLiteValueIterator * modified_iterator();
 
+  void try_dump();
+
  private:
   void            init_dbs();
   std::string     get_type(const char *table, const char *path);

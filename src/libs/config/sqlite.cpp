@@ -272,17 +272,6 @@ SQLiteConfiguration::~SQLiteConfiguration()
       printf("Boom, we are dead, database cannot be closed "
 	     "because there are open handles\n");
     }
-    if ( __default_sql ) {
-      sqlite3 *tdb;
-      if ( sqlite3_open(__default_file, &tdb) == SQLITE_OK ) {
-	try {
-	  dump(tdb, __default_sql);
-	} catch (Exception &e) {
-	  e.print_trace();
-	}
-	sqlite3_close(tdb);
-      }
-    }
   }
 
   if (__host_file)    free(__host_file);
@@ -406,7 +395,7 @@ SQLiteConfiguration::dump(::sqlite3 *tdb, const char *dumpfile)
 {
   FILE *f = fopen(dumpfile, "w");
   if ( ! f ) {
-    throw CouldNotOpenFileException(dumpfile, errno, "Could not open SQLite dump file");
+    throw CouldNotOpenFileException(dumpfile, errno, "Could not open dump file");
   }
 
   fprintf(f, "BEGIN TRANSACTION;\n");
@@ -428,10 +417,36 @@ SQLiteConfiguration::dump(::sqlite3 *tdb, const char *dumpfile)
 }
 
 
+/** Try to dump default configuration.
+ * This method will try to open the SQL dump file for writing and dump
+ * the current content of the default database into the file.
+ * @exception Exception thrown if dumping fails
+ */
+void
+SQLiteConfiguration::try_dump()
+{
+  if ( __default_sql ) {
+    sqlite3 *tdb;
+    if ( sqlite3_open(__default_file, &tdb) == SQLITE_OK ) {
+      try {
+	dump(tdb, __default_sql);
+	sqlite3_close(tdb);
+      } catch (Exception &e) {
+	sqlite3_close(tdb);
+	throw;
+      }
+    }
+  }
+}
+
 void
 SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
 {
   FILE *f = fopen(dumpfile, "r");
+
+  if (! f) {
+    throw CouldNotOpenConfigException("Import failed, could not open dump file");
+  }
 
   char line[4096];
   char *errmsg;
