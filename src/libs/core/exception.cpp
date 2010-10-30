@@ -640,7 +640,7 @@ Exception::print_trace() throw()
  * @return error number, may be 0 if not set
  */
 int
-Exception::errno() throw()
+Exception::get_errno() throw()
 {
   return _errno;
 }
