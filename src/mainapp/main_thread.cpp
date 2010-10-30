@@ -28,7 +28,6 @@
 
 #include <core/threading/interruptible_barrier.h>
 #include <core/exceptions/system.h>
-#include <core/macros.h>
 #include <config/sqlite.h>
 #include <config/net_handler.h>
 #include <utils/logging/multi.h>
@@ -48,6 +47,10 @@
 
 #include <cstdio>
 #include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include <core/macros.h>
 
 using namespace fawkes;
 
@@ -129,6 +132,21 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   __multi_logger->set_loglevel(log_level);
   LibLogger::init(__multi_logger);
+
+  /* Prepare home dir directory, just in case */
+  const char *homedir = getenv("HOME");
+  if (homedir) {
+    char *userdir;
+    if (asprintf(&userdir, "%s/%s", homedir, USERDIR) != -1) {
+      if (access(userdir, W_OK) != 0) {
+	if (mkdir(userdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
+	  __multi_logger->log_warn("FawkesMainThread", "Failed to create .fawkes "
+				   "directory %s, trying without", userdir);
+	}
+      }
+      free(userdir);
+    }
+  }
 
   /* Config stuff */
   SQLiteConfiguration *sqliteconf = new SQLiteConfiguration(CONFDIR);
