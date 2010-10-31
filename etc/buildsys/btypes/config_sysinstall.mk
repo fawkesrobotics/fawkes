@@ -2,7 +2,7 @@
 #   Makefile Build System for Fawkes: Config Settings specific to Fawkes
 #                            -------------------
 #   Created on Thu Oct 16 20:00:11 2008
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -51,6 +51,7 @@ EXEC_IFACEDIR      = $(EXEC_FFLIBDIR)/interfaces
 EXEC_INCDIR        = $(EXEC_BASEDIR)/include/fawkes
 EXEC_DFILEDIR      = $(EXEC_BASEDIR)/share/applications
 EXEC_DOCDIR        = $(EXEC_BASEDIR)/share/doc/fawkes-$(FAWKES_VERSION)
+EXEC_MANDIR        = $(EXEC_BASEDIR)/share/man
 EXEC_LUADIR        = $(EXEC_RESDIR)/lua
 EXEC_LUALIBDIR     = $(EXEC_FFLIBDIR)/lua
 EXEC_BUILDSYSDIR   = $(EXEC_RESDIR)/buildsys
