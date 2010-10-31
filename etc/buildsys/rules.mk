@@ -2,7 +2,7 @@
 #                      Makefile Build System for Fawkes
 #                            -------------------
 #   Created on Sun Sep 03 14:14:14 2006
-#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -74,8 +74,8 @@ endif
 ifeq ($(MAKELEVEL),1)
   EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui)
 endif
-all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
-gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) subdirs
+all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
+gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
 uncolored-all: all
 uncolored-gui: gui
 
@@ -103,10 +103,12 @@ clean: presubdirs subdirs
 	$(SILENT)$(foreach B,$(BINS_all),rm -f $(B);)
 	$(SILENT)$(foreach L,$(LIBS_all),rm -f $(addsuffix *,$(L));)
 	$(SILENT)$(foreach P,$(PLUGINS_all),rm -f $(P);)
+	$(SILENT)$(foreach M,$(MANPAGES_all),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
 	$(SILENT)$(foreach B,$(BINS_gui),rm -f $(B);)
 	$(SILENT)$(foreach L,$(LIBS_gui),rm -f $(L);)
 	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -f $(P);)
+	$(SILENT)$(foreach M,$(MANPAGES_gui),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 	$(SILENT)$(foreach E,$(CLEAN_FILES),rm -rf $(E);)
 
@@ -175,6 +177,14 @@ endif
 moc_%.cpp: %.h
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
+
+$(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
+	$(SILENT) mkdir -p $(@D)
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Generating man page for $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENT)$(ASCIIDOC_A2X) -afawkes_version='$(FAWKES_VERSION)' \
+	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf' -f manpage \
+	-D $(@D) $< >/dev/null 2>&1
+	$(SILENT) rm -f $(SRCDIR)/$*.xml
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$*)

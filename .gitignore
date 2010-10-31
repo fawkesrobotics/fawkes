@@ -10,6 +10,7 @@
 /bin_*/
 /cfg/*.db
 /doc/api
+/doc/man
 /lib/
 /lib_*/
 /log/

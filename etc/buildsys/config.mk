@@ -93,6 +93,7 @@ IFACEDIR      = $(abspath $(TOP_BASEDIR)/lib/interfaces)
 IFACESRCDIR   = $(abspath $(TOP_BASEDIR)/src/interfaces)
 LOGDIR        = $(abspath $(TOP_BASEDIR)/log)
 DOCDIR        = $(abspath $(FAWKES_BASEDIR)/doc)
+MANDIR        = $(abspath $(DOCDIR)/man)
 FVSRCDIR      = $(abspath $(FAWKES_BASEDIR)/src/firevision)
 TOP_FVSRCDIR  = $(abspath $(TOP_BASEDIR)/src/firevision)
 BASESRCDIRS   = $(abspath $(FAWKES_BASEDIR)/src $(TOP_BASEDIR)/src)
@@ -113,6 +114,7 @@ EXEC_IFACEDIR  = $(abspath $(EXEC_BASEDIR)/lib/interfaces)
 EXEC_LOGDIR    = $(abspath $(EXEC_BASEDIR)/log)
 EXEC_DOCDIR    = $(abspath $(EXEC_BASEDIR)/doc)
 EXEC_TMPDIR    = /tmp
+EXEC_MANDIR    = $(abspath $(EXEX_DOCDIR)/man)
 
 # Some paths divert in submodule configuration
 ifeq ($(SUBMODULE_INTERN),1)
@@ -130,6 +132,8 @@ MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
 PKGCONFIG = $(shell which pkg-config)
 NM=nm
+ASCIIDOC=asciidoc
+ASCIIDOC_A2X=a2x
 ifneq ($(wildcard /bin/bash),)
   SHELL = /bin/bash
 else
@@ -159,6 +163,7 @@ GCC_USE_OPENMP=0
 DO_32BIT_BUILD=0
 
 COMMA := ,
+MANPAGE_SECTIONS = 1 8
 
 ### CFLAGS, preprocessor, compiler and linker options
 LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
