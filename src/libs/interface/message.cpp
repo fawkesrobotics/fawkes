@@ -413,6 +413,7 @@ Message::num_fields() const
 
 /** Clone this message.
  * Shall be implemented by every sub-class to return a message of proper type.
+ * @return new message cloned from this instance
  */
 Message *
 Message::clone() const

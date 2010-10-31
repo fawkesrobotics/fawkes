@@ -89,6 +89,7 @@ namespace firevision {
  * This returns a buffer containing the disparity image. The buffer is not copied
  * so do not change anything in the buffer or subsequent calls to get_xyz() and
  * get_world_xyz() will return invalid results.
+ * @return disparity buffer
  *
  * @fn virtual size_t           StereoProcessor::disparity_buffer_size() const = 0
  * Get disparity buffer size.

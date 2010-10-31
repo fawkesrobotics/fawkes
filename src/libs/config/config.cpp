@@ -126,6 +126,7 @@ namespace fawkes {
  * @fn std::string Configuration::get_string(const char *path)
  * Get value from configuration which is of type string
  * @param path path to value
+ * @return value
  *
  * @fn Configuration::ValueIterator * Configuration::get_value(const char *path)
  * Get value from configuration.

@@ -127,6 +127,7 @@ XabslFileInputSource::readValue()
  * @param buf_length maximum length of the string to be read, warning, this
  * method will write one more byte than buf_length. This is done to be compatible
  * with broken Xabsl.
+ * @return true on success, false otherwise
  */
 bool
 XabslFileInputSource::readString(char *buf, int buf_length)

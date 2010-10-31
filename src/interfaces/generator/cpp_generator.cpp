@@ -385,6 +385,7 @@ CppInterfaceGenerator::write_messages_cpp(FILE *f)
   fprintf(f,
 	  "/** Check if message is valid and can be enqueued.\n"
 	  " * @param message Message to check\n"
+	  " * @return true if the message is valid, false otherwise.\n"
 	  " */\n"
 	  "bool\n"
 	  "%s::message_valid(const Message *message) const\n"

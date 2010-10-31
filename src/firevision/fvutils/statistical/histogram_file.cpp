@@ -98,6 +98,7 @@ HistogramFile::histogram_blocks()
  * @param x the x-coordinate
  * @param y the y-coordinate
  * @param z the z-coordinate
+ * @return value
  */
 uint32_t
 HistogramFile::get_value(hint_t object_type,

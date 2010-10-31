@@ -99,6 +99,7 @@ HomCoord::x()
 
 /** Setter function for x.
  * @param x the new x value
+ * @return reference to this
  */
 HomCoord&
 HomCoord::x(float x)
@@ -128,6 +129,7 @@ HomCoord::y()
 
 /** Setter function for y.
  * @param y the new y value
+ * @return reference to this
  */
 HomCoord&
 HomCoord::y(float y)
@@ -157,6 +159,7 @@ HomCoord::z()
 
 /** Setter function for z.
  * @param z the new z value
+ * @return reference to this
  */
 HomCoord&
 HomCoord::z(float z)
@@ -186,6 +189,7 @@ HomCoord::w()
 
 /** Setter function for w.
  * @param w the new w value
+ * @return reference to this
  */
 HomCoord&
 HomCoord::w(float w)
@@ -196,6 +200,7 @@ HomCoord::w(float w)
 
 /** Convenience function to rotate the HomCoord around the x-axis.
  * @param rad the roation angle in rad
+ * @return reference to this
  */
 HomCoord&
 HomCoord::rotate_x(float rad)
@@ -209,6 +214,7 @@ HomCoord::rotate_x(float rad)
 
 /** Convenience function to rotate the HomCoord around the y-axis.
  * @param rad the roation angle in rad
+ * @return reference to this
  */
 HomCoord&
 HomCoord::rotate_y(float rad)
@@ -222,6 +228,7 @@ HomCoord::rotate_y(float rad)
 
 /** Convenience function to rotate the HomCoord around the z-axis.
  * @param rad the roation angle in rad
+ * @return reference to this
  */
 HomCoord&
 HomCoord::rotate_z(float rad)

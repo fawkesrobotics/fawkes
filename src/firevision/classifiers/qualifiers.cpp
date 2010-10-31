@@ -75,7 +75,8 @@ Qualifier::~Qualifier()
 {
 }
 
-/** buffer getter
+/** Get buffer.
+ * @return pointer to buffer
  */
 unsigned char*
 Qualifier::get_buffer()
@@ -107,7 +108,8 @@ Qualifier::set_buffer(unsigned char* buffer, unsigned int width,
 
 
 
-/** colorspace getter
+/** Get colorspace.
+ * @return colorspace
  */
 colorspace_t
 Qualifier::get_colorspace()

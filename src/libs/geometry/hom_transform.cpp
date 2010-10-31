@@ -64,13 +64,15 @@ HomTransform::HomTransform(const Matrix& m)
   m_matrix = new Matrix(m);
 }
 
-/** Destructor */
+/** Destructor. */
 HomTransform::~HomTransform()
 {
   delete m_matrix;
 }
 
-/** Reset transformation. */
+/** Reset transformation.
+ * @return reference to this
+ */
 HomTransform&
 HomTransform::reset()
 {

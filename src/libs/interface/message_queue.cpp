@@ -502,6 +502,7 @@ MessageQueue::MessageIterator::operator*() const
 
 /** Act on current message.
  * Node that you have to make sure that this is not called on the end node!
+ * @return current message
  */
 Message *
 MessageQueue::MessageIterator::operator->() const

@@ -191,6 +191,7 @@ PikeCamera::print_info()
  * @param width width of the AOI
  * @param height height of the AOI
  * @param show_work_area highlight the work area in the image
+ * @return true on success, false otherwise
  */
 bool
 PikeCamera::set_autofunction_aoi( unsigned int left,

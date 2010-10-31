@@ -468,6 +468,7 @@ RobotisRX28::discover(unsigned int timeout_ms)
  * reading the reply.
  * @param id servo ID, not the broadcast ID
  * @param timeout_ms maximum wait time in miliseconds
+ * @return true if the ping was successful, false otherwise
  */
 bool
 RobotisRX28::ping(unsigned char id, unsigned int timeout_ms)

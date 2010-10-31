@@ -124,6 +124,7 @@ class RefPtr
   /** Dereferencing.
    * Use the methods of the underlying instance like so:
    * <code>refptr->memberfun()</code>.
+   * @return pointer to encapsulated object
    */
   inline T_CppObject* operator->() const;
 

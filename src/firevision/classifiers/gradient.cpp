@@ -117,8 +117,6 @@ GradientClassifier::set_src_buffer(unsigned char *yuv422_planar,
   _q->set_buffer(yuv422_planar, width, height);
 }
 
-/** Performs the classification.
- */
 std::list< ROI > *
 GradientClassifier::classify()
 {

@@ -62,6 +62,7 @@ namespace firevision {
  * @fn bool ImageCompressor::supports_compression_destination(CompressionDestination cd)
  * Check if compressor supports desired compression destination.
  * @param cd compression destination
+ * @return true if supported, false otherwise
  *
  * @fn size_t ImageCompressor::recommended_compressed_buffer_size()
  * Get the recommended size for the compressed buffer. It is not guaranteed

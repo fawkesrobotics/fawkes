@@ -256,6 +256,7 @@ ProjectiveCam::get_p() const
 
 /** Returns the modified P matrix.
  * With the ground plane assumption the third column can be ignored.
+ * @return modified P matrix
  */
 Matrix
 ProjectiveCam::get_GPA_p() const

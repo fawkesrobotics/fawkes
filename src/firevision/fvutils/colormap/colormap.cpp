@@ -63,6 +63,7 @@ namespace firevision {
  *
  * @fn size_t Colormap::size() = 0
  * Size in bytes of buffer returned by get_buffer().
+ * @return size in bytes of buffer returned by get_buffer()
  *
  * @fn unsigned char * Colormap::get_buffer() const = 0
  * Get the raw buffer of this colormap.

@@ -78,6 +78,7 @@ CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e)
  * the given thread at the given time is unsafe.
  * The finalizer shall NOT call Thread::prepare_finalize().
  * @param thread thread to prepare finalization for
+ * @return true if nothing prevents finalization, false otherwise
  * @see Thread::prepare_finalize()
  * 
  *

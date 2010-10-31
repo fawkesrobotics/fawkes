@@ -57,7 +57,8 @@ namespace firevision {
  * @return The offest of the field's center.
  *
  * @fn const field_circles_t& FieldLines::get_circles() const
- * Returns a reference to a std::list of arcs and/or circles on the field
+ * Get circles.
+ * @return reference to a std::list of arcs and/or circles on the field
  *
  * @author Christof Rath
  */

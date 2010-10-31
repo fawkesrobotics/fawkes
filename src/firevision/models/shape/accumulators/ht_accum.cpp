@@ -222,6 +222,7 @@ RhtYNode::RhtYNode(int y)
 /** Insert.
  * @param y0 y
  * @param r0 r
+ * @return number of sub-elements
  */
 int
 RhtYNode::insert(int y0, int r0)

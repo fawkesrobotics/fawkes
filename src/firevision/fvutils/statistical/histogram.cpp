@@ -215,6 +215,7 @@ Histogram::get_dimensions(unsigned int& width, unsigned int& height, unsigned in
 /** Get value from histogram.
  * @param x x coordinate in histogram plane
  * @param y y coordinate in histogram plane
+ * @return value
  */
 unsigned int
 Histogram::get_value(unsigned int x, unsigned int y)
@@ -227,6 +228,7 @@ Histogram::get_value(unsigned int x, unsigned int y)
  * @param x x coordinate in histogram plane
  * @param y y coordinate in histogram plane
  * @param z z coordinate in the histogram
+ * @return value
  */
 unsigned int
 Histogram::get_value(unsigned int x, unsigned int y, unsigned int z)
@@ -411,6 +413,7 @@ Histogram::save(const char *filename, bool formatted_output)
 
 /** Load from file.
  * @param filename file name to read from
+ * @return true on success, false otherwise
  */
 bool
 Histogram::load(const char *filename) 

@@ -67,6 +67,7 @@ class ModuleManager {
    * @param filename the name of the module file to check if it is opened.
    * It is compared to loaded modules and must match what
    * Module::GetBaseFilename() returns
+   * @return true if module has been opened, false otherwise
    */
   virtual bool      module_opened(const char *filename) = 0;
 

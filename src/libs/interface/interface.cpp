@@ -711,6 +711,7 @@ Interface::set_from_chunk(void *chunk)
  * Use this method to determine if there is any open instance of the interface
  * that is writing to the interface. This can also be the queried interface
  * instance.
+ * @return true if a writer for the interface exists, false otherwise
  */
 bool
 Interface::has_writer() const
@@ -737,6 +738,7 @@ Interface::has_writer() const
  * @endcode
  * Note that this can result in a race condition. You have to be registered as
  * a BlackBoardEventListener to be sure that you are really the last.
+ * @return number of readers
  */
 unsigned int
 Interface::num_readers() const

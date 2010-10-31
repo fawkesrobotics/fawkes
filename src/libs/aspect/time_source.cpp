@@ -55,6 +55,7 @@ TimeSourceAspect::~TimeSourceAspect()
 /** Get time source.
  * This method is called by the aspect initializer to get the time source
  * the thread with this aspect provides.
+ * @return time source provided by the thread with this aspect
  */
 TimeSource *
 TimeSourceAspect::get_timesource() const

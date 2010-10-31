@@ -87,6 +87,7 @@ NOEXPORT unsigned int __num_text = 0;
  * @fn double SkillGuiCairoRenderInstructor::get_scale()
  * Get scale factor.
  * If scale_override() returns true, shall return the requested scale value.
+ * @return scale factor
  *
  * @fn void   SkillGuiCairoRenderInstructor::set_scale(double scale)
  * Set scale.

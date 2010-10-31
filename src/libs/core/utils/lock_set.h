@@ -126,6 +126,7 @@ LockSet<KeyType, LessKey>::unlock() const
 /** Insert item with lock.
  * The set is automatically locked and unlocked during the removal.
  * @param key key of the value to insert
+ * @return iterator to inserted item
  */
 template <typename KeyType, typename LessKey>
 std::pair<typename LockSet<KeyType, LessKey>::iterator, bool>

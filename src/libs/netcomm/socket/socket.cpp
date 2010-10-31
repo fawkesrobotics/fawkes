@@ -517,6 +517,7 @@ Socket::write(const void *buf, size_t count)
  * @param read_all setting this to true causes a call to read() loop until exactly
  * count bytes have been read, if false it will return after the first successful read
  * with the number of bytes available then.
+ * @return number of bytes read.
  * @see write
  * @exception SocketException thrown for any error during reading
  */
@@ -619,6 +620,7 @@ Socket::send(void *buf, size_t buf_len)
  * read() is recommended.
  * @param buf buffer to read data into
  * @param buf_len length of buffer, number of bytes to read from stream
+ * @return number of bytes read
  * @exception SocketException thrown if an error occurs or the other side
  * has closed the connection.
  */
@@ -685,6 +687,7 @@ Socket::send(void *buf, size_t buf_len,
  * @param addr return parameter, contains address of sender
  * @param addr_len initially has to contain size of address, on return
  * contains the actual bytes used.
+ * @return number of bytes received
  */
 size_t
 Socket::recv(void *buf, size_t buf_len,

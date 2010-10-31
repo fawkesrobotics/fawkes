@@ -69,6 +69,7 @@ FittedCircle::reset(void)
 
 /** Add point.
  * @param pt point
+ * @return distance from circle center
  */
 float
 FittedCircle::addPoint(const point_t& pt)

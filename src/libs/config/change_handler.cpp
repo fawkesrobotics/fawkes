@@ -109,6 +109,7 @@ ConfigurationChangeHandler::~ConfigurationChangeHandler()
  * Implement this method to return the name of the component whose values you
  * want to monitor. If NULL or the empty string is returned all components
  * will be monitored.
+ * @return monitored path prefix
  */
 const char *
 ConfigurationChangeHandler::config_monitor_prefix()

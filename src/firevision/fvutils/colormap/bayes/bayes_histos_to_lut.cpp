@@ -197,6 +197,7 @@ BayesHistosToLut::getAPrioriProb(unsigned int y,
  * @param object objcet
  * @param u YUV U-value
  * @param v YUV V-value
+ * @return a posteriori probability
  */
 float
 BayesHistosToLut::getAPosterioriProb(hint_t object,
@@ -225,6 +226,7 @@ BayesHistosToLut::getAPosterioriProb(hint_t object,
  * @param y YUV Y-value
  * @param u YUV U-value
  * @param v YUV V-value
+ * @return a posteriori probability
  */
 float
 BayesHistosToLut::getAPosterioriProb(hint_t object,

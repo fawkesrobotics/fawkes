@@ -66,6 +66,7 @@ namespace fawkes {
  * The size that is needed in the shared memory memptr to accomodate the
  * header data. This size has to fit all the data that will be stored in the
  * header. It must return the same size every time.
+ * @return size of header
  *
  * @fn void SharedMemoryHeader::initialize(void *memptr)
  * Initialize the header.
@@ -841,6 +842,7 @@ SharedMemory::lock_for_read()
  *   // is locked
  * }
  * @endcode
+ * @return true if the lock was acquired for reading, false if lock was not acquired.
  * @see isProtected()
  * @see unlock()
  * @see lock()
@@ -896,6 +898,7 @@ SharedMemory::lock_for_write()
  *   // is locked
  * }
  * @endcode
+ * @return true if the lock was acquired for writing, false if lock was not acquired.
  * @see isProtected()
  * @see unlock()
  * @see lock()

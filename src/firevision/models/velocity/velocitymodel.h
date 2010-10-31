@@ -74,6 +74,7 @@ class VelocityModel
    * glob_vel_x = rel_vel_x * cos( robot_ori ) - rel_vel_y * sin( robot_ori )
    * WORLD denotes velocities in the robot coordinate system
    * glob_vel_y = rel_vel_x * sin( robot_ori ) + rel_vel_y * cos( robot_ori )
+   * @return coordinate system type
    */
   virtual coordsys_type_t getCoordinateSystem()                     = 0;
 

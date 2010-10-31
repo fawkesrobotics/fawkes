@@ -575,6 +575,7 @@ BBLogFile::interface_id() const
 
 /** Get interface hash.
  * Hash of logged interface.
+ * @return interface hash
  */
 unsigned char *
 BBLogFile::interface_hash() const

@@ -704,6 +704,7 @@ WorldInfoDataContainer::get_ball_pos_relative( const char* host,
  * @param host the robot's hostname
  * @param pos refercence to a HomPoint where the position of the ball
  * written to
+ * @return true if position was found/received, false otherwise
  */
 bool
 WorldInfoDataContainer::get_ball_pos_global( const char* host,

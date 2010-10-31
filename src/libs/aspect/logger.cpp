@@ -54,6 +54,7 @@ LoggerAspect::~LoggerAspect()
 /** Get time source.
  * This method is called by the aspect initializer to get the time source
  * the thread with this aspect provides.
+ * @return logger provide by the thread with this aspect
  */
 Logger *
 LoggerAspect::get_logger() const

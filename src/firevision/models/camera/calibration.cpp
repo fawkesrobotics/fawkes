@@ -82,6 +82,7 @@ Calibration::K() const
  * 0, scale factor in y-direction, y-coordinate of the principal point
  * 0, 0, 1
  * @param k the calibration matrix
+ * @return reference to this instance
  */
 Calibration&
 Calibration::K(const fawkes::Matrix& k)

@@ -78,6 +78,7 @@ class ScanlineModel
 
   /** Prefix ++ operator.
    * Advances to the next point but returns the old point.
+   * @return pointer to next point
    */
   virtual fawkes::point_t *  operator++(int)                                = 0;
 

@@ -264,6 +264,7 @@ class SkillGuiBatchRenderer
    * @param closure contains the file handle
    * @param data data to write
    * @param length length of data
+   * @return Cairo status
    */
   static cairo_status_t write_func(void *closure,
 				   const unsigned char *data, unsigned int length)

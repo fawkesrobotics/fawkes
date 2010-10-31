@@ -80,6 +80,7 @@ namespace firevision {
  * @param camera_string camera that can be used by CameraFactory to open a
  * camera.
  * @param thread thread to register for this camera
+ * @return raw camera instance, which can by dynamically casted to the expected type.
  *
  * @fn void VisionMaster::unregister_thread(Thread *thread) = 0
  * Unregister a thread.

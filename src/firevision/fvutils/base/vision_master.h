@@ -110,6 +110,7 @@ class VisionMaster
    * @param camera_string camera that can be used by CameraFactory to open a
    * camera.
    * @param thread thread to register for this camera
+   * @return typed raw camera
    */
   template <class CC>
     CC *

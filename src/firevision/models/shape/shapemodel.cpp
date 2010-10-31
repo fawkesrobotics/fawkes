@@ -42,6 +42,7 @@ namespace firevision {
  * Check if the given point is close to the shape.
  * @param in_roi_x x coordinate of point in the same ROI as the shape
  * @param in_roi_y y coordinate of point in the same ROI as the shape
+ * @return true if point is close to shape, false otherwise
  */
 
 /** Virtual empty destructor. */

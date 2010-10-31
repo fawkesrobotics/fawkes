@@ -142,6 +142,7 @@ ThreadList::~ThreadList()
 
 /** Assignment operator.
  * @param tl thread list to assign
+ * @return reference to this instance
  */
 ThreadList &
 ThreadList::operator= (const ThreadList &tl)

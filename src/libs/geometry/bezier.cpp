@@ -149,6 +149,7 @@ Bezier::get_control_points() const
 
 /** Get a specific control point.
  * @param i the index of the control point
+ * @return control point
  */
 HomPoint
 Bezier::get_control_point(unsigned int i) const

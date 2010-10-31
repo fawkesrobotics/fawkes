@@ -41,6 +41,7 @@ namespace firevision {
  * @param y Y value
  * @param u U value
  * @param v V value
+ * @return color classification
  *
  * @fn const char * ColorModel::get_name()
  * Get name of color model.

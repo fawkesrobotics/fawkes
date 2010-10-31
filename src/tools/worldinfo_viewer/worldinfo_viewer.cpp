@@ -126,7 +126,9 @@ WorldInfoViewer::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 }
 
 
-/** Update the GUI */
+/** Update the GUI.
+ * @return always true
+ */
 bool
 WorldInfoViewer::update()
 {

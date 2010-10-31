@@ -404,6 +404,7 @@ ImageWidget::set_cam()
  *        installed. The list of all writable formats can be determined
  *        by using Gdk::Pixbuf::get_formats() with
  *        Gdk::PixbufFormat::is_writable().)
+ * @return true on success, false otherwise
  */
 bool
 ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()

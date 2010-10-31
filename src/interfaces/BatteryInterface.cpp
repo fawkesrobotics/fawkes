@@ -350,6 +350,7 @@ BatteryInterface::SleepMessage::clone() const
 }
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
+ * @return true if the message is valid, false otherwise.
  */
 bool
 BatteryInterface::message_valid(const Message *message) const

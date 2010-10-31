@@ -56,6 +56,7 @@ rad2deg(float rad)
  * @param y1 Y coordinate of first point
  * @param x2 X coordinate of second point
  * @param y2 Y coordinate of second point
+ * @return distance between points
  */
 inline float
 distance(float x1, float y1, float x2, float y2)

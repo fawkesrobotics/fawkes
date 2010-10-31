@@ -198,6 +198,7 @@ Laser360Interface::enum_tostring(const char *enumtype, int val) const
 /* =========== messages =========== */
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
+ * @return true if the message is valid, false otherwise.
  */
 bool
 Laser360Interface::message_valid(const Message *message) const

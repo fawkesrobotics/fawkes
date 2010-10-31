@@ -201,6 +201,7 @@ ColormapFile::get_colormap()
 
 /** Check if given file is a colormap file.
  * @param filename name of file to check
+ * @return true if file is a colormap file, false otherwise
  */
 bool
 ColormapFile::is_colormap_file(const char *filename)
@@ -212,6 +213,7 @@ ColormapFile::is_colormap_file(const char *filename)
 /** Compose filename.
  * In the format %g is replaced with the hostname.
  * @param format format for the filename
+ * @return filename
  */
 std::string
 ColormapFile::compose_filename(const std::string format)

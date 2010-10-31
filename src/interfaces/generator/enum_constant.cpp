@@ -43,7 +43,7 @@ InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 
 
 /** Get name of enum constant.
- * return name of enum constant.
+ * @return name of enum constant.
  */
 std::string
 InterfaceEnumConstant::getName()

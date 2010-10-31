@@ -141,6 +141,7 @@ class LaserGuiHildonWindow : public Hildon::Window
  protected:
   /** Event handler for key pressed events.
    * @param event event parameters
+   * @return always false
    */
   virtual bool on_key_pressed(GdkEventKey* event)
   {
@@ -168,6 +169,7 @@ class LaserGuiHildonWindow : public Hildon::Window
 
   /** Event handler for window state change events.
    * @param event event parameters
+   * @return always false
    */
   virtual bool on_window_state_event(GdkEventWindowState *event)
   {
