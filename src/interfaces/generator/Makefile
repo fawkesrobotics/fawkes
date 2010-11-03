@@ -13,18 +13,46 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard ../../../etc/buildsys/config.mk),)
-  # Fawkes
-  BASEDIR = ../../..
-else
-  # RCSoftX
-  BASEDIR = ../../../..
-endif
+BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/interface.mk
 
-CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+ifeq ($(HAVE_INTERFACE_GENERATOR),1)
+  CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
+  LDFLAGS_ffifacegen = $(LDFLAGS_LIBXMLPP) $(LDFLAGS_LIBCRYPTO)
+  LIBS_ffifacegen = stdc++ fawkescore fawkesutils
 
-include $(SRCDIR)/generator_rules.mk
+  OBJS_ffifacegen = constant.o cpp_generator.o digest.o		\
+		    enum_constant.o field.o pseudomap.o main.o	\
+		    message.o parser.o tolua_generator.o	\
+		    type_checker.o
+
+  OBJS_all     += $(OBJS_ffifacegen)
+  BINS_all     += $(BINDIR)/ffifacegen
+
+else
+  ifneq ($(HAVE_LIBXMLPP),1)
+    WARN_TARGETS += warning_libxmlpp
+  endif
+  ifneq ($(HAVE_LIBCRYPTO),1)
+    WARN_TARGETS += warning_openssl
+  endif
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+  ifneq ($(WARN_TARGETS),)
+all: $(WARN_TARGETS)
+  endif
+.PHONY: warning_libxmlpp
+warning_libxmlpp:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (libxml++[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
+
+.PHONY: warning_openssl
+warning_openssl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (openssl[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
+endif
+
 include $(BUILDSYSDIR)/base.mk
-

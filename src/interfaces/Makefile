@@ -17,11 +17,12 @@ BASEDIR = ../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
+PRESUBDIRS = generator
+
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
 include $(BUILDSYSDIR)/interface.mk
 
-# Interface generator stuff
-include $(SRCDIR)/generator/generator_rules.mk
+$(LIBS_all) $(INTERFACES_SRCS) $(INTERFACES_HDRS): | generator
+$(INTERFACES_LIBS) $(INTERFACES_TOUCH) $(TOLUA_ALL): | generator
 
 include $(BUILDSYSDIR)/base.mk
-
