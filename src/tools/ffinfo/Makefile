@@ -2,7 +2,7 @@
 #             Makefile Build System for Fawkes : Fawkes Info Tool
 #                            -------------------
 #   Created on Fri Aug 07 23:36:59 2009
-#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -20,8 +20,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_ffinfo = stdc++ fawkescore
 OBJS_ffinfo = ffinfo.o
 
-OBJS_all =	$(OBJS_ffinfo)
-BINS_all =	$(BINDIR)/ffinfo
+OBJS_all     =	$(OBJS_ffinfo)
+BINS_all     =	$(BINDIR)/ffinfo
+MANPAGES_all =	$(MANDIR)/man1/ffinfo.1
 
 include $(BUILDSYSDIR)/base.mk
-

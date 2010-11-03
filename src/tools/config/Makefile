@@ -2,7 +2,7 @@
 #            Makefile Build System for Fawkes : Config Tool
 #                            -------------------
 #   Created on Wed Nov 22 00:29:31 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -20,8 +20,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_ffconfig = stdc++ fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_ffconfig = main.o
 
-OBJS_all =	$(OBJS_ffconfig)
-BINS_all =	$(BINDIR)/ffconfig
+OBJS_all     =	$(OBJS_ffconfig)
+BINS_all     =	$(BINDIR)/ffconfig
+MANPAGES_all =	$(MANDIR)/man1/ffconfig.1
 
 include $(BUILDSYSDIR)/base.mk
-

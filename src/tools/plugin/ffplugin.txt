@@ -1,0 +1,77 @@
+ffplugin(1)
+===========
+
+NAME
+----
+ffplugin - Manage loaded Fawkes plugins
+
+SYNOPSIS
+--------
+[verse]
+'ffplugin' [-h] [-l plugin|-u plugin|-R plugin|-w|-a|-L] [-r host[:port]]
+
+DESCRIPTION
+-----------
+This program connects to a Fawkes instance over the network and can
+then instruct to load or unload plugins, watch for plugin events, or
+list available or currently loaded plugins.
+
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+  *-l* 'plugin'::
+	Load the plugin named 'plugin'.
+
+  *-u* 'plugin'::
+	Unload the plugin named 'plugin'.
+
+  *-R* 'plugin'::
+	Reload the plugin named 'plugin'. This will first order an
+	unload of the plugin, and then a load.
+
+  *-w*::
+	Watch all load/unload operations and print them on the console
+	as they happen.
+
+  *-a*::
+	Query for a list of all available plugins (loaded or unloaded)
+	and print to the console.
+
+  *-L*::
+	Query for a list of currently loaded plugins and print to the
+	console. If no option is given this is the default action.
+
+  *-r* 'host[:port]'::
+	Remote host and optionally port to connect to. If not given
+	defaults to localhost:1910.
+
+EXAMPLES
+--------
+
+ *ffplugin -l webview*::
+	Load the webview plugin on the Fawkes instance on the local
+	host.
+
+ *ffplugin -a -r myrobot:1234*::
+	Query a list of available plugins from the Fawkes instance
+	running on the host "myrobot" on port 1234.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

@@ -1,0 +1,51 @@
+fflogview(1)
+============
+
+NAME
+----
+fflogview - Show log messages
+
+SYNOPSIS
+--------
+[verse]
+'fflogview' [-h] [hostname[:port]]
+
+DESCRIPTION
+-----------
+This program connects to a Fawkes instance over the network and shows
+all log messages created by that instance.
+
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+ '[hostname[:port]]'::
+	Optionally hostname and port to connect to. If not given
+	defaults to localhost:1910.
+
+
+EXAMPLES
+--------
+
+ *fflogview myrobot:1910*::
+	Show log messages of Fawkes instance running on host myrobot
+	and listening on port 1910.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
