@@ -181,9 +181,14 @@ moc_%.cpp: %.h
 $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Generating man page for $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT)$(ASCIIDOC_A2X) -afawkes_version='$(FAWKES_VERSION)' \
+	$(SILENT)TEMPFILE=$$(mktemp --tmpdir fawkes_manpage_$*_XXXXXXXXXX); \
+	$(ASCIIDOC_A2X) -afawkes_version='$(FAWKES_VERSION)' \
 	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf' -f manpage \
-	-D $(@D) $< >/dev/null 2>&1
+	-D $(@D) $< >$$TEMPFILE 2>&1; \
+	if egrep -v '^Note: Writing $(@F)$$' $$TEMPFILE >/dev/null 2>&1; then \
+		cat $$TEMPFILE; \
+	fi; \
+	rm $$TEMPFILE
 	$(SILENT) rm -f $(SRCDIR)/$*.xml
 
 .SECONDEXPANSION:
