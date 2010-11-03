@@ -30,6 +30,7 @@ ifeq ($(HAVE_INTERFACE_GENERATOR),1)
 
   OBJS_all     += $(OBJS_ffifacegen)
   BINS_all     += $(BINDIR)/ffifacegen
+  MANPAGES_all += $(MANDIR)/man1/ffifacegen.1
 
 else
   ifneq ($(HAVE_LIBXMLPP),1)
