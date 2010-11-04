@@ -4,4 +4,4 @@ Comment=View world information as seen by the soccer robot
 Type=Application
 Exec=wiv
 Icon=@RESDIR@/guis/worldinfo_viewer/soccer_field.svg
-Categories=Robotics;Development;Education;
+Categories=Robotics;Development;Education;Science;
