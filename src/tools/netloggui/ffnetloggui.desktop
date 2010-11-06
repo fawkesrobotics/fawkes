@@ -5,3 +5,4 @@ Type=Application
 Exec=ffnetloggui
 Icon=@RESDIR@/guis/netloggui/ffnetloggui.svg
 Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8

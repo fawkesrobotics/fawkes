@@ -5,3 +5,4 @@ Type=Application
 Exec=fvfuseviewer
 Icon=@RESDIR@/guis/fuse_viewer/fuse.svg
 Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8

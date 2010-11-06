@@ -5,3 +5,4 @@ Type=Application
 Exec=ffbatterymon
 Icon=@RESDIR@/guis/battery_monitor/battery_monitor.svg
 Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8

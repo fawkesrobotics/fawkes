@@ -5,3 +5,4 @@ Type=Application
 Exec=firestation
 Icon=@RESDIR@/guis/firestation/firestation.svg
 Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8
