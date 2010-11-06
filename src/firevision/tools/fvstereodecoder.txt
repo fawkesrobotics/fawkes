@@ -1,0 +1,41 @@
+fvstereodecoder(1)
+==================
+
+NAME
+----
+fvstereodecoder - FireVision stereo image decoder
+
+SYNOPSIS
+--------
+[verse]
+*fvstereodecoder* 'directory'
+
+DESCRIPTION
+-----------
+This program reads in all FireVision raw files of the specified
+'directory'. It assumes Bumblebee stereo camera images in these
+files and converts them to YUV422 planar color images. These are
+then written side by side into a JPEG file.
+
+EXAMPLES
+--------
+
+ *fvstereodecoder imagedir*::
+	Decode all raw images in imagedir.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

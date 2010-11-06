@@ -1,0 +1,52 @@
+fvcmpp(1)
+=========
+
+NAME
+----
+fvcmpp - FireVision colormap post-processor
+
+SYNOPSIS
+--------
+[verse]
+*fvcmpp* -i 'infile' -o 'outfile'
+
+DESCRIPTION
+-----------
+This program applies some useful postprocessing steps to colormaps to
+make them more reliable. It basically computes a weighted sum to fill
+holes in the colormap.
+
+Input and output files are FireVision colormap files.
+
+OPTIONS
+-------
+ *-i* 'infile'::
+	Input file.
+
+ *-o* 'outfile'::
+	Output file.
+
+
+EXAMPLES
+--------
+
+ *fvcmpp -i input.colormap -o output.colormap*::
+	Postprocess the colormap from input.colormap and write the
+	result to the file output.colormap.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Daniel Beck <beck@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

@@ -1,0 +1,78 @@
+fvconverter(1)
+==============
+
+NAME
+----
+fvconverter - Convert images to file formats supported by Firevision
+
+SYNOPSIS
+--------
+[verse]
+*fvconverter* 'infile' 'outfile'
+*fvconverter* -u -c colorspace -w width -h height 'infile' 'outfile'
+
+DESCRIPTION
+-----------
+This program can be used to convert image files between the formats
+supported by FireVision. The supported formats are unformatted raw,
+FireVision raw, JPEG, PNG, and PNM. The unformatted raw format is a
+file that contains the byte stream of an image from a camera as-is,
+without any further information or file header. FireVision raw format
+adds a header with some information.
+
+In case of an input image which is not unformatted raw, the simple
+first form of the command must be used. For unformatted raw the
+second format must be used. Unformatted raw may not be the output
+image format.
+
+The filetype of the input file is inferred by the file content. The
+format of the output file is determined by the extension of the
+output file. It must be raw, jpeg or jpg, png, or pnm for the
+respective output format. Raw is always FireVision raw format.
+
+If called without any parameters the usage instructions are displayed.
+
+OPTIONS
+-------
+ *-u*::
+	Unformatted raw input.
+
+ *-c* 'colorspace'::
+	The unformatted raw input file is in colorspace 'colorspace'.
+
+ *-w* 'width'::
+	The unformatted raw input file has the given 'width'.
+
+ *-h* 'height'::
+	The unformatted raw input file has the given 'height'.
+
+
+EXAMPLES
+--------
+
+ *fvconverter input.jpg output.raw*::
+	Read the file input.jpg and convert it to FireVision output.
+	Write the result to the file output.raw.
+
+ *fvconverter -u -c YUV422_PLANAR -w 640 -h 480 input.raw output.raw*::
+	Convert the informatted input.raw, which contains an image in
+	YUV422 planar color space and has a size of 640x480 pixel to
+	the FireVision raw format.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Daniel Beck <beck@kbsg.rwth-aachen.de>
+and Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

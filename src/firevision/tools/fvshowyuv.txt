@@ -1,0 +1,55 @@
+fvshowyuv(1)
+============
+
+NAME
+----
+fvshowyuv - Visualize the YUV color space
+
+SYNOPSIS
+--------
+[verse]
+*fvshowyuv*
+
+DESCRIPTION
+-----------
+Shows a 2D plane for the YUV colorspace with adjustable Y
+component. On the horizontal axis the U values are shown increasing
+from left to right, on the vertical axis the V values are display
+increasing from bottom to top. With the up and down cursor keys the Y
+value can be set, initially starting at 128.
+
+
+KEYS
+----
+ *UP/DOWN*::
+	Increase/decrease Y by 1.
+
+ *PAGE-UP/PAGE-DOWN*::
+	Increase/decrease Y by 20.
+
+ *q/Esc*::
+	Quit the viewer.
+
+
+EXAMPLES
+--------
+
+ *fvshowyuv*
+	Show YUV plane.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

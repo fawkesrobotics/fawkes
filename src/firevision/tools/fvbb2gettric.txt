@@ -1,0 +1,42 @@
+fvbb2gettric(1)
+===============
+
+NAME
+----
+fvbb2gettric - Get configuration file from Bumblebee 2 camera
+
+SYNOPSIS
+--------
+[verse]
+*fvbb2gettric* 'file'
+
+DESCRIPTION
+-----------
+Open the first available Bumblebee 2 camera on the IEEE1394 bus and
+read the Triclops context and write it to 'file' for later offline
+usage. This is useful when post-processing images offline at a later
+time.
+
+
+EXAMPLES
+--------
+
+ *fvbb2gettric context.dat*::
+	Read context from camera and write to context.dat.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

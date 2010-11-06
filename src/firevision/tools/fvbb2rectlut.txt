@@ -1,0 +1,61 @@
+fvbb2rectlut(1)
+===============
+
+NAME
+----
+fvbb2rectlut - Retrieve and verify Bumblebee 2 rectification info
+
+SYNOPSIS
+--------
+[verse]
+*fvbb2rectlut* \<-r|-v|-d|-i> 'file'
+
+DESCRIPTION
+-----------
+Open the first available Bumblebee 2 camera on the IEEE1394 bus and
+read the rectification information, verify it with previously
+downloaded data or print information.
+
+OPTIONS
+-------
+ *-r* 'file'::
+	Read rectification information and write it to 'file'.
+
+ *-v* 'file'::
+	Read rectification information and compare the meta
+	information with the data in the given 'file'. This can be
+	used to verify that the rectification information is for the
+	connected camera and not for a different camera of the same
+	model.
+
+ *-d* 'file'::
+	Read rectification information and compare the meta
+	information as well as every byte of the rectification lookup
+	table with the data from 'file'.
+
+ *-i* 'file'::
+	Print information read from the given file.
+
+EXAMPLES
+--------
+
+ *fvbb2rectlut -r file*::
+	Read rectification information from a connected Bumblebee 2
+	camera and store it in the file.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

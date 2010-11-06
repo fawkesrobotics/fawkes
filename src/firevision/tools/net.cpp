@@ -291,7 +291,7 @@ class FireVisionNetworkTool
   void
   print_usage()
   {
-    printf("Usage: %s -i/-l/-L/-s -n host[:port]/id file\n"
+    printf("Usage: %s -i/-c/-C/-s/-e [-n host[:port]/id file]\n"
 	   "  -i             Get image\n"
 	   "  -j             Get JPEG-compressed image\n"
 	   "  -c             Get colormap\n"

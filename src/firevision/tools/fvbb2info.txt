@@ -1,0 +1,40 @@
+fvbb2info(1)
+============
+
+NAME
+----
+fvbb2info - Show information about Bumblebee 2 camera.
+
+SYNOPSIS
+--------
+[verse]
+*fvbb2info*
+
+DESCRIPTION
+-----------
+Open the first available Bumblebee 2 camera on the IEEE1394 bus and
+show information about the internal settings and values.
+
+
+EXAMPLES
+--------
+
+ *fvbb2info*::
+	Open camera and show info.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
