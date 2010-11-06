@@ -211,5 +211,10 @@ $(DESTDIR)$(EXEC_BINDIR)/%: $(BINDIR)/%
 
 # Manpage install target
 $(DESTDIR)$(EXEC_MANDIR)/%: $(MANDIR)/%
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Copying man page $* to $@"
-	$(SILENT)install -D -m 0644  $< $@ || exit $$?
+	$(SILENT)if [ -e "$<" ]; then \
+		echo -e "$(INDENT_PRINT)--- Copying man page $* to $@"; \
+		install -D -m 0644  $< $@ || exit $$?; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Cannot copy man page $* (does not exist)$(TNORMAL)"; \
+	fi
+
