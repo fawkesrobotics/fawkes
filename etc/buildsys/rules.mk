@@ -183,10 +183,10 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	$(SILENT)if type -P $(ASCIIDOC_A2X) >/dev/null 2>&1; then \
 	echo -e "$(INDENT_PRINT)=== Generating man page for $(TBOLDGREEN)$*$(TNORMAL) ---"; \
 	TEMPFILE=$$(mktemp -t fawkes_manpage_$*_XXXXXXXXXX); \
-	$(ASCIIDOC_A2X) -afawkes_version='$(FAWKES_VERSION)' \
-	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf' -f manpage \
+	$(ASCIIDOC_A2X) -f manpage \
+	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf -afawkes_version="$(FAWKES_VERSION)"' \
 	-D $(@D) $< >$$TEMPFILE 2>&1; \
-	if egrep -v '^Note: Writing $(@F)$$' $$TEMPFILE >/dev/null 2>&1; then \
+	if egrep -v '^\(Note: Writing $(@F)|Writing $(@F) for refentry\)$$' $$TEMPFILE >/dev/null 2>&1; then \
 		cat $$TEMPFILE; \
 	fi; \
 	rm $$TEMPFILE; \
