@@ -94,9 +94,13 @@ WebRequestDispatcher::process_request_cb(void *callback_data,
  * @param max maximum number of bytes that can be put in buf
  * @return suitable libmicrohttpd return code
  */
-int
-WebRequestDispatcher::dynamic_reply_data_cb(void *reply,
-					    uint64_t pos, char *buf, int max)
+#if MHD_VERSION >= 0x00090200
+static ssize_t
+dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, size_t max)
+#else
+static int
+dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, int max)
+#endif
 {
   DynamicWebReply *dreply = static_cast<DynamicWebReply *>(reply);
   return dreply->next_chunk(pos, buf, max);
@@ -106,8 +110,8 @@ WebRequestDispatcher::dynamic_reply_data_cb(void *reply,
 /** Callback to free dynamic web reply.
  * @param reply Instance of DynamicWebReply to free.
  */
-void
-WebRequestDispatcher::dynamic_reply_free_cb(void *reply)
+static void
+dynamic_reply_free_cb(void *reply)
 {
   DynamicWebReply *dreply = static_cast<DynamicWebReply *>(reply);
   delete dreply;
@@ -236,9 +240,9 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       } else if (dreply) {
 	response = MHD_create_response_from_callback(dreply->size(),
 						     dreply->chunk_size(),
-						     WebRequestDispatcher::dynamic_reply_data_cb,
+						     dynamic_reply_data_cb,
 						     dreply,
-						     WebRequestDispatcher::dynamic_reply_free_cb);
+						     dynamic_reply_free_cb);
 	ret = MHD_queue_response (connection, dreply->code(), response);
 	MHD_destroy_response (response);
       } else {
