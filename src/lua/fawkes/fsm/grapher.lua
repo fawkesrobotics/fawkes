@@ -3,8 +3,9 @@
 --  grapher.lua - FSM DOT Grapher
 --
 --  Created: Tue Dec 23 00:02:34 2008
---  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
---
+--  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
