@@ -3,8 +3,9 @@
 --  agentenv.lua - Agent environment functions
 --
 --  Created: Fri Jan 02 14:44:24 2008
---  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
---
+--  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

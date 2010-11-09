@@ -4,7 +4,8 @@
 --
 --  Created: Fri Jan 02 17:30:28 2009
 --  Copyright  2008-2010  Tim Niemueller [http://www.niemueller.de]
---
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify

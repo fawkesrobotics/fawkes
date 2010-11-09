@@ -3,7 +3,9 @@
 --  jumpstates.lua - LuaAgent JumpState
 --
 --  Created: Fri Jan 02 15:31:45 2009
---  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 --
 ------------------------------------------------------------------------
 
