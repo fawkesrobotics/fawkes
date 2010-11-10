@@ -35,7 +35,7 @@ JumpState        = jumpstmod.JumpState
 local fsmgrapher = require("fawkes.fsm.grapher")
 
 
---- @class FSM Finite State Machine
+--- FSM Finite State Machine
 -- Representation with utility methods of a FSM.
 FSM = { current = nil, debug = false, export_states_to_parent = true }
 

@@ -32,7 +32,7 @@ require("fawkes.fsm.jumpstate")
 local JumpState     = fawkes.fsm.jumpstate.JumpState
 
 
---- @class SubFSMJumpState
+--- SubFSMJumpState
 -- This special jump state allows for executing another FSM/HSM while the state
 -- is active. It can execute transition based on the state of the sub-FSM.
 -- @author Tim Niemueller

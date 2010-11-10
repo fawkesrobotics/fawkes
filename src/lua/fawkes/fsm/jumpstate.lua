@@ -31,7 +31,7 @@ local State = fsmmod.State
 assert(State, "State for JumpState is nil")
 
 
---- @class JumpState
+--- JumpState
 -- Hybrid State Machine jump state for FSM.  This class provides a
 -- generic state that makes a Finite State Machine a Hybrid State
 -- Machine (iff only jump states are used). Jump states are states
