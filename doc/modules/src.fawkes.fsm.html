@@ -1,0 +1,649 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b>roslua: ROS client library for Lua</b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>roslua</h1>
+
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/fawkes.modinit.html">fawkes.modinit</a>
+	</li>
+
+	<li>
+		<a href="../modules/fawkes.stringext.html">fawkes.stringext</a>
+	</li>
+
+	<li>
+		<a href="../modules/fawkes.tableext.html">fawkes.tableext</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.depinit.html">src.fawkes.depinit</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.dotgraph.html">src.fawkes.dotgraph</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.fsm.html">src.fawkes.fsm</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.hsm.html">src.fawkes.hsm</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.interface_initializer.html">src.fawkes.interface_initializer</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.logprint.html">src.fawkes.logprint</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.mathext.html">src.fawkes.mathext</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.predlib.html">src.fawkes.predlib</a>
+	</li>
+
+	<li>
+		<a href="../modules/src.fawkes.trigger.html">src.fawkes.trigger</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>...</code></h1>
+
+<p>This module provides a generic finite state machine (FSM).</p>
+
+<p><b>Author:</b>
+<table class="authors_list">
+
+	<tr><td class="name">Tim Niemueller</td></tr>
+
+</table>
+</p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM.is_instance">FSM.is_instance</a>&nbsp;(obj)</td>
+	<td class="summary">Check if given object is an instance of FSM class.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:changed">FSM:changed</a>&nbsp;()</td>
+	<td class="summary">Check if the FSM changed since last call.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:clear_states">FSM:clear_states</a>&nbsp;()</td>
+	<td class="summary">Remove all states.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:graph">FSM:graph</a>&nbsp;()</td>
+	<td class="summary">Get graph representation of FSM.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:loop">FSM:loop</a>&nbsp;()</td>
+	<td class="summary">Run the FSM.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:mark_changed">FSM:mark_changed</a>&nbsp;()</td>
+	<td class="summary">Mark FSM as changed.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:new">FSM:new</a>&nbsp;(o)</td>
+	<td class="summary">Constructor.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:new_state">FSM:new_state</a>&nbsp;(name, vars, export_to)</td>
+	<td class="summary">Convenience method to create a new state.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:reset">FSM:reset</a>&nbsp;()</td>
+	<td class="summary">Reset FSM.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:reset_trace">FSM:reset_trace</a>&nbsp;()</td>
+	<td class="summary">Resets the internal trace.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:set_changed">FSM:set_changed</a>&nbsp;(changed)</td>
+	<td class="summary">Set change state of FSM.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:set_debug">FSM:set_debug</a>&nbsp;(debug)</td>
+	<td class="summary">Enable or disable debugging.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:set_error">FSM:set_error</a>&nbsp;(error)</td>
+	<td class="summary">Set error of FSM.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:traced">FSM:traced</a>&nbsp;(sot)</td>
+	<td class="summary">Check if the given state or transition was used in current trace.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:traced_state">FSM:traced_state</a>&nbsp;(state)</td>
+	<td class="summary">Check if state was reached in current trace.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:traced_trans">FSM:traced_trans</a>&nbsp;(trans)</td>
+	<td class="summary">Check if the given transition was used in current trace.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#FSM:trans">FSM:trans</a>&nbsp;(next_state, ...)</td>
+	<td class="summary">Execute state transition.</td>
+	</tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="FSM.is_instance"></a><strong>FSM.is_instance</strong>&nbsp;(obj)</dt>
+<dd>
+Check if given object is an instance of FSM class.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  obj: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+true if obj is an instance of FSM class
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:changed"></a><strong>FSM:changed</strong>&nbsp;()</dt>
+<dd>
+Check if the FSM changed since last call. The FSM has changed if there has been a transition to a new state since the last call to reset() or changed(). Note that changed() will only ever return true at most once per cycle as it resets the changed flag during execution.
+
+
+
+
+
+
+
+<h3>Return value:</h3>
+true if the FSM has changed, false otherwise
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:clear_states"></a><strong>FSM:clear_states</strong>&nbsp;()</dt>
+<dd>
+Remove all states.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:graph"></a><strong>FSM:graph</strong>&nbsp;()</dt>
+<dd>
+Get graph representation of FSM. This creates a graph representation of this FSM using the graphviz library. The graph is returned as a string in the dot graph language.
+
+
+
+
+
+
+
+<h3>Return value:</h3>
+graph representation as string in the dot graph language
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:loop"></a><strong>FSM:loop</strong>&nbsp;()</dt>
+<dd>
+Run the FSM. Runs the loop() function of the current state and executes possible state transitions that result from running the loop.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:mark_changed"></a><strong>FSM:mark_changed</strong>&nbsp;()</dt>
+<dd>
+Mark FSM as changed. This can be used to cause a redrawing of the FSM graph if a state changed its label for example.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:new"></a><strong>FSM:new</strong>&nbsp;(o)</dt>
+<dd>
+Constructor. Create a new FSM with the given table as the base.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  o: table with initializations. The table may not have a metatable set and it must have the fields name (name of the FSM) and start (name of start state of the FSM).
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+initialized FSM
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:new_state"></a><strong>FSM:new_state</strong>&nbsp;(name, vars, export_to)</dt>
+<dd>
+Convenience method to create a new state. Creates a new instance of State and assigns it to the states table. Any variables that exist in the (optional) vars table are put into state as local variables.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  name: name of the state and optionally the variable in the environment of the caller that holds this state
+	</li>
+	
+	<li>
+	  vars: all values from this table will be added to the newly created state.
+	</li>
+	
+	<li>
+	  export_to: if passed a table this method will assign the state to a field with the name of the state in that table.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:reset"></a><strong>FSM:reset</strong>&nbsp;()</dt>
+<dd>
+Reset FSM. Unsets the current state, if there was one the exit() routine is called. All states of this FSM are reset, traces and variables are reset, FSM is marked as changed. The next call to loop() will initialize the start state and set it as current state.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:reset_trace"></a><strong>FSM:reset_trace</strong>&nbsp;()</dt>
+<dd>
+Resets the internal trace. Tracing information will be discarded. This can be used to restart the trace without causing a whole FSM reset.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:set_changed"></a><strong>FSM:set_changed</strong>&nbsp;(changed)</dt>
+<dd>
+Set change state of FSM.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  changed: true to mark FSM as changed, false otherwise
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:set_debug"></a><strong>FSM:set_debug</strong>&nbsp;(debug)</dt>
+<dd>
+Enable or disable debugging. Value can be either set for an instance of SkillHSM, or globally for SkillHSM to set the new default value which applies to newly generated SkillHSMs.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  debug: true to enable debugging, false to disable
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:set_error"></a><strong>FSM:set_error</strong>&nbsp;(error)</dt>
+<dd>
+Set error of FSM. Sets the error for the FSM and prints it as warning.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  error: error message
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:traced"></a><strong>FSM:traced</strong>&nbsp;(sot)</dt>
+<dd>
+Check if the given state or transition was used in current trace.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  sot: state or transition to check, if a string assumed to be a state name
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+two values, first is true if state/transition is included in current trace, false otherwise, second is a list of traces where the given state/transition was involved. Note that the indexes of the traces in the list are not consecutive!
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:traced_state"></a><strong>FSM:traced_state</strong>&nbsp;(state)</dt>
+<dd>
+Check if state was reached in current trace.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  state: state to check if a transition originated from or went to this one
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+two values, first is true if state is included in current trace, false otherwise, second is a list of traces where the given state was involved. Note that the indexes of the traces in the list are not consecutive!
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:traced_trans"></a><strong>FSM:traced_trans</strong>&nbsp;(trans)</dt>
+<dd>
+Check if the given transition was used in current trace.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  trans: transition to check
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+two values, first is true if transition is included in current trace, false otherwise, second is a list of traces where the given transition was involved. Note that the indexes of the traces in the list are not consecutive!
+
+
+
+</dd>
+
+
+
+
+<dt><a name="FSM:trans"></a><strong>FSM:trans</strong>&nbsp;(next_state, ...)</dt>
+<dd>
+Execute state transition. If next_state is not nil, it calls the exit() function of the current state, and then calls the init() function of the next state with any given additional parameters. After that, the current state becomes next.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  next_state: next state, if nil no transition is executed
+	</li>
+	
+	<li>
+	  ...: any number of extra arguments, passed to next:init().
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>
