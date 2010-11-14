@@ -154,12 +154,61 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
   return success;
 }
 
+
+/** Set target, given transition, and rotation as quaternion.
+ * Check IK solvability for target Transform. If solvable,
+ * then set target to manipulator configuration __manipGoal
+ * @param transX x-transition
+ * @param transY y-transition
+ * @param transZ z-transition
+ * @param quatW quaternion skalar
+ * @param quatX quaternion 1st value
+ * @param quatY quaternion 2nd value
+ * @param quatZ quaternion 3rd value
+ * @return true if solvable, false otherwise
+ */
+ bool
+ OpenRAVERobot::setTargetQuat(float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ)
+ {
+  Vector trans(transX, transY, transZ);
+  Vector   rot(quatW, quatX, quatY, quatZ);
+
+  return setTargetTransform(trans, rot);
+ }
+
+
+/** Set target, given transition, and rotation as axis-angle.
+ * Check IK solvability for target Transform. If solvable,
+ * then set target to manipulator configuration __manipGoal
+ * @param transX x-transition
+ * @param transY y-transition
+ * @param transZ z-transition
+ * @param angle axis-angle angle
+ * @param axisX axis-angle x-axis value
+ * @param axisY axis-angle y-axis value
+ * @param axisZ axis-angle z-axis value
+ * @return true if solvable, false otherwise
+ */
+ bool
+ OpenRAVERobot::setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ)
+ {
+  Vector trans(transX, transY, transZ);
+  Vector aa(angle, axisX, axisY, axisZ);
+  Vector rot = quatFromAxisAngle(aa);
+
+  return setTargetTransform(trans, rot);
+ }
+
 // just temporary! no IK check etc involved
 void
 OpenRAVERobot::setTargetAngles( std::vector<float>& angles )
 {
   __manipGoal->setAngles(angles);
 }
+
+
+
+
 
 /* ################### getters ##################*/
 /** Returns RobotBasePtr for uses in other classes.
@@ -171,7 +220,7 @@ OpenRAVERobot::getRobotPtr() const
   return __robot;
 }
 
-
+// not needed
 void
 OpenRAVERobot::getTargetAngles(std::vector<float>& to)
 {
