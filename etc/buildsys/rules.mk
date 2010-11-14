@@ -186,7 +186,7 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	$(ASCIIDOC_A2X) -f manpage \
 	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf -afawkes_version="$(FAWKES_VERSION)"' \
 	-D $(@D) $< >$$TEMPFILE 2>&1; \
-	if egrep -v '^\(Note: Writing $(@F)|Writing $(@F) for refentry\)$$' $$TEMPFILE >/dev/null 2>&1; then \
+	if egrep -v '^(Note: Writing $(@F)|Writing $(@F) for refentry)$$' $$TEMPFILE >/dev/null 2>&1; then \
 		cat $$TEMPFILE; \
 	fi; \
 	rm $$TEMPFILE; \
@@ -204,6 +204,9 @@ $(BINDIR)/%: $$(OBJS_$$*)
 	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
+ifeq ($(WARN_MISSING_MANPAGE),1)
+	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $* does not have a man page$(TNORMAL) ---")
+endif
 
 $(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)

@@ -161,9 +161,12 @@ FAWKES_VERSION       = $(FAWKES_VERSION_MAJOR).$(FAWKES_VERSION_MINOR)$(subst .0
 GCC_USE_OPENMP=0
 # Build for 32 Bit, even on a 64 Bit machine
 DO_32BIT_BUILD=0
+# Warn if a binary has no man page?
+WARN_MISSING_MANPAGE=1
+# Man page sections to check and build
+MANPAGE_SECTIONS = 1 8
 
 COMMA := ,
-MANPAGE_SECTIONS = 1 8
 
 ### CFLAGS, preprocessor, compiler and linker options
 LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
