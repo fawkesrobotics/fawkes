@@ -72,7 +72,7 @@ endif
 # One to build 'em all
 .PHONY: all gui
 ifeq ($(MAKELEVEL),1)
-  EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui)
+  EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) $(MANPAGES_gui)
 endif
 all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
 gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
