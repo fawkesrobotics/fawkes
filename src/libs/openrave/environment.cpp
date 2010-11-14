@@ -204,6 +204,7 @@ OpenRAVEEnvironment::startViewer()
 /** Plan collision-free path for current and target manipulator
  * configuration of a OpenRAVERobot robot.
  * @param robot pointer to OpenRAVERobot object of robot to use
+ * @return false if some error occured during planning, true otherwise
  */
 bool
 OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)

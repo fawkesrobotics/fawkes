@@ -167,14 +167,14 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
  * @param quatZ quaternion 3rd value
  * @return true if solvable, false otherwise
  */
- bool
- OpenRAVERobot::setTargetQuat(float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ)
- {
+bool
+OpenRAVERobot::setTargetQuat(float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ)
+{
   Vector trans(transX, transY, transZ);
   Vector   rot(quatW, quatX, quatY, quatZ);
 
   return setTargetTransform(trans, rot);
- }
+}
 
 
 /** Set target, given transition, and rotation as axis-angle.
@@ -189,15 +189,15 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
  * @param axisZ axis-angle z-axis value
  * @return true if solvable, false otherwise
  */
- bool
- OpenRAVERobot::setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ)
- {
+bool
+OpenRAVERobot::setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ)
+{
   Vector trans(transX, transY, transZ);
   Vector aa(angle, axisX, axisY, axisZ);
   Vector rot = quatFromAxisAngle(aa);
 
   return setTargetTransform(trans, rot);
- }
+}
 
 // just temporary! no IK check etc involved
 void
