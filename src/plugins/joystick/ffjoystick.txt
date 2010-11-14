@@ -1,0 +1,76 @@
+ffjoystick(1)
+=============
+
+NAME
+----
+ffjoystick - Provide joystick via blackboard or print movements
+
+SYNOPSIS
+--------
+[verse]
+*ffjoystick* [-r 'host[:port]'] [-d 'dev'] [-l]
+
+DESCRIPTION
+-----------
+This tool is used to provide a joystick connected to the local machine
+to a Fawkes instance via the blackboard, or to print debug output
+about joystick data in the blackboard.
+
+Generally, the joystick plugin should be preferred, because it
+operates faster within Fawkes. This is especially useful for joysticks
+communicating wirelessly with a USB dongle. For cabled joysticks
+however, this may not be feasible. In such situations, the joystick
+can be connected to a laptop or desktop, and the data is transmitted
+via a remote blackboard connection to the robot.
+
+In the second mode, the tool prints out changes to the joystick
+blackboard interface. This can be used to verify and debug joystick
+communication, and to ensure that data is written to the correct
+blackboard.
+
+Both modes are mutually exclusive. If -l is given on the command line,
+the second mode will be used, regardless of other parameters.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-r* 'host[:port]]'::
+	The host and port of the Fawkes instance to connect to.
+
+ *-d* 'dev'::
+	Joystick device file to use, defaults to /dev/input/js0.
+
+ *-l*::
+	Listen to the blackboard for joystick changes and print them
+	out to the console.
+
+
+EXAMPLES
+--------
+
+ *ffjoystick -r myrobot*::
+	Open the default local joystick and write the data to the
+	blackboard on myrobot.
+
+ *ffjoystick -r myrobot -l*::
+	Listen to changes to the joystick blackboard interface and
+	print them to stdout.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

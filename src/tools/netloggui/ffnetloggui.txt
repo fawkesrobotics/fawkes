@@ -1,0 +1,34 @@
+ffnetloggui(1)
+==============
+
+NAME
+----
+ffnetloggui - Watch Fawkes log messages remotely
+
+SYNOPSIS
+--------
+[verse]
+*ffnetlogview*
+
+DESCRIPTION
+-----------
+This GUI application allows for viewing log messages remotely. Once
+started it will try to connect to Fawkes instances on the local
+network (found via mDNS-SD).
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

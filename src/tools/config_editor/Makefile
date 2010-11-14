@@ -37,6 +37,7 @@ OBJS_all = $(OBJS_ffconfiggui)
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui = $(BINDIR)/ffconfiggui
   INST_RESDIRS = guis/config_editor
+  MANPAGES_gui = $(MANDIR)/man1/ffconfiggui.1
 else
   WARN_TARGETS += warning_ffconfiggui
 endif

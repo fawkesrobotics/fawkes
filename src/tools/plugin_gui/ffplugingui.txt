@@ -1,0 +1,43 @@
+ffplugingui(1)
+==============
+
+NAME
+----
+ffplugingui - Watch and instruct the Fawkes plugin system
+
+SYNOPSIS
+--------
+[verse]
+*ffplugingui*
+
+DESCRIPTION
+-----------
+This GUI application allows for viewing the current status in terms of
+loaded plugins. It also allows to order Fawkes to load or unload
+plugins, and shows short descriptions of the plugins.
+
+Use the connect button to connect to a Fawkes instance, click the
+checkbox next to a plugin name to load or unload it.
+
+If you would like a more condensed view set
+/apps/fawkes/plugingui/description_as_tooltip to true. This will
+remove the descriptive line from the main window and instead show it
+as a tooltip if you stop the mouse over the plugin name.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Daniel Beck <beck@kbsg.rwth-aachen.de> and
+Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

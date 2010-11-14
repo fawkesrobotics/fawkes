@@ -33,6 +33,7 @@ OBJS_all += $(OBJS_fvfuseviewer)
 ifeq ($(HAVE_GLADE_GUI),1)
   BINS_gui += $(BINDIR)/fvfuseviewer
   INST_RESDIRS = guis/fuse_viewer
+  MANPAGES_all += $(MANDIR)/man1/fvfuseviewer.1
 else
   ifneq ($(HAVE_AVAHI),1)
     WARN_TARGETS += warning_avahi

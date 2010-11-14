@@ -35,6 +35,7 @@ OBJS_all = $(OBJS_ffwiviewer)
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   BINS_gui = $(BINDIR)/ffwiviewer
   INST_RESDIRS = guis/worldinfo_viewer
+  MANPAGES_gui = $(MANDIR)/man1/ffwiviewer.1
 else
   WARN_TARGETS += warning_wiv
 endif

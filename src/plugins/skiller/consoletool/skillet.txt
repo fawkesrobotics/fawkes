@@ -1,0 +1,79 @@
+skillet(1)
+==========
+
+NAME
+----
+skillet - Skiller remote instruction console tool
+
+SYNOPSIS
+--------
+[verse]
+*skillet* [-r 'host[:port]'] ['skill string'...]
+
+DESCRIPTION
+-----------
+This tool is used to instruct the skiller plugin remotely from the
+console. In a sense it is a very basic version of the SkillGUI. It
+allows to give a skill string on the command line or type in a skill
+string, which is then ordered for execution by the skiller.
+
+All arguments on the command line are merged into one skill string, it
+is therefore not possible to execute multiple skill strings at
+once. This may change in the future. It is recommended to quote the
+skill string into one argument.
+
+SKILL SHELL
+-----------
+If skillet is run without a skill string it opens a skill shell. It
+supports a few custom commands, any other string is passed verbatim to
+the skiller.
+
+Commands
+~~~~~~~~
+ *cont*::
+	Order any consecutively entered command in continuous mode,
+	that is keep executing the skill string until it succeeds or
+	fails, until an explicit stop is send, or until another skill
+	stirng is executed.
+
+ *oneshot*::
+	Any consecutively executed skill string is executed as a
+	one-shot skill, i.e. only one iteration is performed with the
+	given skill string.
+
+ *stop*::
+	Stop a currently running continuous skill string.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-r* 'host[:port]]'::
+	The host and port of the Fawkes instance to connect to.
+
+
+
+EXAMPLES
+--------
+
+ *skillet*::
+	Connect to the skiller on the local host and enter the skill
+	shell.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

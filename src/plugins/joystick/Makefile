@@ -26,8 +26,9 @@ OBJS_ffjoystick = ffjoystick.o acquisition_thread.o
 OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick)
 
 ifeq ($(OS),Linux)
-  BINS_all = $(BINDIR)/ffjoystick
-  PLUGINS_all = $(PLUGINDIR)/joystick.so
+  BINS_all      = $(BINDIR)/ffjoystick
+  PLUGINS_all   = $(PLUGINDIR)/joystick.so
+  MANPAGES_all  = $(MANDIR)/man1/ffjoystick.1
 else
   WARN_TARGETS += warning_onlylinux
 endif
