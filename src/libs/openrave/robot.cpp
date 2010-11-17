@@ -135,29 +135,8 @@ OpenRAVERobot::updateManipulator()
   __manip->setAngles(angles);
 }
 
-/** Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __manipGoal
- * @param trans transformation vector
- * @param rotQuat rotation vector; a quaternion
- * @return true if solvable, false otherwise
- */
-bool
-OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat)
-{
-  Transform target;
-  target.trans = trans;
-  target.rot = rotQuat;
-
-  bool success = __arm->FindIKSolution(IkParameterization(target),__anglesTarget,true);
-  __manipGoal->setAngles(__anglesTarget);
-
-  return success;
-}
-
 
 /** Set target, given transition, and rotation as quaternion.
- * Check IK solvability for target Transform. If solvable,
- * then set target to manipulator configuration __manipGoal
  * @param transX x-transition
  * @param transY y-transition
  * @param transZ z-transition
@@ -176,10 +155,7 @@ OpenRAVERobot::setTargetQuat(float& transX, float& transY, float& transZ, float&
   return setTargetTransform(trans, rot);
 }
 
-
 /** Set target, given transition, and rotation as axis-angle.
- * Check IK solvability for target Transform. If solvable,
- * then set target to manipulator configuration __manipGoal
  * @param transX x-transition
  * @param transY y-transition
  * @param transZ z-transition
@@ -197,6 +173,72 @@ OpenRAVERobot::setTargetAxisAngle(float& transX, float& transY, float& transZ, f
   Vector rot = quatFromAxisAngle(aa);
 
   return setTargetTransform(trans, rot);
+}
+
+/** Set target, given transition, and rotation as ZXZ Euler-rotation.
+ * @param transX x-transition
+ * @param transY y-transition
+ * @param transZ z-transition
+ * @param phi 1st rotaion (on z-axis)
+ * @param theta 2nd rotaion (on x-axis)
+ * @param psi 3rd rotaion (on z-axis)
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRAVERobot::setTargetEulerZXZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
+{
+  Vector trans(transX, transY, transZ);
+
+  std::vector<float> rot(9, 0.f); //rotations vector
+  rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
+  rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
+  rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
+
+  return setTargetEuler(trans, rot);
+}
+
+/** Set target, given transition, and rotation as ZYZ Euler-rotation.
+ * @param transX x-transition
+ * @param transY y-transition
+ * @param transZ z-transition
+ * @param phi 1st rotaion (on z-axis)
+ * @param theta 2nd rotaion (on y-axis)
+ * @param psi 3rd rotaion (on z-axis)
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRAVERobot::setTargetEulerZYZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
+{
+  Vector trans(transX, transY, transZ);
+
+  std::vector<float> rot(9, 0.f); //rotations vector
+  rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
+  rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
+  rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
+
+  return setTargetEuler(trans, rot);
+}
+
+/** Set target, given transition, and rotation as ZYX Euler-rotation.
+ * @param transX x-transition
+ * @param transY y-transition
+ * @param transZ z-transition
+ * @param phi 1st rotaion (on z-axis)
+ * @param theta 2nd rotaion (on y-axis)
+ * @param psi 3rd rotaion (on x-axis)
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRAVERobot::setTargetEulerZYX (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
+{
+  Vector trans(transX, transY, transZ);
+
+  std::vector<float> rot(9, 0.f); //rotations vector
+  rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
+  rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
+  rot.at(6) = psi;   //3rd row, 1st value; rotation on x-axis
+
+  return setTargetEuler(trans, rot);
 }
 
 // just temporary! no IK check etc involved
@@ -264,4 +306,64 @@ OpenRAVERobot::getTrajectoryDevice() const
 
   return traj;
 }
+
+
+/* ########################################
+   ###------------- private ------------###
+   ########################################*/
+
+/** Set target, given transformation (transition, and rotation as quaternion).
+ * Check IK solvability for target Transform. If solvable,
+ * then set target angles to manipulator configuration __manipGoal
+ * @param trans transformation vector
+ * @param rotQuat rotation vector; a quaternion
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat)
+{
+  Transform target;
+  target.trans = trans;
+  target.rot = rotQuat;
+
+  bool success = __arm->FindIKSolution(IkParameterization(target),__anglesTarget,true);
+  __manipGoal->setAngles(__anglesTarget);
+
+  return success;
+}
+
+/** Set target, given 3 consecutive axis rotations.
+ * Axis rotations are given as 1 vector representing a 3x3 matrix,
+ * (left to right, top to bottom) where each row represents
+ * one rotation over one axis (axis-angle notation).
+ * See public setTargetEuler methods to get a better understanding.
+ *
+ * Check IK solvability for target Transform. If solvable,
+ * then set target angles to manipulator configuration __manipGoal
+ * @param rotations 3x3 matrix given as one row.
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRAVERobot::setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotations)
+{
+  if( rotations.size() != 9 ) {
+    if(__logger)
+      __logger->log_error("OpenRAVE Robot", "Bad size of rotations vector. Is %i, expected 9", rotations.size());
+    return false;
+  }
+
+  Vector r1(rotations.at(0), rotations.at(1), rotations.at(2));
+  Vector r2(rotations.at(3), rotations.at(4), rotations.at(5));
+  Vector r3(rotations.at(6), rotations.at(7), rotations.at(8));
+
+  Vector q1 = quatFromAxisAngle(r1);
+  Vector q2 = quatFromAxisAngle(r2);
+  Vector q3 = quatFromAxisAngle(r3);
+
+  Vector q12  = quatMultiply (q1, q2);
+  Vector quat = quatMultiply (q12, q3);
+
+  return setTargetTransform(trans, quat);
+}
+
 } // end of namespace fawkes

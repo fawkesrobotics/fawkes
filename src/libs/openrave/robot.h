@@ -51,6 +51,9 @@ class OpenRAVERobot
 
   virtual bool setTargetQuat	 (float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ);
   virtual bool setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ);
+  virtual bool setTargetEulerZXZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
+  virtual bool setTargetEulerZYZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
+  virtual bool setTargetEulerZYX (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
   virtual void setTargetAngles( std::vector<float>& angles ); // just temporary
 
   virtual void getTargetAngles(std::vector<float>& to); // not needed
@@ -62,6 +65,7 @@ class OpenRAVERobot
  private:
   void init();
   bool setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat);
+  bool setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotations);
 
   fawkes::Logger*	                __logger;
 
