@@ -10,7 +10,7 @@ OBJS_qa_or_env = qa_env.o
 LIBS_qa_or_manip = fawkesutils fawkesopenrave stdc++
 OBJS_qa_or_manip = qa_manip.o
 
-LIBS_qa_or_robot = fawkesutils fawkesopenrave stdc++
+LIBS_qa_or_robot = fawkescore fawkesutils fawkesopenrave stdc++
 OBJS_qa_or_robot = qa_robot.o
 
 LIBS_qa_or_con = fawkesutils fawkesopenrave stdc++

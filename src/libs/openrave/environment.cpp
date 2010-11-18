@@ -24,6 +24,7 @@
 
 #include <openrave-core.h>
 #include <utils/logging/logger.h>
+#include <core/exceptions/software.h>
 
 using namespace OpenRAVE;
 namespace fawkes {
@@ -57,7 +58,6 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
  * @param logger pointer to fawkes logger
  */
 OpenRAVEEnvironment::OpenRAVEEnvironment(fawkes::Logger* logger) :
-  __name( "OpenRAVE Environment" ),
   __logger( logger )
 {
 }
@@ -73,24 +73,16 @@ void
 OpenRAVEEnvironment::create()
 {
   // create environment
-  try {
-    __env = RaveCreateEnvironment();
-    if(__logger)
-      __logger->log_debug(__name, "Environment created");
-  } catch(const openrave_exception &e) {
-    if(__logger)
-      __logger->log_warn(__name, "Could not create Environment. Ex:%s", e.what());
-    throw;
-  }
+  __env = RaveCreateEnvironment();
+  if(!__env)
+    {throw fawkes::Exception("OpenRAVE Environment: Could not create environment. Error in OpenRAVE.");}
+  else if (__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Environment created");}
 
   // create planner
-  try {
-    __planner = RaveCreatePlanner(__env,"birrt");
-  } catch(const openrave_exception &e) {
-    if(__logger)
-      __logger->log_warn(__name, "Could not create Planner. Ex:%s", e.what());
-    throw;
-  }
+  __planner = RaveCreatePlanner(__env,"birrt");
+  if(!__planner)
+    {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
 }
 
 /** Destroy the environment */
@@ -100,9 +92,10 @@ OpenRAVEEnvironment::destroy()
   try {
     __env->Destroy();
     if(__logger)
-      __logger->log_debug(__name, "Environment destroyed");
+      {__logger->log_debug("OpenRAVE Environment", "Environment destroyed");}
   } catch(const openrave_exception& e) {
-    __logger->log_warn(__name, "Could not destroy Environment. Ex:%s", e.what());
+    if(__logger)
+      {__logger->log_warn("OpenRAVE Environment", "Could not destroy Environment. Ex:%s", e.what());}
   }
 }
 
@@ -131,48 +124,43 @@ OpenRAVEEnvironment::disableDebug()
  * @param robot RobotBasePtr of robot to add
  * @return 1 if succeeded, 0 if not able to add robot
  */
-bool
+void
 OpenRAVEEnvironment::addRobot(RobotBasePtr robot)
 {
-    return __env->AddRobot(robot);
+  if(!__env->AddRobot(robot))
+    {throw fawkes::Exception("OpenRAVE Environment: Could not add robot to environment. Error in OpenRAVE.");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
 }
 
 /** Add a robot into the scene
  * @param filename path to robot's xml file
  * @return 1 if succeeded, 0 if not able to load file
  */
-bool
+void
 OpenRAVEEnvironment::addRobot(const std::string& filename)
 {
   // load the robot
-  RobotBasePtr robot;
-  try {
-    robot = __env->ReadRobotXMLFile(filename);
-  } catch(const openrave_exception &e) {
-    if(__logger)
-      __logger->log_error(__name, "Robot could not be loaded. Ex:%s", e.what());
-    return 0;
-  }
+  RobotBasePtr robot = __env->ReadRobotXMLFile(filename);
 
-  if( !robot ) {
-    // could not load robot file. Check file path, and test file itself for correct syntax and semantics
-    // by loading it directly into openrave with "openrave robotfile.xml"
-    if(__logger)
-      __logger->log_error(__name, "Robot could not be loaded.");
-    return 0;
-  } else {
-    return addRobot(robot);
-  }
+  // if could not load robot file: Check file path, and test file itself for correct syntax and semantics
+  // by loading it directly into openrave with "openrave robotfile.xml"
+  if( !robot )
+    {throw fawkes::IllegalArgumentException("OpenRAVE Environment: Robot could not be loaded. Check xml file/path.");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Robot loaded.");}
+
+  addRobot(robot);
 }
 
 /** Add a robot into the scene
  * @param robot pointer to OpenRAVERobot object of robot to add
  * @return 1 if succeeded, 0 if not able to add robot
  */
-bool
+void
 OpenRAVEEnvironment::addRobot(OpenRAVERobot* robot)
 {
-    return addRobot(robot->getRobotPtr());
+  addRobot(robot->getRobotPtr());
 }
 
 
@@ -196,7 +184,7 @@ OpenRAVEEnvironment::startViewer()
     boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
   } catch( const openrave_exception &e) {
     if(__logger)
-      __logger->log_error(__name, "Could not load viewr. Ex:%s", e.what());
+      {__logger->log_error("OpenRAVE Environment", "Could not load viewr. Ex:%s", e.what());}
     throw;
   }
 }
@@ -204,26 +192,27 @@ OpenRAVEEnvironment::startViewer()
 /** Plan collision-free path for current and target manipulator
  * configuration of a OpenRAVERobot robot.
  * @param robot pointer to OpenRAVERobot object of robot to use
- * @return false if some error occured during planning, true otherwise
  */
-bool
+void
 OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
 {
+  bool success;
+
   // init planner
-  if( !__planner->InitPlan(robot->getRobotPtr(),robot->getPlannerParams()) ) {
-    if(__logger)
-      __logger->log_error(__name, "Planner: init failed");
-    return 0;
-  }
+  success = __planner->InitPlan(robot->getRobotPtr(),robot->getPlannerParams());
+  if(!success)
+    {throw fawkes::Exception("OpenRAVE Environment: Planner: init failed");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Planner: initialized");}
 
   // plan path
   boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->getRobotPtr()->GetActiveDOF()));
   traj->Clear();
-  if( !__planner->PlanPath(traj) ) {
-    if(__logger)
-    __logger->log_error(__name, "Planner: plan failed");
-    return 0;
-  }
+  success = __planner->PlanPath(traj);
+  if(!success)
+    {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
 
   // re-timing the trajectory with cubic interpolation
   traj->CalcTrajTiming(robot->getRobotPtr(),TrajectoryBase::CUBIC,true,true);
@@ -236,8 +225,6 @@ OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
   for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
     trajRobot->push_back((*it).q);
   }
-
-  return 1;
 }
 
 

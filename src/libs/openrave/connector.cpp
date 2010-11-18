@@ -27,6 +27,7 @@
 
 #include <openrave-core.h>
 #include <utils/logging/logger.h>
+#include <core/exceptions/software.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -50,15 +51,13 @@ OpenRAVEConnector::~OpenRAVEConnector()
 
 /** Setup stuff .
  * MUST be called before starting to work with OR stuff*/
-bool
+void
 OpenRAVEConnector::setup(const std::string& filenameRobot)
 {
   try {
     OpenRAVE::RaveInitialize(true);
   } catch(const OpenRAVE::openrave_exception &e) {
-    if(__logger)
-      __logger->log_error("OpenRAVE Connector", "Could not initialize OpenRAVE. Ex:%s", e.what());
-    throw;
+    throw fawkes::Exception("OpenRAVE Connector", "Could not initialize OpenRAVE. Ex:%s", e.what());
   }
 
   __env   = new OpenRAVEEnvironment(__logger);
@@ -66,13 +65,12 @@ OpenRAVEConnector::setup(const std::string& filenameRobot)
 
   __env->create();
   __env->enableDebug(); // TODO: cfg
-  if( !__robot->load(filenameRobot, __env) )    {return 0;}
-  if( !__env->addRobot(__robot) )               {return 0;}
-  if( !__robot->setReady() )                    {return 0;}
+
+  __robot->load(filenameRobot, __env);
+  __env->addRobot(__robot);
+  __robot->setReady();
 
   __env->lock();
-
-  return 1;
 }
 
 /** Start Viewer */
@@ -119,10 +117,10 @@ OpenRAVEConnector::setTargetAxisAngle(float& transX, float& transY, float& trans
 /** Run planner on previously set target.
  * @return false if some error occured during planning, true otherwise
  */
-bool
+void
 OpenRAVEConnector::runPlanner()
 {
-  return __env->runPlanner(__robot);
+  __env->runPlanner(__robot);
 }
 
 /** Get trajectory from planned path.

@@ -44,8 +44,8 @@ class OpenRAVERobot
   virtual ~OpenRAVERobot();
 
   // build/load robot parts
-  virtual bool load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
-  virtual bool setReady();
+  virtual void load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
+  virtual void setReady();
   virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator(); // not needed
 

@@ -65,7 +65,12 @@ main(int argc, char **argv)
 
   env->create();
 
-  robot->load(robotFile, env);
+  try {
+    robot->load(robotFile, env);
+  } catch (Exception &e) {
+    cl->log_error("qa_robot", "error:%s", e.what());
+    return 0;
+  }
 
   // configure manip
   manip->addMotor(0,0);
@@ -76,7 +81,7 @@ main(int argc, char **argv)
   robot->setManipulator(manip);
 
   env->addRobot(robot);
-
+  robot->setReady();
   env->lock();
 
 

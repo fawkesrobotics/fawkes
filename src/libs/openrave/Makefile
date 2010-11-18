@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_libfawkesopenrave = fawkesutils fawkesgeometry
+LIBS_libfawkesopenrave = fawkescore fawkesutils fawkesgeometry
 OBJS_libfawkesopenrave = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 
 #Check for openRAVE

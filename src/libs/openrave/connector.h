@@ -44,7 +44,7 @@ class OpenRAVEConnector
   OpenRAVEConnector(fawkes::Logger* logger = 0);
   virtual ~OpenRAVEConnector();
 
-  virtual bool setup(const std::string& filenameRobot);
+  virtual void setup(const std::string& filenameRobot);
 
   virtual void setManipulator(OpenRAVEManipulator* manip);
 
@@ -53,7 +53,7 @@ class OpenRAVEConnector
   virtual bool setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ);
 
   virtual void startViewer() const;
-  virtual bool runPlanner();
+  virtual void runPlanner();
 
   virtual std::vector< std::vector<float> >* getTrajectory() const;
   virtual OpenRAVEEnvironment* getEnvironment() const;

@@ -26,6 +26,7 @@
 
 #include <openrave-core.h>
 #include <utils/logging/logger.h>
+#include <core/exceptions/software.h>
 
 using namespace OpenRAVE;
 namespace fawkes {
@@ -64,40 +65,38 @@ OpenRAVERobot::init()
 
 
 /** Load robot from xml file
- *@param filename path to robot's xml file
+ * @param filename path to robot's xml file
+ * @param env pointer to OpenRAVEEnvironment object
  */
-bool
+void
 OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* env)
 {
-  // load the robot
   // TODO: implementing without usage of 'environment'
-  try {
-    __robot = env->getEnvPtr()->ReadRobotXMLFile(filename);
-  } catch(const openrave_exception &e) {
-    if(__logger)
-      __logger->log_error("OpenRAVE Robot", "Robot could not be loaded. Ex:%s", e.what());
-    return 0;
-  }
+  // openrave_exception handling is done in OpenRAVE (see environment-core.h)
+  __robot = env->getEnvPtr()->ReadRobotXMLFile(filename);
 
-  if(!__robot) {
-    if(__logger)
-      __logger->log_error("OpenRAVE Robot", "Robot could not be loaded.");
-    return 0;
-  }
-
-  return 1;
+  if(!__robot)
+    {throw fawkes::IllegalArgumentException("OpenRAVE Robot: Robot could not be loaded. Check xml file/path.");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Robot", "Robot loaded.");}
 }
 
 /** Set robot ready for usage.
- *  Here: Set active DOFs and create plannerParameters.
- * Only successful after added to environment */
-bool
+ * Here: Set active DOFs and create plannerParameters.
+ * CAUTION: Only successful after added to environment. Otherwise no active DOF will be recognized. */
+void
 OpenRAVERobot::setReady()
 {
+  if(!__robot)
+    {throw fawkes::Exception("OpenRAVE Robot: Robot not loaded properly yet.");}
+
   __name = __robot->GetName();
   __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
   __arm = __robot->GetActiveManipulator();
   __robot->SetActiveDOFs(__arm->GetArmIndices());
+
+  if(__robot->GetActiveDOF() == 0)
+    {throw fawkes::Exception("OpenRAVE Robot: Robot not added to environment yet. Need to do that first, otherwise planner will fail.");}
 
   // create planner parameters
   try {
@@ -107,12 +106,11 @@ OpenRAVERobot::setReady()
     __plannerParams->SetRobotActiveJoints(__robot); // set planning configuration space to current active dofs
     __plannerParams->vgoalconfig.resize(__robot->GetActiveDOF());
   } catch(const openrave_exception &e) {
-    if(__logger)
-      __logger->log_error("OpenRAVE Robot", "Could not create PlannerParameters. Ex:%s", e.what());
-    return 0;
+    throw fawkes::Exception("OpenRAVE Robot: Could not create PlannerParameters. Ex:%s", e.what());
   }
 
-  return 1;
+  if(__logger)
+    {__logger->log_debug("OpenRAVE Robot", "Robot ready.");}
 }
 
 /** Set pointer to OpenRAVEManipulator object.
@@ -348,7 +346,7 @@ OpenRAVERobot::setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotat
 {
   if( rotations.size() != 9 ) {
     if(__logger)
-      __logger->log_error("OpenRAVE Robot", "Bad size of rotations vector. Is %i, expected 9", rotations.size());
+      {__logger->log_error("OpenRAVE Robot", "Bad size of rotations vector. Is %i, expected 9", rotations.size());}
     return false;
   }
 

@@ -54,18 +54,17 @@ class OpenRAVEEnvironment
   virtual void disableDebug();
 
   virtual void startViewer();
-  virtual bool runPlanner(OpenRAVERobot* robot);
+  virtual void runPlanner(OpenRAVERobot* robot);
 
-  virtual bool addRobot(const std::string& filename);
-  virtual bool addRobot(OpenRAVE::RobotBasePtr robot);
-  virtual bool addRobot(OpenRAVERobot* robot);
+  virtual void addRobot(const std::string& filename);
+  virtual void addRobot(OpenRAVE::RobotBasePtr robot);
+  virtual void addRobot(OpenRAVERobot* robot);
 
 
   //virtual RobotBasePtr getRobot() const;
   virtual OpenRAVE::EnvironmentBasePtr getEnvPtr() const;
 
  private:
-  const char*		__name;
   fawkes::Logger*	__logger;
 
   OpenRAVE::EnvironmentBasePtr	__env;
