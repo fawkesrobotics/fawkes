@@ -40,7 +40,7 @@ namespace fawkes {
   class NetworkLogger;
   class Clock;
   class TimeWait;
-  class AspectIniFin;
+  class AspectManager;
   class PluginManager;
   class Time;
   class PluginNetworkHandler;
@@ -81,7 +81,7 @@ class FawkesMainThread
   fawkes::NetworkLogger        *__network_logger;
   fawkes::Clock                *__clock;
   fawkes::TimeWait             *__time_wait;
-  fawkes::AspectIniFin         *__aspect_inifin;
+  fawkes::AspectManager        *__aspect_manager;
 
   fawkes::Thread               *__mainloop_thread;
   fawkes::Mutex                *__mainloop_mutex;

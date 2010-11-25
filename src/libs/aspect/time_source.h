@@ -3,7 +3,7 @@
  *  time_source.h - Time source aspect for Fawkes
  *
  *  Created: Sun Feb 24 13:29:45 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,11 +24,16 @@
 #ifndef __ASPECT_TIME_SOURCE_H_
 #define __ASPECT_TIME_SOURCE_H_
 
+#include <aspect/aspect.h>
+
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class TimeSource;
 
-class TimeSourceAspect
+class TimeSourceAspect : public virtual Aspect
 {
  public:
   TimeSourceAspect(TimeSource *timesource) __attribute__((nonnull));

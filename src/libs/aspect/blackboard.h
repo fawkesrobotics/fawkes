@@ -24,13 +24,18 @@
 #ifndef __ASPECT_BLACKBOARD_H_
 #define __ASPECT_BLACKBOARD_H_
 
+#include <aspect/aspect.h>
 #include <blackboard/blackboard.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class BlackBoardAspect
+class BlackBoardAspect : public virtual Aspect
 {
  public:
+  BlackBoardAspect();
   virtual ~BlackBoardAspect();
 
   void init_BlackBoardAspect(BlackBoard *bb);

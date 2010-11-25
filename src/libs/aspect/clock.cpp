@@ -2,8 +2,9 @@
 /***************************************************************************
  *  clock.cpp - Clock aspect for Fawkes
  *
- *  Created: Tue June 12 22:30:33 2007
- *  Copyright  2007  Daniel Beck
+ *  Created: Tue Jun 12 22:30:33 2007
+ *  Copyright  2007       Daniel Beck
+ *             2007-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +25,9 @@
 #include <aspect/clock.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ClockAspect <aspect/clock.h>
  * Thread aspect that allows to obtain the current time from the clock.
@@ -39,6 +43,12 @@ namespace fawkes {
  * By means of this member access to the clock is given.
  */
 
+/** Constructor. */
+ClockAspect::ClockAspect()
+{
+  add_aspect("ClockAspect");
+}
+
 /** Virtual empty destructor. */
 ClockAspect::~ClockAspect()
 {
@@ -51,7 +61,7 @@ ClockAspect::~ClockAspect()
  * @param clock Clock instance to use.
  */
 void
-ClockAspect::init_ClockAspect(Clock* clock)
+ClockAspect::init_ClockAspect(Clock *clock)
 {
   this->clock = clock;
 }

@@ -24,6 +24,9 @@
 #include <aspect/vision_master.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class VisionMasterAspect <aspect/vision_master.h>
  * Vision Master Aspect.
@@ -42,6 +45,7 @@ namespace fawkes {
  */
 VisionMasterAspect::VisionMasterAspect(firevision::VisionMaster *master)
 {
+  add_aspect("VisionMasterAspect");
   this->master = master;
 }
 

@@ -3,7 +3,7 @@
  *  fawkes_network.h - Fawkes network aspect for Fawkes
  *
  *  Created: Mon May 07 19:44:18 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,13 +24,18 @@
 #ifndef __ASPECT_FAWKES_NETWORK_H_
 #define __ASPECT_FAWKES_NETWORK_H_
 
+#include <aspect/aspect.h>
 #include <netcomm/fawkes/hub.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class FawkesNetworkAspect
+class FawkesNetworkAspect : public virtual Aspect
 {
  public:
+  FawkesNetworkAspect();
   virtual ~FawkesNetworkAspect();
 
   void init_FawkesNetworkAspect(FawkesNetworkHub *fnethub);

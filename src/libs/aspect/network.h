@@ -3,7 +3,7 @@
  *  network.h - Network aspect for Fawkes
  *
  *  Created: Fri Jun 29 14:23:02 2007 (on flight to RoboCup 2007, Atlanta)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,15 +24,20 @@
 #ifndef __ASPECT_NETWORK_H_
 #define __ASPECT_NETWORK_H_
 
+#include <aspect/aspect.h>
 #include <netcomm/service_discovery/service_publisher.h>
 #include <netcomm/service_discovery/service_browser.h>
 #include <netcomm/utils/resolver.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class NetworkAspect
+class NetworkAspect : public virtual Aspect
 {
  public:
+  NetworkAspect();
   virtual ~NetworkAspect();
 
   void init_NetworkAspect(NetworkNameResolver *resolver,

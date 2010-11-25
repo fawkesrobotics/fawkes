@@ -3,7 +3,7 @@
  *  thread_producer.h - Thread producer aspect for Fawkes
  *
  *  Created: Tue Nov 20 11:24:35 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,13 +24,18 @@
 #ifndef __ASPECT_THREAD_PRODUCER_H_
 #define __ASPECT_THREAD_PRODUCER_H_
 
+#include <aspect/aspect.h>
 #include <core/threading/thread_collector.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class ThreadProducerAspect
+class ThreadProducerAspect : public virtual Aspect
 {
  public:
+  ThreadProducerAspect();
   virtual ~ThreadProducerAspect();
 
   void init_ThreadProducerAspect(ThreadCollector *collector);

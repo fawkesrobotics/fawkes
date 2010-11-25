@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  plugin_director.h - Plugin director aspect for Fawkes
+ *  plugin_director.cpp - Plugin director aspect for Fawkes
  *
  *  Created: Thu Feb 12 12:02:58 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,9 @@
 #include <aspect/plugin_director.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class PluginDirectorAspect <aspect/plugin_director.h>
  * Thread aspect to access the PluginManager.
@@ -44,6 +47,12 @@ namespace fawkes {
  * The plugin manager will remain valid for the whole lifetime of the
  * thread.
  */
+
+/** Constructor. */
+PluginDirectorAspect::PluginDirectorAspect()
+{
+  add_aspect("PluginDirectorAspect");
+}
 
 /** Virtual empty Destructor. */
 PluginDirectorAspect::~PluginDirectorAspect()

@@ -25,9 +25,12 @@
 #include <core/threading/thread.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class BlockedTimingAspect <aspect/blocked_timing.h>
- * Thread aspect to use blocked timing
+ * Thread aspect to use blocked timing.
  * The Fawkes main application provides basic means to synchronize all
  * running thread with respect to several given hooks (see WakeupHook).
  * Threads of a woken up at a particular point in time. The hooks basically
@@ -38,7 +41,6 @@ namespace fawkes {
  * @see Thread::OpMode
  * @ingroup Aspects
  * @author Tim Niemueller
- *
  */
 
 // Side note: Overriding Thread::run() can make our requirement useless, but
@@ -50,7 +52,8 @@ namespace fawkes {
  */
 BlockedTimingAspect::BlockedTimingAspect(WakeupHook wakeup_hook)
 {
-  this->wakeup_hook = wakeup_hook;
+  add_aspect("BlockedTimingAspect");
+  __wakeup_hook = wakeup_hook;
 }
 
 
@@ -68,7 +71,7 @@ BlockedTimingAspect::~BlockedTimingAspect()
 BlockedTimingAspect::WakeupHook
 BlockedTimingAspect::blockedTimingAspectHook() const
 {
-  return wakeup_hook;
+  return __wakeup_hook;
 }
 
 } // end namespace fawkes
