@@ -28,6 +28,7 @@
 #include <core/threading/thread_finalizer.h>
 
 #include <map>
+#include <list>
 #include <string>
 
 namespace fawkes {
@@ -63,6 +64,8 @@ class AspectManager : public ThreadInitializer, public ThreadFinalizer
   void register_inifin(AspectIniFin *inifin);
   void unregister_inifin(AspectIniFin *inifin);
 
+  bool has_threads_for_aspect(const char *aspect_name);
+
   void register_default_inifins(BlackBoard *blackboard,
 				ThreadCollector *collector,
 				Configuration *config,
@@ -80,6 +83,7 @@ class AspectManager : public ThreadInitializer, public ThreadFinalizer
  private:
   std::map<std::string, AspectIniFin *> __inifins;
   std::map<std::string, AspectIniFin *> __default_inifins;
+  std::map<std::string, std::list<Thread *> > __threads;
 };
 
 

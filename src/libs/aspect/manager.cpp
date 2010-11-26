@@ -22,6 +22,7 @@
  */
 
 #include <aspect/manager.h>
+#include <aspect/inifins/aspect_provider.h>
 #include <aspect/inifins/blackboard.h>
 #include <aspect/inifins/blocked_timing.h>
 #include <aspect/inifins/clock.h>
@@ -84,7 +85,24 @@ AspectManager::unregister_inifin(AspectIniFin *inifin)
     throw Exception("An initializer for %s has not been registered",
 		    inifin->get_aspect_name());
   }
+  if (! __threads[inifin->get_aspect_name()].empty()) {
+    throw Exception("Threads with the %s aspect are still alive, cannot "
+		    "unregister the aspect", inifin->get_aspect_name());
+  }
   __inifins.erase(inifin->get_aspect_name());
+  __threads.erase(inifin->get_aspect_name());
+}
+
+/** Check if threads for a particular aspect still exist.
+ * @param aspect_name name of the aspect to check for
+ * @return true if thread for the given aspect have been registered,
+ * false otherwise
+ */
+bool
+AspectManager::has_threads_for_aspect(const char *aspect_name)
+{
+  return (__threads.find(aspect_name) != __threads.end()) &&
+         (! __threads[aspect_name].empty());
 }
 
 void
@@ -98,10 +116,14 @@ AspectManager::init(Thread *thread)
     for (i = aspects.begin(); i != aspects.end(); ++i) {
       if (__inifins.find(*i) == __inifins.end()) {
 	throw CannotInitializeThreadException("Thread '%s' has the %s, "
-					      "but no initilizer is known.",
+					      "but no initiliazer is known.",
 					      thread->name(), *i);
       }
       __inifins[*i]->init(thread);
+    }
+
+    for (i = aspects.begin(); i != aspects.end(); ++i) {
+      __threads[*i].push_back(thread);
     }
   }
 }
@@ -120,6 +142,12 @@ void AspectManager::finalize(Thread *thread)
 					    thread->name(), *i);
       }
       __inifins[*i]->finalize(thread);
+    }
+
+    // We remove the threads afterwards, because we assume that the plugin
+    // will not be unloaded, if the finalization throws an exception.
+    for (i = aspects.begin(); i != aspects.end(); ++i) {
+      __threads[*i].remove(thread);
     }
   }
 }
@@ -182,6 +210,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 {
   if (! __default_inifins.empty())  return;
 
+  AspectProviderAspectIniFin *prov_aif = new AspectProviderAspectIniFin(this);
   BlackBoardAspectIniFin *bb_aif = new BlackBoardAspectIniFin(blackboard);
   BlockedTimingAspectIniFin *bt_aif = new BlockedTimingAspectIniFin();
   ClockAspectIniFin *clock_aif = new ClockAspectIniFin(clock);
@@ -200,6 +229,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   VisionMasterAspectIniFin *vm_aif = new VisionMasterAspectIniFin();
   VisionAspectIniFin *vis_aif = new VisionAspectIniFin(vm_aif);
 
+  __default_inifins[prov_aif->get_aspect_name()] = prov_aif;
   __default_inifins[bb_aif->get_aspect_name()] = bb_aif;
   __default_inifins[bt_aif->get_aspect_name()] = bt_aif;
   __default_inifins[clock_aif->get_aspect_name()] = clock_aif;

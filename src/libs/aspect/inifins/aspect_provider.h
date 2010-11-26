@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  vision.h - Fawkes VisionMasterAspect initializer/finalizer
+ *  aspect_provider.h - Fawkes Aspect Provider initializer/finalizer
  *
- *  Created: Wed Nov 24 00:09:35 2010
+ *  Created: Thu Nov 25 12:19:28 2010 (Thanksgiving, Pittsburgh)
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,29 +21,29 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_VISION_H_
-#define __ASPECT_INIFINS_VISION_H_
+#ifndef __ASPECT_INIFINS_ASPECT_PROVIDER_H_
+#define __ASPECT_INIFINS_ASPECT_PROVIDER_H_
 
 #include <aspect/inifins/inifin.h>
-#include <aspect/vision.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class VisionMasterAspectIniFin;
+class AspectManager;
 
-class VisionAspectIniFin : public AspectIniFin
+class AspectProviderAspectIniFin : public AspectIniFin
 {
  public:
-  VisionAspectIniFin(VisionMasterAspectIniFin *master_inifin);
+  AspectProviderAspectIniFin(AspectManager *manager);
+
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
   virtual bool prepare_finalize(Thread *thread);
 
  private:
-  VisionMasterAspectIniFin *__master_inifin;
+  AspectManager *__aspect_manager;
 };
 
 } // end namespace fawkes
