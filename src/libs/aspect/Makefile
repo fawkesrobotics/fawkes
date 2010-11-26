@@ -22,7 +22,7 @@ else
   OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/vision*.cpp))
 endif
 
-LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin
+LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin fawkeswebview
 OBJS_libfawkesaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 HDRS_libfawkesaspects = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 INST_HDRS_SUBDIR_libfawkesaspects = aspect
