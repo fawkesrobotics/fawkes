@@ -94,9 +94,9 @@ class PluginManager
   ThreadCollector   *thread_collector;
   PluginLoader      *plugin_loader;
 
-  LockMap< std::string, Plugin * > plugins;
-  LockMap< std::string, Plugin * >::iterator pit;
-  LockMap< std::string, Plugin * >::reverse_iterator rpit;
+  LockList<Plugin *> plugins;
+  LockList<Plugin *>::iterator pit;
+  LockList<Plugin *>::reverse_iterator rpit;
 
   LockMap< std::string, std::string > __meta_plugins;
   LockMap< std::string, std::string >::iterator __mpit;

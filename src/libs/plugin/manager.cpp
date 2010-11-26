@@ -49,6 +49,22 @@ namespace fawkes {
 }
 #endif
 
+/// @cond INTERNALS
+class plname_eq
+{
+public:
+  plname_eq(std::string name) {
+    __name = name;
+  }
+  bool operator()(Plugin *plugin)
+  {
+    return (__name == plugin->name());
+  }
+private:
+  std::string __name;
+};
+/// @endcond INTERNALS
+
 /** @class PluginManager <plugin/manager.h>
  * Fawkes Plugin Manager.
  * This class provides a manager for the plugins used in fawkes. It can
@@ -68,7 +84,6 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     const char *meta_plugin_prefix)
   : ConfigurationChangeHandler(meta_plugin_prefix)
 {
-  plugins.clear();
   this->thread_collector = thread_collector;
   plugin_loader = new PluginLoader(PLUGINDIR, config);
   next_plugin_id = 1;
@@ -107,8 +122,8 @@ PluginManager::~PluginManager()
   __pinfo_cache.unlock();
   // Unload all plugins
   for (rpit = plugins.rbegin(); rpit != plugins.rend(); ++rpit) {
-    thread_collector->force_remove((*rpit).second->threads());
-    plugin_loader->unload( (*rpit).second );
+    thread_collector->force_remove((*rpit)->threads());
+    plugin_loader->unload(*rpit);
   }
   plugins.clear();
   plugin_ids.clear();
@@ -194,7 +209,7 @@ PluginManager::get_loaded_plugins()
 
   plugins.lock();
   for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
-    rv.push_back(pit->first);
+    rv.push_back((*pit)->name());
   }
   plugins.unlock();
   __meta_plugins.lock();
@@ -296,14 +311,16 @@ PluginManager::load(const char *plugin_list)
       }
     }
 
-    if (try_real_plugin && (plugins.find(*i) == plugins.end()) ) {
+    if (try_real_plugin &&
+	(find_if(plugins.begin(), plugins.end(), plname_eq(*i)) == plugins.end()))
+    {
       try {
 	//printf("Going to load real plugin %s\n", i->c_str());
 	Plugin *plugin = plugin_loader->load(i->c_str());
 	plugins.lock();
 	try {
 	  thread_collector->add(plugin->threads());
-	  plugins[*i] = plugin;
+	  plugins.push_back(plugin);
 	  plugin_ids[*i] = next_plugin_id++;
 	  notify_loaded(i->c_str());
 	} catch (CannotInitializeThreadException &e) {
@@ -334,12 +351,13 @@ PluginManager::load(const char *plugin_list)
 void
 PluginManager::unload(const char *plugin_name)
 {
-  if ( plugins.find(plugin_name) != plugins.end() ) {
-    plugins.lock();
+  MutexLocker lock(plugins.mutex());
+  if ( (pit = find_if(plugins.begin(), plugins.end(), plname_eq(plugin_name)))
+       != plugins.end()) {
     try {
-      thread_collector->remove(plugins[plugin_name]->threads());
-      plugin_loader->unload(plugins[plugin_name]);
-      plugins.erase(plugin_name);
+      thread_collector->remove((*pit)->threads());
+      plugin_loader->unload(*pit);
+      plugins.erase(pit);
       plugin_ids.erase(plugin_name);
       notify_unloaded(plugin_name);
       // find all meta plugins that required this module, this can no longer
@@ -369,17 +387,15 @@ PluginManager::unload(const char *plugin_name)
 
     } catch (Exception &e) {
       LibLogger::log_error("PluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
-      plugins.unlock();
       throw;
     }
-    plugins.unlock();
   } else if (__meta_plugins.find(plugin_name) != __meta_plugins.end()) {
     std::list<std::string> pp = parse_plugin_list(__meta_plugins[plugin_name].c_str());
 
     for (std::list<std::string>::reverse_iterator i = pp.rbegin(); i != pp.rend(); ++i) {
       if ( i->length() == 0 ) continue;
-      if ( (plugins.find(*i) == plugins.end()) &&
-	   (__meta_plugins.find(*i) != __meta_plugins.end()) ) {
+      if ((find_if(plugins.begin(), plugins.end(), plname_eq(*i)) == plugins.end())
+	   && (__meta_plugins.find(*i) != __meta_plugins.end()) ) {
 	continue;
       }
 
