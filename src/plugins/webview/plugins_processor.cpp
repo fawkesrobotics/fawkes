@@ -72,12 +72,37 @@ WebviewPluginsRequestProcessor::process_request(const char *url,
 
     if (subpath.find("/load/") == 0) {
       std::string plugin_name = subpath.substr(std::string("/load/").length());
-      __manager->load(plugin_name.c_str());
-      return new WebRedirectReply(__baseurl);
+      try {
+	__manager->load(plugin_name.c_str());
+	return new WebRedirectReply(__baseurl);
+      } catch (Exception &e) {
+	WebPageReply *r = new WebPageReply("Loading plugin failed");
+	r->append_body("<h1>Loading plugin '%s' failed</h1>", plugin_name.c_str());
+	*r += "<p>The encountered error was:</p>";
+	for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+	  *r += std::string(*i) + "<br/>\n";
+	}
+	r->append_body("<p><a href=\"%s\">Back to overview</a> - "
+		       "<a href=\"%s\">Retry</a></p>", __baseurl, url);
+	return r;
+      }
     } else if (subpath.find("/unload/") == 0) {
       std::string plugin_name = subpath.substr(std::string("/unload/").length());
-      __manager->unload(plugin_name.c_str());
-      return new WebRedirectReply(__baseurl);
+      try {
+	__manager->unload(plugin_name.c_str());
+	return new WebRedirectReply(__baseurl);
+      } catch (Exception &e) {
+	WebPageReply *r = new WebPageReply("Unloading plugin failed");
+	r->append_body("<h1>Unloading plugin '%s' failed</h1>",
+		       plugin_name.c_str());
+	*r += "<p>The encountered error was:</p>";
+	for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+	  *r += std::string(*i) + "<br/>\n";
+	}
+	r->append_body("<p><a href=\"%s\">Back to overview</a> - "
+		       "<a href=\"%s\">Retry</a></p>", __baseurl, url);
+	return r;
+      }
     } else {
       WebPageReply *r = new WebPageReply("Plugins");
       *r += "<h2>Fawkes Plugins</h2>\n";
