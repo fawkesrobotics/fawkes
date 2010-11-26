@@ -30,8 +30,10 @@
 #include <aspect/network.h>
 #include <aspect/logger.h>
 #include <aspect/plugin_director.h>
+#include <aspect/webview.h>
 
 #include <utils/logging/cache.h>
+#include <webview/url_manager.h>
 
 namespace fawkes {
   class NetworkService;
@@ -54,7 +56,8 @@ class WebviewThread
   public fawkes::BlackBoardAspect,
   public fawkes::NetworkAspect,
   public fawkes::LoggerAspect,
-  public fawkes::PluginDirectorAspect
+  public fawkes::PluginDirectorAspect,
+  public fawkes::WebviewAspect
 {
  public:
   WebviewThread();

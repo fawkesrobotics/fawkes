@@ -60,11 +60,11 @@ WebviewPluginsRequestProcessor::~WebviewPluginsRequestProcessor()
 
 WebReply *
 WebviewPluginsRequestProcessor::process_request(const char *url,
-					       const char *method,
-					       const char *version,
-					       const char *upload_data,
-					       size_t *upload_data_size,
-					       void **session_data)
+						const char *method,
+						const char *version,
+						const char *upload_data,
+						size_t *upload_data_size,
+						void **session_data)
 {
   if ( strncmp(__baseurl, url, __baseurl_len) == 0 ) {
     // It is in our URL prefix range
@@ -79,7 +79,7 @@ WebviewPluginsRequestProcessor::process_request(const char *url,
       __manager->unload(plugin_name.c_str());
       return new WebRedirectReply(__baseurl);
     } else {
-      WebPageReply *r = new WebPageReply("BlackBoard");
+      WebPageReply *r = new WebPageReply("Plugins");
       *r += "<h2>Fawkes Plugins</h2>\n";
 
       *r += "<table>\n";
