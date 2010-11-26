@@ -3,7 +3,7 @@
  *  request_dispatcher.cpp - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:48:04 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -22,9 +22,11 @@
 
 #include <webview/request_dispatcher.h>
 #include <webview/request_processor.h>
+#include <webview/url_manager.h>
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
 
+#include <core/threading/mutex_locker.h>
 #include <utils/misc/string_urlescape.h>
 
 #include <sys/types.h>
@@ -48,12 +50,15 @@ namespace fawkes {
  */
 
 /** Constructor.
+ * @param url_manager URL manager to use for URL to processor mapping
  * @param headergen page header generator
  * @param footergen page footer generator
  */
-WebRequestDispatcher::WebRequestDispatcher(WebPageHeaderGenerator *headergen,
+WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
+					   WebPageHeaderGenerator *headergen,
 					   WebPageFooterGenerator *footergen)
 {
+  __url_manager           = url_manager;
   __page_header_generator = headergen;
   __page_footer_generator = footergen;
 }
@@ -183,23 +188,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   if ((0 != strcmp(method, "GET")) && (0 != strcmp(method, "POST")))
     return MHD_NO; /* unexpected method */
 
-  WebRequestProcessor *proc = NULL;
-  std::map<std::string, WebRequestProcessor *>::iterator __pit;
-  for (__pit = __processors.begin(); (proc == NULL) && (__pit != __processors.end()); ++__pit) {
-    if (surl.find(__pit->first) == 0) {
-      __active_baseurl = __pit->first;
-      proc = __pit->second;
-    }
-  }
-
-  if ( surl == "/" ) {
-    if ( __startpage_processor ) {
-      proc = __startpage_processor;
-    } else {
-      WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
-      ret = queue_static_reply(connection, &preply);
-    }
-  }
+  MutexLocker lock(__url_manager->mutex());
+  WebRequestProcessor *proc = __url_manager->find_processor(surl);
 
   if (proc) {
     char *urlc = strdup(url);
@@ -259,39 +249,15 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       }
     }
   } else {
-    WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-    ret = queue_static_reply(connection, &ereply);
+    if (surl == "/") {
+      WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
+      ret = queue_static_reply(connection, &preply);
+    } else {
+      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+      ret = queue_static_reply(connection, &ereply);
+    }
   }
   return ret;
-}
-
-/** Add a request processor.
- * @param url_prefix baseurl this processor should handle
- * @param processor processor for baseurl
- */
-void
-WebRequestDispatcher::add_processor(const char *url_prefix,
-				    WebRequestProcessor *processor)
-{
-  if (std::string(url_prefix) == "/") {
-    __startpage_processor = processor;
-  } else {
-    __processors[url_prefix] = processor;
-  }
-}
-
-
-/** Remove a request processor.
- * @param url_prefix baseurl the processor handled
- */
-void
-WebRequestDispatcher::remove_processor(const char *url_prefix)
-{
-  if (std::string(url_prefix) == "/") {
-    __startpage_processor = NULL;
-  } else {
-    __processors.erase(url_prefix);
-  }
 }
 
 } // end namespace fawkes

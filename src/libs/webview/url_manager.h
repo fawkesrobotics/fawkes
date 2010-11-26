@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  redirect_reply.h - Web request reply for a redirect
+ *  url_manager.h - Web URL manager
  *
- *  Created: Thu Feb 12 13:39:04 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Nov 25 21:53:07 2010
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,20 +20,36 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_REDIRECT_REPLY_H_
-#define __LIBS_WEBVIEW_REDIRECT_REPLY_H_
+#ifndef __LIBS_WEBVIEW_URL_MANAGER_H_
+#define __LIBS_WEBVIEW_URL_MANAGER_H_
 
-#include <webview/reply.h>
+#include <map>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class WebRedirectReply : public StaticWebReply
+class Mutex;
+class WebRequestProcessor;
+
+class WebUrlManager
 {
  public:
-  WebRedirectReply(std::string url);
+  WebUrlManager();
+  ~WebUrlManager();
+
+  void register_baseurl(const char *url_prefix, WebRequestProcessor *processor);
+  void unregister_baseurl(const char *url_prefix);
+
+  WebRequestProcessor * find_processor(std::string &url) const;
+  Mutex * mutex();
+
+ private:
+  Mutex                                        *__mutex;
+  WebRequestProcessor                          *__startpage_processor;
+  std::map<std::string, WebRequestProcessor *>  __processors;
 };
 
 } // end namespace fawkes
