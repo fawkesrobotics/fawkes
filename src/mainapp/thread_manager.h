@@ -48,7 +48,8 @@ class FawkesThreadManager
   FawkesThreadManager();
   virtual ~FawkesThreadManager();
 
-  void set_inifin(fawkes::ThreadInitializer *initializer, fawkes::ThreadFinalizer *finalizer);
+  void set_inifin(fawkes::ThreadInitializer *initializer,
+		  fawkes::ThreadFinalizer *finalizer);
 
   virtual void add(fawkes::ThreadList &tl)
   {
