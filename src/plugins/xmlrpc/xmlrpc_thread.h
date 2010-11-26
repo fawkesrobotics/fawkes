@@ -30,12 +30,14 @@
 #include <aspect/network.h>
 #include <aspect/logger.h>
 #include <aspect/plugin_director.h>
+#include <aspect/webview.h>
 
 #include <utils/logging/cache.h>
 
 namespace fawkes {
   class NetworkService;
   class WebRequestDispatcher;
+  class WebUrlManager;
   class WebServer;
 }
 
@@ -50,7 +52,8 @@ class XmlRpcThread
   public fawkes::BlackBoardAspect,
   public fawkes::NetworkAspect,
   public fawkes::LoggerAspect,
-  public fawkes::PluginDirectorAspect
+  public fawkes::PluginDirectorAspect,
+  public fawkes::WebviewAspect
 {
  public:
   XmlRpcThread();
@@ -66,11 +69,13 @@ class XmlRpcThread
  private:
   fawkes::WebServer            *__webserver;
   fawkes::WebRequestDispatcher *__dispatcher;
+  fawkes::WebUrlManager        *__url_manager;
 
   XmlRpcRequestProcessor       *__processor;
   XmlRpcPluginMethods          *__plugin_methods;
   XmlRpcLogMethods             *__log_methods;
 
+  bool                          __custom_server;
   unsigned int                  __cfg_port;
 
   fawkes::CacheLogger           __cache_logger;

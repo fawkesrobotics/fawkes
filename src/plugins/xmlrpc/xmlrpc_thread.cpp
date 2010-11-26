@@ -27,6 +27,7 @@
 
 #include <core/version.h>
 #include <webview/server.h>
+#include <webview/url_manager.h>
 #include <webview/request_dispatcher.h>
 
 using namespace fawkes;
@@ -56,42 +57,60 @@ XmlRpcThread::~XmlRpcThread()
 void
 XmlRpcThread::init()
 {
-  __cfg_port = config->get_uint("/xmlrpc/port");
+  try {
+    __custom_server = config->get_bool("/xmlrpc/custom_server");
+  } catch (Exception &e) {
+    __custom_server = false;
+  }
+  if (__custom_server) {
+    __cfg_port = config->get_uint("/xmlrpc/port");
+  }
 
   __cache_logger.clear();
 
-  __dispatcher = new WebRequestDispatcher();
-  __webserver  = new WebServer(__cfg_port, __dispatcher);
-
-  __processor  = new XmlRpcRequestProcessor(logger);
+  __processor   = new XmlRpcRequestProcessor(logger);
 
   xmlrpc_c::registry *registry = __processor->registry();
   __plugin_methods = new XmlRpcPluginMethods(registry, plugin_manager, logger);
   __log_methods    = new XmlRpcLogMethods(registry, &__cache_logger, logger);
 
-  __dispatcher->add_processor("/", __processor);
+  if (__custom_server) {
+    __url_manager = new WebUrlManager();
+    __dispatcher  = new WebRequestDispatcher(__url_manager);
+    __webserver   = new WebServer(__cfg_port, __dispatcher);
 
-  logger->log_info("XmlRpcThread", "Listening for HTTP connections on port %u", __cfg_port);
+    logger->log_info("XmlRpcThread", "Listening for HTTP connections on port %u",
+		     __cfg_port);
 
+    __url_manager->register_baseurl("/", __processor);
 
-  __xmlrpc_service = new NetworkService(nnresolver, "Fawkes XML-RPC on %h",
-					"_http._tcp", __cfg_port);
-  __xmlrpc_service->add_txt("fawkesver=%u.%u.%u", FAWKES_VERSION_MAJOR,
-			    FAWKES_VERSION_MINOR, FAWKES_VERSION_MICRO);
-  service_publisher->publish_service(__xmlrpc_service);
-
+    __xmlrpc_service = new NetworkService(nnresolver, "Fawkes XML-RPC on %h",
+					  "_http._tcp", __cfg_port);
+    __xmlrpc_service->add_txt("fawkesver=%u.%u.%u", FAWKES_VERSION_MAJOR,
+			      FAWKES_VERSION_MINOR, FAWKES_VERSION_MICRO);
+    service_publisher->publish_service(__xmlrpc_service);
+  } else {
+    set_opmode(Thread::OPMODE_WAITFORWAKEUP);
+    logger->log_info("XmlRpcThread", "Registering as /xmlrpc in webview");
+    webview_url_manager->register_baseurl("/xmlrpc", __processor);
+  }
 
 }
 
 void
 XmlRpcThread::finalize()
 {
-  service_publisher->unpublish_service(__xmlrpc_service);
-  delete __xmlrpc_service;
+  if (__custom_server) {
+    service_publisher->unpublish_service(__xmlrpc_service);
+    delete __xmlrpc_service;
 
-  delete __webserver;
-  delete __plugin_methods;
-  delete __dispatcher;
+    delete __webserver;
+    delete __plugin_methods;
+    delete __dispatcher;
+    delete __url_manager;
+  } else {
+    webview_url_manager->unregister_baseurl("/xmlrpc");
+  }
   delete __processor;
 }
 
@@ -99,5 +118,9 @@ XmlRpcThread::finalize()
 void
 XmlRpcThread::loop()
 {
-  __webserver->process();
+  if (__custom_server) {
+    __webserver->process();
+  } else {
+    
+  }
 }
