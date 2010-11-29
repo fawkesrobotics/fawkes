@@ -60,6 +60,9 @@
 #ifdef HAVE_PIKE_CAM
 #include <cams/pike.h>
 #endif
+#ifdef HAVE_KINECT_CAM
+#include <cams/kinect.h>
+#endif
 
 using namespace std;
 
@@ -195,6 +198,15 @@ CameraFactory::instance(const CameraArgumentParser *cap)
     c = new PikeCamera(cap);
 #else
     throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "kinect" ) {
+#ifdef HAVE_KINECT_CAM
+    c = new KinectCamera(cap);
+#else
+    throw UnknownCameraTypeException("No Kinect support at compile time");
 #endif
   }
 
