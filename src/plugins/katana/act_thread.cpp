@@ -70,6 +70,15 @@ KatanaActThread::init()
   __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
   __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
 
+#ifdef HAVE_OPENRAVE
+  __cfg_OR_enabled       = config->get_bool("/hardware/katana/openrave/enabled");
+  __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
+  __cfg_OR_auto_load_ik  = config->get_bool("/hardware/katana/openrave/auto_load_ik");
+  __cfg_OR_robot_file    = config->get_string("/hardware/katana/openrave/robot_file");
+#else
+  __cfg_OR_enabled       = false;
+#endif
+
   try {
     TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, __cfg_read_timeout, __cfg_write_timeout};
     __device.reset(new CCdlCOM(ccd, __cfg_device.c_str()));
@@ -96,9 +105,12 @@ KatanaActThread::init()
 
   __sensacq_thread.reset(new KatanaSensorAcquisitionThread(__katana, logger));
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
-  __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
   __gripper_thread = new KatanaGripperThread(__katana, logger,
 					     __cfg_gripper_pollint);
+  if(__cfg_OR_enabled)
+    {__goto_thread    = new KatanaGotoThreadOpenRAVE(__katana, logger, __cfg_goto_pollint);}
+  else
+    {__goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);}
 
   __sensacq_thread->start();
 
@@ -109,7 +121,7 @@ KatanaActThread::init()
   __tt.reset(new TimeTracker());
   __tt_count = 0;
   __ttc_read_sensor = __tt->add_class("Read Sensor");
-#endif  
+#endif
 
 }
 
@@ -125,6 +137,8 @@ KatanaActThread::finalize()
   __sensacq_thread->cancel();
   __sensacq_thread->join();
   __sensacq_thread.reset();
+
+  __goto_thread->finalize();
 
   // Setting to NULL also deletes instance (RefPtr)
   __calib_thread   = NULL;
@@ -305,12 +319,12 @@ KatanaActThread::loop()
     } else if (__katana_if->msgq_first_is<KatanaInterface::OpenGripperMessage>()) {
       KatanaInterface::OpenGripperMessage *msg = __katana_if->msgq_first(msg);
       __gripper_thread->set_mode(KatanaGripperThread::OPEN_GRIPPER);
-      start_motion(__gripper_thread, msg->id(), "Opening gripper");      
+      start_motion(__gripper_thread, msg->id(), "Opening gripper");
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::CloseGripperMessage>()) {
       KatanaInterface::CloseGripperMessage *msg = __katana_if->msgq_first(msg);
       __gripper_thread->set_mode(KatanaGripperThread::CLOSE_GRIPPER);
-      start_motion(__gripper_thread, msg->id(), "Closing gripper");      
+      start_motion(__gripper_thread, msg->id(), "Closing gripper");
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetEnabledMessage>()) {
       KatanaInterface::SetEnabledMessage *msg = __katana_if->msgq_first(msg);
@@ -352,7 +366,7 @@ KatanaActThread::loop()
     __tt_count = 0;
     __tt->print_to_stdout();
   }
-#endif  
+#endif
 }
 
 

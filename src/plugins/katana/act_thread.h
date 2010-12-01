@@ -26,6 +26,7 @@
 #include "motion_thread.h"
 #include "calib_thread.h"
 #include "goto_thread.h"
+#include "goto_thread_openrave.h"
 #include "gripper_thread.h"
 #include "sensacq_thread.h"
 
@@ -102,6 +103,11 @@ class KatanaActThread
   float          __cfg_park_phi;
   float          __cfg_park_theta;
   float          __cfg_park_psi;
+
+  bool           __cfg_OR_enabled;
+  bool           __cfg_OR_use_viewer;
+  bool           __cfg_OR_auto_load_ik;
+  std::string    __cfg_OR_robot_file;
 
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
