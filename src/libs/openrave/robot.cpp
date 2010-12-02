@@ -173,71 +173,48 @@ OpenRAVERobot::setTargetAxisAngle(float& transX, float& transY, float& transZ, f
   return setTargetTransform(trans, rot);
 }
 
-/** Set target, given transition, and rotation as ZXZ Euler-rotation.
+/** Set target, given transition, and Euler-rotation.
+ * @param type Euler-rotation type (ZXZ, ZYZ, ...)
  * @param transX x-transition
  * @param transY y-transition
  * @param transZ z-transition
- * @param phi 1st rotaion (on z-axis)
- * @param theta 2nd rotaion (on x-axis)
- * @param psi 3rd rotaion (on z-axis)
+ * @param phi 1st rotation
+ * @param theta 2nd rotation
+ * @param psi 3rd rotation
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetEulerZXZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
+OpenRAVERobot::setTargetEuler(euler_rotation_t type, float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
 {
   Vector trans(transX, transY, transZ);
-
   std::vector<float> rot(9, 0.f); //rotations vector
-  rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
-  rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
-  rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
+
+  switch(type) {
+    case (EULER_ZXZ) :
+        rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
+        rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
+        rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
+        break;
+
+    case (EULER_ZYZ) :
+        rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
+        rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
+        rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
+        break;
+
+    case (EULER_ZYX) :
+        rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
+        rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
+        rot.at(6) = psi;   //3rd row, 1st value; rotation on x-axis
+        break;
+
+    default :
+        return false;
+  }
 
   return setTargetEuler(trans, rot);
 }
 
-/** Set target, given transition, and rotation as ZYZ Euler-rotation.
- * @param transX x-transition
- * @param transY y-transition
- * @param transZ z-transition
- * @param phi 1st rotaion (on z-axis)
- * @param theta 2nd rotaion (on y-axis)
- * @param psi 3rd rotaion (on z-axis)
- * @return true if solvable, false otherwise
- */
-bool
-OpenRAVERobot::setTargetEulerZYZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
-{
-  Vector trans(transX, transY, transZ);
-
-  std::vector<float> rot(9, 0.f); //rotations vector
-  rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
-  rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
-  rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
-
-  return setTargetEuler(trans, rot);
-}
-
-/** Set target, given transition, and rotation as ZYX Euler-rotation.
- * @param transX x-transition
- * @param transY y-transition
- * @param transZ z-transition
- * @param phi 1st rotaion (on z-axis)
- * @param theta 2nd rotaion (on y-axis)
- * @param psi 3rd rotaion (on x-axis)
- * @return true if solvable, false otherwise
- */
-bool
-OpenRAVERobot::setTargetEulerZYX (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
-{
-  Vector trans(transX, transY, transZ);
-
-  std::vector<float> rot(9, 0.f); //rotations vector
-  rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
-  rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
-  rot.at(6) = psi;   //3rd row, 1st value; rotation on x-axis
-
-  return setTargetEuler(trans, rot);
-}
 
 // just temporary! no IK check etc involved
 void

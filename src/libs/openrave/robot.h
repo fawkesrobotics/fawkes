@@ -23,6 +23,8 @@
 #ifndef __OPENRAVE_ROBOT_H
 #define __OPENRAVE_ROBOT_H
 
+#include "types.h"
+
 #include <rave/rave.h>
 #include <vector>
 
@@ -51,9 +53,7 @@ class OpenRAVERobot
 
   virtual bool setTargetQuat	 (float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ);
   virtual bool setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ);
-  virtual bool setTargetEulerZXZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
-  virtual bool setTargetEulerZYZ (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
-  virtual bool setTargetEulerZYX (float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
+  virtual bool setTargetEuler(euler_rotation_t type, float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
   virtual void setTargetAngles( std::vector<float>& angles ); // just temporary
 
   virtual void getTargetAngles(std::vector<float>& to); // not needed
