@@ -52,7 +52,7 @@ OpenRAVEConnector::~OpenRAVEConnector()
 /** Setup stuff .
  * MUST be called before starting to work with OR stuff*/
 void
-OpenRAVEConnector::setup(const std::string& filenameRobot)
+OpenRAVEConnector::setup(const std::string& filenameRobot, bool autogenerateIK)
 {
   try {
     OpenRAVE::RaveInitialize(true);
@@ -71,6 +71,10 @@ OpenRAVEConnector::setup(const std::string& filenameRobot)
   __robot->setReady();
 
   __env->lock();
+
+  if( autogenerateIK )
+    __env->loadIKSolver(__robot);
+
 }
 
 /** Start Viewer */
@@ -112,6 +116,15 @@ bool
 OpenRAVEConnector::setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ)
 {
   return __robot->setTargetQuat(transX, transY, transZ, angle, axisX, axisY, axisZ);
+}
+
+/** Set target, given three euler rotations
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRAVEConnector::setTargetEuler(euler_rotation_t type, float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
+{
+  return __robot->setTargetEuler(type, transX, transY, transZ, phi, theta, psi);
 }
 
 /** Run planner on previously set target.

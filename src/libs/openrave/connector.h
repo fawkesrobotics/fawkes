@@ -23,6 +23,8 @@
 #ifndef __OPENRAVE_CONNECTOR_H_
 #define __OPENRAVE_CONNECTOR_H_
 
+#include "types.h"
+
 #include <rave/rave.h>
 
 namespace fawkes {
@@ -44,13 +46,14 @@ class OpenRAVEConnector
   OpenRAVEConnector(fawkes::Logger* logger = 0);
   virtual ~OpenRAVEConnector();
 
-  virtual void setup(const std::string& filenameRobot);
+  virtual void setup(const std::string& filenameRobot, bool autogenerateIK=false);
 
   virtual void setManipulator(OpenRAVEManipulator* manip);
 
   virtual void setTarget(std::vector<float>& angles); //temporary. TODO: should be euler/quat/axisangle etc
   virtual bool setTargetQuat	 (float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ);
   virtual bool setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ);
+  virtual bool setTargetEuler( euler_rotation_t type, float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
 
   virtual void startViewer() const;
   virtual void runPlanner();
