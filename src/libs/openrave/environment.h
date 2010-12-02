@@ -54,6 +54,7 @@ class OpenRAVEEnvironment
   virtual void disableDebug();
 
   virtual void startViewer();
+  virtual void loadIKSolver(OpenRAVERobot* robot);
   virtual void runPlanner(OpenRAVERobot* robot);
 
   virtual void addRobot(const std::string& filename);

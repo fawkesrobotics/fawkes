@@ -26,6 +26,8 @@
 #include <utils/logging/logger.h>
 #include <core/exceptions/software.h>
 
+#include <sstream>
+
 using namespace OpenRAVE;
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -187,6 +189,24 @@ OpenRAVEEnvironment::startViewer()
       {__logger->log_error("OpenRAVE Environment", "Could not load viewr. Ex:%s", e.what());}
     throw;
   }
+}
+
+/** Autogenerate IKfast IK solver for robot
+ * @param robot pointer to OpenRAVERobot object
+ */
+void
+OpenRAVEEnvironment::loadIKSolver(OpenRAVERobot* robot)
+{
+  ProblemInstancePtr ikfast = RaveCreateProblem(__env,"ikfast");
+  RobotBasePtr robotBase = robot->getRobotPtr();
+  __env->LoadProblem(ikfast,"");
+
+  std::stringstream ssin,ssout;
+  ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)IkParameterization::Type_Transform6D;
+  // if necessary, add free inc for degrees of freedom
+  //ssin << " " << 0.04f;
+  if( !ikfast->SendCommand(ssout,ssin) )
+    {throw fawkes::Exception("OpenRAVE Environment: Could not load ik solver");}
 }
 
 /** Plan collision-free path for current and target manipulator
