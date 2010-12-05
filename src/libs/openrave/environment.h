@@ -70,6 +70,8 @@ class OpenRAVEEnvironment
 
   OpenRAVE::EnvironmentBasePtr	__env;
   OpenRAVE::PlannerBasePtr      __planner;
+
+  bool  __viewerEnabled;
 };
 } // end of namespace fawkes
 

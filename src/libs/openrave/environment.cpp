@@ -60,7 +60,8 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
  * @param logger pointer to fawkes logger
  */
 OpenRAVEEnvironment::OpenRAVEEnvironment(fawkes::Logger* logger) :
-  __logger( logger )
+  __logger( logger ),
+  __viewerEnabled( 0 )
 {
 }
 
@@ -245,6 +246,10 @@ OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
   for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
     trajRobot->push_back((*it).q);
   }
+
+  // display motion in viewer
+  if( __viewerEnabled )
+    {robot->getRobotPtr()->SetActiveMotion(traj);}
 }
 
 
