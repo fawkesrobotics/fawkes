@@ -48,8 +48,10 @@ class OpenRAVERobot
   // build/load robot parts
   virtual void load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
   virtual void setReady();
+  virtual void calibrate(float& deviceTransX, float& deviceTransY, float& deviceTransZ);
   virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator(); // not needed
+
 
   virtual bool setTargetQuat	 (float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ);
   virtual bool setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ);
@@ -78,6 +80,10 @@ class OpenRAVERobot
   OpenRAVE::PlannerBase::PlannerParametersPtr   __plannerParams;
   std::vector< std::vector<float> >*            __traj;
   std::vector<float>                            __anglesTarget;
+
+  float         __transOffsetX;
+  float         __transOffsetY;
+  float         __transOffsetZ;
 };
 
 } // end of namespace fawkes

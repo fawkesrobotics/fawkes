@@ -61,6 +61,10 @@ void
 OpenRAVERobot::init()
 {
   __traj = new std::vector< std::vector<float> >();
+
+  __transOffsetX = 0.f;
+  __transOffsetY = 0.f;
+  __transOffsetZ = 0.f;
 }
 
 
@@ -111,6 +115,29 @@ OpenRAVERobot::setReady()
 
   if(__logger)
     {__logger->log_debug("OpenRAVE Robot", "Robot ready.");}
+}
+
+/** Calibrate transition offset between coordinate systems
+ * of real device and OpenRAVE model.
+ * Sets model's angles to current device's angles (from __manip),
+ * and compares transitions.
+ * @param transX transition on x-axis (real device)
+ * @param transY transition on y-axis (real device)
+ * @param transZ transition on z-axis (real device)
+ */
+void
+OpenRAVERobot::calibrate(float& deviceTransX, float& deviceTransY, float& deviceTransZ)
+{
+  // get device's current angles, and set them for OpenRAVE model
+  std::vector<float> angles;
+  __manip->getAngles(angles);
+  __robot->SetActiveDOFValues(angles);
+
+  // get model's current transition and compare
+  Transform trans = __arm->GetEndEffectorTransform();
+  __transOffsetX = trans.trans[0] - deviceTransX;
+  __transOffsetY = trans.trans[1] - deviceTransY;
+  __transOffsetZ = trans.trans[2] - deviceTransZ;
 }
 
 /** Set pointer to OpenRAVEManipulator object.
@@ -191,12 +218,14 @@ OpenRAVERobot::setTargetEuler(euler_rotation_t type, float& transX, float& trans
 
   switch(type) {
     case (EULER_ZXZ) :
+        __logger->log_debug("TEST ZXZ", "%f %f %f %f %f %f", transX, transY, transZ, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
         break;
 
     case (EULER_ZYZ) :
+        __logger->log_debug("TEST ZYZ", "%f %f %f %f %f %f", transX, transY, transZ, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
@@ -253,6 +282,8 @@ OpenRAVERobot::getPlannerParams() const
   __manipGoal->getAngles(__plannerParams->vgoalconfig);
   __manip->getAngles(__plannerParams->vinitialconfig);
 
+  __robot->SetActiveDOFValues(__plannerParams->vinitialconfig);
+
   return __plannerParams;
 }
 
@@ -301,6 +332,10 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
   target.trans = trans;
   target.rot = rotQuat;
 
+  target.trans[0] += __transOffsetX;
+  target.trans[1] += __transOffsetY;
+  target.trans[2] += __transOffsetZ;
+
   bool success = __arm->FindIKSolution(IkParameterization(target),__anglesTarget,true);
   __manipGoal->setAngles(__anglesTarget);
 
@@ -330,6 +365,10 @@ OpenRAVERobot::setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotat
   Vector r1(rotations.at(0), rotations.at(1), rotations.at(2));
   Vector r2(rotations.at(3), rotations.at(4), rotations.at(5));
   Vector r3(rotations.at(6), rotations.at(7), rotations.at(8));
+
+  __logger->log_debug("TEST", "Rot1: %f %f %f", r1[0], r1[1], r1[2]);
+  __logger->log_debug("TEST", "Rot2: %f %f %f", r2[0], r2[1], r2[2]);
+  __logger->log_debug("TEST", "Rot3: %f %f %f", r3[0], r3[1], r3[2]);
 
   Vector q1 = quatFromAxisAngle(r1);
   Vector q2 = quatFromAxisAngle(r2);
