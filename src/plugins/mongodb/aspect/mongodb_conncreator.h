@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  mongodb.h - MongoDB aspect for Fawkes
+ *  mongodb_conncreator.h - Fawkes MongoDB connection creator
  *
- *  Created: Mon Dec 06 00:24:43 2010
+ *  Created: Mon Dec 06 21:20:16 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,10 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_H_
-#define __PLUGINS_MONGODB_ASPECT_MONGODB_H_
-
-#include <aspect/aspect.h>
+#ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
+#define __PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
 
 namespace mongo {
   class DBClientBase;
@@ -35,26 +33,14 @@ namespace fawkes {
 }
 #endif
 
-class MongoDBAspect : public virtual Aspect
+class MongoDBConnCreator
 {
-  friend class MongoDBAspectIniFin;
-
  public:
-  MongoDBAspect();
-  MongoDBAspect(const char *dbname, const char *user, const char *clearpwd);
-  virtual ~MongoDBAspect();
+  virtual mongo::DBClientBase *  create_client(const char *dbname,
+					       const char *name,
+					       const char *clearpwd) = 0;
 
-
- protected:
-  mongo::DBClientBase *mongodb_client;
-
- private:
-  void init_MongoDBAspect(mongo::DBClientBase *mongodb_client);
-
- private:
-  char *__mongodb_name;
-  char *__mongodb_user;
-  char *__mongodb_pass;
+  virtual void delete_client(mongo::DBClientBase *client) = 0;
 };
 
 } // end namespace fawkes

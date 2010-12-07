@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  mongodb.h - MongoDB aspect for Fawkes
+ *  mongodb_inifin.h - Fawkes MongoDBAspect initializer/finalizer
  *
- *  Created: Mon Dec 06 00:24:43 2010
+ *  Created: Mon Dec 06 21:12:05 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,40 +21,30 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_H_
-#define __PLUGINS_MONGODB_ASPECT_MONGODB_H_
+#ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_INIFIN_H_
+#define __PLUGINS_MONGODB_ASPECT_MONGODB_INIFIN_H_
 
-#include <aspect/aspect.h>
+#include <aspect/inifins/inifin.h>
 
-namespace mongo {
-  class DBClientBase;
-}
+#include <vector>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class MongoDBAspect : public virtual Aspect
+class MongoDBConnCreator;
+
+class MongoDBAspectIniFin : public AspectIniFin
 {
-  friend class MongoDBAspectIniFin;
-
  public:
-  MongoDBAspect();
-  MongoDBAspect(const char *dbname, const char *user, const char *clearpwd);
-  virtual ~MongoDBAspect();
+  MongoDBAspectIniFin(MongoDBConnCreator *conn_creator);
 
-
- protected:
-  mongo::DBClientBase *mongodb_client;
+  virtual void init(Thread *thread);
+  virtual void finalize(Thread *thread);
 
  private:
-  void init_MongoDBAspect(mongo::DBClientBase *mongodb_client);
-
- private:
-  char *__mongodb_name;
-  char *__mongodb_user;
-  char *__mongodb_pass;
+  MongoDBConnCreator *__conn_creator;
 };
 
 } // end namespace fawkes

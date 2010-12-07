@@ -90,7 +90,7 @@ MongoDBAspect::~MongoDBAspect()
 void
 MongoDBAspect::init_MongoDBAspect(mongo::DBClientBase *mongodb_client)
 {
-  this->mongodb_client = std::auto_ptr<mongo::DBClientBase>(mongodb_client);
+  this->mongodb_client = mongodb_client;
 }
 
 } // end namespace fawkes

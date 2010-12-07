@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  mongodb.h - MongoDB aspect for Fawkes
+ *  mongodb_conncreator.cpp - Fawkes MongoDB connection creator
  *
- *  Created: Mon Dec 06 00:24:43 2010
+ *  Created: Mon Dec 06 21:28:54 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,42 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_H_
-#define __PLUGINS_MONGODB_ASPECT_MONGODB_H_
-
-#include <aspect/aspect.h>
-
-namespace mongo {
-  class DBClientBase;
-}
+#include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class MongoDBAspect : public virtual Aspect
-{
-  friend class MongoDBAspectIniFin;
-
- public:
-  MongoDBAspect();
-  MongoDBAspect(const char *dbname, const char *user, const char *clearpwd);
-  virtual ~MongoDBAspect();
-
-
- protected:
-  mongo::DBClientBase *mongodb_client;
-
- private:
-  void init_MongoDBAspect(mongo::DBClientBase *mongodb_client);
-
- private:
-  char *__mongodb_name;
-  char *__mongodb_user;
-  char *__mongodb_pass;
-};
-
 } // end namespace fawkes
-
-#endif
