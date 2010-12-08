@@ -27,19 +27,24 @@
 using namespace mongo;
 using namespace fawkes;
 
+/** Client configuration. */
 class MongoDBThread::ClientConf
 {
  public:
+  /** Connection mode enumeration. */
   typedef enum {
-    CONNECTION,
-    REPLICA_SET,
-    SYNC_CLUSTER
+    CONNECTION,		/**< connect to single node */
+    REPLICA_SET,	/**< connect to replica set */
+    SYNC_CLUSTER	/**< connect to sync cluster */
   } ConnectionMode;
 
   ClientConf(fawkes::Configuration *config, fawkes::Logger *logger,
 	     std::string cfgname, std::string prefix);
   mongo::DBClientBase * create_client();
 
+  /** Check if configuration is active.
+   * @return true if configuration is active, false otherwise
+   */
   bool is_active() const { return __active; }
 
  private:
@@ -166,6 +171,15 @@ MongoDBThread::delete_client(mongo::DBClientBase *client)
 }
 
 
+/** Read authentication info for given configuration.
+ * This will first try to read the fields auth_dbname, auth_username, and
+ * auth_password. If that fails, the auth/ subdirectory is crawled for subtrees
+ * that contain the just named entries.
+ * @param config configuration to query
+ * @param logger logger for info messages
+ * @param cfgname configuration name
+ * @param prefix configuration path prefix
+ */
 void
 MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
 					 std::string cfgname, std::string prefix)
@@ -204,6 +218,13 @@ MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
   }
 }
 					 
+/** Constructor.
+ * This will read the given configuration.
+ * @param config configuration to query
+ * @param logger logger for info messages
+ * @param cfgname configuration name
+ * @param prefix configuration path prefix
+ */
 MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
 				      std::string cfgname, std::string prefix)
 {
@@ -252,6 +273,9 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
   }
 }
 
+/** Create MongoDB client for this configuration.
+ * @return MongoDB client
+ */
 mongo::DBClientBase *
 MongoDBThread::ClientConf::create_client()
 {
