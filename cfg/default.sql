@@ -280,4 +280,7 @@ INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_con
 INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/display_duration','unsigned int',120,'Time to show marker elements when not updated. Useful to still analyze the seen after program has been terminated; sec');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/horizontal_viewing_angle','float',57.0,'Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/vertical_viewing_angle','float',43.0,'Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg');
+INSERT INTO "config" VALUES('/plugins/mongodb/clients/default/active','bool',1,'Activate this client configuration?');
+INSERT INTO "config" VALUES('/plugins/mongodb/clients/default/mode','string','connection','Client mode: connection, replica_set, or sync_cluster');
+INSERT INTO "config" VALUES('/plugins/mongodb/clients/default/hostport','string','localhost','Host and optionally port (as :1234 suffix) for connection mode client');
 COMMIT;
