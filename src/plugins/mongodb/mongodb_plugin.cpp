@@ -22,6 +22,7 @@
 
 #include "mongodb_plugin.h"
 #include "mongodb_thread.h"
+#include "mongodb_logger_thread.h"
 
 using namespace fawkes;
 
@@ -40,6 +41,12 @@ MongoDBPlugin::MongoDBPlugin(Configuration *config)
   : Plugin(config)
 {
   thread_list.push_back(new MongoDBThread());
+
+  bool enable_logger = true;
+  try {
+    enable_logger = config->get_bool("/plugins/mongodb/enable_logger");
+  } catch (Exception &e) {}
+  if (enable_logger) thread_list.push_back(new MongoDBLoggerThread());
 }
 
 
