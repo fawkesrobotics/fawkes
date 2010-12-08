@@ -40,10 +40,10 @@ class MongoDBAspect : public virtual Aspect
   friend class MongoDBAspectIniFin;
 
  public:
-  MongoDBAspect();
-  MongoDBAspect(const char *dbname, const char *user, const char *clearpwd);
+  MongoDBAspect(const char *config_prefix = 0);
   virtual ~MongoDBAspect();
 
+  const char * mongodb_config_name() const { return __config_name; }
 
  protected:
   mongo::DBClientBase *mongodb_client;
@@ -52,9 +52,7 @@ class MongoDBAspect : public virtual Aspect
   void init_MongoDBAspect(mongo::DBClientBase *mongodb_client);
 
  private:
-  char *__mongodb_name;
-  char *__mongodb_user;
-  char *__mongodb_pass;
+  char *__config_name;
 };
 
 } // end namespace fawkes

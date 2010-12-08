@@ -32,6 +32,16 @@ namespace fawkes {
 }
 #endif
 
+/** @class MongoDBAspectIniFin <plugins/mongodb/aspect/mongodb_inifin.h>
+ * MongoDBAspect initializer/finalizer.
+ * This initializer/finalizer will use the MongoDBConnCreator instance to
+ * create client instances as requested by a thread.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param conn_creator connection creator to use for initializing threads
+ */
 MongoDBAspectIniFin::MongoDBAspectIniFin(MongoDBConnCreator *conn_creator)
   : AspectIniFin("MongoDBAspect")
 {
@@ -49,10 +59,8 @@ MongoDBAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  mongo::DBClientBase *client = 
-    __conn_creator->create_client(mongodb_thread->__mongodb_name,
-				  mongodb_thread->__mongodb_user,
-				  mongodb_thread->__mongodb_pass);
+  mongo::DBClientBase *client =
+    __conn_creator->create_client(mongodb_thread->mongodb_config_name());
 
   mongodb_thread->init_MongoDBAspect(client);
 }

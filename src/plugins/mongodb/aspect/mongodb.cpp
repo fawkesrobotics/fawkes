@@ -42,6 +42,12 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+/** @fn const char * MongoDBAspect::mongodb_config_name() const
+ * Get MongoDB configuration name.
+ * @return MongoDB path name for the configuration settings from the
+ * global configuration. Note that this may return 0 if the default
+ * configuration should be used.
+ */
 
 /** @var mongo::DBClientBase *  MongoDBAspect::mongodb_client
  * MongoDB client to use to interact with the database. If database name, user
@@ -50,34 +56,21 @@ namespace fawkes {
  * initialized).
  */
 
-/** Constructor. */
-MongoDBAspect::MongoDBAspect()
-{
-  add_aspect("MongoDBAspect");
-  __mongodb_name = __mongodb_user = __mongodb_pass = 0;
-}
-
-/** Constructor with authentication.
- * @param dbname database name to authenticate
- * @param user username
- * @param clearpwd password in clear text
+/** Constructor.
+ * @param config_name optional configuration name from which the
+ * configuration for the database is read from the global configuration.
  */
-MongoDBAspect::MongoDBAspect(const char *dbname,
-			     const char *user, const char *clearpwd)
+MongoDBAspect::MongoDBAspect(const char *config_name)
 {
   add_aspect("MongoDBAspect");
-  __mongodb_name = strdup(dbname);
-  __mongodb_user = strdup(user);
-  __mongodb_pass = strdup(clearpwd);
+  __config_name = config_name ? strdup(config_name) : 0;
 }
 
 
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
-  if (__mongodb_name)  free(__mongodb_name);
-  if (__mongodb_user)  free(__mongodb_user);
-  if (__mongodb_pass)  free(__mongodb_pass);
+  if (__config_name)  free(__config_name);
 }
 
 
