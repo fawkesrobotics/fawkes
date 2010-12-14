@@ -69,7 +69,7 @@ class KickerInterface : public Interface
     int32_t num_kicks_right; /**< 
       Number of Right-Kicks
      */
-    GuideBallSideEnum guide_ball_side; /**< Side where the ball
+    int32_t guide_ball_side; /**< Side where the ball
       guidance arm is currently erected. */
     uint32_t current_intensity; /**< 
       The currently set intensity.
@@ -150,7 +150,7 @@ class KickerInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      GuideBallSideEnum guide_ball_side; /**< Side where to guide the ball and erect the arm. */
+      int32_t guide_ball_side; /**< Side where to guide the ball and erect the arm. */
     } GuideBallMessage_data_t;
 #pragma pack(pop)
 

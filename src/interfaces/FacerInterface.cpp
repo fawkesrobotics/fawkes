@@ -107,7 +107,7 @@ FacerInterface::tostring_if_facer_opmode_t(if_facer_opmode_t value) const
 FacerInterface::if_facer_opmode_t
 FacerInterface::opmode() const
 {
-  return data->opmode;
+  return (FacerInterface::if_facer_opmode_t)data->opmode;
 }
 
 /** Get maximum length of opmode value.
@@ -858,7 +858,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const SetOpmodeMessage *m) : 
 FacerInterface::if_facer_opmode_t
 FacerInterface::SetOpmodeMessage::opmode() const
 {
-  return data->opmode;
+  return (FacerInterface::if_facer_opmode_t)data->opmode;
 }
 
 /** Get maximum length of opmode value.

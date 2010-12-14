@@ -197,7 +197,7 @@ GameStateInterface::set_game_state(const uint32_t new_game_state)
 GameStateInterface::if_gamestate_team_t
 GameStateInterface::state_team() const
 {
-  return data->state_team;
+  return (GameStateInterface::if_gamestate_team_t)data->state_team;
 }
 
 /** Get maximum length of state_team value.
@@ -228,7 +228,7 @@ GameStateInterface::set_state_team(const if_gamestate_team_t new_state_team)
 GameStateInterface::if_gamestate_team_t
 GameStateInterface::our_team() const
 {
-  return data->our_team;
+  return (GameStateInterface::if_gamestate_team_t)data->our_team;
 }
 
 /** Get maximum length of our_team value.
@@ -259,7 +259,7 @@ GameStateInterface::set_our_team(const if_gamestate_team_t new_our_team)
 GameStateInterface::if_gamestate_goalcolor_t
 GameStateInterface::our_goal_color() const
 {
-  return data->our_goal_color;
+  return (GameStateInterface::if_gamestate_goalcolor_t)data->our_goal_color;
 }
 
 /** Get maximum length of our_goal_color value.
@@ -290,7 +290,7 @@ GameStateInterface::set_our_goal_color(const if_gamestate_goalcolor_t new_our_go
 GameStateInterface::if_gamestate_half_t
 GameStateInterface::half() const
 {
-  return data->half;
+  return (GameStateInterface::if_gamestate_half_t)data->half;
 }
 
 /** Get maximum length of half value.
@@ -352,7 +352,7 @@ GameStateInterface::set_kickoff(const bool new_kickoff)
 GameStateInterface::if_gamestate_role_t
 GameStateInterface::role() const
 {
-  return data->role;
+  return (GameStateInterface::if_gamestate_role_t)data->role;
 }
 
 /** Get maximum length of role value.
@@ -545,7 +545,7 @@ GameStateInterface::SetTeamColorMessage::SetTeamColorMessage(const SetTeamColorM
 GameStateInterface::if_gamestate_team_t
 GameStateInterface::SetTeamColorMessage::our_team() const
 {
-  return data->our_team;
+  return (GameStateInterface::if_gamestate_team_t)data->our_team;
 }
 
 /** Get maximum length of our_team value.
@@ -725,7 +725,7 @@ GameStateInterface::SetStateTeamMessage::SetStateTeamMessage(const SetStateTeamM
 GameStateInterface::if_gamestate_team_t
 GameStateInterface::SetStateTeamMessage::state_team() const
 {
-  return data->state_team;
+  return (GameStateInterface::if_gamestate_team_t)data->state_team;
 }
 
 /** Get maximum length of state_team value.

@@ -59,7 +59,7 @@ class SkillerDebugInterface : public Interface
     char graph[8192]; /**< 
       The selected graph in a dot string representation.
      */
-    GraphDirectionEnum graph_dir; /**< 
+    int32_t graph_dir; /**< 
       Primary direction of current graph.
      */
     bool graph_colored; /**< 
@@ -109,7 +109,7 @@ class SkillerDebugInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      GraphDirectionEnum graph_dir; /**< 
+      int32_t graph_dir; /**< 
       Primary direction of current graph.
      */
     } SetGraphDirectionMessage_data_t;

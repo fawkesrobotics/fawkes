@@ -207,7 +207,7 @@ SkillerInterface::set_exclusive_controller(const uint32_t new_exclusive_controll
 SkillerInterface::SkillStatusEnum
 SkillerInterface::status() const
 {
-  return data->status;
+  return (SkillerInterface::SkillStatusEnum)data->status;
 }
 
 /** Get maximum length of status value.

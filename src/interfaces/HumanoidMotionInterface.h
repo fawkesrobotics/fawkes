@@ -67,7 +67,7 @@ class HumanoidMotionInterface : public Interface
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     bool moving; /**< True if the robot is currently moving. */
-    LegEnum supporting_leg; /**< Marks the supporting leg */
+    int32_t supporting_leg; /**< Marks the supporting leg */
     float max_step_length; /**< 
       Maximum length of a footstep in m.
      */
@@ -434,7 +434,7 @@ class HumanoidMotionInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      LegEnum leg; /**< Leg to kick with */
+      int32_t leg; /**< Leg to kick with */
       float strength; /**< Kick strength */
     } KickMessage_data_t;
 #pragma pack(pop)
@@ -519,7 +519,7 @@ class HumanoidMotionInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      StandupEnum from_pos; /**< Position from where to standup. */
+      int32_t from_pos; /**< Position from where to standup. */
     } StandupMessage_data_t;
 #pragma pack(pop)
 
@@ -581,7 +581,7 @@ class HumanoidMotionInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      StiffnessMotionPatternEnum motion_pattern; /**< the motion pattern to update */
+      int32_t motion_pattern; /**< the motion pattern to update */
       float head_yaw; /**< head_yaw */
       float head_pitch; /**< head_pitch */
       float l_shoulder_pitch; /**< l_shoulder_pitch */

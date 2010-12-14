@@ -383,7 +383,7 @@ VisualDisplay2DInterface::AddCartLineMessage::set_y(unsigned int index, const fl
 VisualDisplay2DInterface::LineStyle
 VisualDisplay2DInterface::AddCartLineMessage::style() const
 {
-  return data->style;
+  return (VisualDisplay2DInterface::LineStyle)data->style;
 }
 
 /** Get maximum length of style value.
@@ -637,7 +637,7 @@ VisualDisplay2DInterface::AddCartCircleMessage::set_radius(const float new_radiu
 VisualDisplay2DInterface::LineStyle
 VisualDisplay2DInterface::AddCartCircleMessage::style() const
 {
-  return data->style;
+  return (VisualDisplay2DInterface::LineStyle)data->style;
 }
 
 /** Get maximum length of style value.
@@ -925,7 +925,7 @@ VisualDisplay2DInterface::AddCartRectMessage::set_height(const float new_height)
 VisualDisplay2DInterface::LineStyle
 VisualDisplay2DInterface::AddCartRectMessage::style() const
 {
-  return data->style;
+  return (VisualDisplay2DInterface::LineStyle)data->style;
 }
 
 /** Get maximum length of style value.
@@ -1184,7 +1184,7 @@ VisualDisplay2DInterface::AddCartTextMessage::set_text(const char * new_text)
 VisualDisplay2DInterface::Anchor
 VisualDisplay2DInterface::AddCartTextMessage::anchor() const
 {
-  return data->anchor;
+  return (VisualDisplay2DInterface::Anchor)data->anchor;
 }
 
 /** Get maximum length of anchor value.
