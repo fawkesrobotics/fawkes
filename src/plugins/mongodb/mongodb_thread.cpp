@@ -146,7 +146,6 @@ MongoDBThread::finalize()
 void
 MongoDBThread::loop()
 {
-  logger->log_debug(name(), "loop");
 }
 
 mongo::DBClientBase *
