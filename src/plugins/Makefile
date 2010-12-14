@@ -21,7 +21,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser flite joystick openrave katana pantilt roomba nao robotino \
 	  perception \
 	  skiller luaagent worldmodel laserht laser-filter laser-pointclouds \
-	  static_transforms \
+	  static_transforms mongodb mongolog \
 	  openni refboxcomm ros player xmlrpc \
 	  readylogagent
 	  #festival
@@ -32,4 +32,5 @@ luaagent: skiller
 rrdweb: rrd
 katana: openrave
 perception: ros
+mongolog: mongodb
 
