@@ -47,6 +47,8 @@ class MongoDBThread::ClientConf
    */
   bool is_active() const { return __active; }
 
+  void log(Logger *logger, const char *component, const char *indent);
+
  private:
   void read_authinfo(Configuration *config, Logger *logger,
 		     std::string cfgname, std::string prefix);
@@ -118,6 +120,7 @@ MongoDBThread::init()
 	__configs[cfg_name] = conf;
 	logger->log_info(name(), "Added MongoDB client configuration %s",
 			 cfg_name.c_str());
+	conf->log(logger, name(), "  ");
       } catch (Exception &e) {
 	logger->log_warn(name(), "Invalid MongoDB client config %s, ignoring, "
 			 "exception follows.", cfg_name.c_str());
@@ -335,4 +338,67 @@ MongoDBThread::ClientConf::create_client()
   }
 
   return client;
+}
+
+
+/** Write client configuration information to log.
+ * @param logger logger to write to
+ * @param component component to pass to logger
+ * @param indent indentation to put before each string
+ */
+void
+MongoDBThread::ClientConf::log(Logger *logger, const char *component,
+			       const char *indent)
+{
+  switch (__mode) {
+  case REPLICA_SET:
+    {
+      logger->log_info(component, "%smode:   replica set", indent);
+      logger->log_info(component, "%shosts:", indent);
+      std::vector<mongo::HostAndPort>::iterator i;
+      for (i = __replicaset_hostports.begin();
+	   i != __replicaset_hostports.end();
+	   ++i)
+      {
+	logger->log_info(component, "%s  - %s:", indent, i->toString().c_str());
+      }
+
+      if (! __auth_infos.empty()) {
+	logger->log_info(component, "%sauth infos:", indent);
+	std::list<AuthInfo>::iterator a;
+	for (a = __auth_infos.begin(); a != __auth_infos.end(); ++a) {
+	  logger->log_info(component, "%s  - %s @ %s", indent, a->username.c_str(),
+			   a->dbname.c_str());
+	}
+      }
+    }
+    break;
+
+  case SYNC_CLUSTER:
+    {
+      logger->log_info(component, "%smode:   sync cluster", indent);
+      logger->log_info(component, "%shosts:", indent);
+      std::list<mongo::HostAndPort>::iterator i;
+      for (i = __synccluster_hostports.begin(); i != __synccluster_hostports.end(); ++i) {
+	logger->log_info(component, "%s  - %s:", indent, i->toString().c_str());
+      }
+    }
+    break;
+
+  default:
+    {
+      logger->log_info(component, "%smode:   connection", indent);
+      logger->log_info(component, "%shost:   %s", indent,
+		       __conn_hostport.toString().c_str());
+      if (! __auth_infos.empty()) {
+	logger->log_info(component, "%sauth infos:", indent);
+	std::list<AuthInfo>::iterator a;
+	for (a = __auth_infos.begin(); a != __auth_infos.end(); ++a) {
+	  logger->log_info(component, "%s  - %s @ %s", indent, a->username.c_str(),
+			   a->dbname.c_str());
+	}
+      }
+    }
+    break;
+  }
 }
