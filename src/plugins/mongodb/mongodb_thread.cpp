@@ -117,10 +117,17 @@ MongoDBThread::init()
 
       try {
 	ClientConf *conf = new ClientConf(config, logger, cfg_name, cfg_prefix);
-	__configs[cfg_name] = conf;
-	logger->log_info(name(), "Added MongoDB client configuration %s",
-			 cfg_name.c_str());
-	conf->log(logger, name(), "  ");
+	if (conf->is_active()) {
+	  __configs[cfg_name] = conf;
+	  logger->log_info(name(), "Added MongoDB client configuration %s",
+			   cfg_name.c_str());
+	  conf->log(logger, name(), "  ");
+	} else {
+	  logger->log_info(name(), "Ignoring disabled MongoDB client "
+			   "configuration %s", cfg_name.c_str());
+	  delete conf;
+	  ignored_configs.insert(cfg_name);
+	}
       } catch (Exception &e) {
 	logger->log_warn(name(), "Invalid MongoDB client config %s, ignoring, "
 			 "exception follows.", cfg_name.c_str());
