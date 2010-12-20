@@ -30,6 +30,7 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/aspect_provider.h>
+#include <utils/time/wait.h>
 
 class RRDThread
 : public fawkes::Thread,
@@ -47,11 +48,32 @@ class RRDThread
   virtual void loop();
   virtual void finalize();
 
+  // for RRDManager
+  virtual void add_rrd(fawkes::RRDDefinition *rrd_def);
+  virtual void add_graph(fawkes::RRDGraphDefinition *rrd_graph_def);
+
+  virtual void add_data(const char *rrd_name, const char *format, ...);
+
+  virtual const std::vector<fawkes::RRDDefinition *> &       get_rrds() const;
+  virtual const std::vector<fawkes::RRDGraphDefinition *> &  get_graphs() const;
+
+  void generate_graphs();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   fawkes::RRDAspectIniFin     __rrd_aspect_inifin;
+
+  std::vector<fawkes::RRDDefinition *>      __rrds;
+  std::vector<fawkes::RRDGraphDefinition *> __graphs;
+
+  fawkes::RRDDefinition      *test_rrd_def;
+  fawkes::RRDGraphDefinition *test_graph_def;
+
+  fawkes::TimeWait           *__time_wait;
+  unsigned int                __loop_count;
+  unsigned int                __counter;
 };
 
 #endif

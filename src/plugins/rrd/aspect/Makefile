@@ -18,7 +18,7 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
-LIBS_libfawkesrrdaspect = fawkescore fawkesaspects
+LIBS_libfawkesrrdaspect = stdc++ fawkescore fawkesaspects
 OBJS_libfawkesrrdaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesrrdaspect)
