@@ -15,6 +15,6 @@
 
 ifneq ($(wildcard /usr/include/mongo/client/dbclient.h),)
   HAVE_MONGODB=1
-  LIBS_MONGODB=mongoclient boost_thread-mt boost_filesystem
+  LIBS_MONGODB=mongoclient boost_thread-mt boost_filesystem-mt boost_system-mt
 endif
 

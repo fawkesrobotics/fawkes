@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
-LIBS_mongolog = fawkescore fawkesaspects fawkesinterface fawkesmongodbaspect $(LIBS_MONGODB)
+LIBS_mongolog = fawkescore fawkesaspects fawkesblackboard fawkesinterface fawkesutils fawkesmongodbaspect $(LIBS_MONGODB)
 OBJS_mongolog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_mongolog)
