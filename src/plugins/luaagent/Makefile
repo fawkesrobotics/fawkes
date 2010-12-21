@@ -20,7 +20,8 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 CFLAGS  += $(CFLAGS_LUA)
 
-LIBS_luaagent = fawkescore fawkesutils fawkeslua SkillerInterface SkillerDebugInterface
+LIBS_luaagent = fawkescore fawkesutils fawkesaspects fawkeslua fawkesblackboard \
+		fawkesinterface SkillerInterface SkillerDebugInterface
 OBJS_luaagent = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all      = $(OBJS_luaagent)

@@ -38,12 +38,12 @@ ifeq ($(HAVE_LUA),1)
   ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
     HAVE_TOLUA = 1
     TOLUAPP=tolua++
-    TOLUA_LIBS=tolua++-$(LUA_VERSION)
+    TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
   endif
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/lua$(subst .,,$(LUA_VERSION))/tolua++.h),)
     HAVE_TOLUA = 1
     TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
-    TOLUA_LIBS=tolua++
+    TOLUA_LIBS=tolua++ stdc++
   endif
   CLEAN_FILES=*_tolua.{pkg,cpp}
 

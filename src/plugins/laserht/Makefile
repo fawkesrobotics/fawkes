@@ -22,7 +22,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 # stages.
 #CFLAGS += -DLASERHT_TIMETRACKER
 
-LIBS_laserht = fawkescore fawkesutils fawkesaspects \
+LIBS_laserht = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	       fawkesinterface \
 	       Laser360Interface Laser720Interface ObjectPositionInterface \
 	       VisualDisplay2DInterface
 OBJS_laserht = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))

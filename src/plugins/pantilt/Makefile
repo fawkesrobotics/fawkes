@@ -17,7 +17,8 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_pantilt = fawkescore fawkesutils fawkesaspects PanTiltInterface LedInterface
+LIBS_pantilt = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	       fawkesinterface PanTiltInterface LedInterface
 OBJS_pantilt = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
 
 PLUGINS_all = $(PLUGINDIR)/pantilt.so

@@ -16,7 +16,8 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_katana = fawkescore fawkesutils fawkesaspects KatanaInterface 
+LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface KatanaInterface 
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 #CFLAGS += -DUSE_TIMETRACKER

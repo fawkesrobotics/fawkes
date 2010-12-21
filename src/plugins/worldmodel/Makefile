@@ -17,7 +17,9 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_worldmodel = fawkesaspects fawkesinterface fawkesgeometry GameStateInterface ObjectPositionInterface
+LIBS_worldmodel = m fawkescore fawkesutils fawkesaspects fawkesgeometry \
+		  fawkesblackboard fawkesinterface fawkesnetcomm \
+		  GameStateInterface ObjectPositionInterface
 OBJS_worldmodel = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all    = $(OBJS_worldmodel)

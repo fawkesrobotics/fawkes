@@ -20,7 +20,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 HAVE_LIBXMLPP   = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
 HAVE_SPL        = $(if $(filter nao%,$(BUILD_TYPE)),1)
 
-LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects \
+LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		  fawkesinterface fawkesnetcomm \
 		  GameStateInterface SwitchInterface
 OBJS_refboxcomm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))) \
 		  processor/processor.o processor/state_handler.o \

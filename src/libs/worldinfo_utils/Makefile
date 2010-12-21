@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_libfawkesworldinfo_utils = stdc++ fawkesnetcomm fawkesgeometry fawkesutils
+LIBS_libfawkesworldinfo_utils = stdc++ m fawkescore fawkesnetcomm fawkesgeometry fawkesutils
 OBJS_libfawkesworldinfo_utils = data_container.o
 HDRS_libfawkesworldinfo_utils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 

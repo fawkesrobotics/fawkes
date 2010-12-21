@@ -25,7 +25,7 @@ endif
 
 SUBDIRS = gtk
 
-LIBS_libfawkesgeometry = stdc++
+LIBS_libfawkesgeometry = stdc++ m fawkescore
 OBJS_libfawkesgeometry = matrix.o		\
 			 vector.o		\
 			 printable.o		\

@@ -19,12 +19,13 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 SUBDIRS=console
 
-LIBS_bblogger = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard \
-		SwitchInterface
+LIBS_bblogger = fawkescore fawkesutils fawkesaspects fawkesinterface \
+		fawkesgeometry fawkesblackboard SwitchInterface
 OBJS_bblogger = bblogger_plugin.o log_thread.o
 
 
-LIBS_bblogreplay = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
+LIBS_bblogreplay = fawkescore fawkesutils fawkesaspects fawkesinterface \
+		   fawkesgeometry fawkesblackboard
 OBJS_bblogreplay = bblogreplay_plugin.o		\
 		   logreplay_thread.o		\
 		   logreplay_bt_thread.o	\

@@ -29,7 +29,7 @@ ifneq ($(HAVE_SHAPE_MODELS),1)
 endif
 
 OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(filter-out $(MODELS_FILTEROUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
-LIBS_libfvmodels := fawkesutils fvutils fvclassifiers fawkesgeometry
+LIBS_libfvmodels := m fawkescore fawkesutils fvutils fvclassifiers fawkesgeometry
 HDRS_libfvmodels = $(patsubst %.o,%.h,$(OBJS_libfvmodels))
 
 OBJS_all = $(OBJS_libfvmodels)
