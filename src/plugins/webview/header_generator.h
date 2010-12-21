@@ -28,21 +28,22 @@
 #include <map>
 #include <string>
 
+namespace fawkes {
+  class WebNavManager;
+}
+
 class WebviewHeaderGenerator : public fawkes::WebPageHeaderGenerator
 {
  public:
-  WebviewHeaderGenerator();
+  WebviewHeaderGenerator(fawkes::WebNavManager *nav_manager);
 
   std::string html_header(std::string &title,
 			  std::string &active_baseurl);
 
-  void add_nav_entry(std::string baseurl, std::string name);
-  void remove_nav_entry(std::string baseurl);
-
  private:
   static const char *PAGE_HEADER;
 
-  std::map<std::string, std::string> __nav_entries;
+  fawkes::WebNavManager *__nav_manager; 
 };
 
 #endif

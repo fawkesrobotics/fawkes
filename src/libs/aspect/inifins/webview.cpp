@@ -25,6 +25,7 @@
 #include <aspect/webview.h>
 #include <core/threading/thread_finalizer.h>
 #include <webview/url_manager.h>
+#include <webview/nav_manager.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -41,12 +42,14 @@ WebviewAspectIniFin::WebviewAspectIniFin()
   : AspectIniFin("WebviewAspect")
 {
   __url_manager = new WebUrlManager();
+  __nav_manager = new WebNavManager();
 }
 
 /** Destructor. */
 WebviewAspectIniFin::~WebviewAspectIniFin()
 {
   delete __url_manager;
+  delete __nav_manager;
 }
 
 
@@ -61,7 +64,7 @@ WebviewAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  webview_thread->init_WebviewAspect(__url_manager);
+  webview_thread->init_WebviewAspect(__url_manager, __nav_manager);
 }
 
 

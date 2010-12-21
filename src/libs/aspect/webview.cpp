@@ -63,15 +63,18 @@ WebviewAspect::~WebviewAspect()
 
 
 /** Set URL manager.
- * @param url_manager URL manager to register processors to
  * It is guaranteed that this is called for a logging thread before
  * Thread::start() is called (when running regularly inside Fawkes).
+ * @param url_manager URL manager to register processors to
+ * @param nav_manager Navigation manager to add navigation entries
  * @see WebviewMaster
  */
 void
-WebviewAspect::init_WebviewAspect(WebUrlManager *url_manager)
+WebviewAspect::init_WebviewAspect(WebUrlManager *url_manager,
+				  WebNavManager *nav_manager)
 {
   webview_url_manager = url_manager;
+  webview_nav_manager = nav_manager;
 }
 
 } // end namespace fawkes

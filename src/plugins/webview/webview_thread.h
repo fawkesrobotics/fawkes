@@ -33,7 +33,6 @@
 #include <aspect/webview.h>
 
 #include <utils/logging/cache.h>
-#include <webview/url_manager.h>
 
 namespace fawkes {
   class NetworkService;
