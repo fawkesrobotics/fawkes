@@ -85,11 +85,14 @@ OpenRAVEConnector::startViewer() const
 }
 
 
-/** Set OpenRAVEManipulator object for robot */
+/** Set OpenRAVEManipulator object for robot, and calculate
+ * coordinate-system offsets.
+ * Make sure to update manip angles before calibrating! */
 void
-OpenRAVEConnector::setManipulator(OpenRAVEManipulator* manip)
+OpenRAVEConnector::setManipulator(OpenRAVEManipulator* manip, float deviceTransX, float deviceTransY, float deviceTransZ)
 {
   __robot->setManipulator(manip);
+  __robot->calibrate(deviceTransX, deviceTransY, deviceTransZ);
 }
 
 /** Set target angles;
