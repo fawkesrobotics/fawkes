@@ -101,7 +101,7 @@ OpenRAVEManipulator::anglesOR2Device(std::vector<float>& from) const
 {
   std::vector<float> _to(__cntDevice);
   for (unsigned int i=0; i<__motors.size(); i++) {
-    _to[__motors[i].noDevice] = angleOR2Device(__motors[i].noDevice, from[__motors[i].noDevice]);
+    _to[__motors[i].noDevice] = angleOR2Device(__motors[i].noDevice, from[__motors[i].no]);
   }
 
   return _to;

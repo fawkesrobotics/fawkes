@@ -190,6 +190,8 @@ OpenRAVEEnvironment::startViewer()
       {__logger->log_error("OpenRAVE Environment", "Could not load viewr. Ex:%s", e.what());}
     throw;
   }
+
+  __viewerEnabled = true;
 }
 
 /** Autogenerate IKfast IK solver for robot
