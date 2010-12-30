@@ -1,8 +1,9 @@
+
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#            Makefile Build System for Fawkes: PanTilt Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Thu Dec 30 22:01:16 2010
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,19 +14,18 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-# base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
-	  laser flite joystick katana pantilt vision roomba \
-	  skiller luaagent worldmodel laserht \
-	  refboxcomm player xmlrpc \
-	  readylogagent
-	  #festival
+LIBS_roomba = fawkescore fawkesutils fawkesaspects
+OBJS_roomba = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
 
-include $(BUILDSYSDIR)/rules.mk
+PLUGINS_all = $(PLUGINDIR)/roomba.so
 
-luaagent: skiller
-rrdweb: rrd
+OBJS_all = $(OBJS_roomba)
+
+#INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+#include $(BUILDSYSDIR)/interface.mk
+
+include $(BUILDSYSDIR)/base.mk
 
