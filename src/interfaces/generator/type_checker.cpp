@@ -79,8 +79,9 @@ InterfaceDataTypeChecker::validType(const std::string &type, std::vector<Interfa
        (type == "double") ) {
     return true;
   } else if ( enum_constants != NULL ) {
-    for (std::vector<InterfaceEnumConstant>::iterator i = enum_constants->begin(); i != enum_constants->end(); ++i) {
-      if ( type == (*i).getName() ) {
+    std::vector<InterfaceEnumConstant>::iterator i;
+    for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+      if ( type == (*i).get_name() ) {
 	return true;
       }
     }

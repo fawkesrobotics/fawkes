@@ -23,6 +23,8 @@
 #include "parser.h"
 #include "exceptions.h"
 
+#include <utils/misc/string_conversions.h>
+
 #include <iostream>
 #include <vector>
 
@@ -306,10 +308,11 @@ InterfaceParser::printParsed(vector<InterfaceConstant> &     constants,
   
   cout << "EnumConstants" << endl;
   for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
-    cout << "  EnumConstant: name=" << (*i).getName() << endl;
-    vector< pair<string,string> > items = (*i).getItems();
-    for (vector< pair<string,string> >::iterator j = items.begin(); j != items.end(); ++j) {
-	cout << "    Item: " << (*j).first << "(" << (*j).second << ")" << endl;
+    cout << "  EnumConstant: name=" << (*i).get_name() << endl;
+    vector<InterfaceEnumConstant::EnumItem> items = (*i).get_items();
+    vector<InterfaceEnumConstant::EnumItem>::iterator j;
+    for (j = items.begin(); j != items.end(); ++j) {
+      cout << "    Item: " << j->name << "(" << j->comment << ")" << endl;
     }
   }
     
@@ -492,6 +495,7 @@ InterfaceParser::parse()
       for (NodeSet::iterator j = items.begin(); j != items.end(); ++j) {
 
 	std::string item_name;
+	std::string item_value;
 	el = dynamic_cast<const Element *>(*j);
 	if ( el ) {
 	  // valid element
@@ -501,6 +505,12 @@ InterfaceParser::parse()
 	    throw InterfaceGeneratorInvalidContentException("no name for enum item");
 	  }
 	  item_name = attr->get_value();
+
+	  Attribute *val_attr;
+	  val_attr = el->get_attribute("value");
+	  if ( val_attr ) {
+	    item_value = val_attr->get_value();
+	  }
 	  
 	} else {
 	  throw InterfaceGeneratorInvalidContentException("enum item is not an element");
@@ -512,7 +522,12 @@ InterfaceParser::parse()
 	}
 	const TextNode *comment_node = dynamic_cast<const TextNode *>(comment_set[0]);
 	if ( comment_node ) {
-	  enum_constant.addItem(item_name, comment_node->get_content());
+	  if (item_value != "") {
+	    enum_constant.add_item(item_name, comment_node->get_content(),
+				   fawkes::StringConversions::to_int(item_value));
+	  } else {
+	    enum_constant.add_item(item_name, comment_node->get_content());
+	  }
 	} else {
 	  throw InterfaceGeneratorInvalidContentException("enum comment not a text node");
 	}
@@ -520,10 +535,12 @@ InterfaceParser::parse()
 
       enum_constants.push_back(enum_constant);
     }
-    for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
-      for (vector<InterfaceEnumConstant>::iterator j = i + 1; j != enum_constants.end(); ++j) {
-	if ( (*i).getName() == (*j).getName() ) {
-	  throw InterfaceGeneratorAmbiguousNameException((*i).getName().c_str(), "enum constant");
+    vector<InterfaceEnumConstant>::iterator i;
+    for (i = enum_constants.begin(); i != enum_constants.end(); ++i) {
+      vector<InterfaceEnumConstant>::iterator j;
+      for (j = i + 1; j != enum_constants.end(); ++j) {
+	if ( i->get_name() == j->get_name() ) {
+	  throw InterfaceGeneratorAmbiguousNameException((*i).get_name().c_str(), "enum constant");
 	}
       }
     }

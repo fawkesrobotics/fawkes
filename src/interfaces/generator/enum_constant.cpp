@@ -36,9 +36,9 @@
 InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 					     const std::string &comment)
 {
-  this->name  = name;
-  this->comment = comment;
-  items.clear();
+  __name  = name;
+  __comment = comment;
+  __items.clear();
 }
 
 
@@ -46,9 +46,9 @@ InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
  * @return name of enum constant.
  */
 std::string
-InterfaceEnumConstant::getName()
+InterfaceEnumConstant::get_name()
 {
-  return name;
+  return __name;
 }
 
 
@@ -56,9 +56,9 @@ InterfaceEnumConstant::getName()
  * @return comment of enum constant.
  */
 std::string
-InterfaceEnumConstant::getComment()
+InterfaceEnumConstant::get_comment()
 {
-  return comment;
+  return __comment;
 }
 
 
@@ -66,25 +66,45 @@ InterfaceEnumConstant::getComment()
  * @return vector of enum items. First item in pair contains item name, second item
  * the comment.
  */
-std::vector< std::pair< std::string,std::string > >
-InterfaceEnumConstant::getItems()
+std::vector<InterfaceEnumConstant::EnumItem>
+InterfaceEnumConstant::get_items()
 {
-  return items;
+  return __items;
 }
 
 
-/** Add an item.
+/** Add an item without custom value.
  * @param name name of item
  * @param comment comment of item.
  */
 void
-InterfaceEnumConstant::addItem(std::string name, std::string comment)
+InterfaceEnumConstant::add_item(std::string name, std::string comment)
 {
-  for ( std::vector< std::pair< std::string, std::string > >::iterator i = items.begin(); i != items.end(); ++i) {
-    if ( (*i).first == name ) {
+  std::vector<EnumItem>::iterator i;
+  for (i = __items.begin(); i != __items.end(); ++i) {
+    if (i->name == name) {
       throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
     }
   }
-  std::pair< std::string, std::string > p(name, comment);
-  items.push_back(p);
+  EnumItem p = {name, comment, false, 0};
+  __items.push_back(p);
+}
+
+
+/** Add an item with custom value.
+ * @param name name of item
+ * @param comment comment of item.
+ * @param value custom value
+ */
+void
+InterfaceEnumConstant::add_item(std::string name, std::string comment, int value)
+{
+  std::vector<EnumItem>::iterator i;
+  for (i = __items.begin(); i != __items.end(); ++i) {
+    if (i->name == name) {
+      throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
+    }
+  }
+  EnumItem p = {name, comment, true, value};
+  __items.push_back(p);
 }
