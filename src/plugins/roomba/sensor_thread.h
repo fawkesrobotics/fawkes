@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  roomba_plugin.cpp - Plugin to interface with a Roomba
+ *  sensor_thread.h - Roomba plugin sensor thread
  *
- *  Created: Thu Dec 30 22:05:07 2010
+ *  Created: Mon Jan 03 00:03:42 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,28 +20,31 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "roomba_plugin.h"
-#include "thread_roomba_500.h"
-#include "sensor_thread.h"
+#ifndef __PLUGINS_ROOMBA_SENSOR_THREAD_H_
+#define __PLUGINS_ROOMBA_SENSOR_THREAD_H_
 
-using namespace fawkes;
+#include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/logging.h>
 
-/** @class RoombaPlugin "roomba_plugin.h"
- * Plugin to interface with a Roomba robot.
- * @author Tim Niemueller
- */
+class Roomba500Thread;
 
-/** Constructor.
- * @param config Fawkes configuration
- */
-RoombaPlugin::RoombaPlugin(Configuration *config)
-  : Plugin(config)
+class RoombaSensorThread
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect
 {
-  Roomba500Thread *roomba500_thread = new Roomba500Thread();
-  thread_list.push_back(roomba500_thread);
-  thread_list.push_back(new RoombaSensorThread(roomba500_thread));
-}
+ public:
+  RoombaSensorThread(Roomba500Thread *roomba500_thread);
+
+  virtual void loop();
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
+ private:
+  Roomba500Thread *__roomba500_thread;
+};
 
 
-PLUGIN_DESCRIPTION("Roomba vacuum robot plugin.")
-EXPORT_PLUGIN(RoombaPlugin)
+#endif

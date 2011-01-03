@@ -17,15 +17,17 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_roomba = fawkescore fawkesutils fawkesaspects
+LIBS_roomba = fawkescore fawkesutils fawkesaspects \
+	      Roomba500Interface LedInterface SwitchInterface MotorInterface \
+	      BatteryInterface
 OBJS_roomba = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
 
 PLUGINS_all = $(PLUGINDIR)/roomba.so
 
 OBJS_all = $(OBJS_roomba)
 
-#INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-#include $(BUILDSYSDIR)/interface.mk
+INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+include $(BUILDSYSDIR)/interface.mk
 
 include $(BUILDSYSDIR)/base.mk
 

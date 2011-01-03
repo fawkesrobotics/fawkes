@@ -136,6 +136,12 @@ class Roomba500
     MODE_FULL		= 3	///< Control acquired, safety measures disabled.
   } Mode;
 
+  /** Sensor stream state. */
+  typedef enum {
+    STREAM_ENABLE = 1,		///< Stream enabled.
+    STREAM_DISABLE = 0		///< Stream disabled.
+  } StreamState;
+
   /** Charging state. */
   typedef enum {
     CHARGING_NO			= 0,	///< Not charging.
@@ -271,6 +277,10 @@ class Roomba500
   static const unsigned char MOTOR_SIDE_BRUSH_BACKWARD;	///< Side backward bit.
   static const unsigned char MOTOR_MAIN_BRUSHES_BACKWARD; ///< Main backward bit.
 
+  static const unsigned char CHARGER_HOME_BASE;	///< Home base charger bit.
+  static const unsigned char CHARGER_INTERNAL;	///< Internal charger bit.
+
+
   /// @cond OBVIOUS
   static const unsigned short int SENSPACK_SIZE_GROUP_0;
   static const unsigned short int SENSPACK_SIZE_GROUP_1;
@@ -279,7 +289,7 @@ class Roomba500
   static const unsigned short int SENSPACK_SIZE_GROUP_4;
   static const unsigned short int SENSPACK_SIZE_GROUP_5;
   static const unsigned short int SENSPACK_SIZE_GROUP_6;
-  static const unsigned short int SENSPACK_SIZE_GROUP_100;
+  static const unsigned short int SENSPACK_SIZE_GROUP_ALL;
   static const unsigned short int SENSPACK_SIZE_GROUP_101;
   static const unsigned short int SENSPACK_SIZE_GROUP_106;
   static const unsigned short int SENSPACK_SIZE_GROUP_107;
@@ -344,6 +354,67 @@ class Roomba500
 
   static const short int MAX_PWM;	///< Maximum PWM value for wheels.
   static const unsigned short int MAX_ENCODER_COUNT;	///< Maximum encoder count.
+  static const unsigned short int STREAM_INTERVAL_MS;	///< Time in ms between
+						///< streamed sensor packets.
+
+
+  static const unsigned char CHECKSUM_SIZE;	///< Checksum byte size.
+
+  /** Struct for packet group with everything (SENSPACK_GROUP_ALL). */
+  typedef struct {
+    uint8_t  bumps_wheeldrops;		///< Bumps and wheeldrops bits.
+    uint8_t  wall;			///< Wall sensor value.
+    uint8_t  cliff_left;		///< Left cliff sensor.
+    uint8_t  cliff_front_left;		///< Front left cliff sensor.
+    uint8_t  cliff_front_right;		///< Front right cliff sensor.
+    uint8_t  cliff_right;		///< Right cliff sensor.
+    uint8_t  virtual_wall;		///< Wall sensor.
+    uint8_t  overcurrents;		///< Overcurrents bits.
+    uint8_t  dirt_detect;		///< Dirt detect sensor.
+    uint8_t  unused_1;			///< Unused byte.
+    uint8_t  ir_opcode_omni;		///< Omni IR receiver character.
+    uint8_t  buttons;			///< Buttons bits.
+    uint16_t distance;			///< Traveled distance in mm.
+    uint16_t angle;			///< Turned angle in degree.
+    uint8_t  charging_state;		///< Charging state.
+    uint16_t voltage;			///< Voltage in mV.
+    uint16_t current;			///< Current in mA.
+    uint8_t  temperature;		///< Temperature in deg C.
+    uint16_t battery_charge;		///< Battery charge in mAh.
+    uint16_t battery_capacity;		///< Battery capacity in mAh.
+    uint16_t wall_signal;		///< Raw wall signal.
+    uint16_t cliff_left_signal;		///< Raw left cliff signal.
+    uint16_t cliff_front_left_signal;	///< Raw front left cliff signal.
+    uint16_t cliff_front_right_signal;	///< Raw front right cliff signal.
+    uint16_t cliff_right_signal;	///< Raw right cliff signal.
+    uint8_t  unused_2;			///< Unused byte.
+    uint16_t unused_3;			///< Unused byte.
+    uint8_t  charger_available;		///< Available chargers bits.
+    uint8_t  mode;			///< Open Interface mode.
+    uint8_t  song_number;		///< Song number.
+    uint8_t  song_playing;		///< Song playing byte.
+    uint8_t  stream_num_packets;	///< Number of streamed packets.
+    uint16_t velocity;			///< Velocity in mm/sec.
+    uint16_t radius;			///< Radius in mm.
+    uint16_t velocity_right;		///< Velocity of right wheel in mm/sec.
+    uint16_t velocity_left;		///< Velocity of left wheel in mm/sec.
+    uint16_t encoder_counts_left;	///< Encoder counts for left wheel.
+    uint16_t encoder_counts_right;	///< Encoder counts for right wheel.
+    uint8_t  light_bumper;		///< Light bumper bits.
+    uint16_t light_bump_left;		///< Raw left light bumper signal.
+    uint16_t light_bump_front_left;	///< Raw front left light bumper signal.
+    uint16_t light_bump_center_left;	///< Raw center left light bumper signal.
+    uint16_t light_bump_center_right;	///< Raw center right light bumper signal.
+    uint16_t light_bump_front_right;	///< Raw front right light bumper signal.
+    uint16_t light_bump_right;  	///< Raw right light bumper signal.
+    uint8_t  ir_opcode_left;		///< Left IR receiver character.
+    uint8_t  ir_opcode_right;		///< Right IR receiver character.
+    uint16_t left_motor_current;	///< Raw left motor current signal.
+    uint16_t right_motor_current;	///< Raw right motor current signal.
+    uint16_t main_brush_current;	///< Raw main brush motor current signal.
+    uint16_t side_brush_current;	///< Raw side brush motor current signal.
+    uint8_t  stasis;			///< Castor stasis.
+  } SensorPacketGroupAll;
 
  public:
   Roomba500(const char *device_file);
@@ -366,39 +437,47 @@ class Roomba500
   void disable_brushes();
   void enable_brushes(bool main = true, bool side = true, bool vacuum = true,
 		      bool main_backward = false, bool side_backward = false);
+  void set_leds(bool debris, bool spot, bool dock, bool check_robot,
+		char clean_color, char clean_intensity);
 
-  /*
-  void enable_sensors(SensorPacketID packets = SENSPACK_GROUP_ALL);
+  void enable_sensors();
   void disable_sensors();
-
+  void read_sensors();
   bool is_data_available();
-  void read_data();
-  */
+  const SensorPacketGroupAll &  get_sensor_packet() const;
+
+  static unsigned short int get_packet_size(SensorPacketID packet);
 
  private:
   void send(OpCode opcode,
 	    const void *params = NULL, const size_t plength = 0);
+  void recv(unsigned int timeout_ms = 0);
   void assert_control()
   {
     if ((__mode != MODE_FULL) && (__mode != MODE_SAFE)) {
-      throw fawkes::Exception("Stop command only available in FULL or SAFE mode.");
+      throw fawkes::Exception("Command only available in FULL or SAFE mode.");
     }
   }
-
+  void assert_connected()
+  { if (__mode == MODE_OFF) throw fawkes::Exception("Not connected to robot."); }
 
  private:
-  char *__device_file;
-  int   __fd;
+  Mode                  __mode;
+  SensorPacketID        __packet_id;
+  unsigned char         __packet_reply_id;
+  unsigned short        __packet_length;
+  bool                  __sensors_enabled;
+  SensorPacketGroupAll  __sensor_packet;
+  bool                  __sensor_packet_received;
 
-  Mode __mode;
-  bool __sensors_enabled;
+  char                 *__device_file;
+  int                   __fd;
 
+  unsigned char         __obuffer[16];
+  unsigned char         __ibuffer[82];
 
-  unsigned char __obuffer[16];
-  unsigned char __ibuffer[82];
-
-  int           __obuffer_length;
-  int           __ibuffer_length;
+  int                   __obuffer_length;
+  int                   __ibuffer_length;
 };
 
 #endif

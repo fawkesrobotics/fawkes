@@ -97,6 +97,9 @@ const unsigned char Roomba500::MOTOR_MAIN_BRUSHES		=  4;
 const unsigned char Roomba500::MOTOR_SIDE_BRUSH_BACKWARD	=  8;
 const unsigned char Roomba500::MOTOR_MAIN_BRUSHES_BACKWARD	= 16;
 
+const unsigned char Roomba500::CHARGER_HOME_BASE	= 2;
+const unsigned char Roomba500::CHARGER_INTERNAL		= 1;
+
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_0 = 26;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_1 = 10;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_2 = 6;
@@ -104,7 +107,7 @@ const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_3 = 10;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_4 = 14;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_5 = 12;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_6 = 52;
-const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_100 = 80;
+const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_ALL = 80;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_101 = 28;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_106 = 12;
 const unsigned short int Roomba500::SENSPACK_SIZE_GROUP_107 = 9;
@@ -168,6 +171,11 @@ const float Roomba500::MAX_RADIUS_MM     = 2000;
 
 const unsigned short int Roomba500::MAX_ENCODER_COUNT = 65535;
 const short int Roomba500::MAX_PWM           = 255;
+
+const unsigned short int Roomba500::STREAM_INTERVAL_MS = 15;
+
+const unsigned char Roomba500::CHECKSUM_SIZE = 1;
+
 /// @endcond
 
 /// @cond INTERNALS
@@ -188,6 +196,11 @@ typedef struct {
   int16_t right_pwm;
 } DrivePWMParams;
 
+typedef struct {
+  uint8_t num_packets;
+  uint8_t packet_id;
+} StreamOnePacketParams;
+
 #pragma pack(pop)
 /// @endcond
 
@@ -204,7 +217,10 @@ typedef struct {
  */
 Roomba500::Roomba500(const char *device_file)
 {
+  __mode = MODE_OFF;
   __fd = -1;
+  __packet_id = SENSPACK_GROUP_ALL;
+  __sensors_enabled = false;
   __device_file = strdup(device_file);
 
   try {
@@ -292,6 +308,7 @@ Roomba500::close()
     ::close(__fd);
     __fd = -1;
   }
+  __mode = MODE_OFF;
 }
 
 /** Send instruction packet.
@@ -330,6 +347,164 @@ Roomba500::send(Roomba500::OpCode opcode,
   }
 }
 
+
+/** Receive a packet.
+ * @param timeout_ms maximum wait time in miliseconds, 0 to wait indefinitely.
+ */
+void
+Roomba500::recv(unsigned int timeout_ms)
+{
+  timeval timeout = {0, timeout_ms  * 1000};
+
+  fd_set read_fds;
+  FD_ZERO(&read_fds);
+  FD_SET(__fd, &read_fds);
+
+  int rv = 0;
+  rv = select(__fd + 1, &read_fds, NULL, NULL, (timeout_ms > 0) ? &timeout : NULL);
+
+  if ( rv == -1 ) {
+   throw Exception(errno, "Roomba500::recv(): select on file descriptor failed");
+  } else if ( rv == 0 ) {
+    throw TimeoutException("Timeout while waiting for incoming Roomba data");
+  }
+
+  __ibuffer_length = 0;
+
+  // get octets one by one
+  int bytes_read = 0;
+  while (bytes_read < __packet_length) {
+    bytes_read += read(__fd, &__ibuffer[6] + bytes_read, __packet_length - bytes_read);
+  }
+  if (bytes_read < __packet_length) {
+    throw Exception("Roomba500::recv(): failed to read packet data");
+  }
+
+  __ibuffer_length = __packet_length;
+}
+
+
+/** Check if data is available.
+ * @return true if data is available and can be read, false otherwise
+ */
+bool
+Roomba500::is_data_available()
+{
+  if (!__sensors_enabled) {
+    throw Exception("Roomba 500 sensors have not been enabled.");
+  }
+
+  timeval timeout = {0, 0};
+
+  fd_set read_fds;
+  FD_ZERO(&read_fds);
+  FD_SET(__fd, &read_fds);
+
+  int rv = 0;
+  rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+
+  return (rv > 0);
+}
+
+
+/** Read sensor values.
+ * Enable sensors before using enable_sensors(). This method will block until new
+ * data has been read. You can call is_data_available() to check if this method
+ * will block or not.
+ */
+void
+Roomba500::read_sensors()
+{
+  if (!__sensors_enabled) {
+    throw Exception("Roomba 500 sensors have not been enabled.");
+  }
+
+  recv();
+
+  if ((__ibuffer[0] != 19) || (__ibuffer[2] != SENSPACK_GROUP_ALL)) {
+    throw Exception("Invalid data received (Header %u, packet %u).",
+		    __ibuffer[0], __ibuffer[2]);
+  }
+
+  if (__ibuffer_length != SENSPACK_SIZE_GROUP_ALL + 4) {
+    throw Exception("Packet size mismatch (%u, expected %u", __ibuffer_length,
+		    SENSPACK_SIZE_GROUP_ALL + 4);
+  }
+
+  unsigned int sum = 0;
+  for (int i = 1; i < __ibuffer_length - 1; ++i) {
+    sum += __ibuffer[i];
+  }
+  if (((sum + __ibuffer[__ibuffer_length - 1]) & 0xFF) != 0) {
+    throw Exception("Checksum mismatch (%u, expected %u)",
+		    __ibuffer[__ibuffer_length - 1],
+		    255 - (sum & 0xFF));
+  }
+
+  memcpy(&__sensor_packet, &__ibuffer[3], sizeof(SensorPacketGroupAll));
+  __sensor_packet_received = true;
+}
+
+/** Enable sensor data stream.
+ * For simplicity and efficiency only the single SENSPACK_GROUP_ALL packet can
+ * be streamed at this time. Make sure that the used connection is fast enough.
+ * 56700 bit/sec should suffice, but 115200 is strongly recommended. If using
+ * RooTooth make sure to use it in fast mode.
+ */
+void
+Roomba500::enable_sensors()
+{
+  assert_connected();
+
+  StreamOnePacketParams sp;
+  sp.num_packets = 1;
+  sp.packet_id = SENSPACK_GROUP_ALL;
+
+  send(OPCODE_STREAM, &sp, sizeof(StreamOnePacketParams));
+
+  __packet_id = SENSPACK_GROUP_ALL;
+  __packet_reply_id = 19;
+  __packet_length = 2 + 1 + get_packet_size(SENSPACK_GROUP_ALL) + CHECKSUM_SIZE;
+  __sensors_enabled = true;
+  __sensor_packet_received = false;
+}
+
+
+/** Disable sensor data stream. */
+void
+Roomba500::disable_sensors()
+{
+  assert_connected();
+
+  if ( ! __sensors_enabled) {
+    throw Exception("Roomba 500 sensors have not been enabled.");
+  }
+
+  unsigned char streamstate = STREAM_DISABLE;
+
+  send(OPCODE_PAUSE_RESUME_STREAM, &streamstate, 1);
+
+  __sensors_enabled = false;
+  __sensor_packet_received = false;
+}
+
+
+/** Get latest sensor packet.
+ * @return sensor packet
+ */
+const Roomba500::SensorPacketGroupAll &
+Roomba500::get_sensor_packet() const
+{
+  if ( ! __sensors_enabled) {
+    throw Exception("Roomba 500 sensors have not been enabled.");
+  }
+
+  if (__sensor_packet_received) {
+    throw Exception("No valid data received, yet.");
+  }
+
+  return __sensor_packet;
+}
 
 /** Set control mode.
  * @param mode the mode can be either MODE_FULL or MODE_SAFE (recommended).
@@ -563,4 +738,113 @@ Roomba500::enable_brushes(bool main, bool side, bool vacuum,
   if (side_backward)  param |= MOTOR_SIDE_BRUSH_BACKWARD;
 
   send(OPCODE_MOTORS, &param, 1);
+}
+
+
+/** Set LED status of main LEDs.
+ * Available only in safe or full mode.
+ * @param debris true to enable debris LED, false to disable
+ * @param spot true to enable spot LED, false to disable
+ * @param dock true to enable dock LED, false to disable
+ * @param check_robot true to enable check_robot LED, false to disable
+ * @param clean_color color of clean button LED from green (0) to red (255)
+ * @param clean_intensity intensity of clean button LED from off (0) to
+ * full intensity (255)
+ */
+void
+Roomba500::set_leds(bool debris, bool spot, bool dock, bool check_robot,
+		    char clean_color, char clean_intensity)
+{
+  assert_control();
+
+  unsigned char param[3] = {0, clean_color, clean_intensity};
+  if (debris)       param[0] |= LED_DEBRIS;
+  if (spot)         param[0] |= LED_SPOT;
+  if (dock)         param[0] |= LED_DOCK;
+  if (check_robot)  param[0] |= LED_CHECK_ROBOT;
+
+  send(OPCODE_LEDS, &param, 3);
+}
+
+
+/** Get size of packet.
+ * @param packet ID of packet to query size for
+ * @return size of packet
+ * @exception Exception thrown for unknown packet IDs.
+ */
+unsigned short int
+Roomba500::get_packet_size(Roomba500::SensorPacketID packet)
+{
+  switch (packet) {
+  case SENSPACK_BUMPS_DROPS:		return SENSPACK_SIZE_BUMPS_DROPS;
+  case SENSPACK_WALL:			return SENSPACK_SIZE_WALL;
+  case SENSPACK_CLIFF_LEFT:		return SENSPACK_SIZE_CLIFF_LEFT;
+  case SENSPACK_CLIFF_FRONT_LEFT:	return SENSPACK_SIZE_CLIFF_FRONT_LEFT;
+  case SENSPACK_CLIFF_FRONT_RIGHT:	return SENSPACK_SIZE_CLIFF_FRONT_RIGHT;
+  case SENSPACK_CLIFF_RIGHT:		return SENSPACK_SIZE_CLIFF_RIGHT;
+  case SENSPACK_VIRTUAL_WALL:		return SENSPACK_SIZE_VIRTUAL_WALL;
+  case SENSPACK_WHEEL_OVERCURRENTS:	return SENSPACK_SIZE_WHEEL_OVERCURRENTS;
+  case SENSPACK_DIRT_DETECT:		return SENSPACK_SIZE_DIRT_DETECT;
+  case SENSPACK_IR_CHAR_OMNI:		return SENSPACK_SIZE_IR_CHAR_OMNI;
+  case SENSPACK_BUTTONS:		return SENSPACK_SIZE_BUTTONS;
+  case SENSPACK_DISTANCE:		return SENSPACK_SIZE_DISTANCE;
+  case SENSPACK_ANGLE:			return SENSPACK_SIZE_ANGLE;
+  case SENSPACK_CHARGING_STATE:		return SENSPACK_SIZE_CHARGING_STATE;
+  case SENSPACK_VOLTAGE:		return SENSPACK_SIZE_VOLTAGE;
+  case SENSPACK_CURRENT:		return SENSPACK_SIZE_CURRENT;
+  case SENSPACK_TEMPERATURE:		return SENSPACK_SIZE_TEMPERATURE;
+  case SENSPACK_BATTERY_CHARGE:		return SENSPACK_SIZE_BATTERY_CHARGE;
+  case SENSPACK_BATTERY_CAPACITY:	return SENSPACK_SIZE_BATTERY_CAPACITY;
+  case SENSPACK_WALL_SIGNAL:		return SENSPACK_SIZE_WALL_SIGNAL;
+  case SENSPACK_CLIFF_LEFT_SIGNAL:	return SENSPACK_SIZE_CLIFF_LEFT_SIGNAL;
+  case SENSPACK_CLIFF_FRONT_LEFT_SIGNAL:
+    return SENSPACK_SIZE_CLIFF_FRONT_LEFT_SIGNAL;
+  case SENSPACK_CLIFF_FRONT_RIGHT_SIGNAL:
+    return SENSPACK_SIZE_CLIFF_FRONT_RIGHT_SIGNAL;
+  case SENSPACK_CLIFF_RIGHT_SIGNAL:	return SENSPACK_SIZE_CLIFF_RIGHT_SIGNAL;
+  case SENSPACK_CHARGE_SOURCES:		return SENSPACK_SIZE_CHARGE_SOURCES;
+  case SENSPACK_OI_MODE:		return SENSPACK_SIZE_OI_MODE;
+  case SENSPACK_SONG_NUMBER:		return SENSPACK_SIZE_SONG_NUMBER;
+  case SENSPACK_SONG_PLAYING:		return SENSPACK_SIZE_SONG_PLAYING;
+  case SENSPACK_STREAM_PACKETS:		return SENSPACK_SIZE_STREAM_PACKETS;
+  case SENSPACK_REQ_VELOCITY:		return SENSPACK_SIZE_REQ_VELOCITY;
+  case SENSPACK_REQ_RADIUS:		return SENSPACK_SIZE_REQ_RADIUS;
+  case SENSPACK_REQ_RIGHT_VELOCITY:	return SENSPACK_SIZE_REQ_RIGHT_VELOCITY;
+  case SENSPACK_REQ_LEFT_VELOCITY:	return SENSPACK_SIZE_REQ_LEFT_VELOCITY;
+  case SENSPACK_RIGHT_ENCODER:		return SENSPACK_SIZE_RIGHT_ENCODER;
+  case SENSPACK_LEFT_ENCODER:		return SENSPACK_SIZE_LEFT_ENCODER;
+  case SENSPACK_LIGHT_BUMPER:		return SENSPACK_SIZE_LIGHT_BUMPER;
+  case SENSPACK_LIGHT_BUMPER_LEFT:	return SENSPACK_SIZE_LIGHT_BUMPER_LEFT;
+  case SENSPACK_LIGHT_BUMPER_FRONT_LEFT:
+    return SENSPACK_SIZE_LIGHT_BUMPER_FRONT_LEFT;
+  case SENSPACK_LIGHT_BUMPER_CENTER_LEFT:
+    return SENSPACK_SIZE_LIGHT_BUMPER_CENTER_LEFT;
+  case SENSPACK_LIGHT_BUMPER_CENTER_RIGHT:
+    return SENSPACK_SIZE_LIGHT_BUMPER_CENTER_RIGHT;
+  case SENSPACK_LIGHT_BUMPER_FRONT_RIGHT:
+    return SENSPACK_SIZE_LIGHT_BUMPER_FRONT_RIGHT;
+  case SENSPACK_LIGHT_BUMPER_RIGHT:
+    return SENSPACK_SIZE_LIGHT_BUMPER_RIGHT;
+  case SENSPACK_IR_CHAR_LEFT:		return SENSPACK_SIZE_IR_CHAR_LEFT;
+  case SENSPACK_IR_CHAR_RIGHT:		return SENSPACK_SIZE_IR_CHAR_RIGHT;
+  case SENSPACK_LEFT_MOTOR_CURRENT:	return SENSPACK_SIZE_LEFT_MOTOR_CURRENT;
+  case SENSPACK_RIGHT_MOTOR_CURRENT:	return SENSPACK_SIZE_RIGHT_MOTOR_CURRENT;
+  case SENSPACK_BRUSH_MOTOR_CURRENT:	return SENSPACK_SIZE_BRUSH_MOTOR_CURRENT;
+  case SENSPACK_SIDE_BRUSH_MOTOR_CURRENT:
+    return SENSPACK_SIZE_SIDE_BRUSH_MOTOR_CURRENT;
+  case SENSPACK_STASIS:			return SENSPACK_SIZE_STASIS;
+  case SENSPACK_GROUP_0:		return SENSPACK_SIZE_GROUP_0;
+  case SENSPACK_GROUP_1:		return SENSPACK_SIZE_GROUP_1;
+  case SENSPACK_GROUP_2:		return SENSPACK_SIZE_GROUP_2;
+  case SENSPACK_GROUP_3:		return SENSPACK_SIZE_GROUP_3;
+  case SENSPACK_GROUP_4:		return SENSPACK_SIZE_GROUP_4;
+  case SENSPACK_GROUP_5:		return SENSPACK_SIZE_GROUP_5;
+  case SENSPACK_GROUP_6:		return SENSPACK_SIZE_GROUP_6;
+  case SENSPACK_GROUP_ALL:		return SENSPACK_SIZE_GROUP_ALL;
+  case SENSPACK_GROUP_101:		return SENSPACK_SIZE_GROUP_101;
+  case SENSPACK_GROUP_106:		return SENSPACK_SIZE_GROUP_106;
+  case SENSPACK_GROUP_107:		return SENSPACK_SIZE_GROUP_107;
+  default:
+    throw Exception("Roomba500:get_packet_size(): unknown packet ID %i", packet);
+  }
 }
