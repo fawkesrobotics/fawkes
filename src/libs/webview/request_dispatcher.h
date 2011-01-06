@@ -3,7 +3,7 @@
  *  request_dispatcher.h - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:44:33 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_REQUEST_DISPATCHER_H_
-#define __PLUGINS_WEBVIEW_REQUEST_DISPATCHER_H_
+#ifndef __LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
+#define __LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
 
 #include <string>
 #include <map>
@@ -35,6 +35,7 @@ namespace fawkes {
 #endif
 
 class WebRequestProcessor;
+class WebUrlManager;
 class WebPageHeaderGenerator;
 class WebPageFooterGenerator;
 class StaticWebReply;
@@ -42,12 +43,9 @@ class StaticWebReply;
 class WebRequestDispatcher
 {
  public:
-  WebRequestDispatcher(WebPageHeaderGenerator *headergen = 0,
+  WebRequestDispatcher(WebUrlManager *url_manager,
+		       WebPageHeaderGenerator *headergen = 0,
 		       WebPageFooterGenerator *footergen = 0);
-
-  void add_processor(const char *url_prefix, WebRequestProcessor *processor);
-  void remove_processor(const char *url_prefix);
-
 
   static int process_request_cb(void *callback_data,
 				struct MHD_Connection * connection,
@@ -58,6 +56,7 @@ class WebRequestDispatcher
 				size_t *upload_data_size,
 				void  **session_data);
 
+ private:
   int queue_static_reply(struct MHD_Connection * connection,
 			 StaticWebReply *sreply);
   int process_request(struct MHD_Connection * connection,
@@ -69,8 +68,7 @@ class WebRequestDispatcher
 		      void **session_data);
 
  private:
-  std::map<std::string, WebRequestProcessor *>  __processors;
-  WebRequestProcessor                          *__startpage_processor;
+  WebUrlManager                                *__url_manager;
 
   std::string                                   __active_baseurl;
   WebPageHeaderGenerator                       *__page_header_generator;

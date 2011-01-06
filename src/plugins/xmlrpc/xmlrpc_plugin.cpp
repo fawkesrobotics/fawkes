@@ -38,6 +38,14 @@ XmlRpcPlugin::XmlRpcPlugin(Configuration *config)
   : Plugin(config)
 {
   thread_list.push_back(new XmlRpcThread());
+
+  bool custom_server = false;
+  try {
+    custom_server = config->get_bool("/xmlrpc/custom_server");
+  } catch (Exception &e) {}
+
+  //if (custom_server) add_dependency("webview");
+
 }
 
 

@@ -23,9 +23,12 @@
 #include "header_generator.h"
 
 #include <utils/system/hostinfo.h>
+#include <webview/nav_manager.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace fawkes;
 
 /** @class WebviewHeaderGenerator "header_generator.h"
  * Webview page header.
@@ -45,28 +48,12 @@ const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "<a id=\"logo\" href=\"/\"/><img src=\"/static/webview.png\" alt=\"Fawkes WebView\"/></a>"
   "<hr /></div>\n";
 
-/** Constructor. */
-WebviewHeaderGenerator::WebviewHeaderGenerator()
-{
-}
-
-/** Add navigation entry.
- * @param baseurl baseurl that should be linked for this entry
- * @param name string to print as link name
+/** Constructor.
+ * @param nav_manager navigation manager to use to generate the navigation
  */
-void
-WebviewHeaderGenerator::add_nav_entry(std::string baseurl, std::string name)
+WebviewHeaderGenerator::WebviewHeaderGenerator(WebNavManager *nav_manager)
 {
-  __nav_entries[baseurl] = name;
-}
-
-/** Remove navigation entry.
- * @param baseurl baseurl whose config entry to remove
- */
-void
-WebviewHeaderGenerator::remove_nav_entry(std::string baseurl)
-{
-  __nav_entries.erase(baseurl);
+  __nav_manager = nav_manager;
 }
 
 std::string
@@ -83,8 +70,9 @@ WebviewHeaderGenerator::html_header(std::string &title,
   }
 
   rv += "  <div id=\"mainnav\" class=\"nav\"><ul>";
-  std::map<std::string, std::string>::iterator nei;
-  for (nei = __nav_entries.begin(); nei != __nav_entries.end(); ++nei) {
+  WebNavManager::NavMap::const_iterator nei;
+  const WebNavManager::NavMap &nav_entries(__nav_manager->get_nav_entries());
+  for (nei = nav_entries.begin(); nei != nav_entries.end(); ++nei) {
     rv += "<li";
     if ( nei->first == active_baseurl ) {
       rv += " class=\"active\"";

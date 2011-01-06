@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  redirect_reply.h - Web request reply for a redirect
+ *  nav_manager.h - Web Navigation manager
  *
- *  Created: Thu Feb 12 13:39:04 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Dec 21 01:28:50 2010
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,20 +20,39 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_REDIRECT_REPLY_H_
-#define __LIBS_WEBVIEW_REDIRECT_REPLY_H_
+#ifndef __LIBS_WEBVIEW_NAV_MANAGER_H_
+#define __LIBS_WEBVIEW_NAV_MANAGER_H_
 
-#include <webview/reply.h>
+#include <map>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class WebRedirectReply : public StaticWebReply
+class Mutex;
+
+class WebNavManager
 {
  public:
-  WebRedirectReply(std::string url);
+  /** Navigation map type, mapping URLs to labels. */
+  typedef std::map<std::string, std::string> NavMap;
+
+  WebNavManager();
+  ~WebNavManager();
+
+  void add_nav_entry(std::string baseurl, std::string name);
+  void remove_nav_entry(std::string baseurl);
+
+  /** Get navigation entries. @return navigation entries map. */
+  const NavMap & get_nav_entries() const { return __nav_entries; }
+  /** Get mutex for navigation entries. @return mutex for navigation entries. */
+  Mutex *  mutex() { return __mutex; }
+
+ private:
+  Mutex                                        *__mutex;
+  NavMap __nav_entries;
 };
 
 } // end namespace fawkes
