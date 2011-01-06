@@ -24,8 +24,12 @@
 #include "roomba_500.h"
 #include <interfaces/Roomba500Interface.h>
 
+#include <core/threading/mutex_locker.h>
 #include <utils/time/wait.h>
 #include <utils/math/angle.h>
+#ifdef USE_TIMETRACKER
+#  include <utils/time/tracker.h>
+#endif
 
 #include <interfaces/LedInterface.h>
 #include <interfaces/SwitchInterface.h>
@@ -53,7 +57,12 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
       logger(logger), clock(clock), __roomba(roomba)
   {
     __mutex = new Mutex();
-    __time_wait = new TimeWait(clock, (Roomba500::STREAM_INTERVAL_MS - 1) * 1000);
+    __time_wait = new TimeWait(clock, Roomba500::STREAM_INTERVAL_MS * 1000);
+
+#ifdef USE_TIMETRACKER
+    __tt_count  = 0;
+    __ttc_query = __tt.add_class("Query");
+#endif
 
     __roomba->enable_sensors();
   }
@@ -72,8 +81,19 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
 
     __mutex->lock();
     try {
+#ifdef USE_TIMETRACKER
+      __tt.ping_start(__ttc_query);
+#endif
       __roomba->read_sensors();
-      __fresh_data = true;
+#ifdef USE_TIMETRACKER
+      __tt.ping_end(__ttc_query);
+      if (++__tt_count == 300) {
+	__tt_count = 0;
+	__tt.print_to_stdout();
+	__tt.reset();
+      }
+#endif
+      __fresh_data = __roomba->has_sensor_packet();
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to read sensor info, exception follows");
       logger->log_warn(name(), e);
@@ -111,12 +131,25 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
     __mutex->unlock();
   }
 
+  /** Get Mutex.
+   * @return mutex
+   */
+  Mutex * mutex()
+  {
+    return __mutex;
+  }
+
  private:
   Logger            *logger;
   Clock             *clock;
   RefPtr<Roomba500>  __roomba;
   TimeWait          *__time_wait;
   Mutex             *__mutex;
+#ifdef USE_TIMETRACKER
+  TimeTracker        __tt;
+  unsigned int       __ttc_query;
+  unsigned int       __tt_count;
+#endif
 
  private:
   bool __fresh_data;
@@ -200,8 +233,10 @@ Roomba500Thread::init()
     throw;
   }
 
+  __wt = NULL;
   try {
     __roomba = new Roomba500(__cfg_device.c_str());
+    __roomba->set_mode(Roomba500::MODE_SAFE);
     __wt = new WorkerThread(logger, clock, __roomba);
   } catch (Exception &e) {
     close_interfaces();
@@ -242,6 +277,7 @@ Roomba500Thread::finalize()
   __wt->cancel();
   __wt->join();
   delete __wt;
+  __roomba->set_mode(Roomba500::MODE_PASSIVE);
   __roomba.clear();
   close_interfaces();
 }
@@ -330,7 +366,7 @@ void
 Roomba500Thread::write_blackboard()
 {
   if (__wt->has_fresh_data()) {
-    __wt->lock();
+    MutexLocker lock(__wt->mutex());
 
     const Roomba500::SensorPacketGroupAll & sp = __roomba->get_sensor_packet();
 
@@ -376,21 +412,21 @@ Roomba500Thread::write_blackboard()
     __switch_if_but_clock->set_enabled(sp.buttons & Roomba500::BUTTON_CLOCK);
 
     // Convert mm to m for distance
-    __roomba500_if->set_distance(ntohs(sp.distance) / 1000.);
+    __roomba500_if->set_distance((int)ntohs(sp.distance) / 1000.);
     // invert because in Fawkes positive angles go counter-clockwise, while
     // for the Roomba they go clockwise, additionally convert into radians.
-    __roomba500_if->set_angle(-deg2rad(ntohs(sp.angle)));
+    __roomba500_if->set_angle(-deg2rad((int)ntohs(sp.angle)));
     __roomba500_if->set_charging_state(
 	(Roomba500Interface::ChargingState)sp.charging_state);
     __roomba500_if->set_voltage(ntohs(sp.voltage));
-    __roomba500_if->set_current(ntohs(sp.current));
-    __roomba500_if->set_temperature(sp.temperature);
+    __roomba500_if->set_current((int)ntohs(sp.current));
+    __roomba500_if->set_temperature((int)sp.temperature);
     __roomba500_if->set_battery_charge(ntohs(sp.battery_charge));
     __roomba500_if->set_battery_capacity(ntohs(sp.battery_capacity));
 
     __battery_if->set_voltage(ntohs(sp.voltage));
-    __battery_if->set_current(ntohs(sp.current));
-    __battery_if->set_temperature(sp.temperature);
+    __battery_if->set_current((int)ntohs(sp.current));
+    __battery_if->set_temperature((char)sp.temperature);
     __battery_if->set_absolute_soc(ntohs(sp.battery_capacity) /
 				   ntohs(sp.battery_charge));
     __battery_if->set_relative_soc(__battery_if->absolute_soc());
@@ -407,10 +443,10 @@ Roomba500Thread::write_blackboard()
     __roomba500_if->set_song_number(sp.song_number);
     __roomba500_if->set_song_playing(sp.song_playing == 1);
 
-    __roomba500_if->set_velocity(ntohs(sp.velocity) / 1000.);
-    __roomba500_if->set_radius(ntohs(sp.radius) / 1000.);
-    __roomba500_if->set_velocity_right(ntohs(sp.velocity_right) / 1000.);
-    __roomba500_if->set_velocity_left(ntohs(sp.velocity_left) / 1000.);
+    __roomba500_if->set_velocity((int)ntohs(sp.velocity) / 1000.);
+    __roomba500_if->set_radius((int)ntohs(sp.radius) / 1000.);
+    __roomba500_if->set_velocity_right((int)ntohs(sp.velocity_right) / 1000.);
+    __roomba500_if->set_velocity_left((int)ntohs(sp.velocity_left) / 1000.);
     __roomba500_if->set_encoder_counts_left(ntohs(sp.encoder_counts_left));
     __roomba500_if->set_encoder_counts_right(ntohs(sp.encoder_counts_right));
 
@@ -439,13 +475,11 @@ Roomba500Thread::write_blackboard()
     __roomba500_if->set_ir_opcode_right(
 	(Roomba500Interface::InfraredCharacter)sp.ir_opcode_right);
 
-    __roomba500_if->set_left_motor_current(ntohs(sp.left_motor_current) / 1000.);
-    __roomba500_if->set_right_motor_current(ntohs(sp.right_motor_current) / 1000.);
-    __roomba500_if->set_side_brush_current(ntohs(sp.side_brush_current) / 1000.);
-    __roomba500_if->set_main_brush_current(ntohs(sp.main_brush_current) / 1000.);
+    __roomba500_if->set_left_motor_current((int)ntohs(sp.left_motor_current));
+    __roomba500_if->set_right_motor_current((int)ntohs(sp.right_motor_current));
+    __roomba500_if->set_side_brush_current((int)ntohs(sp.side_brush_current));
+    __roomba500_if->set_main_brush_current((int)ntohs(sp.main_brush_current));
     __roomba500_if->set_caster_stasis(sp.stasis == 1);
-
-    
 
     __roomba500_if->write();
 
@@ -459,7 +493,5 @@ Roomba500Thread::write_blackboard()
     __switch_if_but_clock->write();
 
     __battery_if->write();
-
-    __wt->unlock();
   }
 }

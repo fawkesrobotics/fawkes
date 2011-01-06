@@ -124,6 +124,7 @@ INSERT INTO "config" VALUES('/hardware/laser/lase_edl/irq','unsigned int',0,'IRQ
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/num_init_tries','unsigned int',5,'Number of times to try initialization');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/mount_rotation','float',180,'Rotation of the laser towards front; degree');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/use_dead_spots_filter','bool','0','If true, the fflaser_calibrate tool must be used to gain information about dead spots, which are then extracted with a filter');
+INSERT INTO "config" VALUES('/hardware/roomba/device','string','/dev/ttyUSB0','Device file for the serial connection to the Roomba.');
 INSERT INTO "config" VALUES('/plugins/laserht/laser_interface_id','string','Laser','Interface ID of the Laser360Interface to get data from');
 INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',12,'Number of samples to take per data point on the range of 180 deg');
 INSERT INTO "config" VALUES('/plugins/laserht/line/r_scale','float',0.02,'Distance scale for r parameter of line; m');

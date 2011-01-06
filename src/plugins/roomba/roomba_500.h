@@ -356,10 +356,12 @@ class Roomba500
   static const unsigned short int MAX_ENCODER_COUNT;	///< Maximum encoder count.
   static const unsigned short int STREAM_INTERVAL_MS;	///< Time in ms between
 						///< streamed sensor packets.
-
+  static const unsigned short int MODE_CHANGE_WAIT_MS;	///< Time in ms to wait
+							///< after mode changes
 
   static const unsigned char CHECKSUM_SIZE;	///< Checksum byte size.
 
+#pragma pack(push,1)
   /** Struct for packet group with everything (SENSPACK_GROUP_ALL). */
   typedef struct {
     uint8_t  bumps_wheeldrops;		///< Bumps and wheeldrops bits.
@@ -374,12 +376,12 @@ class Roomba500
     uint8_t  unused_1;			///< Unused byte.
     uint8_t  ir_opcode_omni;		///< Omni IR receiver character.
     uint8_t  buttons;			///< Buttons bits.
-    uint16_t distance;			///< Traveled distance in mm.
-    uint16_t angle;			///< Turned angle in degree.
+    int16_t  distance;			///< Traveled distance in mm.
+    int16_t  angle;			///< Turned angle in degree.
     uint8_t  charging_state;		///< Charging state.
     uint16_t voltage;			///< Voltage in mV.
-    uint16_t current;			///< Current in mA.
-    uint8_t  temperature;		///< Temperature in deg C.
+    int16_t  current;			///< Current in mA.
+    int8_t   temperature;		///< Temperature in deg C.
     uint16_t battery_charge;		///< Battery charge in mAh.
     uint16_t battery_capacity;		///< Battery capacity in mAh.
     uint16_t wall_signal;		///< Raw wall signal.
@@ -394,10 +396,10 @@ class Roomba500
     uint8_t  song_number;		///< Song number.
     uint8_t  song_playing;		///< Song playing byte.
     uint8_t  stream_num_packets;	///< Number of streamed packets.
-    uint16_t velocity;			///< Velocity in mm/sec.
-    uint16_t radius;			///< Radius in mm.
-    uint16_t velocity_right;		///< Velocity of right wheel in mm/sec.
-    uint16_t velocity_left;		///< Velocity of left wheel in mm/sec.
+    int16_t  velocity;			///< Velocity in mm/sec.
+    int16_t  radius;			///< Radius in mm.
+    int16_t  velocity_right;		///< Velocity of right wheel in mm/sec.
+    int16_t  velocity_left;		///< Velocity of left wheel in mm/sec.
     uint16_t encoder_counts_left;	///< Encoder counts for left wheel.
     uint16_t encoder_counts_right;	///< Encoder counts for right wheel.
     uint8_t  light_bumper;		///< Light bumper bits.
@@ -409,12 +411,13 @@ class Roomba500
     uint16_t light_bump_right;  	///< Raw right light bumper signal.
     uint8_t  ir_opcode_left;		///< Left IR receiver character.
     uint8_t  ir_opcode_right;		///< Right IR receiver character.
-    uint16_t left_motor_current;	///< Raw left motor current signal.
-    uint16_t right_motor_current;	///< Raw right motor current signal.
-    uint16_t main_brush_current;	///< Raw main brush motor current signal.
-    uint16_t side_brush_current;	///< Raw side brush motor current signal.
+    int16_t  left_motor_current;	///< Raw left motor current signal.
+    int16_t  right_motor_current;	///< Raw right motor current signal.
+    int16_t  main_brush_current;	///< Raw main brush motor current signal.
+    int16_t  side_brush_current;	///< Raw side brush motor current signal.
     uint8_t  stasis;			///< Castor stasis.
   } SensorPacketGroupAll;
+#pragma pack(pop)
 
  public:
   Roomba500(const char *device_file);
@@ -442,8 +445,11 @@ class Roomba500
 
   void enable_sensors();
   void disable_sensors();
-  void read_sensors();
   bool is_data_available();
+  void read_sensors();
+  void query_sensors();
+  bool has_sensor_packet() const
+  { return __sensor_packet_received; };
   const SensorPacketGroupAll &  get_sensor_packet() const;
 
   static unsigned short int get_packet_size(SensorPacketID packet);
@@ -451,7 +457,8 @@ class Roomba500
  private:
   void send(OpCode opcode,
 	    const void *params = NULL, const size_t plength = 0);
-  void recv(unsigned int timeout_ms = 0);
+  void recv(size_t index, size_t num_bytes, unsigned int timeout_ms = 0);
+
   void assert_control()
   {
     if ((__mode != MODE_FULL) && (__mode != MODE_SAFE)) {

@@ -111,8 +111,8 @@
     <field type="float" name="angle">Turned angle in radians.</field>
     <field type="ChargingState" name="charging_state">Charging state.</field>
     <field type="uint16" name="voltage">Voltage in mV.</field>
-    <field type="uint16" name="current">Current in mA.</field>
-    <field type="uint8" name="temperature">Temperature in degree Celsius.</field>
+    <field type="int16" name="current">Current in mA.</field>
+    <field type="int8" name="temperature">Temperature in degree Celsius.</field>
     <field type="uint16" name="battery_charge">Battery charge in mAh.</field>
     <field type="uint16" name="battery_capacity">Battery capacity in mAh.</field>
     <field type="uint16" name="wall_signal">Raw wall signal</field>
@@ -155,10 +155,10 @@
       Left receiver opcode.</field>
     <field type="InfraredCharacter" name="ir_opcode_right">
       Right receiver opcode.</field>
-    <field type="float" name="left_motor_current">Left motor current in A.</field>
-    <field type="float" name="right_motor_current">Right motor current in A.</field>
-    <field type="float" name="main_brush_current">Main brush current in A.</field>
-    <field type="float" name="side_brush_current">Side brush current in A.</field>
+    <field type="int16" name="left_motor_current">Left motor current in mA.</field>
+    <field type="int16" name="right_motor_current">Right motor current in mA.</field>
+    <field type="int16" name="main_brush_current">Main brush current in mA.</field>
+    <field type="int16" name="side_brush_current">Side brush current in mA.</field>
     <field type="bool" name="caster_stasis">Caster wheel stasis.</field>
   </data>
   <message name="Stop">

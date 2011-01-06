@@ -173,6 +173,7 @@ const unsigned short int Roomba500::MAX_ENCODER_COUNT = 65535;
 const short int Roomba500::MAX_PWM           = 255;
 
 const unsigned short int Roomba500::STREAM_INTERVAL_MS = 15;
+const unsigned short int Roomba500::MODE_CHANGE_WAIT_MS = 20;
 
 const unsigned char Roomba500::CHECKSUM_SIZE = 1;
 
@@ -297,6 +298,8 @@ Roomba500::open() {
   }
 
   send(OPCODE_START);
+  usleep(MODE_CHANGE_WAIT_MS * 1000);
+  __mode = MODE_PASSIVE;
 }
 
 
@@ -338,6 +341,14 @@ Roomba500::send(Roomba500::OpCode opcode,
 
   int written = write(__fd, __obuffer, __obuffer_length);
 
+  /*
+  printf("Wrote %i of %i bytes:\n", written, __obuffer_length);
+  for (int i = 0; i < __obuffer_length; ++i) {
+    printf("%2u %s", __obuffer[i], i == written ? "| " : "");
+  }
+  printf("\n");
+  */
+
   if ( written < 0 ) {
     throw Exception(errno, "Failed to write Roomba 500 packet %i", opcode);
   } else if (written < __obuffer_length) {
@@ -349,10 +360,12 @@ Roomba500::send(Roomba500::OpCode opcode,
 
 
 /** Receive a packet.
+ * @param index index in ibuffer to fill
+ * @param num_bytes number of bytes to read
  * @param timeout_ms maximum wait time in miliseconds, 0 to wait indefinitely.
  */
 void
-Roomba500::recv(unsigned int timeout_ms)
+Roomba500::recv(size_t index, size_t num_bytes, unsigned int timeout_ms)
 {
   timeval timeout = {0, timeout_ms  * 1000};
 
@@ -373,14 +386,19 @@ Roomba500::recv(unsigned int timeout_ms)
 
   // get octets one by one
   int bytes_read = 0;
-  while (bytes_read < __packet_length) {
-    bytes_read += read(__fd, &__ibuffer[6] + bytes_read, __packet_length - bytes_read);
+  while (bytes_read < (int)num_bytes) {
+    int rv = read(__fd, &__ibuffer[index] +bytes_read, num_bytes -bytes_read);
+    if (rv == -1) {
+      throw Exception(errno, "Roomba500::recv(): read failed");
+    }
+    bytes_read += rv;
   }
-  if (bytes_read < __packet_length) {
+
+  if (bytes_read < (int)num_bytes) {
     throw Exception("Roomba500::recv(): failed to read packet data");
   }
 
-  __ibuffer_length = __packet_length;
+  __ibuffer_length = index + num_bytes;
 }
 
 
@@ -419,30 +437,55 @@ Roomba500::read_sensors()
     throw Exception("Roomba 500 sensors have not been enabled.");
   }
 
-  recv();
+  bool done = false;
+  unsigned int skipped = 0;
+  while (!done) {
+    __ibuffer_length = 0;
 
-  if ((__ibuffer[0] != 19) || (__ibuffer[2] != SENSPACK_GROUP_ALL)) {
-    throw Exception("Invalid data received (Header %u, packet %u).",
-		    __ibuffer[0], __ibuffer[2]);
+    recv(__ibuffer_length, 1);
+    if (__ibuffer[0] != 19) {
+      ++skipped;
+      continue;
+    }
+
+    recv(__ibuffer_length, 1);
+    if (__ibuffer[1] != __packet_length + 1) {
+      ++skipped;
+      continue;
+    }
+
+    recv(__ibuffer_length, 1);
+    if (__ibuffer[2] != __packet_id) {
+      ++skipped;
+      continue;
+    }
+
+    recv(__ibuffer_length, __packet_length);
+
+    recv(__ibuffer_length++, 1);
+
+    unsigned int sum = 0;
+    for (int i = 0; i < __ibuffer_length; ++i) {
+      sum += __ibuffer[i];
+    }
+
+    if ((sum & 0xFF) != 0) {
+      __sensor_packet_received = false;
+    } else {
+      memcpy(&__sensor_packet, &__ibuffer[3], sizeof(SensorPacketGroupAll));
+      __sensor_packet_received = true;
+    }
+
+    done = true;
   }
 
-  if (__ibuffer_length != SENSPACK_SIZE_GROUP_ALL + 4) {
-    throw Exception("Packet size mismatch (%u, expected %u", __ibuffer_length,
-		    SENSPACK_SIZE_GROUP_ALL + 4);
+  /*
+  printf("Read %u bytes: ", __ibuffer_length);
+  for (int i = 0; i < __ibuffer_length; ++i) {
+    printf("%2u ", __ibuffer[i]);
   }
-
-  unsigned int sum = 0;
-  for (int i = 1; i < __ibuffer_length - 1; ++i) {
-    sum += __ibuffer[i];
-  }
-  if (((sum + __ibuffer[__ibuffer_length - 1]) & 0xFF) != 0) {
-    throw Exception("Checksum mismatch (%u, expected %u)",
-		    __ibuffer[__ibuffer_length - 1],
-		    255 - (sum & 0xFF));
-  }
-
-  memcpy(&__sensor_packet, &__ibuffer[3], sizeof(SensorPacketGroupAll));
-  __sensor_packet_received = true;
+  printf(" (skipped %u)\n", skipped);
+  */
 }
 
 /** Enable sensor data stream.
@@ -464,7 +507,7 @@ Roomba500::enable_sensors()
 
   __packet_id = SENSPACK_GROUP_ALL;
   __packet_reply_id = 19;
-  __packet_length = 2 + 1 + get_packet_size(SENSPACK_GROUP_ALL) + CHECKSUM_SIZE;
+  __packet_length = get_packet_size(SENSPACK_GROUP_ALL);
   __sensors_enabled = true;
   __sensor_packet_received = false;
 }
@@ -489,17 +532,37 @@ Roomba500::disable_sensors()
 }
 
 
+/** Query sensor once..
+ * For simplicity and efficiency only the single SENSPACK_GROUP_ALL packet can
+ * be streamed at this time.
+ */
+void
+Roomba500::query_sensors()
+{
+  assert_connected();
+
+  unsigned char p = SENSPACK_GROUP_ALL;
+
+  send(OPCODE_QUERY, &p, 1);
+
+  __packet_id = SENSPACK_GROUP_ALL;
+  __packet_reply_id = 0;
+  __packet_length = get_packet_size(SENSPACK_GROUP_ALL);
+  __sensor_packet_received = true;
+
+  recv(0, __packet_length, 10);
+
+  memcpy(&__sensor_packet, __ibuffer, sizeof(SensorPacketGroupAll));
+}
+
+
 /** Get latest sensor packet.
  * @return sensor packet
  */
 const Roomba500::SensorPacketGroupAll &
 Roomba500::get_sensor_packet() const
 {
-  if ( ! __sensors_enabled) {
-    throw Exception("Roomba 500 sensors have not been enabled.");
-  }
-
-  if (__sensor_packet_received) {
+  if (! __sensor_packet_received) {
     throw Exception("No valid data received, yet.");
   }
 
@@ -515,16 +578,17 @@ Roomba500::get_sensor_packet() const
 void
 Roomba500::set_mode(Roomba500::Mode mode)
 {
-  if (mode == MODE_SAFE) {
+  if (mode == MODE_PASSIVE) {
+    send(OPCODE_START);
+  } if (mode == MODE_SAFE) {
     send(OPCODE_SAFE);
   } else if (mode == MODE_FULL) {
     send(OPCODE_FULL);
   } else if (mode == MODE_OFF) {
     throw Exception("Mode OFF cannot be set, use power_down() instead");
-  } else if (mode == MODE_PASSIVE) {
-    throw Exception("Mode PASSIVE cannot be set, use clean() instead");
   }
 
+  usleep(MODE_CHANGE_WAIT_MS * 1000);
   __mode = mode;
 }
 

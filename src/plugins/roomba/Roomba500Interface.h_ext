@@ -154,8 +154,8 @@ class Roomba500Interface : public Interface
     float angle; /**< Turned angle in radians. */
     ChargingState charging_state; /**< Charging state. */
     uint16_t voltage; /**< Voltage in mV. */
-    uint16_t current; /**< Current in mA. */
-    uint8_t temperature; /**< Temperature in degree Celsius. */
+    int16_t current; /**< Current in mA. */
+    int8_t temperature; /**< Temperature in degree Celsius. */
     uint16_t battery_charge; /**< Battery charge in mAh. */
     uint16_t battery_capacity; /**< Battery capacity in mAh. */
     uint16_t wall_signal; /**< Raw wall signal */
@@ -197,10 +197,10 @@ class Roomba500Interface : public Interface
       Left receiver opcode. */
     InfraredCharacter ir_opcode_right; /**< 
       Right receiver opcode. */
-    float left_motor_current; /**< Left motor current in A. */
-    float right_motor_current; /**< Right motor current in A. */
-    float main_brush_current; /**< Main brush current in A. */
-    float side_brush_current; /**< Side brush current in A. */
+    int16_t left_motor_current; /**< Left motor current in mA. */
+    int16_t right_motor_current; /**< Right motor current in mA. */
+    int16_t main_brush_current; /**< Main brush current in mA. */
+    int16_t side_brush_current; /**< Side brush current in mA. */
     bool caster_stasis; /**< Caster wheel stasis. */
   } Roomba500Interface_data_t;
 #pragma pack(pop)
@@ -352,11 +352,11 @@ class Roomba500Interface : public Interface
   uint16_t voltage() const;
   void set_voltage(const uint16_t new_voltage);
   size_t maxlenof_voltage() const;
-  uint16_t current() const;
-  void set_current(const uint16_t new_current);
+  int16_t current() const;
+  void set_current(const int16_t new_current);
   size_t maxlenof_current() const;
-  uint8_t temperature() const;
-  void set_temperature(const uint8_t new_temperature);
+  int8_t temperature() const;
+  void set_temperature(const int8_t new_temperature);
   size_t maxlenof_temperature() const;
   uint16_t battery_charge() const;
   void set_battery_charge(const uint16_t new_battery_charge);
@@ -451,17 +451,17 @@ class Roomba500Interface : public Interface
   InfraredCharacter ir_opcode_right() const;
   void set_ir_opcode_right(const InfraredCharacter new_ir_opcode_right);
   size_t maxlenof_ir_opcode_right() const;
-  float left_motor_current() const;
-  void set_left_motor_current(const float new_left_motor_current);
+  int16_t left_motor_current() const;
+  void set_left_motor_current(const int16_t new_left_motor_current);
   size_t maxlenof_left_motor_current() const;
-  float right_motor_current() const;
-  void set_right_motor_current(const float new_right_motor_current);
+  int16_t right_motor_current() const;
+  void set_right_motor_current(const int16_t new_right_motor_current);
   size_t maxlenof_right_motor_current() const;
-  float main_brush_current() const;
-  void set_main_brush_current(const float new_main_brush_current);
+  int16_t main_brush_current() const;
+  void set_main_brush_current(const int16_t new_main_brush_current);
   size_t maxlenof_main_brush_current() const;
-  float side_brush_current() const;
-  void set_side_brush_current(const float new_side_brush_current);
+  int16_t side_brush_current() const;
+  void set_side_brush_current(const int16_t new_side_brush_current);
   size_t maxlenof_side_brush_current() const;
   bool is_caster_stasis() const;
   void set_caster_stasis(const bool new_caster_stasis);

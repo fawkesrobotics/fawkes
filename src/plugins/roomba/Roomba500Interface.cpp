@@ -77,8 +77,8 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_ENUM, "charging_state", 1, &data->charging_state, "ChargingState");
   add_fieldinfo(IFT_UINT16, "voltage", 1, &data->voltage);
-  add_fieldinfo(IFT_UINT16, "current", 1, &data->current);
-  add_fieldinfo(IFT_UINT8, "temperature", 1, &data->temperature);
+  add_fieldinfo(IFT_INT16, "current", 1, &data->current);
+  add_fieldinfo(IFT_INT8, "temperature", 1, &data->temperature);
   add_fieldinfo(IFT_UINT16, "battery_charge", 1, &data->battery_charge);
   add_fieldinfo(IFT_UINT16, "battery_capacity", 1, &data->battery_capacity);
   add_fieldinfo(IFT_UINT16, "wall_signal", 1, &data->wall_signal);
@@ -110,14 +110,14 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_UINT16, "light_bump_right", 1, &data->light_bump_right);
   add_fieldinfo(IFT_ENUM, "ir_opcode_left", 1, &data->ir_opcode_left, "InfraredCharacter");
   add_fieldinfo(IFT_ENUM, "ir_opcode_right", 1, &data->ir_opcode_right, "InfraredCharacter");
-  add_fieldinfo(IFT_FLOAT, "left_motor_current", 1, &data->left_motor_current);
-  add_fieldinfo(IFT_FLOAT, "right_motor_current", 1, &data->right_motor_current);
-  add_fieldinfo(IFT_FLOAT, "main_brush_current", 1, &data->main_brush_current);
-  add_fieldinfo(IFT_FLOAT, "side_brush_current", 1, &data->side_brush_current);
+  add_fieldinfo(IFT_INT16, "left_motor_current", 1, &data->left_motor_current);
+  add_fieldinfo(IFT_INT16, "right_motor_current", 1, &data->right_motor_current);
+  add_fieldinfo(IFT_INT16, "main_brush_current", 1, &data->main_brush_current);
+  add_fieldinfo(IFT_INT16, "side_brush_current", 1, &data->side_brush_current);
   add_fieldinfo(IFT_BOOL, "caster_stasis", 1, &data->caster_stasis);
   add_messageinfo("StopMessage");
   add_messageinfo("DriveStraightMessage");
-  unsigned char tmp_hash[] = {0xf2, 0x4f, 0x6e, 0x3b, 0x63, 0x7, 0x22, 0x81, 0x8b, 0xc2, 0xab, 0xaf, 0x9, 0xf0, 0xb8, 0x9b};
+  unsigned char tmp_hash[] = {0x13, 0x51, 0x34, 0x2, 0xca, 0xb, 0xe3, 0xa3, 0x7d, 0x23, 0x23, 0x52, 0xef, 0xe2, 0x63, 0xf4};
   set_hash(tmp_hash);
 }
 
@@ -1105,7 +1105,7 @@ Roomba500Interface::set_voltage(const uint16_t new_voltage)
  * Current in mA.
  * @return current value
  */
-uint16_t
+int16_t
 Roomba500Interface::current() const
 {
   return data->current;
@@ -1126,7 +1126,7 @@ Roomba500Interface::maxlenof_current() const
  * @param new_current new current value
  */
 void
-Roomba500Interface::set_current(const uint16_t new_current)
+Roomba500Interface::set_current(const int16_t new_current)
 {
   data->current = new_current;
   data_changed = true;
@@ -1136,7 +1136,7 @@ Roomba500Interface::set_current(const uint16_t new_current)
  * Temperature in degree Celsius.
  * @return temperature value
  */
-uint8_t
+int8_t
 Roomba500Interface::temperature() const
 {
   return data->temperature;
@@ -1157,7 +1157,7 @@ Roomba500Interface::maxlenof_temperature() const
  * @param new_temperature new temperature value
  */
 void
-Roomba500Interface::set_temperature(const uint8_t new_temperature)
+Roomba500Interface::set_temperature(const int8_t new_temperature)
 {
   data->temperature = new_temperature;
   data_changed = true;
@@ -2145,10 +2145,10 @@ Roomba500Interface::set_ir_opcode_right(const InfraredCharacter new_ir_opcode_ri
 }
 
 /** Get left_motor_current value.
- * Left motor current in A.
+ * Left motor current in mA.
  * @return left_motor_current value
  */
-float
+int16_t
 Roomba500Interface::left_motor_current() const
 {
   return data->left_motor_current;
@@ -2165,21 +2165,21 @@ Roomba500Interface::maxlenof_left_motor_current() const
 }
 
 /** Set left_motor_current value.
- * Left motor current in A.
+ * Left motor current in mA.
  * @param new_left_motor_current new left_motor_current value
  */
 void
-Roomba500Interface::set_left_motor_current(const float new_left_motor_current)
+Roomba500Interface::set_left_motor_current(const int16_t new_left_motor_current)
 {
   data->left_motor_current = new_left_motor_current;
   data_changed = true;
 }
 
 /** Get right_motor_current value.
- * Right motor current in A.
+ * Right motor current in mA.
  * @return right_motor_current value
  */
-float
+int16_t
 Roomba500Interface::right_motor_current() const
 {
   return data->right_motor_current;
@@ -2196,21 +2196,21 @@ Roomba500Interface::maxlenof_right_motor_current() const
 }
 
 /** Set right_motor_current value.
- * Right motor current in A.
+ * Right motor current in mA.
  * @param new_right_motor_current new right_motor_current value
  */
 void
-Roomba500Interface::set_right_motor_current(const float new_right_motor_current)
+Roomba500Interface::set_right_motor_current(const int16_t new_right_motor_current)
 {
   data->right_motor_current = new_right_motor_current;
   data_changed = true;
 }
 
 /** Get main_brush_current value.
- * Main brush current in A.
+ * Main brush current in mA.
  * @return main_brush_current value
  */
-float
+int16_t
 Roomba500Interface::main_brush_current() const
 {
   return data->main_brush_current;
@@ -2227,21 +2227,21 @@ Roomba500Interface::maxlenof_main_brush_current() const
 }
 
 /** Set main_brush_current value.
- * Main brush current in A.
+ * Main brush current in mA.
  * @param new_main_brush_current new main_brush_current value
  */
 void
-Roomba500Interface::set_main_brush_current(const float new_main_brush_current)
+Roomba500Interface::set_main_brush_current(const int16_t new_main_brush_current)
 {
   data->main_brush_current = new_main_brush_current;
   data_changed = true;
 }
 
 /** Get side_brush_current value.
- * Side brush current in A.
+ * Side brush current in mA.
  * @return side_brush_current value
  */
-float
+int16_t
 Roomba500Interface::side_brush_current() const
 {
   return data->side_brush_current;
@@ -2258,11 +2258,11 @@ Roomba500Interface::maxlenof_side_brush_current() const
 }
 
 /** Set side_brush_current value.
- * Side brush current in A.
+ * Side brush current in mA.
  * @param new_side_brush_current new side_brush_current value
  */
 void
-Roomba500Interface::set_side_brush_current(const float new_side_brush_current)
+Roomba500Interface::set_side_brush_current(const int16_t new_side_brush_current)
 {
   data->side_brush_current = new_side_brush_current;
   data_changed = true;
