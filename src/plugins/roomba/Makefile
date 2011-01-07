@@ -17,6 +17,9 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+# Uncomment to enable simple time tracking
+#CFLAGS = -DUSE_TIMETRACKER
+
 LIBS_roomba = fawkescore fawkesutils fawkesaspects \
 	      Roomba500Interface LedInterface SwitchInterface MotorInterface \
 	      BatteryInterface

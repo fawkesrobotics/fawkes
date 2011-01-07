@@ -27,6 +27,10 @@
 
 #include <stdint.h>
 
+namespace fawkes {
+  class Mutex;
+}
+
 class Roomba500
 {
  public:
@@ -448,9 +452,14 @@ class Roomba500
   bool is_data_available();
   void read_sensors();
   void query_sensors();
+  /** Check if sensor packet is availabe.
+   * @return true if sensor packet is available, false otherwise
+   */
   bool has_sensor_packet() const
   { return __sensor_packet_received; };
-  const SensorPacketGroupAll &  get_sensor_packet() const;
+  const SensorPacketGroupAll  get_sensor_packet() const;
+
+  void play_fanfare();
 
   static unsigned short int get_packet_size(SensorPacketID packet);
 
@@ -476,9 +485,12 @@ class Roomba500
   bool                  __sensors_enabled;
   SensorPacketGroupAll  __sensor_packet;
   bool                  __sensor_packet_received;
+  fawkes::Mutex        *__sensor_mutex;
 
   char                 *__device_file;
   int                   __fd;
+  fawkes::Mutex        *__read_mutex;
+  fawkes::Mutex        *__write_mutex;
 
   unsigned char         __obuffer[16];
   unsigned char         __ibuffer[82];

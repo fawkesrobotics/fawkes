@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  thread_roomba_500.h - Roomba 500 thread
+ *  thread_roomba_500.cpp - Roomba 500 thread
  *
  *  Created: Sun Jan 02 12:47:35 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
@@ -24,7 +24,6 @@
 #include "roomba_500.h"
 #include <interfaces/Roomba500Interface.h>
 
-#include <core/threading/mutex_locker.h>
 #include <utils/time/wait.h>
 #include <utils/math/angle.h>
 #ifdef USE_TIMETRACKER
@@ -56,30 +55,35 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
     : Thread("Roomba500WorkerThread", Thread::OPMODE_CONTINUOUS),
       logger(logger), clock(clock), __roomba(roomba)
   {
-    __mutex = new Mutex();
+    __fresh_data_mutex = new Mutex();
     __time_wait = new TimeWait(clock, Roomba500::STREAM_INTERVAL_MS * 1000);
 
 #ifdef USE_TIMETRACKER
     __tt_count  = 0;
     __ttc_query = __tt.add_class("Query");
+    __ttc_loop = __tt.add_class("Loop");
 #endif
 
     __roomba->enable_sensors();
+    __roomba->play_fanfare();
   }
 
   /** Destructor. */
   ~WorkerThread()
   {
     __roomba->disable_sensors();
-    delete __mutex;
+    delete __fresh_data_mutex;
     delete __time_wait;
   }
 
   virtual void loop()
   {
-    __time_wait->mark_start();
+#ifdef USE_TIMETRACKER
+    __tt.ping_start(__ttc_loop);
+#endif
+    
+    //__time_wait->mark_start();
 
-    __mutex->lock();
     try {
 #ifdef USE_TIMETRACKER
       __tt.ping_start(__ttc_query);
@@ -87,20 +91,23 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
       __roomba->read_sensors();
 #ifdef USE_TIMETRACKER
       __tt.ping_end(__ttc_query);
-      if (++__tt_count == 300) {
-	__tt_count = 0;
-	__tt.print_to_stdout();
-	__tt.reset();
-      }
 #endif
       __fresh_data = __roomba->has_sensor_packet();
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to read sensor info, exception follows");
       logger->log_warn(name(), e);
     }
-    __mutex->unlock();
 
-    __time_wait->wait_systime();
+    //__time_wait->wait_systime();
+
+#ifdef USE_TIMETRACKER
+      __tt.ping_end(__ttc_loop);
+      if (++__tt_count == 300) {
+	__tt_count = 0;
+	__tt.print_to_stdout();
+	__tt.reset();
+      }
+#endif
   }
 
   /** Check if fresh data is available.
@@ -108,35 +115,11 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
    */
   bool has_fresh_data()
   {
-    __mutex->lock();
+    __fresh_data_mutex->lock();
     bool rv = __fresh_data;
     __fresh_data = false;
-    __mutex->unlock();
+    __fresh_data_mutex->unlock();
     return rv;
-  }
-
-  /** Lock mutex.
-   * Use this when accessing the Roomba instance outside the worker thread.
-   */
-  void lock()
-  {
-    __mutex->lock();
-  }
-
-  /** Unlock mutex.
-   * Use this when accessing the Roomba instance outside the worker thread.
-   */
-  void unlock()
-  {
-    __mutex->unlock();
-  }
-
-  /** Get Mutex.
-   * @return mutex
-   */
-  Mutex * mutex()
-  {
-    return __mutex;
   }
 
  private:
@@ -144,10 +127,11 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
   Clock             *clock;
   RefPtr<Roomba500>  __roomba;
   TimeWait          *__time_wait;
-  Mutex             *__mutex;
+  Mutex             *__fresh_data_mutex;
 #ifdef USE_TIMETRACKER
   TimeTracker        __tt;
   unsigned int       __ttc_query;
+  unsigned int       __ttc_loop;
   unsigned int       __tt_count;
 #endif
 
@@ -193,11 +177,12 @@ Roomba500Thread::init()
   __battery_if = NULL;
   __roomba500_if = NULL;
 
+  __greeting_loop_count = 0;
+
   __cfg_device = config->get_string("/hardware/roomba/device");
 
   try {
     __roomba500_if = blackboard->open_for_writing<Roomba500Interface>("Roomba 500");
-
     __led_if_debris =
       blackboard->open_for_writing<LedInterface>("Roomba LED Debris");
     __led_if_spot = blackboard->open_for_writing<LedInterface>("Roomba LED Spot");
@@ -237,6 +222,7 @@ Roomba500Thread::init()
   try {
     __roomba = new Roomba500(__cfg_device.c_str());
     __roomba->set_mode(Roomba500::MODE_SAFE);
+    __roomba->set_leds(false, false, false, true, 0, 0);
     __wt = new WorkerThread(logger, clock, __roomba);
   } catch (Exception &e) {
     close_interfaces();
@@ -316,12 +302,10 @@ Roomba500Thread::loop()
        (led_clean_color != __led_if_clean_color->intensity()) ||
        (led_clean_intensity != __led_if_clean_intensity->intensity()) )
   {
-    __wt->lock();
     __roomba->set_leds(led_debris > 0.5, led_spot > 0.5,
 		       led_dock > 0.5, led_check_robot > 0.5,
 		       (char)roundf(led_clean_color * 255.),
 		       (char)roundf(led_clean_intensity * 255.));
-    __wt->unlock();
 
     __led_if_debris->set_intensity(led_debris);
     __led_if_spot->set_intensity(led_spot);
@@ -341,20 +325,23 @@ Roomba500Thread::loop()
   while (! __roomba500_if->msgq_empty() ) {
     if (__roomba500_if->msgq_first_is<Roomba500Interface::StopMessage>())
     {
-      __wt->lock();
       __roomba->stop();
-      __wt->unlock();
     } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveStraightMessage>()) {
       Roomba500Interface::DriveStraightMessage *msg =
 	__roomba500_if->msgq_first(msg);
 
-      __wt->lock();
       __roomba->drive_straight(msg->velocity());
-      __wt->unlock();
     }
     __roomba500_if->msgq_pop();
   }
 
+  if (__greeting_loop_count < 50) {
+    if (++__greeting_loop_count == 50) {
+      __roomba->set_leds(false, false, false, false, 0, 0);
+    } else {
+      __roomba->set_leds(false, false, false, true, 0, __greeting_loop_count * 5);
+    }
+  }
 }
 
 
@@ -366,9 +353,7 @@ void
 Roomba500Thread::write_blackboard()
 {
   if (__wt->has_fresh_data()) {
-    MutexLocker lock(__wt->mutex());
-
-    const Roomba500::SensorPacketGroupAll & sp = __roomba->get_sensor_packet();
+    const Roomba500::SensorPacketGroupAll sp(__roomba->get_sensor_packet());
 
     __roomba500_if->set_mode((Roomba500Interface::Mode)sp.mode);
     __roomba500_if->set_wheel_drop_left(

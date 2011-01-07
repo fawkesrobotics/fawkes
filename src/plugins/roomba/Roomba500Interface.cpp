@@ -209,7 +209,7 @@ Roomba500Interface::tostring_ChargingState(ChargingState value) const
 Roomba500Interface::Mode
 Roomba500Interface::mode() const
 {
-  return data->mode;
+  return (Roomba500Interface::Mode)data->mode;
 }
 
 /** Get maximum length of mode value.
@@ -705,7 +705,7 @@ Roomba500Interface::set_dirt_detect(const bool new_dirt_detect)
 Roomba500Interface::InfraredCharacter
 Roomba500Interface::ir_opcode_omni() const
 {
-  return data->ir_opcode_omni;
+  return (Roomba500Interface::InfraredCharacter)data->ir_opcode_omni;
 }
 
 /** Get maximum length of ir_opcode_omni value.
@@ -1046,7 +1046,7 @@ Roomba500Interface::set_angle(const float new_angle)
 Roomba500Interface::ChargingState
 Roomba500Interface::charging_state() const
 {
-  return data->charging_state;
+  return (Roomba500Interface::ChargingState)data->charging_state;
 }
 
 /** Get maximum length of charging_state value.
@@ -2086,7 +2086,7 @@ Roomba500Interface::set_light_bump_right(const uint16_t new_light_bump_right)
 Roomba500Interface::InfraredCharacter
 Roomba500Interface::ir_opcode_left() const
 {
-  return data->ir_opcode_left;
+  return (Roomba500Interface::InfraredCharacter)data->ir_opcode_left;
 }
 
 /** Get maximum length of ir_opcode_left value.
@@ -2119,7 +2119,7 @@ Roomba500Interface::set_ir_opcode_left(const InfraredCharacter new_ir_opcode_lef
 Roomba500Interface::InfraredCharacter
 Roomba500Interface::ir_opcode_right() const
 {
-  return data->ir_opcode_right;
+  return (Roomba500Interface::InfraredCharacter)data->ir_opcode_right;
 }
 
 /** Get maximum length of ir_opcode_right value.

@@ -23,6 +23,8 @@
 #include "roomba_500.h"
 
 #include <core/exceptions/system.h>
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -224,10 +226,17 @@ Roomba500::Roomba500(const char *device_file)
   __sensors_enabled = false;
   __device_file = strdup(device_file);
 
+  __sensor_mutex = new Mutex();
+  __read_mutex   = new Mutex();
+  __write_mutex  = new Mutex();
+
   try {
     open();
   } catch (Exception &e) {
     free(__device_file);
+    delete __write_mutex;
+    delete __read_mutex;
+    delete __sensor_mutex;
     throw;
   }
 }
@@ -238,6 +247,9 @@ Roomba500::~Roomba500()
 {
   close();
   free(__device_file);
+  delete __write_mutex;
+  delete __read_mutex;
+  delete __sensor_mutex;
 }
 
 
@@ -323,6 +335,8 @@ void
 Roomba500::send(Roomba500::OpCode opcode,
 		const void *params, const size_t plength)
 {
+  MutexLocker write_lock(__write_mutex);
+
   // Byte 0 and 1 must be 0xFF
   __obuffer[0] = opcode;
   __obuffer_length = 1;
@@ -433,6 +447,8 @@ Roomba500::is_data_available()
 void
 Roomba500::read_sensors()
 {
+  MutexLocker read_lock(__read_mutex);
+
   if (!__sensors_enabled) {
     throw Exception("Roomba 500 sensors have not been enabled.");
   }
@@ -472,8 +488,10 @@ Roomba500::read_sensors()
     if ((sum & 0xFF) != 0) {
       __sensor_packet_received = false;
     } else {
+      __sensor_mutex->lock();
       memcpy(&__sensor_packet, &__ibuffer[3], sizeof(SensorPacketGroupAll));
       __sensor_packet_received = true;
+      __sensor_mutex->unlock();
     }
 
     done = true;
@@ -532,7 +550,7 @@ Roomba500::disable_sensors()
 }
 
 
-/** Query sensor once..
+/** Query sensor once.
  * For simplicity and efficiency only the single SENSPACK_GROUP_ALL packet can
  * be streamed at this time.
  */
@@ -550,18 +568,24 @@ Roomba500::query_sensors()
   __packet_length = get_packet_size(SENSPACK_GROUP_ALL);
   __sensor_packet_received = true;
 
-  recv(0, __packet_length, 10);
 
+  __read_mutex->lock();
+  recv(0, __packet_length, 10);
+  __read_mutex->unlock();
+
+  __sensor_mutex->lock();
   memcpy(&__sensor_packet, __ibuffer, sizeof(SensorPacketGroupAll));
+  __sensor_mutex->unlock();
 }
 
 
 /** Get latest sensor packet.
  * @return sensor packet
  */
-const Roomba500::SensorPacketGroupAll &
+const Roomba500::SensorPacketGroupAll
 Roomba500::get_sensor_packet() const
 {
+  MutexLocker lock(__sensor_mutex);
   if (! __sensor_packet_received) {
     throw Exception("No valid data received, yet.");
   }
@@ -827,7 +851,44 @@ Roomba500::set_leds(bool debris, bool spot, bool dock, bool check_robot,
   if (dock)         param[0] |= LED_DOCK;
   if (check_robot)  param[0] |= LED_CHECK_ROBOT;
 
-  send(OPCODE_LEDS, &param, 3);
+  send(OPCODE_LEDS, param, 3);
+}
+
+
+/** Play a simple fanfare.
+ * You can play this for example upon connection to inform the user.
+ */
+void
+Roomba500::play_fanfare()
+{
+  unsigned char p[14];
+  p[0] = 0;
+  p[1] = 6;
+
+  // C,E,G,G,E,G
+  p[2] = 72;
+  p[3] = 6;
+
+  p[4] = 76;
+  p[5] = 6;
+
+  p[6] = 79;
+  p[7] = 8;
+
+  p[8] = 79;
+  p[9] = 10;
+
+  p[10] = 76;
+  p[11] = 8;
+
+  p[12] = 79;
+  p[13] = 8;
+
+  unsigned char play;
+  play = 0;
+
+  send(OPCODE_SONG, p, sizeof(p));
+  send(OPCODE_PLAY, &play, 1);
 }
 
 

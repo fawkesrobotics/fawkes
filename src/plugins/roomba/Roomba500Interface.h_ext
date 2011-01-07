@@ -125,7 +125,7 @@ class Roomba500Interface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    Mode mode; /**< Open Interface mode. */
+    int32_t mode; /**< Open Interface mode. */
     bool wheel_drop_left; /**< Left wheel drop sensor. */
     bool wheel_drop_right; /**< Right wheel drop sensor. */
     bool bump_left; /**< Bump on left. */
@@ -141,7 +141,7 @@ class Roomba500Interface : public Interface
     bool overcurrent_left_wheel; /**< Overcurrent on left wheel. */
     bool overcurrent_right_wheel; /**< Overcurrent on right wheel. */
     bool dirt_detect; /**< Dirt detected? */
-    InfraredCharacter ir_opcode_omni; /**< Omni IR receiver code. */
+    int32_t ir_opcode_omni; /**< Omni IR receiver code. */
     bool button_clean; /**< Clean button pressed. */
     bool button_spot; /**< Spot button pressed. */
     bool button_dock; /**< Dock button pressed. */
@@ -152,7 +152,7 @@ class Roomba500Interface : public Interface
     bool button_clock; /**< Clock button pressed. */
     float distance; /**< Travelled distance in m. */
     float angle; /**< Turned angle in radians. */
-    ChargingState charging_state; /**< Charging state. */
+    int32_t charging_state; /**< Charging state. */
     uint16_t voltage; /**< Voltage in mV. */
     int16_t current; /**< Current in mA. */
     int8_t temperature; /**< Temperature in degree Celsius. */
@@ -193,9 +193,9 @@ class Roomba500Interface : public Interface
     uint16_t light_bump_front_right; /**< Raw front right
       bumper signal. */
     uint16_t light_bump_right; /**< Raw right bumper signal. */
-    InfraredCharacter ir_opcode_left; /**< 
+    int32_t ir_opcode_left; /**< 
       Left receiver opcode. */
-    InfraredCharacter ir_opcode_right; /**< 
+    int32_t ir_opcode_right; /**< 
       Right receiver opcode. */
     int16_t left_motor_current; /**< Left motor current in mA. */
     int16_t right_motor_current; /**< Right motor current in mA. */

@@ -91,6 +91,8 @@ class Roomba500Thread
 
   std::string  __cfg_device;
 
+  unsigned int __greeting_loop_count;
+
   class WorkerThread;
   WorkerThread *__wt;
 };
