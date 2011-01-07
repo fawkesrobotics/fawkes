@@ -65,7 +65,7 @@ namespace firevision {
 
 char* FileLoader::extension = NULL;
 
-#if defined(__GLIBC__)
+#if defined(__GLIBC__) || defined(__FreeBSD__)
 int file_select(const struct dirent* ent)
 #else
 int file_select(struct dirent *ent)

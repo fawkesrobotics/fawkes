@@ -23,5 +23,12 @@ ifeq ($(HAVE_LIBXMLRPCPP),1)
   HAVE_XMLRPC = 1
   CFLAGS_LIBXMLRPCPP  = $(shell $(PKGCONFIG) --cflags $(LIBXMLPP_PACKAGES))
   LDFLAGS_LIBXMLRPCPP = $(shell $(PKGCONFIG) --libs $(LIBXMLPP_PACKAGES))
+else
+  # Might be FreeBSD
+  ifneq ($(wildcard $(SYSROOT)/usr/local/include/xmlrpc-c/registry.hpp),)
+    HAVE_LIBXMLRPCPP = 1
+    HAVE_XMLRPC = 1
+    LDFLAGS_LIBXMLRPCPP = -lxmlrpc_server++ -lxmlrpc++
+  endif
 endif
 

@@ -38,7 +38,7 @@ class CameraArgumentParser;
 
 class FileLoader : public Camera
 {
-#if defined(__GLIBC__)
+#if defined(__GLIBC__) || defined(__FreeBSD__)
   friend int file_select(const struct dirent*);
 #else
   friend int file_select(struct dirent*);

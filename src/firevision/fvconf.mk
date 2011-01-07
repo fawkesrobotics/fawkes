@@ -84,7 +84,7 @@ ifeq ($(HAVE_LIBDC1394),1)
       HAVE_PIKE_CAM = 1
     endif
   endif
-  VISION_CAM_LIBS    += $(subst -l,,$(shell $(PKGCONFIG) --libs 'libdc1394-2'))
+  VISION_CAM_LDFLAGS    += $(shell $(PKGCONFIG) --libs 'libdc1394-2')
 endif
 
 ifeq ($(HAVE_SDL),1)
@@ -247,10 +247,11 @@ printconf:
 	$(SILENT)echo -e " $(VISION_CTRL_PRINT)"
 	$(SILENT)echo "Libs:"
 	$(SILENT)echo -e " $(VISION_LIBS_PRINT)"
-	$(SILENT)echo VISION_LIBDIRS:  $(VISION_LIBDIRS)
-	$(SILENT)echo VISION_INCDIRS:  $(VISION_INCDIRS)
-	$(SILENT)echo VISION_CAM_LIBS: $(VISION_CAM_LIBS)
-	$(SILENT)echo VISION_CFLAGS:   $(VISION_CFLAGS)
+	$(SILENT)echo VISION_LIBDIRS:     $(VISION_LIBDIRS)
+	$(SILENT)echo VISION_INCDIRS:     $(VISION_INCDIRS)
+	$(SILENT)echo VISION_CAM_LIBS:    $(VISION_CAM_LIBS)
+	$(SILENT)echo VISION_CAM_LDFLAGS: $(VISION_CAM_LDFLAGS)
+	$(SILENT)echo VISION_CFLAGS:      $(VISION_CFLAGS)
 endif
 
 ifneq ($(SRCDIR),)

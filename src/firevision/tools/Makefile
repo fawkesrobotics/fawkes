@@ -137,12 +137,12 @@ else
     WARN_TARGETS += warning_bb2rectlut_bb2
   endif
 endif
-ifeq ($(HAVE_SDL)$(HAVE_GTKMM),11)
+ifeq ($(HAVE_SDL)$(HAVE_GUI),11)
   BINS_gui += $(BINDIR)/fvviewer
 else
   WARN_TARGETS_GUI += warning_viewer
 endif
-ifeq ($(HAVE_SDL),1)
+ifeq ($(HAVE_SDL)$(HAVE_GUI),11)
   BINS_gui += $(BINDIR)/fvshowyuv
 else
   WARN_TARGETS_GUI += warning_showyuv

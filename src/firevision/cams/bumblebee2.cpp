@@ -32,7 +32,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string>
-#include <endian.h>
+#ifdef __FreeBSD__
+#  include <sys/endian.h>
+#else
+#  include <endian.h>
+#endif
 
 #include <utils/math/angle.h>
 
