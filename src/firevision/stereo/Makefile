@@ -30,7 +30,7 @@ endif
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   INCDIRS += $(TRICLOPS_SDK_INCDIRS)
   LIBDIRS += $(TRICLOPS_SDK_LIBDIRS)
-  LIBS    += $(TRICLOPS_SDK_LIBS)
+  LIBS    += $(TRICLOPS_SDK_LIBS) m fvcams
 else
   FILTER_OUT   += triclops.o
 endif
