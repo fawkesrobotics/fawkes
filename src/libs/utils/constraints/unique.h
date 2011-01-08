@@ -25,6 +25,7 @@
 #define __UTILS_CONSTRAINTS_UNIQUE_H_
 
 #include <core/exception.h>
+#include <cstddef>
 
 namespace fawkes {
 

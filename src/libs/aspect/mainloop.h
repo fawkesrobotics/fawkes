@@ -3,7 +3,7 @@
  *  mainloop.h - Main loop aspect for Fawkes
  *
  *  Created: Sat Aug  2 00:10:32 2008
- *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,15 +24,20 @@
 #ifndef __ASPECT_MAINLOOP_H_
 #define __ASPECT_MAINLOOP_H_
 
+#include <aspect/aspect.h>
 #include <aspect/blocked_timing/executor.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class BlockedTimingExecutor;
 
-class MainLoopAspect
+class MainLoopAspect : public virtual Aspect
 {
  public:
+  MainLoopAspect();
   virtual ~MainLoopAspect();
 
   void init_MainLoopAspect(BlockedTimingExecutor *btexec);

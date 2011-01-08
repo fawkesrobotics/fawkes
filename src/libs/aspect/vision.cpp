@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  logging.h - Logging aspect for Fawkes
+ *  vision.cpp - Vision aspect for Fawkes
  *
  *  Created: Tue May 29 14:47:43 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -54,6 +54,7 @@ namespace fawkes {
  */
 VisionAspect::VisionAspect(VisionThreadMode mode)
 {
+  add_aspect("VisionAspect");
   __vision_thread_mode = mode;
 }
 

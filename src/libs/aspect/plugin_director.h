@@ -3,7 +3,7 @@
  *  plugin_director.h - Plugin director aspect for Fawkes
  *
  *  Created: Thu Feb 12 12:00:48 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,13 +24,18 @@
 #ifndef __ASPECT_PLUGIN_DIRECTOR_H_
 #define __ASPECT_PLUGIN_DIRECTOR_H_
 
+#include <aspect/aspect.h>
 #include <plugin/manager.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class PluginDirectorAspect
+class PluginDirectorAspect : public virtual Aspect
 {
  public:
+  PluginDirectorAspect();
   virtual ~PluginDirectorAspect();
 
   void init_PluginDirectorAspect(PluginManager *manager);

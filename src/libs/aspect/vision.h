@@ -3,7 +3,7 @@
  *  vision.h - Vision aspect for Fawkes
  *
  *  Created: Tue May 29 14:47:03 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,11 +24,15 @@
 #ifndef __ASPECT_VISION_H_
 #define __ASPECT_VISION_H_
 
+#include <aspect/aspect.h>
 #include <fvutils/base/vision_master.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class VisionAspect
+class VisionAspect : public virtual Aspect
 {
  public:
   /** The operation mode of this vision thread.

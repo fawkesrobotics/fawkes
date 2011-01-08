@@ -3,7 +3,7 @@
  *  logger.h - Logger aspect for Fawkes
  *
  *  Created: Wed Feb 11 22:21:24 2009
- *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,11 +24,16 @@
 #ifndef __ASPECT_LOGGER_H_
 #define __ASPECT_LOGGER_H_
 
+#include <aspect/aspect.h>
+
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class Logger;
 
-class LoggerAspect
+class LoggerAspect : public virtual Aspect
 {
  public:
   LoggerAspect(Logger *logger) __attribute__((nonnull));

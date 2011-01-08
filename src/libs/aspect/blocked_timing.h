@@ -3,7 +3,7 @@
  *  blocked_timing.h - Blocked timing aspect for Fawkes
  *
  *  Created: Thu Jan 11 16:49:25 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,11 +24,14 @@
 #ifndef __ASPECT_BLOCKED_TIMING_H_
 #define __ASPECT_BLOCKED_TIMING_H_
 
+#include <aspect/aspect.h>
+
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class Thread;
-
-class BlockedTimingAspect
+class BlockedTimingAspect : public virtual Aspect
 {
  public:
   /** Type to define at which hook the thread is woken up.
@@ -54,7 +57,7 @@ class BlockedTimingAspect
   WakeupHook blockedTimingAspectHook() const;
 
  private:
-  WakeupHook wakeup_hook;
+  WakeupHook __wakeup_hook;
 };
 
 } // end namespace fawkes

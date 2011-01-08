@@ -3,7 +3,7 @@
  *  time_source.cpp - Time source aspect for Fawkes
  *
  *  Created: Sun Feb 24 13:34:37 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,9 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <aspect/aspect.h>
 #include <aspect/time_source.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class TimeSourceAspect <aspect/time_source.h>
  * Thread aspect that allows to provide a time source to the Fawkes clock.
@@ -43,6 +47,7 @@ namespace fawkes {
  */
 TimeSourceAspect::TimeSourceAspect(TimeSource *timesource)
 {
+  add_aspect("TimeSourceAspect");
   __time_source = timesource;
 }
 

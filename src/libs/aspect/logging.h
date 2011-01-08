@@ -3,7 +3,7 @@
  *  logging.h - Logging aspect for Fawkes
  *
  *  Created: Wed Jan 17 14:29:18 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,13 +24,18 @@
 #ifndef __ASPECT_LOGGING_H_
 #define __ASPECT_LOGGING_H_
 
+#include <aspect/aspect.h>
 #include <utils/logging/logger.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class LoggingAspect
+class LoggingAspect : public virtual Aspect
 {
  public:
+  LoggingAspect();
   virtual ~LoggingAspect();
 
   void init_LoggingAspect(Logger *logger);

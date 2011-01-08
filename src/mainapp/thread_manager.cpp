@@ -348,7 +348,12 @@ FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
   }
 
   tl.stop();
-  tl.finalize(finalizer);
+  try {
+    tl.finalize(finalizer);
+  } catch (Exception &e) {
+    tl.unlock();
+    throw;
+  }
 
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     internal_remove_thread(*i);

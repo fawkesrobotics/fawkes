@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  fawkes_network.h - Fawkes network aspect for Fawkes
+ *  fawkes_network.cpp - Fawkes network aspect for Fawkes
  *
  *  Created: Mon May 07 19:45:32 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -26,6 +26,9 @@
 #include <netcomm/fawkes/hub.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class FawkesNetworkAspect <aspect/fawkes_network.h>
  * Thread aspect to participate in the Fawkes Network protocol.
@@ -54,6 +57,12 @@ namespace fawkes {
  * The logger will remain valid for the whole lifetime of the
  * thread.
  */
+
+/** Constructor. */
+FawkesNetworkAspect::FawkesNetworkAspect()
+{
+  add_aspect("FawkesNetworkAspect");
+}
 
 /** Virtual empty Destructor. */
 FawkesNetworkAspect::~FawkesNetworkAspect()

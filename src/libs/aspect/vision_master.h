@@ -3,7 +3,7 @@
  *  vision_master.h - Vision Master aspect for Fawkes
  *
  *  Created: Tue May 29 14:45:03 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,16 +24,22 @@
 #ifndef __ASPECT_VISION_MASTER_H_
 #define __ASPECT_VISION_MASTER_H_
 
+#include <aspect/aspect.h>
+
 namespace firevision {
   class VisionMaster;
 }
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class VisionMasterAspect
+
+class VisionMasterAspect : public virtual Aspect
 {
  public:
-  VisionMasterAspect(firevision::VisionMaster *master);
+  VisionMasterAspect(firevision::VisionMaster *master) __attribute__((nonnull));
   virtual ~VisionMasterAspect();
 
   firevision::VisionMaster *  vision_master();

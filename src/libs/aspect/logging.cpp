@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  logging.h - Logging aspect for Fawkes
+ *  logging.cpp - Logging aspect for Fawkes
  *
  *  Created: Wed Jan 17 14:30:20 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,9 @@
 #include <aspect/logging.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class LoggingAspect <aspect/logging.h>
  * Thread aspect to log output.
@@ -47,6 +50,13 @@ namespace fawkes {
  * The logger will remain valid for the whole lifetime of the
  * thread.
  */
+
+/** Constructor. */
+LoggingAspect::LoggingAspect()
+{
+  add_aspect("LoggingAspect");
+}
+
 
 /** Virtual empty Destructor. */
 LoggingAspect::~LoggingAspect()

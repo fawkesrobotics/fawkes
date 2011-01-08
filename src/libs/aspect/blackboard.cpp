@@ -24,6 +24,9 @@
 #include <aspect/blackboard.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class BlackBoardAspect <aspect/blackboard.h>
  * Thread aspect to access to BlackBoard.
@@ -39,6 +42,13 @@ namespace fawkes {
  * This is the BlackBoard instance you can use to interact with the
  * BlackBoard. It is set when the thread starts.
  */
+
+/** Constructor. */
+BlackBoardAspect::BlackBoardAspect()
+{
+  add_aspect("BlackBoardAspect");
+}
+
 
 /** Virtual empty destructor. */
 BlackBoardAspect::~BlackBoardAspect()

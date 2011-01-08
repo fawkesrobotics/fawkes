@@ -3,7 +3,7 @@
  *  thread_producer.cpp - Thread producer aspect for Fawkes
  *
  *  Created: Tue Nov 20 11:26:24 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,9 @@
 #include <aspect/thread_producer.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ThreadProducerAspect <aspect/thread_producer.h>
  * Aspect for thread producing threads.
@@ -56,6 +59,12 @@ namespace fawkes {
  * Use this thread collector to register/unregister threads as they are
  * created/deleted. It is set when the thread starts.
  */
+
+/** Constructor. */
+ThreadProducerAspect::ThreadProducerAspect()
+{
+  add_aspect("ThreadProducerAspect");
+}
 
 /** Virtual empty destructor. */
 ThreadProducerAspect::~ThreadProducerAspect()

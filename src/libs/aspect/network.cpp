@@ -3,7 +3,7 @@
  *  network.cpp - network aspect for Fawkes
  *
  *  Created: Fri Jun 29 15:17:08 2007 (on flight to RoboCup 2007, Atlanta)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,9 @@
 #include <aspect/network.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class NetworkAspect <aspect/network.h>
  * Thread aspect for network communication.
@@ -33,7 +36,7 @@ namespace fawkes {
  * services (for example using mDNS-SD via Avahi).
  *
  * It is guaranteed that if used properly from within plugins that
- * initNetworkAspect() is called before the thread is started.
+ * init_NetworkAspect() is called before the thread is started.
  *
  * @ingroup Aspects
  * @author Tim Niemueller
@@ -57,6 +60,12 @@ namespace fawkes {
  * The service_browser will remain valid for the whole lifetime of the
  * thread.
  */
+
+/** Constructor. */
+NetworkAspect::NetworkAspect()
+{
+  add_aspect("NetworkAspect");
+}
 
 /** Virtual empty Destructor. */
 NetworkAspect::~NetworkAspect()

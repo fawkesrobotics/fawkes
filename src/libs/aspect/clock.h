@@ -2,8 +2,9 @@
 /***************************************************************************
  *  clock.h - Clock aspect for Fawkes
  *
- *  Created: Tue June 12 18:36:09 2007
- *  Copyright  2007  Daniel Beck
+ *  Created: Tue Jun 12 18:36:09 2007
+ *  Copyright  2007       Daniel Beck
+ *             2007-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,19 +25,24 @@
 #ifndef __ASPECT_CLOCK_H_
 #define __ASPECT_CLOCK_H_
 
+#include <aspect/aspect.h>
 #include <utils/time/clock.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class ClockAspect
+class ClockAspect : public virtual Aspect
 {
  public:
-    virtual ~ClockAspect();
+  ClockAspect();
+  virtual ~ClockAspect();
 
-    void init_ClockAspect(Clock* clock);
+  void init_ClockAspect(Clock *clock);
 
  protected:
-    Clock* clock;
+  Clock *clock;
 };
 
 } // end namespace fawkes

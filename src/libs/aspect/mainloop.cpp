@@ -3,7 +3,7 @@
  *  mainloop.cpp - Main loop aspect for Fawkes
  *
  *  Created: Sat Aug 02 00:16:30 2008
- *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,9 @@
 #include <aspect/mainloop.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class MainLoopAspect <aspect/mainloop.h>
  * Thread aspect that allows to replace the main loop of the main application
@@ -42,6 +45,12 @@ namespace fawkes {
  * This is a blocked timing executor instance which can be used to run threads
  * with the BlockedTimingAspect.
  */
+
+/** Constructor. */
+MainLoopAspect::MainLoopAspect()
+{
+  add_aspect("MainLoopAspect");
+}
 
 /** Virtual empty destructor. */
 MainLoopAspect::~MainLoopAspect()

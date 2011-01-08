@@ -40,7 +40,7 @@
 #include <netcomm/utils/network_logger.h>
 
 #include <blackboard/local.h>
-#include <aspect/inifin.h>
+#include <aspect/manager.h>
 #include <plugin/manager.h>
 #include <plugin/loader.h>
 #include <plugin/net/handler.h>
@@ -76,7 +76,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __plugin_manager    = NULL;
   __network_manager   = NULL;
   __thread_manager    = NULL;
-  __aspect_inifin     = NULL;
+  __aspect_manager    = NULL;
 
   __mainloop_thread   = NULL;
   __mainloop_mutex    = new Mutex();
@@ -219,10 +219,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
       __blackboard       = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
     }
     __thread_manager     = new FawkesThreadManager();
-    __aspect_inifin      = new AspectIniFin(__blackboard,
-					    __thread_manager->aspect_collector(),
-					    __config, __multi_logger, __clock);
-    __thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
+    __aspect_manager     = new AspectManager();
+    __thread_manager->set_inifin(__aspect_manager, __aspect_manager);
     __plugin_manager     = new PluginManager(__thread_manager, __config,
 					     "/fawkes/meta_plugins/");
     __network_manager    = new FawkesNetworkManager(__thread_manager, net_tcp_port,
@@ -237,14 +235,15 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __network_logger = new NetworkLogger(__network_manager->hub(), log_level);
   __multi_logger->add_logger(__network_logger);
 
-  __aspect_inifin->set_fnet_hub( __network_manager->hub() );
-  __aspect_inifin->set_network_members( __network_manager->nnresolver(),
-					__network_manager->service_publisher(),
-					__network_manager->service_browser() );
-  __aspect_inifin->set_plugin_manager(__plugin_manager);
-  __aspect_inifin->set_mainloop_employer(this);
-  __aspect_inifin->set_logger_employer(this);
-  __aspect_inifin->set_blocked_timing_executor(__thread_manager);
+  __aspect_manager->register_default_inifins(__blackboard,
+					     __thread_manager->aspect_collector(),
+					     __config, __multi_logger, __clock,
+					     __network_manager->hub(),
+					     this, this, __thread_manager,
+					     __network_manager->nnresolver(),
+					     __network_manager->service_publisher(),
+					     __network_manager->service_browser(),
+					     __plugin_manager);
 
   __plugin_nethandler = new PluginNetworkHandler(__plugin_manager,
 						 __network_manager->hub(),
@@ -343,7 +342,7 @@ FawkesMainThread::destruct()
   delete __config;
   delete __network_manager;
   delete __thread_manager;
-  delete __aspect_inifin;
+  delete __aspect_manager;
   delete __time_wait;
   delete __loop_start;
   delete __loop_end;

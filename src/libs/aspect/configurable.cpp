@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  configurable.h - Configurable aspect for Fawkes
+ *  configurable.cpp - Configurable aspect for Fawkes
  *
  *  Created: Fri Jan 12 14:34:12 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,9 @@
 #include <aspect/configurable.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ConfigurableAspect <aspect/configurable.h>
  * Thread aspect to access configuration data.
@@ -52,6 +55,12 @@ namespace fawkes {
  * The configuration will remain valid for the whole lifetime of the
  * thread.
  */
+
+/** Constructor. */
+ConfigurableAspect::ConfigurableAspect()
+{
+  add_aspect("ConfigurableAspect");
+}
 
 /** Virtual empty Destructor. */
 ConfigurableAspect::~ConfigurableAspect()

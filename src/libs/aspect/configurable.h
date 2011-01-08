@@ -3,7 +3,7 @@
  *  configurable.h - Configurable aspect for Fawkes
  *
  *  Created: Fri Jan 12 14:33:10 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,13 +24,18 @@
 #ifndef __ASPECT_CONFIGURABLE_H_
 #define __ASPECT_CONFIGURABLE_H_
 
+#include <aspect/aspect.h>
 #include <config/config.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class ConfigurableAspect
+class ConfigurableAspect : public virtual Aspect
 {
  public:
+  ConfigurableAspect();
   virtual ~ConfigurableAspect();
 
   void init_ConfigurableAspect(Configuration *config);
