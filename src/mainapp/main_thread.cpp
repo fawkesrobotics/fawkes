@@ -28,7 +28,6 @@
 
 #include <core/threading/interruptible_barrier.h>
 #include <core/exceptions/system.h>
-#include <core/macros.h>
 #include <config/sqlite.h>
 #include <config/net_handler.h>
 #include <utils/logging/multi.h>
@@ -48,6 +47,11 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cerrno>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include <core/macros.h>
 
 using namespace fawkes;
 
@@ -130,13 +134,29 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __multi_logger->set_loglevel(log_level);
   LibLogger::init(__multi_logger);
 
+  /* Prepare home dir directory, just in case */
+  const char *homedir = getenv("HOME");
+  if (homedir) {
+    char *userdir;
+    if (asprintf(&userdir, "%s/%s", homedir, USERDIR) != -1) {
+      if (access(userdir, W_OK) != 0) {
+	if (mkdir(userdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
+	  __multi_logger->log_warn("FawkesMainThread", "Failed to create .fawkes "
+				   "directory %s, trying without", userdir);
+	}
+      }
+      free(userdir);
+    }
+  }
+
   /* Config stuff */
-  SQLiteConfiguration *sqliteconf = new SQLiteConfiguration(CONFDIR);
-  __config = sqliteconf;
+  __sqlite_conf = new SQLiteConfiguration(CONFDIR);
+  __config = __sqlite_conf;
   __config->load(__argp->arg("c"), __argp->arg("d"));
 
   try {
-    SQLiteConfiguration::SQLiteValueIterator *i = sqliteconf->modified_iterator();
+    SQLiteConfiguration::SQLiteValueIterator *i =
+      __sqlite_conf->modified_iterator();
     while (i->next()) {
       std::string modtype = i->get_modtype();
       if (modtype == "changed") {
@@ -280,6 +300,33 @@ FawkesMainThread::~FawkesMainThread()
 void
 FawkesMainThread::destruct()
 {
+  try {
+    __sqlite_conf->try_dump();
+  } catch (CouldNotOpenFileException &e) {
+    if (e.get_errno() == EACCES) {
+      __multi_logger->log_warn("FawkesMainThread", "Cannot write to dump file, "
+			       "no write ");
+      __multi_logger->log_warn("FawkesMainThread", "permission for file or "
+			       "directory. This");
+      __multi_logger->log_warn("FawkesMainThread", "usually happens if running "
+			       "with system-wide");
+      __multi_logger->log_warn("FawkesMainThread", "installed Fawkes as non-root "
+			       "user. Make");
+      __multi_logger->log_warn("FawkesMainThread", "configuration changes to the "
+			       "host-based");
+      __multi_logger->log_warn("FawkesMainThread", "database (set as non-default "
+			       "values).");
+    } else {
+      __multi_logger->log_warn("FawkesMainThread", "Failed to dump default "
+			       "config (open), exception follows.");
+      __multi_logger->log_warn("FawkesMainThread", e);
+    }
+  } catch (Exception &e) {
+    __multi_logger->log_warn("FawkesMainThread", "Failed to dump default config, "
+			     "exception follows.");
+    __multi_logger->log_warn("FawkesMainThread", e);
+  }
+
   // Must delete network logger first since network manager has to die before the LibLogger
   // is finalized.
   __multi_logger->remove_logger(__network_logger);

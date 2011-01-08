@@ -50,7 +50,7 @@ class Exception : public std::exception {
   void print_backtrace() const throw();
   char *  generate_backtrace() const throw();
 
-  int errno() throw();
+  int get_errno() throw();
 
   void          set_type_id(const char *id);
   const char *  type_id() const;

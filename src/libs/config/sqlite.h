@@ -26,6 +26,8 @@
 
 #include <config/config.h>
 #include <utils/system/hostinfo.h>
+#include <list>
+#include <string>
 
 struct sqlite3;
 struct sqlite3_stmt;
@@ -37,7 +39,8 @@ class Mutex;
 class SQLiteConfiguration : public Configuration
 {
  public:
-  SQLiteConfiguration(const char *conf_path = NULL);
+  SQLiteConfiguration();
+  SQLiteConfiguration(const char *sysconfdir, const char *userconfdir = NULL);
   virtual ~SQLiteConfiguration();
 
   virtual void          copy(Configuration *copyconf);
@@ -155,6 +158,8 @@ class SQLiteConfiguration : public Configuration
 
   SQLiteValueIterator * modified_iterator();
 
+  void try_dump();
+
  private:
   void            init_dbs();
   std::string     get_type(const char *table, const char *path);
@@ -167,16 +172,18 @@ class SQLiteConfiguration : public Configuration
   void dump(::sqlite3 *tdb, const char *dumpfile);
   void import(::sqlite3 *tdb, const char *dumpfile);
   void import_default(const char *default_dump);
+  void attach_default(const char *db_file);
 
  private:
   ::sqlite3 *db;
-  const char *conf_path;
   bool opened;
   Mutex *mutex;
 
+  char *__sysconfdir;
+  char *__userconfdir;
   char *__host_file;
   char *__default_file;
-  char *__default_dump;
+  char *__default_sql;
 };
 
 } // end namespace fawkes

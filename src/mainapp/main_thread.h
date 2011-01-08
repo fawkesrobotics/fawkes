@@ -35,6 +35,7 @@ namespace fawkes {
   class ArgumentParser;
   class LocalBlackBoard;
   class Configuration;
+  class SQLiteConfiguration;
   class ConfigNetworkHandler;
   class MultiLogger;
   class NetworkLogger;
@@ -87,6 +88,7 @@ class FawkesMainThread
   fawkes::Mutex                *__mainloop_mutex;
   fawkes::InterruptibleBarrier *__mainloop_barrier;
 
+  fawkes::SQLiteConfiguration  *__sqlite_conf;
   FawkesThreadManager          *__thread_manager;
   fawkes::PluginManager        *__plugin_manager;
   fawkes::PluginNetworkHandler *__plugin_nethandler;
