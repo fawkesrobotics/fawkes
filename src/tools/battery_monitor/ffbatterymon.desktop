@@ -4,4 +4,5 @@ Comment=Show battery status of robots
 Type=Application
 Exec=ffbatterymon
 Icon=@RESDIR@/guis/battery_monitor/battery_monitor.svg
-Categories=Robotics;Development;Education;
+Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8

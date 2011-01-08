@@ -4,4 +4,5 @@ Comment=Edit the configuration of robots
 Type=Application
 Exec=ffconfiggui
 Icon=@RESDIR@/guis/config_editor/config.png
-Categories=Robotics;Development;Education;
+Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8

@@ -4,4 +4,5 @@ Comment=Load and unload plugins on the robot
 Type=Application
 Exec=ffplugingui
 Icon=@RESDIR@/guis/plugin_tool/plugin.svg
-Categories=Robotics;Development;Education;
+Categories=Robotics;Development;Education;Science;
+Encoding=UTF-8
