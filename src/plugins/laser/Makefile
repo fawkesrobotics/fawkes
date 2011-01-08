@@ -19,8 +19,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 SUBDIRS = deadspots
 
 
-LIBS_laser = fawkescore fawkesutils fawkesaspects \
-	     Laser360Interface Laser720Interface
+LIBS_laser = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	     fawkesinterface Laser360Interface Laser720Interface
 
 ifeq ($(HAVE_LIBPCAN),1)
   LIBS_laser += $(LIBS_LIBPCAN)

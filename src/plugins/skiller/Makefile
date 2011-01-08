@@ -25,7 +25,9 @@ SUBDIRS = consoletool
 # CFLAGS += -DSKILLER_TIMETRACKING -DSKILLER_TT_MOD=50
 CFLAGS  += $(CFLAGS_LUA)
 
-LIBS_skiller = fawkescore fawkesutils fawkesnetcomm fawkeslua SkillerInterface SkillerDebugInterface
+LIBS_skiller = fawkescore fawkesutils fawkesaspects fawkesnetcomm fawkeslua \
+	       fawkesblackboard fawkesinterface \
+	       SkillerInterface SkillerDebugInterface
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_skiller)

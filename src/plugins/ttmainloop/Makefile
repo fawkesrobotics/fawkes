@@ -17,7 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_ttmainloop = fawkesaspects
+LIBS_ttmainloop = fawkescore fawkesutils fawkesaspects
 OBJS_ttmainloop = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_ttmainloop)

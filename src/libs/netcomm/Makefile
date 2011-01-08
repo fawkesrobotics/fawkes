@@ -40,7 +40,7 @@ warning_libcrypto:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Building WorldInfo proto without encryption$(TNORMAL) (No OpenSSL/libcrypto installed)"
 endif
 
-LIBS_libfawkesnetcomm = fawkescore fawkesutils
+LIBS_libfawkesnetcomm = stdc++ m fawkescore fawkesutils
 OBJS_libfawkesnetcomm = $(filter-out $(OMIT_OBJECTS),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 HDRS_libfawkesnetcomm = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h $(SRCDIR)/*/*/*.h))
 

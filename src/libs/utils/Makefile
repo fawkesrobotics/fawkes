@@ -37,7 +37,7 @@ else
   WARN_TARGETS += warning_libxmlpp
 endif
 
-LIBS_libfawkesutils = stdc++ fawkescore magic $(if $(filter Linux,$(OS)),dl)
+LIBS_libfawkesutils = stdc++ m fawkescore magic $(if $(filter Linux,$(OS)),dl)
 OBJS_libfawkesutils =	$(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 HDRS_libfawkesutils = $(subst $(SRCDIR)/,,$(filter-out $(patsubst %.o,%.h,$(FILTER_OUT)),$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h)))
 
