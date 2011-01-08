@@ -1,0 +1,40 @@
+ffinfo(1)
+=========
+
+NAME
+----
+ffinfo - Print Fawkes version
+
+SYNOPSIS
+--------
+[verse]
+'ffinfo'
+
+DESCRIPTION
+-----------
+This little application prints "Fawkes 'VERSION'", where 'VERSION'
+will be the actual installed version number.
+
+
+EXAMPLES
+--------
+
+ *ffinfo*::
+	Get version information.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

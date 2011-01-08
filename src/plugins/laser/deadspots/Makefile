@@ -23,5 +23,6 @@ OBJS_fflaser_deadspots = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)
 
 BINS_all = $(BINDIR)/fflaser_deadspots
 OBJS_all = $(OBJS_fflaser_deadspots)
+MANPAGES_all = $(MANDIR)/man1/fflaser_deadspots.1
 
 include $(BUILDSYSDIR)/base.mk

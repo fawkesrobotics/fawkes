@@ -21,11 +21,11 @@ ifndef __buildsys_interface_mk_
 __buildsys_interface_mk_ := 1
 
 include $(BUILDSYSDIR)/lua.mk
-include $(BUILDSYSDIR)/ext/gmsl
 
 ifneq ($(PKGCONFIG),)
-  HAVE_LIBXMLPP   = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
-  CFLAGS_LIBXMLPP = $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+  HAVE_LIBXMLPP    = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+  CFLAGS_LIBXMLPP  = $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+  LDFLAGS_LIBXMLPP = $(shell $(PKGCONFIG) --libs libxml++-2.6)
   HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'libcrypto'; echo $${?/1/}),1,0)
   LIBCRYPTO_PKG  := libcrypto
   CFLAGS_LIBCRYPTO  = $(shell $(PKGCONFIG) --cflags 'libcrypto')
@@ -98,13 +98,6 @@ ifneq ($(INTERFACES_all),)
   endif
 
 ifeq ($(OBJSSUBMAKE),1)
-  ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
-$(INTERFACES_SRCS): $(BINDIR)/ffifacegen
-$(INTERFACES_HDRS): $(BINDIR)/ffifacegen
-$(INTERFACES_LIBS): | $(BINDIR)/ffifacegen
-$(INTERFACES_TOUCH): $(BINDIR)/ffifacegen
-$(TOLUA_ALL): $(BINDIR)/ffifacegen
-  endif
 
 $(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
 $(INTERFACES_HDRS): $(IFACESRCDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch

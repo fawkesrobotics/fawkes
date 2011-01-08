@@ -45,8 +45,9 @@ LIBS_fawkes = stdc++ fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
 	      fawkesconfig fawkesplugin fawkesaspects
 OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all =	$(OBJS_fawkes)
-BINS_all =	$(BINDIR)/fawkes
+OBJS_all     = $(OBJS_fawkes)
+BINS_all     = $(BINDIR)/fawkes
+MANPAGES_all = $(MANDIR)/man8/fawkes.8
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)

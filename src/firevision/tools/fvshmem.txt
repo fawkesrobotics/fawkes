@@ -1,0 +1,70 @@
+fvshmem(1)
+==========
+
+NAME
+----
+fvshmem - List and cleanup FireVision image shared memory segments
+
+SYNOPSIS
+--------
+[verse]
+*fvshmem* [-h] [-c] [-c[t]] [-l] [-m] [-i 'image_id' 'file']
+
+DESCRIPTION
+-----------
+List, save, or cleanup shared memory segments created by
+FireVision. FireVision stores images retrieved from cameras and lookup
+tables in shared memory segments. Olugins can decide to create additional
+segments. All shared memory segments have a unique ID.
+
+A list of currently existing segments can be retrieved. For images a
+snapshot can be written into a FireVision raw file. Segments might
+require cleanup if the creating process has died without closing the
+segments. You can also choose to cleanup segments of specified
+types. Segments for which are currently used are detected and not
+removed.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-l*::
+	List FireVision shared memory segments.
+
+ *-c*['t']::
+	Cleanup shared memory segments. A type 't' can be optionally
+	passed to determine that only these segments should be cleaned
+	up. The type can be either 'i' for images or 'l' for lookup
+	tables. If empty both types are cleaned up.
+
+ *-i* 'image_id' 'file'::
+	Read the file from the shared memory image segment with the ID
+	'image_id' and write it to 'file' as FireVision raw.
+
+
+EXAMPLES
+--------
+
+ *fvshmem -l*::
+	List all shared memory segments.
+
+ *fvshmem -c*::
+	Cleanup all FireVision shared memory segments.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

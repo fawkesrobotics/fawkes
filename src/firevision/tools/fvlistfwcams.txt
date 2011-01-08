@@ -1,0 +1,39 @@
+fvlistfwcams(1)
+===============
+
+NAME
+----
+fvlistfwcams - Show available Firewire camers.
+
+SYNOPSIS
+--------
+[verse]
+'fvlistfwcams'
+
+DESCRIPTION
+-----------
+This program lists the Firewire (IEEE 1394) cameras connected to the
+system and accessible to the current user.
+
+EXAMPLES
+--------
+
+ *fvlistfwcams*::
+	List connected Firewire cameras.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

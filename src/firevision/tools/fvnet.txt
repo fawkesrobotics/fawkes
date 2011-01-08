@@ -1,0 +1,89 @@
+fvnet(1)
+==========
+
+NAME
+----
+fvnet - Explore and retrieve from FireVision instances on the network
+
+SYNOPSIS
+--------
+[verse]
+*fvnet* -e
+*fvnet* -s -n 'host[:port]]'
+*fvnet* \<-i|-j|-c|-C> -n 'host[:port]]/id' 'file'
+
+DESCRIPTION
+-----------
+Explore FireVision instances on the network and interact with those
+instances. In the first form the network is explored using mDNS-SD
+service discovery to find FireVision Fountain instances. These are
+then queried for existing images and lookup tables.
+
+In the second form the available images and lookup tables are queried
+from a specified host.
+
+The third form finally allows for retrieving images and retrieving or
+pushing colormaps reading from or writing to 'file'.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-e*::
+	Explore the local network using service discovery.
+
+ *-s*::
+	Query a particular FireVision Foutain instance for available
+	images and colormaps.
+
+ *-n* 'host[:port]][/id]'::
+	The network string defining the host and optionally port to
+	connect to. For interaction with a particular image or
+	colormap the ID is passed.
+
+ *-i*::
+	Retrieve FireVision raw image defined with -n and write it to
+	'file'. The '/id' suffix must be given with the appropriate ID.
+
+ *-j*::
+	Retrieve JPEG image defined with -n and write it to
+	'file'. The '/id' suffix must be given with the appropriate
+	ID.
+
+ *-c*::
+	Retrieve colormap defined with -n and write it to 'file'. The
+	'/id' suffix must be given with the appropriate ID.
+
+ *-c*::
+	Send colormap from 'file' to host and ID defined with -n. The
+	'/id' suffix must be given with the appropriate ID.
+
+
+EXAMPLES
+--------
+
+ *fvnet -e*::
+	Explore the network listing existing FireVision Fountain
+	instances and querying each for images and colormap.
+
+ *fvnet -i -n myrobot/my_image image.raw*::
+	Read the image with the the ID my_image from the host myrobot
+	and write it to image.raw.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

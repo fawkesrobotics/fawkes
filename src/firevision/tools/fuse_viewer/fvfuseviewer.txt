@@ -1,0 +1,35 @@
+fvfuseviewer(1)
+===============
+
+NAME
+----
+fvfuseviewer - View FireVision images over the network
+
+SYNOPSIS
+--------
+[verse]
+*fvfuseviewer*
+
+DESCRIPTION
+-----------
+This GUI application allows for viewing images from running FireVision
+applications. Note that the fvfountain plugin must be loaded to be
+able to view the images.
+
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

@@ -1,0 +1,110 @@
+fflaser_deadspots(1)
+====================
+
+NAME
+----
+fflaser_deadspots - Calibrate dead spots for the Fawkes laser plugin
+
+SYNOPSIS
+--------
+[verse]
+*fflaser_deadspots* [-r 'host[:port]'] [-w 'sec'] [-n 'N'] [-c 'dist']
+		  [-m 'margin_deg'] [-d] [-b] 'num spots'
+
+DESCRIPTION
+-----------
+This tool is used to calibrate dead spots for spinning laser
+scanners. If a laser scanner is mounted, sometimes not the whole field
+of view can be used, because mounting of other hardware requires
+brackets or poles, creating regions where laser data is useless and
+generally short, i.e. dead spots.
+
+This tool reads laser data from the blackboard for a given number of
+cycles, and thresholds it based on a given distance. It records a
+given number of data sets and compares the threshold to the median of
+each beam. Any laser beam that is shorted than the given distance is
+considered to be in a dead spot. After registering all short beams,
+adjacent beams are accumulated to dead spot regions. The configuration
+information is then written to the configuration of the connected
+Fawkes instance for later use (unless a dry run is performed). To
+prevent false calibration the number of expected dead spots can be
+supplied, to detect if there was not enough free space around the
+robot during calibration.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-r* 'host[:port]]'::
+	The host and port of the Fawkes instance to connect to.
+
+ *-w* 'sec'::
+	Wait the given time in seconds before acquiring the data. This
+	gives some time for last preparations, like removing a
+	cable. The maximum wait time is 60 seconds, the default wait
+	time is 10 seconds.
+
+ *-n* 'N'::
+	The number of measurements to use to calculate the median of
+	the laser beam distance value to compare to the threshold. The
+	default number of measurements is 100.
+
+ *-c* 'dist'::
+	The threshold distance. Laser beams below this distance are
+	considered dead, longer once are good. The default threshold
+	distance is 0.9 meters.
+ *-m* 'margin_deg'::
+	Add an extra margin of 'margin_deg' to each calculated dead
+	spots, on both sides. Dead spots, that overlap after applying
+	the margin are merged. The margin can be negative to shrink
+	the regions. The margin is given in degrees as integer with a
+	value range of [-359..359].
+
+ *-d*::
+	Do a dry run, i.e. do not write the calibration information to
+	the configuration file but only print it to the console.
+
+ *-b*::
+	Write a fake laser scan to the blackboard interface
+	"Laser720Interface::Laser Calibration", with "good" values
+	having a distance of 1.0, and dead values a distance of 0.
+	This allows for a quick inspection if the result matches the
+	expectation. Stop showing the data with Ctrl-C when done.
+
+ 'num spots'::
+	Expect to have 'N' dead spots. If a different number of dead
+	spots is found abort and report an error.
+
+
+
+EXAMPLES
+--------
+
+ *fflaser_deadspots 4*::
+	Read measurements from Fawkes on localhost, calculate dead
+	spots with the default values and expect 4 dead spots. Write
+	the data back to the configuration when successful.
+
+ *fflaser_deadspots -w 5 -n 200 -c 1.5 -m 1 -d 3*::
+	Run the calibration, based on 200 measurements and a distance
+	threshold of 1.5 meters, after waiting 5 seconds. Add a margin
+	of 1 degree to calculated spots, expect 3 dead spots. Do not
+	write data to the configuration (perform a dry run).
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

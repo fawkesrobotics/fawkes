@@ -1,0 +1,67 @@
+skillgui_batch_render(1)
+========================
+
+NAME
+----
+skillgui_batch_render - Render FSM graphs by batch processing
+
+SYNOPSIS
+--------
+[verse]
+*ffrefboxrep* -i 'dir' -o 'dir' -f 'format' [-p] [-w] [-s 'scale]
+
+DESCRIPTION
+-----------
+This tool reads all graph files from a directory (recorded using the
+SkillGUI) and converts them to graph images of the specified
+format. It can optionally add a white background and scale the
+graphics.
+
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-i* 'dir'::
+	Input directory containing the dot graph files.
+
+ *-o* 'dir'::
+	Directory to write the graphs to. Should be empty.
+
+ *-f* 'format'::
+	The desired output format, one of pdf, svg, or png.
+
+ *-w*::
+	Instead of a transparent background use a white background.
+
+ *-p*::
+	Postprocess the images to have all the same size. Only
+	available for PNG output format.
+
+ *-s* 'scale'::
+	Scale the output images by the factor 'scale'.
+
+
+EXAMPLES
+--------
+
+ *skillgui_batch_render -i indir -d outdir -f pdf*::
+	Render all dot graphs in indir to PDF files in outdir.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

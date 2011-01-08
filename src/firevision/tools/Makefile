@@ -83,30 +83,26 @@ OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
 	   $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvcmpp) \
 	   $(OBJS_fvlistsrcams)
-BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvcmpp
+BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvcmpp $(BINDIR)/fvnet \
+	   $(BINDIR)/fvbb2rectlut $(BINDIR)/fvconverter
+MANPAGES_all = $(MANDIR)/man1/fvshmem.1 $(MANDIR)/man1/fvcmpp.1 \
+		$(MANDIR)/man1/fvnet.1 $(MANDIR)/man1/fvbb2rectlut.1 \
+		$(MANDIR)/man1/fvconverter.1
 
-ifneq ($(realpath $(SRCDIR)/net.cpp),)
-  BINS_all += $(BINDIR)/fvnet
-endif
-ifneq ($(realpath $(SRCDIR)/bb2rectlut.cpp),)
-  BINS_all += $(BINDIR)/fvbb2rectlut
-endif
-ifneq ($(realpath $(SRCDIR)/converter.cpp),)
-  BINS_all += $(BINDIR)/fvconverter
-endif
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
 else
-  ifneq ($(realpath $(SRCDIR)/tricalcdisp.cpp),)
+  ifneq ($(wildcard $(SRCDIR)/tricalcdisp.cpp),)
     WARN_TARGETS += warning_tricalcdisp
   endif
-  ifneq ($(realpath $(SRCDIR)/bb2rectlut.cpp),)
+  ifneq ($(wildcard $(SRCDIR)/bb2rectlut.cpp),)
     WARN_TARGETS += warning_bb2rectlut_triclops
   endif
 endif
 
 ifeq ($(HAVE_FIREWIRE_CAM),1)
   BINS_all += $(BINDIR)/fvlistfwcams
+  MANPAGES_all += $(MANDIR)/man1/fvlistfwcams.1
 else
   ifneq ($(realpath $(SRCDIR)/listfwcams.cpp),)
     WARN_TARGETS += warning_listfwcams
@@ -123,6 +119,8 @@ endif
 
 ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
   BINS_all += $(BINDIR)/fvbb2gettric $(BINDIR)/fvstereodecoder $(BINDIR)/fvbb2info
+  MANPAGES_all += $(MANDIR)/man1/fvbb2gettric.1 $(MANDIR)/man1/fvstereodecoder.1 \
+		  $(MANDIR)/man1/fvbb2info.1
 else
   ifneq ($(realpath $(SRCDIR)/bb2gettric.cpp),)
     WARN_TARGETS += warning_bb2gettric
@@ -139,11 +137,13 @@ else
 endif
 ifeq ($(HAVE_SDL)$(HAVE_GUI),11)
   BINS_gui += $(BINDIR)/fvviewer
+  MANPAGES_gui += $(MANDIR)/man1/fvviewer.1
 else
   WARN_TARGETS_GUI += warning_viewer
 endif
 ifeq ($(HAVE_SDL)$(HAVE_GUI),11)
   BINS_gui += $(BINDIR)/fvshowyuv
+  MANPAGES_gui += $(MANDIR)/man1/fvshowyuv.1
 else
   WARN_TARGETS_GUI += warning_showyuv
 endif

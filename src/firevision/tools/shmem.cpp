@@ -42,7 +42,7 @@ main(int argc, char **argv)
 
   if ( argp->has_arg("h") ) {
     // Show usage note
-    cout << endl << "Usage: " << argv[0] << " [-h] [-c] [-c[t]] [-l] [-m] [-i image_id] [file]" << endl
+    cout << endl << "Usage: " << argv[0] << " [-h] [-c] [-c[t]] [-l] [-i image_id] [file]" << endl
 	 << " -h     Show this help message" << endl
 	 << " -i id  Save image ID to file" << endl
 	 << " -c[t]  Cleanup (remove all FireVision related shmem segments of given type)"

@@ -1,0 +1,109 @@
+ffconfig(1)
+===========
+
+NAME
+----
+ffconfig - Query and modify configuration settings remotely.
+
+SYNOPSIS
+--------
+[verse]
+'ffconfig' [-h] [options] <cmd> [args]
+
+DESCRIPTION
+-----------
+This program connects to a Fawkes instance over the network and can
+query and modify configuration settings.
+
+To use this tool, a command string is formed that consists of a
+command and its arguments. A number of options is available to modify
+the behavior of the program.
+
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+ *-c*::
+	Show comments (only available with list and watch cmd).
+
+ *-a*::
+	Show all values, even double if default and host-specific
+	values exist (only available with list).
+
+ *-q*::
+	Quiet mode. Only show important output, suitable for parsing
+	(not supported for all commands yet).
+
+  *-r* 'host[:port]'::
+	Remote host and optionally port to connect to. If not given
+	defaults to localhost:1910.
+
+COMMANDS
+--------
+ *list*::
+	List all configuration items.
+
+ *watch*::
+	Watch configuration changes and print them as they happen.
+
+ *get* 'path'::
+    Get and print the value at 'path'.
+
+ *set* 'path' 'value' '[type]'::
+	Set a host-specific value for the given 'path' to the given
+	'value'. The 'type' must be given if the value is newly
+	created. It must be one of float/uint/int/bool/string.
+
+ *set_default* 'path' 'value' [type]::
+	Set a default value for the given 'path' to the given
+	'value'. The 'type' must be given if the value is newly
+	created. It must be one of float/uint/int/bool/string.
+
+ *set_comment* 'path' 'comment'::
+    Set 'comment' for the given host-specific value at 'path'. The
+    value at the given path must already exist in the host-specific
+    configuration.
+
+ *set_default_comment* 'path' 'comment'::
+    Set default 'comment' for the given 'path'. The value at
+    the given path must already exist in the default configuration.
+
+  *erase* 'path'::
+    Erase value at 'path' from host-specific configuration.
+
+  'erase_default' 'path'::
+    Erase value at 'path' from default configuration.
+
+
+
+EXAMPLES
+--------
+
+ *ffconfig list*::
+	List all configuration values on localhost.
+	host.
+
+ *ffplugin -r myrobot:1234 set /my_value "test string" string*::
+	Connect to Fawkes running on the host "myrobot" on port 1234
+	and set the host-specific value at /my_value to "test string"
+	of type string. If the value already exists it must be of type
+	string, or an error occurs.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

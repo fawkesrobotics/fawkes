@@ -27,6 +27,7 @@ OBJS_all =	$(OBJS_skillet)
 
 ifeq ($(HAVE_READLINE),1)
   BINS_all =	$(BINDIR)/skillet
+  MANPAGES_all = $(MANDIR)/man1/skillet.1
 else
   WARN_TARGETS += warning_readline
 endif

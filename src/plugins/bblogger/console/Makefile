@@ -23,6 +23,7 @@ OBJS_ffbblog = bblog.o ../bblogfile.o
 
 OBJS_all =	$(OBJS_ffbblog)
 BINS_all =	$(BINDIR)/ffbblog
+MANPAGES_all =  $(MANDIR)/man1/ffbblog.1
 
 include $(BUILDSYSDIR)/base.mk
 

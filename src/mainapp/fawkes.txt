@@ -1,0 +1,122 @@
+fawkes(8)
+==========
+
+NAME
+----
+fawkes - Main application of the Fawkes Robot Software Framework
+
+SYNOPSIS
+--------
+[verse]
+'fawkes' [-h] [-C] [-c db-file] [-d sql-file] [-q[qqq]] [-l level]
+	[-L loggers] [-p plugins] [-u user] [-g group]
+	[-Dpid-file] [-Dpid-file -k] [-Dpid-file -s] 
+
+DESCRIPTION
+-----------
+This program is the main application that provides the environment
+for *Fawkes* plugins to run. When run, it creates the blackboard,
+loads the configuration files and sets up the basic aspect
+initializers required to initialize plugins.
+
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+ *-C*::
+	Cleanup old BB segments. This is only required when using the
+	old sysvipc shared memory blackboard (off by default).
+
+ *-c* 'db-file'::
+	Mutable configuration file, created if it does not exist. If
+	it does however it must contain a valid SQLite
+	database. 'db-file' is either the absolute path to the
+	configuration database, or it is a path relative to the system
+	configuration directory or the .fawkes directory in the user's
+	home directory. In either case it should be suffixed by .db.
+
+ *-d* 'sql-file'::
+	Default configuration SQL dump file. On program startup the
+	default configuration is imported from this file. On exit, it
+	is written back. 'sql-file' is either an absolute path to the
+	default.sql dump file or a path relative to the system
+	configuration directory or the .fawkes directory in the user's
+	home directory. In either case it should be suffixed by .sql.
+
+ *-q[qqq]*::
+	Quiet mode, -q omits debug, -qq debug and info, -qqq omit
+	debug, info and warn, -qqqq no output of logger.
+
+ *-l* 'level'::
+	Set log level directly mutually exclusive with -q. 'level' is one
+	of debug, info, warn, error and none.
+
+ *-L* 'loggers'::
+	Define loggers. By default this setting is read from config
+	file (or console logger if unset in config). Format for
+	'loggers' is: logger:args[;logger2:args2[!...]]. The logger
+	options depend on the logger. Currently supported:
+	console (default), file:file.log, network logger is always
+	enabled.
+
+ *-p* 'plugins'::
+	Load the given plugins on startup. 'plugins' is a
+	comma-separated list of plugins to load, for example
+	fvbase,fvfountain,fvretriever. The plugins will be loaded in
+	the given order after startup. An error to load any of these
+	plugins will cause the successive plugins not to be loaded.
+
+ *-u* 'user'::
+	Drop privileges as soon as possible and run as given 'user'.
+
+ *-g* 'group'::
+	Drop privileges as soon as possible and run as given 'group'.
+
+ *-D*'[pid-file]'::
+	Run daemonized in the background, 'pid-file' is optional and
+	defaults to /var/run/fawkes.pid, it must be an absolute path.
+
+ *-D*'[pid-file]' *-k*::
+	Kill a daemonized process running in the background. The 'pid-file'
+	is used to determine the process ID and is optional as above.
+
+ *-D*'[pid-file]' *-s*::
+	Check status of daemon. The exit value can be used to check on
+	the status. The 'pid-file' is used to determine the process ID
+	and is optional as above.
+
+Configuration
+-------------
+The configuration is stored in SQLite databases for fast retrieval.
+
+
+EXAMPLES
+--------
+
+ *fawkes*::
+	Run fawkes and await commands.
+
+ *fawkes -p webview*::
+	Run fawkes and load the webview plugin after startup. After
+	this, you cann access Fawkes via http://localhost:10117 to
+	load more plugins, read the logs or inspect the blackboard.
+
+SEE ALSO
+--------
+linkff:ffplugin[1]
+linkff:ffconfig[1]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

@@ -1,0 +1,35 @@
+skillgui(1)
+===========
+
+NAME
+----
+skillgui - Monitor and instruct the skiller remotely
+
+SYNOPSIS
+--------
+[verse]
+*skillgui*
+
+DESCRIPTION
+-----------
+This GUI application allows for monitoring the skiller and luaagent
+plugins, and instructig the skiller plugin. It reads data from the
+blackboard and uses Graphviz to visualize the finite state machines
+graphs of active skills.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

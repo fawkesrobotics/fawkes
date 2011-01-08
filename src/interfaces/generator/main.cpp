@@ -39,11 +39,18 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "d:v");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "hd:v");
 
   const vector<const char *> & items = argp->items();
-  if ( items.size() == 0 ) {
-    cout << "Usage: " << argv[0] << " [-d dir] config.xml [config2.xml...]" << endl << endl;
+  if ( items.size() == 0 || argp->has_arg("h") ) {
+  cout << "Fawkes Interface generator - Usage Instructions" << endl
+       << "===============================================================================" << endl
+       << "Usage: " << argv[0] << " [-h] [-d dir] [-v] config.xml [config2.xml...]" << endl
+       << "where [options] is one or more of:" << endl
+       << " -h        These help instructions" << endl
+       << " -d dir    Directory where to write generated files" << endl
+       << " -v        Verbose console output." << endl
+       << endl;
   } else {
     string dir = ".";
     if ( argp->has_arg("d") ) {

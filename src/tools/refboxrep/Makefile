@@ -24,6 +24,7 @@ OBJS_ffrefboxrep = main.o refbox_state_writer.o refbox_state_sender.o msl2007.o 
 
 OBJS_all =	$(OBJS_ffrefboxrep)
 BINS_all =	$(BINDIR)/ffrefboxrep
+MANPAGES_all =  $(MANDIR)/man1/ffrefboxrep.1
 
 CFLAGS  += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
 LDFLAGS += $(shell $(PKGCONFIG) --libs libxml++-2.6)

@@ -1,0 +1,170 @@
+ffifacegen(1)
+=============
+
+NAME
+----
+ffifacegen - Fawkes interface code generator
+
+SYNOPSIS
+--------
+[verse]
+'ffifacegen' [-h] [-d dir] [-v] config.xml [config2.xml...]
+
+DESCRIPTION
+-----------
+The interface generator takes an XML interface definition file as
+input and generates C++ and Lua/C++ code. If this code is compiled
+into a shared library it can be used to access a blackboard interface
+from C++ or Lua applications.
+
+Definition File Format
+~~~~~~~~~~~~~~~~~~~~~~
+The interface is defined by an interface document specifying one
++<interface>+ element. It comprises (optional) constants, (mandatory)
+data fields, and (optional) messages.
+
+_Example:_
+[literal]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NameThisInterface" author="Author Name" year="2010">
+  <constants>
+  <!-- constant definitions -->
+  </constants>
+  <data>
+    <comment>Commentary on interface.</comment>
+    <!-- field definitions -->
+  </data>
+  <message name="MessageTypeName">
+    <comment>Set the test int to the given value.</comment>
+    <!-- reference and field definitions -->
+  </message>
+  <!-- Any number of additional message types -->
+</interface>
+
+Constants
+~~~~~~~~~
+The constants are optional. It comprises constant values of arbitrary
+types or enumerations.
+_Example:_
+[literal]
+<constant type="int32" value="5" name="CONSTANT_NAME">Comment</constant>
+
+Constants are exported as static class members of the interface. The
+value of the field is a comment used for documentation purposes.
+
+_Example:_
+[literal]
+<enum name="TestEnum">
+  <comment>Demonstrating enums</comment>
+  <item name="TEST_ENUM_1">Item 1</item>
+  <item name="TEST_ENUM_2">Item 2</item>
+</enum>
+
+Enumerations are symbolic names of type integer. The field text are
+comments about the overall enumeration and the enumeration items.
+
+Fields
+~~~~~~
+Data is stored in fields in the interfaces. Data can be one of the
+following types:
+* string
+* byte (equivalent to uint8)
+* char (equivalent to char)
+* int8
+* uint8
+* int16
+* uint16
+* int32
+* uint32
+* int64
+* uint64 (not recommended, see below)
+* bool
+* float
+* double
+* custom enum types (as specified in the constants)
+Note that uint64 (and to some degree int64) can cause problems. Lua
+for example supports integers only up to 52 bits. Java does not
+support unsigned types, therefore it is limited to int64 (although not
+supported as of now, it may be in the future). If you think that you
+need 64 bit integers and need the full range, be aware of these
+problems and state this clearly in the documentation of the module in
+question.
+
+Number and boolean types can be used to form statically sized
+arrays. For this add an attribute length with the number of elements
+in the array. The same attribute must be given for strings to denote
+the maximum length (including null termination).
+
+_Example:_
+[literal]
+<field type="bool" name="test_bool">Test Bool</field>
+<field type="int32" name="test_int">Test integer</field>
+<field type="string" length="30" name="test_string">A test string</field>
+<field type="int32" length="30" name="test_array">Integer array</field>
+
+
+Messages
+~~~~~~~~
+Messages are defined as sub-documents. Any number of messages can be
+defined for an interface.
+_Example:_
+[literal]
+<message name="SetTestInt">
+  <comment>Set the test int to the given value.</comment>
+  <ref>test_int</ref>
+</message>
+<message name="Calculate">
+  <comment>Adds Summand and Addend.</comment>
+  <field type="int32" name="summand">Summand</field>
+  <field type="int32" name="addend">Addend</field>
+</message>
+
+The +<ref>+ field can be used to reference fields of the interface. An
+appropriate field with the given name and the same type as in the
+interface is then added. Fields can otherwise be specified in the same
+way they are for the interface. References and fields can be mixed in
+a message.
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+  *-d* 'dir'::
+	Directory in which the resulting output files are
+	generated. The default is the current working directory.
+
+  *-v*::
+	Verbose output to console.
+
+  'config.xml...'::
+	Any number of XML interface definition files as described
+	above. The appropriate files are generated for each of the
+	given input files.
+
+EXAMPLES
+--------
+ *ffifacegen MyInterface.xml*::
+	Create the source files as defined in MyInterface.xml in the
+	current working directory.
+
+Also see TestInterface.xml in the source distribution for an example
+of a full interface.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

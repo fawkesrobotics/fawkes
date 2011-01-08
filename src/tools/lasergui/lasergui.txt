@@ -1,0 +1,38 @@
+lasergui(1)
+===========
+
+NAME
+----
+lasergui - Watch laser scanner data remotely in real-time
+
+SYNOPSIS
+--------
+[verse]
+*lasergui*
+
+DESCRIPTION
+-----------
+This GUI application allows for viewing laser scanner data
+remotely. It connects to a Fawkes instance and reads the current data
+from the blackboard and updates as new data comes in. It can show high
+and low resolution laser interfaces, and visualize the data as beams,
+end points, or hull. The data can be freely zoomed, moved, and rotated
+by 90 degrees.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de> and Masrur
+Doostdar <doostdar@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

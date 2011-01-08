@@ -40,6 +40,9 @@ Fawkes		libstrfunc		>= 8.3			mandatory
 Fawkes		Perl			>= 5.8			mandatory
 		(used for "make license-check")
 
+Fawkes		asciidoc		>= 8.4.5		mandatory
+		(used to generate man pages)
+
 Fawkes		libexecinfo		>= 1.1			optional
 		(req. on FreeBSD for backtraces in Exception)
 

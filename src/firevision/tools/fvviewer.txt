@@ -1,0 +1,120 @@
+fvviewer(1)
+===========
+
+NAME
+----
+fvviewer - View FireVision images from various sources
+
+SYNOPSIS
+--------
+[verse]
+*fvviewer* [options] -s 'shmem_id'
+*fvviewer* [options] -n 'host[:port]/image_id'
+*fvviewer* [options] -f 'file'
+*fvviewer* [options] 'camera argument string'
+
+DESCRIPTION
+-----------
+Retrieve images via FireVision and display them in a X11 window.
+
+In the first form the image is read from a shared memory image segment
+with the given 'shmem_id' on the local host. The second form retrieves
+the image via the network and FireVision Fountain connecting to the
+given host (and optionally port) and reading the image for
+'image_id'. The third format allows for reading an image from the
+given file.
+
+The last form is the most flexible as it allows you to pass in an
+arbitrary camera argument string to open any camera supported by
+FireVision.
+
+All forms share common options described below. Additionally there are
+keys that can be pressed in the window to influence the behavior. By
+default the viewer will start with continuous mode disabled, that
+means that the user needs to press the space button to retrieve the
+next image.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-c*::
+	Start in continuous mode.
+
+ *-s* 'shmem_id'::
+	Open image from local shared memory segment with ID 'shmem_id'.
+
+ *-n* 'host[:port]]/image_id'::
+	Open image via the network. The argument defines the host and
+	optionally port to connect to, and the 'image_id' to retrieve.
+
+ *-j*::
+	Retrieve images JPEG compressed (network retrieval only). This
+	conserves bandwidth but also lowers the image quality.
+
+ *-d* 'delay'::
+	Delay in ms to wait before a new image is captured after the
+	previous one has been received. This is especially useful for
+	continuous local shared memory display.
+
+ *-f* 'file'::
+	Read image from 'file.
+
+ *-o* 'shmem_id'::
+	Write the incoming image into a local shared memory segment
+	with the given ID. This can be used for quickly relaying
+	images for debugging.
+
+ *-v*::
+	Verbose console output.
+
+KEYS
+----
+ *c*::
+	Toggle continuous mode.
+
+ *r*::
+	Rectify image. Asks for a rectification info file and will
+	show the rectified image. The rectification is performed
+	locally.
+
+ *+/-*::
+	Increase or decrease the delay by 5 ms respectively.
+
+ *Shift-R*::
+	Rectify image, but use the already loaded rectification file
+	and do not query again. Only useful after *r* has already been
+	used, for example to quickly toggle between the rectified and
+	non-rectified versions.
+
+ *Space*::
+	Refresh the image (in non-continuous mode).
+
+ *q/Esc*::
+	Quit the viewer.
+
+
+EXAMPLES
+--------
+
+ *fvviewer -n myrobot/my_image*::
+	Read the image with the the ID my_image via the network from
+	the host myrobot.
+
+SEE ALSO
+--------
+linkff:fawkes[8], linkff:fvnet[1], linkff:fvshmem[1]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

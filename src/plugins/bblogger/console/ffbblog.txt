@@ -1,0 +1,125 @@
+ffbblog(1)
+==========
+
+NAME
+----
+ffbblog - Fawkes blackboard log file tool
+
+SYNOPSIS
+--------
+[verse]
+*ffbblog* [-r 'host[:port]'] <command> 'file' ['params']
+
+DESCRIPTION
+-----------
+This tool operates on log files recorded using the bblogger plugin. It
+reads the binary log file and prints human readable output to the
+console. It can also enable or disable a currently ongoing logging
+process.
+
+The tool can watch log files as they are written (in a way similar to
+the unix tool linkff:tail[1]). It can also print an entry at a
+specific index, or the meta information about a log file. In replay
+mode it will print the information to the console in the same timing
+that it was recorded. Log files can be repaired, for example if the
+logging process ended prematurely (e.g. because of a segfault in a
+plugin you are debugging). It will update the meta information in the
+file as required for other tool operations. It can enable or disable
+logging in a currently running bblogger. Finally, the log files can be
+converted to other formats compatible with other tools.
+
+For replaying a log file to the blackboard use the fflogreplay plugin.
+
+COMMANDS
+--------
+ *watch*::
+	Watch the given file as it is written. This is useful if the
+	bblogger plugin is currently running and writing updates to
+	the given file.
+
+ *info*::
+	Show meta information about the given log file.
+
+ *print* 'index' ['index'...]::
+	Print one or more specified indexes. The indexes are given on
+	the command line following the file names and must be in the
+	available range that can be queried with the info command.
+
+ *replay*::
+	Replay the given log file with a timing similar to the one it
+	had during recording.
+
+ *repair*::
+	Repair the given log file. It will check for certain
+	unconsistencies in the log file which occur if the logging
+	process is ended prematurely, and then repairs them.
+
+ *enable*::
+	Enable logging in a currently running bblogger. The -r
+	parameter can be optionally supplied to connect to a remote
+	Fawkes instance.
+
+ *disable*::
+	Disable logging in a currently running bblogger. The -r
+	parameter can be optionally supplied to connect to a remote
+	Fawkes instance.
+
+ *convert* 'infile' 'outfile' 'format'::
+	Convert the log file to a different format (see formats below
+	for the available formats). After the input 'infile', two
+	more parameters are expected. First the output file 'outfile'
+	must be given followed by the desired output 'format'.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-r* 'host[:port]]'::
+	The host and port of the Fawkes instance to connect to.
+
+FORMATS
+-------
+The following output formats are available for converting bblogger log
+files.
+
+Comma-separated Values (CSV)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Lines starting with # are considered comments. The very first line
+contains a comment with the field names, followed by type and length
+in braces. Fields are separated as data rows.
+
+One row of data is written per line. It contains fields separated by
+semicolons (;). Warning, strings that may contain semicolons are
+currently not escaped.
+
+
+EXAMPLES
+--------
+
+ *ffbblog info 'file.bblog'*::
+	Show meta information of 'file.bblog'.
+
+ *ffbblog replay 'file.bblog'*::
+	Replay 'file.bblog' in real-time.
+
+ *ffbblog convert 'in.bblog' 'out.csv' 'csv'*::
+	convert the file 'in.bblog' to CSV format and write the
+	converted data to 'out.csv'.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

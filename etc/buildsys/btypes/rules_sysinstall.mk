@@ -2,7 +2,7 @@
 #     Makefile Build System for Fawkes: Rules for system-wide installation
 #                            -------------------
 #   Created on Mon Sep 07 11:24:07 2009
-#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -28,10 +28,13 @@ ifdef __buildsys_lua_mk_
 $(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(subst /,_,$L) = $(FFLIBSUBDIR))))
 endif
 
+# Prefix man pages with proper path
+MANPAGES_install = $(addprefix $(DESTDIR)$(EXEC_MANDIR)/,$(patsubst $(abspath $(MANDIR))/%,%,$(MANPAGES_all) $(MANPAGES_gui)))
+
 # Main install target
 .PHONY: install install_test_basedir install_config install_buildsys install_lua install_apidoc uncolored-install
 uncolored-install: install
-install: install_test_basedir presubdirs $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) resdirs subdirs install_buildsys install_config install_lua install_apidoc
+install: install_test_basedir presubdirs $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) $(MANPAGES_install) resdirs subdirs install_buildsys install_config install_lua install_apidoc
 
 # Only allow "make install" from basedir
 install_test_basedir:
@@ -150,7 +153,6 @@ ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 	$(SILENT)rm -rf $(DESTDIR)$(EXEC_INCDIR)
 endif
 
-
 # Library install target
 # 1. Copy library, with or without SOVER
 # 2. Copy header files
@@ -205,5 +207,15 @@ $(DESTDIR)$(EXEC_BINDIR)/%: $(BINDIR)/%
 		-e 's|@PLUGINDIR@|$(EXEC_PLUGINDIR)|' \
 		$(SRCDIR)/$*.desktop > $(DESTDIR)$(EXEC_DFILEDIR)/$*.desktop; \
 		chmod 644 $(DESTDIR)$(EXEC_DFILEDIR)/$*.desktop; \
+	fi
+
+
+# Manpage install target
+$(DESTDIR)$(EXEC_MANDIR)/%: $(MANDIR)/%
+	$(SILENT)if [ -e "$<" ]; then \
+		echo -e "$(INDENT_PRINT)--- Copying man page $* to $@"; \
+		install -D -m 0644  $< $@ || exit $$?; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Cannot copy man page $* (does not exist)$(TNORMAL)"; \
 	fi
 

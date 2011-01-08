@@ -1,0 +1,36 @@
+firestation(1)
+==============
+
+NAME
+----
+firestation - FireVision viewing and calibration GUI
+
+SYNOPSIS
+--------
+[verse]
+*firestation*
+
+DESCRIPTION
+-----------
+This GUI application allows for inspecting a running FireVision
+systems by viewing images and visualizing color maps. Its second
+purpose is to calibrate the vision system, e.g. by creating mirror
+calibration files and creating color maps.
+
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
