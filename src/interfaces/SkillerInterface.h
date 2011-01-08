@@ -67,7 +67,7 @@ class SkillerInterface : public Interface
       carry your instance serial your exec messages will be ignored. Aquire control with
       the AquireControlMessage. Make sure you release control before exiting.
      */
-    SkillStatusEnum status; /**< 
+    int32_t status; /**< 
       The status of the current skill execution.
      */
     bool continuous; /**< 

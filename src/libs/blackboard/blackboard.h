@@ -56,8 +56,8 @@ class BlackBoard
   virtual bool                 is_alive() const throw() = 0;
   virtual bool                 try_aliveness_restore() throw() = 0;
 
-  virtual std::list<Interface *>  open_multiple_for_reading(const char *interface_type,
-							      const char *id_pattern = "*") = 0;
+  virtual std::list<Interface *>  open_multiple_for_reading(const char *type_pattern,
+							    const char *id_pattern = "*") = 0;
 
   template <class InterfaceType>
     std::list<InterfaceType *>    open_multiple_for_reading(const char *id_pattern = "*");

@@ -193,7 +193,7 @@ KickerInterface::set_num_kicks_right(const int32_t new_num_kicks_right)
 KickerInterface::GuideBallSideEnum
 KickerInterface::guide_ball_side() const
 {
-  return data->guide_ball_side;
+  return (KickerInterface::GuideBallSideEnum)data->guide_ball_side;
 }
 
 /** Get maximum length of guide_ball_side value.
@@ -589,7 +589,7 @@ KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallMessage *m) :
 KickerInterface::GuideBallSideEnum
 KickerInterface::GuideBallMessage::guide_ball_side() const
 {
-  return data->guide_ball_side;
+  return (KickerInterface::GuideBallSideEnum)data->guide_ball_side;
 }
 
 /** Get maximum length of guide_ball_side value.

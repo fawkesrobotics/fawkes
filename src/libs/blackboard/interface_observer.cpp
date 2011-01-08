@@ -112,35 +112,39 @@ BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char
 /** Add interface creation type to watch list.
  * With this you add an interface type to the watch list. For any type on this list
  * you will be notified if an interface is created.
- * @param type type to watch
+ * @param type_pattern pattern of interface types to watch, supports wildcards
+ * similar to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @param id_pattern pattern of interface IDs to open, supports wildcards similar
  * to filenames (*, ?, []), see "man fnmatch" for all supported.
  */
 void
-BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type, const char *id_pattern) throw()
+BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type_pattern,
+						      const char *id_pattern) throw()
 {
   __bbio_observed_create.lock();
-  __bbio_observed_create[type].push_back(id_pattern);
-  __bbio_observed_create[type].sort();
-  __bbio_observed_create[type].unique();
+  __bbio_observed_create[type_pattern].push_back(id_pattern);
+  __bbio_observed_create[type_pattern].sort();
+  __bbio_observed_create[type_pattern].unique();
   __bbio_observed_create.unlock();
 }
 
 
 /** Add interface destruction type to watch list.
- * With this you add an interface type to the watch list. For any type on this list
- * you will be notified if an interface is destroyed.
- * @param type type to watch
+ * With this you add an interface type to the watch list. For any type on this
+ * list you will be notified if an interface is destroyed.
+ * @param type_pattern pattern of interface types to watch, supports wildcards
+ * similar to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @param id_pattern pattern of interface IDs to open, supports wildcards similar
  * to filenames (*, ?, []), see "man fnmatch" for all supported.
  */
 void
-BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type, const char *id_pattern) throw()
+BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
+						       const char *id_pattern) throw()
 {
   __bbio_observed_destroy.lock();
-  __bbio_observed_destroy[type].push_back(id_pattern);
-  __bbio_observed_destroy[type].sort();
-  __bbio_observed_destroy[type].unique();
+  __bbio_observed_destroy[type_pattern].push_back(id_pattern);
+  __bbio_observed_destroy[type_pattern].sort();
+  __bbio_observed_destroy[type_pattern].unique();
   __bbio_observed_destroy.unlock();
 }
 

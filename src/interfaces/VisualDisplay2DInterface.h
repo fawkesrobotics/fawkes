@@ -93,7 +93,7 @@ class VisualDisplay2DInterface : public Interface
       float x[2]; /**< X coordinates of two points */
       float y[2]; /**< Y coordinates of two
     points */
-      LineStyle style; /**< Style of this object. */
+      int32_t style; /**< Style of this object. */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartLineMessage_data_t;
 #pragma pack(pop)
@@ -139,7 +139,7 @@ class VisualDisplay2DInterface : public Interface
       float x; /**< X coordinate of center point */
       float y; /**< Y coordinate of center point */
       float radius; /**< Radius of the circle. */
-      LineStyle style; /**< Style of this object. */
+      int32_t style; /**< Style of this object. */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartCircleMessage_data_t;
 #pragma pack(pop)
@@ -185,7 +185,7 @@ class VisualDisplay2DInterface : public Interface
       float y; /**< Y coordinate of lower right corner */
       float width; /**< Width of rectangle */
       float height; /**< Height of rectangle */
-      LineStyle style; /**< Style of this object. */
+      int32_t style; /**< Style of this object. */
       uint8_t color[4]; /**< Color in RGBA */
     } AddCartRectMessage_data_t;
 #pragma pack(pop)
@@ -233,7 +233,7 @@ class VisualDisplay2DInterface : public Interface
       float x; /**< X coordinate of upper left corner */
       float y; /**< Y coordinate of upper left corner */
       char text[128]; /**< Width of rectangle */
-      Anchor anchor; /**< Anchor which marks the
+      int32_t anchor; /**< Anchor which marks the
       alignment to the given point. */
       float size; /**< Font size (max height in m). */
       uint8_t color[4]; /**< Color in RGBA */

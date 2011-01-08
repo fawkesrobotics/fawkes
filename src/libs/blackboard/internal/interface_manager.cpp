@@ -291,7 +291,8 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
 /** Open all interfaces of the given type for reading.
  * This will create interface instances for all currently registered interfaces of
  * the given type. The result can be casted to the appropriate type.
- * @param type type of the interface
+ * @param type_pattern pattern of interface types to open, supports wildcards
+ * similar to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @param id_pattern pattern of interface IDs to open, supports wildcards similar
  * to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @return list of new fully initialized interface instances of requested type. The
@@ -299,7 +300,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
  * with it!
  */
 std::list<Interface *>
-BlackBoardInterfaceManager::open_multiple_for_reading(const char *type,
+BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
 						      const char *id_pattern)
 {
   mutex->lock();
@@ -316,8 +317,16 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type,
       iface = NULL;
       ih = (interface_header_t *)*cit;
 
-      if ((strncmp(type, ih->type, __INTERFACE_TYPE_SIZE) != 0) ||
-	  (fnmatch(id_pattern, ih->id, 0) == FNM_NOMATCH) ) {
+      // ensure 0-termination
+      char type[__INTERFACE_TYPE_SIZE + 1];
+      char id[__INTERFACE_ID_SIZE + 1];
+      type[__INTERFACE_TYPE_SIZE] = 0;
+      id[__INTERFACE_TYPE_SIZE] = 0;
+      strncpy(type, ih->type, __INTERFACE_TYPE_SIZE);
+      strncpy(id, ih->id, __INTERFACE_ID_SIZE);
+
+      if ((fnmatch(type_pattern, type, 0) == FNM_NOMATCH) ||
+	  (fnmatch(id_pattern, id, 0) == FNM_NOMATCH) ) {
 	// type or ID prefix does not match, go on
 	continue;
       }

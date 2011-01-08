@@ -168,7 +168,7 @@ HumanoidMotionInterface::set_walking(const bool new_walking)
 HumanoidMotionInterface::LegEnum
 HumanoidMotionInterface::supporting_leg() const
 {
-  return data->supporting_leg;
+  return (HumanoidMotionInterface::LegEnum)data->supporting_leg;
 }
 
 /** Get maximum length of supporting_leg value.
@@ -2366,7 +2366,7 @@ HumanoidMotionInterface::KickMessage::KickMessage(const KickMessage *m) : Messag
 HumanoidMotionInterface::LegEnum
 HumanoidMotionInterface::KickMessage::leg() const
 {
-  return data->leg;
+  return (HumanoidMotionInterface::LegEnum)data->leg;
 }
 
 /** Get maximum length of leg value.
@@ -2666,7 +2666,7 @@ HumanoidMotionInterface::StandupMessage::StandupMessage(const StandupMessage *m)
 HumanoidMotionInterface::StandupEnum
 HumanoidMotionInterface::StandupMessage::from_pos() const
 {
-  return data->from_pos;
+  return (HumanoidMotionInterface::StandupEnum)data->from_pos;
 }
 
 /** Get maximum length of from_pos value.
@@ -3002,7 +3002,7 @@ HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage(co
 HumanoidMotionInterface::StiffnessMotionPatternEnum
 HumanoidMotionInterface::SetStiffnessParamsMessage::motion_pattern() const
 {
-  return data->motion_pattern;
+  return (HumanoidMotionInterface::StiffnessMotionPatternEnum)data->motion_pattern;
 }
 
 /** Get maximum length of motion_pattern value.

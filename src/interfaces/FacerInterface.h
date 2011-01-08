@@ -55,7 +55,7 @@ class FacerInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    if_facer_opmode_t opmode; /**< 
+    int32_t opmode; /**< 
       Current opmode.
      */
     uint32_t num_identities; /**< 
@@ -148,7 +148,7 @@ class FacerInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      if_facer_opmode_t opmode; /**< 
+      int32_t opmode; /**< 
       Current opmode.
      */
     } SetOpmodeMessage_data_t;

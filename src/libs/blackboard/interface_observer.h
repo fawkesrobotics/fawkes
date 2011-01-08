@@ -44,8 +44,10 @@ class BlackBoardInterfaceObserver
   virtual void bb_interface_destroyed(const char *type, const char *id) throw();
 
  protected:
-  void bbio_add_observed_create(const char *type, const char *id_pattern = "*") throw();
-  void bbio_add_observed_destroy(const char *type, const char *id_pattern = "*") throw();
+  void bbio_add_observed_create(const char *type_pattern,
+				const char *id_pattern = "*") throw();
+  void bbio_add_observed_destroy(const char *type_pattern,
+				 const char *id_pattern = "*") throw();
 
   /** Type for lockable interface type hash sets. */
   typedef  LockMap<std::string, std::list<std::string> >  ObservedInterfaceLockMap;

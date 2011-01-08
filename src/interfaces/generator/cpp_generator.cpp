@@ -840,7 +840,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    "%s%s\n"
 	    "%s%s::%s%s() const\n"
 	    "{\n"
-	    "  return data->%s;\n"
+	    "  return %sdata->%s;\n"
 	    "}\n\n",
 	    (*i).getName().c_str(),
 	    (*i).getComment().c_str(),
@@ -848,6 +848,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    (*i).isEnumType() ? (interface_classname + "::").c_str() : "",
 	    (*i).getAccessType().c_str(),
 	    inclusion_prefix.c_str(), classname.c_str(), ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
+	    (*i).isEnumType() ? (std::string("(") + interface_classname + "::" +
+				 i->getAccessType() + ")").c_str() : "",
 	    (*i).getName().c_str() );
 
     if ( (i->getLengthValue() > 0) && (i->getType() != "string") ) {

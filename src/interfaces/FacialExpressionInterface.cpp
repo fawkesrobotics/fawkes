@@ -137,7 +137,7 @@ FacialExpressionInterface::tostring_mouth_t(mouth_t value) const
 FacialExpressionInterface::brows_t
 FacialExpressionInterface::brows_action() const
 {
-  return data->brows_action;
+  return (FacialExpressionInterface::brows_t)data->brows_action;
 }
 
 /** Get maximum length of brows_action value.
@@ -168,7 +168,7 @@ FacialExpressionInterface::set_brows_action(const brows_t new_brows_action)
 FacialExpressionInterface::eyes_t
 FacialExpressionInterface::eyes_action() const
 {
-  return data->eyes_action;
+  return (FacialExpressionInterface::eyes_t)data->eyes_action;
 }
 
 /** Get maximum length of eyes_action value.
@@ -199,7 +199,7 @@ FacialExpressionInterface::set_eyes_action(const eyes_t new_eyes_action)
 FacialExpressionInterface::jowl_t
 FacialExpressionInterface::jowl_action() const
 {
-  return data->jowl_action;
+  return (FacialExpressionInterface::jowl_t)data->jowl_action;
 }
 
 /** Get maximum length of jowl_action value.
@@ -230,7 +230,7 @@ FacialExpressionInterface::set_jowl_action(const jowl_t new_jowl_action)
 FacialExpressionInterface::mouth_t
 FacialExpressionInterface::mouth_action() const
 {
-  return data->mouth_action;
+  return (FacialExpressionInterface::mouth_t)data->mouth_action;
 }
 
 /** Get maximum length of mouth_action value.
@@ -363,7 +363,7 @@ FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage(const MoveBrowsMes
 FacialExpressionInterface::brows_t
 FacialExpressionInterface::MoveBrowsMessage::brows_action() const
 {
-  return data->brows_action;
+  return (FacialExpressionInterface::brows_t)data->brows_action;
 }
 
 /** Get maximum length of brows_action value.
@@ -453,7 +453,7 @@ FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage(const MoveEyesMessag
 FacialExpressionInterface::eyes_t
 FacialExpressionInterface::MoveEyesMessage::eyes_action() const
 {
-  return data->eyes_action;
+  return (FacialExpressionInterface::eyes_t)data->eyes_action;
 }
 
 /** Get maximum length of eyes_action value.
@@ -543,7 +543,7 @@ FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage(const MoveJowlMessag
 FacialExpressionInterface::jowl_t
 FacialExpressionInterface::MoveJowlMessage::jowl_action() const
 {
-  return data->jowl_action;
+  return (FacialExpressionInterface::jowl_t)data->jowl_action;
 }
 
 /** Get maximum length of jowl_action value.
@@ -633,7 +633,7 @@ FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage(const MoveMouthMes
 FacialExpressionInterface::mouth_t
 FacialExpressionInterface::MoveMouthMessage::mouth_action() const
 {
-  return data->mouth_action;
+  return (FacialExpressionInterface::mouth_t)data->mouth_action;
 }
 
 /** Get maximum length of mouth_action value.

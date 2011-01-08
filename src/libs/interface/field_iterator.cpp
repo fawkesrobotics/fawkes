@@ -623,6 +623,27 @@ InterfaceFieldIterator::get_byte(unsigned int index) const
 }
 
 
+/** Get value of current enum field as integer.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+int32_t
+InterfaceFieldIterator::get_enum(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_ENUM ) {
+    throw TypeMismatchException("Requested value is not of type enum");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((int32_t *)__infol->value)[index];
+  }
+}
+
 /** Get value of current field as bool array.
  * @return field value
  * @exception NullPointerException invalid iterator, possibly end iterator
@@ -830,6 +851,25 @@ InterfaceFieldIterator::get_bytes() const
     throw TypeMismatchException("Requested value is not of type float");
   } else {
     return (uint8_t *)__infol->value;
+  }
+}
+
+
+/** Get value of current enum field as integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
+ */
+int32_t *
+InterfaceFieldIterator::get_enums() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_ENUM ) {
+    throw TypeMismatchException("Requested value is not of type enum");
+  } else {
+    return (int32_t *)__infol->value;
   }
 }
 

@@ -105,12 +105,12 @@ class GameStateInterface : public Interface
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t game_state; /**< Current game state */
-    if_gamestate_team_t state_team; /**< Team referred to by game state */
-    if_gamestate_team_t our_team; /**< Our team color */
-    if_gamestate_goalcolor_t our_goal_color; /**< Our own goal color */
-    if_gamestate_half_t half; /**< Current game half */
+    int32_t state_team; /**< Team referred to by game state */
+    int32_t our_team; /**< Our team color */
+    int32_t our_goal_color; /**< Our own goal color */
+    int32_t half; /**< Current game half */
     bool kickoff; /**< Whether we have kickoff */
-    if_gamestate_role_t role; /**< Current role of this robot */
+    int32_t role; /**< Current role of this robot */
     uint32_t score_cyan; /**< Score of team cyan */
     uint32_t score_magenta; /**< Score of team magenta */
   } GameStateInterface_data_t;
@@ -128,7 +128,7 @@ class GameStateInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      if_gamestate_team_t our_team; /**< Our team color */
+      int32_t our_team; /**< Our team color */
     } SetTeamColorMessage_data_t;
 #pragma pack(pop)
 
@@ -182,7 +182,7 @@ class GameStateInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      if_gamestate_team_t state_team; /**< Team referred to by game state */
+      int32_t state_team; /**< Team referred to by game state */
     } SetStateTeamMessage_data_t;
 #pragma pack(pop)
 

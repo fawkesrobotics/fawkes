@@ -399,8 +399,10 @@ BlackBoardNotifier::notify_of_interface_created(const char *type, const char *id
 
   BBioMapIterator lhmi;
   BBioListIterator i, l;
-  if ( (lhmi = __bbio_created.find(type)) != __bbio_created.end() ) {
-    BBioList &list = (*lhmi).second;
+  for (lhmi = __bbio_created.begin(); lhmi != __bbio_created.end(); ++lhmi) {
+    if (fnmatch(lhmi->first.c_str(), type, 0) != 0) continue;
+
+    BBioList &list = lhmi->second;
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceObserver *bbio = i->first;
       for (std::list<std::string>::iterator pi = i->second.begin(); pi != i->second.end(); ++pi) {
@@ -432,7 +434,9 @@ BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *
 
   BBioMapIterator lhmi;
   BBioListIterator i, l;
-  if ( (lhmi = __bbio_destroyed.find(type)) != __bbio_destroyed.end() ) {
+  for (lhmi = __bbio_destroyed.begin(); lhmi != __bbio_destroyed.end(); ++lhmi) {
+    if (fnmatch(lhmi->first.c_str(), type, 0) != 0) continue;
+
     BBioList &list = (*lhmi).second;
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceObserver *bbio = i->first;

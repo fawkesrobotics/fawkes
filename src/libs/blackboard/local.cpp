@@ -124,10 +124,11 @@ LocalBlackBoard::open_for_writing(const char *type, const char *identifier)
 
 
 std::list<Interface *>
-LocalBlackBoard::open_multiple_for_reading(const char *type, const char *id_pattern)
+LocalBlackBoard::open_multiple_for_reading(const char *type_pattern,
+					   const char *id_pattern)
 {
   try {
-    return __im->open_multiple_for_reading(type, id_pattern);
+    return __im->open_multiple_for_reading(type_pattern, id_pattern);
   } catch (Exception &e) {
     throw;
   }  

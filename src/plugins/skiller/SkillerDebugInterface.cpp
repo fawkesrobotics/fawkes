@@ -162,7 +162,7 @@ SkillerDebugInterface::set_graph(const char * new_graph)
 SkillerDebugInterface::GraphDirectionEnum
 SkillerDebugInterface::graph_dir() const
 {
-  return data->graph_dir;
+  return (SkillerDebugInterface::GraphDirectionEnum)data->graph_dir;
 }
 
 /** Get maximum length of graph_dir value.
@@ -417,7 +417,7 @@ SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage(const 
 SkillerDebugInterface::GraphDirectionEnum
 SkillerDebugInterface::SetGraphDirectionMessage::graph_dir() const
 {
-  return data->graph_dir;
+  return (SkillerDebugInterface::GraphDirectionEnum)data->graph_dir;
 }
 
 /** Get maximum length of graph_dir value.

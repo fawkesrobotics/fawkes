@@ -267,14 +267,23 @@ RemoteBlackBoard::open_for_writing(const char *type, const char *identifier)
 
 
 std::list<Interface *>
-RemoteBlackBoard::open_multiple_for_reading(const char *type, const char *id_pattern)
+RemoteBlackBoard::open_multiple_for_reading(const char *type_pattern,
+					    const char *id_pattern)
 {
   std::list<Interface *> rv;
 
   InterfaceInfoList *infl = list_all();
   for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
-    if ((strncmp(type, i->type(), __INTERFACE_TYPE_SIZE) != 0) ||
-	(fnmatch(id_pattern, i->id(), 0) == FNM_NOMATCH) ) {
+    // ensure 0-termination
+    char type[__INTERFACE_TYPE_SIZE + 1];
+    char id[__INTERFACE_ID_SIZE + 1];
+    type[__INTERFACE_TYPE_SIZE] = 0;
+    id[__INTERFACE_TYPE_SIZE] = 0;
+    strncpy(type, i->type(), __INTERFACE_TYPE_SIZE);
+    strncpy(id, i->id(), __INTERFACE_ID_SIZE);
+
+    if ((fnmatch(type_pattern, type, 0) == FNM_NOMATCH) ||
+	(fnmatch(id_pattern, id, 0) == FNM_NOMATCH) ) {
       // type or ID prefix does not match, go on
       continue;
     }

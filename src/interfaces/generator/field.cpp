@@ -134,8 +134,10 @@ InterfaceField::getStructType() const
     return "char";
   } else if (type == "byte") {
     return "uint8_t";
-  } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
+  } else if (type == "float" || type == "double" || type == "bool") {
     return type;
+  } else if (is_enum_type) {
+    return "int32_t";
   } else {
     return type + "_t";
   }
