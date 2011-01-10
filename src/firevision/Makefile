@@ -41,6 +41,7 @@ filters: models
 apps: fvutils models cams filters classifiers stereo
 tools: apps fvutils stereo fvwidgets
 models: classifiers
+stereo: cams
 ifneq ($(CLASSIFIERS_DEPS),)
 classifiers: $(CLASSIFIERS_DEPS)
 endif
