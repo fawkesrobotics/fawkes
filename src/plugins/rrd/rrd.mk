@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#            Makefile Build System for Fawkes: RRD Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri Dec 17 00:33:15 2010
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,18 +13,11 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
-include $(BASEDIR)/etc/buildsys/config.mk
+ifneq ($(PKGCONFIG),)
+  HAVE_RRD = $(if $(shell $(PKGCONFIG) --exists 'librrd'; echo $${?/1/}),1,0)
+endif
 
-# base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
-	  laser flite joystick katana pantilt \
-	  skiller luaagent worldmodel laserht \
-	  refboxcomm player xmlrpc \
-	  readylogagent
-	  #festival
-
-include $(BUILDSYSDIR)/rules.mk
-
-luaagent: skiller
-
+ifeq ($(HAVE_RRD),1)
+  CFLAGS_RRD    = -DHAVE_RRD $(shell $(PKGCONFIG) --cflags 'librrd')
+  LDFLAGS_RRD   = $(shell $(PKGCONFIG) --libs 'librrd')
+endif

@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#                Makefile Build System for Fawkes: RRD Aspect
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri Dec 17 00:18:29 2010
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,18 +13,17 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../..
+
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(LIBSRCDIR)/utils/utils.mk
 
-# base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
-	  laser flite joystick katana pantilt \
-	  skiller luaagent worldmodel laserht \
-	  refboxcomm player xmlrpc \
-	  readylogagent
-	  #festival
+LIBS_libfawkesrrdaspect = stdc++ fawkescore fawkesaspects
+OBJS_libfawkesrrdaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-include $(BUILDSYSDIR)/rules.mk
+OBJS_all    = $(OBJS_libfawkesrrdaspect)
 
-luaagent: skiller
+LIBS_all = $(LIBDIR)/libfawkesrrdaspect.so
+
+include $(BUILDSYSDIR)/base.mk
 
