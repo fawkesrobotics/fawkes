@@ -23,6 +23,7 @@
 #include "rrd_thread.h"
 
 #include <core/exceptions/system.h>
+#include <core/threading/scoped_rwlock.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/system/file.h>
 #include <cstdio>
@@ -47,6 +48,7 @@ RRDThread::RRDThread()
     AspectProviderAspect("RRDAspect", &__rrd_aspect_inifin),
     __rrd_aspect_inifin(this)
 {
+  set_prepfin_conc_loop(true);
 }
 
 
@@ -59,35 +61,12 @@ RRDThread::~RRDThread()
 void
 RRDThread::init()
 {
-  std::vector<RRDDataSource> rrds;
-  rrds.push_back(RRDDataSource("value", RRDDataSource::COUNTER,
-			       30, 0, RRDDataSource::UNKNOWN));
-  test_rrd_def = new RRDDefinition("test", 10, false, rrds);
-  add_rrd(test_rrd_def);
+  __cfg_graph_interval = 30.;
+  try {
+    __cfg_graph_interval = config->get_float("/plugins/rrd/graph_interval");
+  } catch (Exception &e) {}
 
-  std::vector<RRDGraphDataDefinition> defs;
-  std::vector<RRDGraphElement *> els;
-
-  defs.push_back(RRDGraphDataDefinition("value", RRDArchive::AVERAGE,
-					test_rrd_def, "value"));
-  
-  els.push_back(new RRDGraphLine("value", 1, "FF0000", "Value", false));
-  els.push_back(new RRDGraphGPrint("value", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("value", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("value", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
-
-  test_graph_def = new RRDGraphDefinition(test_rrd_def, -600, -10, 10,
-					  "Test Value", "Foo", 10,
-					  false, defs, els);
-
-  add_graph(test_graph_def);
-
-  __time_wait = new TimeWait(clock, 1000000);
-  __loop_count = 0;
-  __counter = 0;
+  __time_wait = new TimeWait(clock, time_sec_to_usec(__cfg_graph_interval));
 }
 
 
@@ -101,19 +80,7 @@ void
 RRDThread::loop()
 {
   __time_wait->mark_start();
-  __loop_count++;
-  if (rand() > RAND_MAX/2) __counter++;
-  if (__loop_count == 10) {
-    try {
-      add_data(test_rrd_def->get_name(), "N:%u", __counter);
-      generate_graphs();
-    } catch (Exception &e) {
-      logger->log_warn(name(), "Adding data to %s failed, exception follows",
-		       test_rrd_def->get_name());
-      logger->log_warn(name(), e);
-    }
-    __loop_count = 0;
-  }
+  generate_graphs();
   __time_wait->wait_systime();
 }
 
@@ -122,6 +89,8 @@ RRDThread::loop()
 void
 RRDThread::generate_graphs()
 {
+  ScopedRWLock lock(__graphs.rwlock(), true, ScopedRWLock::LOCK_READ);
+
   std::vector<fawkes::RRDGraphDefinition *>::iterator g;
   for (g = __graphs.begin(); g != __graphs.end(); ++g) {
     size_t argc = 0;
@@ -198,7 +167,42 @@ RRDThread::add_rrd(RRDDefinition *rrd_def)
     }
   }
 
+  ScopedRWLock lock(__rrds.rwlock());
+  RWLockVector<fawkes::RRDDefinition *>::iterator r;
+  for (r = __rrds.begin(); r != __rrds.end(); ++r) {
+    if (strcmp((*r)->get_name(), rrd_def->get_name()) == 0) {
+      throw Exception("RRD with name %s has already been registered",
+		      rrd_def->get_name());
+    }
+  }
   __rrds.push_back(rrd_def);
+}
+
+void
+RRDThread::remove_rrd(RRDDefinition *rrd_def)
+{
+  ScopedRWLock rrds_lock(__rrds.rwlock());
+  RWLockVector<fawkes::RRDDefinition *>::iterator r;
+  for (r = __rrds.begin(); r != __rrds.end(); ++r) {
+    if (strcmp((*r)->get_name(), rrd_def->get_name()) == 0) {
+      __rrds.erase(r);
+      break;
+    }
+  }
+
+  ScopedRWLock graph_lock(__graphs.rwlock());
+  bool graphs_modified = false;
+  do {
+    graphs_modified = false;
+    RWLockVector<fawkes::RRDGraphDefinition *>::iterator g;
+    for (g = __graphs.begin(); g != __graphs.end(); ++g) {
+      if (strcmp((*g)->get_rrd_def()->get_name(), rrd_def->get_name()) == 0) {
+	__graphs.erase(g);
+	graphs_modified = true;
+	break;
+      }
+    }
+  } while (graphs_modified);
 }
 
 void
@@ -214,12 +218,22 @@ RRDThread::add_graph(RRDGraphDefinition *rrd_graph_def)
   rrd_graph_def->set_filename(filename);
   free(filename);
 
+  ScopedRWLock lock(__graphs.rwlock());
+  RWLockVector<fawkes::RRDGraphDefinition *>::iterator g;
+  for (g = __graphs.begin(); g != __graphs.end(); ++g) {
+    if (strcmp((*g)->get_name(), rrd_graph_def->get_name()) == 0) {
+      throw Exception("RRD graph with name %s has already been registered",
+		      rrd_graph_def->get_name());
+    }
+  }
   __graphs.push_back(rrd_graph_def);
 }
 
 void
 RRDThread::add_data(const char *rrd_name, const char *format, ...)
 {
+  ScopedRWLock lock(__rrds.rwlock(), true, ScopedRWLock::LOCK_READ);
+
   std::vector<RRDDefinition *>::const_iterator d;
   for (d = __rrds.begin(); d != __rrds.end(); ++d) {
     RRDDefinition *rrd_def = *d;
