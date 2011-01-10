@@ -22,6 +22,7 @@
 
 #include "rrdweb_processor.h"
 #include <plugins/rrd/aspect/rrd_manager.h>
+#include <core/threading/scoped_rwlock.h>
 #include <webview/page_reply.h>
 #include <webview/file_reply.h>
 #include <webview/error_reply.h>
@@ -71,8 +72,10 @@ RRDWebRequestProcessor::process_request(const char *url,
     // It is in our URL prefix range
     std::string subpath = std::string(url).substr(__baseurl_len);
 
-    const std::vector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
-    std::vector<RRDGraphDefinition *>::const_iterator g;
+    const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
+    RWLockVector<RRDGraphDefinition *>::const_iterator g;
+
+    ScopedRWLock(graphs.rwlock(), true, ScopedRWLock::LOCK_READ);
 
     if (subpath.find("/graph/") == 0) {
       std::string graph_name = subpath.substr(subpath.find_first_not_of("/", std::string("/graph/").length()));
