@@ -23,7 +23,7 @@ PRESUBDIRS = aspect
 CFLAGS  += $(CFLAGS_RRD)
 LDFLAGS += $(LDFLAGS_RRD)
 
-LIBS_rrd = fawkescore fawkesaspects fawkesutils fawkesrrdaspect $(LIBS_RRD)
+LIBS_rrd = m fawkescore fawkesaspects fawkesutils fawkesrrdaspect $(LIBS_RRD)
 OBJS_rrd = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_rrd)
