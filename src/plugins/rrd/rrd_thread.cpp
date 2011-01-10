@@ -276,14 +276,14 @@ RRDThread::add_data(const char *rrd_name, const char *format, ...)
 }
 
 
-const std::vector<RRDDefinition *> &
+const fawkes::RWLockVector<RRDDefinition *> &
 RRDThread::get_rrds() const
 {
   return __rrds;
 }
 
 
-const std::vector<RRDGraphDefinition *> &
+const fawkes::RWLockVector<RRDGraphDefinition *> &
 RRDThread::get_graphs() const
 {
   return __graphs;

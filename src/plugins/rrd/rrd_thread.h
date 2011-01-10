@@ -56,8 +56,9 @@ class RRDThread
 
   virtual void add_data(const char *rrd_name, const char *format, ...);
 
-  virtual const std::vector<fawkes::RRDDefinition *> &       get_rrds() const;
-  virtual const std::vector<fawkes::RRDGraphDefinition *> &  get_graphs() const;
+  virtual const fawkes::RWLockVector<fawkes::RRDDefinition *> & get_rrds() const;
+  virtual const fawkes::RWLockVector<fawkes::RRDGraphDefinition *> &
+    get_graphs() const;
 
   void generate_graphs();
 

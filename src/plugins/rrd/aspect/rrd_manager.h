@@ -25,6 +25,7 @@
 #define __PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
 
 #include <plugins/rrd/aspect/rrd_descriptions.h>
+#include <core/utils/rwlock_vector.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -70,12 +71,12 @@ class RRDManager
   /** Get RRDs.
    * @return vector of all current RRD definitions.
    */
-  virtual const std::vector<RRDDefinition *> &       get_rrds() const = 0;
+  virtual const RWLockVector<RRDDefinition *> &       get_rrds() const = 0;
 
   /** Get graphs.
    * @return vector of all current graph definitions.
    */
-  virtual const std::vector<RRDGraphDefinition *> &  get_graphs() const = 0;
+  virtual const RWLockVector<RRDGraphDefinition *> &  get_graphs() const = 0;
 
 };
 
