@@ -26,6 +26,7 @@
 #include <plugins/rrd/aspect/rrd_manager.h>
 #include <plugins/rrd/aspect/rrd_inifin.h>
 #include <core/threading/thread.h>
+#include <core/utils/rwlock_vector.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
@@ -50,12 +51,14 @@ class RRDThread
 
   // for RRDManager
   virtual void add_rrd(fawkes::RRDDefinition *rrd_def);
+  virtual void remove_rrd(fawkes::RRDDefinition *rrd_def);
   virtual void add_graph(fawkes::RRDGraphDefinition *rrd_graph_def);
 
   virtual void add_data(const char *rrd_name, const char *format, ...);
 
-  virtual const std::vector<fawkes::RRDDefinition *> &       get_rrds() const;
-  virtual const std::vector<fawkes::RRDGraphDefinition *> &  get_graphs() const;
+  virtual const fawkes::RWLockVector<fawkes::RRDDefinition *> & get_rrds() const;
+  virtual const fawkes::RWLockVector<fawkes::RRDGraphDefinition *> &
+    get_graphs() const;
 
   void generate_graphs();
 
@@ -65,15 +68,12 @@ class RRDThread
  private:
   fawkes::RRDAspectIniFin     __rrd_aspect_inifin;
 
-  std::vector<fawkes::RRDDefinition *>      __rrds;
-  std::vector<fawkes::RRDGraphDefinition *> __graphs;
-
-  fawkes::RRDDefinition      *test_rrd_def;
-  fawkes::RRDGraphDefinition *test_graph_def;
+  fawkes::RWLockVector<fawkes::RRDDefinition *>      __rrds;
+  fawkes::RWLockVector<fawkes::RRDGraphDefinition *> __graphs;
 
   fawkes::TimeWait           *__time_wait;
+  float                       __cfg_graph_interval;
   unsigned int                __loop_count;
-  unsigned int                __counter;
 };
 
 #endif

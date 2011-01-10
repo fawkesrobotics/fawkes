@@ -619,6 +619,8 @@ RRDGraphArea::to_string() const
  */
 
 /** Constructor.
+ * @param name name of this graph definition, used internally, name must be
+ * unique among all registered graphs.
  * @param rrd_def pointer to definition of the RRD to graph
  * @param start time from where to start graphing. Maybe an absolute time or
  * a negative number for relative times, e.g. "-300" for 5 minutes back from now.
@@ -633,7 +635,7 @@ RRDGraphArea::to_string() const
  * @param def data definitions for the graph
  * @param elements elements to print in the graph
  */
-RRDGraphDefinition::RRDGraphDefinition(RRDDefinition *rrd_def,
+RRDGraphDefinition::RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
 				       time_t start, time_t end, unsigned int step,
 				       const char *title,
 				       const char *vertical_label,
@@ -641,9 +643,10 @@ RRDGraphDefinition::RRDGraphDefinition(RRDDefinition *rrd_def,
 				       bool slope_mode,
 				       std::vector<RRDGraphDataDefinition> &def,
 				       std::vector<RRDGraphElement *> &elements)
-  : __rrd_def(rrd_def), __start(start), __end(end), __step(step), __title(title),
-    __vertical_label(vertical_label), __update_interval(update_interval),
-    __slope_mode(slope_mode), __defs(def), __elements(elements)
+  : __name(name), __rrd_def(rrd_def), __start(start), __end(end), __step(step),
+    __title(title), __vertical_label(vertical_label),
+    __update_interval(update_interval), __slope_mode(slope_mode),
+    __defs(def), __elements(elements)
 {
   __filename = NULL;
   __argv = NULL;
