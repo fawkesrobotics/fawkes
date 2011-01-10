@@ -17,7 +17,7 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 # base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
+SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser flite joystick katana pantilt \
 	  skiller luaagent worldmodel laserht \
 	  refboxcomm player xmlrpc \
@@ -27,4 +27,5 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 include $(BUILDSYSDIR)/rules.mk
 
 luaagent: skiller
+rrdweb: rrd
 
