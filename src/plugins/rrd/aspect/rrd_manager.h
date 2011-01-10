@@ -45,6 +45,12 @@ class RRDManager
    */
   virtual void add_rrd(RRDDefinition *rrd_def) = 0;
 
+  /** Remove RRD.
+   * Remove a RRD definition. This also removes all associated graphs.
+   * @param rrd_def RRD definition
+   */
+  virtual void remove_rrd(RRDDefinition *rrd_def) = 0;
+
   /** Add graph.
    * Add a graph definition from which to generate graphs.
    * @param rrd_graph_def RRD graph definition

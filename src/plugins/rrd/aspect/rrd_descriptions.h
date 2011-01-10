@@ -287,8 +287,8 @@ class RRDGraphArea : public RRDGraphElement
 class RRDGraphDefinition
 {
  public:
-  RRDGraphDefinition(RRDDefinition *rrd_def, time_t start, time_t end,
-		     unsigned int step,
+  RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
+		     time_t start, time_t end, unsigned int step,
 		     const char *title, const char *vertical_label,
 		     unsigned int update_interval, bool slope_mode,
 		     std::vector<RRDGraphDataDefinition> &def,
@@ -299,6 +299,8 @@ class RRDGraphDefinition
   const char ** get_argv(size_t &argc) const;
 
   
+  /** Get graph definition name. @return graph definition name */
+  const char *  get_name() const { return __name; }
   /** Get RRD definition. @return RRD definition */
   const RRDDefinition * get_rrd_def() const { return __rrd_def; }
   /** Get start time. @return start time  */
@@ -328,6 +330,7 @@ class RRDGraphDefinition
   const char *          get_filename() const { return __filename; }
 
  private:
+  const char                          *__name;
   const RRDDefinition                 *__rrd_def;
   const time_t                         __start;
   const time_t                         __end;
