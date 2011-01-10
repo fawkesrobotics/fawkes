@@ -13,7 +13,7 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard $(SYSROOT)/usr/include/flite/flite.h),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/flite/flite.h $(SYSROOT)/usr/local/include/flite/flite.h),)
   HAVE_FLITE=1
 endif
 
