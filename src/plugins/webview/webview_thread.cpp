@@ -33,6 +33,8 @@
 #include <webview/request_dispatcher.h>
 #include <webview/page_reply.h>
 #include <webview/server.h>
+#include <webview/url_manager.h>
+#include <webview/nav_manager.h>
 
 using namespace fawkes;
 
@@ -58,7 +60,6 @@ WebviewThread::WebviewThread()
     LoggerAspect(&__cache_logger)
 {
   set_prepfin_conc_loop(true);
-  
 }
 
 
@@ -80,23 +81,24 @@ WebviewThread::init()
 			     FAWKES_VERSION_MICRO);
   __service_browse_handler = new WebviewServiceBrowseHandler(logger, __webview_service);
 
-  __header_gen = new WebviewHeaderGenerator();
+  __header_gen = new WebviewHeaderGenerator(webview_nav_manager);
   __footer_gen = new WebviewFooterGenerator(__service_browse_handler);
 
-  __dispatcher = new WebRequestDispatcher(__header_gen, __footer_gen);
+  __dispatcher = new WebRequestDispatcher(webview_url_manager,
+					  __header_gen, __footer_gen);
   __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
 
   __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
   __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
   __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
   __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
-  __dispatcher->add_processor("/", __startpage_processor);
-  __dispatcher->add_processor(STATIC_URL_PREFIX, __static_processor);
-  __dispatcher->add_processor(BLACKBOARD_URL_PREFIX, __blackboard_processor);
-  __dispatcher->add_processor(PLUGINS_URL_PREFIX, __plugins_processor);
+  webview_url_manager->register_baseurl("/", __startpage_processor);
+  webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
+  webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
+  webview_url_manager->register_baseurl(PLUGINS_URL_PREFIX, __plugins_processor);
 
-  __header_gen->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
-  __header_gen->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
+  webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
+  webview_nav_manager->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
 
@@ -110,6 +112,14 @@ WebviewThread::finalize()
 {
   service_publisher->unpublish_service(__webview_service);
   service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+
+  webview_url_manager->unregister_baseurl("/");
+  webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
+  webview_url_manager->unregister_baseurl(BLACKBOARD_URL_PREFIX);
+  webview_url_manager->unregister_baseurl(PLUGINS_URL_PREFIX);
+
+  webview_nav_manager->remove_nav_entry(BLACKBOARD_URL_PREFIX);
+  webview_nav_manager->remove_nav_entry(PLUGINS_URL_PREFIX);
 
   delete __webserver;
 

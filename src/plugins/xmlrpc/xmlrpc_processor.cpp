@@ -75,7 +75,7 @@ XmlRpcRequestProcessor::process_request(const char *url,
 					void **session_data)
 {
   if ( *session_data == NULL ) {
-    std::string *c = new std::string(upload_data);
+    std::string *c = new std::string(upload_data ? upload_data : "");
     *upload_data_size = 0;
     *session_data = c;
     return NULL;

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  header_generator.h - Generator of page header
+ *  url_manager.h - Web URL manager
  *
- *  Created: Sun Aug 30 14:37:21 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Nov 25 21:53:07 2010
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,30 +20,38 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_HEADER_GENERATOR_H_
-#define __PLUGINS_WEBVIEW_HEADER_GENERATOR_H_
-
-#include <webview/page_header_generator.h>
+#ifndef __LIBS_WEBVIEW_URL_MANAGER_H_
+#define __LIBS_WEBVIEW_URL_MANAGER_H_
 
 #include <map>
 #include <string>
 
 namespace fawkes {
-  class WebNavManager;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
 
-class WebviewHeaderGenerator : public fawkes::WebPageHeaderGenerator
+class Mutex;
+class WebRequestProcessor;
+
+class WebUrlManager
 {
  public:
-  WebviewHeaderGenerator(fawkes::WebNavManager *nav_manager);
+  WebUrlManager();
+  ~WebUrlManager();
 
-  std::string html_header(std::string &title,
-			  std::string &active_baseurl);
+  void register_baseurl(const char *url_prefix, WebRequestProcessor *processor);
+  void unregister_baseurl(const char *url_prefix);
+
+  WebRequestProcessor * find_processor(std::string &url) const;
+  Mutex * mutex();
 
  private:
-  static const char *PAGE_HEADER;
-
-  fawkes::WebNavManager *__nav_manager; 
+  Mutex                                        *__mutex;
+  WebRequestProcessor                          *__startpage_processor;
+  std::map<std::string, WebRequestProcessor *>  __processors;
 };
+
+} // end namespace fawkes
 
 #endif
