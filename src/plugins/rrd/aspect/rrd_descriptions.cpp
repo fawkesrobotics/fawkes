@@ -24,6 +24,7 @@
 #include <plugins/rrd/aspect/rrd_descriptions.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
+#include <utils/misc/string_conversions.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -656,18 +657,10 @@ RRDGraphDefinition::RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
   __fonts.push_back("TITLE:12:");
   __fonts.push_back("AXIS:8:");
   __width = 560;
-  if (asprintf(&__width_s, "%u", __width) == -1) {
-    throw OutOfMemoryException("Failed to create graph width string");
-  }
-  if (asprintf(&__start_s, "%li", __start) == -1) {
-    throw OutOfMemoryException("Failed to create graph start string");
-  }
-  if (asprintf(&__end_s, "%li", __end) == -1) {
-    throw OutOfMemoryException("Failed to create graph end string");
-  }
-  if (asprintf(&__step_s, "%u", __step) == -1) {
-    throw OutOfMemoryException("Failed to create step string");
-  }
+  __width_s = strdup(StringConversions::to_string(__width).c_str());
+  __start_s = strdup(StringConversions::to_string(__start).c_str());
+  __end_s   = strdup(StringConversions::to_string(__end).c_str());
+  __step_s  = strdup(StringConversions::to_string(__step).c_str());
 }
 
 
