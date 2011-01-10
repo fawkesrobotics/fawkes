@@ -25,6 +25,7 @@
 #define __UTILS_TIME_TIME_H_
 
 #include <sys/time.h>
+#include <cmath>
 
 namespace fawkes {
 
@@ -62,6 +63,16 @@ time_diff_sec(const long int a_sec, const long int a_usec,
   return res;
 }
 
+
+/** Convert seconds to micro seconds.
+ * @param sec seconds to convert
+ * @return time in microseconds
+ */
+inline long int
+time_sec_to_usec(float sec)
+{
+  return (long)roundf(sec * 1000000.);
+}
 
 /** Get difference between two time structs in microseconds.
  * The calculated time is t = a - b
