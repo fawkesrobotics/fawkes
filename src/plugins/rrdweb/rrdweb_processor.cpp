@@ -23,6 +23,7 @@
 #include "rrdweb_processor.h"
 #include <plugins/rrd/aspect/rrd_manager.h>
 #include <core/threading/scoped_rwlock.h>
+#include <core/exception.h>
 #include <webview/page_reply.h>
 #include <webview/file_reply.h>
 #include <webview/error_reply.h>
@@ -82,7 +83,11 @@ RRDWebRequestProcessor::process_request(const char *url,
 
       for (g = graphs.begin(); g != graphs.end(); ++g) {
 	if (strcmp((*g)->get_rrd_def()->get_name(), graph_name.c_str()) == 0) {
-	  return new DynamicFileWebReply((*g)->get_filename());
+          try {
+	    return new DynamicFileWebReply((*g)->get_filename());
+	  } catch (Exception &e) {
+            return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, e.what());
+	  }
 	}
       }
       return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "Graph not found");
