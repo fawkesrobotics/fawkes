@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
+#include <cstring>
 #include <rrd.h>
 
 using namespace fawkes;

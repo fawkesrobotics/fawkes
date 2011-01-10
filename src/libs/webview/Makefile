@@ -22,8 +22,18 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
   LIBS_libfawkeswebview = stdc++ fawkescore fawkesutils
   OBJS_libfawkeswebview = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
   LIBS_all  = $(LIBDIR)/libfawkeswebview.so
+else
+  WARN_TARGETS += warning_libmicrohttpd
 endif
 OBJS_all = $(OBJS_libfawkeswebview)
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_libmicrohttpd
+warning_libmicrohttpd:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Webview Library$(TNORMAL) (libmicrohttpd[-devel] not installed)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
 

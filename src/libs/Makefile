@@ -30,7 +30,7 @@ blackboard: core utils interface netcomm
 netcomm: core utils
 config: core netcomm utils
 plugin: core netcomm utils config
-aspect: core utils blackboard netcomm config plugin
+aspect: core utils blackboard netcomm config plugin webview
 geometry: core
 worldinfo_utils: core netcomm geometry
 lua: core utils blackboard config

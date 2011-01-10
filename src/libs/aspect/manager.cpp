@@ -37,7 +37,9 @@
 #include <aspect/inifins/time_source.h>
 #include <aspect/inifins/vision_master.h>
 #include <aspect/inifins/vision.h>
-#include <aspect/inifins/webview.h>
+#ifdef HAVE_WEBVIEW
+#  include <aspect/inifins/webview.h>
+#endif
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -229,7 +231,9 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   TimeSourceAspectIniFin *ts_aif = new TimeSourceAspectIniFin(clock);
   VisionMasterAspectIniFin *vm_aif = new VisionMasterAspectIniFin();
   VisionAspectIniFin *vis_aif = new VisionAspectIniFin(vm_aif);
+#ifdef HAVE_WEBVIEW
   WebviewAspectIniFin *web_aif = new WebviewAspectIniFin();
+#endif
 
   __default_inifins[prov_aif->get_aspect_name()] = prov_aif;
   __default_inifins[bb_aif->get_aspect_name()] = bb_aif;
@@ -246,7 +250,9 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   __default_inifins[ts_aif->get_aspect_name()] = ts_aif;
   __default_inifins[vm_aif->get_aspect_name()] = vm_aif;
   __default_inifins[vis_aif->get_aspect_name()] = vis_aif;
+#ifdef HAVE_WEBVIEW
   __default_inifins[web_aif->get_aspect_name()] = web_aif;
+#endif
 
   std::map<std::string, AspectIniFin *>::iterator i;
   for (i = __default_inifins.begin(); i != __default_inifins.end(); ++i) {
