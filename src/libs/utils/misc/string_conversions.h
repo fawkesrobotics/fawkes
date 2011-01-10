@@ -37,6 +37,7 @@ class StringConversions
 
   static std::string to_string(unsigned int i);
   static std::string to_string(int i);
+  static std::string to_string(long int i);
   static std::string to_string(float f);
   static std::string to_string(double d);
   static std::string to_string(bool b);

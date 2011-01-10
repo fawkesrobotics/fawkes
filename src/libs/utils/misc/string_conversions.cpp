@@ -102,6 +102,24 @@ StringConversions::to_string(const int i)
 }
 
 
+/** Convert long int value to a string.
+ * @param i value to convert
+ * @return string representation of value.
+ */
+std::string
+StringConversions::to_string(const long int i)
+{
+  char *tmp;
+  std::string rv;
+  if (asprintf(&tmp, "%li", i) == -1) {
+    throw OutOfMemoryException("StringConversions::tostring(const long int): asprintf() failed");
+  }
+  rv = tmp;
+  free(tmp);
+  return rv;
+}
+
+
 /** Convert float value to a string.
  * @param f value to convert
  * @return string representation of value.
