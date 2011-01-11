@@ -19,7 +19,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 ifeq ($(HAVE_FESTIVAL),1)
   LDFLAGS += $(LDFLAGS_FESTIVAL)
   CFLAGS  += $(CFLAGS_FESTIVAL)
-  LIBS_festival = fawkescore fawkesutils fawkesaspects SpeechSynthInterface $(LIBS_FESTIVAL)
+  LIBS_festival = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
+		  SpeechSynthInterface $(LIBS_FESTIVAL)
   OBJS_festival = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
   PLUGINS_all = $(PLUGINDIR)/festival.so
 else

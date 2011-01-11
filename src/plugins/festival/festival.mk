@@ -28,7 +28,11 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/festival/festival.h),)
     CFLAGS_FESTIVAL = -I/usr/include/speech_tools
     LIBS_FESTIVAL   = Festival estbase estools eststring
   else
-    FESTIVAL_ERROR=Festival version too old ($(FESTIVAL_VERSION) < 1.96)
+    ifneq ($(FESTIVAL_BIN),)
+      FESTIVAL_ERROR=Festival version too old ($(FESTIVAL_VERSION) < 1.96)
+    else
+      FESTIVAL_ERROR=Festival binary not installed, cannot determine version
+    endif
   endif
 else
   FESTIVAL_ERROR=festival[-devel] not installed
