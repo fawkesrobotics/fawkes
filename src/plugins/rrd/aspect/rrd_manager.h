@@ -40,6 +40,9 @@ namespace fawkes {
 class RRDManager
 {
  public:
+  /** Virtual empty destructor. */
+  virtual ~RRDManager() {}
+
   /** Add RRD.
    * Add an RRD which can then be fed with data using add_data().
    * @param rrd_def RRD definition

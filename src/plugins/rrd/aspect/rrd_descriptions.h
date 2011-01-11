@@ -202,6 +202,7 @@ class RRDGraphDataDefinition
 class RRDGraphElement
 {
  public:
+  virtual ~RRDGraphElement() {}
   virtual const char *  to_string() const = 0;
 };
 
@@ -211,6 +212,9 @@ class RRDGraphGPrint : public RRDGraphElement
  public:
   RRDGraphGPrint(const char *def_name, RRDArchive::ConsolidationFunction cf,
 		 const char *format);
+  virtual ~RRDGraphGPrint();
+
+  RRDGraphGPrint &  operator=(const RRDGraphGPrint &g);
 
   virtual const char *  to_string() const;
 
@@ -234,6 +238,9 @@ class RRDGraphLine : public RRDGraphElement
  public:
   RRDGraphLine(const char *def_name, float width, const char *color,
 	       const char *legend, bool stacked);
+  virtual ~RRDGraphLine();
+
+  RRDGraphLine &  operator=(const RRDGraphLine &g);
 
   virtual const char *  to_string() const;
 
@@ -263,6 +270,9 @@ class RRDGraphArea : public RRDGraphElement
  public:
   RRDGraphArea(const char *def_name, const char *color,
 	       const char *legend, bool stacked);
+  virtual ~RRDGraphArea();
+
+  RRDGraphArea &  operator=(const RRDGraphArea &g);
 
   virtual const char *  to_string() const;
 
@@ -279,7 +289,7 @@ class RRDGraphArea : public RRDGraphElement
   const char *__def_name;
   const char *__color;
   const char *__legend;
-  const bool  __stacked;
+  bool        __stacked;
 
   mutable char *__string;
 };

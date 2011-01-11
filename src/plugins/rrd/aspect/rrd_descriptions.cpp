@@ -531,6 +531,28 @@ RRDGraphGPrint::RRDGraphGPrint(const char *def_name,
 }
 
 
+/** Destructor. */
+RRDGraphGPrint::~RRDGraphGPrint()
+{
+  if (__string) free(__string);
+}
+
+/** Assignment operator.
+ * @param g matching graph element to assign
+ * @return reference to this instance
+ */
+RRDGraphGPrint &
+RRDGraphGPrint::operator=(const RRDGraphGPrint &g)
+{
+  __string   = NULL;
+  __def_name = g.__def_name;
+  __cf       = g.__cf;
+  __format   = g.__format;
+
+  return *this;
+}
+
+
 const char *
 RRDGraphGPrint::to_string() const
 {
@@ -565,6 +587,31 @@ RRDGraphLine::RRDGraphLine(const char *def_name, float width, const char *color,
 }
 
 
+/** Destructor. */
+RRDGraphLine::~RRDGraphLine()
+{
+  if (__string) free(__string);
+}
+
+
+/** Assignment operator.
+ * @param g matching graph element to assign
+ * @return reference to this instance
+ */
+RRDGraphLine &
+RRDGraphLine::operator=(const RRDGraphLine &g)
+{
+  __string   = NULL;
+  __def_name = g.__def_name;
+  __width    = g.__width;
+  __color    = g.__color;
+  __legend   = g.__legend;
+  __stacked  = g.__stacked;
+
+  return *this;
+}
+
+
 const char *
 RRDGraphLine::to_string() const
 {
@@ -595,6 +642,30 @@ RRDGraphArea::RRDGraphArea(const char *def_name,const char *color,
   : __def_name(def_name), __color(color), __legend(legend), __stacked(stacked),
     __string(NULL)
 {
+}
+
+
+/** Destructor. */
+RRDGraphArea::~RRDGraphArea()
+{
+  if (__string) free(__string);
+}
+
+
+/** Assignment operator.
+ * @param g matching graph element to assign
+ * @return reference to this instance
+ */
+RRDGraphArea &
+RRDGraphArea::operator=(const RRDGraphArea &g)
+{
+  __string   = NULL;
+  __def_name = g.__def_name;
+  __color    = g.__color;
+  __legend   = g.__legend;
+  __stacked  = g.__stacked;
+
+  return *this;
 }
 
 
