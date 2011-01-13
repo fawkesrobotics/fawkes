@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-#include "models/color/thresholds.h"
+#include <fvmodels/color/thresholds.h>
 
 using namespace std;
 
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ColorModelThresholds <models/color/thresholds.h>
+/** @class ColorModelThresholds <fvmodels/color/thresholds.h>
  * Really simple thresholds-based model with some hard-coded thresholds. Was
  * just for initial development of color models.
  */

@@ -21,47 +21,47 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/factory.h>
+#include <fvcams/factory.h>
 #include <fvutils/system/camargp.h>
 
 #ifdef HAVE_FIREWIRE_CAM
-#include <cams/firewire.h>
+#include <fvcams/firewire.h>
 #endif
 #ifdef HAVE_LEUTRON_CAM
-#include <cams/leutron.h>
+#include <fvcams/leutron.h>
 #endif
 #ifdef HAVE_FILELOADER_CAM
-#include <cams/fileloader.h>
+#include <fvcams/fileloader.h>
 #endif
 #ifdef HAVE_SHMEM_CAM
-#include <cams/shmem.h>
+#include <fvcams/shmem.h>
 #endif
 #ifdef HAVE_NETWORK_CAM
-#include <cams/net.h>
+#include <fvcams/net.h>
 #endif
 #ifdef HAVE_V4L_CAM
-#include <cams/v4l.h>
+#include <fvcams/v4l.h>
 #endif
 #ifdef HAVE_V4L1_CAM
-#include <cams/v4l1.h>
+#include <fvcams/v4l1.h>
 #endif
 #ifdef HAVE_V4L2_CAM
-#include <cams/v4l2.h>
+#include <fvcams/v4l2.h>
 #endif
 #ifdef HAVE_NAO_CAM
-#include <cams/nao.h>
+#include <fvcams/nao.h>
 #endif
 #ifdef HAVE_BUMBLEBEE2_CAM
-#include <cams/bumblebee2.h>
+#include <fvcams/bumblebee2.h>
 #endif
 #ifdef HAVE_SWISSRANGER_CAM
-#include <cams/swissranger.h>
+#include <fvcams/swissranger.h>
 #endif
 #ifdef HAVE_PIKE_CAM
-#include <cams/pike.h>
+#include <fvcams/pike.h>
 #endif
 #ifdef HAVE_KINECT_CAM
-#include <cams/kinect.h>
+#include <fvcams/kinect.h>
 #endif
 
 using namespace std;
@@ -71,7 +71,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraFactory <cams/factory.h>
+/** @class CameraFactory <fvcams/factory.h>
  * Camera factory.
  * This camera factory provides access to all cameras in a unified way. You just
  * supply a camera argument string and depending on the camera ID and compile-time

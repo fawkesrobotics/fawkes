@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/roidraw.h>
+#include <fvfilters/roidraw.h>
 #include <fvutils/color/color_object_map.h>
 #include <fvutils/draw/drawer.h>
 
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterROIDraw <filters/roidraw.h>
+/** @class FilterROIDraw <fvfilters/roidraw.h>
  * ROI Drawing filter.
  * This filter visually marks the given region of interest.
  * @author Tim Niemueller

@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_FILTER_MORPHOLOGY_EROSION_H_
 #define __FIREVISION_FILTER_MORPHOLOGY_EROSION_H_
 
-#include <filters/morphology/morphologicalfilter.h>
+#include <fvfilters/morphology/morphologicalfilter.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_SHMEM_H_
 #define __FIREVISION_CAMS_SHMEM_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/ipc/shm_image.h>
 

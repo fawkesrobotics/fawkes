@@ -22,7 +22,7 @@
  */
 
 #include <core/exception.h>
-#include <models/scanlines/beams.h>
+#include <fvmodels/scanlines/beams.h>
 
 #include <cmath>
 
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ScanlineBeams <models/scanlines/beams.h>
+/** @class ScanlineBeams <fvmodels/scanlines/beams.h>
  * Raytraced beams scanline model.
  * This model uses a defined number of beams shot from the bottom of the image
  * towards the top using Bresenham. With this you can have kind of a radar-like

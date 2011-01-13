@@ -28,7 +28,7 @@
 #  error SIFT not available, you may not use the SiftClassifier
 #endif
 
-#include <classifiers/classifier.h>
+#include <fvclassifiers/classifier.h>
 
 //#ifdef FEAT_TIMETRACKER
 namespace fawkes {

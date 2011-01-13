@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <classifiers/faces.h>
+#include <fvclassifiers/faces.h>
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -36,7 +36,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FacesClassifier <classifiers/faces.h>
+/** @class FacesClassifier <fvclassifiers/faces.h>
  * Faces classifier.
  * This class provides a classifier that uses OpenCV to detect images in the given
  * image. The faces are reported back as regions of interest. Each ROI is considered

@@ -25,8 +25,8 @@
 #ifndef __FIREVISION_FILTER_HV_SEARCH_H_
 #define __FIREVISION_FILTER_HV_SEARCH_H_
 
-#include <filters/filter.h>
-#include <models/color/colormodel.h>
+#include <fvfilters/filter.h>
+#include <fvmodels/color/colormodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

@@ -22,14 +22,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/control.h>
+#include <fvcams/control/control.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class CameraControl <cams/control/control.h>
+/** @class CameraControl <fvcams/control/control.h>
  * Camera control interface base class.
  * Some cameras feature an actuator to allow for panning and tilting the
  * camera or support additional features like setting the focus, using

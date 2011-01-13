@@ -38,7 +38,7 @@ namespace firevision {
 }
 #endif
 
-/** @class AboveHorizonException <models/camera/projective_cam.h>
+/** @class AboveHorizonException <fvmodels/camera/projective_cam.h>
  * The point that should be calculated lies above the horizon
  * @ingroup Exceptions
  */
@@ -65,7 +65,7 @@ AboveHorizonException::get_img_pt() const
 
 
 
-/** @class ProjectiveCam projective_cam.h <models/camera/projective_cam.h>
+/** @class ProjectiveCam projective_cam.h <fvmodels/camera/projective_cam.h>
  * Abstract class for projective cameras
  * @author Christof Rath
  */

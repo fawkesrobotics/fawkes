@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_FILTER_ROIDRAW_H_
 #define __FIREVISION_FILTER_ROIDRAW_H_
 
-#include <filters/filter.h>
+#include <fvfilters/filter.h>
 #include <list>
 
 namespace firevision {

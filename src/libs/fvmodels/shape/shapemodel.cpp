@@ -23,14 +23,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/shape/shapemodel.h>
+#include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class Shape <models/shape/shapemodel.h>
+/** @class Shape <fvmodels/shape/shapemodel.h>
  * Shape interface.
  * Generic API for accessing using shapes.
  *
@@ -51,7 +51,7 @@ Shape::~Shape()
 }
 
 
-/** @class ShapeModel <models/shape/shapemodel.h>
+/** @class ShapeModel <fvmodels/shape/shapemodel.h>
  * Shape model interface.
  *
  *

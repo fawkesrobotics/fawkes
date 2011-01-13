@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/camera/ccd_cam.h>
+#include <fvmodels/camera/ccd_cam.h>
 
 using namespace fawkes;
 
@@ -29,7 +29,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CCDCam <models/camera/ccd_cam.h>
+/** @class CCDCam <fvmodels/camera/ccd_cam.h>
  * A class for a ccd camera model.
  * @author Christof Rath
  */

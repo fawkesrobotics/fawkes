@@ -24,9 +24,9 @@
 #ifndef __FIREVISION_CONTROL_SONYEVID100P_H_
 #define __FIREVISION_CONTROL_SONYEVID100P_H_
 
-#include <cams/control/pantilt.h>
-#include <cams/control/zoom.h>
-#include <cams/control/effect.h>
+#include <fvcams/control/pantilt.h>
+#include <fvcams/control/zoom.h>
+#include <fvcams/control/effect.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

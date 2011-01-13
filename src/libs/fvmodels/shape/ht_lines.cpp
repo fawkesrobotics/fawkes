@@ -25,7 +25,7 @@
 
 #include <cmath>
 #include <sys/time.h>
-#include <models/shape/ht_lines.h>
+#include <fvmodels/shape/ht_lines.h>
 #include <utils/math/angle.h>
 
 using namespace std;
@@ -38,7 +38,7 @@ namespace firevision {
 
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 
-/** @class HtLinesModel <models/shape/ht_lines.h>
+/** @class HtLinesModel <fvmodels/shape/ht_lines.h>
  * Hough-Transform line matcher.
  */
 

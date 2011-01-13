@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_FILTERS_HIPASS_H_
 #define __FIREVISION_FILTERS_HIPASS_H_
 
-#include <filters/filter.h>
+#include <fvfilters/filter.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

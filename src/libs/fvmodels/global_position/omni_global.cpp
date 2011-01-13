@@ -22,15 +22,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/global_position/omni_global.h>
-#include <models/mirror/mirrormodel.h>
+#include <fvmodels/global_position/omni_global.h>
+#include <fvmodels/mirror/mirrormodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class OmniGlobal <models/global_position/omni_global.h>
+/** @class OmniGlobal <fvmodels/global_position/omni_global.h>
  * Omni vision global position model.
  */
 

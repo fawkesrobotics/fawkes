@@ -30,8 +30,8 @@
 #include <climits>
 #include <cstring>
 
-#include <cams/firewire.h>
-#include <cams/cam_exceptions.h>
+#include <fvcams/firewire.h>
+#include <fvcams/cam_exceptions.h>
 #include <fvutils/system/camargp.h>
 
 #include <dc1394/utils.h>
@@ -44,7 +44,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FirewireCamera <cams/firewire.h>
+/** @class FirewireCamera <fvcams/firewire.h>
  * Firewire camera.
  * This camera implementation allows for access to IEEE1394 cameras via
  * libdc1394.

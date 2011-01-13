@@ -23,10 +23,10 @@
 
 #include <core/exception.h>
 
-#include <filters/morphology/geodesic_erosion.h>
-#include <filters/morphology/segenerator.h>
-#include <filters/morphology/erosion.h>
-#include <filters/max.h>
+#include <fvfilters/morphology/geodesic_erosion.h>
+#include <fvfilters/morphology/segenerator.h>
+#include <fvfilters/morphology/erosion.h>
+#include <fvfilters/max.h>
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/statistical/imagediff.h>
@@ -51,7 +51,7 @@ const unsigned int FilterGeodesicErosion::MASK   = 1;
     throw e;								\
   }
 
-/** @class FilterGeodesicErosion <filters/morphology/geodesic_erosion.h>
+/** @class FilterGeodesicErosion <fvfilters/morphology/geodesic_erosion.h>
  * Morphological geodesic erosion.
  * @author Tim Niemueller
  */

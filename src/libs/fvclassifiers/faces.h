@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CLASSIFIERS_FACES_H_
 #define __FIREVISION_CLASSIFIERS_FACES_H_
 
-#include <classifiers/classifier.h>
+#include <fvclassifiers/classifier.h>
 
 struct CvHaarClassifierCascade;
 struct CvMemStorage;

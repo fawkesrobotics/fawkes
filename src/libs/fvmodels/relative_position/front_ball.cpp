@@ -26,7 +26,7 @@
 
 #include <cmath>
 #include <iostream>
-#include <models/relative_position/front_ball.h>
+#include <fvmodels/relative_position/front_ball.h>
 #include <utils/math/angle.h>
 
 using namespace std;
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FrontBallRelativePos <models/relative_position/front_ball.h>
+/** @class FrontBallRelativePos <fvmodels/relative_position/front_ball.h>
  * Relative ball position model for front vision.
  */
 

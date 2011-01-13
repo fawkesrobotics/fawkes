@@ -30,8 +30,8 @@
 #include <cmath>
 
 #include <fvutils/base/types.h>
-#include <models/shape/line.h>
-#include <models/shape/accumulators/ht_accum.h>
+#include <fvmodels/shape/line.h>
+#include <fvmodels/shape/accumulators/ht_accum.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

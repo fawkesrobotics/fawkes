@@ -23,10 +23,10 @@
 
 #include <core/exception.h>
 
-#include <filters/morphology/tophat_closing.h>
-#include <filters/morphology/segenerator.h>
-#include <filters/morphology/closing.h>
-#include <filters/difference.h>
+#include <fvfilters/morphology/tophat_closing.h>
+#include <fvfilters/morphology/segenerator.h>
+#include <fvfilters/morphology/closing.h>
+#include <fvfilters/difference.h>
 
 #include <cstddef>
 
@@ -47,7 +47,7 @@ const unsigned int FilterTophatClosing::FILTERIMAGE  = 1;
     throw e;								\
   }
 
-/** @class FilterTophatClosing <filters/morphology/tophat_closing.h>
+/** @class FilterTophatClosing <fvfilters/morphology/tophat_closing.h>
  * Morphological tophat closing.
  * @author Tim Niemueller
  */

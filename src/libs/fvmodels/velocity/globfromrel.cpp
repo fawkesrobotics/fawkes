@@ -24,7 +24,7 @@
 
 #include <core/exception.h>
 #include <cmath>
-#include <models/velocity/globfromrel.h>
+#include <fvmodels/velocity/globfromrel.h>
 #include <utils/time/time.h>
 
 // #include "utils/system/console_colors.h"
@@ -38,7 +38,7 @@ namespace firevision {
 }
 #endif
 
-/** @class VelocityGlobalFromRelative <models/velocity/globfromrel.h>
+/** @class VelocityGlobalFromRelative <fvmodels/velocity/globfromrel.h>
  * Global velocity from relative velocities.
  */
 

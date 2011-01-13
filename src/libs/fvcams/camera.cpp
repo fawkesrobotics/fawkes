@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Camera <cams/camera.h>
+/** @class Camera <fvcams/camera.h>
  * Camera interface for image aquiring devices in FireVision.
  *
  * In general cameras shall initiate a continuous flow of images and shall

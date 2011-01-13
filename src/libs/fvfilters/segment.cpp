@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/color/colormodel.h>
-#include <filters/segment.h>
+#include <fvmodels/color/colormodel.h>
+#include <fvfilters/segment.h>
 
 #include <fvutils/color/yuv.h>
 #include <cstddef>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterSegment <filters/segment.h>
+/** @class FilterSegment <fvfilters/segment.h>
  * Segmentation filter.
  * Visually marks pixels of a given color and makes the segmentation visible.
  * The pixels are marked with bright colors.

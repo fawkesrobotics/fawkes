@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/morphology/segenerator.h>
+#include <fvfilters/morphology/segenerator.h>
 
 #include <utils/math/angle.h>
 
@@ -39,7 +39,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SEGenerator <filters/morphology/segenerator.h>
+/** @class SEGenerator <fvfilters/morphology/segenerator.h>
  * Basic generators for structuring elements for morphological filters.
  * @author Tim Niemueller
  */

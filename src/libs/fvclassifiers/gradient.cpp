@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class GradientClassifier <classifiers/gradient.h>
+/** @class GradientClassifier <fvclassifiers/gradient.h>
  * Gradient classifier.
  * Uses the difference of the current and the last value.
  */

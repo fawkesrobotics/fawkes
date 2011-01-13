@@ -24,7 +24,7 @@
 #include <iostream>
 #include <vector>
 
-#include <classifiers/siftpp.h>
+#include <fvclassifiers/siftpp.h>
 
 //#ifdef SIFTPP_TIMETRACKER
 #include <utils/time/clock.h>
@@ -47,7 +47,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SiftppClassifier <classifiers/siftpp.h>
+/** @class SiftppClassifier <fvclassifiers/siftpp.h>
  * SIFTPP classifier.
  *
  * This class provides a classifier that uses SIFTPP to detect objects in a given

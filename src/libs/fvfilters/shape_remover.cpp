@@ -21,17 +21,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/shape_remover.h>
+#include <fvfilters/shape_remover.h>
 
 
-#include <models/shape/shapemodel.h>
+#include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class FilterShapeRemover <filters/shape_remover.h>
+/** @class FilterShapeRemover <fvfilters/shape_remover.h>
  * Remove shapes from an image.
  */
 

@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/shape/rht_circle.h>
+#include <fvmodels/shape/rht_circle.h>
 
 #include <cmath>
 #include <sys/time.h>
@@ -47,7 +47,7 @@ namespace firevision {
 const float RhtCircleModel::RHT_MIN_RADIUS = 40.0;
 const float RhtCircleModel::RHT_MAX_RADIUS = 500.0;
 
-/** @class RhtCircleModel <models/shape/rht_circle.h>
+/** @class RhtCircleModel <fvmodels/shape/rht_circle.h>
  * Randomized Hough-Transform circle model.
  */
 

@@ -89,6 +89,7 @@ TMPDIR        = /tmp
 PLUGINDIR     = $(abspath $(TOP_BASEDIR)/plugins)
 RESDIR        = $(abspath $(TOP_BASEDIR)/res)
 LIBSRCDIR     = $(abspath $(FAWKES_BASEDIR)/src/libs)
+EXTLIBDIR     = $(abspath $(LIBSRCDIR)/extlib)
 IFACEDIR      = $(abspath $(TOP_BASEDIR)/lib/interfaces)
 IFACESRCDIR   = $(abspath $(TOP_BASEDIR)/src/interfaces)
 LOGDIR        = $(abspath $(TOP_BASEDIR)/log)

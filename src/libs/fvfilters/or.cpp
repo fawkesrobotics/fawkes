@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterOr <filters/or.h>
+/** @class FilterOr <fvfilters/or.h>
  * Or filter.
  * @author Tim Niemueller
  */

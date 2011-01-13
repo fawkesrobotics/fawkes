@@ -24,7 +24,7 @@
 
 #include <core/exception.h>
 
-#include <models/mirror/bulb.h>
+#include <fvmodels/mirror/bulb.h>
 #include <utils/system/console_colors.h>
 #include <fvutils/ipc/shm_lut.h>
 
@@ -46,7 +46,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Bulb <models/mirror/bulb.h>
+/** @class Bulb <fvmodels/mirror/bulb.h>
  * Bulb mirror lookup table.
  * This mirror model is based on a LUT that will map image pixels to radial
  * coordinates in relative radial coordinates.

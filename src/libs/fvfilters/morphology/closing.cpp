@@ -21,10 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/morphology/closing.h>
+#include <fvfilters/morphology/closing.h>
 
-#include <filters/morphology/dilation.h>
-#include <filters/morphology/erosion.h>
+#include <fvfilters/morphology/dilation.h>
+#include <fvfilters/morphology/erosion.h>
 
 #include <cstddef>
 
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterClosing <filters/morphology/closing.h>
+/** @class FilterClosing <fvfilters/morphology/closing.h>
  * Morphological closing.
  *
  * @author Tim Niemueller

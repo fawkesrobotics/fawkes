@@ -27,8 +27,8 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 
-#include <cams/camera.h>
-#include <cams/cam_exceptions.h>
+#include <fvcams/camera.h>
+#include <fvcams/cam_exceptions.h>
 
 #include <cstddef>
 

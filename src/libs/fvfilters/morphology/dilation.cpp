@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/morphology/dilation.h>
+#include <fvfilters/morphology/dilation.h>
 
 #include <fvutils/color/yuv.h>
 #include <core/exception.h>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterDilation <filters/morphology/dilation.h>
+/** @class FilterDilation <fvfilters/morphology/dilation.h>
  * Morphological dilation.
  *
  * @author Tim Niemueller

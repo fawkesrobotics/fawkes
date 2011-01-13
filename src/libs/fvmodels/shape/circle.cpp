@@ -23,7 +23,7 @@
  */
 
 #include <cmath>
-#include <models/shape/circle.h>
+#include <fvmodels/shape/circle.h>
 
 using namespace std;
 using namespace fawkes;
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Circle <models/shape/circle.h>
+/** @class Circle <fvmodels/shape/circle.h>
  * Circle shape.
  */
 

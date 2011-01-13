@@ -22,9 +22,9 @@
 #ifndef __FIREVISION_MODELS_RELATIVE_POSITION_BACK_PROJECTION_H_
 #define __FIREVISION_MODELS_RELATIVE_POSITION_BACK_PROJECTION_H_
 
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
-#include <models/camera/projective_cam.h>
+#include <fvmodels/camera/projective_cam.h>
 #include <utils/math/types.h>
 
 namespace firevision {

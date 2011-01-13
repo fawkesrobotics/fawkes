@@ -26,7 +26,7 @@
 #ifndef __FIREVISION_MODELS_GLOBAL_POSITION_GLOBFROMREL_H_
 #define __FIREVISION_MODELS_GLOBAL_POSITION_GLOBFROMREL_H_
 
-#include <models/global_position/globalpositionmodel.h>
+#include <fvmodels/global_position/globalpositionmodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

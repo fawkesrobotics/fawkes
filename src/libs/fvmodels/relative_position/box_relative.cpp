@@ -24,7 +24,7 @@
  */
 
 #include <cmath>
-#include <models/relative_position/box_relative.h>
+#include <fvmodels/relative_position/box_relative.h>
 #include <utils/math/angle.h>
 
 #include <iostream>
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class BoxRelative <models/relative_position/box_relative.h>
+/** @class BoxRelative <fvmodels/relative_position/box_relative.h>
  * Relative (beer) box position model.
  * Model used in Bremen to get world champions :-)
  */

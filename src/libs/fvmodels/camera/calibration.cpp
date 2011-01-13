@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/camera/calibration.h>
+#include <fvmodels/camera/calibration.h>
 #include <iostream>
 #include <core/exceptions/software.h>
 
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Calibration <models/camera/calibration.h>
+/** @class Calibration <fvmodels/camera/calibration.h>
  * A Calibration matrix for a finite camera.
  *
  * @author Christof Rath

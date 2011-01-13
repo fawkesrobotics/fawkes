@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <classifiers/simple.h>
+#include <fvclassifiers/simple.h>
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/color_object_map.h>
 
-#include <models/scanlines/scanlinemodel.h>
-#include <models/color/colormodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
+#include <fvmodels/color/colormodel.h>
 
 #include <core/exceptions/software.h>
 
@@ -39,7 +39,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SimpleColorClassifier <classifiers/simple.h>
+/** @class SimpleColorClassifier <fvclassifiers/simple.h>
  * Simple classifier.
  */
 

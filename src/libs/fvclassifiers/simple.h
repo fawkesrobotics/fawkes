@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CLASSIFIERS_SIMPLE_H_
 #define __FIREVISION_CLASSIFIERS_SIMPLE_H_
 
-#include <classifiers/classifier.h>
+#include <fvclassifiers/classifier.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

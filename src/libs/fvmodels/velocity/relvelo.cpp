@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/velocity/relvelo.h>
+#include <fvmodels/velocity/relvelo.h>
 
 #include <utils/system/console_colors.h>
 #include <utils/time/time.h>
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class VelocityFromRelative <models/velocity/relvelo.h>
+/** @class VelocityFromRelative <fvmodels/velocity/relvelo.h>
  * Calculate velocity from relative positions.
  */
 

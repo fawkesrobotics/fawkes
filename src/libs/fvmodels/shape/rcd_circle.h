@@ -31,7 +31,7 @@
 
 #include <utils/math/types.h>
 #include <fvutils/base/types.h>
-#include <models/shape/circle.h>
+#include <fvmodels/shape/circle.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

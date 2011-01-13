@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_V4L_H_
 #define __FIREVISION_CAMS_V4L_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 //#include <sys/types.h>
 
 namespace firevision {

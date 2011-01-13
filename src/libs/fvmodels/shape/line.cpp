@@ -24,7 +24,7 @@
  */
 
 #include <utils/math/angle.h>
-#include <models/shape/line.h>
+#include <fvmodels/shape/line.h>
 
 // #include <utils/geometry/line.h>
 // #include <utils/geometry/point.h>
@@ -36,7 +36,7 @@ namespace firevision {
 }
 #endif
 
-/** @class LineShape <models/shape/line.h>
+/** @class LineShape <fvmodels/shape/line.h>
  * Line shape.
  */
 

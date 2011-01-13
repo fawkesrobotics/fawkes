@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/scanlines/star.h>
+#include <fvmodels/scanlines/star.h>
 #include <fvutils/color/yuv.h>
 #include <utils/math/angle.h>
 
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ScanlineStar <models/scanlines/star.h>
+/** @class ScanlineStar <fvmodels/scanlines/star.h>
  * Star-like arranged scanline points.
  *
  * @author Daniel Beck

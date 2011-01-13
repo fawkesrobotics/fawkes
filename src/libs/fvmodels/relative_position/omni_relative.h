@@ -27,8 +27,8 @@
 #ifndef __FIREVISION_MODELS_RELATIVE_POSITION_OMNI_RELATIVE_H_
 #define __FIREVISION_MODELS_RELATIVE_POSITION_OMNI_RELATIVE_H_
 
-#include <models/relative_position/relativepositionmodel.h>
-#include <models/mirror/mirrormodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
+#include <fvmodels/mirror/mirrormodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 

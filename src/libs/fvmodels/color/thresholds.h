@@ -25,7 +25,7 @@
 #ifndef __FIREVISION_COLORMODEL_THRESHOLDS_H_
 #define __FIREVISION_COLORMODEL_THRESHOLDS_H_
 
-#include <models/color/colormodel.h>
+#include <fvmodels/color/colormodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

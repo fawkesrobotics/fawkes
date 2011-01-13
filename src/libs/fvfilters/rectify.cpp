@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/rectify.h>
+#include <fvfilters/rectify.h>
 
 #include <core/exceptions/software.h>
 
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterRectify <filters/rectify.h>
+/** @class FilterRectify <fvfilters/rectify.h>
  * Rectify image.
  * This filter can be used to use a rectification information block to rectify
  * the given image. It has special support for RectificationLutInfoBlocks by using the

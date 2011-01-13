@@ -23,14 +23,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/dummy.h>
+#include <fvcams/control/dummy.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class DummyCameraControl <cams/control/dummy.h>
+/** @class DummyCameraControl <fvcams/control/dummy.h>
  * Dummy camera control.
  * This control supports every control type, but the operations are NOOPs.
  * This is useful to instantiate the dummy control to avoid NULL checks.

@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_MODELS_SCANLINES_STAR_H_
 #define __FIREVISION_MODELS_SCANLINES_STAR_H_
 
-#include <models/scanlines/scanlinemodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
 #include <vector>
 #include <map>
 

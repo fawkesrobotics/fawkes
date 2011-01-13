@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
                                                                                 
-#include <models/shape/accumulators/fit_accum.h>
+#include <fvmodels/shape/accumulators/fit_accum.h>
 
-#include <models/shape/circle.h>
+#include <fvmodels/shape/circle.h>
 #include <cmath>
 
 using namespace fawkes;
@@ -35,7 +35,7 @@ namespace firevision {
 
 const float FitAccum::TOO_SMALL_DELTA = 1.0e-3f;
 
-/** @class FitAccum <models/shape/accumulators/fit_accum.h>
+/** @class FitAccum <fvmodels/shape/accumulators/fit_accum.h>
  * FIT Accumulator.
  */
 

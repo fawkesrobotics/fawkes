@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/max.h>
+#include <fvfilters/max.h>
 
 #include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterMax <filters/max.h>
+/** @class FilterMax <fvfilters/max.h>
  * Maximum filter.
  * @author Tim Niemueller
  */

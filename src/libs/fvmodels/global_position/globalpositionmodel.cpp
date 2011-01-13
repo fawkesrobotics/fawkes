@@ -22,14 +22,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/global_position/globalpositionmodel.h>
+#include <fvmodels/global_position/globalpositionmodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class GlobalPositionModel <models/global_position/globalpositionmodel.h>
+/** @class GlobalPositionModel <fvmodels/global_position/globalpositionmodel.h>
  * Global Position Model Interface.
  * This interface defines the API for global position models.
  *

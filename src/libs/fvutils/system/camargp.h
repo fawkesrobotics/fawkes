@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_FVUTILS_SYSTEM_CAMARGP_H_
 #define __FIREVISION_FVUTILS_SYSTEM_CAMARGP_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 #include <map>
 #include <string>

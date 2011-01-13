@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(FVSRCDIR)/fvconf.mk
+include $(BUILDSYSDIR)/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
@@ -47,7 +47,7 @@ FILTER_OUT   += adapters/iplimage.o
 else
 CFLAGS  += $(CFLAGS_OPENCV)
 LDFLAGS += $(LDFLAGS_OPENCV)
-  ifneq ($(wildcard $(FVBASEDIR)/fvutils/recognition/forest/forest.h),)
+  ifneq ($(wildcard $(LIBSRCDIR)/fvutils/recognition/forest/forest.h),)
     LDFLAGS += $(LDFLAGS_OPENCV_GUI)
   endif
 endif

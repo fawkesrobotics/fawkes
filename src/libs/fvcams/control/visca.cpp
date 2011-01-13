@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/visca.h>
+#include <fvcams/control/visca.h>
 
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ViscaControlException <cams/control/visca.h>
+/** @class ViscaControlException <fvcams/control/visca.h>
  * Visca exception.
  */
 
@@ -59,7 +59,7 @@ ViscaControlException::ViscaControlException(const char *msg, const int _errno)
 {
 }
 
-/** @class ViscaControlInquiryRunningException <cams/control/visca.h>
+/** @class ViscaControlInquiryRunningException <fvcams/control/visca.h>
  * Visca inquire running exception.
  */
 
@@ -82,7 +82,7 @@ const unsigned int ViscaControl::VISCA_WHITEBALANCE_ATW      = VISCA_WB_ATW;
 /** Manual white balance. */
 const unsigned int ViscaControl::VISCA_WHITEBALANCE_MANUAL   = VISCA_WB_MANUAL;
 
-/** @class ViscaControl <cams/control/visca.h>
+/** @class ViscaControl <fvcams/control/visca.h>
  * Visca control protocol implementation over a serial line.
  * @author Tim Niemueller
  */

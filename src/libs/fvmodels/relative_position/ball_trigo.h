@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_MODELS_RELATIVE_POSITION_BALL_TRIGO_H_
 #define __FIREVISION_MODELS_RELATIVE_POSITION_BALL_TRIGO_H_
 
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

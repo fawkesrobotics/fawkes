@@ -26,7 +26,7 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
-#include <cams/fileloader.h>
+#include <fvcams/fileloader.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/filetype.h>
 #include <fvutils/system/camargp.h>
@@ -54,7 +54,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FileLoader <cams/fileloader.h>
+/** @class FileLoader <fvcams/fileloader.h>
  * Load images from files.
  * The file loader tries to determine the image format of the given image using
  * the the file type utility. Currently it recognizes JPEG and FvRaw image files.

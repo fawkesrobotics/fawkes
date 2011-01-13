@@ -22,14 +22,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/focus.h>
+#include <fvcams/control/focus.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class CameraControlFocus <cams/control/focus.h>
+/** @class CameraControlFocus <fvcams/control/focus.h>
  * Camera focus control interface.
  * Some cameras feature an adjustable focus.
  *

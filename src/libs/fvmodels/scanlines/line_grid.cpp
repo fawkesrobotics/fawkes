@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/scanlines/line_grid.h>
+#include <fvmodels/scanlines/line_grid.h>
 
 #include <fvutils/base/roi.h>
 #include <fvutils/draw/drawer.h>
@@ -36,7 +36,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ScanlineLineGrid <models/scanlines/line_grid.h>
+/** @class ScanlineLineGrid <fvmodels/scanlines/line_grid.h>
  * Grid of scan lines.
  * A grid of scan lines (i.e. horizontal and/or vertical lines) instead of only
  * points on the grid crossings.

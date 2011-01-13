@@ -24,13 +24,13 @@
 #ifndef __FIREVISION_CAMS_V4L2_H_
 #define __FIREVISION_CAMS_V4L2_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
-#include <cams/control/color.h>
-#include <cams/control/image.h>
+#include <fvcams/control/color.h>
+#include <fvcams/control/image.h>
 
 /* Number of buffers to use for memory mapped IO */
 #define MMAP_NUM_BUFFERS 4;

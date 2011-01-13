@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/sharpen.h>
+#include <fvfilters/sharpen.h>
 
 #include <core/exception.h>
 
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterSharpen <filters/sharpen.h>
+/** @class FilterSharpen <fvfilters/sharpen.h>
  * Sharpen filter.
  * @author Tim Niemueller
  */

@@ -32,7 +32,7 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 
-#include <classifiers/classifier.h>
+#include <fvclassifiers/classifier.h>
 
 // FIXME replace with forward declarations
 #include <siftpp/sift.hpp>

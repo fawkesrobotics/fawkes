@@ -21,13 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <classifiers/border_shrinker.h>
+#include <fvclassifiers/border_shrinker.h>
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
-#include <models/scanlines/scanlinemodel.h>
-#include <models/color/colormodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
+#include <fvmodels/color/colormodel.h>
 
 #include <cstddef>
 
@@ -36,7 +36,7 @@ namespace firevision {
 }
 #endif
 
-/** @class BorderShrinker <classifiers/border_shrinker.h>
+/** @class BorderShrinker <fvclassifiers/border_shrinker.h>
  * Border shrinker.
  * This shrinker makes sure that a ROI does not get too close to the image
  * boundaries. This may be needed for some mask-based operations.

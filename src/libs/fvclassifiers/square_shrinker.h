@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CLASSIFIER_SQUARE_SHRINKER_H_
 #define __FIREVISION_CLASSIFIER_SQUARE_SHRINKER_H_
 
-#include <classifiers/shrinker.h>
+#include <fvclassifiers/shrinker.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/v4l2.h>
+#include <fvcams/v4l2.h>
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -73,7 +73,7 @@ class V4L2CameraData
 /// @endcond
 
 
-/** @class V4L2Camera <cams/v4l2.h>
+/** @class V4L2Camera <fvcams/v4l2.h>
  * Video4Linux 2 camera access implementation.
  *
  * @todo UPTR method

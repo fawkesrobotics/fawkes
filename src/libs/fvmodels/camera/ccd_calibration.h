@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CCD_CALIBRATION_H__
 #define __FIREVISION_CCD_CALIBRATION_H__
 
-#include <models/camera/calibration.h>
+#include <fvmodels/camera/calibration.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

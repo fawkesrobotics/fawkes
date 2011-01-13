@@ -21,10 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/morphology/opening.h>
+#include <fvfilters/morphology/opening.h>
 
-#include <filters/morphology/dilation.h>
-#include <filters/morphology/erosion.h>
+#include <fvfilters/morphology/dilation.h>
+#include <fvfilters/morphology/erosion.h>
 
 #include <cstddef>
 
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterOpening <filters/morphology/opening.h>
+/** @class FilterOpening <fvfilters/morphology/opening.h>
  * Morphological opening.
  *
  * @author Tim Niemueller

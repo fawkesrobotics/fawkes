@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/nao.h>
+#include <fvcams/nao.h>
 #include <fvutils/system/camargp.h>
 #include <utils/logging/liblogger.h>
 #include <core/exceptions/software.h>
@@ -97,7 +97,7 @@ namespace firevision {
 }
 #endif
 
-/** @class NaoCamera <cams/nao.h>
+/** @class NaoCamera <fvcams/nao.h>
  * Video4Linux 2 camera with Nao-specific extensions.
  *
  * @author Tobias Kellner

@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/median.h>
+#include <fvfilters/median.h>
 
 #include <core/exception.h>
 #include <ippi.h>
@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterMedian <filters/median.h>
+/** @class FilterMedian <fvfilters/median.h>
  * Median filter.
  * @author Tim Niemueller
  */

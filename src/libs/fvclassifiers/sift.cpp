@@ -24,7 +24,7 @@
 #include <iostream>
 #include <vector>
 
-#include <classifiers/sift.h>
+#include <fvclassifiers/sift.h>
 //#ifdef SIFT_TIMETRACKER
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
@@ -54,7 +54,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SiftClassifier <classifiers/sift.h>
+/** @class SiftClassifier <fvclassifiers/sift.h>
  * SIFT classifier.
  *
  * This class provides a classifier that uses OpenCV to detect objects in a given

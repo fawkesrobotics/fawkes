@@ -14,13 +14,27 @@
 #*****************************************************************************
 
 BASEDIR = ../..
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/fvconf.mk
 
 SUBDIRS = core utils interface netcomm blackboard config lua plugin aspect \
 	  geometry webview worldinfo_utils gui_utils \
+	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/rules.mk
+ifeq ($(HAVE_SIFT),1)
+  SUBDIRS += extlib/sift
+  CLASSIFIERS_DEPS += extlib/sift
+endif
+ifeq ($(HAVE_SURF),1)
+  SUBDIRS += extlib/surf
+  CLASSIFIERS_DEPS += extlib/surf
+endif
+ifeq ($(HAVE_SIFTPP),1)
+  SUBDIRS += extlib/siftpp
+  CLASSIFIERS_DEPS += extlib/siftpp
+endif
+
 
 # Explicit dependencies, this is needed to have make bail out if there is any
 # error. This is also necessary for working parallel build (i.e. for dual core)
@@ -38,4 +52,15 @@ interfaces: core interface
 gui_utils: core netcomm plugin
 naoutils: core utils
 webview: core utils
+fvutils: core utils netcomm
+fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
+fvfilters: fvmodels
+fvmodels: fvclassifiers geometry
+fvstereo: fvcams
+ifneq ($(CLASSIFIERS_DEPS),)
+fvclassifiers: $(CLASSIFIERS_DEPS)
+endif
+
+include $(BUILDSYSDIR)/rules.mk
+include $(LIBSRCDIR)/extlibs.mk
 

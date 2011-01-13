@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/filter.h>
+#include <fvfilters/filter.h>
 
 #include <core/exceptions/software.h>
 #include <cstdlib>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Filter <filters/filter.h>
+/** @class Filter <fvfilters/filter.h>
  * Filter interface.
  * This class defines the general interface that filters are used with.
  *

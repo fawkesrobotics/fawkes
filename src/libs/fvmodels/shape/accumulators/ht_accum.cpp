@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "models/shape/accumulators/ht_accum.h"
+#include <fvmodels/shape/accumulators/ht_accum.h>
 
 using namespace std;
 
@@ -38,23 +38,23 @@ RhtXNode* RhtXNode::reuse_tail = NULL;
 RhtYNode* RhtYNode::reuse_tail = NULL;
 RhtRNode* RhtRNode::reuse_tail = NULL;
 
-/** @class RhtAccNode <models/shape/accumulators/ht_accum.h>
+/** @class RhtAccNode <fvmodels/shape/accumulators/ht_accum.h>
  * Hough-Transform accumulator node.
  */
 
-/** @class RhtRNode <models/shape/accumulators/ht_accum.h>
+/** @class RhtRNode <fvmodels/shape/accumulators/ht_accum.h>
  * Hough-Transform accumulator node.
  */
 
-/** @class RhtXNode <models/shape/accumulators/ht_accum.h>
+/** @class RhtXNode <fvmodels/shape/accumulators/ht_accum.h>
  * Hough-Transform accumulator node.
  */
 
-/** @class RhtYNode <models/shape/accumulators/ht_accum.h>
+/** @class RhtYNode <fvmodels/shape/accumulators/ht_accum.h>
  * Hough-Transform accumulator node.
  */
 
-/** @class RhtAccumulator <models/shape/accumulators/ht_accum.h>
+/** @class RhtAccumulator <fvmodels/shape/accumulators/ht_accum.h>
  * Hough-Transform accumulator.
  */
 

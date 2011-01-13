@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_BUMBLEBEE2_H_
 #define __FIREVISION_CAMS_BUMBLEBEE2_H_
 
-#include <cams/firewire.h>
+#include <fvcams/firewire.h>
 #include <fvutils/color/bayer.h>
 
 namespace firevision {

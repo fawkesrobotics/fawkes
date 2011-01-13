@@ -24,8 +24,8 @@
 #ifndef __FIREVISION_MODELS_VELOCITY_GLOBAL_H_
 #define __FIREVISION_MODELS_VELOCITY_GLOBAL_H_
 
-#include <models/velocity/velocitymodel.h>
-#include <models/global_position/globalpositionmodel.h>
+#include <fvmodels/velocity/velocitymodel.h>
+#include <fvmodels/global_position/globalpositionmodel.h>
 
 #include <sys/time.h>
 #include <vector>

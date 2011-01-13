@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/sobel.h>
+#include <fvfilters/sobel.h>
 
 #include <core/exception.h>
 
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterSobel <filters/sobel.h>
+/** @class FilterSobel <fvfilters/sobel.h>
  * Sobel filter.
  * @author Tim Niemueller
  */

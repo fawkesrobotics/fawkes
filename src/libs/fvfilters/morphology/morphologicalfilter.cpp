@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/morphology/morphologicalfilter.h>
+#include <fvfilters/morphology/morphologicalfilter.h>
 
 #include <cstddef>
 
@@ -30,7 +30,7 @@ namespace firevision {
 }
 #endif
 
-/** @class MorphologicalFilter <filters/morphology/morphologicalfilter.h>
+/** @class MorphologicalFilter <fvfilters/morphology/morphologicalfilter.h>
  * Morphological filter interface.
  * This interface defines specific API details for morphological filters.
  *

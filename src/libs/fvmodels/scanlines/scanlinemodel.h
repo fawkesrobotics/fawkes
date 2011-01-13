@@ -41,7 +41,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ScanlineModel <models/scanlines/scanlinemodel.h>
+/** @class ScanlineModel <fvmodels/scanlines/scanlinemodel.h>
  * Scanline model interface.
  * This interface defines the API for the scanline model. A scanline model
  * determines a specific set of points in the image that should be used for image

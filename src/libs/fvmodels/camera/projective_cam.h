@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_PROJECTIVE_CAM_H__
 #define __FIREVISION_PROJECTIVE_CAM_H__
 
-#include <models/camera/calibration.h>
+#include <fvmodels/camera/calibration.h>
 #include <geometry/hom_transform.h>
 #include <fvutils/base/types.h>
 

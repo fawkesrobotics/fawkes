@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/compare.h>
+#include <fvfilters/compare.h>
 
 #include <fvutils/color/yuv.h>
 #include <cstddef>
@@ -36,7 +36,7 @@ const unsigned int FilterCompare::BACKGROUND = 0;
 /** Foreground image. */
 const unsigned int FilterCompare::FOREGROUND = 1;
 
-/** @class FilterCompare <filters/compare.h>
+/** @class FilterCompare <fvfilters/compare.h>
  * Comparison filter.
  */ 
 

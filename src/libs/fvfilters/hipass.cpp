@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/hipass.h>
+#include <fvfilters/hipass.h>
 #include <core/exception.h>
 
 #include <ippi.h>
@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterHipass <filters/hipass.h>
+/** @class FilterHipass <fvfilters/hipass.h>
  * Hipass filter.
  */
 

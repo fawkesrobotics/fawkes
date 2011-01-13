@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/color/colormodel.h>
+#include <fvmodels/color/colormodel.h>
 #include <fvutils/color/color_object_map.h>
 #include <cstring>
 
@@ -30,7 +30,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ColorModel <models/color/colormodel.h>
+/** @class ColorModel <fvmodels/color/colormodel.h>
  * Color model interface.
  * This interface defines the API for color models.
  *

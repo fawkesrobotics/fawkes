@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_MODELS_MIRROR_BULB_H_
 #define __FIREVISION_MODELS_MIRROR_BULB_H_
 
-#include <models/mirror/mirrormodel.h>
+#include <fvmodels/mirror/mirrormodel.h>
 
 #include <string>
 

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/net.h>
-#include <cams/cam_exceptions.h>
+#include <fvcams/net.h>
+#include <fvcams/cam_exceptions.h>
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -45,7 +45,7 @@ namespace firevision {
 }
 #endif
 
-/** @class NetworkCamera <cams/net.h>
+/** @class NetworkCamera <fvcams/net.h>
  * Network camera.
  * Retrieve images via network (FUSE).
  * @see FuseClient

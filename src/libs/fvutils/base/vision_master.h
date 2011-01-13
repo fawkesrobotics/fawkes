@@ -25,7 +25,7 @@
 #define __FIREVISION_FVUTILS_BASE_VISION_MASTER_H_
 
 #include <fvutils/color/colorspaces.h>
-#include <cams/control/control.h>
+#include <fvcams/control/control.h>
 #include <core/utils/refptr.h>
 #include <core/exceptions/software.h>
 

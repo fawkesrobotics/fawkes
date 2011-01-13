@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/scanlines/grid.h>
+#include <fvmodels/scanlines/grid.h>
 #include <core/exceptions/software.h>
 
 #include <cstring>
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ScanlineGrid <models/scanlines/grid.h>
+/** @class ScanlineGrid <fvmodels/scanlines/grid.h>
  * Scanline Grid.
  * A grid as scanline points. The crossings of the lines are the scanline
  * points.

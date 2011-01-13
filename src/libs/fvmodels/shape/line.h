@@ -30,7 +30,7 @@
 
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
-#include <models/shape/shapemodel.h>
+#include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

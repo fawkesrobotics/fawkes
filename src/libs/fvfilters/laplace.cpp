@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/laplace.h>
+#include <fvfilters/laplace.h>
 
 #include <core/exception.h>
 
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterLaplace <filters/laplace.h>
+/** @class FilterLaplace <fvfilters/laplace.h>
  * Laplacian filter.
  * Laplacian of Gaussian filter.
  * @author Tim Niemueller

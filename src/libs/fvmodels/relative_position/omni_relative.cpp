@@ -24,14 +24,14 @@
 
 #include <cmath>
 #include <iostream>
-#include <models/relative_position/omni_relative.h>
+#include <fvmodels/relative_position/omni_relative.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class OmniRelative <models/relative_position/omni_relative.h>
+/** @class OmniRelative <fvmodels/relative_position/omni_relative.h>
  * Omni vision relative position model.
  */
 

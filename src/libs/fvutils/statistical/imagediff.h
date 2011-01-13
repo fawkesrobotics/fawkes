@@ -25,7 +25,7 @@
 #ifndef __FIREVISION_FVUTILS_STATISTICAL_IMAGEDIFF_H_
 #define __FIREVISION_FVUTILS_STATISTICAL_IMAGEDIFF_H_
 
-#include <models/scanlines/scanlinemodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <stereo/stereo_processor.h>
+#include <fvstereo/stereo_processor.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class StereoProcessor <stereo/stereo_processor.h>
+/** @class StereoProcessor <fvstereo/stereo_processor.h>
  * Stereo processor interface.
  * This interface provides access to different stereo processing
  * implementations.

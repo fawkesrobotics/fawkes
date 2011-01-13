@@ -29,7 +29,7 @@
 #ifndef __FIREVISION_MODELS_SCANLINE_CORNERHORIZON_H_
 #define __FIREVISION_MODELS_SCANLINE_CORNERHORIZON_H_
 
-#include <models/scanlines/scanlinemodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
 #include <fvutils/base/types.h>
 
 namespace firevision {

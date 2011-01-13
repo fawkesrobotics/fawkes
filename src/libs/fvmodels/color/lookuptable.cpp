@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/color/lookuptable.h>
+#include <fvmodels/color/lookuptable.h>
 
 #include <fvutils/color/yuv.h>
 #include <fvutils/colormap/yuvcm.h>
@@ -49,7 +49,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ColorModelLookupTable <models/color/lookuptable.h>
+/** @class ColorModelLookupTable <fvmodels/color/lookuptable.h>
  * Color model based on a lookup table.
  * Very fast and easy implementation of a lookup table. It ignores
  * the luminance and determines the classification just based on the U and

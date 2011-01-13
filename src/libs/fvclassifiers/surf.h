@@ -30,7 +30,7 @@
 
 #include <vector>
 
-#include <classifiers/classifier.h>
+#include <fvclassifiers/classifier.h>
 
 // FIXME replace with forward declarations
 #include <surf/ipoint.h>

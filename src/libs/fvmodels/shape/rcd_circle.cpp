@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/shape/rcd_circle.h>
+#include <fvmodels/shape/rcd_circle.h>
 #include <cmath>
 #include <sys/time.h>
 #include <cstdlib>
@@ -47,7 +47,7 @@ namespace firevision {
 #define TBY_RADIUS_DIFF(x1, y1, x2, y2, r)			\
   (((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2))-(r)*(r))
 
-/** @class RcdCircleModel <models/shape/rcd_circle.h>
+/** @class RcdCircleModel <fvmodels/shape/rcd_circle.h>
  * RCD circle model from the following literature
  *  An Efficient Randomized Algorithm for Detecting Circles
  */

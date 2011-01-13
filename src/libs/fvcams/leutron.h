@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_LEUTRON_H_
 #define __FIREVISION_CAMS_LEUTRON_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 class LvCameraNode;
 class LvGrabberNode;

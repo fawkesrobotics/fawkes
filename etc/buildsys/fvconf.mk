@@ -24,12 +24,8 @@ CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO \
      SWISSRANGER PIKE
 CTRLS=EVID100P DPPTU
 
-FVBASEDIR           = $(FAWKES_BASEDIR)/src/firevision
-TOP_FVBASEDIR       = $(TOP_BASEDIR)/src/firevision
 FVCONFDIR           = $(EXEC_CONFDIR)/firevision
-FVLIBDIR            = $(TOP_FVBASEDIR)/libs
-FVEXTLIBDIR         = $(FVBASEDIR)/extlib
-VISION_INCDIRS      = $(realpath $(FVBASEDIR)) $(realpath $(FVLIBDIR))
+VISION_INCDIRS      =
 VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
@@ -75,16 +71,10 @@ ifneq ($(PKGCONFIG),)
   HAVE_SDL = $(if $(shell $(PKGCONFIG) --exists 'sdl'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_LIBDC1394),1)
-  ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/firewire.h)),)
-    HAVE_FIREWIRE_CAM   = 1
-    ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/bumblebee2.h)),)
-      HAVE_BUMBLEBEE2_CAM = 1
-    endif
-    ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/pike.h)),)
-      HAVE_PIKE_CAM = 1
-    endif
-  endif
-  VISION_CAM_LDFLAGS    += $(shell $(PKGCONFIG) --libs 'libdc1394-2')
+  HAVE_FIREWIRE_CAM   = 1
+  HAVE_BUMBLEBEE2_CAM = 1
+  HAVE_PIKE_CAM       = 1
+  VISION_CAM_LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdc1394-2')
 endif
 
 ifeq ($(HAVE_SDL),1)
@@ -115,15 +105,9 @@ else
   endif
 endif
 
-ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/net.h)),)
-  HAVE_NETWORK_CAM    = 1
-endif
-ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/fileloader.h)),)
-  HAVE_FILELOADER_CAM = 1
-endif
-ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/shmem.h)),)
-  HAVE_SHMEM_CAM      = 1
-endif
+HAVE_NETWORK_CAM    = 1
+HAVE_FILELOADER_CAM = 1
+HAVE_SHMEM_CAM      = 1
 
 
 HAVE_DPPTU_CTRL     = 0
@@ -194,7 +178,7 @@ ifeq ($(HAVE_OPENCV),1)
 endif
 
 ## check for SIFT-support (patent-encumbered!)
-SIFT_DIR = $(FVBASEDIR)/extlib/sift
+SIFT_DIR = $(EXTLIBDIR)/sift
 ifneq ($(wildcard $(realpath $(SIFT_DIR))),)
   HAVE_SIFT = 1
   LIBS_SIFT = sift
@@ -202,33 +186,33 @@ ifneq ($(wildcard $(realpath $(SIFT_DIR))),)
 endif
 
 ## check for SURF-support (patent-encumbered!)
-SURF_DIR = $(FVBASEDIR)/extlib/surf
+SURF_DIR = $(EXTLIBDIR)/surf
 ifneq ($(wildcard $(realpath $(SURF_DIR))),)
   ifneq ($(ARCH),x86_64)
     HAVE_SURF = 1
     LIBS_SURF = surf
-    CFLAGS_SURF = -DHAVE_SURF -I$(FVBASEDIR)/extlib
+    CFLAGS_SURF = -DHAVE_SURF -I$(EXTLIBDIR)
   endif
 endif
 
 ## check for SIFTPP-support (patent-encumbered!)
-SIFTPP_DIR = $(FVBASEDIR)/extlib/siftpp
+SIFTPP_DIR = $(EXTLIBDIR)/siftpp
 ifneq ($(wildcard $(realpath $(SIFTPP_DIR))),)
   HAVE_SIFTPP = 1
   LIBS_SIFTPP = siftpp
-  CFLAGS_SIFTPP = -DHAVE_SIFTPP -I$(FVBASEDIR)/extlib
+  CFLAGS_SIFTPP = -DHAVE_SIFTPP -I$(EXTLIBDIR)
 # -DNDEBUG -DVL_LOWE_STRICT -DVL_USEFASTMATH
 endif
 
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(wildcard $(FVLIBDIR)/bulb_calib/bulb*),)
+ifneq ($(wildcard $(LIBSRCDIR)/bulb_calib/bulb*),)
   HAVE_BULB_CREATOR = 1
   VISION_CFLAGS += -DHAVE_BULB_CREATOR
 endif
 
-ifneq ($(wildcard $(realpath $(FVBASEDIR)/fvutils/rectification)),)
+ifneq ($(wildcard $(LIBSRCDIR)/fvutils/rectification),)
   HAVE_RECTINFO = 1
   VISION_CFLAGS += -DHAVE_RECTINFO
 endif

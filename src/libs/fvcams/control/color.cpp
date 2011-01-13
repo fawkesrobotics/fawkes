@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/color.h>
+#include <fvcams/control/color.h>
 #include <core/exceptions/software.h>
 
 namespace firevision {
@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraControlColor <cams/control/color.h>
+/** @class CameraControlColor <fvcams/control/color.h>
  * Camera color control interface.
  * Some cameras feature adjustable color controls
  * like white balance, brightness etc.

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/sony_evid100p.h>
-#include <cams/control/visca.h>
+#include <fvcams/control/sony_evid100p.h>
+#include <fvcams/control/visca.h>
 #include <fvutils/system/camargp.h>
 
 #include <utils/math/angle.h>
@@ -94,7 +94,7 @@ const unsigned int SonyEviD100PControl::EFFECT_SLIM     = 7;
 const unsigned int SonyEviD100PControl::EFFECT_STRETCH  = 8;
 
 
-/** @class SonyEviD100PControl <cams/control/sony_evid100p.h>
+/** @class SonyEviD100PControl <fvcams/control/sony_evid100p.h>
  * Sony Evi D100P pan/tilt control.
  * Internally uses Visca.
  * @author Tim Niemueller

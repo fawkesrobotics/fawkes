@@ -25,9 +25,9 @@
 #ifndef __FIREVISION_MODELS_VELOCITY_GLOBALFROMRELATIVE_H_
 #define __FIREVISION_MODELS_VELOCITY_GLOBALFROMRELATIVE_H_
 
-#include <models/velocity/velocitymodel.h>
-#include <models/velocity/relvelo.h>
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/velocity/velocitymodel.h>
+#include <fvmodels/velocity/relvelo.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 

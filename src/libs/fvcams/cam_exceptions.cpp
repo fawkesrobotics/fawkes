@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/cam_exceptions.h>
+#include <fvcams/cam_exceptions.h>
 
 using namespace fawkes;
 
@@ -30,7 +30,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraNotOpenedException <cams/cam_exceptions.h>
+/** @class CameraNotOpenedException <fvcams/cam_exceptions.h>
  * Camera not opened exception.
  * Throw this exception if an operations was requested on a camera that is
  * not possible if the camera has not been properly opened before.
@@ -42,7 +42,7 @@ CameraNotOpenedException::CameraNotOpenedException()
 {
 }
 
-/** @class CameraNotStartedException <cams/cam_exceptions.h>
+/** @class CameraNotStartedException <fvcams/cam_exceptions.h>
  * Camera not started exception.
  * Throw this exception if an operations was requested on a camera that is
  * not possible if the camera has not been properly started before.
@@ -55,7 +55,7 @@ CameraNotStartedException::CameraNotStartedException()
 }
 
 
-/** @class CaptureException <cams/cam_exceptions.h>
+/** @class CaptureException <fvcams/cam_exceptions.h>
  * Capturing a frame failed.
  * This exception is thrown if a camera failed to retrieve a new image from
  * the camera.
@@ -74,7 +74,7 @@ CaptureException::CaptureException(const char *format, ...)
 }
 
 
-/** @class UnknownCameraTypeException <cams/cam_exceptions.h>
+/** @class UnknownCameraTypeException <fvcams/cam_exceptions.h>
  * Unknown camera type exception.
  * Thrown if the requested camera has not been recognized or the needed
  * libraries were not available at compile time.
@@ -90,7 +90,7 @@ UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
 }
 
 
-/** @class UnknownCameraException <cams/cam_exceptions.h>
+/** @class UnknownCameraException <fvcams/cam_exceptions.h>
  * Unknown camera exception.
  * Thrown if the requested camera is not available.
  */
@@ -105,7 +105,7 @@ UnknownCameraException::UnknownCameraException(const char *msg)
 }
 
 
-/** @class UnknownCameraControlTypeException <cams/cam_exceptions.h>
+/** @class UnknownCameraControlTypeException <fvcams/cam_exceptions.h>
  * Unknown camera control exception.
  * Thrown if the requested camera control has not been recognized or the needed
  * libraries were not available at compile time.

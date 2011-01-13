@@ -25,9 +25,9 @@
 #ifndef __FIREVISION_CAMS_NAO_H_
 #define __FIREVISION_CAMS_NAO_H_
 
-#include <cams/v4l2.h>
+#include <fvcams/v4l2.h>
 
-#include <cams/control/source.h>
+#include <fvcams/control/source.h>
 
 #include <core/exceptions/software.h>
 #include <unistd.h>

@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/scanlines/cornerhorizon.h>
+#include <fvmodels/scanlines/cornerhorizon.h>
 #include <utils/math/angle.h>
 #include <cstdlib>
 #include <cstring>
@@ -37,7 +37,7 @@ namespace firevision {
 
 const float CornerHorizon::M_PI_HALF = M_PI / 2.f;
 
-/** @class CornerHorizon <models/scanlines/cornerhorizon.h>
+/** @class CornerHorizon <fvmodels/scanlines/cornerhorizon.h>
  * Cut of arbitrary scanline models at an artificial horizon.
  * The artificial horizon is calculated by the highest corner that is visible
  * in the image. From that the Y coordinate in the image is used and everything

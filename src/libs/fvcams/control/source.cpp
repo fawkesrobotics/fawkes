@@ -22,14 +22,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/source.h>
+#include <fvcams/control/source.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class CameraControlSource <cams/control/source.h>
+/** @class CameraControlSource <fvcams/control/source.h>
  * Camera source control interface.
  * Some cameras have multiple image sources; with this control, it is
  * possible to switch between them.

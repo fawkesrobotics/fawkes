@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_SCANLINE_GRID_H_
 #define __FIREVISION_SCANLINE_GRID_H_
 
-#include <models/scanlines/scanlinemodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
 #include <fvutils/base/roi.h>
 #include <fvutils/base/types.h>
 

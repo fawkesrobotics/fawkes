@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/unwarp.h>
+#include <fvfilters/unwarp.h>
 
-#include <models/mirror/mirrormodel.h>
+#include <fvmodels/mirror/mirrormodel.h>
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
@@ -33,7 +33,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterUnwarp <filters/unwarp.h>
+/** @class FilterUnwarp <fvfilters/unwarp.h>
  * Create unwarped image with given mirror model.
  * @author Tim Niemueller
  */

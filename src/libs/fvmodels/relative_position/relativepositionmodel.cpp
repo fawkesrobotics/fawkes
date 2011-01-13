@@ -22,14 +22,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class RelativePositionModel <models/relative_position/relativepositionmodel.h>
+/** @class RelativePositionModel <fvmodels/relative_position/relativepositionmodel.h>
  * Relative Position Model Interface.
  * This interfaces defines a relative position model.
  *

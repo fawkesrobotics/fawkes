@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/morphology/erosion.h>
+#include <fvfilters/morphology/erosion.h>
 
 #include <fvutils/color/yuv.h>
 #include <core/exception.h>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterErosion <filters/morphology/erosion.h>
+/** @class FilterErosion <fvfilters/morphology/erosion.h>
  * Morphological erosion.
  *
  * @author Tim Niemueller

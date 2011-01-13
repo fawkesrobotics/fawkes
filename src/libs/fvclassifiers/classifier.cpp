@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <classifiers/classifier.h>
+#include <fvclassifiers/classifier.h>
 #include <cstring>
 #include <cstdlib>
 
@@ -30,7 +30,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Classifier <classifiers/classifier.h>
+/** @class Classifier <fvclassifiers/classifier.h>
  * Classifier to extract regions of interest.
  * The classifier finds regions of interest (ROI) by some a priori knowledge
  * like known colors or shapes. The list of ROIs returned by classify() _must_

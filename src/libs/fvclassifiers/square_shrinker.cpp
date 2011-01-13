@@ -21,13 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <classifiers/square_shrinker.h>
+#include <fvclassifiers/square_shrinker.h>
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
-#include <models/scanlines/scanlinemodel.h>
-#include <models/color/colormodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
+#include <fvmodels/color/colormodel.h>
 
 #include <cstddef>
 
@@ -36,7 +36,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SquareShrinker <classifiers/square_shrinker.h>
+/** @class SquareShrinker <fvclassifiers/square_shrinker.h>
  * Square shrinker.
  * This shrinker makes sure that a ROI is always squared.
  * @author Tim Niemueller

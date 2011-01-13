@@ -23,10 +23,10 @@
 
 #include <core/exception.h>
 
-#include <filters/morphology/geodesic_dilation.h>
-#include <filters/morphology/segenerator.h>
-#include <filters/morphology/dilation.h>
-#include <filters/min.h>
+#include <fvfilters/morphology/geodesic_dilation.h>
+#include <fvfilters/morphology/segenerator.h>
+#include <fvfilters/morphology/dilation.h>
+#include <fvfilters/min.h>
 
 #include <fvutils/statistical/imagediff.h>
 #include <fvutils/color/colorspaces.h>
@@ -53,7 +53,7 @@ const unsigned int FilterGeodesicDilation::MASK   = 1;
   }
 
 
-/** @class FilterGeodesicDilation <filters/morphology/geodesic_dilation.h>
+/** @class FilterGeodesicDilation <fvfilters/morphology/geodesic_dilation.h>
  * Morphological geodesic dilation.
  * @author Tim Niemueller
  */

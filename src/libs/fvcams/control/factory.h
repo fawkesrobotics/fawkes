@@ -27,7 +27,7 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 
-#include <cams/control/control.h>
+#include <fvcams/control/control.h>
 
 #include <cstddef>
 

@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/zoom.h>
+#include <fvcams/control/zoom.h>
 #include <core/exceptions/software.h>
 
 namespace firevision {
@@ -30,7 +30,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraControlZoom <cams/control/zoom.h>
+/** @class CameraControlZoom <fvcams/control/zoom.h>
  * Camera zoom control interface.
  * Some cameras feature zooming.
  *

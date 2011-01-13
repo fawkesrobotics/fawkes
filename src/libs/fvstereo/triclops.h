@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_STEREO_TRICLOPS_H_
 #define __FIREVISION_STEREO_TRICLOPS_H_
 
-#include <stereo/stereo_processor.h>
+#include <fvstereo/stereo_processor.h>
 #include <sys/types.h>
 
 namespace firevision {

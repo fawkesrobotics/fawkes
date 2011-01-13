@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <models/relative_position/back_projection.h>
+#include <fvmodels/relative_position/back_projection.h>
 
 #include <cmath>
 
@@ -28,7 +28,7 @@ namespace firevision {
 }
 #endif
 
-/** @class BackProjectionPositionModel <models/relative_position/back_projection.h>
+/** @class BackProjectionPositionModel <fvmodels/relative_position/back_projection.h>
  * This model uses a ProjectiveCam to back project points in the image to
  * the world by the ground plane assumption.
  *

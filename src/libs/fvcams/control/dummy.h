@@ -26,12 +26,12 @@
 #ifndef __FIREVISION_CAMS_DUMMY_CONTROL_H_
 #define __FIREVISION_CAMS_DUMMY_CONTROL_H_
 
-#include <cams/control/color.h>
-#include <cams/control/image.h>
-#include <cams/control/pantilt.h>
-#include <cams/control/zoom.h>
-#include <cams/control/effect.h>
-#include <cams/control/focus.h>
+#include <fvcams/control/color.h>
+#include <fvcams/control/image.h>
+#include <fvcams/control/pantilt.h>
+#include <fvcams/control/zoom.h>
+#include <fvcams/control/effect.h>
+#include <fvcams/control/focus.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

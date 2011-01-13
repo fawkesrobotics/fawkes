@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/relative_position/ball_trigo.h>
+#include <fvmodels/relative_position/ball_trigo.h>
 #include <utils/math/angle.h>
 
 #include <cmath>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class BallTrigoRelativePos <models/relative_position/ball_trigo.h>
+/** @class BallTrigoRelativePos <fvmodels/relative_position/ball_trigo.h>
  * Relative ball position model for pan/tilt camera.
  * This uses basic trigonometry to calculate the position of the ball given
  * only the center of the ball in the image as variable parameters, and the

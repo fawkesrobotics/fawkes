@@ -25,8 +25,8 @@
 #ifndef __FIREVISION_MODELS_VELOCITY_RELATIVE_H_
 #define __FIREVISION_MODELS_VELOCITY_RELATIVE_H_
 
-#include <models/velocity/velocitymodel.h>
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/velocity/velocitymodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
 #include <fvutils/base/types.h>
 

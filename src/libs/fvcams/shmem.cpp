@@ -23,7 +23,7 @@
 #include <core/exception.h>
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
-#include <cams/shmem.h>
+#include <fvcams/shmem.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/camargp.h>
 
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SharedMemoryCamera <cams/shmem.h>
+/** @class SharedMemoryCamera <fvcams/shmem.h>
  * Shared memory camera.
  * Camera to retrieve images from a shared memory segment.
  *

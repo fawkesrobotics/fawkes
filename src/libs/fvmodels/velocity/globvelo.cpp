@@ -23,7 +23,7 @@
  */
 
 #include <cmath>
-#include <models/velocity/globvelo.h>
+#include <fvmodels/velocity/globvelo.h>
 
 #include <utils/time/time.h>
 
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class VelocityFromGlobal <models/velocity/globvelo.h>
+/** @class VelocityFromGlobal <fvmodels/velocity/globvelo.h>
  * Velocity from global positions.
  */
 

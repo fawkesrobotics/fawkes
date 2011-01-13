@@ -23,7 +23,7 @@
 
 #include <core/exception.h>
 
-#include <cams/leutron.h>
+#include <fvcams/leutron.h>
 #include <fvutils/color/colorspaces.h>
 
 #include <lvdef.h>
@@ -38,7 +38,7 @@ namespace firevision {
 }
 #endif
 
-/** @class LeutronCamera <cams/leutron.h>
+/** @class LeutronCamera <fvcams/leutron.h>
  * Cameras accessed through Leutron framegrabber.
  */
 

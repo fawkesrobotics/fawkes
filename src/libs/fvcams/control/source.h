@@ -25,7 +25,7 @@
 #ifndef __FIREVISION_CAMS_CONTROL_SOURCE_H_
 #define __FIREVISION_CAMS_CONTROL_SOURCE_H_
 
-#include <cams/control/control.h>
+#include <fvcams/control/control.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

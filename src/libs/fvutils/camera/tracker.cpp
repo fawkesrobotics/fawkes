@@ -27,7 +27,7 @@
 #include <utils/system/console_colors.h>
 #include <utils/math/angle.h>
 
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
 #include <cmath>
 

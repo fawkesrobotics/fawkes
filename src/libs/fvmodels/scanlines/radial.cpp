@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/scanlines/radial.h>
+#include <fvmodels/scanlines/radial.h>
 
 #include <utils/system/console_colors.h>
 
@@ -35,7 +35,7 @@ namespace firevision {
 }
 #endif
 
-/** @class ScanlineRadial <models/scanlines/radial.h>
+/** @class ScanlineRadial <fvmodels/scanlines/radial.h>
  * Radial scanlines.
  * Uses circles to generate scanline points. A dead radius is ignored in the
  * center of the image (for example for the camera itself in an omni-vision system).

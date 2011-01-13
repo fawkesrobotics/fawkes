@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/sum.h>
+#include <fvfilters/sum.h>
 
 #include <fvutils/color/yuv.h>
 
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterSum <filters/sum.h>
+/** @class FilterSum <fvfilters/sum.h>
  * Sum filter.
  * Adds two images.
  * @author Tim Niemueller

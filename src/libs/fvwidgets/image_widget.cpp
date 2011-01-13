@@ -27,7 +27,7 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/color/yuv.h>
 #include <fvutils/scalers/lossy.h>
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 #include <iomanip>
 

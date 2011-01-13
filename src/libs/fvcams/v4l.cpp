@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/v4l.h>
+#include <fvcams/v4l.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -30,12 +30,12 @@
 
 #ifdef HAVE_V4L1_CAM
 #include <linux/videodev.h>
-#include <cams/v4l1.h>
+#include <fvcams/v4l1.h>
 #endif
 
 #ifdef HAVE_V4L2_CAM
 #include <linux/videodev2.h>
-#include <cams/v4l2.h>
+#include <fvcams/v4l2.h>
 #endif
 
 #include <fvutils/system/camargp.h>
@@ -47,7 +47,7 @@ namespace firevision {
 }
 #endif
 
-/** @class V4LCamera <cams/v4l.h>
+/** @class V4LCamera <fvcams/v4l.h>
  * General Video4Linux camera implementation.
  * Maintains backwards compatibility.
  * Chooses on the fly whether v4l1 or v4l2 is needed for a given device.

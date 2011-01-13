@@ -24,8 +24,8 @@
 #ifndef __FIREVISION_CAMS_FIREWIRE_H_
 #define __FIREVISION_CAMS_FIREWIRE_H_
 
-#include <cams/camera.h>
-#include <cams/control/focus.h>
+#include <fvcams/camera.h>
+#include <fvcams/control/focus.h>
 
 #include <dc1394/dc1394.h>
 

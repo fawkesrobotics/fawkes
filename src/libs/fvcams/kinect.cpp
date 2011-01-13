@@ -40,12 +40,12 @@ const unsigned int KinectCamera::RGB_IMAGE = 0;
 /** False color depth image */
 const unsigned int KinectCamera::FALSE_COLOR_DEPTH_IMAGE = 1;
 
-/** @class KinectCamera <cams/kinect.h>
+/** @class KinectCamera <fvcams/kinect.h>
  * Access the Microsoft Kinect camera using the freenect driver.
  * @author Daniel Beck
  */
 
-/** @class FvFreenectDevice <cams/kinect.h>
+/** @class FvFreenectDevice <fvcams/kinect.h>
  * Implementation of the FreenectDevice interface of the driver.
  * @author Daniel Beck
  */

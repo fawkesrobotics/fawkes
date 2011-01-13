@@ -24,7 +24,7 @@
 #include <iostream>
 #include <vector>
 
-#include <classifiers/surf.h>
+#include <fvclassifiers/surf.h>
 #include <math.h>
 //#ifdef SURF_TIMETRACKER
 #include <utils/time/clock.h>
@@ -58,7 +58,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SurfClassifier <classifiers/surf.h>
+/** @class SurfClassifier <fvclassifiers/surf.h>
  * SURF classifier.
  *
  * This class provides a classifier that uses SURF to detect objects in a given

@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/difference.h>
+#include <fvfilters/difference.h>
 
 #include <fvutils/color/yuv.h>
 #include <cstddef>
@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterDifference <filters/difference.h>
+/** @class FilterDifference <fvfilters/difference.h>
  * Calculates the difference of two images.
  */
 

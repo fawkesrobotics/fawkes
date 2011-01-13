@@ -24,8 +24,8 @@
 #ifndef __FIREVISION_CAMS_SWISSRANGER_H_
 #define __FIREVISION_CAMS_SWISSRANGER_H_
 
-#include <cams/camera.h>
-#include <cams/control/focus.h>
+#include <fvcams/camera.h>
+#include <fvcams/control/focus.h>
 
 // libmesasr header defining basic types and enums
 #include <definesSR.h>

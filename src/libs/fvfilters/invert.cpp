@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/invert.h>
+#include <fvfilters/invert.h>
 
 #include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterInvert <filters/invert.h>
+/** @class FilterInvert <fvfilters/invert.h>
  * Inversion filter.
  * This will invert the given image.
  * @author Tim Niemueller

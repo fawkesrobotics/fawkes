@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <classifiers/shrinker.h>
+#include <fvclassifiers/shrinker.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
@@ -32,7 +32,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Shrinker <classifiers/shrinker.h>
+/** @class Shrinker <fvclassifiers/shrinker.h>
  * Shrinker class to shrink ROIs.
  * This shrinker shrinks a given ROI. This is done to cope with several
  * special problems that arise in different setups. For example if playing

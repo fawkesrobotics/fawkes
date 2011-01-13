@@ -25,7 +25,7 @@
 #ifndef __FIREVISION_MODELS_RELPOS_BOX_H_
 #define __FIREVISION_MODELS_RELPOS_BOX_H_
 
-#include <models/relative_position/relativepositionmodel.h>
+#include <fvmodels/relative_position/relativepositionmodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 

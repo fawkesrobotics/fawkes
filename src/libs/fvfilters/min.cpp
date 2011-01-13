@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/min.h>
+#include <fvfilters/min.h>
 
 #include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterMin <filters/min.h>
+/** @class FilterMin <fvfilters/min.h>
  * Minimum filter
  * @author Tim Niemueller
  */

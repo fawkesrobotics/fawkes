@@ -23,10 +23,10 @@
 #ifndef __FIREVISION_CLASSIFIERS_GRADIENT_H_
 #define __FIREVISION_CLASSIFIERS_GRADIENT_H_
 
-#include <classifiers/classifier.h>
-#include <classifiers/qualifiers.h>
+#include <fvclassifiers/classifier.h>
+#include <fvclassifiers/qualifiers.h>
 
-#include <models/scanlines/grid.h>
+#include <fvmodels/scanlines/grid.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

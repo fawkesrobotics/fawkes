@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/mirror/mirrormodel.h>
+#include <fvmodels/mirror/mirrormodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class MirrorModel <models/mirror/mirrormodel.h>
+/** @class MirrorModel <fvmodels/mirror/mirrormodel.h>
  * Mirror model interface.
  * This interface defines the API for a mirror model.
  *

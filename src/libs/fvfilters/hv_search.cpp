@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/hv_search.h>
+#include <fvfilters/hv_search.h>
 
 #include <fvutils/color/yuv.h>
 
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterHVSearch <filters/hv_search.h>
+/** @class FilterHVSearch <fvfilters/hv_search.h>
  * Horizontal/vertical search filter.
  * This filter works similar to the horizontal search filter, but additionally
  * it search for color changes in vertical direction.

@@ -25,7 +25,7 @@
 #ifndef __FIREVISION_FILTERS_MORPHOLOGY_GEODESIC_EROSION_H_
 #define __FIREVISION_FILTERS_MORPHOLOGY_GEODESIC_EROSION_H_
 
-#include <filters/morphology/morphologicalfilter.h>
+#include <fvfilters/morphology/morphologicalfilter.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

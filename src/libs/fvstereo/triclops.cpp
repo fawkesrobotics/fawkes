@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <stereo/triclops.h>
+#include <fvstereo/triclops.h>
 
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
-#include <cams/bumblebee2.h>
+#include <fvcams/bumblebee2.h>
 #include <fvutils/base/roi.h>
 #include <utils/math/angle.h>
 #include <fvutils/color/conversions.h>
@@ -66,7 +66,7 @@ class TriclopsStereoProcessorData
 };
 /// @endcond
 
-/** @class TriclopsStereoProcessor <stereo/triclops.h>
+/** @class TriclopsStereoProcessor <fvstereo/triclops.h>
  * Stereo processing using PGR Triclops SDK.
  * This class uses the Triclops SDK provided by Point Grey Research along with
  * the Bumblebee2 cameras.

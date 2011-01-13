@@ -24,7 +24,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/threshold.h>
+#include <fvfilters/threshold.h>
 
 #include <core/exception.h>
 
@@ -36,7 +36,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterThreshold <filters/threshold.h>
+/** @class FilterThreshold <fvfilters/threshold.h>
  * Threshold filter
  */
 

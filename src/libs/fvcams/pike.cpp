@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/pike.h>
-#include <cams/cam_exceptions.h>
+#include <fvcams/pike.h>
+#include <fvcams/cam_exceptions.h>
 
 #include <fvutils/system/camargp.h>
 
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class PikeCamera <cams/pike.h>
+/** @class PikeCamera <fvcams/pike.h>
  * Pike camera.
  * Allows to access some special features of the Pike camera made by
  * Allied Vision Technologies.

@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/hor_search.h>
+#include <fvfilters/hor_search.h>
 
 #include <fvutils/color/yuv.h>
 
@@ -34,7 +34,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterHSearch <filters/hor_search.h>
+/** @class FilterHSearch <fvfilters/hor_search.h>
  * Search horizontally for a color change. Mark these changes with white
  * pixels, all other with black pixels.
  * @author Yuxiao Hu

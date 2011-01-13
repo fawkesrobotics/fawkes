@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterGauss <filters/gauss.h>
+/** @class FilterGauss <fvfilters/gauss.h>
  * Gaussian filter.
  * Applies Gaussian linear filter to image (blur effect).
  */

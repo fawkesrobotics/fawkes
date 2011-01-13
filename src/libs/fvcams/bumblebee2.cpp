@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/bumblebee2.h>
+#include <fvcams/bumblebee2.h>
 
-#include <cams/cam_exceptions.h>
+#include <fvcams/cam_exceptions.h>
 #include <core/exception.h>
 #include <fvutils/system/camargp.h>
 #include <fvutils/color/conversions.h>
@@ -53,7 +53,7 @@ namespace firevision {
 }
 #endif
 
-/** @class Bumblebee2Camera <cams/bumblebee2.h>
+/** @class Bumblebee2Camera <fvcams/bumblebee2.h>
  * Bumblebee2 camera.
  * Camera implementation that allows fo access to the PointGrey Research Bumblebee2
  * camera. It uses libdc1394 to access the camera for fast image transfers (as recommended

@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
 #define __FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
 
-#include <models/color/colormodel.h>
+#include <fvmodels/color/colormodel.h>
 
 #include <fvutils/colormap/yuvcm.h>
 #include <string>

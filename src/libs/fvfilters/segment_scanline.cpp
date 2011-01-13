@@ -24,10 +24,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <filters/segment_scanline.h>
+#include <fvfilters/segment_scanline.h>
 
-#include <models/color/colormodel.h>
-#include <models/scanlines/scanlinemodel.h>
+#include <fvmodels/color/colormodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
 
 #include <fvutils/color/yuv.h>
 #include <cstddef>
@@ -38,7 +38,7 @@ namespace firevision {
 }
 #endif
 
-/** @class FilterScanlineSegmentation <filters/segment_scanline.h>
+/** @class FilterScanlineSegmentation <fvfilters/segment_scanline.h>
  * Segmentation filter.
  * Visually marks pixels depending of their classification determined by the
  * supplied color model to make the segmentation visible - but only the pixels

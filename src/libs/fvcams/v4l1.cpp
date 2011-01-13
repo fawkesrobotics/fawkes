@@ -24,7 +24,7 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 
-#include <cams/v4l1.h>
+#include <fvcams/v4l1.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/rgb.h>
 #include <fvutils/system/camargp.h>
@@ -86,7 +86,7 @@ class V4L1CameraData
 
 /// @endcond
 
-/** @class V4L1Camera <cams/v4l1.h>
+/** @class V4L1Camera <fvcams/v4l1.h>
  * Video4Linux 1 camera implementation.
  */
 

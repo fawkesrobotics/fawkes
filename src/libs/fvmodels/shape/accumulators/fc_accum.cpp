@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
                                                                                 
-#include <models/shape/accumulators/fc_accum.h>
+#include <fvmodels/shape/accumulators/fc_accum.h>
 
 #include <cmath>
 #include <cstdio>
@@ -35,7 +35,7 @@ namespace firevision {
 
 const float FittedCircle::TOO_SMALL_DELTA = 1.0e-3f;
 
-/** @class FittedCircle <models/shape/accumulators/fc_accum.h>
+/** @class FittedCircle <fvmodels/shape/accumulators/fc_accum.h>
  * FittedCircle accumulator.
  */
 

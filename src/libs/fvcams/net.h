@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_NET_H_
 #define __FIREVISION_CAMS_NET_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 #include <fvutils/net/fuse_client_handler.h>
 #include <vector>
 

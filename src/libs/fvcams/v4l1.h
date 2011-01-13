@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_V4L1_H_
 #define __FIREVISION_CAMS_V4L1_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

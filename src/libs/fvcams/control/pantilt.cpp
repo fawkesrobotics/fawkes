@@ -22,14 +22,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/pantilt.h>
+#include <fvcams/control/pantilt.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class CameraControlPanTilt <cams/control/pantilt.h>
+/** @class CameraControlPanTilt <fvcams/control/pantilt.h>
  * Camera pan/tilt control interface.
  * Some cameras feature an actuator to allow for panning and tilting the
  * camera.

@@ -26,7 +26,7 @@
 #ifndef __FIREVISION_CAMS_FILELOADER_H_
 #define __FIREVISION_CAMS_FILELOADER_H_
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 #include <dirent.h>
 
 namespace firevision {

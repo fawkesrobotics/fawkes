@@ -24,7 +24,7 @@
 #ifndef __FIREVISION_CAMS_PIKE_H_
 #define __FIREVISION_CAMS_PIKE_H_
 
-#include <cams/firewire.h>
+#include <fvcams/firewire.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */

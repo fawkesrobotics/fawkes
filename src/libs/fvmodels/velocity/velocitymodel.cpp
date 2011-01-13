@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/velocity/velocitymodel.h>
+#include <fvmodels/velocity/velocitymodel.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class VelocityModel <models/velocity/velocitymodel.h>
+/** @class VelocityModel <fvmodels/velocity/velocitymodel.h>
  * Velocity model interface.
  *
  *

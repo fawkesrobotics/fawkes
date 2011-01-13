@@ -25,7 +25,7 @@
 
 #include <utils/math/angle.h>
 #include <sys/time.h>
-#include <models/shape/rht_lines.h>
+#include <fvmodels/shape/rht_lines.h>
 
 using namespace std;
 using namespace fawkes;
@@ -37,7 +37,7 @@ namespace firevision {
 }
 #endif
 
-/** @class RhtLinesModel <models/shape/rht_lines.h>
+/** @class RhtLinesModel <fvmodels/shape/rht_lines.h>
  * Randomized Hough-Transform line model.
  */
 

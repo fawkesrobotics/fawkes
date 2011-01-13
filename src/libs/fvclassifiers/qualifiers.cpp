@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <classifiers/qualifiers.h>
+#include <fvclassifiers/qualifiers.h>
 #include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
 

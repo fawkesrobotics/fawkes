@@ -25,8 +25,8 @@
 #include <core/exceptions/software.h>
 #include <utils/system/console_colors.h>
 
-#include <cams/swissranger.h>
-#include <cams/cam_exceptions.h>
+#include <fvcams/swissranger.h>
+#include <fvcams/cam_exceptions.h>
 #include <fvutils/system/camargp.h>
 
 #include <cstdlib>
@@ -48,7 +48,7 @@ namespace firevision {
 }
 #endif
 
-/** @class SwissRangerCamera <cams/swissranger.h>
+/** @class SwissRangerCamera <fvcams/swissranger.h>
  * SwissRanger camera.
  * This camera implementation provides access to the SwissRanger SR4000 camera
  * (and probably other models supported by libmesasr, but cannot test).

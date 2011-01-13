@@ -25,14 +25,14 @@
 #ifndef __FIREVISION_FILTER_NOTHING_H_
 #define __FIREVISION_FILTER_NOTHING_H_
 
-#include <filters/filter.h>
+#include <fvfilters/filter.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class FilterNothing <filters/nothing.h>
+/** @class FilterNothing <fvfilters/nothing.h>
  * A filter that does... nothing.
  * @author Tim Niemueller
  */

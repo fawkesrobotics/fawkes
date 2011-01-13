@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <models/camera/ccd_calibration.h>
+#include <fvmodels/camera/ccd_calibration.h>
 
 #include <cmath>
 
@@ -29,7 +29,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CCDCalibration <models/camera/ccd_calibration.h>
+/** @class CCDCalibration <fvmodels/camera/ccd_calibration.h>
  * A Calibration matrix for a ccd camera
  * @author Christof Rath
  */

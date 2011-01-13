@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/image.h>
+#include <fvcams/control/image.h>
 #include <core/exceptions/software.h>
 
 namespace firevision {
@@ -31,7 +31,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraControlImage <cams/control/image.h>
+/** @class CameraControlImage <fvcams/control/image.h>
  * Camera image control interface.
  * Some cameras feature adjustable image controls
  * like size, format or mirroring.

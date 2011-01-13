@@ -21,28 +21,28 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/control/factory.h>
+#include <fvcams/control/factory.h>
 #include <fvutils/system/camargp.h>
 #include <core/exceptions/software.h>
 
-#include <cams/control/color.h>
-#include <cams/control/image.h>
-#include <cams/control/effect.h>
-#include <cams/control/focus.h>
-#include <cams/control/pantilt.h>
-#include <cams/control/zoom.h>
-#include <cams/control/source.h>
-#include <cams/control/dummy.h>
-#include <cams/cam_exceptions.h>
+#include <fvcams/control/color.h>
+#include <fvcams/control/image.h>
+#include <fvcams/control/effect.h>
+#include <fvcams/control/focus.h>
+#include <fvcams/control/pantilt.h>
+#include <fvcams/control/zoom.h>
+#include <fvcams/control/source.h>
+#include <fvcams/control/dummy.h>
+#include <fvcams/cam_exceptions.h>
 
 #ifdef HAVE_VISCA_CTRL
-#include <cams/control/visca.h>
+#include <fvcams/control/visca.h>
 #endif
 #ifdef HAVE_EVID100P_CTRL
-#include <cams/control/sony_evid100p.h>
+#include <fvcams/control/sony_evid100p.h>
 #endif
 #ifdef HAVE_DPPTU_CTRL
-#include <cams/control/dp_ptu.h>
+#include <fvcams/control/dp_ptu.h>
 #endif
 
 #include <typeinfo>
@@ -54,7 +54,7 @@ namespace firevision {
 }
 #endif
 
-/** @class CameraControlFactory <cams/control/factory.h>
+/** @class CameraControlFactory <fvcams/control/factory.h>
  * Camera control factory.
  * This camera control factory provides access to all camera controls in a unified way.
  * You just supply a camera argument string and depending on the camera ID and compile-time
