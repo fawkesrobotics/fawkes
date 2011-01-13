@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/firestation/firestation.h>
+#include "firestation.h"
 #include <libglademm/xml.h>
 #include <iostream>
 

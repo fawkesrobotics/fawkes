@@ -16,7 +16,7 @@
 BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(FVSRCDIR)/fvconf.mk
+include $(BUILDSYSDIR)/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
@@ -24,7 +24,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvsrsave = fawkesaspects fvutils fvcams fvmodels fvclassifiers fvfilters
+LIBS_fvsrsave = fawkescore fawkesaspects fvutils fvcams fvmodels fvclassifiers fvfilters
 OBJS_fvsrsave = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_fvsrsave)

@@ -21,7 +21,7 @@
  */
 
 #include <fvutils/system/camargp.h>
-#include <cams/swissranger.h>
+#include <fvcams/swissranger.h>
 
 using namespace firevision;
 

@@ -33,9 +33,9 @@
 #include <fvutils/system/camargp.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_lut.h>
-#include <cams/factory.h>
-#include <cams/cam_exceptions.h>
-#include <cams/control/factory.h>
+#include <fvcams/factory.h>
+#include <fvcams/cam_exceptions.h>
+#include <fvcams/control/factory.h>
 #include <core/exceptions/software.h>
 
 #include <aspect/vision.h>

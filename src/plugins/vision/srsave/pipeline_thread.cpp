@@ -22,7 +22,7 @@
 
 #include "pipeline_thread.h"
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 
 #include <sys/time.h>
 #include <stdlib.h>

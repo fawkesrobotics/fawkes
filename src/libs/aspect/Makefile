@@ -19,13 +19,6 @@ include $(BUILDCONFDIR)/webview/webview.mk
 
 LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin
 
-ifeq ($(HAVE_FIREVISION),1)
-  INCDIRS += $(realpath $(BASEDIR)/src/firevision)
-else
-  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/vision*.cpp $(SRCDIR)/inifins/vision*.cpp))
-  WARN_TARGETS += warning_vision
-endif
-
 ifneq ($(HAVE_WEBVIEW),1)
   OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/webview.cpp $(SRCDIR)/inifins/webview.cpp))
   WARN_TARGETS += warning_webview
@@ -47,10 +40,6 @@ all: $(WARN_TARGETS)
 .PHONY: warning_webview warning_vision
 warning_webview:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding WebviewAspect$(TNORMAL) (libfawkeswebview not built)"
-
-warning_vision:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Excluding vision aspects$(TNORMAL) (FireVision not available)"
-
 endif
 
 include $(BUILDSYSDIR)/base.mk

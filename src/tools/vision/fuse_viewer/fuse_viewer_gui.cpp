@@ -26,7 +26,7 @@
 #include <core/exception.h>
 #include <fvwidgets/fuse_image_list_widget.h>
 #include <fvwidgets/image_widget.h>
-#include <cams/net.h>
+#include <fvcams/net.h>
 
 #include <cstring>
 

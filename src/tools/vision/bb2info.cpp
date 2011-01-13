@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <cams/bumblebee2.h>
+#include <fvcams/bumblebee2.h>
 #include <fvutils/system/camargp.h>
-#include <stereo/triclops.h>
+#include <fvstereo/triclops.h>
 
 using namespace std;
 using namespace firevision;

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/fountain/fountain_plugin.h>
-#include <apps/fountain/fountain_thread.h>
+#include "fountain_plugin.h"
+#include "fountain_thread.h"
 
 using namespace fawkes;
 

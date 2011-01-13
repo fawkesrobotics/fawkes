@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <cams/fileloader.h>
+#include <fvcams/fileloader.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/writers/jpeg.h>
 #include <fvutils/writers/png.h>

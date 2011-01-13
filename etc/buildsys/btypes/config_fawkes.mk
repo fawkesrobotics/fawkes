@@ -19,9 +19,3 @@ SYSROOT ?=
 # Read FawkesDebugging in the Fawkes Trac Wiki on how to use it
 CFLAGS_BASE +=	-g -Wall -Werror
 
-### Feature checks
-ifneq ($(realpath $(BASEDIR)/src/firevision),)
-  HAVE_FIREVISION=1
-  CFLAGS_BASE += -DHAVE_FIREVISION
-endif
-

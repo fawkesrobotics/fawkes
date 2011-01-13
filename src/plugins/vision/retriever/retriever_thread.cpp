@@ -20,14 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/retriever/retriever_thread.h>
+#include "retriever_thread.h"
 
-#include <cams/camera.h>
+#include <fvcams/camera.h>
 #include <fvutils/ipc/shm_image.h>
 #include <utils/time/tracker.h>
 #include <fvutils/writers/seq_writer.h>
 #include <fvutils/writers/jpeg.h>
-#include <models/color/lookuptable.h>
+#include <fvmodels/color/lookuptable.h>
 
 #include <cstring>
 #include <cstdlib>

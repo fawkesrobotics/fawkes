@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/fountain/fountain_thread.h>
+#include "fountain_thread.h"
 
 #include <core/exceptions/software.h>
 #include <fvutils/net/fuse_server.h>
@@ -31,7 +31,7 @@
 using namespace fawkes;
 using namespace firevision;
 
-/** @class FountainThread <apps/fountain/fountain_thread.h>
+/** @class FountainThread "fountain_thread.h"
  * Fountain main thread.
  * @author Tim Niemueller
  */

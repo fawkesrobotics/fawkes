@@ -25,7 +25,7 @@
 
 #include <core/threading/thread.h>
 
-#include <cams/shmem.h>
+#include <fvcams/shmem.h>
 #include <fvutils/color/colorspaces.h>
 
 #include <map>

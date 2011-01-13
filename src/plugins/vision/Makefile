@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(FVSRCDIR)/fvconf.mk
+include $(BUILDSYSDIR)/fvconf.mk
 
 SUBDIRS = base fountain retriever
 

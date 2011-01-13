@@ -31,7 +31,7 @@
 #endif
 #include <utils/logging/logger.h>
 
-#include <cams/shmem.h>
+#include <fvcams/shmem.h>
 #include <fvutils/color/conversions.h>
 
 #ifndef _GNU_SOURCE

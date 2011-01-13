@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(FVSRCDIR)/fvconf.mk
+include $(BUILDSYSDIR)/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)

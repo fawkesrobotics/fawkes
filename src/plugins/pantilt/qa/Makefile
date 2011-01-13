@@ -14,21 +14,13 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
-
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(FVSRCDIR)/fvconf.mk
-
-CFLAGS   += $(VISION_CFLAGS)
-LDFLAGS  += $(VISION_LDFLAGS)
-INCDIRS  += $(VISION_INCDIRS)
-LIBDIRS  += $(VISION_LIBDIRS)
-LIBS     += $(VISION_LIBS)
 
 OBJS_qa_rx28ptu := qa_rx28ptu.o ../robotis/rx28.o
 LIBS_qa_rx28ptu := fawkescore fawkesutils
 
 OBJS_qa_evid100p := qa_evid100p.o ../sony/visca.o ../sony/evid100p.o
-LIBS_qa_evid100p := fawkescore fawkesutils
+LIBS_qa_evid100p := m fawkescore fawkesutils
 
 OBJS_all = $(OBJS_qa_rx28ptu) $(OBJS_qa_evid100p)
 BINS_all = $(BINDIR)/qa_rx28ptu $(BINDIR)/qa_evid100p

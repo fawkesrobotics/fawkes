@@ -20,15 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/firestation/fuse_transfer_widget.h>
-#include <tools/firestation/colormap_viewer_widget.h>
+#include "fuse_transfer_widget.h"
+#include "colormap_viewer_widget.h"
 
 #include <fvutils/net/fuse_client.h>
 #include <fvutils/net/fuse_message.h>
 #include <fvutils/net/fuse_lut_content.h>
 #include <fvutils/net/fuse_lutlist_content.h>
 
-#include <models/color/lookuptable.h>
+#include <fvmodels/color/lookuptable.h>
 
 #include <netinet/in.h>
 #include <cstring>

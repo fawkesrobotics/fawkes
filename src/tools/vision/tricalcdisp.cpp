@@ -24,7 +24,7 @@
 #include <fvutils/readers/fvraw.h>
 #include <fvutils/color/conversions.h>
 
-#include <stereo/triclops.h>
+#include <fvstereo/triclops.h>
 
 #include <list>
 #include <string>

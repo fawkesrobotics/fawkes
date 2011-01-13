@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/firestation/mirror_calib.h>
+#include "mirror_calib.h"
 #ifdef HAVE_BULB_CREATOR
-#include <models/mirror/bulb.h>
-#include <bulb_calib/bulb_sampler.h>
+#  include <fvmodels/mirror/bulb.h>
+#  include <bulb_calib/bulb_sampler.h>
 #endif
 #include <core/exception.h>
 #include <utils/math/angle.h>

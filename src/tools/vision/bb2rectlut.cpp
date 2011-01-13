@@ -21,7 +21,7 @@
  */
 
 #ifdef HAVE_BUMBLEBEE2_CAM
-#include <cams/bumblebee2.h>
+#include <fvcams/bumblebee2.h>
 #endif
 #include <fvutils/system/camargp.h>
 #include <utils/system/argparser.h>
@@ -30,7 +30,7 @@
 #include <fvutils/rectification/rectinfo_lut_block.h>
 
 #ifdef HAVE_TRICLOPS_SDK
-#include <stereo/triclops.h>
+#include <fvstereo/triclops.h>
 #include <cerrno>
 #endif
 

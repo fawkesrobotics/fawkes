@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/base/aqt_vision_threads.h>
+#include "aqt_vision_threads.h"
 
 #include <core/threading/barrier.h>
 #include <utils/time/clock.h>
@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class FvAqtVisionThreads <apps/base/aqt_vision_threads.h>
+/** @class FvAqtVisionThreads "aqt_vision_threads.h"
  * Aquisition-dependant threads.
  * This class is used for managing the vision threads that depend on a
  * given aquisition thread. Used internally in base vision.

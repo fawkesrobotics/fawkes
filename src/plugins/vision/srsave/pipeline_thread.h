@@ -30,7 +30,9 @@
 #include <aspect/vision.h>
 #include <aspect/blackboard.h>
 
-class Camera;
+namespace firevision {
+  class Camera;
+}
 
 class FvSrSavePipelineThread
 : public fawkes::Thread,
@@ -48,9 +50,9 @@ class FvSrSavePipelineThread
   virtual void loop();
 
  private:
-  Camera          *__cam;
+  firevision::Camera *__cam;
 
-  unsigned int     __frame_i;
+  unsigned int __frame_i;
 };
 
 #endif /* __FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_ */

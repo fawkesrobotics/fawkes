@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <cams/firewire.h>
+#include <fvcams/firewire.h>
 
 using namespace firevision;
 

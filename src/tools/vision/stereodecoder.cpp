@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <cams/bumblebee2.h>
+#include <fvcams/bumblebee2.h>
 #include <fvutils/writers/jpeg.h>
 #include <fvutils/readers/fvraw.h>
 #include <fvutils/color/conversions.h>

@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/firestation/colormap_viewer_widget.h>
+#include "colormap_viewer_widget.h"
 #include <fvutils/colormap/colormap.h>
 #include <fvutils/scalers/lossy.h>
 #include <fvutils/color/conversions.h>

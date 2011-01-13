@@ -24,22 +24,22 @@
 #include <core/exceptions/software.h>
 #include <utils/system/argparser.h>
 
-#include <cams/factory.h>
+#include <fvcams/factory.h>
 #ifdef HAVE_SHMEM_CAM
-#include <cams/shmem.h>
+#include <fvcams/shmem.h>
 #endif
 #ifdef HAVE_NETWORK_CAM
-#include <cams/net.h>
+#include <fvcams/net.h>
 #endif
 #ifdef HAVE_FILELOADER_CAM
-#include <cams/fileloader.h>
+#include <fvcams/fileloader.h>
 #endif
 
 #include <fvwidgets/image_display.h>
 #ifdef HAVE_RECTINFO
 #include <fvutils/rectification/rectfile.h>
 #include <fvutils/rectification/rectinfo_block.h>
-#include <filters/rectify.h>
+#include <fvfilters/rectify.h>
 #endif
 
 #include <cstring>

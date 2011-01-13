@@ -28,9 +28,9 @@
 #include <fvwidgets/fuse_image_list_widget.h>
 #include <gui_utils/avahi_dispatcher.h>
 
-#include <cams/fileloader.h>
-#include <cams/shmem.h>
-#include <cams/net.h>
+#include <fvcams/fileloader.h>
+#include <fvcams/shmem.h>
+#include <fvcams/net.h>
 
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/conversions.h>
