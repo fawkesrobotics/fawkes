@@ -18,12 +18,18 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 # Uncomment to enable simple time tracking
-#CFLAGS = -DUSE_TIMETRACKER
+#CFLAGS += -DUSE_TIMETRACKER
 
-LIBS_roomba = fawkescore fawkesutils fawkesaspects \
+LIBS_roomba = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface \
 	      Roomba500Interface LedInterface SwitchInterface MotorInterface \
 	      BatteryInterface
 OBJS_roomba = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
+
+ifeq ($(HAVE_BLUEZ),1)
+  CFLAGS  += $(CFLAGS_BLUEZ)
+  LDFLAGS += $(LDFLAGS_BLUEZ)
+endif
 
 PLUGINS_all = $(PLUGINDIR)/roomba.so
 

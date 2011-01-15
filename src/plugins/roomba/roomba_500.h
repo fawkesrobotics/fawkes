@@ -2,7 +2,7 @@
 /***************************************************************************
  *  roomba_500.h - Roomba Open Interface implementation for 500 series
  *
- *  Created: Sat Jan 01 19:13:38 2010
+ *  Created: Sat Jan 01 19:13:38 2011
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -34,6 +34,18 @@ namespace fawkes {
 class Roomba500
 {
  public:
+  /** Connection type. */
+  typedef enum {
+    CONNTYPE_SERIAL,	///< Use serial connection (device file).
+    CONNTYPE_ROOTOOTH	///< Use BlueZ to find and connect to RooTooth
+  } ConnectionType;
+
+  /** Connection flags.
+   * These flags allow to influence the connection creation and operation. */
+  typedef enum {
+    FLAG_FIREFLY_FASTMODE =  1	///< Enable fast mode, assume FireFly RooTooth
+  } ConnectionFlags;
+
   /** Roomba 500 Command op codes. */
   typedef enum {
     OPCODE_START		= 128,	///< Initiate communication with Roomba.
@@ -424,11 +436,31 @@ class Roomba500
 #pragma pack(pop)
 
  public:
-  Roomba500(const char *device_file);
+  Roomba500(ConnectionType conntype, const char *device, unsigned int flags = 0);
   ~Roomba500();
 
   void open();
   void close();
+
+  /** Check if connection has been established.
+   * @return true if connection has been established, false otherwise. */
+  bool is_connected() const { return (__fd != -1); }
+
+  /** Get connection type.
+   * @return connection type */
+  ConnectionType  get_connection_type() const { return __conntype; }
+  /** Get device string.
+   * @return device string */
+  const char * get_device() const { return __device; }
+
+  /** Get current mode.
+   * @return current mode. */
+  Mode get_mode() const { return __mode; }
+
+  /** Check if robot is being controlled.
+   * @return true if robot is being controlled, false otherwise. */
+  bool is_controlled() const
+  { return is_connected() && ( (__mode == MODE_SAFE) || (__mode == MODE_FULL) ); }
 
   void set_mode(Mode mode);
   void clean();
@@ -478,6 +510,9 @@ class Roomba500
   { if (__mode == MODE_OFF) throw fawkes::Exception("Not connected to robot."); }
 
  private:
+  ConnectionType        __conntype;
+  unsigned int          __conn_flags;
+
   Mode                  __mode;
   SensorPacketID        __packet_id;
   unsigned char         __packet_reply_id;
@@ -487,7 +522,7 @@ class Roomba500
   bool                  __sensor_packet_received;
   fawkes::Mutex        *__sensor_mutex;
 
-  char                 *__device_file;
+  char                 *__device;
   int                   __fd;
   fawkes::Mutex        *__read_mutex;
   fawkes::Mutex        *__write_mutex;

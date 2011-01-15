@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<interface name="Roomba500Interface" author="Tim Niemueller" year="2010">
+<interface name="Roomba500Interface" author="Tim Niemueller" year="2011">
   <constants>
     <enum name="Mode">
       <comment>Open Interface mode.</comment>

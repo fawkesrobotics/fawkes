@@ -2,7 +2,7 @@
 /***************************************************************************
  *  roomba_500.cpp - Roomba Open Interface implementation for 500 series
  *
- *  Created: Sat Jan 01 19:37:13 2010
+ *  Created: Sat Jan 01 19:37:13 2011
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -33,6 +33,17 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <netinet/in.h>
+
+#ifdef HAVE_BLUEZ
+#  include <bluetooth/bluetooth.h>
+#  include <bluetooth/hci.h>
+#  include <bluetooth/hci_lib.h>
+#  include <bluetooth/rfcomm.h>
+#  include <sys/socket.h>
+#  include <fnmatch.h>
+#endif
+
+static const bdaddr_t _BDADDR_ANY = {{0, 0, 0, 0, 0, 0}};
 
 using namespace fawkes;
 
@@ -216,15 +227,30 @@ typedef struct {
  */
 
 /** Constructor.
- * @param device_file device file for serial connection
+ * @param conntype connection type
+ * @param device for CONN_SERIAL connection type this is the device file for
+ * the serial connection. For CONN_ROOTOOTH this is either a name pattern
+ * of a bluetooth device to query or a bluetooth address. The name can be the
+ * full name, or a pattern using shell globs (e.g. FireFly-*). The bluetooth
+ * address must be given in hexadecimal manner (e.g. 00:11:22:33:44:55).
+ * @param flags ConnectionFlags constants, joined with bit-wise "or" (|).
  */
-Roomba500::Roomba500(const char *device_file)
+Roomba500::Roomba500(Roomba500::ConnectionType conntype, const char *device,
+		     unsigned int flags)
 {
+  __conntype   = conntype;
+  __conn_flags = flags;
+#ifndef HAVE_BLUEZ
+  if (__conntype == CONNTYPE_ROOTOOTH) {
+    throw Exception("Native RooTooth not available at compile time.");
+  }
+#endif
   __mode = MODE_OFF;
   __fd = -1;
   __packet_id = SENSPACK_GROUP_ALL;
   __sensors_enabled = false;
-  __device_file = strdup(device_file);
+
+  __device = strdup(device);
 
   __sensor_mutex = new Mutex();
   __read_mutex   = new Mutex();
@@ -233,7 +259,7 @@ Roomba500::Roomba500(const char *device_file)
   try {
     open();
   } catch (Exception &e) {
-    free(__device_file);
+    free(__device);
     delete __write_mutex;
     delete __read_mutex;
     delete __sensor_mutex;
@@ -246,7 +272,7 @@ Roomba500::Roomba500(const char *device_file)
 Roomba500::~Roomba500()
 {
   close();
-  free(__device_file);
+  free(__device);
   delete __write_mutex;
   delete __read_mutex;
   delete __sensor_mutex;
@@ -255,58 +281,239 @@ Roomba500::~Roomba500()
 
 /** Open serial port. */
 void
-Roomba500::open() {
+Roomba500::open()
+{
+  if (__conntype == CONNTYPE_SERIAL) {
+    struct termios param;
 
-  struct termios param;
+    __fd = ::open(__device, O_NOCTTY | O_RDWR);
+    if (__fd == -1) {
+      throw CouldNotOpenFileException(__device, errno, "Cannot open device file");
+    }
 
-  __fd = ::open(__device_file, O_NOCTTY | O_RDWR);
-  if (__fd == -1) {
-    throw CouldNotOpenFileException(__device_file, errno, "Cannot open device file");
-  }
+    if (tcgetattr(__fd, &param) == -1) {
+      Exception e(errno, "Getting the port parameters failed");
+      ::close(__fd);
+      __fd = -1;
+      throw e;
+    }
 
-  if (tcgetattr(__fd, &param) == -1) {
-    Exception e(errno, "Getting the port parameters failed");
+    cfsetospeed(&param, B115200);
+    cfsetispeed(&param, B115200);
+
+    param.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN);
+    param.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK | PARMRK);
+
+    // turn off hardware flow control
+    param.c_iflag &= ~(IXON | IXOFF | IXANY);
+    param.c_cflag &= ~CRTSCTS;
+
+    param.c_cflag |= (CREAD | CLOCAL);
+    
+    // number of data bits: 8
+    param.c_cflag &= ~CS5 & ~CS6 & ~CS7 & ~CS8;
+    param.c_cflag |= CS8;
+    
+    // parity: none
+    param.c_cflag &= ~(PARENB | PARODD);
+    param.c_iflag &= ~(INPCK | ISTRIP);
+    
+    // stop bits: 1
+    param.c_cflag &= ~CSTOPB;
+
+    //enable raw output
+    param.c_oflag &= ~OPOST;
+
+    param.c_cc[VMIN]  = 1;
+    param.c_cc[VTIME] = 0;
+    
+    tcflush(__fd, TCIOFLUSH);
+
+    if (tcsetattr(__fd, TCSANOW, &param) != 0) {
+      Exception e(errno, "Setting the port parameters failed");
+      ::close(__fd);
+      __fd = -1;
+      throw e;
+    }
+  } else {
+#ifndef HAVE_BLUEZ
+    throw Exception("Native RooTooth support unavailable at compile time.");
+#else
+    struct hci_dev_info di;
+    inquiry_info *ii = NULL;
+    int max_rsp, num_rsp;
+    int dev_id, sock, len, flags;
+    char addrstr[19] = { 0 };
+    char name[248] = { 0 };
+    bdaddr_t baddr = _BDADDR_ANY;
+
+    if ((dev_id = hci_get_route(NULL)) < 0) {
+      throw Exception("RooTooth: local bluetooth device is not available");
+    }
+
+    if (hci_devinfo(dev_id, &di) < 0) {
+      throw Exception("RooTooth: cannot get local device info.");
+    }
+
+    if ((sock = hci_open_dev(dev_id)) < 0) {
+      throw Exception("RooTooth: failed to open socket.");
+    }
+
+    len  = 8;
+    max_rsp = 255;
+    flags = IREQ_CACHE_FLUSH;
+    ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
+
+    if (strcmp(__device, "") == 0) {
+      // we simply guess from the device class
+
+      num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
+      if (num_rsp < 0) {
+	throw Exception(errno, "HCI inquiry failed");
+      }
+
+      for (int i = 0; i < num_rsp; i++) {
+
+	uint8_t b[6];
+        baswap((bdaddr_t *) b, &(ii+i)->bdaddr);
+
+	ba2str(&(ii+i)->bdaddr, addrstr);
+	/*
+	printf("Comparing (0x%2.2x%2.2x%2.2x) (0x%2.2x%2.2x%2.2x) %s %s\n",
+	       b[0], b[1], b[2],
+	       ii[i].dev_class[0], ii[i].dev_class[1], ii[i].dev_class[2],
+	       name, addrstr);
+	*/
+
+	// This checks for the RooTooth I have which identifies itself as
+	// FireFly-XXXX, where XXXX are the last four digits of the BT addr
+	if (// check OUI for Roving Networks
+	    (b[0] == 0x00) && (b[1] == 0x06) && (b[2] == 0x66) &&
+
+	    // check device class
+	    (ii[i].dev_class[0] == 0x00) &&
+	    (ii[i].dev_class[1] == 0x1f) &&
+	    (ii[i].dev_class[2] == 0x00) )
+	{
+	  // verify the name
+	  memset(name, 0, sizeof(name));
+	  hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name), name, 0);
+
+	  if ( // Now check the advertised name
+	      (fnmatch("FireFly-*", name, FNM_NOESCAPE) == 0) ||
+	      (strcmp("RooTooth", name) == 0) )
+	  {
+	    // found a device which is likely a 
+	    ba2str(&(ii+i)->bdaddr, addrstr);
+	    //printf("found A: %s  %s\n", addrstr, name);
+	    free(__device);
+	    __device = strdup(addrstr);
+	    bacpy(&baddr, &(ii+i)->bdaddr);
+	    break;
+	  }
+	}
+      }
+    } else {
+      bool is_bdaddr = (bachk(__device) == 0);
+
+      if (is_bdaddr) {
+	//printf("Match by bdaddr\n");
+
+	str2ba(__device, &baddr);
+	ba2str(&baddr, addrstr);
+
+	//printf("found B: %s  %s\n", addrstr, name);
+      } else {
+	//printf("Match by btname\n");
+
+	num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
+	if (num_rsp < 0) {
+	  throw Exception(errno, "HCI inquiry failed");
+	}
+
+	// we have a name pattern to check
+	for (int i = 0; i < num_rsp; i++) {
+	  ba2str(&(ii+i)->bdaddr, addrstr);
+	  memset(name, 0, sizeof(name));
+	  if (hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name), 
+				   name, 0) < 0)
+	  {
+	    strcpy(name, "[unknown]");
+	  }
+	  if (fnmatch(__device, name, FNM_NOESCAPE) == 0) {
+	    // found the device
+	    //printf("found C: %s  %s\n", addrstr, name);
+	    free(__device);
+	    __device = strdup(addrstr);
+	    bacpy(&baddr, &(ii+i)->bdaddr);
+	    break;
+	  }
+	}
+      }
+    }
+
+    free(ii);
+    ::close(sock);
+
+    if (bacmp(&baddr, &_BDADDR_ANY) == 0) {
+      throw Exception("Could not find RooTooth device.");
+    }
+    ba2str(&baddr, addrstr);
+
+    // connect via RFCOMM
+    struct sockaddr_rc rcaddr = { 0 };
+
+    // allocate a socket
+    __fd = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+
+    // set the connection parameters (who to connect to)
+    rcaddr.rc_family = AF_BLUETOOTH;
+    rcaddr.rc_channel = (uint8_t) 1;
+    bacpy(&rcaddr.rc_bdaddr, &baddr);
+
+    // connect to server
+    if (connect(__fd, (struct sockaddr *)&rcaddr, sizeof(rcaddr)) < 0) {
+      throw Exception(errno, "Failed to connect to %s", addrstr);
+    }
+
+    // Set to passive mode to ensure that auto-detection does no harm
+    send(OPCODE_START);
+    usleep(MODE_CHANGE_WAIT_MS * 1000);
+    // disable sensors just in case
+    disable_sensors();
+
+    if (flags & FLAG_FIREFLY_FASTMODE) {
+      const char *cmd_seq = "$$$";
+      if (write(__fd, cmd_seq, 3) != 3) {
+	throw Exception(errno, "Roomba500 (RooTooth): Failed to send command "
+			"sequence to enable fast mode");
+      }
+
+      timeval timeout = {1, 500000};
+      fd_set read_fds;
+      FD_ZERO(&read_fds);
+      FD_SET(__fd, &read_fds);
+
+      int rv = 0;
+      rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+
+      if (rv > 0) {
+	char cmd_reply[4];
+	if (read(__fd, cmd_reply, 4) == 4) {
+	  if (strncmp(cmd_reply, "CMD", 3) == 0) {
+	    // We entered command mode, enable fast mode
+	    const char *cmd_fastmode = "F,1\r";
+	    if (write(__fd, cmd_fastmode, 4) != 4) {
+	      throw Exception(errno, "Roomba500 (RooTooth): Failed to send fast "
+			      "mode command sequence.");
+	    } // else fast mode enabled
+	  } // else invalid reply, again assume fast mode
+	} // assume fast mode
+      } // else assume already enabled fast mode
+    } // else do not enable fast mode, assume user knows what he is doing
+
     ::close(__fd);
-    __fd = -1;
-    throw e;
-  }
-
-  cfsetospeed(&param, B115200);
-  cfsetispeed(&param, B115200);
-
-  param.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN);
-  param.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK | PARMRK);
-
-  // turn off hardware flow control
-  param.c_iflag &= ~(IXON | IXOFF | IXANY);
-  param.c_cflag &= ~CRTSCTS;
-
-  param.c_cflag |= (CREAD | CLOCAL);
-    
-  // number of data bits: 8
-  param.c_cflag &= ~CS5 & ~CS6 & ~CS7 & ~CS8;
-  param.c_cflag |= CS8;
-    
-  // parity: none
-  param.c_cflag &= ~(PARENB | PARODD);
-  param.c_iflag &= ~(INPCK | ISTRIP);
-    
-  // stop bits: 1
-  param.c_cflag &= ~CSTOPB;
-
-  //enable raw output
-  param.c_oflag &= ~OPOST;
-
-  param.c_cc[VMIN]  = 1;
-  param.c_cc[VTIME] = 0;
-    
-  tcflush(__fd, TCIOFLUSH);
-
-  if (tcsetattr(__fd, TCSANOW, &param) != 0) {
-    Exception e(errno, "Setting the port parameters failed");
-    ::close(__fd);
-    __fd = -1;
-    throw e;
+#endif
   }
 
   send(OPCODE_START);
@@ -536,10 +743,6 @@ void
 Roomba500::disable_sensors()
 {
   assert_connected();
-
-  if ( ! __sensors_enabled) {
-    throw Exception("Roomba 500 sensors have not been enabled.");
-  }
 
   unsigned char streamstate = STREAM_DISABLE;
 

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  thread_roomba_500.cpp - Roomba 500 thread
  *
- *  Created: Sun Jan 02 12:47:35 2010
+ *  Created: Sun Jan 02 12:47:35 2011
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -179,7 +179,64 @@ Roomba500Thread::init()
 
   __greeting_loop_count = 0;
 
-  __cfg_device = config->get_string("/hardware/roomba/device");
+  __cfg_device = "";
+  __cfg_btsave = false;
+
+  Roomba500::ConnectionType conntype;
+  __cfg_conntype = config->get_string("/hardware/roomba/connection_type");
+  __cfg_btfast = false;
+  __cfg_bttype = "firefly";
+  if (__cfg_conntype == "rootooth") {
+    try {
+      __cfg_device = config->get_string("/hardware/roomba/btaddr");
+    } catch (Exception &e) {
+      try {
+	__cfg_device = config->get_string("/hardware/roomba/btname");
+      } catch (Exception &e2) {
+	logger->log_info(name(), "Neither bluetooth name nor address set, "
+			 "trying auto-detect");
+      }
+    }
+    try {
+      __cfg_btfast = config->get_bool("/hardware/roomba/btfast");
+    } catch (Exception &e) {}
+
+    try {
+      __cfg_bttype = config->get_string("/hardware/roomba/bttype");
+    } catch (Exception &e) {
+      logger->log_info(name(), "RooTooth type not set, assuming 'firefly'");
+    }
+    if (__cfg_bttype == "firefly") {
+      // we're cool
+    } else if (__cfg_bttype == "mitsumi") {
+      if (__cfg_btfast) {
+	logger->log_warn(name(), "Fast mode setting for Mitsumi RooTooth not "
+			 "supported, please set outside of Fawkes or wait "
+			 "until configuration timeout has passed.");
+	__cfg_btfast = false;
+      }
+    } else {
+      logger->log_warn(name(), "Unknown RooTooth hardware type '%s' set",
+		       __cfg_bttype.c_str());
+      if (__cfg_btfast) {
+	logger->log_warn(name(), "Fast mode setting only supported for "
+			 "FireFly RooTooth");
+	__cfg_btfast = false;
+      }
+    }
+
+    conntype = Roomba500::CONNTYPE_ROOTOOTH;
+  } else if (__cfg_conntype == "serial") {
+    __cfg_device = config->get_string("/hardware/roomba/device");
+    conntype = Roomba500::CONNTYPE_SERIAL;
+  } else {
+    throw Exception("Unknown mode '%s', must be rootooth or serial",
+		    __cfg_conntype.c_str());
+  }
+
+  try {
+    __cfg_btsave = config->get_bool("/hardware/roomba/btsave");
+  } catch (Exception &e) {}
 
   Roomba500::Mode mode = Roomba500::MODE_PASSIVE;
   __cfg_mode = "passive";
@@ -237,7 +294,12 @@ Roomba500Thread::init()
 
   __wt = NULL;
   try {
-    __roomba = new Roomba500(__cfg_device.c_str());
+    unsigned int flags = 0;
+    if (conntype == Roomba500::CONNTYPE_ROOTOOTH) {
+      logger->log_debug(name(), "Opening device, this may take a while");
+      if (__cfg_btfast) flags |= Roomba500::FLAG_FIREFLY_FASTMODE;
+    }
+    __roomba = new Roomba500(conntype, __cfg_device.c_str(), flags);
     __roomba->set_mode(mode);
     if (__roomba->is_controlled())
       __roomba->set_leds(false, false, false, true, 0, 0);

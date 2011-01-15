@@ -2,7 +2,7 @@
 /***************************************************************************
  *  thread_roomba_500.h - Roomba 500 thread
  *
- *  Created: Sun Jan 02 12:47:35 2010
+ *  Created: Sun Jan 02 12:47:35 2011
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -89,8 +89,12 @@ class Roomba500Thread
 
   fawkes::RefPtr<Roomba500>   __roomba;
 
+  std::string  __cfg_conntype;
   std::string  __cfg_mode;
   std::string  __cfg_device;
+  std::string  __cfg_bttype;
+  bool         __cfg_btsave;
+  bool         __cfg_btfast;
 
   unsigned int __greeting_loop_count;
 

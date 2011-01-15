@@ -2,7 +2,7 @@
 /***************************************************************************
  *  sensor_thread.cpp - Roomba plugin sensor thread
  *
- *  Created: Mon Jan 03 00:05:32 2010
+ *  Created: Mon Jan 03 00:05:32 2011
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/

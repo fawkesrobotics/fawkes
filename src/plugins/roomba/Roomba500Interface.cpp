@@ -3,7 +3,7 @@
  *  Roomba500Interface.cpp - Fawkes BlackBoard Interface - Roomba500Interface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2010  Tim Niemueller
+ *  Copyright  2011  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -117,7 +117,7 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_BOOL, "caster_stasis", 1, &data->caster_stasis);
   add_messageinfo("StopMessage");
   add_messageinfo("DriveStraightMessage");
-  unsigned char tmp_hash[] = {0x13, 0x51, 0x34, 0x2, 0xca, 0xb, 0xe3, 0xa3, 0x7d, 0x23, 0x23, 0x52, 0xef, 0xe2, 0x63, 0xf4};
+  unsigned char tmp_hash[] = {0x62, 0xa0, 0x6b, 0x57, 0x31, 0xee, 0xb5, 0x33, 0x4b, 0x38, 0xd8, 0x8f, 0x2a, 0x9a, 0x84, 0xe8};
   set_hash(tmp_hash);
 }
 
