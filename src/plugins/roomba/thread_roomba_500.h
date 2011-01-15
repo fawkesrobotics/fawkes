@@ -89,6 +89,7 @@ class Roomba500Thread
 
   fawkes::RefPtr<Roomba500>   __roomba;
 
+  std::string  __cfg_mode;
   std::string  __cfg_device;
 
   unsigned int __greeting_loop_count;

@@ -65,7 +65,7 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
 #endif
 
     __roomba->enable_sensors();
-    __roomba->play_fanfare();
+    if (__roomba->is_controlled())  __roomba->play_fanfare();
   }
 
   /** Destructor. */
@@ -149,7 +149,7 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
 
 /** Constructor. */
 Roomba500Thread::Roomba500Thread()
-  : Thread("Roomba500:Sensor", Thread::OPMODE_WAITFORWAKEUP),
+  : Thread("Roomba500", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
 }
@@ -180,6 +180,23 @@ Roomba500Thread::init()
   __greeting_loop_count = 0;
 
   __cfg_device = config->get_string("/hardware/roomba/device");
+
+  Roomba500::Mode mode = Roomba500::MODE_PASSIVE;
+  __cfg_mode = "passive";
+  try {
+    __cfg_mode = config->get_string("/hardware/roomba/mode");
+  } catch (Exception &e) {}
+  if (__cfg_mode == "passive") {
+    mode = Roomba500::MODE_PASSIVE;
+  } else if (__cfg_mode == "safe") {
+    mode = Roomba500::MODE_SAFE;
+  } else if (__cfg_mode == "full") {
+    mode = Roomba500::MODE_FULL;
+  } else {
+    throw Exception("Unknown mode '%s', must be one of passive, safe, or full",
+		    __cfg_mode.c_str());
+  }
+
 
   try {
     __roomba500_if = blackboard->open_for_writing<Roomba500Interface>("Roomba 500");
@@ -221,8 +238,9 @@ Roomba500Thread::init()
   __wt = NULL;
   try {
     __roomba = new Roomba500(__cfg_device.c_str());
-    __roomba->set_mode(Roomba500::MODE_SAFE);
-    __roomba->set_leds(false, false, false, true, 0, 0);
+    __roomba->set_mode(mode);
+    if (__roomba->is_controlled())
+      __roomba->set_leds(false, false, false, true, 0, 0);
     __wt = new WorkerThread(logger, clock, __roomba);
   } catch (Exception &e) {
     close_interfaces();
@@ -302,10 +320,15 @@ Roomba500Thread::loop()
        (led_clean_color != __led_if_clean_color->intensity()) ||
        (led_clean_intensity != __led_if_clean_intensity->intensity()) )
   {
-    __roomba->set_leds(led_debris > 0.5, led_spot > 0.5,
-		       led_dock > 0.5, led_check_robot > 0.5,
-		       (char)roundf(led_clean_color * 255.),
-		       (char)roundf(led_clean_intensity * 255.));
+    try {
+      __roomba->set_leds(led_debris > 0.5, led_spot > 0.5,
+			 led_dock > 0.5, led_check_robot > 0.5,
+			 (char)roundf(led_clean_color * 255.),
+			 (char)roundf(led_clean_intensity * 255.));
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Failed to set LEDs, exception follows");
+      logger->log_warn(name(), e);
+    }
 
     __led_if_debris->set_intensity(led_debris);
     __led_if_spot->set_intensity(led_spot);
@@ -325,21 +348,34 @@ Roomba500Thread::loop()
   while (! __roomba500_if->msgq_empty() ) {
     if (__roomba500_if->msgq_first_is<Roomba500Interface::StopMessage>())
     {
-      __roomba->stop();
+      try {
+	__roomba->stop();
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to stop robot, exception follows");
+	logger->log_warn(name(), e);
+      }
     } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveStraightMessage>()) {
       Roomba500Interface::DriveStraightMessage *msg =
 	__roomba500_if->msgq_first(msg);
 
-      __roomba->drive_straight(msg->velocity());
+      try {
+	__roomba->drive_straight(msg->velocity());
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to drive straight, exception follows");
+	logger->log_warn(name(), e);
+      }
     }
     __roomba500_if->msgq_pop();
   }
 
-  if (__greeting_loop_count < 50) {
-    if (++__greeting_loop_count == 50) {
-      __roomba->set_leds(false, false, false, false, 0, 0);
-    } else {
-      __roomba->set_leds(false, false, false, true, 0, __greeting_loop_count * 5);
+  if (__roomba->is_controlled()) {
+    if (__greeting_loop_count < 50) {
+      if (++__greeting_loop_count == 50) {
+	__roomba->set_leds(false, false, false, false, 0, 0);
+      } else {
+	__roomba->set_leds(false, false, false, true,
+			   0, __greeting_loop_count * 5);
+      }
     }
   }
 }
