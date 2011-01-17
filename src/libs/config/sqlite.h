@@ -116,31 +116,31 @@ class SQLiteConfiguration : public Configuration
    public:
     virtual ~SQLiteValueIterator();
     virtual bool          next();
-    virtual bool          valid();
+    virtual bool          valid() const;
     
-    virtual const char *  path();
-    virtual const char *  type();
+    virtual const char *  path() const;
+    virtual const char *  type() const;
     
-    virtual bool          is_float();
-    virtual bool          is_uint();
-    virtual bool          is_int();
-    virtual bool          is_bool();
-    virtual bool          is_string();
+    virtual bool          is_float() const;
+    virtual bool          is_uint() const;
+    virtual bool          is_int() const;
+    virtual bool          is_bool() const;
+    virtual bool          is_string() const;
 
-    virtual bool          is_default();
+    virtual bool          is_default() const;
 
-    virtual float         get_float();
-    virtual unsigned int  get_uint();
-    virtual int           get_int();
-    virtual bool          get_bool();
-    virtual std::string   get_string();
+    virtual float         get_float() const;
+    virtual unsigned int  get_uint() const;
+    virtual int           get_int() const;
+    virtual bool          get_bool() const;
+    virtual std::string   get_string() const;
 
-    virtual std::string   get_as_string();
+    virtual std::string   get_as_string() const;
 
-    virtual std::string   get_comment();
+    virtual std::string   get_comment() const;
 
-    std::string           get_modtype();
-    std::string           get_oldvalue();
+    std::string           get_modtype() const;
+    std::string           get_oldvalue() const;
 
    private:
     ::sqlite3_stmt *__stmt;

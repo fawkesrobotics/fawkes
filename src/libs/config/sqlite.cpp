@@ -2137,7 +2137,7 @@ SQLiteConfiguration::SQLiteValueIterator::next()
  * @return true, if the iterator is still valid, false otherwise
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::valid()
+SQLiteConfiguration::SQLiteValueIterator::valid() const
 {
   return ( __stmt != NULL);
 }
@@ -2147,7 +2147,7 @@ SQLiteConfiguration::SQLiteValueIterator::valid()
  * @return path of value
  */
 const char *
-SQLiteConfiguration::SQLiteValueIterator::path()
+SQLiteConfiguration::SQLiteValueIterator::path() const
 {
   return (const char *)sqlite3_column_text(__stmt, 0);
 }
@@ -2157,7 +2157,7 @@ SQLiteConfiguration::SQLiteValueIterator::path()
  * @return string representation of value type.
  */
 const char *
-SQLiteConfiguration::SQLiteValueIterator::type()
+SQLiteConfiguration::SQLiteValueIterator::type() const
 {
   return (const char *)sqlite3_column_text(__stmt, 1);
 }
@@ -2167,7 +2167,7 @@ SQLiteConfiguration::SQLiteValueIterator::type()
  * @return true, if value is a float, false otherwise
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::is_float()
+SQLiteConfiguration::SQLiteValueIterator::is_float() const
 {
   return (strcmp("float", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
@@ -2177,7 +2177,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_float()
  * @return true, if value is a unsigned int, false otherwise
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::is_uint()
+SQLiteConfiguration::SQLiteValueIterator::is_uint() const
 {
   return (strcmp("unsigned int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
@@ -2186,7 +2186,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_uint()
  * @return true, if value is a int, false otherwise
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::is_int()
+SQLiteConfiguration::SQLiteValueIterator::is_int() const
 {
   return (strcmp("int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
@@ -2196,7 +2196,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_int()
  * @return true, if value is a bool, false otherwise
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::is_bool()
+SQLiteConfiguration::SQLiteValueIterator::is_bool() const
 {
   return (strcmp("bool", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
@@ -2206,13 +2206,13 @@ SQLiteConfiguration::SQLiteValueIterator::is_bool()
  * @return true, if value is a string, false otherwise
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::is_string()
+SQLiteConfiguration::SQLiteValueIterator::is_string() const
 {
   return (strcmp("string", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
 bool
-SQLiteConfiguration::SQLiteValueIterator::is_default()
+SQLiteConfiguration::SQLiteValueIterator::is_default() const
 {
   return (sqlite3_column_int(__stmt, 4) == 1);
 }
@@ -2222,7 +2222,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_default()
  * @return value
  */
 float
-SQLiteConfiguration::SQLiteValueIterator::get_float()
+SQLiteConfiguration::SQLiteValueIterator::get_float() const
 {
   return (float)sqlite3_column_double(__stmt, 2);
 }
@@ -2232,7 +2232,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_float()
  * @return value
  */
 unsigned int
-SQLiteConfiguration::SQLiteValueIterator::get_uint()
+SQLiteConfiguration::SQLiteValueIterator::get_uint() const
 {
   int i = sqlite3_column_int(__stmt, 2);
   if( i < 0 ) {
@@ -2247,7 +2247,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_uint()
  * @return value
  */
 int
-SQLiteConfiguration::SQLiteValueIterator::get_int()
+SQLiteConfiguration::SQLiteValueIterator::get_int() const
 {
   return sqlite3_column_int(__stmt, 2);
 }
@@ -2256,7 +2256,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_int()
  * @return value
  */
 bool
-SQLiteConfiguration::SQLiteValueIterator::get_bool()
+SQLiteConfiguration::SQLiteValueIterator::get_bool() const
 {
   return (sqlite3_column_int(__stmt, 2) != 0);
 }
@@ -2265,7 +2265,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_bool()
  * @return value
  */
 std::string
-SQLiteConfiguration::SQLiteValueIterator::get_string()
+SQLiteConfiguration::SQLiteValueIterator::get_string() const
 {
   return (const char *)sqlite3_column_text(__stmt, 2);
 }
@@ -2275,7 +2275,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_string()
  * @return value
  */
 std::string
-SQLiteConfiguration::SQLiteValueIterator::get_as_string()
+SQLiteConfiguration::SQLiteValueIterator::get_as_string() const
 {
   return (const char *)sqlite3_column_text(__stmt, 2);
 }
@@ -2284,7 +2284,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_as_string()
  * @return string comment value
  */
 std::string
-SQLiteConfiguration::SQLiteValueIterator::get_comment()
+SQLiteConfiguration::SQLiteValueIterator::get_comment() const
 {
   const char *c = (const char *)sqlite3_column_text(__stmt, 3);
   return c ? c : "";
@@ -2297,7 +2297,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_comment()
  * @return string modification type
  */
 std::string
-SQLiteConfiguration::SQLiteValueIterator::get_modtype()
+SQLiteConfiguration::SQLiteValueIterator::get_modtype() const
 {
   const char *c = (const char *)sqlite3_column_text(__stmt, 4);
   return c ? c : "";
@@ -2313,7 +2313,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_modtype()
  * @return string modification type
  */
 std::string
-SQLiteConfiguration::SQLiteValueIterator::get_oldvalue()
+SQLiteConfiguration::SQLiteValueIterator::get_oldvalue() const
 {
   const char *c = (const char *)sqlite3_column_text(__stmt, 5);
   return c ? c : "";
