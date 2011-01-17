@@ -25,13 +25,14 @@
 #define __CONFIG_CONFIG_H_
 
 #include <core/exception.h>
-#include <config/change_handler.h>
 #include <utils/misc/string_compare.h>
 #include <string>
 #include <list>
 #include <map>
 
 namespace fawkes {
+
+class ConfigurationChangeHandler;
 
 class ConfigurationException : public Exception
 {
@@ -85,6 +86,7 @@ class Configuration
     virtual int           get_int() const                                 = 0;
     virtual bool          get_bool() const                                = 0;
     virtual std::string   get_string() const                              = 0;
+    virtual std::string   get_as_string() const                           = 0;
 
     virtual std::string   get_comment() const                             = 0;
 
@@ -179,11 +181,8 @@ class Configuration
   /** Change handler range. */
   ChangeHandlerMultimapRange             _ch_range;
 
-  /** Find handlers for given path.
-   * @param path path to get handlers for
-   * @return list with config change handlers.
-   */
   ChangeHandlerList * find_handlers(const char *path);
+  void notify_handlers(const char *path, bool comment_changed = false);
 
 };
 

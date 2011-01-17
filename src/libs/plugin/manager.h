@@ -60,14 +60,10 @@ class PluginManager
   ~PluginManager();
 
   // for ConfigurationChangeHandler
-  virtual void config_tag_changed(const char *new_tag);
-  virtual void config_value_changed(const char *path, bool is_default, int value);
-  virtual void config_value_changed(const char *path, bool is_default, unsigned int value);
-  virtual void config_value_changed(const char *path, bool is_default, float value);
-  virtual void config_value_changed(const char *path, bool is_default, bool value);
-  virtual void config_value_changed(const char *path, bool is_default, const char *value);
-  virtual void config_comment_changed(const char *path, bool is_default, const char *comment);
-  virtual void config_value_erased(const char *path, bool is_default);
+  virtual void config_tag_changed(const char *new_location);
+  virtual void config_value_changed(const Configuration::ValueIterator *v);
+  virtual void config_comment_changed(const Configuration::ValueIterator *v);
+  virtual void config_value_erased(const char *path);
 
   // for FamListener
   virtual void fam_event(const char *filename, unsigned int mask);

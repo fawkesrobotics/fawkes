@@ -139,6 +139,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual int           get_int() const;
     virtual bool          get_bool() const;
     virtual std::string   get_string() const;
+    virtual std::string   get_as_string() const;
 
     virtual std::string   get_comment() const;
 

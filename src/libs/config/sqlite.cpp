@@ -1298,11 +1298,7 @@ SQLiteConfiguration::set_float(const char *path, float f)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, false, f);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1350,11 +1346,7 @@ SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
   }
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, false, uint);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1403,11 +1395,7 @@ SQLiteConfiguration::set_int(const char *path, int i)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator j = h->begin(); j != h->end(); ++j) {
-    (*j)->config_value_changed(path, false, i);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1456,11 +1444,7 @@ SQLiteConfiguration::set_bool(const char *path, bool b)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, false, b);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1512,11 +1496,7 @@ SQLiteConfiguration::set_string(const char *path,
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, false, s);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1560,11 +1540,7 @@ SQLiteConfiguration::set_comment(const char *path, const char *comment)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_comment_changed(path, false, comment);
-  }
-  delete h;
+  notify_handlers(path, true);
 }
 
 
@@ -1598,11 +1574,7 @@ SQLiteConfiguration::erase(const char *path)
 
   sqlite3_finalize(stmt);
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_erased(path, false);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1651,11 +1623,7 @@ SQLiteConfiguration::set_default_float(const char *path, float f)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, true, f);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1703,11 +1671,7 @@ SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
   }
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, true, uint);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1754,11 +1718,7 @@ SQLiteConfiguration::set_default_int(const char *path, int i)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator j = h->begin(); j != h->end(); ++j) {
-    (*j)->config_value_changed(path, true, i);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1807,11 +1767,7 @@ SQLiteConfiguration::set_default_bool(const char *path, bool b)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, true, b);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1862,11 +1818,7 @@ SQLiteConfiguration::set_default_string(const char *path,
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, true, s);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1909,11 +1861,7 @@ SQLiteConfiguration::set_default_comment(const char *path, const char *comment)
 
   mutex->unlock();
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_comment_changed(path, true, comment);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 
@@ -1947,11 +1895,7 @@ SQLiteConfiguration::erase_default(const char *path)
 
   sqlite3_finalize(stmt);
 
-  ChangeHandlerList *h = find_handlers(path);
-  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_erased(path, true);
-  }
-  delete h;
+  notify_handlers(path);
 }
 
 

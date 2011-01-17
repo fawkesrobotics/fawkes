@@ -33,6 +33,7 @@
 #include <netcomm/utils/exceptions.h>
 
 #include <utils/logging/liblogger.h>
+#include <utils/misc/string_conversions.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -1721,6 +1722,38 @@ NetworkConfiguration::NetConfValueIterator::get_string() const
     }
   } else {
     return i->get_string();
+  }
+}
+
+
+std::string
+NetworkConfiguration::NetConfValueIterator::get_as_string() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on "
+				 "invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_STRING_VALUE) {
+      config_string_value_msg_t *sm = msg->msgge<config_string_value_msg_t>();
+      return sm->s;
+    } else if (msg->msgid() == MSG_CONFIG_BOOL_VALUE) {
+      config_bool_value_msg_t *bm = msg->msg<config_bool_value_msg_t>();
+      return (bm->b != 0) ? "true" : "false";
+    } else if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
+      config_int_value_msg_t *im = msg->msg<config_int_value_msg_t>();
+      return StringConversions::to_string(im->i);
+    } else if (msg->msgid() == MSG_CONFIG_UINT_VALUE) {
+      config_uint_value_msg_t *im = msg->msg<config_uint_value_msg_t>();
+      return StringConversions::to_string(im->u);
+    } else if (msg->msgid() == MSG_CONFIG_FLOAT_VALUE) {
+      config_float_value_msg_t *fm = msg->msg<config_float_value_msg_t>();
+      return StringConversions::to_string(fm->f);
+    } else {
+      throw Exception("NetConfValueIterator::get_as_string: unknown type");
+    }
+  } else {
+    return i->get_as_string();
   }
 }
 

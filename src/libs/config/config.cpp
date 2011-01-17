@@ -22,6 +22,7 @@
  */
 
 #include <config/config.h>
+#include <config/change_handler.h>
 #include <cstring>
 
 namespace fawkes {
@@ -516,8 +517,9 @@ Configuration::rem_change_handler(ConfigurationChangeHandler *h)
 }
 
 
-/** Find all handlers for the given path.
- * @param path config path
+/** Find handlers for given path.
+ * @param path path to get handlers for
+ * @return list with config change handlers.
  */
 Configuration::ChangeHandlerList *
 Configuration::find_handlers(const char *path)
@@ -533,6 +535,34 @@ Configuration::find_handlers(const char *path)
   }
 
   return rv;
+}
+
+
+/** Notify handlers for given path.
+ * @param path path to notify handlers for
+ * @param comment_changed true if the change is about a comment change,
+ * false otherwise
+ */
+void
+Configuration::notify_handlers(const char *path, bool comment_changed)
+{
+  ChangeHandlerList *h = find_handlers(path);
+  Configuration::ValueIterator *value = get_value(path);
+  if (value->next()) {
+    for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+      if (comment_changed) {
+	(*i)->config_comment_changed(value);
+      } else {
+	(*i)->config_value_changed(value);
+      }
+    }
+  } else {
+    for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+      (*i)->config_value_erased(path);
+    }
+  }
+  delete value;
+  delete h;
 }
 
 } // end namespace fawkes

@@ -26,6 +26,8 @@
 #include <config/sqlite.h>
 
 #include <iostream>
+#include <cstdio>
+
 
 using namespace std;
 using namespace fawkes;
@@ -42,34 +44,30 @@ public:
   }
 
   virtual void
-  config_value_changed(const char *path, int value)
+  config_value_changed(const Configuration::ValueIterator *v)
   {
-    printf("CCH: Integer '%s' changed to %i\n", path, value);
+    if (v->is_string()) {
+      printf("CCH: String '%s' changed to %s\n",
+	     v->path(), v->get_string().c_str());
+    } else if (v->is_bool()) {
+      printf("CCH: Bool '%s' changed to %i\n", v->path(), v->get_bool());
+    } else if (v->is_int()) {
+      printf("CCH: Integer '%s' changed to %i\n", v->path(), v->get_int());
+    } else if (v->is_uint()) {
+      printf("CCH: Unsigned Integer '%s' changed to %u\n",
+	     v->path(), v->get_uint());
+    } else if (v->is_float()) {
+      printf("CCH: Float '%s' changed to %f\n", v->path(), v->get_float());
+    }
   }
 
   virtual void
-  config_value_changed(const char *path, unsigned int value)
+  config_comment_changed(const Configuration::ValueIterator *v)
   {
-    printf("CCH: Unsigned Integer '%s' changed to %u\n", path, value);
+    printf("CCH: Comment of '%s' changed to %s\n",
+	   v->path(), v->get_comment().c_str());
   }
 
-  virtual void
-  config_value_changed(const char *path, float value)
-  {
-    printf("CCH: Float '%s' changed to %f\n", path, value);
-  }
-
-  virtual void
-  config_value_changed(const char *path, bool value)
-  {
-    printf("CCH: Bool '%s' changed to %i\n", path, value);
-  }
-
-  virtual void
-  config_value_changed(const char *path, const char *value)
-  {
-    printf("CCH: String '%s' changed to %s\n", path, value);
-  }
 
   virtual void
   config_value_erased(const char *path)
