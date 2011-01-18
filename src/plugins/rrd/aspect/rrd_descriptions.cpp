@@ -3,7 +3,7 @@
  *  rrd_descriptions.cpp - Fawkes RRD descriptions
  *
  *  Created: Sat Dec 18 11:41:32 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -22,6 +22,7 @@
  */
 
 #include <plugins/rrd/aspect/rrd_descriptions.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
 #include <utils/misc/string_conversions.h>
@@ -54,8 +55,8 @@ const float RRDDataSource::UNKNOWN = FLT_MIN;
  */
 RRDDataSource::RRDDataSource(const char *name, Type type, unsigned int heartbeat,
 			     float min, float max)
-  : __name(name), __type(type), __heartbeat(heartbeat), __min(min), __max(max),
-    __rpn_expression(""), __string(NULL)
+  : __name(strdup(name)), __type(type), __heartbeat(heartbeat),
+    __min(min), __max(max), __rpn_expression(NULL), __string(NULL)
 {
   if (__type == COMPUTE) {
     throw IllegalArgumentException("Non-compute data source ctor used with "
@@ -69,8 +70,8 @@ RRDDataSource::RRDDataSource(const char *name, Type type, unsigned int heartbeat
  * @param rpn_expression RPN expression
  */
 RRDDataSource::RRDDataSource(const char *name, const char *rpn_expression)
-  : __name(name), __type(COMPUTE), __heartbeat(300), __min(UNKNOWN),
-    __max(UNKNOWN), __rpn_expression(rpn_expression), __string(NULL)
+  : __name(strdup(name)), __type(COMPUTE), __heartbeat(300), __min(UNKNOWN),
+    __max(UNKNOWN), __rpn_expression(strdup(rpn_expression)), __string(NULL)
 {
 }
 
@@ -78,9 +79,11 @@ RRDDataSource::RRDDataSource(const char *name, const char *rpn_expression)
  * @param other other instance to copy
  */
 RRDDataSource::RRDDataSource(const RRDDataSource &other)
-  : __name(other.__name), __type(other.__type), __heartbeat(other.__heartbeat),
+  : __name(strdup(other.__name)), __type(other.__type),
+    __heartbeat(other.__heartbeat),
     __min(other.__min), __max(other.__max),
-    __rpn_expression(other.__rpn_expression), __string(NULL)
+    __rpn_expression(other.__rpn_expression ? strdup(other.__rpn_expression) : 0),
+    __string(NULL)
 {
 }
 
@@ -88,6 +91,8 @@ RRDDataSource::RRDDataSource(const RRDDataSource &other)
 RRDDataSource::~RRDDataSource()
 {
   if (__string) free(__string);
+  if (__name)  free(__name);
+  if (__rpn_expression)  free(__rpn_expression);
 }
 
 /** Assignment operator.
@@ -98,13 +103,16 @@ RRDDataSource &
 RRDDataSource::operator=(const RRDDataSource &other)
 {
   if (__string) free(__string);
+  if (__name)  free(__name);
+  if (__rpn_expression)  free(__rpn_expression);
   __string = NULL;
-  __name = other.__name;
+  __rpn_expression = NULL;
+  __name = strdup(other.__name);
   __type = other.__type;
   __heartbeat = other.__heartbeat;
   __min = other.__min;
   __max = other.__max;
-  __rpn_expression = other.__rpn_expression;
+  if (other.__rpn_expression)  __rpn_expression = strdup(other.__rpn_expression);
 
   return *this;
 }
@@ -257,35 +265,34 @@ RRDArchive::cf_to_string(ConsolidationFunction cf)
  * This creates the RRD definition with the default RRAs produced by
  * get_default_rra().
  * @param name RRD name
+ * @param ds data sources
  * @param step_sec Specifies the base interval in seconds with which data
  * will be fed into the RRD.
  * @param recreate if true existing RRD files will be overwritten, otherwise
  * data is appended.
- * @param ds data sources
  */
-RRDDefinition::RRDDefinition(const char *name, unsigned int step_sec,
-			     bool recreate,
-			     std::vector<RRDDataSource> &ds)
-  : __name(name), __step_sec(step_sec), __recreate(recreate),
-    __ds(ds), __rra(get_default_rra()), __filename(NULL)
+RRDDefinition::RRDDefinition(const char *name, std::vector<RRDDataSource> &ds,
+			     unsigned int step_sec, bool recreate)
+  : __name(strdup(name)), __step_sec(step_sec), __recreate(recreate),
+    __ds(ds), __rra(get_default_rra()), __filename(NULL), __rrd_manager(NULL)
 {
 }
 
 /** Constructor.
  * @param name RRD name
+ * @param ds data sources
+ * @param rra RRAs for this RRD.
  * @param step_sec Specifies the base interval in seconds with which data
  * will be fed into the RRD.
  * @param recreate if true existing RRD files will be overwritten, otherwise
  * data is appended.
- * @param ds data sources
- * @param rra RRAs for this RRD.
  */
-RRDDefinition::RRDDefinition(const char *name, unsigned int step_sec,
-			     bool recreate,
+RRDDefinition::RRDDefinition(const char *name,
 			     std::vector<RRDDataSource> &ds,
-			     std::vector<RRDArchive> &rra)
-  : __name(name), __step_sec(step_sec), __recreate(recreate), __ds(ds),
-    __rra(rra), __filename(NULL)
+			     std::vector<RRDArchive> &rra,
+			     unsigned int step_sec, bool recreate)
+  : __name(strdup(name)), __step_sec(step_sec), __recreate(recreate), __ds(ds),
+    __rra(rra), __filename(NULL), __rrd_manager(NULL)
 {
 }
 
@@ -294,11 +301,11 @@ RRDDefinition::RRDDefinition(const char *name, unsigned int step_sec,
  * @param other instance to clone
  */
 RRDDefinition::RRDDefinition(const RRDDefinition &other)
-  : __name(other.__name), __step_sec(other.__step_sec),
+  : __name(strdup(other.__name)), __step_sec(other.__step_sec),
     __recreate(other.__recreate), __ds(other.__ds), __rra(other.__rra),
-    __filename(NULL)
+    __filename(other.__filename ? strdup(other.__filename) : 0),
+    __rrd_manager(NULL)
 {
-  if (other.__filename) __filename=strdup(other.__filename);
 }
 
 /** Assignment operator.
@@ -308,13 +315,16 @@ RRDDefinition::RRDDefinition(const RRDDefinition &other)
 RRDDefinition &
 RRDDefinition::operator=(const RRDDefinition &other)
 {
+  if (__name)  free(__name);
   if (__filename) free(__filename);
-  __filename  = NULL;
-  __name      = other.__name;
-  __step_sec  = other.__step_sec;
-  __recreate  = other.__recreate;
-  __ds        = other.__ds;
-  __rra       = other.__rra;
+  if (__rrd_manager)  __rrd_manager->remove_rrd(this);
+  __filename    = NULL;
+  __rrd_manager = NULL;
+  __name        = strdup(other.__name);
+  __step_sec    = other.__step_sec;
+  __recreate    = other.__recreate;
+  __ds          = other.__ds;
+  __rra         = other.__rra;
   if (other.__filename) __filename=strdup(other.__filename);
   return *this;
 }
@@ -322,6 +332,9 @@ RRDDefinition::operator=(const RRDDefinition &other)
 /** Destructor. */
 RRDDefinition::~RRDDefinition()
 {
+  if (__rrd_manager)  __rrd_manager->remove_rrd(this);
+
+  if (__name)  free(__name);
   if (__filename)  free(__filename);
 }
 
@@ -406,6 +419,23 @@ RRDDefinition::set_filename(const char *filename)
 }
 
 
+/** Set RRD manager.
+ * This can be done only once. Do not do this manually, rather let the RRDManager
+ * handle this! The RRD manager is used to unregister this RRD if it is deleted.
+ * This is a precaution to avoid dangling RRDs.
+ * @param rrd_manager RRD manager to use
+ */
+void
+RRDDefinition::set_rrd_manager(RRDManager *rrd_manager)
+{
+  if (__rrd_manager) {
+    throw Exception("RRD definition %s: RRD manager has already been set", __name);
+  }
+  __rrd_manager = rrd_manager;
+}
+
+
+
 /** @class RRDGraphDataDefinition <plugins/rrd/aspect/rrd_descriptions.h>
  * Represent data definition in graph arguments.
  * @author Tim Niemueller
@@ -417,13 +447,14 @@ RRDDefinition::set_filename(const char *filename)
  * @param cf consolidation function to apply if needed
  * @param rrd_def RRD definition to use
  * @param ds_name data source name in RRD, @p rrd_def will be queried for the
- * data source.
+ * data source. If ds_name is NULL, @p name will be used as the data source name.
  */
 RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name,
 					       RRDArchive::ConsolidationFunction cf,
 					       const RRDDefinition *rrd_def,
 					       const char *ds_name)
-  : __name(name), __rrd_def(rrd_def), __ds_name(ds_name),
+  : __name(strdup(name)), __rrd_def(rrd_def),
+    __ds_name(ds_name ? strdup(ds_name) : strdup(name)),
     __rpn_expression(NULL), __cf(cf), __string(NULL)
 {
 }
@@ -435,7 +466,8 @@ RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name,
  */
 RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name,
 					       const char *rpn_expression)
-  : __name(name), __rrd_def(0), __ds_name(NULL), __rpn_expression(rpn_expression),
+  : __name(strdup(name)), __rrd_def(0), __ds_name(NULL),
+    __rpn_expression(strdup(rpn_expression)),
     __cf(RRDArchive::AVERAGE), __string(NULL)
 {
 }
@@ -445,8 +477,10 @@ RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name,
  * @param other instance to clone
  */
 RRDGraphDataDefinition::RRDGraphDataDefinition(const RRDGraphDataDefinition &other)
-  : __name(other.__name), __rrd_def(other.__rrd_def), __ds_name(other.__ds_name),
-    __rpn_expression(other.__rpn_expression),  __cf(other.__cf), __string(NULL)
+  : __name(strdup(other.__name)), __rrd_def(other.__rrd_def),
+    __ds_name(other.__ds_name ? strdup(other.__ds_name) : NULL),
+    __rpn_expression(other.__rpn_expression ? strdup(other.__rpn_expression) : 0),
+    __cf(other.__cf), __string(NULL)
 {
 }
 
@@ -454,7 +488,10 @@ RRDGraphDataDefinition::RRDGraphDataDefinition(const RRDGraphDataDefinition &oth
 /** Destructor. */
 RRDGraphDataDefinition::~RRDGraphDataDefinition()
 {
-  if (__string) free(__string);
+  if (__name)  free(__name);
+  if (__ds_name)  free(__ds_name);
+  if (__rpn_expression)  free(__rpn_expression);
+  if (__string)   free(__string);
 }
 
 /** Assignment operator.
@@ -464,12 +501,17 @@ RRDGraphDataDefinition::~RRDGraphDataDefinition()
 RRDGraphDataDefinition &
 RRDGraphDataDefinition::operator=(const RRDGraphDataDefinition &other)
 {
-  if (__string) free(__string);
+  if (__string)  free(__string);
+  if (__ds_name) free(__ds_name);
+  if (__name)  free(__name);
+  if (__rpn_expression) free(__rpn_expression);
+
   __string         = NULL;
-  __name           = other.__name;
+  __rpn_expression = NULL;
+  __name           = strdup(other.__name);
   __rrd_def        = other.__rrd_def;
-  __ds_name        = other.__ds_name;
-  __rpn_expression = other.__rpn_expression;
+  if (other.__ds_name)  __ds_name = strdup(other.__ds_name);
+  if (other.__rpn_expression)  __rpn_expression = other.__rpn_expression;
   __cf             = other.__cf;
 
   return *this;
@@ -507,10 +549,22 @@ RRDGraphDataDefinition::to_string() const
  * existing graph elements.
  * @author Tim Niemueller
  *
- * @fn const char *  RRDGraphElement::to_string() const = 0
- * Create string representation.
+ * @fn RRDGraphElement * RRDGraphElement::clone() const
+ * Clone this element.
+ * The clone function is needed to copy an object without knowing its type and
+ * therefore without calling its copy constructor.
+ * @return new copied instance
+ */
+
+/** Create string representation.
  * @return string suitable for rrd_graph_v().
  */
+const char *
+RRDGraphElement::to_string() const
+{
+  throw NotImplementedException("Invalid graph element");
+}
+
 
 
 /** @class RRDGraphGPrint <plugins/rrd/aspect/rrd_descriptions.h>
@@ -526,7 +580,17 @@ RRDGraphDataDefinition::to_string() const
 RRDGraphGPrint::RRDGraphGPrint(const char *def_name,
 			       RRDArchive::ConsolidationFunction cf,
 			       const char *format)
-  : __def_name(def_name), __cf(cf), __format(format), __string(NULL)
+  : __def_name(strdup(def_name)), __cf(cf), __format(strdup(format)),
+    __string(NULL)
+{
+}
+
+/** Copy constructor.
+ * @param other instance to copy
+ */
+RRDGraphGPrint::RRDGraphGPrint(const RRDGraphGPrint &other)
+  : __def_name(strdup(other.__def_name)), __cf(other.__cf),
+    __format(strdup(other.__format)), __string(NULL)
 {
 }
 
@@ -534,6 +598,8 @@ RRDGraphGPrint::RRDGraphGPrint(const char *def_name,
 /** Destructor. */
 RRDGraphGPrint::~RRDGraphGPrint()
 {
+  if (__def_name)  free(__def_name);
+  if (__format) free(__format);
   if (__string) free(__string);
 }
 
@@ -544,10 +610,14 @@ RRDGraphGPrint::~RRDGraphGPrint()
 RRDGraphGPrint &
 RRDGraphGPrint::operator=(const RRDGraphGPrint &g)
 {
+  if (__def_name)  free(__def_name);
+  if (__format) free(__format);
+  if (__string) free(__string);
+
   __string   = NULL;
-  __def_name = g.__def_name;
+  __def_name = strdup(g.__def_name);
   __cf       = g.__cf;
-  __format   = g.__format;
+  __format   = strdup(g.__format);
 
   return *this;
 }
@@ -581,8 +651,18 @@ RRDGraphGPrint::to_string() const
  */
 RRDGraphLine::RRDGraphLine(const char *def_name, float width, const char *color,
 			   const char *legend, bool stacked)
-  : __def_name(def_name), __width(width), __color(color), __legend(legend),
-    __stacked(stacked), __string(NULL)
+  : __def_name(strdup(def_name)), __width(width), __color(strdup(color)),
+    __legend(strdup(legend)), __stacked(stacked), __string(NULL)
+{
+}
+
+/** Copy ctor.
+ * @param other instance to copy
+ */
+RRDGraphLine::RRDGraphLine(const RRDGraphLine &other)
+  : __def_name(strdup(other.__def_name)), __width(other.__width),
+    __color(strdup(other.__color)),
+    __legend(strdup(other.__legend)), __stacked(other.__stacked), __string(NULL)
 {
 }
 
@@ -590,6 +670,9 @@ RRDGraphLine::RRDGraphLine(const char *def_name, float width, const char *color,
 /** Destructor. */
 RRDGraphLine::~RRDGraphLine()
 {
+  if (__def_name)  free(__def_name);
+  if (__color)  free(__color);
+  if (__legend)  free(__legend);
   if (__string) free(__string);
 }
 
@@ -601,11 +684,16 @@ RRDGraphLine::~RRDGraphLine()
 RRDGraphLine &
 RRDGraphLine::operator=(const RRDGraphLine &g)
 {
+  if (__def_name)  free(__def_name);
+  if (__color)  free(__color);
+  if (__legend)  free(__legend);
+  if (__string) free(__string);
+
   __string   = NULL;
-  __def_name = g.__def_name;
+  __def_name = strdup(g.__def_name);
   __width    = g.__width;
-  __color    = g.__color;
-  __legend   = g.__legend;
+  __color    = strdup(g.__color);
+  __legend   = strdup(g.__legend);
   __stacked  = g.__stacked;
 
   return *this;
@@ -639,8 +727,18 @@ RRDGraphLine::to_string() const
  */
 RRDGraphArea::RRDGraphArea(const char *def_name,const char *color,
 			   const char *legend, bool stacked)
-  : __def_name(def_name), __color(color), __legend(legend), __stacked(stacked),
-    __string(NULL)
+  : __def_name(strdup(def_name)), __color(strdup(color)),
+    __legend(strdup(legend)), __stacked(stacked), __string(NULL)
+{
+}
+
+
+/** Copy ctor.
+ * @param other instance to copy
+ */
+RRDGraphArea::RRDGraphArea(const RRDGraphArea &other)
+  : __def_name(strdup(other.__def_name)), __color(strdup(other.__color)),
+    __legend(strdup(other.__legend)), __stacked(other.__stacked), __string(NULL)
 {
 }
 
@@ -648,6 +746,9 @@ RRDGraphArea::RRDGraphArea(const char *def_name,const char *color,
 /** Destructor. */
 RRDGraphArea::~RRDGraphArea()
 {
+  if (__def_name)  free(__def_name);
+  if (__color)  free(__color);
+  if (__legend)  free(__legend);
   if (__string) free(__string);
 }
 
@@ -659,10 +760,15 @@ RRDGraphArea::~RRDGraphArea()
 RRDGraphArea &
 RRDGraphArea::operator=(const RRDGraphArea &g)
 {
+  if (__def_name)  free(__def_name);
+  if (__color)  free(__color);
+  if (__legend)  free(__legend);
+  if (__string) free(__string);
+
   __string   = NULL;
-  __def_name = g.__def_name;
-  __color    = g.__color;
-  __legend   = g.__legend;
+  __def_name = strdup(g.__def_name);
+  __color    = strdup(g.__color);
+  __legend   = strdup(g.__legend);
   __stacked  = g.__stacked;
 
   return *this;
@@ -705,18 +811,20 @@ RRDGraphArea::to_string() const
  * @param update_interval The interval at which the graph should be generated.
  * @param slope_mode true to enable slope mode when graphing
  * @param def data definitions for the graph
- * @param elements elements to print in the graph
+ * @param elements elements to print in the graph. This graph definition takes
+ * ownership of the graph elemenets and will delete them in its dtor.
  */
 RRDGraphDefinition::RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
-				       time_t start, time_t end, unsigned int step,
 				       const char *title,
 				       const char *vertical_label,
-				       unsigned int update_interval,
-				       bool slope_mode,
 				       std::vector<RRDGraphDataDefinition> &def,
-				       std::vector<RRDGraphElement *> &elements)
-  : __name(name), __rrd_def(rrd_def), __start(start), __end(end), __step(step),
-    __title(title), __vertical_label(vertical_label),
+				       std::vector<RRDGraphElement *> &elements,
+				       time_t start, time_t end, unsigned int step,
+				       unsigned int update_interval,
+				       bool slope_mode)
+  : __name(strdup(name)), __rrd_def(rrd_def),
+    __start(start), __end(end), __step(step),
+    __title(strdup(title)), __vertical_label(strdup(vertical_label)),
     __update_interval(update_interval), __slope_mode(slope_mode),
     __defs(def), __elements(elements)
 {
@@ -734,12 +842,41 @@ RRDGraphDefinition::RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
   __step_s  = strdup(StringConversions::to_string(__step).c_str());
 }
 
+/** Copy constructor.
+ * @param other instance to copy
+ */
+RRDGraphDefinition::RRDGraphDefinition(const RRDGraphDefinition &other)
+  : __name(strdup(other.__name)), __rrd_def(other.__rrd_def),
+    __start(other.__start), __end(other.__end), __step(other.__step),
+    __title(strdup(other.__title)),
+    __vertical_label(strdup(other.__vertical_label)),
+    __update_interval(other.__update_interval),
+    __slope_mode(other.__slope_mode), __defs(other.__defs),
+    __width(other.__width), __fonts(other.__fonts),
+    __filename(strdup(other.__filename))
+{
+  std::vector<RRDGraphElement *>::const_iterator i;
+  for (i = other.__elements.begin(); i != other.__elements.end(); ++i) {
+    __elements.push_back((*i)->clone());
+  }
+
+  __argv = NULL;
+  __argc = 0;
+  __width_s = strdup(StringConversions::to_string(__width).c_str());
+  __start_s = strdup(StringConversions::to_string(__start).c_str());
+  __end_s   = strdup(StringConversions::to_string(__end).c_str());
+  __step_s  = strdup(StringConversions::to_string(__step).c_str());
+}
+
 
 /** Destructor. */
 RRDGraphDefinition::~RRDGraphDefinition()
 {
   if (__filename) free(__filename);
   if (__argv)  free(__argv);
+  if (__name)  free(__name);
+  if (__title)  free(__title);
+  if (__vertical_label)  free(__vertical_label);
 
   free(__width_s);
   free(__start_s);
@@ -796,7 +933,12 @@ RRDGraphDefinition::get_argv(size_t &argc) const
     __argv[i++] = "--title";
     __argv[i++] = __title;
     __argv[i++] = "--vertical-label";
-    __argv[i++] = __vertical_label;
+
+    if (strcmp(__vertical_label, "") == 0) {
+      __argv[i++] = " ";
+    } else {
+      __argv[i++] = __vertical_label;
+    }
 
     if (__slope_mode) __argv[i++] = "--slope-mode";
 

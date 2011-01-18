@@ -176,6 +176,8 @@ RRDThread::add_rrd(RRDDefinition *rrd_def)
 		      rrd_def->get_name());
     }
   }
+
+  rrd_def->set_rrd_manager(this);
   __rrds.push_back(rrd_def);
 }
 

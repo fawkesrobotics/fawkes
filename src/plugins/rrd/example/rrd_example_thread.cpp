@@ -58,24 +58,23 @@ void
 RRDExampleThread::init()
 {
   std::vector<RRDDataSource> rrds;
-  rrds.push_back(RRDDataSource("value", RRDDataSource::COUNTER,
-			       30, 0, RRDDataSource::UNKNOWN));
-  __test_rrd_def = new RRDDefinition("test", 10, false, rrds);
+  rrds.push_back(RRDDataSource("value", RRDDataSource::COUNTER));
+  __test_rrd_def = new RRDDefinition("test", rrds);
   rrd_manager->add_rrd(__test_rrd_def);
 
   std::vector<RRDGraphDataDefinition> defs;
-  std::vector<RRDGraphElement *> els;
+  std::vector<RRDGraphElement> els;
 
   defs.push_back(RRDGraphDataDefinition("value", RRDArchive::AVERAGE,
-					__test_rrd_def, "value"));
+					_test_rrd_def));
   
-  els.push_back(new RRDGraphLine("value", 1, "FF0000", "Value", false));
-  els.push_back(new RRDGraphGPrint("value", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("value", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("value", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+  els.push_back(RRDGraphLine("value", 1, "FF0000", "Value", false));
+  els.push_back(RRDGraphGPrint("value", RRDArchive::LAST,
+			       "Current\\:%8.2lf %s"));
+  els.push_back(RRDGraphGPrint("value", RRDArchive::AVERAGE,
+			       "Average\\:%8.2lf %s"));
+  els.push_back(RRDGraphGPrint("value", RRDArchive::MAX,
+			       "Maximum\\:%8.2lf %s\\n"));
 
   __test_graph_def = new RRDGraphDefinition("testgraph", __test_rrd_def,
 					    -600, -10, 10,

@@ -25,13 +25,13 @@
 #define __PLUGINS_RRD_ASPECT_RRD_H_
 
 #include <aspect/aspect.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
+#include <plugins/rrd/aspect/rrd_descriptions.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-class RRDManager;
 
 class RRDAspect : public virtual Aspect
 {
