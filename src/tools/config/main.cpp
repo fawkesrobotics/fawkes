@@ -128,7 +128,7 @@ print_header()
  * @param i config item to print.
  */
 void
-print_value(Configuration::ValueIterator *i, bool show_comment = false)
+print_line(Configuration::ValueIterator *i, bool show_comment = false)
 {
   if ( i->is_float() ) {
     printf("%s %-55s| %-8s| %-14f\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_float());
@@ -158,7 +158,7 @@ print_value(Configuration::ValueIterator *i, bool show_comment = false)
  * @param i config item to print.
  */
 void
-print_line(Configuration::ValueIterator *i, bool show_comment = false)
+print_value(Configuration::ValueIterator *i, bool show_comment = false)
 {
   if ( i->is_float() ) {
     printf("%-14f\n", i->get_float());
@@ -264,10 +264,10 @@ main(int argc, char **argv)
       Configuration::ValueIterator *i = netconf->get_value(args[1]);
       if ( i->next() ) {
 	if( quiet ) {
-	  print_line(i);
+	  print_value(i);
 	} else {
 	  print_header();
-	  print_value(i);
+	  print_line(i);
 	}
       } else {
 	printf("No such value found!\n");
