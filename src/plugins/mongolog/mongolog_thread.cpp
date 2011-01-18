@@ -90,6 +90,12 @@ MongoLogThread::init()
   */
 
   __database = "fflog";
+  try {
+    __database = config->get_string("/plugins/mongolog/database");
+  } catch (Exception &e) {
+    logger->log_info(name(), "No database configured, writing to %s",
+		     __database.c_str());
+  }
 
   bbio_add_observed_create("*", "*");
 
@@ -105,6 +111,8 @@ MongoLogThread::init()
   }
 
   blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+
+  config->set_string("/plugins/mongorrd/databases/mongolog", __database);
 }
 
 
@@ -118,6 +126,7 @@ MongoLogThread::finalize()
   }
   __configs.clear();
   */
+  config->erase("/plugins/mongorrd/databases/mongolog");
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = __listeners.begin(); i != __listeners.end(); ++i) {
     delete i->second;
