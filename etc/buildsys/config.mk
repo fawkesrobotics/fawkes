@@ -150,9 +150,9 @@ endif
 #  GCC_VERSION_MAJOR=$(shell LANG=C $(CC) -v 2>&1 | grep "gcc version" | awk '{ print $$3 }' | awk -F. '{ print $$1 }')
 #endif
 
-FAWKES_VERSION_MAJOR = $(lastword $(shell grep FAWKES_VERSION_MAJOR $(LIBSRCDIR)/core/version.h))
-FAWKES_VERSION_MINOR = $(lastword $(shell grep FAWKES_VERSION_MINOR $(LIBSRCDIR)/core/version.h))
-FAWKES_VERSION_MICRO = $(lastword $(shell grep FAWKES_VERSION_MICRO $(LIBSRCDIR)/core/version.h))
+FAWKES_VERSION_MAJOR = $(lastword $(shell grep "\#define FAWKES_VERSION_MAJOR" $(LIBSRCDIR)/core/version.h))
+FAWKES_VERSION_MINOR = $(lastword $(shell grep "\#define FAWKES_VERSION_MINOR" $(LIBSRCDIR)/core/version.h))
+FAWKES_VERSION_MICRO = $(lastword $(shell grep "\#define FAWKES_VERSION_MICRO" $(LIBSRCDIR)/core/version.h))
 DEFAULT_SOVER        = $(FAWKES_VERSION_MAJOR).$(FAWKES_VERSION_MINOR).$(FAWKES_VERSION_MICRO)
 FAWKES_VERSION       = $(FAWKES_VERSION_MAJOR).$(FAWKES_VERSION_MINOR)$(subst .0,,.$(FAWKES_VERSION_MICRO))
 
