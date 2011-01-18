@@ -35,13 +35,14 @@ namespace fawkes {
  * tags, the &lt;head&gt; section, and the opening &lt;body&gt; tag.
  * @author Tim Niemueller
  *
- * @fn std::string WebPageHeaderGenerator::html_header(std::string &title, std::string &active_baseurl) = 0
+ * @fn std::string WebPageHeaderGenerator::html_header(std::string &title, std::string &active_baseurl, std::string &html_header) = 0
  * Generate HTML header.
  * @param title HTML title, must be put in &lt;title&gt; tag in &lt;head&gt;
  * section
  * @param active_baseurl the baseurl currently active processor (this is the
  * baseurl a processor is registered for). This can be used for example to
  * highlight the current section in the navigation.
+ * @param html_header custom HTML code to place in the head element of the page.
  * @return header HTML code
  */
 

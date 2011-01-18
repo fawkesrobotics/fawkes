@@ -42,6 +42,7 @@ const char *  WebviewHeaderGenerator::PAGE_HEADER =
   " <head>\n"
   "  <title>%s (%s)</title>\n"
   "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/webview.css\" />\n"
+  "%s"
   " </head>\n"
   " <body>\n"
   "  <div id=\"header\">"
@@ -58,13 +59,16 @@ WebviewHeaderGenerator::WebviewHeaderGenerator(WebNavManager *nav_manager)
 
 std::string
 WebviewHeaderGenerator::html_header(std::string &title,
-				    std::string &active_baseurl)
+				    std::string &active_baseurl,
+				    std::string &html_header)
 {
   fawkes::HostInfo hi;
 
   std::string rv = "";
   char *s;
-  if ( asprintf(&s, PAGE_HEADER, title.c_str(), hi.short_name()) != -1 ) {
+  if ( asprintf(&s, PAGE_HEADER, title.c_str(), hi.short_name(),
+		html_header.c_str()) != -1 )
+  {
     rv = s;
     free(s);
   }

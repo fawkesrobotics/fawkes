@@ -83,6 +83,8 @@ h4 :link, h4 :visited, h5 :link, h5 :visited, h6 :link, h6 :visited {
 
 /* Instances */
 #footer hr { margin-top: 15px; margin-bottom: 5px; }
+#footer #version { font-size: 10px; }
+#footer #version a, :link:hover, :visited:hover { background-color: white;  color: black; border-bottom: none; }
 .instances ul { font-size: 10px; list-style: none; margin: 0; text-align: right }
 .instances li {
     /*border-right: 1px solid #d7d7d7;*/

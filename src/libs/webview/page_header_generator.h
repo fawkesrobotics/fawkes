@@ -36,7 +36,8 @@ class WebPageHeaderGenerator
   virtual ~WebPageHeaderGenerator();
 
   virtual std::string html_header(std::string &title,
-				  std::string &active_baseurl) = 0;
+				  std::string &active_baseurl,
+				  std::string &html_header) = 0;
 
 };
 
