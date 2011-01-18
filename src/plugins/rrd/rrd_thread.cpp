@@ -105,8 +105,9 @@ RRDThread::generate_graphs()
     rrd_clear_error();
     rrd_info_t *i = rrd_graph_v(argc, (char **)argv);
     if (i == NULL) {
-      throw Exception("Creating graph for %s failed: %s",
-		      (*g)->get_rrd_def()->get_name(), rrd_get_error());
+      throw Exception("Creating graph %s (for RRD %s) failed: %s",
+		      (*g)->get_name(), (*g)->get_rrd_def()->get_name(),
+		      rrd_get_error());
     }
     rrd_info_free(i);
   }
@@ -214,9 +215,9 @@ RRDThread::add_graph(RRDGraphDefinition *rrd_graph_def)
   // generate filename
   char *filename;
   if (asprintf(&filename, "%s/%s.png", ".",
-	       rrd_graph_def->get_rrd_def()->get_name()) == -1) {
+	       rrd_graph_def->get_name()) == -1) {
     throw OutOfMemoryException("Failed to create filename for PNG %s",
-			       rrd_graph_def->get_rrd_def()->get_name());
+			       rrd_graph_def->get_name());
   }
   rrd_graph_def->set_filename(filename);
   free(filename);
