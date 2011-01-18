@@ -1,0 +1,4 @@
+.rrdgrid { width: 100%; }
+.rrdgrid td { padding-bottom: 20px; }
+.rrdgrid .left { text-align: left;  }
+.rrdgrid .right { text-align: right; }
