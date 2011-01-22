@@ -187,8 +187,7 @@ FileAlterationMonitor::watch_dir(const char *dirpath)
       }
     }
   } else {
-    throw Exception("FileAlterationMonitor",
-		    "Cannot add watch for %s", dirpath);
+    throw Exception(errno, "FileAlterationMonitor: cannot add watch for %s", dirpath);
   }
 
   closedir(d);
@@ -210,8 +209,7 @@ FileAlterationMonitor::watch_file(const char *filepath)
   if ( (iw = inotify_add_watch(__inotify_fd, filepath, mask)) >= 0) {
     __inotify_watches[iw] = filepath;
   } else {
-    throw Exception("FileAlterationMonitor",
-		    "Cannot add watch for file %s", filepath);
+    throw Exception("FileAlterationMonitor: cannot add watch for file %s", filepath);
   }
 #endif
 }
