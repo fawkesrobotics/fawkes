@@ -19,13 +19,13 @@ include $(BASEDIR)/etc/buildsys/config.mk
 CFLAGS = -g
 
 OBJS_qa_config = qa_config.o
-LIBS_qa_config = fawkesconfig
+LIBS_qa_config = fawkescore fawkesconfig
 
-#OBJS_qa_config_change_handler = qa_config_change_handler.o
-#LIBS_qa_config_change_handler = fawkesconfig
+OBJS_qa_config_change_handler = qa_config_change_handler.o
+LIBS_qa_config_change_handler = fawkescore fawkesconfig
 
 OBJS_qa_config_net_list_content = qa_net_list_content.o
-LIBS_qa_config_net_list_content = fawkesconfig
+LIBS_qa_config_net_list_content = fawkescore fawkesconfig
 
 OBJS_all = $(OBJS_qa_config) $(OBJS_qa_config_net_list_content)
 # $(OBJS_qa_config_change_handler)

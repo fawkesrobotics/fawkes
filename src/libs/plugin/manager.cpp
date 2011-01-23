@@ -414,62 +414,35 @@ PluginManager::config_tag_changed(const char *new_tag)
 }
 
 void
-PluginManager::config_value_changed(const char *path, bool is_default, int value)
+PluginManager::config_value_changed(const Configuration::ValueIterator *v)
 {
-  LibLogger::log_warn("PluginManager", "Integer value changed in meta plugins "
-		      "path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, unsigned int value)
-{
-  LibLogger::log_warn("PluginManager", "Unsigned integer value changed in meta "
-		      "plugins path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, float value)
-{
-  LibLogger::log_warn("PluginManager", "Float value changed in meta "
-		      "plugins path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, bool value)
-{
-  LibLogger::log_warn("PluginManager", "Boolean value changed in meta "
-		      "plugins path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_comment_changed(const char *path, bool is_default, const char *comment)
-{
-  // ignored
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, const char *value)
-{
-  __pinfo_cache.lock();
-  std::string p = std::string(path).substr(__meta_plugin_prefix.length());
-  std::string s = std::string("Meta: ") + value;
-  std::list<std::pair<std::string, std::string> >::iterator i;
-  bool found = false;
-  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
-    if (p == i->first) {
-      i->second = s;
-      found = true;
-      break;
+  if (v->is_string()) {
+    __pinfo_cache.lock();
+    std::string p = std::string(v->path()).substr(__meta_plugin_prefix.length());
+    std::string s = std::string("Meta: ") + v->get_string();
+    std::list<std::pair<std::string, std::string> >::iterator i;
+    bool found = false;
+    for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+      if (p == i->first) {
+	i->second = s;
+	found = true;
+	break;
+      }
     }
+    if (! found) {
+      __pinfo_cache.push_back(make_pair(p, s));
+    }
+    __pinfo_cache.unlock();
   }
-  if (! found) {
-    __pinfo_cache.push_back(make_pair(p, s));
-  }
-  __pinfo_cache.unlock();
 }
 
 void
-PluginManager::config_value_erased(const char *path, bool is_default)
+PluginManager::config_comment_changed(const Configuration::ValueIterator *v)
+{
+}
+
+void
+PluginManager::config_value_erased(const char *path)
 {
   __pinfo_cache.lock();
   std::string p = std::string(path).substr(__meta_plugin_prefix.length());

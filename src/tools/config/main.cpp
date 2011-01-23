@@ -22,6 +22,7 @@
 
 #include <netcomm/fawkes/client.h>
 #include <config/netconf.h>
+#include <config/change_handler.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
 
@@ -34,7 +35,8 @@ using namespace fawkes;
 
 /** Tool to watch and output config changes.
  */
-class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public SignalHandler
+class ConfigChangeWatcherTool
+  : public ConfigurationChangeHandler, public SignalHandler
 {
  public:
 
@@ -43,6 +45,7 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
    * @param c network client, thread is cancelled on signal
    */
   ConfigChangeWatcherTool(Configuration *config, FawkesNetworkClient *c)
+    : ConfigurationChangeHandler("")
   {
     this->c = c;
     this->config = config;
@@ -61,39 +64,21 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
     printf("--> New tag loaded: %s\n", new_tag);
   }
 
-  virtual void config_value_changed(const char *path, bool is_default, int value)
+  virtual void config_value_changed(const Configuration::ValueIterator *v)
   {
-    printf("%s %-55s| %-8s| %-14i\n", is_default ? "*" : " ", path, "int", value);
+    printf("%s %-55s| %-8s| %-14s\n", v->is_default() ? "*" : " ",
+	   v->path(), v->type(), v->get_as_string().c_str());
   }
 
-  virtual void config_value_changed(const char *path, bool is_default, unsigned int value)
+  virtual void config_comment_changed(const Configuration::ValueIterator *v)
   {
-    printf("%s %-55s| %-8s| %-14u\n", is_default ? "*" : " ", path, "uint", value);
+    printf("%s %s: %s\n", v->is_default() ? "C" : "c",
+	   v->path(), v->get_comment().c_str());
   }
 
-  virtual void config_value_changed(const char *path, bool is_default, float value)
+  virtual void config_value_erased(const char *path)
   {
-    printf("%s %-55s| %-8s| %-14f\n", is_default ? "*" : " ", path, "float", value);
-  }
-
-  virtual void config_value_changed(const char *path, bool is_default, bool value)
-  {
-    printf("%s %-55s| %-8s| %-14s\n", is_default ? "*" : " ", path, "bool", (value ? "true" : "false"));
-  }
-
-  virtual void config_value_changed(const char *path, bool is_default, const char *value)
-  {
-    printf("%s %-55s| %-8s| %-14s\n", is_default ? "*" : " ", path, "string", value);
-  }
-
-  virtual void config_comment_changed(const char *path, bool is_default, const char *comment)
-  {
-    printf("%s %s: %s\n", is_default ? "C" : "c", path, comment);
-  }
-
-  virtual void config_value_erased(const char *path, bool is_default)
-  {
-    printf("%s %-55s| %-8s| %-14s\n", is_default ? "*" : " ", path, "", "ERASED");
+    printf("  %-55s| %-8s| %-14s\n", path, "", "ERASED");
   }
 
 

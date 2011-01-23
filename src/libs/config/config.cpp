@@ -22,6 +22,7 @@
  */
 
 #include <config/config.h>
+#include <config/change_handler.h>
 #include <cstring>
 
 namespace fawkes {
@@ -399,67 +400,71 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  * This advances to the next element, if there is one.
  * @return true, if another element has been reached, false otherwise
  *
- * @fn bool Configuration::ValueIterator::valid()
+ * @fn bool Configuration::ValueIterator::valid() const
  * Check if the current element is valid.
  * This is much like the classic end element for iterators. If the iterator is
  * invalid there all subsequent calls to next() shall fail.
  * @return true, if the iterator is still valid, false otherwise
  *
- * @fn const char * Configuration::ValueIterator::path()
+ * @fn const char * Configuration::ValueIterator::path() const
  * Path of value.
  * @return path of value
  *
- * @fn const char * Configuration::ValueIterator::type()
+ * @fn const char * Configuration::ValueIterator::type() const
  * Type of value.
  * @return string representation of value type.
  *
- * @fn bool Configuration::ValueIterator::is_float()
+ * @fn bool Configuration::ValueIterator::is_float() const
  * Check if current value is a float.
  * @return true, if value is a float, false otherwise
  *
- * @fn bool Configuration::ValueIterator::is_uint()
+ * @fn bool Configuration::ValueIterator::is_uint() const
  * Check if current value is a unsigned int.
  * @return true, if value is a unsigned int, false otherwise
  *
- * @fn bool Configuration::ValueIterator::is_int()
+ * @fn bool Configuration::ValueIterator::is_int() const
  * Check if current value is a int.
  * @return true, if value is a int, false otherwise
  *
- * @fn bool Configuration::ValueIterator::is_bool()
+ * @fn bool Configuration::ValueIterator::is_bool() const
  * Check if current value is a bool.
  * @return true, if value is a bool, false otherwise
  *
- * @fn bool Configuration::ValueIterator::is_string()
+ * @fn bool Configuration::ValueIterator::is_string() const
  * Check if current value is a string.
  * @return true, if value is a string, false otherwise
  *
- * @fn bool Configuration::ValueIterator::is_default()
+ * @fn bool Configuration::ValueIterator::is_default() const
  * Check if current value was read from the default config.
  * @return true, if value was read from the default config, false otherwise
  *
- * @fn float Configuration::ValueIterator::get_float()
+ * @fn float Configuration::ValueIterator::get_float() const
  * Get float value.
  * @return value
  *
- * @fn unsigned int Configuration::ValueIterator::get_uint()
+ * @fn unsigned int Configuration::ValueIterator::get_uint() const
  * Get unsigned int value.
  * @return value
  *
- * @fn int Configuration::ValueIterator::get_int()
+ * @fn int Configuration::ValueIterator::get_int() const
  * Get int value.
  * @return value
  *
- * @fn bool Configuration::ValueIterator::get_bool()
+ * @fn bool Configuration::ValueIterator::get_bool() const
  * Get bool value.
  * @return value
  *
- * @fn std::string Configuration::ValueIterator::get_string()
+ * @fn std::string Configuration::ValueIterator::get_string() const
  * Get string value.
  * @return value
  *
- * @fn std::string Configuration::ValueIterator::get_comment()
+ * @fn std::string Configuration::ValueIterator::get_comment() const
  * Get comment of value.
  * @return comment
+ *
+ * @fn std::string Configuration::ValueIterator::get_as_string() const
+ * Get value as string.
+ * @return value as string
  *
  */
 
@@ -512,8 +517,9 @@ Configuration::rem_change_handler(ConfigurationChangeHandler *h)
 }
 
 
-/** Find all handlers for the given path.
- * @param path config path
+/** Find handlers for given path.
+ * @param path path to get handlers for
+ * @return list with config change handlers.
  */
 Configuration::ChangeHandlerList *
 Configuration::find_handlers(const char *path)
@@ -529,6 +535,34 @@ Configuration::find_handlers(const char *path)
   }
 
   return rv;
+}
+
+
+/** Notify handlers for given path.
+ * @param path path to notify handlers for
+ * @param comment_changed true if the change is about a comment change,
+ * false otherwise
+ */
+void
+Configuration::notify_handlers(const char *path, bool comment_changed)
+{
+  ChangeHandlerList *h = find_handlers(path);
+  Configuration::ValueIterator *value = get_value(path);
+  if (value->next()) {
+    for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+      if (comment_changed) {
+	(*i)->config_comment_changed(value);
+      } else {
+	(*i)->config_value_changed(value);
+      }
+    }
+  } else {
+    for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+      (*i)->config_value_erased(path);
+    }
+  }
+  delete value;
+  delete h;
 }
 
 } // end namespace fawkes
