@@ -3,7 +3,7 @@
  *  server.cpp - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:40:54 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -23,9 +23,13 @@
 #include <webview/server.h>
 #include <webview/request_dispatcher.h>
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 #include <utils/logging/logger.h>
 
 #include <sys/socket.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cerrno>
 #include <microhttpd.h>
 
 namespace fawkes {
@@ -48,9 +52,12 @@ namespace fawkes {
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 		     fawkes::Logger *logger)
 {
-  __port       = port;
-  __dispatcher = dispatcher;
-  __logger     = logger;
+  __port         = port;
+  __dispatcher   = dispatcher;
+  __logger       = logger;
+
+  __ssl_key_mem  = NULL;
+  __ssl_cert_mem = NULL;
 
   __daemon = MHD_start_daemon(MHD_NO_FLAG,
 			      __port,
@@ -66,6 +73,40 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 
 }
 
+/** SSL constructor.
+ * @param port TCP port to listen on
+ * @param dispatcher dispatcher to call for requests
+ * @param key_pem_filepath path to PEM formatted file containing the key
+ * @param cert_pem_filepath path to PEM formatted file containing the certificate
+ * @param logger optional logger, used to output possible run-time problems
+ */
+WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
+		     const char *key_pem_filepath, const char *cert_pem_filepath,
+		     fawkes::Logger *logger)
+{
+  __port       = port;
+  __dispatcher = dispatcher;
+  __logger     = logger;
+
+  __ssl_key_mem  = read_file(key_pem_filepath);
+  __ssl_cert_mem = read_file(cert_pem_filepath);
+
+  __daemon = MHD_start_daemon(MHD_USE_SSL,
+			      __port,
+			      NULL,
+			      NULL,
+			      WebRequestDispatcher::process_request_cb,
+			      (void *)__dispatcher,
+			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
+			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
+			      MHD_OPTION_END);
+
+  if ( __daemon == NULL ) {
+    throw fawkes::Exception("Could not start microhttpd (SSL)");
+  }
+
+}
+
 
 /** Destructor. */
 WebServer::~WebServer()
@@ -73,6 +114,51 @@ WebServer::~WebServer()
   MHD_stop_daemon(__daemon);
   __daemon = NULL;
   __dispatcher = NULL;
+
+  if (__ssl_key_mem)   free(__ssl_key_mem);
+  if (__ssl_cert_mem)  free(__ssl_cert_mem);
+}
+
+
+/** Read file into memory.
+ * @param filename file path
+ * @return memory location of file content, free after done
+ */
+char *
+WebServer::read_file(const char *filename)
+{
+  FILE *f = fopen(filename, "rb");
+  if (! f) {
+    throw CouldNotOpenFileException(filename, errno);
+  }
+
+  long size = 0;
+  if ((fseek(f, 0, SEEK_END) != 0) || ((size = ftell(f)) == 1)) {
+    fclose(f);
+    throw Exception("Cannot determine file size of %s", filename);
+  }
+  fseek(f, 0, SEEK_SET);
+
+  if ( size == 0 ) {
+    fclose(f);
+    throw Exception("File %s has zero length", filename);
+  } else if (size > 1024 * 1024) {
+    // keys or certs should not be that long...
+    fclose(f);
+    throw Exception("File %s is unexpectedly large", filename);
+  }
+
+  char *rv = (char *)malloc(size);
+  if (fread(rv, size, 1, f) != 1) {
+    int terrno = errno;
+    fclose(f);
+    free(rv);
+    throw FileReadException(filename, terrno);
+  }
+
+  fclose(f);
+
+  return rv;
 }
 
 /** Process requests.
