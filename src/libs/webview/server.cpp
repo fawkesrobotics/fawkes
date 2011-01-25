@@ -161,6 +161,18 @@ WebServer::read_file(const char *filename)
   return rv;
 }
 
+
+/** Setup basic authentication.
+ * @param realm authentication realm to display to the user
+ * @param verifier verifier to use for checking credentials
+ */
+void
+WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
+{
+  __dispatcher->setup_basic_auth(realm, verifier);
+}
+
+
 /** Process requests.
  * This method waits for new requests and processes them when received.
  */

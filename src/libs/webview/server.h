@@ -34,6 +34,7 @@ namespace fawkes {
 
 class Logger;
 class WebRequestDispatcher;
+class WebUserVerifier;
 
 class WebServer {
  public:
@@ -45,6 +46,8 @@ class WebServer {
   ~WebServer();
 
   void process();
+
+  void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
 
  private:
   static char * read_file(const char *filename);

@@ -25,8 +25,10 @@
 #include <webview/url_manager.h>
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
+#include <webview/user_verifier.h>
 
 #include <core/threading/mutex_locker.h>
+#include <core/exception.h>
 #include <utils/misc/string_urlescape.h>
 
 #include <sys/types.h>
@@ -35,6 +37,15 @@
 #include <microhttpd.h>
 #include <cstring>
 #include <cstdlib>
+
+#define UNAUTHORIZED_REPLY						\
+  "<html>\n"								\
+  " <head><title>Access denied</title></head>\n"			\
+  " <body>\n"								\
+  "  <h1>Access denied</h1>\n"					\
+  "  <p>Authentication is required to access Fawkes Webview</p>\n"	\
+  " </body>\n"								\
+  "</html>"
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -58,11 +69,43 @@ WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
 					   WebPageHeaderGenerator *headergen,
 					   WebPageFooterGenerator *footergen)
 {
+  __realm                 = NULL;
   __url_manager           = url_manager;
   __page_header_generator = headergen;
   __page_footer_generator = footergen;
 }
 
+
+/** Destructor. */
+WebRequestDispatcher::~WebRequestDispatcher()
+{
+  if (__realm)  free(__realm);
+}
+
+
+/** Setup basic authentication.
+ * @param realm authentication realm to display to the user.
+ * If NULL basic authentication will be disabled.
+ * @param verifier verifier to use for checking credentials.
+ * If NULL basic authentication will be disabled.
+ */
+void
+WebRequestDispatcher::setup_basic_auth(const char *realm,
+				       WebUserVerifier *verifier)
+{
+#if MHD_VERSION >= 0x00090400
+  if (__realm)  free(__realm);
+  __realm = NULL;
+  __user_verifier = NULL;
+  if (realm && verifier) {
+    __realm = strdup(realm);
+    __user_verifier = verifier;
+  }
+#else
+  throw Exception("libmicrohttpd >= 0.9.4 is required for basic authentication, "
+		  "which was not available at compile time.");
+#endif
+}
 
 /** Process request callback for libmicrohttpd.
  * @param callback_data instance of WebRequestDispatcher to call
@@ -123,14 +166,12 @@ dynamic_reply_free_cb(void *reply)
 }
 
 
-/** Queue a static web reply.
- * @param connection libmicrohttpd connection to queue response to
- * @param sreply static web reply to queue
- * @return suitable libmicrohttpd return code
+/** Prepare response from static reply.
+ * @param sreply static reply
+ * @return response struct ready to be enqueued
  */
-int
-WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
-					 StaticWebReply *sreply)
+struct MHD_Response *
+WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
 {
   struct MHD_Response *response;
   WebPageReply *wpreply = dynamic_cast<WebPageReply *>(sreply);
@@ -152,12 +193,50 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
   }
 
   const WebReply::HeaderMap &headers = sreply->headers();
-  for (WebReply::HeaderMap::const_iterator i = headers.begin(); i != headers.end(); ++i) {
+  WebReply::HeaderMap::const_iterator i;
+  for (i = headers.begin(); i != headers.end(); ++i) {
     MHD_add_response_header(response, i->first.c_str(), i->second.c_str());
   }
 
+  return response;
+}
+
+/** Queue a static web reply.
+ * @param connection libmicrohttpd connection to queue response to
+ * @param sreply static web reply to queue
+ * @return suitable libmicrohttpd return code
+ */
+int
+WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
+					 StaticWebReply *sreply)
+{
+  struct MHD_Response *response = prepare_static_response(sreply);
+
   int rv = MHD_queue_response(connection, sreply->code(), response);
   MHD_destroy_response(response);
+  return rv;
+}
+
+
+/** Queue a static web reply after basic authentication failure.
+ * @param connection libmicrohttpd connection to queue response to
+ * @return suitable libmicrohttpd return code
+ */
+int
+WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection)
+{
+  StaticWebReply sreply(WebReply::HTTP_UNAUTHORIZED, UNAUTHORIZED_REPLY);
+#if MHD_VERSION >= 0x00090400
+  struct MHD_Response *response = prepare_static_response(&sreply);
+
+  int rv = MHD_queue_basic_auth_fail_response(connection, __realm, response);
+  MHD_destroy_response(response);
+#else
+  sreply.add_header(MHD_HTTP_HEADER_WWW_AUTHENTICATE,
+		    (std::string("Basic realm=") + __realm).c_str());
+  
+  int rv = queue_static_reply(connection, &sreply);
+#endif
   return rv;
 }
 
@@ -207,7 +286,9 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       *session_data = NULL; /* clear context pointer */
     } else {
       if ( *session_data == NULL) {
-	WebReply *reply = proc->process_request(urls.c_str(), method, version, upload_data, upload_data_size, session_data);
+	WebReply *reply = proc->process_request(urls.c_str(), method, version,
+						upload_data, upload_data_size,
+						session_data);
 	if ((reply != NULL) || (*session_data == NULL)) {
 	  return MHD_NO;
 	} else {
@@ -216,11 +297,21 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       }
     }
 
-    struct MHD_Response *response;
+#if MHD_VERSION >= 0x00090400
+    if (__realm) {
+      char *user, *pass = NULL;
+      user = MHD_basic_auth_get_username_password(connection, &pass);
+      if ( (user == NULL) || (pass == NULL) ||
+	   ! __user_verifier->verify_user(user, pass))
+      {
+	return queue_basic_auth_fail(connection);
+      }
+    }
+#endif
 
-
-    WebReply *reply = proc->process_request(urls.c_str(), method, version, upload_data, upload_data_size, session_data);
-
+    WebReply *reply = proc->process_request(urls.c_str(), method, version,
+					    upload_data, upload_data_size,
+					    session_data);
     if ( reply ) {
       StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
       DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
@@ -228,6 +319,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 	ret = queue_static_reply(connection, sreply);
 	delete reply;
       } else if (dreply) {
+	struct MHD_Response *response;
 	response = MHD_create_response_from_callback(dreply->size(),
 						     dreply->chunk_size(),
 						     dynamic_reply_data_cb,
