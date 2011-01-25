@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  webview_plugin.h - Fawkes Webview Plugin
+ *  user_verifier.h - Webview user verifier
  *
- *  Created: Mon Oct 13 17:46:57 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jan 24 18:41:18 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,28 +20,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/webview/webview_plugin.h>
-#include <core/exception.h>
+#ifndef __PLUGINS_WEBVIEW_USER_VERIFIER_H_
+#define __PLUGINS_WEBVIEW_USER_VERIFIER_H_
 
-#include "webview_thread.h"
+#include <webview/user_verifier.h>
+#include <regex.h>
 
-using namespace fawkes;
-
-/** @class WebviewPlugin <plugins/webview/webview_plugin.h>
- * Webview plugin for Fawkes.
- * This provides an extensible web interface for Fawkes.
- * @author Tim Niemueller
- */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-WebviewPlugin::WebviewPlugin(Configuration *config)
-  : Plugin(config)
-{
-  thread_list.push_back(new WebviewThread());
+namespace fawkes {
+  class Configuration;
+  class Logger;
 }
 
+class WebviewUserVerifier : public fawkes::WebUserVerifier
+{
+ public:
+  WebviewUserVerifier(fawkes::Configuration *config, fawkes::Logger *logger);
+  virtual ~WebviewUserVerifier();
 
-PLUGIN_DESCRIPTION("Web interface for Fawkes")
-EXPORT_PLUGIN(WebviewPlugin)
+  virtual bool verify_user(const char *user, const char *password) throw();
+
+ private:
+  fawkes::Configuration *config;
+  fawkes::Logger        *logger;
+
+  regex_t __hash_regex;
+};
+
+#endif

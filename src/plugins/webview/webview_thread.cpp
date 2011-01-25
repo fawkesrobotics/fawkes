@@ -28,8 +28,12 @@
 #include "service_browse_handler.h"
 #include "header_generator.h"
 #include "footer_generator.h"
+#include "user_verifier.h"
 
 #include <core/version.h>
+#include <core/exceptions/system.h>
+#include <utils/system/file.h>
+#include <utils/system/hostinfo.h>
 #include <webview/request_dispatcher.h>
 #include <webview/page_reply.h>
 #include <webview/server.h>
@@ -72,6 +76,54 @@ WebviewThread::init()
 {
   __cfg_port = config->get_uint("/webview/port");
 
+  bool __cfg_use_ssl = false;
+  try {
+    __cfg_use_ssl = config->get_bool("/webview/use_ssl");
+  } catch (Exception &e) {}
+
+  if (__cfg_use_ssl) {
+    __cfg_ssl_create = false;
+    try {
+      __cfg_ssl_create = config->get_bool("/webview/ssl_create");
+    } catch (Exception &e) {}
+
+    __cfg_ssl_key  = config->get_string("/webview/ssl_key");
+    __cfg_ssl_cert = config->get_string("/webview/ssl_cert");
+
+    if (__cfg_ssl_key[0] != '/')
+      __cfg_ssl_key = std::string(CONFDIR"/") + __cfg_ssl_key;
+
+    if (__cfg_ssl_cert[0] != '/')
+      __cfg_ssl_cert = std::string(CONFDIR"/") + __cfg_ssl_cert;
+
+    logger->log_debug(name(), "Key: %s  Cert: %s", __cfg_ssl_key.c_str(),
+		      __cfg_ssl_cert.c_str());
+
+    if (! File::exists(__cfg_ssl_key.c_str())) {
+      if (File::exists(__cfg_ssl_cert.c_str())) {
+	throw Exception("Key file %s does not exist, but certificate file %s "
+			"does", __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
+      } else if (__cfg_ssl_create) {
+	ssl_create(__cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
+      } else {
+ 	throw Exception("Key file %s does not exist", __cfg_ssl_key.c_str());
+      }
+    } else if (! File::exists(__cfg_ssl_cert.c_str())) {
+      throw Exception("Certificate file %s does not exist, but key file %s "
+		      "does", __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
+    }
+  }
+
+  bool __cfg_use_basic_auth = false;
+  try {
+    __cfg_use_basic_auth = config->get_bool("/webview/use_basic_auth");
+  } catch (Exception &e) {}
+  __cfg_basic_auth_realm = "Fawkes Webview";
+  try {
+    __cfg_basic_auth_realm = config->get_bool("/webview/basic_auth_realm");
+  } catch (Exception &e) {}
+
+
   __cache_logger.clear();
 
   __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
@@ -86,7 +138,30 @@ WebviewThread::init()
 
   __dispatcher = new WebRequestDispatcher(webview_url_manager,
 					  __header_gen, __footer_gen);
-  __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
+
+
+  try {
+    if (__cfg_use_ssl) {
+      __webserver  = new WebServer(__cfg_port, __dispatcher, __cfg_ssl_key.c_str(),
+				   __cfg_ssl_cert.c_str(), logger);
+    } else {
+      __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
+    }
+
+    if (__cfg_use_basic_auth) {
+      __user_verifier = new WebviewUserVerifier(config, logger);
+      __webserver->setup_basic_auth(__cfg_basic_auth_realm.c_str(),
+				    __user_verifier);
+    }
+  } catch (Exception &e) {
+    delete __webview_service;
+    delete __service_browse_handler;
+    delete __header_gen;
+    delete __footer_gen;
+    delete __dispatcher;
+    throw;
+  }
+
 
   __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
   __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
@@ -141,4 +216,29 @@ void
 WebviewThread::loop()
 {
   __webserver->process();
+}
+
+
+void
+WebviewThread::ssl_create(const char *ssl_key_file, const char *ssl_cert_file)
+{
+  logger->log_info(name(), "Creating SSL key and certificate. "
+		   "This may take a while...");
+  HostInfo h;
+
+  char *cmd;
+  if (asprintf(&cmd, "openssl req -new -x509 -batch -nodes -days 365 "
+	       "-subj \"/C=XX/L=World/O=Fawkes/CN=%s.local\" "
+	       "-out \"%s\" -keyout \"%s\" >/dev/null 2>&1",
+	       h.short_name(), ssl_cert_file, ssl_key_file) == -1)
+  {
+    throw OutOfMemoryException("Webview/SSL: Could not generate OpenSSL string");
+  }
+
+  int status = system(cmd);
+  free(cmd);
+
+  if (WEXITSTATUS(status) != 0) {
+    throw Exception("Failed to auto-generate key/certificate pair");
+  }
 }

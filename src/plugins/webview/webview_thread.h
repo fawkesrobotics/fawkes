@@ -47,6 +47,7 @@ class WebviewPluginsRequestProcessor;
 class WebviewServiceBrowseHandler;
 class WebviewFooterGenerator;
 class WebviewHeaderGenerator;
+class WebviewUserVerifier;
 
 class WebviewThread
 : public fawkes::Thread,
@@ -70,6 +71,10 @@ class WebviewThread
   static const char *BLACKBOARD_URL_PREFIX;
   static const char *PLUGINS_URL_PREFIX;
 
+ private:
+  void ssl_create(const char *ssl_key_file, const char *ssl_cert_file);
+
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
@@ -84,8 +89,15 @@ class WebviewThread
   WebviewServiceBrowseHandler        *__service_browse_handler;
   WebviewHeaderGenerator             *__header_gen;
   WebviewFooterGenerator             *__footer_gen;
+  WebviewUserVerifier                *__user_verifier;
 
   unsigned int __cfg_port;
+  bool         __cfg_use_ssl;
+  bool         __cfg_ssl_create;
+  std::string  __cfg_ssl_key;
+  std::string  __cfg_ssl_cert;
+  bool         __cfg_use_basic_auth;
+  std::string  __cfg_basic_auth_realm;
 
   fawkes::CacheLogger     __cache_logger;
   fawkes::NetworkService *__webview_service;
