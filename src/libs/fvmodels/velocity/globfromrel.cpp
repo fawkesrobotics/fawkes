@@ -104,7 +104,7 @@ void
 VelocityGlobalFromRelative::setRobotPosition(float x, float y, float ori, timeval t)
 {
   timeval now;
-  gettimeofday(&now, NULL);
+  gettimeofday(&now, 0);
   robot_ori     = ori;
   robot_poseage = time_diff_sec(now, t);
 }
@@ -138,10 +138,10 @@ VelocityGlobalFromRelative::getTime(long int *sec, long int *usec)
 void
 VelocityGlobalFromRelative::getVelocity(float *vel_x, float *vel_y)
 {
-  if (vel_x != NULL) {
+  if (vel_x != 0) {
     *vel_x = velocity_x;
   }
-  if (vel_y != NULL) {
+  if (vel_y != 0) {
     *vel_y = velocity_y;
   }
 }

@@ -60,7 +60,6 @@ char
 getkey()
 {
   char buf[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  ssize_t n = 0;
   struct termios tattr,              // new terminal attributes
     saved_attributes;              // restore the original settings of the terminal
   
@@ -74,7 +73,7 @@ getkey()
   tattr.c_cc[VTIME]= 0;                           // of input characters (MIN=0,TIME=0)
   tcsetattr( STDIN_FILENO, TCSANOW, &tattr );
   
-  n = read( STDIN_FILENO, buf, 1 );
+  read( STDIN_FILENO, buf, 1 );
   
   tcsetattr( STDIN_FILENO, TCSANOW, &saved_attributes );
   clear_nonblock_flag();

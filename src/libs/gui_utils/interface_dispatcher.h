@@ -24,6 +24,7 @@
 #ifndef __LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 #define __LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 
+#include <cstddef>
 #include <glibmm/dispatcher.h>
 #include <blackboard/interface_listener.h>
 #include <core/utils/lock_queue.h>

@@ -48,7 +48,7 @@ VisionMasterAspectIniFin::init(Thread *thread)
 {
   VisionMasterAspect *vision_master_thread;
   vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
-  if (vision_master_thread == NULL) {
+  if (vision_master_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "VisionMasterAspect, but RTTI says it "
 					  "has not. ", thread->name());
@@ -70,7 +70,7 @@ VisionMasterAspectIniFin::prepare_finalize(Thread *thread)
 {
   VisionMasterAspect *vision_master_thread;
   vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
-  if (vision_master_thread == NULL) {
+  if (vision_master_thread == 0) {
     return true;
   }
 
@@ -88,7 +88,7 @@ VisionMasterAspectIniFin::finalize(Thread *thread)
 {
   VisionMasterAspect *vision_master_thread;
   vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
-  if (vision_master_thread == NULL) {
+  if (vision_master_thread == 0) {
     throw CannotFinalizeThreadException("Thread '%s' claims to have the "
 					"VisionMasterAspect, but RTTI says it "
 					"has not. ", thread->name());

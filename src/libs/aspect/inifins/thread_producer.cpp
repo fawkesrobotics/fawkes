@@ -50,7 +50,7 @@ ThreadProducerAspectIniFin::init(Thread *thread)
 {
   ThreadProducerAspect *thread_producer_thread;
   thread_producer_thread = dynamic_cast<ThreadProducerAspect *>(thread);
-  if (thread_producer_thread == NULL) {
+  if (thread_producer_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "ThreadProducerAspect, but RTTI says it "
 					  "has not. ", thread->name());

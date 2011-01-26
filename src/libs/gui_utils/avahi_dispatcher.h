@@ -24,6 +24,7 @@
 #ifndef __LIBS_GUI_UTILS_AVAHI_DISPATCHER_H_
 #define __LIBS_GUI_UTILS_AVAHI_DISPATCHER_H_
 
+#include <cstddef>
 #include <glibmm/dispatcher.h>
 #include <netcomm/service_discovery/browse_handler.h>
 #include <core/utils/lock_queue.h>

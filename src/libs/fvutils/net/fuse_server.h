@@ -46,7 +46,7 @@ class FuseServer
 {
  public:
 
-  FuseServer(unsigned short int port, fawkes::ThreadCollector *collector = NULL);
+  FuseServer(unsigned short int port, fawkes::ThreadCollector *collector = 0);
   virtual ~FuseServer();
 
   virtual void add_connection(fawkes::StreamSocket *s) throw();

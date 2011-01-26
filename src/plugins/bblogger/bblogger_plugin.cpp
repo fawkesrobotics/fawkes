@@ -62,10 +62,12 @@ BlackBoardLoggerPlugin::BlackBoardLoggerPlugin(Configuration *config)
     throw;
   }
 
+  /*
   bool generate_replay_config = false;
   try {
     generate_replay_config = config->get_bool((prefix + "generate_replay_config").c_str());
   } catch (Exception &e) {} // ignored, use default set above
+  */
 
   std::string scenario_prefix = prefix + scenario + "/";
   std::string ifaces_prefix   = scenario_prefix + "interfaces/";

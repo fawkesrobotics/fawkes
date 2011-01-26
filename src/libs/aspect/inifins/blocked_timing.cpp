@@ -48,7 +48,7 @@ BlockedTimingAspectIniFin::init(Thread *thread)
   BlockedTimingAspect *blocked_timing_thread __unused;
   blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
 
-  if (blocked_timing_thread == NULL) {
+  if (blocked_timing_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "BlockedTimingAspect, but RTTI says it "
 					  "has not. ", thread->name());

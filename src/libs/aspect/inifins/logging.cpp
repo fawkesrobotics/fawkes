@@ -50,7 +50,7 @@ LoggingAspectIniFin::init(Thread *thread)
 {
   LoggingAspect *logging_thread;
   logging_thread = dynamic_cast<LoggingAspect *>(thread);
-  if (logging_thread == NULL) {
+  if (logging_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "LoggingAspect, but RTTI says it "
 					  "has not. ", thread->name());
