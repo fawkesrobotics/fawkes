@@ -131,6 +131,8 @@ INSERT INTO "config" VALUES('/hardware/roomba/btname','string','FireFly-*','Blue
 INSERT INTO "config" VALUES('/hardware/roomba/bttype','string','firefly','Hardware type of RooTooth. New Sparkfun models are firefly, older RoboDynamics ones are mitsumi (currently untested).');
 INSERT INTO "config" VALUES('/hardware/roomba/btsave','bool',1,'If RooTooth is auto-detected, save bluetooth address to config for faster connection next time.');
 INSERT INTO "config" VALUES('/hardware/roomba/btfast','bool',1,'Try to enable fast mode on startup. Startup takes longer. Disable if you have RooTooth powered on most of the time anyway and not plug it in just before you launch. Only supported for FireFly RooTooth.');
+INSERT INTO "config" VALUES('/hardware/roomba/query_mode','bool',1,'Query data in each loop instead of streaming. More reliably with RooTooth, can be disabled for serial connection for slightly better performance.');
+INSERT INTO "config" VALUES('/hardware/roomba/play_fanfare','bool',1,'Play fanfare when connection has been established. Disable when testing late at night...');
 INSERT INTO "config" VALUES('/plugins/laserht/laser_interface_id','string','Laser','Interface ID of the Laser360Interface to get data from');
 INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',12,'Number of samples to take per data point on the range of 180 deg');
 INSERT INTO "config" VALUES('/plugins/laserht/line/r_scale','float',0.02,'Distance scale for r parameter of line; m');

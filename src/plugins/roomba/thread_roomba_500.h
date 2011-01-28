@@ -95,6 +95,8 @@ class Roomba500Thread
   std::string  __cfg_bttype;
   bool         __cfg_btsave;
   bool         __cfg_btfast;
+  bool         __cfg_query_mode;
+  bool         __cfg_play_fanfare;
 
   unsigned int __greeting_loop_count;
 

@@ -51,9 +51,10 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
    * @param roomba refptr to Roomba500 instance
    */
   WorkerThread(fawkes::Logger *logger, fawkes::Clock *clock,
-	       fawkes::RefPtr<Roomba500> roomba)
+	       fawkes::RefPtr<Roomba500> roomba, bool query_mode)
     : Thread("Roomba500WorkerThread", Thread::OPMODE_CONTINUOUS),
-      logger(logger), clock(clock), __roomba(roomba)
+      logger(logger), clock(clock), __roomba(roomba),
+      __query_mode(query_mode)
   {
     __fresh_data_mutex = new Mutex();
     __time_wait = new TimeWait(clock, Roomba500::STREAM_INTERVAL_MS * 1000);
@@ -64,14 +65,13 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
     __ttc_loop = __tt.add_class("Loop");
 #endif
 
-    __roomba->enable_sensors();
-    if (__roomba->is_controlled())  __roomba->play_fanfare();
+    if (! __query_mode)  __roomba->enable_sensors();
   }
 
   /** Destructor. */
   ~WorkerThread()
   {
-    __roomba->disable_sensors();
+    if (! __query_mode)  __roomba->disable_sensors();
     delete __fresh_data_mutex;
     delete __time_wait;
   }
@@ -88,7 +88,8 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
 #ifdef USE_TIMETRACKER
       __tt.ping_start(__ttc_query);
 #endif
-      __roomba->read_sensors();
+      if (__query_mode)  __roomba->query_sensors();
+      else               __roomba->read_sensors();
 #ifdef USE_TIMETRACKER
       __tt.ping_end(__ttc_query);
 #endif
@@ -137,6 +138,7 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
 
  private:
   bool __fresh_data;
+  bool __query_mode;
 };
 
 
@@ -186,6 +188,17 @@ Roomba500Thread::init()
   __cfg_conntype = config->get_string("/hardware/roomba/connection_type");
   __cfg_btfast = false;
   __cfg_bttype = "firefly";
+  __cfg_play_fanfare = true;
+  __cfg_query_mode = true;
+
+  try {
+    __cfg_play_fanfare = config->get_bool("/hardware/roomba/play_fanfare");
+  } catch (Exception &e) {}
+
+  try {
+    __cfg_query_mode = config->get_bool("/hardware/roomba/query_mode");
+  } catch (Exception &e) {}
+
   if (__cfg_conntype == "rootooth") {
     try {
       __cfg_device = config->get_string("/hardware/roomba/btaddr");
@@ -296,14 +309,23 @@ Roomba500Thread::init()
   try {
     unsigned int flags = 0;
     if (conntype == Roomba500::CONNTYPE_ROOTOOTH) {
-      logger->log_debug(name(), "Opening device, this may take a while");
+      logger->log_debug(name(), "Connecting via RooTooth, this may take a while");
       if (__cfg_btfast) flags |= Roomba500::FLAG_FIREFLY_FASTMODE;
     }
     __roomba = new Roomba500(conntype, __cfg_device.c_str(), flags);
+
+    if (__cfg_btsave) {
+      logger->log_debug(name(), "Saving Bluetooth address %s. Will be used for "
+			"next connection.", __roomba->get_device());
+      config->set_string("/hardware/roomba/btaddr", __roomba->get_device());
+    }
+
     __roomba->set_mode(mode);
-    if (__roomba->is_controlled())
+    if (__roomba->is_controlled()) {
+      if (__cfg_play_fanfare)  __roomba->play_fanfare();
       __roomba->set_leds(false, false, false, true, 0, 0);
-    __wt = new WorkerThread(logger, clock, __roomba);
+    }
+    __wt = new WorkerThread(logger, clock, __roomba, __cfg_query_mode);
   } catch (Exception &e) {
     close_interfaces();
     __roomba.clear();
