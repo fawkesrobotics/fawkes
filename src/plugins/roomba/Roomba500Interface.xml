@@ -14,6 +14,7 @@
     </enum>
     <enum name="InfraredCharacter">
       <comment>Infrared character values.</comment>
+      <item name="IR_NONE" value="0">No valid IR signal</item>
       <item name="IR_REMOTE_LEFT" value="129">IR Remote Control: left button</item>
       <item name="IR_REMOTE_FORWARD" value="130"> IR Remote Control: forward
         button</item>

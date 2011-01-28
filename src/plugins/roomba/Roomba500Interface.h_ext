@@ -52,6 +52,7 @@ class Roomba500Interface : public Interface
 
   /** Infrared character values. */
   typedef enum {
+    IR_NONE = 0 /**< No valid IR signal */,
     IR_REMOTE_LEFT = 129 /**< IR Remote Control: left button */,
     IR_REMOTE_FORWARD = 130 /**<  IR Remote Control: forward
         button */,

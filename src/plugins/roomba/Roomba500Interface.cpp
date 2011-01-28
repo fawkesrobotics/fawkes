@@ -117,7 +117,7 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_BOOL, "caster_stasis", 1, &data->caster_stasis);
   add_messageinfo("StopMessage");
   add_messageinfo("DriveStraightMessage");
-  unsigned char tmp_hash[] = {0x62, 0xa0, 0x6b, 0x57, 0x31, 0xee, 0xb5, 0x33, 0x4b, 0x38, 0xd8, 0x8f, 0x2a, 0x9a, 0x84, 0xe8};
+  unsigned char tmp_hash[] = {0x93, 0x9f, 0x65, 0x5e, 0x4b, 0x3d, 0xe0, 0xa6, 0x6, 0xae, 0x48, 0xe7, 0x61, 0x8, 0x7d, 0xc9};
   set_hash(tmp_hash);
 }
 
@@ -149,6 +149,7 @@ const char *
 Roomba500Interface::tostring_InfraredCharacter(InfraredCharacter value) const
 {
   switch (value) {
+  case IR_NONE: return "IR_NONE";
   case IR_REMOTE_LEFT: return "IR_REMOTE_LEFT";
   case IR_REMOTE_FORWARD: return "IR_REMOTE_FORWARD";
   case IR_REMOTE_RIGHT: return "IR_REMOTE_RIGHT";
