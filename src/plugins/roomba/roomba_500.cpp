@@ -476,15 +476,23 @@ Roomba500::open()
       throw Exception(errno, "Failed to connect to %s", addrstr);
     }
 
-    // Set to passive mode to ensure that auto-detection does no harm
-    send(OPCODE_START);
-    usleep(MODE_CHANGE_WAIT_MS * 1000);
-    // disable sensors just in case
-    disable_sensors();
+    try {
+      // Set to passive mode to ensure that auto-detection does no harm
+      send(OPCODE_START);
+      usleep(MODE_CHANGE_WAIT_MS * 1000);
+      __mode = MODE_PASSIVE;
+      // disable sensors just in case
+      disable_sensors();
+    } catch (Exception &e) {
+      ::close(__fd);
+      __mode = MODE_OFF;
+      throw;
+    }
 
     if (flags & FLAG_FIREFLY_FASTMODE) {
       const char *cmd_seq = "$$$";
       if (write(__fd, cmd_seq, 3) != 3) {
+	::close(__fd);
 	throw Exception(errno, "Roomba500 (RooTooth): Failed to send command "
 			"sequence to enable fast mode");
       }
@@ -504,6 +512,7 @@ Roomba500::open()
 	    // We entered command mode, enable fast mode
 	    const char *cmd_fastmode = "F,1\r";
 	    if (write(__fd, cmd_fastmode, 4) != 4) {
+	      ::close(__fd);
 	      throw Exception(errno, "Roomba500 (RooTooth): Failed to send fast "
 			      "mode command sequence.");
 	    } // else fast mode enabled
@@ -512,13 +521,19 @@ Roomba500::open()
       } // else assume already enabled fast mode
     } // else do not enable fast mode, assume user knows what he is doing
 
-    ::close(__fd);
 #endif
   }
 
-  send(OPCODE_START);
-  usleep(MODE_CHANGE_WAIT_MS * 1000);
-  __mode = MODE_PASSIVE;
+  try {
+    send(OPCODE_START);
+    usleep(MODE_CHANGE_WAIT_MS * 1000);
+    __mode = MODE_PASSIVE;
+  } catch (Exception &e) {
+    ::close(__fd);
+    __mode = MODE_OFF;
+    throw;
+  }
+
 }
 
 
@@ -773,7 +788,7 @@ Roomba500::query_sensors()
 
 
   __read_mutex->lock();
-  recv(0, __packet_length, 10);
+  recv(0, __packet_length);
   __read_mutex->unlock();
 
   __sensor_mutex->lock();
