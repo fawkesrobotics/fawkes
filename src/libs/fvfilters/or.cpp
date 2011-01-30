@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "filters/or.h"
+#include <fvfilters/or.h>
 
 #include <core/exception.h>
 

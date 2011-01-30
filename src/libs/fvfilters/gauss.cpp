@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "filters/gauss.h"
+#include <fvfilters/gauss.h>
 
 #include <cstddef>
 #include <ippi.h>
