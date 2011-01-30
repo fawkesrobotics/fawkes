@@ -29,7 +29,7 @@ LIBS     = $(VISION_LIBS)
 
 LIBS_firestation = stdc++ m fawkescore fawkesutils fawkesgeometry fvutils \
 		   fawkesnetcomm fvmodels fvclassifiers fvcams fvwidgets \
-		   fawkesguiutils fvfilters
+		   fawkesguiutils
 ifeq ($(HAVE_BULB_CREATOR),1)
   LIBS_firestation += fvbulbcalib
 endif

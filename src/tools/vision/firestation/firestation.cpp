@@ -21,7 +21,6 @@
  */
 
 #include "firestation.h"
-#include "mirror_calib.h"
 #include "color_train_widget.h"
 #include "fuse_transfer_widget.h"
 
@@ -33,6 +32,8 @@
 #include <fvcams/fileloader.h>
 #include <fvcams/shmem.h>
 #include <fvcams/net.h>
+
+#include <fvmodels/mirror/mirror_calib.h>
 
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/conversions.h>

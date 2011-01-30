@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_FIRESTATION_MIRROR_CALIB_H_
-#define __FIREVISION_TOOLS_FIRESTATION_MIRROR_CALIB_H_
+#ifndef __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
+#define __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 
 #include <geometry/hom_point.h>
 #include <utils/math/angle.h>
@@ -186,5 +186,5 @@ class MirrorCalibTool
 
 }
 
-#endif /*  __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_ */
+#endif /*  __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_ */
 
