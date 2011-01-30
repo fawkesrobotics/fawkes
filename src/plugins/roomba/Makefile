@@ -24,16 +24,20 @@ LIBS_roomba = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface \
 	      Roomba500Interface LedInterface SwitchInterface MotorInterface \
 	      BatteryInterface
-OBJS_roomba = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
+OBJS_roomba = roomba_plugin.o roomba_500.o thread_roomba_500.o sensor_thread.o
+
+LIBS_roombajoy = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	         fawkesinterface Roomba500Interface JoystickInterface
+OBJS_roombajoy = roombajoy_plugin.o roombajoy_thread.o
 
 ifeq ($(HAVE_BLUEZ),1)
-  CFLAGS  += $(CFLAGS_BLUEZ)
-  LDFLAGS += $(LDFLAGS_BLUEZ)
+  CFLAGS         += $(CFLAGS_BLUEZ)
+  LDFLAGS_roomba += $(LDFLAGS_BLUEZ)
 endif
 
-PLUGINS_all = $(PLUGINDIR)/roomba.so
+PLUGINS_all = $(PLUGINDIR)/roomba.so $(PLUGINDIR)/roombajoy.so
 
-OBJS_all = $(OBJS_roomba)
+OBJS_all = $(OBJS_roomba) $(OBJS_roombajoy)
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
 include $(BUILDSYSDIR)/interface.mk
