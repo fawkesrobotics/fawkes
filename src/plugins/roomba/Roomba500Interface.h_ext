@@ -120,6 +120,14 @@ class Roomba500Interface : public Interface
   } ChargingState;
   const char * tostring_ChargingState(ChargingState value) const;
 
+  /** State of the brushes. */
+  typedef enum {
+    BRUSHSTATE_OFF /**< Brush is off. */,
+    BRUSHSTATE_FORWARD /**< Brush is turning forward. */,
+    BRUSHSTATE_BACKWARD /**< Brush is turning backward. */
+  } BrushState;
+  const char * tostring_BrushState(BrushState value) const;
+
  private:
 #pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
@@ -151,8 +159,8 @@ class Roomba500Interface : public Interface
     bool button_day; /**< Day button pressed. */
     bool button_schedule; /**< Schedule button pressed. */
     bool button_clock; /**< Clock button pressed. */
-    float distance; /**< Travelled distance in m. */
-    float angle; /**< Turned angle in radians. */
+    int16_t distance; /**< Travelled distance in m. */
+    int16_t angle; /**< Turned angle in radians. */
     int32_t charging_state; /**< Charging state. */
     uint16_t voltage; /**< Voltage in mV. */
     int16_t current; /**< Current in mA. */
@@ -172,10 +180,10 @@ class Roomba500Interface : public Interface
       Internal charger available? */
     uint8_t song_number; /**< Song number. */
     bool song_playing; /**< Song playing? */
-    float velocity; /**< Requested velocity in m/s. */
-    float radius; /**< Requested radius in m. */
-    float velocity_right; /**< Requested left velocity. */
-    float velocity_left; /**< Requested right velocity. */
+    int16_t velocity; /**< Requested velocity in mm/s. */
+    int16_t radius; /**< Requested radius in mm. */
+    int16_t velocity_right; /**< Requested left velocity in mm/s. */
+    int16_t velocity_left; /**< Requested right velocity in mm/s. */
     uint16_t encoder_counts_left; /**< Encoder count left. */
     uint16_t encoder_counts_right; /**< Encoder count right. */
     bool bumper_left; /**< Left bumper active? */
@@ -232,6 +240,55 @@ class Roomba500Interface : public Interface
     virtual Message * clone() const;
   };
 
+  class DockMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } DockMessage_data_t;
+#pragma pack(pop)
+
+    DockMessage_data_t *data;
+
+   public:
+    DockMessage();
+    ~DockMessage();
+
+    DockMessage(const DockMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class SetModeMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t mode; /**< Open Interface mode. */
+    } SetModeMessage_data_t;
+#pragma pack(pop)
+
+    SetModeMessage_data_t *data;
+
+   public:
+    SetModeMessage(const Mode ini_mode);
+    SetModeMessage();
+    ~SetModeMessage();
+
+    SetModeMessage(const SetModeMessage *m);
+    /* Methods */
+    Mode mode() const;
+    void set_mode(const Mode new_mode);
+    size_t maxlenof_mode() const;
+    virtual Message * clone() const;
+  };
+
   class DriveStraightMessage : public Message
   {
    private:
@@ -240,22 +297,88 @@ class Roomba500Interface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float velocity; /**< Requested velocity in m/s. */
+      int16_t velocity; /**< Requested velocity in mm/s. */
     } DriveStraightMessage_data_t;
 #pragma pack(pop)
 
     DriveStraightMessage_data_t *data;
 
    public:
-    DriveStraightMessage(const float ini_velocity);
+    DriveStraightMessage(const int16_t ini_velocity);
     DriveStraightMessage();
     ~DriveStraightMessage();
 
     DriveStraightMessage(const DriveStraightMessage *m);
     /* Methods */
-    float velocity() const;
-    void set_velocity(const float new_velocity);
+    int16_t velocity() const;
+    void set_velocity(const int16_t new_velocity);
     size_t maxlenof_velocity() const;
+    virtual Message * clone() const;
+  };
+
+  class DriveMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int16_t velocity; /**< Requested velocity in mm/s. */
+      int16_t radius; /**< Requested radius in mm. */
+    } DriveMessage_data_t;
+#pragma pack(pop)
+
+    DriveMessage_data_t *data;
+
+   public:
+    DriveMessage(const int16_t ini_velocity, const int16_t ini_radius);
+    DriveMessage();
+    ~DriveMessage();
+
+    DriveMessage(const DriveMessage *m);
+    /* Methods */
+    int16_t velocity() const;
+    void set_velocity(const int16_t new_velocity);
+    size_t maxlenof_velocity() const;
+    int16_t radius() const;
+    void set_radius(const int16_t new_radius);
+    size_t maxlenof_radius() const;
+    virtual Message * clone() const;
+  };
+
+  class SetMotorsMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool vacuuming; /**< Enable vacuuming? */
+      int32_t main; /**< Main brush state. */
+      int32_t side; /**< Side brush state. */
+    } SetMotorsMessage_data_t;
+#pragma pack(pop)
+
+    SetMotorsMessage_data_t *data;
+
+   public:
+    SetMotorsMessage(const bool ini_vacuuming, const BrushState ini_main, const BrushState ini_side);
+    SetMotorsMessage();
+    ~SetMotorsMessage();
+
+    SetMotorsMessage(const SetMotorsMessage *m);
+    /* Methods */
+    bool is_vacuuming() const;
+    void set_vacuuming(const bool new_vacuuming);
+    size_t maxlenof_vacuuming() const;
+    BrushState main() const;
+    void set_main(const BrushState new_main);
+    size_t maxlenof_main() const;
+    BrushState side() const;
+    void set_side(const BrushState new_side);
+    size_t maxlenof_side() const;
     virtual Message * clone() const;
   };
 
@@ -341,11 +464,11 @@ class Roomba500Interface : public Interface
   bool is_button_clock() const;
   void set_button_clock(const bool new_button_clock);
   size_t maxlenof_button_clock() const;
-  float distance() const;
-  void set_distance(const float new_distance);
+  int16_t distance() const;
+  void set_distance(const int16_t new_distance);
   size_t maxlenof_distance() const;
-  float angle() const;
-  void set_angle(const float new_angle);
+  int16_t angle() const;
+  void set_angle(const int16_t new_angle);
   size_t maxlenof_angle() const;
   ChargingState charging_state() const;
   void set_charging_state(const ChargingState new_charging_state);
@@ -392,17 +515,17 @@ class Roomba500Interface : public Interface
   bool is_song_playing() const;
   void set_song_playing(const bool new_song_playing);
   size_t maxlenof_song_playing() const;
-  float velocity() const;
-  void set_velocity(const float new_velocity);
+  int16_t velocity() const;
+  void set_velocity(const int16_t new_velocity);
   size_t maxlenof_velocity() const;
-  float radius() const;
-  void set_radius(const float new_radius);
+  int16_t radius() const;
+  void set_radius(const int16_t new_radius);
   size_t maxlenof_radius() const;
-  float velocity_right() const;
-  void set_velocity_right(const float new_velocity_right);
+  int16_t velocity_right() const;
+  void set_velocity_right(const int16_t new_velocity_right);
   size_t maxlenof_velocity_right() const;
-  float velocity_left() const;
-  void set_velocity_left(const float new_velocity_left);
+  int16_t velocity_left() const;
+  void set_velocity_left(const int16_t new_velocity_left);
   size_t maxlenof_velocity_left() const;
   uint16_t encoder_counts_left() const;
   void set_encoder_counts_left(const uint16_t new_encoder_counts_left);

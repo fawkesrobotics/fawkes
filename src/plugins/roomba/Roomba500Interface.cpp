@@ -73,8 +73,8 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_BOOL, "button_day", 1, &data->button_day);
   add_fieldinfo(IFT_BOOL, "button_schedule", 1, &data->button_schedule);
   add_fieldinfo(IFT_BOOL, "button_clock", 1, &data->button_clock);
-  add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
-  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+  add_fieldinfo(IFT_INT16, "distance", 1, &data->distance);
+  add_fieldinfo(IFT_INT16, "angle", 1, &data->angle);
   add_fieldinfo(IFT_ENUM, "charging_state", 1, &data->charging_state, "ChargingState");
   add_fieldinfo(IFT_UINT16, "voltage", 1, &data->voltage);
   add_fieldinfo(IFT_INT16, "current", 1, &data->current);
@@ -90,10 +90,10 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_BOOL, "internal_charger_available", 1, &data->internal_charger_available);
   add_fieldinfo(IFT_UINT8, "song_number", 1, &data->song_number);
   add_fieldinfo(IFT_BOOL, "song_playing", 1, &data->song_playing);
-  add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
-  add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_FLOAT, "velocity_right", 1, &data->velocity_right);
-  add_fieldinfo(IFT_FLOAT, "velocity_left", 1, &data->velocity_left);
+  add_fieldinfo(IFT_INT16, "velocity", 1, &data->velocity);
+  add_fieldinfo(IFT_INT16, "radius", 1, &data->radius);
+  add_fieldinfo(IFT_INT16, "velocity_right", 1, &data->velocity_right);
+  add_fieldinfo(IFT_INT16, "velocity_left", 1, &data->velocity_left);
   add_fieldinfo(IFT_UINT16, "encoder_counts_left", 1, &data->encoder_counts_left);
   add_fieldinfo(IFT_UINT16, "encoder_counts_right", 1, &data->encoder_counts_right);
   add_fieldinfo(IFT_BOOL, "bumper_left", 1, &data->bumper_left);
@@ -116,8 +116,12 @@ Roomba500Interface::Roomba500Interface() : Interface()
   add_fieldinfo(IFT_INT16, "side_brush_current", 1, &data->side_brush_current);
   add_fieldinfo(IFT_BOOL, "caster_stasis", 1, &data->caster_stasis);
   add_messageinfo("StopMessage");
+  add_messageinfo("DockMessage");
+  add_messageinfo("SetModeMessage");
   add_messageinfo("DriveStraightMessage");
-  unsigned char tmp_hash[] = {0x93, 0x9f, 0x65, 0x5e, 0x4b, 0x3d, 0xe0, 0xa6, 0x6, 0xae, 0x48, 0xe7, 0x61, 0x8, 0x7d, 0xc9};
+  add_messageinfo("DriveMessage");
+  add_messageinfo("SetMotorsMessage");
+  unsigned char tmp_hash[] = {0x60, 0xa1, 0x1e, 0x86, 0x89, 0x2, 0x20, 0x34, 0x89, 0x32, 0xdb, 0x69, 0xee, 0x12, 0x86, 0x43};
   set_hash(tmp_hash);
 }
 
@@ -199,6 +203,20 @@ Roomba500Interface::tostring_ChargingState(ChargingState value) const
   case CHARGING_TRICKLE: return "CHARGING_TRICKLE";
   case CHARGING_WAITING: return "CHARGING_WAITING";
   case CHARGING_ERROR: return "CHARGING_ERROR";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert BrushState constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+Roomba500Interface::tostring_BrushState(BrushState value) const
+{
+  switch (value) {
+  case BRUSHSTATE_OFF: return "BRUSHSTATE_OFF";
+  case BRUSHSTATE_FORWARD: return "BRUSHSTATE_FORWARD";
+  case BRUSHSTATE_BACKWARD: return "BRUSHSTATE_BACKWARD";
   default: return "UNKNOWN";
   }
 }
@@ -982,7 +1000,7 @@ Roomba500Interface::set_button_clock(const bool new_button_clock)
  * Travelled distance in m.
  * @return distance value
  */
-float
+int16_t
 Roomba500Interface::distance() const
 {
   return data->distance;
@@ -1003,7 +1021,7 @@ Roomba500Interface::maxlenof_distance() const
  * @param new_distance new distance value
  */
 void
-Roomba500Interface::set_distance(const float new_distance)
+Roomba500Interface::set_distance(const int16_t new_distance)
 {
   data->distance = new_distance;
   data_changed = true;
@@ -1013,7 +1031,7 @@ Roomba500Interface::set_distance(const float new_distance)
  * Turned angle in radians.
  * @return angle value
  */
-float
+int16_t
 Roomba500Interface::angle() const
 {
   return data->angle;
@@ -1034,7 +1052,7 @@ Roomba500Interface::maxlenof_angle() const
  * @param new_angle new angle value
  */
 void
-Roomba500Interface::set_angle(const float new_angle)
+Roomba500Interface::set_angle(const int16_t new_angle)
 {
   data->angle = new_angle;
   data_changed = true;
@@ -1514,10 +1532,10 @@ Roomba500Interface::set_song_playing(const bool new_song_playing)
 }
 
 /** Get velocity value.
- * Requested velocity in m/s.
+ * Requested velocity in mm/s.
  * @return velocity value
  */
-float
+int16_t
 Roomba500Interface::velocity() const
 {
   return data->velocity;
@@ -1534,21 +1552,21 @@ Roomba500Interface::maxlenof_velocity() const
 }
 
 /** Set velocity value.
- * Requested velocity in m/s.
+ * Requested velocity in mm/s.
  * @param new_velocity new velocity value
  */
 void
-Roomba500Interface::set_velocity(const float new_velocity)
+Roomba500Interface::set_velocity(const int16_t new_velocity)
 {
   data->velocity = new_velocity;
   data_changed = true;
 }
 
 /** Get radius value.
- * Requested radius in m.
+ * Requested radius in mm.
  * @return radius value
  */
-float
+int16_t
 Roomba500Interface::radius() const
 {
   return data->radius;
@@ -1565,21 +1583,21 @@ Roomba500Interface::maxlenof_radius() const
 }
 
 /** Set radius value.
- * Requested radius in m.
+ * Requested radius in mm.
  * @param new_radius new radius value
  */
 void
-Roomba500Interface::set_radius(const float new_radius)
+Roomba500Interface::set_radius(const int16_t new_radius)
 {
   data->radius = new_radius;
   data_changed = true;
 }
 
 /** Get velocity_right value.
- * Requested left velocity.
+ * Requested left velocity in mm/s.
  * @return velocity_right value
  */
-float
+int16_t
 Roomba500Interface::velocity_right() const
 {
   return data->velocity_right;
@@ -1596,21 +1614,21 @@ Roomba500Interface::maxlenof_velocity_right() const
 }
 
 /** Set velocity_right value.
- * Requested left velocity.
+ * Requested left velocity in mm/s.
  * @param new_velocity_right new velocity_right value
  */
 void
-Roomba500Interface::set_velocity_right(const float new_velocity_right)
+Roomba500Interface::set_velocity_right(const int16_t new_velocity_right)
 {
   data->velocity_right = new_velocity_right;
   data_changed = true;
 }
 
 /** Get velocity_left value.
- * Requested right velocity.
+ * Requested right velocity in mm/s.
  * @return velocity_left value
  */
-float
+int16_t
 Roomba500Interface::velocity_left() const
 {
   return data->velocity_left;
@@ -1627,11 +1645,11 @@ Roomba500Interface::maxlenof_velocity_left() const
 }
 
 /** Set velocity_left value.
- * Requested right velocity.
+ * Requested right velocity in mm/s.
  * @param new_velocity_left new velocity_left value
  */
 void
-Roomba500Interface::set_velocity_left(const float new_velocity_left)
+Roomba500Interface::set_velocity_left(const int16_t new_velocity_left)
 {
   data->velocity_left = new_velocity_left;
   data_changed = true;
@@ -2306,8 +2324,16 @@ Roomba500Interface::create_message(const char *type) const
 {
   if ( strncmp("StopMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new StopMessage();
+  } else if ( strncmp("DockMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new DockMessage();
+  } else if ( strncmp("SetModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetModeMessage();
   } else if ( strncmp("DriveStraightMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new DriveStraightMessage();
+  } else if ( strncmp("DriveMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new DriveMessage();
+  } else if ( strncmp("SetMotorsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMotorsMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2340,6 +2366,9 @@ Roomba500Interface::enum_tostring(const char *enumtype, int val) const
   }
   if (strcmp(enumtype, "ChargingState") == 0) {
     return tostring_ChargingState((ChargingState)val);
+  }
+  if (strcmp(enumtype, "BrushState") == 0) {
+    return tostring_BrushState((BrushState)val);
   }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
@@ -2391,6 +2420,142 @@ Roomba500Interface::StopMessage::clone() const
 {
   return new Roomba500Interface::StopMessage(this);
 }
+/** @class Roomba500Interface::DockMessage <interfaces/Roomba500Interface.h>
+ * DockMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+Roomba500Interface::DockMessage::DockMessage() : Message("DockMessage")
+{
+  data_size = sizeof(DockMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DockMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+Roomba500Interface::DockMessage::~DockMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+Roomba500Interface::DockMessage::DockMessage(const DockMessage *m) : Message("DockMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (DockMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+Roomba500Interface::DockMessage::clone() const
+{
+  return new Roomba500Interface::DockMessage(this);
+}
+/** @class Roomba500Interface::SetModeMessage <interfaces/Roomba500Interface.h>
+ * SetModeMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_mode initial value for mode
+ */
+Roomba500Interface::SetModeMessage::SetModeMessage(const Mode ini_mode) : Message("SetModeMessage")
+{
+  data_size = sizeof(SetModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->mode = ini_mode;
+  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "Mode");
+}
+/** Constructor */
+Roomba500Interface::SetModeMessage::SetModeMessage() : Message("SetModeMessage")
+{
+  data_size = sizeof(SetModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "Mode");
+}
+
+/** Destructor */
+Roomba500Interface::SetModeMessage::~SetModeMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+Roomba500Interface::SetModeMessage::SetModeMessage(const SetModeMessage *m) : Message("SetModeMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get mode value.
+ * Open Interface mode.
+ * @return mode value
+ */
+Roomba500Interface::Mode
+Roomba500Interface::SetModeMessage::mode() const
+{
+  return (Roomba500Interface::Mode)data->mode;
+}
+
+/** Get maximum length of mode value.
+ * @return length of mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Roomba500Interface::SetModeMessage::maxlenof_mode() const
+{
+  return 1;
+}
+
+/** Set mode value.
+ * Open Interface mode.
+ * @param new_mode new mode value
+ */
+void
+Roomba500Interface::SetModeMessage::set_mode(const Mode new_mode)
+{
+  data->mode = new_mode;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+Roomba500Interface::SetModeMessage::clone() const
+{
+  return new Roomba500Interface::SetModeMessage(this);
+}
 /** @class Roomba500Interface::DriveStraightMessage <interfaces/Roomba500Interface.h>
  * DriveStraightMessage Fawkes BlackBoard Interface Message.
  * 
@@ -2401,7 +2566,7 @@ Roomba500Interface::StopMessage::clone() const
 /** Constructor with initial values.
  * @param ini_velocity initial value for velocity
  */
-Roomba500Interface::DriveStraightMessage::DriveStraightMessage(const float ini_velocity) : Message("DriveStraightMessage")
+Roomba500Interface::DriveStraightMessage::DriveStraightMessage(const int16_t ini_velocity) : Message("DriveStraightMessage")
 {
   data_size = sizeof(DriveStraightMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -2409,7 +2574,7 @@ Roomba500Interface::DriveStraightMessage::DriveStraightMessage(const float ini_v
   data      = (DriveStraightMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->velocity = ini_velocity;
-  add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
+  add_fieldinfo(IFT_INT16, "velocity", 1, &data->velocity);
 }
 /** Constructor */
 Roomba500Interface::DriveStraightMessage::DriveStraightMessage() : Message("DriveStraightMessage")
@@ -2419,7 +2584,7 @@ Roomba500Interface::DriveStraightMessage::DriveStraightMessage() : Message("Driv
   memset(data_ptr, 0, data_size);
   data      = (DriveStraightMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
+  add_fieldinfo(IFT_INT16, "velocity", 1, &data->velocity);
 }
 
 /** Destructor */
@@ -2442,10 +2607,10 @@ Roomba500Interface::DriveStraightMessage::DriveStraightMessage(const DriveStraig
 
 /* Methods */
 /** Get velocity value.
- * Requested velocity in m/s.
+ * Requested velocity in mm/s.
  * @return velocity value
  */
-float
+int16_t
 Roomba500Interface::DriveStraightMessage::velocity() const
 {
   return data->velocity;
@@ -2462,11 +2627,11 @@ Roomba500Interface::DriveStraightMessage::maxlenof_velocity() const
 }
 
 /** Set velocity value.
- * Requested velocity in m/s.
+ * Requested velocity in mm/s.
  * @param new_velocity new velocity value
  */
 void
-Roomba500Interface::DriveStraightMessage::set_velocity(const float new_velocity)
+Roomba500Interface::DriveStraightMessage::set_velocity(const int16_t new_velocity)
 {
   data->velocity = new_velocity;
 }
@@ -2481,6 +2646,288 @@ Roomba500Interface::DriveStraightMessage::clone() const
 {
   return new Roomba500Interface::DriveStraightMessage(this);
 }
+/** @class Roomba500Interface::DriveMessage <interfaces/Roomba500Interface.h>
+ * DriveMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_velocity initial value for velocity
+ * @param ini_radius initial value for radius
+ */
+Roomba500Interface::DriveMessage::DriveMessage(const int16_t ini_velocity, const int16_t ini_radius) : Message("DriveMessage")
+{
+  data_size = sizeof(DriveMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DriveMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->velocity = ini_velocity;
+  data->radius = ini_radius;
+  add_fieldinfo(IFT_INT16, "velocity", 1, &data->velocity);
+  add_fieldinfo(IFT_INT16, "radius", 1, &data->radius);
+}
+/** Constructor */
+Roomba500Interface::DriveMessage::DriveMessage() : Message("DriveMessage")
+{
+  data_size = sizeof(DriveMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DriveMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_INT16, "velocity", 1, &data->velocity);
+  add_fieldinfo(IFT_INT16, "radius", 1, &data->radius);
+}
+
+/** Destructor */
+Roomba500Interface::DriveMessage::~DriveMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+Roomba500Interface::DriveMessage::DriveMessage(const DriveMessage *m) : Message("DriveMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (DriveMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get velocity value.
+ * Requested velocity in mm/s.
+ * @return velocity value
+ */
+int16_t
+Roomba500Interface::DriveMessage::velocity() const
+{
+  return data->velocity;
+}
+
+/** Get maximum length of velocity value.
+ * @return length of velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Roomba500Interface::DriveMessage::maxlenof_velocity() const
+{
+  return 1;
+}
+
+/** Set velocity value.
+ * Requested velocity in mm/s.
+ * @param new_velocity new velocity value
+ */
+void
+Roomba500Interface::DriveMessage::set_velocity(const int16_t new_velocity)
+{
+  data->velocity = new_velocity;
+}
+
+/** Get radius value.
+ * Requested radius in mm.
+ * @return radius value
+ */
+int16_t
+Roomba500Interface::DriveMessage::radius() const
+{
+  return data->radius;
+}
+
+/** Get maximum length of radius value.
+ * @return length of radius value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Roomba500Interface::DriveMessage::maxlenof_radius() const
+{
+  return 1;
+}
+
+/** Set radius value.
+ * Requested radius in mm.
+ * @param new_radius new radius value
+ */
+void
+Roomba500Interface::DriveMessage::set_radius(const int16_t new_radius)
+{
+  data->radius = new_radius;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+Roomba500Interface::DriveMessage::clone() const
+{
+  return new Roomba500Interface::DriveMessage(this);
+}
+/** @class Roomba500Interface::SetMotorsMessage <interfaces/Roomba500Interface.h>
+ * SetMotorsMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_vacuuming initial value for vacuuming
+ * @param ini_main initial value for main
+ * @param ini_side initial value for side
+ */
+Roomba500Interface::SetMotorsMessage::SetMotorsMessage(const bool ini_vacuuming, const BrushState ini_main, const BrushState ini_side) : Message("SetMotorsMessage")
+{
+  data_size = sizeof(SetMotorsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMotorsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->vacuuming = ini_vacuuming;
+  data->main = ini_main;
+  data->side = ini_side;
+  add_fieldinfo(IFT_BOOL, "vacuuming", 1, &data->vacuuming);
+  add_fieldinfo(IFT_ENUM, "main", 1, &data->main, "BrushState");
+  add_fieldinfo(IFT_ENUM, "side", 1, &data->side, "BrushState");
+}
+/** Constructor */
+Roomba500Interface::SetMotorsMessage::SetMotorsMessage() : Message("SetMotorsMessage")
+{
+  data_size = sizeof(SetMotorsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMotorsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "vacuuming", 1, &data->vacuuming);
+  add_fieldinfo(IFT_ENUM, "main", 1, &data->main, "BrushState");
+  add_fieldinfo(IFT_ENUM, "side", 1, &data->side, "BrushState");
+}
+
+/** Destructor */
+Roomba500Interface::SetMotorsMessage::~SetMotorsMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+Roomba500Interface::SetMotorsMessage::SetMotorsMessage(const SetMotorsMessage *m) : Message("SetMotorsMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMotorsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get vacuuming value.
+ * Enable vacuuming?
+ * @return vacuuming value
+ */
+bool
+Roomba500Interface::SetMotorsMessage::is_vacuuming() const
+{
+  return data->vacuuming;
+}
+
+/** Get maximum length of vacuuming value.
+ * @return length of vacuuming value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Roomba500Interface::SetMotorsMessage::maxlenof_vacuuming() const
+{
+  return 1;
+}
+
+/** Set vacuuming value.
+ * Enable vacuuming?
+ * @param new_vacuuming new vacuuming value
+ */
+void
+Roomba500Interface::SetMotorsMessage::set_vacuuming(const bool new_vacuuming)
+{
+  data->vacuuming = new_vacuuming;
+}
+
+/** Get main value.
+ * Main brush state.
+ * @return main value
+ */
+Roomba500Interface::BrushState
+Roomba500Interface::SetMotorsMessage::main() const
+{
+  return (Roomba500Interface::BrushState)data->main;
+}
+
+/** Get maximum length of main value.
+ * @return length of main value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Roomba500Interface::SetMotorsMessage::maxlenof_main() const
+{
+  return 1;
+}
+
+/** Set main value.
+ * Main brush state.
+ * @param new_main new main value
+ */
+void
+Roomba500Interface::SetMotorsMessage::set_main(const BrushState new_main)
+{
+  data->main = new_main;
+}
+
+/** Get side value.
+ * Side brush state.
+ * @return side value
+ */
+Roomba500Interface::BrushState
+Roomba500Interface::SetMotorsMessage::side() const
+{
+  return (Roomba500Interface::BrushState)data->side;
+}
+
+/** Get maximum length of side value.
+ * @return length of side value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Roomba500Interface::SetMotorsMessage::maxlenof_side() const
+{
+  return 1;
+}
+
+/** Set side value.
+ * Side brush state.
+ * @param new_side new side value
+ */
+void
+Roomba500Interface::SetMotorsMessage::set_side(const BrushState new_side)
+{
+  data->side = new_side;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+Roomba500Interface::SetMotorsMessage::clone() const
+{
+  return new Roomba500Interface::SetMotorsMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -2492,8 +2939,24 @@ Roomba500Interface::message_valid(const Message *message) const
   if ( m0 != NULL ) {
     return true;
   }
-  const DriveStraightMessage *m1 = dynamic_cast<const DriveStraightMessage *>(message);
+  const DockMessage *m1 = dynamic_cast<const DockMessage *>(message);
   if ( m1 != NULL ) {
+    return true;
+  }
+  const SetModeMessage *m2 = dynamic_cast<const SetModeMessage *>(message);
+  if ( m2 != NULL ) {
+    return true;
+  }
+  const DriveStraightMessage *m3 = dynamic_cast<const DriveStraightMessage *>(message);
+  if ( m3 != NULL ) {
+    return true;
+  }
+  const DriveMessage *m4 = dynamic_cast<const DriveMessage *>(message);
+  if ( m4 != NULL ) {
+    return true;
+  }
+  const SetMotorsMessage *m5 = dynamic_cast<const SetMotorsMessage *>(message);
+  if ( m5 != NULL ) {
     return true;
   }
   return false;

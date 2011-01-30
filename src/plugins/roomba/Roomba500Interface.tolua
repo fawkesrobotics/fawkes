@@ -56,6 +56,12 @@ class Roomba500Interface : public Interface
     CHARGING_ERROR = 5
   } ChargingState;
 
+  typedef enum {
+    BRUSHSTATE_OFF,
+    BRUSHSTATE_FORWARD,
+    BRUSHSTATE_BACKWARD
+  } BrushState;
+
   class StopMessage : public Message
   {
     StopMessage();
@@ -63,15 +69,64 @@ class Roomba500Interface : public Interface
 
   };
 
+  class DockMessage : public Message
+  {
+    DockMessage();
+    ~DockMessage();
+
+  };
+
+  class SetModeMessage : public Message
+  {
+    SetModeMessage(Mode ini_mode);
+    SetModeMessage();
+    ~SetModeMessage();
+
+    Mode mode();
+    void set_mode(const Mode new_mode);
+    int maxlenof_mode() const;
+  };
+
   class DriveStraightMessage : public Message
   {
-    DriveStraightMessage(float ini_velocity);
+    DriveStraightMessage(short ini_velocity);
     DriveStraightMessage();
     ~DriveStraightMessage();
 
-    float velocity();
-    void set_velocity(const float new_velocity);
+    short velocity();
+    void set_velocity(const short new_velocity);
     int maxlenof_velocity() const;
+  };
+
+  class DriveMessage : public Message
+  {
+    DriveMessage(short ini_velocity, short ini_radius);
+    DriveMessage();
+    ~DriveMessage();
+
+    short velocity();
+    void set_velocity(const short new_velocity);
+    int maxlenof_velocity() const;
+    short radius();
+    void set_radius(const short new_radius);
+    int maxlenof_radius() const;
+  };
+
+  class SetMotorsMessage : public Message
+  {
+    SetMotorsMessage(bool ini_vacuuming, BrushState ini_main, BrushState ini_side);
+    SetMotorsMessage();
+    ~SetMotorsMessage();
+
+    bool is_vacuuming();
+    void set_vacuuming(const bool new_vacuuming);
+    int maxlenof_vacuuming() const;
+    BrushState main();
+    void set_main(const BrushState new_main);
+    int maxlenof_main() const;
+    BrushState side();
+    void set_side(const BrushState new_side);
+    int maxlenof_side() const;
   };
 
   Mode mode();
@@ -149,11 +204,11 @@ class Roomba500Interface : public Interface
   bool is_button_clock();
   void set_button_clock(const bool new_button_clock);
   int maxlenof_button_clock() const;
-  float distance();
-  void set_distance(const float new_distance);
+  short distance();
+  void set_distance(const short new_distance);
   int maxlenof_distance() const;
-  float angle();
-  void set_angle(const float new_angle);
+  short angle();
+  void set_angle(const short new_angle);
   int maxlenof_angle() const;
   ChargingState charging_state();
   void set_charging_state(const ChargingState new_charging_state);
@@ -200,17 +255,17 @@ class Roomba500Interface : public Interface
   bool is_song_playing();
   void set_song_playing(const bool new_song_playing);
   int maxlenof_song_playing() const;
-  float velocity();
-  void set_velocity(const float new_velocity);
+  short velocity();
+  void set_velocity(const short new_velocity);
   int maxlenof_velocity() const;
-  float radius();
-  void set_radius(const float new_radius);
+  short radius();
+  void set_radius(const short new_radius);
   int maxlenof_radius() const;
-  float velocity_right();
-  void set_velocity_right(const float new_velocity_right);
+  short velocity_right();
+  void set_velocity_right(const short new_velocity_right);
   int maxlenof_velocity_right() const;
-  float velocity_left();
-  void set_velocity_left(const float new_velocity_left);
+  short velocity_left();
+  void set_velocity_left(const short new_velocity_left);
   int maxlenof_velocity_left() const;
   unsigned short encoder_counts_left();
   void set_encoder_counts_left(const unsigned short new_encoder_counts_left);

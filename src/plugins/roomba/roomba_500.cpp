@@ -223,6 +223,9 @@ typedef struct {
  * Roomba 500 series communication class.
  * This class implements the serial communication with Roomba robots of the
  * 500 series.
+ *
+ * RFCOMM by reading http://people.csail.mit.edu/albert/bluez-intro/.
+ *
  * @author Tim Niemueller
  */
 
@@ -865,8 +868,9 @@ Roomba500::clean_spot()
 void
 Roomba500::seek_dock()
 {
-  send(OPCODE_SEEK_DOCK);
+  assert_connected();
 
+  send(OPCODE_SEEK_DOCK);
   __mode = MODE_PASSIVE;
 }
 
@@ -877,8 +881,9 @@ Roomba500::seek_dock()
 void
 Roomba500::power_down()
 {
-  send(OPCODE_POWER);
+  assert_connected();
 
+  send(OPCODE_POWER);
   __mode = MODE_PASSIVE;
 }
 
@@ -897,19 +902,18 @@ Roomba500::stop()
 
 /** Drive Roomba straight.
  * Available only in safe or full mode.
- * @param velocity_m_per_sec desired velocity in m/sec
+ * @param velo_mm_per_sec desired velocity in m/sec
  */
 void
-Roomba500::drive_straight(float velocity_m_per_sec)
+Roomba500::drive_straight(short int velo_mm_per_sec)
 {
   assert_control();
 
-  int mm_per_sec = (int)roundf(velocity_m_per_sec * 1000.);
-  if (mm_per_sec < -MAX_LIN_VEL_MM_S)  mm_per_sec = -MAX_LIN_VEL_MM_S;
-  if (mm_per_sec >  MAX_LIN_VEL_MM_S)  mm_per_sec =  MAX_LIN_VEL_MM_S;
+  if (velo_mm_per_sec < -MAX_LIN_VEL_MM_S)  velo_mm_per_sec = -MAX_LIN_VEL_MM_S;
+  if (velo_mm_per_sec >  MAX_LIN_VEL_MM_S)  velo_mm_per_sec =  MAX_LIN_VEL_MM_S;
 
   DriveParams dp;
-  dp.velocity = htons(mm_per_sec);
+  dp.velocity = htons(velo_mm_per_sec);
   dp.radius   = htons(0x8000);
 
   send(OPCODE_DRIVE, &dp, sizeof(DriveParams));
@@ -934,21 +938,42 @@ Roomba500::drive_turn(Roomba500::TurnDirection direction)
 
 /** Drive Roomba on an arc.
  * Available only in safe or full mode.
- * @param velocity_m_per_sec desired velocity in m/sec
- * @param radius_m desired radius of arc in m
+ * @param velo_mm_per_sec desired velocity in m/sec
+ * @param radius_mm desired radius of arc in m
  */
 void
-Roomba500::drive_arc(float velocity_m_per_sec, float radius_m)
+Roomba500::drive_arc(short int velo_mm_per_sec, short int radius_mm)
 {
   assert_control();
 
-  int velo_mm_per_sec = (int)roundf(velocity_m_per_sec * 1000.);
   if (velo_mm_per_sec < -MAX_LIN_VEL_MM_S)  velo_mm_per_sec = -MAX_LIN_VEL_MM_S;
   if (velo_mm_per_sec >  MAX_LIN_VEL_MM_S)  velo_mm_per_sec =  MAX_LIN_VEL_MM_S;
 
-  int radius_mm = (int)roundf(radius_m * 1000.);
   if (radius_mm < -MAX_RADIUS_MM)  radius_mm = -MAX_RADIUS_MM;
   if (radius_mm >  MAX_RADIUS_MM)  radius_mm =  MAX_RADIUS_MM;
+
+  DriveParams dp;
+  dp.velocity = htons(velo_mm_per_sec);
+  dp.radius   = htons(radius_mm);
+
+  send(OPCODE_DRIVE, &dp, sizeof(DriveParams));  
+}
+
+/** Drive Roomba.
+ * Available only in safe or full mode.
+ * @param velo_mm_per_sec desired velocity in m/sec
+ * @param radius_mm desired radius of arc in m
+ */
+void
+Roomba500::drive(short int velo_mm_per_sec, short int radius_mm)
+{
+  assert_control();
+
+  if (velo_mm_per_sec < -MAX_LIN_VEL_MM_S)  velo_mm_per_sec = -MAX_LIN_VEL_MM_S;
+  if (velo_mm_per_sec >  MAX_LIN_VEL_MM_S)  velo_mm_per_sec =  MAX_LIN_VEL_MM_S;
+
+  if (radius_mm < -MAX_RADIUS_MM)  radius_mm = -MAX_RADIUS_MM;
+  if (radius_mm >  MAX_RADIUS_MM)  radius_mm =  0x8000; // drive straight
 
   DriveParams dp;
   dp.velocity = htons(velo_mm_per_sec);
@@ -960,19 +985,18 @@ Roomba500::drive_arc(float velocity_m_per_sec, float radius_m)
 
 /** Directly control wheel velocities.
  * Available only in safe or full mode.
- * @param left_velo_m_per_sec velocity of left wheel in m/sec
- * @param right_velo_m_per_sec velocity of right wheel in m/sec
+ * @param left_mm_per_sec velocity of left wheel in m/sec
+ * @param right_mm_per_sec velocity of right wheel in m/sec
  */
 void
-Roomba500::drive_direct(float left_velo_m_per_sec, float right_velo_m_per_sec)
+Roomba500::drive_direct(short int left_mm_per_sec,
+			short int right_mm_per_sec)
 {
   assert_control();
 
-  int left_mm_per_sec = (int)roundf(left_velo_m_per_sec * 1000.);
   if (left_mm_per_sec < -MAX_LIN_VEL_MM_S)  left_mm_per_sec = -MAX_LIN_VEL_MM_S;
   if (left_mm_per_sec >  MAX_LIN_VEL_MM_S)  left_mm_per_sec =  MAX_LIN_VEL_MM_S;
 
-  int right_mm_per_sec = (int)roundf(right_velo_m_per_sec * 1000.);
   if (right_mm_per_sec < -MAX_LIN_VEL_MM_S)  right_mm_per_sec = -MAX_LIN_VEL_MM_S;
   if (right_mm_per_sec >  MAX_LIN_VEL_MM_S)  right_mm_per_sec =  MAX_LIN_VEL_MM_S;
 
@@ -1008,21 +1032,7 @@ Roomba500::drive_pwm(short int left_wheel_pwm, short int right_wheel_pwm)
 }
 
 
-/** Disable all brushes (and vacuuming).
- * Available only in safe or full mode.
- */
-void
-Roomba500::disable_brushes()
-{
-  assert_control();
-
-  unsigned char param = 0;
-
-  send(OPCODE_MOTORS, &param, 1);
-}
-
-
-/** Enable brushes (and vacuum).
+/** Set motor states (brushes and vacuum).
  * Available only in safe or full mode.
  * @param main true to enable main brushes
  * @param side true to enable side brush
@@ -1031,8 +1041,8 @@ Roomba500::disable_brushes()
  * @param side_backward true to enable backward operation of side brush
  */
 void
-Roomba500::enable_brushes(bool main, bool side, bool vacuum,
-			  bool main_backward, bool side_backward)
+Roomba500::set_motors(bool main, bool side, bool vacuum,
+		      bool main_backward, bool side_backward)
 {
   assert_control();
 

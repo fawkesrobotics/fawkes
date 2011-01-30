@@ -49,6 +49,7 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
    * @param logger logger
    * @param clock clock
    * @param roomba refptr to Roomba500 instance
+   * @param query_mode true to query data instead of streaming it.
    */
   WorkerThread(fawkes::Logger *logger, fawkes::Clock *clock,
 	       fawkes::RefPtr<Roomba500> roomba, bool query_mode)
@@ -434,11 +435,57 @@ Roomba500Thread::loop()
     {
       try {
 	__roomba->stop();
+	//__roomba->set_motors(false, false, false, false, false);
+	//logger->log_debug(name(), "Stopped");
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to stop robot, exception follows");
 	logger->log_warn(name(), e);
       }
-    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveStraightMessage>()) {
+    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::SetModeMessage>())
+    {
+      Roomba500Interface::SetModeMessage *msg =
+	__roomba500_if->msgq_first(msg);
+
+      Roomba500::Mode mode = __roomba->get_mode();
+
+      switch (msg->mode()) {
+      case Roomba500Interface::MODE_OFF:
+	logger->log_debug(name(), "Switching off");
+	mode = Roomba500::MODE_OFF;
+	break;
+      case Roomba500Interface::MODE_PASSIVE:
+	logger->log_debug(name(), "Switching to passive mode");
+	mode = Roomba500::MODE_PASSIVE;
+	break;
+      case Roomba500Interface::MODE_SAFE:
+	logger->log_debug(name(), "Switching to safe mode");
+	mode = Roomba500::MODE_SAFE;
+	break;
+      case Roomba500Interface::MODE_FULL:
+	logger->log_debug(name(), "Switching to full mode");
+	mode = Roomba500::MODE_FULL;
+	break;
+      default:
+	logger->log_warn(name(), "Invalid mode %i received, ignoring",
+			 msg->mode());
+      }
+      try {
+	__roomba->set_mode(mode);
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Cannot set mode, exception follows");
+	logger->log_warn(name(), e);
+      }
+
+    } else if (__roomba500_if->msgq_first_is<Roomba500Interface::DockMessage>()) {
+      try {
+	__roomba->seek_dock();
+	logger->log_debug(name(), "Docking");
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to seek dock, exception follows");
+	logger->log_warn(name(), e);
+      }
+    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveStraightMessage>())
+    {
       Roomba500Interface::DriveStraightMessage *msg =
 	__roomba500_if->msgq_first(msg);
 
@@ -446,6 +493,34 @@ Roomba500Thread::loop()
 	__roomba->drive_straight(msg->velocity());
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to drive straight, exception follows");
+	logger->log_warn(name(), e);
+      }
+    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveMessage>())
+    {
+      Roomba500Interface::DriveMessage *msg =
+	__roomba500_if->msgq_first(msg);
+
+      try {
+	__roomba->drive(msg->velocity(), msg->radius());
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to drive, exception follows");
+	logger->log_warn(name(), e);
+      }
+
+    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::SetMotorsMessage>())
+    {
+      Roomba500Interface::SetMotorsMessage *msg =
+	__roomba500_if->msgq_first(msg);
+
+      try {
+	__roomba->set_motors(
+	  (msg->main() != Roomba500Interface::BRUSHSTATE_OFF),
+	  (msg->side() != Roomba500Interface::BRUSHSTATE_OFF),
+	  msg->is_vacuuming(),
+	  (msg->main() == Roomba500Interface::BRUSHSTATE_BACKWARD),
+	  (msg->side() == Roomba500Interface::BRUSHSTATE_BACKWARD));
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to set motors, exception follows");
 	logger->log_warn(name(), e);
       }
     }
@@ -517,7 +592,7 @@ Roomba500Thread::write_blackboard()
     __switch_if_but_clock->set_enabled(sp.buttons & Roomba500::BUTTON_CLOCK);
 
     // Convert mm to m for distance
-    __roomba500_if->set_distance((int)ntohs(sp.distance) / 1000.);
+    __roomba500_if->set_distance((int16_t)ntohs(sp.distance));
     // invert because in Fawkes positive angles go counter-clockwise, while
     // for the Roomba they go clockwise, additionally convert into radians.
     __roomba500_if->set_angle(-deg2rad((int)ntohs(sp.angle)));
@@ -548,10 +623,10 @@ Roomba500Thread::write_blackboard()
     __roomba500_if->set_song_number(sp.song_number);
     __roomba500_if->set_song_playing(sp.song_playing == 1);
 
-    __roomba500_if->set_velocity((int)ntohs(sp.velocity) / 1000.);
-    __roomba500_if->set_radius((int)ntohs(sp.radius) / 1000.);
-    __roomba500_if->set_velocity_right((int)ntohs(sp.velocity_right) / 1000.);
-    __roomba500_if->set_velocity_left((int)ntohs(sp.velocity_left) / 1000.);
+    __roomba500_if->set_velocity((int16_t)ntohs(sp.velocity));
+    __roomba500_if->set_radius((int16_t)ntohs(sp.radius));
+    __roomba500_if->set_velocity_right((int16_t)ntohs(sp.velocity_right));
+    __roomba500_if->set_velocity_left((int16_t)ntohs(sp.velocity_left));
     __roomba500_if->set_encoder_counts_left(ntohs(sp.encoder_counts_left));
     __roomba500_if->set_encoder_counts_right(ntohs(sp.encoder_counts_right));
 

@@ -78,6 +78,12 @@
       <item name="CHARGING_WAITING" value="4">Waiting.</item>
       <item name="CHARGING_ERROR" value="5">Fault condition.</item>
     </enum>
+    <enum name="BrushState">
+      <comment>State of the brushes.</comment>
+      <item name="BRUSHSTATE_OFF">Brush is off.</item>
+      <item name="BRUSHSTATE_FORWARD">Brush is turning forward.</item>
+      <item name="BRUSHSTATE_BACKWARD">Brush is turning backward.</item>
+    </enum>
   </constants>
   <data>
     <comment>
@@ -108,8 +114,8 @@
     <field type="bool" name="button_day">Day button pressed.</field>
     <field type="bool" name="button_schedule">Schedule button pressed.</field>
     <field type="bool" name="button_clock">Clock button pressed.</field>
-    <field type="float" name="distance">Travelled distance in m.</field>
-    <field type="float" name="angle">Turned angle in radians.</field>
+    <field type="int16" name="distance">Travelled distance in m.</field>
+    <field type="int16" name="angle">Turned angle in radians.</field>
     <field type="ChargingState" name="charging_state">Charging state.</field>
     <field type="uint16" name="voltage">Voltage in mV.</field>
     <field type="int16" name="current">Current in mA.</field>
@@ -129,10 +135,10 @@
       Internal charger available?</field>
     <field type="uint8" name="song_number">Song number.</field>
     <field type="bool" name="song_playing">Song playing?</field>
-    <field type="float" name="velocity">Requested velocity in m/s.</field>
-    <field type="float" name="radius">Requested radius in m.</field>
-    <field type="float" name="velocity_right">Requested left velocity.</field>
-    <field type="float" name="velocity_left">Requested right velocity.</field>
+    <field type="int16" name="velocity">Requested velocity in mm/s.</field>
+    <field type="int16" name="radius">Requested radius in mm.</field>
+    <field type="int16" name="velocity_right">Requested left velocity in mm/s.</field>
+    <field type="int16" name="velocity_left">Requested right velocity in mm/s.</field>
     <field type="uint16" name="encoder_counts_left">Encoder count left.</field>
     <field type="uint16" name="encoder_counts_right">Encoder count right.</field>
     <field type="bool" name="bumper_left">Left bumper active?</field>
@@ -165,8 +171,26 @@
   <message name="Stop">
     <comment>Stop all motion.</comment>
   </message>
+  <message name="Dock">
+    <comment>Dock robot.</comment>
+  </message>
+  <message name="SetMode">
+    <comment>Set operation mode.</comment>
+    <ref>mode</ref>
+  </message>
   <message name="DriveStraight">
     <comment>Drive straight.</comment>
     <ref>velocity</ref>
+  </message>
+  <message name="Drive">
+    <comment>Drive with the given parameters.</comment>
+    <ref>velocity</ref>
+    <ref>radius</ref>
+  </message>
+  <message name="SetMotors">
+    <comment>Set vacuuming state</comment>
+    <field type="bool" name="vacuuming">Enable vacuuming?</field>
+    <field type="BrushState" name="main">Main brush state.</field>
+    <field type="BrushState" name="side">Side brush state.</field>
   </message>
 </interface>

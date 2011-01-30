@@ -468,14 +468,14 @@ class Roomba500
   void seek_dock();
   void power_down();
   void stop();
-  void drive_straight(float velocity_m_per_sec);
+  void drive_straight(short int velo_mm_per_sec);
   void drive_turn(TurnDirection direction);
-  void drive_arc(float velocity_m_per_sec, float radius_m);
-  void drive_direct(float left_velo_m_per_sec, float right_velo_m_per_sec);
+  void drive_arc(short int velo_mm_per_sec, short int radius_mm);
+  void drive(short int velocity_mm_per_sec, short int radius_mm);
+  void drive_direct(short int left_mm_per_sec, short int right_mm_per_sec);
   void drive_pwm(short int left_wheel_pwm, short int right_wheel_pwm);
-  void disable_brushes();
-  void enable_brushes(bool main = true, bool side = true, bool vacuum = true,
-		      bool main_backward = false, bool side_backward = false);
+  void set_motors(bool main = true, bool side = true, bool vacuum = true,
+		  bool main_backward = false, bool side_backward = false);
   void set_leds(bool debris, bool spot, bool dock, bool check_robot,
 		char clean_color, char clean_intensity);
 
