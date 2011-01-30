@@ -159,7 +159,7 @@ ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   ifneq ($(wildcard $(realpath $(IPP_DIR)/$(IPP_ARCH)/include/ipp.h)),)
     HAVE_IPP = 1
     VISION_CFLAGS  += -DHAVE_IPP
-    VISION_LIBS    += pthread
+    VISION_LIBS    += pthread m
     ifeq ($(wildcard $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/sharedlib/libguide.so),)
       # IPP is used from ICC installation, possibly without actually using icc atm
       VISION_LIBDIRS += $(ICC_DIR)/lib/$(ICC_ARCH)
