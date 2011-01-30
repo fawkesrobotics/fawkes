@@ -26,9 +26,10 @@
 
 #include <geometry/hom_point.h>
 #include <utils/math/angle.h>
+#include <fvutils/base/types.h>
 
 #ifdef HAVE_BULB_CREATOR
-#include <models/mirror/bulb.h>
+#include <fvmodels/mirror/bulb.h>
 #include <bulb_calib/bulb_generator.h>
 #endif
 
@@ -37,9 +38,11 @@
 #include <map>
 #include <cassert>
 
+namespace firevision {
+
 class MirrorCalibTool
 #ifdef HAVE_BULB_CREATOR
- : public firevision::BulbGeneratorProgressHandler
+ : public BulbGeneratorProgressHandler
 #endif
 {
  public:
@@ -128,7 +131,7 @@ class MirrorCalibTool
 
   static void apply_sobel(unsigned char* src, unsigned char* dst,
                           int widt, int height,
-                          firevision::orientation_t ori);
+                          orientation_t ori);
   static void apply_sharpen(unsigned char* src, unsigned char* dst,
                             int widt, int height);
   static void apply_median(unsigned char* src, unsigned char* dst,
@@ -157,9 +160,11 @@ class MirrorCalibTool
   static PolarAnglePair find_nearest_neighbors(PolarAngle angle,
                                                const MarkMap& mark_map);
   static RealDistance interpolate(PolarRadius radius, const MarkList& marks);
-  static firevision::Bulb generate(int width, int height,
-                                   const PixelPoint& center,
-                                   const MarkMap& mark_map);
+#ifdef HAVE_BULB_CREATOR
+  static Bulb generate(int width, int height,
+                       const PixelPoint& center,
+                       const MarkMap& mark_map);
+#endif
 
   unsigned char*   img_yuv_buffer_;
   int              img_center_x_;
@@ -174,10 +179,12 @@ class MirrorCalibTool
   const unsigned char* last_yuv_buffer_;
 
 #ifdef HAVE_BULB_CREATOR
-  firevision::Bulb* bulb_;
-  firevision::BulbGenerator* m_generator;
+  Bulb* bulb_;
+  BulbGenerator* generator_;
 #endif
 };
+
+}
 
 #endif /*  __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_ */
 

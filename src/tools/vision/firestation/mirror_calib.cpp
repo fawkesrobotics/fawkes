@@ -29,12 +29,12 @@
 #include <fvutils/color/yuv.h>
 #include <fvutils/readers/pnm.h>
 
-#include <filters/sobel.h>
-#include <filters/sharpen.h>
-#include <filters/median.h>
-#include <filters/or.h>
-#include <filters/laplace.h>
-#include <filters/min.h>
+#include <fvfilters/sobel.h>
+#include <fvfilters/sharpen.h>
+#include <fvfilters/median.h>
+#include <fvfilters/or.h>
+#include <fvfilters/laplace.h>
+#include <fvfilters/min.h>
 
 #include <algorithm>
 #include <iostream>
@@ -46,11 +46,9 @@
 //#define FILTER_HOLES
 #define FILTER_MINI_HOLES
 
-using namespace std;
 using namespace fawkes;
-#ifdef HAVE_BULB_CREATOR
-using namespace firevision;
-#endif
+
+namespace firevision {
 
 /** @class MirrorCalibTool mirror_calib.h
  * This class encapsulates the routines necessary for interactive mirror
@@ -480,7 +478,7 @@ class MirrorCalibTool::CartesianImage
       throw fawkes::Exception("Point p is out of image");
     }
     PixelPoint pp = to_pixel(p);
-    const firevision::YUV_t ignr(0);
+    const YUV_t ignr(0);
     if (mask() == 0 ||
         (YUV422_PLANAR_Y_AT(mask(), width(), pp.x, pp.y) != ignr.Y &&
          YUV422_PLANAR_U_AT(mask(), width(), height(), pp.x, pp.y) != ignr.U &&
@@ -495,9 +493,9 @@ class MirrorCalibTool::CartesianImage
   }
 
   /** Maximum cartesian X coordinate of the image. */
-  inline int max_x() const { return max(center().x, width() - center().x); }
+  inline int max_x() const { return std::max(center().x, width() - center().x); }
   /** Maximum cartesian Y coordinate of the image. */
-  inline int max_y() const { return max(center().y, height() - center().y); }
+  inline int max_y() const { return std::max(center().y, height() - center().y); }
   /** Maximum polar radius of the image. */
   inline PolarRadius max_radius() const {
     return static_cast<PolarRadius>(sqrt(max_x()*max_x() + max_y()*max_y()));
@@ -837,7 +835,7 @@ MirrorCalibTool::MirrorCalibTool()
     state_(CalibrationState())
 #ifdef HAVE_BULB_CREATOR
   , bulb_(0),
-    m_generator(0)
+    generator_(0)
 #endif
 {
 }
@@ -971,7 +969,7 @@ MirrorCalibTool::apply_sobel(unsigned char* src,
                              unsigned char* dst,
                              int width,
                              int height,
-                             firevision::orientation_t ori)
+                             orientation_t ori)
 {
   ROI* roi = ROI::full_image(width, height);
   FilterSobel filter;
@@ -1581,7 +1579,7 @@ MirrorCalibTool::PolarAnglePair
 MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
                                         const MarkMap& mark_map)
 {
-  typedef vector<PolarAngle> AngleList;
+  typedef std::vector<PolarAngle> AngleList;
   AngleList diffs;
   for (MarkMap::const_iterator it = mark_map.begin();
        it != mark_map.end(); it++)
@@ -1702,6 +1700,7 @@ MirrorCalibTool::interpolate(PolarRadius radius,
 }
 
 
+#ifdef HAVE_BULB_CREATOR
 /**
  * Generates a new bulb based on the given data.
  * @param width The width of the image.
@@ -1793,6 +1792,7 @@ MirrorCalibTool::generate(int width,
   }
   return bulb;
 }
+#endif
 
 
 void
@@ -1957,5 +1957,7 @@ MirrorCalibTool::draw_crosshair(unsigned char* yuv_buffer,
       }
     }
   }
+}
+
 }
 

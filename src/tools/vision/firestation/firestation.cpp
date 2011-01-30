@@ -247,7 +247,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
 
   // --- mirror calibration -----------------------------------------
-  m_calib_tool = new MirrorCalibTool();
+  m_calib_tool = new firevision::MirrorCalibTool();
 
 #ifndef HAVE_BULB_CREATOR
   Gtk::Notebook *nb = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "ntbOptions") );

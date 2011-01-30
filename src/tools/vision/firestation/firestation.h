@@ -35,11 +35,11 @@ namespace firevision {
   class ShmImageLister;
   class Writer;
   class FuseImageListWidget;
+  class MirrorCalibTool;
 }
 namespace fawkes {
   class AvahiDispatcher;
 }
-class MirrorCalibTool;
 class ColorTrainTool;
 class ColorTrainWidget;
 class FuseTransferWidget;
@@ -224,7 +224,7 @@ class Firestation : public Gtk::Window
   bool m_enable_scaling;
   float m_scale_factor;
 
-  MirrorCalibTool* m_calib_tool;
+  firevision::MirrorCalibTool* m_calib_tool;
   ColorTrainWidget* m_ctw;
   FuseTransferWidget* m_ftw;
   firevision::FuseImageListWidget* m_filw;
