@@ -26,6 +26,9 @@
 #include <utils/logging/logger.h>
 #include <core/exceptions/software.h>
 
+#include <boost/thread/thread.hpp>
+#include <boost/bind.hpp>
+
 #include <sstream>
 
 using namespace OpenRAVE;

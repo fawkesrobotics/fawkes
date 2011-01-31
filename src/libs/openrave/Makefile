@@ -26,7 +26,7 @@ endif
 
 ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS  += $(shell $(PKGCONFIG) --cflags 'openrave')
-  LDFLAGS += $(shell $(PKGCONFIG) --libs 'openrave') -lopenrave-core
+  LDFLAGS += $(shell $(PKGCONFIG) --libs 'openrave') -lopenrave-core -lboost_thread
   LIBS_all  = $(LIBDIR)/libfawkesopenrave.so
   OBJS_all = $(OBJS_libfawkesopenrave)
 else
