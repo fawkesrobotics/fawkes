@@ -73,13 +73,13 @@ main(int argc, char **argv)
 
     JoystickRemoteBlackBoardPoster jbp(host, port, &logger);
 
-    jbp.joystick_plugged(2, 10);
-    float axis_x[2], axis_y[2], new_axis_x[2], new_axis_y[2];
+    jbp.joystick_plugged(3, 10);
+    float axis[3], new_axis[3];
     unsigned int button, new_button;
     Time last, now;
 
-    axis_x[0] = axis_y[0] = axis_y[1] = 0.;
-    axis_x[1] = 0.5;
+    axis[0] = axis[1] = 0.;
+    axis[2] = 0.5;
 
     last.stamp();
 
@@ -97,14 +97,14 @@ main(int argc, char **argv)
       }
       if (key == 0) {
 	wait_time = 5;
-	new_axis_x[0] = new_axis_y[0] = 0;
+	new_axis[0] = new_axis[1] = 0;
 	new_button = 0;
 
       } else if (key == 27) {
 	key = getkey();
 	if (key == 0) {
 	  // Escape key
-	  new_axis_x[0] = new_axis_y[0] = 0;
+	  new_axis[0] = new_axis[1] = 0;
 	  new_button = 0;
 	} else {
 	  if (key != 91) continue;
@@ -113,24 +113,24 @@ main(int argc, char **argv)
 	  if (key == 0) continue;
 
 	  switch (key) {
-	  case 65: new_axis_x[0] = +1.; break;
-	  case 66: new_axis_x[0] = -1.; break;
-	  case 67: new_axis_y[0] = -1.; break;
-	  case 68: new_axis_y[0] = +1.; break;
+	  case 65: new_axis[0] = +1.; break;
+	  case 66: new_axis[0] = -1.; break;
+	  case 67: new_axis[1] = -1.; break;
+	  case 68: new_axis[1] = +1.; break;
 	  default: continue;
 	  }
 	}
       } else if (key == '+') {
-	if ((axis_x[1] + 0.1) <= 1.0) {
-	  new_axis_x[1] += 0.1;
+	if ((axis[2] + 0.1) <= 1.0) {
+	  new_axis[2] += 0.1;
 	} else {
-	  new_axis_x[1]  = 1.;
+	  new_axis[2]  = 1.;
 	}
       } else if (key == '-') {
-	if ((axis_x[1] - 0.1) >= 0.) {
-	  new_axis_x[1] -= 0.1;
+	if ((axis[2] - 0.1) >= 0.) {
+	  new_axis[2] -= 0.1;
 	} else {
-	  new_axis_x[1]  = 0.;
+	  new_axis[2]  = 0.;
 	}
       } else if (key == '1') {
 	new_button = JoystickInterface::BUTTON_1;
@@ -156,16 +156,14 @@ main(int argc, char **argv)
 	new_button = JoystickInterface::BUTTON_10;
       }
 
-      if ((axis_x[0] != new_axis_x[0]) || (axis_x[1] != new_axis_x[1]) ||
-	  (axis_y[0] != new_axis_y[0]) || (axis_y[1] != new_axis_y[1]) ||
-	  (button != new_button))
+      if ((axis[0] != new_axis[0]) || (axis[1] != new_axis[1]) ||
+	  (axis[2] != new_axis[2]) || (button != new_button))
       {
-	axis_x[0] = new_axis_x[0];
-	axis_x[1] = new_axis_x[1];
-	axis_y[0] = new_axis_y[0];
-	axis_y[1] = new_axis_y[1];
+	axis[0] = new_axis[0];
+	axis[1] = new_axis[1];
+	axis[2] = new_axis[2];
 	button    = new_button;
-	jbp.joystick_changed(button, axis_x, axis_y);
+	jbp.joystick_changed(button, axis);
       }
     }
 

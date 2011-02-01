@@ -134,13 +134,13 @@ class JoystickBlackBoardLogger
 
     try {
       __joystick_if->read();
-      float *axis_x_value = __joystick_if->axis_x();
-      float *axis_y_value = __joystick_if->axis_y();
-      __logger->log_info("Joystick", "0: (%f, %f)  1: (%f, %f)  2: (%f, %f)  3: (%f, %f)",
-			 axis_x_value[0], axis_y_value[0],
-			 axis_x_value[1], axis_y_value[1],
-			 axis_x_value[2], axis_y_value[2],
-			 axis_x_value[3], axis_y_value[3]);
+      float *axis_value = __joystick_if->axis();
+      __logger->log_info("Joystick", "Axes:    0: %f  1: %f  2: %f  3: %f  4: %f  "
+			 "5: %f  6: %f  7: %f  8: %f",
+			 axis_value[0], axis_value[1],
+			 axis_value[2], axis_value[3],
+			 axis_value[4], axis_value[5],
+			 axis_value[6], axis_value[7]);
       char button_string[33];
       button_string[32] = 0;
       unsigned int pressed_buttons = __joystick_if->pressed_buttons();

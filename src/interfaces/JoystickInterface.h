@@ -87,8 +87,7 @@ class JoystickInterface : public Interface
       corresponding bit is set to 1. Use the BUTTON_* constants for bit-wise
       comparisons.
      */
-    float axis_x[4]; /**< X values of axes */
-    float axis_y[4]; /**< Y values of axes */
+    float axis[8]; /**< Values of axes. */
   } JoystickInterface_data_t;
 #pragma pack(pop)
 
@@ -112,16 +111,11 @@ class JoystickInterface : public Interface
   uint32_t pressed_buttons() const;
   void set_pressed_buttons(const uint32_t new_pressed_buttons);
   size_t maxlenof_pressed_buttons() const;
-  float * axis_x() const;
-  float axis_x(unsigned int index) const;
-  void set_axis_x(unsigned int index, const float new_axis_x);
-  void set_axis_x(const float * new_axis_x);
-  size_t maxlenof_axis_x() const;
-  float * axis_y() const;
-  float axis_y(unsigned int index) const;
-  void set_axis_y(unsigned int index, const float new_axis_y);
-  void set_axis_y(const float * new_axis_y);
-  size_t maxlenof_axis_y() const;
+  float * axis() const;
+  float axis(unsigned int index) const;
+  void set_axis(unsigned int index, const float new_axis);
+  void set_axis(const float * new_axis);
+  size_t maxlenof_axis() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

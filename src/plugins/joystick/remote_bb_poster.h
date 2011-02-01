@@ -39,8 +39,7 @@ class JoystickRemoteBlackBoardPoster : public JoystickBlackBoardHandler
 				 fawkes::Logger *logger);
   ~JoystickRemoteBlackBoardPoster();
 
-  virtual void joystick_changed(unsigned int pressed_buttons,
-				float *axis_x_values, float *axis_y_values);
+  virtual void joystick_changed(unsigned int pressed_buttons, float *axis_values);
   virtual void joystick_plugged(char num_axes, char num_buttons);
   virtual void joystick_unplugged();
 

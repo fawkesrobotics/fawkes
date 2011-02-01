@@ -58,8 +58,7 @@ JoystickRemoteBlackBoardPoster::~JoystickRemoteBlackBoardPoster()
 
 void
 JoystickRemoteBlackBoardPoster::joystick_changed(unsigned int pressed_buttons,
-						 float *axis_x_values,
-						 float *axis_y_values)
+						 float *axis_values)
 {
   if ( ! __bb->is_alive() ) {
     if ( __bb->try_aliveness_restore() ) {
@@ -69,9 +68,8 @@ JoystickRemoteBlackBoardPoster::joystick_changed(unsigned int pressed_buttons,
   }
   
   try {
-    __joystick_if->set_pressed_buttons( pressed_buttons );
-    __joystick_if->set_axis_x( axis_x_values );
-    __joystick_if->set_axis_y( axis_y_values );
+    __joystick_if->set_pressed_buttons(pressed_buttons);
+    __joystick_if->set_axis(axis_values);
     __joystick_if->write();
   } catch (Exception &e) {
     if ( ! __warning_printed ) {

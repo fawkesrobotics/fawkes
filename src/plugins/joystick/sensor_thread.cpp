@@ -67,8 +67,7 @@ JoystickSensorThread::loop()
     __joystick_if->set_num_axes( __aqt->num_axes() );
     __joystick_if->set_num_buttons( __aqt->num_buttons() );
     __joystick_if->set_pressed_buttons( __aqt->pressed_buttons() );
-    __joystick_if->set_axis_x( __aqt->axis_x_values() );
-    __joystick_if->set_axis_y( __aqt->axis_y_values() );
+    __joystick_if->set_axis( __aqt->axis_values() );
     __joystick_if->write();
     __aqt->unlock();
   }
