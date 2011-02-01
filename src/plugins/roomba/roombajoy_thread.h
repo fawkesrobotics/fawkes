@@ -52,6 +52,7 @@ class RoombaJoystickThread
 
  private:
   void stop();
+  unsigned int confval(const char *path, unsigned int default_value);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -65,6 +66,16 @@ class RoombaJoystickThread
   bool __main_brush_enabled;
   bool __side_brush_enabled;
   bool __vacuuming_enabled;
+
+  unsigned int __cfg_but_main_brush;
+  unsigned int __cfg_but_side_brush;
+  unsigned int __cfg_but_vacuuming;
+  unsigned int __cfg_but_dock;
+  unsigned int __cfg_but_mode;
+
+  unsigned int __cfg_axis_forward;
+  unsigned int __cfg_axis_sideward;
+  unsigned int __cfg_axis_speed;
 };
 
 #endif

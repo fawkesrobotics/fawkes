@@ -133,6 +133,14 @@ INSERT INTO "config" VALUES('/hardware/roomba/btsave','bool',1,'If RooTooth is a
 INSERT INTO "config" VALUES('/hardware/roomba/btfast','bool',1,'Try to enable fast mode on startup. Startup takes longer. Disable if you have RooTooth powered on most of the time anyway and not plug it in just before you launch. Only supported for FireFly RooTooth.');
 INSERT INTO "config" VALUES('/hardware/roomba/query_mode','bool',1,'Query data in each loop instead of streaming. More reliably with RooTooth, can be disabled for serial connection for slightly better performance.');
 INSERT INTO "config" VALUES('/hardware/roomba/play_fanfare','bool',1,'Play fanfare when connection has been established. Disable when testing late at night...');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_main_brush','unsigned int',1,'Button bit for main brush button.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_side_brush','unsigned int',2,'Button bit for side brush button.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_vacuuming','unsigned int',4,'Button bit for vacuuming button.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_dock','unsigned int',8,'Button bit for dock button.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_spot','unsigned int',16,'Button bit for spot cleaning.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_forward','unsigned int',0,'Axis index for forward/backward axis.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_sideward','unsigned int',1,'Axis index for sideward/turn movement.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_speed','unsigned int',2,'Axis index for speed setting.');
 INSERT INTO "config" VALUES('/plugins/laserht/laser_interface_id','string','Laser','Interface ID of the Laser360Interface to get data from');
 INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',12,'Number of samples to take per data point on the range of 180 deg');
 INSERT INTO "config" VALUES('/plugins/laserht/line/r_scale','float',0.02,'Distance scale for r parameter of line; m');
