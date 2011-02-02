@@ -117,9 +117,8 @@ JoystickInterface::JoystickInterface() : Interface()
   add_fieldinfo(IFT_BYTE, "num_axes", 1, &data->num_axes);
   add_fieldinfo(IFT_BYTE, "num_buttons", 1, &data->num_buttons);
   add_fieldinfo(IFT_UINT32, "pressed_buttons", 1, &data->pressed_buttons);
-  add_fieldinfo(IFT_FLOAT, "axis_x", 4, &data->axis_x);
-  add_fieldinfo(IFT_FLOAT, "axis_y", 4, &data->axis_y);
-  unsigned char tmp_hash[] = {0x20, 0xe5, 0x9c, 0x19, 0x6e, 0xd2, 0xcf, 0xcc, 0xf2, 0x5d, 0x70, 0x88, 0x52, 0x66, 0x7a, 0x1e};
+  add_fieldinfo(IFT_FLOAT, "axis", 8, &data->axis);
+  unsigned char tmp_hash[] = {0xc7, 0x2c, 0xd5, 0x77, 0xbd, 0x8c, 00, 0x87, 0x99, 0x78, 0x8f, 0x1a, 0x80, 0x7f, 0x4, 0x6d};
   set_hash(tmp_hash);
 }
 
@@ -238,123 +237,64 @@ JoystickInterface::set_pressed_buttons(const uint32_t new_pressed_buttons)
   data_changed = true;
 }
 
-/** Get axis_x value.
- * X values of axes
- * @return axis_x value
+/** Get axis value.
+ * Values of axes.
+ * @return axis value
  */
 float *
-JoystickInterface::axis_x() const
+JoystickInterface::axis() const
 {
-  return data->axis_x;
+  return data->axis;
 }
 
-/** Get axis_x value at given index.
- * X values of axes
+/** Get axis value at given index.
+ * Values of axes.
  * @param index index of value
- * @return axis_x value
+ * @return axis value
  * @exception Exception thrown if index is out of bounds
  */
 float
-JoystickInterface::axis_x(unsigned int index) const
+JoystickInterface::axis(unsigned int index) const
 {
-  if (index > 4) {
-    throw Exception("Index value %u out of bounds (0..4)", index);
+  if (index > 8) {
+    throw Exception("Index value %u out of bounds (0..8)", index);
   }
-  return data->axis_x[index];
+  return data->axis[index];
 }
 
-/** Get maximum length of axis_x value.
- * @return length of axis_x value, can be length of the array or number of 
+/** Get maximum length of axis value.
+ * @return length of axis value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-JoystickInterface::maxlenof_axis_x() const
+JoystickInterface::maxlenof_axis() const
 {
-  return 4;
+  return 8;
 }
 
-/** Set axis_x value.
- * X values of axes
- * @param new_axis_x new axis_x value
+/** Set axis value.
+ * Values of axes.
+ * @param new_axis new axis value
  */
 void
-JoystickInterface::set_axis_x(const float * new_axis_x)
+JoystickInterface::set_axis(const float * new_axis)
 {
-  memcpy(data->axis_x, new_axis_x, sizeof(float) * 4);
+  memcpy(data->axis, new_axis, sizeof(float) * 8);
   data_changed = true;
 }
 
-/** Set axis_x value at given index.
- * X values of axes
- * @param new_axis_x new axis_x value
+/** Set axis value at given index.
+ * Values of axes.
+ * @param new_axis new axis value
  * @param index index for of the value
  */
 void
-JoystickInterface::set_axis_x(unsigned int index, const float new_axis_x)
+JoystickInterface::set_axis(unsigned int index, const float new_axis)
 {
-  if (index > 4) {
-    throw Exception("Index value %u out of bounds (0..4)", index);
+  if (index > 8) {
+    throw Exception("Index value %u out of bounds (0..8)", index);
   }
-  data->axis_x[index] = new_axis_x;
-}
-/** Get axis_y value.
- * Y values of axes
- * @return axis_y value
- */
-float *
-JoystickInterface::axis_y() const
-{
-  return data->axis_y;
-}
-
-/** Get axis_y value at given index.
- * Y values of axes
- * @param index index of value
- * @return axis_y value
- * @exception Exception thrown if index is out of bounds
- */
-float
-JoystickInterface::axis_y(unsigned int index) const
-{
-  if (index > 4) {
-    throw Exception("Index value %u out of bounds (0..4)", index);
-  }
-  return data->axis_y[index];
-}
-
-/** Get maximum length of axis_y value.
- * @return length of axis_y value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-JoystickInterface::maxlenof_axis_y() const
-{
-  return 4;
-}
-
-/** Set axis_y value.
- * Y values of axes
- * @param new_axis_y new axis_y value
- */
-void
-JoystickInterface::set_axis_y(const float * new_axis_y)
-{
-  memcpy(data->axis_y, new_axis_y, sizeof(float) * 4);
-  data_changed = true;
-}
-
-/** Set axis_y value at given index.
- * Y values of axes
- * @param new_axis_y new axis_y value
- * @param index index for of the value
- */
-void
-JoystickInterface::set_axis_y(unsigned int index, const float new_axis_y)
-{
-  if (index > 4) {
-    throw Exception("Index value %u out of bounds (0..4)", index);
-  }
-  data->axis_y[index] = new_axis_y;
+  data->axis[index] = new_axis;
 }
 /* =========== message create =========== */
 Message *

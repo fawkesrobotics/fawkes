@@ -81,7 +81,7 @@ INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/type','string','Evi
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/active','bool','0','Is this PTU active?');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/device','string','/dev/ttyUSB1','Device file for EviD100P PTU');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/read_timeout_ms','unsigned int',50,'Read timeout for EviD100P PTU');
-INSERT INTO "config" VALUES('/hardware/joystick/device_file','string','/dev/js0','Joystick device file');
+INSERT INTO "config" VALUES('/hardware/joystick/device_file','string','/dev/input/js0','Joystick device file');
 INSERT INTO "config" VALUES('/hardware/katana/device','string','/dev/ttyUSB0','Device file of serial port the arm is connected to; file path');
 INSERT INTO "config" VALUES('/hardware/katana/kni_conffile','string','/etc/kni/hd300/katana6M180.cfg','KNI configuration file; file path');
 INSERT INTO "config" VALUES('/hardware/katana/auto_calibrate','bool','1','Automatically calibrate on startup?');

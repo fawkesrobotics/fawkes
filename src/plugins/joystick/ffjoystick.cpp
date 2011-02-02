@@ -22,6 +22,7 @@
  */
 
 #include "acquisition_thread.h"
+#include "remote_bb_poster.h"
 
 #include <core/threading/thread.h>
 #include <core/threading/wait_condition.h>
@@ -81,84 +82,6 @@ class JoystickQuitHandler : public SignalHandler
   JoystickAcquisitionThread &__aqt;
 };
 
-/** Small glue class that posts new data to a RemoteBlackBoard.
- * @author Tim Niemueller
- */
-class JoystickBlackBoardPoster : public JoystickBlackBoardHandler
-{
- public:
-  /** Constructor.
-   * @param argp argument parser, makes use of -r flag for host:port.
-   * @param logger logger
-   */
-  JoystickBlackBoardPoster(ArgumentParser &argp, Logger *logger)
-    : __argp(argp), __logger(logger)
-  {
-    char *host = (char *)"localhost";
-    unsigned short int port = 1910;
-    bool free_host = argp.parse_hostport("r", &host, &port);
-    
-    __bb = new RemoteBlackBoard(host, port);
-    if ( free_host )  free(host);
-
-    __joystick_if = __bb->open_for_writing<JoystickInterface>("Joystick");
-    __warning_printed = false;
-  }
-
-  /** Destructor. */
-  ~JoystickBlackBoardPoster()
-  {
-    __bb->close(__joystick_if);
-    delete __bb;
-  }
-
-  virtual void joystick_changed(unsigned int pressed_buttons,
-				float *axis_x_values, float *axis_y_values)
-  {
-    if ( ! __bb->is_alive() ) {
-      if ( __bb->try_aliveness_restore() ) {
-	__logger->log_info("Joystick", "Connection re-established, writing data");
-	__warning_printed = false;
-      }
-    }
-
-    try {
-      __joystick_if->set_pressed_buttons( pressed_buttons );
-      __joystick_if->set_axis_x( axis_x_values );
-      __joystick_if->set_axis_y( axis_y_values );
-      __joystick_if->write();
-    } catch (Exception &e) {
-      if ( ! __warning_printed ) {
-	e.print_trace();
-	__logger->log_warn("Joystick", "Lost connection to BlackBoard, will try to re-establish");
-	__warning_printed = true;
-      }
-    }
-  }
-
-  void joystick_plugged(char num_axes, char num_buttons)
-  {
-    __joystick_if->set_num_axes( num_axes );
-    __joystick_if->set_num_buttons( num_buttons );
-    __joystick_if->write();
-  }
-
-  void joystick_unplugged()
-  {
-    __joystick_if->set_num_axes( 0 );
-    __joystick_if->set_num_buttons( 0 );
-    __joystick_if->write();
-  }
-
- private:
-  bool __warning_printed;
-  ArgumentParser &__argp;
-  BlackBoard *__bb;
-  JoystickInterface *__joystick_if;
-  Logger *__logger;
-};
-
-
 /** Log joystick data gathered via RemoteBlackBoard to console.
  * @author Tim Niemueller
  */
@@ -211,13 +134,13 @@ class JoystickBlackBoardLogger
 
     try {
       __joystick_if->read();
-      float *axis_x_value = __joystick_if->axis_x();
-      float *axis_y_value = __joystick_if->axis_y();
-      __logger->log_info("Joystick", "0: (%f, %f)  1: (%f, %f)  2: (%f, %f)  3: (%f, %f)",
-			 axis_x_value[0], axis_y_value[0],
-			 axis_x_value[1], axis_y_value[1],
-			 axis_x_value[2], axis_y_value[2],
-			 axis_x_value[3], axis_y_value[3]);
+      float *axis_value = __joystick_if->axis();
+      __logger->log_info("Joystick", "Axes:    0: %f  1: %f  2: %f  3: %f  4: %f  "
+			 "5: %f  6: %f  7: %f  8: %f",
+			 axis_value[0], axis_value[1],
+			 axis_value[2], axis_value[3],
+			 axis_value[4], axis_value[5],
+			 axis_value[6], axis_value[7]);
       char button_string[33];
       button_string[32] = 0;
       unsigned int pressed_buttons = __joystick_if->pressed_buttons();
@@ -282,11 +205,17 @@ main(int argc, char **argv)
       SignalManager::register_handler(SIGINT, &jbl);
       jbl.run();
     } else {
-      JoystickBlackBoardPoster jbp(argp, &logger);
+      char *host = (char *)"localhost";
+      unsigned short int port = 1910;
+      bool free_host = argp.parse_hostport("r", &host, &port);
+
+      JoystickRemoteBlackBoardPoster jbp(host, port, &logger);
       JoystickAcquisitionThread aqt(joystick_device, &jbp, &logger);
 
       JoystickQuitHandler jqh(aqt);
       SignalManager::register_handler(SIGINT, &jqh);
+
+      if (free_host)  free(host);
 
       aqt.start();
       aqt.join();

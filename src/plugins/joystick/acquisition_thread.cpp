@@ -43,11 +43,10 @@ using namespace fawkes;
  * used to directly instantiate the acquisition thread outside of Fawkes.
  * @author Tim Niemueller
  *
- * @fn void JoystickBlackBoardHandler::joystick_changed(unsigned int pressed_buttons, float *axis_x_values, float *axis_y_values) = 0
+ * @fn void JoystickBlackBoardHandler::joystick_changed(unsigned int pressed_buttons, float *axis_values) = 0
  * Joystick data changed.
  * @param pressed_buttons the new pressed_buttons array
- * @param axis_x_values array of X axis values, the length is at least num_axes()
- * @param axis_y_values array of Y axis values, the length is at least num_axes()
+ * @param axis_values array of axis values, the length is at least num_axes()
  *
  * @fn void JoystickBlackBoardHandler::joystick_plugged(char num_axes, char num_buttons)
  * A (new) joystick has been plugged in
@@ -76,8 +75,9 @@ JoystickAcquisitionThread::JoystickAcquisitionThread()
 {
   set_prepfin_conc_loop(true);
   __data_mutex = NULL;
-  __axis_x_values = NULL;
-  __axis_y_values = NULL;
+  __axis_values = NULL;
+  __bbhandler = NULL;
+  logger = NULL;
 }
 
 
@@ -93,9 +93,9 @@ JoystickAcquisitionThread::JoystickAcquisitionThread(const char *device_file,
 						     Logger *logger)
   : Thread("JoystickAcquisitionThread", Thread::OPMODE_CONTINUOUS)
 {
+  set_prepfin_conc_loop(true);
   __data_mutex = NULL;
-  __axis_x_values = NULL;
-  __axis_y_values = NULL;
+  __axis_values = NULL;
   __bbhandler = handler;
   this->logger = logger;
   init(device_file);
@@ -136,15 +136,12 @@ JoystickAcquisitionThread::open_joystick()
     throw Exception(errno, "Failed to get number of buttons for joystick");
   }
 
-  __num_axes = (__num_axes / 2) + (__num_axes % 2);
-
-  if ( (__axis_x_values == NULL) && (__axis_y_values == NULL) ) {
+  if (__axis_values == NULL) {
     // memory had not been allocated
-    // minimum of 4 because there are 4 axes in the interface
-    __axis_array_size = std::max((int)__num_axes, 4);
-    __axis_x_values   = (float *)malloc(sizeof(float) * __axis_array_size);
-    __axis_y_values   = (float *)malloc(sizeof(float) * __axis_array_size);
-  } else if ( __num_axes > std::max((int)__axis_array_size, 4) ) {
+    // minimum of 8 because there are 8 axes in the interface
+    __axis_array_size = std::max((int)__num_axes, 8);
+    __axis_values   = (float *)malloc(sizeof(float) * __axis_array_size);
+  } else if ( __num_axes > std::max((int)__axis_array_size, 8) ) {
     // We loose axes as we cannot increase BB interface on-the-fly
     __num_axes = __axis_array_size;
   }
@@ -155,8 +152,7 @@ JoystickAcquisitionThread::open_joystick()
   logger->log_debug(name(), "Number of Buttons: %i", __num_buttons);
   logger->log_debug(name(), "Axis Array Size:   %u", __axis_array_size);
 
-  memset(__axis_x_values, 0, sizeof(float) * __axis_array_size);
-  memset(__axis_y_values, 0, sizeof(float) * __axis_array_size);
+  memset(__axis_values, 0, sizeof(float) * __axis_array_size);
   __pressed_buttons = 0;
 
   if ( __bbhandler ) {
@@ -180,8 +176,7 @@ void
 JoystickAcquisitionThread::finalize()
 {
   if ( __fd >= 0 )  close(__fd);
-  free(__axis_x_values);
-  free(__axis_y_values);
+  free(__axis_values);
   delete __data_mutex;
 }
 
@@ -218,26 +213,22 @@ JoystickAcquisitionThread::loop()
 	logger->log_warn(name(), "Button value for button > 32, ignoring");
       }
     } else if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_AXIS) {
-      unsigned int axis_index = e.number / 2;
-      if ( axis_index >= __axis_array_size ) {
-	logger->log_warn(name(), "Got value for axis %u, but only %u axes registered. "
+      if ( e.number >= __axis_array_size ) {
+	logger->log_warn(name(),
+			 "Got value for axis %u, but only %u axes registered. "
 			 "Plugged in a different joystick? Ignoring.",
-			 axis_index + 1 /* natural numbering */, __axis_array_size);
+			 e.number + 1 /* natural numbering */, __axis_array_size);
       } else {
-	if ( (e.number % 2) == 0 ) {
-	  __axis_x_values[axis_index] = e.value / 32767.f;
-	  //logger->log_debug(name(), "Axis %u new X: %f", axis_index, __axis_x_values[axis_index]);
-	} else {
-	  __axis_y_values[axis_index] = e.value / 32767.f;
-	  //logger->log_debug(name(), "Axis %u new Y: %f", axis_index, __axis_y_values[axis_index]);
-	}
+	__axis_values[e.number] = e.value / 32767.f;
+	//logger->log_debug(name(), "Axis %u new X: %f",
+	//                  axis_index, __axis_values[e.number]);
       }
     }
 
     __data_mutex->unlock();
 
     if ( __bbhandler ) {
-      __bbhandler->joystick_changed(__pressed_buttons, __axis_x_values, __axis_y_values);
+      __bbhandler->joystick_changed(__pressed_buttons, __axis_values);
     }
   } else {
     // Connection to joystick has been lost
@@ -319,21 +310,11 @@ JoystickAcquisitionThread::pressed_buttons() const
 }
 
 
-/** Get values for X axes.
- * @return array of X axis values.
+/** Get values for the axes.
+ * @return array of axis values.
  */
 float *
-JoystickAcquisitionThread::axis_x_values()
+JoystickAcquisitionThread::axis_values()
 {
-  return __axis_x_values;
-}
-
-
-/** Get values for Y axes.
- * @return array of Y axis values.
- */
-float *
-JoystickAcquisitionThread::axis_y_values()
-{
-  return __axis_y_values;
+  return __axis_values;
 }

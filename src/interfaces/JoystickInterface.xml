@@ -52,7 +52,6 @@
       corresponding bit is set to 1. Use the BUTTON_* constants for bit-wise
       comparisons.
     </field>
-    <field type="float" name="axis_x" length="4">X values of axes</field>
-    <field type="float" name="axis_y" length="4">Y values of axes</field>
+    <field type="float" name="axis" length="8">Values of axes.</field>
   </data>
 </interface>
