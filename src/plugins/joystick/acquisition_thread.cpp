@@ -219,7 +219,11 @@ JoystickAcquisitionThread::loop()
 			 "Plugged in a different joystick? Ignoring.",
 			 e.number + 1 /* natural numbering */, __axis_array_size);
       } else {
-	__axis_values[e.number] = e.value / 32767.f;
+	// Joystick axes usually go positive right, down, twist right, min speed,
+	// hat right, and hat down. In the Fawkes coordinate system we actually
+	// want opposite directions, hence multiply each value by -1
+	__axis_values[e.number] = (e.value == 0) ? 0. : (e.value / -32767.f);
+	
 	//logger->log_debug(name(), "Axis %u new X: %f",
 	//                  axis_index, __axis_values[e.number]);
       }
