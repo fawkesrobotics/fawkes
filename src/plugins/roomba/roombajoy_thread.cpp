@@ -31,7 +31,8 @@
 #define CFG_BUT_SIDE_BRUSH CFG_PREFIX"but_side_brush"
 #define CFG_BUT_VACUUMING  CFG_PREFIX"but_vacuuming"
 #define CFG_BUT_DOCK       CFG_PREFIX"but_dock"
-#define CFG_BUT_MODE       CFG_PREFIX"but_spot"
+#define CFG_BUT_SPOT       CFG_PREFIX"but_spot"
+#define CFG_BUT_MODE       CFG_PREFIX"but_mode"
 #define CFG_AXIS_FORWARD   CFG_PREFIX"axis_forward"
 #define CFG_AXIS_SIDEWARD  CFG_PREFIX"axis_sideward"
 #define CFG_AXIS_SPEED     CFG_PREFIX"axis_speed"
@@ -66,7 +67,8 @@ RoombaJoystickThread::init()
   __cfg_but_main_brush = confval(CFG_BUT_MAIN_BRUSH, JoystickInterface::BUTTON_1);
   __cfg_but_side_brush = confval(CFG_BUT_SIDE_BRUSH, JoystickInterface::BUTTON_2);
   __cfg_but_vacuuming  = confval(CFG_BUT_VACUUMING,  JoystickInterface::BUTTON_3);
-  __cfg_but_dock       = confval(CFG_BUT_DOCK,       JoystickInterface::BUTTON_5);
+  __cfg_but_dock       = confval(CFG_BUT_DOCK,       JoystickInterface::BUTTON_4);
+  __cfg_but_spot       = confval(CFG_BUT_SPOT,       JoystickInterface::BUTTON_5);
   __cfg_but_mode       = confval(CFG_BUT_MODE,       JoystickInterface::BUTTON_6);
 
   __cfg_axis_forward   = confval(CFG_AXIS_FORWARD,  0);
@@ -152,6 +154,14 @@ RoombaJoystickThread::loop()
 	Roomba500Interface::DockMessage *dm =
 	  new Roomba500Interface::DockMessage();
 	__roomba500_if->msgq_enqueue(dm);
+      }
+
+      if (__joy_if->pressed_buttons() & __cfg_but_spot) {
+	/*
+	Roomba500Interface::DockMessage *dm =
+	  new Roomba500Interface::DockMessage();
+	__roomba500_if->msgq_enqueue(dm);
+	*/
       }
 
       if (__joy_if->pressed_buttons() & __cfg_but_mode) {

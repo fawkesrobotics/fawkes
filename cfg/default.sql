@@ -138,6 +138,7 @@ INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_side_brush','unsigned
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_vacuuming','unsigned int',4,'Button bit for vacuuming button.');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_dock','unsigned int',8,'Button bit for dock button.');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_spot','unsigned int',16,'Button bit for spot cleaning.');
+INSERT INTO "config" VALUES('/hardware/roomba/joystick/but_mode','unsigned int',32,'Button bit for setting the mode.');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_forward','unsigned int',0,'Axis index for forward/backward axis.');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_sideward','unsigned int',1,'Axis index for sideward/turn movement.');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_speed','unsigned int',2,'Axis index for speed setting.');

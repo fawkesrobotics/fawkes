@@ -71,6 +71,7 @@ class RoombaJoystickThread
   unsigned int __cfg_but_side_brush;
   unsigned int __cfg_but_vacuuming;
   unsigned int __cfg_but_dock;
+  unsigned int __cfg_but_spot;
   unsigned int __cfg_but_mode;
 
   unsigned int __cfg_axis_forward;
