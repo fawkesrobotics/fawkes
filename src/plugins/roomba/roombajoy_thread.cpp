@@ -187,23 +187,21 @@ RoombaJoystickThread::loop()
 	       __joy_if->axis(__cfg_axis_sideward) == 0) {
       stop();
     } else {
-      float velocity = __joy_if->axis(__cfg_axis_forward) *  500;
-      float radius   = __joy_if->axis(__cfg_axis_sideward) * 2000;
-      if (__cfg_axis_speed > __joy_if->maxlenof_axis()) {
-	velocity *= .5f;
-      } else {
-	velocity *= __joy_if->axis(__cfg_axis_speed);
+      float forward  = __joy_if->axis(__cfg_axis_forward) *  500;
+      float sideward = __joy_if->axis(__cfg_axis_sideward);
+      float radius   = copysignf(std::max(100, (int)(1. - fabs(sideward)) * 1500),
+				 sideward);
+      float velocity = .5;
+      if (__cfg_axis_speed < __joy_if->maxlenof_axis()) {
+	velocity = __joy_if->axis(__cfg_axis_speed);
       }
 
-      int16_t velmm = roundf(velocity);
+      int16_t velmm = roundf(forward * velocity);
       int16_t radmm = roundf(radius);
       // special case handling for "turn on place"
-      if (radmm == 2000) {
-	velmm =  abs(__last_velo);
-	radmm =    1;
-      } else if (radmm == -2000) {
-	velmm =  abs(__last_velo);
-	radmm = -  1;
+      if (abs(velmm) <= 5) {
+	velmm =  fabs(sideward * velocity) * 500;
+	radmm =  (int16_t)copysignf(1, sideward);
       }
 
       logger->log_debug(name(), "Joystick (%f,%f,%f)  Velo %f/%i  Radius %f/%i",
