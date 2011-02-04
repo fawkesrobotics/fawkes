@@ -75,6 +75,10 @@ RoombaJoystickThread::init()
   __cfg_axis_sideward  = confval(CFG_AXIS_SIDEWARD, 1);
   __cfg_axis_speed     = confval(CFG_AXIS_SPEED,    2);
 
+  __cfg_min_radius     = config->get_uint(CFG_PREFIX"min_radius");
+  __cfg_max_radius     = config->get_uint(CFG_PREFIX"max_radius");
+  __cfg_max_velocity   = config->get_uint(CFG_PREFIX"max_velocity");
+
   try {
     __roomba500_if = blackboard->open_for_reading<Roomba500Interface>("Roomba 500");
     __joy_if = blackboard->open_for_reading<JoystickInterface>("Joystick");
@@ -97,7 +101,7 @@ RoombaJoystickThread::init()
     logger->log_warn(name(), "Speed axis disabled, setting half max speed.");
   }
 
-  __last_velo = 250;
+  __last_velo = __cfg_max_velocity / 2;
   __main_brush_enabled = false;
   __side_brush_enabled = false;
   __vacuuming_enabled  = false;
@@ -187,9 +191,11 @@ RoombaJoystickThread::loop()
 	       __joy_if->axis(__cfg_axis_sideward) == 0) {
       stop();
     } else {
-      float forward  = __joy_if->axis(__cfg_axis_forward) *  500;
+      float forward  = __joy_if->axis(__cfg_axis_forward) *  __cfg_max_velocity;
       float sideward = __joy_if->axis(__cfg_axis_sideward);
-      float radius   = copysignf(std::max(100, (int)(1. - fabs(sideward)) * 1500),
+      float radius   = copysignf(std::max(__cfg_min_radius,
+					  (int)(1. - fabs(sideward)) *
+					  __cfg_max_radius),
 				 sideward);
       float velocity = .5;
       if (__cfg_axis_speed < __joy_if->maxlenof_axis()) {
@@ -200,7 +206,7 @@ RoombaJoystickThread::loop()
       int16_t radmm = roundf(radius);
       // special case handling for "turn on place"
       if (abs(velmm) <= 5) {
-	velmm =  fabs(sideward * velocity) * 500;
+	velmm =  fabs(sideward * velocity) * __cfg_max_velocity;
 	radmm =  (int16_t)copysignf(1, sideward);
       }
 

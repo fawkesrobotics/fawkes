@@ -77,6 +77,10 @@ class RoombaJoystickThread
   unsigned int __cfg_axis_forward;
   unsigned int __cfg_axis_sideward;
   unsigned int __cfg_axis_speed;
+
+  unsigned int __cfg_min_radius;
+  unsigned int __cfg_max_radius;
+  unsigned int __cfg_max_velocity;
 };
 
 #endif
