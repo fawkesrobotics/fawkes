@@ -21,7 +21,6 @@
  */
 
 #include "thread_roomba_500.h"
-#include "roomba_500.h"
 #include <interfaces/Roomba500Interface.h>
 
 #include <utils/time/wait.h>
@@ -447,23 +446,29 @@ Roomba500Thread::loop()
 	__roomba500_if->msgq_first(msg);
 
       Roomba500::Mode mode = __roomba->get_mode();
+      char color     =   0;
+      char intensity = 255;
 
       switch (msg->mode()) {
       case Roomba500Interface::MODE_OFF:
 	logger->log_debug(name(), "Switching off");
 	mode = Roomba500::MODE_OFF;
+	intensity = 0;
 	break;
       case Roomba500Interface::MODE_PASSIVE:
 	logger->log_debug(name(), "Switching to passive mode");
 	mode = Roomba500::MODE_PASSIVE;
+	color = 0;
 	break;
       case Roomba500Interface::MODE_SAFE:
 	logger->log_debug(name(), "Switching to safe mode");
 	mode = Roomba500::MODE_SAFE;
+	color = 128;
 	break;
       case Roomba500Interface::MODE_FULL:
 	logger->log_debug(name(), "Switching to full mode");
 	mode = Roomba500::MODE_FULL;
+	color = 255;
 	break;
       default:
 	logger->log_warn(name(), "Invalid mode %i received, ignoring",
@@ -471,6 +476,11 @@ Roomba500Thread::loop()
       }
       try {
 	__roomba->set_mode(mode);
+	__roomba->set_leds(__led_if_debris->intensity() >= 0.5,
+			   __led_if_spot->intensity() >= 0.5,
+			   __led_if_dock->intensity() >= 0.5,
+			   __led_if_check_robot->intensity() >= 0.5,
+			   color, intensity);
       } catch (Exception &e) {
 	logger->log_warn(name(), "Cannot set mode, exception follows");
 	logger->log_warn(name(), e);
@@ -674,4 +684,32 @@ Roomba500Thread::write_blackboard()
 
     __battery_if->write();
   }
+}
+
+
+/** Set mode and indicate with LED.
+ * This will set the mode and if successful also set the color and intensity
+ * of the clean LED indicating the mode.
+ * @param mode mode to set
+ * @exception Exception may be thrown if mode setting fails
+ */
+void
+Roomba500Thread::set_mode(Roomba500::Mode mode)
+{
+  char color     =   0;
+  char intensity = 255;
+
+  switch (mode) {
+  case Roomba500::MODE_OFF:     intensity =   0; break;
+  case Roomba500::MODE_PASSIVE: color     =   0; break;
+  case Roomba500::MODE_SAFE:    color     = 128; break;
+  case Roomba500::MODE_FULL:    color     = 255; break;
+  }
+
+  __roomba->set_mode(mode);
+  __roomba->set_leds(__led_if_debris->intensity() >= 0.5,
+		     __led_if_spot->intensity() >= 0.5,
+		     __led_if_dock->intensity() >= 0.5,
+		     __led_if_check_robot->intensity() >= 0.5,
+		     color, intensity);
 }

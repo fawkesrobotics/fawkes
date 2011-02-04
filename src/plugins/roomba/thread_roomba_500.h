@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_ROOMBA_THREAD_ROOMBA_500_H_
 #define __PLUGINS_ROOMBA_THREAD_ROOMBA_500_H_
 
+#include "roomba_500.h"
+
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -39,8 +41,6 @@ namespace fawkes {
   class BatteryInterface;
   class Roomba500Interface;
 }
-
-class Roomba500;
 
 class Roomba500Thread
 : public fawkes::Thread,
@@ -65,7 +65,7 @@ class Roomba500Thread
  private:
   void close_interfaces();
   float led_process(fawkes::LedInterface *iface);
-
+  void set_mode(Roomba500::Mode mode);
 
  private:
   fawkes::LedInterface       *__led_if_debris;
