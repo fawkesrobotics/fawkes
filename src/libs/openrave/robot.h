@@ -48,6 +48,7 @@ class OpenRAVERobot
   // build/load robot parts
   virtual void load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
   virtual void setReady();
+  virtual void setOffset(float transX, float transY, float transZ);
   virtual void calibrate(float& deviceTransX, float& deviceTransY, float& deviceTransZ);
   virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator(); // not needed

@@ -48,7 +48,7 @@ class OpenRAVEConnector
 
   virtual void setup(const std::string& filenameRobot, bool autogenerateIK=false);
 
-  virtual void setManipulator(OpenRAVEManipulator* manip, float deviceTransX=0.f, float deviceTransY=0.f, float deviceTransZ=0.f);
+  virtual void setManipulator(OpenRAVEManipulator* manip, float transX=0.f, float transY=0.f, float transZ=0.f, bool calibrate=0);
 
   virtual void setTarget(std::vector<float>& angles); //temporary. TODO: should be euler/quat/axisangle etc
   virtual bool setTargetQuat	 (float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ);

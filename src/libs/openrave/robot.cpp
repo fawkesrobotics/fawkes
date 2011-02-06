@@ -117,13 +117,27 @@ OpenRAVERobot::setReady()
     {__logger->log_debug("OpenRAVE Robot", "Robot ready.");}
 }
 
-/** Calibrate transition offset between coordinate systems
+/** Directly set transition offset between coordinate systems
+ * of real device and OpenRAVE model.
+ * @param transX transition offset on x-axis
+ * @param transY transition offset on y-axis
+ * @param transZ transition offset on z-axis
+ */
+ void
+ OpenRAVERobot::setOffset(float transX, float transY, float transZ)
+ {
+  __transOffsetX = transX;
+  __transOffsetY = transY;
+  __transOffsetZ = transZ;
+ }
+
+/** Calculate transition offset between coordinate systems
  * of real device and OpenRAVE model.
  * Sets model's angles to current device's angles (from __manip),
  * and compares transitions.
- * @param transX transition on x-axis (real device)
- * @param transY transition on y-axis (real device)
- * @param transZ transition on z-axis (real device)
+ * @param deviceTransX transition on x-axis (real device)
+ * @param deviceTransY transition on y-axis (real device)
+ * @param deviceTransZ transition on z-axis (real device)
  */
 void
 OpenRAVERobot::calibrate(float& deviceTransX, float& deviceTransY, float& deviceTransZ)
