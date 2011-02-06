@@ -31,13 +31,16 @@ class KatanaGotoThread : public KatanaMotionThread
   KatanaGotoThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
 		   unsigned int poll_interval_ms);
 
-  void set_target(float x, float y, float z, float phi, float theta, float psi);
+  virtual void set_target(float x, float y, float z, float phi, float theta, float psi);
+
   virtual void once();
+  virtual void init();
+  virtual void finalize();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+ protected:
+  virtual void run() { Thread::run(); }
 
- private:
   float __x, __y, __z;
   float __phi, __theta, __psi;
   unsigned int __poll_interval_usec;
