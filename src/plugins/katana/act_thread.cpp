@@ -108,7 +108,7 @@ KatanaActThread::init()
   __gripper_thread = new KatanaGripperThread(__katana, logger,
 					     __cfg_gripper_pollint);
   if(__cfg_OR_enabled)
-    {__goto_thread    = new KatanaGotoThreadOpenRAVE(__katana, logger, __cfg_goto_pollint);}
+    {__goto_thread    = new KatanaGotoThreadOpenRAVE(__katana, logger, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);}
   else
     {__goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);}
 
