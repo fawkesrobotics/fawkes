@@ -105,6 +105,9 @@ RoombaJoystickThread::init()
   __main_brush_enabled = false;
   __side_brush_enabled = false;
   __vacuuming_enabled  = false;
+
+  __strong_rumble = false;
+  __weak_rumble   = false;
 }
 
 void
@@ -119,6 +122,52 @@ void
 RoombaJoystickThread::loop()
 {
   __joy_if->read();
+  __roomba500_if->read();
+
+  if (__joy_if->supported_ff_effects() & JoystickInterface::JFF_RUMBLE) {
+    uint16_t mlb = __roomba500_if->light_bump_left();
+    mlb = std::max(mlb, __roomba500_if->light_bump_front_left());
+    mlb = std::max(mlb, __roomba500_if->light_bump_center_left());
+    mlb = std::max(mlb, __roomba500_if->light_bump_center_right());
+    mlb = std::max(mlb, __roomba500_if->light_bump_front_right());
+    mlb = std::max(mlb, __roomba500_if->light_bump_right());
+
+    if (__roomba500_if->is_bump_left() || __roomba500_if->is_bump_right()) {
+      if (! __weak_rumble) {
+	JoystickInterface::StartRumbleMessage *msg =
+	  new JoystickInterface::StartRumbleMessage();
+
+	msg->set_strong_magnitude(0xFFFF);
+	msg->set_weak_magnitude(0x8000);
+      
+	__joy_if->msgq_enqueue(msg);
+	__weak_rumble = true;
+	__strong_rumble = false;
+      }
+    } else if ((mlb > 200) && !__strong_rumble) {
+      JoystickInterface::StartRumbleMessage *msg =
+	new JoystickInterface::StartRumbleMessage();
+
+      float mf = (mlb / 1000.f);
+      if (mf > 1)   mf = 1;
+      if (mf < 0.4) mf = 0.4;
+
+      msg->set_weak_magnitude(floorf(mf * 0xFFFF));
+      if (mf > 0.8) msg->set_strong_magnitude(0x8000);
+
+      __joy_if->msgq_enqueue(msg);
+
+      __weak_rumble = false;
+      __strong_rumble = true;
+    } else if (__weak_rumble || __strong_rumble) {
+      JoystickInterface::StopRumbleMessage *msg =
+	new JoystickInterface::StopRumbleMessage();
+      __joy_if->msgq_enqueue(msg);
+      
+      __weak_rumble = __strong_rumble = false;
+    }
+  }
+
   if (__joy_if->changed()) {
     if (__joy_if->num_axes() == 0) {
       logger->log_debug(name(), "Joystick disconnected, stopping");
@@ -172,7 +221,6 @@ RoombaJoystickThread::loop()
 	Roomba500Interface::SetModeMessage *sm =
 	  new Roomba500Interface::SetModeMessage();
 
-	__roomba500_if->read();
 	switch (__roomba500_if->mode()) {
 	case Roomba500Interface::MODE_PASSIVE:
 	  sm->set_mode(Roomba500Interface::MODE_SAFE); break;
@@ -205,17 +253,18 @@ RoombaJoystickThread::loop()
       int16_t velmm = roundf(forward * velocity);
       int16_t radmm = roundf(radius);
       // special case handling for "turn on place"
-      if (abs(velmm) <= 5) {
+      if (fabsf(__joy_if->axis(__cfg_axis_forward)) < 0.1) {
 	velmm =  fabs(sideward * velocity) * __cfg_max_velocity;
 	radmm =  (int16_t)copysignf(1, sideward);
       }
 
+      /*
       logger->log_debug(name(), "Joystick (%f,%f,%f)  Velo %f/%i  Radius %f/%i",
 			__joy_if->axis(__cfg_axis_forward),
 			__joy_if->axis(__cfg_axis_sideward),
 			__joy_if->axis(__cfg_axis_speed),
 			velocity, velmm, radius, radmm);
-
+      */
 
       __last_velo = velmm;
 

@@ -63,6 +63,9 @@ class RoombaJoystickThread
 
   int __last_velo;
 
+  bool __strong_rumble;
+  bool __weak_rumble;
+
   bool __main_brush_enabled;
   bool __side_brush_enabled;
   bool __vacuuming_enabled;
