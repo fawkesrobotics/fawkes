@@ -35,6 +35,7 @@
 // include <interfaces/MotorInterface.h>
 
 #include <netinet/in.h>
+#include <cstdio>
 
 using namespace fawkes;
 
@@ -323,7 +324,7 @@ Roomba500Thread::init()
     __roomba->set_mode(mode);
     if (__roomba->is_controlled()) {
       if (__cfg_play_fanfare)  __roomba->play_fanfare();
-      __roomba->set_leds(false, false, false, true, 0, 0);
+      __roomba->set_leds(false, false, false, true, 0, 255);
     }
     __wt = new WorkerThread(logger, clock, __roomba, __cfg_query_mode);
   } catch (Exception &e) {
@@ -475,12 +476,21 @@ Roomba500Thread::loop()
 			 msg->mode());
       }
       try {
-	__roomba->set_mode(mode);
-	__roomba->set_leds(__led_if_debris->intensity() >= 0.5,
-			   __led_if_spot->intensity() >= 0.5,
-			   __led_if_dock->intensity() >= 0.5,
-			   __led_if_check_robot->intensity() >= 0.5,
-			   color, intensity);
+	bool was_controlled = __roomba->is_controlled();
+	if (! was_controlled) {
+	  // set first
+	  __roomba->set_mode(mode);
+	}
+	if (__roomba->is_controlled()) {
+	  __roomba->set_leds(__led_if_debris->intensity() >= 0.5,
+			     __led_if_spot->intensity() >= 0.5,
+			     __led_if_dock->intensity() >= 0.5,
+			     __led_if_check_robot->intensity() >= 0.5,
+			     color, intensity);
+	}
+	if (was_controlled) {
+	  __roomba->set_mode(mode);
+	}
       } catch (Exception &e) {
 	logger->log_warn(name(), "Cannot set mode, exception follows");
 	logger->log_warn(name(), e);
@@ -560,6 +570,18 @@ Roomba500Thread::write_blackboard()
   if (__wt->has_fresh_data()) {
     const Roomba500::SensorPacketGroupAll sp(__roomba->get_sensor_packet());
 
+    int charge = roundf(((float)ntohs(sp.battery_charge) /
+			 (float)ntohs(sp.battery_capacity)) * 100.);
+
+    if (__roomba->is_controlled()) {
+      if (charge != __battery_percent) {
+	char digits[4];
+	snprintf(digits, 4, "%u%%", charge);
+	__roomba->set_digit_leds(digits);
+	__battery_percent = charge;
+      }
+    }
+
     __roomba500_if->set_mode((Roomba500Interface::Mode)sp.mode);
     __roomba500_if->set_wheel_drop_left(
         sp.bumps_wheeldrops & Roomba500::WHEEL_DROP_LEFT);
@@ -617,8 +639,8 @@ Roomba500Thread::write_blackboard()
     __battery_if->set_voltage(ntohs(sp.voltage));
     __battery_if->set_current((int)ntohs(sp.current));
     __battery_if->set_temperature((char)sp.temperature);
-    __battery_if->set_absolute_soc(ntohs(sp.battery_capacity) /
-				   ntohs(sp.battery_charge));
+    __battery_if->set_absolute_soc((float)ntohs(sp.battery_charge) /
+				   (float)ntohs(sp.battery_capacity));
     __battery_if->set_relative_soc(__battery_if->absolute_soc());
 
     __roomba500_if->set_wall_signal(ntohs(sp.wall_signal));

@@ -100,6 +100,8 @@ class Roomba500Thread
 
   unsigned int __greeting_loop_count;
 
+  int          __battery_percent;
+
   class WorkerThread;
   WorkerThread *__wt;
 };
