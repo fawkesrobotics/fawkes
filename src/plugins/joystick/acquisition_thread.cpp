@@ -21,6 +21,7 @@
  */
 
 #include "acquisition_thread.h"
+#include "force_feedback.h"
 
 #include <core/threading/mutex.h>
 #include <core/exceptions/system.h>
@@ -77,6 +78,7 @@ JoystickAcquisitionThread::JoystickAcquisitionThread()
   __data_mutex = NULL;
   __axis_values = NULL;
   __bbhandler = NULL;
+  __ff = NULL;
   logger = NULL;
 }
 
@@ -96,6 +98,7 @@ JoystickAcquisitionThread::JoystickAcquisitionThread(const char *device_file,
   set_prepfin_conc_loop(true);
   __data_mutex = NULL;
   __axis_values = NULL;
+  __ff = NULL;
   __bbhandler = handler;
   this->logger = logger;
   init(device_file);
@@ -162,13 +165,41 @@ JoystickAcquisitionThread::open_joystick()
 }
 
 void
+JoystickAcquisitionThread::open_forcefeedback()
+{
+  __ff = new JoystickForceFeedback(__joystick_name);
+  logger->log_debug(name(), "Force Feedback:    %s", (__ff) ? "Yes" : "No");
+  logger->log_debug(name(), "Supported effects:");
+
+  if (__ff->can_rumble())   logger->log_debug(name(), "  rumble");
+  if (__ff->can_periodic()) logger->log_debug(name(), "  periodic");
+  if (__ff->can_constant()) logger->log_debug(name(), "  constant");
+  if (__ff->can_spring())   logger->log_debug(name(), "  spring");
+  if (__ff->can_friction()) logger->log_debug(name(), "  friction");
+  if (__ff->can_damper())   logger->log_debug(name(), "  damper");
+  if (__ff->can_inertia())  logger->log_debug(name(), "  inertia");
+  if (__ff->can_ramp())     logger->log_debug(name(), "  ramp");
+  if (__ff->can_square())   logger->log_debug(name(), "  square");
+  if (__ff->can_triangle()) logger->log_debug(name(), "  triangle");
+  if (__ff->can_sine())     logger->log_debug(name(), "  sine");
+  if (__ff->can_saw_up())   logger->log_debug(name(), "  saw up");
+  if (__ff->can_saw_down()) logger->log_debug(name(), "  saw down");
+  if (__ff->can_custom())   logger->log_debug(name(), "  custom");
+}
+
+void
 JoystickAcquisitionThread::init(std::string device_file)
 {
   __new_data = false;
   __cfg_device_file = device_file;
   open_joystick();
+  try {
+    open_forcefeedback();
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Initializing force feedback failed, disabling");
+    logger->log_warn(name(), e);
+  }
   __data_mutex = new Mutex();
-
 }
 
 
@@ -239,6 +270,11 @@ JoystickAcquisitionThread::loop()
     try {
       open_joystick();
       logger->log_warn(name(), "Joystick plugged in. Delivering data again.");
+      try {
+	open_forcefeedback();
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Initializing force feedback failed, disabling");
+      }
     } catch (...) {
       // ignored
     }

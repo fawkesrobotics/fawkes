@@ -18,15 +18,18 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_joystick = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		fawkesinterface JoystickInterface
-OBJS_joystick = joystick_plugin.o sensor_thread.o acquisition_thread.o
+OBJS_joystick = joystick_plugin.o sensor_thread.o acquisition_thread.o \
+		force_feedback.o act_thread.o
 
 LIBS_ffjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface JoystickInterface
-OBJS_ffjoystick = ffjoystick.o acquisition_thread.o remote_bb_poster.o
+OBJS_ffjoystick = ffjoystick.o acquisition_thread.o remote_bb_poster.o \
+		  force_feedback.o
 
 LIBS_ffkbjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface JoystickInterface
-OBJS_ffkbjoystick = ffkbjoystick.o acquisition_thread.o remote_bb_poster.o
+OBJS_ffkbjoystick = ffkbjoystick.o acquisition_thread.o remote_bb_poster.o \
+		    force_feedback.o
 
 OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick)
 

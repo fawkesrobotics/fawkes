@@ -36,6 +36,8 @@ namespace fawkes {
   class Mutex;
 }
 
+class JoystickForceFeedback;
+
 class JoystickBlackBoardHandler
 {
  public:
@@ -70,12 +72,15 @@ class JoystickAcquisitionThread
   unsigned int       pressed_buttons() const;
   float *            axis_values();
 
+  JoystickForceFeedback *  ff() const { return __ff; }
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   void init(std::string device_file);
   void open_joystick();
+  void open_forcefeedback();
 
  private:
   std::string __cfg_device_file;
@@ -94,6 +99,7 @@ class JoystickAcquisitionThread
   float          *__axis_values;
 
   JoystickBlackBoardHandler *__bbhandler;
+  JoystickForceFeedback *__ff;
 };
 
 
