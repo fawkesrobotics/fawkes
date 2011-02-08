@@ -1083,6 +1083,21 @@ Roomba500::set_leds(bool debris, bool spot, bool dock, bool check_robot,
 }
 
 
+/** Set digit LEDs.
+ * Available only in safe or full mode.
+ * Note, that not all characters are availabe. You can use ASCII table entries
+ * 32-39, 44-63, 65-96, and 123-126.
+ * @param digits array of digit values
+ */
+void
+Roomba500::set_digit_leds(const char digits[4])
+{
+  assert_control();
+
+  send(OPCODE_DIGIT_LEDS_ASCII, digits, 4);
+}
+
+
 /** Play a simple fanfare.
  * You can play this for example upon connection to inform the user.
  */

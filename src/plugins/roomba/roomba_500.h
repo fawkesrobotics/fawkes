@@ -479,6 +479,8 @@ class Roomba500
   void set_leds(bool debris, bool spot, bool dock, bool check_robot,
 		char clean_color, char clean_intensity);
 
+  void set_digit_leds(const char digits[4]);
+
   void enable_sensors();
   void disable_sensors();
   bool is_data_available();
