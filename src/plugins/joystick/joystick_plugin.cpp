@@ -22,6 +22,7 @@
 
 #include <plugins/joystick/joystick_plugin.h>
 
+#include "act_thread.h"
 #include "sensor_thread.h"
 #include "acquisition_thread.h"
 
@@ -40,8 +41,10 @@ JoystickPlugin::JoystickPlugin(Configuration *config)
   : Plugin(config)
 {
   JoystickAcquisitionThread *aqt = new JoystickAcquisitionThread();
-  thread_list.push_back(new JoystickSensorThread(aqt));
+  JoystickSensorThread *senst = new JoystickSensorThread(aqt);
+  thread_list.push_back(senst);
   thread_list.push_back(aqt);
+  thread_list.push_back(new JoystickActThread(aqt, senst));
 }
 
 

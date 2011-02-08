@@ -34,6 +34,24 @@
     <constant type="uint32" name="BUTTON_30" value="536870912">Button 30</constant>
     <constant type="uint32" name="BUTTON_31" value="1073741824">Button 31</constant>
     <constant type="uint32" name="BUTTON_32" value="2147483648">Button 32</constant>
+
+    <constant type="uint8" name="JFF_RUMBLE" value="1">Rumbling.</constant>
+    <constant type="uint8" name="JFF_PERIODIC" value="2">Periodic force.</constant>
+    <constant type="uint8" name="JFF_RAMP" value="4">Ramp effect.</constant>
+    <constant type="uint8" name="JFF_SPRING" value="8">Simulate spring.</constant>
+    <constant type="uint8" name="JFF_FRICTION" value="16">Sim. Friciton.</constant>
+    <constant type="uint8" name="JFF_DAMPER" value="32">Simulate damper.</constant>
+    <constant type="uint8" name="JFF_INERTIA" value="64">Simulate inertia.</constant>
+    <constant type="uint8" name="JFF_CONSTANT" value="128">Constant force.</constant>
+
+    <enum name="Direction">
+      <comment>Effect direction.</comment>
+      <item name="DIRECTION_DOWN" value="0">Down.</item>
+      <item name="DIRECTION_LEFT" value="16384">Left.</item>
+      <item name="DIRECTION_UP" value="32768">Up.</item>
+      <item name="DIRECTION_RIGHT" value="49152">Right.</item>
+    </enum>
+
   </constants>
   <data>
     <comment>
@@ -47,11 +65,34 @@
     <field type="byte" name="num_buttons">
       The number of buttons of this joystick.
     </field>
+    <field type="byte" name="supported_ff_effects">
+      Bit field indicating available force-feedback effects.
+    </field>
     <field type="uint32" name="pressed_buttons">
       A bit field of enabled buttons. For each currently clicked button the
       corresponding bit is set to 1. Use the BUTTON_* constants for bit-wise
       comparisons.
     </field>
     <field type="float" name="axis" length="8">Values of axes.</field>
+    <field type="uint8" name="ff_effects">
+      Currently running effects. Either 0 if no effect is running, or a bit-wise
+      ored field of the JFF constants.
+    </field>
   </data>
+  <message name="StartRumble">
+    <comment>Start joystick rumbling.</comment>
+    <field type="uint16" name="length">Effect length in ms.
+       Setting to 0 will make the effect to play continuously until stopped.
+    </field>
+    <field type="uint16" name="delay">Delay before effect starts in ms.</field>
+    <field type="Direction" name="direction">Direction of effect</field>
+    <field type="uint16" name="strong_magnitude">Magnitude of heavy motor.</field>
+    <field type="uint16" name="weak_magnitude">Magnitude of light motor.</field>
+  </message>
+  <message name="StopRumble">
+    <comment>Stop a specific effect.</comment>
+  </message>
+  <message name="StopAll">
+    <comment>Stop all currently running effects.</comment>
+  </message>
 </interface>
