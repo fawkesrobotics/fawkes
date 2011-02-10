@@ -52,7 +52,7 @@ endif
 
 # We are lazy...
 OBJS_libfvfilters := $(patsubst %.cpp,%.o,$(filter-out $(IPPI_FILTERS:$(SRCDIR)/%=%),$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
-LIBS_libfvfilters += fawkescore fawkesutils fvutils fvmodels
+LIBS_libfvfilters += fawkescore fawkesutils fvutils
 HDRS_libfvfilters = nothing.h $(patsubst %.o,%.h,$(OBJS_libfvfilters))
 
 OBJS_all = $(OBJS_libfvfilters)

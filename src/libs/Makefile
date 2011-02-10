@@ -19,7 +19,7 @@ include $(BUILDSYSDIR)/fvconf.mk
 
 SUBDIRS = core utils interface netcomm blackboard config lua plugin aspect \
 	  geometry webview worldinfo_utils gui_utils \
-	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
+	  fvutils fvcams fvfilters fvmodels fvclassifiers fvstereo fvwidgets \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
 ifeq ($(HAVE_SIFT),1)
@@ -54,7 +54,7 @@ naoutils: core utils
 webview: core utils
 fvutils: core utils netcomm
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
-fvfilters: fvmodels
+# fvfilters: fvmodels
 fvmodels: fvclassifiers geometry
 fvstereo: fvcams
 ifneq ($(CLASSIFIERS_DEPS),)
