@@ -31,6 +31,8 @@ local msgspec_graph
 
 function init()
    pub_graph = roslua.publisher(roslua.node_name.."/graph", "skiller/Graph")
+   pub_graph.latching = true
+
    srv_direction = roslua.service(roslua.node_name.."/graph/set_direction",
 				  "skiller/SetGraphDirection",
 				  set_direction)
