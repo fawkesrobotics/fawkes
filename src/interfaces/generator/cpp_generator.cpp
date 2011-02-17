@@ -866,7 +866,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      "  if (index > %s) {\n"
 	      "    throw Exception(\"Index value %%u out of bounds (0..%s)\", index);\n"
 	      "  }\n"
-	      "  return data->%s[index];\n"
+	      "  return %sdata->%s[index];\n"
 	      "}\n\n",
 	      (*i).getName().c_str(),
 	      (*i).getComment().c_str(),
@@ -876,6 +876,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      inclusion_prefix.c_str(), classname.c_str(),
 	      ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
 	      i->getLength().c_str(), i->getLength().c_str(),
+	      (*i).isEnumType() ? (std::string("(") + interface_classname + "::" +
+				   i->getPlainAccessType() + ")").c_str() : "",
 	      (*i).getName().c_str() );
     }
 
