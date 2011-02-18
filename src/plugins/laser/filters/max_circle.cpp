@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  circle.cpp - Laser data circle data filter (example)
+ *  max_circle.cpp - Laser data circle data filter (example)
  *
  *  Created: Fri Oct 10 17:16:57 2008
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,27 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "circle.h"
+#include "max_circle.h"
 
 #include <utils/math/angle.h>
 #include <cstdlib>
 
-/** @class LaserCircleDataFilter "circle.h"
- * Demonstration laser data filter.
- * Cuts off all beams that are longer than a given radius.
+/** @class LaserMaxCircleDataFilter "circle.h"
+ * Cut of laser data at max distance.
+ * All beams longer than a given radius are cut of at the maximum length.
  * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param radius radius of cut-off circle in meters
  */
-LaserCircleDataFilter::LaserCircleDataFilter(float radius)
+LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(float radius)
 {
   __radius = radius;
 }
 
 void
-LaserCircleDataFilter::filter(const float *data, unsigned int data_size)
+LaserMaxCircleDataFilter::filter(const float *data, unsigned int data_size)
 {
   if ( _filtered_data_size != data_size ) {
     if (_filtered_data)  free(_filtered_data);

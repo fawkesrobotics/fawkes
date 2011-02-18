@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  circle.h - Laser data circle data filter (example)
+ *  max_circle.h - Laser data circle data filter (example)
  *
  *  Created: Fri Oct 10 17:15:34 2008
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,15 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_CIRCLE_H_
-#define __PLUGINS_LASER_FILTERS_CIRCLE_H_
+#ifndef __PLUGINS_LASER_FILTERS_MAX_CIRCLE_H_
+#define __PLUGINS_LASER_FILTERS_MAX_CIRCLE_H_
 
 #include "../filter.h"
 
-class LaserCircleDataFilter : public LaserDataFilter
+class LaserMaxCircleDataFilter : public LaserDataFilter
 {
  public:
-  LaserCircleDataFilter(float radius);
+  LaserMaxCircleDataFilter(float radius);
 
   void filter(const float *data, unsigned int data_size);
 

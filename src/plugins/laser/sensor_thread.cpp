@@ -22,7 +22,7 @@
 
 #include "sensor_thread.h"
 #include "acquisition_thread.h"
-#include "filters/circle.h"
+#include "filters/max_circle.h"
 #include "filters/720to360.h"
 #include "filters/deadspots.h"
 #include "filters/cascade.h"
