@@ -464,10 +464,10 @@ Visca::recv_packet(unsigned int timeout_ms)
   }
 
   // get octets one by one
-  int bytes_read = read(__fd, __ibuffer, 1);
+  read(__fd, __ibuffer, 1);
   int pos = 0;
   while (__ibuffer[pos] != VISCA_TERMINATOR) {
-    bytes_read = read(__fd, &__ibuffer[++pos], 1);
+    read(__fd, &__ibuffer[++pos], 1);
     usleep(0);
   }
   __ibuffer_length = pos + 1;

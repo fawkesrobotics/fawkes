@@ -170,6 +170,7 @@ RefBoxStateSender::add_penalty(unsigned int player, unsigned int penalty,
   p.player            = player;
   p.penalty           = penalty;
   p.seconds_remaining = seconds_remaining;
+  __penalties[player] = p;
 }
 
 

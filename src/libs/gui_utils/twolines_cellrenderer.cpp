@@ -164,13 +164,13 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
   Glib::RefPtr<Gdk::GC> gc = Gdk::GC::create(window);
     
   // Get cell state
-  Gtk::StateType state;
+  //Gtk::StateType state;
   Gtk::StateType text_state;
   if ((flags & Gtk::CELL_RENDERER_SELECTED) != 0) {
-    state = Gtk::STATE_SELECTED;
+    //state = Gtk::STATE_SELECTED;
     text_state = (widget.has_focus()) ? Gtk::STATE_SELECTED : Gtk::STATE_ACTIVE;
   } else {
-    state = Gtk::STATE_NORMAL;
+    //state = Gtk::STATE_NORMAL;
     text_state = (widget.is_sensitive()) ? Gtk::STATE_NORMAL : Gtk::STATE_INSENSITIVE;
   }
 	
@@ -190,7 +190,7 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
     Pango::FontDescription font2 = style->get_font();
     font2.set_size((int)roundf(Pango::SCALE_SMALL * std::max(font2.get_size(), 8)));
     layout2->set_font_description(font2);
-    Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
+    //Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
     layout2->set_ellipsize(Pango::ELLIPSIZE_END);
     layout2->set_width((cell_area.get_width() - property_xpad()) * Pango::SCALE);
     widget.get_style()->paint_layout (win, text_state, true, cell_area,

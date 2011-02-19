@@ -92,7 +92,7 @@ void
 VelocityFromGlobal::setRobotPosition(float x, float y, float ori, timeval t)
 {
   timeval _now;
-  gettimeofday(&_now, NULL);
+  gettimeofday(&_now, 0);
   robot_pos_x   = x;
   robot_pos_y   = y;
   robot_pos_ori = ori;
@@ -117,7 +117,7 @@ VelocityFromGlobal::setTime(timeval t)
 void
 VelocityFromGlobal::setTimeNow()
 {
-  gettimeofday(&now, NULL);
+  gettimeofday(&now, 0);
 }
 
 
@@ -132,10 +132,10 @@ VelocityFromGlobal::getTime(long int *sec, long int *usec)
 void
 VelocityFromGlobal::getVelocity(float *vel_x, float *vel_y)
 {
-  if (vel_x != NULL) {
+  if (vel_x != 0) {
     *vel_x = velocity_x;
   }
-  if (vel_y != NULL) {
+  if (vel_y != 0) {
     *vel_y = velocity_y;
   }
 }

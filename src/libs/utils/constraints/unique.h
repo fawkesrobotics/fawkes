@@ -78,7 +78,7 @@ template <class ResourceType>
 template <class ResourceType>
   UniquenessConstraint<ResourceType>::UniquenessConstraint()
 {
-  _resource = NULL;
+  _resource = 0;
 }
 
 
@@ -91,7 +91,7 @@ template <class ResourceType>
 void
 UniquenessConstraint<ResourceType>::add(ResourceType *r)
 {
-  if ( (_resource != NULL) && (r != _resource) ) {
+  if ( (_resource != 0) && (r != _resource) ) {
     throw UniquenessViolationException("Different resource has already been added.");
   } else {
     _resource = r;
@@ -106,7 +106,7 @@ template <class ResourceType>
 void
 UniquenessConstraint<ResourceType>::remove(ResourceType *r)
 {
-  if ( r == _resource )  _resource = NULL;
+  if ( r == _resource )  _resource = 0;
 }
 
 /** Get resource.

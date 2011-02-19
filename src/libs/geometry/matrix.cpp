@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #ifdef HAVE_OPENCV
+#  include <cstddef>
 #  include <opencv/cv.h>
 #endif
 

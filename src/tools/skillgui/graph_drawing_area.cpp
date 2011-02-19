@@ -542,14 +542,14 @@ SkillGuiGraphDrawingArea::on_expose_event(GdkEventExpose* event)
   // This is where we draw on the window
   Glib::RefPtr<Gdk::Window> window = get_window();
   if(window) {
-    Gtk::Allocation allocation = get_allocation();
-    const int width = allocation.get_width();
-    const int height = allocation.get_height();
+    //Gtk::Allocation allocation = get_allocation();
+    //const int width = allocation.get_width();
+    //const int height = allocation.get_height();
     
     // coordinates for the center of the window
-    int xc, yc;
-    xc = width / 2;
-    yc = height / 2;
+    //int xc, yc;
+    //xc = width / 2;
+    //yc = height / 2;
     
     __cairo = window->create_cairo_context();
     __cairo->set_source_rgb(1, 1, 1);

@@ -45,7 +45,7 @@ class FilterROIDraw : public Filter
   } border_style_t;
 
  public:
-  FilterROIDraw(const std::list<ROI> *rois = NULL, border_style_t style = INVERTED);
+  FilterROIDraw(const std::list<ROI> *rois = 0, border_style_t style = INVERTED);
   virtual ~FilterROIDraw();
 
   virtual void apply();

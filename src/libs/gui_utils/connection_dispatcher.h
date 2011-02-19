@@ -24,6 +24,7 @@
 #ifndef __LIBS_GUI_UTILS_CONNECTION_DISPATCHER_H_
 #define __LIBS_GUI_UTILS_CONNECTION_DISPATCHER_H_
 
+#include <cstddef>
 #include <glibmm/dispatcher.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <netcomm/fawkes/component_ids.h>

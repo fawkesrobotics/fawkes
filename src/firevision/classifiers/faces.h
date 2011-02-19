@@ -40,7 +40,7 @@ class FacesClassifier : public Classifier
  public:
   FacesClassifier(const char *haarcascade_file,
 		  unsigned int pixel_width, unsigned int pixel_height,
-		  IplImage *image = NULL,
+		  IplImage *image = 0,
 		  float haar_scale_factor = 1.1, int min_neighbours = 3, int flags = 0);
 
   virtual ~FacesClassifier(); 

@@ -29,6 +29,7 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/adapters/iplimage.h>
 
+#include <cstddef>
 #include <opencv/cv.h>
 
 namespace firevision {

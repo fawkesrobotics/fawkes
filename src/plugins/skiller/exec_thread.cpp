@@ -228,7 +228,7 @@ SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
 void
 SkillerExecutionThread::publish_skill_status(std::string &curss)
 {
-  const char *sst = "Unknown";
+  //const char *sst = "Unknown";
   LUA_INTEGER running = 0, final = 0, failed = 0;
 
   SkillerInterface::SkillStatusEnum old_status = __skiller_if->status();
@@ -238,7 +238,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
 
     if ( curss == "" ) {
       // nothing running, we're inactive
-      sst = "S_INACTIVE/empty";
+      //sst = "S_INACTIVE/empty";
       __skiller_if->set_status(SkillerInterface::S_INACTIVE);
 
     } else {                                  // Stack:
@@ -258,17 +258,17 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       }
 
       if ( failed > 0 ) {
-	sst = "S_FAILED";
+	//sst = "S_FAILED";
 	new_status = SkillerInterface::S_FAILED;
       } else if ( (final > 0) && (running == 0) ) {
-	sst = "S_FINAL";
+	//sst = "S_FINAL";
 	new_status = SkillerInterface::S_FINAL;
       } else if ( running > 0 ) {
-	sst = "S_RUNNING";
+	//sst = "S_RUNNING";
 	new_status = SkillerInterface::S_RUNNING;
       } else {
 	// all zero
-	sst = "S_INACTIVE";
+	//sst = "S_INACTIVE";
 	new_status = SkillerInterface::S_INACTIVE;
       }
     }

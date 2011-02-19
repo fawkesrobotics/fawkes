@@ -129,7 +129,11 @@ endif
 HAVE_DPPTU_CTRL     = 0
 ifeq ($(OS),Linux)
   HAVE_V4L_CAM        = 1
-  HAVE_V4L1_CAM       = 1
+  ifneq ($(wildcard $(SYSROOT)/usr/include/linux/videodev.h),)
+    HAVE_V4L1_CAM       = 1
+  else
+    HAVE_V4L1_FAIL_REASON = v4l1 not available, kernel >= 2.6.38 removed support
+  endif
   ifneq ($(wildcard $(SYSROOT)/usr/include/linux/videodev2.h),)
     HAVE_V4L2_CAM       = 1
     ifeq ($(BUILD_TYPE),naocross)
