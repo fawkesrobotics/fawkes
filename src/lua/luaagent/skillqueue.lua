@@ -120,10 +120,24 @@ function SkillQueue:skill_string()
       for k,v in pairs(t) do
 	 if k ~= 1 then
 	    if type(v) == "table" then
-	       -- FSM variable
-	       assert(self.fsm, "SkillQueue: FSM not set and fsm parameter used")
-	       for k2,v2 in ipairs(v) do
-		  table.insert(subp, string.format("%s = %q", k2, self.fsm.vars[v2]))
+               if tonumber(k) then
+		  -- FSM variable
+		  assert(self.fsm, "SkillQueue: FSM not set and fsm parameter used")
+		  for k2,v2 in pairs(v) do
+		     --printf("Least commitment: %s = %q", k2, self.fsm.vars[v2])
+		     table.insert(subp, string.format("%s = %q", k2, self.fsm.vars[v2]))
+		  end
+	       else
+		  local array = {}
+		  for _,v2 in ipairs(v) do
+		     table.insert(array, string.format("%q", tostring(v2)))
+		  end
+		  for k2,v2 in pairs(v) do
+		     if not tonumber(k2) then
+			table.insert(array, string.format("%s = %q", k2, tostring(v2)))
+		     end
+		  end
+		  table.insert(subp, string.format("%s = {%s}", k, table.concat(array, ", ")))
 	       end
 	    elseif type(v) == "boolean" then
 	       table.insert(subp, string.format("%s = %s", k, tostring(v)))
