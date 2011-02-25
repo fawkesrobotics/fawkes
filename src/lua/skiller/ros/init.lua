@@ -46,10 +46,10 @@ function goal_cb(goal_handle, action_server)
       setfenv(sksf, sandbox)
       goal_handle.vars.sksf = sksf
       printf("Accepting goal %s", goal_handle.goal_id)
-      goal_handle:accept()
+      goal_handle:accept(goal_handle.vars.skillstring)
    else
       printf("Rejecting goal %s", goal_handle.goal_id)
-      goal_handle:reject(sksf)
+      goal_handle:reject(goal_handle.vars.skillstring)
    end
 end
 
