@@ -33,18 +33,18 @@ namespace fawkes {
 }
 #endif
 
-class OpenRAVEManager;
+class OpenRAVEConnector;
 
 class OpenRAVEAspectIniFin : public AspectIniFin
 {
  public:
-  OpenRAVEAspectIniFin(OpenRAVEManager *or_manager);
+  OpenRAVEAspectIniFin(OpenRAVEConnector *openrave);
 
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
  private:
-  OpenRAVEManager *__or_manager;
+  OpenRAVEConnector *__openrave;
 };
 
 } // end namespace fawkes

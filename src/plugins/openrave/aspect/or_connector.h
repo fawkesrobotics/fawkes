@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_manager.h - Fawkes OpenRAVE manager interface
+ *  or_connector.h - Fawkes OpenRAVE connector interface
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ASPECT_OR_MANAGER_H_
-#define __PLUGINS_OPENRAVE_ASPECT_OR_MANAGER_H_
+#ifndef __PLUGINS_OPENRAVE_ASPECT_OR_CONNECTOR_H_
+#define __PLUGINS_OPENRAVE_ASPECT_OR_CONNECTOR_H_
 
 //#include <plugins/openrave/aspect/or_descriptions.h>
 
@@ -32,15 +32,15 @@ namespace fawkes {
 #endif
 
 
-/** @class OpenRAVEManager <plugins/openrave/aspect/or_manager.h>
+/** @class OpenRAVEConnector <plugins/openrave/aspect/or_manager.h>
  * Interface for a OpenRAVE connection creator.
  * @author Bahram Maleki-Fard
  */
-class OpenRAVEManager
+class OpenRAVEConnector
 {
  public:
   /** Virtual empty destructor. */
-  virtual ~OpenRAVEManager() {}
+  virtual ~OpenRAVEConnector() {}
 
 };
 

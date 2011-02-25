@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_OPENRAVE_OR_THREAD_H_
 #define __PLUGINS_OPENRAVE_OR_THREAD_H_
 
-#include <plugins/openrave/aspect/or_manager.h>
+#include <plugins/openrave/aspect/or_connector.h>
 #include <plugins/openrave/aspect/or_inifin.h>
 
 #include <core/threading/thread.h>
@@ -36,7 +36,7 @@ class OpenRAVEThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::AspectProviderAspect,
-  public fawkes::OpenRAVEManager
+  public fawkes::OpenRAVEConnector
 {
  public:
   OpenRAVEThread();

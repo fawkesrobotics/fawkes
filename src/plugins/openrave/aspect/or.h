@@ -25,7 +25,7 @@
 #define __PLUGINS_OPENRAVE_ASPECT_OR_H_
 
 #include <aspect/aspect.h>
-#include <plugins/openrave/aspect/or_manager.h>
+#include <plugins/openrave/aspect/or_connector.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -41,10 +41,10 @@ class OpenRAVEAspect : public virtual Aspect
   virtual ~OpenRAVEAspect();
 
  protected:
-  OpenRAVEManager *or_manager;
+  OpenRAVEConnector *openrave;
 
  private:
-  void init_OpenRAVEAspect(OpenRAVEManager *or_manager);
+  void init_OpenRAVEAspect(OpenRAVEConnector *openrave);
 };
 
 } // end namespace fawkes

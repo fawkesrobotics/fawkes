@@ -62,9 +62,9 @@ OpenRAVEAspect::~OpenRAVEAspect()
  * @param or_manager OpenRAVEManager to use
  */
 void
-OpenRAVEAspect::init_OpenRAVEAspect(OpenRAVEManager *or_manager)
+OpenRAVEAspect::init_OpenRAVEAspect(OpenRAVEConnector *openrave)
 {
-  this->or_manager = or_manager;
+  this->openrave = openrave;
 }
 
 } // end namespace fawkes

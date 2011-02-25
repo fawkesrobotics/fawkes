@@ -23,7 +23,7 @@
 
 #include <plugins/openrave/aspect/or_inifin.h>
 #include <plugins/openrave/aspect/or.h>
-#include <plugins/openrave/aspect/or_manager.h>
+#include <plugins/openrave/aspect/or_connector.h>
 
 #include <core/threading/thread_finalizer.h>
 
@@ -42,10 +42,10 @@ namespace fawkes {
 /** Constructor.
  * @param or_manager OpenRAVEManager to pass on to threads
  */
-OpenRAVEAspectIniFin::OpenRAVEAspectIniFin(OpenRAVEManager *or_manager)
+OpenRAVEAspectIniFin::OpenRAVEAspectIniFin(OpenRAVEConnector *openrave)
   : AspectIniFin("OpenRAVEAspect")
 {
-  __or_manager = or_manager;
+  __openrave = openrave;
 }
 
 void
@@ -59,7 +59,7 @@ OpenRAVEAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  or_thread->init_OpenRAVEAspect(__or_manager);
+  or_thread->init_OpenRAVEAspect(__openrave);
 }
 
 void
