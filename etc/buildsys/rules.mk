@@ -127,6 +127,13 @@ endif
 presubdirs: $(PRESUBDIRS)
 subdirs: $(SUBDIRS)
 
+ifneq ($(MAKECMDGOALS),clean)
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(MANPAGES_all)$(TARGETS_all)$(EXTRA_ALL)),)
+subdirs: | $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL)
+$(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL): | $(PRESUBDIRS)
+  endif
+endif
+
 ifneq ($(PRESUBDIRS)$(SUBDIRS),)
 $(PRESUBDIRS) $(SUBDIRS):
 	$(SILENTSYMB) if [ ! -d "$(realpath $(SRCDIR)/$(@))" ]; then \
