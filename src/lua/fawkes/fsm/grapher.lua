@@ -312,12 +312,17 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 
       if state.transitions then
 	 for _, tr in ipairs(state.transitions) do
-	    if not state.subfsm or not integrated_subfsm or
-	       state.final_transition ~= tr and state.failure_transition ~= tr then
-
+	    if not tr.hide and
+	       (
+		  not state.subfsm or not integrated_subfsm or
+		  state.final_transition ~= tr and state.failure_transition ~= tr
+	       )
+	    then
 	       local from = is_subgraph and subgraph_name .. "_" .. name or name
-	       local to = is_subgraph and subgraph_name .. "_" .. tr.state.name or tr.state.name
-	       --print("*** Adding transition " .. from .. " -> " .. to .. "(" .. tr.description .. ")")
+	       local to = is_subgraph and subgraph_name .. "_"
+		  .. tr.state.name or tr.state.name
+	       -- printf("*** Adding transition " .. from .. " -> " .. to .. "("
+	       --        .. tr.description .. ", hide: %s)", tostring(tr.hide))
 
 	       if states[tr.state.name] then -- not collapsed
 
