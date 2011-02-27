@@ -39,8 +39,7 @@ namespace fawkes {
  *
  * Fawkes uses RefPtr so that you don't need to remember
  * to delete the object explicitly, or know when a method expects you to delete 
- * the object that it returns, and to prevent any need to manually reference 
- * and unreference cairo objects.
+ * the object that it returns.
  *
  * Note that RefPtr is thread-safe.
  *
