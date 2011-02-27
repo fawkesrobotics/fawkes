@@ -21,6 +21,7 @@
  */
 
 #include "openni_plugin.h"
+#include "context_thread.h"
 
 using namespace fawkes;
 
@@ -37,6 +38,7 @@ using namespace fawkes;
 OpenNiPlugin::OpenNiPlugin(Configuration *config)
   : Plugin(config)
 {
+  thread_list.push_back(new OpenNiContextThread());
 }
 
 

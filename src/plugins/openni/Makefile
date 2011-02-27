@@ -17,16 +17,16 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface
+	      fawkesinterface fawkesopenniaspect
 OBJS_openni = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 #CFLAGS += -DUSE_TIMETRACKER
 
-ifneq ($(wildcard $(SYSROOT)/usr/include/ni/XnContext.h),)
-  HAVE_OPENNI = 1
-endif
 ifeq ($(HAVE_OPENNI),1)
-  CFLAGS  = -DHAVE_OPENNI
+  PRESUBDIRS = aspect
+
+  CFLAGS  += $(CFLAGS_OPENNI)
+  LDFLAGS += $(LDFLAGS_OPENNI)
   PLUGINS_all = $(PLUGINDIR)/openni.so
 else
   WARN_TARGETS += warning_openni
