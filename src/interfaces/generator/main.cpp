@@ -39,6 +39,7 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
+  int rv = 0;
   ArgumentParser *argp = new ArgumentParser(argc, argv, "hd:v");
 
   const vector<const char *> & items = argp->items();
@@ -134,9 +135,12 @@ main(int argc, char **argv)
       } catch (Exception &e) {
 	cout << "Generating the interface failed." << endl;
 	e.print_trace();
+        rv = -1;
       }
     }
   }
 
   delete argp;
+
+  return rv;
 }
