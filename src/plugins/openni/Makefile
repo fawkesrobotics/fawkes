@@ -17,7 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesopenniaspect
+	      fawkesinterface fawkesopenniaspect pthread \
+	      HumanSkeletonInterface
 OBJS_openni = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 #CFLAGS += -DUSE_TIMETRACKER
