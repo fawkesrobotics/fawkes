@@ -40,7 +40,10 @@ using namespace fawkes;
 const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "<html>\n"
   " <head>\n"
+  "  <meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" />\n"
+  "  <meta http-equiv=\"Content-Language\" content=\"en-us\" />\n"
   "  <title>%s (%s)</title>\n"
+  "  <link rel=\"icon\" type=\"image/png\" href=\"/static/images/favicon.png\" />\n"
   "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/webview.css\" />\n"
   "%s"
   " </head>\n"
