@@ -24,7 +24,15 @@ module("skiller.ros", package.seeall)
 require("roslua")
 require("actionlib")
 require("skiller.ros.graph")
+require("fawkes.logprint")
 local skillenv
+
+-- You can set this from the outside, it must be a function which takes
+-- the same arguments as printf (from fawkes.logprint), i.e. a format string
+-- and a suitable number of additional arguments for the format entities, as
+-- for string.format().
+print_fail  = fawkes.logprint.print_warn
+print_final = fawkes.logprint.print_info
 
 function init()
    roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/skiller"}
@@ -68,11 +76,12 @@ function spin_cb(goal_handle, action_server)
       if failed > 0 then
 	 local result = action_server.actspec.result_spec:instantiate()
 	 result.values.errmsg = skillenv.get_error()
-	 print_warn("Skill execution of '%s' failed (%s)",
+	 print_fail("Skill execution of '%s' failed (%s)",
 		    goal_handle.vars.skillstring, result.values.errmsg)
 	 goal_handle:abort(result, result.values.errmsg)
       elseif final > 0 and running == 0 then
-	 print_info("Skill execution of '%s' succeeded", goal_handle.vars.skillstring)
+	 print_final("Skill execution of '%s' succeeded",
+		     goal_handle.vars.skillstring)
 	 local result = action_server.actspec.result_spec:instantiate()
 	 goal_handle:finish(result)
       elseif running > 0 then
