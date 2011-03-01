@@ -61,6 +61,11 @@ class OpenRAVEEnvironment
   virtual void addRobot(OpenRAVE::RobotBasePtr robot);
   virtual void addRobot(OpenRAVERobot* robot);
 
+  virtual bool addObject(const std::string& name, const std::string& filename);
+  virtual bool deleteObject(const std::string& name);
+  virtual bool renameObject(const std::string& name, const std::string& newName);
+  virtual bool moveObject(const std::string& name, float transX, float transY, float transZ, OpenRAVERobot* robot=NULL);
+  virtual bool rotateObject(const std::string& name, float rotX, float rotY, float rotZ);
 
   //virtual RobotBasePtr getRobot() const;
   virtual OpenRAVE::EnvironmentBasePtr getEnvPtr() const;

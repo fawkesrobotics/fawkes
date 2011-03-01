@@ -258,4 +258,126 @@ OpenRAVEEnvironment::runPlanner(OpenRAVERobot* robot)
 }
 
 
+/** Add an object to the environment.
+ * @param name name that should be given to that object
+ * @param filename path to xml file of that object (KinBody)
+ */
+bool
+OpenRAVEEnvironment::addObject(const std::string& name, const std::string& filename)
+{
+  try {
+    KinBodyPtr kb = __env->ReadKinBodyXMLFile(filename);
+    kb->SetName(name);
+    __env->AddKinBody(kb);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Environment", "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
+    return false;
+  }
+
+  return true;
+}
+
+/** Remove object from environment.
+ * @param name name of the object
+ */
+bool
+OpenRAVEEnvironment::deleteObject(const std::string& name)
+{
+  try {
+    KinBodyPtr kb = __env->GetKinBody(name);
+    __env->Remove(kb);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Environment", "Could not delete Object '%s'. Ex:%s", name.c_str(), e.what());
+    return false;
+  }
+
+  return true;
+}
+
+/** Rename object.
+ * @param name current name of the object
+ * @param newName new name of the object
+ */
+bool
+OpenRAVEEnvironment::renameObject(const std::string& name, const std::string& newName)
+{
+  try {
+    KinBodyPtr kb = __env->GetKinBody(name);
+    kb->SetName(newName);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Environment", "Could not rename Object '%s' to '%s'. Ex:%s", name.c_str(), newName.c_str(), e.what());
+    return false;
+  }
+
+  return true;
+}
+
+/** Move object in the environment.
+ * Distances are given in meters
+ * @param name name of the object
+ * @param transX transition along x-axis
+ * @param transY transition along y-axis
+ * @param transZ transition along z-axis
+ * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
+ */
+bool
+OpenRAVEEnvironment::moveObject(const std::string& name, float transX, float transY, float transZ, OpenRAVERobot* robot)
+{
+  try {
+    KinBodyPtr kb = __env->GetKinBody(name);
+
+    Transform transform = kb->GetTransform();
+    transform.trans = Vector(transX, transY, transZ);
+
+    if( robot ) {
+      Transform robotTrans = robot->getRobotPtr()->GetTransform();
+      transform.trans += robotTrans.trans;
+    }
+
+    kb->SetTransform(transform);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Environment", "Could not move Object '%s'. Ex:%s", name.c_str(), e.what());
+    return false;
+  }
+
+  return true;
+}
+
+/** Rotate object along its axis.
+ * Rotation angles should be given in radians.
+ * @param name name of the object
+ * @param rotX 1st rotation, along x-axis
+ * @param rotY 2nd rotation, along y-axis
+ * @param rotZ 3rd rotation, along z-axis
+ */
+bool
+OpenRAVEEnvironment::rotateObject(const std::string& name, float rotX, float rotY, float rotZ)
+{
+  try {
+    KinBodyPtr kb = __env->GetKinBody(name);
+
+    Vector q1 = quatFromAxisAngle(Vector(rotX, 0.f, 0.f));
+    Vector q2 = quatFromAxisAngle(Vector(0.f, rotY, 0.f));
+    Vector q3 = quatFromAxisAngle(Vector(0.f, 0.f, rotZ));
+
+    Vector q12  = quatMultiply (q1, q2);
+    Vector quat = quatMultiply (q12, q3);
+
+    Transform transform = kb->GetTransform();
+    transform.rot = quat;
+
+    kb->SetTransform(transform);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Environment", "Could not rotate Object '%s'. Ex:%s", name.c_str(), e.what());
+    return false;
+  }
+
+  return true;
+}
+
 } // end of namespace fawkes
