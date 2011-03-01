@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __OPENRAVE_ROBOT_H
-#define __OPENRAVE_ROBOT_H
+#ifndef __PLUGINS_OPENRAVE_ROBOT_H
+#define __PLUGINS_OPENRAVE_ROBOT_H
 
 #include "types.h"
 

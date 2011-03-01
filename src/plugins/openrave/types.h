@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __OPENRAVE_TYPES_H_
-#define __OPENRAVE_TYPES_H_
+#ifndef __PLUGINS_OPENRAVE_TYPES_H_
+#define __PLUGINS_OPENRAVE_TYPES_H_
 
 #include <utils/math/types.h>
 
