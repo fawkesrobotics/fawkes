@@ -24,7 +24,7 @@ CFLAGS  += $(CFLAGS_OPENRAVE)
 LDFLAGS += $(LDFLAGS_OPENRAVE)
 
 LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesopenraveaspect $(LIBS_OPENRAVE)
-OBJS_openrave = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_openrave = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 
 OBJS_all    = $(OBJS_openrave)
 
