@@ -94,7 +94,7 @@ RRDWebRequestProcessor::process_request(const char *url,
     } else {
       WebPageReply *r = new WebPageReply("RRD Graphs");
       r->set_html_header("  <link rel=\"stylesheet\" type=\"text/css\" "
-			 "href=\"/static/rrdweb.css\" />\n");
+			 "href=\"/static/css/rrdweb.css\" />\n");
       *r += "<h2>RRD Graphs</h2>\n";
 
       std::string subpath = std::string(url).substr(__baseurl_len);

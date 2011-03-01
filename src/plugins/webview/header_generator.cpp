@@ -41,7 +41,7 @@ const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "<html>\n"
   " <head>\n"
   "  <title>%s (%s)</title>\n"
-  "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/webview.css\" />\n"
+  "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/webview.css\" />\n"
   "%s"
   " </head>\n"
   " <body>\n"
