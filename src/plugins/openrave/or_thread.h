@@ -31,6 +31,12 @@
 #include <aspect/configurable.h>
 #include <aspect/aspect_provider.h>
 
+namespace fawkes {
+  class OpenRAVEEnvironment;
+  class OpenRAVERobot;
+  class OpenRAVEManipulator;
+}
+
 class OpenRAVEThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
@@ -46,11 +52,26 @@ class OpenRAVEThread
   virtual void loop();
   virtual void finalize();
 
+  //for OpenRAVEConnector
+  //virtual void testDebug();
+  virtual fawkes::OpenRAVEEnvironment*	getEnvironment() const;
+  virtual fawkes::OpenRAVERobot*	getActiveRobot() const;
+  virtual void				setActiveRobot(fawkes::OpenRAVERobot* robot);
+  virtual fawkes::OpenRAVERobot*	addRobot(const std::string& filenameRobot, bool autogenerateIK);
+  virtual void 				setManipulator(fawkes::OpenRAVEManipulator* manip, float transX=0.f, float transY=0.f, float transZ=0.f, bool calibrate=0);
+  virtual void 				setManipulator(fawkes::OpenRAVERobot* robot, fawkes::OpenRAVEManipulator* manip, float transX=0.f, float transY=0.f, float transZ=0.f, bool calibrate=0);
+
+  virtual void startViewer() const;
+  virtual void runPlanner(fawkes::OpenRAVERobot* = NULL);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   fawkes::OpenRAVEAspectIniFin     __or_aspectIniFin;
+
+  fawkes::OpenRAVEEnvironment*  __OREnv;
+  fawkes::OpenRAVERobot*        __ORRobot;
 };
 
 #endif
