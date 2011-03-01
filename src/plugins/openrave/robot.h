@@ -49,14 +49,14 @@ class OpenRAVERobot
   virtual void load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
   virtual void setReady();
   virtual void setOffset(float transX, float transY, float transZ);
-  virtual void calibrate(float& deviceTransX, float& deviceTransY, float& deviceTransZ);
+  virtual void calibrate(float deviceTransX, float deviceTransY, float deviceTransZ);
   virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void updateManipulator(); // not needed
 
 
-  virtual bool setTargetQuat	 (float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ);
-  virtual bool setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ);
-  virtual bool setTargetEuler(euler_rotation_t type, float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi);
+  virtual bool setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ);
+  virtual bool setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ);
+  virtual bool setTargetEuler(euler_rotation_t type, float transX, float transY, float transZ, float phi, float theta, float psi);
   virtual void setTargetAngles( std::vector<float>& angles ); // just temporary
 
   virtual void getTargetAngles(std::vector<float>& to); // not needed

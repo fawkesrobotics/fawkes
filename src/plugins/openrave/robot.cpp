@@ -140,7 +140,7 @@ OpenRAVERobot::setReady()
  * @param deviceTransZ transition on z-axis (real device)
  */
 void
-OpenRAVERobot::calibrate(float& deviceTransX, float& deviceTransY, float& deviceTransZ)
+OpenRAVERobot::calibrate(float deviceTransX, float deviceTransY, float deviceTransZ)
 {
   // get device's current angles, and set them for OpenRAVE model
   std::vector<float> angles;
@@ -186,7 +186,7 @@ OpenRAVERobot::updateManipulator()
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetQuat(float& transX, float& transY, float& transZ, float& quatW, float& quatX, float& quatY, float& quatZ)
+OpenRAVERobot::setTargetQuat(float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ)
 {
   Vector trans(transX, transY, transZ);
   Vector   rot(quatW, quatX, quatY, quatZ);
@@ -205,7 +205,7 @@ OpenRAVERobot::setTargetQuat(float& transX, float& transY, float& transZ, float&
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetAxisAngle(float& transX, float& transY, float& transZ, float& angle, float& axisX, float& axisY, float& axisZ)
+OpenRAVERobot::setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ)
 {
   Vector trans(transX, transY, transZ);
   Vector aa(angle, axisX, axisY, axisZ);
@@ -225,7 +225,7 @@ OpenRAVERobot::setTargetAxisAngle(float& transX, float& transY, float& transZ, f
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetEuler(euler_rotation_t type, float& transX, float& transY, float& transZ, float& phi, float& theta, float& psi)
+OpenRAVERobot::setTargetEuler(euler_rotation_t type, float transX, float transY, float transZ, float phi, float theta, float psi)
 {
   Vector trans(transX, transY, transZ);
   std::vector<float> rot(9, 0.f); //rotations vector
