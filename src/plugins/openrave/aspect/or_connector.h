@@ -25,12 +25,16 @@
 #define __PLUGINS_OPENRAVE_ASPECT_OR_CONNECTOR_H_
 
 //#include <plugins/openrave/aspect/or_descriptions.h>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
+class OpenRAVEEnvironment;
+class OpenRAVERobot;
+class OpenRAVEManipulator;
 
 /** @class OpenRAVEConnector <plugins/openrave/aspect/or_manager.h>
  * Interface for a OpenRAVE connection creator.
@@ -42,6 +46,21 @@ class OpenRAVEConnector
   /** Virtual empty destructor. */
   virtual ~OpenRAVEConnector() {}
 
+  virtual void startViewer() const = 0;
+
+  virtual void runPlanner(OpenRAVERobot* = NULL) = 0;
+
+  virtual OpenRAVEEnvironment* getEnvironment() const = 0;
+
+  virtual OpenRAVERobot* getActiveRobot() const = 0;
+
+  virtual void setActiveRobot(OpenRAVERobot* robot) = 0;
+
+  virtual OpenRAVERobot* addRobot(const std::string& filenameRobot, bool autogenerateIK)  = 0;
+
+  virtual void setManipulator(OpenRAVEManipulator* manip, float transX=0.f, float transY=0.f, float transZ=0.f, bool calibrate=0)  = 0;
+
+  virtual void setManipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip, float transX=0.f, float transY=0.f, float transZ=0.f, bool calibrate=0)  = 0;
 };
 
 } // end namespace fawkes
