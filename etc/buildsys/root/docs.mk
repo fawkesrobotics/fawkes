@@ -28,6 +28,7 @@ tracdoc: api-trac.doxygen
 %.doxygen:
 	$(SILENT) echo "--> Building documentation ($@). This may take a while..."
 	$(SILENT) rm -rf doc/api
+	$(SILENT) mkdir -p doc/api
 	$(SILENT) $(DOXYGEN) $(DOCDIR)/doxygen/$*$(if $(SUBMODULE_EXTERN),-submodule).doxygen >/dev/null 2>&1
 	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
 		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \
