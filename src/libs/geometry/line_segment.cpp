@@ -99,6 +99,7 @@ LineSegment::p2() const
 }
 
 /** Project a point on this LineSegment
+ * @param p a point
  * @return the projected point
  */
 HomPoint 
