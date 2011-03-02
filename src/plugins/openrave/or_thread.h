@@ -64,6 +64,14 @@ class OpenRAVEThread
   virtual void startViewer() const;
   virtual void runPlanner(fawkes::OpenRAVERobot* = NULL);
 
+  //handling objects; mainly from environment.h
+  virtual bool addObject(const std::string& name, const std::string& filename);
+  virtual bool deleteObject(const std::string& name);
+  virtual bool renameObject(const std::string& name, const std::string& newName);
+  virtual bool moveObject(const std::string& name, float transX, float transY, float transZ, fawkes::OpenRAVERobot* robot=NULL);
+  virtual bool rotateObject(const std::string& name, float rotX, float rotY, float rotZ);
+  virtual bool setTargetObject(const std::string& name, fawkes::OpenRAVERobot* robot, float rotX = 0);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 

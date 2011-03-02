@@ -175,3 +175,37 @@ OpenRAVEThread::addRobot(const std::string& filenameRobot, bool autogenerateIK)
 
   return robot;
 }
+
+/* ##########################################################
+ * #    object handling (mainly from environment.h)        #
+* ########################################################*/
+bool OpenRAVEThread::addObject(const std::string& name, const std::string& filename) {
+  return __OREnv->addObject(name, filename); }
+
+bool OpenRAVEThread::deleteObject(const std::string& name) {
+  return __OREnv->deleteObject(name); }
+
+bool OpenRAVEThread::renameObject(const std::string& name, const std::string& newName) {
+  return __OREnv->renameObject(name, newName); }
+
+bool OpenRAVEThread::moveObject(const std::string& name, float transX, float transY, float transZ, OpenRAVERobot* robot) {
+  return __OREnv->moveObject(name, transX, transY, transZ, robot); }
+
+bool OpenRAVEThread::rotateObject(const std::string& name, float rotX, float rotY, float rotZ) {
+  return __OREnv->rotateObject(name, rotX, rotY, rotZ); }
+
+/** Set an object as the target.
+ * Currently the object should be cylindric, and stand upright. It may
+ * also be rotated on its x-axis, but that rotation needs to be given in an argument
+ * to calculate correct position for endeffecto. This is only temporary until
+ * proper graps planning for 5DOF in OpenRAVE is provided.
+ * @param name name of the object
+ * @param rotX rotation of object on x-axis (radians)
+ */
+bool
+OpenRAVEThread::setTargetObject(const std::string& name, OpenRAVERobot* robot, float rotX)
+{
+  OpenRAVE::Transform transform = __OREnv->getEnvPtr()->GetKinBody(name)->GetTransform();
+
+  return robot->setTargetObjectPosition(transform.trans[0], transform.trans[1], transform.trans[2], rotX);
+}
