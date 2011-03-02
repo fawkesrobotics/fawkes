@@ -114,18 +114,27 @@ BlackBoardNetworkHandler::loop()
     case MSG_BB_OPEN_FOR_WRITING:
       {
 	bb_iopen_msg_t *om = msg->msg<bb_iopen_msg_t>();
+
+	char type[__INTERFACE_TYPE_SIZE + 1];
+	char id[__INTERFACE_ID_SIZE + 1];
+	type[__INTERFACE_TYPE_SIZE] = 0;
+	id[__INTERFACE_ID_SIZE] = 0;
+	strncpy(type, om->type, __INTERFACE_TYPE_SIZE);
+	strncpy(id, om->id, __INTERFACE_ID_SIZE);
+
 	LibLogger::log_debug("BlackBoardNetworkHandler", "Remote opens interface %s::%s",
-			     om->type, om->id);
+			     type, id);
 	try {
 	  Interface *iface;
+
 	  if ( msg->msgid() == MSG_BB_OPEN_FOR_READING ) {
-	    iface = __bb->open_for_reading(om->type, om->id);
+	    iface = __bb->open_for_reading(type, id);
 	  } else {
-	    iface = __bb->open_for_writing(om->type, om->id);
+	    iface = __bb->open_for_writing(type, id);
 	  }
 	  if ( memcmp(iface->hash(), om->hash, __INTERFACE_HASH_SIZE) != 0 ) {
 	    LibLogger::log_warn("BlackBoardNetworkHandler", "Opening interface %s::%s failed, "
-				"hash mismatch", om->type, om->id);
+				"hash mismatch", type, id);
 	    send_openfailure(clid, BB_ERR_HASH_MISMATCH);
 	  } else {
 	    __interfaces[iface->serial()] = iface;
@@ -139,15 +148,15 @@ BlackBoardNetworkHandler::loop()
 	  }
 	} catch (BlackBoardInterfaceNotFoundException &nfe) {
 	  LibLogger::log_warn("BlackBoardNetworkHandler", "Opening interface %s::%s failed, "
-			      "interface class not found", om->type, om->id);
+			      "interface class not found", type, id);
 	  send_openfailure(clid, BB_ERR_UNKNOWN_TYPE);
 	} catch (BlackBoardWriterActiveException &wae) {
 	  LibLogger::log_warn("BlackBoardNetworkHandler", "Opening interface %s::%s failed, "
-			      "writer already exists", om->type, om->id);
+			      "writer already exists", type, id);
 	  send_openfailure(clid, BB_ERR_WRITER_EXISTS);
 	} catch (Exception &e) {
 	  LibLogger::log_warn("BlackBoardNetworkHandler", "Opening interface %s::%s failed",
-			      om->type, om->id);
+			      type, id);
 	  LibLogger::log_warn("BlackBoardNetworkHandler", e);
 	  send_openfailure(clid, BB_ERR_UNKNOWN_ERR);
 	}
