@@ -22,6 +22,7 @@
 
 #include "openni_plugin.h"
 #include "context_thread.h"
+#include "tracker_thread.h"
 
 using namespace fawkes;
 
@@ -39,6 +40,7 @@ OpenNiPlugin::OpenNiPlugin(Configuration *config)
   : Plugin(config)
 {
   thread_list.push_back(new OpenNiContextThread());
+  thread_list.push_back(new OpenNiUserTrackerThread());
 }
 
 

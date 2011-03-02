@@ -38,6 +38,7 @@
 
 namespace fawkes {
   class HumanSkeletonInterface;
+  class HumanSkeletonProjectionInterface;
 }
 
 class OpenNiUserTrackerThread
@@ -68,12 +69,18 @@ class OpenNiUserTrackerThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void update_skel_if(XnUserID id, fawkes::HumanSkeletonInterface *skel_if);
+  typedef struct {
+    fawkes::HumanSkeletonInterface            *skel_if;
+    fawkes::HumanSkeletonProjectionInterface  *proj_if;
+  } UserInfo;
 
+  typedef std::map<XnUserID, UserInfo>  UserMap;
+
+  void update_user(XnUserID id, UserInfo &user);
 
  private:
   xn::UserGenerator               *__user_gen;
-  fawkes::HumanSkeletonInterface  *__skel_if;
+  xn::DepthGenerator              *__depth_gen;
 
   XnCallbackHandle                 __user_cb_handle;
   XnCallbackHandle                 __calib_cb_handle;
@@ -82,9 +89,7 @@ class OpenNiUserTrackerThread
   char                             __calib_pose_name[32];
   bool                             __skel_need_calib_pose;
 
-  typedef std::map<XnUserID, fawkes::HumanSkeletonInterface *>
-    SkeletonInterfaceMap;
-  SkeletonInterfaceMap             __skel_ifs;
+  UserMap                          __users;
 };
 
 #endif

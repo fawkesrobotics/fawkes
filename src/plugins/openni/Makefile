@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesopenniaspect pthread \
-	      HumanSkeletonInterface
+	      HumanSkeletonInterface HumanSkeletonProjectionInterface
 OBJS_openni = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 #CFLAGS += -DUSE_TIMETRACKER
