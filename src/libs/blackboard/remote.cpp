@@ -221,7 +221,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
     } else if ( error == BB_ERR_HASH_MISMATCH ) {
       throw Exception("Hash mismatch for interface %s:%s", type, identifier);
     } else if ( error == BB_ERR_UNKNOWN_TYPE ) {
-      throw Exception("Type %s unknoen (%s:%s)", type, type, identifier);
+      throw Exception("Type %s unknown (%s::%s)", type, type, identifier);
     } else if ( error == BB_ERR_WRITER_EXISTS ) {
       throw BlackBoardWriterActiveException(identifier, type);
     } else {
@@ -243,7 +243,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
   Interface *iface = __instance_factory->new_interface_instance(type, identifier);
   try {
     open_interface(type, identifier, writer, iface);
-  } catch (...) {
+  } catch (Exception &e) {
     __instance_factory->delete_interface_instance(iface);
     throw;
   }
@@ -443,6 +443,12 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
 	if ( __proxies.find(ntohl(esm->serial)) != __proxies.end() ) {
 	  __proxies[ntohl(esm->serial)]->writer_removed(ntohl(esm->event_serial));
 	}
+      } else if (msgid == MSG_BB_INTERFACE_CREATED) {
+	bb_ievent_msg_t *em = m->msg<bb_ievent_msg_t>();
+	__notifier->notify_of_interface_created(em->type, em->id);
+      } else if (msgid == MSG_BB_INTERFACE_DESTROYED) {
+	bb_ievent_msg_t *em = m->msg<bb_ievent_msg_t>();
+	__notifier->notify_of_interface_destroyed(em->type, em->id);
       } else {
 	__wait_mutex->lock();
 	__m = m;

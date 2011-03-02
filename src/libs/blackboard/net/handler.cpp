@@ -27,6 +27,7 @@
 #include <blackboard/blackboard.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/net/interface_listener.h>
+#include <blackboard/net/interface_observer.h>
 
 #include <interface/interface.h>
 #include <interface/interface_info.h>
@@ -61,12 +62,15 @@ BlackBoardNetworkHandler::BlackBoardNetworkHandler(BlackBoard *blackboard,
   __bb   = blackboard;
   __nhub = hub;
   __nhub->add_handler(this);
+
+  __observer = new BlackBoardNetHandlerInterfaceObserver(blackboard, hub);
 }
 
 
 /** Destructor. */
 BlackBoardNetworkHandler::~BlackBoardNetworkHandler()
 {
+  delete __observer;
   __nhub->remove_handler(this);
   __inbound_queue.clear();
   // close all open interfaces
