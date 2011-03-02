@@ -54,10 +54,12 @@ class OpenRAVERobot
   virtual void updateManipulator(); // not needed
 
 
-  virtual bool setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ);
-  virtual bool setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ);
-  virtual bool setTargetEuler(euler_rotation_t type, float transX, float transY, float transZ, float phi, float theta, float psi);
+  virtual bool setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ, bool noOffset = false);
+  virtual bool setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ, bool noOffset = false);
+  virtual bool setTargetEuler(euler_rotation_t type, float transX, float transY, float transZ, float phi, float theta, float psi, bool noOffset = false);
   virtual void setTargetAngles( std::vector<float>& angles ); // just temporary
+
+  virtual bool setTargetObjectPosition(float transX, float transY, float transZ, float rotX);
 
   virtual void getTargetAngles(std::vector<float>& to); // not needed
   virtual OpenRAVE::RobotBasePtr getRobotPtr() const;
@@ -67,8 +69,8 @@ class OpenRAVERobot
 
  private:
   void init();
-  bool setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat);
-  bool setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotations);
+  bool setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool noOffset = false);
+  bool setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool noOffset = false);
 
   fawkes::Logger*	                __logger;
 
