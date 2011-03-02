@@ -29,9 +29,11 @@
 #include <vector>
 #include <string>
 
+#include <plugins/openrave/aspect/or.h>
+
 #ifdef HAVE_OPENRAVE
 namespace fawkes {
-  class OpenRAVEConnector;
+  class OpenRAVERobot;
   class OpenRAVEManipulatorKatana6M180;
 }
 #endif
@@ -39,11 +41,11 @@ namespace fawkes {
 class KatanaGotoThreadOpenRAVE : public KatanaGotoThread
 {
  public:
-  KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
+  KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRAVEConnector* openrave,
 		   unsigned int poll_interval_ms,
-                   std::string robotFile,
-                   bool autoloadIK,
-                   bool useViewer);
+                   std::string robot_file,
+                   bool autoload_IK,
+                   bool use_viewer);
 
 #ifdef HAVE_OPENRAVE
 
@@ -53,22 +55,24 @@ class KatanaGotoThreadOpenRAVE : public KatanaGotoThread
 
   void set_target(float x, float y, float z, float phi, float theta, float psi);
 
-  virtual bool updateMotorData();
-  virtual void moveKatana();
+  virtual bool update_motor_data();
+  virtual void move_katana();
 
  private:
-  fawkes::OpenRAVEConnector*                    __ORCon;
-  fawkes::OpenRAVEManipulatorKatana6M180*       __manip;
+  fawkes::OpenRAVERobot*                        __OR_robot;
+  fawkes::OpenRAVEManipulatorKatana6M180*       __OR_manip;
 
-  std::vector< std::vector<float> >*            __targetTraj;
+  std::vector< std::vector<float> >*            __target_traj;
   std::vector< std::vector<float> >::iterator   __it;
 
-  std::vector< int >    __motorEncoders;
-  std::vector< float >  __motorAngles;
+  std::vector< int >    __motor_encoders;
+  std::vector< float >  __motor_angles;
 
-  const std::string     __cfg_robotFile;
-  bool                  __cfg_autoloadIK;
-  bool                  __cfg_useViewer;
+  const std::string     __cfg_robot_file;
+  bool                  __cfg_autoload_IK;
+  bool                  __cfg_use_viewer;
+
+  fawkes::OpenRAVEConnector*    _openrave;
 
 #endif //HAVE_OPENRAVE
 };

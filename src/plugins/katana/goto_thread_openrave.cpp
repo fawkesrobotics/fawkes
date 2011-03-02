@@ -29,9 +29,9 @@
 
 #ifdef HAVE_OPENRAVE
 
-#include <openrave/connector.h>
-#include <openrave/manipulators/katana6M180.h>
-#include <openrave/types.h>
+#include <plugins/openrave/robot.h>
+#include <plugins/openrave/manipulators/katana6M180.h>
+#include <plugins/openrave/types.h>
 
 #include <vector>
 
@@ -48,24 +48,26 @@ using namespace fawkes;
 /** Constructor.
  * @param katana linear motion base class
  * @param logger logger
- * @param robotFile path to robot's xml-file
- * @param useViewer true, if viewer should be started (default: false)
+ * @param robot_file path to robot's xml-file
+ * @param use_viewer true, if viewer should be started (default: false)
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  */
 KatanaGotoThreadOpenRAVE::KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katana,
 				   fawkes::Logger *logger,
+                                   fawkes::OpenRAVEConnector* openrave,
 				   unsigned int poll_interval_ms,
-                                   std::string robotFile,
-                                   bool autoloadIK,
-                                   bool useViewer) :
+                                   std::string robot_file,
+                                   bool autoload_IK,
+                                   bool use_viewer) :
   KatanaGotoThread(katana, logger, poll_interval_ms),
-  __ORCon( 0 ),
-  __manip( 0 ),
-  __targetTraj( 0 ),
-  __cfg_robotFile( robotFile ),
-  __cfg_autoloadIK( autoloadIK ),
-  __cfg_useViewer( useViewer )
+  __OR_robot( 0 ),
+  __OR_manip( 0 ),
+  __target_traj( 0 ),
+  __cfg_robot_file( robot_file ),
+  __cfg_autoload_IK( autoload_IK ),
+  __cfg_use_viewer( use_viewer ),
+  _openrave( openrave )
 {
 }
 
@@ -94,24 +96,21 @@ void
 KatanaGotoThreadOpenRAVE::init()
 {
   try {
-    __ORCon = new OpenRAVEConnector(_logger);
-
-    __ORCon->setup(__cfg_robotFile, __cfg_autoloadIK);
+    __OR_robot = _openrave->add_robot(__cfg_robot_file, __cfg_autoload_IK);
 
     // configure manipulator
     // TODO: from config parameters? neccessary?
-    __manip = new OpenRAVEManipulatorKatana6M180(6, 5);
-    __manip->addMotor(0,0);
-    __manip->addMotor(1,1);
-    __manip->addMotor(2,2);
-    __manip->addMotor(4,3);
-    __manip->addMotor(5,4);
+    __OR_manip = new OpenRAVEManipulatorKatana6M180(6, 5);
+    __OR_manip->add_motor(0,0);
+    __OR_manip->add_motor(1,1);
+    __OR_manip->add_motor(2,2);
+    __OR_manip->add_motor(4,3);
+    __OR_manip->add_motor(5,4);
 
     // Set manipulator and offsets.
     // offsetZ: katana.kinbody is 0.185 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
     // offsetX: katana.kinbody is setup 0.0725 on +x axis
-    __ORCon->setManipulator(__manip, 0.0725f, 0.f, 0.3865f);
-
+    _openrave->set_manipulator(__OR_robot, __OR_manip, 0.0725f, 0.f, 0.3865f);
   } catch (fawkes::Exception& e) {
     // TODO: not just simple throw....
     throw;
@@ -119,38 +118,38 @@ KatanaGotoThreadOpenRAVE::init()
     _logger->log_warn(name(), "Fetching position values failed: %s", e.what());
   }
 
-  if( __cfg_useViewer)
-    __ORCon->startViewer();
+  if( __cfg_use_viewer)
+    _openrave->start_viewer();
 }
 
 void
 KatanaGotoThreadOpenRAVE::finalize()
 {
-  delete(__ORCon);
-  __ORCon = NULL;
+  delete(__OR_robot);
+  __OR_robot = NULL;
 
-  delete(__manip);
-  __manip = NULL;
+  delete(__OR_manip);
+  __OR_manip = NULL;
 }
 
 void
 KatanaGotoThreadOpenRAVE::once()
 {
   // Fetch motor encoder values
-  if( !updateMotorData() ) {
+  if( !update_motor_data() ) {
     _logger->log_warn("KatanaGotoThread", "Fetching current motor values failed");
     _finished = true;
     return;
   }
 
   // Convert encoder values to angles, and set starting point for planner
-  encToRad(__motorEncoders, __motorAngles);
-  __manip->setAnglesDevice(__motorAngles);
+  encToRad(__motor_encoders, __motor_angles);
+  __OR_manip->set_angles_device(__motor_angles);
 
   // Checking if target has IK solution
   _logger->log_debug(name(), "Check IK(%f,%f,%f, %f,%f,%f)",
 		       __x, __y, __z, __phi, __theta, __psi);
-  if( !__ORCon->setTargetEuler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi) ) {
+  if( !__OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi) ) {
     _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
     _finished = true;
     _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
@@ -159,7 +158,7 @@ KatanaGotoThreadOpenRAVE::once()
 
   // Run planner
   try {
-    __ORCon->runPlanner();
+    _openrave->run_planner(__OR_robot);
   } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
     _finished = true;
@@ -168,9 +167,9 @@ KatanaGotoThreadOpenRAVE::once()
   }
 
   // Get trajectories and move katana along them
-  __targetTraj = __ORCon->getTrajectory();
+  __target_traj = __OR_robot->get_trajectory_device();
   try {
-    moveKatana();
+    move_katana();
   } catch (/*KNI*/::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Moving along trajectory failed (ignoring): %s", e.what());
     _finished = true;
@@ -182,7 +181,7 @@ KatanaGotoThreadOpenRAVE::once()
 
   // TODO: Check for finished motion
   // Can't use current version like in goto_thread, because target is not set in libkni!
-  // can check endeffector position instead, or check last angle values from __targetTraj with katana-arm values
+  // can check endeffector position instead, or check last angle values from __target_traj with katana-arm values
 
   _finished = true;
 }
@@ -193,7 +192,7 @@ KatanaGotoThreadOpenRAVE::once()
  * @return true if succesful, false otherwise
  */
 bool
-KatanaGotoThreadOpenRAVE::updateMotorData()
+KatanaGotoThreadOpenRAVE::update_motor_data()
 {
   CKatBase *base = _katana->GetBase();
   short num_errors  = 0;
@@ -223,7 +222,7 @@ KatanaGotoThreadOpenRAVE::updateMotorData()
   while (1) {
     usleep(__poll_interval_usec);
     try {
-      __motorEncoders = _katana->getRobotEncoders(false); //fetch encoder values, param refreshEncoders=false
+      __motor_encoders = _katana->getRobotEncoders(false); //fetch encoder values, param refreshEncoders=false
     } catch (/*KNI*/::Exception &e) {
       if (++num_errors <= 10) {
         _logger->log_warn("KatanaGotoThread", "Receiving encoder values failed, retrying");
@@ -241,11 +240,11 @@ KatanaGotoThreadOpenRAVE::updateMotorData()
 }
 
 
-/** Move katana arm along the current trajectory __targetTraj. */
+/** Move katana arm along the current trajectory __target_traj. */
 void
-KatanaGotoThreadOpenRAVE::moveKatana()
+KatanaGotoThreadOpenRAVE::move_katana()
 {
-  for( __it=__targetTraj->begin(); __it!=__targetTraj->end(); ++__it) {
+  for( __it=__target_traj->begin(); __it!=__target_traj->end(); ++__it) {
     for( unsigned int i=0; i<__it->size(); i++) {
       _katana->moveMotorTo(i, __it->at(i));
     }

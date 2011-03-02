@@ -107,11 +107,14 @@ KatanaActThread::init()
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
   __gripper_thread = new KatanaGripperThread(__katana, logger,
 					     __cfg_gripper_pollint);
+#ifdef HAVE_OPENRAVE
   if(__cfg_OR_enabled)
-    {__goto_thread    = new KatanaGotoThreadOpenRAVE(__katana, logger, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);}
+    {__goto_thread    = new KatanaGotoThreadOpenRAVE(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);}
   else
+#endif
     {__goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);}
 
+  __goto_thread->init();
   __sensacq_thread->start();
 
   bbil_add_message_interface(__katana_if);

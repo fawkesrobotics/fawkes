@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface KatanaInterface 
+	      fawkesinterface KatanaInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 #CFLAGS += -DUSE_TIMETRACKER
@@ -42,7 +42,7 @@ ifeq ($(HAVE_LIBKNI),1)
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE),1)
-    LIBS_katana += fawkesopenrave
+    LIBS_katana += fawkesopenrave fawkesopenraveaspect
     CFLAGS  += $(CFLAGS_OPENRAVE)
     LDFLAGS += $(LDFLAGS_OPENRAVE)
   else

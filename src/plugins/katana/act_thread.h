@@ -35,6 +35,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <plugins/openrave/aspect/or.h>
 #include <blackboard/interface_listener.h>
 #include <core/utils/refptr.h>
 #ifdef USE_TIMETRACKER
@@ -60,6 +61,9 @@ class KatanaActThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
+#ifdef HAVE_OPENRAVE
+  public fawkes::OpenRAVEAspect,
+#endif
   public fawkes::BlackBoardInterfaceListener
 {
  public:
