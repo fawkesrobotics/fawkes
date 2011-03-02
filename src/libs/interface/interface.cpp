@@ -486,6 +486,9 @@ Interface::datasize() const
 void
 Interface::set_type_id(const char *type, const char *id)
 {
+  __type[__INTERFACE_TYPE_SIZE] = 0;
+  __id[__INTERFACE_ID_SIZE] = 0;
+  __uid[__INTERFACE_UID_SIZE] = 0;
   strncpy(__type, type, __INTERFACE_TYPE_SIZE);
   strncpy(__id, id, __INTERFACE_ID_SIZE);
   snprintf(__uid, __INTERFACE_UID_SIZE, "%s::%s", type, id);
