@@ -50,25 +50,25 @@ class OpenRAVEEnvironment
   virtual void destroy();
   virtual void lock();
 
-  virtual void enableDebug();
-  virtual void disableDebug();
+  virtual void enable_debug();
+  virtual void disable_debug();
 
-  virtual void startViewer();
-  virtual void loadIKSolver(OpenRAVERobot* robot);
-  virtual void runPlanner(OpenRAVERobot* robot);
+  virtual void start_viewer();
+  virtual void load_IK_solver(OpenRAVERobot* robot);
+  virtual void run_planner(OpenRAVERobot* robot);
 
-  virtual void addRobot(const std::string& filename);
-  virtual void addRobot(OpenRAVE::RobotBasePtr robot);
-  virtual void addRobot(OpenRAVERobot* robot);
+  virtual void add_robot(const std::string& filename);
+  virtual void add_robot(OpenRAVE::RobotBasePtr robot);
+  virtual void add_robot(OpenRAVERobot* robot);
 
-  virtual bool addObject(const std::string& name, const std::string& filename);
-  virtual bool deleteObject(const std::string& name);
-  virtual bool renameObject(const std::string& name, const std::string& newName);
-  virtual bool moveObject(const std::string& name, float transX, float transY, float transZ, OpenRAVERobot* robot=NULL);
-  virtual bool rotateObject(const std::string& name, float rotX, float rotY, float rotZ);
+  virtual bool add_object(const std::string& name, const std::string& filename);
+  virtual bool delete_object(const std::string& name);
+  virtual bool rename_object(const std::string& name, const std::string& new_name);
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot=NULL);
+  virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
 
   //virtual RobotBasePtr getRobot() const;
-  virtual OpenRAVE::EnvironmentBasePtr getEnvPtr() const;
+  virtual OpenRAVE::EnvironmentBasePtr get_env_ptr() const;
 
  private:
   fawkes::Logger*	__logger;
@@ -76,7 +76,7 @@ class OpenRAVEEnvironment
   OpenRAVE::EnvironmentBasePtr	__env;
   OpenRAVE::PlannerBasePtr      __planner;
 
-  bool  __viewerEnabled;
+  bool  __viewer_enabled;
 };
 } // end of namespace fawkes
 

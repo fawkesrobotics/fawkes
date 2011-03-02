@@ -64,19 +64,19 @@ OpenRAVEThread::init()
     logger->log_error(name(), "Could not initialize OpenRAVE. Ex:%s", e.what());
   }
 
-  __OREnv = new OpenRAVEEnvironment(logger);
+  __OR_env = new OpenRAVEEnvironment(logger);
 
-  __OREnv->create();
-  __OREnv->enableDebug(); // TODO: cfg
+  __OR_env->create();
+  __OR_env->enable_debug(); // TODO: cfg
 
-  __OREnv->lock();
+  __OR_env->lock();
 }
 
 
 void
 OpenRAVEThread::finalize()
 {
-  __OREnv->destroy();
+  __OR_env->destroy();
 }
 
 
@@ -92,27 +92,27 @@ OpenRAVEThread::loop()
  * @return pointer
  */
 OpenRAVEEnvironment*
-OpenRAVEThread::getEnvironment() const
+OpenRAVEThread::get_environment() const
 {
-  return __OREnv;
+  return __OR_env;
 }
 
 /** Get pointer to currently used OpenRAVERobot object.
  * @return pointer
  */
 OpenRAVERobot*
-OpenRAVEThread::getActiveRobot() const
+OpenRAVEThread::get_active_robot() const
 {
-  return __ORRobot;
+  return __OR_robot;
 }
 
 /** Set robot to be used
  * @param robot OpenRAVERobot that should be used implicitly in other methods
  */
 void
-OpenRAVEThread::setActiveRobot(OpenRAVERobot* robot)
+OpenRAVEThread::set_active_robot(OpenRAVERobot* robot)
 {
-  __ORRobot = robot;
+  __OR_robot = robot;
 }
 
 /** Set OpenRAVEManipulator object for robot, and calculate
@@ -121,57 +121,57 @@ OpenRAVEThread::setActiveRobot(OpenRAVERobot* robot)
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
 void
-OpenRAVEThread::setManipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip, float transX, float transY, float transZ, bool calibrate)
+OpenRAVEThread::set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
 {
-  robot->setManipulator(manip);
+  robot->set_manipulator(manip);
   if( calibrate )
-    {robot->calibrate(transX, transY, transZ);}
+    {robot->calibrate(trans_x, trans_y, trans_z);}
   else
-    {robot->setOffset(transX, transY, transZ);}
+    {robot->set_offset(trans_x, trans_y, trans_z);}
 }
 void
-OpenRAVEThread::setManipulator(OpenRAVEManipulator* manip, float transX, float transY, float transZ, bool calibrate)
+OpenRAVEThread::set_manipulator(OpenRAVEManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
 {
-  setManipulator(__ORRobot, manip, transX, transY, transZ, calibrate);
+  set_manipulator(__OR_robot, manip, trans_x, trans_y, trans_z, calibrate);
 }
 
 
 /** Start Viewer */
 void
-OpenRAVEThread::startViewer() const
+OpenRAVEThread::start_viewer() const
 {
-  __OREnv->startViewer();
+  __OR_env->start_viewer();
 }
 
 /** Run planner on previously set target.
  * @param robot robot to use planner on. If none is given, the currently used robot is taken
  */
 void
-OpenRAVEThread::runPlanner(OpenRAVERobot* robot)
+OpenRAVEThread::run_planner(OpenRAVERobot* robot)
 {
   if(!robot)
-    robot = __ORRobot;
+    robot = __OR_robot;
 
-  __OREnv->runPlanner(robot);
+  __OR_env->run_planner(robot);
 }
 
 /** Add a new robot to the environment, and set it as the currently active one.
- * @param filenameRobot path to robot's xml file
- * @param autogenerateIK if true: autogenerate IKfast IK solver for robot
+ * @param filename_robot path to robot's xml file
+ * @param autogenerate_IK if true: autogenerate IKfast IK solver for robot
  * @return pointer to new OpenRAVERobot object
  */
 OpenRAVERobot*
-OpenRAVEThread::addRobot(const std::string& filenameRobot, bool autogenerateIK)
+OpenRAVEThread::add_robot(const std::string& filename_robot, bool autogenerate_IK)
 {
   OpenRAVERobot* robot = new OpenRAVERobot(logger);
-  robot->load(filenameRobot, __OREnv);
-  __OREnv->addRobot(robot);
-  robot->setReady();
+  robot->load(filename_robot, __OR_env);
+  __OR_env->add_robot(robot);
+  robot->set_ready();
 
-  if( autogenerateIK )
-    __OREnv->loadIKSolver(robot);
+  if( autogenerate_IK )
+    __OR_env->load_IK_solver(robot);
 
-  setActiveRobot(robot);
+  set_active_robot(robot);
 
   return robot;
 }
@@ -179,20 +179,20 @@ OpenRAVEThread::addRobot(const std::string& filenameRobot, bool autogenerateIK)
 /* ##########################################################
  * #    object handling (mainly from environment.h)        #
 * ########################################################*/
-bool OpenRAVEThread::addObject(const std::string& name, const std::string& filename) {
-  return __OREnv->addObject(name, filename); }
+bool OpenRAVEThread::add_object(const std::string& name, const std::string& filename) {
+  return __OR_env->add_object(name, filename); }
 
-bool OpenRAVEThread::deleteObject(const std::string& name) {
-  return __OREnv->deleteObject(name); }
+bool OpenRAVEThread::delete_object(const std::string& name) {
+  return __OR_env->delete_object(name); }
 
-bool OpenRAVEThread::renameObject(const std::string& name, const std::string& newName) {
-  return __OREnv->renameObject(name, newName); }
+bool OpenRAVEThread::rename_object(const std::string& name, const std::string& new_name) {
+  return __OR_env->rename_object(name, new_name); }
 
-bool OpenRAVEThread::moveObject(const std::string& name, float transX, float transY, float transZ, OpenRAVERobot* robot) {
-  return __OREnv->moveObject(name, transX, transY, transZ, robot); }
+bool OpenRAVEThread::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot) {
+  return __OR_env->move_object(name, trans_x, trans_y, trans_z, robot); }
 
-bool OpenRAVEThread::rotateObject(const std::string& name, float rotX, float rotY, float rotZ) {
-  return __OREnv->rotateObject(name, rotX, rotY, rotZ); }
+bool OpenRAVEThread::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z) {
+  return __OR_env->rotate_object(name, rot_x, rot_y, rot_z); }
 
 /** Set an object as the target.
  * Currently the object should be cylindric, and stand upright. It may
@@ -200,12 +200,12 @@ bool OpenRAVEThread::rotateObject(const std::string& name, float rotX, float rot
  * to calculate correct position for endeffecto. This is only temporary until
  * proper graps planning for 5DOF in OpenRAVE is provided.
  * @param name name of the object
- * @param rotX rotation of object on x-axis (radians)
+ * @param rot_x rotation of object on x-axis (radians)
  */
 bool
-OpenRAVEThread::setTargetObject(const std::string& name, OpenRAVERobot* robot, float rotX)
+OpenRAVEThread::set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x)
 {
-  OpenRAVE::Transform transform = __OREnv->getEnvPtr()->GetKinBody(name)->GetTransform();
+  OpenRAVE::Transform transform = __OR_env->get_env_ptr()->GetKinBody(name)->GetTransform();
 
-  return robot->setTargetObjectPosition(transform.trans[0], transform.trans[1], transform.trans[2], rotX);
+  return robot->set_target_object_position(transform.trans[0], transform.trans[1], transform.trans[2], rot_x);
 }

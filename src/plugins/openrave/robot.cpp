@@ -62,9 +62,9 @@ OpenRAVERobot::init()
 {
   __traj = new std::vector< std::vector<float> >();
 
-  __transOffsetX = 0.f;
-  __transOffsetY = 0.f;
-  __transOffsetZ = 0.f;
+  __trans_offset_x = 0.f;
+  __trans_offset_y = 0.f;
+  __trans_offset_z = 0.f;
 }
 
 
@@ -77,7 +77,7 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
 {
   // TODO: implementing without usage of 'environment'
   // openrave_exception handling is done in OpenRAVE (see environment-core.h)
-  __robot = env->getEnvPtr()->ReadRobotXMLFile(filename);
+  __robot = env->get_env_ptr()->ReadRobotXMLFile(filename);
 
   if(!__robot)
     {throw fawkes::IllegalArgumentException("OpenRAVE Robot: Robot could not be loaded. Check xml file/path.");}
@@ -89,7 +89,7 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
  * Here: Set active DOFs and create plannerParameters.
  * CAUTION: Only successful after added to environment. Otherwise no active DOF will be recognized. */
 void
-OpenRAVERobot::setReady()
+OpenRAVERobot::set_ready()
 {
   if(!__robot)
     {throw fawkes::Exception("OpenRAVE Robot: Robot not loaded properly yet.");}
@@ -105,10 +105,10 @@ OpenRAVERobot::setReady()
   // create planner parameters
   try {
     PlannerBase::PlannerParametersPtr params(new PlannerBase::PlannerParameters());
-    __plannerParams = params;
-    __plannerParams->_nMaxIterations = 4000; // max iterations before failure
-    __plannerParams->SetRobotActiveJoints(__robot); // set planning configuration space to current active dofs
-    __plannerParams->vgoalconfig.resize(__robot->GetActiveDOF());
+    __planner_params = params;
+    __planner_params->_nMaxIterations = 4000; // max iterations before failure
+    __planner_params->SetRobotActiveJoints(__robot); // set planning configuration space to current active dofs
+    __planner_params->vgoalconfig.resize(__robot->GetActiveDOF());
   } catch(const openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Robot: Could not create PlannerParameters. Ex:%s", e.what());
   }
@@ -119,130 +119,130 @@ OpenRAVERobot::setReady()
 
 /** Directly set transition offset between coordinate systems
  * of real device and OpenRAVE model.
- * @param transX transition offset on x-axis
- * @param transY transition offset on y-axis
- * @param transZ transition offset on z-axis
+ * @param trans_x transition offset on x-axis
+ * @param trans_y transition offset on y-axis
+ * @param trans_z transition offset on z-axis
  */
  void
- OpenRAVERobot::setOffset(float transX, float transY, float transZ)
+ OpenRAVERobot::set_offset(float trans_x, float trans_y, float trans_z)
  {
-  __transOffsetX = transX;
-  __transOffsetY = transY;
-  __transOffsetZ = transZ;
+  __trans_offset_x = trans_x;
+  __trans_offset_y = trans_y;
+  __trans_offset_z = trans_z;
  }
 
 /** Calculate transition offset between coordinate systems
  * of real device and OpenRAVE model.
  * Sets model's angles to current device's angles (from __manip),
  * and compares transitions.
- * @param deviceTransX transition on x-axis (real device)
- * @param deviceTransY transition on y-axis (real device)
- * @param deviceTransZ transition on z-axis (real device)
+ * @param device_trans_x transition on x-axis (real device)
+ * @param device_trans_y transition on y-axis (real device)
+ * @param device_trans_z transition on z-axis (real device)
  */
 void
-OpenRAVERobot::calibrate(float deviceTransX, float deviceTransY, float deviceTransZ)
+OpenRAVERobot::calibrate(float device_trans_x, float device_trans_y, float device_trans_z)
 {
   // get device's current angles, and set them for OpenRAVE model
   std::vector<float> angles;
-  __manip->getAngles(angles);
+  __manip->get_angles(angles);
   __robot->SetActiveDOFValues(angles);
 
   // get model's current transition and compare
   Transform trans = __arm->GetEndEffectorTransform();
-  __transOffsetX = trans.trans[0] - deviceTransX;
-  __transOffsetY = trans.trans[1] - deviceTransY;
-  __transOffsetZ = trans.trans[2] - deviceTransZ;
+  __trans_offset_x = trans.trans[0] - device_trans_x;
+  __trans_offset_y = trans.trans[1] - device_trans_y;
+  __trans_offset_z = trans.trans[2] - device_trans_z;
 }
 
 /** Set pointer to OpenRAVEManipulator object.
  *  Make sure this is called AFTER all manipulator settings have
- *  been set (assures that __manipGoal has the same settings) .*/
+ *  been set (assures that __manip_goal has the same settings) .*/
 void
-OpenRAVERobot::setManipulator(fawkes::OpenRAVEManipulator* manip)
+OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip)
 {
   __manip = manip;
-  __manipGoal = new OpenRAVEManipulator(*__manip);
+  __manip_goal = new OpenRAVEManipulator(*__manip);
 }
 
 /** Update motor values from OpenRAVE model.
  * TODO: why would we need this??? */
 void
-OpenRAVERobot::updateManipulator()
+OpenRAVERobot::update_manipulator()
 {
   std::vector<float> angles;
   __robot->GetDOFValues(angles);
-  __manip->setAngles(angles);
+  __manip->set_angles(angles);
 }
 
 
 /** Set target, given transition, and rotation as quaternion.
- * @param transX x-transition
- * @param transY y-transition
- * @param transZ z-transition
- * @param quatW quaternion skalar
- * @param quatX quaternion 1st value
- * @param quatY quaternion 2nd value
- * @param quatZ quaternion 3rd value
- * @param noOffset if true, do not include manipulator offset (default: false)
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
+ * @param quat_w quaternion skalar
+ * @param quat_x quaternion 1st value
+ * @param quat_y quaternion 2nd value
+ * @param quat_z quaternion 3rd value
+ * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetQuat(float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ, bool noOffset)
+OpenRAVERobot::set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset)
 {
-  Vector trans(transX, transY, transZ);
-  Vector   rot(quatW, quatX, quatY, quatZ);
+  Vector trans(trans_x, trans_y, trans_z);
+  Vector   rot(quat_w, quat_x, quat_y, quat_z);
 
-  return setTargetTransform(trans, rot, noOffset);
+  return set_target_transform(trans, rot, no_offset);
 }
 
 /** Set target, given transition, and rotation as axis-angle.
- * @param transX x-transition
- * @param transY y-transition
- * @param transZ z-transition
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
  * @param angle axis-angle angle
  * @param axisX axis-angle x-axis value
  * @param axisY axis-angle y-axis value
  * @param axisZ axis-angle z-axis value
- * @param noOffset if true, do not include manipulator offset (default: false)
+ * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ, bool noOffset)
+OpenRAVERobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset)
 {
-  Vector trans(transX, transY, transZ);
+  Vector trans(trans_x, trans_y, trans_z);
   Vector aa(angle, axisX, axisY, axisZ);
   Vector rot = quatFromAxisAngle(aa);
 
-  return setTargetTransform(trans, rot, noOffset);
+  return set_target_transform(trans, rot, no_offset);
 }
 
 /** Set target, given transition, and Euler-rotation.
  * @param type Euler-rotation type (ZXZ, ZYZ, ...)
- * @param transX x-transition
- * @param transY y-transition
- * @param transZ z-transition
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
  * @param phi 1st rotation
  * @param theta 2nd rotation
  * @param psi 3rd rotation
- * @param noOffset if true, do not include manipulator offset (default: false)
+ * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetEuler(euler_rotation_t type, float transX, float transY, float transZ, float phi, float theta, float psi, bool noOffset)
+OpenRAVERobot::set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset)
 {
-  Vector trans(transX, transY, transZ);
+  Vector trans(trans_x, trans_y, trans_z);
   std::vector<float> rot(9, 0.f); //rotations vector
 
   switch(type) {
     case (EULER_ZXZ) :
-        __logger->log_debug("TEST ZXZ", "%f %f %f %f %f %f", transX, transY, transZ, phi, theta, psi);
+        __logger->log_debug("TEST ZXZ", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
         break;
 
     case (EULER_ZYZ) :
-        __logger->log_debug("TEST ZYZ", "%f %f %f %f %f %f", transX, transY, transZ, phi, theta, psi);
+        __logger->log_debug("TEST ZYZ", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
@@ -258,7 +258,7 @@ OpenRAVERobot::setTargetEuler(euler_rotation_t type, float transX, float transY,
         return false;
   }
 
-  return setTargetEuler(trans, rot, noOffset);
+  return set_target_euler(trans, rot, no_offset);
 }
 
 /** Set target by giving position of an object.
@@ -266,38 +266,38 @@ OpenRAVERobot::setTargetEuler(euler_rotation_t type, float transX, float transY,
  * also be rotated on its x-axis, but that rotation needs to be given in an argument
  * to calculate correct position for end-effector. This is only temporary until
  * proper grasp planning for 5DOF in OpenRAVE is provided.
- * @param transX x-transition of object
- * @param transY y-transition of object
- * @param transZ z-transition of object
- * @param rotX rotation of object on x-axis (radians) (default: 0.f, i.e. upright)
+ * @param trans_x x-transition of object
+ * @param trans_y y-transition of object
+ * @param trans_z z-transition of object
+ * @param rot_x rotation of object on x-axis (radians) (default: 0.f, i.e. upright)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetObjectPosition(float transX, float transY, float transZ, float rotX)
+OpenRAVERobot::set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x)
 {
   // This is about 2 times faster than using setTargetEuler each time, especially when it comes
   // to the while loop (whole loop: ~56ms vs ~99ms)
 
   // quaternion defining consecutiv rotations on axis
-  float alpha = atan2(transY - __transOffsetY, transX - __transOffsetX);      //angle to rotate left/right when manipulator points to +x
-  Vector quatY = quatFromAxisAngle(Vector(0.f, M_PI/2, 0.f));           //1st, rotate down -> manipulator points to +x
-  Vector quatX = quatFromAxisAngle(Vector(-alpha, 0.f, 0.f));           //2nd, rotate left/right -> manipulator points to object
-  Vector quatZ = quatFromAxisAngle(Vector(0.f, 0.f, rotX));             //last, rotate wrist -> manipulator ready to grab
+  float alpha = atan2(trans_y - __trans_offset_y, trans_x - __trans_offset_x);      //angle to rotate left/right when manipulator points to +x
+  Vector quat_y = quatFromAxisAngle(Vector(0.f, M_PI/2, 0.f));           //1st, rotate down -> manipulator points to +x
+  Vector quat_x = quatFromAxisAngle(Vector(-alpha, 0.f, 0.f));           //2nd, rotate left/right -> manipulator points to object
+  Vector quat_z = quatFromAxisAngle(Vector(0.f, 0.f, rot_x));             //last, rotate wrist -> manipulator ready to grab
 
-  Vector quatXY =  quatMultiply (quatY, quatX);
-  Vector quatXYZ = quatMultiply (quatXY, quatZ);
+  Vector quat_xY =  quatMultiply (quat_y, quat_x);
+  Vector quat_xYZ = quatMultiply (quat_xY, quat_z);
 
-  Vector trans(transX, transY, transZ);
+  Vector trans(trans_x, trans_y, trans_z);
 
-  if( setTargetTransform(trans, quatXYZ, true) )
+  if( set_target_transform(trans, quat_xYZ, true) )
     return true;
 
-  //try varying 2nd rotation (quatY) until a valid IK is found. Max angle: 45° (~0.79 rad)
+  //try varying 2nd rotation (quat_y) until a valid IK is found. Max angle: 45° (~0.79 rad)
   Vector quatPosY=quatFromAxisAngle(Vector(0.f, 0.017f, 0.f));          //rotate up for 1°
   Vector quatNegY=quatFromAxisAngle(Vector(0.f, -0.017f, 0.f));         //rotate down for 1°
 
-  Vector quatPos(quatXY);       //starting position, after first 2 rotations
-  Vector quatNeg(quatXY);
+  Vector quatPos(quat_xY);       //starting position, after first 2 rotations
+  Vector quatNeg(quat_xY);
 
   unsigned int count = 0;
   bool foundIK = false;
@@ -308,11 +308,11 @@ OpenRAVERobot::setTargetObjectPosition(float transX, float transY, float transZ,
     quatPos = quatMultiply(quatPos, quatPosY);  //move up ~1°
     quatNeg = quatMultiply(quatNeg, quatNegY);  //move down ~1°
 
-    quatXYZ = quatMultiply(quatPos, quatZ);     //apply wrist rotation
-    foundIK = setTargetTransform(trans, quatXYZ, true);
+    quat_xYZ = quatMultiply(quatPos, quat_z);     //apply wrist rotation
+    foundIK = set_target_transform(trans, quat_xYZ, true);
     if( !foundIK ) {
-      quatXYZ = quatMultiply(quatNeg, quatZ);
-      foundIK = setTargetTransform(trans, quatXYZ, true);
+      quat_xYZ = quatMultiply(quatNeg, quat_z);
+      foundIK = set_target_transform(trans, quat_xYZ, true);
     }
   }
 
@@ -322,9 +322,9 @@ OpenRAVERobot::setTargetObjectPosition(float transX, float transY, float transZ,
 
 // just temporary! no IK check etc involved
 void
-OpenRAVERobot::setTargetAngles( std::vector<float>& angles )
+OpenRAVERobot::set_target_angles( std::vector<float>& angles )
 {
-  __manipGoal->setAngles(angles);
+  __manip_goal->set_angles(angles);
 }
 
 
@@ -335,53 +335,53 @@ OpenRAVERobot::setTargetAngles( std::vector<float>& angles )
  * @return RobotBasePtr of current robot
  */
 OpenRAVE::RobotBasePtr
-OpenRAVERobot::getRobotPtr() const
+OpenRAVERobot::get_robot_ptr() const
 {
   return __robot;
 }
 
 // not needed
 void
-OpenRAVERobot::getTargetAngles(std::vector<float>& to)
+OpenRAVERobot::get_target_angles(std::vector<float>& to)
 {
-  to = __anglesTarget;
+  to = __angles_target;
 }
 
 /** Updates planner parameters and return pointer to it
  * @return PlannerParametersPtr or robot's planner params
  */
 OpenRAVE::PlannerBase::PlannerParametersPtr
-OpenRAVERobot::getPlannerParams() const
+OpenRAVERobot::get_planner_params() const
 {
-  __manipGoal->getAngles(__plannerParams->vgoalconfig);
-  __manip->getAngles(__plannerParams->vinitialconfig);
+  __manip_goal->get_angles(__planner_params->vgoalconfig);
+  __manip->get_angles(__planner_params->vinitialconfig);
 
-  __robot->SetActiveDOFValues(__plannerParams->vinitialconfig);
+  __robot->SetActiveDOFValues(__planner_params->vinitialconfig);
 
-  return __plannerParams;
+  return __planner_params;
 }
 
 /** Return pointer to trajectory of motion from
- * __manip to __manipGoal with OpenRAVE-model angle format
+ * __manip to __manip_goal with OpenRAVE-model angle format
  * @return pointer to trajectory
  */
 std::vector< std::vector<float> >*
-OpenRAVERobot::getTrajectory() const
+OpenRAVERobot::get_trajectory() const
 {
   return __traj;
 }
 
 /** Return pointer to trajectory of motion from
- * __manip to __manipGoal with device angle format
+ * __manip to __manip_goal with device angle format
  * @return pointer to trajectory
  */
 std::vector< std::vector<float> >*
-OpenRAVERobot::getTrajectoryDevice() const
+OpenRAVERobot::get_trajectory_device() const
 {
   std::vector< std::vector<float> >* traj = new std::vector< std::vector<float> >();
 
   for(unsigned int i=0; i<__traj->size(); i++) {
-    traj->push_back(__manip->anglesOR2Device(__traj->at(i)));
+    traj->push_back(__manip->angles_or_to_device(__traj->at(i)));
   }
 
   return traj;
@@ -394,27 +394,27 @@ OpenRAVERobot::getTrajectoryDevice() const
 
 /** Set target, given transformation (transition, and rotation as quaternion).
  * Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __manipGoal
+ * then set target angles to manipulator configuration __manip_goal
  * @param trans transformation vector
  * @param rotQuat rotation vector; a quaternion
- * @param noOffset if true, do not include manipulator offset (default: false)
+ * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool noOffset)
+OpenRAVERobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset)
 {
   Transform target;
   target.trans = trans;
   target.rot = rotQuat;
 
-  if( !noOffset ) {
-    target.trans[0] += __transOffsetX;
-    target.trans[1] += __transOffsetY;
-    target.trans[2] += __transOffsetZ;
+  if( !no_offset ) {
+    target.trans[0] += __trans_offset_x;
+    target.trans[1] += __trans_offset_y;
+    target.trans[2] += __trans_offset_z;
   }
 
-  bool success = __arm->FindIKSolution(IkParameterization(target),__anglesTarget,true);
-  __manipGoal->setAngles(__anglesTarget);
+  bool success = __arm->FindIKSolution(IkParameterization(target),__angles_target,true);
+  __manip_goal->set_angles(__angles_target);
 
   return success;
 }
@@ -426,13 +426,13 @@ OpenRAVERobot::setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rot
  * See public setTargetEuler methods to get a better understanding.
  *
  * Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __manipGoal
+ * then set target angles to manipulator configuration __manip_goal
  * @param rotations 3x3 matrix given as one row.
- * @param noOffset if true, do not include manipulator offset (default: false)
+ * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool noOffset)
+OpenRAVERobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset)
 {
   if( rotations.size() != 9 ) {
     if(__logger)
@@ -455,7 +455,7 @@ OpenRAVERobot::setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotat
   Vector q12  = quatMultiply (q1, q2);
   Vector quat = quatMultiply (q12, q3);
 
-  return setTargetTransform(trans, quat, noOffset);
+  return set_target_transform(trans, quat, no_offset);
 }
 
 } // end of namespace fawkes

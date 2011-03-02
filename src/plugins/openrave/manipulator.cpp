@@ -36,11 +36,11 @@ namespace fawkes {
 
 /** Constructor
  * @param count number of motors of OpenRAVE model
- * @param countDevice number of motors of real device
+ * @param count_device number of motors of real device
  */
-OpenRAVEManipulator::OpenRAVEManipulator(unsigned int count, unsigned int countDevice) :
+OpenRAVEManipulator::OpenRAVEManipulator(unsigned int count, unsigned int count_device) :
   __cnt( count ),
-  __cntDevice( countDevice )
+  __cnt_device( count_device )
 {
 }
 
@@ -52,14 +52,14 @@ OpenRAVEManipulator::~OpenRAVEManipulator()
 
 /** Adds a motor to the list(vector) of motors
  * @param number motor number in OpenRAVE
- * @param numberDevice motor number of real device
+ * @param number_device motor number of real device
  */
 void
-OpenRAVEManipulator::addMotor(unsigned int number, unsigned int numberDevice)
+OpenRAVEManipulator::add_motor(unsigned int number, unsigned int number_device)
 {
   motor_t motor;
   motor.no = number;
-  motor.noDevice = numberDevice;
+  motor.no_device = number_device;
   motor.angle = 0.f;
 
   __motors.push_back(motor);
@@ -73,7 +73,7 @@ OpenRAVEManipulator::addMotor(unsigned int number, unsigned int numberDevice)
  * @param to target tvector of angles
  */
 void
-OpenRAVEManipulator::getAngles(std::vector<float>& to) const
+OpenRAVEManipulator::get_angles(std::vector<float>& to) const
 {
   to.resize(__cnt);
   for (unsigned int i=0; i<__motors.size(); i++) {
@@ -85,11 +85,11 @@ OpenRAVEManipulator::getAngles(std::vector<float>& to) const
  * @param to target vector of angles
  */
 void
-OpenRAVEManipulator::getAnglesDevice(std::vector<float>& to) const
+OpenRAVEManipulator::get_angles_device(std::vector<float>& to) const
 {
   std::vector<float> tmp;
-  getAngles(tmp);
-  to = anglesOR2Device(tmp);
+  get_angles(tmp);
+  to = angles_or_to_device(tmp);
 }
 
 /** Transform OpenRAVE motor angles to real device angles
@@ -97,11 +97,11 @@ OpenRAVEManipulator::getAnglesDevice(std::vector<float>& to) const
  * @return vector of angles
  */
 std::vector<float>
-OpenRAVEManipulator::anglesOR2Device(std::vector<float>& from) const
+OpenRAVEManipulator::angles_or_to_device(std::vector<float>& from) const
 {
-  std::vector<float> _to(__cntDevice);
+  std::vector<float> _to(__cnt_device);
   for (unsigned int i=0; i<__motors.size(); i++) {
-    _to[__motors[i].noDevice] = angleOR2Device(__motors[i].noDevice, from[__motors[i].no]);
+    _to[__motors[i].no_device] = angle_OR_to_device(__motors[i].no_device, from[__motors[i].no]);
   }
 
   return _to;
@@ -115,7 +115,7 @@ OpenRAVEManipulator::anglesOR2Device(std::vector<float>& from) const
  * @param angles motor angles
  */
 void
-OpenRAVEManipulator::setAngles(std::vector<float>& angles)
+OpenRAVEManipulator::set_angles(std::vector<float>& angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angles[__motors[i].no];
@@ -126,10 +126,10 @@ OpenRAVEManipulator::setAngles(std::vector<float>& angles)
  * @param angles motor angles
  */
 void
-OpenRAVEManipulator::setAnglesDevice(std::vector<float>& angles)
+OpenRAVEManipulator::set_angles_device(std::vector<float>& angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
-    __motors[i].angle = angleDevice2OR(__motors[i].noDevice, angles[__motors[i].noDevice]);
+    __motors[i].angle = angle_device_to_OR(__motors[i].no_device, angles[__motors[i].no_device]);
   }
 }
 
@@ -142,7 +142,7 @@ OpenRAVEManipulator::setAnglesDevice(std::vector<float>& angles)
  * @return transformed angle
  */
 float
-OpenRAVEManipulator::angleOR2Device(unsigned int number, float angle) const
+OpenRAVEManipulator::angle_OR_to_device(unsigned int number, float angle) const
 {
   // Transformations should be implemented in subclasses, as these depend on
   // the attached manipulator device.
@@ -155,7 +155,7 @@ OpenRAVEManipulator::angleOR2Device(unsigned int number, float angle) const
  * @return transformed angle
  */
 float
-OpenRAVEManipulator::angleDevice2OR(unsigned int number, float angle) const
+OpenRAVEManipulator::angle_device_to_OR(unsigned int number, float angle) const
 {
   // Transformations should be implemented in subclasses, as these depend on
   // the attached manipulator device.

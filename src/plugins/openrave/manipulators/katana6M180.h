@@ -38,8 +38,8 @@ class OpenRAVEManipulatorKatana6M180 : public OpenRAVEManipulator
 
 
  private:
-  virtual float angleOR2Device(unsigned int number, float angle) const;
-  virtual float angleDevice2OR(unsigned int number, float angle) const;
+  virtual float angle_OR_to_device(unsigned int number, float angle) const;
+  virtual float angle_device_to_OR(unsigned int number, float angle) const;
 };
 
 } // end of namespace fawkes

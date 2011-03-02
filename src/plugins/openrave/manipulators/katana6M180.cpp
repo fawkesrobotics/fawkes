@@ -60,7 +60,7 @@ OpenRAVEManipulatorKatana6M180::~OpenRAVEManipulatorKatana6M180()
  * @return transformed angle
  */
 float
-OpenRAVEManipulatorKatana6M180::angleOR2Device(unsigned int number, float angle) const
+OpenRAVEManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float angle) const
 {
   float _angle;
 
@@ -94,7 +94,7 @@ OpenRAVEManipulatorKatana6M180::angleOR2Device(unsigned int number, float angle)
  * @return transformed angle
  */
 float
-OpenRAVEManipulatorKatana6M180::angleDevice2OR(unsigned int number, float angle) const
+OpenRAVEManipulatorKatana6M180::angle_device_to_OR(unsigned int number, float angle) const
 {
   float _angle;
 

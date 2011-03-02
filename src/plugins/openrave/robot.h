@@ -47,46 +47,46 @@ class OpenRAVERobot
 
   // build/load robot parts
   virtual void load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
-  virtual void setReady();
-  virtual void setOffset(float transX, float transY, float transZ);
-  virtual void calibrate(float deviceTransX, float deviceTransY, float deviceTransZ);
-  virtual void setManipulator(fawkes::OpenRAVEManipulator* manip);
-  virtual void updateManipulator(); // not needed
+  virtual void set_ready();
+  virtual void set_offset(float trans_x, float trans_y, float trans_z);
+  virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
+  virtual void set_manipulator(fawkes::OpenRAVEManipulator* manip);
+  virtual void update_manipulator(); // not needed
 
 
-  virtual bool setTargetQuat	 (float transX, float transY, float transZ, float quatW, float quatX, float quatY, float quatZ, bool noOffset = false);
-  virtual bool setTargetAxisAngle(float transX, float transY, float transZ, float angle, float axisX, float axisY, float axisZ, bool noOffset = false);
-  virtual bool setTargetEuler(euler_rotation_t type, float transX, float transY, float transZ, float phi, float theta, float psi, bool noOffset = false);
-  virtual void setTargetAngles( std::vector<float>& angles ); // just temporary
+  virtual bool set_target_quat	 (float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
+  virtual bool set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset = false);
+  virtual bool set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset = false);
+  virtual void set_target_angles( std::vector<float>& angles ); // just temporary
 
-  virtual bool setTargetObjectPosition(float transX, float transY, float transZ, float rotX);
+  virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x);
 
-  virtual void getTargetAngles(std::vector<float>& to); // not needed
-  virtual OpenRAVE::RobotBasePtr getRobotPtr() const;
-  virtual OpenRAVE::PlannerBase::PlannerParametersPtr getPlannerParams() const;
-  virtual std::vector< std::vector<float> >* getTrajectory() const;
-  virtual std::vector< std::vector<float> >* getTrajectoryDevice() const;
+  virtual void get_target_angles(std::vector<float>& to); // not needed
+  virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
+  virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
+  virtual std::vector< std::vector<float> >* get_trajectory() const;
+  virtual std::vector< std::vector<float> >* get_trajectory_device() const;
 
  private:
   void init();
-  bool setTargetTransform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool noOffset = false);
-  bool setTargetEuler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool noOffset = false);
+  bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset = false);
+  bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset = false);
 
   fawkes::Logger*	                __logger;
 
   OpenRAVE::RobotBasePtr                __robot;
   std::string                           __name;
   OpenRAVEManipulator*	                __manip;
-  OpenRAVEManipulator*	                __manipGoal;
+  OpenRAVEManipulator*	                __manip_goal;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
 
-  OpenRAVE::PlannerBase::PlannerParametersPtr   __plannerParams;
+  OpenRAVE::PlannerBase::PlannerParametersPtr   __planner_params;
   std::vector< std::vector<float> >*            __traj;
-  std::vector<float>                            __anglesTarget;
+  std::vector<float>                            __angles_target;
 
-  float         __transOffsetX;
-  float         __transOffsetY;
-  float         __transOffsetZ;
+  float         __trans_offset_x;
+  float         __trans_offset_y;
+  float         __trans_offset_z;
 };
 
 } // end of namespace fawkes

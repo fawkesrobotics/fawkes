@@ -32,33 +32,33 @@ namespace fawkes {
 
 typedef struct {
   unsigned int	no;       /**< motor number in OpenRAVE*/
-  unsigned int  noDevice;  /**< motor number of real device */
+  unsigned int  no_device;  /**< motor number of real device */
   float		angle;	  /**< radian angle */
 } motor_t;
 
 class OpenRAVEManipulator
 {
  public:
-  OpenRAVEManipulator(unsigned int count, unsigned int countDevice);
+  OpenRAVEManipulator(unsigned int count, unsigned int count_device);
   virtual ~OpenRAVEManipulator();
 
-  virtual void addMotor(unsigned int number, unsigned int numberDevice);
+  virtual void add_motor(unsigned int number, unsigned int number_device);
 
-  virtual std::vector<float> anglesOR2Device(std::vector<float>& from) const;
-  virtual void getAngles(std::vector<float>& v) const; // angles of OpenRAVE model
-  virtual void getAnglesDevice(std::vector<float>& v) const; // angles of real device
+  virtual std::vector<float> angles_or_to_device(std::vector<float>& from) const;
+  virtual void get_angles(std::vector<float>& v) const; // angles of OpenRAVE model
+  virtual void get_angles_device(std::vector<float>& v) const; // angles of real device
 
-  virtual void setAngles(std::vector<float>& angles);
-  virtual void setAnglesDevice(std::vector<float>& angles);
+  virtual void set_angles(std::vector<float>& angles);
+  virtual void set_angles_device(std::vector<float>& angles);
 
 
  protected:
-  virtual float angleOR2Device(unsigned int number, float angle) const;
-  virtual float angleDevice2OR(unsigned int number, float angle) const;
+  virtual float angle_OR_to_device(unsigned int number, float angle) const;
+  virtual float angle_device_to_OR(unsigned int number, float angle) const;
 
   std::vector<motor_t>  __motors;
   unsigned int          __cnt;
-  unsigned int          __cntDevice;
+  unsigned int          __cnt_device;
 };
 
 } // end of namespace fawkes
