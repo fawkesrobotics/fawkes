@@ -44,7 +44,10 @@ using namespace fawkes;
 OpenRAVEThread::OpenRAVEThread()
   : Thread("OpenRAVEThread", Thread::OPMODE_CONTINUOUS),
     AspectProviderAspect("OpenRAVEAspect", &__or_aspectIniFin),
-    __or_aspectIniFin(this)
+  __or_aspectIniFin( this ),
+  __OR_env( 0 ),
+  __OR_robot( 0 )
+
 {
 }
 

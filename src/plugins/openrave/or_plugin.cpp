@@ -21,7 +21,9 @@
  */
 
 #include "or_plugin.h"
+
 #include "or_thread.h"
+#include "or_message_handler_thread.h"
 
 using namespace fawkes;
 
@@ -40,7 +42,10 @@ using namespace fawkes;
 OpenRAVEPlugin::OpenRAVEPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new OpenRAVEThread());
+  OpenRAVEThread* or_thread = new OpenRAVEThread();
+
+  thread_list.push_back(or_thread);
+  thread_list.push_back(new OpenRAVEMessageHandlerThread(or_thread));
 }
 
 
