@@ -1,3 +1,4 @@
+
 #*****************************************************************************
 #              Makefile Build System for Fawkes: OpenRAVE Plugin
 #                            -------------------
@@ -23,7 +24,7 @@ PRESUBDIRS = aspect
 CFLAGS  += $(CFLAGS_OPENRAVE)
 LDFLAGS += $(LDFLAGS_OPENRAVE)
 
-LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesopenraveaspect $(LIBS_OPENRAVE)
+LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenraveaspect fawkesinterface $(LIBS_OPENRAVE)
 OBJS_openrave = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 
 OBJS_all    = $(OBJS_openrave)
@@ -36,6 +37,9 @@ endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
+
+INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+include $(BUILDSYSDIR)/interface.mk
 
 .PHONY: warning_openrave
 warning_openrave:
