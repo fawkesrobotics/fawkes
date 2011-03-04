@@ -195,6 +195,9 @@ endif
 # Required if BASEDIR != EXEC_BASEDIR
 export LD_LIBRARY_PATH=$(call merge,:, $(LIBDIRS_BASE) $(LIBDIRS))
 
+# Function to convert file to variable pattern
+nametr = $(subst /,_,$(subst -,_,$1))
+
 ifeq ($(COLORED),1)
 TBOLDGRAY	= \033[1;30m
 TBLUE		= \033[0;34m

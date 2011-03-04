@@ -17,7 +17,7 @@ include $(BUILDSYSDIR)/btypes/rules_fawkes.mk
 include $(BUILDSYSDIR)/ext/gmsl
 
 # Plugins are installed to special directory
-$(foreach P,$(PLUGINS_all:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(subst /,_,$P) = $(FFLIBSUBDIR)/plugins))
+$(foreach P,$(PLUGINS_all:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(call nametr,$P) = $(FFLIBSUBDIR)/plugins))
 
 # Library headers get subdir matching name if not set
 $(foreach P,$(LIBS_all:$(LIBDIR)/libfawkes%.so=%) $(LIBS_gui:$(LIBDIR)/libfawkes%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfawkes$P)),$P),$(eval INST_HDRS_SUBDIR_libfawkes$P = $P)))
@@ -25,7 +25,7 @@ $(foreach P,$(LIBS_all:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),
 
 ifdef __buildsys_lua_mk_
 # Lua libraries are "inferred" and automatically installed to proper directory
-$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(subst /,_,$L) = $(FFLIBSUBDIR))))
+$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(call nametr,$L) = $(FFLIBSUBDIR))))
 endif
 
 # Prefix man pages with proper path
@@ -131,9 +131,9 @@ endif
 ifneq ($(LIBS_all)$(LIBS_gui),)
 	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling libraries: $(subst $(LIBDIR)/,,$(LIBS_all) $(LIBS_gui))"
 	$(SILENT)$(foreach L,$(subst $(LIBDIR)/,,$(LIBS_all) $(LIBS_gui)), \
-	rm -f $(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$(L:%.so=%))))/$L*; \
-	$(if $(HDRS_$(subst /,_,$(L:%.so=%))), \
-	rm -f $(foreach h,$(HDRS_$(subst /,_,$(L:%.so=%))),"$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(subst /,_,$(L:%.so=%)))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" ); \
+	rm -f $(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$(L:%.so=%))))/$L*; \
+	$(if $(HDRS_$(call nametr,$(L:%.so=%))), \
+	rm -f $(foreach h,$(HDRS_$(call nametr,$(L:%.so=%))),"$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$(L:%.so=%)))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" ); \
 	))
 endif
 ifneq ($(PLUGINS_all)$(PLUGINS_gui),)
@@ -158,35 +158,35 @@ endif
 # 2. Copy header files
 # Yes, the code is ugly, it does many calls to subst. That is necessary to make
 # application Makefiles easy to read and write... Some of the most used patterns:
-# $(subst /,_,$*)  Replace subdir separators with underscores, e.g. for
+# $(call nametr,$*)  Replace subdir separators with underscores, e.g. for
 # $(LIBDIR)/interfaces/libMyInterface.so the stem becomes interfaces_libMyInterface.so
 # SOVER related: generate different SOVER suffixes (e.g. 0.3.0, .0 and w/o suffix
 # Path replacing: in app Makefiles project-relative paths are used, they have to
 #                 be replaced by EXEC_ stuff. Additionall there are INST_LIB_SUBDIR
 #                 items that allow libs to be installed in a subdir
 $(DESTDIR)$(EXEC_LIBDIR)/%.so: $(LIBDIR)/%.so
-	$(if $(NOSOVER_$(subst /,_,$*)), \
+	$(if $(NOSOVER_$(call nametr,$*)), \
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Copying library $* to $@"; \
-	install -D $< $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<) || exit $$?; \
+	install -D $< $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<) || exit $$?; \
 	, \
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Copying library $* to $@.$(SOVER_$(subst /,_,$*))"; \
-	install -D $<.$(SOVER_$(subst /,_,$*)) $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(SOVER_$(subst /,_,$*)) || exit $$?; \
-	echo -e "$(INDENT_PRINT)--- Creating symlink $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(firstword $(call split,.,$(SOVER_$(subst /,_,$*)))) -> $(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(SOVER_$(subst /,_,$*)))"; \
-	ln -sf "$(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(SOVER_$(subst /,_,$*)))" "$(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(firstword $(call split,.,$(SOVER_$(subst /,_,$*))))" || exit $$?; \
-	echo -e "$(INDENT_PRINT)--- Creating symlink $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<) -> $(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(SOVER_$(subst /,_,$*)))"; \
-	ln -sf "$(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<).$(SOVER_$(subst /,_,$*)))" "$(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(subst /,_,$*))),$<)" || exit $$?; \
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Copying library $* to $@.$(SOVER_$(call nametr,$*))"; \
+	install -D $<.$(SOVER_$(call nametr,$*)) $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(SOVER_$(call nametr,$*)) || exit $$?; \
+	echo -e "$(INDENT_PRINT)--- Creating symlink $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(firstword $(call split,.,$(SOVER_$(call nametr,$*)))) -> $(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(SOVER_$(call nametr,$*)))"; \
+	ln -sf "$(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(SOVER_$(call nametr,$*)))" "$(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(firstword $(call split,.,$(SOVER_$(call nametr,$*))))" || exit $$?; \
+	echo -e "$(INDENT_PRINT)--- Creating symlink $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<) -> $(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(SOVER_$(call nametr,$*)))"; \
+	ln -sf "$(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(SOVER_$(call nametr,$*)))" "$(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<)" || exit $$?; \
 	)
-	$(SILENT) $(if $(HDRS_$(subst /,_,$*)),$(foreach h,$(HDRS_$(subst /,_,$*)), \
+	$(SILENT) $(if $(HDRS_$(call nametr,$*)),$(foreach h,$(HDRS_$(call nametr,$*)), \
 	if [ -f "$(SRCDIR)/$h" ]; then \
-		echo -e "$(INDENT_PRINT)--- Copying header $h to $(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(subst /,_,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)"; \
-		install -D -m 644 "$(SRCDIR)/$h" "$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(subst /,_,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" || exit $$?; \
+		echo -e "$(INDENT_PRINT)--- Copying header $h to $(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)"; \
+		install -D -m 644 "$(SRCDIR)/$h" "$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" || exit $$?; \
 	else \
 		echo -e "$(INDENT_PRINT)--- $(TRED)Header $h does not exist.$(TNORMAL)"; \
 		exit 1; \
 	fi; \
 	))
 
-#	$(SILENTSYMB) for h in $(HDRS_$(subst /,_,$*)); do \
+#	$(SILENTSYMB) for h in $(HDRS_$(call nametr,$*)); do \
 
 # Plugin install target
 $(DESTDIR)$(EXEC_PLUGINDIR)/%.so: $(PLUGINDIR)/%.so

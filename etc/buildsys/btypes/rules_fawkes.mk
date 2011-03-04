@@ -14,14 +14,14 @@
 #*****************************************************************************
 
 # Rule for building plugins in PLUGINDIR
-$(PLUGINDIR)/%.so: $$(OBJS_$$*)
+$(PLUGINDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
-	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
+	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
+	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$(call nametr,$*))) $(addprefix -L,$(LIBDIRS))
 	$(SILENT)$(NM) $@ | grep -q plugin_factory; \
 	if [ "$$?" != "0" ]; then \
 		rm $@; \

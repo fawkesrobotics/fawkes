@@ -49,10 +49,10 @@ ifeq ($(HAVE_LUA),1)
 
   ifeq ($(HAVE_TOLUA),1)
 .SECONDEXPANSION:
-%_tolua.cpp: $$(TOLUA_$$(subst /,_,$$*))
+%_tolua.cpp: $$(TOLUA_$$(call nametr,$$*))
 	$(SILENT) echo "$(INDENT_PRINT)--- Generating Lua package C++ file $(@F)"
 	$(SILENT)cat $(addprefix $(SRCDIR)/,$(subst $(SRCDIR)/,,$(filter %.tolua,$^))) > $(patsubst %.cpp,%.pkg,$@)
-	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(subst /,_,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
+	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
 	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
 	awk '/^#if defined/ { f=1 }; f { t = t "\n" $$0 }; !f {print}; f && /^#endif/ {print "extern \"C\" {" t "\n}\n"; f=0}' | \
 	awk '/^\*\/$$/ { print; while ((getline line < "$(BASEDIR)/doc/headers/lichead_c.GPL_WRE") > 0) print line }; ! /^\*\/$$/ { print }' \
