@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  openni_plugin.cpp - Plugin to access OpenNI features
+ *  usertracker_plugin.h - Plugin to track users using OpenNI
  *
- *  Created: Thu Feb 17 10:23:03 2011
+ *  Created: Fri Mar 04 11:12:48 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,27 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "openni_plugin.h"
-#include "context_thread.h"
+#ifndef __PLUGINS_OPENNI_USERTRACKER_PLUGIN_H_
+#define __PLUGINS_OPENNI_USERTRACKER_PLUGIN_H_
 
-using namespace fawkes;
+#include <core/plugin.h>
 
-/** @class OpenNiPlugin "openni_plugin.h"
- * Plugin to access OpenNI from Fawkes.
- * This plugin integrates OpenNI and provides access to the OpenNI context
- * to other plugins.
- * @author Tim Niemueller
- */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-OpenNiPlugin::OpenNiPlugin(Configuration *config)
-  : Plugin(config)
+class OpenNiUserTrackerPlugin : public fawkes::Plugin
 {
-  thread_list.push_back(new OpenNiContextThread());
-}
+ public:
+  OpenNiUserTrackerPlugin(fawkes::Configuration *config);
+};
 
-
-PLUGIN_DESCRIPTION("OpenNI integration base plugin")
-EXPORT_PLUGIN(OpenNiPlugin)
+#endif

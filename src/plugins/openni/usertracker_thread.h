@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  tracker_thread.h - OpenNI user tracker thread
+ *  usertracker_thread.h - OpenNI user tracker thread
  *
  *  Created: Sun Feb 27 17:52:26 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_TRACKER_THREAD_H_
-#define __PLUGINS_OPENNI_TRACKER_THREAD_H_
+#ifndef __PLUGINS_OPENNI_USERTRACKER_THREAD_H_
+#define __PLUGINS_OPENNI_USERTRACKER_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>

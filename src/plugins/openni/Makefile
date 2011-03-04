@@ -17,23 +17,26 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesopenniaspect pthread \
-	      HumanSkeletonInterface HumanSkeletonProjectionInterface
-OBJS_openni = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
+	      fawkesinterface fawkesopenniaspect
+OBJS_openni = openni_plugin.o context_thread.o
 
-#CFLAGS += -DUSE_TIMETRACKER
+LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+			  fawkesinterface fawkesopenniaspect \
+			  HumanSkeletonInterface HumanSkeletonProjectionInterface
+OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
+
+OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker)
 
 ifeq ($(HAVE_OPENNI),1)
   PRESUBDIRS = aspect
 
   CFLAGS  += $(CFLAGS_OPENNI)
   LDFLAGS += $(LDFLAGS_OPENNI)
-  PLUGINS_all = $(PLUGINDIR)/openni.so
+  PLUGINS_all = $(PLUGINDIR)/openni.so $(PLUGINDIR)/openni-usertracker.so
 else
   WARN_TARGETS += warning_openni
 endif
 
-OBJS_all = $(OBJS_openni)
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
 include $(BUILDSYSDIR)/interface.mk

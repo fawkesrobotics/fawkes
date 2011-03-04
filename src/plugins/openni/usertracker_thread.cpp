@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  tracker_thread.cpp - OpenNI user tracker thread
+ *  usertracker_thread.cpp - OpenNI user tracker thread
  *
  *  Created: Sun Feb 27 17:53:38 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "tracker_thread.h"
+#include "usertracker_thread.h"
 
 #include <core/threading/mutex_locker.h>
 #include <interfaces/HumanSkeletonInterface.h>
