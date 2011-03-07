@@ -24,6 +24,7 @@
 #include <mainapp/main_thread.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
+#include <utils/ipc/shm_registry.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 
@@ -354,6 +355,7 @@ main(int argc, char **argv)
   }
 
   Thread::init_main();
+  SharedMemoryRegistry shm_registry(true);
 
   if ( argp->has_arg("h") ) {
     usage(argv[0]);
