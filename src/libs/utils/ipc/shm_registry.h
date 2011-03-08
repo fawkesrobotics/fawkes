@@ -59,7 +59,6 @@ class SharedMemoryRegistry
 
  private:
   typedef struct {
-    sem_t       semaphore;
     SharedMemID segments[MAXNUM_SHM_SEGMS];
   } MemInfo;
 
@@ -67,6 +66,7 @@ class SharedMemoryRegistry
   int   __shmfd;
   char *__shm_name;
 
+  sem_t   *__sem;
   MemInfo *__meminfo;
 };
 

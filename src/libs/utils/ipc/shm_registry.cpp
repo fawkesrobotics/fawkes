@@ -81,12 +81,30 @@ SharedMemoryRegistry::SharedMemoryRegistry(bool master, const char *name)
     throw Exception(errno, "Failed to open shared memory registry");
   }
 
+
   if (master) {
-    if (ftruncate(__shmfd, sizeof(MemInfo)) != 0) {
+    sem_unlink(__shm_name);
+    __sem = sem_open(__shm_name, O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP, 1);
+    if (__sem == SEM_FAILED) {
       close(__shmfd);
       shm_unlink(__shm_name);
       free(__shm_name);
+      throw Exception(errno, "Failed to init shared memory registry semaphore");
+    }
+    if (ftruncate(__shmfd, sizeof(MemInfo)) != 0) {
+      close(__shmfd);
+      shm_unlink(__shm_name);
+      sem_unlink(__shm_name);
+      free(__shm_name);
       throw Exception(errno, "Failed to resize memory for shared memory registry");
+    }
+  } else {
+    __sem = sem_open(__shm_name, 0);
+    if (__sem == SEM_FAILED) {
+      close(__shmfd);
+      shm_unlink(__shm_name);
+      free(__shm_name);
+      throw Exception(errno, "Failed to init shared memory registry semaphore");
     }
   }
 
@@ -94,26 +112,22 @@ SharedMemoryRegistry::SharedMemoryRegistry(bool master, const char *name)
 			      MAP_SHARED, __shmfd, 0);
   if (__meminfo == MAP_FAILED) {
     close(__shmfd);
-    if (master)  shm_unlink(__shm_name);
+    if (master) {
+      shm_unlink(__shm_name);
+      sem_unlink(__shm_name);
+    }
     free(__shm_name);
     throw Exception(errno, "Failed to mmap shared memory registry");
   }
 
   if (master) {
     memset(__meminfo, 0, sizeof(MemInfo));
-
-    if (sem_init(&__meminfo->semaphore, 1, 1) != 0) {
-      close(__shmfd);
-      shm_unlink(__shm_name);
-      free(__shm_name);
-      throw Exception(errno, "Failed to init shared memory registry semaphore");
-    }
   
-    sem_wait(&__meminfo->semaphore);
+    sem_wait(__sem);
     for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
       __meminfo->segments[i].shmid = -1;
     }
-    sem_post(&__meminfo->semaphore);
+    sem_post(__sem);
   }
 }
 
@@ -122,7 +136,11 @@ SharedMemoryRegistry::SharedMemoryRegistry(bool master, const char *name)
 SharedMemoryRegistry::~SharedMemoryRegistry()
 {
   close(__shmfd);
-  if (__master) shm_unlink(__shm_name);
+  sem_close(__sem);
+  if (__master) {
+    shm_unlink(__shm_name);
+    sem_unlink(__shm_name);
+  }
 
   free(__shm_name);
 }
@@ -136,7 +154,7 @@ SharedMemoryRegistry::get_snapshot() const
 {
   std::list<SharedMemID> rv;
 
-  sem_wait(&__meminfo->semaphore);
+  sem_wait(__sem);
 
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
     if (__meminfo->segments[i].shmid > 0) {
@@ -144,7 +162,7 @@ SharedMemoryRegistry::get_snapshot() const
     }
   }
 
-  sem_post(&__meminfo->semaphore);
+  sem_post(__sem);
 
   return rv;
 }
@@ -160,7 +178,7 @@ SharedMemoryRegistry::find_segments(const char *magic_token) const
 {
   std::list<SharedMemID> rv;
 
-  sem_wait(&__meminfo->semaphore);
+  sem_wait(__sem);
 
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
     if ((__meminfo->segments[i].shmid > 0) &&
@@ -171,7 +189,7 @@ SharedMemoryRegistry::find_segments(const char *magic_token) const
     }
   }
 
-  sem_post(&__meminfo->semaphore);
+  sem_post(__sem);
 
   return rv;
 }
@@ -184,7 +202,7 @@ SharedMemoryRegistry::find_segments(const char *magic_token) const
 void
 SharedMemoryRegistry::add_segment(int shmid, const char *magic_token)
 {
-  sem_wait(&__meminfo->semaphore);
+  sem_wait(__sem);
 
   bool valid = false;
   for (unsigned int i = 0; !valid && i < MAXNUM_SHM_SEGMS; ++i) {
@@ -195,7 +213,7 @@ SharedMemoryRegistry::add_segment(int shmid, const char *magic_token)
     }
   }
 
-  sem_post(&__meminfo->semaphore);
+  sem_post(__sem);
 
   if (! valid) {
     throw Exception("Maximum number of shared memory segments already registered");
@@ -209,7 +227,7 @@ SharedMemoryRegistry::add_segment(int shmid, const char *magic_token)
 void
 SharedMemoryRegistry::remove_segment(int shmid)
 {
-  sem_wait(&__meminfo->semaphore);
+  sem_wait(__sem);
 
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
     if (__meminfo->segments[i].shmid == shmid) {
@@ -217,7 +235,7 @@ SharedMemoryRegistry::remove_segment(int shmid)
     }
   }
 
-  sem_post(&__meminfo->semaphore);
+  sem_post(__sem);
 }
 
 } // end namespace fawkes
