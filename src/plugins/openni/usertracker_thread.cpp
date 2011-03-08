@@ -184,7 +184,11 @@ OpenNiUserTrackerThread::loop()
 {
   MutexLocker lock(openni.objmutex_ptr());
 
-  __user_gen->WaitAndUpdateData(); 
+  //__user_gen->WaitAndUpdateData(); 
+  if (! __user_gen->IsDataNew()) {
+    //logger->log_debug(name(), "No new data, skipping loop");
+    return;
+  }
 
   xn::SkeletonCapability skelcap = __user_gen->GetSkeletonCap();
 
