@@ -16,6 +16,8 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+PRESUBDIRS = interfaces
+
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesopenniaspect
 OBJS_openni = openni_plugin.o context_thread.o
@@ -28,7 +30,7 @@ OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker)
 
 ifeq ($(HAVE_OPENNI),1)
-  PRESUBDIRS = aspect
+  PRESUBDIRS += aspect
 
   CFLAGS  += $(CFLAGS_OPENNI)
   LDFLAGS += $(LDFLAGS_OPENNI)
