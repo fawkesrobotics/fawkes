@@ -46,7 +46,7 @@ p_connect_to_blackboard()
 {
   if ( g_blackboard )
  {
-   printf( "connect_to_blackboard/2: already connected\n" );
+   printf( "p_connect_to_blackboard(): already connected\n" );
    return EC_fail;
  }
     
@@ -55,7 +55,7 @@ p_connect_to_blackboard()
 
   if ( EC_succeed != EC_arg( 1 ).is_string( &hostname ) )
   {
-    printf( "bb_connect/2: first argument is not a string\n" );
+    printf( "p_connect_to_blackboard(): first argument is not a string\n" );
     return EC_fail;
   }
 
@@ -78,7 +78,7 @@ p_disconnect_from_blackboard()
 {
   if ( !g_blackboard )
   {
-    printf( "bb_disconnect/2: not connected\n" );
+    printf( "p_disconnect_from_blackboard(): not connected\n" );
     return EC_fail;
   }
 
@@ -94,7 +94,7 @@ p_is_alive()
 {
   if ( !g_blackboard )
   {
-    printf( "bb_alive/0: not connected\n" );
+    printf( "p_is_alive(): not connected\n" );
     return EC_fail;
   }
 
@@ -120,19 +120,19 @@ p_open_interface()
 
   if ( EC_succeed != EC_arg( 1 ).is_atom( &mode) )
   {
-    printf( "p_open_for_reading(): no mode given\n" );
+    printf( "p_open_interface(): no mode given\n" );
     return EC_fail;
   }
 
   if ( EC_succeed != EC_arg( 2 ).is_string( &interface_type ) )
   {
-    printf( "p_open_for_reading(): no type given\n" );
+    printf( "p_open_interface(): no type given\n" );
     return EC_fail;
   }
 
   if ( EC_succeed != EC_arg ( 3 ).is_string( &interface_id ) )
   {
-    printf( "bb_open_for_reading/2: no id given\n" );
+    printf( "p_open_interface(): no id given\n" );
     return EC_fail;
   }
 
@@ -162,7 +162,7 @@ p_close_interface()
 {
   if ( !g_blackboard )
   {
-    printf("bb_close_interface/2: not connected\n" );
+    printf("p_close_interface(): not connected\n" );
     return EC_fail;
   }
 
@@ -171,7 +171,7 @@ p_close_interface()
 
   if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
   {
-    printf( "bb_close_interface/2: no id given\n" );
+    printf( "p_close_interface(): no id given\n" );
     return EC_fail;
   }
 
@@ -231,13 +231,13 @@ p_read_from_interface()
 
   if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
   {
-    printf( "bb_read_interface/3: no interface id given\n" );
+    printf( "p_read_from_interface(): no interface id given\n" );
     return EC_fail;
   }
 
   if ( EC_succeed != EC_arg( 2 ).is_string( &field ) )
   {
-    printf( "bb_read_interface/3: no field given\n" );
+    printf( "p_read_from_interface(): no field given\n" );
     return EC_fail;
   }
 
@@ -382,7 +382,7 @@ p_read_from_interface()
 
       if ( fit == (*it)->fields_end() )
       {
-	printf( "bb_read_interface/3: interface %s has no field %s\n",
+	printf( "p_read_from_interface(): interface %s has no field %s\n",
 		interface_id, field );
 	
 	return EC_fail;
@@ -394,7 +394,7 @@ p_read_from_interface()
 
   if ( it == g_interfaces.end() )
   {
-    printf( "bb_read_interface/3: no interface with id %s found\n",
+    printf( "p_read_from_interface(): no interface with id %s found\n",
 	    interface_id );
     
     return EC_fail;
@@ -411,13 +411,13 @@ p_write_to_interface()
 
   if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
   {
-    printf( "bb_write_interface/3: no interface id given\n" );
+    printf( "p_write_to_interface(): no interface id given\n" );
     return EC_fail;
   }
 
   if ( EC_succeed != EC_arg( 2 ).is_string( &field ) )
   {
-    printf( "bb_write_interface/3: no field given\n" );
+    printf( "p_write_to_interface(): no field given\n" );
     return EC_fail;
   }
 
@@ -430,7 +430,7 @@ p_write_to_interface()
     {
       if ( !(*it)->is_writer() )
       {
-	printf( "bb_write_interface/3: not a writer\n" );
+	printf( "p_write_to_interface(): not a writer\n" );
 	return EC_fail;
       }
 
@@ -620,7 +620,7 @@ p_write_to_interface()
 
       if ( fit == (*it)->fields_end() )
       {
-	printf( "bb_read_interface/3: interface %s has no field %s\n",
+	printf( "p_write_to_interface(): interface %s has no field %s\n",
 		interface_id, field );
 	
 	return EC_fail;
@@ -632,7 +632,7 @@ p_write_to_interface()
 
   if ( it == g_interfaces.end() )
   {
-    printf( "bb_read_interface/3: no interface with id %s found\n",
+    printf( "p_write_to_interface(): no interface with id %s found\n",
 	    interface_id );
     
     return EC_fail;
