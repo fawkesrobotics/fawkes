@@ -39,6 +39,8 @@ using namespace fawkes;
 BlackBoard* g_blackboard = 0;
 vector< Interface* > g_interfaces;
 
+bool process_message_args(Message* msg, EC_word arg_list);
+
 int
 p_connect_to_blackboard()
 {
@@ -59,7 +61,6 @@ p_connect_to_blackboard()
 
 try
  {
-   printf( "bb_connect/2: connecting to host %s\n", hostname );
    g_blackboard = new RemoteBlackBoard( hostname, 1910 );
  }
  catch ( Exception& e )
@@ -168,12 +169,6 @@ p_close_interface()
   // char* interface_type;
   char* interface_id;
 
-  // if ( EC_succeed != EC_arg( 1 ).is_string( &interface_type ) )
-  // {
-  //   printf( "bb_close_interface/2: no type given\n" );
-  //   return EC_fail;
-  // }
-
   if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
   {
     printf( "bb_close_interface/2: no id given\n" );
@@ -186,8 +181,6 @@ p_close_interface()
 	it != g_interfaces.end();
 	++it )
   {
-    // if ( (*it)->oftype( interface_type ) &&
-    // 	 0 == strcmp( (*it)->id(), interface_id ) )
     if ( 0 == strcmp( (*it)->id(), interface_id ) )
 
     {
@@ -647,4 +640,420 @@ p_write_to_interface()
 
   return EC_succeed;
   
+}
+
+
+int
+p_send_message()
+{
+  char* interface_id;
+  char* message_type;
+
+  if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
+  {
+    printf( "p_send_message(): no interface id given\n" );
+    return EC_fail;
+  }
+
+  if ( EC_succeed != EC_arg( 2 ).is_string( &message_type ) )
+  {
+    printf( "p_send_message(): no message type given\n" );
+    return EC_fail;
+  }
+
+  vector< Interface* >::iterator it;
+  for ( it = g_interfaces.begin();
+	it != g_interfaces.end();
+	++it )
+  {
+    if ( 0 == strcmp( interface_id, (*it)->id() ) )
+    {
+      if ( (*it)->is_writer() )
+      {
+	printf( "p_send_message(): interface with id %s is a writer\n", interface_id );
+	return EC_fail;
+      }
+
+      try
+      {
+	Message* msg = (*it)->create_message( message_type );
+
+	EC_word head;
+	EC_word tail;
+	if ( EC_succeed == EC_arg( 3 ).is_list( head, tail ) )
+	{
+	  if ( !process_message_args(msg, ::list(head, tail)) )
+	  {
+	    return EC_fail;
+	  };
+	}
+
+	(*it)->msgq_enqueue( msg );
+      }
+      catch (Exception& e)
+      {
+	e.print_trace();
+	return EC_fail;
+      }
+
+      break;
+    }
+  }
+
+  if ( it == g_interfaces.end() )
+  {
+    printf( "p_send_message(): no interface with name %s\n", interface_id );
+    return EC_fail;
+  }
+
+  return EC_succeed;
+}
+
+
+int
+p_recv_messages()
+{
+  char* interface_id;
+
+  if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
+  {
+    printf( "p_recv_messages(): no interface id given\n" );
+    return EC_fail;
+  }
+
+  vector< Interface* >::iterator it;
+
+  for ( it  = g_interfaces.begin();
+	it != g_interfaces.end();
+	++it )
+  {
+    if ( 0 == strcmp( interface_id, (*it)->id() ) )
+    {
+      EC_word msg_list = nil();
+
+      while ( !(*it)->msgq_empty() )
+      {
+	Message* msg = (*it)->msgq_first();
+
+	// construct list of key-value pairs: [[field1, val1], [field2, val2], ...]
+	EC_word args = nil();
+	for ( InterfaceFieldIterator fit = msg->fields();
+	      fit != msg->fields_end();
+	      ++fit )
+	{
+	  EC_word value;
+
+	  switch ( fit.get_type() )
+	  {
+	  case IFT_BOOL:
+	    if ( fit.get_bool() )
+	    { value = EC_atom( (char*) "true" ); }
+	    else
+	    { value = EC_atom( (char*) "false" ); }
+
+	    break;
+
+	  case IFT_INT8:
+	    value = EC_word( (long) fit.get_int8() );
+	    break;
+
+	  case IFT_UINT8:
+	    value = EC_word( (long) fit.get_uint8() );
+	    break;
+
+	  case IFT_INT16:
+	    value = EC_word( (long) fit.get_int16() );
+	    break;
+
+	  case IFT_UINT16:
+	    value = EC_word( (long) fit.get_uint16() );
+	    break;
+
+	  case IFT_INT32:
+	    value = EC_word( (long) fit.get_int32() );
+	    break;
+
+	  case IFT_UINT32:
+	    value = EC_word( (long) fit.get_uint32() );
+	    break;
+
+	  case IFT_INT64:
+	    value = EC_word( (long) fit.get_int64() );
+	    break;
+
+	  case IFT_UINT64:
+	    value = EC_word( (long) fit.get_uint64() );
+	    break;
+
+	  case IFT_FLOAT:
+	    value = EC_word( (double) fit.get_float() );
+	    break;
+
+	  case IFT_STRING:
+	    value = EC_word( fit.get_string() );
+	    break;
+
+	  case IFT_BYTE:
+	  case IFT_ENUM:
+	    printf( "p_recv_messages(): NOT YET IMPLEMENTED\n" );
+	    break;
+
+	  default:
+	    printf( "p_recv_messages(): unknown field type\n" );
+	  }
+
+	  EC_word field = ::list( EC_word( fit.get_name() ),
+				  ::list( value, nil() ) );
+	  args = ::list(field, args);
+	}
+
+	// construct list of messages: [[MsgType, [[Key1, Val1], ...]], ... ]
+	msg_list = ::list( ::list( EC_word( msg->type() ),
+				   ::list(args, nil() ) ),
+			   msg_list );
+
+	(*it)->msgq_pop();
+      }
+
+      if ( EC_succeed != EC_arg( 2 ).unify( msg_list ) )
+      {
+	printf( "p_recv_messages(): could not bind return value\n" );
+	return EC_fail;
+      }
+
+      break;
+    }
+  }
+
+  if ( it == g_interfaces.end() )
+  {
+    printf( "p_recv_messages(): no interface with id %s found\n", interface_id );
+    return EC_fail;
+  }
+
+  return EC_succeed;
+}
+
+
+bool
+process_message_args(Message* msg, EC_word arg_list)
+{
+  EC_word head;
+  EC_word tail;
+
+  for ( ; EC_succeed == arg_list.is_list(head, tail) ; arg_list = tail )
+  {
+    // [field, value]
+    EC_word field;
+    EC_word value;
+    EC_word t1;
+    EC_word t2;
+
+    if ( EC_succeed != head.is_list( field, t1 ) ||
+	 EC_succeed != t1.is_list( value, t2 )        )
+    {
+      printf( "p_send_messge(): could not parse argument list\n" );
+      return false;
+    }
+
+    char* field_name;
+    if ( EC_succeed != field.is_string( &field_name ) )
+    {
+      printf( "p_send_message(): malformed argument list\n" );
+      return false;
+    }
+
+    InterfaceFieldIterator fit;
+    for ( fit = msg->fields();
+	  fit != msg->fields_end();
+	  ++fit )
+    {
+      if ( 0 == strcmp( fit.get_name(), field_name ) )
+      {
+	switch( fit.get_type() )
+	{
+	case IFT_BOOL:
+	  {
+	    EC_atom val;
+	    if ( EC_succeed != value.is_atom( &val ) )
+	    {
+	      printf( "p_send_message(): no value_given (bool)\n" );
+	      return false;
+	    }
+
+	    if ( 0 == strcmp( "true", val.name() ) )
+	    { fit.set_bool( true ); }
+	    else if ( 0 == strcmp( "false", val.name() ) )
+	    { fit.set_bool( false ); }
+	    else
+	    {
+	      printf( "p_send_message(): boolean value neither true nor false\n" );
+	      return false;
+	    }
+	  }
+
+	  break;
+
+	case IFT_INT8:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (int8)\n" );
+	      return false;
+	    }
+
+	    fit.set_int8( (int8_t) val );
+	  }
+
+	  break;
+
+	case IFT_UINT8:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (uint8)\n" );
+	      return false;
+	    }
+
+	    fit.set_uint8( (uint8_t) val );
+	  }
+
+	  break;
+
+	case IFT_INT16:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (int16)\n" );
+	      return false;
+	    }
+
+	    fit.set_int16( (int16_t) val );
+	  }
+
+	  break;
+
+	case IFT_UINT16:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (uint16)\n" );
+	      return false;
+	    }
+
+	    fit.set_uint16( (uint16_t) val );
+	  }
+
+	  break;
+
+	case IFT_INT32:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (int32)\n" );
+	      return false;
+	    }
+
+	    fit.set_int32( (int32_t) val );
+	  }
+
+	  break;
+
+	case IFT_UINT32:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (uint32)\n" );
+	      return false;
+	    }
+
+	    fit.set_uint32( (uint32_t) val );
+	  }
+
+	  break;
+
+	case IFT_INT64:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (int64)\n" );
+	      return false;
+	    }
+
+	    fit.set_int64( (int64_t) val );
+	  }
+
+	  break;
+
+	case IFT_UINT64:
+	  {
+	    long val;
+	    if ( EC_succeed != value.is_long( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (uint64)\n" );
+	      return false;
+	    }
+
+	    fit.set_uint64( (uint64_t) val );
+	  }
+
+	  break;
+
+	case IFT_FLOAT:
+	  {
+	    double val;
+	    if ( EC_succeed != value.is_double( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (float)\n" );
+	      return false;
+	    }
+
+	    fit.set_float( (float) val );
+	  }
+
+	  break;
+
+	case IFT_STRING:
+	  {
+	    char* val;
+	    if ( EC_succeed != value.is_string( &val ) )
+	    {
+	      printf( "p_send_message(): no value given (string)\n" );
+	      return false;
+	    }
+
+	    fit.set_string( val );
+	  }
+
+	  break;
+
+	case IFT_BYTE:
+	case IFT_ENUM:
+	  printf( "p_send_message(): NOT YET IMPLEMENTET\n" );
+	  break;
+
+	default:
+	  break;
+	}
+
+	break;
+      }
+    }
+
+    if ( fit == msg->fields_end() )
+    {
+      printf( "p_send_message(): message has no field with name %s\n",
+	      field_name );
+      return false;
+    }
+  }
+
+  return true;
 }

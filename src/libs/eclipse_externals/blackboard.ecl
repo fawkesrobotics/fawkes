@@ -10,6 +10,8 @@
 :- external(bb_write_interfaces/0, p_write_interfaces).
 :- external(bb_read_interface/3, p_read_from_interface).
 :- external(bb_write_interface/3, p_write_to_interface).
+:- external(bb_send_message/3, p_send_message).
+:- external(bb_recv_messages/2, p_recv_messages).
 
 bb_open_interface_writing(Type, Id) :-
         bb_open_interface(w, Type, Id).
