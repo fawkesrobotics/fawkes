@@ -43,22 +43,9 @@ ifeq ($(HAVE_VISCA_CTRL),1)
 endif
 
 # check for JPEG lib
-ifneq ($(wildcard $(SYSROOT)/usr/include/jpeglib.h $(SYSROOT)/usr/local/include/jpeglib.h),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/jpeglib.h $(SYSROOT)/usr/local/include/jpeglib.h $(SYSROOT)/opt/local/include/jpeglib.h),)
   HAVE_LIBJPEG   = 1
   VISION_CFLAGS += -DHAVE_LIBJPEG
-endif
-
-# check for PNG lib
-HAVE_LIBPNG = $(if $(shell $(PKGCONFIG) --exists 'libpng'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_LIBPNG),1)
-  CFLAGS_LIBPNG  = -DHAVE_LIBPNG $(shell $(PKGCONFIG) --cflags 'libpng')
-  LDFLAGS_LIBPNG = $(shell $(PKGCONFIG) --libs 'libpng')
-endif
-
-HAVE_LIBV4L2 = $(if $(shell $(PKGCONFIG) --exists 'libv4l2'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_LIBPNG),1)
-  CFLAGS_LIBV4L2  = -DHAVE_LIBV4L2 $(shell $(PKGCONFIG) --cflags 'libv4l2')
-  LDFLAGS_LIBV4L2 = $(shell $(PKGCONFIG) --libs 'libv4l2')
 endif
 
 ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
@@ -69,6 +56,9 @@ endif
 ifneq ($(PKGCONFIG),)
   HAVE_LIBDC1394 = $(if $(shell $(PKGCONFIG) --exists 'libdc1394-2'; echo $${?/1/}),1,0)
   HAVE_SDL = $(if $(shell $(PKGCONFIG) --exists 'sdl'; echo $${?/1/}),1,0)
+  HAVE_LIBPNG = $(if $(shell $(PKGCONFIG) --exists 'libpng'; echo $${?/1/}),1,0)
+  HAVE_LIBV4L2 = $(if $(shell $(PKGCONFIG) --exists 'libv4l2'; echo $${?/1/}),1,0)
+  HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_LIBDC1394),1)
   HAVE_FIREWIRE_CAM   = 1
@@ -80,6 +70,23 @@ endif
 ifeq ($(HAVE_SDL),1)
   CFLAGS_SDL  = $(shell $(PKGCONFIG) --cflags 'sdl')
   LDFLAGS_SDL = $(shell $(PKGCONFIG) --libs 'sdl')
+endif
+
+# check for PNG lib
+ifeq ($(HAVE_LIBPNG),1)
+  CFLAGS_LIBPNG  = -DHAVE_LIBPNG $(shell $(PKGCONFIG) --cflags 'libpng')
+  LDFLAGS_LIBPNG = $(shell $(PKGCONFIG) --libs 'libpng')
+endif
+
+ifeq ($(HAVE_LIBPNG),1)
+  CFLAGS_LIBV4L2  = -DHAVE_LIBV4L2 $(shell $(PKGCONFIG) --cflags 'libv4l2')
+  LDFLAGS_LIBV4L2 = $(shell $(PKGCONFIG) --libs 'libv4l2')
+endif
+
+ifeq ($(HAVE_OPENCV),1)
+  CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
+  LDFLAGS_OPENCV     = $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
+  LDFLAGS_OPENCV_GUI = -lhighgui
 endif
 
 # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
@@ -172,13 +179,6 @@ ifneq ($(wildcard $(realpath $(IPP_DIR))),)
     VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/sharedlib
     VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/include
   endif
-endif
-
-HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_OPENCV),1)
-  CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS_OPENCV     = $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
-  LDFLAGS_OPENCV_GUI = -lhighgui
 endif
 
 ## check for SIFT-support (patent-encumbered!)
