@@ -74,8 +74,8 @@ endif
 ifeq ($(MAKELEVEL),1)
   EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) $(MANPAGES_gui)
 endif
-all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
-gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
+all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
+gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
 uncolored-all: all
 uncolored-gui: gui
 
@@ -101,13 +101,13 @@ clean: presubdirs subdirs
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf "$(SRCDIR)/$(OBJDIR)" ; fi
 	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf "$(DEPDIR)" ; fi
 	$(SILENT)$(foreach B,$(BINS_all),rm -f $(B);)
-	$(SILENT)$(foreach L,$(LIBS_all),rm -f $(addsuffix *,$(L));)
-	$(SILENT)$(foreach P,$(PLUGINS_all),rm -f $(P);)
+	$(SILENT)$(foreach L,$(LIBS_all:%.so=%.$(SOEXT)),rm -f $(addsuffix *,$(L));)
+	$(SILENT)$(foreach P,$(PLUGINS_all:%.so=%.$(SOEXT)),rm -f $(P);)
 	$(SILENT)$(foreach M,$(MANPAGES_all),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
 	$(SILENT)$(foreach B,$(BINS_gui),rm -f $(B);)
-	$(SILENT)$(foreach L,$(LIBS_gui),rm -f $(L);)
-	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -f $(P);)
+	$(SILENT)$(foreach L,$(LIBS_gui:%.so=%.$(SOEXT)),rm -f $(L);)
+	$(SILENT)$(foreach P,$(PLUGINS_gui:%.so=%.$(SOEXT)),rm -f $(P);)
 	$(SILENT)$(foreach M,$(MANPAGES_gui),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 	$(SILENT)$(foreach E,$(CLEAN_FILES),rm -rf $(E);)

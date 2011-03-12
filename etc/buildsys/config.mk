@@ -178,7 +178,8 @@ CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
 		   -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" -DIFACEDIR=\"$(EXEC_IFACEDIR)\" \
 		   -DCONFDIR=\"$(EXEC_CONFDIR)\" -DUSERDIR=\"$(EXEC_USERDIR)\" \
 		   -DLOGDIR=\"$(EXEC_LOGDIR)\" -DRESDIR=\"$(EXEC_RESDIR)\" \
-		   -DTMPDIR=\"$(EXEC_TMPDIR)\" -DBUILDTYPE=\"$(BUILD_TYPE)\"
+		   -DTMPDIR=\"$(EXEC_TMPDIR)\" -DBUILDTYPE=\"$(BUILD_TYPE)\" \
+		   -DSOEXT=\"$(SOEXT)\"
 
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP) $(CFLAGS_DEFS)
 LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic -fPIC -Wl,--no-undefined $(LDFLAGS_OPENMP) -lstdc++
@@ -191,6 +192,7 @@ ifeq ($(OS),FreeBSD)
   DEFAULT_INCLUDES += -I/usr/local/include
   LDFLAGS_BASE     += -L/usr/local/lib -lpthread
 endif
+SOEXT               = so
 
 # Required if BASEDIR != EXEC_BASEDIR
 export LD_LIBRARY_PATH=$(call merge,:, $(LIBDIRS_BASE) $(LIBDIRS))
