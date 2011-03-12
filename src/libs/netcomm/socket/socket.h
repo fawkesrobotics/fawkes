@@ -30,6 +30,28 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+// just to be safe nobody else can do it
+#include <sys/signal.h>
+
+#ifdef POLL_IN
+#  undef POLL_IN
+#endif
+#ifdef POLL_OUT
+#  undef POLL_OUT
+#endif
+#ifdef POLL_PRI
+#  undef POLL_PRI
+#endif
+#ifdef POLL_RDHUP
+#  undef POLL_RDHUP
+#endif
+#ifdef POLL_ERR
+#  undef POLL_ERR
+#endif
+#ifdef POLL_HUP
+#  undef POLL_HUP
+#endif
+
 
 namespace fawkes {
 
