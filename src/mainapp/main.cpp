@@ -335,7 +335,7 @@ main(int argc, char **argv)
       return 203;
     }
     int r = 0;
-    r = setresuid(pw->pw_uid, pw->pw_uid, pw->pw_uid);
+    r = setreuid(pw->pw_uid, pw->pw_uid);
     if (r < 0) {
       perror("Failed to drop privileges (user)");
     }
@@ -348,7 +348,7 @@ main(int argc, char **argv)
       return 204;
     }
     int r = 0;
-    r = setresgid(gr->gr_gid, gr->gr_gid, gr->gr_gid);
+    r = setregid(gr->gr_gid, gr->gr_gid);
     if (r < 0) {
       perror("Failed to drop privileges (group)");
     }
