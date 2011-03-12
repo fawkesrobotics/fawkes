@@ -28,6 +28,9 @@
 
 #include <pthread.h>
 #include <cerrno>
+#if defined(__MACH__) && defined(__APPLE__)
+#  include <sys/time.h>
+#endif
 
 namespace fawkes {
 
@@ -201,11 +204,19 @@ WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
     wait();
     return true;
   } else {
-    long err = 0;
     struct timespec now;
-    if ( clock_gettime(CLOCK_REALTIME, &now) != 0 ) {
-      throw Exception(err, "WaitCondition::reltimed_wait: Failed to get current time");
+#if defined(__MACH__) && defined(__APPLE__)
+    struct timeval nowt;
+    if ( gettimeofday(&nowt, NULL) != 0 ) {
+      throw Exception(errno, "WaitCondition::reltimed_wait: Failed to get current time");
     }
+    now.tv_sec  = nowt.tv_sec;
+    now.tv_nsec = nowt.tv_usec * 1000;
+#else
+    if ( clock_gettime(CLOCK_REALTIME, &now) != 0 ) {
+      throw Exception(errno, "WaitCondition::reltimed_wait: Failed to get current time");
+    }
+#endif
 
     long int s  = now.tv_sec  + sec;
     long int ns = now.tv_nsec + nanosec;
@@ -215,6 +226,7 @@ WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
     }
 
     struct timespec ts = { s, ns };
+    long err = 0;
 
     if ( __own_mutex) {
       __mutex->lock();

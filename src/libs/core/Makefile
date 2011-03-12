@@ -16,12 +16,15 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_libfawkescore = pthread rt stdc++ m
+LIBS_libfawkescore = pthread stdc++ m
+ifneq ($(OS),Darwin)
+  LIBS_libfawkescore += rt
+endif
 OBJS_libfawkescore = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 HDRS_libfawkescore = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
 OBJS_all = $(OBJS_libfawkescore)
-LIBS_all  = $(LIBDIR)/libfawkescore.so
+LIBS_all = $(LIBDIR)/libfawkescore.so
 
 ifeq ($(OS),FreeBSD)
   ifneq ($(wildcard /usr/local/include/execinfo.h),)
