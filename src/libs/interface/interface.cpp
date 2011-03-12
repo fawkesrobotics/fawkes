@@ -29,6 +29,7 @@
 #include <core/exceptions/system.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
+#include <utils/misc/strndup.h>
 
 #include <cstring>
 #include <cstdio>

@@ -23,6 +23,7 @@
 
 #include <interface/interface_info.h>
 #include <interface/interface.h>
+#include <utils/misc/strndup.h>
 
 #include <cstdlib>
 #include <cstring>
