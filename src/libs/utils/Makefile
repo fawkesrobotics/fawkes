@@ -19,13 +19,15 @@ include $(BUILDSYSDIR)/lua.mk
 
 FILTER_OUT=%_tolua.o
 
-ifneq ($(realpath $(SYSROOT)/usr/include/magic.h),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/magic.h $(SYSROOT)/opt/local/include/magic.h),)
   HAVE_LIBMAGIC = 1
 else
   ERROR_TARGETS += error_libmagic
 endif
 
-HAVE_LIBXMLPP = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+ifneq ($(PKGCONFIG),)
+  HAVE_LIBXMLPP = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+endif
 ifeq ($(HAVE_LIBXMLPP),1)
   CFLAGS_LIBXMLPP=$(shell $(PKGCONFIG) --cflags 'libxml++-2.6')
   LDFLAGS_LIBXMLPP=$(shell $(PKGCONFIG) --libs 'libxml++-2.6')
@@ -37,7 +39,7 @@ else
   WARN_TARGETS += warning_libxmlpp
 endif
 
-LIBS_libfawkesutils = stdc++ m rt fawkescore magic $(if $(filter Linux,$(OS)),dl)
+LIBS_libfawkesutils = stdc++ m fawkescore magic $(if $(filter-out Darwin,$(OS)),rt) $(if $(filter Linux,$(OS)),dl)
 OBJS_libfawkesutils =	$(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 HDRS_libfawkesutils = $(subst $(SRCDIR)/,,$(filter-out $(patsubst %.o,%.h,$(FILTER_OUT)),$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h)))
 
