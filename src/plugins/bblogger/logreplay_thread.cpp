@@ -41,6 +41,8 @@
 #include <fcntl.h>
 #ifdef __FreeBSD__
 #  include <sys/endian.h>
+#elif defined(__MACH__) && defined(__APPLE__)
+#  include <sys/_endian.h>
 #else
 #  include <endian.h>
 #endif
