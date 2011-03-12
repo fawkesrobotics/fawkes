@@ -16,9 +16,6 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = deadspots
-
-
 LIBS_laser = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	     fawkesinterface Laser360Interface Laser720Interface
 
