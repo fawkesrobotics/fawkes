@@ -97,7 +97,7 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 #ifdef HAVE_INOTIFY
   __fam_thread = new FamThread();
   RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
-  fam->add_filter("^[^.].*\\.so$");
+  fam->add_filter("^[^.].*\\."SOEXT"$");
   fam->add_listener(this);
   fam->watch_dir(PLUGINDIR);
   __fam_thread->start();
@@ -138,8 +138,7 @@ PluginManager::init_pinfo_cache()
 
   DIR *plugin_dir;
   struct dirent* dirp;
-  /* constant for this somewhere? */
-  const char *file_ext = ".so";
+  const char *file_ext = "."SOEXT;
 
   if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
     throw Exception(errno, "Plugin directory %s could not be opened", PLUGINDIR);
@@ -460,8 +459,7 @@ PluginManager::config_value_erased(const char *path)
 void
 PluginManager::fam_event(const char *filename, unsigned int mask)
 {
-  /* constant for this somewhere? */
-  const char *file_ext = ".so";
+  const char *file_ext = "."SOEXT;
 
   const char *pos = strstr(filename, file_ext);
   std::string p = std::string(filename).substr(0, strlen(filename) - strlen(file_ext));
