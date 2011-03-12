@@ -27,6 +27,7 @@
 #include <fvutils/rectification/rectinfo_lut_block.h>
 
 #include <core/exceptions/system.h>
+#include <utils/misc/strndup.h>
 
 #include <cstring>
 #include <cstdio>
