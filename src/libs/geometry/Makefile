@@ -64,7 +64,7 @@ endif
 
 $(LUALIBDIR)/fawkesgeometry.so: | $(LIBDIR)/libfawkesgeometry.so
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
-gtk: | $(LIBDIR)/libfawkesgeometry.so
+gtk: | $(LIBDIR)/libfawkesgeometry.$(SOEXT)
 endif
 
 include $(BUILDSYSDIR)/base.mk
