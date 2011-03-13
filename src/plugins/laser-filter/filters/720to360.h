@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_720TO360_H_
-#define __PLUGINS_LASER_FILTERS_720TO360_H_
+#ifndef __PLUGINS_LASER_FILTER_FILTERS_720TO360_H_
+#define __PLUGINS_LASER_FILTER_FILTERS_720TO360_H_
 
-#include "../filter.h"
+#include "filter.h"
 
 class Laser720to360DataFilter : public LaserDataFilter
 {

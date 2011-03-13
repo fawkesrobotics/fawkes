@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_H_
-#define __PLUGINS_LASER_FILTER_H_
+#ifndef __PLUGINS_LASER_FILTER_FILTER_H_
+#define __PLUGINS_LASER_FILTER_FILTER_H_
 
 class LaserDataFilter
 {
