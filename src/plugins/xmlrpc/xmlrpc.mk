@@ -24,11 +24,19 @@ ifeq ($(HAVE_LIBXMLRPCPP),1)
   CFLAGS_LIBXMLRPCPP  = $(shell $(PKGCONFIG) --cflags $(LIBXMLPP_PACKAGES))
   LDFLAGS_LIBXMLRPCPP = $(shell $(PKGCONFIG) --libs $(LIBXMLPP_PACKAGES))
 else
-  # Might be FreeBSD
+  # FreeBSD
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/xmlrpc-c/registry.hpp),)
     HAVE_LIBXMLRPCPP = 1
     HAVE_XMLRPC = 1
     LDFLAGS_LIBXMLRPCPP = -lxmlrpc_server++ -lxmlrpc++
+  endif
+  # Mac OS X
+  ifneq ($(wildcard $(SYSROOT)/opt/local/include/xmlrpc-c/registry.hpp),)
+    HAVE_LIBXMLRPCPP = 1
+    HAVE_XMLRPC = 1
+    LDFLAGS_LIBXMLRPCPP = -lxmlrpc_server -lxmlrpc_server++ -lxmlrpc++ -lxmlrpc_util -lxmlrpc_abyss \
+			  -lxmlrpc_server_abyss++ -lxmlrpc_cpp -lxmlrpc \
+			  -lxmlrpc_server_abyss -lxmlrpc_xmlparse -lxmlrpc_xmltok
   endif
 endif
 
