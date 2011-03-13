@@ -30,7 +30,8 @@ switch-buildtype:
 	else \
 		echo -e "$(INDENT_PRINT)--- Switching build type from $(BUILD_TYPE) to $(BT)"; \
 		if [ -e "$(TOP_BASEDIR)/etc/buildsys/buildtype.mk" ]; then \
-			sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' $(TOP_BASEDIR)/etc/buildsys/buildtype.mk; \
+			sed -i.bak -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' $(TOP_BASEDIR)/etc/buildsys/buildtype.mk; \
+			rm -f $(TOP_BASEDIR)/etc/buildsys/buildtype.mk.bak; \
 		else \
 			mkdir -p $(TOP_BASEDIR)/etc/buildsys; \
 			echo "BUILD_TYPE=$(BT)" > $(TOP_BASEDIR)/etc/buildsys/buildtype.mk; \
