@@ -35,9 +35,11 @@
 :- export bb_recv_messages/2.
 
 %% load the external code from the shared object
-:- getcwd(Cwd),
-   concat_string([Cwd, "../../../lib/eclipse_externals.so"], L),
-   load(L).
+:- ( exists("../../../lib") ->
+       load("../../../lib/eclipse_externals.so")
+   ;
+       load("../../../../lib/eclipse_externals.so")
+   ).
 
 %% definition of external predicates
 :- external(bb_connect/1, p_connect_to_blackboard).
