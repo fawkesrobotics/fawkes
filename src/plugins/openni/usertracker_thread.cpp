@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class OpenNiUserTrackerThread "tracker_thread.h"
+/** @class OpenNiUserTrackerThread "usertracker_thread.h"
  * OpenNI User Tracker Thread.
  * This thread requests a user tracker node from OpenNI and publishes the
  * retrieved information via the blackboard.

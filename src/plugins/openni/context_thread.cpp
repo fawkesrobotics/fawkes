@@ -61,6 +61,14 @@ OpenNiContextThread::init()
     throw Exception("Initializing OpenNI failed: %s", xnGetStatusString(st));
   }
 
+  __last_refcount = __openni.refcount();
+
+  __check_now.set_clock(clock);
+  __check_last.set_clock(clock);
+  __check_last.stamp();
+
+  __device_no_data_loops = 0;
+
   __openni_aspect_inifin.set_openni_context(__openni);
 }
 
@@ -79,6 +87,108 @@ void
 OpenNiContextThread::loop()
 {
   __openni.lock();
+  if (__openni.refcount() != __last_refcount) {
+    print_nodes();
+    __last_refcount = __openni.refcount();
+  }
   __openni->WaitNoneUpdateAll();
+
+  __check_now.stamp();
+  if ((__check_now - &__check_last) > 5) {
+    verify_active();
+    __check_last = __check_now;
+  }
+
   __openni.unlock();
+}
+
+inline const char *
+type_to_string(XnProductionNodeType type)
+{
+  switch (type) {
+  case XN_NODE_TYPE_DEVICE:   return "device";
+  case XN_NODE_TYPE_DEPTH:    return "depth";
+  case XN_NODE_TYPE_IMAGE:    return "image";
+  case XN_NODE_TYPE_AUDIO:    return "audio";
+  case XN_NODE_TYPE_IR:       return "IR";
+  case XN_NODE_TYPE_USER:     return "user";
+  case XN_NODE_TYPE_RECORDER: return "recorder";
+  case XN_NODE_TYPE_PLAYER:   return "player";
+  case XN_NODE_TYPE_GESTURE:  return "gesture";
+  case XN_NODE_TYPE_SCENE:    return "scene";
+  case XN_NODE_TYPE_HANDS:    return "hands";
+  case XN_NODE_TYPE_CODEC:    return "codec";
+  default:                    return "unknown";
+  }
+}
+
+/** Print active nodes to log.
+ * Assumes that the context has been locked.
+ */
+void
+OpenNiContextThread::print_nodes()
+{
+  xn::NodeInfoList nodes;
+  if (__openni->EnumerateExistingNodes(nodes) == XN_STATUS_OK) {
+    logger->log_info(name(), "Currently existing nodes:");
+    for (xn::NodeInfoList::Iterator n = nodes.Begin(); n != nodes.End(); ++n) {
+      const XnProductionNodeDescription &pnd = (*n).GetDescription();
+      const char *info = (*n).GetCreationInfo();
+      if (strlen(info) == 0)  info = NULL;
+
+      xn::Generator generator;
+      bool have_gen = ((*n).GetInstance(generator) == XN_STATUS_OK);
+
+      logger->log_info(name(), "  %-8s %8s (type: %-8s  vendor: %-12s  name: %-24s  "
+		       "version: %u.%u.%u.%u%s%s)",
+		       (*n).GetInstanceName(),
+		       have_gen ? (generator.IsGenerating() ? "active" : "inactive") : "unknown",
+		       type_to_string(pnd.Type), pnd.strVendor, pnd.strName,
+		       pnd.Version.nMajor, pnd.Version.nMinor, pnd.Version.nMaintenance,
+		       pnd.Version.nBuild, info ? "  info: " : "", info ? info : "");
+    }
+  }
+}
+
+
+/** Verify that all nodes are active.
+ * Assumes that the context has been locked.
+ */
+void
+OpenNiContextThread::verify_active()
+{
+  xn::NodeInfoList nodes;
+  if (__openni->EnumerateExistingNodes(nodes) == XN_STATUS_OK) {
+    for (xn::NodeInfoList::Iterator n = nodes.Begin(); n != nodes.End(); ++n) {
+      xn::Generator generator;
+      bool have_gen = ((*n).GetInstance(generator) == XN_STATUS_OK);
+
+      if (have_gen) {
+	const XnProductionNodeDescription &pnd = (*n).GetDescription();
+	// do not verify on device nodes for now, always reports inactive :-/
+	if (! generator.IsGenerating() && (pnd.Type != XN_NODE_TYPE_DEVICE) ) {
+	  logger->log_warn(name(), "Inactive node '%s' (%s, %s/%s), trying to activate",
+			   (*n).GetInstanceName(), type_to_string(pnd.Type),
+			   pnd.strVendor, pnd.strName);
+	  generator.StartGenerating();
+	} else if (pnd.Type == XN_NODE_TYPE_DEVICE) {
+	  // as an alternative, verify how often it has not been updated
+	  if (generator.IsDataNew()) {
+	    __device_no_data_loops = 0;
+	  } else {
+	    if (++__device_no_data_loops > 2) {
+	      logger->log_warn(name(), "Device '%s' had no fresh data for long time. "
+			       "Reload maybe necessary.", (*n).GetInstanceName());
+	    }
+	  }
+	}
+
+	xn::ErrorStateCapability ecap = generator.GetErrorStateCap();
+	if (ecap.GetErrorState() != XN_STATUS_OK) {
+	  logger->log_warn(name(), "ERROR in node '%s': %s", (*n).GetInstanceName(),
+			   xnGetStatusString(ecap.GetErrorState()));
+	}
+      }
+    }
+  }
 }

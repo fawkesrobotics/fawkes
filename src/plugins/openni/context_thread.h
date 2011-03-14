@@ -31,6 +31,8 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/aspect_provider.h>
 #include <plugins/openni/aspect/openni_inifin.h>
+#include <utils/time/time.h>
+
 
 namespace xn {
   class Context;
@@ -52,12 +54,23 @@ class OpenNiContextThread
   virtual void loop();
   virtual void finalize();
 
+ private:
+  void print_nodes();
+  void verify_active();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   fawkes::LockPtr<xn::Context>  __openni;
   fawkes::OpenNiAspectIniFin    __openni_aspect_inifin;
+
+  int __last_refcount;
+
+  fawkes::Time __check_last;
+  fawkes::Time __check_now;
+
+  unsigned int __device_no_data_loops;
 
 };
 
