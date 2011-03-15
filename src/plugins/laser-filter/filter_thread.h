@@ -30,14 +30,15 @@
 #include <aspect/blackboard.h>
 
 #include <string>
+#include <list>
+#include <vector>
 
 namespace fawkes {
   class Laser360Interface;
   class Laser720Interface;
 }
 
-class LaserDataFilterCascade;
-class LaserReverseAngleDataFilter;
+class LaserDataFilter;
 
 class LaserFilterThread
 : public fawkes::Thread,
@@ -53,19 +54,36 @@ class LaserFilterThread
   virtual void finalize();
   virtual void loop();
 
+ private:
+  typedef struct {
+    bool               is_360;
+    std::string        id;
+    fawkes::Interface *interface;
+  } LaserInterface;
+
+  void open_interfaces(std::string prefix, std::vector<LaserInterface> &ifs,
+		       std::vector<float *> &bufs, bool writing);
+
+  LaserDataFilter *  create_filter(std::string filter_type, std::string prefix,
+				   unsigned int in_data_size, std::vector<float *> &inbufs);
+
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::Laser360Interface *__laser360_if;
-  fawkes::Laser720Interface *__laser720_if;
+  std::vector<LaserInterface> __in;
+  std::vector<LaserInterface> __out;
 
-  LaserDataFilterCascade *__filters;
+  std::vector<float *>  __in_bufs;
+  std::vector<float *>  __out_bufs;
 
-  unsigned int            __num_values;
+  LaserDataFilter *__filter;
 
-  std::string             __cfg_name;
-  std::string             __cfg_prefix;
+  unsigned int     __num_values;
+
+  std::string      __cfg_name;
+  std::string      __cfg_prefix;
 };
 
 

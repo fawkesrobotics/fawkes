@@ -26,9 +26,14 @@
 #include "filters/deadspots.h"
 #include "filters/cascade.h"
 #include "filters/reverse_angle.h"
+#include "filters/min_circle.h"
+#include "filters/circle_sector.h"
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
+
+#include <cstring>
+#include <memory>
 
 using namespace fawkes;
 
@@ -59,22 +64,253 @@ LaserFilterThread::LaserFilterThread(std::string &cfg_name,
 void
 LaserFilterThread::init()
 {
-  __laser360_if = NULL;
-  __laser720_if = NULL;
+  // Get input interfaces
+  try {
+    open_interfaces(__cfg_prefix + "in/", __in, __in_bufs, false);
+    open_interfaces(__cfg_prefix + "out/", __out, __out_bufs, true);
 
-  __filters = new LaserDataFilterCascade();
+    if (__in.empty()) {
+      throw Exception("No input interfaces defined for %s", __cfg_name.c_str());
+    }
+    if (__out.empty()) {
+      throw Exception("No output interfaces defined for %s", __cfg_name.c_str());
+    }
+
+
+    std::map<std::string, std::string> filters;
+
+    std::string fpfx = __cfg_prefix + "filters/";
+    std::auto_ptr<Configuration::ValueIterator> i(config->search(fpfx.c_str()));
+    while (i->next()) {
+      std::string filter_name = std::string(i->path()).substr(fpfx.length());
+      if (filter_name.find("/") != std::string::npos) {
+	// If it contains a slash we assume it is a parameter for a filter
+	continue;
+      }
+
+      if (! i->is_string()) {
+	throw Exception("Filter value %s is not a string", i->path());
+      }
+
+      logger->log_debug(name(), "Cascade %s - adding filter %s (%s)",
+			__cfg_name.c_str(), filter_name.c_str(), i->get_string().c_str());
+
+      filters[filter_name] = i->get_string();
+    }
+    if (filters.empty()) {
+      throw Exception("No filters defined for %s", __cfg_name.c_str());
+    }
+
+    if (filters.size() == 1) {
+      std::string filter_name = filters.begin()->first;
+      __filter = create_filter(filters[filter_name], fpfx + filter_name + "/",
+			       __in[0].is_360 ? 360 : 720, __in_bufs);
+    } else {
+      LaserDataFilterCascade *cascade = new LaserDataFilterCascade(__in[0].is_360 ? 360 : 720,
+								   __in_bufs);
+
+      try {
+	std::map<std::string, std::string>::iterator f;
+	for (f = filters.begin(); f != filters.end(); ++f) {
+	  cascade->add_filter(create_filter(f->second, fpfx + f->first + "/",
+					    cascade->get_out_data_size(),
+					    cascade->get_out_vector()));
+	}
+      } catch (Exception &e) {
+	delete cascade;
+	throw;
+      }
+
+      __filter = cascade;
+    }
+
+    if (__out[0].is_360 && (__filter->get_out_data_size() != 360)) {
+      Exception e("Output interface and filter data size for %s do not match (%u != 360)",
+		  __cfg_name.c_str(), __filter->get_out_data_size());
+      delete __filter;
+      throw e;
+    } else if (!__out[0].is_360 && (__filter->get_out_data_size() != 720)) {
+      Exception e("Output interface and filter data size for %s do not match (%u != 720)",
+		  __cfg_name.c_str(), __filter->get_out_data_size());
+      delete __filter;
+      throw e;
+    }
+
+    __filter->set_out_vector(__out_bufs);
+
+  } catch (Exception &e) {
+    for (unsigned int i = 0; i < __in.size(); ++i) {
+      blackboard->close(__in[i].interface);
+    }
+    for (unsigned int i = 0; i < __out.size(); ++i) {
+      blackboard->close(__out[i].interface);
+    }
+    throw;
+  }
 }
 
 
 void
 LaserFilterThread::finalize()
 {
-  delete __filters;
-  blackboard->close(__laser360_if);
-  blackboard->close(__laser720_if);
+  delete __filter;
+
+  for (unsigned int i = 0; i < __in.size(); ++i) {
+    blackboard->close(__in[i].interface);
+  }
+  __in.clear();
+  for (unsigned int i = 0; i < __out.size(); ++i) {
+    blackboard->close(__out[i].interface);
+  }
+  __out.clear();
 }
 
 void
 LaserFilterThread::loop()
 {
+  std::vector<LaserInterface>::iterator i;
+  for (i = __in.begin(); i != __in.end(); ++i) {
+    i->interface->read();
+  }
+  
+  __filter->filter();
+
+  for (i = __out.begin(); i != __out.end(); ++i) {
+    i->interface->write();
+  }
 }
+
+
+void
+LaserFilterThread::open_interfaces(std::string prefix,
+				   std::vector<LaserInterface> &ifs,
+				   std::vector<float *> &bufs, bool writing)
+{
+  std::auto_ptr<Configuration::ValueIterator> in(config->search(prefix.c_str()));
+  while (in->next()) {
+    if (! in->is_string()) {
+      throw Exception("Config value %s is not of type string", in->path());
+    } else {
+      std::string uid = in->get_string();
+      size_t sf;
+
+      if ((sf = uid.find("::")) == std::string::npos) {
+	throw Exception("Interface '%s' is not a UID", uid.c_str());
+      }
+      std::string type = uid.substr(0, sf);
+      std::string id = uid.substr(sf + 2);
+
+      LaserInterface lif;
+      lif.interface = NULL;
+
+      if (type == "Laser360Interface") {
+	lif.is_360 = true;
+      } else if (type == "Laser720Interface") {
+	lif.is_360 = false;
+      } else {
+	throw Exception("Interfaces must be of type Laser360Interface or "
+			"Laser720Interface, but it is '%s'", type.c_str());
+      }
+
+      lif.id = id;
+      ifs.push_back(lif);
+    }
+  }
+
+  if (ifs.empty()) {
+    throw Exception("No interfaces defined at %s", prefix.c_str());
+  }
+
+  bufs.resize(ifs.size());
+
+  bool must_360 = ifs[0].is_360;
+
+  try {
+    if (writing) {
+      for (unsigned int i = 0; i < ifs.size(); ++i) {
+	if (ifs[i].is_360) {
+	  if (! must_360) {
+	    throw Exception("Interfaces of mixed sizes for %s",
+			    __cfg_name.c_str());
+	  }
+	  logger->log_debug(name(), "Opening writing Laser360Interface::%s", ifs[i].id.c_str());
+	  Laser360Interface *laser360 = 
+	    blackboard->open_for_writing<Laser360Interface>(ifs[i].id.c_str());
+
+	  ifs[i].interface = laser360;
+	  bufs[i] = laser360->distances();
+	  
+	} else {
+	  if (must_360) {
+	    throw Exception("Interfaces of mixed sizes for %s",
+			    __cfg_name.c_str());
+	  }
+
+	  logger->log_debug(name(), "Opening writing Laser720Interface::%s", ifs[i].id.c_str());
+	  Laser720Interface *laser720 = 
+	    blackboard->open_for_writing<Laser720Interface>(ifs[i].id.c_str());
+
+	  ifs[i].interface = laser720;
+	  bufs[i] = laser720->distances();
+	}
+      }
+    } else {
+      for (unsigned int i = 0; i < ifs.size(); ++i) {
+	if (ifs[i].is_360) {
+	  logger->log_debug(name(), "Opening reading Laser360Interface::%s", ifs[i].id.c_str());
+	  Laser360Interface *laser360 =
+	    blackboard->open_for_reading<Laser360Interface>(ifs[i].id.c_str());
+
+	  ifs[i].interface = laser360;
+	  bufs[i] = laser360->distances();
+	  
+	} else {
+	  logger->log_debug(name(), "Opening reading Laser720Interface::%s", ifs[i].id.c_str());
+	  Laser720Interface *laser720 =
+	    blackboard->open_for_reading<Laser720Interface>(ifs[i].id.c_str());
+
+	  ifs[i].interface = laser720;
+	  bufs[i] = laser720->distances();
+	}
+      }
+    }
+  } catch (Exception &e) {
+    for (unsigned int i = 0; i < ifs.size(); ++i) {
+      blackboard->close(ifs[i].interface);
+    }
+    ifs.clear();
+    bufs.clear();
+    throw;
+  }
+}
+
+
+LaserDataFilter *
+LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
+				 unsigned int in_data_size, std::vector<float *> &inbufs)
+{
+  if (filter_type == "720to360") {
+    bool average = false;
+    try {
+      average = config->get_bool((prefix + "average").c_str());
+    } catch (Exception &e) {} // ignore
+    return new Laser720to360DataFilter(average, in_data_size, inbufs);
+  } else if (filter_type == "reverse") {
+    return new LaserReverseAngleDataFilter(in_data_size, inbufs);
+  } else if (filter_type == "max_circle") {
+    float radius = config->get_float((prefix + "radius").c_str());
+    return new LaserMaxCircleDataFilter(radius, in_data_size, inbufs);
+  } else if (filter_type == "min_circle") {
+    float radius = config->get_float((prefix + "radius").c_str());
+    return new LaserMinCircleDataFilter(radius, in_data_size, inbufs);
+  } else if (filter_type == "circle_sector") {
+    unsigned int from = config->get_uint((prefix + "from").c_str());
+    unsigned int to   = config->get_uint((prefix + "to").c_str());
+    return new LaserCircleSectorDataFilter(from, to, in_data_size, inbufs);
+  } else if (filter_type == "dead_spots") {
+    return new LaserDeadSpotsDataFilter(config, logger, prefix, in_data_size, inbufs);
+  } else {
+    throw Exception("Unknown filter type %s", filter_type.c_str());
+  }
+}
+
