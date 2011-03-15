@@ -53,7 +53,7 @@ using namespace fawkes;
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-h] [-r host[:port]] <num_spots>\n"
+  printf("Usage: %s [-h] [-r host[:port]] <num_spots> <config_prefix>\n"
 	 " -h              This help message\n"
 	 " -r host[:port]  Remote host (and optionally port) to connect to\n"
 	 " -n <NUM>        Number of measurements to use, defaults to %u\n"
@@ -62,6 +62,7 @@ print_usage(const char *program_name)
 	 " -m <MARGIN_DEG> Margin in degree to add around dead spot regions\n"
 	 " -d              Dry-run, do not save results to configuration\n"
 	 " -b              Show data by opening a blackboard laser interface\n"
+	 " -i <ID>         Open laser interface named <ID>\n"
 	 "<num_spots>      Expected number of dead spots\n",
 	 program_name, DEFAULT_NUM_MEASUREMENTS, DEFAULT_WAIT_TIME,
 	 DEFAULT_COMPARE_DISTANCE);
@@ -430,7 +431,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:n:w:c:m:bd");
+  ArgumentParser argp(argc, argv, "hr:n:w:c:m:bdi:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -443,6 +444,8 @@ main(int argc, char **argv)
   long int wait_time        = DEFAULT_WAIT_TIME;
   float compare_distance    = DEFAULT_COMPARE_DISTANCE;
   float margin              = 0;
+  std::string interface_id  = "Laser";
+  std::string cfg_prefix    = "";
 
   if (argp.has_arg("n")) {
     num_measurements = argp.parse_int("n");
@@ -480,10 +483,27 @@ main(int argc, char **argv)
       return -4;
     }
   }
-  if (argp.num_items() != 1) {
+  if (argp.num_items() == 0) {
     printf("Number of expected dead spots not supplied\n\n");
     print_usage(argp.program_name());
     return -4;
+  } else if ((argp.num_items() == 1) && ! argp.has_arg("d") ) {
+    printf("Config prefix not given and not dry-run\n\n");
+    print_usage(argp.program_name());
+    return -4;
+  } else if (argp.num_items() > 2) {
+    printf("Too many arguments\n\n");
+    print_usage(argp.program_name());
+    return -4;
+  } else if (argp.num_items() == 2) {
+    cfg_prefix = argp.items()[1];
+    if (cfg_prefix[cfg_prefix.length() - 1] != '/') {
+      cfg_prefix += "/";
+    }
+  }
+
+  if (argp.has_arg("i")) {
+    interface_id =  argp.arg("i");
   }
   bool free_host = argp.parse_hostport("r", &host, &port);
 
@@ -507,8 +527,8 @@ main(int argc, char **argv)
   Laser360Interface *laser360 = NULL;
   Laser720Interface *laser720 = NULL;
   try {
-    laser360 = blackboard->open_for_reading<Laser360Interface>("Laser");
-    laser720 = blackboard->open_for_reading<Laser720Interface>("Laser");
+    laser360 = blackboard->open_for_reading<Laser360Interface>(interface_id.c_str());
+    laser720 = blackboard->open_for_reading<Laser720Interface>(interface_id.c_str());
   } catch (Exception &e) {
     printf("Failed to open blackboard interfaces");
     e.print_trace();
@@ -582,7 +602,7 @@ main(int argc, char **argv)
 
       for (unsigned int i = 0; i < dead_spots.size(); ++i) {
 	char *prefix;
-	if (asprintf(&prefix, "/hardware/laser/dead_spots/%u/", i) == -1) {
+	if (asprintf(&prefix, "%s%u/", cfg_prefix.c_str(), i) == -1) {
 	  printf("Failed to store dead spot %u, out of memory\n", i);
 	  continue;
 	}
