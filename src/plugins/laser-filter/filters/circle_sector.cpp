@@ -24,8 +24,8 @@
 
 #include <core/exception.h>
 #include <utils/math/angle.h>
-#include <cstdlib>
 #include <algorithm>
+#include <cstring>
 
 using namespace fawkes;
 
@@ -39,36 +39,41 @@ using namespace fawkes;
 /** Constructor.
  * @param from start angle (index in data)
  * @param to end angle (index in data)
+ * @param in_data_size number of entries in value arrays
+ * @param in vector of input arrays
  */
 LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(unsigned int from,
-							 unsigned int to)
+							 unsigned int to,
+							 unsigned int in_data_size,
+							 std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, in.size())
 {
   __from = from;
   __to   = to;
 }
 
-void
-LaserCircleSectorDataFilter::filter(const float *data, unsigned int data_size)
-{
-  if ( _filtered_data_size != data_size ) {
-    if (_filtered_data)  free(_filtered_data);
-    _filtered_data      = (float *)malloc(sizeof(float) * data_size);
-    _filtered_data_size = data_size;
-    for (unsigned int i = 0; i < data_size; ++i) {
-      _filtered_data[i] = 0;
-    }
-  }
 
-  if (__from > __to) {
-    for (unsigned int i = __from; i < data_size; ++i) {
-      _filtered_data[i] = data[i];
-    }
-    for (unsigned int i = 0; i <= std::min(__to, data_size-1); ++i) {
-      _filtered_data[i] = data[i];
-    }
-  } else {
-    for (unsigned int i = __from; i <= std::min(__to, data_size-1); ++i) {
-      _filtered_data[i] = data[i];
+void
+LaserCircleSectorDataFilter::filter()
+{
+  const unsigned int vecsize = std::min(in.size(), out.size());
+  const unsigned int arrsize = std::min(in_data_size, out_data_size);
+  for (unsigned int a = 0; a < vecsize; ++a) {
+    float *inbuf  = in[a];
+    float *outbuf = out[a];
+    memset(outbuf, 0, out_data_size);
+
+    if (__from > __to) {
+      for (unsigned int i = __from; i < arrsize; ++i) {
+	outbuf[i] = inbuf[i];
+      }
+      for (unsigned int i = 0; i <= std::min(__to, arrsize-1); ++i) {
+	outbuf[i] = inbuf[i];
+      }
+    } else {
+      for (unsigned int i = __from; i <= std::min(__to, arrsize-1); ++i) {
+	outbuf[i] = inbuf[i];
+      }
     }
   }
 }

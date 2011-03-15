@@ -28,9 +28,10 @@
 class Laser720to360DataFilter : public LaserDataFilter
 {
  public:
-  Laser720to360DataFilter(bool average = false);
+  Laser720to360DataFilter(bool average,
+			  unsigned int data_size, std::vector<float *> in);
 
-  void filter(const float *data, unsigned int data_size);
+  void filter();
 
  private:
   bool __average;

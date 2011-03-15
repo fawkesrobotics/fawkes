@@ -3,7 +3,7 @@
  *  deadspots.cpp - Laser data dead spots filter
  *
  *  Created: Wed Jun 24 22:42:51 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -48,10 +48,15 @@ using namespace fawkes;
  * @param config configuration instance
  * @param logger logger for informational output
  * @param prefix configuration prefix where to log for config information
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
  */
 LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(fawkes::Configuration *config,
 						   fawkes::Logger *logger,
-						   std::string prefix)
+						   std::string prefix,
+						   unsigned int in_data_size,
+						   std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, in.size())
 {
   __logger = logger;
 
@@ -101,6 +106,8 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(fawkes::Configuration *config
   if (__num_spots == 0) {
     throw Exception("Dead spots filter enabled but no calibration data exists. Run fflaser_deadspots.");
   }
+
+  calc_spots();
 }
 
 LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
@@ -110,33 +117,53 @@ LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
 
 
 void
-LaserDeadSpotsDataFilter::filter(const float *data, unsigned int data_size)
+LaserDeadSpotsDataFilter::set_out_vector(std::vector<float *> &out)
 {
-  if (unlikely(_filtered_data_size != data_size)) {
-    // need to calculate new beam ranges and allocate different memory segment
-    float angle_factor = 360.0 / data_size;
-    for (unsigned int i = 0; i < __num_spots; ++i) {
-      __dead_spots[i * 2    ] = std::min(data_size - 1, (unsigned int)ceilf(__cfg_dead_spots[i].first  / angle_factor));
-      __dead_spots[i * 2 + 1] = std::min(data_size - 1, (unsigned int)ceilf(__cfg_dead_spots[i].second / angle_factor));
-    }
-    if (_filtered_data)  free(_filtered_data);
-    _filtered_data      = (float *)malloc(sizeof(float) * data_size);
-    _filtered_data_size = data_size;
+  LaserDataFilter::set_out_vector(out);
+  calc_spots();
+}
+
+void
+LaserDeadSpotsDataFilter::calc_spots()
+{
+  if (in_data_size != out_data_size) {
+    throw Exception("Dead spots filter requires equal input and output data size");
   }
 
-  unsigned int start = 0;
+  // need to calculate new beam ranges and allocate different memory segment
+  float angle_factor = 360.0 / in_data_size;
   for (unsigned int i = 0; i < __num_spots; ++i) {
-    const unsigned int spot_start = __dead_spots[i * 2    ];
-    const unsigned int spot_end   = __dead_spots[i * 2 + 1];
-    for (unsigned int j = start; j < spot_start; ++j) {
-      _filtered_data[j] = data[j];
-    }
-    for (unsigned int j = spot_start; j <= spot_end; ++j) {
-      _filtered_data[j] = 0.0;
-    }
-    start = spot_end + 1;
+    __dead_spots[i * 2    ] =
+      std::min(in_data_size - 1,
+	       (unsigned int)ceilf(__cfg_dead_spots[i].first / angle_factor));
+    __dead_spots[i * 2 + 1] =
+      std::min(in_data_size - 1,
+	       (unsigned int)ceilf(__cfg_dead_spots[i].second / angle_factor));
   }
-  for (unsigned int j = start; j < data_size; ++j) {
-    _filtered_data[j] = data[j];
+}
+
+void
+LaserDeadSpotsDataFilter::filter()
+{
+  const unsigned int vecsize = std::min(in.size(), out.size());
+  for (unsigned int a = 0; a < vecsize; ++a) {
+    float *inbuf  = in[a];
+    float *outbuf = out[a];
+
+    unsigned int start = 0;
+    for (unsigned int i = 0; i < __num_spots; ++i) {
+      const unsigned int spot_start = __dead_spots[i * 2    ];
+      const unsigned int spot_end   = __dead_spots[i * 2 + 1];
+      for (unsigned int j = start; j < spot_start; ++j) {
+	outbuf[j] = inbuf[j];
+      }
+      for (unsigned int j = spot_start; j <= spot_end; ++j) {
+	outbuf[j] = 0.0;
+      }
+      start = spot_end + 1;
+    }
+    for (unsigned int j = start; j < in_data_size; ++j) {
+      outbuf[j] = inbuf[j];
+    }
   }
 }

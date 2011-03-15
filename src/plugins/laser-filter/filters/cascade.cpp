@@ -29,21 +29,39 @@
  */
 
 /** Constructor.
- * @param own_filters true to make the cascade own filters that are added, i.e.
- * they are deleted if the cascade is deleted.
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
  */
-LaserDataFilterCascade::LaserDataFilterCascade(bool own_filters)
+LaserDataFilterCascade::LaserDataFilterCascade(unsigned int in_data_size,
+					       std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, 0)
 {
-  _free_filtered_data = false;
-  __own_filters       = own_filters;
+  out_data_size = in_data_size;
+  out = in;
+  set_array_ownership(false, false);
 }
 
 
 /** Destructor. */
 LaserDataFilterCascade::~LaserDataFilterCascade()
 {
-  if (__own_filters)  delete_filters();
+  delete_filters();
 }
+
+
+/** Set filtered data array
+ * @param out vector of output values. The vector is only accepted if it has
+ * the same size as the current one. The filter will now longer assume
+ * ownership of the arrays in the vector. Either free the memory or call
+ * set_array_ownership().
+ */
+void
+LaserDataFilterCascade::set_out_vector(std::vector<float *> &out)
+{
+  __filters.back()->set_out_vector(out);
+  this->out = __filters.back()->get_out_vector();
+}
+
 
 
 /** Add a filter to the cascade.
@@ -53,6 +71,8 @@ void
 LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 {
   __filters.push_back(filter);
+  out_data_size = filter->get_out_data_size();
+  out = filter->get_out_vector();
 }
 
 
@@ -78,13 +98,9 @@ LaserDataFilterCascade::delete_filters()
 
 
 void
-LaserDataFilterCascade::filter(const float *data, unsigned int data_size)
+LaserDataFilterCascade::filter()
 {
-  float *d = (float *)data;
   for (__fit = __filters.begin(); __fit != __filters.end(); ++__fit) {
-    (*__fit)->filter(d, data_size);
-    (*__fit)->filtered_data(d, data_size);
+    (*__fit)->filter();
   }
-  _filtered_data = (float *)d;
-  _filtered_data_size = data_size;
 }

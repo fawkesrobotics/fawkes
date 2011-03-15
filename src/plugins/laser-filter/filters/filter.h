@@ -23,21 +23,42 @@
 #ifndef __PLUGINS_LASER_FILTER_FILTER_H_
 #define __PLUGINS_LASER_FILTER_FILTER_H_
 
+#include <vector>
+
 class LaserDataFilter
 {
  public:
-  LaserDataFilter();
+  LaserDataFilter(unsigned int in_data_size,
+		  std::vector<float *> in, unsigned int out_size);
   virtual ~LaserDataFilter();
 
-  virtual float *       filtered_data();
-  virtual unsigned int  filtered_data_size();
-  virtual void          filtered_data(float *&data, unsigned int &data_size);
-  virtual void          filter(const float *data, unsigned int data_size)   = 0;
+  virtual std::vector<float *> & get_out_vector();
+  virtual void                   set_out_vector(std::vector<float *> &out);
+  virtual unsigned int           get_out_data_size();
+
+  virtual void                   filter()   = 0;
+
+  void  set_array_ownership(bool own_in, bool own_out);
+  /** Check if input arrays are owned by filter.
+   * @return true if arrays are owned by this filter, false otherwise. */
+  bool  owns_in()  const { return __own_in;  };
+  /** Check if output arrays are owned by filter.
+   * @return true if arrays are owned by this filter, false otherwise. */
+  bool  owns_out() const { return __own_out; };
 
  protected:
-  float        *_filtered_data;
-  unsigned int  _filtered_data_size;
-  bool          _free_filtered_data;
+  virtual void set_out_data_size(unsigned int data_size);
+
+
+ protected:
+  unsigned int         out_data_size;
+  unsigned int         in_data_size;
+  std::vector<float *> in;
+  std::vector<float *> out;
+
+ private:
+  bool __own_in;
+  bool __own_out;
 };
 
 

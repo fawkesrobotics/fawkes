@@ -25,7 +25,7 @@
 #include <utils/math/angle.h>
 #include <cstdlib>
 
-/** @class LaserMinCircleDataFilter "circle.h"
+/** @class LaserMinCircleDataFilter "min_circle.h"
  * Erase beams below a certain minimum distance distance.
  * All beams shorter than a given radius are erase (set to 0).
  * @author Tim Niemueller
@@ -33,26 +33,32 @@
 
 /** Constructor.
  * @param radius radius of cut-off circle in meters
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
  */
-LaserMinCircleDataFilter::LaserMinCircleDataFilter(float radius)
+LaserMinCircleDataFilter::LaserMinCircleDataFilter(float radius,
+						   unsigned int in_data_size,
+						   std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, in.size())
 {
   __radius = radius;
 }
 
-void
-LaserMinCircleDataFilter::filter(const float *data, unsigned int data_size)
-{
-  if ( _filtered_data_size != data_size ) {
-    if (_filtered_data)  free(_filtered_data);
-    _filtered_data      = (float *)malloc(sizeof(float) * data_size);
-    _filtered_data_size = data_size;
-  }
 
-  for (unsigned int i = 0; i < data_size; ++i) {
-    if (data[i] < __radius) {
-      _filtered_data[i] = 0;
-    } else {
-      _filtered_data[i] = data[i];
+void
+LaserMinCircleDataFilter::filter()
+{
+  const unsigned int vecsize = std::min(in.size(), out.size());
+  const unsigned int arrsize = std::min(in_data_size, out_data_size);
+  for (unsigned int a = 0; a < vecsize; ++a) {
+    float *inbuf  = in[a];
+    float *outbuf = out[a];
+    for (unsigned int i = 0; i < arrsize; ++i) {
+      if (inbuf[i] < __radius) {
+	outbuf[i] = 0;
+      } else {
+	outbuf[i] = inbuf[i];
+      }
     }
   }
 }

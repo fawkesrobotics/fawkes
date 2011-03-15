@@ -30,8 +30,10 @@
 class LaserDataFilterCascade : public LaserDataFilter
 {
  public:
-  LaserDataFilterCascade(bool own_filters = true);
+  LaserDataFilterCascade(unsigned int data_size, std::vector<float *> in);
   ~LaserDataFilterCascade();
+
+  virtual void set_out_vector(std::vector<float *> &out);
 
   void add_filter(LaserDataFilter *filter);
   void remove_filter(LaserDataFilter *filter);
@@ -41,12 +43,16 @@ class LaserDataFilterCascade : public LaserDataFilter
    * @return true if filters have been registered, false otherwise */
   inline bool has_filters() const { return ! __filters.empty(); }
 
-  void filter(const float *data, unsigned int data_size);
+  void filter();
+
+  /** Get filters.
+   * @return list of active filters. */
+  const std::list<LaserDataFilter *> &  get_filters() const { return __filters; }
 
  private:
-  bool                                   __own_filters;
   std::list<LaserDataFilter *>           __filters;
   std::list<LaserDataFilter *>::iterator __fit;
 };
+
 
 #endif

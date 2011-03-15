@@ -34,29 +34,39 @@
 /** Constructor.
  * @param average if true, beams will be averaged by left and right neighbours,
  * otherwise every second beam will be used
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
  */
-Laser720to360DataFilter::Laser720to360DataFilter(bool average)
+Laser720to360DataFilter::Laser720to360DataFilter(bool average,
+						 unsigned int in_data_size,
+						 std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, in.size())
 {
-  __average           = average;
-  _filtered_data      = (float *)malloc(sizeof(float) * 360);
-  _filtered_data_size = 360;
+  if (in_data_size != 720) {
+    throw fawkes::Exception("720to360 filter needs input array size of "
+			    "720 entries");
+  }
+  set_out_data_size(360);
+  __average = average;
 }
 
 void
-Laser720to360DataFilter::filter(const float *data, unsigned int data_size)
+Laser720to360DataFilter::filter()
 {
-  if ( data_size != 720 ) {
-    throw fawkes::Exception("Expected 720 values, but got %u", data_size);
-  }
+  const unsigned int vecsize = std::min(in.size(), out.size());
+  for (unsigned int a = 0; a < vecsize; ++a) {
+    float *inbuf  = in[a];
+    float *outbuf = out[a];
 
-  if (__average) {
-    _filtered_data[0] = (data[719] / data[0]) / 2.0;
-    for (unsigned int i = 1; i < 360; ++i) {
-      _filtered_data[i] = (data[i * 2 - 1] + data[i * 2 + 1]) / 2.0;
-    }
-  } else {
-    for (unsigned int i = 0; i < 360; ++i) {
-      _filtered_data[i] = data[i * 2];
+    if (__average) {
+      outbuf[0] = (inbuf[719] / inbuf[0]) / 2.0;
+      for (unsigned int i = 1; i < 360; ++i) {
+	outbuf[i] = (inbuf[i * 2 - 1] + inbuf[i * 2 + 1]) / 2.0;
+      }
+    } else {
+      for (unsigned int i = 0; i < 360; ++i) {
+	outbuf[i] = inbuf[i * 2];
+      }
     }
   }
 }

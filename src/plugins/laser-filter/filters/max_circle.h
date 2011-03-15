@@ -28,9 +28,10 @@
 class LaserMaxCircleDataFilter : public LaserDataFilter
 {
  public:
-  LaserMaxCircleDataFilter(float radius);
+  LaserMaxCircleDataFilter(float radius,
+			   unsigned int in_data_size, std::vector<float *> in);
 
-  void filter(const float *data, unsigned int data_size);
+  void filter();
 
  private:
   float  __radius;

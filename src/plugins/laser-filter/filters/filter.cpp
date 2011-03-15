@@ -21,6 +21,8 @@
  */
 
 #include "filter.h"
+#include <core/exception.h>
+
 #include <cstdlib>
 
 /** @class LaserDataFilter "filter.h"
@@ -29,41 +31,67 @@
  * readings as input, mangle them and return a new array of filtered laser data.
  * @author Tim Niemueller
  *
- * @fn void LaserDataFilter::filter(const float *data, unsigned int data_size) = 0
+ * @fn void LaserDataFilter::filter() = 0
  * Filter the incoming data.
- * Function shall create the _filtered_data float array with the same size as
- * the incoming data and write filtered data to this interface or copy through
- * the original value if the filter does not apply.
- * @param data the laser data
- * @param data_size the number of elements in the data array
+ * Function shall filter the data in the "in" member vector and write output
+ * to the "out" member vector.
  */
 
-/** @var LaserDataFilter::_filtered_data
- * Allocate a float array and assign your filtered values or copy through the
- * original values if unmodified.
+/** @var LaserDataFilter::in
+ * Vector of input arrays.
+ * Each entry in the vector is an array of data_size entries. It depends on
+ * the filter how multiple inputs are processed.
  */
 
-/** @var LaserDataFilter::_filtered_data_size
- * Size in bytes of _filtered_data.
+/** @var LaserDataFilter::out
+ * Vector of output arrays.
+ * Each entry in the vector is an array of data_size entries. It depends on
+ * the filter how multiple outputs are generated.
  */
 
-/** @var LaserDataFilter::_free_filtered_data
- * True to have _filtered_data deleted automatically on destruction.
+/** @var LaserDataFilter::in_data_size
+ * Number of entries in input arrays.
  */
 
-/** Constructor. */
-LaserDataFilter::LaserDataFilter()
+/** @var LaserDataFilter::out_data_size
+ * Number of entries in output arrays.
+ */
+
+/** Constructor.
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
+ * @param out_size number of value arrays to generate in out vector
+ */
+LaserDataFilter::LaserDataFilter(unsigned int in_data_size,
+				 std::vector<float *> in, unsigned int out_size)
 {
-  _filtered_data      = NULL;
-  _filtered_data_size = 0;
-  _free_filtered_data = true;
+  this->in            = in;
+  this->in_data_size  = in_data_size;
+  this->out_data_size = in_data_size; // yes, in_data_size!
+
+  if (out_size > 0)  out.resize(out_size);
+  for (unsigned int i = 0; i < out_size; ++i) {
+    out[i] = (float *)malloc(out_data_size * sizeof(float));
+  }
+
+  __own_in  = false;
+  __own_out = true;
 }
 
 
 /** Virtual empty destructor. */
 LaserDataFilter::~LaserDataFilter()
 {
-  if (_filtered_data && _free_filtered_data)  free(_filtered_data);
+  if (__own_in) {
+    for (unsigned int i = 0; i < in.size(); ++i) {
+      free(in[i]);
+    }
+  }
+  if (__own_out) {
+    for (unsigned int i = 0; i < out.size(); ++i) {
+      free(out[i]);
+    }
+  }
 }
 
 
@@ -71,10 +99,58 @@ LaserDataFilter::~LaserDataFilter()
  * @return a float array of the same size as the last array given to filter()
  * or NULL if filter() was never called.
  */
-float *
-LaserDataFilter::filtered_data()
+std::vector<float *> &
+LaserDataFilter::get_out_vector()
 {
-  return _filtered_data;
+  return out;
+}
+
+/** Set filtered data array
+ * @param out vector of output values. The vector is only accepted if it has
+ * the same size as the current one. The filter will now longer assume
+ * ownership of the arrays in the vector. Either free the memory or call
+ * set_array_ownership().
+ */
+void
+LaserDataFilter::set_out_vector(std::vector<float *> &out)
+{
+  if (this->out.size() != out.size()) {
+    throw fawkes::Exception("Filter out vector size mismatch: %zu vs. %zu",
+			    this->out.size(), out.size());
+  }
+
+  if (__own_out) {
+    for (unsigned int i = 0; i < this->out.size(); ++i) {
+      free(this->out[i]);
+    }
+  }
+  this->out.clear();
+
+  this->out = out;
+  __own_out = false;
+}
+
+
+/** Resize output arrays.
+ * A side effect is that the output array size will be owned afterwards.
+ * Call this method only in constructors! Note that the output arrays are
+ * only recreated if own by the filter. If you passed an out vector you have
+ * to make sure the contained arrays fit (before calling set_out_vector()!).
+ * @param data_size number of entries in output arrays.
+ */
+void
+LaserDataFilter::set_out_data_size(unsigned int data_size)
+{
+  if (out_data_size != data_size) {
+    if (__own_out) {
+      for (unsigned int i = 0; i < out.size(); ++i) {
+	free(out[i]);
+	out[i] = (float *)malloc(data_size * sizeof(float));
+      }
+    }
+  }
+
+  out_data_size = data_size;
 }
 
 
@@ -82,19 +158,20 @@ LaserDataFilter::filtered_data()
  * @return size of filtered data array or 0 if filter() was never called.
  */
 unsigned int
-LaserDataFilter::filtered_data_size()
+LaserDataFilter::get_out_data_size()
 {
-  return _filtered_data_size;
+  return out_data_size;
 }
 
 
-/** Get filtered data array and size.
- * @param data upon return contains pointer to filtered data
- * @param data_size upon return contains data size
+/** Set input/output array ownership.
+ * Owned arrays will be freed on destruction or when setting new arrays.
+ * @param own_in true to assign ownership of input arrays, false otherwise
+ * @param own_out true to assign ownership of output arrays, false otherwise
  */
 void
-LaserDataFilter::filtered_data(float *&data, unsigned int &data_size)
+LaserDataFilter::set_array_ownership(bool own_in, bool own_out)
 {
-  data      = _filtered_data;
-  data_size = _filtered_data_size;
+  __own_in  = own_in;
+  __own_out = own_out;
 }

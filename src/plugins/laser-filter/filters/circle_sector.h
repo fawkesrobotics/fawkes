@@ -28,9 +28,10 @@
 class LaserCircleSectorDataFilter : public LaserDataFilter
 {
  public:
-  LaserCircleSectorDataFilter(unsigned int from, unsigned int to);
+  LaserCircleSectorDataFilter(unsigned int from, unsigned int to,
+			      unsigned int data_size, std::vector<float *> in);
 
-  void filter(const float *data, unsigned int data_size);
+  void filter();
 
  private:
   unsigned int __from;

@@ -33,26 +33,31 @@
 
 /** Constructor.
  * @param radius radius of cut-off circle in meters
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
  */
-LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(float radius)
+LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(float radius,
+						   unsigned int in_data_size,
+						   std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, in.size())
 {
   __radius = radius;
 }
 
 void
-LaserMaxCircleDataFilter::filter(const float *data, unsigned int data_size)
+LaserMaxCircleDataFilter::filter()
 {
-  if ( _filtered_data_size != data_size ) {
-    if (_filtered_data)  free(_filtered_data);
-    _filtered_data      = (float *)malloc(sizeof(float) * data_size);
-    _filtered_data_size = data_size;
-  }
-
-  for (unsigned int i = 0; i < data_size; ++i) {
-    if (data[i] > __radius) {
-      _filtered_data[i] = __radius;
-    } else {
-      _filtered_data[i] = data[i];
+  const unsigned int vecsize = std::min(in.size(), out.size());
+  const unsigned int arrsize = std::min(in_data_size, out_data_size);
+  for (unsigned int a = 0; a < vecsize; ++a) {
+    float *inbuf  = in[a];
+    float *outbuf = out[a];
+    for (unsigned int i = 0; i < arrsize; ++i) {
+      if (inbuf[i] > __radius) {
+	outbuf[i] = __radius;
+      } else {
+	outbuf[i] = inbuf[i];
+      }
     }
   }
 }
