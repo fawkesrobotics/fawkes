@@ -146,7 +146,11 @@ end
 
 function GOTO:init()
    local x, y, z = self.fsm.vars.x, self.fsm.vars.y, self.fsm.vars.z
-   local phi, theta, psi = 0, 0, 0
+   --local phi, theta, psi = 0, 0, 0
+   local phi = math.pi/2 + math.atan2(y,x)
+   local theta = math.pi/2
+   local psi = -math.pi/2
+
    if self.fsm.vars.phi   ~= nil then phi   = self.fsm.vars.phi end
    if self.fsm.vars.theta ~= nil then theta = self.fsm.vars.theta end
    if self.fsm.vars.psi   ~= nil then psi   = self.fsm.vars.psi end
