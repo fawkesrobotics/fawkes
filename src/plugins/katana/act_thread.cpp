@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cstdarg>
 #include <kniBase.h>
+#include <common/MathHelperFunctions.h>
 
 using namespace fawkes;
 
@@ -100,6 +101,17 @@ KatanaActThread::init()
     throw fawkes::Exception(e.what());
   }
 
+  try {
+    __motor_init.resize(__katana->getNumberOfMotors());
+    for(unsigned int i=0; i<__motor_init.size(); i++) {
+      __motor_init.at(i) = *(__katbase->GetMOT()->arr[i].GetInitialParameters());
+    }
+
+    logger->log_debug(name(), "Katana initial motor parameters successfully loaded");
+  } catch (/*KNI*/::Exception &e) {
+    throw fawkes::Exception(e.what());
+  }
+
   // If you have more than one interface: catch exception and close them!
   __katana_if = blackboard->open_for_writing<KatanaInterface>("Katana");
 
@@ -107,6 +119,7 @@ KatanaActThread::init()
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
   __gripper_thread = new KatanaGripperThread(__katana, logger,
 					     __cfg_gripper_pollint);
+  __motor_control_thread = new KatanaMotorControlThread(__katana, logger, __cfg_goto_pollint);
   __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
 #ifdef HAVE_OPENRAVE
   __goto_openrave_thread = new KatanaGotoOpenRAVEThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
@@ -144,6 +157,7 @@ KatanaActThread::finalize()
   __calib_thread   = NULL;
   __goto_thread    = NULL;
   __gripper_thread = NULL;
+  __motor_control_thread = NULL;
 #ifdef HAVE_OPENRAVE
    if(__cfg_OR_enabled)
     {__goto_openrave_thread->finalize();}
@@ -235,6 +249,26 @@ KatanaActThread::update_sensors(bool refresh)
   if (refresh) __sensacq_thread->wakeup();
 }
 
+
+/** Update motor encoder and angle data in BB interface.
+ * @param refresh recv new data from arm
+ */
+void
+KatanaActThread::update_motors(bool refresh)
+{
+  try {
+    std::vector<int> encoders = __katana->getRobotEncoders(refresh);
+
+    for(unsigned int i=0; i<encoders.size(); i++) {
+      __katana_if->set_encoders(i, encoders.at(i));
+      __katana_if->set_angles(i, KNI_MHF::enc2rad( encoders.at(i), __motor_init.at(i).angleOffset, __motor_init.at(i).encodersPerCycle, __motor_init.at(i).encoderOffset, __motor_init.at(i).rotationDirection));
+    }
+  } catch (/*KNI*/::Exception &e) {
+    logger->log_warn(name(), "Updating motor values failed: %s", e.what());
+  }
+}
+
+
 /** Start a motion.
  * @param motion_thread motion thread to start
  * @param msgid BB message  ID of message that caused the motion
@@ -281,6 +315,7 @@ KatanaActThread::loop()
 {
   if ( __actmot_thread ) {
     update_position(/* refresh */ false);
+    update_motors(/* refresh */ false);
     __katana_if->write();
     if (! __actmot_thread->finished()) {
       return;
@@ -376,6 +411,7 @@ KatanaActThread::loop()
 	  logger->log_debug(name(), "Turning ON the arm");
 	  __katana->switchRobotOn();
 	  update_position(/* refresh */ true);
+          update_motors(/* refresh */ true);
 #ifdef HAVE_OPENRAVE
 	    if(__cfg_OR_enabled)
 	      {__goto_openrave_thread->update_openrave_data();}
@@ -397,6 +433,30 @@ KatanaActThread::loop()
 
       __katana->setRobotVelocityLimit(max_vel);
       __katana_if->set_max_velocity(max_vel);
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::SetMotorEncoderMessage>()) {
+      KatanaInterface::SetMotorEncoderMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_encoder(msg->nr(), msg->enc(), false);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::MoveMotorEncoderMessage>()) {
+      KatanaInterface::MoveMotorEncoderMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_encoder(msg->nr(), msg->enc(), true);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::SetMotorAngleMessage>()) {
+      KatanaInterface::SetMotorAngleMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_angle(msg->nr(), msg->angle(), false);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::MoveMotorAngleMessage>()) {
+      KatanaInterface::MoveMotorAngleMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_angle(msg->nr(), msg->angle(), true);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
 
     } else {
       logger->log_warn(name(), "Unknown message received");

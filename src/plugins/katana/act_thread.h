@@ -29,6 +29,7 @@
 #include "goto_openrave_thread.h"
 #include "gripper_thread.h"
 #include "sensacq_thread.h"
+#include "motor_control_thread.h"
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -54,6 +55,7 @@ class CCplSerialCRC;
 class CLMBase;
 class CKatBase;
 class CSctBase;
+class TMotInit;
 
 class KatanaActThread
 : public fawkes::Thread,
@@ -87,6 +89,7 @@ class KatanaActThread
   void stop_motion();
   void update_position(bool refresh);
   void update_sensors(bool refresh);
+  void update_motors(bool refresh);
   void start_motion(fawkes::RefPtr<KatanaMotionThread> motion_thread,
 		    unsigned int msgid, const char *logmsg, ...);
 
@@ -118,6 +121,7 @@ class KatanaActThread
   fawkes::RefPtr<KatanaCalibrationThread>      __calib_thread;
   fawkes::RefPtr<KatanaGotoThread>             __goto_thread;
   fawkes::RefPtr<KatanaGripperThread>          __gripper_thread;
+  fawkes::RefPtr<KatanaMotorControlThread>     __motor_control_thread;
 #ifdef HAVE_OPENRAVE
   fawkes::RefPtr<KatanaGotoOpenRAVEThread>     __goto_openrave_thread;
 #endif
@@ -127,6 +131,8 @@ class KatanaActThread
   std::auto_ptr<CCplSerialCRC>   __protocol;
   CKatBase                      *__katbase;
   CSctBase                      *__sensor_ctrl;
+  std::vector<TMotInit>          __motor_init;
+
 #ifdef USE_TIMETRACKER
   std::auto_ptr<fawkes::TimeTracker> __tt;
   unsigned int __tt_count;
