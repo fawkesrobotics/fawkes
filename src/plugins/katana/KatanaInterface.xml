@@ -89,6 +89,9 @@
     <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
     <field type="float" name="psi">Euler angle Psi of tool orientation..</field>
 
+    <field type="int32" length="6" name="encoders">Encoder values of motors</field>
+    <field type="float" length="6" name="angles">Angle values of motors</field>
+
     <field type="uint32" name="msgid">The ID of the message that is currently being
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
@@ -141,5 +144,25 @@
   <message name="SetMaxVelocity">
     <comment>Sets maximum velocity for the arm. Set to 0 to use default.</comment>
     <ref>max_velocity</ref>
+  </message>
+  <message name="SetMotorEncoder">
+    <comment>Sets absolute motor encoder</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="uint32" name="enc">Encoder value</field>
+  </message>
+  <message name="MoveMotorEncoder">
+    <comment>Increases/Decreases motor encoder by a given value</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="uint32" name="enc">Encoder value</field>
+  </message>
+  <message name="SetMotorAngle">
+    <comment>Sets absolute motor angle</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="float" name="angle">Angle value (positive: increase; negative: decrease)</field>
+  </message>
+  <message name="MoveMotorAngle">
+    <comment>Increases/Decreases motor angle by a given value</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="float" name="angle">Angle value (positive: increase; negative: decrease)</field>
   </message>
 </interface>

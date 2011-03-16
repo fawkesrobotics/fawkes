@@ -77,6 +77,8 @@ class KatanaInterface : public Interface
     float phi; /**< Euler angle Phi of tool orientation. */
     float theta; /**< Euler angle Theta of tool orientation. */
     float psi; /**< Euler angle Psi of tool orientation.. */
+    int32_t encoders[6]; /**< Encoder values of motors */
+    float angles[6]; /**< Angle values of motors */
     uint32_t msgid; /**< The ID of the message that is currently being
       processed, or 0 if no message is being processed. */
     bool final; /**< True, if the last goto command has been finished,
@@ -362,6 +364,130 @@ class KatanaInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetMotorEncoderMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t nr; /**< Motor number */
+      uint32_t enc; /**< Encoder value */
+    } SetMotorEncoderMessage_data_t;
+#pragma pack(pop)
+
+    SetMotorEncoderMessage_data_t *data;
+
+   public:
+    SetMotorEncoderMessage(const uint32_t ini_nr, const uint32_t ini_enc);
+    SetMotorEncoderMessage();
+    ~SetMotorEncoderMessage();
+
+    SetMotorEncoderMessage(const SetMotorEncoderMessage *m);
+    /* Methods */
+    uint32_t nr() const;
+    void set_nr(const uint32_t new_nr);
+    size_t maxlenof_nr() const;
+    uint32_t enc() const;
+    void set_enc(const uint32_t new_enc);
+    size_t maxlenof_enc() const;
+    virtual Message * clone() const;
+  };
+
+  class MoveMotorEncoderMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t nr; /**< Motor number */
+      uint32_t enc; /**< Encoder value */
+    } MoveMotorEncoderMessage_data_t;
+#pragma pack(pop)
+
+    MoveMotorEncoderMessage_data_t *data;
+
+   public:
+    MoveMotorEncoderMessage(const uint32_t ini_nr, const uint32_t ini_enc);
+    MoveMotorEncoderMessage();
+    ~MoveMotorEncoderMessage();
+
+    MoveMotorEncoderMessage(const MoveMotorEncoderMessage *m);
+    /* Methods */
+    uint32_t nr() const;
+    void set_nr(const uint32_t new_nr);
+    size_t maxlenof_nr() const;
+    uint32_t enc() const;
+    void set_enc(const uint32_t new_enc);
+    size_t maxlenof_enc() const;
+    virtual Message * clone() const;
+  };
+
+  class SetMotorAngleMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t nr; /**< Motor number */
+      float angle; /**< Angle value (positive: increase; negative: decrease) */
+    } SetMotorAngleMessage_data_t;
+#pragma pack(pop)
+
+    SetMotorAngleMessage_data_t *data;
+
+   public:
+    SetMotorAngleMessage(const uint32_t ini_nr, const float ini_angle);
+    SetMotorAngleMessage();
+    ~SetMotorAngleMessage();
+
+    SetMotorAngleMessage(const SetMotorAngleMessage *m);
+    /* Methods */
+    uint32_t nr() const;
+    void set_nr(const uint32_t new_nr);
+    size_t maxlenof_nr() const;
+    float angle() const;
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    virtual Message * clone() const;
+  };
+
+  class MoveMotorAngleMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t nr; /**< Motor number */
+      float angle; /**< Angle value (positive: increase; negative: decrease) */
+    } MoveMotorAngleMessage_data_t;
+#pragma pack(pop)
+
+    MoveMotorAngleMessage_data_t *data;
+
+   public:
+    MoveMotorAngleMessage(const uint32_t ini_nr, const float ini_angle);
+    MoveMotorAngleMessage();
+    ~MoveMotorAngleMessage();
+
+    MoveMotorAngleMessage(const MoveMotorAngleMessage *m);
+    /* Methods */
+    uint32_t nr() const;
+    void set_nr(const uint32_t new_nr);
+    size_t maxlenof_nr() const;
+    float angle() const;
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   KatanaInterface();
@@ -392,6 +518,16 @@ class KatanaInterface : public Interface
   float psi() const;
   void set_psi(const float new_psi);
   size_t maxlenof_psi() const;
+  int32_t * encoders() const;
+  int32_t encoders(unsigned int index) const;
+  void set_encoders(unsigned int index, const int32_t new_encoders);
+  void set_encoders(const int32_t * new_encoders);
+  size_t maxlenof_encoders() const;
+  float * angles() const;
+  float angles(unsigned int index) const;
+  void set_angles(unsigned int index, const float new_angles);
+  void set_angles(const float * new_angles);
+  size_t maxlenof_angles() const;
   uint32_t msgid() const;
   void set_msgid(const uint32_t new_msgid);
   size_t maxlenof_msgid() const;

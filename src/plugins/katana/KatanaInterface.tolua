@@ -130,6 +130,62 @@ class KatanaInterface : public Interface
     int maxlenof_max_velocity() const;
   };
 
+  class SetMotorEncoderMessage : public Message
+  {
+    SetMotorEncoderMessage(unsigned int ini_nr, unsigned int ini_enc);
+    SetMotorEncoderMessage();
+    ~SetMotorEncoderMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    unsigned int enc();
+    void set_enc(const unsigned int new_enc);
+    int maxlenof_enc() const;
+  };
+
+  class MoveMotorEncoderMessage : public Message
+  {
+    MoveMotorEncoderMessage(unsigned int ini_nr, unsigned int ini_enc);
+    MoveMotorEncoderMessage();
+    ~MoveMotorEncoderMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    unsigned int enc();
+    void set_enc(const unsigned int new_enc);
+    int maxlenof_enc() const;
+  };
+
+  class SetMotorAngleMessage : public Message
+  {
+    SetMotorAngleMessage(unsigned int ini_nr, float ini_angle);
+    SetMotorAngleMessage();
+    ~SetMotorAngleMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    float angle();
+    void set_angle(const float new_angle);
+    int maxlenof_angle() const;
+  };
+
+  class MoveMotorAngleMessage : public Message
+  {
+    MoveMotorAngleMessage(unsigned int ini_nr, float ini_angle);
+    MoveMotorAngleMessage();
+    ~MoveMotorAngleMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    float angle();
+    void set_angle(const float new_angle);
+    int maxlenof_angle() const;
+  };
+
   unsigned int sensor_value(int index);
   void set_sensor_value(unsigned int index, const unsigned char new_sensor_value);
   int maxlenof_sensor_value() const;
@@ -151,6 +207,12 @@ class KatanaInterface : public Interface
   float psi();
   void set_psi(const float new_psi);
   int maxlenof_psi() const;
+  int encoders(int index);
+  void set_encoders(unsigned int index, const int new_encoders);
+  int maxlenof_encoders() const;
+  float angles(int index);
+  void set_angles(unsigned int index, const float new_angles);
+  int maxlenof_angles() const;
   unsigned int msgid();
   void set_msgid(const unsigned int new_msgid);
   int maxlenof_msgid() const;
