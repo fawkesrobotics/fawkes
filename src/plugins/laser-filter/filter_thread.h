@@ -54,6 +54,11 @@ class LaserFilterThread
   virtual void finalize();
   virtual void loop();
 
+  void wait_done();
+
+  void set_wait_threads(std::list<LaserFilterThread *> &threads);
+  void set_wait_barrier(fawkes::Barrier *barrier);
+
  private:
   typedef struct {
     bool               is_360;
@@ -65,7 +70,8 @@ class LaserFilterThread
 		       std::vector<float *> &bufs, bool writing);
 
   LaserDataFilter *  create_filter(std::string filter_type, std::string prefix,
-				   unsigned int in_data_size, std::vector<float *> &inbufs);
+				   unsigned int in_data_size,
+				   std::vector<float *> &inbufs);
 
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -84,6 +90,14 @@ class LaserFilterThread
 
   std::string      __cfg_name;
   std::string      __cfg_prefix;
+
+
+
+  std::list<LaserFilterThread *>  __wait_threads;
+  bool                            __wait_done;
+  fawkes::Mutex                  *__wait_mutex;
+  fawkes::WaitCondition          *__wait_cond;
+  fawkes::Barrier                *__wait_barrier;
 };
 
 

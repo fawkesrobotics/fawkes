@@ -29,6 +29,10 @@
 #include "filters/min_circle.h"
 #include "filters/circle_sector.h"
 
+#include <core/threading/barrier.h>
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
+
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
 
@@ -58,13 +62,13 @@ LaserFilterThread::LaserFilterThread(std::string &cfg_name,
   set_name("LaserFilterThread(%s)", cfg_name.c_str());
   __cfg_name   = cfg_name;
   __cfg_prefix = cfg_prefix;
+  __wait_barrier = NULL;
 }
 
 
 void
 LaserFilterThread::init()
 {
-  // Get input interfaces
   try {
     open_interfaces(__cfg_prefix + "in/", __in, __in_bufs, false);
     open_interfaces(__cfg_prefix + "out/", __out, __out_bufs, true);
@@ -92,8 +96,8 @@ LaserFilterThread::init()
 	throw Exception("Filter value %s is not a string", i->path());
       }
 
-      logger->log_debug(name(), "Cascade %s - adding filter %s (%s)",
-			__cfg_name.c_str(), filter_name.c_str(), i->get_string().c_str());
+      logger->log_debug(name(), "Adding filter %s (%s)",
+			filter_name.c_str(), i->get_string().c_str());
 
       filters[filter_name] = i->get_string();
     }
@@ -147,6 +151,15 @@ LaserFilterThread::init()
     }
     throw;
   }
+
+  std::list<LaserFilterThread *>::iterator wt;
+  for (wt = __wait_threads.begin(); wt != __wait_threads.end(); ++wt) {
+    logger->log_debug(name(), "Depending on %s", (*wt)->name());
+  }
+
+  __wait_done  = true;
+  __wait_mutex = new Mutex();
+  __wait_cond  = new WaitCondition(__wait_mutex);
 }
 
 
@@ -154,6 +167,8 @@ void
 LaserFilterThread::finalize()
 {
   delete __filter;
+  delete __wait_cond;
+  delete __wait_mutex;
 
   for (unsigned int i = 0; i < __in.size(); ++i) {
     blackboard->close(__in[i].interface);
@@ -168,16 +183,54 @@ LaserFilterThread::finalize()
 void
 LaserFilterThread::loop()
 {
+  // Wait for dependencies
+  if (__wait_barrier) {
+    std::list<LaserFilterThread *>::iterator wt;
+    for (wt = __wait_threads.begin(); wt != __wait_threads.end(); ++wt) {
+      (*wt)->wait_done();
+    }
+  }
+
+  // Read input interfaces
   std::vector<LaserInterface>::iterator i;
   for (i = __in.begin(); i != __in.end(); ++i) {
     i->interface->read();
   }
-  
+
+  // Filter!
   __filter->filter();
 
+  // Write output interfaces
   for (i = __out.begin(); i != __out.end(); ++i) {
     i->interface->write();
   }
+
+  if (__wait_barrier) {
+    __wait_mutex->lock();
+    __wait_done = false;
+    __wait_cond->wake_all();
+    __wait_mutex->unlock();
+    __wait_barrier->wait();
+    __wait_mutex->lock();
+    __wait_done = true;
+    __wait_mutex->unlock();
+  }
+}
+
+
+/** Wait until thread is done.
+ * This method blocks the calling thread until this instance's thread has
+ * finished filtering.
+ */
+void
+LaserFilterThread::wait_done()
+{
+  __wait_mutex->lock();
+  while (__wait_done) {
+    //logger->log_debug(name(), "%s is waiting", Thread::current_thread()->name());
+    __wait_cond->wait();
+  }
+  __wait_mutex->unlock();
 }
 
 
@@ -314,3 +367,28 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
   }
 }
 
+
+/** Set threads to wait for in loop.
+ * The threads produce data this thread depends on as input, therefore this
+ * instance has to wait for these threads to get up to date data in each
+ * loop.
+ * @param threads threads this instance depends on
+ */
+void
+LaserFilterThread::set_wait_threads(std::list<LaserFilterThread *> &threads)
+{
+  __wait_threads = threads;
+}
+
+
+/** Set wait barrier.
+ * If there are any dependencies between laser filter threads a common
+ * barrier is used to signal the end of filtering to reset internal
+ * variables for the next loop.
+ * @param barrier common "end of filtering" barrier
+ */
+void
+LaserFilterThread::set_wait_barrier(fawkes::Barrier *barrier)
+{
+  __wait_barrier = barrier;
+}
