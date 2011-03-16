@@ -196,6 +196,37 @@ p_close_interface()
   { return EC_fail; }
 }
 
+
+int
+p_has_writer()
+{
+  char* interface_id;
+
+  if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
+  {
+    printf( "p_has_writer(): no id given\n" );
+    return EC_fail;
+  }
+
+  for ( vector< Interface* >::iterator it = g_interfaces.begin();
+	it != g_interfaces.end();
+	++it )
+  {
+    if ( 0 == strcmp( (*it)->id(), interface_id ) )
+    {
+      if ( (*it)->has_writer() )
+      { return EC_succeed; }
+      else
+      { return EC_fail; }
+
+      break;
+    }
+  }
+
+  return EC_fail;
+}
+
+
 int
 p_read_interfaces()
 {
@@ -367,9 +398,15 @@ p_read_from_interface()
 	    break;
 	    
 	  case IFT_BYTE:
-	  case IFT_ENUM:
 	    printf( "p_read_from_interface(): NOT YET IMPLEMENTED\n" );
 	    break;
+
+	  case IFT_ENUM:
+	    if ( EC_succeed != EC_arg( 3 ).unify( fit.get_value_string() ) )
+	    {
+	      printf( "p_read_from_interface(): could not bind return value\n" );
+	      return EC_fail;
+	    }
 
 	  default:
 	    break;

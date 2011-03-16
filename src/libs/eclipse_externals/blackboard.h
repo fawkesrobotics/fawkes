@@ -30,6 +30,9 @@ extern "C" int p_is_alive();
 
 extern "C" int p_open_interface();
 extern "C" int p_close_interface();
+
+extern "C" int p_has_writer();
+
 extern "C" int p_read_interfaces();
 extern "C" int p_write_interfaces();
 
