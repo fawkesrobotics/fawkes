@@ -158,7 +158,7 @@ bayerGBRG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned char *yu
 
     r = (bf[-1] + bf[1]) >> 1;
     b = (bf[-width] + bf[width]) >> 1;
-    RGB2YUV(r, *bf, g, y2, u2, v2);
+    RGB2YUV(r, *bf, b, y2, u2, v2);
     ++bf;
 
     assign(y, u, v, y1, u1, v1, y2, u2, v2);
@@ -541,5 +541,241 @@ bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *y
 
 }
 */
+
+void
+bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
+					    unsigned char *yuv,
+					    unsigned int width,
+					    unsigned int height)
+{
+  unsigned char *y = yuv;
+  unsigned char *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
+  unsigned char *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
+  const unsigned char *b = bayer;
+
+  int y1, u1, v1, y2, u2, v2;
+  int t1, t2;
+
+  for ( unsigned int h = 0; h < height; h += 2) {
+
+    // r  g  ... line
+    for (unsigned int w = 0; w < width; w += 2) {
+      t1 = b[width];
+      t2 = b[1];
+      RGB2YUV(*b, t1, t2, y1, u1, v1);
+      ++b;
+
+      t1 = b[width - 1];
+      t2 = b[-1];
+      RGB2YUV(t1, *b, t2, y2, u2, v2);
+      ++b;
+
+      assign(y, u, v, y1, u1, v1, y2, u2, v2);
+    }
+
+    // g  b  ... line
+    for (unsigned int w = 0; w < width; w += 2) {
+      t1 = b[1];
+      t2 = *(b-width+1);
+      RGB2YUV(t1, *b, t2, y1, u1, v1);
+      ++b;
+
+      t1 = b[-1];
+      t2 = *(b-width);
+      RGB2YUV(t1, t2, *b, y2, u2, v2);
+      ++b;
+
+      assign(y, u, v, y1, u1, v1, y2, u2, v2);
+    }
+  }
+}
+
+
+void
+bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned char *yuv,
+				   unsigned int width, unsigned int height)
+{
+  unsigned char *y = yuv;
+  unsigned char *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
+  unsigned char *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
+  const unsigned char *bf = bayer;
+
+  int y1, u1, v1, y2, u2, v2;
+  int r, g, b;
+
+  // first line is special
+  // g  r  ... line
+  // not full data in first columns
+  RGB2YUV(bf[1], *bf, bf[width], y1, u1, v1);
+  ++bf;
+
+  b = (bf[width - 1] + bf[width + 1]) >> 1;
+  // correct:
+  // g = (bf[-1] + bf[width] + bf[1]) / 3;
+  // faster:
+  g = (bf[-1] + bf[1]) >> 1;
+  RGB2YUV(*bf, g, b, y2, u2, v2);
+  ++bf;
+
+  assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+  // rest of first line
+  for (unsigned int w = 2; w < width - 2; w += 2) {
+    r = (bf[-1] + bf[1]) >> 1;
+    RGB2YUV(r, *bf, bf[width], y1, u1, v1);
+    ++bf;
+
+    b = (bf[width - 1] + bf[width + 1]) >> 1;
+    // correct:
+    // g = (bf[-1] + bf[width] + bf[1]) / 3;
+    // faster:
+    g = (bf[-1] + bf[1]) >> 1;
+    RGB2YUV(*bf, g, b, y2, u2, v2);
+    ++bf;
+
+    assign(y, u, v, y1, u1, v1, y2, u2, v2);
+  }
+
+  // not full data in last columns
+  r = (bf[-1] + bf[1]) >> 1;
+  RGB2YUV(r, *bf, bf[width], y1, u1, v1);
+  ++bf;
+
+  g = (bf[-1] + bf[width]) >> 1;
+  RGB2YUV(*bf, g, bf[width - 1], y2, u2, v2);
+  ++bf;
+
+  assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+  for ( unsigned int h = 1; h < height - 1; h += 2) {
+
+    // b  g  ... line
+    // correct: g = (*(bf-width) + bf[1] + bf[width]) / 3;
+    // faster:
+    g = (*(bf-width) + bf[1]) >> 1;
+    r = (*(bf-width+1) + bf[width+1]) >> 1;
+    RGB2YUV(r, g, *bf, y1, u1, v1);
+    ++bf;
+
+    b = (bf[-1] + bf[1]) >> 1;
+    r = (*(bf-width) + bf[width]) >> 1;
+    RGB2YUV(r, *bf, g, y2, u2, v2);
+    ++bf;
+
+    assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+    for (unsigned int w = 2; w < width - 2; w += 2) {
+      g = (*(bf-width) + bf[1] + bf[width] + bf[-1]) >> 2;
+      r = (*(bf-width-1) + *(bf-width+1) + bf[width-1] + bf[width+1]) >> 2;
+      RGB2YUV(r, g, *bf, y1, u1, v1);
+      ++bf;
+
+      b = (bf[-1] + bf[1]) >> 1;
+      r = ( *(bf-width) + bf[width]) >> 1;
+      RGB2YUV(r, *bf, b, y2, u2, v2);
+      ++bf;
+
+      assign(y, u, v, y1, u1, v1, y2, u2, v2);
+    }
+
+    g = (*(bf-width) + bf[1] + bf[width] + bf[-1]) >> 2;
+    r = (*(bf-width-1) + *(bf-width+1) + bf[width-1] + bf[width+1]) >> 2;
+    RGB2YUV(r, g, *bf, y1, u1, v1);
+    ++bf;
+
+    r = (*(bf-width) + bf[width]) >> 1;
+    RGB2YUV(r, *bf, bf[-1], y2, u2, v2);
+    ++bf;
+
+    assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+
+    // g  r  ... line
+    b = (bf[width] + *(bf-width)) >> 1;
+    RGB2YUV(bf[1], *bf, b, y1, u1, v1);
+    ++bf;
+
+    b = (*(bf-width-1) + *(bf-width+1) + bf[width - 1] + bf[width + 1]) >> 2;
+    g = (*(bf-width) + bf[1] + bf[width] + bf[-1]) >> 2;
+    RGB2YUV(*bf, g, b, y2, u2, v2);
+    ++bf;
+
+    assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+    for (unsigned int w = 2; w < width - 2; w += 2) {
+      b = (bf[width] + *(bf-width)) >> 1;
+      r = (bf[-1] + bf[1]) >> 1;
+      RGB2YUV(r, *bf, b, y1, u1, v1);
+      ++bf;
+
+      b = (*(bf-width-1) + *(bf-width+1) + bf[width-1] + bf[width+1]) >> 2;
+      g = (*(bf-width) + bf[1] + bf[width] + bf[-1]) >> 2;
+      RGB2YUV(*bf, g, b, y2, u2, v2);
+      ++bf;
+
+      assign(y, u, v, y1, u1, v1, y2, u2, v2);
+    }
+
+    b = (bf[width] + *(bf-width)) >> 1;
+    r = (bf[-1] + bf[1]) >> 1;
+    RGB2YUV(r, *bf, b, y1, u1, v1);
+    ++bf;
+
+    b = (*(bf-width-1) + bf[width-1]) >> 1;
+    // correct: g = (*(bf-width) + bf[width] + bf[-1]) / 3;
+    // faster:
+    g = (*(bf-width) + bf[-1]) >> 1;
+    RGB2YUV(*bf, g, r, y2, u2, v2);
+    ++bf;
+
+    assign(y, u, v, y1, u1, v1, y2, u2, v2);
+  }
+
+  // last b  g  ... line
+  // correct: g = (*(bf-width) + bf[1] + bf[width]) / 3;
+  // faster:
+  g = (*(bf-width) + bf[1]) >> 1;
+  r = *(bf-width+1);
+  RGB2YUV(r, g, *bf, y1, u1, v1);
+  ++bf;
+
+  b = (bf[-1] + bf[1]) >> 1;
+  r = *(bf-width);
+  RGB2YUV(r, *bf, b, y2, u2, v2);
+  ++bf;
+
+  assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+  for (unsigned int w = 2; w < width - 2; w += 2) {
+    // correct: g = (*(bf-width) + bf[1] + bf[-1]) / 3
+    // faster:
+    g = (*(bf-width) + bf[-1]) >> 1;
+    r = (*(bf-width-1) + *(bf-width+1)) >> 1;
+    RGB2YUV(r, g, *bf, y1, u1, v1);
+    ++bf;
+
+    b = (bf[-1] + bf[1]) >> 1;
+    r = *(bf-width);
+    RGB2YUV(r, *bf, b, y2, u2, v2);
+    ++bf;
+
+    assign(y, u, v, y1, u1, v1, y2, u2, v2);
+  }
+
+  // correct: g = (*(bf-width) + bf[1] + bf[-1]) / 3;
+  // faster:
+  g = (*(bf-width) + bf[-1]) >> 1;
+  r = (*(bf-width-1) + *(bf-width+1)) >> 1;
+  RGB2YUV(r, g, *bf, y1, u1, v1);
+  ++bf;
+
+  r = *(bf-width);
+  RGB2YUV(r, *bf, bf[-1], y2, u2, v2);
+  ++bf;
+
+  assign(y, u, v, y1, u1, v1, y2, u2, v2);
+
+}
+
 
 } // end namespace firevision

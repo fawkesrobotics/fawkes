@@ -168,9 +168,11 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
   case YUV422_PLANAR:
     return (width * height * 2);
 
+  case MONO16:
   case RAW16:
     return (width * height * 2);
     
+  case RAW8:
   case GRAY8:
   case MONO8:
   case BAYER_MOSAIC_RGGB:
@@ -188,9 +190,12 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
   case CARTESIAN_3D_DOUBLE:
     return (3 * width * height * sizeof(double));
 
-  default:
+  case CS_UNKNOWN:
+  case COLORSPACE_N:
     return 0;
   }
+
+  return 0;
 }
 
 } // end namespace firevision
