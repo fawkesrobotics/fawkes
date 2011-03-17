@@ -85,6 +85,7 @@ fsm:add_transitions{
    {"DECIDE_MODE", "STOP", "vars.stop", precond=true},
    {"DECIDE_MODE", "PARK", "vars.park", precond=true},
    {"DECIDE_MODE", "GRIPPER", "vars.gripper", precond=true},
+   {"DECIDE_MODE", "MOVE", "vars.move and vars.nr and (vars.enc or vars.angle)", precond=true},
    {"DECIDE_MODE", "FAILED", true, precond=true, desc="No valid command"},
    {"CALIBRATE", "CHECKERR", jc_arm_is_final, desc="final"},
    {"CALIBRATE", "FAILED", jc_next_msg, desc="next msg"},
@@ -97,6 +98,8 @@ fsm:add_transitions{
    {"GRIPPER", "FAILED", jc_next_msg, desc="next msg"},
    {"PARK", "CHECKERR", jc_arm_is_final, desc="final"},
    {"PARK", "FAILED", jc_next_msg, desc="next msg"},
+   {"MOVE", "CHECKERR", jc_arm_is_final, desc="final"},
+   {"MOVE", "FAILED", jc_next_msg, desc="next msg"},
    {"CHECKERR", "FINAL", "katanaarm:error_code() == katanaarm.ERROR_NONE", desc="no error"},
    {"CHECKERR", "FAILED", "katanaarm:error_code() ~= katanaarm.ERROR_NONE", desc="error"},
 }
@@ -156,4 +159,20 @@ function GOTO:init()
    if self.fsm.vars.psi   ~= nil then psi   = self.fsm.vars.psi end
    local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
    self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+end
+
+function MOVE:init()
+   if self.fsm.vars.enc then
+      if self.fsm.vars.rel then
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.MoveMotorEncoderMessage:new(self.fsm.vars.nr, self.fsm.vars.enc))
+      else
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.SetMotorEncoderMessage:new(self.fsm.vars.nr, self.fsm.vars.enc))
+      end
+   else
+      if self.fsm.vars.rel then
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.MoveMotorAngleMessage:new(self.fsm.vars.nr, self.fsm.vars.angle))
+      else
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.SetMotorAngleMessage:new(self.fsm.vars.nr, self.fsm.vars.angle))
+      end
+   end
 end
