@@ -82,5 +82,21 @@
       <Translation>0 0 0.54</Translation>
       <RotationAxis>0 1 0 -25</RotationAxis>
     </Geom>
+
+
+    <!-- red emergency button -->
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <Extents>0.03 0.0675 0.055</Extents>
+      <Translation>0.01 0 0.095</Translation>
+      <RotationAxis>0 0 0 -25</RotationAxis>
+    </Geom>
+    <Geom type="cylinder">
+      <DiffuseColor>1 0 0</DiffuseColor>
+      <Radius>0.02</Radius>
+      <Height>0.01</Height>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Translation>0.017 0 0.15</Translation>
+    </Geom>
   </Body>
 </KinBody>
