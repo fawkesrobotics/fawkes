@@ -27,14 +27,20 @@ LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard 
 			  HumanSkeletonInterface HumanSkeletonProjectionInterface
 OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 
-OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker)
+LIBS_openni_image = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
+		    fvutils
+OBJS_openni_image = image_plugin.o image_thread.o
+
+OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image)
 
 ifeq ($(HAVE_OPENNI),1)
   PRESUBDIRS += aspect
 
   CFLAGS  += $(CFLAGS_OPENNI)
   LDFLAGS += $(LDFLAGS_OPENNI)
-  PLUGINS_all = $(PLUGINDIR)/openni.so $(PLUGINDIR)/openni-usertracker.so
+  PLUGINS_all = $(PLUGINDIR)/openni.so \
+		$(PLUGINDIR)/openni-usertracker.so \
+		$(PLUGINDIR)/openni-image.so
 else
   WARN_TARGETS += warning_openni
 endif
