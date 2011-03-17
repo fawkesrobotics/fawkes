@@ -53,11 +53,11 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Constructor. */
   LaserGuiHildonWindow()
     : __athome_drawer(true),
-      __img_lines(RESDIR"/lasergui/lines_"ICON_FORMAT".png"),
-      __img_points(RESDIR"/lasergui/points_"ICON_FORMAT".png"),
-      __img_hull(RESDIR"/lasergui/hull_"ICON_FORMAT".png"),
-      __img_lowres(RESDIR"/lasergui/lines_lowres_"ICON_FORMAT".png"),
-      __img_rotation(RESDIR"/lasergui/rotate-90.png"),
+      __img_lines(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png"),
+      __img_points(RESDIR"/guis/lasergui/points_"ICON_FORMAT".png"),
+      __img_hull(RESDIR"/guis/lasergui/hull_"ICON_FORMAT".png"),
+      __img_lowres(RESDIR"/guis/lasergui/lines_lowres_"ICON_FORMAT".png"),
+      __img_rotation(RESDIR"/guis/lasergui/rotate-90.png"),
       __tb_connection(Gtk::Stock::CONNECT),
       __tb_lines(__img_lines),
       __tb_points(__img_points),
@@ -73,7 +73,7 @@ class LaserGuiHildonWindow : public Hildon::Window
     __ifd = NULL;
 
     std::auto_ptr<Glib::Error> error;
-    set_icon_from_file(RESDIR"/lasergui/lines_"ICON_FORMAT".png", error);
+    set_icon_from_file(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png", error);
 
     add(__area);
     __area.show();
