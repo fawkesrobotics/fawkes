@@ -45,6 +45,10 @@ void bayerGBRG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 						 unsigned int width,
 						 unsigned int height);
 
+void bayerGRBG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
+						 unsigned char *yuv,
+						 unsigned int width,
+						 unsigned int height);
 void bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 						 unsigned char *yuv,
 						 unsigned int width,

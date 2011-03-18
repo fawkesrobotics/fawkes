@@ -120,8 +120,8 @@ convert(colorspace_t   from,  colorspace_t   to,
     yuv422packed_to_bgr_with_alpha_plainc(src, dst, width, height);
   } else if ( (from == BAYER_MOSAIC_GBRG) && (to == YUV422_PLANAR) ) {
     bayerGBRG_to_yuv422planar_bilinear(src, dst, width, height);
-  } else if ( (from == BAYER_MOSAIC_RGGB) && (to == YUV422_PLANAR) ) {
-    bayerRGGB_to_yuv422planar_nearest_neighbour(src, dst, width, height);
+  } else if ( (from == BAYER_MOSAIC_GRBG) && (to == YUV422_PLANAR) ) {
+    bayerGRBG_to_yuv422planar_nearest_neighbour(src, dst, width, height);
   } else if ( (from == BAYER_MOSAIC_GRBG) && (to == YUV422_PLANAR) ) {
     bayerGRBG_to_yuv422planar_bilinear(src, dst, width, height);
   } else if ( (from == YUV444_PACKED) && (to == YUV422_PLANAR) ) {

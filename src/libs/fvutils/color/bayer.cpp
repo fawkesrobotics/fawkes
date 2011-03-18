@@ -543,6 +543,46 @@ bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *y
 */
 
 void
+bayerGRBG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
+					    unsigned char *yuv,
+					    unsigned int width,
+					    unsigned int height)
+{
+  unsigned char *y = yuv;
+  unsigned char *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
+  unsigned char *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
+  const unsigned char *b = bayer;
+
+  int y1, u1, v1, y2, u2, v2;
+
+  for ( unsigned int h = 0; h < height; h += 2) {
+
+    // g  r  ... line
+    for (unsigned int w = 0; w < width; w += 2) {
+      RGB2YUV(b[1], b[width], *b, y1, u1, v1);
+      ++b;
+
+      RGB2YUV(*b, b[-1], b[width - 1], y2, u2, v2);
+      ++b;
+
+      assign(y, u, v, y1, u1, v1, y2, u2, v2);
+    }
+
+    // b  g  ... line
+    for (unsigned int w = 0; w < width; w += 2) {
+      RGB2YUV(*(b-width+1), b[1], *b, y1, u1, v1);
+      ++b;
+
+      RGB2YUV(*(b-width), *b, b[-1], y2, u2, v2);
+      ++b;
+
+      assign(y, u, v, y1, u1, v1, y2, u2, v2);
+    }
+  }
+}
+
+
+void
 bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 					    unsigned char *yuv,
 					    unsigned int width,
@@ -554,20 +594,15 @@ bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
   const unsigned char *b = bayer;
 
   int y1, u1, v1, y2, u2, v2;
-  int t1, t2;
 
   for ( unsigned int h = 0; h < height; h += 2) {
 
     // r  g  ... line
     for (unsigned int w = 0; w < width; w += 2) {
-      t1 = b[width];
-      t2 = b[1];
-      RGB2YUV(*b, t1, t2, y1, u1, v1);
+      RGB2YUV(*b, b[1], b[width+1], y1, u1, v1);
       ++b;
 
-      t1 = b[width - 1];
-      t2 = b[-1];
-      RGB2YUV(t1, *b, t2, y2, u2, v2);
+      RGB2YUV(b[-1], *b, b[width], y2, u2, v2);
       ++b;
 
       assign(y, u, v, y1, u1, v1, y2, u2, v2);
@@ -575,21 +610,16 @@ bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 
     // g  b  ... line
     for (unsigned int w = 0; w < width; w += 2) {
-      t1 = b[1];
-      t2 = *(b-width+1);
-      RGB2YUV(t1, *b, t2, y1, u1, v1);
+      RGB2YUV(*(b-width), *b, b[1], y1, u1, v1);
       ++b;
 
-      t1 = b[-1];
-      t2 = *(b-width);
-      RGB2YUV(t1, t2, *b, y2, u2, v2);
+      RGB2YUV(*(b-width-1), b[-1], *b, y2, u2, v2);
       ++b;
 
       assign(y, u, v, y1, u1, v1, y2, u2, v2);
     }
   }
 }
-
 
 void
 bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned char *yuv,
