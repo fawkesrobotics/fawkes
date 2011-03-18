@@ -31,57 +31,6 @@ using namespace fawkes;
 bool g_draw_skeleton = true;
 bool g_print_id = true;
 bool g_print_state = true;
-GLfloat g_texcoords[8];
-
-
-unsigned int
-get_closest_power_of_two(unsigned int n)
-{
-  unsigned int m = 2;
-  while(m < n) m<<=1;
-
-  return m;
-}
-
-GLuint
-init_texture(void** buf, int& width, int& height)
-{
-  GLuint texID = 0;
-  glGenTextures(1,&texID);
-
-  width = get_closest_power_of_two(width);
-  height = get_closest_power_of_two(height); 
-  *buf = new unsigned char[width*height*4];
-  glBindTexture(GL_TEXTURE_2D,texID);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  return texID;
-}
-
-
-
-void
-draw_rectangle(float topLeftX, float topLeftY, float bottomRightX, float bottomRightY)
-{
-  GLfloat verts[8] = {	topLeftX, topLeftY, topLeftX, bottomRightY,
-			bottomRightX, bottomRightY, bottomRightX, topLeftY };
-  glVertexPointer(2, GL_FLOAT, 0, verts);
-  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-  glFlush();
-}
-
-void
-draw_texture(float topLeftX, float topLeftY, float bottomRightX, float bottomRightY)
-{
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(2, GL_FLOAT, 0, g_texcoords);
-
-  draw_rectangle(topLeftX, topLeftY, bottomRightX, bottomRightY);
-
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-}
 
 float user_colors[][3] = {
   {0,1,1},
@@ -98,12 +47,11 @@ float user_colors[][3] = {
 };
 unsigned int num_colors = 10;
 
-void glPrintString(void *font, char *str)
+void
+glPrintString(void *font, char *str)
 {
   int i,l = strlen(str);
-
-  for(i=0; i<l; i++)
-  {
+  for(i=0; i<l; i++) {
     glutBitmapCharacter(font,*str++);
   }
 }
@@ -160,53 +108,6 @@ void
 draw_skeletons(UserMap &users, unsigned int x_res, unsigned int y_res)
 {
   if (users.empty()) return;
-
-  static bool initialized = false;	
-  static GLuint depthTexID;
-  static unsigned char* pDepthTexBuf;
-  static int texWidth, texHeight;
-
-  float topLeftX;
-  float topLeftY;
-  float bottomRightY;
-  float bottomRightX;
-  float texXpos;
-  float texYpos;
-
-
-  if(!initialized) {
-    texWidth =  get_closest_power_of_two(x_res);
-    texHeight = get_closest_power_of_two(y_res);
-
-    depthTexID = init_texture((void**)&pDepthTexBuf,texWidth, texHeight) ;
-    initialized = true;
-
-    topLeftX = x_res;
-    topLeftY = 0;
-    bottomRightY = y_res;
-    bottomRightX = 0;
-    texXpos =(float)x_res/texWidth;
-    texYpos  =(float)y_res/texHeight;
-
-    memset(g_texcoords, 0, sizeof(g_texcoords));
-    g_texcoords[0] = texXpos;
-    g_texcoords[1] = texYpos;
-    g_texcoords[2] = texXpos;
-    g_texcoords[7] = texYpos;
-  }
-
-  memset(pDepthTexBuf, 0, 3 * 2 * x_res * y_res);
-
-  glBindTexture(GL_TEXTURE_2D, depthTexID);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0,
-	       GL_RGB, GL_UNSIGNED_BYTE, pDepthTexBuf);
-
-  // Display the OpenGL texture map
-  glColor4f(0.75,0.75,0.75,1);
-
-  glEnable(GL_TEXTURE_2D);
-  draw_texture(x_res, y_res, 0, 0);	
-  glDisable(GL_TEXTURE_2D);
 
   char label[50] = "";
   for (UserMap::iterator i = users.begin(); i != users.end(); ++i) {

@@ -21,26 +21,33 @@
  */
 
 #include "skel_drawer.h"
+#include "image_drawer.h"
+
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <blackboard/remote.h>
 #include <blackboard/interface_observer.h>
 #include <utils/system/argparser.h>
+#include <fvcams/net.h>
 
 #include <map>
 #include <string>
 #include <queue>
 #include <cstdio>
+#include <cstring>
 #include <GL/glut.h>
 
 #define GL_WIN_SIZE_X 640
 #define GL_WIN_SIZE_Y 480
 
 using namespace fawkes;
+using namespace firevision;
 
 bool g_quit = false;
 bool g_pause = false;
 RemoteBlackBoard *g_rbb;
+NetworkCamera *g_cam;
+SkelGuiImageDrawer *g_image_drawer = NULL;
 
 UserMap  g_users;
 
@@ -148,10 +155,11 @@ void clean_exit()
   exit(1);
 }
 
+
 // this function is called each frame
 void glut_display (void)
 {
-  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Setup the OpenGL viewpoint
   glMatrixMode(GL_PROJECTION);
@@ -170,16 +178,19 @@ void glut_display (void)
     unsigned int x_res = g_users.begin()->second.proj_if->res_x();
     unsigned int y_res = g_users.begin()->second.proj_if->res_y();
     glOrtho(0, x_res, y_res, 0, -1.0, 1.0);
-    glDisable(GL_TEXTURE_2D);
+
+    //glDisable(GL_TEXTURE_2D);
 
     // Process the data
+    if (g_image_drawer)  g_image_drawer->draw_camimg();
     draw_skeletons(g_users, x_res, y_res);
   }
 
   glutSwapBuffers();
 }
 
-void glut_idle (void)
+
+void glut_idle()
 {
   if (g_quit)  clean_exit();
 
@@ -189,7 +200,8 @@ void glut_idle (void)
   glutPostRedisplay();
 }
 
-void glut_keyboard (unsigned char key, int x, int y)
+void
+glut_keyboard(unsigned char key, int x, int y)
 {
   switch (key) {
   case 27:
@@ -242,9 +254,10 @@ void glInit (int * pargc, char ** argv)
 
 int main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hl:u:R:waLr:");
+  ArgumentParser argp(argc, argv, "hr:f::j");
 
   Thread::init_main();
+  glInit(&argc, argv);
 
   std::string host = "localhost";
   unsigned short int port = 1910;
@@ -252,10 +265,41 @@ int main(int argc, char **argv)
     argp.parse_hostport("r", host, port);
   }
 
+  bool use_firevision = false;
+  std::string fvhost = host;
+  unsigned short int fvport = 2208;
+  if ( argp.has_arg("f") ) {
+    use_firevision = true;
+    argp.parse_hostport("f", fvhost, fvport);
+  }
+
   printf("Connecting to %s:%u\n", host.c_str(), port);
-  g_rbb = new RemoteBlackBoard(host.c_str(), port);
+  try {
+    g_rbb = new RemoteBlackBoard(host.c_str(), port);
+  } catch (Exception &e) {
+    e.print_trace();
+    exit(-1);
+  }
   g_obs = new SkelIfObserver(g_rbb);
- 
-  glInit(&argc, argv);
+
+  g_cam = NULL;
+  g_image_drawer = NULL;
+
+  if (use_firevision) {
+    g_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image",
+			      argp.has_arg("j"));
+    g_cam->open();
+    g_cam->start();
+    if ((g_cam->pixel_width() != GL_WIN_SIZE_X) ||
+	(g_cam->pixel_height() != GL_WIN_SIZE_Y))
+    {
+      printf("Image size different from window size, closing camera");
+      delete g_cam;
+      g_cam = NULL;
+    }
+
+    g_image_drawer = new SkelGuiImageDrawer(g_cam);
+  }
+
   glutMainLoop();
 }

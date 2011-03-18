@@ -18,9 +18,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
 
 LIBS_ffskelgui = stdc++ glut GL fawkescore fawkesutils fawkesnetcomm \
-		 fawkesblackboard fawkesinterface \
+		 fawkesblackboard fawkesinterface fvutils fvcams \
 		 HumanSkeletonInterface HumanSkeletonProjectionInterface
-OBJS_ffskelgui = main.o skel_drawer.o
+OBJS_ffskelgui = main.o skel_drawer.o image_drawer.o
 
 OBJS_all =	$(OBJS_ffskelgui)
 
