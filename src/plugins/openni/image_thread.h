@@ -68,9 +68,15 @@ class OpenNiImageThread
   firevision::SharedMemoryImageBuffer *__image_buf;
   firevision::SharedMemoryImageBuffer *__depth_buf;
 
+  typedef enum {
+    DEBAYER_BILINEAR,
+    DEBAYER_NEAREST_NEIGHBOR,
+    CONVERT_YUV
+  } CopyMode;
+  CopyMode                             __cfg_copy_mode;
+
   size_t                               __depth_bufsize;
 
-  unsigned int                         __input_format;
   unsigned short int                   __usb_vendor;
   unsigned short int                   __usb_product;
 };

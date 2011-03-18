@@ -154,4 +154,5 @@ INSERT INTO "config" VALUES('/plugins/refboxcomm/SPL/port','unsigned int',3838,N
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/host','string','localhost','The host to connect to for the remote blackboard');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/port','unsigned int',1911,'Port on the remote host to connect to');
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/interface_id','string','RefBoxComm','Interface of the GameStateInterface on the remote blackboard');
+INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinear','De-bayering mode, can be bilinear or nearest_neighbor');
 COMMIT;

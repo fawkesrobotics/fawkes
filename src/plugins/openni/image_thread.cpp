@@ -60,6 +60,8 @@ OpenNiImageThread::init()
 {
   MutexLocker lock(openni.objmutex_ptr());
 
+  __cfg_copy_mode = CONVERT_YUV;
+
   __image_gen = new xn::ImageGenerator();
   std::auto_ptr<xn::ImageGenerator> imagegen_autoptr(__image_gen);
 
@@ -147,7 +149,6 @@ OpenNiImageThread::init()
     // XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER = 6
     // InputFormat should be 6 = uncompressed Bayer for Kinect
     logger->log_debug(name(), "Kinect camera detected, initializing");
-    __input_format = 6;
     if (__image_gen->SetIntProperty("InputFormat", 6) != XN_STATUS_OK) {
       throw Exception("Failed to set uncompressed bayer input format");
     }
@@ -162,9 +163,22 @@ OpenNiImageThread::init()
       throw Exception("Failed to set registration type");
     }
     */
+    __cfg_copy_mode = DEBAYER_BILINEAR;
+    try {
+      std::string debayering = config->get_string("/plugins/openni-image/debayering");
+      if (debayering == "bilinear") {
+        __cfg_copy_mode = DEBAYER_BILINEAR;
+      } else if (debayering == "nearest_neighbor") {
+        __cfg_copy_mode = DEBAYER_NEAREST_NEIGHBOR;
+      } else {
+        logger->log_warn(name(), "Unknown de-bayering mode '%s', using bilinear instead.",
+			 debayering.c_str());
+      }
+    } catch (Exception &e) {
+      logger->log_warn(name(), "No de-bayering mode set, using bilinear.");
+    }
   } else {
     logger->log_debug(name(), "PrimeSense camera detected, initializing");
-    __input_format = 5;
     if (__image_gen->SetIntProperty("InputFormat", 5) != XN_STATUS_OK) {
       throw Exception("Failed to set uncompressed bayer input format");
     }
@@ -178,6 +192,7 @@ OpenNiImageThread::init()
       throw Exception("Failed to set registration type");
     }
     */
+    __cfg_copy_mode = CONVERT_YUV;
   }
 
   __image_md = new xn::ImageMetaData();
@@ -243,14 +258,19 @@ OpenNiImageThread::loop()
   MutexLocker lock(openni.objmutex_ptr());
 
   if (__image_gen->IsDataNew() && (__image_buf->num_attached() > 1)) {
-    if (__input_format == 6) {
+    if (__cfg_copy_mode == DEBAYER_BILINEAR) {
+      bayerGRBG_to_yuv422planar_bilinear(__image_md->Data(),
+					 __image_buf->buffer(),
+					 __image_md->XRes(),
+					 __image_md->YRes());
+    } else if (__cfg_copy_mode == CONVERT_YUV) {
+      yuv422packed_to_yuv422planar(__image_md->Data(), __image_buf->buffer(),
+				   __image_md->XRes(), __image_md->YRes());
+    } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
       bayerGRBG_to_yuv422planar_nearest_neighbour(__image_md->Data(),
 						  __image_buf->buffer(),
 						  __image_md->XRes(),
 						  __image_md->YRes());
-    } else if (__input_format == 5) {
-      yuv422packed_to_yuv422planar(__image_md->Data(), __image_buf->buffer(),
-				   __image_md->XRes(), __image_md->YRes());
     }
   }
 
