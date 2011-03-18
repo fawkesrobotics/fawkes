@@ -176,7 +176,7 @@ OpenNiContextThread::verify_active()
 	  if (generator.IsDataNew()) {
 	    __device_no_data_loops = 0;
 	  } else {
-	    if (++__device_no_data_loops > 2) {
+	    if (++__device_no_data_loops > 3) {
 	      logger->log_warn(name(), "Device '%s' had no fresh data for long time. "
 			       "Reload maybe necessary.", (*n).GetInstanceName());
 	    }
