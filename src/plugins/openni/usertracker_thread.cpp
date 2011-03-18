@@ -111,15 +111,48 @@ OpenNiUserTrackerThread::init()
 
   XnStatus st;
 
-  if ((st = openni->FindExistingNode(XN_NODE_TYPE_USER, *__user_gen)) != XN_STATUS_OK) {
-    if (__user_gen->Create(*(openni.operator->())) != XN_STATUS_OK) {
-      throw Exception("Failed to acquire user generator (%s)", xnGetStatusString(st));
+  if ((st = openni->FindExistingNode(XN_NODE_TYPE_DEPTH, *__depth_gen))
+      != XN_STATUS_OK)
+  {
+    xn::EnumerationErrors errors;
+    if (__depth_gen->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
+      Exception e("Failed to create depth generator (%s)", xnGetStatusString(st));
+      for (xn::EnumerationErrors::Iterator i = errors.Begin();
+	   i != errors.End(); ++i)
+      {
+	XnProductionNodeDescription d = i.Description();
+	e.append("%s: %s/%s/%u.%u.%u.%u: %s",
+		 xnProductionNodeTypeToString(d.Type),
+		 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
+		 d.Version.nMaintenance, d.Version.nBuild, 
+		 xnGetStatusString(i.Error()));
+      }
+
+      throw e;
     }
   }
 
-  if ((st = openni->FindExistingNode(XN_NODE_TYPE_DEPTH, *__depth_gen)) != XN_STATUS_OK) {
-    throw Exception("Failed to acquire depth generator (%s)", xnGetStatusString(st));
+  if ((st = openni->FindExistingNode(XN_NODE_TYPE_USER, *__user_gen))
+      != XN_STATUS_OK)
+  {
+    xn::EnumerationErrors errors;
+    if (__user_gen->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
+      Exception e("Failed to create user generator (%s)", xnGetStatusString(st));
+      for (xn::EnumerationErrors::Iterator i = errors.Begin();
+           i != errors.End(); ++i)
+      {
+        XnProductionNodeDescription d = i.Description();
+        e.append("%s: %s/%s/%u.%u.%u.%u: %s",
+                 xnProductionNodeTypeToString(d.Type),
+                 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
+                 d.Version.nMaintenance, d.Version.nBuild,
+                 xnGetStatusString(i.Error()));
+      }
+
+      throw e;
+    }
   }
+
 
   if (!__user_gen->IsCapabilitySupported(XN_CAPABILITY_SKELETON)) {
     throw Exception("User generator does not support skeleton capability");
@@ -157,6 +190,7 @@ OpenNiUserTrackerThread::init()
   }
 
   skelcap.SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+  __depth_gen->StartGenerating();
   __user_gen->StartGenerating();
 
   usergen_autoptr.release();
