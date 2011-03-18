@@ -242,7 +242,7 @@ OpenNiUserTrackerThread::loop()
   st = skelcap.GetSkeletonJoint(id, joint, jtf);			\
   if (st != XN_STATUS_OK) {						\
     ori[0] = ori[1] = ori[2] = ori[3] = ori[4] = ori[5] = 0.;		\
-    ori[6] = ori[7] = ori[8] = ori_confidence = 0.;			\
+    ori[6] = ori[7] = ori[8] = ori_confidence = pos_confidence = 0.;	\
     proj[0] = proj[1] = 0;						\
   } else {								\
     pos[0] = jtf.position.position.X;					\
