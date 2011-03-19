@@ -34,22 +34,23 @@ namespace fawkes {
 
 /** BlackBoard network message types */
 typedef enum {
-  MSG_BB_LIST_ALL,
-  MSG_BB_INTERFACE_LIST,
-  MSG_BB_OPEN_FOR_READING,
-  MSG_BB_OPEN_FOR_WRITING,
-  MSG_BB_OPEN_SUCCESS,
-  MSG_BB_OPEN_FAILURE,
-  MSG_BB_CLOSE,
-  MSG_BB_WRITE,
-  MSG_BB_INTERFACE_MESSAGE,
-  MSG_BB_DATA_CHANGED,
-  MSG_BB_READER_ADDED,
-  MSG_BB_READER_REMOVED,
-  MSG_BB_WRITER_ADDED,
-  MSG_BB_WRITER_REMOVED,
-  MSG_BB_INTERFACE_CREATED,
-  MSG_BB_INTERFACE_DESTROYED
+  MSG_BB_LIST_ALL		=  0,
+  MSG_BB_INTERFACE_LIST		=  1,
+  MSG_BB_OPEN_FOR_READING	=  2,
+  MSG_BB_OPEN_FOR_WRITING	=  3,
+  MSG_BB_OPEN_SUCCESS		=  4,
+  MSG_BB_OPEN_FAILURE		=  5,
+  MSG_BB_CLOSE			=  6,
+  MSG_BB_WRITE			=  7,
+  MSG_BB_INTERFACE_MESSAGE	=  8,
+  MSG_BB_DATA_CHANGED		=  9,
+  MSG_BB_READER_ADDED		= 10,
+  MSG_BB_READER_REMOVED		= 11,
+  MSG_BB_WRITER_ADDED		= 12,
+  MSG_BB_WRITER_REMOVED		= 13,
+  MSG_BB_INTERFACE_CREATED	= 14,
+  MSG_BB_INTERFACE_DESTROYED	= 15,
+  MSG_BB_LIST			= 16
 } blackboard_msgid_t;
 
 /** Error codes */
@@ -66,6 +67,12 @@ typedef enum {
 typedef struct {
   dynamic_list_t interface_list;	/**< dynamic buffer list with interface info */
 } bb_ilist_msg_t;
+
+/** Message to request constrained interface list. */
+typedef struct {
+  char          type_pattern[__INTERFACE_TYPE_SIZE];	/**< type pattern */
+  char          id_pattern[__INTERFACE_ID_SIZE];	/**< ID pattern */
+} bb_ilistreq_msg_t;
 
 /** Message to identify an interface on open. */
 typedef struct {

@@ -510,6 +510,47 @@ BlackBoardInterfaceManager::list_all() const
 }
 
 
+/** Get a constrained list of interfaces.
+ * @param type_pattern tyoe pattern, may contain shell-like wildcards * (any number
+ * of characters) and ? (one character), cf. man fnmatch().
+ * @param id_pattern ID pattern, may contain shell-like wildcards * (any number
+ * of characters) and ? (one character), cf. man fnmatch().
+ * @return list of currently existing interfaces matching the given type and
+ * ID patterns. List may be outdated on return since there maybe concurrent
+ * actions.
+ */
+InterfaceInfoList *
+BlackBoardInterfaceManager::list(const char *type_pattern,
+				 const char *id_pattern) const
+{
+  InterfaceInfoList *infl = new InterfaceInfoList();
+
+  memmgr->lock();
+  interface_header_t *ih;
+  BlackBoardMemoryManager::ChunkIterator cit;
+  for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
+    ih = (interface_header_t *)*cit;
+    char type[__INTERFACE_TYPE_SIZE + 1];
+    char id[__INTERFACE_ID_SIZE + 1];
+    // ensure NULL-termination
+    type[__INTERFACE_TYPE_SIZE] = 0;
+    id[__INTERFACE_ID_SIZE] = 0;
+    strncpy(type, ih->type, __INTERFACE_TYPE_SIZE);
+    strncpy(id, ih->id, __INTERFACE_ID_SIZE);
+    if ((fnmatch(type_pattern, type, FNM_NOESCAPE) == 0) &&
+	(fnmatch(id_pattern, id, FNM_NOESCAPE) == 0))
+    {
+      infl->append(ih->type, ih->id, ih->hash, ih->serial,
+		   ih->flag_writer_active, ih->num_readers);
+    }
+  }
+
+  memmgr->unlock();
+
+  return infl;
+}
+
+
 /** Get the writer interface for the given mem serial.
  * @param mem_serial memory serial to get writer for
  * @return writer interface for given mem serial, or NULL if non exists
