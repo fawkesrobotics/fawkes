@@ -81,6 +81,7 @@ class LaserDrawingArea
 
   void set_rotation(float rot_rad);
   void set_draw_mode(draw_mode_t mode);
+  void set_connected(bool connected);
   
   void toggle_break_drawing();
 
@@ -115,6 +116,7 @@ class LaserDrawingArea
   std::list<fawkes::ObjectPositionInterface*>* __l_objpos_if_misc;
   std::list<fawkes::Position2DTrackInterface*>* __l_track_if;
 
+  bool                       __connected;
   draw_mode_t                __draw_mode;
 
   float                      __zoom_factor;

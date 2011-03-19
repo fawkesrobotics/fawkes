@@ -1,18 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Fri Jun 26 15:59:42 2009 -->
+<?xml version="1.0"?>
 <glade-interface>
+  <!-- interface-requires gtk+ 2.12 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="wnd_lasergui">
     <property name="title" translatable="yes">Laser GUI</property>
     <property name="icon">lines.svg</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <widget class="GtkToolbar" id="tb_main">
             <property name="visible">True</property>
-            <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
-            <property name="icon_size">GTK_ICON_SIZE_SMALL_TOOLBAR</property>
+            <property name="toolbar_style">icons</property>
+            <property name="icon_size">0</property>
             <property name="icon_size_set">True</property>
             <child>
               <widget class="GtkToolButton" id="tb_connection">
@@ -21,13 +22,27 @@
                 <property name="stock_id">gtk-connect</property>
               </widget>
               <packing>
-                <property name="homogeneous">True</property>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="tb_select">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Select Interface</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-open</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
               </packing>
             </child>
             <child>
               <widget class="GtkSeparatorToolItem" id="toolbutton2">
                 <property name="visible">True</property>
               </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkRadioToolButton" id="tb_lines">
@@ -38,6 +53,7 @@
                 <property name="active">True</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -50,6 +66,7 @@
                 <property name="group">tb_lines</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -62,6 +79,7 @@
                 <property name="group">tb_lines</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -69,27 +87,18 @@
               <widget class="GtkSeparatorToolItem" id="toolbutton5">
                 <property name="visible">True</property>
               </widget>
-            </child>
-            <child>
-              <widget class="GtkToggleToolButton" id="tb_highres">
-                <property name="visible">True</property>
-                <property name="tooltip_text">Switch between 360/720 degree resolution</property>
-                <property name="label" translatable="yes">Low Resolution</property>
-                <property name="icon">lines_highres.svg</property>
-              </widget>
               <packing>
-                <property name="homogeneous">True</property>
+                <property name="expand">False</property>
               </packing>
             </child>
             <child>
               <widget class="GtkToggleToolButton" id="tb_trimvals">
                 <property name="visible">True</property>
-                <property name="tooltip_text">Trim out values (faster drawing)</property>
                 <property name="label" translatable="yes">Cut out</property>
                 <property name="stock_id">gtk-cut</property>
               </widget>
               <packing>
-                <property name="homogeneous">True</property>
+                <property name="expand">False</property>
               </packing>
             </child>
             <child>
@@ -99,6 +108,7 @@
                 <property name="icon">rotate-90.png</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -108,6 +118,7 @@
                 <property name="stock_id">gtk-media-stop</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -117,6 +128,7 @@
                 <property name="icon">human_emph_legs_32x32.svg</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -124,6 +136,9 @@
               <widget class="GtkSeparatorToolItem" id="tb_div1">
                 <property name="visible">True</property>
               </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkToolButton" id="tb_zoom_in">
@@ -132,6 +147,7 @@
                 <property name="stock_id">gtk-zoom-in</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -142,6 +158,7 @@
                 <property name="stock_id">gtk-zoom-out</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -150,6 +167,7 @@
                 <property name="visible">True</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
@@ -159,12 +177,14 @@
                 <property name="stock_id">gtk-quit</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -184,17 +204,18 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Starting Leg Track Mode</property>
     <property name="modal">True</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">dialog</property>
     <property name="transient_for">wnd_lasergui</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox2">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <widget class="GtkVBox" id="vbox2">
             <property name="visible">True</property>
+            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkLabel" id="label1">
                 <property name="visible">True</property>
@@ -202,6 +223,9 @@
 mode. This might take a short while.</property>
                 <property name="wrap">True</property>
               </widget>
+              <packing>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkHSeparator" id="hseparator1">
@@ -230,7 +254,7 @@ mode. This might take a short while.</property>
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area3">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <property name="layout_style">end</property>
             <child>
               <placeholder/>
             </child>
@@ -240,7 +264,8 @@ mode. This might take a short while.</property>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </widget>

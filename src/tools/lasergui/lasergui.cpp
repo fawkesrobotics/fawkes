@@ -3,8 +3,8 @@
  *  lasergui.cpp - minimalistic laser visualization
  *
  *  Created: Thu Oct 09 12:51:52 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
- *             2009  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
+ *  Copyright  2008-2011  Tim Niemueller [www.niemueller.de]
+ *             2009       Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
  *
  ****************************************************************************/
 
@@ -35,6 +35,7 @@
 
 
 #include <gui_utils/service_chooser_dialog.h>
+#include <gui_utils/interface_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>
 #include <gui_utils/connection_dispatcher.h>
 #include <gui_utils/robot/allemaniacs_athome.h>
@@ -67,12 +68,16 @@ class LaserGuiGtkWindow : public Gtk::Window
 		    const Glib::RefPtr<Gnome::Glade::Xml> &refxml)
     : Gtk::Window(cobject), __athome_drawer(true)
   {
+    __laser_if_type = "Laser360Interface";
+    __laser_if_id   = "Laser";
+    __ifd = NULL;
+
     refxml->get_widget_derived("da_laser", __area);
     refxml->get_widget("tb_connection", __tb_connection);
+    refxml->get_widget("tb_select", __tb_select);
     refxml->get_widget("tb_lines", __tb_lines);
     refxml->get_widget("tb_points", __tb_points);
     refxml->get_widget("tb_hull", __tb_hull);
-    refxml->get_widget("tb_highres", __tb_highres);
     refxml->get_widget("tb_trimvals", __tb_trimvals);
     refxml->get_widget("tb_rotation", __tb_rotation);
     refxml->get_widget("tb_legtracker", __tb_legtracker);
@@ -85,10 +90,10 @@ class LaserGuiGtkWindow : public Gtk::Window
 
     __area->set_robot_drawer(&__athome_drawer);
 
+    __tb_select->set_sensitive(false);
     __tb_lines->set_sensitive(false);
     __tb_points->set_sensitive(false);
     __tb_hull->set_sensitive(false);
-    __tb_highres->set_sensitive(false);
     __tb_trimvals->set_sensitive(false);
     __tb_rotation->set_sensitive(false);
     __tb_legtracker->set_sensitive(false);
@@ -97,13 +102,13 @@ class LaserGuiGtkWindow : public Gtk::Window
     __tb_zoom_out->set_sensitive(false);
 
     __tb_connection->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_connection_clicked));
+    __tb_select->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_select_clicked));
     __tb_lines->signal_toggled().connect(sigc::bind(sigc::mem_fun(*__area, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_LINES));
     __tb_points->signal_toggled().connect(sigc::bind(sigc::mem_fun(*__area, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_POINTS));
     __tb_hull->signal_toggled().connect(sigc::bind(sigc::mem_fun(*__area, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_HULL));
     __tb_zoom_in->signal_clicked().connect(sigc::mem_fun(*__area, &LaserDrawingArea::zoom_in));
     __tb_zoom_out->signal_clicked().connect(sigc::mem_fun(*__area, &LaserDrawingArea::zoom_out));
 
-    __tb_highres->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_resolution_toggled));
     __tb_legtracker->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_legtracker_toggled));
     __tb_trimvals->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_trimvals_toggled));
     __tb_rotation->signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiGtkWindow::on_rotation_toggled));
@@ -128,6 +133,105 @@ class LaserGuiGtkWindow : public Gtk::Window
 
   }
 
+
+  /** Event handler for connection button. */
+  virtual void on_select_clicked()
+  {
+    if ( ! __connection_dispatcher.get_client()->connected() ) {
+      Gtk::MessageDialog md(*this,
+			    "Cannot get list of interfaces if not connected.",
+			    /* markup */ false,
+			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			    /* modal */ true);
+      md.set_title("Interface Selection Failed");
+      md.run();
+    } else {
+      InterfaceChooserDialog ifcd(*this, __bb, "Laser*Interface", "*",
+				  "Select Laser Interface");
+      if (ifcd.run()) {
+	Glib::ustring type, id;
+	ifcd.get_selected_interface(type, id);
+
+	open_interface(type, id);
+      }
+    }
+  }
+
+  /** Open interface.
+   * Tries to open the interface, and on success replaces the existing
+   * instances.
+   * @param type type of interface to open
+   * @param id id of interface to open
+   */
+  void
+  open_interface(Glib::ustring &type, Glib::ustring &id)
+  {
+    __bb->unregister_listener(__ifd);
+    if (type == "Laser720Interface") {
+      try {
+	Laser720Interface *laser720 =
+	  __bb->open_for_reading<Laser720Interface>(id.c_str());
+	__area->set_laser720_if(NULL);
+	__area->set_laser360_if(NULL);
+	__area->set_laser720_if(laser720);
+	__bb->close(__laser720_if);
+	__bb->close(__laser360_if);
+	__laser720_if = laser720;
+	__laser360_if = NULL;
+	__laser_if_type = type;
+	__laser_if_id = id;
+	__bb->unregister_listener(__ifd);
+	delete __ifd;
+	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", laser720);
+	__ifd->signal_data_changed().connect(
+	     sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
+
+      } catch (Exception &e) {
+	std::string msg = std::string("Failed to open interface: ") + e.what();
+	Gtk::MessageDialog md(*this, msg, /* markup */ false,
+			      Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			      /* modal */ true);
+	md.set_title("Opening Interface Failed");
+	md.run();
+      }
+    } else if (type == "Laser360Interface") {
+      try {
+	Laser360Interface *laser360 =
+	  __bb->open_for_reading<Laser360Interface>(id.c_str());
+	__area->set_laser720_if(NULL);
+	__area->set_laser360_if(NULL);
+	__area->set_laser360_if(laser360);
+	__bb->close(__laser720_if);
+	__bb->close(__laser360_if);
+	__laser360_if = laser360;
+	__laser720_if = NULL;
+	__laser_if_type = type;
+	__laser_if_id = id;
+	__bb->unregister_listener(__ifd);
+	delete __ifd;
+	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", laser360);
+	__ifd->signal_data_changed().connect(
+	     sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
+      } catch (Exception &e) {
+	std::string msg = std::string("Failed to open interface: ") + e.what();
+	Gtk::MessageDialog md(*this, msg, /* markup */ false,
+			      Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			      /* modal */ true);
+	md.set_title("Opening Interface Failed");
+	md.run();
+      }
+    } else {
+      std::string msg = std::string("Unknown interface type ") + type;
+      Gtk::MessageDialog md(*this, msg, /* markup */ false,
+			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+				/* modal */ true);
+      md.set_title("Opening Interface Failed");
+      md.run();
+    }
+
+    __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
+  }
+
   /** Event handler for connected event. */
   virtual void on_connect()
   {
@@ -147,16 +251,8 @@ class LaserGuiGtkWindow : public Gtk::Window
       
       //__laser_if = __bb->open_for_reading<Laser360Interface>("LegtrackerAveragedLaser");
 
-
-      if (__tb_highres->get_active()) {
-	__laser720_if = __bb->open_for_reading<Laser720Interface>("Laser");
-	__area->set_laser720_if(__laser720_if);
-	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser720_if);
-      } else {
-	__laser360_if = __bb->open_for_reading<Laser360Interface>("Laser");
-	__area->set_laser360_if(__laser360_if);
-	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser360_if);
-      }
+      __area->set_connected(true);
+      open_interface(__laser_if_type, __laser_if_id);
 
       __line_if = __bb->open_for_reading<ObjectPositionInterface>("LaserLine");
       __area->set_line_if(__line_if);
@@ -165,16 +261,13 @@ class LaserGuiGtkWindow : public Gtk::Window
 
       on_legtracker_toggled();
 
-      __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
-      __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
-
       __area->queue_draw();
 
       __tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
+      __tb_select->set_sensitive(true);
       __tb_lines->set_sensitive(true);
       __tb_points->set_sensitive(true);
       __tb_hull->set_sensitive(true);
-      __tb_highres->set_sensitive(true);
       __tb_trimvals->set_sensitive(true);
       __tb_rotation->set_sensitive(true);
       __tb_legtracker->set_sensitive(true);
@@ -202,6 +295,7 @@ class LaserGuiGtkWindow : public Gtk::Window
   /** Event handler for disconnected event. */
   virtual void on_disconnect()
   {
+    __area->set_connected(false);
     __area->reset_laser_ifs();
     __area->set_line_if(NULL);
     __area->set_visdisp_if(NULL);
@@ -265,10 +359,10 @@ class LaserGuiGtkWindow : public Gtk::Window
     __line_if = NULL;
 
     __tb_connection->set_stock_id(Gtk::Stock::CONNECT);
+    __tb_select->set_sensitive(false);
     __tb_lines->set_sensitive(false);
     __tb_points->set_sensitive(false);
     __tb_hull->set_sensitive(false);
-    __tb_highres->set_sensitive(false);
     __tb_trimvals->set_sensitive(false);
     __tb_rotation->set_sensitive(false);
     __tb_legtracker->set_sensitive(false);
@@ -293,38 +387,6 @@ class LaserGuiGtkWindow : public Gtk::Window
   void on_stop_toggled()
   {
     __area->toggle_break_drawing();
-  }
-
-  /** Event handler for resolution button. */
-  void on_resolution_toggled()
-  {
-    if (! __bb)  return;
-
-    try {
-      __bb->close(__laser360_if);
-      __bb->close(__laser720_if);
-      __bb->unregister_listener(__ifd);
-      delete __ifd;
-      __laser360_if = NULL;
-      __laser720_if = NULL;
-
-      if ( __tb_highres->get_active() ) {
-	__laser720_if = __bb->open_for_reading<Laser720Interface>("Laser");
-	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser720_if);
-	__ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
-	__bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
-	__area->set_laser720_if(__laser720_if);
-      } else {
-	__laser360_if = __bb->open_for_reading<Laser360Interface>("Laser");
-	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser360_if);
-	__ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
-	__bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
-	__area->set_laser360_if(__laser360_if);
-      }
-      __area->queue_draw();
-    } catch (Exception &e) {
-      e.print_trace();
-    }
   }
 
   /** Event handler for legtracker button */
@@ -478,7 +540,6 @@ class LaserGuiGtkWindow : public Gtk::Window
   Gtk::RadioToolButton               *__tb_lines;
   Gtk::RadioToolButton               *__tb_points;
   Gtk::RadioToolButton               *__tb_hull;
-  Gtk::ToggleToolButton              *__tb_highres;
   Gtk::ToggleToolButton              *__tb_trimvals;
   Gtk::ToggleToolButton              *__tb_rotation;
   Gtk::ToggleToolButton              *__tb_legtracker;
@@ -486,9 +547,13 @@ class LaserGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton                    *__tb_zoom_in;
   Gtk::ToolButton                    *__tb_zoom_out;
   Gtk::ToolButton                    *__tb_exit;
+  Gtk::ToolButton                    *__tb_select;
 
   Gtk::Dialog                        *__dlg_ltopen;
   Gtk::ProgressBar                   *__pgb_ltopen;
+
+  Glib::ustring                       __laser_if_type;
+  Glib::ustring                       __laser_if_id;
 };
 
 int

@@ -70,6 +70,7 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
   __rotation = 0;
   __break_drawing = false;
   __first_draw = true;
+  __connected = false;
 
   __visdisp = new VisualDisplay2D();
 
@@ -151,6 +152,15 @@ LaserDrawingArea::set_objpos_if(std::list<fawkes::ObjectPositionInterface*>* l_o
   __switch_if = switch_if;
 }
 
+/** Set connection status.
+ * @param connected true if connected, false otherwise
+ */
+void
+LaserDrawingArea::set_connected(bool connected)
+{
+  __connected = connected;
+  queue_draw();
+}
 
 
 /** Set 360 degree laser interface.
@@ -161,6 +171,7 @@ LaserDrawingArea::set_laser360_if(Laser360Interface *laser_if)
 {
   __laser360_if = laser_if;
   __laser720_if = NULL;
+  queue_draw();
 }
 
 
@@ -172,6 +183,7 @@ LaserDrawingArea::set_laser720_if(Laser720Interface *laser_if)
 {
   __laser720_if = laser_if;
   __laser360_if = NULL;
+  queue_draw();
 }
 
 
@@ -196,7 +208,7 @@ LaserDrawingArea::reset_laser_ifs()
   __xc = width / 2;
   __yc = height / 2;
   __zoom_factor = 50;
-
+  queue_draw();
 }
 
 /** Set line interface.
@@ -325,9 +337,17 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     cr->translate(__xc, __yc);
   
     cr->save();
-    if ( (__laser360_if == NULL) && (__laser720_if == NULL) ) {
+    if (! __connected) {
       Cairo::TextExtents te;
       std::string t = "Not connected to BlackBoard";
+      cr->set_source_rgb(1, 0, 0);
+      cr->set_font_size(20);
+      cr->get_text_extents(t, te);
+      cr->move_to(- te.width / 2, -te.height / 2);
+      cr->show_text(t);
+    } else if ( (__laser360_if == NULL) && (__laser720_if == NULL) ) {
+      Cairo::TextExtents te;
+      std::string t = "No interface opened";
       cr->set_source_rgb(1, 0, 0);
       cr->set_font_size(20);
       cr->get_text_extents(t, te);
@@ -336,8 +356,9 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     } else if ( (__laser360_if && ! __laser360_if->has_writer()) ||
 		(__laser720_if && ! __laser720_if->has_writer()) ) {
       Cairo::TextExtents te;
-      std::string t = "No writer for 360° laser interface";
-      if (__laser720_if) t = "No writer for 720° laser interface";
+      std::string t = "No writer for ";
+      if (__laser360_if) t += __laser360_if->uid();
+      if (__laser720_if) t += __laser720_if->uid();
       cr->set_source_rgb(1, 0, 0);
       cr->set_font_size(20);
       cr->get_text_extents(t, te);
