@@ -89,7 +89,9 @@ end
 
 
 function SkillQueue_stop_ros(self)
-   goal_handle:cancel()
+   if goal_handle then
+      goal_handle:cancel()
+   end
    goal_handle = nil
 end
 
