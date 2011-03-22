@@ -33,6 +33,10 @@
 #include <cmath>
 #include <string>
 #include <cstdio>
+#ifdef HAVE_LIBUDEV
+#  include <cstring>
+#  include <libudev.h>
+#endif
 
 using namespace qrk;
 using namespace fawkes;
@@ -77,7 +81,81 @@ HokuyoUrgAcquisitionThread::init()
 {
   pre_init(config, logger);
 
+#ifdef HAVE_LIBUDEV
+  try {
+    __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
+  } catch (Exception &e) {
+    // check if bus/port numbers are given
+    try {
+      __cfg_device = "";
+      __cfg_busnum = config->get_string((__cfg_prefix + "busnum").c_str());
+      __cfg_devnum = config->get_string((__cfg_prefix + "devnum").c_str());
+
+
+      // try to find device using udev
+      struct udev *udev;
+      struct udev_enumerate *enumerate;
+      struct udev_list_entry *devices, *dev_list_entry;
+      struct udev_device *dev, *usb_device, *usb_parent;
+      udev = udev_new();
+      if (!udev) {
+	throw Exception("HokuyoURG: Failed to initialize udev for "
+			"device detection");
+      }
+
+      enumerate = udev_enumerate_new(udev);
+      udev_enumerate_add_match_subsystem(enumerate, "tty");
+      udev_enumerate_scan_devices(enumerate);
+
+      devices = udev_enumerate_get_list_entry(enumerate);
+      udev_list_entry_foreach(dev_list_entry, devices) {
+
+	const char *path;
+
+	path = udev_list_entry_get_name(dev_list_entry);
+	dev = udev_device_new_from_syspath(udev, path);
+
+	usb_device = udev_device_get_parent_with_subsystem_devtype(dev, "usb",
+								   "usb_device");
+	usb_parent = udev_device_get_parent_with_subsystem_devtype(usb_device,
+								   "usb",
+								   "usb_device");
+	if (! dev || ! usb_device || ! usb_parent) continue;
+	
+	if ( (strcmp(udev_device_get_sysattr_value(usb_device,"manufacturer"),
+		     "Hokuyo Data Flex for USB") == 0) &&
+	     (strcmp(udev_device_get_sysattr_value(usb_device,"product"),
+		     "URG-Series USB Driver") == 0) &&
+	     (__cfg_busnum == udev_device_get_sysattr_value(usb_parent, "busnum")) &&
+	     (__cfg_devnum == udev_device_get_sysattr_value(usb_parent, "devnum")) )
+	{
+	  __cfg_device = udev_device_get_devnode(dev);
+	  logger->log_info(name(), "Found device at USB bus %s, addr %s, device "
+			   "file is at %s", __cfg_busnum.c_str(),
+			   __cfg_devnum.c_str(), __cfg_device.c_str());
+	  logger->log_info(name(), "USB Vendor: %s (%s)  Product: %s (%s)",
+			   udev_device_get_sysattr_value(usb_device, "manufacturer"),
+			   udev_device_get_sysattr_value(usb_device, "idVendor"),
+			   udev_device_get_sysattr_value(usb_device, "product"),
+			   udev_device_get_sysattr_value(usb_device, "idProduct"));
+	}
+      }
+      udev_enumerate_unref(enumerate);
+      udev_unref(udev);
+
+      if (__cfg_device == "") {
+	throw Exception("No Hokuyo URG found at USB bus %s addr %s",
+			__cfg_busnum.c_str(), __cfg_devnum.c_str());
+      }
+
+    } catch (Exception &e2) {
+      e.append(e2);
+      throw e;
+    }
+  }
+#else
   __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
+#endif
 
   __ctrl = new UrgCtrl();
   std::auto_ptr<UrgCtrl> ctrl(__ctrl);

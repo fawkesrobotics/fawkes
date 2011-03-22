@@ -37,3 +37,10 @@ ifeq ($(HAVE_URG_GBX),1)
   LDFLAGS_URG_GBX = $(shell $(PKGCONFIG) --libs 'flexiport' 'hokuyo_aist')
 endif
 
+
+HAVE_LIBUDEV=$(if $(shell $(PKGCONFIG) --exists 'libudev'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBUDEV),1)
+  CFLAGS_LIBUDEV  = -DHAVE_LIBUDEV $(shell $(PKGCONFIG) --cflags 'libudev')
+  LDFLAGS_LIBUDEV = $(shell $(PKGCONFIG) --libs 'libudev')
+endif
+

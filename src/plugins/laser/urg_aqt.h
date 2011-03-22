@@ -61,6 +61,8 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   std::map<std::string, std::string> __device_info;
 
   std::string  __cfg_device;
+  std::string  __cfg_busnum;
+  std::string  __cfg_devnum;
 
   unsigned int __first_ray;
   unsigned int __last_ray;
