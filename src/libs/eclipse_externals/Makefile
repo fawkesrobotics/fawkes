@@ -20,8 +20,8 @@ include $(BASEDIR)/src/libs/eclipse_externals/eclipse.mk
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
 
-LIBS_eclipse_externals = fawkescore fawkesblackboard fawkesinterface eclipse
-OBJS_eclipse_externals = blackboard.o
+LIBS_eclipse_externals = fawkescore fawkesblackboard fawkesinterface fawkesutils eclipse
+OBJS_eclipse_externals = blackboard.o rcsoft_map_graph.o
 
 OBJS_all = $(OBJS_eclipse_externals)
 
