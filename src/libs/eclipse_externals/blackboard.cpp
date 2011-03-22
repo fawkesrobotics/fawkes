@@ -36,7 +36,38 @@
 using namespace std;
 using namespace fawkes;
 
-BlackBoard* g_blackboard = 0;
+class BlackBoardWrapper
+{
+public:
+  BlackBoardWrapper() : m_blackboard( 0 ) {}
+  ~BlackBoardWrapper() { delete m_blackboard; }
+
+  void connect( const char* host )
+  {
+    m_blackboard = new RemoteBlackBoard( host, 1910 );
+  }
+
+  bool connected()
+  {
+    return m_blackboard ? true : false;
+  }
+
+  void disconnect()
+  {
+    delete m_blackboard;
+    m_blackboard = 0;
+  }
+
+  BlackBoard* instance()
+  {
+    return m_blackboard;
+  }
+
+private:
+  BlackBoard*          m_blackboard;
+};
+
+BlackBoardWrapper g_blackboard;
 vector< Interface* > g_interfaces;
 
 bool process_message_args(Message* msg, EC_word arg_list);
@@ -44,12 +75,12 @@ bool process_message_args(Message* msg, EC_word arg_list);
 int
 p_connect_to_blackboard()
 {
-  if ( g_blackboard )
- {
-   printf( "p_connect_to_blackboard(): already connected\n" );
-   return EC_fail;
- }
-    
+  if ( g_blackboard.connected() )
+  {
+    printf( "p_connect_to_blackboard(): already connected\n" );
+    return EC_fail;
+  }
+
   // get hostname
   char* hostname;
 
@@ -59,31 +90,30 @@ p_connect_to_blackboard()
     return EC_fail;
   }
 
-try
- {
-   g_blackboard = new RemoteBlackBoard( hostname, 1910 );
- }
- catch ( Exception& e )
- {
-   e.print_trace();
-   return EC_fail;
- }
+  try
+  {
+    g_blackboard.connect( hostname );
+  }
+  catch ( Exception& e )
+  {
+    e.print_trace();
+    return EC_fail;
+  }
 
- return EC_succeed;
+  return EC_succeed;
 }
 
 
 int
 p_disconnect_from_blackboard()
 {
-  if ( !g_blackboard )
+  if ( !g_blackboard.connected() )
   {
     printf( "p_disconnect_from_blackboard(): not connected\n" );
     return EC_fail;
   }
 
-  delete g_blackboard;
-  g_blackboard = 0;
+  g_blackboard.disconnect();
 
   return EC_succeed;
 }
@@ -92,13 +122,13 @@ p_disconnect_from_blackboard()
 int
 p_is_alive()
 {
-  if ( !g_blackboard )
+  if ( !g_blackboard.connected() )
   {
     printf( "p_is_alive(): not connected\n" );
     return EC_fail;
   }
 
-  if ( g_blackboard->is_alive() )
+  if ( g_blackboard.instance()->is_alive() )
   { return EC_succeed; }
   else
   { return EC_fail; }
@@ -108,7 +138,7 @@ p_is_alive()
 int
 p_open_interface()
 {
-  if ( !g_blackboard )
+  if ( !g_blackboard.connected() )
   {
     printf("p_open_interface(): not connected\n" );
     return EC_fail;
@@ -141,9 +171,9 @@ p_open_interface()
     Interface* iface;
 
     if ( 0 == strcmp( "w", mode.name() ) )
-    { iface = g_blackboard->open_for_writing( interface_type, interface_id ); }
+    { iface = g_blackboard.instance()->open_for_writing( interface_type, interface_id ); }
     else
-    { iface = g_blackboard->open_for_reading( interface_type, interface_id ); }
+    { iface = g_blackboard.instance()->open_for_reading( interface_type, interface_id ); }
 
     g_interfaces.push_back( iface );
   }
@@ -160,7 +190,7 @@ p_open_interface()
 int
 p_close_interface()
 {
-  if ( !g_blackboard )
+  if ( !g_blackboard.connected() )
   {
     printf("p_close_interface(): not connected\n" );
     return EC_fail;
@@ -185,7 +215,7 @@ p_close_interface()
 
     {
       iface_found = true;
-      g_blackboard->close( *it );
+      g_blackboard.instance()->close( *it );
       break;
     }
   }
