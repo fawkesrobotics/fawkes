@@ -33,42 +33,78 @@
 #include <cstring>
 #include <cstdlib>
 
-using namespace std;
-using namespace fawkes;
-
-class BlackBoardWrapper
+/** @class fawkes::EclExternalBlackBoard
+ * Wrapper class for using the blackboard in the implementation of the external
+ * predicates.
+ * @author Daniel Beck
+ */
+namespace fawkes
+{
+class EclExternalBlackBoard
 {
 public:
-  BlackBoardWrapper() : m_blackboard( 0 ) {}
-  ~BlackBoardWrapper() { delete m_blackboard; }
+  /** Constructor. */
+  EclExternalBlackBoard() : m_blackboard( 0 ) {}
+  /** Destructor. */
+  ~EclExternalBlackBoard() {
+    for ( std::vector< Interface* >::iterator iit = m_interfaces.begin();
+	  iit != m_interfaces.end();
+	  ++iit )
+    { m_blackboard->close( *iit ); }
+    delete m_blackboard;
+  }
 
+  /** Open remote blackboard connection.
+   * @param host the host running Fawkes
+   */
   void connect( const char* host )
   {
     m_blackboard = new RemoteBlackBoard( host, 1910 );
   }
 
+  /** Query connection status.
+   * @return true if connected; false otherwise
+   */
   bool connected()
   {
     return m_blackboard ? true : false;
   }
 
+  /** Disconnect remote blackboard connection. */
   void disconnect()
   {
+    for ( std::vector< Interface* >::iterator iit = m_interfaces.begin();
+	  iit != m_interfaces.end();
+	  ++iit )
+    { m_blackboard->close( *iit ); }
     delete m_blackboard;
     m_blackboard = 0;
   }
 
+  /** Access the BlackBoard instance.
+   * @return the blackboard instance
+   */
   BlackBoard* instance()
   {
     return m_blackboard;
   }
 
+  std::vector< Interface* >& interfaces()
+  {
+    return m_interfaces;
+  }
+
 private:
-  BlackBoard*          m_blackboard;
+  BlackBoard*                m_blackboard;
+  std::vector< Interface* >  m_interfaces;
 };
 
-BlackBoardWrapper g_blackboard;
-vector< Interface* > g_interfaces;
+}
+
+using namespace std;
+using namespace fawkes;
+
+EclExternalBlackBoard g_blackboard;
 
 bool process_message_args(Message* msg, EC_word arg_list);
 
@@ -175,7 +211,7 @@ p_open_interface()
     else
     { iface = g_blackboard.instance()->open_for_reading( interface_type, interface_id ); }
 
-    g_interfaces.push_back( iface );
+    g_blackboard.interfaces().push_back( iface );
   }
   catch (Exception& e)
   {
@@ -207,8 +243,8 @@ p_close_interface()
 
   bool iface_found = false;
 
-  for ( vector< Interface* >::iterator it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( (*it)->id(), interface_id ) )
@@ -238,8 +274,8 @@ p_has_writer()
     return EC_fail;
   }
 
-  for ( vector< Interface* >::iterator it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( (*it)->id(), interface_id ) )
@@ -258,10 +294,46 @@ p_has_writer()
 
 
 int
+p_instance_serial()
+{
+  if ( !g_blackboard.connected() )
+  {
+    printf( "p_instance_serial(): not connected to blackboard\n" );
+    return EC_fail;
+  }
+
+  char* interface_id;
+  if ( EC_succeed != EC_arg( 1 ).is_string( &interface_id ) )
+  {
+    printf( "p_instance_serial(): no interface id given\n" );
+    return EC_fail;
+  }
+
+  for ( vector< Interface* >::iterator iit = g_blackboard.interfaces().begin();
+	iit != g_blackboard.interfaces().end();
+	++iit )
+  {
+    if ( 0 == strcmp( (*iit)->id(), interface_id ) )
+    {
+      if ( EC_succeed != EC_arg( 2 ).unify( (*iit)->serial() ) )
+      {
+	printf( "p_instance_serial(): could not bind return value\n" );
+	return EC_fail;
+      }
+
+      return EC_succeed;
+    }
+  }
+
+  return EC_fail;
+}
+
+
+int
 p_read_interfaces()
 {
-  for ( vector< Interface* >::iterator it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     (*it)->read();
@@ -273,8 +345,8 @@ p_read_interfaces()
 int
 p_write_interfaces()
 {
-  for ( vector< Interface* >::iterator it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( (*it)->is_writer() )
@@ -303,8 +375,8 @@ p_read_from_interface()
   }
 
   vector< Interface* >::iterator it;
-  for ( it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -459,7 +531,7 @@ p_read_from_interface()
     }
   }
 
-  if ( it == g_interfaces.end() )
+  if ( it == g_blackboard.interfaces().end() )
   {
     printf( "p_read_from_interface(): no interface with id %s found\n",
 	    interface_id );
@@ -489,8 +561,8 @@ p_write_to_interface()
   }
 
   vector< Interface* >::iterator it;
-  for ( it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -697,7 +769,7 @@ p_write_to_interface()
     }
   }
 
-  if ( it == g_interfaces.end() )
+  if ( it == g_blackboard.interfaces().end() )
   {
     printf( "p_write_to_interface(): no interface with id %s found\n",
 	    interface_id );
@@ -729,8 +801,8 @@ p_send_message()
   }
 
   vector< Interface* >::iterator it;
-  for ( it = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( it = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -767,7 +839,7 @@ p_send_message()
     }
   }
 
-  if ( it == g_interfaces.end() )
+  if ( it == g_blackboard.interfaces().end() )
   {
     printf( "p_send_message(): no interface with name %s\n", interface_id );
     return EC_fail;
@@ -790,8 +862,8 @@ p_recv_messages()
 
   vector< Interface* >::iterator it;
 
-  for ( it  = g_interfaces.begin();
-	it != g_interfaces.end();
+  for ( it  = g_blackboard.interfaces().begin();
+	it != g_blackboard.interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -892,7 +964,7 @@ p_recv_messages()
     }
   }
 
-  if ( it == g_interfaces.end() )
+  if ( it == g_blackboard.interfaces().end() )
   {
     printf( "p_recv_messages(): no interface with id %s found\n", interface_id );
     return EC_fail;

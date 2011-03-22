@@ -27,28 +27,40 @@
 #include <eclipseclass.h>
 #include <cstdio>
 
-using namespace std;
-using namespace fawkes;
-
-class RCSoftMapGraphWrapper
+/** @class fawkes::EclExternalRCSoftMapGraph
+ * Wrapper class for using the RCSoftMapGraph in the implementation of
+ * the external predicates.
+ * @author Daniel Beck
+ */
+namespace fawkes
+{
+class EclExternalRCSoftMapGraph
 {
 public:
-  RCSoftMapGraphWrapper() : m_map_graph(0) {};
-  ~RCSoftMapGraphWrapper()
-  {
-    delete m_map_graph;
-  }
+  /** Cosntructor. */
+  EclExternalRCSoftMapGraph() : m_map_graph(0) {}
+  /** Destructor. */
+  ~EclExternalRCSoftMapGraph() { delete m_map_graph; }
 
+  /** Load map file.
+   * @param file the map file
+   */
   void load( const char* file )
   {
-    m_map_graph = new RCSoftMapGraph( string(file) );
+    m_map_graph = new RCSoftMapGraph( std::string(file) );
   }
 
+  /** Query status.
+   * @return true if a map file is loaded; false otherwise
+   */
   bool loaded()
   {
     return m_map_graph ? true : false;
   }
 
+  /** Access the RCSoftMapGraph instance.
+   * @return the RCSoftMapGraph instance
+   */
   RCSoftMapGraph* map_graph()
   {
     return m_map_graph;
@@ -56,9 +68,15 @@ public:
 
 private:
   RCSoftMapGraph* m_map_graph;
+
 };
 
-RCSoftMapGraphWrapper g_map_graph;
+}
+
+using namespace std;
+using namespace fawkes;
+
+EclExternalRCSoftMapGraph g_map_graph;
 
 int
 p_map_graph_load()

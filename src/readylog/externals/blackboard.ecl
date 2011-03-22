@@ -28,6 +28,7 @@
 :- export bb_open_interface/3.
 :- export bb_close_interface/1.
 :- export bb_has_writer/1.
+:- export bb_instance_serial/2.
 :- export bb_read_interfaces/0.
 :- export bb_write_interfaces/0.
 :- export bb_read_interface/3.
@@ -49,6 +50,7 @@
 :- external(bb_open_interface/3, p_open_interface).
 :- external(bb_close_interface/1, p_close_interface).
 :- external(bb_has_writer/1, p_has_writer).
+:- external(bb_instance_serial/2, p_instance_serial).
 :- external(bb_read_interfaces/0, p_read_interfaces).
 :- external(bb_write_interfaces/0, p_write_interfaces).
 :- external(bb_read_interface/3, p_read_from_interface).
