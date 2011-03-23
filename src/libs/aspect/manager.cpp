@@ -115,18 +115,37 @@ AspectManager::init(Thread *thread)
   if (aspected_thread != NULL) { // thread has aspects to initialize
     const std::list<const char *> &aspects = aspected_thread->get_aspects();
 
-    std::list<const char *>::const_iterator i;
-    for (i = aspects.begin(); i != aspects.end(); ++i) {
-      if (__inifins.find(*i) == __inifins.end()) {
-	throw CannotInitializeThreadException("Thread '%s' has the %s, "
-					      "but no initiliazer is known.",
-					      thread->name(), *i);
-      }
-      __inifins[*i]->init(thread);
-    }
+    std::list<const char *> initialized;
 
-    for (i = aspects.begin(); i != aspects.end(); ++i) {
-      __threads[*i].push_back(thread);
+    try {
+      std::list<const char *>::const_iterator i;
+      for (i = aspects.begin(); i != aspects.end(); ++i) {
+	if (__inifins.find(*i) == __inifins.end()) {
+	  throw CannotInitializeThreadException("Thread '%s' has the %s, "
+						"but no initiliazer is known.",
+						thread->name(), *i);
+	}
+	__inifins[*i]->init(thread);
+	initialized.push_back(*i);
+      }
+
+      for (i = aspects.begin(); i != aspects.end(); ++i) {
+	__threads[*i].push_back(thread);
+      }
+    } catch (CannotInitializeThreadException &e) {
+      std::list<const char *>::const_reverse_iterator i;
+      for (i = initialized.rbegin(); i != initialized.rend(); ++i) {
+	__inifins[*i]->finalize(thread);
+      }
+      throw;
+    } catch (Exception &e) {
+      std::list<const char *>::const_reverse_iterator i;
+      for (i = initialized.rbegin(); i != initialized.rend(); ++i) {
+	__inifins[*i]->finalize(thread);
+      }
+      CannotInitializeThreadException ce;
+      ce.append(e);
+      throw ce;
     }
   }
 }

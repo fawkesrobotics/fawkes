@@ -9,6 +9,8 @@
 /bin/
 /bin_*/
 /cfg/*.db
+/cfg/*.key
+/cfg/*.crt
 /doc/api
 /doc/man
 /lib/

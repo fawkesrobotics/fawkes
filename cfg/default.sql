@@ -30,6 +30,12 @@ INSERT INTO "config" VALUES('/worldinfo/max_msgs_per_recv','unsigned int','20','
 INSERT INTO "config" VALUES('/worldinfo/flush_time_sec','unsigned int','5','Time of inactivity after which the world info message sequence number is resetted; sec');
 INSERT INTO "config" VALUES('/worldinfo/multicast_loopback','bool','1','Enable loopback for multicast messages?');
 INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests; TCP port');
+INSERT INTO "config" VALUES('/webview/use_ssl','bool',0,'Encrypt connections?');
+INSERT INTO "config" VALUES('/webview/ssl_create','bool',1,'Create self-signed certificate if key and certificate files not found?');
+INSERT INTO "config" VALUES('/webview/ssl_key','string','webview.key','Key file name, if not absolute relative to config dir.');
+INSERT INTO "config" VALUES('/webview/ssl_cert','string','webview.crt','Certificate file name, if not absolute relative to config dir.');
+INSERT INTO "config" VALUES('/webview/use_basic_auth','bool',0,'Use basic authentication?');
+INSERT INTO "config" VALUES('/webview/users/fawkes','string','fawkes','Example user, delete or change password!');
 INSERT INTO "config" VALUES('/xmlrpc/port','unsigned int','3008','TCP port for XML-RPC HTTP requests; TCP port');
 INSERT INTO "config" VALUES('/ballposlog/log_level','unsigned int','0','Log level for ballposlog example plugin; sum of any of debug=0, info=1, warn=2, error=4, none=8');
 INSERT INTO "config" VALUES('/skiller/skillspace','string','test','Skill space');

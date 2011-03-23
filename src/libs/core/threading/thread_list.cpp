@@ -357,26 +357,41 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
   ThreadList initialized_threads;
   bool success = true;
   for (ThreadList::iterator i = begin(); i != end(); ++i) {
+    // if initializer fails, we assume it handles finalization
     try {
       initializer->init(*i);
+    } catch (Exception &e) {
+      cite.append("Initialized failed to initialize thread '%s'", (*i)->name());
+      cite.append(e);
+      success = false;
+      break;
+    }
+    // if the thread's init() method fails, we need to finalize that very
+    // thread only with the finalizer, already initialized threads muts be
+    // fully finalized
+    try {
       (*i)->init();
       initialized_threads.push_back(*i);
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
-      cite.append("Initializing thread '%s' in list '%s' failed", (*i)->name(), __name);
+      cite.append("Initializing thread '%s' in list '%s' failed",
+		  (*i)->name(), __name);
       cite.append(e);
+      finalizer->finalize(*i);
       success = false;
       break;
     } catch (Exception &e) {
       notify_of_failed_init();
       cite.append("Could not initialize thread '%s'", (*i)->name());
       cite.append(e);
+      finalizer->finalize(*i);
       success = false;
       break;
     } catch (...) {
       notify_of_failed_init();
       cite.append("Could not initialize thread '%s'", (*i)->name());
       cite.append("Unknown exception caught");
+      finalizer->finalize(*i);
       success = false;
       break;
     }
