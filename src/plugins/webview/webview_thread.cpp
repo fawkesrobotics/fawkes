@@ -40,6 +40,8 @@
 #include <webview/url_manager.h>
 #include <webview/nav_manager.h>
 
+#include <sys/wait.h>
+
 using namespace fawkes;
 
 
