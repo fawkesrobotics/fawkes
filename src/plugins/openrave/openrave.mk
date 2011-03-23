@@ -20,5 +20,5 @@ endif
 
 ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS_OPENRAVE    = $(shell $(PKGCONFIG) --cflags 'openrave')
-  LDFLAGS_OPENRAVE   = $(shell $(PKGCONFIG) --libs 'openrave') -lopenrave-core -lboost_thread
+  LDFLAGS_OPENRAVE   = $(shell $(PKGCONFIG) --libs 'openrave') -lopenrave-core -lboost_thread-mt
 endif
