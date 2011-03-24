@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 SUBDIRS = deadspots
 
 LIBS_laser_filter = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	             fawkesinterface Laser360Interface Laser720Interface
+	             fawkesinterface Laser360Interface Laser720Interface fawkesgeometry
 
 OBJS_laser_filter = $(filter-out deadspots/% $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 PLUGINS_all = $(PLUGINDIR)/laser-filter.so
