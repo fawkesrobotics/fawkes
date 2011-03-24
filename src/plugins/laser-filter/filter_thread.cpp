@@ -29,6 +29,7 @@
 #include "filters/min_circle.h"
 #include "filters/circle_sector.h"
 #include "filters/min_merge.h"
+#include "filters/projection.h"
 
 #include <core/threading/barrier.h>
 #include <core/threading/mutex.h>
@@ -365,6 +366,8 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
     return new LaserDeadSpotsDataFilter(config, logger, prefix, in_data_size, inbufs);
   } else if (filter_type == "min_merge") {
     return new LaserMinMergeDataFilter(in_data_size, inbufs);
+  } else if (filter_type == "projection") {
+    return new LaserProjectionDataFilter(config, logger, in_data_size, inbufs);
   } else {
     throw Exception("Unknown filter type %s", filter_type.c_str());
   }
