@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 # base + hardware drivers + functional + integration
 SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser flite joystick katana pantilt vision \
-	  skiller luaagent worldmodel laserht \
+	  skiller luaagent worldmodel laserht laser-filter \
 	  openni refboxcomm player xmlrpc \
 	  readylogagent
 	  #festival
