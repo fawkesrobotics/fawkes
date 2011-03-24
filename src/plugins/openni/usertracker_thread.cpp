@@ -21,6 +21,7 @@
  */
 
 #include "usertracker_thread.h"
+#include "utils/setup.h"
 
 #include <core/threading/mutex_locker.h>
 #include <interfaces/HumanSkeletonInterface.h>
@@ -132,6 +133,8 @@ OpenNiUserTrackerThread::init()
     }
   }
 
+  fawkes::openni::setup_map_generator(*__depth_gen, config);
+
   if ((st = openni->FindExistingNode(XN_NODE_TYPE_USER, *__user_gen))
       != XN_STATUS_OK)
   {
@@ -190,6 +193,7 @@ OpenNiUserTrackerThread::init()
   }
 
   skelcap.SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+
   __depth_gen->StartGenerating();
   __user_gen->StartGenerating();
 
