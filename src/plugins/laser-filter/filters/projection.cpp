@@ -57,13 +57,15 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     std::vector<float *> in)
   : LaserDataFilter(in_data_size, in, in.size()),
     __logger(logger),
-    LEFT(false),
-    X_ROT(deg2rad(LEFT ? 90 : -90)),
-    Y_ROT(deg2rad(LEFT ? -51 : -51)),
-    Z_ROT(deg2rad(LEFT ? -38 : 38)),
-    X_TRANS(6.0f),
-    Y_TRANS(LEFT ? 15.0f : -15.0f),
-    Z_TRANS(156.5 - 29.0f)
+    LEFT(true),
+    /* rotation */
+    X_ROT(deg2rad(LEFT ? -51.0f : 51.0f)),
+    Y_ROT(deg2rad(LEFT ? 0.0f : 0.0f)),
+    Z_ROT(deg2rad(LEFT ? -38.0f : 38.0f)),
+    /* translation */
+    X_TRANS(0.06f),
+    Y_TRANS(LEFT ? 0.15f : -0.15f),
+    Z_TRANS(1.565f - 0.29f)
 {
 }
 
@@ -76,12 +78,19 @@ LaserProjectionDataFilter::transform(const float angle, const float length,
                                      float& new_angle, float& new_length)
 {
   HomPolar p = HomPolar(length, angle);
+  // 1. Move the coordinate so that subsequent rotations are exactly like the
+  // fixtures.
+  p.rotate_z(-1.0f * deg2rad(90.0f)).rotate_y(-1.0f * deg2rad(-90.0f));
+  // 2. Rotate the coordinate system the same way it was rotated by the
+  // fixtures.
   p.rotate_z(-1.0f * Z_ROT).rotate_y(-1.0f * Y_ROT).rotate_x(-1.0f * X_ROT);
+  // 3. Translate to the position of the EDL laser.
   p += HomVector(X_TRANS, Y_TRANS, Z_TRANS);
+  // 4. Cut z-coordinate.
   p.z() = 0.0f;
   new_angle = p.phi();
   new_length = p.length();
-  // Why is p.length() != p.r() (p.r() == 160)
+  // Why is p.length() != p.r() (p.r() == 160) TODO trac entry
 }
 
 void

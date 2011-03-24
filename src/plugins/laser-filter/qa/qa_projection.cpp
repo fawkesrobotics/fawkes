@@ -44,10 +44,12 @@ main(int argc, char **argv)
   for (int i = 0; i < data_size; ++i) {
     readings[i] = 0.0f;
   }
-  readings[0] = 160;
-  //readings[45] = 160;
-  //readings[90] = 160;
-  //readings[270] = 160;
+  //readings[0] = 2.934f;
+  readings[45] = 1.59;
+  //readings[0] = 1.60;
+  //readings[45] = 1.60;
+  //readings[90] = 1.60;
+  //readings[270] = 1.60;
 
   std::vector<float*> in;
   in.push_back(readings);
@@ -60,7 +62,7 @@ main(int argc, char **argv)
         const float angle = static_cast<float>(i);
         const float length = inbuf[i];
         const HomPolar p = HomPolar(length, deg2rad(angle));
-        printf("IN  %lf = %lf (%.2f, %.2f, %.2f)\n",
+        printf("IN  %lf / %lf (%.2f, %.2f, %.2f)\n",
                angle, length, p.x(), p.y(), p.z());
       }
     }
@@ -78,7 +80,7 @@ main(int argc, char **argv)
         const float new_angle = static_cast<float>(i);
         const float new_length = outbuf[i];
         const HomPolar p = HomPolar(new_length, deg2rad(new_angle));
-        printf("OUT %lf = %lf (%.2f, %.2f, %.2f)\n",
+        printf("OUT %lf / %lf (%.2f, %.2f, %.2f)\n",
                new_angle, new_length, p.x(), p.y(), p.z());
       }
     }
