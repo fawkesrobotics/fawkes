@@ -50,7 +50,7 @@ LaserMinMergeDataFilter::filter()
 
   float *outbuf = out[0];
 
-  memcpy(outbuf, in[0], out_data_size);
+  copy_to_outbuf(outbuf, in[0]);
 
   for (unsigned int a = 1; a < vecsize; ++a) {
     float *inbuf  = in[a];

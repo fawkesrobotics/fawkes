@@ -49,6 +49,9 @@ class LaserDataFilter
  protected:
   virtual void set_out_data_size(unsigned int data_size);
 
+  void reset_outbuf(float* outbuf);
+  void copy_to_outbuf(float* outbuf, const float* inbuf);
+
 
  protected:
   unsigned int         out_data_size;
