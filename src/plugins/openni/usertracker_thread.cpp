@@ -442,6 +442,9 @@ OpenNiUserTrackerThread::lost_user(XnUserID id)
 
   logger->log_error(name(), "Lost user ID %u, closing interface '%s'",
 		    id, __users[id].skel_if->uid());
+  // write invalid, a reader might still be open
+  __users[id].skel_if->set_state(HumanSkeletonInterface::STATE_INVALID);
+  __users[id].skel_if->write();
   blackboard->close(__users[id].skel_if);
   blackboard->close(__users[id].proj_if);
   __users.erase(id);
