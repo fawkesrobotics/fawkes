@@ -21,6 +21,7 @@
  */
 
 #include "image_thread.h"
+#include "utils/setup.h"
 
 #include <core/threading/mutex_locker.h>
 #include <fvutils/ipc/shm_image.h>
@@ -113,12 +114,8 @@ OpenNiImageThread::init()
     }
   }
 
-  XnMapOutputMode output_mode;
-  output_mode.nXRes = XN_VGA_X_RES;
-  output_mode.nYRes = XN_VGA_Y_RES;
-  output_mode.nFPS  = 30;
-  __image_gen->SetMapOutputMode(output_mode);
-  __depth_gen->SetMapOutputMode(output_mode);
+  fawkes::openni::setup_map_generator(*__image_gen, config);
+  fawkes::openni::setup_map_generator(*__depth_gen, config);
 
   __usb_vendor = 0;
   __usb_product = 0;

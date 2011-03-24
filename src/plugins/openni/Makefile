@@ -28,7 +28,7 @@ LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard 
 OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 
 LIBS_openni_image = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
-		    fvutils
+		    fvutils fawkesopenniutils
 OBJS_openni_image = image_plugin.o image_thread.o
 
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image)
