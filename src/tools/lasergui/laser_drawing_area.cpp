@@ -30,6 +30,7 @@
 #include <gui_utils/robot/drawer.h>
 #include <algorithm>
 #include <utils/misc/string_conversions.h>
+#include <cstdio>
 
 //#define LASERGUI_DEBUG_PRINT_TRACKS
 #define CFG_PRINT_NR_TRACKELEMENTS 5
@@ -900,6 +901,18 @@ LaserDrawingArea::on_button_press_event(GdkEventButton *event)
 {
   __last_mouse_x = event->x;
   __last_mouse_y = event->y;
+
+  double user_x = event->x;
+  double user_y = event->y;
+  Glib::RefPtr<Gdk::Window> window = get_window();
+  Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
+  cr->save();
+  cr->translate(__xc, __yc);
+  cr->rotate(0.5 * M_PI + __rotation);
+  cr->scale(-__zoom_factor, __zoom_factor);
+  cr->device_to_user(user_x, user_y);
+  printf("Clicked at (%.3lf, %.3lf)\n", user_x, user_y);
+  cr->restore();
   return true;
 }
 
