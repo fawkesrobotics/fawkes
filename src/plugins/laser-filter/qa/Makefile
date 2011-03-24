@@ -17,7 +17,7 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 OBJS_qa_projection := qa_projection.o ../filters/filter.o ../filters/projection.o
-LIBS_qa_projection := fawkescore fawkesutils fawkesgeometry
+LIBS_qa_projection := fawkescore fawkesutils fawkesgeometry m
 
 OBJS_all = $(OBJS_qa_projection)
 BINS_all = $(BINDIR)/qa_projection

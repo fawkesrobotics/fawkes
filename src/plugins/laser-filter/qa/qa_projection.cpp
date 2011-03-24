@@ -41,10 +41,12 @@ main(int argc, char **argv)
   int data_size = 360;
   float* readings = new float[data_size];
 
-  memset(readings, 0, data_size);
-  //readings[0] = 160;
+  for (int i = 0; i < data_size; ++i) {
+    readings[i] = 0.0f;
+  }
+  readings[0] = 160;
   //readings[45] = 160;
-  readings[90] = 160;
+  //readings[90] = 160;
   //readings[270] = 160;
 
   std::vector<float*> in;

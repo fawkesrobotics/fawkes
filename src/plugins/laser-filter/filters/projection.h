@@ -50,6 +50,17 @@ class LaserProjectionDataFilter : public LaserDataFilter
                  float& new_angle, float& new_length);
 
   fawkes::Logger *__logger;
+
+  const bool LEFT;
+
+  const float X_ROT;
+  const float Y_ROT;
+  const float Z_ROT;
+
+  const float X_TRANS;
+  const float Y_TRANS;
+  const float Z_TRANS;
+
 };
 
 #endif

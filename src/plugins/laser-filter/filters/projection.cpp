@@ -60,7 +60,14 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     unsigned int in_data_size,
     std::vector<float *> in)
   : LaserDataFilter(in_data_size, in, in.size()),
-    __logger(logger)
+    __logger(logger),
+    LEFT(false),
+    X_ROT(deg2rad(LEFT ? 90 : -90)),
+    Y_ROT(deg2rad(LEFT ? -51 : -51)),
+    Z_ROT(deg2rad(LEFT ? -38 : 38)),
+    X_TRANS(6.0f),
+    Y_TRANS(LEFT ? 15.0f : -15.0f),
+    Z_TRANS(156.5 - 29.0f)
 {
 }
 
@@ -72,14 +79,6 @@ void
 LaserProjectionDataFilter::transform(const float angle, const float length,
                                      float& new_angle, float& new_length)
 {
-  const float X_ROT = deg2rad(-90);
-  const float Y_ROT = deg2rad(-51);
-  const float Z_ROT = deg2rad(38);
-
-  const float X_TRANS = 6.0f;
-  const float Y_TRANS = -15.0f;
-  const float Z_TRANS = 156.5 - 29.0f;
-
   HomPolar p = HomPolar(length, angle);
   p.rotate_z(-1.0f * Z_ROT).rotate_y(-1.0f * Y_ROT).rotate_x(-1.0f * X_ROT);
   p += HomVector(X_TRANS, Y_TRANS, Z_TRANS);
@@ -96,14 +95,22 @@ LaserProjectionDataFilter::filter()
   for (unsigned int a = 0; a < vecsize; ++a) {
     float* inbuf  = in[a];
     float* outbuf = out[a];
-    memset(outbuf, 0, out_data_size);
+    memset(outbuf, 0, sizeof(float) * out_data_size);
     for (unsigned int i = 0; i < in_data_size; ++i) {
-      const float angle = deg2rad(static_cast<float>(i));
       const float length = inbuf[i];
+      if (length == 0.0f) {
+        // skip non-readings (they should not be translated, because then the
+        // length would not be 0.0f anymore)
+        continue;
+      }
+      const float angle = deg2rad(static_cast<float>(i));
       float new_angle;
       float new_length;
       transform(angle, length, new_angle, new_length);
-      const int j = static_cast<int>(rad2deg(new_angle));
+      const int j = static_cast<int>(rad2deg(normalize_rad(new_angle)));
+      if (new_length != 0.0f) {
+        printf("converted %d/%.2f into %d/%.2f\n", i, length, j, new_length);
+      }
       outbuf[j] = new_length;
     }
   }
