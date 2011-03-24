@@ -34,7 +34,7 @@ OBJS_openni_image = image_plugin.o image_thread.o
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image)
 
 ifeq ($(HAVE_OPENNI),1)
-  PRESUBDIRS += aspect
+  PRESUBDIRS += aspect utils
 
   CFLAGS  += $(CFLAGS_OPENNI)
   LDFLAGS += $(LDFLAGS_OPENNI)
