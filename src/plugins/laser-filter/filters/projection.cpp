@@ -39,12 +39,8 @@
 using namespace fawkes;
 
 /** @class LaserProjectionDataFilter "filters/projection.h"
- * Erase dead spots (i.e. mounting rods in the laser range) from laser data.
- * This filter reads a number of values stored in /hardware/laser/projection, where
- * each dead spot must contain two entries, a start and an end in degrees. Each
- * entry is stored as submembers of the given tree, for example as
- * /hardware/laser/deadspots/0/start and /hardware/laser/deadspots/0/end.
- * @author Tim Niemueller
+ * Projects URG lasers into the EDL laser plane.
+ * @author Christoph Schwering
  */
 
 /** Constructor.
@@ -108,9 +104,6 @@ LaserProjectionDataFilter::filter()
       float new_length;
       transform(angle, length, new_angle, new_length);
       const int j = static_cast<int>(rad2deg(normalize_rad(new_angle)));
-      if (new_length != 0.0f) {
-        printf("converted %d/%.2f into %d/%.2f\n", i, length, j, new_length);
-      }
       outbuf[j] = new_length;
     }
   }
