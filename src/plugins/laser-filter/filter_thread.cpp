@@ -367,7 +367,17 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
   } else if (filter_type == "min_merge") {
     return new LaserMinMergeDataFilter(in_data_size, inbufs);
   } else if (filter_type == "projection") {
-    return new LaserProjectionDataFilter(config, logger, in_data_size, inbufs);
+    const bool left = config->get_bool((prefix + "left").c_str());
+    const float x_rot = config->get_float((prefix + "x_rot").c_str());
+    const float y_rot = config->get_float((prefix + "y_rot").c_str());
+    const float z_rot = config->get_float((prefix + "z_rot").c_str());
+    const float x_trans = config->get_float((prefix + "x_trans").c_str());
+    const float y_trans = config->get_float((prefix + "y_trans").c_str());
+    const float z_trans = config->get_float((prefix + "z_trans").c_str());
+    return new LaserProjectionDataFilter(left,
+                                         x_rot, y_rot, z_rot,
+                                         x_trans, y_trans, z_trans,
+                                         in_data_size, inbufs);
   } else {
     throw Exception("Unknown filter type %s", filter_type.c_str());
   }

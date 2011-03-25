@@ -51,21 +51,19 @@ using namespace fawkes;
  * @param in vector of input arrays
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
-    fawkes::Configuration *config,
-    fawkes::Logger *logger,
+    bool left,
+    float x_rot, float y_rot, float z_rot,
+    float x_trans, float y_trans, float z_trans,
     unsigned int in_data_size,
     std::vector<float *> in)
   : LaserDataFilter(in_data_size, in, in.size()),
-    __logger(logger),
-    LEFT(true),
-    /* rotation */
-    X_ROT(deg2rad(LEFT ? -51.0f : 51.0f)),
-    Y_ROT(deg2rad(LEFT ? 0.0f : 0.0f)),
-    Z_ROT(deg2rad(LEFT ? -38.0f : 38.0f)),
-    /* translation */
-    X_TRANS(0.06f),
-    Y_TRANS(LEFT ? 0.15f : -0.15f),
-    Z_TRANS(1.565f - 0.29f)
+    LEFT(left),
+    X_ROT(x_rot),
+    Y_ROT(y_rot),
+    Z_ROT(z_rot),
+    X_TRANS(x_trans),
+    Y_TRANS(y_trans),
+    Z_TRANS(z_trans)
 {
 }
 

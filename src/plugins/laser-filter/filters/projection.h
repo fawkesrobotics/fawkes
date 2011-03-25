@@ -37,8 +37,9 @@ namespace fawkes {
 class LaserProjectionDataFilter : public LaserDataFilter
 {
  public:
-  LaserProjectionDataFilter(fawkes::Configuration *config,
-                            fawkes::Logger *logger,
+  LaserProjectionDataFilter(bool left,
+                            float x_rot, float y_rot, float z_rot,
+                            float x_trans, float y_trans, float z_trans,
                             unsigned int in_data_size,
                             std::vector<float *> in);
   ~LaserProjectionDataFilter();
@@ -48,8 +49,6 @@ class LaserProjectionDataFilter : public LaserDataFilter
  private:
   inline void transform(const float angle, const float length,
                         float& new_angle, float& new_length);
-
-  fawkes::Logger *__logger;
 
   const bool LEFT;
 
