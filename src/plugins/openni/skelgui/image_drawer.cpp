@@ -34,6 +34,16 @@
 using namespace fawkes;
 using namespace firevision;
 
+/** @class SkelGuiImageDrawer "image_drawer.h"
+ * Draw images from camera in texture.
+ * Uses texture mapping to show an image acquired from a camera in the
+ * background.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param cam camera to capture image with
+ */
 SkelGuiImageDrawer::SkelGuiImageDrawer(firevision::Camera *cam)
   : __width(cam->pixel_width()), __height(cam->pixel_height())
 {
@@ -52,7 +62,7 @@ SkelGuiImageDrawer::SkelGuiImageDrawer(firevision::Camera *cam)
   __texture_initialized = false;
 }
 
-
+/** Destructor. */
 SkelGuiImageDrawer::~SkelGuiImageDrawer()
 {
   free(__texture);
@@ -118,6 +128,7 @@ SkelGuiImageDrawer::draw_texture()
 }
 
 
+/** Draw camera image. */
 void
 SkelGuiImageDrawer::draw_camimg()
 {
