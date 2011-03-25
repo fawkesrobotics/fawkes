@@ -79,7 +79,7 @@ function SkillJumpState:new(o)
       assert(o.final_state, "SkillJumpState " .. o.name .. " requires success target state for sub-skill execution")
       o.failure_state = o.failure_state or "FAILED"
    end
-
+   print_info("Adding %s",o.name)
 
    assert(not (o.skill or o.skills or o.subskills) or
        o.skill and not o.skills and not o.subskills or
@@ -102,10 +102,16 @@ function SkillJumpState:new(o)
 
    if o.final_state then
       o.final_transition = o:add_new_transition(o.final_state, o.jumpcond_skill_final)
+      o.hide_final_transition = o.hide_final_transition or false
+      assert(type(o.hide_final_transition) == "boolean", "Hide final transition for " .. o.name .. " not a boolean")
+      o.final_transition.hide = o.hide_final_transition
       if o.fintrans_dotattr then o.final_transition.dotattr = o.fintrans_dotattr end
    end
    if o.failure_state then
       o.failure_transition = o:add_new_transition(o.failure_state, o.jumpcond_skill_failed)
+      o.hide_failure_transition = o.hide_failure_transition or false
+      assert(type(o.hide_failure_transition) == "boolean", "Hide failure transition for " .. o.name .. " not a boolean")
+      o.failure_transition.hide = o.hide_failure_transition
       if o.failtrans_dotattr then o.failure_transition.dotattr = o.failtrans_dotattr end
    end
 
