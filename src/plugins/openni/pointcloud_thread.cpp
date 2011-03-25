@@ -172,9 +172,9 @@ OpenNiPointCloudThread::loop()
 	  *xp++ = 0; *yp++ = 0; *zp++ = 0;
 	} else {
 	  // Fill in XYZ
-	  *xp++ = (w - __center_x) * data[depth_idx] * __focal_length;
-	  *yp++ = (h - __center_y) * data[depth_idx] * __focal_length;
-	  *zp++ = data[depth_idx] * 0.001;
+	  *xp++ = data[depth_idx] * 0.001;
+	  *yp++ = (w - __center_x) * data[depth_idx] * __focal_length;
+	  *zp++ = (h - __center_y) * data[depth_idx] * __focal_length;
 	}
       }
     }
