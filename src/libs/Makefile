@@ -53,6 +53,7 @@ interfaces: core interface
 gui_utils: core netcomm plugin
 naoutils: core utils
 webview: core utils
+eclipse_externals: blackboard interface utils
 fvutils: core utils netcomm
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
 fvfilters: fvmodels
