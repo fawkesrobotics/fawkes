@@ -31,7 +31,11 @@ LIBS_openni_image = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
 		    fvutils fawkesopenniutils
 OBJS_openni_image = image_plugin.o image_thread.o
 
-OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image)
+LIBS_openni_pointcloud = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
+			 fvutils fawkesopenniutils
+OBJS_openni_pointcloud = pointcloud_plugin.o pointcloud_thread.o
+
+OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image) $(OBJS_openni_pointcloud)
 
 ifeq ($(HAVE_OPENNI),1)
   PRESUBDIRS += aspect utils
@@ -40,7 +44,8 @@ ifeq ($(HAVE_OPENNI),1)
   LDFLAGS += $(LDFLAGS_OPENNI)
   PLUGINS_all = $(PLUGINDIR)/openni.so \
 		$(PLUGINDIR)/openni-usertracker.so \
-		$(PLUGINDIR)/openni-image.so
+		$(PLUGINDIR)/openni-image.so \
+		$(PLUGINDIR)/openni-pointcloud.so
 else
   WARN_TARGETS += warning_openni
 endif
@@ -54,7 +59,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_openni
 warning_openni:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenNI Plugin$(TNORMAL) (openni[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenNI Plugins$(TNORMAL) (openni[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
