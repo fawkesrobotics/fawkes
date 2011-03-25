@@ -46,8 +46,8 @@ class LaserProjectionDataFilter : public LaserDataFilter
   void filter();
 
  private:
-  void transform(const float angle, const float length,
-                 float& new_angle, float& new_length);
+  inline void transform(const float angle, const float length,
+                        float& new_angle, float& new_length);
 
   fawkes::Logger *__logger;
 

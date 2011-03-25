@@ -73,14 +73,18 @@ LaserProjectionDataFilter::~LaserProjectionDataFilter()
 {
 }
 
-void
+inline void
 LaserProjectionDataFilter::transform(const float angle, const float length,
                                      float& new_angle, float& new_length)
 {
   HomPolar p = HomPolar(length, angle);
   // 1. Move the coordinate so that subsequent rotations are exactly like the
   // fixtures.
-  p.rotate_z(-1.0f * deg2rad(90.0f)).rotate_y(-1.0f * deg2rad(-90.0f));
+  if (LEFT) {
+    p.rotate_z(-1.0f * deg2rad(90.0f)).rotate_y(-1.0f * deg2rad(-90.0f));
+  } else {
+    p.rotate_z(-1.0f * deg2rad(-90.0f)).rotate_y(-1.0f * deg2rad(-90.0f));
+  }
   // 2. Rotate the coordinate system the same way it was rotated by the
   // fixtures.
   p.rotate_z(-1.0f * Z_ROT).rotate_y(-1.0f * Y_ROT).rotate_x(-1.0f * X_ROT);
