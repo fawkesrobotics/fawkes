@@ -73,6 +73,11 @@ function AgentSkillExecJumpState:new(o)
    o.inits  = o.inits or {}
    o.skill_queue = SkillQueue:new{name=o.name, skills=o.skills, fsm=o.fsm}
 
+   o.hide_final_transition = o.hide_final_transition or false
+   o.hide_failure_transition = o.hide_failure_transition or false
+   assert(type(o.hide_final_transition) == "boolean", "Hide final transition for " .. o.name .. " not a boolean")
+   assert(type(o.hide_failure_transition) == "boolean", "Hide failure transition for " .. o.name .. " not a boolean")
+   
    o.skill_status = skillstati.S_RUNNING
 
    o:set_transition_labels()
@@ -149,12 +154,15 @@ function AgentSkillExecJumpState:prepare()
    local skills = (#self.skills == 1) and "Skill" or "Skills"
    if self.final_state and self.failure_state and self.final_state == self.failure_state then
       self.transition = self:add_new_transition(self.final_state, self.finished, skills .. " finished")
+      self.transition.hide = (self.hide_final_transition and self.hide_failure_transition)
    else
       if self.final_state then
-	 self.final_transition   = self:add_new_transition(self.final_state, self.final, skills .. " succeeded")
+         self.final_transition   = self:add_new_transition(self.final_state, self.final, skills .. " succeeded")
+         self.final_transition.hide = self.hide_final_transition
       end
       if self.failure_state then
-	 self.failure_transition = self:add_new_transition(self.failure_state, self.failed, skills .. " failed")
+         self.failure_transition = self:add_new_transition(self.failure_state, self.failed, skills .. " failed")
+         self.failure_transition.hide = self.hide_failure_transition
       end
    end
 
