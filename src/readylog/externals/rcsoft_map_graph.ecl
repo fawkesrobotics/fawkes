@@ -26,6 +26,8 @@
 :- export map_graph_get_node_coords/3.
 :- export map_graph_get_nodes/1.
 :- export map_graph_search_nodes/2.
+:- export map_graph_get_closest_node/3.
+:- export map_graph_get_children/2.
 
 %% load the external code from the shared object
 :- ( exists("../../../lib") ->
@@ -39,3 +41,5 @@
 :- external(map_graph_get_node_coords/3, p_map_graph_get_node_coords).
 :- external(map_graph_get_nodes/1, p_map_graph_get_nodes).
 :- external(map_graph_search_nodes/2, p_map_graph_search_nodes).
+:- external(map_graph_get_closest_node/3, p_map_graph_get_closest_node).
+:- external(map_graph_get_children/2, p_map_graph_get_children).

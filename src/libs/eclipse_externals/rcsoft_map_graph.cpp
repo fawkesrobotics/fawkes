@@ -172,6 +172,42 @@ p_map_graph_get_nodes()
 }
 
 int
+p_map_graph_get_closest_node()
+{
+  if ( !g_map_graph.loaded() )
+  {
+    printf( "p_map_search_nodes(): map file not loaded\n" );
+    return EC_fail;
+  }
+
+  double x;
+  double y;
+  if ( EC_succeed != EC_arg( 1 ).is_double( &x ) )
+  {
+    printf( "p_map_graph_get_closest_node(): no x-coordinate given\n" );
+    return EC_fail;
+  }
+
+  if ( EC_succeed != EC_arg( 2 ).is_double( &y ) )
+  {
+    printf( "p_map_graph_get_closest_node(): no y-coordinate given\n" );
+    return EC_fail;
+  }
+
+  RCSoftMapNode node = g_map_graph.map_graph()->closest_node( (float) x,
+							      (float) y,
+							      "" );
+
+  if ( EC_succeed != EC_arg( 3 ).unify( EC_word( node.name().c_str() ) ) )
+  {
+    printf( "p_map_graph_get_closest_node(): could not bind return value\n" );
+    return EC_fail;
+  }
+
+  return EC_succeed;
+}
+
+int
 p_map_graph_search_nodes()
 {
   if ( !g_map_graph.loaded() )
@@ -203,6 +239,41 @@ p_map_graph_search_nodes()
   if ( EC_succeed != EC_arg( 1 ).unify( tail ) )
   {
     printf( "p_map_search_nodes(): could not bind return value\n" );
+    return EC_fail;
+  }
+
+  return EC_succeed;
+}
+
+int
+p_map_graph_get_children()
+{
+  if ( !g_map_graph.loaded() )
+  {
+    printf( "p_map_graph_get_children(): no map file loaded\n" );
+    return EC_fail;
+  }
+
+  char* nodename;
+  if ( EC_succeed != EC_arg( 1 ).is_string( &nodename ) )
+  {
+    printf( "p_map_graph_get_children(): no node name given\n" );
+    return EC_fail;
+  }
+
+  RCSoftMapNode node = g_map_graph.map_graph()->node( nodename );
+  vector< string > children = node.children();
+  EC_word tail = nil();
+  for ( vector< string >::iterator nit = children.begin();
+	nit != children.end();
+	++nit )
+  {
+    tail = list( EC_word( (*nit).c_str() ), tail );
+  }
+
+  if ( EC_succeed != EC_arg( 2 ).unify( tail ) )
+  {
+    printf( "p_map_graph_get_children(): cannot bind return value\n" );
     return EC_fail;
   }
 
