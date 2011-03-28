@@ -24,7 +24,8 @@
 #define __ECLIPSE_EXTERNALS_RCSOFT_MAP_GRAPH_H
 
 extern "C" int p_map_graph_load();
-extern "C" int p_map_graph_get_node_coords();
+extern "C" int p_map_graph_get_node_coords3();
+extern "C" int p_map_graph_get_node_coords4();
 extern "C" int p_map_graph_get_nodes();
 extern "C" int p_map_graph_get_closest_node();
 extern "C" int p_map_graph_search_nodes();

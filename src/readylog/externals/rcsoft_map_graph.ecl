@@ -24,6 +24,7 @@
 :- module(rcsoft_map_graph).
 :- export map_graph_load/1.
 :- export map_graph_get_node_coords/3.
+:- export map_graph_get_node_coords/4.
 :- export map_graph_get_nodes/1.
 :- export map_graph_search_nodes/2.
 :- export map_graph_get_closest_node/3.
@@ -38,7 +39,8 @@
 
 %% definition of external predicates
 :- external(map_graph_load/1, p_map_graph_load).
-:- external(map_graph_get_node_coords/3, p_map_graph_get_node_coords).
+:- external(map_graph_get_node_coords/3, p_map_graph_get_node_coords3).
+:- external(map_graph_get_node_coords/4, p_map_graph_get_node_coords4).
 :- external(map_graph_get_nodes/1, p_map_graph_get_nodes).
 :- external(map_graph_search_nodes/2, p_map_graph_search_nodes).
 :- external(map_graph_get_closest_node/3, p_map_graph_get_closest_node).

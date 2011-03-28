@@ -26,6 +26,8 @@
 #include <core/exception.h>
 #include <eclipseclass.h>
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 /** @class fawkes::EclExternalRCSoftMapGraph
  * Wrapper class for using the RCSoftMapGraph in the implementation of
@@ -108,7 +110,7 @@ p_map_graph_load()
 }
 
 int
-p_map_graph_get_node_coords()
+p_map_graph_get_node_coords3()
 {
   if ( !g_map_graph.loaded() )
   {
@@ -125,12 +127,14 @@ p_map_graph_get_node_coords()
 
   RCSoftMapNode node = g_map_graph.map_graph()->node( string(nodename) );
   
+  // x-coordinate
   if ( EC_succeed != EC_arg( 2 ).unify( EC_word( (double) node.x() ) ) )
   {
     printf( "p_map_get_node(): could not bind return value\n" );
     return EC_fail;
   }
 
+  // y-coordinate
   if ( EC_succeed != EC_arg( 3 ).unify( EC_word( (double) node.y() ) ) )
   {
     printf( "p_map_get_node(): could not bind return value\n" );
@@ -139,6 +143,46 @@ p_map_graph_get_node_coords()
 
   return EC_succeed;
 }
+
+int
+p_map_graph_get_node_coords4()
+{
+  if ( EC_succeed != p_map_graph_get_node_coords3() )
+  { return EC_fail; }
+
+  char* nodename;
+  if ( EC_succeed != EC_arg( 1 ).is_string( &nodename ) )
+  {
+    printf( "p_map_get_node(): first argument is not a string\n" );
+    return EC_fail;
+  }
+
+  RCSoftMapNode node = g_map_graph.map_graph()->node( string(nodename) );
+
+  // check for orientation property
+  int result;
+  vector< string >::iterator pit;
+  for ( pit = node.properties().begin();
+	pit != node.properties().end();
+	++pit )
+  {
+    if ( 0 == strncmp( (*pit).c_str(), "Orientation", 11 ) )
+    {
+      double ori = atof( (*pit).substr( 11 ).c_str() );
+      result = EC_arg( 4 ).unify( EC_word( ori ) );
+      break;
+    }
+  }
+
+  if ( node.properties().end() == pit )
+  { result = EC_arg( 4 ).unify( EC_atom( (char*) "false" ) ); }
+
+  if ( EC_succeed != result)
+  { return EC_fail; }
+
+  return EC_succeed;
+}
+
 
 int
 p_map_graph_get_nodes()
