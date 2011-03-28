@@ -89,6 +89,9 @@ public:
     return m_blackboard;
   }
 
+  /** Obtain the list of opened interfaces.
+   * @return list of opened interfaces
+   */
   std::vector< Interface* >& interfaces()
   {
     return m_interfaces;
