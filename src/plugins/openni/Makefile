@@ -17,6 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 PRESUBDIRS = interfaces
+SUBDIRS = skelgui
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesopenniaspect
