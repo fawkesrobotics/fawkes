@@ -38,6 +38,8 @@ class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
 
   virtual void fill_texture();
 
+  void toggle_show_labels();
+
  private:
   firevision::Camera  *__depth_cam;
   firevision::Camera  *__label_cam;
@@ -45,6 +47,8 @@ class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
 
   const unsigned int   __max_depth;
   float               *__histogram;
+
+  bool                 __show_labels;
 };
 
 #endif

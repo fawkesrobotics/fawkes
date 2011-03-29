@@ -56,6 +56,7 @@ Camera *g_depth_cam;
 Camera *g_label_cam;
 SkelGuiImageDrawer *g_image_drawer = NULL;
 SkelGuiDepthDrawer *g_depth_drawer = NULL;
+SkelGuiSkeletonDrawer *g_skeleton_drawer = NULL;
 
 UserMap  g_users;
 
@@ -160,6 +161,13 @@ void clean_exit()
   }
   delete g_rbb;
 
+  delete g_image_cam;
+  delete g_depth_cam;
+  delete g_label_cam;
+  delete g_image_drawer;
+  delete g_depth_drawer;
+  delete g_skeleton_drawer;
+
   exit(1);
 }
 
@@ -187,12 +195,8 @@ void glut_display (void)
       }
     }
 
-    g_users.begin()->second.proj_if->read();
-    unsigned int x_res = g_users.begin()->second.proj_if->res_x();
-    unsigned int y_res = g_users.begin()->second.proj_if->res_y();
-
     // Process the data
-    if (g_draw_skeleton)  draw_skeletons(g_users, x_res, y_res);
+    if (g_draw_skeleton)  g_skeleton_drawer->draw();
   }
 
   glutSwapBuffers();
@@ -214,6 +218,7 @@ glut_keyboard(unsigned char key, int x, int y)
 {
   switch (key) {
   case 27:
+  case 'q':
     clean_exit();
   case 'i':
     g_draw_image = ! g_draw_image;
@@ -225,6 +230,12 @@ glut_keyboard(unsigned char key, int x, int y)
     break;
   case 's':
     g_draw_skeleton = ! g_draw_skeleton;
+    break;
+  case 'l':
+    g_skeleton_drawer->toggle_print_state();
+    break;
+  case 'L':
+    if (g_depth_drawer) g_depth_drawer->toggle_show_labels();
     break;
   case'p':
     g_pause = !g_pause;
@@ -320,6 +331,8 @@ int main(int argc, char **argv)
     g_image_drawer = new SkelGuiImageDrawer(g_image_cam);
     g_depth_drawer = new SkelGuiDepthDrawer(g_depth_cam, g_label_cam, 10000);
   }
+
+  g_skeleton_drawer = new SkelGuiSkeletonDrawer(g_users);
 
   glutMainLoop();
 }

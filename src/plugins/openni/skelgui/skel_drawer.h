@@ -37,6 +37,32 @@ typedef struct {
 
 typedef std::map<std::string, UserInfo>  UserMap;
 
-void draw_skeletons(UserMap &users, unsigned int x_res, unsigned int y_res);
+class SkelGuiSkeletonDrawer
+{
+ public:
+  /** Print state enum. */
+  typedef enum {
+    PRINT_NONE,		/**< Print neither ID nor state */
+    PRINT_ID,		/**< Print only ID */
+    PRINT_ID_STATE	/**< Print ID and state */
+  } PrintState;
+
+  SkelGuiSkeletonDrawer(UserMap &users);
+
+  void draw();
+
+  void toggle_print_state();
+  void set_print_state(PrintState state);
+
+ private:
+  void print_string(void *font, char *str);
+  void draw_limb(float *proj1, float conf1, float *proj2, float conf2);
+  void draw_user(UserInfo &user);
+
+ private:
+  UserMap  &__users;
+
+  PrintState __print_state;
+};
 
 #endif

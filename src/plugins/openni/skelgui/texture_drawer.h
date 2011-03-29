@@ -48,14 +48,13 @@ class SkelGuiTextureDrawer
 		      float bottomRightX, float bottomRightY);
 
  protected:
-  unsigned char       *__rgb_buf;
-  unsigned char       *__texture;
+  unsigned char       *__texture;	/**< Texture buffer. */
 
-  const unsigned int   __width;
-  const unsigned int   __height;
+  const unsigned int   __width;		/**< Width of visible area from texture */
+  const unsigned int   __height;	/**< Height of visible area from texture */
 
-  const unsigned int   __texture_width;
-  const unsigned int   __texture_height;
+  const unsigned int   __texture_width;	/**< Real texture width */
+  const unsigned int   __texture_height;		/**< Real texture height */
 
  private:
   bool                 __texture_initialized;

@@ -39,10 +39,17 @@ using namespace firevision;
  * Uses texture mapping to show an image acquired from a camera in the
  * background.
  * @author Tim Niemueller
+ *
+ * @fn SkelGuiTextureDrawer::fill_texture()
+ * Fill texture with data.
+ * This function is called during draw() and the sub-class shall implement it
+ * to fill the texture with the data to show. Be aware that the texture size
+ * and the actually shown size will likely differ.
  */
 
 /** Constructor.
- * @param cam camera to capture image with
+ * @param width width of visible area
+ * @param height height of visible area
  */
 SkelGuiTextureDrawer::SkelGuiTextureDrawer(unsigned int width, unsigned int height)
   : __width(width), __height(height),
@@ -100,6 +107,7 @@ SkelGuiTextureDrawer::draw_rectangle(float topLeftX, float topLeftY,
   glFlush();
 }
 
+/** Draw texture to screen. */
 void
 SkelGuiTextureDrawer::draw()
 {
@@ -122,6 +130,10 @@ SkelGuiTextureDrawer::draw()
   glDisable(GL_TEXTURE_2D);
 }
 
+/** Copy an RGB buffer to texture.
+ * @param rgb_buf the RGB buffer to copy, it must exactly of dimensions __width
+ * and __height.
+ */
 void
 SkelGuiTextureDrawer::copy_rgb_to_texture(const unsigned char *rgb_buf)
 {

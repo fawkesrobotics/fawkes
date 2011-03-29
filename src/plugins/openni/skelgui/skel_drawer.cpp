@@ -29,25 +29,33 @@
 
 using namespace fawkes;
 
-bool g_print_id = true;
-bool g_print_state = true;
+/** @class SkelGuiSkeletonDrawer "skel_drawer.h"
+ * Draw body skeleton using OpenGL.
+ * This class draws the limbs as read from the user interfaces.
+ * @author Tim Niemueller
+ */
 
-void
-glPrintString(void *font, char *str)
+/** Constructor.
+ * @param users map of users shared with interface observer
+ */
+SkelGuiSkeletonDrawer::SkelGuiSkeletonDrawer(UserMap &users)
+  : __users(users)
 {
-  int i,l = strlen(str);
-  for(i=0; i<l; i++) {
-    glutBitmapCharacter(font,*str++);
-  }
+  __print_state = PRINT_ID_STATE;
 }
 
 void
-draw_limb(float *proj1, float conf1, float *proj2, float conf2)
+SkelGuiSkeletonDrawer::print_string(void *font, char *str)
+{
+  const int l = strlen(str);
+  for(int i = 0; i < l; ++i)  glutBitmapCharacter(font, *str++);
+}
+
+void
+SkelGuiSkeletonDrawer::draw_limb(float *proj1, float conf1,
+				 float *proj2, float conf2)
 {
   if (conf1 < 0.5 || conf2 < 0.5)  return;
-
-  //GLint x1 = proj1[0], y1 = proj1[1], x2 = proj2[0], y2 = proj2[1];
-  //printf("Drawing from (%i,%i) to (%i,%i)\n", x1, y1, x2, y2);
 
   glVertex3i(proj1[0], proj1[1], 0);
   glVertex3i(proj2[0], proj2[1], 0);
@@ -60,7 +68,7 @@ draw_limb(float *proj1, float conf1, float *proj2, float conf2)
 	    user.skel_if->pos_##joint2##_confidence());
 
 void
-draw_user(UserInfo &user)
+SkelGuiSkeletonDrawer::draw_user(UserInfo &user)
 {
   if (user.skel_if->state() != HumanSkeletonInterface::STATE_TRACKING)  return;
 
@@ -89,16 +97,17 @@ draw_user(UserInfo &user)
 
 }
 
+/** Draw skeletons. */
 void
-draw_skeletons(UserMap &users, unsigned int x_res, unsigned int y_res)
+SkelGuiSkeletonDrawer::draw()
 {
-  if (users.empty()) return;
+  if (__users.empty()) return;
 
   char label[50] = "";
-  for (UserMap::iterator i = users.begin(); i != users.end(); ++i) {
-    if (g_print_id) {
+  for (UserMap::iterator i = __users.begin(); i != __users.end(); ++i) {
+    if (__print_state != PRINT_NONE) {
       memset(label, 0, sizeof(label));
-      if (!g_print_state) {
+      if (__print_state == PRINT_ID) {
 	sprintf(label, "%s", i->first.c_str());
       }
       else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_TRACKING)
@@ -117,7 +126,7 @@ draw_skeletons(UserMap &users, unsigned int x_res, unsigned int y_res)
 		1);
       
       glRasterPos2i(i->second.proj_if->proj_com(0), i->second.proj_if->proj_com(1));
-      glPrintString(GLUT_BITMAP_HELVETICA_18, label);
+      print_string(GLUT_BITMAP_HELVETICA_18, label);
     }
 
     glBegin(GL_LINES);
@@ -129,4 +138,28 @@ draw_skeletons(UserMap &users, unsigned int x_res, unsigned int y_res)
     draw_user(i->second);
     glEnd();
   }
+}
+
+/** Toggle the printing state.
+ * This toggles through the printing state in the order PRINT_NONE,
+ * PRINT_ID_STATE, and PRINT_ID.
+ */
+void
+SkelGuiSkeletonDrawer::toggle_print_state()
+{
+  switch (__print_state) {
+  case PRINT_NONE:      __print_state = PRINT_ID_STATE; break;
+  case PRINT_ID_STATE:  __print_state = PRINT_ID;       break;
+  case PRINT_ID:        __print_state = PRINT_NONE;     break;
+  }
+}
+
+
+/** Set print state.
+ * @param state new print state
+ */
+void
+SkelGuiSkeletonDrawer::set_print_state(SkelGuiSkeletonDrawer::PrintState state)
+{
+  __print_state = state;
 }

@@ -44,6 +44,7 @@ using namespace firevision;
 
 /** Constructor.
  * @param depth_cam camera to capture depth image
+ * @param label_cam label to capture label frame
  * @param max_depth maximum depth value to expect
  */
 SkelGuiDepthDrawer::SkelGuiDepthDrawer(firevision::Camera *depth_cam,
@@ -56,6 +57,7 @@ SkelGuiDepthDrawer::SkelGuiDepthDrawer(firevision::Camera *depth_cam,
   __label_cam      = label_cam;
   __rgb_buf        = malloc_buffer(RGB, __width, __height);
   __histogram      = (float *)malloc(__max_depth * sizeof(float));
+  __show_labels    = true;
 }
 
 /** Destructor. */
@@ -63,6 +65,15 @@ SkelGuiDepthDrawer::~SkelGuiDepthDrawer()
 {
   free(__rgb_buf);
   free(__histogram);
+}
+
+/** Toggle label state.
+ * Turns on or off the label coloring of the depth map.
+ */
+void
+SkelGuiDepthDrawer::toggle_show_labels()
+{
+  __show_labels = ! __show_labels;
 }
 
 /** Fill texture. */
@@ -103,7 +114,7 @@ SkelGuiDepthDrawer::fill_texture()
   for (unsigned int i = 0; i < __width * __height; ++i, ++l, ++d, r += 3) {
     r[0] = 0; r[1] = 0; r[2] = 0;
     unsigned int color = *l % NUM_USER_COLORS;
-    if (*l == 0) color = NUM_USER_COLORS;
+    if (!__show_labels || (*l == 0)) color = NUM_USER_COLORS;
 
     if (*d != 0) {
       float hv = __histogram[*d];
