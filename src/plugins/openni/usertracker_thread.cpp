@@ -112,50 +112,9 @@ OpenNiUserTrackerThread::init()
 
   XnStatus st;
 
-  if ((st = openni->FindExistingNode(XN_NODE_TYPE_DEPTH, *__depth_gen))
-      != XN_STATUS_OK)
-  {
-    xn::EnumerationErrors errors;
-    if (__depth_gen->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
-      Exception e("Failed to create depth generator (%s)", xnGetStatusString(st));
-      for (xn::EnumerationErrors::Iterator i = errors.Begin();
-	   i != errors.End(); ++i)
-      {
-	XnProductionNodeDescription d = i.Description();
-	e.append("%s: %s/%s/%u.%u.%u.%u: %s",
-		 xnProductionNodeTypeToString(d.Type),
-		 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
-		 d.Version.nMaintenance, d.Version.nBuild, 
-		 xnGetStatusString(i.Error()));
-      }
-
-      throw e;
-    }
-  }
-
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
   fawkes::openni::setup_map_generator(*__depth_gen, config);
-
-  if ((st = openni->FindExistingNode(XN_NODE_TYPE_USER, *__user_gen))
-      != XN_STATUS_OK)
-  {
-    xn::EnumerationErrors errors;
-    if (__user_gen->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
-      Exception e("Failed to create user generator (%s)", xnGetStatusString(st));
-      for (xn::EnumerationErrors::Iterator i = errors.Begin();
-           i != errors.End(); ++i)
-      {
-        XnProductionNodeDescription d = i.Description();
-        e.append("%s: %s/%s/%u.%u.%u.%u: %s",
-                 xnProductionNodeTypeToString(d.Type),
-                 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
-                 d.Version.nMaintenance, d.Version.nBuild,
-                 xnGetStatusString(i.Error()));
-      }
-
-      throw e;
-    }
-  }
-
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_USER, __user_gen);
 
   if (!__user_gen->IsCapabilitySupported(XN_CAPABILITY_SKELETON)) {
     throw Exception("User generator does not support skeleton capability");

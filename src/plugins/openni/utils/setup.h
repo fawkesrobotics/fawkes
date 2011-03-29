@@ -23,6 +23,9 @@
 #ifndef __PLUGINS_OPENNI_UTILS_SETUP_H_
 #define __PLUGINS_OPENNI_UTILS_SETUP_H_
 
+#include <core/exception.h>
+#include <core/utils/lockptr.h>
+
 #include <XnCppWrapper.h>
 #include <string>
 
@@ -38,7 +41,48 @@ namespace fawkes {
 void setup_map_generator(xn::MapGenerator &generator,
 			 fawkes::Configuration *config);
 
+/** Find existing or create new node.
+ * This method will first try to find an existing node of the given type.
+ * If this fails, it tries to create a new node of the desired type (leaving
+ * the choice of the implementation to the system.
+ * @param openni context to use, note that the context must have been locked
+ * outside of this method call!
+ * @param type node type
+ * @param node instance that will be initialized for the node type
+ * @exception Exception thrown if an error occurs while trying to find or
+ * create the node. It may contain enumeration errors.
+ */
+template<class ProdNodeClass>
+void find_or_create_node(fawkes::LockPtr<xn::Context> &openni,
+			 XnProductionNodeType type, ProdNodeClass &node)
+{
+  XnStatus st;
+  if ((st = openni->FindExistingNode(type, *node)) != XN_STATUS_OK) {
+    xn::EnumerationErrors errors;
+    if (node->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
+      fawkes::Exception e("Failed to create user generator (%s)",
+			  xnGetStatusString(st));
+      for (xn::EnumerationErrors::Iterator i = errors.Begin();
+           i != errors.End(); ++i)
+      {
+        XnProductionNodeDescription d = i.Description();
+        e.append("%s: %s/%s/%u.%u.%u.%u: %s",
+                 xnProductionNodeTypeToString(d.Type),
+                 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
+                 d.Version.nMaintenance, d.Version.nBuild,
+                 xnGetStatusString(i.Error()));
+      }
+
+      throw e;
+    }
+  }
+}
+
 } // end namespace fawkes::openni
 } // end namespace fawkes
+
+
+
+
 
 #endif

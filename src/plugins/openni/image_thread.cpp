@@ -71,48 +71,8 @@ OpenNiImageThread::init()
 
   XnStatus st;
 
-  if ((st = openni->FindExistingNode(XN_NODE_TYPE_IMAGE, *__image_gen))
-      != XN_STATUS_OK)
-  {
-    xn::EnumerationErrors errors;
-    if (__image_gen->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
-      Exception e("Failed to create image generator (%s)", xnGetStatusString(st));
-
-      for (xn::EnumerationErrors::Iterator i = errors.Begin();
-	   i != errors.End(); ++i)
-      {
-	XnProductionNodeDescription d = i.Description();
-	e.append("%s: %s/%s/%u.%u.%u.%u: %s",
-		 xnProductionNodeTypeToString(d.Type),
-		 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
-		 d.Version.nMaintenance, d.Version.nBuild, 
-		 xnGetStatusString(i.Error()));
-      }
-
-      throw e;
-    }
-  }
-
-  if ((st = openni->FindExistingNode(XN_NODE_TYPE_DEPTH, *__depth_gen))
-      != XN_STATUS_OK)
-  {
-    xn::EnumerationErrors errors;
-    if (__depth_gen->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
-      Exception e("Failed to create depth generator (%s)", xnGetStatusString(st));
-      for (xn::EnumerationErrors::Iterator i = errors.Begin();
-	   i != errors.End(); ++i)
-      {
-	XnProductionNodeDescription d = i.Description();
-	e.append("%s: %s/%s/%u.%u.%u.%u: %s",
-		 xnProductionNodeTypeToString(d.Type),
-		 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
-		 d.Version.nMaintenance, d.Version.nBuild, 
-		 xnGetStatusString(i.Error()));
-      }
-
-      throw e;
-    }
-  }
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_IMAGE, __image_gen);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
 
   fawkes::openni::setup_map_generator(*__image_gen, config);
   fawkes::openni::setup_map_generator(*__depth_gen, config);

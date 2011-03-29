@@ -30,6 +30,13 @@ namespace fawkes {
 }
 #endif
 
+/** Setup a map generator from configuration.
+ * This method reads the config values /plugins/openni/resolution and
+ * /plugins/openni/fps and uses it to setup the map output of the given map
+ * generator.
+ * @param generator generator to setup
+ * @param config config to read values from
+ */
 void
 setup_map_generator(xn::MapGenerator &generator,
 		    fawkes::Configuration *config)
