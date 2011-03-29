@@ -83,6 +83,8 @@ class OpenNiUserTrackerThread
   xn::UserGenerator               *__user_gen;
   xn::DepthGenerator              *__depth_gen;
 
+  xn::SkeletonCapability          *__skelcap;
+
   XnCallbackHandle                 __user_cb_handle;
   XnCallbackHandle                 __calib_cb_handle;
   XnCallbackHandle                 __pose_cb_handle;

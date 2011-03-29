@@ -158,6 +158,11 @@ OpenNiImageThread::init()
   __image_gen->GetMetaData(*__image_md);
   __depth_gen->GetMetaData(*__depth_md);
 
+  __image_width  = __image_md->XRes();
+  __image_height = __image_md->YRes();
+  __depth_width  = __image_md->XRes();
+  __depth_height = __image_md->YRes();
+
   /*
   const char *pixel_format = "unknown";
   switch (__image_gen->GetPixelFormat()) {
@@ -213,25 +218,27 @@ void
 OpenNiImageThread::loop()
 {
   MutexLocker lock(openni.objmutex_ptr());
+  bool is_image_new = __image_gen->IsDataNew();
+  bool is_depth_new = __depth_gen->IsDataNew();
+  const XnUInt8 * const      image_data = __image_md->Data();
+  const XnDepthPixel * const depth_data = __depth_md->Data();
+  lock.unlock();
 
-  if (__image_gen->IsDataNew() && (__image_buf->num_attached() > 1)) {
+  if (is_image_new && (__image_buf->num_attached() > 1)) {
     if (__cfg_copy_mode == DEBAYER_BILINEAR) {
-      bayerGRBG_to_yuv422planar_bilinear(__image_md->Data(),
-					 __image_buf->buffer(),
-					 __image_md->XRes(),
-					 __image_md->YRes());
+      bayerGRBG_to_yuv422planar_bilinear(image_data, __image_buf->buffer(),
+					 __image_width, __image_height);
     } else if (__cfg_copy_mode == CONVERT_YUV) {
-      yuv422packed_to_yuv422planar(__image_md->Data(), __image_buf->buffer(),
-				   __image_md->XRes(), __image_md->YRes());
+      yuv422packed_to_yuv422planar(image_data, __image_buf->buffer(),
+				   __image_width, __image_height);
     } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
-      bayerGRBG_to_yuv422planar_nearest_neighbour(__image_md->Data(),
+      bayerGRBG_to_yuv422planar_nearest_neighbour(image_data,
 						  __image_buf->buffer(),
-						  __image_md->XRes(),
-						  __image_md->YRes());
+						  __image_width, __image_height);
     }
   }
 
-  if (__depth_gen->IsDataNew() && (__depth_buf->num_attached() > 1)) {
-    memcpy(__depth_buf->buffer(), __depth_md->Data(), __depth_bufsize);
+  if (is_depth_new && (__depth_buf->num_attached() > 1)) {
+    memcpy(__depth_buf->buffer(), depth_data, __depth_bufsize);
   }
 }

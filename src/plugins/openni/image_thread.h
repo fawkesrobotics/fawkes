@@ -79,6 +79,10 @@ class OpenNiImageThread
 
   unsigned short int                   __usb_vendor;
   unsigned short int                   __usb_product;
+  unsigned int                         __image_width;
+  unsigned int                         __image_height;
+  unsigned int                         __depth_width;
+  unsigned int                         __depth_height;
 };
 
 #endif

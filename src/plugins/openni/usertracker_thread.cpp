@@ -126,22 +126,22 @@ OpenNiUserTrackerThread::init()
     throw Exception("Failed to register user callbacks (%s)", xnGetStatusString(st));
   }
 
-  xn::SkeletonCapability skelcap = __user_gen->GetSkeletonCap();
+  __skelcap = new xn::SkeletonCapability(__user_gen->GetSkeletonCap());
 
-  st = skelcap.RegisterCalibrationCallbacks(cb_calibration_start,
-					    cb_calibration_end,
-					    this, __calib_cb_handle);
+  st = __skelcap->RegisterCalibrationCallbacks(cb_calibration_start,
+					       cb_calibration_end,
+					       this, __calib_cb_handle);
   if (st != XN_STATUS_OK) {
     throw Exception("Failed to register calibration callbacks (%s)", xnGetStatusString(st));
   }
 
-  __skel_need_calib_pose = skelcap.NeedPoseForCalibration();
+  __skel_need_calib_pose = __skelcap->NeedPoseForCalibration();
 
   if (__skel_need_calib_pose) {
     if (! __user_gen->IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION)) {
       throw Exception("Calibration requires pose, but not supported by node");
     }
-    skelcap.GetCalibrationPose(__calib_pose_name);
+    __skelcap->GetCalibrationPose(__calib_pose_name);
 
     xn::PoseDetectionCapability posecap = __user_gen->GetPoseDetectionCap();
     st = posecap.RegisterToPoseCallbacks(cb_pose_start, cb_pose_end,
@@ -151,7 +151,7 @@ OpenNiUserTrackerThread::init()
     }
   }
 
-  skelcap.SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+  __skelcap->SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
 
   __depth_gen->StartGenerating();
   __user_gen->StartGenerating();
@@ -179,15 +179,10 @@ OpenNiUserTrackerThread::finalize()
 void
 OpenNiUserTrackerThread::loop()
 {
-  MutexLocker lock(openni.objmutex_ptr());
+  // we do not lock here, we are only operating on our user generator copy
+  // and the update happens in a different main loop hook
 
-  //__user_gen->WaitAndUpdateData(); 
-  if (! __user_gen->IsDataNew()) {
-    //logger->log_debug(name(), "No new data, skipping loop");
-    return;
-  }
-
-  xn::SkeletonCapability skelcap = __user_gen->GetSkeletonCap();
+  if (! __user_gen->IsDataNew())  return;
 
   UserMap::iterator i;
   for (i = __users.begin(); i != __users.end(); ++i) {
@@ -195,9 +190,9 @@ OpenNiUserTrackerThread::loop()
 
 
     HumanSkeletonInterface::State new_state = i->second.skel_if->state();
-    if (skelcap.IsTracking(i->first)) {
+    if (__skelcap->IsTracking(i->first)) {
       new_state = HumanSkeletonInterface::STATE_TRACKING;
-    } else if (skelcap.IsCalibrating(i->first)) {
+    } else if (__skelcap->IsCalibrating(i->first)) {
       new_state = HumanSkeletonInterface::STATE_CALIBRATING;
     } else {
       new_state = HumanSkeletonInterface::STATE_DETECTING_POSE;
@@ -240,7 +235,7 @@ OpenNiUserTrackerThread::loop()
 //		     joint_name, xnGetStatusString(st));
 
 #define SET_JTF(id, joint, joint_name, bbfield)				\
-  st = skelcap.GetSkeletonJoint(id, joint, jtf);			\
+  st = __skelcap->GetSkeletonJoint(id, joint, jtf);			\
   if (st != XN_STATUS_OK) {						\
     ori[0] = ori[1] = ori[2] = ori[3] = ori[4] = ori[5] = 0.;		\
     ori[6] = ori[7] = ori[8] = ori_confidence = pos_confidence = 0.;	\
@@ -276,8 +271,6 @@ OpenNiUserTrackerThread::update_user(XnUserID id, UserInfo &user)
 {
   XnSkeletonJointTransformation jtf;
   XnStatus st;
-
-  xn::SkeletonCapability skelcap = __user_gen->GetSkeletonCap();
 
   float pos[3], ori[9], proj[2], pos_confidence, ori_confidence;
 
