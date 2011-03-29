@@ -40,6 +40,9 @@ namespace fawkes {
   class HumanSkeletonInterface;
   class HumanSkeletonProjectionInterface;
 }
+namespace firevision {
+  class SharedMemoryImageBuffer;
+}
 
 class OpenNiUserTrackerThread
 : public fawkes::Thread,
@@ -83,6 +86,7 @@ class OpenNiUserTrackerThread
   xn::UserGenerator               *__user_gen;
   xn::DepthGenerator              *__depth_gen;
 
+  xn::SceneMetaData               *__scene_md;
   xn::SkeletonCapability          *__skelcap;
 
   XnCallbackHandle                 __user_cb_handle;
@@ -93,6 +97,9 @@ class OpenNiUserTrackerThread
   bool                             __skel_need_calib_pose;
 
   UserMap                          __users;
+
+  firevision::SharedMemoryImageBuffer *__label_buf;
+  size_t                               __label_bufsize;
 };
 
 #endif

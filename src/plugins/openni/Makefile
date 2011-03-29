@@ -24,6 +24,7 @@ OBJS_openni = openni_plugin.o context_thread.o
 
 LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 			  fawkesinterface fawkesopenniaspect fawkesopenniutils \
+			  fvutils \
 			  HumanSkeletonInterface HumanSkeletonProjectionInterface
 OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 

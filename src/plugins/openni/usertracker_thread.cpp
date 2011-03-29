@@ -26,10 +26,12 @@
 #include <core/threading/mutex_locker.h>
 #include <interfaces/HumanSkeletonInterface.h>
 #include <interfaces/HumanSkeletonProjectionInterface.h>
+#include <fvutils/ipc/shm_image.h>
 
 #include <memory>
 
 using namespace fawkes;
+using namespace firevision;
 
 /** @class OpenNiUserTrackerThread "usertracker_thread.h"
  * OpenNI User Tracker Thread.
@@ -120,10 +122,17 @@ OpenNiUserTrackerThread::init()
     throw Exception("User generator does not support skeleton capability");
   }
 
+  __scene_md = new xn::SceneMetaData();
+  std::auto_ptr<xn::SceneMetaData> scenemd_autoptr(__scene_md);
+  if ((st = __user_gen->GetUserPixels(0, *__scene_md)) != XN_STATUS_OK) {
+    throw Exception("Failed to get scene meta data (%s)", xnGetStatusString(st));
+  }
+
   st = __user_gen->RegisterUserCallbacks(cb_new_user, cb_lost_user,
 					 this, __user_cb_handle);
   if (st != XN_STATUS_OK) {
-    throw Exception("Failed to register user callbacks (%s)", xnGetStatusString(st));
+    throw Exception("Failed to register user callbacks (%s)",
+		    xnGetStatusString(st));
   }
 
   __skelcap = new xn::SkeletonCapability(__user_gen->GetSkeletonCap());
@@ -156,8 +165,15 @@ OpenNiUserTrackerThread::init()
   __depth_gen->StartGenerating();
   __user_gen->StartGenerating();
 
+  __label_buf = new SharedMemoryImageBuffer("openni-labels", RAW16,
+  					    __scene_md->XRes(),
+					    __scene_md->YRes());
+  __label_bufsize = colorspace_buffer_size(RAW16,
+					   __scene_md->XRes(), __scene_md->YRes());
+
   usergen_autoptr.release();
   depthgen_autoptr.release();
+  scenemd_autoptr.release();
 }
 
 
@@ -167,6 +183,9 @@ OpenNiUserTrackerThread::finalize()
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
   delete __user_gen;
+  delete __scene_md;
+  delete __skelcap;
+  delete __label_buf;
 
   UserMap::iterator i;
   for (i = __users.begin(); i != __users.end(); ++i) {
@@ -224,6 +243,11 @@ OpenNiUserTrackerThread::loop()
       i->second.proj_if->write();
     }
   }
+
+  if (__label_buf->num_attached() > 1) {
+    memcpy(__label_buf->buffer(), __scene_md->Data(), __label_bufsize);
+  }
+
 }
 
 
