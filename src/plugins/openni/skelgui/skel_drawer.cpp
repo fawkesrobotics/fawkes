@@ -21,6 +21,7 @@
  */
 
 #include "skel_drawer.h"
+#include "colors.h"
 
 #include <cstring>
 #include <cstdio>
@@ -28,24 +29,8 @@
 
 using namespace fawkes;
 
-bool g_draw_skeleton = true;
 bool g_print_id = true;
 bool g_print_state = true;
-
-float user_colors[][3] = {
-  {0,1,1},
-  {0,0,1},
-  {0,1,0},
-  {1,1,0},
-  {1,0,0},
-  {1,.5,0},
-  {.5,1,0},
-  {0,.5,1},
-  {.5,0,1},
-  {1,1,.5},
-  {1,1,1}
-};
-unsigned int num_colors = 10;
 
 void
 glPrintString(void *font, char *str)
@@ -116,31 +101,32 @@ draw_skeletons(UserMap &users, unsigned int x_res, unsigned int y_res)
       if (!g_print_state) {
 	sprintf(label, "%s", i->first.c_str());
       }
-      else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_TRACKING) {
+      else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_TRACKING)
+      {
 	sprintf(label, "%s - Tracking", i->first.c_str());
-      } else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_CALIBRATING) {
+      } else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_CALIBRATING)
+      {
 	sprintf(label, "%s - Calibrating...", i->first.c_str());
       } else {
 	sprintf(label, "%s - Looking for pose", i->first.c_str());
       }
       
-      glColor4f(1 - user_colors[i->second.skel_if->user_id() % num_colors][0],
-		1 - user_colors[i->second.skel_if->user_id() % num_colors][1],
-		1 - user_colors[i->second.skel_if->user_id() % num_colors][2], 1);
+      glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
+		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
+		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
+		1);
       
       glRasterPos2i(i->second.proj_if->proj_com(0), i->second.proj_if->proj_com(1));
       glPrintString(GLUT_BITMAP_HELVETICA_18, label);
     }
 
-    if (g_draw_skeleton) {
-      glBegin(GL_LINES);
-      glColor4f(1 - user_colors[i->second.skel_if->user_id() % num_colors][0],
-		1 - user_colors[i->second.skel_if->user_id() % num_colors][1],
-		1 - user_colors[i->second.skel_if->user_id() % num_colors][2], 1);
+    glBegin(GL_LINES);
+    glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
+	      1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
+	      1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
+	      1);
 
-      draw_user(i->second);
-
-      glEnd();
-    }
+    draw_user(i->second);
+    glEnd();
   }
 }

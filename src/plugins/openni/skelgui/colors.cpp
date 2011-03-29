@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  image_drawer.h - Skeleton Visualization GUI: image drawer
+ *  colors.cpp - Skeleton Visualization GUI: colors
  *
- *  Created: Sat Mar 19 00:08:08 2011
+ *  Created: Tue Mar 29 17:55:20 2011 (on the way to Magdeburg for GO2011)
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,26 +20,20 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_SKELGUI_IMAGE_DRAWER_H_
-#define __PLUGINS_OPENNI_SKELGUI_IMAGE_DRAWER_H_
+#include "colors.h"
 
-#include "texture_drawer.h"
-
-namespace firevision {
-  class Camera;
-}
-
-class SkelGuiImageDrawer : public SkelGuiTextureDrawer
-{
- public:
-  SkelGuiImageDrawer(firevision::Camera *cam);
-  ~SkelGuiImageDrawer();
-
-  void fill_texture();
-
- private:
-  firevision::Camera  *__cam;
-  unsigned char       *__rgb_buf;
+float USER_COLORS[][3] = {
+  {0,1,1},
+  {0,0,1},
+  {0,1,0},
+  {1,1,0},
+  {1,0,0},
+  {1,.5,0},
+  {.5,1,0},
+  {0,.5,1},
+  {.5,0,1},
+  {1,1,.5},
+  {1,1,1}
 };
 
-#endif
+unsigned int NUM_USER_COLORS = 10;

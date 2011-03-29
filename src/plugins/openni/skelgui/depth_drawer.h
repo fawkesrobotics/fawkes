@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  image_drawer.h - Skeleton Visualization GUI: image drawer
+ *  depth_drawer.h - Skeleton Visualization GUI: depth drawer
  *
- *  Created: Sat Mar 19 00:08:08 2011
+ *  Created: Tue Mar 29 17:03:59 2011 (on the way to Magdeburg for GO2011)
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_SKELGUI_IMAGE_DRAWER_H_
-#define __PLUGINS_OPENNI_SKELGUI_IMAGE_DRAWER_H_
+#ifndef __PLUGINS_OPENNI_SKELGUI_DEPTH_DRAWER_H_
+#define __PLUGINS_OPENNI_SKELGUI_DEPTH_DRAWER_H_
 
 #include "texture_drawer.h"
 
@@ -29,17 +29,22 @@ namespace firevision {
   class Camera;
 }
 
-class SkelGuiImageDrawer : public SkelGuiTextureDrawer
+class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
 {
  public:
-  SkelGuiImageDrawer(firevision::Camera *cam);
-  ~SkelGuiImageDrawer();
+  SkelGuiDepthDrawer(firevision::Camera *depth_cam, firevision::Camera *label_cam,
+		     unsigned int max_depth);
+  ~SkelGuiDepthDrawer();
 
-  void fill_texture();
+  virtual void fill_texture();
 
  private:
-  firevision::Camera  *__cam;
+  firevision::Camera  *__depth_cam;
+  firevision::Camera  *__label_cam;
   unsigned char       *__rgb_buf;
+
+  const unsigned int   __max_depth;
+  float               *__histogram;
 };
 
 #endif

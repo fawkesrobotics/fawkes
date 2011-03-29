@@ -22,6 +22,7 @@
 
 #include "skel_drawer.h"
 #include "image_drawer.h"
+#include "depth_drawer.h"
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
@@ -29,6 +30,7 @@
 #include <blackboard/interface_observer.h>
 #include <utils/system/argparser.h>
 #include <fvcams/net.h>
+#include <fvcams/shmem.h>
 
 #include <map>
 #include <string>
@@ -45,9 +47,15 @@ using namespace firevision;
 
 bool g_quit = false;
 bool g_pause = false;
+bool g_draw_image = true;
+bool g_draw_depth = false;
+bool g_draw_skeleton = true;
 RemoteBlackBoard *g_rbb;
-NetworkCamera *g_cam;
+Camera *g_image_cam;
+Camera *g_depth_cam;
+Camera *g_label_cam;
 SkelGuiImageDrawer *g_image_drawer = NULL;
+SkelGuiDepthDrawer *g_depth_drawer = NULL;
 
 UserMap  g_users;
 
@@ -166,6 +174,11 @@ void glut_display (void)
   glPushMatrix();
   glLoadIdentity();
 
+  glOrtho(0, GL_WIN_SIZE_X, GL_WIN_SIZE_Y, 0, -1.0, 1.0);
+
+  if (g_draw_image && g_image_drawer)  g_image_drawer->draw();
+  if (g_draw_depth && g_depth_drawer)  g_depth_drawer->draw();
+
   if (! g_users.empty()) {
     if (!g_pause) {
       for (UserMap::iterator i = g_users.begin(); i != g_users.end(); ++i) {
@@ -177,13 +190,9 @@ void glut_display (void)
     g_users.begin()->second.proj_if->read();
     unsigned int x_res = g_users.begin()->second.proj_if->res_x();
     unsigned int y_res = g_users.begin()->second.proj_if->res_y();
-    glOrtho(0, x_res, y_res, 0, -1.0, 1.0);
-
-    //glDisable(GL_TEXTURE_2D);
 
     // Process the data
-    if (g_image_drawer)  g_image_drawer->draw_camimg();
-    draw_skeletons(g_users, x_res, y_res);
+    if (g_draw_skeleton)  draw_skeletons(g_users, x_res, y_res);
   }
 
   glutSwapBuffers();
@@ -206,25 +215,16 @@ glut_keyboard(unsigned char key, int x, int y)
   switch (key) {
   case 27:
     clean_exit();
-  case 'b':
-    // Draw background?
-    //g_bDrawBackground = !g_bDrawBackground;
+  case 'i':
+    g_draw_image = ! g_draw_image;
+    if (g_draw_image)  g_draw_depth = false;
     break;
-  case 'x':
-    // Draw pixels at all?
-    //g_bDrawPixels = !g_bDrawPixels;
+  case 'd':
+    g_draw_depth = ! g_draw_depth;
+    if (g_draw_depth)  g_draw_image = false;
     break;
   case 's':
-    // Draw Skeleton?
-    //g_bDrawSkeleton = !g_bDrawSkeleton;
-    break;
-  case 'i':
-    // Print label?
-    //g_bPrintID = !g_bPrintID;
-    break;
-  case 'l':
-    // Print ID & state as label, or only ID?
-    //g_bPrintState = !g_bPrintState;
+    g_draw_skeleton = ! g_draw_skeleton;
     break;
   case'p':
     g_pause = !g_pause;
@@ -254,7 +254,7 @@ void glInit (int * pargc, char ** argv)
 
 int main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:f::j");
+  ArgumentParser argp(argc, argv, "hr:f::js");
 
   Thread::init_main();
   glInit(&argc, argv);
@@ -265,12 +265,10 @@ int main(int argc, char **argv)
     argp.parse_hostport("r", host, port);
   }
 
-  bool use_firevision = false;
   std::string fvhost = host;
   unsigned short int fvport = 2208;
-  if ( argp.has_arg("f") ) {
-    use_firevision = true;
-    argp.parse_hostport("f", fvhost, fvport);
+  if ( argp.has_arg("n") ) {
+    argp.parse_hostport("n", fvhost, fvport);
   }
 
   printf("Connecting to %s:%u\n", host.c_str(), port);
@@ -282,23 +280,45 @@ int main(int argc, char **argv)
   }
   g_obs = new SkelIfObserver(g_rbb);
 
-  g_cam = NULL;
+  g_image_cam = NULL;
+  g_depth_cam = NULL;
+  g_label_cam = NULL;
   g_image_drawer = NULL;
 
-  if (use_firevision) {
-    g_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image",
-			      argp.has_arg("j"));
-    g_cam->open();
-    g_cam->start();
-    if ((g_cam->pixel_width() != GL_WIN_SIZE_X) ||
-	(g_cam->pixel_height() != GL_WIN_SIZE_Y))
+  if (argp.has_arg("n") || argp.has_arg("s")) {
+    if (argp.has_arg("n")) {
+      g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image",
+				      argp.has_arg("j"));
+      g_depth_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-depth");
+      g_label_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-labels");
+    } else {
+      g_image_cam = new SharedMemoryCamera("openni-image");
+      g_depth_cam = new SharedMemoryCamera("openni-depth");
+      g_label_cam = new SharedMemoryCamera("openni-labels");
+    }
+    g_image_cam->open();
+    g_image_cam->start();
+    g_depth_cam->open();
+    g_depth_cam->start();
+    g_label_cam->open();
+    g_label_cam->start();
+
+    if ((g_image_cam->pixel_width() != GL_WIN_SIZE_X) ||
+	(g_image_cam->pixel_height() != GL_WIN_SIZE_Y) ||
+	(g_depth_cam->pixel_width() != GL_WIN_SIZE_X) ||
+	(g_depth_cam->pixel_height() != GL_WIN_SIZE_Y) ||
+	(g_label_cam->pixel_width() != GL_WIN_SIZE_X) ||
+	(g_label_cam->pixel_height() != GL_WIN_SIZE_Y))
     {
       printf("Image size different from window size, closing camera");
-      delete g_cam;
-      g_cam = NULL;
+      delete g_image_cam;
+      delete g_depth_cam;
+      delete g_label_cam;
+      g_image_cam = g_depth_cam = g_label_cam = NULL;
     }
 
-    g_image_drawer = new SkelGuiImageDrawer(g_cam);
+    g_image_drawer = new SkelGuiImageDrawer(g_image_cam);
+    g_depth_drawer = new SkelGuiDepthDrawer(g_depth_cam, g_label_cam, 10000);
   }
 
   glutMainLoop();
