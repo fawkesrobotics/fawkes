@@ -77,6 +77,7 @@ class OpenNiUserTrackerThread
   typedef std::map<XnUserID, UserInfo>  UserMap;
 
   void update_user(XnUserID id, UserInfo &user);
+  void update_com(XnUserID id, UserInfo &user);
 
  private:
   xn::UserGenerator               *__user_gen;

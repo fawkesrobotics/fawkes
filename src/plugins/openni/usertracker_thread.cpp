@@ -212,12 +212,16 @@ OpenNiUserTrackerThread::loop()
       // update skeleton information
       try {
 	update_user(i->first, i->second);
+	update_com(i->first, i->second);
 	needs_write = true;
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to update skeleton data for %u, "
 			 "exception follows", i->first);
 	logger->log_warn(name(), e);
       }
+    } else if (new_state == HumanSkeletonInterface::STATE_DETECTING_POSE) {
+      update_com(i->first, i->second);
+      needs_write = true;
     }
 
     if (needs_write) {
@@ -302,6 +306,12 @@ OpenNiUserTrackerThread::update_user(XnUserID id, UserInfo &user)
   SET_JTF(id, XN_SKEL_RIGHT_ANKLE, "right ankle", right_ankle);
   SET_JTF(id, XN_SKEL_RIGHT_FOOT, "right foot", right_foot);
 
+}
+
+
+void
+OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
+{
   XnPoint3D compt, compt_proj;
   if (__user_gen->GetCoM(id, compt) == XN_STATUS_OK) {
     float com[3], com_proj[2];
@@ -317,9 +327,7 @@ OpenNiUserTrackerThread::update_user(XnUserID id, UserInfo &user)
     user.skel_if->set_com(com);
     user.proj_if->set_proj_com(com_proj);
   }
-
 }
-
 
 /** Notify of new user.
  * This is called by the OpenNI callback when a new user has been detected.
