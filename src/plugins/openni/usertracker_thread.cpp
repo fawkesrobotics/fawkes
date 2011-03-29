@@ -333,9 +333,10 @@ OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
   if (__user_gen->GetCoM(id, compt) == XN_STATUS_OK) {
     float com[3], com_proj[2];
 
-    com[0] = compt.X;
-    com[1] = compt.Y;
-    com[2] = compt.Z;
+    // translating to Fawkes coordinates, empirically verified
+    com[0] =  compt.Z * 0.001;
+    com[1] = -compt.X * 0.001;
+    com[2] =  compt.Y * 0.001;
 
     __depth_gen->ConvertRealWorldToProjective(1, &compt, &compt_proj);
     com_proj[0] = compt_proj.X;
