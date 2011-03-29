@@ -182,6 +182,7 @@ RobotisRX28::open() {
   if (__fd == -1) {
     throw CouldNotOpenFileException(__device_file, errno, "Cannot open device file");
   }
+  tcflush(__fd, TCIOFLUSH);
 
   if (tcgetattr(__fd, &param) == -1) {
     Exception e(errno, "Getting the port parameters failed");
@@ -315,8 +316,17 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
   //printf("Wrote %d bytes\n", written);
 
   // For some reason we have to read the shit immediately, although ECHO is off
-  int readd __attribute__((unused)) = read(__fd, __ibuffer, __obuffer_length);
-  //printf("Read %d bytes\n", readb);
+  int readd = 0;
+  while (readd < __obuffer_length) {
+    readd += read(__fd, __ibuffer + readd, __obuffer_length - readd);
+  }
+#ifdef DEBUG_RX28_COMM
+  printf("Read %d junk bytes: ", readd);
+  for (int i = 0; i < readd; ++i) {
+    printf("%X ", __ibuffer[i]);
+  }
+  printf("\n");
+#endif
 
   if ( written < 0 ) {
     throw Exception(errno, "Failed to write RX28 packet %x for %x", instruction, id);
