@@ -225,7 +225,7 @@ class RobotisRX28
 			      const unsigned char *params, const unsigned char plength);
   void send(const unsigned char id, const unsigned char instruction,
 	    const unsigned char *params, const unsigned char plength);
-  void recv(unsigned int timeout_ms = 0xFFFFFFFF);
+  void recv(const unsigned char exp_length, unsigned int timeout_ms = 0xFFFFFFFF);
   void assert_valid_id(unsigned char id);
   unsigned int merge_twobyte_value(unsigned int id,
 				   unsigned char ind_l, unsigned char ind_h);
