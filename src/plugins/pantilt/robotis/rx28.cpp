@@ -303,13 +303,13 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
   __obuffer[3 + plength+2] = calc_checksum(id, instruction, params, plength);
   __obuffer_length = plength+2 + 4 ; // 4 for 0xFF 0xFF ID LENGTH
 
-  /*
+#ifdef DEBUG_RX28_COMM
   printf("Sending: ");
   for (int i = 0; i < __obuffer_length; ++i) {
     printf("%X ", __obuffer[i]);
   }
   printf("\n");
-  */
+#endif
 
   int written = write(__fd, __obuffer, __obuffer_length);
   //printf("Wrote %d bytes\n", written);
@@ -354,15 +354,17 @@ RobotisRX28::recv(unsigned int timeout_ms)
   // get octets one by one
   int bytes_read = 0;
   while (bytes_read < 6) {
-    //printf("Trying to read %d bytes\n", 6 - bytes_read);
+#ifdef DEBUG_RX28_COMM
+    printf("Trying to read %d bytes\n", 6 - bytes_read);
+#endif
     bytes_read += read(__fd, __ibuffer + bytes_read, 6 - bytes_read);
-    /*
+#ifdef DEBUG_RX28_COMM
     printf("%d bytes read  ", bytes_read);
     for (int i = 0; i < bytes_read; ++i) {
       printf("%X ", __ibuffer[i]);
     }
     printf("\n");
-    */
+#endif
   }
   if (bytes_read < 6) {
     throw Exception("Failed to read packet header");
@@ -380,20 +382,20 @@ RobotisRX28::recv(unsigned int timeout_ms)
   }
 
   __ibuffer_length = plength+2 + 4;
-  /*
+#ifdef DEBUG_RX28_COMM
   printf("Read: ");
   for (int i = 0; i < __ibuffer_length; ++i) {
     printf("%X ", __ibuffer[i]);
   }
   printf("\n");
-  */
+#endif
 
   // verify checksum
   unsigned char checksum = calc_checksum(__ibuffer[PACKET_OFFSET_ID],
 					 __ibuffer[PACKET_OFFSET_INST],
 					 &__ibuffer[PACKET_OFFSET_PARAM], plength);
   if (checksum != __ibuffer[plength + 5]) {
-    throw Exception("Checksum error while receiving packeg, expected %d, got %d",
+    throw Exception("Checksum error while receiving packet, expected %d, got %d",
 		    checksum, __ibuffer[plength + 5]);
   }
 
@@ -528,7 +530,7 @@ RobotisRX28::finish_read_table_values()
   recv();
 
   if (__ibuffer_length != 5 + RX28_CONTROL_TABLE_LENGTH + 1) {
-    throw Exception("Input buffer of invalid size");
+    throw Exception("Input buffer of invalid size: %u vs. %u", __ibuffer_length, 5 + RX28_CONTROL_TABLE_LENGTH + 1);
   }
   memcpy(__control_table[__ibuffer[PACKET_OFFSET_ID]],
 	 &__ibuffer[PACKET_OFFSET_PARAM], RX28_CONTROL_TABLE_LENGTH);
@@ -1287,7 +1289,7 @@ RobotisRX28::set_goal_speeds(unsigned int num_servos, ...)
   for (unsigned int i = 0; i < num_servos; ++i) {
     unsigned char id    = va_arg(arg, unsigned int);
     unsigned int  value = va_arg(arg, unsigned int);
-    printf("Servo speed %u to %u\n", id, value);
+    //printf("Servo speed %u to %u\n", id, value);
     param[2 + i * 3] = id;
     param[2 + i * 3 + 1] = (value & 0xFF);
     param[2 + i * 3 + 2] = (value >> 8) & 0xFF;
