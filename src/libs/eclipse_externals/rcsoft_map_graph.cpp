@@ -160,7 +160,7 @@ p_map_graph_get_node_coords4()
   RCSoftMapNode node = g_map_graph.map_graph()->node( string(nodename) );
 
   // check for orientation property
-  int result;
+  int result = EC_succeed;
   vector< string >::iterator pit;
   for ( pit = node.properties().begin();
 	pit != node.properties().end();
