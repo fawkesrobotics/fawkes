@@ -346,7 +346,6 @@ LaseEdlAcquisitionThread::init_bus()
       std::string::size_type pos_end = l->find("]", pos);
       if (pos_end != std::string::npos) {
 	std::string item = l->substr(pos, pos_end - pos);
-	logger->log_debug(name(), "Item %s", item.c_str());
 	if (item == "net") {
 	  throw Exception("PCAN driver has been compiled in netdev mode, but "
 			  "chardev mode is required. Please read the plugin "

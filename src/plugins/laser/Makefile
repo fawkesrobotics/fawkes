@@ -19,6 +19,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_laser = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	     fawkesinterface Laser360Interface Laser720Interface
 
+CFLAGS  += $(CFLAGS_LIBUDEV)
+LDFLAGS += $(LDFLAGS_LIBUDEV)
+
 ifeq ($(HAVE_LIBPCAN),1)
   LIBS_laser += $(LIBS_LIBPCAN)
   CFLAGS     += $(CFLAGS_LIBPCAN)
