@@ -59,6 +59,8 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   void         close(Interface *interface);
 
   InterfaceInfoList *  list_all() const;
+  InterfaceInfoList *  list(const char *type_pattern,
+			    const char *id_pattern) const;
 
   std::list<Interface *> open_multiple_for_reading(const char *type_pattern,
 						   const char *id_pattern = "*");

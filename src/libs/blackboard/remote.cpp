@@ -414,6 +414,57 @@ RemoteBlackBoard::list_all()
 }
 
 
+InterfaceInfoList *
+RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
+{
+  __mutex->lock();
+  if (__inbound_thread != NULL &&
+      strcmp(Thread::current_thread()->name(), __inbound_thread) == 0)
+  {
+    throw Exception("Cannot call list() from inbound handler");
+  }
+  __mutex->unlock();
+
+  InterfaceInfoList *infl = new InterfaceInfoList();
+
+  bb_ilistreq_msg_t *om =
+    (bb_ilistreq_msg_t *)calloc(1, sizeof(bb_ilistreq_msg_t));
+  strncpy(om->type_pattern, type_pattern, __INTERFACE_TYPE_SIZE);
+  strncpy(om->id_pattern, id_pattern, __INTERFACE_ID_SIZE);
+
+  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
+							MSG_BB_LIST,
+							om,
+							sizeof(bb_ilistreq_msg_t));
+
+  __wait_mutex->lock();
+  __fnc->enqueue(omsg);
+  while (! __m ||
+	 (__m->msgid() != MSG_BB_INTERFACE_LIST)) {
+    if ( __m ) {
+      __m->unref();
+      __m = NULL;
+    }
+    __wait_cond->wait();
+  }
+  __wait_mutex->unlock();
+
+  BlackBoardInterfaceListContent *bbilc =
+    __m->msgc<BlackBoardInterfaceListContent>();
+  while ( bbilc->has_next() ) {
+    size_t iisize;
+    bb_iinfo_msg_t *ii = bbilc->next(&iisize);
+    infl->append(ii->type, ii->id, ii->hash,  ii->serial,
+		 ii->has_writer, ii->num_readers);
+  }
+
+  __m->unref();
+  __m = NULL;
+
+  return infl;
+}
+
+
 /** We are no longer registered in Fawkes network client.
  * Ignored.
  * @param id the id of the calling client

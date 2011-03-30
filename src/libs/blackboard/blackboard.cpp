@@ -134,11 +134,18 @@ namespace fawkes {
  * @return list of new fully initialized interface instances of requested type.
  * You have to close all interfaces on your own when done with the list!
  *
- *
  * @fn InterfaceInfoList * BlackBoard::list_all()
- * Get list of interfaces.
+ * Get list of all currently existing interfaces.
  * @return list of interfaces
  *
+ * @fn InterfaceInfoList * BlackBoard::list(const char *type_pattern, const char *id_pattern)
+ * Get list of interfaces matching type and ID patterns.
+ * See the fnmatch() documentation for possible patterns.
+ * @param type_pattern pattern with shell like globs (* for any number of
+ * characters, ? for exactly one character) to match the interface type.
+ * @param id_pattern pattern with shell like globs (* for any number of
+ * characters, ? for exactly one character) to match the interface ID.
+ * @return list of interfaces
  *
  * @fn void BlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
  * Register BB event listener.

@@ -114,6 +114,37 @@ BlackBoardNetworkHandler::loop()
       }
       break;
 
+    case MSG_BB_LIST:
+      {
+	BlackBoardInterfaceListContent *ilist =
+	  new BlackBoardInterfaceListContent();
+
+	bb_ilistreq_msg_t *lrm = msg->msg<bb_ilistreq_msg_t>();
+
+	char type_pattern[__INTERFACE_TYPE_SIZE + 1];
+	char id_pattern[__INTERFACE_ID_SIZE + 1];
+	type_pattern[__INTERFACE_TYPE_SIZE] = 0;
+	id_pattern[__INTERFACE_ID_SIZE] = 0;
+	strncpy(type_pattern, lrm->type_pattern, __INTERFACE_TYPE_SIZE);
+	strncpy(id_pattern, lrm->id_pattern, __INTERFACE_ID_SIZE);
+
+	InterfaceInfoList *infl = __bb->list(type_pattern, id_pattern);
+	for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i)
+	{
+	  ilist->append_interface(*i);
+	}
+
+	try {
+	  __nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
+	} catch (Exception &e) {
+	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent "
+			       "interface list to %u, exception follows", clid);
+	  LibLogger::log_error("BlackBoardNetworkHandler", e);
+	}
+	delete infl;
+      }
+      break;
+
     case MSG_BB_OPEN_FOR_READING:
     case MSG_BB_OPEN_FOR_WRITING:
       {

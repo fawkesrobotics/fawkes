@@ -53,6 +53,8 @@ class BlackBoard
   virtual void         close(Interface *interface) = 0;
 
   virtual InterfaceInfoList *  list_all() = 0;
+  virtual InterfaceInfoList *  list(const char *type_pattern,
+				    const char *id_pattern) = 0;
   virtual bool                 is_alive() const throw() = 0;
   virtual bool                 try_aliveness_restore() throw() = 0;
 
