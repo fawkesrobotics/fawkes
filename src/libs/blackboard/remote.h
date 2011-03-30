@@ -104,6 +104,8 @@ class RemoteBlackBoard
 
   Mutex         *__wait_mutex;
   WaitCondition *__wait_cond;
+
+  const char *__inbound_thread;
 };
 
 } // end namespace fawkes

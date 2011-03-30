@@ -88,6 +88,15 @@ typedef struct {
 } bb_iinfo_msg_t;
 
 
+/** Message for interface events.
+ * This message is used for MSG_BB_INTERFACE_CREATED and MSG_BB_INTERFACE_REMOVED.
+ */
+typedef struct {
+  char          type[__INTERFACE_TYPE_SIZE];	/**< interface type name */
+  char          id[__INTERFACE_ID_SIZE];	/**< interface instance ID */
+} bb_ievent_msg_t;
+
+
 /** Message to identify an interface instance.
  * This message is used for MSG_BB_CLOSE, MSG_BB_READER_ADDED, MSG_BB_READER_REMOVED,
  * MSG_BB_WRITER_ADDED, and MSG_BB_READER_REMOVED.

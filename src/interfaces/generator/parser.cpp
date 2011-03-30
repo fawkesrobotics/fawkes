@@ -72,21 +72,8 @@ InterfaceParser::getFields(xmlpp::Node *node)
   vector<InterfaceField> result;
   NodeSet set = node->find("field");
   for (NodeSet::iterator i = set.begin(); i != set.end(); ++i) {
-    // Get constant name
-    NodeSet nameset = (*i)->find("text()");
-    if ( nameset.size() == 0 ) {
-      throw InterfaceGeneratorInvalidContentException("no name for constant");
-    }
-    const TextNode *comment_node = dynamic_cast<const TextNode *>(nameset[0]);
-    if ( ! comment_node ) {
-      throw InterfaceGeneratorInvalidContentException("comment node not text node for constant");
-    }
-    std::string field_comment = comment_node->get_content();
-    //std::cout << "Field name: " << field_name << std::endl;
-    
-
     InterfaceField f(&enum_constants);
-    f.setComment(field_comment);
+
     const Element * el = dynamic_cast<const Element *>(*i);
     if ( el ) {
       // valid element
@@ -100,6 +87,18 @@ InterfaceParser::getFields(xmlpp::Node *node)
       throw InterfaceGeneratorInvalidContentException("constant is not an element");
     }
 
+    // Get field comment
+    NodeSet nameset = (*i)->find("text()");
+    if ( nameset.size() == 0 ) {
+      throw InterfaceGeneratorInvalidContentException("no comment for field %s", f.getName().c_str());
+    }
+    const TextNode *comment_node = dynamic_cast<const TextNode *>(nameset[0]);
+    if ( ! comment_node ) {
+      throw InterfaceGeneratorInvalidContentException("comment node not text node for constant");
+    }
+    f.setComment(comment_node->get_content());
+
+    //std::cout << "Field name: " << field_name << std::endl;
     try {
       f.valid();
       result.push_back(f);
