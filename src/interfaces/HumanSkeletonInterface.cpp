@@ -49,6 +49,7 @@ HumanSkeletonInterface::HumanSkeletonInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_ENUM, "state", 1, &data->state, "State");
   add_fieldinfo(IFT_UINT32, "user_id", 1, &data->user_id);
+  add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_STRING, "pose", 32, data->pose);
   add_fieldinfo(IFT_FLOAT, "com", 3, &data->com);
   add_fieldinfo(IFT_FLOAT, "pos_head", 3, &data->pos_head);
@@ -147,7 +148,7 @@ HumanSkeletonInterface::HumanSkeletonInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "ori_right_ankle_confidence", 1, &data->ori_right_ankle_confidence);
   add_fieldinfo(IFT_FLOAT, "ori_right_foot", 9, &data->ori_right_foot);
   add_fieldinfo(IFT_FLOAT, "ori_right_foot_confidence", 1, &data->ori_right_foot_confidence);
-  unsigned char tmp_hash[] = {0x6a, 0x54, 0x96, 0xa5, 0x58, 0x65, 0x60, 0xe7, 0xf1, 0x54, 0xeb, 0xa7, 0xcf, 0x69, 0xe1, 0xd6};
+  unsigned char tmp_hash[] = {0x5f, 0x47, 0x2f, 0xb3, 0x8b, 0xf1, 0xe1, 0xa, 0xb9, 0x42, 0x34, 0xea, 0x83, 0x43, 0x94, 0x37};
   set_hash(tmp_hash);
 }
 
@@ -231,6 +232,49 @@ void
 HumanSkeletonInterface::set_user_id(const uint32_t new_user_id)
 {
   data->user_id = new_user_id;
+  data_changed = true;
+}
+
+/** Get visibility_history value.
+ * 
+      The visibility history indicates the persistence of user sightings.
+      A positive value indicates the number of successful consecutive sightings
+      of the user (center of mass not equal to zero), the absolute of a negative
+      value gives the number of consecutive negative (non-) sightings. The value
+      is zero only if uninitialized.
+    
+ * @return visibility_history value
+ */
+int32_t
+HumanSkeletonInterface::visibility_history() const
+{
+  return data->visibility_history;
+}
+
+/** Get maximum length of visibility_history value.
+ * @return length of visibility_history value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanSkeletonInterface::maxlenof_visibility_history() const
+{
+  return 1;
+}
+
+/** Set visibility_history value.
+ * 
+      The visibility history indicates the persistence of user sightings.
+      A positive value indicates the number of successful consecutive sightings
+      of the user (center of mass not equal to zero), the absolute of a negative
+      value gives the number of consecutive negative (non-) sightings. The value
+      is zero only if uninitialized.
+    
+ * @param new_visibility_history new visibility_history value
+ */
+void
+HumanSkeletonInterface::set_visibility_history(const int32_t new_visibility_history)
+{
+  data->visibility_history = new_visibility_history;
   data_changed = true;
 }
 

@@ -341,8 +341,9 @@ OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
 {
   XnPoint3D compt, compt_proj;
   XnStatus st;
+  float com[3], com_proj[2];
+  com[0] = com[1] = com[2] = com_proj[0] = com_proj[1] = 0.;
   if ((st = __user_gen->GetCoM(id, compt)) == XN_STATUS_OK) {
-    float com[3], com_proj[2];
 
     // translating to Fawkes coordinates, empirically verified
     com[0] =  compt.Z * 0.001;
@@ -352,11 +353,26 @@ OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
     __depth_gen->ConvertRealWorldToProjective(1, &compt, &compt_proj);
     com_proj[0] = compt_proj.X;
     com_proj[1] = compt_proj.Y;
-
-    user.skel_if->set_com(com);
-    user.proj_if->set_proj_com(com_proj);
   } else {
     logger->log_warn(name(), "GetCoM failed: %s", xnGetStatusString(st));
+  }
+
+  user.skel_if->set_com(com);
+  user.proj_if->set_proj_com(com_proj);
+
+  int current_vishist = user.skel_if->visibility_history();
+  if ((com[0] == 0.) && (com[1] == 0.) && (com[2] == 0.)) {
+    if (current_vishist < 0) {
+      user.skel_if->set_visibility_history(--current_vishist);
+    } else {
+      user.skel_if->set_visibility_history(-1);
+    }
+  } else {
+    if (current_vishist > 0) {
+      user.skel_if->set_visibility_history(++current_vishist);
+    } else {
+      user.skel_if->set_visibility_history(1);
+    }
   }
 }
 

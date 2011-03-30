@@ -28,6 +28,13 @@
     </comment>
     <field type="State" name="state">Current state.</field>
     <field type="uint32" name="user_id">Tracking ID of this user.</field>
+    <field type="int32" name="visibility_history">
+      The visibility history indicates the persistence of user sightings.
+      A positive value indicates the number of successful consecutive sightings
+      of the user (center of mass not equal to zero), the absolute of a negative
+      value gives the number of consecutive negative (non-) sightings. The value
+      is zero only if uninitialized.
+    </field>
 
     <field type="string" length="32" name="pose">Detected user pose.</field>
 

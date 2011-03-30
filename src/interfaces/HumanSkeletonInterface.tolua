@@ -17,6 +17,9 @@ class HumanSkeletonInterface : public Interface
   unsigned int user_id();
   void set_user_id(const unsigned int new_user_id);
   int maxlenof_user_id() const;
+  int visibility_history();
+  void set_visibility_history(const int new_visibility_history);
+  int maxlenof_visibility_history() const;
   char * pose();
   void set_pose(const char * new_pose);
   int maxlenof_pose() const;

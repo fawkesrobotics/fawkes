@@ -66,6 +66,13 @@ class HumanSkeletonInterface : public Interface
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     int32_t state; /**< Current state. */
     uint32_t user_id; /**< Tracking ID of this user. */
+    int32_t visibility_history; /**< 
+      The visibility history indicates the persistence of user sightings.
+      A positive value indicates the number of successful consecutive sightings
+      of the user (center of mass not equal to zero), the absolute of a negative
+      value gives the number of consecutive negative (non-) sightings. The value
+      is zero only if uninitialized.
+     */
     char pose[32]; /**< Detected user pose. */
     float com[3]; /**< Center of mass. */
     float pos_head[3]; /**< Head position vector. */
@@ -272,6 +279,9 @@ class HumanSkeletonInterface : public Interface
   uint32_t user_id() const;
   void set_user_id(const uint32_t new_user_id);
   size_t maxlenof_user_id() const;
+  int32_t visibility_history() const;
+  void set_visibility_history(const int32_t new_visibility_history);
+  size_t maxlenof_visibility_history() const;
   char * pose() const;
   void set_pose(const char * new_pose);
   size_t maxlenof_pose() const;
