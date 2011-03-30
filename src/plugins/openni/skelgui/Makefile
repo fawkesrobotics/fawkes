@@ -17,15 +17,29 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
 
-LIBS_ffskelgui = stdc++ m glut GL fawkescore fawkesutils fawkesnetcomm \
+LIBS_ffskelgui = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 		 fawkesblackboard fawkesinterface fvutils fvcams \
 		 HumanSkeletonInterface HumanSkeletonProjectionInterface
 OBJS_ffskelgui = main.o colors.o skel_drawer.o texture_drawer.o \
 		 image_drawer.o depth_drawer.o
 
-OBJS_all =	$(OBJS_ffskelgui)
+OBJS_all = $(OBJS_ffskelgui)
 
-BINS_gui =	$(BINDIR)/ffskelgui
+CFLAGS  += $(CFLAGS_GL) $(CFLAGS_GLUT)
+LDFLAGS += $(LDFLAGS_GL) $(LDFLAGS_GLUT)
+
+ifeq ($(HAVE_GL)$(HAVE_GLUT),11)
+  BINS_gui = $(BINDIR)/ffskelgui
+else
+  WARN_TARGETS += warning_opengl
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_opengl
+warning_opengl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skeleton GUI$(TNORMAL) (OpenGL not available, mesa-libGL[-devel] or freeglut[-devel] not installed)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
-

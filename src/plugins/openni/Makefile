@@ -52,10 +52,6 @@ else
   WARN_TARGETS += warning_openni
 endif
 
-
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BUILDSYSDIR)/interface.mk
-
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
