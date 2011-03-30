@@ -362,7 +362,7 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
     unsigned int from = config->get_uint((prefix + "from").c_str());
     unsigned int to   = config->get_uint((prefix + "to").c_str());
     return new LaserCircleSectorDataFilter(from, to, in_data_size, inbufs);
-  } else if (filter_type == "dead_spots") {
+  } else if (filter_type == "deadspots") {
     return new LaserDeadSpotsDataFilter(config, logger, prefix, in_data_size, inbufs);
   } else if (filter_type == "min_merge") {
     return new LaserMinMergeDataFilter(in_data_size, inbufs);
