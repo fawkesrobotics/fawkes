@@ -194,6 +194,12 @@ class LockPtr
   explicit inline LockPtr(T_CppObject *cpp_object, Mutex *objmutex,
 			  int *refcount, Mutex *refmutex);
 
+  /** Get current refcount.
+   * Get reference count. Use this with care, as it may change any time.
+   * @return current reference count
+   */
+  inline int  refcount() const { return *__ref_count; }
+
   /** For use only in the internal implementation of sharedptr.
    * Get reference count pointer.
    * Warning: This is for internal use only.  Do not manually modify the

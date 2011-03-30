@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#        Makefile Build System for Fawkes: OpenNI-specific interfaces
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Tue Mar 08 11:51:21 2011
+#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,19 +13,12 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../..
+
 include $(BASEDIR)/etc/buildsys/config.mk
 
-# base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
-	  laser flite joystick katana pantilt vision \
-	  skiller luaagent worldmodel laserht \
-	  openni refboxcomm player xmlrpc \
-	  readylogagent
-	  #festival
+INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+include $(BUILDSYSDIR)/interface.mk
 
-include $(BUILDSYSDIR)/rules.mk
-
-luaagent: skiller
-rrdweb: rrd
+include $(BUILDSYSDIR)/base.mk
 

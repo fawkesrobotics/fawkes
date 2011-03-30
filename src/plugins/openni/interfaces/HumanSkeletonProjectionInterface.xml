@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="HumanSkeletonProjectionInterface" author="Tim Niemueller" year="2007-2011">
+  <data>
+    <comment>
+      This interface provides projections of the 3D position coordinates into the 2D image of
+      the acquiring camera. Instances shall always be associated with a HumanSkeletonInterface
+      with the same ID. This interface is particularly useful for RGBD cameras.
+    </comment>
+    <field type="float" name="horizontal_fov">Opening angle in radians.</field>
+    <field type="float" name="vertical_fov">Opening angle in radians.</field>
+    <field type="uint32" name="res_x">X resolution (number of columns in frame).</field>
+    <field type="uint32" name="res_y">Y resolution (number of rows in frame).</field>
+    <field type="uint16" name="max_depth">Maximum depth value.</field>
+
+    <field type="float" length="2" name="proj_com">Center of mass.</field>
+
+    <field type="float" length="2" name="proj_head">Head position vector.</field>
+    <field type="float" length="2" name="proj_neck">Neck position vector.</field>
+    <field type="float" length="2" name="proj_torso">Torso position vector.</field>
+    <field type="float" length="2" name="proj_waist">Waist position vector.</field>
+
+    <field type="float" length="2" name="proj_left_collar">
+      Left position vector.</field>
+    <field type="float" length="2" name="proj_left_shoulder">
+      Left shoulder position vector.</field>
+    <field type="float" length="2" name="proj_left_elbow">
+      Left elbow position vector.</field>
+    <field type="float" length="2" name="proj_left_wrist">
+      Left wrist position vector.</field>
+    <field type="float" length="2" name="proj_left_hand">
+      Left hand position vector.</field>
+    <field type="float" length="2" name="proj_left_fingertip">
+      Left fingertip position vector.</field>
+
+    <field type="float" length="2" name="proj_right_collar">
+      Right collar position vector.</field>
+    <field type="float" length="2" name="proj_right_shoulder">
+      Right shoulder position vector.</field>
+    <field type="float" length="2" name="proj_right_elbow">
+      Right elbow position vector.</field>
+    <field type="float" length="2" name="proj_right_wrist">
+      Right wrist position vector.</field>
+    <field type="float" length="2" name="proj_right_hand">
+      Right hand position vector.</field>
+    <field type="float" length="2" name="proj_right_fingertip">
+      Right fingertip position vector.</field>
+
+    <field type="float" length="2" name="proj_left_hip">
+      Left hip position vector.</field>
+    <field type="float" length="2" name="proj_left_knee">
+      Left knee position vector.</field>
+    <field type="float" length="2" name="proj_left_ankle">
+      Left ankle position vector.</field>
+    <field type="float" length="2" name="proj_left_foot">
+      Left foot position vector.</field>
+
+    <field type="float" length="2" name="proj_right_hip">
+      Right hip position vector.</field>
+    <field type="float" length="2" name="proj_right_knee">
+      Right knee position vector.</field>
+    <field type="float" length="2" name="proj_right_ankle">
+      Right ankle position vector.</field>
+    <field type="float" length="2" name="proj_right_foot">
+      Right foot position vector.</field>
+
+  </data>
+</interface>

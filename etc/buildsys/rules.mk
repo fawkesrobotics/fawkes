@@ -63,7 +63,7 @@ $(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%),$(if $(SOV
 
 ifdef __buildsys_lua_mk_
 # Lua libraries do not set an SOVER, it's not checked anyway
-$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval NOSOVER_lua_$(subst /,_,$L)=1)))
+$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval NOSOVER_lua_$(call nametr,$L)=1)))
 endif
 
 # Dependencies
@@ -208,25 +208,25 @@ $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
+	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 ifeq ($(WARN_MISSING_MANPAGE),1)
 	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $* does not have a man page$(TNORMAL) ---")
 endif
 
-$(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
+$(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(subst /,_,$*)),,.$(SOVER_$(subst /,_,$*))) $(subst ..,__,$^) \
-	$(if $(NOSOVER_$(subst /,_,$*)),,-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*))) \
+	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(call nametr,$*)),,.$(SOVER_$(call nametr,$*))) $(subst ..,__,$^) \
+	$(if $(NOSOVER_$(call nametr,$*)),,-Wl,-soname=$(@F).$(SOVER_$(call nametr,$*))) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
-	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
-	$(if $(NOSOVER_$(subst /,_,$*)),, \
-	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@; \
-	ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@.$(firstword $(call split,.,$(SOVER_$(subst /,_,$*)))); \
+	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
+	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$(call nametr,$*))) $(addprefix -L,$(LIBDIRS))
+	$(if $(NOSOVER_$(call nametr,$*)),, \
+	$(SILENT) ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@; \
+	ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@.$(firstword $(call split,.,$(SOVER_$(call nametr,$*)))); \
 	)
 
 ### Check if there are special additions

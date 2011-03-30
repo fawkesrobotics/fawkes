@@ -29,6 +29,7 @@
 #include <list>
 #include <cstdlib>
 #include <iostream>
+#include <cstdio>
 
 using namespace std;
 using namespace firevision;

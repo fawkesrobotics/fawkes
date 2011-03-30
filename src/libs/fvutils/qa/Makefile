@@ -28,22 +28,25 @@ OBJS_fv_qa_camargp := qa_camargp.o
 LIBS_fv_qa_camargp := fvutils
 
 OBJS_fv_qa_jpegbm := qa_jpegbm.o
-LIBS_fv_qa_jpegbm := fvutils
+LIBS_fv_qa_jpegbm := fvutils fawkesutils
 
 OBJS_fv_qa_shmimg := qa_shmimg.o
-LIBS_fv_qa_shmimg := fvutils
+LIBS_fv_qa_shmimg := fvutils fawkesutils
 
 OBJS_fv_qa_rectlut := qa_rectlut.o
 LIBS_fv_qa_rectlut := fvutils
 
 OBJS_fv_qa_fuse := qa_fuse.o
-LIBS_fv_qa_fuse := fvutils
+LIBS_fv_qa_fuse := fvutils fawkescore
 
 OBJS_fv_qa_shmlut := qa_shmlut.o
-LIBS_fv_qa_shmlut := fvutils
+LIBS_fv_qa_shmlut := fvutils fawkesutils
 
 OBJS_fv_qa_colormap := qa_colormap.o
-LIBS_fv_qa_colormap := fvutils fvwidgets
+LIBS_fv_qa_colormap := fvutils fvwidgets fawkescore
+
+OBJS_fv_qa_createimage := qa_createimage.o
+LIBS_fv_qa_createimage := fvutils fvwidgets
 
 #ifneq ($(wildcard $(FVBASEDIR)/fvutils/recognition/forest/forest.h),)
 #  OBJS_fv_qa_randomtree := qa_randomtree.o
@@ -58,6 +61,7 @@ OBJS_all += $(OBJS_fv_qa_camargp)		\
 	    $(OBJS_fv_qa_shmlut)		\
 	    $(OBJS_fv_qa_rectlut)		\
 	    $(OBJS_fv_qa_fuse)			\
+	    $(OBJS_fv_qa_createimage)		\
 	    $(OBJS_fv_qa_colormap)
 
 
@@ -66,7 +70,8 @@ BINS_all += $(BINDIR)/fv_qa_camargp		\
 	    $(BINDIR)/fv_qa_shmimg		\
 	    $(BINDIR)/fv_qa_shmlut		\
 	    $(BINDIR)/fv_qa_rectlut		\
-	    $(BINDIR)/fv_qa_fuse			\
+	    $(BINDIR)/fv_qa_fuse		\
+	    $(BINDIR)/fv_qa_createimage		\
 	    $(BINDIR)/fv_qa_colormap
 
 

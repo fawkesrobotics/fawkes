@@ -170,7 +170,7 @@ ArgumentParser::has_arg(const char *argn)
 const char *
 ArgumentParser::arg(const char *argn)
 {
-  if (_opts.count((char *)argn) > 0) {
+  if ((_opts.count(argn) > 0) && (_opts[argn] != NULL)) {
     return _opts[ (char *)argn ];
   } else {
     return NULL;
@@ -190,7 +190,7 @@ ArgumentParser::arg(const char *argn)
 bool
 ArgumentParser::arg(const char *argn, char **value)
 {
-  if (_opts.count((char *)argn) > 0) {
+  if ((_opts.count(argn) > 0) && (_opts[argn] != NULL)) {
     *value = strdup(_opts[ (char *)argn ]);
     return true;
   } else {
@@ -200,15 +200,15 @@ ArgumentParser::arg(const char *argn, char **value)
 
 
 /** Parse host:port string.
- * The value referenced by the given argn is parsed for the pattern "host:port". If the
- * string does not match this pattern an exception is thrown.
+ * The value referenced by the given argn is parsed for the pattern "host:port".
+ * If the string does not match this pattern an exception is thrown.
  * The host will be a newly allocated copy of the string. You have to
  * free it after you are done with it. If no port is supplied in the string (plain
  * hostname string) the port argument is left unchanged. If the argument has not
- * been supplied at all both values are left unchanged. Thus it is safe to put the default
- * values into the variables before passing them to this method. Note however that you
- * have to free the returned host string in case of a successful return, and only in
- * that case probably!
+ * been supplied at all both values are left unchanged. Thus it is safe to put the
+ * default values into the variables before passing them to this method. Note
+ * however that you have to free the returned host string in case of a successful
+ * return, and only in that case probably!
  * @param argn argument name to retrieve
  * @param host Upon successful return contains a pointer to a newly alloated string
  * with the hostname part. Free it after you are finished.
@@ -217,9 +217,10 @@ ArgumentParser::arg(const char *argn, char **value)
  * @exception OutOfBoundsException thrown if port is not in the range [0..65535]
  */
 bool
-ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int *port)
+ArgumentParser::parse_hostport(const char *argn, char **host,
+			       unsigned short int *port)
 {
-  if (_opts.count((char *)argn) > 0) {
+  if ((_opts.count(argn) > 0) && (_opts[argn] != NULL)) {
     char *tmpvalue = strdup(_opts[ (char *)argn ]);
 
     if ( strchr(tmpvalue, ':') != NULL ) {
@@ -259,7 +260,7 @@ ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int
 bool
 ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned short int &port)
 {
-  if (_opts.count(argn) == 0) return false;
+  if ((_opts.count(argn) == 0) || (_opts[argn] == NULL)) return false;
 
   std::string tmpvalue = _opts[argn];
 
@@ -293,7 +294,7 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
 long int
 ArgumentParser::parse_int(const char *argn)
 {
-  if (_opts.count((char *)argn) > 0) {
+  if ((_opts.count(argn) > 0) && (_opts[argn] != NULL)) {
     char *endptr;
     long int rv = strtol(_opts[argn], &endptr, 10);
     if ( endptr[0] != 0 ) {
@@ -317,7 +318,7 @@ ArgumentParser::parse_int(const char *argn)
 double
 ArgumentParser::parse_float(const char *argn)
 {
-  if (_opts.count((char *)argn) > 0) {
+  if ((_opts.count(argn) > 0) && (_opts[argn] != NULL)) {
     char *endptr;
     double rv = strtod(_opts[argn], &endptr);
     if ( endptr[0] != 0 ) {
