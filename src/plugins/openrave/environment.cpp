@@ -52,14 +52,9 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 }
 
 
-/** @class OpenRAVEEnvironment <openrave/environment.h>
- * Class handling interaction with the OpenRAVE::EnvironmentBase class.
- * This class loads a scene and adds robots/objects etc to it. All calculations
- * in OpenRAVE (IK, planning, etc) are done based on the current scene.
- * @author Bahram Maleki-Fard
- */
 
-/** Constructor
+
+/** Constructor.
  * @param logger pointer to fawkes logger
  */
 OpenRAVEEnvironment::OpenRAVEEnvironment(fawkes::Logger* logger) :
@@ -74,7 +69,7 @@ OpenRAVEEnvironment::~OpenRAVEEnvironment()
   this->destroy();
 }
 
-/** Create and lock the environment */
+/** Create and lock the environment. */
 void
 OpenRAVEEnvironment::create()
 {
@@ -91,7 +86,7 @@ OpenRAVEEnvironment::create()
     {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
 }
 
-/** Destroy the environment */
+/** Destroy the environment. */
 void
 OpenRAVEEnvironment::destroy()
 {
@@ -105,28 +100,28 @@ OpenRAVEEnvironment::destroy()
   }
 }
 
-/** Lock the environment to prevent changes */
+/** Lock the environment to prevent changes. */
 void
 OpenRAVEEnvironment::lock()
 {
   EnvironmentMutex::scoped_lock lock(__env->GetMutex());
 }
 
-/** Enable debugging messages of OpenRAVE */
+/** Enable debugging messages of OpenRAVE. */
 void
 OpenRAVEEnvironment::enable_debug()
 {
   RaveSetDebugLevel(Level_Debug);
 }
 
-/** Disable debugging messages of OpenRAVE */
+/** Disable debugging messages of OpenRAVE. */
 void
 OpenRAVEEnvironment::disable_debug()
 {
   RaveSetDebugLevel(Level_Fatal);
 }
 
-/** Add a robot into the scene
+/** Add a robot into the scene.
  * @param robot RobotBasePtr of robot to add
  * @return 1 if succeeded, 0 if not able to add robot
  */
@@ -139,7 +134,7 @@ OpenRAVEEnvironment::add_robot(RobotBasePtr robot)
     {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
 }
 
-/** Add a robot into the scene
+/** Add a robot into the scene.
  * @param filename path to robot's xml file
  * @return 1 if succeeded, 0 if not able to load file
  */
@@ -159,7 +154,7 @@ OpenRAVEEnvironment::add_robot(const std::string& filename)
   add_robot(robot);
 }
 
-/** Add a robot into the scene
+/** Add a robot into the scene.
  * @param robot pointer to OpenRAVERobot object of robot to add
  * @return 1 if succeeded, 0 if not able to add robot
  */
@@ -170,7 +165,7 @@ OpenRAVEEnvironment::add_robot(OpenRAVERobot* robot)
 }
 
 
-/** Get EnvironmentBasePtr
+/** Get EnvironmentBasePtr.
  * @return EnvironmentBasePtr in use
  */
 OpenRAVE::EnvironmentBasePtr
@@ -197,7 +192,7 @@ OpenRAVEEnvironment::start_viewer()
   __viewer_enabled = true;
 }
 
-/** Autogenerate IKfast IK solver for robot
+/** Autogenerate IKfast IK solver for robot.
  * @param robot pointer to OpenRAVERobot object
  */
 void
@@ -261,6 +256,7 @@ OpenRAVEEnvironment::run_planner(OpenRAVERobot* robot)
 /** Add an object to the environment.
  * @param name name that should be given to that object
  * @param filename path to xml file of that object (KinBody)
+ * @return true if successful
  */
 bool
 OpenRAVEEnvironment::add_object(const std::string& name, const std::string& filename)
@@ -280,6 +276,7 @@ OpenRAVEEnvironment::add_object(const std::string& name, const std::string& file
 
 /** Remove object from environment.
  * @param name name of the object
+ * @return true if successful
  */
 bool
 OpenRAVEEnvironment::delete_object(const std::string& name)
@@ -299,6 +296,7 @@ OpenRAVEEnvironment::delete_object(const std::string& name)
 /** Rename object.
  * @param name current name of the object
  * @param new_name new name of the object
+ * @return true if successful
  */
 bool
 OpenRAVEEnvironment::rename_object(const std::string& name, const std::string& new_name)
@@ -322,6 +320,7 @@ OpenRAVEEnvironment::rename_object(const std::string& name, const std::string& n
  * @param trans_y transition along y-axis
  * @param trans_z transition along z-axis
  * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
+ * @return true if successful
  */
 bool
 OpenRAVEEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot)
@@ -353,6 +352,7 @@ OpenRAVEEnvironment::move_object(const std::string& name, float trans_x, float t
  * @param rot_x 1st rotation, along x-axis
  * @param rot_y 2nd rotation, along y-axis
  * @param rot_z 3rd rotation, along z-axis
+ * @return true if successful
  */
 bool
 OpenRAVEEnvironment::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z)

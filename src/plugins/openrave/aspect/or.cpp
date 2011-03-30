@@ -37,7 +37,7 @@ namespace fawkes {
  * @author Bahram Maleki-Fard
  */
 
-/** @var fawkes::OpenRAVEManager *  OpenRAVEAspect::or_manager
+/** @var fawkes::OpenRAVEConnector *  OpenRAVEAspect::openrave
  * Manager class to access OpenRAVE features. It will take care of properly
  * distributing the work.
  */

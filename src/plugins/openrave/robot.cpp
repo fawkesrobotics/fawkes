@@ -42,6 +42,7 @@ OpenRAVERobot::OpenRAVERobot(fawkes::Logger* logger) :
 {
   init();
 }
+/** Constructor */
 OpenRAVERobot::OpenRAVERobot(const std::string& filename, fawkes::OpenRAVEEnvironment* env, fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
@@ -156,7 +157,9 @@ OpenRAVERobot::calibrate(float device_trans_x, float device_trans_y, float devic
 
 /** Set pointer to OpenRAVEManipulator object.
  *  Make sure this is called AFTER all manipulator settings have
- *  been set (assures that __manip_goal has the same settings) .*/
+ *  been set (assures that __manip_goal has the same settings).
+ * @param manip pointer to OpenRAVEManipulator object
+ */
 void
 OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip)
 {
@@ -321,6 +324,9 @@ OpenRAVERobot::set_target_object_position(float trans_x, float trans_y, float tr
 
 
 // just temporary! no IK check etc involved
+/** Set target angles directly.
+ * @param angles vector with angle values
+ */
 void
 OpenRAVERobot::set_target_angles( std::vector<float>& angles )
 {
@@ -341,6 +347,9 @@ OpenRAVERobot::get_robot_ptr() const
 }
 
 // not needed
+/** Get target angles.
+ * @param to vector that should be filled with angles
+ */
 void
 OpenRAVERobot::get_target_angles(std::vector<float>& to)
 {

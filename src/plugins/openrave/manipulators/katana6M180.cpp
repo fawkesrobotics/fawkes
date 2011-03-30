@@ -31,7 +31,7 @@
 }
 #endif
 
-/** @class OpenRAVEManipulatorKatana6M180 <openrave/motors_katana.h>
+/** @class OpenRAVEManipulatorKatana6M180 <plugins/openrave/manipulators/katana6M180.h>
  * Class containing information about all katana6M180 motors.
  * @author Bahram Maleki-Fard
  */

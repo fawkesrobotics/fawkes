@@ -38,6 +38,7 @@ class Logger;
 class OpenRAVEManipulator;
 class OpenRAVEEnvironment;
 
+/** OpenRAVE Robot class */
 class OpenRAVERobot
 {
  public:

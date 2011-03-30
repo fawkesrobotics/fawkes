@@ -121,6 +121,11 @@ OpenRAVEThread::set_active_robot(OpenRAVERobot* robot)
 /** Set OpenRAVEManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
  * Make sure to update manip angles before calibrating!
+ * @param robot pointer to OpenRAVERobot object, explicitly set
+ * @param manip pointer to OpenRAVManipulator that is set for robot
+ * @param trans_x transition offset on x-axis
+ * @param trans_y transition offset on y-axis
+ * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
 void
@@ -132,6 +137,16 @@ OpenRAVEThread::set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip
   else
     {robot->set_offset(trans_x, trans_y, trans_z);}
 }
+/** Set OpenRAVEManipulator object for robot, and calculate
+ * coordinate-system offsets or set them directly.
+ * Make sure to update manip angles before calibrating!
+ * Uses default OpenRAVERobot object.
+ * @param manip pointer to OpenRAVManipulator that is set for robot
+ * @param trans_x transition offset on x-axis
+ * @param trans_y transition offset on y-axis
+ * @param trans_z transition offset on z-axis
+ * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
+ */
 void
 OpenRAVEThread::set_manipulator(OpenRAVEManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
 {
@@ -182,18 +197,44 @@ OpenRAVEThread::add_robot(const std::string& filename_robot, bool autogenerate_I
 /* ##########################################################
  * #    object handling (mainly from environment.h)        #
 * ########################################################*/
+/** Add an object to the environment.
+ * @param name name that should be given to that object
+ * @param filename path to xml file of that object (KinBody)
+ * @return true if successful */
 bool OpenRAVEThread::add_object(const std::string& name, const std::string& filename) {
   return __OR_env->add_object(name, filename); }
 
+/** Remove object from environment.
+ * @param name name of the object
+ * @return true if successful */
 bool OpenRAVEThread::delete_object(const std::string& name) {
   return __OR_env->delete_object(name); }
 
+/** Rename object.
+ * @param name current name of the object
+ * @param new_name new name of the object
+ * @return true if successful */
 bool OpenRAVEThread::rename_object(const std::string& name, const std::string& new_name) {
   return __OR_env->rename_object(name, new_name); }
 
+/** Move object in the environment.
+ * Distances are given in meters
+ * @param name name of the object
+ * @param trans_x transition along x-axis
+ * @param trans_y transition along y-axis
+ * @param trans_z transition along z-axis
+ * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
+ * @return true if successful */
 bool OpenRAVEThread::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot) {
   return __OR_env->move_object(name, trans_x, trans_y, trans_z, robot); }
 
+/** Rotate object along its axis.
+ * Rotation angles should be given in radians.
+ * @param name name of the object
+ * @param rot_x 1st rotation, along x-axis
+ * @param rot_y 2nd rotation, along y-axis
+ * @param rot_z 3rd rotation, along z-axis
+ * @return true if successful */
 bool OpenRAVEThread::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z) {
   return __OR_env->rotate_object(name, rot_x, rot_y, rot_z); }
 
@@ -203,7 +244,9 @@ bool OpenRAVEThread::rotate_object(const std::string& name, float rot_x, float r
  * to calculate correct position for endeffecto. This is only temporary until
  * proper graps planning for 5DOF in OpenRAVE is provided.
  * @param name name of the object
+ * @param robot pointer to OpenRAVERobot that the target is set for
  * @param rot_x rotation of object on x-axis (radians)
+ * @return true if IK solvable
  */
 bool
 OpenRAVEThread::set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x)

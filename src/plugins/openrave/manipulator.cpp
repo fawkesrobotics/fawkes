@@ -29,7 +29,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRAVEManipulator <openrave/motors.h>
+/** @class OpenRAVEManipulator <plugins/openrave/manipulator.h>
  * Class containing information about all manipulator motors.
  * @author Bahram Maleki-Fard
  */

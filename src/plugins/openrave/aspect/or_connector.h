@@ -36,7 +36,7 @@ class OpenRAVEEnvironment;
 class OpenRAVERobot;
 class OpenRAVEManipulator;
 
-/** @class OpenRAVEConnector <plugins/openrave/aspect/or_manager.h>
+/** @class OpenRAVEConnector <plugins/openrave/aspect/or_connector.h>
  * Interface for a OpenRAVE connection creator.
  * @author Bahram Maleki-Fard
  */
@@ -52,7 +52,7 @@ class OpenRAVEConnector
   /** Run planner on previously set target.
   * @param robot robot to use planner on. If none is given, the currently used robot is taken
   */
-  virtual void run_planner(OpenRAVERobot* = NULL) = 0;
+  virtual void run_planner(OpenRAVERobot* robot = NULL) = 0;
 
   /** Get pointer to OpenRAVEEnvironment object.
   * @return pointer
@@ -76,29 +76,48 @@ class OpenRAVEConnector
   */
   virtual OpenRAVERobot* add_robot(const std::string& filename_robot, bool autogenerate_IK)  = 0;
 
-/** Set OpenRAVEManipulator object for given robot, and calculate
+/** Set OpenRAVEManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
  * Make sure to update manip angles before calibrating!
+ * @param robot pointer to OpenRAVERobot object, explicitly set
+ * @param manip pointer to OpenRAVManipulator that is set for robot
+ * @param trans_x transition offset on x-axis
+ * @param trans_y transition offset on y-axis
+ * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
   virtual void set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
+
+/** Set OpenRAVEManipulator object for robot, and calculate
+ * coordinate-system offsets or set them directly.
+ * Make sure to update manip angles before calibrating!
+ * Uses default OpenRAVERobot object.
+ * @param manip pointer to OpenRAVManipulator that is set for robot
+ * @param trans_x transition offset on x-axis
+ * @param trans_y transition offset on y-axis
+ * @param trans_z transition offset on z-axis
+ * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
+ */
   virtual void set_manipulator(OpenRAVEManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
 
   // object handling methods
   /** Add an object to the environment.
   * @param name name that should be given to that object
   * @param filename path to xml file of that object (KinBody)
+  * @return true if successful
   */
   virtual bool add_object(const std::string& name, const std::string& filename) = 0;
 
   /** Remove object from environment.
   * @param name name of the object
+  * @return true if successful
   */
   virtual bool delete_object(const std::string& name) = 0;
 
   /** Rename object.
   * @param name current name of the object
   * @param new_name new name of the object
+  * @return true if successful
   */
   virtual bool rename_object(const std::string& name, const std::string& new_name) = 0;
 
@@ -109,6 +128,7 @@ class OpenRAVEConnector
   * @param trans_y transition along y-axis
   * @param trans_z transition along z-axis
   * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
+  * @return true if successful
   */
   virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot=NULL) = 0;
 
@@ -118,6 +138,7 @@ class OpenRAVEConnector
   * @param rot_x 1st rotation, along x-axis
   * @param rot_y 2nd rotation, along y-axis
   * @param rot_z 3rd rotation, along z-axis
+  * @return true if successful
   */
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z) = 0;
 
@@ -127,7 +148,9 @@ class OpenRAVEConnector
   * to calculate correct position for endeffecto. This is only temporary until
   * proper graps planning for 5DOF in OpenRAVE is provided.
   * @param name name of the object
+  * @param robot pointer to OpenRAVERobot that the target is set for
   * @param rot_x rotation of object on x-axis (radians)
+  * @return true if IK solvable
   */
   virtual bool set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x = 0) = 0;
 };

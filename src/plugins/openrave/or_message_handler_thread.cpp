@@ -33,7 +33,8 @@ using namespace fawkes;
  * @author Bahram Maleki-Fard
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param or_thread OpenRAVEThread, main thread. */
 OpenRAVEMessageHandlerThread::OpenRAVEMessageHandlerThread(OpenRAVEThread* or_thread)
   : Thread("OpenRAVEMessageHandlerThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),

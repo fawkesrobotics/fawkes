@@ -30,6 +30,8 @@ namespace fawkes {
 }
 #endif
 
+/** Struct containing angle of current motor, its number in OpenRAVE and
+ * corresponding motor number of real devices. */
 typedef struct {
   unsigned int	no;       /**< motor number in OpenRAVE*/
   unsigned int  no_device;  /**< motor number of real device */
@@ -56,7 +58,7 @@ class OpenRAVEManipulator
   virtual float angle_OR_to_device(unsigned int number, float angle) const;
   virtual float angle_device_to_OR(unsigned int number, float angle) const;
 
-  std::vector<motor_t>  __motors;
+  std::vector<motor_t>  __motors;       /**< vector of motors */
   unsigned int          __cnt;
   unsigned int          __cnt_device;
 };

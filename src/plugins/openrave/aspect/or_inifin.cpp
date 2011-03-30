@@ -34,13 +34,13 @@ namespace fawkes {
 
 /** @class OpenRAVEAspectIniFin <plugins/rrd/aspect/rrd_inifin.h>
  * OpenRAVEAspect initializer/finalizer.
- * This initializer/finalizer will provide the OpenRAVEManager to threads with
+ * This initializer/finalizer will provide the OpenRAVEConnector to threads with
  * the OpenRAVEAspect.
  * @author Bahram Maleki-Fard
  */
 
 /** Constructor.
- * @param or_manager OpenRAVEManager to pass on to threads
+ * @param openrave OpenRAVEConnector to pass on to threads
  */
 OpenRAVEAspectIniFin::OpenRAVEAspectIniFin(OpenRAVEConnector *openrave)
   : AspectIniFin("OpenRAVEAspect")
