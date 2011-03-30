@@ -4,7 +4,7 @@
  *  shm.h - shared memory segment
  *
  *  Generated: Thu Jan 12 13:12:24 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -63,14 +63,17 @@ class SharedMemory
 
   virtual ~SharedMemory();
 
-  bool                is_read_only();
-  bool                is_destroyed();
-  bool                is_swapable();
-  bool                is_valid();
-  bool                is_creator();
-  bool                is_protected();
-  void *              memptr();
-  size_t              data_size();
+  bool                is_read_only() const;
+  bool                is_destroyed() const;
+  bool                is_swapable() const;
+  bool                is_valid() const;
+  bool                is_creator() const;
+  bool                is_protected() const;
+  void *              memptr() const;
+  size_t              data_size() const;
+  int                 shmem_id() const;
+  unsigned int        num_attached() const;
+
   void                set(void *memptr);
   void                set_destroy_on_delete(bool destroy);
   void                add_semaphore();
@@ -82,8 +85,8 @@ class SharedMemory
   bool                try_lock_for_write();
   void                unlock();
 
-  void *              ptr(void *addr);
-  void *              addr(void *ptr);
+  void *              ptr(void *addr) const;
+  void *              addr(void *ptr) const;
 
   static void         list(const char *magic_token,
 			   SharedMemoryHeader *header, SharedMemoryLister *lister);

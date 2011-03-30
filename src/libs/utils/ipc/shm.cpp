@@ -579,7 +579,7 @@ SharedMemory::attach()
  * @see addr()
  */
 void *
-SharedMemory::ptr(void *addr)
+SharedMemory::ptr(void *addr) const
 {
   if ( _shm_offset == 0 )  return addr;
   if ( addr == NULL) return NULL;
@@ -610,7 +610,7 @@ SharedMemory::ptr(void *addr)
  * @see ptr()
  */
 void *
-SharedMemory::addr(void *ptr)
+SharedMemory::addr(void *ptr) const
 {
   if ( _shm_offset == 0 )  return ptr;
   if ( ptr == NULL) return NULL;
@@ -626,7 +626,7 @@ SharedMemory::addr(void *ptr)
  * @return true, if the segment is opened in read-only mode, false otherwise
  */
 bool
-SharedMemory::is_read_only()
+SharedMemory::is_read_only() const
 {
   return _is_read_only;
 }
@@ -643,7 +643,7 @@ SharedMemory::is_read_only()
  * otherwise
  */
 bool
-SharedMemory::is_creator()
+SharedMemory::is_creator() const
 {
   return __created;
 }
@@ -655,7 +655,7 @@ SharedMemory::is_creator()
  * @see getDataSize()
  */
 void *
-SharedMemory::memptr()
+SharedMemory::memptr() const
 {
   return _memptr;
 }
@@ -667,9 +667,29 @@ SharedMemory::memptr()
  * @return size of the data-segment in bytes
  */
 size_t
-SharedMemory::data_size()
+SharedMemory::data_size() const
 {
   return _data_size;
+}
+
+
+/** Get shared memory ID.
+ * @return shared memory ID
+ */
+int
+SharedMemory::shmem_id() const
+{
+  return __shared_mem_id;
+}
+
+
+/** Get number of attached processes.
+ * @return number of attached processes
+ */
+unsigned int
+SharedMemory::num_attached() const
+{
+  return num_attached(__shared_mem_id);
 }
 
 
@@ -694,7 +714,7 @@ SharedMemory::set(void *memptr)
  *         otherwise
  */
 bool
-SharedMemory::is_destroyed()
+SharedMemory::is_destroyed() const
 {
   return is_destroyed(__shared_mem_id);
 }
@@ -705,7 +725,7 @@ SharedMemory::is_destroyed()
  * @return true, if the memory can be swapped, false otherwise
  */
 bool
-SharedMemory::is_swapable()
+SharedMemory::is_swapable() const
 {
   return is_swapable(__shared_mem_id);
 }
@@ -719,7 +739,7 @@ SharedMemory::is_swapable()
  *         false otherwise
  */
 bool
-SharedMemory::is_valid()
+SharedMemory::is_valid() const
 {
   return (_memptr != NULL);
 }
@@ -736,7 +756,7 @@ SharedMemory::is_valid()
  * @return true, if semaphore is associated to memory, false otherwise
  */
 bool
-SharedMemory::is_protected()
+SharedMemory::is_protected() const
 {
   return (__semset != NULL);
 }
