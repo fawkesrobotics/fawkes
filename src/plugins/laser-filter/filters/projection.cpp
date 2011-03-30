@@ -44,11 +44,36 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param config configuration instance
- * @param logger logger for informational output
- * @param prefix configuration prefix where to log for config information
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
+ * @param left indicates whether or not the laser at the left or at the right
+ *             of the robot or, in other words: left must be true if the X axis
+ *             of the laser is directed to the ground; left must be false if the
+ *             X axis of the laser is directed to the sky.
+ *             <br/>
+ *             This information is needed to know how to rotate the laser's
+ *             coordinate system such that, if you look at the front panel of
+ *             the laser, the X axis looks into your eye and the Y axis looks
+ *             to the bottom of the laser body.
+ *             <br/>
+ *             Subsequently, this coordinate system is rotated (see [xyz]_rot)
+ *             and then translated ([xyz]_trans).
+ * @param x_rot the rotation of the X axis of the laser panel coordinate system
+ *              which is determined with the left parameter (see left).
+ *              This rotation is done after the Y axis rotation.
+ * @param y_rot the rotation of the Y axis of the laser panel coordinate system
+ *              which is determined with the left parameter (see left).
+ *              This rotation is done before the Z axis rotation and
+ *              after the Y axis rotation.
+ * @param z_rot the rotation of the Z axis of the laser panel coordinate system
+ *              which is determined with the left parameter (see left).
+ *              This rotation is done before the Y axis and X axis rotations.
+ * @param x_trans X component of the vector from the EDL laser to this URG
+ *                laser in the fawkes coordinate system.
+ * @param y_trans Y component of the vector from the EDL laser to this URG
+ *                laser in the fawkes coordinate system.
+ * @param z_trans Z component of the vector from the EDL laser to this URG
+ *                laser in the fawkes coordinate system.
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
     bool left,
