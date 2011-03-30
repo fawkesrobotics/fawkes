@@ -48,7 +48,8 @@ class LaserProjectionDataFilter : public LaserDataFilter
 
  private:
   inline void transform(const float angle, const float length,
-                        float& new_angle, float& new_length);
+                        float& new_angle, float& new_length,
+                        bool& too_low);
 
   const bool LEFT;
 
@@ -60,6 +61,7 @@ class LaserProjectionDataFilter : public LaserDataFilter
   const float Y_TRANS;
   const float Z_TRANS;
 
+  const float Z_THRESHOLD;
 };
 
 #endif

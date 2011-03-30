@@ -88,7 +88,8 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     Z_ROT(z_rot),
     X_TRANS(x_trans),
     Y_TRANS(y_trans),
-    Z_TRANS(z_trans)
+    Z_TRANS(z_trans),
+    Z_THRESHOLD(-5.0f)
 {
 }
 
@@ -98,7 +99,8 @@ LaserProjectionDataFilter::~LaserProjectionDataFilter()
 
 inline void
 LaserProjectionDataFilter::transform(const float angle, const float length,
-                                     float& new_angle, float& new_length)
+                                     float& new_angle, float& new_length,
+                                     bool& too_low)
 {
   HomPolar p = HomPolar(length, angle);
   // 1. Move the coordinate so that subsequent rotations are exactly like the
@@ -113,6 +115,8 @@ LaserProjectionDataFilter::transform(const float angle, const float length,
   p.rotate_z(-1.0f * Z_ROT).rotate_y(-1.0f * Y_ROT).rotate_x(-1.0f * X_ROT);
   // 3. Translate to the position of the EDL laser.
   p += HomVector(X_TRANS, Y_TRANS, Z_TRANS);
+  too_low = p.z() < Z_THRESHOLD;
+  if (too_low) printf("SKIPPING: (%.2f, %.2f, %.2f)\n", p.x(), p.y(), p.z()); // TODO remove
   // 4. Cut z-coordinate.
   p.z() = 0.0f;
   new_angle = p.phi();
@@ -138,7 +142,12 @@ LaserProjectionDataFilter::filter()
       const float angle = deg2rad(static_cast<float>(i));
       float new_angle;
       float new_length;
-      transform(angle, length, new_angle, new_length);
+      bool too_low;
+      transform(angle, length, new_angle, new_length, too_low);
+      if (too_low) {
+        // skip readings that probably hit the ground
+        continue;
+      }
       const int j = static_cast<int>(rad2deg(normalize_rad(new_angle)));
       outbuf[j] = new_length;
     }
