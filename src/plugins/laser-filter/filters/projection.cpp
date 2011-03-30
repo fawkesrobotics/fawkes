@@ -47,14 +47,13 @@ using namespace fawkes;
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  * @param left indicates whether or not the laser at the left or at the right
- *             of the robot or, in other words: left must be true if the X axis
- *             of the laser is directed to the ground; left must be false if the
- *             X axis of the laser is directed to the sky.
+ *             of the robot or, in other words: left must be true iff the X axis
+ *             of the laser is directed to the bottom right.
  *             <br/>
  *             This information is needed to know how to rotate the laser's
- *             coordinate system such that, if you look at the front panel of
- *             the laser, the X axis looks into your eye and the Y axis looks
- *             to the bottom of the laser body.
+ *             coordinate system such that the X axis comes out of the front
+ *             panel and the Y axis comes out of the right side panel of the
+ *             laser body.
  *             <br/>
  *             Subsequently, this coordinate system is rotated (see [xyz]_rot)
  *             and then translated ([xyz]_trans).
@@ -89,7 +88,7 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     X_TRANS(x_trans),
     Y_TRANS(y_trans),
     Z_TRANS(z_trans),
-    Z_THRESHOLD(-5.0f)
+    Z_THRESHOLD(-0.15f)
 {
 }
 
@@ -106,17 +105,20 @@ LaserProjectionDataFilter::transform(const float angle, const float length,
   // 1. Move the coordinate so that subsequent rotations are exactly like the
   // fixtures.
   if (LEFT) {
-    p.rotate_z(-1.0f * deg2rad(90.0f)).rotate_y(-1.0f * deg2rad(-90.0f));
+    p.rotate_z(-1.0f * deg2rad(90.0f));
+    p.rotate_y(-1.0f * deg2rad(-90.0f));
   } else {
-    p.rotate_z(-1.0f * deg2rad(-90.0f)).rotate_y(-1.0f * deg2rad(-90.0f));
+    p.rotate_z(-1.0f * deg2rad(-90.0f));
+    p.rotate_y(-1.0f * deg2rad(-90.0f));
   }
   // 2. Rotate the coordinate system the same way it was rotated by the
   // fixtures.
-  p.rotate_z(-1.0f * Z_ROT).rotate_y(-1.0f * Y_ROT).rotate_x(-1.0f * X_ROT);
+  p.rotate_z(-1.0f * deg2rad(Z_ROT));
+  p.rotate_y(-1.0f * deg2rad(Y_ROT));
+  p.rotate_x(-1.0f * deg2rad(X_ROT));
   // 3. Translate to the position of the EDL laser.
   p += HomVector(X_TRANS, Y_TRANS, Z_TRANS);
   too_low = p.z() < Z_THRESHOLD;
-  if (too_low) printf("SKIPPING: (%.2f, %.2f, %.2f)\n", p.x(), p.y(), p.z()); // TODO remove
   // 4. Cut z-coordinate.
   p.z() = 0.0f;
   new_angle = p.phi();
