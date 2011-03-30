@@ -255,6 +255,7 @@ p_close_interface()
     {
       iface_found = true;
       g_blackboard.instance()->close( *it );
+      g_blackboard.interfaces().erase( it );
       break;
     }
   }
