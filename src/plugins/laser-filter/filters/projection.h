@@ -40,6 +40,7 @@ class LaserProjectionDataFilter : public LaserDataFilter
   LaserProjectionDataFilter(bool left,
                             float x_rot, float y_rot, float z_rot,
                             float x_trans, float y_trans, float z_trans,
+                            float z_threshold,
                             unsigned int in_data_size,
                             std::vector<float *> in);
   ~LaserProjectionDataFilter();

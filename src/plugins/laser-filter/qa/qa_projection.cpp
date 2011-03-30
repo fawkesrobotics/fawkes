@@ -70,8 +70,8 @@ main(int argc, char **argv)
     }
   }
 
-  //LaserProjectionDataFilter filter(true, -39.0f, 0.0f, -39.0f, 0.0f, 0.0f, 0.0f, data_size, in);
-  LaserProjectionDataFilter filter(false, 39.0f, 0.0f, 39.0f, 0.0f, 0.0f, 0.0f, data_size, in);
+  //LaserProjectionDataFilter filter(true, -39.0f, 0.0f, -39.0f, 0.0f, 0.0f, 0.0f, 0.05f, data_size, in);
+  LaserProjectionDataFilter filter(false, 39.0f, 0.0f, 39.0f, 0.0f, 0.0f, 0.0f, 0.05f, data_size, in);
   filter.filter();
 
   const std::vector<float*> out = filter.get_out_vector();

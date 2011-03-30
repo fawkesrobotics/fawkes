@@ -73,11 +73,17 @@ using namespace fawkes;
  *                laser in the fawkes coordinate system.
  * @param z_trans Z component of the vector from the EDL laser to this URG
  *                laser in the fawkes coordinate system.
+ * @param z_threshold all points with this value as Z coordinate in the EDL
+ *                    laser coordinate system are considered ground points
+ *                    and therefore ignored; a suitable value might be -0.05
+ *                    meters (note that the threshold should be negative,
+ *                    because the ground is below the EDL laser)
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
     bool left,
     float x_rot, float y_rot, float z_rot,
     float x_trans, float y_trans, float z_trans,
+    float z_threshold,
     unsigned int in_data_size,
     std::vector<float *> in)
   : LaserDataFilter(in_data_size, in, in.size()),
@@ -88,7 +94,7 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     X_TRANS(x_trans),
     Y_TRANS(y_trans),
     Z_TRANS(z_trans),
-    Z_THRESHOLD(-0.15f)
+    Z_THRESHOLD(z_threshold)
 {
 }
 
