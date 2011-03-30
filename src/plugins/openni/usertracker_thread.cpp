@@ -258,6 +258,10 @@ OpenNiUserTrackerThread::loop()
 //		     "%s joint (%s)",
 //		     joint_name, xnGetStatusString(st));
 
+
+// change from mm to m
+// translating to Fawkes coordinates, empirically verified
+// permute ori columns to match our coordinate system, empirically verified
 #define SET_JTF(id, joint, joint_name, bbfield)				\
   st = __skelcap->GetSkeletonJoint(id, joint, jtf);			\
   if (st != XN_STATUS_OK) {						\
@@ -265,14 +269,20 @@ OpenNiUserTrackerThread::loop()
     ori[6] = ori[7] = ori[8] = ori_confidence = pos_confidence = 0.;	\
     proj[0] = proj[1] = 0;						\
   } else {								\
-    pos[0] = jtf.position.position.X;					\
-    pos[1] = jtf.position.position.Y;					\
-    pos[2] = jtf.position.position.Z;					\
+    pos[0] =  jtf.position.position.Z * 0.001;				\
+    pos[1] = -jtf.position.position.X * 0.001;				\
+    pos[2] =  jtf.position.position.Y * 0.001;				\
     pos_confidence = jtf.position.fConfidence;				\
 									\
-    for (unsigned char i = 0; i < 9; ++i) {				\
-      ori[i] = jtf.orientation.orientation.elements[i];			\
-    }									\
+    ori[0] =  jtf.orientation.orientation.elements[2];			\
+    ori[1] = -jtf.orientation.orientation.elements[0];			\
+    ori[2] =  jtf.orientation.orientation.elements[1];			\
+    ori[3] =  jtf.orientation.orientation.elements[5];			\
+    ori[4] = -jtf.orientation.orientation.elements[3];			\
+    ori[5] =  jtf.orientation.orientation.elements[4];			\
+    ori[6] =  jtf.orientation.orientation.elements[8];			\
+    ori[7] = -jtf.orientation.orientation.elements[6];			\
+    ori[8] =  jtf.orientation.orientation.elements[7];			\
     ori_confidence = jtf.orientation.fConfidence;			\
 									\
     XnPoint3D pt;							\
@@ -330,7 +340,8 @@ void
 OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
 {
   XnPoint3D compt, compt_proj;
-  if (__user_gen->GetCoM(id, compt) == XN_STATUS_OK) {
+  XnStatus st;
+  if ((st = __user_gen->GetCoM(id, compt)) == XN_STATUS_OK) {
     float com[3], com_proj[2];
 
     // translating to Fawkes coordinates, empirically verified
@@ -344,6 +355,8 @@ OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
 
     user.skel_if->set_com(com);
     user.proj_if->set_proj_com(com_proj);
+  } else {
+    logger->log_warn(name(), "GetCoM failed: %s", xnGetStatusString(st));
   }
 }
 
