@@ -160,7 +160,6 @@ PanTiltRX28Thread::init()
 void
 PanTiltRX28Thread::finalize()
 {
-  logger->log_debug(name(), "Finalizing");
   blackboard->unregister_listener(this);
   blackboard->close(__pantilt_if);
   blackboard->close(__led_if);

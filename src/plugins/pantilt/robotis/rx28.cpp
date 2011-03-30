@@ -182,6 +182,7 @@ RobotisRX28::open() {
   if (__fd == -1) {
     throw CouldNotOpenFileException(__device_file, errno, "Cannot open device file");
   }
+  tcflush(__fd, TCIOFLUSH);
 
   if (tcgetattr(__fd, &param) == -1) {
     Exception e(errno, "Getting the port parameters failed");
@@ -303,20 +304,29 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
   __obuffer[3 + plength+2] = calc_checksum(id, instruction, params, plength);
   __obuffer_length = plength+2 + 4 ; // 4 for 0xFF 0xFF ID LENGTH
 
-  /*
+#ifdef DEBUG_RX28_COMM
   printf("Sending: ");
   for (int i = 0; i < __obuffer_length; ++i) {
     printf("%X ", __obuffer[i]);
   }
   printf("\n");
-  */
+#endif
 
   int written = write(__fd, __obuffer, __obuffer_length);
   //printf("Wrote %d bytes\n", written);
 
   // For some reason we have to read the shit immediately, although ECHO is off
-  int readd __attribute__((unused)) = read(__fd, __ibuffer, __obuffer_length);
-  //printf("Read %d bytes\n", readb);
+  int readd = 0;
+  while (readd < __obuffer_length) {
+    readd += read(__fd, __ibuffer + readd, __obuffer_length - readd);
+  }
+#ifdef DEBUG_RX28_COMM
+  printf("Read %d junk bytes: ", readd);
+  for (int i = 0; i < readd; ++i) {
+    printf("%X ", __ibuffer[i]);
+  }
+  printf("\n");
+#endif
 
   if ( written < 0 ) {
     throw Exception(errno, "Failed to write RX28 packet %x for %x", instruction, id);
@@ -329,9 +339,10 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
 
 /** Receive a packet.
  * @param timeout_ms maximum wait time in miliseconds
+ * @param exp_length expected number of bytes
  */
 void
-RobotisRX28::recv(unsigned int timeout_ms)
+RobotisRX28::recv(const unsigned char exp_length, unsigned int timeout_ms)
 {
   timeval timeout = {0, (timeout_ms == 0xFFFFFFFF ? __default_timeout_ms : timeout_ms)  * 1000};
 
@@ -354,21 +365,33 @@ RobotisRX28::recv(unsigned int timeout_ms)
   // get octets one by one
   int bytes_read = 0;
   while (bytes_read < 6) {
-    //printf("Trying to read %d bytes\n", 6 - bytes_read);
+#ifdef DEBUG_RX28_COMM
+    printf("Trying to read %d bytes\n", 6 - bytes_read);
+#endif
     bytes_read += read(__fd, __ibuffer + bytes_read, 6 - bytes_read);
-    /*
+#ifdef DEBUG_RX28_COMM
     printf("%d bytes read  ", bytes_read);
     for (int i = 0; i < bytes_read; ++i) {
       printf("%X ", __ibuffer[i]);
     }
     printf("\n");
-    */
+#endif
   }
   if (bytes_read < 6) {
     throw Exception("Failed to read packet header");
   }
-  unsigned char plength = __ibuffer[PACKET_OFFSET_LENGTH] - 2;
-  //printf("header read, params have length %d\n", plength);
+  if ( (__ibuffer[0] != 0xFF) || (__ibuffer[1] != 0xFF) ) {
+    throw Exception("Packet does not start with 0xFFFF.");
+  }
+  if (exp_length != __ibuffer[PACKET_OFFSET_LENGTH] - 2) {
+    tcflush(__fd, TCIFLUSH);
+    throw Exception("Wrong packet length, expected %u, got %u",
+		    exp_length,  __ibuffer[PACKET_OFFSET_LENGTH] - 2);
+  }
+  const unsigned char plength = __ibuffer[PACKET_OFFSET_LENGTH] - 2;
+#ifdef DEBUG_RX28_COMM
+  printf("header read, params have length %d\n", plength);
+#endif
   if (plength > 0) {
     bytes_read = 0;
     while (bytes_read < plength) {
@@ -380,20 +403,20 @@ RobotisRX28::recv(unsigned int timeout_ms)
   }
 
   __ibuffer_length = plength+2 + 4;
-  /*
+#ifdef DEBUG_RX28_COMM
   printf("Read: ");
   for (int i = 0; i < __ibuffer_length; ++i) {
     printf("%X ", __ibuffer[i]);
   }
   printf("\n");
-  */
+#endif
 
   // verify checksum
   unsigned char checksum = calc_checksum(__ibuffer[PACKET_OFFSET_ID],
 					 __ibuffer[PACKET_OFFSET_INST],
 					 &__ibuffer[PACKET_OFFSET_PARAM], plength);
   if (checksum != __ibuffer[plength + 5]) {
-    throw Exception("Checksum error while receiving packeg, expected %d, got %d",
+    throw Exception("Checksum error while receiving packet, expected %d, got %d",
 		    checksum, __ibuffer[plength + 5]);
   }
 
@@ -441,7 +464,7 @@ RobotisRX28::discover(unsigned int timeout_ms)
 
   for (unsigned int i = 0; i < RX28_MAX_NUM_SERVOS; ++i) {
     try {
-      recv(timeout_ms);
+      recv(0, timeout_ms);
       rv.push_back(__ibuffer[PACKET_OFFSET_ID]);
     } catch (TimeoutException &e) {
       // the first timeout, no more devices can be expected to respond
@@ -476,7 +499,7 @@ RobotisRX28::ping(unsigned char id, unsigned int timeout_ms)
   assert_valid_id(id);
   try {
     send(id, INST_PING, NULL, 0);
-    recv(timeout_ms);
+    recv(0, timeout_ms);
     return true;
   } catch (Exception &e) {
     e.print_trace();
@@ -525,10 +548,10 @@ RobotisRX28::start_read_table_values(unsigned char id)
 void
 RobotisRX28::finish_read_table_values()
 {
-  recv();
+  recv(RX28_CONTROL_TABLE_LENGTH);
 
   if (__ibuffer_length != 5 + RX28_CONTROL_TABLE_LENGTH + 1) {
-    throw Exception("Input buffer of invalid size");
+    throw Exception("Input buffer of invalid size: %u vs. %u", __ibuffer_length, 5 + RX28_CONTROL_TABLE_LENGTH + 1);
   }
   memcpy(__control_table[__ibuffer[PACKET_OFFSET_ID]],
 	 &__ibuffer[PACKET_OFFSET_PARAM], RX28_CONTROL_TABLE_LENGTH);
@@ -554,7 +577,7 @@ RobotisRX28::read_table_value(unsigned char id,
   param[1] = read_length;
 
   send(id, INST_READ, param, 2);
-  recv();
+  recv(read_length);
 
   if (__ibuffer_length != (5 + read_length + 1)) {
     throw Exception("Input buffer not of expected size, expected %u, got %u",
@@ -596,7 +619,7 @@ RobotisRX28::write_table_value(unsigned char id, unsigned char addr,
       if (double_byte) __control_table[id][addr + 1] = param[2];
     }
 
-    if ((id != BROADCAST_ID) && responds_all(id))  recv();
+    if ((id != BROADCAST_ID) && responds_all(id))  recv(0);
   } catch (Exception &e) {
     e.print_trace();
     throw;
@@ -635,7 +658,7 @@ RobotisRX28::write_table_values(unsigned char id, unsigned char start_addr,
       }
     }
 
-    if ((id != BROADCAST_ID) && responds_all(id))  recv();
+    if ((id != BROADCAST_ID) && responds_all(id))  recv(0);
   } catch (Exception &e) {
     e.print_trace();
     throw;
@@ -1287,7 +1310,7 @@ RobotisRX28::set_goal_speeds(unsigned int num_servos, ...)
   for (unsigned int i = 0; i < num_servos; ++i) {
     unsigned char id    = va_arg(arg, unsigned int);
     unsigned int  value = va_arg(arg, unsigned int);
-    printf("Servo speed %u to %u\n", id, value);
+    //printf("Servo speed %u to %u\n", id, value);
     param[2 + i * 3] = id;
     param[2 + i * 3 + 1] = (value & 0xFF);
     param[2 + i * 3 + 2] = (value >> 8) & 0xFF;
