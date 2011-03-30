@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  reverse_angle.h - Reverse the angle in which laser data is taken
+ *  laser_filter_plugin.h - Fawkes Laser filter plugin
  *
- *  Created: Wed Jan 06 17:14:27 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Mar 13 01:06:04 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,18 +20,23 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_REVERSE_ANGLE_H_
-#define __PLUGINS_LASER_FILTERS_REVERSE_ANGLE_H_
+#ifndef __PLUGINS_LASER_FILTER_LASER_FILTER_PLUGIN_H_
+#define __PLUGINS_LASER_FILTER_LASER_FILTER_PLUGIN_H_
 
-#include "../filter.h"
+#include <core/plugin.h>
 
-class LaserReverseAngleDataFilter : public LaserDataFilter
+namespace fawkes {
+  class Barrier;
+}
+
+class LaserFilterPlugin : public fawkes::Plugin
 {
  public:
-  LaserReverseAngleDataFilter(unsigned int data_size);
-
-  void filter(const float *data, unsigned int data_size);
-
+  LaserFilterPlugin(fawkes::Configuration *config);
+  ~LaserFilterPlugin();
+  
+ private:
+  fawkes::Barrier *__barrier;
 };
 
 #endif

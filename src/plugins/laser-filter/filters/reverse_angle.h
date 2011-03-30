@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  circle.h - Laser data circle data filter (example)
+ *  reverse_angle.h - Reverse the angle in which laser data is taken
  *
- *  Created: Fri Oct 10 17:15:34 2008
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Jan 06 17:14:27 2010
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,20 +20,18 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_CIRCLE_H_
-#define __PLUGINS_LASER_FILTERS_CIRCLE_H_
+#ifndef __PLUGINS_LASER_FILTER_FILTERS_REVERSE_ANGLE_H_
+#define __PLUGINS_LASER_FILTER_FILTERS_REVERSE_ANGLE_H_
 
-#include "../filter.h"
+#include "filter.h"
 
-class LaserCircleDataFilter : public LaserDataFilter
+class LaserReverseAngleDataFilter : public LaserDataFilter
 {
  public:
-  LaserCircleDataFilter(float radius);
+  LaserReverseAngleDataFilter(unsigned int data_size, std::vector<float *> in);
 
-  void filter(const float *data, unsigned int data_size);
+  void filter();
 
- private:
-  float  __radius;
 };
 
 #endif

@@ -237,6 +237,7 @@ Interface::~Interface()
     minfol = __messageinfo_list;
   }
   delete __timestamp;
+  delete __local_read_timestamp;
 }
 
 /** Get interface hash.

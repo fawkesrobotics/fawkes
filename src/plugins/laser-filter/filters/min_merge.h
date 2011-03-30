@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  720to360.h - Laser data data filter to downsample 720 to 360 values
+ *  min_merge.h - Laser min merge data filter
  *
- *  Created: Tue Jun 23 14:36:12 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Mar 16 21:45:27 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,20 +20,17 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_720TO360_H_
-#define __PLUGINS_LASER_FILTERS_720TO360_H_
+#ifndef __PLUGINS_LASER_FILTER_FILTERS_MIN_MERGE_H_
+#define __PLUGINS_LASER_FILTER_FILTERS_MIN_MERGE_H_
 
-#include "../filter.h"
+#include "filter.h"
 
-class Laser720to360DataFilter : public LaserDataFilter
+class LaserMinMergeDataFilter : public LaserDataFilter
 {
  public:
-  Laser720to360DataFilter(bool average = false);
+  LaserMinMergeDataFilter(unsigned int in_data_size, std::vector<float *> in);
 
-  void filter(const float *data, unsigned int data_size);
-
- private:
-  bool __average;
+  virtual void filter();
 };
 
 #endif

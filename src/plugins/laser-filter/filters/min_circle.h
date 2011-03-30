@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  filter.h - Laser data filter interface
+ *  min_circle.h - Laser data min circle radius data filter
  *
- *  Created: Fri Oct 10 17:11:04 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Feb 19 00:21:41 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,25 +20,21 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_H_
-#define __PLUGINS_LASER_FILTER_H_
+#ifndef __PLUGINS_LASER_FILTER_FILTERS_MIN_CIRCLE_H_
+#define __PLUGINS_LASER_FILTER_FILTERS_MIN_CIRCLE_H_
 
-class LaserDataFilter
+#include "filter.h"
+
+class LaserMinCircleDataFilter : public LaserDataFilter
 {
  public:
-  LaserDataFilter();
-  virtual ~LaserDataFilter();
+  LaserMinCircleDataFilter(float radius,
+			   unsigned int data_size, std::vector<float *> in);
 
-  virtual float *       filtered_data();
-  virtual unsigned int  filtered_data_size();
-  virtual void          filtered_data(float *&data, unsigned int &data_size);
-  virtual void          filter(const float *data, unsigned int data_size)   = 0;
+  void filter();
 
- protected:
-  float        *_filtered_data;
-  unsigned int  _filtered_data_size;
-  bool          _free_filtered_data;
+ private:
+  float  __radius;
 };
-
 
 #endif

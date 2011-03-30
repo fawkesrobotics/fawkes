@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  reverse_angle.h - Reverse the angle in which laser data is taken
+ *  reverse_angle.cpp - Reverse the angle in which laser data is taken
  *
  *  Created: Wed Jan 06 17:15:38 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -37,24 +37,25 @@
  */
 
 /** Constructor.
- * @param data_size Data size of the input. Output size will be the same. The
- * input data must have the exact same data size.
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
  */
-LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(unsigned int data_size)
+LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(unsigned int in_data_size,
+							 std::vector<float *> in)
+  : LaserDataFilter(in_data_size, in, in.size())
 {
-  _filtered_data      = (float *)malloc(sizeof(float) * data_size);
-  _filtered_data_size = data_size;
 }
 
 void
-LaserReverseAngleDataFilter::filter(const float *data, unsigned int data_size)
+LaserReverseAngleDataFilter::filter()
 {
-  if ( data_size != _filtered_data_size ) {
-    throw fawkes::Exception("Expected %u values, but got %u",
-			    _filtered_data_size, data_size);
-  }
-
-  for (unsigned int i = 0; i < _filtered_data_size; ++i) {
-    _filtered_data[i] = data[data_size - i];
+  const unsigned int vecsize = std::min(in.size(), out.size());
+  const unsigned int arrsize = std::min(in_data_size, out_data_size);
+  for (unsigned int a = 0; a < vecsize; ++a) {
+    float *inbuf  = in[a];
+    float *outbuf = out[a];
+    for (unsigned int i = 0; i < arrsize; ++i) {
+      outbuf[i] = inbuf[arrsize - i];
+    }
   }
 }

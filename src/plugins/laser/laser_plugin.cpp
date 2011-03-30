@@ -120,11 +120,11 @@ LaserPlugin::LaserPlugin(Configuration *config)
   }
 
   if ( thread_list.empty() ) {
-    throw Exception("No synchronization peers configured, aborting");
+    throw Exception("No laser devices configured, aborting");
   } else {
   }
 }
 
 
-PLUGIN_DESCRIPTION("Reads data from laser range finder and writes to BlackBoard")
+PLUGIN_DESCRIPTION("Hardware driver for laser range finders")
 EXPORT_PLUGIN(LaserPlugin)

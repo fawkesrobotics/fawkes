@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  deadspots.h - Laser data dead spots filter
+ *  circle_sector.h - Filter laser data for circle sector
  *
- *  Created: Wed Jun 24 22:39:19 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Feb 19 00:27:33 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,35 +20,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTERS_DEADSPOTS_H_
-#define __PLUGINS_LASER_FILTERS_DEADSPOTS_H_
+#ifndef __PLUGINS_LASER_FILTER_FILTERS_CIRCLE_SECTOR_H_
+#define __PLUGINS_LASER_FILTER_FILTERS_CIRCLE_SECTOR_H_
 
-#include "../filter.h"
+#include "filter.h"
 
-#include <vector>
-#include <utility>
-#include <string>
-
-namespace fawkes {
-  class Configuration;
-  class Logger;
-}
-
-class LaserDeadSpotsDataFilter : public LaserDataFilter
+class LaserCircleSectorDataFilter : public LaserDataFilter
 {
  public:
-  LaserDeadSpotsDataFilter(fawkes::Configuration *config, fawkes::Logger *logger,
-			   std::string prefix);
-  ~LaserDeadSpotsDataFilter();
+  LaserCircleSectorDataFilter(unsigned int from, unsigned int to,
+			      unsigned int data_size, std::vector<float *> in);
 
-  void filter(const float *data, unsigned int data_size);
+  void filter();
 
  private:
-  fawkes::Logger *__logger;
-
-  unsigned int  __num_spots;
-  unsigned int *__dead_spots;
-  std::vector<std::pair<float, float> > __cfg_dead_spots;
+  unsigned int __from;
+  unsigned int __to;
 };
 
 #endif
