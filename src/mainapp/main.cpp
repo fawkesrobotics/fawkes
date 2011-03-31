@@ -3,7 +3,7 @@
  *  main.cpp - Fawkes main application
  *
  *  Created: Thu Nov  2 16:44:48 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -143,6 +143,7 @@ usage(const char *progname)
        << "                  in the given order after startup." << endl
        << " -u user          Drop privileges as soon as possible and run as given user." << endl
        << " -g group         Drop privileges as soon as possible and run as given group." << endl
+       << " -P port          TCP port to listen on for Fawkes network connections." << endl
 #ifdef HAVE_LIBDAEMON
        << " -D[pid file]     Run daemonized in the background, pid file is optional, " << endl
        << "                  defaults to /var/run/fawkes.pid, must be absolute path." << endl
@@ -253,7 +254,7 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = NULL;
   try {
-    argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ksu:g:");
+    argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ksu:g:P:");
   }
   catch (UnknownArgumentException &e) {
     cout << endl;

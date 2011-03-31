@@ -3,7 +3,7 @@
  *  main_thread.cpp - Fawkes main thread
  *
  *  Created: Thu Nov  2 16:47:50 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -198,13 +198,26 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   unsigned int net_tcp_port     = 1910;
   std::string  net_service_name = "Fawkes on %h";
-  try {
-    net_tcp_port = __config->get_uint("/fawkes/mainapp/net/tcp_port");
-  } catch (Exception &e) {}  // ignore, we stick with the default
-  if (net_tcp_port > 65535)  net_tcp_port = 1910;
-  try {
-    net_service_name = __config->get_string("/fawkes/mainapp/net/service_name");
-  } catch (Exception &e) {}  // ignore, we stick with the default
+  if (argp->has_arg("P")) {
+    try {
+      net_tcp_port = argp->parse_int("P");
+    } catch (Exception &e) {
+      __multi_logger->log_warn("FawkesMainThread", "Illegal port '%s', using %u",
+			       argp->arg("P"), net_tcp_port);
+    }
+  } else {
+    try {
+      net_tcp_port = __config->get_uint("/fawkes/mainapp/net/tcp_port");
+    } catch (Exception &e) {}  // ignore, we stick with the default
+    try {
+      net_service_name = __config->get_string("/fawkes/mainapp/net/service_name");
+    } catch (Exception &e) {}  // ignore, we stick with the default
+  }
+  if (net_tcp_port > 65535) {
+    __multi_logger->log_warn("FawkesMainThread", "Invalid port '%u', using 1910",
+			     net_tcp_port);
+    net_tcp_port = 1910;
+  }
 
   // Cleanup stale BlackBoard shared memory segments if requested
   if ( __argp->has_arg("C") ) {
