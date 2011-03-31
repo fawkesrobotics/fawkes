@@ -30,6 +30,16 @@
 #include <cstring>
 #include <cerrno>
 
+#ifdef HAVE_LIBDAEMON
+#  include <cerrno>
+#  include <cstring>
+#  include <libdaemon/dfork.h>
+#  include <libdaemon/dlog.h>
+#  include <libdaemon/dpid.h>
+#  include <sys/stat.h>
+#  include <sys/wait.h>
+#endif
+
 bool g_quit = false;
 int  g_signum = SIGINT;
 
@@ -49,15 +59,24 @@ handle_signal(int signum)
 void
 usage(const char *progname)
 {
-  printf("Usage: %s <progfile> [args...]\n"
+  printf("Usage: %s [options] <progfile> [args...]\n"
 	 "progfile   full absolute path to executable\n"
-	 "args       any number of arguments, passed to program as-is\n",
+	 "args       any number of arguments, passed to program as-is\n\n"
+	 "where [options] passed in before <progfile> are one or more of:\n"
+#ifdef HAVE_LIBDAEMON
+	 " -D[pid file]     Run daemonized in the background, pid file is optional,\n"
+	 "                  defaults to /var/run/ffwatchdog_basename.pid, must be absolute path.\n"
+	 " -D[pid file] -k  Kill a daemonized process running in the background,\n"
+	 "                  pid file is optional as above.\n"
+	 " -D[pid file] -s  Check status of daemon.\n"
+#endif
+	 " -h               Show help instructions.\n\n",
 	 progname);
 }
 
 
 pid_t
-fork_and_exec(int argc, char **argv)
+fork_and_exec(int argc, char **argv, int prog_start)
 {
   pid_t pid = fork();
   if (pid == -1) {
@@ -68,15 +87,106 @@ fork_and_exec(int argc, char **argv)
     // child
     setsid();
     signal(SIGINT, SIG_IGN);    
-    if (execve(argv[1], &argv[1], environ) == -1) {
+    if (execve(argv[prog_start], &argv[prog_start], environ) == -1) {
       printf("Failed to execute %s, exited with %i: %s\n",
-	     argv[1], errno, strerror(errno));
+	     argv[prog_start], errno, strerror(errno));
       exit(-1);
     }
   }
 
   return pid;
 }
+
+
+#ifdef HAVE_LIBDAEMON
+void
+daemonize_cleanup()
+{
+  daemon_retval_send(-1);
+  daemon_retval_done();
+  daemon_pid_file_remove();}
+
+pid_t
+daemonize(int argc, char **argv)
+{
+  pid_t pid;
+  mode_t old_umask = umask(0);
+
+  // Prepare for return value passing
+  daemon_retval_init();
+
+  // Do the fork
+  if ((pid = daemon_fork()) < 0) {
+    return -1;
+        
+  } else if (pid) { // the parent
+    int ret;
+
+    // Wait for 20 seconds for the return value passed from the daemon process
+    if ((ret = daemon_retval_wait(20)) < 0) {
+      daemon_log(LOG_ERR, "Could not recieve return value from daemon process.");
+      return -1;
+    }
+
+    if ( ret != 0 ) {
+      daemon_log(LOG_ERR, "*** Daemon startup failed, see syslog for details. ***");
+      switch (ret) {
+      case 1:
+	daemon_log(LOG_ERR, "Daemon failed to close file descriptors");
+	break;
+      case 2:
+	daemon_log(LOG_ERR, "Daemon failed to create PID file");
+	break;
+      }
+      return -1;
+    } else {
+      return pid;
+    }
+
+  } else { // the daemon
+#ifdef DAEMON_CLOSE_ALL_AVAILABLE
+    if (daemon_close_all(-1) < 0) {
+      daemon_log(LOG_ERR, "Failed to close all file descriptors: %s",
+		 strerror(errno));
+      // Send the error condition to the parent process
+      daemon_retval_send(1);
+      return -1;
+    }
+#endif
+
+    // Create the PID file
+    if (daemon_pid_file_create() < 0) {
+      printf("Could not create PID file (%s).", strerror(errno));
+      daemon_log(LOG_ERR, "Could not create PID file (%s).", strerror(errno));
+
+      // Send the error condition to the parent process
+      daemon_retval_send(2);
+      return -1;
+    }
+
+    // Send OK to parent process
+    daemon_retval_send(0);
+
+    daemon_log(LOG_INFO, "Sucessfully started");
+
+    umask(old_umask);
+    return 0;
+  }
+}
+
+/** Global variable containing the path to the PID file.
+ * unfortunately needed for libdaemon */
+const char *ffwatchdog_pid_file;
+
+/** Function that returns the PID file name.
+ * @return PID file name
+ */
+const char *
+ffwatchdog_daemon_pid_file_proc()
+{
+  return ffwatchdog_pid_file;
+}
+#endif // HAVE_LIBDAEMON
 
 
 
@@ -87,16 +197,136 @@ fork_and_exec(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-  if (argc == 1) {
+  if (argc < 2) {
     usage(argv[0]);
     exit(1);
   }
 
-  if (access(argv[1], X_OK) != 0) {
+  bool arg_verbose = false;
+  bool arg_daemonize = false;
+  bool arg_daemon_kill = false;
+  bool arg_daemon_status = false;
+  const char *daemon_pid_file = NULL;
+  int c;
+  while ((c = getopt(argc, argv, "D::ksvh")) != -1) {
+    if (c == '?') {
+      printf("Unknown argument passed\n");
+      usage(argv[0]);
+      exit(3);
+    } else if (c == ':') {
+      printf("Argument is missing a parameter\n");
+      usage(argv[0]);
+      exit(3);
+    } else {
+      if (c == 'D') {
+	arg_daemonize = true;
+	daemon_pid_file = optarg;
+      } else if (c == 'k') {
+	arg_daemon_kill = true;
+      } else if (c == 's') {
+	arg_daemon_status = true;
+      } else if (c == 'v') {
+	arg_verbose = true;
+      } else if (c == 'h') {
+	usage(argv[0]);
+	exit(0);
+      } else {
+	printf("Unknown argument '%c'\n", c);
+	usage(argv[0]);
+	exit(3);
+      }
+    }
+  }
+
+  int prog_start = optind;
+
+  if (prog_start >= argc) {
+    usage(argv[0]);
+    exit(1);
+  }
+
+  if (access(argv[prog_start], X_OK) != 0) {
     printf("Cannot execute '%s': %s\n\n", argv[1], strerror(errno));
     usage(argv[0]);
     exit(2);
   }
+
+#ifdef HAVE_LIBDAEMON
+  pid_t dpid;
+  int ret;
+
+  char *daemon_ident = NULL;
+
+  if ( arg_daemonize ) {
+    // Set identification string for the daemon for both syslog and PID file
+
+    char *argv_copy = strdup(argv[prog_start]);
+    if (asprintf(&daemon_ident, "ffwatchdog_%s", basename(argv_copy)) == -1) {
+      free(argv_copy);
+      printf("Failed to create daemon ident, not enough memory\n");
+      exit(5);
+    }
+    free(argv_copy);
+    daemon_pid_file_ident = daemon_log_ident = daemon_ident;
+    if ( daemon_pid_file != NULL ) {
+      ffwatchdog_pid_file  = daemon_pid_file;
+      daemon_pid_file_proc = ffwatchdog_daemon_pid_file_proc;
+    }
+
+    // We should daemonize, check if we were called to kill a daemonized copy
+    if (arg_daemon_kill) {
+      // Check that the daemon is not run twice a the same time
+      if ((dpid = daemon_pid_file_is_running()) < 0) {
+	daemon_log(LOG_ERR, "Watchdog daemon for %s not running.",
+		   argv[prog_start]);
+	return 1;
+      }
+
+      // Kill daemon with SIGINT
+      if ((ret = daemon_pid_file_kill_wait(SIGINT, 5)) < 0) {
+	daemon_log(LOG_WARNING, "Failed to kill watchdog daemon for %s",
+		   argv[prog_start]);
+      }
+      return (ret < 0) ? 1 : 0;
+    }
+
+    if (arg_daemon_status) {
+      // Check daemon status
+      if (daemon_pid_file_is_running() < 0) {
+	if (arg_verbose) {
+	  printf("Watchdog daemon for %s is not running\n", argv[prog_start]);
+	}
+	return 1;
+      } else {
+	if (arg_verbose) {
+	  printf("Watchdog daemon for %s is running\n", argv[prog_start]);
+	}
+	return 0;
+      }
+    }
+
+    // Check that the daemon is not run twice a the same time
+    if ((dpid = daemon_pid_file_is_running()) >= 0) {
+      daemon_log(LOG_ERR, "Watchdog daemon for %s already running on (PID %u)",
+		 argv[prog_start], dpid);
+      return 201;
+    }
+
+    dpid = daemonize(argc, argv);
+    if ( dpid < 0 ) {
+      daemonize_cleanup();
+      return 201;
+    } else if (dpid) {
+      // parent
+      return 0;
+    } // else child, continue as usual
+  }
+#else
+  if (daemonize) {
+    printf("Daemonize support was not available at compile time.\n");
+    exit(13);
+  }
+#endif
 
   struct sigaction sa;
   sa.sa_handler = handle_signal;
@@ -110,7 +340,7 @@ main(int argc, char **argv)
 
   pid_t pid = -1;
   while (! g_quit) {
-    pid = fork_and_exec(argc, argv);
+    pid = fork_and_exec(argc, argv, prog_start);
 
     while (pid != -1 && ! g_quit) {
 
@@ -121,28 +351,35 @@ main(int argc, char **argv)
       if (cpid == -1) {
 	printf("Failed to wait for child: %s\n", strerror(errno));
       } else if (WIFEXITED(status)) {
-	printf("%i|%s exited, status=%d\n", cpid, argv[1], WEXITSTATUS(status));
+	printf("%i|%s exited, status=%d\n", cpid, argv[prog_start],
+	       WEXITSTATUS(status));
 	pid = -1;
       } else if (WIFSIGNALED(status)) {
-	printf("%i|%s killed by signal %s\n", cpid, argv[1],
+	printf("%i|%s killed by signal %s\n", cpid, argv[prog_start],
 	       strsignal(WTERMSIG(status)));
 	pid = -1;
       } else if (WIFSTOPPED(status)) {
-	printf("%i|%s stopped by signal %s\n", cpid, argv[1],
+	printf("%i|%s stopped by signal %s\n", cpid, argv[prog_start],
 	       strsignal(WSTOPSIG(status)));
 	pid = -1;
       } else if (WIFCONTINUED(status)) {
-	printf("%i|%s continued\n", cpid, argv[1]);
+	printf("%i|%s continued\n", cpid, argv[prog_start]);
       }
     }
   }
 
   if (pid != -1) {
-    printf("Killing %s with signal %s\n", argv[1], strsignal(g_signum));
+    printf("Killing %s with signal %s\n", argv[prog_start], strsignal(g_signum));
     if (kill(pid, g_signum) == -1) {
-      printf("Failed to kill %s: %s\n", argv[1], strerror(errno));
+      printf("Failed to kill %s: %s\n", argv[prog_start], strerror(errno));
     }
   }
+
+#ifdef HAVE_LIBDAEMON
+  if (arg_daemonize) {
+    daemonize_cleanup();
+  }
+#endif
 
   return 0;
 }

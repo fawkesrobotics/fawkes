@@ -24,4 +24,14 @@ OBJS_all     =	$(OBJS_ffwatchdog)
 BINS_all     =	$(BINDIR)/ffwatchdog
 MANPAGES_all =	$(MANDIR)/man1/ffwatchdog.1
 
+ifeq ($(OBJSSUBMAKE),1)
+  ifneq ($(WARN_TARGETS),)
+all: $(WARN_TARGETS)
+  endif
+.PHONY: warning_libdaemon
+warning_libdaemon:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without daemonizing support$(TNORMAL) (libdaemon[-devel] not installed)"
+endif
+
+
 include $(BUILDSYSDIR)/base.mk
