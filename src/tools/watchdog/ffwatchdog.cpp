@@ -207,38 +207,41 @@ main(int argc, char **argv)
   bool arg_daemon_kill = false;
   bool arg_daemon_status = false;
   const char *daemon_pid_file = NULL;
-  int c;
-  while ((c = getopt(argc, argv, "D::ksvh")) != -1) {
-    if (c == '?') {
-      printf("Unknown argument passed\n");
-      usage(argv[0]);
-      exit(3);
-    } else if (c == ':') {
-      printf("Argument is missing a parameter\n");
-      usage(argv[0]);
-      exit(3);
-    } else {
-      if (c == 'D') {
-	arg_daemonize = true;
-	daemon_pid_file = optarg;
-      } else if (c == 'k') {
-	arg_daemon_kill = true;
-      } else if (c == 's') {
-	arg_daemon_status = true;
-      } else if (c == 'v') {
-	arg_verbose = true;
-      } else if (c == 'h') {
-	usage(argv[0]);
-	exit(0);
+
+  int prog_start;
+  for (prog_start = 1; prog_start < argc; ++prog_start) {
+    if (argv[prog_start][0] == '-') {
+      // argument starts
+      char param = argv[prog_start][1];
+      if (param == '-') {
+	++prog_start;
+	break;
       } else {
-	printf("Unknown argument '%c'\n", c);
-	usage(argv[0]);
-	exit(3);
+	if (param == 'D') {
+	  arg_daemonize = true;
+	  daemon_pid_file = NULL;
+	  if (strlen(&argv[prog_start][1]) > 1) {
+	    daemon_pid_file = &argv[prog_start][2];
+	  }
+	} else if (param == 'k') {
+	  arg_daemon_kill = true;
+	} else if (param == 's') {
+	  arg_daemon_status = true;
+	} else if (param == 'v') {
+	  arg_verbose = true;
+	} else if (param == 'h') {
+	  usage(argv[0]);
+	  exit(0);
+	} else {
+	  printf("Unknown argument '%c'\n", param);
+	  usage(argv[0]);
+	  exit(3);
+	}
       }
+    } else {
+      break;
     }
   }
-
-  int prog_start = optind;
 
   if (prog_start >= argc) {
     usage(argv[0]);
