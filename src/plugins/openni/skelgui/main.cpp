@@ -350,7 +350,7 @@ void glInit (int * pargc, char ** argv)
 
 int main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:f::js");
+  ArgumentParser argp(argc, argv, "hr:n::js");
 
   Thread::init_main();
   glInit(&argc, argv);
