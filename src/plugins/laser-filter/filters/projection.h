@@ -37,9 +37,36 @@ namespace fawkes {
 class LaserProjectionDataFilter : public LaserDataFilter
 {
  public:
+  struct Rotation {
+    Rotation(float x_rot_degree, float y_rot_degree, float z_rot_degree)
+        : x(x_rot_degree), y(y_rot_degree), z(z_rot_degree)
+    { }
+    float x;
+    float y;
+    float z;
+  };
+  struct Translation {
+    Translation(float x_trans_degree, float y_trans_degree, float z_trans_degree)
+        : x(x_trans_degree), y(y_trans_degree), z(z_trans_degree)
+    { }
+    float x; 
+    float y;
+    float z;
+  };
+  struct Rectangle {
+    Rectangle(float x_min, float x_max, float y_min, float y_max)
+        : x_min(x_min), x_max(x_max), y_min(y_min), y_max(y_max)
+    { }
+    float x_min;
+    float x_max;
+    float y_min;
+    float y_max;
+  };
+
   LaserProjectionDataFilter(bool left,
-                            float x_rot, float y_rot, float z_rot,
-                            float x_trans, float y_trans, float z_trans,
+                            const Rotation& rot,
+                            const Translation& trans,
+                            const Rectangle& robot_rectangle,
                             float z_threshold,
                             unsigned int in_data_size,
                             std::vector<float *> in);
@@ -50,19 +77,13 @@ class LaserProjectionDataFilter : public LaserDataFilter
  private:
   inline void transform(const float angle, const float length,
                         float& new_angle, float& new_length,
-                        bool& too_low);
+                        bool& in_robot_rect, bool& too_low);
 
-  const bool LEFT;
-
-  const float X_ROT;
-  const float Y_ROT;
-  const float Z_ROT;
-
-  const float X_TRANS;
-  const float Y_TRANS;
-  const float Z_TRANS;
-
-  const float Z_THRESHOLD;
+  const bool        LEFT;
+  const Rotation    ROT;
+  const Translation TRANS;
+  const Rectangle   ROBOT;
+  const float       Z_THRESHOLD;
 };
 
 #endif

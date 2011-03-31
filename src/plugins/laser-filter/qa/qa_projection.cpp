@@ -45,13 +45,13 @@ main(int argc, char **argv)
     readings[i] = 0.0f;
   }
   //readings[0] = 2.934f;
-  //readings[45] = 1.59;
-  //readings[0] = 1.60;
-  //readings[45] = 1.60;
-  //readings[90] = 1.60;
-  //readings[135] = 1.60;
-  //readings[270] = 1.60;
-  //readings[90+90] = 1.60;
+  readings[0] = 1.50f;
+  readings[90] = 1.50f;
+  readings[135] = 1.50f;
+  readings[270] = 1.50f;
+  readings[180] = 1.50f;
+  readings[40] = 1.50f; // this one is too low (Z_THRESHOLD)
+  readings[39] = 0.40f; // this one is in the robot
 
   std::vector<float*> in;
   in.push_back(readings);
@@ -70,8 +70,12 @@ main(int argc, char **argv)
     }
   }
 
-  //LaserProjectionDataFilter filter(true, -39.0f, 0.0f, -39.0f, 0.0f, 0.0f, 0.0f, 0.05f, data_size, in);
-  LaserProjectionDataFilter filter(false, 39.0f, 0.0f, 39.0f, 0.0f, 0.0f, 0.0f, 0.05f, data_size, in);
+  const bool LEFT = true;
+  const LaserProjectionDataFilter::Rotation ROT((LEFT ? -39.0f : 39.0f), 0.0f, (LEFT ? -39.0f : 39.0f));
+  const LaserProjectionDataFilter::Translation TRANS(0.08f, (LEFT ? 0.20f : -0.20f), 1.17f);
+  const LaserProjectionDataFilter::Rectangle ROBOT_RECT(-0.07, 0.31, -0.20f, 0.20f);
+  const float Z_THRESHOLD = -0.05;
+  LaserProjectionDataFilter filter(LEFT, ROT, TRANS, ROBOT_RECT, Z_THRESHOLD , data_size, in);
   filter.filter();
 
   const std::vector<float*> out = filter.get_out_vector();

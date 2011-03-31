@@ -43,9 +43,79 @@ using namespace fawkes;
  * @author Christoph Schwering
  */
 
+/** @class LaserProjectionDataFilter::Rotation "filters/projection.h"
+ * Coordinate system rotation structure.
+ * @author Christoph Schwering
+ */
+
+/** @fn LaserProjectionDataFilter::Rotation::Rotation(float x_rot_degree, float y_rot_degree, float z_rot_degree) "filters/projection.h"
+ * Constructor for a new rotation container.
+ * @param x_rot_degree coordinate system rotation around the X axis which is
+ *                     performed last (counter-clockwise rotation in degrees)
+ * @param y_rot_degree coordinate system rotation around the Y axis which is
+ *                     performed last (counter-clockwise rotation in degrees)
+ * @param z_rot_degree coordinate system rotation around the Z axis which is
+ *                     performed last (counter-clockwise rotation in degrees)
+ */
+
+/** @var LaserProjectionDataFilter::Rotation::x "filters/projection.h"
+ * Rotation around X axis in degrees. */
+
+/** @var LaserProjectionDataFilter::Rotation::y "filters/projection.h"
+ * Rotation around X axis in degrees. */
+
+/** @var LaserProjectionDataFilter::Rotation::z "filters/projection.h"
+ * Rotation around X axis in degrees. */
+
+/** @class LaserProjectionDataFilter::Translation "filters/projection.h"
+ * Coordinate system translation structure.
+ * @author Christoph Schwering
+ */
+
+/** @fn LaserProjectionDataFilter::Translation::Translation(float x_trans_degree, float y_trans_degree, float z_trans_degree) "filters/projection.h"
+ * Constructor for a new translation container.
+ * @param x_trans_degree x-component of the vector from EDL laser to URG laser
+ * @param y_trans_degree y-component of the vector from EDL laser to URG laser
+ * @param z_trans_degree z-component of the vector from EDL laser to URG laser
+ */
+
+/** @var LaserProjectionDataFilter::Translation::x "filters/projection.h"
+ * X componenent of vector from destination to origin. */
+
+/** @var LaserProjectionDataFilter::Translation::y "filters/projection.h"
+ * Y componenent of vector from destination to origin. */
+
+/** @var LaserProjectionDataFilter::Translation::z "filters/projection.h"
+ * Z componenent of vector from destination to origin. */
+
+/** @class LaserProjectionDataFilter::Rectangle "filters/projection.h"
+ * Rectangle structure.
+ * @author Christoph Schwering
+ */
+
+/** @fn LaserProjectionDataFilter::Rectangle::Rectangle(float x_min, float x_max, float y_min, float y_max) "filters/projection.h"
+ * Constructor for a new translation container.
+ * @param x_min distance from EDL laser to back of robot
+ * @param x_max distance from EDL laser to front of robot
+ * @param y_min distance from EDL laser to right of robot
+ * @param y_max distance from EDL laser to left of robot
+ */
+
+/** @var LaserProjectionDataFilter::Rectangle::x_min "filters/projection.h"
+ * Distance from EDL to back of robot. */
+
+/** @var LaserProjectionDataFilter::Rectangle::x_max "filters/projection.h"
+ * Distance from EDL to front of robot. */
+
+/** @var LaserProjectionDataFilter::Rectangle::y_min "filters/projection.h"
+ * Distance from EDL to right of robot. */
+
+/** @var LaserProjectionDataFilter::Rectangle::y_max "filters/projection.h"
+ * Distance from EDL to left of robot. */
+
 /** Constructor.
- * @param in_data_size number of entries input value arrays
- * @param in vector of input arrays
+ * @param in_data_size number of entries input value arrays.
+ * @param in vector of input arrays.
  * @param left indicates whether or not the laser at the left or at the right
  *             of the robot or, in other words: left must be true iff the X axis
  *             of the laser is directed to the bottom right.
@@ -55,45 +125,35 @@ using namespace fawkes;
  *             panel and the Y axis comes out of the right side panel of the
  *             laser body.
  *             <br/>
- *             Subsequently, this coordinate system is rotated (see [xyz]_rot)
+ *             Subsequently, this coordinate system is rotated (see rot)
  *             and then translated ([xyz]_trans).
- * @param x_rot the rotation of the X axis of the laser panel coordinate system
- *              which is determined with the left parameter (see left).
- *              This rotation is done after the Y axis rotation.
- * @param y_rot the rotation of the Y axis of the laser panel coordinate system
- *              which is determined with the left parameter (see left).
- *              This rotation is done before the Z axis rotation and
- *              after the Y axis rotation.
- * @param z_rot the rotation of the Z axis of the laser panel coordinate system
- *              which is determined with the left parameter (see left).
- *              This rotation is done before the Y axis and X axis rotations.
- * @param x_trans X component of the vector from the EDL laser to this URG
- *                laser in the fawkes coordinate system.
- * @param y_trans Y component of the vector from the EDL laser to this URG
- *                laser in the fawkes coordinate system.
- * @param z_trans Z component of the vector from the EDL laser to this URG
- *                laser in the fawkes coordinate system.
+ * @param rot the rotation of the X, Y and Z axis of the laser panel coordinate
+ *            system which is determined with the left parameter (see left).
+ *            First, the Z axis is rotated, then the Y axis and then the X axis.
+ * @param trans the translation from the URG laser into the EDL laser plane,
+ *              which is the vector from the EDL laser to the URG laser.
+ * @param robot_rectangle a rectangle relative to the fawkes coordinate system
+ *                        centered at the EDL laser which denotes the size of
+ *                        the robot.
  * @param z_threshold all points with this value as Z coordinate in the EDL
  *                    laser coordinate system are considered ground points
  *                    and therefore ignored; a suitable value might be -0.05
  *                    meters (note that the threshold should be negative,
- *                    because the ground is below the EDL laser)
+ *                    because the ground is below the EDL laser).
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
     bool left,
-    float x_rot, float y_rot, float z_rot,
-    float x_trans, float y_trans, float z_trans,
+    const Rotation& rot,
+    const Translation& trans,
+    const Rectangle& robot_rectangle,
     float z_threshold,
     unsigned int in_data_size,
     std::vector<float *> in)
   : LaserDataFilter(in_data_size, in, in.size()),
     LEFT(left),
-    X_ROT(x_rot),
-    Y_ROT(y_rot),
-    Z_ROT(z_rot),
-    X_TRANS(x_trans),
-    Y_TRANS(y_trans),
-    Z_TRANS(z_trans),
+    ROT(rot),
+    TRANS(trans),
+    ROBOT(robot_rectangle),
     Z_THRESHOLD(z_threshold)
 {
 }
@@ -105,7 +165,7 @@ LaserProjectionDataFilter::~LaserProjectionDataFilter()
 inline void
 LaserProjectionDataFilter::transform(const float angle, const float length,
                                      float& new_angle, float& new_length,
-                                     bool& too_low)
+                                     bool& in_robot_rect, bool& too_low)
 {
   HomPolar p = HomPolar(length, angle);
   // 1. Move the coordinate so that subsequent rotations are exactly like the
@@ -119,11 +179,13 @@ LaserProjectionDataFilter::transform(const float angle, const float length,
   }
   // 2. Rotate the coordinate system the same way it was rotated by the
   // fixtures.
-  p.rotate_z(-1.0f * deg2rad(Z_ROT));
-  p.rotate_y(-1.0f * deg2rad(Y_ROT));
-  p.rotate_x(-1.0f * deg2rad(X_ROT));
+  p.rotate_z(-1.0f * deg2rad(ROT.z));
+  p.rotate_y(-1.0f * deg2rad(ROT.y));
+  p.rotate_x(-1.0f * deg2rad(ROT.x));
   // 3. Translate to the position of the EDL laser.
-  p += HomVector(X_TRANS, Y_TRANS, Z_TRANS);
+  p += HomVector(TRANS.x, TRANS.y, TRANS.z);
+  in_robot_rect = ROBOT.x_min < p.x() && p.x() < ROBOT.x_max &&
+                  ROBOT.y_min < p.y() && p.y() < ROBOT.y_max;
   too_low = p.z() < Z_THRESHOLD;
   // 4. Cut z-coordinate.
   p.z() = 0.0f;
@@ -150,8 +212,13 @@ LaserProjectionDataFilter::filter()
       const float angle = deg2rad(static_cast<float>(i));
       float new_angle;
       float new_length;
+      bool in_robot_rect;
       bool too_low;
-      transform(angle, length, new_angle, new_length, too_low);
+      transform(angle, length, new_angle, new_length, in_robot_rect, too_low);
+      if (in_robot_rect) {
+        // skip readings that are within the X, Y coords of the robot
+        continue;
+      }
       if (too_low) {
         // skip readings that probably hit the ground
         continue;
