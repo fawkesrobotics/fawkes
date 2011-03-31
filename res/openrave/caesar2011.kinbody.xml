@@ -1,9 +1,11 @@
 <KinBody name="caesar_body">
 
   <Body name="caesar_base" type="dynamic">
+    <!--
     <Mass type="mimicgeom">
       <density>100</density>
     </Mass>
+    -->
 
     <Geom type="box">
       <DiffuseColor>0 0 0</DiffuseColor>
@@ -12,9 +14,11 @@
   </Body>
 
   <Body name="caesar_rack" type="dynamic">
+    <!--
     <Mass type="mimicgeom">
       <density>100</density>
     </Mass>
+    -->
 
     <!-- put caesar_rack on back of caesar_base -->
     <Translation>-0.15 0 0.3</Translation>
