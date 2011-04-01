@@ -63,10 +63,12 @@ KatanaGotoThreadOpenRAVE::KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katan
   KatanaGotoThread(katana, logger, poll_interval_ms),
   __OR_robot( 0 ),
   __OR_manip( 0 ),
+  __target_obj( "" ),
   __target_traj( 0 ),
   __cfg_robot_file( robot_file ),
   __cfg_autoload_IK( autoload_IK ),
   __cfg_use_viewer( use_viewer ),
+  __is_target_object( 0 ),
   _openrave( openrave )
 {
 }
@@ -90,6 +92,19 @@ KatanaGotoThreadOpenRAVE::set_target(float x, float y, float z,
   __phi   = (phi);
   __theta = (theta);
   __psi   = (psi);
+
+  __is_target_object = false;
+}
+
+/** Set target position.
+ * @param object_name name of the object (kinbody) in OpenRAVEEnvironment
+ */
+void
+KatanaGotoThreadOpenRAVE::set_target(const std::string& object_name)
+{
+  __target_object = object_name;
+
+  __is_target_object = true;
 }
 
 void
@@ -147,13 +162,25 @@ KatanaGotoThreadOpenRAVE::once()
   __OR_manip->set_angles_device(__motor_angles);
 
   // Checking if target has IK solution
-  _logger->log_debug(name(), "Check IK(%f,%f,%f, %f,%f,%f)",
+  if( __is_target_object) {
+    _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
+
+    if( !_openrave->set_target_object(__target_object, __OR_robot) ) {
+      _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
+      _finished = true;
+      _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
+      return;
+    }
+  }
+  else {
+    _logger->log_debug(name(), "Check IK(%f,%f,%f, %f,%f,%f)",
 		       __x, __y, __z, __phi, __theta, __psi);
-  if( !__OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi) ) {
-    _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
-    return;
+    if( !__OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi) ) {
+      _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
+      _finished = true;
+      _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
+      return;
+    }
   }
 
   // Run planner

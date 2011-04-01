@@ -54,6 +54,7 @@ class KatanaGotoThreadOpenRAVE : public KatanaGotoThread
   virtual void finalize();
 
   void set_target(float x, float y, float z, float phi, float theta, float psi);
+  void set_target(const std::string& object_name);
 
   virtual bool update_motor_data();
   virtual void move_katana();
@@ -62,6 +63,7 @@ class KatanaGotoThreadOpenRAVE : public KatanaGotoThread
   fawkes::OpenRAVERobot*                        __OR_robot;
   fawkes::OpenRAVEManipulatorKatana6M180*       __OR_manip;
 
+  std::string                                   __target_object;
   std::vector< std::vector<float> >*            __target_traj;
   std::vector< std::vector<float> >::iterator   __it;
 
@@ -71,6 +73,8 @@ class KatanaGotoThreadOpenRAVE : public KatanaGotoThread
   const std::string     __cfg_robot_file;
   bool                  __cfg_autoload_IK;
   bool                  __cfg_use_viewer;
+
+  bool                  __is_target_object;
 
   fawkes::OpenRAVEConnector*    _openrave;
 
