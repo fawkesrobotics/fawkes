@@ -82,6 +82,7 @@ fsm:add_transitions{
    {"DECIDE_MODE", "VELOCITY", "vars.velocity ~= nil", desc="max velocity", precond=true},
    {"DECIDE_MODE", "GOTO", "vars.x ~= nil and vars.y ~= nil and vars.z ~= nil",
     desc="goto parms", precond=true},
+   {"DECIDE_MODE", "GOTO_OBJECT", "vars.object ~= nil", desc="goto obj params", precond=true},
    {"DECIDE_MODE", "STOP", "vars.stop", precond=true},
    {"DECIDE_MODE", "PARK", "vars.park", precond=true},
    {"DECIDE_MODE", "GRIPPER", "vars.gripper", precond=true},
@@ -93,6 +94,7 @@ fsm:add_transitions{
    {"STOP", "CHECKERR", true},
    {"VELOCITY", "CHECKERR", true},
    {"GOTO", "CHECKERR", jc_arm_is_final, desc="final"},
+   {"GOTO_OBJECT", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GOTO", "FAILED", jc_next_msg, desc="next msg"},
    {"GRIPPER", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GRIPPER", "FAILED", jc_next_msg, desc="next msg"},
@@ -158,6 +160,15 @@ function GOTO:init()
    if self.fsm.vars.theta ~= nil then theta = self.fsm.vars.theta end
    if self.fsm.vars.psi   ~= nil then psi   = self.fsm.vars.psi end
    local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
+   self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+end
+
+function GOTO_OBJECT:init()
+   local rot_x = 0.0
+
+   if self.fsm.vars.rot_x  ~= nil then rot_x   = self.fsm.vars.rot_x end
+
+   local gm = katanaarm.ObjectGotoMessage:new(self.fsm.vars.object, rot_x)
    self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
 end
 
