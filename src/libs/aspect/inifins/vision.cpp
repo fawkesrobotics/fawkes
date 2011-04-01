@@ -72,6 +72,7 @@ VisionAspectIniFin::init(Thread *thread)
 					    thread->name());
     }
 
+    __master_inifin->add_vision_thread(vision_thread);
     vision_thread->init_VisionAspect(__master_inifin->vision_master());
   } catch (DependencyViolationException &e) {
     CannotInitializeThreadException ce("Dependency violation for "
