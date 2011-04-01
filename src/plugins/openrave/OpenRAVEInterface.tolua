@@ -29,6 +29,17 @@ class OpenRAVEInterface : public Interface
     int maxlenof_name() const;
   };
 
+  class AttachObjectMessage : public Message
+  {
+    AttachObjectMessage(char * ini_name);
+    AttachObjectMessage();
+    ~AttachObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+  };
+
   class MoveObjectMessage : public Message
   {
     MoveObjectMessage(char * ini_name, float ini_x, float ini_y, float ini_z);

@@ -54,10 +54,11 @@ OpenRAVEInterface::OpenRAVEInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "success", 1, &data->success);
   add_messageinfo("AddObjectMessage");
   add_messageinfo("DeleteObjectMessage");
+  add_messageinfo("AttachObjectMessage");
   add_messageinfo("MoveObjectMessage");
   add_messageinfo("RotateObjectMessage");
   add_messageinfo("RenameObjectMessage");
-  unsigned char tmp_hash[] = {0x60, 0x2, 0x7a, 0x54, 0x84, 0x87, 0x59, 0xd7, 0xd0, 0x3a, 0xfc, 0x31, 0x7f, 0x60, 0x8d, 0xe9};
+  unsigned char tmp_hash[] = {0x42, 0x33, 0x76, 0xfc, 0xac, 0x83, 0x18, 0x30, 0xc0, 0x7b, 0xc0, 0xee, 0x4b, 0x42, 0x23, 0xcc};
   set_hash(tmp_hash);
 }
 
@@ -207,6 +208,8 @@ OpenRAVEInterface::create_message(const char *type) const
     return new AddObjectMessage();
   } else if ( strncmp("DeleteObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new DeleteObjectMessage();
+  } else if ( strncmp("AttachObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new AttachObjectMessage();
   } else if ( strncmp("MoveObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new MoveObjectMessage();
   } else if ( strncmp("RotateObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -454,6 +457,96 @@ Message *
 OpenRAVEInterface::DeleteObjectMessage::clone() const
 {
   return new OpenRAVEInterface::DeleteObjectMessage(this);
+}
+/** @class OpenRAVEInterface::AttachObjectMessage <interfaces/OpenRAVEInterface.h>
+ * AttachObjectMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_name initial value for name
+ */
+OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_name) : Message("AttachObjectMessage")
+{
+  data_size = sizeof(AttachObjectMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AttachObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->name, ini_name, 30);
+  add_fieldinfo(IFT_STRING, "name", 30, data->name);
+}
+/** Constructor */
+OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage() : Message("AttachObjectMessage")
+{
+  data_size = sizeof(AttachObjectMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AttachObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "name", 30, data->name);
+}
+
+/** Destructor */
+OpenRAVEInterface::AttachObjectMessage::~AttachObjectMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage(const AttachObjectMessage *m) : Message("AttachObjectMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AttachObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get name value.
+ * Name of object
+ * @return name value
+ */
+char *
+OpenRAVEInterface::AttachObjectMessage::name() const
+{
+  return data->name;
+}
+
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRAVEInterface::AttachObjectMessage::maxlenof_name() const
+{
+  return 30;
+}
+
+/** Set name value.
+ * Name of object
+ * @param new_name new name value
+ */
+void
+OpenRAVEInterface::AttachObjectMessage::set_name(const char * new_name)
+{
+  strncpy(data->name, new_name, sizeof(data->name));
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+OpenRAVEInterface::AttachObjectMessage::clone() const
+{
+  return new OpenRAVEInterface::AttachObjectMessage(this);
 }
 /** @class OpenRAVEInterface::MoveObjectMessage <interfaces/OpenRAVEInterface.h>
  * MoveObjectMessage Fawkes BlackBoard Interface Message.
@@ -978,16 +1071,20 @@ OpenRAVEInterface::message_valid(const Message *message) const
   if ( m1 != NULL ) {
     return true;
   }
-  const MoveObjectMessage *m2 = dynamic_cast<const MoveObjectMessage *>(message);
+  const AttachObjectMessage *m2 = dynamic_cast<const AttachObjectMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const RotateObjectMessage *m3 = dynamic_cast<const RotateObjectMessage *>(message);
+  const MoveObjectMessage *m3 = dynamic_cast<const MoveObjectMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const RenameObjectMessage *m4 = dynamic_cast<const RenameObjectMessage *>(message);
+  const RotateObjectMessage *m4 = dynamic_cast<const RotateObjectMessage *>(message);
   if ( m4 != NULL ) {
+    return true;
+  }
+  const RenameObjectMessage *m5 = dynamic_cast<const RenameObjectMessage *>(message);
+  if ( m5 != NULL ) {
     return true;
   }
   return false;
