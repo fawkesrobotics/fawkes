@@ -101,7 +101,7 @@ OpenNiPointCloudThread::init()
   __width  = __depth_md->XRes();
   __height = __depth_md->YRes();
   float scale = __width / (float)XN_SXGA_X_RES;
-  __focal_length = ((float)zpd / pixel_size) * scale * 0.001;
+  __focal_length = ((float)zpd / pixel_size) * scale;
   __center_x = (__width  / 2.) - .5f;
   __center_y = (__height / 2.) - .5f;
   __plane_size = __width * __height;
@@ -140,6 +140,8 @@ OpenNiPointCloudThread::loop()
     float *yp = xp + __plane_size;
     float *zp = yp + __plane_size;
 
+    const float constant = 0.001 / __focal_length;
+
     unsigned int depth_idx = 0;
     for (unsigned int h = 0; h < __height; ++h) {
       for (unsigned int w = 0; w < __width; ++w, ++depth_idx) {
@@ -153,8 +155,8 @@ OpenNiPointCloudThread::loop()
 	} else {
 	  // Fill in XYZ
 	  *xp++ = data[depth_idx] * 0.001;
-	  *yp++ = -(w - __center_x) * data[depth_idx] * __focal_length * 0.001;
-	  *zp++ = -(h - __center_y) * data[depth_idx] * __focal_length * 0.001;
+	  *yp++ = -(w - __center_x) * data[depth_idx] * constant;
+	  *zp++ = -(h - __center_y) * data[depth_idx] * constant;
 	}
       }
     }
