@@ -165,12 +165,12 @@ class OpenRAVEConnector
   * @param name name of the object
   * @param robot pointer to OpenRAVERobot that object is released from
   */
-  virtual void release_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+  virtual bool release_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
 
   /** Release all grabbed kinbodys from the robot.
   * @param robot pointer to OpenRAVERobot that objects are released from
   */
-  virtual void release_all_objects(OpenRAVERobot* robot) = 0;
+  virtual bool release_all_objects(OpenRAVERobot* robot) = 0;
 
 };
 

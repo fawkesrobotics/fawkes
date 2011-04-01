@@ -259,42 +259,40 @@ OpenRAVEThread::set_target_object(const std::string& name, OpenRAVERobot* robot,
 /** Attach a kinbody to the robot.
  * @param name name of the object
  * @param robot pointer to OpenRAVERobot that object is attached to
- * @return true if IK solvable
+ * @return true if successfull
  */
 bool
 OpenRAVEThread::attach_object(const std::string& name, OpenRAVERobot* robot)
 {
-  OpenRAVE::KinBodyPtr body = __OR_env->get_env_ptr()->GetKinBody(name);
-
   if( !robot )
     { robot = __OR_robot; }
 
-  return robot->get_robot_ptr()->Grab(body);
+  return robot->attach_object(name, __OR_env);
 }
 
 /** Release a kinbody from the robot.
  * @param name name of the object
  * @param robot pointer to OpenRAVERobot that object is released from
+ * @return true if successfull
  */
-void
+bool
 OpenRAVEThread::release_object(const std::string& name, OpenRAVERobot* robot)
 {
-  OpenRAVE::KinBodyPtr body = __OR_env->get_env_ptr()->GetKinBody(name);
-
   if( !robot )
     { robot = __OR_robot; }
 
-  robot->get_robot_ptr()->Release(body);
+  return robot->release_object(name, __OR_env);
 }
 
 /** Release all grabbed kinbodys from the robot.
  * @param robot pointer to OpenRAVERobot that objects are released from
+ * @return true if successfull
  */
-void
+bool
 OpenRAVEThread::release_all_objects(OpenRAVERobot* robot)
 {
   if( !robot )
     { robot = __OR_robot; }
 
-  robot->get_robot_ptr()->ReleaseAllGrabbed();
+  return robot->release_all_objects();
 }
