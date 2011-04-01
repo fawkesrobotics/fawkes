@@ -281,6 +281,9 @@ OpenRAVERobot::set_target_object_position(float trans_x, float trans_y, float tr
   // This is about 2 times faster than using setTargetEuler each time, especially when it comes
   // to the while loop (whole loop: ~56ms vs ~99ms)
 
+  // release all attached/grabbed bodys
+  __robot->ReleaseAllGrabbed();
+
   // quaternion defining consecutiv rotations on axis
   float alpha = atan2(trans_y - __trans_offset_y, trans_x - __trans_offset_x);      //angle to rotate left/right when manipulator points to +x
   Vector quat_y = quatFromAxisAngle(Vector(0.f, M_PI/2, 0.f));           //1st, rotate down -> manipulator points to +x
