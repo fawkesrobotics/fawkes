@@ -336,6 +336,8 @@ KatanaActThread::loop()
         if(__cfg_OR_enabled)
           {__goto_openrave_thread->update_openrave_data();}
 #endif
+      update_position(/* refresh */ true);
+      update_motors(/* refresh */ true);
     }
   }
 
