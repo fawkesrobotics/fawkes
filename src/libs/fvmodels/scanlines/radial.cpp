@@ -321,7 +321,7 @@ ScanlineRadial::set_center(unsigned int center_x, unsigned int center_y)
 void
 ScanlineRadial::set_radius(unsigned int dead_radius, unsigned int max_radius)
 {
-  this->max_radius      = 0;
+  this->max_radius      = max_radius;
   this->dead_radius     = dead_radius;
   this->auto_max_radius = (max_radius == 0);
 
