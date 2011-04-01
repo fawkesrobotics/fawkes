@@ -123,9 +123,9 @@ KatanaGotoThreadOpenRAVE::init()
     __OR_manip->add_motor(5,4);
 
     // Set manipulator and offsets.
-    // offsetZ: katana.kinbody is 0.185 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
+    // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
     // offsetX: katana.kinbody is setup 0.0725 on +x axis
-    _openrave->set_manipulator(__OR_robot, __OR_manip, 0.0725f, 0.f, 0.3865f);
+    _openrave->set_manipulator(__OR_robot, __OR_manip, 0.0725f, 0.f, 0.3665f);
   } catch (fawkes::Exception& e) {
     // TODO: not just simple throw....
     throw;

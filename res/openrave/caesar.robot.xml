@@ -2,7 +2,7 @@
 <Robot name="caesar">
   <!--<KinBody prefix="arm_" file="katana.kinbody.xml"> -->
   <KinBody prefix="arm_" file="../../src/plugins/openrave/manipulators/katana.kinbody.xml">
-     <Translation>0.0725 0 0.185</Translation>
+     <Translation>0.0725 0 0.1725</Translation>
   </KinBody>
 
   <KinBody file="caesar2011.kinbody.xml">
