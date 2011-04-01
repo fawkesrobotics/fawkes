@@ -153,6 +153,13 @@ class OpenRAVEConnector
   * @return true if IK solvable
   */
   virtual bool set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x = 0) = 0;
+
+  /** Attach a kinbody to the robot.
+  * @param name name of the object
+  * @param robot pointer to OpenRAVERobot that the target is set for
+  * @return true if IK solvable
+  */
+  virtual bool attach_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
 };
 
 } // end namespace fawkes
