@@ -312,6 +312,19 @@ KatanaActThread::loop()
 		   msg->x(), msg->y(), msg->z(),
 		   msg->phi(), msg->theta(), msg->psi());
 
+#ifdef HAVE_OPENRAVE
+    } else if (__katana_if->msgq_first_is<KatanaInterface::ObjectGotoMessage>() && __cfg_OR_enabled) {
+      KatanaInterface::ObjectGotoMessage *msg = __katana_if->msgq_first(msg);
+
+      float rot_x = 0.f
+      if( msg->rot_x() )
+        { rot = msg->rot_x(); }
+
+      __goto_thread->set_target(msg->object(), rot_x);
+      start_motion(__goto_thread, msg->id(),
+		   "Linear movement to object (%s, %f)", msg->object(), msg->rot_x);
+#endif
+
     } else if (__katana_if->msgq_first_is<KatanaInterface::ParkMessage>()) {
       KatanaInterface::ParkMessage *msg = __katana_if->msgq_first(msg);
 
