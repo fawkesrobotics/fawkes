@@ -71,6 +71,7 @@ class OpenRAVEThread
   virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, fawkes::OpenRAVERobot* robot=NULL);
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
   virtual bool set_target_object(const std::string& name, fawkes::OpenRAVERobot* robot, float rot_x = 0);
+  virtual bool attach_object(const std::string& name, fawkes::OpenRAVERobot* robot=NULL);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

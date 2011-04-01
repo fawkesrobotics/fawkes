@@ -255,3 +255,19 @@ OpenRAVEThread::set_target_object(const std::string& name, OpenRAVERobot* robot,
 
   return robot->set_target_object_position(transform.trans[0], transform.trans[1], transform.trans[2], rot_x);
 }
+
+/** Attach a kinbody to the robot.
+ * @param name name of the object
+ * @param robot pointer to OpenRAVERobot that the target is set for
+ * @return true if IK solvable
+ */
+bool
+OpenRAVEThread::attach_object(const std::string& name, OpenRAVERobot* robot)
+{
+  OpenRAVE::KinBodyPtr body = __OR_env->get_env_ptr()->GetKinBody(name);
+
+  if( !robot )
+    { robot = __OR_robot; }
+
+  return robot->get_robot_ptr()->Grab(body);
+}
