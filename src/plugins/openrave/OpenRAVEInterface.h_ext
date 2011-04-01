@@ -144,6 +144,55 @@ class OpenRAVEInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class ReleaseObjectMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char name[30]; /**< Name of object */
+    } ReleaseObjectMessage_data_t;
+#pragma pack(pop)
+
+    ReleaseObjectMessage_data_t *data;
+
+   public:
+    ReleaseObjectMessage(const char * ini_name);
+    ReleaseObjectMessage();
+    ~ReleaseObjectMessage();
+
+    ReleaseObjectMessage(const ReleaseObjectMessage *m);
+    /* Methods */
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
+    virtual Message * clone() const;
+  };
+
+  class ReleaseAllObjectsMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ReleaseAllObjectsMessage_data_t;
+#pragma pack(pop)
+
+    ReleaseAllObjectsMessage_data_t *data;
+
+   public:
+    ReleaseAllObjectsMessage();
+    ~ReleaseAllObjectsMessage();
+
+    ReleaseAllObjectsMessage(const ReleaseAllObjectsMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   class MoveObjectMessage : public Message
   {
    private:

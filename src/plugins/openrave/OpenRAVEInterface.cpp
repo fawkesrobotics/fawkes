@@ -55,10 +55,12 @@ OpenRAVEInterface::OpenRAVEInterface() : Interface()
   add_messageinfo("AddObjectMessage");
   add_messageinfo("DeleteObjectMessage");
   add_messageinfo("AttachObjectMessage");
+  add_messageinfo("ReleaseObjectMessage");
+  add_messageinfo("ReleaseAllObjectsMessage");
   add_messageinfo("MoveObjectMessage");
   add_messageinfo("RotateObjectMessage");
   add_messageinfo("RenameObjectMessage");
-  unsigned char tmp_hash[] = {0x42, 0x33, 0x76, 0xfc, 0xac, 0x83, 0x18, 0x30, 0xc0, 0x7b, 0xc0, 0xee, 0x4b, 0x42, 0x23, 0xcc};
+  unsigned char tmp_hash[] = {0x5e, 0x34, 0xb9, 0xd9, 0x92, 0x45, 0x44, 0x88, 0xe2, 0xde, 0x4e, 0x92, 0xff, 0x37, 0x4a, 0x14};
   set_hash(tmp_hash);
 }
 
@@ -210,6 +212,10 @@ OpenRAVEInterface::create_message(const char *type) const
     return new DeleteObjectMessage();
   } else if ( strncmp("AttachObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new AttachObjectMessage();
+  } else if ( strncmp("ReleaseObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ReleaseObjectMessage();
+  } else if ( strncmp("ReleaseAllObjectsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ReleaseAllObjectsMessage();
   } else if ( strncmp("MoveObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new MoveObjectMessage();
   } else if ( strncmp("RotateObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -547,6 +553,142 @@ Message *
 OpenRAVEInterface::AttachObjectMessage::clone() const
 {
   return new OpenRAVEInterface::AttachObjectMessage(this);
+}
+/** @class OpenRAVEInterface::ReleaseObjectMessage <interfaces/OpenRAVEInterface.h>
+ * ReleaseObjectMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_name initial value for name
+ */
+OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage(const char * ini_name) : Message("ReleaseObjectMessage")
+{
+  data_size = sizeof(ReleaseObjectMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ReleaseObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->name, ini_name, 30);
+  add_fieldinfo(IFT_STRING, "name", 30, data->name);
+}
+/** Constructor */
+OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage() : Message("ReleaseObjectMessage")
+{
+  data_size = sizeof(ReleaseObjectMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ReleaseObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "name", 30, data->name);
+}
+
+/** Destructor */
+OpenRAVEInterface::ReleaseObjectMessage::~ReleaseObjectMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage(const ReleaseObjectMessage *m) : Message("ReleaseObjectMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ReleaseObjectMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get name value.
+ * Name of object
+ * @return name value
+ */
+char *
+OpenRAVEInterface::ReleaseObjectMessage::name() const
+{
+  return data->name;
+}
+
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRAVEInterface::ReleaseObjectMessage::maxlenof_name() const
+{
+  return 30;
+}
+
+/** Set name value.
+ * Name of object
+ * @param new_name new name value
+ */
+void
+OpenRAVEInterface::ReleaseObjectMessage::set_name(const char * new_name)
+{
+  strncpy(data->name, new_name, sizeof(data->name));
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+OpenRAVEInterface::ReleaseObjectMessage::clone() const
+{
+  return new OpenRAVEInterface::ReleaseObjectMessage(this);
+}
+/** @class OpenRAVEInterface::ReleaseAllObjectsMessage <interfaces/OpenRAVEInterface.h>
+ * ReleaseAllObjectsMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+OpenRAVEInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage() : Message("ReleaseAllObjectsMessage")
+{
+  data_size = sizeof(ReleaseAllObjectsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ReleaseAllObjectsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+OpenRAVEInterface::ReleaseAllObjectsMessage::~ReleaseAllObjectsMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+OpenRAVEInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage(const ReleaseAllObjectsMessage *m) : Message("ReleaseAllObjectsMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ReleaseAllObjectsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+OpenRAVEInterface::ReleaseAllObjectsMessage::clone() const
+{
+  return new OpenRAVEInterface::ReleaseAllObjectsMessage(this);
 }
 /** @class OpenRAVEInterface::MoveObjectMessage <interfaces/OpenRAVEInterface.h>
  * MoveObjectMessage Fawkes BlackBoard Interface Message.
@@ -1075,16 +1217,24 @@ OpenRAVEInterface::message_valid(const Message *message) const
   if ( m2 != NULL ) {
     return true;
   }
-  const MoveObjectMessage *m3 = dynamic_cast<const MoveObjectMessage *>(message);
+  const ReleaseObjectMessage *m3 = dynamic_cast<const ReleaseObjectMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const RotateObjectMessage *m4 = dynamic_cast<const RotateObjectMessage *>(message);
+  const ReleaseAllObjectsMessage *m4 = dynamic_cast<const ReleaseAllObjectsMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const RenameObjectMessage *m5 = dynamic_cast<const RenameObjectMessage *>(message);
+  const MoveObjectMessage *m5 = dynamic_cast<const MoveObjectMessage *>(message);
   if ( m5 != NULL ) {
+    return true;
+  }
+  const RotateObjectMessage *m6 = dynamic_cast<const RotateObjectMessage *>(message);
+  if ( m6 != NULL ) {
+    return true;
+  }
+  const RenameObjectMessage *m7 = dynamic_cast<const RenameObjectMessage *>(message);
+  if ( m7 != NULL ) {
     return true;
   }
   return false;

@@ -40,6 +40,24 @@ class OpenRAVEInterface : public Interface
     int maxlenof_name() const;
   };
 
+  class ReleaseObjectMessage : public Message
+  {
+    ReleaseObjectMessage(char * ini_name);
+    ReleaseObjectMessage();
+    ~ReleaseObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+  };
+
+  class ReleaseAllObjectsMessage : public Message
+  {
+    ReleaseAllObjectsMessage();
+    ~ReleaseAllObjectsMessage();
+
+  };
+
   class MoveObjectMessage : public Message
   {
     MoveObjectMessage(char * ini_name, float ini_x, float ini_y, float ini_z);

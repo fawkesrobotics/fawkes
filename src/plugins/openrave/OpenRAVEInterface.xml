@@ -33,6 +33,13 @@
     <comment>Attaches the object to the active robot</comment>
     <field type="string" length="30" name="name">Name of object</field>
   </message>
+  <message name="ReleaseObject">
+    <comment>Releases the object from the active robot</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+  </message>
+  <message name="ReleaseAllObjects">
+    <comment>Releases all grabbed objects from the active robot</comment>
+  </message>
   <message name="MoveObject">
     <comment>Move object in current environment.</comment>
     <field type="string" length="30" name="name">Name of object</field>
