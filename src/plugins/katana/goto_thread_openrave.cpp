@@ -63,7 +63,7 @@ KatanaGotoThreadOpenRAVE::KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katan
   KatanaGotoThread(katana, logger, poll_interval_ms),
   __OR_robot( 0 ),
   __OR_manip( 0 ),
-  __target_obj( "" ),
+  __target_object( "" ),
   __target_traj( 0 ),
   __cfg_robot_file( robot_file ),
   __cfg_autoload_IK( autoload_IK ),
@@ -100,7 +100,7 @@ KatanaGotoThreadOpenRAVE::set_target(float x, float y, float z,
  * @param object_name name of the object (kinbody) in OpenRAVEEnvironment
  */
 void
-KatanaGotoThreadOpenRAVE::set_target(const std::string& object_name)
+KatanaGotoThreadOpenRAVE::set_target(const std::string& object_name, float rot_x)
 {
   __target_object = object_name;
 

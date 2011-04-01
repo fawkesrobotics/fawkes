@@ -25,6 +25,8 @@
 
 #include "motion_thread.h"
 
+#include <string>
+
 class KatanaGotoThread : public KatanaMotionThread
 {
  public:
@@ -32,6 +34,7 @@ class KatanaGotoThread : public KatanaMotionThread
 		   unsigned int poll_interval_ms);
 
   virtual void set_target(float x, float y, float z, float phi, float theta, float psi);
+  virtual void set_target(const std::string& object_name, float rot_x);
 
   virtual void once();
   virtual void init();
