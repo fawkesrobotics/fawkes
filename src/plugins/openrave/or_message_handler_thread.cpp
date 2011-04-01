@@ -94,6 +94,12 @@ OpenRAVEMessageHandlerThread::loop()
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
+    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::AttachObjectMessage>()) {
+      OpenRAVEInterface::AttachObjectMessage *msg = __if_openrave->msgq_first(msg);
+      if( __or_thread->attach_object(msg->name()) )
+        { __if_openrave->set_success(true); }
+      __if_openrave->set_final(true);
+
     } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::MoveObjectMessage>()) {
       OpenRAVEInterface::MoveObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->move_object(msg->name(), msg->x(), msg->y(), msg->z()) )
