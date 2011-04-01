@@ -111,12 +111,13 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("FlushMessage");
   add_messageinfo("ParkMessage");
   add_messageinfo("LinearGotoMessage");
+  add_messageinfo("ObjectGotoMessage");
   add_messageinfo("CalibrateMessage");
   add_messageinfo("OpenGripperMessage");
   add_messageinfo("CloseGripperMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetMaxVelocityMessage");
-  unsigned char tmp_hash[] = {0x36, 0x80, 0x78, 0x4, 0x9f, 0x14, 0x1b, 0x27, 0x38, 0x40, 0x77, 0xb6, 0xc0, 0x7, 0xe, 0x73};
+  unsigned char tmp_hash[] = {0x83, 0x59, 0x8c, 0xee, 0x42, 0x33, 0x69, 0x6f, 0xb9, 0xd7, 0xa5, 0x73, 0x71, 0x86, 0x92, 0xd};
   set_hash(tmp_hash);
 }
 
@@ -618,6 +619,8 @@ KatanaInterface::create_message(const char *type) const
     return new ParkMessage();
   } else if ( strncmp("LinearGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new LinearGotoMessage();
+  } else if ( strncmp("ObjectGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ObjectGotoMessage();
   } else if ( strncmp("CalibrateMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new CalibrateMessage();
   } else if ( strncmp("OpenGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1060,6 +1063,130 @@ KatanaInterface::LinearGotoMessage::clone() const
 {
   return new KatanaInterface::LinearGotoMessage(this);
 }
+/** @class KatanaInterface::ObjectGotoMessage <interfaces/KatanaInterface.h>
+ * ObjectGotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_object initial value for object
+ * @param ini_rot_x initial value for rot_x
+ */
+KatanaInterface::ObjectGotoMessage::ObjectGotoMessage(const char * ini_object, const float ini_rot_x) : Message("ObjectGotoMessage")
+{
+  data_size = sizeof(ObjectGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ObjectGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->object, ini_object, 32);
+  data->rot_x = ini_rot_x;
+  add_fieldinfo(IFT_STRING, "object", 32, data->object);
+  add_fieldinfo(IFT_FLOAT, "rot_x", 1, &data->rot_x);
+}
+/** Constructor */
+KatanaInterface::ObjectGotoMessage::ObjectGotoMessage() : Message("ObjectGotoMessage")
+{
+  data_size = sizeof(ObjectGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ObjectGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "object", 32, data->object);
+  add_fieldinfo(IFT_FLOAT, "rot_x", 1, &data->rot_x);
+}
+
+/** Destructor */
+KatanaInterface::ObjectGotoMessage::~ObjectGotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::ObjectGotoMessage::ObjectGotoMessage(const ObjectGotoMessage *m) : Message("ObjectGotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ObjectGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get object value.
+ * Name of object
+ * @return object value
+ */
+char *
+KatanaInterface::ObjectGotoMessage::object() const
+{
+  return data->object;
+}
+
+/** Get maximum length of object value.
+ * @return length of object value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::ObjectGotoMessage::maxlenof_object() const
+{
+  return 32;
+}
+
+/** Set object value.
+ * Name of object
+ * @param new_object new object value
+ */
+void
+KatanaInterface::ObjectGotoMessage::set_object(const char * new_object)
+{
+  strncpy(data->object, new_object, sizeof(data->object));
+}
+
+/** Get rot_x value.
+ * Rotation of object on its x-axis
+ * @return rot_x value
+ */
+float
+KatanaInterface::ObjectGotoMessage::rot_x() const
+{
+  return data->rot_x;
+}
+
+/** Get maximum length of rot_x value.
+ * @return length of rot_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::ObjectGotoMessage::maxlenof_rot_x() const
+{
+  return 1;
+}
+
+/** Set rot_x value.
+ * Rotation of object on its x-axis
+ * @param new_rot_x new rot_x value
+ */
+void
+KatanaInterface::ObjectGotoMessage::set_rot_x(const float new_rot_x)
+{
+  data->rot_x = new_rot_x;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::ObjectGotoMessage::clone() const
+{
+  return new KatanaInterface::ObjectGotoMessage(this);
+}
 /** @class KatanaInterface::CalibrateMessage <interfaces/KatanaInterface.h>
  * CalibrateMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1401,24 +1528,28 @@ KatanaInterface::message_valid(const Message *message) const
   if ( m3 != NULL ) {
     return true;
   }
-  const CalibrateMessage *m4 = dynamic_cast<const CalibrateMessage *>(message);
+  const ObjectGotoMessage *m4 = dynamic_cast<const ObjectGotoMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const OpenGripperMessage *m5 = dynamic_cast<const OpenGripperMessage *>(message);
+  const CalibrateMessage *m5 = dynamic_cast<const CalibrateMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const CloseGripperMessage *m6 = dynamic_cast<const CloseGripperMessage *>(message);
+  const OpenGripperMessage *m6 = dynamic_cast<const OpenGripperMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetEnabledMessage *m7 = dynamic_cast<const SetEnabledMessage *>(message);
+  const CloseGripperMessage *m7 = dynamic_cast<const CloseGripperMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const SetMaxVelocityMessage *m8 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  const SetEnabledMessage *m8 = dynamic_cast<const SetEnabledMessage *>(message);
   if ( m8 != NULL ) {
+    return true;
+  }
+  const SetMaxVelocityMessage *m9 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  if ( m9 != NULL ) {
     return true;
   }
   return false;

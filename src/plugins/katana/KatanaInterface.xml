@@ -120,6 +120,11 @@
     <ref>theta</ref>
     <ref>psi</ref>
   </message>
+  <message name="ObjectGoto">
+    <comment>States the next target object to navigate to with OpenRAVE support</comment>
+    <field type="string" length="32" name="object">Name of object</field>
+    <field type="float" name="rot_x">Rotation of object on its x-axis</field>
+  </message>
   <message name="Calibrate">
     <comment>Start calibration routine.</comment>
   </message>
