@@ -160,6 +160,18 @@ class OpenRAVEConnector
   * @return true if IK solvable
   */
   virtual bool attach_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+
+  /** Release a kinbody from the robot.
+  * @param name name of the object
+  * @param robot pointer to OpenRAVERobot that object is released from
+  */
+  virtual void release_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+
+  /** Release all grabbed kinbodys from the robot.
+  * @param robot pointer to OpenRAVERobot that objects are released from
+  */
+  virtual void release_all_objects(OpenRAVERobot* robot) = 0;
+
 };
 
 } // end namespace fawkes
