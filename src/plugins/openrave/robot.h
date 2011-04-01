@@ -28,7 +28,6 @@
 #include <rave/rave.h>
 #include <vector>
 
-
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -54,6 +53,11 @@ class OpenRAVERobot
   virtual void set_manipulator(fawkes::OpenRAVEManipulator* manip);
   virtual void update_manipulator(); // not needed
 
+  virtual bool attach_object(OpenRAVE::KinBodyPtr object);
+  virtual bool attach_object(const std::string& name, fawkes::OpenRAVEEnvironment* env);
+  virtual bool release_object(OpenRAVE::KinBodyPtr object);
+  virtual bool release_object(const std::string& name, fawkes::OpenRAVEEnvironment* env);
+  virtual bool release_all_objects();
 
   virtual bool set_target_quat	 (float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
   virtual bool set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset = false);

@@ -400,6 +400,89 @@ OpenRAVERobot::get_trajectory_device() const
 }
 
 
+
+/* ###### attach / release kinbodys ###### */
+/** Attach a kinbody to the robot.
+ * @param object KinbodyPtr of object to be attached
+ * @return true if successful
+ */
+bool
+OpenRAVERobot::attach_object(OpenRAVE::KinBodyPtr object)
+{
+  bool success = false;
+  try{
+    success = __robot->Grab(object);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Robot", "Could not attach Object. Ex:%s", e.what());
+    return false;
+  }
+
+  return success;
+}
+/** Attach a kinbody to the robot.
+ * @param name name of the object
+ * @param env pointer to OpenRAVEEnvironment object
+ * @return true if successful
+ */
+bool
+OpenRAVERobot::attach_object(const std::string& name, fawkes::OpenRAVEEnvironment* env)
+{
+  OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
+
+  return attach_object(body);
+}
+
+/** Release a kinbody from the robot.
+ * @param object KinbodyPtr of object to be released
+ * @return true if successful
+ */
+bool
+OpenRAVERobot::release_object(OpenRAVE::KinBodyPtr object)
+{
+  try{
+    __robot->Release(object);
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Robot", "Could not release Object. Ex:%s", e.what());
+    return false;
+  }
+
+  return true;
+}
+/** Release a kinbody from the robot.
+ * @param name name of the object
+ * @param env pointer to OpenRAVEEnvironment object
+ * @return true if successful
+ */
+bool
+OpenRAVERobot::release_object(const std::string& name, fawkes::OpenRAVEEnvironment* env)
+{
+  OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
+
+  return release_object(body);
+}
+
+/** Release all grabbed kinbodys from the robot.
+ * @return true if successful
+ */
+bool
+OpenRAVERobot::release_all_objects()
+{
+  try{
+    __robot->ReleaseAllGrabbed();
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Robot", "Could not release all objects. Ex:%s", e.what());
+    return false;
+  }
+
+  return true;
+}
+
+
+
+
 /* ########################################
    ###------------- private ------------###
    ########################################*/
