@@ -86,8 +86,8 @@ class ROI {
   void         set_pixel_step(unsigned int step);
   unsigned int get_pixel_step() const;
 
-  hint_t       get_hint() const;
-  void         set_hint(hint_t hint);
+  unsigned int get_hint() const;
+  void         set_hint(unsigned int);
 
   bool         contains(unsigned int x, unsigned int y);
 
@@ -129,7 +129,10 @@ class ROI {
   /** pixel step */
   unsigned int pixel_step;
   /** ROI hint */
-  hint_t       hint;
+  unsigned int hint;
+
+  /** ROI primary color */
+  color_t      color;
 
   /** Minimum estimate of points in ROI that are attributed to the ROI hint */
   unsigned int num_hint_points;
