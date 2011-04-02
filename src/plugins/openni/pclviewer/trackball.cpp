@@ -69,6 +69,7 @@ _tbPointToVector(int x, int y, int width, int height, float v[3])
 static void
 _tbAnimate(void)
 {
+  tb_original_idle_func();
   glutPostRedisplay();
 }
 
