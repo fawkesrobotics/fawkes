@@ -60,13 +60,19 @@ SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
                                              unsigned int box_extent,
                                              bool upward,
                                              unsigned int neighbourhood_min_match,
-                                             unsigned int grow_by)
-: Classifier("SimpleColorClassifier")
+                                             unsigned int grow_by,
+					     color_t color)
+  : Classifier("SimpleColorClassifier"),
+    color(color)
 {
-  if (!scanline_model)
-    throw fawkes::NullPointerException("SimpleColorClassifier: scanline_model may not be NULL");
-  if (!color_model)
-    throw fawkes::NullPointerException("SimpleColorClassifier: color_model may not be NULL");
+  if (scanline_model == NULL) {
+    throw fawkes::NullPointerException("SimpleColorClassifier: scanline_model "
+				       "may not be NULL");
+  }
+  if (color_model == NULL) {
+    throw fawkes::NullPointerException("SimpleColorClassifier: color_model "
+				       "may not be NULL");
+  }
 
   modified = false;
   this->scanline_model = scanline_model;
@@ -76,29 +82,6 @@ SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
   this->upward = upward;
   this->grow_by = grow_by;
   this->neighbourhood_min_match = neighbourhood_min_match;
-  set_hint(H_BALL);
-}
-
-
-/** Sets the object of interest (hint_t)
- * This function clears the current list of objects of interests
- * @param hint Object of interest
- */
-void
-SimpleColorClassifier::set_hint (hint_t hint)
-{
-  colors_of_interest.clear();
-  colors_of_interest.push_back(ColorObjectMap::get_instance().get(hint));
-}
-
-/** Adds another object of interest (hint_t)
- * @param hint Object of interest
- */
-void
-SimpleColorClassifier::add_hint (hint_t hint)
-{
-  colors_of_interest.push_back(ColorObjectMap::get_instance().get(hint));
-  colors_of_interest.unique();
 }
 
 
@@ -157,15 +140,9 @@ SimpleColorClassifier::classify()
   }
 
 
-  std::list< ROI > *rv;
+  std::list< ROI > *rv = new std::list< ROI >();
   std::list< ROI >::iterator roi_it, roi_it2;
   color_t c;
-  std::map<color_t, std::list< ROI > > to_be_considered;
-  std::map<color_t, std::list< ROI > >::iterator tbc_it;
-
-  for (std::list<color_t>::const_iterator it = colors_of_interest.begin(); it != colors_of_interest.end(); ++it) {
-    to_be_considered[*it];
-  }
 
   unsigned int  x = 0, y = 0;
   unsigned char yp = 0, up = 0, vp = 0;
@@ -181,32 +158,19 @@ SimpleColorClassifier::classify()
 
     YUV422_PLANAR_YUV(_src, _width, _height, x, y, yp, up, vp);
 
-    /*
-     cout << "SimpleColorClassifier: Checking at ("
-                                                  << x
-                                                  << ","
-                                                  << y
-                                                  << ") "
-                                                    << " with color Y=" << (int)macro_pixel[y_pos]
-                                                    << "  U=" << (int)macro_pixel[0]
-                                                    << "  V=" << (int)macro_pixel[2]
-                                                    << endl;
-                                                    */
-
     c = color_model->determine(yp,up, vp);
 
-    if ((tbc_it = to_be_considered.find(c)) != to_be_considered.end()) {
-      rv = &tbc_it->second;
+    if (color == c) {
       // Yeah, found a ball, make it big and name it a ROI
       // Note that this may throw out a couple of ROIs for just one ball,
       // as the name suggests this one is really ABSOLUTELY simple and not
       // useful for anything else than quick testing
 
       if (neighbourhood_min_match) {
-        num_what = consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
+        num_what =
+	  consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
       }
       if (num_what >= neighbourhood_min_match) {
-
         bool ok = false;
 
         for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
@@ -249,7 +213,8 @@ SimpleColorClassifier::classify()
           if (to_y > _height) to_y = _height;
           r.width = to_x - r.start.x;
           r.height = to_y - r.start.y;
-          r.hint = ColorObjectMap::get_instance().get(c);
+          r.hint = c;
+	  r.color = c;
 
           r.line_step = _width;
           r.pixel_step = 1;
@@ -274,64 +239,53 @@ SimpleColorClassifier::classify()
 
   // Grow regions
   if (grow_by > 0) {
-    for (tbc_it = to_be_considered.begin(); tbc_it != to_be_considered.end(); ++tbc_it) {
-      rv = &tbc_it->second;
-
-      for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-        (*roi_it).grow( grow_by );
-      }
+    for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+      (*roi_it).grow( grow_by );
     }
   }
 
-  //bool restart = false;
   // Merge neighbouring regions
-  for (tbc_it = to_be_considered.begin(); tbc_it != to_be_considered.end(); ++tbc_it) {
-    rv = &tbc_it->second;
+  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+    roi_it2 = roi_it;
+    ++roi_it2;
 
-    for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-      roi_it2 = roi_it;//rv->begin();
-      ++roi_it2;
-
-      while ( roi_it2 != rv->end() ) {
-        if ((roi_it != roi_it2) && roi_it->neighbours(&(*roi_it2), scanline_model->get_margin())) {
-          *roi_it += *roi_it2;
-          rv->erase(roi_it2);
-          roi_it2 = rv->begin(); //restart
-        } else {
-          ++roi_it2;
-        }
+    while ( roi_it2 != rv->end() ) {
+      if ((roi_it != roi_it2) &&
+	  roi_it->neighbours(&(*roi_it2), scanline_model->get_margin()))
+      {
+	*roi_it += *roi_it2;
+	rv->erase(roi_it2);
+	roi_it2 = rv->begin(); //restart
+      } else {
+	++roi_it2;
       }
     }
   }
 
-  std::list< ROI > *result = new std::list< ROI >;
-  for (tbc_it = to_be_considered.begin(); tbc_it != to_be_considered.end(); ++tbc_it) {
-    rv = &tbc_it->second;
-
-    // Throw away all ROIs that have not enough classified points
-    for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-      while ( (roi_it != rv->end()) &&
-             ((*roi_it).num_hint_points < min_num_points )) {
-               roi_it = rv->erase( roi_it );
-             }
+  // Throw away all ROIs that have not enough classified points
+  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+    while ( (roi_it != rv->end()) &&
+	    ((*roi_it).num_hint_points < min_num_points ))
+    {
+      roi_it = rv->erase( roi_it );
     }
-
-    // sort ROIs by number of hint points, descending (and thus call reverse)
-    rv->sort();
-    rv->reverse();
-    result->merge(*rv);
   }
 
-  return result;
+  // sort ROIs by number of hint points, descending (and thus call reverse)
+  rv->sort();
+  rv->reverse();
+
+  return rv;
 }
 
 
-/** Get mass point of ball.
+/** Get mass point of primary color.
  * @param roi ROI to consider
  * @param massPoint contains mass point upon return
  */
 void
-SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPoint )
+SimpleColorClassifier::get_mass_point_of_color( ROI *roi,
+						fawkes::point_t *massPoint )
 {
   unsigned int nrOfOrangePixels;
   nrOfOrangePixels = 0;
@@ -352,16 +306,16 @@ SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPo
   unsigned char *lup  = up;
   unsigned char *lvp  = vp;
 
-  color_t color;
+  color_t dcolor;
 
   // consider each ROI pixel
   for (h = 0; h < roi->height; ++h) {
     for (w = 0; w < roi->width; w += 2) {
       // classify its color
-      color = color_model->determine(*yp++, *up++, *vp++);
+      dcolor = color_model->determine(*yp++, *up++, *vp++);
       yp++;
       // ball pixel?
-      if (color == ColorObjectMap::get_instance().get(roi->hint)) {
+      if (color == dcolor) {
         // take into account its coordinates
         massPoint->x += w;
         massPoint->y += h;

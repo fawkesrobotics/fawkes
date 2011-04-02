@@ -25,6 +25,7 @@
 #define __FIREVISION_CLASSIFIERS_SIMPLE_H_
 
 #include <fvclassifiers/classifier.h>
+#include <fvutils/base/types.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -43,18 +44,12 @@ class SimpleColorClassifier : public Classifier
 			unsigned int box_extent = 50,
 			bool upward = false,
 			unsigned int neighbourhood_min_match = 8,
-			unsigned int grow_by = 10                );
+			unsigned int grow_by = 10,
+			color_t color = C_ORANGE);
 
   virtual std::list< ROI > * classify();
 
-  virtual void get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPoint );
-
-  /** Sets the object of interest (hint_t)
-   * @param hint Object of interest
-   */
-  virtual void set_hint (hint_t hint);
-  virtual void add_hint (hint_t hint);
-
+  virtual void get_mass_point_of_color(ROI *roi, fawkes::point_t *massPoint);
  private:
   unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
 
@@ -75,7 +70,7 @@ class SimpleColorClassifier : public Classifier
   ScanlineModel *scanline_model;
   ColorModel    *color_model;
 
-  std::list<color_t> colors_of_interest;
+  const color_t  color;
 };
 
 } // end namespace firevision
