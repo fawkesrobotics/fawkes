@@ -50,7 +50,7 @@ class OpenRAVERobot
   virtual void set_ready();
   virtual void set_offset(float trans_x, float trans_y, float trans_z);
   virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
-  virtual void set_manipulator(fawkes::OpenRAVEManipulator* manip);
+  virtual void set_manipulator(fawkes::OpenRAVEManipulator* manip, bool display_movements = false);
   virtual void update_manipulator();
   virtual void update_model();
 
@@ -73,6 +73,7 @@ class OpenRAVERobot
   virtual std::vector< std::vector<float> >* get_trajectory() const;
   virtual std::vector< std::vector<float> >* get_trajectory_device() const;
 
+  virtual bool display_planned_movements() const;
  private:
   void init();
   bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset = false);
@@ -93,6 +94,8 @@ class OpenRAVERobot
   float         __trans_offset_x;
   float         __trans_offset_y;
   float         __trans_offset_z;
+
+  bool          __display_planned_movements;
 };
 
 } // end of namespace fawkes

@@ -159,12 +159,16 @@ OpenRAVERobot::calibrate(float device_trans_x, float device_trans_y, float devic
  *  Make sure this is called AFTER all manipulator settings have
  *  been set (assures that __manip_goal has the same settings).
  * @param manip pointer to OpenRAVEManipulator object
+ * @param display_movements true, if movements should be displayed in viewer.
+ *  Better be "false" if want to sync OpenRAVE models with device
  */
 void
-OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip)
+OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip, bool display_movements)
 {
   __manip = manip;
   __manip_goal = new OpenRAVEManipulator(*__manip);
+
+  __display_planned_movements = display_movements;
 }
 
 /** Update motor values from OpenRAVE model.
@@ -184,6 +188,15 @@ OpenRAVERobot::update_model()
   std::vector<float> angles;
   __manip->get_angles(angles);
   __robot->SetActiveDOFValues(angles);
+}
+
+/** Getter for __display_planned_movements.
+ * @return return value
+ */
+bool
+OpenRAVERobot::display_planned_movements() const
+{
+  return __display_planned_movements;
 }
 
 /** Set target, given transition, and rotation as quaternion.

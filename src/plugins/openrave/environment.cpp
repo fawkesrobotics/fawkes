@@ -248,7 +248,7 @@ OpenRAVEEnvironment::run_planner(OpenRAVERobot* robot)
   }
 
   // display motion in viewer
-  if( __viewer_enabled )
+  if( __viewer_enabled && robot->display_planned_movements())
     {robot->get_robot_ptr()->SetActiveMotion(traj);}
 }
 
