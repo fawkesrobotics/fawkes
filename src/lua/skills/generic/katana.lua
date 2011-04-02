@@ -159,8 +159,18 @@ function GOTO:init()
    if self.fsm.vars.phi   ~= nil then phi   = self.fsm.vars.phi end
    if self.fsm.vars.theta ~= nil then theta = self.fsm.vars.theta end
    if self.fsm.vars.psi   ~= nil then psi   = self.fsm.vars.psi end
-   local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
-   self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+
+   -- check if distances are too high (means they are in libkni coordinate system)
+   if math.abs(x) > 5 or
+      math.abs(y) > 5 or
+      math.abs(z) > 5 then
+
+      local gm = katanaarm.LinearGotoKniMessage:new(x, y, z, phi, theta, psi)
+      self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+   else
+      local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
+      self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+   end
 end
 
 function GOTO_OBJECT:init()
