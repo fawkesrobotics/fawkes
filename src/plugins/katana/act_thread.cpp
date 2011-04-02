@@ -294,6 +294,11 @@ KatanaActThread::loop()
       __actmot_thread = NULL;
       logger->log_debug(name(), "Motion thread collected");
       __sensacq_thread->set_enabled(true);
+
+#ifdef HAVE_OPENRAVE
+        if(__cfg_OR_enabled)
+          {__goto_thread->update_openrave_data();}
+#endif
     }
   }
 
@@ -350,6 +355,10 @@ KatanaActThread::loop()
 	  logger->log_debug(name(), "Turning ON the arm");
 	  __katana->switchRobotOn();
 	  update_position(/* refresh */ true);
+#ifdef HAVE_OPENRAVE
+	    if(__cfg_OR_enabled)
+	      {__goto_thread->update_openrave_data();}
+#endif
 	} else {
 	  logger->log_debug(name(), "Turning OFF the arm");
 	  __katana->switchRobotOff();
