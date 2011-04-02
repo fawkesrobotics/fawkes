@@ -206,9 +206,11 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
 
   __wait_mutex->lock();
   __fnc->enqueue(omsg);
-  while (! __m ||
-	 ((__m->msgid() != MSG_BB_OPEN_SUCCESS) &&
-	  (__m->msgid() != MSG_BB_OPEN_FAILURE))) {
+  while (is_alive() &&
+	 (! __m ||
+	   ((__m->msgid() != MSG_BB_OPEN_SUCCESS) &&
+	   (__m->msgid() != MSG_BB_OPEN_FAILURE))))
+  {
     if ( __m ) {
       __m->unref();
       __m = NULL;
@@ -216,6 +218,11 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
     __wait_cond->wait();
   }
   __wait_mutex->unlock();
+
+  if (!is_alive()) {
+    throw Exception("Connection died while trying to open %s::%s",
+		    type, identifier);
+  }
 
   if ( __m->msgid() == MSG_BB_OPEN_SUCCESS ) {
     // We got the interface, create internal storage and prepare instance for return
@@ -551,6 +558,7 @@ RemoteBlackBoard::connection_died(unsigned int id) throw()
   }
   __proxies.clear();
   __proxies.unlock();
+  __wait_cond->wake_all();
 }
 
 
