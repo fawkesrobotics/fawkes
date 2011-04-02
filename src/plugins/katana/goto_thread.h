@@ -36,6 +36,9 @@ class KatanaGotoThread : public KatanaMotionThread
   virtual void set_target(float x, float y, float z, float phi, float theta, float psi);
   virtual void set_target(const std::string& object_name, float rot_x);
 
+  // adding such that derivinv class KatanaGotoThreadOpenRAVE does not fail
+  virtual void update_openrave_data();
+
   virtual void once();
   virtual void init();
   virtual void finalize();

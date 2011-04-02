@@ -214,6 +214,26 @@ KatanaGotoThreadOpenRAVE::once()
 }
 
 
+/** Update data of arm in OpenRAVE model */
+void
+KatanaGotoThreadOpenRAVE::update_openrave_data()
+{
+  // Fetch motor encoder values
+  if( !update_motor_data() ) {
+    _logger->log_warn("KatanaGotoThread", "Fetching current motor values failed");
+    _finished = true;
+    return;
+  }
+
+  // Convert encoder values to angles, and set starting point for planner
+  encToRad(__motor_encoders, __motor_angles);
+  __OR_manip->set_angles_device(__motor_angles);
+
+  std::vector<float> angles;
+  __OR_manip->get_angles(angles);
+
+  __OR_robot->get_robot_ptr()->SetActiveDOFValues(angles);
+}
 
 /** Update motors and fetch current encoder values.
  * @return true if succesful, false otherwise
