@@ -291,8 +291,8 @@ YuvColormap::operator+=(const Colormap & cmlt)
 Colormap &
 YuvColormap::operator=(const YuvColormap & yuvcm)
 {
-  if ( __depth != yuvcm.__depth ) {
-    throw TypeMismatchException("Depth of colormaps does not match");
+  if ( __lut_size != yuvcm.__lut_size ) {
+    throw TypeMismatchException("Size of colormaps does not match");
   }
 
   memcpy(__lut, yuvcm.__lut, __lut_size);
@@ -353,6 +353,21 @@ unsigned int
 YuvColormap::plane_size() const
 {
   return __plane_size;
+}
+
+
+/** Replace a given color with another one.
+ * @param from color to replace
+ * @param to color to replace @p from with
+ */
+void
+YuvColormap::replace_color(color_t from, color_t to)
+{
+  unsigned char *this_lut = __lut;
+
+  for (unsigned int i = 0; i < __plane_size * __depth; ++i, ++this_lut) {
+    if (*this_lut == from)  *this_lut = to;
+  }
 }
 
 } // end namespace firevision
