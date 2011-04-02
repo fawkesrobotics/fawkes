@@ -37,7 +37,13 @@ LIBS_openni_pointcloud = fawkescore fawkesutils fawkesaspects  fawkesopenniaspec
 			 fvutils fawkesopenniutils
 OBJS_openni_pointcloud = pointcloud_plugin.o pointcloud_thread.o
 
-OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image) $(OBJS_openni_pointcloud)
+LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+			  fawkesinterface fawkesopenniaspect fawkesopenniutils \
+			  fvutils ObjectPositionInterface
+OBJS_openni_handtracker = handtracker_plugin.o handtracker_thread.o
+
+OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image) \
+	   $(OBJS_openni_pointcloud) $(OBJS_openni_handtracker)
 
 ifeq ($(HAVE_OPENNI),1)
   PRESUBDIRS += aspect utils
@@ -46,6 +52,7 @@ ifeq ($(HAVE_OPENNI),1)
   LDFLAGS += $(LDFLAGS_OPENNI)
   PLUGINS_all = $(PLUGINDIR)/openni.so \
 		$(PLUGINDIR)/openni-usertracker.so \
+		$(PLUGINDIR)/openni-handtracker.so \
 		$(PLUGINDIR)/openni-image.so \
 		$(PLUGINDIR)/openni-pointcloud.so
 else

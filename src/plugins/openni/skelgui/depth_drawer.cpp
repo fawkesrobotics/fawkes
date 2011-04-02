@@ -88,7 +88,6 @@ SkelGuiDepthDrawer::fill_texture()
     throw;
   }
 
-  uint16_t *label = (uint16_t *)__label_cam->buffer();
   uint16_t *depth = (uint16_t *)__depth_cam->buffer();
   unsigned int num_points = 0;
   memset(__histogram, 0, __max_depth * sizeof(float));
@@ -153,7 +152,6 @@ SkelGuiDepthDrawer::fill_texture()
 
   copy_rgb_to_texture(__rgb_buf);
 
-  __label_cam->dispose_buffer();
   __depth_cam->dispose_buffer();
 }
 

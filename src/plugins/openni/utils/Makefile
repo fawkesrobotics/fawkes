@@ -22,7 +22,7 @@ include $(SRCDIR)/../openni.mk
 CFLAGS  += $(CFLAGS_OPENNI)
 LDFLAGS += $(LDFLAGS_OPENNI)
 
-LIBS_libfawkesopenniutils = stdc++ fawkescore fawkesaspects fawkesutils
+LIBS_libfawkesopenniutils = stdc++ m fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesopenniutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesopenniutils)

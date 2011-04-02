@@ -23,6 +23,8 @@
 #include "skel_drawer.h"
 #include "colors.h"
 
+#include <utils/math/angle.h>
+
 #include <cstring>
 #include <cstdio>
 #include <GL/glut.h>
@@ -37,9 +39,10 @@ using namespace fawkes;
 
 /** Constructor.
  * @param users map of users shared with interface observer
+ * @param hands map of hands shared with interface observer
  */
-SkelGuiSkeletonDrawer::SkelGuiSkeletonDrawer(UserMap &users)
-  : __users(users)
+SkelGuiSkeletonDrawer::SkelGuiSkeletonDrawer(UserMap &users, HandMap &hands)
+  : __users(users), __hands(hands)
 {
   __print_state = PRINT_ID_STATE;
 }
@@ -97,12 +100,27 @@ SkelGuiSkeletonDrawer::draw_user(UserInfo &user)
 
 }
 
+void
+SkelGuiSkeletonDrawer::draw_circle(unsigned int id, float *proj, float radius)
+{
+  glBegin(GL_LINE_LOOP);
+  glVertex2f(proj[0], proj[1]);
+  glColor4f(1 - USER_COLORS[id % NUM_USER_COLORS][0],
+	    1 - USER_COLORS[id % NUM_USER_COLORS][1],
+	    1 - USER_COLORS[id % NUM_USER_COLORS][2],
+	    1);
+  for (int i=0; i < 360; ++i) {
+    float rad = deg2rad(i);;
+    glVertex2f( proj[0] + cos(rad) * radius, proj[1] + sin(rad) * radius);
+  }
+  glEnd();
+}
+
+
 /** Draw skeletons. */
 void
 SkelGuiSkeletonDrawer::draw()
 {
-  if (__users.empty()) return;
-
   char label[50] = "";
   for (UserMap::iterator i = __users.begin(); i != __users.end(); ++i) {
     if (__print_state != PRINT_NONE) {
@@ -138,6 +156,17 @@ SkelGuiSkeletonDrawer::draw()
     draw_user(i->second);
     glEnd();
   }
+
+  glEnable(GL_LINE_SMOOTH);
+  glLineWidth(4);
+  for (HandMap::iterator i = __hands.begin(); i != __hands.end(); ++i) {
+    if (i->second.hand_if->is_visible()) {
+      float proj[2] = {i->second.hand_if->world_x(), i->second.hand_if->world_y()};
+      draw_circle(i->second.hand_if->world_z(), proj, 10);
+    }
+  }
+  glLineWidth(1.);
+  glDisable(GL_LINE_SMOOTH);
 }
 
 /** Toggle the printing state.
@@ -161,5 +190,8 @@ SkelGuiSkeletonDrawer::toggle_print_state()
 void
 SkelGuiSkeletonDrawer::set_print_state(SkelGuiSkeletonDrawer::PrintState state)
 {
+  glBegin(GL_LINE_LOOP);
+
   __print_state = state;
+  glEnd();
 }

@@ -38,6 +38,9 @@ namespace fawkes {
 }
 #endif
 
+void get_resolution(fawkes::Configuration *config,
+		    unsigned int &width, unsigned int &height);
+
 void setup_map_generator(xn::MapGenerator &generator,
 			 fawkes::Configuration *config);
 
