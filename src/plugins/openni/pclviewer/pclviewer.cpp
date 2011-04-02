@@ -21,6 +21,10 @@
  */
 
 #include "trackball.h"
+#include "skel_drawer.h"
+#include "transfer_thread.h"
+#include <plugins/openni/utils/skel_if_observer.h>
+#include <plugins/openni/utils/hand_if_observer.h>
 
 #include <core/threading/thread.h>
 #include <utils/math/angle.h>
@@ -40,11 +44,14 @@
 #define GL_WIN_SIZE_Y 600
 
 using namespace fawkes;
+using namespace fawkes::openni;
 using namespace firevision;
 
 Camera *g_pcl_cam = NULL;
 Camera *g_image_cam = NULL;
 unsigned char *g_rgb_buf = NULL;
+const unsigned char *g_pcl_buf = NULL;
+const unsigned char *g_image_buf = NULL;
 
 GLfloat    g_scale;			/* scaling factor */
 GLdouble   g_pan_x = 0.0;
@@ -56,29 +63,58 @@ GLint      g_mouse_button = -1;
 BlackBoard *g_bb = NULL;;
 ObjectPositionInterface *g_obj_if = NULL;
 
-void
-draw_points()
-{
-  g_pcl_cam->capture();
-  if (g_image_cam) {
-    g_image_cam->capture();
-    convert(g_image_cam->colorspace(), RGB, g_image_cam->buffer(), g_rgb_buf,
-	    g_image_cam->pixel_width(), g_image_cam->pixel_height());
-    g_image_cam->dispose_buffer();
-  }
+UserMap  g_users;
+HandMap  g_hands;
 
+SkelIfObserver *g_obs = NULL;
+HandIfObserver *g_hands_obs = NULL;
+SkelGuiSkeletonDrawer3D *g_skel_drawer = NULL;
+
+PclViewerTransferThread *g_transfer_thread = NULL;
+
+void
+rotate_scale_matrix()
+{
   glRotatef(90., 0, 0, 1);
   glRotatef(45., 0, 1, 0);
   //glTranslatef(0, 0, -4);
   glScalef(3.0, 3.0, 3.0);
+}
+
+
+void
+draw_points()
+{
+  if (! g_transfer_thread) {
+    g_pcl_cam->capture();
+    if (g_image_cam) {
+      g_image_cam->capture();
+      convert(g_image_cam->colorspace(), RGB, g_image_cam->buffer(), g_rgb_buf,
+	    g_image_cam->pixel_width(), g_image_cam->pixel_height());
+      g_image_cam->dispose_buffer();
+    }
+  } else {
+    if (g_image_cam) {
+      g_transfer_thread->lock_for_read();
+      convert(g_image_cam->colorspace(), RGB, g_image_buf, g_rgb_buf,
+	      g_image_cam->pixel_width(), g_image_cam->pixel_height());
+      g_transfer_thread->unlock();
+    }
+  }
+
+  rotate_scale_matrix();
   glBegin(GL_POINTS);
 
   const unsigned int width  = g_pcl_cam->pixel_width();
   const unsigned int height = g_pcl_cam->pixel_height();
 
-  float *x = (float *)g_pcl_cam->buffer();
+  float *x = (float *)g_pcl_buf;
   float *y = x + width * height;
   float *z = y + width * height;
+
+  if (g_transfer_thread) {
+    g_transfer_thread->lock_for_read();
+  }
 
   if (g_image_cam) {
     unsigned char *rgb = g_rgb_buf;
@@ -111,6 +147,11 @@ draw_points()
       }
     }
   }
+
+  if (g_transfer_thread) {
+    g_transfer_thread->unlock();
+  }
+
   //printf("Zero values %u/%u\n", zero_values, num_values);
   glEnd();
 
@@ -128,7 +169,9 @@ draw_points()
   glEnd();
   glPointSize(1);
 
-  g_pcl_cam->dispose_buffer();
+  if (! g_transfer_thread) {
+    g_pcl_cam->dispose_buffer();
+  }
 }
 
 
@@ -234,18 +277,26 @@ display()
     tbMatrix();
 
     glPushMatrix();
-      draw_points();
+    draw_points();
     glPopMatrix();
 
-    if (g_bb && g_obj_if) {
+    if (g_bb) {
       try {
-	g_obj_if->read();
+	if (g_obj_if) {
+	  g_obj_if->read();
 
-	glPushMatrix();
-	  draw_object();
-	glPopMatrix();
+	  glPushMatrix();
+	    draw_object();
+	  glPopMatrix();
+	}
 
-	
+	if (g_skel_drawer) {
+	  glPushMatrix();
+	    rotate_scale_matrix();
+	    g_skel_drawer->draw();
+	  glPopMatrix();
+	}
+
       } catch (Exception &e) {
 	printf("Interface read failed, closing");
 	g_bb->close(g_obj_if);
@@ -263,6 +314,8 @@ display()
 void
 idle()
 {
+  if (g_obs)        g_obs->process_queue();
+  if (g_hands_obs)  g_hands_obs->process_queue();
   glutPostRedisplay();
 }
 
@@ -317,6 +370,10 @@ init(ArgumentParser &argp)
       e.print_trace();
       exit(-1);
     }
+
+    g_obs = new SkelIfObserver(g_bb, g_users);
+    g_hands_obs = new HandIfObserver(g_bb, g_hands);
+    g_skel_drawer = new SkelGuiSkeletonDrawer3D(g_users, g_hands);
   }
 
   std::string fvhost = host;
@@ -325,22 +382,40 @@ init(ArgumentParser &argp)
   if (argp.has_arg("n")) {
     argp.parse_hostport("n", fvhost, fvport);
     g_pcl_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-pointcloud");
+    g_pcl_cam->open();
+    g_pcl_cam->start();
+
+    g_transfer_thread = new PclViewerTransferThread();
+    g_transfer_thread->add_camera("openni-pointcloud", g_pcl_cam);
+
+    g_pcl_buf = g_transfer_thread->buffer("openni-pointcloud");
+
     if (argp.has_arg("R")) {
-      g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image");
+      g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image",
+				      argp.has_arg("j"));
+      g_image_cam->open();
+      g_image_cam->start();
+      g_rgb_buf = malloc_buffer(RGB, g_image_cam->pixel_width(),
+				g_image_cam->pixel_height());
+      g_transfer_thread->add_camera("openni-image", g_image_cam);
+      g_image_buf = g_transfer_thread->buffer("openni-image");
     }
+
+    g_transfer_thread->start();
+
   } else {
     g_pcl_cam = new SharedMemoryCamera("openni-pointcloud");
+    g_pcl_cam->open();
+    g_pcl_cam->start();
+    g_pcl_buf = g_pcl_cam->buffer();
     if (argp.has_arg("R")) {
       g_image_cam = new SharedMemoryCamera("openni-image");
+      g_image_cam->open();
+      g_image_cam->start();
+      g_image_buf = g_image_cam->buffer();
+      g_rgb_buf = malloc_buffer(RGB, g_image_cam->pixel_width(),
+				g_image_cam->pixel_height());
     }
-  }
-  g_pcl_cam->open();
-  g_pcl_cam->start();
-  if (argp.has_arg("R")) {
-    g_image_cam->open();
-    g_image_cam->start();
-    g_rgb_buf = malloc_buffer(RGB, g_image_cam->pixel_width(),
-			      g_image_cam->pixel_height());
   }
 }
 
@@ -348,7 +423,7 @@ init(ArgumentParser &argp)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:n::si:R");
+  ArgumentParser argp(argc, argv, "hr:n::si:Rj");
   Thread::init_main();
 
   glutInit(&argc, argv);

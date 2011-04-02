@@ -19,8 +19,10 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 
 LIBS_ffpclviewer = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 		 fawkesblackboard fawkesinterface fvutils fvcams \
-		 ObjectPositionInterface
-OBJS_ffpclviewer = pclviewer.o trackball.o
+		 fawkesopenniutils \
+		 ObjectPositionInterface HumanSkeletonInterface
+OBJS_ffpclviewer = pclviewer.o trackball.o skel_drawer.o \
+		   transfer_thread.o
 
 OBJS_all = $(OBJS_ffpclviewer)
 
