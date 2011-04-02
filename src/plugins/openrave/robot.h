@@ -51,7 +51,8 @@ class OpenRAVERobot
   virtual void set_offset(float trans_x, float trans_y, float trans_z);
   virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
   virtual void set_manipulator(fawkes::OpenRAVEManipulator* manip);
-  virtual void update_manipulator(); // not needed
+  virtual void update_manipulator();
+  virtual void update_model();
 
   virtual bool attach_object(OpenRAVE::KinBodyPtr object);
   virtual bool attach_object(const std::string& name, fawkes::OpenRAVEEnvironment* env);

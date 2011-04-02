@@ -168,15 +168,23 @@ OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip)
 }
 
 /** Update motor values from OpenRAVE model.
- * TODO: why would we need this??? */
+ * Can be used to sync real device with OpenRAVE model*/
 void
 OpenRAVERobot::update_manipulator()
 {
   std::vector<float> angles;
-  __robot->GetDOFValues(angles);
+  __robot->GetActiveDOFValues(angles);
   __manip->set_angles(angles);
 }
 
+/** Update/Set OpenRAVE motor angles */
+void
+OpenRAVERobot::update_model()
+{
+  std::vector<float> angles;
+  __manip->get_angles(angles);
+  __robot->SetActiveDOFValues(angles);
+}
 
 /** Set target, given transition, and rotation as quaternion.
  * @param trans_x x-transition
