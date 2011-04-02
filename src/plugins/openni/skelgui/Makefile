@@ -21,7 +21,7 @@ LIBS_ffskelgui = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 		 fawkesblackboard fawkesinterface fvutils fvcams \
 		 HumanSkeletonInterface HumanSkeletonProjectionInterface \
 		 ObjectPositionInterface
-OBJS_ffskelgui = main.o colors.o skel_drawer.o texture_drawer.o \
+OBJS_ffskelgui = main.o skel_drawer.o texture_drawer.o \
 		 image_drawer.o depth_drawer.o
 
 OBJS_all = $(OBJS_ffskelgui)

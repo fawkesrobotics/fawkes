@@ -21,7 +21,7 @@
  */
 
 #include "depth_drawer.h"
-#include "colors.h"
+#include <plugins/openni/utils/colors.h>
 
 #include <fvcams/camera.h>
 #include <fvutils/color/colorspaces.h>
@@ -33,6 +33,7 @@
 #include <GL/glut.h>
 
 using namespace fawkes;
+using namespace fawkes::openni;
 using namespace firevision;
 
 /** @class SkelGuiDepthDrawer "image_drawer.h"

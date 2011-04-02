@@ -21,9 +21,11 @@
  */
 
 #include "skel_drawer.h"
-#include "colors.h"
 
 #include <utils/math/angle.h>
+
+#include <plugins/openni/utils/colors.h>
+
 
 #include <cstring>
 #include <cstdio>
