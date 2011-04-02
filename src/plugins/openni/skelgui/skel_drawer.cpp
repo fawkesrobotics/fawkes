@@ -32,6 +32,7 @@
 #include <GL/glut.h>
 
 using namespace fawkes;
+using namespace fawkes::openni;
 
 /** @class SkelGuiSkeletonDrawer "skel_drawer.h"
  * Draw body skeleton using OpenGL.
@@ -115,6 +116,7 @@ SkelGuiSkeletonDrawer::draw_circle(unsigned int id, float *proj, float radius)
     float rad = deg2rad(i);;
     glVertex2f( proj[0] + cos(rad) * radius, proj[1] + sin(rad) * radius);
   }
+  glColor4f(1, 1, 1, 1);
   glEnd();
 }
 

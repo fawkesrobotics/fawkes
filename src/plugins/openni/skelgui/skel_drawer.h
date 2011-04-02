@@ -23,28 +23,11 @@
 #ifndef __PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
 #define __PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
 
+#include <plugins/openni/utils/types.h>
+
 #include <interfaces/HumanSkeletonInterface.h>
 #include <interfaces/HumanSkeletonProjectionInterface.h>
 #include <interfaces/ObjectPositionInterface.h>
-
-#include <map>
-#include <string>
-
-/** User info to pass to draw_skeletons(). */
-typedef struct {
-  fawkes::HumanSkeletonInterface            *skel_if;	/**< Skeleton interface. */
-  fawkes::HumanSkeletonProjectionInterface  *proj_if;	/**< Projection interface. */
-} UserInfo;
-
-
-typedef std::map<std::string, UserInfo>  UserMap;
-
-/** Hand info to pass to draw_skeletons(). */
-typedef struct {
-  fawkes::ObjectPositionInterface           *hand_if;	/**< Hand pos interface. */
-} HandInfo;
-
-typedef std::map<std::string, HandInfo>  HandMap;
 
 class SkelGuiSkeletonDrawer
 {
@@ -56,7 +39,8 @@ class SkelGuiSkeletonDrawer
     PRINT_ID_STATE	/**< Print ID and state */
   } PrintState;
 
-  SkelGuiSkeletonDrawer(UserMap &users, HandMap &hands);
+  SkelGuiSkeletonDrawer(fawkes::openni::UserMap &users,
+			fawkes::openni::HandMap &hands);
 
   void draw();
 
@@ -66,12 +50,12 @@ class SkelGuiSkeletonDrawer
  private:
   void print_string(void *font, char *str);
   void draw_limb(float *proj1, float conf1, float *proj2, float conf2);
-  void draw_user(UserInfo &user);
+  void draw_user(fawkes::openni::UserInfo &user);
   void draw_circle(unsigned int id, float *proj, float radius);
 
  private:
-  UserMap  &__users;
-  HandMap  &__hands;
+  fawkes::openni::UserMap  &__users;
+  fawkes::openni::HandMap  &__hands;
 
   PrintState __print_state;
 };
