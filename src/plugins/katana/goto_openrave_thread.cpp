@@ -89,9 +89,9 @@ void
 KatanaGotoOpenRAVEThread::set_target(float x, float y, float z,
 			     float phi, float theta, float psi)
 {
-  __x     = x/1000.f;
-  __y     = y/1000.f;
-  __z     = z/1000.f;
+  __x     = x;
+  __y     = y;
+  __z     = z;
   __phi   = (phi);
   __theta = (theta);
   __psi   = (psi);

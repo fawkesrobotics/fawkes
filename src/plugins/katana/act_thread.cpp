@@ -377,12 +377,31 @@ KatanaActThread::loop()
     } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoKniMessage>()) {
       KatanaInterface::LinearGotoKniMessage *msg = __katana_if->msgq_first(msg);
 
-      __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
-				msg->phi(), msg->theta(), msg->psi());
-      start_motion(__goto_thread, msg->id(),
-		   "Linear movement to (%f,%f,%f, %f,%f,%f)",
-		   msg->x(), msg->y(), msg->z(),
-		   msg->phi(), msg->theta(), msg->psi());
+      float x = msg->x() * __cfg_distance_scale + __cfg_offset_x;
+      float y = msg->y() * __cfg_distance_scale + __cfg_offset_y;
+      float z = msg->z() * __cfg_distance_scale + __cfg_offset_z;
+
+      if( __cfg_OR_enabled ) {
+#ifdef HAVE_OPENRAVE
+          __goto_openrave_thread->set_target(x, y, z,
+				  	     msg->phi(), msg->theta(), msg->psi());
+
+          start_motion(__goto_openrave_thread, msg->id(),
+		       "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		       x, y, z,
+		       msg->phi(), msg->theta(), msg->psi());
+
+#endif
+        } else {
+          __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
+				    msg->phi(), msg->theta(), msg->psi());
+
+          start_motion(__goto_thread, msg->id(),
+		       "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		       x, y, z,
+		       msg->phi(), msg->theta(), msg->psi());
+
+        }
 
 #ifdef HAVE_OPENRAVE
     } else if (__katana_if->msgq_first_is<KatanaInterface::ObjectGotoMessage>() && __cfg_OR_enabled) {
@@ -402,8 +421,11 @@ KatanaActThread::loop()
 
       if(__cfg_OR_enabled) {
 #ifdef HAVE_OPENRAVE
-        __goto_openrave_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
-                                           __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+        __goto_openrave_thread->set_target(__cfg_park_x * __cfg_distance_scale + __cfg_offset_x,
+                                           __cfg_park_y * __cfg_distance_scale + __cfg_offset_y,
+                                  	   __cfg_park_z * __cfg_distance_scale + __cfg_offset_z,
+				  	   __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+
         start_motion(__goto_openrave_thread, msg->id(), "Parking arm");
 #endif
       } else {
