@@ -113,6 +113,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("FlushMessage");
   add_messageinfo("ParkMessage");
   add_messageinfo("LinearGotoMessage");
+  add_messageinfo("LinearGotoKniMessage");
   add_messageinfo("ObjectGotoMessage");
   add_messageinfo("CalibrateMessage");
   add_messageinfo("OpenGripperMessage");
@@ -123,7 +124,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0x84, 0xe3, 0x38, 0x8f, 0x81, 0xfe, 0xa0, 0xb, 0xf3, 0xf4, 0x76, 0x12, 0xc5, 0xbd, 0xbc, 0xec};
+  unsigned char tmp_hash[] = {0x18, 0xd7, 0xc6, 0x14, 0xa3, 0x5a, 0xa3, 0xd8, 0x82, 0xcf, 0x58, 0x7b, 0xfd, 0xda, 0x70, 0xc};
   set_hash(tmp_hash);
 }
 
@@ -743,6 +744,8 @@ KatanaInterface::create_message(const char *type) const
     return new ParkMessage();
   } else if ( strncmp("LinearGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new LinearGotoMessage();
+  } else if ( strncmp("LinearGotoKniMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new LinearGotoKniMessage();
   } else if ( strncmp("ObjectGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ObjectGotoMessage();
   } else if ( strncmp("CalibrateMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1194,6 +1197,272 @@ Message *
 KatanaInterface::LinearGotoMessage::clone() const
 {
   return new KatanaInterface::LinearGotoMessage(this);
+}
+/** @class KatanaInterface::LinearGotoKniMessage <interfaces/KatanaInterface.h>
+ * LinearGotoKniMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_z initial value for z
+ * @param ini_phi initial value for phi
+ * @param ini_theta initial value for theta
+ * @param ini_psi initial value for psi
+ */
+KatanaInterface::LinearGotoKniMessage::LinearGotoKniMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoKniMessage")
+{
+  data_size = sizeof(LinearGotoKniMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (LinearGotoKniMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->x = ini_x;
+  data->y = ini_y;
+  data->z = ini_z;
+  data->phi = ini_phi;
+  data->theta = ini_theta;
+  data->psi = ini_psi;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
+  add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
+}
+/** Constructor */
+KatanaInterface::LinearGotoKniMessage::LinearGotoKniMessage() : Message("LinearGotoKniMessage")
+{
+  data_size = sizeof(LinearGotoKniMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (LinearGotoKniMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
+  add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
+}
+
+/** Destructor */
+KatanaInterface::LinearGotoKniMessage::~LinearGotoKniMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::LinearGotoKniMessage::LinearGotoKniMessage(const LinearGotoKniMessage *m) : Message("LinearGotoKniMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (LinearGotoKniMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get x value.
+ * X-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @return x value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * X-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @param new_x new x value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Y-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @return y value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * Y-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @param new_y new y value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get z value.
+ * Z-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @return z value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::z() const
+{
+  return data->z;
+}
+
+/** Get maximum length of z value.
+ * @return length of z value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_z() const
+{
+  return 1;
+}
+
+/** Set z value.
+ * Z-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @param new_z new z value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_z(const float new_z)
+{
+  data->z = new_z;
+}
+
+/** Get phi value.
+ * Euler angle Phi of tool orientation.
+ * @return phi value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::phi() const
+{
+  return data->phi;
+}
+
+/** Get maximum length of phi value.
+ * @return length of phi value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_phi() const
+{
+  return 1;
+}
+
+/** Set phi value.
+ * Euler angle Phi of tool orientation.
+ * @param new_phi new phi value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_phi(const float new_phi)
+{
+  data->phi = new_phi;
+}
+
+/** Get theta value.
+ * Euler angle Theta of tool orientation.
+ * @return theta value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::theta() const
+{
+  return data->theta;
+}
+
+/** Get maximum length of theta value.
+ * @return length of theta value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_theta() const
+{
+  return 1;
+}
+
+/** Set theta value.
+ * Euler angle Theta of tool orientation.
+ * @param new_theta new theta value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_theta(const float new_theta)
+{
+  data->theta = new_theta;
+}
+
+/** Get psi value.
+ * Euler angle Psi of tool orientation.
+ * @return psi value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::psi() const
+{
+  return data->psi;
+}
+
+/** Get maximum length of psi value.
+ * @return length of psi value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_psi() const
+{
+  return 1;
+}
+
+/** Set psi value.
+ * Euler angle Psi of tool orientation.
+ * @param new_psi new psi value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_psi(const float new_psi)
+{
+  data->psi = new_psi;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::LinearGotoKniMessage::clone() const
+{
+  return new KatanaInterface::LinearGotoKniMessage(this);
 }
 /** @class KatanaInterface::ObjectGotoMessage <interfaces/KatanaInterface.h>
  * ObjectGotoMessage Fawkes BlackBoard Interface Message.
@@ -2156,44 +2425,48 @@ KatanaInterface::message_valid(const Message *message) const
   if ( m3 != NULL ) {
     return true;
   }
-  const ObjectGotoMessage *m4 = dynamic_cast<const ObjectGotoMessage *>(message);
+  const LinearGotoKniMessage *m4 = dynamic_cast<const LinearGotoKniMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const CalibrateMessage *m5 = dynamic_cast<const CalibrateMessage *>(message);
+  const ObjectGotoMessage *m5 = dynamic_cast<const ObjectGotoMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const OpenGripperMessage *m6 = dynamic_cast<const OpenGripperMessage *>(message);
+  const CalibrateMessage *m6 = dynamic_cast<const CalibrateMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const CloseGripperMessage *m7 = dynamic_cast<const CloseGripperMessage *>(message);
+  const OpenGripperMessage *m7 = dynamic_cast<const OpenGripperMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const SetEnabledMessage *m8 = dynamic_cast<const SetEnabledMessage *>(message);
+  const CloseGripperMessage *m8 = dynamic_cast<const CloseGripperMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const SetMaxVelocityMessage *m9 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  const SetEnabledMessage *m9 = dynamic_cast<const SetEnabledMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const SetMotorEncoderMessage *m9 = dynamic_cast<const SetMotorEncoderMessage *>(message);
-  if ( m9 != NULL ) {
-    return true;
-  }
-  const MoveMotorEncoderMessage *m10 = dynamic_cast<const MoveMotorEncoderMessage *>(message);
+  const SetMaxVelocityMessage *m10 = dynamic_cast<const SetMaxVelocityMessage *>(message);
   if ( m10 != NULL ) {
     return true;
   }
-  const SetMotorAngleMessage *m11 = dynamic_cast<const SetMotorAngleMessage *>(message);
+  const SetMotorEncoderMessage *m11 = dynamic_cast<const SetMotorEncoderMessage *>(message);
   if ( m11 != NULL ) {
     return true;
   }
-  const MoveMotorAngleMessage *m12 = dynamic_cast<const MoveMotorAngleMessage *>(message);
+  const MoveMotorEncoderMessage *m12 = dynamic_cast<const MoveMotorEncoderMessage *>(message);
   if ( m12 != NULL ) {
+    return true;
+  }
+  const SetMotorAngleMessage *m13 = dynamic_cast<const SetMotorAngleMessage *>(message);
+  if ( m13 != NULL ) {
+    return true;
+  }
+  const MoveMotorAngleMessage *m14 = dynamic_cast<const MoveMotorAngleMessage *>(message);
+  if ( m14 != NULL ) {
     return true;
   }
   return false;

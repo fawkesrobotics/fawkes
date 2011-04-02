@@ -71,6 +71,11 @@ KatanaActThread::init()
   __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
   __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
 
+  __cfg_offset_x         = config->get_float("/hardware/katana/offset_x");
+  __cfg_offset_y         = config->get_float("/hardware/katana/offset_y");
+  __cfg_offset_z         = config->get_float("/hardware/katana/offset_z");
+  __cfg_distance_scale   = config->get_float("/hardware/katana/distance_scale");
+
 #ifdef HAVE_OPENRAVE
   __cfg_OR_enabled       = config->get_bool("/hardware/katana/openrave/enabled");
   __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
@@ -193,9 +198,9 @@ KatanaActThread::update_position(bool refresh)
   double x, y, z, phi, theta, psi;
   try {
     __katana->getCoordinates(x, y, z, phi, theta, psi, refresh);
-    __katana_if->set_x(x);
-    __katana_if->set_y(y);
-    __katana_if->set_z(z);
+    __katana_if->set_x(__cfg_offset_x + __cfg_distance_scale * x);
+    __katana_if->set_y(__cfg_offset_y + __cfg_distance_scale * y);
+    __katana_if->set_z(__cfg_offset_z + __cfg_distance_scale * z);
     __katana_if->set_phi(phi);
     __katana_if->set_theta(theta);
     __katana_if->set_psi(psi);
@@ -359,13 +364,25 @@ KatanaActThread::loop()
 		     msg->phi(), msg->theta(), msg->psi());
 #endif
       } else {
-        __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
-				  msg->phi(), msg->theta(), msg->psi());
+        __goto_thread->set_target((msg->x() - __cfg_offset_x)/__cfg_distance_scale,
+                                  (msg->y() - __cfg_offset_y)/__cfg_distance_scale,
+                                  (msg->z() - __cfg_offset_z)/__cfg_distance_scale,
+			 	  msg->phi(), msg->theta(), msg->psi());
         start_motion(__goto_thread, msg->id(),
 		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
 		     msg->x(), msg->y(), msg->z(),
 		     msg->phi(), msg->theta(), msg->psi());
       }
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoKniMessage>()) {
+      KatanaInterface::LinearGotoKniMessage *msg = __katana_if->msgq_first(msg);
+
+      __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
+				msg->phi(), msg->theta(), msg->psi());
+      start_motion(__goto_thread, msg->id(),
+		   "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		   msg->x(), msg->y(), msg->z(),
+		   msg->phi(), msg->theta(), msg->psi());
 
 #ifdef HAVE_OPENRAVE
     } else if (__katana_if->msgq_first_is<KatanaInterface::ObjectGotoMessage>() && __cfg_OR_enabled) {

@@ -111,6 +111,11 @@ class KatanaActThread
   float          __cfg_park_theta;
   float          __cfg_park_psi;
 
+  float          __cfg_offset_x;
+  float          __cfg_offset_y;
+  float          __cfg_offset_z;
+  float          __cfg_distance_scale;
+
   bool           __cfg_OR_enabled;
   bool           __cfg_OR_use_viewer;
   bool           __cfg_OR_auto_load_ik;

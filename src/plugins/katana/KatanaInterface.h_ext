@@ -213,6 +213,56 @@ class KatanaInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class LinearGotoKniMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float x; /**< X-Coordinate for tool position
+    compared to base libkni coordinate system. */
+      float y; /**< Y-Coordinate for tool position
+    compared to base libkni coordinate system. */
+      float z; /**< Z-Coordinate for tool position
+    compared to base libkni coordinate system. */
+      float phi; /**< Euler angle Phi of tool orientation. */
+      float theta; /**< Euler angle Theta of tool orientation. */
+      float psi; /**< Euler angle Psi of tool orientation. */
+    } LinearGotoKniMessage_data_t;
+#pragma pack(pop)
+
+    LinearGotoKniMessage_data_t *data;
+
+   public:
+    LinearGotoKniMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi);
+    LinearGotoKniMessage();
+    ~LinearGotoKniMessage();
+
+    LinearGotoKniMessage(const LinearGotoKniMessage *m);
+    /* Methods */
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float z() const;
+    void set_z(const float new_z);
+    size_t maxlenof_z() const;
+    float phi() const;
+    void set_phi(const float new_phi);
+    size_t maxlenof_phi() const;
+    float theta() const;
+    void set_theta(const float new_theta);
+    size_t maxlenof_theta() const;
+    float psi() const;
+    void set_psi(const float new_psi);
+    size_t maxlenof_psi() const;
+    virtual Message * clone() const;
+  };
+
   class ObjectGotoMessage : public Message
   {
    private:

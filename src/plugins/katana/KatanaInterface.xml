@@ -123,6 +123,19 @@
     <ref>theta</ref>
     <ref>psi</ref>
   </message>
+  <message name="LinearGotoKni">
+    <comment>States the next target to navigate to.
+       Uses values in libkni coordinate system, mainly to provide functionality for old skills</comment>
+    <field type="float" name="x">X-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="y">Y-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="z">Z-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="phi">Euler angle Phi of tool orientation.</field>
+    <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
+    <field type="float" name="psi">Euler angle Psi of tool orientation.</field>
+  </message>
   <message name="ObjectGoto">
     <comment>States the next target object to navigate to with OpenRAVE support</comment>
     <field type="string" length="32" name="object">Name of object</field>

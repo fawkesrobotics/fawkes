@@ -73,6 +73,32 @@ class KatanaInterface : public Interface
     int maxlenof_psi() const;
   };
 
+  class LinearGotoKniMessage : public Message
+  {
+    LinearGotoKniMessage(float ini_x, float ini_y, float ini_z, float ini_phi, float ini_theta, float ini_psi);
+    LinearGotoKniMessage();
+    ~LinearGotoKniMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float z();
+    void set_z(const float new_z);
+    int maxlenof_z() const;
+    float phi();
+    void set_phi(const float new_phi);
+    int maxlenof_phi() const;
+    float theta();
+    void set_theta(const float new_theta);
+    int maxlenof_theta() const;
+    float psi();
+    void set_psi(const float new_psi);
+    int maxlenof_psi() const;
+  };
+
   class ObjectGotoMessage : public Message
   {
     ObjectGotoMessage(char * ini_object, float ini_rot_x);
