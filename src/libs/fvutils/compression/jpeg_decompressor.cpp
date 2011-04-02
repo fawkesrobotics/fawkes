@@ -4,7 +4,7 @@
  *
  *  Created: July 2007 (Sci-Bono, South Africa, B&B)
  *  Copyright  2006-2007  Daniel Beck
- *             2007       Tim Niemueller [www.niemueller.de]
+ *             2007-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,10 +24,12 @@
 
 #include <fvutils/color/conversions.h>
 #include <fvutils/compression/jpeg_decompressor.h>
+#include <core/exception.h>
 
 #include <sys/types.h>
 #include <cstdio>
 #include <cstdlib>
+#include <setjmp.h>
 
 extern "C" {
 #include <jpeglib.h>
@@ -49,6 +51,28 @@ typedef struct {
 
 typedef my_source_mgr * my_src_ptr;
 
+
+struct my_error_mgr {
+  struct jpeg_error_mgr pub;	/* "public" fields */
+
+  jmp_buf setjmp_buffer;	/* for return to caller */
+};
+
+typedef struct my_error_mgr * my_error_ptr;
+
+/*
+ * Here's the routine that will replace the standard error_exit method:
+ */
+
+METHODDEF(void)
+my_error_exit (j_common_ptr cinfo)
+{
+  /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
+  my_error_ptr myerr = (my_error_ptr) cinfo->err;
+
+  /* Return control to the setjmp point */
+  longjmp(myerr->setjmp_buffer, 1);
+}
 
 METHODDEF(void)
 init_source (j_decompress_ptr cinfo)
@@ -137,9 +161,22 @@ JpegImageDecompressor::decompress()
   // JPEG decompression
   // Allocate and initialize a JPEG decompression object
   struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
-  
-  cinfo.err = jpeg_std_error(&jerr);
+
+  struct my_error_mgr jerr;
+  cinfo.err = jpeg_std_error(&jerr.pub);
+  jerr.pub.error_exit = my_error_exit;
+  /* Establish the setjmp return context for my_error_exit to use. */
+  if (setjmp(jerr.setjmp_buffer)) {
+    char buffer[JMSG_LENGTH_MAX];
+    (*cinfo.err->format_message) ((jpeg_common_struct *)&cinfo, buffer);
+
+    /* If we get here, the JPEG code has signaled an error.
+     * We need to clean up the JPEG object, close the input file, and return.
+     */
+    jpeg_destroy_decompress(&cinfo);
+    throw fawkes::Exception("Decompression failed: %s", buffer);
+  }
+
   jpeg_create_decompress(&cinfo);
 
   // Specify the source of the compressed data
@@ -176,13 +213,6 @@ JpegImageDecompressor::decompress()
   jpeg_destroy_decompress(&cinfo);
   
   free(row_pointer[0]);
-  
-//   FILE* imagefile = fopen("asdf.ppm", "w");
-
-//   fprintf(imagefile,"P6\n%u %u\n255\n", image_data.width,
-//           image_data.height );
-//   fwrite(buffer, 1, cinfo.output_width * cinfo.num_components * cinfo.image_width, imagefile);
-//   fclose(imagefile);
 
   // convert to yuv422packed and store in member frame_buffer
   convert(RGB, YUV422_PLANAR, buffer, _decompressed_buffer, cinfo.output_width, cinfo.output_height);

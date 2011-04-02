@@ -1,10 +1,10 @@
 
 /***************************************************************************
- *  jpeg.cpp - JPEG image compressor
+ *  jpeg_compressor.cpp - JPEG image compressor
  *
- *  Generated: Sat Aug 12 13:42:39 2006 (in LFI of Central Medical Library
- *                                       of Germany, Cologne)
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Aug 12 13:42:39 2006 (in LFI of Central Medical Library
+ *                                     of Germany, Cologne)
+ *  Copyright  2005-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -159,6 +159,16 @@ term_source(j_decompress_ptr cinfo)
   /* nothing to do */
 }
 
+METHODDEF(void)
+fv_jpeg_error_exit(j_common_ptr cinfo)
+{
+  /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
+  fv_jpeg_error_mgr_t *myerr = (fv_jpeg_error_mgr_t *) cinfo->err;
+  
+  /* Return control to the setjmp point */
+  longjmp(myerr->setjmp_buffer, 1);
+}
+
 
 /**
  * set momory-jpeg image to JPEG lib Info struct
@@ -210,7 +220,7 @@ void
 JpegImageCompressor::compress()
 {
   struct jpeg_compress_struct cinfo;
-  struct jpeg_error_mgr jerr;
+  fv_jpeg_error_mgr_t jerr;
   unsigned int row_stride;
   unsigned char *row_buffer;
 
@@ -223,7 +233,21 @@ JpegImageCompressor::compress()
   /* zero out the compression info structure and
      allocate a new compressor handle */
   memset (&cinfo, 0, sizeof(cinfo));
-  cinfo.err = jpeg_std_error(&jerr);
+  cinfo.err = jpeg_std_error(&jerr.pub);
+  jerr.pub.error_exit = fv_jpeg_error_exit;
+
+  /* Establish the setjmp return context for my_error_exit to use. */
+  if (setjmp(jerr.setjmp_buffer)) {
+    char buffer[JMSG_LENGTH_MAX];
+    (*cinfo.err->format_message) ((jpeg_common_struct *)&cinfo, buffer);
+
+    /* If we get here, the JPEG code has signaled an error.
+     * We need to clean up the JPEG object, close the input file, and return.
+     */
+    jpeg_destroy_compress(&cinfo);
+    throw fawkes::Exception("Compression failed: %s", buffer);
+  }
+
   jpeg_create_compress(&cinfo);
  
   /* Setup JPEG datastructures */
@@ -338,7 +362,7 @@ JpegImageCompressor::compressed_size()
 size_t
 JpegImageCompressor::recommended_compressed_buffer_size()
 {
-  return width * height / 5;
+  return width * height / 4;
 }
 
 
