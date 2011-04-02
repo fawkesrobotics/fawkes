@@ -28,6 +28,7 @@
 #include <fvcams/shmem.h>
 #include <utils/system/argparser.h>
 #include <fvutils/ipc/shm_image.h>
+#include <fvutils/color/conversions.h>
 
 #include <blackboard/remote.h>
 #include <interfaces/ObjectPositionInterface.h>
@@ -41,7 +42,9 @@
 using namespace fawkes;
 using namespace firevision;
 
-Camera *g_pcl_cam;
+Camera *g_pcl_cam = NULL;
+Camera *g_image_cam = NULL;
+unsigned char *g_rgb_buf = NULL;
 
 GLfloat    g_scale;			/* scaling factor */
 GLdouble   g_pan_x = 0.0;
@@ -57,6 +60,12 @@ void
 draw_points()
 {
   g_pcl_cam->capture();
+  if (g_image_cam) {
+    g_image_cam->capture();
+    convert(g_image_cam->colorspace(), RGB, g_image_cam->buffer(), g_rgb_buf,
+	    g_image_cam->pixel_width(), g_image_cam->pixel_height());
+    g_image_cam->dispose_buffer();
+  }
 
   glRotatef(90., 0, 0, 1);
   glRotatef(45., 0, 1, 0);
@@ -71,17 +80,35 @@ draw_points()
   float *y = x + width * height;
   float *z = y + width * height;
 
-  //unsigned int num_values = 0, zero_values = 0;
-  for (unsigned int h = 0; h < height; ++h) {
-    for (unsigned int w = 0; w < width; ++w) {
-      //++num_values;
-      if ((*x == 0) && (*y == 0) && (*z == 0)) {
-	x++; y++; z++;
-	//++zero_values;
-	continue;
+  if (g_image_cam) {
+    unsigned char *rgb = g_rgb_buf;
+    //unsigned int num_values = 0, zero_values = 0;
+    for (unsigned int h = 0; h < height; ++h) {
+      for (unsigned int w = 0; w < width; ++w, rgb += 3) {
+	//++num_values;
+	if ((*x == 0) && (*y == 0) && (*z == 0)) {
+	  x++; y++; z++;
+	  //++zero_values;
+	  continue;
+	}
+	
+	glColor3f(rgb[0] / 255.,rgb[1] / 255.,rgb[2] / 255.);
+	glVertex3f(*x++, *y++, *z++);
       }
-
-      glVertex3f(*x++, *y++, *z++);
+    }
+  } else {
+    //unsigned int num_values = 0, zero_values = 0;
+    for (unsigned int h = 0; h < height; ++h) {
+      for (unsigned int w = 0; w < width; ++w) {
+	//++num_values;
+	if ((*x == 0) && (*y == 0) && (*z == 0)) {
+	  x++; y++; z++;
+	  //++zero_values;
+	  continue;
+	}
+	
+	glVertex3f(*x++, *y++, *z++);
+      }
     }
   }
   //printf("Zero values %u/%u\n", zero_values, num_values);
@@ -285,7 +312,7 @@ init(ArgumentParser &argp)
 	id = argp.arg("i");
       }
 
-      g_obj_if = g_bb->open_for_reading<ObjectPositionInterface>("Cannikin");
+      g_obj_if = g_bb->open_for_reading<ObjectPositionInterface>(id.c_str());
     } catch (Exception &e) {
       e.print_trace();
       exit(-1);
@@ -298,18 +325,30 @@ init(ArgumentParser &argp)
   if (argp.has_arg("n")) {
     argp.parse_hostport("n", fvhost, fvport);
     g_pcl_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-pointcloud");
+    if (argp.has_arg("R")) {
+      g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image");
+    }
   } else {
     g_pcl_cam = new SharedMemoryCamera("openni-pointcloud");
+    if (argp.has_arg("R")) {
+      g_image_cam = new SharedMemoryCamera("openni-image");
+    }
   }
   g_pcl_cam->open();
   g_pcl_cam->start();
+  if (argp.has_arg("R")) {
+    g_image_cam->open();
+    g_image_cam->start();
+    g_rgb_buf = malloc_buffer(RGB, g_image_cam->pixel_width(),
+			      g_image_cam->pixel_height());
+  }
 }
 
 
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:n::si:");
+  ArgumentParser argp(argc, argv, "hr:n::si:R");
   Thread::init_main();
 
   glutInit(&argc, argv);
