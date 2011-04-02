@@ -136,6 +136,8 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   cbe_skillstring->set_model(__sks_list);
   cbe_skillstring->set_text_column(__sks_record.skillstring);
 
+  cbe_skillstring->get_entry()->set_activates_default(true);
+
   __trv_plugins->set_network_client(connection_dispatcher.get_client());
 #ifdef HAVE_GCONFMM
   __trv_plugins->set_gconf_prefix(GCONF_PREFIX);
