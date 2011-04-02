@@ -305,14 +305,27 @@ int main(int argc, char **argv)
     } else {
       g_image_cam = new SharedMemoryCamera("openni-image");
       g_depth_cam = new SharedMemoryCamera("openni-depth");
-      g_label_cam = new SharedMemoryCamera("openni-labels");
+      try {
+	g_label_cam = new SharedMemoryCamera("openni-labels");
+	if ((g_label_cam->pixel_width() != GL_WIN_SIZE_X) ||
+	    (g_label_cam->pixel_height() != GL_WIN_SIZE_Y)) {
+	  delete g_label_cam;
+	  g_label_cam = NULL;
+	  throw Exception("Invalid label cam");
+	}
+      } catch (Exception &e) {
+	printf("Cannot open label cam, user tracker not running? "
+	       "Disabling labels.\n");
+      }
     }
     g_image_cam->open();
     g_image_cam->start();
     g_depth_cam->open();
     g_depth_cam->start();
-    g_label_cam->open();
-    g_label_cam->start();
+    if (g_label_cam) {
+      g_label_cam->open();
+      g_label_cam->start();
+    }
 
     if ((g_image_cam->pixel_width() != GL_WIN_SIZE_X) ||
 	(g_image_cam->pixel_height() != GL_WIN_SIZE_Y) ||
