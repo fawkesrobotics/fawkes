@@ -24,7 +24,7 @@
 #ifndef __PLUGINS_KATANA_GOTO_THREAD_OPENRAVE_H_
 #define __PLUGINS_KATANA_GOTO_THREAD_OPENRAVE_H_
 
-#include "goto_thread.h"
+#include "motion_thread.h"
 
 #include <vector>
 #include <string>
@@ -38,7 +38,7 @@ namespace fawkes {
 }
 #endif
 
-class KatanaGotoOpenRAVEThread : public KatanaGotoThread
+class KatanaGotoOpenRAVEThread : public KatanaMotionThread
 {
  public:
   KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRAVEConnector* openrave,
@@ -78,6 +78,10 @@ class KatanaGotoOpenRAVEThread : public KatanaGotoThread
   bool                  __is_target_object;
 
   fawkes::OpenRAVEConnector*    _openrave;
+
+  float __x, __y, __z;
+  float __phi, __theta, __psi;
+  unsigned int __poll_interval_usec;
 
 #endif //HAVE_OPENRAVE
 };

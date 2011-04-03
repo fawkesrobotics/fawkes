@@ -59,8 +59,8 @@ KatanaGotoOpenRAVEThread::KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katan
 				   unsigned int poll_interval_ms,
                                    std::string robot_file,
                                    bool autoload_IK,
-                                   bool use_viewer) :
-  KatanaGotoThread(katana, logger, poll_interval_ms),
+                                   bool use_viewer)
+  : KatanaMotionThread("KatanaGotoOpenRAVEThread", katana, logger),
   __OR_robot( 0 ),
   __OR_manip( 0 ),
   __target_object( "" ),

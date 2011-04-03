@@ -107,14 +107,13 @@ KatanaActThread::init()
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
   __gripper_thread = new KatanaGripperThread(__katana, logger,
 					     __cfg_gripper_pollint);
+  __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
 #ifdef HAVE_OPENRAVE
+  __goto_openrave_thread = new KatanaGotoOpenRAVEThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
   if(__cfg_OR_enabled)
-    {__goto_thread    = new KatanaGotoOpenRAVEThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);}
-  else
+    {__goto_openrave_thread->init();}
 #endif
-    {__goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);}
 
-  __goto_thread->init();
   __sensacq_thread->start();
 
   bbil_add_message_interface(__katana_if);
@@ -141,12 +140,15 @@ KatanaActThread::finalize()
   __sensacq_thread->join();
   __sensacq_thread.reset();
 
-  __goto_thread->finalize();
-
   // Setting to NULL also deletes instance (RefPtr)
   __calib_thread   = NULL;
   __goto_thread    = NULL;
   __gripper_thread = NULL;
+#ifdef HAVE_OPENRAVE
+   if(__cfg_OR_enabled)
+    {__goto_openrave_thread->finalize();}
+  __goto_openrave_thread = NULL;
+#endif
 
   __katana->freezeRobot();
   __katana = NULL;
@@ -297,7 +299,7 @@ KatanaActThread::loop()
 
 #ifdef HAVE_OPENRAVE
         if(__cfg_OR_enabled)
-          {__goto_thread->update_openrave_data();}
+          {__goto_openrave_thread->update_openrave_data();}
 #endif
     }
   }
@@ -310,12 +312,23 @@ KatanaActThread::loop()
     } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoMessage>()) {
       KatanaInterface::LinearGotoMessage *msg = __katana_if->msgq_first(msg);
 
-      __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
-				msg->phi(), msg->theta(), msg->psi());
-      start_motion(__goto_thread, msg->id(),
-		   "Linear movement to (%f,%f,%f, %f,%f,%f)",
-		   msg->x(), msg->y(), msg->z(),
-		   msg->phi(), msg->theta(), msg->psi());
+      if(__cfg_OR_enabled) {
+#ifdef HAVE_OPENRAVE
+        __goto_openrave_thread->set_target(msg->x(), msg->y(), msg->z(),
+                                           msg->phi(), msg->theta(), msg->psi());
+        start_motion(__goto_openrave_thread, msg->id(),
+		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		     msg->x(), msg->y(), msg->z(),
+		     msg->phi(), msg->theta(), msg->psi());
+#endif
+      } else {
+        __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
+				  msg->phi(), msg->theta(), msg->psi());
+        start_motion(__goto_thread, msg->id(),
+		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		     msg->x(), msg->y(), msg->z(),
+		     msg->phi(), msg->theta(), msg->psi());
+      }
 
 #ifdef HAVE_OPENRAVE
     } else if (__katana_if->msgq_first_is<KatanaInterface::ObjectGotoMessage>() && __cfg_OR_enabled) {
@@ -325,17 +338,25 @@ KatanaActThread::loop()
       if( msg->rot_x() )
         { rot_x = msg->rot_x(); }
 
-      __goto_thread->set_target(msg->object(), rot_x);
-      start_motion(__goto_thread, msg->id(),
+      __goto_openrave_thread->set_target(msg->object(), rot_x);
+      start_motion(__goto_openrave_thread, msg->id(),
 		   "Linear movement to object (%s, %f)", msg->object(), msg->rot_x());
 #endif
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::ParkMessage>()) {
       KatanaInterface::ParkMessage *msg = __katana_if->msgq_first(msg);
 
-      __goto_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
-				__cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
-      start_motion(__goto_thread, msg->id(), "Parking arm");
+      if(__cfg_OR_enabled) {
+#ifdef HAVE_OPENRAVE
+        __goto_openrave_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
+                                           __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+        start_motion(__goto_openrave_thread, msg->id(), "Parking arm");
+#endif
+      } else {
+        __goto_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
+				  __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+        start_motion(__goto_thread, msg->id(), "Parking arm");
+      }
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::OpenGripperMessage>()) {
       KatanaInterface::OpenGripperMessage *msg = __katana_if->msgq_first(msg);
@@ -357,7 +378,7 @@ KatanaActThread::loop()
 	  update_position(/* refresh */ true);
 #ifdef HAVE_OPENRAVE
 	    if(__cfg_OR_enabled)
-	      {__goto_thread->update_openrave_data();}
+	      {__goto_openrave_thread->update_openrave_data();}
 #endif
 	} else {
 	  logger->log_debug(name(), "Turning OFF the arm");

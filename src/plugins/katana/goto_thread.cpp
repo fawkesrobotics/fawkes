@@ -67,18 +67,6 @@ KatanaGotoThread::set_target(float x, float y, float z,
 }
 
 void
-KatanaGotoThread::set_target(const std::string& object_name, float rot_x) {};
-
-void
-KatanaGotoThread::update_openrave_data() {};
-
-void
-KatanaGotoThread::init() {};
-
-void
-KatanaGotoThread::finalize() {};
-
-void
 KatanaGotoThread::once()
 {
   try {

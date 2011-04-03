@@ -118,6 +118,9 @@ class KatanaActThread
   fawkes::RefPtr<KatanaCalibrationThread>      __calib_thread;
   fawkes::RefPtr<KatanaGotoThread>             __goto_thread;
   fawkes::RefPtr<KatanaGripperThread>          __gripper_thread;
+#ifdef HAVE_OPENRAVE
+  fawkes::RefPtr<KatanaGotoOpenRAVEThread>     __goto_openrave_thread;
+#endif
 
   fawkes::RefPtr<CLMBase>        __katana;
   std::auto_ptr<CCdlCOM>         __device;
