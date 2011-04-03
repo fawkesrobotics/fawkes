@@ -26,7 +26,7 @@
 #include "motion_thread.h"
 #include "calib_thread.h"
 #include "goto_thread.h"
-#include "goto_thread_openrave.h"
+#include "goto_openrave_thread.h"
 #include "gripper_thread.h"
 #include "sensacq_thread.h"
 

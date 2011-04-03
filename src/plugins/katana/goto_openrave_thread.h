@@ -38,10 +38,10 @@ namespace fawkes {
 }
 #endif
 
-class KatanaGotoThreadOpenRAVE : public KatanaGotoThread
+class KatanaGotoOpenRAVEThread : public KatanaGotoThread
 {
  public:
-  KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRAVEConnector* openrave,
+  KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRAVEConnector* openrave,
 		   unsigned int poll_interval_ms,
                    std::string robot_file,
                    bool autoload_IK,

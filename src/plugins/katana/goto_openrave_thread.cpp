@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "goto_thread_openrave.h"
+#include "goto_openrave_thread.h"
 #include "conversion.h"
 
 #include <cstdlib>
@@ -37,7 +37,7 @@
 
 using namespace fawkes;
 
-/** @class KatanaGotoThreadOpenRAVE "goto_thread_openrave.h"
+/** @class KatanaGotoOpenRAVEThread "goto_thread_openrave.h"
  * Katana collision-free goto thread.
  * This thread moves the arm into a specified position,
  * using IK and path-planning from OpenRAVE.
@@ -53,7 +53,7 @@ using namespace fawkes;
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  */
-KatanaGotoThreadOpenRAVE::KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katana,
+KatanaGotoOpenRAVEThread::KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katana,
 				   fawkes::Logger *logger,
                                    fawkes::OpenRAVEConnector* openrave,
 				   unsigned int poll_interval_ms,
@@ -83,7 +83,7 @@ KatanaGotoThreadOpenRAVE::KatanaGotoThreadOpenRAVE(fawkes::RefPtr<CLMBase> katan
  * @param psi Psi Euler angle of tool
  */
 void
-KatanaGotoThreadOpenRAVE::set_target(float x, float y, float z,
+KatanaGotoOpenRAVEThread::set_target(float x, float y, float z,
 			     float phi, float theta, float psi)
 {
   __x     = x/1000.f;
@@ -100,7 +100,7 @@ KatanaGotoThreadOpenRAVE::set_target(float x, float y, float z,
  * @param object_name name of the object (kinbody) in OpenRAVEEnvironment
  */
 void
-KatanaGotoThreadOpenRAVE::set_target(const std::string& object_name, float rot_x)
+KatanaGotoOpenRAVEThread::set_target(const std::string& object_name, float rot_x)
 {
   __target_object = object_name;
 
@@ -108,7 +108,7 @@ KatanaGotoThreadOpenRAVE::set_target(const std::string& object_name, float rot_x
 }
 
 void
-KatanaGotoThreadOpenRAVE::init()
+KatanaGotoOpenRAVEThread::init()
 {
   try {
     __OR_robot = _openrave->add_robot(__cfg_robot_file, __cfg_autoload_IK);
@@ -138,7 +138,7 @@ KatanaGotoThreadOpenRAVE::init()
 }
 
 void
-KatanaGotoThreadOpenRAVE::finalize()
+KatanaGotoOpenRAVEThread::finalize()
 {
   delete(__OR_robot);
   __OR_robot = NULL;
@@ -148,7 +148,7 @@ KatanaGotoThreadOpenRAVE::finalize()
 }
 
 void
-KatanaGotoThreadOpenRAVE::once()
+KatanaGotoOpenRAVEThread::once()
 {
   // Fetch motor encoder values
   if( !update_motor_data() ) {
@@ -216,7 +216,7 @@ KatanaGotoThreadOpenRAVE::once()
 
 /** Update data of arm in OpenRAVE model */
 void
-KatanaGotoThreadOpenRAVE::update_openrave_data()
+KatanaGotoOpenRAVEThread::update_openrave_data()
 {
   // Fetch motor encoder values
   if( !update_motor_data() ) {
@@ -239,7 +239,7 @@ KatanaGotoThreadOpenRAVE::update_openrave_data()
  * @return true if succesful, false otherwise
  */
 bool
-KatanaGotoThreadOpenRAVE::update_motor_data()
+KatanaGotoOpenRAVEThread::update_motor_data()
 {
   CKatBase *base = _katana->GetBase();
   short num_errors  = 0;
@@ -289,7 +289,7 @@ KatanaGotoThreadOpenRAVE::update_motor_data()
 
 /** Move katana arm along the current trajectory __target_traj. */
 void
-KatanaGotoThreadOpenRAVE::move_katana()
+KatanaGotoOpenRAVEThread::move_katana()
 {
   for( __it=__target_traj->begin(); __it!=__target_traj->end(); ++__it) {
     for( unsigned int i=0; i<__it->size(); i++) {
