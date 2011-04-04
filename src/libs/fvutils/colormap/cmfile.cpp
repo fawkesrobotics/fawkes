@@ -181,7 +181,8 @@ ColormapFile::get_colormap()
   assert_header();
 
   // create colormap, throws an exception is depth/num_blocks is invalid
-  printf("File header dimensions: %dx%dx%d\n", __header->depth, __header->width, __header->height);
+  //printf("File header dimensions: %dx%dx%d\n",
+  //	 __header->depth, __header->width, __header->height);
   cm = new YuvColormap(__header->depth, __header->width, __header->height);
 
   unsigned int level = 0;
