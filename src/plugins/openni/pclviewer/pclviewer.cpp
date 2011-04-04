@@ -40,8 +40,8 @@
 #include <GL/glut.h>
 #include <cstdio>
 
-#define GL_WIN_SIZE_X 600
-#define GL_WIN_SIZE_Y 600
+#define GL_WIN_SIZE_X 800
+#define GL_WIN_SIZE_Y 800
 
 using namespace fawkes;
 using namespace fawkes::openni;

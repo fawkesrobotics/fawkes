@@ -27,7 +27,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 
 using namespace fawkes;
 using namespace firevision;
@@ -100,7 +99,6 @@ PclViewerTransferThread::loop()
 {
   std::map<std::string, firevision::Camera *>::iterator c;
   for (c = __cams.begin(); c != __cams.end(); ++c) {
-    printf("Capturing %s\n", c->first.c_str());
     c->second->capture();
     __rwlock->lock_for_write();
     memcpy(__buffers[c->first], c->second->buffer(), __buffer_sizes[c->first]);

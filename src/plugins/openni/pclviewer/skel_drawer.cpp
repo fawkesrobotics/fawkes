@@ -103,24 +103,25 @@ SkelGuiSkeletonDrawer3D::draw()
 {
   for (UserMap::iterator i = __users.begin(); i != __users.end(); ++i) {
     i->second.skel_if->read();
+    if (i->second.skel_if->state() != HumanSkeletonInterface::STATE_INVALID) {
+      glPointSize(10);
+      glBegin(GL_POINTS);
+      glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
+		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
+		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
+		1);
+      float *com = i->second.skel_if->com();
+      glVertex4f(com[0], com[1], com[2], 1.0);
+      glEnd();
+      glPointSize(1);
 
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
-	      1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
-	      1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
-	      1);
-    float *com = i->second.skel_if->com();
-    glVertex4f(com[0], com[1], com[2], 1.0);
-    glEnd();
-    glPointSize(1);
-    
-    glLineWidth(3);
-    glBegin(GL_LINES);
-    draw_user(i->second);
-    glColor4f(1, 1, 1, 1);
-    glEnd();
-    glLineWidth(1);
+      glLineWidth(3);
+      glBegin(GL_LINES);
+      draw_user(i->second);
+      glColor4f(1, 1, 1, 1);
+      glEnd();
+      glLineWidth(1);
+    }
   }
 
   /*
