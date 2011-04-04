@@ -127,38 +127,40 @@ SkelGuiSkeletonDrawer::draw()
 {
   char label[50] = "";
   for (UserMap::iterator i = __users.begin(); i != __users.end(); ++i) {
-    if (__print_state != PRINT_NONE) {
-      memset(label, 0, sizeof(label));
-      if (__print_state == PRINT_ID) {
-	sprintf(label, "%s", i->first.c_str());
-      }
-      else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_TRACKING)
-      {
-	sprintf(label, "%s - Tracking", i->first.c_str());
-      } else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_CALIBRATING)
-      {
-	sprintf(label, "%s - Calibrating...", i->first.c_str());
-      } else {
+    if (i->second.skel_if->state() != HumanSkeletonInterface::STATE_INVALID) {
+      if (__print_state != PRINT_NONE) {
+	memset(label, 0, sizeof(label));
+	if (__print_state == PRINT_ID) {
+	  sprintf(label, "%s", i->first.c_str());
+	}
+	else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_TRACKING)
+	{
+	  sprintf(label, "%s - Tracking", i->first.c_str());
+	} else if (i->second.skel_if->state() == HumanSkeletonInterface::STATE_CALIBRATING)
+	{
+	  sprintf(label, "%s - Calibrating...", i->first.c_str());
+	} else {
 	sprintf(label, "%s - Looking for pose", i->first.c_str());
-      }
+	}
+
+	glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
+		  1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
+		  1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
+		  1);
       
+	glRasterPos2i(i->second.proj_if->proj_com(0), i->second.proj_if->proj_com(1));
+	print_string(GLUT_BITMAP_HELVETICA_18, label);
+      }
+
+      glBegin(GL_LINES);
       glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
 		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
 		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
 		1);
-      
-      glRasterPos2i(i->second.proj_if->proj_com(0), i->second.proj_if->proj_com(1));
-      print_string(GLUT_BITMAP_HELVETICA_18, label);
+
+      draw_user(i->second);
+      glEnd();
     }
-
-    glBegin(GL_LINES);
-    glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
-	      1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
-	      1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
-	      1);
-
-    draw_user(i->second);
-    glEnd();
   }
 
   glEnable(GL_LINE_SMOOTH);
