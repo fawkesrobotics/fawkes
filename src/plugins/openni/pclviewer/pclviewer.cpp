@@ -61,7 +61,7 @@ GLint      g_mouse_state = -1;
 GLint      g_mouse_button = -1;
 
 BlackBoard *g_bb = NULL;;
-ObjectPositionInterface *g_obj_if = NULL;
+std::list<ObjectPositionInterface *> g_obj_ifs;
 
 UserMap  g_users;
 HandMap  g_hands;
@@ -176,7 +176,7 @@ draw_points()
 
 
 void
-draw_object()
+draw_objects()
 {
   glRotatef(90., 0, 0, 1);
   glRotatef(45., 0, 1, 0);
@@ -186,10 +186,16 @@ draw_object()
   glPointSize(10);
   glBegin(GL_POINTS);
   glColor3f(0, 1, 0);
-  glVertex4f(g_obj_if->relative_x(),
-	     g_obj_if->relative_y(),
-	     g_obj_if->relative_z(),
-	     1.0);
+  std::list<ObjectPositionInterface *>::iterator i;
+  for (i = g_obj_ifs.begin(); i != g_obj_ifs.end(); ++i) {
+    (*i)->read();
+    if ((*i)->is_visible()) {
+      glVertex4f((*i)->relative_x(),
+		 (*i)->relative_y(),
+		 (*i)->relative_z(),
+		 1.0);
+    }
+  }
   glColor3f(1.0, 1.0, 1.0);
   glEnd();
   glPointSize(1);
@@ -282,11 +288,9 @@ display()
 
     if (g_bb) {
       try {
-	if (g_obj_if) {
-	  g_obj_if->read();
-
+	if (! g_obj_ifs.empty()) {
 	  glPushMatrix();
-	    draw_object();
+	    draw_objects();
 	  glPopMatrix();
 	}
 
@@ -299,8 +303,11 @@ display()
 
       } catch (Exception &e) {
 	printf("Interface read failed, closing");
-	g_bb->close(g_obj_if);
-	g_obj_if = NULL;
+	std::list<ObjectPositionInterface *>::iterator i;
+	for (i = g_obj_ifs.begin(); i != g_obj_ifs.end(); ++i) {
+	  g_bb->close(*i);
+	}
+	g_obj_ifs.clear();
 	delete g_bb;
 	g_bb = NULL;
       }
@@ -360,12 +367,12 @@ init(ArgumentParser &argp)
     try {
       g_bb = new RemoteBlackBoard(host.c_str(), port);
 
-      std::string id = "Cannikin";
-      if (argp.has_arg("i")) {
-	id = argp.arg("i");
+      const std::vector< const char * > &items = argp.items();
+      for (unsigned int i = 0; i < items.size(); ++i) {
+	ObjectPositionInterface * obj_if =
+	  g_bb->open_for_reading<ObjectPositionInterface>(items[i]);
+	g_obj_ifs.push_back(obj_if);
       }
-
-      g_obj_if = g_bb->open_for_reading<ObjectPositionInterface>(id.c_str());
     } catch (Exception &e) {
       e.print_trace();
       exit(-1);
@@ -423,7 +430,7 @@ init(ArgumentParser &argp)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:n::si:Rj");
+  ArgumentParser argp(argc, argv, "hr:n::sRj");
   Thread::init_main();
 
   glutInit(&argc, argv);
