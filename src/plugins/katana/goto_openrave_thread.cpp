@@ -199,7 +199,14 @@ KatanaGotoOpenRAVEThread::once()
   // Get trajectories and move katana along them
   __target_traj = __OR_robot->get_trajectory_device();
   try {
-    move_katana();
+    bool final = false;
+    __it = __target_traj->begin();
+    while (!final) {
+      final = move_katana();
+
+      update_openrave_data();
+    }
+
   } catch (/*KNI*/::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Moving along trajectory failed (ignoring): %s", e.what());
     _finished = true;
@@ -210,8 +217,9 @@ KatanaGotoOpenRAVEThread::once()
 
 
   // TODO: Check for finished motion
-  // Can't use current version like in goto_thread, because target is not set in libkni!
-  // can check endeffector position instead, or check last angle values from __target_traj with katana-arm values
+  // Can't use current version like in goto_thread, because target is
+  // not set in libkni!  can check endeffector position instead, or
+  // check last angle values from __target_traj with katana-arm values
 
   _finished = true;
 }
@@ -249,7 +257,7 @@ KatanaGotoOpenRAVEThread::update_motor_data()
 
   // update motors
   while (1) {
-    usleep(__poll_interval_usec);
+    //usleep(__poll_interval_usec);
     try {
       base->GetSCT()->arr[0].recvDAT(); // update sensor values
       base->recvMPS(); // get position for all motors
@@ -270,7 +278,7 @@ KatanaGotoOpenRAVEThread::update_motor_data()
   // fetch encoder values
   num_errors = 0;
   while (1) {
-    usleep(__poll_interval_usec);
+    //usleep(__poll_interval_usec);
     try {
       __motor_encoders = _katana->getRobotEncoders(false); //fetch encoder values, param refreshEncoders=false
     } catch (/*KNI*/::Exception &e) {
@@ -290,15 +298,19 @@ KatanaGotoOpenRAVEThread::update_motor_data()
 }
 
 
-/** Move katana arm along the current trajectory __target_traj. */
-void
+/** Realize next trajectory point.
+ * Take the next point from the current trajectory __target_traj, set its
+ * joint values and advance the iterator.
+ * @return true if the trajectory is finished, i.e. there are no more points
+ * left, false otherwise.
+ */
+bool
 KatanaGotoOpenRAVEThread::move_katana()
 {
-  for( __it=__target_traj->begin(); __it!=__target_traj->end(); ++__it) {
-    for( unsigned int i=0; i<__it->size(); i++) {
-      _katana->moveMotorTo(i, __it->at(i));
-    }
+  for (unsigned int i = 0; i < __it->size(); ++i) {
+    _katana->moveMotorTo(i, __it->at(i));
   }
+  return (++__it == __target_traj->end());
 }
 
 #endif

@@ -59,7 +59,7 @@ class KatanaGotoOpenRAVEThread : public KatanaMotionThread
 
   virtual void update_openrave_data();
   virtual bool update_motor_data();
-  virtual void move_katana();
+  virtual bool move_katana();
 
  private:
   fawkes::OpenRAVERobot*                        __OR_robot;
