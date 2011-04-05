@@ -38,6 +38,10 @@ namespace fawkes {
 #endif
 
 
+/** Sets and loads a viewer for OpenRAVE.
+ * @param env OpenRAVE environment to be attached
+ * @param viewername name of the viewr, usually "qtcoin"
+ */
 void
 SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 {
@@ -52,7 +56,12 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 }
 
 
-
+/** @class OpenRAVEEnvironment <plugins/openrave/environment.h>
+* Class handling interaction with the OpenRAVE::EnvironmentBase class.
+* This class loads a scene and handles robots/objects etc in it. All calculations
+* in OpenRAVE (IK, planning, etc) are done based on the current scene.
+* @author Bahram Maleki-Fard
+*/
 
 /** Constructor.
  * @param logger pointer to fawkes logger
@@ -126,7 +135,7 @@ OpenRAVEEnvironment::disable_debug()
  * @return 1 if succeeded, 0 if not able to add robot
  */
 void
-OpenRAVEEnvironment::add_robot(RobotBasePtr robot)
+OpenRAVEEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
   if(!__env->AddRobot(robot))
     {throw fawkes::Exception("OpenRAVE Environment: Could not add robot to environment. Error in OpenRAVE.");}

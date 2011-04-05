@@ -59,8 +59,8 @@ class OpenRAVEManipulator
   virtual float angle_device_to_OR(unsigned int number, float angle) const;
 
   std::vector<motor_t>  __motors;       /**< vector of motors */
-  unsigned int          __cnt;
-  unsigned int          __cnt_device;
+  unsigned int          __cnt;          /**< number of motors on OpenRAVE model */
+  unsigned int          __cnt_device;   /**< number of motors on real device */
 };
 
 } // end of namespace fawkes

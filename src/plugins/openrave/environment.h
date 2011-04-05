@@ -40,6 +40,8 @@ void SetViewer(OpenRAVE::EnvironmentBasePtr penv, const std::string& viewername)
 
 class Logger;
 class OpenRAVERobot;
+
+/** OpenRAVEEnvironment class */
 class OpenRAVEEnvironment
 {
  public:

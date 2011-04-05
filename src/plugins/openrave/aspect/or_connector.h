@@ -142,6 +142,26 @@ class OpenRAVEConnector
   */
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z) = 0;
 
+  /** Attach a kinbody to the robot.
+  * @param name name of the object
+  * @param robot pointer to OpenRAVERobot that the target is set for
+  * @return true if successful
+  */
+  virtual bool attach_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+
+  /** Release a kinbody from the robot.
+  * @param name name of the object
+  * @param robot pointer to OpenRAVERobot that object is released from
+  * @return true if successful
+  */
+  virtual bool release_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+
+  /** Release all grabbed kinbodys from the robot.
+  * @param robot pointer to OpenRAVERobot that objects are released from
+  * @return true if successful
+  */
+  virtual bool release_all_objects(OpenRAVERobot* robot) = 0;
+
   /** Set an object as the target.
   * Currently the object should be cylindric, and stand upright. It may
   * also be rotated on its x-axis, but that rotation needs to be given in an argument
@@ -153,25 +173,6 @@ class OpenRAVEConnector
   * @return true if IK solvable
   */
   virtual bool set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x = 0) = 0;
-
-  /** Attach a kinbody to the robot.
-  * @param name name of the object
-  * @param robot pointer to OpenRAVERobot that the target is set for
-  * @return true if IK solvable
-  */
-  virtual bool attach_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
-
-  /** Release a kinbody from the robot.
-  * @param name name of the object
-  * @param robot pointer to OpenRAVERobot that object is released from
-  */
-  virtual bool release_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
-
-  /** Release all grabbed kinbodys from the robot.
-  * @param robot pointer to OpenRAVERobot that objects are released from
-  */
-  virtual bool release_all_objects(OpenRAVERobot* robot) = 0;
-
 };
 
 } // end namespace fawkes

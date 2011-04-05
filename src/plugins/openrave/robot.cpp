@@ -34,7 +34,17 @@ namespace fawkes {
 }
 #endif
 
-/** Constructor */
+/** @class OpenRAVERobot <plugins/openrave/robot.h>
+* Class handling interaction with the OpenRAVE::RobotBase class.
+* This class mainly handles robot specific tasks, like setting a
+* target, looking for IK solutions and handling planning parameters
+* for the robot.
+* @author Bahram Maleki-Fard
+*/
+
+/** Constructor
+ * @param logger pointer to fawkes logger
+ */
 OpenRAVERobot::OpenRAVERobot(fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
@@ -42,7 +52,11 @@ OpenRAVERobot::OpenRAVERobot(fawkes::Logger* logger) :
 {
   init();
 }
-/** Constructor */
+/** Constructor
+ * @param filename path to robot's xml file
+ * @param env pointer to OpenRAVEEnvironment object
+ * @param logger pointer to fawkes logger
+ */
 OpenRAVERobot::OpenRAVERobot(const std::string& filename, fawkes::OpenRAVEEnvironment* env, fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
