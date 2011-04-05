@@ -40,16 +40,20 @@
 #  include <sys/wait.h>
 #endif
 
-bool g_quit = false;
+int  g_quit = 0;
+bool g_force_quit = false;
 int  g_signum = SIGINT;
 
 void
 handle_signal(int signum)
 {
   printf("Received %s signal\n", strsignal(signum));
-  if (signum == SIGINT || signum == SIGTERM || signum == SIGKILL) {
-    g_signum = signum;
-    g_quit = true;
+  g_signum = signum;
+  switch (signum) {
+  case SIGINT:   g_quit += 1; break; // sigint escalates
+  case SIGTERM:  g_quit  = 3; break;
+  case SIGKILL:  g_quit  = 4; break;
+  default: break;
   }
 }
 
@@ -372,9 +376,44 @@ main(int argc, char **argv)
   }
 
   if (pid != -1) {
-    printf("Killing %s with signal %s\n", argv[prog_start], strsignal(g_signum));
-    if (kill(pid, g_signum) == -1) {
-      printf("Failed to kill %s: %s\n", argv[prog_start], strerror(errno));
+
+    int last_quit = 0;
+    printf("Stopping child. Press Ctrl-C again to escalate.\n");
+
+    for (unsigned int i = 0; i < 600; ++i) {
+      if (last_quit != g_quit) {
+	int signum;
+	if (g_quit <= 2) {
+	  signum = SIGINT;
+	} else if (g_quit == 3) {
+	  signum = SIGTERM;
+	} else {
+	  signum = SIGKILL;
+	}
+
+	printf("Killing %s with signal %s\n", argv[prog_start],
+	       strsignal(signum));
+	if (kill(pid, signum) == -1) {
+	  printf("Failed to kill %s: %s\n", argv[prog_start], strerror(errno));
+	}
+      }
+      last_quit = g_quit;
+
+      usleep(10000);
+      int status;
+      int rv = waitpid(pid, &status, WNOHANG);
+      if (rv == -1) {
+	if (errno == EINTR)  continue;
+	if (errno == ECHILD) {
+	  pid = -1;
+	  break;
+	}
+      } else if (rv > 0) {
+	pid = -1;
+	break;
+      }
+      if (i >= 300) g_quit = 2;
+      if (i >= 500) g_quit = 3;
     }
   }
 
