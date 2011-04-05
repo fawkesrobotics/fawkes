@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  goto_thread_openrave.cpp - Katana goto one-time thread using openrave lib
+ *  goto_openrave_thread.cpp - Katana goto one-time thread using openrave lib
  *
  *  Created: Wed Jun 10 11:45:31 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
@@ -34,10 +34,10 @@
 #include <plugins/openrave/types.h>
 
 #include <vector>
-
+#endif
 using namespace fawkes;
 
-/** @class KatanaGotoOpenRAVEThread "goto_thread_openrave.h"
+/** @class KatanaGotoOpenRAVEThread "goto_openrave_thread.h"
  * Katana collision-free goto thread.
  * This thread moves the arm into a specified position,
  * using IK and path-planning from OpenRAVE.
@@ -48,10 +48,12 @@ using namespace fawkes;
 /** Constructor.
  * @param katana linear motion base class
  * @param logger logger
- * @param robot_file path to robot's xml-file
- * @param use_viewer true, if viewer should be started (default: false)
+ * @param openrave pointer to OpenRAVEConnector aspect
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
+ * @param robot_file path to robot's xml-file
+ * @param autoload_IK true, if IK databas should be automatically generated (recommended)
+ * @param use_viewer true, if viewer should be started (default: false)
  */
 KatanaGotoOpenRAVEThread::KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katana,
 				   fawkes::Logger *logger,
@@ -73,6 +75,7 @@ KatanaGotoOpenRAVEThread::KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katan
 {
 }
 
+#ifdef HAVE_OPENRAVE
 
 /** Set target position.
  * @param x X coordinate relative to base

@@ -38,7 +38,7 @@ class KatanaGotoThread : public KatanaMotionThread
   virtual void once();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected:
+ private:
   virtual void run() { Thread::run(); }
 
   float __x, __y, __z;

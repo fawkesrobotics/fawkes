@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  goto_thread_openrave.h - Katana goto one-time thread using openrave lib
+ *  goto_openrave_thread.h - Katana goto one-time thread using openrave lib
  *
  *  Created: Wed Jun 10 11:44:24 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GOTO_THREAD_OPENRAVE_H_
-#define __PLUGINS_KATANA_GOTO_THREAD_OPENRAVE_H_
+#ifndef __PLUGINS_KATANA_GOTO_OPENRAVE_THREAD_H_
+#define __PLUGINS_KATANA_GOTO_OPENRAVE_THREAD_H_
 
 #include "motion_thread.h"
 
@@ -38,6 +38,7 @@ namespace fawkes {
 }
 #endif
 
+/** class KatanaGotoOpenRAVEThread */
 class KatanaGotoOpenRAVEThread : public KatanaMotionThread
 {
  public:
