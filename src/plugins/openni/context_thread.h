@@ -33,9 +33,11 @@
 #include <plugins/openni/aspect/openni_inifin.h>
 #include <utils/time/time.h>
 
+#include <sys/types.h>
 
 namespace xn {
   class Context;
+  class Device;
 }
 
 class OpenNiContextThread
@@ -57,6 +59,8 @@ class OpenNiContextThread
  private:
   void print_nodes();
   void verify_active();
+  void start_sensor_server();
+  void stop_sensor_server();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -65,13 +69,17 @@ class OpenNiContextThread
   fawkes::LockPtr<xn::Context>  __openni;
   fawkes::OpenNiAspectIniFin    __openni_aspect_inifin;
 
+  bool         __cfg_run_sensor_server;
+  std::string  __cfg_sensor_bin;
+  pid_t        __sensor_server_pid;
+  xn::Device  *__device;
+
   int __last_refcount;
 
   fawkes::Time __check_last;
   fawkes::Time __check_now;
 
   unsigned int __device_no_data_loops;
-
 };
 
 #endif
