@@ -57,6 +57,7 @@
     <offsetfrom>L4</offsetfrom>
     <Translation>0.0 0.0 0.12</Translation>
     <Geom type="trimesh">
+      <RotationAxis>0 0 1 90</RotationAxis>
       <Data>L5.wrl 0.001</Data>
       <Render>L5.wrl 0.001</Render>
     </Geom>
@@ -69,7 +70,7 @@
       <Data>Gripper_Base.wrl 0.001</Data>
       <Render>Gripper_Base.wrl 0.001</Render>
       <RotationAxis>1 0 0 90</RotationAxis>
-      <RotationAxis>0 0 1 90</RotationAxis>
+      <RotationAxis>0 0 1 180</RotationAxis>
     </Geom>
     <geom type="box">
       <extents>0.014 0.002 0.016</extents>
@@ -77,14 +78,14 @@
       <diffusecolor>0 0 1</diffusecolor>
       <transparency>0.5</transparency>
       <RotationAxis>1 0 0 90</RotationAxis>
-      <RotationAxis>0 0 1 90</RotationAxis>
+      <RotationAxis>0 0 1 180</RotationAxis>
     </geom>
   </Body>
   <Body name="Gripper_Right" type="dynamic">
     <offsetfrom>Gripper_Base</offsetfrom>
     <Translation>0.0 0.0 0.035</Translation>
     <RotationAxis>1 0 0 90</RotationAxis>
-    <RotationAxis>0 0 1 90</RotationAxis>
+    <RotationAxis>0 0 1 180</RotationAxis>
     <Geom type="trimesh">
       <Data>Gripper_Right.wrl 0.001</Data>
       <Render>Gripper_Right.wrl 0.001</Render>
@@ -115,7 +116,7 @@
     <offsetfrom>Gripper_Base</offsetfrom>
     <Translation>0.0 0.0 0.035</Translation>
     <RotationAxis>1 0 0 90</RotationAxis>
-    <RotationAxis>0 0 1 90</RotationAxis>
+    <RotationAxis>0 0 1 180</RotationAxis>
     <Geom type="trimesh">
       <Data>Gripper_Left.wrl 0.001</Data>
       <Render>Gripper_Left.wrl 0.001</Render>
@@ -198,7 +199,7 @@
     <Body>L5</Body>
     <offsetfrom>L5</offsetfrom>
     <!-- <limitsdeg>-168.0 168.0</limitsdeg> -->
-    <limitsdeg>-171.45 172.45</limitsdeg>
+    <limitsdeg>-81.45 263.45</limitsdeg>
     <axis>0 0 1</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>

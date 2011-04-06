@@ -78,7 +78,7 @@ OpenRAVEManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float an
       _angle = M_PI/2 - angle;
       break;
     case 4:
-      _angle = M_PI - angle; // TODO: use arm-montage angle
+      _angle = 1.5*M_PI - angle;
       break;
     default:
       _angle = angle;
@@ -112,7 +112,7 @@ OpenRAVEManipulatorKatana6M180::angle_device_to_OR(unsigned int number, float an
       _angle = M_PI/2 - angle;
       break;
     case 4:
-      _angle = M_PI - angle; // TODO: use arm-montage angle
+      _angle = 1.5*M_PI - angle;
       break;
     default:
       _angle = angle;
