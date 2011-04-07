@@ -256,9 +256,25 @@ OpenRAVEEnvironment::run_planner(OpenRAVERobot* robot)
     trajRobot->push_back((*it).q);
   }
 
-  // display motion in viewer
-  if( __viewer_enabled && robot->display_planned_movements())
-    {robot->get_robot_ptr()->SetActiveMotion(traj);}
+  // viewer options
+  if( __viewer_enabled ) {
+
+    // display trajectory in viewer
+    __graph_handle.clear(); // remove all GraphHandlerPtr and currently drawn plots
+    {
+      RobotBasePtr tmp_robot = robot->get_robot_ptr();
+      RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
+        for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
+          tmp_robot->SetActiveDOFValues((*it).q);
+          __graph_handle.push_back(__env->plot3(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+        }
+     } // robot state is restored
+
+    // display motion in viewer
+    if( robot->display_planned_movements())
+      {robot->get_robot_ptr()->SetActiveMotion(traj);}
+  }
+
 }
 
 

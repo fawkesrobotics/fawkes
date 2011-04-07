@@ -78,6 +78,8 @@ class OpenRAVEEnvironment
   OpenRAVE::EnvironmentBasePtr	__env;
   OpenRAVE::PlannerBasePtr      __planner;
 
+  std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
+
   bool  __viewer_enabled;
 };
 } // end of namespace fawkes
