@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_inifin.cpp - Fawkes OpenRAVEAspect initializer/finalizer
+ *  or_inifin.cpp - Fawkes OpenRaveAspect initializer/finalizer
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -32,38 +32,38 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRAVEAspectIniFin <plugins/rrd/aspect/rrd_inifin.h>
- * OpenRAVEAspect initializer/finalizer.
- * This initializer/finalizer will provide the OpenRAVEConnector to threads with
- * the OpenRAVEAspect.
+/** @class OpenRaveAspectIniFin <plugins/rrd/aspect/rrd_inifin.h>
+ * OpenRaveAspect initializer/finalizer.
+ * This initializer/finalizer will provide the OpenRaveConnector to threads with
+ * the OpenRaveAspect.
  * @author Bahram Maleki-Fard
  */
 
 /** Constructor.
- * @param openrave OpenRAVEConnector to pass on to threads
+ * @param openrave OpenRaveConnector to pass on to threads
  */
-OpenRAVEAspectIniFin::OpenRAVEAspectIniFin(OpenRAVEConnector *openrave)
-  : AspectIniFin("OpenRAVEAspect")
+OpenRaveAspectIniFin::OpenRaveAspectIniFin(OpenRaveConnector *openrave)
+  : AspectIniFin("OpenRaveAspect")
 {
   __openrave = openrave;
 }
 
 void
-OpenRAVEAspectIniFin::init(Thread *thread)
+OpenRaveAspectIniFin::init(Thread *thread)
 {
-  OpenRAVEAspect *or_thread;
-  or_thread = dynamic_cast<OpenRAVEAspect *>(thread);
+  OpenRaveAspect *or_thread;
+  or_thread = dynamic_cast<OpenRaveAspect *>(thread);
   if (or_thread == NULL) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "OpenRAVEAspect, but RTTI says it "
+					  "OpenRaveAspect, but RTTI says it "
 					  "has not. ", thread->name());
   }
 
-  or_thread->init_OpenRAVEAspect(__openrave);
+  or_thread->init_OpenRaveAspect(__openrave);
 }
 
 void
-OpenRAVEAspectIniFin::finalize(Thread *thread)
+OpenRaveAspectIniFin::finalize(Thread *thread)
 {
 }
 

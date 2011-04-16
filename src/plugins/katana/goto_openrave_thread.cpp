@@ -37,7 +37,7 @@
 #endif
 using namespace fawkes;
 
-/** @class KatanaGotoOpenRAVEThread "goto_openrave_thread.h"
+/** @class KatanaGotoOpenRaveThread "goto_openrave_thread.h"
  * Katana collision-free goto thread.
  * This thread moves the arm into a specified position,
  * using IK and path-planning from OpenRAVE.
@@ -48,21 +48,21 @@ using namespace fawkes;
 /** Constructor.
  * @param katana linear motion base class
  * @param logger logger
- * @param openrave pointer to OpenRAVEConnector aspect
+ * @param openrave pointer to OpenRaveConnector aspect
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  * @param robot_file path to robot's xml-file
  * @param autoload_IK true, if IK databas should be automatically generated (recommended)
  * @param use_viewer true, if viewer should be started (default: false)
  */
-KatanaGotoOpenRAVEThread::KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katana,
+KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katana,
 				   fawkes::Logger *logger,
-                                   fawkes::OpenRAVEConnector* openrave,
+                                   fawkes::OpenRaveConnector* openrave,
 				   unsigned int poll_interval_ms,
                                    std::string robot_file,
                                    bool autoload_IK,
                                    bool use_viewer)
-  : KatanaMotionThread("KatanaGotoOpenRAVEThread", katana, logger),
+  : KatanaMotionThread("KatanaGotoOpenRaveThread", katana, logger),
   __OR_robot( 0 ),
   __OR_manip( 0 ),
   __target_object( "" ),
@@ -86,7 +86,7 @@ KatanaGotoOpenRAVEThread::KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katan
  * @param psi Psi Euler angle of tool
  */
 void
-KatanaGotoOpenRAVEThread::set_target(float x, float y, float z,
+KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
 			     float phi, float theta, float psi)
 {
   __x     = x;
@@ -100,10 +100,10 @@ KatanaGotoOpenRAVEThread::set_target(float x, float y, float z,
 }
 
 /** Set target position.
- * @param object_name name of the object (kinbody) in OpenRAVEEnvironment
+ * @param object_name name of the object (kinbody) in OpenRaveEnvironment
  */
 void
-KatanaGotoOpenRAVEThread::set_target(const std::string& object_name, float rot_x)
+KatanaGotoOpenRaveThread::set_target(const std::string& object_name, float rot_x)
 {
   __target_object = object_name;
 
@@ -111,14 +111,14 @@ KatanaGotoOpenRAVEThread::set_target(const std::string& object_name, float rot_x
 }
 
 void
-KatanaGotoOpenRAVEThread::init()
+KatanaGotoOpenRaveThread::init()
 {
   try {
     __OR_robot = _openrave->add_robot(__cfg_robot_file, __cfg_autoload_IK);
 
     // configure manipulator
     // TODO: from config parameters? neccessary?
-    __OR_manip = new OpenRAVEManipulatorKatana6M180(6, 5);
+    __OR_manip = new OpenRaveManipulatorKatana6M180(6, 5);
     __OR_manip->add_motor(0,0);
     __OR_manip->add_motor(1,1);
     __OR_manip->add_motor(2,2);
@@ -141,7 +141,7 @@ KatanaGotoOpenRAVEThread::init()
 }
 
 void
-KatanaGotoOpenRAVEThread::finalize()
+KatanaGotoOpenRaveThread::finalize()
 {
   delete(__OR_robot);
   __OR_robot = NULL;
@@ -151,7 +151,7 @@ KatanaGotoOpenRAVEThread::finalize()
 }
 
 void
-KatanaGotoOpenRAVEThread::once()
+KatanaGotoOpenRaveThread::once()
 {
   // Fetch motor encoder values
   if( !update_motor_data() ) {
@@ -227,7 +227,7 @@ KatanaGotoOpenRAVEThread::once()
 
 /** Update data of arm in OpenRAVE model */
 void
-KatanaGotoOpenRAVEThread::update_openrave_data()
+KatanaGotoOpenRaveThread::update_openrave_data()
 {
   // Fetch motor encoder values
   if( !update_motor_data() ) {
@@ -250,7 +250,7 @@ KatanaGotoOpenRAVEThread::update_openrave_data()
  * @return true if succesful, false otherwise
  */
 bool
-KatanaGotoOpenRAVEThread::update_motor_data()
+KatanaGotoOpenRaveThread::update_motor_data()
 {
   CKatBase *base = _katana->GetBase();
   short num_errors  = 0;
@@ -305,7 +305,7 @@ KatanaGotoOpenRAVEThread::update_motor_data()
  * left, false otherwise.
  */
 bool
-KatanaGotoOpenRAVEThread::move_katana()
+KatanaGotoOpenRaveThread::move_katana()
 {
   for (unsigned int i = 0; i < __it->size(); ++i) {
     _katana->moveMotorTo(i, __it->at(i));

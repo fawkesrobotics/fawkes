@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_inifin.h - Fawkes OpenRAVEAspect initializer/finalizer
+ *  or_inifin.h - Fawkes OpenRaveAspect initializer/finalizer
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -33,18 +33,18 @@ namespace fawkes {
 }
 #endif
 
-class OpenRAVEConnector;
+class OpenRaveConnector;
 
-class OpenRAVEAspectIniFin : public AspectIniFin
+class OpenRaveAspectIniFin : public AspectIniFin
 {
  public:
-  OpenRAVEAspectIniFin(OpenRAVEConnector *openrave);
+  OpenRaveAspectIniFin(OpenRaveConnector *openrave);
 
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
  private:
-  OpenRAVEConnector *__openrave;
+  OpenRaveConnector *__openrave;
 };
 
 } // end namespace fawkes

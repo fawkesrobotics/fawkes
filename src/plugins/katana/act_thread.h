@@ -64,7 +64,7 @@ class KatanaActThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
 #ifdef HAVE_OPENRAVE
-  public fawkes::OpenRAVEAspect,
+  public fawkes::OpenRaveAspect,
 #endif
   public fawkes::BlackBoardInterfaceListener
 {
@@ -128,7 +128,7 @@ class KatanaActThread
   fawkes::RefPtr<KatanaGripperThread>          __gripper_thread;
   fawkes::RefPtr<KatanaMotorControlThread>     __motor_control_thread;
 #ifdef HAVE_OPENRAVE
-  fawkes::RefPtr<KatanaGotoOpenRAVEThread>     __goto_openrave_thread;
+  fawkes::RefPtr<KatanaGotoOpenRaveThread>     __goto_openrave_thread;
 #endif
 
   fawkes::RefPtr<CLMBase>        __katana;

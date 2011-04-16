@@ -56,7 +56,7 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 }
 
 
-/** @class OpenRAVEEnvironment <plugins/openrave/environment.h>
+/** @class OpenRaveEnvironment <plugins/openrave/environment.h>
 * Class handling interaction with the OpenRAVE::EnvironmentBase class.
 * This class loads a scene and handles robots/objects etc in it. All calculations
 * in OpenRAVE (IK, planning, etc) are done based on the current scene.
@@ -66,21 +66,21 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 /** Constructor.
  * @param logger pointer to fawkes logger
  */
-OpenRAVEEnvironment::OpenRAVEEnvironment(fawkes::Logger* logger) :
+OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
   __logger( logger ),
   __viewer_enabled( 0 )
 {
 }
 
 /** Destructor. */
-OpenRAVEEnvironment::~OpenRAVEEnvironment()
+OpenRaveEnvironment::~OpenRaveEnvironment()
 {
   this->destroy();
 }
 
 /** Create and lock the environment. */
 void
-OpenRAVEEnvironment::create()
+OpenRaveEnvironment::create()
 {
   // create environment
   __env = RaveCreateEnvironment();
@@ -97,7 +97,7 @@ OpenRAVEEnvironment::create()
 
 /** Destroy the environment. */
 void
-OpenRAVEEnvironment::destroy()
+OpenRaveEnvironment::destroy()
 {
   try {
     __env->Destroy();
@@ -111,21 +111,21 @@ OpenRAVEEnvironment::destroy()
 
 /** Lock the environment to prevent changes. */
 void
-OpenRAVEEnvironment::lock()
+OpenRaveEnvironment::lock()
 {
   EnvironmentMutex::scoped_lock lock(__env->GetMutex());
 }
 
 /** Enable debugging messages of OpenRAVE. */
 void
-OpenRAVEEnvironment::enable_debug()
+OpenRaveEnvironment::enable_debug()
 {
   RaveSetDebugLevel(Level_Debug);
 }
 
 /** Disable debugging messages of OpenRAVE. */
 void
-OpenRAVEEnvironment::disable_debug()
+OpenRaveEnvironment::disable_debug()
 {
   RaveSetDebugLevel(Level_Fatal);
 }
@@ -135,7 +135,7 @@ OpenRAVEEnvironment::disable_debug()
  * @return 1 if succeeded, 0 if not able to add robot
  */
 void
-OpenRAVEEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
+OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
   if(!__env->AddRobot(robot))
     {throw fawkes::Exception("OpenRAVE Environment: Could not add robot to environment. Error in OpenRAVE.");}
@@ -148,7 +148,7 @@ OpenRAVEEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
  * @return 1 if succeeded, 0 if not able to load file
  */
 void
-OpenRAVEEnvironment::add_robot(const std::string& filename)
+OpenRaveEnvironment::add_robot(const std::string& filename)
 {
   // load the robot
   RobotBasePtr robot = __env->ReadRobotXMLFile(filename);
@@ -164,11 +164,11 @@ OpenRAVEEnvironment::add_robot(const std::string& filename)
 }
 
 /** Add a robot into the scene.
- * @param robot pointer to OpenRAVERobot object of robot to add
+ * @param robot pointer to OpenRaveRobot object of robot to add
  * @return 1 if succeeded, 0 if not able to add robot
  */
 void
-OpenRAVEEnvironment::add_robot(OpenRAVERobot* robot)
+OpenRaveEnvironment::add_robot(OpenRaveRobot* robot)
 {
   add_robot(robot->get_robot_ptr());
 }
@@ -178,7 +178,7 @@ OpenRAVEEnvironment::add_robot(OpenRAVERobot* robot)
  * @return EnvironmentBasePtr in use
  */
 OpenRAVE::EnvironmentBasePtr
-OpenRAVEEnvironment::get_env_ptr() const
+OpenRaveEnvironment::get_env_ptr() const
 {
   return __env;
 }
@@ -188,7 +188,7 @@ OpenRAVEEnvironment::get_env_ptr() const
  *  a lot of CPU/GPU resources.
  */
 void
-OpenRAVEEnvironment::start_viewer()
+OpenRaveEnvironment::start_viewer()
 {
   try {
     boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
@@ -202,10 +202,10 @@ OpenRAVEEnvironment::start_viewer()
 }
 
 /** Autogenerate IKfast IK solver for robot.
- * @param robot pointer to OpenRAVERobot object
+ * @param robot pointer to OpenRaveRobot object
  */
 void
-OpenRAVEEnvironment::load_IK_solver(OpenRAVERobot* robot)
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot)
 {
   ProblemInstancePtr ikfast = RaveCreateProblem(__env,"ikfast");
   RobotBasePtr robotBase = robot->get_robot_ptr();
@@ -220,11 +220,11 @@ OpenRAVEEnvironment::load_IK_solver(OpenRAVERobot* robot)
 }
 
 /** Plan collision-free path for current and target manipulator
- * configuration of a OpenRAVERobot robot.
- * @param robot pointer to OpenRAVERobot object of robot to use
+ * configuration of a OpenRaveRobot robot.
+ * @param robot pointer to OpenRaveRobot object of robot to use
  */
 void
-OpenRAVEEnvironment::run_planner(OpenRAVERobot* robot)
+OpenRaveEnvironment::run_planner(OpenRaveRobot* robot)
 {
   bool success;
 
@@ -284,7 +284,7 @@ OpenRAVEEnvironment::run_planner(OpenRAVERobot* robot)
  * @return true if successful
  */
 bool
-OpenRAVEEnvironment::add_object(const std::string& name, const std::string& filename)
+OpenRaveEnvironment::add_object(const std::string& name, const std::string& filename)
 {
   try {
     KinBodyPtr kb = __env->ReadKinBodyXMLFile(filename);
@@ -304,7 +304,7 @@ OpenRAVEEnvironment::add_object(const std::string& name, const std::string& file
  * @return true if successful
  */
 bool
-OpenRAVEEnvironment::delete_object(const std::string& name)
+OpenRaveEnvironment::delete_object(const std::string& name)
 {
   try {
     KinBodyPtr kb = __env->GetKinBody(name);
@@ -324,7 +324,7 @@ OpenRAVEEnvironment::delete_object(const std::string& name)
  * @return true if successful
  */
 bool
-OpenRAVEEnvironment::rename_object(const std::string& name, const std::string& new_name)
+OpenRaveEnvironment::rename_object(const std::string& name, const std::string& new_name)
 {
   try {
     KinBodyPtr kb = __env->GetKinBody(name);
@@ -348,7 +348,7 @@ OpenRAVEEnvironment::rename_object(const std::string& name, const std::string& n
  * @return true if successful
  */
 bool
-OpenRAVEEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot)
+OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot)
 {
   try {
     KinBodyPtr kb = __env->GetKinBody(name);
@@ -380,7 +380,7 @@ OpenRAVEEnvironment::move_object(const std::string& name, float trans_x, float t
  * @return true if successful
  */
 bool
-OpenRAVEEnvironment::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z)
+OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z)
 {
   try {
     KinBodyPtr kb = __env->GetKinBody(name);

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  OpenRAVEInterface.cpp - Fawkes BlackBoard Interface - OpenRAVEInterface
+ *  OpenRaveInterface.cpp - Fawkes BlackBoard Interface - OpenRaveInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2011  Bahram Maleki-Fard
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/OpenRAVEInterface.h>
+#include <interfaces/OpenRaveInterface.h>
 
 #include <core/exceptions/software.h>
 
@@ -30,8 +30,8 @@
 
 namespace fawkes {
 
-/** @class OpenRAVEInterface <interfaces/OpenRAVEInterface.h>
- * OpenRAVEInterface Fawkes BlackBoard Interface.
+/** @class OpenRaveInterface <interfaces/OpenRaveInterface.h>
+ * OpenRaveInterface Fawkes BlackBoard Interface.
  * 
       Interface providing access to OpenRAVE functionality
     
@@ -41,11 +41,11 @@ namespace fawkes {
 
 
 /** Constructor */
-OpenRAVEInterface::OpenRAVEInterface() : Interface()
+OpenRaveInterface::OpenRaveInterface() : Interface()
 {
-  data_size = sizeof(OpenRAVEInterface_data_t);
+  data_size = sizeof(OpenRaveInterface_data_t);
   data_ptr  = malloc(data_size);
-  data      = (OpenRAVEInterface_data_t *)data_ptr;
+  data      = (OpenRaveInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
@@ -60,12 +60,12 @@ OpenRAVEInterface::OpenRAVEInterface() : Interface()
   add_messageinfo("MoveObjectMessage");
   add_messageinfo("RotateObjectMessage");
   add_messageinfo("RenameObjectMessage");
-  unsigned char tmp_hash[] = {0x5e, 0x34, 0xb9, 0xd9, 0x92, 0x45, 0x44, 0x88, 0xe2, 0xde, 0x4e, 0x92, 0xff, 0x37, 0x4a, 0x14};
+  unsigned char tmp_hash[] = {0x8b, 0x75, 0xea, 0xc, 0x65, 0xda, 0x9f, 0x25, 0x2, 0x8c, 0x22, 0x47, 0x2b, 0xee, 0xd1, 0xe5};
   set_hash(tmp_hash);
 }
 
 /** Destructor */
-OpenRAVEInterface::~OpenRAVEInterface()
+OpenRaveInterface::~OpenRaveInterface()
 {
   free(data_ptr);
 }
@@ -76,7 +76,7 @@ OpenRAVEInterface::~OpenRAVEInterface()
  * @return msgid value
  */
 uint32_t
-OpenRAVEInterface::msgid() const
+OpenRaveInterface::msgid() const
 {
   return data->msgid;
 }
@@ -86,7 +86,7 @@ OpenRAVEInterface::msgid() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::maxlenof_msgid() const
+OpenRaveInterface::maxlenof_msgid() const
 {
   return 1;
 }
@@ -97,7 +97,7 @@ OpenRAVEInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-OpenRAVEInterface::set_msgid(const uint32_t new_msgid)
+OpenRaveInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
   data_changed = true;
@@ -109,7 +109,7 @@ OpenRAVEInterface::set_msgid(const uint32_t new_msgid)
  * @return final value
  */
 bool
-OpenRAVEInterface::is_final() const
+OpenRaveInterface::is_final() const
 {
   return data->final;
 }
@@ -119,7 +119,7 @@ OpenRAVEInterface::is_final() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::maxlenof_final() const
+OpenRaveInterface::maxlenof_final() const
 {
   return 1;
 }
@@ -130,7 +130,7 @@ OpenRAVEInterface::maxlenof_final() const
  * @param new_final new final value
  */
 void
-OpenRAVEInterface::set_final(const bool new_final)
+OpenRaveInterface::set_final(const bool new_final)
 {
   data->final = new_final;
   data_changed = true;
@@ -143,7 +143,7 @@ OpenRAVEInterface::set_final(const bool new_final)
  * @return error_code value
  */
 uint32_t
-OpenRAVEInterface::error_code() const
+OpenRaveInterface::error_code() const
 {
   return data->error_code;
 }
@@ -153,7 +153,7 @@ OpenRAVEInterface::error_code() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::maxlenof_error_code() const
+OpenRaveInterface::maxlenof_error_code() const
 {
   return 1;
 }
@@ -165,7 +165,7 @@ OpenRAVEInterface::maxlenof_error_code() const
  * @param new_error_code new error_code value
  */
 void
-OpenRAVEInterface::set_error_code(const uint32_t new_error_code)
+OpenRaveInterface::set_error_code(const uint32_t new_error_code)
 {
   data->error_code = new_error_code;
   data_changed = true;
@@ -176,7 +176,7 @@ OpenRAVEInterface::set_error_code(const uint32_t new_error_code)
  * @return success value
  */
 bool
-OpenRAVEInterface::is_success() const
+OpenRaveInterface::is_success() const
 {
   return data->success;
 }
@@ -186,7 +186,7 @@ OpenRAVEInterface::is_success() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::maxlenof_success() const
+OpenRaveInterface::maxlenof_success() const
 {
   return 1;
 }
@@ -196,7 +196,7 @@ OpenRAVEInterface::maxlenof_success() const
  * @param new_success new success value
  */
 void
-OpenRAVEInterface::set_success(const bool new_success)
+OpenRaveInterface::set_success(const bool new_success)
 {
   data->success = new_success;
   data_changed = true;
@@ -204,7 +204,7 @@ OpenRAVEInterface::set_success(const bool new_success)
 
 /* =========== message create =========== */
 Message *
-OpenRAVEInterface::create_message(const char *type) const
+OpenRaveInterface::create_message(const char *type) const
 {
   if ( strncmp("AddObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new AddObjectMessage();
@@ -233,24 +233,24 @@ OpenRAVEInterface::create_message(const char *type) const
  * @param other other interface to copy values from
  */
 void
-OpenRAVEInterface::copy_values(const Interface *other)
+OpenRaveInterface::copy_values(const Interface *other)
 {
-  const OpenRAVEInterface *oi = dynamic_cast<const OpenRAVEInterface *>(other);
+  const OpenRaveInterface *oi = dynamic_cast<const OpenRaveInterface *>(other);
   if (oi == NULL) {
     throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
                                 type(), other->type());
   }
-  memcpy(data, oi->data, sizeof(OpenRAVEInterface_data_t));
+  memcpy(data, oi->data, sizeof(OpenRaveInterface_data_t));
 }
 
 const char *
-OpenRAVEInterface::enum_tostring(const char *enumtype, int val) const
+OpenRaveInterface::enum_tostring(const char *enumtype, int val) const
 {
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */
-/** @class OpenRAVEInterface::AddObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::AddObjectMessage <interfaces/OpenRaveInterface.h>
  * AddObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -261,7 +261,7 @@ OpenRAVEInterface::enum_tostring(const char *enumtype, int val) const
  * @param ini_name initial value for name
  * @param ini_path initial value for path
  */
-OpenRAVEInterface::AddObjectMessage::AddObjectMessage(const char * ini_name, const char * ini_path) : Message("AddObjectMessage")
+OpenRaveInterface::AddObjectMessage::AddObjectMessage(const char * ini_name, const char * ini_path) : Message("AddObjectMessage")
 {
   data_size = sizeof(AddObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -274,7 +274,7 @@ OpenRAVEInterface::AddObjectMessage::AddObjectMessage(const char * ini_name, con
   add_fieldinfo(IFT_STRING, "path", 1024, data->path);
 }
 /** Constructor */
-OpenRAVEInterface::AddObjectMessage::AddObjectMessage() : Message("AddObjectMessage")
+OpenRaveInterface::AddObjectMessage::AddObjectMessage() : Message("AddObjectMessage")
 {
   data_size = sizeof(AddObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -286,7 +286,7 @@ OpenRAVEInterface::AddObjectMessage::AddObjectMessage() : Message("AddObjectMess
 }
 
 /** Destructor */
-OpenRAVEInterface::AddObjectMessage::~AddObjectMessage()
+OpenRaveInterface::AddObjectMessage::~AddObjectMessage()
 {
   free(data_ptr);
 }
@@ -294,7 +294,7 @@ OpenRAVEInterface::AddObjectMessage::~AddObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::AddObjectMessage::AddObjectMessage(const AddObjectMessage *m) : Message("AddObjectMessage")
+OpenRaveInterface::AddObjectMessage::AddObjectMessage(const AddObjectMessage *m) : Message("AddObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -309,7 +309,7 @@ OpenRAVEInterface::AddObjectMessage::AddObjectMessage(const AddObjectMessage *m)
  * @return name value
  */
 char *
-OpenRAVEInterface::AddObjectMessage::name() const
+OpenRaveInterface::AddObjectMessage::name() const
 {
   return data->name;
 }
@@ -319,7 +319,7 @@ OpenRAVEInterface::AddObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::AddObjectMessage::maxlenof_name() const
+OpenRaveInterface::AddObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -329,7 +329,7 @@ OpenRAVEInterface::AddObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::AddObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::AddObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -339,7 +339,7 @@ OpenRAVEInterface::AddObjectMessage::set_name(const char * new_name)
  * @return path value
  */
 char *
-OpenRAVEInterface::AddObjectMessage::path() const
+OpenRaveInterface::AddObjectMessage::path() const
 {
   return data->path;
 }
@@ -349,7 +349,7 @@ OpenRAVEInterface::AddObjectMessage::path() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::AddObjectMessage::maxlenof_path() const
+OpenRaveInterface::AddObjectMessage::maxlenof_path() const
 {
   return 1024;
 }
@@ -359,7 +359,7 @@ OpenRAVEInterface::AddObjectMessage::maxlenof_path() const
  * @param new_path new path value
  */
 void
-OpenRAVEInterface::AddObjectMessage::set_path(const char * new_path)
+OpenRaveInterface::AddObjectMessage::set_path(const char * new_path)
 {
   strncpy(data->path, new_path, sizeof(data->path));
 }
@@ -370,11 +370,11 @@ OpenRAVEInterface::AddObjectMessage::set_path(const char * new_path)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::AddObjectMessage::clone() const
+OpenRaveInterface::AddObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::AddObjectMessage(this);
+  return new OpenRaveInterface::AddObjectMessage(this);
 }
-/** @class OpenRAVEInterface::DeleteObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::DeleteObjectMessage <interfaces/OpenRaveInterface.h>
  * DeleteObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -384,7 +384,7 @@ OpenRAVEInterface::AddObjectMessage::clone() const
 /** Constructor with initial values.
  * @param ini_name initial value for name
  */
-OpenRAVEInterface::DeleteObjectMessage::DeleteObjectMessage(const char * ini_name) : Message("DeleteObjectMessage")
+OpenRaveInterface::DeleteObjectMessage::DeleteObjectMessage(const char * ini_name) : Message("DeleteObjectMessage")
 {
   data_size = sizeof(DeleteObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -395,7 +395,7 @@ OpenRAVEInterface::DeleteObjectMessage::DeleteObjectMessage(const char * ini_nam
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
 }
 /** Constructor */
-OpenRAVEInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("DeleteObjectMessage")
+OpenRaveInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("DeleteObjectMessage")
 {
   data_size = sizeof(DeleteObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -406,7 +406,7 @@ OpenRAVEInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("DeleteO
 }
 
 /** Destructor */
-OpenRAVEInterface::DeleteObjectMessage::~DeleteObjectMessage()
+OpenRaveInterface::DeleteObjectMessage::~DeleteObjectMessage()
 {
   free(data_ptr);
 }
@@ -414,7 +414,7 @@ OpenRAVEInterface::DeleteObjectMessage::~DeleteObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::DeleteObjectMessage::DeleteObjectMessage(const DeleteObjectMessage *m) : Message("DeleteObjectMessage")
+OpenRaveInterface::DeleteObjectMessage::DeleteObjectMessage(const DeleteObjectMessage *m) : Message("DeleteObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -429,7 +429,7 @@ OpenRAVEInterface::DeleteObjectMessage::DeleteObjectMessage(const DeleteObjectMe
  * @return name value
  */
 char *
-OpenRAVEInterface::DeleteObjectMessage::name() const
+OpenRaveInterface::DeleteObjectMessage::name() const
 {
   return data->name;
 }
@@ -439,7 +439,7 @@ OpenRAVEInterface::DeleteObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::DeleteObjectMessage::maxlenof_name() const
+OpenRaveInterface::DeleteObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -449,7 +449,7 @@ OpenRAVEInterface::DeleteObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::DeleteObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::DeleteObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -460,11 +460,11 @@ OpenRAVEInterface::DeleteObjectMessage::set_name(const char * new_name)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::DeleteObjectMessage::clone() const
+OpenRaveInterface::DeleteObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::DeleteObjectMessage(this);
+  return new OpenRaveInterface::DeleteObjectMessage(this);
 }
-/** @class OpenRAVEInterface::AttachObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::AttachObjectMessage <interfaces/OpenRaveInterface.h>
  * AttachObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -474,7 +474,7 @@ OpenRAVEInterface::DeleteObjectMessage::clone() const
 /** Constructor with initial values.
  * @param ini_name initial value for name
  */
-OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_name) : Message("AttachObjectMessage")
+OpenRaveInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_name) : Message("AttachObjectMessage")
 {
   data_size = sizeof(AttachObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -485,7 +485,7 @@ OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_nam
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
 }
 /** Constructor */
-OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage() : Message("AttachObjectMessage")
+OpenRaveInterface::AttachObjectMessage::AttachObjectMessage() : Message("AttachObjectMessage")
 {
   data_size = sizeof(AttachObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -496,7 +496,7 @@ OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage() : Message("AttachO
 }
 
 /** Destructor */
-OpenRAVEInterface::AttachObjectMessage::~AttachObjectMessage()
+OpenRaveInterface::AttachObjectMessage::~AttachObjectMessage()
 {
   free(data_ptr);
 }
@@ -504,7 +504,7 @@ OpenRAVEInterface::AttachObjectMessage::~AttachObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage(const AttachObjectMessage *m) : Message("AttachObjectMessage")
+OpenRaveInterface::AttachObjectMessage::AttachObjectMessage(const AttachObjectMessage *m) : Message("AttachObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -519,7 +519,7 @@ OpenRAVEInterface::AttachObjectMessage::AttachObjectMessage(const AttachObjectMe
  * @return name value
  */
 char *
-OpenRAVEInterface::AttachObjectMessage::name() const
+OpenRaveInterface::AttachObjectMessage::name() const
 {
   return data->name;
 }
@@ -529,7 +529,7 @@ OpenRAVEInterface::AttachObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::AttachObjectMessage::maxlenof_name() const
+OpenRaveInterface::AttachObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -539,7 +539,7 @@ OpenRAVEInterface::AttachObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::AttachObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::AttachObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -550,11 +550,11 @@ OpenRAVEInterface::AttachObjectMessage::set_name(const char * new_name)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::AttachObjectMessage::clone() const
+OpenRaveInterface::AttachObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::AttachObjectMessage(this);
+  return new OpenRaveInterface::AttachObjectMessage(this);
 }
-/** @class OpenRAVEInterface::ReleaseObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::ReleaseObjectMessage <interfaces/OpenRaveInterface.h>
  * ReleaseObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -564,7 +564,7 @@ OpenRAVEInterface::AttachObjectMessage::clone() const
 /** Constructor with initial values.
  * @param ini_name initial value for name
  */
-OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage(const char * ini_name) : Message("ReleaseObjectMessage")
+OpenRaveInterface::ReleaseObjectMessage::ReleaseObjectMessage(const char * ini_name) : Message("ReleaseObjectMessage")
 {
   data_size = sizeof(ReleaseObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -575,7 +575,7 @@ OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage(const char * ini_n
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
 }
 /** Constructor */
-OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage() : Message("ReleaseObjectMessage")
+OpenRaveInterface::ReleaseObjectMessage::ReleaseObjectMessage() : Message("ReleaseObjectMessage")
 {
   data_size = sizeof(ReleaseObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -586,7 +586,7 @@ OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage() : Message("Relea
 }
 
 /** Destructor */
-OpenRAVEInterface::ReleaseObjectMessage::~ReleaseObjectMessage()
+OpenRaveInterface::ReleaseObjectMessage::~ReleaseObjectMessage()
 {
   free(data_ptr);
 }
@@ -594,7 +594,7 @@ OpenRAVEInterface::ReleaseObjectMessage::~ReleaseObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage(const ReleaseObjectMessage *m) : Message("ReleaseObjectMessage")
+OpenRaveInterface::ReleaseObjectMessage::ReleaseObjectMessage(const ReleaseObjectMessage *m) : Message("ReleaseObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -609,7 +609,7 @@ OpenRAVEInterface::ReleaseObjectMessage::ReleaseObjectMessage(const ReleaseObjec
  * @return name value
  */
 char *
-OpenRAVEInterface::ReleaseObjectMessage::name() const
+OpenRaveInterface::ReleaseObjectMessage::name() const
 {
   return data->name;
 }
@@ -619,7 +619,7 @@ OpenRAVEInterface::ReleaseObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::ReleaseObjectMessage::maxlenof_name() const
+OpenRaveInterface::ReleaseObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -629,7 +629,7 @@ OpenRAVEInterface::ReleaseObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::ReleaseObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::ReleaseObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -640,11 +640,11 @@ OpenRAVEInterface::ReleaseObjectMessage::set_name(const char * new_name)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::ReleaseObjectMessage::clone() const
+OpenRaveInterface::ReleaseObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::ReleaseObjectMessage(this);
+  return new OpenRaveInterface::ReleaseObjectMessage(this);
 }
-/** @class OpenRAVEInterface::ReleaseAllObjectsMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::ReleaseAllObjectsMessage <interfaces/OpenRaveInterface.h>
  * ReleaseAllObjectsMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -652,7 +652,7 @@ OpenRAVEInterface::ReleaseObjectMessage::clone() const
 
 
 /** Constructor */
-OpenRAVEInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage() : Message("ReleaseAllObjectsMessage")
+OpenRaveInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage() : Message("ReleaseAllObjectsMessage")
 {
   data_size = sizeof(ReleaseAllObjectsMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -662,7 +662,7 @@ OpenRAVEInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage() : Messag
 }
 
 /** Destructor */
-OpenRAVEInterface::ReleaseAllObjectsMessage::~ReleaseAllObjectsMessage()
+OpenRaveInterface::ReleaseAllObjectsMessage::~ReleaseAllObjectsMessage()
 {
   free(data_ptr);
 }
@@ -670,7 +670,7 @@ OpenRAVEInterface::ReleaseAllObjectsMessage::~ReleaseAllObjectsMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage(const ReleaseAllObjectsMessage *m) : Message("ReleaseAllObjectsMessage")
+OpenRaveInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage(const ReleaseAllObjectsMessage *m) : Message("ReleaseAllObjectsMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -686,11 +686,11 @@ OpenRAVEInterface::ReleaseAllObjectsMessage::ReleaseAllObjectsMessage(const Rele
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::ReleaseAllObjectsMessage::clone() const
+OpenRaveInterface::ReleaseAllObjectsMessage::clone() const
 {
-  return new OpenRAVEInterface::ReleaseAllObjectsMessage(this);
+  return new OpenRaveInterface::ReleaseAllObjectsMessage(this);
 }
-/** @class OpenRAVEInterface::MoveObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::MoveObjectMessage <interfaces/OpenRaveInterface.h>
  * MoveObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -703,7 +703,7 @@ OpenRAVEInterface::ReleaseAllObjectsMessage::clone() const
  * @param ini_y initial value for y
  * @param ini_z initial value for z
  */
-OpenRAVEInterface::MoveObjectMessage::MoveObjectMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_z) : Message("MoveObjectMessage")
+OpenRaveInterface::MoveObjectMessage::MoveObjectMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_z) : Message("MoveObjectMessage")
 {
   data_size = sizeof(MoveObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -720,7 +720,7 @@ OpenRAVEInterface::MoveObjectMessage::MoveObjectMessage(const char * ini_name, c
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
 }
 /** Constructor */
-OpenRAVEInterface::MoveObjectMessage::MoveObjectMessage() : Message("MoveObjectMessage")
+OpenRaveInterface::MoveObjectMessage::MoveObjectMessage() : Message("MoveObjectMessage")
 {
   data_size = sizeof(MoveObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -734,7 +734,7 @@ OpenRAVEInterface::MoveObjectMessage::MoveObjectMessage() : Message("MoveObjectM
 }
 
 /** Destructor */
-OpenRAVEInterface::MoveObjectMessage::~MoveObjectMessage()
+OpenRaveInterface::MoveObjectMessage::~MoveObjectMessage()
 {
   free(data_ptr);
 }
@@ -742,7 +742,7 @@ OpenRAVEInterface::MoveObjectMessage::~MoveObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::MoveObjectMessage::MoveObjectMessage(const MoveObjectMessage *m) : Message("MoveObjectMessage")
+OpenRaveInterface::MoveObjectMessage::MoveObjectMessage(const MoveObjectMessage *m) : Message("MoveObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -757,7 +757,7 @@ OpenRAVEInterface::MoveObjectMessage::MoveObjectMessage(const MoveObjectMessage 
  * @return name value
  */
 char *
-OpenRAVEInterface::MoveObjectMessage::name() const
+OpenRaveInterface::MoveObjectMessage::name() const
 {
   return data->name;
 }
@@ -767,7 +767,7 @@ OpenRAVEInterface::MoveObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::MoveObjectMessage::maxlenof_name() const
+OpenRaveInterface::MoveObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -777,7 +777,7 @@ OpenRAVEInterface::MoveObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::MoveObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::MoveObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -787,7 +787,7 @@ OpenRAVEInterface::MoveObjectMessage::set_name(const char * new_name)
  * @return x value
  */
 float
-OpenRAVEInterface::MoveObjectMessage::x() const
+OpenRaveInterface::MoveObjectMessage::x() const
 {
   return data->x;
 }
@@ -797,7 +797,7 @@ OpenRAVEInterface::MoveObjectMessage::x() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::MoveObjectMessage::maxlenof_x() const
+OpenRaveInterface::MoveObjectMessage::maxlenof_x() const
 {
   return 1;
 }
@@ -807,7 +807,7 @@ OpenRAVEInterface::MoveObjectMessage::maxlenof_x() const
  * @param new_x new x value
  */
 void
-OpenRAVEInterface::MoveObjectMessage::set_x(const float new_x)
+OpenRaveInterface::MoveObjectMessage::set_x(const float new_x)
 {
   data->x = new_x;
 }
@@ -817,7 +817,7 @@ OpenRAVEInterface::MoveObjectMessage::set_x(const float new_x)
  * @return y value
  */
 float
-OpenRAVEInterface::MoveObjectMessage::y() const
+OpenRaveInterface::MoveObjectMessage::y() const
 {
   return data->y;
 }
@@ -827,7 +827,7 @@ OpenRAVEInterface::MoveObjectMessage::y() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::MoveObjectMessage::maxlenof_y() const
+OpenRaveInterface::MoveObjectMessage::maxlenof_y() const
 {
   return 1;
 }
@@ -837,7 +837,7 @@ OpenRAVEInterface::MoveObjectMessage::maxlenof_y() const
  * @param new_y new y value
  */
 void
-OpenRAVEInterface::MoveObjectMessage::set_y(const float new_y)
+OpenRaveInterface::MoveObjectMessage::set_y(const float new_y)
 {
   data->y = new_y;
 }
@@ -847,7 +847,7 @@ OpenRAVEInterface::MoveObjectMessage::set_y(const float new_y)
  * @return z value
  */
 float
-OpenRAVEInterface::MoveObjectMessage::z() const
+OpenRaveInterface::MoveObjectMessage::z() const
 {
   return data->z;
 }
@@ -857,7 +857,7 @@ OpenRAVEInterface::MoveObjectMessage::z() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::MoveObjectMessage::maxlenof_z() const
+OpenRaveInterface::MoveObjectMessage::maxlenof_z() const
 {
   return 1;
 }
@@ -867,7 +867,7 @@ OpenRAVEInterface::MoveObjectMessage::maxlenof_z() const
  * @param new_z new z value
  */
 void
-OpenRAVEInterface::MoveObjectMessage::set_z(const float new_z)
+OpenRaveInterface::MoveObjectMessage::set_z(const float new_z)
 {
   data->z = new_z;
 }
@@ -878,11 +878,11 @@ OpenRAVEInterface::MoveObjectMessage::set_z(const float new_z)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::MoveObjectMessage::clone() const
+OpenRaveInterface::MoveObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::MoveObjectMessage(this);
+  return new OpenRaveInterface::MoveObjectMessage(this);
 }
-/** @class OpenRAVEInterface::RotateObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::RotateObjectMessage <interfaces/OpenRaveInterface.h>
  * RotateObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -895,7 +895,7 @@ OpenRAVEInterface::MoveObjectMessage::clone() const
  * @param ini_y initial value for y
  * @param ini_z initial value for z
  */
-OpenRAVEInterface::RotateObjectMessage::RotateObjectMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_z) : Message("RotateObjectMessage")
+OpenRaveInterface::RotateObjectMessage::RotateObjectMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_z) : Message("RotateObjectMessage")
 {
   data_size = sizeof(RotateObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -912,7 +912,7 @@ OpenRAVEInterface::RotateObjectMessage::RotateObjectMessage(const char * ini_nam
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
 }
 /** Constructor */
-OpenRAVEInterface::RotateObjectMessage::RotateObjectMessage() : Message("RotateObjectMessage")
+OpenRaveInterface::RotateObjectMessage::RotateObjectMessage() : Message("RotateObjectMessage")
 {
   data_size = sizeof(RotateObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -926,7 +926,7 @@ OpenRAVEInterface::RotateObjectMessage::RotateObjectMessage() : Message("RotateO
 }
 
 /** Destructor */
-OpenRAVEInterface::RotateObjectMessage::~RotateObjectMessage()
+OpenRaveInterface::RotateObjectMessage::~RotateObjectMessage()
 {
   free(data_ptr);
 }
@@ -934,7 +934,7 @@ OpenRAVEInterface::RotateObjectMessage::~RotateObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::RotateObjectMessage::RotateObjectMessage(const RotateObjectMessage *m) : Message("RotateObjectMessage")
+OpenRaveInterface::RotateObjectMessage::RotateObjectMessage(const RotateObjectMessage *m) : Message("RotateObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -949,7 +949,7 @@ OpenRAVEInterface::RotateObjectMessage::RotateObjectMessage(const RotateObjectMe
  * @return name value
  */
 char *
-OpenRAVEInterface::RotateObjectMessage::name() const
+OpenRaveInterface::RotateObjectMessage::name() const
 {
   return data->name;
 }
@@ -959,7 +959,7 @@ OpenRAVEInterface::RotateObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::RotateObjectMessage::maxlenof_name() const
+OpenRaveInterface::RotateObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -969,7 +969,7 @@ OpenRAVEInterface::RotateObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::RotateObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::RotateObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -979,7 +979,7 @@ OpenRAVEInterface::RotateObjectMessage::set_name(const char * new_name)
  * @return x value
  */
 float
-OpenRAVEInterface::RotateObjectMessage::x() const
+OpenRaveInterface::RotateObjectMessage::x() const
 {
   return data->x;
 }
@@ -989,7 +989,7 @@ OpenRAVEInterface::RotateObjectMessage::x() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::RotateObjectMessage::maxlenof_x() const
+OpenRaveInterface::RotateObjectMessage::maxlenof_x() const
 {
   return 1;
 }
@@ -999,7 +999,7 @@ OpenRAVEInterface::RotateObjectMessage::maxlenof_x() const
  * @param new_x new x value
  */
 void
-OpenRAVEInterface::RotateObjectMessage::set_x(const float new_x)
+OpenRaveInterface::RotateObjectMessage::set_x(const float new_x)
 {
   data->x = new_x;
 }
@@ -1009,7 +1009,7 @@ OpenRAVEInterface::RotateObjectMessage::set_x(const float new_x)
  * @return y value
  */
 float
-OpenRAVEInterface::RotateObjectMessage::y() const
+OpenRaveInterface::RotateObjectMessage::y() const
 {
   return data->y;
 }
@@ -1019,7 +1019,7 @@ OpenRAVEInterface::RotateObjectMessage::y() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::RotateObjectMessage::maxlenof_y() const
+OpenRaveInterface::RotateObjectMessage::maxlenof_y() const
 {
   return 1;
 }
@@ -1029,7 +1029,7 @@ OpenRAVEInterface::RotateObjectMessage::maxlenof_y() const
  * @param new_y new y value
  */
 void
-OpenRAVEInterface::RotateObjectMessage::set_y(const float new_y)
+OpenRaveInterface::RotateObjectMessage::set_y(const float new_y)
 {
   data->y = new_y;
 }
@@ -1039,7 +1039,7 @@ OpenRAVEInterface::RotateObjectMessage::set_y(const float new_y)
  * @return z value
  */
 float
-OpenRAVEInterface::RotateObjectMessage::z() const
+OpenRaveInterface::RotateObjectMessage::z() const
 {
   return data->z;
 }
@@ -1049,7 +1049,7 @@ OpenRAVEInterface::RotateObjectMessage::z() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::RotateObjectMessage::maxlenof_z() const
+OpenRaveInterface::RotateObjectMessage::maxlenof_z() const
 {
   return 1;
 }
@@ -1059,7 +1059,7 @@ OpenRAVEInterface::RotateObjectMessage::maxlenof_z() const
  * @param new_z new z value
  */
 void
-OpenRAVEInterface::RotateObjectMessage::set_z(const float new_z)
+OpenRaveInterface::RotateObjectMessage::set_z(const float new_z)
 {
   data->z = new_z;
 }
@@ -1070,11 +1070,11 @@ OpenRAVEInterface::RotateObjectMessage::set_z(const float new_z)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::RotateObjectMessage::clone() const
+OpenRaveInterface::RotateObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::RotateObjectMessage(this);
+  return new OpenRaveInterface::RotateObjectMessage(this);
 }
-/** @class OpenRAVEInterface::RenameObjectMessage <interfaces/OpenRAVEInterface.h>
+/** @class OpenRaveInterface::RenameObjectMessage <interfaces/OpenRaveInterface.h>
  * RenameObjectMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1085,7 +1085,7 @@ OpenRAVEInterface::RotateObjectMessage::clone() const
  * @param ini_name initial value for name
  * @param ini_newName initial value for newName
  */
-OpenRAVEInterface::RenameObjectMessage::RenameObjectMessage(const char * ini_name, const char * ini_newName) : Message("RenameObjectMessage")
+OpenRaveInterface::RenameObjectMessage::RenameObjectMessage(const char * ini_name, const char * ini_newName) : Message("RenameObjectMessage")
 {
   data_size = sizeof(RenameObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1098,7 +1098,7 @@ OpenRAVEInterface::RenameObjectMessage::RenameObjectMessage(const char * ini_nam
   add_fieldinfo(IFT_STRING, "newName", 30, data->newName);
 }
 /** Constructor */
-OpenRAVEInterface::RenameObjectMessage::RenameObjectMessage() : Message("RenameObjectMessage")
+OpenRaveInterface::RenameObjectMessage::RenameObjectMessage() : Message("RenameObjectMessage")
 {
   data_size = sizeof(RenameObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1110,7 +1110,7 @@ OpenRAVEInterface::RenameObjectMessage::RenameObjectMessage() : Message("RenameO
 }
 
 /** Destructor */
-OpenRAVEInterface::RenameObjectMessage::~RenameObjectMessage()
+OpenRaveInterface::RenameObjectMessage::~RenameObjectMessage()
 {
   free(data_ptr);
 }
@@ -1118,7 +1118,7 @@ OpenRAVEInterface::RenameObjectMessage::~RenameObjectMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-OpenRAVEInterface::RenameObjectMessage::RenameObjectMessage(const RenameObjectMessage *m) : Message("RenameObjectMessage")
+OpenRaveInterface::RenameObjectMessage::RenameObjectMessage(const RenameObjectMessage *m) : Message("RenameObjectMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
@@ -1133,7 +1133,7 @@ OpenRAVEInterface::RenameObjectMessage::RenameObjectMessage(const RenameObjectMe
  * @return name value
  */
 char *
-OpenRAVEInterface::RenameObjectMessage::name() const
+OpenRaveInterface::RenameObjectMessage::name() const
 {
   return data->name;
 }
@@ -1143,7 +1143,7 @@ OpenRAVEInterface::RenameObjectMessage::name() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::RenameObjectMessage::maxlenof_name() const
+OpenRaveInterface::RenameObjectMessage::maxlenof_name() const
 {
   return 30;
 }
@@ -1153,7 +1153,7 @@ OpenRAVEInterface::RenameObjectMessage::maxlenof_name() const
  * @param new_name new name value
  */
 void
-OpenRAVEInterface::RenameObjectMessage::set_name(const char * new_name)
+OpenRaveInterface::RenameObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
 }
@@ -1163,7 +1163,7 @@ OpenRAVEInterface::RenameObjectMessage::set_name(const char * new_name)
  * @return newName value
  */
 char *
-OpenRAVEInterface::RenameObjectMessage::newName() const
+OpenRaveInterface::RenameObjectMessage::newName() const
 {
   return data->newName;
 }
@@ -1173,7 +1173,7 @@ OpenRAVEInterface::RenameObjectMessage::newName() const
  * maximum number of characters for a string
  */
 size_t
-OpenRAVEInterface::RenameObjectMessage::maxlenof_newName() const
+OpenRaveInterface::RenameObjectMessage::maxlenof_newName() const
 {
   return 30;
 }
@@ -1183,7 +1183,7 @@ OpenRAVEInterface::RenameObjectMessage::maxlenof_newName() const
  * @param new_newName new newName value
  */
 void
-OpenRAVEInterface::RenameObjectMessage::set_newName(const char * new_newName)
+OpenRaveInterface::RenameObjectMessage::set_newName(const char * new_newName)
 {
   strncpy(data->newName, new_newName, sizeof(data->newName));
 }
@@ -1194,16 +1194,16 @@ OpenRAVEInterface::RenameObjectMessage::set_newName(const char * new_newName)
  * @return clone of this message
  */
 Message *
-OpenRAVEInterface::RenameObjectMessage::clone() const
+OpenRaveInterface::RenameObjectMessage::clone() const
 {
-  return new OpenRAVEInterface::RenameObjectMessage(this);
+  return new OpenRaveInterface::RenameObjectMessage(this);
 }
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
  */
 bool
-OpenRAVEInterface::message_valid(const Message *message) const
+OpenRaveInterface::message_valid(const Message *message) const
 {
   const AddObjectMessage *m0 = dynamic_cast<const AddObjectMessage *>(message);
   if ( m0 != NULL ) {
@@ -1241,7 +1241,7 @@ OpenRAVEInterface::message_valid(const Message *message) const
 }
 
 /// @cond INTERNALS
-EXPORT_INTERFACE(OpenRAVEInterface)
+EXPORT_INTERFACE(OpenRaveInterface)
 /// @endcond
 
 

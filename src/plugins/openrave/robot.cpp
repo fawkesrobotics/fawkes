@@ -34,7 +34,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRAVERobot <plugins/openrave/robot.h>
+/** @class OpenRaveRobot <plugins/openrave/robot.h>
 * Class handling interaction with the OpenRAVE::RobotBase class.
 * This class mainly handles robot specific tasks, like setting a
 * target, looking for IK solutions and handling planning parameters
@@ -45,7 +45,7 @@ namespace fawkes {
 /** Constructor
  * @param logger pointer to fawkes logger
  */
-OpenRAVERobot::OpenRAVERobot(fawkes::Logger* logger) :
+OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
   __manip( 0 )
@@ -54,10 +54,10 @@ OpenRAVERobot::OpenRAVERobot(fawkes::Logger* logger) :
 }
 /** Constructor
  * @param filename path to robot's xml file
- * @param env pointer to OpenRAVEEnvironment object
+ * @param env pointer to OpenRaveEnvironment object
  * @param logger pointer to fawkes logger
  */
-OpenRAVERobot::OpenRAVERobot(const std::string& filename, fawkes::OpenRAVEEnvironment* env, fawkes::Logger* logger) :
+OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironment* env, fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
   __manip( 0 )
@@ -67,13 +67,13 @@ OpenRAVERobot::OpenRAVERobot(const std::string& filename, fawkes::OpenRAVEEnviro
 }
 
 /** Destructor */
-OpenRAVERobot::~OpenRAVERobot()
+OpenRaveRobot::~OpenRaveRobot()
 {
 }
 
 /** Inittialize object attributes */
 void
-OpenRAVERobot::init()
+OpenRaveRobot::init()
 {
   __traj = new std::vector< std::vector<float> >();
 
@@ -85,10 +85,10 @@ OpenRAVERobot::init()
 
 /** Load robot from xml file
  * @param filename path to robot's xml file
- * @param env pointer to OpenRAVEEnvironment object
+ * @param env pointer to OpenRaveEnvironment object
  */
 void
-OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* env)
+OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironment* env)
 {
   // TODO: implementing without usage of 'environment'
   // openrave_exception handling is done in OpenRAVE (see environment-core.h)
@@ -104,7 +104,7 @@ OpenRAVERobot::load(const std::string& filename, fawkes::OpenRAVEEnvironment* en
  * Here: Set active DOFs and create plannerParameters.
  * CAUTION: Only successful after added to environment. Otherwise no active DOF will be recognized. */
 void
-OpenRAVERobot::set_ready()
+OpenRaveRobot::set_ready()
 {
   if(!__robot)
     {throw fawkes::Exception("OpenRAVE Robot: Robot not loaded properly yet.");}
@@ -139,7 +139,7 @@ OpenRAVERobot::set_ready()
  * @param trans_z transition offset on z-axis
  */
  void
- OpenRAVERobot::set_offset(float trans_x, float trans_y, float trans_z)
+ OpenRaveRobot::set_offset(float trans_x, float trans_y, float trans_z)
  {
   __trans_offset_x = trans_x;
   __trans_offset_y = trans_y;
@@ -155,7 +155,7 @@ OpenRAVERobot::set_ready()
  * @param device_trans_z transition on z-axis (real device)
  */
 void
-OpenRAVERobot::calibrate(float device_trans_x, float device_trans_y, float device_trans_z)
+OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float device_trans_z)
 {
   // get device's current angles, and set them for OpenRAVE model
   std::vector<float> angles;
@@ -169,18 +169,18 @@ OpenRAVERobot::calibrate(float device_trans_x, float device_trans_y, float devic
   __trans_offset_z = trans.trans[2] - device_trans_z;
 }
 
-/** Set pointer to OpenRAVEManipulator object.
+/** Set pointer to OpenRaveManipulator object.
  *  Make sure this is called AFTER all manipulator settings have
  *  been set (assures that __manip_goal has the same settings).
- * @param manip pointer to OpenRAVEManipulator object
+ * @param manip pointer to OpenRaveManipulator object
  * @param display_movements true, if movements should be displayed in viewer.
  *  Better be "false" if want to sync OpenRAVE models with device
  */
 void
-OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip, bool display_movements)
+OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_movements)
 {
   __manip = manip;
-  __manip_goal = new OpenRAVEManipulator(*__manip);
+  __manip_goal = new OpenRaveManipulator(*__manip);
 
   __display_planned_movements = display_movements;
 }
@@ -188,7 +188,7 @@ OpenRAVERobot::set_manipulator(fawkes::OpenRAVEManipulator* manip, bool display_
 /** Update motor values from OpenRAVE model.
  * Can be used to sync real device with OpenRAVE model*/
 void
-OpenRAVERobot::update_manipulator()
+OpenRaveRobot::update_manipulator()
 {
   std::vector<float> angles;
   __robot->GetActiveDOFValues(angles);
@@ -197,7 +197,7 @@ OpenRAVERobot::update_manipulator()
 
 /** Update/Set OpenRAVE motor angles */
 void
-OpenRAVERobot::update_model()
+OpenRaveRobot::update_model()
 {
   std::vector<float> angles;
   __manip->get_angles(angles);
@@ -208,7 +208,7 @@ OpenRAVERobot::update_model()
  * @return return value
  */
 bool
-OpenRAVERobot::display_planned_movements() const
+OpenRaveRobot::display_planned_movements() const
 {
   return __display_planned_movements;
 }
@@ -225,7 +225,7 @@ OpenRAVERobot::display_planned_movements() const
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset)
+OpenRaveRobot::set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   Vector   rot(quat_w, quat_x, quat_y, quat_z);
@@ -245,7 +245,7 @@ OpenRAVERobot::set_target_quat(float trans_x, float trans_y, float trans_z, floa
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset)
+OpenRaveRobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   Vector aa(angle, axisX, axisY, axisZ);
@@ -266,7 +266,7 @@ OpenRAVERobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset)
+OpenRaveRobot::set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   std::vector<float> rot(9, 0.f); //rotations vector
@@ -311,7 +311,7 @@ OpenRAVERobot::set_target_euler(euler_rotation_t type, float trans_x, float tran
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x)
+OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x)
 {
   // This is about 2 times faster than using setTargetEuler each time, especially when it comes
   // to the while loop (whole loop: ~56ms vs ~99ms)
@@ -366,7 +366,7 @@ OpenRAVERobot::set_target_object_position(float trans_x, float trans_y, float tr
  * @param angles vector with angle values
  */
 void
-OpenRAVERobot::set_target_angles( std::vector<float>& angles )
+OpenRaveRobot::set_target_angles( std::vector<float>& angles )
 {
   __manip_goal->set_angles(angles);
 }
@@ -379,7 +379,7 @@ OpenRAVERobot::set_target_angles( std::vector<float>& angles )
  * @return RobotBasePtr of current robot
  */
 OpenRAVE::RobotBasePtr
-OpenRAVERobot::get_robot_ptr() const
+OpenRaveRobot::get_robot_ptr() const
 {
   return __robot;
 }
@@ -389,7 +389,7 @@ OpenRAVERobot::get_robot_ptr() const
  * @param to vector that should be filled with angles
  */
 void
-OpenRAVERobot::get_target_angles(std::vector<float>& to)
+OpenRaveRobot::get_target_angles(std::vector<float>& to)
 {
   to = __angles_target;
 }
@@ -398,7 +398,7 @@ OpenRAVERobot::get_target_angles(std::vector<float>& to)
  * @return PlannerParametersPtr or robot's planner params
  */
 OpenRAVE::PlannerBase::PlannerParametersPtr
-OpenRAVERobot::get_planner_params() const
+OpenRaveRobot::get_planner_params() const
 {
   __manip_goal->get_angles(__planner_params->vgoalconfig);
   __manip->get_angles(__planner_params->vinitialconfig);
@@ -413,7 +413,7 @@ OpenRAVERobot::get_planner_params() const
  * @return pointer to trajectory
  */
 std::vector< std::vector<float> >*
-OpenRAVERobot::get_trajectory() const
+OpenRaveRobot::get_trajectory() const
 {
   return __traj;
 }
@@ -423,7 +423,7 @@ OpenRAVERobot::get_trajectory() const
  * @return pointer to trajectory
  */
 std::vector< std::vector<float> >*
-OpenRAVERobot::get_trajectory_device() const
+OpenRaveRobot::get_trajectory_device() const
 {
   std::vector< std::vector<float> >* traj = new std::vector< std::vector<float> >();
 
@@ -442,7 +442,7 @@ OpenRAVERobot::get_trajectory_device() const
  * @return true if successful
  */
 bool
-OpenRAVERobot::attach_object(OpenRAVE::KinBodyPtr object)
+OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object)
 {
   bool success = false;
   try{
@@ -457,11 +457,11 @@ OpenRAVERobot::attach_object(OpenRAVE::KinBodyPtr object)
 }
 /** Attach a kinbody to the robot.
  * @param name name of the object
- * @param env pointer to OpenRAVEEnvironment object
+ * @param env pointer to OpenRaveEnvironment object
  * @return true if successful
  */
 bool
-OpenRAVERobot::attach_object(const std::string& name, fawkes::OpenRAVEEnvironment* env)
+OpenRaveRobot::attach_object(const std::string& name, fawkes::OpenRaveEnvironment* env)
 {
   OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
 
@@ -473,7 +473,7 @@ OpenRAVERobot::attach_object(const std::string& name, fawkes::OpenRAVEEnvironmen
  * @return true if successful
  */
 bool
-OpenRAVERobot::release_object(OpenRAVE::KinBodyPtr object)
+OpenRaveRobot::release_object(OpenRAVE::KinBodyPtr object)
 {
   try{
     __robot->Release(object);
@@ -487,11 +487,11 @@ OpenRAVERobot::release_object(OpenRAVE::KinBodyPtr object)
 }
 /** Release a kinbody from the robot.
  * @param name name of the object
- * @param env pointer to OpenRAVEEnvironment object
+ * @param env pointer to OpenRaveEnvironment object
  * @return true if successful
  */
 bool
-OpenRAVERobot::release_object(const std::string& name, fawkes::OpenRAVEEnvironment* env)
+OpenRaveRobot::release_object(const std::string& name, fawkes::OpenRaveEnvironment* env)
 {
   OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
 
@@ -502,7 +502,7 @@ OpenRAVERobot::release_object(const std::string& name, fawkes::OpenRAVEEnvironme
  * @return true if successful
  */
 bool
-OpenRAVERobot::release_all_objects()
+OpenRaveRobot::release_all_objects()
 {
   try{
     __robot->ReleaseAllGrabbed();
@@ -531,7 +531,7 @@ OpenRAVERobot::release_all_objects()
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset)
+OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset)
 {
   Transform target;
   target.trans = trans;
@@ -562,7 +562,7 @@ OpenRAVERobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
  * @return true if solvable, false otherwise
  */
 bool
-OpenRAVERobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset)
+OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset)
 {
   if( rotations.size() != 9 ) {
     if(__logger)

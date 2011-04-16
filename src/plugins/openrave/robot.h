@@ -34,30 +34,30 @@ namespace fawkes {
 #endif
 
 class Logger;
-class OpenRAVEManipulator;
-class OpenRAVEEnvironment;
+class OpenRaveManipulator;
+class OpenRaveEnvironment;
 
 /** OpenRAVE Robot class */
-class OpenRAVERobot
+class OpenRaveRobot
 {
  public:
-  OpenRAVERobot(fawkes::Logger* logger = 0);
-  OpenRAVERobot(const std::string& filename, fawkes::OpenRAVEEnvironment* env, fawkes::Logger* logger = 0);
-  virtual ~OpenRAVERobot();
+  OpenRaveRobot(fawkes::Logger* logger = 0);
+  OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironment* env, fawkes::Logger* logger = 0);
+  virtual ~OpenRaveRobot();
 
   // build/load robot parts
-  virtual void load(const std::string& filename, fawkes::OpenRAVEEnvironment* env);
+  virtual void load(const std::string& filename, fawkes::OpenRaveEnvironment* env);
   virtual void set_ready();
   virtual void set_offset(float trans_x, float trans_y, float trans_z);
   virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
-  virtual void set_manipulator(fawkes::OpenRAVEManipulator* manip, bool display_movements = false);
+  virtual void set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_movements = false);
   virtual void update_manipulator();
   virtual void update_model();
 
   virtual bool attach_object(OpenRAVE::KinBodyPtr object);
-  virtual bool attach_object(const std::string& name, fawkes::OpenRAVEEnvironment* env);
+  virtual bool attach_object(const std::string& name, fawkes::OpenRaveEnvironment* env);
   virtual bool release_object(OpenRAVE::KinBodyPtr object);
-  virtual bool release_object(const std::string& name, fawkes::OpenRAVEEnvironment* env);
+  virtual bool release_object(const std::string& name, fawkes::OpenRaveEnvironment* env);
   virtual bool release_all_objects();
 
   virtual bool set_target_quat	 (float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
@@ -83,8 +83,8 @@ class OpenRAVERobot
 
   OpenRAVE::RobotBasePtr                __robot;
   std::string                           __name;
-  OpenRAVEManipulator*	                __manip;
-  OpenRAVEManipulator*	                __manip_goal;
+  OpenRaveManipulator*	                __manip;
+  OpenRaveManipulator*	                __manip_goal;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
 
   OpenRAVE::PlannerBase::PlannerParametersPtr   __planner_params;

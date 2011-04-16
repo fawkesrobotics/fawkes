@@ -24,7 +24,7 @@ PRESUBDIRS = aspect
 CFLAGS  += $(CFLAGS_OPENRAVE)
 LDFLAGS += $(LDFLAGS_OPENRAVE)
 
-LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenrave fawkesopenraveaspect fawkesinterface OpenRAVEInterface $(LIBS_OPENRAVE)
+LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenrave fawkesopenraveaspect fawkesinterface OpenRaveInterface $(LIBS_OPENRAVE)
 OBJS_openrave = or_plugin.o or_thread.o or_message_handler_thread.o
 
 LIBS_libfawkesopenrave = m fawkescore fawkesutils $(LIBS_OPENRAVE)
@@ -34,7 +34,7 @@ OBJS_all    = $(OBJS_openrave) $(OBJS_libfawkesopenrave)
 
 ifeq ($(HAVE_OPENRAVE),1)
   PLUGINS_all = $(PLUGINDIR)/openrave.so
-  LIBS_all = $(LIBDIR)/libfawkesopenrave.so 
+  LIBS_all = $(LIBDIR)/libfawkesopenrave.so
 else
   WARN_TARGETS += warning_openrave
 endif

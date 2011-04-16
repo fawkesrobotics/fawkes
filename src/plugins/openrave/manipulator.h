@@ -38,11 +38,11 @@ typedef struct {
   float		angle;	  /**< radian angle */
 } motor_t;
 
-class OpenRAVEManipulator
+class OpenRaveManipulator
 {
  public:
-  OpenRAVEManipulator(unsigned int count, unsigned int count_device);
-  virtual ~OpenRAVEManipulator();
+  OpenRaveManipulator(unsigned int count, unsigned int count_device);
+  virtual ~OpenRaveManipulator();
 
   virtual void add_motor(unsigned int number, unsigned int number_device);
 

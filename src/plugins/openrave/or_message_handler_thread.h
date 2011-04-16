@@ -32,10 +32,10 @@
 #include <aspect/blackboard.h>
 
 namespace fawkes {
-  class OpenRAVEInterface;
+  class OpenRaveInterface;
 }
 
-class OpenRAVEMessageHandlerThread
+class OpenRaveMessageHandlerThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -43,8 +43,8 @@ class OpenRAVEMessageHandlerThread
   public fawkes::BlackBoardAspect
 {
  public:
-  OpenRAVEMessageHandlerThread(OpenRAVEThread* or_thread);
-  virtual ~OpenRAVEMessageHandlerThread();
+  OpenRaveMessageHandlerThread(OpenRaveThread* or_thread);
+  virtual ~OpenRaveMessageHandlerThread();
 
   virtual void init();
   virtual void loop();
@@ -54,8 +54,8 @@ class OpenRAVEMessageHandlerThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  OpenRAVEThread*		__or_thread;
-  fawkes::OpenRAVEInterface*	__if_openrave;
+  OpenRaveThread*		__or_thread;
+  fawkes::OpenRaveInterface*	__if_openrave;
 };
 
 #endif

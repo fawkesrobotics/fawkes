@@ -25,10 +25,10 @@
 
 #include <core/plugin.h>
 
-class OpenRAVEPlugin : public fawkes::Plugin
+class OpenRavePlugin : public fawkes::Plugin
 {
  public:
-  OpenRAVEPlugin(fawkes::Configuration *config);
+  OpenRavePlugin(fawkes::Configuration *config);
 };
 
 #endif

@@ -33,16 +33,16 @@
 
 #ifdef HAVE_OPENRAVE
 namespace fawkes {
-  class OpenRAVERobot;
-  class OpenRAVEManipulatorKatana6M180;
+  class OpenRaveRobot;
+  class OpenRaveManipulatorKatana6M180;
 }
 #endif
 
-/** class KatanaGotoOpenRAVEThread */
-class KatanaGotoOpenRAVEThread : public KatanaMotionThread
+/** class KatanaGotoOpenRaveThread */
+class KatanaGotoOpenRaveThread : public KatanaMotionThread
 {
  public:
-  KatanaGotoOpenRAVEThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRAVEConnector* openrave,
+  KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
 		   unsigned int poll_interval_ms,
                    std::string robot_file,
                    bool autoload_IK,
@@ -62,8 +62,8 @@ class KatanaGotoOpenRAVEThread : public KatanaMotionThread
   virtual bool move_katana();
 
  private:
-  fawkes::OpenRAVERobot*                        __OR_robot;
-  fawkes::OpenRAVEManipulatorKatana6M180*       __OR_manip;
+  fawkes::OpenRaveRobot*                        __OR_robot;
+  fawkes::OpenRaveManipulatorKatana6M180*       __OR_manip;
 
   std::string                                   __target_object;
   std::vector< std::vector<float> >*            __target_traj;
@@ -78,7 +78,7 @@ class KatanaGotoOpenRAVEThread : public KatanaMotionThread
 
   bool                  __is_target_object;
 
-  fawkes::OpenRAVEConnector*    _openrave;
+  fawkes::OpenRaveConnector*    _openrave;
 
   float __x, __y, __z;
   float __phi, __theta, __psi;

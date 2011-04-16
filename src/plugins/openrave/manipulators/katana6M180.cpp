@@ -31,7 +31,7 @@
 }
 #endif
 
-/** @class OpenRAVEManipulatorKatana6M180 <plugins/openrave/manipulators/katana6M180.h>
+/** @class OpenRaveManipulatorKatana6M180 <plugins/openrave/manipulators/katana6M180.h>
  * Class containing information about all katana6M180 motors.
  * @author Bahram Maleki-Fard
  */
@@ -40,13 +40,13 @@
  * @param count number of motors of OpenRAVE model
  * @param countDevice number of motors of real device
  */
-OpenRAVEManipulatorKatana6M180::OpenRAVEManipulatorKatana6M180(unsigned int count, unsigned int countDevice) :
-  OpenRAVEManipulator( count, countDevice )
+OpenRaveManipulatorKatana6M180::OpenRaveManipulatorKatana6M180(unsigned int count, unsigned int countDevice) :
+  OpenRaveManipulator( count, countDevice )
 {
 }
 
 /** Destructor. */
-OpenRAVEManipulatorKatana6M180::~OpenRAVEManipulatorKatana6M180()
+OpenRaveManipulatorKatana6M180::~OpenRaveManipulatorKatana6M180()
 {
 }
 
@@ -60,7 +60,7 @@ OpenRAVEManipulatorKatana6M180::~OpenRAVEManipulatorKatana6M180()
  * @return transformed angle
  */
 float
-OpenRAVEManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float angle) const
+OpenRaveManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float angle) const
 {
   float _angle;
 
@@ -94,7 +94,7 @@ OpenRAVEManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float an
  * @return transformed angle
  */
 float
-OpenRAVEManipulatorKatana6M180::angle_device_to_OR(unsigned int number, float angle) const
+OpenRaveManipulatorKatana6M180::angle_device_to_OR(unsigned int number, float angle) const
 {
   float _angle;
 

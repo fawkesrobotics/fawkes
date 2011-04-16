@@ -27,8 +27,8 @@
 
 using namespace fawkes;
 
-/** @class OpenRAVEPlugin <plugins/openrave/or_plugin.h>
- * OpenRave Connector plugin.
+/** @class OpenRavePlugin <plugins/openrave/or_plugin.h>
+ * OpenRAVE Connector plugin.
  * This plugin provides access to OpenRAVE for other Fawkes plugins.
  * It builds up an environment, manages objects and robots in that environment
  * and handles ik solving and path-planning.
@@ -39,15 +39,15 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-OpenRAVEPlugin::OpenRAVEPlugin(Configuration *config)
+OpenRavePlugin::OpenRavePlugin(Configuration *config)
   : Plugin(config)
 {
-  OpenRAVEThread* or_thread = new OpenRAVEThread();
+  OpenRaveThread* or_thread = new OpenRaveThread();
 
   thread_list.push_back(or_thread);
-  thread_list.push_back(new OpenRAVEMessageHandlerThread(or_thread));
+  thread_list.push_back(new OpenRaveMessageHandlerThread(or_thread));
 }
 
 
 PLUGIN_DESCRIPTION("OpenRAVE Connector Plugin")
-EXPORT_PLUGIN(OpenRAVEPlugin)
+EXPORT_PLUGIN(OpenRavePlugin)

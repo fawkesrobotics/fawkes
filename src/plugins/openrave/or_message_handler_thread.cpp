@@ -22,21 +22,21 @@
 
 #include "or_message_handler_thread.h"
 
-#include <interfaces/OpenRAVEInterface.h>
+#include <interfaces/OpenRaveInterface.h>
 
 using namespace fawkes;
 
-/** @class OpenRAVEMessageHandlerThread "or_message_handler_thread.h"
+/** @class OpenRaveMessageHandlerThread "or_message_handler_thread.h"
  * OpenRAVE Thread.
- * This thread handles incoming messages for the OpenRAVEInterface.
+ * This thread handles incoming messages for the OpenRaveInterface.
  *
  * @author Bahram Maleki-Fard
  */
 
 /** Constructor.
- * @param or_thread OpenRAVEThread, main thread. */
-OpenRAVEMessageHandlerThread::OpenRAVEMessageHandlerThread(OpenRAVEThread* or_thread)
-  : Thread("OpenRAVEMessageHandlerThread", Thread::OPMODE_WAITFORWAKEUP),
+ * @param or_thread OpenRaveThread, main thread. */
+OpenRaveMessageHandlerThread::OpenRaveMessageHandlerThread(OpenRaveThread* or_thread)
+  : Thread("OpenRaveMessageHandlerThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
   __or_thread( or_thread ),
   __if_openrave( 0 )
@@ -45,16 +45,16 @@ OpenRAVEMessageHandlerThread::OpenRAVEMessageHandlerThread(OpenRAVEThread* or_th
 
 
 /** Destructor. */
-OpenRAVEMessageHandlerThread::~OpenRAVEMessageHandlerThread()
+OpenRaveMessageHandlerThread::~OpenRaveMessageHandlerThread()
 {
 }
 
 
 void
-OpenRAVEMessageHandlerThread::init()
+OpenRaveMessageHandlerThread::init()
 {
   try {
-    __if_openrave = blackboard->open_for_writing<OpenRAVEInterface>("OpenRAVE");
+    __if_openrave = blackboard->open_for_writing<OpenRaveInterface>("OpenRAVE");
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not open OpenRAVE interface for writing. Er:%s", e.what());
   }
@@ -62,7 +62,7 @@ OpenRAVEMessageHandlerThread::init()
 
 
 void
-OpenRAVEMessageHandlerThread::finalize()
+OpenRaveMessageHandlerThread::finalize()
 {
   try {
     blackboard->close(__if_openrave);
@@ -73,7 +73,7 @@ OpenRAVEMessageHandlerThread::finalize()
 
 
 void
-OpenRAVEMessageHandlerThread::loop()
+OpenRaveMessageHandlerThread::loop()
 {
   while( !__if_openrave->msgq_empty() ) {
     __if_openrave->set_success(false);
@@ -82,50 +82,50 @@ OpenRAVEMessageHandlerThread::loop()
     __if_openrave->set_msgid(m->id());
     __if_openrave->write();
 
-    if (__if_openrave->msgq_first_is<OpenRAVEInterface::AddObjectMessage>()) {
-      OpenRAVEInterface::AddObjectMessage *msg = __if_openrave->msgq_first(msg);
+    if (__if_openrave->msgq_first_is<OpenRaveInterface::AddObjectMessage>()) {
+      OpenRaveInterface::AddObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->add_object(msg->name(), msg->path()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::DeleteObjectMessage>()) {
-      OpenRAVEInterface::DeleteObjectMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::DeleteObjectMessage>()) {
+      OpenRaveInterface::DeleteObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->delete_object(msg->name()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::AttachObjectMessage>()) {
-      OpenRAVEInterface::AttachObjectMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::AttachObjectMessage>()) {
+      OpenRaveInterface::AttachObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->attach_object(msg->name()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::ReleaseObjectMessage>()) {
-      OpenRAVEInterface::ReleaseObjectMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::ReleaseObjectMessage>()) {
+      OpenRaveInterface::ReleaseObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->release_object(msg->name()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::ReleaseAllObjectsMessage>()) {
-      OpenRAVEInterface::ReleaseAllObjectsMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::ReleaseAllObjectsMessage>()) {
+      OpenRaveInterface::ReleaseAllObjectsMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->release_all_objects() )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::MoveObjectMessage>()) {
-      OpenRAVEInterface::MoveObjectMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::MoveObjectMessage>()) {
+      OpenRaveInterface::MoveObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->move_object(msg->name(), msg->x(), msg->y(), msg->z()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::RotateObjectMessage>()) {
-      OpenRAVEInterface::RotateObjectMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::RotateObjectMessage>()) {
+      OpenRaveInterface::RotateObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->rotate_object(msg->name(), msg->x(), msg->y(), msg->z()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
-    } else if (__if_openrave->msgq_first_is<OpenRAVEInterface::RenameObjectMessage>()) {
-      OpenRAVEInterface::RenameObjectMessage *msg = __if_openrave->msgq_first(msg);
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::RenameObjectMessage>()) {
+      OpenRaveInterface::RenameObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->rename_object(msg->name(), msg->newName()) )
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);

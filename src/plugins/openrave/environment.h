@@ -39,14 +39,14 @@ namespace fawkes {
 void SetViewer(OpenRAVE::EnvironmentBasePtr penv, const std::string& viewername);
 
 class Logger;
-class OpenRAVERobot;
+class OpenRaveRobot;
 
-/** OpenRAVEEnvironment class */
-class OpenRAVEEnvironment
+/** OpenRaveEnvironment class */
+class OpenRaveEnvironment
 {
  public:
-  OpenRAVEEnvironment(fawkes::Logger* logger = 0);
-  ~OpenRAVEEnvironment();
+  OpenRaveEnvironment(fawkes::Logger* logger = 0);
+  ~OpenRaveEnvironment();
 
   virtual void create();
   virtual void destroy();
@@ -56,17 +56,17 @@ class OpenRAVEEnvironment
   virtual void disable_debug();
 
   virtual void start_viewer();
-  virtual void load_IK_solver(OpenRAVERobot* robot);
-  virtual void run_planner(OpenRAVERobot* robot);
+  virtual void load_IK_solver(OpenRaveRobot* robot);
+  virtual void run_planner(OpenRaveRobot* robot);
 
   virtual void add_robot(const std::string& filename);
   virtual void add_robot(OpenRAVE::RobotBasePtr robot);
-  virtual void add_robot(OpenRAVERobot* robot);
+  virtual void add_robot(OpenRaveRobot* robot);
 
   virtual bool add_object(const std::string& name, const std::string& filename);
   virtual bool delete_object(const std::string& name);
   virtual bool rename_object(const std::string& name, const std::string& new_name);
-  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot=NULL);
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot=NULL);
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
 
   //virtual RobotBasePtr getRobot() const;

@@ -29,7 +29,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRAVEManipulator <plugins/openrave/manipulator.h>
+/** @class OpenRaveManipulator <plugins/openrave/manipulator.h>
  * Class containing information about all manipulator motors.
  * @author Bahram Maleki-Fard
  */
@@ -38,14 +38,14 @@ namespace fawkes {
  * @param count number of motors of OpenRAVE model
  * @param count_device number of motors of real device
  */
-OpenRAVEManipulator::OpenRAVEManipulator(unsigned int count, unsigned int count_device) :
+OpenRaveManipulator::OpenRaveManipulator(unsigned int count, unsigned int count_device) :
   __cnt( count ),
   __cnt_device( count_device )
 {
 }
 
 /** Destructor. */
-OpenRAVEManipulator::~OpenRAVEManipulator()
+OpenRaveManipulator::~OpenRaveManipulator()
 {
 }
 
@@ -55,7 +55,7 @@ OpenRAVEManipulator::~OpenRAVEManipulator()
  * @param number_device motor number of real device
  */
 void
-OpenRAVEManipulator::add_motor(unsigned int number, unsigned int number_device)
+OpenRaveManipulator::add_motor(unsigned int number, unsigned int number_device)
 {
   motor_t motor;
   motor.no = number;
@@ -73,7 +73,7 @@ OpenRAVEManipulator::add_motor(unsigned int number, unsigned int number_device)
  * @param to target tvector of angles
  */
 void
-OpenRAVEManipulator::get_angles(std::vector<float>& to) const
+OpenRaveManipulator::get_angles(std::vector<float>& to) const
 {
   to.resize(__cnt);
   for (unsigned int i=0; i<__motors.size(); i++) {
@@ -85,7 +85,7 @@ OpenRAVEManipulator::get_angles(std::vector<float>& to) const
  * @param to target vector of angles
  */
 void
-OpenRAVEManipulator::get_angles_device(std::vector<float>& to) const
+OpenRaveManipulator::get_angles_device(std::vector<float>& to) const
 {
   std::vector<float> tmp;
   get_angles(tmp);
@@ -97,7 +97,7 @@ OpenRAVEManipulator::get_angles_device(std::vector<float>& to) const
  * @return vector of angles
  */
 std::vector<float>
-OpenRAVEManipulator::angles_or_to_device(std::vector<float>& from) const
+OpenRaveManipulator::angles_or_to_device(std::vector<float>& from) const
 {
   std::vector<float> _to(__cnt_device);
   for (unsigned int i=0; i<__motors.size(); i++) {
@@ -115,7 +115,7 @@ OpenRAVEManipulator::angles_or_to_device(std::vector<float>& from) const
  * @param angles motor angles
  */
 void
-OpenRAVEManipulator::set_angles(std::vector<float>& angles)
+OpenRaveManipulator::set_angles(std::vector<float>& angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angles[__motors[i].no];
@@ -126,7 +126,7 @@ OpenRAVEManipulator::set_angles(std::vector<float>& angles)
  * @param angles motor angles
  */
 void
-OpenRAVEManipulator::set_angles_device(std::vector<float>& angles)
+OpenRaveManipulator::set_angles_device(std::vector<float>& angles)
 {
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angle_device_to_OR(__motors[i].no_device, angles[__motors[i].no_device]);
@@ -142,7 +142,7 @@ OpenRAVEManipulator::set_angles_device(std::vector<float>& angles)
  * @return transformed angle
  */
 float
-OpenRAVEManipulator::angle_OR_to_device(unsigned int number, float angle) const
+OpenRaveManipulator::angle_OR_to_device(unsigned int number, float angle) const
 {
   // Transformations should be implemented in subclasses, as these depend on
   // the attached manipulator device.
@@ -155,7 +155,7 @@ OpenRAVEManipulator::angle_OR_to_device(unsigned int number, float angle) const
  * @return transformed angle
  */
 float
-OpenRAVEManipulator::angle_device_to_OR(unsigned int number, float angle) const
+OpenRaveManipulator::angle_device_to_OR(unsigned int number, float angle) const
 {
   // Transformations should be implemented in subclasses, as these depend on
   // the attached manipulator device.

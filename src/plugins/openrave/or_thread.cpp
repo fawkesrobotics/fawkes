@@ -31,7 +31,7 @@
 
 using namespace fawkes;
 
-/** @class OpenRAVEThread "or_thread.h"
+/** @class OpenRaveThread "or_thread.h"
  * OpenRAVE Thread.
  * This thread maintains an active connection to OpenRAVE and provides an
  * aspect to access OpenRAVE to make it convenient for other threads to use
@@ -41,9 +41,9 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-OpenRAVEThread::OpenRAVEThread()
-  : Thread("OpenRAVEThread", Thread::OPMODE_CONTINUOUS),
-    AspectProviderAspect("OpenRAVEAspect", &__or_aspectIniFin),
+OpenRaveThread::OpenRaveThread()
+  : Thread("OpenRaveThread", Thread::OPMODE_CONTINUOUS),
+    AspectProviderAspect("OpenRaveAspect", &__or_aspectIniFin),
   __or_aspectIniFin( this ),
   __OR_env( 0 ),
   __OR_robot( 0 )
@@ -53,13 +53,13 @@ OpenRAVEThread::OpenRAVEThread()
 
 
 /** Destructor. */
-OpenRAVEThread::~OpenRAVEThread()
+OpenRaveThread::~OpenRaveThread()
 {
 }
 
 
 void
-OpenRAVEThread::init()
+OpenRaveThread::init()
 {
   try {
     OpenRAVE::RaveInitialize(true);
@@ -67,7 +67,7 @@ OpenRAVEThread::init()
     logger->log_error(name(), "Could not initialize OpenRAVE. Ex:%s", e.what());
   }
 
-  __OR_env = new OpenRAVEEnvironment(logger);
+  __OR_env = new OpenRaveEnvironment(logger);
 
   __OR_env->create();
   __OR_env->enable_debug(); // TODO: cfg
@@ -77,51 +77,51 @@ OpenRAVEThread::init()
 
 
 void
-OpenRAVEThread::finalize()
+OpenRaveThread::finalize()
 {
   __OR_env->destroy();
 }
 
 
 void
-OpenRAVEThread::loop()
+OpenRaveThread::loop()
 {
 }
 
 /* ##########################################################
- * #    methods form OpenRAVEConnector (or_connector.h)     #
+ * #    methods form OpenRaveConnector (or_connector.h)     #
  * ########################################################*/
-/** Get pointer to OpenRAVEEnvironment object.
+/** Get pointer to OpenRaveEnvironment object.
  * @return pointer
  */
-OpenRAVEEnvironment*
-OpenRAVEThread::get_environment() const
+OpenRaveEnvironment*
+OpenRaveThread::get_environment() const
 {
   return __OR_env;
 }
 
-/** Get pointer to currently used OpenRAVERobot object.
+/** Get pointer to currently used OpenRaveRobot object.
  * @return pointer
  */
-OpenRAVERobot*
-OpenRAVEThread::get_active_robot() const
+OpenRaveRobot*
+OpenRaveThread::get_active_robot() const
 {
   return __OR_robot;
 }
 
 /** Set robot to be used
- * @param robot OpenRAVERobot that should be used implicitly in other methods
+ * @param robot OpenRaveRobot that should be used implicitly in other methods
  */
 void
-OpenRAVEThread::set_active_robot(OpenRAVERobot* robot)
+OpenRaveThread::set_active_robot(OpenRaveRobot* robot)
 {
   __OR_robot = robot;
 }
 
-/** Set OpenRAVEManipulator object for robot, and calculate
+/** Set OpenRaveManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
  * Make sure to update manip angles before calibrating!
- * @param robot pointer to OpenRAVERobot object, explicitly set
+ * @param robot pointer to OpenRaveRobot object, explicitly set
  * @param manip pointer to OpenRAVManipulator that is set for robot
  * @param trans_x transition offset on x-axis
  * @param trans_y transition offset on y-axis
@@ -129,7 +129,7 @@ OpenRAVEThread::set_active_robot(OpenRAVERobot* robot)
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
 void
-OpenRAVEThread::set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
+OpenRaveThread::set_manipulator(OpenRaveRobot* robot, OpenRaveManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
 {
   robot->set_manipulator(manip);
   if( calibrate )
@@ -137,10 +137,10 @@ OpenRAVEThread::set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip
   else
     {robot->set_offset(trans_x, trans_y, trans_z);}
 }
-/** Set OpenRAVEManipulator object for robot, and calculate
+/** Set OpenRaveManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
  * Make sure to update manip angles before calibrating!
- * Uses default OpenRAVERobot object.
+ * Uses default OpenRaveRobot object.
  * @param manip pointer to OpenRAVManipulator that is set for robot
  * @param trans_x transition offset on x-axis
  * @param trans_y transition offset on y-axis
@@ -148,7 +148,7 @@ OpenRAVEThread::set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
 void
-OpenRAVEThread::set_manipulator(OpenRAVEManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
+OpenRaveThread::set_manipulator(OpenRaveManipulator* manip, float trans_x, float trans_y, float trans_z, bool calibrate)
 {
   set_manipulator(__OR_robot, manip, trans_x, trans_y, trans_z, calibrate);
 }
@@ -156,7 +156,7 @@ OpenRAVEThread::set_manipulator(OpenRAVEManipulator* manip, float trans_x, float
 
 /** Start Viewer */
 void
-OpenRAVEThread::start_viewer() const
+OpenRaveThread::start_viewer() const
 {
   __OR_env->start_viewer();
 }
@@ -165,7 +165,7 @@ OpenRAVEThread::start_viewer() const
  * @param robot robot to use planner on. If none is given, the currently used robot is taken
  */
 void
-OpenRAVEThread::run_planner(OpenRAVERobot* robot)
+OpenRaveThread::run_planner(OpenRaveRobot* robot)
 {
   if(!robot)
     robot = __OR_robot;
@@ -176,12 +176,12 @@ OpenRAVEThread::run_planner(OpenRAVERobot* robot)
 /** Add a new robot to the environment, and set it as the currently active one.
  * @param filename_robot path to robot's xml file
  * @param autogenerate_IK if true: autogenerate IKfast IK solver for robot
- * @return pointer to new OpenRAVERobot object
+ * @return pointer to new OpenRaveRobot object
  */
-OpenRAVERobot*
-OpenRAVEThread::add_robot(const std::string& filename_robot, bool autogenerate_IK)
+OpenRaveRobot*
+OpenRaveThread::add_robot(const std::string& filename_robot, bool autogenerate_IK)
 {
-  OpenRAVERobot* robot = new OpenRAVERobot(logger);
+  OpenRaveRobot* robot = new OpenRaveRobot(logger);
   robot->load(filename_robot, __OR_env);
   __OR_env->add_robot(robot);
   robot->set_ready();
@@ -201,20 +201,20 @@ OpenRAVEThread::add_robot(const std::string& filename_robot, bool autogenerate_I
  * @param name name that should be given to that object
  * @param filename path to xml file of that object (KinBody)
  * @return true if successful */
-bool OpenRAVEThread::add_object(const std::string& name, const std::string& filename) {
+bool OpenRaveThread::add_object(const std::string& name, const std::string& filename) {
   return __OR_env->add_object(name, filename); }
 
 /** Remove object from environment.
  * @param name name of the object
  * @return true if successful */
-bool OpenRAVEThread::delete_object(const std::string& name) {
+bool OpenRaveThread::delete_object(const std::string& name) {
   return __OR_env->delete_object(name); }
 
 /** Rename object.
  * @param name current name of the object
  * @param new_name new name of the object
  * @return true if successful */
-bool OpenRAVEThread::rename_object(const std::string& name, const std::string& new_name) {
+bool OpenRaveThread::rename_object(const std::string& name, const std::string& new_name) {
   return __OR_env->rename_object(name, new_name); }
 
 /** Move object in the environment.
@@ -225,7 +225,7 @@ bool OpenRAVEThread::rename_object(const std::string& name, const std::string& n
  * @param trans_z transition along z-axis
  * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
  * @return true if successful */
-bool OpenRAVEThread::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot) {
+bool OpenRaveThread::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot) {
   return __OR_env->move_object(name, trans_x, trans_y, trans_z, robot); }
 
 /** Rotate object along its axis.
@@ -235,7 +235,7 @@ bool OpenRAVEThread::move_object(const std::string& name, float trans_x, float t
  * @param rot_y 2nd rotation, along y-axis
  * @param rot_z 3rd rotation, along z-axis
  * @return true if successful */
-bool OpenRAVEThread::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z) {
+bool OpenRaveThread::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z) {
   return __OR_env->rotate_object(name, rot_x, rot_y, rot_z); }
 
 /** Set an object as the target.
@@ -244,12 +244,12 @@ bool OpenRAVEThread::rotate_object(const std::string& name, float rot_x, float r
  * to calculate correct position for endeffecto. This is only temporary until
  * proper graps planning for 5DOF in OpenRAVE is provided.
  * @param name name of the object
- * @param robot pointer to OpenRAVERobot that the target is set for
+ * @param robot pointer to OpenRaveRobot that the target is set for
  * @param rot_x rotation of object on x-axis (radians)
  * @return true if IK solvable
  */
 bool
-OpenRAVEThread::set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x)
+OpenRaveThread::set_target_object(const std::string& name, OpenRaveRobot* robot, float rot_x)
 {
   OpenRAVE::Transform transform = __OR_env->get_env_ptr()->GetKinBody(name)->GetTransform();
 
@@ -258,11 +258,11 @@ OpenRAVEThread::set_target_object(const std::string& name, OpenRAVERobot* robot,
 
 /** Attach a kinbody to the robot.
  * @param name name of the object
- * @param robot pointer to OpenRAVERobot that object is attached to
+ * @param robot pointer to OpenRaveRobot that object is attached to
  * @return true if successfull
  */
 bool
-OpenRAVEThread::attach_object(const std::string& name, OpenRAVERobot* robot)
+OpenRaveThread::attach_object(const std::string& name, OpenRaveRobot* robot)
 {
   if( !robot )
     { robot = __OR_robot; }
@@ -272,11 +272,11 @@ OpenRAVEThread::attach_object(const std::string& name, OpenRAVERobot* robot)
 
 /** Release a kinbody from the robot.
  * @param name name of the object
- * @param robot pointer to OpenRAVERobot that object is released from
+ * @param robot pointer to OpenRaveRobot that object is released from
  * @return true if successfull
  */
 bool
-OpenRAVEThread::release_object(const std::string& name, OpenRAVERobot* robot)
+OpenRaveThread::release_object(const std::string& name, OpenRaveRobot* robot)
 {
   if( !robot )
     { robot = __OR_robot; }
@@ -285,11 +285,11 @@ OpenRAVEThread::release_object(const std::string& name, OpenRAVERobot* robot)
 }
 
 /** Release all grabbed kinbodys from the robot.
- * @param robot pointer to OpenRAVERobot that objects are released from
+ * @param robot pointer to OpenRaveRobot that objects are released from
  * @return true if successfull
  */
 bool
-OpenRAVEThread::release_all_objects(OpenRAVERobot* robot)
+OpenRaveThread::release_all_objects(OpenRaveRobot* robot)
 {
   if( !robot )
     { robot = __OR_robot; }

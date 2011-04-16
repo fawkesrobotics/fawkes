@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  OpenRAVEInterface.h - Fawkes BlackBoard Interface - OpenRAVEInterface
+ *  OpenRaveInterface.h - Fawkes BlackBoard Interface - OpenRaveInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2011  Bahram Maleki-Fard
@@ -30,10 +30,10 @@
 
 namespace fawkes {
 
-class OpenRAVEInterface : public Interface
+class OpenRaveInterface : public Interface
 {
  /// @cond INTERNALS
- INTERFACE_MGMT_FRIENDS(OpenRAVEInterface)
+ INTERFACE_MGMT_FRIENDS(OpenRaveInterface)
  /// @endcond
  public:
   /* constants */
@@ -52,10 +52,10 @@ class OpenRAVEInterface : public Interface
       final is true. 0 if no error occured, an error code from ERROR_*
       constants otherwise (or a bit-wise combination). */
     bool success; /**< True, if last command was successful. False otherwise */
-  } OpenRAVEInterface_data_t;
+  } OpenRaveInterface_data_t;
 #pragma pack(pop)
 
-  OpenRAVEInterface_data_t *data;
+  OpenRaveInterface_data_t *data;
 
  public:
   /* messages */
@@ -304,8 +304,8 @@ class OpenRAVEInterface : public Interface
 
   virtual bool message_valid(const Message *message) const;
  private:
-  OpenRAVEInterface();
-  ~OpenRAVEInterface();
+  OpenRaveInterface();
+  ~OpenRaveInterface();
 
  public:
   /* Methods */

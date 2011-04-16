@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or.cpp - OpenRAVE aspect for Fawkes
+ *  or.cpp - OpenRave aspect for Fawkes
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -28,41 +28,41 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRAVEAspect <plugins/openrave/aspect/or.h>
+/** @class OpenRaveAspect <plugins/openrave/aspect/or.h>
  * Thread aspect create, update, and graph round-robin databases (RRD).
- * Give this aspect to your thread to access the OpenRAVE environment,
+ * Give this aspect to your thread to access the OpenRave environment,
  * add robots or objects, path plans for manipulator movement, etc.
  *
  * @ingroup Aspects
  * @author Bahram Maleki-Fard
  */
 
-/** @var fawkes::OpenRAVEConnector *  OpenRAVEAspect::openrave
- * Manager class to access OpenRAVE features. It will take care of properly
+/** @var fawkes::OpenRaveConnector *  OpenRaveAspect::openrave
+ * Manager class to access OpenRave features. It will take care of properly
  * distributing the work.
  */
 
 /** Constructor. */
-OpenRAVEAspect::OpenRAVEAspect()
+OpenRaveAspect::OpenRaveAspect()
 {
-  add_aspect("OpenRAVEAspect");
+  add_aspect("OpenRaveAspect");
 }
 
 
 /** Virtual empty destructor. */
-OpenRAVEAspect::~OpenRAVEAspect()
+OpenRaveAspect::~OpenRaveAspect()
 {
 }
 
 
-/** Init OpenRAVE aspect.
- * This sets the OpenRAVE manager to access OpenRAVE.
- * It is guaranteed that this is called for an OpenRAVE Thread before start
+/** Init OpenRave aspect.
+ * This sets the OpenRave manager to access OpenRave.
+ * It is guaranteed that this is called for an OpenRave Thread before start
  * is called (when running regularly inside Fawkes).
- * @param or_manager OpenRAVEManager to use
+ * @param or_manager OpenRaveManager to use
  */
 void
-OpenRAVEAspect::init_OpenRAVEAspect(OpenRAVEConnector *openrave)
+OpenRaveAspect::init_OpenRaveAspect(OpenRaveConnector *openrave)
 {
   this->openrave = openrave;
 }

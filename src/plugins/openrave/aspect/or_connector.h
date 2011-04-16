@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_connector.h - Fawkes OpenRAVE connector interface
+ *  or_connector.h - Fawkes OpenRave connector interface
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -32,73 +32,73 @@ namespace fawkes {
 }
 #endif
 
-class OpenRAVEEnvironment;
-class OpenRAVERobot;
-class OpenRAVEManipulator;
+class OpenRaveEnvironment;
+class OpenRaveRobot;
+class OpenRaveManipulator;
 
-/** @class OpenRAVEConnector <plugins/openrave/aspect/or_connector.h>
- * Interface for a OpenRAVE connection creator.
+/** @class OpenRaveConnector <plugins/openrave/aspect/or_connector.h>
+ * Interface for a OpenRave connection creator.
  * @author Bahram Maleki-Fard
  */
-class OpenRAVEConnector
+class OpenRaveConnector
 {
  public:
   /** Virtual empty destructor. */
-  virtual ~OpenRAVEConnector() {}
+  virtual ~OpenRaveConnector() {}
 
-  /** Start OpenRAVE viewer */
+  /** Start OpenRave viewer */
   virtual void start_viewer() const = 0;
 
   /** Run planner on previously set target.
   * @param robot robot to use planner on. If none is given, the currently used robot is taken
   */
-  virtual void run_planner(OpenRAVERobot* robot = NULL) = 0;
+  virtual void run_planner(OpenRaveRobot* robot = NULL) = 0;
 
-  /** Get pointer to OpenRAVEEnvironment object.
+  /** Get pointer to OpenRaveEnvironment object.
   * @return pointer
   */
-  virtual OpenRAVEEnvironment* get_environment() const = 0;
+  virtual OpenRaveEnvironment* get_environment() const = 0;
 
-  /** Get pointer to currently used OpenRAVERobot object.
+  /** Get pointer to currently used OpenRaveRobot object.
   * @return pointer
   */
-  virtual OpenRAVERobot* get_active_robot() const = 0;
+  virtual OpenRaveRobot* get_active_robot() const = 0;
 
   /** Set robot to be used
-  * @param robot OpenRAVERobot that should be used implicitly in other methods
+  * @param robot OpenRaveRobot that should be used implicitly in other methods
   */
-  virtual void set_active_robot(OpenRAVERobot* robot) = 0;
+  virtual void set_active_robot(OpenRaveRobot* robot) = 0;
 
   /** Add a new robot to the environment, and set it as the currently active one.
   * @param filename_robot path to robot's xml file
   * @param autogenerate_IK if true: autogenerate IKfast IK solver for robot
-  * @return pointer to new OpenRAVERobot object
+  * @return pointer to new OpenRaveRobot object
   */
-  virtual OpenRAVERobot* add_robot(const std::string& filename_robot, bool autogenerate_IK)  = 0;
+  virtual OpenRaveRobot* add_robot(const std::string& filename_robot, bool autogenerate_IK)  = 0;
 
-/** Set OpenRAVEManipulator object for robot, and calculate
+/** Set OpenRaveManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
  * Make sure to update manip angles before calibrating!
- * @param robot pointer to OpenRAVERobot object, explicitly set
+ * @param robot pointer to OpenRaveRobot object, explicitly set
  * @param manip pointer to OpenRAVManipulator that is set for robot
  * @param trans_x transition offset on x-axis
  * @param trans_y transition offset on y-axis
  * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
-  virtual void set_manipulator(OpenRAVERobot* robot, OpenRAVEManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
+  virtual void set_manipulator(OpenRaveRobot* robot, OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
 
-/** Set OpenRAVEManipulator object for robot, and calculate
+/** Set OpenRaveManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
  * Make sure to update manip angles before calibrating!
- * Uses default OpenRAVERobot object.
+ * Uses default OpenRaveRobot object.
  * @param manip pointer to OpenRAVManipulator that is set for robot
  * @param trans_x transition offset on x-axis
  * @param trans_y transition offset on y-axis
  * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
-  virtual void set_manipulator(OpenRAVEManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
+  virtual void set_manipulator(OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
 
   // object handling methods
   /** Add an object to the environment.
@@ -130,7 +130,7 @@ class OpenRAVEConnector
   * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
   * @return true if successful
   */
-  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRAVERobot* robot=NULL) = 0;
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot=NULL) = 0;
 
   /** Rotate object along its axis.
   * Rotation angles should be given in radians.
@@ -144,35 +144,35 @@ class OpenRAVEConnector
 
   /** Attach a kinbody to the robot.
   * @param name name of the object
-  * @param robot pointer to OpenRAVERobot that the target is set for
+  * @param robot pointer to OpenRaveRobot that the target is set for
   * @return true if successful
   */
-  virtual bool attach_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+  virtual bool attach_object(const std::string& name, OpenRaveRobot* robot=NULL) = 0;
 
   /** Release a kinbody from the robot.
   * @param name name of the object
-  * @param robot pointer to OpenRAVERobot that object is released from
+  * @param robot pointer to OpenRaveRobot that object is released from
   * @return true if successful
   */
-  virtual bool release_object(const std::string& name, OpenRAVERobot* robot=NULL) = 0;
+  virtual bool release_object(const std::string& name, OpenRaveRobot* robot=NULL) = 0;
 
   /** Release all grabbed kinbodys from the robot.
-  * @param robot pointer to OpenRAVERobot that objects are released from
+  * @param robot pointer to OpenRaveRobot that objects are released from
   * @return true if successful
   */
-  virtual bool release_all_objects(OpenRAVERobot* robot) = 0;
+  virtual bool release_all_objects(OpenRaveRobot* robot) = 0;
 
   /** Set an object as the target.
   * Currently the object should be cylindric, and stand upright. It may
   * also be rotated on its x-axis, but that rotation needs to be given in an argument
   * to calculate correct position for endeffecto. This is only temporary until
-  * proper graps planning for 5DOF in OpenRAVE is provided.
+  * proper graps planning for 5DOF in OpenRave is provided.
   * @param name name of the object
-  * @param robot pointer to OpenRAVERobot that the target is set for
+  * @param robot pointer to OpenRaveRobot that the target is set for
   * @param rot_x rotation of object on x-axis (radians)
   * @return true if IK solvable
   */
-  virtual bool set_target_object(const std::string& name, OpenRAVERobot* robot, float rot_x = 0) = 0;
+  virtual bool set_target_object(const std::string& name, OpenRaveRobot* robot, float rot_x = 0) = 0;
 };
 
 } // end namespace fawkes

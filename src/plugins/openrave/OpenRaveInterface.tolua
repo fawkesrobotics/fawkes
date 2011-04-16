@@ -1,7 +1,7 @@
-$#include <interfaces/OpenRAVEInterface.h>
+$#include <interfaces/OpenRaveInterface.h>
 $using namespace fawkes;
 namespace fawkes {
-class OpenRAVEInterface : public Interface
+class OpenRaveInterface : public Interface
 {
 
   class AddObjectMessage : public Message

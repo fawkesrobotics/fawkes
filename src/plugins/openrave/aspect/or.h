@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or.h - OpenRAVE aspect for Fawkes
+ *  or.h - OpenRave aspect for Fawkes
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -32,19 +32,19 @@ namespace fawkes {
 }
 #endif
 
-class OpenRAVEAspect : public virtual Aspect
+class OpenRaveAspect : public virtual Aspect
 {
-  friend class OpenRAVEAspectIniFin;
+  friend class OpenRaveAspectIniFin;
 
  public:
-  OpenRAVEAspect();
-  virtual ~OpenRAVEAspect();
+  OpenRaveAspect();
+  virtual ~OpenRaveAspect();
 
  protected:
-  OpenRAVEConnector *openrave;
+  OpenRaveConnector *openrave;
 
  private:
-  void init_OpenRAVEAspect(OpenRAVEConnector *openrave);
+  void init_OpenRaveAspect(OpenRaveConnector *openrave);
 };
 
 } // end namespace fawkes

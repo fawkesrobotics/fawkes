@@ -30,11 +30,11 @@ namespace fawkes {
 }
 #endif
 
-class OpenRAVEManipulatorKatana6M180 : public OpenRAVEManipulator
+class OpenRaveManipulatorKatana6M180 : public OpenRaveManipulator
 {
  public:
-  OpenRAVEManipulatorKatana6M180(unsigned int count, unsigned int countDevice);
-  virtual ~OpenRAVEManipulatorKatana6M180();
+  OpenRaveManipulatorKatana6M180(unsigned int count, unsigned int countDevice);
+  virtual ~OpenRaveManipulatorKatana6M180();
 
 
  private:
