@@ -50,6 +50,14 @@ function ActionJumpState:new(o)
    return o
 end
 
+function ActionJumpState:goal_handle()
+   return self.subfsm.vars.goal
+end
+
+function ActionJumpState:goal_sent()
+   return (self.subfsm.vars.goal ~= nil)
+end
+
 function action_trans(from, to, state_to)
    local state_to = state_to or to
    return {from, state_to, "vars.goal and vars.goal.state == vars.goal." .. to, desc="["..to.."]"}
@@ -64,7 +72,8 @@ local function set_params(msg, input)
       if f.is_builtin then
 	 msg.values[f.name] = input[f.name]
       else
-	 assert(type(input[f.name]) == "table", "Input value for " .. f.name .. " is not a table")
+	 assert(type(input[f.name]) == "table",
+		"Input value for " .. f.name .. " is not a table")
 	 set_params(msg.values[f.name], input[f.name])
       end
    end
@@ -130,9 +139,12 @@ function ActionJumpState:setup_subfsm()
 end
 
 function ActionJumpState:do_exit()
-   if self.subfsm.current.name == self.subfsm.fail_state and self.subfsm.vars.goal then
+   if self.subfsm.current.name == self.subfsm.fail_state
+      and self.subfsm.vars.goal
+   then
       self.subfsm.error = self.subfsm.vars.goal.status_text or ""
-      print_warn("ActionJumpState[%s %s] error: %s", self.name, self.action_client.name, self.subfsm.error)
+      print_warn("ActionJumpState[%s %s] error: %s",
+		 self.name, self.action_client.name, self.subfsm.error)
    end
 
    SubFSMJumpState.do_exit(self)
