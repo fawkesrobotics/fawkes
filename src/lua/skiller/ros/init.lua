@@ -26,6 +26,7 @@ require("actionlib")
 require("skiller.ros.graph")
 require("fawkes.logprint")
 local skillenv
+local nodemon
 
 -- You can set this from the outside, it must be a function which takes
 -- the same arguments as printf (from fawkes.logprint), i.e. a format string
@@ -36,10 +37,21 @@ print_final = fawkes.logprint.print_info
 
 function init()
    roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/skiller"}
+
+   local ok, nodemonmod = pcall(require, "nodemon")
+   if ok then
+      nodemon = nodemonmod.NodeStatePublisher:new()
+   else
+      print_warn("Node monitoring disabled (module nodemon not found):\n%s",
+		 nodemonmod)
+   end
+
    skiller_as = actionlib.action_server("/skiller/exec", "skiller/ExecSkill",
 					goal_cb, spin_cb, cancel_cb)
    skiller.ros.graph.init()
    skillenv = require("skiller.skillenv")
+
+   if nodemon then nodemon:set_running() end
 end
 
 
@@ -47,17 +59,25 @@ function goal_cb(goal_handle, action_server)
    printf("Starting goal %s", goal_handle.goal_id)
    action_server:cancel_goals_before(goal_handle.goalmsg.values.header.values.stamp)
    goal_handle.vars.skillstring = goal_handle.goalmsg.values.goal.values.skillstring
-   local ok, sksf = pcall(loadstring, goal_handle.vars.skillstring)
-   if ok then
+   local sksf, err = loadstring(goal_handle.vars.skillstring)
+   if sksf then
       skillenv.reset_all()
       local sandbox = skillenv.gensandbox()
       setfenv(sksf, sandbox)
       goal_handle.vars.sksf = sksf
       printf("Accepting goal %s", goal_handle.goal_id)
       goal_handle:accept(goal_handle.vars.skillstring)
+      nodemon:set_running()
    else
-      printf("Rejecting goal %s", goal_handle.goal_id)
-      goal_handle:reject(goal_handle.vars.skillstring)
+      local errstr = string.format("lua_error_skillstring: %s|%s",
+				   goal_handle.vars.skillstring, err)
+      print_error(errstr)
+      if nodemon then
+	 nodemon:set_error(errstr)
+	 nodemon:set_recovering("autorecover: ready for new skill calls")
+	 nodemon:set_running()
+      end
+      goal_handle:reject(errstr)
    end
 end
 
@@ -66,22 +86,37 @@ function spin_cb(goal_handle, action_server)
    skillenv.reset_status()
    local ok, errmsg = pcall(goal_handle.vars.sksf)
    if not ok then
-      print_error("Execution of %s failed: %s", goal_handle.vars.skillstring, errmsg)
+      local errstr = string.format("lua_error_skill: %s|%s",
+				   goal_handle.vars.skillstring, errmsg)
+      print_error(errstr)
+
       local result = action_server.actspec.result_spec:instantiate()
-      result.values.errmsg = errmsg
-      goal_handle:abort(result, errmsg)
+      result.values.errmsg = errstr
+      if nodemon then
+	 nodemon:set_error(errstr)
+	 nodemon:set_recovering("autorecover: ready for new skill calls")
+	 nodemon:set_running()
+      end
+      goal_handle:abort(result, errstr)
    else
       local running, final, failed = skillenv.get_status()
 
       if failed > 0 then
 	 local result = action_server.actspec.result_spec:instantiate()
-	 result.values.errmsg = skillenv.get_error()
-	 print_fail("Skill execution of '%s' failed (%s)",
-		    goal_handle.vars.skillstring, result.values.errmsg)
-	 goal_handle:abort(result, result.values.errmsg)
+	 local errstr = string.format("exec_fail: %s|%s",
+				      goal_handle.vars.skillstring,
+				      skillenv.get_error())
+
+	 result.values.errmsg = errstr
+	 print_fail("errstr")
+	 if nodemon then
+	    nodemon:set_error(errstr)
+	    nodemon:set_recovering("autorecover: ready for new skill calls")
+	    nodemon:set_running()
+	 end
+	 goal_handle:abort(result, errstr)
       elseif final > 0 and running == 0 then
-	 print_final("Skill execution of '%s' succeeded",
-		     goal_handle.vars.skillstring)
+	 print_final("exec_final: %s", goal_handle.vars.skillstring)
 	 local result = action_server.actspec.result_spec:instantiate()
 	 goal_handle:finish(result)
       elseif running > 0 then
@@ -99,7 +134,9 @@ end
 
 
 function cancel_cb(goal_handle, action_server)
-   print_warn("Goal %s (%s) cancelled", goal_handle.goal_id, goal_handle.vars.skillstring)
+   print_warn("Goal %s (%s) cancelled",
+	      goal_handle.goal_id, goal_handle.vars.skillstring)
    skillenv.reset_all()
    skiller.ros.graph.publish()
+   nodemon:set_running()
 end
