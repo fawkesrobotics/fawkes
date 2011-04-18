@@ -79,7 +79,6 @@ function SkillJumpState:new(o)
       assert(o.final_state, "SkillJumpState " .. o.name .. " requires success target state for sub-skill execution")
       o.failure_state = o.failure_state or "FAILED"
    end
-   print_info("Adding %s",o.name)
 
    assert(not (o.skill or o.skills or o.subskills) or
        o.skill and not o.skills and not o.subskills or
