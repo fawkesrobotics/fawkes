@@ -82,18 +82,25 @@ function publish(fsm)
    local m = roslua.get_msgspec("skiller/Graph"):instantiate()
    m.values.stamp = roslua.Time.now()
 
-   if fsm and (fsm:changed() or fawkes.fsm.grapher.get_params_changed()) then
-      if fsm.dotattr then
-	 fsm.dotattr.fontname = "Neo Sans Intel"
-      else
-	 fsm.dotattr = { fontname = "Neo Sans Intel"}
+   if fsm then
+      if (fsm:changed() or fawkes.fsm.grapher.get_params_changed()) then
+	 if fsm.dotattr then
+	    fsm.dotattr.fontname = "Neo Sans Intel"
+	 else
+	    fsm.dotattr = { fontname = "Neo Sans Intel"}
+	 end
+	 local graph = fsm:graph()
+	 m.values.name      = active_skill
+	 m.values.dotgraph  = graph
+	 m.values.colored   = fawkes.fsm.grapher.get_colored()
+	 m.values.direction = rankdir_to_graphdir()
+	 do_publish = true
       end
-      local graph = fsm:graph()
-      m.values.name      = active_skill
-      m.values.dotgraph  = graph
+   else
+      m.values.name      = ""
+      m.values.dotgraph  = ""
       m.values.colored   = fawkes.fsm.grapher.get_colored()
       m.values.direction = rankdir_to_graphdir()
-      do_publish = true
    end
 
    if do_publish then pub_graph:publish(m) end
