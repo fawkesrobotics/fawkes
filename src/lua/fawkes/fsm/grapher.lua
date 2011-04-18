@@ -153,6 +153,7 @@ local function generate_dotgraph(fsm, g, subgraph_name)
       gmod.setv(start_node, "label", fsm.start)
    end
    if fsm.current and fsm.current == start_state then
+      gmod.setv(start_node, "active", "true")
       if colored_output then
 	 gmod.setv(start_node, "fillcolor", "#ffc080")
       else
@@ -197,6 +198,7 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 	 end
 
 	 if fsm.current and name == current_name then
+	    gmod.setv(n, "active", "true")
 	    if colored_output then
 	       if current_name == fsm.exit_state then
 		  gmod.setv(n, "fillcolor", "#ccffcc")
@@ -257,7 +259,7 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 	    end
 	 end
 	 if fsm.current and state_name == fsm.current.name then
-	    gmod.setv(subgraph, "active")
+	    gmod.setv(subgraph, "active", "true")
 	 end
       end
 
@@ -294,7 +296,7 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 	 end
 
 	 if fsm.current and state_name == fsm.current.name then
-	    gmod.setv(subgraph, "active")
+	    gmod.setv(subgraph, "active", "true")
 	 end
 
 	 local e = gmod.edge(g, state.name, subfsm_graph_name .. "_RUN_SUBFSMS")
