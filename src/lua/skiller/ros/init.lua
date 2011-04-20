@@ -84,7 +84,7 @@ end
 
 function spin_cb(goal_handle, action_server)
    skillenv.reset_status()
-   local ok, errmsg = pcall(goal_handle.vars.sksf)
+   local ok, errmsg = xpcall(goal_handle.vars.sksf, debug.traceback)
    if not ok then
       local errstr = string.format("lua_error_skill: %s|%s",
 				   goal_handle.vars.skillstring, errmsg)
@@ -108,7 +108,7 @@ function spin_cb(goal_handle, action_server)
 				      skillenv.get_error())
 
 	 result.values.errmsg = errstr
-	 print_fail("errstr")
+	 print_fail(errstr)
 	 if nodemon then
 	    nodemon:set_error(errstr)
 	    nodemon:set_recovering("autorecover: ready for new skill calls")
