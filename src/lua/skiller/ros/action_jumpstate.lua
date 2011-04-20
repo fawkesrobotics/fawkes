@@ -68,13 +68,29 @@ end
 -- Given a table of input values this function iterates over the messages
 -- fields and sets the message value fields appropriately. If the input 
 local function set_params(msg, input)
+   assert(msg, "ActionJumpState: message is nil")
    for _, f in ipairs(msg.spec.fields) do
-      if f.is_builtin then
-	 msg.values[f.name] = input[f.name]
+      if f.is_array then
+	 local a = {}
+	 if f.is_builtin then
+	    for i, v in ipairs(input[f.name]) do
+	       a[i] = v
+	    end
+	 else
+	    for i, v in ipairs(input[f.name]) do
+	       a[i] = f.spec:instantiate()
+	       set_params(a[i], v)
+	    end
+	 end
+	 msg.values[f.name] = a
       else
-	 assert(type(input[f.name]) == "table",
-		"Input value for " .. f.name .. " is not a table")
-	 set_params(msg.values[f.name], input[f.name])
+	 if f.is_builtin then
+	    msg.values[f.name] = input[f.name]
+	 else
+	    assert(type(input[f.name]) == "table",
+		   "Input value for " .. f.name .. " is not a table")
+	    set_params(msg.values[f.name], input[f.name])
+	 end
       end
    end
 end
@@ -91,6 +107,7 @@ function ActionJumpState:setup_subfsm()
 				    exit_state="FINAL", fail_state="FAILED"}
    self.subfsm.action_client = self.action_client
    self.subfsm.graph_collapse = true
+   if self.collapse ~= nil then self.subfsm.graph_collapse = self.collapse end
 
    self.subfsm:set_debug(self.fsm.debug)
    self.subfsm:define_states{
