@@ -13,12 +13,13 @@
 #
 #*****************************************************************************
 
-#Check for openRAVE
+#Check for OpenRAVE
 ifneq ($(PKGCONFIG),)
-  HAVE_OPENRAVE := $(if $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}),1,0)
+  HAVE_OPENRAVE := $(if $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}) \
+                     OR $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_OPENRAVE),1)
-  CFLAGS_OPENRAVE    = $(shell $(PKGCONFIG) --cflags 'openrave')
-  LDFLAGS_OPENRAVE   = $(shell $(PKGCONFIG) --libs 'openrave') -lopenrave-core -lboost_thread-mt
+  CFLAGS_OPENRAVE    = $(shell openrave-config --cflags-only-I)
+  LDFLAGS_OPENRAVE   = $(shell openrave-config --libs-core)
 endif
