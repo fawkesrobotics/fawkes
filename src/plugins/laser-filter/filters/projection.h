@@ -63,8 +63,8 @@ class LaserProjectionDataFilter : public LaserDataFilter
     float y_max;
   };
 
-  LaserProjectionDataFilter(bool left,
-                            const Rotation& rot,
+  LaserProjectionDataFilter(const Rotation& laser_rot,
+                            const Rotation& fixture_rot,
                             const Translation& trans,
                             const Rectangle& robot_rectangle,
                             float z_threshold,
@@ -79,8 +79,8 @@ class LaserProjectionDataFilter : public LaserDataFilter
                         float& new_angle, float& new_length,
                         bool& in_robot_rect, bool& too_low);
 
-  const bool        LEFT;
-  const Rotation    ROT;
+  const Rotation    LASER_ROT;
+  const Rotation    FIXTURE_ROT;
   const Translation TRANS;
   const Rectangle   ROBOT;
   const float       Z_THRESHOLD;

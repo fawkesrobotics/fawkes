@@ -142,16 +142,16 @@ using namespace fawkes;
  *                    because the ground is below the EDL laser).
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
-    bool left,
-    const Rotation& rot,
+    const Rotation& laser_rot,
+    const Rotation& fixture_rot,
     const Translation& trans,
     const Rectangle& robot_rectangle,
     float z_threshold,
     unsigned int in_data_size,
     std::vector<float *> in)
   : LaserDataFilter(in_data_size, in, in.size()),
-    LEFT(left),
-    ROT(rot),
+    LASER_ROT(laser_rot),
+    FIXTURE_ROT(fixture_rot),
     TRANS(trans),
     ROBOT(robot_rectangle),
     Z_THRESHOLD(z_threshold)
@@ -170,18 +170,14 @@ LaserProjectionDataFilter::transform(const float angle, const float length,
   HomPolar p = HomPolar(length, angle);
   // 1. Move the coordinate so that subsequent rotations are exactly like the
   // fixtures.
-  if (LEFT) {
-    p.rotate_z(-1.0f * deg2rad(90.0f));
-    p.rotate_y(-1.0f * deg2rad(-90.0f));
-  } else {
-    p.rotate_z(-1.0f * deg2rad(-90.0f));
-    p.rotate_y(-1.0f * deg2rad(-90.0f));
-  }
+  p.rotate_z(-1.0f * deg2rad(LASER_ROT.z));
+  p.rotate_y(-1.0f * deg2rad(LASER_ROT.y));
+  p.rotate_x(-1.0f * deg2rad(LASER_ROT.x));
   // 2. Rotate the coordinate system the same way it was rotated by the
   // fixtures.
-  p.rotate_z(-1.0f * deg2rad(ROT.z));
-  p.rotate_y(-1.0f * deg2rad(ROT.y));
-  p.rotate_x(-1.0f * deg2rad(ROT.x));
+  p.rotate_z(-1.0f * deg2rad(FIXTURE_ROT.z));
+  p.rotate_y(-1.0f * deg2rad(FIXTURE_ROT.y));
+  p.rotate_x(-1.0f * deg2rad(FIXTURE_ROT.x));
   // 3. Translate to the position of the EDL laser.
   p += HomVector(TRANS.x, TRANS.y, TRANS.z);
   in_robot_rect = ROBOT.x_min < p.x() && p.x() < ROBOT.x_max &&

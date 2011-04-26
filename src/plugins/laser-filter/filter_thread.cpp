@@ -367,10 +367,12 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
   } else if (filter_type == "min_merge") {
     return new LaserMinMergeDataFilter(in_data_size, inbufs);
   } else if (filter_type == "projection") {
-    const bool left = config->get_bool((prefix + "left").c_str());
-    const LaserProjectionDataFilter::Rotation rot(config->get_float((prefix + "x_rot").c_str()),
-                                                  config->get_float((prefix + "y_rot").c_str()),
-                                                  config->get_float((prefix + "z_rot").c_str()));
+    const LaserProjectionDataFilter::Rotation laser_rot(config->get_float((prefix + "x_rot_laser").c_str()),
+                                                  config->get_float((prefix + "y_rot_laser").c_str()),
+                                                  config->get_float((prefix + "z_rot_laser").c_str()));
+    const LaserProjectionDataFilter::Rotation fixture_rot(config->get_float((prefix + "x_rot_fixture").c_str()),
+                                                          config->get_float((prefix + "y_rot_fixture").c_str()),
+                                                          config->get_float((prefix + "z_rot_fixture").c_str()));
     const LaserProjectionDataFilter::Translation trans(config->get_float((prefix + "x_trans").c_str()),
                                                        config->get_float((prefix + "y_trans").c_str()),
                                                        config->get_float((prefix + "z_trans").c_str()));
@@ -379,7 +381,7 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
                                                           config->get_float((prefix + "y_min").c_str()),
                                                           config->get_float((prefix + "y_max").c_str()));
     const float z_threshold = config->get_float((prefix + "z_threshold").c_str());
-    return new LaserProjectionDataFilter(left, rot, trans, robot_rect, z_threshold, in_data_size, inbufs);
+    return new LaserProjectionDataFilter(laser_rot, fixture_rot, trans, robot_rect, z_threshold, in_data_size, inbufs);
   } else {
     throw Exception("Unknown filter type %s", filter_type.c_str());
   }

@@ -70,12 +70,13 @@ main(int argc, char **argv)
     }
   }
 
-  const bool LEFT = true;
-  const LaserProjectionDataFilter::Rotation ROT((LEFT ? -39.0f : 39.0f), 0.0f, (LEFT ? -39.0f : 39.0f));
+  const bool LEFT = false;
+  const LaserProjectionDataFilter::Rotation LASER_ROT(0.0f, -90.0f, (LEFT ? 90.0f : -90.0f));
+  const LaserProjectionDataFilter::Rotation FIXTURE_ROT((LEFT ? -39.0f : 39.0f), 0.0f, (LEFT ? -39.0f : 39.0f));
   const LaserProjectionDataFilter::Translation TRANS(0.08f, (LEFT ? 0.20f : -0.20f), 1.17f);
   const LaserProjectionDataFilter::Rectangle ROBOT_RECT(-0.07, 0.31, -0.20f, 0.20f);
   const float Z_THRESHOLD = -0.05;
-  LaserProjectionDataFilter filter(LEFT, ROT, TRANS, ROBOT_RECT, Z_THRESHOLD , data_size, in);
+  LaserProjectionDataFilter filter(LASER_ROT, FIXTURE_ROT, TRANS, ROBOT_RECT, Z_THRESHOLD , data_size, in);
   filter.filter();
 
   const std::vector<float*> out = filter.get_out_vector();
