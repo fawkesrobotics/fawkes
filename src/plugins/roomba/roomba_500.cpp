@@ -178,9 +178,8 @@ const float Roomba500::DIAMETER          = 0.33;
 const float Roomba500::BUMPER_X_OFFSET   = 0.05;
 const float Roomba500::AXLE_LENGTH       = 0.235;
 
-const float Roomba500::MAX_LIN_VEL_MM_S  = 500;
-const float Roomba500::MAX_ANG_VEL_RAD_S = 2;
-const float Roomba500::MAX_RADIUS_MM     = 2000;
+const short int Roomba500::MAX_LIN_VEL_MM_S  = 500;
+const short int Roomba500::MAX_RADIUS_MM     = 2000;
 
 const unsigned short int Roomba500::MAX_ENCODER_COUNT = 65535;
 const short int Roomba500::MAX_PWM           = 255;

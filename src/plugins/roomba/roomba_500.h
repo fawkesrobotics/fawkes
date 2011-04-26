@@ -364,9 +364,8 @@ class Roomba500
   static const float BUMPER_X_OFFSET;	///< X Offset of bumper.
   static const float AXLE_LENGTH;	///< Axle length.
 
-  static const float MAX_LIN_VEL_MM_S;	///< Maximum linear velocity.
-  static const float MAX_ANG_VEL_RAD_S;	///< Maximum angular velocity.
-  static const float MAX_RADIUS_MM;	///< Maximum drive radius.
+  static const short int MAX_LIN_VEL_MM_S;	///< Maximum linear velocity.
+  static const short int MAX_RADIUS_MM;	///< Maximum drive radius.
 
   static const short int MAX_PWM;	///< Maximum PWM value for wheels.
   static const unsigned short int MAX_ENCODER_COUNT;	///< Maximum encoder count.

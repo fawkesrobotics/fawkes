@@ -570,8 +570,8 @@ Roomba500Thread::write_blackboard()
   if (__wt->has_fresh_data()) {
     const Roomba500::SensorPacketGroupAll sp(__roomba->get_sensor_packet());
 
-    int charge = roundf(((float)ntohs(sp.battery_charge) /
-			 (float)ntohs(sp.battery_capacity)) * 100.);
+    int charge = (int)roundf(((float)ntohs(sp.battery_charge) /
+			      (float)ntohs(sp.battery_capacity)) * 100.);
 
     if (__roomba->is_controlled()) {
       if (charge != __battery_percent) {
@@ -626,8 +626,8 @@ Roomba500Thread::write_blackboard()
     // Convert mm to m for distance
     __roomba500_if->set_distance((int16_t)ntohs(sp.distance));
     // invert because in Fawkes positive angles go counter-clockwise, while
-    // for the Roomba they go clockwise, additionally convert into radians.
-    __roomba500_if->set_angle(-deg2rad((int)ntohs(sp.angle)));
+    // for the Roomba they go clockwise
+    __roomba500_if->set_angle(- (int16_t)ntohs(sp.angle));
     __roomba500_if->set_charging_state(
 	(Roomba500Interface::ChargingState)sp.charging_state);
     __roomba500_if->set_voltage(ntohs(sp.voltage));

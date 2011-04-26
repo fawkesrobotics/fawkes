@@ -152,7 +152,7 @@ RoombaJoystickThread::loop()
       if (mf > 1)   mf = 1;
       if (mf < 0.4) mf = 0.4;
 
-      msg->set_weak_magnitude(floorf(mf * 0xFFFF));
+      msg->set_weak_magnitude((uint16_t)floorf(mf * 0xFFFF));
       if (mf > 0.8) msg->set_strong_magnitude(0x8000);
 
       __joy_if->msgq_enqueue(msg);
@@ -250,11 +250,11 @@ RoombaJoystickThread::loop()
 	velocity = __joy_if->axis(__cfg_axis_speed);
       }
 
-      int16_t velmm = roundf(forward * velocity);
-      int16_t radmm = roundf(radius);
+      int16_t velmm = (int16_t)roundf(forward * velocity);
+      int16_t radmm = (int16_t)roundf(radius);
       // special case handling for "turn on place"
       if (fabsf(__joy_if->axis(__cfg_axis_forward)) < 0.1) {
-	velmm =  fabs(sideward * velocity) * __cfg_max_velocity;
+	velmm =  (int16_t)fabs(sideward * velocity) * __cfg_max_velocity;
 	radmm =  (int16_t)copysignf(1, sideward);
       }
 
