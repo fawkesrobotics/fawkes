@@ -41,9 +41,9 @@
 #  include <bluetooth/rfcomm.h>
 #  include <sys/socket.h>
 #  include <fnmatch.h>
-#endif
 
 static const bdaddr_t _BDADDR_ANY = {{0, 0, 0, 0, 0, 0}};
+#endif
 
 using namespace fawkes;
 
