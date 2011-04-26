@@ -216,10 +216,14 @@ ToLuaInterfaceGenerator::write_constants_h(FILE *f)
 
   for ( vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
     fprintf(f, "  typedef enum {\n");
-    vector< pair<string,string> > items = (*i).getItems();
-    vector< pair<string,string> >::iterator j = items.begin();
+    vector<InterfaceEnumConstant::EnumItem> items = (*i).get_items();
+    vector<InterfaceEnumConstant::EnumItem>::iterator j = items.begin();
     while (j != items.end()) {
-      fprintf(f, "    %s", (*j).first.c_str());
+      if (j->has_custom_value) {
+	fprintf(f, "    %s = %i", j->name.c_str(), j->custom_value);
+      } else {
+	fprintf(f, "    %s", j->name.c_str());
+      }
       ++j;
       if ( j != items.end() ) {
 	fprintf(f, ",\n");
@@ -227,7 +231,7 @@ ToLuaInterfaceGenerator::write_constants_h(FILE *f)
 	fprintf(f, "\n");
       }
     }
-    fprintf(f, "  } %s;\n\n", (*i).getName().c_str());
+    fprintf(f, "  } %s;\n\n", (*i).get_name().c_str());
   }
 }
 

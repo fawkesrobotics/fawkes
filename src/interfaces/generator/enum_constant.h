@@ -30,17 +30,27 @@
 class InterfaceEnumConstant
 {
  public:
+  /** Enumeration item. */
+  typedef struct {
+    std::string name;			///< Name of item.
+    std::string comment;		///< Comment for item.
+    bool        has_custom_value;	///< True if custom value set.
+    int         custom_value;		///< Custom value.
+  } EnumItem;
+
   InterfaceEnumConstant(const std::string &name, const std::string &comment);
 
-  std::string getName();
-  std::string getComment();
-  std::vector< std::pair< std::string, std::string > > getItems();
-  void addItem(std::string name, std::string comment);
+  std::string get_name();
+  std::string get_comment();
+  std::vector<EnumItem> get_items();
+  void add_item(std::string name, std::string comment);
+  void add_item(std::string name, std::string comment, int value);
 
  private:
-  std::string name;
-  std::string comment;
-  std::vector< std::pair<std::string, std::string> > items;
+
+  std::string __name;
+  std::string __comment;
+  std::vector<EnumItem> __items;
 };
 
 #endif
