@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_JOYSTICK_ACQUISITION_THREAD_H_
 #define __PLUGINS_JOYSTICK_ACQUISITION_THREAD_H_
 
+#include "bb_handler.h"
+
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
@@ -37,16 +39,6 @@ namespace fawkes {
 }
 
 class JoystickForceFeedback;
-
-class JoystickBlackBoardHandler
-{
- public:
-  virtual ~JoystickBlackBoardHandler();
-  virtual void joystick_changed(unsigned int pressed_buttons, 
-				float *axis_values) = 0;
-  virtual void joystick_plugged(char num_axes, char num_buttons) = 0;
-  virtual void joystick_unplugged() = 0;
-};
 
 class JoystickAcquisitionThread
 : public fawkes::Thread,

@@ -37,38 +37,12 @@
 
 using namespace fawkes;
 
-/** @class JoystickBlackBoardHandler "acquisition_thread.h"
- * Handler class for joystick data.
- * This interface allows to plug a generic handler to the
- * JoystickAcquisitionThread via the alternative constructor. This can be
- * used to directly instantiate the acquisition thread outside of Fawkes.
- * @author Tim Niemueller
- *
- * @fn void JoystickBlackBoardHandler::joystick_changed(unsigned int pressed_buttons, float *axis_values) = 0
- * Joystick data changed.
- * @param pressed_buttons the new pressed_buttons array
- * @param axis_values array of axis values, the length is at least num_axes()
- *
- * @fn void JoystickBlackBoardHandler::joystick_plugged(char num_axes, char num_buttons)
- * A (new) joystick has been plugged in
- * @param num_axes number of axes
- * @param num_buttons number of buttons
- *
- * @fn void JoystickBlackBoardHandler::joystick_unplugged()
- * The joystick has been unplugged and is no longer available.
- */
-
-/** Virtual empty destructor. */
-JoystickBlackBoardHandler::~JoystickBlackBoardHandler()
-{
-}
 
 /** @class JoystickAcquisitionThread "acquisition_thread.h"
  * Joystick acqusition thread for Linux joystick API.
  * @see Linux Kernel Documentation (joystick-api.txt)
  * @author Tim Niemueller
  */
-
 
 /** Constructor. */
 JoystickAcquisitionThread::JoystickAcquisitionThread()

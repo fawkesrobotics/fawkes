@@ -20,7 +20,6 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "acquisition_thread.h"
 #include "remote_bb_poster.h"
 
 #include <core/exceptions/system.h>
