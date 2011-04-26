@@ -72,6 +72,8 @@ class JoystickAcquisitionThread
   unsigned int       pressed_buttons() const;
   float *            axis_values();
 
+  /** Access force feedback of joystick.
+   * @return instance of JoystickForceFeedback class for current joystick. */
   JoystickForceFeedback *  ff() const { return __ff; }
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */

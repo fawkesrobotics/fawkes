@@ -44,9 +44,81 @@
 
 using namespace fawkes;
 
+/** @class JoystickForceFeedback "force_feedback.h"
+ * Cause force feedback on a joystick.
+ * An instance of this class opens an input device which belongs to
+ * the given device name. It searches all input devices to find the
+ * correct device file. Once opened, it detects the available features
+ * of the joystick and provides conventient access to it allowing for
+ * rumbling effects, for instance.
+ * @author Tim Niemueller
+ *
+ * @fn bool JoystickForceFeedback::is_rumbling()
+ * Check if rumbling effect is active.
+ * @return true if effect is active, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_rumble()
+ * Check if rumbling effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_periodic()
+ * Check if periodic effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_constant()
+ * Check if constant effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_spring()
+ * Check if spring effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_friction()
+ * Check if friction effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_damper()
+ * Check if damper effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_inertia()
+ * Check if inertia effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_ramp()
+ * Check if ramp effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_square()
+ * Check if square effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_triangle()
+ * Check if triangle effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_sine()
+ * Check if sine effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_saw_up()
+ * Check if upward saw effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_saw_down()
+ * Check if downward saw effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ * @fn bool JoystickForceFeedback::can_custom()
+ * Check if custom effect is supported.
+ * @return true if effect is supported, false otherwise
+ *
+ */
+
 /** Constructor.
- * @param name device name, note that this is not the device file, but rather
- * the event files are tried and the device name is compared.
+ * @param device_name device name, note that this is not the device
+ * file, but rather the event files are tried and the device name is
+ * compared.
  */
 JoystickForceFeedback::JoystickForceFeedback(const char *device_name)
 {
@@ -152,12 +224,26 @@ JoystickForceFeedback::JoystickForceFeedback(const char *device_name)
 }
 
 
+/** Destructor. */
 JoystickForceFeedback::~JoystickForceFeedback()
 {
   close(__fd);
 }
 
 
+/** Rumble the joystick.
+
+ * This is the most basic force feedback for example in force feedback
+ * joypads. Often such joysticks provide two effect magnitudes, a
+ * strong heavier motor for larger effects, and a smaller one for
+ * vibrating effects.
+ * @param strong_magnitude magnitude to use on the larger motor
+ * @param weak_magnitude magnitude to use on the smaller motor
+ * @param direction direction of the effect, meaningful on joysticks
+ * (rather than joypads)
+ * @param length length of the effect in ms
+ * @param delay delay before the effect starts in ms
+ */
 void
 JoystickForceFeedback::rumble(uint16_t strong_magnitude, uint16_t weak_magnitude,
 			      Direction direction, uint16_t length, uint16_t delay)
@@ -192,6 +278,7 @@ JoystickForceFeedback::rumble(uint16_t strong_magnitude, uint16_t weak_magnitude
 }
 
 
+/** Stop rumbling. */
 void
 JoystickForceFeedback::stop_rumble()
 {
@@ -204,6 +291,7 @@ JoystickForceFeedback::stop_rumble()
 }
 
 
+/** Stop all current effects. */
 void
 JoystickForceFeedback::stop_all()
 {

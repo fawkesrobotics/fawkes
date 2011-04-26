@@ -29,11 +29,12 @@
 class JoystickForceFeedback
 {
  public:
+  /** Direction of the effect. */
   typedef enum {
-    DIRECTION_DOWN  = 0x0000,
-    DIRECTION_LEFT  = 0x4000,
-    DIRECTION_UP    = 0x8000,
-    DIRECTION_RIGHT = 0xC000
+    DIRECTION_DOWN  = 0x0000,	/**< Downward effect direction. */
+    DIRECTION_LEFT  = 0x4000,	/**< Left effect direction. */
+    DIRECTION_UP    = 0x8000,	/**< Upward effect direction. */
+    DIRECTION_RIGHT = 0xC000	/**< Right effect direction. */
   } Direction;
 
   JoystickForceFeedback(const char *device_name);
@@ -47,7 +48,6 @@ class JoystickForceFeedback
   void stop_rumble();
 
   bool is_rumbling() { return (__rumble.id != -1); }
-
   bool can_rumble()   { return __can_rumble;   }
   bool can_periodic() { return __can_periodic; }
   bool can_constant() { return __can_constant; }
@@ -62,6 +62,7 @@ class JoystickForceFeedback
   bool can_saw_up()   { return __can_saw_up;   }
   bool can_saw_down() { return __can_saw_down; }
   bool can_custom()   { return __can_custom;   }
+
  private:
   int __fd;
   struct ff_effect __rumble;
