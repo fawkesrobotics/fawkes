@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  sensor_thread.h - Joystick thread that pushes data into the interface
+ *  act_thread.h - Joystick thread to execute force feedback
  *
- *  Created: Sat Nov 22 18:05:01 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Feb 07 19:52:48 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_SENSOR_THREAD_H_
-#define __PLUGINS_JOYSTICK_SENSOR_THREAD_H_
+#ifndef __PLUGINS_JOYSTICK_ACT_THREAD_H_
+#define __PLUGINS_JOYSTICK_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -34,8 +34,9 @@ namespace fawkes {
 }
 
 class JoystickAcquisitionThread;
+class JoystickSensorThread;
 
-class JoystickSensorThread
+class JoystickActThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -43,15 +44,11 @@ class JoystickSensorThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JoystickSensorThread(JoystickAcquisitionThread *aqt);
+  JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst);
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
-
-  /** Get joystick interface.
-   * @return joystick interface */
-  fawkes::JoystickInterface * joystick_interface() const { return __joystick_if; }
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -60,6 +57,9 @@ class JoystickSensorThread
   fawkes::JoystickInterface *__joystick_if;
 
   JoystickAcquisitionThread *__aqt;
+  JoystickSensorThread      *__senst;
+
+  bool __joystick_connected;
 };
 
 

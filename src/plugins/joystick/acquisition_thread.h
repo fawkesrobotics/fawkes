@@ -36,12 +36,14 @@ namespace fawkes {
   class Mutex;
 }
 
+class JoystickForceFeedback;
+
 class JoystickBlackBoardHandler
 {
  public:
   virtual ~JoystickBlackBoardHandler();
-  virtual void joystick_changed(unsigned int pressed_buttons,
-				float *axis_x_values, float *axis_y_values) = 0;
+  virtual void joystick_changed(unsigned int pressed_buttons, 
+				float *axis_values) = 0;
   virtual void joystick_plugged(char num_axes, char num_buttons) = 0;
   virtual void joystick_unplugged() = 0;
 };
@@ -68,8 +70,11 @@ class JoystickAcquisitionThread
   char               num_buttons() const;
   const char *       joystick_name() const;
   unsigned int       pressed_buttons() const;
-  float *            axis_x_values();
-  float *            axis_y_values();
+  float *            axis_values();
+
+  /** Access force feedback of joystick.
+   * @return instance of JoystickForceFeedback class for current joystick. */
+  JoystickForceFeedback *  ff() const { return __ff; }
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -77,6 +82,7 @@ class JoystickAcquisitionThread
  private:
   void init(std::string device_file);
   void open_joystick();
+  void open_forcefeedback();
 
  private:
   std::string __cfg_device_file;
@@ -92,10 +98,10 @@ class JoystickAcquisitionThread
   fawkes::Mutex  *__data_mutex;
 
   unsigned int    __pressed_buttons;
-  float          *__axis_x_values;
-  float          *__axis_y_values;
+  float          *__axis_values;
 
   JoystickBlackBoardHandler *__bbhandler;
+  JoystickForceFeedback *__ff;
 };
 
 

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  joystick_plugin.h - Fawkes Joystick Plugin
+ *  roombajoy_plugin.cpp - Control your Roomba with a joystick
  *
- *  Created: Sat Nov 22 18:04:49 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jan 29 14:30:07 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,33 +20,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/joystick/joystick_plugin.h>
-
-#include "act_thread.h"
-#include "sensor_thread.h"
-#include "acquisition_thread.h"
+#include "roombajoy_plugin.h"
+#include "roombajoy_thread.h"
 
 using namespace fawkes;
 
-/** @class JoystickPlugin "joystick_plugin.h"
- * Joystick plugin for Fawkes.
- * This plugin provides access to a joystick from within Fawkes.
+/** @class RoombaJoystickPlugin "roombajoy_plugin.h"
+ * Control Roomba with a Joystick.
  * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param config Fawkes configuration
  */
-JoystickPlugin::JoystickPlugin(Configuration *config)
+RoombaJoystickPlugin::RoombaJoystickPlugin(Configuration *config)
   : Plugin(config)
 {
-  JoystickAcquisitionThread *aqt = new JoystickAcquisitionThread();
-  JoystickSensorThread *senst = new JoystickSensorThread(aqt);
-  thread_list.push_back(senst);
-  thread_list.push_back(aqt);
-  thread_list.push_back(new JoystickActThread(aqt, senst));
+  thread_list.push_back(new RoombaJoystickThread());
 }
 
 
-PLUGIN_DESCRIPTION("Provides access to a joystick")
-EXPORT_PLUGIN(JoystickPlugin)
+PLUGIN_DESCRIPTION("Control your Roomba with a Joystick")
+EXPORT_PLUGIN(RoombaJoystickPlugin)

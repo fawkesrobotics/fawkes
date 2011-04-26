@@ -1,0 +1,49 @@
+ffkbjoystick(1)
+===============
+
+NAME
+----
+ffkbjoystick - Emulate joystick via keyboard and post to blackboard
+
+SYNOPSIS
+--------
+[verse]
+*ffkbjoystick* [-r 'host[:port]']
+
+DESCRIPTION
+-----------
+This tool is used to emulate a joystick using the keyboard and post
+the data to a remote blackboard, similar to ffjoystick.
+
+OPTIONS
+-------
+ *-h*::
+	Show usage instructions.
+
+ *-r* 'host[:port]]'::
+	The host and port of the Fawkes instance to connect to.
+
+
+EXAMPLES
+--------
+
+ *ffkbjoystick -r myrobot*::
+	Open the default local joystick and write the data to the
+	blackboard on myrobot.
+
+SEE ALSO
+--------
+linkff:fawkes[8] linkff:ffjoystick[1]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org

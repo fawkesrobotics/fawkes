@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="Roomba500Interface" author="Tim Niemueller" year="2011">
+  <constants>
+    <enum name="Mode">
+      <comment>Open Interface mode.</comment>
+      <item name="MODE_OFF" value="0">No connection.</item>
+      <item name="MODE_PASSIVE" value="1">Passive mode, no control,
+        only listening.</item>
+      <item name="MODE_SAFE" value="2">Control acquired, safety measures
+        in place.</item>
+      <item name="MODE_FULL" value="3">Control acquired, safety measures
+        disabled.</item>
+    </enum>
+    <enum name="InfraredCharacter">
+      <comment>Infrared character values.</comment>
+      <item name="IR_NONE" value="0">No valid IR signal</item>
+      <item name="IR_REMOTE_LEFT" value="129">IR Remote Control: left button</item>
+      <item name="IR_REMOTE_FORWARD" value="130"> IR Remote Control: forward
+        button</item>
+      <item name="IR_REMOTE_RIGHT" value="131">IR Remote Control: right
+        button</item>
+      <item name="IR_REMOTE_SPOT" value="132">IR Remote Control: spot button</item>
+      <item name="IR_REMOTE_MAX" value="133">IR Remote Control: max button</item>
+      <item name="IR_REMOTE_SMALL" value="134">IR Remote Control: small
+        button</item>
+      <item name="IR_REMOTE_MEDIUM" value="135">IR Remote Control:
+        medium button</item>
+      <item name="IR_REMOTE_LARGE_CLEAN" value="136">IR Remote Control:
+        large/clean button</item>
+      <item name="IR_REMOTE_STOP" value="137">IR Remote Control: stop button</item>
+      <item name="IR_REMOTE_POWER" value="138">IR Remote Control:
+        power button</item>
+      <item name="IR_REMOTE_ARC_LEFT" value="139">IR Remote Control:
+        left arc button</item>
+      <item name="IR_REMOTE_ARC_RIGHT" value="140">IR Remote Control:
+        right arc button</item>
+      <item name="IR_REMOTE_STOP2" value="141">IR Remote Control:
+        stop button</item>
+      <item name="IR_SCHED_REMOTE_DOWNLOAD" value="142">IR scheduling remote:
+        download button</item>
+      <item name="IR_SCHED_REMOTE_SEEK_DOCK" value="143">IR scheduling remote:
+        seek dock button</item>
+      <item name="IR_DISC_DOCK_RESERVED" value="240">Roomba Discovery dock:
+        reserved</item>
+      <item name="IR_DISC_DOCK_RED_BUOY" value="248">Roomba Discovery dock:
+        red buoy</item>
+      <item name="IR_DISC_DOCK_GREEN_BUOY" value="244">Roomba Discovery dock:
+        green buoy</item>
+      <item name="IR_DISC_DOCK_FORCE_FIELD" value="242">Roomba Discovery dock:
+        red and green buoy</item>
+      <item name="IR_DISC_DOCK_RED_GREEN_BUOY" value="252">Roomba Discovery dock:
+        red buoy and force field</item>
+      <item name="IR_DISC_DOCK_RED_BUOY_FORCE_FIELD" value="250">Roomba Discovery
+        dock: green buoy and force field</item>
+      <item name="IR_DISC_DOCK_GREEN_BUOY_FORCE_FIELD" value="246">Roomba
+        Discovery dock: green buoy and force field.</item>
+      <item name="IR_DISC_DOCK_RED_GREEN_BUOY_FORCE_FIELD" value="254">Roomba
+        Discovery dock: red and green buoy and force field</item>
+      <item name="IR_DOCK_RESERVED" value="160">Roomba 500 dock: reserved</item>
+      <item name="IR_DOCK_RED_BUOY" value="168">Roomba 500 dock: red buoy</item>
+      <item name="IR_DOCK_GREEN_BUOY" value="164">Roomba 500 dock: green buoy</item>
+      <item name="IR_DOCK_FORCE_FIELD" value="161">Roomba 500 dock: red and green buoy</item>
+      <item name="IR_DOCK_RED_GREEN_BUOY" value="172">Roomba 500 dock: red buoy and force field</item>
+      <item name="IR_DOCK_RED_BUOY_FORCE_FIELD" value="169">Roomba 500 dock: green buoy and force field.</item>
+      <item name="IR_DOCK_GREEN_BUOY_FORCE_FIELD" value="165">Roomba 500 dock: green buoy and force field.</item>
+      <item name="IR_DOCK_RED_GREEN_BUOY_FORCE_FIELD" value="173">Roomba 500 dock: red and green buoy and force field.</item>
+      <item name="IR_VIRTUAL_WALL" value="162">IR Virtual Wall</item>
+    </enum>
+    <enum name="ChargingState">
+      <comment>
+	Current charging state.
+      </comment>
+      <item name="CHARGING_NO" value="0">Not charging.</item>
+      <item name="CHARGING_RECONDITIONING" value="1">Reconditioning battery.</item>
+      <item name="CHARGING_FULL" value="2">Full charging cycle.</item>
+      <item name="CHARGING_TRICKLE" value="3">Trickle charging.</item>
+      <item name="CHARGING_WAITING" value="4">Waiting.</item>
+      <item name="CHARGING_ERROR" value="5">Fault condition.</item>
+    </enum>
+    <enum name="BrushState">
+      <comment>State of the brushes.</comment>
+      <item name="BRUSHSTATE_OFF">Brush is off.</item>
+      <item name="BRUSHSTATE_FORWARD">Brush is turning forward.</item>
+      <item name="BRUSHSTATE_BACKWARD">Brush is turning backward.</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      Roomba 500 hardware interface.      
+    </comment>
+    <field type="Mode" name="mode">Open Interface mode.</field>
+    <field type="bool" name="wheel_drop_left">Left wheel drop sensor.</field>
+    <field type="bool" name="wheel_drop_right">Right wheel drop sensor.</field>
+    <field type="bool" name="bump_left">Bump on left.</field>
+    <field type="bool" name="bump_right">Bump on right.</field>
+    <field type="bool" name="wall">Wall sensor.</field>
+    <field type="bool" name="cliff_left">Cliff detected left.</field>
+    <field type="bool" name="cliff_front_left">Cliff detected front left.</field>
+    <field type="bool" name="cliff_front_right">Cliff detected front right.</field>
+    <field type="bool" name="cliff_right">Cliff detected right.</field>
+    <field type="bool" name="virtual_wall">Virtual wall detected.</field>
+    <field type="bool" name="overcurrent_side_brush">Overcurrent on side brush.</field>
+    <field type="bool" name="overcurrent_main_brush">Overcurrent on main brush.</field>
+    <field type="bool" name="overcurrent_left_wheel">Overcurrent on left wheel.</field>
+    <field type="bool" name="overcurrent_right_wheel">Overcurrent on right wheel.</field>
+    <field type="bool" name="dirt_detect">Dirt detected?</field>
+    <field type="InfraredCharacter" name="ir_opcode_omni">Omni IR receiver code.</field>
+    <field type="bool" name="button_clean">Clean button pressed.</field>
+    <field type="bool" name="button_spot">Spot button pressed.</field>
+    <field type="bool" name="button_dock">Dock button pressed.</field>
+    <field type="bool" name="button_minute">Minute button pressed.</field>
+    <field type="bool" name="button_hour">Hour button pressed.</field>
+    <field type="bool" name="button_day">Day button pressed.</field>
+    <field type="bool" name="button_schedule">Schedule button pressed.</field>
+    <field type="bool" name="button_clock">Clock button pressed.</field>
+    <field type="int16" name="distance">Travelled distance in m.</field>
+    <field type="int16" name="angle">Turned angle in radians.</field>
+    <field type="ChargingState" name="charging_state">Charging state.</field>
+    <field type="uint16" name="voltage">Voltage in mV.</field>
+    <field type="int16" name="current">Current in mA.</field>
+    <field type="int8" name="temperature">Temperature in degree Celsius.</field>
+    <field type="uint16" name="battery_charge">Battery charge in mAh.</field>
+    <field type="uint16" name="battery_capacity">Battery capacity in mAh.</field>
+    <field type="uint16" name="wall_signal">Raw wall signal</field>
+    <field type="uint16" name="cliff_left_signal">Raw left cliff signal.</field>
+    <field type="uint16" name="cliff_front_left_signal">Raw front left
+      cliff signal.</field>
+    <field type="uint16" name="cliff_front_right_signal">Raw front right
+      cliff signal.</field>
+    <field type="uint16" name="cliff_right_signal">Raw right cliff signal.</field>
+    <field type="bool" name="home_base_charger_available">
+      Home base charger available?</field>
+    <field type="bool" name="internal_charger_available">
+      Internal charger available?</field>
+    <field type="uint8" name="song_number">Song number.</field>
+    <field type="bool" name="song_playing">Song playing?</field>
+    <field type="int16" name="velocity">Requested velocity in mm/s.</field>
+    <field type="int16" name="radius">Requested radius in mm.</field>
+    <field type="int16" name="velocity_right">Requested left velocity in mm/s.</field>
+    <field type="int16" name="velocity_left">Requested right velocity in mm/s.</field>
+    <field type="uint16" name="encoder_counts_left">Encoder count left.</field>
+    <field type="uint16" name="encoder_counts_right">Encoder count right.</field>
+    <field type="bool" name="bumper_left">Left bumper active?</field>
+    <field type="bool" name="bumper_front_left">Front left bumper active?</field>
+    <field type="bool" name="bumper_center_left">Center left bumper active?</field>
+    <field type="bool" name="bumper_center_right">Center right bumper active?</field>
+    <field type="bool" name="bumper_front_right">Front right bumper active?</field>
+    <field type="bool" name="bumper_right">Right bumper active?</field>
+
+    <field type="uint16" name="light_bump_left">Raw left bumper signal.</field>
+    <field type="uint16" name="light_bump_front_left">Raw front left bumper
+      signal.</field>
+    <field type="uint16" name="light_bump_center_left">Raw center left
+      bumper signal.</field>
+    <field type="uint16" name="light_bump_center_right">Raw center right
+      bumper signal.</field>
+    <field type="uint16" name="light_bump_front_right">Raw front right
+      bumper signal.</field>
+    <field type="uint16" name="light_bump_right">Raw right bumper signal.</field>  
+    <field type="InfraredCharacter" name="ir_opcode_left">
+      Left receiver opcode.</field>
+    <field type="InfraredCharacter" name="ir_opcode_right">
+      Right receiver opcode.</field>
+    <field type="int16" name="left_motor_current">Left motor current in mA.</field>
+    <field type="int16" name="right_motor_current">Right motor current in mA.</field>
+    <field type="int16" name="main_brush_current">Main brush current in mA.</field>
+    <field type="int16" name="side_brush_current">Side brush current in mA.</field>
+    <field type="bool" name="caster_stasis">Caster wheel stasis.</field>
+  </data>
+  <message name="Stop">
+    <comment>Stop all motion.</comment>
+  </message>
+  <message name="Dock">
+    <comment>Dock robot.</comment>
+  </message>
+  <message name="SetMode">
+    <comment>Set operation mode.</comment>
+    <ref>mode</ref>
+  </message>
+  <message name="DriveStraight">
+    <comment>Drive straight.</comment>
+    <ref>velocity</ref>
+  </message>
+  <message name="Drive">
+    <comment>Drive with the given parameters.</comment>
+    <ref>velocity</ref>
+    <ref>radius</ref>
+  </message>
+  <message name="SetMotors">
+    <comment>Set vacuuming state</comment>
+    <field type="bool" name="vacuuming">Enable vacuuming?</field>
+    <field type="BrushState" name="main">Main brush state.</field>
+    <field type="BrushState" name="side">Side brush state.</field>
+  </message>
+</interface>

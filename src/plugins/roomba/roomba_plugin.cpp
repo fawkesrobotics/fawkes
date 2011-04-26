@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  joystick_plugin.h - Fawkes Joystick Plugin
+ *  roomba_plugin.cpp - Plugin to interface with a Roomba
  *
- *  Created: Sat Nov 22 18:04:49 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Dec 30 22:05:07 2010
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,33 +20,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/joystick/joystick_plugin.h>
-
-#include "act_thread.h"
+#include "roomba_plugin.h"
+#include "thread_roomba_500.h"
 #include "sensor_thread.h"
-#include "acquisition_thread.h"
 
 using namespace fawkes;
 
-/** @class JoystickPlugin "joystick_plugin.h"
- * Joystick plugin for Fawkes.
- * This plugin provides access to a joystick from within Fawkes.
+/** @class RoombaPlugin "roomba_plugin.h"
+ * Plugin to interface with a Roomba robot.
  * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param config Fawkes configuration
  */
-JoystickPlugin::JoystickPlugin(Configuration *config)
+RoombaPlugin::RoombaPlugin(Configuration *config)
   : Plugin(config)
 {
-  JoystickAcquisitionThread *aqt = new JoystickAcquisitionThread();
-  JoystickSensorThread *senst = new JoystickSensorThread(aqt);
-  thread_list.push_back(senst);
-  thread_list.push_back(aqt);
-  thread_list.push_back(new JoystickActThread(aqt, senst));
+  Roomba500Thread *roomba500_thread = new Roomba500Thread();
+  thread_list.push_back(roomba500_thread);
+  thread_list.push_back(new RoombaSensorThread(roomba500_thread));
 }
 
 
-PLUGIN_DESCRIPTION("Provides access to a joystick")
-EXPORT_PLUGIN(JoystickPlugin)
+PLUGIN_DESCRIPTION("Roomba vacuum robot plugin.")
+EXPORT_PLUGIN(RoombaPlugin)

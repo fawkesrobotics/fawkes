@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  sensor_thread.h - Joystick thread that pushes data into the interface
+ *  sensor_thread.h - Roomba plugin sensor thread
  *
- *  Created: Sat Nov 22 18:05:01 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jan 03 00:03:42 2011
+ *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,46 +20,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_SENSOR_THREAD_H_
-#define __PLUGINS_JOYSTICK_SENSOR_THREAD_H_
+#ifndef __PLUGINS_ROOMBA_SENSOR_THREAD_H_
+#define __PLUGINS_ROOMBA_SENSOR_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/blackboard.h>
 
-namespace fawkes {
-  class JoystickInterface;
-}
+class Roomba500Thread;
 
-class JoystickAcquisitionThread;
-
-class JoystickSensorThread
+class RoombaSensorThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::LoggingAspect
 {
  public:
-  JoystickSensorThread(JoystickAcquisitionThread *aqt);
+  RoombaSensorThread(Roomba500Thread *roomba500_thread);
 
-  virtual void init();
-  virtual void finalize();
   virtual void loop();
-
-  /** Get joystick interface.
-   * @return joystick interface */
-  fawkes::JoystickInterface * joystick_interface() const { return __joystick_if; }
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JoystickInterface *__joystick_if;
-
-  JoystickAcquisitionThread *__aqt;
+  Roomba500Thread *__roomba500_thread;
 };
 
 

@@ -35,6 +35,58 @@ class JoystickInterface : public Interface
   static const unsigned int BUTTON_30;
   static const unsigned int BUTTON_31;
   static const unsigned int BUTTON_32;
+  static const unsigned char JFF_RUMBLE;
+  static const unsigned char JFF_PERIODIC;
+  static const unsigned char JFF_RAMP;
+  static const unsigned char JFF_SPRING;
+  static const unsigned char JFF_FRICTION;
+  static const unsigned char JFF_DAMPER;
+  static const unsigned char JFF_INERTIA;
+  static const unsigned char JFF_CONSTANT;
+
+  typedef enum {
+    DIRECTION_DOWN = 0,
+    DIRECTION_LEFT = 16384,
+    DIRECTION_UP = 32768,
+    DIRECTION_RIGHT = 49152
+  } Direction;
+
+  class StartRumbleMessage : public Message
+  {
+    StartRumbleMessage(unsigned short ini_length, unsigned short ini_delay, Direction ini_direction, unsigned short ini_strong_magnitude, unsigned short ini_weak_magnitude);
+    StartRumbleMessage();
+    ~StartRumbleMessage();
+
+    unsigned short length();
+    void set_length(const unsigned short new_length);
+    int maxlenof_length() const;
+    unsigned short delay();
+    void set_delay(const unsigned short new_delay);
+    int maxlenof_delay() const;
+    Direction direction();
+    void set_direction(const Direction new_direction);
+    int maxlenof_direction() const;
+    unsigned short strong_magnitude();
+    void set_strong_magnitude(const unsigned short new_strong_magnitude);
+    int maxlenof_strong_magnitude() const;
+    unsigned short weak_magnitude();
+    void set_weak_magnitude(const unsigned short new_weak_magnitude);
+    int maxlenof_weak_magnitude() const;
+  };
+
+  class StopRumbleMessage : public Message
+  {
+    StopRumbleMessage();
+    ~StopRumbleMessage();
+
+  };
+
+  class StopAllMessage : public Message
+  {
+    StopAllMessage();
+    ~StopAllMessage();
+
+  };
 
   unsigned char num_axes();
   void set_num_axes(const unsigned char new_num_axes);
@@ -42,15 +94,18 @@ class JoystickInterface : public Interface
   unsigned char num_buttons();
   void set_num_buttons(const unsigned char new_num_buttons);
   int maxlenof_num_buttons() const;
+  unsigned char supported_ff_effects();
+  void set_supported_ff_effects(const unsigned char new_supported_ff_effects);
+  int maxlenof_supported_ff_effects() const;
   unsigned int pressed_buttons();
   void set_pressed_buttons(const unsigned int new_pressed_buttons);
   int maxlenof_pressed_buttons() const;
-  float axis_x(int index);
-  void set_axis_x(unsigned int index, const float new_axis_x);
-  int maxlenof_axis_x() const;
-  float axis_y(int index);
-  void set_axis_y(unsigned int index, const float new_axis_y);
-  int maxlenof_axis_y() const;
+  float axis(int index);
+  void set_axis(unsigned int index, const float new_axis);
+  int maxlenof_axis() const;
+  unsigned char ff_effects();
+  void set_ff_effects(const unsigned char new_ff_effects);
+  int maxlenof_ff_effects() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
