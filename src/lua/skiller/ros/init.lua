@@ -69,12 +69,11 @@ function goal_cb(goal_handle, action_server)
       goal_handle:accept(goal_handle.vars.skillstring)
       nodemon:set_running()
    else
-      local errstr = string.format("lua_error_skillstring: %s|%s",
-				   goal_handle.vars.skillstring, err)
-      print_error(errstr)
+      local errstr = string.format("%s|%s", goal_handle.vars.skillstring, err)
+      print_error("lua_error_skillstring: " .. errstr)
       if nodemon then
-	 nodemon:set_error(errstr)
-	 nodemon:set_recovering("autorecover: ready for new skill calls")
+	 nodemon:set_error("lua_error_skillstring", errstr)
+	 nodemon:set_recovering("autorecover", "ready for new skill calls")
 	 nodemon:set_running()
       end
       goal_handle:reject(errstr)
@@ -86,14 +85,13 @@ function spin_cb(goal_handle, action_server)
    skillenv.reset_status()
    local ok, errmsg = xpcall(goal_handle.vars.sksf, debug.traceback)
    if not ok then
-      local errstr = string.format("lua_error_skill: %s|%s",
-				   goal_handle.vars.skillstring, errmsg)
-      print_error(errstr)
+      local errstr = string.format("%s|%s", goal_handle.vars.skillstring, errmsg)
+      print_error("lua_error_skill: " .. errstr)
 
       local result = action_server.actspec.result_spec:instantiate()
       result.values.errmsg = errstr
       if nodemon then
-	 nodemon:set_error(errstr)
+	 nodemon:set_error("lua_error_skill", errstr)
 	 nodemon:set_recovering("autorecover: ready for new skill calls")
 	 nodemon:set_running()
       end
@@ -110,8 +108,8 @@ function spin_cb(goal_handle, action_server)
 	 result.values.errmsg = errstr
 	 print_fail(errstr)
 	 if nodemon then
-	    nodemon:set_error(errstr)
-	    nodemon:set_recovering("autorecover: ready for new skill calls")
+	    nodemon:set_error("lua_error_skill", errstr)
+	    nodemon:set_recovering("autorecover", "ready for new skill calls")
 	    nodemon:set_running()
 	 end
 	 goal_handle:abort(result, errstr)
