@@ -27,7 +27,7 @@
 #include <cstring>
 #include <cstdlib>
 
-#if ! (defined(__USE_XOPEN2K8) || defined(__POSIX_VISIBLE) && __POSIX_VISIBLE >= 200809)
+#if ! (defined(__USE_XOPEN2K8) || defined(__USE_GNU) || defined(__POSIX_VISIBLE) && __POSIX_VISIBLE >= 200809)
 #define __COMPAT_STRNDUP
 
 char * strndup(const char *s, size_t n);
