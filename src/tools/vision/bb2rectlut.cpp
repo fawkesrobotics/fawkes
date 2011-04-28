@@ -249,7 +249,12 @@ print_info(ArgumentParser *argp)
 	     lut_file, rif->version(),
 	     rif->is_little_endian() ? "little endian" : "big endian",
 	     rif->num_blocks(), blocks->size(),
-	     (long unsigned int)rif->guid(), rif->model());
+#if __WORDSIZE == 64
+	     (long unsigned int)rif->guid(),
+#else
+	     (long long unsigned int)rif->guid(),
+#endif
+	     rif->model());
 
       unsigned int u = 1;
       RectificationInfoFile::RectInfoBlockVector::const_iterator b;
