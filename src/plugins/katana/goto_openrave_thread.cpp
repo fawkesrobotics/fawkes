@@ -45,6 +45,8 @@ using namespace fawkes;
  * @author Bahram Maleki-Fard (OpenRAVE extension)
  */
 
+#ifdef HAVE_OPENRAVE
+
 /** Constructor.
  * @param katana linear motion base class
  * @param logger logger
@@ -75,7 +77,6 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katan
 {
 }
 
-#ifdef HAVE_OPENRAVE
 
 /** Set target position.
  * @param x X coordinate relative to base
@@ -240,7 +241,7 @@ KatanaGotoOpenRaveThread::update_openrave_data()
   encToRad(__motor_encoders, __motor_angles);
   __OR_manip->set_angles_device(__motor_angles);
 
-  std::vector<float> angles;
+  std::vector<OpenRAVE::dReal> angles;
   __OR_manip->get_angles(angles);
 
   __OR_robot->get_robot_ptr()->SetActiveDOFValues(angles);

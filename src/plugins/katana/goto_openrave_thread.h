@@ -41,14 +41,14 @@ namespace fawkes {
 /** class KatanaGotoOpenRaveThread */
 class KatanaGotoOpenRaveThread : public KatanaMotionThread
 {
+#ifdef HAVE_OPENRAVE
+
  public:
   KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
 		   unsigned int poll_interval_ms,
                    std::string robot_file,
                    bool autoload_IK,
                    bool use_viewer);
-
-#ifdef HAVE_OPENRAVE
 
   virtual void once();
   virtual void init();
