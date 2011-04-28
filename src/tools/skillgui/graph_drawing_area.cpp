@@ -25,6 +25,7 @@
 
 #include <cmath>
 #include <libgen.h>
+#include <sys/time.h>
 
 /** @class SkillGuiGraphDrawingArea "graph_drawing_area.h"
  * Graph drawing area.
@@ -153,15 +154,23 @@ SkillGuiGraphDrawingArea::set_graph(std::string graph)
 
   if ( __recording ) {
     char *tmp;
+#if defined(__MACH__) && defined(__APPLE__)
+    struct timeval t;
+    if (gettimeofday(&t, NULL) == 0) {
+      long int nsec = t.tv_usec * 1000;
+#else
     timespec t;
     if (clock_gettime(CLOCK_REALTIME, &t) == 0) {
+      long int nsec = t.tv_nsec;
+#endif
       struct tm tms;
       localtime_r(&t.tv_sec, &tms);
 
       if ( asprintf(&tmp, "%s/%s_%04i%02i%02i-%02i%02i%02i.%09li.dot",
 		    __record_directory.c_str(), __graph_fsm.c_str(),
 		    tms.tm_year + 1900, tms.tm_mon + 1, tms.tm_mday,
-		    tms.tm_hour, tms.tm_min, tms.tm_sec, t.tv_nsec) != -1) {
+		    tms.tm_hour, tms.tm_min, tms.tm_sec, nsec) != -1)
+      {
 
 	//printf("Would record to filename %s\n", tmp);
 	save_dotfile(tmp);

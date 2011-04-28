@@ -23,8 +23,12 @@
 
 #include <fvcams/fileloader.h>
 #include <fvutils/writers/fvraw.h>
-#include <fvutils/writers/jpeg.h>
-#include <fvutils/writers/png.h>
+#ifdef HAVE_LIBJPEG
+#  include <fvutils/writers/jpeg.h>
+#endif
+#ifdef HAVE_LIBPNG
+#  include <fvutils/writers/png.h>
+#endif
 #include <fvutils/writers/pnm.h>
 
 #include <fvutils/readers/fvraw.h>
@@ -122,18 +126,22 @@ main(int argc, char** argv)
     printf("Format for out file %s is FvRaw\n", fn_out);
     writer = new FvRawWriter();
   }
+#ifdef HAVE_LIBJPEG
   // JPEG
   else if ( 0 == strcmp(ext_out, "jpeg") || 0 == strcmp(ext_out, "jpg") )
   { 
     printf("Format for out file %s is Jpeg\n", fn_out);
     writer = new JpegWriter();
   }
+#endif
+#ifdef HAVE_LIBPNG
   // PNG
   else if ( 0 == strcmp(ext_out, "png") )
   {
     printf("Format for out file %s is PNG\n", fn_out);
     writer = new PNGWriter();
   }
+#endif
   // PNM
   else if ( 0 == strcmp(ext_out, "pnm") )
   {

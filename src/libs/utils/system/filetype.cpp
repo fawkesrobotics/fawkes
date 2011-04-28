@@ -24,7 +24,9 @@
 #include <utils/system/filetype.h>
 #include <core/exception.h>
 
-#include <magic.h>
+#ifdef HAVE_LIBMAGIC
+#  include <magic.h>
+#endif
 
 namespace fawkes {
 
@@ -39,6 +41,7 @@ filetype_file(const char *filename)
 {
   std::string rv;
 
+#ifdef HAVE_LIBMAGIC
   magic_t m = magic_open( MAGIC_ERROR );
   magic_load( m, NULL );
 
@@ -51,6 +54,11 @@ filetype_file(const char *filename)
 
   rv = res;
   magic_close( m );
+#else
+  throw fawkes::Exception("Failed to determine file type of %s "
+			  "(libmagic not available at compile time)",
+			  filename);
+#endif
 
   return rv;
 }
@@ -67,11 +75,12 @@ mimetype_file(const char *filename)
 {
   std::string rv;
 
-#ifdef MAGIC_MIME_TYPE
+#ifdef HAVE_LIBMAGIC
+#  ifdef MAGIC_MIME_TYPE
   magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME_TYPE );
-#else
+#  else
   magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME );
-#endif
+#  endif
   magic_load( m, NULL );
 
   const char * res = magic_file( m, filename );
@@ -82,10 +91,15 @@ mimetype_file(const char *filename)
   }
 
   rv = res;
-#ifndef MAGIC_MIME_TYPE
+#  ifndef MAGIC_MIME_TYPE
   rv = rv.substr(0, rv.find(","));
-#endif
+#  endif
   magic_close(m);
+#else
+  throw fawkes::Exception("Failed to determine file type of %s "
+			  "(libmagic not available at compile time)",
+			  filename);
+#endif
   return rv;
 }
 

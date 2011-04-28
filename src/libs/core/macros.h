@@ -37,7 +37,9 @@
 #  define __noreturn	__attribute__ ((__noreturn__))
 #  define __malloc	__attribute__ ((__malloc__))
 #  define __must_check	__attribute__ ((__warn_unused_result__))
-#  define __deprecated	__attribute__ ((__deprecated__))
+#  ifndef __deprecated
+#    define __deprecated	__attribute__ ((__deprecated__))
+#  endif
 #  ifndef __used
 #    define __used	__attribute__ ((__used__))
 #  endif

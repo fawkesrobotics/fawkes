@@ -24,6 +24,7 @@
 #include <fvutils/fileformat/fvfile.h>
 
 #include <core/exceptions/system.h>
+#include <utils/misc/strndup.h>
 
 #include <cstring>
 #include <cstdio>

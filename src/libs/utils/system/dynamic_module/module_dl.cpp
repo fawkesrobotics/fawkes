@@ -42,7 +42,7 @@ namespace fawkes {
  * with glibc, applicable for Linux Systems
  */
 
-const char * ModuleDL::FILE_EXTENSION = "so";
+const char * ModuleDL::FILE_EXTENSION = SOEXT;
 
 
 /** Constructor for ModuleDL
@@ -82,9 +82,10 @@ ModuleDL::open()
   // Note: We assume Linux-style shared objects
   std::string full_filename = "";
   full_filename = filename;
-  if ( full_filename.find(".so", 0) != (full_filename.length() - 3)) {
+  //                                                                .   SOEXT
+  if ( full_filename.find("."SOEXT, 0) != (full_filename.length() - 1 - strlen(FILE_EXTENSION)) ) {
     // filename has no proper ending
-    full_filename += ".so";
+    full_filename += "."SOEXT;
   }
 
   int tflags = 0;
@@ -247,7 +248,9 @@ ModuleDL::get_symbol(const char *symbol_name)
 
 
 /** Get file extension for dl modules
- * @return Returns the file extension for dl modules, this is "so"
+ * @return Returns the file extension for dl modules, this is "so" on Linux
+ * and FreeBSD systems, and dylib on MacOS X. It is defined at compile time
+ * in config.mk.
  */
 const char *
 ModuleDL::get_file_extension()
