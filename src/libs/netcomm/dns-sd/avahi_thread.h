@@ -163,7 +163,8 @@ class AvahiThread
   void wake_poller();
 
   /* publisher private methods */
-  AvahiEntryGroup * create_service(const NetworkService &service, AvahiEntryGroup *exgroup);
+  AvahiEntryGroup * create_service(const NetworkService &service,
+				   AvahiEntryGroup *exgroup);
   void group_reset(AvahiEntryGroup *g);
   void group_erase(AvahiEntryGroup *g);
   void name_collision(AvahiEntryGroup *g);

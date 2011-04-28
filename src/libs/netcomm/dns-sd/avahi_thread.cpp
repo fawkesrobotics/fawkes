@@ -27,6 +27,8 @@
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
+#include <utils/misc/string_conversions.h>
+#include <utils/logging/liblogger.h>
 
 #include <avahi-client/lookup.h>
 #include <avahi-client/publish.h>
@@ -267,21 +269,45 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
     }
   }
 
-  // only IPv4 for now
   AvahiStringList *al = NULL;
   const std::list<std::string> &l = service.txt();
   for (std::list<std::string>::const_iterator j = l.begin(); j != l.end(); ++j) {
     al = avahi_string_list_add(al, j->c_str());
   }
-  if ( avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
-					    AVAHI_PUBLISH_USE_MULTICAST,
-					    service.name(), service.type(),
-					    service.domain(), service.host(),
-					    service.port(), al) < 0) {
-    avahi_string_list_free(al);
-    throw Exception("Adding Avahi services failed");
+
+  // only IPv4 for now
+  int rv = AVAHI_ERR_COLLISION;
+  for (int i = 1; (i <= 100) && (rv == AVAHI_ERR_COLLISION); ++i) {
+    std::string name = service.name();
+    if (i > 1) {
+      name += " ";
+      name += StringConversions::to_string(i);
+    }
+    
+    rv = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC,
+					      AVAHI_PROTO_INET,
+					      AVAHI_PUBLISH_USE_MULTICAST,
+					      name.c_str(), service.type(),
+					      service.domain(),
+					      service.host(),
+					      service.port(), al);
+
+    if ((i > 1) && (rv >= 0)) {
+      service.set_modified_name(name.c_str());
+    }
   }
+
   avahi_string_list_free(al);
+
+  if (rv < 0) {
+    throw Exception("Adding Avahi/mDNS-SD service failed: %s", avahi_strerror(rv));
+  }
+
+  if (service.modified_name() != 0) {
+    LibLogger::log_warn("FawkesNetworkManager", "Network service name collision, "
+			"modified to '%s' (from '%s')", service.modified_name(),
+			service.name());
+  }
 
   /* Tell the server to register the service */
   if (avahi_entry_group_commit(group) < 0) {
@@ -295,7 +321,7 @@ void
 AvahiThread::recreate_services()
 {
   for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    (*__sit).second = create_service((*__sit).first, (*__sit).second);
+    (*__sit).second = create_service(__sit->first, __sit->second);
   }
 }
 
