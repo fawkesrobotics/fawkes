@@ -120,38 +120,43 @@ class FawkesMainApp : public SignalHandler
 void
 usage(const char *progname)
 {
-  cout << "Fawkes Main Application - Usage Instructions" << endl
-       << "===============================================================================" << endl
-       << "Call with: " << progname << " [options]" << endl
-       << "where [options] is one or more of:" << endl
-       << " -h               These help instructions" << endl
-       << " -C               Cleanup old BB segments" << endl
-       << " -c db-file       Mutable configuration file, created if it does not exist" << endl
-       << "                  if it does however it must contain valid SQLite database" << endl
-       << " -d sql-file      Default configuration SQL dump file." << endl
-       << " -q[qqq]          Quiet mode, -q omits debug, -qq debug and info," << endl
-       << "                  -qqq omit debug, info and warn, -qqqq no output of logger" << endl
-       << " -l level         Set log level directly mutually exclusive with -q" << endl
-       << "                  level is one of debug, info, warn, error and none" << endl
-       << " -L loggers       Define loggers. By default this setting is read from " << endl
-       << "                  config file (or console logger if unset in config)." << endl
-       << "                  format for loggers is: logger:args[;logger2:args2[!...]]" << endl
-       << "                  the loggeroptions depend on the logger. Currently supported:" << endl
-       << "                  console (default), file:file.log, network logger always starts" << endl
-       << " -p plugins       Comma-separated list of plugins, for example " << endl
-       << "                  fvbase,fvfountain,fvretriever. These plugins will be loaded" << endl
-       << "                  in the given order after startup." << endl
-       << " -u user          Drop privileges as soon as possible and run as given user." << endl
-       << " -g group         Drop privileges as soon as possible and run as given group." << endl
-       << " -P port          TCP port to listen on for Fawkes network connections." << endl
+  printf("Fawkes Main Application - Usage Instructions\n"
+	 "================================================"
+	 "===============================\n"
+	 "Usage: %s [options]\n"
+	 "where [options] is one or more of:\n"
+         " -h                       These help instructions\n"
+         " -C                       Cleanup old BB segments\n"
+         " -c db-file               Mutable configuration file, created if it "
+	 "does not\n                          "
+	 "exist, if it does must contain valid SQLite database\n"
+         " -d sql-file              Default configuration SQL dump file.\n"
+         " -q[qqq]                  Quiet mode, -q omits debug, -qq debug and"
+	 "info,\n                          "
+	 "-qqq omit debug, info and warn, -qqqq no output\n"
+         " -l level                 Set log level directly mutually exclusive"
+	 "with -q,\n                          "
+	 "level is one of debug, info, warn, error, or none\n"
+         " -L loggers               Define loggers. By default this setting is"
+	 "read from\n                          "
+	 "config (console logger if unset). Format is:\n"
+	 "                          logger:args[;logger2:args2[!...]]\n"
+	 "                          Currently supported:\n"
+         "                          console, file:file.log, network logger always added\n"
+         " -p plugins               List of plugins to load on startup in given order\n"
+         " -u user                  Drop privileges and run as given user.\n"
+         " -g group                 Drop privileges and run as given group.\n"
+         " -P port                  TCP port to listen on for Fawkes network connections.\n"
+         " --net-service-name=name  mDNS service name to use.\n"
 #ifdef HAVE_LIBDAEMON
-       << " -D[pid file]     Run daemonized in the background, pid file is optional, " << endl
-       << "                  defaults to /var/run/fawkes.pid, must be absolute path." << endl
-       << " -D[pid file] -k  Kill a daemonized process running in the background," << endl
-       << "                  pid file is optional as above." << endl
-       << " -D[pid file] -s  Check status of daemon." << endl
+         " -D[pid file]             Run daemonized in the background, pid file "
+	 "is optional,\n                          "
+	 "default is /var/run/fawkes.pid, must be absolute path.\n"
+         " -D[pid file] -k          Kill a daemonized Fawkes running in the"
+	 "background\n"
+         " -D[pid file] -s          Check status of daemon.\n"
 #endif
-       << endl;
+	 "\n", progname);
 }
 
 
@@ -254,7 +259,14 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = NULL;
   try {
-    argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ksu:g:P:");
+    option long_options[] = {
+      {"net-service-name", 1, 0, 0},
+      {0, 0, 0, 0}
+    };
+
+    argp = new ArgumentParser(argc, argv,
+			      "hCc:d:q::l:L:p:D::ksu:g:P:",
+			      long_options);
   }
   catch (UnknownArgumentException &e) {
     cout << endl;

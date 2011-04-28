@@ -209,10 +209,16 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     try {
       net_tcp_port = __config->get_uint("/fawkes/mainapp/net/tcp_port");
     } catch (Exception &e) {}  // ignore, we stick with the default
+  }
+
+  if (argp->has_arg("net-service-name")) {
+    net_service_name = argp->arg("net-service-name");
+  } else {
     try {
       net_service_name = __config->get_string("/fawkes/mainapp/net/service_name");
     } catch (Exception &e) {}  // ignore, we stick with the default
   }
+
   if (net_tcp_port > 65535) {
     __multi_logger->log_warn("FawkesMainThread", "Invalid port '%u', using 1910",
 			     net_tcp_port);
