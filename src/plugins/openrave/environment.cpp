@@ -249,7 +249,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot)
 
   // setting robots trajectory
   std::vector<TrajectoryBase::TPOINT> points = traj->GetPoints();
-  std::vector< std::vector<float> >* trajRobot = robot->get_trajectory();
+  std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
   trajRobot->clear();
 
   for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
@@ -266,7 +266,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot)
       RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
         for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
           tmp_robot->SetActiveDOFValues((*it).q);
-          __graph_handle.push_back(__env->plot3(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+          __graph_handle.push_back(__env->plot3(RaveVector<float>(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans), 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
 

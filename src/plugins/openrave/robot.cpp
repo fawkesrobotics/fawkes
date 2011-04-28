@@ -75,7 +75,7 @@ OpenRaveRobot::~OpenRaveRobot()
 void
 OpenRaveRobot::init()
 {
-  __traj = new std::vector< std::vector<float> >();
+  __traj = new std::vector< std::vector<dReal> >();
 
   __trans_offset_x = 0.f;
   __trans_offset_y = 0.f;
@@ -158,7 +158,7 @@ void
 OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float device_trans_z)
 {
   // get device's current angles, and set them for OpenRAVE model
-  std::vector<float> angles;
+  std::vector<dReal> angles;
   __manip->get_angles(angles);
   __robot->SetActiveDOFValues(angles);
 
@@ -190,7 +190,7 @@ OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_
 void
 OpenRaveRobot::update_manipulator()
 {
-  std::vector<float> angles;
+  std::vector<dReal> angles;
   __robot->GetActiveDOFValues(angles);
   __manip->set_angles(angles);
 }
@@ -199,7 +199,7 @@ OpenRaveRobot::update_manipulator()
 void
 OpenRaveRobot::update_model()
 {
-  std::vector<float> angles;
+  std::vector<dReal> angles;
   __manip->get_angles(angles);
   __robot->SetActiveDOFValues(angles);
 }
@@ -389,7 +389,7 @@ OpenRaveRobot::get_robot_ptr() const
  * @param to vector that should be filled with angles
  */
 void
-OpenRaveRobot::get_target_angles(std::vector<float>& to)
+OpenRaveRobot::get_target_angles(std::vector<dReal>& to)
 {
   to = __angles_target;
 }
@@ -412,7 +412,7 @@ OpenRaveRobot::get_planner_params() const
  * __manip to __manip_goal with OpenRAVE-model angle format
  * @return pointer to trajectory
  */
-std::vector< std::vector<float> >*
+std::vector< std::vector<dReal> >*
 OpenRaveRobot::get_trajectory() const
 {
   return __traj;
@@ -427,8 +427,11 @@ OpenRaveRobot::get_trajectory_device() const
 {
   std::vector< std::vector<float> >* traj = new std::vector< std::vector<float> >();
 
+  std::vector<float> v;
+
   for(unsigned int i=0; i<__traj->size(); i++) {
-    traj->push_back(__manip->angles_or_to_device(__traj->at(i)));
+    __manip->angles_or_to_device(__traj->at(i), v);
+    traj->push_back(v);
   }
 
   return traj;

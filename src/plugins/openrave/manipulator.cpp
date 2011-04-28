@@ -68,70 +68,7 @@ OpenRaveManipulator::add_motor(unsigned int number, unsigned int number_device)
 
 
 
-/* ########## getter ########## */
-/** Get motor angles of OpenRAVE model
- * @param to target tvector of angles
- */
-void
-OpenRaveManipulator::get_angles(std::vector<float>& to) const
-{
-  to.resize(__cnt);
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    to[__motors[i].no] = __motors[i].angle;
-  }
-}
 
-/** Get motor angles of real device
- * @param to target vector of angles
- */
-void
-OpenRaveManipulator::get_angles_device(std::vector<float>& to) const
-{
-  std::vector<float> tmp;
-  get_angles(tmp);
-  to = angles_or_to_device(tmp);
-}
-
-/** Transform OpenRAVE motor angles to real device angles
- * @param from motor angles of OpenRAVE model
- * @return vector of angles
- */
-std::vector<float>
-OpenRaveManipulator::angles_or_to_device(std::vector<float>& from) const
-{
-  std::vector<float> _to(__cnt_device);
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    _to[__motors[i].no_device] = angle_OR_to_device(__motors[i].no_device, from[__motors[i].no]);
-  }
-
-  return _to;
-}
-
-
-
-
-/* ########## setter ########## */
-/** Set motor angles of OpenRAVE model
- * @param angles motor angles
- */
-void
-OpenRaveManipulator::set_angles(std::vector<float>& angles)
-{
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    __motors[i].angle = angles[__motors[i].no];
-  }
-}
-
-/** Set motor angles of real device
- * @param angles motor angles
- */
-void
-OpenRaveManipulator::set_angles_device(std::vector<float>& angles)
-{
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    __motors[i].angle = angle_device_to_OR(__motors[i].no_device, angles[__motors[i].no_device]);
-  }
-}
 
 
 

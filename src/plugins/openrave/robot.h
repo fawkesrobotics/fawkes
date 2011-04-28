@@ -67,10 +67,10 @@ class OpenRaveRobot
 
   virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x);
 
-  virtual void get_target_angles(std::vector<float>& to); // not needed
+  virtual void get_target_angles(std::vector<OpenRAVE::dReal>& to); // not needed
   virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
   virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
-  virtual std::vector< std::vector<float> >* get_trajectory() const;
+  virtual std::vector< std::vector<OpenRAVE::dReal> >* get_trajectory() const;
   virtual std::vector< std::vector<float> >* get_trajectory_device() const;
 
   virtual bool display_planned_movements() const;
@@ -88,8 +88,8 @@ class OpenRaveRobot
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
 
   OpenRAVE::PlannerBase::PlannerParametersPtr   __planner_params;
-  std::vector< std::vector<float> >*            __traj;
-  std::vector<float>                            __angles_target;
+  std::vector< std::vector<OpenRAVE::dReal> >*            __traj;
+  std::vector<OpenRAVE::dReal>                            __angles_target;
 
   float         __trans_offset_x;
   float         __trans_offset_y;
