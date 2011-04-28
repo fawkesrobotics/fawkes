@@ -1,9 +1,8 @@
 
-
 /***************************************************************************
  *  shm.h - shared memory segment
  *
- *  Generated: Thu Jan 12 13:12:24 2006
+ *  Created: Thu Jan 12 13:12:24 2006
  *  Copyright  2005-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -27,6 +26,7 @@
 
 // for size_t
 #include <sys/types.h>
+#include <utils/ipc/shm_registry.h>
 
 namespace fawkes {
 
@@ -110,7 +110,8 @@ class SharedMemory
    public:
     SharedMemoryIterator();
     SharedMemoryIterator(const SharedMemoryIterator &shmit);
-    SharedMemoryIterator(const char *magic_token, SharedMemoryHeader *header);
+    SharedMemoryIterator(std::list<SharedMemoryRegistry::SharedMemID> ids,
+			 SharedMemoryHeader *header);
     ~SharedMemoryIterator();
 
     SharedMemoryIterator &      operator++ ();        // prefix
@@ -133,10 +134,11 @@ class SharedMemory
     void attach();
     void reset();
 
+    bool                    __initialized;
     char                   *__magic_token;
-    int                     __max_id;
+    std::list<SharedMemoryRegistry::SharedMemID> __ids;
+    std::list<SharedMemoryRegistry::SharedMemID>::iterator __id_it;
     int                     __cur_shmid;
-    int                     __cur_id;
     SharedMemoryHeader     *__header;
     void                   *__shm_buf;
     void                   *__data_buf;
@@ -179,6 +181,8 @@ class SharedMemory
 
 
  private:
+  SharedMemoryRegistry *__shm_registry;
+
   void          *__shared_mem;
   int            __shared_mem_id;
   void          *__shared_mem_upper_bound;
