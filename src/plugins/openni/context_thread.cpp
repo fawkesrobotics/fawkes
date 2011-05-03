@@ -22,6 +22,10 @@
 
 #include "context_thread.h"
 
+#include <cerrno>
+#include <csignal>
+#include <unistd.h>
+#include <sys/wait.h>
 #include <XnCppWrapper.h>
 
 using namespace fawkes;
@@ -40,7 +44,6 @@ OpenNiContextThread::OpenNiContextThread()
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
     AspectProviderAspect("OpenNiAspect", &__openni_aspect_inifin)
 {
-  set_prepfin_conc_loop(true);
 }
 
 
@@ -53,6 +56,16 @@ OpenNiContextThread::~OpenNiContextThread()
 void
 OpenNiContextThread::init()
 {
+  __sensor_server_pid = -1;
+  __cfg_run_sensor_server = false;
+  try {
+    __cfg_run_sensor_server =
+      config->get_bool("/plugins/openni/run_sensor_server");
+  } catch (Exception &e) {} // ignore and use default
+  if (__cfg_run_sensor_server) {
+    __cfg_sensor_bin = config->get_string("/plugins/openni/sensor_server_bin");
+  }
+
   __openni = new xn::Context();
 
   XnStatus st;
@@ -68,8 +81,29 @@ OpenNiContextThread::init()
   __check_last.stamp();
 
   __device_no_data_loops = 0;
-
   __openni_aspect_inifin.set_openni_context(__openni);
+
+  if (__cfg_run_sensor_server) {
+    start_sensor_server();
+
+    // We don't want the server to die, we kill it by ourself.
+    // Therefore we hold an instance all the time. Since client
+    // connections are not properly terminated on unloading openni,
+    // setting the timeout to 0 to stop the server immediately after
+    // it is no longer used does not work.
+    xn::NodeInfoList list;
+    if (__openni->EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL, list)
+	== XN_STATUS_OK)
+    {
+      for (xn::NodeInfoList::Iterator i = list.Begin(); i != list.End(); ++i) {
+	if ((*i).GetDescription().Type == XN_NODE_TYPE_DEVICE) {
+	  __device = new xn::Device();
+	  (*i).GetInstance(*__device);
+	  break;
+	}
+      }
+    }
+  }
 }
 
 
@@ -77,9 +111,15 @@ void
 OpenNiContextThread::finalize()
 {
   __openni->StopGeneratingAll();
+
   __openni->Shutdown();
   __openni.clear();
   __openni_aspect_inifin.set_openni_context(__openni);
+
+  if (__cfg_run_sensor_server) {
+    delete __device;
+    stop_sensor_server();
+  }
 }
 
 
@@ -190,5 +230,68 @@ OpenNiContextThread::verify_active()
 	}
       }
     }
+  }
+}
+
+/** Start the sensor server daemon. */
+void
+OpenNiContextThread::start_sensor_server()
+{
+  if (__sensor_server_pid != -1) {
+    throw Exception("Sensor server appears to be already running");
+  }
+
+  logger->log_info(name(), "Starting XnSensorServer");
+
+  pid_t pid = fork();
+  if (pid == -1) {
+    throw Exception(errno, "Forking for new process failed: %s");
+  } else if (pid == 0) {
+    // child
+    setsid();
+    // ignore SIGINT, we will propagate it as SIGTERM on unload
+    signal(SIGINT, SIG_IGN);
+    fclose(stdout);
+    fclose(stdin);
+    fclose(stderr);
+    char *argv[] = {(char *)__cfg_sensor_bin.c_str(), NULL};
+    if (execve(__cfg_sensor_bin.c_str(), argv, environ) == -1) {
+      throw Exception("Failed to execute %s, exited with %i: %s\n",
+		      __cfg_sensor_bin.c_str(), errno, strerror(errno));
+    }
+  }
+
+  __sensor_server_pid = pid;
+}
+
+void
+OpenNiContextThread::stop_sensor_server()
+{
+  if (__sensor_server_pid == -1) {
+    throw Exception("Sensor server appears not to be already running");
+  }
+
+  logger->log_info(name(), "Stopping XnSensorServer");
+  ::kill(__sensor_server_pid, SIGTERM);
+  for (unsigned int i = 0; i < 200; ++i) {
+    usleep(10000);
+    int status;
+    int rv = waitpid(__sensor_server_pid, &status, WNOHANG);
+    if (rv == -1) {
+      if (errno == EINTR)  continue;
+      if (errno == ECHILD) {
+	__sensor_server_pid = -1;
+	break;
+      }
+    } else if (rv > 0) {
+      __sensor_server_pid = -1;
+      break;
+    }
+  }
+
+  if (__sensor_server_pid != -1) {
+    logger->log_warn(name(), "Killing XnSensorServer");
+    ::kill(__sensor_server_pid, SIGKILL);
+    __sensor_server_pid = -1;
   }
 }
