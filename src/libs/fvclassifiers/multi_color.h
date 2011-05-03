@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  simple.h - Header for ReallySimpleClassifier
+ *  multi-color.h - Header for multi color classifier
  *
- *  Created: Wed May 18 11:39:10 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Apr 02 09:51:27 2011
+ *  Copyright  2005-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_SIMPLE_H_
-#define __FIREVISION_CLASSIFIERS_SIMPLE_H_
+#ifndef __FIREVISION_CLASSIFIERS_MULTI_COLOR_H_
+#define __FIREVISION_CLASSIFIERS_MULTI_COLOR_H_
 
 #include <fvclassifiers/classifier.h>
 #include <fvutils/base/types.h>
@@ -35,17 +35,16 @@ namespace firevision {
 class ScanlineModel;
 class ColorModel;
 
-class SimpleColorClassifier : public Classifier
+class MultiColorClassifier : public Classifier
 {
  public:
-  SimpleColorClassifier(ScanlineModel *scanline_model,
-			ColorModel *color_model,
-			unsigned int min_num_points=6,
-			unsigned int box_extent = 50,
-			bool upward = false,
-			unsigned int neighbourhood_min_match = 8,
-			unsigned int grow_by = 10,
-			color_t color = C_ORANGE);
+  MultiColorClassifier(ScanlineModel *scanline_model,
+		       ColorModel *color_model,
+		       unsigned int min_num_points=6,
+		       unsigned int box_extent = 50,
+		       bool upward = false,
+		       unsigned int neighbourhood_min_match = 8,
+		       unsigned int grow_by = 10);
 
   virtual std::list< ROI > * classify();
 
@@ -69,8 +68,6 @@ class SimpleColorClassifier : public Classifier
 
   ScanlineModel *scanline_model;
   ColorModel    *color_model;
-
-  const color_t  color;
 };
 
 } // end namespace firevision

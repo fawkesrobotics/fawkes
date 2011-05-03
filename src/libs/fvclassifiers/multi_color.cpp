@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  simple.cpp - Implementation of a SimpleColorClassifier
+ *  multi_color.cpp - Implementation of a MultiColorClassifier
  *
- *  Created: Thu May 16 00:00:00 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Apr 02 09:57:14 2011
+ *  Copyright  2005-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvclassifiers/simple.h>
+#include <fvclassifiers/multi_color.h>
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/yuv.h>
@@ -39,8 +39,9 @@ namespace firevision {
 }
 #endif
 
-/** @class SimpleColorClassifier <fvclassifiers/simple.h>
- * Simple classifier.
+/** @class MultiColorClassifier <fvclassifiers/multi_color.h>
+ * Simple multi-color classifier.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -54,23 +55,21 @@ namespace firevision {
  * @param neighbourhood_min_match minimum number of object pixels to grow neighbourhood
  * @param grow_by grow region by that many pixels
  */
-SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
-                                             ColorModel *color_model,
-                                             unsigned int min_num_points,
-                                             unsigned int box_extent,
-                                             bool upward,
-                                             unsigned int neighbourhood_min_match,
-                                             unsigned int grow_by,
-					     color_t color)
-  : Classifier("SimpleColorClassifier"),
-    color(color)
+MultiColorClassifier::MultiColorClassifier(ScanlineModel *scanline_model,
+					   ColorModel *color_model,
+					   unsigned int min_num_points,
+					   unsigned int box_extent,
+					   bool upward,
+					   unsigned int neighbourhood_min_match,
+					   unsigned int grow_by)
+  : Classifier("MultiColorClassifier")
 {
   if (scanline_model == NULL) {
-    throw fawkes::NullPointerException("SimpleColorClassifier: scanline_model "
+    throw fawkes::NullPointerException("MultiColorClassifier: scanline_model "
 				       "may not be NULL");
   }
   if (color_model == NULL) {
-    throw fawkes::NullPointerException("SimpleColorClassifier: color_model "
+    throw fawkes::NullPointerException("MultiColorClassifier: color_model "
 				       "may not be NULL");
   }
 
@@ -86,7 +85,7 @@ SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
 
 
 unsigned int
-SimpleColorClassifier::consider_neighbourhood( unsigned int x, unsigned int y , color_t what)
+MultiColorClassifier::consider_neighbourhood( unsigned int x, unsigned int y , color_t what)
 {
   color_t c;
   unsigned int num_what = 0;
@@ -131,17 +130,16 @@ SimpleColorClassifier::consider_neighbourhood( unsigned int x, unsigned int y , 
 }
 
 std::list< ROI > *
-SimpleColorClassifier::classify()
+MultiColorClassifier::classify()
 {
 
   if (_src == NULL) {
-    //cout << "SimpleColorClassifier: ERROR, src buffer not set. NOT classifying." << endl;
     return new std::list< ROI >;
   }
 
-
-  std::list< ROI > *rv = new std::list< ROI >();
-  std::list< ROI >::iterator roi_it, roi_it2;
+  std::map<color_t, std::list<ROI> > rois;
+  std::map<color_t, std::list<ROI> >::iterator map_it;
+  std::list<ROI>::iterator roi_it, roi_it2;
   color_t c;
 
   unsigned int  x = 0, y = 0;
@@ -160,8 +158,8 @@ SimpleColorClassifier::classify()
 
     c = color_model->determine(yp,up, vp);
 
-    if (color == c) {
-      // Yeah, found a ball, make it big and name it a ROI
+    if ((c != C_BACKGROUND) && (c != C_OTHER)) {
+      // Yeah, found something, make it big and name it a ROI
       // Note that this may throw out a couple of ROIs for just one ball,
       // as the name suggests this one is really ABSOLUTELY simple and not
       // useful for anything else than quick testing
@@ -173,7 +171,7 @@ SimpleColorClassifier::classify()
       if (num_what >= neighbourhood_min_match) {
         bool ok = false;
 
-        for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+        for (roi_it = rois[c].begin(); roi_it != rois[c].end(); ++roi_it) {
           if ( (*roi_it).contains(x, y) ) {
             // everything is fine, this point is already in another ROI
             ok = true;
@@ -181,7 +179,7 @@ SimpleColorClassifier::classify()
           }
         }
         if (! ok) {
-          for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+          for (roi_it = rois[c].begin(); roi_it != rois[c].end(); ++roi_it) {
             if ( (*roi_it).neighbours(x, y, scanline_model->get_margin()) ) {
               // ROI is neighbour of this point, extend region
               (*roi_it).extend(x, y);
@@ -229,7 +227,7 @@ SimpleColorClassifier::classify()
             r.height -= (r.start.y + r.height) - _height;
           }
 
-          rv->push_back( r );
+          rois[c].push_back( r );
         }
       } // End if enough neighbours
     } // end if is orange
@@ -239,42 +237,56 @@ SimpleColorClassifier::classify()
 
   // Grow regions
   if (grow_by > 0) {
-    for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-      (*roi_it).grow( grow_by );
+    for (map_it = rois.begin(); map_it != rois.end(); ++map_it) {
+      for (roi_it = map_it->second.begin();
+	   roi_it != map_it->second.end(); ++roi_it)
+      {
+	(*roi_it).grow( grow_by );
+      }
     }
   }
 
   // Merge neighbouring regions
-  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-    roi_it2 = roi_it;
-    ++roi_it2;
+  for (map_it = rois.begin(); map_it != rois.end(); ++map_it) {
+    for (roi_it = map_it->second.begin(); roi_it != map_it->second.end(); ++roi_it)
+    {
+      roi_it2 = roi_it;
+      ++roi_it2;
 
-    while ( roi_it2 != rv->end() ) {
-      if ((roi_it != roi_it2) &&
-	  roi_it->neighbours(&(*roi_it2), scanline_model->get_margin()))
-      {
-	*roi_it += *roi_it2;
-	rv->erase(roi_it2);
-	roi_it2 = rv->begin(); //restart
-      } else {
-	++roi_it2;
+      while ( roi_it2 != map_it->second.end() ) {
+	if ((roi_it != roi_it2) &&
+	    roi_it->neighbours(&(*roi_it2), scanline_model->get_margin()))
+	{
+	  *roi_it += *roi_it2;
+	  map_it->second.erase(roi_it2);
+	  roi_it2 = map_it->second.begin(); //restart
+	} else {
+	  ++roi_it2;
+	}
       }
     }
   }
 
   // Throw away all ROIs that have not enough classified points
-  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-    while ( (roi_it != rv->end()) &&
-	    ((*roi_it).num_hint_points < min_num_points ))
+  for (map_it = rois.begin(); map_it != rois.end(); ++map_it) {
+    for (roi_it = map_it->second.begin(); roi_it != map_it->second.end(); ++roi_it)
     {
-      roi_it = rv->erase( roi_it );
+      while ( (roi_it != map_it->second.end()) &&
+	      ((*roi_it).num_hint_points < min_num_points ))
+      {
+	roi_it = map_it->second.erase(roi_it);
+      }
     }
   }
 
   // sort ROIs by number of hint points, descending (and thus call reverse)
-  rv->sort();
-  rv->reverse();
 
+  std::list<ROI> *rv = new std::list<ROI>();
+  for (map_it = rois.begin(); map_it != rois.end(); ++map_it) {
+    map_it->second.sort();
+    rv->merge(map_it->second);
+  }
+  rv->reverse();
   return rv;
 }
 
@@ -284,8 +296,8 @@ SimpleColorClassifier::classify()
  * @param massPoint contains mass point upon return
  */
 void
-SimpleColorClassifier::get_mass_point_of_color( ROI *roi,
-						fawkes::point_t *massPoint )
+MultiColorClassifier::get_mass_point_of_color( ROI *roi,
+					       fawkes::point_t *massPoint )
 {
   unsigned int nrOfOrangePixels;
   nrOfOrangePixels = 0;
@@ -315,7 +327,7 @@ SimpleColorClassifier::get_mass_point_of_color( ROI *roi,
       dcolor = color_model->determine(*yp++, *up++, *vp++);
       yp++;
       // ball pixel?
-      if (color == dcolor) {
+      if (dcolor == roi->color) {
         // take into account its coordinates
         massPoint->x += w;
         massPoint->y += h;

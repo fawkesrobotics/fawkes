@@ -148,6 +148,17 @@ ColorModelLookupTable::get_colormap() const
 }
 
 
+/** Set colormap.
+ * @param yuvcm colormap to assign. The content of the colormap is copied
+ * into the internal one.
+ */
+void
+ColorModelLookupTable::set_colormap(const YuvColormap &yuvcm)
+{
+  *__colormap = yuvcm;
+}
+
+
 /** Load colormap from file.
  * @param filename name of colormap file
  */

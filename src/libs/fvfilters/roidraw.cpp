@@ -59,7 +59,7 @@ void
 FilterROIDraw::draw_roi(const ROI *roi)
 {
   if (__border_style == DASHED_HINT) {
-    YUV_t hint_color = ColorObjectMap::get_color(ColorObjectMap::get_instance().get(roi->hint));
+    YUV_t hint_color = ColorObjectMap::get_color(roi->color);
     __drawer->set_buffer(dst, roi->image_width, roi->image_height);
     bool draw_black = false;
     fawkes::point_t end;

@@ -69,6 +69,8 @@ class YuvColormap : public Colormap
 
   void copy_uvplane(unsigned char *uvplane, unsigned int level);
 
+  void replace_color(color_t from, color_t to);
+
  private:
   void constructor(unsigned int depth, unsigned int width, unsigned int height,
 		   const char *shmem_lut_id = 0, bool destroy_on_free = false);
