@@ -205,8 +205,10 @@ OpenNiUserTrackerThread::loop()
 
   UserMap::iterator i;
   for (i = __users.begin(); i != __users.end(); ++i) {
-    bool needs_write = false;
 
+    if (!i->second.valid)  continue;
+
+    bool needs_write = false;
 
     HumanSkeletonInterface::State new_state = i->second.skel_if->state();
     if (__skelcap->IsTracking(i->first)) {
@@ -384,54 +386,54 @@ void
 OpenNiUserTrackerThread::new_user(XnUserID id)
 {
   if (__users.find(id) != __users.end()) {
-    logger->log_error(name(), "New user ID %u, but interface already exists", id);
-    return;
-  }
-
-  char *ifid;
-  if (asprintf(&ifid, "OpenNI Human %u", id) == -1) {
-    logger->log_warn(name(), "New user ID %u, but cannot generate "
-		     "interface ID", id);
-    return;
-  }
-  try {
-    logger->log_debug(name(), "Opening interface 'HumanSkeletonInterface::%s'", ifid);
-    __users[id].skel_if = blackboard->open_for_writing<HumanSkeletonInterface>(ifid);
-    __users[id].skel_if->set_user_id(id);
-    __users[id].skel_if->write();
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to open interface, exception follows");
-    logger->log_warn(name(), e);
-  }
-
-  try {
-    logger->log_debug(name(), "Opening interface 'HumanSkeletonProjectionInterface::%s'", ifid);
-    __users[id].proj_if = blackboard->open_for_writing<HumanSkeletonProjectionInterface>(ifid);
-    XnFieldOfView fov;
-    XnStatus st;
-    if ((st = __depth_gen->GetFieldOfView(fov)) != XN_STATUS_OK) {
-      logger->log_error(name(), "Failed to get field of view, ignoring. (%s)",
-			xnGetStatusString(st));
-    } else {
-      __users[id].proj_if->set_horizontal_fov(fov.fHFOV);
-      __users[id].proj_if->set_vertical_fov(fov.fVFOV);
+    logger->log_error(name(), "New user ID %u, interface already exists", id);
+  } else {
+    char *ifid;
+    if (asprintf(&ifid, "OpenNI Human %u", id) == -1) {
+      logger->log_warn(name(), "New user ID %u, but cannot generate "
+		       "interface ID", id);
+      return;
+    }
+    try {
+      logger->log_debug(name(), "Opening interface 'HumanSkeletonInterface::%s'", ifid);
+      __users[id].skel_if = blackboard->open_for_writing<HumanSkeletonInterface>(ifid);
+      __users[id].skel_if->set_user_id(id);
+      __users[id].skel_if->write();
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Failed to open interface, exception follows");
+      logger->log_warn(name(), e);
     }
 
-    xn::DepthMetaData dmd;
-    __depth_gen->GetMetaData(dmd);
-    __users[id].proj_if->set_res_x(dmd.XRes());
-    __users[id].proj_if->set_res_y(dmd.YRes());
-    __users[id].proj_if->set_max_depth(__depth_gen->GetDeviceMaxDepth());
-    __users[id].proj_if->write();
-  } catch (Exception &e) {
-    blackboard->close(__users[id].proj_if);
-    __users.erase(id);
-    logger->log_warn(name(), "Failed to open interface, exception follows");
-    logger->log_warn(name(), e);
+    try {
+      logger->log_debug(name(), "Opening interface 'HumanSkeletonProjectionInterface::%s'", ifid);
+      __users[id].proj_if = blackboard->open_for_writing<HumanSkeletonProjectionInterface>(ifid);
+      XnFieldOfView fov;
+      XnStatus st;
+      if ((st = __depth_gen->GetFieldOfView(fov)) != XN_STATUS_OK) {
+        logger->log_error(name(), "Failed to get field of view, ignoring. (%s)",
+			  xnGetStatusString(st));
+      } else {
+        __users[id].proj_if->set_horizontal_fov(fov.fHFOV);
+        __users[id].proj_if->set_vertical_fov(fov.fVFOV);
+      }
+
+      xn::DepthMetaData dmd;
+      __depth_gen->GetMetaData(dmd);
+      __users[id].proj_if->set_res_x(dmd.XRes());
+      __users[id].proj_if->set_res_y(dmd.YRes());
+      __users[id].proj_if->set_max_depth(__depth_gen->GetDeviceMaxDepth());
+      __users[id].proj_if->write();
+    } catch (Exception &e) {
+      blackboard->close(__users[id].proj_if);
+      __users.erase(id);
+      logger->log_warn(name(), "Failed to open interface, exception follows");
+      logger->log_warn(name(), e);
+    }
+
+    free(ifid);
   }
 
-
-  free(ifid);
+  __users[id].valid = true;
 
   if (__skel_need_calib_pose) {
     __user_gen->GetPoseDetectionCap().StartPoseDetection(__calib_pose_name, id);
@@ -454,14 +456,15 @@ OpenNiUserTrackerThread::lost_user(XnUserID id)
     return;
   }
 
-  logger->log_error(name(), "Lost user ID %u, closing interface '%s'",
+  logger->log_error(name(), "Lost user ID %u, setting interface '%s' to invalid",
 		    id, __users[id].skel_if->uid());
   // write invalid, a reader might still be open
   __users[id].skel_if->set_state(HumanSkeletonInterface::STATE_INVALID);
   __users[id].skel_if->write();
-  blackboard->close(__users[id].skel_if);
-  blackboard->close(__users[id].proj_if);
-  __users.erase(id);
+  __users[id].valid = false;
+  //blackboard->close(__users[id].skel_if);
+  //blackboard->close(__users[id].proj_if);
+  //__users.erase(id);
 }
 
 

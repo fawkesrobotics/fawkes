@@ -73,6 +73,7 @@ class OpenNiUserTrackerThread
 
  private:
   typedef struct {
+    bool                                       valid;
     fawkes::HumanSkeletonInterface            *skel_if;
     fawkes::HumanSkeletonProjectionInterface  *proj_if;
   } UserInfo;
