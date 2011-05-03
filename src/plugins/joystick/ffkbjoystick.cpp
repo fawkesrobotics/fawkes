@@ -79,6 +79,8 @@ main(int argc, char **argv)
 
     axis[0] = axis[1] = 0.;
     axis[2] = 0.5;
+    new_axis[0] = new_axis[1] = new_axis[2] = 0.;
+    button = new_button = 0;
 
     last.stamp();
 
