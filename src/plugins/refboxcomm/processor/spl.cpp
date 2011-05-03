@@ -234,7 +234,7 @@ SplRefBoxProcessor::refbox_process()
       }
     }
   } catch (fawkes::Exception &e) {
-    if ( e.errno() != EAGAIN ) {
+    if ( e.get_errno() != EAGAIN ) {
       __logger->log_warn("SplRefBoxProcessor", "Receiving failed, exception follows");
       __logger->log_warn("SplRefBoxProcessor", e);
     } // else just no data available this time
