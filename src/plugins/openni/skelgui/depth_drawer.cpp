@@ -81,9 +81,7 @@ void
 SkelGuiDepthDrawer::fill_texture()
 {
   __depth_cam->capture();
-  __label_cam->capture();
 
-  uint16_t *label = (uint16_t *)__label_cam->buffer();
   uint16_t *depth = (uint16_t *)__depth_cam->buffer();
   unsigned int num_points = 0;
   memset(__histogram, 0, __max_depth * sizeof(float));
@@ -108,25 +106,41 @@ SkelGuiDepthDrawer::fill_texture()
     }
   }
 
-  uint16_t *l = label;
-  uint16_t *d = depth;
-  unsigned char *r = __rgb_buf;
-  for (unsigned int i = 0; i < __width * __height; ++i, ++l, ++d, r += 3) {
-    r[0] = 0; r[1] = 0; r[2] = 0;
-    unsigned int color = *l % NUM_USER_COLORS;
-    if (!__show_labels || (*l == 0)) color = NUM_USER_COLORS;
 
-    if (*d != 0) {
-      float hv = __histogram[*d];
-      r[0] = hv * USER_COLORS[color][0];
-      r[1] = hv * USER_COLORS[color][1];
-      r[2] = hv * USER_COLORS[color][2];
+  if (__label_cam) {
+    __label_cam->capture();
+    uint16_t *l = (uint16_t *)__label_cam->buffer();
+    uint16_t *d = depth;
+    unsigned char *r = __rgb_buf;
+    for (unsigned int i = 0; i < __width * __height; ++i, ++l, ++d, r += 3) {
+      r[0] = 0; r[1] = 0; r[2] = 0;
+      unsigned int color = *l % NUM_USER_COLORS;
+      if (!__show_labels || (*l == 0)) color = NUM_USER_COLORS;
+
+      if (*d != 0) {
+	float hv = __histogram[*d];
+	r[0] = hv * USER_COLORS[color][0];
+	r[1] = hv * USER_COLORS[color][1];
+	r[2] = hv * USER_COLORS[color][2];
+      }
+    }
+    __label_cam->dispose_buffer();
+  } else {
+    uint16_t *d = depth;
+    unsigned char *r = __rgb_buf;
+    for (unsigned int i = 0; i < __width * __height; ++i, ++d, r += 3) {
+      r[0] = 0; r[1] = 0; r[2] = 0;
+      if (*d != 0) {
+	float hv = __histogram[*d];
+	r[0] = hv;
+	r[1] = hv;
+	r[2] = hv;
+      }
     }
   }
 
   copy_rgb_to_texture(__rgb_buf);
 
-  __label_cam->dispose_buffer();
   __depth_cam->dispose_buffer();
 }
 

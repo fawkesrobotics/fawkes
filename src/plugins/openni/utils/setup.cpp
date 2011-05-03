@@ -30,20 +30,18 @@ namespace fawkes {
 }
 #endif
 
-/** Setup a map generator from configuration.
+/** Get resolution from configuration.
  * This method reads the config values /plugins/openni/resolution and
- * /plugins/openni/fps and uses it to setup the map output of the given map
- * generator.
- * @param generator generator to setup
+ * sets the width and height fields appropriately.
  * @param config config to read values from
+ * @param width upon return contains configured width
+ * @param height upon return contains configured height
  */
-void
-setup_map_generator(xn::MapGenerator &generator,
-		    fawkes::Configuration *config)
+void get_resolution(fawkes::Configuration *config,
+		    unsigned int &width, unsigned int &height)
 {
   
   std::string  cfg_resolution = config->get_string("/plugins/openni/resolution");
-  unsigned int cfg_fps  = config->get_uint("/plugins/openni/fps");
 
   XnResolution res = XN_RES_VGA;
 
@@ -68,15 +66,34 @@ setup_map_generator(xn::MapGenerator &generator,
   } else if (cfg_resolution == "1080P") {
     res = XN_RES_1080P;
   } else {
-    throw Exception("setup_map_generator(): Unknown resolution '%s'",
+    throw Exception("get_resolution(): Unknown resolution '%s'",
 		    cfg_resolution.c_str());
   }
 
   xn::Resolution resolution(res);
+  width  = resolution.GetXResolution();
+  height = resolution.GetYResolution();
+}
+
+
+/** Setup a map generator from configuration.
+ * This method reads the config values /plugins/openni/resolution and
+ * /plugins/openni/fps and uses it to setup the map output of the given map
+ * generator.
+ * @param generator generator to setup
+ * @param config config to read values from
+ */
+void
+setup_map_generator(xn::MapGenerator &generator,
+		    fawkes::Configuration *config)
+{
+  unsigned int width = 0, height = 0;
+  get_resolution(config, width, height);
+  unsigned int cfg_fps  = config->get_uint("/plugins/openni/fps");
 
   XnMapOutputMode output_mode;
-  output_mode.nXRes = resolution.GetXResolution();
-  output_mode.nYRes = resolution.GetYResolution();
+  output_mode.nXRes = width;
+  output_mode.nYRes = height;
   output_mode.nFPS  = cfg_fps;
   XnStatus st;
   if ((st = generator.SetMapOutputMode(output_mode)) != XN_STATUS_OK) {

@@ -59,6 +59,7 @@ SkelGuiDepthDrawer *g_depth_drawer = NULL;
 SkelGuiSkeletonDrawer *g_skeleton_drawer = NULL;
 
 UserMap  g_users;
+HandMap  g_hands;
 
 /// @cond INTERNALS
 class SkelIfObserver : public BlackBoardInterfaceObserver
@@ -148,13 +149,93 @@ class SkelIfObserver : public BlackBoardInterfaceObserver
   unsigned int __active_queue;
   std::queue<std::string> __queues[2];
 };
+
+
+class SkelHandIfObserver : public BlackBoardInterfaceObserver
+{
+ public:
+  SkelHandIfObserver(BlackBoard *bb)
+  {
+    __queue_lock = new Mutex();
+    __bb = bb;
+
+    std::list<ObjectPositionInterface *> hands =
+      __bb->open_multiple_for_reading<ObjectPositionInterface>("OpenNI Hand *");
+
+    std::list<ObjectPositionInterface *>::iterator i;
+    for (i = hands.begin(); i != hands.end(); ++i) {
+      HandInfo hand;
+      hand.hand_if = *i;
+      g_hands[hand.hand_if->id()] = hand;
+    }
+
+    bbio_add_observed_create("ObjectPositionInterface", "OpenNI Hand *");
+    __bb->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+  }
+
+  ~SkelHandIfObserver()
+  {
+    __bb->unregister_observer(this);
+    delete __queue_lock;
+  }
+
+  virtual void
+  bb_interface_created(const char *type, const char *id) throw()
+  {
+    printf("Interface %s::%s created\n", type, id);
+
+    if (g_hands.find(id) == g_hands.end()) {
+      __queue_lock->lock();
+      __queues[__active_queue].push(id);
+      __queue_lock->unlock();
+    }
+  }
+
+  void
+  process_queue()
+  {
+    __queue_lock->lock();
+    unsigned int proc_queue = __active_queue;
+    __active_queue = 1 - __active_queue;
+    __queue_lock->unlock();
+    while (! __queues[proc_queue].empty()) {
+      std::string id = __queues[proc_queue].front();
+
+      try {
+	HandInfo hand;
+	printf("Opening ObjectPositionInterface::%s\n", id.c_str());
+	hand.hand_if = __bb->open_for_reading<ObjectPositionInterface>(id.c_str());
+
+	printf("Adding %s to hand map\n", id.c_str());
+	g_hands[id] = hand;
+      } catch (Exception &e) {
+	printf("Failed to open interfaces for '%s', exception follows",
+	       id.c_str());
+	e.print_trace();
+	continue;
+      }
+
+      __queues[proc_queue].pop();
+    }
+  }
+
+
+ private:
+  BlackBoard *__bb;
+  Mutex *__queue_lock;
+  unsigned int __active_queue;
+  std::queue<std::string> __queues[2];
+};
 /// @endcond
 
 
 SkelIfObserver *g_obs;
+SkelHandIfObserver *g_hands_obs;
 
 void clean_exit()
 {
+  delete g_obs;
+  delete g_hands_obs;
   for (UserMap::iterator i = g_users.begin(); i != g_users.end(); ++i) {
     g_rbb->close(i->second.skel_if);
     g_rbb->close(i->second.proj_if);
@@ -187,11 +268,14 @@ void glut_display (void)
   if (g_draw_image && g_image_drawer)  g_image_drawer->draw();
   if (g_draw_depth && g_depth_drawer)  g_depth_drawer->draw();
 
-  if (! g_users.empty()) {
+  if (! g_users.empty() || ! g_hands.empty() ) {
     if (!g_pause) {
       for (UserMap::iterator i = g_users.begin(); i != g_users.end(); ++i) {
 	i->second.skel_if->read();
 	i->second.proj_if->read();
+      }
+      for (HandMap::iterator i = g_hands.begin(); i != g_hands.end(); ++i) {
+	i->second.hand_if->read();
       }
     }
 
@@ -208,6 +292,7 @@ void glut_idle()
   if (g_quit)  clean_exit();
 
   g_obs->process_queue();
+  g_hands_obs->process_queue();
 
   // Display the frame
   glutPostRedisplay();
@@ -265,7 +350,7 @@ void glInit (int * pargc, char ** argv)
 
 int main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:f::js");
+  ArgumentParser argp(argc, argv, "hr:n::js");
 
   Thread::init_main();
   glInit(&argc, argv);
@@ -290,6 +375,7 @@ int main(int argc, char **argv)
     exit(-1);
   }
   g_obs = new SkelIfObserver(g_rbb);
+  g_hands_obs = new SkelHandIfObserver(g_rbb);
 
   g_image_cam = NULL;
   g_depth_cam = NULL;
@@ -305,34 +391,42 @@ int main(int argc, char **argv)
     } else {
       g_image_cam = new SharedMemoryCamera("openni-image");
       g_depth_cam = new SharedMemoryCamera("openni-depth");
-      g_label_cam = new SharedMemoryCamera("openni-labels");
+      try {
+	g_label_cam = new SharedMemoryCamera("openni-labels");
+	g_label_cam->open();
+	g_label_cam->start();
+	if ((g_label_cam->pixel_width() != GL_WIN_SIZE_X) ||
+	    (g_label_cam->pixel_height() != GL_WIN_SIZE_Y)) {
+	  delete g_label_cam;
+	  g_label_cam = NULL;
+	  throw Exception("Invalid label cam");
+	}
+      } catch (Exception &e) {
+	printf("Cannot open label cam, user tracker not running? "
+	       "Disabling labels.\n");
+      }
     }
     g_image_cam->open();
     g_image_cam->start();
     g_depth_cam->open();
     g_depth_cam->start();
-    g_label_cam->open();
-    g_label_cam->start();
 
     if ((g_image_cam->pixel_width() != GL_WIN_SIZE_X) ||
 	(g_image_cam->pixel_height() != GL_WIN_SIZE_Y) ||
 	(g_depth_cam->pixel_width() != GL_WIN_SIZE_X) ||
-	(g_depth_cam->pixel_height() != GL_WIN_SIZE_Y) ||
-	(g_label_cam->pixel_width() != GL_WIN_SIZE_X) ||
-	(g_label_cam->pixel_height() != GL_WIN_SIZE_Y))
+	(g_depth_cam->pixel_height() != GL_WIN_SIZE_Y) )
     {
       printf("Image size different from window size, closing camera");
       delete g_image_cam;
       delete g_depth_cam;
-      delete g_label_cam;
-      g_image_cam = g_depth_cam = g_label_cam = NULL;
+      g_image_cam = g_depth_cam = NULL;
     }
 
     g_image_drawer = new SkelGuiImageDrawer(g_image_cam);
     g_depth_drawer = new SkelGuiDepthDrawer(g_depth_cam, g_label_cam, 10000);
   }
 
-  g_skeleton_drawer = new SkelGuiSkeletonDrawer(g_users);
+  g_skeleton_drawer = new SkelGuiSkeletonDrawer(g_users, g_hands);
 
   glutMainLoop();
 }
