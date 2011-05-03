@@ -20,7 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "colors.h"
+#include <plugins/openni/utils/colors.h>
+
+namespace fawkes {
+  namespace openni {
+#if 0 /* just to make Emacs auto-indent happy */
+  }
+}
+#endif
 
 float USER_COLORS[][3] = {
   {0,1,1},
@@ -37,3 +44,7 @@ float USER_COLORS[][3] = {
 };
 
 unsigned int NUM_USER_COLORS = 10;
+
+
+} // end namespace fawkes::openni
+} // end namespace fawkes

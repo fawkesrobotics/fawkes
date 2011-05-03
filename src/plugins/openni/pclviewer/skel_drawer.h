@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  skel_drawer.h - Skeleton Visualization GUI: skeleton drawer
+ *  skel_drawer.h - OpenNI Visualization: 3D skeleton drawer
  *
- *  Created: Wed Mar 02 11:33:29 2011
+ *  Created: Sat Apr 02 19:56:55 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
-#define __PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
+#ifndef __PLUGINS_OPENNI_PCLVIEWER_SKEL_DRAWER_H_
+#define __PLUGINS_OPENNI_PCLVIEWER_SKEL_DRAWER_H_
 
 #include <plugins/openni/utils/types.h>
 
@@ -29,7 +29,7 @@
 #include <interfaces/HumanSkeletonProjectionInterface.h>
 #include <interfaces/ObjectPositionInterface.h>
 
-class SkelGuiSkeletonDrawer
+class SkelGuiSkeletonDrawer3D
 {
  public:
   /** Print state enum. */
@@ -39,8 +39,8 @@ class SkelGuiSkeletonDrawer
     PRINT_ID_STATE	/**< Print ID and state */
   } PrintState;
 
-  SkelGuiSkeletonDrawer(fawkes::openni::UserMap &users,
-			fawkes::openni::HandMap &hands);
+  SkelGuiSkeletonDrawer3D(fawkes::openni::UserMap &users,
+			  fawkes::openni::HandMap &hands);
 
   void draw();
 
@@ -49,9 +49,9 @@ class SkelGuiSkeletonDrawer
 
  private:
   void print_string(void *font, char *str);
-  void draw_limb(float *proj1, float conf1, float *proj2, float conf2);
+  void draw_limb(float *p1, float conf1, float *p2, float conf2);
   void draw_user(fawkes::openni::UserInfo &user);
-  void draw_circle(unsigned int id, float *proj, float radius);
+  void draw_circle(unsigned int id, float *p, float radius);
 
  private:
   fawkes::openni::UserMap  &__users;

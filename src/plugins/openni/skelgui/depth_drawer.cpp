@@ -21,7 +21,7 @@
  */
 
 #include "depth_drawer.h"
-#include "colors.h"
+#include <plugins/openni/utils/colors.h>
 
 #include <fvcams/camera.h>
 #include <fvutils/color/colorspaces.h>
@@ -33,6 +33,7 @@
 #include <GL/glut.h>
 
 using namespace fawkes;
+using namespace fawkes::openni;
 using namespace firevision;
 
 /** @class SkelGuiDepthDrawer "image_drawer.h"
@@ -80,7 +81,13 @@ SkelGuiDepthDrawer::toggle_show_labels()
 void
 SkelGuiDepthDrawer::fill_texture()
 {
-  __depth_cam->capture();
+  try {
+    __depth_cam->capture();
+  } catch (Exception &e) {
+    printf("Capturing depth image failed, exception follows\n");
+    e.print_trace();
+    throw;
+  }
 
   uint16_t *depth = (uint16_t *)__depth_cam->buffer();
   unsigned int num_points = 0;
@@ -106,9 +113,14 @@ SkelGuiDepthDrawer::fill_texture()
     }
   }
 
-
   if (__label_cam) {
-    __label_cam->capture();
+    try {
+      __label_cam->capture();
+    } catch (Exception &e) {
+      printf("Capturing label image failed, exception follows\n");
+      e.print_trace();
+      throw;
+    }
     uint16_t *l = (uint16_t *)__label_cam->buffer();
     uint16_t *d = depth;
     unsigned char *r = __rgb_buf;

@@ -1,7 +1,7 @@
 #*****************************************************************************
-#        Makefile Build System for Fawkes : Skeleton Visualization
+#        Makefile Build System for Fawkes : Point Cloud Viewer
 #                            -------------------
-#   Created on Wed Mar 02 11:12:39 2011
+#   Created on Fri Apr 01 14:39:58 2011
 #   Copyright (C) 2006-2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -17,21 +17,20 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
 
-LIBS_ffskelgui = stdc++ m fawkescore fawkesutils fawkesnetcomm \
+LIBS_ffpclviewer = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 		 fawkesblackboard fawkesinterface fvutils fvcams \
 		 fawkesopenniutils \
-		 HumanSkeletonInterface HumanSkeletonProjectionInterface \
-		 ObjectPositionInterface
-OBJS_ffskelgui = main.o skel_drawer.o texture_drawer.o \
-		 image_drawer.o depth_drawer.o
+		 ObjectPositionInterface HumanSkeletonInterface
+OBJS_ffpclviewer = pclviewer.o trackball.o skel_drawer.o \
+		   transfer_thread.o
 
-OBJS_all = $(OBJS_ffskelgui)
+OBJS_all = $(OBJS_ffpclviewer)
 
-CFLAGS  += $(CFLAGS_GL) $(CFLAGS_GLUT)
-LDFLAGS += $(LDFLAGS_GL) $(LDFLAGS_GLUT)
+CFLAGS  += $(CFLAGS_GL) $(CFLAGS_GLU) $(CFLAGS_GLUT)
+LDFLAGS += $(LDFLAGS_GL) $(LDFLAGS_GLU) $(LDFLAGS_GLUT)
 
-ifeq ($(HAVE_GL)$(HAVE_GLUT),11)
-  BINS_gui = $(BINDIR)/ffskelgui
+ifeq ($(HAVE_GL)$(HAVE_GLU)$(HAVE_GLUT),111)
+  BINS_gui = $(BINDIR)/ffpclviewer
 else
   WARN_TARGETS += warning_opengl
 endif
@@ -41,7 +40,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_opengl
 warning_opengl:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skeleton GUI$(TNORMAL) (OpenGL not available, mesa-libGL[-devel] or freeglut[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL viewer$(TNORMAL) (OpenGL not available, mesa-libGL[-devel], libmesa-libGLU[-devel] or freeglut[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

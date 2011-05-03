@@ -23,6 +23,8 @@
 #include "skel_drawer.h"
 #include "image_drawer.h"
 #include "depth_drawer.h"
+#include <plugins/openni/utils/skel_if_observer.h>
+#include <plugins/openni/utils/hand_if_observer.h>
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
@@ -43,6 +45,7 @@
 #define GL_WIN_SIZE_Y 480
 
 using namespace fawkes;
+using namespace fawkes::openni;
 using namespace firevision;
 
 bool g_quit = false;
@@ -61,176 +64,8 @@ SkelGuiSkeletonDrawer *g_skeleton_drawer = NULL;
 UserMap  g_users;
 HandMap  g_hands;
 
-/// @cond INTERNALS
-class SkelIfObserver : public BlackBoardInterfaceObserver
-{
- public:
-  SkelIfObserver(BlackBoard *bb)
-  {
-    __queue_lock = new Mutex();
-    __bb = bb;
-
-    std::list<HumanSkeletonInterface *> skels =
-      __bb->open_multiple_for_reading<HumanSkeletonInterface>("OpenNI Human *");
-
-    std::list<HumanSkeletonProjectionInterface *> projs;
-
-    std::list<HumanSkeletonInterface *>::iterator i;
-    for (i = skels.begin(); i != skels.end(); ++i) {
-      UserInfo user;
-      user.skel_if = *i;
-      user.proj_if =
-	__bb->open_for_reading<HumanSkeletonProjectionInterface>(user.skel_if->id());
-
-      g_users[user.skel_if->id()] = user;
-    }
-
-    bbio_add_observed_create("HumanSkeletonInterface", "OpenNI Human *");
-    __bb->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
-  }
-
-  ~SkelIfObserver()
-  {
-    __bb->unregister_observer(this);
-    delete __queue_lock;
-  }
-
-  virtual void
-  bb_interface_created(const char *type, const char *id) throw()
-  {
-    printf("Interface %s::%s created\n", type, id);
-
-    if (g_users.find(id) == g_users.end()) {
-      __queue_lock->lock();
-      __queues[__active_queue].push(id);
-      __queue_lock->unlock();
-    }
-  }
-
-  void
-  process_queue()
-  {
-    __queue_lock->lock();
-    unsigned int proc_queue = __active_queue;
-    __active_queue = 1 - __active_queue;
-    __queue_lock->unlock();
-    while (! __queues[proc_queue].empty()) {
-      std::string id = __queues[proc_queue].front();
-
-      try {
-	UserInfo user;
-	printf("Opening HumanSkeletonInterface::%s\n", id.c_str());
-	user.skel_if = __bb->open_for_reading<HumanSkeletonInterface>(id.c_str());
-	try {
-	  printf("Opening HumanSkeletonProjectionInterface::%s\n", id.c_str());
-	  user.proj_if =
-	    __bb->open_for_reading<HumanSkeletonProjectionInterface>(id.c_str());
-	} catch (Exception &e) {
-	  __bb->close(user.skel_if);
-	  throw;
-	}
-
-	printf("Adding %s to user map\n", id.c_str());
-	g_users[id] = user;
-      } catch (Exception &e) {
-	printf("Failed to open interfaces for '%s', exception follows", id.c_str());
-	e.print_trace();
-	continue;
-      }
-
-      __queues[proc_queue].pop();
-    }
-  }
-
-
- private:
-  BlackBoard *__bb;
-  Mutex *__queue_lock;
-  unsigned int __active_queue;
-  std::queue<std::string> __queues[2];
-};
-
-
-class SkelHandIfObserver : public BlackBoardInterfaceObserver
-{
- public:
-  SkelHandIfObserver(BlackBoard *bb)
-  {
-    __queue_lock = new Mutex();
-    __bb = bb;
-
-    std::list<ObjectPositionInterface *> hands =
-      __bb->open_multiple_for_reading<ObjectPositionInterface>("OpenNI Hand *");
-
-    std::list<ObjectPositionInterface *>::iterator i;
-    for (i = hands.begin(); i != hands.end(); ++i) {
-      HandInfo hand;
-      hand.hand_if = *i;
-      g_hands[hand.hand_if->id()] = hand;
-    }
-
-    bbio_add_observed_create("ObjectPositionInterface", "OpenNI Hand *");
-    __bb->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
-  }
-
-  ~SkelHandIfObserver()
-  {
-    __bb->unregister_observer(this);
-    delete __queue_lock;
-  }
-
-  virtual void
-  bb_interface_created(const char *type, const char *id) throw()
-  {
-    printf("Interface %s::%s created\n", type, id);
-
-    if (g_hands.find(id) == g_hands.end()) {
-      __queue_lock->lock();
-      __queues[__active_queue].push(id);
-      __queue_lock->unlock();
-    }
-  }
-
-  void
-  process_queue()
-  {
-    __queue_lock->lock();
-    unsigned int proc_queue = __active_queue;
-    __active_queue = 1 - __active_queue;
-    __queue_lock->unlock();
-    while (! __queues[proc_queue].empty()) {
-      std::string id = __queues[proc_queue].front();
-
-      try {
-	HandInfo hand;
-	printf("Opening ObjectPositionInterface::%s\n", id.c_str());
-	hand.hand_if = __bb->open_for_reading<ObjectPositionInterface>(id.c_str());
-
-	printf("Adding %s to hand map\n", id.c_str());
-	g_hands[id] = hand;
-      } catch (Exception &e) {
-	printf("Failed to open interfaces for '%s', exception follows",
-	       id.c_str());
-	e.print_trace();
-	continue;
-      }
-
-      __queues[proc_queue].pop();
-    }
-  }
-
-
- private:
-  BlackBoard *__bb;
-  Mutex *__queue_lock;
-  unsigned int __active_queue;
-  std::queue<std::string> __queues[2];
-};
-/// @endcond
-
-
 SkelIfObserver *g_obs;
-SkelHandIfObserver *g_hands_obs;
+HandIfObserver *g_hands_obs;
 
 void clean_exit()
 {
@@ -374,8 +209,8 @@ int main(int argc, char **argv)
     e.print_trace();
     exit(-1);
   }
-  g_obs = new SkelIfObserver(g_rbb);
-  g_hands_obs = new SkelHandIfObserver(g_rbb);
+  g_obs = new SkelIfObserver(g_rbb, g_users);
+  g_hands_obs = new HandIfObserver(g_rbb, g_hands);
 
   g_image_cam = NULL;
   g_depth_cam = NULL;
@@ -410,6 +245,10 @@ int main(int argc, char **argv)
     g_image_cam->start();
     g_depth_cam->open();
     g_depth_cam->start();
+    if (g_label_cam) {
+      g_label_cam->open();
+      g_label_cam->start();
+    }
 
     if ((g_image_cam->pixel_width() != GL_WIN_SIZE_X) ||
 	(g_image_cam->pixel_height() != GL_WIN_SIZE_Y) ||
