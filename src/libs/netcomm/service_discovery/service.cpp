@@ -69,6 +69,8 @@ NetworkService::NetworkService(const char         *name,
   _host   = strdup(host);
   _port   = port;
 
+  _modified_name = NULL;
+
   _addr = NULL;
   _addr_size = 0;
 }
@@ -101,6 +103,8 @@ NetworkService::NetworkService(const char         *name,
   _host   = strdup(host);
   _port   = port;
 
+  _modified_name = NULL;
+
   _addr = (struct sockaddr *)malloc(addr_size);
   memcpy(_addr, addr, addr_size);
   _addr_size = addr_size;
@@ -125,6 +129,8 @@ NetworkService::NetworkService(const char         *name,
   _domain = NULL;
   _host   = NULL;
   _port   = port;
+
+  _modified_name = NULL;
 
   _addr = NULL;
   _addr_size = 0;
@@ -159,6 +165,8 @@ NetworkService::NetworkService(NetworkNameResolver *nnresolver,
   _host   = NULL;
   _port   = port;
 
+  _modified_name = NULL;
+
   _addr = NULL;
   _addr_size = 0;
 }
@@ -177,6 +185,8 @@ NetworkService::NetworkService(const char         *name,
   _type   = strdup(type);
   _domain = strdup(domain);
 
+  _modified_name = NULL;
+
   _host   = NULL;
   _port   = 0;
   _addr = NULL;
@@ -192,6 +202,7 @@ NetworkService::~NetworkService()
   if ( _domain != NULL)  free( _domain );
   if ( _host   != NULL)  free( _host );
   if ( _addr   != NULL)  free( _addr );
+  if ( _modified_name   != NULL)  free( _modified_name );
 }
 
 
@@ -213,6 +224,11 @@ NetworkService::NetworkService(const NetworkService *s)
     _host = strdup(s->_host);
   } else {
     _host = NULL;
+  }
+
+  _modified_name = NULL;
+  if (s->_modified_name != NULL) {
+    _modified_name = strdup(s->_modified_name);
   }
 
   _addr = NULL;
@@ -240,6 +256,11 @@ NetworkService::NetworkService(const NetworkService &s)
     _host = strdup(s._host);
   } else {
     _host = NULL;
+  }
+
+  _modified_name = NULL;
+  if (s._modified_name != NULL) {
+    _modified_name = strdup(s._modified_name);
   }
 
   _addr = NULL;
@@ -296,6 +317,32 @@ const char *
 NetworkService::name() const
 {
   return _name;
+}
+
+
+/** Set modified name of service.
+ * The modified name is the original name with a suffix that has been added
+ * to resolve a name collision.
+ * @param new_name new name
+ */
+void
+NetworkService::set_modified_name(const char *new_name) const
+{
+  if (_modified_name)  free(_modified_name);
+  _modified_name = strdup(new_name);
+}
+
+
+/** Get modified name of service.
+ * The modified name is the original name with a suffix that has been added
+ * to resolve a name collision.
+ * @return modified name of service, this may be NULL if the name has not
+ * been modified
+ */
+const char *
+NetworkService::modified_name() const
+{
+  return _modified_name;
 }
 
 
