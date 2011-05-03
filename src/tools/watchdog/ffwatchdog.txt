@@ -1,0 +1,46 @@
+ffwatchdog(1)
+=============
+
+NAME
+----
+ffwatchdog - Watchdog for processes
+
+SYNOPSIS
+--------
+[verse]
+'ffwatchdog' <program> [args]
+
+DESCRIPTION
+-----------
+Execute the given 'program' which must be a full absolute path to a
+binary to execute. If the program stops or crashes, it is immediately
+restarted. If the watchdog is stopped, the running child is killed
+with the same signal.
+
+
+EXAMPLES
+--------
+
+ *ffwatchdog* /bin/echo test::
+	Continusously executes echo as fast as possible.
+
+ *ffwatchdog* $HOME/fawkes/bin/fawkes::
+	Executes Fawkes and if it crashes, e.g. due to a faulty
+	plugin, immediately restarts (the state is not recovered!).
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
