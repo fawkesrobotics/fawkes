@@ -20,19 +20,23 @@ include $(LIBSRCDIR)/utils/utils.mk
 include $(SRCDIR)/../openni.mk
 
 CFLAGS  += $(CFLAGS_OPENNI)
-LDFLAGS += $(LDFLAGS_OPENNI)
 
-LIBS_libfawkesopenniutils = stdc++ m fawkescore fawkesaspects fawkesutils \
+LIBS_libfawkesopenni_client_utils = stdc++ m fawkescore fawkesaspects fawkesutils \
 			    fawkesblackboard fawkesinterface \
 			    HumanSkeletonInterface ObjectPositionInterface \
 			    HumanSkeletonProjectionInterface
+OBJS_libfawkesopenni_client_utils = colors.o hand_if_observer.o skel_if_observer.o
 
-OBJS_libfawkesopenniutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_libfawkesopenni_utils = stdc++ m fawkescore fawkesaspects fawkesutils
+LDFLAGS_libfawkesopenni_utils += $(LDFLAGS_OPENNI)
+OBJS_libfawkesopenni_utils = setup.o conversions.o
 
-OBJS_all    = $(OBJS_libfawkesopenniutils)
+
+OBJS_all = $(OBJS_libfawkesopenni_utils) $(OBJS_libfawkesopenni_client_utils)
+LIBS_all = $(LIBDIR)/libfawkesopenni_client_utils.so
 
 ifeq ($(HAVE_OPENNI),1)
-  LIBS_all = $(LIBDIR)/libfawkesopenniutils.so
+  LIBS_all += $(LIBDIR)/libfawkesopenni_utils.so
 else
   WARN_TARGETS += warning_openni
 endif
@@ -42,7 +46,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_openni
 warning_openni:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenNI Utils$(TNORMAL) (openni[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Partially omitting OpenNI Utils$(TNORMAL) (openni[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

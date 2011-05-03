@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-PRESUBDIRS = interfaces
+PRESUBDIRS = interfaces utils
 SUBDIRS = skelgui pclviewer
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -24,29 +24,35 @@ LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_openni = openni_plugin.o context_thread.o
 
 LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-			  fawkesinterface fawkesopenniaspect fawkesopenniutils \
+			  fawkesinterface fawkesopenniaspect fawkesopenni_utils \
 			  fvutils \
 			  HumanSkeletonInterface HumanSkeletonProjectionInterface
 OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 
 LIBS_openni_image = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
-		    fvutils fawkesopenniutils
+		    fvutils fawkesopenni_utils
 OBJS_openni_image = image_plugin.o image_thread.o
 
 LIBS_openni_pointcloud = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
-			 fvutils fawkesopenniutils
+			 fvutils fawkesopenni_utils
 OBJS_openni_pointcloud = pointcloud_plugin.o pointcloud_thread.o
 
 LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-			  fawkesinterface fawkesopenniaspect fawkesopenniutils \
+			  fawkesinterface fawkesopenniaspect fawkesopenni_utils \
 			  fvutils ObjectPositionInterface
 OBJS_openni_handtracker = handtracker_plugin.o handtracker_thread.o
 
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image) \
 	   $(OBJS_openni_pointcloud) $(OBJS_openni_handtracker)
 
+# Ordering constraints
+utils: interfaces
+skelgui: utils
+pclviewer: utils
+
+
 ifeq ($(HAVE_OPENNI),1)
-  PRESUBDIRS += aspect utils
+  PRESUBDIRS += aspect
 
   CFLAGS  += $(CFLAGS_OPENNI)
   LDFLAGS += $(LDFLAGS_OPENNI)

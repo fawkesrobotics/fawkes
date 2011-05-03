@@ -19,7 +19,7 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 
 LIBS_ffpclviewer = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 		 fawkesblackboard fawkesinterface fvutils fvcams \
-		 fawkesopenniutils \
+		 fawkesopenni_client_utils \
 		 ObjectPositionInterface HumanSkeletonInterface
 OBJS_ffpclviewer = pclviewer.o trackball.o skel_drawer.o \
 		   transfer_thread.o

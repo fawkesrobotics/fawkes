@@ -19,7 +19,7 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 
 LIBS_ffskelgui = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 		 fawkesblackboard fawkesinterface fvutils fvcams \
-		 fawkesopenniutils \
+		 fawkesopenni_client_utils \
 		 HumanSkeletonInterface HumanSkeletonProjectionInterface \
 		 ObjectPositionInterface
 OBJS_ffskelgui = main.o skel_drawer.o texture_drawer.o \
