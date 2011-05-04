@@ -1,0 +1,7 @@
+= Skiller Errors =
+
+The skiller has three principal failures which may occur, only two of which are considered to be relevant for node monitoring.
+
+The relevant failures are first, the input skill string might be malformed, or second, the execution might cause a run-time Lua. Bot failures prevent the behavior to be completed. These errors are published via nodemon, and the caller of the skill will be notified that the skill has failed.
+
+The third kind of errors, not relevant to the node monitoring, is that the skill execution itself reports a failure. For example, there might be a skill to grasp an object. After grasping, it verifies by some method that the object is indeed in the hand. If for some reason it is not, for example it knocked the object over, it reports a failure. This kind of failure, however, is the normal situation of execution of real-world behavior with an uncertain outcome, not a crucial system error, and is therefore not published via the node monitoring.
