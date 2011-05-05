@@ -66,7 +66,8 @@ class MissingArgumentException : public Exception
 class ArgumentParser
 {
  public:
-  ArgumentParser(int argc, char **argv, const char *opt_string, option *long_options = NULL);
+  ArgumentParser(int argc, char **argv,
+		 const char *opt_string, option *long_options = NULL);
   ~ArgumentParser();
 
   bool         has_arg(const char *argn);
@@ -85,18 +86,31 @@ class ArgumentParser
   const std::vector< const char * > &    items() const;
   std::vector< const char * >::size_type num_items() const;
 
+
   int            argc() const;
   const char **  argv() const;
 
+  /** Get option string.
+   * @return option string used to create instance */
+  std::string  get_optstring() const
+  { return __opt_string; }
+
+  /** Get long option configuration.
+   * @return vector of long options used to create instance */
+  std::vector<option> get_long_opts() const
+  { return __long_opts; }
+
  private:
-  std::map<std::string, const char *> _opts;
-  std::map<std::string, const char *> _opts_cit;
-  std::vector< const char * >  _items;
+  std::map<std::string, const char *> __opts;
+  std::map<std::string, const char *> __opts_cit;
+  std::vector< const char * >  __items;
 
-  char *  _program_name;
-  char ** _argv;
-  int     _argc;
+  char *  __program_name;
+  char ** __argv;
+  int     __argc;
 
+  std::string         __opt_string;
+  std::vector<option> __long_opts;
 };
 
 } // end namespace fawkes
