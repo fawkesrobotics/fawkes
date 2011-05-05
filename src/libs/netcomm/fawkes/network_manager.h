@@ -3,7 +3,7 @@
  *  network_manager.h - Fawkes network manager
  *
  *  Created: Wed Nov 15 23:52:40 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,39 +24,43 @@
 #ifndef __FAWKES_NETWORK_MANAGER_H_
 #define __FAWKES_NETWORK_MANAGER_H_
 
-class FawkesThreadManager;
 namespace fawkes {
-  class FawkesNetworkServerThread;
-  class FawkesNetworkHandler;
-  class FawkesNetworkHub;
-  class AvahiThread;
-  class NetworkNameResolver;
-  class ServicePublisher;
-  class ServiceBrowser;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
+class ThreadCollector;
+class FawkesNetworkServerThread;
+class FawkesNetworkHandler;
+class FawkesNetworkHub;
+class AvahiThread;
+class NetworkNameResolver;
+class ServicePublisher;
+class ServiceBrowser;
 
 class FawkesNetworkManager
 {
  public:
-  FawkesNetworkManager(FawkesThreadManager *thread_manager,
+  FawkesNetworkManager(ThreadCollector *thread_collector,
 		       unsigned short int fawkes_port,
 		       const char *service_name);
   ~FawkesNetworkManager();
 
-  fawkes::FawkesNetworkHub *     hub();
-  fawkes::NetworkNameResolver *  nnresolver();
-  fawkes::ServicePublisher *     service_publisher();
-  fawkes::ServiceBrowser *       service_browser();
+  FawkesNetworkHub *     hub();
+  NetworkNameResolver *  nnresolver();
+  ServicePublisher *     service_publisher();
+  ServiceBrowser *       service_browser();
 
  private:
-  unsigned short int                  fawkes_port;
-  FawkesThreadManager                *thread_manager;
-  fawkes::FawkesNetworkServerThread  *fawkes_network_thread;
-  fawkes::AvahiThread                *avahi_thread;
+  unsigned short int          __fawkes_port;
+  ThreadCollector            *__thread_collector;
+  FawkesNetworkServerThread  *__fawkes_network_thread;
+  AvahiThread                *__avahi_thread;
 
-  fawkes::NetworkNameResolver        *_nnresolver;
-  fawkes::ServicePublisher           *_service_publisher;
-  fawkes::ServiceBrowser             *_service_browser;
+  NetworkNameResolver        *__nnresolver;
+  ServicePublisher           *__service_publisher;
+  ServiceBrowser             *__service_browser;
 };
+
+} // end namespace fawkes
 
 #endif

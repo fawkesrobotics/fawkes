@@ -3,7 +3,7 @@
  *  network_manager.cpp - Fawkes network manager
  *
  *  Created: Wed Nov 16 00:05:18 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "network_manager.h"
-#include "thread_manager.h"
+#include <netcomm/fawkes/network_manager.h>
+#include <core/threading/thread_collector.h>
 
 #include <core/exceptions/system.h>
 #include <netcomm/fawkes/server_thread.h>
@@ -39,9 +39,12 @@
 
 #include <cstdlib>
 
-using namespace fawkes;
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-/** @class FawkesNetworkManager mainapp/network_manager.h
+/** @class FawkesNetworkManager <netcomm/fawkes/network_manager.h>
  * Fawkes Network Manager.
  * This class provides a manager for network connections used in Fawkes.
  *
@@ -49,34 +52,37 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param thread_manager thread manager that threads shall be registered to
+ * @param thread_collector thread collector that threads shall be registered to
  * @param fawkes_port port to listen on for Fawkes network connections
  * @param service_name Avahi service name for Fawkes network service
  */
-FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
+FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
 					   unsigned short int fawkes_port,
 					   const char *service_name)
 {
-  this->fawkes_port    = fawkes_port;
-  this->thread_manager = thread_manager;
-  fawkes_network_thread = new FawkesNetworkServerThread(fawkes_port, thread_manager);
-  thread_manager->add(fawkes_network_thread);
+  __fawkes_port      = fawkes_port;
+  __thread_collector = thread_collector;
+  __fawkes_network_thread = new FawkesNetworkServerThread(__fawkes_port,
+							  __thread_collector);
+  __thread_collector->add(__fawkes_network_thread);
 #ifdef HAVE_AVAHI
-  avahi_thread          = new AvahiThread();
-  _service_publisher     = avahi_thread;
-  _service_browser       = avahi_thread;
-  thread_manager->add(avahi_thread);
-  _nnresolver = new NetworkNameResolver(avahi_thread);
-  NetworkService *fawkes_service = new NetworkService(_nnresolver, service_name,
-						      "_fawkes._tcp", fawkes_port);
-  avahi_thread->publish_service(fawkes_service);
+  __avahi_thread          = new AvahiThread();
+  __service_publisher     = __avahi_thread;
+  __service_browser       = __avahi_thread;
+  __thread_collector->add(__avahi_thread);
+  __nnresolver = new NetworkNameResolver(__avahi_thread);
+  NetworkService *fawkes_service = new NetworkService(__nnresolver, service_name,
+						      "_fawkes._tcp",
+						      __fawkes_port);
+  __avahi_thread->publish_service(fawkes_service);
   delete fawkes_service;
 #else
-  LibLogger::log_warn("FawkesNetworkManager", "Avahi not available, only using dummies "
+  LibLogger::log_warn("FawkesNetworkManager",
+		      "Avahi not available, only using dummies "
 		      "for service publishing/browsing.");
-  _service_publisher = new DummyServicePublisher();
-  _service_browser   = new DummyServiceBrowser();
-  _nnresolver        = new NetworkNameResolver();
+  __service_publisher = new DummyServicePublisher();
+  __service_browser   = new DummyServiceBrowser();
+  __nnresolver        = new NetworkNameResolver();
 #endif
 }
 
@@ -84,16 +90,16 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
 /** Destructor. */
 FawkesNetworkManager::~FawkesNetworkManager()
 {
-  thread_manager->remove(fawkes_network_thread);
-  delete fawkes_network_thread;
+  __thread_collector->remove(__fawkes_network_thread);
+  delete __fawkes_network_thread;
 #ifdef HAVE_AVAHI
-  thread_manager->remove(avahi_thread);
-  delete avahi_thread;
+  __thread_collector->remove(__avahi_thread);
+  delete __avahi_thread;
 #else
-  delete _service_publisher;
-  delete _service_browser;
+  delete __service_publisher;
+  delete __service_browser;
 #endif
-  delete _nnresolver;
+  delete __nnresolver;
 }
 
 
@@ -103,7 +109,7 @@ FawkesNetworkManager::~FawkesNetworkManager()
 FawkesNetworkHub *
 FawkesNetworkManager::hub()
 {
-  return fawkes_network_thread;
+  return __fawkes_network_thread;
 }
 
 
@@ -113,7 +119,7 @@ FawkesNetworkManager::hub()
 NetworkNameResolver *
 FawkesNetworkManager::nnresolver()
 {
-  return _nnresolver;
+  return __nnresolver;
 }
 
 
@@ -123,7 +129,7 @@ FawkesNetworkManager::nnresolver()
 ServicePublisher *
 FawkesNetworkManager::service_publisher()
 {
-  return _service_publisher;
+  return __service_publisher;
 }
 
 
@@ -133,5 +139,7 @@ FawkesNetworkManager::service_publisher()
 ServiceBrowser *
 FawkesNetworkManager::service_browser()
 {
-  return _service_browser;
+  return __service_browser;
 }
+
+} // end namespace fawkes
