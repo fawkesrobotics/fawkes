@@ -21,12 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <mainapp/main_thread.h>
+#include <baseapp/main_thread.h>
 
-#include <mainapp/network_manager.h>
-#include <mainapp/thread_manager.h>
+#include <baseapp/thread_manager.h>
 
 #include <core/threading/interruptible_barrier.h>
+#include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <config/sqlite.h>
 #include <config/net_handler.h>
@@ -34,12 +34,12 @@
 #include <utils/logging/console.h>
 #include <utils/logging/liblogger.h>
 #include <utils/logging/factory.h>
-#include <utils/system/argparser.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
 #include <netcomm/utils/network_logger.h>
-
+#include <netcomm/fawkes/network_manager.h>
 #include <blackboard/local.h>
+
 #include <aspect/manager.h>
 #include <plugin/manager.h>
 #include <plugin/loader.h>
@@ -48,15 +48,16 @@
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include <core/macros.h>
 
-using namespace fawkes;
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-/** @class FawkesMainThread mainapp/main_thread.h
- * Fawkes main thread.
+/** @class FawkesMainThread <baseapp/main_thread.h>
+ * Fawkes default main thread.
  * This thread initializes all important stuff like the BlackBoard,
  * handles plugins and wakes up threads at defined hooks.
  *
@@ -65,12 +66,23 @@ using namespace fawkes;
 
 
 /** Constructor.
- * @param argp argument parser
+ * @param config configuration to use
+ * @param multi_logger basic multi logger to use, a network logger will be
+ * added in the ctor.
+ * @param blackboard blackboard to use to communicate
+ * @param load_plugins string with comma-separated list of names of plugins
+ * to load on startup.
+ * @param tcp_port TCP port to listen on for Fawkes network connections
+ * @param service_name mDNS-SD service name to announce Fawkes with
  */
-FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
+FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
+				   MultiLogger *multi_logger,
+				   BlackBoard *blackboard,
+				   const char *load_plugins,
+				   unsigned short tcp_port,
+				   const char *service_name)
   : Thread("FawkesMainThread")
 {
-  __blackboard        = NULL;
   __config_nethandler = NULL;
   __config            = NULL;
   __plugin_manager    = NULL;
@@ -84,174 +96,40 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   __plugin_mutex      = new Mutex();
 
-  __argp = argp;
 
-  /* Logging stuff */
-  const char *tmp;
-  Logger::LogLevel log_level = Logger::LL_DEBUG;
-  if ( __argp->has_arg("q") ) {
-    log_level = Logger::LL_INFO;
-    if ( (tmp = __argp->arg("q")) != NULL ) {
-      for (unsigned int i = 0; i < strlen(tmp); ++i) {
-	if ( tmp[i] == 'q' ) {
-	  switch (log_level) {
-	  case Logger::LL_INFO:  log_level = Logger::LL_WARN; break;
-	  case Logger::LL_WARN:  log_level = Logger::LL_ERROR; break;
-	  case Logger::LL_ERROR: log_level = Logger::LL_NONE; break;
-	  default: break;
-	  }
-	}
-      }
-    }
-  } else if ( (tmp = __argp->arg("l")) != NULL ) {
-    if ( strcmp(tmp, "debug") == 0 ) {
-      log_level = Logger::LL_DEBUG;
-    } else if ( strcmp(tmp, "info") == 0 ) {
-      log_level = Logger::LL_INFO;
-    } else if ( strcmp(tmp, "warn") == 0 ) {
-      log_level = Logger::LL_WARN;
-    } else if ( strcmp(tmp, "error") == 0 ) {
-      log_level = Logger::LL_ERROR;
-    } else if ( strcmp(tmp, "none") == 0 ) {
-      log_level = Logger::LL_NONE;
-    } else {
-      printf("Unknown log level '%s', using default\n", tmp);
-    }
-  }
+  __multi_logger      = multi_logger;
+  __sqlite_conf       = config;
+  __config            = config;
+  __blackboard        = blackboard;
 
-  if ( (tmp = __argp->arg("L")) != NULL ) {
-    try {
-      __multi_logger = LoggerFactory::multilogger_instance(tmp);
-    } catch (Exception &e) {
-      e.append("Initializing multi logger failed");
-      destruct();
-      throw;
-    }
-  } else {
-    __multi_logger = new MultiLogger(new ConsoleLogger());
-  }
-
-  __multi_logger->set_loglevel(log_level);
-  LibLogger::init(__multi_logger);
-
-  /* Prepare home dir directory, just in case */
-  const char *homedir = getenv("HOME");
-  if (homedir) {
-    char *userdir;
-    if (asprintf(&userdir, "%s/%s", homedir, USERDIR) != -1) {
-      if (access(userdir, W_OK) != 0) {
-	if (mkdir(userdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
-	  __multi_logger->log_warn("FawkesMainThread", "Failed to create .fawkes "
-				   "directory %s, trying without", userdir);
-	}
-      }
-      free(userdir);
-    }
-  }
-
-  /* Config stuff */
-  __sqlite_conf = new SQLiteConfiguration(CONFDIR);
-  __config = __sqlite_conf;
-  __config->load(__argp->arg("c"), __argp->arg("d"));
-
-  try {
-    SQLiteConfiguration::SQLiteValueIterator *i =
-      __sqlite_conf->modified_iterator();
-    while (i->next()) {
-      std::string modtype = i->get_modtype();
-      if (modtype == "changed") {
-	__multi_logger->log_warn("FawkesMainThread",  "Default config value CHANGED: %s (was: %s now: %s)",
-				 i->path(), i->get_oldvalue().c_str(),
-				 i->get_as_string().c_str());
-      } else if (modtype == "erased") {
-	__multi_logger->log_warn("FawkesMainThread",  "Default config value ERASED:  %s",
-				 i->path());
-      } else {
-	__multi_logger->log_debug("FawkesMainThread", "Default config value ADDED:   %s (value: %s)",
-				  i->path(), i->get_as_string().c_str());
-      }
-    }
-    delete i;
-  } catch (Exception &e) {
-    __multi_logger->log_warn("FawkesMainThread", "Failed to read modified default config values, no dump?");
+  __load_plugins      = NULL;
+  if (load_plugins) {
+    __load_plugins = strdup(load_plugins);
   }
 
   /* Clock */
   __clock = Clock::instance();
 
-  std::string bb_magic_token = "";
-  unsigned int bb_size = 2097152;
-  try {
-    bb_magic_token = __config->get_string("/fawkes/mainapp/blackboard_magic_token");
-    __multi_logger->log_info("FawkesMainApp", "BlackBoard magic token defined. "
-			     "Using shared memory BlackBoard.");
-  } catch (Exception &e) {
-    // ignore
-  }
-  try {
-    bb_size = __config->get_uint("/fawkes/mainapp/blackboard_size");
-  } catch (Exception &e) {
-    __multi_logger->log_warn("FawkesMainApp", "BlackBoard size not defined. "
-			     "Will use %u, saving to default DB", bb_size);
-    __config->set_default_uint("/fawkes/mainapp/blackboard_size", bb_size);
-  }
-
-  unsigned int net_tcp_port     = 1910;
-  std::string  net_service_name = "Fawkes on %h";
-  if (argp->has_arg("P")) {
-    try {
-      net_tcp_port = argp->parse_int("P");
-    } catch (Exception &e) {
-      __multi_logger->log_warn("FawkesMainThread", "Illegal port '%s', using %u",
-			       argp->arg("P"), net_tcp_port);
-    }
-  } else {
-    try {
-      net_tcp_port = __config->get_uint("/fawkes/mainapp/net/tcp_port");
-    } catch (Exception &e) {}  // ignore, we stick with the default
-  }
-
-  if (argp->has_arg("net-service-name")) {
-    net_service_name = argp->arg("net-service-name");
-  } else {
-    try {
-      net_service_name = __config->get_string("/fawkes/mainapp/net/service_name");
-    } catch (Exception &e) {}  // ignore, we stick with the default
-  }
-
-  if (net_tcp_port > 65535) {
-    __multi_logger->log_warn("FawkesMainThread", "Invalid port '%u', using 1910",
-			     net_tcp_port);
-    net_tcp_port = 1910;
-  }
-
-  // Cleanup stale BlackBoard shared memory segments if requested
-  if ( __argp->has_arg("C") ) {
-    LocalBlackBoard::cleanup(bb_magic_token.c_str(), /* output with lister? */ true);
-  }
-
   /* Managers */
   try {
-    if ( bb_magic_token == "") {
-      __blackboard       = new LocalBlackBoard(bb_size);
-    } else {
-      __blackboard       = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
-    }
     __thread_manager     = new FawkesThreadManager();
     __aspect_manager     = new AspectManager();
     __thread_manager->set_inifin(__aspect_manager, __aspect_manager);
     __plugin_manager     = new PluginManager(__thread_manager, __config,
 					     "/fawkes/meta_plugins/");
-    __network_manager    = new FawkesNetworkManager(__thread_manager, net_tcp_port,
-						    net_service_name.c_str());
-    __config_nethandler  = new ConfigNetworkHandler(__config, __network_manager->hub());
+    __network_manager    = new FawkesNetworkManager(__thread_manager,
+						    tcp_port,
+						    service_name);
+    __config_nethandler  = new ConfigNetworkHandler(__config,
+						    __network_manager->hub());
   } catch (Exception &e) {
     e.append("Initializing managers failed");
     destruct();
     throw;
   }
 
-  __network_logger = new NetworkLogger(__network_manager->hub(), log_level);
+  __network_logger = new NetworkLogger(__network_manager->hub(),
+				       __multi_logger->loglevel());
   __multi_logger->add_logger(__network_logger);
 
   __aspect_manager->register_default_inifins(__blackboard,
@@ -269,7 +147,10 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 						 __plugin_mutex);
   __plugin_nethandler->start();
 
-  __blackboard->start_nethandler(__network_manager->hub());
+  LocalBlackBoard *lbb = dynamic_cast<LocalBlackBoard *>(__blackboard);
+  if (lbb) {
+    lbb->start_nethandler(__network_manager->hub());
+  }
 
   __loop_start = new Time(__clock);
   __loop_end   = new Time(__clock);
@@ -277,25 +158,29 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     __max_thread_time_usec = __config->get_uint("/fawkes/mainapp/max_thread_time");
   } catch (Exception &e) {
     __max_thread_time_usec = 30000;
-    __multi_logger->log_info("FawkesMainApp", "Maximum thread time not set, assuming 30ms.");
+    __multi_logger->log_info("FawkesMainApp",
+			     "Maximum thread time not set, assuming 30ms.");
   }
   __max_thread_time_nanosec = __max_thread_time_usec * 1000;
 
   __time_wait = NULL;
   try {
-    __desired_loop_time_usec = __config->get_uint("/fawkes/mainapp/desired_loop_time");
+    __desired_loop_time_usec =
+      __config->get_uint("/fawkes/mainapp/desired_loop_time");
     if ( __desired_loop_time_usec > 0 ) {
       __time_wait = new TimeWait(__clock, __desired_loop_time_usec);
     }
   } catch (Exception &e) {
     __desired_loop_time_usec = 0;
-    __multi_logger->log_info("FawkesMainApp", "Desired loop time not set, assuming 0");
+    __multi_logger->log_info("FawkesMainApp",
+			     "Desired loop time not set, assuming 0");
   }
 
   __desired_loop_time_sec  = (float)__desired_loop_time_usec / 1000000.f;
 
   try {
-    __enable_looptime_warnings = __config->get_bool("/fawkes/mainapp/enable_looptime_warnings");
+    __enable_looptime_warnings =
+      __config->get_bool("/fawkes/mainapp/enable_looptime_warnings");
     if(!__enable_looptime_warnings) {
       __multi_logger->log_debug(name(), "loop time warnings are disabled");
     }
@@ -345,8 +230,10 @@ FawkesMainThread::destruct()
     __multi_logger->log_warn("FawkesMainThread", e);
   }
 
-  // Must delete network logger first since network manager has to die before the LibLogger
-  // is finalized.
+  if (__load_plugins)  free(__load_plugins);
+
+  // Must delete network logger first since network manager
+  // has to die before the LibLogger is finalized.
   __multi_logger->remove_logger(__network_logger);
   delete __network_logger;
 
@@ -356,9 +243,7 @@ FawkesMainThread::destruct()
     delete __plugin_nethandler;
   }
   delete __plugin_manager;
-  delete __blackboard;
   delete __config_nethandler;
-  delete __config;
   delete __network_manager;
   delete __thread_manager;
   delete __aspect_manager;
@@ -370,22 +255,17 @@ FawkesMainThread::destruct()
   delete __mainloop_mutex;
 
   delete __plugin_mutex;
-
-  // implicitly frees multi_logger and all sub-loggers
-  LibLogger::finalize();
-
-  Clock::finalize();
 }
 
 void
 FawkesMainThread::once()
 {
-  if ( __argp->has_arg("p") ) {
+  if ( __load_plugins) {
     try {
-      __plugin_manager->load(__argp->arg("p"));
+      __plugin_manager->load(__load_plugins);
     } catch (Exception &e) {
       __multi_logger->log_error("FawkesMainThread", "Failed to load plugins %s, "
-				"exception follows", __argp->arg("p"));
+				"exception follows", __load_plugins);
       __multi_logger->log_error("FawkesMainThread", e);
     }
   } else {
@@ -551,3 +431,69 @@ FawkesMainThread::loop()
   // catch ... is not a good idea, would catch cancellation exception
   // at least needs to be rethrown.
 }
+
+
+/** @class FawkesMainThread::Runner <baseapp/main_thread.h>
+ * Utility class to run the main thread.
+ *
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param fmt Fawkes main thread to run
+ */
+FawkesMainThread::Runner::Runner(FawkesMainThread *fmt)
+{
+  __init_mutex = new Mutex();
+  __init_running   = true;
+  __init_quit      = false;
+  __sigint_running = false;
+
+  __fmt = fmt;
+}
+
+
+/** Destructor. */
+FawkesMainThread::Runner::~Runner()
+{
+  delete __init_mutex;
+}
+
+/** Run main thread. */
+void
+FawkesMainThread::Runner::run()
+{
+  __init_mutex->lock();
+  __init_running = false;
+  if ( ! __init_quit ) {
+    __fmt->start();
+    __init_mutex->unlock();
+    __fmt->join();
+  } else {
+    __init_mutex->unlock();
+  }
+}
+
+/** Handle signals.
+ * @param signum signal number
+ */
+void
+FawkesMainThread::Runner::handle_signal(int signum)
+{
+  if ((signum == SIGINT) && ! __sigint_running) {
+    printf("\nFawkes: SIGINT received, shutting down.\n"
+	   "Hit Ctrl-C again to force immediate exit.\n\n");
+    MutexLocker lock(__init_mutex);
+    if (__init_running) {
+      __init_quit = true;
+    } else {
+      __fmt->cancel();
+    }
+    __sigint_running = true;
+  } else if ((signum == SIGTERM) || __sigint_running) {
+    // we really need to quit
+    ::exit(-2);
+  }
+}
+
+} // end namespace fawkes

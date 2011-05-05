@@ -24,42 +24,13 @@ include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 #	   $(patsubst %,-l:%,$(subst $(abspath $(PLUGINDIR))/,,$(wildcard $(PLUGINDIR)/*.so))) \
 #	   -lpthread
 
-# Check for availability of libdaemon
-HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_LIBDAEMON),1)
-  CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
-  LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
-else
-  WARN_TARGETS += warning_libdaemon
-endif
-
-# We need Avahi CFLAGS because of includes in Avahi source, on BSD this is
-# in /usr/local/include and thus it needs extra flags
-ifeq ($(HAVE_AVAHI),1)
-  CFLAGS += $(CFLAGS_AVAHI)
-else
-  WARN_TARGETS += warning_avahi
-endif
-
 LIBS_fawkes = stdc++ fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
-	      fawkesconfig fawkesplugin fawkesaspects
+	      fawkesconfig fawkesplugin fawkesaspects fawkesbaseapp
 OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all     = $(OBJS_fawkes)
 BINS_all     = $(BINDIR)/fawkes
 MANPAGES_all = $(MANDIR)/man8/fawkes.8
-
-ifeq ($(OBJSSUBMAKE),1)
-  ifneq ($(WARN_TARGETS),)
-all: $(WARN_TARGETS)
-  endif
-.PHONY: warning_libdaemon
-warning_libdaemon:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without daemonizing support$(TNORMAL) (libdaemon[-devel] not installed)"
-warning_avahi:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without mDNS-SD support$(TNORMAL) (avahi[-devel] not installed)"
-endif
-
 
 include $(BUILDSYSDIR)/base.mk
 

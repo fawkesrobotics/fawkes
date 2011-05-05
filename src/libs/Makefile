@@ -2,7 +2,7 @@
 #                  Makefile Build System for Fawkes: Libraries
 #                            -------------------
 #   Created on Tue Nov 07 16:12:59 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   copyright (C) 2006-2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
 SUBDIRS = core utils interface netcomm blackboard config lua plugin aspect \
-	  geometry webview worldinfo_utils gui_utils \
+	  geometry webview worldinfo_utils gui_utils baseapp \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
@@ -52,6 +52,7 @@ interfaces: core interface
 gui_utils: core netcomm plugin
 naoutils: core utils
 webview: core utils
+baseapp: core utils aspect config netcomm blackboard plugin
 fvutils: core utils netcomm
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
 fvfilters: fvmodels
