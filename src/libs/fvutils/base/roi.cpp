@@ -287,7 +287,7 @@ ROI::get_hint() const
  * @see getHint()
  */
 void
-ROI::set_hint(unsigned int)
+ROI::set_hint(unsigned int hint)
 {
   this->hint = hint;
 }

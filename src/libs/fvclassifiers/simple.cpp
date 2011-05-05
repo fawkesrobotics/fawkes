@@ -53,6 +53,7 @@ namespace firevision {
  * extended towards the top instead of the bottom.
  * @param neighbourhood_min_match minimum number of object pixels to grow neighbourhood
  * @param grow_by grow region by that many pixels
+ * @param color color to look for
  */
 SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
                                              ColorModel *color_model,
