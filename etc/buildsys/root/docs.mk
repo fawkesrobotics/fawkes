@@ -20,7 +20,7 @@ endif
 ifndef __buildsys_root_docs_mk_
 __buildsys_root_docs_mk_ := 1
 
-.PHONY: apidoc quickdoc tracdoc uncolored-quickdoc
+.PHONY: apidoc quickdoc tracdoc
 apidoc: api.doxygen
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
