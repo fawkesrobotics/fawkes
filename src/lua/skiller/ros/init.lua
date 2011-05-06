@@ -40,7 +40,7 @@ function init()
 
    local ok, nodemonmod = pcall(require, "nodemon")
    if ok then
-      nodemon = nodemonmod.NodeStatePublisher:new()
+      nodemon = nodemonmod.NodeStatePublisher:new("skiller", "skiller")
    else
       print_warn("Node monitoring disabled (module nodemon not found):\n%s",
 		 nodemonmod)
