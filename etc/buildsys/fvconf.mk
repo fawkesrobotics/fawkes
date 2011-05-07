@@ -208,7 +208,7 @@ endif
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(wildcard $(LIBSRCDIR)/bulb_calib/bulb*),)
+ifneq ($(wildcard $(TOP_FVSRCDIR)/libs/bulb_calib/bulb*),)
   HAVE_BULB_CREATOR = 1
   VISION_CFLAGS += -DHAVE_BULB_CREATOR
 endif
