@@ -834,8 +834,7 @@ MirrorCalibTool::MirrorCalibTool()
     img_yuv_mask_(0),
     state_(CalibrationState())
 #ifdef HAVE_BULB_CREATOR
-  , bulb_(0),
-    generator_(0)
+  , bulb_(0)
 #endif
 {
 }
@@ -1377,7 +1376,7 @@ MirrorCalibTool::next_step()
         make_grayscale(result.yuv_buffer(), result.buflen());
         make_contrast(result.yuv_buffer(), result.buflen());
       }
-      printf("Edge detection in %d\n", src_img.results().size());
+      printf("Edge detection in %u\n", (unsigned) src_img.results().size());
       src_img.add_result(result);
       set_last_yuv_buffer(result.yuv_buffer());
       assert(!memcmp(result.yuv_buffer(),
@@ -1392,7 +1391,7 @@ MirrorCalibTool::next_step()
                          : src_img.results().size() - 1;
         const int index2 = src_img.results().size() - ORIENTATION_COUNT + 1;
         assert(index1 != index2);
-        printf("ORing: %d = or(%d, %d)\n", src_img.results().size(),
+        printf("ORing: %d = or(%d, %d)\n", (unsigned) src_img.results().size(),
             index1, index2);
         StepResult& prev1 = src_img.result(index1);
         StepResult& prev2 = src_img.result(index2);
@@ -1631,10 +1630,12 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
 #if 0
   std::cout << "Found nearest neighbor 1: "
             << "ref="<<angle<<"="<<rad2deg(angle)<<" "
-            << "to="<<min1<<"="<<rad2deg(min1) << std::endl;
+            << "to="<<min1<<"="<<rad2deg(min1) <<" "
+            << "index="<<min1_index << std::endl;
   std::cout << "Found nearest neighbor 2: "
             << "ref="<<angle<<"="<<rad2deg(angle)<<" "
-            << "to="<<min2<<"="<<rad2deg(min2) << std::endl;
+            << "to="<<min2<<"="<<rad2deg(min2) <<" "
+            << "index="<<min2_index << std::endl;
 #endif
   return PolarAnglePair(min1, min2);
 }
@@ -1863,7 +1864,7 @@ MirrorCalibTool::save(const char* filename)
     Bulb bulb = generate(src_img.width(), src_img.height(), center, mark_map_);
     bulb.save(filename);
   } else {
-    cout << "Can't save in the middle of the calibration" << endl;
+    std::cout << "Can't save in the middle of the calibration" << std::endl;
   }
 #endif
 }

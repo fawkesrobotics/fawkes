@@ -24,13 +24,16 @@
 #ifndef __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 #define __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 
+#ifndef HAVE_IPP
+#error "IPP not installed"
+#endif
+
 #include <geometry/hom_point.h>
 #include <utils/math/angle.h>
 #include <fvutils/base/types.h>
 
 #ifdef HAVE_BULB_CREATOR
 #include <fvmodels/mirror/bulb.h>
-#include <bulb_calib/bulb_generator.h>
 #endif
 
 #include <iostream>
@@ -41,9 +44,6 @@
 namespace firevision {
 
 class MirrorCalibTool
-#ifdef HAVE_BULB_CREATOR
- : public BulbGeneratorProgressHandler
-#endif
 {
  public:
   static void draw_line(unsigned char* yuv_buffer, double angle_deg,
@@ -73,14 +73,6 @@ class MirrorCalibTool
             unsigned int y,
             float* x_ret,
             float* y_ret);
-  /** Nothing.
-   * @param total_steps */
-  virtual void setTotalSteps(unsigned int total_steps) {};
-  /** Nothing.
-   * @param progress */
-  virtual void setProgress(unsigned int progress) {};
-  /** Nothing. */
-  virtual void finished() {};
   
   void load(const char* filename);
   void save(const char* filename);
@@ -180,7 +172,6 @@ class MirrorCalibTool
 
 #ifdef HAVE_BULB_CREATOR
   Bulb* bulb_;
-  BulbGenerator* generator_;
 #endif
 };
 

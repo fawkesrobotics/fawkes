@@ -28,6 +28,10 @@ ifneq ($(HAVE_SHAPE_MODELS),1)
   MODELS_FILTEROUT += shape/%
 endif
 
+ifeq ($(HAVE_IPP),0)
+  MODELS_FILTEROUT += mirror/mirror_calib%
+endif
+
 OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(filter-out $(MODELS_FILTEROUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 LIBS_libfvmodels := m fawkescore fawkesutils fvfilters fvutils fvclassifiers fawkesgeometry
 HDRS_libfvmodels = $(patsubst %.o,%.h,$(OBJS_libfvmodels))
