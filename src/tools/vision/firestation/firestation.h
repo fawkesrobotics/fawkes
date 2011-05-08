@@ -224,7 +224,9 @@ class Firestation : public Gtk::Window
   bool m_enable_scaling;
   float m_scale_factor;
 
+#ifdef HAVE_IPP
   firevision::MirrorCalibTool* m_calib_tool;
+#endif
   ColorTrainWidget* m_ctw;
   FuseTransferWidget* m_ftw;
   firevision::FuseImageListWidget* m_filw;

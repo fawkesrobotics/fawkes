@@ -33,7 +33,9 @@
 #include <fvcams/shmem.h>
 #include <fvcams/net.h>
 
+#ifdef HAVE_IPP
 #include <fvmodels/mirror/mirror_calib.h>
+#endif
 
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/conversions.h>
@@ -248,14 +250,16 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
 
   // --- mirror calibration -----------------------------------------
+#ifdef HAVE_IPP
   m_calib_tool = new firevision::MirrorCalibTool();
+#endif
 
-#ifndef HAVE_BULB_CREATOR
+#if !defined(HAVE_BULB_CREATOR) or !defined(HAVE_IPP)
   Gtk::Notebook *nb = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "ntbOptions") );
   Gtk::HBox *box = dynamic_cast<Gtk::HBox*>( get_widget(ref_xml, "boxMirrorCalib") );
   nb->get_tab_label(*box)->set_sensitive(false);
   box->set_sensitive(false);
-#endif /* HAVE_BULB_CREATOR */
+#endif
 
   m_scl_mc_line = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclMcLine") );
   m_scl_mc_line->signal_change_value().connect( sigc::mem_fun(*this, &Firestation::mc_on_line_angle_changed) );
@@ -364,7 +368,9 @@ Firestation::~Firestation()
   delete m_camera;
   delete m_img_writer;
 
+#ifdef HAVE_IPP
   delete m_calib_tool;
+#endif
   delete m_ctw;
   delete m_ftw;
   delete m_filw;
@@ -1036,6 +1042,7 @@ Firestation::image_click(GdkEventButton* event)
 
     case MODE_MIRROR_CALIB:
       {
+#ifdef HAVE_IPP
         m_calib_tool->next_step();
         const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
         memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
@@ -1069,11 +1076,15 @@ Firestation::image_click(GdkEventButton* event)
 	    m_ent_mc_ori->set_text("");
 	  }
           */
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
 	break;
       }
 
     case MODE_MIRROR_CALIB_EVAL:
       {
+#ifdef HAVE_IPP
 	float dist;
 	float phi;
 	m_calib_tool->eval(image_x, image_y, &dist, &phi);
@@ -1082,6 +1093,9 @@ Firestation::image_click(GdkEventButton* event)
             image_x, image_y,
             rad2deg(phi), dist);
         //printf("Distance: %2f\t Phi: %2f\n", dist, phi);
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
 	break;
       }
 
@@ -1161,6 +1175,7 @@ void
 Firestation::mc_draw_line()
 {
   if (m_img_src != SRC_NONE) {
+#ifdef HAVE_IPP
     memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer, m_img_size);
     MirrorCalibTool::draw_line(m_yuv_draw_buffer,
                                mc_line_angle_deg,
@@ -1169,6 +1184,9 @@ Firestation::mc_draw_line()
                                m_img_width,
                                m_img_height);
     draw_image();
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
   }
 }
 
@@ -1204,9 +1222,13 @@ Firestation::mc_load_mask()
     {
     case Gtk::RESPONSE_OK:
       {
+#ifdef HAVE_IPP
 	std::string filename = m_fcd_mc_load_mask->get_filename();
 	m_calib_tool->load_mask( filename.c_str() );
 	//m_op_mode = MODE_MIRROR_CALIB_EVAL;
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
 	break;
       }
     case Gtk::RESPONSE_CANCEL:
@@ -1229,6 +1251,7 @@ Firestation::mc_memorize()
     }
   else */ if (m_img_src != SRC_NONE)
     {
+#ifdef HAVE_IPP
       double ori = mc_line_angle_deg;
       std::cout << "Starting calibration for ori = " << ori << std::endl;
       m_calib_tool->push_back(m_yuv_orig_buffer, m_img_size,
@@ -1274,6 +1297,9 @@ Firestation::mc_memorize()
 
       m_stb_status->push("Entering mirror calibration mode");
 #endif
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
   }
 }
 
@@ -1308,9 +1334,13 @@ Firestation::mc_load()
     {
     case Gtk::RESPONSE_OK:
       {
+#ifdef HAVE_IPP
 	std::string filename = m_fcd_mc_load->get_filename();
 	m_calib_tool->load( filename.c_str() );
 	m_op_mode = MODE_MIRROR_CALIB_EVAL;
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
 	break;
       }
     case Gtk::RESPONSE_CANCEL:
@@ -1334,9 +1364,13 @@ Firestation::mc_save()
     {
     case(Gtk::RESPONSE_OK):
       {
+#ifdef HAVE_IPP
 	std::string filename = m_fcd_mc_save->get_filename();
 
 	m_calib_tool->save( filename.c_str() );
+#else
+        printf("IPP not installed; mirror calibration does not work.\n");
+#endif
 	break;
       }
 

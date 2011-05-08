@@ -34,7 +34,6 @@ ifeq ($(HAVE_BULB_CREATOR),1)
   LIBS_firestation += fvbulbcalib
 endif
 OBJS_firestation = color_train_widget.o         \
-		   mirror_calib.o		\
 		   fuse_transfer_widget.o	\
 		   colormap_viewer_widget.o	\
 	           firestation.o		\
