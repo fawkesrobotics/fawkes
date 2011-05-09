@@ -36,7 +36,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-#include <plugins/openrave/aspect/or.h>
+#include <plugins/openrave/aspect/openrave.h>
 #include <blackboard/interface_listener.h>
 #include <core/utils/refptr.h>
 #ifdef USE_TIMETRACKER

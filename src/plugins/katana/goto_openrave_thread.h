@@ -29,7 +29,7 @@
 #include <vector>
 #include <string>
 
-#include <plugins/openrave/aspect/or.h>
+#include <plugins/openrave/aspect/openrave.h>
 
 #ifdef HAVE_OPENRAVE
 namespace fawkes {
