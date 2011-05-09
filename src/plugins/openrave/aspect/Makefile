@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#              Makefile Build System for Fawkes: OpenRAVE Aspect
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri Feb 25 15:08:00 2011
+#   Copyright (C) 2011 by Bahram Maleki-Fard, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,19 +13,17 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../..
+
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(LIBSRCDIR)/utils/utils.mk
 
-# base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
-	  laser flite joystick openrave katana pantilt vision roomba \
-	  skiller luaagent worldmodel laserht \
-	  openni refboxcomm player xmlrpc \
-	  readylogagent
-	  #festival
+LIBS_libfawkesopenraveaspect = stdc++ fawkescore fawkesaspects fawkesutils
+OBJS_libfawkesopenraveaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-include $(BUILDSYSDIR)/rules.mk
+OBJS_all    = $(OBJS_libfawkesopenraveaspect)
 
-luaagent: skiller
-rrdweb: rrd
+LIBS_all = $(LIBDIR)/libfawkesopenraveaspect.so
+
+include $(BUILDSYSDIR)/base.mk
 

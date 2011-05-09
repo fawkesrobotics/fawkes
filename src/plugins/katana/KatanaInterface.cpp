@@ -100,6 +100,8 @@ KatanaInterface::KatanaInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
   add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
+  add_fieldinfo(IFT_INT32, "encoders", 6, &data->encoders);
+  add_fieldinfo(IFT_FLOAT, "angles", 6, &data->angles);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
@@ -111,12 +113,18 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("FlushMessage");
   add_messageinfo("ParkMessage");
   add_messageinfo("LinearGotoMessage");
+  add_messageinfo("LinearGotoKniMessage");
+  add_messageinfo("ObjectGotoMessage");
   add_messageinfo("CalibrateMessage");
   add_messageinfo("OpenGripperMessage");
   add_messageinfo("CloseGripperMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetMaxVelocityMessage");
-  unsigned char tmp_hash[] = {0x36, 0x80, 0x78, 0x4, 0x9f, 0x14, 0x1b, 0x27, 0x38, 0x40, 0x77, 0xb6, 0xc0, 0x7, 0xe, 0x73};
+  add_messageinfo("SetMotorEncoderMessage");
+  add_messageinfo("MoveMotorEncoderMessage");
+  add_messageinfo("SetMotorAngleMessage");
+  add_messageinfo("MoveMotorAngleMessage");
+  unsigned char tmp_hash[] = {0x18, 0xd7, 0xc6, 0x14, 0xa3, 0x5a, 0xa3, 0xd8, 0x82, 0xcf, 0x58, 0x7b, 0xfd, 0xda, 0x70, 0xc};
   set_hash(tmp_hash);
 }
 
@@ -381,6 +389,124 @@ KatanaInterface::set_psi(const float new_psi)
   data_changed = true;
 }
 
+/** Get encoders value.
+ * Encoder values of motors
+ * @return encoders value
+ */
+int32_t *
+KatanaInterface::encoders() const
+{
+  return data->encoders;
+}
+
+/** Get encoders value at given index.
+ * Encoder values of motors
+ * @param index index of value
+ * @return encoders value
+ * @exception Exception thrown if index is out of bounds
+ */
+int32_t
+KatanaInterface::encoders(unsigned int index) const
+{
+  if (index > 6) {
+    throw Exception("Index value %u out of bounds (0..6)", index);
+  }
+  return data->encoders[index];
+}
+
+/** Get maximum length of encoders value.
+ * @return length of encoders value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::maxlenof_encoders() const
+{
+  return 6;
+}
+
+/** Set encoders value.
+ * Encoder values of motors
+ * @param new_encoders new encoders value
+ */
+void
+KatanaInterface::set_encoders(const int32_t * new_encoders)
+{
+  memcpy(data->encoders, new_encoders, sizeof(int32_t) * 6);
+  data_changed = true;
+}
+
+/** Set encoders value at given index.
+ * Encoder values of motors
+ * @param new_encoders new encoders value
+ * @param index index for of the value
+ */
+void
+KatanaInterface::set_encoders(unsigned int index, const int32_t new_encoders)
+{
+  if (index > 6) {
+    throw Exception("Index value %u out of bounds (0..6)", index);
+  }
+  data->encoders[index] = new_encoders;
+}
+/** Get angles value.
+ * Angle values of motors
+ * @return angles value
+ */
+float *
+KatanaInterface::angles() const
+{
+  return data->angles;
+}
+
+/** Get angles value at given index.
+ * Angle values of motors
+ * @param index index of value
+ * @return angles value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+KatanaInterface::angles(unsigned int index) const
+{
+  if (index > 6) {
+    throw Exception("Index value %u out of bounds (0..6)", index);
+  }
+  return data->angles[index];
+}
+
+/** Get maximum length of angles value.
+ * @return length of angles value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::maxlenof_angles() const
+{
+  return 6;
+}
+
+/** Set angles value.
+ * Angle values of motors
+ * @param new_angles new angles value
+ */
+void
+KatanaInterface::set_angles(const float * new_angles)
+{
+  memcpy(data->angles, new_angles, sizeof(float) * 6);
+  data_changed = true;
+}
+
+/** Set angles value at given index.
+ * Angle values of motors
+ * @param new_angles new angles value
+ * @param index index for of the value
+ */
+void
+KatanaInterface::set_angles(unsigned int index, const float new_angles)
+{
+  if (index > 6) {
+    throw Exception("Index value %u out of bounds (0..6)", index);
+  }
+  data->angles[index] = new_angles;
+}
 /** Get msgid value.
  * The ID of the message that is currently being
       processed, or 0 if no message is being processed.
@@ -618,6 +744,10 @@ KatanaInterface::create_message(const char *type) const
     return new ParkMessage();
   } else if ( strncmp("LinearGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new LinearGotoMessage();
+  } else if ( strncmp("LinearGotoKniMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new LinearGotoKniMessage();
+  } else if ( strncmp("ObjectGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ObjectGotoMessage();
   } else if ( strncmp("CalibrateMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new CalibrateMessage();
   } else if ( strncmp("OpenGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -628,6 +758,14 @@ KatanaInterface::create_message(const char *type) const
     return new SetEnabledMessage();
   } else if ( strncmp("SetMaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetMaxVelocityMessage();
+  } else if ( strncmp("SetMotorEncoderMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMotorEncoderMessage();
+  } else if ( strncmp("MoveMotorEncoderMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new MoveMotorEncoderMessage();
+  } else if ( strncmp("SetMotorAngleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMotorAngleMessage();
+  } else if ( strncmp("MoveMotorAngleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new MoveMotorAngleMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1060,6 +1198,396 @@ KatanaInterface::LinearGotoMessage::clone() const
 {
   return new KatanaInterface::LinearGotoMessage(this);
 }
+/** @class KatanaInterface::LinearGotoKniMessage <interfaces/KatanaInterface.h>
+ * LinearGotoKniMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_z initial value for z
+ * @param ini_phi initial value for phi
+ * @param ini_theta initial value for theta
+ * @param ini_psi initial value for psi
+ */
+KatanaInterface::LinearGotoKniMessage::LinearGotoKniMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoKniMessage")
+{
+  data_size = sizeof(LinearGotoKniMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (LinearGotoKniMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->x = ini_x;
+  data->y = ini_y;
+  data->z = ini_z;
+  data->phi = ini_phi;
+  data->theta = ini_theta;
+  data->psi = ini_psi;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
+  add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
+}
+/** Constructor */
+KatanaInterface::LinearGotoKniMessage::LinearGotoKniMessage() : Message("LinearGotoKniMessage")
+{
+  data_size = sizeof(LinearGotoKniMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (LinearGotoKniMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
+  add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
+  add_fieldinfo(IFT_FLOAT, "psi", 1, &data->psi);
+}
+
+/** Destructor */
+KatanaInterface::LinearGotoKniMessage::~LinearGotoKniMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::LinearGotoKniMessage::LinearGotoKniMessage(const LinearGotoKniMessage *m) : Message("LinearGotoKniMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (LinearGotoKniMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get x value.
+ * X-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @return x value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * X-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @param new_x new x value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Y-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @return y value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * Y-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @param new_y new y value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get z value.
+ * Z-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @return z value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::z() const
+{
+  return data->z;
+}
+
+/** Get maximum length of z value.
+ * @return length of z value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_z() const
+{
+  return 1;
+}
+
+/** Set z value.
+ * Z-Coordinate for tool position
+    compared to base libkni coordinate system.
+ * @param new_z new z value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_z(const float new_z)
+{
+  data->z = new_z;
+}
+
+/** Get phi value.
+ * Euler angle Phi of tool orientation.
+ * @return phi value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::phi() const
+{
+  return data->phi;
+}
+
+/** Get maximum length of phi value.
+ * @return length of phi value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_phi() const
+{
+  return 1;
+}
+
+/** Set phi value.
+ * Euler angle Phi of tool orientation.
+ * @param new_phi new phi value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_phi(const float new_phi)
+{
+  data->phi = new_phi;
+}
+
+/** Get theta value.
+ * Euler angle Theta of tool orientation.
+ * @return theta value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::theta() const
+{
+  return data->theta;
+}
+
+/** Get maximum length of theta value.
+ * @return length of theta value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_theta() const
+{
+  return 1;
+}
+
+/** Set theta value.
+ * Euler angle Theta of tool orientation.
+ * @param new_theta new theta value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_theta(const float new_theta)
+{
+  data->theta = new_theta;
+}
+
+/** Get psi value.
+ * Euler angle Psi of tool orientation.
+ * @return psi value
+ */
+float
+KatanaInterface::LinearGotoKniMessage::psi() const
+{
+  return data->psi;
+}
+
+/** Get maximum length of psi value.
+ * @return length of psi value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoKniMessage::maxlenof_psi() const
+{
+  return 1;
+}
+
+/** Set psi value.
+ * Euler angle Psi of tool orientation.
+ * @param new_psi new psi value
+ */
+void
+KatanaInterface::LinearGotoKniMessage::set_psi(const float new_psi)
+{
+  data->psi = new_psi;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::LinearGotoKniMessage::clone() const
+{
+  return new KatanaInterface::LinearGotoKniMessage(this);
+}
+/** @class KatanaInterface::ObjectGotoMessage <interfaces/KatanaInterface.h>
+ * ObjectGotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_object initial value for object
+ * @param ini_rot_x initial value for rot_x
+ */
+KatanaInterface::ObjectGotoMessage::ObjectGotoMessage(const char * ini_object, const float ini_rot_x) : Message("ObjectGotoMessage")
+{
+  data_size = sizeof(ObjectGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ObjectGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->object, ini_object, 32);
+  data->rot_x = ini_rot_x;
+  add_fieldinfo(IFT_STRING, "object", 32, data->object);
+  add_fieldinfo(IFT_FLOAT, "rot_x", 1, &data->rot_x);
+}
+/** Constructor */
+KatanaInterface::ObjectGotoMessage::ObjectGotoMessage() : Message("ObjectGotoMessage")
+{
+  data_size = sizeof(ObjectGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ObjectGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "object", 32, data->object);
+  add_fieldinfo(IFT_FLOAT, "rot_x", 1, &data->rot_x);
+}
+
+/** Destructor */
+KatanaInterface::ObjectGotoMessage::~ObjectGotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::ObjectGotoMessage::ObjectGotoMessage(const ObjectGotoMessage *m) : Message("ObjectGotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ObjectGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get object value.
+ * Name of object
+ * @return object value
+ */
+char *
+KatanaInterface::ObjectGotoMessage::object() const
+{
+  return data->object;
+}
+
+/** Get maximum length of object value.
+ * @return length of object value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::ObjectGotoMessage::maxlenof_object() const
+{
+  return 32;
+}
+
+/** Set object value.
+ * Name of object
+ * @param new_object new object value
+ */
+void
+KatanaInterface::ObjectGotoMessage::set_object(const char * new_object)
+{
+  strncpy(data->object, new_object, sizeof(data->object));
+}
+
+/** Get rot_x value.
+ * Rotation of object on its x-axis
+ * @return rot_x value
+ */
+float
+KatanaInterface::ObjectGotoMessage::rot_x() const
+{
+  return data->rot_x;
+}
+
+/** Get maximum length of rot_x value.
+ * @return length of rot_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::ObjectGotoMessage::maxlenof_rot_x() const
+{
+  return 1;
+}
+
+/** Set rot_x value.
+ * Rotation of object on its x-axis
+ * @param new_rot_x new rot_x value
+ */
+void
+KatanaInterface::ObjectGotoMessage::set_rot_x(const float new_rot_x)
+{
+  data->rot_x = new_rot_x;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::ObjectGotoMessage::clone() const
+{
+  return new KatanaInterface::ObjectGotoMessage(this);
+}
 /** @class KatanaInterface::CalibrateMessage <interfaces/KatanaInterface.h>
  * CalibrateMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1378,6 +1906,502 @@ KatanaInterface::SetMaxVelocityMessage::clone() const
 {
   return new KatanaInterface::SetMaxVelocityMessage(this);
 }
+/** @class KatanaInterface::SetMotorEncoderMessage <interfaces/KatanaInterface.h>
+ * SetMotorEncoderMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_nr initial value for nr
+ * @param ini_enc initial value for enc
+ */
+KatanaInterface::SetMotorEncoderMessage::SetMotorEncoderMessage(const uint32_t ini_nr, const uint32_t ini_enc) : Message("SetMotorEncoderMessage")
+{
+  data_size = sizeof(SetMotorEncoderMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMotorEncoderMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->nr = ini_nr;
+  data->enc = ini_enc;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_UINT32, "enc", 1, &data->enc);
+}
+/** Constructor */
+KatanaInterface::SetMotorEncoderMessage::SetMotorEncoderMessage() : Message("SetMotorEncoderMessage")
+{
+  data_size = sizeof(SetMotorEncoderMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMotorEncoderMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_UINT32, "enc", 1, &data->enc);
+}
+
+/** Destructor */
+KatanaInterface::SetMotorEncoderMessage::~SetMotorEncoderMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::SetMotorEncoderMessage::SetMotorEncoderMessage(const SetMotorEncoderMessage *m) : Message("SetMotorEncoderMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMotorEncoderMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get nr value.
+ * Motor number
+ * @return nr value
+ */
+uint32_t
+KatanaInterface::SetMotorEncoderMessage::nr() const
+{
+  return data->nr;
+}
+
+/** Get maximum length of nr value.
+ * @return length of nr value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetMotorEncoderMessage::maxlenof_nr() const
+{
+  return 1;
+}
+
+/** Set nr value.
+ * Motor number
+ * @param new_nr new nr value
+ */
+void
+KatanaInterface::SetMotorEncoderMessage::set_nr(const uint32_t new_nr)
+{
+  data->nr = new_nr;
+}
+
+/** Get enc value.
+ * Encoder value
+ * @return enc value
+ */
+uint32_t
+KatanaInterface::SetMotorEncoderMessage::enc() const
+{
+  return data->enc;
+}
+
+/** Get maximum length of enc value.
+ * @return length of enc value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetMotorEncoderMessage::maxlenof_enc() const
+{
+  return 1;
+}
+
+/** Set enc value.
+ * Encoder value
+ * @param new_enc new enc value
+ */
+void
+KatanaInterface::SetMotorEncoderMessage::set_enc(const uint32_t new_enc)
+{
+  data->enc = new_enc;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::SetMotorEncoderMessage::clone() const
+{
+  return new KatanaInterface::SetMotorEncoderMessage(this);
+}
+/** @class KatanaInterface::MoveMotorEncoderMessage <interfaces/KatanaInterface.h>
+ * MoveMotorEncoderMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_nr initial value for nr
+ * @param ini_enc initial value for enc
+ */
+KatanaInterface::MoveMotorEncoderMessage::MoveMotorEncoderMessage(const uint32_t ini_nr, const uint32_t ini_enc) : Message("MoveMotorEncoderMessage")
+{
+  data_size = sizeof(MoveMotorEncoderMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (MoveMotorEncoderMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->nr = ini_nr;
+  data->enc = ini_enc;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_UINT32, "enc", 1, &data->enc);
+}
+/** Constructor */
+KatanaInterface::MoveMotorEncoderMessage::MoveMotorEncoderMessage() : Message("MoveMotorEncoderMessage")
+{
+  data_size = sizeof(MoveMotorEncoderMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (MoveMotorEncoderMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_UINT32, "enc", 1, &data->enc);
+}
+
+/** Destructor */
+KatanaInterface::MoveMotorEncoderMessage::~MoveMotorEncoderMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::MoveMotorEncoderMessage::MoveMotorEncoderMessage(const MoveMotorEncoderMessage *m) : Message("MoveMotorEncoderMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (MoveMotorEncoderMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get nr value.
+ * Motor number
+ * @return nr value
+ */
+uint32_t
+KatanaInterface::MoveMotorEncoderMessage::nr() const
+{
+  return data->nr;
+}
+
+/** Get maximum length of nr value.
+ * @return length of nr value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::MoveMotorEncoderMessage::maxlenof_nr() const
+{
+  return 1;
+}
+
+/** Set nr value.
+ * Motor number
+ * @param new_nr new nr value
+ */
+void
+KatanaInterface::MoveMotorEncoderMessage::set_nr(const uint32_t new_nr)
+{
+  data->nr = new_nr;
+}
+
+/** Get enc value.
+ * Encoder value
+ * @return enc value
+ */
+uint32_t
+KatanaInterface::MoveMotorEncoderMessage::enc() const
+{
+  return data->enc;
+}
+
+/** Get maximum length of enc value.
+ * @return length of enc value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::MoveMotorEncoderMessage::maxlenof_enc() const
+{
+  return 1;
+}
+
+/** Set enc value.
+ * Encoder value
+ * @param new_enc new enc value
+ */
+void
+KatanaInterface::MoveMotorEncoderMessage::set_enc(const uint32_t new_enc)
+{
+  data->enc = new_enc;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::MoveMotorEncoderMessage::clone() const
+{
+  return new KatanaInterface::MoveMotorEncoderMessage(this);
+}
+/** @class KatanaInterface::SetMotorAngleMessage <interfaces/KatanaInterface.h>
+ * SetMotorAngleMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_nr initial value for nr
+ * @param ini_angle initial value for angle
+ */
+KatanaInterface::SetMotorAngleMessage::SetMotorAngleMessage(const uint32_t ini_nr, const float ini_angle) : Message("SetMotorAngleMessage")
+{
+  data_size = sizeof(SetMotorAngleMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMotorAngleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->nr = ini_nr;
+  data->angle = ini_angle;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+}
+/** Constructor */
+KatanaInterface::SetMotorAngleMessage::SetMotorAngleMessage() : Message("SetMotorAngleMessage")
+{
+  data_size = sizeof(SetMotorAngleMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMotorAngleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+}
+
+/** Destructor */
+KatanaInterface::SetMotorAngleMessage::~SetMotorAngleMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::SetMotorAngleMessage::SetMotorAngleMessage(const SetMotorAngleMessage *m) : Message("SetMotorAngleMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMotorAngleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get nr value.
+ * Motor number
+ * @return nr value
+ */
+uint32_t
+KatanaInterface::SetMotorAngleMessage::nr() const
+{
+  return data->nr;
+}
+
+/** Get maximum length of nr value.
+ * @return length of nr value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetMotorAngleMessage::maxlenof_nr() const
+{
+  return 1;
+}
+
+/** Set nr value.
+ * Motor number
+ * @param new_nr new nr value
+ */
+void
+KatanaInterface::SetMotorAngleMessage::set_nr(const uint32_t new_nr)
+{
+  data->nr = new_nr;
+}
+
+/** Get angle value.
+ * Angle value (positive: increase; negative: decrease)
+ * @return angle value
+ */
+float
+KatanaInterface::SetMotorAngleMessage::angle() const
+{
+  return data->angle;
+}
+
+/** Get maximum length of angle value.
+ * @return length of angle value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetMotorAngleMessage::maxlenof_angle() const
+{
+  return 1;
+}
+
+/** Set angle value.
+ * Angle value (positive: increase; negative: decrease)
+ * @param new_angle new angle value
+ */
+void
+KatanaInterface::SetMotorAngleMessage::set_angle(const float new_angle)
+{
+  data->angle = new_angle;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::SetMotorAngleMessage::clone() const
+{
+  return new KatanaInterface::SetMotorAngleMessage(this);
+}
+/** @class KatanaInterface::MoveMotorAngleMessage <interfaces/KatanaInterface.h>
+ * MoveMotorAngleMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_nr initial value for nr
+ * @param ini_angle initial value for angle
+ */
+KatanaInterface::MoveMotorAngleMessage::MoveMotorAngleMessage(const uint32_t ini_nr, const float ini_angle) : Message("MoveMotorAngleMessage")
+{
+  data_size = sizeof(MoveMotorAngleMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (MoveMotorAngleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->nr = ini_nr;
+  data->angle = ini_angle;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+}
+/** Constructor */
+KatanaInterface::MoveMotorAngleMessage::MoveMotorAngleMessage() : Message("MoveMotorAngleMessage")
+{
+  data_size = sizeof(MoveMotorAngleMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (MoveMotorAngleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "nr", 1, &data->nr);
+  add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
+}
+
+/** Destructor */
+KatanaInterface::MoveMotorAngleMessage::~MoveMotorAngleMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::MoveMotorAngleMessage::MoveMotorAngleMessage(const MoveMotorAngleMessage *m) : Message("MoveMotorAngleMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (MoveMotorAngleMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get nr value.
+ * Motor number
+ * @return nr value
+ */
+uint32_t
+KatanaInterface::MoveMotorAngleMessage::nr() const
+{
+  return data->nr;
+}
+
+/** Get maximum length of nr value.
+ * @return length of nr value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::MoveMotorAngleMessage::maxlenof_nr() const
+{
+  return 1;
+}
+
+/** Set nr value.
+ * Motor number
+ * @param new_nr new nr value
+ */
+void
+KatanaInterface::MoveMotorAngleMessage::set_nr(const uint32_t new_nr)
+{
+  data->nr = new_nr;
+}
+
+/** Get angle value.
+ * Angle value (positive: increase; negative: decrease)
+ * @return angle value
+ */
+float
+KatanaInterface::MoveMotorAngleMessage::angle() const
+{
+  return data->angle;
+}
+
+/** Get maximum length of angle value.
+ * @return length of angle value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::MoveMotorAngleMessage::maxlenof_angle() const
+{
+  return 1;
+}
+
+/** Set angle value.
+ * Angle value (positive: increase; negative: decrease)
+ * @param new_angle new angle value
+ */
+void
+KatanaInterface::MoveMotorAngleMessage::set_angle(const float new_angle)
+{
+  data->angle = new_angle;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::MoveMotorAngleMessage::clone() const
+{
+  return new KatanaInterface::MoveMotorAngleMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1401,24 +2425,48 @@ KatanaInterface::message_valid(const Message *message) const
   if ( m3 != NULL ) {
     return true;
   }
-  const CalibrateMessage *m4 = dynamic_cast<const CalibrateMessage *>(message);
+  const LinearGotoKniMessage *m4 = dynamic_cast<const LinearGotoKniMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const OpenGripperMessage *m5 = dynamic_cast<const OpenGripperMessage *>(message);
+  const ObjectGotoMessage *m5 = dynamic_cast<const ObjectGotoMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const CloseGripperMessage *m6 = dynamic_cast<const CloseGripperMessage *>(message);
+  const CalibrateMessage *m6 = dynamic_cast<const CalibrateMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetEnabledMessage *m7 = dynamic_cast<const SetEnabledMessage *>(message);
+  const OpenGripperMessage *m7 = dynamic_cast<const OpenGripperMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const SetMaxVelocityMessage *m8 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  const CloseGripperMessage *m8 = dynamic_cast<const CloseGripperMessage *>(message);
   if ( m8 != NULL ) {
+    return true;
+  }
+  const SetEnabledMessage *m9 = dynamic_cast<const SetEnabledMessage *>(message);
+  if ( m9 != NULL ) {
+    return true;
+  }
+  const SetMaxVelocityMessage *m10 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  if ( m10 != NULL ) {
+    return true;
+  }
+  const SetMotorEncoderMessage *m11 = dynamic_cast<const SetMotorEncoderMessage *>(message);
+  if ( m11 != NULL ) {
+    return true;
+  }
+  const MoveMotorEncoderMessage *m12 = dynamic_cast<const MoveMotorEncoderMessage *>(message);
+  if ( m12 != NULL ) {
+    return true;
+  }
+  const SetMotorAngleMessage *m13 = dynamic_cast<const SetMotorAngleMessage *>(message);
+  if ( m13 != NULL ) {
+    return true;
+  }
+  const MoveMotorAngleMessage *m14 = dynamic_cast<const MoveMotorAngleMessage *>(message);
+  if ( m14 != NULL ) {
     return true;
   }
   return false;

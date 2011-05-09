@@ -1,0 +1,57 @@
+<KinBody name="caesar_body">
+
+  <Body name="caesar_base" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>100</density>
+    </Mass>
+
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <Extents>0.19 0.2 0.3</Extents>
+    </Geom>
+  </Body>
+
+  <Body name="caesar_rack" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>100</density>
+    </Mass>
+
+    <!-- put caesar_rack on back of caesar_base -->
+    <Translation>-0.1675 0 0.3</Translation>
+
+    <!-- rack base -->
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <!-- <Extents>0.0125 0.17 0.4</Extents> -->
+      <Extents>0.0125 0.17 0.4</Extents>
+      <Translation>0 0 0.4</Translation>
+    </Geom>
+
+    <!--rack monitor -->
+    <Geom type="box">
+      <DiffuseColor>0.3 0.3 0.3</DiffuseColor>
+      <Extents>0.0125 0.15 0.1</Extents>
+      <!-- <Translation>0.025 0 0.55</Translation> -->
+      <Translation>0.025 0 0.55</Translation>
+    </Geom>
+  </Body>
+
+  <Body name="caesar_rack_2011" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>100</density>
+    </Mass>
+
+    <!-- put caesar_rack on back of caesar_base -->
+    <Translation>-0.1675 0 0.3</Translation>
+
+    <!-- rack horizontal casts (on caesar_base) -->
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <!-- <Extents>0.0125 0.17 0.4</Extents> -->
+      <Extents>0.0125 0.17 0.4</Extents>
+      <Translation>0 0 0.4</Translation>
+    </Geom>
+
+
+  </Body>
+</KinBody>

@@ -73,6 +73,46 @@ class KatanaInterface : public Interface
     int maxlenof_psi() const;
   };
 
+  class LinearGotoKniMessage : public Message
+  {
+    LinearGotoKniMessage(float ini_x, float ini_y, float ini_z, float ini_phi, float ini_theta, float ini_psi);
+    LinearGotoKniMessage();
+    ~LinearGotoKniMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float z();
+    void set_z(const float new_z);
+    int maxlenof_z() const;
+    float phi();
+    void set_phi(const float new_phi);
+    int maxlenof_phi() const;
+    float theta();
+    void set_theta(const float new_theta);
+    int maxlenof_theta() const;
+    float psi();
+    void set_psi(const float new_psi);
+    int maxlenof_psi() const;
+  };
+
+  class ObjectGotoMessage : public Message
+  {
+    ObjectGotoMessage(char * ini_object, float ini_rot_x);
+    ObjectGotoMessage();
+    ~ObjectGotoMessage();
+
+    char * object();
+    void set_object(const char * new_object);
+    int maxlenof_object() const;
+    float rot_x();
+    void set_rot_x(const float new_rot_x);
+    int maxlenof_rot_x() const;
+  };
+
   class CalibrateMessage : public Message
   {
     CalibrateMessage();
@@ -116,6 +156,62 @@ class KatanaInterface : public Interface
     int maxlenof_max_velocity() const;
   };
 
+  class SetMotorEncoderMessage : public Message
+  {
+    SetMotorEncoderMessage(unsigned int ini_nr, unsigned int ini_enc);
+    SetMotorEncoderMessage();
+    ~SetMotorEncoderMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    unsigned int enc();
+    void set_enc(const unsigned int new_enc);
+    int maxlenof_enc() const;
+  };
+
+  class MoveMotorEncoderMessage : public Message
+  {
+    MoveMotorEncoderMessage(unsigned int ini_nr, unsigned int ini_enc);
+    MoveMotorEncoderMessage();
+    ~MoveMotorEncoderMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    unsigned int enc();
+    void set_enc(const unsigned int new_enc);
+    int maxlenof_enc() const;
+  };
+
+  class SetMotorAngleMessage : public Message
+  {
+    SetMotorAngleMessage(unsigned int ini_nr, float ini_angle);
+    SetMotorAngleMessage();
+    ~SetMotorAngleMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    float angle();
+    void set_angle(const float new_angle);
+    int maxlenof_angle() const;
+  };
+
+  class MoveMotorAngleMessage : public Message
+  {
+    MoveMotorAngleMessage(unsigned int ini_nr, float ini_angle);
+    MoveMotorAngleMessage();
+    ~MoveMotorAngleMessage();
+
+    unsigned int nr();
+    void set_nr(const unsigned int new_nr);
+    int maxlenof_nr() const;
+    float angle();
+    void set_angle(const float new_angle);
+    int maxlenof_angle() const;
+  };
+
   unsigned int sensor_value(int index);
   void set_sensor_value(unsigned int index, const unsigned char new_sensor_value);
   int maxlenof_sensor_value() const;
@@ -137,6 +233,12 @@ class KatanaInterface : public Interface
   float psi();
   void set_psi(const float new_psi);
   int maxlenof_psi() const;
+  int encoders(int index);
+  void set_encoders(unsigned int index, const int new_encoders);
+  int maxlenof_encoders() const;
+  float angles(int index);
+  void set_angles(unsigned int index, const float new_angles);
+  int maxlenof_angles() const;
   unsigned int msgid();
   void set_msgid(const unsigned int new_msgid);
   int maxlenof_msgid() const;
