@@ -40,6 +40,7 @@ class KatanaMotorControlThread : public KatanaMotionThread
  protected:
   virtual void run() { Thread::run(); }
 
+ private:
   unsigned int __nr;
   int __encoder;
   float __angle;
