@@ -16,6 +16,8 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+PRESUBDIRS = interfaces
+
 LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface KatanaInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
@@ -54,9 +56,6 @@ else
 endif
 
 OBJS_all = $(OBJS_katana)
-
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BUILDSYSDIR)/interface.mk
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
