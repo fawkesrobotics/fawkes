@@ -24,6 +24,7 @@
 #include <webview/request_processor.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <core/exception.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -42,6 +43,7 @@ namespace fawkes {
 WebUrlManager::WebUrlManager()
 {
   __mutex = new Mutex();
+  __startpage_processor = NULL;
 }
 
 
@@ -55,6 +57,8 @@ WebUrlManager::~WebUrlManager()
 /** Add a request processor.
  * @param url_prefix baseurl this processor should handle
  * @param processor processor for baseurl
+ * @exception Exception thrown if a processor has already been registered
+ * for the given URL prefix.
  */
 void
 WebUrlManager::register_baseurl(const char *url_prefix,
@@ -62,8 +66,15 @@ WebUrlManager::register_baseurl(const char *url_prefix,
 {
   MutexLocker lock(__mutex);
   if (std::string(url_prefix) == "/") {
+    if (__startpage_processor) {
+      throw Exception("Start page processor has already been registered");
+    }
     __startpage_processor = processor;
   } else {
+    if (__processors.find(url_prefix) != __processors.end()) {
+      throw Exception("A processor for %s has already been registered",
+		      url_prefix);
+    }
     __processors[url_prefix] = processor;
   }
 }
