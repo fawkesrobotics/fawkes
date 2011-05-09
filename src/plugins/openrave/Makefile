@@ -19,7 +19,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
-PRESUBDIRS = aspect
+PRESUBDIRS = aspect interfaces
 
 CFLAGS  += $(CFLAGS_OPENRAVE)
 LDFLAGS += $(LDFLAGS_OPENRAVE)
@@ -43,9 +43,6 @@ $(PLUGINDIR)/openrave.$(SOEXT): | $(LIBDIR)/libfawkesopenrave.$(SOEXT)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BUILDSYSDIR)/interface.mk
 
 .PHONY: warning_openrave
 warning_openrave:
