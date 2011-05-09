@@ -28,4 +28,5 @@ include $(BUILDSYSDIR)/rules.mk
 
 luaagent: skiller
 rrdweb: rrd
+katana: openrave
 
