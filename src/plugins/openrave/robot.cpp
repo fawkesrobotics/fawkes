@@ -389,7 +389,7 @@ OpenRaveRobot::get_robot_ptr() const
  * @param to vector that should be filled with angles
  */
 void
-OpenRaveRobot::get_target_angles(std::vector<dReal>& to)
+OpenRaveRobot::get_target_angles(std::vector<OpenRAVE::dReal>& to)
 {
   to = __angles_target;
 }
