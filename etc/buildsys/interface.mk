@@ -71,6 +71,7 @@ ifneq ($(INTERFACES_all),)
 	$(eval INST_HDRS_SUBDIR_interfaces_lib$I  = interfaces)			\
 	$(eval OBJS_all                    += $$(OBJS_interfaces_lib$I))	\
 	$(eval INTERFACES_SRCS             += $(SRCDIR)/$I.cpp)			\
+	$(eval INTERFACES_TOLUA            += $(SRCDIR)/$I.tolua)		\
 	$(eval INTERFACES_HDRS             += $(IFACESRCDIR)/$I.h)		\
 	$(eval INTERFACES_LIBS             += $(IFACEDIR)/lib$I.so)		\
 	$(eval INTERFACES_TOUCH            += $(SRCDIR)/$(OBJDIR)/$I.touch)	\
@@ -101,6 +102,7 @@ ifeq ($(OBJSSUBMAKE),1)
 
 $(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
 $(INTERFACES_HDRS): $(IFACESRCDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
+$(INTERFACES_TOLUA): $(SRCDIR)/%.tolua: $(SRCDIR)/$(OBJDIR)/%.touch
 
 $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
