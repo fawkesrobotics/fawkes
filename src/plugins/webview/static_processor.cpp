@@ -90,7 +90,7 @@ WebviewStaticRequestProcessor::process_request(const char *url,
 	char tmp[1024];
 	strerror_r(errno, tmp, sizeof(tmp));
 	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				 std::string("File access failed: ") + tmp);
+				     "File access failed: %s",  tmp);
       }
     } else {
       if (strncmp(realfile, __htdocs_dir, __htdocs_dir_len) == 0) {
@@ -98,11 +98,12 @@ WebviewStaticRequestProcessor::process_request(const char *url,
 	  DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
 	  return freply;
 	} catch (fawkes::Exception &e) {
-	  __logger->log_error("WebStaticReqProc", "Cannot fulfill request for file %s,"
+	  __logger->log_error("WebStaticReqProc",
+			      "Cannot fulfill request for file %s,"
 			      " exception follows", url);
 	  __logger->log_error("WebStaticReqProc", e);
 	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				   *(e.begin()));
+				       *(e.begin()));
 	}
       } else {
 	// Someone tries to trick us to give away files we don't want to give
