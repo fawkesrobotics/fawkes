@@ -23,8 +23,8 @@
 #ifndef __PLUGINS_OPENRAVE_OR_THREAD_H_
 #define __PLUGINS_OPENRAVE_OR_THREAD_H_
 
-#include <plugins/openrave/aspect/or_connector.h>
-#include <plugins/openrave/aspect/or_inifin.h>
+#include <plugins/openrave/aspect/openrave_connector.h>
+#include <plugins/openrave/aspect/openrave_inifin.h>
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>

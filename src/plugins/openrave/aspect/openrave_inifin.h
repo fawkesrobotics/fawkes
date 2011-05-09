@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or.h - OpenRave aspect for Fawkes
+ *  openrave_inifin.h - Fawkes OpenRaveAspect initializer/finalizer
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -21,30 +21,30 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ASPECT_OR_H_
-#define __PLUGINS_OPENRAVE_ASPECT_OR_H_
+#ifndef __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_INIFIN_H_
+#define __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_INIFIN_H_
 
-#include <aspect/aspect.h>
-#include <plugins/openrave/aspect/or_connector.h>
+#include <aspect/inifins/inifin.h>
+
+#include <vector>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class OpenRaveAspect : public virtual Aspect
+class OpenRaveConnector;
+
+class OpenRaveAspectIniFin : public AspectIniFin
 {
-  friend class OpenRaveAspectIniFin;
-
  public:
-  OpenRaveAspect();
-  virtual ~OpenRaveAspect();
+  OpenRaveAspectIniFin(OpenRaveConnector *openrave);
 
- protected:
-  OpenRaveConnector *openrave;
+  virtual void init(Thread *thread);
+  virtual void finalize(Thread *thread);
 
  private:
-  void init_OpenRaveAspect(OpenRaveConnector *openrave);
+  OpenRaveConnector *__openrave;
 };
 
 } // end namespace fawkes

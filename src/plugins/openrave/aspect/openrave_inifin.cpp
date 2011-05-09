@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or.cpp - OpenRave aspect for Fawkes
+ *  openrave_inifin.cpp - Fawkes OpenRaveAspect initializer/finalizer
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -21,50 +21,52 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/openrave/aspect/or.h>
+#include <plugins/openrave/aspect/openrave_inifin.h>
+#include <plugins/openrave/aspect/openrave.h>
+#include <plugins/openrave/aspect/openrave_connector.h>
+
+#include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class OpenRaveAspect <plugins/openrave/aspect/or.h>
- * Thread aspect create, update, and graph round-robin databases (RRD).
- * Give this aspect to your thread to access the OpenRave environment,
- * add robots or objects, path plans for manipulator movement, etc.
- *
- * @ingroup Aspects
+/** @class OpenRaveAspectIniFin <plugins/rrd/aspect/rrd_inifin.h>
+ * OpenRaveAspect initializer/finalizer.
+ * This initializer/finalizer will provide the OpenRaveConnector to threads with
+ * the OpenRaveAspect.
  * @author Bahram Maleki-Fard
  */
 
-/** @var fawkes::OpenRaveConnector *  OpenRaveAspect::openrave
- * Manager class to access OpenRave features. It will take care of properly
- * distributing the work.
+/** Constructor.
+ * @param openrave OpenRaveConnector to pass on to threads
  */
-
-/** Constructor. */
-OpenRaveAspect::OpenRaveAspect()
+OpenRaveAspectIniFin::OpenRaveAspectIniFin(OpenRaveConnector *openrave)
+  : AspectIniFin("OpenRaveAspect")
 {
-  add_aspect("OpenRaveAspect");
+  __openrave = openrave;
 }
 
-
-/** Virtual empty destructor. */
-OpenRaveAspect::~OpenRaveAspect()
-{
-}
-
-
-/** Init OpenRave aspect.
- * This sets the OpenRave manager to access OpenRave.
- * It is guaranteed that this is called for an OpenRave Thread before start
- * is called (when running regularly inside Fawkes).
- * @param or_manager OpenRaveManager to use
- */
 void
-OpenRaveAspect::init_OpenRaveAspect(OpenRaveConnector *openrave)
+OpenRaveAspectIniFin::init(Thread *thread)
 {
-  this->openrave = openrave;
+  OpenRaveAspect *or_thread;
+  or_thread = dynamic_cast<OpenRaveAspect *>(thread);
+  if (or_thread == NULL) {
+    throw CannotInitializeThreadException("Thread '%s' claims to have the "
+					  "OpenRaveAspect, but RTTI says it "
+					  "has not. ", thread->name());
+  }
+
+  or_thread->init_OpenRaveAspect(__openrave);
 }
+
+void
+OpenRaveAspectIniFin::finalize(Thread *thread)
+{
+}
+
+
 
 } // end namespace fawkes

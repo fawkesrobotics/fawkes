@@ -21,10 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ASPECT_OR_CONNECTOR_H_
-#define __PLUGINS_OPENRAVE_ASPECT_OR_CONNECTOR_H_
+#ifndef __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
+#define __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
 
-//#include <plugins/openrave/aspect/or_descriptions.h>
 #include <string>
 
 namespace fawkes {
