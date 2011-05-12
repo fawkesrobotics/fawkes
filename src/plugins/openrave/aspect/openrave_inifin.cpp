@@ -32,7 +32,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRaveAspectIniFin <plugins/rrd/aspect/rrd_inifin.h>
+/** @class OpenRaveAspectIniFin <plugins/openrave/aspect/openrave_inifin.h>
  * OpenRaveAspect initializer/finalizer.
  * This initializer/finalizer will provide the OpenRaveConnector to threads with
  * the OpenRaveAspect.
@@ -52,6 +52,7 @@ void
 OpenRaveAspectIniFin::init(Thread *thread)
 {
   OpenRaveAspect *or_thread;
+
   or_thread = dynamic_cast<OpenRaveAspect *>(thread);
   if (or_thread == NULL) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "

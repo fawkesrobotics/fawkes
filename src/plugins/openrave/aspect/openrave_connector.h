@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_connector.h - Fawkes OpenRave connector interface
+ *  openrave_connector.h - Fawkes OpenRave connector interface
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -35,7 +35,7 @@ class OpenRaveEnvironment;
 class OpenRaveRobot;
 class OpenRaveManipulator;
 
-/** @class OpenRaveConnector <plugins/openrave/aspect/or_connector.h>
+/** @class OpenRaveConnector <plugins/openrave/aspect/openrave_connector.h>
  * Interface for a OpenRave connection creator.
  * @author Bahram Maleki-Fard
  */

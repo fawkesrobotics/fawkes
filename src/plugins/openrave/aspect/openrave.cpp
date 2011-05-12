@@ -28,7 +28,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class OpenRaveAspect <plugins/openrave/aspect/or.h>
+/** @class OpenRaveAspect <plugins/openrave/aspect/openrave.h>
  * Thread aspect create, update, and graph round-robin databases (RRD).
  * Give this aspect to your thread to access the OpenRave environment,
  * add robots or objects, path plans for manipulator movement, etc.
