@@ -58,13 +58,13 @@ using namespace fawkes;
  *                     performed last (counter-clockwise rotation in degrees)
  */
 
-/** @var LaserProjectionDataFilter::Rotation::x "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rotation::x
  * Rotation around X axis in degrees. */
 
-/** @var LaserProjectionDataFilter::Rotation::y "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rotation::y
  * Rotation around X axis in degrees. */
 
-/** @var LaserProjectionDataFilter::Rotation::z "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rotation::z
  * Rotation around X axis in degrees. */
 
 /** @class LaserProjectionDataFilter::Translation "filters/projection.h"
@@ -79,13 +79,13 @@ using namespace fawkes;
  * @param z_trans_degree z-component of the vector from EDL laser to URG laser
  */
 
-/** @var LaserProjectionDataFilter::Translation::x "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Translation::x
  * X componenent of vector from destination to origin. */
 
-/** @var LaserProjectionDataFilter::Translation::y "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Translation::y
  * Y componenent of vector from destination to origin. */
 
-/** @var LaserProjectionDataFilter::Translation::z "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Translation::z
  * Z componenent of vector from destination to origin. */
 
 /** @class LaserProjectionDataFilter::Rectangle "filters/projection.h"
@@ -101,35 +101,27 @@ using namespace fawkes;
  * @param y_max distance from EDL laser to left of robot
  */
 
-/** @var LaserProjectionDataFilter::Rectangle::x_min "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rectangle::x_min
  * Distance from EDL to back of robot. */
 
-/** @var LaserProjectionDataFilter::Rectangle::x_max "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rectangle::x_max
  * Distance from EDL to front of robot. */
 
-/** @var LaserProjectionDataFilter::Rectangle::y_min "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rectangle::y_min
  * Distance from EDL to right of robot. */
 
-/** @var LaserProjectionDataFilter::Rectangle::y_max "filters/projection.h"
+/** @var float LaserProjectionDataFilter::Rectangle::y_max
  * Distance from EDL to left of robot. */
 
 /** Constructor.
  * @param in_data_size number of entries input value arrays.
  * @param in vector of input arrays.
- * @param left indicates whether or not the laser at the left or at the right
- *             of the robot or, in other words: left must be true iff the X axis
- *             of the laser is directed to the bottom right.
- *             <br/>
- *             This information is needed to know how to rotate the laser's
- *             coordinate system such that the X axis comes out of the front
- *             panel and the Y axis comes out of the right side panel of the
- *             laser body.
- *             <br/>
- *             Subsequently, this coordinate system is rotated (see rot)
- *             and then translated ([xyz]_trans).
- * @param rot the rotation of the X, Y and Z axis of the laser panel coordinate
- *            system which is determined with the left parameter (see left).
- *            First, the Z axis is rotated, then the Y axis and then the X axis.
+ * @param laser_rot the rotation of the X, Y and Z axis of the laser beams
+ *                  coordinate system with respect to the laser panel coordinate
+ *                  system.
+ * @param fixture_rot the rotation of the X, Y and Z axis of the laser panel
+ *                    coordinate system with respect to the fawkes coordinate
+ *                    system.
  * @param trans the translation from the URG laser into the EDL laser plane,
  *              which is the vector from the EDL laser to the URG laser.
  * @param robot_rectangle a rectangle relative to the fawkes coordinate system

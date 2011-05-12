@@ -41,14 +41,17 @@ class LaserProjectionDataFilter : public LaserDataFilter
     Rotation(float x_rot_degree, float y_rot_degree, float z_rot_degree)
         : x(x_rot_degree), y(y_rot_degree), z(z_rot_degree)
     { }
+
     float x;
     float y;
     float z;
   };
+
   struct Translation {
     Translation(float x_trans_degree, float y_trans_degree, float z_trans_degree)
         : x(x_trans_degree), y(y_trans_degree), z(z_trans_degree)
     { }
+
     float x; 
     float y;
     float z;
@@ -57,6 +60,7 @@ class LaserProjectionDataFilter : public LaserDataFilter
     Rectangle(float x_min, float x_max, float y_min, float y_max)
         : x_min(x_min), x_max(x_max), y_min(y_min), y_max(y_max)
     { }
+
     float x_min;
     float x_max;
     float y_min;
