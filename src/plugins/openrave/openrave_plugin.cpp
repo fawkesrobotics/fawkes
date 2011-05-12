@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_plugin.cpp - Fawkes OpenRAVE Plugin
+ *  openrave_plugin.cpp - Fawkes OpenRAVE Plugin
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -20,14 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "or_plugin.h"
+#include "openrave_plugin.h"
 
-#include "or_thread.h"
-#include "or_message_handler_thread.h"
+#include "openrave_thread.h"
+#include "message_handler_thread.h"
 
 using namespace fawkes;
 
-/** @class OpenRavePlugin <plugins/openrave/or_plugin.h>
+/** @class OpenRavePlugin <plugins/openrave/openrave_plugin.h>
  * OpenRAVE Connector plugin.
  * This plugin provides access to OpenRAVE for other Fawkes plugins.
  * It builds up an environment, manages objects and robots in that environment

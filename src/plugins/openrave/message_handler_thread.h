@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_message_handler_thread.h - OpenRAVE interface messages handler thread
+ *  message_handler_thread.h - OpenRAVE interface messages handler thread
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_OR_MESSAGE_HANDLER_THREAD_H_
-#define __PLUGINS_OPENRAVE_OR_MESSAGE_HANDLER_THREAD_H_
+#ifndef __PLUGINS_OPENRAVE_MESSAGE_HANDLER_THREAD_H_
+#define __PLUGINS_OPENRAVE_MESSAGE_HANDLER_THREAD_H_
 
-#include "or_thread.h"
+#include "openrave_thread.h"
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_message_handler_thread.cpp - OpenRAVE Thread
+ *  message_handler_thread.cpp - OpenRAVE Thread
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -20,13 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "or_message_handler_thread.h"
+#include "message_handler_thread.h"
 
 #include <interfaces/OpenRaveInterface.h>
 
 using namespace fawkes;
 
-/** @class OpenRaveMessageHandlerThread "or_message_handler_thread.h"
+/** @class OpenRaveMessageHandlerThread "message_handler_thread.h"
  * OpenRAVE Thread.
  * This thread handles incoming messages for the OpenRaveInterface.
  *

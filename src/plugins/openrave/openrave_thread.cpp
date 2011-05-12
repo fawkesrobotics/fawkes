@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_thread.cpp - OpenRAVE Thread
+ *  openrave_thread.cpp - OpenRAVE Thread
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "or_thread.h"
+#include "openrave_thread.h"
 
 #include "environment.h"
 #include "robot.h"
@@ -31,7 +31,7 @@
 
 using namespace fawkes;
 
-/** @class OpenRaveThread "or_thread.h"
+/** @class OpenRaveThread "openrave_thread.h"
  * OpenRAVE Thread.
  * This thread maintains an active connection to OpenRAVE and provides an
  * aspect to access OpenRAVE to make it convenient for other threads to use
@@ -89,7 +89,7 @@ OpenRaveThread::loop()
 }
 
 /* ##########################################################
- * #    methods form OpenRaveConnector (or_connector.h)     #
+ * #    methods form OpenRaveConnector (openrave_connector.h)     #
  * ########################################################*/
 /** Get pointer to OpenRaveEnvironment object.
  * @return pointer

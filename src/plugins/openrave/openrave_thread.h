@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  or_thread.h - OpenRAVE Thread
+ *  openrave_thread.h - OpenRAVE Thread
  *
  *  Created: Fri Feb 25 15:08:00 2011
  *  Copyright  2011  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_OR_THREAD_H_
-#define __PLUGINS_OPENRAVE_OR_THREAD_H_
+#ifndef __PLUGINS_OPENRAVE_OPENRAVE_THREAD_H_
+#define __PLUGINS_OPENRAVE_OPENRAVE_THREAD_H_
 
 #include <plugins/openrave/aspect/openrave_connector.h>
 #include <plugins/openrave/aspect/openrave_inifin.h>

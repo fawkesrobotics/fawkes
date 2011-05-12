@@ -25,7 +25,7 @@ CFLAGS  += $(CFLAGS_OPENRAVE)
 LDFLAGS += $(LDFLAGS_OPENRAVE)
 
 LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenrave fawkesopenraveaspect fawkesinterface OpenRaveInterface $(LIBS_OPENRAVE)
-OBJS_openrave = or_plugin.o or_thread.o or_message_handler_thread.o
+OBJS_openrave = openrave_plugin.o openrave_thread.o message_handler_thread.o
 
 LIBS_libfawkesopenrave = m fawkescore fawkesutils $(LIBS_OPENRAVE)
 OBJS_libfawkesopenrave = environment.o robot.o manipulator.o manipulators/katana6M180.o
