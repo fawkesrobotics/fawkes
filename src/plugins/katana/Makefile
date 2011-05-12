@@ -32,8 +32,8 @@ ifeq ($(HAVE_LIBKNI),1)
   LDFLAGS_LIBKNI = $(shell $(PKGCONFIG) --libs 'libkni3')
 endif
 ifneq ($(PKGCONFIG),)
-  HAVE_OPENRAVE := $(if $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}) \
-                     OR $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/}),1,0)
+  HAVE_OPENRAVE := $(if $(or $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}),\
+			     $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/})),1,0)
 endif
 ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS_OPENRAVE    = $(shell openrave-config --cflags-only-I) -DHAVE_OPENRAVE
