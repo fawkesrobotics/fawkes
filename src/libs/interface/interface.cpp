@@ -26,6 +26,7 @@
 #include <interface/mediators/interface_mediator.h>
 #include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
+#include <core/threading/mutex.h>
 #include <core/exceptions/system.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
@@ -34,6 +35,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
 #include <typeinfo>
 #include <regex.h>
 
@@ -154,6 +156,17 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * changed. So set the timestamp only if the data has changed and the
  * readers should see this.
  *
+ * An interface provides support for buffers. Like the shared and
+ * private memory sections described above, buffers are additional
+ * memory sections that can be used to save data from the shared
+ * section or save or restore from and to the private memory
+ * section. One example use case is to save the current shared memory
+ * content at one point in time at a specific main loop hook, and
+ * restore it only later at a suitable time in another continuous
+ * thread. Another useful application is to keep a history for
+ * hysteresis processing, or to observe the development of the values
+ * in an interface.
+ *
  * Interfaces are not created directly, but rather by using the
  * interface generator.
  *
@@ -235,7 +248,11 @@ Interface::Interface()
   data_ptr  = NULL;
   data_size = 0;
 
+  __buffers = NULL;
+  __num_buffers = 0;
+
   __message_queue = new MessageQueue();
+  __data_mutex = new Mutex();
 }
 
 
@@ -243,7 +260,9 @@ Interface::Interface()
 Interface::~Interface()
 {
   if ( __rwlock) __rwlock->unref();
+  delete __data_mutex;
   delete __message_queue;
+  if (__buffers)  free(__buffers);
   // free fieldinfo list
   interface_fieldinfo_t *finfol = __fieldinfo_list;
   while ( finfol ) {
@@ -453,14 +472,17 @@ void
 Interface::read()
 {
   __rwlock->lock_for_read();
+  __data_mutex->lock();
   if ( __valid ) {
     memcpy(data_ptr, __mem_data_ptr, data_size);
     *__local_read_timestamp = *__timestamp;
     __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
   } else {
+    __data_mutex->unlock();
     __rwlock->unlock();
     throw InterfaceInvalidException(this, "read()");
   }
+  __data_mutex->unlock();
   __rwlock->unlock();
 }
 
@@ -477,6 +499,7 @@ Interface::write()
   }
 
   __rwlock->lock_for_write();
+  __data_mutex->lock();
   if ( __valid ) {
     memcpy(__mem_data_ptr, data_ptr, data_size);
     if (data_changed) {
@@ -488,9 +511,11 @@ Interface::write()
       data_changed = false;
     }
   } else {
+    __data_mutex->unlock();
     __rwlock->unlock();
     throw InterfaceInvalidException(this, "write()");
   }
+  __data_mutex->unlock();
   __rwlock->unlock();
 
   __interface_mediator->notify_of_data_change(this);
@@ -1130,6 +1155,112 @@ Interface::num_fields()
   return __num_fields;
 }
 
+
+/** Resize buffer array.
+ * This resizes the memory region used to store data buffers.
+ * @param num_buffers number of buffers to resize to (memory is allocated
+ * as necessary, 0 frees the memory area).
+ * @exception Exception thrown if resizing the memory section fails
+ */
+void
+Interface::resize_buffers(unsigned int num_buffers)
+{
+  __data_mutex->lock();
+  if (num_buffers == 0) {
+    if (__buffers != NULL) {
+      free(__buffers);
+      __buffers = NULL;
+      __num_buffers = 0;
+    }
+  } else {
+    void *tmp = realloc(__buffers, num_buffers * data_size);
+    if (tmp == NULL) {
+      __data_mutex->unlock();
+      throw Exception(errno, "Resizing buffers for interface %s failed", __uid);
+    } else {
+      __buffers     = tmp;
+      __num_buffers = num_buffers;
+    }
+  }
+  __data_mutex->unlock();
+}
+
+
+/** Get number of buffers.
+ * @return number of buffers
+ */
+unsigned int
+Interface::num_buffers() const
+{
+  return __num_buffers;
+}
+
+
+/** Copy data from private memory to buffer.
+ * @param buffer buffer number to copy to
+ */
+void
+Interface::copy_shared_to_buffer(unsigned int buffer)
+{
+  if (buffer > __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+
+  __rwlock->lock_for_read();
+  __data_mutex->lock();
+
+  void *buf = (char *)__buffers + buffer * data_size;
+
+  if ( __valid ) {
+    memcpy(buf, __mem_data_ptr, data_size);
+  } else {
+    __data_mutex->unlock();
+    __rwlock->unlock();
+    throw InterfaceInvalidException(this, "copy_shared_to_buffer()");
+  }
+  __data_mutex->unlock();
+  __rwlock->unlock();
+}
+
+
+/** Copy data from private memory to buffer.
+ * @param buffer buffer number to copy to
+ */
+void
+Interface::copy_private_to_buffer(unsigned int buffer)
+{
+  if (buffer > __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+
+  __data_mutex->lock();
+  void *buf = (char *)__buffers + buffer * data_size;
+  memcpy(buf, data_ptr, data_size);
+  __data_mutex->unlock();
+}
+
+
+
+/** Copy data from buffer to private memory.
+ * @param buffer buffer number to copy to
+ */
+void
+Interface::read_from_buffer(unsigned int buffer)
+{
+  if (buffer > __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+  __data_mutex->lock();
+  void *buf = (char *)__buffers + buffer * data_size;
+  memcpy(data_ptr, buf, data_size);
+  __data_mutex->unlock();
+}
 
 /** Parse UID to type and ID strings.
  * Note that the returned values (type and id) must be freed once they are
