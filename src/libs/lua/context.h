@@ -25,7 +25,9 @@
 
 #include <lua/exceptions.h>
 #include <core/utils/lock_list.h>
+#include <core/utils/refptr.h>
 #include <utils/system/fam.h>
+#include <utils/system/fam_thread.h>
 
 #include <lua.hpp>
 
@@ -45,9 +47,12 @@ class Mutex;
 class LuaContext : public FamListener
 {
  public:
-  LuaContext(bool watch_dirs = true, bool enable_tracebacks = true);
+  LuaContext(bool enable_tracebacks = true);
   LuaContext(lua_State *L);
   ~LuaContext();
+
+  void setup_fam(bool auto_restart, bool conc_thread);
+  RefPtr<FileAlterationMonitor>  get_fam() const;
 
   void set_start_script(const char *start_script);
 
@@ -164,7 +169,8 @@ class LuaContext : public FamListener
   std::map<std::string, lua_Integer>            __integers;
   std::map<std::string, lua_Integer>::iterator  __integers_it;
 
-  FileAlterationMonitor  *__fam;
+  RefPtr<FileAlterationMonitor>  __fam;
+  FamThread                     *__fam_thread;
 
   LockList<LuaContextWatcher *> __watchers;
 

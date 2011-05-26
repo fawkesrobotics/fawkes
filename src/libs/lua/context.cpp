@@ -60,29 +60,21 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param watch_dirs true to watch added package and C package dirs for
- * changes
  * @param enable_tracebacks if true an error function is installed at the top
  * of the stackand used for pcalls where errfunc is 0.
  */
-LuaContext::LuaContext(bool watch_dirs, bool enable_tracebacks)
+LuaContext::LuaContext(bool enable_tracebacks)
 {
   __owns_L = true;
   __enable_tracebacks = enable_tracebacks;
+  __fam = NULL;
+  __fam_thread = NULL;
 
-  if ( watch_dirs ) {
-    __fam = new FileAlterationMonitor();
-    __fam->add_filter("^[^.].*\\.lua$"); 
-    __fam->add_listener(this);
-  } else {
-    __fam = NULL;
-  }
   __lua_mutex = new Mutex();
 
   __start_script = NULL;
   __L = init_state();
 }
-
 
 /** Wrapper contstructor.
  * This wraps around an existing Lua state. It does not initialize the state in
@@ -99,18 +91,58 @@ LuaContext::LuaContext(lua_State *L)
   __lua_mutex = new Mutex();
   __start_script = NULL;
   __fam = NULL;
+  __fam_thread = NULL;
 }
 
 /** Destructor. */
 LuaContext::~LuaContext()
 {
   __lua_mutex->lock();
-  delete __fam;
+  if (__fam_thread) {
+    __fam_thread->cancel();
+    __fam_thread->join();
+    delete __fam_thread;
+  }
   delete __lua_mutex;
   if ( __start_script )  free(__start_script);
   if ( __owns_L) {
     lua_close(__L);
   }
+}
+
+
+/** Setup file alteration monitor.
+ * Setup an internal file alteration monitor that can react to changes
+ * on Lua files and packages.
+ * @param auto_restart automatically restart the Lua context in case
+ * of an event
+ * @param conc_thread true to run a concurrent thread for event
+ * processing. If and only if you set this to false, ensure that
+ * process_fam_events() periodically.
+ */
+void
+LuaContext::setup_fam(bool auto_restart, bool conc_thread)
+{
+  __fam = new FileAlterationMonitor();
+  __fam->add_filter("^[^.].*\\.lua$"); 
+  if (auto_restart) {
+    __fam->add_listener(this);
+  }
+  if (conc_thread) {
+    __fam_thread = new FamThread(__fam);
+    __fam_thread->start();
+  }
+}
+
+
+/** Get file alteration monitor.
+ * @return reference counted pointer to file alteration monitor. Note
+ * that the pointer might be invalid if setup_fam() has not been called.
+ */
+RefPtr<FileAlterationMonitor>
+LuaContext::get_fam() const
+{
+  return __fam;
 }
 
 
