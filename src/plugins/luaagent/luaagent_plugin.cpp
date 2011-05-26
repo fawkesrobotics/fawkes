@@ -3,7 +3,7 @@
  *  luaagent_plugin.h - Fawkes LuaAgent Plugin
  *
  *  Created: Thu Jan 01 13:00:00 2008
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  */
 
 #include "luaagent_plugin.h"
-#include "exec_thread.h"
+#include "periodic_exec_thread.h"
 
 using namespace fawkes;
 
@@ -38,7 +38,7 @@ using namespace fawkes;
 LuaAgentPlugin::LuaAgentPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new LuaAgentExecutionThread());
+  thread_list.push_back(new LuaAgentPeriodicExecutionThread());
 }
 
 PLUGIN_DESCRIPTION("Runs an agent written in Lua")
