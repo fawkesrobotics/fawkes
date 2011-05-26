@@ -133,7 +133,10 @@ SkillerExecutionThread::init()
     __skiller_if = blackboard->open_for_writing<SkillerInterface>("Skiller");
     __skdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("Skiller");
     
-    __lua  = new LuaContext(__cfg_watch_files);
+    __lua  = new LuaContext();
+    if (__cfg_watch_files) {
+      __lua->setup_fam(/* auto restart */ true, /* conc thread */ false);
+    }
 
     __lua_ifi = new LuaInterfaceImporter(__lua, blackboard, config, logger);
     __lua_ifi->open_reading_interfaces(reading_prefix);
