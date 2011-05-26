@@ -201,6 +201,12 @@ LuaContext::init_state()
     lua_setglobal(L, __integers_it->first.c_str());
   }
 
+  for ( __cfuncs_it = __cfuncs.begin(); __cfuncs_it != __cfuncs.end(); ++__cfuncs_it)
+  {
+    lua_pushcfunction(L, __cfuncs_it->second);
+    lua_setglobal(L, __cfuncs_it->first.c_str());
+  }
+
   LuaContext *tmpctx = new LuaContext(L);
   MutexLocker(__watchers.mutex());
   LockList<LuaContextWatcher *>::iterator i;
@@ -567,6 +573,9 @@ LuaContext::assert_unique_name(const char *name, std::string type)
   if ( (type == "integer") && (__integers.find(name) != __integers.end()) ) {
     throw Exception("Integer entry already exists for name %s", name);
   }
+  if ( (type == "cfunction") && (__cfuncs.find(name) != __cfuncs.end()) ) {
+    throw Exception("C function entry already exists for name %s", name);
+  }
 }
 
 
@@ -660,6 +669,23 @@ LuaContext::set_integer(const char *name, lua_Integer value)
   __integers[name] = value;
 
   lua_pushinteger(__L, value);
+  lua_setglobal(__L, name);
+}
+
+
+/** Assign cfunction to global variable.
+ * @param name name of global variable to assign the value to
+ * @param f function
+ */
+void
+LuaContext::set_cfunction(const char *name, lua_CFunction f)
+{
+  MutexLocker lock(__lua_mutex);
+  assert_unique_name(name, "cfunction");
+
+  __cfuncs[name] = f;
+
+  lua_pushcfunction(__L, f);
   lua_setglobal(__L, name);
 }
 
@@ -807,6 +833,17 @@ LuaContext::push_usertype(void *data, const char *type_name,
   }
 
   tolua_pushusertype(__L, data, type_n.c_str());
+}
+
+
+/** Push C function on top of stack.
+ * @param f C Function to push
+ */
+void
+LuaContext::push_cfunction(lua_CFunction f)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushcfunction(__L, f);
 }
 
 
@@ -997,6 +1034,7 @@ LuaContext::remove_global(const char *name)
   __booleans.erase(name);
   __numbers.erase(name);
   __integers.erase(name);
+  __cfuncs.erase(name);
 
   lua_pushnil(__L);
   lua_setglobal(__L, name);

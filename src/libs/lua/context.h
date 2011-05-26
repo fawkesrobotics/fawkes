@@ -80,6 +80,7 @@ class LuaContext : public FamListener
   void set_number(const char *name, lua_Number value);
   void set_boolean(const char *name, bool value);
   void set_integer(const char *name, lua_Integer value);
+  void set_cfunction(const char *name, lua_CFunction f);
   void remove_global(const char *name);
   void set_global(const char *name);
 
@@ -94,7 +95,9 @@ class LuaContext : public FamListener
   void push_thread();
   void push_value(int idx);
   void push_vfstring(const char *format, va_list arg);
-  void push_usertype(void *data, const char *type_name, const char *name_space = 0);
+  void push_usertype(void *data, const char *type_name,
+		     const char *name_space = 0);
+  void push_cfunction(lua_CFunction f);
 
   void pop(int n);
   void remove(int idx);
@@ -160,14 +163,16 @@ class LuaContext : public FamListener
 
   std::map<std::string, std::pair<void *, std::string> > __usertypes;
   std::map<std::string, std::pair<void *, std::string> >::iterator __utit;
-  std::map<std::string, std::string>            __strings;
-  std::map<std::string, std::string>::iterator  __strings_it;
-  std::map<std::string, bool>                   __booleans;
-  std::map<std::string, bool>::iterator         __booleans_it;
-  std::map<std::string, lua_Number>             __numbers;
-  std::map<std::string, lua_Number>::iterator   __numbers_it;
-  std::map<std::string, lua_Integer>            __integers;
-  std::map<std::string, lua_Integer>::iterator  __integers_it;
+  std::map<std::string, std::string>             __strings;
+  std::map<std::string, std::string>::iterator   __strings_it;
+  std::map<std::string, bool>                    __booleans;
+  std::map<std::string, bool>::iterator          __booleans_it;
+  std::map<std::string, lua_Number>              __numbers;
+  std::map<std::string, lua_Number>::iterator    __numbers_it;
+  std::map<std::string, lua_Integer>             __integers;
+  std::map<std::string, lua_Integer>::iterator   __integers_it;
+  std::map<std::string, lua_CFunction>           __cfuncs;
+  std::map<std::string, lua_CFunction>::iterator __cfuncs_it;
 
   RefPtr<FileAlterationMonitor>  __fam;
   FamThread                     *__fam_thread;
