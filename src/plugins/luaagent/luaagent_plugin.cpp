@@ -22,6 +22,7 @@
 
 #include "luaagent_plugin.h"
 #include "periodic_exec_thread.h"
+#include "continuous_exec_thread.h"
 
 using namespace fawkes;
 
@@ -38,7 +39,16 @@ using namespace fawkes;
 LuaAgentPlugin::LuaAgentPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new LuaAgentPeriodicExecutionThread());
+  bool continuous = false;
+  try {
+    continuous = config->get_bool("/luaagent/continuous");
+  } catch (Exception &e) {} // ignored, use default
+
+  if (continuous) {
+    thread_list.push_back(new LuaAgentContinuousExecutionThread());
+  } else {
+    thread_list.push_back(new LuaAgentPeriodicExecutionThread());
+  }
 }
 
 PLUGIN_DESCRIPTION("Runs an agent written in Lua")
