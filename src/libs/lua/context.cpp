@@ -552,19 +552,19 @@ LuaContext::pcall(int nargs, int nresults, int errfunc)
 void
 LuaContext::assert_unique_name(const char *name, std::string type)
 {
-  if ( (type != "usertype") && (__usertypes.find(name) != __usertypes.end()) ) {
+  if ( (type == "usertype") && (__usertypes.find(name) != __usertypes.end()) ) {
     throw Exception("User type entry already exists for name %s", name);
   }
-  if ( (type != "string") && (__strings.find(name) != __strings.end()) ) {
+  if ( (type == "string") && (__strings.find(name) != __strings.end()) ) {
     throw Exception("String entry already exists for name %s", name);
   }
-  if ( (type != "boolean") && (__booleans.find(name) != __booleans.end()) ) {
+  if ( (type == "boolean") && (__booleans.find(name) != __booleans.end()) ) {
     throw Exception("Boolean entry already exists for name %s", name);
   }
-  if ( (type != "number") && (__numbers.find(name) != __numbers.end()) ) {
+  if ( (type == "number") && (__numbers.find(name) != __numbers.end()) ) {
     throw Exception("Number entry already exists for name %s", name);
   }
-  if ( (type != "integer") && (__integers.find(name) != __integers.end()) ) {
+  if ( (type == "integer") && (__integers.find(name) != __integers.end()) ) {
     throw Exception("Integer entry already exists for name %s", name);
   }
 }
