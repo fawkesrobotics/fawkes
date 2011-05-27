@@ -30,7 +30,7 @@
 #include <interface/interface.h>
 
 #include <core/exceptions/software.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 namespace fawkes {
 

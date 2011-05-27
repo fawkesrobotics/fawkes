@@ -23,7 +23,7 @@
 #include "remote_bb_poster.h"
 
 #include <blackboard/remote.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <interfaces/JoystickInterface.h>
 
 using namespace fawkes;

@@ -30,7 +30,7 @@
 #include <core/threading/thread_initializer.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #ifdef HAVE_INOTIFY
 #  include <utils/system/fam_thread.h>
 #endif

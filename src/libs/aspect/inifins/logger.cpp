@@ -23,7 +23,7 @@
 
 #include <aspect/inifins/logger.h>
 #include <aspect/logger.h>
-#include <aspect/logger/employer.h>
+#include <logging/logger_employer.h>
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
 

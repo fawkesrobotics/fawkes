@@ -25,7 +25,7 @@
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
 #include <core/threading/mutex.h>
-#include <utils/logging/component.h>
+#include <logging/component.h>
 #ifdef SKILLER_TIMETRACKING
 #  include <utils/time/tracker.h>
 #endif
@@ -146,6 +146,7 @@ SkillerExecutionThread::init()
 
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
+    __lua->add_package("fawkeslogging");
     __lua->add_package("fawkesinterface");
     __lua->add_package("fawkesgeometry");
 

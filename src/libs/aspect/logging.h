@@ -25,7 +25,7 @@
 #define __ASPECT_LOGGING_H_
 
 #include <aspect/aspect.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */

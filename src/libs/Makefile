@@ -17,8 +17,8 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
-SUBDIRS = core utils interface netcomm blackboard config lua plugin aspect \
-	  geometry webview worldinfo_utils gui_utils baseapp \
+SUBDIRS = core utils interface netcomm blackboard config logging lua plugin \
+	  aspect geometry webview worldinfo_utils gui_utils baseapp \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
@@ -38,23 +38,24 @@ endif
 
 # Explicit dependencies, this is needed to have make bail out if there is any
 # error. This is also necessary for working parallel build (i.e. for dual core)
-utils: core 
+utils: core
 interface: core utils
-blackboard: core utils interface netcomm
+blackboard: core utils interface netcomm logging
 netcomm: core utils
-config: core netcomm utils
-plugin: core netcomm utils config
-aspect: core utils blackboard netcomm config plugin webview
+config: core netcomm utils logging
+plugin: core netcomm utils config logging
+aspect: core utils blackboard netcomm config plugin webview logging
 geometry: core
 worldinfo_utils: core netcomm geometry
-lua: core utils blackboard config
+lua: core utils blackboard config logging
 interfaces: core interface
-gui_utils: core netcomm plugin
+gui_utils: core netcomm plugin logging
+logging: core utils netcomm
 naoutils: core utils
-webview: core utils
-baseapp: core utils aspect config netcomm blackboard plugin
-fvutils: core utils netcomm
-fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
+webview: core utils logging
+baseapp: core utils aspect config netcomm blackboard plugin logging
+fvutils: core utils netcomm logging
+fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
 fvfilters: fvmodels
 fvmodels: fvclassifiers geometry
 fvstereo: fvcams

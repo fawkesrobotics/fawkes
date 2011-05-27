@@ -24,7 +24,7 @@
 
 #include <core/exceptions/system.h>
 #include <utils/system/argparser.h>
-#include <utils/logging/console.h>
+#include <logging/console.h>
 #include <utils/system/getkey.h>
 #include <utils/time/time.h>
 

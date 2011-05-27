@@ -23,7 +23,7 @@
 #include "sync_listener.h"
 
 #include <blackboard/blackboard.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 using namespace fawkes;
 

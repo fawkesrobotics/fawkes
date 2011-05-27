@@ -32,7 +32,7 @@
 #include <netcomm/fawkes/message.h>
 #include <netcomm/utils/exceptions.h>
 
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #include <utils/misc/string_conversions.h>
 
 #ifndef _GNU_SOURCE

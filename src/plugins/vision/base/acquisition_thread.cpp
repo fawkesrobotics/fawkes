@@ -29,7 +29,7 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 #endif
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <fvcams/shmem.h>
 #include <fvutils/color/conversions.h>

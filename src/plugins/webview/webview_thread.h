@@ -32,7 +32,7 @@
 #include <aspect/plugin_director.h>
 #include <aspect/webview.h>
 
-#include <utils/logging/cache.h>
+#include <logging/cache.h>
 
 namespace fawkes {
   class NetworkService;

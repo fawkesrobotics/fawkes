@@ -22,19 +22,20 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/logging/file.h>
+#include <logging/file.h>
 #include <utils/system/file.h>
 
 #include <core/threading/mutex.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/time.h>
 #include <time.h>
-#include <cstdio>
+#include <fcntl.h>
+#include <cerrno>
 
 namespace fawkes {
 
-/** @class FileLogger file.h <logging/file.h>
+/** @class FileLogger <logging/file.h>
  * Interface for logging to a specified file.
  * The FileLogger will pipe all output into the given file. The
  * output will be prepended by a single character which determines the 
@@ -49,11 +50,12 @@ namespace fawkes {
 FileLogger::FileLogger(const char* filename, LogLevel log_level)
   : Logger(log_level)
 {
-  try {
-    log_file = new File(filename, File::APPEND);
-  } catch (UnableToOpenFileException& e) {
-    throw;
+  int fd = open(filename, O_RDWR | O_CREAT | O_APPEND,
+		S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+  if (fd == -1) {
+    throw Exception(errno, "Failed to open log file %s", filename);
   }
+  log_file = fdopen(fd, "a");
 
   now_s = (struct tm *)malloc(sizeof(struct tm));
 
@@ -65,8 +67,7 @@ FileLogger::FileLogger(const char* filename, LogLevel log_level)
 FileLogger::~FileLogger()
 {
   free(now_s);
-  
-  delete log_file;
+  fclose(log_file);
   delete mutex;
 }
 
@@ -120,12 +121,12 @@ FileLogger::log_debug(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -140,12 +141,12 @@ FileLogger::log_info(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -160,12 +161,12 @@ FileLogger::log_warn(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -180,12 +181,12 @@ FileLogger::log_error(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -199,11 +200,11 @@ FileLogger::vlog_debug(const char* component, const char* format, va_list va)
     gettimeofday(&now, NULL);
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -217,11 +218,11 @@ FileLogger::vlog_info(const char *component, const char *format, va_list va)
     gettimeofday(&now, NULL);
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -235,11 +236,11 @@ FileLogger::vlog_warn(const char *component, const char *format, va_list va)
     gettimeofday(&now, NULL);
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -253,11 +254,11 @@ FileLogger::vlog_error(const char *component, const char *format, va_list va)
     gettimeofday(&now, NULL);
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -310,12 +311,12 @@ FileLogger::tlog_debug(struct timeval *t, const char *component, Exception &e)
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -328,12 +329,12 @@ FileLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -346,12 +347,12 @@ FileLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -364,12 +365,12 @@ FileLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
+      fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-      fprintf(log_file->stream(), "%s", *i);
-      fprintf(log_file->stream(), "\n");
+      fprintf(log_file, "%s", *i);
+      fprintf(log_file, "\n");
     }
-    fflush(log_file->stream());
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -381,11 +382,11 @@ FileLogger::vtlog_debug(struct timeval *t, const char* component, const char* fo
   if (log_level <= LL_DEBUG ) {
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -397,11 +398,11 @@ FileLogger::vtlog_info(struct timeval *t, const char *component, const char *for
   if (log_level <= LL_INFO ) {
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -413,11 +414,11 @@ FileLogger::vtlog_warn(struct timeval *t, const char *component, const char *for
   if (log_level <= LL_WARN ) {
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }
@@ -429,11 +430,11 @@ FileLogger::vtlog_error(struct timeval *t, const char *component, const char *fo
   if (log_level <= LL_ERROR ) {
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
+    fprintf(log_file, "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    fflush(log_file->stream());
+    vfprintf(log_file, format, va);
+    fprintf(log_file, "\n");
+    fflush(log_file);
     mutex->unlock();
   }
 }

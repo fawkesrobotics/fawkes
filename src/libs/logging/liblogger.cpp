@@ -21,16 +21,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/logging/liblogger.h>
-#include <utils/logging/multi.h>
-#include <utils/logging/console.h>
+#include <logging/liblogger.h>
+#include <logging/multi.h>
+#include <logging/console.h>
 
 #include <core/exceptions/software.h>
 #include <core/threading/mutex.h>
 
 namespace fawkes {
 
-/** @class LibLogger <utils/logging/liblogger.h>
+/** @class LibLogger <logging/liblogger.h>
  * Library logger.
  * This logger is meant to be used in libraries that depend on utils anyway
  * and in utils itself. This logger is completely static so it only has to be

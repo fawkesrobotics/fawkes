@@ -21,7 +21,7 @@
  */
 
 #include "remotebb.h"
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <blackboard/remote.h>
 #include <interfaces/GameStateInterface.h>

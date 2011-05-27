@@ -26,7 +26,7 @@
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <algorithm>
 #include <tolua++.h>

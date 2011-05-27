@@ -74,8 +74,6 @@ class Clock
  private:
   Clock();
 
-  static bool destruct_ok;
-
   TimeSource *ext_timesource;
   bool ext_default;
 

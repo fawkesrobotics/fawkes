@@ -26,7 +26,7 @@
 #include <plugin/net/messages.h>
 #include <plugin/net/list_message.h>
 
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>

@@ -23,7 +23,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <utils/logging/cache.h>
+#include <logging/cache.h>
 
 #include <cstdlib>
 #include <sys/time.h>
@@ -36,7 +36,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class CacheLogger <utils/logging/cache.h>
+/** @class CacheLogger <logging/cache.h>
  * Logging Cache.
  * The CacheLogger will cache the log messages. By default these are
  * 20 messages.

@@ -24,14 +24,15 @@
 #ifndef __UTILS_LOGGING_MULTI_H_
 #define __UTILS_LOGGING_MULTI_H_
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
+#include <logging/logger_employer.h>
 
 namespace fawkes {
 
 
 class MultiLoggerData;
 
-class MultiLogger : public Logger
+ class MultiLogger : public Logger, public LoggerEmployer
 {
  public:
   MultiLogger();

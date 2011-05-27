@@ -21,7 +21,7 @@
  */
 
 #include "log.h"
-#include <utils/logging/cache.h>
+#include <logging/cache.h>
 
 #include <xmlrpc-c/girerr.hpp>
 

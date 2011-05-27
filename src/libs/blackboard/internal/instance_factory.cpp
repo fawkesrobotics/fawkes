@@ -28,7 +28,6 @@
 
 #include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module.h>
-#include <utils/logging/liblogger.h>
 
 #include <cstdlib>
 #include <cstring>

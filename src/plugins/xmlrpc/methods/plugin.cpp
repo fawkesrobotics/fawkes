@@ -22,7 +22,7 @@
 
 #include "plugin.h"
 #include <plugin/manager.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <algorithm>
 #include <map>

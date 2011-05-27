@@ -30,7 +30,7 @@
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/component_ids.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <cstdlib>
 #include <cstring>

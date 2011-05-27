@@ -22,7 +22,7 @@
  */
 
 #include <core/threading/mutex.h>
-#include <utils/logging/console.h>
+#include <logging/console.h>
 
 #include <utils/system/console_colors.h>
 
@@ -33,7 +33,7 @@
 
 namespace fawkes {
 
-/** @class ConsoleLogger logging/console.h
+/** @class ConsoleLogger <logging/console.h>
  * Interface for logging to stderr on console.
  * The ConsoleLogger will pipe all output to stderr on the console. The
  * output will be color coded due to the importance of the output.

@@ -24,7 +24,7 @@
 #include <blackboard/blackboard.h>
 #include <blackboard/net/interface_observer.h>
 #include <blackboard/net/messages.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/fawkes/component_ids.h>
 

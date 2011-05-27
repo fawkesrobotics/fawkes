@@ -25,7 +25,7 @@
 
 #include <xmlrpc-c/registry.hpp>
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 namespace fawkes {
   class CacheLogger;

@@ -23,7 +23,6 @@
 
 #include <aspect/inifins/logging.h>
 #include <aspect/logging.h>
-#include <utils/logging/logger.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */

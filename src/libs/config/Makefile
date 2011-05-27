@@ -37,7 +37,7 @@ error_sqlite:
 	$(SILENT)exit 1
 endif
 
-LIBS_libfawkesconfig = stdc++ fawkescore fawkesutils fawkesnetcomm
+LIBS_libfawkesconfig = stdc++ fawkescore fawkesutils fawkesnetcomm fawkeslogging
 OBJS_libfawkesconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 HDRS_libfawkesconfig = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 

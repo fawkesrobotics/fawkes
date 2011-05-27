@@ -24,7 +24,7 @@
 
 #include <fvcams/nao.h>
 #include <fvutils/system/camargp.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #include <core/exceptions/software.h>
 
 #include <fcntl.h>

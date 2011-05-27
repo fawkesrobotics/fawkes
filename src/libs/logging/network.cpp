@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  network_logger.cpp - Fawkes network logger
+ *  network.cpp - Fawkes network logger
  *
  *  Created: Sat Dec 15 00:48:52 2007 (after I5 xmas party)
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/utils/network_logger.h>
+#include <logging/network.h>
 
 #include <core/threading/mutex.h>
 #include <netcomm/fawkes/component_ids.h>

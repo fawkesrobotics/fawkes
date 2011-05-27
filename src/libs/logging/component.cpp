@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/logging/component.h>
-#include <utils/logging/logger.h>
+#include <logging/component.h>
+#include <logging/logger.h>
 
 #include <cstring>
 #include <cstdlib>

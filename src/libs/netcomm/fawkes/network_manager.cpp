@@ -28,7 +28,6 @@
 #include <netcomm/fawkes/server_thread.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/utils/resolver.h>
-#include <utils/logging/liblogger.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
 #include <netcomm/service_discovery/service.h>
@@ -77,9 +76,6 @@ FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
   __avahi_thread->publish_service(fawkes_service);
   delete fawkes_service;
 #else
-  LibLogger::log_warn("FawkesNetworkManager",
-		      "Avahi not available, only using dummies "
-		      "for service publishing/browsing.");
   __service_publisher = new DummyServicePublisher();
   __service_browser   = new DummyServiceBrowser();
   __nnresolver        = new NetworkNameResolver();

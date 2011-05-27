@@ -29,7 +29,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <blackboard/blackboard.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 /** @class WorldModelObjPosMajorityFuser "objpos_majority.h"
  * ObjectPositionInterface majority fuser.

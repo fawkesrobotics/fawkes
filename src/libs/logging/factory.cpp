@@ -21,17 +21,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/logging/factory.h>
-#include <utils/logging/console.h>
-#include <utils/logging/file.h>
-#include <utils/logging/multi.h>
+#include <logging/factory.h>
+#include <logging/console.h>
+#include <logging/file.h>
+#include <logging/multi.h>
 
 #include <cstring>
 #include <cstdlib>
 
 namespace fawkes {
 
-/** @class UnknownLoggerTypeException factory.h <utils/logging/factory.h>
+/** @class UnknownLoggerTypeException <logging/factory.h>
  * Unknown logger type exception.
  * Thrown if the requested logger has not been recognized
  */
@@ -46,7 +46,7 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
 }
 
 
-/** @class LoggerFactory factory.h <utils/logging/factory.h>
+/** @class LoggerFactory <logging/factory.h>
  * Logger factory.
  * This logging factory provides access to all loggers in a unified way. You just
  * supply a logger argument string and depending on the logger type an instance of
