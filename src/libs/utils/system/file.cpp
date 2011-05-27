@@ -46,7 +46,7 @@ namespace fawkes {
  * @param error the errno
  */
 UnableToOpenFileException::UnableToOpenFileException(const char *filename, int error)
-  : Exception("Unable to open file", error)
+  : Exception(error, "Unable to open file")
 {
   append("File that could not be opened: %s", filename);
 }
