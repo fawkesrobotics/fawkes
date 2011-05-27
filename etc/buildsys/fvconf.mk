@@ -48,17 +48,13 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/jpeglib.h $(SYSROOT)/usr/local/include/
   VISION_CFLAGS += -DHAVE_LIBJPEG
 endif
 
-ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
-  HAVE_SWISSRANGER_CAM   = 1
-  VISION_CAM_LIBS       += mesasr usb
-endif
-
 ifneq ($(PKGCONFIG),)
   HAVE_LIBDC1394 = $(if $(shell $(PKGCONFIG) --exists 'libdc1394-2'; echo $${?/1/}),1,0)
   HAVE_SDL = $(if $(shell $(PKGCONFIG) --exists 'sdl'; echo $${?/1/}),1,0)
   HAVE_LIBPNG = $(if $(shell $(PKGCONFIG) --exists 'libpng'; echo $${?/1/}),1,0)
   HAVE_LIBV4L2 = $(if $(shell $(PKGCONFIG) --exists 'libv4l2'; echo $${?/1/}),1,0)
   HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
+  HAVE_LIBUSB = $(if $(shell $(PKGCONFIG) --exists 'libusb'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_LIBDC1394),1)
   HAVE_FIREWIRE_CAM   = 1
@@ -87,6 +83,21 @@ ifeq ($(HAVE_OPENCV),1)
   CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
   LDFLAGS_OPENCV     = $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
   LDFLAGS_OPENCV_GUI = -lhighgui
+endif
+
+ifeq ($(HAVE_LIBUSB),1)
+  CFLAGS_LIBUSB  = -DHAVE_LIBUSB $(shell $(PKGCONFIG) --cflags 'libusb')
+  LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb')
+endif
+
+# Check for SwissRanger library
+ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
+  ifeq ($(HAVE_LIBUSB),1)
+    HAVE_SWISSRANGER_CAM   = 1
+    VISION_CAM_LIBS       += mesasr
+    CFLAGS_SWISSRANGER     = $(CFLAGS_LIBUSB)
+    LDFLAGS_SWISSRANGER    = $(LDFLAGS_LIBUSB)
+  endif
 endif
 
 # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
