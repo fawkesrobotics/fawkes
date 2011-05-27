@@ -23,6 +23,15 @@ USE_PAPYRUS=0
 
 ifneq ($(PKGCONFIG),)
   HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_GRAPHVIZ),1)
+    _GRAPHVIZ_VERSION_OK = $(if $(shell $(PKGCONFIG) --atleast-version=2.22 'libgvc'; echo $${?/1/}),1,0)
+    ifneq ($(_GRAPHVIZ_VERSION_OK),1)
+      HAVE_GRAPHVIZ=0
+      GUI_ERROR += (Graphviz too old, need at least version 2.22)
+    endif
+  else
+    GUI_ERROR += (graphviz not installed)
+  endif
 
   ifeq ($(USE_PAPYRUS),1)
     HAVE_PAPYRUS  = $(if $(shell $(PKGCONFIG) --exists 'papyrus-1.0' 'papyrus-gtkmm-1.0'; echo $${?/1/}),1,0)
@@ -36,8 +45,6 @@ ifneq ($(PKGCONFIG),)
   ifeq ($(HAVE_GRAPHVIZ),1)
     CFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
     LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
-  else
-    GUI_ERROR += (graphviz not installed)
   endif
 endif
 
