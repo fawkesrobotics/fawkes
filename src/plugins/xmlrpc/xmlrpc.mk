@@ -42,7 +42,8 @@ else
   ifneq ($(wildcard $(SYSROOT)/usr/include/xmlrpc-c/registry.hpp),)
     HAVE_LIBXMLRPCPP = 1
     HAVE_XMLRPC = 1
-    LDFLAGS_LIBXMLRPCPP = -lxmlrpc_server++ -lxmlrpc++
+    LDFLAGS_LIBXMLRPCPP = -lxmlrpc_server++ -lxmlrpc++ -lxmlrpc -lxmlrpc_xmlparse \
+			  -lxmlrpc_xmltok -lxmlrpc_server
   endif
 endif
 
