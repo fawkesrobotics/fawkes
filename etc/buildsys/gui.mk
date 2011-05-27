@@ -123,7 +123,7 @@ ifeq ($(HAVE_GTKMM)$(HAVE_CAIROMM)$(HAVE_GTHREAD),111)
   endif
 endif
 
-GUI_ERROR = ($(call merge, and ,$(PKG_MISSING)) not installed)
+GUI_ERROR = $(if $(PKG_MISSING),($(call merge, and ,$(PKG_MISSING)) not installed))
 
 # Some default warnings that may be used
 ifeq ($(OBJSSUBMAKE),1)
