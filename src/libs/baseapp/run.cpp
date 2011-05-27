@@ -24,18 +24,26 @@
 #include <baseapp/run.h>
 #include <baseapp/daemonize.h>
 #include <baseapp/main_thread.h>
+#include <baseapp/thread_manager.h>
 
 #include <core/threading/thread.h>
 
 #include <blackboard/local.h>
 #include <config/sqlite.h>
+#include <config/net_handler.h>
 #include <utils/ipc/shm.h>
 #include <utils/system/argparser.h>
-#include <utils/logging/multi.h>
-#include <utils/logging/console.h>
-#include <utils/logging/liblogger.h>
-#include <utils/logging/factory.h>
+#include <logging/multi.h>
+#include <logging/console.h>
+#include <logging/liblogger.h>
+#include <logging/factory.h>
+#include <logging/network.h>
 #include <utils/time/clock.h>
+#include <netcomm/fawkes/network_manager.h>
+#include <plugin/manager.h>
+#include <plugin/net/handler.h>
+#include <aspect/manager.h>
+
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -55,9 +63,16 @@ namespace fawkes {
 ArgumentParser       *argument_parser = NULL;
 FawkesMainThread     *main_thread = NULL;
 MultiLogger          *logger = NULL;
+NetworkLogger        *network_logger = NULL;
 BlackBoard           *blackboard = NULL;
 SQLiteConfiguration  *config = NULL;
-
+PluginManager        *plugin_manager = NULL;
+AspectManager        *aspect_manager = NULL;
+ThreadManager        *thread_manager = NULL;
+FawkesNetworkManager *network_manager = NULL;
+ConfigNetworkHandler *nethandler_config = NULL;
+PluginNetworkHandler *nethandler_plugin = NULL;
+Clock                *clock = NULL;
 
 int
 init(int argc, char **argv)
@@ -268,18 +283,56 @@ init(int argc, char **argv)
 			     /* output with lister? */ true);
   }
 
+  LocalBlackBoard *lbb = NULL;
   if ( bb_magic_token == "") {
-    blackboard       = new LocalBlackBoard(bb_size);
+    lbb = new LocalBlackBoard(bb_size);
   } else {
-    blackboard       = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
+    lbb = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
   }
+  blackboard = lbb;
+
+  aspect_manager     = new AspectManager();
+  thread_manager     = new ThreadManager(aspect_manager, aspect_manager);
+
+  plugin_manager     = new PluginManager(thread_manager, config,
+					 "/fawkes/meta_plugins/");
+  network_manager    = new FawkesNetworkManager(thread_manager,
+						net_tcp_port,
+						net_service_name.c_str());
+  nethandler_config  = new ConfigNetworkHandler(config,
+						network_manager->hub());
+
+  nethandler_plugin  = new PluginNetworkHandler(plugin_manager,
+						network_manager->hub());
+  nethandler_plugin->start();
+
+  network_logger = new NetworkLogger(network_manager->hub(),
+				     logger->loglevel());
+  logger->add_logger(network_logger);
+
+  clock = Clock::instance();
+
+  lbb->start_nethandler(network_manager->hub());
+
 
   // *** Create main thread, but do not start, yet
-  main_thread = new fawkes::FawkesMainThread(config, logger, blackboard,
-					     argument_parser->arg("p"),
-					     net_tcp_port,
-					     net_service_name.c_str());
+  main_thread = new fawkes::FawkesMainThread(config, logger,
+					     thread_manager,
+					     plugin_manager,
+					     argument_parser->arg("p"));
 
+  aspect_manager->register_default_inifins(blackboard,
+					   thread_manager->aspect_collector(),
+					   config, logger, clock,
+					   network_manager->hub(),
+					   main_thread, logger,
+					   thread_manager,
+					   network_manager->nnresolver(),
+					   network_manager->service_publisher(),
+					   network_manager->service_browser(),
+					   plugin_manager);
+
+  
 
   return 0;
 }
@@ -293,11 +346,33 @@ cleanup()
     fawkes::daemon::cleanup();
   }
 
+  nethandler_plugin->cancel();
+  nethandler_plugin->join();
+
+  // Must delete network logger first since network manager
+  // has to die before the LibLogger is finalized.
+  logger->remove_logger(network_logger);
+  delete network_logger;
+
   delete main_thread;
   delete argument_parser;
+  delete nethandler_config;
+  delete nethandler_plugin;
+  delete plugin_manager;
+  delete network_manager;
+  delete config;
+  delete thread_manager;
+  delete aspect_manager;
 
   main_thread = NULL;
   argument_parser = NULL;
+  thread_manager = NULL;
+  aspect_manager = NULL;
+  plugin_manager = NULL;
+  nethandler_config = NULL;
+  config = NULL;
+  network_manager = NULL;
+  clock = NULL;
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();

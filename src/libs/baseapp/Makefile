@@ -21,7 +21,7 @@ LDFLAGS += $(LDFLAGS_LIBDAEMON)
 
 LIBS_libfawkesbaseapp = stdc++ fawkescore fawkesutils fawkesconfig \
 			fawkesblackboard fawkesplugin fawkesnetcomm \
-			fawkesaspects
+			fawkesaspects fawkeslogging
 
 OBJS_libfawkesbaseapp =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 HDRS_libfawkesbaseapp = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))

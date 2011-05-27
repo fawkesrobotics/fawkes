@@ -26,7 +26,6 @@
 
 #include <core/threading/thread.h>
 #include <aspect/mainloop/employer.h>
-#include <aspect/logger/employer.h>
 #include <utils/system/signal.h>
 
 #include <list>
@@ -37,7 +36,6 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-class BlackBoard;
 class Configuration;
 class SQLiteConfiguration;
 class ConfigNetworkHandler;
@@ -51,30 +49,25 @@ class Time;
 class PluginNetworkHandler;
 class InterruptibleBarrier;
 class Mutex;
-class FawkesThreadManager;
+class ThreadManager;
 class FawkesNetworkManager;
 
 class FawkesMainThread
 : public Thread,
-  public MainLoopEmployer,
-  public LoggerEmployer
+  public MainLoopEmployer
 {
  public:
   FawkesMainThread(SQLiteConfiguration *config,
 		   MultiLogger *multi_logger,
-		   BlackBoard *blackboard,
-		   const char *load_plugins,
-		   unsigned short tcp_port,
-		   const char *service_name);
+		   ThreadManager *thread_manager,
+		   PluginManager *plugin_manager,
+		   const char *load_plugins);
   virtual ~FawkesMainThread();
 
   virtual void once();
   virtual void loop();
 
   virtual void set_mainloop_thread(Thread *mainloop_thread);
-
-  virtual void add_logger(Logger *logger);
-  virtual void remove_logger(Logger *logger);
 
   class Runner : public SignalHandler {
   public:
@@ -97,8 +90,6 @@ class FawkesMainThread
   void destruct();
 
   Configuration        *__config;
-  ConfigNetworkHandler *__config_nethandler;
-  BlackBoard           *__blackboard;
   MultiLogger          *__multi_logger;
   NetworkLogger        *__network_logger;
   Clock                *__clock;
@@ -112,11 +103,10 @@ class FawkesMainThread
   char                 *__load_plugins;
 
   SQLiteConfiguration  *__sqlite_conf;
-  FawkesThreadManager  *__thread_manager;
+  ThreadManager        *__thread_manager;
   PluginManager        *__plugin_manager;
-  PluginNetworkHandler *__plugin_nethandler;
   Mutex                *__plugin_mutex;
-  FawkesNetworkManager         *__network_manager;
+  FawkesNetworkManager *__network_manager;
 
   std::list<std::string>        __recovered_threads;
   unsigned int                  __desired_loop_time_usec;

@@ -42,13 +42,14 @@ class WaitCondition;
 class ThreadInitializer;
 class ThreadFinalizer;
 
-class FawkesThreadManager
+class ThreadManager
 : public ThreadCollector,
   public BlockedTimingExecutor
 {
  public:
-  FawkesThreadManager();
-  virtual ~FawkesThreadManager();
+  ThreadManager();
+  ThreadManager(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
+  virtual ~ThreadManager();
 
   void set_inifin(ThreadInitializer *initializer,
 		  ThreadFinalizer *finalizer);
@@ -96,10 +97,10 @@ class FawkesThreadManager
   void remove_maybelocked(ThreadList &tl, bool lock);
   void remove_maybelocked(Thread *t, bool lock);
 
-  class FawkesThreadManagerAspectCollector : public ThreadCollector
+  class ThreadManagerAspectCollector : public ThreadCollector
   {
    public:
-    FawkesThreadManagerAspectCollector(FawkesThreadManager *parent_manager);
+    ThreadManagerAspectCollector(ThreadManager *parent_manager);
 
     virtual void add(ThreadList &tl);
     virtual void add(Thread *t);
@@ -111,7 +112,7 @@ class FawkesThreadManager
     virtual void force_remove(Thread *t);
 
    private:
-    FawkesThreadManager *__parent_manager;
+    ThreadManager *__parent_manager;
   };
 
  private:
@@ -124,7 +125,7 @@ class FawkesThreadManager
   ThreadList     __untimed_threads;
   WaitCondition *__waitcond_timedthreads;
 
-  FawkesThreadManagerAspectCollector *__aspect_collector;
+  ThreadManagerAspectCollector *__aspect_collector;
   bool __interrupt_timed_thread_wait;
 
 };

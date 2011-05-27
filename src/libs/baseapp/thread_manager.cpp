@@ -37,7 +37,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class FawkesThreadManager <baseapp/thread_manager.h>
+/** @class ThreadManager <baseapp/thread_manager.h>
  * Base application thread manager.
  * This class provides a manager for the threads. Threads are memorized by
  * their wakeup hook. When the thread manager is deleted, all threads are
@@ -54,14 +54,14 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-FawkesThreadManager::FawkesThreadManagerAspectCollector::FawkesThreadManagerAspectCollector(FawkesThreadManager *parent_manager)
+ThreadManager::ThreadManagerAspectCollector::ThreadManagerAspectCollector(ThreadManager *parent_manager)
 {
   __parent_manager = parent_manager;
 }
 
 
 void
-FawkesThreadManager::FawkesThreadManagerAspectCollector::add(ThreadList &tl)
+ThreadManager::ThreadManagerAspectCollector::add(ThreadList &tl)
 {
   BlockedTimingAspect *timed_thread;
 
@@ -76,7 +76,7 @@ FawkesThreadManager::FawkesThreadManagerAspectCollector::add(ThreadList &tl)
 
 
 void
-FawkesThreadManager::FawkesThreadManagerAspectCollector::add(Thread *t)
+ThreadManager::ThreadManagerAspectCollector::add(Thread *t)
 {
   BlockedTimingAspect *timed_thread;
 
@@ -89,7 +89,7 @@ FawkesThreadManager::FawkesThreadManagerAspectCollector::add(Thread *t)
 
 
 void
-FawkesThreadManager::FawkesThreadManagerAspectCollector::remove(ThreadList &tl)
+ThreadManager::ThreadManagerAspectCollector::remove(ThreadList &tl)
 {
   BlockedTimingAspect *timed_thread;
 
@@ -104,7 +104,7 @@ FawkesThreadManager::FawkesThreadManagerAspectCollector::remove(ThreadList &tl)
 
 
 void
-FawkesThreadManager::FawkesThreadManagerAspectCollector::remove(Thread *t)
+ThreadManager::ThreadManagerAspectCollector::remove(Thread *t)
 {
   BlockedTimingAspect *timed_thread;
 
@@ -117,33 +117,53 @@ FawkesThreadManager::FawkesThreadManagerAspectCollector::remove(Thread *t)
 
 
 void
-FawkesThreadManager::FawkesThreadManagerAspectCollector::force_remove(fawkes::ThreadList &tl)
+ThreadManager::ThreadManagerAspectCollector::force_remove(fawkes::ThreadList &tl)
 {
   throw AccessViolationException("ThreadManagerAspect threads may not force removal of threads");
 }
 
 void
-FawkesThreadManager::FawkesThreadManagerAspectCollector::force_remove(fawkes::Thread *t)
+ThreadManager::ThreadManagerAspectCollector::force_remove(fawkes::Thread *t)
 {
   throw AccessViolationException("ThreadManagerAspect threads may not force removal of threads");
 }
 
 
 /** Constructor.
+ * When using this constructor you need to make sure to call set_inifin()
+ * before any thread is added.
  */
-FawkesThreadManager::FawkesThreadManager()
+ThreadManager::ThreadManager()
 {
   __initializer = NULL;
   __finalizer   = NULL;
   __threads.clear();
   __waitcond_timedthreads = new WaitCondition();
   __interrupt_timed_thread_wait = false;
-  __aspect_collector = new FawkesThreadManagerAspectCollector(this);
+  __aspect_collector = new ThreadManagerAspectCollector(this);
+}
+
+/** Constructor.
+ * This contsructor is equivalent to the one without parameters followed
+ * by a call to set_inifins().
+ * @param initializer thread initializer
+ * @param finalizer thread finalizer
+ */
+ThreadManager::ThreadManager(ThreadInitializer *initializer,
+			     ThreadFinalizer *finalizer)
+{
+  __initializer = NULL;
+  __finalizer   = NULL;
+  __threads.clear();
+  __waitcond_timedthreads = new WaitCondition();
+  __interrupt_timed_thread_wait = false;
+  __aspect_collector = new ThreadManagerAspectCollector(this);
+  set_inifin(initializer, finalizer);
 }
 
 
 /** Destructor. */
-FawkesThreadManager::~FawkesThreadManager()
+ThreadManager::~ThreadManager()
 {
   // stop all threads, we call finalize, and we run through it as long as there are
   // still running threads, after that, we force the thread's death.
@@ -164,7 +184,7 @@ FawkesThreadManager::~FawkesThreadManager()
  * @param finalizer thread finalizer
  */
 void
-FawkesThreadManager::set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
+ThreadManager::set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
 {
   __initializer = initializer;
   __finalizer   = finalizer;
@@ -179,7 +199,7 @@ FawkesThreadManager::set_inifin(ThreadInitializer *initializer, ThreadFinalizer 
  * @param changed list of changed hooks, appropriate hook is added if necessary
  */
 void
-FawkesThreadManager::internal_remove_thread(Thread *t)
+ThreadManager::internal_remove_thread(Thread *t)
 {
   BlockedTimingAspect *timed_thread;
 
@@ -204,14 +224,14 @@ FawkesThreadManager::internal_remove_thread(Thread *t)
  * @param changed list of changed hooks, appropriate hook is added if necessary
  */
 void
-FawkesThreadManager::internal_add_thread(Thread *t)
+ThreadManager::internal_add_thread(Thread *t)
 {
   BlockedTimingAspect *timed_thread;
   if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(t)) != NULL ) {
     BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
 
     if ( __threads.find(hook) == __threads.end() ) {
-      __threads[hook].set_name("FawkesThreadManagerList Hook %i", hook);
+      __threads[hook].set_name("ThreadManagerList Hook %i", hook);
       __threads[hook].set_maintain_barrier(true);
     }
     __threads[hook].push_back_locked(t);
@@ -235,10 +255,10 @@ FawkesThreadManager::internal_add_thread(Thread *t)
  * threads could not be initialised
  */
 void
-FawkesThreadManager::add_maybelocked(ThreadList &tl, bool lock)
+ThreadManager::add_maybelocked(ThreadList &tl, bool lock)
 {
   if ( ! (__initializer && __finalizer) ) {
-    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+    throw NullPointerException("ThreadManager: initializer/finalizer not set");
   }
 
   if ( tl.sealed() ) {
@@ -280,20 +300,20 @@ FawkesThreadManager::add_maybelocked(ThreadList &tl, bool lock)
  * thread could not be initialised
  */
 void
-FawkesThreadManager::add_maybelocked(Thread *thread, bool lock)
+ThreadManager::add_maybelocked(Thread *thread, bool lock)
 {
   if ( thread == NULL ) {
     throw NullPointerException("FawkesThreadMananger: cannot add NULL as thread");
   }
 
   if ( ! (__initializer && __finalizer) ) {
-    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+    throw NullPointerException("ThreadManager: initializer/finalizer not set");
   }
 
   try {
     __initializer->init(thread);
   } catch (CannotInitializeThreadException &e) {
-    e.append("Adding thread in FawkesThreadManager failed");
+    e.append("Adding thread in ThreadManager failed");
     throw;
   }
 
@@ -318,15 +338,15 @@ FawkesThreadManager::add_maybelocked(Thread *thread, bool lock)
  * sealed the thread manager will refuse to remove it
  */
 void
-FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
+ThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
 {
   if ( ! (__initializer && __finalizer) ) {
-    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+    throw NullPointerException("ThreadManager: initializer/finalizer not set");
   }
 
 
   if ( ! tl.sealed() ) {
-    throw ThreadListNotSealedException("(FawkesThreadManager) Cannot remove unsealed thread "
+    throw ThreadListNotSealedException("(ThreadManager) Cannot remove unsealed thread "
 				       "list. Not accepting unsealed list '%s' for removal",
 				       tl.name());
   }
@@ -379,12 +399,12 @@ FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
  * finalized
  */
 void
-FawkesThreadManager::remove_maybelocked(Thread *thread, bool lock)
+ThreadManager::remove_maybelocked(Thread *thread, bool lock)
 {
   if ( thread == NULL ) return;
 
   if ( ! (__initializer && __finalizer) ) {
-    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+    throw NullPointerException("ThreadManager: initializer/finalizer not set");
   }
 
   MutexLocker locker(__threads.mutex(), lock);
@@ -394,7 +414,7 @@ FawkesThreadManager::remove_maybelocked(Thread *thread, bool lock)
       throw CannotFinalizeThreadException("Thread '%s'cannot be finalized", thread->name());
     }
   } catch (CannotFinalizeThreadException &e) {
-    e.append("FawkesThreadManager cannot stop thread '%s'", thread->name());
+    e.append("ThreadManager cannot stop thread '%s'", thread->name());
     thread->cancel_finalize();
     throw;
   }
@@ -427,7 +447,7 @@ FawkesThreadManager::remove_maybelocked(Thread *thread, bool lock)
  * before they are removed (may cause unpredictable results otherwise).
  */
 void
-FawkesThreadManager::force_remove(ThreadList &tl)
+ThreadManager::force_remove(ThreadList &tl)
 {
   if ( ! tl.sealed() ) {
     throw ThreadListNotSealedException("Not accepting unsealed list '%s' for removal",
@@ -463,7 +483,7 @@ FawkesThreadManager::force_remove(ThreadList &tl)
  * before they are removed (may cause unpredictable results otherwise).
  */
 void
-FawkesThreadManager::force_remove(fawkes::Thread *thread)
+ThreadManager::force_remove(fawkes::Thread *thread)
 {
   MutexLocker lock(__threads.mutex());
   try {
@@ -482,7 +502,7 @@ FawkesThreadManager::force_remove(fawkes::Thread *thread)
 
 
 void
-FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
+ThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
 				     unsigned int timeout_usec)
 {
   MutexLocker lock(__threads.mutex());
@@ -501,7 +521,7 @@ FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
 
 
 void
-FawkesThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier)
+ThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier)
 {
   MutexLocker lock(__threads.mutex());
 
@@ -519,7 +539,7 @@ FawkesThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barri
 
 
 void
-FawkesThreadManager::try_recover(std::list<std::string> &recovered_threads)
+ThreadManager::try_recover(std::list<std::string> &recovered_threads)
 {
   __threads.lock();
   for (__tit = __threads.begin(); __tit != __threads.end(); ++__tit) {
@@ -530,14 +550,14 @@ FawkesThreadManager::try_recover(std::list<std::string> &recovered_threads)
 
 
 bool
-FawkesThreadManager::timed_threads_exist()
+ThreadManager::timed_threads_exist()
 {
   return (__threads.size() > 0);
 }
 
 
 void
-FawkesThreadManager::wait_for_timed_threads()
+ThreadManager::wait_for_timed_threads()
 {
   __interrupt_timed_thread_wait = false;
   __waitcond_timedthreads->wait();
@@ -548,7 +568,7 @@ FawkesThreadManager::wait_for_timed_threads()
 }
 
 void
-FawkesThreadManager::interrupt_timed_thread_wait()
+ThreadManager::interrupt_timed_thread_wait()
 {
   __interrupt_timed_thread_wait = true;
   __waitcond_timedthreads->wake_all();
@@ -560,7 +580,7 @@ FawkesThreadManager::interrupt_timed_thread_wait()
  * @return thread collector instance to use for ThreadProducerAspect.
  */
 ThreadCollector *
-FawkesThreadManager::aspect_collector() const
+ThreadManager::aspect_collector() const
 {
   return __aspect_collector;
 }

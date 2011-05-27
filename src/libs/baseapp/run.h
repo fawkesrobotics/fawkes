@@ -27,9 +27,17 @@
 namespace fawkes {
   class ArgumentParser;
   class MultiLogger;
+  class NetworkLogger;
   class BlackBoard;
   class SQLiteConfiguration;
   class FawkesMainThread;
+  class PluginManager;
+  class AspectManager;
+  class ThreadManager;
+  class FawkesNetworkManager;
+  class Clock;
+  class ConfigNetworkHandler;
+  class PluginNetworkHandler;
 
   namespace runtime {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -40,8 +48,16 @@ namespace fawkes {
 extern ArgumentParser       *argument_parser;
 extern FawkesMainThread     *main_thread;
 extern MultiLogger          *logger;
+extern NetworkLogger        *network_logger;
 extern BlackBoard           *blackboard;
 extern SQLiteConfiguration  *config;
+extern Clock                *clock;
+extern PluginManager        *plugin_manager;
+extern AspectManager        *aspect_manager;
+extern ThreadManager        *thread_manager;
+extern FawkesNetworkManager *network_manager;
+extern ConfigNetworkHandler *nethandler_config;
+extern PluginNetworkHandler *nethandler_plugin;
 
 int  init(int argc, char **argv);
 void run();

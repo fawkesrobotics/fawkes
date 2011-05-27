@@ -29,14 +29,9 @@
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <config/sqlite.h>
-#include <config/net_handler.h>
-#include <utils/logging/multi.h>
-#include <utils/logging/console.h>
-#include <utils/logging/liblogger.h>
-#include <utils/logging/factory.h>
+#include <logging/multi.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
-#include <netcomm/utils/network_logger.h>
 #include <netcomm/fawkes/network_manager.h>
 #include <blackboard/local.h>
 
@@ -48,6 +43,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
+#include <cstdlib>
 
 #include <core/macros.h>
 
@@ -77,30 +73,20 @@ namespace fawkes {
  */
 FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
 				   MultiLogger *multi_logger,
-				   BlackBoard *blackboard,
-				   const char *load_plugins,
-				   unsigned short tcp_port,
-				   const char *service_name)
+				   ThreadManager *thread_manager,
+				   PluginManager *plugin_manager,
+				   const char *load_plugins)
   : Thread("FawkesMainThread")
 {
-  __config_nethandler = NULL;
-  __config            = NULL;
-  __plugin_manager    = NULL;
-  __network_manager   = NULL;
-  __thread_manager    = NULL;
-  __aspect_manager    = NULL;
+  __plugin_manager    = plugin_manager;
+  __thread_manager    = thread_manager;
+  __multi_logger      = multi_logger;
+  __sqlite_conf       = config;
+  __config            = config;
 
   __mainloop_thread   = NULL;
   __mainloop_mutex    = new Mutex();
   __mainloop_barrier  = new InterruptibleBarrier(__mainloop_mutex, 2);
-
-  __plugin_mutex      = new Mutex();
-
-
-  __multi_logger      = multi_logger;
-  __sqlite_conf       = config;
-  __config            = config;
-  __blackboard        = blackboard;
 
   __load_plugins      = NULL;
   if (load_plugins) {
@@ -109,48 +95,6 @@ FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
 
   /* Clock */
   __clock = Clock::instance();
-
-  /* Managers */
-  try {
-    __thread_manager     = new FawkesThreadManager();
-    __aspect_manager     = new AspectManager();
-    __thread_manager->set_inifin(__aspect_manager, __aspect_manager);
-    __plugin_manager     = new PluginManager(__thread_manager, __config,
-					     "/fawkes/meta_plugins/");
-    __network_manager    = new FawkesNetworkManager(__thread_manager,
-						    tcp_port,
-						    service_name);
-    __config_nethandler  = new ConfigNetworkHandler(__config,
-						    __network_manager->hub());
-  } catch (Exception &e) {
-    e.append("Initializing managers failed");
-    destruct();
-    throw;
-  }
-
-  __network_logger = new NetworkLogger(__network_manager->hub(),
-				       __multi_logger->loglevel());
-  __multi_logger->add_logger(__network_logger);
-
-  __aspect_manager->register_default_inifins(__blackboard,
-					     __thread_manager->aspect_collector(),
-					     __config, __multi_logger, __clock,
-					     __network_manager->hub(),
-					     this, this, __thread_manager,
-					     __network_manager->nnresolver(),
-					     __network_manager->service_publisher(),
-					     __network_manager->service_browser(),
-					     __plugin_manager);
-
-  __plugin_nethandler = new PluginNetworkHandler(__plugin_manager,
-						 __network_manager->hub(),
-						 __plugin_mutex);
-  __plugin_nethandler->start();
-
-  LocalBlackBoard *lbb = dynamic_cast<LocalBlackBoard *>(__blackboard);
-  if (lbb) {
-    lbb->start_nethandler(__network_manager->hub());
-  }
 
   __loop_start = new Time(__clock);
   __loop_end   = new Time(__clock);
@@ -232,29 +176,12 @@ FawkesMainThread::destruct()
 
   if (__load_plugins)  free(__load_plugins);
 
-  // Must delete network logger first since network manager
-  // has to die before the LibLogger is finalized.
-  __multi_logger->remove_logger(__network_logger);
-  delete __network_logger;
-
-  if ( __plugin_nethandler ) {
-    __plugin_nethandler->cancel();
-    __plugin_nethandler->join();
-    delete __plugin_nethandler;
-  }
-  delete __plugin_manager;
-  delete __config_nethandler;
-  delete __network_manager;
-  delete __thread_manager;
-  delete __aspect_manager;
   delete __time_wait;
   delete __loop_start;
   delete __loop_end;
 
   delete __mainloop_barrier;
   delete __mainloop_mutex;
-
-  delete __plugin_mutex;
 }
 
 void
@@ -300,20 +227,6 @@ FawkesMainThread::set_mainloop_thread(Thread *mainloop_thread)
 
 
 void
-FawkesMainThread::add_logger(Logger *logger)
-{
-  __multi_logger->add_logger(logger);
-}
-
-
-void
-FawkesMainThread::remove_logger(Logger *logger)
-{
-  __multi_logger->remove_logger(logger);
-}
-
-
-void
 FawkesMainThread::loop()
 {
   if ( ! __thread_manager->timed_threads_exist() ) {
@@ -328,7 +241,7 @@ FawkesMainThread::loop()
     }
   }
 
-  __plugin_mutex->lock();
+  __plugin_manager->lock();
 
   try {
     if ( __time_wait ) {
@@ -411,7 +324,7 @@ FawkesMainThread::loop()
       }
     }
 
-    __plugin_mutex->unlock();
+    __plugin_manager->unlock();
 
     if ( __time_wait ) {
       __time_wait->wait_systime();
