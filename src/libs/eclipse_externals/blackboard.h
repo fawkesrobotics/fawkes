@@ -43,4 +43,5 @@ extern "C" int p_write_to_interface();
 extern "C" int p_send_message();
 extern "C" int p_recv_messages();
 
-#endif /* __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_BB_INTERFACE_H_ */
+#endif
+

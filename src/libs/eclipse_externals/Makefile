@@ -36,7 +36,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_eclipse
 warning_eclipse:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe externals(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe externals$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
