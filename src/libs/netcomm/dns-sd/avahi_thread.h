@@ -3,7 +3,7 @@
  *  avahi_thread.h - Avahi Thread
  *
  *  Created: Wed Nov 08 11:17:06 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
