@@ -29,7 +29,7 @@ INSERT INTO "config" VALUES('/worldinfo/sleep_time_msec','unsigned int','10','Ti
 INSERT INTO "config" VALUES('/worldinfo/max_msgs_per_recv','unsigned int','20','Maximum number of messages to process per receive');
 INSERT INTO "config" VALUES('/worldinfo/flush_time_sec','unsigned int','5','Time of inactivity after which the world info message sequence number is resetted; sec');
 INSERT INTO "config" VALUES('/worldinfo/multicast_loopback','bool','1','Enable loopback for multicast messages?');
-INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests; TCP port');
+INSERT INTO "config" VALUES('/webview/port','unsigned int','8088','TCP port for Webview HTTP requests; TCP port');
 INSERT INTO "config" VALUES('/webview/use_ssl','bool',0,'Encrypt connections?');
 INSERT INTO "config" VALUES('/webview/ssl_create','bool',1,'Create self-signed certificate if key and certificate files not found?');
 INSERT INTO "config" VALUES('/webview/ssl_key','string','webview.key','Key file name, if not absolute relative to config dir.');
