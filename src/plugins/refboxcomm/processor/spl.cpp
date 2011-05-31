@@ -25,7 +25,7 @@
 #include "state_handler.h"
 #include <core/exception.h>
 #include <netcomm/socket/datagram.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #ifdef USE_SPL_GC6
 #  include <interfaces/SoccerPenaltyInterface.h>
