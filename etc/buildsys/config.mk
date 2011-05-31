@@ -95,11 +95,8 @@ IFACESRCDIR   = $(abspath $(TOP_BASEDIR)/src/interfaces)
 LOGDIR        = $(abspath $(TOP_BASEDIR)/log)
 DOCDIR        = $(abspath $(FAWKES_BASEDIR)/doc)
 MANDIR        = $(abspath $(DOCDIR)/man)
-FVSRCDIR      = $(abspath $(FAWKES_BASEDIR)/src/firevision)
-TOP_FVSRCDIR  = $(abspath $(TOP_BASEDIR)/src/firevision)
 BASESRCDIRS   = $(abspath $(FAWKES_BASEDIR)/src $(TOP_BASEDIR)/src)
 LIBSRCDIRS    = $(abspath $(FAWKES_BASEDIR)/src/libs $(TOP_BASEDIR)/src/libs)
-FVSRCDIRS     = $(abspath $(FAWKES_BASEDIR)/src/firevision $(TOP_BASEDIR)/src/firevision)
 BUILDCONFDIR  = $(LIBSRCDIR)
 
 # Paths at execution time, may be different if installed or deployed
@@ -173,7 +170,7 @@ COMMA := ,
 LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
 LIBDIRS_EXEC_BASE= $(EXEC_LIBDIR) $(EXEC_LIBDIR)/interfaces
 LDFLAGS_RPATH    = $(addprefix -Wl$(COMMA)-rpath -Wl$(COMMA),$(LIBDIRS_EXEC_BASE) $(LIBDIRS_BASE) $(LIBDIRS))
-DEFAULT_INCLUDES = $(addprefix -I,$(BASESRCDIRS) $(LIBSRCDIRS) $(FVSRCDIRS))
+DEFAULT_INCLUDES = $(addprefix -I,$(BASESRCDIRS) $(LIBSRCDIRS))
 CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
 		   -DPLUGINDIR=\"$(EXEC_PLUGINDIR)\" -DIFACEDIR=\"$(EXEC_IFACEDIR)\" \
 		   -DCONFDIR=\"$(EXEC_CONFDIR)\" -DUSERDIR=\"$(EXEC_USERDIR)\" \
