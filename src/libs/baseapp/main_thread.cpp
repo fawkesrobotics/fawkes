@@ -65,11 +65,10 @@ namespace fawkes {
  * @param config configuration to use
  * @param multi_logger basic multi logger to use, a network logger will be
  * added in the ctor.
- * @param blackboard blackboard to use to communicate
+ * @param thread_manager thread manager used to wakeup threads
+ * @param plugin_manager plugin manager to load the desired plugins
  * @param load_plugins string with comma-separated list of names of plugins
  * to load on startup.
- * @param tcp_port TCP port to listen on for Fawkes network connections
- * @param service_name mDNS-SD service name to announce Fawkes with
  */
 FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
 				   MultiLogger *multi_logger,

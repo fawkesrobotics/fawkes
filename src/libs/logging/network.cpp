@@ -43,7 +43,7 @@ NetworkLoggerMessageContent::serialize()
 }
 
 
-/** @class NetworkLogger <netcomm/utils/network_logger.h>
+/** @class NetworkLogger <logging/network.h>
  * Interface for logging to network clients.
  * The NetwokLogger will pipe all output to clients that subscribed for log
  * messages.
@@ -428,7 +428,7 @@ NetworkLogger::client_disconnected(unsigned int clid)
 }
 
 
-/** @class NetworkLoggerMessageContent <netcomm/utils/network_logger.h>
+/** @class NetworkLoggerMessageContent <logging/network.h>
  * Message sent over the network with a log message.
  * Contains a buffer with a small header and two null-terminated strings, the first
  * being the component and the second being the real message.

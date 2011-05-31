@@ -62,8 +62,6 @@ namespace fawkes {
 /** Constructor.
  * @param manager plugin manager for the actual work
  * @param hub Fawkes network hub
- * @param mutex mutex that will be used to protect loading and unloading of
- * plugins.
  */
 PluginNetworkHandler::PluginNetworkHandler(PluginManager *manager,
 					   FawkesNetworkHub *hub)
