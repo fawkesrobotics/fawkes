@@ -85,7 +85,7 @@ endif
 
 ifeq ($(HAVE_OPENCV),1)
   CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS_OPENCV     = $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
+  LDFLAGS_OPENCV     = $(filter-out -lhighgui -lcvaux,$(shell $(PKGCONFIG) --libs 'opencv'))
   LDFLAGS_OPENCV_GUI = -lhighgui
 endif
 
