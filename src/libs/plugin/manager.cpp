@@ -35,6 +35,7 @@
 #  include <utils/system/fam_thread.h>
 #endif
 #include <config/config.h>
+#include <utils/system/dynamic_module/module_manager.h>
 
 #include <algorithm>
 #include <cstring>
@@ -132,6 +133,15 @@ PluginManager::~PluginManager()
   delete __mutex;
 }
 
+
+/** Set flags to open modules with.
+ * @param open_flags flags to pass to modules when opening them
+ */
+void
+PluginManager::set_module_flags(Module::ModuleFlags flags)
+{
+  plugin_loader->get_module_manager()->set_open_flags(flags);
+}
 
 void
 PluginManager::init_pinfo_cache()

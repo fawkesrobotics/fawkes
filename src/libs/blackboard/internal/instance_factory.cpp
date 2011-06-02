@@ -3,7 +3,7 @@
  *  instance_factory.cpp - BlackBoard interface instance factory
  *
  *  Created: Mon Mar 03 18:01:53 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -26,7 +26,7 @@
 
 #include <interface/interface.h>
 
-#include <utils/system/dynamic_module/module_manager_factory.h>
+#include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
 
 #include <cstdlib>
@@ -46,7 +46,7 @@ namespace fawkes {
 /** Constructor.*/
 BlackBoardInstanceFactory::BlackBoardInstanceFactory()
 {
-  __mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, IFACEDIR);
+  __mm = new ModuleManager(IFACEDIR);
 }
 
 

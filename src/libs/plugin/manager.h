@@ -29,6 +29,7 @@
 #include <core/utils/lock_map.h>
 #include <config/change_handler.h>
 #include <utils/system/fam.h>
+#include <utils/system/dynamic_module/module.h>
 
 #include <string>
 #include <utility>
@@ -58,6 +59,8 @@ class PluginManager
 		Configuration *config,
 		const char *meta_plugin_prefix);
   ~PluginManager();
+
+  void set_module_flags(Module::ModuleFlags flags);
 
   // for ConfigurationChangeHandler
   virtual void config_tag_changed(const char *new_location);
