@@ -79,20 +79,30 @@ private:
  * and removed from appropriately.
  * @param config Fawkes configuration
  * @param meta_plugin_prefix Path prefix for meta plugins
+ * @param module_flags flags to use to open plugin modules
+ * @param init_cache true to initialize the plugin cache, false to skip this
+ * step. Note that some functions like transmitting a list of available plugins
+ * is unavailable until the cache has been initialized. You can defer
+ * initialization of the cache if required.
  */
 PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     Configuration *config,
-			     const char *meta_plugin_prefix)
+			     const char *meta_plugin_prefix,
+			     Module::ModuleFlags module_flags,
+			     bool init_cache)
   : ConfigurationChangeHandler(meta_plugin_prefix)
 {
   __mutex = new Mutex();
   this->thread_collector = thread_collector;
   plugin_loader = new PluginLoader(PLUGINDIR, config);
+  plugin_loader->get_module_manager()->set_open_flags(module_flags);
   next_plugin_id = 1;
   __config = config;
   __meta_plugin_prefix = meta_plugin_prefix;
 
-  init_pinfo_cache();
+  if (init_cache) {
+    init_pinfo_cache();
+  }
 
   __config->add_change_handler(this);
 
@@ -135,7 +145,7 @@ PluginManager::~PluginManager()
 
 
 /** Set flags to open modules with.
- * @param open_flags flags to pass to modules when opening them
+ * @param flags flags to pass to modules when opening them
  */
 void
 PluginManager::set_module_flags(Module::ModuleFlags flags)
@@ -143,6 +153,8 @@ PluginManager::set_module_flags(Module::ModuleFlags flags)
   plugin_loader->get_module_manager()->set_open_flags(flags);
 }
 
+
+/** Initialize plugin info cache. */
 void
 PluginManager::init_pinfo_cache()
 {

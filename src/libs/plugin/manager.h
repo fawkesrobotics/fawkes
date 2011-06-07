@@ -57,10 +57,13 @@ class PluginManager
  public:
   PluginManager(ThreadCollector *thread_collector,
 		Configuration *config,
-		const char *meta_plugin_prefix);
+		const char *meta_plugin_prefix,
+		Module::ModuleFlags module_flags = Module::MODULE_FLAGS_DEFAULT,
+		bool init_cache = true);
   ~PluginManager();
 
   void set_module_flags(Module::ModuleFlags flags);
+  void init_pinfo_cache();
 
   // for ConfigurationChangeHandler
   virtual void config_tag_changed(const char *new_location);
@@ -87,7 +90,6 @@ class PluginManager
   void unlock();
 
  private:
-  void init_pinfo_cache();
   void notify_loaded(const char *plugin_name);
   void notify_unloaded(const char *plugin_name);
 
