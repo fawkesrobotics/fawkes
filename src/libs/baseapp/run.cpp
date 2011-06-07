@@ -73,26 +73,25 @@ FawkesNetworkManager *network_manager = NULL;
 ConfigNetworkHandler *nethandler_config = NULL;
 PluginNetworkHandler *nethandler_plugin = NULL;
 Clock                *clock = NULL;
+InitOptions          *init_options = NULL;
 
 int
 init(int argc, char **argv)
 {
-  // *** parse arguments
+  return init(InitOptions(argc, argv));
+}
 
-  option long_options[] = {
-    {"net-service-name", 1, 0, 0},
-      {0, 0, 0, 0}
-  };
-  
-  argument_parser = new ArgumentParser(argc, argv,
-				       "hCc:d:q::l:L:p:P:u:g:D::ks",
-				       long_options);
 
-  if ( argument_parser->has_arg("D") ) {
-    fawkes::daemon::init(argument_parser->arg("D"), argv[0]);
-    if (argument_parser->has_arg("k")) {
+int
+init(InitOptions options)
+{
+  init_options = new InitOptions(options);
+
+  if ( options.daemonize() ) {
+    fawkes::daemon::init(options.daemon_pid_file(), options.basename());
+    if (options.daemonize_kill()) {
       fawkes::daemon::kill();
-    } else if (argument_parser->has_arg("s")) {
+    } else if (options.daemonize_status()) {
       return fawkes::daemon::running() ? 0 : 1;
     } else {
       fawkes::daemon::start();
@@ -102,11 +101,11 @@ init(int argc, char **argv)
   // *** set user group if requested
   const char *user  = NULL;
   const char *group = NULL;
-  if (argument_parser->has_arg("u")) {
-    user = argument_parser->arg("u");
+  if (options.has_username()) {
+    user = options.username();
   }
-  if (argument_parser->has_arg("g")) {
-    group = argument_parser->arg("g");
+  if (options.has_groupname()) {
+    group = options.groupname();
   }
 
   if (user != NULL) {
@@ -140,41 +139,9 @@ init(int argc, char **argv)
   SharedMemoryRegistry shm_registry(true);
 
   // *** setup logging
-  const char *tmp;
-  Logger::LogLevel log_level = Logger::LL_DEBUG;
-  if ( argument_parser->has_arg("q") ) {
-    log_level = Logger::LL_INFO;
-    if ( (tmp = argument_parser->arg("q")) != NULL ) {
-      for (unsigned int i = 0; i < strlen(tmp); ++i) {
-	if ( tmp[i] == 'q' ) {
-	  switch (log_level) {
-	  case Logger::LL_INFO:  log_level = Logger::LL_WARN; break;
-	  case Logger::LL_WARN:  log_level = Logger::LL_ERROR; break;
-	  case Logger::LL_ERROR: log_level = Logger::LL_NONE; break;
-	  default: break;
-	  }
-	}
-      }
-    }
-  } else if ( (tmp = argument_parser->arg("l")) != NULL ) {
-    if ( strcmp(tmp, "debug") == 0 ) {
-      log_level = Logger::LL_DEBUG;
-    } else if ( strcmp(tmp, "info") == 0 ) {
-      log_level = Logger::LL_INFO;
-    } else if ( strcmp(tmp, "warn") == 0 ) {
-      log_level = Logger::LL_WARN;
-    } else if ( strcmp(tmp, "error") == 0 ) {
-      log_level = Logger::LL_ERROR;
-    } else if ( strcmp(tmp, "none") == 0 ) {
-      log_level = Logger::LL_NONE;
-    } else {
-      printf("Unknown log level '%s', using default\n", tmp);
-    }
-  }
-
-  if ( argument_parser->has_arg("L") != 0 ) {
+  if (options.has_loggers()) {
     try {
-      logger = LoggerFactory::multilogger_instance(argument_parser->arg("L"));
+      logger = LoggerFactory::multilogger_instance(options.loggers());
     } catch (Exception &e) {
       e.append("Initializing multi logger failed");
       throw;
@@ -183,7 +150,7 @@ init(int argc, char **argv)
     logger = new MultiLogger(new ConsoleLogger());
   }
 
-  logger->set_loglevel(log_level);
+  logger->set_loglevel(options.log_level());
   LibLogger::init(logger);
 
   // *** Prepare home dir directory, just in case
@@ -204,7 +171,7 @@ init(int argc, char **argv)
   // *** setup config
   config = new SQLiteConfiguration(CONFDIR);
 
-  config->load(argument_parser->arg("c"), argument_parser->arg("d"));
+  config->load(options.host_config(), options.default_config());
 
   try {
     SQLiteConfiguration::SQLiteValueIterator *i = config->modified_iterator();
@@ -232,21 +199,16 @@ init(int argc, char **argv)
   // *** Determine network parameters
   unsigned int net_tcp_port     = 1910;
   std::string  net_service_name = "Fawkes on %h";
-  if (argument_parser->has_arg("P")) {
-    try {
-      net_tcp_port = argument_parser->parse_int("P");
-    } catch (Exception &e) {
-      logger->log_warn("FawkesMainThread", "Illegal port '%s', using %u",
-		       argument_parser->arg("P"), net_tcp_port);
-    }
+  if (options.has_net_tcp_port()) {
+    net_tcp_port = options.net_tcp_port();
   } else {
     try {
       net_tcp_port = config->get_uint("/fawkes/mainapp/net/tcp_port");
     } catch (Exception &e) {}  // ignore, we stick with the default
   }
 
-  if (argument_parser->has_arg("net-service-name")) {
-    net_service_name = argument_parser->arg("net-service-name");
+  if (options.has_net_service_name()) {
+    net_service_name = options.net_service_name();
   } else {
     try {
       net_service_name = config->get_string("/fawkes/mainapp/net/service_name");
@@ -278,11 +240,11 @@ init(int argc, char **argv)
   }
 
   // Cleanup stale BlackBoard shared memory segments if requested
-  if ( argument_parser->has_arg("C") ) {
+  if ( options.bb_cleanup()) {
     LocalBlackBoard::cleanup(bb_magic_token.c_str(),
 			     /* output with lister? */ true);
   }
-
+  
   LocalBlackBoard *lbb = NULL;
   if ( bb_magic_token == "") {
     lbb = new LocalBlackBoard(bb_size);
@@ -295,7 +257,9 @@ init(int argc, char **argv)
   thread_manager     = new ThreadManager(aspect_manager, aspect_manager);
 
   plugin_manager     = new PluginManager(thread_manager, config,
-					 "/fawkes/meta_plugins/");
+					 "/fawkes/meta_plugins/",
+					 options.plugin_module_flags(),
+					 options.init_plugin_cache());
   network_manager    = new FawkesNetworkManager(thread_manager,
 						net_tcp_port,
 						net_service_name.c_str());
@@ -319,7 +283,7 @@ init(int argc, char **argv)
   main_thread = new fawkes::FawkesMainThread(config, logger,
 					     thread_manager,
 					     plugin_manager,
-					     argument_parser->arg("p"));
+					     options.load_plugin_list());
 
   aspect_manager->register_default_inifins(blackboard,
 					   thread_manager->aspect_collector(),
@@ -342,7 +306,7 @@ cleanup()
 {
   Thread::destroy_main();
 
-  if ( argument_parser->has_arg("D") ) {
+  if (init_options->daemonize()) {
     fawkes::daemon::cleanup();
   }
 
@@ -356,6 +320,7 @@ cleanup()
 
   delete main_thread;
   delete argument_parser;
+  delete init_options;
   delete nethandler_config;
   delete nethandler_plugin;
   delete plugin_manager;
