@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 # base + hardware drivers + functional + integration
 SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
-	  laser flite joystick katana pantilt vision roomba \
+	  laser flite joystick katana pantilt vision roomba nao \
 	  skiller luaagent worldmodel laserht \
 	  openni refboxcomm player xmlrpc \
 	  readylogagent
