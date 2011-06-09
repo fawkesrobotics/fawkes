@@ -20,8 +20,10 @@ PRESUBDIRS = interfaces
 
 LIBS_naoqi = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	   fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
-	   alcore alcommon
-OBJS_naoqi = naoqi_plugin.o broker_thread.o
+	   alcore alcommon alvalue almemoryfastaccess \
+	   boost_serialization-mt boost_signals-mt \
+	   NaoHardwareInterface
+OBJS_naoqi = naoqi_plugin.o broker_thread.o dcm_thread.o
 
 LIBS_libnaofawkes = dl fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkesnaoqiaspect fawkesbaseapp \

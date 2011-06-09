@@ -23,11 +23,11 @@
 #include <core/plugin.h>
 
 #include "broker_thread.h"
+#include "dcm_thread.h"
 
 using namespace fawkes;
 
-/** @class NaoQiPlugin "nao_plugin.h"
- * Plugin to access NaoQi from Fawkes.
+/** Plugin to access NaoQi from Fawkes.
  * This plugin integrates NaoQi and provides access to the NaoQi broker
  * to other plugins.
  * @author Tim Niemueller
@@ -42,6 +42,7 @@ class NaoQiPlugin : public fawkes::Plugin
     : Plugin(config)
   {
     thread_list.push_back(new NaoQiBrokerThread());
+    thread_list.push_back(new NaoQiDCMThread());
   }
 };
 
