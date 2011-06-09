@@ -27,6 +27,7 @@
 #include <core/exception.h>
 #include <core/threading/thread.h>
 #include <plugin/manager.h>
+#include <utils/system/dynamic_module/module.h>
 
 #include <alcore/altypes.h>
 #include <alcommon/albroker.h>
@@ -58,19 +59,30 @@ class NaoFawkesModule : public AL::ALModule
   {
     setModuleDescription("Fawkes integration module");
 
-    int argc = 2;
-    const char *argv[] = { "naofawkes",
-			   "--net-service-name=\"NaoQi Fawkes on %h\"" };
     try {
       printf("*** Initializing embedded Fawkes\n");
-      if (fawkes::runtime::init(argc, (char **)argv) != 0) {
+
+      // The module flags hack is required because otherwise NaoQi segfaults
+      // due to problems with boost static initialization after a module
+      // has been closed once, unfortunately that prevents loading a
+      // new version of a plugin without a restart.
+
+      fawkes::runtime::InitOptions init_options = 
+	fawkes::runtime::InitOptions("naofawkes")
+	.plugin_module_flags(fawkes::Module::MODULE_FLAGS_DEFAULT |
+			     fawkes::Module::MODULE_NODELETE)
+	.net_service_name("NaoQi Fawkes on %h")
+	.load_plugins("naoqi");
+
+      if (fawkes::runtime::init(init_options) != 0) {
 	//throw AL::ALError(name, "ctor", "Initializing Fawkes failed");
 	printf("--- Fawkes initialization failed\n");
       } else {
+
 	printf("*** Starting embedded Fawkes\n");
 	fawkes::runtime::main_thread->start();
-	printf("*** Loading plugins\n");
-	fawkes::runtime::plugin_manager->load("naoqi");
+	//printf("*** Loading plugins\n");
+	//fawkes::runtime::plugin_manager->load("naoqi");
       }
     } catch (fawkes::Exception &e) {
       printf("--- Fawkes initialization failed, exception follows.\n");
