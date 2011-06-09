@@ -1,5 +1,6 @@
 HumanSkeletonProjectionInterface.h
 KatanaInterface.h
+NaoHardwareInterface.h
 PanTiltInterface.h
 SkillerDebugInterface.h
 Roomba500Interface.h

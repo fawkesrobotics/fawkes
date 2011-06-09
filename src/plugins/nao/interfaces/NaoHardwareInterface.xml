@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NaoHardwareInterface" author="Tim Niemueller" year="2008">
+  <constants>
+    <constant type="uint32" name="SERVO_head_yaw" value="1">Head yaw servo</constant>
+    <constant type="uint32" name="SERVO_head_pitch" value="2">Head pitch</constant>
+    <constant type="uint32" name="SERVO_l_shoulder_pitch" value="4">Left shoulder pitch</constant>
+    <constant type="uint32" name="SERVO_l_shoulder_roll" value="8">Left shoulder roll</constant>
+    <constant type="uint32" name="SERVO_l_elbow_yaw" value="16">Left elbow yaw</constant>
+    <constant type="uint32" name="SERVO_l_elbow_roll" value="32">Left elbow roll</constant>
+    <constant type="uint32" name="SERVO_l_hip_yaw_pitch" value="64">Left hip yaw pitch</constant>
+    <constant type="uint32" name="SERVO_l_hip_roll" value="128">Left hip roll</constant>
+    <constant type="uint32" name="SERVO_l_hip_pitch" value="256">Left hip pitch</constant>
+    <constant type="uint32" name="SERVO_l_knee_pitch" value="512">Left knee pitch</constant>
+    <constant type="uint32" name="SERVO_l_ankle_pitch" value="1024">Left ankle pitch</constant>
+    <constant type="uint32" name="SERVO_l_ankle_roll" value="2048">Left ankle roll</constant>
+    <constant type="uint32" name="SERVO_r_hip_yaw_pitch" value="4096">Right hip yaw pitch</constant>
+    <constant type="uint32" name="SERVO_r_hip_roll" value="8192">Right hip roll</constant>
+    <constant type="uint32" name="SERVO_r_hip_pitch" value="16384">Right hip pitch</constant>
+    <constant type="uint32" name="SERVO_r_knee_pitch" value="32768">Right knee pitch</constant>
+    <constant type="uint32" name="SERVO_r_ankle_pitch" value="65536">Right ankle pitch</constant>
+    <constant type="uint32" name="SERVO_r_ankle_roll" value="131072">Right ankle roll</constant>
+    <constant type="uint32" name="SERVO_r_shoulder_pitch" value="262144">Right shoulder pitch</constant>
+    <constant type="uint32" name="SERVO_r_shoulder_roll" value="524288">Right shoulder roll</constant>
+    <constant type="uint32" name="SERVO_r_elbow_yaw" value="1048576">Right elbow yaw</constant>
+    <constant type="uint32" name="SERVO_r_elbow_roll" value="2097152">Right elbow roll</constant>
+    <!-- Note: if you add servos appropriately increase SERVO_max! -->
+    <constant type="uint32" name="SERVO_min" value="1">Minimum value for servos</constant>
+    <constant type="uint32" name="SERVO_max" value="2097152">Maximum value for servos</constant>
+
+    <constant type="float" name="USD_left_left" value="0.0">Ultrasonic left-to-left wave</constant>
+    <constant type="float" name="USD_left_right" value="1.0">Ultrasonic left-to-right wave</constant>
+    <constant type="float" name="USD_right_left" value="2.0">Ultrasonic right-to-left wave</constant>
+    <constant type="float" name="USD_right_right" value="3.0">Ultrasonic right-to-right wave</constant>
+
+    <enum name="InterpolationType">
+      <comment>
+	This determines the type of the interpolation.
+      </comment>
+      <item name="INTERPOLATION_LINEAR">Linear interpolation.</item>
+      <item name="INTERPOLATION_SMOOTH">Smooth interpolation.</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      This interface provides access to the hardware related data of a Nao robot.
+    </comment>
+    <pseudomap type="float" keytype="uint32" name="servo_value">
+      <comment>Access servo value via SERVO_* constant.</comment>
+      <mapref key="1">head_yaw</mapref>
+      <mapref key="2">head_pitch</mapref>
+      <mapref key="4">l_shoulder_pitch</mapref>
+      <mapref key="8">l_shoulder_roll</mapref>
+      <mapref key="16">l_elbow_yaw</mapref>
+      <mapref key="32">l_elbow_roll</mapref>
+      <mapref key="64">l_hip_yaw_pitch</mapref>
+      <mapref key="128">l_hip_roll</mapref>
+      <mapref key="256">l_hip_pitch</mapref>
+      <mapref key="512">l_knee_pitch</mapref>
+      <mapref key="1024">l_ankle_pitch</mapref>
+      <mapref key="2048">l_ankle_roll</mapref>
+      <mapref key="4096">r_hip_yaw_pitch</mapref>
+      <mapref key="8192">r_hip_roll</mapref>
+      <mapref key="16384">r_hip_pitch</mapref>
+      <mapref key="32768">r_knee_pitch</mapref>
+      <mapref key="65536">r_ankle_pitch</mapref>
+      <mapref key="131072">r_ankle_roll</mapref>
+      <mapref key="262144">r_shoulder_pitch</mapref>
+      <mapref key="524288">r_shoulder_roll</mapref>
+      <mapref key="1048576">r_elbow_yaw</mapref>
+      <mapref key="2097152">r_elbow_roll</mapref>
+    </pseudomap>
+    <field type="bool"  name="servo_enabled">True if servos are enabled, false otherwise</field>
+    <field type="float" name="head_yaw">Head yaw</field>
+    <field type="float" name="head_pitch">Head pitch</field>
+    <field type="float" name="l_shoulder_pitch">Left shoulder pitch</field>
+    <field type="float" name="l_shoulder_roll">Left shoulder roll</field>
+    <field type="float" name="l_elbow_yaw">Left elbow yaw</field>
+    <field type="float" name="l_elbow_roll">Left elbow roll</field>
+    <field type="float" name="l_hip_yaw_pitch">Left hip yaw pitch</field>
+    <field type="float" name="l_hip_roll">Left hip roll</field>
+    <field type="float" name="l_hip_pitch">Left hip pitch</field>
+    <field type="float" name="l_knee_pitch">Left knee pitch</field>
+    <field type="float" name="l_ankle_pitch">Left ankle pitch</field>
+    <field type="float" name="l_ankle_roll">Left ankle roll</field>
+    <field type="float" name="r_hip_yaw_pitch">Right hip yaw pitch</field>
+    <field type="float" name="r_hip_roll">Right hip roll</field>
+    <field type="float" name="r_hip_pitch">Right hip pitch</field>
+    <field type="float" name="r_knee_pitch">Right knee pitch</field>
+    <field type="float" name="r_ankle_pitch">Right ankle pitch</field>
+    <field type="float" name="r_ankle_roll">Right ankle roll</field>
+    <field type="float" name="r_shoulder_pitch">Right shoulder pitch</field>
+    <field type="float" name="r_shoulder_roll">Right shoulder roll</field>
+    <field type="float" name="r_elbow_yaw">Right elbow yaw</field>
+    <field type="float" name="r_elbow_roll">Right elbow roll</field>
+    <field type="float" name="accel_x">Accelerometer x</field>
+    <field type="float" name="accel_y">Accelerometer y</field>
+    <field type="float" name="accel_z">Accelerometer z</field>
+    <field type="float" name="gyro_x">Gyrometer x</field>
+    <field type="float" name="gyro_y">Gyrometer y</field>
+    <field type="float" name="gyro_ref">Gyrometer reference</field>
+    <field type="float" name="angle_x">Angle x</field>
+    <field type="float" name="angle_y">Angle y</field>
+    <field type="float" name="l_fsr_fl">Left FSR front left</field>
+    <field type="float" name="l_fsr_fr">Left FSR front right</field>
+    <field type="float" name="l_fsr_rl">Left FSR rear left</field>
+    <field type="float" name="l_fsr_rr">Left FSR rear right</field>
+    <field type="float" name="r_fsr_fl">Right FSR front left</field>
+    <field type="float" name="r_fsr_fr">Right FSR front right</field>
+    <field type="float" name="r_fsr_rl">Right FSR rear left</field>
+    <field type="float" name="r_fsr_rr">Right FSR rear right</field>
+    <field type="float" name="ultrasonic_distance">Ultrasonic sensor reading</field>
+    <field type="float" name="ultrasonic_direction">Direction that was used to gather the ultrasonic reading.</field>
+    <field type="float" name="l_bumper_l">Left foot bumper left side</field>
+    <field type="float" name="l_bumper_r">Left foot bumper right side</field>
+    <field type="float" name="r_bumper_l">Right foot bumper left side</field>
+    <field type="float" name="r_bumper_r">Right foot bumper right side</field>
+    <field type="float" name="chest_button">Chest button state</field>
+    <field type="float" name="battery_charge">Battery charge</field>
+    <field type="int32" name="time">
+      Current reference time in ms. For real hardware this is the DCM time.
+      Times in messages are always offsets to the current time and the current
+      time is added before executing the command.
+    </field>
+  </data>
+  <message name="SetServos">
+    <comment>Orders a setting of the servos to the specified angles.</comment>
+    <ref>head_yaw</ref>
+    <ref>head_pitch</ref>
+    <ref>l_shoulder_pitch</ref>
+    <ref>l_shoulder_roll</ref>
+    <ref>l_elbow_yaw</ref>
+    <ref>l_elbow_roll</ref>
+    <ref>l_hip_yaw_pitch</ref>
+    <ref>l_hip_roll</ref>
+    <ref>l_hip_pitch</ref>
+    <ref>l_knee_pitch</ref>
+    <ref>l_ankle_pitch</ref>
+    <ref>l_ankle_roll</ref>
+    <ref>r_hip_yaw_pitch</ref>
+    <ref>r_hip_roll</ref>
+    <ref>r_hip_pitch</ref>
+    <ref>r_knee_pitch</ref>
+    <ref>r_ankle_pitch</ref>
+    <ref>r_ankle_roll</ref>
+    <ref>r_shoulder_pitch</ref>
+    <ref>r_shoulder_roll</ref>
+    <ref>r_elbow_yaw</ref>
+    <ref>r_elbow_roll</ref>
+    <ref>time</ref>
+  </message>
+  <message name="GotoAngles">
+    <comment>Orders a setting of the servos to the specified angles with the
+      given interpolation for all joints in one go.</comment>
+    <ref>head_yaw</ref>
+    <ref>head_pitch</ref>
+    <ref>l_shoulder_pitch</ref>
+    <ref>l_shoulder_roll</ref>
+    <ref>l_elbow_yaw</ref>
+    <ref>l_elbow_roll</ref>
+    <ref>l_hip_yaw_pitch</ref>
+    <ref>l_hip_roll</ref>
+    <ref>l_hip_pitch</ref>
+    <ref>l_knee_pitch</ref>
+    <ref>l_ankle_pitch</ref>
+    <ref>l_ankle_roll</ref>
+    <ref>r_hip_yaw_pitch</ref>
+    <ref>r_hip_roll</ref>
+    <ref>r_hip_pitch</ref>
+    <ref>r_knee_pitch</ref>
+    <ref>r_ankle_pitch</ref>
+    <ref>r_ankle_roll</ref>
+    <ref>r_shoulder_pitch</ref>
+    <ref>r_shoulder_roll</ref>
+    <ref>r_elbow_yaw</ref>
+    <ref>r_elbow_roll</ref>
+    <field type="float" name="time_sec">Time in seconds when to reach the desired position</field>
+    <field type="InterpolationType" name="interpolation">Type of interpolation</field>
+  </message>
+  <message name="GotoAngle">
+    <comment>Orders a setting of the given servo to the specified angles with
+      the given interpolation.</comment>
+    <field type="uint32" name="servos">A concatenated list of SERVO_* constants to
+      define the servos that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants.</field>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <field type="float" name="time_sec">Time in seconds when to reach the desired position</field>
+    <field type="InterpolationType" name="interpolation">Type of interpolation</field>
+  </message>
+  <message name="GotoAngleWithSpeed">
+    <comment>Set selected servos to a specific value.</comment>
+    <field type="uint32" name="servos">A concatenated list of SERVO_* constants to
+      define the servos that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants.</field>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <field type="uint16" name="speed">Percentage of the servo speed (1-100).</field>
+  </message>
+  <message name="SetServo">
+    <comment>Set selected servos to a specific value.</comment>
+    <field type="uint32" name="servos">A concatenated list of SERVO_* constants to
+      define the servos that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants.</field>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <ref>time</ref>
+  </message>
+  <message name="EnableServos">
+    <comment>Enables servos. In NaoQi terms it sets stiffness to on.</comment>
+  </message>
+  <message name="DisableServos">
+    <comment>Disables servos. In NaoQi terms it sets stiffness to on.</comment>
+  </message>
+  <message name="SetGlobalStiffness">
+    <comment>Sets stiffness of all joints to the same value.</comment>
+    <ref>time</ref>
+    <field type="float" name="value">Stiffness value to set for all joints.(0-1)</field>
+  </message>
+  <message name="EmitUltrasonicWave">
+    <comment>Sends a ultrasonic wave for detection.</comment>
+    <ref>ultrasonic_direction</ref>
+    <ref>time</ref>
+  </message>
+</interface>
