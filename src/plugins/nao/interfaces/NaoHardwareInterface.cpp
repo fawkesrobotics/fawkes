@@ -51,42 +51,50 @@ const uint32_t NaoHardwareInterface::SERVO_l_shoulder_roll = 8u;
 const uint32_t NaoHardwareInterface::SERVO_l_elbow_yaw = 16u;
 /** SERVO_l_elbow_roll constant */
 const uint32_t NaoHardwareInterface::SERVO_l_elbow_roll = 32u;
+/** SERVO_l_wrist_yaw constant */
+const uint32_t NaoHardwareInterface::SERVO_l_wrist_yaw = 64u;
+/** SERVO_l_hand constant */
+const uint32_t NaoHardwareInterface::SERVO_l_hand = 128u;
 /** SERVO_l_hip_yaw_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_l_hip_yaw_pitch = 64u;
+const uint32_t NaoHardwareInterface::SERVO_l_hip_yaw_pitch = 256u;
 /** SERVO_l_hip_roll constant */
-const uint32_t NaoHardwareInterface::SERVO_l_hip_roll = 128u;
+const uint32_t NaoHardwareInterface::SERVO_l_hip_roll = 512u;
 /** SERVO_l_hip_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_l_hip_pitch = 256u;
+const uint32_t NaoHardwareInterface::SERVO_l_hip_pitch = 1024u;
 /** SERVO_l_knee_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_l_knee_pitch = 512u;
+const uint32_t NaoHardwareInterface::SERVO_l_knee_pitch = 2048u;
 /** SERVO_l_ankle_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_l_ankle_pitch = 1024u;
+const uint32_t NaoHardwareInterface::SERVO_l_ankle_pitch = 4096u;
 /** SERVO_l_ankle_roll constant */
-const uint32_t NaoHardwareInterface::SERVO_l_ankle_roll = 2048u;
-/** SERVO_r_hip_yaw_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_r_hip_yaw_pitch = 4096u;
-/** SERVO_r_hip_roll constant */
-const uint32_t NaoHardwareInterface::SERVO_r_hip_roll = 8192u;
-/** SERVO_r_hip_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_r_hip_pitch = 16384u;
-/** SERVO_r_knee_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_r_knee_pitch = 32768u;
-/** SERVO_r_ankle_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_r_ankle_pitch = 65536u;
-/** SERVO_r_ankle_roll constant */
-const uint32_t NaoHardwareInterface::SERVO_r_ankle_roll = 131072u;
+const uint32_t NaoHardwareInterface::SERVO_l_ankle_roll = 8192u;
 /** SERVO_r_shoulder_pitch constant */
-const uint32_t NaoHardwareInterface::SERVO_r_shoulder_pitch = 262144u;
+const uint32_t NaoHardwareInterface::SERVO_r_shoulder_pitch = 16384u;
 /** SERVO_r_shoulder_roll constant */
-const uint32_t NaoHardwareInterface::SERVO_r_shoulder_roll = 524288u;
+const uint32_t NaoHardwareInterface::SERVO_r_shoulder_roll = 32768u;
 /** SERVO_r_elbow_yaw constant */
-const uint32_t NaoHardwareInterface::SERVO_r_elbow_yaw = 1048576u;
+const uint32_t NaoHardwareInterface::SERVO_r_elbow_yaw = 65536u;
 /** SERVO_r_elbow_roll constant */
-const uint32_t NaoHardwareInterface::SERVO_r_elbow_roll = 2097152u;
+const uint32_t NaoHardwareInterface::SERVO_r_elbow_roll = 131072u;
+/** SERVO_r_wrist_yaw constant */
+const uint32_t NaoHardwareInterface::SERVO_r_wrist_yaw = 262144u;
+/** SERVO_r_hand constant */
+const uint32_t NaoHardwareInterface::SERVO_r_hand = 524288u;
+/** SERVO_r_hip_yaw_pitch constant */
+const uint32_t NaoHardwareInterface::SERVO_r_hip_yaw_pitch = 1048576u;
+/** SERVO_r_hip_roll constant */
+const uint32_t NaoHardwareInterface::SERVO_r_hip_roll = 2097152u;
+/** SERVO_r_hip_pitch constant */
+const uint32_t NaoHardwareInterface::SERVO_r_hip_pitch = 4194304u;
+/** SERVO_r_knee_pitch constant */
+const uint32_t NaoHardwareInterface::SERVO_r_knee_pitch = 8388608u;
+/** SERVO_r_ankle_pitch constant */
+const uint32_t NaoHardwareInterface::SERVO_r_ankle_pitch = 16777216u;
+/** SERVO_r_ankle_roll constant */
+const uint32_t NaoHardwareInterface::SERVO_r_ankle_roll = 33554432u;
 /** SERVO_min constant */
 const uint32_t NaoHardwareInterface::SERVO_min = 1u;
 /** SERVO_max constant */
-const uint32_t NaoHardwareInterface::SERVO_max = 2097152u;
+const uint32_t NaoHardwareInterface::SERVO_max = 33554432u;
 /** USD_left_left constant */
 const float NaoHardwareInterface::USD_left_left = 0.0;
 /** USD_left_right constant */
@@ -111,22 +119,26 @@ NaoHardwareInterface::NaoHardwareInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "l_shoulder_roll", 1, &data->l_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "l_elbow_yaw", 1, &data->l_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "l_elbow_roll", 1, &data->l_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "l_hip_yaw_pitch", 1, &data->l_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "l_hip_roll", 1, &data->l_hip_roll);
   add_fieldinfo(IFT_FLOAT, "l_hip_pitch", 1, &data->l_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "r_wrist_yaw", 1, &data->r_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_hand", 1, &data->r_hand);
   add_fieldinfo(IFT_FLOAT, "r_hip_yaw_pitch", 1, &data->r_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "r_hip_roll", 1, &data->r_hip_roll);
   add_fieldinfo(IFT_FLOAT, "r_hip_pitch", 1, &data->r_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "r_knee_pitch", 1, &data->r_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_pitch", 1, &data->r_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_roll", 1, &data->r_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
   add_fieldinfo(IFT_FLOAT, "accel_x", 1, &data->accel_x);
   add_fieldinfo(IFT_FLOAT, "accel_y", 1, &data->accel_y);
   add_fieldinfo(IFT_FLOAT, "accel_z", 1, &data->accel_z);
@@ -143,13 +155,22 @@ NaoHardwareInterface::NaoHardwareInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "r_fsr_fr", 1, &data->r_fsr_fr);
   add_fieldinfo(IFT_FLOAT, "r_fsr_rl", 1, &data->r_fsr_rl);
   add_fieldinfo(IFT_FLOAT, "r_fsr_rr", 1, &data->r_fsr_rr);
+  add_fieldinfo(IFT_FLOAT, "l_total_weight", 1, &data->l_total_weight);
+  add_fieldinfo(IFT_FLOAT, "r_total_weight", 1, &data->r_total_weight);
+  add_fieldinfo(IFT_FLOAT, "l_cop_x", 1, &data->l_cop_x);
+  add_fieldinfo(IFT_FLOAT, "l_cop_y", 1, &data->l_cop_y);
+  add_fieldinfo(IFT_FLOAT, "r_cop_x", 1, &data->r_cop_x);
+  add_fieldinfo(IFT_FLOAT, "r_cop_y", 1, &data->r_cop_y);
   add_fieldinfo(IFT_FLOAT, "ultrasonic_distance", 1, &data->ultrasonic_distance);
   add_fieldinfo(IFT_FLOAT, "ultrasonic_direction", 1, &data->ultrasonic_direction);
-  add_fieldinfo(IFT_FLOAT, "l_bumper_l", 1, &data->l_bumper_l);
-  add_fieldinfo(IFT_FLOAT, "l_bumper_r", 1, &data->l_bumper_r);
-  add_fieldinfo(IFT_FLOAT, "r_bumper_l", 1, &data->r_bumper_l);
-  add_fieldinfo(IFT_FLOAT, "r_bumper_r", 1, &data->r_bumper_r);
-  add_fieldinfo(IFT_FLOAT, "chest_button", 1, &data->chest_button);
+  add_fieldinfo(IFT_UINT8, "l_foot_bumper_l", 1, &data->l_foot_bumper_l);
+  add_fieldinfo(IFT_UINT8, "l_foot_bumper_r", 1, &data->l_foot_bumper_r);
+  add_fieldinfo(IFT_UINT8, "r_foot_bumper_l", 1, &data->r_foot_bumper_l);
+  add_fieldinfo(IFT_UINT8, "r_foot_bumper_r", 1, &data->r_foot_bumper_r);
+  add_fieldinfo(IFT_UINT8, "head_touch_front", 1, &data->head_touch_front);
+  add_fieldinfo(IFT_UINT8, "head_touch_middle", 1, &data->head_touch_middle);
+  add_fieldinfo(IFT_UINT8, "head_touch_rear", 1, &data->head_touch_rear);
+  add_fieldinfo(IFT_UINT8, "chest_button", 1, &data->chest_button);
   add_fieldinfo(IFT_FLOAT, "battery_charge", 1, &data->battery_charge);
   add_fieldinfo(IFT_INT32, "time", 1, &data->time);
   add_messageinfo("SetServosMessage");
@@ -161,7 +182,7 @@ NaoHardwareInterface::NaoHardwareInterface() : Interface()
   add_messageinfo("DisableServosMessage");
   add_messageinfo("SetGlobalStiffnessMessage");
   add_messageinfo("EmitUltrasonicWaveMessage");
-  unsigned char tmp_hash[] = {0x57, 0xd9, 0x69, 0xfd, 0x44, 0x7, 0x37, 0x62, 0xa0, 0x30, 0x47, 0xc3, 0xb5, 0xc9, 0xe4, 0xc0};
+  unsigned char tmp_hash[] = {0x10, 0x37, 0x9d, 0xed, 0xb0, 0xa0, 0xcd, 0xff, 0xc8, 0x4e, 0x21, 0x1f, 0xef, 0x8e, 0xde, 0xb4};
   set_hash(tmp_hash);
 }
 
@@ -401,6 +422,68 @@ NaoHardwareInterface::set_l_elbow_roll(const float new_l_elbow_roll)
   data_changed = true;
 }
 
+/** Get l_wrist_yaw value.
+ * Left wrist yaw
+ * @return l_wrist_yaw value
+ */
+float
+NaoHardwareInterface::l_wrist_yaw() const
+{
+  return data->l_wrist_yaw;
+}
+
+/** Get maximum length of l_wrist_yaw value.
+ * @return length of l_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_l_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set l_wrist_yaw value.
+ * Left wrist yaw
+ * @param new_l_wrist_yaw new l_wrist_yaw value
+ */
+void
+NaoHardwareInterface::set_l_wrist_yaw(const float new_l_wrist_yaw)
+{
+  data->l_wrist_yaw = new_l_wrist_yaw;
+  data_changed = true;
+}
+
+/** Get l_hand value.
+ * Left hand
+ * @return l_hand value
+ */
+float
+NaoHardwareInterface::l_hand() const
+{
+  return data->l_hand;
+}
+
+/** Get maximum length of l_hand value.
+ * @return length of l_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_l_hand() const
+{
+  return 1;
+}
+
+/** Set l_hand value.
+ * Left hand
+ * @param new_l_hand new l_hand value
+ */
+void
+NaoHardwareInterface::set_l_hand(const float new_l_hand)
+{
+  data->l_hand = new_l_hand;
+  data_changed = true;
+}
+
 /** Get l_hip_yaw_pitch value.
  * Left hip yaw pitch
  * @return l_hip_yaw_pitch value
@@ -587,6 +670,192 @@ NaoHardwareInterface::set_l_ankle_roll(const float new_l_ankle_roll)
   data_changed = true;
 }
 
+/** Get r_shoulder_pitch value.
+ * Right shoulder pitch
+ * @return r_shoulder_pitch value
+ */
+float
+NaoHardwareInterface::r_shoulder_pitch() const
+{
+  return data->r_shoulder_pitch;
+}
+
+/** Get maximum length of r_shoulder_pitch value.
+ * @return length of r_shoulder_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_shoulder_pitch() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_pitch value.
+ * Right shoulder pitch
+ * @param new_r_shoulder_pitch new r_shoulder_pitch value
+ */
+void
+NaoHardwareInterface::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
+{
+  data->r_shoulder_pitch = new_r_shoulder_pitch;
+  data_changed = true;
+}
+
+/** Get r_shoulder_roll value.
+ * Right shoulder roll
+ * @return r_shoulder_roll value
+ */
+float
+NaoHardwareInterface::r_shoulder_roll() const
+{
+  return data->r_shoulder_roll;
+}
+
+/** Get maximum length of r_shoulder_roll value.
+ * @return length of r_shoulder_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_shoulder_roll() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_roll value.
+ * Right shoulder roll
+ * @param new_r_shoulder_roll new r_shoulder_roll value
+ */
+void
+NaoHardwareInterface::set_r_shoulder_roll(const float new_r_shoulder_roll)
+{
+  data->r_shoulder_roll = new_r_shoulder_roll;
+  data_changed = true;
+}
+
+/** Get r_elbow_yaw value.
+ * Right elbow yaw
+ * @return r_elbow_yaw value
+ */
+float
+NaoHardwareInterface::r_elbow_yaw() const
+{
+  return data->r_elbow_yaw;
+}
+
+/** Get maximum length of r_elbow_yaw value.
+ * @return length of r_elbow_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_elbow_yaw() const
+{
+  return 1;
+}
+
+/** Set r_elbow_yaw value.
+ * Right elbow yaw
+ * @param new_r_elbow_yaw new r_elbow_yaw value
+ */
+void
+NaoHardwareInterface::set_r_elbow_yaw(const float new_r_elbow_yaw)
+{
+  data->r_elbow_yaw = new_r_elbow_yaw;
+  data_changed = true;
+}
+
+/** Get r_elbow_roll value.
+ * Right elbow roll
+ * @return r_elbow_roll value
+ */
+float
+NaoHardwareInterface::r_elbow_roll() const
+{
+  return data->r_elbow_roll;
+}
+
+/** Get maximum length of r_elbow_roll value.
+ * @return length of r_elbow_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_elbow_roll() const
+{
+  return 1;
+}
+
+/** Set r_elbow_roll value.
+ * Right elbow roll
+ * @param new_r_elbow_roll new r_elbow_roll value
+ */
+void
+NaoHardwareInterface::set_r_elbow_roll(const float new_r_elbow_roll)
+{
+  data->r_elbow_roll = new_r_elbow_roll;
+  data_changed = true;
+}
+
+/** Get r_wrist_yaw value.
+ * Right wrist yaw
+ * @return r_wrist_yaw value
+ */
+float
+NaoHardwareInterface::r_wrist_yaw() const
+{
+  return data->r_wrist_yaw;
+}
+
+/** Get maximum length of r_wrist_yaw value.
+ * @return length of r_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set r_wrist_yaw value.
+ * Right wrist yaw
+ * @param new_r_wrist_yaw new r_wrist_yaw value
+ */
+void
+NaoHardwareInterface::set_r_wrist_yaw(const float new_r_wrist_yaw)
+{
+  data->r_wrist_yaw = new_r_wrist_yaw;
+  data_changed = true;
+}
+
+/** Get r_hand value.
+ * Right hand
+ * @return r_hand value
+ */
+float
+NaoHardwareInterface::r_hand() const
+{
+  return data->r_hand;
+}
+
+/** Get maximum length of r_hand value.
+ * @return length of r_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_hand() const
+{
+  return 1;
+}
+
+/** Set r_hand value.
+ * Right hand
+ * @param new_r_hand new r_hand value
+ */
+void
+NaoHardwareInterface::set_r_hand(const float new_r_hand)
+{
+  data->r_hand = new_r_hand;
+  data_changed = true;
+}
+
 /** Get r_hip_yaw_pitch value.
  * Right hip yaw pitch
  * @return r_hip_yaw_pitch value
@@ -770,130 +1039,6 @@ void
 NaoHardwareInterface::set_r_ankle_roll(const float new_r_ankle_roll)
 {
   data->r_ankle_roll = new_r_ankle_roll;
-  data_changed = true;
-}
-
-/** Get r_shoulder_pitch value.
- * Right shoulder pitch
- * @return r_shoulder_pitch value
- */
-float
-NaoHardwareInterface::r_shoulder_pitch() const
-{
-  return data->r_shoulder_pitch;
-}
-
-/** Get maximum length of r_shoulder_pitch value.
- * @return length of r_shoulder_pitch value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::maxlenof_r_shoulder_pitch() const
-{
-  return 1;
-}
-
-/** Set r_shoulder_pitch value.
- * Right shoulder pitch
- * @param new_r_shoulder_pitch new r_shoulder_pitch value
- */
-void
-NaoHardwareInterface::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
-{
-  data->r_shoulder_pitch = new_r_shoulder_pitch;
-  data_changed = true;
-}
-
-/** Get r_shoulder_roll value.
- * Right shoulder roll
- * @return r_shoulder_roll value
- */
-float
-NaoHardwareInterface::r_shoulder_roll() const
-{
-  return data->r_shoulder_roll;
-}
-
-/** Get maximum length of r_shoulder_roll value.
- * @return length of r_shoulder_roll value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::maxlenof_r_shoulder_roll() const
-{
-  return 1;
-}
-
-/** Set r_shoulder_roll value.
- * Right shoulder roll
- * @param new_r_shoulder_roll new r_shoulder_roll value
- */
-void
-NaoHardwareInterface::set_r_shoulder_roll(const float new_r_shoulder_roll)
-{
-  data->r_shoulder_roll = new_r_shoulder_roll;
-  data_changed = true;
-}
-
-/** Get r_elbow_yaw value.
- * Right elbow yaw
- * @return r_elbow_yaw value
- */
-float
-NaoHardwareInterface::r_elbow_yaw() const
-{
-  return data->r_elbow_yaw;
-}
-
-/** Get maximum length of r_elbow_yaw value.
- * @return length of r_elbow_yaw value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::maxlenof_r_elbow_yaw() const
-{
-  return 1;
-}
-
-/** Set r_elbow_yaw value.
- * Right elbow yaw
- * @param new_r_elbow_yaw new r_elbow_yaw value
- */
-void
-NaoHardwareInterface::set_r_elbow_yaw(const float new_r_elbow_yaw)
-{
-  data->r_elbow_yaw = new_r_elbow_yaw;
-  data_changed = true;
-}
-
-/** Get r_elbow_roll value.
- * Right elbow roll
- * @return r_elbow_roll value
- */
-float
-NaoHardwareInterface::r_elbow_roll() const
-{
-  return data->r_elbow_roll;
-}
-
-/** Get maximum length of r_elbow_roll value.
- * @return length of r_elbow_roll value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::maxlenof_r_elbow_roll() const
-{
-  return 1;
-}
-
-/** Set r_elbow_roll value.
- * Right elbow roll
- * @param new_r_elbow_roll new r_elbow_roll value
- */
-void
-NaoHardwareInterface::set_r_elbow_roll(const float new_r_elbow_roll)
-{
-  data->r_elbow_roll = new_r_elbow_roll;
   data_changed = true;
 }
 
@@ -1393,6 +1538,192 @@ NaoHardwareInterface::set_r_fsr_rr(const float new_r_fsr_rr)
   data_changed = true;
 }
 
+/** Get l_total_weight value.
+ * Total weight on left foot
+ * @return l_total_weight value
+ */
+float
+NaoHardwareInterface::l_total_weight() const
+{
+  return data->l_total_weight;
+}
+
+/** Get maximum length of l_total_weight value.
+ * @return length of l_total_weight value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_l_total_weight() const
+{
+  return 1;
+}
+
+/** Set l_total_weight value.
+ * Total weight on left foot
+ * @param new_l_total_weight new l_total_weight value
+ */
+void
+NaoHardwareInterface::set_l_total_weight(const float new_l_total_weight)
+{
+  data->l_total_weight = new_l_total_weight;
+  data_changed = true;
+}
+
+/** Get r_total_weight value.
+ * Total weight on right foot
+ * @return r_total_weight value
+ */
+float
+NaoHardwareInterface::r_total_weight() const
+{
+  return data->r_total_weight;
+}
+
+/** Get maximum length of r_total_weight value.
+ * @return length of r_total_weight value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_total_weight() const
+{
+  return 1;
+}
+
+/** Set r_total_weight value.
+ * Total weight on right foot
+ * @param new_r_total_weight new r_total_weight value
+ */
+void
+NaoHardwareInterface::set_r_total_weight(const float new_r_total_weight)
+{
+  data->r_total_weight = new_r_total_weight;
+  data_changed = true;
+}
+
+/** Get l_cop_x value.
+ * Center of pressure X for left foot.
+ * @return l_cop_x value
+ */
+float
+NaoHardwareInterface::l_cop_x() const
+{
+  return data->l_cop_x;
+}
+
+/** Get maximum length of l_cop_x value.
+ * @return length of l_cop_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_l_cop_x() const
+{
+  return 1;
+}
+
+/** Set l_cop_x value.
+ * Center of pressure X for left foot.
+ * @param new_l_cop_x new l_cop_x value
+ */
+void
+NaoHardwareInterface::set_l_cop_x(const float new_l_cop_x)
+{
+  data->l_cop_x = new_l_cop_x;
+  data_changed = true;
+}
+
+/** Get l_cop_y value.
+ * Center of pressure Y for left foot.
+ * @return l_cop_y value
+ */
+float
+NaoHardwareInterface::l_cop_y() const
+{
+  return data->l_cop_y;
+}
+
+/** Get maximum length of l_cop_y value.
+ * @return length of l_cop_y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_l_cop_y() const
+{
+  return 1;
+}
+
+/** Set l_cop_y value.
+ * Center of pressure Y for left foot.
+ * @param new_l_cop_y new l_cop_y value
+ */
+void
+NaoHardwareInterface::set_l_cop_y(const float new_l_cop_y)
+{
+  data->l_cop_y = new_l_cop_y;
+  data_changed = true;
+}
+
+/** Get r_cop_x value.
+ * Center of pressure X for right foot.
+ * @return r_cop_x value
+ */
+float
+NaoHardwareInterface::r_cop_x() const
+{
+  return data->r_cop_x;
+}
+
+/** Get maximum length of r_cop_x value.
+ * @return length of r_cop_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_cop_x() const
+{
+  return 1;
+}
+
+/** Set r_cop_x value.
+ * Center of pressure X for right foot.
+ * @param new_r_cop_x new r_cop_x value
+ */
+void
+NaoHardwareInterface::set_r_cop_x(const float new_r_cop_x)
+{
+  data->r_cop_x = new_r_cop_x;
+  data_changed = true;
+}
+
+/** Get r_cop_y value.
+ * Center of pressure Y for right foot.
+ * @return r_cop_y value
+ */
+float
+NaoHardwareInterface::r_cop_y() const
+{
+  return data->r_cop_y;
+}
+
+/** Get maximum length of r_cop_y value.
+ * @return length of r_cop_y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_r_cop_y() const
+{
+  return 1;
+}
+
+/** Set r_cop_y value.
+ * Center of pressure Y for right foot.
+ * @param new_r_cop_y new r_cop_y value
+ */
+void
+NaoHardwareInterface::set_r_cop_y(const float new_r_cop_y)
+{
+  data->r_cop_y = new_r_cop_y;
+  data_changed = true;
+}
+
 /** Get ultrasonic_distance value.
  * Ultrasonic sensor reading
  * @return ultrasonic_distance value
@@ -1455,127 +1786,220 @@ NaoHardwareInterface::set_ultrasonic_direction(const float new_ultrasonic_direct
   data_changed = true;
 }
 
-/** Get l_bumper_l value.
+/** Get l_foot_bumper_l value.
  * Left foot bumper left side
- * @return l_bumper_l value
+ * @return l_foot_bumper_l value
  */
-float
-NaoHardwareInterface::l_bumper_l() const
+uint8_t
+NaoHardwareInterface::l_foot_bumper_l() const
 {
-  return data->l_bumper_l;
+  return data->l_foot_bumper_l;
 }
 
-/** Get maximum length of l_bumper_l value.
- * @return length of l_bumper_l value, can be length of the array or number of 
+/** Get maximum length of l_foot_bumper_l value.
+ * @return length of l_foot_bumper_l value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoHardwareInterface::maxlenof_l_bumper_l() const
+NaoHardwareInterface::maxlenof_l_foot_bumper_l() const
 {
   return 1;
 }
 
-/** Set l_bumper_l value.
+/** Set l_foot_bumper_l value.
  * Left foot bumper left side
- * @param new_l_bumper_l new l_bumper_l value
+ * @param new_l_foot_bumper_l new l_foot_bumper_l value
  */
 void
-NaoHardwareInterface::set_l_bumper_l(const float new_l_bumper_l)
+NaoHardwareInterface::set_l_foot_bumper_l(const uint8_t new_l_foot_bumper_l)
 {
-  data->l_bumper_l = new_l_bumper_l;
+  data->l_foot_bumper_l = new_l_foot_bumper_l;
   data_changed = true;
 }
 
-/** Get l_bumper_r value.
+/** Get l_foot_bumper_r value.
  * Left foot bumper right side
- * @return l_bumper_r value
+ * @return l_foot_bumper_r value
  */
-float
-NaoHardwareInterface::l_bumper_r() const
+uint8_t
+NaoHardwareInterface::l_foot_bumper_r() const
 {
-  return data->l_bumper_r;
+  return data->l_foot_bumper_r;
 }
 
-/** Get maximum length of l_bumper_r value.
- * @return length of l_bumper_r value, can be length of the array or number of 
+/** Get maximum length of l_foot_bumper_r value.
+ * @return length of l_foot_bumper_r value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoHardwareInterface::maxlenof_l_bumper_r() const
+NaoHardwareInterface::maxlenof_l_foot_bumper_r() const
 {
   return 1;
 }
 
-/** Set l_bumper_r value.
+/** Set l_foot_bumper_r value.
  * Left foot bumper right side
- * @param new_l_bumper_r new l_bumper_r value
+ * @param new_l_foot_bumper_r new l_foot_bumper_r value
  */
 void
-NaoHardwareInterface::set_l_bumper_r(const float new_l_bumper_r)
+NaoHardwareInterface::set_l_foot_bumper_r(const uint8_t new_l_foot_bumper_r)
 {
-  data->l_bumper_r = new_l_bumper_r;
+  data->l_foot_bumper_r = new_l_foot_bumper_r;
   data_changed = true;
 }
 
-/** Get r_bumper_l value.
+/** Get r_foot_bumper_l value.
  * Right foot bumper left side
- * @return r_bumper_l value
+ * @return r_foot_bumper_l value
  */
-float
-NaoHardwareInterface::r_bumper_l() const
+uint8_t
+NaoHardwareInterface::r_foot_bumper_l() const
 {
-  return data->r_bumper_l;
+  return data->r_foot_bumper_l;
 }
 
-/** Get maximum length of r_bumper_l value.
- * @return length of r_bumper_l value, can be length of the array or number of 
+/** Get maximum length of r_foot_bumper_l value.
+ * @return length of r_foot_bumper_l value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoHardwareInterface::maxlenof_r_bumper_l() const
+NaoHardwareInterface::maxlenof_r_foot_bumper_l() const
 {
   return 1;
 }
 
-/** Set r_bumper_l value.
+/** Set r_foot_bumper_l value.
  * Right foot bumper left side
- * @param new_r_bumper_l new r_bumper_l value
+ * @param new_r_foot_bumper_l new r_foot_bumper_l value
  */
 void
-NaoHardwareInterface::set_r_bumper_l(const float new_r_bumper_l)
+NaoHardwareInterface::set_r_foot_bumper_l(const uint8_t new_r_foot_bumper_l)
 {
-  data->r_bumper_l = new_r_bumper_l;
+  data->r_foot_bumper_l = new_r_foot_bumper_l;
   data_changed = true;
 }
 
-/** Get r_bumper_r value.
+/** Get r_foot_bumper_r value.
  * Right foot bumper right side
- * @return r_bumper_r value
+ * @return r_foot_bumper_r value
  */
-float
-NaoHardwareInterface::r_bumper_r() const
+uint8_t
+NaoHardwareInterface::r_foot_bumper_r() const
 {
-  return data->r_bumper_r;
+  return data->r_foot_bumper_r;
 }
 
-/** Get maximum length of r_bumper_r value.
- * @return length of r_bumper_r value, can be length of the array or number of 
+/** Get maximum length of r_foot_bumper_r value.
+ * @return length of r_foot_bumper_r value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoHardwareInterface::maxlenof_r_bumper_r() const
+NaoHardwareInterface::maxlenof_r_foot_bumper_r() const
 {
   return 1;
 }
 
-/** Set r_bumper_r value.
+/** Set r_foot_bumper_r value.
  * Right foot bumper right side
- * @param new_r_bumper_r new r_bumper_r value
+ * @param new_r_foot_bumper_r new r_foot_bumper_r value
  */
 void
-NaoHardwareInterface::set_r_bumper_r(const float new_r_bumper_r)
+NaoHardwareInterface::set_r_foot_bumper_r(const uint8_t new_r_foot_bumper_r)
 {
-  data->r_bumper_r = new_r_bumper_r;
+  data->r_foot_bumper_r = new_r_foot_bumper_r;
+  data_changed = true;
+}
+
+/** Get head_touch_front value.
+ * Front part of head touch sensor (only Academics robot)
+ * @return head_touch_front value
+ */
+uint8_t
+NaoHardwareInterface::head_touch_front() const
+{
+  return data->head_touch_front;
+}
+
+/** Get maximum length of head_touch_front value.
+ * @return length of head_touch_front value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_head_touch_front() const
+{
+  return 1;
+}
+
+/** Set head_touch_front value.
+ * Front part of head touch sensor (only Academics robot)
+ * @param new_head_touch_front new head_touch_front value
+ */
+void
+NaoHardwareInterface::set_head_touch_front(const uint8_t new_head_touch_front)
+{
+  data->head_touch_front = new_head_touch_front;
+  data_changed = true;
+}
+
+/** Get head_touch_middle value.
+ * Middle part of head touch sensor (only Academics robot)
+ * @return head_touch_middle value
+ */
+uint8_t
+NaoHardwareInterface::head_touch_middle() const
+{
+  return data->head_touch_middle;
+}
+
+/** Get maximum length of head_touch_middle value.
+ * @return length of head_touch_middle value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_head_touch_middle() const
+{
+  return 1;
+}
+
+/** Set head_touch_middle value.
+ * Middle part of head touch sensor (only Academics robot)
+ * @param new_head_touch_middle new head_touch_middle value
+ */
+void
+NaoHardwareInterface::set_head_touch_middle(const uint8_t new_head_touch_middle)
+{
+  data->head_touch_middle = new_head_touch_middle;
+  data_changed = true;
+}
+
+/** Get head_touch_rear value.
+ * Rear part of head touch sensor (only Academics robot)
+ * @return head_touch_rear value
+ */
+uint8_t
+NaoHardwareInterface::head_touch_rear() const
+{
+  return data->head_touch_rear;
+}
+
+/** Get maximum length of head_touch_rear value.
+ * @return length of head_touch_rear value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::maxlenof_head_touch_rear() const
+{
+  return 1;
+}
+
+/** Set head_touch_rear value.
+ * Rear part of head touch sensor (only Academics robot)
+ * @param new_head_touch_rear new head_touch_rear value
+ */
+void
+NaoHardwareInterface::set_head_touch_rear(const uint8_t new_head_touch_rear)
+{
+  data->head_touch_rear = new_head_touch_rear;
   data_changed = true;
 }
 
@@ -1583,7 +2007,7 @@ NaoHardwareInterface::set_r_bumper_r(const float new_r_bumper_r)
  * Chest button state
  * @return chest_button value
  */
-float
+uint8_t
 NaoHardwareInterface::chest_button() const
 {
   return data->chest_button;
@@ -1604,7 +2028,7 @@ NaoHardwareInterface::maxlenof_chest_button() const
  * @param new_chest_button new chest_button value
  */
 void
-NaoHardwareInterface::set_chest_button(const float new_chest_button)
+NaoHardwareInterface::set_chest_button(const uint8_t new_chest_button)
 {
   data->chest_button = new_chest_button;
   data_changed = true;
@@ -1702,37 +2126,45 @@ NaoHardwareInterface::servo_value(const uint32_t key) const
   } else if (key == 32) {
     return data->l_elbow_roll;
   } else if (key == 64) {
-    return data->l_hip_yaw_pitch;
+    return data->l_wrist_yaw;
   } else if (key == 128) {
-    return data->l_hip_roll;
+    return data->l_hand;
   } else if (key == 256) {
-    return data->l_hip_pitch;
+    return data->l_hip_yaw_pitch;
   } else if (key == 512) {
-    return data->l_knee_pitch;
+    return data->l_hip_roll;
   } else if (key == 1024) {
-    return data->l_ankle_pitch;
+    return data->l_hip_pitch;
   } else if (key == 2048) {
-    return data->l_ankle_roll;
+    return data->l_knee_pitch;
   } else if (key == 4096) {
-    return data->r_hip_yaw_pitch;
+    return data->l_ankle_pitch;
   } else if (key == 8192) {
-    return data->r_hip_roll;
+    return data->l_ankle_roll;
   } else if (key == 16384) {
-    return data->r_hip_pitch;
-  } else if (key == 32768) {
-    return data->r_knee_pitch;
-  } else if (key == 65536) {
-    return data->r_ankle_pitch;
-  } else if (key == 131072) {
-    return data->r_ankle_roll;
-  } else if (key == 262144) {
     return data->r_shoulder_pitch;
-  } else if (key == 524288) {
+  } else if (key == 32768) {
     return data->r_shoulder_roll;
-  } else if (key == 1048576) {
+  } else if (key == 65536) {
     return data->r_elbow_yaw;
-  } else if (key == 2097152) {
+  } else if (key == 131072) {
     return data->r_elbow_roll;
+  } else if (key == 262144) {
+    return data->r_wrist_yaw;
+  } else if (key == 524288) {
+    return data->r_hand;
+  } else if (key == 1048576) {
+    return data->r_hip_yaw_pitch;
+  } else if (key == 2097152) {
+    return data->r_hip_roll;
+  } else if (key == 4194304) {
+    return data->r_hip_pitch;
+  } else if (key == 8388608) {
+    return data->r_knee_pitch;
+  } else if (key == 16777216) {
+    return data->r_ankle_pitch;
+  } else if (key == 33554432) {
+    return data->r_ankle_roll;
   } else {
     throw Exception("Invalid key, cannot retrieve value");
   }
@@ -1760,37 +2192,45 @@ NaoHardwareInterface::set_servo_value(const uint32_t key, const float new_value)
   } else if (key == 32) {
     data->l_elbow_roll = new_value;
   } else if (key == 64) {
-    data->l_hip_yaw_pitch = new_value;
+    data->l_wrist_yaw = new_value;
   } else if (key == 128) {
-    data->l_hip_roll = new_value;
+    data->l_hand = new_value;
   } else if (key == 256) {
-    data->l_hip_pitch = new_value;
+    data->l_hip_yaw_pitch = new_value;
   } else if (key == 512) {
-    data->l_knee_pitch = new_value;
+    data->l_hip_roll = new_value;
   } else if (key == 1024) {
-    data->l_ankle_pitch = new_value;
+    data->l_hip_pitch = new_value;
   } else if (key == 2048) {
-    data->l_ankle_roll = new_value;
+    data->l_knee_pitch = new_value;
   } else if (key == 4096) {
-    data->r_hip_yaw_pitch = new_value;
+    data->l_ankle_pitch = new_value;
   } else if (key == 8192) {
-    data->r_hip_roll = new_value;
+    data->l_ankle_roll = new_value;
   } else if (key == 16384) {
-    data->r_hip_pitch = new_value;
-  } else if (key == 32768) {
-    data->r_knee_pitch = new_value;
-  } else if (key == 65536) {
-    data->r_ankle_pitch = new_value;
-  } else if (key == 131072) {
-    data->r_ankle_roll = new_value;
-  } else if (key == 262144) {
     data->r_shoulder_pitch = new_value;
-  } else if (key == 524288) {
+  } else if (key == 32768) {
     data->r_shoulder_roll = new_value;
-  } else if (key == 1048576) {
+  } else if (key == 65536) {
     data->r_elbow_yaw = new_value;
-  } else if (key == 2097152) {
+  } else if (key == 131072) {
     data->r_elbow_roll = new_value;
+  } else if (key == 262144) {
+    data->r_wrist_yaw = new_value;
+  } else if (key == 524288) {
+    data->r_hand = new_value;
+  } else if (key == 1048576) {
+    data->r_hip_yaw_pitch = new_value;
+  } else if (key == 2097152) {
+    data->r_hip_roll = new_value;
+  } else if (key == 4194304) {
+    data->r_hip_pitch = new_value;
+  } else if (key == 8388608) {
+    data->r_knee_pitch = new_value;
+  } else if (key == 16777216) {
+    data->r_ankle_pitch = new_value;
+  } else if (key == 33554432) {
+    data->r_ankle_roll = new_value;
   }
 }
 
@@ -1867,19 +2307,23 @@ NaoHardwareInterface::enum_tostring(const char *enumtype, int val) const
  * @param ini_l_knee_pitch initial value for l_knee_pitch
  * @param ini_l_ankle_pitch initial value for l_ankle_pitch
  * @param ini_l_ankle_roll initial value for l_ankle_roll
+ * @param ini_l_wrist_yaw initial value for l_wrist_yaw
+ * @param ini_l_hand initial value for l_hand
+ * @param ini_r_shoulder_pitch initial value for r_shoulder_pitch
+ * @param ini_r_shoulder_roll initial value for r_shoulder_roll
+ * @param ini_r_elbow_yaw initial value for r_elbow_yaw
+ * @param ini_r_wrist_yaw initial value for r_wrist_yaw
+ * @param ini_r_hand initial value for r_hand
  * @param ini_r_hip_yaw_pitch initial value for r_hip_yaw_pitch
  * @param ini_r_hip_roll initial value for r_hip_roll
  * @param ini_r_hip_pitch initial value for r_hip_pitch
  * @param ini_r_knee_pitch initial value for r_knee_pitch
  * @param ini_r_ankle_pitch initial value for r_ankle_pitch
  * @param ini_r_ankle_roll initial value for r_ankle_roll
- * @param ini_r_shoulder_pitch initial value for r_shoulder_pitch
- * @param ini_r_shoulder_roll initial value for r_shoulder_roll
- * @param ini_r_elbow_yaw initial value for r_elbow_yaw
  * @param ini_r_elbow_roll initial value for r_elbow_roll
  * @param ini_time initial value for time
  */
-NaoHardwareInterface::SetServosMessage::SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const int32_t ini_time) : Message("SetServosMessage")
+NaoHardwareInterface::SetServosMessage::SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll, const int32_t ini_time) : Message("SetServosMessage")
 {
   data_size = sizeof(SetServosMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1898,15 +2342,19 @@ NaoHardwareInterface::SetServosMessage::SetServosMessage(const float ini_head_ya
   data->l_knee_pitch = ini_l_knee_pitch;
   data->l_ankle_pitch = ini_l_ankle_pitch;
   data->l_ankle_roll = ini_l_ankle_roll;
+  data->l_wrist_yaw = ini_l_wrist_yaw;
+  data->l_hand = ini_l_hand;
+  data->r_shoulder_pitch = ini_r_shoulder_pitch;
+  data->r_shoulder_roll = ini_r_shoulder_roll;
+  data->r_elbow_yaw = ini_r_elbow_yaw;
+  data->r_wrist_yaw = ini_r_wrist_yaw;
+  data->r_hand = ini_r_hand;
   data->r_hip_yaw_pitch = ini_r_hip_yaw_pitch;
   data->r_hip_roll = ini_r_hip_roll;
   data->r_hip_pitch = ini_r_hip_pitch;
   data->r_knee_pitch = ini_r_knee_pitch;
   data->r_ankle_pitch = ini_r_ankle_pitch;
   data->r_ankle_roll = ini_r_ankle_roll;
-  data->r_shoulder_pitch = ini_r_shoulder_pitch;
-  data->r_shoulder_roll = ini_r_shoulder_roll;
-  data->r_elbow_yaw = ini_r_elbow_yaw;
   data->r_elbow_roll = ini_r_elbow_roll;
   data->time = ini_time;
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
@@ -1921,15 +2369,19 @@ NaoHardwareInterface::SetServosMessage::SetServosMessage(const float ini_head_ya
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_wrist_yaw", 1, &data->r_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_hand", 1, &data->r_hand);
   add_fieldinfo(IFT_FLOAT, "r_hip_yaw_pitch", 1, &data->r_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "r_hip_roll", 1, &data->r_hip_roll);
   add_fieldinfo(IFT_FLOAT, "r_hip_pitch", 1, &data->r_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "r_knee_pitch", 1, &data->r_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_pitch", 1, &data->r_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_roll", 1, &data->r_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
   add_fieldinfo(IFT_INT32, "time", 1, &data->time);
 }
@@ -1953,15 +2405,19 @@ NaoHardwareInterface::SetServosMessage::SetServosMessage() : Message("SetServosM
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_wrist_yaw", 1, &data->r_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_hand", 1, &data->r_hand);
   add_fieldinfo(IFT_FLOAT, "r_hip_yaw_pitch", 1, &data->r_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "r_hip_roll", 1, &data->r_hip_roll);
   add_fieldinfo(IFT_FLOAT, "r_hip_pitch", 1, &data->r_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "r_knee_pitch", 1, &data->r_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_pitch", 1, &data->r_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_roll", 1, &data->r_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
   add_fieldinfo(IFT_INT32, "time", 1, &data->time);
 }
@@ -2345,6 +2801,216 @@ NaoHardwareInterface::SetServosMessage::set_l_ankle_roll(const float new_l_ankle
   data->l_ankle_roll = new_l_ankle_roll;
 }
 
+/** Get l_wrist_yaw value.
+ * Left wrist yaw
+ * @return l_wrist_yaw value
+ */
+float
+NaoHardwareInterface::SetServosMessage::l_wrist_yaw() const
+{
+  return data->l_wrist_yaw;
+}
+
+/** Get maximum length of l_wrist_yaw value.
+ * @return length of l_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_l_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set l_wrist_yaw value.
+ * Left wrist yaw
+ * @param new_l_wrist_yaw new l_wrist_yaw value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_l_wrist_yaw(const float new_l_wrist_yaw)
+{
+  data->l_wrist_yaw = new_l_wrist_yaw;
+}
+
+/** Get l_hand value.
+ * Left hand
+ * @return l_hand value
+ */
+float
+NaoHardwareInterface::SetServosMessage::l_hand() const
+{
+  return data->l_hand;
+}
+
+/** Get maximum length of l_hand value.
+ * @return length of l_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_l_hand() const
+{
+  return 1;
+}
+
+/** Set l_hand value.
+ * Left hand
+ * @param new_l_hand new l_hand value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_l_hand(const float new_l_hand)
+{
+  data->l_hand = new_l_hand;
+}
+
+/** Get r_shoulder_pitch value.
+ * Right shoulder pitch
+ * @return r_shoulder_pitch value
+ */
+float
+NaoHardwareInterface::SetServosMessage::r_shoulder_pitch() const
+{
+  return data->r_shoulder_pitch;
+}
+
+/** Get maximum length of r_shoulder_pitch value.
+ * @return length of r_shoulder_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_r_shoulder_pitch() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_pitch value.
+ * Right shoulder pitch
+ * @param new_r_shoulder_pitch new r_shoulder_pitch value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
+{
+  data->r_shoulder_pitch = new_r_shoulder_pitch;
+}
+
+/** Get r_shoulder_roll value.
+ * Right shoulder roll
+ * @return r_shoulder_roll value
+ */
+float
+NaoHardwareInterface::SetServosMessage::r_shoulder_roll() const
+{
+  return data->r_shoulder_roll;
+}
+
+/** Get maximum length of r_shoulder_roll value.
+ * @return length of r_shoulder_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_r_shoulder_roll() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_roll value.
+ * Right shoulder roll
+ * @param new_r_shoulder_roll new r_shoulder_roll value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
+{
+  data->r_shoulder_roll = new_r_shoulder_roll;
+}
+
+/** Get r_elbow_yaw value.
+ * Right elbow yaw
+ * @return r_elbow_yaw value
+ */
+float
+NaoHardwareInterface::SetServosMessage::r_elbow_yaw() const
+{
+  return data->r_elbow_yaw;
+}
+
+/** Get maximum length of r_elbow_yaw value.
+ * @return length of r_elbow_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_r_elbow_yaw() const
+{
+  return 1;
+}
+
+/** Set r_elbow_yaw value.
+ * Right elbow yaw
+ * @param new_r_elbow_yaw new r_elbow_yaw value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
+{
+  data->r_elbow_yaw = new_r_elbow_yaw;
+}
+
+/** Get r_wrist_yaw value.
+ * Right wrist yaw
+ * @return r_wrist_yaw value
+ */
+float
+NaoHardwareInterface::SetServosMessage::r_wrist_yaw() const
+{
+  return data->r_wrist_yaw;
+}
+
+/** Get maximum length of r_wrist_yaw value.
+ * @return length of r_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_r_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set r_wrist_yaw value.
+ * Right wrist yaw
+ * @param new_r_wrist_yaw new r_wrist_yaw value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_r_wrist_yaw(const float new_r_wrist_yaw)
+{
+  data->r_wrist_yaw = new_r_wrist_yaw;
+}
+
+/** Get r_hand value.
+ * Right hand
+ * @return r_hand value
+ */
+float
+NaoHardwareInterface::SetServosMessage::r_hand() const
+{
+  return data->r_hand;
+}
+
+/** Get maximum length of r_hand value.
+ * @return length of r_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::SetServosMessage::maxlenof_r_hand() const
+{
+  return 1;
+}
+
+/** Set r_hand value.
+ * Right hand
+ * @param new_r_hand new r_hand value
+ */
+void
+NaoHardwareInterface::SetServosMessage::set_r_hand(const float new_r_hand)
+{
+  data->r_hand = new_r_hand;
+}
+
 /** Get r_hip_yaw_pitch value.
  * Right hip yaw pitch
  * @return r_hip_yaw_pitch value
@@ -2525,96 +3191,6 @@ NaoHardwareInterface::SetServosMessage::set_r_ankle_roll(const float new_r_ankle
   data->r_ankle_roll = new_r_ankle_roll;
 }
 
-/** Get r_shoulder_pitch value.
- * Right shoulder pitch
- * @return r_shoulder_pitch value
- */
-float
-NaoHardwareInterface::SetServosMessage::r_shoulder_pitch() const
-{
-  return data->r_shoulder_pitch;
-}
-
-/** Get maximum length of r_shoulder_pitch value.
- * @return length of r_shoulder_pitch value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::SetServosMessage::maxlenof_r_shoulder_pitch() const
-{
-  return 1;
-}
-
-/** Set r_shoulder_pitch value.
- * Right shoulder pitch
- * @param new_r_shoulder_pitch new r_shoulder_pitch value
- */
-void
-NaoHardwareInterface::SetServosMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
-{
-  data->r_shoulder_pitch = new_r_shoulder_pitch;
-}
-
-/** Get r_shoulder_roll value.
- * Right shoulder roll
- * @return r_shoulder_roll value
- */
-float
-NaoHardwareInterface::SetServosMessage::r_shoulder_roll() const
-{
-  return data->r_shoulder_roll;
-}
-
-/** Get maximum length of r_shoulder_roll value.
- * @return length of r_shoulder_roll value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::SetServosMessage::maxlenof_r_shoulder_roll() const
-{
-  return 1;
-}
-
-/** Set r_shoulder_roll value.
- * Right shoulder roll
- * @param new_r_shoulder_roll new r_shoulder_roll value
- */
-void
-NaoHardwareInterface::SetServosMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
-{
-  data->r_shoulder_roll = new_r_shoulder_roll;
-}
-
-/** Get r_elbow_yaw value.
- * Right elbow yaw
- * @return r_elbow_yaw value
- */
-float
-NaoHardwareInterface::SetServosMessage::r_elbow_yaw() const
-{
-  return data->r_elbow_yaw;
-}
-
-/** Get maximum length of r_elbow_yaw value.
- * @return length of r_elbow_yaw value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::SetServosMessage::maxlenof_r_elbow_yaw() const
-{
-  return 1;
-}
-
-/** Set r_elbow_yaw value.
- * Right elbow yaw
- * @param new_r_elbow_yaw new r_elbow_yaw value
- */
-void
-NaoHardwareInterface::SetServosMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
-{
-  data->r_elbow_yaw = new_r_elbow_yaw;
-}
-
 /** Get r_elbow_roll value.
  * Right elbow roll
  * @return r_elbow_roll value
@@ -2709,24 +3285,28 @@ NaoHardwareInterface::SetServosMessage::clone() const
  * @param ini_l_shoulder_roll initial value for l_shoulder_roll
  * @param ini_l_elbow_yaw initial value for l_elbow_yaw
  * @param ini_l_elbow_roll initial value for l_elbow_roll
+ * @param ini_l_wrist_yaw initial value for l_wrist_yaw
+ * @param ini_l_hand initial value for l_hand
  * @param ini_l_hip_yaw_pitch initial value for l_hip_yaw_pitch
  * @param ini_l_hip_roll initial value for l_hip_roll
  * @param ini_l_hip_pitch initial value for l_hip_pitch
  * @param ini_l_knee_pitch initial value for l_knee_pitch
  * @param ini_l_ankle_pitch initial value for l_ankle_pitch
  * @param ini_l_ankle_roll initial value for l_ankle_roll
+ * @param ini_r_shoulder_pitch initial value for r_shoulder_pitch
+ * @param ini_r_shoulder_roll initial value for r_shoulder_roll
+ * @param ini_r_elbow_yaw initial value for r_elbow_yaw
+ * @param ini_r_elbow_roll initial value for r_elbow_roll
+ * @param ini_r_wrist_yaw initial value for r_wrist_yaw
+ * @param ini_r_hand initial value for r_hand
  * @param ini_r_hip_yaw_pitch initial value for r_hip_yaw_pitch
  * @param ini_r_hip_roll initial value for r_hip_roll
  * @param ini_r_hip_pitch initial value for r_hip_pitch
  * @param ini_r_knee_pitch initial value for r_knee_pitch
  * @param ini_r_ankle_pitch initial value for r_ankle_pitch
  * @param ini_r_ankle_roll initial value for r_ankle_roll
- * @param ini_r_shoulder_pitch initial value for r_shoulder_pitch
- * @param ini_r_shoulder_roll initial value for r_shoulder_roll
- * @param ini_r_elbow_yaw initial value for r_elbow_yaw
- * @param ini_r_elbow_roll initial value for r_elbow_roll
  */
-NaoHardwareInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_time_sec, const InterpolationType ini_interpolation, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll) : Message("GotoAnglesMessage")
+NaoHardwareInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_time_sec, const InterpolationType ini_interpolation, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll) : Message("GotoAnglesMessage")
 {
   data_size = sizeof(GotoAnglesMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -2741,22 +3321,26 @@ NaoHardwareInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_time_
   data->l_shoulder_roll = ini_l_shoulder_roll;
   data->l_elbow_yaw = ini_l_elbow_yaw;
   data->l_elbow_roll = ini_l_elbow_roll;
+  data->l_wrist_yaw = ini_l_wrist_yaw;
+  data->l_hand = ini_l_hand;
   data->l_hip_yaw_pitch = ini_l_hip_yaw_pitch;
   data->l_hip_roll = ini_l_hip_roll;
   data->l_hip_pitch = ini_l_hip_pitch;
   data->l_knee_pitch = ini_l_knee_pitch;
   data->l_ankle_pitch = ini_l_ankle_pitch;
   data->l_ankle_roll = ini_l_ankle_roll;
+  data->r_shoulder_pitch = ini_r_shoulder_pitch;
+  data->r_shoulder_roll = ini_r_shoulder_roll;
+  data->r_elbow_yaw = ini_r_elbow_yaw;
+  data->r_elbow_roll = ini_r_elbow_roll;
+  data->r_wrist_yaw = ini_r_wrist_yaw;
+  data->r_hand = ini_r_hand;
   data->r_hip_yaw_pitch = ini_r_hip_yaw_pitch;
   data->r_hip_roll = ini_r_hip_roll;
   data->r_hip_pitch = ini_r_hip_pitch;
   data->r_knee_pitch = ini_r_knee_pitch;
   data->r_ankle_pitch = ini_r_ankle_pitch;
   data->r_ankle_roll = ini_r_ankle_roll;
-  data->r_shoulder_pitch = ini_r_shoulder_pitch;
-  data->r_shoulder_roll = ini_r_shoulder_roll;
-  data->r_elbow_yaw = ini_r_elbow_yaw;
-  data->r_elbow_roll = ini_r_elbow_roll;
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
   add_fieldinfo(IFT_ENUM, "interpolation", 1, &data->interpolation, "InterpolationType");
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
@@ -2765,22 +3349,26 @@ NaoHardwareInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_time_
   add_fieldinfo(IFT_FLOAT, "l_shoulder_roll", 1, &data->l_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "l_elbow_yaw", 1, &data->l_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "l_elbow_roll", 1, &data->l_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "l_hip_yaw_pitch", 1, &data->l_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "l_hip_roll", 1, &data->l_hip_roll);
   add_fieldinfo(IFT_FLOAT, "l_hip_pitch", 1, &data->l_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "r_wrist_yaw", 1, &data->r_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_hand", 1, &data->r_hand);
   add_fieldinfo(IFT_FLOAT, "r_hip_yaw_pitch", 1, &data->r_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "r_hip_roll", 1, &data->r_hip_roll);
   add_fieldinfo(IFT_FLOAT, "r_hip_pitch", 1, &data->r_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "r_knee_pitch", 1, &data->r_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_pitch", 1, &data->r_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_roll", 1, &data->r_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
 }
 /** Constructor */
 NaoHardwareInterface::GotoAnglesMessage::GotoAnglesMessage() : Message("GotoAnglesMessage")
@@ -2798,22 +3386,26 @@ NaoHardwareInterface::GotoAnglesMessage::GotoAnglesMessage() : Message("GotoAngl
   add_fieldinfo(IFT_FLOAT, "l_shoulder_roll", 1, &data->l_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "l_elbow_yaw", 1, &data->l_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "l_elbow_roll", 1, &data->l_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "l_hip_yaw_pitch", 1, &data->l_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "l_hip_roll", 1, &data->l_hip_roll);
   add_fieldinfo(IFT_FLOAT, "l_hip_pitch", 1, &data->l_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
+  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "r_wrist_yaw", 1, &data->r_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "r_hand", 1, &data->r_hand);
   add_fieldinfo(IFT_FLOAT, "r_hip_yaw_pitch", 1, &data->r_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "r_hip_roll", 1, &data->r_hip_roll);
   add_fieldinfo(IFT_FLOAT, "r_hip_pitch", 1, &data->r_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "r_knee_pitch", 1, &data->r_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_pitch", 1, &data->r_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "r_ankle_roll", 1, &data->r_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
-  add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
-  add_fieldinfo(IFT_FLOAT, "r_elbow_roll", 1, &data->r_elbow_roll);
 }
 
 /** Destructor */
@@ -3075,6 +3667,66 @@ NaoHardwareInterface::GotoAnglesMessage::set_l_elbow_roll(const float new_l_elbo
   data->l_elbow_roll = new_l_elbow_roll;
 }
 
+/** Get l_wrist_yaw value.
+ * Left wrist yaw
+ * @return l_wrist_yaw value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::l_wrist_yaw() const
+{
+  return data->l_wrist_yaw;
+}
+
+/** Get maximum length of l_wrist_yaw value.
+ * @return length of l_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_l_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set l_wrist_yaw value.
+ * Left wrist yaw
+ * @param new_l_wrist_yaw new l_wrist_yaw value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_l_wrist_yaw(const float new_l_wrist_yaw)
+{
+  data->l_wrist_yaw = new_l_wrist_yaw;
+}
+
+/** Get l_hand value.
+ * Left hand
+ * @return l_hand value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::l_hand() const
+{
+  return data->l_hand;
+}
+
+/** Get maximum length of l_hand value.
+ * @return length of l_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_l_hand() const
+{
+  return 1;
+}
+
+/** Set l_hand value.
+ * Left hand
+ * @param new_l_hand new l_hand value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_l_hand(const float new_l_hand)
+{
+  data->l_hand = new_l_hand;
+}
+
 /** Get l_hip_yaw_pitch value.
  * Left hip yaw pitch
  * @return l_hip_yaw_pitch value
@@ -3255,6 +3907,186 @@ NaoHardwareInterface::GotoAnglesMessage::set_l_ankle_roll(const float new_l_ankl
   data->l_ankle_roll = new_l_ankle_roll;
 }
 
+/** Get r_shoulder_pitch value.
+ * Right shoulder pitch
+ * @return r_shoulder_pitch value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::r_shoulder_pitch() const
+{
+  return data->r_shoulder_pitch;
+}
+
+/** Get maximum length of r_shoulder_pitch value.
+ * @return length of r_shoulder_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_shoulder_pitch() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_pitch value.
+ * Right shoulder pitch
+ * @param new_r_shoulder_pitch new r_shoulder_pitch value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
+{
+  data->r_shoulder_pitch = new_r_shoulder_pitch;
+}
+
+/** Get r_shoulder_roll value.
+ * Right shoulder roll
+ * @return r_shoulder_roll value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::r_shoulder_roll() const
+{
+  return data->r_shoulder_roll;
+}
+
+/** Get maximum length of r_shoulder_roll value.
+ * @return length of r_shoulder_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_shoulder_roll() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_roll value.
+ * Right shoulder roll
+ * @param new_r_shoulder_roll new r_shoulder_roll value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
+{
+  data->r_shoulder_roll = new_r_shoulder_roll;
+}
+
+/** Get r_elbow_yaw value.
+ * Right elbow yaw
+ * @return r_elbow_yaw value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::r_elbow_yaw() const
+{
+  return data->r_elbow_yaw;
+}
+
+/** Get maximum length of r_elbow_yaw value.
+ * @return length of r_elbow_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_elbow_yaw() const
+{
+  return 1;
+}
+
+/** Set r_elbow_yaw value.
+ * Right elbow yaw
+ * @param new_r_elbow_yaw new r_elbow_yaw value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
+{
+  data->r_elbow_yaw = new_r_elbow_yaw;
+}
+
+/** Get r_elbow_roll value.
+ * Right elbow roll
+ * @return r_elbow_roll value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::r_elbow_roll() const
+{
+  return data->r_elbow_roll;
+}
+
+/** Get maximum length of r_elbow_roll value.
+ * @return length of r_elbow_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_elbow_roll() const
+{
+  return 1;
+}
+
+/** Set r_elbow_roll value.
+ * Right elbow roll
+ * @param new_r_elbow_roll new r_elbow_roll value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_r_elbow_roll(const float new_r_elbow_roll)
+{
+  data->r_elbow_roll = new_r_elbow_roll;
+}
+
+/** Get r_wrist_yaw value.
+ * Right wrist yaw
+ * @return r_wrist_yaw value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::r_wrist_yaw() const
+{
+  return data->r_wrist_yaw;
+}
+
+/** Get maximum length of r_wrist_yaw value.
+ * @return length of r_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set r_wrist_yaw value.
+ * Right wrist yaw
+ * @param new_r_wrist_yaw new r_wrist_yaw value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_r_wrist_yaw(const float new_r_wrist_yaw)
+{
+  data->r_wrist_yaw = new_r_wrist_yaw;
+}
+
+/** Get r_hand value.
+ * Right hand
+ * @return r_hand value
+ */
+float
+NaoHardwareInterface::GotoAnglesMessage::r_hand() const
+{
+  return data->r_hand;
+}
+
+/** Get maximum length of r_hand value.
+ * @return length of r_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_hand() const
+{
+  return 1;
+}
+
+/** Set r_hand value.
+ * Right hand
+ * @param new_r_hand new r_hand value
+ */
+void
+NaoHardwareInterface::GotoAnglesMessage::set_r_hand(const float new_r_hand)
+{
+  data->r_hand = new_r_hand;
+}
+
 /** Get r_hip_yaw_pitch value.
  * Right hip yaw pitch
  * @return r_hip_yaw_pitch value
@@ -3433,126 +4265,6 @@ void
 NaoHardwareInterface::GotoAnglesMessage::set_r_ankle_roll(const float new_r_ankle_roll)
 {
   data->r_ankle_roll = new_r_ankle_roll;
-}
-
-/** Get r_shoulder_pitch value.
- * Right shoulder pitch
- * @return r_shoulder_pitch value
- */
-float
-NaoHardwareInterface::GotoAnglesMessage::r_shoulder_pitch() const
-{
-  return data->r_shoulder_pitch;
-}
-
-/** Get maximum length of r_shoulder_pitch value.
- * @return length of r_shoulder_pitch value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_shoulder_pitch() const
-{
-  return 1;
-}
-
-/** Set r_shoulder_pitch value.
- * Right shoulder pitch
- * @param new_r_shoulder_pitch new r_shoulder_pitch value
- */
-void
-NaoHardwareInterface::GotoAnglesMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
-{
-  data->r_shoulder_pitch = new_r_shoulder_pitch;
-}
-
-/** Get r_shoulder_roll value.
- * Right shoulder roll
- * @return r_shoulder_roll value
- */
-float
-NaoHardwareInterface::GotoAnglesMessage::r_shoulder_roll() const
-{
-  return data->r_shoulder_roll;
-}
-
-/** Get maximum length of r_shoulder_roll value.
- * @return length of r_shoulder_roll value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_shoulder_roll() const
-{
-  return 1;
-}
-
-/** Set r_shoulder_roll value.
- * Right shoulder roll
- * @param new_r_shoulder_roll new r_shoulder_roll value
- */
-void
-NaoHardwareInterface::GotoAnglesMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
-{
-  data->r_shoulder_roll = new_r_shoulder_roll;
-}
-
-/** Get r_elbow_yaw value.
- * Right elbow yaw
- * @return r_elbow_yaw value
- */
-float
-NaoHardwareInterface::GotoAnglesMessage::r_elbow_yaw() const
-{
-  return data->r_elbow_yaw;
-}
-
-/** Get maximum length of r_elbow_yaw value.
- * @return length of r_elbow_yaw value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_elbow_yaw() const
-{
-  return 1;
-}
-
-/** Set r_elbow_yaw value.
- * Right elbow yaw
- * @param new_r_elbow_yaw new r_elbow_yaw value
- */
-void
-NaoHardwareInterface::GotoAnglesMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
-{
-  data->r_elbow_yaw = new_r_elbow_yaw;
-}
-
-/** Get r_elbow_roll value.
- * Right elbow roll
- * @return r_elbow_roll value
- */
-float
-NaoHardwareInterface::GotoAnglesMessage::r_elbow_roll() const
-{
-  return data->r_elbow_roll;
-}
-
-/** Get maximum length of r_elbow_roll value.
- * @return length of r_elbow_roll value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoHardwareInterface::GotoAnglesMessage::maxlenof_r_elbow_roll() const
-{
-  return 1;
-}
-
-/** Set r_elbow_roll value.
- * Right elbow roll
- * @param new_r_elbow_roll new r_elbow_roll value
- */
-void
-NaoHardwareInterface::GotoAnglesMessage::set_r_elbow_roll(const float new_r_elbow_roll)
-{
-  data->r_elbow_roll = new_r_elbow_roll;
 }
 
 /** Clone this message.

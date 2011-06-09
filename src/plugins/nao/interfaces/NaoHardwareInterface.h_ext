@@ -43,22 +43,26 @@ class NaoHardwareInterface : public Interface
   static const uint32_t SERVO_l_shoulder_roll;
   static const uint32_t SERVO_l_elbow_yaw;
   static const uint32_t SERVO_l_elbow_roll;
+  static const uint32_t SERVO_l_wrist_yaw;
+  static const uint32_t SERVO_l_hand;
   static const uint32_t SERVO_l_hip_yaw_pitch;
   static const uint32_t SERVO_l_hip_roll;
   static const uint32_t SERVO_l_hip_pitch;
   static const uint32_t SERVO_l_knee_pitch;
   static const uint32_t SERVO_l_ankle_pitch;
   static const uint32_t SERVO_l_ankle_roll;
+  static const uint32_t SERVO_r_shoulder_pitch;
+  static const uint32_t SERVO_r_shoulder_roll;
+  static const uint32_t SERVO_r_elbow_yaw;
+  static const uint32_t SERVO_r_elbow_roll;
+  static const uint32_t SERVO_r_wrist_yaw;
+  static const uint32_t SERVO_r_hand;
   static const uint32_t SERVO_r_hip_yaw_pitch;
   static const uint32_t SERVO_r_hip_roll;
   static const uint32_t SERVO_r_hip_pitch;
   static const uint32_t SERVO_r_knee_pitch;
   static const uint32_t SERVO_r_ankle_pitch;
   static const uint32_t SERVO_r_ankle_roll;
-  static const uint32_t SERVO_r_shoulder_pitch;
-  static const uint32_t SERVO_r_shoulder_roll;
-  static const uint32_t SERVO_r_elbow_yaw;
-  static const uint32_t SERVO_r_elbow_roll;
   static const uint32_t SERVO_min;
   static const uint32_t SERVO_max;
   static const float USD_left_left;
@@ -88,22 +92,26 @@ class NaoHardwareInterface : public Interface
     float l_shoulder_roll; /**< Left shoulder roll */
     float l_elbow_yaw; /**< Left elbow yaw */
     float l_elbow_roll; /**< Left elbow roll */
+    float l_wrist_yaw; /**< Left wrist yaw */
+    float l_hand; /**< Left hand */
     float l_hip_yaw_pitch; /**< Left hip yaw pitch */
     float l_hip_roll; /**< Left hip roll */
     float l_hip_pitch; /**< Left hip pitch */
     float l_knee_pitch; /**< Left knee pitch */
     float l_ankle_pitch; /**< Left ankle pitch */
     float l_ankle_roll; /**< Left ankle roll */
+    float r_shoulder_pitch; /**< Right shoulder pitch */
+    float r_shoulder_roll; /**< Right shoulder roll */
+    float r_elbow_yaw; /**< Right elbow yaw */
+    float r_elbow_roll; /**< Right elbow roll */
+    float r_wrist_yaw; /**< Right wrist yaw */
+    float r_hand; /**< Right hand */
     float r_hip_yaw_pitch; /**< Right hip yaw pitch */
     float r_hip_roll; /**< Right hip roll */
     float r_hip_pitch; /**< Right hip pitch */
     float r_knee_pitch; /**< Right knee pitch */
     float r_ankle_pitch; /**< Right ankle pitch */
     float r_ankle_roll; /**< Right ankle roll */
-    float r_shoulder_pitch; /**< Right shoulder pitch */
-    float r_shoulder_roll; /**< Right shoulder roll */
-    float r_elbow_yaw; /**< Right elbow yaw */
-    float r_elbow_roll; /**< Right elbow roll */
     float accel_x; /**< Accelerometer x */
     float accel_y; /**< Accelerometer y */
     float accel_z; /**< Accelerometer z */
@@ -120,13 +128,22 @@ class NaoHardwareInterface : public Interface
     float r_fsr_fr; /**< Right FSR front right */
     float r_fsr_rl; /**< Right FSR rear left */
     float r_fsr_rr; /**< Right FSR rear right */
+    float l_total_weight; /**< Total weight on left foot */
+    float r_total_weight; /**< Total weight on right foot */
+    float l_cop_x; /**< Center of pressure X for left foot. */
+    float l_cop_y; /**< Center of pressure Y for left foot. */
+    float r_cop_x; /**< Center of pressure X for right foot. */
+    float r_cop_y; /**< Center of pressure Y for right foot. */
     float ultrasonic_distance; /**< Ultrasonic sensor reading */
     float ultrasonic_direction; /**< Direction that was used to gather the ultrasonic reading. */
-    float l_bumper_l; /**< Left foot bumper left side */
-    float l_bumper_r; /**< Left foot bumper right side */
-    float r_bumper_l; /**< Right foot bumper left side */
-    float r_bumper_r; /**< Right foot bumper right side */
-    float chest_button; /**< Chest button state */
+    uint8_t l_foot_bumper_l; /**< Left foot bumper left side */
+    uint8_t l_foot_bumper_r; /**< Left foot bumper right side */
+    uint8_t r_foot_bumper_l; /**< Right foot bumper left side */
+    uint8_t r_foot_bumper_r; /**< Right foot bumper right side */
+    uint8_t head_touch_front; /**< Front part of head touch sensor (only Academics robot) */
+    uint8_t head_touch_middle; /**< Middle part of head touch sensor (only Academics robot) */
+    uint8_t head_touch_rear; /**< Rear part of head touch sensor (only Academics robot) */
+    uint8_t chest_button; /**< Chest button state */
     float battery_charge; /**< Battery charge */
     int32_t time; /**< 
       Current reference time in ms. For real hardware this is the DCM time.
@@ -160,15 +177,19 @@ class NaoHardwareInterface : public Interface
       float l_knee_pitch; /**< Left knee pitch */
       float l_ankle_pitch; /**< Left ankle pitch */
       float l_ankle_roll; /**< Left ankle roll */
+      float l_wrist_yaw; /**< Left wrist yaw */
+      float l_hand; /**< Left hand */
+      float r_shoulder_pitch; /**< Right shoulder pitch */
+      float r_shoulder_roll; /**< Right shoulder roll */
+      float r_elbow_yaw; /**< Right elbow yaw */
+      float r_wrist_yaw; /**< Right wrist yaw */
+      float r_hand; /**< Right hand */
       float r_hip_yaw_pitch; /**< Right hip yaw pitch */
       float r_hip_roll; /**< Right hip roll */
       float r_hip_pitch; /**< Right hip pitch */
       float r_knee_pitch; /**< Right knee pitch */
       float r_ankle_pitch; /**< Right ankle pitch */
       float r_ankle_roll; /**< Right ankle roll */
-      float r_shoulder_pitch; /**< Right shoulder pitch */
-      float r_shoulder_roll; /**< Right shoulder roll */
-      float r_elbow_yaw; /**< Right elbow yaw */
       float r_elbow_roll; /**< Right elbow roll */
       int32_t time; /**< 
       Current reference time in ms. For real hardware this is the DCM time.
@@ -181,7 +202,7 @@ class NaoHardwareInterface : public Interface
     SetServosMessage_data_t *data;
 
    public:
-    SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const int32_t ini_time);
+    SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll, const int32_t ini_time);
     SetServosMessage();
     ~SetServosMessage();
 
@@ -223,6 +244,27 @@ class NaoHardwareInterface : public Interface
     float l_ankle_roll() const;
     void set_l_ankle_roll(const float new_l_ankle_roll);
     size_t maxlenof_l_ankle_roll() const;
+    float l_wrist_yaw() const;
+    void set_l_wrist_yaw(const float new_l_wrist_yaw);
+    size_t maxlenof_l_wrist_yaw() const;
+    float l_hand() const;
+    void set_l_hand(const float new_l_hand);
+    size_t maxlenof_l_hand() const;
+    float r_shoulder_pitch() const;
+    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
+    size_t maxlenof_r_shoulder_pitch() const;
+    float r_shoulder_roll() const;
+    void set_r_shoulder_roll(const float new_r_shoulder_roll);
+    size_t maxlenof_r_shoulder_roll() const;
+    float r_elbow_yaw() const;
+    void set_r_elbow_yaw(const float new_r_elbow_yaw);
+    size_t maxlenof_r_elbow_yaw() const;
+    float r_wrist_yaw() const;
+    void set_r_wrist_yaw(const float new_r_wrist_yaw);
+    size_t maxlenof_r_wrist_yaw() const;
+    float r_hand() const;
+    void set_r_hand(const float new_r_hand);
+    size_t maxlenof_r_hand() const;
     float r_hip_yaw_pitch() const;
     void set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch);
     size_t maxlenof_r_hip_yaw_pitch() const;
@@ -241,15 +283,6 @@ class NaoHardwareInterface : public Interface
     float r_ankle_roll() const;
     void set_r_ankle_roll(const float new_r_ankle_roll);
     size_t maxlenof_r_ankle_roll() const;
-    float r_shoulder_pitch() const;
-    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
-    size_t maxlenof_r_shoulder_pitch() const;
-    float r_shoulder_roll() const;
-    void set_r_shoulder_roll(const float new_r_shoulder_roll);
-    size_t maxlenof_r_shoulder_roll() const;
-    float r_elbow_yaw() const;
-    void set_r_elbow_yaw(const float new_r_elbow_yaw);
-    size_t maxlenof_r_elbow_yaw() const;
     float r_elbow_roll() const;
     void set_r_elbow_roll(const float new_r_elbow_roll);
     size_t maxlenof_r_elbow_roll() const;
@@ -275,29 +308,33 @@ class NaoHardwareInterface : public Interface
       float l_shoulder_roll; /**< Left shoulder roll */
       float l_elbow_yaw; /**< Left elbow yaw */
       float l_elbow_roll; /**< Left elbow roll */
+      float l_wrist_yaw; /**< Left wrist yaw */
+      float l_hand; /**< Left hand */
       float l_hip_yaw_pitch; /**< Left hip yaw pitch */
       float l_hip_roll; /**< Left hip roll */
       float l_hip_pitch; /**< Left hip pitch */
       float l_knee_pitch; /**< Left knee pitch */
       float l_ankle_pitch; /**< Left ankle pitch */
       float l_ankle_roll; /**< Left ankle roll */
+      float r_shoulder_pitch; /**< Right shoulder pitch */
+      float r_shoulder_roll; /**< Right shoulder roll */
+      float r_elbow_yaw; /**< Right elbow yaw */
+      float r_elbow_roll; /**< Right elbow roll */
+      float r_wrist_yaw; /**< Right wrist yaw */
+      float r_hand; /**< Right hand */
       float r_hip_yaw_pitch; /**< Right hip yaw pitch */
       float r_hip_roll; /**< Right hip roll */
       float r_hip_pitch; /**< Right hip pitch */
       float r_knee_pitch; /**< Right knee pitch */
       float r_ankle_pitch; /**< Right ankle pitch */
       float r_ankle_roll; /**< Right ankle roll */
-      float r_shoulder_pitch; /**< Right shoulder pitch */
-      float r_shoulder_roll; /**< Right shoulder roll */
-      float r_elbow_yaw; /**< Right elbow yaw */
-      float r_elbow_roll; /**< Right elbow roll */
     } GotoAnglesMessage_data_t;
 #pragma pack(pop)
 
     GotoAnglesMessage_data_t *data;
 
    public:
-    GotoAnglesMessage(const float ini_time_sec, const InterpolationType ini_interpolation, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll);
+    GotoAnglesMessage(const float ini_time_sec, const InterpolationType ini_interpolation, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll);
     GotoAnglesMessage();
     ~GotoAnglesMessage();
 
@@ -327,6 +364,12 @@ class NaoHardwareInterface : public Interface
     float l_elbow_roll() const;
     void set_l_elbow_roll(const float new_l_elbow_roll);
     size_t maxlenof_l_elbow_roll() const;
+    float l_wrist_yaw() const;
+    void set_l_wrist_yaw(const float new_l_wrist_yaw);
+    size_t maxlenof_l_wrist_yaw() const;
+    float l_hand() const;
+    void set_l_hand(const float new_l_hand);
+    size_t maxlenof_l_hand() const;
     float l_hip_yaw_pitch() const;
     void set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch);
     size_t maxlenof_l_hip_yaw_pitch() const;
@@ -345,6 +388,24 @@ class NaoHardwareInterface : public Interface
     float l_ankle_roll() const;
     void set_l_ankle_roll(const float new_l_ankle_roll);
     size_t maxlenof_l_ankle_roll() const;
+    float r_shoulder_pitch() const;
+    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
+    size_t maxlenof_r_shoulder_pitch() const;
+    float r_shoulder_roll() const;
+    void set_r_shoulder_roll(const float new_r_shoulder_roll);
+    size_t maxlenof_r_shoulder_roll() const;
+    float r_elbow_yaw() const;
+    void set_r_elbow_yaw(const float new_r_elbow_yaw);
+    size_t maxlenof_r_elbow_yaw() const;
+    float r_elbow_roll() const;
+    void set_r_elbow_roll(const float new_r_elbow_roll);
+    size_t maxlenof_r_elbow_roll() const;
+    float r_wrist_yaw() const;
+    void set_r_wrist_yaw(const float new_r_wrist_yaw);
+    size_t maxlenof_r_wrist_yaw() const;
+    float r_hand() const;
+    void set_r_hand(const float new_r_hand);
+    size_t maxlenof_r_hand() const;
     float r_hip_yaw_pitch() const;
     void set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch);
     size_t maxlenof_r_hip_yaw_pitch() const;
@@ -363,18 +424,6 @@ class NaoHardwareInterface : public Interface
     float r_ankle_roll() const;
     void set_r_ankle_roll(const float new_r_ankle_roll);
     size_t maxlenof_r_ankle_roll() const;
-    float r_shoulder_pitch() const;
-    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
-    size_t maxlenof_r_shoulder_pitch() const;
-    float r_shoulder_roll() const;
-    void set_r_shoulder_roll(const float new_r_shoulder_roll);
-    size_t maxlenof_r_shoulder_roll() const;
-    float r_elbow_yaw() const;
-    void set_r_elbow_yaw(const float new_r_elbow_yaw);
-    size_t maxlenof_r_elbow_yaw() const;
-    float r_elbow_roll() const;
-    void set_r_elbow_roll(const float new_r_elbow_roll);
-    size_t maxlenof_r_elbow_roll() const;
     virtual Message * clone() const;
   };
 
@@ -639,6 +688,12 @@ class NaoHardwareInterface : public Interface
   float l_elbow_roll() const;
   void set_l_elbow_roll(const float new_l_elbow_roll);
   size_t maxlenof_l_elbow_roll() const;
+  float l_wrist_yaw() const;
+  void set_l_wrist_yaw(const float new_l_wrist_yaw);
+  size_t maxlenof_l_wrist_yaw() const;
+  float l_hand() const;
+  void set_l_hand(const float new_l_hand);
+  size_t maxlenof_l_hand() const;
   float l_hip_yaw_pitch() const;
   void set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch);
   size_t maxlenof_l_hip_yaw_pitch() const;
@@ -657,6 +712,24 @@ class NaoHardwareInterface : public Interface
   float l_ankle_roll() const;
   void set_l_ankle_roll(const float new_l_ankle_roll);
   size_t maxlenof_l_ankle_roll() const;
+  float r_shoulder_pitch() const;
+  void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
+  size_t maxlenof_r_shoulder_pitch() const;
+  float r_shoulder_roll() const;
+  void set_r_shoulder_roll(const float new_r_shoulder_roll);
+  size_t maxlenof_r_shoulder_roll() const;
+  float r_elbow_yaw() const;
+  void set_r_elbow_yaw(const float new_r_elbow_yaw);
+  size_t maxlenof_r_elbow_yaw() const;
+  float r_elbow_roll() const;
+  void set_r_elbow_roll(const float new_r_elbow_roll);
+  size_t maxlenof_r_elbow_roll() const;
+  float r_wrist_yaw() const;
+  void set_r_wrist_yaw(const float new_r_wrist_yaw);
+  size_t maxlenof_r_wrist_yaw() const;
+  float r_hand() const;
+  void set_r_hand(const float new_r_hand);
+  size_t maxlenof_r_hand() const;
   float r_hip_yaw_pitch() const;
   void set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch);
   size_t maxlenof_r_hip_yaw_pitch() const;
@@ -675,18 +748,6 @@ class NaoHardwareInterface : public Interface
   float r_ankle_roll() const;
   void set_r_ankle_roll(const float new_r_ankle_roll);
   size_t maxlenof_r_ankle_roll() const;
-  float r_shoulder_pitch() const;
-  void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
-  size_t maxlenof_r_shoulder_pitch() const;
-  float r_shoulder_roll() const;
-  void set_r_shoulder_roll(const float new_r_shoulder_roll);
-  size_t maxlenof_r_shoulder_roll() const;
-  float r_elbow_yaw() const;
-  void set_r_elbow_yaw(const float new_r_elbow_yaw);
-  size_t maxlenof_r_elbow_yaw() const;
-  float r_elbow_roll() const;
-  void set_r_elbow_roll(const float new_r_elbow_roll);
-  size_t maxlenof_r_elbow_roll() const;
   float accel_x() const;
   void set_accel_x(const float new_accel_x);
   size_t maxlenof_accel_x() const;
@@ -735,26 +796,53 @@ class NaoHardwareInterface : public Interface
   float r_fsr_rr() const;
   void set_r_fsr_rr(const float new_r_fsr_rr);
   size_t maxlenof_r_fsr_rr() const;
+  float l_total_weight() const;
+  void set_l_total_weight(const float new_l_total_weight);
+  size_t maxlenof_l_total_weight() const;
+  float r_total_weight() const;
+  void set_r_total_weight(const float new_r_total_weight);
+  size_t maxlenof_r_total_weight() const;
+  float l_cop_x() const;
+  void set_l_cop_x(const float new_l_cop_x);
+  size_t maxlenof_l_cop_x() const;
+  float l_cop_y() const;
+  void set_l_cop_y(const float new_l_cop_y);
+  size_t maxlenof_l_cop_y() const;
+  float r_cop_x() const;
+  void set_r_cop_x(const float new_r_cop_x);
+  size_t maxlenof_r_cop_x() const;
+  float r_cop_y() const;
+  void set_r_cop_y(const float new_r_cop_y);
+  size_t maxlenof_r_cop_y() const;
   float ultrasonic_distance() const;
   void set_ultrasonic_distance(const float new_ultrasonic_distance);
   size_t maxlenof_ultrasonic_distance() const;
   float ultrasonic_direction() const;
   void set_ultrasonic_direction(const float new_ultrasonic_direction);
   size_t maxlenof_ultrasonic_direction() const;
-  float l_bumper_l() const;
-  void set_l_bumper_l(const float new_l_bumper_l);
-  size_t maxlenof_l_bumper_l() const;
-  float l_bumper_r() const;
-  void set_l_bumper_r(const float new_l_bumper_r);
-  size_t maxlenof_l_bumper_r() const;
-  float r_bumper_l() const;
-  void set_r_bumper_l(const float new_r_bumper_l);
-  size_t maxlenof_r_bumper_l() const;
-  float r_bumper_r() const;
-  void set_r_bumper_r(const float new_r_bumper_r);
-  size_t maxlenof_r_bumper_r() const;
-  float chest_button() const;
-  void set_chest_button(const float new_chest_button);
+  uint8_t l_foot_bumper_l() const;
+  void set_l_foot_bumper_l(const uint8_t new_l_foot_bumper_l);
+  size_t maxlenof_l_foot_bumper_l() const;
+  uint8_t l_foot_bumper_r() const;
+  void set_l_foot_bumper_r(const uint8_t new_l_foot_bumper_r);
+  size_t maxlenof_l_foot_bumper_r() const;
+  uint8_t r_foot_bumper_l() const;
+  void set_r_foot_bumper_l(const uint8_t new_r_foot_bumper_l);
+  size_t maxlenof_r_foot_bumper_l() const;
+  uint8_t r_foot_bumper_r() const;
+  void set_r_foot_bumper_r(const uint8_t new_r_foot_bumper_r);
+  size_t maxlenof_r_foot_bumper_r() const;
+  uint8_t head_touch_front() const;
+  void set_head_touch_front(const uint8_t new_head_touch_front);
+  size_t maxlenof_head_touch_front() const;
+  uint8_t head_touch_middle() const;
+  void set_head_touch_middle(const uint8_t new_head_touch_middle);
+  size_t maxlenof_head_touch_middle() const;
+  uint8_t head_touch_rear() const;
+  void set_head_touch_rear(const uint8_t new_head_touch_rear);
+  size_t maxlenof_head_touch_rear() const;
+  uint8_t chest_button() const;
+  void set_chest_button(const uint8_t new_chest_button);
   size_t maxlenof_chest_button() const;
   float battery_charge() const;
   void set_battery_charge(const float new_battery_charge);
