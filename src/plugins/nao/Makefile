@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_naoqi = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_naoqi = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	   fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
 	   alcore alcommon alvalue almemoryfastaccess \
 	   boost_serialization-mt boost_signals-mt \

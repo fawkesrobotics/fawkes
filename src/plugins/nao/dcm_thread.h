@@ -28,7 +28,12 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <plugins/nao/aspect/naoqi.h>
+
+#include <core/utils/lock_vector.h>
+
+#include <interfaces/NaoJointPositionInterface.h>
 
 #include <althread/alprocesssignals.h>
 #include <alcommon/alproxy.h>
@@ -39,13 +44,15 @@ namespace AL {
   class ALMemoryFastAccess;
 }
 namespace fawkes {
-  class NaoHardwareInterface;
+  class NaoJointStiffnessInterface;
+  class NaoSensorInterface;
 }
 
 class NaoQiDCMThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+  public fawkes::BlockedTimingAspect,
   public fawkes::ClockAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::NaoQiAspect
@@ -63,16 +70,40 @@ class NaoQiDCMThread
 
  private:
   void dcm_callback();
+  void read_values();
+  void update_interfaces(fawkes::NaoJointPositionInterface *joint_pos_if,
+			 fawkes::NaoJointStiffnessInterface *joint_stiffness_if,
+			 fawkes::NaoSensorInterface *sensor_if);
+  void process_messages();
+
+
+  void send_commands(unsigned int servos, std::string what,
+		     float value, int time_offset);
+  void send_command(std::string name, float value, int time_offset);
+
+  class HighFreqThread;
+  HighFreqThread *__highfreq_thread;
 
  private:
   AL::ALPtr<AL::DCMProxy> __dcm;
+  AL::ALPtr<AL::ALMotionProxy> __almotion;
   AL::ALPtr<AL::ALMemoryFastAccess> __memfa;
+  bool __robocup_version;
 
   AL::ALProcessSignals::ProcessSignalConnection __dcm_sigconn;
 
-  std::vector<float> __values;
+  int                       __dcm_time;
+  fawkes::LockVector<float> __values;
 
-  fawkes::NaoHardwareInterface *__naohw_if;
+  fawkes::NaoJointPositionInterface   *__joint_pos_highfreq_if;
+  fawkes::NaoJointPositionInterface   *__joint_pos_if;
+  fawkes::NaoJointStiffnessInterface  *__joint_stiffness_highfreq_if;
+  fawkes::NaoJointStiffnessInterface  *__joint_stiffness_if;
+  fawkes::NaoSensorInterface          *__sensor_highfreq_if;
+  fawkes::NaoSensorInterface          *__sensor_if;
+
+  uint8_t                                      __robot_version[4];
+  fawkes::NaoJointPositionInterface::RobotType __robot_type;
 };
 
 #endif
