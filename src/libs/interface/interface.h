@@ -157,6 +157,16 @@ class Interface
   template <class MessageType>
     MessageType *  msgq_first(MessageType *&msg);
 
+  /** Get first message casted to the desired type without exceptions.
+   * This method allows to combine a call to msgq_first_is() and msgq_first()
+   * into a single call.
+   * @param msg reference to pointer to message of desired type, upon successful
+   * return points to the message. 
+   * @return pointer to message if it is of the desired type, 0 otherwise
+   */
+  template <class MessageType>
+    MessageType * msgq_first_safe(MessageType *&msg) throw();
+
   MessageQueue::MessageIterator  msgq_begin();
   MessageQueue::MessageIterator  msgq_end();
 
@@ -262,6 +272,15 @@ MessageType *
 Interface::msgq_first(MessageType *&msg)
 {
   msg = this->msgq_first<MessageType>();
+  return msg;
+}
+
+
+template <class MessageType>
+MessageType *
+Interface::msgq_first_safe(MessageType *&msg) throw()
+{
+  msg = dynamic_cast<MessageType *>(__message_queue->first());
   return msg;
 }
 
