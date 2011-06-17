@@ -1,0 +1,241 @@
+
+/***************************************************************************
+ *  naogui.h - Nao GUI
+ *
+ *  Created: Mon Oct 27 17:10:58 2008
+ *  Copyright  2008-2011  Tim Niemueller [www.niemueller.de]
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+#ifndef __PLUGINS_NAO_TOOLS_NAOGUI_NAOGUI_H_
+#define __PLUGINS_NAO_TOOLS_NAOGUI_NAOGUI_H_
+
+#include <gui_utils/connection_dispatcher.h>
+
+#include <gtkmm.h>
+#include <libglademm/xml.h>
+
+namespace fawkes {
+  class BlackBoard;
+  class NaoJointPositionInterface;
+  class NaoJointStiffnessInterface;
+  class NaoSensorInterface;
+  class NavigatorInterface;
+  class HumanoidMotionInterface;
+  class InterfaceDispatcher;
+}
+
+class NaoGuiGtkWindow : public Gtk::Window
+{
+ public:
+  NaoGuiGtkWindow(BaseObjectType* cobject,
+		  const Glib::RefPtr<Gnome::Glade::Xml> &refxml);
+  ~NaoGuiGtkWindow();
+
+ private:
+  void update_servo_value(Gtk::HScale *hsc, Gtk::Label *label, float value);
+  void update_sensor_value(Gtk::Label *label, float value, bool show_decimal=true);
+  void update_entry_value(Gtk::Entry *ent, float value, unsigned int width = 2);
+  void update_ultrasonic_direction(float direction);
+  void send_servo_msg(Gtk::HScale *hsc, unsigned int servo);
+  void update_values(bool force = false);
+  void update_jointpos_values(bool force = false);
+  void update_sensor_values(bool force = false);
+  bool servos_enabled() const;
+
+
+  void on_stiffness_clicked();
+  void on_control_toggled();
+  void on_sv_copy_clicked();
+  void on_us_emit_clicked();
+  void on_us_auto_toggled();
+  void on_goto_parkpos_clicked();
+  void on_goto_zero_all_clicked();
+  void on_get_up_clicked();
+  void on_walkvel_exec_clicked();
+  void on_ws_exec_clicked();
+  void on_wsw_exec_clicked();
+  void on_kick_exec_clicked();
+  void on_nav_exec_clicked();
+  void on_wa_exec_clicked();
+  void on_turn_exec_clicked();
+  void on_motion_stop_clicked();
+  void on_cf_read_clicked();
+  void on_cf_write_clicked();
+  void on_global_stiffness_toggled();
+  void on_stiff_write_clicked();
+  void on_stiff_read_clicked();
+  void on_slider_changed(Gtk::HScale *hsc, Gtk::Label *lab, unsigned int servo);
+  void on_changed_time();
+  void on_connection_clicked();
+  void on_connect();
+  void on_disconnect();
+  void on_exit_clicked();
+
+  bool convert_str2float(Glib::ustring sn, float *f);
+  Glib::ustring convert_float2str(float f, unsigned int width = 2);
+
+  void init();
+
+
+ private:
+  fawkes::BlackBoard *bb;
+  fawkes::InterfaceDispatcher *ifd_jointpos;
+  fawkes::InterfaceDispatcher *ifd_sensor;
+  fawkes::NaoJointPositionInterface *jointpos_if;
+  fawkes::NaoJointStiffnessInterface *jointstiff_if;
+  fawkes::NaoSensorInterface *sensor_if;
+  fawkes::NavigatorInterface *nao_navi_if;
+  fawkes::HumanoidMotionInterface *hummot_fawkes_if;
+  fawkes::HumanoidMotionInterface *hummot_naoqi_if;
+  fawkes::ConnectionDispatcher connection_dispatcher;
+  int servo_time;
+
+  bool servo_enabled;
+  bool global_stiffness_enabled;
+
+  Gtk::Frame  *frm_servos;
+  Gtk::Frame  *frm_sensors;
+  Gtk::Frame  *frm_ultrasonic;
+
+  Gtk::HScale *hsc_HeadYaw;
+  Gtk::Label  *lab_HeadYaw;
+  Gtk::HScale *hsc_HeadPitch;
+  Gtk::Label  *lab_HeadPitch;
+  Gtk::HScale *hsc_RShoulderPitch;
+  Gtk::Label  *lab_RShoulderPitch;
+  Gtk::HScale *hsc_RShoulderRoll;
+  Gtk::Label  *lab_RShoulderRoll;
+  Gtk::HScale *hsc_RElbowYaw;
+  Gtk::Label  *lab_RElbowYaw;
+  Gtk::HScale *hsc_RElbowRoll;
+  Gtk::Label  *lab_RElbowRoll;
+  Gtk::HScale *hsc_RWristYaw;
+  Gtk::Label  *lab_RWristYaw;
+  Gtk::HScale *hsc_RHand;
+  Gtk::Label  *lab_RHand;
+  Gtk::HScale *hsc_LShoulderPitch;
+  Gtk::Label  *lab_LShoulderPitch;
+  Gtk::HScale *hsc_LShoulderRoll;
+  Gtk::Label  *lab_LShoulderRoll;
+  Gtk::HScale *hsc_LElbowYaw;
+  Gtk::Label  *lab_LElbowYaw;
+  Gtk::HScale *hsc_LElbowRoll;
+  Gtk::Label  *lab_LElbowRoll;
+  Gtk::HScale *hsc_LWristYaw;
+  Gtk::Label  *lab_LWristYaw;
+  Gtk::HScale *hsc_LHand;
+  Gtk::Label  *lab_LHand;
+  Gtk::HScale *hsc_RHipYawPitch;
+  Gtk::Label  *lab_RHipYawPitch;
+  Gtk::HScale *hsc_RHipPitch;
+  Gtk::Label  *lab_RHipPitch;
+  Gtk::HScale *hsc_RHipRoll;
+  Gtk::Label  *lab_RHipRoll;
+  Gtk::HScale *hsc_RKneePitch;
+  Gtk::Label  *lab_RKneePitch;
+  Gtk::HScale *hsc_RAnklePitch;
+  Gtk::Label  *lab_RAnklePitch;
+  Gtk::HScale *hsc_RAnkleRoll;
+  Gtk::Label  *lab_RAnkleRoll;
+  Gtk::HScale *hsc_LHipYawPitch;
+  Gtk::Label  *lab_LHipYawPitch;
+  Gtk::HScale *hsc_LHipPitch;
+  Gtk::Label  *lab_LHipPitch;
+  Gtk::HScale *hsc_LHipRoll;
+  Gtk::Label  *lab_LHipRoll;
+  Gtk::HScale *hsc_LKneePitch;
+  Gtk::Label  *lab_LKneePitch;
+  Gtk::HScale *hsc_LAnklePitch;
+  Gtk::Label  *lab_LAnklePitch;
+  Gtk::HScale *hsc_LAnkleRoll;
+  Gtk::Label  *lab_LAnkleRoll;
+  Gtk::HScale *hsc_time;
+  Gtk::Label  *lab_time;
+  Gtk::ToolButton *tb_connection;
+  Gtk::ToolButton *tb_stiffness;
+  Gtk::ToggleToolButton *tb_control;
+  Gtk::ToolButton *tb_getup;
+  Gtk::ToolButton *tb_parkpos;
+  Gtk::ToolButton *tb_zeroall;
+  Gtk::ToolButton *tb_exit;
+  Gtk::Label  *lab_l_fsr_fl;
+  Gtk::Label  *lab_l_fsr_fr;
+  Gtk::Label  *lab_l_fsr_rl;
+  Gtk::Label  *lab_l_fsr_rr;
+  Gtk::Label  *lab_r_fsr_fl;
+  Gtk::Label  *lab_r_fsr_fr;
+  Gtk::Label  *lab_r_fsr_rl;
+  Gtk::Label  *lab_r_fsr_rr;
+  Gtk::Label  *lab_r_cop;
+  Gtk::Label  *lab_l_cop;
+  Gtk::Label  *lab_r_total_weight;
+  Gtk::Label  *lab_l_total_weight;
+  Gtk::Label  *lab_chest_button;
+  Gtk::Label  *lab_touch_front;
+  Gtk::Label  *lab_touch_middle;
+  Gtk::Label  *lab_touch_rear;
+  Gtk::Label  *lab_l_bumper_l;
+  Gtk::Label  *lab_l_bumper_r;
+  Gtk::Label  *lab_r_bumper_l;
+  Gtk::Label  *lab_r_bumper_r;
+  Gtk::Label  *lab_accel_x;
+  Gtk::Label  *lab_accel_y;
+  Gtk::Label  *lab_accel_z;
+  Gtk::Label  *lab_gyro_x;
+  Gtk::Label  *lab_gyro_y;
+  Gtk::Label  *lab_gyro_ref;
+  Gtk::Label  *lab_angles_xy;
+  Gtk::Label  *lab_ultrasonic_distance;
+  Gtk::Label  *lab_ultrasonic_direction;
+  Gtk::Label  *lab_battery_charge;
+  Gtk::Button *but_sv_copy;
+  Gtk::ToggleButton *but_us_auto;
+  Gtk::Button *but_us_emit;
+  Gtk::ComboBox     *cmb_us_direction;
+
+  Gtk::RadioButton *rad_motion_fawkes;
+  Gtk::RadioButton *rad_motion_naoqi;
+  Gtk::Button *but_stop;
+  Gtk::Expander *exp_motion;
+  Gtk::Entry  *ent_ws_distance;
+  Gtk::Button *but_ws_exec;
+  Gtk::Entry  *ent_wsw_distance;
+  Gtk::Button *but_wsw_exec;
+  Gtk::Entry  *ent_wa_angle;
+  Gtk::Entry  *ent_wa_radius;
+  Gtk::Button *but_wa_exec;
+  Gtk::Entry  *ent_turn_angle;
+  Gtk::Button *but_turn_exec;
+  Gtk::ComboBox *cmb_kick_leg;
+  Gtk::Entry  *ent_kick_strength;
+  Gtk::Button *but_kick_exec;
+
+  Gtk::Entry  *ent_walkvel_x;
+  Gtk::Entry  *ent_walkvel_y;
+  Gtk::Entry  *ent_walkvel_theta;
+  Gtk::Entry  *ent_walkvel_speed;
+  Gtk::Button *but_walkvel_exec;
+
+  Gtk::Entry  *ent_nav_x;
+  Gtk::Entry  *ent_nav_y;
+  Gtk::Entry  *ent_nav_ori;
+  Gtk::Button *but_nav_exec;
+
+  unsigned int update_cycle;
+};
+
+#endif

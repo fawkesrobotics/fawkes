@@ -1,0 +1,1333 @@
+
+/***************************************************************************
+ *  naogui.cpp - Nao GUI
+ *
+ *  Created: Mon Apr 14 12:54:19 2008
+ *  Copyright  2008-2011  Tim Niemueller [www.niemueller.de]
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+#include "naogui.h"
+
+#include <utils/system/argparser.h>
+#include <blackboard/remote.h>
+#include <interfaces/NaoJointPositionInterface.h>
+#include <interfaces/NaoJointStiffnessInterface.h>
+#include <interfaces/NaoSensorInterface.h>
+#include <interfaces/HumanoidMotionInterface.h>
+#include <interfaces/NavigatorInterface.h>
+#include <netcomm/fawkes/client.h>
+
+#include <gui_utils/service_chooser_dialog.h>
+#include <gui_utils/interface_dispatcher.h>
+
+#include <cstring>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <sstream>
+#include <gtkmm/clipboard.h>
+
+using namespace fawkes;
+
+
+/** @class NaoGuiGtkWindow "naogui.h"
+ * Nao GUI main window.
+ * The Nao GUI provides access to the most basic servo, sensor and motion
+ * data and commands.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param cobject C base object
+ * @param refxml Glade XML
+ */
+NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
+				 const Glib::RefPtr<Gnome::Glade::Xml> &refxml)
+  : Gtk::Window(cobject)
+{
+  servo_time = 500;
+  bb = NULL;
+  jointpos_if = NULL;
+  jointstiff_if = NULL;
+  sensor_if = NULL;
+  nao_navi_if = NULL;
+  hummot_naoqi_if = NULL;
+  hummot_fawkes_if = NULL;
+  servo_enabled = false;
+
+  update_cycle = 0;
+
+  refxml->get_widget("frm_servos", frm_servos);
+  refxml->get_widget("frm_sensors", frm_sensors);
+  refxml->get_widget("frm_ultrasonic", frm_ultrasonic);
+
+  refxml->get_widget("lab_HeadYaw", lab_HeadYaw);
+  refxml->get_widget("lab_HeadPitch", lab_HeadPitch);
+  refxml->get_widget("lab_RShoulderPitch", lab_RShoulderPitch);
+  refxml->get_widget("lab_RShoulderRoll", lab_RShoulderRoll);
+  refxml->get_widget("lab_LShoulderPitch", lab_LShoulderPitch);
+  refxml->get_widget("lab_LShoulderRoll", lab_LShoulderRoll);
+  refxml->get_widget("lab_LElbowYaw", lab_LElbowYaw);
+  refxml->get_widget("lab_LElbowRoll", lab_LElbowRoll);
+  refxml->get_widget("lab_LWristYaw", lab_LWristYaw);
+  refxml->get_widget("lab_LHand", lab_LHand);
+  refxml->get_widget("lab_RElbowYaw", lab_RElbowYaw);
+  refxml->get_widget("lab_RElbowRoll", lab_RElbowRoll);
+  refxml->get_widget("lab_RWristYaw", lab_RWristYaw);
+  refxml->get_widget("lab_RHand", lab_RHand);
+  refxml->get_widget("lab_RHipYawPitch", lab_RHipYawPitch);
+  refxml->get_widget("lab_RHipPitch", lab_RHipPitch);
+  refxml->get_widget("lab_RHipRoll", lab_RHipRoll);
+  refxml->get_widget("lab_RKneePitch", lab_RKneePitch);
+  refxml->get_widget("lab_RAnklePitch", lab_RAnklePitch);
+  refxml->get_widget("lab_RAnkleRoll", lab_RAnkleRoll);
+  refxml->get_widget("lab_LHipYawPitch", lab_LHipYawPitch);
+  refxml->get_widget("lab_LHipPitch", lab_LHipPitch);
+  refxml->get_widget("lab_LHipRoll", lab_LHipRoll);
+  refxml->get_widget("lab_LKneePitch", lab_LKneePitch);
+  refxml->get_widget("lab_LAnklePitch", lab_LAnklePitch);
+  refxml->get_widget("lab_LAnkleRoll", lab_LAnkleRoll);
+  refxml->get_widget("hsc_HeadYaw", hsc_HeadYaw);
+  refxml->get_widget("hsc_HeadPitch", hsc_HeadPitch);
+  refxml->get_widget("hsc_RShoulderPitch", hsc_RShoulderPitch);
+  refxml->get_widget("hsc_RShoulderRoll", hsc_RShoulderRoll);
+  refxml->get_widget("hsc_RElbowYaw", hsc_RElbowYaw);
+  refxml->get_widget("hsc_RElbowRoll", hsc_RElbowRoll);
+  refxml->get_widget("hsc_RWristYaw", hsc_RWristYaw);
+  refxml->get_widget("hsc_RHand", hsc_RHand);
+  refxml->get_widget("hsc_LShoulderPitch", hsc_LShoulderPitch);
+  refxml->get_widget("hsc_LShoulderRoll", hsc_LShoulderRoll);
+  refxml->get_widget("hsc_LElbowYaw", hsc_LElbowYaw);
+  refxml->get_widget("hsc_LElbowRoll", hsc_LElbowRoll);
+  refxml->get_widget("hsc_LWristYaw", hsc_LWristYaw);
+  refxml->get_widget("hsc_LHand", hsc_LHand);
+  refxml->get_widget("hsc_RHipYawPitch", hsc_RHipYawPitch);
+  refxml->get_widget("hsc_RHipPitch", hsc_RHipPitch);
+  refxml->get_widget("hsc_RHipRoll", hsc_RHipRoll);
+  refxml->get_widget("hsc_RKneePitch", hsc_RKneePitch);
+  refxml->get_widget("hsc_RAnklePitch", hsc_RAnklePitch);
+  refxml->get_widget("hsc_RAnkleRoll", hsc_RAnkleRoll);
+  refxml->get_widget("hsc_LHipYawPitch", hsc_LHipYawPitch);
+  refxml->get_widget("hsc_LHipPitch", hsc_LHipPitch);
+  refxml->get_widget("hsc_LHipRoll", hsc_LHipRoll);
+  refxml->get_widget("hsc_LKneePitch", hsc_LKneePitch);
+  refxml->get_widget("hsc_LAnklePitch", hsc_LAnklePitch);
+  refxml->get_widget("hsc_LAnkleRoll", hsc_LAnkleRoll);
+  refxml->get_widget("hsc_time", hsc_time);
+  refxml->get_widget("lab_time", lab_time);
+  refxml->get_widget("tb_connection", tb_connection);
+  refxml->get_widget("tb_stiffness", tb_stiffness);
+  refxml->get_widget("tb_control", tb_control);
+  refxml->get_widget("tb_getup", tb_getup);
+  refxml->get_widget("tb_parkpos", tb_parkpos);
+  refxml->get_widget("tb_zeroall", tb_zeroall);
+  refxml->get_widget("tb_exit", tb_exit);
+  refxml->get_widget("lab_l_fsr_fl", lab_l_fsr_fl);
+  refxml->get_widget("lab_l_fsr_fr", lab_l_fsr_fr);
+  refxml->get_widget("lab_l_fsr_rl", lab_l_fsr_rl);
+  refxml->get_widget("lab_l_fsr_rr", lab_l_fsr_rr);
+  refxml->get_widget("lab_r_fsr_fl", lab_r_fsr_fl);
+  refxml->get_widget("lab_r_fsr_fr", lab_r_fsr_fr);
+  refxml->get_widget("lab_r_fsr_rl", lab_r_fsr_rl);
+  refxml->get_widget("lab_r_fsr_rr", lab_r_fsr_rr);
+  refxml->get_widget("lab_l_cop", lab_l_cop);
+  refxml->get_widget("lab_r_cop", lab_r_cop);
+  refxml->get_widget("lab_l_total_weight", lab_l_total_weight);
+  refxml->get_widget("lab_r_total_weight", lab_r_total_weight);
+  refxml->get_widget("lab_chest_button", lab_chest_button);
+  refxml->get_widget("lab_touch_front", lab_touch_front);
+  refxml->get_widget("lab_touch_middle", lab_touch_middle);
+  refxml->get_widget("lab_touch_rear", lab_touch_rear);
+  refxml->get_widget("lab_l_bumper_l", lab_l_bumper_l);
+  refxml->get_widget("lab_l_bumper_r", lab_l_bumper_r);
+  refxml->get_widget("lab_r_bumper_l", lab_r_bumper_l);
+  refxml->get_widget("lab_r_bumper_r", lab_r_bumper_r);
+  refxml->get_widget("lab_accel_x", lab_accel_x);
+  refxml->get_widget("lab_accel_y", lab_accel_y);
+  refxml->get_widget("lab_accel_z", lab_accel_z);
+  refxml->get_widget("lab_gyro_x", lab_gyro_x);
+  refxml->get_widget("lab_gyro_y", lab_gyro_y);
+  refxml->get_widget("lab_gyro_ref", lab_gyro_ref);
+  refxml->get_widget("lab_angles_xy", lab_angles_xy);
+  refxml->get_widget("lab_ultrasonic_distance", lab_ultrasonic_distance);
+  refxml->get_widget("lab_ultrasonic_direction", lab_ultrasonic_direction);
+  refxml->get_widget("lab_battery_charge", lab_battery_charge);
+  refxml->get_widget("but_sv_copy", but_sv_copy);
+  refxml->get_widget("cmb_us_direction", cmb_us_direction);
+  refxml->get_widget("but_us_emit", but_us_emit);
+  refxml->get_widget("but_us_auto", but_us_auto);
+  refxml->get_widget("exp_motion", exp_motion);
+  refxml->get_widget("but_stop", but_stop);
+  refxml->get_widget("but_ws_exec", but_ws_exec);
+  refxml->get_widget("ent_ws_distance", ent_ws_distance);
+  refxml->get_widget("but_wsw_exec", but_wsw_exec);
+  refxml->get_widget("ent_wsw_distance", ent_wsw_distance);
+  refxml->get_widget("but_wa_exec", but_wa_exec);
+  refxml->get_widget("ent_wa_angle", ent_wa_angle);
+  refxml->get_widget("ent_wa_radius", ent_wa_radius);
+  refxml->get_widget("but_turn_exec", but_turn_exec);
+  refxml->get_widget("cmb_kick_leg", cmb_kick_leg);
+  refxml->get_widget("ent_kick_strength", ent_kick_strength);
+  refxml->get_widget("but_kick_exec", but_kick_exec);
+  refxml->get_widget("ent_turn_angle", ent_turn_angle);
+  refxml->get_widget("rad_motion_fawkes", rad_motion_fawkes);
+  refxml->get_widget("rad_motion_naoqi", rad_motion_naoqi);
+  refxml->get_widget("ent_walkvel_x", ent_walkvel_x);
+  refxml->get_widget("ent_walkvel_y", ent_walkvel_y);
+  refxml->get_widget("ent_walkvel_theta", ent_walkvel_theta);
+  refxml->get_widget("ent_walkvel_speed", ent_walkvel_speed);
+  refxml->get_widget("but_walkvel_exec", but_walkvel_exec);
+
+  refxml->get_widget("ent_nav_x", ent_nav_x);
+  refxml->get_widget("ent_nav_y", ent_nav_y);
+  refxml->get_widget("ent_nav_ori", ent_nav_ori);
+  refxml->get_widget("but_nav_exec", but_nav_exec);
+
+  cmb_kick_leg->set_active(0);
+  cmb_us_direction->set_active(0);
+  frm_servos->set_sensitive(false);
+  frm_sensors->set_sensitive(false);
+  frm_ultrasonic->set_sensitive(false);
+  exp_motion->set_sensitive(false);
+
+  hsc_HeadYaw->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_HeadYaw, lab_HeadYaw, NaoJointPositionInterface::SERVO_head_yaw));
+  hsc_HeadPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_HeadPitch, lab_HeadPitch, NaoJointPositionInterface::SERVO_head_pitch));
+  hsc_RShoulderPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RShoulderPitch, lab_RShoulderPitch, NaoJointPositionInterface::SERVO_r_shoulder_pitch));
+  hsc_RShoulderRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RShoulderRoll, lab_RShoulderRoll, NaoJointPositionInterface::SERVO_r_shoulder_roll));
+  hsc_RElbowYaw->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RElbowYaw, lab_RElbowYaw, NaoJointPositionInterface::SERVO_r_elbow_yaw));
+  hsc_RElbowRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RElbowRoll, lab_RElbowRoll, NaoJointPositionInterface::SERVO_r_elbow_roll));
+  hsc_RWristYaw->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RWristYaw, lab_RWristYaw, NaoJointPositionInterface::SERVO_r_wrist_yaw));
+  hsc_RHand->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RHand, lab_RHand, NaoJointPositionInterface::SERVO_r_hand));
+  hsc_LShoulderPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LShoulderPitch, lab_LShoulderPitch, NaoJointPositionInterface::SERVO_l_shoulder_pitch));
+  hsc_LShoulderRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LShoulderRoll, lab_LShoulderRoll, NaoJointPositionInterface::SERVO_l_shoulder_roll));
+  hsc_LElbowYaw->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LElbowYaw, lab_LElbowYaw, NaoJointPositionInterface::SERVO_l_elbow_yaw));
+  hsc_LElbowRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LElbowRoll, lab_LElbowRoll, NaoJointPositionInterface::SERVO_l_elbow_roll));
+  hsc_LWristYaw->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LWristYaw, lab_LWristYaw, NaoJointPositionInterface::SERVO_r_wrist_yaw));
+  hsc_LHand->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LHand, lab_LHand, NaoJointPositionInterface::SERVO_r_hand));
+  hsc_RHipYawPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RHipYawPitch, lab_RHipYawPitch, NaoJointPositionInterface::SERVO_r_hip_yaw_pitch));
+  hsc_RHipPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RHipPitch, lab_RHipPitch, NaoJointPositionInterface::SERVO_r_hip_pitch));
+  hsc_RHipRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RHipRoll, lab_RHipRoll, NaoJointPositionInterface::SERVO_r_hip_roll));
+  hsc_RKneePitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RKneePitch, lab_RKneePitch, NaoJointPositionInterface::SERVO_r_knee_pitch));
+  hsc_RAnklePitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RAnklePitch, lab_RAnklePitch, NaoJointPositionInterface::SERVO_r_ankle_pitch));
+  hsc_RAnkleRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_RAnkleRoll, lab_RAnkleRoll, NaoJointPositionInterface::SERVO_r_ankle_roll));
+  hsc_LHipYawPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LHipYawPitch, lab_LHipYawPitch, NaoJointPositionInterface::SERVO_l_hip_yaw_pitch));
+  hsc_LHipPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LHipPitch, lab_LHipPitch, NaoJointPositionInterface::SERVO_l_hip_pitch));
+  hsc_LHipRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LHipRoll, lab_LHipRoll, NaoJointPositionInterface::SERVO_l_hip_roll));
+  hsc_LKneePitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LKneePitch, lab_LKneePitch, NaoJointPositionInterface::SERVO_l_knee_pitch));
+  hsc_LAnklePitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LAnklePitch, lab_LAnklePitch, NaoJointPositionInterface::SERVO_l_ankle_pitch));
+  hsc_LAnkleRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LAnkleRoll, lab_LAnkleRoll, NaoJointPositionInterface::SERVO_l_ankle_roll));
+  hsc_time->signal_value_changed().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_changed_time));
+  tb_connection->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connection_clicked));
+  tb_stiffness->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_clicked));
+  tb_control->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_control_toggled));
+  tb_parkpos->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_goto_parkpos_clicked));
+  tb_zeroall->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_goto_zero_all_clicked));
+  tb_getup->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_get_up_clicked));
+  tb_exit->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_exit_clicked));
+  but_sv_copy->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_sv_copy_clicked));
+  but_us_auto->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_us_auto_toggled));
+  but_us_emit->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_us_emit_clicked));
+  but_walkvel_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_walkvel_exec_clicked));
+  but_ws_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_ws_exec_clicked));
+  but_stop->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_motion_stop_clicked));
+  but_wsw_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_wsw_exec_clicked));
+  but_wa_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_wa_exec_clicked));
+  but_kick_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_kick_exec_clicked));
+  but_turn_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_turn_exec_clicked));
+  but_nav_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_nav_exec_clicked));
+  /*
+  but_stiff_read->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiff_read_clicked));
+  but_stiff_write->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiff_write_clicked));
+  chk_global_stiffness->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_global_stiffness_toggled));
+  */
+
+  connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connect));
+  connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_disconnect));
+
+  on_control_toggled();
+  init();
+}
+
+
+/** Destructor. */
+NaoGuiGtkWindow::~NaoGuiGtkWindow()
+{
+  on_disconnect();
+}
+
+/**
+ * Sets the default values (locale dependent)
+ */
+void
+NaoGuiGtkWindow::init()
+{
+  ent_walkvel_x->set_text(convert_float2str(0.5f, 1));
+  ent_walkvel_y->set_text(convert_float2str(0.f, 1));
+  ent_walkvel_theta->set_text(convert_float2str(0.f, 1));
+  ent_walkvel_speed->set_text(convert_float2str(0.5f, 1));
+
+  ent_ws_distance->set_text(convert_float2str(0.2f, 1));
+
+  ent_wsw_distance->set_text(convert_float2str(0.2f, 1));
+
+  ent_wa_angle->set_text(convert_float2str(1.f, 1));
+  ent_wa_radius->set_text(convert_float2str(0.3f, 1));
+
+  ent_turn_angle->set_text(convert_float2str(1.f, 1));
+
+  ent_nav_x->set_text(convert_float2str(0.f, 1));
+  ent_nav_y->set_text(convert_float2str(0.f, 1));
+  ent_nav_ori->set_text(convert_float2str(0.f, 1));
+}
+
+/** Update a servo value.
+ * @param hsc horizontal scale for value
+ * @param label label for value
+ * @param value servo value
+ */
+void
+NaoGuiGtkWindow::update_servo_value(Gtk::HScale *hsc, Gtk::Label *label, float value)
+{
+  float f = roundf(value * 100.);
+  if ( ! tb_control->get_active() && (hsc->get_value() != f)) {
+    hsc->set_value(f);
+  }
+  // this might seem more expensive than just setting it, but the really
+  // expensive thing are screen updates, and they can be avoid much of the
+  // time
+  Glib::ustring fs = convert_float2str(value);
+  if (label->get_text() != fs) {
+    label->set_text(fs);
+  }
+}
+
+
+/** Update sensor value.
+ * @param label label for value
+ * @param value sensor value
+ * @param show_decimal true to show as decimal, false to show as integer
+ */
+void
+NaoGuiGtkWindow::update_sensor_value(Gtk::Label *label, float value, bool show_decimal)
+{
+  Glib::ustring s = convert_float2str(value, show_decimal ? 2 : 0);
+  if (label->get_text() != s) {
+    label->set_text(s);
+  }
+}
+
+
+/** Update an entry value.
+ * @param ent entry field for the value
+ * @param value the value to set
+ * @param width the number of positions after decimal point
+ */
+void
+NaoGuiGtkWindow::update_entry_value(Gtk::Entry *ent, float value, unsigned int width)
+{
+  if ( value != -123456 ) {
+    ent->set_text(convert_float2str(value, width));
+  } else {
+    ent->set_text("");
+  }
+}
+
+
+/** Update ultrasonic direction field.
+ * @param direction direction value from interface field
+ */
+void
+NaoGuiGtkWindow::update_ultrasonic_direction(float direction)
+{
+  if ( direction == NaoSensorInterface::USD_left_left ) {
+    lab_ultrasonic_direction->set_text("l-l");
+  } else if ( direction == NaoSensorInterface::USD_left_right ) {
+    lab_ultrasonic_direction->set_text("l-r");
+  } else if ( direction == NaoSensorInterface::USD_right_left ) {
+    lab_ultrasonic_direction->set_text("r-l");
+  } else if ( direction == NaoSensorInterface::USD_right_right ) {
+    lab_ultrasonic_direction->set_text("r-r");
+  }
+}
+
+
+/** Send servo message.
+ * @param hsc scale from which to take the value from
+ * @param servo the servo constant for the servo to set from the
+ * NaoJointPositionInterface
+ */
+void
+NaoGuiGtkWindow::send_servo_msg(Gtk::HScale *hsc, unsigned int servo)
+{
+  if ( jointpos_if && tb_control->get_active() ) {
+    jointpos_if->read();
+
+    if (servo == NaoJointPositionInterface::SERVO_head_pitch || servo == NaoJointPositionInterface::SERVO_head_yaw) {
+      HumanoidMotionInterface::YawPitchHeadMessage *m
+        = new HumanoidMotionInterface::YawPitchHeadMessage(hsc_HeadYaw->get_value() / 100.f, hsc_HeadPitch->get_value() / 100.f, servo_time / 1000.f);
+
+      if ( rad_motion_fawkes->get_active() ) {
+        hummot_fawkes_if->msgq_enqueue(m);
+      } else {
+        hummot_naoqi_if->msgq_enqueue(m);
+      }
+    }
+    else {
+      NaoJointPositionInterface::SetServoMessage *m
+        = new NaoJointPositionInterface::SetServoMessage(servo,
+							 hsc->get_value() / 100.f,
+							 servo_time);
+
+      jointpos_if->msgq_enqueue(m);
+    }
+  }
+}
+
+
+/** Event handler for slider changes.
+ * @param hsc horizontal slider that caused the event
+ * @param label label to set with the value
+ * @param servo the servo constant for the servo to set from the
+ * NaoJointPositionInterface
+ */
+void
+NaoGuiGtkWindow::on_slider_changed(Gtk::HScale *hsc, Gtk::Label *label,
+				   unsigned int servo)
+{
+  send_servo_msg(hsc, servo);
+}
+
+
+/** Time change event handler. */
+void
+NaoGuiGtkWindow::on_changed_time()
+{
+  char *tmp;
+  if (asprintf(&tmp, "%d", (int)hsc_time->get_value()) != -1) {
+    lab_time->set_text(tmp);
+    free(tmp);
+  }
+
+  servo_time = (int)hsc_time->get_value();
+}
+
+
+/** Update joint position values.
+ * Called whenever the NaoJointPositionInterface changes.
+ * @param force true to force an update, false to update depending
+ * on internal state
+ */
+void
+NaoGuiGtkWindow::update_jointpos_values(bool force)
+{
+  if ( ! jointpos_if ) return;
+
+  /*
+  // we take only each 10th update to decrease ffnaogui CPU usage
+  if (! force && (++update_cycle % 10 != 0)) {
+    return;
+  }
+  update_cycle = 0;
+  */
+
+  try {
+    jointpos_if->read();
+    update_servo_value(hsc_HeadYaw, lab_HeadYaw, jointpos_if->head_yaw());
+    update_servo_value(hsc_HeadPitch, lab_HeadPitch, jointpos_if->head_pitch());
+    update_servo_value(hsc_RShoulderPitch, lab_RShoulderPitch, jointpos_if->r_shoulder_pitch());
+    update_servo_value(hsc_RShoulderRoll, lab_RShoulderRoll, jointpos_if->r_shoulder_roll());
+    update_servo_value(hsc_RElbowYaw, lab_RElbowYaw, jointpos_if->r_elbow_yaw());
+    update_servo_value(hsc_RElbowRoll, lab_RElbowRoll, jointpos_if->r_elbow_roll());
+    update_servo_value(hsc_RWristYaw, lab_RWristYaw, jointpos_if->r_wrist_yaw());
+    update_servo_value(hsc_RHand, lab_RHand, jointpos_if->r_hand());
+    update_servo_value(hsc_LShoulderPitch, lab_LShoulderPitch, jointpos_if->l_shoulder_pitch());
+    update_servo_value(hsc_LShoulderRoll, lab_LShoulderRoll, jointpos_if->l_shoulder_roll());
+    update_servo_value(hsc_LElbowYaw, lab_LElbowYaw, jointpos_if->l_elbow_yaw());
+    update_servo_value(hsc_LElbowRoll, lab_LElbowRoll, jointpos_if->l_elbow_roll());
+    update_servo_value(hsc_LWristYaw, lab_LWristYaw, jointpos_if->l_wrist_yaw());
+    update_servo_value(hsc_LHand, lab_LHand, jointpos_if->l_hand());
+    update_servo_value(hsc_RHipYawPitch, lab_RHipYawPitch, jointpos_if->r_hip_yaw_pitch());
+    update_servo_value(hsc_RHipPitch, lab_RHipPitch, jointpos_if->r_hip_pitch());
+    update_servo_value(hsc_RHipRoll, lab_RHipRoll, jointpos_if->r_hip_roll());
+    update_servo_value(hsc_RKneePitch, lab_RKneePitch, jointpos_if->r_knee_pitch());
+    update_servo_value(hsc_RAnklePitch, lab_RAnklePitch, jointpos_if->r_ankle_pitch());
+    update_servo_value(hsc_RAnkleRoll, lab_RAnkleRoll, jointpos_if->r_ankle_roll());
+    update_servo_value(hsc_LHipYawPitch, lab_LHipYawPitch, jointpos_if->l_hip_yaw_pitch());
+    update_servo_value(hsc_LHipPitch, lab_LHipPitch, jointpos_if->l_hip_pitch());
+    update_servo_value(hsc_LHipRoll, lab_LHipRoll, jointpos_if->l_hip_roll());
+    update_servo_value(hsc_LKneePitch, lab_LKneePitch, jointpos_if->l_knee_pitch());
+    update_servo_value(hsc_LAnklePitch, lab_LAnklePitch, jointpos_if->l_ankle_pitch());
+    update_servo_value(hsc_LAnkleRoll, lab_LAnkleRoll, jointpos_if->l_ankle_roll());
+
+    bool currently_servo_enabled = servos_enabled();
+
+    if ( currently_servo_enabled && ! servo_enabled ) {
+      tb_stiffness->set_stock_id(Gtk::Stock::YES);
+      tb_control->set_sensitive(true);
+      tb_getup->set_sensitive(true);
+      tb_parkpos->set_sensitive(true);
+      tb_zeroall->set_sensitive(true);
+    } else if (! currently_servo_enabled && servo_enabled ) {
+      tb_stiffness->set_stock_id(Gtk::Stock::NO);
+      tb_control->set_sensitive(false);
+      tb_getup->set_sensitive(false);
+      tb_parkpos->set_sensitive(false);
+      tb_zeroall->set_sensitive(false);
+    }
+    servo_enabled = currently_servo_enabled;
+  } catch (Exception &e) {
+    // ignored, happens on disconnect while events are pending
+  }
+}
+
+
+
+/** Update sensor values.
+ * Called whenever the NaoSensorInterface changes.
+ * @param force true to force an update, false to update depending
+ * on internal state
+ */
+void
+NaoGuiGtkWindow::update_sensor_values(bool force)
+{
+  if ( ! sensor_if ) return;
+
+  try {
+    sensor_if->read();
+
+    update_sensor_value(lab_l_fsr_fl, sensor_if->l_fsr_fl());
+    update_sensor_value(lab_l_fsr_fr, sensor_if->l_fsr_fr());
+    update_sensor_value(lab_l_fsr_rl, sensor_if->l_fsr_rl());
+    update_sensor_value(lab_l_fsr_rr, sensor_if->l_fsr_rr());
+    update_sensor_value(lab_r_fsr_fl, sensor_if->r_fsr_fl());
+    update_sensor_value(lab_r_fsr_fr, sensor_if->r_fsr_fr());
+    update_sensor_value(lab_r_fsr_rl, sensor_if->r_fsr_rl());
+    update_sensor_value(lab_r_fsr_rr, sensor_if->r_fsr_rr());
+    update_sensor_value(lab_r_total_weight, sensor_if->r_total_weight());
+    update_sensor_value(lab_l_total_weight, sensor_if->l_total_weight());
+
+    update_sensor_value(lab_chest_button, sensor_if->chest_button(), false);
+    update_sensor_value(lab_touch_front, sensor_if->head_touch_front(), false);
+    update_sensor_value(lab_touch_middle, sensor_if->head_touch_middle(), false);
+    update_sensor_value(lab_touch_rear, sensor_if->head_touch_rear(), false);
+    update_sensor_value(lab_l_bumper_l, sensor_if->l_foot_bumper_l(), false);
+    update_sensor_value(lab_l_bumper_r, sensor_if->l_foot_bumper_r(), false);
+    update_sensor_value(lab_r_bumper_l, sensor_if->r_foot_bumper_l(), false);
+    update_sensor_value(lab_r_bumper_r, sensor_if->r_foot_bumper_r(), false);
+
+    update_sensor_value(lab_accel_x, sensor_if->accel_x());
+    update_sensor_value(lab_accel_y, sensor_if->accel_y());
+    update_sensor_value(lab_accel_z, sensor_if->accel_z());
+    update_sensor_value(lab_gyro_x, sensor_if->gyro_x());
+    update_sensor_value(lab_gyro_y, sensor_if->gyro_y());
+    update_sensor_value(lab_gyro_ref, sensor_if->gyro_ref());
+
+    update_sensor_value(lab_battery_charge, sensor_if->battery_charge());
+
+    Glib::ustring l_cop =
+      "(" + convert_float2str(sensor_if->l_cop_x(), 1) + ", " + 
+      convert_float2str(sensor_if->l_cop_y(), 1) + ")";
+    lab_l_cop->set_text(l_cop);
+
+    Glib::ustring r_cop =
+      "(" + convert_float2str(sensor_if->r_cop_x(), 1) + ", " + 
+      convert_float2str(sensor_if->r_cop_y(), 1) + ")";
+    lab_r_cop->set_text(r_cop);
+
+    Glib::ustring angles_xy =
+      convert_float2str(sensor_if->angle_x(), 2) + "/" + 
+      convert_float2str(sensor_if->angle_y(), 2);
+    lab_angles_xy->set_text(angles_xy);
+
+
+    update_sensor_value(lab_ultrasonic_distance, sensor_if->ultrasonic_distance());
+    update_ultrasonic_direction(sensor_if->ultrasonic_direction());
+
+    if ( but_us_auto->get_active() ) {
+      NaoSensorInterface::EmitUltrasonicWaveMessage *m =
+	new NaoSensorInterface::EmitUltrasonicWaveMessage(cmb_us_direction->get_active_row_number());
+      sensor_if->msgq_enqueue(m);
+    }
+  } catch (Exception &e) {
+    // ignored, happens on disconnect while events are pending
+  }
+}
+
+bool
+NaoGuiGtkWindow::servos_enabled() const
+{
+  jointstiff_if->read();
+  return (jointstiff_if->minimum() > 0.);
+}
+
+
+void
+NaoGuiGtkWindow::on_stiffness_clicked()
+{
+  const float stiffness = servos_enabled() ? 0. : 1.;
+  NaoJointStiffnessInterface::SetBodyStiffnessMessage *dmsg =
+    new NaoJointStiffnessInterface::SetBodyStiffnessMessage(stiffness, 0.5);
+  jointstiff_if->msgq_enqueue(dmsg);
+}
+
+
+/** Control toggle event handler. */
+void
+NaoGuiGtkWindow::on_control_toggled()
+{
+  bool sensitive = tb_control->get_active();
+  hsc_HeadYaw->set_sensitive(sensitive);
+  hsc_HeadPitch->set_sensitive(sensitive);
+  hsc_RShoulderPitch->set_sensitive(sensitive);
+  hsc_RShoulderRoll->set_sensitive(sensitive);
+  hsc_RElbowYaw->set_sensitive(sensitive);
+  hsc_RElbowRoll->set_sensitive(sensitive);
+  hsc_RWristYaw->set_sensitive(sensitive);
+  hsc_RHand->set_sensitive(sensitive);
+  hsc_LShoulderPitch->set_sensitive(sensitive);
+  hsc_LShoulderRoll->set_sensitive(sensitive);
+  hsc_LElbowYaw->set_sensitive(sensitive);
+  hsc_LElbowRoll->set_sensitive(sensitive);
+  hsc_LWristYaw->set_sensitive(sensitive);
+  hsc_LHand->set_sensitive(sensitive);
+  hsc_RHipYawPitch->set_sensitive(sensitive);
+  hsc_RHipPitch->set_sensitive(sensitive);
+  hsc_RHipRoll->set_sensitive(sensitive);
+  hsc_RKneePitch->set_sensitive(sensitive);
+  hsc_RAnklePitch->set_sensitive(sensitive);
+  hsc_RAnkleRoll->set_sensitive(sensitive);
+  hsc_LHipYawPitch->set_sensitive(sensitive);
+  hsc_LHipPitch->set_sensitive(sensitive);
+  hsc_LHipRoll->set_sensitive(sensitive);
+  hsc_LKneePitch->set_sensitive(sensitive);
+  hsc_LAnklePitch->set_sensitive(sensitive);
+  hsc_LAnkleRoll->set_sensitive(sensitive);
+
+  if ( ! sensitive ) {
+    update_jointpos_values();
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_sv_copy_clicked()
+{
+  std::stringstream txt; 
+  txt <<
+    "head_yaw = " << (hsc_HeadYaw->get_value() / 100.f) << ",\n" <<
+    "head_pitch = " << (hsc_HeadPitch->get_value() / 100.f) << ",\n" <<
+    "l_shoulder_pitch = " << (hsc_LShoulderPitch->get_value() / 100.f) << ",\n" <<
+    "l_shoulder_roll = " << (hsc_LShoulderRoll->get_value() / 100.f) << ",\n" <<
+    "l_elbow_yaw = " << (hsc_LElbowYaw->get_value() / 100.f) << ",\n" <<
+    "l_elbow_roll = " << (hsc_LElbowRoll->get_value() / 100.f) << ",\n" <<
+    "l_wrist_yaw = " << (hsc_LWristYaw->get_value() / 100.f) << ",\n" <<
+    "l_hand = " << (hsc_LHand->get_value() / 100.f) << ",\n" <<
+    "r_shoulder_pitch = " << (hsc_RShoulderPitch->get_value() / 100.f) << ",\n" <<
+    "r_shoulder_roll = " << (hsc_RShoulderRoll->get_value() / 100.f) << ",\n" <<
+    "r_elbow_yaw = " << (hsc_RElbowYaw->get_value() / 100.f) << ",\n" <<
+    "r_elbow_roll = " << (hsc_RElbowRoll->get_value() / 100.f) << ",\n" <<
+    "r_wrist_yaw = " << (hsc_RWristYaw->get_value() / 100.f) << ",\n" <<
+    "r_hand = " << (hsc_RHand->get_value() / 100.f) << ",\n" <<
+    "l_hip_yaw_pitch = " << (hsc_LHipYawPitch->get_value() / 100.f) << ",\n" <<
+    "l_hip_roll = " << (hsc_LHipRoll->get_value() / 100.f) << ",\n" <<
+    "l_hip_pitch = " << (hsc_LHipPitch->get_value() / 100.f) << ",\n" <<
+    "l_knee_pitch = " << (hsc_LKneePitch->get_value() / 100.f) << ",\n" <<
+    "l_ankle_pitch = " << (hsc_LAnklePitch->get_value() / 100.f) << ",\n" <<
+    "l_ankle_roll = " << (hsc_LAnkleRoll->get_value() / 100.f) << ",\n" <<
+    "r_hip_yaw_pitch = " << (hsc_RHipYawPitch->get_value() / 100.f) << ",\n" <<
+    "r_hip_roll = " << (hsc_RHipRoll->get_value() / 100.f) << ",\n" <<
+    "r_hip_pitch = " << (hsc_RHipPitch->get_value() / 100.f) << ",\n" <<
+    "r_knee_pitch = " << (hsc_RKneePitch->get_value() / 100.f) << ",\n" <<
+    "r_ankle_pitch = " << (hsc_RAnklePitch->get_value() / 100.f) << ",\n" <<
+    "r_ankle_roll = " << (hsc_RAnkleRoll->get_value() / 100.f);
+  Gtk::Clipboard::get()->set_text(txt.str());
+}
+
+
+void
+NaoGuiGtkWindow::on_us_emit_clicked()
+{
+  NaoSensorInterface::EmitUltrasonicWaveMessage *m =
+    new NaoSensorInterface::EmitUltrasonicWaveMessage(cmb_us_direction->get_active_row_number());
+  sensor_if->msgq_enqueue(m);
+}
+
+
+void
+NaoGuiGtkWindow::on_us_auto_toggled()
+{
+  but_us_emit->set_sensitive(! but_us_auto->get_active());
+}
+
+/** Event handler for connection button. */
+void
+NaoGuiGtkWindow::on_connection_clicked()
+{
+  if ( ! connection_dispatcher.get_client()->connected() ) {
+    ServiceChooserDialog ssd(*this, connection_dispatcher.get_client());
+    ssd.run_and_connect();
+  } else {
+    connection_dispatcher.get_client()->disconnect();
+  }
+}
+
+/** Event handler for connected event. */
+void
+NaoGuiGtkWindow::on_connect()
+{
+  try {
+    bb = new RemoteBlackBoard(connection_dispatcher.get_client());
+    jointpos_if =
+      bb->open_for_reading<NaoJointPositionInterface>("Nao Joint Positions");
+    jointstiff_if =
+      bb->open_for_reading<NaoJointStiffnessInterface>("Nao Joint Stiffness");
+    sensor_if =
+      bb->open_for_reading<NaoSensorInterface>("Nao Sensors");
+    nao_navi_if = bb->open_for_reading<NavigatorInterface>("Navigator");
+    hummot_fawkes_if = bb->open_for_reading<HumanoidMotionInterface>("Nao Motion");
+    hummot_naoqi_if =
+      bb->open_for_reading<HumanoidMotionInterface>("NaoQi Motion");
+
+    ifd_jointpos = new InterfaceDispatcher("NaoJointPosIfaceDisp", jointpos_if);
+    ifd_sensor = new InterfaceDispatcher("NaoSensorIfaceDisp", sensor_if);
+    ifd_jointpos->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_jointpos_values), false)));
+    ifd_sensor->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_sensor_values), false)));
+    bb->register_listener(ifd_jointpos, BlackBoard::BBIL_FLAG_DATA);
+    bb->register_listener(ifd_sensor, BlackBoard::BBIL_FLAG_DATA);
+
+    tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
+
+    frm_servos->set_sensitive(true);
+    frm_sensors->set_sensitive(true);
+    frm_ultrasonic->set_sensitive(true);
+    exp_motion->set_sensitive(true);
+    tb_stiffness->set_sensitive(true);
+    but_us_auto->set_sensitive(true);
+    but_us_emit->set_sensitive(true);
+    cmb_us_direction->set_sensitive(true);
+
+    this->set_title(std::string("Nao GUI @ ") + connection_dispatcher.get_client()->get_hostname());
+  } catch (Exception &e) {
+    Glib::ustring message = *(e.begin());
+    Gtk::MessageDialog md(*this, message, /* markup */ false,
+			  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			  /* modal */ true);
+    md.set_title("BlackBoard connection failed");
+    md.run();
+    if ( bb ) {
+      bb->unregister_listener(ifd_jointpos);
+      bb->unregister_listener(ifd_sensor);
+      bb->close(jointpos_if);
+      bb->close(jointstiff_if);
+      bb->close(sensor_if);
+      bb->close(nao_navi_if);
+      bb->close(hummot_fawkes_if);
+      bb->close(hummot_naoqi_if);
+      delete ifd_jointpos;
+      delete ifd_sensor;
+      delete bb;
+      jointpos_if = NULL;
+      jointstiff_if = NULL;
+      sensor_if = NULL;
+      nao_navi_if = NULL;
+      hummot_fawkes_if = NULL;
+      hummot_naoqi_if = NULL;
+      bb = NULL;
+      ifd_jointpos = NULL;
+      ifd_sensor = NULL;
+    }
+
+    connection_dispatcher.get_client()->disconnect();
+  }
+}
+
+/** Event handler for disconnected event. */
+void
+NaoGuiGtkWindow::on_disconnect()
+{
+  if (tb_control->get_active()) tb_control->set_active(false);
+  frm_servos->set_sensitive(false);
+  frm_sensors->set_sensitive(false);
+  frm_ultrasonic->set_sensitive(false);
+  exp_motion->set_sensitive(false);
+  tb_stiffness->set_sensitive(false);
+  tb_control->set_sensitive(false);
+  tb_getup->set_sensitive(false);
+  tb_parkpos->set_sensitive(false);
+  tb_zeroall->set_sensitive(false);
+  but_us_auto->set_sensitive(false);
+  but_us_emit->set_sensitive(false);
+  cmb_us_direction->set_sensitive(false);
+
+  if (bb) {
+    bb->unregister_listener(ifd_jointpos);
+    bb->unregister_listener(ifd_sensor);
+    bb->close(jointpos_if);
+    bb->close(jointstiff_if);
+    bb->close(sensor_if);
+    bb->close(nao_navi_if);
+    bb->close(hummot_fawkes_if);
+    bb->close(hummot_naoqi_if);
+    delete ifd_jointpos;
+    delete ifd_sensor;
+    delete bb;
+    jointpos_if = NULL;
+    jointstiff_if = NULL;
+    sensor_if = NULL;
+    nao_navi_if = NULL;
+    hummot_fawkes_if = NULL;
+    hummot_naoqi_if = NULL;
+    bb = NULL;
+    ifd_jointpos = NULL;
+    ifd_sensor = NULL;
+  }
+
+  tb_connection->set_stock_id(Gtk::Stock::CONNECT);
+  if (servo_enabled) {
+    servo_enabled = false;
+    tb_stiffness->set_stock_id(Gtk::Stock::NO);
+  }
+  this->set_title("Nao GUI");
+}
+
+
+void
+NaoGuiGtkWindow::on_exit_clicked()
+{
+  Gtk::Main::quit();
+}
+
+void
+NaoGuiGtkWindow::on_goto_parkpos_clicked()
+{
+  if (hummot_naoqi_if && hummot_naoqi_if->has_writer() ) {
+    HumanoidMotionInterface::ParkMessage *m =
+      new HumanoidMotionInterface::ParkMessage();
+    hummot_naoqi_if->msgq_enqueue(m);
+  }
+}
+
+/**
+ * Sets all servos to zeros (calibration configuration)
+ */
+void
+NaoGuiGtkWindow::on_goto_zero_all_clicked()
+{
+  if ( jointpos_if && jointpos_if->has_writer() ) {
+    // NaoJointPositionInterface::GotoAnglesMessage *m =
+    //   new NaoJointPositionInterface::GotoAnglesMessage(/*sec */ 3.0,
+    //                                               NaoHardwareInterface::INTERPOLATION_SMOOTH,
+    //                                               /* head */ 0., 0.,
+    //                                               /* l shoulder */ 0., 0.,
+    //                                               /* l elbow */ 0., 0.,
+    //                                               /* l hip */ 0., 0., 0.,
+    //                                               /* l knee */ 0.,
+    //                                               /* l ankle */ 0., 0.,
+    //                                               /* r hip */ 0., 0., 0.,
+    //                                               /* r knee */ 0.,
+    //                                               /* r ankle */ 0., 0.,
+    //                                               /* r shoulder */ 0., 0.,
+    //                                               /* r elbow */ 0., 0.);
+    // jointpos_if->msgq_enqueue(m);
+  }
+}
+
+void
+NaoGuiGtkWindow::on_get_up_clicked()
+{
+  if (hummot_naoqi_if && hummot_naoqi_if->has_writer() ) {
+    HumanoidMotionInterface::GetUpMessage *m =
+      new HumanoidMotionInterface::GetUpMessage();
+    hummot_naoqi_if->msgq_enqueue(m);
+  }
+}
+
+
+/**
+ * Converts a float value to a Glib::ustring (locale dependent)
+ * @param f The float value
+ * @param width The precision width
+ * @return the formatted string
+ */
+Glib::ustring
+NaoGuiGtkWindow::convert_float2str(float f, unsigned int width)
+{
+#if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 16 )
+  return Glib::ustring::format(std::fixed, std::setprecision(width), f);
+#else
+  std::ostringstream ss;
+  ss << std::fixed << std::setprecision(width);
+  ss << f;
+
+  return Glib::locale_to_utf8(ss.str());
+#endif
+}
+
+
+
+bool
+NaoGuiGtkWindow::convert_str2float(Glib::ustring sn, float *f)
+{
+  char *endptr = NULL;
+  *f = strtof(sn.c_str(), &endptr);
+  if ( endptr[0] != 0 ) {
+    Glib::ustring s("Could not convert string to valid number: ");
+    s.append(sn, 0, sn.length() - strlen(endptr));
+    s += "   &gt;&gt;&gt;<b>";
+    s += endptr[0];
+    s += "</b>&lt;&lt;&lt;   ";
+    s.append(endptr + 1, strlen(endptr) - 1);
+
+    Gtk::MessageDialog md(*this, s,
+			  /* use markup */ true,
+			  Gtk::MESSAGE_ERROR);
+    md.set_title("Invalid value");
+    md.run();
+    md.hide();
+    return false;
+  } else {
+    return true;
+  }
+}
+
+void
+NaoGuiGtkWindow::on_ws_exec_clicked()
+{
+  float f;
+  if ( convert_str2float(ent_ws_distance->get_text(), &f) ) {
+    HumanoidMotionInterface::WalkStraightMessage *m =
+      new HumanoidMotionInterface::WalkStraightMessage(f);
+    if ( rad_motion_fawkes->get_active() ) {
+      hummot_fawkes_if->msgq_enqueue(m);
+    } else {
+      hummot_naoqi_if->msgq_enqueue(m);
+    }
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_walkvel_exec_clicked()
+{
+  float x = 0., y = 0., theta = 0., speed = 0.;
+  if ( convert_str2float(ent_walkvel_x->get_text(), &x) &&
+       convert_str2float(ent_walkvel_y->get_text(), &y) &&
+       convert_str2float(ent_walkvel_theta->get_text(), &theta) &&
+       convert_str2float(ent_walkvel_speed->get_text(), &speed) )
+  {
+    HumanoidMotionInterface::WalkVelocityMessage *m =
+      new HumanoidMotionInterface::WalkVelocityMessage(x, y, theta, speed);
+    if ( rad_motion_fawkes->get_active() ) {
+      hummot_fawkes_if->msgq_enqueue(m);
+    } else {
+      hummot_naoqi_if->msgq_enqueue(m);
+    }
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_kick_exec_clicked()
+{
+  float f;
+  if ( convert_str2float(ent_kick_strength->get_text(), &f) ) {
+    HumanoidMotionInterface::LegEnum leg = HumanoidMotionInterface::LEG_LEFT;
+    if ( cmb_kick_leg->get_active_row_number() == 1 ) {
+      leg = HumanoidMotionInterface::LEG_RIGHT;
+    }
+    HumanoidMotionInterface::KickMessage *m =
+      new HumanoidMotionInterface::KickMessage(leg, f);
+    if ( rad_motion_fawkes->get_active() ) {
+      hummot_fawkes_if->msgq_enqueue(m);
+    } else {
+      hummot_naoqi_if->msgq_enqueue(m);
+    }
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_wsw_exec_clicked()
+{
+  float f;
+  if ( convert_str2float(ent_wsw_distance->get_text(), &f) ) {
+    HumanoidMotionInterface::WalkSidewaysMessage *m =
+      new HumanoidMotionInterface::WalkSidewaysMessage(f);
+    if ( rad_motion_fawkes->get_active() ) {
+      hummot_fawkes_if->msgq_enqueue(m);
+    } else {
+      hummot_naoqi_if->msgq_enqueue(m);
+    }
+  }
+}
+
+void
+NaoGuiGtkWindow::on_nav_exec_clicked()
+{
+  float x,y,ori;
+  if ( convert_str2float(ent_nav_x->get_text(), &x)
+       && convert_str2float(ent_nav_y->get_text(), &y)
+       && convert_str2float(ent_nav_ori->get_text(), &ori) ) {
+    NavigatorInterface::CartesianGotoMessage *m =
+      new NavigatorInterface::CartesianGotoMessage(x, y, ori);
+    nao_navi_if->msgq_enqueue(m);
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_wa_exec_clicked()
+{
+  float angle, radius;
+  if ( convert_str2float(ent_wa_angle->get_text(), &angle) &&
+       convert_str2float(ent_wa_radius->get_text(), &radius) ) {
+    HumanoidMotionInterface::WalkArcMessage *m =
+      new HumanoidMotionInterface::WalkArcMessage(angle, radius);
+    if ( rad_motion_fawkes->get_active() ) {
+      hummot_fawkes_if->msgq_enqueue(m);
+    } else {
+      hummot_naoqi_if->msgq_enqueue(m);
+    }
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_turn_exec_clicked()
+{
+  float f;
+  if ( convert_str2float(ent_turn_angle->get_text(), &f) ) {
+    HumanoidMotionInterface::TurnMessage *m =
+      new HumanoidMotionInterface::TurnMessage(f);
+    if ( rad_motion_fawkes->get_active() ) {
+      hummot_fawkes_if->msgq_enqueue(m);
+    } else {
+      hummot_naoqi_if->msgq_enqueue(m);
+    }
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_motion_stop_clicked()
+{
+  HumanoidMotionInterface::StopMessage *m =
+    new HumanoidMotionInterface::StopMessage();
+  if ( rad_motion_fawkes->get_active() ) {
+    hummot_fawkes_if->msgq_enqueue(m);
+  } else {
+    hummot_naoqi_if->msgq_enqueue(m);
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_global_stiffness_toggled()
+{
+    /*
+  bool is_active = chk_global_stiffness->get_active();
+  if(is_active) {
+    ent_stiff_global->set_sensitive(true);
+    ent_stiff_lhipyawpitch->set_sensitive(false);
+    ent_stiff_rhipyawpitch->set_sensitive(false);
+    ent_stiff_lkneepitch->set_sensitive(false);
+    ent_stiff_rkneepitch->set_sensitive(false);
+    ent_stiff_lhiproll->set_sensitive(false);
+    ent_stiff_rhiproll->set_sensitive(false);
+    ent_stiff_lhippitch->set_sensitive(false);
+    ent_stiff_rhippitch->set_sensitive(false);
+    ent_stiff_lankleroll->set_sensitive(false);
+    ent_stiff_rankleroll->set_sensitive(false);
+    ent_stiff_lanklepitch->set_sensitive(false);
+    ent_stiff_ranklepitch->set_sensitive(false);
+    ent_stiff_lshoulderpitch->set_sensitive(false);
+    ent_stiff_rshoulderpitch->set_sensitive(false);
+    ent_stiff_lshoulderroll->set_sensitive(false);
+    ent_stiff_rshoulderroll->set_sensitive(false);
+    ent_stiff_headyaw->set_sensitive(false);
+    ent_stiff_headpitch->set_sensitive(false);
+    ent_stiff_lelbowyaw->set_sensitive(false);
+    ent_stiff_relbowyaw->set_sensitive(false);
+    ent_stiff_lelbowroll->set_sensitive(false);
+    ent_stiff_relbowroll->set_sensitive(false);
+  } else {
+    ent_stiff_global->set_sensitive(false);
+    ent_stiff_lhipyawpitch->set_sensitive(true);
+    ent_stiff_rhipyawpitch->set_sensitive(true);
+    ent_stiff_lkneepitch->set_sensitive(true);
+    ent_stiff_rkneepitch->set_sensitive(true);
+    ent_stiff_lhiproll->set_sensitive(true);
+    ent_stiff_rhiproll->set_sensitive(true);
+    ent_stiff_lhippitch->set_sensitive(true);
+    ent_stiff_rhippitch->set_sensitive(true);
+    ent_stiff_lankleroll->set_sensitive(true);
+    ent_stiff_rankleroll->set_sensitive(true);
+    ent_stiff_lanklepitch->set_sensitive(true);
+    ent_stiff_ranklepitch->set_sensitive(true);
+    ent_stiff_lshoulderpitch->set_sensitive(true);
+    ent_stiff_rshoulderpitch->set_sensitive(true);
+    ent_stiff_lshoulderroll->set_sensitive(true);
+    ent_stiff_rshoulderroll->set_sensitive(true);
+    ent_stiff_headyaw->set_sensitive(true);
+    ent_stiff_headpitch->set_sensitive(true);
+    ent_stiff_lelbowyaw->set_sensitive(true);
+    ent_stiff_relbowyaw->set_sensitive(true);
+    ent_stiff_lelbowroll->set_sensitive(true);
+    ent_stiff_relbowroll->set_sensitive(true);
+  }
+    */
+}
+
+void
+NaoGuiGtkWindow::on_stiff_write_clicked()
+{
+  /*
+  if(!hummot_fawkes_if->has_writer() || !naostiff_if->has_writer()) return;
+
+  float f_ent_stiff_lhipyawpitch;
+  float f_ent_stiff_rhipyawpitch;
+  float f_ent_stiff_lkneepitch;
+  float f_ent_stiff_rkneepitch;
+  float f_ent_stiff_lhiproll;
+  float f_ent_stiff_rhiproll;
+  float f_ent_stiff_lhippitch;
+  float f_ent_stiff_rhippitch;
+  float f_ent_stiff_lankleroll;
+  float f_ent_stiff_rankleroll;
+  float f_ent_stiff_lanklepitch;
+  float f_ent_stiff_ranklepitch;
+  float f_ent_stiff_lshoulderpitch;
+  float f_ent_stiff_rshoulderpitch;
+  float f_ent_stiff_lshoulderroll;
+  float f_ent_stiff_rshoulderroll;
+  float f_ent_stiff_headyaw;
+  float f_ent_stiff_headpitch;
+  float f_ent_stiff_lelbowyaw;
+  float f_ent_stiff_relbowyaw;
+  float f_ent_stiff_lelbowroll;
+  float f_ent_stiff_relbowroll;
+  float f_ent_stiff_global;
+
+  if(chk_global_stiffness->get_active() &&
+      ((ent_stiff_global->get_text() == "") || convert_str2float(ent_stiff_global->get_text(), &f_ent_stiff_global))) {
+        HumanoidMotionInterface::StiffnessMotionPatternEnum motion_pattern;
+        if(cmb_behaviour->get_active_row_number() == 0) {
+          motion_pattern = HumanoidMotionInterface::WALK;
+        } else if(cmb_behaviour->get_active_row_number() == 1) {
+          motion_pattern = HumanoidMotionInterface::KICK;
+        } else {
+          return;
+        }
+
+        HumanoidMotionInterface::SetStiffnessParamsMessage *m =
+          new HumanoidMotionInterface::SetStiffnessParamsMessage(motion_pattern,
+              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
+              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
+              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
+              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
+              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
+              f_ent_stiff_global, f_ent_stiff_global);
+
+        if ( rad_motion_fawkes->get_active() ) {
+          hummot_fawkes_if->msgq_enqueue(m);
+        } else {
+          delete m;
+        }
+  } else if( ((ent_stiff_lhipyawpitch->get_text() == "") || convert_str2float(ent_stiff_lhipyawpitch->get_text(), &f_ent_stiff_lhipyawpitch)) &&
+      ((ent_stiff_rhipyawpitch->get_text() == "") || convert_str2float(ent_stiff_rhipyawpitch->get_text(), &f_ent_stiff_rhipyawpitch)) &&
+      ((ent_stiff_lkneepitch->get_text() == "") || convert_str2float(ent_stiff_lkneepitch->get_text(), &f_ent_stiff_lkneepitch)) &&
+      ((ent_stiff_rkneepitch->get_text() == "") || convert_str2float(ent_stiff_rkneepitch->get_text(), &f_ent_stiff_rkneepitch)) &&
+      ((ent_stiff_lhiproll->get_text() == "") || convert_str2float(ent_stiff_lhiproll->get_text(), &f_ent_stiff_lhiproll)) &&
+      ((ent_stiff_rhiproll->get_text() == "") || convert_str2float(ent_stiff_rhiproll->get_text(), &f_ent_stiff_rhiproll)) &&
+      ((ent_stiff_lhippitch->get_text() == "") || convert_str2float(ent_stiff_lhippitch->get_text(), &f_ent_stiff_lhippitch)) &&
+      ((ent_stiff_rhippitch->get_text() == "") || convert_str2float(ent_stiff_rhippitch->get_text(), &f_ent_stiff_rhippitch)) &&
+      ((ent_stiff_lankleroll->get_text() == "") || convert_str2float(ent_stiff_lankleroll->get_text(), &f_ent_stiff_lankleroll)) &&
+      ((ent_stiff_rankleroll->get_text() == "") || convert_str2float(ent_stiff_rankleroll->get_text(), &f_ent_stiff_rankleroll)) &&
+      ((ent_stiff_lanklepitch->get_text() == "") || convert_str2float(ent_stiff_lanklepitch->get_text(), &f_ent_stiff_lanklepitch)) &&
+      ((ent_stiff_ranklepitch->get_text() == "") || convert_str2float(ent_stiff_ranklepitch->get_text(), &f_ent_stiff_ranklepitch)) &&
+      ((ent_stiff_lshoulderpitch->get_text() == "") || convert_str2float(ent_stiff_lshoulderpitch->get_text(), &f_ent_stiff_lshoulderpitch)) &&
+      ((ent_stiff_rshoulderpitch->get_text() == "") || convert_str2float(ent_stiff_rshoulderpitch->get_text(), &f_ent_stiff_rshoulderpitch)) &&
+      ((ent_stiff_lshoulderroll->get_text() == "") || convert_str2float(ent_stiff_lshoulderroll->get_text(), &f_ent_stiff_lshoulderroll)) &&
+      ((ent_stiff_rshoulderroll->get_text() == "") || convert_str2float(ent_stiff_rshoulderroll->get_text(), &f_ent_stiff_rshoulderroll)) &&
+      ((ent_stiff_headyaw->get_text() == "") || convert_str2float(ent_stiff_headyaw->get_text(), &f_ent_stiff_headyaw)) &&
+      ((ent_stiff_headpitch->get_text() == "") || convert_str2float(ent_stiff_headpitch->get_text(), &f_ent_stiff_headpitch)) &&
+      ((ent_stiff_lelbowyaw->get_text() == "") || convert_str2float(ent_stiff_lelbowyaw->get_text(), &f_ent_stiff_lelbowyaw)) &&
+      ((ent_stiff_relbowyaw->get_text() == "") || convert_str2float(ent_stiff_relbowyaw->get_text(), &f_ent_stiff_relbowyaw)) &&
+      ((ent_stiff_lelbowroll->get_text() == "") || convert_str2float(ent_stiff_lelbowroll->get_text(), &f_ent_stiff_lelbowroll)) &&
+      ((ent_stiff_relbowroll->get_text() == "") || convert_str2float(ent_stiff_relbowroll->get_text(), &f_ent_stiff_relbowroll)) &&
+      ((ent_stiff_global->get_text() == "") || convert_str2float(ent_stiff_global->get_text(), &f_ent_stiff_global)) ) {
+
+        HumanoidMotionInterface::SetStiffnessParamsMessage *m = new HumanoidMotionInterface::SetStiffnessParamsMessage();
+
+        if(ent_stiff_lhipyawpitch->get_text() != "") {
+          m->set_l_hip_yaw_pitch(f_ent_stiff_lhipyawpitch);
+        } else {
+          m->set_l_hip_yaw_pitch(1.0);
+        }
+        if(ent_stiff_rhipyawpitch->get_text() != "") {
+          m->set_r_hip_yaw_pitch(f_ent_stiff_rhipyawpitch);
+        } else {
+          m->set_r_hip_yaw_pitch(1.0);
+        }
+        if(ent_stiff_lkneepitch->get_text() != "") {
+          m->set_l_knee_pitch(f_ent_stiff_lkneepitch);
+        } else {
+          m->set_l_knee_pitch(1.0);
+        }
+        if(ent_stiff_rkneepitch->get_text() != "") {
+          m->set_r_knee_pitch(f_ent_stiff_rkneepitch);
+        } else {
+          m->set_r_knee_pitch(1.0);
+        }
+        if(ent_stiff_lhiproll->get_text() != "") {
+          m->set_l_hip_roll(f_ent_stiff_lhiproll);
+        } else {
+          m->set_l_hip_roll(1.0);
+        }
+        if(ent_stiff_rhiproll->get_text() != "") {
+          m->set_r_hip_roll(f_ent_stiff_rhiproll);
+        } else {
+          m->set_r_hip_roll(1.0);
+        }
+        if (ent_stiff_lhippitch->get_text() != "") {
+          m->set_l_hip_pitch(f_ent_stiff_lhippitch);
+        } else {
+          m->set_l_hip_pitch(1.0);
+        }
+        if (ent_stiff_rhippitch->get_text() != "") {
+          m->set_r_hip_pitch(f_ent_stiff_rhippitch);
+        } else {
+          m->set_r_hip_pitch(1.0);
+        }
+        if (ent_stiff_lankleroll->get_text() != "") {
+          m->set_l_ankle_roll(f_ent_stiff_lankleroll);
+        } else {
+          m->set_l_ankle_roll(1.0);
+        }
+        if (ent_stiff_rankleroll->get_text() != "") {
+          m->set_r_ankle_roll(f_ent_stiff_rankleroll);
+        } else {
+          m->set_r_ankle_roll(1.0);
+        }
+        if (ent_stiff_lanklepitch->get_text() != "") {
+          m->set_l_ankle_pitch(f_ent_stiff_lanklepitch);
+        } else {
+          m->set_l_ankle_pitch(1.0);
+        }
+        if (ent_stiff_ranklepitch->get_text() != "") {
+          m->set_r_ankle_pitch(f_ent_stiff_ranklepitch);
+        } else {
+          m->set_r_ankle_pitch(1.0);
+        }
+        if (ent_stiff_lshoulderpitch->get_text() != "") {
+          m->set_l_shoulder_pitch(f_ent_stiff_lshoulderpitch);
+        } else {
+          m->set_l_shoulder_pitch(1.0);
+        }
+        if (ent_stiff_rshoulderpitch->get_text() != "") {
+          m->set_r_shoulder_pitch(f_ent_stiff_rshoulderpitch);
+        } else {
+          m->set_r_shoulder_pitch(1.0);
+        }
+        if (ent_stiff_lshoulderroll->get_text() != "") {
+          m->set_l_shoulder_roll(f_ent_stiff_lshoulderroll);
+        } else {
+          m->set_l_shoulder_roll(1.0);
+        }
+        if (ent_stiff_rshoulderroll->get_text() != "") {
+          m->set_r_shoulder_roll(f_ent_stiff_rshoulderroll);
+        } else {
+          m->set_r_shoulder_roll(1.0);
+        }
+        if (ent_stiff_headyaw->get_text() != "") {
+          m->set_head_yaw(f_ent_stiff_headyaw);
+        } else {
+          m->set_head_yaw(1.0);
+        }
+        if (ent_stiff_headpitch->get_text() != "") {
+          m->set_head_pitch(f_ent_stiff_headpitch);
+        } else {
+          m->set_head_pitch(1.0);
+        }
+        if (ent_stiff_lelbowyaw->get_text() != "") {
+          m->set_l_elbow_yaw(f_ent_stiff_lelbowyaw);
+        } else {
+          m->set_l_elbow_yaw(1.0);
+        }
+        if (ent_stiff_relbowyaw->get_text() != "") {
+          m->set_r_elbow_yaw(f_ent_stiff_relbowyaw);
+        } else {
+          m->set_r_elbow_yaw(1.0);
+        }
+        if (ent_stiff_lelbowroll->get_text() != "") {
+          m->set_l_elbow_roll(f_ent_stiff_lelbowroll);
+        } else {
+          m->set_l_elbow_roll(1.0);
+        }
+        if (ent_stiff_relbowroll->get_text() != "") {
+          m->set_r_elbow_roll(f_ent_stiff_relbowroll);
+        } else {
+          m->set_r_elbow_roll(1.0);
+        }
+        if(cmb_behaviour->get_active_row_number() == 0) {
+          m->set_motion_pattern(HumanoidMotionInterface::WALK);
+        } else if(cmb_behaviour->get_active_row_number() == 1) {
+          m->set_motion_pattern(HumanoidMotionInterface::KICK);
+        } else {
+          return;
+        }
+        if ( rad_motion_fawkes->get_active() ) {
+          hummot_fawkes_if->msgq_enqueue(m);
+        } else {
+          delete m;
+        }
+  }
+  */
+}
+
+void
+NaoGuiGtkWindow::on_stiff_read_clicked()
+{
+  /*
+  if(!hummot_fawkes_if->has_writer() || !naostiff_if->has_writer()) return;
+
+  naostiff_if->read();
+
+  ent_stiff_headyaw->set_text(convert_float2str(naostiff_if->head_yaw()));
+  ent_stiff_headpitch->set_text(convert_float2str(naostiff_if->head_pitch()));
+  ent_stiff_lshoulderpitch->set_text(convert_float2str(naostiff_if->l_shoulder_pitch()));
+  ent_stiff_rshoulderpitch->set_text(convert_float2str(naostiff_if->r_shoulder_pitch()));
+  ent_stiff_lshoulderroll->set_text(convert_float2str(naostiff_if->l_shoulder_roll()));
+  ent_stiff_rshoulderroll->set_text(convert_float2str(naostiff_if->r_shoulder_roll()));
+  ent_stiff_lelbowyaw->set_text(convert_float2str(naostiff_if->l_elbow_yaw()));
+  ent_stiff_relbowyaw->set_text(convert_float2str(naostiff_if->r_elbow_yaw()));
+  ent_stiff_lelbowroll->set_text(convert_float2str(naostiff_if->l_elbow_roll()));
+  ent_stiff_relbowroll->set_text(convert_float2str(naostiff_if->r_elbow_roll()));
+  ent_stiff_lhiproll->set_text(convert_float2str(naostiff_if->l_hip_roll()));
+  ent_stiff_rhiproll->set_text(convert_float2str(naostiff_if->r_hip_roll()));
+  ent_stiff_lhippitch->set_text(convert_float2str(naostiff_if->l_hip_pitch()));
+  ent_stiff_rhippitch->set_text(convert_float2str(naostiff_if->r_hip_pitch()));
+  ent_stiff_rhipyawpitch->set_text(convert_float2str(naostiff_if->r_hip_yaw_pitch()));
+  ent_stiff_lhipyawpitch->set_text(convert_float2str(naostiff_if->l_hip_yaw_pitch()));
+  ent_stiff_lkneepitch->set_text(convert_float2str(naostiff_if->l_knee_pitch()));
+  ent_stiff_rkneepitch->set_text(convert_float2str(naostiff_if->r_knee_pitch()));
+  ent_stiff_lankleroll->set_text(convert_float2str(naostiff_if->l_ankle_roll()));
+  ent_stiff_rankleroll->set_text(convert_float2str(naostiff_if->r_ankle_roll()));
+  ent_stiff_lanklepitch->set_text(convert_float2str(naostiff_if->l_ankle_pitch()));
+  ent_stiff_ranklepitch->set_text(convert_float2str(naostiff_if->r_ankle_pitch()));
+  */
+}
