@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  NaoHardwareInterface.h - Fawkes BlackBoard Interface - NaoHardwareInterface
+ *  NaoJointPositionInterface.h - Fawkes BlackBoard Interface - NaoJointPositionInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2008  Tim Niemueller
+ *  Copyright  2008-2011  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACES_NAOHARDWAREINTERFACE_H_
-#define __INTERFACES_NAOHARDWAREINTERFACE_H_
+#ifndef __INTERFACES_NAOJOINTPOSITIONINTERFACE_H_
+#define __INTERFACES_NAOJOINTPOSITIONINTERFACE_H_
 
 #include <interface/interface.h>
 #include <interface/message.h>
@@ -30,10 +30,10 @@
 
 namespace fawkes {
 
-class NaoHardwareInterface : public Interface
+class NaoJointPositionInterface : public Interface
 {
  /// @cond INTERNALS
- INTERFACE_MGMT_FRIENDS(NaoHardwareInterface)
+ INTERFACE_MGMT_FRIENDS(NaoJointPositionInterface)
  /// @endcond
  public:
   /* constants */
@@ -65,19 +65,20 @@ class NaoHardwareInterface : public Interface
   static const uint32_t SERVO_r_ankle_roll;
   static const uint32_t SERVO_min;
   static const uint32_t SERVO_max;
-  static const float USD_left_left;
-  static const float USD_left_right;
-  static const float USD_right_left;
-  static const float USD_right_right;
 
   /** 
-	This determines the type of the interpolation.
+        Enumeration describing the actual version of the robot that's being
+	used.
        */
   typedef enum {
-    INTERPOLATION_LINEAR /**< Linear interpolation. */,
-    INTERPOLATION_SMOOTH /**< Smooth interpolation. */
-  } InterpolationType;
-  const char * tostring_InterpolationType(InterpolationType value) const;
+    ROBOTYPE_ACADEMIC /**< 
+        Academic version with 25 DoF and touch sensors.
+       */,
+    ROBOTYPE_ROBOCUP /**< 
+	RoboCup version with 21 DoF.
+       */
+  } RobotType;
+  const char * tostring_RobotType(RobotType value) const;
 
  private:
 #pragma pack(push,4)
@@ -85,7 +86,12 @@ class NaoHardwareInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    bool servo_enabled; /**< True if servos are enabled, false otherwise */
+    int32_t robot_type; /**< Robot type. */
+    uint8_t robot_version[4]; /**< 
+      Robot version. Fields are in ascending array index major, minor, micro and
+      patch level. Currently only the first two are used by Aldebaran, but due to
+      struct alignment we add two extra bytes.
+     */
     float head_yaw; /**< Head yaw */
     float head_pitch; /**< Head pitch */
     float l_shoulder_pitch; /**< Left shoulder pitch */
@@ -112,51 +118,59 @@ class NaoHardwareInterface : public Interface
     float r_knee_pitch; /**< Right knee pitch */
     float r_ankle_pitch; /**< Right ankle pitch */
     float r_ankle_roll; /**< Right ankle roll */
-    float accel_x; /**< Accelerometer x */
-    float accel_y; /**< Accelerometer y */
-    float accel_z; /**< Accelerometer z */
-    float gyro_x; /**< Gyrometer x */
-    float gyro_y; /**< Gyrometer y */
-    float gyro_ref; /**< Gyrometer reference */
-    float angle_x; /**< Angle x */
-    float angle_y; /**< Angle y */
-    float l_fsr_fl; /**< Left FSR front left */
-    float l_fsr_fr; /**< Left FSR front right */
-    float l_fsr_rl; /**< Left FSR rear left */
-    float l_fsr_rr; /**< Left FSR rear right */
-    float r_fsr_fl; /**< Right FSR front left */
-    float r_fsr_fr; /**< Right FSR front right */
-    float r_fsr_rl; /**< Right FSR rear left */
-    float r_fsr_rr; /**< Right FSR rear right */
-    float l_total_weight; /**< Total weight on left foot */
-    float r_total_weight; /**< Total weight on right foot */
-    float l_cop_x; /**< Center of pressure X for left foot. */
-    float l_cop_y; /**< Center of pressure Y for left foot. */
-    float r_cop_x; /**< Center of pressure X for right foot. */
-    float r_cop_y; /**< Center of pressure Y for right foot. */
-    float ultrasonic_distance; /**< Ultrasonic sensor reading */
-    float ultrasonic_direction; /**< Direction that was used to gather the ultrasonic reading. */
-    uint8_t l_foot_bumper_l; /**< Left foot bumper left side */
-    uint8_t l_foot_bumper_r; /**< Left foot bumper right side */
-    uint8_t r_foot_bumper_l; /**< Right foot bumper left side */
-    uint8_t r_foot_bumper_r; /**< Right foot bumper right side */
-    uint8_t head_touch_front; /**< Front part of head touch sensor (only Academics robot) */
-    uint8_t head_touch_middle; /**< Middle part of head touch sensor (only Academics robot) */
-    uint8_t head_touch_rear; /**< Rear part of head touch sensor (only Academics robot) */
-    uint8_t chest_button; /**< Chest button state */
-    float battery_charge; /**< Battery charge */
     int32_t time; /**< 
       Current reference time in ms. For real hardware this is the DCM time.
       Times in messages are always offsets to the current time and the current
       time is added before executing the command.
      */
-  } NaoHardwareInterface_data_t;
+  } NaoJointPositionInterface_data_t;
 #pragma pack(pop)
 
-  NaoHardwareInterface_data_t *data;
+  NaoJointPositionInterface_data_t *data;
 
  public:
   /* messages */
+  class SetServoMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t servo; /**< A concatenated list of SERVO_* constants to
+      define the servos that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants. */
+      float value; /**< Servo value to set for servos. */
+      int32_t time; /**< 
+      Current reference time in ms. For real hardware this is the DCM time.
+      Times in messages are always offsets to the current time and the current
+      time is added before executing the command.
+     */
+    } SetServoMessage_data_t;
+#pragma pack(pop)
+
+    SetServoMessage_data_t *data;
+
+   public:
+    SetServoMessage(const uint32_t ini_servo, const float ini_value, const int32_t ini_time);
+    SetServoMessage();
+    ~SetServoMessage();
+
+    SetServoMessage(const SetServoMessage *m);
+    /* Methods */
+    uint32_t servo() const;
+    void set_servo(const uint32_t new_servo);
+    size_t maxlenof_servo() const;
+    float value() const;
+    void set_value(const float new_value);
+    size_t maxlenof_value() const;
+    int32_t time() const;
+    void set_time(const int32_t new_time);
+    size_t maxlenof_time() const;
+    virtual Message * clone() const;
+  };
+
   class SetServosMessage : public Message
   {
    private:
@@ -182,6 +196,7 @@ class NaoHardwareInterface : public Interface
       float r_shoulder_pitch; /**< Right shoulder pitch */
       float r_shoulder_roll; /**< Right shoulder roll */
       float r_elbow_yaw; /**< Right elbow yaw */
+      float r_elbow_roll; /**< Right elbow roll */
       float r_wrist_yaw; /**< Right wrist yaw */
       float r_hand; /**< Right hand */
       float r_hip_yaw_pitch; /**< Right hip yaw pitch */
@@ -190,7 +205,6 @@ class NaoHardwareInterface : public Interface
       float r_knee_pitch; /**< Right knee pitch */
       float r_ankle_pitch; /**< Right ankle pitch */
       float r_ankle_roll; /**< Right ankle roll */
-      float r_elbow_roll; /**< Right elbow roll */
       int32_t time; /**< 
       Current reference time in ms. For real hardware this is the DCM time.
       Times in messages are always offsets to the current time and the current
@@ -202,7 +216,7 @@ class NaoHardwareInterface : public Interface
     SetServosMessage_data_t *data;
 
    public:
-    SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll, const int32_t ini_time);
+    SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const int32_t ini_time);
     SetServosMessage();
     ~SetServosMessage();
 
@@ -259,6 +273,9 @@ class NaoHardwareInterface : public Interface
     float r_elbow_yaw() const;
     void set_r_elbow_yaw(const float new_r_elbow_yaw);
     size_t maxlenof_r_elbow_yaw() const;
+    float r_elbow_roll() const;
+    void set_r_elbow_roll(const float new_r_elbow_roll);
+    size_t maxlenof_r_elbow_roll() const;
     float r_wrist_yaw() const;
     void set_r_wrist_yaw(const float new_r_wrist_yaw);
     size_t maxlenof_r_wrist_yaw() const;
@@ -283,12 +300,50 @@ class NaoHardwareInterface : public Interface
     float r_ankle_roll() const;
     void set_r_ankle_roll(const float new_r_ankle_roll);
     size_t maxlenof_r_ankle_roll() const;
-    float r_elbow_roll() const;
-    void set_r_elbow_roll(const float new_r_elbow_roll);
-    size_t maxlenof_r_elbow_roll() const;
     int32_t time() const;
     void set_time(const int32_t new_time);
     size_t maxlenof_time() const;
+    virtual Message * clone() const;
+  };
+
+  class GotoAngleMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t servo; /**< 
+      A concatenated list of SERVO_* constants to define the servos
+      that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants.
+     */
+      float value; /**< Servo value to set for servos. */
+      float time_sec; /**< 
+      Time in seconds when to reach the desired position.
+     */
+    } GotoAngleMessage_data_t;
+#pragma pack(pop)
+
+    GotoAngleMessage_data_t *data;
+
+   public:
+    GotoAngleMessage(const uint32_t ini_servo, const float ini_value, const float ini_time_sec);
+    GotoAngleMessage();
+    ~GotoAngleMessage();
+
+    GotoAngleMessage(const GotoAngleMessage *m);
+    /* Methods */
+    uint32_t servo() const;
+    void set_servo(const uint32_t new_servo);
+    size_t maxlenof_servo() const;
+    float value() const;
+    void set_value(const float new_value);
+    size_t maxlenof_value() const;
+    float time_sec() const;
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
     virtual Message * clone() const;
   };
 
@@ -300,8 +355,9 @@ class NaoHardwareInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float time_sec; /**< Time in seconds when to reach the desired position */
-      int32_t interpolation; /**< Type of interpolation */
+      float time_sec; /**< 
+      Time in seconds when to reach the desired position.
+     */
       float head_yaw; /**< Head yaw */
       float head_pitch; /**< Head pitch */
       float l_shoulder_pitch; /**< Left shoulder pitch */
@@ -334,7 +390,7 @@ class NaoHardwareInterface : public Interface
     GotoAnglesMessage_data_t *data;
 
    public:
-    GotoAnglesMessage(const float ini_time_sec, const InterpolationType ini_interpolation, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll);
+    GotoAnglesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll);
     GotoAnglesMessage();
     ~GotoAnglesMessage();
 
@@ -343,9 +399,6 @@ class NaoHardwareInterface : public Interface
     float time_sec() const;
     void set_time_sec(const float new_time_sec);
     size_t maxlenof_time_sec() const;
-    InterpolationType interpolation() const;
-    void set_interpolation(const InterpolationType new_interpolation);
-    size_t maxlenof_interpolation() const;
     float head_yaw() const;
     void set_head_yaw(const float new_head_yaw);
     size_t maxlenof_head_yaw() const;
@@ -427,47 +480,6 @@ class NaoHardwareInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class GotoAngleMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      uint32_t servos; /**< A concatenated list of SERVO_* constants to
-      define the servos that should execute the movement. The list shall consist of
-      binary or'ed SERVO_* constants. */
-      float value; /**< Servo value to set for servos. */
-      float time_sec; /**< Time in seconds when to reach the desired position */
-      int32_t interpolation; /**< Type of interpolation */
-    } GotoAngleMessage_data_t;
-#pragma pack(pop)
-
-    GotoAngleMessage_data_t *data;
-
-   public:
-    GotoAngleMessage(const uint32_t ini_servos, const float ini_value, const float ini_time_sec, const InterpolationType ini_interpolation);
-    GotoAngleMessage();
-    ~GotoAngleMessage();
-
-    GotoAngleMessage(const GotoAngleMessage *m);
-    /* Methods */
-    uint32_t servos() const;
-    void set_servos(const uint32_t new_servos);
-    size_t maxlenof_servos() const;
-    float value() const;
-    void set_value(const float new_value);
-    size_t maxlenof_value() const;
-    float time_sec() const;
-    void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
-    InterpolationType interpolation() const;
-    void set_interpolation(const InterpolationType new_interpolation);
-    size_t maxlenof_interpolation() const;
-    virtual Message * clone() const;
-  };
-
   class GotoAngleWithSpeedMessage : public Message
   {
    private:
@@ -476,7 +488,7 @@ class NaoHardwareInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      uint32_t servos; /**< A concatenated list of SERVO_* constants to
+      uint32_t servo; /**< A concatenated list of SERVO_* constants to
       define the servos that should execute the movement. The list shall consist of
       binary or'ed SERVO_* constants. */
       float value; /**< Servo value to set for servos. */
@@ -487,15 +499,15 @@ class NaoHardwareInterface : public Interface
     GotoAngleWithSpeedMessage_data_t *data;
 
    public:
-    GotoAngleWithSpeedMessage(const uint32_t ini_servos, const float ini_value, const uint16_t ini_speed);
+    GotoAngleWithSpeedMessage(const uint32_t ini_servo, const float ini_value, const uint16_t ini_speed);
     GotoAngleWithSpeedMessage();
     ~GotoAngleWithSpeedMessage();
 
     GotoAngleWithSpeedMessage(const GotoAngleWithSpeedMessage *m);
     /* Methods */
-    uint32_t servos() const;
-    void set_servos(const uint32_t new_servos);
-    size_t maxlenof_servos() const;
+    uint32_t servo() const;
+    void set_servo(const uint32_t new_servo);
+    size_t maxlenof_servo() const;
     float value() const;
     void set_value(const float new_value);
     size_t maxlenof_value() const;
@@ -505,171 +517,21 @@ class NaoHardwareInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class SetServoMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      uint32_t servos; /**< A concatenated list of SERVO_* constants to
-      define the servos that should execute the movement. The list shall consist of
-      binary or'ed SERVO_* constants. */
-      float value; /**< Servo value to set for servos. */
-      int32_t time; /**< 
-      Current reference time in ms. For real hardware this is the DCM time.
-      Times in messages are always offsets to the current time and the current
-      time is added before executing the command.
-     */
-    } SetServoMessage_data_t;
-#pragma pack(pop)
-
-    SetServoMessage_data_t *data;
-
-   public:
-    SetServoMessage(const uint32_t ini_servos, const float ini_value, const int32_t ini_time);
-    SetServoMessage();
-    ~SetServoMessage();
-
-    SetServoMessage(const SetServoMessage *m);
-    /* Methods */
-    uint32_t servos() const;
-    void set_servos(const uint32_t new_servos);
-    size_t maxlenof_servos() const;
-    float value() const;
-    void set_value(const float new_value);
-    size_t maxlenof_value() const;
-    int32_t time() const;
-    void set_time(const int32_t new_time);
-    size_t maxlenof_time() const;
-    virtual Message * clone() const;
-  };
-
-  class EnableServosMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    } EnableServosMessage_data_t;
-#pragma pack(pop)
-
-    EnableServosMessage_data_t *data;
-
-   public:
-    EnableServosMessage();
-    ~EnableServosMessage();
-
-    EnableServosMessage(const EnableServosMessage *m);
-    /* Methods */
-    virtual Message * clone() const;
-  };
-
-  class DisableServosMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    } DisableServosMessage_data_t;
-#pragma pack(pop)
-
-    DisableServosMessage_data_t *data;
-
-   public:
-    DisableServosMessage();
-    ~DisableServosMessage();
-
-    DisableServosMessage(const DisableServosMessage *m);
-    /* Methods */
-    virtual Message * clone() const;
-  };
-
-  class SetGlobalStiffnessMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float value; /**< Stiffness value to set for all joints.(0-1) */
-      int32_t time; /**< 
-      Current reference time in ms. For real hardware this is the DCM time.
-      Times in messages are always offsets to the current time and the current
-      time is added before executing the command.
-     */
-    } SetGlobalStiffnessMessage_data_t;
-#pragma pack(pop)
-
-    SetGlobalStiffnessMessage_data_t *data;
-
-   public:
-    SetGlobalStiffnessMessage(const float ini_value, const int32_t ini_time);
-    SetGlobalStiffnessMessage();
-    ~SetGlobalStiffnessMessage();
-
-    SetGlobalStiffnessMessage(const SetGlobalStiffnessMessage *m);
-    /* Methods */
-    float value() const;
-    void set_value(const float new_value);
-    size_t maxlenof_value() const;
-    int32_t time() const;
-    void set_time(const int32_t new_time);
-    size_t maxlenof_time() const;
-    virtual Message * clone() const;
-  };
-
-  class EmitUltrasonicWaveMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float ultrasonic_direction; /**< Direction that was used to gather the ultrasonic reading. */
-      int32_t time; /**< 
-      Current reference time in ms. For real hardware this is the DCM time.
-      Times in messages are always offsets to the current time and the current
-      time is added before executing the command.
-     */
-    } EmitUltrasonicWaveMessage_data_t;
-#pragma pack(pop)
-
-    EmitUltrasonicWaveMessage_data_t *data;
-
-   public:
-    EmitUltrasonicWaveMessage(const float ini_ultrasonic_direction, const int32_t ini_time);
-    EmitUltrasonicWaveMessage();
-    ~EmitUltrasonicWaveMessage();
-
-    EmitUltrasonicWaveMessage(const EmitUltrasonicWaveMessage *m);
-    /* Methods */
-    float ultrasonic_direction() const;
-    void set_ultrasonic_direction(const float new_ultrasonic_direction);
-    size_t maxlenof_ultrasonic_direction() const;
-    int32_t time() const;
-    void set_time(const int32_t new_time);
-    size_t maxlenof_time() const;
-    virtual Message * clone() const;
-  };
-
   virtual bool message_valid(const Message *message) const;
  private:
-  NaoHardwareInterface();
-  ~NaoHardwareInterface();
+  NaoJointPositionInterface();
+  ~NaoJointPositionInterface();
 
  public:
   /* Methods */
-  bool is_servo_enabled() const;
-  void set_servo_enabled(const bool new_servo_enabled);
-  size_t maxlenof_servo_enabled() const;
+  RobotType robot_type() const;
+  void set_robot_type(const RobotType new_robot_type);
+  size_t maxlenof_robot_type() const;
+  uint8_t * robot_version() const;
+  uint8_t robot_version(unsigned int index) const;
+  void set_robot_version(unsigned int index, const uint8_t new_robot_version);
+  void set_robot_version(const uint8_t * new_robot_version);
+  size_t maxlenof_robot_version() const;
   float head_yaw() const;
   void set_head_yaw(const float new_head_yaw);
   size_t maxlenof_head_yaw() const;
@@ -748,110 +610,9 @@ class NaoHardwareInterface : public Interface
   float r_ankle_roll() const;
   void set_r_ankle_roll(const float new_r_ankle_roll);
   size_t maxlenof_r_ankle_roll() const;
-  float accel_x() const;
-  void set_accel_x(const float new_accel_x);
-  size_t maxlenof_accel_x() const;
-  float accel_y() const;
-  void set_accel_y(const float new_accel_y);
-  size_t maxlenof_accel_y() const;
-  float accel_z() const;
-  void set_accel_z(const float new_accel_z);
-  size_t maxlenof_accel_z() const;
-  float gyro_x() const;
-  void set_gyro_x(const float new_gyro_x);
-  size_t maxlenof_gyro_x() const;
-  float gyro_y() const;
-  void set_gyro_y(const float new_gyro_y);
-  size_t maxlenof_gyro_y() const;
-  float gyro_ref() const;
-  void set_gyro_ref(const float new_gyro_ref);
-  size_t maxlenof_gyro_ref() const;
-  float angle_x() const;
-  void set_angle_x(const float new_angle_x);
-  size_t maxlenof_angle_x() const;
-  float angle_y() const;
-  void set_angle_y(const float new_angle_y);
-  size_t maxlenof_angle_y() const;
-  float l_fsr_fl() const;
-  void set_l_fsr_fl(const float new_l_fsr_fl);
-  size_t maxlenof_l_fsr_fl() const;
-  float l_fsr_fr() const;
-  void set_l_fsr_fr(const float new_l_fsr_fr);
-  size_t maxlenof_l_fsr_fr() const;
-  float l_fsr_rl() const;
-  void set_l_fsr_rl(const float new_l_fsr_rl);
-  size_t maxlenof_l_fsr_rl() const;
-  float l_fsr_rr() const;
-  void set_l_fsr_rr(const float new_l_fsr_rr);
-  size_t maxlenof_l_fsr_rr() const;
-  float r_fsr_fl() const;
-  void set_r_fsr_fl(const float new_r_fsr_fl);
-  size_t maxlenof_r_fsr_fl() const;
-  float r_fsr_fr() const;
-  void set_r_fsr_fr(const float new_r_fsr_fr);
-  size_t maxlenof_r_fsr_fr() const;
-  float r_fsr_rl() const;
-  void set_r_fsr_rl(const float new_r_fsr_rl);
-  size_t maxlenof_r_fsr_rl() const;
-  float r_fsr_rr() const;
-  void set_r_fsr_rr(const float new_r_fsr_rr);
-  size_t maxlenof_r_fsr_rr() const;
-  float l_total_weight() const;
-  void set_l_total_weight(const float new_l_total_weight);
-  size_t maxlenof_l_total_weight() const;
-  float r_total_weight() const;
-  void set_r_total_weight(const float new_r_total_weight);
-  size_t maxlenof_r_total_weight() const;
-  float l_cop_x() const;
-  void set_l_cop_x(const float new_l_cop_x);
-  size_t maxlenof_l_cop_x() const;
-  float l_cop_y() const;
-  void set_l_cop_y(const float new_l_cop_y);
-  size_t maxlenof_l_cop_y() const;
-  float r_cop_x() const;
-  void set_r_cop_x(const float new_r_cop_x);
-  size_t maxlenof_r_cop_x() const;
-  float r_cop_y() const;
-  void set_r_cop_y(const float new_r_cop_y);
-  size_t maxlenof_r_cop_y() const;
-  float ultrasonic_distance() const;
-  void set_ultrasonic_distance(const float new_ultrasonic_distance);
-  size_t maxlenof_ultrasonic_distance() const;
-  float ultrasonic_direction() const;
-  void set_ultrasonic_direction(const float new_ultrasonic_direction);
-  size_t maxlenof_ultrasonic_direction() const;
-  uint8_t l_foot_bumper_l() const;
-  void set_l_foot_bumper_l(const uint8_t new_l_foot_bumper_l);
-  size_t maxlenof_l_foot_bumper_l() const;
-  uint8_t l_foot_bumper_r() const;
-  void set_l_foot_bumper_r(const uint8_t new_l_foot_bumper_r);
-  size_t maxlenof_l_foot_bumper_r() const;
-  uint8_t r_foot_bumper_l() const;
-  void set_r_foot_bumper_l(const uint8_t new_r_foot_bumper_l);
-  size_t maxlenof_r_foot_bumper_l() const;
-  uint8_t r_foot_bumper_r() const;
-  void set_r_foot_bumper_r(const uint8_t new_r_foot_bumper_r);
-  size_t maxlenof_r_foot_bumper_r() const;
-  uint8_t head_touch_front() const;
-  void set_head_touch_front(const uint8_t new_head_touch_front);
-  size_t maxlenof_head_touch_front() const;
-  uint8_t head_touch_middle() const;
-  void set_head_touch_middle(const uint8_t new_head_touch_middle);
-  size_t maxlenof_head_touch_middle() const;
-  uint8_t head_touch_rear() const;
-  void set_head_touch_rear(const uint8_t new_head_touch_rear);
-  size_t maxlenof_head_touch_rear() const;
-  uint8_t chest_button() const;
-  void set_chest_button(const uint8_t new_chest_button);
-  size_t maxlenof_chest_button() const;
-  float battery_charge() const;
-  void set_battery_charge(const float new_battery_charge);
-  size_t maxlenof_battery_charge() const;
   int32_t time() const;
   void set_time(const int32_t new_time);
   size_t maxlenof_time() const;
-  float servo_value(uint32_t key) const;
-  void set_servo_value(const uint32_t key, const float new_value);
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

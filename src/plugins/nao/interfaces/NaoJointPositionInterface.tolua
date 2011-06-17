@@ -1,7 +1,7 @@
-$#include <interfaces/NaoHardwareInterface.h>
+$#include <interfaces/NaoJointPositionInterface.h>
 $using namespace fawkes;
 namespace fawkes {
-class NaoHardwareInterface : public Interface
+class NaoJointPositionInterface : public Interface
 {
   static const unsigned int SERVO_head_yaw;
   static const unsigned int SERVO_head_pitch;
@@ -31,19 +31,32 @@ class NaoHardwareInterface : public Interface
   static const unsigned int SERVO_r_ankle_roll;
   static const unsigned int SERVO_min;
   static const unsigned int SERVO_max;
-  static const float USD_left_left;
-  static const float USD_left_right;
-  static const float USD_right_left;
-  static const float USD_right_right;
 
   typedef enum {
-    INTERPOLATION_LINEAR,
-    INTERPOLATION_SMOOTH
-  } InterpolationType;
+    ROBOTYPE_ACADEMIC,
+    ROBOTYPE_ROBOCUP
+  } RobotType;
+
+  class SetServoMessage : public Message
+  {
+    SetServoMessage(unsigned int ini_servo, float ini_value, int ini_time);
+    SetServoMessage();
+    ~SetServoMessage();
+
+    unsigned int servo();
+    void set_servo(const unsigned int new_servo);
+    int maxlenof_servo() const;
+    float value();
+    void set_value(const float new_value);
+    int maxlenof_value() const;
+    int time();
+    void set_time(const int new_time);
+    int maxlenof_time() const;
+  };
 
   class SetServosMessage : public Message
   {
-    SetServosMessage(float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll, float ini_r_elbow_roll, int ini_time);
+    SetServosMessage(float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll, int ini_time);
     SetServosMessage();
     ~SetServosMessage();
 
@@ -98,6 +111,9 @@ class NaoHardwareInterface : public Interface
     float r_elbow_yaw();
     void set_r_elbow_yaw(const float new_r_elbow_yaw);
     int maxlenof_r_elbow_yaw() const;
+    float r_elbow_roll();
+    void set_r_elbow_roll(const float new_r_elbow_roll);
+    int maxlenof_r_elbow_roll() const;
     float r_wrist_yaw();
     void set_r_wrist_yaw(const float new_r_wrist_yaw);
     int maxlenof_r_wrist_yaw() const;
@@ -122,26 +138,37 @@ class NaoHardwareInterface : public Interface
     float r_ankle_roll();
     void set_r_ankle_roll(const float new_r_ankle_roll);
     int maxlenof_r_ankle_roll() const;
-    float r_elbow_roll();
-    void set_r_elbow_roll(const float new_r_elbow_roll);
-    int maxlenof_r_elbow_roll() const;
     int time();
     void set_time(const int new_time);
     int maxlenof_time() const;
   };
 
+  class GotoAngleMessage : public Message
+  {
+    GotoAngleMessage(unsigned int ini_servo, float ini_value, float ini_time_sec);
+    GotoAngleMessage();
+    ~GotoAngleMessage();
+
+    unsigned int servo();
+    void set_servo(const unsigned int new_servo);
+    int maxlenof_servo() const;
+    float value();
+    void set_value(const float new_value);
+    int maxlenof_value() const;
+    float time_sec();
+    void set_time_sec(const float new_time_sec);
+    int maxlenof_time_sec() const;
+  };
+
   class GotoAnglesMessage : public Message
   {
-    GotoAnglesMessage(float ini_time_sec, InterpolationType ini_interpolation, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll);
+    GotoAnglesMessage(float ini_time_sec, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll);
     GotoAnglesMessage();
     ~GotoAnglesMessage();
 
     float time_sec();
     void set_time_sec(const float new_time_sec);
     int maxlenof_time_sec() const;
-    InterpolationType interpolation();
-    void set_interpolation(const InterpolationType new_interpolation);
-    int maxlenof_interpolation() const;
     float head_yaw();
     void set_head_yaw(const float new_head_yaw);
     int maxlenof_head_yaw() const;
@@ -222,35 +249,15 @@ class NaoHardwareInterface : public Interface
     int maxlenof_r_ankle_roll() const;
   };
 
-  class GotoAngleMessage : public Message
-  {
-    GotoAngleMessage(unsigned int ini_servos, float ini_value, float ini_time_sec, InterpolationType ini_interpolation);
-    GotoAngleMessage();
-    ~GotoAngleMessage();
-
-    unsigned int servos();
-    void set_servos(const unsigned int new_servos);
-    int maxlenof_servos() const;
-    float value();
-    void set_value(const float new_value);
-    int maxlenof_value() const;
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
-    InterpolationType interpolation();
-    void set_interpolation(const InterpolationType new_interpolation);
-    int maxlenof_interpolation() const;
-  };
-
   class GotoAngleWithSpeedMessage : public Message
   {
-    GotoAngleWithSpeedMessage(unsigned int ini_servos, float ini_value, unsigned short ini_speed);
+    GotoAngleWithSpeedMessage(unsigned int ini_servo, float ini_value, unsigned short ini_speed);
     GotoAngleWithSpeedMessage();
     ~GotoAngleWithSpeedMessage();
 
-    unsigned int servos();
-    void set_servos(const unsigned int new_servos);
-    int maxlenof_servos() const;
+    unsigned int servo();
+    void set_servo(const unsigned int new_servo);
+    int maxlenof_servo() const;
     float value();
     void set_value(const float new_value);
     int maxlenof_value() const;
@@ -259,68 +266,12 @@ class NaoHardwareInterface : public Interface
     int maxlenof_speed() const;
   };
 
-  class SetServoMessage : public Message
-  {
-    SetServoMessage(unsigned int ini_servos, float ini_value, int ini_time);
-    SetServoMessage();
-    ~SetServoMessage();
-
-    unsigned int servos();
-    void set_servos(const unsigned int new_servos);
-    int maxlenof_servos() const;
-    float value();
-    void set_value(const float new_value);
-    int maxlenof_value() const;
-    int time();
-    void set_time(const int new_time);
-    int maxlenof_time() const;
-  };
-
-  class EnableServosMessage : public Message
-  {
-    EnableServosMessage();
-    ~EnableServosMessage();
-
-  };
-
-  class DisableServosMessage : public Message
-  {
-    DisableServosMessage();
-    ~DisableServosMessage();
-
-  };
-
-  class SetGlobalStiffnessMessage : public Message
-  {
-    SetGlobalStiffnessMessage(float ini_value, int ini_time);
-    SetGlobalStiffnessMessage();
-    ~SetGlobalStiffnessMessage();
-
-    float value();
-    void set_value(const float new_value);
-    int maxlenof_value() const;
-    int time();
-    void set_time(const int new_time);
-    int maxlenof_time() const;
-  };
-
-  class EmitUltrasonicWaveMessage : public Message
-  {
-    EmitUltrasonicWaveMessage(float ini_ultrasonic_direction, int ini_time);
-    EmitUltrasonicWaveMessage();
-    ~EmitUltrasonicWaveMessage();
-
-    float ultrasonic_direction();
-    void set_ultrasonic_direction(const float new_ultrasonic_direction);
-    int maxlenof_ultrasonic_direction() const;
-    int time();
-    void set_time(const int new_time);
-    int maxlenof_time() const;
-  };
-
-  bool is_servo_enabled();
-  void set_servo_enabled(const bool new_servo_enabled);
-  int maxlenof_servo_enabled() const;
+  RobotType robot_type();
+  void set_robot_type(const RobotType new_robot_type);
+  int maxlenof_robot_type() const;
+  unsigned char robot_version(int index);
+  void set_robot_version(unsigned int index, const unsigned char new_robot_version);
+  int maxlenof_robot_version() const;
   float head_yaw();
   void set_head_yaw(const float new_head_yaw);
   int maxlenof_head_yaw() const;
@@ -399,110 +350,9 @@ class NaoHardwareInterface : public Interface
   float r_ankle_roll();
   void set_r_ankle_roll(const float new_r_ankle_roll);
   int maxlenof_r_ankle_roll() const;
-  float accel_x();
-  void set_accel_x(const float new_accel_x);
-  int maxlenof_accel_x() const;
-  float accel_y();
-  void set_accel_y(const float new_accel_y);
-  int maxlenof_accel_y() const;
-  float accel_z();
-  void set_accel_z(const float new_accel_z);
-  int maxlenof_accel_z() const;
-  float gyro_x();
-  void set_gyro_x(const float new_gyro_x);
-  int maxlenof_gyro_x() const;
-  float gyro_y();
-  void set_gyro_y(const float new_gyro_y);
-  int maxlenof_gyro_y() const;
-  float gyro_ref();
-  void set_gyro_ref(const float new_gyro_ref);
-  int maxlenof_gyro_ref() const;
-  float angle_x();
-  void set_angle_x(const float new_angle_x);
-  int maxlenof_angle_x() const;
-  float angle_y();
-  void set_angle_y(const float new_angle_y);
-  int maxlenof_angle_y() const;
-  float l_fsr_fl();
-  void set_l_fsr_fl(const float new_l_fsr_fl);
-  int maxlenof_l_fsr_fl() const;
-  float l_fsr_fr();
-  void set_l_fsr_fr(const float new_l_fsr_fr);
-  int maxlenof_l_fsr_fr() const;
-  float l_fsr_rl();
-  void set_l_fsr_rl(const float new_l_fsr_rl);
-  int maxlenof_l_fsr_rl() const;
-  float l_fsr_rr();
-  void set_l_fsr_rr(const float new_l_fsr_rr);
-  int maxlenof_l_fsr_rr() const;
-  float r_fsr_fl();
-  void set_r_fsr_fl(const float new_r_fsr_fl);
-  int maxlenof_r_fsr_fl() const;
-  float r_fsr_fr();
-  void set_r_fsr_fr(const float new_r_fsr_fr);
-  int maxlenof_r_fsr_fr() const;
-  float r_fsr_rl();
-  void set_r_fsr_rl(const float new_r_fsr_rl);
-  int maxlenof_r_fsr_rl() const;
-  float r_fsr_rr();
-  void set_r_fsr_rr(const float new_r_fsr_rr);
-  int maxlenof_r_fsr_rr() const;
-  float l_total_weight();
-  void set_l_total_weight(const float new_l_total_weight);
-  int maxlenof_l_total_weight() const;
-  float r_total_weight();
-  void set_r_total_weight(const float new_r_total_weight);
-  int maxlenof_r_total_weight() const;
-  float l_cop_x();
-  void set_l_cop_x(const float new_l_cop_x);
-  int maxlenof_l_cop_x() const;
-  float l_cop_y();
-  void set_l_cop_y(const float new_l_cop_y);
-  int maxlenof_l_cop_y() const;
-  float r_cop_x();
-  void set_r_cop_x(const float new_r_cop_x);
-  int maxlenof_r_cop_x() const;
-  float r_cop_y();
-  void set_r_cop_y(const float new_r_cop_y);
-  int maxlenof_r_cop_y() const;
-  float ultrasonic_distance();
-  void set_ultrasonic_distance(const float new_ultrasonic_distance);
-  int maxlenof_ultrasonic_distance() const;
-  float ultrasonic_direction();
-  void set_ultrasonic_direction(const float new_ultrasonic_direction);
-  int maxlenof_ultrasonic_direction() const;
-  unsigned char l_foot_bumper_l();
-  void set_l_foot_bumper_l(const unsigned char new_l_foot_bumper_l);
-  int maxlenof_l_foot_bumper_l() const;
-  unsigned char l_foot_bumper_r();
-  void set_l_foot_bumper_r(const unsigned char new_l_foot_bumper_r);
-  int maxlenof_l_foot_bumper_r() const;
-  unsigned char r_foot_bumper_l();
-  void set_r_foot_bumper_l(const unsigned char new_r_foot_bumper_l);
-  int maxlenof_r_foot_bumper_l() const;
-  unsigned char r_foot_bumper_r();
-  void set_r_foot_bumper_r(const unsigned char new_r_foot_bumper_r);
-  int maxlenof_r_foot_bumper_r() const;
-  unsigned char head_touch_front();
-  void set_head_touch_front(const unsigned char new_head_touch_front);
-  int maxlenof_head_touch_front() const;
-  unsigned char head_touch_middle();
-  void set_head_touch_middle(const unsigned char new_head_touch_middle);
-  int maxlenof_head_touch_middle() const;
-  unsigned char head_touch_rear();
-  void set_head_touch_rear(const unsigned char new_head_touch_rear);
-  int maxlenof_head_touch_rear() const;
-  unsigned char chest_button();
-  void set_chest_button(const unsigned char new_chest_button);
-  int maxlenof_chest_button() const;
-  float battery_charge();
-  void set_battery_charge(const float new_battery_charge);
-  int maxlenof_battery_charge() const;
   int time();
   void set_time(const int new_time);
   int maxlenof_time() const;
-  float servo_value(unsigned int key) const;
-  void set_servo_value(const unsigned int key, const float new_value);
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

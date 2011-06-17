@@ -22,7 +22,8 @@ LIBS_naoqi = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	   fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
 	   alcore alcommon alvalue almemoryfastaccess \
 	   boost_serialization-mt boost_signals-mt \
-	   NaoHardwareInterface
+	   NaoJointPositionInterface NaoJointStiffnessInterface \
+	   NaoSensorInterface
 OBJS_naoqi = naoqi_plugin.o broker_thread.o dcm_thread.o
 
 LIBS_libnaofawkes = dl fawkescore fawkesutils fawkesaspects fawkesblackboard \
