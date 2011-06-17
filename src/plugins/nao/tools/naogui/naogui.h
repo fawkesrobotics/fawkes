@@ -210,7 +210,6 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::RadioButton *rad_motion_fawkes;
   Gtk::RadioButton *rad_motion_naoqi;
   Gtk::Button *but_stop;
-  Gtk::Expander *exp_motion;
   Gtk::Entry  *ent_ws_distance;
   Gtk::Button *but_ws_exec;
   Gtk::Entry  *ent_wsw_distance;

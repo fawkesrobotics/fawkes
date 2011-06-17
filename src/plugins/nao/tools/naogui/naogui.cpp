@@ -170,7 +170,6 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   refxml->get_widget("cmb_us_direction", cmb_us_direction);
   refxml->get_widget("but_us_emit", but_us_emit);
   refxml->get_widget("but_us_auto", but_us_auto);
-  refxml->get_widget("exp_motion", exp_motion);
   refxml->get_widget("but_stop", but_stop);
   refxml->get_widget("but_ws_exec", but_ws_exec);
   refxml->get_widget("ent_ws_distance", ent_ws_distance);
@@ -202,7 +201,6 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   frm_servos->set_sensitive(false);
   frm_sensors->set_sensitive(false);
   frm_ultrasonic->set_sensitive(false);
-  exp_motion->set_sensitive(false);
 
   hsc_HeadYaw->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_HeadYaw, lab_HeadYaw, NaoJointPositionInterface::SERVO_head_yaw));
   hsc_HeadPitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_HeadPitch, lab_HeadPitch, NaoJointPositionInterface::SERVO_head_pitch));
@@ -714,7 +712,6 @@ NaoGuiGtkWindow::on_connect()
     frm_servos->set_sensitive(true);
     frm_sensors->set_sensitive(true);
     frm_ultrasonic->set_sensitive(true);
-    exp_motion->set_sensitive(true);
     tb_stiffness->set_sensitive(true);
     but_us_auto->set_sensitive(true);
     but_us_emit->set_sensitive(true);
@@ -763,7 +760,6 @@ NaoGuiGtkWindow::on_disconnect()
   frm_servos->set_sensitive(false);
   frm_sensors->set_sensitive(false);
   frm_ultrasonic->set_sensitive(false);
-  exp_motion->set_sensitive(false);
   tb_stiffness->set_sensitive(false);
   tb_control->set_sensitive(false);
   tb_getup->set_sensitive(false);
