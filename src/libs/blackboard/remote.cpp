@@ -189,6 +189,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
 
   __mutex->lock();
   if (__inbound_thread != NULL &&
+      Thread::current_thread() &&
       strcmp(Thread::current_thread()->name(), __inbound_thread) == 0)
   {
     throw Exception("Cannot call open_interface() from inbound handler");
