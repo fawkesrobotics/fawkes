@@ -26,7 +26,6 @@
 #include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 namespace fawkes {
   class BlackBoard;
@@ -42,7 +41,7 @@ class NaoGuiGtkWindow : public Gtk::Window
 {
  public:
   NaoGuiGtkWindow(BaseObjectType* cobject,
-		  const Glib::RefPtr<Gnome::Glade::Xml> &refxml);
+		  const Glib::RefPtr<Gtk::Builder> &builder);
   ~NaoGuiGtkWindow();
 
  private:
@@ -206,6 +205,64 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::ToggleButton *but_us_auto;
   Gtk::Button *but_us_emit;
   Gtk::ComboBox     *cmb_us_direction;
+
+  Gtk::Button *but_stiffness_read;
+  Gtk::Button *but_stiffness_write;
+  Gtk::SpinButton *spb_stiffness_global;
+  Gtk::CheckButton *chb_stiffness_global;
+  Gtk::SpinButton *spb_HeadYaw;
+  Gtk::SpinButton *spb_HeadPitch;
+  Gtk::SpinButton *spb_RShoulderPitch;
+  Gtk::SpinButton *spb_RShoulderRoll;
+  Gtk::SpinButton *spb_RElbowYaw;
+  Gtk::SpinButton *spb_RElbowRoll;
+  Gtk::SpinButton *spb_RWristYaw;
+  Gtk::SpinButton *spb_RHand;
+  Gtk::SpinButton *spb_LShoulderPitch;
+  Gtk::SpinButton *spb_LShoulderRoll;
+  Gtk::SpinButton *spb_LElbowYaw;
+  Gtk::SpinButton *spb_LElbowRoll;
+  Gtk::SpinButton *spb_LWristYaw;
+  Gtk::SpinButton *spb_LHand;
+  Gtk::SpinButton *spb_RHipYawPitch;
+  Gtk::SpinButton *spb_RHipPitch;
+  Gtk::SpinButton *spb_RHipRoll;
+  Gtk::SpinButton *spb_RKneePitch;
+  Gtk::SpinButton *spb_RAnklePitch;
+  Gtk::SpinButton *spb_RAnkleRoll;
+  Gtk::SpinButton *spb_LHipYawPitch;
+  Gtk::SpinButton *spb_LHipPitch;
+  Gtk::SpinButton *spb_LHipRoll;
+  Gtk::SpinButton *spb_LKneePitch;
+  Gtk::SpinButton *spb_LAnklePitch;
+  Gtk::SpinButton *spb_LAnkleRoll;
+
+  Gtk::Label *lab_stiff_HeadYaw;
+  Gtk::Label *lab_stiff_HeadPitch;
+  Gtk::Label *lab_stiff_RShoulderPitch;
+  Gtk::Label *lab_stiff_RShoulderRoll;
+  Gtk::Label *lab_stiff_RElbowYaw;
+  Gtk::Label *lab_stiff_RElbowRoll;
+  Gtk::Label *lab_stiff_RWristYaw;
+  Gtk::Label *lab_stiff_RHand;
+  Gtk::Label *lab_stiff_LShoulderPitch;
+  Gtk::Label *lab_stiff_LShoulderRoll;
+  Gtk::Label *lab_stiff_LElbowYaw;
+  Gtk::Label *lab_stiff_LElbowRoll;
+  Gtk::Label *lab_stiff_LWristYaw;
+  Gtk::Label *lab_stiff_LHand;
+  Gtk::Label *lab_stiff_RHipYawPitch;
+  Gtk::Label *lab_stiff_RHipPitch;
+  Gtk::Label *lab_stiff_RHipRoll;
+  Gtk::Label *lab_stiff_RKneePitch;
+  Gtk::Label *lab_stiff_RAnklePitch;
+  Gtk::Label *lab_stiff_RAnkleRoll;
+  Gtk::Label *lab_stiff_LHipYawPitch;
+  Gtk::Label *lab_stiff_LHipPitch;
+  Gtk::Label *lab_stiff_LHipRoll;
+  Gtk::Label *lab_stiff_LKneePitch;
+  Gtk::Label *lab_stiff_LAnklePitch;
+  Gtk::Label *lab_stiff_LAnkleRoll;
 
   Gtk::RadioButton *rad_motion_fawkes;
   Gtk::RadioButton *rad_motion_naoqi;

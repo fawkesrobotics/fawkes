@@ -17,8 +17,8 @@ BASEDIR = ../../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GTKMM)
+LDFLAGS += $(LDFLAGS_GTKMM)
 
 LIBS_ffnaogui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		fawkesguiutils fawkesinterface \
@@ -28,7 +28,7 @@ LIBS_ffnaogui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 OBJS_ffnaogui = main.o naogui.o
 OBJS_all = $(OBJS_ffnaogui)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GTKMM),1)
   BINS_gui = $(BINDIR)/ffnaogui
 else
   WARN_TARGETS += warning_naogui

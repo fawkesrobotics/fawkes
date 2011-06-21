@@ -24,8 +24,7 @@
 
 #include <core/threading/thread.h>
 
-/** This is the main program of the Nao GUI.
- */
+/** This is the main program of the Nao GUI. */
 int
 main(int argc, char **argv) {
   fawkes::Thread::init_main();
@@ -34,12 +33,12 @@ main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
 
 
-  Glib::RefPtr<Gnome::Glade::Xml> refxml;
-  refxml =
-    Gnome::Glade::Xml::create(RESDIR"/guis/naogui/naogui.glade", "", "ffnaogui");
+  Glib::RefPtr<Gtk::Builder> builder;
+  builder =
+    Gtk::Builder::create_from_file(RESDIR"/guis/naogui/naogui.ui");
 
   NaoGuiGtkWindow *window = NULL;
-  refxml->get_widget_derived("window", window);
+  builder->get_widget_derived("window", window);
 
   Gtk::Main::run(*window);
 
