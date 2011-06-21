@@ -210,6 +210,8 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("cmb_kick_leg", cmb_kick_leg);
   builder->get_widget("ent_kick_strength", ent_kick_strength);
   builder->get_widget("but_kick_exec", but_kick_exec);
+  builder->get_widget("cmb_standup_from", cmb_standup_from);
+  builder->get_widget("but_standup_exec", but_standup_exec);
   builder->get_widget("ent_turn_angle", ent_turn_angle);
   builder->get_widget("rad_motion_fawkes", rad_motion_fawkes);
   builder->get_widget("rad_motion_naoqi", rad_motion_naoqi);
@@ -260,6 +262,7 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("lab_tts_active", lab_tts_active);
 
   cmb_kick_leg->set_active(0);
+  cmb_standup_from->set_active(0);
   cmb_us_direction->set_active(0);
   frm_servos->set_sensitive(false);
   frm_sensors->set_sensitive(false);
@@ -308,6 +311,7 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   but_wsw_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_wsw_exec_clicked));
   but_wa_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_wa_exec_clicked));
   but_kick_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_kick_exec_clicked));
+  but_standup_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_standup_exec_clicked));
   but_turn_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_turn_exec_clicked));
   but_nav_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_nav_exec_clicked));
   but_stiffness_read->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_read_clicked));
@@ -1048,6 +1052,28 @@ NaoGuiGtkWindow::on_kick_exec_clicked()
     } else {
       hummot_naoqi_if->msgq_enqueue(m);
     }
+  }
+}
+
+
+void
+NaoGuiGtkWindow::on_standup_exec_clicked()
+{
+  HumanoidMotionInterface::StandupEnum from =
+    HumanoidMotionInterface::STANDUP_DETECT;
+
+  if (cmb_standup_from->get_active_row_number() == 1) {
+    from = HumanoidMotionInterface::STANDUP_FRONT;
+  } else if (cmb_standup_from->get_active_row_number() == 2) {
+    from = HumanoidMotionInterface::STANDUP_BACK;
+  }
+
+  HumanoidMotionInterface::StandupMessage *m =
+    new HumanoidMotionInterface::StandupMessage(from);
+  if ( rad_motion_fawkes->get_active() ) {
+    hummot_fawkes_if->msgq_enqueue(m);
+  } else {
+    hummot_naoqi_if->msgq_enqueue(m);
   }
 }
 

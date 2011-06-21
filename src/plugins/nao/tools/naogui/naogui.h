@@ -70,6 +70,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   void on_ws_exec_clicked();
   void on_wsw_exec_clicked();
   void on_kick_exec_clicked();
+  void on_standup_exec_clicked();
   void on_nav_exec_clicked();
   void on_wa_exec_clicked();
   void on_turn_exec_clicked();
@@ -284,6 +285,8 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::ComboBox *cmb_kick_leg;
   Gtk::Entry  *ent_kick_strength;
   Gtk::Button *but_kick_exec;
+  Gtk::ComboBox *cmb_standup_from;
+  Gtk::Button *but_standup_exec;
 
   Gtk::Entry  *ent_walkvel_x;
   Gtk::Entry  *ent_walkvel_y;

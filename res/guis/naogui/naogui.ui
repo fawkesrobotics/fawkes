@@ -358,6 +358,23 @@
     <property name="page_increment">10</property>
     <property name="page_size">10</property>
   </object>
+  <object class="GtkListStore" id="lst_standup_from">
+    <columns>
+      <!-- column-name what -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">DETECT</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">FRONT</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">BACK</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkListStore" id="model1">
     <columns>
       <!-- column-name gchararray -->
@@ -4050,6 +4067,114 @@
                                       </packing>
                                     </child>
                                     <child>
+                                      <object class="GtkFrame" id="frame10">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label_xalign">0</property>
+                                        <property name="shadow_type">none</property>
+                                        <child>
+                                          <object class="GtkAlignment" id="alignment14">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="top_padding">4</property>
+                                            <property name="left_padding">12</property>
+                                            <child>
+                                              <object class="GtkHBox" id="hbox4">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="spacing">5</property>
+                                                <child>
+                                                  <object class="GtkLabel" id="label73">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">False</property>
+                                                    <property name="label" translatable="yes">From:</property>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">0</property>
+                                                  </packing>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkAspectFrame" id="aspectframe5">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">False</property>
+                                                    <property name="label_xalign">0</property>
+                                                    <property name="shadow_type">none</property>
+                                                    <child>
+                                                      <object class="GtkComboBox" id="cmb_standup_from">
+                                                        <property name="visible">True</property>
+                                                        <property name="can_focus">False</property>
+                                                        <property name="model">lst_standup_from</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="renderer3"/>
+                                                          <attributes>
+                                                            <attribute name="text">0</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
+                                                    </child>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">1</property>
+                                                  </packing>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkAspectFrame" id="aspectframe6">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">False</property>
+                                                    <property name="label_xalign">0</property>
+                                                    <property name="shadow_type">none</property>
+                                                    <child>
+                                                      <object class="GtkButton" id="but_standup_exec">
+                                                        <property name="label" translatable="yes">Execute</property>
+                                                        <property name="visible">True</property>
+                                                        <property name="can_focus">True</property>
+                                                        <property name="receives_default">True</property>
+                                                        <property name="use_action_appearance">False</property>
+                                                      </object>
+                                                    </child>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">False</property>
+                                                    <property name="pack_type">end</property>
+                                                    <property name="position">2</property>
+                                                  </packing>
+                                                </child>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        <child type="label">
+                                          <object class="GtkLabel" id="label78">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">&lt;b&gt;Standup&lt;/b&gt;</property>
+                                            <property name="use_markup">True</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">14</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSeparator" id="separator1">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">15</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <object class="GtkHBox" id="hbox5">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -4080,6 +4205,7 @@
                                                             <property name="can_focus">True</property>
                                                             <property name="receives_default">False</property>
                                                             <property name="use_action_appearance">False</property>
+                                                            <property name="xalign">0</property>
                                                             <property name="active">True</property>
                                                             <property name="draw_indicator">True</property>
                                                           </object>
@@ -4097,6 +4223,7 @@
                                                             <property name="can_focus">True</property>
                                                             <property name="receives_default">False</property>
                                                             <property name="use_action_appearance">False</property>
+                                                            <property name="xalign">0</property>
                                                             <property name="draw_indicator">True</property>
                                                             <property name="group">rad_motion_naoqi</property>
                                                           </object>
@@ -4176,7 +4303,7 @@ are used to execute Nao motions.</property>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">True</property>
-                                        <property name="position">14</property>
+                                        <property name="position">16</property>
                                       </packing>
                                     </child>
                                   </object>
