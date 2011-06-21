@@ -31,8 +31,9 @@ LIBS_naoqi_motion = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
 		    alcore alcommon alvalue althread \
 		    boost_serialization-mt boost_signals-mt \
-		    HumanoidMotionInterface
-OBJS_naoqi_motion = motion_plugin.o motion_thread.o motion_kick_task.o
+		    HumanoidMotionInterface NaoSensorInterface
+OBJS_naoqi_motion = motion_plugin.o motion_thread.o \
+		    motion_kick_task.o motion_standup_task.o
 
 LIBS_naoqi_speechsynth = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 			 fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \

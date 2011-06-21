@@ -39,6 +39,7 @@ namespace AL {
 }
 namespace fawkes {
   class HumanoidMotionInterface;
+  class NaoSensorInterface;
 }
 
 class NaoQiMotionThread
@@ -87,6 +88,7 @@ class NaoQiMotionThread
   AL::ALPtr<AL::ALThreadPool>  __thread_pool;
 
   fawkes::HumanoidMotionInterface *__hummot_if;
+  fawkes::NaoSensorInterface      *__sensor_if;
 
   int __motion_task_id;
   AL::ALPtr<AL::ALTask>        __motion_task;

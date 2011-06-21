@@ -22,6 +22,7 @@
 
 #include "motion_thread.h"
 #include "motion_kick_task.h"
+#include "motion_standup_task.h"
 
 #include <alcore/alerror.h>
 #include <alproxies/allauncherproxy.h>
@@ -29,6 +30,7 @@
 #include <althread/althreadpool.h>
 
 #include <interfaces/HumanoidMotionInterface.h>
+#include <interfaces/NaoSensorInterface.h>
 
 using namespace fawkes;
 
@@ -77,6 +79,8 @@ NaoQiMotionThread::init()
 
   __hummot_if =
     blackboard->open_for_writing<HumanoidMotionInterface>("NaoQi Motion");
+  __sensor_if =
+    blackboard->open_for_reading<NaoSensorInterface>("Nao Sensors");
 }
 
 
@@ -86,7 +90,9 @@ NaoQiMotionThread::finalize()
   stop_motion();
 
   blackboard->close(__hummot_if);
+  blackboard->close(__sensor_if);
   __hummot_if = NULL;
+  __sensor_if = NULL;
 
   __almotion.reset();
 }
@@ -236,7 +242,27 @@ NaoQiMotionThread::process_messages()
     else if (HumanoidMotionInterface::KickMessage *msg =
 	     __hummot_if->msgq_first_safe(msg))
     {
+      if (__motion_task) {
+	__motion_task->exitTask();
+      }
       __motion_task.reset(new NaoQiMotionKickTask(__almotion, msg->leg()));
+      __thread_pool->enqueue(__motion_task);
+
+      __hummot_if->set_msgid(msg->id());
+    }
+
+    else if (HumanoidMotionInterface::StandupMessage *msg =
+	     __hummot_if->msgq_first_safe(msg))
+    {
+      if (__motion_task) {
+	__motion_task->exitTask();
+      }
+
+      __sensor_if->read();
+      __motion_task.reset(new NaoQiMotionStandupTask(__almotion, msg->from_pos(),
+						     __sensor_if->accel_x(),
+						     __sensor_if->accel_y(),
+						     __sensor_if->accel_z()));
       __thread_pool->enqueue(__motion_task);
 
       __hummot_if->set_msgid(msg->id());
