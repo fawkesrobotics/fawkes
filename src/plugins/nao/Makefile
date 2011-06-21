@@ -34,6 +34,13 @@ LIBS_naoqi_motion = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    HumanoidMotionInterface
 OBJS_naoqi_motion = motion_plugin.o motion_thread.o
 
+LIBS_naoqi_speechsynth = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+			 fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
+			 alcore alcommon alvalue \
+			 boost_serialization-mt boost_signals-mt \
+			 SpeechSynthInterface
+OBJS_naoqi_speechsynth = speechsynth_plugin.o speechsynth_thread.o
+
 LIBS_libnaofawkes = dl fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkesnaoqiaspect fawkesbaseapp \
 		    fawkesplugin fawkesnaoqibroker\
@@ -45,14 +52,15 @@ LIBS_libfawkesnaoqibroker = alcore alcommon
 OBJS_libfawkesnaoqibroker = naoqi_broker.o
 
 OBJS_all = $(OBJS_naoqi) $(OBJS_libnaofawkes) $(OBJS_libfawkesnaoqibroker) \
-	$(OBJS_naoqi_motion)
+	$(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth)
 
 ifeq ($(HAVE_NAOQI),1)
   PRESUBDIRS += aspect
 
   CFLAGS  += $(CFLAGS_NAOQI)
   LDFLAGS += $(LDFLAGS_NAOQI)
-  PLUGINS_all = $(PLUGINDIR)/naoqi.so $(PLUGINDIR)/naoqi-motion.so
+  PLUGINS_all = $(PLUGINDIR)/naoqi.so $(PLUGINDIR)/naoqi-motion.so \
+		$(PLUGINDIR)/naoqi-speechsynth.so
   LIBS_all = $(LIBDIR)/libfawkesnaoqibroker.so $(LIBDIR)/libnaofawkes.so
 
   TARGETS_all = info_naoqiroot
