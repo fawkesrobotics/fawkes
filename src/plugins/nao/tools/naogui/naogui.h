@@ -74,9 +74,9 @@ class NaoGuiGtkWindow : public Gtk::Window
   void on_motion_stop_clicked();
   void on_cf_read_clicked();
   void on_cf_write_clicked();
-  void on_global_stiffness_toggled();
-  void on_stiff_write_clicked();
-  void on_stiff_read_clicked();
+  void on_stiffness_write_clicked();
+  void on_stiffness_read_clicked();
+  void on_stiffness_global_toggled();
   void on_slider_changed(Gtk::HScale *hsc, Gtk::Label *lab, unsigned int servo);
   void on_changed_time();
   void on_connection_clicked();

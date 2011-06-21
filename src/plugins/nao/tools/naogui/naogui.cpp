@@ -304,11 +304,9 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   but_kick_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_kick_exec_clicked));
   but_turn_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_turn_exec_clicked));
   but_nav_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_nav_exec_clicked));
-  /*
-  but_stiff_read->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiff_read_clicked));
-  but_stiff_write->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiff_write_clicked));
-  chk_global_stiffness->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_global_stiffness_toggled));
-  */
+  but_stiffness_read->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_read_clicked));
+  but_stiffness_write->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_write_clicked));
+  chb_stiffness_global->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_global_toggled));
 
   connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connect));
   connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_disconnect));
@@ -1089,298 +1087,159 @@ NaoGuiGtkWindow::on_motion_stop_clicked()
 
 
 void
-NaoGuiGtkWindow::on_global_stiffness_toggled()
+NaoGuiGtkWindow::on_stiffness_global_toggled()
 {
-    /*
-  bool is_active = chk_global_stiffness->get_active();
-  if(is_active) {
-    ent_stiff_global->set_sensitive(true);
-    ent_stiff_lhipyawpitch->set_sensitive(false);
-    ent_stiff_rhipyawpitch->set_sensitive(false);
-    ent_stiff_lkneepitch->set_sensitive(false);
-    ent_stiff_rkneepitch->set_sensitive(false);
-    ent_stiff_lhiproll->set_sensitive(false);
-    ent_stiff_rhiproll->set_sensitive(false);
-    ent_stiff_lhippitch->set_sensitive(false);
-    ent_stiff_rhippitch->set_sensitive(false);
-    ent_stiff_lankleroll->set_sensitive(false);
-    ent_stiff_rankleroll->set_sensitive(false);
-    ent_stiff_lanklepitch->set_sensitive(false);
-    ent_stiff_ranklepitch->set_sensitive(false);
-    ent_stiff_lshoulderpitch->set_sensitive(false);
-    ent_stiff_rshoulderpitch->set_sensitive(false);
-    ent_stiff_lshoulderroll->set_sensitive(false);
-    ent_stiff_rshoulderroll->set_sensitive(false);
-    ent_stiff_headyaw->set_sensitive(false);
-    ent_stiff_headpitch->set_sensitive(false);
-    ent_stiff_lelbowyaw->set_sensitive(false);
-    ent_stiff_relbowyaw->set_sensitive(false);
-    ent_stiff_lelbowroll->set_sensitive(false);
-    ent_stiff_relbowroll->set_sensitive(false);
+  bool is_active = chb_stiffness_global->get_active();
+
+  spb_HeadYaw->set_sensitive(! is_active);
+  spb_HeadPitch->set_sensitive(! is_active);
+  spb_RShoulderPitch->set_sensitive(! is_active);
+  spb_RShoulderRoll->set_sensitive(! is_active);
+  spb_RElbowYaw->set_sensitive(! is_active);
+  spb_RElbowRoll->set_sensitive(! is_active);
+  spb_RWristYaw->set_sensitive(! is_active);
+  spb_RHand->set_sensitive(! is_active);
+  spb_LShoulderPitch->set_sensitive(! is_active);
+  spb_LShoulderRoll->set_sensitive(! is_active);
+  spb_LElbowYaw->set_sensitive(! is_active);
+  spb_LElbowRoll->set_sensitive(! is_active);
+  spb_LWristYaw->set_sensitive(! is_active);
+  spb_LHand->set_sensitive(! is_active);
+  spb_RHipYawPitch->set_sensitive(! is_active);
+  spb_RHipPitch->set_sensitive(! is_active);
+  spb_RHipRoll->set_sensitive(! is_active);
+  spb_RKneePitch->set_sensitive(! is_active);
+  spb_RAnklePitch->set_sensitive(! is_active);
+  spb_RAnkleRoll->set_sensitive(! is_active);
+  spb_LHipYawPitch->set_sensitive(! is_active);
+  spb_LHipPitch->set_sensitive(! is_active);
+  spb_LHipRoll->set_sensitive(! is_active);
+  spb_LKneePitch->set_sensitive(! is_active);
+  spb_LAnklePitch->set_sensitive(! is_active);
+  spb_LAnkleRoll->set_sensitive(! is_active);
+
+  spb_stiffness_global->set_sensitive(is_active);
+
+  lab_stiff_HeadYaw->set_sensitive(! is_active);
+  lab_stiff_HeadPitch->set_sensitive(! is_active);
+  lab_stiff_RShoulderPitch->set_sensitive(! is_active);
+  lab_stiff_RShoulderRoll->set_sensitive(! is_active);
+  lab_stiff_RElbowYaw->set_sensitive(! is_active);
+  lab_stiff_RElbowRoll->set_sensitive(! is_active);
+  lab_stiff_RWristYaw->set_sensitive(! is_active);
+  lab_stiff_RHand->set_sensitive(! is_active);
+  lab_stiff_LShoulderPitch->set_sensitive(! is_active);
+  lab_stiff_LShoulderRoll->set_sensitive(! is_active);
+  lab_stiff_LElbowYaw->set_sensitive(! is_active);
+  lab_stiff_LElbowRoll->set_sensitive(! is_active);
+  lab_stiff_LWristYaw->set_sensitive(! is_active);
+  lab_stiff_LHand->set_sensitive(! is_active);
+  lab_stiff_RHipYawPitch->set_sensitive(! is_active);
+  lab_stiff_RHipPitch->set_sensitive(! is_active);
+  lab_stiff_RHipRoll->set_sensitive(! is_active);
+  lab_stiff_RKneePitch->set_sensitive(! is_active);
+  lab_stiff_RAnklePitch->set_sensitive(! is_active);
+  lab_stiff_RAnkleRoll->set_sensitive(! is_active);
+  lab_stiff_LHipYawPitch->set_sensitive(! is_active);
+  lab_stiff_LHipPitch->set_sensitive(! is_active);
+  lab_stiff_LHipRoll->set_sensitive(! is_active);
+  lab_stiff_LKneePitch->set_sensitive(! is_active);
+  lab_stiff_LAnklePitch->set_sensitive(! is_active);
+  lab_stiff_LAnkleRoll->set_sensitive(! is_active);
+}
+
+void
+NaoGuiGtkWindow::on_stiffness_write_clicked()
+{
+
+
+  if (chb_stiffness_global->get_active()) {
+    float stiff_global = spb_stiffness_global->get_value();
+    NaoJointStiffnessInterface::SetBodyStiffnessMessage *m =
+      new NaoJointStiffnessInterface::SetBodyStiffnessMessage(stiff_global, .5);
+    jointstiff_if->msgq_enqueue(m);
   } else {
-    ent_stiff_global->set_sensitive(false);
-    ent_stiff_lhipyawpitch->set_sensitive(true);
-    ent_stiff_rhipyawpitch->set_sensitive(true);
-    ent_stiff_lkneepitch->set_sensitive(true);
-    ent_stiff_rkneepitch->set_sensitive(true);
-    ent_stiff_lhiproll->set_sensitive(true);
-    ent_stiff_rhiproll->set_sensitive(true);
-    ent_stiff_lhippitch->set_sensitive(true);
-    ent_stiff_rhippitch->set_sensitive(true);
-    ent_stiff_lankleroll->set_sensitive(true);
-    ent_stiff_rankleroll->set_sensitive(true);
-    ent_stiff_lanklepitch->set_sensitive(true);
-    ent_stiff_ranklepitch->set_sensitive(true);
-    ent_stiff_lshoulderpitch->set_sensitive(true);
-    ent_stiff_rshoulderpitch->set_sensitive(true);
-    ent_stiff_lshoulderroll->set_sensitive(true);
-    ent_stiff_rshoulderroll->set_sensitive(true);
-    ent_stiff_headyaw->set_sensitive(true);
-    ent_stiff_headpitch->set_sensitive(true);
-    ent_stiff_lelbowyaw->set_sensitive(true);
-    ent_stiff_relbowyaw->set_sensitive(true);
-    ent_stiff_lelbowroll->set_sensitive(true);
-    ent_stiff_relbowroll->set_sensitive(true);
+    float stiff_head_yaw = spb_HeadYaw->get_value(),
+      stiff_head_pitch = spb_HeadPitch->get_value(),
+      stiff_l_shoulder_pitch = spb_LShoulderPitch->get_value(),
+      stiff_l_shoulder_roll = spb_LShoulderRoll->get_value(),
+      stiff_l_elbow_yaw = spb_LElbowYaw->get_value(),
+      stiff_l_elbow_roll = spb_LElbowRoll->get_value(),
+      stiff_l_wrist_yaw = spb_LWristYaw->get_value(),
+      stiff_l_hand = spb_LHand->get_value(),
+      stiff_l_hip_yaw_pitch = spb_LHipYawPitch->get_value(),
+      stiff_l_hip_pitch = spb_LHipPitch->get_value(),
+      stiff_l_hip_roll = spb_LHipRoll->get_value(),
+      stiff_l_knee_pitch = spb_LKneePitch->get_value(),
+      stiff_l_ankle_roll = spb_LAnkleRoll->get_value(),
+      stiff_l_ankle_pitch = spb_LAnklePitch->get_value(),
+      stiff_r_shoulder_pitch = spb_RShoulderPitch->get_value(),
+      stiff_r_shoulder_roll = spb_RShoulderRoll->get_value(),
+      stiff_r_elbow_yaw = spb_RElbowYaw->get_value(),
+      stiff_r_elbow_roll = spb_RElbowRoll->get_value(),
+      stiff_r_wrist_yaw = spb_RWristYaw->get_value(),
+      stiff_r_hand = spb_RHand->get_value(),
+      stiff_r_hip_yaw_pitch = spb_RHipYawPitch->get_value(),
+      stiff_r_hippitch = spb_RHipPitch->get_value(),
+      stiff_r_hiproll = spb_RHipRoll->get_value(),
+      stiff_r_knee_pitch = spb_RKneePitch->get_value(),
+      stiff_r_ankle_roll = spb_RAnkleRoll->get_value(),
+      stiff_r_ankle_pitch = spb_RAnklePitch->get_value();
+
+    NaoJointStiffnessInterface::SetStiffnessesMessage *m =
+      new NaoJointStiffnessInterface::SetStiffnessesMessage
+             (0.5,
+	      stiff_head_yaw, stiff_head_pitch,
+	      stiff_l_shoulder_pitch, stiff_l_shoulder_roll,
+	      stiff_l_elbow_yaw, stiff_l_elbow_roll,
+	      stiff_l_wrist_yaw, stiff_l_hand,
+	      stiff_l_hip_yaw_pitch,
+	      stiff_l_hip_roll, stiff_l_hip_pitch, stiff_l_knee_pitch,
+	      stiff_l_ankle_pitch, stiff_l_ankle_roll,
+	      stiff_r_shoulder_pitch, stiff_r_shoulder_roll,
+	      stiff_r_elbow_yaw, stiff_r_elbow_roll,
+	      stiff_r_wrist_yaw, stiff_r_hand,
+	      stiff_r_hip_yaw_pitch, stiff_r_hiproll, stiff_r_hippitch,
+	      stiff_r_knee_pitch, stiff_r_ankle_roll, stiff_r_ankle_pitch);
+
+    jointstiff_if->msgq_enqueue(m);
   }
-    */
 }
 
 void
-NaoGuiGtkWindow::on_stiff_write_clicked()
+NaoGuiGtkWindow::on_stiffness_read_clicked()
 {
-  /*
-  if(!hummot_fawkes_if->has_writer() || !naostiff_if->has_writer()) return;
+  jointstiff_if->read();
 
-  float f_ent_stiff_lhipyawpitch;
-  float f_ent_stiff_rhipyawpitch;
-  float f_ent_stiff_lkneepitch;
-  float f_ent_stiff_rkneepitch;
-  float f_ent_stiff_lhiproll;
-  float f_ent_stiff_rhiproll;
-  float f_ent_stiff_lhippitch;
-  float f_ent_stiff_rhippitch;
-  float f_ent_stiff_lankleroll;
-  float f_ent_stiff_rankleroll;
-  float f_ent_stiff_lanklepitch;
-  float f_ent_stiff_ranklepitch;
-  float f_ent_stiff_lshoulderpitch;
-  float f_ent_stiff_rshoulderpitch;
-  float f_ent_stiff_lshoulderroll;
-  float f_ent_stiff_rshoulderroll;
-  float f_ent_stiff_headyaw;
-  float f_ent_stiff_headpitch;
-  float f_ent_stiff_lelbowyaw;
-  float f_ent_stiff_relbowyaw;
-  float f_ent_stiff_lelbowroll;
-  float f_ent_stiff_relbowroll;
-  float f_ent_stiff_global;
+  printf("HeadYaw: %s (%f)\n", convert_float2str(jointstiff_if->head_yaw()).c_str(),
+	 jointstiff_if->head_yaw());
 
-  if(chk_global_stiffness->get_active() &&
-      ((ent_stiff_global->get_text() == "") || convert_str2float(ent_stiff_global->get_text(), &f_ent_stiff_global))) {
-        HumanoidMotionInterface::StiffnessMotionPatternEnum motion_pattern;
-        if(cmb_behaviour->get_active_row_number() == 0) {
-          motion_pattern = HumanoidMotionInterface::WALK;
-        } else if(cmb_behaviour->get_active_row_number() == 1) {
-          motion_pattern = HumanoidMotionInterface::KICK;
-        } else {
-          return;
-        }
+  spb_HeadYaw->set_value(jointstiff_if->head_yaw());
+  spb_HeadPitch->set_value(jointstiff_if->head_pitch());
+  spb_RShoulderPitch->set_value(jointstiff_if->r_shoulder_pitch());
+  spb_RShoulderRoll->set_value(jointstiff_if->r_shoulder_roll());
+  spb_RElbowYaw->set_value(jointstiff_if->r_elbow_yaw());
+  spb_RElbowRoll->set_value(jointstiff_if->r_elbow_roll());
+  spb_RWristYaw->set_value(jointstiff_if->r_wrist_yaw());
+  spb_RHand->set_value(jointstiff_if->r_hand());
+  spb_LShoulderPitch->set_value(jointstiff_if->l_shoulder_pitch());
+  spb_LShoulderRoll->set_value(jointstiff_if->l_shoulder_roll());
+  spb_LElbowYaw->set_value(jointstiff_if->l_elbow_yaw());
+  spb_LElbowRoll->set_value(jointstiff_if->l_elbow_roll());
+  spb_LWristYaw->set_value(jointstiff_if->l_wrist_yaw());
+  spb_LHand->set_value(jointstiff_if->l_hand());
+  spb_RHipYawPitch->set_value(jointstiff_if->r_hip_yaw_pitch());
+  spb_RHipPitch->set_value(jointstiff_if->r_hip_pitch());
+  spb_RHipRoll->set_value(jointstiff_if->r_hip_roll());
+  spb_RKneePitch->set_value(jointstiff_if->r_knee_pitch());
+  spb_RAnklePitch->set_value(jointstiff_if->r_ankle_pitch());
+  spb_RAnkleRoll->set_value(jointstiff_if->r_ankle_roll());
+  spb_LHipYawPitch->set_value(jointstiff_if->l_hip_yaw_pitch());
+  spb_LHipPitch->set_value(jointstiff_if->l_hip_pitch());
+  spb_LHipRoll->set_value(jointstiff_if->l_hip_roll());
+  spb_LKneePitch->set_value(jointstiff_if->l_knee_pitch());
+  spb_LAnklePitch->set_value(jointstiff_if->l_ankle_pitch());
+  spb_LAnkleRoll->set_value(jointstiff_if->l_ankle_roll());
 
-        HumanoidMotionInterface::SetStiffnessParamsMessage *m =
-          new HumanoidMotionInterface::SetStiffnessParamsMessage(motion_pattern,
-              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
-              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
-              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
-              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
-              f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global, f_ent_stiff_global,
-              f_ent_stiff_global, f_ent_stiff_global);
-
-        if ( rad_motion_fawkes->get_active() ) {
-          hummot_fawkes_if->msgq_enqueue(m);
-        } else {
-          delete m;
-        }
-  } else if( ((ent_stiff_lhipyawpitch->get_text() == "") || convert_str2float(ent_stiff_lhipyawpitch->get_text(), &f_ent_stiff_lhipyawpitch)) &&
-      ((ent_stiff_rhipyawpitch->get_text() == "") || convert_str2float(ent_stiff_rhipyawpitch->get_text(), &f_ent_stiff_rhipyawpitch)) &&
-      ((ent_stiff_lkneepitch->get_text() == "") || convert_str2float(ent_stiff_lkneepitch->get_text(), &f_ent_stiff_lkneepitch)) &&
-      ((ent_stiff_rkneepitch->get_text() == "") || convert_str2float(ent_stiff_rkneepitch->get_text(), &f_ent_stiff_rkneepitch)) &&
-      ((ent_stiff_lhiproll->get_text() == "") || convert_str2float(ent_stiff_lhiproll->get_text(), &f_ent_stiff_lhiproll)) &&
-      ((ent_stiff_rhiproll->get_text() == "") || convert_str2float(ent_stiff_rhiproll->get_text(), &f_ent_stiff_rhiproll)) &&
-      ((ent_stiff_lhippitch->get_text() == "") || convert_str2float(ent_stiff_lhippitch->get_text(), &f_ent_stiff_lhippitch)) &&
-      ((ent_stiff_rhippitch->get_text() == "") || convert_str2float(ent_stiff_rhippitch->get_text(), &f_ent_stiff_rhippitch)) &&
-      ((ent_stiff_lankleroll->get_text() == "") || convert_str2float(ent_stiff_lankleroll->get_text(), &f_ent_stiff_lankleroll)) &&
-      ((ent_stiff_rankleroll->get_text() == "") || convert_str2float(ent_stiff_rankleroll->get_text(), &f_ent_stiff_rankleroll)) &&
-      ((ent_stiff_lanklepitch->get_text() == "") || convert_str2float(ent_stiff_lanklepitch->get_text(), &f_ent_stiff_lanklepitch)) &&
-      ((ent_stiff_ranklepitch->get_text() == "") || convert_str2float(ent_stiff_ranklepitch->get_text(), &f_ent_stiff_ranklepitch)) &&
-      ((ent_stiff_lshoulderpitch->get_text() == "") || convert_str2float(ent_stiff_lshoulderpitch->get_text(), &f_ent_stiff_lshoulderpitch)) &&
-      ((ent_stiff_rshoulderpitch->get_text() == "") || convert_str2float(ent_stiff_rshoulderpitch->get_text(), &f_ent_stiff_rshoulderpitch)) &&
-      ((ent_stiff_lshoulderroll->get_text() == "") || convert_str2float(ent_stiff_lshoulderroll->get_text(), &f_ent_stiff_lshoulderroll)) &&
-      ((ent_stiff_rshoulderroll->get_text() == "") || convert_str2float(ent_stiff_rshoulderroll->get_text(), &f_ent_stiff_rshoulderroll)) &&
-      ((ent_stiff_headyaw->get_text() == "") || convert_str2float(ent_stiff_headyaw->get_text(), &f_ent_stiff_headyaw)) &&
-      ((ent_stiff_headpitch->get_text() == "") || convert_str2float(ent_stiff_headpitch->get_text(), &f_ent_stiff_headpitch)) &&
-      ((ent_stiff_lelbowyaw->get_text() == "") || convert_str2float(ent_stiff_lelbowyaw->get_text(), &f_ent_stiff_lelbowyaw)) &&
-      ((ent_stiff_relbowyaw->get_text() == "") || convert_str2float(ent_stiff_relbowyaw->get_text(), &f_ent_stiff_relbowyaw)) &&
-      ((ent_stiff_lelbowroll->get_text() == "") || convert_str2float(ent_stiff_lelbowroll->get_text(), &f_ent_stiff_lelbowroll)) &&
-      ((ent_stiff_relbowroll->get_text() == "") || convert_str2float(ent_stiff_relbowroll->get_text(), &f_ent_stiff_relbowroll)) &&
-      ((ent_stiff_global->get_text() == "") || convert_str2float(ent_stiff_global->get_text(), &f_ent_stiff_global)) ) {
-
-        HumanoidMotionInterface::SetStiffnessParamsMessage *m = new HumanoidMotionInterface::SetStiffnessParamsMessage();
-
-        if(ent_stiff_lhipyawpitch->get_text() != "") {
-          m->set_l_hip_yaw_pitch(f_ent_stiff_lhipyawpitch);
-        } else {
-          m->set_l_hip_yaw_pitch(1.0);
-        }
-        if(ent_stiff_rhipyawpitch->get_text() != "") {
-          m->set_r_hip_yaw_pitch(f_ent_stiff_rhipyawpitch);
-        } else {
-          m->set_r_hip_yaw_pitch(1.0);
-        }
-        if(ent_stiff_lkneepitch->get_text() != "") {
-          m->set_l_knee_pitch(f_ent_stiff_lkneepitch);
-        } else {
-          m->set_l_knee_pitch(1.0);
-        }
-        if(ent_stiff_rkneepitch->get_text() != "") {
-          m->set_r_knee_pitch(f_ent_stiff_rkneepitch);
-        } else {
-          m->set_r_knee_pitch(1.0);
-        }
-        if(ent_stiff_lhiproll->get_text() != "") {
-          m->set_l_hip_roll(f_ent_stiff_lhiproll);
-        } else {
-          m->set_l_hip_roll(1.0);
-        }
-        if(ent_stiff_rhiproll->get_text() != "") {
-          m->set_r_hip_roll(f_ent_stiff_rhiproll);
-        } else {
-          m->set_r_hip_roll(1.0);
-        }
-        if (ent_stiff_lhippitch->get_text() != "") {
-          m->set_l_hip_pitch(f_ent_stiff_lhippitch);
-        } else {
-          m->set_l_hip_pitch(1.0);
-        }
-        if (ent_stiff_rhippitch->get_text() != "") {
-          m->set_r_hip_pitch(f_ent_stiff_rhippitch);
-        } else {
-          m->set_r_hip_pitch(1.0);
-        }
-        if (ent_stiff_lankleroll->get_text() != "") {
-          m->set_l_ankle_roll(f_ent_stiff_lankleroll);
-        } else {
-          m->set_l_ankle_roll(1.0);
-        }
-        if (ent_stiff_rankleroll->get_text() != "") {
-          m->set_r_ankle_roll(f_ent_stiff_rankleroll);
-        } else {
-          m->set_r_ankle_roll(1.0);
-        }
-        if (ent_stiff_lanklepitch->get_text() != "") {
-          m->set_l_ankle_pitch(f_ent_stiff_lanklepitch);
-        } else {
-          m->set_l_ankle_pitch(1.0);
-        }
-        if (ent_stiff_ranklepitch->get_text() != "") {
-          m->set_r_ankle_pitch(f_ent_stiff_ranklepitch);
-        } else {
-          m->set_r_ankle_pitch(1.0);
-        }
-        if (ent_stiff_lshoulderpitch->get_text() != "") {
-          m->set_l_shoulder_pitch(f_ent_stiff_lshoulderpitch);
-        } else {
-          m->set_l_shoulder_pitch(1.0);
-        }
-        if (ent_stiff_rshoulderpitch->get_text() != "") {
-          m->set_r_shoulder_pitch(f_ent_stiff_rshoulderpitch);
-        } else {
-          m->set_r_shoulder_pitch(1.0);
-        }
-        if (ent_stiff_lshoulderroll->get_text() != "") {
-          m->set_l_shoulder_roll(f_ent_stiff_lshoulderroll);
-        } else {
-          m->set_l_shoulder_roll(1.0);
-        }
-        if (ent_stiff_rshoulderroll->get_text() != "") {
-          m->set_r_shoulder_roll(f_ent_stiff_rshoulderroll);
-        } else {
-          m->set_r_shoulder_roll(1.0);
-        }
-        if (ent_stiff_headyaw->get_text() != "") {
-          m->set_head_yaw(f_ent_stiff_headyaw);
-        } else {
-          m->set_head_yaw(1.0);
-        }
-        if (ent_stiff_headpitch->get_text() != "") {
-          m->set_head_pitch(f_ent_stiff_headpitch);
-        } else {
-          m->set_head_pitch(1.0);
-        }
-        if (ent_stiff_lelbowyaw->get_text() != "") {
-          m->set_l_elbow_yaw(f_ent_stiff_lelbowyaw);
-        } else {
-          m->set_l_elbow_yaw(1.0);
-        }
-        if (ent_stiff_relbowyaw->get_text() != "") {
-          m->set_r_elbow_yaw(f_ent_stiff_relbowyaw);
-        } else {
-          m->set_r_elbow_yaw(1.0);
-        }
-        if (ent_stiff_lelbowroll->get_text() != "") {
-          m->set_l_elbow_roll(f_ent_stiff_lelbowroll);
-        } else {
-          m->set_l_elbow_roll(1.0);
-        }
-        if (ent_stiff_relbowroll->get_text() != "") {
-          m->set_r_elbow_roll(f_ent_stiff_relbowroll);
-        } else {
-          m->set_r_elbow_roll(1.0);
-        }
-        if(cmb_behaviour->get_active_row_number() == 0) {
-          m->set_motion_pattern(HumanoidMotionInterface::WALK);
-        } else if(cmb_behaviour->get_active_row_number() == 1) {
-          m->set_motion_pattern(HumanoidMotionInterface::KICK);
-        } else {
-          return;
-        }
-        if ( rad_motion_fawkes->get_active() ) {
-          hummot_fawkes_if->msgq_enqueue(m);
-        } else {
-          delete m;
-        }
-  }
-  */
-}
-
-void
-NaoGuiGtkWindow::on_stiff_read_clicked()
-{
-  /*
-  if(!hummot_fawkes_if->has_writer() || !naostiff_if->has_writer()) return;
-
-  naostiff_if->read();
-
-  ent_stiff_headyaw->set_text(convert_float2str(naostiff_if->head_yaw()));
-  ent_stiff_headpitch->set_text(convert_float2str(naostiff_if->head_pitch()));
-  ent_stiff_lshoulderpitch->set_text(convert_float2str(naostiff_if->l_shoulder_pitch()));
-  ent_stiff_rshoulderpitch->set_text(convert_float2str(naostiff_if->r_shoulder_pitch()));
-  ent_stiff_lshoulderroll->set_text(convert_float2str(naostiff_if->l_shoulder_roll()));
-  ent_stiff_rshoulderroll->set_text(convert_float2str(naostiff_if->r_shoulder_roll()));
-  ent_stiff_lelbowyaw->set_text(convert_float2str(naostiff_if->l_elbow_yaw()));
-  ent_stiff_relbowyaw->set_text(convert_float2str(naostiff_if->r_elbow_yaw()));
-  ent_stiff_lelbowroll->set_text(convert_float2str(naostiff_if->l_elbow_roll()));
-  ent_stiff_relbowroll->set_text(convert_float2str(naostiff_if->r_elbow_roll()));
-  ent_stiff_lhiproll->set_text(convert_float2str(naostiff_if->l_hip_roll()));
-  ent_stiff_rhiproll->set_text(convert_float2str(naostiff_if->r_hip_roll()));
-  ent_stiff_lhippitch->set_text(convert_float2str(naostiff_if->l_hip_pitch()));
-  ent_stiff_rhippitch->set_text(convert_float2str(naostiff_if->r_hip_pitch()));
-  ent_stiff_rhipyawpitch->set_text(convert_float2str(naostiff_if->r_hip_yaw_pitch()));
-  ent_stiff_lhipyawpitch->set_text(convert_float2str(naostiff_if->l_hip_yaw_pitch()));
-  ent_stiff_lkneepitch->set_text(convert_float2str(naostiff_if->l_knee_pitch()));
-  ent_stiff_rkneepitch->set_text(convert_float2str(naostiff_if->r_knee_pitch()));
-  ent_stiff_lankleroll->set_text(convert_float2str(naostiff_if->l_ankle_roll()));
-  ent_stiff_rankleroll->set_text(convert_float2str(naostiff_if->r_ankle_roll()));
-  ent_stiff_lanklepitch->set_text(convert_float2str(naostiff_if->l_ankle_pitch()));
-  ent_stiff_ranklepitch->set_text(convert_float2str(naostiff_if->r_ankle_pitch()));
-  */
+  spb_stiffness_global->set_value(jointstiff_if->minimum());
 }
