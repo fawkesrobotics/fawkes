@@ -75,6 +75,7 @@ class NaoQiDCMThread
 			 fawkes::NaoJointStiffnessInterface *joint_stiffness_if,
 			 fawkes::NaoSensorInterface *sensor_if);
   void process_messages();
+  std::vector<std::string> parse_servo_bitfield(unsigned int servos);
 
 
   void send_commands(unsigned int servos, std::string what,
@@ -104,6 +105,8 @@ class NaoQiDCMThread
 
   uint8_t                                      __robot_version[4];
   fawkes::NaoJointPositionInterface::RobotType __robot_type;
+
+  AL::ALValue __alljoint_names;
 };
 
 #endif

@@ -67,6 +67,21 @@ enum SensorType {  HEAD_PITCH = 0, HEAD_YAW,
 		   CHEST_BUTTON, BATTERY_CHARGE,
 		   SensorTypeN};
 
+enum StiffnessJoint { STIFFJ_HEAD_PITCH = 0, STIFFJ_HEAD_YAW,
+		      STIFFJ_L_SHOULDER_PITCH, STIFFJ_L_SHOULDER_ROLL,
+		      STIFFJ_L_ELBOW_YAW, STIFFJ_L_ELBOW_ROLL,
+		      STIFFJ_L_HIP_YAW_PITCH, STIFFJ_L_HIP_ROLL,
+		      STIFFJ_L_HIP_PITCH, STIFFJ_L_KNEE_PITCH,
+		      STIFFJ_L_ANKLE_PITCH, STIFFJ_L_ANKLE_ROLL,
+		      STIFFJ_R_SHOULDER_PITCH, STIFFJ_R_SHOULDER_ROLL,
+		      STIFFJ_R_ELBOW_YAW, STIFFJ_R_ELBOW_ROLL,
+		      STIFFJ_R_HIP_YAW_PITCH, STIFFJ_R_HIP_ROLL,
+		      STIFFJ_R_HIP_PITCH, STIFFJ_R_KNEE_PITCH,
+		      STIFFJ_R_ANKLE_PITCH, STIFFJ_R_ANKLE_ROLL,
+		      STIFFJ_L_WRIST_YAW, STIFFJ_L_HAND,
+		      STIFFJ_R_WRIST_YAW, STIFFJ_R_HAND,
+		      StiffnessJointN };
+
 #define ACCELEROMETER_G_FACTOR 56.
 
 // Clipping as suggested by Aldebaran at RoboCup 2008, Suzhou
@@ -332,6 +347,39 @@ NaoQiDCMThread::init()
 
   // Setup alias for setting stiffness, reuse fastmem keys vector
   logger->log_debug(name(), "Initializing setJointStiffness alias");
+
+  if (__robot_type == NaoJointPositionInterface::ROBOTYPE_ROBOCUP) {
+    __alljoint_names.arraySetSize(22);
+  } else {
+    __alljoint_names.arraySetSize(26);
+    __alljoint_names[STIFFJ_L_WRIST_YAW]      = "LWristYaw";
+    __alljoint_names[STIFFJ_L_HAND]           = "LHand";
+    __alljoint_names[STIFFJ_R_WRIST_YAW]      = "RWristYaw";
+    __alljoint_names[STIFFJ_R_HAND]           = "RHand";
+  }
+  __alljoint_names[STIFFJ_HEAD_PITCH]       = "HeadPitch";
+  __alljoint_names[STIFFJ_HEAD_YAW]         = "HeadYaw";
+  __alljoint_names[STIFFJ_L_SHOULDER_PITCH] = "LShoulderPitch";
+  __alljoint_names[STIFFJ_L_SHOULDER_ROLL]  = "LShoulderRoll";
+  __alljoint_names[STIFFJ_L_ELBOW_YAW]      = "LElbowYaw";
+  __alljoint_names[STIFFJ_L_ELBOW_ROLL]     = "LElbowRoll";
+  __alljoint_names[STIFFJ_L_HIP_YAW_PITCH]  = "LHipYawPitch";
+  __alljoint_names[STIFFJ_L_HIP_ROLL]       = "LHipRoll";
+  __alljoint_names[STIFFJ_L_HIP_PITCH]      = "LHipPitch";
+  __alljoint_names[STIFFJ_L_KNEE_PITCH]     = "LKneePitch";
+  __alljoint_names[STIFFJ_L_ANKLE_PITCH]    = "LAnklePitch";
+  __alljoint_names[STIFFJ_L_ANKLE_ROLL]     = "LAnkleRoll";
+
+  __alljoint_names[STIFFJ_R_SHOULDER_PITCH] = "RShoulderPitch";
+  __alljoint_names[STIFFJ_R_SHOULDER_ROLL]  = "RShoulderRoll";
+  __alljoint_names[STIFFJ_R_ELBOW_YAW]      = "RElbowYaw";
+  __alljoint_names[STIFFJ_R_ELBOW_ROLL]     = "RElbowRoll";
+  __alljoint_names[STIFFJ_R_HIP_YAW_PITCH]  = "RHipYawPitch";
+  __alljoint_names[STIFFJ_R_HIP_ROLL]       = "RHipRoll";
+  __alljoint_names[STIFFJ_R_HIP_PITCH]      = "RHipPitch";
+  __alljoint_names[STIFFJ_R_KNEE_PITCH]     = "RKneePitch";
+  __alljoint_names[STIFFJ_R_ANKLE_PITCH]    = "RAnklePitch";
+  __alljoint_names[STIFFJ_R_ANKLE_ROLL]     = "RAnkleRoll";
 
   try {
     AL::ALValue setJointStiffnessAlias;
@@ -649,8 +697,15 @@ NaoQiDCMThread::process_messages()
       send_commands(msg->servo(), "Hardness", msg->value(),
 		    (int)roundf(1000. * msg->time_sec()));
       */
-    }
 
+
+      std::vector<std::string> servos = parse_servo_bitfield(msg->servo());
+      std::vector<float> values(servos.size(), msg->value());
+
+      __almotion->post.stiffnessInterpolation(servos, values,
+					      msg->time_sec());
+
+    }
     else if (NaoJointStiffnessInterface::SetBodyStiffnessMessage *msg =
 	__joint_stiffness_if->msgq_first_safe(msg))
     {
@@ -681,6 +736,40 @@ NaoQiDCMThread::process_messages()
     else if (NaoJointStiffnessInterface::SetStiffnessesMessage *msg =
 	     __joint_stiffness_if->msgq_first_safe(msg))
     {
+      std::vector<float> values(__alljoint_names.getSize());
+      values[STIFFJ_HEAD_PITCH] = msg->head_pitch();
+      values[STIFFJ_HEAD_YAW] = msg->head_yaw();
+      values[STIFFJ_L_SHOULDER_PITCH] = msg->l_shoulder_pitch();
+      values[STIFFJ_L_SHOULDER_ROLL] = msg->l_shoulder_roll();
+      values[STIFFJ_L_ELBOW_YAW] = msg->l_elbow_yaw();
+      values[STIFFJ_L_ELBOW_ROLL] = msg->l_elbow_roll();
+      values[STIFFJ_L_HIP_YAW_PITCH] = msg->l_hip_yaw_pitch();
+      values[STIFFJ_L_HIP_ROLL] = msg->l_hip_roll();
+      values[STIFFJ_L_HIP_PITCH] = msg->l_hip_pitch();
+      values[STIFFJ_L_KNEE_PITCH] = msg->l_knee_pitch();
+      values[STIFFJ_L_ANKLE_PITCH] = msg->l_ankle_pitch();
+      values[STIFFJ_L_ANKLE_ROLL] = msg->l_ankle_roll();
+
+      values[STIFFJ_R_SHOULDER_PITCH] = msg->r_shoulder_pitch();
+      values[STIFFJ_R_SHOULDER_ROLL] = msg->r_shoulder_roll();
+      values[STIFFJ_R_ELBOW_YAW] = msg->r_elbow_yaw();
+      values[STIFFJ_R_ELBOW_ROLL] = msg->r_elbow_roll();
+      values[STIFFJ_R_HIP_YAW_PITCH] = msg->r_hip_yaw_pitch();
+      values[STIFFJ_R_HIP_ROLL] = msg->r_hip_roll();
+      values[STIFFJ_R_HIP_PITCH] = msg->r_hip_pitch();
+      values[STIFFJ_R_KNEE_PITCH] = msg->r_knee_pitch();
+      values[STIFFJ_R_ANKLE_PITCH] = msg->r_ankle_pitch();
+      values[STIFFJ_R_ANKLE_ROLL] = msg->r_ankle_roll();
+
+      if (__robot_type != NaoJointPositionInterface::ROBOTYPE_ROBOCUP) {
+	values[STIFFJ_L_WRIST_YAW] = msg->l_wrist_yaw();
+	values[STIFFJ_L_HAND] = msg->l_hand();
+	values[STIFFJ_R_WRIST_YAW] = msg->r_wrist_yaw();
+	values[STIFFJ_R_HAND] = msg->r_hand();
+      }
+
+      __almotion->post.stiffnessInterpolation(__alljoint_names, values,
+					      msg->time_sec());
     }
 
     __joint_stiffness_if->msgq_pop();
@@ -700,78 +789,21 @@ NaoQiDCMThread::send_commands(unsigned int servos, std::string what,
   __almotion->killAll();
   */
 
-  if ( servos & NaoJointPositionInterface::SERVO_head_yaw ) {
-    float v = CLIP_VALUE(HEAD_YAW, value);
-    send_command("HeadYaw/" + what + "/Actuator/Value", v, time_offset);
+  std::vector<std::string> servonames = parse_servo_bitfield(servos);
+
+  std::vector<std::string>::iterator s;
+  for (s = servonames.begin(); s != servonames.end(); ++s) {
+    float v = value;
+    if (*s == "HeadYaw") {
+      v = CLIP_VALUE(HEAD_YAW, value);
+    } else if (*s == "LShoulderPitch") {
+      v = CLIP_VALUE(L_SHOULDER_PITCH, value);
+    } else if (*s == "RShoulderPitch") {
+      v = CLIP_VALUE(R_SHOULDER_PITCH, value);
+    }
+    send_command(*s + "/" + what + "/Actuator/Value",
+		 v, time_offset);
   }
-
-  if ( servos & NaoJointPositionInterface::SERVO_head_pitch )
-    send_command("HeadPitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_shoulder_pitch ) {
-    float v = CLIP_VALUE(L_SHOULDER_PITCH, value);
-    send_command("LShoulderPitch/" + what + "/Actuator/Value", v, time_offset);
-  }
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_shoulder_roll )
-    send_command("LShoulderRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_elbow_yaw )
-    send_command("LElbowYaw/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_elbow_roll )
-    send_command("LElbowRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_shoulder_pitch ) {
-    float v = CLIP_VALUE(R_SHOULDER_PITCH, value);
-    send_command("RShoulderPitch/" + what + "/Actuator/Value", v, time_offset);
-
-  }
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_shoulder_roll )
-    send_command("RShoulderRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_elbow_yaw )
-    send_command("RElbowYaw/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_elbow_roll )
-    send_command("RElbowRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_hip_yaw_pitch )
-    send_command("LHipYawPitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_hip_pitch )
-    send_command("LHipPitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_hip_roll )
-    send_command("LHipRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_hip_yaw_pitch )
-    send_command("RHipYawPitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_hip_pitch )
-    send_command("RHipPitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_hip_roll )
-    send_command("RHipRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_knee_pitch )
-    send_command("LKneePitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_knee_pitch )
-    send_command("RKneePitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_ankle_pitch )
-    send_command("LAnklePitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_l_ankle_roll )
-    send_command("LAnkleRoll/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_ankle_pitch )
-    send_command("RAnklePitch/" + what + "/Actuator/Value", value, time_offset);
-
-  if ( servos & NaoJointPositionInterface::SERVO_r_ankle_roll )
-    send_command("RAnkleRoll/" + what + "/Actuator/Value", value, time_offset);
 }
 
 void
@@ -794,4 +826,79 @@ NaoQiDCMThread::send_command(std::string name, float value, int time_offset)
   cmd[2][0][1] = __dcm_time + time_offset;
 
   __dcm->set(cmd); 
+}
+
+
+std::vector<std::string>
+NaoQiDCMThread::parse_servo_bitfield(unsigned int servos)
+{
+  std::vector<std::string> servonames;
+
+  if ( servos & NaoJointPositionInterface::SERVO_head_yaw )
+    servonames.push_back("HeadYaw");
+
+  if ( servos & NaoJointPositionInterface::SERVO_head_pitch )
+    servonames.push_back("HeadPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_shoulder_pitch )
+    servonames.push_back("LShoulderPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_shoulder_roll )
+    servonames.push_back("LShoulderRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_elbow_yaw )
+    servonames.push_back("LElbowYaw");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_elbow_roll )
+    servonames.push_back("LElbowRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_shoulder_pitch )
+    servonames.push_back("RShoulderPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_shoulder_roll )
+    servonames.push_back("RShoulderRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_elbow_yaw )
+    servonames.push_back("RElbowYaw");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_elbow_roll )
+    servonames.push_back("RElbowRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_hip_yaw_pitch )
+    servonames.push_back("LHipYawPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_hip_pitch )
+    servonames.push_back("LHipPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_hip_roll )
+    servonames.push_back("LHipRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_hip_yaw_pitch )
+    servonames.push_back("RHipYawPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_hip_pitch )
+    servonames.push_back("RHipPitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_hip_roll )
+    servonames.push_back("RHipRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_knee_pitch )
+    servonames.push_back("LKneePitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_knee_pitch )
+    servonames.push_back("RKneePitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_ankle_pitch )
+    servonames.push_back("LAnklePitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_l_ankle_roll )
+    servonames.push_back("LAnkleRoll");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_ankle_pitch )
+    servonames.push_back("RAnklePitch");
+
+  if ( servos & NaoJointPositionInterface::SERVO_r_ankle_roll )
+    servonames.push_back("RAnkleRoll");
+
+  return servonames;
 }
