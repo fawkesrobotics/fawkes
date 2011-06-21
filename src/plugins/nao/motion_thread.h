@@ -35,6 +35,7 @@
 
 namespace AL {
   class ALMotionProxy;
+  class ALTask;
 }
 namespace fawkes {
   class HumanoidMotionInterface;
@@ -83,10 +84,12 @@ class NaoQiMotionThread
 
  private:
   AL::ALPtr<AL::ALMotionProxy> __almotion;
+  AL::ALPtr<AL::ALThreadPool>  __thread_pool;
 
   fawkes::HumanoidMotionInterface *__hummot_if;
 
   int __motion_task_id;
+  AL::ALPtr<AL::ALTask>        __motion_task;
 };
 
 #endif

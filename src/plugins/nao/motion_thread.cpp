@@ -21,10 +21,12 @@
  */
 
 #include "motion_thread.h"
+#include "motion_kick_task.h"
 
 #include <alcore/alerror.h>
 #include <alproxies/allauncherproxy.h>
 #include <alproxies/almotionproxy.h>
+#include <althread/althreadpool.h>
 
 #include <interfaces/HumanoidMotionInterface.h>
 
@@ -71,6 +73,7 @@ NaoQiMotionThread::init()
   }
 
   __almotion = naoqi_broker->getMotionProxy();
+  __thread_pool = naoqi_broker->getThreadPool();
 
   __hummot_if =
     blackboard->open_for_writing<HumanoidMotionInterface>("NaoQi Motion");
@@ -104,6 +107,11 @@ NaoQiMotionThread::stop_motion()
       __almotion->killTask(__motion_task_id);
     }
     __motion_task_id = -1;
+  } else if (__motion_task) {
+    if (__motion_task) {
+      __motion_task->exitTask();
+      __motion_task.reset();
+    }
   }
 }
 
@@ -132,7 +140,17 @@ NaoQiMotionThread::loop()
 
   bool walking = __almotion->walkIsActive();
   bool tasking = __motion_task_id != -1 && __almotion->isRunning(__motion_task_id);
-  __hummot_if->set_moving(walking || tasking);
+  bool custom_task  = false;
+
+  if (__motion_task) {
+    if (__motion_task->getState() == AL::ALTask::RUNNING) {
+      custom_task = true;
+    } else if (__motion_task->getState() == AL::ALTask::ENDED) {
+      __motion_task.reset();
+    }
+  }
+
+  __hummot_if->set_moving(walking || tasking || custom_task);
   AL::ALValue varms_enabled = __almotion->getWalkArmsEnable();
   bool arms_enabled = varms_enabled[0] || varms_enabled[1];
   __hummot_if->set_arms_enabled(arms_enabled);
@@ -211,6 +229,15 @@ NaoQiMotionThread::process_messages()
 		       /* r knee */ 2.2,
 		       /* r ankle */ -1.23, 0.,
 		       /* time */ 3.0);
+
+      __hummot_if->set_msgid(msg->id());
+    }
+
+    else if (HumanoidMotionInterface::KickMessage *msg =
+	     __hummot_if->msgq_first_safe(msg))
+    {
+      __motion_task.reset(new NaoQiMotionKickTask(__almotion, msg->leg()));
+      __thread_pool->enqueue(__motion_task);
 
       __hummot_if->set_msgid(msg->id());
     }
