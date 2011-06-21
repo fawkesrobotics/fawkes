@@ -19,8 +19,7 @@
       This interface provides acces to basic humanoid motion patterns.
     </comment>
 
-    <field type="bool" name="walking">True if the robot is moving.</field>
-    <field type="LegEnum" name="supporting_leg">Marks the supporting leg</field>
+    <field type="bool" name="moving">True if the robot is moving.</field>
     <field type="bool" name="arms_enabled">
       If true the arms are controlled during walking for balancing.
     </field>

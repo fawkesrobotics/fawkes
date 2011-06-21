@@ -100,7 +100,9 @@ NaoQiMotionThread::stop_motion()
   if (__almotion->walkIsActive()) {
     __almotion->setWalkTargetVelocity(0., 0., 0., 0.);
   } else if (__motion_task_id != -1) {
-    __almotion->killTask(__motion_task_id);
+    if (__almotion->isRunning(__motion_task_id)) {
+      __almotion->killTask(__motion_task_id);
+    }
     __motion_task_id = -1;
   }
 }
@@ -126,8 +128,15 @@ NaoQiMotionThread::fix_angles()
 void
 NaoQiMotionThread::loop()
 {
-  //bool walking = __almotion->walkIsActive();
   process_messages();
+
+  bool walking = __almotion->walkIsActive();
+  bool tasking = __motion_task_id != -1 && __almotion->isRunning(__motion_task_id);
+  __hummot_if->set_moving(walking || tasking);
+  AL::ALValue varms_enabled = __almotion->getWalkArmsEnable();
+  bool arms_enabled = varms_enabled[0] || varms_enabled[1];
+  __hummot_if->set_arms_enabled(arms_enabled);
+  __hummot_if->write();
 }
 
 
@@ -135,8 +144,6 @@ NaoQiMotionThread::loop()
 void
 NaoQiMotionThread::process_messages()
 {
-  //bool walking = __almotion->walkIsActive();
-
   // process bb messages
   if ( ! __hummot_if->msgq_empty() ) {
     if (__hummot_if->msgq_first_is<HumanoidMotionInterface::StopMessage>())
@@ -164,6 +171,7 @@ NaoQiMotionThread::process_messages()
 	  logger->log_warn(name(), "WalkVelocity command failed: %s", e.what());
 	}
       }
+      __hummot_if->set_msgid(msg->id());
     }
 
     else if (HumanoidMotionInterface::GetUpMessage *msg =
@@ -184,6 +192,7 @@ NaoQiMotionThread::process_messages()
 		       /* r ankle */ -0.52, 0.,
 		       /* time */ 3.0);
 
+      __hummot_if->set_msgid(msg->id());
     }
     else if (HumanoidMotionInterface::ParkMessage *msg =
 	     __hummot_if->msgq_first_safe(msg))
@@ -203,6 +212,7 @@ NaoQiMotionThread::process_messages()
 		       /* r ankle */ -1.23, 0.,
 		       /* time */ 3.0);
 
+      __hummot_if->set_msgid(msg->id());
     }
 
     __hummot_if->msgq_pop();

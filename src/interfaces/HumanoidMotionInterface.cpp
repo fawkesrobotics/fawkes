@@ -48,8 +48,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   data      = (HumanoidMotionInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_BOOL, "walking", 1, &data->walking);
-  add_fieldinfo(IFT_ENUM, "supporting_leg", 1, &data->supporting_leg, "LegEnum");
+  add_fieldinfo(IFT_BOOL, "moving", 1, &data->moving);
   add_fieldinfo(IFT_BOOL, "arms_enabled", 1, &data->arms_enabled);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_messageinfo("StopMessage");
@@ -63,7 +62,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_messageinfo("GetUpMessage");
   add_messageinfo("StandupMessage");
   add_messageinfo("YawPitchHeadMessage");
-  unsigned char tmp_hash[] = {0xfb, 0xe9, 0x6b, 0xa3, 0xa7, 0x60, 0x4b, 0x1d, 0x63, 0x9f, 0x1, 0xe, 0x6d, 0xc2, 0x6b, 0x67};
+  unsigned char tmp_hash[] = {00, 0x9a, 0xa9, 0x29, 0xf9, 0x6b, 0xe1, 0xd7, 0xc7, 0xec, 0x5, 0x64, 0xc2, 0x3f, 0x54, 0xd3};
   set_hash(tmp_hash);
 }
 
@@ -100,65 +99,34 @@ HumanoidMotionInterface::tostring_StandupEnum(StandupEnum value) const
   }
 }
 /* Methods */
-/** Get walking value.
+/** Get moving value.
  * True if the robot is moving.
- * @return walking value
+ * @return moving value
  */
 bool
-HumanoidMotionInterface::is_walking() const
+HumanoidMotionInterface::is_moving() const
 {
-  return data->walking;
+  return data->moving;
 }
 
-/** Get maximum length of walking value.
- * @return length of walking value, can be length of the array or number of 
+/** Get maximum length of moving value.
+ * @return length of moving value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-HumanoidMotionInterface::maxlenof_walking() const
+HumanoidMotionInterface::maxlenof_moving() const
 {
   return 1;
 }
 
-/** Set walking value.
+/** Set moving value.
  * True if the robot is moving.
- * @param new_walking new walking value
+ * @param new_moving new moving value
  */
 void
-HumanoidMotionInterface::set_walking(const bool new_walking)
+HumanoidMotionInterface::set_moving(const bool new_moving)
 {
-  data->walking = new_walking;
-  data_changed = true;
-}
-
-/** Get supporting_leg value.
- * Marks the supporting leg
- * @return supporting_leg value
- */
-HumanoidMotionInterface::LegEnum
-HumanoidMotionInterface::supporting_leg() const
-{
-  return (HumanoidMotionInterface::LegEnum)data->supporting_leg;
-}
-
-/** Get maximum length of supporting_leg value.
- * @return length of supporting_leg value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-HumanoidMotionInterface::maxlenof_supporting_leg() const
-{
-  return 1;
-}
-
-/** Set supporting_leg value.
- * Marks the supporting leg
- * @param new_supporting_leg new supporting_leg value
- */
-void
-HumanoidMotionInterface::set_supporting_leg(const LegEnum new_supporting_leg)
-{
-  data->supporting_leg = new_supporting_leg;
+  data->moving = new_moving;
   data_changed = true;
 }
 
