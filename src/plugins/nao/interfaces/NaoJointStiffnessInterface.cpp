@@ -78,7 +78,7 @@ NaoJointStiffnessInterface::NaoJointStiffnessInterface() : Interface()
   add_messageinfo("SetStiffnessMessage");
   add_messageinfo("SetBodyStiffnessMessage");
   add_messageinfo("SetStiffnessesMessage");
-  unsigned char tmp_hash[] = {0xa1, 0xd1, 0xbb, 0xb1, 0x6d, 0x97, 0xb5, 0x1c, 0xdd, 0xf, 0x82, 0xa0, 0x75, 0x15, 0x51, 0xb9};
+  unsigned char tmp_hash[] = {0x29, 0x35, 0x74, 0x2f, 0x4e, 0x93, 0x53, 0xc4, 0x28, 0x56, 0xc8, 0x4a, 0x66, 0x81, 0xd6, 0x6d};
   set_hash(tmp_hash);
 }
 
@@ -1276,14 +1276,14 @@ NaoJointStiffnessInterface::SetBodyStiffnessMessage::clone() const
  * @param ini_l_shoulder_roll initial value for l_shoulder_roll
  * @param ini_l_elbow_yaw initial value for l_elbow_yaw
  * @param ini_l_elbow_roll initial value for l_elbow_roll
+ * @param ini_l_wrist_yaw initial value for l_wrist_yaw
+ * @param ini_l_hand initial value for l_hand
  * @param ini_l_hip_yaw_pitch initial value for l_hip_yaw_pitch
  * @param ini_l_hip_roll initial value for l_hip_roll
  * @param ini_l_hip_pitch initial value for l_hip_pitch
  * @param ini_l_knee_pitch initial value for l_knee_pitch
  * @param ini_l_ankle_pitch initial value for l_ankle_pitch
  * @param ini_l_ankle_roll initial value for l_ankle_roll
- * @param ini_l_wrist_yaw initial value for l_wrist_yaw
- * @param ini_l_hand initial value for l_hand
  * @param ini_r_shoulder_pitch initial value for r_shoulder_pitch
  * @param ini_r_shoulder_roll initial value for r_shoulder_roll
  * @param ini_r_elbow_yaw initial value for r_elbow_yaw
@@ -1297,7 +1297,7 @@ NaoJointStiffnessInterface::SetBodyStiffnessMessage::clone() const
  * @param ini_r_ankle_roll initial value for r_ankle_roll
  * @param ini_r_elbow_roll initial value for r_elbow_roll
  */
-NaoJointStiffnessInterface::SetStiffnessesMessage::SetStiffnessesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll) : Message("SetStiffnessesMessage")
+NaoJointStiffnessInterface::SetStiffnessesMessage::SetStiffnessesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll) : Message("SetStiffnessesMessage")
 {
   data_size = sizeof(SetStiffnessesMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1311,14 +1311,14 @@ NaoJointStiffnessInterface::SetStiffnessesMessage::SetStiffnessesMessage(const f
   data->l_shoulder_roll = ini_l_shoulder_roll;
   data->l_elbow_yaw = ini_l_elbow_yaw;
   data->l_elbow_roll = ini_l_elbow_roll;
+  data->l_wrist_yaw = ini_l_wrist_yaw;
+  data->l_hand = ini_l_hand;
   data->l_hip_yaw_pitch = ini_l_hip_yaw_pitch;
   data->l_hip_roll = ini_l_hip_roll;
   data->l_hip_pitch = ini_l_hip_pitch;
   data->l_knee_pitch = ini_l_knee_pitch;
   data->l_ankle_pitch = ini_l_ankle_pitch;
   data->l_ankle_roll = ini_l_ankle_roll;
-  data->l_wrist_yaw = ini_l_wrist_yaw;
-  data->l_hand = ini_l_hand;
   data->r_shoulder_pitch = ini_r_shoulder_pitch;
   data->r_shoulder_roll = ini_r_shoulder_roll;
   data->r_elbow_yaw = ini_r_elbow_yaw;
@@ -1338,14 +1338,14 @@ NaoJointStiffnessInterface::SetStiffnessesMessage::SetStiffnessesMessage(const f
   add_fieldinfo(IFT_FLOAT, "l_shoulder_roll", 1, &data->l_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "l_elbow_yaw", 1, &data->l_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "l_elbow_roll", 1, &data->l_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "l_hip_yaw_pitch", 1, &data->l_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "l_hip_roll", 1, &data->l_hip_roll);
   add_fieldinfo(IFT_FLOAT, "l_hip_pitch", 1, &data->l_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
-  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
   add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
@@ -1374,14 +1374,14 @@ NaoJointStiffnessInterface::SetStiffnessesMessage::SetStiffnessesMessage() : Mes
   add_fieldinfo(IFT_FLOAT, "l_shoulder_roll", 1, &data->l_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "l_elbow_yaw", 1, &data->l_elbow_yaw);
   add_fieldinfo(IFT_FLOAT, "l_elbow_roll", 1, &data->l_elbow_roll);
+  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
+  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "l_hip_yaw_pitch", 1, &data->l_hip_yaw_pitch);
   add_fieldinfo(IFT_FLOAT, "l_hip_roll", 1, &data->l_hip_roll);
   add_fieldinfo(IFT_FLOAT, "l_hip_pitch", 1, &data->l_hip_pitch);
   add_fieldinfo(IFT_FLOAT, "l_knee_pitch", 1, &data->l_knee_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_pitch", 1, &data->l_ankle_pitch);
   add_fieldinfo(IFT_FLOAT, "l_ankle_roll", 1, &data->l_ankle_roll);
-  add_fieldinfo(IFT_FLOAT, "l_wrist_yaw", 1, &data->l_wrist_yaw);
-  add_fieldinfo(IFT_FLOAT, "l_hand", 1, &data->l_hand);
   add_fieldinfo(IFT_FLOAT, "r_shoulder_pitch", 1, &data->r_shoulder_pitch);
   add_fieldinfo(IFT_FLOAT, "r_shoulder_roll", 1, &data->r_shoulder_roll);
   add_fieldinfo(IFT_FLOAT, "r_elbow_yaw", 1, &data->r_elbow_yaw);
@@ -1625,6 +1625,66 @@ NaoJointStiffnessInterface::SetStiffnessesMessage::set_l_elbow_roll(const float 
   data->l_elbow_roll = new_l_elbow_roll;
 }
 
+/** Get l_wrist_yaw value.
+ * Left wrist yaw
+ * @return l_wrist_yaw value
+ */
+float
+NaoJointStiffnessInterface::SetStiffnessesMessage::l_wrist_yaw() const
+{
+  return data->l_wrist_yaw;
+}
+
+/** Get maximum length of l_wrist_yaw value.
+ * @return length of l_wrist_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoJointStiffnessInterface::SetStiffnessesMessage::maxlenof_l_wrist_yaw() const
+{
+  return 1;
+}
+
+/** Set l_wrist_yaw value.
+ * Left wrist yaw
+ * @param new_l_wrist_yaw new l_wrist_yaw value
+ */
+void
+NaoJointStiffnessInterface::SetStiffnessesMessage::set_l_wrist_yaw(const float new_l_wrist_yaw)
+{
+  data->l_wrist_yaw = new_l_wrist_yaw;
+}
+
+/** Get l_hand value.
+ * Left hand
+ * @return l_hand value
+ */
+float
+NaoJointStiffnessInterface::SetStiffnessesMessage::l_hand() const
+{
+  return data->l_hand;
+}
+
+/** Get maximum length of l_hand value.
+ * @return length of l_hand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoJointStiffnessInterface::SetStiffnessesMessage::maxlenof_l_hand() const
+{
+  return 1;
+}
+
+/** Set l_hand value.
+ * Left hand
+ * @param new_l_hand new l_hand value
+ */
+void
+NaoJointStiffnessInterface::SetStiffnessesMessage::set_l_hand(const float new_l_hand)
+{
+  data->l_hand = new_l_hand;
+}
+
 /** Get l_hip_yaw_pitch value.
  * Left hip yaw pitch
  * @return l_hip_yaw_pitch value
@@ -1803,66 +1863,6 @@ void
 NaoJointStiffnessInterface::SetStiffnessesMessage::set_l_ankle_roll(const float new_l_ankle_roll)
 {
   data->l_ankle_roll = new_l_ankle_roll;
-}
-
-/** Get l_wrist_yaw value.
- * Left wrist yaw
- * @return l_wrist_yaw value
- */
-float
-NaoJointStiffnessInterface::SetStiffnessesMessage::l_wrist_yaw() const
-{
-  return data->l_wrist_yaw;
-}
-
-/** Get maximum length of l_wrist_yaw value.
- * @return length of l_wrist_yaw value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoJointStiffnessInterface::SetStiffnessesMessage::maxlenof_l_wrist_yaw() const
-{
-  return 1;
-}
-
-/** Set l_wrist_yaw value.
- * Left wrist yaw
- * @param new_l_wrist_yaw new l_wrist_yaw value
- */
-void
-NaoJointStiffnessInterface::SetStiffnessesMessage::set_l_wrist_yaw(const float new_l_wrist_yaw)
-{
-  data->l_wrist_yaw = new_l_wrist_yaw;
-}
-
-/** Get l_hand value.
- * Left hand
- * @return l_hand value
- */
-float
-NaoJointStiffnessInterface::SetStiffnessesMessage::l_hand() const
-{
-  return data->l_hand;
-}
-
-/** Get maximum length of l_hand value.
- * @return length of l_hand value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoJointStiffnessInterface::SetStiffnessesMessage::maxlenof_l_hand() const
-{
-  return 1;
-}
-
-/** Set l_hand value.
- * Left hand
- * @param new_l_hand new l_hand value
- */
-void
-NaoJointStiffnessInterface::SetStiffnessesMessage::set_l_hand(const float new_l_hand)
-{
-  data->l_hand = new_l_hand;
 }
 
 /** Get r_shoulder_pitch value.

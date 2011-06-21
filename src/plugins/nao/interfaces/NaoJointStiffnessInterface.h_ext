@@ -167,14 +167,14 @@ class NaoJointStiffnessInterface : public Interface
       float l_shoulder_roll; /**< Left shoulder roll */
       float l_elbow_yaw; /**< Left elbow yaw */
       float l_elbow_roll; /**< Left elbow roll */
+      float l_wrist_yaw; /**< Left wrist yaw */
+      float l_hand; /**< Left hand */
       float l_hip_yaw_pitch; /**< Left hip yaw pitch */
       float l_hip_roll; /**< Left hip roll */
       float l_hip_pitch; /**< Left hip pitch */
       float l_knee_pitch; /**< Left knee pitch */
       float l_ankle_pitch; /**< Left ankle pitch */
       float l_ankle_roll; /**< Left ankle roll */
-      float l_wrist_yaw; /**< Left wrist yaw */
-      float l_hand; /**< Left hand */
       float r_shoulder_pitch; /**< Right shoulder pitch */
       float r_shoulder_roll; /**< Right shoulder roll */
       float r_elbow_yaw; /**< Right elbow yaw */
@@ -193,7 +193,7 @@ class NaoJointStiffnessInterface : public Interface
     SetStiffnessesMessage_data_t *data;
 
    public:
-    SetStiffnessesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll);
+    SetStiffnessesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_elbow_roll);
     SetStiffnessesMessage();
     ~SetStiffnessesMessage();
 
@@ -220,6 +220,12 @@ class NaoJointStiffnessInterface : public Interface
     float l_elbow_roll() const;
     void set_l_elbow_roll(const float new_l_elbow_roll);
     size_t maxlenof_l_elbow_roll() const;
+    float l_wrist_yaw() const;
+    void set_l_wrist_yaw(const float new_l_wrist_yaw);
+    size_t maxlenof_l_wrist_yaw() const;
+    float l_hand() const;
+    void set_l_hand(const float new_l_hand);
+    size_t maxlenof_l_hand() const;
     float l_hip_yaw_pitch() const;
     void set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch);
     size_t maxlenof_l_hip_yaw_pitch() const;
@@ -238,12 +244,6 @@ class NaoJointStiffnessInterface : public Interface
     float l_ankle_roll() const;
     void set_l_ankle_roll(const float new_l_ankle_roll);
     size_t maxlenof_l_ankle_roll() const;
-    float l_wrist_yaw() const;
-    void set_l_wrist_yaw(const float new_l_wrist_yaw);
-    size_t maxlenof_l_wrist_yaw() const;
-    float l_hand() const;
-    void set_l_hand(const float new_l_hand);
-    size_t maxlenof_l_hand() const;
     float r_shoulder_pitch() const;
     void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
     size_t maxlenof_r_shoulder_pitch() const;

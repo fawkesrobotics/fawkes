@@ -60,14 +60,14 @@
     <ref>l_shoulder_roll</ref>
     <ref>l_elbow_yaw</ref>
     <ref>l_elbow_roll</ref>
+    <ref>l_wrist_yaw</ref>
+    <ref>l_hand</ref>
     <ref>l_hip_yaw_pitch</ref>
     <ref>l_hip_roll</ref>
     <ref>l_hip_pitch</ref>
     <ref>l_knee_pitch</ref>
     <ref>l_ankle_pitch</ref>
     <ref>l_ankle_roll</ref>
-    <ref>l_wrist_yaw</ref>
-    <ref>l_hand</ref>
     <ref>r_shoulder_pitch</ref>
     <ref>r_shoulder_roll</ref>
     <ref>r_elbow_yaw</ref>
