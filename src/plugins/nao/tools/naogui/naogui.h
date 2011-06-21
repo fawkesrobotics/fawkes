@@ -34,6 +34,7 @@ namespace fawkes {
   class NaoSensorInterface;
   class NavigatorInterface;
   class HumanoidMotionInterface;
+  class SpeechSynthInterface;
   class InterfaceDispatcher;
 }
 
@@ -54,6 +55,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   void update_jointpos_values(bool force = false);
   void update_sensor_values(bool force = false);
   bool servos_enabled() const;
+  void update_tts();
 
 
   void on_stiffness_clicked();
@@ -77,6 +79,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   void on_stiffness_write_clicked();
   void on_stiffness_read_clicked();
   void on_stiffness_global_toggled();
+  void on_tts_exec_clicked();
   void on_slider_changed(Gtk::HScale *hsc, Gtk::Label *lab, unsigned int servo);
   void on_changed_time();
   void on_connection_clicked();
@@ -94,10 +97,12 @@ class NaoGuiGtkWindow : public Gtk::Window
   fawkes::BlackBoard *bb;
   fawkes::InterfaceDispatcher *ifd_jointpos;
   fawkes::InterfaceDispatcher *ifd_sensor;
+  fawkes::InterfaceDispatcher *ifd_tts;
   fawkes::NaoJointPositionInterface *jointpos_if;
   fawkes::NaoJointStiffnessInterface *jointstiff_if;
   fawkes::NaoSensorInterface *sensor_if;
   fawkes::NavigatorInterface *nao_navi_if;
+  fawkes::SpeechSynthInterface *speechsynth_if;
   fawkes::HumanoidMotionInterface *hummot_fawkes_if;
   fawkes::HumanoidMotionInterface *hummot_naoqi_if;
   fawkes::ConnectionDispatcher connection_dispatcher;
@@ -290,6 +295,10 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::Entry  *ent_nav_y;
   Gtk::Entry  *ent_nav_ori;
   Gtk::Button *but_nav_exec;
+
+  Gtk::Entry *ent_tts;
+  Gtk::Button *but_tts_exec;
+  Gtk::Label *lab_tts_active;
 
   unsigned int update_cycle;
 };

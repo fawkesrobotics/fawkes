@@ -33,16 +33,20 @@ main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
 
 
-  Glib::RefPtr<Gtk::Builder> builder;
-  builder =
-    Gtk::Builder::create_from_file(RESDIR"/guis/naogui/naogui.ui");
+  try {
+    Glib::RefPtr<Gtk::Builder> builder;
+    builder =
+      Gtk::Builder::create_from_file(RESDIR"/guis/naogui/naogui.ui");
+    
+    NaoGuiGtkWindow *window = NULL;
+    builder->get_widget_derived("window", window);
+    
+    Gtk::Main::run(*window);
 
-  NaoGuiGtkWindow *window = NULL;
-  builder->get_widget_derived("window", window);
-
-  Gtk::Main::run(*window);
-
-  delete window;
+    delete window;
+  } catch (Gtk::BuilderError &e) {
+    printf("Failed to instantiate window: %s\n", e.what().c_str());
+  }
 
   fawkes::Thread::destroy_main();
 

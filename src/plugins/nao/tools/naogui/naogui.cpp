@@ -29,6 +29,7 @@
 #include <interfaces/NaoSensorInterface.h>
 #include <interfaces/HumanoidMotionInterface.h>
 #include <interfaces/NavigatorInterface.h>
+#include <interfaces/SpeechSynthInterface.h>
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/service_chooser_dialog.h>
@@ -67,6 +68,7 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   nao_navi_if = NULL;
   hummot_naoqi_if = NULL;
   hummot_fawkes_if = NULL;
+  speechsynth_if = NULL;
   servo_enabled = false;
 
   update_cycle = 0;
@@ -253,6 +255,10 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("ent_nav_ori", ent_nav_ori);
   builder->get_widget("but_nav_exec", but_nav_exec);
 
+  builder->get_widget("ent_tts", ent_tts);
+  builder->get_widget("but_tts_exec", but_tts_exec);
+  builder->get_widget("lab_tts_active", lab_tts_active);
+
   cmb_kick_leg->set_active(0);
   cmb_us_direction->set_active(0);
   frm_servos->set_sensitive(false);
@@ -307,6 +313,8 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   but_stiffness_read->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_read_clicked));
   but_stiffness_write->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_write_clicked));
   chb_stiffness_global->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_global_toggled));
+
+  but_tts_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_tts_exec_clicked));
 
   connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connect));
   connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_disconnect));
@@ -548,6 +556,25 @@ NaoGuiGtkWindow::update_jointpos_values(bool force)
 }
 
 
+void
+NaoGuiGtkWindow::update_tts()
+{
+  if ( ! speechsynth_if || ! speechsynth_if->is_valid()) return;
+
+  speechsynth_if->read();
+  if ((speechsynth_if->is_final() || (speechsynth_if->msgid() == 0)) &&
+       (lab_tts_active->get_text() != "No"))
+  {
+    lab_tts_active->set_text("No");
+
+  } else if (! speechsynth_if->is_final() &&
+	     (speechsynth_if->msgid() != 0) &&
+	     (lab_tts_active->get_text() != "Yes"))
+  {
+    lab_tts_active->set_text("Yes");
+  }
+}
+
 
 /** Update sensor values.
  * Called whenever the NaoSensorInterface changes.
@@ -754,13 +781,17 @@ NaoGuiGtkWindow::on_connect()
     hummot_fawkes_if = bb->open_for_reading<HumanoidMotionInterface>("Nao Motion");
     hummot_naoqi_if =
       bb->open_for_reading<HumanoidMotionInterface>("NaoQi Motion");
+    speechsynth_if = bb->open_for_reading<SpeechSynthInterface>("NaoQi TTS");
 
     ifd_jointpos = new InterfaceDispatcher("NaoJointPosIfaceDisp", jointpos_if);
     ifd_sensor = new InterfaceDispatcher("NaoSensorIfaceDisp", sensor_if);
+    ifd_tts = new InterfaceDispatcher("NaoTTSIfaceDisp", speechsynth_if);
     ifd_jointpos->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_jointpos_values), false)));
     ifd_sensor->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_sensor_values), false)));
+    ifd_tts->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_tts)));
     bb->register_listener(ifd_jointpos, BlackBoard::BBIL_FLAG_DATA);
     bb->register_listener(ifd_sensor, BlackBoard::BBIL_FLAG_DATA);
+    bb->register_listener(ifd_tts, BlackBoard::BBIL_FLAG_DATA);
 
     tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
 
@@ -783,14 +814,17 @@ NaoGuiGtkWindow::on_connect()
     if ( bb ) {
       bb->unregister_listener(ifd_jointpos);
       bb->unregister_listener(ifd_sensor);
+      bb->unregister_listener(ifd_tts);
       bb->close(jointpos_if);
       bb->close(jointstiff_if);
       bb->close(sensor_if);
       bb->close(nao_navi_if);
       bb->close(hummot_fawkes_if);
       bb->close(hummot_naoqi_if);
+      bb->close(speechsynth_if);
       delete ifd_jointpos;
       delete ifd_sensor;
+      delete ifd_tts;
       delete bb;
       jointpos_if = NULL;
       jointstiff_if = NULL;
@@ -798,9 +832,11 @@ NaoGuiGtkWindow::on_connect()
       nao_navi_if = NULL;
       hummot_fawkes_if = NULL;
       hummot_naoqi_if = NULL;
+      speechsynth_if = NULL;
       bb = NULL;
       ifd_jointpos = NULL;
       ifd_sensor = NULL;
+      ifd_tts = NULL;
     }
 
     connection_dispatcher.get_client()->disconnect();
@@ -827,14 +863,17 @@ NaoGuiGtkWindow::on_disconnect()
   if (bb) {
     bb->unregister_listener(ifd_jointpos);
     bb->unregister_listener(ifd_sensor);
+    bb->unregister_listener(ifd_tts);
     bb->close(jointpos_if);
     bb->close(jointstiff_if);
     bb->close(sensor_if);
     bb->close(nao_navi_if);
     bb->close(hummot_fawkes_if);
     bb->close(hummot_naoqi_if);
+    bb->close(speechsynth_if);
     delete ifd_jointpos;
     delete ifd_sensor;
+    delete ifd_tts;
     delete bb;
     jointpos_if = NULL;
     jointstiff_if = NULL;
@@ -842,9 +881,11 @@ NaoGuiGtkWindow::on_disconnect()
     nao_navi_if = NULL;
     hummot_fawkes_if = NULL;
     hummot_naoqi_if = NULL;
+    speechsynth_if = NULL;
     bb = NULL;
     ifd_jointpos = NULL;
     ifd_sensor = NULL;
+    ifd_tts = NULL;
   }
 
   tb_connection->set_stock_id(Gtk::Stock::CONNECT);
@@ -1211,9 +1252,6 @@ NaoGuiGtkWindow::on_stiffness_read_clicked()
 {
   jointstiff_if->read();
 
-  printf("HeadYaw: %s (%f)\n", convert_float2str(jointstiff_if->head_yaw()).c_str(),
-	 jointstiff_if->head_yaw());
-
   spb_HeadYaw->set_value(jointstiff_if->head_yaw());
   spb_HeadPitch->set_value(jointstiff_if->head_pitch());
   spb_RShoulderPitch->set_value(jointstiff_if->r_shoulder_pitch());
@@ -1242,4 +1280,12 @@ NaoGuiGtkWindow::on_stiffness_read_clicked()
   spb_LAnkleRoll->set_value(jointstiff_if->l_ankle_roll());
 
   spb_stiffness_global->set_value(jointstiff_if->minimum());
+}
+
+void
+NaoGuiGtkWindow::on_tts_exec_clicked()
+{
+  SpeechSynthInterface::SayMessage *m =
+    new SpeechSynthInterface::SayMessage(ent_tts->get_text().c_str());
+  speechsynth_if->msgq_enqueue(m);
 }
