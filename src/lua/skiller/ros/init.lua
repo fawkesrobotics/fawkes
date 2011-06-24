@@ -136,5 +136,6 @@ function cancel_cb(goal_handle, action_server)
 	      goal_handle.goal_id, goal_handle.vars.skillstring)
    skillenv.reset_all()
    skiller.ros.graph.publish()
-   nodemon:set_running()
+   if nodemon then nodemon:set_running() end
 end
+
