@@ -67,7 +67,7 @@ function goal_cb(goal_handle, action_server)
       goal_handle.vars.sksf = sksf
       printf("Accepting goal %s", goal_handle.goal_id)
       goal_handle:accept(goal_handle.vars.skillstring)
-      nodemon:set_running()
+      if nodemon then nodemon:set_running() end
    else
       local errstr = string.format("%s|%s", goal_handle.vars.skillstring, err)
       print_error("lua_error_skillstring: " .. errstr)
