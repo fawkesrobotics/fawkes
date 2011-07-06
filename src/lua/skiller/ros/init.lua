@@ -106,7 +106,7 @@ function spin_cb(goal_handle, action_server)
 				      skillenv.get_error())
 
 	 result.values.errmsg = errstr
-	 print_fail(errstr)
+	 print_fail("%s", errstr)
 	 if nodemon then
 	    nodemon:set_error("lua_error_skill", errstr)
 	    nodemon:set_recovering("autorecover", "ready for new skill calls")
