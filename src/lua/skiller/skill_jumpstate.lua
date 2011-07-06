@@ -131,6 +131,7 @@ function SkillJumpState:set_transition_labels()
 	    table.insert(snames, s[1].name)
 	 end
       end
+      self.skill_names = table.concat(snames, ", ")
       if self.failure_transition then
 	 self.failure_transition.description = table.concat(snames, " or ") .. " failed"
       end
@@ -139,9 +140,11 @@ function SkillJumpState:set_transition_labels()
       end
       self.dotattr.comment = table.concat(snames, ", ")
    elseif self.skill then
+      self.skill_names = self.skill.name
       self.final_transition.description = self.skill.name .. " succeeded";
       self.failure_transition.description = self.skill.name .. " failed";
    else
+      self.skill_names = ""
       if self.failure_transition then
 	 self.failure_transition.description = "Skills failed"
       end
@@ -176,7 +179,7 @@ function SkillJumpState:jumpcond_skill_failed()
       end
 
       if error and error ~= "" then
-	 self.fsm:set_error(self.name .. "() failed, " .. error)
+	 self.fsm:set_error(self.name .. "()/" .. self.skill_names .." failed: " .. error)
       end
       return true
    else
