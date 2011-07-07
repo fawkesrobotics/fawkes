@@ -163,14 +163,15 @@ OpenRaveThread::start_viewer() const
 
 /** Run planner on previously set target.
  * @param robot robot to use planner on. If none is given, the currently used robot is taken
+ * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
-OpenRaveThread::run_planner(OpenRaveRobot* robot)
+OpenRaveThread::run_planner(OpenRaveRobot* robot, float sampling)
 {
   if(!robot)
     robot = __OR_robot;
 
-  __OR_env->run_planner(robot);
+  __OR_env->run_planner(robot, sampling);
 }
 
 /** Add a new robot to the environment, and set it as the currently active one.

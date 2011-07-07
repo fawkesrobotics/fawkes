@@ -51,8 +51,9 @@ class OpenRaveConnector
 
   /** Run planner on previously set target.
   * @param robot robot to use planner on. If none is given, the currently used robot is taken
+  * @param sampling sampling time between each trajectory point (in seconds)
   */
-  virtual void run_planner(OpenRaveRobot* robot = NULL) = 0;
+  virtual void run_planner(OpenRaveRobot* robot = NULL, float sampling=0.01f) = 0;
 
   /** Get pointer to OpenRaveEnvironment object.
   * @return pointer
