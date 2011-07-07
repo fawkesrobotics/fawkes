@@ -189,7 +189,7 @@ KatanaGotoOpenRaveThread::once()
 
   // Run planner
   try {
-    _openrave->run_planner(__OR_robot);
+    _openrave->run_planner(__OR_robot, 0.04f);
   } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
     _finished = true;
