@@ -222,9 +222,10 @@ OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot)
 /** Plan collision-free path for current and target manipulator
  * configuration of a OpenRaveRobot robot.
  * @param robot pointer to OpenRaveRobot object of robot to use
+ * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
-OpenRaveEnvironment::run_planner(OpenRaveRobot* robot)
+OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 {
   bool success;
 
@@ -247,11 +248,17 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot)
   // re-timing the trajectory with cubic interpolation
   traj->CalcTrajTiming(robot->get_robot_ptr(),TrajectoryBase::CUBIC,true,true);
 
+  // sampling trajectory
+  std::vector<TrajectoryBase::TPOINT> points;
+  for(dReal time = 0; time <= traj->GetTotalDuration(); time += (dReal)sampling) {
+    TrajectoryBase::TPOINT point;
+    traj->SampleTrajectory(time,point);
+    points.push_back(point);
+  }
+
   // setting robots trajectory
-  std::vector<TrajectoryBase::TPOINT> points = traj->GetPoints();
   std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
   trajRobot->clear();
-
   for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
     trajRobot->push_back((*it).q);
   }
