@@ -56,9 +56,9 @@ end
 
 
 function goal_cb(goal_handle, action_server)
-   printf("Starting goal %s", goal_handle.goal_id)
    action_server:cancel_goals_before(goal_handle.goalmsg.values.header.values.stamp)
    goal_handle.vars.skillstring = goal_handle.goalmsg.values.goal.values.skillstring
+   printf("Starting goal %s (%s)", goal_handle.goal_id, goal_handle.vars.skillstring)
    local sksf, err = loadstring(goal_handle.vars.skillstring)
    if sksf then
       skillenv.reset_all()
