@@ -88,10 +88,10 @@ end
 
 function ServiceJumpState:do_exit()
    if self.service_client:concexec_succeeded() then
-      print_warn("Getting result")
+      --print_warn("Getting result")
       self.fsm.vars.result = self.service_client:concexec_result()
    elseif not self.service_client:concexec_finished() then
-      print_warn("Aborting")
+      --print_warn("Aborting")
       self.service_client:concexec_abort()
    end
    if self.subfsm.current.name == self.subfsm.fail_state then
