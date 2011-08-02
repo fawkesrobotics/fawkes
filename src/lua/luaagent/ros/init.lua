@@ -31,26 +31,58 @@ require("luaagent.skillqueue")
 local actc_skiller
 --local pub_status
 local goal_handle
+nodemon=nil
 
 function init()
    roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/luaagent"}
+
+   local ok, nodemonmod = pcall(require, "nodemon")
+   if ok then
+      nodemon = nodemonmod.NodeStatePublisher:new("luaagent", "luaagent")
+   else
+      print_warn("Node monitoring disabled (module nodemon not found):\n%s",
+                 nodemonmod)
+   end
+
    skiller.ros.graph.init()
    require("luaagent.agentenv")
    luaagent.agentenv.write_graph = skiller.ros.graph.publish
 
+
    --pub_status = roslua.publisher("/luaagent/status", "skiller/SkillStatus")
    actc_skiller = actionlib.action_client("/skiller/exec", "skiller/ExecSkill")
    printf("Waiting for Skiller")
-   actc_skiller:wait_for_server()
-   printf("Skiller connected")
    luaagent.skillqueue.SkillQueue.execute = SkillQueue_execute_ros
    luaagent.skillqueue.SkillQueue.status  = SkillQueue_status_ros
    luaagent.skillqueue.SkillQueue.stop    = SkillQueue_stop_ros
    luaagent.skillqueue.SkillQueue.error   = SkillQueue_error_ros
 
-   roslua.add_spinner(luaagent.agentenv.execute)
+   roslua.add_spinner(deferred_init)
 end
 
+
+function deferred_init()
+   if actc_skiller:has_server() then
+      roslua.remove_spinner(deferred_init)
+      printf("Skiller connected")
+
+      local ok, err = pcall(agentenv.init, AGENT)
+
+      if not ok then
+         if luaagent.ros.nodemon then
+            luaagent.ros.nodemon:set_fatal("init_fail",
+                                           "Agent initialization failed: " .. err)
+         end
+         print_error("Initialization of agent '%s' failed: %s", AGENT, err)
+         roslua.exit()
+      else
+         roslua.add_spinner(luaagent.agentenv.execute)
+         if nodemon then nodemon:set_running() end
+         print_warn("Agent '%s' initialization complete.", AGENT)
+      end
+   end
+   if nodemon then nodemon:ping() end
+end
 
 function publish_status(fsm)
    local m = pub_status.msgspec:instantiate()
@@ -78,6 +110,18 @@ function SkillQueue_status_ros(self)
       return skiller.skillstati.S_INACTIVE
    else
       if goal_handle:canceled() or goal_handle:failed() then
+         --[[
+         -- We only care about errors, e.g. not simply that an action failed,
+         -- but the skill string was wrong or similar, this is already reported
+         -- by the skiller, hence do not report again
+         if goal_handle and goal_handle:failed() and nodemon then
+            local s = string.format("Skill execution of %s failed: %s",
+                                    self.skillstring,
+                                    goal_handle.result.values.errmsg or "?")
+            nodemon:set_error("skill_exec_failed", s)
+            nodemon:set_recovering("autorecover", "Can continue next time")
+         end
+         --]]
 	 return skiller.skillstati.S_FAILED
       elseif goal_handle:succeeded() then
 	 return skiller.skillstati.S_FINAL

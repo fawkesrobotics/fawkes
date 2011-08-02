@@ -35,6 +35,3 @@ luaagent.ros.init()
 agentenv = require("luaagent.agentenv")
 fawkes.depinit.add_module_initializer(skiller.ros.topic_initializer.init_topics)
 fawkes.depinit.add_module_initializer(skiller.ros.service_initializer.init_services)
-agentenv.init(AGENT)
-
-print_warn("Agent '%s' initialization complete.", AGENT)
