@@ -2,9 +2,11 @@
 ----------------------------------------------------------------------------
 --  init.lua - Skiller ROS dependent bits
 --
---  Created: Tue Aug 24 13:29:28 2010 (at Intel Research, Pittsburgh)
---  Copyright  2010  Tim Niemueller [www.niemueller.de]
---
+--  Created: Tue Aug 24 13:29:28 2010 (at Intel Labs Pittsburgh)
+--  Copyright  2010-2011  Tim Niemueller [www.niemueller.de]
+--             2011       SRI International
+--             2010-2011  Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
@@ -36,7 +38,7 @@ print_fail  = fawkes.logprint.print_warn
 print_final = fawkes.logprint.print_info
 
 function init()
-   roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/skiller"}
+   roslua.init_node{node_name="skiller"}
 
    local ok, nodemonmod = pcall(require, "nodemon")
    if ok then
@@ -46,7 +48,7 @@ function init()
 		 nodemonmod)
    end
 
-   skiller_as = actionlib.action_server("/skiller/exec", "skiller/ExecSkill",
+   skiller_as = actionlib.action_server("~exec", "skiller/ExecSkill",
 					goal_cb, spin_cb, cancel_cb)
    skiller.ros.graph.init()
    skillenv = require("skiller.skillenv")
@@ -56,9 +58,12 @@ end
 
 
 function goal_cb(goal_handle, action_server)
-   action_server:cancel_goals_before(goal_handle.goalmsg.values.header.values.stamp)
-   goal_handle.vars.skillstring = goal_handle.goalmsg.values.goal.values.skillstring
-   printf("Starting goal %s (%s)", goal_handle.goal_id, goal_handle.vars.skillstring)
+   local stamp = goal_handle.goalmsg.values.header.values.stamp
+   action_server:cancel_goals_before(stamp)
+   goal_handle.vars.skillstring =
+      goal_handle.goalmsg.values.goal.values.skillstring
+   printf("Starting goal %s (%s)", goal_handle.goal_id,
+          goal_handle.vars.skillstring)
    local sksf, err = loadstring(goal_handle.vars.skillstring)
    if sksf then
       skillenv.reset_all()

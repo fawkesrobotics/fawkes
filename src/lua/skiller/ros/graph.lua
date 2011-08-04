@@ -30,13 +30,13 @@ local srv_direction
 local msgspec_graph
 
 function init()
-   pub_graph = roslua.publisher(roslua.node_name.."/graph", "skiller/Graph")
+   pub_graph = roslua.publisher("~graph", "skiller/Graph")
    pub_graph.latching = true
 
-   srv_direction = roslua.service(roslua.node_name.."/graph/set_direction",
+   srv_direction = roslua.service("~graph/set_direction",
 				  "skiller/SetGraphDirection",
 				  set_direction)
-   srv_color = roslua.service(roslua.node_name.."/graph/set_colored",
+   srv_color = roslua.service("~graph/set_colored",
 			      "skiller/SetGraphColored",
 			      set_colored)
    msgspec_graph = roslua.get_msgspec("skiller/Graph")

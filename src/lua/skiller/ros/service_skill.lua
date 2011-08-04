@@ -54,7 +54,7 @@ end
 function use(module_name, service_name, service_type, persistent)
    local M = {}
    local skill_name   = module_name:match(".([%w%d_]+)$")
-   local service_var  = "_sv_"..service_name:match("/([%w%d_]+)$")
+   local service_var  = "_sv_"..service_name:match("^/?([%w%d_/]+)$")
    local service_spec = roslua.get_srvspec(service_type)
    local start_state  = skill_name:upper()
    local persistent   = persistent or false
