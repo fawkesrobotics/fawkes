@@ -34,7 +34,7 @@ local goal_handle
 nodemon=nil
 
 function init()
-   roslua.init_node{master_uri=ROS_MASTER_URI, node_name="/luaagent"}
+   roslua.init_node{node_name="luaagent"}
 
    local ok, nodemonmod = pcall(require, "nodemon")
    if ok then
@@ -50,7 +50,7 @@ function init()
 
 
    --pub_status = roslua.publisher("/luaagent/status", "skiller/SkillStatus")
-   actc_skiller = actionlib.action_client("/skiller/exec", "skiller/ExecSkill")
+   actc_skiller = actionlib.action_client("skiller/exec", "skiller/ExecSkill")
    printf("Waiting for Skiller")
    luaagent.skillqueue.SkillQueue.execute = SkillQueue_execute_ros
    luaagent.skillqueue.SkillQueue.status  = SkillQueue_status_ros
