@@ -30,6 +30,7 @@
 #include <interfaces/HumanoidMotionInterface.h>
 #include <interfaces/NavigatorInterface.h>
 #include <interfaces/SpeechSynthInterface.h>
+#include <interfaces/LedInterface.h>
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/service_chooser_dialog.h>
@@ -261,6 +262,85 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("but_tts_exec", but_tts_exec);
   builder->get_widget("lab_tts_active", lab_tts_active);
 
+  builder->get_widget("scl_chest_r",      scl_chest_r);
+  builder->get_widget("scl_chest_g",      scl_chest_g);
+  builder->get_widget("scl_chest_b",      scl_chest_b);
+  builder->get_widget("scl_left_eye_r",   scl_left_eye_r);
+  builder->get_widget("scl_left_eye_g",   scl_left_eye_g);
+  builder->get_widget("scl_left_eye_b",   scl_left_eye_b);
+  builder->get_widget("scl_right_eye_r",  scl_right_eye_r);
+  builder->get_widget("scl_right_eye_g",  scl_right_eye_g);
+  builder->get_widget("scl_right_eye_b",  scl_right_eye_b);
+  builder->get_widget("scl_left_foot_r",  scl_left_foot_r);
+  builder->get_widget("scl_left_foot_g",  scl_left_foot_g);
+  builder->get_widget("scl_left_foot_b",  scl_left_foot_b);
+  builder->get_widget("scl_right_foot_r", scl_right_foot_r);
+  builder->get_widget("scl_right_foot_g", scl_right_foot_g);
+  builder->get_widget("scl_right_foot_b", scl_right_foot_b);
+
+  builder->get_widget("tb_left_ear_0",    tb_left_ear_0);
+  builder->get_widget("tb_left_ear_36",   tb_left_ear_36);
+  builder->get_widget("tb_left_ear_72",   tb_left_ear_72);
+  builder->get_widget("tb_left_ear_108",  tb_left_ear_108);
+  builder->get_widget("tb_left_ear_144",  tb_left_ear_144);
+  builder->get_widget("tb_left_ear_180",  tb_left_ear_180);
+  builder->get_widget("tb_left_ear_216",  tb_left_ear_216);
+  builder->get_widget("tb_left_ear_252",  tb_left_ear_252);
+  builder->get_widget("tb_left_ear_288",  tb_left_ear_288);
+  builder->get_widget("tb_left_ear_324",  tb_left_ear_324);
+
+  builder->get_widget("tb_right_ear_0",   tb_right_ear_0);
+  builder->get_widget("tb_right_ear_36",  tb_right_ear_36);
+  builder->get_widget("tb_right_ear_72",  tb_right_ear_72);
+  builder->get_widget("tb_right_ear_108", tb_right_ear_108);
+  builder->get_widget("tb_right_ear_144", tb_right_ear_144);
+  builder->get_widget("tb_right_ear_180", tb_right_ear_180);
+  builder->get_widget("tb_right_ear_216", tb_right_ear_216);
+  builder->get_widget("tb_right_ear_252", tb_right_ear_252);
+  builder->get_widget("tb_right_ear_288", tb_right_ear_288);
+  builder->get_widget("tb_right_ear_324", tb_right_ear_324);
+
+  builder->get_widget("tb_control_leds", tb_control_leds);
+
+  // required for LedInterface data callback
+  led_scales["ChestBoard/Red"]   = scl_chest_r;
+  led_scales["ChestBoard/Green"] = scl_chest_g;
+  led_scales["ChestBoard/Blue"]  = scl_chest_b;
+  led_scales["Face/Red/Left"]    = scl_left_eye_r;
+  led_scales["Face/Green/Left"]  = scl_left_eye_g;
+  led_scales["Face/Blue/Left"]   = scl_left_eye_b;
+  led_scales["Face/Red/Right"]   = scl_right_eye_r;
+  led_scales["Face/Green/Right"] = scl_right_eye_g;
+  led_scales["Face/Blue/Right"]  = scl_right_eye_b;
+  led_scales["LFoot/Red"]        = scl_left_foot_r;
+  led_scales["LFoot/Green"]      = scl_left_foot_g;
+  led_scales["LFoot/Blue"]       = scl_left_foot_b;
+  led_scales["RFoot/Red"]        = scl_right_foot_r;
+  led_scales["RFoot/Green"]      = scl_right_foot_g;
+  led_scales["RFoot/Blue"]       = scl_right_foot_b;
+
+  led_buttons["Ears/Left/0Deg"]   = tb_left_ear_0;
+  led_buttons["Ears/Left/36Deg"]  = tb_left_ear_36;
+  led_buttons["Ears/Left/72Deg"]  = tb_left_ear_72;
+  led_buttons["Ears/Left/108Deg"] = tb_left_ear_108;
+  led_buttons["Ears/Left/144Deg"] = tb_left_ear_144;
+  led_buttons["Ears/Left/180Deg"] = tb_left_ear_180;
+  led_buttons["Ears/Left/216Deg"] = tb_left_ear_216;
+  led_buttons["Ears/Left/252Deg"] = tb_left_ear_252;
+  led_buttons["Ears/Left/288Deg"] = tb_left_ear_288;
+  led_buttons["Ears/Left/324Deg"] = tb_left_ear_324;
+
+  led_buttons["Ears/Right/0Deg"]   = tb_right_ear_0;
+  led_buttons["Ears/Right/36Deg"]  = tb_right_ear_36;
+  led_buttons["Ears/Right/72Deg"]  = tb_right_ear_72;
+  led_buttons["Ears/Right/108Deg"] = tb_right_ear_108;
+  led_buttons["Ears/Right/144Deg"] = tb_right_ear_144;
+  led_buttons["Ears/Right/180Deg"] = tb_right_ear_180;
+  led_buttons["Ears/Right/216Deg"] = tb_right_ear_216;
+  led_buttons["Ears/Right/252Deg"] = tb_right_ear_252;
+  led_buttons["Ears/Right/288Deg"] = tb_right_ear_288;
+  led_buttons["Ears/Right/324Deg"] = tb_right_ear_324;
+
   cmb_kick_leg->set_active(0);
   cmb_standup_from->set_active(0);
   cmb_us_direction->set_active(0);
@@ -320,8 +400,64 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
 
   but_tts_exec->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_tts_exec_clicked));
 
+  tb_left_ear_0->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/0Deg", tb_left_ear_0));
+  tb_left_ear_36->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/36Deg", tb_left_ear_36));
+  tb_left_ear_72->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/72Deg", tb_left_ear_72));
+  tb_left_ear_108->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/108Deg", tb_left_ear_108));
+  tb_left_ear_144->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/144Deg", tb_left_ear_144));
+  tb_left_ear_180->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/180Deg", tb_left_ear_180));
+  tb_left_ear_216->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/216Deg", tb_left_ear_216));
+  tb_left_ear_252->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/252Deg", tb_left_ear_252));
+  tb_left_ear_288->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/288Deg", tb_left_ear_288));
+  tb_left_ear_324->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Left/324Deg", tb_left_ear_324));
+
+  tb_right_ear_0->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/0Deg", tb_right_ear_0));
+  tb_right_ear_36->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/36Deg", tb_right_ear_36));
+  tb_right_ear_72->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/72Deg", tb_right_ear_72));
+  tb_right_ear_108->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/108Deg", tb_right_ear_108));
+  tb_right_ear_144->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/144Deg", tb_right_ear_144));
+  tb_right_ear_180->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/180Deg", tb_right_ear_180));
+  tb_right_ear_216->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/216Deg", tb_right_ear_216));
+  tb_right_ear_252->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/252Deg", tb_right_ear_252));
+  tb_right_ear_288->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/288Deg", tb_right_ear_288));
+  tb_right_ear_324->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_tb_toggled), "Ears/Right/324Deg", tb_right_ear_324));
+
+  scl_chest_r->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "ChestBoard/Red", scl_chest_r));
+  scl_chest_g->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "ChestBoard/Green", scl_chest_g));
+  scl_chest_b->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "ChestBoard/Blue", scl_chest_b));
+  scl_left_eye_r->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "Face/Red/Left", scl_left_eye_r));
+  scl_left_eye_g->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "Face/Green/Left", scl_left_eye_g));
+  scl_left_eye_b->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "Face/Blue/Left", scl_left_eye_b));
+  scl_right_eye_r->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "Face/Red/Right", scl_right_eye_r));
+  scl_right_eye_g->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "Face/Green/Right", scl_right_eye_g));
+  scl_right_eye_b->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "Face/Blue/Right", scl_right_eye_b));
+  scl_left_foot_r->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "LFoot/Red", scl_left_foot_r));
+  scl_left_foot_g->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "LFoot/Green", scl_left_foot_g));
+  scl_left_foot_b->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "LFoot/Blue", scl_left_foot_b));
+  scl_right_foot_r->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "RFoot/Red", scl_right_foot_r));
+  scl_right_foot_g->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "RFoot/Green", scl_right_foot_g));
+  scl_right_foot_b->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_changed), "RFoot/Blue", scl_right_foot_b));
+
+  scl_chest_r->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "ChestBoard/Red", scl_chest_r));
+  scl_chest_g->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "ChestBoard/Green", scl_chest_g));
+  scl_chest_b->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "ChestBoard/Blue", scl_chest_b));
+  scl_left_eye_r->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "Face/Red/Left", scl_left_eye_r));
+  scl_left_eye_g->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "Face/Green/Left", scl_left_eye_g));
+  scl_left_eye_b->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "Face/Blue/Left", scl_left_eye_b));
+  scl_right_eye_r->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "Face/Red/Right", scl_right_eye_r));
+  scl_right_eye_g->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "Face/Green/Right", scl_right_eye_g));
+  scl_right_eye_b->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "Face/Blue/Right", scl_right_eye_b));
+  scl_left_foot_r->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "LFoot/Red", scl_left_foot_r));
+  scl_left_foot_g->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "LFoot/Green", scl_left_foot_g));
+  scl_left_foot_b->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "LFoot/Blue", scl_left_foot_b));
+  scl_right_foot_r->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "RFoot/Red", scl_right_foot_r));
+  scl_right_foot_g->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "RFoot/Green", scl_right_foot_g));
+  scl_right_foot_b->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "RFoot/Blue", scl_right_foot_b));
+
   connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connect));
   connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_disconnect));
+
+  tb_control_leds->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_control_leds_toggled));
 
   on_control_toggled();
   init();
@@ -787,15 +923,35 @@ NaoGuiGtkWindow::on_connect()
       bb->open_for_reading<HumanoidMotionInterface>("NaoQi Motion");
     speechsynth_if = bb->open_for_reading<SpeechSynthInterface>("NaoQi TTS");
 
+    std::list<fawkes::Interface *> led_ifs_l =
+      bb->open_multiple_for_reading("LedInterface", "Nao LED *");
+
+    std::list<fawkes::Interface *>::iterator li;
+    for (li = led_ifs_l.begin(); li != led_ifs_l.end(); ++li) {
+      std::string id = (*li)->id();
+      std::string::size_type last_space  = id.rfind(" ");
+      std::string device = id.substr(last_space + 1);
+
+      LedInterface *led_if = dynamic_cast<LedInterface *>(*li);
+      if (led_if == NULL)  continue;
+
+      on_led_data_changed(led_if);
+
+      led_ifs[device] = led_if;
+    }
+
     ifd_jointpos = new InterfaceDispatcher("NaoJointPosIfaceDisp", jointpos_if);
     ifd_sensor = new InterfaceDispatcher("NaoSensorIfaceDisp", sensor_if);
     ifd_tts = new InterfaceDispatcher("NaoTTSIfaceDisp", speechsynth_if);
+    ifd_leds = new InterfaceDispatcher("NaoLedsIfaceDisp", led_ifs_l);
     ifd_jointpos->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_jointpos_values), false)));
     ifd_sensor->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_sensor_values), false)));
     ifd_tts->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_tts)));
+    ifd_leds->signal_data_changed().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_data_changed));
     bb->register_listener(ifd_jointpos, BlackBoard::BBIL_FLAG_DATA);
     bb->register_listener(ifd_sensor, BlackBoard::BBIL_FLAG_DATA);
     bb->register_listener(ifd_tts, BlackBoard::BBIL_FLAG_DATA);
+    bb->register_listener(ifd_leds, BlackBoard::BBIL_FLAG_DATA);
 
     tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
 
@@ -819,6 +975,7 @@ NaoGuiGtkWindow::on_connect()
       bb->unregister_listener(ifd_jointpos);
       bb->unregister_listener(ifd_sensor);
       bb->unregister_listener(ifd_tts);
+      bb->unregister_listener(ifd_leds);
       bb->close(jointpos_if);
       bb->close(jointstiff_if);
       bb->close(sensor_if);
@@ -829,6 +986,7 @@ NaoGuiGtkWindow::on_connect()
       delete ifd_jointpos;
       delete ifd_sensor;
       delete ifd_tts;
+      delete ifd_leds;
       delete bb;
       jointpos_if = NULL;
       jointstiff_if = NULL;
@@ -841,6 +999,7 @@ NaoGuiGtkWindow::on_connect()
       ifd_jointpos = NULL;
       ifd_sensor = NULL;
       ifd_tts = NULL;
+      ifd_leds = NULL;
     }
 
     connection_dispatcher.get_client()->disconnect();
@@ -868,6 +1027,7 @@ NaoGuiGtkWindow::on_disconnect()
     bb->unregister_listener(ifd_jointpos);
     bb->unregister_listener(ifd_sensor);
     bb->unregister_listener(ifd_tts);
+    bb->unregister_listener(ifd_leds);
     bb->close(jointpos_if);
     bb->close(jointstiff_if);
     bb->close(sensor_if);
@@ -875,9 +1035,17 @@ NaoGuiGtkWindow::on_disconnect()
     bb->close(hummot_fawkes_if);
     bb->close(hummot_naoqi_if);
     bb->close(speechsynth_if);
+
+    std::map<std::string, fawkes::LedInterface *>::iterator li;
+    for (li = led_ifs.begin(); li != led_ifs.end(); ++li) {
+      bb->close(li->second);
+    }
+    led_ifs.clear();
+
     delete ifd_jointpos;
     delete ifd_sensor;
     delete ifd_tts;
+    delete ifd_leds;
     delete bb;
     jointpos_if = NULL;
     jointstiff_if = NULL;
@@ -890,6 +1058,7 @@ NaoGuiGtkWindow::on_disconnect()
     ifd_jointpos = NULL;
     ifd_sensor = NULL;
     ifd_tts = NULL;
+    ifd_leds = NULL;
   }
 
   tb_connection->set_stock_id(Gtk::Stock::CONNECT);
@@ -1314,4 +1483,117 @@ NaoGuiGtkWindow::on_tts_exec_clicked()
   SpeechSynthInterface::SayMessage *m =
     new SpeechSynthInterface::SayMessage(ent_tts->get_text().c_str());
   speechsynth_if->msgq_enqueue(m);
+}
+
+
+void
+NaoGuiGtkWindow::on_led_tb_toggled(std::string iface_id,
+                                   Gtk::ToggleButton *tb)
+{
+  if ( (led_ifs.find(iface_id) != led_ifs.end()) && led_ifs[iface_id]->is_valid())
+  {
+    try {
+      if (tb->get_active()) {
+        led_ifs[iface_id]->msgq_enqueue(new LedInterface::TurnOnMessage());
+      } else {
+        led_ifs[iface_id]->msgq_enqueue(new LedInterface::TurnOffMessage());
+      }
+    } catch (Exception &e) {
+      e.print_trace();
+    }
+  }
+}
+
+void
+NaoGuiGtkWindow::on_control_leds_toggled()
+{
+  bool is_active = tb_control_leds->get_active();
+
+  scl_chest_r->set_sensitive(is_active);
+  scl_chest_g->set_sensitive(is_active);
+  scl_chest_b->set_sensitive(is_active);
+  scl_left_eye_r->set_sensitive(is_active);
+  scl_left_eye_g->set_sensitive(is_active);
+  scl_left_eye_b->set_sensitive(is_active);
+  scl_right_eye_r->set_sensitive(is_active);
+  scl_right_eye_g->set_sensitive(is_active);
+  scl_right_eye_b->set_sensitive(is_active);
+  scl_left_foot_r->set_sensitive(is_active);
+  scl_left_foot_g->set_sensitive(is_active);
+  scl_left_foot_b->set_sensitive(is_active);
+  scl_right_foot_r->set_sensitive(is_active);
+  scl_right_foot_g->set_sensitive(is_active);
+  scl_right_foot_b->set_sensitive(is_active);
+
+  tb_left_ear_0->set_sensitive(is_active);
+  tb_left_ear_36->set_sensitive(is_active);
+  tb_left_ear_72->set_sensitive(is_active);
+  tb_left_ear_108->set_sensitive(is_active);
+  tb_left_ear_144->set_sensitive(is_active);
+  tb_left_ear_180->set_sensitive(is_active);
+  tb_left_ear_216->set_sensitive(is_active);
+  tb_left_ear_252->set_sensitive(is_active);
+  tb_left_ear_288->set_sensitive(is_active);
+  tb_left_ear_324->set_sensitive(is_active);
+
+  tb_right_ear_0->set_sensitive(is_active);
+  tb_right_ear_36->set_sensitive(is_active);
+  tb_right_ear_72->set_sensitive(is_active);
+  tb_right_ear_108->set_sensitive(is_active);
+  tb_right_ear_144->set_sensitive(is_active);
+  tb_right_ear_180->set_sensitive(is_active);
+  tb_right_ear_216->set_sensitive(is_active);
+  tb_right_ear_252->set_sensitive(is_active);
+  tb_right_ear_288->set_sensitive(is_active);
+  tb_right_ear_324->set_sensitive(is_active);
+}
+
+
+void
+NaoGuiGtkWindow::on_led_slider_changed(std::string iface_id, Gtk::Scale *scl)
+{
+  if ( (led_ifs.find(iface_id) != led_ifs.end()) && led_ifs[iface_id]->is_valid())
+  {
+    try {
+      LedInterface::SetIntensityMessage *sim =
+        new LedInterface::SetIntensityMessage(0., scl->get_value());
+      led_ifs[iface_id]->msgq_enqueue(sim);
+    } catch (Exception &e) {
+      e.print_trace();
+    }
+  }  
+}
+
+
+bool
+NaoGuiGtkWindow::on_led_slider_button_release(GdkEventButton *event,
+                                              std::string iface_id,
+                                              Gtk::Scale *scl)
+{
+  if ( (led_ifs.find(iface_id) != led_ifs.end()) && led_ifs[iface_id]->is_valid())
+  {
+    on_led_data_changed(led_ifs[iface_id]);
+  }
+  return true;
+}
+
+void
+NaoGuiGtkWindow::on_led_data_changed(fawkes::Interface *iface)
+{
+  if (tb_control_leds->get_active())  return;
+
+  std::string id = iface->id();
+  std::string::size_type last_space  = id.rfind(" ");
+  std::string device = id.substr(last_space + 1);
+
+  LedInterface *led_if = dynamic_cast<LedInterface *>(iface);
+  if ((led_if != NULL) && (led_scales.find(device) != led_scales.end())) {
+    led_if->read();
+    led_scales[device]->set_value(led_if->intensity());
+  }
+
+  if ((led_if != NULL) && (led_buttons.find(device) != led_buttons.end())) {
+    led_if->read();
+    led_buttons[device]->set_active(led_if->intensity() >= .5);
+  }
 }

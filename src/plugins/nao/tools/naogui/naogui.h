@@ -36,6 +36,8 @@ namespace fawkes {
   class HumanoidMotionInterface;
   class SpeechSynthInterface;
   class InterfaceDispatcher;
+  class LedInterface;
+  class Interface;
 }
 
 class NaoGuiGtkWindow : public Gtk::Window
@@ -57,6 +59,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   bool servos_enabled() const;
   void update_tts();
 
+  void on_led_data_changed(fawkes::Interface *iface);
 
   void on_stiffness_clicked();
   void on_control_toggled();
@@ -88,6 +91,12 @@ class NaoGuiGtkWindow : public Gtk::Window
   void on_disconnect();
   void on_exit_clicked();
 
+  void on_control_leds_toggled();
+  void on_led_tb_toggled(std::string iface_id, Gtk::ToggleButton *tb);
+  void on_led_slider_changed(std::string iface_id, Gtk::Scale *scl);
+  bool on_led_slider_button_release(GdkEventButton *event,
+                                    std::string iface_id, Gtk::Scale *scl);
+
   bool convert_str2float(Glib::ustring sn, float *f);
   Glib::ustring convert_float2str(float f, unsigned int width = 2);
 
@@ -99,6 +108,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   fawkes::InterfaceDispatcher *ifd_jointpos;
   fawkes::InterfaceDispatcher *ifd_sensor;
   fawkes::InterfaceDispatcher *ifd_tts;
+  fawkes::InterfaceDispatcher *ifd_leds;
   fawkes::NaoJointPositionInterface *jointpos_if;
   fawkes::NaoJointStiffnessInterface *jointstiff_if;
   fawkes::NaoSensorInterface *sensor_if;
@@ -107,6 +117,11 @@ class NaoGuiGtkWindow : public Gtk::Window
   fawkes::HumanoidMotionInterface *hummot_fawkes_if;
   fawkes::HumanoidMotionInterface *hummot_naoqi_if;
   fawkes::ConnectionDispatcher connection_dispatcher;
+
+  std::map<std::string, fawkes::LedInterface *> led_ifs;
+  std::map<std::string, Gtk::Scale *> led_scales;
+  std::map<std::string, Gtk::ToggleButton *> led_buttons;
+
   int servo_time;
 
   bool servo_enabled;
@@ -302,6 +317,46 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::Entry *ent_tts;
   Gtk::Button *but_tts_exec;
   Gtk::Label *lab_tts_active;
+
+  Gtk::Scale *scl_chest_r;
+  Gtk::Scale *scl_chest_g;
+  Gtk::Scale *scl_chest_b;
+  Gtk::Scale *scl_left_eye_r;
+  Gtk::Scale *scl_left_eye_g;
+  Gtk::Scale *scl_left_eye_b;
+  Gtk::Scale *scl_right_eye_r;
+  Gtk::Scale *scl_right_eye_g;
+  Gtk::Scale *scl_right_eye_b;
+  Gtk::Scale *scl_left_foot_r;
+  Gtk::Scale *scl_left_foot_g;
+  Gtk::Scale *scl_left_foot_b;
+  Gtk::Scale *scl_right_foot_r;
+  Gtk::Scale *scl_right_foot_g;
+  Gtk::Scale *scl_right_foot_b;
+
+  Gtk::ToggleButton *tb_left_ear_0;
+  Gtk::ToggleButton *tb_left_ear_36;
+  Gtk::ToggleButton *tb_left_ear_72;
+  Gtk::ToggleButton *tb_left_ear_108;
+  Gtk::ToggleButton *tb_left_ear_144;
+  Gtk::ToggleButton *tb_left_ear_180;
+  Gtk::ToggleButton *tb_left_ear_216;
+  Gtk::ToggleButton *tb_left_ear_252;
+  Gtk::ToggleButton *tb_left_ear_288;
+  Gtk::ToggleButton *tb_left_ear_324;
+
+  Gtk::ToggleButton *tb_right_ear_0;
+  Gtk::ToggleButton *tb_right_ear_36;
+  Gtk::ToggleButton *tb_right_ear_72;
+  Gtk::ToggleButton *tb_right_ear_108;
+  Gtk::ToggleButton *tb_right_ear_144;
+  Gtk::ToggleButton *tb_right_ear_180;
+  Gtk::ToggleButton *tb_right_ear_216;
+  Gtk::ToggleButton *tb_right_ear_252;
+  Gtk::ToggleButton *tb_right_ear_288;
+  Gtk::ToggleButton *tb_right_ear_324;
+
+  Gtk::ToggleButton *tb_control_leds;
 
   unsigned int update_cycle;
 };

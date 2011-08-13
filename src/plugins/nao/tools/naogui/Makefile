@@ -23,7 +23,7 @@ LDFLAGS += $(LDFLAGS_GTKMM)
 LIBS_ffnaogui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		fawkesguiutils fawkesinterface \
 	        NaoJointPositionInterface NaoJointStiffnessInterface \
-		NaoSensorInterface SpeechSynthInterface \
+		NaoSensorInterface SpeechSynthInterface LedInterface \
 		HumanoidMotionInterface NavigatorInterface
 OBJS_ffnaogui = main.o naogui.o
 OBJS_all = $(OBJS_ffnaogui)
