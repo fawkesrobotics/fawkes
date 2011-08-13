@@ -77,25 +77,23 @@ ConfigAddDialog::ConfigAddDialog(Gtk::Entry       *ent_path,
   m_cmb_type->signal_changed().connect( sigc::mem_fun( *this, &ConfigAddDialog::on_my_changed) );
 }
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
  * @param cobject pointer to base object type
- * @param ref_xml Glade XML file
+ * @param builder Gtk builder
  */
-ConfigAddDialog::ConfigAddDialog( BaseObjectType* cobject,
-				  const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml )
+ConfigAddDialog::ConfigAddDialog(BaseObjectType* cobject,
+                                 const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Dialog(cobject)
 {
-  ref_xml->get_widget("entPathAdd", m_ent_path);
-  ref_xml->get_widget("cmbTypeAdd", m_cmb_type);
-  ref_xml->get_widget("entValueAdd", m_ent_value);
-  ref_xml->get_widget("cmbBoolAdd", m_cob_bool_value);
-  ref_xml->get_widget("nbkTypesAdd", m_type_pages);
-  ref_xml->get_widget("chbIsDefaultAdd", m_chb_is_default);
+  builder->get_widget("entPathAdd", m_ent_path);
+  builder->get_widget("cmbTypeAdd", m_cmb_type);
+  builder->get_widget("entValueAdd", m_ent_value);
+  builder->get_widget("cmbBoolAdd", m_cob_bool_value);
+  builder->get_widget("nbkTypesAdd", m_type_pages);
+  builder->get_widget("chbIsDefaultAdd", m_chb_is_default);
   
   m_cmb_type->signal_changed().connect( sigc::mem_fun( *this, &ConfigAddDialog::on_my_changed) );
 }
-#endif
 
 /** Destructor. */
 ConfigAddDialog::~ConfigAddDialog()

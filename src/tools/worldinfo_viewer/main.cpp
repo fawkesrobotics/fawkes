@@ -27,7 +27,6 @@
 #include <utils/time/clock.h>
 #include <config/sqlite.h>
 
-#include <libglademm/xml.h>
 #include <iostream>
 #include <string>
 
@@ -39,7 +38,7 @@ int main(int argc, char** argv)
   
   HostInfo* host_info = new HostInfo();
   Configuration* config = new SQLiteConfiguration(CONFDIR);
-  config->load(host_info->short_name(), "default.db");
+  config->load(host_info->short_name(), "default");
   delete host_info;
 
   std::string addr;
@@ -75,18 +74,19 @@ int main(int argc, char** argv)
     {
       Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = 
-	Gnome::Glade::Xml::create( RESDIR"/guis/worldinfo_viewer/"
-				   "worldinfo_viewer.glade" );
+      Glib::RefPtr<Gtk::Builder> builder = 
+	Gtk::Builder::create_from_file( RESDIR"/guis/worldinfo_viewer/"
+                                        "worldinfo_viewer.ui" );
 #else
-      std::auto_ptr<Gnome::Glade::XmlError> error;
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/guis/worldinfo_viewer/worldinfo_viewer.glade", "", "", error);
+      std::auto_ptr<Gtk::BuilderError> error;
+      Glib::RefPtr<Gtk::Builder> builder =
+        Gtk::Builder::create_from_file(RESDIR"/guis/worldinfo_viewer/worldinfo_viewer.ui", error);
       if (error.get()) {
-        throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+        throw fawkes::Exception("Failed to load UI file: %s", error->what().c_str());
       }
 #endif
 			      
-      WorldInfoViewer viewer(ref_xml, data_container);
+      WorldInfoViewer viewer(builder, data_container);
       backend_thread->new_gamestate_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::gamestate_changed ) );
 
       kit.run( viewer.get_window() );

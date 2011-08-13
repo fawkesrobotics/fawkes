@@ -34,14 +34,14 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param ref_xml Glade XML object
+ * @param builder builder to get widgets from
  */
-BatteryMonitor::BatteryMonitor( Glib::RefPtr< Gnome::Glade::Xml > ref_xml )
+BatteryMonitor::BatteryMonitor(Glib::RefPtr<Gtk::Builder> builder)
 {
-  ref_xml->get_widget("wndMain", m_wnd_main);
+  builder->get_widget("wndMain", m_wnd_main);
   m_trv_battery = NULL;
-  ref_xml->get_widget_derived( "trvBattery", m_trv_battery );
-  ref_xml->get_widget("btnQuit", m_btn_quit);
+  builder->get_widget_derived( "trvBattery", m_trv_battery );
+  builder->get_widget("btnQuit", m_btn_quit);
   m_btn_quit->signal_clicked().connect( sigc::mem_fun( *this, &BatteryMonitor::on_btn_quit_clicked ) );
 
   m_avahi = new AvahiThread();

@@ -18,14 +18,14 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_ffnetloggui = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesguiutils
 OBJS_ffnetloggui = main.o netloggui.o
 OBJS_all = $(OBJS_ffnetloggui)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffnetloggui
   INST_RESDIRS = guis/netloggui
   MANPAGES_gui = $(MANDIR)/man1/ffnetloggui.1

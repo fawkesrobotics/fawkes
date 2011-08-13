@@ -28,16 +28,17 @@ int
 main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
 
-  Glib::RefPtr<Gnome::Glade::Xml> refxml;
+  Glib::RefPtr<Gtk::Builder> builder;
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-  refxml = Gnome::Glade::Xml::create(RESDIR"/guis/netloggui/netloggui.glade");
+  builder = Gtk::Builder::create_from_file(RESDIR"/guis/netloggui/netloggui.ui");
 #else
-  std::auto_ptr<Gnome::Glade::XmlError> error;
-  refxml = Gnome::Glade::Xml::create(RESDIR"/guis/netloggui/netloggui.glade", "", "", error);
+  Glib::RefPtr<Gtk::BuilderError> error;
+  builder =
+    Gtk::Builder::create_from_file(RESDIR"/guis/netloggui/netloggui.ui", error);
 #endif
 
   NetLogGuiGtkWindow *window = NULL;
-  refxml->get_widget_derived("wnd_netloggui", window);
+  builder->get_widget_derived("wnd_netloggui", window);
 
   Gtk::Main::run(*window);
 

@@ -25,7 +25,6 @@
 #ifdef HAVE_GCONFMM
 #  include <gconfmm.h>
 #endif
-#include <libglademm/xml.h>
 #include <iostream>
 
 using namespace std;
@@ -39,18 +38,26 @@ int main(int argc, char** argv)
     Gnome::Conf::init();
 #endif
 
+    Glib::RefPtr<Gtk::Builder> builder;
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/guis/plugin_tool/plugin_tool.glade");
+    try {
+      builder =
+        Gtk::Builder::create_from_file(RESDIR"/guis/plugin_tool/plugin_gui.ui");
+    } catch (Gtk::BuilderError &e) {
+      printf("Failed to create GUI: %s\n", e.what().c_str());
+    }
 #else
-    std::auto_ptr<Gnome::Glade::XmlError> error;
-    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/guis/plugin_tool/plugin_tool.glade", "", "", error);
+    std::auto_ptr<Gtk::BuilderError> error;
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file(RESDIR"/guis/plugin_tool/plugin_gui.ui", error);
     if (error.get()) {
-      throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+      throw fawkes::Exception("Failed to load Glade file: %s",
+                              error->what().c_str());
     }
 #endif
 
     PluginGuiGtkWindow *window = NULL;
-    refxml->get_widget_derived("wndMain", window);
+    builder->get_widget_derived("wndMain", window);
 
     kit.run( *window );
 

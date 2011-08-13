@@ -21,7 +21,6 @@
  */
 
 #include "firestation.h"
-#include <libglademm/xml.h>
 #include <iostream>
 
 using namespace std;
@@ -29,21 +28,23 @@ using namespace std;
 int main(int argc, char** argv)
 {
   try
-    {
-      Gtk::Main kit(argc, argv);
+  {
+    Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-      Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/guis/firestation/firestation.glade");
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui");
 #else
-      std::auto_ptr<Gnome::Glade::XmlError> error;
-      Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/guis/firestation/firestation.glade", "", "", error);
+    std::auto_ptr<Gtk::BuilderError> error;
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui", error);
 #endif
-      Firestation firestation(refXml);
-      kit.run( firestation.get_window() );
-      return 0;
-    }
+    Firestation firestation(builder);
+    kit.run(firestation.get_window());
+    return 0;
+  }
   catch (std::exception const& e)
-    {
-      std::cerr << "Error: " << e.what() << std::endl;
-      return -1;
-    }
+  {
+    std::cerr << "Error: " << e.what() << std::endl;
+    return -1;
+  }
 }

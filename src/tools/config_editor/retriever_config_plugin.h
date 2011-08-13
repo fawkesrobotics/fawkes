@@ -26,15 +26,14 @@
 #include "config_editor_plugin.h"
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 #include <string>
 
 class RetrieverConfigDialog : public Gtk::Dialog
 {
  public:
-  RetrieverConfigDialog( BaseObjectType* cobject,
-			 const Glib::RefPtr< Gnome::Glade::Xml >& ref_xml );
+  RetrieverConfigDialog(BaseObjectType* cobject,
+                        const Glib::RefPtr<Gtk::Builder> &builder);
   virtual ~RetrieverConfigDialog();
 
   void add_camera( std::string camera_name,
@@ -81,7 +80,7 @@ class RetrieverConfigDialog : public Gtk::Dialog
 class RetrieverConfigPlugin : public ConfigEditorPlugin
 {
  public:
-  RetrieverConfigPlugin( std::string glade_path );
+  RetrieverConfigPlugin( std::string ui_path );
   virtual ~RetrieverConfigPlugin();
 
  protected:

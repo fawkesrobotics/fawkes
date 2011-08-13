@@ -21,7 +21,6 @@
  */
 
 #include "battery_monitor.h"
-#include <libglademm/xml.h>
 #include <iostream>
 
 using namespace std;
@@ -31,13 +30,18 @@ int main( int argc, char** argv )
   try
   {
     Gtk::Main kit( argc, argv );
-    Glib::RefPtr< Gnome::Glade::Xml > ref_xml = Gnome::Glade::Xml::create( RESDIR"/guis/battery_monitor/battery_monitor.glade" );
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file( RESDIR"/guis/battery_monitor/battery_monitor.ui");
 
-    BatteryMonitor battery_monitor( ref_xml );
+    BatteryMonitor battery_monitor(builder);
 
-    kit.run( battery_monitor.get_window() );
+    kit.run(battery_monitor.get_window());
   }
-  catch ( const std::exception& e )
+  catch (Gtk::BuilderError &e)
+  {
+    printf("Failed to instantiate window: %s\n", e.what().c_str());
+  }
+  catch (const std::exception& e)
   {
     cerr << "Error: " << e.what() << endl;
   }

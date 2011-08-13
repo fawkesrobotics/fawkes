@@ -1,24 +1,23 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<?xml version="1.0"?>
 <!--*- mode: xml -*-->
-<glade-interface>
-  <widget class="GtkWindow" id="wndMain">
+<interface>
+  <object class="GtkWindow" id="wndMain">
     <property name="width_request">350</property>
     <property name="height_request">400</property>
     <property name="visible">True</property>
     <property name="title" translatable="yes">FUSE Viewer</property>
     <child>
-      <widget class="GtkVBox" id="vbox1">
+      <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
         <property name="spacing">1</property>
         <child>
-          <widget class="GtkVPaned" id="vpaned1">
+          <object class="GtkVPaned" id="vpaned1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="position">90</property>
             <property name="position_set">True</property>
             <child>
-              <widget class="GtkScrolledWindow" id="swFuseList">
+              <object class="GtkScrolledWindow" id="swFuseList">
                 <property name="height_request">120</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -28,40 +27,40 @@
                 <child>
                   <placeholder/>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="resize">False</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkViewport" id="vpImage">
+              <object class="GtkViewport" id="vpImage">
                 <property name="visible">True</property>
                 <property name="resize_mode">GTK_RESIZE_QUEUE</property>
                 <property name="shadow_type">GTK_SHADOW_OUT</property>
                 <child>
                   <placeholder/>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
-          </widget>
+          </object>
         </child>
         <child>
-          <widget class="GtkExpander" id="exdSave">
+          <object class="GtkExpander" id="exdSave">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <widget class="GtkVBox" id="vbox2">
+              <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
                 <child>
-                  <widget class="GtkHBox" id="hboxTypePlace">
+                  <object class="GtkHBox" id="hboxTypePlace">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkAspectFrame" id="afSaveType">
+                      <object class="GtkAspectFrame" id="afSaveType">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="label_yalign">0</property>
@@ -71,39 +70,38 @@
                         <child>
                           <placeholder/>
                         </child>
-                      </widget>
+                      </object>
                     </child>
                     <child>
-                      <widget class="GtkFileChooserButton" id="fcbSaveTo">
+                      <object class="GtkFileChooserButton" id="fcbSaveTo">
                         <property name="visible">True</property>
                         <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                      </widget>
+                      </object>
                       <packing>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </widget>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkHBox" id="hboxSave">
+                  <object class="GtkHBox" id="hboxSave">
                     <property name="visible">True</property>
                     <property name="homogeneous">True</property>
                     <child>
                       <placeholder/>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="cbtAutoSave">
+                      <object class="GtkCheckButton" id="cbtAutoSave">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Auto save</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
-                      </widget>
+                      </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="padding">9</property>
@@ -111,14 +109,13 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="btSaveImage">
+                      <object class="GtkButton" id="btSaveImage">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Save image</property>
-                        <property name="response_id">0</property>
-                      </widget>
+                      </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="position">2</property>
@@ -127,24 +124,21 @@
                     <child>
                       <placeholder/>
                     </child>
-                  </widget>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </widget>
+              </object>
             </child>
-            <child>
-              <widget class="GtkLabel" id="label2">
+            <child type="label">
+              <object class="GtkLabel" id="label2">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Save image</property>
-              </widget>
-              <packing>
-                <property name="type">label_item</property>
-              </packing>
+              </object>
             </child>
-          </widget>
+          </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
@@ -152,16 +146,16 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkStatusbar" id="stb">
+          <object class="GtkStatusbar" id="stb">
             <property name="visible">True</property>
             <property name="spacing">2</property>
-          </widget>
+          </object>
           <packing>
             <property name="expand">False</property>
             <property name="position">2</property>
           </packing>
         </child>
-      </widget>
+      </object>
     </child>
-  </widget>
-</glade-interface>
+  </object>
+</interface>

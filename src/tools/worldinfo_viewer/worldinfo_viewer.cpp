@@ -43,17 +43,17 @@ using namespace fawkes;
 
 
 /** Constructor.
- * @param ref_xml reference to the Glade XML file
+ * @param builder Gtk Builder
  * @param data_container pointer to the central instance of the
  * WorldInfoDataContainer
  */
-WorldInfoViewer::WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-				  WorldInfoDataContainer* data_container )
+WorldInfoViewer::WorldInfoViewer(Glib::RefPtr<Gtk::Builder> builder,
+                                 WorldInfoDataContainer* data_container )
 {
-  m_wnd_main   = dynamic_cast<Gtk::Window*>( get_widget(ref_xml, "wndMain") );
-  m_vbx_field  = dynamic_cast<Gtk::VBox*>( get_widget(ref_xml, "vbxField") );
-  m_trv_robots = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvRobots") );
-  m_stb_status = dynamic_cast<Gtk::Statusbar*>( get_widget(ref_xml, "stbStatus") );
+  builder->get_widget("wndMain", m_wnd_main);
+  builder->get_widget("vbxField", m_vbx_field);
+  builder->get_widget("trvRobots", m_trv_robots);
+  builder->get_widget("stbStatus", m_stb_status);
 
   m_field_view = new FieldView( data_container, true, true, false );
   m_vbx_field->pack_start( *m_field_view );
@@ -102,27 +102,6 @@ Gtk::Window&
 WorldInfoViewer::get_window() const
 {
   return *m_wnd_main;
-}
-
-Gtk::Widget*
-WorldInfoViewer::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-			    const char* widget_name) const
-{
-  Gtk::Widget* widget;
-  ref_xml->get_widget(widget_name, widget);
-  if ( !widget )
-  {
-    char* err_str;
-    if (asprintf(&err_str, "Couldn't find widget %s", widget_name) != -1)
-    {
-      throw std::runtime_error(err_str);
-      free(err_str);
-    } 
-    else 
-    { throw std::runtime_error("Getting widget failed"); }
-  }
-
-  return widget;
 }
 
 

@@ -141,8 +141,6 @@ LogView::ctor(const char *hostname, unsigned short int port)
     }
   }
 
-  set_headers_clickable();
-
   __connection_dispatcher->signal_message_received().connect(sigc::mem_fun(*this, &LogView::on_message_received));
   __connection_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &LogView::on_client_connected));
   __connection_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &LogView::on_client_disconnected));
@@ -310,7 +308,6 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
     timestr = time;
   }
 
-  printf("APpending %s\n", message);
   Gtk::TreeModel::Row row  = *__list->append();
   row[__record.loglevel]   = loglevel;
   row[__record.time]       = timestr;

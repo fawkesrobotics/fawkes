@@ -42,14 +42,13 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
- * Special ctor to be used with Glade's get_widget_derived().
+ * Special ctor to be used with Gtk::Builder's get_widget_derived().
  * @param cobject Gtk C object
- * @param refxml Glade's XML reference
+ * @param builder Gtk Builder
  */
 LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
-				   const Glib::RefPtr<Gnome::Glade::Xml>& refxml)
+				   const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::DrawingArea(cobject)
 {
   __draw_mode = MODE_LINES;
@@ -77,15 +76,8 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
 	     Gdk::BUTTON_PRESS_MASK );
 
-#ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-  signal_expose_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_expose_event));
-  signal_button_press_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_button_press_event));
-  signal_motion_notify_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_motion_notify_event));
-#endif
-
   //Glib::RefPtr<Gdk::Window> window = get_window();
 }
-#endif
 
 /** Constructor. */
 LaserDrawingArea::LaserDrawingArea()
@@ -111,12 +103,6 @@ LaserDrawingArea::LaserDrawingArea()
   __visdisp = new VisualDisplay2D();
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
-
-#ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-  signal_expose_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_expose_event));
-  signal_button_press_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_button_press_event));
-  signal_motion_notify_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_motion_notify_event));
-#endif
 }
 
 
@@ -298,11 +284,11 @@ LaserDrawingArea::set_rotation(float rot_rad)
 
 
 /** Expose event handler.
- * @param event event info structure.
+ * @param cr Cairo context for drawing
  * @return signal return value
  */
 bool
-LaserDrawingArea::on_expose_event(GdkEventExpose* event)
+LaserDrawingArea::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
   // This is where we draw on the window
   Glib::RefPtr<Gdk::Window> window = get_window();
@@ -319,16 +305,10 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       __xc = width / 2;
       __yc = height / 2;
     }
-    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
     cr->set_line_width(1.0);
 
-    // clip to the area indicated by the expose event so that we only redraw
-    // the portion of the window that needs to be redrawn
-    cr->rectangle(event->area.x, event->area.y,
-		  event->area.width, event->area.height);
     cr->set_source_rgb(1, 1, 1);
     cr->fill_preserve();
-    cr->clip();
     cr->set_source_rgb(0, 0, 0);
     //cr->set_source_rgba(0,0,0,1);
 
@@ -428,7 +408,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
  */
 void
 LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window> &window,
-				Cairo::RefPtr<Cairo::Context> &cr)
+				const Cairo::RefPtr<Cairo::Context> &cr)
 {
   cr->save();
   cr->set_source_rgba(0, 0, 0.8, 0.2);
@@ -446,7 +426,7 @@ LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window> &window,
  */
 void
 LaserDrawingArea::draw_beams(Glib::RefPtr<Gdk::Window> &window,
-			     Cairo::RefPtr<Cairo::Context> &cr)
+			     const Cairo::RefPtr<Cairo::Context> &cr)
 {
   float *distances = __laser360_if ? __laser360_if->distances() : __laser720_if->distances();
   size_t nd = __laser360_if ? __laser360_if->maxlenof_distances() : __laser720_if->maxlenof_distances();
@@ -516,7 +496,7 @@ LaserDrawingArea::draw_beams(Glib::RefPtr<Gdk::Window> &window,
  */
 void
 LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
-				    Cairo::RefPtr<Cairo::Context> &cr)
+				    const Cairo::RefPtr<Cairo::Context> &cr)
 {
   std::list<ObjectPositionInterface*>::iterator objpos_if_itt;;
 
@@ -810,7 +790,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
  */
 void
 LaserDrawingArea::draw_segments(Glib::RefPtr<Gdk::Window> &window,
-				Cairo::RefPtr<Cairo::Context> &cr)
+				const Cairo::RefPtr<Cairo::Context> &cr)
 {
   float *distances = __laser360_if ? __laser360_if->distances() : __laser720_if->distances();
   size_t nd = __laser_segmentation_if->maxlenof_distances();

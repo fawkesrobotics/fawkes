@@ -19,8 +19,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
 include $(BUILDSYSDIR)/ext/gmsl
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_ffconfiggui = stdc++ fawkescore fawkesconfig fawkesguiutils fvutils
 OBJS_ffconfiggui = main.o			\
@@ -34,7 +34,7 @@ OBJS_ffconfiggui = main.o			\
 		   naostiffness_config_plugin.o
 OBJS_all = $(OBJS_ffconfiggui)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffconfiggui
   INST_RESDIRS = guis/config_editor
   MANPAGES_gui = $(MANDIR)/man1/ffconfiggui.1

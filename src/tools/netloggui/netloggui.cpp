@@ -43,17 +43,17 @@ using namespace fawkes;
 
 /** Constructor.
  * @param cobject C base object
- * @param refxml Glade XML
+ * @param builder Gtk builder
  */
 NetLogGuiGtkWindow::NetLogGuiGtkWindow(BaseObjectType* cobject,
-				       const Glib::RefPtr<Gnome::Glade::Xml> &refxml)
+				       const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Window(cobject)
 {
-  refxml->get_widget("vbox_main", vbox_main);
-  refxml->get_widget("lab_no_connection", lab_no_connection);
-  refxml->get_widget("tb_connection", tb_connection);
-  refxml->get_widget("tb_exit", tb_exit);
-  refxml->get_widget("tb_clear", tb_clear);
+  builder->get_widget("vbox_main", vbox_main);
+  builder->get_widget("lab_no_connection", lab_no_connection);
+  builder->get_widget("tb_connection", tb_connection);
+  builder->get_widget("tb_exit", tb_exit);
+  builder->get_widget("tb_clear", tb_clear);
 
   vbox_main->pack_end(ntb_logviewers);
 
@@ -164,8 +164,9 @@ NetLogGuiGtkWindow::on_service_added(fawkes::NetworkService *service)
   Gtk::Label *invisible = Gtk::manage(new Gtk::Label(Glib::ustring(service->name()) + "::" + service->type() + "::" + service->domain()));
   Gtk::ScrolledWindow *scrolled = Gtk::manage(new Gtk::ScrolledWindow());
   scrolled->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  LogView *logview = Gtk::manage(new LogView(service->addr_string().c_str(), service->port()));
-  scrolled->add(*logview);
+  LogView *logview =
+    Gtk::manage(new LogView(service->addr_string().c_str(), service->port()));
+  //scrolled->add(*logview);
 
   hbox->pack_start(*button);
   hbox->pack_start(*label);
@@ -182,7 +183,7 @@ NetLogGuiGtkWindow::on_service_added(fawkes::NetworkService *service)
   logview->show();
   hbox->show();
 
-  int rv = ntb_logviewers.append_page(*scrolled, *hbox);
+  int rv = ntb_logviewers.append_page(*logview, *hbox);
 
   return rv;
 }
@@ -201,8 +202,8 @@ NetLogGuiGtkWindow::on_service_removed(fawkes::NetworkService *service)
       Gtk::HBox   *hbox = dynamic_cast<Gtk::HBox *>(tab_label);
 
       if ( hbox ) {
-	Gtk::Box_Helpers::BoxList b = hbox->children();
-	Gtk::Widget *w = b[2].get_widget();
+        std::vector<Gtk::Widget *> children = hbox->get_children();
+	Gtk::Widget *w = children[2];
 	if (w) {
 	  Gtk::Label *label = dynamic_cast<Gtk::Label *>(w);
 	  if ( label ) {
