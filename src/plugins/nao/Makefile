@@ -21,6 +21,7 @@ SUBDIRS = tools
 
 LIBS_naoqi = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	   fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
+	   fawkesnaoqi_dcm_utils \
 	   alcore alcommon alvalue almemoryfastaccess \
 	   boost_serialization-mt boost_signals-mt \
 	   NaoJointPositionInterface NaoJointStiffnessInterface \
@@ -52,7 +53,11 @@ OBJS_libnaofawkes = naofawkes_module.o
 LIBS_libfawkesnaoqibroker = alcore alcommon
 OBJS_libfawkesnaoqibroker = naoqi_broker.o
 
+LIBS_libfawkesnaoqi_dcm_utils = alcore alcommon alvalue
+OBJS_libfawkesnaoqi_dcm_utils = dcm_utils.o
+
 OBJS_all = $(OBJS_naoqi) $(OBJS_libnaofawkes) $(OBJS_libfawkesnaoqibroker) \
+	$(OBJS_libfawkesnaoqi_dcm_utils) \
 	$(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth)
 
 ifeq ($(HAVE_NAOQI),1)
@@ -62,7 +67,9 @@ ifeq ($(HAVE_NAOQI),1)
   LDFLAGS += $(LDFLAGS_NAOQI)
   PLUGINS_all = $(PLUGINDIR)/naoqi.so $(PLUGINDIR)/naoqi-motion.so \
 		$(PLUGINDIR)/naoqi-speechsynth.so
-  LIBS_all = $(LIBDIR)/libfawkesnaoqibroker.so $(LIBDIR)/libnaofawkes.so
+  LIBS_all = $(LIBDIR)/libfawkesnaoqibroker.so \
+	     $(LIBDIR)/libfawkesnaoqi_dcm_utils.so \
+	     $(LIBDIR)/libnaofawkes.so
 
   TARGETS_all = info_naoqiroot
 else
