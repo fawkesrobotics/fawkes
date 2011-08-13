@@ -59,11 +59,13 @@ FuseImageListWidget::FuseImageListWidget()
   m_signal_delete_clients.connect( sigc::mem_fun( *this, &FuseImageListWidget::delete_clients) );
   m_signal_update_image_l.connect( sigc::mem_fun( *this, &FuseImageListWidget::update_image_list) );
 
+  /*
   m_popup_menu = Gtk::manage( new Gtk::Menu() );
   Gtk::Menu::MenuList& menulist = m_popup_menu->items();
   menulist.push_back( Gtk::Menu_Helpers::MenuElem("Update now", sigc::mem_fun( *this, &FuseImageListWidget::update_image_list) ) );
   menulist.push_back( Gtk::Menu_Helpers::SeparatorElem() );
   menulist.push_back( Gtk::Menu_Helpers::MenuElem("Add host manually", sigc::mem_fun( *this, &FuseImageListWidget::on_add_host_manually) ) );
+  */
 
   set_image_list_trv(this);
 }
@@ -287,7 +289,7 @@ FuseImageListWidget::on_image_event(GdkEvent *event)
 {
   GdkEventButton btn = event->button;
   if (btn.type == GDK_BUTTON_PRESS && btn.button == 3) {
-    m_popup_menu->popup(btn.button, btn.time);
+    //m_popup_menu->popup(btn.button, btn.time);
     return true;
   }
   return false;
@@ -539,7 +541,8 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 void
 FuseImageListWidget::on_add_host_manually()
 {
-  Gtk::Dialog* add_host = new Gtk::Dialog("Add host manually", this->get_window(), true);
+  Gtk::Dialog* add_host =
+    new Gtk::Dialog("Add host manually", true);
   add_host->add_button(Gtk::Stock::ADD, Gtk::RESPONSE_OK);
   add_host->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
@@ -549,7 +552,7 @@ FuseImageListWidget::on_add_host_manually()
   Gtk::Entry* hent = Gtk::manage( new Gtk::Entry() );
   Gtk::HBox*  pbox = Gtk::manage( new Gtk::HBox() );
 
-  Gtk::Adjustment prange(2208, 1, 65535);
+  Glib::RefPtr<Gtk::Adjustment> prange = Gtk::Adjustment::create(2208, 1, 65535);
   Gtk::SpinButton *pent = Gtk::manage( new Gtk::SpinButton(prange) );
 
   char * fawkes_ip = getenv("FAWKES_IP");

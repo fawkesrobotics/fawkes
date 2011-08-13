@@ -30,7 +30,7 @@ namespace fawkes {
  * This interface provides a generic way to draw robots in different applications.
  * @author Tim Niemueller
  *
- * @fn void CairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window> &window, Cairo::RefPtr<Cairo::Context> &cr) = 0
+ * @fn void CairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window> &window, const Cairo::RefPtr<Cairo::Context> &cr) = 0
  * Draw robot.
  * This method must be implemented to do the actual drawing. The cairo context can
  * be assumed to be translated so that the robot's center is at (0,0) and all

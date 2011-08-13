@@ -73,8 +73,7 @@ InterfaceChooserDialog::InterfaceChooserDialog(Gtk::Window &parent,
 					       const char *type_pattern,
 					       const char *id_pattern,
 					       Glib::ustring title)
-  : Gtk::Dialog(title, parent, /* modal */ true, /* separator */ true),
-    __parent(parent)
+  : Gtk::Dialog(title, parent, /* modal */ true), __parent(parent)
 {
   __model = Gtk::ListStore::create(__record);
 
@@ -89,7 +88,7 @@ InterfaceChooserDialog::InterfaceChooserDialog(Gtk::Window &parent,
   __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   __treeview.show();
 
-  Gtk::VBox *vbox = get_vbox();
+  Gtk::Box *vbox = get_vbox();
   vbox->pack_start(__scrollwin);
   __scrollwin.show();
 

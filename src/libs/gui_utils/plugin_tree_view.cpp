@@ -67,19 +67,17 @@ PluginTreeView::PluginTreeView()
   ctor();
 }
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
  * @param cobject pointer to base object type
- * @param ref_xml Glade XML file
+ * @param builder Gtk::Builder instance
  */
 PluginTreeView::PluginTreeView(BaseObjectType* cobject,
-			       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+			       const Glib::RefPtr<Gtk::Builder> builder)
   : Gtk::TreeView(cobject),
     m_dispatcher(FAWKES_CID_PLUGINMANAGER)
 {
   ctor();
 }
-#endif
 
 
 void
@@ -467,7 +465,8 @@ PluginTreeView::append_plugin_column()
   else
   {
     TwoLinesCellRenderer *twolines_renderer = new TwoLinesCellRenderer();
-    Gtk::TreeViewColumn *tlcol = new Gtk::TreeViewColumn("Plugin", *Gtk::manage(twolines_renderer));
+    Gtk::TreeViewColumn *tlcol =
+      new Gtk::TreeViewColumn("Plugin", *Gtk::manage(twolines_renderer));
     append_column(*Gtk::manage(tlcol));
 
  #  ifdef GLIBMM_PROPERTIES_ENABLED

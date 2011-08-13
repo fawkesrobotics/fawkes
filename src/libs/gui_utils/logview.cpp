@@ -59,19 +59,17 @@ LogView::LogView(const char *hostname, unsigned short int port)
 }
 
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
- * Special ctor to be used with Glade's get_widget_derived().
+ * Special ctor to be used with Gtk::Builder's get_widget_derived().
  * @param cobject Gtk C object
- * @param refxml Glade's XML reference
+ * @param builder Gtk builder
  */
 LogView::LogView(BaseObjectType* cobject,
-		 const Glib::RefPtr<Gnome::Glade::Xml>& refxml)
+		 const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::TreeView(cobject)
 {
   ctor();
 }
-#endif
 
 
 /** Destructor. */
@@ -92,14 +90,15 @@ void
 LogView::ctor(const char *hostname, unsigned short int port)
 {
   __list = Gtk::ListStore::create(__record);
+  set_model(__list);
   __have_recently_added_path = false;
 
   __list->signal_row_inserted().connect(sigc::mem_fun(*this, &LogView::on_row_inserted));
-  set_model(__list);
   get_selection()->set_mode(Gtk::SELECTION_NONE);
 
   if ( (hostname != NULL) && (port != 0) ) {
-    __connection_dispatcher = new ConnectionDispatcher(hostname, port, FAWKES_CID_NETWORKLOGGER);
+    __connection_dispatcher =
+      new ConnectionDispatcher(hostname, port, FAWKES_CID_NETWORKLOGGER);
   } else {
     __connection_dispatcher = new ConnectionDispatcher(FAWKES_CID_NETWORKLOGGER);
   }
@@ -116,10 +115,14 @@ LogView::ctor(const char *hostname, unsigned short int port)
 
   Glib::ListHandle<Gtk::TreeViewColumn *> columns = get_columns();
   int colnum = -1;
-  for (Glib::ListHandle<Gtk::TreeViewColumn *>::iterator c = columns.begin(); c != columns.end(); ++c) {
+  for (Glib::ListHandle<Gtk::TreeViewColumn *>::iterator c = columns.begin();
+       c != columns.end();
+       ++c)
+  {
     ++colnum;
-    Gtk::CellRenderer *cell_renderer = (*c)->get_first_cell_renderer();
-    Gtk::CellRendererText *text_renderer = dynamic_cast<Gtk::CellRendererText *>(cell_renderer);
+    Gtk::CellRenderer *cell_renderer = (*c)->get_first_cell();
+    Gtk::CellRendererText *text_renderer =
+      dynamic_cast<Gtk::CellRendererText *>(cell_renderer);
     if ( text_renderer ) {
 #ifdef GLIBMM_PROPERTIES_ENABLED
       if ( (colnum == compcol) || (colnum == msgcol) ) {
@@ -138,10 +141,11 @@ LogView::ctor(const char *hostname, unsigned short int port)
     }
   }
 
+  set_headers_clickable();
+
   __connection_dispatcher->signal_message_received().connect(sigc::mem_fun(*this, &LogView::on_message_received));
   __connection_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &LogView::on_client_connected));
   __connection_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &LogView::on_client_disconnected));
-  signal_expose_event().connect_notify(sigc::mem_fun(*this, &LogView::on_expose_notify));
 }
 
 
@@ -221,11 +225,13 @@ LogView::on_row_inserted(const Gtk::TreeModel::Path& path,
 }
 
 
-void
-LogView::on_expose_notify(GdkEventExpose *event)
+bool
+LogView::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
   __have_recently_added_path = false;
+  return Gtk::TreeView::on_draw(cr);
 }
+
 
 void
 LogView::on_client_connected()
@@ -304,6 +310,7 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
     timestr = time;
   }
 
+  printf("APpending %s\n", message);
   Gtk::TreeModel::Row row  = *__list->append();
   row[__record.loglevel]   = loglevel;
   row[__record.time]       = timestr;

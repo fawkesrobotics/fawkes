@@ -56,7 +56,7 @@ namespace fawkes {
 ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
 					   Glib::ustring title,
 					   const char *service)
-  : Gtk::Dialog(title, parent, /* modal */ true, /* separator */ true),
+  : Gtk::Dialog(title, parent, /* modal */ true),
     __parent(parent), __expander("Manual entry")
 {
   __service_model = new ServiceModel(service);
@@ -75,7 +75,7 @@ ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
 					   FawkesNetworkClient *client,
 					   Glib::ustring title,
 					   const char *service)
-  : Gtk::Dialog(title, parent, /* modal */ true, /* separator */ true),
+  : Gtk::Dialog(title, parent, /* modal */ true),
     __parent(parent), __expander("Manual entry")
 {
   __service_model = new ServiceModel(service);
@@ -110,7 +110,7 @@ ServiceChooserDialog::ctor()
   if (fawkes_ip) __entry.set_text(fawkes_ip);
   else __entry.set_text("localhost");
 
-  Gtk::VBox *vbox = get_vbox();
+  Gtk::Box *vbox = get_vbox();
   vbox->pack_start(__scrollwin);
   vbox->pack_end(__expander, Gtk::PACK_SHRINK);
   __scrollwin.show();
