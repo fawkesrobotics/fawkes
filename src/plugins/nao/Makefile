@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 PRESUBDIRS = interfaces
-SUBDIRS = tools
+SUBDIRS = naogui
 
 LIBS_naoqi = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	   fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
