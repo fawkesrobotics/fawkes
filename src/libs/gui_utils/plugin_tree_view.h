@@ -30,9 +30,6 @@
 #include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
-#ifdef HAVE_GLADEMM
-#  include <libglademm/xml.h>
-#endif
 #ifdef HAVE_GCONFMM
 #  include <gconfmm.h>
 #endif
@@ -50,9 +47,8 @@ class PluginTreeView
 {
  public:
   PluginTreeView();
-#ifdef HAVE_GLADEMM
-  PluginTreeView(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
-#endif
+  PluginTreeView(BaseObjectType* cobject,
+                 const Glib::RefPtr<Gtk::Builder> builder);
   virtual ~PluginTreeView();
 
   void set_network_client(fawkes::FawkesNetworkClient* client);

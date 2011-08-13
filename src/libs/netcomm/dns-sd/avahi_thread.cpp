@@ -3,7 +3,7 @@
  *  avahi_thread.cpp - Avahi thread
  *
  *  Created: Wed Nov 08 11:19:25 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -75,6 +75,9 @@ AvahiThread::AvahiThread()
 AvahiThread::~AvahiThread()
 {
   delete init_wc;
+
+  remove_pending_services();
+  remove_pending_browsers();
 
   erase_groups();
   erase_browsers();
@@ -343,6 +346,8 @@ AvahiThread::create_pending_services()
 void
 AvahiThread::remove_pending_services()
 {
+  Thread::CancelState old_state;
+  set_cancel_state(CANCEL_DISABLED, &old_state);
   __pending_remove_services.lock();
   while ( ! __pending_remove_services.empty()) {
     NetworkService &s = __pending_remove_services.front();
@@ -353,6 +358,7 @@ AvahiThread::remove_pending_services()
     __pending_remove_services.pop();
   }
   __pending_remove_services.unlock();
+  set_cancel_state(old_state);
 }
 
 
@@ -384,8 +390,8 @@ void
 AvahiThread::erase_groups()
 {
   for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    group_erase((*__sit).second);
-    (*__sit).second = NULL;
+    if (__sit->second)  group_erase(__sit->second);
+    __sit->second = NULL;
   }
 }
 
@@ -552,6 +558,8 @@ AvahiThread::create_pending_browsers()
 void
 AvahiThread::remove_pending_browsers()
 {
+  Thread::CancelState old_state;
+  set_cancel_state(CANCEL_DISABLED, &old_state);
   __pending_browser_removes.lock();
   while ( ! __pending_browser_removes.empty()) {
     std::string &s = __pending_browser_removes.front();
@@ -560,6 +568,7 @@ AvahiThread::remove_pending_browsers()
     __pending_browser_removes.pop();
   }
   __pending_browser_removes.unlock();
+  set_cancel_state(old_state);
 }
 
 

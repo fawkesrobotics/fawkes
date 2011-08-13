@@ -37,7 +37,7 @@ class CairoRobotDrawer
   virtual ~CairoRobotDrawer();
 
   virtual void draw_robot(Glib::RefPtr<Gdk::Window> &window,
-			  Cairo::RefPtr<Cairo::Context> &cr)   = 0;
+			  const Cairo::RefPtr<Cairo::Context> &cr)   = 0;
 };
 
 }

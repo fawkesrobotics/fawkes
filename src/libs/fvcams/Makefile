@@ -19,14 +19,12 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
-LDFLAGS  += $(VISION_LDFLAGS)
+LDFLAGS  += $(VISION_LDFLAGS) $(VISION_CAM_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LDFLAGS_libfvcams = $(VISION_CAM_LDFLAGS)
-
-LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils fawkeslogging
+LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils
 OBJS_libfvcams = camera.o          \
                  control/control.o \
                  control/color.o   \
@@ -42,55 +40,57 @@ OBJS_libfvcams = camera.o          \
                  control/factory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)
-OBJS_libfvcams += control/visca.o
+  OBJS_libfvcams += control/visca.o
 endif
 ifeq ($(HAVE_EVID100P_CTRL),1)
-OBJS_libfvcams += control/sony_evid100p.o
+  OBJS_libfvcams += control/sony_evid100p.o
 endif
 ifeq ($(HAVE_DPPTU_CTRL),1)
-OBJS_libfvcams += control/dp_ptu.o
+  OBJS_libfvcams += control/dp_ptu.o
 endif
 ifeq ($(HAVE_FIREWIRE_CAM),1)
-OBJS_libfvcams += firewire.o
+  OBJS_libfvcams += firewire.o
 endif
 ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
-OBJS_libfvcams += bumblebee2.o
+  OBJS_libfvcams += bumblebee2.o
 endif
 ifeq ($(HAVE_PIKE_CAM),1)
-OBJS_libfvcams += pike.o
+  OBJS_libfvcams += pike.o
 endif
 ifeq ($(HAVE_LEUTRON_CAM),1)
-OBJS_libfvcams += leutron.o
-# Leutron headers are in a bad shape...
-CFLAGS += -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+  OBJS_libfvcams += leutron.o
+  # Leutron headers are in a bad shape...
+  CFLAGS += -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
 endif
 ifeq ($(HAVE_V4L1_CAM),1)
-OBJS_libfvcams += v4l1.o
+  OBJS_libfvcams += v4l1.o
 endif
 ifeq ($(HAVE_V4L2_CAM),1)
-OBJS_libfvcams += v4l2.o
+  OBJS_libfvcams += v4l2.o
 endif
 ifeq ($(HAVE_V4L_CAM),1)
-OBJS_libfvcams += v4l.o
+  OBJS_libfvcams += v4l.o
 endif
 ifeq ($(HAVE_NAO_CAM),1)
-OBJS_libfvcams += nao.o
+  OBJS_libfvcams += nao.o
 endif
 ifeq ($(HAVE_FILELOADER_CAM),1)
-OBJS_libfvcams += fileloader.o
+  OBJS_libfvcams += fileloader.o
 endif
 ifeq ($(HAVE_NETWORK_CAM),1)
-OBJS_libfvcams += net.o
+  OBJS_libfvcams += net.o
 endif
 ifeq ($(HAVE_SHMEM_CAM),1)
-OBJS_libfvcams += shmem.o
+  OBJS_libfvcams += shmem.o
 endif
 ifeq ($(HAVE_SWISSRANGER_CAM),1)
-OBJS_libfvcams += swissranger.o
+  OBJS_libfvcams += swissranger.o
+  CFLAGS  += $(CFLAGS_SWISSRANGER)
+  LDFLAGS += $(LDFLAGS_SWISSRANGER)
 endif
 ifeq ($(HAVE_LIBV4L2),1)
-CFLAGS  += $(CFLAGS_LIBV4L2)
-LDFLAGS += $(LDFLAGS_LIBV4L2)
+  CFLAGS  += $(CFLAGS_LIBV4L2)
+  LDFLAGS += $(LDFLAGS_LIBV4L2)
 endif
 
 ifneq ($(HAVE_FIREWIRE_CAM),1)

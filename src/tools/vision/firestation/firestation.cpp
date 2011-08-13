@@ -60,118 +60,76 @@ using namespace firevision;
  */
 
 /** Constructor.
- * @param ref_xml reference pointer to the glade file
+ * @param builder Gtk Builder
  */
-Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
 {
   // --- main window ------------------------------------------------
-  m_wnd_main = dynamic_cast<Gtk::Window*>( get_widget(ref_xml, "wndMain") );
+  builder->get_widget("wndMain", m_wnd_main);
+  builder->get_widget("imgImage", m_img_image);
+  builder->get_widget("evtImageEventBox", m_evt_image);
+  builder->get_widget("trvShmImageIds", m_trv_shm_image_ids);
+  builder->get_widget("stbStatus", m_stb_status);
+  builder->get_widget("ckbContTrans", m_ckb_cont_trans);
+  builder->get_widget("spbUpdateTime", m_spb_update_time);
 
-  m_img_image = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgImage") );
   m_img_image->signal_size_allocate().connect( sigc::mem_fun(*this, &Firestation::resize_image) );
-
-  m_evt_image = dynamic_cast<Gtk::EventBox*>( get_widget(ref_xml, "evtImageEventBox") );
   m_evt_image->signal_button_press_event().connect( sigc::mem_fun(*this, &Firestation::image_click) );
-
-  m_trv_shm_image_ids = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvShmImageIds") );
-
-  m_stb_status = dynamic_cast<Gtk::Statusbar*>( get_widget(ref_xml, "stbStatus") );
-
-  m_ckb_cont_trans = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "ckbContTrans") );
   m_ckb_cont_trans->signal_toggled().connect( sigc::mem_fun(*this, &Firestation::enable_cont_img_trans) );
 
-  m_spb_update_time = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbUpdateTime") );
   // ----------------------------------------------------------------
 
 
   // --- toolbar widgets --------------------------------------------
-  m_tbtn_exit = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnExit") );
+  builder->get_widget("tbtnExit", m_tbtn_exit);
+  builder->get_widget("tbtnCloseCamera", m_tbtn_close_camera);
+  builder->get_widget("tbtnUpdate", m_tbtn_update);
+  builder->get_widget("tbtnSave", m_tbtn_save);
+  builder->get_widget("tbtnOpenFile", m_tbtn_open_file);
+  builder->get_widget("tbtnOpenFolder", m_tbtn_open_folder);
+  builder->get_widget("tbtnOpenShm", m_tbtn_open_shm);
+  builder->get_widget("tbtnOpenFuse", m_tbtn_open_fuse);
+
   m_tbtn_exit->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::exit) );
-
-  m_tbtn_close_camera = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnCloseCamera") );
   m_tbtn_close_camera->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::close_camera) );
-
-  m_tbtn_update = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnUpdate") );
   m_tbtn_update->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::update_image) );
-
-  m_tbtn_save = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnSave") );
   m_tbtn_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::save_image) );
-
-  m_tbtn_open_file = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFile") );
   m_tbtn_open_file->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_file) );
-
-  m_tbtn_open_folder = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFolder") );
   m_tbtn_open_folder->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_folder) );
-
-  m_tbtn_open_shm = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenShm") );
   m_tbtn_open_shm->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_shm) );
-
-  m_tbtn_open_fuse = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFuse") );
   m_tbtn_open_fuse->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_fuse) );
   // ----------------------------------------------------------------
 
 
   // --- dialogs ----------------------------------------------------
-  ref_xml->get_widget("fcdOpenImage", m_fcd_open_image);
-  if ( !m_fcd_open_image )
-    {
-      throw std::runtime_error("Couldn't find fcdOpenImage.");
-    }
+  builder->get_widget("fcdOpenImage", m_fcd_open_image);
+  builder->get_widget("fcdSaveImage", m_fcd_save_image);
+  builder->get_widget("dlgOpenShm", m_dlg_open_shm);
+  builder->get_widget("trvShmImageIds", m_trv_shm_image_ids);
+  builder->get_widget("dlgOpenFuse", m_dlg_open_fuse);
+  builder->get_widget("ckbFuseJpeg", m_ckb_fuse_jpeg);
+  builder->get_widget("trvFuseServices", m_trv_fuse_services);
 
-  Gtk::FileFilter* filter_jpg = new Gtk::FileFilter();
+  Glib::RefPtr<Gtk::FileFilter> filter_jpg = Gtk::FileFilter::create();
   filter_jpg->set_name("JPEG");
   filter_jpg->add_pattern("*.jpg");
   filter_jpg->add_pattern("*.jpeg");
-  m_fcd_open_image->add_filter(*filter_jpg);
+  m_fcd_open_image->add_filter(filter_jpg);
 
-  Gtk::FileFilter* filter_fvraw = new Gtk::FileFilter();
+  Glib::RefPtr<Gtk::FileFilter> filter_fvraw = Gtk::FileFilter::create();
   filter_fvraw->set_name("FVRaw");
   filter_fvraw->add_pattern("*.raw");
   filter_fvraw->add_pattern("*.fvraw");
-  m_fcd_open_image->add_filter(*filter_fvraw);
+  m_fcd_open_image->add_filter(filter_fvraw);
 
-  ref_xml->get_widget("fcdSaveImage", m_fcd_save_image);
-  if ( !m_fcd_save_image )
-    {
-      throw std::runtime_error("Couldn't find fcdSaveImage.");
-    }
-  m_fcd_save_image->add_filter(*filter_jpg);
-  m_fcd_save_image->add_filter(*filter_fvraw);
+  m_fcd_save_image->add_filter(filter_jpg);
+  m_fcd_save_image->add_filter(filter_fvraw);
 
-  ref_xml->get_widget("dlgOpenShm", m_dlg_open_shm);
-  if (!m_dlg_open_shm)
-    {
-      throw std::runtime_error("Couldn't find dlgOpenShm.");
-    }
-
-  ref_xml->get_widget("trvShmImageIds", m_trv_shm_image_ids);
-  if ( !m_trv_shm_image_ids )
-    {
-      throw std::runtime_error("Couldn't find trvShmImageIds.");
-    }
   m_shm_list_store = Gtk::ListStore::create(m_shm_columns);
   m_trv_shm_image_ids->set_model(m_shm_list_store);
   m_trv_shm_image_ids->append_column("#", m_shm_columns.m_id);
   m_trv_shm_image_ids->append_column("Name", m_shm_columns.m_name);
 
-
-  ref_xml->get_widget("dlgOpenFuse", m_dlg_open_fuse);
-  if (!m_dlg_open_fuse)
-    {
-      throw std::runtime_error("Couldn't find dlgOpenFuse.");
-    }
-
-  ref_xml->get_widget("ckbFuseJpeg", m_ckb_fuse_jpeg);
-  if (! m_ckb_fuse_jpeg )
-    {
-      throw std::runtime_error("Couldn't find ckbFuseJpeg.");
-    }
-
-  ref_xml->get_widget("trvFuseServices", m_trv_fuse_services);
-  if ( !m_trv_fuse_services )
-    {
-      throw std::runtime_error("Couldn't find trvFuseServices.");
-    }
   m_fuse_tree_store = Gtk::TreeStore::create(m_fuse_columns);
   m_trv_fuse_services->set_model(m_fuse_tree_store);
   //  m_trv_fuse_services->append_column("#", m_fuse_columns.m_id);
@@ -181,65 +139,66 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   // --- color train widget -----------------------------------------
   m_ctw = new ColorTrainWidget(this);
-  m_cmb_ct_type  = dynamic_cast<Gtk::ComboBox*>( get_widget(ref_xml, "cmbCtObjectType") );
+  builder->get_widget("cmbCtObjectType", m_cmb_ct_type);
+  builder->get_widget("btnCtStart", m_btn_ct_start);
+  builder->get_widget("btnCtSeg", m_btn_ct_seg);
+  builder->get_widget("spbtnCtCmDepth", m_spbtn_depth);
+  builder->get_widget("spbtnCtCmWidth", m_spbtn_width);
+  builder->get_widget("spbtnCtCmHeight", m_spbtn_height);
+
   m_cmb_ct_type->signal_changed().connect(sigc::mem_fun(*this, &Firestation::ct_object_changed));
   m_cmb_ct_type->set_active(0);
 
-  m_btn_ct_start = dynamic_cast<Gtk::ToggleButton*>( get_widget(ref_xml, "btnCtStart") );
   m_btn_ct_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_start) );
 
   m_ctw->update_image().connect( sigc::mem_fun(*this, &Firestation::draw_image) );
   m_ctw->colormap_updated().connect( sigc::mem_fun(*this, &Firestation::on_colormap_updated) );
 
   Gtk::Button* btn;
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtUnselect") );
+  builder->get_widget("btnCtUnselect", btn);
   m_ctw->set_reset_selection_btn(btn);
 
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtAdd") );
+  builder->get_widget("btnCtAdd", btn);
   m_ctw->set_add_to_colormap_btn(btn);
 
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtReset") );
+  builder->get_widget("btnCtReset", btn);
   m_ctw->set_reset_colormap_btn(btn);
 
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveHistos") );
+  builder->get_widget("btnCtSaveHistos", btn);
   m_ctw->set_save_histos_btn(btn);
 
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtLoadHistos") );
+  builder->get_widget("btnCtLoadHistos", btn);
   m_ctw->set_load_histos_btn(btn);
 
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveColormap") );
+  builder->get_widget("btnCtSaveColormap", btn);
   m_ctw->set_save_colormap_btn(btn);
 
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtLoadColormap") );
+  builder->get_widget("btnCtLoadColormap", btn);
   m_ctw->set_load_colormap_btn(btn);
 
   Gtk::Scale* scl;
-  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtThreshold") );
+  builder->get_widget("sclCtThreshold", scl);
   m_ctw->set_threshold_scl(scl);
 
-  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtMinProb") );
+  builder->get_widget("sclCtMinProb", scl);
   m_ctw->set_min_prob_scl(scl);
 
-  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtLayerSelector") );
+  builder->get_widget("sclCtLayerSelector", scl);
   m_ctw->set_cm_layer_selector(scl);
 
   Gtk::Image* img;
-  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgCtSegmentation") );
+  builder->get_widget("imgCtSegmentation", img);
   m_ctw->set_segmentation_img(img);
 
-  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgCtColormap") );
+  builder->get_widget("imgCtColormap", img);
   m_ctw->set_colormap_img(img);
 
   Gtk::FileChooserDialog* fcd;
-  fcd = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdFilechooser") );
+  builder->get_widget("fcdFilechooser", fcd);
   m_ctw->set_filechooser_dlg(fcd);
 
 
-  m_btn_ct_seg = dynamic_cast<Gtk::ToggleButton*>( get_widget(ref_xml, "btnCtSeg") );
   m_btn_ct_seg->signal_toggled().connect( sigc::mem_fun(*this, &Firestation::draw_image) );
-  m_spbtn_depth = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmDepth") );
-  m_spbtn_width = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmWidth") );
-  m_spbtn_height = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmHeight") );
   m_ctw->set_cm_selector(m_spbtn_depth, m_spbtn_width, m_spbtn_height);
   // ----------------------------------------------------------------
 
@@ -248,56 +207,57 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_calib_tool = new MirrorCalibTool();
 
 #ifndef HAVE_BULB_CREATOR
-  Gtk::Notebook *nb = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "ntbOptions") );
-  Gtk::HBox *box = dynamic_cast<Gtk::HBox*>( get_widget(ref_xml, "boxMirrorCalib") );
+  Gtk::Notebook *nb;
+  builder->get_widget("ntbOptions", nb);
+  Gtk::HBox *box;
+  builder->get_widget("boxMirrorCalib", box);
   nb->get_tab_label(*box)->set_sensitive(false);
   box->set_sensitive(false);
 #endif /* HAVE_BULB_CREATOR */
 
-  m_btn_mc_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart") );
+  builder->get_widget("btnMcStart", m_btn_mc_start);
+  builder->get_widget("btnCalibLoad", m_btn_mc_load);
+  builder->get_widget("btnCalibSave", m_btn_mc_save);
+  builder->get_widget("entCalibDist", m_ent_mc_dist);
+  builder->get_widget("entCalibOri", m_ent_mc_ori);
+  builder->get_widget("fcdCalibSave", m_fcd_mc_save);
+  builder->get_widget("fcdCalibLoad", m_fcd_mc_load);
+
   m_btn_mc_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start) );
-
-  m_btn_mc_load = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibLoad") );
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
-
-  m_btn_mc_save = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibSave") );
   m_btn_mc_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_save) );
-
-  m_ent_mc_dist = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entCalibDist") );
-  m_ent_mc_ori = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entCalibOri") );
-
-  m_fcd_mc_save = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCalibSave") );
-  m_fcd_mc_load = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCalibLoad") );
   // ----------------------------------------------------------------
 
 
   // --- fuse transfer widget ---------------------------------------
   m_ftw = new FuseTransferWidget();
 
-  Gtk::TreeView* trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseRemoteLuts") );
+  Gtk::TreeView* trv;
+  builder->get_widget("trvFuseRemoteLuts", trv);
   m_ftw->set_remote_lut_list_trv(trv);
-  trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseLocalLuts") );
+  builder->get_widget("trvFuseLocalLuts", trv);
   m_ftw->set_local_lut_list_trv(trv);
-  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgFuseLocal") );
+  builder->get_widget("imgFuseLocal", img);
   m_ftw->set_local_img(img);
-  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgFuseRemote") );
+  builder->get_widget("imgFuseRemote", img);
   m_ftw->set_remote_img(img);
-  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnFuseUpload") );
+  builder->get_widget("btnFuseUpload", btn);
   m_ftw->set_upload_btn(btn);
-  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclLocalLayerSelector") );
+  builder->get_widget("sclLocalLayerSelector", scl);
   m_ftw->set_local_layer_selector(scl);
-  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclRemoteLayerSelector") );
+  builder->get_widget("sclRemoteLayerSelector", scl);
   m_ftw->set_remote_layer_selector(scl);
   // ----------------------------------------------------------------
 
 
   // --- fuse image list widget -------------------------------------
   m_filw = new FuseImageListWidget();
-  trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseImageList") );
+  builder->get_widget("trvFuseImageList", trv);
   m_filw->set_image_list_trv(trv);
-  Gtk::CheckButton* chk = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chkFuseImageListUpdate") );
+  Gtk::CheckButton* chk;
+  builder->get_widget("chkFuseImageListUpdate", chk);
   m_filw->set_auto_update_chk(chk);
-  chk = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chkFuseCompression") );
+  builder->get_widget("chkFuseCompression", chk);
   m_filw->set_toggle_compression_chk(chk);
   m_filw->image_selected().connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
   // ----------------------------------------------------------------
@@ -363,23 +323,6 @@ Firestation::~Firestation()
   delete m_fcd_save_image;
   delete m_dlg_open_shm;
   delete m_dlg_open_fuse;
-}
-
-Gtk::Widget*
-Firestation::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-			const char* widget_name) const
-{
-  Gtk::Widget* widget;
-  ref_xml->get_widget(widget_name, widget);
-  if ( !widget )
-    {
-      std::string err_str = "Couldn't find widget ";
-      err_str += std::string(widget_name);
-      err_str += ".";
-      throw runtime_error(err_str);
-    }
-
-  return widget;
 }
 
 /** Returns reference to main window.
@@ -1177,10 +1120,10 @@ Firestation::mc_load()
 {
   m_fcd_mc_load->set_transient_for(*this);
 
-  Gtk::FileFilter filter_mirror;
-  filter_mirror.set_name("Mirror Calibration");
-  filter_mirror.add_pattern("*.mirror");
-  filter_mirror.add_pattern("*.bulb");
+  Glib::RefPtr<Gtk::FileFilter> filter_mirror = Gtk::FileFilter::create();
+  filter_mirror->set_name("Mirror Calibration");
+  filter_mirror->add_pattern("*.mirror");
+  filter_mirror->add_pattern("*.bulb");
   m_fcd_mc_load->add_filter(filter_mirror);
 
   int result = m_fcd_mc_load->run();

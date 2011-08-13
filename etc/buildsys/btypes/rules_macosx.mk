@@ -26,8 +26,7 @@ $(LIBDIR)/%.dylib: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
+	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(wildcard $(LIBDIRS_$(subst /,_,$*)))) $(addprefix -L,$(wildcard $(LIBDIRS)))
 
@@ -36,8 +35,7 @@ $(PLUGINDIR)/%.dylib: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
+	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 	$(SILENT)$(NM) $@ | grep -q plugin_factory; \

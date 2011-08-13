@@ -38,20 +38,20 @@ using namespace fawkes;
 
 /** Constructor.
  * @param cobject C base object
- * @param ref_xml Glade XML
+ * @param builder Gtk Builder
  */
 PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType* cobject,
-				       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+				       const Glib::RefPtr<Gtk::Builder> builder)
   : Gtk::Window(cobject)
 {
-  ref_xml->get_widget("stbStatus", m_stb_status);
-  ref_xml->get_widget_derived("trvPlugins", m_trv_plugins);
+  builder->get_widget("stbStatus", m_stb_status);
+  builder->get_widget_derived("trvPlugins", m_trv_plugins);
 
 #ifdef HAVE_GCONFMM
   m_trv_plugins->set_gconf_prefix(GCONF_PREFIX);
 #endif
 
-  m_service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect", "wndMain");
+  m_service_selector = new ServiceSelectorCBE(builder, "cbeHosts", "btnConnect", "wndMain");
   m_trv_plugins->set_network_client( m_service_selector->get_network_client() );
 
   m_service_selector->signal_connected().connect(sigc::mem_fun(*this, &PluginGuiGtkWindow::on_connect));

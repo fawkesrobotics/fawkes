@@ -32,7 +32,7 @@
 using namespace fawkes;
 
 /** @class fawkes::ServiceSelectorCBE gui_utils/service_selector_cbe.h
- * This widget consists of a Gtk::ComboBoxEntry and a Gtk::Button. The
+ * This widget consists of a Gtk::ComboBox and a Gtk::Button. The
  * combo box contains all detected services of a given type; upon
  * click the button opens a network connection to the selected service.
  *
@@ -41,7 +41,7 @@ using namespace fawkes;
  */
 
 /** @var fawkes::ServiceSelectorCBE::m_cbe_services
- * A Gtk::ComboBoxEntry that lists all available services.
+ * A Gtk::ComboBox that lists all available services.
  */
 
 /** @var fawkes::ServiceSelectorCBE::m_btn_connect
@@ -70,7 +70,7 @@ using namespace fawkes;
  * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
-ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
 					Gtk::Button* connect,
 					Gtk::Window* parent,
 					const char* service )
@@ -91,7 +91,7 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
  * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
-ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
 					Gtk::ToolButton* connect,
 					Gtk::Window* parent,
 					const char* service )
@@ -106,15 +106,14 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
   initialize();
 }
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
- * @param ref_xml Glade XML file
+ * @param builder Gtk builder
  * @param cbe_name name of the combo box
  * @param btn_name name of the button
  * @param wnd_name name of the parent window
  * @param service service identifier
  */
-ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
+ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gtk::Builder> builder,
 					const char* cbe_name,
 					const char* btn_name,
 					const char* wnd_name,
@@ -122,20 +121,22 @@ ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 {
   m_service_model = new ServiceModel(service);
 
-  ref_xml->get_widget(wnd_name, m_parent);
-  ref_xml->get_widget(cbe_name, m_cbe_services);
-  ref_xml->get_widget(btn_name, m_btn_connect);
+  builder->get_widget(wnd_name, m_parent);
+  builder->get_widget(cbe_name, m_cbe_services);
+  builder->get_widget(btn_name, m_btn_connect);
 
   initialize();
 }
-#endif
 
 /** Initializer method. */
 void
 ServiceSelectorCBE::initialize()
 {
+  if (! m_cbe_services->get_has_entry()) {
+    throw Exception("Service combo box does not have an entry, fix UI file?");
+  }
   m_cbe_services->set_model( m_service_model->get_list_store() );
-  m_cbe_services->set_text_column(m_service_model->get_column_record().name);
+  m_cbe_services->set_entry_text_column(m_service_model->get_column_record().name);
   m_cbe_services->get_entry()->set_activates_default(true);
   m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
   

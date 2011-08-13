@@ -20,6 +20,7 @@ include $(BUILDSYSDIR)/fvconf.mk
 SUBDIRS = core utils interface netcomm blackboard config logging lua plugin \
 	  aspect geometry webview worldinfo_utils gui_utils baseapp \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
+	  eclipse_externals \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
 ifeq ($(HAVE_SIFT),1)
@@ -52,10 +53,11 @@ interfaces: core interface
 gui_utils: core netcomm plugin logging
 logging: core utils netcomm
 naoutils: core utils
-webview: core utils logging
+webview: core utils
 baseapp: core utils aspect config netcomm blackboard plugin logging
-fvutils: core utils netcomm logging
-fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
+eclipse_externals: blackboard interface utils
+fvutils: core utils netcomm
+fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
 fvfilters: fvmodels
 fvmodels: fvclassifiers geometry
 fvstereo: fvcams

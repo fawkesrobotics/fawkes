@@ -65,10 +65,10 @@ using namespace fawkes;
 
 /** Constructor.
  * @param cobject base object type
- * @param ref_xml Glade XML object
+ * @param builder builder to get widgets from
  */
-BatteryMonitorTreeView::BatteryMonitorTreeView( BaseObjectType* cobject,
-						const Glib::RefPtr< Gnome::Glade::Xml >& ref_xml )
+BatteryMonitorTreeView::BatteryMonitorTreeView(BaseObjectType* cobject,
+                                               const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::TreeView( cobject )
 {
   m_battery_list = Gtk::ListStore::create( m_battery_record );
@@ -80,10 +80,10 @@ BatteryMonitorTreeView::BatteryMonitorTreeView( BaseObjectType* cobject,
   append_column_numeric( "Voltage [V]", m_battery_record.voltage, "%.3f" );
   append_column_numeric( "Current [A]", m_battery_record.current, "%.3f" );
 
-  ref_xml->get_widget("dlgWarning", m_dlg_warning);
+  builder->get_widget("dlgWarning", m_dlg_warning);
   m_dlg_warning->hide();
 
-  m_trigger_update.connect( sigc::mem_fun( *this, &BatteryMonitorTreeView::update ) );
+  m_trigger_update.connect(sigc::mem_fun(*this, &BatteryMonitorTreeView::update));
 
   m_relative_soc_threshold = 20.0;
 }
@@ -91,9 +91,10 @@ BatteryMonitorTreeView::BatteryMonitorTreeView( BaseObjectType* cobject,
 /** Destructor. */
 BatteryMonitorTreeView::~BatteryMonitorTreeView()
 {
-  for ( std::map< string, BatteryInterface* >::iterator biit = m_battery_interfaces.begin();
-	biit != m_battery_interfaces.end();
-	++biit )
+  std::map< string, BatteryInterface* >::iterator biit;
+  for (biit = m_battery_interfaces.begin();
+       biit != m_battery_interfaces.end();
+       ++biit)
   {
     std::map< string, BlackBoard* >::iterator rbit;
     rbit = m_remote_bbs.find( biit->first );
@@ -110,9 +111,10 @@ BatteryMonitorTreeView::~BatteryMonitorTreeView()
   }
 
   // delete interface dispatcher
-  for ( std::map< string, InterfaceDispatcher* >::iterator i = m_interface_dispatcher.begin();
-	i != m_interface_dispatcher.end();
-	++i )
+  std::map< string, InterfaceDispatcher* >::iterator i;
+  for (i = m_interface_dispatcher.begin();
+       i != m_interface_dispatcher.end();
+       ++i )
   {
     delete i->second;
   }
@@ -166,7 +168,8 @@ BatteryMonitorTreeView::add_host( const char* h )
       bi = rbb->open_for_reading< BatteryInterface >( "Battery" );
       m_battery_interfaces[ host ] = bi;
 
-      InterfaceDispatcher* id = new InterfaceDispatcher( "BatteryMonitorTreeView", bi );
+      InterfaceDispatcher* id =
+        new InterfaceDispatcher( "BatteryMonitorTreeView", bi );
 
       id->signal_data_changed().connect( sigc::mem_fun( *this,
 							&BatteryMonitorTreeView::on_data_changed ) );

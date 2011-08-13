@@ -25,7 +25,7 @@ LIBS_ffplugingui = stdc++ fawkescore fawkesutils fawkesguiutils
 OBJS_ffplugingui = main.o plugin_gui.o
 OBJS_all = $(OBJS_ffplugingui)
 
-ifeq ($(HAVE_GLADE_GUI),1)
+ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffplugingui
   INST_RESDIRS = guis/plugin_tool
   MANPAGES_gui = $(MANDIR)/man1/ffplugingui.1

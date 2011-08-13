@@ -44,21 +44,19 @@ class ConnectionDispatcher;
 class ServiceSelectorCBE
 {
  public:
-  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+  ServiceSelectorCBE( Gtk::ComboBox* services,
 		      Gtk::Button* connect,
 		      Gtk::Window* parent,
 		      const char* service = "_fawkes._tcp" );
-  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+  ServiceSelectorCBE( Gtk::ComboBox* services,
 		      Gtk::ToolButton* connect,
 		      Gtk::Window* parent,
 		      const char* service = "_fawkes._tcp" );
-#ifdef HAVE_GLADEMM
-  ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
+  ServiceSelectorCBE( Glib::RefPtr<Gtk::Builder> builder,
 		      const char* cbe_name = "cbeServices",
 		      const char* btn_name = "btnConnect",
 		      const char* wnd_name = "wndMain",
 		      const char* service = "_fawkes._tcp" );
-#endif
   virtual ~ServiceSelectorCBE();
 
   FawkesNetworkClient* get_network_client();
@@ -77,7 +75,7 @@ class ServiceSelectorCBE
   void on_disconnected();
 
  protected:
-  Gtk::ComboBoxEntry   *m_cbe_services;
+  Gtk::ComboBox        *m_cbe_services;
   Gtk::Button          *m_btn_connect;
   Gtk::ToolButton      *m_tbtn_connect;
   Gtk::Window          *m_parent;

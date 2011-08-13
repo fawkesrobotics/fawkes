@@ -46,7 +46,7 @@ class FieldView : public Gtk::DrawingArea
   void remove_host( Glib::ustring name );
 
  protected:
-  virtual bool on_expose_event(GdkEventExpose* event);
+  virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &context);
 
  private:
   void draw_field_msl( Cairo::RefPtr<Cairo::Context> context );

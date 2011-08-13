@@ -67,26 +67,26 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
   __fcd_recording->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
   __fcd_recording->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
-  __filter_pdf = new Gtk::FileFilter();
+  __filter_pdf = Gtk::FileFilter::create();
   __filter_pdf->set_name("Portable Document Format (PDF)");
   __filter_pdf->add_pattern("*.pdf");
-  __filter_svg = new Gtk::FileFilter();
+  __filter_svg = Gtk::FileFilter::create();
   __filter_svg->set_name("Scalable Vector Graphic (SVG)");
   __filter_svg->add_pattern("*.svg");
-  __filter_png = new Gtk::FileFilter();
+  __filter_png = Gtk::FileFilter::create();
   __filter_png->set_name("Portable Network Graphic (PNG)");
   __filter_png->add_pattern("*.png");
-  __filter_dot = new Gtk::FileFilter();
+  __filter_dot = Gtk::FileFilter::create();
   __filter_dot->set_name("DOT Graph");
   __filter_dot->add_pattern("*.dot");
-  __fcd_save->add_filter(*__filter_pdf);
-  __fcd_save->add_filter(*__filter_svg);
-  __fcd_save->add_filter(*__filter_png);
-  __fcd_save->add_filter(*__filter_dot);
-  __fcd_save->set_filter(*__filter_pdf);
+  __fcd_save->add_filter(__filter_pdf);
+  __fcd_save->add_filter(__filter_svg);
+  __fcd_save->add_filter(__filter_png);
+  __fcd_save->add_filter(__filter_dot);
+  __fcd_save->set_filter(__filter_pdf);
 
-  __fcd_open->add_filter(*__filter_dot);
-  __fcd_open->set_filter(*__filter_dot);
+  __fcd_open->add_filter(__filter_dot);
+  __fcd_open->set_filter(__filter_dot);
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
 	     Gdk::BUTTON_PRESS_MASK );
@@ -105,10 +105,10 @@ SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
   delete __fcd_save;
   delete __fcd_open;
   delete __fcd_recording;
-  delete __filter_pdf;
-  delete __filter_svg;
-  delete __filter_png;
-  delete __filter_dot;
+  __filter_pdf.reset();
+  __filter_svg.reset();
+  __filter_png.reset();
+  __filter_dot.reset();
 }
 
 
@@ -442,7 +442,7 @@ SkillGuiGraphDrawingArea::save()
   int result = __fcd_save->run();
   if (result == Gtk::RESPONSE_OK) {
 
-    Gtk::FileFilter *f = __fcd_save->get_filter();
+    Glib::RefPtr<Gtk::FileFilter> f = __fcd_save->get_filter();
     std::string filename = __fcd_save->get_filename();
     if (filename != "") {
       if (f == __filter_dot) {

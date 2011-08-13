@@ -25,9 +25,6 @@
 #define __LIBS_GUI_UTILS_THROBBER_H_
 
 #include <gtkmm.h>
-#ifdef HAVE_GLADEMM
-#  include <libglademm/xml.h>
-#endif
 
 namespace fawkes {
 
@@ -35,10 +32,8 @@ class Throbber : public Gtk::Image
 {
  public:
   Throbber(Gtk::IconSize &icon_size);
-#ifdef HAVE_GLADEMM
   Throbber(BaseObjectType* cobject,
-	   const Glib::RefPtr<Gnome::Glade::Xml>& ref_glade);
-#endif
+	   const Glib::RefPtr<Gtk::Builder> &builder);
 
   void set_timeout(unsigned int timeout);
 

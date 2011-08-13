@@ -81,10 +81,10 @@ class SkillGuiGraphDrawingArea
   Gtk::FileChooserDialog *__fcd_save;
   Gtk::FileChooserDialog *__fcd_open;
   Gtk::FileChooserDialog *__fcd_recording;
-  Gtk::FileFilter *__filter_pdf;
-  Gtk::FileFilter *__filter_svg;
-  Gtk::FileFilter *__filter_png;
-  Gtk::FileFilter *__filter_dot;
+  Glib::RefPtr<Gtk::FileFilter> __filter_pdf;
+  Glib::RefPtr<Gtk::FileFilter> __filter_svg;
+  Glib::RefPtr<Gtk::FileFilter> __filter_png;
+  Glib::RefPtr<Gtk::FileFilter> __filter_dot;
 
   sigc::signal<void> __signal_update_disabled;
 

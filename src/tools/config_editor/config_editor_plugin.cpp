@@ -57,8 +57,8 @@ using namespace fawkes;
  * The (main-) dialog of the plugin.
  */
 
-/** @var ConfigEditorPlugin::m_ref_xml
- * Glade XML object created from the Glade file of the plugin.
+/** @var ConfigEditorPlugin::m_builder
+ * Gtk Builder created from the UI file of the plugin.
  */
 
 /** @var ConfigEditorPlugin:: m_config
@@ -72,14 +72,13 @@ using namespace fawkes;
 /** Constructor.
  * @param config_path the prefix of the part that can be configured
  * with this plugin
- * @param glade_file a Glade file which contains the definition the
+ * @param ui_file a Gtk Builder file which contains the definition the
  * plugin's GUI components
  */
-ConfigEditorPlugin::ConfigEditorPlugin( string config_path, 
-					string glade_file )
+ConfigEditorPlugin::ConfigEditorPlugin(string config_path, string ui_file)
 {
   m_config_path = config_path;
-  m_ref_xml = Gnome::Glade::Xml::create( glade_file );
+  m_builder = Gtk::Builder::create_from_file(ui_file);
 }
 
 /** Destructor. */
