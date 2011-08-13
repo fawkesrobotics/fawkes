@@ -43,6 +43,14 @@ LIBS_naoqi_speechsynth = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 			 SpeechSynthInterface
 OBJS_naoqi_speechsynth = speechsynth_plugin.o speechsynth_thread.o
 
+LIBS_naoqi_leds = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		  fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
+		  fawkesnaoqi_dcm_utils \
+		  alcore alcommon alvalue almemoryfastaccess \
+		  boost_serialization-mt boost_signals-mt \
+		  LedInterface NaoJointPositionInterface
+OBJS_naoqi_leds = led_plugin.o led_thread.o
+
 LIBS_libnaofawkes = dl fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkesnaoqiaspect fawkesbaseapp \
 		    fawkesplugin fawkesnaoqibroker\
@@ -58,7 +66,7 @@ OBJS_libfawkesnaoqi_dcm_utils = dcm_utils.o
 
 OBJS_all = $(OBJS_naoqi) $(OBJS_libnaofawkes) $(OBJS_libfawkesnaoqibroker) \
 	$(OBJS_libfawkesnaoqi_dcm_utils) \
-	$(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth)
+	$(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth) $(OBJS_naoqi_leds)
 
 ifeq ($(HAVE_NAOQI),1)
   PRESUBDIRS += aspect
@@ -66,7 +74,8 @@ ifeq ($(HAVE_NAOQI),1)
   CFLAGS  += $(CFLAGS_NAOQI)
   LDFLAGS += $(LDFLAGS_NAOQI)
   PLUGINS_all = $(PLUGINDIR)/naoqi.so $(PLUGINDIR)/naoqi-motion.so \
-		$(PLUGINDIR)/naoqi-speechsynth.so
+		$(PLUGINDIR)/naoqi-speechsynth.so \
+		$(PLUGINDIR)/naoqi-leds.so
   LIBS_all = $(LIBDIR)/libfawkesnaoqibroker.so \
 	     $(LIBDIR)/libfawkesnaoqi_dcm_utils.so \
 	     $(LIBDIR)/libnaofawkes.so
