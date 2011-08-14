@@ -39,7 +39,7 @@ ifeq ($(HAVE_OPENRAVE),1)
 endif
 
 ifeq ($(HAVE_LIBKNI),1)
-  CFLAGS  += $(CFLAGS_LIBKNI)
+  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-error
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE),1)
