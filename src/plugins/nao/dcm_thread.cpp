@@ -26,6 +26,7 @@
 #include <alproxies/dcmproxy.h>
 #include <alproxies/almotionproxy.h>
 #include <alproxies/almemoryproxy.h>
+#include <alproxies/alaudioplayerproxy.h>
 #include <alcore/alerror.h>
 #include <almemoryfastaccess/almemoryfastaccess.h>
 
@@ -186,10 +187,12 @@ void
 NaoQiDCMThread::init()
 {
   // Is the DCM running ?
+  bool is_auplayer_available = false;
   try {
     AL::ALPtr<AL::ALLauncherProxy> launcher(new AL::ALLauncherProxy(naoqi_broker));
     bool is_dcm_available = launcher->isModulePresent("DCM");
     bool is_almotion_available = launcher->isModulePresent("ALMotion");
+    is_auplayer_available = launcher->isModulePresent("ALAudioPlayer");
 
     if (! is_dcm_available) {
       throw Exception("DCMThread: NaoQi DCM is not available");
@@ -442,6 +445,15 @@ NaoQiDCMThread::init()
   __dcm_sigconn =
     __dcm->getGenericProxy()->getModule()->
     atPostProcess(boost::bind(&NaoQiDCMThread::dcm_callback, this));
+
+  // Is the audio player loaded?
+  try {
+    if (is_auplayer_available) {
+      AL::ALPtr<AL::ALAudioPlayerProxy>
+        auplayer(new AL::ALAudioPlayerProxy(naoqi_broker));
+      auplayer->playFile(RESDIR"/sounds/naostartup.wav");
+    }
+  } catch (AL::ALError& e) {} // ignored
 
   
   /*
