@@ -72,7 +72,7 @@ class NaoFawkesModule : public AL::ALModule
 	.plugin_module_flags(fawkes::Module::MODULE_FLAGS_DEFAULT |
 			     fawkes::Module::MODULE_NODELETE)
 	.net_service_name("NaoQi Fawkes on %h")
-	.load_plugins("naoqi,naoqi-motion,webview");
+	.load_plugins("naoqi,naoqi-motion,naoqi-buttons,webview");
 
       if (fawkes::runtime::init(init_options) != 0) {
 	//throw AL::ALError(name, "ctor", "Initializing Fawkes failed");
