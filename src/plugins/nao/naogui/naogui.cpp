@@ -31,6 +31,7 @@
 #include <interfaces/NavigatorInterface.h>
 #include <interfaces/SpeechSynthInterface.h>
 #include <interfaces/LedInterface.h>
+#include <interfaces/SwitchInterface.h>
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/service_chooser_dialog.h>
@@ -341,6 +342,36 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   led_buttons["Ears/Right/288Deg"] = tb_right_ear_288;
   led_buttons["Ears/Right/324Deg"] = tb_right_ear_324;
 
+
+  builder->get_widget("but_chestbut",     but_chestbut);
+  builder->get_widget("but_head_front",   but_head_front);
+  builder->get_widget("but_head_middle",  but_head_middle);
+  builder->get_widget("but_head_rear",    but_head_rear);
+  builder->get_widget("but_lfoot_bumper", but_lfoot_bumper);
+  builder->get_widget("but_rfoot_bumper", but_rfoot_bumper);
+
+  std::map<std::string, std::string> widget_if_map;
+  widget_if_map["Chest"]       = "chestbut";
+  widget_if_map["Foot Left"]   = "lfoot_bumper";
+  widget_if_map["Foot Right"]  = "rfoot_bumper";
+  widget_if_map["Head Front"]  = "head_front";
+  widget_if_map["Head Middle"] = "head_middle";
+  widget_if_map["Head Rear"]   = "head_rear";
+
+  std::map<std::string, std::string>::iterator m;
+  for (m = widget_if_map.begin(); m != widget_if_map.end(); ++m) {
+    ButtonLabelSet labels;
+
+    builder->get_widget("lab_enabled_" + m->second, labels.lab_enabled);
+    builder->get_widget("lab_history_" + m->second, labels.lab_history);
+    builder->get_widget("lab_value_" + m->second, labels.lab_value);
+    builder->get_widget("lab_short_" + m->second, labels.lab_short);
+    builder->get_widget("lab_long_" + m->second, labels.lab_long);
+    builder->get_widget("lab_total_" + m->second, labels.lab_total);
+
+    button_labels[m->first] = labels;
+  }
+
   cmb_kick_leg->set_active(0);
   cmb_standup_from->set_active(0);
   cmb_us_direction->set_active(0);
@@ -453,6 +484,19 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   scl_right_foot_r->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "RFoot/Red", scl_right_foot_r));
   scl_right_foot_g->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "RFoot/Green", scl_right_foot_g));
   scl_right_foot_b->signal_button_release_event().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_slider_button_release), "RFoot/Blue", scl_right_foot_b));
+
+  but_chestbut->signal_pressed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_pressed), "Chest"));
+  but_chestbut->signal_released().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_released), "Chest"));
+  but_head_front->signal_pressed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_pressed), "Head Front"));
+  but_head_front->signal_released().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_released), "Head Front"));
+  but_head_middle->signal_pressed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_pressed), "Head Middle"));
+  but_head_middle->signal_released().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_released), "Head Middle"));
+  but_head_rear->signal_pressed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_pressed), "Head Rear"));
+  but_head_rear->signal_released().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_released), "Head Rear"));
+  but_lfoot_bumper->signal_pressed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_pressed), "Foot Left"));
+  but_lfoot_bumper->signal_released().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_released), "Foot Left"));
+  but_rfoot_bumper->signal_pressed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_pressed), "Foot Right"));
+  but_rfoot_bumper->signal_released().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_click_released), "Foot Right"));
 
   connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connect));
   connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_disconnect));
@@ -926,32 +970,62 @@ NaoGuiGtkWindow::on_connect()
     std::list<fawkes::Interface *> led_ifs_l =
       bb->open_multiple_for_reading("LedInterface", "Nao LED *");
 
-    std::list<fawkes::Interface *>::iterator li;
-    for (li = led_ifs_l.begin(); li != led_ifs_l.end(); ++li) {
+    std::list<fawkes::Interface *>::iterator li = led_ifs_l.begin();
+    while (li != led_ifs_l.end()) {
       std::string id = (*li)->id();
       std::string::size_type last_space  = id.rfind(" ");
       std::string device = id.substr(last_space + 1);
 
       LedInterface *led_if = dynamic_cast<LedInterface *>(*li);
-      if (led_if == NULL)  continue;
+      if (led_if == NULL) {
+        bb->close(*li);
+        li = led_ifs_l.erase(li);
+        continue;
+      } else {
+        ++li;
+      }
 
       on_led_data_changed(led_if);
-
       led_ifs[device] = led_if;
+    }
+
+    std::list<fawkes::Interface *> button_ifs_l =
+      bb->open_multiple_for_reading("SwitchInterface", "Nao Button *");
+
+    li = button_ifs_l.begin();
+    while (li != button_ifs_l.end()) {
+      std::string id = (*li)->id();
+      std::string::size_type start  = std::string("Nao Button ").size();
+      std::string device = id.substr(start);
+
+      SwitchInterface *switch_if = dynamic_cast<SwitchInterface *>(*li);
+      if (switch_if == NULL) {
+        bb->close(*li);
+        li = button_ifs_l.erase(li);
+        continue;
+      } else {
+        ++li;
+      }
+
+      on_button_data_changed(switch_if);
+      button_ifs[device] = switch_if;
     }
 
     ifd_jointpos = new InterfaceDispatcher("NaoJointPosIfaceDisp", jointpos_if);
     ifd_sensor = new InterfaceDispatcher("NaoSensorIfaceDisp", sensor_if);
     ifd_tts = new InterfaceDispatcher("NaoTTSIfaceDisp", speechsynth_if);
     ifd_leds = new InterfaceDispatcher("NaoLedsIfaceDisp", led_ifs_l);
+    ifd_buttons = new InterfaceDispatcher("NaoButtonsIfaceDisp", button_ifs_l);
     ifd_jointpos->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_jointpos_values), false)));
     ifd_sensor->signal_data_changed().connect(sigc::hide(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_sensor_values), false)));
     ifd_tts->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &NaoGuiGtkWindow::update_tts)));
     ifd_leds->signal_data_changed().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_led_data_changed));
+    ifd_buttons->signal_data_changed().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_button_data_changed));
     bb->register_listener(ifd_jointpos, BlackBoard::BBIL_FLAG_DATA);
     bb->register_listener(ifd_sensor, BlackBoard::BBIL_FLAG_DATA);
     bb->register_listener(ifd_tts, BlackBoard::BBIL_FLAG_DATA);
     bb->register_listener(ifd_leds, BlackBoard::BBIL_FLAG_DATA);
+    bb->register_listener(ifd_buttons, BlackBoard::BBIL_FLAG_DATA);
 
     tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
 
@@ -976,6 +1050,7 @@ NaoGuiGtkWindow::on_connect()
       bb->unregister_listener(ifd_sensor);
       bb->unregister_listener(ifd_tts);
       bb->unregister_listener(ifd_leds);
+      bb->unregister_listener(ifd_buttons);
       bb->close(jointpos_if);
       bb->close(jointstiff_if);
       bb->close(sensor_if);
@@ -1028,6 +1103,7 @@ NaoGuiGtkWindow::on_disconnect()
     bb->unregister_listener(ifd_sensor);
     bb->unregister_listener(ifd_tts);
     bb->unregister_listener(ifd_leds);
+    bb->unregister_listener(ifd_buttons);
     bb->close(jointpos_if);
     bb->close(jointstiff_if);
     bb->close(sensor_if);
@@ -1042,10 +1118,17 @@ NaoGuiGtkWindow::on_disconnect()
     }
     led_ifs.clear();
 
+    std::map<std::string, fawkes::SwitchInterface *>::iterator si;
+    for (si = button_ifs.begin(); si != button_ifs.end(); ++si) {
+      bb->close(si->second);
+    }
+    button_ifs.clear();
+
     delete ifd_jointpos;
     delete ifd_sensor;
     delete ifd_tts;
     delete ifd_leds;
+    delete ifd_buttons;
     delete bb;
     jointpos_if = NULL;
     jointstiff_if = NULL;
@@ -1059,6 +1142,7 @@ NaoGuiGtkWindow::on_disconnect()
     ifd_sensor = NULL;
     ifd_tts = NULL;
     ifd_leds = NULL;
+    ifd_buttons = NULL;
   }
 
   tb_connection->set_stock_id(Gtk::Stock::CONNECT);
@@ -1588,12 +1672,82 @@ NaoGuiGtkWindow::on_led_data_changed(fawkes::Interface *iface)
 
   LedInterface *led_if = dynamic_cast<LedInterface *>(iface);
   if ((led_if != NULL) && (led_scales.find(device) != led_scales.end())) {
-    led_if->read();
-    led_scales[device]->set_value(led_if->intensity());
+    try {
+      led_if->read();
+      led_scales[device]->set_value(led_if->intensity());
+    } catch (Exception &e) {}
   }
 
   if ((led_if != NULL) && (led_buttons.find(device) != led_buttons.end())) {
-    led_if->read();
-    led_buttons[device]->set_active(led_if->intensity() >= .5);
+    try {
+      led_if->read();
+      led_buttons[device]->set_active(led_if->intensity() >= .5);
+    } catch (Exception &e) {}
   }
 }
+
+
+void
+NaoGuiGtkWindow::on_button_click_pressed(std::string iface_id)
+{
+  if (button_ifs.find(iface_id) != button_ifs.end()) {
+    try {
+      SwitchInterface::EnableSwitchMessage *msg =
+        new SwitchInterface::EnableSwitchMessage();
+      button_ifs[iface_id]->msgq_enqueue(msg);
+    } catch (Exception &e) {}
+  }
+}
+
+void
+NaoGuiGtkWindow::on_button_click_released(std::string iface_id)
+{
+  if (button_ifs.find(iface_id) != button_ifs.end()) {
+    try {
+      SwitchInterface::DisableSwitchMessage *msg =
+        new SwitchInterface::DisableSwitchMessage();
+      button_ifs[iface_id]->msgq_enqueue(msg);
+    } catch (Exception &e) {}
+  }
+}
+
+void
+NaoGuiGtkWindow::on_button_data_changed(fawkes::Interface *iface)
+{
+  std::string id = iface->id();
+  std::string::size_type start  = std::string("Nao Button ").size();
+  std::string device = id.substr(start);
+
+  SwitchInterface *switch_if = dynamic_cast<SwitchInterface *>(iface);
+  if ((switch_if != NULL) && (button_labels.find(device) != button_labels.end())) {
+    try {
+      switch_if->read();
+      ButtonLabelSet &l = button_labels[device];
+      if (switch_if->is_enabled() && l.lab_enabled->get_text() == "No") {
+        l.lab_enabled->set_text("Yes");
+      }
+      if (! switch_if->is_enabled() && l.lab_enabled->get_text() == "Yes") {
+        l.lab_enabled->set_text("No");
+      }
+
+      Glib::ustring s;
+      s = convert_float2str(switch_if->history(), 3);
+      if (l.lab_history->get_text() != s)  l.lab_history->set_text(s);
+
+      s = convert_float2str(switch_if->value(), 1);
+      if (l.lab_value->get_text() != s)  l.lab_value->set_text(s);
+
+      s = convert_float2str(switch_if->short_activations(), 0);
+      if (l.lab_short->get_text() != s)  l.lab_short->set_text(s);
+
+      s = convert_float2str(switch_if->long_activations(), 0);
+      if (l.lab_long->get_text() != s)  l.lab_long->set_text(s);
+
+      s = convert_float2str(switch_if->activation_count(), 0);
+      if (l.lab_total->get_text() != s)  l.lab_total->set_text(s);
+    } catch (Exception &e) {}
+  } else {
+    printf("Could not find %s\n", device.c_str());
+  }
+}
+

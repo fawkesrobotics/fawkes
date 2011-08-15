@@ -24,7 +24,7 @@ LIBS_ffnaogui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		fawkesguiutils fawkesinterface \
 	        NaoJointPositionInterface NaoJointStiffnessInterface \
 		NaoSensorInterface SpeechSynthInterface LedInterface \
-		HumanoidMotionInterface NavigatorInterface
+		HumanoidMotionInterface NavigatorInterface SwitchInterface
 OBJS_ffnaogui = main.o naogui.o
 OBJS_all = $(OBJS_ffnaogui)
 

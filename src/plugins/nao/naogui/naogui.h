@@ -29,6 +29,7 @@
 
 namespace fawkes {
   class BlackBoard;
+  class Interface;
   class NaoJointPositionInterface;
   class NaoJointStiffnessInterface;
   class NaoSensorInterface;
@@ -37,7 +38,7 @@ namespace fawkes {
   class SpeechSynthInterface;
   class InterfaceDispatcher;
   class LedInterface;
-  class Interface;
+  class SwitchInterface;
 }
 
 class NaoGuiGtkWindow : public Gtk::Window
@@ -60,6 +61,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   void update_tts();
 
   void on_led_data_changed(fawkes::Interface *iface);
+  void on_button_data_changed(fawkes::Interface *iface);
 
   void on_stiffness_clicked();
   void on_control_toggled();
@@ -97,6 +99,9 @@ class NaoGuiGtkWindow : public Gtk::Window
   bool on_led_slider_button_release(GdkEventButton *event,
                                     std::string iface_id, Gtk::Scale *scl);
 
+  void on_button_click_pressed(std::string iface_id);
+  void on_button_click_released(std::string iface_id);
+
   bool convert_str2float(Glib::ustring sn, float *f);
   Glib::ustring convert_float2str(float f, unsigned int width = 2);
 
@@ -109,6 +114,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   fawkes::InterfaceDispatcher *ifd_sensor;
   fawkes::InterfaceDispatcher *ifd_tts;
   fawkes::InterfaceDispatcher *ifd_leds;
+  fawkes::InterfaceDispatcher *ifd_buttons;
   fawkes::NaoJointPositionInterface *jointpos_if;
   fawkes::NaoJointStiffnessInterface *jointstiff_if;
   fawkes::NaoSensorInterface *sensor_if;
@@ -357,6 +363,24 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::ToggleButton *tb_right_ear_324;
 
   Gtk::ToggleButton *tb_control_leds;
+
+  Gtk::Button *but_chestbut;
+  Gtk::Button *but_head_front;
+  Gtk::Button *but_head_middle;
+  Gtk::Button *but_head_rear;
+  Gtk::Button *but_lfoot_bumper;
+  Gtk::Button *but_rfoot_bumper;
+
+  typedef struct {
+    Gtk::Label  *lab_enabled;
+    Gtk::Label  *lab_history;
+    Gtk::Label  *lab_value;
+    Gtk::Label  *lab_short;
+    Gtk::Label  *lab_long;
+    Gtk::Label  *lab_total;
+  } ButtonLabelSet;
+  std::map<std::string, ButtonLabelSet> button_labels;
+  std::map<std::string, fawkes::SwitchInterface *> button_ifs;
 
   unsigned int update_cycle;
 };
