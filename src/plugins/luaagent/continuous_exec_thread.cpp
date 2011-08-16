@@ -25,7 +25,7 @@
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
 #include <core/threading/mutex.h>
-#include <utils/logging/component.h>
+#include <logging/component.h>
 
 #include <lua/context.h>
 #include <lua/interface_importer.h>
