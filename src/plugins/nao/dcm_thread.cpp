@@ -61,7 +61,12 @@ enum SensorType {  HEAD_PITCH = 0, HEAD_YAW,
 		   L_FSR_FL, L_FSR_FR, L_FSR_RL, L_FSR_RR,
 		   R_FSR_FL, R_FSR_FR, R_FSR_RL, R_FSR_RR,
 		   L_COP_X, L_COP_Y, L_TOTAL_WEIGHT, R_COP_X, R_COP_Y,
-		   R_TOTAL_WEIGHT, ULTRASONIC_DISTANCE,
+		   R_TOTAL_WEIGHT,
+                   ULTRASONIC_DIRECTION, ULTRASONIC_DISTANCE,
+                   ULTRASONIC_DISTANCE_LEFT_0, ULTRASONIC_DISTANCE_LEFT_1,
+                   ULTRASONIC_DISTANCE_LEFT_2, ULTRASONIC_DISTANCE_LEFT_3,
+                   ULTRASONIC_DISTANCE_RIGHT_0, ULTRASONIC_DISTANCE_RIGHT_1,
+                   ULTRASONIC_DISTANCE_RIGHT_2, ULTRASONIC_DISTANCE_RIGHT_3,
 		   L_FOOT_BUMPER_L, L_FOOT_BUMPER_R,
 		   R_FOOT_BUMPER_L, R_FOOT_BUMPER_R,
 		   HEAD_TOUCH_FRONT, HEAD_TOUCH_MIDDLE, HEAD_TOUCH_REAR,
@@ -226,6 +231,8 @@ NaoQiDCMThread::init()
       __robot_version[0] = atoi(version_major.c_str());
       __robot_version[1] = atoi(version_minor.c_str());
     }
+    __usboard_version =
+      almemory->getData("Device/DeviceList/USBoard/ProgVersion", 0);
   } catch (AL::ALError &e) {
     throw Exception("Retrieving robot info failed: %s", e.toString().c_str());
   }
@@ -323,7 +330,18 @@ NaoQiDCMThread::init()
   keys[R_TOTAL_WEIGHT] = prefix + "RFoot/FSR/TotalWeight/Sensor/Value";
 
   // Ultrasonic
-  keys[ULTRASONIC_DISTANCE] = prefix + "US/Sensor/Value";
+  keys[ULTRASONIC_DIRECTION]        = prefix + "US/Actuator/Value";
+  keys[ULTRASONIC_DISTANCE]         = prefix + "US/Sensor/Value";
+
+  keys[ULTRASONIC_DISTANCE_LEFT_0]  = prefix + "US/Left/Sensor/Value";
+  keys[ULTRASONIC_DISTANCE_LEFT_1]  = prefix + "US/Left/Sensor/Value1";
+  keys[ULTRASONIC_DISTANCE_LEFT_2]  = prefix + "US/Left/Sensor/Value2";
+  keys[ULTRASONIC_DISTANCE_LEFT_3]  = prefix + "US/Left/Sensor/Value3";
+
+  keys[ULTRASONIC_DISTANCE_RIGHT_0] = prefix + "US/Right/Sensor/Value";
+  keys[ULTRASONIC_DISTANCE_RIGHT_1] = prefix + "US/Right/Sensor/Value1";
+  keys[ULTRASONIC_DISTANCE_RIGHT_2] = prefix + "US/Right/Sensor/Value2";
+  keys[ULTRASONIC_DISTANCE_RIGHT_3] = prefix + "US/Right/Sensor/Value3";
 
   // Bumpers and Buttons
   keys[L_FOOT_BUMPER_L]     = prefix + "LFoot/Bumper/Left/Sensor/Value";
@@ -432,6 +450,9 @@ NaoQiDCMThread::init()
   __joint_pos_if->set_robot_version(__robot_version);
   __joint_pos_highfreq_if->set_robot_type(__robot_type);
   __joint_pos_highfreq_if->set_robot_version(__robot_version);
+
+  __sensor_if->set_ultrasonic_direction(NaoSensorInterface::USD_NONE);
+  __sensor_highfreq_if->set_ultrasonic_direction(NaoSensorInterface::USD_NONE);
 
   // Write once the current data on startup
   update_interfaces(__joint_pos_if, __joint_stiffness_if, __sensor_if);
@@ -653,7 +674,46 @@ NaoQiDCMThread::update_interfaces(NaoJointPositionInterface *joint_pos_if,
   sensor_if->set_angle_y(__values[ANGLE_Y]);
 
   // Ultrasonic sound
-  sensor_if->set_ultrasonic_distance(__values[ULTRASONIC_DISTANCE]);
+  NaoSensorInterface::UltrasonicDirection us_dir =
+    sensor_if->ultrasonic_direction();
+  switch (us_dir) {
+  case NaoSensorInterface::USD_LEFT_LEFT:
+  case NaoSensorInterface::USD_RIGHT_LEFT:
+    {
+      float us_left[4] = {__values[ULTRASONIC_DISTANCE], 0, 0, 0};
+      sensor_if->set_ultrasonic_distance_left(us_left);
+
+      float us_right[4] = {0, 0, 0, 0};
+      sensor_if->set_ultrasonic_distance_right(us_right);
+    }
+    break;
+  case NaoSensorInterface::USD_LEFT_RIGHT:
+  case NaoSensorInterface::USD_RIGHT_RIGHT:
+    {
+      float us_left[4] = {0, 0, 0, 0};
+      sensor_if->set_ultrasonic_distance_left(us_left);
+
+      float us_right[4] = {__values[ULTRASONIC_DISTANCE], 0, 0, 0};
+      sensor_if->set_ultrasonic_distance_right(us_right);
+    }
+    break;
+
+  default:
+    {
+      float us_left[4] = {__values[ULTRASONIC_DISTANCE_LEFT_0],
+                          __values[ULTRASONIC_DISTANCE_LEFT_1],
+                          __values[ULTRASONIC_DISTANCE_LEFT_2],
+                          __values[ULTRASONIC_DISTANCE_LEFT_3]};
+      sensor_if->set_ultrasonic_distance_left(us_left);
+
+      float us_right[4] = {__values[ULTRASONIC_DISTANCE_RIGHT_0],
+                           __values[ULTRASONIC_DISTANCE_RIGHT_1],
+                           __values[ULTRASONIC_DISTANCE_RIGHT_2],
+                           __values[ULTRASONIC_DISTANCE_RIGHT_3]};
+      sensor_if->set_ultrasonic_distance_right(us_right);
+    }
+    break;
+  }
 
   // Battery
   sensor_if->set_battery_charge(__values[BATTERY_CHARGE]);
@@ -668,6 +728,7 @@ NaoQiDCMThread::update_interfaces(NaoJointPositionInterface *joint_pos_if,
 void
 NaoQiDCMThread::process_messages()
 {
+  // *** Joint position messages
   while (! __joint_pos_if->msgq_empty()) {
     if (NaoJointPositionInterface::SetServoMessage *msg =
 	__joint_pos_if->msgq_first_safe(msg))
@@ -701,13 +762,14 @@ NaoQiDCMThread::process_messages()
     __joint_pos_if->msgq_pop();
   }
 
+  // *** Joint stiffness messages
   while (! __joint_stiffness_if->msgq_empty()) {
     if (NaoJointStiffnessInterface::SetStiffnessMessage *msg =
 	__joint_stiffness_if->msgq_first_safe(msg))
     {
       /* DCM version, disfunctional due to ALMotion deficiencies
       send_commands(msg->servo(), "Hardness", msg->value(),
-		    (int)roundf(1000. * msg->time_sec()));
+		    "Merge", (int)roundf(1000. * msg->time_sec()));
       */
 
 
@@ -786,6 +848,40 @@ NaoQiDCMThread::process_messages()
 
     __joint_stiffness_if->msgq_pop();
   }
+
+  // *** Sensor messages
+  while (! __sensor_if->msgq_empty()) {
+    if (NaoSensorInterface::EmitUltrasonicWaveMessage *msg =
+	__sensor_if->msgq_first_safe(msg))
+    {
+      int value = ultrasonic_value(msg->ultrasonic_direction());
+      send_command("US/Actuator/Value", value, "ClearAll", 0);
+
+      __sensor_if->set_ultrasonic_direction(msg->ultrasonic_direction());
+      __sensor_highfreq_if->set_ultrasonic_direction(msg->ultrasonic_direction());
+
+    } else if (NaoSensorInterface::StartUltrasonicMessage *msg =
+	__sensor_if->msgq_first_safe(msg))
+    {
+      int value = ultrasonic_value(msg->ultrasonic_direction());
+      value += 64;
+      send_command("US/Actuator/Value", value, "ClearAll", 0);
+
+      __sensor_if->set_ultrasonic_direction(msg->ultrasonic_direction());
+      __sensor_highfreq_if->set_ultrasonic_direction(msg->ultrasonic_direction());
+
+    } else if (NaoSensorInterface::StopUltrasonicMessage *msg =
+	__sensor_if->msgq_first_safe(msg))
+    {
+      send_command("US/Actuator/Value", 0, "ClearAll", 0);
+
+      __sensor_if->set_ultrasonic_direction(NaoSensorInterface::USD_NONE);
+      __sensor_highfreq_if->set_ultrasonic_direction(NaoSensorInterface::USD_NONE);
+    }
+
+    __sensor_if->msgq_pop();
+  }
+
 }
 
 
@@ -814,12 +910,13 @@ NaoQiDCMThread::send_commands(unsigned int servos, std::string what,
       v = CLIP_VALUE(R_SHOULDER_PITCH, value);
     }
     send_command(*s + "/" + what + "/Actuator/Value",
-		 v, time_offset);
+		 v, "Merge", time_offset);
   }
 }
 
 void
-NaoQiDCMThread::send_command(std::string name, float value, int time_offset)
+NaoQiDCMThread::send_command(std::string name, float value,
+                             std::string kind, int time_offset)
 {
   AL::ALValue cmd;
 
@@ -831,7 +928,7 @@ NaoQiDCMThread::send_command(std::string name, float value, int time_offset)
 
   cmd.arraySetSize(3);
   cmd[0] = name;
-  cmd[1] = std::string("Merge");
+  cmd[1] = kind;
   cmd[2].arraySetSize(1);
   cmd[2][0].arraySetSize(2);
   cmd[2][0][0] = value;
@@ -913,4 +1010,22 @@ NaoQiDCMThread::parse_servo_bitfield(unsigned int servos)
     servonames.push_back("RAnkleRoll");
 
   return servonames;
+}
+
+
+int
+NaoQiDCMThread::ultrasonic_value(fawkes::NaoSensorInterface::UltrasonicDirection direction)
+{
+  int value = 0;
+  switch (direction) {
+  case NaoSensorInterface::USD_LEFT_LEFT:   value =  0; break;
+  case NaoSensorInterface::USD_LEFT_RIGHT:  value =  1; break;
+  case NaoSensorInterface::USD_RIGHT_LEFT:  value =  2; break;
+  case NaoSensorInterface::USD_RIGHT_RIGHT: value =  3; break;
+  case NaoSensorInterface::USD_BOTH_BOTH:   value = 12; break;
+  default:
+    logger->log_warn(name(), "Illegal ultrasonic direction, "
+                     "using left-right");
+  }
+  return value;
 }

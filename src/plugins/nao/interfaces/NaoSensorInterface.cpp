@@ -39,14 +39,6 @@ namespace fawkes {
  */
 
 
-/** USD_left_left constant */
-const float NaoSensorInterface::USD_left_left = 0.0;
-/** USD_left_right constant */
-const float NaoSensorInterface::USD_left_right = 1.0;
-/** USD_right_left constant */
-const float NaoSensorInterface::USD_right_left = 2.0;
-/** USD_right_right constant */
-const float NaoSensorInterface::USD_right_right = 3.0;
 
 /** Constructor */
 NaoSensorInterface::NaoSensorInterface() : Interface()
@@ -78,8 +70,9 @@ NaoSensorInterface::NaoSensorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "l_cop_y", 1, &data->l_cop_y);
   add_fieldinfo(IFT_FLOAT, "r_cop_x", 1, &data->r_cop_x);
   add_fieldinfo(IFT_FLOAT, "r_cop_y", 1, &data->r_cop_y);
-  add_fieldinfo(IFT_FLOAT, "ultrasonic_distance", 1, &data->ultrasonic_distance);
-  add_fieldinfo(IFT_FLOAT, "ultrasonic_direction", 1, &data->ultrasonic_direction);
+  add_fieldinfo(IFT_FLOAT, "ultrasonic_distance_left", 4, &data->ultrasonic_distance_left);
+  add_fieldinfo(IFT_FLOAT, "ultrasonic_distance_right", 4, &data->ultrasonic_distance_right);
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
   add_fieldinfo(IFT_UINT8, "l_foot_bumper_l", 1, &data->l_foot_bumper_l);
   add_fieldinfo(IFT_UINT8, "l_foot_bumper_r", 1, &data->l_foot_bumper_r);
   add_fieldinfo(IFT_UINT8, "r_foot_bumper_l", 1, &data->r_foot_bumper_l);
@@ -90,7 +83,9 @@ NaoSensorInterface::NaoSensorInterface() : Interface()
   add_fieldinfo(IFT_UINT8, "chest_button", 1, &data->chest_button);
   add_fieldinfo(IFT_FLOAT, "battery_charge", 1, &data->battery_charge);
   add_messageinfo("EmitUltrasonicWaveMessage");
-  unsigned char tmp_hash[] = {0xbe, 0x69, 0x25, 0xb3, 0x95, 0xae, 0xd1, 0x9, 0xe9, 0x27, 0x13, 0x93, 0xd6, 0xb3, 0xb7, 0x98};
+  add_messageinfo("StartUltrasonicMessage");
+  add_messageinfo("StopUltrasonicMessage");
+  unsigned char tmp_hash[] = {0x41, 0x41, 0x54, 0x94, 0xca, 0xe8, 0x3d, 0x7a, 0xb8, 0xaa, 0xc2, 0x4e, 0x2c, 0xac, 0xcb, 0x15};
   set_hash(tmp_hash);
 }
 
@@ -98,6 +93,23 @@ NaoSensorInterface::NaoSensorInterface() : Interface()
 NaoSensorInterface::~NaoSensorInterface()
 {
   free(data_ptr);
+}
+/** Convert UltrasonicDirection constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+NaoSensorInterface::tostring_UltrasonicDirection(UltrasonicDirection value) const
+{
+  switch (value) {
+  case USD_NONE: return "USD_NONE";
+  case USD_LEFT_LEFT: return "USD_LEFT_LEFT";
+  case USD_LEFT_RIGHT: return "USD_LEFT_RIGHT";
+  case USD_RIGHT_RIGHT: return "USD_RIGHT_RIGHT";
+  case USD_RIGHT_LEFT: return "USD_RIGHT_LEFT";
+  case USD_BOTH_BOTH: return "USD_BOTH_BOTH";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get accel_x value.
@@ -782,45 +794,158 @@ NaoSensorInterface::set_r_cop_y(const float new_r_cop_y)
   data_changed = true;
 }
 
-/** Get ultrasonic_distance value.
- * Ultrasonic sensor reading
- * @return ultrasonic_distance value
+/** Get ultrasonic_distance_left value.
+ * 
+      First four ultrasonic sensor readings from left receiver. Distance
+      to detected object is in meters.
+    
+ * @return ultrasonic_distance_left value
  */
-float
-NaoSensorInterface::ultrasonic_distance() const
+float *
+NaoSensorInterface::ultrasonic_distance_left() const
 {
-  return data->ultrasonic_distance;
+  return data->ultrasonic_distance_left;
 }
 
-/** Get maximum length of ultrasonic_distance value.
- * @return length of ultrasonic_distance value, can be length of the array or number of 
+/** Get ultrasonic_distance_left value at given index.
+ * 
+      First four ultrasonic sensor readings from left receiver. Distance
+      to detected object is in meters.
+    
+ * @param index index of value
+ * @return ultrasonic_distance_left value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+NaoSensorInterface::ultrasonic_distance_left(unsigned int index) const
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  return data->ultrasonic_distance_left[index];
+}
+
+/** Get maximum length of ultrasonic_distance_left value.
+ * @return length of ultrasonic_distance_left value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoSensorInterface::maxlenof_ultrasonic_distance() const
+NaoSensorInterface::maxlenof_ultrasonic_distance_left() const
 {
-  return 1;
+  return 4;
 }
 
-/** Set ultrasonic_distance value.
- * Ultrasonic sensor reading
- * @param new_ultrasonic_distance new ultrasonic_distance value
+/** Set ultrasonic_distance_left value.
+ * 
+      First four ultrasonic sensor readings from left receiver. Distance
+      to detected object is in meters.
+    
+ * @param new_ultrasonic_distance_left new ultrasonic_distance_left value
  */
 void
-NaoSensorInterface::set_ultrasonic_distance(const float new_ultrasonic_distance)
+NaoSensorInterface::set_ultrasonic_distance_left(const float * new_ultrasonic_distance_left)
 {
-  data->ultrasonic_distance = new_ultrasonic_distance;
+  memcpy(data->ultrasonic_distance_left, new_ultrasonic_distance_left, sizeof(float) * 4);
   data_changed = true;
 }
 
-/** Get ultrasonic_direction value.
- * Direction that was used to gather the ultrasonic reading.
- * @return ultrasonic_direction value
+/** Set ultrasonic_distance_left value at given index.
+ * 
+      First four ultrasonic sensor readings from left receiver. Distance
+      to detected object is in meters.
+    
+ * @param new_ultrasonic_distance_left new ultrasonic_distance_left value
+ * @param index index for of the value
+ */
+void
+NaoSensorInterface::set_ultrasonic_distance_left(unsigned int index, const float new_ultrasonic_distance_left)
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  data->ultrasonic_distance_left[index] = new_ultrasonic_distance_left;
+}
+/** Get ultrasonic_distance_right value.
+ * 
+      First four ultrasonic sensor readings from right receiver. Distance
+      to detected object is in meters.
+    
+ * @return ultrasonic_distance_right value
+ */
+float *
+NaoSensorInterface::ultrasonic_distance_right() const
+{
+  return data->ultrasonic_distance_right;
+}
+
+/** Get ultrasonic_distance_right value at given index.
+ * 
+      First four ultrasonic sensor readings from right receiver. Distance
+      to detected object is in meters.
+    
+ * @param index index of value
+ * @return ultrasonic_distance_right value
+ * @exception Exception thrown if index is out of bounds
  */
 float
+NaoSensorInterface::ultrasonic_distance_right(unsigned int index) const
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  return data->ultrasonic_distance_right[index];
+}
+
+/** Get maximum length of ultrasonic_distance_right value.
+ * @return length of ultrasonic_distance_right value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoSensorInterface::maxlenof_ultrasonic_distance_right() const
+{
+  return 4;
+}
+
+/** Set ultrasonic_distance_right value.
+ * 
+      First four ultrasonic sensor readings from right receiver. Distance
+      to detected object is in meters.
+    
+ * @param new_ultrasonic_distance_right new ultrasonic_distance_right value
+ */
+void
+NaoSensorInterface::set_ultrasonic_distance_right(const float * new_ultrasonic_distance_right)
+{
+  memcpy(data->ultrasonic_distance_right, new_ultrasonic_distance_right, sizeof(float) * 4);
+  data_changed = true;
+}
+
+/** Set ultrasonic_distance_right value at given index.
+ * 
+      First four ultrasonic sensor readings from right receiver. Distance
+      to detected object is in meters.
+    
+ * @param new_ultrasonic_distance_right new ultrasonic_distance_right value
+ * @param index index for of the value
+ */
+void
+NaoSensorInterface::set_ultrasonic_distance_right(unsigned int index, const float new_ultrasonic_distance_right)
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  data->ultrasonic_distance_right[index] = new_ultrasonic_distance_right;
+}
+/** Get ultrasonic_direction value.
+ * 
+      Direction that was used to gather the ultrasonic readings.
+    
+ * @return ultrasonic_direction value
+ */
+NaoSensorInterface::UltrasonicDirection
 NaoSensorInterface::ultrasonic_direction() const
 {
-  return data->ultrasonic_direction;
+  return (NaoSensorInterface::UltrasonicDirection)data->ultrasonic_direction;
 }
 
 /** Get maximum length of ultrasonic_direction value.
@@ -834,11 +959,13 @@ NaoSensorInterface::maxlenof_ultrasonic_direction() const
 }
 
 /** Set ultrasonic_direction value.
- * Direction that was used to gather the ultrasonic reading.
+ * 
+      Direction that was used to gather the ultrasonic readings.
+    
  * @param new_ultrasonic_direction new ultrasonic_direction value
  */
 void
-NaoSensorInterface::set_ultrasonic_direction(const float new_ultrasonic_direction)
+NaoSensorInterface::set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction)
 {
   data->ultrasonic_direction = new_ultrasonic_direction;
   data_changed = true;
@@ -1129,6 +1256,10 @@ NaoSensorInterface::create_message(const char *type) const
 {
   if ( strncmp("EmitUltrasonicWaveMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new EmitUltrasonicWaveMessage();
+  } else if ( strncmp("StartUltrasonicMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StartUltrasonicMessage();
+  } else if ( strncmp("StopUltrasonicMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StopUltrasonicMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1153,6 +1284,9 @@ NaoSensorInterface::copy_values(const Interface *other)
 const char *
 NaoSensorInterface::enum_tostring(const char *enumtype, int val) const
 {
+  if (strcmp(enumtype, "UltrasonicDirection") == 0) {
+    return tostring_UltrasonicDirection((UltrasonicDirection)val);
+  }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
@@ -1167,7 +1301,7 @@ NaoSensorInterface::enum_tostring(const char *enumtype, int val) const
 /** Constructor with initial values.
  * @param ini_ultrasonic_direction initial value for ultrasonic_direction
  */
-NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage(const float ini_ultrasonic_direction) : Message("EmitUltrasonicWaveMessage")
+NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage(const UltrasonicDirection ini_ultrasonic_direction) : Message("EmitUltrasonicWaveMessage")
 {
   data_size = sizeof(EmitUltrasonicWaveMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1175,7 +1309,7 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage(const f
   data      = (EmitUltrasonicWaveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->ultrasonic_direction = ini_ultrasonic_direction;
-  add_fieldinfo(IFT_FLOAT, "ultrasonic_direction", 1, &data->ultrasonic_direction);
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
 }
 /** Constructor */
 NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage() : Message("EmitUltrasonicWaveMessage")
@@ -1185,7 +1319,7 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (EmitUltrasonicWaveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_FLOAT, "ultrasonic_direction", 1, &data->ultrasonic_direction);
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
 }
 
 /** Destructor */
@@ -1208,13 +1342,15 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage(const E
 
 /* Methods */
 /** Get ultrasonic_direction value.
- * Direction that was used to gather the ultrasonic reading.
+ * 
+      Direction that was used to gather the ultrasonic readings.
+    
  * @return ultrasonic_direction value
  */
-float
+NaoSensorInterface::UltrasonicDirection
 NaoSensorInterface::EmitUltrasonicWaveMessage::ultrasonic_direction() const
 {
-  return data->ultrasonic_direction;
+  return (NaoSensorInterface::UltrasonicDirection)data->ultrasonic_direction;
 }
 
 /** Get maximum length of ultrasonic_direction value.
@@ -1228,11 +1364,13 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::maxlenof_ultrasonic_direction() c
 }
 
 /** Set ultrasonic_direction value.
- * Direction that was used to gather the ultrasonic reading.
+ * 
+      Direction that was used to gather the ultrasonic readings.
+    
  * @param new_ultrasonic_direction new ultrasonic_direction value
  */
 void
-NaoSensorInterface::EmitUltrasonicWaveMessage::set_ultrasonic_direction(const float new_ultrasonic_direction)
+NaoSensorInterface::EmitUltrasonicWaveMessage::set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction)
 {
   data->ultrasonic_direction = new_ultrasonic_direction;
 }
@@ -1247,6 +1385,146 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::clone() const
 {
   return new NaoSensorInterface::EmitUltrasonicWaveMessage(this);
 }
+/** @class NaoSensorInterface::StartUltrasonicMessage <interfaces/NaoSensorInterface.h>
+ * StartUltrasonicMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_ultrasonic_direction initial value for ultrasonic_direction
+ */
+NaoSensorInterface::StartUltrasonicMessage::StartUltrasonicMessage(const UltrasonicDirection ini_ultrasonic_direction) : Message("StartUltrasonicMessage")
+{
+  data_size = sizeof(StartUltrasonicMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StartUltrasonicMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->ultrasonic_direction = ini_ultrasonic_direction;
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+}
+/** Constructor */
+NaoSensorInterface::StartUltrasonicMessage::StartUltrasonicMessage() : Message("StartUltrasonicMessage")
+{
+  data_size = sizeof(StartUltrasonicMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StartUltrasonicMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+}
+
+/** Destructor */
+NaoSensorInterface::StartUltrasonicMessage::~StartUltrasonicMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NaoSensorInterface::StartUltrasonicMessage::StartUltrasonicMessage(const StartUltrasonicMessage *m) : Message("StartUltrasonicMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StartUltrasonicMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get ultrasonic_direction value.
+ * 
+      Direction that was used to gather the ultrasonic readings.
+    
+ * @return ultrasonic_direction value
+ */
+NaoSensorInterface::UltrasonicDirection
+NaoSensorInterface::StartUltrasonicMessage::ultrasonic_direction() const
+{
+  return (NaoSensorInterface::UltrasonicDirection)data->ultrasonic_direction;
+}
+
+/** Get maximum length of ultrasonic_direction value.
+ * @return length of ultrasonic_direction value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NaoSensorInterface::StartUltrasonicMessage::maxlenof_ultrasonic_direction() const
+{
+  return 1;
+}
+
+/** Set ultrasonic_direction value.
+ * 
+      Direction that was used to gather the ultrasonic readings.
+    
+ * @param new_ultrasonic_direction new ultrasonic_direction value
+ */
+void
+NaoSensorInterface::StartUltrasonicMessage::set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction)
+{
+  data->ultrasonic_direction = new_ultrasonic_direction;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NaoSensorInterface::StartUltrasonicMessage::clone() const
+{
+  return new NaoSensorInterface::StartUltrasonicMessage(this);
+}
+/** @class NaoSensorInterface::StopUltrasonicMessage <interfaces/NaoSensorInterface.h>
+ * StopUltrasonicMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+NaoSensorInterface::StopUltrasonicMessage::StopUltrasonicMessage() : Message("StopUltrasonicMessage")
+{
+  data_size = sizeof(StopUltrasonicMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopUltrasonicMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+NaoSensorInterface::StopUltrasonicMessage::~StopUltrasonicMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NaoSensorInterface::StopUltrasonicMessage::StopUltrasonicMessage(const StopUltrasonicMessage *m) : Message("StopUltrasonicMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopUltrasonicMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NaoSensorInterface::StopUltrasonicMessage::clone() const
+{
+  return new NaoSensorInterface::StopUltrasonicMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1256,6 +1534,14 @@ NaoSensorInterface::message_valid(const Message *message) const
 {
   const EmitUltrasonicWaveMessage *m0 = dynamic_cast<const EmitUltrasonicWaveMessage *>(message);
   if ( m0 != NULL ) {
+    return true;
+  }
+  const StartUltrasonicMessage *m1 = dynamic_cast<const StartUltrasonicMessage *>(message);
+  if ( m1 != NULL ) {
+    return true;
+  }
+  const StopUltrasonicMessage *m2 = dynamic_cast<const StopUltrasonicMessage *>(message);
+  if ( m2 != NULL ) {
     return true;
   }
   return false;

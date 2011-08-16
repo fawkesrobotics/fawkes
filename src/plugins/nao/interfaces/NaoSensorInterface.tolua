@@ -3,20 +3,43 @@ $using namespace fawkes;
 namespace fawkes {
 class NaoSensorInterface : public Interface
 {
-  static const float USD_left_left;
-  static const float USD_left_right;
-  static const float USD_right_left;
-  static const float USD_right_right;
+
+  typedef enum {
+    USD_NONE,
+    USD_LEFT_LEFT,
+    USD_LEFT_RIGHT,
+    USD_RIGHT_RIGHT,
+    USD_RIGHT_LEFT,
+    USD_BOTH_BOTH
+  } UltrasonicDirection;
 
   class EmitUltrasonicWaveMessage : public Message
   {
-    EmitUltrasonicWaveMessage(float ini_ultrasonic_direction);
+    EmitUltrasonicWaveMessage(UltrasonicDirection ini_ultrasonic_direction);
     EmitUltrasonicWaveMessage();
     ~EmitUltrasonicWaveMessage();
 
-    float ultrasonic_direction();
-    void set_ultrasonic_direction(const float new_ultrasonic_direction);
+    UltrasonicDirection ultrasonic_direction();
+    void set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction);
     int maxlenof_ultrasonic_direction() const;
+  };
+
+  class StartUltrasonicMessage : public Message
+  {
+    StartUltrasonicMessage(UltrasonicDirection ini_ultrasonic_direction);
+    StartUltrasonicMessage();
+    ~StartUltrasonicMessage();
+
+    UltrasonicDirection ultrasonic_direction();
+    void set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction);
+    int maxlenof_ultrasonic_direction() const;
+  };
+
+  class StopUltrasonicMessage : public Message
+  {
+    StopUltrasonicMessage();
+    ~StopUltrasonicMessage();
+
   };
 
   float accel_x();
@@ -85,11 +108,14 @@ class NaoSensorInterface : public Interface
   float r_cop_y();
   void set_r_cop_y(const float new_r_cop_y);
   int maxlenof_r_cop_y() const;
-  float ultrasonic_distance();
-  void set_ultrasonic_distance(const float new_ultrasonic_distance);
-  int maxlenof_ultrasonic_distance() const;
-  float ultrasonic_direction();
-  void set_ultrasonic_direction(const float new_ultrasonic_direction);
+  float ultrasonic_distance_left(int index);
+  void set_ultrasonic_distance_left(unsigned int index, const float new_ultrasonic_distance_left);
+  int maxlenof_ultrasonic_distance_left() const;
+  float ultrasonic_distance_right(int index);
+  void set_ultrasonic_distance_right(unsigned int index, const float new_ultrasonic_distance_right);
+  int maxlenof_ultrasonic_distance_right() const;
+  UltrasonicDirection ultrasonic_direction();
+  void set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction);
   int maxlenof_ultrasonic_direction() const;
   unsigned char l_foot_bumper_l();
   void set_l_foot_bumper_l(const unsigned char new_l_foot_bumper_l);

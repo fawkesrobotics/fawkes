@@ -34,6 +34,7 @@
 #include <core/utils/lock_vector.h>
 
 #include <interfaces/NaoJointPositionInterface.h>
+#include <interfaces/NaoSensorInterface.h>
 
 #include <althread/alprocesssignals.h>
 #include <alcommon/alproxy.h>
@@ -45,7 +46,6 @@ namespace AL {
 }
 namespace fawkes {
   class NaoJointStiffnessInterface;
-  class NaoSensorInterface;
 }
 
 class NaoQiDCMThread
@@ -80,7 +80,10 @@ class NaoQiDCMThread
 
   void send_commands(unsigned int servos, std::string what,
 		     float value, int time_offset);
-  void send_command(std::string name, float value, int time_offset);
+  void send_command(std::string name, float value,
+                    std::string kind, int time_offset);
+
+  int ultrasonic_value(fawkes::NaoSensorInterface::UltrasonicDirection direction);
 
   class HighFreqThread;
   HighFreqThread *__highfreq_thread;
@@ -105,6 +108,7 @@ class NaoQiDCMThread
 
   uint8_t                                      __robot_version[4];
   fawkes::NaoJointPositionInterface::RobotType __robot_type;
+  int                                          __usboard_version;
 
   AL::ALValue __alljoint_names;
 };

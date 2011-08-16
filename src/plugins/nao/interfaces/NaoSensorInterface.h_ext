@@ -37,10 +37,19 @@ class NaoSensorInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const float USD_left_left;
-  static const float USD_left_right;
-  static const float USD_right_left;
-  static const float USD_right_right;
+
+  /** 
+	This determines the chosen sender/receiver.
+       */
+  typedef enum {
+    USD_NONE /**< No transmission received, yet. */,
+    USD_LEFT_LEFT /**< Left emitter and left receiver. */,
+    USD_LEFT_RIGHT /**< Left emitter and right receiver. */,
+    USD_RIGHT_RIGHT /**< Right emitter and right receiver. */,
+    USD_RIGHT_LEFT /**< Right emitter and left receiver. */,
+    USD_BOTH_BOTH /**< Both emitters and both receivers. */
+  } UltrasonicDirection;
+  const char * tostring_UltrasonicDirection(UltrasonicDirection value) const;
 
  private:
 #pragma pack(push,4)
@@ -70,8 +79,17 @@ class NaoSensorInterface : public Interface
     float l_cop_y; /**< Center of pressure Y for left foot. */
     float r_cop_x; /**< Center of pressure X for right foot. */
     float r_cop_y; /**< Center of pressure Y for right foot. */
-    float ultrasonic_distance; /**< Ultrasonic sensor reading */
-    float ultrasonic_direction; /**< Direction that was used to gather the ultrasonic reading. */
+    float ultrasonic_distance_left[4]; /**< 
+      First four ultrasonic sensor readings from left receiver. Distance
+      to detected object is in meters.
+     */
+    float ultrasonic_distance_right[4]; /**< 
+      First four ultrasonic sensor readings from right receiver. Distance
+      to detected object is in meters.
+     */
+    int32_t ultrasonic_direction; /**< 
+      Direction that was used to gather the ultrasonic readings.
+     */
     uint8_t l_foot_bumper_l; /**< Left foot bumper left side */
     uint8_t l_foot_bumper_r; /**< Left foot bumper right side */
     uint8_t r_foot_bumper_l; /**< Right foot bumper left side */
@@ -96,22 +114,75 @@ class NaoSensorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float ultrasonic_direction; /**< Direction that was used to gather the ultrasonic reading. */
+      int32_t ultrasonic_direction; /**< 
+      Direction that was used to gather the ultrasonic readings.
+     */
     } EmitUltrasonicWaveMessage_data_t;
 #pragma pack(pop)
 
     EmitUltrasonicWaveMessage_data_t *data;
 
    public:
-    EmitUltrasonicWaveMessage(const float ini_ultrasonic_direction);
+    EmitUltrasonicWaveMessage(const UltrasonicDirection ini_ultrasonic_direction);
     EmitUltrasonicWaveMessage();
     ~EmitUltrasonicWaveMessage();
 
     EmitUltrasonicWaveMessage(const EmitUltrasonicWaveMessage *m);
     /* Methods */
-    float ultrasonic_direction() const;
-    void set_ultrasonic_direction(const float new_ultrasonic_direction);
+    UltrasonicDirection ultrasonic_direction() const;
+    void set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction);
     size_t maxlenof_ultrasonic_direction() const;
+    virtual Message * clone() const;
+  };
+
+  class StartUltrasonicMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t ultrasonic_direction; /**< 
+      Direction that was used to gather the ultrasonic readings.
+     */
+    } StartUltrasonicMessage_data_t;
+#pragma pack(pop)
+
+    StartUltrasonicMessage_data_t *data;
+
+   public:
+    StartUltrasonicMessage(const UltrasonicDirection ini_ultrasonic_direction);
+    StartUltrasonicMessage();
+    ~StartUltrasonicMessage();
+
+    StartUltrasonicMessage(const StartUltrasonicMessage *m);
+    /* Methods */
+    UltrasonicDirection ultrasonic_direction() const;
+    void set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction);
+    size_t maxlenof_ultrasonic_direction() const;
+    virtual Message * clone() const;
+  };
+
+  class StopUltrasonicMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopUltrasonicMessage_data_t;
+#pragma pack(pop)
+
+    StopUltrasonicMessage_data_t *data;
+
+   public:
+    StopUltrasonicMessage();
+    ~StopUltrasonicMessage();
+
+    StopUltrasonicMessage(const StopUltrasonicMessage *m);
+    /* Methods */
     virtual Message * clone() const;
   };
 
@@ -188,11 +259,18 @@ class NaoSensorInterface : public Interface
   float r_cop_y() const;
   void set_r_cop_y(const float new_r_cop_y);
   size_t maxlenof_r_cop_y() const;
-  float ultrasonic_distance() const;
-  void set_ultrasonic_distance(const float new_ultrasonic_distance);
-  size_t maxlenof_ultrasonic_distance() const;
-  float ultrasonic_direction() const;
-  void set_ultrasonic_direction(const float new_ultrasonic_direction);
+  float * ultrasonic_distance_left() const;
+  float ultrasonic_distance_left(unsigned int index) const;
+  void set_ultrasonic_distance_left(unsigned int index, const float new_ultrasonic_distance_left);
+  void set_ultrasonic_distance_left(const float * new_ultrasonic_distance_left);
+  size_t maxlenof_ultrasonic_distance_left() const;
+  float * ultrasonic_distance_right() const;
+  float ultrasonic_distance_right(unsigned int index) const;
+  void set_ultrasonic_distance_right(unsigned int index, const float new_ultrasonic_distance_right);
+  void set_ultrasonic_distance_right(const float * new_ultrasonic_distance_right);
+  size_t maxlenof_ultrasonic_distance_right() const;
+  UltrasonicDirection ultrasonic_direction() const;
+  void set_ultrasonic_direction(const UltrasonicDirection new_ultrasonic_direction);
   size_t maxlenof_ultrasonic_direction() const;
   uint8_t l_foot_bumper_l() const;
   void set_l_foot_bumper_l(const uint8_t new_l_foot_bumper_l);
