@@ -1262,6 +1262,30 @@ Interface::read_from_buffer(unsigned int buffer)
   __data_mutex->unlock();
 }
 
+
+/** Compare buffer to private memory.
+ * @param buffer buffer number of buffer to compare to private memory
+ * @return returns a number less than, equal to, or greater than zero
+ * if the shared buffer if less than, equal to, or greater than the
+ * private buffer respectively.
+ */
+int
+Interface::compare_buffers(unsigned int buffer)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+  __data_mutex->lock();
+  void *buf = (char *)__buffers + buffer * data_size;
+  int rv = memcmp(buf, data_ptr, data_size);
+  __data_mutex->unlock();
+
+  return rv;
+}
+
+
 /** Parse UID to type and ID strings.
  * Note that the returned values (type and id) must be freed once they are
  * no longer used. Also verifies lengths of the type and id strings.

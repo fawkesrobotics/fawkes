@@ -114,6 +114,7 @@ class Interface
   void                    copy_shared_to_buffer(unsigned int buffer);
   void                    copy_private_to_buffer(unsigned int buffer);
   void                    read_from_buffer(unsigned int buffer);
+  int                     compare_buffers(unsigned int buffer);
 
   void          read();
   void          write();
