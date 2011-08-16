@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/logging/multi.h>
-#include <utils/logging/logger.h>
+#include <logging/multi.h>
+#include <logging/logger.h>
 
 #include <core/utils/lock_list.h>
 #include <core/threading/thread.h>
@@ -55,7 +55,7 @@ class MultiLoggerData
 /// @endcond
 
 
-/** @class MultiLogger <utils/logging/multi.h>
+/** @class MultiLogger <logging/multi.h>
  * Log through multiple loggers.
  * It can be hand to have the opportunity to log to multiple channels, for
  * example log to a file and via network to a remote console. This can be

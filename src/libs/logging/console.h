@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  file.h - Fawkes file logger
+ *  console.h - Fawkes console logger
  *
- *  Created: Tue Jan 16 16:47:03 2007
+ *  Created: Tue Jan 16 21:06:50 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *             2007       Daniel Beck
  *
  ****************************************************************************/
 
@@ -22,23 +21,22 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_LOGGING_FILE_H_
-#define __UTILS_LOGGING_FILE_H_
+#ifndef __UTILS_LOGGING_CONSOLE_H_
+#define __UTILS_LOGGING_CONSOLE_H_
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <ctime>
 
 namespace fawkes {
 
 
 class Mutex;
-class File;
 
-class FileLogger : public Logger
+class ConsoleLogger : public Logger
 {
  public:
-  FileLogger(const char* filename, LogLevel min_level = LL_DEBUG);
-  virtual ~FileLogger();
+  ConsoleLogger(LogLevel log_level = LL_DEBUG);
+  virtual ~ConsoleLogger();
 
   virtual void log_debug(const char *component, const char *format, ...);
   virtual void log_info(const char *component, const char *format, ...);
@@ -54,7 +52,6 @@ class FileLogger : public Logger
   virtual void log_info(const char *component, Exception &e);
   virtual void log_warn(const char *component, Exception &e);
   virtual void log_error(const char *component, Exception &e);
-
 
   virtual void tlog_debug(struct timeval *t, const char *component, const char *format, ...);
   virtual void tlog_info(struct timeval *t, const char *component, const char *format, ...);
@@ -75,11 +72,10 @@ class FileLogger : public Logger
   virtual void vtlog_error(struct timeval *t, const char *component,
 			   const char *format, va_list va);
 
- private:
-  struct ::tm *now_s;
 
-  File        *log_file;
-  Mutex       *mutex;
+ private:
+  struct ::tm  *now_s;
+  Mutex        *mutex;
 };
 
 

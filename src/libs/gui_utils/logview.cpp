@@ -24,7 +24,7 @@
 #include <gui_utils/logview.h>
 #include <gui_utils/connection_dispatcher.h>
 #include <netcomm/fawkes/client.h>
-#include <netcomm/utils/network_logger.h>
+#include <logging/network.h>
 
 #include <gtkmm.h>
 

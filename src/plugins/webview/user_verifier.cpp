@@ -24,7 +24,7 @@
 
 #include <core/exception.h>
 #include <config/config.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <string>
 #ifdef __USE_GNU

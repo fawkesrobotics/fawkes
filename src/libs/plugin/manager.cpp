@@ -30,7 +30,7 @@
 #include <core/threading/thread_initializer.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #ifdef HAVE_INOTIFY
 #  include <utils/system/fam_thread.h>
 #endif
@@ -84,6 +84,7 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     const char *meta_plugin_prefix)
   : ConfigurationChangeHandler(meta_plugin_prefix)
 {
+  __mutex = new Mutex();
   this->thread_collector = thread_collector;
   plugin_loader = new PluginLoader(PLUGINDIR, config);
   next_plugin_id = 1;
@@ -128,6 +129,7 @@ PluginManager::~PluginManager()
   plugins.clear();
   plugin_ids.clear();
   delete plugin_loader;
+  delete __mutex;
 }
 
 
@@ -563,6 +565,38 @@ PluginManager::notify_unloaded(const char *plugin_name)
     }
   }
   __listeners.unlock();
+}
+
+
+/** Lock plugin manager.
+ * This is an utility method that you can use for mutual access to the plugin
+ * manager. The mutex is not used internally, but meant to be used from
+ * callers.
+ */
+void
+PluginManager::lock()
+{
+  __mutex->lock();
+}
+
+
+/** Try to lock plugin manager.
+ * This is an utility method that you can use for mutual access to the plugin
+ * manager. The mutex is not used internally, but meant to be used from
+ * callers.
+ * @return true if the lock was acquired, false otherwise
+ */
+bool
+PluginManager::try_lock()
+{
+  return __mutex->try_lock();
+}
+
+/** Unlock plugin manager. */
+void
+PluginManager::unlock()
+{
+  __mutex->unlock();
 }
 
 } // end namespace fawkes

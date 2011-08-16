@@ -32,7 +32,7 @@
 #include <interface/interface.h>
 #include <interface/interface_info.h>
 
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
 

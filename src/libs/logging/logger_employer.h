@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  employer.h - Fawkes logger employer
+ *  logger_employer.h - Fawkes logger employer
  *
  *  Created: Wed Feb 11 22:26:27 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,19 +21,34 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_LOGGER_EMPLOYER_H_
-#define __ASPECT_LOGGER_EMPLOYER_H_
+#ifndef __LOGGING_LOGGER_EMPLOYER_H_
+#define __LOGGING_LOGGER_EMPLOYER_H_
 
 namespace fawkes {
 
 class Logger;
 
+/** Logger employer
+ * The LoggerEmployer shall pipe all log messages of the system to
+ * added loggers.
+ * @author Tim Niemueller
+ */
 class LoggerEmployer
 {
  public:
-  virtual ~LoggerEmployer();
+  /** Virtual empty destructor. */
+  virtual ~LoggerEmployer() {}
 
+  /** Add a new logger.
+   * An exception should be thrown if anything prevents this from succeeding.
+   * @param logger logger to add
+   */
   virtual void add_logger(Logger *logger)    = 0;
+
+  /** Remove a logger.
+   * An exception should be thrown if anything prevents this from succeeding.
+   * @param logger logger to remove
+   */
   virtual void remove_logger(Logger *logger) = 0;
 };
 

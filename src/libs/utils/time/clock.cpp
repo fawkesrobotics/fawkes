@@ -24,7 +24,7 @@
 
 #include <utils/time/clock.h>
 #include <utils/time/timesource.h>
-#include <utils/logging/liblogger.h>
+#include <core/exception.h>
 
 #include <cstdlib>
 
@@ -40,26 +40,18 @@ namespace fawkes {
 
 /** initialize static members */
 Clock* Clock::_instance = NULL;
-bool Clock::destruct_ok = false;
 
 /** Constructor. */
 Clock::Clock()
 {
-  destruct_ok = false;
   ext_timesource = 0;
   ext_default = false;
 }
 
 
-/** Destructor.
- * Generates a log message if Clock::finalize wasn't called beforehand 
- */
+/** Destructor. */
 Clock::~Clock()
 {
-  if ( !destruct_ok ) {
-    LibLogger::log_error("Clock", "dtor called without calling Clock::finalize() first");
-  }
-
   delete ext_timesource;
 }
 
@@ -72,23 +64,18 @@ Clock::~Clock()
 Clock *
 Clock::instance()
 {
-  if ( NULL == _instance )
-    {
-      _instance = new Clock();
-    }
+  if (NULL == _instance) {
+    _instance = new Clock();
+  }
   
   return _instance;
 }
 
 
-/** Finalize.
- * Sets a boolean flag which prevents a log message from being generated in
- * the destructor.
- */
+/** Finalize. */
 void
 Clock::finalize()
 {
-  destruct_ok = true;
   delete _instance;
   _instance = NULL;
 }

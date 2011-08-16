@@ -28,7 +28,7 @@
 #include <blackboard/internal/notifier.h>
 
 #include <core/threading/refc_rwlock.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/message.h>
 

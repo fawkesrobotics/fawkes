@@ -32,7 +32,7 @@
 #include <blackboard/interface_listener.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
-#include <utils/logging/console.h>
+#include <logging/console.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <netcomm/socket/socket.h>
 

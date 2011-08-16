@@ -40,7 +40,6 @@
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module_dl.h>
-#include <utils/logging/liblogger.h>
 
 #include <cstdlib>
 #include <cstring>

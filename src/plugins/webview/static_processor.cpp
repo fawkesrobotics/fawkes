@@ -25,7 +25,7 @@
 #include <webview/error_reply.h>
 
 #include <core/exception.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <cstring>
 #include <cstdlib>

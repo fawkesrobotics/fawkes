@@ -24,7 +24,7 @@
 #include <webview/request_dispatcher.h>
 #include <core/exception.h>
 #include <core/exceptions/system.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <sys/socket.h>
 #include <cstdlib>

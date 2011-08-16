@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  network_logger.h - Fawkes network logger
+ *  network - Fawkes network logger
  *
  *  Created: Sat Dec 15 00:45:54 2007 (after I5 xmas party)
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
@@ -21,12 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_NETWORK_LOGGER_H_
-#define __NETCOMM_UTILS_NETWORK_LOGGER_H_
+#ifndef __LOGGING_NETWORK_H_
+#define __LOGGING_NETWORK_H_
 
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_queue.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/fawkes/message_content.h>
 

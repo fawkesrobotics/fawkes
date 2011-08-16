@@ -22,7 +22,7 @@
 
 #include "service_browse_handler.h"
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 using namespace fawkes;
 

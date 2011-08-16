@@ -24,7 +24,7 @@
 #include "file.h"
 
 #include <blackboard/blackboard.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <core/exceptions/system.h>
 #include <interfaces/SwitchInterface.h>
 

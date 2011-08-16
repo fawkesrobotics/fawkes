@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  employer.cpp - Fawkes logger employer
+ *  daemonize.h - Fawkes daemonization functions
  *
- *  Created: Wed Feb 11 22:28:15 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed May 04 23:32:25 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,30 +21,24 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/logger/employer.h>
+#ifndef __LIBS_BASEAPP_DAEMONIZE_H_
+#define __LIBS_BASEAPP_DAEMONIZE_H_
+
 
 namespace fawkes {
-
-/** @class LoggerEmployer <aspect/logger/employer.h>
- * Logger employer
- * The LoggerEmployer shall pipe all log messages of the system to added
- * loggers.
- * @author Tim Niemueller
- *
- * @fn void LoggerEmployer::add_logger(fawkes::Logger *logger)
- * Add a new logger.
- * An exception should be thrown if anything prevents this from succeeding.
- * @param logger logger to add
- *
- * @fn void LoggerEmployer::remove_logger(fawkes::Logger *logger)
- * Remove a logger.
- * An exception should be thrown if anything prevents this from succeeding.
- * @param logger logger to remove
- */
-
-/** Virtual empty destructor. */
-LoggerEmployer::~LoggerEmployer()
-{
+  namespace daemon {
+#if 0 /* just to make Emacs auto-indent happy */
+  }
 }
+#endif
 
-} // end of namespace fawkes
+void init(const char *pidfile, const char *progname);
+bool start();
+bool running();
+void kill();
+void cleanup();
+
+} // end namespace fawkes::daemon
+} // end namespace fawkes
+
+#endif

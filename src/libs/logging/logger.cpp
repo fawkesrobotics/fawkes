@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 namespace fawkes {
 
-/** @class Logger logging/logger.h
+/** @class Logger <logging/logger.h>
  * Interface for logging.
  * This interface facilitates a way to collect all output, be it debugging
  * output, informational output, warning or error messages.

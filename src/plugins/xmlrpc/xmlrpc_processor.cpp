@@ -23,7 +23,7 @@
 #include "xmlrpc_processor.h"
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <xmlrpc-c/registry.hpp>
 #include <cstring>

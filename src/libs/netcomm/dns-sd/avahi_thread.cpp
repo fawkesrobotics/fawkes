@@ -28,7 +28,6 @@
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
 #include <utils/misc/string_conversions.h>
-#include <utils/logging/liblogger.h>
 
 #include <avahi-client/lookup.h>
 #include <avahi-client/publish.h>
@@ -306,11 +305,13 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
     throw Exception("Adding Avahi/mDNS-SD service failed: %s", avahi_strerror(rv));
   }
 
+  /*
   if (service.modified_name() != 0) {
     LibLogger::log_warn("FawkesNetworkManager", "Network service name collision, "
 			"modified to '%s' (from '%s')", service.modified_name(),
 			service.name());
   }
+  */
 
   /* Tell the server to register the service */
   if (avahi_entry_group_commit(group) < 0) {

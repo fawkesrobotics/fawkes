@@ -47,7 +47,6 @@ class ThreadCollector;
 class FawkesNetworkHub;
 class Plugin;
 class PluginLoader;
-class Mutex;
 class PluginListMessage;
 class Configuration;
 class FamThread;
@@ -58,8 +57,7 @@ class PluginNetworkHandler
   public fawkes::PluginManagerListener
 {
  public:
-  PluginNetworkHandler(PluginManager *manager, FawkesNetworkHub *hub,
-		       Mutex *mutex = NULL);
+  PluginNetworkHandler(PluginManager *manager, FawkesNetworkHub *hub);
   ~PluginNetworkHandler();
 
   virtual void handle_network_message(FawkesNetworkMessage *msg);
@@ -88,8 +86,6 @@ class PluginNetworkHandler
  protected: virtual void run() { Thread::run(); }
 
  private:
-  Mutex             *__mutex;
-
   PluginManager     *__manager;
   FawkesNetworkHub  *__hub;
 

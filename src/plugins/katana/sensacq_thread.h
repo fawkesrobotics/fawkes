@@ -24,7 +24,7 @@
 #define __PLUGINS_KATANA_SENSAQT_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <core/utils/refptr.h>
 
 // Classes from libkni (KNI)

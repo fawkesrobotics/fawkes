@@ -24,7 +24,7 @@
 #include <config/net_handler.h>
 #include <config/net_messages.h>
 #include <config/net_list_content.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>

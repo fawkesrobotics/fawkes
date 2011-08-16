@@ -79,6 +79,10 @@ class PluginManager
   void add_listener(PluginManagerListener *listener);
   void remove_listener(PluginManagerListener *listener);
 
+  void lock();
+  bool try_lock();
+  void unlock();
+
  private:
   void init_pinfo_cache();
   void notify_loaded(const char *plugin_name);
@@ -89,6 +93,7 @@ class PluginManager
  private:
   ThreadCollector   *thread_collector;
   PluginLoader      *plugin_loader;
+  Mutex             *__mutex;
 
   LockList<Plugin *> plugins;
   LockList<Plugin *>::iterator pit;

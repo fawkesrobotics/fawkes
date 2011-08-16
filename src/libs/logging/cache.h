@@ -24,7 +24,7 @@
 #ifndef __UTILS_LOGGING_CACHE_H_
 #define __UTILS_LOGGING_CACHE_H_
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <ctime>
 
 #include <string>

@@ -1,8 +1,8 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes : Log Tool
+#           Makefile Build System for Fawkes : BaseApp library
 #                            -------------------
-#   Created on Sat Dec 15 02:02:54 2007
-#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Wed May 04 23:47:31 2011
+#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,15 +13,11 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-
-include $(BASEDIR)/etc/buildsys/config.mk
-
-LIBS_fflogview = stdc++ fawkescore fawkesutils fawkesnetcomm fawkeslogging
-OBJS_fflogview = main.o
-
-OBJS_all     =	$(OBJS_fflogview)
-BINS_all     =	$(BINDIR)/fflogview
-MANPAGES_all =	$(MANDIR)/man1/fflogview.1
-
-include $(BUILDSYSDIR)/base.mk
+# Check for availability of libdaemon
+HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBDAEMON),1)
+  CFLAGS_LIBDAEMON  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
+  LDFLAGS_LIBDAEMON += $(shell $(PKGCONFIG) --libs 'libdaemon')
+else
+  WARN_TARGETS += warning_libdaemon
+endif

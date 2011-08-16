@@ -35,7 +35,7 @@ endif
 
 ifeq ($(HAVE_LIBMICROHTTPD)$(HAVE_LIBXMLRPCPP),11)
   LIBS_xmlrpc = fawkescore fawkesutils fawkesaspects fawkeswebview fawkesnetcomm \
-		fawkesplugin
+		fawkesplugin fawkeslogging
   OBJS_xmlrpc = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
   PLUGINS_all = $(PLUGINDIR)/xmlrpc.so
 endif
