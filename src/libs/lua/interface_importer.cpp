@@ -62,6 +62,7 @@ LuaInterfaceImporter::LuaInterfaceImporter(LuaContext *context,
   __blackboard = blackboard;
   __config = config;
   __logger = logger;
+  __two_stage = false;
   __context->add_watcher(this);
 
   __interfaces_pushed = false;
@@ -133,6 +134,9 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
 	  iface = __blackboard->open_for_writing(iftype.c_str(), ifname.c_str());
 	} else {
 	  iface = __blackboard->open_for_reading(iftype.c_str(), ifname.c_str());
+	}
+	if (__two_stage) {
+	  iface->resize_buffers(1);
 	}
 	imap[varname] = iface;
       } catch (Exception &e) {
@@ -286,6 +290,41 @@ LuaInterfaceImporter::read()
 {
   for (InterfaceMap::iterator i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
     i->second->read();
+  }
+}
+
+
+/** Read from all reading interfaces into a buffer.
+ */
+void
+LuaInterfaceImporter::read_to_buffer()
+{
+  InterfaceMap::iterator i;
+  if (! __two_stage) {
+    for (i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+      i->second->resize_buffers(1);
+    }
+    __two_stage = true;
+  }
+  for (i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+    i->second->copy_shared_to_buffer(0);
+  }
+}
+
+/** Update interfaces from internal buffers.
+ * @exception Exception thrown if read_to_buffer() was not called
+ * before.
+ */
+void
+LuaInterfaceImporter::read_from_buffer()
+{
+  if (! __two_stage) {
+    throw Exception("LuaInterfaceImporter: trying to read buffer witout "
+		    "previous read_to_buffer()");
+  }
+  InterfaceMap::iterator i;
+  for (i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+    i->second->read_from_buffer(0);
   }
 }
 

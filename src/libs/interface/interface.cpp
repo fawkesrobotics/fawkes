@@ -26,6 +26,7 @@
 #include <interface/mediators/interface_mediator.h>
 #include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
+#include <core/threading/mutex.h>
 #include <core/exceptions/system.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
@@ -34,6 +35,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
 #include <typeinfo>
 #include <regex.h>
 
@@ -113,29 +115,60 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
 
 /** @class Interface <interface/interface.h>
  * Base class for all Fawkes BlackBoard interfaces.
- * Never use directly. Use interface generator to create interfaces.
  *
- * Interfaces are identified by a type and an ID. The type is just a textual
- * representation of the class name. The ID identifies a specific instance of this
- * interface type. Additionally each interface has a hash. The hash is an MD5
- * digest of the XML config file that was fed to the interface generator to
- * create the interface. It is used to detect incompatible versions of the same
+ * Interfaces are identified by a type and an ID. The type is just a
+ * textual representation of the class name. The ID identifies a
+ * specific instance of this interface type. Additionally each
+ * interface has a hash. The hash is an MD5 digest of the XML config
+ * file that was fed to the interface generator to create the
+ * interface. It is used to detect incompatible versions of the same
  * interface type.
  *
- * An interface has an internal timestamp. This timestamp indicates when the
- * data in the interface has been modified last. The timestamp is usually
- * automatically updated. But it some occasions the writer may choose to provide
- * its own timestamp data. This can be useful for example for an interface
- * providing hardware data to give the exact capture time.
- * In the automatic case nothing has to be done manually. The timestamp is
- * updated automatically by calling the write() method if and only if the
- * data in the interface has actually been modified. The reader can call
- * changed() to see if the data changed.
- * In the non-automatic case the writer must first disable automatic timestamping
- * using set_auto_timestamping(). Then it must provide a timestamp everytime
- * before calling write(). Note that setting the timestamp already marks the
- * interface as having changed. So set the timestamp only if the data has
- * changed and the readers should see this.
+ * Interfaces have at least two sections of memory which contains a
+ * struct composed of the internal data of the interface. The first is
+ * shared with either the LocalBlackBoard instance (and hence all
+ * other instances of the interface) or with a transmission thread of
+ * a RemoteBlackBoard. The second is a private copy of the data. The
+ * data is copied between the shared and private section only upon
+ * request. Interfaces are either reading or writing, denoting their
+ * kind of access towards the shared memory section. At any point in
+ * time there may at most exist one writer for an interface, but any
+ * number of readers. The shared section is protected by a
+ * ReadWriteLock. For a writer, a call to write() will copy the data
+ * from the private to the shared section. For a reader, a call to
+ * read() will copy the data from the shared to the private
+ * section. Upon opening the interface, the private section is copied
+ * once from the shared section, even when opening a writer.
+ *
+ * An interface has an internal timestamp. This timestamp indicates
+ * when the data in the interface has been modified last. The
+ * timestamp is usually automatically updated. But it some occasions
+ * the writer may choose to provide its own timestamp data. This can
+ * be useful for example for an interface providing hardware data to
+ * give the exact capture time.  In the automatic case nothing has to
+ * be done manually. The timestamp is updated automatically by calling
+ * the write() method if and only if the data in the interface has
+ * actually been modified. The reader can call changed() to see if the
+ * data changed.  In the non-automatic case the writer must first
+ * disable automatic timestamping using set_auto_timestamping(). Then
+ * it must provide a timestamp everytime before calling write(). Note
+ * that setting the timestamp already marks the interface as having
+ * changed. So set the timestamp only if the data has changed and the
+ * readers should see this.
+ *
+ * An interface provides support for buffers. Like the shared and
+ * private memory sections described above, buffers are additional
+ * memory sections that can be used to save data from the shared
+ * section or save or restore from and to the private memory
+ * section. One example use case is to save the current shared memory
+ * content at one point in time at a specific main loop hook, and
+ * restore it only later at a suitable time in another continuous
+ * thread. Another useful application is to keep a history for
+ * hysteresis processing, or to observe the development of the values
+ * in an interface.
+ *
+ * Interfaces are not created directly, but rather by using the
+ * interface generator.
  *
  * @author Tim Niemueller
  */
@@ -167,12 +200,13 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  *
  * @fn bool Interface::create_message(const char *type) const = 0
  * Create message based on type name.
- * This will create a new message of the given type. The type must be given without
- * the InterfaceName:: prefix but just the plain class name of the message.
+ * This will create a new message of the given type. The type must be
+ * given without the InterfaceName:: prefix but just the plain class
+ * name of the message.
  * @param type message type
  * @return message of the given type, empty
- * @exception UnknownTypeException thrown if this interface cannot create a message
- * of the given type.
+ * @exception UnknownTypeException thrown if this interface cannot
+ * create a message of the given type.
  *
  * @fn void Interface::copy_values(const Interface *interface) = 0
  * Copy values from another interface.
@@ -180,7 +214,7 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * type as this instance.
  * @param interface interface to copy from
  *
- * @fn const char * Interface::enum_tostring(const char *enumtype, int val) const = 0
+ * @fn const char * Interface::enum_tostring(const char *enumtype, int val) const
  * Convert arbitrary enum value to string.
  * Given the string representation of the enum type and the value this method
  * returns the string representation of the specific value, or the string
@@ -214,7 +248,11 @@ Interface::Interface()
   data_ptr  = NULL;
   data_size = 0;
 
+  __buffers = NULL;
+  __num_buffers = 0;
+
   __message_queue = new MessageQueue();
+  __data_mutex = new Mutex();
 }
 
 
@@ -222,7 +260,9 @@ Interface::Interface()
 Interface::~Interface()
 {
   if ( __rwlock) __rwlock->unref();
+  delete __data_mutex;
   delete __message_queue;
+  if (__buffers)  free(__buffers);
   // free fieldinfo list
   interface_fieldinfo_t *finfol = __fieldinfo_list;
   while ( finfol ) {
@@ -242,9 +282,10 @@ Interface::~Interface()
 }
 
 /** Get interface hash.
- * The interface is a unique version identifier of an interface. It is the has of
- * the input XML file during the generation of the interface. It is meant to be used
- * to ensure that all sides are using the exact same version of an interface.
+ * The interface is a unique version identifier of an interface. It is
+ * the has of the input XML file during the generation of the
+ * interface. It is meant to be used to ensure that all sides are
+ * using the exact same version of an interface.
  * @return constant byte string containing the hash value of hash_size() length
  */
 const unsigned char *
@@ -292,7 +333,8 @@ Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
 			 size_t length, void *value, const char *enumtype)
 {
   interface_fieldinfo_t *infol = __fieldinfo_list;
-  interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+  interface_fieldinfo_t *newinfo =
+    (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
   newinfo->type     = type;
   newinfo->enumtype = enumtype;
@@ -326,7 +368,8 @@ void
 Interface::add_messageinfo(const char *type)
 {
   interface_messageinfo_t *infol = __messageinfo_list;
-  interface_messageinfo_t *newinfo = (interface_messageinfo_t *)malloc(sizeof(interface_messageinfo_t));
+  interface_messageinfo_t *newinfo =
+    (interface_messageinfo_t *)malloc(sizeof(interface_messageinfo_t));
 
   newinfo->type = type;
   newinfo->next = NULL;
@@ -396,9 +439,10 @@ Interface::is_writer() const
 
 
 /** Mark this interface invalid.
- * An interface can become invalid, for example if the connection of a RemoteBlackBoard
- * dies. In this case the interface becomes invalid and successive read()/write() calls
- * will throw an InterfaceInvalidException.
+ * An interface can become invalid, for example if the connection of a
+ * RemoteBlackBoard dies. In this case the interface becomes invalid
+ * and successive read()/write() calls will throw an
+ * InterfaceInvalidException.
  * @param valid true to mark the interface valid or false to mark it invalid
  */
 void
@@ -421,26 +465,31 @@ Interface::is_valid() const
 
 
 /** Read from BlackBoard into local copy.
- * @exception InterfaceInvalidException thrown if the interface has been marked invalid
+ * @exception InterfaceInvalidException thrown if the interface has
+ * been marked invalid
  */
 void
 Interface::read()
 {
   __rwlock->lock_for_read();
+  __data_mutex->lock();
   if ( __valid ) {
     memcpy(data_ptr, __mem_data_ptr, data_size);
     *__local_read_timestamp = *__timestamp;
     __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
   } else {
+    __data_mutex->unlock();
     __rwlock->unlock();
     throw InterfaceInvalidException(this, "read()");
   }
+  __data_mutex->unlock();
   __rwlock->unlock();
 }
 
 
 /** Write from local copy into BlackBoard memory.
- * @exception InterfaceInvalidException thrown if the interface has been marked invalid
+ * @exception InterfaceInvalidException thrown if the interface has
+ * been marked invalid
  */
 void
 Interface::write()
@@ -450,8 +499,8 @@ Interface::write()
   }
 
   __rwlock->lock_for_write();
+  __data_mutex->lock();
   if ( __valid ) {
-    memcpy(__mem_data_ptr, data_ptr, data_size);
     if (data_changed) {
       if (__auto_timestamping)  __timestamp->stamp();
       long sec = 0, usec = 0;
@@ -460,10 +509,13 @@ Interface::write()
       data_ts->timestamp_usec = usec;
       data_changed = false;
     }
+    memcpy(__mem_data_ptr, data_ptr, data_size);
   } else {
+    __data_mutex->unlock();
     __rwlock->unlock();
     throw InterfaceInvalidException(this, "write()");
   }
+  __data_mutex->unlock();
   __rwlock->unlock();
 
   __interface_mediator->notify_of_data_change(this);
@@ -512,7 +564,8 @@ Interface::set_instance_serial(unsigned short instance_serial)
  * @param msg_mediator message mediator.
  */
 void
-Interface::set_mediators(InterfaceMediator *iface_mediator, MessageMediator *msg_mediator)
+Interface::set_mediators(InterfaceMediator *iface_mediator,
+			 MessageMediator *msg_mediator)
 {
   __interface_mediator = iface_mediator;
   __message_mediator   = msg_mediator;
@@ -546,12 +599,13 @@ Interface::set_readwrite(bool write_access, RefCountRWLock *rwlock)
 
 
 /** Check equality of two interfaces.
- * Two interfaces are the same if their types and identifiers are equal.
- * This does not mean that both interfaces are the very same instance for accessing
- * the BlackBoard. Instead this just means that both instances will access the same
- * chunk of memory in the BlackBoard and the instances MAY be the same.
- * If you want to know if two instances are exactly the same compare the instance
- * serials using the serial() method.
+ * Two interfaces are the same if their types and identifiers are
+ * equal.  This does not mean that both interfaces are the very same
+ * instance for accessing the BlackBoard. Instead this just means that
+ * both instances will access the same chunk of memory in the
+ * BlackBoard and the instances MAY be the same.  If you want to know
+ * if two instances are exactly the same compare the instance serials
+ * using the serial() method.
  * @param comp interface to compare current instance with
  * @return true, if interfaces point to the same data, false otherwise
  */
@@ -595,10 +649,11 @@ Interface::id() const
 
 
 /** Get unique identifier of interface.
- * As the name suggests this ID denotes a unique memory instance of this interface
- * in the blackboard. It is provided by the system and currently returns a string
- * of the form "type::id", where type is replaced by the type returned by type() and
- * id is the ID returned by id().
+ * As the name suggests this ID denotes a unique memory instance of
+ * this interface in the blackboard. It is provided by the system and
+ * currently returns a string of the form "type::id", where type is
+ * replaced by the type returned by type() and id is the ID returned
+ * by id().
  * @return string with the unique identifier of the interface.
  */
 const char *
@@ -682,11 +737,12 @@ Interface::set_auto_timestamping(bool enabled)
 
 
 /** Check if data has been changed.
- * Note that if the data has been modified this method will return true at least
- * until the next call to read. From then on it will return false if the data has
- * not been modified between the two read() calls and still true otherwise.
- * @return true if data has been changed between the last call to read() and
- * the one before.
+ * Note that if the data has been modified this method will return
+ * true at least until the next call to read. From then on it will
+ * return false if the data has not been modified between the two
+ * read() calls and still true otherwise.
+ * @return true if data has been changed between the last call to
+ * read() and the one before.
  */
 bool
 Interface::changed() const
@@ -696,26 +752,30 @@ Interface::changed() const
 
 
 /** Set from a raw data chunk.
- * This allows for setting the interface data from a raw chunk. This is not useful
- * in general but only in rare situations like network transmission. Do not use it unless
- * you really know what you are doing. The method expects the chunk to be exactly of the
- * size returned by datasize(). No check is done, a segfault will most likely occur
- * if you provide invalid data.
- * @param chunk data chunk, must be exactly of the size that is returned by datasize()
+ * This allows for setting the interface data from a raw chunk. This
+ * is not useful in general but only in rare situations like network
+ * transmission. Do not use it unless you really know what you are
+ * doing. The method expects the chunk to be exactly of the size
+ * returned by datasize(). No check is done, a segfault will most
+ * likely occur if you provide invalid data.
+ * @param chunk data chunk, must be exactly of the size that is
+ * returned by datasize()
  */
 void
 Interface::set_from_chunk(void *chunk)
 {
-  // This could be checked but should never happen with our generated interfaces anyway
-  // if ( data_ptr == NULL ) throw NullPointerException("Interface not initialized");
+  // This could be checked but should never happen with our generated
+  // interfaces anyway
+  // if ( data_ptr == NULL )
+  //   throw NullPointerException("Interface not initialized");
 
   memcpy(data_ptr, chunk, data_size);
 }
 
 /** Check if there is a writer for the interface.
- * Use this method to determine if there is any open instance of the interface
- * that is writing to the interface. This can also be the queried interface
- * instance.
+ * Use this method to determine if there is any open instance of the
+ * interface that is writing to the interface. This can also be the
+ * queried interface instance.
  * @return true if a writer for the interface exists, false otherwise
  */
 bool
@@ -726,10 +786,11 @@ Interface::has_writer() const
 
 
 /** Get the number of readers.
- * Use this method to determine how many reading instances of the interface
- * currently exist. If the current instance is a reading instance it will
- * be included in the count number. To determine if you are the last man having
- * this interface you can use the following code:
+ * Use this method to determine how many reading instances of the
+ * interface currently exist. If the current instance is a reading
+ * instance it will be included in the count number. To determine if
+ * you are the last man having this interface you can use the
+ * following code:
  * @code
  * // for a writing instance:
  * if ( interface->num_readers == 0 ) {
@@ -741,8 +802,9 @@ Interface::has_writer() const
  *   // we are the last one to have this interface open
  * }
  * @endcode
- * Note that this can result in a race condition. You have to be registered as
- * a BlackBoardEventListener to be sure that you are really the last.
+ * Note that this can result in a race condition. You have to be
+ * registered as a BlackBoardEventListener to be sure that you are
+ * really the last.
  * @return number of readers
  */
 unsigned int
@@ -753,16 +815,16 @@ Interface::num_readers() const
 
 
 /** Enqueue message at end of queue.
- * This appends the given message to the queue and transmits the message via the
- * message mediator. The message is afterwards owned by the other side and will be
- * unrefed and freed as soon as it has been processed. If you want to keep this
- * message to read a feedback status you have to reference it _before_ enqueuing
- * it!
+ * This appends the given message to the queue and transmits the
+ * message via the message mediator. The message is afterwards owned
+ * by the other side and will be unrefed and freed as soon as it has
+ * been processed. If you want to keep this message to read a feedback
+ * status you have to reference it _before_ enqueuing it!
  * This can only be called on a reading interface instance.
  * @param message Message to enqueue.
  * @return message id after message has been queued
- * @exception MessageAlreadyQueuedException thrown if the message has already been
- * enqueued to an interface.
+ * @exception MessageAlreadyQueuedException thrown if the message has
+ * already been enqueued to an interface.
  */
 unsigned int
 Interface::msgq_enqueue(Message *message)
@@ -786,14 +848,18 @@ Interface::msgq_enqueue(Message *message)
 
 
 /** Enqueue copy of message at end of queue.
- * This method creates a copy of the message and enqueues it. Note that this way
- * you cannot receive status message in the message, because the other side will not
- * use your message instance but a copy instead.
+
+ * This method creates a copy of the message and enqueues it. Note
+ * that this way you cannot receive status message in the message,
+ * because the other side will not use your message instance but a
+ * copy instead.
  *
- * This is particularly useful if you call from an environment with automatic garbage
- * collection that does not honor the referencing feature of message but rather just
- * deletes it.
+ * This is particularly useful if you call from an environment with
+ * automatic garbage collection that does not honor the referencing
+ * feature of message but rather just deletes it.
+ *
  * This can only be called on a reading interface instance.
+ *
  * @param message Message to enqueue.
  * @return message id after message has been queued
  * @exception MessageAlreadyQueuedException thrown if the message has already been
@@ -825,7 +891,9 @@ Interface::msgq_enqueue_copy(Message *message)
 
 
 /** Enqueue message.
- * This will enqueue the message without transmitting it via the message mediator.
+ * This will enqueue the message without transmitting it via the
+ * message mediator.
+ *
  * This can only be called on a writing interface instance.
  * @param message message to enqueue
  */
@@ -842,11 +910,13 @@ Interface::msgq_append(Message *message)
 
 
 /** Remove message from queue.
- * Removes the given message from the queue. Note that if you unref()ed the message
- * after insertion this will most likely delete the object. It is not safe to use the
- * message after removing it from the queue in general. Know what you are doing if
- * you want to use it.
+ * Removes the given message from the queue. Note that if you
+ * unref()ed the message after insertion this will most likely delete
+ * the object. It is not safe to use the message after removing it
+ * from the queue in general.
+ *
  * This can only be called on a writing interface instance.
+ *
  * @param message Message to remove.
  */
 void
@@ -927,7 +997,9 @@ Interface::msgq_flush()
 
 
 /** Lock message queue.
- * Lock the message queue. You have to do this before using the iterator safely.
+ * Lock the message queue. You have to do this * before using the
+ * iterator safely.
+ *
  * This can only be called on a writing interface instance.
  */
 void
@@ -943,17 +1015,21 @@ Interface::msgq_lock()
 
 
 /** Try to lock message queue.
- * Try to lock the message queue. Returns immediately and does not wait for lock.
+ * Try to lock the message queue. Returns immediately and does not
+ * wait for lock.
+ *
+ * This can only be called on a writing interface instance.
  * @return true, if the lock has been aquired, false otherwise.
  * @see lock()
- * This can only be called on a writing interface instance.
  */
 bool
 Interface::msgq_try_lock()
 {
   if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
-					"reading instance of an interface (try_lock).");
+    throw InterfaceWriteDeniedException(__type, __id,
+					"Cannot work on message queue on "
+					"reading instance of an interface "
+					"(msgq_try_lock).");
   }
 
   return __message_queue->try_lock();
@@ -977,9 +1053,12 @@ Interface::msgq_unlock()
 
 /** Get start iterator for message queue.
  * Not that you must have locked the queue before this operation!
+ *
  * This can only be called on a writing interface instance.
+ *
  * @return iterator to begin of message queue.
- * @exception NotLockedException thrown if message queue is not locked during this operation.
+ * @exception NotLockedException thrown if message queue is not locked
+ * during this operation.
  */
 MessageQueue::MessageIterator
 Interface::msgq_begin()
@@ -995,15 +1074,19 @@ Interface::msgq_begin()
 
 /** Get end iterator for message queue.
  * Not that you must have locked the queue before this operation!
+ *
  * This can only be called on a writing interface instance.
+ *
  * @return iterator beyond end of message queue.
- * @exception NotLockedException thrown if message queue is not locked during this operation.
+ * @exception NotLockedException thrown if message queue is not locked
+ * during this operation.
  */
 MessageQueue::MessageIterator
 Interface::msgq_end()
 {
   if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+    throw InterfaceWriteDeniedException(__type, __id,
+					"Cannot work on message queue on "
 					"reading instance of an interface (end).");
   }
 
@@ -1012,7 +1095,9 @@ Interface::msgq_end()
 
 
 /** Get the first message from the message queue.
+ *
  * This can only be called on a writing interface instance.
+ *
  * @return first message in queue or NULL if there is none
  */
 Message *
@@ -1068,6 +1153,136 @@ unsigned int
 Interface::num_fields()
 {
   return __num_fields;
+}
+
+
+/** Resize buffer array.
+ * This resizes the memory region used to store data buffers.
+ * @param num_buffers number of buffers to resize to (memory is allocated
+ * as necessary, 0 frees the memory area).
+ * @exception Exception thrown if resizing the memory section fails
+ */
+void
+Interface::resize_buffers(unsigned int num_buffers)
+{
+  __data_mutex->lock();
+  if (num_buffers == 0) {
+    if (__buffers != NULL) {
+      free(__buffers);
+      __buffers = NULL;
+      __num_buffers = 0;
+    }
+  } else {
+    void *tmp = realloc(__buffers, num_buffers * data_size);
+    if (tmp == NULL) {
+      __data_mutex->unlock();
+      throw Exception(errno, "Resizing buffers for interface %s failed", __uid);
+    } else {
+      __buffers     = tmp;
+      __num_buffers = num_buffers;
+    }
+  }
+  __data_mutex->unlock();
+}
+
+
+/** Get number of buffers.
+ * @return number of buffers
+ */
+unsigned int
+Interface::num_buffers() const
+{
+  return __num_buffers;
+}
+
+
+/** Copy data from private memory to buffer.
+ * @param buffer buffer number to copy to
+ */
+void
+Interface::copy_shared_to_buffer(unsigned int buffer)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+
+  __rwlock->lock_for_read();
+  __data_mutex->lock();
+
+  void *buf = (char *)__buffers + buffer * data_size;
+
+  if ( __valid ) {
+    memcpy(buf, __mem_data_ptr, data_size);
+  } else {
+    __data_mutex->unlock();
+    __rwlock->unlock();
+    throw InterfaceInvalidException(this, "copy_shared_to_buffer()");
+  }
+  __data_mutex->unlock();
+  __rwlock->unlock();
+}
+
+
+/** Copy data from private memory to buffer.
+ * @param buffer buffer number to copy to
+ */
+void
+Interface::copy_private_to_buffer(unsigned int buffer)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+
+  __data_mutex->lock();
+  void *buf = (char *)__buffers + buffer * data_size;
+  memcpy(buf, data_ptr, data_size);
+  __data_mutex->unlock();
+}
+
+
+
+/** Copy data from buffer to private memory.
+ * @param buffer buffer number to copy to
+ */
+void
+Interface::read_from_buffer(unsigned int buffer)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+  __data_mutex->lock();
+  void *buf = (char *)__buffers + buffer * data_size;
+  memcpy(data_ptr, buf, data_size);
+  __data_mutex->unlock();
+}
+
+
+/** Compare buffer to private memory.
+ * @param buffer buffer number of buffer to compare to private memory
+ * @return returns a number less than, equal to, or greater than zero
+ * if the shared buffer if less than, equal to, or greater than the
+ * private buffer respectively.
+ */
+int
+Interface::compare_buffers(unsigned int buffer)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+  __data_mutex->lock();
+  void *buf = (char *)__buffers + buffer * data_size;
+  int rv = memcmp(buf, data_ptr, data_size);
+  __data_mutex->unlock();
+
+  return rv;
 }
 
 

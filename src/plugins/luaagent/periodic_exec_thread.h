@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  exec_thread.h - Fawkes LuaAgent: Execution Thread
+ *  periodic_exec_thread.h - Fawkes LuaAgent: Periodic Execution Thread
  *
  *  Created: Thu Jan 01 11:12:13 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LUAAGENT_EXEC_THREAD_H_
-#define __PLUGINS_LUAAGENT_EXEC_THREAD_H_
+#ifndef __PLUGINS_LUAAGENT_PERIODIC_EXEC_THREAD_H_
+#define __PLUGINS_LUAAGENT_PERIODIC_EXEC_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -45,7 +45,7 @@ namespace fawkes {
   class SkillerDebugInterface;
 }
 
-class LuaAgentExecutionThread
+class LuaAgentPeriodicExecutionThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -54,8 +54,8 @@ class LuaAgentExecutionThread
   public fawkes::ClockAspect
 {
  public:
-  LuaAgentExecutionThread();
-  virtual ~LuaAgentExecutionThread();
+  LuaAgentPeriodicExecutionThread();
+  virtual ~LuaAgentPeriodicExecutionThread();
 
   virtual void init();
   virtual void loop();

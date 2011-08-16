@@ -83,6 +83,9 @@ class LuaInterfaceImporter : public LuaContextWatcher
 
   void push_interfaces();
 
+  void read_to_buffer();
+  void read_from_buffer();
+
   void read();
   void write();
 
@@ -103,6 +106,8 @@ class LuaInterfaceImporter : public LuaContextWatcher
   BlackBoard    *__blackboard;
   Configuration *__config;
   Logger        *__logger;
+
+  bool              __two_stage;
 
   InterfaceMap      __reading_ifs;
   InterfaceListMap  __reading_multi_ifs;
