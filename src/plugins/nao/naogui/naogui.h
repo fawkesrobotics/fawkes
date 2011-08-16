@@ -52,7 +52,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   void update_servo_value(Gtk::HScale *hsc, Gtk::Label *label, float value);
   void update_sensor_value(Gtk::Label *label, float value, bool show_decimal=true);
   void update_entry_value(Gtk::Entry *ent, float value, unsigned int width = 2);
-  void update_ultrasonic_direction(float direction);
+  void update_ultrasonic_direction();
   void send_servo_msg(Gtk::HScale *hsc, unsigned int servo);
   void update_values(bool force = false);
   void update_jointpos_values(bool force = false);
@@ -225,13 +225,21 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::Label  *lab_gyro_y;
   Gtk::Label  *lab_gyro_ref;
   Gtk::Label  *lab_angles_xy;
-  Gtk::Label  *lab_ultrasonic_distance;
   Gtk::Label  *lab_ultrasonic_direction;
+  Gtk::Label  *lab_ultrasonic_left0;
+  Gtk::Label  *lab_ultrasonic_left1;
+  Gtk::Label  *lab_ultrasonic_left2;
+  Gtk::Label  *lab_ultrasonic_left3;
+  Gtk::Label  *lab_ultrasonic_right0;
+  Gtk::Label  *lab_ultrasonic_right1;
+  Gtk::Label  *lab_ultrasonic_right2;
+  Gtk::Label  *lab_ultrasonic_right3;
   Gtk::Label  *lab_battery_charge;
-  Gtk::Button *but_sv_copy;
   Gtk::ToggleButton *but_us_auto;
-  Gtk::Button *but_us_emit;
+  Gtk::Button       *but_us_emit;
   Gtk::ComboBox     *cmb_us_direction;
+
+  Gtk::Button *but_sv_copy;
 
   Gtk::Button *but_stiffness_read;
   Gtk::Button *but_stiffness_write;

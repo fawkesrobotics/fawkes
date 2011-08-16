@@ -193,8 +193,15 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("lab_gyro_y", lab_gyro_y);
   builder->get_widget("lab_gyro_ref", lab_gyro_ref);
   builder->get_widget("lab_angles_xy", lab_angles_xy);
-  builder->get_widget("lab_ultrasonic_distance", lab_ultrasonic_distance);
   builder->get_widget("lab_ultrasonic_direction", lab_ultrasonic_direction);
+  builder->get_widget("lab_ultrasonic_left0", lab_ultrasonic_left0);
+  builder->get_widget("lab_ultrasonic_left1", lab_ultrasonic_left1);
+  builder->get_widget("lab_ultrasonic_left2", lab_ultrasonic_left2);
+  builder->get_widget("lab_ultrasonic_left3", lab_ultrasonic_left3);
+  builder->get_widget("lab_ultrasonic_right0", lab_ultrasonic_right0);
+  builder->get_widget("lab_ultrasonic_right1", lab_ultrasonic_right1);
+  builder->get_widget("lab_ultrasonic_right2", lab_ultrasonic_right2);
+  builder->get_widget("lab_ultrasonic_right3", lab_ultrasonic_right3);
   builder->get_widget("lab_battery_charge", lab_battery_charge);
   builder->get_widget("but_sv_copy", but_sv_copy);
   builder->get_widget("cmb_us_direction", cmb_us_direction);
@@ -596,16 +603,23 @@ NaoGuiGtkWindow::update_entry_value(Gtk::Entry *ent, float value, unsigned int w
  * @param direction direction value from interface field
  */
 void
-NaoGuiGtkWindow::update_ultrasonic_direction(float direction)
+NaoGuiGtkWindow::update_ultrasonic_direction()
 {
-  if ( direction == NaoSensorInterface::USD_left_left ) {
-    lab_ultrasonic_direction->set_text("l-l");
-  } else if ( direction == NaoSensorInterface::USD_left_right ) {
-    lab_ultrasonic_direction->set_text("l-r");
-  } else if ( direction == NaoSensorInterface::USD_right_left ) {
-    lab_ultrasonic_direction->set_text("r-l");
-  } else if ( direction == NaoSensorInterface::USD_right_right ) {
-    lab_ultrasonic_direction->set_text("r-r");
+  if ( ! sensor_if || ! sensor_if->is_valid()) return;
+
+  switch (sensor_if->ultrasonic_direction()) {
+  case NaoSensorInterface::USD_LEFT_LEFT:
+    lab_ultrasonic_direction->set_text("l-l"); break;
+  case NaoSensorInterface::USD_LEFT_RIGHT:
+    lab_ultrasonic_direction->set_text("l-r"); break;
+  case NaoSensorInterface::USD_RIGHT_RIGHT:
+    lab_ultrasonic_direction->set_text("r-r"); break;
+  case NaoSensorInterface::USD_RIGHT_LEFT:
+    lab_ultrasonic_direction->set_text("r-l"); break;
+  case NaoSensorInterface::USD_BOTH_BOTH:
+    lab_ultrasonic_direction->set_text("b-b"); break;
+  default:
+    lab_ultrasonic_direction->set_text("none"); break;
   }
 }
 
@@ -817,15 +831,16 @@ NaoGuiGtkWindow::update_sensor_values(bool force)
       convert_float2str(sensor_if->angle_y(), 2);
     lab_angles_xy->set_text(angles_xy);
 
+    update_ultrasonic_direction();
+    update_sensor_value(lab_ultrasonic_left0, sensor_if->ultrasonic_distance_left(0));
+    update_sensor_value(lab_ultrasonic_left1, sensor_if->ultrasonic_distance_left(1));
+    update_sensor_value(lab_ultrasonic_left2, sensor_if->ultrasonic_distance_left(2));
+    update_sensor_value(lab_ultrasonic_left3, sensor_if->ultrasonic_distance_left(3));
+    update_sensor_value(lab_ultrasonic_right0, sensor_if->ultrasonic_distance_right(0));
+    update_sensor_value(lab_ultrasonic_right1, sensor_if->ultrasonic_distance_right(1));
+    update_sensor_value(lab_ultrasonic_right2, sensor_if->ultrasonic_distance_right(2));
+    update_sensor_value(lab_ultrasonic_right3, sensor_if->ultrasonic_distance_right(3));
 
-    update_sensor_value(lab_ultrasonic_distance, sensor_if->ultrasonic_distance());
-    update_ultrasonic_direction(sensor_if->ultrasonic_direction());
-
-    if ( but_us_auto->get_active() ) {
-      NaoSensorInterface::EmitUltrasonicWaveMessage *m =
-	new NaoSensorInterface::EmitUltrasonicWaveMessage(cmb_us_direction->get_active_row_number());
-      sensor_if->msgq_enqueue(m);
-    }
   } catch (Exception &e) {
     // ignored, happens on disconnect while events are pending
   }
@@ -922,11 +937,32 @@ NaoGuiGtkWindow::on_sv_copy_clicked()
 }
 
 
+static NaoSensorInterface::UltrasonicDirection
+string_to_usd(std::string &value)
+{
+  if (value == "l-l") {
+    return NaoSensorInterface::USD_LEFT_LEFT;
+  } else if (value == "l-r") {
+    return NaoSensorInterface::USD_LEFT_RIGHT;
+  } else if (value == "r-l") {
+    return NaoSensorInterface::USD_RIGHT_LEFT;
+  } else if (value == "r-r") {
+    return NaoSensorInterface::USD_RIGHT_RIGHT;
+  } else if (value == "b-b") {
+    return NaoSensorInterface::USD_BOTH_BOTH;
+  }
+  return NaoSensorInterface::USD_NONE;
+}
+
 void
 NaoGuiGtkWindow::on_us_emit_clicked()
 {
+  std::string value;
+  cmb_us_direction->get_active()->get_value(0, value);
+  NaoSensorInterface::UltrasonicDirection dirval = string_to_usd(value);
+
   NaoSensorInterface::EmitUltrasonicWaveMessage *m =
-    new NaoSensorInterface::EmitUltrasonicWaveMessage(cmb_us_direction->get_active_row_number());
+    new NaoSensorInterface::EmitUltrasonicWaveMessage(dirval);
   sensor_if->msgq_enqueue(m);
 }
 
@@ -934,7 +970,19 @@ NaoGuiGtkWindow::on_us_emit_clicked()
 void
 NaoGuiGtkWindow::on_us_auto_toggled()
 {
-  but_us_emit->set_sensitive(! but_us_auto->get_active());
+  if (but_us_auto->get_active()) {
+    std::string value;
+    cmb_us_direction->get_active()->get_value(0, value);
+    NaoSensorInterface::UltrasonicDirection dirval = string_to_usd(value);
+
+    NaoSensorInterface::StartUltrasonicMessage *m =
+      new NaoSensorInterface::StartUltrasonicMessage(dirval);
+    sensor_if->msgq_enqueue(m);
+  } else {
+    NaoSensorInterface::StopUltrasonicMessage *m =
+      new NaoSensorInterface::StopUltrasonicMessage();
+    sensor_if->msgq_enqueue(m);
+  }
 }
 
 /** Event handler for connection button. */
