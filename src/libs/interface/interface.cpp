@@ -1202,7 +1202,7 @@ Interface::num_buffers() const
 void
 Interface::copy_shared_to_buffer(unsigned int buffer)
 {
-  if (buffer > __num_buffers) {
+  if (buffer >= __num_buffers) {
     throw OutOfBoundsException("Buffer ID out of bounds",
 			       buffer, 0, __num_buffers);
   }
@@ -1231,7 +1231,7 @@ Interface::copy_shared_to_buffer(unsigned int buffer)
 void
 Interface::copy_private_to_buffer(unsigned int buffer)
 {
-  if (buffer > __num_buffers) {
+  if (buffer >= __num_buffers) {
     throw OutOfBoundsException("Buffer ID out of bounds",
 			       buffer, 0, __num_buffers);
   }
@@ -1251,7 +1251,7 @@ Interface::copy_private_to_buffer(unsigned int buffer)
 void
 Interface::read_from_buffer(unsigned int buffer)
 {
-  if (buffer > __num_buffers) {
+  if (buffer >= __num_buffers) {
     throw OutOfBoundsException("Buffer ID out of bounds",
 			       buffer, 0, __num_buffers);
   }
