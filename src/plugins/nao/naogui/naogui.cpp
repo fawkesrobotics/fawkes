@@ -635,9 +635,11 @@ NaoGuiGtkWindow::send_servo_msg(Gtk::HScale *hsc, unsigned int servo)
   if ( jointpos_if && tb_control->get_active() ) {
     jointpos_if->read();
 
-    if (servo == NaoJointPositionInterface::SERVO_head_pitch || servo == NaoJointPositionInterface::SERVO_head_yaw) {
-      HumanoidMotionInterface::YawPitchHeadMessage *m
-        = new HumanoidMotionInterface::YawPitchHeadMessage(hsc_HeadYaw->get_value() / 100.f, hsc_HeadPitch->get_value() / 100.f, servo_time / 1000.f);
+    if (servo == NaoJointPositionInterface::SERVO_head_pitch ||
+        servo == NaoJointPositionInterface::SERVO_head_yaw)
+    {
+      HumanoidMotionInterface::YawPitchHeadMessage *m =
+        new HumanoidMotionInterface::YawPitchHeadMessage(hsc_HeadYaw->get_value() / 100.f, hsc_HeadPitch->get_value() / 100.f, servo_time / 1000.f);
 
       if ( rad_motion_fawkes->get_active() ) {
         hummot_fawkes_if->msgq_enqueue(m);

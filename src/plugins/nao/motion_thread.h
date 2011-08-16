@@ -91,6 +91,7 @@ class NaoQiMotionThread
   fawkes::NaoSensorInterface      *__sensor_if;
 
   int __motion_task_id;
+  int __head_task_id;
   AL::ALPtr<AL::ALTask>        __motion_task;
 };
 

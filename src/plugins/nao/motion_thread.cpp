@@ -59,7 +59,7 @@ NaoQiMotionThread::~NaoQiMotionThread()
 void
 NaoQiMotionThread::init()
 {
-  __motion_task_id = -1;
+  __motion_task_id = __head_task_id = -1;
 
   // Is ALMotion available?
   try {
@@ -118,6 +118,13 @@ NaoQiMotionThread::stop_motion()
       __motion_task->exitTask();
       __motion_task.reset();
     }
+  }
+
+  if (__head_task_id != -1) {
+    if (__almotion->isRunning(__head_task_id)) {
+      __almotion->killTask(__head_task_id);
+    }
+    __head_task_id = -1;
   }
 }
 
@@ -196,6 +203,27 @@ NaoQiMotionThread::process_messages()
 	}
       }
       __hummot_if->set_msgid(msg->id());
+    }
+
+    else if (HumanoidMotionInterface::YawPitchHeadMessage *msg =
+	     __hummot_if->msgq_first_safe(msg))
+    {
+      std::vector<float> angles;
+      angles.push_back(msg->yaw());
+      angles.push_back(msg->pitch());
+
+      std::vector<std::string> names;
+      names.push_back("HeadYaw");
+      names.push_back("HeadPitch");
+
+      if ((__head_task_id != -1) && __almotion->isRunning(__head_task_id)) {
+        __almotion->killTask(__head_task_id);
+        __head_task_id = -1;
+      }
+
+      __head_task_id =
+        __almotion->post.angleInterpolation(names, angles, msg->time_sec(), true);
+
     }
 
     else if (HumanoidMotionInterface::GetUpMessage *msg =
