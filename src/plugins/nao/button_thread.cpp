@@ -118,6 +118,13 @@ NaoQiButtonThread::init()
   __head_rear_if =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Head Rear");
 
+  __chestbut_if->resize_buffers(1);
+  __lfoot_bumper_if->resize_buffers(1);
+  __rfoot_bumper_if->resize_buffers(1);
+  __head_front_if->resize_buffers(1);
+  __head_middle_if->resize_buffers(1);
+  __head_rear_if->resize_buffers(1);
+
   __chestbut_remote_enabled = false;
   __lfoot_bumper_remote_enabled = __rfoot_bumper_remote_enabled = false;
   __head_front_remote_enabled = __head_middle_remote_enabled =
@@ -211,6 +218,26 @@ NaoQiButtonThread::loop()
   }
 }
 
+
+void
+NaoQiButtonThread::set_interface(SwitchInterface *switch_if,
+                                 bool enabled, float value, float history,
+                                 unsigned int activations,
+                                 unsigned int short_act, unsigned int long_act)
+{
+  switch_if->copy_shared_to_buffer(0);
+
+  switch_if->set_enabled(enabled);
+  switch_if->set_value(value);
+  switch_if->set_history(history);
+  switch_if->set_activation_count(activations);
+  switch_if->set_short_activations(short_act);
+  switch_if->set_long_activations(long_act);
+
+  if (switch_if->compare_buffers(0) != 0)  switch_if->write();
+}
+
+
 void
 NaoQiButtonThread::process_pattern_button(SwitchInterface *switch_if,
                                           float sensor_value, float time_diff_sec,
@@ -230,13 +257,9 @@ NaoQiButtonThread::process_pattern_button(SwitchInterface *switch_if,
   pattern_button_logic(value, time_diff_sec, enabled, history,
                        activations, short_act, long_act,
                        sound_short, sound_long);
-  switch_if->set_enabled(enabled);
-  switch_if->set_value(value);
-  switch_if->set_history(history);
-  switch_if->set_activation_count(activations);
-  switch_if->set_short_activations(short_act);
-  switch_if->set_long_activations(long_act);
-  switch_if->write();
+
+  set_interface(switch_if, enabled, value, history,
+                activations, short_act, long_act);
 }
 
 
@@ -258,13 +281,8 @@ NaoQiButtonThread::process_bumpers(SwitchInterface *switch_if,
 
   bumpers_logic(value, time_diff_sec, enabled, history, activations, sound_id);
 
-  switch_if->set_enabled(enabled);
-  switch_if->set_value(value);
-  switch_if->set_history(history);
-  switch_if->set_activation_count(activations);
-  switch_if->set_short_activations(short_act);
-  switch_if->set_long_activations(long_act);
-  switch_if->write();
+  set_interface(switch_if, enabled, value, history,
+                activations, short_act, long_act);
 }
 
 
@@ -344,6 +362,13 @@ NaoQiButtonThread::pattern_button_logic(float value, float time_diff_sec,
       history  = time_diff_sec;
     }
   }
+
+  // stop after two minutes, nobody cares after that
+  if (history < -120.) {
+    history = -120.;
+  } else if (history > 120.) {
+    history =  120.;
+  }
 }
 
 
@@ -372,5 +397,12 @@ NaoQiButtonThread::bumpers_logic(float value, float time_diff_sec,
     } else {
       history  = time_diff_sec;
     }
+  }
+
+  // stop after two minutes, nobody cares after that
+  if (history < -120.) {
+    history = -120.;
+  } else if (history > 120.) {
+    history =  120.;
   }
 }

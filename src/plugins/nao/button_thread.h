@@ -67,6 +67,11 @@ class NaoQiButtonThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  void set_interface(fawkes::SwitchInterface *switch_if,
+                     bool enabled, float value, float history,
+                     unsigned int activations,
+                     unsigned int short_act, unsigned int long_act);
+
   void process_messages(fawkes::SwitchInterface *switch_if,
                         bool &remote_enabled, float &value);
 
