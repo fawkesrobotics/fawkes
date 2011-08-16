@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  exec_thread.cpp - Fawkes LuaAgent: Execution Thread
+ *  periodic_exec_thread.cpp - Fawkes LuaAgent: Periodic Execution Thread
  *
  *  Created: Thu Jan 01 11:12:13 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "exec_thread.h"
+#include "periodic_exec_thread.h"
 
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
@@ -39,17 +39,19 @@
 using namespace std;
 using namespace fawkes;
 
-/** @class LuaAgentExecutionThread "exec_thread.h"
- * LuaAgent Execution Thread.
+/** @class LuaAgentPeriodicExecutionThread "periodic_exec_thread.h"
+ * LuaAgent Periodic Execution Thread.
  * This thread runs and controls the Lua interpreter and passes data into the
- * execution engine.
+ * execution engine. It hooks into the THINK main loop hook and expects the
+ * agent's execution function to return quickly. If you have a separate agent
+ * main loop use the concurrent execution thread.
  *
  * @author Tim Niemueller
  */
 
 /** Constructor. */
-LuaAgentExecutionThread::LuaAgentExecutionThread()
-  : Thread("LuaAgentExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
+LuaAgentPeriodicExecutionThread::LuaAgentPeriodicExecutionThread()
+  : Thread("LuaAgentPeriodicExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
 {
   __lua = NULL;
@@ -57,7 +59,7 @@ LuaAgentExecutionThread::LuaAgentExecutionThread()
 
 
 /** Destructor. */
-LuaAgentExecutionThread::~LuaAgentExecutionThread()
+LuaAgentPeriodicExecutionThread::~LuaAgentPeriodicExecutionThread()
 {
 }
 
@@ -67,7 +69,7 @@ LuaAgentExecutionThread::~LuaAgentExecutionThread()
  * else!
  */
 void
-LuaAgentExecutionThread::init_failure_cleanup()
+LuaAgentPeriodicExecutionThread::init_failure_cleanup()
 {
   try {
     if ( __skiller_if ) {
@@ -89,7 +91,7 @@ LuaAgentExecutionThread::init_failure_cleanup()
 
 
 void
-LuaAgentExecutionThread::init()
+LuaAgentPeriodicExecutionThread::init()
 {
   try {
     __cfg_agent       = config->get_string("/luaagent/agent");
@@ -99,7 +101,7 @@ LuaAgentExecutionThread::init()
     throw;
   }
 
-  logger->log_debug("LuaAgentExecutionThread", "Agent: %s", __cfg_agent.c_str());
+  logger->log_debug("LuaAgentPeriodicExecutionThread", "Agent: %s", __cfg_agent.c_str());
 
   __clog = new ComponentLogger(logger, "LuaAgentLua");
 
@@ -122,7 +124,10 @@ LuaAgentExecutionThread::init()
   __agdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("LuaAgent");
 
   try {
-    __lua  = new LuaContext(__cfg_watch_files);
+    __lua  = new LuaContext();
+    if (__cfg_watch_files) {
+      __lua->setup_fam(/* auto restart */ true, /* conc thread */ false);
+    }
 
     __lua_ifi = new LuaInterfaceImporter(__lua, blackboard, config, logger);
     __lua_ifi->open_reading_interfaces(reading_prefix);
@@ -158,7 +163,7 @@ LuaAgentExecutionThread::init()
 
 
 void
-LuaAgentExecutionThread::finalize()
+LuaAgentPeriodicExecutionThread::finalize()
 {
   if (__skiller_if->has_writer() ) {
     __skiller_if->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
@@ -173,7 +178,7 @@ LuaAgentExecutionThread::finalize()
 }
 
 void
-LuaAgentExecutionThread::process_agdbg_messages()
+LuaAgentPeriodicExecutionThread::process_agdbg_messages()
 {
   while ( ! __agdbg_if->msgq_empty() ) {
     if (__agdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphDirectionMessage>() ) {
@@ -188,16 +193,16 @@ LuaAgentExecutionThread::process_agdbg_messages()
 	}
 	__lua->do_string("agentenv.set_graphdir(\"%s\")", graphdir.c_str());
       } catch (Exception &e) {
-	logger->log_warn("LuaAgentExecutionThread", "Failed to set graph direction, exception follows");
-	logger->log_warn("LuaAgentExecutionThread", e);
+	logger->log_warn("LuaAgentPeriodicExecutionThread", "Failed to set graph direction, exception follows");
+	logger->log_warn("LuaAgentPeriodicExecutionThread", e);
       }
     } else if (__agdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphColoredMessage>() ) {
       SkillerDebugInterface::SetGraphColoredMessage *m = __agdbg_if->msgq_first<SkillerDebugInterface::SetGraphColoredMessage>();
       try {
 	__lua->do_string("agentenv.set_graph_colored(%s)", m->is_graph_colored() ? "true" : "false");
       } catch (Exception &e) {
-	logger->log_warn("LuaAgentExecutionThread", "Failed to set graph direction, exception follows");
-	logger->log_warn("LuaAgentExecutionThread", e);
+	logger->log_warn("LuaAgentPeriodicExecutionThread", "Failed to set graph direction, exception follows");
+	logger->log_warn("LuaAgentPeriodicExecutionThread", e);
       }
     }
 
@@ -207,7 +212,7 @@ LuaAgentExecutionThread::process_agdbg_messages()
 
 
 void
-LuaAgentExecutionThread::loop()
+LuaAgentPeriodicExecutionThread::loop()
 {
 #ifdef HAVE_INOTIFY
   __lua->process_fam_events();
@@ -222,9 +227,9 @@ LuaAgentExecutionThread::loop()
     // Stack:
     __lua->do_string("agentenv.execute()");
   } catch (Exception &e) {
-    logger->log_error("LuaAgentExecutionThread", "Execution of %s.execute() failed, exception follows",
+    logger->log_error("LuaAgentPeriodicExecutionThread", "Execution of %s.execute() failed, exception follows",
 		      __cfg_agent.c_str());
-    logger->log_error("LuaAgentExecutionThread", e);
+    logger->log_error("LuaAgentPeriodicExecutionThread", e);
   }
 
   __lua_ifi->write();

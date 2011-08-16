@@ -50,6 +50,7 @@ class InterfaceMediator;
 class MessageMediator;
 class Time;
 class Clock;
+class Mutex;
 
 class InterfaceWriteDeniedException : public Exception
 {
@@ -107,6 +108,13 @@ class Interface
   virtual Message *       create_message(const char *type) const = 0;
   virtual void            copy_values(const Interface *interface) = 0;
   virtual const char *    enum_tostring(const char *enumtype, int val) const = 0;
+
+  void                    resize_buffers(unsigned int num_buffers);
+  unsigned int            num_buffers() const;
+  void                    copy_shared_to_buffer(unsigned int buffer);
+  void                    copy_private_to_buffer(unsigned int buffer);
+  void                    read_from_buffer(unsigned int buffer);
+  int                     compare_buffers(unsigned int buffer);
 
   void          read();
   void          write();
@@ -225,6 +233,10 @@ class Interface
   unsigned int       __mem_serial;
   bool               __write_access;
 
+  void *             __buffers;
+  unsigned int       __num_buffers;
+
+  Mutex             *__data_mutex;
   RefCountRWLock    *__rwlock;
 
   InterfaceMediator *__interface_mediator;
