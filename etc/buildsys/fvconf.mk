@@ -80,11 +80,20 @@ ifeq ($(HAVE_LIBPNG),1)
 endif
 
 ifeq ($(HAVE_OPENCV),1)
-# Specify LDFLAGS manually, too many libs depending on old Gtk atm
-# (filter-out -lhighgui -lcvaux,(shell $(PKGCONFIG) --libs 'opencv'))
+  # Specify LDFLAGS manually, too many libs depending on old Gtk atm
+  # (filter-out -lhighgui -lcvaux,(shell $(PKGCONFIG) --libs 'opencv'))
+  VERSION_OPENCV          = $(shell $(PKGCONFIG) --modversion 'opencv')
+  VERSION_SPLITTED_OPENCV = $(call split,.,$(VERSION_OPENCV))
+  VERSION_MAJOR_OPENCV    = $(word 1,$(VERSION_SPLITTED_OPENCV))
+  VERSION_MINOR_OPENCV    = $(word 2,$(VERSION_SPLITTED_OPENCV))
   CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS_OPENCV     = -lopencv_core -lopencv_imgproc -lopencv_ml
-  LDFLAGS_OPENCV_GUI = -lopencv_highgui
+  ifeq ($(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV),2.0)
+    LDFLAGS_OPENCV     = -lcxcore
+    LDFLAGS_OPENCV_GUI = -lhighgui
+  else
+    LDFLAGS_OPENCV     = -lopencv_core -lopencv_imgproc -lopencv_ml
+    LDFLAGS_OPENCV_GUI = -lopencv_highgui
+  endif
 endif
 
 ifeq ($(HAVE_LIBUSB),1)

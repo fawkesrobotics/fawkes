@@ -26,7 +26,12 @@ LIBS     += $(VISION_LIBS)
 
 ifeq ($(HAVE_OPENCV),1)
   CFLAGS  += $(CFLAGS_OPENCV)
-  LDFLAGS += $(LDFLAGS_OPENCV) -lopencv_objdetect
+  LDFLAGS += $(LDFLAGS_OPENCV)
+  ifeq ($(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV),2.0)
+    LDFLAGS += -lcv
+  else
+    LDFLAGS += -lopencv_objdetect
+  endif
 else
   WARN_TARGETS += warning_opencv
   FILTER_OUT += faces.cpp
