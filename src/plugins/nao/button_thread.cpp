@@ -26,6 +26,7 @@
 #include <alproxies/dcmproxy.h>
 #include <alproxies/alaudioplayerproxy.h>
 #include <alproxies/almemoryproxy.h>
+#include <alproxies/alsentinelproxy.h>
 #include <alcore/alerror.h>
 #include <almemoryfastaccess/almemoryfastaccess.h>
 
@@ -84,6 +85,7 @@ NaoQiButtonThread::init()
   try {
     AL::ALPtr<AL::ALLauncherProxy> launcher(new AL::ALLauncherProxy(naoqi_broker));
     bool is_auplayer_available = launcher->isModulePresent("ALAudioPlayer");
+    bool is_alsentinel_available = launcher->isModulePresent("ALSentinel");
 
     if (! is_auplayer_available) {
       logger->log_warn(name(), "ALAudioPlayer not available, disabling sounds");
@@ -96,6 +98,15 @@ NaoQiButtonThread::init()
         __auplayer->loadFile(RESDIR"/sounds/metal_click_1_left.wav");
       __sound_bumper_right =
         __auplayer->loadFile(RESDIR"/sounds/metal_click_1_right.wav");
+    }
+
+    if (is_alsentinel_available) {
+      logger->log_warn(name(), "ALSentinel loaded, disabling its button handling");
+      AL::ALPtr<AL::ALSentinelProxy>
+        alsentinel(new AL::ALSentinelProxy(naoqi_broker));
+      alsentinel->enableDefaultActionSimpleClick(false);
+      alsentinel->enableDefaultActionDoubleClick(false);
+      alsentinel->enableDefaultActionTripleClick(false);
     }
   } catch (AL::ALError& e) {
     throw Exception("Checking module availability failed: %s",
@@ -197,6 +208,7 @@ NaoQiButtonThread::loop()
       __chestbut_if->long_activations() == 3 &&
       __chestbut_if->activation_count() != last_shutdown_actcount)
   {
+    logger->log_debug(name(), "Shutting down");
     last_shutdown_actcount = __chestbut_if->activation_count();
     if (__auplayer)  __auplayer->playFile(RESDIR"/sounds/naoshutdown.wav");
 
