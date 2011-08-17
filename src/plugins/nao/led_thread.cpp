@@ -106,20 +106,16 @@ NaoQiLedThread::init()
     __cfg_verbose_face = config->get_bool("/hardware/nao/leds/verbose_face");
   } catch (Exception &e) {} // ignored, use default
 
-  logger->log_debug(name(), "Init");
   __dcm   = naoqi_broker->getDcmProxy();
   __almem = naoqi_broker->getMemoryProxy();
 
-  logger->log_debug(name(), "Get prefix");
   try {
     __subd_prefix = (std::string)__dcm->getPrefix()[0];
-    logger->log_debug(name(), "Prefix: %s", __subd_prefix.c_str());
   } catch (AL::ALError &e) {
     throw Exception("Failed to get DCM prefix: %s", e.toString().c_str());
   }
   PathParser subdpp(__subd_prefix);
 
-  logger->log_debug(name(), "get devices");
   std::vector<std::string> leddevs;
   try {
     leddevs = dcm::get_devices(__dcm, __almem, "Led");
@@ -128,7 +124,6 @@ NaoQiLedThread::init()
   }
 
   // Initialize fast memory access
-  logger->log_debug(name(), "Initializing fast memory access");
   std::string prefix = __subd_prefix;
   std::vector<std::string> keys;
   keys.resize(LedTypeN);
@@ -246,7 +241,6 @@ NaoQiLedThread::init()
     (joint_pos_if->robot_type() != NaoJointPositionInterface::ROBOTYPE_ACADEMIC);
   blackboard->close(joint_pos_if);
 
-  logger->log_debug(name(), "Setup interfaces");
   std::vector<std::string>::iterator l;
   for (l = leddevs.begin(); l != leddevs.end(); ++l) {
     PathParser pp(*l);
@@ -318,17 +312,17 @@ NaoQiLedThread::init()
     throw;
   }
 
-  logger->log_debug(name(), "Interfaces and device IDs:");
+  //logger->log_debug(name(), "Interfaces and device IDs:");
   fawkes::LedInterface *last = NULL;
   for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
     if (i->first == last)  continue;
 
-    logger->log_debug(name(), "  %s", i->first->id());
+    //logger->log_debug(name(), "  %s", i->first->id());
     std::pair<LedMap::iterator, LedMap::iterator> ret =
       __leds.equal_range(i->first);
       
     for (LedMap::iterator j = ret.first; j != ret.second; ++j) {
-      logger->log_debug(name(), "    %s", j->second.c_str());
+      //logger->log_debug(name(), "    %s", j->second.c_str());
 
       for (unsigned int k = 0; k < keys.size(); ++k) {
         if (keys[k] == j->second) {
@@ -341,7 +335,6 @@ NaoQiLedThread::init()
     }
   }
 
-  logger->log_debug(name(), "Setup listener");
   last = NULL;
   for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
     if (i->first != last) {
@@ -388,7 +381,6 @@ NaoQiLedThread::loop()
     }
 
     if (maxval != i->first->intensity()) {
-      logger->log_debug(name(), "Setting %s to %f", i->first->id(), maxval);
       i->first->set_intensity(maxval);
       i->first->write();
     }
