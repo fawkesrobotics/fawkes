@@ -357,7 +357,7 @@ class HumanoidMotionInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class YawPitchHeadMessage : public Message
+  class MoveHeadMessage : public Message
   {
    private:
 #pragma pack(push,4)
@@ -367,18 +367,18 @@ class HumanoidMotionInterface : public Interface
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float yaw; /**< Desired yaw (horizontal orientation). */
       float pitch; /**< Desired pitch (vertical orientation). */
-      float time_sec; /**< Time in seconds when to reach the target. */
-    } YawPitchHeadMessage_data_t;
+      float speed; /**< Maximum speed in [0.0..1.0]. */
+    } MoveHeadMessage_data_t;
 #pragma pack(pop)
 
-    YawPitchHeadMessage_data_t *data;
+    MoveHeadMessage_data_t *data;
 
    public:
-    YawPitchHeadMessage(const float ini_yaw, const float ini_pitch, const float ini_time_sec);
-    YawPitchHeadMessage();
-    ~YawPitchHeadMessage();
+    MoveHeadMessage(const float ini_yaw, const float ini_pitch, const float ini_speed);
+    MoveHeadMessage();
+    ~MoveHeadMessage();
 
-    YawPitchHeadMessage(const YawPitchHeadMessage *m);
+    MoveHeadMessage(const MoveHeadMessage *m);
     /* Methods */
     float yaw() const;
     void set_yaw(const float new_yaw);
@@ -386,9 +386,9 @@ class HumanoidMotionInterface : public Interface
     float pitch() const;
     void set_pitch(const float new_pitch);
     size_t maxlenof_pitch() const;
-    float time_sec() const;
-    void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
+    float speed() const;
+    void set_speed(const float new_speed);
+    size_t maxlenof_speed() const;
     virtual Message * clone() const;
   };
 

@@ -128,11 +128,11 @@ class HumanoidMotionInterface : public Interface
     int maxlenof_from_pos() const;
   };
 
-  class YawPitchHeadMessage : public Message
+  class MoveHeadMessage : public Message
   {
-    YawPitchHeadMessage(float ini_yaw, float ini_pitch, float ini_time_sec);
-    YawPitchHeadMessage();
-    ~YawPitchHeadMessage();
+    MoveHeadMessage(float ini_yaw, float ini_pitch, float ini_speed);
+    MoveHeadMessage();
+    ~MoveHeadMessage();
 
     float yaw();
     void set_yaw(const float new_yaw);
@@ -140,9 +140,9 @@ class HumanoidMotionInterface : public Interface
     float pitch();
     void set_pitch(const float new_pitch);
     int maxlenof_pitch() const;
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
+    float speed();
+    void set_speed(const float new_speed);
+    int maxlenof_speed() const;
   };
 
   bool is_moving();
