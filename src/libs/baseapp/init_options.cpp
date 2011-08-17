@@ -52,6 +52,7 @@ namespace fawkes {
 InitOptions::InitOptions(const char *basename)
 {
   __basename = strdup(basename);
+  __default_plugin = strdup("default");
   __has_net_tcp_port = false;
   __net_tcp_port = 0;
   __has_loggers = false;
@@ -84,6 +85,7 @@ InitOptions::InitOptions(const char *basename)
 InitOptions::InitOptions(const InitOptions &options)
 {
   __basename = strdup(options.__basename);
+  __default_plugin = strdup(options.__default_plugin);
   __net_tcp_port = 0;
   __has_net_tcp_port = options.__has_net_tcp_port;
   if (__has_net_tcp_port) {
@@ -163,6 +165,8 @@ InitOptions::InitOptions(int argc, char **argv)
   ArgumentParser *argp = fawkes::runtime::argument_parser;
 
   __basename = strdup(argp->program_name());
+  __default_plugin = strdup("default");
+
   __has_net_tcp_port = argp->has_arg("P");
   if (__has_net_tcp_port) {
     __net_tcp_port = argp->parse_int("P");
@@ -171,7 +175,6 @@ InitOptions::InitOptions(int argc, char **argv)
   if (__has_loggers) {
     __loggers = strdup(argp->arg("L"));
   }
-
 
   const char *tmp;
   __log_level = Logger::LL_DEBUG;
@@ -252,6 +255,7 @@ InitOptions::InitOptions(int argc, char **argv)
 InitOptions::~InitOptions()
 {
   free(__basename);
+  free(__default_plugin);
   if (__has_loggers)           free(__loggers);
   if (__has_net_service_name)  free(__net_service_name);
   if (__has_username)          free(__username);
@@ -272,6 +276,8 @@ InitOptions::operator=(const InitOptions &options)
 {
   free(__basename);
   __basename = strdup(options.__basename);
+  free(__default_plugin);
+  __default_plugin = strdup(options.__default_plugin);
   __net_tcp_port = 0;
   __has_net_tcp_port = options.__has_net_tcp_port;
   if (__has_net_tcp_port) {
@@ -361,6 +367,19 @@ InitOptions::operator=(const InitOptions &options)
   __init_plugin_cache = options.__init_plugin_cache;
   __plugin_module_flags = options.__plugin_module_flags;
 
+  return *this;
+}
+
+
+/** Set additional default plugin name.
+ * @param default_plugin_ additional default plugin name
+ * @return reference to this instance
+ */
+InitOptions &
+InitOptions::default_plugin(const char *default_plugin_)
+{
+  free(__default_plugin);
+  __default_plugin = strdup(default_plugin_);
   return *this;
 }
 
@@ -588,6 +607,20 @@ const char *
 InitOptions::basename() const
 {
   return __basename;
+}
+
+
+/** Get name of default plugin.
+ * This is usually the name of a meta plugin to load the appropriate
+ * plugins.  It may have a specialized name on a specific robot
+ * platform. It defaults to "default". Note that "default" is always
+ * loaded to avoid confusion.
+ * @return default plugin name
+ */
+const char *
+InitOptions::default_plugin() const
+{
+  return __default_plugin;
 }
 
 

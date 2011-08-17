@@ -59,6 +59,7 @@ class InitOptions
   InitOptions &  bb_cleanup(bool bb_cleanup);
   InitOptions &  init_plugin_cache(bool init_plugin_cache);
   InitOptions &  load_plugins(const char *plugin_list);
+  InitOptions &  default_plugin(const char *default_plugin);
   InitOptions &  plugin_module_flags(Module::ModuleFlags flags);
 
   const char *basename() const;
@@ -70,6 +71,7 @@ class InitOptions
 
   bool has_load_plugin_list() const;
   const char * load_plugin_list() const;
+  const char * default_plugin() const;
   
 
   bool has_loggers() const;
@@ -104,6 +106,7 @@ class InitOptions
 
   bool                __has_load_plugin_list;
   char               *__load_plugin_list;
+  char               *__default_plugin;
 
   bool                __has_loggers;
   char               *__loggers;
