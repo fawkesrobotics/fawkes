@@ -21,6 +21,7 @@
  */
 
 #include "dcm_thread.h"
+#include "motion_utils.h"
 
 #include <alproxies/allauncherproxy.h>
 #include <alproxies/dcmproxy.h>
@@ -203,7 +204,7 @@ NaoQiDCMThread::init()
       throw Exception("DCMThread: NaoQi DCM is not available");
     }
     if (! is_almotion_available) {
-      //throw Exception("DCMThread: ALMotion is not available");
+      throw Exception("DCMThread: ALMotion is not available");
     }
   } catch (AL::ALError& e) {
     throw Exception("Checking module availability failed: %s",
@@ -741,22 +742,33 @@ NaoQiDCMThread::process_messages()
     {
     }
 
-    else if (NaoJointPositionInterface::GotoAngleMessage *msg =
+    else if (NaoJointPositionInterface::MoveServoMessage *msg =
 	     __joint_pos_if->msgq_first_safe(msg))
     {
-	
-      //__almotion->post.angleInterpolation();
+      std::vector<std::string> servos = parse_servo_bitfield(msg->servo());
+      std::vector<float> values(servos.size(), msg->value());
+      __almotion->setAngles(servos, values, msg->speed());
     }
 
-    else if (NaoJointPositionInterface::GotoAnglesMessage *msg =
+    else if (NaoJointPositionInterface::MoveServosMessage *msg =
 	     __joint_pos_if->msgq_first_safe(msg))
     {
-      //__almotion->post.angleInterpolation();
-    }
-
-    else if (NaoJointPositionInterface::GotoAngleWithSpeedMessage *msg =
-	     __joint_pos_if->msgq_first_safe(msg))
-    {
+      motion::move_joints(
+        __almotion,
+        /* head */ msg->head_yaw(), msg->head_pitch(),
+        /* l shoulder */ msg->l_shoulder_pitch(), msg->l_shoulder_roll(),
+        /* l elbow */ msg->l_elbow_yaw(), msg->l_elbow_roll(),
+        /* l wrist/hand */ msg->l_wrist_yaw(), msg->l_hand(),
+        /* l hip */ msg->l_hip_yaw_pitch(), msg->l_hip_roll(), msg->l_hip_pitch(),
+        /* l knee */ msg->l_knee_pitch(),
+        /* l ankle */ msg->l_ankle_pitch(), msg->l_ankle_roll(),
+        /* r shoulder */ msg->r_shoulder_pitch(), msg->r_shoulder_roll(),
+        /* r elbow */ msg->r_elbow_yaw(), msg->r_elbow_roll(),
+        /* r wrist/hand */ msg->r_wrist_yaw(), msg->r_hand(),
+        /* r hip */ msg->r_hip_yaw_pitch(), msg->r_hip_roll(), msg->r_hip_pitch(),
+        /* r knee */ msg->r_knee_pitch(),
+        /* r ankle */ msg->r_ankle_pitch(), msg->r_ankle_roll(),
+        /* speed */ msg->speed());
     }
 
     __joint_pos_if->msgq_pop();
@@ -771,7 +783,6 @@ NaoQiDCMThread::process_messages()
       send_commands(msg->servo(), "Hardness", msg->value(),
 		    "Merge", (int)roundf(1000. * msg->time_sec()));
       */
-
 
       std::vector<std::string> servos = parse_servo_bitfield(msg->servo());
       std::vector<float> values(servos.size(), msg->value());
