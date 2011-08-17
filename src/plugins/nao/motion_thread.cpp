@@ -23,6 +23,7 @@
 #include "motion_thread.h"
 #include "motion_kick_task.h"
 #include "motion_standup_task.h"
+#include "motion_utils.h"
 
 #include <alcore/alerror.h>
 #include <alproxies/allauncherproxy.h>
@@ -59,7 +60,7 @@ NaoQiMotionThread::~NaoQiMotionThread()
 void
 NaoQiMotionThread::init()
 {
-  __motion_task_id = __head_task_id = -1;
+  __motion_task_id = -1;
 
   // Is ALMotion available?
   try {
@@ -120,29 +121,10 @@ NaoQiMotionThread::stop_motion()
     }
   }
 
-  if (__head_task_id != -1) {
-    if (__almotion->isRunning(__head_task_id)) {
-      __almotion->killTask(__head_task_id);
-    }
-    __head_task_id = -1;
-  }
-}
 
-
-/** Fix ALMotion's belief of body angles.
- * If body angles have been set via the DCM, ALMotions model is out of
- * date which can cause a quick snapping back to the last posture known
- * to ALMotion causing very fast and potentially dangerous movements.
- *
- * Seems not to work as expected atm.
- */
-void
-NaoQiMotionThread::fix_angles()
-{
-
-  __almotion->setAngles("Body", __almotion->getAngles("Body", true), 1.);
-  //__almotion->setStiffnesses("Body", 0.0);
-  //__almotion->setStiffnesses("Body", 1.0);
+  AL::ALValue names  = AL::ALValue::array("HeadYaw", "HeadPitch");
+  std::vector<float> head_angles = __almotion->getAngles(names, false);
+  __almotion->setAngles(names, head_angles, 1.0);
 }
 
 
@@ -205,64 +187,54 @@ NaoQiMotionThread::process_messages()
       __hummot_if->set_msgid(msg->id());
     }
 
-    else if (HumanoidMotionInterface::YawPitchHeadMessage *msg =
+    else if (HumanoidMotionInterface::MoveHeadMessage *msg =
 	     __hummot_if->msgq_first_safe(msg))
     {
-      std::vector<float> angles;
-      angles.push_back(msg->yaw());
-      angles.push_back(msg->pitch());
+      AL::ALValue names  = AL::ALValue::array("HeadYaw", "HeadPitch");
+      AL::ALValue angles = AL::ALValue::array(msg->yaw(), msg->pitch());
 
-      std::vector<std::string> names;
-      names.push_back("HeadYaw");
-      names.push_back("HeadPitch");
-
-      if ((__head_task_id != -1) && __almotion->isRunning(__head_task_id)) {
-        __almotion->killTask(__head_task_id);
-        __head_task_id = -1;
-      }
-
-      __head_task_id =
-        __almotion->post.angleInterpolation(names, angles, msg->time_sec(), true);
-
+      __almotion->setAngles(names, angles, msg->speed());
     }
 
     else if (HumanoidMotionInterface::GetUpMessage *msg =
 	     __hummot_if->msgq_first_safe(msg))
     {
-      goto_body_angles(/* head */ 0., 0.,
-		       /* l shoulder */ 2.1, 0.35,
-		       /* l elbow */ -1.40, -1.40, 
-		       /* l wrist/hand */ 0., 0.,
-		       /* l hip */ 0., 0., -0.52,
-		       /* l knee */ 1.05,
-		       /* l ankle */ -0.52, 0.,
-		       /* r shoulder */ 2.1, -0.35, 
-		       /* r elbow */ 1.40, 1.40,
-		       /* r wrist/hand */ 0., 0.,
-		       /* r hip */ 0., 0., -0.52,
-		       /* r knee */ 1.05,
-		       /* r ankle */ -0.52, 0.,
-		       /* time */ 3.0);
+      motion::timed_move_joints(__almotion,
+                                /* head */ 0., 0.,
+                                /* l shoulder */ 2.1, 0.35,
+                                /* l elbow */ -1.40, -1.40, 
+                                /* l wrist/hand */ 0., 0.,
+                                /* l hip */ 0., 0., -0.52,
+                                /* l knee */ 1.05,
+                                /* l ankle */ -0.52, 0.,
+                                /* r shoulder */ 2.1, -0.35, 
+                                /* r elbow */ 1.40, 1.40,
+                                /* r wrist/hand */ 0., 0.,
+                                /* r hip */ 0., 0., -0.52,
+                                /* r knee */ 1.05,
+                                /* r ankle */ -0.52, 0.,
+                                /* time */ 3.0);
 
       __hummot_if->set_msgid(msg->id());
     }
     else if (HumanoidMotionInterface::ParkMessage *msg =
 	     __hummot_if->msgq_first_safe(msg))
     {
-      goto_body_angles(/* head */ 0., 0.,
-		       /* l shoulder */ 1.58, 0.15,
-		       /* l elbow */ -1.20, -1.1,
-		       /* l wrist/hand */ 0., 0.,
-		       /* l hip */ -0.08, 0., -0.85,
-		       /* l knee */ 2.2,
-		       /* l ankle */ -1.23, 0.,
-		       /* r shoulder */ 1.55, -0.15,
-		       /* r elbow */ 1.2, 1.1,
-		       /* r wrist/hand */ 0., 0.,
-		       /* r hip */ -0.08, 0., -0.85,
-		       /* r knee */ 2.2,
-		       /* r ankle */ -1.23, 0.,
-		       /* time */ 3.0);
+      motion::timed_move_joints(__almotion,
+                                /* head */ 0., 0.,
+                                /* l shoulder */ 1.58, 0.15,
+                                /* l elbow */ -1.20, -1.1,
+                                /* l wrist/hand */ 0., 0.,
+                                /* l hip */ -0.08, 0., -0.85,
+                                /* l knee */ 2.2,
+                                /* l ankle */ -1.23, 0.,
+                                /* r shoulder */ 1.55, -0.15,
+                                /* r elbow */ 1.2, 1.1,
+                                /* r wrist/hand */ 0., 0.,
+                                /* r hip */ -0.08, 0., -0.85,
+                                /* r knee */ 2.2,
+                                /* r ankle */ -1.23, 0.,
+                                /* time */ 3.0);
 
       __hummot_if->set_msgid(msg->id());
     }
@@ -298,77 +270,4 @@ NaoQiMotionThread::process_messages()
 
     __hummot_if->msgq_pop();
   }
-}
-
-
-void
-NaoQiMotionThread::goto_body_angles(float head_yaw, float head_pitch,
-				    float l_shoulder_pitch, float l_shoulder_roll,
-				    float l_elbow_yaw, float l_elbow_roll,
-				    float l_wrist_yaw, float l_hand,
-				    float l_hip_yaw_pitch, float l_hip_roll,
-				    float l_hip_pitch, float l_knee_pitch,
-				    float l_ankle_pitch, float l_ankle_roll,
-				    float r_shoulder_pitch, float r_shoulder_roll,
-				    float r_elbow_yaw, float r_elbow_roll,
-				    float r_wrist_yaw, float r_hand,
-				    float r_hip_yaw_pitch, float r_hip_roll,
-				    float r_hip_pitch, float r_knee_pitch,
-				    float r_ankle_pitch, float r_ankle_roll,
-				    float time_sec)
-{
-  int num_joints = __almotion->getJointNames("Body").size();
-
-  std::vector<float> angles;
-  angles.push_back(head_yaw);
-  angles.push_back(head_pitch);
-
-  angles.push_back(l_shoulder_pitch);
-  angles.push_back(l_shoulder_roll);
-  angles.push_back(l_elbow_yaw);
-  angles.push_back(l_elbow_roll);
-  if (num_joints == 26) { //academic version
-    angles.push_back(l_wrist_yaw);
-    angles.push_back(l_hand);
-  }
-
-  angles.push_back(l_hip_yaw_pitch);
-  angles.push_back(l_hip_roll);
-  angles.push_back(l_hip_pitch);
-  angles.push_back(l_knee_pitch);
-  angles.push_back(l_ankle_pitch);
-  angles.push_back(l_ankle_roll);
-
-  angles.push_back(r_hip_yaw_pitch);
-  angles.push_back(r_hip_roll);
-  angles.push_back(r_hip_pitch);
-  angles.push_back(r_knee_pitch);
-  angles.push_back(r_ankle_pitch);
-  angles.push_back(r_ankle_roll);
-
-  angles.push_back(r_shoulder_pitch);
-  angles.push_back(r_shoulder_roll);
-  angles.push_back(r_elbow_yaw);
-  angles.push_back(r_elbow_roll);
-  if (num_joints == 26) {
-    angles.push_back(r_wrist_yaw);
-    angles.push_back(r_hand);
-  }
-
-  std::vector<std::string> joint_names = __almotion->getJointNames("Body");
-  __almotion->killTasksUsingResources(joint_names);
-
-  fix_angles();
-
-  __motion_task_id =
-    __almotion->post.angleInterpolation("Body", angles, time_sec, true);
-
-  /*
-  for (unsigned int i = 0; i < 160; ++i) {
-    std::vector<float> angles2 = __almotion->getAngles("Body", false);
-    std::vector<float> angles3 = __almotion->getAngles("Body", true);
-    printf("3-- LShoulderPitch: cmd %f  sensed %f\n", angles2[2], angles3[2]);
-    usleep(20000);
-  }
-  */
 }

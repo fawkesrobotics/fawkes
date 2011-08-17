@@ -21,7 +21,7 @@ SUBDIRS = naogui
 
 LIBS_naoqi = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	   fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
-	   fawkesnaoqi_dcm_utils \
+	   fawkesnaoqi_dcm_utils fawkesnaoqi_motion_utils \
 	   alcore alcommon alvalue almemoryfastaccess \
 	   boost_serialization-mt boost_signals-mt \
 	   NaoJointPositionInterface NaoJointStiffnessInterface \
@@ -31,6 +31,7 @@ OBJS_naoqi = naoqi_plugin.o broker_thread.o dcm_thread.o
 LIBS_naoqi_motion = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkesnaoqiaspect fawkesnaoqibroker \
 		    alcore alcommon alvalue althread \
+		    fawkesnaoqi_motion_utils \
 		    boost_serialization-mt boost_signals-mt \
 		    HumanoidMotionInterface NaoSensorInterface
 OBJS_naoqi_motion = motion_plugin.o motion_thread.o \
@@ -72,8 +73,11 @@ OBJS_libfawkesnaoqibroker = naoqi_broker.o
 LIBS_libfawkesnaoqi_dcm_utils = alcore alcommon alvalue
 OBJS_libfawkesnaoqi_dcm_utils = dcm_utils.o
 
+LIBS_libfawkesnaoqi_motion_utils = alcore alcommon alvalue
+OBJS_libfawkesnaoqi_motion_utils = motion_utils.o
+
 OBJS_all = $(OBJS_naoqi) $(OBJS_libnaofawkes) $(OBJS_libfawkesnaoqibroker) \
-	$(OBJS_libfawkesnaoqi_dcm_utils) \
+	$(OBJS_libfawkesnaoqi_dcm_utils) $(OBJS_libfawkesnaoqi_motion_utils)\
 	$(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth) $(OBJS_naoqi_leds) \
 	$(OBJS_naoqi_buttons)
 
@@ -88,6 +92,7 @@ ifeq ($(HAVE_NAOQI),1)
 		$(PLUGINDIR)/naoqi-buttons.so
   LIBS_all = $(LIBDIR)/libfawkesnaoqibroker.so \
 	     $(LIBDIR)/libfawkesnaoqi_dcm_utils.so \
+	     $(LIBDIR)/libfawkesnaoqi_motion_utils.so \
 	     $(LIBDIR)/libnaofawkes.so
 
   TARGETS_all = info_naoqiroot
