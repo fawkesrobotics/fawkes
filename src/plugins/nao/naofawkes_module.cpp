@@ -33,6 +33,8 @@
 #include <alcommon/albroker.h>
 #include <alcommon/albrokermanager.h>
 #include <alcommon/almodule.h>
+#include <alproxies/allauncherproxy.h>
+#include <alproxies/alaudioplayerproxy.h>
 
 #include <cstdio>
 #include <dlfcn.h>
@@ -55,7 +57,7 @@ class NaoFawkesModule : public AL::ALModule
    * as a parameter)
    */
   NaoFawkesModule(AL::ALPtr<AL::ALBroker> broker, const std::string &name)
-    : AL::ALModule(broker, name)
+    : AL::ALModule(broker, name), broker(broker)
   {
     setModuleDescription("Fawkes integration module");
 
@@ -92,6 +94,7 @@ class NaoFawkesModule : public AL::ALModule
     }
 
     printf("*** Embedded Fawkes initialization done\n");
+    play_startup_sound();
   }
 
   /** Destructor.
@@ -103,6 +106,25 @@ class NaoFawkesModule : public AL::ALModule
     fawkes::runtime::main_thread->join();
     fawkes::runtime::cleanup();
   }
+
+  /** Play startup sound. */
+  void
+  play_startup_sound()
+  {
+    // Is the auplayer running ?
+    try {
+      AL::ALPtr<AL::ALLauncherProxy> launcher(new AL::ALLauncherProxy(broker));
+      bool is_auplayer_available = launcher->isModulePresent("ALAudioPlayer");
+
+      if (is_auplayer_available) {
+        AL::ALPtr<AL::ALAudioPlayerProxy>
+          auplayer(new AL::ALAudioPlayerProxy(broker));
+        auplayer->playFile(RESDIR"/sounds/naostartup.wav");
+      }
+    } catch (AL::ALError& e) {} // ignored
+  }
+  private:
+    AL::ALPtr<AL::ALBroker> broker;
 };
 
 #ifdef __cplusplus
