@@ -48,6 +48,7 @@ class PluginManager;
 class Time;
 class PluginNetworkHandler;
 class InterruptibleBarrier;
+class Barrier;
 class Mutex;
 class ThreadManager;
 class FawkesNetworkManager;
@@ -69,6 +70,8 @@ class FawkesMainThread
   virtual void loop();
 
   virtual void set_mainloop_thread(Thread *mainloop_thread);
+
+  void full_start();
 
   class Runner : public SignalHandler {
   public:
@@ -97,6 +100,7 @@ class FawkesMainThread
   TimeWait             *__time_wait;
   AspectManager        *__aspect_manager;
 
+  Barrier              *__init_barrier;
   Thread               *__mainloop_thread;
   Mutex                *__mainloop_mutex;
   InterruptibleBarrier *__mainloop_barrier;

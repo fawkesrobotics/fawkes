@@ -191,6 +191,22 @@ FawkesMainThread::destruct()
   delete __mainloop_mutex;
 }
 
+/** Start the thread and wait until once() completes.
+ * This is useful to assure that all plugins are loaded before assuming that
+ * startup is complete.
+ */
+void
+FawkesMainThread::full_start()
+{
+  __init_barrier = new Barrier(2);
+  
+  start(false);
+
+  __init_barrier->wait();
+  delete(__init_barrier);
+  __init_barrier = 0;
+}
+
 void
 FawkesMainThread::once()
 {
@@ -245,6 +261,8 @@ FawkesMainThread::once()
 	__multi_logger->log_error("FawkesMainThread", e);
     }
   }
+
+  if (__init_barrier)  __init_barrier->wait();
 }
 
 void
