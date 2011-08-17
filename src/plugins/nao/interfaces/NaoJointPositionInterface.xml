@@ -126,10 +126,10 @@
     <ref>r_ankle_roll</ref>
     <ref>time</ref>
   </message>
-  <message name="GotoAngle">
+  <message name="MoveServo">
     <comment>
       Orders a setting of the given servo to the specified angles with
-      the given interpolation.
+      the given speed.
     </comment>
     <field type="uint32" name="servo">
       A concatenated list of SERVO_* constants to define the servos
@@ -137,11 +137,11 @@
       binary or'ed SERVO_* constants.
     </field>
     <field type="float" name="value">Servo value to set for servos.</field>
-    <field type="float" name="time_sec">
-      Time in seconds when to reach the desired position.
+    <field type="float" name="speed">
+      Fraction of max speed in range [0.0..1.0].
     </field>
   </message>
-  <message name="GotoAngles">
+  <message name="MoveServos">
     <comment>Orders a smooth motion of the servos.</comment>
     <ref>head_yaw</ref>
     <ref>head_pitch</ref>
@@ -169,16 +169,8 @@
     <ref>r_knee_pitch</ref>
     <ref>r_ankle_pitch</ref>
     <ref>r_ankle_roll</ref>
-    <field type="float" name="time_sec">
-      Time in seconds when to reach the desired position.
+    <field type="float" name="speed">
+      Fraction of max speed in range [0.0..1.0].
     </field>
-  </message>
-  <message name="GotoAngleWithSpeed">
-    <comment>Set selected servos to a specific value.</comment>
-    <field type="uint32" name="servo">A concatenated list of SERVO_* constants to
-      define the servos that should execute the movement. The list shall consist of
-      binary or'ed SERVO_* constants.</field>
-    <field type="float" name="value">Servo value to set for servos.</field>
-    <field type="uint16" name="speed">Percentage of the servo speed (1-100).</field>
   </message>
 </interface>

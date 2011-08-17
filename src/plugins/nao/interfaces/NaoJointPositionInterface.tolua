@@ -143,11 +143,11 @@ class NaoJointPositionInterface : public Interface
     int maxlenof_time() const;
   };
 
-  class GotoAngleMessage : public Message
+  class MoveServoMessage : public Message
   {
-    GotoAngleMessage(unsigned int ini_servo, float ini_value, float ini_time_sec);
-    GotoAngleMessage();
-    ~GotoAngleMessage();
+    MoveServoMessage(unsigned int ini_servo, float ini_value, float ini_speed);
+    MoveServoMessage();
+    ~MoveServoMessage();
 
     unsigned int servo();
     void set_servo(const unsigned int new_servo);
@@ -155,20 +155,20 @@ class NaoJointPositionInterface : public Interface
     float value();
     void set_value(const float new_value);
     int maxlenof_value() const;
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
+    float speed();
+    void set_speed(const float new_speed);
+    int maxlenof_speed() const;
   };
 
-  class GotoAnglesMessage : public Message
+  class MoveServosMessage : public Message
   {
-    GotoAnglesMessage(float ini_time_sec, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll);
-    GotoAnglesMessage();
-    ~GotoAnglesMessage();
+    MoveServosMessage(float ini_speed, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll);
+    MoveServosMessage();
+    ~MoveServosMessage();
 
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
+    float speed();
+    void set_speed(const float new_speed);
+    int maxlenof_speed() const;
     float head_yaw();
     void set_head_yaw(const float new_head_yaw);
     int maxlenof_head_yaw() const;
@@ -247,23 +247,6 @@ class NaoJointPositionInterface : public Interface
     float r_ankle_roll();
     void set_r_ankle_roll(const float new_r_ankle_roll);
     int maxlenof_r_ankle_roll() const;
-  };
-
-  class GotoAngleWithSpeedMessage : public Message
-  {
-    GotoAngleWithSpeedMessage(unsigned int ini_servo, float ini_value, unsigned short ini_speed);
-    GotoAngleWithSpeedMessage();
-    ~GotoAngleWithSpeedMessage();
-
-    unsigned int servo();
-    void set_servo(const unsigned int new_servo);
-    int maxlenof_servo() const;
-    float value();
-    void set_value(const float new_value);
-    int maxlenof_value() const;
-    unsigned short speed();
-    void set_speed(const unsigned short new_speed);
-    int maxlenof_speed() const;
   };
 
   RobotType robot_type();

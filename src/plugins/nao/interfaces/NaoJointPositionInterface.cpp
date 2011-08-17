@@ -135,10 +135,9 @@ NaoJointPositionInterface::NaoJointPositionInterface() : Interface()
   add_fieldinfo(IFT_INT32, "time", 1, &data->time);
   add_messageinfo("SetServoMessage");
   add_messageinfo("SetServosMessage");
-  add_messageinfo("GotoAngleMessage");
-  add_messageinfo("GotoAnglesMessage");
-  add_messageinfo("GotoAngleWithSpeedMessage");
-  unsigned char tmp_hash[] = {0xfe, 0x28, 0x34, 0xed, 0xa8, 0xfb, 0xea, 0x8e, 0xf, 0x74, 0x5a, 0x71, 0x55, 0x38, 0x4, 0x78};
+  add_messageinfo("MoveServoMessage");
+  add_messageinfo("MoveServosMessage");
+  unsigned char tmp_hash[] = {0x87, 0x3b, 0x41, 0x5d, 0x94, 0x57, 0x82, 0x55, 0x3, 0xbb, 0x3e, 0xf, 0x89, 0x50, 0x6b, 0x46};
   set_hash(tmp_hash);
 }
 
@@ -1120,12 +1119,10 @@ NaoJointPositionInterface::create_message(const char *type) const
     return new SetServoMessage();
   } else if ( strncmp("SetServosMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetServosMessage();
-  } else if ( strncmp("GotoAngleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new GotoAngleMessage();
-  } else if ( strncmp("GotoAnglesMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new GotoAnglesMessage();
-  } else if ( strncmp("GotoAngleWithSpeedMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new GotoAngleWithSpeedMessage();
+  } else if ( strncmp("MoveServoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new MoveServoMessage();
+  } else if ( strncmp("MoveServosMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new MoveServosMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2309,8 +2306,8 @@ NaoJointPositionInterface::SetServosMessage::clone() const
 {
   return new NaoJointPositionInterface::SetServosMessage(this);
 }
-/** @class NaoJointPositionInterface::GotoAngleMessage <interfaces/NaoJointPositionInterface.h>
- * GotoAngleMessage Fawkes BlackBoard Interface Message.
+/** @class NaoJointPositionInterface::MoveServoMessage <interfaces/NaoJointPositionInterface.h>
+ * MoveServoMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
@@ -2319,37 +2316,37 @@ NaoJointPositionInterface::SetServosMessage::clone() const
 /** Constructor with initial values.
  * @param ini_servo initial value for servo
  * @param ini_value initial value for value
- * @param ini_time_sec initial value for time_sec
+ * @param ini_speed initial value for speed
  */
-NaoJointPositionInterface::GotoAngleMessage::GotoAngleMessage(const uint32_t ini_servo, const float ini_value, const float ini_time_sec) : Message("GotoAngleMessage")
+NaoJointPositionInterface::MoveServoMessage::MoveServoMessage(const uint32_t ini_servo, const float ini_value, const float ini_speed) : Message("MoveServoMessage")
 {
-  data_size = sizeof(GotoAngleMessage_data_t);
+  data_size = sizeof(MoveServoMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (GotoAngleMessage_data_t *)data_ptr;
+  data      = (MoveServoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->servo = ini_servo;
   data->value = ini_value;
-  data->time_sec = ini_time_sec;
+  data->speed = ini_speed;
   add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
-  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
 }
 /** Constructor */
-NaoJointPositionInterface::GotoAngleMessage::GotoAngleMessage() : Message("GotoAngleMessage")
+NaoJointPositionInterface::MoveServoMessage::MoveServoMessage() : Message("MoveServoMessage")
 {
-  data_size = sizeof(GotoAngleMessage_data_t);
+  data_size = sizeof(MoveServoMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (GotoAngleMessage_data_t *)data_ptr;
+  data      = (MoveServoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
-  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
 }
 
 /** Destructor */
-NaoJointPositionInterface::GotoAngleMessage::~GotoAngleMessage()
+NaoJointPositionInterface::MoveServoMessage::~MoveServoMessage()
 {
   free(data_ptr);
 }
@@ -2357,12 +2354,12 @@ NaoJointPositionInterface::GotoAngleMessage::~GotoAngleMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-NaoJointPositionInterface::GotoAngleMessage::GotoAngleMessage(const GotoAngleMessage *m) : Message("GotoAngleMessage")
+NaoJointPositionInterface::MoveServoMessage::MoveServoMessage(const MoveServoMessage *m) : Message("MoveServoMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (GotoAngleMessage_data_t *)data_ptr;
+  data      = (MoveServoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
 }
 
@@ -2376,7 +2373,7 @@ NaoJointPositionInterface::GotoAngleMessage::GotoAngleMessage(const GotoAngleMes
  * @return servo value
  */
 uint32_t
-NaoJointPositionInterface::GotoAngleMessage::servo() const
+NaoJointPositionInterface::MoveServoMessage::servo() const
 {
   return data->servo;
 }
@@ -2386,7 +2383,7 @@ NaoJointPositionInterface::GotoAngleMessage::servo() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAngleMessage::maxlenof_servo() const
+NaoJointPositionInterface::MoveServoMessage::maxlenof_servo() const
 {
   return 1;
 }
@@ -2400,7 +2397,7 @@ NaoJointPositionInterface::GotoAngleMessage::maxlenof_servo() const
  * @param new_servo new servo value
  */
 void
-NaoJointPositionInterface::GotoAngleMessage::set_servo(const uint32_t new_servo)
+NaoJointPositionInterface::MoveServoMessage::set_servo(const uint32_t new_servo)
 {
   data->servo = new_servo;
 }
@@ -2410,7 +2407,7 @@ NaoJointPositionInterface::GotoAngleMessage::set_servo(const uint32_t new_servo)
  * @return value value
  */
 float
-NaoJointPositionInterface::GotoAngleMessage::value() const
+NaoJointPositionInterface::MoveServoMessage::value() const
 {
   return data->value;
 }
@@ -2420,7 +2417,7 @@ NaoJointPositionInterface::GotoAngleMessage::value() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAngleMessage::maxlenof_value() const
+NaoJointPositionInterface::MoveServoMessage::maxlenof_value() const
 {
   return 1;
 }
@@ -2430,43 +2427,43 @@ NaoJointPositionInterface::GotoAngleMessage::maxlenof_value() const
  * @param new_value new value value
  */
 void
-NaoJointPositionInterface::GotoAngleMessage::set_value(const float new_value)
+NaoJointPositionInterface::MoveServoMessage::set_value(const float new_value)
 {
   data->value = new_value;
 }
 
-/** Get time_sec value.
+/** Get speed value.
  * 
-      Time in seconds when to reach the desired position.
+      Fraction of max speed in range [0.0..1.0].
     
- * @return time_sec value
+ * @return speed value
  */
 float
-NaoJointPositionInterface::GotoAngleMessage::time_sec() const
+NaoJointPositionInterface::MoveServoMessage::speed() const
 {
-  return data->time_sec;
+  return data->speed;
 }
 
-/** Get maximum length of time_sec value.
- * @return length of time_sec value, can be length of the array or number of 
+/** Get maximum length of speed value.
+ * @return length of speed value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAngleMessage::maxlenof_time_sec() const
+NaoJointPositionInterface::MoveServoMessage::maxlenof_speed() const
 {
   return 1;
 }
 
-/** Set time_sec value.
+/** Set speed value.
  * 
-      Time in seconds when to reach the desired position.
+      Fraction of max speed in range [0.0..1.0].
     
- * @param new_time_sec new time_sec value
+ * @param new_speed new speed value
  */
 void
-NaoJointPositionInterface::GotoAngleMessage::set_time_sec(const float new_time_sec)
+NaoJointPositionInterface::MoveServoMessage::set_speed(const float new_speed)
 {
-  data->time_sec = new_time_sec;
+  data->speed = new_speed;
 }
 
 /** Clone this message.
@@ -2475,19 +2472,19 @@ NaoJointPositionInterface::GotoAngleMessage::set_time_sec(const float new_time_s
  * @return clone of this message
  */
 Message *
-NaoJointPositionInterface::GotoAngleMessage::clone() const
+NaoJointPositionInterface::MoveServoMessage::clone() const
 {
-  return new NaoJointPositionInterface::GotoAngleMessage(this);
+  return new NaoJointPositionInterface::MoveServoMessage(this);
 }
-/** @class NaoJointPositionInterface::GotoAnglesMessage <interfaces/NaoJointPositionInterface.h>
- * GotoAnglesMessage Fawkes BlackBoard Interface Message.
+/** @class NaoJointPositionInterface::MoveServosMessage <interfaces/NaoJointPositionInterface.h>
+ * MoveServosMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor with initial values.
- * @param ini_time_sec initial value for time_sec
+ * @param ini_speed initial value for speed
  * @param ini_head_yaw initial value for head_yaw
  * @param ini_head_pitch initial value for head_pitch
  * @param ini_l_shoulder_pitch initial value for l_shoulder_pitch
@@ -2515,14 +2512,14 @@ NaoJointPositionInterface::GotoAngleMessage::clone() const
  * @param ini_r_ankle_pitch initial value for r_ankle_pitch
  * @param ini_r_ankle_roll initial value for r_ankle_roll
  */
-NaoJointPositionInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll) : Message("GotoAnglesMessage")
+NaoJointPositionInterface::MoveServosMessage::MoveServosMessage(const float ini_speed, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll) : Message("MoveServosMessage")
 {
-  data_size = sizeof(GotoAnglesMessage_data_t);
+  data_size = sizeof(MoveServosMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (GotoAnglesMessage_data_t *)data_ptr;
+  data      = (MoveServosMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  data->time_sec = ini_time_sec;
+  data->speed = ini_speed;
   data->head_yaw = ini_head_yaw;
   data->head_pitch = ini_head_pitch;
   data->l_shoulder_pitch = ini_l_shoulder_pitch;
@@ -2549,7 +2546,7 @@ NaoJointPositionInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_
   data->r_knee_pitch = ini_r_knee_pitch;
   data->r_ankle_pitch = ini_r_ankle_pitch;
   data->r_ankle_roll = ini_r_ankle_roll;
-  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
   add_fieldinfo(IFT_FLOAT, "l_shoulder_pitch", 1, &data->l_shoulder_pitch);
@@ -2578,14 +2575,14 @@ NaoJointPositionInterface::GotoAnglesMessage::GotoAnglesMessage(const float ini_
   add_fieldinfo(IFT_FLOAT, "r_ankle_roll", 1, &data->r_ankle_roll);
 }
 /** Constructor */
-NaoJointPositionInterface::GotoAnglesMessage::GotoAnglesMessage() : Message("GotoAnglesMessage")
+NaoJointPositionInterface::MoveServosMessage::MoveServosMessage() : Message("MoveServosMessage")
 {
-  data_size = sizeof(GotoAnglesMessage_data_t);
+  data_size = sizeof(MoveServosMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (GotoAnglesMessage_data_t *)data_ptr;
+  data      = (MoveServosMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
+  add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
   add_fieldinfo(IFT_FLOAT, "l_shoulder_pitch", 1, &data->l_shoulder_pitch);
@@ -2615,7 +2612,7 @@ NaoJointPositionInterface::GotoAnglesMessage::GotoAnglesMessage() : Message("Got
 }
 
 /** Destructor */
-NaoJointPositionInterface::GotoAnglesMessage::~GotoAnglesMessage()
+NaoJointPositionInterface::MoveServosMessage::~MoveServosMessage()
 {
   free(data_ptr);
 }
@@ -2623,48 +2620,48 @@ NaoJointPositionInterface::GotoAnglesMessage::~GotoAnglesMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-NaoJointPositionInterface::GotoAnglesMessage::GotoAnglesMessage(const GotoAnglesMessage *m) : Message("GotoAnglesMessage")
+NaoJointPositionInterface::MoveServosMessage::MoveServosMessage(const MoveServosMessage *m) : Message("MoveServosMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (GotoAnglesMessage_data_t *)data_ptr;
+  data      = (MoveServosMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
-/** Get time_sec value.
+/** Get speed value.
  * 
-      Time in seconds when to reach the desired position.
+      Fraction of max speed in range [0.0..1.0].
     
- * @return time_sec value
+ * @return speed value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::time_sec() const
+NaoJointPositionInterface::MoveServosMessage::speed() const
 {
-  return data->time_sec;
+  return data->speed;
 }
 
-/** Get maximum length of time_sec value.
- * @return length of time_sec value, can be length of the array or number of 
+/** Get maximum length of speed value.
+ * @return length of speed value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_time_sec() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_speed() const
 {
   return 1;
 }
 
-/** Set time_sec value.
+/** Set speed value.
  * 
-      Time in seconds when to reach the desired position.
+      Fraction of max speed in range [0.0..1.0].
     
- * @param new_time_sec new time_sec value
+ * @param new_speed new speed value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_time_sec(const float new_time_sec)
+NaoJointPositionInterface::MoveServosMessage::set_speed(const float new_speed)
 {
-  data->time_sec = new_time_sec;
+  data->speed = new_speed;
 }
 
 /** Get head_yaw value.
@@ -2672,7 +2669,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_time_sec(const float new_time_
  * @return head_yaw value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::head_yaw() const
+NaoJointPositionInterface::MoveServosMessage::head_yaw() const
 {
   return data->head_yaw;
 }
@@ -2682,7 +2679,7 @@ NaoJointPositionInterface::GotoAnglesMessage::head_yaw() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_head_yaw() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_head_yaw() const
 {
   return 1;
 }
@@ -2692,7 +2689,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_head_yaw() const
  * @param new_head_yaw new head_yaw value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_head_yaw(const float new_head_yaw)
+NaoJointPositionInterface::MoveServosMessage::set_head_yaw(const float new_head_yaw)
 {
   data->head_yaw = new_head_yaw;
 }
@@ -2702,7 +2699,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_head_yaw(const float new_head_
  * @return head_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::head_pitch() const
+NaoJointPositionInterface::MoveServosMessage::head_pitch() const
 {
   return data->head_pitch;
 }
@@ -2712,7 +2709,7 @@ NaoJointPositionInterface::GotoAnglesMessage::head_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_head_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_head_pitch() const
 {
   return 1;
 }
@@ -2722,7 +2719,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_head_pitch() const
  * @param new_head_pitch new head_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_head_pitch(const float new_head_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_head_pitch(const float new_head_pitch)
 {
   data->head_pitch = new_head_pitch;
 }
@@ -2732,7 +2729,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_head_pitch(const float new_hea
  * @return l_shoulder_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_shoulder_pitch() const
+NaoJointPositionInterface::MoveServosMessage::l_shoulder_pitch() const
 {
   return data->l_shoulder_pitch;
 }
@@ -2742,7 +2739,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_shoulder_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_shoulder_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_shoulder_pitch() const
 {
   return 1;
 }
@@ -2752,7 +2749,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_shoulder_pitch() const
  * @param new_l_shoulder_pitch new l_shoulder_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_shoulder_pitch(const float new_l_shoulder_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_l_shoulder_pitch(const float new_l_shoulder_pitch)
 {
   data->l_shoulder_pitch = new_l_shoulder_pitch;
 }
@@ -2762,7 +2759,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_shoulder_pitch(const float n
  * @return l_shoulder_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_shoulder_roll() const
+NaoJointPositionInterface::MoveServosMessage::l_shoulder_roll() const
 {
   return data->l_shoulder_roll;
 }
@@ -2772,7 +2769,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_shoulder_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_shoulder_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_shoulder_roll() const
 {
   return 1;
 }
@@ -2782,7 +2779,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_shoulder_roll() const
  * @param new_l_shoulder_roll new l_shoulder_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_shoulder_roll(const float new_l_shoulder_roll)
+NaoJointPositionInterface::MoveServosMessage::set_l_shoulder_roll(const float new_l_shoulder_roll)
 {
   data->l_shoulder_roll = new_l_shoulder_roll;
 }
@@ -2792,7 +2789,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_shoulder_roll(const float ne
  * @return l_elbow_yaw value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_elbow_yaw() const
+NaoJointPositionInterface::MoveServosMessage::l_elbow_yaw() const
 {
   return data->l_elbow_yaw;
 }
@@ -2802,7 +2799,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_elbow_yaw() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_elbow_yaw() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_elbow_yaw() const
 {
   return 1;
 }
@@ -2812,7 +2809,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_elbow_yaw() const
  * @param new_l_elbow_yaw new l_elbow_yaw value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_elbow_yaw(const float new_l_elbow_yaw)
+NaoJointPositionInterface::MoveServosMessage::set_l_elbow_yaw(const float new_l_elbow_yaw)
 {
   data->l_elbow_yaw = new_l_elbow_yaw;
 }
@@ -2822,7 +2819,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_elbow_yaw(const float new_l_
  * @return l_elbow_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_elbow_roll() const
+NaoJointPositionInterface::MoveServosMessage::l_elbow_roll() const
 {
   return data->l_elbow_roll;
 }
@@ -2832,7 +2829,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_elbow_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_elbow_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_elbow_roll() const
 {
   return 1;
 }
@@ -2842,7 +2839,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_elbow_roll() const
  * @param new_l_elbow_roll new l_elbow_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_elbow_roll(const float new_l_elbow_roll)
+NaoJointPositionInterface::MoveServosMessage::set_l_elbow_roll(const float new_l_elbow_roll)
 {
   data->l_elbow_roll = new_l_elbow_roll;
 }
@@ -2852,7 +2849,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_elbow_roll(const float new_l
  * @return l_wrist_yaw value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_wrist_yaw() const
+NaoJointPositionInterface::MoveServosMessage::l_wrist_yaw() const
 {
   return data->l_wrist_yaw;
 }
@@ -2862,7 +2859,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_wrist_yaw() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_wrist_yaw() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_wrist_yaw() const
 {
   return 1;
 }
@@ -2872,7 +2869,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_wrist_yaw() const
  * @param new_l_wrist_yaw new l_wrist_yaw value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_wrist_yaw(const float new_l_wrist_yaw)
+NaoJointPositionInterface::MoveServosMessage::set_l_wrist_yaw(const float new_l_wrist_yaw)
 {
   data->l_wrist_yaw = new_l_wrist_yaw;
 }
@@ -2882,7 +2879,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_wrist_yaw(const float new_l_
  * @return l_hand value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_hand() const
+NaoJointPositionInterface::MoveServosMessage::l_hand() const
 {
   return data->l_hand;
 }
@@ -2892,7 +2889,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_hand() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hand() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_hand() const
 {
   return 1;
 }
@@ -2902,7 +2899,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hand() const
  * @param new_l_hand new l_hand value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_hand(const float new_l_hand)
+NaoJointPositionInterface::MoveServosMessage::set_l_hand(const float new_l_hand)
 {
   data->l_hand = new_l_hand;
 }
@@ -2912,7 +2909,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_hand(const float new_l_hand)
  * @return l_hip_yaw_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_hip_yaw_pitch() const
+NaoJointPositionInterface::MoveServosMessage::l_hip_yaw_pitch() const
 {
   return data->l_hip_yaw_pitch;
 }
@@ -2922,7 +2919,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_hip_yaw_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hip_yaw_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_hip_yaw_pitch() const
 {
   return 1;
 }
@@ -2932,7 +2929,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hip_yaw_pitch() const
  * @param new_l_hip_yaw_pitch new l_hip_yaw_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch)
 {
   data->l_hip_yaw_pitch = new_l_hip_yaw_pitch;
 }
@@ -2942,7 +2939,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_hip_yaw_pitch(const float ne
  * @return l_hip_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_hip_roll() const
+NaoJointPositionInterface::MoveServosMessage::l_hip_roll() const
 {
   return data->l_hip_roll;
 }
@@ -2952,7 +2949,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_hip_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hip_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_hip_roll() const
 {
   return 1;
 }
@@ -2962,7 +2959,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hip_roll() const
  * @param new_l_hip_roll new l_hip_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_hip_roll(const float new_l_hip_roll)
+NaoJointPositionInterface::MoveServosMessage::set_l_hip_roll(const float new_l_hip_roll)
 {
   data->l_hip_roll = new_l_hip_roll;
 }
@@ -2972,7 +2969,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_hip_roll(const float new_l_h
  * @return l_hip_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_hip_pitch() const
+NaoJointPositionInterface::MoveServosMessage::l_hip_pitch() const
 {
   return data->l_hip_pitch;
 }
@@ -2982,7 +2979,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_hip_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hip_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_hip_pitch() const
 {
   return 1;
 }
@@ -2992,7 +2989,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_hip_pitch() const
  * @param new_l_hip_pitch new l_hip_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_hip_pitch(const float new_l_hip_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_l_hip_pitch(const float new_l_hip_pitch)
 {
   data->l_hip_pitch = new_l_hip_pitch;
 }
@@ -3002,7 +2999,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_hip_pitch(const float new_l_
  * @return l_knee_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_knee_pitch() const
+NaoJointPositionInterface::MoveServosMessage::l_knee_pitch() const
 {
   return data->l_knee_pitch;
 }
@@ -3012,7 +3009,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_knee_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_knee_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_knee_pitch() const
 {
   return 1;
 }
@@ -3022,7 +3019,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_knee_pitch() const
  * @param new_l_knee_pitch new l_knee_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_knee_pitch(const float new_l_knee_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_l_knee_pitch(const float new_l_knee_pitch)
 {
   data->l_knee_pitch = new_l_knee_pitch;
 }
@@ -3032,7 +3029,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_knee_pitch(const float new_l
  * @return l_ankle_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_ankle_pitch() const
+NaoJointPositionInterface::MoveServosMessage::l_ankle_pitch() const
 {
   return data->l_ankle_pitch;
 }
@@ -3042,7 +3039,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_ankle_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_ankle_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_ankle_pitch() const
 {
   return 1;
 }
@@ -3052,7 +3049,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_ankle_pitch() const
  * @param new_l_ankle_pitch new l_ankle_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_ankle_pitch(const float new_l_ankle_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_l_ankle_pitch(const float new_l_ankle_pitch)
 {
   data->l_ankle_pitch = new_l_ankle_pitch;
 }
@@ -3062,7 +3059,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_ankle_pitch(const float new_
  * @return l_ankle_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::l_ankle_roll() const
+NaoJointPositionInterface::MoveServosMessage::l_ankle_roll() const
 {
   return data->l_ankle_roll;
 }
@@ -3072,7 +3069,7 @@ NaoJointPositionInterface::GotoAnglesMessage::l_ankle_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_ankle_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_l_ankle_roll() const
 {
   return 1;
 }
@@ -3082,7 +3079,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_l_ankle_roll() const
  * @param new_l_ankle_roll new l_ankle_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_l_ankle_roll(const float new_l_ankle_roll)
+NaoJointPositionInterface::MoveServosMessage::set_l_ankle_roll(const float new_l_ankle_roll)
 {
   data->l_ankle_roll = new_l_ankle_roll;
 }
@@ -3092,7 +3089,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_l_ankle_roll(const float new_l
  * @return r_shoulder_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_shoulder_pitch() const
+NaoJointPositionInterface::MoveServosMessage::r_shoulder_pitch() const
 {
   return data->r_shoulder_pitch;
 }
@@ -3102,7 +3099,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_shoulder_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_shoulder_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_shoulder_pitch() const
 {
   return 1;
 }
@@ -3112,7 +3109,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_shoulder_pitch() const
  * @param new_r_shoulder_pitch new r_shoulder_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
 {
   data->r_shoulder_pitch = new_r_shoulder_pitch;
 }
@@ -3122,7 +3119,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_shoulder_pitch(const float n
  * @return r_shoulder_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_shoulder_roll() const
+NaoJointPositionInterface::MoveServosMessage::r_shoulder_roll() const
 {
   return data->r_shoulder_roll;
 }
@@ -3132,7 +3129,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_shoulder_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_shoulder_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_shoulder_roll() const
 {
   return 1;
 }
@@ -3142,7 +3139,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_shoulder_roll() const
  * @param new_r_shoulder_roll new r_shoulder_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
+NaoJointPositionInterface::MoveServosMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
 {
   data->r_shoulder_roll = new_r_shoulder_roll;
 }
@@ -3152,7 +3149,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_shoulder_roll(const float ne
  * @return r_elbow_yaw value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_elbow_yaw() const
+NaoJointPositionInterface::MoveServosMessage::r_elbow_yaw() const
 {
   return data->r_elbow_yaw;
 }
@@ -3162,7 +3159,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_elbow_yaw() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_elbow_yaw() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_elbow_yaw() const
 {
   return 1;
 }
@@ -3172,7 +3169,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_elbow_yaw() const
  * @param new_r_elbow_yaw new r_elbow_yaw value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
+NaoJointPositionInterface::MoveServosMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
 {
   data->r_elbow_yaw = new_r_elbow_yaw;
 }
@@ -3182,7 +3179,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_elbow_yaw(const float new_r_
  * @return r_elbow_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_elbow_roll() const
+NaoJointPositionInterface::MoveServosMessage::r_elbow_roll() const
 {
   return data->r_elbow_roll;
 }
@@ -3192,7 +3189,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_elbow_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_elbow_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_elbow_roll() const
 {
   return 1;
 }
@@ -3202,7 +3199,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_elbow_roll() const
  * @param new_r_elbow_roll new r_elbow_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_elbow_roll(const float new_r_elbow_roll)
+NaoJointPositionInterface::MoveServosMessage::set_r_elbow_roll(const float new_r_elbow_roll)
 {
   data->r_elbow_roll = new_r_elbow_roll;
 }
@@ -3212,7 +3209,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_elbow_roll(const float new_r
  * @return r_wrist_yaw value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_wrist_yaw() const
+NaoJointPositionInterface::MoveServosMessage::r_wrist_yaw() const
 {
   return data->r_wrist_yaw;
 }
@@ -3222,7 +3219,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_wrist_yaw() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_wrist_yaw() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_wrist_yaw() const
 {
   return 1;
 }
@@ -3232,7 +3229,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_wrist_yaw() const
  * @param new_r_wrist_yaw new r_wrist_yaw value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_wrist_yaw(const float new_r_wrist_yaw)
+NaoJointPositionInterface::MoveServosMessage::set_r_wrist_yaw(const float new_r_wrist_yaw)
 {
   data->r_wrist_yaw = new_r_wrist_yaw;
 }
@@ -3242,7 +3239,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_wrist_yaw(const float new_r_
  * @return r_hand value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_hand() const
+NaoJointPositionInterface::MoveServosMessage::r_hand() const
 {
   return data->r_hand;
 }
@@ -3252,7 +3249,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_hand() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hand() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_hand() const
 {
   return 1;
 }
@@ -3262,7 +3259,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hand() const
  * @param new_r_hand new r_hand value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_hand(const float new_r_hand)
+NaoJointPositionInterface::MoveServosMessage::set_r_hand(const float new_r_hand)
 {
   data->r_hand = new_r_hand;
 }
@@ -3272,7 +3269,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_hand(const float new_r_hand)
  * @return r_hip_yaw_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_hip_yaw_pitch() const
+NaoJointPositionInterface::MoveServosMessage::r_hip_yaw_pitch() const
 {
   return data->r_hip_yaw_pitch;
 }
@@ -3282,7 +3279,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_hip_yaw_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hip_yaw_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_hip_yaw_pitch() const
 {
   return 1;
 }
@@ -3292,7 +3289,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hip_yaw_pitch() const
  * @param new_r_hip_yaw_pitch new r_hip_yaw_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch)
 {
   data->r_hip_yaw_pitch = new_r_hip_yaw_pitch;
 }
@@ -3302,7 +3299,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_hip_yaw_pitch(const float ne
  * @return r_hip_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_hip_roll() const
+NaoJointPositionInterface::MoveServosMessage::r_hip_roll() const
 {
   return data->r_hip_roll;
 }
@@ -3312,7 +3309,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_hip_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hip_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_hip_roll() const
 {
   return 1;
 }
@@ -3322,7 +3319,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hip_roll() const
  * @param new_r_hip_roll new r_hip_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_hip_roll(const float new_r_hip_roll)
+NaoJointPositionInterface::MoveServosMessage::set_r_hip_roll(const float new_r_hip_roll)
 {
   data->r_hip_roll = new_r_hip_roll;
 }
@@ -3332,7 +3329,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_hip_roll(const float new_r_h
  * @return r_hip_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_hip_pitch() const
+NaoJointPositionInterface::MoveServosMessage::r_hip_pitch() const
 {
   return data->r_hip_pitch;
 }
@@ -3342,7 +3339,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_hip_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hip_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_hip_pitch() const
 {
   return 1;
 }
@@ -3352,7 +3349,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_hip_pitch() const
  * @param new_r_hip_pitch new r_hip_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_hip_pitch(const float new_r_hip_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_r_hip_pitch(const float new_r_hip_pitch)
 {
   data->r_hip_pitch = new_r_hip_pitch;
 }
@@ -3362,7 +3359,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_hip_pitch(const float new_r_
  * @return r_knee_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_knee_pitch() const
+NaoJointPositionInterface::MoveServosMessage::r_knee_pitch() const
 {
   return data->r_knee_pitch;
 }
@@ -3372,7 +3369,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_knee_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_knee_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_knee_pitch() const
 {
   return 1;
 }
@@ -3382,7 +3379,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_knee_pitch() const
  * @param new_r_knee_pitch new r_knee_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_knee_pitch(const float new_r_knee_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_r_knee_pitch(const float new_r_knee_pitch)
 {
   data->r_knee_pitch = new_r_knee_pitch;
 }
@@ -3392,7 +3389,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_knee_pitch(const float new_r
  * @return r_ankle_pitch value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_ankle_pitch() const
+NaoJointPositionInterface::MoveServosMessage::r_ankle_pitch() const
 {
   return data->r_ankle_pitch;
 }
@@ -3402,7 +3399,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_ankle_pitch() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_ankle_pitch() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_ankle_pitch() const
 {
   return 1;
 }
@@ -3412,7 +3409,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_ankle_pitch() const
  * @param new_r_ankle_pitch new r_ankle_pitch value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_ankle_pitch(const float new_r_ankle_pitch)
+NaoJointPositionInterface::MoveServosMessage::set_r_ankle_pitch(const float new_r_ankle_pitch)
 {
   data->r_ankle_pitch = new_r_ankle_pitch;
 }
@@ -3422,7 +3419,7 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_ankle_pitch(const float new_
  * @return r_ankle_roll value
  */
 float
-NaoJointPositionInterface::GotoAnglesMessage::r_ankle_roll() const
+NaoJointPositionInterface::MoveServosMessage::r_ankle_roll() const
 {
   return data->r_ankle_roll;
 }
@@ -3432,7 +3429,7 @@ NaoJointPositionInterface::GotoAnglesMessage::r_ankle_roll() const
  * maximum number of characters for a string
  */
 size_t
-NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_ankle_roll() const
+NaoJointPositionInterface::MoveServosMessage::maxlenof_r_ankle_roll() const
 {
   return 1;
 }
@@ -3442,7 +3439,7 @@ NaoJointPositionInterface::GotoAnglesMessage::maxlenof_r_ankle_roll() const
  * @param new_r_ankle_roll new r_ankle_roll value
  */
 void
-NaoJointPositionInterface::GotoAnglesMessage::set_r_ankle_roll(const float new_r_ankle_roll)
+NaoJointPositionInterface::MoveServosMessage::set_r_ankle_roll(const float new_r_ankle_roll)
 {
   data->r_ankle_roll = new_r_ankle_roll;
 }
@@ -3453,171 +3450,9 @@ NaoJointPositionInterface::GotoAnglesMessage::set_r_ankle_roll(const float new_r
  * @return clone of this message
  */
 Message *
-NaoJointPositionInterface::GotoAnglesMessage::clone() const
+NaoJointPositionInterface::MoveServosMessage::clone() const
 {
-  return new NaoJointPositionInterface::GotoAnglesMessage(this);
-}
-/** @class NaoJointPositionInterface::GotoAngleWithSpeedMessage <interfaces/NaoJointPositionInterface.h>
- * GotoAngleWithSpeedMessage Fawkes BlackBoard Interface Message.
- * 
-    
- */
-
-
-/** Constructor with initial values.
- * @param ini_servo initial value for servo
- * @param ini_value initial value for value
- * @param ini_speed initial value for speed
- */
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::GotoAngleWithSpeedMessage(const uint32_t ini_servo, const float ini_value, const uint16_t ini_speed) : Message("GotoAngleWithSpeedMessage")
-{
-  data_size = sizeof(GotoAngleWithSpeedMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (GotoAngleWithSpeedMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-  data->servo = ini_servo;
-  data->value = ini_value;
-  data->speed = ini_speed;
-  add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
-  add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
-  add_fieldinfo(IFT_UINT16, "speed", 1, &data->speed);
-}
-/** Constructor */
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::GotoAngleWithSpeedMessage() : Message("GotoAngleWithSpeedMessage")
-{
-  data_size = sizeof(GotoAngleWithSpeedMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (GotoAngleWithSpeedMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
-  add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
-  add_fieldinfo(IFT_UINT16, "speed", 1, &data->speed);
-}
-
-/** Destructor */
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::~GotoAngleWithSpeedMessage()
-{
-  free(data_ptr);
-}
-
-/** Copy constructor.
- * @param m message to copy from
- */
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::GotoAngleWithSpeedMessage(const GotoAngleWithSpeedMessage *m) : Message("GotoAngleWithSpeedMessage")
-{
-  data_size = m->data_size;
-  data_ptr  = malloc(data_size);
-  memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (GotoAngleWithSpeedMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-}
-
-/* Methods */
-/** Get servo value.
- * A concatenated list of SERVO_* constants to
-      define the servos that should execute the movement. The list shall consist of
-      binary or'ed SERVO_* constants.
- * @return servo value
- */
-uint32_t
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::servo() const
-{
-  return data->servo;
-}
-
-/** Get maximum length of servo value.
- * @return length of servo value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::maxlenof_servo() const
-{
-  return 1;
-}
-
-/** Set servo value.
- * A concatenated list of SERVO_* constants to
-      define the servos that should execute the movement. The list shall consist of
-      binary or'ed SERVO_* constants.
- * @param new_servo new servo value
- */
-void
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::set_servo(const uint32_t new_servo)
-{
-  data->servo = new_servo;
-}
-
-/** Get value value.
- * Servo value to set for servos.
- * @return value value
- */
-float
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::value() const
-{
-  return data->value;
-}
-
-/** Get maximum length of value value.
- * @return length of value value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::maxlenof_value() const
-{
-  return 1;
-}
-
-/** Set value value.
- * Servo value to set for servos.
- * @param new_value new value value
- */
-void
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::set_value(const float new_value)
-{
-  data->value = new_value;
-}
-
-/** Get speed value.
- * Percentage of the servo speed (1-100).
- * @return speed value
- */
-uint16_t
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::speed() const
-{
-  return data->speed;
-}
-
-/** Get maximum length of speed value.
- * @return length of speed value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::maxlenof_speed() const
-{
-  return 1;
-}
-
-/** Set speed value.
- * Percentage of the servo speed (1-100).
- * @param new_speed new speed value
- */
-void
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::set_speed(const uint16_t new_speed)
-{
-  data->speed = new_speed;
-}
-
-/** Clone this message.
- * Produces a message of the same type as this message and copies the
- * data to the new message.
- * @return clone of this message
- */
-Message *
-NaoJointPositionInterface::GotoAngleWithSpeedMessage::clone() const
-{
-  return new NaoJointPositionInterface::GotoAngleWithSpeedMessage(this);
+  return new NaoJointPositionInterface::MoveServosMessage(this);
 }
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
@@ -3634,16 +3469,12 @@ NaoJointPositionInterface::message_valid(const Message *message) const
   if ( m1 != NULL ) {
     return true;
   }
-  const GotoAngleMessage *m2 = dynamic_cast<const GotoAngleMessage *>(message);
+  const MoveServoMessage *m2 = dynamic_cast<const MoveServoMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const GotoAnglesMessage *m3 = dynamic_cast<const GotoAnglesMessage *>(message);
+  const MoveServosMessage *m3 = dynamic_cast<const MoveServosMessage *>(message);
   if ( m3 != NULL ) {
-    return true;
-  }
-  const GotoAngleWithSpeedMessage *m4 = dynamic_cast<const GotoAngleWithSpeedMessage *>(message);
-  if ( m4 != NULL ) {
     return true;
   }
   return false;

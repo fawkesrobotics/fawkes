@@ -306,7 +306,7 @@ class NaoJointPositionInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class GotoAngleMessage : public Message
+  class MoveServoMessage : public Message
   {
    private:
 #pragma pack(push,4)
@@ -320,20 +320,20 @@ class NaoJointPositionInterface : public Interface
       binary or'ed SERVO_* constants.
      */
       float value; /**< Servo value to set for servos. */
-      float time_sec; /**< 
-      Time in seconds when to reach the desired position.
+      float speed; /**< 
+      Fraction of max speed in range [0.0..1.0].
      */
-    } GotoAngleMessage_data_t;
+    } MoveServoMessage_data_t;
 #pragma pack(pop)
 
-    GotoAngleMessage_data_t *data;
+    MoveServoMessage_data_t *data;
 
    public:
-    GotoAngleMessage(const uint32_t ini_servo, const float ini_value, const float ini_time_sec);
-    GotoAngleMessage();
-    ~GotoAngleMessage();
+    MoveServoMessage(const uint32_t ini_servo, const float ini_value, const float ini_speed);
+    MoveServoMessage();
+    ~MoveServoMessage();
 
-    GotoAngleMessage(const GotoAngleMessage *m);
+    MoveServoMessage(const MoveServoMessage *m);
     /* Methods */
     uint32_t servo() const;
     void set_servo(const uint32_t new_servo);
@@ -341,13 +341,13 @@ class NaoJointPositionInterface : public Interface
     float value() const;
     void set_value(const float new_value);
     size_t maxlenof_value() const;
-    float time_sec() const;
-    void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
+    float speed() const;
+    void set_speed(const float new_speed);
+    size_t maxlenof_speed() const;
     virtual Message * clone() const;
   };
 
-  class GotoAnglesMessage : public Message
+  class MoveServosMessage : public Message
   {
    private:
 #pragma pack(push,4)
@@ -355,8 +355,8 @@ class NaoJointPositionInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float time_sec; /**< 
-      Time in seconds when to reach the desired position.
+      float speed; /**< 
+      Fraction of max speed in range [0.0..1.0].
      */
       float head_yaw; /**< Head yaw */
       float head_pitch; /**< Head pitch */
@@ -384,21 +384,21 @@ class NaoJointPositionInterface : public Interface
       float r_knee_pitch; /**< Right knee pitch */
       float r_ankle_pitch; /**< Right ankle pitch */
       float r_ankle_roll; /**< Right ankle roll */
-    } GotoAnglesMessage_data_t;
+    } MoveServosMessage_data_t;
 #pragma pack(pop)
 
-    GotoAnglesMessage_data_t *data;
+    MoveServosMessage_data_t *data;
 
    public:
-    GotoAnglesMessage(const float ini_time_sec, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll);
-    GotoAnglesMessage();
-    ~GotoAnglesMessage();
+    MoveServosMessage(const float ini_speed, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll);
+    MoveServosMessage();
+    ~MoveServosMessage();
 
-    GotoAnglesMessage(const GotoAnglesMessage *m);
+    MoveServosMessage(const MoveServosMessage *m);
     /* Methods */
-    float time_sec() const;
-    void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
+    float speed() const;
+    void set_speed(const float new_speed);
+    size_t maxlenof_speed() const;
     float head_yaw() const;
     void set_head_yaw(const float new_head_yaw);
     size_t maxlenof_head_yaw() const;
@@ -477,43 +477,6 @@ class NaoJointPositionInterface : public Interface
     float r_ankle_roll() const;
     void set_r_ankle_roll(const float new_r_ankle_roll);
     size_t maxlenof_r_ankle_roll() const;
-    virtual Message * clone() const;
-  };
-
-  class GotoAngleWithSpeedMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      uint32_t servo; /**< A concatenated list of SERVO_* constants to
-      define the servos that should execute the movement. The list shall consist of
-      binary or'ed SERVO_* constants. */
-      float value; /**< Servo value to set for servos. */
-      uint16_t speed; /**< Percentage of the servo speed (1-100). */
-    } GotoAngleWithSpeedMessage_data_t;
-#pragma pack(pop)
-
-    GotoAngleWithSpeedMessage_data_t *data;
-
-   public:
-    GotoAngleWithSpeedMessage(const uint32_t ini_servo, const float ini_value, const uint16_t ini_speed);
-    GotoAngleWithSpeedMessage();
-    ~GotoAngleWithSpeedMessage();
-
-    GotoAngleWithSpeedMessage(const GotoAngleWithSpeedMessage *m);
-    /* Methods */
-    uint32_t servo() const;
-    void set_servo(const uint32_t new_servo);
-    size_t maxlenof_servo() const;
-    float value() const;
-    void set_value(const float new_value);
-    size_t maxlenof_value() const;
-    uint16_t speed() const;
-    void set_speed(const uint16_t new_speed);
-    size_t maxlenof_speed() const;
     virtual Message * clone() const;
   };
 
