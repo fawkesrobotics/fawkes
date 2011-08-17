@@ -72,7 +72,8 @@ class NaoFawkesModule : public AL::ALModule
 	.plugin_module_flags(fawkes::Module::MODULE_FLAGS_DEFAULT |
 			     fawkes::Module::MODULE_NODELETE)
 	.net_service_name("NaoQi Fawkes on %h")
-	.load_plugins("naoqi,naoqi-motion,naoqi-buttons,webview");
+	.load_plugins("naoqi,webview")
+        .default_plugin("nao_default");
 
       if (fawkes::runtime::init(init_options) != 0) {
 	//throw AL::ALError(name, "ctor", "Initializing Fawkes failed");
@@ -80,7 +81,7 @@ class NaoFawkesModule : public AL::ALModule
       } else {
 
 	printf("*** Starting embedded Fawkes\n");
-	fawkes::runtime::main_thread->start();
+	fawkes::runtime::main_thread->full_start();
 	//printf("*** Loading plugins\n");
 	//fawkes::runtime::plugin_manager->load("naoqi,naoqi-motion,webview");
       }
