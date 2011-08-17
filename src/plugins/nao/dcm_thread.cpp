@@ -27,7 +27,6 @@
 #include <alproxies/dcmproxy.h>
 #include <alproxies/almotionproxy.h>
 #include <alproxies/almemoryproxy.h>
-#include <alproxies/alaudioplayerproxy.h>
 #include <alcore/alerror.h>
 #include <almemoryfastaccess/almemoryfastaccess.h>
 
@@ -193,12 +192,10 @@ void
 NaoQiDCMThread::init()
 {
   // Is the DCM running ?
-  bool is_auplayer_available = false;
   try {
     AL::ALPtr<AL::ALLauncherProxy> launcher(new AL::ALLauncherProxy(naoqi_broker));
     bool is_dcm_available = launcher->isModulePresent("DCM");
     bool is_almotion_available = launcher->isModulePresent("ALMotion");
-    is_auplayer_available = launcher->isModulePresent("ALAudioPlayer");
 
     if (! is_dcm_available) {
       throw Exception("DCMThread: NaoQi DCM is not available");
@@ -243,7 +240,6 @@ NaoQiDCMThread::init()
   std::string prefix = "Device/SubDeviceList/";
 
   // Initialize fast memory access
-  logger->log_debug(name(), "Initializing fast memory access");
   std::vector<std::string> keys;
   keys.resize(SensorTypeN);
   __values.resize(SensorTypeN);
@@ -368,8 +364,6 @@ NaoQiDCMThread::init()
 
 
   // Setup alias for setting stiffness, reuse fastmem keys vector
-  logger->log_debug(name(), "Initializing setJointStiffness alias");
-
   if (__robot_type == NaoJointPositionInterface::ROBOTYPE_ROBOCUP) {
     __alljoint_names.arraySetSize(22);
   } else {
@@ -424,7 +418,6 @@ NaoQiDCMThread::init()
 		    e.toString().c_str());
   }
 
-  logger->log_debug(name(), "Initializing blackboard interfaces");
   __joint_pos_if =
     blackboard->open_for_writing<NaoJointPositionInterface>("Nao Joint Positions");
   __joint_stiffness_if =
@@ -460,23 +453,12 @@ NaoQiDCMThread::init()
   update_interfaces(__joint_pos_highfreq_if, __joint_stiffness_highfreq_if,
 		    __sensor_highfreq_if);
 
-  logger->log_debug(name(), "Initializing high frequency thread");
   __highfreq_thread = new NaoQiDCMThread::HighFreqThread(this);
   __highfreq_thread->start();
 
   __dcm_sigconn =
     __dcm->getGenericProxy()->getModule()->
     atPostProcess(boost::bind(&NaoQiDCMThread::dcm_callback, this));
-
-  // Is the audio player loaded?
-  try {
-    if (is_auplayer_available) {
-      AL::ALPtr<AL::ALAudioPlayerProxy>
-        auplayer(new AL::ALAudioPlayerProxy(naoqi_broker));
-      auplayer->playFile(RESDIR"/sounds/naostartup.wav");
-    }
-  } catch (AL::ALError& e) {} // ignored
-
   
   /*
   AL::ALValue cmd;
