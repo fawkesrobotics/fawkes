@@ -62,7 +62,6 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
 				 const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Window(cobject)
 {
-  servo_time = 500;
   bb = NULL;
   jointpos_if = NULL;
   jointstiff_if = NULL;
@@ -157,8 +156,8 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("hsc_LKneePitch", hsc_LKneePitch);
   builder->get_widget("hsc_LAnklePitch", hsc_LAnklePitch);
   builder->get_widget("hsc_LAnkleRoll", hsc_LAnkleRoll);
-  builder->get_widget("hsc_time", hsc_time);
-  builder->get_widget("lab_time", lab_time);
+  builder->get_widget("hsc_speed", hsc_speed);
+  builder->get_widget("lab_speed", lab_speed);
   builder->get_widget("tb_connection", tb_connection);
   builder->get_widget("tb_stiffness", tb_stiffness);
   builder->get_widget("tb_control", tb_control);
@@ -412,7 +411,7 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   hsc_LKneePitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LKneePitch, lab_LKneePitch, NaoJointPositionInterface::SERVO_l_knee_pitch));
   hsc_LAnklePitch->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LAnklePitch, lab_LAnklePitch, NaoJointPositionInterface::SERVO_l_ankle_pitch));
   hsc_LAnkleRoll->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_slider_changed), hsc_LAnkleRoll, lab_LAnkleRoll, NaoJointPositionInterface::SERVO_l_ankle_roll));
-  hsc_time->signal_value_changed().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_changed_time));
+  hsc_speed->signal_value_changed().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_changed_speed));
   tb_connection->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_connection_clicked));
   tb_stiffness->signal_clicked().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_stiffness_clicked));
   tb_control->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_control_toggled));
@@ -511,6 +510,7 @@ NaoGuiGtkWindow::NaoGuiGtkWindow(BaseObjectType* cobject,
   tb_control_leds->signal_toggled().connect(sigc::mem_fun(*this, &NaoGuiGtkWindow::on_control_leds_toggled));
 
   on_control_toggled();
+  on_changed_speed();
   init();
 }
 
@@ -638,8 +638,10 @@ NaoGuiGtkWindow::send_servo_msg(Gtk::HScale *hsc, unsigned int servo)
     if (servo == NaoJointPositionInterface::SERVO_head_pitch ||
         servo == NaoJointPositionInterface::SERVO_head_yaw)
     {
-      HumanoidMotionInterface::YawPitchHeadMessage *m =
-        new HumanoidMotionInterface::YawPitchHeadMessage(hsc_HeadYaw->get_value() / 100.f, hsc_HeadPitch->get_value() / 100.f, servo_time / 1000.f);
+      HumanoidMotionInterface::MoveHeadMessage *m = new
+        HumanoidMotionInterface::MoveHeadMessage(hsc_HeadYaw->get_value() / 100.f,
+                                                 hsc_HeadPitch->get_value() /100.f,
+                                                 hsc_speed->get_value() / 100.f);
 
       if ( rad_motion_fawkes->get_active() ) {
         hummot_fawkes_if->msgq_enqueue(m);
@@ -648,11 +650,10 @@ NaoGuiGtkWindow::send_servo_msg(Gtk::HScale *hsc, unsigned int servo)
       }
     }
     else {
-      NaoJointPositionInterface::SetServoMessage *m
-        = new NaoJointPositionInterface::SetServoMessage(servo,
-							 hsc->get_value() / 100.f,
-							 servo_time);
-
+      NaoJointPositionInterface::MoveServoMessage *m = new
+        NaoJointPositionInterface::MoveServoMessage(servo,
+                                                    hsc->get_value() / 100.f,
+                                                    hsc_speed->get_value() /100.f);
       jointpos_if->msgq_enqueue(m);
     }
   }
@@ -673,17 +674,12 @@ NaoGuiGtkWindow::on_slider_changed(Gtk::HScale *hsc, Gtk::Label *label,
 }
 
 
-/** Time change event handler. */
+/** Speed change event handler. */
 void
-NaoGuiGtkWindow::on_changed_time()
+NaoGuiGtkWindow::on_changed_speed()
 {
-  char *tmp;
-  if (asprintf(&tmp, "%d", (int)hsc_time->get_value()) != -1) {
-    lab_time->set_text(tmp);
-    free(tmp);
-  }
-
-  servo_time = (int)hsc_time->get_value();
+  Glib::ustring s = convert_float2str(hsc_speed->get_value() / 100.f, 2);
+  lab_speed->set_text(s);
 }
 
 

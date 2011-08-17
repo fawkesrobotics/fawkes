@@ -87,7 +87,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   void on_stiffness_global_toggled();
   void on_tts_exec_clicked();
   void on_slider_changed(Gtk::HScale *hsc, Gtk::Label *lab, unsigned int servo);
-  void on_changed_time();
+  void on_changed_speed();
   void on_connection_clicked();
   void on_connect();
   void on_disconnect();
@@ -127,8 +127,6 @@ class NaoGuiGtkWindow : public Gtk::Window
   std::map<std::string, fawkes::LedInterface *> led_ifs;
   std::map<std::string, Gtk::Scale *> led_scales;
   std::map<std::string, Gtk::ToggleButton *> led_buttons;
-
-  int servo_time;
 
   bool servo_enabled;
   bool global_stiffness_enabled;
@@ -189,8 +187,8 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::Label  *lab_LAnklePitch;
   Gtk::HScale *hsc_LAnkleRoll;
   Gtk::Label  *lab_LAnkleRoll;
-  Gtk::HScale *hsc_time;
-  Gtk::Label  *lab_time;
+  Gtk::HScale *hsc_speed;
+  Gtk::Label  *lab_speed;
   Gtk::ToolButton *tb_connection;
   Gtk::ToolButton *tb_stiffness;
   Gtk::ToggleToolButton *tb_control;

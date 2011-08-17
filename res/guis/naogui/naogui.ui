@@ -76,6 +76,13 @@
     <property name="step_increment">0.050000000000000003</property>
     <property name="page_increment">0.20000000000000001</property>
   </object>
+  <object class="GtkAdjustment" id="adj_speed">
+    <property name="upper">100</property>
+    <property name="value">20</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="lower">-210</property>
     <property name="upper">210</property>
@@ -403,13 +410,6 @@
     <property name="value">2.7755575615628914e-17</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">0.5</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment6">
-    <property name="upper">10000</property>
-    <property name="value">504</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
   </object>
   <object class="GtkAdjustment" id="adjustment7">
     <property name="lower">-35</property>
@@ -1029,7 +1029,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="xalign">0</property>
-                                        <property name="label" translatable="yes">Control Time</property>
+                                        <property name="label" translatable="yes">Speed</property>
                                       </object>
                                       <packing>
                                         <property name="top_attach">26</property>
@@ -1041,7 +1041,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="xalign">0</property>
-                                        <property name="label" translatable="yes">[0 .. 10000] ms</property>
+                                        <property name="label" translatable="yes">[0.00 .. 1.00]</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1052,10 +1052,10 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkHScale" id="hsc_time">
+                                      <object class="GtkHScale" id="hsc_speed">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="adjustment">adjustment6</property>
+                                        <property name="adjustment">adj_speed</property>
                                         <property name="draw_value">False</property>
                                       </object>
                                       <packing>
@@ -1066,10 +1066,10 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel" id="lab_time">
+                                      <object class="GtkLabel" id="lab_speed">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">500</property>
+                                        <property name="label" translatable="yes">0.50</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">3</property>
