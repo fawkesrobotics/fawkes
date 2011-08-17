@@ -69,12 +69,14 @@ namespace fawkes {
  * @param plugin_manager plugin manager to load the desired plugins
  * @param load_plugins string with comma-separated list of names of plugins
  * to load on startup.
+ * @param default_plugin additional default plugin name
  */
 FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
 				   MultiLogger *multi_logger,
 				   ThreadManager *thread_manager,
 				   PluginManager *plugin_manager,
-				   const char *load_plugins)
+				   const char *load_plugins,
+                                   const char *default_plugin)
   : Thread("FawkesMainThread")
 {
   __plugin_manager    = plugin_manager;
@@ -90,6 +92,11 @@ FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
   __load_plugins      = NULL;
   if (load_plugins) {
     __load_plugins = strdup(load_plugins);
+  }
+
+  __default_plugin    = NULL;
+  if (default_plugin) {
+    __default_plugin = strdup(default_plugin);
   }
 
   /* Clock */
@@ -173,7 +180,8 @@ FawkesMainThread::destruct()
     __multi_logger->log_warn("FawkesMainThread", e);
   }
 
-  if (__load_plugins)  free(__load_plugins);
+  if (__load_plugins)   free(__load_plugins);
+  if (__default_plugin) free(__default_plugin);
 
   delete __time_wait;
   delete __loop_start;
@@ -186,6 +194,7 @@ FawkesMainThread::destruct()
 void
 FawkesMainThread::once()
 {
+  // if plugins passed on command line or in init options, load!
   if ( __load_plugins) {
     try {
       __plugin_manager->load(__load_plugins);
@@ -194,8 +203,33 @@ FawkesMainThread::once()
 				"exception follows", __load_plugins);
       __multi_logger->log_error("FawkesMainThread", e);
     }
-  } else {
+  }
+
+  // load extra default plugin given via init options
+  try {
+    if (__default_plugin && (strcmp("default", __default_plugin) != 0)) {
+      __plugin_manager->load(__default_plugin);
+    }
+  } catch (PluginLoadException &e) {
+    if (e.plugin_name() != __default_plugin) {
+      // only print if name is not default, i.e. one of the plugins that
+      // the default meta plugin
+      __multi_logger->log_error("FawkesMainThread", "Failed to load default "
+                                "plugins, exception follows");
+      __multi_logger->log_error("FawkesMainThread", e);
+    }
+  }
+
+  // if no specific plugins were given to load, load the default plugin
+  if (! __load_plugins) {
     try {
+      if (__default_plugin && (strcmp("default", __default_plugin) != 0)) {
+        __multi_logger->log_error("FawkesMainThread", "Loading %s", __default_plugin);
+        
+        __plugin_manager->load(__default_plugin);
+      } else {
+        __multi_logger->log_error("FawkesMainThread", "NOT Loading default plugin");
+      }
       __plugin_manager->load("default");
     } catch (PluginLoadException &e) {
       if (e.plugin_name() != "default") {

@@ -61,7 +61,8 @@ class FawkesMainThread
 		   MultiLogger *multi_logger,
 		   ThreadManager *thread_manager,
 		   PluginManager *plugin_manager,
-		   const char *load_plugins);
+		   const char *load_plugins,
+                   const char *default_plugin = 0);
   virtual ~FawkesMainThread();
 
   virtual void once();
@@ -100,6 +101,7 @@ class FawkesMainThread
   Mutex                *__mainloop_mutex;
   InterruptibleBarrier *__mainloop_barrier;
 
+  char                 *__default_plugin;
   char                 *__load_plugins;
 
   SQLiteConfiguration  *__sqlite_conf;

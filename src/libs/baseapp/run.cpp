@@ -283,7 +283,8 @@ init(InitOptions options)
   main_thread = new fawkes::FawkesMainThread(config, logger,
 					     thread_manager,
 					     plugin_manager,
-					     options.load_plugin_list());
+					     options.load_plugin_list(),
+                                             options.default_plugin());
 
   aspect_manager->register_default_inifins(blackboard,
 					   thread_manager->aspect_collector(),
