@@ -209,16 +209,22 @@ InitOptions::InitOptions(int argc, char **argv)
   __has_net_service_name = argp->has_arg("net-service-name");
   if (__has_net_service_name) {
     __net_service_name = strdup(argp->arg("net-service-name"));
+  } else {
+    __net_service_name = NULL;
   }
 
   __has_username = argp->has_arg("u");
   if (__has_username) {
     __username = strdup(argp->arg("u"));
+  } else {
+    __username = NULL;
   }
 
   __has_groupname = argp->has_arg("u");
   if (__has_groupname) {
     __groupname = strdup(argp->arg("u"));
+  } else {
+    __groupname = NULL;
   }
 
 
@@ -237,6 +243,8 @@ InitOptions::InitOptions(int argc, char **argv)
   __daemon_pid_file = NULL;
   if (__daemonize && argp->arg("D")) {
     __daemon_pid_file = strdup(argp->arg("D"));
+  } else {
+    __daemon_pid_file = NULL;
   }
   __show_help = argp->has_arg("h");
   __bb_cleanup = argp->has_arg("C");
@@ -244,6 +252,8 @@ InitOptions::InitOptions(int argc, char **argv)
   __has_load_plugin_list = argp->has_arg("p");
   if (__has_load_plugin_list) {
     __load_plugin_list = strdup(argp->arg("p"));
+  } else {
+    __load_plugin_list = NULL;
   }
 
   __init_plugin_cache = true;
@@ -515,6 +525,7 @@ InitOptions::load_plugins(const char *plugin_list)
   if (__has_load_plugin_list) {
     __has_load_plugin_list = false;
     free(__load_plugin_list);
+    __load_plugin_list = NULL;
   }
   if (plugin_list) {
     __has_load_plugin_list = true;
