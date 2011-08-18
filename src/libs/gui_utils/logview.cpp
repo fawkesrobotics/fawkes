@@ -120,7 +120,11 @@ LogView::ctor(const char *hostname, unsigned short int port)
        ++c)
   {
     ++colnum;
+#if GTK_VERSION_GE(3,0)
     Gtk::CellRenderer *cell_renderer = (*c)->get_first_cell();
+#else
+    Gtk::CellRenderer *cell_renderer = (*c)->get_first_cell_renderer();
+#endif
     Gtk::CellRendererText *text_renderer =
       dynamic_cast<Gtk::CellRendererText *>(cell_renderer);
     if ( text_renderer ) {
@@ -144,6 +148,9 @@ LogView::ctor(const char *hostname, unsigned short int port)
   __connection_dispatcher->signal_message_received().connect(sigc::mem_fun(*this, &LogView::on_message_received));
   __connection_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &LogView::on_client_connected));
   __connection_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &LogView::on_client_disconnected));
+#if GTK_VERSION_LT(3,0)
+  signal_expose_event().connect_notify(sigc::mem_fun(*this, &LogView::on_expose_notify));
+#endif
 }
 
 
@@ -222,13 +229,20 @@ LogView::on_row_inserted(const Gtk::TreeModel::Path& path,
   }
 }
 
-
+#if GTK_VERSION_GE(3,0)
 bool
 LogView::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
   __have_recently_added_path = false;
   return Gtk::TreeView::on_draw(cr);
 }
+#else
+void
+LogView::on_expose_notify(GdkEventExpose *event)
+{
+  __have_recently_added_path = false;
+} 
+#endif
 
 
 void

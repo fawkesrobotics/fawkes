@@ -121,12 +121,18 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   tb_graphdir->set_homogeneous(false);
   tb_graphcolored->set_homogeneous(false);
 
+#if GTK_VERSION_GE(3,0)
   if (! cbe_skillstring->get_has_entry()) {
     throw Exception("Skill string combo box has no entry, invalid UI file?");
   }
+#endif
   __sks_list = Gtk::ListStore::create(__sks_record);
   cbe_skillstring->set_model(__sks_list);
+#if GTK_VERSION_GE(3,0)
   cbe_skillstring->set_entry_text_column(__sks_record.skillstring);
+#else
+  cbe_skillstring->set_text_column(__sks_record.skillstring);
+#endif
 
   cbe_skillstring->get_entry()->set_activates_default(true);
 
@@ -146,7 +152,11 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 #endif
 
   cb_graphlist = Gtk::manage(new Gtk::ComboBoxText());
+#if GTK_VERSION_GE(3,0)
   cb_graphlist->append(ACTIVE_SKILL);
+#else
+  cb_graphlist->append_text(ACTIVE_SKILL);
+#endif
   cb_graphlist->set_active_text(ACTIVE_SKILL);
   tb_graphlist->add(*cb_graphlist);
   cb_graphlist->show();
@@ -419,7 +429,11 @@ SkillGuiGtkWindow::on_exec_clicked()
     sks = entry->get_text();
   } else {
     Gtk::TreeModel::Row row = *cbe_skillstring->get_active();
+#if GTK_VERSION_GE(3,0)
     row.get_value(cbe_skillstring->get_entry_text_column(), sks);
+#else
+    row.get_value(cbe_skillstring->get_text_column(), sks);
+#endif
   }
 
   if ( sks != "" ) {
@@ -551,14 +565,23 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 
       if (strcmp(__skdbg_if->graph_fsm(), "LIST") == 0) {
 	Glib::ustring list = __skdbg_if->graph();
+#if GTK_VERSION_GE(3,0)
 	cb_graphlist->remove_all();
 	cb_graphlist->append(ACTIVE_SKILL);
+#else
+	cb_graphlist->clear_items();
+	cb_graphlist->append_text(ACTIVE_SKILL);
+#endif
 	cb_graphlist->set_active_text(ACTIVE_SKILL);
-#if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 14 )
+#if GTK_VERSION_GE(2,14)
 	Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create("\n");
 	std::list<std::string> skills = regex->split(list);
 	for (std::list<std::string>::iterator i = skills.begin(); i != skills.end(); ++i) {
+#if GTK_VERSION_GE(3,0)
 	  if (*i != "")  cb_graphlist->append(*i);
+#else
+	  if (*i != "")  cb_graphlist->append_text(*i);
+#endif
 	}
 #endif
 	if (__skdbg_if->has_writer()) {

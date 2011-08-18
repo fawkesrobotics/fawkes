@@ -64,7 +64,11 @@ class LogView
   virtual void on_message_received(FawkesNetworkMessage *msg);
   virtual void on_client_connected();
   virtual void on_client_disconnected();
+#if GTK_VERSION_GE(3,0)
   virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
+#else
+  virtual void on_expose_notify(GdkEventExpose *event);
+#endif
 
   void ctor(const char *hostname = NULL, unsigned short int port = 0);
 

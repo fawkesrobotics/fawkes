@@ -110,7 +110,12 @@ ConfigTreeView::ConfigTreeView(BaseObjectType* cobject,
   append_column("Path", m_config_record.node);
 
   Gtk::TreeViewColumn *column = get_column(0);
-  Gtk::CellRendererText *cell = (Gtk::CellRendererText *)column->get_first_cell();
+  Gtk::CellRendererText *cell =
+#if GTK_VERSION_GE(3,0)
+    (Gtk::CellRendererText *)column->get_first_cell();
+#else
+    (Gtk::CellRendererText *)column->get_first_cell_renderer();
+#endif
 #ifdef GLIBMM_PROPERTIES_ENABLED
   column->add_attribute(cell->property_underline(), m_config_record.is_default);
 #else

@@ -68,7 +68,11 @@ class SkillGuiGraphDrawingArea
   sigc::signal<void> signal_update_disabled();
 
  protected:
+#if GTK_VERSION_GE(3,0)
+  virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
+#else
   virtual bool on_expose_event(GdkEventExpose* event);
+#endif
   virtual bool on_scroll_event(GdkEventScroll *event);
   virtual bool on_button_press_event(GdkEventButton *event);
   virtual bool on_motion_notify_event(GdkEventMotion *event);
@@ -81,10 +85,17 @@ class SkillGuiGraphDrawingArea
   Gtk::FileChooserDialog *__fcd_save;
   Gtk::FileChooserDialog *__fcd_open;
   Gtk::FileChooserDialog *__fcd_recording;
+#if GTK_VERSION_GE(3,0)
   Glib::RefPtr<Gtk::FileFilter> __filter_pdf;
   Glib::RefPtr<Gtk::FileFilter> __filter_svg;
   Glib::RefPtr<Gtk::FileFilter> __filter_png;
   Glib::RefPtr<Gtk::FileFilter> __filter_dot;
+#else
+  Gtk::FileFilter *__filter_pdf;
+  Gtk::FileFilter *__filter_svg;
+  Gtk::FileFilter *__filter_png;
+  Gtk::FileFilter *__filter_dot;
+#endif
 
   sigc::signal<void> __signal_update_disabled;
 

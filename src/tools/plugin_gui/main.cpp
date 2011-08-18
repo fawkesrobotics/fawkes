@@ -27,6 +27,13 @@
 #endif
 #include <iostream>
 
+#if GTK_VERSION_GE(3,0)
+#  define UI_FILE RESDIR"/guis/plugin_tool/plugin_gui.ui"
+#else
+#  define UI_FILE RESDIR"/guis/plugin_tool/plugin_gui_gtk2.ui"
+#endif
+
+
 using namespace std;
 
 int main(int argc, char** argv)
@@ -42,14 +49,14 @@ int main(int argc, char** argv)
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
     try {
       builder =
-        Gtk::Builder::create_from_file(RESDIR"/guis/plugin_tool/plugin_gui.ui");
+        Gtk::Builder::create_from_file(UI_FILE);
     } catch (Gtk::BuilderError &e) {
       printf("Failed to create GUI: %s\n", e.what().c_str());
     }
 #else
     std::auto_ptr<Gtk::BuilderError> error;
     Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/plugin_tool/plugin_gui.ui", error);
+      Gtk::Builder::create_from_file(UI_FILE, error);
     if (error.get()) {
       throw fawkes::Exception("Failed to load Glade file: %s",
                               error->what().c_str());

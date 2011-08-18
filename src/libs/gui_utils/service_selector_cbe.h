@@ -44,6 +44,7 @@ class ConnectionDispatcher;
 class ServiceSelectorCBE
 {
  public:
+#if GTK_VERSION_GE(3,0)
   ServiceSelectorCBE( Gtk::ComboBox* services,
 		      Gtk::Button* connect,
 		      Gtk::Window* parent,
@@ -52,6 +53,16 @@ class ServiceSelectorCBE
 		      Gtk::ToolButton* connect,
 		      Gtk::Window* parent,
 		      const char* service = "_fawkes._tcp" );
+#else
+  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+		      Gtk::Button* connect,
+		      Gtk::Window* parent,
+		      const char* service = "_fawkes._tcp" );
+  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+		      Gtk::ToolButton* connect,
+		      Gtk::Window* parent,
+		      const char* service = "_fawkes._tcp" );
+#endif
   ServiceSelectorCBE( Glib::RefPtr<Gtk::Builder> builder,
 		      const char* cbe_name = "cbeServices",
 		      const char* btn_name = "btnConnect",
@@ -75,7 +86,11 @@ class ServiceSelectorCBE
   void on_disconnected();
 
  protected:
+#if GTK_VERSION_GE(3,0)
   Gtk::ComboBox        *m_cbe_services;
+#else
+  Gtk::ComboBoxEntry   *m_cbe_services;
+#endif
   Gtk::Button          *m_btn_connect;
   Gtk::ToolButton      *m_tbtn_connect;
   Gtk::Window          *m_parent;

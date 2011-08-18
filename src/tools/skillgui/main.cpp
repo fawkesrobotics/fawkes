@@ -22,6 +22,12 @@
 
 #include "skillgui.h"
 
+#if GTK_VERSION_GE(3,0)
+#  define UI_FILE RESDIR"/guis/skillgui/skillgui.ui"
+#else
+#  define UI_FILE RESDIR"/guis/skillgui/skillgui_gtk2.ui"
+#endif
+
 /** This is the main program of the Skill GUI.
  */
 int
@@ -33,7 +39,7 @@ main(int argc, char **argv) {
 
   try {
     Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/skillgui/skillgui.ui");
+      Gtk::Builder::create_from_file(UI_FILE);
 
     SkillGuiGtkWindow *window = NULL;
     builder->get_widget_derived("wnd_skillgui", window);

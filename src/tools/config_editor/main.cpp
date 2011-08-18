@@ -24,6 +24,12 @@
 #include <tools/config_editor/config_editor.h>
 #include <iostream>
 
+#if GTK_VERSION_GE(3,0)
+#  define UI_FILE RESDIR"/guis/config_editor/config_editor.ui"
+#else
+#  define UI_FILE RESDIR"/guis/config_editor/config_editor_gtk2.ui"
+#endif
+
 using namespace std;
 
 int main(int argc, char** argv)
@@ -35,11 +41,11 @@ int main(int argc, char** argv)
     Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
     Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/config_editor/config_editor.ui");
+      Gtk::Builder::create_from_file(UI_FILE);
 #else
     std::auto_ptr<Gtk::BuilderError> error;
     Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/config_editor/config_editor.ui", error);
+      Gtk::Builder::create_from_file(UI_FILE, error);
     if (error.get()) {
       printf("Failed to load UI file: %s", error->what().c_str());
       exit(-1);

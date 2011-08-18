@@ -76,6 +76,11 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
 	     Gdk::BUTTON_PRESS_MASK );
 
+#if GTK_VERSION_LT(3,0)
+  signal_expose_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_expose_event));
+  signal_button_press_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_button_press_event));
+  signal_motion_notify_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_motion_notify_event));
+#endif
   //Glib::RefPtr<Gdk::Window> window = get_window();
 }
 
@@ -103,6 +108,12 @@ LaserDrawingArea::LaserDrawingArea()
   __visdisp = new VisualDisplay2D();
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
+
+#if GTK_VERSION_LT(3,0)
+  signal_expose_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_expose_event));
+  signal_button_press_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_button_press_event));
+  signal_motion_notify_event().connect(sigc::mem_fun(*this, &LaserDrawingArea::on_motion_notify_event));
+#endif
 }
 
 
@@ -283,12 +294,21 @@ LaserDrawingArea::set_rotation(float rot_rad)
 }
 
 
+#if GTK_VERSION_GE(3,0)
 /** Expose event handler.
  * @param cr Cairo context for drawing
  * @return signal return value
  */
 bool
 LaserDrawingArea::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+#else
+/** Expose event handler.
+ * @param event event info structure.
+ * @return signal return value
+ */
+bool
+LaserDrawingArea::on_expose_event(GdkEventExpose* event)
+#endif
 {
   // This is where we draw on the window
   Glib::RefPtr<Gdk::Window> window = get_window();
@@ -305,10 +325,22 @@ LaserDrawingArea::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
       __xc = width / 2;
       __yc = height / 2;
     }
+#if GTK_VERSION_LT(3,0)
+    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
+#endif
     cr->set_line_width(1.0);
 
+#if GTK_VERSION_LT(3,0)
+    // clip to the area indicated by the expose event so that we only redraw
+    // the portion of the window that needs to be redrawn
+    cr->rectangle(event->area.x, event->area.y,
+		  event->area.width, event->area.height);
+#endif
     cr->set_source_rgb(1, 1, 1);
     cr->fill_preserve();
+#if GTK_VERSION_LT(3,0)
+    cr->clip();
+#endif
     cr->set_source_rgb(0, 0, 0);
     //cr->set_source_rgba(0,0,0,1);
 

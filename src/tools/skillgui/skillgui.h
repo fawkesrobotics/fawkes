@@ -103,7 +103,11 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::Button            *but_stop;
   Gtk::ToggleButton      *but_continuous;
   Gtk::Button            *but_clearlog;
+#if GTK_VERSION_GE(3,0)
   Gtk::ComboBox          *cbe_skillstring;
+#else
+  Gtk::ComboBoxEntry     *cbe_skillstring;
+#endif
   Gtk::Label             *lab_status;
   Gtk::Label             *lab_alive;
   Gtk::Label             *lab_continuous;

@@ -70,7 +70,11 @@ using namespace fawkes;
  * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
+#if GTK_VERSION_GE(3,0)
 ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
+#else
+ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+#endif
 					Gtk::Button* connect,
 					Gtk::Window* parent,
 					const char* service )
@@ -91,7 +95,11 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
  * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
+#if GTK_VERSION_GE(3,0)
 ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
+#else
+ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+#endif
 					Gtk::ToolButton* connect,
 					Gtk::Window* parent,
 					const char* service )
@@ -132,11 +140,17 @@ ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gtk::Builder> builder,
 void
 ServiceSelectorCBE::initialize()
 {
+#if GTK_VERSION_GE(3,0)
   if (! m_cbe_services->get_has_entry()) {
     throw Exception("Service combo box does not have an entry, fix UI file?");
   }
+#endif
   m_cbe_services->set_model( m_service_model->get_list_store() );
+#if GTK_VERSION_GE(3,0)
   m_cbe_services->set_entry_text_column(m_service_model->get_column_record().name);
+#else
+  m_cbe_services->set_text_column(m_service_model->get_column_record().name);
+#endif
   m_cbe_services->get_entry()->set_activates_default(true);
   m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
   
