@@ -42,21 +42,21 @@ using namespace firevision;
 
 /** Constructor.
  * @param cobject C base object
- * @param ref_xml Glade XML
+ * @param builder Gtk builder
  */
 YuvViewerGtkWindow::YuvViewerGtkWindow(BaseObjectType* cobject,
-				       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+				       const Glib::RefPtr<Gtk::Builder> builder)
   : Gtk::Window(cobject)
 {
-  ref_xml->get_widget("yuv_vp",  __yuv_vp);
-  ref_xml->get_widget("cur_vp",  __cur_vp);
-  ref_xml->get_widget("seg_vp",  __seg_vp);
-  ref_xml->get_widget("y_scale", __y_scale);
-  ref_xml->get_widget("u_value", __u_value);
-  ref_xml->get_widget("v_value", __v_value);
-  ref_xml->get_widget("y_res",   __y_res);
-  ref_xml->get_widget("u_res",   __u_res);
-  ref_xml->get_widget("v_res",   __v_res);
+  builder->get_widget("yuv_vp",  __yuv_vp);
+  builder->get_widget("cur_vp",  __cur_vp);
+  builder->get_widget("seg_vp",  __seg_vp);
+  builder->get_widget("y_scale", __y_scale);
+  builder->get_widget("u_value", __u_value);
+  builder->get_widget("v_value", __v_value);
+  builder->get_widget("y_res",   __y_res);
+  builder->get_widget("u_res",   __u_res);
+  builder->get_widget("v_res",   __v_res);
 
   __yuv_widget = Gtk::manage(new ImageWidget(256, 256));
   __cur_widget = Gtk::manage(new ImageWidget( 60, 40));

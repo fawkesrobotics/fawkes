@@ -24,7 +24,6 @@
 
 #include <core/exception.h>
 
-#include <libglademm/xml.h>
 #include <iostream>
 
 using namespace std;
@@ -38,17 +37,19 @@ int main(int argc, char** argv)
     Gtk::Main kit(argc, argv);
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/guis/yuv_viewer/yuv_viewer.glade");
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file(RESDIR"/guis/yuv_viewer/yuv_viewer.ui");
 #else
-    std::auto_ptr<Gnome::Glade::XmlError> error;
-    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/guis/yuv_viewer/yuv_viewer.glade", "", "", error);
+    Glib::RefPtr<Gtk::BuilderError> error;
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create(RESDIR"/guis/yuv_viewer/yuv_viewer.ui", error);
     if (error.get()) {
-      throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+      throw fawkes::Exception("Failed to load UI file: %s", error->what().c_str());
     }
 #endif
 
     YuvViewerGtkWindow *window = NULL;
-    refxml->get_widget_derived("wndMain", window);
+    builder->get_widget_derived("wndMain", window);
 
     kit.run( *window );
 

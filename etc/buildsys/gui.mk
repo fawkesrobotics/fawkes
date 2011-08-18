@@ -22,7 +22,8 @@ __gui_mk := 1
 
 include $(BUILDSYSDIR)/ext/gmsl
 
-PC_GTKMM        = gtkmm-3.0
+PC_GTKMM_3      = gtkmm-3.0
+PC_GTKMM_2      = gtkmm-2.4
 PC_GIOMM        = giomm-2.4
 PC_CAIROMM      = cairomm-1.0
 PC_HILDONMM     = hildonmm
@@ -37,7 +38,18 @@ PKG_GLIBMM      = glibmm24[-devel]
 PKG_GTHREAD     = glib2-devel
 
 ifneq ($(PKGCONFIG),)
-  HAVE_GTKMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM)'; echo $${?/1/}),1,0)
+  HAVE_GTKMM_3 = $(if $(shell $(PKGCONFIG) --atleast-version=3.0.0 '$(PC_GTKMM_3)'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_GTKMM_3),1)
+    PC_GTKMM=$(PC_GTKMM_3)
+    HAVE_GTKMM=1
+  else
+    HAVE_GTKMM_2 = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM_2)'; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_GTKMM_2),1)
+      PC_GTKMM=$(PC_GTKMM_2)
+      HAVE_GTKMM=1
+    endif
+  endif
+
   HAVE_GIOMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GIOMM)'; echo $${?/1/}),1,0)
   HAVE_CAIROMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_CAIROMM)'; echo $${?/1/}),1,0)
   HAVE_GCONFMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GCONFMM)'; echo $${?/1/}),1,0)

@@ -303,16 +303,28 @@ main(int argc, char **argv)
 	      fcd.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	      fcd.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 
+#if GTK_VERSION_GE(3,0)
               Glib::RefPtr<Gtk::FileFilter> filter_rectinfo =
                 Gtk::FileFilter::create();
 	      filter_rectinfo->set_name("Rectification Info");
 	      filter_rectinfo->add_pattern("*.rectinfo");
+#else
+              Gtk::FileFilter filter_rectinfo;
+	      filter_rectinfo.set_name("Rectification Info");
+	      filter_rectinfo.add_pattern("*.rectinfo");
+#endif	      
 	      fcd.add_filter(filter_rectinfo);
 
+#if GTK_VERSION_GE(3,0)
               Glib::RefPtr<Gtk::FileFilter> filter_any =
                 Gtk::FileFilter::create();
 	      filter_any->set_name("Any File");
 	      filter_any->add_pattern("*");
+#else
+              Gtk::FileFilter filter_any;
+	      filter_any.set_name("Any File");
+	      filter_any.add_pattern("*");
+#endif
 	      fcd.add_filter(filter_any);
 
 	      int result = fcd.run();
@@ -339,7 +351,11 @@ main(int argc, char **argv)
 		  for (RectificationInfoFile::RectInfoBlockVector::iterator b = blocks->begin(); b != blocks->end(); ++b) {
 		    Glib::ustring us = rectinfo_camera_strings[(*b)->camera()];
 		    us += Glib::ustring(" (") + rectinfo_type_strings[(*b)->type()] + ")";
+#if GTK_VERSION_GE(3,0)
                     cboxt.append(us);
+#else
+                    cboxt.append_text(us);
+#endif
 		  }
 		  cboxt.set_active(0);
 

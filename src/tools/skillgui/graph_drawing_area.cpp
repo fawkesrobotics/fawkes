@@ -67,18 +67,26 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
   __fcd_recording->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
   __fcd_recording->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
+#if GTK_VERSION_GE(3,0)
   __filter_pdf = Gtk::FileFilter::create();
+  __filter_svg = Gtk::FileFilter::create();
+  __filter_png = Gtk::FileFilter::create();
+  __filter_dot = Gtk::FileFilter::create();
+#else
+  __filter_pdf = new Gtk::FileFilter();
+  __filter_svg = new Gtk::FileFilter();
+  __filter_png = new Gtk::FileFilter();
+  __filter_dot = new Gtk::FileFilter();
+#endif
   __filter_pdf->set_name("Portable Document Format (PDF)");
   __filter_pdf->add_pattern("*.pdf");
-  __filter_svg = Gtk::FileFilter::create();
   __filter_svg->set_name("Scalable Vector Graphic (SVG)");
   __filter_svg->add_pattern("*.svg");
-  __filter_png = Gtk::FileFilter::create();
   __filter_png->set_name("Portable Network Graphic (PNG)");
   __filter_png->add_pattern("*.png");
-  __filter_dot = Gtk::FileFilter::create();
   __filter_dot->set_name("DOT Graph");
   __filter_dot->add_pattern("*.dot");
+#if GTK_VERSION_GE(3,0)
   __fcd_save->add_filter(__filter_pdf);
   __fcd_save->add_filter(__filter_svg);
   __fcd_save->add_filter(__filter_png);
@@ -87,15 +95,25 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
 
   __fcd_open->add_filter(__filter_dot);
   __fcd_open->set_filter(__filter_dot);
+#else
+  __fcd_save->add_filter(*__filter_pdf);
+  __fcd_save->add_filter(*__filter_svg);
+  __fcd_save->add_filter(*__filter_png);
+  __fcd_save->add_filter(*__filter_dot);
+  __fcd_save->set_filter(*__filter_pdf);
+
+  __fcd_open->add_filter(*__filter_dot);
+  __fcd_open->set_filter(*__filter_dot);
+#endif
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
 	     Gdk::BUTTON_PRESS_MASK );
 
-#ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#if GTK_VERSION_LT(3,0)
   signal_expose_event().connect(sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_expose_event));
+#endif
   signal_button_press_event().connect(sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_button_press_event));
   signal_motion_notify_event().connect(sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_motion_notify_event));
-#endif
 }
 
 SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
@@ -105,10 +123,17 @@ SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
   delete __fcd_save;
   delete __fcd_open;
   delete __fcd_recording;
+#if GTK_VERSION_GE(3,0)
   __filter_pdf.reset();
   __filter_svg.reset();
   __filter_png.reset();
   __filter_dot.reset();
+#else
+  delete __filter_pdf;
+  delete __filter_svg;
+  delete __filter_png;
+  delete __filter_dot;
+#endif
 }
 
 
@@ -442,7 +467,11 @@ SkillGuiGraphDrawingArea::save()
   int result = __fcd_save->run();
   if (result == Gtk::RESPONSE_OK) {
 
+#if GTK_VERSION_GE(3,0)
     Glib::RefPtr<Gtk::FileFilter> f = __fcd_save->get_filter();
+#else
+    Gtk::FileFilter *f = __fcd_save->get_filter();
+#endif
     std::string filename = __fcd_save->get_filename();
     if (filename != "") {
       if (f == __filter_dot) {
@@ -541,12 +570,21 @@ SkillGuiGraphDrawingArea::open()
 }
 
 
+#if GTK_VERSION_GE(3,0)
+/** Draw event handler.
+ * @param cr cairo context
+ * @return true
+ */
+bool
+SkillGuiGraphDrawingArea::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+#else
 /** Expose event handler.
  * @param event event info structure.
  * @return signal return value
  */
 bool
 SkillGuiGraphDrawingArea::on_expose_event(GdkEventExpose* event)
+#endif
 {
   // This is where we draw on the window
   Glib::RefPtr<Gdk::Window> window = get_window();
@@ -559,8 +597,11 @@ SkillGuiGraphDrawingArea::on_expose_event(GdkEventExpose* event)
     //int xc, yc;
     //xc = width / 2;
     //yc = height / 2;
-    
+#if GTK_VERSION_LT(3,0)
     __cairo = window->create_cairo_context();
+#else
+    __cairo = cr;
+#endif
     __cairo->set_source_rgb(1, 1, 1);
     __cairo->paint();
 

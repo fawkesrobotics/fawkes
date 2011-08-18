@@ -31,7 +31,6 @@
 #include <fvutils/color/yuv.h>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 using namespace firevision;
 
@@ -39,7 +38,7 @@ class YuvViewerGtkWindow : public Gtk::Window
 {
 private:
 public:
-  YuvViewerGtkWindow(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
+  YuvViewerGtkWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder> builder);
   virtual ~YuvViewerGtkWindow();
 
 private:

@@ -110,20 +110,38 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
   builder->get_widget("ckbFuseJpeg", m_ckb_fuse_jpeg);
   builder->get_widget("trvFuseServices", m_trv_fuse_services);
 
+#if GTK_VERSION_GE(3,0)
   Glib::RefPtr<Gtk::FileFilter> filter_jpg = Gtk::FileFilter::create();
+#else
+  Gtk::FileFilter *filter_jpg = Gtk::manage(new Gtk::FileFilter());
+#endif
   filter_jpg->set_name("JPEG");
   filter_jpg->add_pattern("*.jpg");
   filter_jpg->add_pattern("*.jpeg");
-  m_fcd_open_image->add_filter(filter_jpg);
 
+#if GTK_VERSION_GE(3,0)
   Glib::RefPtr<Gtk::FileFilter> filter_fvraw = Gtk::FileFilter::create();
+#else
+  Gtk::FileFilter *filter_fvraw = Gtk::manage(new Gtk::FileFilter());
+#endif
   filter_fvraw->set_name("FVRaw");
   filter_fvraw->add_pattern("*.raw");
   filter_fvraw->add_pattern("*.fvraw");
+
+#if GTK_VERSION_GE(3,0)
+  m_fcd_open_image->add_filter(filter_jpg);
   m_fcd_open_image->add_filter(filter_fvraw);
 
   m_fcd_save_image->add_filter(filter_jpg);
   m_fcd_save_image->add_filter(filter_fvraw);
+
+#else
+  m_fcd_open_image->add_filter(*filter_jpg);
+  m_fcd_open_image->add_filter(*filter_fvraw);
+
+  m_fcd_save_image->add_filter(*filter_jpg);
+  m_fcd_save_image->add_filter(*filter_fvraw);
+#endif
 
   m_shm_list_store = Gtk::ListStore::create(m_shm_columns);
   m_trv_shm_image_ids->set_model(m_shm_list_store);
@@ -1120,11 +1138,19 @@ Firestation::mc_load()
 {
   m_fcd_mc_load->set_transient_for(*this);
 
+#if GTK_VERSION_GE(3,0)
   Glib::RefPtr<Gtk::FileFilter> filter_mirror = Gtk::FileFilter::create();
+#else
+  Gtk::FileFilter *filter_mirror = Gtk::manage(new Gtk::FileFilter());
+#endif
   filter_mirror->set_name("Mirror Calibration");
   filter_mirror->add_pattern("*.mirror");
   filter_mirror->add_pattern("*.bulb");
+#if GTK_VERSION_GE(3,0)
   m_fcd_mc_load->add_filter(filter_mirror);
+#else
+  m_fcd_mc_load->add_filter(*filter_mirror);
+#endif
 
   int result = m_fcd_mc_load->run();
 

@@ -70,10 +70,18 @@ FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType* cobject,
 
   std::vector<Gdk::PixbufFormat> fmts = Gdk::Pixbuf::get_formats();
   std::vector<Gdk::PixbufFormat>::const_iterator it = fmts.begin();
+#if GTK_VERSION_GE(3,0)
   __save_type->append("Don't save");
+#else
+  __save_type->append_text("Don't save");
+#endif
   for (; it != fmts.end(); ++it) {
     if ((*it).is_writable()) {
+#if GTK_VERSION_GE(3,0)
       __save_type->append((*it).get_name());
+#else
+      __save_type->append_text((*it).get_name());
+#endif
     }
   }
 

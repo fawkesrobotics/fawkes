@@ -19,9 +19,8 @@ include $(BUILDSYSDIR)/fvconf.mk
 include $(BUILDSYSDIR)/gui.mk
 include $(BUILDCONFDIR)/netcomm/netcomm.mk
 
-CFLAGS   = $(VISION_CFLAGS)
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS   = $(VISION_CFLAGS) $(CFLAGS_GUI)
+LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GUI)
 INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
@@ -30,7 +29,7 @@ LIBS_fvyuv_viewer = fawkescore fvutils fvwidgets
 OBJS_fvyuv_viewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 OBJS_all += $(OBJS_fvyuv_viewer)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GUI),1)
   BINS_gui += $(BINDIR)/fvyuv_viewer
   INST_RESDIRS = guis/yuv_viewer
 else
