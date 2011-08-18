@@ -46,6 +46,16 @@ INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/speechsynth','stri
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/katanaarm','string','KatanaInterface::Katana',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/ptu_RX28','string','PanTiltInterface::PanTilt RX28',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/ptu_EviD100P','string','PanTiltInterface::PanTilt EviD100P',NULL);
+INSERT INTO "config" VALUES('/luaagent/agent','string','naojoystick',NULL);
+INSERT INTO "config" VALUES('/luaagent/watch_files','bool',1,NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/joystick','string','JoystickInterface::Joystick',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/naosensors','string','NaoSensorInterface::Nao Sensors',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/naomotion','string','HumanoidMotionInterface::Nao Motion',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/wm_ball','string','ObjectPositionInterface::WM Ball',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/chestbutton','string','SwitchInterface::Nao Button Chest',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/lfootbumper','string','SwitchInterface::Nao Button Foot Left',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/rfootbumper','string','SwitchInterface::Nao Button Foot Right',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/penalty','string','SoccerPenaltyInterface::SPL Penalty',NULL);
 INSERT INTO "config" VALUES('/worldmodel/confspace','string','trunk',NULL);
 INSERT INTO "config" VALUES('/worldmodel/wi_send/trunk/enable_send','bool','0','Enable sending of world info messages?');
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/pose/type','string','ObjectPositionInterface',NULL);

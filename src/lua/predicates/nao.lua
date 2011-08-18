@@ -35,7 +35,7 @@ depends_interfaces = {
    {v="chestbutton", id="Nao Button Chest",      type="SwitchInterface"},
    {v="lfootbumper", id="Nao Button Foot Left",  type="SwitchInterface"},
    {v="rfootbumper", id="Nao Button Foot Right", type="SwitchInterface"},
-   {v="penalty",     id="SPL Penalty",           type="SplPenaltyInterface"}
+   {v="penalty",     id="SPL Penalty",           type="SoccerPenaltyInterface"}
 }
 
 --- Robot is lying on its back.
