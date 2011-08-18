@@ -83,11 +83,13 @@ class NaoFawkesModule : public AL::ALModule
       if (fawkes::runtime::init(init_options) != 0) {
 	//throw AL::ALError(name, "ctor", "Initializing Fawkes failed");
 	logger->info("NaoQiFawkes", "--- Fawkes initialization failed");
+        play_sound(RESDIR"/sounds/naoshutdown.wav");
       } else {
 
 	logger->info("NaoQiFawkes", "*** Starting embedded Fawkes");
 	fawkes::runtime::main_thread->full_start();
         logger->info("NaoQiFawkes", "*** Embedded Fawkes initialization done");
+        play_sound(RESDIR"/sounds/naostartup.wav");
       }
     } catch (fawkes::Exception &e) {
       std::string message;
@@ -98,10 +100,10 @@ class NaoFawkesModule : public AL::ALModule
       logger->info("NaoQiFawkes",
                    "--- Fawkes initialization failed, exception follows.");
       logger->info("NaoQiFawkes", message);
+      play_sound(RESDIR"/sounds/naoshutdown.wav");
       //throw AL::ALError(name, "ctor", e.what());
     }
 
-    play_startup_sound();
   }
 
   /** Destructor.
@@ -114,9 +116,11 @@ class NaoFawkesModule : public AL::ALModule
     fawkes::runtime::cleanup();
   }
 
-  /** Play startup sound. */
+  /** Play startup sound.
+   * @param filename name of file to play
+   */
   void
-  play_startup_sound()
+  play_sound(const char *filename)
   {
     // Is the auplayer running ?
     try {
@@ -126,7 +130,7 @@ class NaoFawkesModule : public AL::ALModule
       if (is_auplayer_available) {
         AL::ALPtr<AL::ALAudioPlayerProxy>
           auplayer(new AL::ALAudioPlayerProxy(broker));
-        auplayer->playFile(RESDIR"/sounds/naostartup.wav");
+        auplayer->playFile(filename);
       }
     } catch (AL::ALError& e) {} // ignored
   }
