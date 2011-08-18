@@ -35,8 +35,8 @@
 #include <alcommon/almodule.h>
 #include <alproxies/allauncherproxy.h>
 #include <alproxies/alaudioplayerproxy.h>
+#include <alproxies/alloggerproxy.h>
 
-#include <cstdio>
 #include <dlfcn.h>
 
 using namespace std;
@@ -61,8 +61,10 @@ class NaoFawkesModule : public AL::ALModule
   {
     setModuleDescription("Fawkes integration module");
 
+    AL::ALPtr<AL::ALLoggerProxy> logger = broker->getLoggerProxy();
+
     try {
-      printf("*** Initializing embedded Fawkes\n");
+      logger->info("NaoQiFawkes", "*** Initializing embedded Fawkes");
 
       // The module flags hack is required because otherwise NaoQi segfaults
       // due to problems with boost static initialization after a module
@@ -79,21 +81,25 @@ class NaoFawkesModule : public AL::ALModule
 
       if (fawkes::runtime::init(init_options) != 0) {
 	//throw AL::ALError(name, "ctor", "Initializing Fawkes failed");
-	printf("--- Fawkes initialization failed\n");
+	logger->info("NaoQiFawkes", "--- Fawkes initialization failed");
       } else {
 
-	printf("*** Starting embedded Fawkes\n");
+	logger->info("NaoQiFawkes", "*** Starting embedded Fawkes");
 	fawkes::runtime::main_thread->full_start();
-	//printf("*** Loading plugins\n");
-	//fawkes::runtime::plugin_manager->load("naoqi,naoqi-motion,webview");
+        logger->info("NaoQiFawkes", "*** Embedded Fawkes initialization done");
       }
     } catch (fawkes::Exception &e) {
-      printf("--- Fawkes initialization failed, exception follows.\n");
-      e.print_trace();
+      std::string message;
+      for (fawkes::Exception::iterator i = e.begin(); i != e.end(); ++i) {
+        if (i != e.begin())  message += "\n";
+        message += *i;
+      }
+      logger->info("NaoQiFawkes",
+                   "--- Fawkes initialization failed, exception follows.");
+      logger->info("NaoQiFawkes", message);
       //throw AL::ALError(name, "ctor", e.what());
     }
 
-    printf("*** Embedded Fawkes initialization done\n");
     play_startup_sound();
   }
 
@@ -139,14 +145,16 @@ _createModule(AL::ALPtr<AL::ALBroker> broker)
   // init broker with the main broker inctance 
   // from the parent executable
 
-  printf("*** Setting broker stuff\n");
+  AL::ALPtr<AL::ALLoggerProxy> logger = broker->getLoggerProxy();
+
+  logger->info("NaoQiFawkes", "*** Setting broker stuff");
   AL::ALBrokerManager::setInstance(broker->fBrokerManager.lock());
   AL::ALBrokerManager::getInstance()->addBroker(broker);
 
   fawkes::naoqi::broker = broker;
     
   // create modules instance
-  printf("*** Instantiating Module\n");
+  logger->info("NaoQiFawkes", "*** Instantiating Module");
   AL::ALModule::createModule<NaoFawkesModule>(broker, "NaoFawkesModule");
 
   return 0;
