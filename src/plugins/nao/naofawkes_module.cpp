@@ -76,6 +76,7 @@ class NaoFawkesModule : public AL::ALModule
 	.plugin_module_flags(fawkes::Module::MODULE_FLAGS_DEFAULT |
 			     fawkes::Module::MODULE_NODELETE)
 	.net_service_name("NaoQi Fawkes on %h")
+        .loggers("console;syslog:NaoQiFawkes")
 	.load_plugins("naoqi,webview")
         .default_plugin("nao_default");
 
