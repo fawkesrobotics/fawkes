@@ -73,6 +73,8 @@ class FawkesMainThread
 
   void full_start();
 
+  MultiLogger *  logger() const;
+
   class Runner : public SignalHandler {
   public:
     Runner(FawkesMainThread *fmt);

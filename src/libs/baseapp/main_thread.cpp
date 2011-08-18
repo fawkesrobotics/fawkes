@@ -28,6 +28,7 @@
 #include <core/threading/interruptible_barrier.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
+#include <core/version.h>
 #include <config/sqlite.h>
 #include <logging/multi.h>
 #include <utils/time/clock.h>
@@ -239,13 +240,6 @@ FawkesMainThread::once()
   // if no specific plugins were given to load, load the default plugin
   if (! __load_plugins) {
     try {
-      if (__default_plugin && (strcmp("default", __default_plugin) != 0)) {
-        __multi_logger->log_error("FawkesMainThread", "Loading %s", __default_plugin);
-        
-        __plugin_manager->load(__default_plugin);
-      } else {
-        __multi_logger->log_error("FawkesMainThread", "NOT Loading default plugin");
-      }
       __plugin_manager->load("default");
     } catch (PluginLoadException &e) {
       if (e.plugin_name() != "default") {
@@ -397,6 +391,15 @@ FawkesMainThread::loop()
 }
 
 
+/** Get logger.
+ * @return logger
+ */
+MultiLogger *
+FawkesMainThread::logger() const
+{
+  return __multi_logger;
+}
+
 /** @class FawkesMainThread::Runner <baseapp/main_thread.h>
  * Utility class to run the main thread.
  *
@@ -430,7 +433,9 @@ FawkesMainThread::Runner::run()
   __init_mutex->lock();
   __init_running = false;
   if ( ! __init_quit ) {
-    __fmt->start();
+    __fmt->full_start();
+    __fmt->logger()->log_info("FawkesMainThread", "Fawkes %s startup complete",
+                              FAWKES_VERSION_STRING);
     __init_mutex->unlock();
     __fmt->join();
   } else {
