@@ -3,7 +3,7 @@
  *  console.cpp - Fawkes console logger
  *
  *  Created: Tue Jan 16 21:08:25 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -34,13 +34,14 @@
 namespace fawkes {
 
 /** @class ConsoleLogger <logging/console.h>
- * Interface for logging to stderr on console.
+ * Interface for logging to stderr.
  * The ConsoleLogger will pipe all output to stderr on the console. The
  * output will be color coded due to the importance of the output.
  *
  * Debug output will be drawn in grey font, informational output in console
  * default color, warnings will be printed in brown/orange and errors in red.
  *
+ * @author Tim Niemueller
  */
 
 /** Constructor.

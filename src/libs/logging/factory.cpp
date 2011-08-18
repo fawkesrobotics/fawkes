@@ -3,7 +3,7 @@
  *  factory.cpp - Logger factory
  *
  *  Created: Mon Jun 04 10:57:21 2007
- *  Copyright  2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2007-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -24,6 +24,7 @@
 #include <logging/factory.h>
 #include <logging/console.h>
 #include <logging/file.h>
+#include <logging/syslog.h>
 #include <logging/multi.h>
 
 #include <cstring>
@@ -33,7 +34,8 @@ namespace fawkes {
 
 /** @class UnknownLoggerTypeException <logging/factory.h>
  * Unknown logger type exception.
- * Thrown if the requested logger has not been recognized
+ * Thrown if the requested logger has not been recognized.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -48,10 +50,11 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
 
 /** @class LoggerFactory <logging/factory.h>
  * Logger factory.
- * This logging factory provides access to all loggers in a unified way. You just
- * supply a logger argument string and depending on the logger type an instance of
- * the desired logger is returned or otherwise
- * an exception is thrown. See instance() for a list of supported logger types.
+ * This logging factory provides access to all loggers in a unified
+ * way. You just supply a logger argument string and depending on the
+ * logger type an instance of the desired logger is returned or
+ * otherwise an exception is thrown. See instance() for a list of
+ * supported logger types.
  *
  * @author Tim Niemueller
  */
@@ -62,6 +65,7 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
  * Supported logger types:
  * - console, ConsoleLogger
  * - file, FileLogger
+ * - syslog, SyslogLogger
  * NOT supported:
  * - NetworkLogger, needs a FawkesNetworkHub which cannot be passed by parameter
  * @param type logger type
@@ -91,6 +95,8 @@ LoggerFactory::instance(const char *type, const char *as)
     }
     l = new FileLogger(file_name);
     free(tmp);
+  } else if ( strcmp(type, "syslog") == 0 ) {
+    l = new SyslogLogger(as);
   }
 
   if ( l == NULL )  throw UnknownLoggerTypeException();
