@@ -51,6 +51,7 @@ INSERT INTO "config" VALUES('/luaagent/watch_files','bool',1,NULL);
 INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/joystick','string','JoystickInterface::Joystick',NULL);
 INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/naosensors','string','NaoSensorInterface::Nao Sensors',NULL);
 INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/naomotion','string','HumanoidMotionInterface::Nao Motion',NULL);
+INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/naojoints','string','NaoJointPositionInterface::Nao Joint Positions',NULL);
 INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/wm_ball','string','ObjectPositionInterface::WM Ball',NULL);
 INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/chestbutton','string','SwitchInterface::Nao Button Chest',NULL);
 INSERT INTO "config" VALUES('/luaagent/interfaces/naojoystick/reading/lfootbumper','string','SwitchInterface::Nao Button Foot Left',NULL);
