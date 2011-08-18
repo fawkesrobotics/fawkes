@@ -53,11 +53,11 @@ interfaces: core interface
 gui_utils: core netcomm plugin logging
 logging: core utils netcomm
 naoutils: core utils
-webview: core utils
+webview: core utils logging
 baseapp: core utils aspect config netcomm blackboard plugin logging
 eclipse_externals: blackboard interface utils
-fvutils: core utils netcomm
-fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils
+fvutils: core utils logging netcomm
+fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils logging fvutils
 fvfilters: fvmodels
 fvmodels: fvclassifiers geometry
 fvstereo: fvcams
