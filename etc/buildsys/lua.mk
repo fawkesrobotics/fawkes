@@ -36,11 +36,20 @@ ifeq ($(HAVE_LUA),1)
   CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_PACKAGE)') -DHAVE_LUA -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
   LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_PACKAGE)')
   ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
-    HAVE_TOLUA = 1
-    TOLUAPP=tolua++
+    # Fedora
+    TOLUAPP=$(shell type -p tolua++)
     TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
+    ifeq ($(TOLUAPP),)
+      # Ubuntu/Debian
+      TOLUAPP=$(shell type -p tolua++$(LUA_VERSION))
+      TOLUA_LIBS=tolua++$(LUA_VERSION) stdc++
+    endif
+    ifneq ($(TOLUAPP),)
+      HAVE_TOLUA = 1
+    endif
   endif
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/lua$(subst .,,$(LUA_VERSION))/tolua++.h),)
+    # FreeBSD
     HAVE_TOLUA = 1
     TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
     TOLUA_LIBS=tolua++ stdc++
