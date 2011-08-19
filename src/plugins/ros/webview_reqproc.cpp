@@ -22,7 +22,7 @@
 
 #include "webview_reqproc.h"
 #include <core/exception.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <webview/error_reply.h>
 #include <webview_msgs/ProcessRequest.h>
 
