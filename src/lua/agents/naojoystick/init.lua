@@ -43,6 +43,22 @@ local FIX_SPEED = 0.6
 local FIX_STEP = 0.6
 local MAX_HEAD_YAW   = 1.5
 local MAX_HEAD_PITCH = 1.5
+local RUMBLE = {BUMPER = {LENGTH = 1000,
+                          DELAY = 0,
+                          STRONG = 0,
+                          WEAK = 0XFFFF
+                },
+                AURA   = {LENGTH = 0,
+                          DELAY = 0,
+                          DIR = 0,
+                          STRONG = 0,
+                          WEAK = 0
+                }
+}
+
+local AXIS = {OMNI = {X=5, Y=4},
+              WALK = {X=1, Y=0},
+              HEAD = {PITCH=3, YAW=2} }
 
 local function button_kick_left()
    return joystick:pressed_buttons() == joystick.BUTTON_7
@@ -61,18 +77,18 @@ local function button_valid()
 end
 
 local function move_omni()
-   return joystick:axis(4) ~= 0 or
-          joystick:axis(5) ~= 0
+   return joystick:axis(AXIS.OMNI.X) ~= 0 or
+          joystick:axis(AXIS.OMNI.Y) ~= 0
 end
 
 local function move_free()
-   return joystick:axis(0) ~= 0 or
-          joystick:axis(1) ~= 0
+   return joystick:axis(AXIS.WALK.X) ~= 0 or
+          joystick:axis(AXIS.WALK.Y) ~= 0
 end
 
 local function move_head()
-   return joystick:axis(2) ~= 0 or
-          joystick:axis(3) ~= 0
+   return joystick:axis(AXIS.HEAD.PITCH) ~= 0 or
+          joystick:axis(AXIS.HEAD.YAW) ~= 0
 end
 
 local function move()
@@ -87,6 +103,8 @@ fsm:add_transitions{
 
    {"READY", "PLAY", cond="preds.short_button"},
    --{"READY", "PLAY", true}, --use for testing without Nao
+   --{"READY", "RUMBLE_TEST", true}, --use for testing rumble with analog-sticks
+   {"RUMBLE_TEST", "FINAL", false},
 
    {"TO_PLAY", "PLAY", wait_sec=0.5},
    {"PLAY", "BUTTON", cond=button_valid, desc="action button pressed"},
@@ -111,38 +129,60 @@ end
 function PLAY:loop()
    self.motion_planned = false
 
-   --process sensors for rumbling. NICE TO HAVE
+   --process bumpers for rumbling
+   if preds.left_bumper_once then
+      joystick:msgq_enqueue_copy(joystick.StartRumbleMessage:new(RUMBLE.BUMPER.LENGTH,
+                                                                 RUMBLE.BUMPER.DELAY,
+                                                                 joystick.DIRECTION_LEFT,
+                                                                 RUMBLE.BUMPER.STRONG,
+                                                                 RUMBLE.BUMPER.WEAK))
+   end
+   if preds.right_bumper_once then
+      joystick:msgq_enqueue_copy(joystick.StartRumbleMessage:new(RUMBLE.BUMPER.LENGTH,
+                                                                 RUMBLE.BUMPER.DELAY,
+                                                                 joystick.DIRECTION_RIGHT,
+                                                                 RUMBLE.BUMPER.STRONG,
+                                                                 RUMBLE.BUMPER.WEAK))
+   end
+
+
+
+   --process sonars for rumbling. NICE TO HAVE
+
+
 
    --process movement
    if move_free() then
       self.moved_body = true
-      printf("send MoveVelocity message. Move free. x:"..joystick:axis(1).."  y:"..joystick:axis(0))
+      printf("send MoveVelocity message. Move free. x:"..joystick:axis(AXIS.WALK.X).."  y:"..joystick:axis(AXIS.WALK.Y))
       self.motion_planned = true
       -- ver1: fix step-size, variable speed
-      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(1), joystick:axis(0) ))
+      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(AXIS.WALK.X), joystick:axis(AXIS.WALK.Y) ))
       -- ver2: variable step-size, fix speed
       --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(1), 0, joystick:axis(0), FIX_SPEED))
 
    elseif move_omni() then
       self.moved_body = true
-      printf("send MoveVelocity message: move omni x:"..joystick:axis(5).."  y:"..joystick:axis(4))
+      printf("send MoveVelocity message: move omni x:"..joystick:axis(AXIS.OMNI.X).."  y:"..joystick:axis(AXIS.OMNI.Y))
       self.motion_planned = true
       -- ver1: fix step-size, variable speed; TODO: normalize x and y, using FIX_STEP as length of direction-vector
       --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(5), joystick:axis(4), 0, 1 ))
       -- ver2: variable step-size, fix speed
-      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(5), joystick:axis(4), 0, FIX_SPEED ))
+      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(AXIS.OMNI.X), joystick:axis(AXIS.OMNI.Y), 0, FIX_SPEED ))
    elseif self.moved_body then
       self.moved_body = false
       printf("stop nao walking, send StopMessage")
       naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
    end
 
+
+
    --process head movement
    if move_head() then
       self.motion_planned = true
       self.moved_head = true
 
-      local yaw, pitch = joystick:axis(2), joystick:axis(3)
+      local yaw, pitch = joystick:axis(AXIS.HEAD.YAW), joystick:axis(AXIS.HEAD.PITCH)
       local speed = math.sqrt(yaw*yaw + pitch*pitch)
 
       yaw = yaw + naojoints:head_yaw()
@@ -167,6 +207,8 @@ function PLAY:loop()
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(naojoints:head_yaw(), naojoints:head_pitch(), 0.4))
    end
 
+
+
    -- stop condition
    if naomotion:is_moving() and
       not self.motion_planned then
@@ -183,4 +225,66 @@ end
 function KICK_RIGHT:init()
    printf("send KickMessage(RIGHT)")
    naomotion:msgq_enqueue_copy(naomotion.KickMessage:new(naomotion.LEG_RIGHT, 1.0))
+end
+
+function RUMBLE_TEST:init()
+   self.rumble_dir = 0
+   self.rumble_strong_dir = 0
+   self.rumble = false
+   self.strong_magnitude = 0
+   self.weak_magnitude = 0
+end
+
+function RUMBLE_TEST:loop()
+   self.rumble = false
+   self.weak_magnitude = 0
+   self.strong_magnitude = 0
+
+   if joystick:axis(AXIS.WALK.X) > 0 then
+      self.rumble = true
+      self.rumble_dir = joystick.DIRECTION_UP
+      self.weak_magnitude = 0X6000*math.abs(joystick:axis(AXIS.WALK.X))
+   elseif joystick:axis(AXIS.WALK.X) < 0 then
+      self.rumble = true
+      self.rumble_dir = joystick.DIRECTION_DOWN
+      self.weak_magnitude = 0X9000*math.abs(joystick:axis(AXIS.WALK.X))
+   elseif joystick:axis(AXIS.WALK.Y) > 0 then
+      self.rumble = true
+      self.rumble_dir = joystick.DIRECTION_RIGHT
+      self.weak_magnitude = 0XC000*math.abs(joystick:axis(AXIS.WALK.Y))
+   elseif joystick:axis(AXIS.WALK.Y) < 0 then
+      self.rumble = true
+      self.rumble_dir = joystick.DIRECTION_LEFT
+      self.weak_magnitude = 0XFFFF*math.abs(joystick:axis(AXIS.WALK.Y))
+   end
+
+   if joystick:axis(AXIS.HEAD.PITCH) > 0 then
+      self.rumble_strong_dir = joystick.DIRECTION_UP
+      self.strong_magnitude = 0X6000*math.abs(joystick:axis(AXIS.HEAD.PITCH))
+   elseif joystick:axis(AXIS.HEAD.PITCH) < 0 then
+      self.rumble_strong_dir = joystick.DIRECTION_DOWN
+      self.strong_magnitude = 0X9000*math.abs(joystick:axis(AXIS.HEAD.PITCH))
+   elseif joystick:axis(AXIS.HEAD.YAW) > 0 then
+      self.rumble_strong_dir = joystick.DIRECTION_RIGHT
+      self.strong_magnitude = 0XC000*math.abs(joystick:axis(AXIS.HEAD.YAW))
+   elseif joystick:axis(AXIS.HEAD.YAW) < 0 then
+      self.rumble_strong_dir = joystick.DIRECTION_LEFT
+      self.strong_magnitude = 0XFFFF*math.abs(joystick:axis(AXIS.HEAD.YAW))
+   end
+
+   if not self.rumble and
+      self.strong_magnitude > 0 then
+      self.rumble = true
+      self.rumble_dir = self.rumble_strong_dir
+   end
+
+   if self.rumble then
+      joystick:msgq_enqueue_copy(joystick.StartRumbleMessage:new(0, 0,
+                                                            self.rumble_dir,
+                                                            self.strong_magnitude,
+                                                            self.weak_magnitude))
+   elseif joystick:ff_effects() ~= 0 then
+      joystick:msgq_enqueue_copy(joystick.StopRumbleMessage:new())
+   end
+
 end
