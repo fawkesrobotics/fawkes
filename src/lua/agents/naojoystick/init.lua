@@ -104,6 +104,7 @@ end
 
 function PLAY:init()
    self.motion_planned = false -- true, if a motion is planned
+   self.moved_head = false     -- true, if head was set to move
 end
 
 function PLAY:loop()
@@ -132,6 +133,7 @@ function PLAY:loop()
    --process head movement
    if move_head() then
       self.motion_planned = true
+      self.moved_head = true
 
       local yaw, pitch = joystick:axis(2), joystick:axis(3)
       local speed = math.sqrt(yaw*yaw + pitch*pitch)
@@ -152,6 +154,10 @@ function PLAY:loop()
 
       printf("send MoveHead message. yaw:"..yaw.."  pitch:"..pitch.."  speed:"..speed)
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, speed))
+   elseif self.moved_head then
+      self.moved_head = false
+      printf("stop head Movement")
+      naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(naojoints:head_yaw(), naojoints:head_pitch(), 0.4))
    end
 
    -- stop condition
