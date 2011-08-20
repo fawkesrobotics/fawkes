@@ -28,7 +28,8 @@ depends_skills     = {}
 depends_interfaces = {
    { v="joystick", type="JoystickInterface", id="Joystick" },
    { v="naomotion", type="HumanoidMotionInterface", id="Nao Motion"},
-   { v="naojoints", type="NaoJointPositionInterface", id="Nao Joint Positions"}
+   { v="naojoints", type="NaoJointPositionInterface", id="Nao Joint Positions"},
+   { v="naosensors", type="NaoSensorInterface", id="Nao Sensors"}
 }
 
 documentation      = [==[Agent to control Nao via joystick.]==]
@@ -43,6 +44,8 @@ local FIX_SPEED = 0.6
 local FIX_STEP = 0.6
 local MAX_HEAD_YAW   = 1.5
 local MAX_HEAD_PITCH = 1.5
+local MAX_SONAR_DIST_WEAK = 0.3
+local MAX_SONAR_DIST_STRONG = 0.1
 local RUMBLE = {BUMPER = {LENGTH = 1000,
                           DELAY = 0,
                           STRONG = 0,
@@ -50,9 +53,9 @@ local RUMBLE = {BUMPER = {LENGTH = 1000,
                 },
                 AURA   = {LENGTH = 0,
                           DELAY = 0,
-                          DIR = 0,
-                          STRONG = 0,
-                          WEAK = 0
+                          DIR = joystick.DIRECTION_UP,
+                          STRONG = 0XCCCC,
+                          WEAK = 0XCCCC
                 }
 }
 
@@ -124,10 +127,18 @@ function PLAY:init()
    self.motion_planned = false -- true, if a motion is planned
    self.moved_head = false     -- true, if head was set to move
    self.moved_body = false     -- true, if nao was set to walk
+   self.ultrasonic_distance = 1.0
+   self.bumper_weak = 0
+   self.bumper_strong = 0
 end
 
 function PLAY:loop()
    self.motion_planned = false
+   self.ultrasonic_distance = naosensors:ultrasonic_distance()
+   self.rumble_weak = 0
+   self.rumble_strong = 0
+
+
 
    --process bumpers for rumbling
    if preds.left_bumper_once then
@@ -147,7 +158,26 @@ function PLAY:loop()
 
 
 
-   --process sonars for rumbling. NICE TO HAVE
+   --process sonars for rumbling
+   if self.ultrasonic_distance < MAX_SONAR_DIST_STRONG then
+      -- multiplyer: max 1.5^2 (15cm). 1.25*0xCCCC = 0xFFFF = maximum rumble
+      local multiplyer = math.pow(math.min(1.5, 10*(MAX_SONAR_DIST_STRONG - self.ultrasonic_distance)), 2)
+      self.rumble_strong = math.min(0xFFFF, RUMBLE.AURA.STRONG * multiplyer)
+      self.rumble_weak   = math.min(0xFFFF, RUMBLE.AURA.WEAK * 1.25)
+   elseif self.ultrasonic_distance < MAX_SONAR_DIST_WEAK then
+      -- multiplyer: max 1.5^2 (15cm). 1.25*0xCCCC = 0xFFFF = maximum rumble
+      local multiplyer = math.pow(math.min(1.5, 10*(MAX_SONAR_DIST_WEAK - self.ultrasonic_distance)), 2)
+      self.rumble_weak = math.min(0xFFFF, RUMBLE.AURA.WEAK * multiplyer)
+   end
+   if self.rumble_weak + self.rumble_strong > 0 then
+      joystick:msgq_enqueue_copy(joystick.StartRumbleMessage:new(RUMBLE.AURA.LENGTH,
+                                                                 RUMBLE.AURA.DELAY,
+                                                                 RUMBLE.AURA.DIR,
+                                                                 self.rumble_strong,
+                                                                 self.rumble_weak))
+   elseif joystick:ff_effects() ~= 0 then
+      joystick:msgq_enqueue_copy(joystick.StopRumbleMessage:new())
+   end
 
 
 
@@ -243,33 +273,33 @@ function RUMBLE_TEST:loop()
    if joystick:axis(AXIS.WALK.X) > 0 then
       self.rumble = true
       self.rumble_dir = joystick.DIRECTION_UP
-      self.weak_magnitude = 0X6000*math.abs(joystick:axis(AXIS.WALK.X))
+      self.weak_magnitude = 0X6000*math.pow(joystick:axis(AXIS.WALK.X),2)
    elseif joystick:axis(AXIS.WALK.X) < 0 then
       self.rumble = true
       self.rumble_dir = joystick.DIRECTION_DOWN
-      self.weak_magnitude = 0X9000*math.abs(joystick:axis(AXIS.WALK.X))
+      self.weak_magnitude = 0X9000*math.pow(joystick:axis(AXIS.WALK.X),2)
    elseif joystick:axis(AXIS.WALK.Y) > 0 then
       self.rumble = true
       self.rumble_dir = joystick.DIRECTION_RIGHT
-      self.weak_magnitude = 0XC000*math.abs(joystick:axis(AXIS.WALK.Y))
+      self.weak_magnitude = 0XC000*math.pow(joystick:axis(AXIS.WALK.Y),2)
    elseif joystick:axis(AXIS.WALK.Y) < 0 then
       self.rumble = true
       self.rumble_dir = joystick.DIRECTION_LEFT
-      self.weak_magnitude = 0XFFFF*math.abs(joystick:axis(AXIS.WALK.Y))
+      self.weak_magnitude = 0XFFFF*math.pow(joystick:axis(AXIS.WALK.Y),2)
    end
 
    if joystick:axis(AXIS.HEAD.PITCH) > 0 then
       self.rumble_strong_dir = joystick.DIRECTION_UP
-      self.strong_magnitude = 0X6000*math.abs(joystick:axis(AXIS.HEAD.PITCH))
+      self.strong_magnitude = 0X6000*math.pow(joystick:axis(AXIS.HEAD.PITCH),2)
    elseif joystick:axis(AXIS.HEAD.PITCH) < 0 then
       self.rumble_strong_dir = joystick.DIRECTION_DOWN
-      self.strong_magnitude = 0X9000*math.abs(joystick:axis(AXIS.HEAD.PITCH))
+      self.strong_magnitude = 0X9000*math.pow(joystick:axis(AXIS.HEAD.PITCH),2)
    elseif joystick:axis(AXIS.HEAD.YAW) > 0 then
       self.rumble_strong_dir = joystick.DIRECTION_RIGHT
-      self.strong_magnitude = 0XC000*math.abs(joystick:axis(AXIS.HEAD.YAW))
+      self.strong_magnitude = 0XC000*math.pow(joystick:axis(AXIS.HEAD.YAW),2)
    elseif joystick:axis(AXIS.HEAD.YAW) < 0 then
       self.rumble_strong_dir = joystick.DIRECTION_LEFT
-      self.strong_magnitude = 0XFFFF*math.abs(joystick:axis(AXIS.HEAD.YAW))
+      self.strong_magnitude = 0XFFFF*math.pow(joystick:axis(AXIS.HEAD.YAW),2)
    end
 
    if not self.rumble and
