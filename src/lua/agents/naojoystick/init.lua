@@ -105,6 +105,7 @@ end
 function PLAY:init()
    self.motion_planned = false -- true, if a motion is planned
    self.moved_head = false     -- true, if head was set to move
+   self.moved_body = false     -- true, if nao was set to walk
 end
 
 function PLAY:loop()
@@ -114,6 +115,7 @@ function PLAY:loop()
 
    --process movement
    if move_free() then
+      self.moved_body = true
       printf("send MoveVelocity message. Move free. x:"..joystick:axis(1).."  y:"..joystick:axis(0))
       self.motion_planned = true
       -- ver1: fix step-size, variable speed
@@ -122,12 +124,17 @@ function PLAY:loop()
       --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(1), 0, joystick:axis(0), FIX_SPEED))
 
    elseif move_omni() then
+      self.moved_body = true
       printf("send MoveVelocity message: move omni x:"..joystick:axis(5).."  y:"..joystick:axis(4))
       self.motion_planned = true
       -- ver1: fix step-size, variable speed; TODO: normalize x and y, using FIX_STEP as length of direction-vector
       --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(5), joystick:axis(4), 0, 1 ))
       -- ver2: variable step-size, fix speed
       naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(5), joystick:axis(4), 0, FIX_SPEED ))
+   elseif self.moved_body then
+      self.moved_body = false
+      printf("stop nao walking, send StopMessage")
+      naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
    end
 
    --process head movement
@@ -156,24 +163,24 @@ function PLAY:loop()
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, speed))
    elseif self.moved_head then
       self.moved_head = false
-      printf("stop head Movement")
+      printf("stop head Movement, send MoveHeadMessage(current_yaw, current_pitch)")
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(naojoints:head_yaw(), naojoints:head_pitch(), 0.4))
    end
 
    -- stop condition
    if naomotion:is_moving() and
       not self.motion_planned then
-      printf("send STOP message")
+      printf("send StopMessage")
       naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
    end
 end
 
 function KICK_LEFT:init()
-   printf("send KICK_LEFT message")
+   printf("send KickMessage(LEFT)")
    naomotion:msgq_enqueue_copy(naomotion.KickMessage:new(naomotion.LEG_LEFT, 1.0))
 end
 
 function KICK_RIGHT:init()
-   printf("send KICK_RIGHT message")
+   printf("send KickMessage(RIGHT)")
    naomotion:msgq_enqueue_copy(naomotion.KickMessage:new(naomotion.LEG_RIGHT, 1.0))
 end
