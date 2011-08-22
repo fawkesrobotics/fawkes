@@ -187,7 +187,7 @@ function PLAY:loop()
       printf("send MoveVelocity message. Move free. x:"..joystick:axis(AXIS.WALK.X).."  y:"..joystick:axis(AXIS.WALK.Y))
       self.motion_planned = true
       -- ver1: fix step-size, variable speed
-      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(AXIS.WALK.X), joystick:axis(AXIS.WALK.Y) ))
+      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(AXIS.WALK.Y), joystick:axis(AXIS.WALK.X) ))
       -- ver2: variable step-size, fix speed
       --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(1), 0, joystick:axis(0), FIX_SPEED))
 
