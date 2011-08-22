@@ -40,12 +40,12 @@ depends_interfaces = {
 
 --- Robot is lying on its back.
 function lying_on_back()
-   return naohw:accel_x() < -0.8
+   return naosensors:accel_x() < -0.8
 end
 
 --- Robot is lying on its front.
 function lying_on_front()
-   return naohw:accel_x() > 0.8
+   return naosensors:accel_x() > 0.8
 end
 
 --- Robot is lying.
