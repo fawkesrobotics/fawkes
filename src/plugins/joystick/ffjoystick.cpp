@@ -4,7 +4,7 @@
  *                   RemoteBlackBoard connection.
  *
  *  Created: Sun Nov 23 01:19:54 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -22,6 +22,7 @@
  */
 
 #include "acquisition_thread.h"
+#include "act_thread.h"
 #include "remote_bb_poster.h"
 
 #include <core/threading/thread.h>
@@ -109,8 +110,17 @@ class JoystickBlackBoardLogger
     __warning_printed = false;
 
     __joystick_if->read();
-    logger->log_debug("Joystick", "Number of Axes:    %i", __joystick_if->num_axes());
-    logger->log_debug("Joystick", "Number of Buttons: %i", __joystick_if->num_buttons());
+    logger->log_debug("Joystick", "Number of Axes:    %i",
+                      __joystick_if->num_axes());
+    logger->log_debug("Joystick", "Number of Buttons: %i",
+                      __joystick_if->num_buttons());
+
+    /** Just a quick hack for rumble testing
+      __joystick_if->msgq_enqueue(
+        new JoystickInterface::StartRumbleMessage(1000, 0,
+                                                  JoystickInterface::DIRECTION_UP,
+                                                  0xFFFF, 0x8000));
+    */
 
     bbil_add_data_interface(__joystick_if);
     __bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
@@ -151,7 +161,8 @@ class JoystickBlackBoardLogger
     } catch (Exception &e) {
       if ( ! __warning_printed ) {
 	e.print_trace();
-	__logger->log_warn("Joystick", "Lost connection to BlackBoard, will try to re-establish");
+	__logger->log_warn("Joystick", "Lost connection to BlackBoard, "
+                           "will try to re-establish");
 	__warning_printed = true;
       }
     }
@@ -175,6 +186,59 @@ class JoystickBlackBoardLogger
   Logger *__logger;
   JoystickInterface *__joystick_if;
   WaitCondition __waitcond;
+};
+
+
+/** Wake actuator thread on incomin messages.
+ * @author Tim Niemueller
+ */
+class JoystickBlackBoardActListener
+  : public BlackBoardInterfaceListener
+{
+ public:
+  /** Constructor.
+   * @param argp argument parser
+   * @param logger logger
+   */
+  JoystickBlackBoardActListener(JoystickAcquisitionThread *aqt,
+                                BlackBoard *blackboard,
+                                JoystickInterface *joystick_if,
+                                Logger *logger)
+    :  BlackBoardInterfaceListener("JoystickBlackBoardActMsgProcThread"),
+       __bb(blackboard), __joystick_if(joystick_if),
+       __logger(logger)
+  {
+    __msgproc = new JoystickActThread::MessageProcessor(aqt, __joystick_if);
+    __msgproc->process();
+    bbil_add_message_interface(__joystick_if);
+    __bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  }
+
+  /** Destructor. */
+  ~JoystickBlackBoardActListener()
+  {
+    __bb->unregister_listener(this);
+    bbil_remove_message_interface(__joystick_if);
+    delete __msgproc;
+  }
+
+  virtual bool bb_interface_message_received(Interface *interface,
+                                             Message *message) throw()
+  {
+    try {
+      __msgproc->process();
+      __msgproc->process_message(message);
+    } catch (Exception &e) {
+      e.print_trace();
+    }
+    return false;
+  }
+
+ private:
+  JoystickActThread::MessageProcessor *__msgproc;
+  BlackBoard *__bb;
+  JoystickInterface *__joystick_if;
+  Logger *__logger;
 };
 
 /** Config tool main.
@@ -211,6 +275,8 @@ main(int argc, char **argv)
 
       JoystickRemoteBlackBoardPoster jbp(host, port, &logger);
       JoystickAcquisitionThread aqt(joystick_device, &jbp, &logger);
+      JoystickBlackBoardActListener aml(&aqt, jbp.blackboard(),
+                                        jbp.joystick_if(), &logger);
 
       JoystickQuitHandler jqh(aqt);
       SignalManager::register_handler(SIGINT, &jqh);

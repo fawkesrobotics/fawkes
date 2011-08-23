@@ -44,6 +44,21 @@ class JoystickActThread
   public fawkes::BlackBoardAspect
 {
  public:
+  class MessageProcessor
+  {
+   public:
+    MessageProcessor(JoystickAcquisitionThread *aqt,
+                     fawkes::JoystickInterface *joystick_if);
+
+    void process();
+    void process_message(fawkes::Message *msg);
+
+   private:    
+    JoystickAcquisitionThread *__aqt;
+    fawkes::JoystickInterface *__joystick_if;
+    bool                       __joystick_connected;
+  };
+ public:
   JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst);
 
   virtual void init();
@@ -59,7 +74,7 @@ class JoystickActThread
   JoystickAcquisitionThread *__aqt;
   JoystickSensorThread      *__senst;
 
-  bool __joystick_connected;
+  MessageProcessor *__msgproc;
 };
 
 
