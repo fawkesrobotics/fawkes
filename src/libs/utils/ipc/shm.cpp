@@ -236,11 +236,13 @@ const short SharedMemory::MaxNumConcurrentReaders = 8;
  *                     no one matching the headers was found
  * @param destroy_on_delete if true the shared memory segment is destroyed
  *                          when this SharedMemory instance is deleted.
+ * @param registry_name name of the SharedMemoryRegistry to use
  */
 SharedMemory::SharedMemory(const char *magic_token,
 			   bool is_read_only,
 			   bool create,
-			   bool destroy_on_delete)
+			   bool destroy_on_delete,
+                           const char *registry_name)
 {
   _magic_token = new char[MagicTokenSize];
   memset(_magic_token, 0, MagicTokenSize);
@@ -264,7 +266,12 @@ SharedMemory::SharedMemory(const char *magic_token,
 
   __write_lock_aquired     = false;
 
-  __shm_registry = new SharedMemoryRegistry();
+  __registry_name     = NULL;
+
+  if (registry_name) {
+    __registry_name = strdup(registry_name);
+  }
+  __shm_registry = new SharedMemoryRegistry(false, registry_name);
 }
 
 
@@ -295,6 +302,11 @@ SharedMemory::SharedMemory(const SharedMemory &s)
   __shared_mem_upper_bound = NULL;
 
   __write_lock_aquired     = false;
+  if (s.__registry_name) {
+    __registry_name = strdup(s.__registry_name);
+  } else {
+    __registry_name = NULL;
+  }
 
   try {
     attach();
@@ -307,7 +319,7 @@ SharedMemory::SharedMemory(const SharedMemory &s)
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry();
+  __shm_registry = new SharedMemoryRegistry(false, __registry_name);
 }
 
 
@@ -330,6 +342,7 @@ SharedMemory::SharedMemory(const SharedMemory &s)
  *                     no one matching the headers was found
  * @param destroy_on_delete if true the shared memory segment is destroyed
  *                          when this SharedMemory instance is deleted.
+ * @param registry_name name of the SharedMemoryRegistry to use
  * @exception ShmNoHeaderException No header has been set
  * @exception ShmInconsistentSegmentSizeException The memory size is not the
  *                                                expected memory size
@@ -338,7 +351,8 @@ SharedMemory::SharedMemory(const SharedMemory &s)
  */
 SharedMemory::SharedMemory(const char *magic_token,
 			   SharedMemoryHeader *header,
-			   bool is_read_only, bool create, bool destroy_on_delete)
+			   bool is_read_only, bool create, bool destroy_on_delete,
+                           const char *registry_name)
 {
   _magic_token = new char[MagicTokenSize];
   memset(_magic_token, 0, MagicTokenSize);
@@ -362,6 +376,11 @@ SharedMemory::SharedMemory(const char *magic_token,
 
   __write_lock_aquired     = false;
 
+  __registry_name = NULL;
+  if (registry_name) {
+    __registry_name = strdup(__registry_name);
+  }
+
   try {
     attach();
   } catch (Exception &e) {
@@ -373,7 +392,7 @@ SharedMemory::SharedMemory(const char *magic_token,
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry();
+  __shm_registry = new SharedMemoryRegistry(false, __registry_name);
 }
 
 
@@ -392,6 +411,7 @@ SharedMemory::~SharedMemory()
   delete[] _magic_token;
   free();
   delete __shm_registry;
+  if (__registry_name)  ::free(__registry_name);
 }
 
 
@@ -1053,14 +1073,17 @@ SharedMemory::num_attached(int shm_id)
  * @param header      header to identify interesting segments with matching
  *                    magic_token
  * @param lister      Lister used to format output
+ * @param registry_name name of the SharedMemoryRegistry to use
  */
 void
 SharedMemory::list(const char *magic_token,
-		   SharedMemoryHeader *header, SharedMemoryLister *lister)
+		   SharedMemoryHeader *header, SharedMemoryLister *lister,
+                   const char *registry_name)
 {
-  printf("Looking for %s\n", magic_token);
+  printf("Looking for '%s' @ registry '%s'\n", magic_token,
+         registry_name ? registry_name : "default");
   lister->print_header();
-  SharedMemoryIterator i = find(magic_token, header);
+  SharedMemoryIterator i = find(magic_token, header, registry_name);
   SharedMemoryIterator endi = end();
 
   if ( i == endi ) {
@@ -1086,15 +1109,17 @@ SharedMemory::list(const char *magic_token,
  * @param header      header to identify interesting segments with matching
  *                    magic_token
  * @param lister      Lister used to format output, maybe NULL (default)
+ * @param registry_name name of the SharedMemoryRegistry to use
  */
 void
 SharedMemory::erase(const char *magic_token,
-		    SharedMemoryHeader *header, SharedMemoryLister *lister)
+		    SharedMemoryHeader *header, SharedMemoryLister *lister,
+                    const char *registry_name)
 {
 
   if (lister != NULL) lister->print_header();
 
-  SharedMemoryIterator i = find(magic_token, header);
+  SharedMemoryIterator i = find(magic_token, header, registry_name);
   SharedMemoryIterator endi = end();
 
   if ( (i == endi) && (lister != NULL)) {
@@ -1132,10 +1157,13 @@ SharedMemory::erase(const char *magic_token,
  * @param header      header to identify interesting segments with matching
  *                    magic_token
  * @param lister      Lister used to format output, maybe NULL (default)
+ * @param registry_name name of the SharedMemoryRegistry to use
  */
 void
 SharedMemory::erase_orphaned(const char *magic_token,
-			     SharedMemoryHeader *header, SharedMemoryLister *lister)
+			     SharedMemoryHeader *header,
+                             SharedMemoryLister *lister,
+                             const char *registry_name)
 {
 
   if (lister != NULL) lister->print_header();
@@ -1185,14 +1213,16 @@ SharedMemory::erase_orphaned(const char *magic_token,
  * @param magic_token Token to look for
  * @param header      header to identify interesting segments with matching
  *                    magic_token
+ * @param registry_name name of the SharedMemoryRegistry to use
  * @return true, if a matching shared memory segment was found, else
  * otherwise
  */
 bool
 SharedMemory::exists(const char *magic_token,
-		     SharedMemoryHeader *header)
+		     SharedMemoryHeader *header,
+                     const char *registry_name)
 {
-  return (find(magic_token, header) != end());
+  return (find(magic_token, header, registry_name) != end());
 }
 
 
@@ -1200,13 +1230,15 @@ SharedMemory::exists(const char *magic_token,
  * Find SharedMemory segments identified by the supplied magic_token and header.
  * @param magic_token magic token
  * @param header shared memory header
+ * @param registry_name name of the SharedMemoryRegistry to use
  * @return iterator pointing to the first found element (or end() if none found)
  */
 SharedMemory::SharedMemoryIterator
-SharedMemory::find(const char *magic_token, SharedMemoryHeader *header)
+SharedMemory::find(const char *magic_token, SharedMemoryHeader *header,
+                   const char *registry_name)
 {
   try {
-    SharedMemoryRegistry shm_registry;
+    SharedMemoryRegistry shm_registry(false, registry_name);
     return SharedMemoryIterator(shm_registry.find_segments(magic_token), header);
   } catch (Exception &e) {
     return end();

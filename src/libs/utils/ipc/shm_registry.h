@@ -46,7 +46,7 @@ class SharedMemoryRegistry
 
  public:
   SharedMemoryRegistry(bool master = false,
-		       const char *name = "/fawkes-shmem-registry");
+		       const char *name = 0);
   ~SharedMemoryRegistry();
 
   std::list<SharedMemoryRegistry::SharedMemID> get_snapshot() const;

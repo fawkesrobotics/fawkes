@@ -57,7 +57,8 @@ class SharedMemory
   SharedMemory(const char *magic_token,
 	       SharedMemoryHeader *header,
 	       bool is_read_only, bool create,
-	       bool destroy_on_delete);
+	       bool destroy_on_delete,
+               const char *registry_name = 0);
 
   SharedMemory(const SharedMemory &s);
 
@@ -89,17 +90,22 @@ class SharedMemory
   void *              addr(void *ptr) const;
 
   static void         list(const char *magic_token,
-			   SharedMemoryHeader *header, SharedMemoryLister *lister);
+			   SharedMemoryHeader *header, SharedMemoryLister *lister,
+                           const char *registry_name = 0);
 
   static void         erase(const char *magic_token,
-			    SharedMemoryHeader *header, SharedMemoryLister *lister = 0);
+			    SharedMemoryHeader *header,
+                            SharedMemoryLister *lister = 0,
+                            const char *registry_name = 0);
 
   static void         erase_orphaned(const char *magic_token,
 				     SharedMemoryHeader *header,
-				     SharedMemoryLister *lister = 0);
+				     SharedMemoryLister *lister = 0,
+                                     const char *registry_name = 0);
 
   static bool         exists(const char *magic_token,
-			     SharedMemoryHeader *header);
+			     SharedMemoryHeader *header,
+                             const char *registry_name = 0);
 
   static bool         is_destroyed(int shm_id);
   static bool         is_swapable(int shm_id);
@@ -147,7 +153,9 @@ class SharedMemory
     size_t                  __segmnattch;
   };
 
-  static SharedMemoryIterator find(const char *magic_token, SharedMemoryHeader *header);
+  static SharedMemoryIterator find(const char *magic_token,
+                                   SharedMemoryHeader *header,
+                                   const char *registry_name = 0);
   static SharedMemoryIterator end();
 
  protected:
@@ -161,7 +169,8 @@ class SharedMemory
   } SharedMemory_header_t;
 
   SharedMemory(const char *magic_token,
-	       bool is_read_only, bool create, bool destroy_on_delete);
+	       bool is_read_only, bool create, bool destroy_on_delete,
+               const char *registry_name = 0);
 
   void attach();
   void free();
@@ -182,6 +191,7 @@ class SharedMemory
 
  private:
   SharedMemoryRegistry *__shm_registry;
+  char *                __registry_name;
 
   void          *__shared_mem;
   int            __shared_mem_id;
