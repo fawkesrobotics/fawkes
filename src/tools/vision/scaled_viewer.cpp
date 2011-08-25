@@ -54,11 +54,14 @@ TimeTracker tt;
 int ttc_capture;
 int ttc_convert;
 int ttc_draw;
+int ttc_interloop;
 unsigned int loop_count = 0;
 
 static bool
 timeout_handler()
 {
+  tt.ping_end(ttc_interloop);
+
   tt.ping_start(ttc_capture);
   cam->capture();
   tt.ping_end(ttc_capture);
@@ -84,6 +87,7 @@ timeout_handler()
                                                          Gdk::INTERP_NEAREST);
 
   img_image->set(scaled);
+  img_image->queue_draw();
 
   tt.ping_end(ttc_draw);
 
@@ -96,6 +100,7 @@ timeout_handler()
     tt.print_to_stdout();
   }
 
+  tt.ping_start(ttc_interloop);
   return true;
 }
 
@@ -177,9 +182,11 @@ main(int argc, char **argv)
     exit(-2);
   }
 
-  ttc_capture  = tt.add_class("Capture");
-  ttc_convert  = tt.add_class("Convert");
-  ttc_draw     = tt.add_class("Draw");
+  ttc_capture   = tt.add_class("Capture");
+  ttc_convert   = tt.add_class("Convert");
+  ttc_draw      = tt.add_class("Draw");
+  ttc_interloop = tt.add_class("InterLoop");
+  tt.ping_start(ttc_interloop);
 
   Glib::RefPtr<Gtk::Builder> builder;
   builder =
