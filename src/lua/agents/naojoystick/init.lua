@@ -286,9 +286,9 @@ function PLAY:loop()
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, speed))
 
    elseif self.moved_head then
-         printf("stop head Movement, send StopMessage")
-         naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
-      --end
+      printf("stop head Movement")
+      naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(naojoints:head_yaw(), naojoints:head_pitch(), 0.2))
+
    end
 
 
