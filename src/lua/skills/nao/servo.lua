@@ -87,9 +87,9 @@ function SERVO:init()
 
    if self.fsm.vars.enable ~= nil then
       if self.fsm.vars.enable then
-         naostiffness:msgq_enqueue_copy(naostiffness.SetBodyStiffnessMessage:new(1.0, 0))
+         naostiffness:msgq_enqueue_copy(naostiffness.SetBodyStiffnessMessage:new(1.0, 0.5))
       else
-	 naostiffness:msgq_enqueue_copy(naostiffness.SetBodyStiffnessMessage:new(0, 0))
+	 naostiffness:msgq_enqueue_copy(naostiffness.SetBodyStiffnessMessage:new(0, 0.5))
       end
    end
 

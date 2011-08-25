@@ -51,7 +51,7 @@ INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/pose','string','Obj
 INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/wm_ball','string','ObjectPositionInterface::WM Ball',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/gamestate','string','GameStateInterface::WM GameState',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/speechsynth','string','SpeechSynthInterface::Nao SpeechSynth',NULL);
-INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/naomotion','string','HumanoidMotionInterface::Nao Motion',NULL);
+INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/naomotion','string','HumanoidMotionInterface::NaoQi Motion',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/naosensors','string','NaoSensorInterface::Nao Sensors',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/naostiffness','string','NaoJointStiffnessInterface::Nao Joint Stiffness',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/nao/reading/naojoints','string','NaoJointPositionInterface::Nao Joint Positions',NULL);

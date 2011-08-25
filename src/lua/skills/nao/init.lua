@@ -48,3 +48,6 @@ skillenv.use_skill("skills.nao.naostrafe")
 
 skillenv.use_skill("skills.nao.beckon")
 skillenv.use_skill("skills.nao.standup")
+
+-- Nao soccer skills
+skillenv.use_skill("skills.nao.soccer.kick")

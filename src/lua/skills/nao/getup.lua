@@ -46,7 +46,7 @@ fsm:add_state(WAIT)
 function GETUP:init()
    self.fsm.vars.time_sec = tonumber(self.fsm.vars.time_sec) or
 			    tonumber(self.fsm.vars[1]) or 3.0
-   naomotion:msgq_enqueue_copy(naomotion.GetUpMessage:new(self.fsm.vars.time_sec))
+   naomotion:msgq_enqueue_copy(naomotion.GetUpMessage:new())
 end
 
 function GETUP:jumpcond_enqueued() return true, self.fsm.vars.time_sec end

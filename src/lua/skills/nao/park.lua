@@ -49,7 +49,7 @@ PARK.nowriter_interfaces = {naomotion}
 function PARK:init()
    self.fsm.vars.time_sec = tonumber(self.fsm.vars.time_sec) or
 			    tonumber(self.fsm.vars[1]) or 3.0
-   naomotion:msgq_enqueue_copy(naomotion.ParkMessage:new(self.fsm.vars.time_sec))
+   naomotion:msgq_enqueue_copy(naomotion.ParkMessage:new())
 end
 
 function PARK:jumpcond_enqueued() return true, self.fsm.vars.time_sec end
