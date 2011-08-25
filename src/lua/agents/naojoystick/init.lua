@@ -47,8 +47,8 @@ local MAX_HEAD_YAW   = 0.4
 local MAX_HEAD_PITCH = 0.8
 local MAX_SONAR_DIST_WEAK = 0.3
 local MAX_SONAR_DIST_STRONG = 0.1
-local CAM_VERTICAL_INVERTER = -1 -- get from config; set to -1 if want to invert
-local RUMBLE = {BUMPER = {LENGTH = 1000,
+local CAM_VERTICAL_INVERTER = 1 -- get from config; set to -1 if want to invert
+local RUMBLE = {BUMPER = {LENGTH = 100,
                           DELAY = 0,
                           STRONG = 0,
                           WEAK = 0XFFFF
@@ -206,6 +206,7 @@ function PLAY:loop()
 
 
    --process sonars for rumbling
+   --[[
    if self.ultrasonic_distance < MAX_SONAR_DIST_STRONG then
       -- multiplyer: max 1.5^2 (15cm). 1.25*0xCCCC = 0xFFFF = maximum rumble
       local multiplyer = math.pow(math.min(1.5, 10*(MAX_SONAR_DIST_STRONG - self.ultrasonic_distance)), 2)
@@ -225,6 +226,7 @@ function PLAY:loop()
    elseif joystick:ff_effects() ~= 0 then
       joystick:msgq_enqueue_copy(joystick.StopRumbleMessage:new())
    end
+   --]]
 
 
 
@@ -236,19 +238,14 @@ function PLAY:loop()
       self.moved_body = true
       printf("send MoveVelocity message. Move free. x:"..joystick:axis(AXIS.WALK.X).."  y:"..joystick:axis(AXIS.WALK.Y))
       self.motion_planned = true
-      -- ver1: fix step-size, variable speed
-      --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(AXIS.WALK.Y), joystick:axis(AXIS.WALK.X) ))
-      -- ver2: variable step-size, fix speed
       naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(1), 0, joystick:axis(0), get_walk_speed()))
 
    elseif move_omni() then
       self.moved_body = true
       printf("send MoveVelocity message: move omni x:"..joystick:axis(AXIS.OMNI.X).."  y:"..joystick:axis(AXIS.OMNI.Y))
       self.motion_planned = true
-      -- ver1: fix step-size, variable speed; TODO: normalize x and y, using FIX_STEP as length of direction-vector
-      --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(5), joystick:axis(4), 0, 1 ))
-      -- ver2: variable step-size, fix speed
       naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(AXIS.OMNI.X), joystick:axis(AXIS.OMNI.Y), 0, get_walk_speed() ))
+
    elseif self.moved_body then
       self.moved_body = false
       printf("stop nao walking, send StopMessage")
@@ -289,20 +286,7 @@ function PLAY:loop()
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, speed))
 
    elseif self.moved_head then
-      local yaw, pitch = naojoints:head_yaw(), naojoints:head_pitch()
-      --if yaw ~= self.last_head.yaw or pitch ~= self.last_head.pitch then
-         --only stop, if previous command was at least considered once. NEEDS TESTING
-         self.moved_head = false
-         local yaw, pitch = naojoints:head_yaw(), naojoints:head_pitch()
-         local yaw_change, pitch_change = self.last_head.move_yaw - self.last_head.yaw, self.last_head.move_pitch - self.last_head.pitch
-         local offset_yaw = math.min(0.05, math.abs(yaw_change))
-         local offset_pitch = math.min(0.05, math.abs(pitch_change))
-
-         if yaw_change < 0 then yaw=math.max(-MAX_HEAD_YAW, yaw-offset_yaw) else yaw=math.min(MAX_HEAD_YAW, yaw+offset_yaw) end
-         if pitch_change < 0 then pitch=math.max(-MAX_HEAD_PITCH, pitch-offset_pitch) else pitch=math.min(MAX_HEAD_PITCH, pitch+offset_pitch) end
-
-         printf("stop head Movement, send MoveHeadMessage(current_yaw, current_pitch)")
-         --naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, 0.25))
+         printf("stop head Movement, send StopMessage")
          naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
       --end
    end
@@ -323,13 +307,6 @@ function BUTTON:init()
    naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
 end
 
-function KICK_LEFT:init()
-   printf("send KickMessage(LEFT)")
-end
-
-function KICK_RIGHT:init()
-   printf("send KickMessage(RIGHT)")
-end
 
 function RUMBLE_TEST:init()
    self.rumble_dir = 0
