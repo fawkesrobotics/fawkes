@@ -24,12 +24,13 @@ module(..., agentenv.module_init)
 -- Crucial agent information
 name               = "naojoystick"
 fsm                = AgentHSM:new{name=name, debug=true, start="INIT"}
-depends_skills     = {}
+depends_skills     = {"kick", "standup"}
 depends_interfaces = {
-   { v="joystick", type="JoystickInterface", id="Joystick" },
-   { v="naomotion", type="HumanoidMotionInterface", id="Nao Motion"},
-   { v="naojoints", type="NaoJointPositionInterface", id="Nao Joint Positions"},
-   { v="naosensors", type="NaoSensorInterface", id="Nao Sensors"}
+   { v="joystick", type="JoystickInterface"},
+   { v="naomotion", type="HumanoidMotionInterface"},
+   { v="naojoints", type="NaoJointPositionInterface"},
+   { v="naosensors", type="NaoSensorInterface"},
+   { v="naostiffness", type = "NaoJointStiffnessInterface"}
 }
 
 documentation      = [==[Agent to control Nao via joystick.]==]
@@ -42,10 +43,11 @@ local preds = require("predicates.nao")
 
 local FIX_SPEED = 0.6
 local FIX_STEP = 0.6
-local MAX_HEAD_YAW   = 1.5
-local MAX_HEAD_PITCH = 1.5
+local MAX_HEAD_YAW   = 0.4
+local MAX_HEAD_PITCH = 0.8
 local MAX_SONAR_DIST_WEAK = 0.3
 local MAX_SONAR_DIST_STRONG = 0.1
+local CAM_VERTICAL_INVERTER = -1 -- get from config; set to -1 if want to invert
 local RUMBLE = {BUMPER = {LENGTH = 1000,
                           DELAY = 0,
                           STRONG = 0,
@@ -59,9 +61,10 @@ local RUMBLE = {BUMPER = {LENGTH = 1000,
                 }
 }
 
-local AXIS = {OMNI = {X=5, Y=4},
+local AXIS = {OMNI = {X=6, Y=5},
               WALK = {X=1, Y=0},
-              HEAD = {PITCH=3, YAW=2} }
+              HEAD = {PITCH=4, YAW=3},
+              SPEED = 2 }
 
 local function button_kick_left()
    return joystick:pressed_buttons() == joystick.BUTTON_7
@@ -71,10 +74,23 @@ local function button_kick_right()
    return joystick:pressed_buttons() == joystick.BUTTON_8
 end
 
+local function button_standup()
+   return joystick:pressed_buttons() == joystick.BUTTON_4
+end
+
+local function button_stop()
+   return joystick:pressed_buttons() == joystick.BUTTON_1
+end
+
+local function button_center_cam()
+   return joystick:pressed_buttons() == joystick.BUTTON_6
+end
+
 local function button_valid()
    if joystick:pressed_buttons() > 0  then
       return button_kick_left() or
-             button_kick_right()
+             button_kick_right() or
+             button_standup()
    end
    return false
 end
@@ -98,11 +114,19 @@ local function move()
    return move_omni() or move_free() or move_head()
 end
 
+local function get_walk_speed()
+   if not AXIS.SPEED then
+      return FIX_SPEED
+   else
+      return (joystick:axis(AXIS.SPEED) + 1) / 2 --axis value from -1.0 to 1.0
+   end
+end
+
 -- Setup FSM
 fsm:add_transitions{
    closure={preds=preds, joystick=joystick, naomotion=naomotion},
 
-   {"INIT", "READY", true},
+   {"INIT", "READY", "joystick:has_writer() and naomotion:has_writer()", desc="initialized"},
 
    {"READY", "PLAY", cond="preds.short_button"},
    --{"READY", "PLAY", true}, --use for testing without Nao
@@ -111,22 +135,43 @@ fsm:add_transitions{
 
    {"TO_PLAY", "PLAY", wait_sec=0.5},
    {"PLAY", "BUTTON", cond=button_valid, desc="action button pressed"},
+   {"PLAY", "LYING", cond="preds.lying", desc="nao fell"},
+   {"PLAY", "READY", cond="preds.short_button"},
 
    {"BUTTON", "KICK_LEFT", cond=button_kick_left, desc="left_kick"},
    {"BUTTON", "KICK_RIGHT", cond=button_kick_right, desc="right_kick"},
+   {"BUTTON", "STANDUP", cond=button_standup, desc="standup"},
    {"BUTTON", "PLAY", cond=true, desc="ignore other buttons"},
 
-   {"KICK_LEFT", "TO_PLAY", cond="not naomotion:is_moving()", desc="kick finished"},
-   {"KICK_RIGHT", "TO_PLAY", cond="not naomotion:is_moving()", desc="kick finished"}
+   {"LYING", "STANDUP", cond=button_standup, desc="standup"},
+
+   {"KICK_LEFT", "PLAY", fail_to="PLAY", skills={{"kick", {leg="left"}}} },
+   {"KICK_RIGHT", "PLAY", fail_to="PLAY", skills={{"kick", {leg="right"}}} },
+   --{"KICK_LEFT", "TO_PLAY", cond="not naomotion:is_moving()", desc="kick finished"},
+   --{"KICK_RIGHT", "TO_PLAY", cond="not naomotion:is_moving()", desc="kick finished"}
+
+   {"STANDUP", "PLAY", fail_to="STANDUP", skills={{"standup"}} }
 }
 
 function INIT:init()
+end
+function INIT:exit()
+   naostiffness:msgq_enqueue_copy(naostiffness.SetBodyStiffnessMessage:new(1, 0.5))
+end
+
+function READY:init()
+   naomotion:msgq_enqueue_copy(naomotion.ParkMessage:new())
+end
+function READY:exit()
+   naomotion:msgq_enqueue_copy(naomotion.GetUpMessage:new())
 end
 
 function PLAY:init()
    self.motion_planned = false -- true, if a motion is planned
    self.moved_head = false     -- true, if head was set to move
    self.moved_body = false     -- true, if nao was set to walk
+
+   self.last_head = {yaw=0, pitch=0, move_yaw=0, move_pitch=0}
    self.ultrasonic_distance = 1.0
    self.bumper_weak = 0
    self.bumper_strong = 0
@@ -134,7 +179,7 @@ end
 
 function PLAY:loop()
    self.motion_planned = false
-   self.ultrasonic_distance = naosensors:ultrasonic_distance()
+   self.ultrasonic_distance = math.max(naosensors:ultrasonic_distance_left(0), naosensors:ultrasonic_distance_right(0))
    self.rumble_weak = 0
    self.rumble_strong = 0
 
@@ -142,6 +187,7 @@ function PLAY:loop()
 
    --process bumpers for rumbling
    if preds.left_bumper_once then
+      printf("send StartRumbleMessege, left kick")
       joystick:msgq_enqueue_copy(joystick.StartRumbleMessage:new(RUMBLE.BUMPER.LENGTH,
                                                                  RUMBLE.BUMPER.DELAY,
                                                                  joystick.DIRECTION_LEFT,
@@ -149,6 +195,7 @@ function PLAY:loop()
                                                                  RUMBLE.BUMPER.WEAK))
    end
    if preds.right_bumper_once then
+      printf("send StartRumbleMessege, right kick")
       joystick:msgq_enqueue_copy(joystick.StartRumbleMessage:new(RUMBLE.BUMPER.LENGTH,
                                                                  RUMBLE.BUMPER.DELAY,
                                                                  joystick.DIRECTION_RIGHT,
@@ -182,14 +229,17 @@ function PLAY:loop()
 
 
    --process movement
-   if move_free() then
+   if button_stop() then
+      self.moved_body = false
+      naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
+   elseif move_free() then
       self.moved_body = true
       printf("send MoveVelocity message. Move free. x:"..joystick:axis(AXIS.WALK.X).."  y:"..joystick:axis(AXIS.WALK.Y))
       self.motion_planned = true
       -- ver1: fix step-size, variable speed
-      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(AXIS.WALK.Y), joystick:axis(AXIS.WALK.X) ))
+      --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( FIX_STEP, 0, joystick:axis(AXIS.WALK.Y), joystick:axis(AXIS.WALK.X) ))
       -- ver2: variable step-size, fix speed
-      --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(1), 0, joystick:axis(0), FIX_SPEED))
+      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(1), 0, joystick:axis(0), get_walk_speed()))
 
    elseif move_omni() then
       self.moved_body = true
@@ -198,7 +248,7 @@ function PLAY:loop()
       -- ver1: fix step-size, variable speed; TODO: normalize x and y, using FIX_STEP as length of direction-vector
       --naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(5), joystick:axis(4), 0, 1 ))
       -- ver2: variable step-size, fix speed
-      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(AXIS.OMNI.X), joystick:axis(AXIS.OMNI.Y), 0, FIX_SPEED ))
+      naomotion:msgq_enqueue_copy(naomotion.WalkVelocityMessage:new( joystick:axis(AXIS.OMNI.X), joystick:axis(AXIS.OMNI.Y), 0, get_walk_speed() ))
    elseif self.moved_body then
       self.moved_body = false
       printf("stop nao walking, send StopMessage")
@@ -208,15 +258,19 @@ function PLAY:loop()
 
 
    --process head movement
-   if move_head() then
+   if button_center_cam() then
+      naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(0.0, 0.0, 0.4))
+   elseif move_head() then
       self.motion_planned = true
       self.moved_head = true
+      self.last_head.yaw = naojoints:head_yaw()
+      self.last_head.pitch = naojoints:head_pitch()
 
       local yaw, pitch = joystick:axis(AXIS.HEAD.YAW), joystick:axis(AXIS.HEAD.PITCH)
-      local speed = math.sqrt(yaw*yaw + pitch*pitch)
+      local speed = math.sqrt(yaw*yaw + pitch*pitch) / 4
 
       yaw = yaw + naojoints:head_yaw()
-      pitch = pitch + naojoints:head_pitch()
+      pitch = CAM_VERTICAL_INVERTER * pitch + naojoints:head_pitch()
 
       if yaw < 0 then
          yaw = math.max(-MAX_HEAD_YAW, yaw)
@@ -229,12 +283,28 @@ function PLAY:loop()
          pitch = math.min(MAX_HEAD_PITCH, pitch)
       end
 
+      self.last_head.move_yaw = yaw
+      self.last_head.move_pitch = pitch
       printf("send MoveHead message. yaw:"..yaw.."  pitch:"..pitch.."  speed:"..speed)
       naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, speed))
+
    elseif self.moved_head then
-      self.moved_head = false
-      printf("stop head Movement, send MoveHeadMessage(current_yaw, current_pitch)")
-      naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(naojoints:head_yaw(), naojoints:head_pitch(), 0.4))
+      local yaw, pitch = naojoints:head_yaw(), naojoints:head_pitch()
+      --if yaw ~= self.last_head.yaw or pitch ~= self.last_head.pitch then
+         --only stop, if previous command was at least considered once. NEEDS TESTING
+         self.moved_head = false
+         local yaw, pitch = naojoints:head_yaw(), naojoints:head_pitch()
+         local yaw_change, pitch_change = self.last_head.move_yaw - self.last_head.yaw, self.last_head.move_pitch - self.last_head.pitch
+         local offset_yaw = math.min(0.05, math.abs(yaw_change))
+         local offset_pitch = math.min(0.05, math.abs(pitch_change))
+
+         if yaw_change < 0 then yaw=math.max(-MAX_HEAD_YAW, yaw-offset_yaw) else yaw=math.min(MAX_HEAD_YAW, yaw+offset_yaw) end
+         if pitch_change < 0 then pitch=math.max(-MAX_HEAD_PITCH, pitch-offset_pitch) else pitch=math.min(MAX_HEAD_PITCH, pitch+offset_pitch) end
+
+         printf("stop head Movement, send MoveHeadMessage(current_yaw, current_pitch)")
+         --naomotion:msgq_enqueue_copy(naomotion.MoveHeadMessage:new(yaw, pitch, 0.25))
+         naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
+      --end
    end
 
 
@@ -247,14 +317,18 @@ function PLAY:loop()
    end
 end
 
+
+function BUTTON:init()
+   -- valid_button checked before, so we can safely stop
+   naomotion:msgq_enqueue_copy(naomotion.StopMessage:new())
+end
+
 function KICK_LEFT:init()
    printf("send KickMessage(LEFT)")
-   naomotion:msgq_enqueue_copy(naomotion.KickMessage:new(naomotion.LEG_LEFT, 1.0))
 end
 
 function KICK_RIGHT:init()
    printf("send KickMessage(RIGHT)")
-   naomotion:msgq_enqueue_copy(naomotion.KickMessage:new(naomotion.LEG_RIGHT, 1.0))
 end
 
 function RUMBLE_TEST:init()
