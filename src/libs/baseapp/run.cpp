@@ -73,6 +73,7 @@ FawkesNetworkManager *network_manager = NULL;
 ConfigNetworkHandler *nethandler_config = NULL;
 PluginNetworkHandler *nethandler_plugin = NULL;
 Clock                *clock = NULL;
+SharedMemoryRegistry *shm_registry;
 InitOptions          *init_options = NULL;
 
 int
@@ -136,7 +137,7 @@ init(InitOptions options)
 
   // *** setup base thread and shm registry
   Thread::init_main();
-  SharedMemoryRegistry shm_registry(true);
+  shm_registry = new SharedMemoryRegistry(true);
 
   // *** setup logging
   if (options.has_loggers()) {
@@ -329,6 +330,7 @@ cleanup()
   delete config;
   delete thread_manager;
   delete aspect_manager;
+  delete shm_registry;
 
   main_thread = NULL;
   argument_parser = NULL;
@@ -339,6 +341,7 @@ cleanup()
   config = NULL;
   network_manager = NULL;
   clock = NULL;
+  shm_registry = NULL;
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
