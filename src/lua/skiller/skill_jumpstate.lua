@@ -22,6 +22,9 @@
 require("fawkes.modinit")
 
 --- SkillJumpState.
+--
+-- WARNING: documentation currently out-of-sync, rewrite in progress.
+--
 -- Skill jump states to build up Hybrid State Machines (HSM)
 -- specifically for the use in skills. SkillJumpState (SJS) provide
 -- specific tools to deal with sub-skills. SJS may operate either a
@@ -75,43 +78,64 @@ function SkillJumpState:new(o)
    assert(o.fsm, "SkillJumpState " .. o.name .. " requires a FSM")
    assert(not getmetatable(o), "Meta table already set for SkillJumpState " .. o.name)
 
-   if o.skill or o.skills then
-      assert(o.final_state, "SkillJumpState " .. o.name .. " requires success target state for sub-skill execution")
-      o.failure_state = o.failure_state or "FAILED"
-   end
+   --if o.skill or o.skills then
+   assert(o.final_to, "SkillJumpState " .. o.name .. " requires final_to state")
+   o.fail_to = o.fail_to or "FAILED"
+   --end
 
-   assert(not (o.skill or o.skills or o.subskills) or
-       o.skill and not o.skills and not o.subskills or
-       o.skills and not o.skill and not o.subskills or
-       o.subskills and not o.skill and not o.skills,
-    "SkillJumpState " .. o.name .. " may only operate in a specific mode")
+   --assert(not (o.skill or o.skills or o.subskills) or
+   --    o.skill and not o.skills and not o.subskills or
+   --    o.skills and not o.skill and not o.subskills or
+   --    o.subskills and not o.skill and not o.skills,
+   -- "SkillJumpState " .. o.name .. " may only operate in a specific mode")
+   assert(o.skills, "No skills given")
 
    setmetatable(o, self)
    setmetatable(self, JumpState)
    self.__index = self
 
    o.skill_status  = skillstati.S_RUNNING
-   o.subskills     = o.subskills or {}
+   --o.subskills     = o.subskills or {}
    o.transitions   = o.transitions or {}
    o.dotattr       = o.dotattr or {}
-   o.base_args     = o.args or {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
-   assert(type(o.subskills) == "table", "Subskills for " .. o.name .. " not a table")
+   --assert(type(o.subskills) == "table", "Subskills for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
 
-   if o.final_state then
-      o.final_transition = o:add_new_transition(o.final_state, o.jumpcond_skill_final)
+   if o.final_to and o.fail_to and o.final_to == o.fail_to then
+      o.final_transition =
+         o:add_new_transition(o.final_to, o.jumpcond_skill_done)
       o.hide_final_transition = o.hide_final_transition or false
-      assert(type(o.hide_final_transition) == "boolean", "Hide final transition for " .. o.name .. " not a boolean")
+      assert(type(o.hide_final_transition) == "boolean",
+             "Hide final transition for " .. o.name .. " not a boolean")
       o.final_transition.hide = o.hide_final_transition
-      if o.fintrans_dotattr then o.final_transition.dotattr = o.fintrans_dotattr end
-   end
-   if o.failure_state then
-      o.failure_transition = o:add_new_transition(o.failure_state, o.jumpcond_skill_failed)
-      o.hide_failure_transition = o.hide_failure_transition or false
-      assert(type(o.hide_failure_transition) == "boolean", "Hide failure transition for " .. o.name .. " not a boolean")
-      o.failure_transition.hide = o.hide_failure_transition
-      if o.failtrans_dotattr then o.failure_transition.dotattr = o.failtrans_dotattr end
+      o.final_fail_trans = true
+      if o.fintrans_dotattr then
+         o.final_transition.dotattr = o.fintrans_dotattr
+      end
+   else
+      if o.final_to then
+         o.final_transition =
+            o:add_new_transition(o.final_to, o.jumpcond_skill_final)
+         o.hide_final_transition = o.hide_final_transition or false
+         assert(type(o.hide_final_transition) == "boolean",
+                "Hide final transition for " .. o.name .. " not a boolean")
+         o.final_transition.hide = o.hide_final_transition
+         if o.fintrans_dotattr then
+            o.final_transition.dotattr = o.fintrans_dotattr
+         end
+      end
+      if o.fail_to then
+         o.failure_transition =
+            o:add_new_transition(o.fail_to, o.jumpcond_skill_failed)
+         o.hide_failure_transition = o.hide_failure_transition or false
+         assert(type(o.hide_failure_transition) == "boolean",
+                "Hide failure transition for " .. o.name .. " not a boolean")
+         o.failure_transition.hide = o.hide_failure_transition
+         if o.failtrans_dotattr then
+            o.failure_transition.dotattr = o.failtrans_dotattr
+         end
+      end
    end
 
    o:set_transition_labels()
@@ -133,16 +157,21 @@ function SkillJumpState:set_transition_labels()
       end
       self.skill_names = table.concat(snames, ", ")
       if self.failure_transition then
-	 self.failure_transition.description = table.concat(snames, " or ") .. " failed"
+	 self.failure_transition.description =
+            table.concat(snames, " or ") .. " failed"
       end
       if self.final_transition then
-	 self.final_transition.description   = table.concat(snames, " and ") .. " succeeded"
+	 self.final_transition.description =
+            table.concat(snames, " and ")
+         if self.final_fail_trans then
+            self.final_transition.description =
+               self.final_transition.description .. " done"
+         else
+            self.final_transition.description =
+               self.final_transition.description .. " succeeded"
+         end
       end
       self.dotattr.comment = table.concat(snames, ", ")
-   elseif self.skill then
-      self.skill_names = self.skill.name
-      self.final_transition.description = self.skill.name .. " succeeded";
-      self.failure_transition.description = self.skill.name .. " failed";
    else
       self.skill_names = ""
       if self.failure_transition then
@@ -155,14 +184,9 @@ function SkillJumpState:set_transition_labels()
    self.fsm:mark_changed()
 end
 
---- Add a subskill to this state.
--- Skills which are added as subskills are automatically reset during init and
--- exit.
--- @param subskill subskill to add
-function SkillJumpState:add_subskill(subskill)
-   table.insert(self.subskills, subskill)
+function SkillJumpState:jumpcond_skill_done()
+   return self:jumpcond_skill_final() or self:jumpcond_skill_failed()
 end
-
 
 function SkillJumpState:jumpcond_skill_final()
    return self.skill_status == skillstati.S_FINAL
@@ -171,15 +195,10 @@ end
 function SkillJumpState:jumpcond_skill_failed()
    if self.skill_status == skillstati.S_FAILED then
       local error = ""
-      if self.skill then
-	 error = self.skill.error
-	 if self.skill.fsm then
-	    error = self.skill.fsm.error
-	 end
-      end
 
       if error and error ~= "" then
-	 self.fsm:set_error(self.name .. "()/" .. self.skill_names .." failed: " .. error)
+	 self.fsm:set_error(self.name .. "()/" .. self.skill_names ..
+                            " failed: " .. error)
       end
       return true
    else
@@ -189,11 +208,9 @@ end
 
 
 --- Execute init routines.
--- This resets any subskills that have been added for this state and then executes
+-- This resets any skills that have been added for this state and then executes
 -- the state's init() routine. Do not overwrite do_init(), rather implement init().
 function SkillJumpState:do_init()
-   self.args = {}
-
    -- Try preconditions
    local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
@@ -201,11 +218,29 @@ function SkillJumpState:do_init()
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
 
-   for k, v in pairs(self.fsm.vars) do self.args[k] = v end
-   if self.skills then
-      for i, s in ipairs(self.skills) do
-	 s.args = self.args
+
+   for _, s in ipairs(self.skills) do
+      local set_already = false
+      local args = {}
+
+      for k, v in pairs(s) do
+         if k ~= 1 then
+            set_already = true
+            if type(k) == "number" and type(v) == "table" then
+               for k2, v2 in pairs(v) do
+                  args[k2] = self.fsm.vars[v2]
+               end
+            else
+               args[k] = v
+            end
+         end
       end
+
+      if not set_already then
+         for k, v in pairs(self.fsm.vars) do args[k] = v end
+      end
+
+      s.__args = args
    end
    self:init()
 
@@ -215,8 +250,8 @@ function SkillJumpState:do_init()
 	 table.insert(t, self:skillstring(skill))
       end
       print_debug("%s: executing %s", self.name, table.concat(t, "; "))
-   elseif self.skill then
-      print_debug("%s: executing %s", self.name, self:skillstring(self.skill))
+   --elseif self.skill then
+   --   print_debug("%s: executing %s", self.name, self:skillstring(self.skill))
    end
 
    return self:try_transitions()
@@ -227,26 +262,18 @@ end
 -- This resets any subskills that have been added for this state and then executes
 -- the state's exit() routine. Do not overwrite do_exit(), rather implement exit().
 function SkillJumpState:do_exit()
-   for _, s in ipairs(self.subskills) do
-      s.reset()
-   end
-   if self.skills then
-      for _, s in ipairs(self.skills) do
-	 s.args = nil
-	 s.status = skillstati.S_RUNNING
-	 s[1].reset()
-      end
-   end
-   if self.skill then
-      self.skill.reset()
+   for _, s in ipairs(self.skills) do
+      s.__args = nil
+      s.status = skillstati.S_RUNNING
+      s[1].reset()
    end
    self:exit()
 end
 
 function SkillJumpState:skillstring(skill)
-   local s = skill.name .. "{"
+   local s = skill[1].name .. "{"
    local first = true
-   for k,v in pairs(self.args or self.base_args) do
+   for k,v in pairs(skill.__args ) do
       s = s .. string.format("%s%s = %s", first and "" or ", ", k, tostring(v))
       first = false
    end
@@ -261,28 +288,21 @@ function SkillJumpState:do_loop()
    -- status might have been changed in custom loop(), execute the following only
    -- for single sub-skill execution and status S_RUNNING
    if self.skill_status == skillstati.S_RUNNING then
-      if self.skill then
-	 if self.fsm.debug then
-	    print_debug("%s: executing %s", self.name, self:skillstring(self.skill))
-	 end
-	 self.skill_status = self.skill(self.args or self.base_args)
-      elseif self.skills then
-	 local all_final = true
-	 for _, s in ipairs(self.skills) do
-	    if s.status == skillstati.S_RUNNING then
-	       s.status = s[1](s.args or s[2])
-	       if s.status == skillstati.S_FAILED then
-		  self.skill_status = s.status
-		  all_final = false
-		  break;
-	       elseif s.status == skillstati.S_RUNNING then
-		  all_final = false
-	       end
-	    end
-	 end
-	 if all_final then
-	    self.skill_status = skillstati.S_FINAL
-	 end
+      local all_final = true
+      for _, s in ipairs(self.skills) do
+         if s.status == skillstati.S_RUNNING then
+            s.status = s[1](s.__args)
+            if s.status == skillstati.S_FAILED then
+               self.skill_status = s.status
+               all_final = false
+               break;
+            elseif s.status == skillstati.S_RUNNING then
+               all_final = false
+            end
+         end
+      end
+      if all_final then
+         self.skill_status = skillstati.S_FINAL
       end
    end
 
@@ -301,18 +321,13 @@ function SkillJumpState:set_skill_name(skill_name)
 end
 
 function SkillJumpState:skill_reset()
-   if self.skill then self.skill.reset() end
-   for _, s in ipairs(self.subskills) do
-      s.reset()
-   end
    if self.skills then
       for _, s in ipairs(self.skills) do
-	 s.args = nil
+	 s.__args = nil
 	 s.status = skillstati.S_RUNNING
 	 s[1].reset()
       end
    end
-   self.args = {}
 end
 
 function SkillJumpState:reset()
