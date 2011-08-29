@@ -424,6 +424,7 @@ FawkesMainThread::Runner::Runner(FawkesMainThread *fmt, bool register_signals)
   if (__register_signals) {
     SignalManager::register_handler(SIGINT,  this);
     SignalManager::register_handler(SIGTERM, this);
+    SignalManager::register_handler(SIGALRM, this);
   }
 }
 
@@ -434,6 +435,7 @@ FawkesMainThread::Runner::~Runner()
   if (__register_signals) {
     SignalManager::unregister_handler(SIGINT);
     SignalManager::unregister_handler(SIGTERM);
+    SignalManager::unregister_handler(SIGALRM);
   }
   delete __init_mutex;
 }
@@ -462,8 +464,6 @@ void
 FawkesMainThread::Runner::handle_signal(int signum)
 {
   if ((signum == SIGINT) && ! __sigint_running) {
-    printf("\nFawkes: SIGINT received, shutting down.\n"
-	   "Hit Ctrl-C again to force immediate exit.\n\n");
     MutexLocker lock(__init_mutex);
     if (__init_running) {
       __init_quit = true;
@@ -471,6 +471,13 @@ FawkesMainThread::Runner::handle_signal(int signum)
       __fmt->cancel();
     }
     __sigint_running = true;
+    alarm(3 /* sec */);
+  } else if (signum == SIGALRM) {
+    // we could use __fmt->logger()->log_info(), but we prefer direct printf
+    // because we're mentioning Ctrl-C only useful on the console anyway
+    printf("\nFawkes shutdown and finalization procedure still running.\n"
+           "Hit Ctrl-C again to force immediate exit.\n\n");
+
   } else if ((signum == SIGTERM) || __sigint_running) {
     // we really need to quit
     ::exit(-2);
