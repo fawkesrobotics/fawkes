@@ -408,21 +408,33 @@ FawkesMainThread::logger() const
 
 /** Constructor.
  * @param fmt Fawkes main thread to run
+ * @param register_signals true to register default signal handlers
+ * for SIGINT, SIGTERM, and SIGALRM.
  */
-FawkesMainThread::Runner::Runner(FawkesMainThread *fmt)
+FawkesMainThread::Runner::Runner(FawkesMainThread *fmt, bool register_signals)
 {
-  __init_mutex = new Mutex();
-  __init_running   = true;
-  __init_quit      = false;
-  __sigint_running = false;
+  __init_mutex       = new Mutex();
+  __init_running     = true;
+  __init_quit        = false;
+  __sigint_running   = false;
+  __register_signals = register_signals;
 
   __fmt = fmt;
+
+  if (__register_signals) {
+    SignalManager::register_handler(SIGINT,  this);
+    SignalManager::register_handler(SIGTERM, this);
+  }
 }
 
 
 /** Destructor. */
 FawkesMainThread::Runner::~Runner()
 {
+  if (__register_signals) {
+    SignalManager::unregister_handler(SIGINT);
+    SignalManager::unregister_handler(SIGTERM);
+  }
   delete __init_mutex;
 }
 

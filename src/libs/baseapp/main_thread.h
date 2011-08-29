@@ -77,7 +77,7 @@ class FawkesMainThread
 
   class Runner : public SignalHandler {
   public:
-    Runner(FawkesMainThread *fmt);
+    Runner(FawkesMainThread *fmt, bool register_signals = true);
     ~Runner();
     void run();
     void handle_signal(int signum);
@@ -87,6 +87,7 @@ class FawkesMainThread
     bool              __init_running;
     bool              __init_quit;
     bool              __sigint_running;
+    bool              __register_signals;
   };
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */

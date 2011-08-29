@@ -72,6 +72,7 @@ InitOptions::InitOptions(const char *basename)
   __daemonize_status = false;
   __show_help = false;
   __bb_cleanup = false;
+  __default_signal_handlers = true;
   __init_plugin_cache = true;
   __has_load_plugin_list = false;
   __load_plugin_list = NULL;
@@ -133,6 +134,7 @@ InitOptions::InitOptions(const InitOptions &options)
   __daemonize_status = options.__daemonize_status;
   __show_help = options.__show_help;
   __bb_cleanup = options.__bb_cleanup;
+  __default_signal_handlers = options.__default_signal_handlers;
   __init_plugin_cache = options.__init_plugin_cache;
   __load_plugin_list = NULL;
   __has_load_plugin_list = options.__has_load_plugin_list;
@@ -258,6 +260,7 @@ InitOptions::InitOptions(int argc, char **argv)
 
   __init_plugin_cache = true;
   __plugin_module_flags = Module::MODULE_FLAGS_DEFAULT;
+  __default_signal_handlers = true;
 }
 
 
@@ -376,6 +379,7 @@ InitOptions::operator=(const InitOptions &options)
 
   __init_plugin_cache = options.__init_plugin_cache;
   __plugin_module_flags = options.__plugin_module_flags;
+  __default_signal_handlers = options.__default_signal_handlers;
 
   return *this;
 }
@@ -611,6 +615,20 @@ InitOptions::plugin_module_flags(Module::ModuleFlags flags)
 }
 
 
+/** Set default signal handlers.
+ * @param enable true to enable default signal handlers, false to disable. Note
+ * that if you disable the signal handlers you must stop the Fawkes main thread
+ * execution by yourself by some other means.
+ * @return reference to this instance
+ */
+InitOptions &
+InitOptions::default_signal_handlers(bool enable)
+{
+  __default_signal_handlers = enable;
+  return *this;
+}
+
+
 /** Get program basename.
  * @return program base name
  */
@@ -742,6 +760,16 @@ bool
 InitOptions::init_plugin_cache() const
 {
   return __init_plugin_cache;
+}
+
+
+/** Check if default signal handlers should be enabled.
+ * @return true if default signal handlers have been requested, false otherwise
+ */
+bool
+InitOptions::default_signal_handlers() const
+{
+  return __default_signal_handlers;
 }
 
 /** Check if daemonization has been requested.

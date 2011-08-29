@@ -61,6 +61,7 @@ class InitOptions
   InitOptions &  load_plugins(const char *plugin_list);
   InitOptions &  default_plugin(const char *default_plugin);
   InitOptions &  plugin_module_flags(Module::ModuleFlags flags);
+  InitOptions &  default_signal_handlers(bool enable);
 
   const char *basename() const;
 
@@ -98,6 +99,8 @@ class InitOptions
 
   Module::ModuleFlags plugin_module_flags() const;
 
+  bool  default_signal_handlers() const;
+
  private:
   char               *__basename;
 
@@ -133,6 +136,7 @@ class InitOptions
 
   bool                __init_plugin_cache;
   Module::ModuleFlags __plugin_module_flags;
+  bool                __default_signal_handlers;
   
 };
 

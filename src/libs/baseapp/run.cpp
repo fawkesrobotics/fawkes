@@ -354,9 +354,8 @@ cleanup()
 void
 run()
 {
-  FawkesMainThread::Runner fawkes(main_thread);
-  SignalManager::register_handler(SIGINT, &fawkes);
-  SignalManager::register_handler(SIGTERM, &fawkes);
+  FawkesMainThread::Runner fawkes(main_thread,
+                                  init_options->default_signal_handlers());
 
   try {
     fawkes.run();
