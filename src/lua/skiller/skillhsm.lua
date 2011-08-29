@@ -44,35 +44,13 @@ function SkillHSM:new(o)
    setmetatable(self, HSM)
    self.__index = self
 
-   f:clear_states()
+   if not f.no_default_states then
+      f.exit_state = "FINAL"
+      f.fail_state = "FAILED"
+      f:define_states{ export_to = o.export_to,
+                       {"FINAL", JumpState}, {"FAILED", JumpState}}
+      f.state_changed = true
+   end
 
    return f
-end
-
-
---- Clear all states.
--- Removes all states. If no_default_states is not set a FINAL and FAILED state
--- are added.
-function SkillHSM:clear_states()
-   self.states = {}
-   if not self.no_default_states then
-      self.exit_state = "FINAL"
-      self.fail_state = "FAILED"
-
-      local es = SkillJumpState:new{name = "FINAL", fsm = self}
-      local fs = SkillJumpState:new{name = "FAILED", fsm = self}
-
-      self.states["FINAL"] = es
-      self.states["FAILED"] = fs
-
-      if self.export_states_to_parent then
-	 local e = getfenv(2)
-	 if e == _M then
-	    e = getfenv(3)
-	 end
-	 e["FINAL"] = es
-	 e["FAILED"] = fs
-      end
-   end
-   self.state_changed = true
 end
