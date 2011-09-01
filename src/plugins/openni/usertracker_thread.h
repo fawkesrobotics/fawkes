@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_OPENNI_USERTRACKER_THREAD_H_
 #define __PLUGINS_OPENNI_USERTRACKER_THREAD_H_
 
+#include "utils/version.h"
+
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
 #include <aspect/logging.h>
@@ -91,8 +93,15 @@ class OpenNiUserTrackerThread
   xn::SkeletonCapability          *__skelcap;
 
   XnCallbackHandle                 __user_cb_handle;
-  XnCallbackHandle                 __calib_cb_handle;
+#if XN_VERSION_GE(1,3,2,0)
+  XnCallbackHandle                 __pose_start_cb_handle;
+  XnCallbackHandle                 __pose_end_cb_handle;
+  XnCallbackHandle                 __calib_start_cb_handle;
+  XnCallbackHandle                 __calib_complete_cb_handle;
+#else
   XnCallbackHandle                 __pose_cb_handle;
+  XnCallbackHandle                 __calib_cb_handle;
+#endif
 
   char                             __calib_pose_name[32];
   bool                             __skel_need_calib_pose;

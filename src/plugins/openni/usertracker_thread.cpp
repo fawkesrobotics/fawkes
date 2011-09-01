@@ -92,6 +92,15 @@ cb_calibration_start(xn::SkeletonCapability &capability, XnUserID id, void *cook
   t->calibration_start(id);
 }
 
+#if XN_VERSION_GE(1,3,2,0)
+static void XN_CALLBACK_TYPE
+cb_calibration_complete(xn::SkeletonCapability &capability, XnUserID id,
+                        XnCalibrationStatus status, void *cookie)
+{
+  OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
+  t->calibration_end(id, status == XN_CALIBRATION_STATUS_OK);
+}
+#else
 static void XN_CALLBACK_TYPE
 cb_calibration_end(xn::SkeletonCapability &capability, XnUserID id,
 		   XnBool success, void *cookie)
@@ -99,6 +108,7 @@ cb_calibration_end(xn::SkeletonCapability &capability, XnUserID id,
   OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
   t->calibration_end(id, success);
 }
+#endif
 
 
 void
@@ -137,11 +147,24 @@ OpenNiUserTrackerThread::init()
 
   __skelcap = new xn::SkeletonCapability(__user_gen->GetSkeletonCap());
 
+#if XN_VERSION_GE(1,3,2,0)
+  st = __skelcap->RegisterToCalibrationStart(cb_calibration_start,
+                                             this, __calib_start_cb_handle);
+  if (st != XN_STATUS_OK) {
+    throw Exception("Failed to register calibration start event (%s)",
+                    xnGetStatusString(st));
+  }
+  st = __skelcap->RegisterToCalibrationComplete(cb_calibration_complete,
+                                                this, __calib_complete_cb_handle);
+#else
   st = __skelcap->RegisterCalibrationCallbacks(cb_calibration_start,
 					       cb_calibration_end,
 					       this, __calib_cb_handle);
+#endif
+
   if (st != XN_STATUS_OK) {
-    throw Exception("Failed to register calibration callbacks (%s)", xnGetStatusString(st));
+    throw Exception("Failed to register calibration callback (%s)",
+                    xnGetStatusString(st));
   }
 
   __skel_need_calib_pose = __skelcap->NeedPoseForCalibration();
@@ -153,8 +176,20 @@ OpenNiUserTrackerThread::init()
     __skelcap->GetCalibrationPose(__calib_pose_name);
 
     xn::PoseDetectionCapability posecap = __user_gen->GetPoseDetectionCap();
+
+#if XN_VERSION_GE(1,3,2,0)
+    st = posecap.RegisterToPoseDetected(cb_pose_start,
+                                        this, __pose_start_cb_handle);
+    if (st != XN_STATUS_OK) {
+      throw Exception("Failed to register pose detect event (%s)",
+                      xnGetStatusString(st));
+    }
+    st = posecap.RegisterToOutOfPose(cb_pose_end,
+                                     this, __pose_end_cb_handle);
+#else
     st = posecap.RegisterToPoseCallbacks(cb_pose_start, cb_pose_end,
 					   this, __pose_cb_handle);
+#endif
     if (st != XN_STATUS_OK) {
       throw Exception("Failed to register pose callbacks (%s)", xnGetStatusString(st));
     }

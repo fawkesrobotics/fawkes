@@ -21,6 +21,7 @@
  */
 
 #include "context_thread.h"
+#include "utils/version.h"
 
 #include <cerrno>
 #include <csignal>
@@ -112,7 +113,11 @@ OpenNiContextThread::finalize()
 {
   __openni->StopGeneratingAll();
 
+#if XN_VERSION_GE(1,3,2,0)
+  __openni->Release();
+#else
   __openni->Shutdown();
+#endif
   __openni.clear();
   __openni_aspect_inifin.set_openni_context(__openni);
 
