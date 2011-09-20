@@ -92,6 +92,10 @@ OpenRaveEnvironment::create()
   __planner = RaveCreatePlanner(__env,"birrt");
   if(!__planner)
     {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
+
+  // create ikfast module
+  __mod_ikfast = RaveCreateModule(__env,"ikfast");
+  __env->AddModule(__mod_ikfast,"");
 }
 
 /** Destroy the environment. */
@@ -208,17 +212,15 @@ OpenRaveEnvironment::start_viewer()
  * @param robot pointer to OpenRaveRobot object
  */
 void
-OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot)
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterization::Type iktype)
 {
-  ProblemInstancePtr ikfast = RaveCreateProblem(__env,"ikfast");
   RobotBasePtr robotBase = robot->get_robot_ptr();
-  __env->LoadProblem(ikfast,"");
 
   std::stringstream ssin,ssout;
-  ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)IkParameterization::Type_Transform6D;
+  ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)iktype;
   // if necessary, add free inc for degrees of freedom
   //ssin << " " << 0.04f;
-  if( !ikfast->SendCommand(ssout,ssin) )
+  if( !__mod_ikfast->SendCommand(ssout,ssin) )
     {throw fawkes::Exception("OpenRAVE Environment: Could not load ik solver");}
 }
 
