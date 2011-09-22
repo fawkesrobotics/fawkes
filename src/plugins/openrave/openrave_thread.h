@@ -62,7 +62,7 @@ class OpenRaveThread
   virtual void 				set_manipulator(fawkes::OpenRaveRobot* robot, fawkes::OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
 
   virtual void start_viewer() const;
-  virtual void run_planner(fawkes::OpenRaveRobot* = NULL);
+  virtual void run_planner(fawkes::OpenRaveRobot* = NULL, float sampling=0.01f);
 
   //handling objects; mainly from environment.h
   virtual bool add_object(const std::string& name, const std::string& filename);

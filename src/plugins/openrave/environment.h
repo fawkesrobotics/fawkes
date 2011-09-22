@@ -57,7 +57,7 @@ class OpenRaveEnvironment
 
   virtual void start_viewer();
   virtual void load_IK_solver(OpenRaveRobot* robot);
-  virtual void run_planner(OpenRaveRobot* robot);
+  virtual void run_planner(OpenRaveRobot* robot, float sampling=0.01f);
 
   virtual void add_robot(const std::string& filename);
   virtual void add_robot(OpenRAVE::RobotBasePtr robot);

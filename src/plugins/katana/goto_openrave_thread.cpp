@@ -27,6 +27,8 @@
 #include <cstdlib>
 #include <kniBase.h>
 
+#include <utils/time/time.h>
+
 #ifdef HAVE_OPENRAVE
 
 #include <plugins/openrave/robot.h>
@@ -188,8 +190,9 @@ KatanaGotoOpenRaveThread::once()
   }
 
   // Run planner
+  float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
   try {
-    _openrave->run_planner(__OR_robot);
+    _openrave->run_planner(__OR_robot, sampling);
   } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
     _finished = true;
@@ -199,13 +202,24 @@ KatanaGotoOpenRaveThread::once()
 
   // Get trajectories and move katana along them
   __target_traj = __OR_robot->get_trajectory_device();
+  Time time_now, time_last = Time();
   try {
     bool final = false;
     __it = __target_traj->begin();
     while (!final) {
+      time_last.stamp_systime();
       final = move_katana();
 
       update_openrave_data();
+      time_now.stamp_systime();
+
+      // Wait before sending next command. W.it until 5ms before reached time for next traj point
+      // CAUTION! In order for this to work correctly, you need to assure that OpenRAVE model of the
+      //   arm and the real device have the same velocity, i.e. need the same amount of time to complete
+      //   a movement. Otherwise sampling over time and waiting does not make much sense.
+      //   Disable the following line if requirement not fulfilled.
+
+      //usleep(1000*1000*(sampling + time_last.in_sec() - time_now.in_sec() - 0.005f));
     }
 
   } catch (/*KNI*/::Exception &e) {
