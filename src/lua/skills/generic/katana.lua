@@ -82,9 +82,11 @@ fsm:add_transitions{
    {"DECIDE_MODE", "VELOCITY", "vars.velocity ~= nil", desc="max velocity", precond=true},
    {"DECIDE_MODE", "GOTO", "vars.x ~= nil and vars.y ~= nil and vars.z ~= nil",
     desc="goto parms", precond=true},
+   {"DECIDE_MODE", "GOTO_OBJECT", "vars.object ~= nil", desc="goto obj params", precond=true},
    {"DECIDE_MODE", "STOP", "vars.stop", precond=true},
    {"DECIDE_MODE", "PARK", "vars.park", precond=true},
    {"DECIDE_MODE", "GRIPPER", "vars.gripper", precond=true},
+   {"DECIDE_MODE", "MOVE", "vars.move and vars.nr and (vars.enc or vars.angle)", precond=true},
    {"DECIDE_MODE", "FAILED", true, precond=true, desc="No valid command"},
    {"CALIBRATE", "CHECKERR", jc_arm_is_final, desc="final"},
    {"CALIBRATE", "FAILED", jc_next_msg, desc="next msg"},
@@ -92,11 +94,14 @@ fsm:add_transitions{
    {"STOP", "CHECKERR", true},
    {"VELOCITY", "CHECKERR", true},
    {"GOTO", "CHECKERR", jc_arm_is_final, desc="final"},
+   {"GOTO_OBJECT", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GOTO", "FAILED", jc_next_msg, desc="next msg"},
    {"GRIPPER", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GRIPPER", "FAILED", jc_next_msg, desc="next msg"},
    {"PARK", "CHECKERR", jc_arm_is_final, desc="final"},
    {"PARK", "FAILED", jc_next_msg, desc="next msg"},
+   {"MOVE", "CHECKERR", jc_arm_is_final, desc="final"},
+   {"MOVE", "FAILED", jc_next_msg, desc="next msg"},
    {"CHECKERR", "FINAL", "katanaarm:error_code() == katanaarm.ERROR_NONE", desc="no error"},
    {"CHECKERR", "FAILED", "katanaarm:error_code() ~= katanaarm.ERROR_NONE", desc="error"},
 }
@@ -146,10 +151,49 @@ end
 
 function GOTO:init()
    local x, y, z = self.fsm.vars.x, self.fsm.vars.y, self.fsm.vars.z
-   local phi, theta, psi = 0, 0, 0
+   --local phi, theta, psi = 0, 0, 0
+   local phi = math.pi/2 + math.atan2(y,x)
+   local theta = math.pi/2
+   local psi = -math.pi/2
+
    if self.fsm.vars.phi   ~= nil then phi   = self.fsm.vars.phi end
    if self.fsm.vars.theta ~= nil then theta = self.fsm.vars.theta end
    if self.fsm.vars.psi   ~= nil then psi   = self.fsm.vars.psi end
-   local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
+
+   -- check if distances are too high (means they are in libkni coordinate system)
+   if math.abs(x) > 5 or
+      math.abs(y) > 5 or
+      math.abs(z) > 5 then
+
+      local gm = katanaarm.LinearGotoKniMessage:new(x, y, z, phi, theta, psi)
+      self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+   else
+      local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
+      self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+   end
+end
+
+function GOTO_OBJECT:init()
+   local rot_x = 0.0
+
+   if self.fsm.vars.rot_x  ~= nil then rot_x   = self.fsm.vars.rot_x end
+
+   local gm = katanaarm.ObjectGotoMessage:new(self.fsm.vars.object, rot_x)
    self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
+end
+
+function MOVE:init()
+   if self.fsm.vars.enc then
+      if self.fsm.vars.rel then
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.MoveMotorEncoderMessage:new(self.fsm.vars.nr, self.fsm.vars.enc))
+      else
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.SetMotorEncoderMessage:new(self.fsm.vars.nr, self.fsm.vars.enc))
+      end
+   else
+      if self.fsm.vars.rel then
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.MoveMotorAngleMessage:new(self.fsm.vars.nr, self.fsm.vars.angle))
+      else
+         self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.SetMotorAngleMessage:new(self.fsm.vars.nr, self.fsm.vars.angle))
+      end
+   end
 end
