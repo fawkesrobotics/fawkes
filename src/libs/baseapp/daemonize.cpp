@@ -31,6 +31,7 @@
 #ifdef HAVE_LIBDAEMON
 #  include <cerrno>
 #  include <cstring>
+#  include <csignal>
 #  include <libdaemon/dfork.h>
 #  include <libdaemon/dlog.h>
 #  include <libdaemon/dpid.h>
