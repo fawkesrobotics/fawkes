@@ -21,9 +21,6 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 PRESUBDIRS = aspect
 
-CFLAGS  += $(CFLAGS_OPENRAVE) -Wno-error
-LDFLAGS += $(LDFLAGS_OPENRAVE)
-
 LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenrave fawkesopenraveaspect fawkesinterface OpenRaveInterface $(LIBS_OPENRAVE)
 OBJS_openrave = or_plugin.o or_thread.o or_message_handler_thread.o
 
@@ -32,7 +29,15 @@ OBJS_libfawkesopenrave = environment.o robot.o manipulator.o manipulators/katana
 
 OBJS_all    = $(OBJS_openrave) $(OBJS_libfawkesopenrave)
 
+ifeq ($(HAVE_PYTHON),1)
+  CFLAGS  += $(CFLAGS_PYTHON)
+  LDFLAGS += $(LDFLAGS_PYTHON)
+else
+  WARN_TARGETS += warning_python
+endif
 ifeq ($(HAVE_OPENRAVE),1)
+  CFLAGS  += $(CFLAGS_OPENRAVE) -Wno-error
+  LDFLAGS += $(LDFLAGS_OPENRAVE)
   PLUGINS_all = $(PLUGINDIR)/openrave.so
   LIBS_all = $(LIBDIR)/libfawkesopenrave.so
 else
@@ -50,6 +55,9 @@ include $(BUILDSYSDIR)/interface.mk
 .PHONY: warning_openrave
 warning_openrave:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (OpenRAVE not installed)"
+
+warning_python:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (python not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

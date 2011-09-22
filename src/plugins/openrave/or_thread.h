@@ -63,6 +63,7 @@ class OpenRaveThread
 
   virtual void start_viewer() const;
   virtual void run_planner(fawkes::OpenRaveRobot* = NULL);
+  virtual void run_graspplanning(const std::string& target_name, fawkes::OpenRaveRobot* robot = NULL);
 
   //handling objects; mainly from environment.h
   virtual bool add_object(const std::string& name, const std::string& filename);
