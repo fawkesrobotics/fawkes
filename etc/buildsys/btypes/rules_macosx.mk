@@ -25,7 +25,7 @@ LIBS_gui:=$(LIBS_gui:%.so=%.dylib)
 $(LIBDIR)/%.dylib: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
+	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) -o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(wildcard $(LIBDIRS_$(subst /,_,$*)))) $(addprefix -L,$(wildcard $(LIBDIRS)))
@@ -34,7 +34,7 @@ $(LIBDIR)/%.dylib: $$(OBJS_$$(subst /,_,$$*))
 $(PLUGINDIR)/%.dylib: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
+	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) -o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))

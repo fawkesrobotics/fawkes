@@ -206,8 +206,8 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) \
+	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
+	-o $@ $(subst ..,__,$^) $(LDFLAGS_BASE) \
 	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
@@ -218,7 +218,8 @@ endif
 $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(call nametr,$*)),,.$(SOVER_$(call nametr,$*))) $(subst ..,__,$^) \
+	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
+	-o $@$(if $(NOSOVER_$(call nametr,$*)),,.$(SOVER_$(call nametr,$*))) $(subst ..,__,$^) \
 	$(if $(NOSOVER_$(call nametr,$*)),,-Wl,-soname=$(@F).$(SOVER_$(call nametr,$*))) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(call nametr,$*)) \
 	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \

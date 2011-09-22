@@ -126,6 +126,7 @@ DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)
 
 ### Programs used, no trivial stuff like ln, rm, ls as per Makefile manual
 CC = gcc
+LD = gcc
 MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
 PKGCONFIG = $(shell which pkg-config)
