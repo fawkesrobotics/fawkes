@@ -21,7 +21,7 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 PRESUBDIRS = aspect interfaces
 
-CFLAGS  += $(CFLAGS_OPENRAVE)
+CFLAGS  += $(CFLAGS_OPENRAVE) -Wno-error
 LDFLAGS += $(LDFLAGS_OPENRAVE)
 
 LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenrave fawkesopenraveaspect fawkesinterface OpenRaveInterface $(LIBS_OPENRAVE)

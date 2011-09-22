@@ -46,10 +46,9 @@ void
 SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
 {
   ViewerBasePtr viewer = RaveCreateViewer(env, viewername);
-  BOOST_ASSERT(!!viewer);
 
   // attach it to the environment:
-  env->AttachViewer(viewer);
+  env->AddViewer(viewer);
 
   // finally you call the viewer's infinite loop (this is why you need a separate thread):
   viewer->main(/*showGUI=*/true);
@@ -137,10 +136,14 @@ OpenRaveEnvironment::disable_debug()
 void
 OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
-  if(!__env->AddRobot(robot))
-    {throw fawkes::Exception("OpenRAVE Environment: Could not add robot to environment. Error in OpenRAVE.");}
-  else if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
+  try{
+    __env->AddRobot(robot);
+    if(__logger)
+      {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
+  } catch(openrave_exception &e) {
+    if(__logger)
+      {__logger->log_debug("OpenRAVE Environment", "Could not add robot to environment. OpenRAVE error:%s", e.message().c_str());}
+  }
 }
 
 /** Add a robot into the scene.
