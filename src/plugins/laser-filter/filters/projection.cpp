@@ -23,18 +23,13 @@
 #include "projection.h"
 
 #include <core/exception.h>
-#include <core/macros.h>
 #include <utils/math/angle.h>
-#include <utils/logging/logger.h>
-#include <config/config.h>
 #include <geometry/hom_polar.h>
 #include <geometry/hom_vector.h>
 
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <sys/types.h>
-#include <regex.h>
 
 using namespace fawkes;
 

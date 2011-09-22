@@ -25,7 +25,7 @@
 #include <core/exception.h>
 #include <core/macros.h>
 #include <utils/math/angle.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <config/config.h>
 
 #include <cstdlib>
