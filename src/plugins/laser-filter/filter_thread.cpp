@@ -29,6 +29,7 @@
 #include "filters/min_circle.h"
 #include "filters/circle_sector.h"
 #include "filters/min_merge.h"
+#include "filters/projection.h"
 
 #include <core/threading/barrier.h>
 #include <core/threading/mutex.h>
@@ -361,10 +362,26 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
     unsigned int from = config->get_uint((prefix + "from").c_str());
     unsigned int to   = config->get_uint((prefix + "to").c_str());
     return new LaserCircleSectorDataFilter(from, to, in_data_size, inbufs);
-  } else if (filter_type == "dead_spots") {
+  } else if (filter_type == "deadspots") {
     return new LaserDeadSpotsDataFilter(config, logger, prefix, in_data_size, inbufs);
   } else if (filter_type == "min_merge") {
     return new LaserMinMergeDataFilter(in_data_size, inbufs);
+  } else if (filter_type == "projection") {
+    const LaserProjectionDataFilter::Rotation laser_rot(config->get_float((prefix + "x_rot_laser").c_str()),
+                                                  config->get_float((prefix + "y_rot_laser").c_str()),
+                                                  config->get_float((prefix + "z_rot_laser").c_str()));
+    const LaserProjectionDataFilter::Rotation fixture_rot(config->get_float((prefix + "x_rot_fixture").c_str()),
+                                                          config->get_float((prefix + "y_rot_fixture").c_str()),
+                                                          config->get_float((prefix + "z_rot_fixture").c_str()));
+    const LaserProjectionDataFilter::Translation trans(config->get_float((prefix + "x_trans").c_str()),
+                                                       config->get_float((prefix + "y_trans").c_str()),
+                                                       config->get_float((prefix + "z_trans").c_str()));
+    const LaserProjectionDataFilter::Rectangle robot_rect(config->get_float((prefix + "x_min").c_str()),
+                                                          config->get_float((prefix + "x_max").c_str()),
+                                                          config->get_float((prefix + "y_min").c_str()),
+                                                          config->get_float((prefix + "y_max").c_str()));
+    const float z_threshold = config->get_float((prefix + "z_threshold").c_str());
+    return new LaserProjectionDataFilter(laser_rot, fixture_rot, trans, robot_rect, z_threshold, in_data_size, inbufs);
   } else {
     throw Exception("Unknown filter type %s", filter_type.c_str());
   }

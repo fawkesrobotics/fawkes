@@ -23,6 +23,7 @@
 #include "filter.h"
 #include <core/exception.h>
 
+#include <cstring>
 #include <cstdlib>
 
 /** @class LaserDataFilter "filter.h"
@@ -162,6 +163,32 @@ LaserDataFilter::get_out_data_size()
 {
   return out_data_size;
 }
+
+
+/** Resets all readings in outbuf to 0.0
+ * @param outbuf array of out_data_size
+ */
+void
+LaserDataFilter::reset_outbuf(float* outbuf)
+{
+  memset(outbuf, 0, sizeof(float) * out_data_size);
+}
+
+/** Copies the readings from inbuf to outbuf.
+ * Requires out_data_size to be equal to in_data_size.
+ * @param inbuf array of in_data_size (= out_data_size) readings
+ * @param outbuf array of out_data_size (= in_data_size) readings
+ */
+void
+LaserDataFilter::copy_to_outbuf(float* outbuf, const float* inbuf)
+{
+  if (in_data_size != out_data_size) {
+    throw fawkes::Exception("copy_to_outbuf() requires equal "\
+                            "input and output data size");
+  }
+  memcpy(outbuf, inbuf, sizeof(float) * out_data_size);
+}
+
 
 
 /** Set input/output array ownership.

@@ -61,7 +61,7 @@ LaserCircleSectorDataFilter::filter()
   for (unsigned int a = 0; a < vecsize; ++a) {
     float *inbuf  = in[a];
     float *outbuf = out[a];
-    memset(outbuf, 0, out_data_size);
+    reset_outbuf(outbuf);
 
     if (__from > __to) {
       for (unsigned int i = __from; i < arrsize; ++i) {

@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#         Makefile Build System for Fawkes : Laser Hough Transform QA
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Wed Dec 30 12:00:00 2009
+#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,19 +13,13 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-# base + hardware drivers + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
-	  laser flite joystick katana pantilt vision roomba \
-	  skiller luaagent worldmodel laserht laser-filter \
-	  openni refboxcomm player xmlrpc \
-	  readylogagent
-	  #festival
+OBJS_qa_projection := qa_projection.o ../filters/filter.o ../filters/projection.o
+LIBS_qa_projection := fawkescore fawkesutils fawkesgeometry m
 
-include $(BUILDSYSDIR)/rules.mk
+OBJS_all = $(OBJS_qa_projection)
+BINS_all = $(BINDIR)/qa_projection
 
-luaagent: skiller
-rrdweb: rrd
-
+include $(BUILDSYSDIR)/base.mk
