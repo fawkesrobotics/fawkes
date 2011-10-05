@@ -402,8 +402,12 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
      } // robot state is restored
 
     // display motion in viewer
-    if( robot->display_planned_movements())
-      {robot->get_robot_ptr()->SetActiveMotion(traj);}
+    if( robot->display_planned_movements()) {
+      if (robot->get_robot_ptr()->GetActiveDOF() == traj->GetDOF())
+        robot->get_robot_ptr()->SetActiveMotion(traj);
+      else
+        robot->get_robot_ptr()->SetMotion(traj);
+    }
   }
 }
 
