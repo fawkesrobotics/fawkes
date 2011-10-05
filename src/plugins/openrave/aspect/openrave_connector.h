@@ -54,6 +54,12 @@ class OpenRaveConnector
   */
   virtual void run_planner(OpenRaveRobot* robot = NULL, float sampling=0.01f) = 0;
 
+  /** Run graspplanning script for a given target.
+  * @param target_name name of targeted object (KinBody)
+  * @param robot robot to use planner on. If none is given, the currently used robot is taken
+  */
+  virtual void run_graspplanning(const std::string& target_name, OpenRaveRobot* robot = NULL) = 0;
+
   /** Get pointer to OpenRaveEnvironment object.
   * @return pointer
   */

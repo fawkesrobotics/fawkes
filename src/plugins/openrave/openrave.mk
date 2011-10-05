@@ -16,10 +16,17 @@
 #Check for OpenRAVE
 ifneq ($(PKGCONFIG),)
   HAVE_OPENRAVE := $(if $(or $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}),\
-                     $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/})),1,0)
+                     $(shell $(PKGCONFIG) --exists 'openrave0.4'; echo $${?/1/})),1,0)
+
+  HAVE_PYTHON := $(if $(shell $(PKGCONFIG) --exists 'python'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS_OPENRAVE    = $(shell openrave-config --cflags-only-I)
   LDFLAGS_OPENRAVE   = $(shell openrave-config --libs-core)
+endif
+
+ifeq ($(HAVE_PYTHON),1)
+  CFLAGS_PYTHON    = $(shell python-config --includes)
+  LDFLAGS_PYTHON   = $(shell python-config --libs)
 endif

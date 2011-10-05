@@ -29,7 +29,10 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 
+#include <Python.h>
+
 #include <sstream>
+#include <cstdio>
 
 using namespace OpenRAVE;
 namespace fawkes {
@@ -92,6 +95,10 @@ OpenRaveEnvironment::create()
   __planner = RaveCreatePlanner(__env,"birrt");
   if(!__planner)
     {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
+
+  // create ikfast module
+  __mod_ikfast = RaveCreateModule(__env,"ikfast");
+  __env->AddModule(__mod_ikfast,"");
 }
 
 /** Destroy the environment. */
@@ -208,17 +215,15 @@ OpenRaveEnvironment::start_viewer()
  * @param robot pointer to OpenRaveRobot object
  */
 void
-OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot)
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterization::Type iktype)
 {
-  ProblemInstancePtr ikfast = RaveCreateProblem(__env,"ikfast");
   RobotBasePtr robotBase = robot->get_robot_ptr();
-  __env->LoadProblem(ikfast,"");
 
   std::stringstream ssin,ssout;
-  ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)IkParameterization::Type_Transform6D;
+  ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)iktype;
   // if necessary, add free inc for degrees of freedom
   //ssin << " " << 0.04f;
-  if( !ikfast->SendCommand(ssout,ssin) )
+  if( !__mod_ikfast->SendCommand(ssout,ssin) )
     {throw fawkes::Exception("OpenRAVE Environment: Could not load ik solver");}
 }
 
@@ -285,6 +290,132 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       {robot->get_robot_ptr()->SetActiveMotion(traj);}
   }
 
+}
+
+
+/** Run graspplanning script for a given target.
+ * Script loads grasping databse, checks if target is graspable for various grasps
+ * and on success returns a string containing trajectory data.
+ * Currently the grasping databse can only be accessed via python, so we use a short
+ * python script (shortened and modified from officiel OpenRAVE graspplanning.py) to do the work.
+ * @param target_name name of targeted object (KinBody)
+ * @param robot pointer to OpenRaveRobot object of robot to use
+ */
+void
+OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot)
+{
+  std::string filename = "../fawkes/src/plugins/openrave/python/graspplanning.py";
+  std::string funcname = "myGrasp";
+
+  boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
+
+  FILE* py_file = fopen(filename.c_str(), "r");
+  if (py_file == NULL)
+    {throw fawkes::Exception("OpenRAVE Environment: Graspplanning: opening python file failed");}
+
+  Py_Initialize();
+
+  // using python C API
+  PyObject* py_main = PyImport_AddModule("__main__"); // borrowed reference
+  assert(py_main);                                    // __main__ should always exist
+  PyObject* py_dict = PyModule_GetDict(py_main);      // borrowed reference
+  assert(py_dict);                                    // __main__ should have a dictionary
+
+  // load file
+  int py_module = PyRun_SimpleFile(py_file, filename.c_str());
+  fclose(py_file);
+  if (!py_module) {
+    // load function from global dictionary
+    PyObject* py_func = PyDict_GetItemString(py_dict, funcname.c_str());
+    if (py_func && PyCallable_Check(py_func)) {
+      // create tuple for args to be passed to py_func
+      PyObject* py_args = PyTuple_New(3);
+      // fill tuple with values. We're not checking for conversion errors here atm, can be added!
+      PyObject* py_value_env_id      = PyInt_FromLong(RaveGetEnvironmentId(__env));
+      PyObject* py_value_robot_name  = PyString_FromString(robot->get_robot_ptr()->GetName().c_str());
+      PyObject* py_value_target_name = PyString_FromString(target_name.c_str());
+      PyTuple_SetItem(py_args, 0, py_value_env_id);      //py_value reference stolen here! no need to DECREF
+      PyTuple_SetItem(py_args, 1, py_value_robot_name);  //py_value reference stolen here! no need to DECREF
+      PyTuple_SetItem(py_args, 2, py_value_target_name); //py_value reference stolen here! no need to DECREF
+      // call function, get return value
+      PyObject* py_value = PyObject_CallObject(py_func, py_args);
+      Py_DECREF(py_args);
+      // check return value
+      if (py_value != NULL) {
+        if (!PyString_Check(py_value)) {
+          Py_DECREF(py_value);
+          Py_DECREF(py_func);
+          Py_Finalize();
+          throw fawkes::Exception("OpenRAVE Environment: Graspplanning: No grasping path found.");
+        }
+        std::stringstream resval;
+        resval << PyString_AsString(py_value);
+        if (!traj->Read(resval, robot->get_robot_ptr()) ) {
+          Py_DECREF(py_value);
+          Py_DECREF(py_func);
+          Py_Finalize();
+          throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Reading trajectory data failed.");
+        }
+        Py_DECREF(py_value);
+      } else { // if calling function failed
+        Py_DECREF(py_func);
+        PyErr_Print();
+        Py_Finalize();
+        throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Calling function failed.");
+      }
+    } else { // if loading func failed
+      if (PyErr_Occurred())
+        PyErr_Print();
+      Py_XDECREF(py_func);
+      Py_Finalize();
+      throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Loading function failed.");
+    }
+    Py_XDECREF(py_func);
+  } else { // if loading module failed
+    PyErr_Print();
+    Py_Finalize();
+    throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Loading python file failed.");
+  }
+
+  Py_Finalize();
+
+  if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Graspplanning: path planned");}
+
+  // re-timing the trajectory with cubic interpolation
+  traj->CalcTrajTiming(robot->get_robot_ptr(),TrajectoryBase::CUBIC,true,true);
+
+  // setting robots trajectory
+  std::vector<TrajectoryBase::TPOINT> points = traj->GetPoints();
+  std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
+  trajRobot->clear();
+
+  for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
+    trajRobot->push_back((*it).q);
+  }
+
+  // viewer options
+  if( __viewer_enabled ) {
+
+    // display trajectory in viewer
+    __graph_handle.clear(); // remove all GraphHandlerPtr and currently drawn plots
+    {
+      RobotBasePtr tmp_robot = robot->get_robot_ptr();
+      RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
+        for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
+          tmp_robot->SetActiveDOFValues((*it).q);
+          __graph_handle.push_back(__env->plot3(RaveVector<float>(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans), 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+        }
+     } // robot state is restored
+
+    // display motion in viewer
+    if( robot->display_planned_movements()) {
+      if (robot->get_robot_ptr()->GetActiveDOF() == traj->GetDOF())
+        robot->get_robot_ptr()->SetActiveMotion(traj);
+      else
+        robot->get_robot_ptr()->SetMotion(traj);
+    }
+  }
 }
 
 

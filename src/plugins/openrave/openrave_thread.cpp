@@ -174,6 +174,19 @@ OpenRaveThread::run_planner(OpenRaveRobot* robot, float sampling)
   __OR_env->run_planner(robot, sampling);
 }
 
+/** Run graspplanning script for a given target.
+ * @param target_name name of targeted object (KinBody)
+ * @param robot robot to use planner on. If none is given, the currently used robot is taken
+ */
+void
+OpenRaveThread::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot)
+{
+  if(!robot)
+    robot = __OR_robot;
+
+  __OR_env->run_graspplanning(target_name, robot);
+}
+
 /** Add a new robot to the environment, and set it as the currently active one.
  * @param filename_robot path to robot's xml file
  * @param autogenerate_IK if true: autogenerate IKfast IK solver for robot
