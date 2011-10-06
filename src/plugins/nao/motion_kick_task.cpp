@@ -80,7 +80,7 @@ print_angles(std::vector<float> angles)
 */
 
 void
-NaoQiMotionKickTask::goto_start_pos(ALValue speed, bool concurrent)
+NaoQiMotionKickTask::goto_start_pos(AL::ALValue speed, bool concurrent)
 {
   float shoulder_pitch = 120;
   float shoulder_roll = 15;
