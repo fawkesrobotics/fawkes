@@ -48,9 +48,16 @@ print_usage(const char *program_name)
 }
 
 
+/** Remote control PTUs via keyboard.
+ * @author Tim Niemueller
+ */
 class PTUJoystickControl
 {
  public:
+  /** Constructor.
+   * @param argc number of arguments in argv
+   * @param argv array of parameters passed into the program
+   */
   PTUJoystickControl(int argc, char **argv)
     : __argp(argc, argv, "hr:p:li")
   {
@@ -63,12 +70,17 @@ class PTUJoystickControl
     }
   }
 
+  /** Destructor. */
   ~PTUJoystickControl()
   {
-    delete __bb;
+    if (__bb) {
+      __bb->close(__ptu_if);
+      delete __bb;
+    }
   }
 
 
+  /** Initialize BB connection. */
   void init()
   {
     char *host = (char *)"localhost";
@@ -118,6 +130,7 @@ class PTUJoystickControl
   }
 
 
+  /** Run control loop. */
   void run()
   {
     if (!__ptu_if)  return;
