@@ -3,7 +3,7 @@
  *  console.cpp - Fawkes console logger
  *
  *  Created: Tue Jan 16 21:08:25 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -34,13 +34,14 @@
 namespace fawkes {
 
 /** @class ConsoleLogger <logging/console.h>
- * Interface for logging to stderr on console.
+ * Interface for logging to stderr.
  * The ConsoleLogger will pipe all output to stderr on the console. The
  * output will be color coded due to the importance of the output.
  *
  * Debug output will be drawn in grey font, informational output in console
  * default color, warnings will be printed in brown/orange and errors in red.
  *
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -70,7 +71,7 @@ ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
     gettimeofday(&now, NULL);
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
-    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", c_darkgray, now_s->tm_hour,
+    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", c_lightgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "%s\n", c_normal);
@@ -179,7 +180,7 @@ ConsoleLogger::log_debug(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_darkgray, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_lightgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)now.tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -293,7 +294,7 @@ ConsoleLogger::tlog_debug(struct timeval *t, const char *component, Exception &e
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_darkgray, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_lightgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -362,7 +363,7 @@ ConsoleLogger::vtlog_debug(struct timeval *t, const char *component, const char 
   if (log_level <= LL_DEBUG ) {
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
-    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", c_darkgray, now_s->tm_hour,
+    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", c_lightgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, (long)t->tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "%s\n", c_normal);

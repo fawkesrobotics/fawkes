@@ -67,6 +67,12 @@ OBJS_fvviewer = viewer.o
 CFLAGS_viewer    += $(CFLAGS_GTKMM) $(CFLAGS_SDL)
 LDFLAGS_fvviewer += $(LDFLAGS_GTKMM) $(LDFLAGS_SDL)
 
+LIBS_fvscaled_viewer = $(VISION_CAM_LIBS) stdc++ fawkescore \
+	fawkesutils fvcams fvutils
+OBJS_fvscaled_viewer = scaled_viewer.o
+CFLAGS_scaled_viewer    += $(CFLAGS_GUI)
+LDFLAGS_fvscaled_viewer += $(LDFLAGS_GUI)
+
 LIBS_fvnet = stdc++ fawkescore fawkesutils fawkesnetcomm fvutils
 OBJS_fvnet = net.o
 
@@ -82,7 +88,7 @@ OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
 	   $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvcmpp) \
-	   $(OBJS_fvlistsrcams)
+	   $(OBJS_fvlistsrcams) $(OBJS_fvscaled_viewer)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvcmpp $(BINDIR)/fvnet \
 	   $(BINDIR)/fvbb2rectlut $(BINDIR)/fvconverter
 MANPAGES_all = $(MANDIR)/man1/fvshmem.1 $(MANDIR)/man1/fvcmpp.1 \
@@ -146,6 +152,11 @@ ifeq ($(HAVE_SDL)$(HAVE_GUI),11)
   MANPAGES_gui += $(MANDIR)/man1/fvshowyuv.1
 else
   WARN_TARGETS_GUI += warning_showyuv
+endif
+ifeq ($(HAVE_GUI),1)
+  BINS_gui += $(BINDIR)/fvscaled_viewer
+else
+  WARN_TARGETS_GUI += warning_scaled_viewer
 endif
 
 

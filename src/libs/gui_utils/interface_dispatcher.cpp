@@ -57,6 +57,41 @@ InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
   bbil_add_writer_interface(iface);
   bbil_add_reader_interface(iface);
 
+  setup_signals();
+}
+
+/** Multi interface constructor.
+ * @param listener_name name of the listener
+ * @param ifaces list of interfaces to watch for data
+ * changes. Register this dispatcher as listener by yourself!
+ * @param message_enqueueing true to enqueue messages after the
+ * message received event handler has been called, false to drop the
+ * message afterwards.
+ */
+InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
+					 std::list<Interface *> ifaces,
+					 bool message_enqueueing)
+  : BlackBoardInterfaceListener(listener_name)
+{
+  __message_enqueueing = message_enqueueing;
+
+  std::list<Interface *>::iterator i;
+  for (i = ifaces.begin(); i != ifaces.end(); ++i) {
+    bbil_add_data_interface(*i);
+    if ( (*i)->is_writer() ) {
+      bbil_add_message_interface(*i);
+    }
+    bbil_add_writer_interface(*i);
+    bbil_add_reader_interface(*i);
+  }
+
+  setup_signals();
+}
+
+
+void
+InterfaceDispatcher::setup_signals()
+{
   __dispatcher_data_changed.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_data_changed));
   __dispatcher_message_received.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_message_received));
   __dispatcher_writer_added.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_added));
@@ -64,7 +99,6 @@ InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
   __dispatcher_reader_added.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_reader_added));
   __dispatcher_reader_removed.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
 }
-
 
 /** Set if received messages should be enqueued or not.
  * The message received event handler can cause the message to be enqueued or not.

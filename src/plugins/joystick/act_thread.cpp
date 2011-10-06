@@ -56,18 +56,85 @@ void
 JoystickActThread::init()
 {
   __joystick_if = __senst->joystick_interface();
-  __joystick_connected = false;
+  __msgproc = new MessageProcessor(__aqt, __joystick_if);
 }
 
 
 void
 JoystickActThread::finalize()
 {
+  delete __msgproc;
 }
 
 
 void
 JoystickActThread::loop()
+{
+  __msgproc->process();
+}
+
+
+/** @class JoystickActThread::MessageProcessor "act_thread.h"
+ * Process incoming messages.
+ * Internal utility class.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param aqt acqusition thread to intsruct
+ * @param joystick_if interface to listen on for messages
+ */
+JoystickActThread::MessageProcessor::MessageProcessor(JoystickAcquisitionThread *aqt,
+                                                      JoystickInterface *joystick_if)
+{
+  __aqt = aqt;
+  __joystick_if = joystick_if;
+  __joystick_connected = false;
+}
+
+/** Process a single message.
+ * @param msg message to process
+ */
+void
+JoystickActThread::MessageProcessor::process_message(Message *msg)
+{
+  JoystickForceFeedback *ff = __aqt->ff();
+
+  if (! ff)  return;
+
+  if (dynamic_cast<JoystickInterface::StartRumbleMessage *>(msg) != NULL) {
+    JoystickInterface::StartRumbleMessage *srm =
+      dynamic_cast<JoystickInterface::StartRumbleMessage *>(msg);
+
+    ff->rumble(srm->strong_magnitude(), srm->weak_magnitude(),
+               (JoystickForceFeedback::Direction)srm->direction(),
+               srm->length(), srm->delay());
+
+    uint8_t e = __joystick_if->ff_effects() | JoystickInterface::JFF_RUMBLE;
+    __joystick_if->set_ff_effects(e);
+    __joystick_if->write();
+    
+  }
+  else if (dynamic_cast<JoystickInterface::StopRumbleMessage *>(msg) != NULL)
+  {
+    ff->stop_rumble();
+    uint8_t e = __joystick_if->ff_effects() & ~JoystickInterface::JFF_RUMBLE;
+    __joystick_if->set_ff_effects(e);
+    __joystick_if->write();
+
+  }
+  else if (dynamic_cast<JoystickInterface::StopAllMessage *>(msg) != NULL)
+  {
+    ff->stop_all();
+    __joystick_if->set_ff_effects(0);
+    __joystick_if->write();
+  }
+}
+
+
+/** Process message currently in the queue. */
+void
+JoystickActThread::MessageProcessor::process()
 {
   JoystickForceFeedback *ff = __aqt->ff();
 
@@ -116,32 +183,7 @@ JoystickActThread::loop()
       break;
     }
 
-    if (__joystick_if->msgq_first_is<JoystickInterface::StartRumbleMessage>()) {
-      JoystickInterface::StartRumbleMessage *msg = __joystick_if->msgq_first(msg);
-
-      ff->rumble(msg->strong_magnitude(), msg->weak_magnitude(),
-		 (JoystickForceFeedback::Direction)msg->direction(),
-		 msg->length(), msg->delay());
-
-      uint8_t e = __joystick_if->ff_effects() | JoystickInterface::JFF_RUMBLE;
-      __joystick_if->set_ff_effects(e);
-      __joystick_if->write();
-
-    }
-    else if (__joystick_if->msgq_first_is<JoystickInterface::StopRumbleMessage>())
-    {
-      ff->stop_rumble();
-      uint8_t e = __joystick_if->ff_effects() & ~JoystickInterface::JFF_RUMBLE;
-      __joystick_if->set_ff_effects(e);
-      __joystick_if->write();
-
-    }
-    else if (__joystick_if->msgq_first_is<JoystickInterface::StopAllMessage>())
-    {
-      ff->stop_all();
-      __joystick_if->set_ff_effects(0);
-      __joystick_if->write();
-    }
+    process_message(__joystick_if->msgq_first());
 
     __joystick_if->msgq_pop();
   }

@@ -260,7 +260,7 @@ JoystickForceFeedback::rumble(uint16_t strong_magnitude, uint16_t weak_magnitude
     __rumble.u.rumble.weak_magnitude   = weak_magnitude;
     __rumble.direction = direction;
     __rumble.replay.length = length;
-    __rumble.replay.delay = length;
+    __rumble.replay.delay = delay;
 
     if (ioctl(__fd, EVIOCSFF, &__rumble) < 0) {
       throw Exception("Failed to upload rumble effect");

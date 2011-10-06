@@ -39,6 +39,17 @@ class JoystickRemoteBlackBoardPoster : public JoystickBlackBoardHandler
 				 fawkes::Logger *logger);
   ~JoystickRemoteBlackBoardPoster();
 
+  /** Get blackboard.
+   * @return blackboard instance
+   */
+  fawkes::BlackBoard * blackboard() { return __bb; }
+
+  /** Get joystick interface.
+   * @return joystick interface
+   */
+  fawkes::JoystickInterface * joystick_if() { return __joystick_if; }
+  
+
   virtual void joystick_changed(unsigned int pressed_buttons, float *axis_values);
   virtual void joystick_plugged(char num_axes, char num_buttons);
   virtual void joystick_unplugged();

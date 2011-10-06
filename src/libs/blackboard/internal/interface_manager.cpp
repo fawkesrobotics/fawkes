@@ -39,7 +39,7 @@
 #include <core/threading/mutex.h>
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
-#include <utils/system/dynamic_module/module_dl.h>
+#include <utils/system/dynamic_module/module.h>
 
 #include <cstdlib>
 #include <cstring>

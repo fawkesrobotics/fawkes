@@ -58,6 +58,11 @@ ifeq ($(HAVE_LUA),1)
       _HAVE_TOLUA_LIB=1
        TOLUA_LIBS=tolua++$(LUA_VERSION) stdc++
     endif
+    # OpenEmbedded/Nao
+    ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++-$(LUA_VERSION).a),)
+      _HAVE_TOLUA_LIB=1
+       TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
+    endif
     ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++$(LUA_VERSION)),)
       _HAVE_TOLUA_BIN=1
       TOLUAPP=tolua++$(LUA_VERSION)

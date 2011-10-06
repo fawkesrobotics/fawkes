@@ -13,104 +13,22 @@
       <item name="STANDUP_BACK">Standup from lying on the back.</item>
       <item name="STANDUP_FRONT">Standup from lying on the tummy.</item>
     </enum>
-    <enum name="StiffnessMotionPatternEnum">
-      <comment>The motion patterns that need specific stiffness settings</comment>
-      <item name="WALK">The walk pattern</item>
-      <item name="KICK">The kick pattern</item>
-    </enum>
   </constants>
   <data>
     <comment>
       This interface provides acces to basic humanoid motion patterns.
     </comment>
 
-    <field type="bool" name="walking">True if the robot is currently moving.</field>
-    <field type="LegEnum" name="supporting_leg">Marks the supporting leg</field>
-
-    <!-- Walk pattern config -->
-    <field type="float" name="max_step_length">
-      Maximum length of a footstep in m.
-    </field>
-    <field type="float" name="max_step_height">
-      Maxium height of a footstep cycloid in m.
-    </field>
-    <field type="float" name="max_step_side">
-      Maximum length of side step in m.
-    </field>
-    <field type="float" name="max_step_turn">
-      Maximum change around vertical axis on radians per footstep.
-    </field>
-    <field type="float" name="zmp_offset_forward">
-      Zero moment point offset in forward direction in m.
-    </field>
-    <field type="float" name="zmp_offset_sideward">
-      Zero moment point offset in sideward direction in m.
-    </field>
-    <field type="float" name="l_hip_roll_compensation">
-      Amplitude in degrees of backlash compensation for left hip roll.
-      This is fitted to the Nao and is possibly not applicable to other robots.
-    </field>
-    <field type="float" name="r_hip_roll_compensation">
-      Amplitude in degrees of backlash compensation for left hip roll.
-      This is fitted to the Nao and is possibly not applicable to other robots.
-    </field>
-    <field type="float" name="hip_height">
-      Height of hip during walk process.
-      This is fitted to the Nao and is possibly not applicable to other robots.
-    </field>
-    <field type="float" name="torso_sideward_orientation">
-      Torso orientation in degrees in sideward direction during walking.
-      This is fitted to the Nao and is possibly not applicable to other robots.
-    </field>
-
-
-    <!-- Arm during walk config -->
+    <field type="bool" name="moving">True if the robot is moving.</field>
     <field type="bool" name="arms_enabled">
       If true the arms are controlled during walking for balancing.
     </field>
-    <field type="float" name="shoulder_pitch_median">
-      Median in radians of the shoulder pitch during walking.
-    </field>
-    <field type="float" name="shoulder_pitch_amplitude">
-      Amplitude of the shoulder pitch movement during walking.
-    </field>
-    <field type="float" name="elbow_roll_median">
-      Median in radians of the elbow roll during walking.
-    </field>
-    <field type="float" name="elbow_roll_amplitude">
-      Amplitude of the elbow roll movement during walking.
-    </field>
+
     <field type="uint32" name="msgid">
       The ID of the message that is currently being
       processed, or 0 if no message is being processed.
     </field>
   </data>
-
-  <message name="SetWalkParams">
-    <comment>Allows for setting certain walking parameters.
-      Values that have a magic value of -1234567 are ignored.
-    </comment>
-    <ref>max_step_length</ref>
-    <ref>max_step_height</ref>
-    <ref>max_step_side</ref>
-    <ref>max_step_turn</ref>
-    <ref>zmp_offset_forward</ref>
-    <ref>zmp_offset_sideward</ref>
-    <ref>l_hip_roll_compensation</ref>
-    <ref>r_hip_roll_compensation</ref>
-    <ref>hip_height</ref>
-    <ref>torso_sideward_orientation</ref>
-  </message>
-  <message name="SetWalkArmsParams">
-    <comment>Allows for setting certain walking parameters related to using the
-      arms for balancing. Values that have a magic value of -1234567 are ignored.
-    </comment>
-    <ref>arms_enabled</ref>
-    <ref>shoulder_pitch_median</ref>
-    <ref>shoulder_pitch_amplitude</ref>
-    <ref>elbow_roll_median</ref>
-    <ref>elbow_roll_amplitude</ref>
-  </message>
 
   <message name="Stop">
     <comment>Stop as soon as possible.</comment>
@@ -118,38 +36,37 @@
   <message name="WalkStraight">
     <comment>Orders the robot to walk on a straight line.</comment>
     <field type="float" name="distance">Distance in m to walk.</field>
-    <field type="uint32" name="num_samples">
-      Number of intermediate samples to use for walking.
-    </field>
   </message>
   <message name="WalkSideways">
-    <comment>Walk sideways.</comment>
+    <comment>Walk sideways (strafe).</comment>
     <field type="float" name="distance">Distance in m to walk.</field>
-    <field type="uint32" name="num_samples">
-      Number of intermediate samples to use for strafing.
-    </field>
   </message>
   <message name="WalkArc">
     <comment>Orders the robot to walk on an arc.</comment>
     <field type="float" name="angle">Angle in radians to turn over the way.</field>
     <field type="float" name="radius">Radius in m of the circle in m.</field>
-    <field type="uint32" name="num_samples">
-      Number of intermediate samples to use for walking.
-    </field>
   </message>
-  <message name="Walk">
-    <comment>Orders the robot to walk in the given direction (or stop if 0)</comment>
-    <field type="float" name="x">Fraction of MaxStepX. Use negative for backwards. [-1.0 to 1.0]</field>
-    <field type="float" name="y">Fraction of MaxStepY. Use negative for right. [-1.0 to 1.0]</field>
-    <field type="float" name="theta">Fraction of MaxStepTheta. Use negative for clockwise [-1.0 to 1.0]</field>
-    <field type="float" name="speed">Fraction of MaxStepFrequency [0.0 to 1.0]</field>
+  <message name="WalkVelocity">
+    <comment>
+      Orders the robot to walk with the given velocities. This is used
+      for an omni-directional walk. It will stop if all velocities are 0.
+    </comment>
+    <field type="float" name="x">
+      Fraction of MaxStepX. Use negative for backwards. [-1.0 to 1.0].
+    </field>
+    <field type="float" name="y">
+      Fraction of MaxStepY. Use negative for right. [-1.0 to 1.0].
+    </field>
+    <field type="float" name="theta">
+      Fraction of MaxStepTheta. Use negative for clockwise [-1.0 to 1.0].
+    </field>
+    <field type="float" name="speed">
+      Fraction of MaxStepFrequency [0.0 to 1.0].
+    </field>
   </message>
   <message name="Turn">
     <comment>Orders the robot to turn on the current position.</comment>
     <field type="float" name="angle">Angle in radians to turn.</field>
-    <field type="uint32" name="num_samples">
-      Number of intermediate samples to use for turning.
-    </field>
   </message>
   <message name="Kick">
     <comment>
@@ -162,46 +79,18 @@
     <comment>
       Bring robot into a park position where it is safe to turn servos off.
     </comment>
-    <field type="float" name="time_sec">Time in seconds when to reach the position.</field>
   </message>
   <message name="GetUp">
     <comment>Bring robot into a standing position when in park position.</comment>
-    <field type="float" name="time_sec">Time in seconds when to reach the position.</field>
   </message>
   <message name="Standup">
     <comment>Bring robot into a standing position when lying on the ground.</comment>
     <field type="StandupEnum" name="from_pos">Position from where to standup.</field>
   </message>
-  <message name="YawPitchHead">
+  <message name="MoveHead">
     <comment>Set head's pan/tilt to the given values..</comment>
     <field type="float" name="yaw">Desired yaw (horizontal orientation).</field>
     <field type="float" name="pitch">Desired pitch (vertical orientation).</field>
-    <field type="float" name="time_sec">Time in seconds when to reach the target.</field>
-  </message>
-  <message name="SetStiffnessParams">
-    <comment>Updates Stiffness values for a certain motion pattern</comment>
-    <field type="StiffnessMotionPatternEnum" name="motion_pattern">the motion pattern to update</field>
-    <field type="float" name="head_yaw">head_yaw</field>
-    <field type="float" name="head_pitch">head_pitch</field>
-    <field type="float" name="l_shoulder_pitch">l_shoulder_pitch</field>
-    <field type="float" name="l_shoulder_roll">l_shoulder_roll</field>
-    <field type="float" name="l_elbow_yaw">l_elbow_yaw</field>
-    <field type="float" name="l_elbow_roll">l_elbow_roll</field>
-    <field type="float" name="l_hip_yaw_pitch">l_hip_yaw_pitch</field>
-    <field type="float" name="l_hip_roll">l_hip_roll</field>
-    <field type="float" name="l_hip_pitch">l_hip_pitch</field>
-    <field type="float" name="l_knee_pitch">l_knee_pitch</field>
-    <field type="float" name="l_ankle_pitch">l_ankle_pitch</field>
-    <field type="float" name="l_ankle_roll">l_ankle_roll</field>
-    <field type="float" name="r_hip_yaw_pitch">r_hip_yaw_pitch</field>
-    <field type="float" name="r_hip_roll">r_hip_roll</field>
-    <field type="float" name="r_hip_pitch">r_hip_pitch</field>
-    <field type="float" name="r_knee_pitch">r_knee_pitch</field>
-    <field type="float" name="r_ankle_pitch">r_ankle_pitch</field>
-    <field type="float" name="r_ankle_roll">r_ankle_roll</field>
-    <field type="float" name="r_shoulder_pitch">r_shoulder_pitch</field>
-    <field type="float" name="r_shoulder_roll">r_shoulder_roll</field>
-    <field type="float" name="r_elbow_yaw">r_elbow_yaw</field>
-    <field type="float" name="r_elbow_roll">r_elbow_roll</field>
+    <field type="float" name="speed">Maximum speed in [0.0..1.0].</field>
   </message>
 </interface>

@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_bbsync = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	      fawkesgeometry fawkesblackboard
+	      fawkesblackboard
 OBJS_bbsync = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all    = $(OBJS_bbsync)

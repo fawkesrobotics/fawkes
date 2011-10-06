@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  module_manager_factory.h - factory class for module managers
+ *  naoqi_inifin.h - Fawkes NaoQiAspect initializer/finalizer
  *
- *  Generated: Sun Sep 11 09:51:41 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 12 15:53:07 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,25 +21,29 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_FACTORY_H_
-#define __UTILS_SYSTEM_DYNAMIC_MODULE_MANAGER_FACTORY_H_
+#ifndef __PLUGINS_NAO_ASPECT_NAOQI_INIFIN_H_
+#define __PLUGINS_NAO_ASPECT_NAOQI_INIFIN_H_
 
-#include <utils/system/dynamic_module/module_manager.h>
+#include <aspect/inifins/inifin.h>
+#include <plugins/nao/aspect/naoqi.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class ModuleManagerFactory
+class NaoQiAspectIniFin : public AspectIniFin
 {
  public:
+  NaoQiAspectIniFin();
 
-  /** The module manager type
-   */
-  typedef enum {
-    MMT_DL = 1       /**< Standard dl modules, used on Linux systems */
-  } ModuleManagerType;
+  virtual void init(Thread *thread);
+  virtual void finalize(Thread *thread);
 
-  static ModuleManager * getInstance(ModuleManagerType mmt,
-				     const char * module_base_dir = "");
+  void set_naoqi_broker(AL::ALPtr<AL::ALBroker> naoqi_broker);
+
+ private:
+  AL::ALPtr<AL::ALBroker> __naoqi_broker;
 };
 
 } // end namespace fawkes

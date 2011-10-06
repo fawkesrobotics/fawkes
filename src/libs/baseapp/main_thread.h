@@ -48,6 +48,7 @@ class PluginManager;
 class Time;
 class PluginNetworkHandler;
 class InterruptibleBarrier;
+class Barrier;
 class Mutex;
 class ThreadManager;
 class FawkesNetworkManager;
@@ -61,7 +62,8 @@ class FawkesMainThread
 		   MultiLogger *multi_logger,
 		   ThreadManager *thread_manager,
 		   PluginManager *plugin_manager,
-		   const char *load_plugins);
+		   const char *load_plugins,
+                   const char *default_plugin = 0);
   virtual ~FawkesMainThread();
 
   virtual void once();
@@ -69,9 +71,13 @@ class FawkesMainThread
 
   virtual void set_mainloop_thread(Thread *mainloop_thread);
 
+  void full_start();
+
+  MultiLogger *  logger() const;
+
   class Runner : public SignalHandler {
   public:
-    Runner(FawkesMainThread *fmt);
+    Runner(FawkesMainThread *fmt, bool register_signals = true);
     ~Runner();
     void run();
     void handle_signal(int signum);
@@ -81,6 +87,7 @@ class FawkesMainThread
     bool              __init_running;
     bool              __init_quit;
     bool              __sigint_running;
+    bool              __register_signals;
   };
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -96,10 +103,12 @@ class FawkesMainThread
   TimeWait             *__time_wait;
   AspectManager        *__aspect_manager;
 
+  Barrier              *__init_barrier;
   Thread               *__mainloop_thread;
   Mutex                *__mainloop_mutex;
   InterruptibleBarrier *__mainloop_barrier;
 
+  char                 *__default_plugin;
   char                 *__load_plugins;
 
   SQLiteConfiguration  *__sqlite_conf;

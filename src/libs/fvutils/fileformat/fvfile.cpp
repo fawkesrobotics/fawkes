@@ -427,8 +427,11 @@ FireVisionDataFile::read_magic_token(const char *filename)
       fclose(f);
       throw FileReadException(filename, errno, "Could not read magic token from file");
     }
+    fclose(f);
+  } else {
+    throw FileReadException(filename, errno,
+                            "Could not read magic token from file");
   }
-  fclose(f);
 
   return magic_token;
 }

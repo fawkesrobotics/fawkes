@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NaoSensorInterface" author="Tim Niemueller" year="2008">
+  <constants>
+    <enum name="UltrasonicDirection">
+      <comment>
+	This determines the chosen sender/receiver.
+      </comment>
+      <item name="USD_NONE">No transmission received, yet.</item>
+      <item name="USD_LEFT_LEFT">Left emitter and left receiver.</item>
+      <item name="USD_LEFT_RIGHT">Left emitter and right receiver.</item>
+      <item name="USD_RIGHT_RIGHT">Right emitter and right receiver.</item>
+      <item name="USD_RIGHT_LEFT">Right emitter and left receiver.</item>
+      <item name="USD_BOTH_BOTH">Both emitters and both receivers.</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      This interface provides access to Nao sensors.
+    </comment>
+    <field type="float" name="accel_x">Accelerometer x</field>
+    <field type="float" name="accel_y">Accelerometer y</field>
+    <field type="float" name="accel_z">Accelerometer z</field>
+    <field type="float" name="gyro_x">Gyrometer x</field>
+    <field type="float" name="gyro_y">Gyrometer y</field>
+    <field type="float" name="gyro_ref">Gyrometer reference</field>
+    <field type="float" name="angle_x">Angle x</field>
+    <field type="float" name="angle_y">Angle y</field>
+    <field type="float" name="l_fsr_fl">Left FSR front left</field>
+    <field type="float" name="l_fsr_fr">Left FSR front right</field>
+    <field type="float" name="l_fsr_rl">Left FSR rear left</field>
+    <field type="float" name="l_fsr_rr">Left FSR rear right</field>
+    <field type="float" name="r_fsr_fl">Right FSR front left</field>
+    <field type="float" name="r_fsr_fr">Right FSR front right</field>
+    <field type="float" name="r_fsr_rl">Right FSR rear left</field>
+    <field type="float" name="r_fsr_rr">Right FSR rear right</field>
+    <field type="float" name="l_total_weight">Total weight on left foot</field>
+    <field type="float" name="r_total_weight">Total weight on right foot</field>
+    <field type="float" name="l_cop_x">Center of pressure X for left foot.</field>
+    <field type="float" name="l_cop_y">Center of pressure Y for left foot.</field>
+    <field type="float" name="r_cop_x">Center of pressure X for right foot.</field>
+    <field type="float" name="r_cop_y">Center of pressure Y for right foot.</field>
+    <field type="float" name="ultrasonic_distance_left" length="4">
+      First four ultrasonic sensor readings from left receiver. Distance
+      to detected object is in meters.
+    </field>
+    <field type="float" name="ultrasonic_distance_right" length="4">
+      First four ultrasonic sensor readings from right receiver. Distance
+      to detected object is in meters.
+    </field>
+    <field type="UltrasonicDirection" name="ultrasonic_direction">
+      Direction that was used to gather the ultrasonic readings.
+    </field>
+    <field type="uint8" name="l_foot_bumper_l">Left foot bumper left side</field>
+    <field type="uint8" name="l_foot_bumper_r">Left foot bumper right side</field>
+    <field type="uint8" name="r_foot_bumper_l">Right foot bumper left side</field>
+    <field type="uint8" name="r_foot_bumper_r">Right foot bumper right side</field>
+    <field type="uint8" name="head_touch_front">Front part of head touch sensor (only Academics robot)</field>
+    <field type="uint8" name="head_touch_middle">Middle part of head touch sensor (only Academics robot)</field>
+    <field type="uint8" name="head_touch_rear">Rear part of head touch sensor (only Academics robot)</field>
+    <field type="uint8" name="chest_button">Chest button state</field>
+    <field type="float" name="battery_charge">Battery charge</field>
+  </data>
+  <message name="EmitUltrasonicWave">
+    <comment>Sends a ultrasonic wave for detection.</comment>
+    <ref>ultrasonic_direction</ref>
+  </message>
+  <message name="StartUltrasonic">
+    <comment>
+      Starts continuous ultrasonic emission until stopped explicitly.
+    </comment>
+    <ref>ultrasonic_direction</ref>
+  </message>
+  <message name="StopUltrasonic">
+    <comment>Stops continuous ultrasonic emission.</comment>
+  </message>
+</interface>

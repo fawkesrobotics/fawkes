@@ -39,6 +39,10 @@ class InterfaceDispatcher
   InterfaceDispatcher(const char *listener_name, fawkes::Interface *iface,
 		      bool message_enqueueing = true);
 
+  InterfaceDispatcher(const char *listener_name_prefix,
+                      std::list<fawkes::Interface *> ifaces,
+		      bool message_enqueueing = true);
+
   void set_message_enqueueing(bool enqueue);
 
   sigc::signal<void, Interface *>               signal_data_changed();
@@ -67,6 +71,8 @@ class InterfaceDispatcher
   virtual void on_reader_added();
   virtual void on_reader_removed();
 
+ private:
+  void setup_signals();
 
  private:
   bool                                           __message_enqueueing;

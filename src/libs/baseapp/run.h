@@ -24,6 +24,8 @@
 #ifndef __LIBS_BASEAPP_RUN_H_
 #define __LIBS_BASEAPP_RUN_H_
 
+#include <baseapp/init_options.h>
+
 namespace fawkes {
   class ArgumentParser;
   class MultiLogger;
@@ -60,6 +62,7 @@ extern ConfigNetworkHandler *nethandler_config;
 extern PluginNetworkHandler *nethandler_plugin;
 
 int  init(int argc, char **argv);
+int  init(InitOptions options);
 void run();
 void cleanup();
 
