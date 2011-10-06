@@ -26,7 +26,6 @@
 #include <netcomm/service_discovery/browse_handler.h>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 #include <map>
 #include <string>
@@ -42,7 +41,7 @@ class BatteryMonitor
   fawkes::ServiceBrowseHandler
 {
  public:
-  BatteryMonitor( Glib::RefPtr< Gnome::Glade::Xml > ref_xml );
+  BatteryMonitor(Glib::RefPtr<Gtk::Builder> builder);
   ~BatteryMonitor();
 
   Gtk::Window& get_window() const;

@@ -24,7 +24,6 @@
 #define __TOOLS_CONFIG_EDITOR_CONFIG_EDITOR_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 class ConfigTreeView;
 
@@ -37,7 +36,7 @@ class FawkesConfigEditor
 : public Gtk::Window
 {
  public:
-  FawkesConfigEditor( Glib::RefPtr<Gnome::Glade::Xml> ref_xml );
+  FawkesConfigEditor(Glib::RefPtr<Gtk::Builder> builder);
   ~FawkesConfigEditor();
 
   Gtk::Window& get_window() const;

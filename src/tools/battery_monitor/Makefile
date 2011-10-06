@@ -19,18 +19,18 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
 include $(BUILDSYSDIR)/ext/gmsl
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_ffbatterymon = stdc++ fawkescore fawkesconfig fawkesnetcomm \
 		    fawkesguiutils fawkesblackboard fawkesinterface \
-		    fvutils BatteryInterface
+		    BatteryInterface
 OBJS_ffbatterymon = 	main.o				\
 			battery_monitor_treeview.o	\
 			battery_monitor.o
 OBJS_all = $(OBJS_ffbatterymon)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffbatterymon
   INST_RESDIRS = guis/battery_monitor
   MANPAGES_gui = $(MANDIR)/man1/ffbatterymon.1

@@ -18,8 +18,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
 # enable for debug output
 #CFLAGS += -DDEBUG_PRINT
@@ -32,7 +32,7 @@ OBJS_ffwiviewer = main.o			\
 
 OBJS_all = $(OBJS_ffwiviewer)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffwiviewer
   INST_RESDIRS = guis/worldinfo_viewer
   MANPAGES_gui = $(MANDIR)/man1/ffwiviewer.1

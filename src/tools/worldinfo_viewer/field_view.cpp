@@ -134,11 +134,11 @@ FieldView::remove_host( Glib::ustring name )
 
 /** Overloaded signal handler.
  * This is were the drawing action happens.
- * @param event the event that triggered the signal
+ * @param context cairo context for drawing
  * @return always true
  */
 bool
-FieldView::on_expose_event(GdkEventExpose* event)
+FieldView::on_draw(const Cairo::RefPtr<Cairo::Context> &context)
 {
   Glib::RefPtr<Gdk::Window> window = get_window();
 
@@ -147,15 +147,6 @@ FieldView::on_expose_event(GdkEventExpose* event)
     Gtk::Allocation allocation = get_allocation();
     const int width  = allocation.get_width();
     const int height = allocation.get_height();
-    
-    Cairo::RefPtr<Cairo::Context> context = window->create_cairo_context();
-    
-    if (event)
-    {
-      context->rectangle( event->area.x, event->area.y,
-			  event->area.width, event->area.height );
-      context->clip();
-    }
     
     // setup
     float unit;

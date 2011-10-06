@@ -46,19 +46,19 @@ using namespace firevision;
 
 /** Constructor.
  * @param cobject C base object
- * @param ref_xml Glade XML
+ * @param builder Gtk::Builder
  */
 FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType* cobject,
-					 const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+					 const Glib::RefPtr<Gtk::Builder> builder)
   : Gtk::Window(cobject)
 {
-  ref_xml->get_widget("swFuseList",  __image_list_scroll);
-  ref_xml->get_widget("vpImage",     __image_viewport);
-  ref_xml->get_widget("afSaveType",  __save_box);
-  ref_xml->get_widget("fcbSaveTo",   __save_filechooser);
-  ref_xml->get_widget("cbtAutoSave", __auto_save);
-  ref_xml->get_widget("btSaveImage", __save_btn);
-  ref_xml->get_widget("stb",         __statusbar);
+  builder->get_widget("swFuseList",  __image_list_scroll);
+  builder->get_widget("vpImage",     __image_viewport);
+  builder->get_widget("afSaveType",  __save_box);
+  builder->get_widget("fcbSaveTo",   __save_filechooser);
+  builder->get_widget("cbtAutoSave", __auto_save);
+  builder->get_widget("btSaveImage", __save_btn);
+  builder->get_widget("stb",         __statusbar);
 
   __img_list_widget = Gtk::manage(new FuseImageListWidget());
   __img_list_widget->image_selected().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_fuse_image_selected) );
@@ -68,12 +68,20 @@ FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType* cobject,
   __save_type = Gtk::manage(new Gtk::ComboBoxText);
   __save_box->add(*__save_type);
 
-  Gdk::Pixbuf::SListHandle_PixbufFormat fmts = Gdk::Pixbuf::get_formats();
-  Gdk::Pixbuf::SListHandle_PixbufFormat::const_iterator it = fmts.begin();
+  std::vector<Gdk::PixbufFormat> fmts = Gdk::Pixbuf::get_formats();
+  std::vector<Gdk::PixbufFormat>::const_iterator it = fmts.begin();
+#if GTK_VERSION_GE(3,0)
+  __save_type->append("Don't save");
+#else
   __save_type->append_text("Don't save");
+#endif
   for (; it != fmts.end(); ++it) {
     if ((*it).is_writable()) {
+#if GTK_VERSION_GE(3,0)
+      __save_type->append((*it).get_name());
+#else
       __save_type->append_text((*it).get_name());
+#endif
     }
   }
 

@@ -24,9 +24,6 @@
 #define __TOOLS_CONFIG_EDITOR_CONFIG_ADD_DIALOG_H_
 
 #include <gtkmm.h>
-#ifdef HAVE_GLADEMM
-#  include <libglademm/xml.h>
-#endif
 
 class ConfigAddDialog : public Gtk::Dialog
 {
@@ -37,9 +34,8 @@ class ConfigAddDialog : public Gtk::Dialog
 		  Gtk::Notebook    *type_pages,
 		  Gtk::ComboBox    *cmb_type,
 		  Gtk::CheckButton *chb_is_default);
-#ifdef HAVE_GLADEMM
-  ConfigAddDialog(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml);
-#endif
+  ConfigAddDialog(BaseObjectType* cobject,
+                  const Glib::RefPtr<Gtk::Builder> &builder);
   virtual ~ConfigAddDialog();
 
   void init(const Glib::ustring& path);

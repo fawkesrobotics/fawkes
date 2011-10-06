@@ -26,7 +26,6 @@
 #include "config_editor_plugin.h"
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 #include <string>
 #include <vector>
@@ -64,7 +63,7 @@ public:
 
  public:
   NaoStiffnessConfigDialog(BaseObjectType *cobject,
-                           const Glib::RefPtr<Gnome::Glade::Xml> &ref_xml);
+                           const Glib::RefPtr<Gtk::Builder> &builder);
   virtual ~NaoStiffnessConfigDialog();
 
   virtual void set_stiffnesses(const nao_stiffnesses &vals);
@@ -116,7 +115,7 @@ public:
 class NaoStiffnessConfigPlugin : public ConfigEditorPlugin
 {
  public:
-   NaoStiffnessConfigPlugin(std::string glade_path);
+   NaoStiffnessConfigPlugin(std::string ui_path);
   virtual ~NaoStiffnessConfigPlugin();
 
  protected:

@@ -80,9 +80,11 @@ ifeq ($(HAVE_LIBPNG),1)
 endif
 
 ifeq ($(HAVE_OPENCV),1)
+# Specify LDFLAGS manually, too many libs depending on old Gtk atm
+# (filter-out -lhighgui -lcvaux,(shell $(PKGCONFIG) --libs 'opencv'))
   CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS_OPENCV     = $(filter-out -lhighgui -lcvaux,$(shell $(PKGCONFIG) --libs 'opencv'))
-  LDFLAGS_OPENCV_GUI = -lhighgui
+  LDFLAGS_OPENCV     = -lopencv_core -lopencv_imgproc -lopencv_ml
+  LDFLAGS_OPENCV_GUI = -lopencv_highgui
 endif
 
 ifeq ($(HAVE_LIBUSB),1)

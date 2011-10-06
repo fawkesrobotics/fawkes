@@ -64,21 +64,19 @@ ConfigEditDialog::ConfigEditDialog(Gtk::Entry *ent_value, Gtk::ComboBox *cob_boo
   m_chb_is_default  = chb_is_default;
 }
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
  * @param cobject pointer to base object type
- * @param ref_xml Glade XML file
+ * @param builder Gtk builder
  */     
-ConfigEditDialog::ConfigEditDialog( BaseObjectType* cobject,
-				    const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml )
+ConfigEditDialog::ConfigEditDialog(BaseObjectType* cobject,
+                                   const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Dialog(cobject)
 {
-  ref_xml->get_widget("entValueEdit", m_ent_value);
-  ref_xml->get_widget("cmbBoolEdit", m_cob_bool_value);
-  ref_xml->get_widget("nbkTypesEdit", m_type_pages);
-  ref_xml->get_widget("chbIsDefaultEdit", m_chb_is_default);
+  builder->get_widget("entValueEdit", m_ent_value);
+  builder->get_widget("cmbBoolEdit", m_cob_bool_value);
+  builder->get_widget("nbkTypesEdit", m_type_pages);
+  builder->get_widget("chbIsDefaultEdit", m_chb_is_default);
 }
-#endif
 
 /** Initialize the dialog.
  * @param path config path

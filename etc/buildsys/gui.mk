@@ -22,27 +22,36 @@ __gui_mk := 1
 
 include $(BUILDSYSDIR)/ext/gmsl
 
-PC_GTKMM        = gtkmm-2.4
+PC_GTKMM_3      = gtkmm-3.0
+PC_GTKMM_2      = gtkmm-2.4
 PC_GIOMM        = giomm-2.4
 PC_CAIROMM      = cairomm-1.0
-PC_GLADEMM      = libglademm-2.4
 PC_HILDONMM     = hildonmm
 PC_HILDONFMMM   = hildon-fmmm
 PC_GCONFMM      = gconfmm-2.6
 PC_GLIBMM       = glibmm-2.4
 PC_GTHREAD      = gthread-2.0
-PKG_GTKMM       = gtkmm24[-devel]
+PKG_GTKMM       = gtkmm30[-devel]
 PKG_CAIROMM     = cairomm[-devel]
-PKG_GLADEMM     = libglademm24[-devel]
 PKG_GCONFMM     = gconfmm26[-devel]
 PKG_GLIBMM      = glibmm24[-devel]
 PKG_GTHREAD     = glib2-devel
 
 ifneq ($(PKGCONFIG),)
-  HAVE_GTKMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM)'; echo $${?/1/}),1,0)
+  HAVE_GTKMM_3 = $(if $(shell $(PKGCONFIG) --atleast-version=3.0.0 '$(PC_GTKMM_3)'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_GTKMM_3),1)
+    PC_GTKMM=$(PC_GTKMM_3)
+    HAVE_GTKMM=1
+  else
+    HAVE_GTKMM_2 = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM_2)'; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_GTKMM_2),1)
+      PC_GTKMM=$(PC_GTKMM_2)
+      HAVE_GTKMM=1
+    endif
+  endif
+
   HAVE_GIOMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GIOMM)'; echo $${?/1/}),1,0)
   HAVE_CAIROMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_CAIROMM)'; echo $${?/1/}),1,0)
-  HAVE_GLADEMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GLADEMM)'; echo $${?/1/}),1,0)
   HAVE_GCONFMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GCONFMM)'; echo $${?/1/}),1,0)
   HAVE_GLIBMM  = $(if $(shell $(PKGCONFIG) --exists '$(PC_GLIBMM)'; echo $${?/1/}),1,0)
   HAVE_GTHREAD = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTHREAD)'; echo $${?/1/}),1,0)
@@ -82,13 +91,6 @@ else
   PKG_MISSING += $(PKG_CAIROMM)
 endif
 
-ifeq ($(HAVE_GLADEMM),1)
-  CFLAGS_GLADEMM   = -DHAVE_GLADEMM $(shell $(PKGCONFIG) --cflags '$(PC_GLADEMM)')
-  LDFLAGS_GLADEMM  = $(shell $(PKGCONFIG) --libs '$(PC_GLADEMM)')
-else
-  PKG_MISSING += $(PKG_GLADEMM)
-endif
-
 ifeq ($(HAVE_GCONFMM),1)
   CFLAGS_GCONFMM  = $(shell $(PKGCONFIG) --cflags '$(PC_GCONFMM)') -DHAVE_GCONFMM
   LDFLAGS_GCONFMM = $(shell $(PKGCONFIG) --libs '$(PC_GCONFMM)')
@@ -116,26 +118,19 @@ ifeq ($(HAVE_GTKMM)$(HAVE_CAIROMM)$(HAVE_GTHREAD),111)
 		$(CFLAGS_GCONFMM) $(CFLAGS_GTHREAD)
   LDFLAGS_GUI += $(LDFLAGS_GTKMM) $(LDFLAGS_CAIROMM) \
 		$(LDFLAGS_GCONFMM) $(LDFLAGS_GTHREAD)
-  ifeq ($(HAVE_GLADEMM),1)
-    HAVE_GLADE_GUI = 1
-    CFLAGS_GUI  += $(CFLAGS_GLADEMM)
-    LDFLAGS_GUI += $(LDFLAGS_GLADEMM)
-  endif
 endif
 
 GUI_ERROR = $(if $(PKG_MISSING),($(call merge, and ,$(PKG_MISSING)) not installed))
 
 # Some default warnings that may be used
 ifeq ($(OBJSSUBMAKE),1)
-.PHONY: warning_gtkmm warning_giomm warning_cairomm warning_glademm warning_hildonmm
+.PHONY: warning_gtkmm warning_giomm warning_cairomm warning_hildonmm
 warning_gtkmm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Gtk dependent GUI apps$(TNORMAL) $(ERROR_GTKMM)";
 warning_giomm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Gio dependent GUI apps$(TNORMAL) $(ERROR_GTKMM)";
 warning_cairomm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Cairo dependent GUI apps$(TNORMAL) $(ERROR_CAIROMM)";
-warning_glademm:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Glade dependent GUI apps$(TNORMAL) $(ERROR_GLADEMM)";
 warning_gconfmm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting GConf dependent GUI apps$(TNORMAL) $(ERROR_GCONFMM)";
 warning_gthread:

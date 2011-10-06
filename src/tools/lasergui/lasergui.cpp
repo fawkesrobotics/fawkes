@@ -41,7 +41,6 @@
 #include <gui_utils/robot/allemaniacs_athome.h>
 
 #include <gtkmm/main.h>
-#include <libglademm/xml.h>
 #include <list>
 #include <utils/misc/string_conversions.h>
 
@@ -60,33 +59,33 @@ using namespace fawkes;
 class LaserGuiGtkWindow : public Gtk::Window
 {
  public:
-  /** Constructor for Glademm.
+  /** Constructor for Gtk::Builder.
    * @param cobject C base object
-   * @param refxml reference to Glade's Xml parser
+   * @param builder Gtk Builder
    */
   LaserGuiGtkWindow(BaseObjectType* cobject,
-		    const Glib::RefPtr<Gnome::Glade::Xml> &refxml)
+		    const Glib::RefPtr<Gtk::Builder> &builder)
     : Gtk::Window(cobject), __athome_drawer(true)
   {
     __laser_if_type = "Laser360Interface";
     __laser_if_id   = "Laser";
     __ifd = NULL;
 
-    refxml->get_widget_derived("da_laser", __area);
-    refxml->get_widget("tb_connection", __tb_connection);
-    refxml->get_widget("tb_select", __tb_select);
-    refxml->get_widget("tb_lines", __tb_lines);
-    refxml->get_widget("tb_points", __tb_points);
-    refxml->get_widget("tb_hull", __tb_hull);
-    refxml->get_widget("tb_trimvals", __tb_trimvals);
-    refxml->get_widget("tb_rotation", __tb_rotation);
-    refxml->get_widget("tb_legtracker", __tb_legtracker);
-    refxml->get_widget("tb_stop", __tb_stop);
-    refxml->get_widget("tb_zoom_in", __tb_zoom_in);
-    refxml->get_widget("tb_zoom_out", __tb_zoom_out);
-    refxml->get_widget("tb_exit", __tb_exit);
-    refxml->get_widget("dlg_ltopen", __dlg_ltopen);
-    refxml->get_widget("pgb_ltopen", __pgb_ltopen);
+    builder->get_widget_derived("da_laser", __area);
+    builder->get_widget("tb_connection", __tb_connection);
+    builder->get_widget("tb_select", __tb_select);
+    builder->get_widget("tb_lines", __tb_lines);
+    builder->get_widget("tb_points", __tb_points);
+    builder->get_widget("tb_hull", __tb_hull);
+    builder->get_widget("tb_trimvals", __tb_trimvals);
+    builder->get_widget("tb_rotation", __tb_rotation);
+    builder->get_widget("tb_legtracker", __tb_legtracker);
+    builder->get_widget("tb_stop", __tb_stop);
+    builder->get_widget("tb_zoom_in", __tb_zoom_in);
+    builder->get_widget("tb_zoom_out", __tb_zoom_out);
+    builder->get_widget("tb_exit", __tb_exit);
+    builder->get_widget("dlg_ltopen", __dlg_ltopen);
+    builder->get_widget("pgb_ltopen", __pgb_ltopen);
 
     __area->set_robot_drawer(&__athome_drawer);
 
@@ -561,11 +560,11 @@ main(int argc, char** argv)
 {
    Gtk::Main kit(argc, argv);
    
-   Glib::RefPtr<Gnome::Glade::Xml> refxml;
-   refxml = Gnome::Glade::Xml::create(RESDIR"/guis/lasergui/lasergui.glade");
+   Glib::RefPtr<Gtk::Builder> builder;
+   builder = Gtk::Builder::create_from_file(RESDIR"/guis/lasergui/lasergui.ui");
 
    LaserGuiGtkWindow *window = NULL;
-   refxml->get_widget_derived("wnd_lasergui", window);
+   builder->get_widget_derived("wnd_lasergui", window);
 
    Gtk::Main::run(*window);
 

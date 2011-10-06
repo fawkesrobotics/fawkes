@@ -30,7 +30,7 @@ LIBS_fvfuseviewer = stdc++ fawkescore fawkesnetcomm fawkesplugin fawkesutils \
 OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 OBJS_all += $(OBJS_fvfuseviewer)
 
-ifeq ($(HAVE_GLADE_GUI),1)
+ifeq ($(HAVE_GUI),1)
   BINS_gui += $(BINDIR)/fvfuseviewer
   INST_RESDIRS = guis/fuse_viewer
   MANPAGES_all += $(MANDIR)/man1/fvfuseviewer.1
