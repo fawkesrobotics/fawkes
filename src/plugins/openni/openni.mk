@@ -16,7 +16,8 @@
 ifneq ($(wildcard $(SYSROOT)/usr/include/ni/XnCppWrapper.h),)
   HAVE_OPENNI=1
   CFLAGS_OPENNI = -DHAVE_OPENNI -I$(SYSROOT)/usr/include/ni -Wno-unused-variable \
-		  -Wno-reorder -fno-strict-aliasing
+		  -Wno-reorder -fno-strict-aliasing -Wno-unknown-pragmas \
+		  -Wno-unused-but-set-variable -Wno-return-type
   LDFLAGS_OPENNI = -lOpenNI -lpthread
 endif
 
