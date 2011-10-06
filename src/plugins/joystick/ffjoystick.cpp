@@ -197,7 +197,9 @@ class JoystickBlackBoardActListener
 {
  public:
   /** Constructor.
-   * @param argp argument parser
+   * @param aqt acquisition thread to pass to message processor
+   * @param blackboard blackboard to register for message event handling
+   * @param joystick_if joystick interface to listen on for messages
    * @param logger logger
    */
   JoystickBlackBoardActListener(JoystickAcquisitionThread *aqt,

@@ -74,7 +74,16 @@ JoystickActThread::loop()
 }
 
 
+/** @class JoystickActThread::MessageProcessor "act_thread.h"
+ * Process incoming messages.
+ * Internal utility class.
+ * @author Tim Niemueller
+ */
 
+/** Constructor.
+ * @param aqt acqusition thread to intsruct
+ * @param joystick_if interface to listen on for messages
+ */
 JoystickActThread::MessageProcessor::MessageProcessor(JoystickAcquisitionThread *aqt,
                                                       JoystickInterface *joystick_if)
 {
@@ -83,6 +92,9 @@ JoystickActThread::MessageProcessor::MessageProcessor(JoystickAcquisitionThread 
   __joystick_connected = false;
 }
 
+/** Process a single message.
+ * @param msg message to process
+ */
 void
 JoystickActThread::MessageProcessor::process_message(Message *msg)
 {
@@ -120,6 +132,7 @@ JoystickActThread::MessageProcessor::process_message(Message *msg)
 }
 
 
+/** Process message currently in the queue. */
 void
 JoystickActThread::MessageProcessor::process()
 {
