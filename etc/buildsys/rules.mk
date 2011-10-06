@@ -115,8 +115,8 @@ clean: presubdirs subdirs
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
 qa: presubdirs subdirs
-	$(SILENT) if [ -d "$(subst /.objs,,$(realpath $(CURDIR)))/qa" ]; then \
-		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(realpath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(realpath $(CURDIR)))/qa)"; \
+	$(SILENT) if [ -d "$(subst /.objs,,$(abspath $(CURDIR)))/qa" ]; then \
+		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(abspath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(abspath $(CURDIR)))/qa)"; \
 		$(MAKE) --no-print-directory --no-keep-going -C "$(subst /.objs,,$(CURDIR))/qa" \
 			SRCDIR="$(subst /.objs,,$(CURDIR))/qa" $(MFLAGS) INDENT="$(INDENT)$(INDENT_STRING)" \
 			OBJSSUBMAKE=0 || exit $$?; \
@@ -136,14 +136,14 @@ endif
 
 ifneq ($(PRESUBDIRS)$(SUBDIRS),)
 $(PRESUBDIRS) $(SUBDIRS):
-	$(SILENTSYMB) if [ ! -d "$(realpath $(SRCDIR)/$(@))" ]; then \
+	$(SILENTSYMB) if [ ! -d "$(abspath $(SRCDIR)/$(@))" ]; then \
 		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL) ---"; \
 		exit 1; \
 	else \
 		echo -e "$(INDENT_PRINT)--> Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
-		$(MAKE) --no-print-directory --no-keep-going -C "$(realpath $(SRCDIR)/$@)" \
+		$(MAKE) --no-print-directory --no-keep-going -C "$(abspath $(SRCDIR)/$@)" \
 		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
-		SRCDIR="$(realpath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
+		SRCDIR="$(abspath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
 		fi \
@@ -230,7 +230,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	)
 
 ### Check if there are special additions
-ifneq ($(realpath $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
+ifneq ($(wildcard $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
   include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
 else
   ifneq ($(SECONDARY_BUILDSYSDIR),)

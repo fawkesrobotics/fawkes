@@ -136,7 +136,7 @@ endif
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBS_all_tolua)
 
-$(LUALIBDIR)/interfaces/%.$(SOEXT): | $(IFACEDIR)/lib%.$(SOEXT)
+$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.$(SOEXT): | $(IFACEDIR)/lib%.$(SOEXT)
 
 else
 all: warning_tolua_wrapper
