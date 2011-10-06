@@ -185,6 +185,8 @@ warning_viewer:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvviewer$(TNORMAL) (SDL[-devel] not installed) $(GUI_ERROR)";
 warning_showyuv:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvshowyuv$(TNORMAL) (SDL[-devel] not installed)";
+warning_scaled_viewer:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvscaled_viewer$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BUILDSYSDIR)/base.mk
