@@ -18,6 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 PRESUBDIRS = interfaces
+SUBDIRS = tool
 
 # Sub directory name that contain PTU drivers
 DRIVERS = dirperc robotis sony
