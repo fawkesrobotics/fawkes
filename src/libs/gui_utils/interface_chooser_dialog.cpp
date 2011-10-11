@@ -97,6 +97,8 @@ InterfaceChooserDialog::InterfaceChooserDialog(Gtk::Window &parent,
 
   set_default_response(1);
 
+  set_multi(false);
+
   __treeview.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &InterfaceChooserDialog::response))), 1));
 
   __bb = blackboard;
@@ -119,9 +121,37 @@ InterfaceChooserDialog::~InterfaceChooserDialog()
 {
 }
 
+
+/** Enables or disables selection of multiple rows.
+ * @param multi if true, multiple items can be selected, otherwise only one
+ */
+void
+InterfaceChooserDialog::set_multi(bool multi)
+{
+  Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
+  if (multi) {
+    treesel->set_mode(Gtk::SELECTION_MULTIPLE);
+  } else {
+    treesel->set_mode(Gtk::SELECTION_SINGLE);
+  }
+}
+
+
+/** Indicates whether or not multiple items can be selected.
+ * @return true if selection mode is multi, otherwise false.
+ */
+bool
+InterfaceChooserDialog::get_multi() const
+{
+  Glib::RefPtr<const Gtk::TreeSelection> treesel = __treeview.get_selection();
+  return treesel->get_mode() == Gtk::SELECTION_MULTIPLE;
+}
+
+
 /** Get selected interface type and ID.
- * If a interface has been selected use this method to get the
+ * If an interface has been selected use this method to get the
  * type and ID.
+ * Only applicable if get_multi() == false.
  * @param type upon return contains the type of the interface
  * @param id upon return contains the ID of the interface
  * @exception Exception thrown if no interface has been selected
@@ -139,6 +169,39 @@ InterfaceChooserDialog::get_selected_interface(Glib::ustring &type,
   } else {
     throw Exception("No interface selected");
   }
+}
+
+
+/** Get selected interface types and their respective IDs.
+ * If one or more interfaces have been selected use this method to get
+ * the types and IDs.
+ * @param type upon return contains the type of the interface
+ * @param id upon return contains the ID of the interface
+ * @exception Exception thrown if no interface has been selected
+ */
+std::vector<std::pair<Glib::ustring, Glib::ustring> >
+InterfaceChooserDialog::get_selected_interfaces()
+{
+  Glib::RefPtr<Gtk::TreeModel> model = __treeview.get_model();
+  Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
+  std::vector<Gtk::TreeModel::Path> sel = treesel->get_selected_rows();
+
+  std::vector< std::pair<Glib::ustring, Glib::ustring> > types_and_ids;
+
+  for (std::vector<Gtk::TreeModel::Path>::const_iterator it = sel.begin();
+       it != sel.end(); ++it)
+  {
+    Gtk::TreePath path = *it;
+    Gtk::TreeModel::const_iterator iter = model->get_iter(path);
+    if (iter) {
+      Gtk::TreeModel::Row row = *iter;
+      std::pair<Glib::ustring, Glib::ustring> pair = std::make_pair(row[__record.type],
+                                                                    row[__record.id]);
+      types_and_ids.push_back(pair);
+    }
+  }
+
+  return types_and_ids;
 }
 
 

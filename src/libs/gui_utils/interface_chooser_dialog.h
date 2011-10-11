@@ -51,7 +51,12 @@ class InterfaceChooserDialog
 
   virtual ~InterfaceChooserDialog();
 
+  void set_multi(bool multi);
+  bool get_multi() const;
+
   void get_selected_interface(Glib::ustring &type, Glib::ustring &id);
+  std::vector< std::pair<Glib::ustring, Glib::ustring> > get_selected_interfaces();
+
   fawkes::Interface *   run_and_open_for_reading();
 
  protected:
