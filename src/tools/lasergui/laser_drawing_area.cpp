@@ -331,16 +331,16 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
 #endif
     cr->set_line_width(1.0);
 
+    cr->set_source_rgb(1, 1, 1);
 #if GTK_VERSION_LT(3,0)
-    // clip to the area indicated by the expose event so that we only redraw
-    // the portion of the window that needs to be redrawn
+    // clip to the area indicated by the expose event so that we only
+    // redraw the portion of the window that needs to be redrawn
     cr->rectangle(event->area.x, event->area.y,
 		  event->area.width, event->area.height);
-#endif
-    cr->set_source_rgb(1, 1, 1);
     cr->fill_preserve();
-#if GTK_VERSION_LT(3,0)
     cr->clip();
+#else
+    cr->paint();
 #endif
     cr->set_source_rgb(0, 0, 0);
     //cr->set_source_rgba(0,0,0,1);
