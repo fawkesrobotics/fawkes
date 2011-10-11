@@ -255,8 +255,14 @@ class LaserGuiGtkWindow : public Gtk::Window
 
       __line_if = __bb->open_for_reading<ObjectPositionInterface>("LaserLine");
       __area->set_line_if(__line_if);
-      __visdis_if = __bb->open_for_writing<VisualDisplay2DInterface>("LaserGUI");
-      __area->set_visdisp_if(__visdis_if);
+      try {
+        __visdis_if = __bb->open_for_writing<VisualDisplay2DInterface>("LaserGUI");
+        __area->set_visdisp_if(__visdis_if);
+      } catch (Exception &e) {
+        __visdis_if = NULL;
+        // visdisplay is optional, probably some other lasergui has it
+        // open atm
+      }
 
       on_legtracker_toggled();
 
@@ -274,6 +280,11 @@ class LaserGuiGtkWindow : public Gtk::Window
       __tb_zoom_in->set_sensitive(true);
       __tb_zoom_out->set_sensitive(true);
     } catch (Exception &e) {
+      __area->reset_laser_ifs();
+      __area->set_line_if(NULL);
+      __area->set_visdisp_if(NULL);
+      __area->queue_draw();
+      __area->set_connected(false);
       if ( __bb ) {
 	__bb->close(__laser360_if);
 	__bb->close(__laser720_if);
