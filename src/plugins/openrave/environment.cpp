@@ -213,6 +213,7 @@ OpenRaveEnvironment::start_viewer()
 
 /** Autogenerate IKfast IK solver for robot.
  * @param robot pointer to OpenRaveRobot object
+ * @param iktype IK type of solver (default: Transform6D; use TranslationDirection5D for 5DOF arms)
  */
 void
 OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterization::Type iktype)
@@ -305,7 +306,7 @@ void
 OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot)
 {
   std::string filename = "../fawkes/src/plugins/openrave/python/graspplanning.py";
-  std::string funcname = "myGrasp";
+  std::string funcname = "runGrasp";
 
   boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
 
