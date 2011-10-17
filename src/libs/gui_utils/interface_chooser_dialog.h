@@ -4,6 +4,7 @@
  *
  *  Created: Sat Mar 19 12:18:43 2011
  *  Copyright  2008-2011  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011       Christoph Schwering
  *
  ****************************************************************************/
 
@@ -38,24 +39,22 @@ namespace fawkes {
 
 class Interface;
 class BlackBoard;
+class InterfaceInfo;
 
 class InterfaceChooserDialog
   : public Gtk::Dialog
 {
  public:
-  InterfaceChooserDialog(Gtk::Window &parent,
-			 BlackBoard *blackboard,
-			 const char *type_pattern,
-			 const char *id_pattern,
-			 Glib::ustring title = "Select Interface");
+  static InterfaceChooserDialog* create(
+      Gtk::Window &parent,
+      BlackBoard *blackboard,
+      const char *type_pattern,
+      const char *id_pattern,
+      const Glib::ustring& title = "Select Interfaces");
 
   virtual ~InterfaceChooserDialog();
 
-  void set_multi(bool multi);
-  bool get_multi() const;
-
   void get_selected_interface(Glib::ustring &type, Glib::ustring &id);
-  std::vector< std::pair<Glib::ustring, Glib::ustring> > get_selected_interfaces();
 
   fawkes::Interface *   run_and_open_for_reading();
 
@@ -71,15 +70,26 @@ class InterfaceChooserDialog
     Gtk::TreeModelColumn<unsigned int> num_readers;	/**< Number of readers */
   };
 
+  InterfaceChooserDialog(Gtk::Window& parent, const Glib::ustring& title);
+
+  void init(BlackBoard* blackboard,
+            const char* type_pattern,
+            const char* id_pattern);
+
+  virtual const InterfaceRecord& record() const;
+  virtual int init_columns();
+  virtual void init_row(Gtk::TreeModel::Row& row, const InterfaceInfo& ii);
+
+  Gtk::TreeView                 __treeview; /**< Tree widget for interfaces. */
+  Glib::RefPtr<Gtk::ListStore>  __model;    /**< Data model of the tree. */
+
  private:
-  BlackBoard    *__bb;
+  BlackBoard *__bb;
 
   Gtk::Window         &__parent;
-  Gtk::TreeView        __treeview;
   Gtk::ScrolledWindow  __scrollwin;
 
-  InterfaceRecord               __record;
-  Glib::RefPtr<Gtk::ListStore>  __model;
+  const InterfaceRecord* __record; /**< Should only be accessed by record(). */
 };
 
 } // end of namespace fawkes
