@@ -305,7 +305,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 void
 OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot)
 {
-  std::string filename = "../fawkes/src/plugins/openrave/python/graspplanning.py";
+  std::string filename = std::string(BINDIR) + "/../fawkes/src/plugins/openrave/python/graspplanning.py";
   std::string funcname = "runGrasp";
 
   boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
@@ -316,11 +316,31 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
 
   Py_Initialize();
 
+  // Need to aquire global interpreter lock (GIL), create new sub-interpreter to run code in there
+  PyGILState_STATE gil_state = PyGILState_Ensure(); // aquire python GIL
+  PyThreadState* cur_state = PyThreadState_Get();   // get current ThreadState; need this to switch back to later
+  PyThreadState* int_state = Py_NewInterpreter();   // create new sub-interpreter
+  PyThreadState_Swap(int_state);                    // set active ThreadState; maybe not needed after calling NewInterpreter() ?
+  // Now we can safely run our python code
+
   // using python C API
   PyObject* py_main = PyImport_AddModule("__main__"); // borrowed reference
-  assert(py_main);                                    // __main__ should always exist
+  if( !py_main ) {
+    // __main__ should always exist
+    fclose(py_file);
+    Py_EndInterpreter(int_state);
+    PyThreadState_Swap(cur_state);
+    PyGILState_Release(gil_state); // release GIL
+    Py_Finalize();
+    throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Python reference '__main__' does not exist.");
+  }
   PyObject* py_dict = PyModule_GetDict(py_main);      // borrowed reference
-  assert(py_dict);                                    // __main__ should have a dictionary
+  if( !py_dict ) {
+    // __main__ should have a dictionary
+    fclose(py_file);
+    Py_Finalize();
+    throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Python reference '__main__' does not have a dictionary.");
+  }
 
   // load file
   int py_module = PyRun_SimpleFile(py_file, filename.c_str());
@@ -378,7 +398,11 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
     throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Loading python file failed.");
   }
 
-  Py_Finalize();
+  Py_EndInterpreter(int_state); // close sub-interpreter
+  PyThreadState_Swap(cur_state); // re-set active state to previous one
+  PyGILState_Release(gil_state); // release GIL
+
+  Py_Finalize(); // should be careful with that, as it closes global interpreter; Other threads running python may fail
 
   if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Graspplanning: path planned");}
