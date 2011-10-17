@@ -22,7 +22,7 @@
  */
 
 #ifndef __LIBS_GUI_UTILS_INTERFACE_CHOOSER_DIALOG_H_
-#define __LIBS_GUI_UTILS_INTERFCE_CHOOSER_DIALOG_H_
+#define __LIBS_GUI_UTILS_INTERFACE_CHOOSER_DIALOG_H_
 
 #include <gtkmm/dialog.h>
 #include <gtkmm/treeview.h>
