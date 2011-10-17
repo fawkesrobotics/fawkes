@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  error_reply.h - Web request reply for an error page
+ *  tracwiki.h - Trac wiki style formatter
  *
- *  Created: Fri Oct 24 19:55:26 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed May 11 17:02:18 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,20 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_ERROR_REPLY_H_
-#define __LIBS_WEBVIEW_ERROR_REPLY_H_
+#ifndef __LIBS_WEBVIEW_FORMATTERS_TRACWIKI_H_
+#define __LIBS_WEBVIEW_FORMATTERS_TRACWIKI_H_
 
-#include <webview/page_reply.h>
+#include <regex.h>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class WebErrorPageReply : public WebPageReply
+class TracWikiHeadingFormatter
 {
  public:
-  WebErrorPageReply(response_code_t error_code, const char *format = NULL, ...);
+  TracWikiHeadingFormatter();
+  virtual ~TracWikiHeadingFormatter();
+
+  virtual std::string format(std::string &text);
+
+ private:
+  regex_t __re_heading;
 };
 
 } // end namespace fawkes

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  error_reply.h - Web request reply for an error page
+ *  webview_plugin.cpp - Provide webview features to ROS
  *
- *  Created: Fri Oct 24 19:55:26 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri May 06 10:44:47 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,22 +20,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_ERROR_REPLY_H_
-#define __LIBS_WEBVIEW_ERROR_REPLY_H_
+#include "webview_plugin.h"
+#include "webview_thread.h"
 
-#include <webview/page_reply.h>
+using namespace fawkes;
 
-namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
+/** @class ROSWebviewPlugin "webview_plugin.h"
+ * ROS webview plugin.
+ * @author Tim Niemueller
+ */
 
-class WebErrorPageReply : public WebPageReply
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+ROSWebviewPlugin::ROSWebviewPlugin(Configuration *config)
+  : Plugin(config)
 {
- public:
-  WebErrorPageReply(response_code_t error_code, const char *format = NULL, ...);
-};
+  thread_list.push_back(new ROSWebviewThread());
+}
 
-} // end namespace fawkes
 
-#endif
+PLUGIN_DESCRIPTION("Provide webview to ROS nodes")
+EXPORT_PLUGIN(ROSWebviewPlugin)

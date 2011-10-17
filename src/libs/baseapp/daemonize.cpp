@@ -65,6 +65,7 @@ fawkes_daemon_pid_file_proc()
 pid_t
 daemonize()
 {
+#ifdef HAVE_LIBDAEMON
   pid_t pid;
   mode_t old_umask = umask(0);
 
@@ -127,12 +128,17 @@ daemonize()
     umask(old_umask);
     return 0;
   }
+#else
+  throw Exception("Daemonizing support is not available.\n"
+		  "(libdaemon[-devel] was not available at compile time)\n");
+#endif
 }
 
 
 void
 init(const char *pidfile, const char *progname)
 {
+#ifdef HAVE_LIBDAEMON
   // Set identification string for the daemon for both syslog and PID file
   daemon_pid_file_ident = daemon_log_ident =
     daemon_ident_from_argv0((char *)progname);
@@ -140,6 +146,10 @@ init(const char *pidfile, const char *progname)
     fawkes_pid_file      = pidfile;
     daemon_pid_file_proc = fawkes_daemon_pid_file_proc;
   }
+#else
+  throw Exception("Daemonizing support is not available.\n"
+		  "(libdaemon[-devel] was not available at compile time)\n");
+#endif
 }
 
 bool
@@ -174,13 +184,19 @@ start()
 bool
 running()
 {
+#ifdef HAVE_LIBDAEMON
   return (daemon_pid_file_is_running() >= 0);
+#else
+  throw Exception("Daemonizing support is not available.\n"
+		  "(libdaemon[-devel] was not available at compile time)\n");
+#endif
 }
 
 
 void
 kill()
 {
+#ifdef HAVE_LIBDAEMON
   pid_t pid;
   int ret;
 
@@ -193,15 +209,24 @@ kill()
   if ((ret = daemon_pid_file_kill_wait(SIGINT, 5)) < 0) {
     daemon_log(LOG_WARNING, "Failed to kill daemon");
   }
+#else
+  throw Exception("Daemonizing support is not available.\n"
+		  "(libdaemon[-devel] was not available at compile time)\n");
+#endif
 }
 
 
 void
 cleanup()
 {
+#ifdef HAVE_LIBDAEMON
   daemon_retval_send(-1);
   daemon_retval_done();
   daemon_pid_file_remove();
+#else
+  throw Exception("Daemonizing support is not available.\n"
+		  "(libdaemon[-devel] was not available at compile time)\n");
+#endif
 }
 
 

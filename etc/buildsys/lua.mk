@@ -73,6 +73,7 @@ ifeq ($(HAVE_LUA),1)
   endif
   # FreeBSD
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/lua$(subst .,,$(LUA_VERSION))/tolua++.h),)
+    # FreeBSD
     HAVE_TOLUA = 1
     TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
     TOLUA_LIBS=tolua++ stdc++

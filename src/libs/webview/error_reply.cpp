@@ -23,6 +23,8 @@
 #include <webview/error_reply.h>
 
 #include <core/exceptions/software.h>
+#include <cstdio>
+#include <cstdlib>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -37,9 +39,11 @@ namespace fawkes {
 
 /** Constructor.
  * @param code error code, must be a 4xx or 5xx HTTP code
- * @param msg additional error message.
+ * @param format format for additional error message, use format as
+ * known from sprintf.
  */
-WebErrorPageReply::WebErrorPageReply(response_code_t code, std::string msg)
+WebErrorPageReply::WebErrorPageReply(response_code_t code,
+				     const char *format, ...)
   : WebPageReply(code)
 {
   if ( (code < 400) || (code > 599) ) {
@@ -223,7 +227,15 @@ WebErrorPageReply::WebErrorPageReply(response_code_t code, std::string msg)
     break;
   }
 
-  _body += "<br />\n<b>" + msg + "</b>\n";
+  if (format) {
+    va_list args;
+    va_start(args, format);
+    char *tmp;
+    if (vasprintf(&tmp, format, args) != -1) {
+      _body += std::string("<br />\n<b>") + tmp + "</b>\n";
+      free(tmp);
+    }
+  }
 }
 
 } // end namespace fawkes

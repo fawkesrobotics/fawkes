@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  error_reply.h - Web request reply for an error page
+ *  ros_plugin.cpp - Plugin to access ROS features
  *
- *  Created: Fri Oct 24 19:55:26 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 05 18:33:32 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,22 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_ERROR_REPLY_H_
-#define __LIBS_WEBVIEW_ERROR_REPLY_H_
+#include "ros_plugin.h"
+#include "node_thread.h"
 
-#include <webview/page_reply.h>
+using namespace fawkes;
 
-namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
+/** @class ROSPlugin "ros_plugin.h"
+ * Plugin to access ROS from Fawkes.
+ * This plugin integrates ROS and provides access to the ROS context
+ * to other plugins.
+ * @author Tim Niemueller
+ */
 
-class WebErrorPageReply : public WebPageReply
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+ROSPlugin::ROSPlugin(Configuration *config)
+  : Plugin(config)
 {
- public:
-  WebErrorPageReply(response_code_t error_code, const char *format = NULL, ...);
-};
+  thread_list.push_back(new ROSNodeThread());
+}
 
-} // end namespace fawkes
 
-#endif
+PLUGIN_DESCRIPTION("Provides access to ROS")
+EXPORT_PLUGIN(ROSPlugin)

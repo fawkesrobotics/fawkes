@@ -22,6 +22,7 @@
 
 #include <webview/reply.h>
 
+#include <core/exception.h>
 #include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
@@ -71,6 +72,28 @@ void
 WebReply::add_header(std::string header, std::string content)
 {
   __headers[header] = content;
+}
+
+
+/** Add a HTTP header.
+ * @param header_string header string of the format "Key: Value".
+ */
+void
+WebReply::add_header(std::string header_string)
+{
+  std::string::size_type pos;
+  if ((pos = header_string.find(":")) != std::string::npos) {
+    std::string header = header_string.substr(0, pos);
+    std::string content;
+    if (header_string[pos+1] == ' ') {
+      content = header_string.substr(pos+2);
+    } else {
+      content = header_string.substr(pos+1);
+    }
+    __headers[header] = content;
+  } else {
+    throw Exception("Invalid header '%s'", header_string.c_str());
+  }
 }
 
 

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  error_reply.h - Web request reply for an error page
+ *  talkerpub_plugin.cpp - Example ROSAspect plugin to publish talker msgs
  *
- *  Created: Fri Oct 24 19:55:26 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 05 18:47:32 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,22 +20,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_ERROR_REPLY_H_
-#define __LIBS_WEBVIEW_ERROR_REPLY_H_
+#include "talkerpub_plugin.h"
+#include "talkerpub_thread.h"
 
-#include <webview/page_reply.h>
+using namespace fawkes;
 
-namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
+/** @class ROSTalkerPubPlugin "talkerpub_plugin.h"
+ * Talker publisher example plugin.
+ * @author Tim Niemueller
+ */
 
-class WebErrorPageReply : public WebPageReply
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+ROSTalkerPubPlugin::ROSTalkerPubPlugin(Configuration *config)
+  : Plugin(config)
 {
- public:
-  WebErrorPageReply(response_code_t error_code, const char *format = NULL, ...);
-};
+  thread_list.push_back(new ROSTalkerPubThread());
+}
 
-} // end namespace fawkes
 
-#endif
+PLUGIN_DESCRIPTION("Publish talker messages via ROS")
+EXPORT_PLUGIN(ROSTalkerPubPlugin)
