@@ -305,7 +305,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 void
 OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot)
 {
-  std::string filename = std::string(BINDIR) + "/../fawkes/src/plugins/openrave/python/graspplanning.py";
+  std::string filename = SRCDIR"/python/graspplanning.py";
   std::string funcname = "runGrasp";
 
   boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
