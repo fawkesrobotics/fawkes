@@ -75,6 +75,7 @@ class ImageWidget : public Gtk::Image
  public:
   ImageWidget(unsigned int width, unsigned int height);
   ImageWidget(Camera *cam, unsigned int refresh_delay = 0, unsigned int width = 0, unsigned int height = 0);
+  ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gtk::Builder> builder);
 #ifdef HAVE_GLADEMM
   ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml);
 #endif
