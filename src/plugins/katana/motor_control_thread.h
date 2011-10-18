@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  goto_thread.h - Katana goto one-time thread
+ *  motor_control_thread.h - Katana direct motor encoder/value control thread
  *
- *  Created: Wed Jun 10 11:44:24 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Mar 13 14:44:24 2011
+ *  Copyright  2011  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,29 +20,32 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GOTO_THREAD_H_
-#define __PLUGINS_KATANA_GOTO_THREAD_H_
+#ifndef __PLUGINS_KATANA_MOTOR_CONTROL_THREAD_H_
+#define __PLUGINS_KATANA_MOTOR_CONTROL_THREAD_H_
 
 #include "motion_thread.h"
 
-#include <string>
-
-class KatanaGotoThread : public KatanaMotionThread
+class KatanaMotorControlThread : public KatanaMotionThread
 {
  public:
-  KatanaGotoThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
+  KatanaMotorControlThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
 		   unsigned int poll_interval_ms);
 
-  virtual void set_target(float x, float y, float z, float phi, float theta, float psi);
+  virtual void set_encoder(unsigned int nr, int value, bool inc=false);
+  virtual void set_angle(unsigned int nr, float value, bool inc=false);
 
   virtual void once();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- private:
+ protected:
   virtual void run() { Thread::run(); }
 
-  float __x, __y, __z;
-  float __phi, __theta, __psi;
+ private:
+  unsigned int __nr;
+  int __encoder;
+  float __angle;
+
+  bool __is_encoder, __is_inc;
   unsigned int __poll_interval_usec;
 };
 

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  goto_thread.h - Katana goto one-time thread
+ *  openrave_plugin.h - Fawkes OpenRAVE Plugin
  *
- *  Created: Wed Jun 10 11:44:24 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Feb 25 15:08:00 2011
+ *  Copyright  2011  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,31 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GOTO_THREAD_H_
-#define __PLUGINS_KATANA_GOTO_THREAD_H_
+#ifndef __PLUGINS_OPENRAVE_OPENRAVE_PLUGIN_H_
+#define __PLUGINS_OPENRAVE_OPENRAVE_PLUGIN_H_
 
-#include "motion_thread.h"
+#include <core/plugin.h>
 
-#include <string>
-
-class KatanaGotoThread : public KatanaMotionThread
+class OpenRavePlugin : public fawkes::Plugin
 {
  public:
-  KatanaGotoThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
-		   unsigned int poll_interval_ms);
-
-  virtual void set_target(float x, float y, float z, float phi, float theta, float psi);
-
-  virtual void once();
-
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- private:
-  virtual void run() { Thread::run(); }
-
-  float __x, __y, __z;
-  float __phi, __theta, __psi;
-  unsigned int __poll_interval_usec;
+  OpenRavePlugin(fawkes::Configuration *config);
 };
-
 
 #endif

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="OpenRaveInterface" author="Bahram Maleki-Fard" year="2011">
+  <constants>
+  </constants>
+
+  <data>
+    <comment>
+      Interface providing access to OpenRAVE functionality
+    </comment>
+    <field type="uint32" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last goto command has been finished,
+      false if it is still running</field>
+    <field type="uint32" name="error_code">Failure code set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise (or a bit-wise combination).</field>
+
+    <field type="bool" name="success">True, if last command was successful. False otherwise</field>
+
+  </data>
+
+  <message name="AddObject">
+    <comment>Add object to current environment.</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+    <field type="string" length="1024" name="path">Path to object xml file</field>
+  </message>
+  <message name="DeleteObject">
+    <comment>Delete object from current environment.</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+  </message>
+  <message name="AttachObject">
+    <comment>Attaches the object to the active robot</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+  </message>
+  <message name="ReleaseObject">
+    <comment>Releases the object from the active robot</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+  </message>
+  <message name="ReleaseAllObjects">
+    <comment>Releases all grabbed objects from the active robot</comment>
+  </message>
+  <message name="MoveObject">
+    <comment>Move object in current environment.</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+    <field type="float" name="x">x position of object (meters)</field>
+    <field type="float" name="y">y position of object (meters)</field>
+    <field type="float" name="z">z position of object (meters)</field>
+  </message>
+  <message name="RotateObject">
+    <comment>Rotate object in current environment.</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+    <field type="float" name="x">x-axis rotation of object (rad)</field>
+    <field type="float" name="y">y-axis rotation of object (rad)</field>
+    <field type="float" name="z">z-axis rotation of object (rad)</field>
+  </message>
+  <message name="RenameObject">
+    <comment>Rename object in current environment.</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+    <field type="string" length="30" name="newName">New name of object</field>
+  </message>
+</interface>

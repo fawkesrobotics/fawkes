@@ -3,6 +3,7 @@ KatanaInterface.h
 NaoJointPositionInterface.h
 NaoJointStiffnessInterface.h
 NaoSensorInterface.h
+OpenRaveInterface.h
 PanTiltInterface.h
 SkillerDebugInterface.h
 Roomba500Interface.h

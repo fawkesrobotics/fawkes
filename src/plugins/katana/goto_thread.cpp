@@ -66,7 +66,6 @@ KatanaGotoThread::set_target(float x, float y, float z,
   __psi   = psi;
 }
 
-
 void
 KatanaGotoThread::once()
 {
@@ -115,7 +114,7 @@ KatanaGotoThread::once()
 	  _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
 	  break;
 	}
-	
+
 	final &= std::abs(mot->arr[i].GetTPS()->tarpos - mot->arr[i].GetPVP()->pos) < 100;
       }
     }

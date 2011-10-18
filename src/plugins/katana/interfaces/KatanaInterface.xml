@@ -89,6 +89,9 @@
     <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
     <field type="float" name="psi">Euler angle Psi of tool orientation..</field>
 
+    <field type="int32" length="6" name="encoders">Encoder values of motors</field>
+    <field type="float" length="6" name="angles">Angle values of motors</field>
+
     <field type="uint32" name="msgid">The ID of the message that is currently being
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
@@ -120,6 +123,24 @@
     <ref>theta</ref>
     <ref>psi</ref>
   </message>
+  <message name="LinearGotoKni">
+    <comment>States the next target to navigate to.
+       Uses values in libkni coordinate system, mainly to provide functionality for old skills</comment>
+    <field type="float" name="x">X-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="y">Y-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="z">Z-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="phi">Euler angle Phi of tool orientation.</field>
+    <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
+    <field type="float" name="psi">Euler angle Psi of tool orientation.</field>
+  </message>
+  <message name="ObjectGoto">
+    <comment>States the next target object to navigate to with OpenRAVE support</comment>
+    <field type="string" length="32" name="object">Name of object</field>
+    <field type="float" name="rot_x">Rotation of object on its x-axis</field>
+  </message>
   <message name="Calibrate">
     <comment>Start calibration routine.</comment>
   </message>
@@ -136,5 +157,25 @@
   <message name="SetMaxVelocity">
     <comment>Sets maximum velocity for the arm. Set to 0 to use default.</comment>
     <ref>max_velocity</ref>
+  </message>
+  <message name="SetMotorEncoder">
+    <comment>Sets absolute motor encoder</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="uint32" name="enc">Encoder value</field>
+  </message>
+  <message name="MoveMotorEncoder">
+    <comment>Increases/Decreases motor encoder by a given value</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="uint32" name="enc">Encoder value</field>
+  </message>
+  <message name="SetMotorAngle">
+    <comment>Sets absolute motor angle</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="float" name="angle">Angle value (positive: increase; negative: decrease)</field>
+  </message>
+  <message name="MoveMotorAngle">
+    <comment>Increases/Decreases motor angle by a given value</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="float" name="angle">Angle value (positive: increase; negative: decrease)</field>
   </message>
 </interface>

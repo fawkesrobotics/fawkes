@@ -1,0 +1,106 @@
+<KinBody name="caesar_body">
+
+  <Body name="caesar_base" type="dynamic">
+    <!--
+    <Mass type="mimicgeom">
+      <density>100</density>
+    </Mass>
+    -->
+
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <Extents>0.19 0.2 0.3</Extents>
+    </Geom>
+  </Body>
+
+  <Body name="caesar_rack" type="dynamic">
+    <!--
+    <Mass type="mimicgeom">
+      <density>100</density>
+    </Mass>
+    -->
+
+    <!-- put caesar_rack on back of caesar_base -->
+    <Translation>-0.15 0 0.3</Translation>
+
+    <!-- horizontal casts (flat on caesar_base) -->
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.1475 0.02 0.02</Extents>
+      <Translation>0.1675 0.18 0.02</Translation>
+    </Geom>
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.1475 0.02 0.02</Extents>
+      <Translation>0.1675 -0.18 0.02</Translation>
+    </Geom>
+
+    <!-- vertical casts, e.g. back rack -->
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.02 0.5</Extents>
+      <Translation>0 -0.18 0.5</Translation>
+    </Geom>
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.02 0.5</Extents>
+      <Translation>0 0.18 0.5</Translation>
+    </Geom>
+
+    <!-- horizontal casts between vertical casts -->
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.16 0.02</Extents>
+      <Translation>0 0 0.02</Translation>
+    </Geom>
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.16 0.02</Extents>
+      <Translation>0 0 0.42</Translation>
+    </Geom>
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.16 0.02</Extents>
+      <Translation>0 0 0.72</Translation>
+    </Geom>
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.16 0.02</Extents>
+      <Translation>0 0 0.82</Translation>
+    </Geom>
+
+    <!-- cover vertical casts with single plate -->
+    <!--
+    <Geom type="box">
+      <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
+      <Extents>0.02 0.2 0.5</Extents>
+      <Translation>0 0 0.5</Translation>
+    </Geom>
+    -->
+
+
+    <!--rack monitor -->
+    <Geom type="box">
+      <DiffuseColor>0.3 0.3 0.3</DiffuseColor>
+      <Extents>0.0125 0.15 0.1</Extents>
+      <Translation>0 0 0.54</Translation>
+      <RotationAxis>0 1 0 -25</RotationAxis>
+    </Geom>
+
+
+    <!-- red emergency button -->
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <Extents>0.03 0.0675 0.055</Extents>
+      <Translation>0.01 0 0.095</Translation>
+      <RotationAxis>0 0 0 -25</RotationAxis>
+    </Geom>
+    <Geom type="cylinder">
+      <DiffuseColor>1 0 0</DiffuseColor>
+      <Radius>0.02</Radius>
+      <Height>0.01</Height>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Translation>0.017 0 0.15</Translation>
+    </Geom>
+  </Body>
+</KinBody>

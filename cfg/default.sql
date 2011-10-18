@@ -141,6 +141,10 @@ INSERT INTO "config" VALUES('/hardware/katana/park_z','float',442.759186,'Z posi
 INSERT INTO "config" VALUES('/hardware/katana/park_phi','float',1.809579,'Phi position for parking');
 INSERT INTO "config" VALUES('/hardware/katana/park_theta','float',0.357964,'Theta position for parking');
 INSERT INTO "config" VALUES('/hardware/katana/park_psi','float',-0.271071,'Psi position for parking');
+INSERT INTO "config" VALUES('/hardware/katana/offset_x','float',0.0,'x Offset of katana to fawkes coordinate system');
+INSERT INTO "config" VALUES('/hardware/katana/offset_y','float',0.0,'y Offset of katana to fawkes coordinate system');
+INSERT INTO "config" VALUES('/hardware/katana/offset_z','float',0.6665,'z Offset of katana to fawkes coordinate system');
+INSERT INTO "config" VALUES('/hardware/katana/distance_scale','float',0.001,'Scale from kni coordinate values to fawkes');
 INSERT INTO "config" VALUES('/hardware/laser/urg/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg/type','string','urg','Configuration is for Hokuyo URG laser range finder using URG library');
 INSERT INTO "config" VALUES('/hardware/laser/urg/device','string','/dev/ttyACM0','Device file');

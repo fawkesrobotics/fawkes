@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  goto_thread.h - Katana goto one-time thread
+ *  katana6M180.h - Fawkes to OpenRAVE Katana6M180 Manipulator Data
  *
- *  Created: Wed Jun 10 11:44:24 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 16 14:50:34 2010
+ *  Copyright  2010  Bahram Maleki-Fard, AllemaniACs RoboCup Team
  *
  ****************************************************************************/
 
@@ -20,31 +20,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GOTO_THREAD_H_
-#define __PLUGINS_KATANA_GOTO_THREAD_H_
+#ifndef __PLUGINS_OPENRAVE_MANIPULATORS_KATANA6M180_H_
+#define __PLUGINS_OPENRAVE_MANIPULATORS_KATANA6M180_H_
 
-#include "motion_thread.h"
+#include "../manipulator.h"
 
-#include <string>
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class KatanaGotoThread : public KatanaMotionThread
+class OpenRaveManipulatorKatana6M180 : public OpenRaveManipulator
 {
  public:
-  KatanaGotoThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
-		   unsigned int poll_interval_ms);
+  OpenRaveManipulatorKatana6M180(unsigned int count, unsigned int countDevice);
+  virtual ~OpenRaveManipulatorKatana6M180();
 
-  virtual void set_target(float x, float y, float z, float phi, float theta, float psi);
 
-  virtual void once();
-
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  private:
-  virtual void run() { Thread::run(); }
-
-  float __x, __y, __z;
-  float __phi, __theta, __psi;
-  unsigned int __poll_interval_usec;
+  virtual float angle_OR_to_device(unsigned int number, float angle) const;
+  virtual float angle_device_to_OR(unsigned int number, float angle) const;
 };
 
+} // end of namespace fawkes
 
 #endif
