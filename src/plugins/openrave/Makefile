@@ -36,7 +36,7 @@ else
   WARN_TARGETS += warning_python
 endif
 ifeq ($(HAVE_OPENRAVE),1)
-  CFLAGS  += $(CFLAGS_OPENRAVE) -Wno-error
+  CFLAGS  += $(CFLAGS_OPENRAVE) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_OPENRAVE)
   PLUGINS_all = $(PLUGINDIR)/openrave.so
   LIBS_all = $(LIBDIR)/libfawkesopenrave.so

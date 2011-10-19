@@ -19,17 +19,19 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
+
+// must be first because it redefines macros from standard headers
+#include <Python.h>
+
 #include "environment.h"
 #include "robot.h"
 
-#include <openrave-core.h>
 #include <logging/logger.h>
 #include <core/exceptions/software.h>
 
+#include <openrave-core.h>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
-
-#include <Python.h>
 
 #include <sstream>
 #include <cstdio>
