@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  multi_interface_chooser_dialog.h - Dialog for choosing a blackboard interface
  *
@@ -44,8 +43,8 @@ class MultiInterfaceChooserDialog : public InterfaceChooserDialog
       BlackBoard *blackboard,
       const char *type_pattern,
       const char *id_pattern,
-      const std::set<std::string>& loaded_interfaces,
-      const Glib::ustring& title = "Select Interfaces");
+      const TypeIdPairSet& loaded_interfaces,
+      const Glib::ustring& title = DEFAULT_TITLE);
 
   virtual ~MultiInterfaceChooserDialog();
 
@@ -53,26 +52,26 @@ class MultiInterfaceChooserDialog : public InterfaceChooserDialog
   TypeIdPairSet get_newly_selected_interfaces() const;
 
  protected:
-  class MultiInterfaceRecord : public InterfaceRecord
+  class Record : public InterfaceChooserDialog::Record
   {
    public:
-    MultiInterfaceRecord();
+    Record();
     Gtk::TreeModelColumn<bool> load; /**< Load this interface? */
   };
 
   MultiInterfaceChooserDialog(Gtk::Window &parent,
-                              const std::set<std::string>& loaded_interfaces,
+                              const TypeIdPairSet& loaded_interfaces,
                               const Glib::ustring& title);
 
-  virtual const MultiInterfaceRecord& record() const;
+  virtual const Record& record() const;
   virtual int init_columns();
   virtual void init_row(Gtk::TreeModel::Row& row, const InterfaceInfo& ii);
 
  private:
   void on_load_toggled(const Glib::ustring& path);
 
-  const MultiInterfaceRecord* __record; /**< Should only be accessed by record(). */
-  std::set<std::string>       __loaded_interfaces;
+  const Record* __record; /**< Should only be accessed by record(). */
+  TypeIdPairSet __loaded_interfaces;
 };
 
 } // end of namespace fawkes

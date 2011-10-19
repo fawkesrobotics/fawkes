@@ -37,14 +37,17 @@ namespace fawkes {
 }
 #endif
 
-/** @class InterfaceChooserDialog::InterfaceRecord <gui_utils/interface_chooser_dialog.h>
+/** Default title of interface chooser dialogs. */
+const char* const InterfaceChooserDialog::DEFAULT_TITLE = "Select Interfaces";
+
+/** @class InterfaceChooserDialog::Record <gui_utils/interface_chooser_dialog.h>
  * Blackboard interface record.
  * Record with information about a blackboard interface for a tree model.
  * @author Tim Niemueller
  */
 
 /** Constructor. */
-InterfaceChooserDialog::InterfaceRecord::InterfaceRecord()
+InterfaceChooserDialog::Record::Record()
 {
   add(type);
   add(id);
@@ -167,16 +170,16 @@ InterfaceChooserDialog::~InterfaceChooserDialog()
 }
 
 
-/** Returns the InterfaceRecord of this chooser dialog.
+/** Returns the Record of this chooser dialog.
  * Subclasses of InterfaceChooserDialog might want to override this method.
- * @return InterfaceRecord implementation.
+ * @return Record implementation.
  */
-const InterfaceChooserDialog::InterfaceRecord&
+const InterfaceChooserDialog::Record&
 InterfaceChooserDialog::record() const
 {
   if (!__record) {
     InterfaceChooserDialog* this_nonconst = const_cast<InterfaceChooserDialog*>(this);
-    this_nonconst->__record = new InterfaceRecord();
+    this_nonconst->__record = new Record();
   }
   return *__record;
 }

@@ -33,14 +33,14 @@
 
 namespace fawkes {
 
-/** @class MultiInterfaceChooserDialog::MultiInterfaceRecord <gui_utils/multi_interface_chooser_dialog.h>
+/** @class MultiInterfaceChooserDialog::Record <gui_utils/multi_interface_chooser_dialog.h>
  * Blackboard interface record.
  * Adds a checkbox whether or not to load the specific interface.
  * @author Christoph Schwering
  */
 
 /** Constructor. */
-MultiInterfaceChooserDialog::MultiInterfaceRecord::MultiInterfaceRecord()
+MultiInterfaceChooserDialog::Record::Record()
 {
   add(load);
 }
@@ -77,7 +77,7 @@ MultiInterfaceChooserDialog::create(
     BlackBoard* blackboard,
     const char* type_pattern,
     const char* id_pattern,
-    const std::set<std::string>& loaded_interfaces,
+    const TypeIdPairSet& loaded_interfaces,
     const Glib::ustring& title)
 {
   MultiInterfaceChooserDialog* d = new MultiInterfaceChooserDialog(
@@ -97,7 +97,7 @@ MultiInterfaceChooserDialog::create(
  */
 MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(
     Gtk::Window &parent,
-    const std::set<std::string>& loaded_interfaces,
+    const TypeIdPairSet& loaded_interfaces,
     const Glib::ustring& title)
   : InterfaceChooserDialog(parent, title),
     __record(NULL),
@@ -126,16 +126,16 @@ MultiInterfaceChooserDialog::on_load_toggled(const Glib::ustring& path)
 }
 
 
-/** Returns the InterfaceRecord of this chooser dialog.
+/** Returns the Record of this chooser dialog.
  * Subclasses of InterfaceChooserDialog might want to override this method.
- * @return InterfaceRecord implementation.
+ * @return Record implementation.
  */
-const MultiInterfaceChooserDialog::MultiInterfaceRecord&
+const MultiInterfaceChooserDialog::Record&
 MultiInterfaceChooserDialog::record() const
 {
   if (!__record) {
     MultiInterfaceChooserDialog* this_nonconst = const_cast<MultiInterfaceChooserDialog*>(this);
-    this_nonconst->__record = new MultiInterfaceRecord();
+    this_nonconst->__record = new Record();
   }
   return *__record;
 }
@@ -180,7 +180,7 @@ MultiInterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
                                       const InterfaceInfo& ii)
 {
   InterfaceChooserDialog::init_row(row, ii);
-  row[record().load] = __loaded_interfaces.find(ii.id()) !=
+  row[record().load] = __loaded_interfaces.find(std::make_pair(ii.type(), ii.id())) !=
                        __loaded_interfaces.end();
 }
 
@@ -225,8 +225,7 @@ MultiInterfaceChooserDialog::get_newly_selected_interfaces() const
     const Gtk::TreeRow& row = *it;
     if (row[record().load]) {
       TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
-      if (__loaded_interfaces.find(pair.second) ==
-          __loaded_interfaces.end())
+      if (__loaded_interfaces.find(pair) == __loaded_interfaces.end())
       {
         types_and_ids.insert(pair);
       }
