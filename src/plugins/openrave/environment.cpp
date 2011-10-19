@@ -23,7 +23,7 @@
 #include "robot.h"
 
 #include <openrave-core.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <core/exceptions/software.h>
 
 #include <boost/thread/thread.hpp>

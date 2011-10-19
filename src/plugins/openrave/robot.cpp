@@ -25,7 +25,7 @@
 #include "environment.h"
 
 #include <openrave-core.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <core/exceptions/software.h>
 
 using namespace OpenRAVE;
