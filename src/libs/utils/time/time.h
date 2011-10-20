@@ -112,6 +112,7 @@ class Time
   long            get_usec() const { return __time.tv_usec; }
   void            get_timestamp(long &sec, long &usec) const
                   { sec  = __time.tv_sec; usec = __time.tv_usec; }
+  bool            is_zero() const { return (__time.tv_sec == 0) && (__time.tv_usec == 0); }
 
   void set_time(const timeval* tv);
   void set_time(long int sec, long int usec);
@@ -141,6 +142,14 @@ class Time
   bool   operator==(const Time* t) const;
   bool   operator!=(const Time& t) const;
   bool   operator!=(const Time* t) const;
+  bool   operator>(const Time& t) const;
+  bool   operator>(const Time* t) const;
+  bool   operator>=(const Time& t) const;
+  bool   operator>=(const Time* t) const;
+  bool   operator<(const Time& t) const;
+  bool   operator<(const Time* t) const;
+  bool   operator<=(const Time& t) const;
+  bool   operator<=(const Time* t) const;
 
   void wait();
   void wait_systime();

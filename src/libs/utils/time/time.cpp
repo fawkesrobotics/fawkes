@@ -72,6 +72,10 @@ const Time TIME_MIN = Time(0, 1);
  * Get microseconds.
  * @return microseconds stored in time stamp
  *
+ * @fn bool Time::is_zero() const
+ * Check if time is zero.
+ * @return true if time is zero, i.e. sec = usec = 0, false otherwise
+ *
  * @fn void Time::get_timestamp(long &sec, long &usec) const
  * Get time stamp.
  * @param sec upon return contains seconds stored in time stamp
@@ -570,6 +574,102 @@ Time::operator!=(const Time* t) const
 {
   return (__time.tv_sec != t->__time.tv_sec) ||
          (__time.tv_usec != t->__time.tv_usec);
+}
+
+
+/** Greater than operator.
+ * @param t time to compare to
+ * @return true if this time is greater than @p t, false otherwise
+ */
+bool
+Time::operator>(const Time& t) const
+{
+  return (__time.tv_sec > t.__time.tv_sec) ||
+    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec > t.__time.tv_usec));
+}
+
+
+/** Greater than operator.
+ * @param t time to compare to
+ * @return true if this time is greater than @p t, false otherwise
+ */
+bool
+Time::operator>(const Time* t) const
+{
+  return (__time.tv_sec > t->__time.tv_sec) ||
+    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec > t->__time.tv_usec));
+}
+
+
+/** Greater than or equal to operator.
+ * @param t time to compare to
+ * @return true if this time is greater than @p t, false otherwise
+ */
+bool
+Time::operator>=(const Time& t) const
+{
+  return (__time.tv_sec > t.__time.tv_sec) ||
+    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec >= t.__time.tv_usec));
+}
+
+
+/** Greater than or equal to operator.
+ * @param t time to compare to
+ * @return true if this time is greater than @p t, false otherwise
+ */
+bool
+Time::operator>=(const Time* t) const
+{
+  return (__time.tv_sec > t->__time.tv_sec) ||
+    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec >= t->__time.tv_usec));
+}
+
+
+/** Less than operator.
+ * @param t time to compare to
+ * @return true if this time is less than @p t, false otherwise
+ */
+bool
+Time::operator<(const Time& t) const
+{
+  return (__time.tv_sec < t.__time.tv_sec) ||
+    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec < t.__time.tv_usec));
+}
+
+
+/** Less than operator.
+ * @param t time to compare to
+ * @return true if this time is less than @p t, false otherwise
+ */
+bool
+Time::operator<(const Time* t) const
+{
+  return (__time.tv_sec < t->__time.tv_sec) ||
+    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec < t->__time.tv_usec));
+}
+
+
+/** Less than or equal to operator.
+ * @param t time to compare to
+ * @return true if this time is less than @p t, false otherwise
+ */
+bool
+Time::operator<=(const Time& t) const
+{
+  return (__time.tv_sec < t.__time.tv_sec) ||
+    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec <= t.__time.tv_usec));
+}
+
+
+/** Less than or equal to operator.
+ * @param t time to compare to
+ * @return true if this time is less than @p t, false otherwise
+ */
+bool
+Time::operator<=(const Time* t) const
+{
+  return (__time.tv_sec < t->__time.tv_sec) ||
+    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec <= t->__time.tv_usec));
 }
 
 
