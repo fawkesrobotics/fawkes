@@ -405,16 +405,20 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
            it != __laser_ifs.end(); ++it) {
         const fawkes::Interface* laser_if = it->first;
         const Color& color = it->second;
+        cr->save();
         cr->set_source_rgb(color.r, color.g, color.b);
         draw_beams(laser_if, window, cr);
+        cr->restore();
       }
       if (__robot_drawer)  __robot_drawer->draw_robot(window, cr);
       for (std::map<fawkes::Interface*, Color>::const_iterator it = __laser_ifs.begin();
            it != __laser_ifs.end(); ++it) {
         const fawkes::Interface* laser_if = it->first;
         const Color& color = it->second;
+        cr->save();
         cr->set_source_rgb(color.r, color.g, color.b);
         draw_segments(laser_if, window, cr);
+        cr->restore();
       }
       draw_persons_legs(window, cr);
 
