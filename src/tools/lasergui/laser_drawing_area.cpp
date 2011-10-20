@@ -158,25 +158,46 @@ LaserDrawingArea::set_connected(bool connected)
 
 
 /** Set new laser interfaces.
+ *
+ * This is also the place where colors are determined the following way:
+ * <pre>
+ *  1. 000 ->   0   0   0
+ *  2. 001 -> 255   0   0
+ *  3. 010 ->   0 255   0
+ *  4. 011 -> 255 255   0
+ *  5. 100 ->   0   0 255
+ *  6. 101 -> 255   0 255
+ *  7. 110 -> 255 255   0
+ *  8. 000 ->   0   0   0
+ *  9. 001 -> 127   0   0
+ * 10. 010 ->   0 127   0
+ * 11. 011 -> 127 127   0
+ * 12. 100 ->   0   0 127
+ * 13. 101 -> 127   0 127
+ * 14. 110 -> 127 127   0
+ * ...
+ * </pre>
+ *
  * @param ifs The interfaces of the lasers that should be visualized.
  */
 void
-LaserDrawingArea::set_laser_ifs(const std::set<fawkes::Interface*>& ifs)
+LaserDrawingArea::set_laser_ifs(const std::list<fawkes::Interface*>& ifs)
 {
   __laser_ifs.clear();
-  unsigned char counter = 0;
+  unsigned char color_counter = 0;
   unsigned char intensity = 255;
-  for (std::set<fawkes::Interface*>::const_iterator it = ifs.begin();
+  for (std::list<fawkes::Interface*>::const_iterator it = ifs.begin();
        it != ifs.end(); ++it) {
-    if ((counter & 0x1 & 0x2 & 0x4) != 0) {
+    if ((color_counter & 0x1 & 0x2 & 0x4) != 0) {
       intensity /= 2;
     }
     Color c;
-    c.r = ((counter & 0x1) != 0) ? intensity : 0;
-    c.g = ((counter & 0x2) != 0) ? intensity : 0;
-    c.b = ((counter & 0x4) != 0) ? intensity : 0;
-    __laser_ifs[*it] = c;
-    ++counter;
+    c.r = ((color_counter & 0x1) != 0) ? intensity : 0;
+    c.g = ((color_counter & 0x2) != 0) ? intensity : 0;
+    c.b = ((color_counter & 0x4) != 0) ? intensity : 0;
+    const InterfaceColorPair p = std::make_pair(*it, c);
+    __laser_ifs.push_back(p);
+    ++color_counter;
   }
   queue_draw();
 }
@@ -294,7 +315,7 @@ LaserDrawingArea::set_rotation(float rot_rad)
 bool
 LaserDrawingArea::all_laser_ifs_have_writer() const
 {
-  for (std::map<fawkes::Interface*, Color>::const_iterator it = __laser_ifs.begin();
+  for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
        it != __laser_ifs.end(); ++it) {
     fawkes::Interface* itf = it->first;
     if (!itf->has_writer()) {
@@ -379,7 +400,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     } else if (! all_laser_ifs_have_writer() ) {
       Cairo::TextExtents te;
       std::string t = "No writer for ";
-      for (std::map<fawkes::Interface*, Color>::const_iterator it = __laser_ifs.begin();
+      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
            it != __laser_ifs.end(); ++it) {
         fawkes::Interface* itf = it->first;
         if (!itf->has_writer()) {
@@ -394,14 +415,14 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       cr->show_text(t);
     } else {
       if (! __break_drawing) {
-        for (std::map<fawkes::Interface*, Color>::const_iterator it = __laser_ifs.begin();
+        for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
              it != __laser_ifs.end(); ++it) {
           fawkes::Interface* laser_if = it->first;
           laser_if->read();
         }
       }
 
-      for (std::map<fawkes::Interface*, Color>::const_iterator it = __laser_ifs.begin();
+      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
            it != __laser_ifs.end(); ++it) {
         const fawkes::Interface* laser_if = it->first;
         const Color& color = it->second;
@@ -411,7 +432,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
         cr->restore();
       }
       if (__robot_drawer)  __robot_drawer->draw_robot(window, cr);
-      for (std::map<fawkes::Interface*, Color>::const_iterator it = __laser_ifs.begin();
+      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
            it != __laser_ifs.end(); ++it) {
         const fawkes::Interface* laser_if = it->first;
         const Color& color = it->second;

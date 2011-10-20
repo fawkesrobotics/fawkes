@@ -23,6 +23,7 @@
 #ifndef __LIBS_GUI_UTILS_MULTI_INTERFACE_CHOOSER_DIALOG_H_
 #define __LIBS_GUI_UTILS_MULTI_INTERFACE_CHOOSER_DIALOG_H_
 
+#include <list>
 #include <set>
 #include <string>
 
@@ -33,23 +34,23 @@ namespace fawkes {
 class MultiInterfaceChooserDialog : public InterfaceChooserDialog
 {
  public:
-  /** Set of type and IDs of interfaces. */
+  /** Pair of type and IDs of interfaces. */
   typedef std::pair<Glib::ustring, Glib::ustring> TypeIdPair;
-  /** Pair of type and ID of an interface. */
-  typedef std::set<TypeIdPair> TypeIdPairSet;
+  /** List of type and ID of an interface. */
+  typedef std::list<TypeIdPair> TypeIdPairList;
 
   static MultiInterfaceChooserDialog* create(
       Gtk::Window &parent,
       BlackBoard *blackboard,
       const char *type_pattern,
       const char *id_pattern,
-      const TypeIdPairSet& loaded_interfaces,
+      const TypeIdPairList& loaded_interfaces,
       const Glib::ustring& title = DEFAULT_TITLE);
 
   virtual ~MultiInterfaceChooserDialog();
 
-  TypeIdPairSet get_selected_interfaces() const;
-  TypeIdPairSet get_newly_selected_interfaces() const;
+  TypeIdPairList get_selected_interfaces() const;
+  TypeIdPairList get_newly_selected_interfaces() const;
 
  protected:
   class Record : public InterfaceChooserDialog::Record
@@ -60,7 +61,7 @@ class MultiInterfaceChooserDialog : public InterfaceChooserDialog
   };
 
   MultiInterfaceChooserDialog(Gtk::Window &parent,
-                              const TypeIdPairSet& loaded_interfaces,
+                              const TypeIdPairList& loaded_interfaces,
                               const Glib::ustring& title);
 
   virtual const Record& record() const;
@@ -68,6 +69,9 @@ class MultiInterfaceChooserDialog : public InterfaceChooserDialog
   virtual void init_row(Gtk::TreeModel::Row& row, const InterfaceInfo& ii);
 
  private:
+  /** Set of type and ID of an interface. */
+  typedef std::set<TypeIdPair> TypeIdPairSet;
+
   void on_load_toggled(const Glib::ustring& path);
 
   const Record* __record; /**< Should only be accessed by record(). */

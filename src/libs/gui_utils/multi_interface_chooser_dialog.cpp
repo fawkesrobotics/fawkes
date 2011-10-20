@@ -28,6 +28,7 @@
 #include <blackboard/blackboard.h>
 #include <interface/interface_info.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 
@@ -67,7 +68,7 @@ MultiInterfaceChooserDialog::Record::Record()
  * characters, ? for exactly one character) to match the interface type.
  * @param id_pattern pattern with shell like globs (* for any number of
  * characters, ? for exactly one character) to match the interface ID.
- * @param loaded_interfaces set of interfaces which are already loaded
+ * @param loaded_interfaces list of interfaces which are already loaded
  * @param title title of the dialog
  * @return new MultiInterfaceChooserDialog
  */
@@ -77,7 +78,7 @@ MultiInterfaceChooserDialog::create(
     BlackBoard* blackboard,
     const char* type_pattern,
     const char* id_pattern,
-    const TypeIdPairSet& loaded_interfaces,
+    const TypeIdPairList& loaded_interfaces,
     const Glib::ustring& title)
 {
   MultiInterfaceChooserDialog* d = new MultiInterfaceChooserDialog(
@@ -92,18 +93,20 @@ MultiInterfaceChooserDialog::create(
  * After calling this constructor, the init() method needs to be called.
  *
  * @param parent parent window
- * @param loaded_interfaces set of interfaces which are already loaded
+ * @param loaded_interfaces list of interfaces which are already loaded
  * @param title title of the dialog
  */
 MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(
     Gtk::Window &parent,
-    const TypeIdPairSet& loaded_interfaces,
+    const TypeIdPairList& loaded_interfaces,
     const Glib::ustring& title)
   : InterfaceChooserDialog(parent, title),
-    __record(NULL),
-    __loaded_interfaces(loaded_interfaces)
+    __record(NULL)
 {
+  __loaded_interfaces.insert(loaded_interfaces.begin(), loaded_interfaces.end());
   Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
+  __treeview.set_reorderable(true);
+  __treeview.set_tooltip_text("Drag the rows to change the painting order.");
   treesel->set_mode(Gtk::SELECTION_NONE);
   // May *NOT* call init(), because init() calls virtual methods.
 }
@@ -163,7 +166,7 @@ MultiInterfaceChooserDialog::init_columns()
   renderer->signal_toggled().connect(
       sigc::mem_fun(*this, &MultiInterfaceChooserDialog::on_load_toggled));
 
-  return n + 1;
+  return n + 2;
 }
 
 
@@ -186,12 +189,12 @@ MultiInterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
 
 
 /** Get selected interface types and their respective IDs.
- * @return A set of type + id pairs of interfaces that are to be loaded.
+ * @return A list of type + id pairs of interfaces that are to be loaded.
  */
-MultiInterfaceChooserDialog::TypeIdPairSet
+MultiInterfaceChooserDialog::TypeIdPairList
 MultiInterfaceChooserDialog::get_selected_interfaces() const
 {
-  TypeIdPairSet types_and_ids;
+  TypeIdPairList types_and_ids;
 
   const Gtk::TreeNodeChildren children = __model->children();
   for (Gtk::TreeNodeChildren::const_iterator it = children.begin();
@@ -200,7 +203,7 @@ MultiInterfaceChooserDialog::get_selected_interfaces() const
     const Gtk::TreeRow& row = *it;
     if (row[record().load]) {
       TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
-      types_and_ids.insert(pair);
+      types_and_ids.push_back(pair);
     }
   }
 
@@ -209,14 +212,14 @@ MultiInterfaceChooserDialog::get_selected_interfaces() const
 
 
 /** Get selected interface types and their respective IDs.
- * @return A set of type + id pairs of interfaces that are to be loaded,
+ * @return A list of type + id pairs of interfaces that are to be loaded,
  *         and *NOT* contained in the list of loaded interfaces handed
  *         over to create().
  */
-MultiInterfaceChooserDialog::TypeIdPairSet
+MultiInterfaceChooserDialog::TypeIdPairList
 MultiInterfaceChooserDialog::get_newly_selected_interfaces() const
 {
-  TypeIdPairSet types_and_ids;
+  TypeIdPairList types_and_ids;
 
   const Gtk::TreeNodeChildren children = __model->children();
   for (Gtk::TreeNodeChildren::const_iterator it = children.begin();
@@ -227,7 +230,7 @@ MultiInterfaceChooserDialog::get_newly_selected_interfaces() const
       TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
       if (__loaded_interfaces.find(pair) == __loaded_interfaces.end())
       {
-        types_and_ids.insert(pair);
+        types_and_ids.push_back(pair);
       }
     }
   }

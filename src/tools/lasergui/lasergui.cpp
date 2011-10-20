@@ -67,10 +67,14 @@ class LaserGuiGtkWindow : public Gtk::Window
   /** Shorthand for pair of interface type and ID. */
   typedef MultiInterfaceChooserDialog::TypeIdPair TypeIdPair;
   /** Shorthand for set of pairs of interface type and ID. */
-  typedef MultiInterfaceChooserDialog::TypeIdPairSet TypeIdPairSet;
+  typedef MultiInterfaceChooserDialog::TypeIdPairList TypeIdPairList;
   /** For each interface, an interface dispatcher is opened that listens for
    * data changes. */
-  typedef std::map<Interface*, InterfaceDispatcher*> InterfaceDispatcherMap;
+  typedef std::pair<Interface*, InterfaceDispatcher*> InterfaceDispatcherPair;
+  /** A list of interfaces and their respective dispatchers.
+   * Note that this is a list and not a map from interface to dispatcher only
+   * to keep the ordering specified by the user in the GUI. */
+  typedef std::list<InterfaceDispatcherPair> InterfaceDispatcherPairList;
 
   /** Constructor for Gtk::Builder.
    * @param cobject C base object
@@ -80,7 +84,7 @@ class LaserGuiGtkWindow : public Gtk::Window
 		    const Glib::RefPtr<Gtk::Builder> &builder)
     : Gtk::Window(cobject), __athome_drawer(true)
   {
-    __laser_if_names.insert(std::make_pair("Laser360Interface", "Laser"));
+    __laser_if_names.push_back(std::make_pair("Laser360Interface", "Laser"));
 
     builder->get_widget_derived("da_laser", __area);
     builder->get_widget("tb_connection", __tb_connection);
@@ -162,12 +166,8 @@ class LaserGuiGtkWindow : public Gtk::Window
                                               "*",
                                               __laser_if_names));
       if (ifcd->run()) {
-        try {
-          TypeIdPairSet interfaces = ifcd->get_selected_interfaces();
-          open_interfaces(interfaces);
-        } catch (const Exception& exc) {
-          fprintf(stderr, "Caught ignored exception: \"%s\".\n", exc.what());
-        }
+        const TypeIdPairList interfaces = ifcd->get_selected_interfaces();
+        open_interfaces(interfaces);
       }
     }
   }
@@ -178,10 +178,10 @@ class LaserGuiGtkWindow : public Gtk::Window
    * @param types_and_ids types and ids of interfaces to open
    */
   void
-  open_interfaces(const TypeIdPairSet& types_and_ids)
+  open_interfaces(const TypeIdPairList& types_and_ids)
   {
     __area->reset_laser_ifs();
-    for (InterfaceDispatcherMap::const_iterator it = __laser_ifs.begin();
+    for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
          it != __laser_ifs.end(); ++it) {
       __bb->unregister_listener(it->second);
       delete it->second;
@@ -191,7 +191,7 @@ class LaserGuiGtkWindow : public Gtk::Window
     __laser_if_names = types_and_ids;
 
     // Open interfaces.
-    for (TypeIdPairSet::const_iterator it = types_and_ids.begin();
+    for (TypeIdPairList::const_iterator it = types_and_ids.begin();
          it != types_and_ids.end(); ++it)
     {
       const Glib::ustring& type = it->first;
@@ -228,15 +228,16 @@ class LaserGuiGtkWindow : public Gtk::Window
         __bb->close(itf);
         continue;
       }
-      __laser_ifs[itf] = itfd;
+      const InterfaceDispatcherPair p = std::make_pair(itf, itfd);
+      __laser_ifs.push_back(p);
     }
 
     // Inform the drawing area.
-    std::set<Interface*> keys;
-    for (InterfaceDispatcherMap::const_iterator it = __laser_ifs.begin();
+    std::list<Interface*> keys;
+    for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
          it != __laser_ifs.end(); ++it)
     {
-      keys.insert(it->first);
+      keys.push_back(it->first);
     }
     __area->set_laser_ifs(keys);
   }
@@ -296,7 +297,7 @@ class LaserGuiGtkWindow : public Gtk::Window
       __area->set_connected(false);
       if ( __bb ) {
         __area->reset_laser_ifs();
-        for (InterfaceDispatcherMap::const_iterator it = __laser_ifs.begin();
+        for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
              it != __laser_ifs.end(); ++it) {
           __bb->unregister_listener(it->second);
           delete it->second;
@@ -321,7 +322,7 @@ class LaserGuiGtkWindow : public Gtk::Window
     __area->set_line_if(NULL);
     __area->set_visdisp_if(NULL);
     __area->queue_draw();
-    for (InterfaceDispatcherMap::const_iterator it = __laser_ifs.begin();
+    for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
          it != __laser_ifs.end(); ++it) {
       __bb->unregister_listener(it->second);
       delete it->second;
@@ -538,7 +539,7 @@ class LaserGuiGtkWindow : public Gtk::Window
 
  private:
   BlackBoard                        *__bb;
-  std::map<fawkes::Interface*, InterfaceDispatcher*> __laser_ifs;
+  InterfaceDispatcherPairList        __laser_ifs;
   Laser720Interface                 *__laser_segmentation_if;
   SwitchInterface                   *__switch_if;
   ObjectPositionInterface           *__target_if;
@@ -571,7 +572,7 @@ class LaserGuiGtkWindow : public Gtk::Window
   Gtk::Dialog                        *__dlg_ltopen;
   Gtk::ProgressBar                   *__pgb_ltopen;
 
-  TypeIdPairSet                       __laser_if_names;
+  TypeIdPairList                      __laser_if_names;
 };
 
 int

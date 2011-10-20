@@ -25,8 +25,6 @@
 
 #include <gtkmm.h>
 #include <list>
-#include <map>
-#include <set>
 #include <interfaces/Position2DTrackInterface.h>
 #include <interfaces/SwitchInterface.h>
 
@@ -58,7 +56,7 @@ class LaserDrawingArea
 		   const Glib::RefPtr<Gtk::Builder> &builder);
   ~LaserDrawingArea();
 
-  void set_laser_ifs(const std::set<fawkes::Interface*>& laser_if);
+  void set_laser_ifs(const std::list<fawkes::Interface*>& laser_if);
   void reset_laser_ifs();
   void set_objpos_if(std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_persons,
 		     std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_legs,
@@ -110,10 +108,12 @@ class LaserDrawingArea
     unsigned char g;
     unsigned char b;
   };
+  typedef std::pair<fawkes::Interface*, Color> InterfaceColorPair;
+  typedef std::list<InterfaceColorPair> InterfaceColorPairList;
 
   bool all_laser_ifs_have_writer() const;
 
-  std::map<fawkes::Interface*, Color>  __laser_ifs;
+  InterfaceColorPairList               __laser_ifs;
   fawkes::Laser720Interface           *__laser_segmentation_if;
   fawkes::SwitchInterface             *__switch_if;
   fawkes::ObjectPositionInterface     *__target_if;
