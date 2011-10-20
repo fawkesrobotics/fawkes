@@ -156,6 +156,9 @@ class Time
   mutable char    *__timestr;
 };
 
+extern const Time TIME_MAX;
+extern const Time TIME_MIN;
+
 } // end namespace fawkes
 
 #endif

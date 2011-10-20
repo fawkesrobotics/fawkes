@@ -34,11 +34,22 @@
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
+#include <limits>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+/** Instance of Time denoting the maximum value possible.
+ * This is particularly useful when initializing a minimization in time.
+ */
+const Time TIME_MAX = Time(std::numeric_limits<time_t>::max(), 999999);
+
+/** Instance of Time denoting the minimum value possible.
+ * This is particularly useful when initializing a maximization in time.
+ */
+const Time TIME_MIN = Time(0, 1);
 
 /** @class Time <utils/time/time.h>
  * A class for handling time.
