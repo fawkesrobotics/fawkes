@@ -268,22 +268,54 @@ function get_status()
 end
 
 
+local function skill_failed(skillname)
+   for _, s in ipairs(skill_status.failed) do
+      if s == skillname then return true end
+   end
+   return false
+end
+
 --- Get error string.
--- @return string of errors that occured in active skills
-function get_error()
-   local errors={}
+-- @return two strings string of errors that occured in active skills, first is
+-- machine readable, second is humand readable
+function get_error(machine)
+   local errors_machine={}
+   local errors_human={}
+
    for _, active_skill in ipairs(active_skills) do
       local fsm = skiller.skillenv.get_skill_fsm(active_skill)
-      if fsm and fsm.error and fsm.error ~= "" then
-	 table.insert(errors, active_skill .. ": " .. fsm.error)
+      if not skill_failed(active_skill) then
+         table.insert(errors_machine, active_skill .. ":ok")
       else
-	 local mod = get_skill_module(active_skill)
-	 if mod and mod.errmsg and mod.errmsg ~= "" then
-	    table.insert(errors, active_skill .. ": " .. mod.ermsg)
-	 end
+         if fsm and fsm.error and fsm.error ~= "" then
+            table.insert(errors_machine, active_skill .. ":" .. fsm.error)
+            table.insert(errors_human, {active_skill, fsm.error})
+         else
+            local mod = get_skill_module(active_skill)
+            if mod and mod.errmsg and mod.errmsg ~= "" then
+               table.insert(errors_machine, active_skill .. ":" .. mod.ermsg)
+               table.insert(errors_human, {active_skill, mod.ermsg})
+            else
+               table.insert(errors_machine, active_skill .. ":unknown")
+               table.insert(errors_human, {active_skill, "unknown error"})
+            end
+         end
       end
    end
-   return table.concat(errors, " | ")
+
+   local rv_human = "The following skills failed: "
+   local first = true
+   for _, e in ipairs(errors_human) do
+      if first then
+         first = false
+      else
+         rv_human = rv_human .. ", "
+      end
+      
+      rv_human = rv_human .. e[1] .. " (" .. e[2] .. ")"
+   end
+
+   return table.concat(errors_machine, " | "), rv_human
 end
 
 --- Get active skills.
