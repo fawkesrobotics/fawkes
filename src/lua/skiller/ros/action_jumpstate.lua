@@ -126,6 +126,7 @@ function ActionJumpState:setup_subfsm()
       action_trans("WAIT_GOAL_ACK", "RECALLING"),
       action_trans("WAIT_GOAL_ACK", "PREEMPTING"),
       action_trans("WAIT_GOAL_ACK", "WAIT_RESULT"),
+      action_trans("WAIT_GOAL_ACK", "ABORTED", "FAILED"),
       action_trans("WAIT_GOAL_ACK", "SUCCEEDED", "FINAL"),
       {"WAIT_GOAL_ACK", "FAILED", timeout={10, error="goal not acknowledged"}},
       action_trans("PENDING", "ACTIVE"),
