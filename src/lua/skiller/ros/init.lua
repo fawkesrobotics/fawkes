@@ -106,14 +106,12 @@ function spin_cb(goal_handle, action_server)
 
       if failed > 0 then
 	 local result = action_server.actspec.result_spec:instantiate()
-	 local errstr = string.format("exec_fail: %s|%s",
-				      goal_handle.vars.skillstring,
-				      skillenv.get_error())
+	 local errstr_machine, errstr_human = skillenv.get_error()
 
-	 result.values.errmsg = errstr
-	 print_fail("%s", errstr)
+	 result.values.errmsg = errstr_machine
+	 print_fail("%s", errstr_human)
 	 if nodemon then
-	    nodemon:set_error("lua_error_skill", errstr)
+	    nodemon:set_error("lua_error_skill", errstr_machine)
 	    nodemon:set_recovering("autorecover", "ready for new skill calls")
 	    nodemon:set_running()
 	 end
