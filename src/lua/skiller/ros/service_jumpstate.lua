@@ -87,17 +87,19 @@ function ServiceJumpState:setup_subfsm()
 end
 
 function ServiceJumpState:do_exit()
-   if self.service_client:concexec_succeeded() then
-      --print_warn("Getting result")
-      self.fsm.vars.result = self.service_client:concexec_result()
-   elseif not self.service_client:concexec_finished() then
-      --print_warn("Aborting")
-      self.service_client:concexec_abort()
-   end
-   if self.subfsm.current.name == self.subfsm.fail_state then
-      self.subfsm.error = self.service_client.concexec_error or ""
-      print_warn("ServiceJumpState[%s %s] error: %s", self.name, self.service_client.service, self.subfsm.error)
-      self.service_client:concexec_abort()
+   -- It's not running if a precondition already causes a state change
+   if self.service_client:concexec_running() then
+      if self.service_client:concexec_succeeded() then
+         self.fsm.vars.result = self.service_client:concexec_result()
+      else
+         self.service_client:concexec_abort()
+      end
+      if self.subfsm.current.name == self.subfsm.fail_state then
+         self.subfsm.error = self.service_client.concexec_error or ""
+         print_warn("ServiceJumpState[%s %s] error: %s",
+                    self.name, self.service_client.service, self.subfsm.error)
+      end
+
    end
 
    SubFSMJumpState.do_exit(self)
