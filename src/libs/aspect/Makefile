@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/webview/webview.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
 			fawkesconfig fawkesplugin fawkeslogging
@@ -26,6 +27,15 @@ ifneq ($(HAVE_WEBVIEW),1)
 else
   CFLAGS += -DHAVE_WEBVIEW
   LIBS_libfawkesaspects += fawkeswebview
+endif
+
+ifneq ($(HAVE_TF),1)
+  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/tf.cpp $(SRCDIR)/inifins/tf.cpp))
+  WARN_TARGETS += warning_tf
+else
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
+  LIBS_libfawkesaspects += fawkestf
 endif
 
 OBJS_libfawkesaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))

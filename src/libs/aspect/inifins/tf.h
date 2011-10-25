@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard aspect for Fawkes
+ *  tf.h - Fawkes TransformAspect initializer/finalizer
  *
- *  Created: Thu Jan 11 16:28:58 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Oct 25 22:31:12 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,27 +20,28 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_BLACKBOARD_H_
-#define __ASPECT_BLACKBOARD_H_
+#ifndef __ASPECT_INIFINS_TF_H_
+#define __ASPECT_INIFINS_TF_H_
 
-#include <aspect/aspect.h>
-#include <blackboard/blackboard.h>
+#include <aspect/inifins/inifin.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class BlackBoardAspect : public virtual Aspect
+class BlackBoard;
+
+class TransformAspectIniFin : public AspectIniFin
 {
  public:
-  BlackBoardAspect();
-  virtual ~BlackBoardAspect();
+  TransformAspectIniFin(BlackBoard *blackboard);
 
-  void init_BlackBoardAspect(BlackBoard *bb);
+  virtual void init(Thread *thread);
+  virtual void finalize(Thread *thread);
 
- protected:
-  BlackBoard *blackboard;
+ private:
+  BlackBoard *__blackboard;
 };
 
 } // end namespace fawkes

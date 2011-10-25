@@ -26,6 +26,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/thread_initializer.h>
+#include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */

@@ -40,6 +40,9 @@
 #ifdef HAVE_WEBVIEW
 #  include <aspect/inifins/webview.h>
 #endif
+#ifdef HAVE_TF
+#  include <aspect/inifins/tf.h>
+#endif
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -201,7 +204,7 @@ AspectManager::prepare_finalize(Thread *thread)
 /** Register default aspect initializer/finalizer.
  * This loads initializer/finalizer of all aspects which are in the
  * Fawkes aspect library.
- * @param blackboard blackboard for BlackBoardAspect
+ * @param blackboard blackboard for BlackBoardAspect and TransformAspect
  * @param collector thread collector for ThreadProducerAspect
  * @param config configuration for ConfigurableAspect
  * @param clock clock for ClockAspect
@@ -253,6 +256,9 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 #ifdef HAVE_WEBVIEW
   WebviewAspectIniFin *web_aif = new WebviewAspectIniFin();
 #endif
+#ifdef HAVE_TF
+  TransformAspectIniFin *tf_aif = new TransformAspectIniFin(blackboard);
+#endif
 
   __default_inifins[prov_aif->get_aspect_name()] = prov_aif;
   __default_inifins[bb_aif->get_aspect_name()] = bb_aif;
@@ -271,6 +277,9 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   __default_inifins[vis_aif->get_aspect_name()] = vis_aif;
 #ifdef HAVE_WEBVIEW
   __default_inifins[web_aif->get_aspect_name()] = web_aif;
+#endif
+#ifdef HAVE_TF
+  __default_inifins[tf_aif->get_aspect_name()] = tf_aif;
 #endif
 
   std::map<std::string, AspectIniFin *>::iterator i;
