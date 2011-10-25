@@ -68,6 +68,7 @@ class InterfaceFieldIterator
   int64_t                get_int64(unsigned int index = 0) const;
   uint64_t               get_uint64(unsigned int index = 0) const;
   float                  get_float(unsigned int index = 0) const;
+  double                 get_double(unsigned int index = 0) const;
   uint8_t                get_byte(unsigned int index = 0) const;
   int32_t                get_enum(unsigned int index = 0) const;
   bool *                 get_bools() const;
@@ -80,6 +81,7 @@ class InterfaceFieldIterator
   int64_t *              get_int64s() const;
   uint64_t *             get_uint64s() const;
   float *                get_floats() const;
+  double *               get_doubles() const;
   uint8_t *              get_bytes() const;
   int32_t *              get_enums() const;
   const char *           get_string() const;
@@ -94,6 +96,7 @@ class InterfaceFieldIterator
   void                   set_int64(int64_t i, unsigned int index = 0);
   void                   set_uint64(uint64_t i, unsigned int index = 0);
   void                   set_float(float f, unsigned int index = 0);
+  void                   set_double(double f, unsigned int index = 0);
   void                   set_byte(uint8_t b, unsigned int index = 0);
   void                   set_bools(bool *b);
   void                   set_int8s(int8_t *i);
@@ -105,6 +108,7 @@ class InterfaceFieldIterator
   void                   set_int64s(int64_t *i);
   void                   set_uint64s(uint64_t *i);
   void                   set_floats(float *f);
+  void                   set_doubles(double *f);
   void                   set_bytes(uint8_t* b);
   void                   set_string(const char* s);
   
