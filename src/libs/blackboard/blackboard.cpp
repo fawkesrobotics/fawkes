@@ -3,8 +3,7 @@
  *  blackboard.cpp - BlackBoard Interface
  *
  *  Created: Sat Sep 16 17:11:13 2006 (on train to Cologne)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,14 +21,18 @@
  */
 
 #include <blackboard/blackboard.h>
+#include <blackboard/internal/notifier.h>
 
 #include <string>
 #include <cstring>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-/** @class BlackBoard blackboard.h <blackboard/blackboard.h>
- * The BlackBoard.
+/** @class BlackBoard <blackboard/blackboard.h>
+ * The BlackBoard abstract class.
  * This class is the single one entry point for programs that use the BlackBoard.
  * It is used to open and close interfaces, register and unregister listeners and
  * observers and to maintain the BlackBoard shared memory segment. Not other classes
@@ -147,63 +150,77 @@ namespace fawkes {
  * characters, ? for exactly one character) to match the interface ID.
  * @return list of interfaces
  *
- * @fn void BlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
- * Register BB event listener.
+ */
+
+
+/** Constructor. */
+BlackBoard::BlackBoard()
+{
+  __notifier = new BlackBoardNotifier();
+}
+
+/** Destructor. */
+BlackBoard::~BlackBoard()
+{
+  delete __notifier;
+}
+
+
+/** Register BB event listener.
  * @param listener BlackBoard event listener to register
- * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
- * and BBIL_FLAG_INTERFACE. Only for the given types the event listener is registered.
- * BBIL_FLAG_ALL can be supplied to register for all events.
- *
- *
- * @fn void BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
- * Unregister BB interface listener.
- * This will remove the given BlackBoard interface listener from any event that it was
- * previously registered for.
+ * @param flag flags what to register for
+ */
+void
+BlackBoard::register_listener(BlackBoardInterfaceListener *listener,
+                              ListenerRegisterFlag flag)
+{
+  __notifier->register_listener(listener, flag);
+}
+
+
+/** Update BB event listener.
+ * @param listener BlackBoard event listener to update
+ * @param flag flags what to update for
+ */
+void
+BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
+                            ListenerRegisterFlag flag)
+{
+  __notifier->update_listener(listener, flag);
+}
+
+
+/** Unregister BB interface listener.
+ * This will remove the given BlackBoard interface listener from any
+ * event that it was previously registered for.
  * @param listener BlackBoard event listener to remove
- *
- *
- * @fn void BlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
- * Register BB interface observer.
+ */
+void
+BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
+{
+  __notifier->unregister_listener(listener);
+}
+
+
+/** Register BB interface observer.
  * @param observer BlackBoard interface observer to register
- * @param flags an or'ed combination of BBIO_FLAG_CREATED, BBIO_FLAG_DESTROYED
- *
- *
- * @fn void BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
- * Unregister BB interface observer.
+ */
+void
+BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
+{
+  __notifier->register_observer(observer);
+}
+
+
+/** Unregister BB interface observer.
  * This will remove the given BlackBoard event listener from any event that it was
  * previously registered for.
  * @param observer BlackBoard event listener to remove
  */
-
-
-/** Data changed notification flag. */
-const unsigned int BlackBoard::BBIL_FLAG_DATA      = 1;
-/** Message received notification flag. */
-const unsigned int BlackBoard::BBIL_FLAG_MESSAGES  = 2;
-/** Reader added/removed notification flag. */
-const unsigned int BlackBoard::BBIL_FLAG_READER    = 4;
-/** Writer added/removed notification flag. */
-const unsigned int BlackBoard::BBIL_FLAG_WRITER    = 8;
-
-/** All interface listener notifications. */
-const unsigned int BlackBoard::BBIL_FLAG_ALL = 
-  BBIL_FLAG_DATA | BBIL_FLAG_MESSAGES | BBIL_FLAG_READER | BBIL_FLAG_WRITER;
-
-/** Interface creation notification flag. */
-const unsigned int BlackBoard::BBIO_FLAG_CREATED   = 1;
-
-/** Interface destruction notification flag. */
-const unsigned int BlackBoard::BBIO_FLAG_DESTROYED = 2;
-
-/** All interface observer notifications */
-const unsigned int BlackBoard::BBIO_FLAG_ALL =
-  BBIO_FLAG_CREATED | BBIO_FLAG_DESTROYED;
-
-
-
-/** Virtual empty destructor. */
-BlackBoard::~BlackBoard()
+void
+BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
+  __notifier->unregister_observer(observer);
 }
 
 

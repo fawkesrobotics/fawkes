@@ -67,7 +67,6 @@ RemoteBlackBoard::RemoteBlackBoard(FawkesNetworkClient *client)
   __fnc->register_handler(this, FAWKES_CID_BLACKBOARD);
 
   __mutex = new Mutex();
-  __notifier = new BlackBoardNotifier();
   __instance_factory = new BlackBoardInstanceFactory();
 
   __wait_mutex = new Mutex();
@@ -103,7 +102,6 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
   __fnc->register_handler(this, FAWKES_CID_BLACKBOARD);
 
   __mutex = new Mutex();
-  __notifier = new BlackBoardNotifier();
   __instance_factory = new BlackBoardInstanceFactory();
 
   __wait_mutex = new Mutex();
@@ -119,7 +117,6 @@ RemoteBlackBoard::~RemoteBlackBoard()
 {
   __fnc->deregister_handler(FAWKES_CID_BLACKBOARD);
   delete __mutex;
-  delete __notifier;
   delete __instance_factory;
 
   for ( __pit = __proxies.begin(); __pit != __proxies.end(); ++__pit) {
@@ -349,34 +346,6 @@ RemoteBlackBoard::close(Interface *interface)
   }
 
   __instance_factory->delete_interface_instance(interface);
-}
-
-
-void
-RemoteBlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
-{
-  __notifier->register_listener(listener, flags);
-}
-
-
-void
-RemoteBlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
-{
-  __notifier->unregister_listener(listener);
-}
-
-
-void
-RemoteBlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
-{
-  __notifier->register_observer(observer, flags);
-}
-
-
-void
-RemoteBlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
-{
-  __notifier->unregister_observer(observer);
 }
 
 

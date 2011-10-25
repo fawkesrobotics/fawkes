@@ -68,13 +68,6 @@ class RemoteBlackBoard
   std::list<Interface *>  open_multiple_for_reading(const char *interface_type,
 						    const char *id_pattern = "*");
 
-  void register_listener(BlackBoardInterfaceListener *listener, unsigned int flags);
-  void unregister_listener(BlackBoardInterfaceListener *listener);
-
-  void register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags);
-  void unregister_observer(BlackBoardInterfaceObserver *observer);
-
-
   /* for FawkesNetworkClientHandler */
   virtual void          deregistered(unsigned int id) throw();
   virtual void          inbound_received(FawkesNetworkMessage *msg,
@@ -97,7 +90,6 @@ class RemoteBlackBoard
   FawkesNetworkClient  *__fnc;
   bool                  __fnc_owner;
   FawkesNetworkMessage *__m;
-  BlackBoardNotifier   *__notifier;
   BlackBoardInstanceFactory *__instance_factory;
   LockMap<unsigned int, BlackBoardInterfaceProxy *> __proxies;
   LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator __pit;
