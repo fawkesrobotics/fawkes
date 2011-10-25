@@ -87,13 +87,20 @@ TransformBroadcaster::TransformBroadcaster(BlackBoard *bb,
   __tfif = __bb->open_for_writing<TransformInterface>(bbid.c_str());
 }
 
+
+/** Constructor for sub-classes. */
+TransformBroadcaster::TransformBroadcaster()
+  : __bb(NULL), __mutex(new Mutex())
+{
+}
+
 /** Destructor.
  * Closes TransformInterface, hence BlackBoard must still be alive and
  * valid.
  */
 TransformBroadcaster::~TransformBroadcaster()
 {
-  __bb->close(__tfif);
+  if (__bb) __bb->close(__tfif);
   delete __mutex;
 }
 

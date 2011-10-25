@@ -1,7 +1,7 @@
 /***************************************************************************
  *  transform_broadcaster.h - Fawkes transform broadcaster (based on ROS tf)
  *
- *  Created: Mon Oct 24 17:10:30 2011
+ *  Created: Tue Oct 25 22:17:54 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -66,12 +66,16 @@ namespace fawkes {
 }
 #endif
 
-class TransformBroadcaster {
+class TransformBroadcaster
+{
  public:
   TransformBroadcaster(BlackBoard *bb, const char *bb_iface_id);
   ~TransformBroadcaster();
 
-  void send_transform(const StampedTransform &transform);
+  virtual void send_transform(const StampedTransform &transform);
+
+ protected:
+  TransformBroadcaster();
 
  private:
   BlackBoard *__bb;
