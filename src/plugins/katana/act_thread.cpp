@@ -135,7 +135,7 @@ KatanaActThread::init()
   __sensacq_thread->start();
 
   bbil_add_message_interface(__katana_if);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
   __tt.reset(new TimeTracker());

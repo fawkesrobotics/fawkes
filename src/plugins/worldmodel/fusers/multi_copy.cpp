@@ -96,7 +96,7 @@ WorldModelMultiCopyFuser::WorldModelMultiCopyFuser(fawkes::BlackBoard *blackboar
   }
 
   bbio_add_observed_create(type, from_id_pattern);
-  blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+  blackboard->register_observer(this);
 }
 
 

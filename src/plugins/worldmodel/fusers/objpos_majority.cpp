@@ -126,7 +126,7 @@ WorldModelObjPosMajorityFuser::WorldModelObjPosMajorityFuser(
                            own_id.c_str());
   bbio_add_observed_create("ObjectPositionInterface",
                            foreign_id_pattern.c_str());
-  blackboard_->register_observer(this, fawkes::BlackBoard::BBIO_FLAG_CREATED);
+  blackboard_->register_observer(this);
 }
 
 

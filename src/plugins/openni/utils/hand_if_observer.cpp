@@ -60,7 +60,7 @@ HandIfObserver::HandIfObserver(BlackBoard *bb, HandMap &hands)
   }
 
   bbio_add_observed_create("ObjectPositionInterface", "OpenNI Hand *");
-  __bb->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+  __bb->register_observer(this);
 }
 
 

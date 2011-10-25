@@ -176,7 +176,7 @@ SkillerExecutionThread::init()
 
   // We want to know if our reader leaves and closes the interface
   bbil_add_reader_interface(__skiller_if);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_READER);
+  blackboard->register_listener(this);
 
 #ifdef SKILLER_TIMETRACKING
   __tt           = new TimeTracker();
