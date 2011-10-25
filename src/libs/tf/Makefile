@@ -17,15 +17,16 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 CFLAGS = -std=c++0x
 
-LIBS_libfawkestf = m fawkescore fawkesutils
+LIBS_libfawkestf = fawkescore fawkesutils fawkesblackboard fawkesinterface \
+		   TransformInterface
 OBJS_libfawkestf = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
 HDRS_libfawkestf = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
 OBJS_all = $(OBJS_libfawkestf)
 
-ifeq ($(HAVE_BULLET),1)
-  CFLAGS  += $(CFLAGS_BULLET)
-  LDFLAGS += $(LDFLAGS_BULLET)
+ifeq ($(HAVE_TF),1)
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
   LIBS_all = $(LIBDIR)/libfawkestf.so
 else
   WARN_TARGETS += warning_bullet
