@@ -86,6 +86,7 @@ main(int argc, char **argv)
     cout << "Trying to open second writer.. " << flush;
     TestInterface *ti_writer_two;
     ti_writer_two = bb->open_for_writing<TestInterface>("SomeID");
+    bb->close(ti_writer_two);
     cout << "BUG: Detection of second writer did NOT work!" << endl;
     exit(2);
   } catch (BlackBoardWriterActiveException &e) {
