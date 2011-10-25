@@ -14,8 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_example = fawkesaspects TestInterface
+LIBS_example = fawkescore fawkesaspects fawkesnetcomm fawkesblackboard TestInterface
 OBJS_example = $(filter-out example_plugin_netping.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 LIBS_example_plugin_netping = fawkescore fawkesutils fawkesnetcomm
