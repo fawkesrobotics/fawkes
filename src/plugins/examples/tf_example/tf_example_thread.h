@@ -27,8 +27,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-
-#include <tf/transform_listener.h>
+#include <aspect/tf.h>
 
 namespace fawkes {
   namespace tf {
@@ -37,11 +36,12 @@ namespace fawkes {
 }
 
 class TfExampleThread
-  : public fawkes::Thread,
-    public fawkes::BlockedTimingAspect,
-    public fawkes::LoggingAspect,
-    public fawkes::ConfigurableAspect,
-    public fawkes::BlackBoardAspect
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::TransformAspect
 {
  public:
   TfExampleThread();
@@ -54,8 +54,6 @@ class TfExampleThread
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
- private:
-  fawkes::tf::TransformListener *__tf_listener;
 };
 
 #endif

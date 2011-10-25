@@ -47,22 +47,20 @@ TfExampleThread::~TfExampleThread()
 void
 TfExampleThread::init()
 {
-  __tf_listener = new tf::TransformListener(blackboard);
 }
 
 
 void
 TfExampleThread::finalize()
 {
-  delete __tf_listener;
 }
 
 
 void
 TfExampleThread::loop()
 {
-  bool world_frame_exists = __tf_listener->frame_exists("/world");
-  bool robot_frame_exists = __tf_listener->frame_exists("/robot");
+  bool world_frame_exists = tf_listener->frame_exists("/world");
+  bool robot_frame_exists = tf_listener->frame_exists("/robot");
 
   if (! world_frame_exists || ! robot_frame_exists) {
     logger->log_warn(name(), "Frame missing: world %s   robot %s",
@@ -70,7 +68,7 @@ TfExampleThread::loop()
                      robot_frame_exists ? "exists" : "missing");
   } else {
     tf::StampedTransform transform;
-    __tf_listener->lookup_transform("/robot", "/world", transform);
+    tf_listener->lookup_transform("/robot", "/world", transform);
 
     fawkes::Time now;
     double diff = now - &transform.stamp;
@@ -78,8 +76,8 @@ TfExampleThread::loop()
     tf::Quaternion q = transform.getRotation();
     tf::Vector3 &v   = transform.getOrigin();
 
-    const tf::TimeCache *world_cache = __tf_listener->get_frame_cache("/world");
-    const tf::TimeCache *robot_cache = __tf_listener->get_frame_cache("/robot");
+    const tf::TimeCache *world_cache = tf_listener->get_frame_cache("/world");
+    const tf::TimeCache *robot_cache = tf_listener->get_frame_cache("/robot");
 
     logger->log_info(name(), "Transform %s -> %s, %f sec old: "
                      "T(%f,%f,%f)  Q(%f,%f,%f,%f)",
