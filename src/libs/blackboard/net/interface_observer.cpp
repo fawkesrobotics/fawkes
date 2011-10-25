@@ -56,7 +56,7 @@ BlackBoardNetHandlerInterfaceObserver::BlackBoardNetHandlerInterfaceObserver(Bla
   bbio_add_observed_create("*", "*");
   bbio_add_observed_destroy("*", "*");
 
-  __blackboard->register_observer(this, BlackBoard::BBIO_FLAG_ALL);
+  __blackboard->register_observer(this);
 }
 
 
