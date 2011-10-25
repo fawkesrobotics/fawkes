@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  mutex.h - Mutex
+ *  recursive_mutex.h - Recursive Mutex
  *
- *  Generated: Thu Sep 14 16:58:49 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Generated: Mon Oct 24 18:33:41 2011
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,39 +21,20 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_MUTEX_H_
-#define __CORE_THREADING_MUTEX_H_
+#ifndef __CORE_THREADING_RECURSIVE_MUTEX_H_
+#define __CORE_THREADING_RECURSIVE_MUTEX_H_
+
+#include <core/threading/mutex.h>
 
 namespace fawkes {
 
-class MutexData;
-class WaitCondition;
-
-class Mutex
+class RecursiveMutex : public Mutex
 {
   friend class WaitCondition;
 
  public:
-  /** Mutex type. */
-  typedef enum {
-    NORMAL,	///< This type of mutex does not detect deadlock.
-    RECURSIVE	///< A thread attempting to relock this mutex without
-    		///< first unlocking it shall succeed in locking the mutex.
-  } Type;
-
-  Mutex(Type type = NORMAL);
-  ~Mutex();
-
-  void lock();
-  bool try_lock();
-  void unlock();
-
-  void stopby();
-
- private:
-  MutexData *mutex_data;
+  RecursiveMutex();
 };
-
 
 } // end namespace fawkes
 

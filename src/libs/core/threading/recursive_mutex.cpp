@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  mutex.h - Mutex
+ *  mutex.cpp - implementation of mutex, based on pthreads
  *
- *  Generated: Thu Sep 14 16:58:49 2006
+ *  Generated: Thu Sep 14 17:03:57 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,40 +21,29 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_MUTEX_H_
-#define __CORE_THREADING_MUTEX_H_
+#include <core/threading/recursive_mutex.h>
 
 namespace fawkes {
 
-class MutexData;
-class WaitCondition;
+/** @class RecursiveMutex <core/threading/recursive_mutex.h>
+ * Recursive mutex.
+ * This is a mutex which can be locked multiple times by the same thread.
+ * Other threads attempting to lock the mutex will block as if this were a
+ * regular mutex.
+ * This class is just a convenience sub-class of Mutex with its type set
+ * to Mutex::RECURSIVE. It is meant to be used to make the actual behavior
+ * more obvious.
+ *
+ * @ingroup Threading
+ * @ingroup FCL
+ *
+ * @author Tim Niemueller
+ */
 
-class Mutex
+/** Constructor. */
+RecursiveMutex::RecursiveMutex()
+  : Mutex(Mutex::RECURSIVE)
 {
-  friend class WaitCondition;
-
- public:
-  /** Mutex type. */
-  typedef enum {
-    NORMAL,	///< This type of mutex does not detect deadlock.
-    RECURSIVE	///< A thread attempting to relock this mutex without
-    		///< first unlocking it shall succeed in locking the mutex.
-  } Type;
-
-  Mutex(Type type = NORMAL);
-  ~Mutex();
-
-  void lock();
-  bool try_lock();
-  void unlock();
-
-  void stopby();
-
- private:
-  MutexData *mutex_data;
-};
-
+}
 
 } // end namespace fawkes
-
-#endif
