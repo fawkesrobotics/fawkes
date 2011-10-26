@@ -122,6 +122,8 @@ INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_min','float',-1.6,
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_max','float',1.6,'Maximum tilt for RX28 PTU');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_margin','float',0.1,'Angle distance between desired and actual pan value to consider RX28 PTU motion finished; rad');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_margin','float',0.1,'Angle distance between desired and actual tilt value to consider RX28 PTU motion finished; rad');
+INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_axis_height','float',0.038,'Distance from PTU base to upper end of PAN axis; m');
+INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_axis_height','float',0.039,'Distance from pan platform to TILT axis; m');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/type','string','EviD100P','Type of PTU; one of RX28, EviD100P and DirectedPerceptionASCII');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/active','bool','0','Is this PTU active?');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/device','string','/dev/ttyUSB1','Device file for EviD100P PTU');

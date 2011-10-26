@@ -48,7 +48,11 @@ PanTiltRX28Thread::PanTiltRX28Thread(std::string &pantilt_cfg_prefix,
 				     std::string &ptu_cfg_prefix,
 				     std::string &ptu_name)
   : PanTiltActThread("PanTiltRX28Thread"),
-    BlackBoardInterfaceListener("PanTiltRX28Thread")
+#ifdef HAVE_TF
+    TransformAspect(TransformAspect::ONLY_PUBLISHER,
+                    (std::string("PTU ") + ptu_name).c_str()),
+#endif
+    BlackBoardInterfaceListener("PanTiltRX28Thread(%s)", ptu_name.c_str())
 {
   set_name("PanTiltRX28Thread(%s)", ptu_name.c_str());
 
@@ -86,6 +90,17 @@ PanTiltRX28Thread::init()
   __cfg_tilt_max         = config->get_float((__ptu_cfg_prefix + "tilt_max").c_str());
   __cfg_pan_margin       = config->get_float((__ptu_cfg_prefix + "pan_margin").c_str());
   __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
+
+#ifdef HAVE_TF
+  __cfg_panaxis_height   = config->get_float((__ptu_cfg_prefix + "pan_axis_height").c_str());
+  __cfg_tiltaxis_height  = config->get_float((__ptu_cfg_prefix + "tilt_axis_height").c_str());
+  __cfg_base_frame       = std::string("/") + __ptu_name + "_base";
+  __cfg_pan_link         = std::string("/") + __ptu_name + "_pan";
+  __cfg_tilt_link        = std::string("/") + __ptu_name + "_tilt";
+
+  __translation_pan.setValue(0, 0, __cfg_panaxis_height);
+  __translation_tilt.setValue(0, 0, __cfg_tiltaxis_height);
+#endif
 
   bool pan_servo_found = false, tilt_servo_found = false;
 
@@ -204,7 +219,8 @@ PanTiltRX28Thread::update_sensor_values()
 {
   if (__wt->has_fresh_data()) {
     float pan = 0, tilt = 0, panvel=0, tiltvel=0;
-    __wt->get_pantilt(pan, tilt);
+    fawkes::Time time;
+    __wt->get_pantilt(pan, tilt, time);
     __wt->get_velocities(panvel, tiltvel);
     __pantilt_if->set_pan(pan);
     __pantilt_if->set_tilt(tilt);
@@ -213,6 +229,16 @@ PanTiltRX28Thread::update_sensor_values()
     __pantilt_if->set_enabled(__wt->is_enabled());
     __pantilt_if->set_final(__wt->is_final());
     __pantilt_if->write();
+
+#ifdef HAVE_TF
+    tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
+    tf::Transform ptr(pr, __translation_pan);
+    tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+
+    tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
+    tf::Transform ttr(tr, __translation_tilt);
+    tf_publisher->send_transform(ttr, time, __cfg_base_frame, __cfg_tilt_link);
+#endif
   }
 }
 
@@ -577,6 +603,20 @@ PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt)
 }
 
 
+/** Get pan/tilt value with time.
+ * @param pan upon return contains the current pan value
+ * @param tilt upon return contains the current tilt value
+ * @param time upon return contains the time the pan and tilt values were read
+ */
+void
+PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt,
+                                             fawkes::Time &time)
+{
+  get_pantilt(pan, tilt);
+  time = __pantilt_time;
+}
+
+
 /** Check if motion is final.
  * @return true if motion is final, false otherwise
  */
@@ -675,6 +715,7 @@ PanTiltRX28Thread::WorkerThread::loop()
     __rx28->read_table_values(__pan_servo_id);
     __fresh_data = true;
     __rx28->read_table_values(__tilt_servo_id);
+    __pantilt_time.stamp();
   } catch (Exception &e) {
     __logger->log_warn(name(), "Error while reading table values from servos, exception follows");
     __logger->log_warn(name(), e);

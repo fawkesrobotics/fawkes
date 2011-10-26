@@ -16,9 +16,13 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 SUBDIRS = tool
+
+CFLAGS  += $(CFLAGS_TF)
+LDFLAGS += $(LDFLAGS_TF)
 
 # Sub directory name that contain PTU drivers
 DRIVERS = dirperc robotis sony
