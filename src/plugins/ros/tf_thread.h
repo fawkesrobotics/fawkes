@@ -28,14 +28,12 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/tf.h>
 #include <plugins/ros/aspect/ros.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 #include <interfaces/TransformInterface.h>
 #include <core/threading/mutex.h>
-
-// from Fawkes
-#include <tf/transform_publisher.h>
 
 #include <list>
 #include <queue>
@@ -50,6 +48,7 @@ class RosTfThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
+  public fawkes::TransformAspect,
   public fawkes::ROSAspect,
   public fawkes::BlackBoardInterfaceObserver,
   public fawkes::BlackBoardInterfaceListener
@@ -81,8 +80,6 @@ class RosTfThread
 
  private:
   std::list<fawkes::TransformInterface *> __tfifs;
-
-  fawkes::tf::TransformPublisher *__tf_publisher;
 
   ros::Subscriber __sub_tf;
   ros::Publisher  __pub_tf;

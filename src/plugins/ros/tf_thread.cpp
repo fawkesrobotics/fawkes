@@ -38,6 +38,7 @@ using namespace fawkes;
 RosTfThread::RosTfThread()
   : Thread("RosTfThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "ROS"),
     BlackBoardInterfaceListener("RosTfThread")
 {
   __tf_msg_queue_mutex = new Mutex();
@@ -60,7 +61,6 @@ RosTfThread::init()
   __seq_num = 0;
 
   __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("TF *");
-  __tf_publisher = new fawkes::tf::TransformPublisher(blackboard, "ROS");
 
   std::list<TransformInterface *>::iterator i;
   for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
@@ -90,8 +90,6 @@ RosTfThread::finalize()
     blackboard->close(*i);
   }
   __tfifs.clear();
-
-  delete __tf_publisher;
 }
 
 
@@ -118,7 +116,7 @@ RosTfThread::loop()
       fawkes::tf::StampedTransform
         st(tr, time, ts.header.frame_id, ts.child_frame_id);
 
-      __tf_publisher->send_transform(st);
+      tf_publisher->send_transform(st);
     }
     __tf_msg_queues[queue].pop();
   }
