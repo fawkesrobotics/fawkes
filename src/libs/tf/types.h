@@ -1,5 +1,5 @@
 /***************************************************************************
- *  transformer.h - Fawkes tf transformer (based on ROS tf)
+ *  types.h - Fawkes tf types (based on ROS tf)
  *
  *  Created: Tue Oct 18 17:03:47 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
@@ -102,7 +102,10 @@ class StampedTransform : public Transform
    */
   StampedTransform(const tf::Transform &input, const fawkes::Time &timestamp,
                    const std::string &frame_id, const std::string &child_frame_id)
-    : tf::Transform(input), stamp(timestamp), frame_id(frame_id), child_frame_id(child_frame_id) {};
+  : tf::Transform(input), stamp(timestamp),
+    frame_id(frame_id), child_frame_id(child_frame_id)
+  {};
+
   
   /** Default constructor only to be used for preallocation */
   StampedTransform() {};
@@ -110,7 +113,8 @@ class StampedTransform : public Transform
   /** Set the inherited Transform data.
    * @param input transform to set
    */
-  void set_data(const tf::Transform &input) { *static_cast<tf::Transform*>(this) = input; };
+  void set_data(const tf::Transform &input)
+  { *static_cast<tf::Transform*>(this) = input; };
 };
 
 /** Comparison operator for StampedTransform.

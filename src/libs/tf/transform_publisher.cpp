@@ -72,6 +72,15 @@ namespace fawkes {
  * it will catch all updates even though we might send them in quick
  * succession.
  * @author Tim Niemueller
+ *
+ * @fn   void TransformPublisher::send_transform(const Transform &transform, const fawkes::Time &time, const std::string frame, const std::string child_frame)
+ * Convenience wrapper to send a transform.
+ * This simply calls send_transform() with a StampedTransform created
+ * from the data pased into this method.
+ * @param transform transform to publish
+ * @param time time of the transform to publish
+ * @param frame reference frame ID
+ * @param child_frame child frame ID
  */
 
 /** Constructor.

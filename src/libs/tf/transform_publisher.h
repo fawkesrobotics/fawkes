@@ -53,6 +53,7 @@
 #define __LIBS_TF_TRANSFORM_PUBLISHER_H_
 
 #include <tf/types.h>
+#include <utils/time/time.h>
 
 namespace fawkes {
 
@@ -73,6 +74,12 @@ class TransformPublisher
   ~TransformPublisher();
 
   virtual void send_transform(const StampedTransform &transform);
+
+  virtual void send_transform(const Transform &transform,
+                              const fawkes::Time &time,
+                              const std::string frame,
+                              const std::string child_frame)
+  { send_transform(StampedTransform(transform, time, frame, child_frame)); }
 
  private:
   bool __enabled;

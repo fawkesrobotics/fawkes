@@ -15,8 +15,6 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-CFLAGS = -std=c++0x
-
 LIBS_libfawkestf = fawkescore fawkesutils fawkesblackboard fawkesinterface \
 		   TransformInterface
 OBJS_libfawkestf = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
