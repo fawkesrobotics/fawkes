@@ -80,30 +80,36 @@ TransformListener::TransformListener(BlackBoard *bb)
   : BlackBoardInterfaceListener("TransformListener"),
     __bb(bb)
 {
-  __tfifs = __bb->open_multiple_for_reading<TransformInterface>("TF *");
+  if (__bb) {
+    __tfifs = __bb->open_multiple_for_reading<TransformInterface>("TF *");
 
-  std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
-    bbil_add_data_interface(*i);
+    std::list<TransformInterface *>::iterator i;
+    for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+      bbil_add_data_interface(*i);
+    }
+    __bb->register_listener(this);
+
+    bbio_add_observed_create("TransformInterface", "TF *");
+    __bb->register_observer(this);
+  } else {
+    set_enabled(false);
   }
-  bb->register_listener(this);
-
-  bbio_add_observed_create("TransformInterface", "TF *");
-  bb->register_observer(this);
 }
 
 
 /** Destructor. */
 TransformListener::~TransformListener()
 {
-  __bb->unregister_listener(this);
-  __bb->unregister_observer(this);
+  if (__bb) {
+    __bb->unregister_listener(this);
+    __bb->unregister_observer(this);
 
-  std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
-    __bb->close(*i);
+    std::list<TransformInterface *>::iterator i;
+    for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+      __bb->close(*i);
+    }
+    __tfifs.clear();
   }
-  __tfifs.clear();
 }
 
 

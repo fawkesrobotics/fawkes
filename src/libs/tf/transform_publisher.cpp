@@ -75,25 +75,23 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param bb blackboard to open transform interface on
+ * @param bb blackboard to open transform interface on, if 0 the
+ * publisher will be disabled. Trying to send a transform will
+ * result in a DisabledException being thrown.
  * @param bb_iface_id the blackboard interface ID to be used for the
  * opened TransformInterface. Note that the name is prefixed with "TF ".
  */
 TransformPublisher::TransformPublisher(BlackBoard *bb,
-                                           const char *bb_iface_id)
+                                       const char *bb_iface_id)
   : __bb(bb), __mutex(new Mutex())
 {
-  std::string bbid = std::string("TF ") + bb_iface_id;
-  __tfif = __bb->open_for_writing<TransformInterface>(bbid.c_str());
-  __tfif->set_auto_timestamping(false);
+  if (__bb) {
+    std::string bbid = std::string("TF ") + bb_iface_id;
+    __tfif = __bb->open_for_writing<TransformInterface>(bbid.c_str());
+    __tfif->set_auto_timestamping(false);
+  }
 }
 
-
-/** Constructor for sub-classes. */
-TransformPublisher::TransformPublisher()
-  : __bb(NULL), __mutex(new Mutex())
-{
-}
 
 /** Destructor.
  * Closes TransformInterface, hence BlackBoard must still be alive and
@@ -112,6 +110,10 @@ TransformPublisher::~TransformPublisher()
 void
 TransformPublisher::send_transform(const StampedTransform &transform)
 {
+  if (! __bb) {
+    throw DisabledException("TransformPublisher is disabled");
+  }
+
   MutexLocker lock(__mutex);
 
   __tfif->set_timestamp(&transform.stamp);

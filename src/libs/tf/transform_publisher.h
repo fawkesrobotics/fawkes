@@ -74,10 +74,8 @@ class TransformPublisher
 
   virtual void send_transform(const StampedTransform &transform);
 
- protected:
-  TransformPublisher();
-
  private:
+  bool __enabled;
   BlackBoard *__bb;
   TransformInterface *__tfif;
   Mutex *__mutex;

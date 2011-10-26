@@ -89,6 +89,10 @@ namespace fawkes {
  * exception fawkes::tf::LookupException
  *
  * 
+ * @fn bool Transformer::is_enabled() const
+ * Check if transformer is enabled.
+ * @return true if enabled, false otherwise
+ *
  * @var static const unsigned int Transformer::MAX_GRAPH_DEPTH
  * Maximum number of times to recurse before assuming the tree
  * has a loop
@@ -289,6 +293,15 @@ Transformer::~Transformer()
 
 };
 
+
+/** Set transformer enabled or disabled.
+ * @param enabled true to enable, false to disable
+ */
+void
+Transformer::set_enabled(bool enabled)
+{
+  enabled_ = enabled;
+}
 
 /** Clear cached transforms. */
 void
@@ -856,6 +869,10 @@ void Transformer::lookup_transform(const std::string& target_frame,
                                    const fawkes::Time& time,
                                    StampedTransform& transform) const
 {
+  if (! enabled_) {
+    throw DisabledException("Transformer has been disabled");
+  }
+
   std::string mapped_tgt = /*assert_resolved(tf_prefix_,*/ target_frame;
   std::string mapped_src = /*assert_resolved(tf_prefix_,*/ source_frame;
 
@@ -886,7 +903,7 @@ void Transformer::lookup_transform(const std::string& target_frame,
     case LOOKUP_ERROR:
       throw LookupException("%s", error_string.c_str());
     default:
-      printf("Unknown error code: %d", retval);
+      throw Exception("lookup_transform: unknown error code: %d", retval);
       break;
     }
   }

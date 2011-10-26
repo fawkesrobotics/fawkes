@@ -111,6 +111,9 @@ class Transformer
 
   const TimeCache *  get_frame_cache(const std::string &frame_id) const;
 
+  void set_enabled(bool enabled);
+  bool is_enabled() const { return enabled_; };
+
  protected: /* methods */
   TimeCache *  getFrame(unsigned int frame_number) const;
 
@@ -121,6 +124,8 @@ class Transformer
                           fawkes::Time& time, std::string* error_string) const;
 
  protected:
+  /// Flag to mark the transformer as disabled
+  bool enabled_;
   /// Map from string frame ids to CompactFrameID.
   typedef std::unordered_map<std::string, CompactFrameID> M_StringToCompactFrameID;
   /// Map from frame IDs to frame numbers

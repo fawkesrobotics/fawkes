@@ -110,5 +110,23 @@ InvalidArgumentException::InvalidArgumentException(const char *format, ...)
 }
 
 
+/** @class DisabledException
+ * The requested feature is disabled.
+ */
+
+/** Constructor.
+ * @param format format of explanatory message of the error, format
+ * and parameters similar to sprintf.
+ */
+DisabledException::DisabledException(const char *format, ...)
+  : TransformException()
+{
+  va_list args;
+  va_start(args, format);
+  append_nolock_va(format, args);
+  va_end(args);
+}
+
+
 } // end namespace tf
 } // end namespace fawkes

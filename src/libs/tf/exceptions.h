@@ -61,6 +61,12 @@ class InvalidArgumentException : public TransformException
   InvalidArgumentException(const char *format, ...);
 };
 
+class DisabledException : public TransformException
+{
+ public:
+  DisabledException(const char *format, ...);
+};
+
 
 } // end namespace tf
 } // end namespace fawkes
