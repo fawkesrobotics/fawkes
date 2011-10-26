@@ -701,7 +701,7 @@ Interface::timestamp() const
 void
 Interface::set_timestamp(const Time *t)
 {
-  if (!__auto_timestamping) throw Exception("Auto timestamping enabled, cannot "
+  if (__auto_timestamping) throw Exception("Auto timestamping enabled, cannot "
 					    "set explicit timestamp");
   if (!__write_access) throw Exception("Timestamp can only be set on writing "
 				       "instance");
