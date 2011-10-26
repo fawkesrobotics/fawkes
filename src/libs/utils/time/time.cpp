@@ -72,6 +72,10 @@ const Time TIME_MIN = Time(0, 1);
  * Get microseconds.
  * @return microseconds stored in time stamp
  *
+ * @fn long Time::get_nsec() const
+ * Get nanoseconds.
+ * @return microsecons converted to nanoseconds
+ *
  * @fn bool Time::is_zero() const
  * Check if time is zero.
  * @return true if time is zero, i.e. sec = usec = 0, false otherwise

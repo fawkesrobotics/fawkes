@@ -108,8 +108,9 @@ class Time
 
   const timeval * get_timeval() const { return &__time; }
   long            get_sec() const  { return __time.tv_sec; }
-  long            get_msec() const { return __time.tv_usec * 1000; }
+  long            get_msec() const { return __time.tv_usec / 1000; }
   long            get_usec() const { return __time.tv_usec; }
+  long            get_nsec() const { return __time.tv_usec * 1000; }
   void            get_timestamp(long &sec, long &usec) const
                   { sec  = __time.tv_sec; usec = __time.tv_usec; }
   bool            is_zero() const { return (__time.tv_sec == 0) && (__time.tv_usec == 0); }
