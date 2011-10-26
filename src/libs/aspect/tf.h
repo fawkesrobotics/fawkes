@@ -38,8 +38,14 @@ namespace fawkes {
 class TransformAspect : public virtual Aspect
 {
  public:
-  TransformAspect();
-  TransformAspect(const char *tf_bb_iface_id);
+  /** Enumeration describing the desired mode of operation. */
+  typedef enum {
+    ONLY_LISTENER,	///< only create a transform listener
+    ONLY_PUBLISHER,	///< only create a transform publisher
+    BOTH		///< create both, transform listener and publisher
+  } Mode;
+
+  TransformAspect(Mode mode = ONLY_LISTENER, const char *tf_bb_iface_id = 0);
   virtual ~TransformAspect();
 
   void init_TransformAspect(BlackBoard *blackboard);
@@ -50,6 +56,7 @@ class TransformAspect : public virtual Aspect
   tf::TransformPublisher  * tf_publisher;
 
  private:
+  Mode  __tf_aspect_mode;
   char *__tf_aspect_bb_iface_id;
 };
 

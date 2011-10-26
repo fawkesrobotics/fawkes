@@ -22,10 +22,10 @@
  */
 
 #include <aspect/tf.h>
-#include <tf/transform_publisher_protector.h>
 
 #include <cstring>
 #include <cstdlib>
+#include <core/threading/thread_initializer.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -56,21 +56,20 @@ namespace fawkes {
  * taking the blackboard interface ID parameter is used!
  */
 
-/** Constructor. */
-TransformAspect::TransformAspect()
-{
-  add_aspect("TransformAspect");
-  __tf_aspect_bb_iface_id = 0;
-}
-
-/** Constructor with transform publisher.
+/** Constructor.
+ * @param mode mode of operation
  * @param tf_bb_iface_id interface ID to be used for the transform
  * publisher. Note that this will be prefixed with "TF ".
  */
-TransformAspect::TransformAspect(const char *tf_bb_iface_id)
+TransformAspect::TransformAspect(Mode mode, const char *tf_bb_iface_id)
+  : __tf_aspect_mode(mode)
 {
   add_aspect("TransformAspect");
-  __tf_aspect_bb_iface_id = strdup(tf_bb_iface_id);
+  if (((mode == ONLY_PUBLISHER) || (mode == BOTH)) && tf_bb_iface_id) {
+    __tf_aspect_bb_iface_id = strdup(tf_bb_iface_id);
+  } else {
+    __tf_aspect_bb_iface_id = 0;
+  }
 }
 
 
@@ -88,13 +87,27 @@ TransformAspect::~TransformAspect()
 void
 TransformAspect::init_TransformAspect(BlackBoard *blackboard)
 {
-  tf_listener = new tf::TransformListener(blackboard);
-  if (__tf_aspect_bb_iface_id) {
+  if (((__tf_aspect_mode == ONLY_PUBLISHER) || (__tf_aspect_mode == BOTH)) &&
+      (__tf_aspect_bb_iface_id == NULL))
+  {
+    throw CannotInitializeThreadException("TransformAspect was initialized "
+                                          "in mode %s but BB interface ID"
+                                          "is not set",
+                                          (__tf_aspect_mode == BOTH) ? "BOTH"
+                                          : "ONLY_PUBLISHER");
+  }
+
+  if ((__tf_aspect_mode == ONLY_LISTENER) || (__tf_aspect_mode == BOTH)) {
+    tf_listener = new tf::TransformListener(blackboard);
+  } else {
+    tf_listener = new tf::TransformListener(NULL);
+  }
+
+  if ((__tf_aspect_mode == ONLY_PUBLISHER) || (__tf_aspect_mode == BOTH)) {
     tf_publisher =
       new tf::TransformPublisher(blackboard, __tf_aspect_bb_iface_id);
   } else {
-    tf_publisher =
-      new tf::TransformPublisherProtector();
+    tf_publisher = new tf::TransformPublisher(NULL, NULL);
   }
 }
 
