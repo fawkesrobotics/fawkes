@@ -29,7 +29,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 
-#include <tf/transform_broadcaster.h>
+#include <tf/transform_publisher.h>
 
 class StaticTransformsThread
 : public fawkes::Thread,
@@ -53,8 +53,8 @@ class StaticTransformsThread
  private:
   typedef struct {
     std::string name;
-    fawkes::tf::TransformBroadcaster *  tf_broadcaster;
-    fawkes::tf::StampedTransform     *  transform;
+    fawkes::tf::TransformPublisher  *  tf_publisher;
+    fawkes::tf::StampedTransform    *  transform;
   } Entry;
 
   std::list<Entry> __entries;

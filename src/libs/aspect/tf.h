@@ -25,7 +25,7 @@
 
 #include <aspect/aspect.h>
 #include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
+#include <tf/transform_publisher.h>
 
 namespace fawkes {
 
@@ -46,8 +46,8 @@ class TransformAspect : public virtual Aspect
   void finalize_TransformAspect();
 
  protected:
-  tf::TransformListener    * tf_listener;
-  tf::TransformBroadcaster * tf_publisher;
+  tf::TransformListener   * tf_listener;
+  tf::TransformPublisher  * tf_publisher;
 
  private:
   char *__tf_aspect_bb_iface_id;

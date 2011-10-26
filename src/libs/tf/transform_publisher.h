@@ -1,5 +1,5 @@
 /***************************************************************************
- *  transform_broadcaster.h - Fawkes transform broadcaster (based on ROS tf)
+ *  transform_publisher.h - Fawkes transform publisher (based on ROS tf)
  *
  *  Created: Tue Oct 25 22:17:54 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
@@ -49,8 +49,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_BROADCASTER_H_
-#define __LIBS_TF_TRANSFORM_BROADCASTER_H_
+#ifndef __LIBS_TF_TRANSFORM_PUBLISHER_H_
+#define __LIBS_TF_TRANSFORM_PUBLISHER_H_
 
 #include <tf/types.h>
 
@@ -66,16 +66,16 @@ namespace fawkes {
 }
 #endif
 
-class TransformBroadcaster
+class TransformPublisher
 {
  public:
-  TransformBroadcaster(BlackBoard *bb, const char *bb_iface_id);
-  ~TransformBroadcaster();
+  TransformPublisher(BlackBoard *bb, const char *bb_iface_id);
+  ~TransformPublisher();
 
   virtual void send_transform(const StampedTransform &transform);
 
  protected:
-  TransformBroadcaster();
+  TransformPublisher();
 
  private:
   BlackBoard *__bb;

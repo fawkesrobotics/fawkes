@@ -22,7 +22,7 @@
  */
 
 #include <aspect/tf.h>
-#include <tf/transform_broadcaster_protector.h>
+#include <tf/transform_publisher_protector.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -37,7 +37,7 @@ namespace fawkes {
 
  * Give this aspect to your thread to gain access to the transform
  * library.  Depending on the parameters to the ctor only the listener
- * or additionaly the broadcaster is created.
+ * or additionaly the publisher is created.
  * It is guaranteed that if used properly from within plugins that the
  * blackboard member has been initialized properly.
  * @ingroup Aspects
@@ -50,7 +50,7 @@ namespace fawkes {
  * other threads in the system.
  */
 
-/** @var tf::TransformBroadcaster *  TransformAspect::tf_publisher
+/** @var tf::TransformPublisher *  TransformAspect::tf_publisher
  * This is the transform publisher which can be used to publish
  * transforms via the blackboard. It is only created if the constructor
  * taking the blackboard interface ID parameter is used!
@@ -82,7 +82,7 @@ TransformAspect::~TransformAspect()
 
 
 /** Init transform aspect.
- * This creates the listener and potentially broadcaster.
+ * This creates the listener and potentially publisher.
  * @param blackboard blackboard used to create listener and/or publisher.
  */
 void
@@ -91,10 +91,10 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard)
   tf_listener = new tf::TransformListener(blackboard);
   if (__tf_aspect_bb_iface_id) {
     tf_publisher =
-      new tf::TransformBroadcaster(blackboard, __tf_aspect_bb_iface_id);
+      new tf::TransformPublisher(blackboard, __tf_aspect_bb_iface_id);
   } else {
     tf_publisher =
-      new tf::TransformBroadcasterProtector();
+      new tf::TransformPublisherProtector();
   }
 }
 

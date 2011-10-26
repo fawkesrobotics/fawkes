@@ -104,8 +104,8 @@ StaticTransformsThread::init()
           try {
             Entry e;
             e.name = cfg_name;
-            e.tf_broadcaster =
-              new tf::TransformBroadcaster(blackboard, cfg_name.c_str());
+            e.tf_publisher =
+              new tf::TransformPublisher(blackboard, cfg_name.c_str());
 
             fawkes::Time time(clock);
             if (use_quaternion) {
@@ -134,7 +134,7 @@ StaticTransformsThread::init()
           } catch (Exception &e) {
             std::list<Entry>::iterator i;
             for (i = __entries.begin(); i != __entries.end(); ++i) {
-              delete i->tf_broadcaster;
+              delete i->tf_publisher;
               delete i->transform;
             }
             __entries.clear();
@@ -166,7 +166,7 @@ StaticTransformsThread::finalize()
 {
   std::list<Entry>::iterator i;
   for (i = __entries.begin(); i != __entries.end(); ++i) {
-    delete i->tf_broadcaster;
+    delete i->tf_publisher;
     delete i->transform;
   }
   __entries.clear();
@@ -179,6 +179,6 @@ StaticTransformsThread::loop()
   std::list<Entry>::iterator i;
   for (i = __entries.begin(); i != __entries.end(); ++i) {
     i->transform->stamp.stamp();
-    i->tf_broadcaster->send_transform(*(i->transform));
+    i->tf_publisher->send_transform(*(i->transform));
   }
 }

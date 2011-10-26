@@ -1,5 +1,5 @@
 /***************************************************************************
- *  transform_broadcaster.cpp - Fawkes transform broadcaster (based on ROS tf)
+ *  transform_publisher.cpp - Fawkes transform publisher (based on ROS tf)
  *
  *  Created: Mon Oct 24 17:13:20 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
@@ -49,7 +49,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <tf/transform_broadcaster.h>
+#include <tf/transform_publisher.h>
 
 #include <blackboard/blackboard.h>
 #include <interfaces/TransformInterface.h>
@@ -64,9 +64,9 @@ namespace fawkes {
 }
 #endif
 
-/** @class TransformBroadcaster <tf/transform_broadcaster.h>
+/** @class TransformPublisher <tf/transform_publisher.h>
  * Utility class to send transforms.
- * The transform broadcaster opens an instance of TransformInterface on
+ * The transform publisher opens an instance of TransformInterface on
  * the blackboard for writing and publishes every transform through
  * that interface. Assuming that the event-based listener is used
  * it will catch all updates even though we might send them in quick
@@ -79,7 +79,7 @@ namespace fawkes {
  * @param bb_iface_id the blackboard interface ID to be used for the
  * opened TransformInterface. Note that the name is prefixed with "TF ".
  */
-TransformBroadcaster::TransformBroadcaster(BlackBoard *bb,
+TransformPublisher::TransformPublisher(BlackBoard *bb,
                                            const char *bb_iface_id)
   : __bb(bb), __mutex(new Mutex())
 {
@@ -89,7 +89,7 @@ TransformBroadcaster::TransformBroadcaster(BlackBoard *bb,
 
 
 /** Constructor for sub-classes. */
-TransformBroadcaster::TransformBroadcaster()
+TransformPublisher::TransformPublisher()
   : __bb(NULL), __mutex(new Mutex())
 {
 }
@@ -98,7 +98,7 @@ TransformBroadcaster::TransformBroadcaster()
  * Closes TransformInterface, hence BlackBoard must still be alive and
  * valid.
  */
-TransformBroadcaster::~TransformBroadcaster()
+TransformPublisher::~TransformPublisher()
 {
   if (__bb) __bb->close(__tfif);
   delete __mutex;
@@ -109,7 +109,7 @@ TransformBroadcaster::~TransformBroadcaster()
  * @param transform transform to publish
  */
 void
-TransformBroadcaster::send_transform(const StampedTransform &transform)
+TransformPublisher::send_transform(const StampedTransform &transform)
 {
   MutexLocker lock(__mutex);
 

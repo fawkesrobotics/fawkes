@@ -1,7 +1,7 @@
 /***************************************************************************
- *  transform_broadcaster.h - Fawkes transform broadcaster (based on ROS tf)
+ *  transform_publisher_protector.cpp - Transform publisher protector
  *
- *  Created: Mon Oct 24 17:10:30 2011
+ *  Created: Tue Oct 25 22:17:48 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -19,10 +19,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_BROADCASTER_PROTECTOR_H_
-#define __LIBS_TF_TRANSFORM_BROADCASTER_PROTECTOR_H_
-
-#include <tf/transform_broadcaster.h>
+#include <tf/transform_publisher_protector.h>
 
 namespace fawkes {
   namespace tf {
@@ -31,16 +28,29 @@ namespace fawkes {
 }
 #endif
 
-class TransformBroadcasterProtector : public TransformBroadcaster
-{
- public:
-  TransformBroadcasterProtector() {};
-  virtual ~TransformBroadcasterProtector();
-  virtual void send_transform(const StampedTransform &transform);
-};
+/** @class TransformPublisherProtector <tf/transform_publisher_protector.h>
+ * Utility class to avoid null pointer errors in TransformAspect.
+ * This class will throw an exception if you try to send a transform.
+ * It is used in the TransformAspect to avoid segfaults due to an
+ * uninitialized publisher if the wrong constructor has been used.
+ * @author Tim Niemueller
+ */
 
+/** Destructor. */
+TransformPublisherProtector::~TransformPublisherProtector()
+{
+}
+
+
+/** Publish transform.
+ * @param transform transform to publish
+ */
+void
+TransformPublisherProtector::send_transform(const StampedTransform &transform)
+{
+  throw Exception("Transform publisher has not been requested. "
+                  "Used wrong TransformAspect constructor?");
+}
 
 } // end namespace tf
 } // end namespace fawkes
-
-#endif
