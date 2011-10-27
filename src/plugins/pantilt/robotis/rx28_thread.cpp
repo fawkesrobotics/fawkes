@@ -4,7 +4,6 @@
  *
  *  Created: Thu Jun 18 09:53:49 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -177,6 +176,7 @@ PanTiltRX28Thread::prepare_finalize_user()
 {
   if (__cfg_turn_off) {
     __wt->goto_pantilt_timed(0, __cfg_tilt_max, 2.0);
+    usleep(5000); // give some time to start moving
     while (! __wt->is_final()) {
       usleep(100000);
     }
@@ -191,6 +191,10 @@ PanTiltRX28Thread::finalize()
   blackboard->close(__pantilt_if);
   blackboard->close(__led_if);
 
+  __wt->cancel();
+  __wt->join();
+  delete __wt;
+
   if (__cfg_turn_off) {
     try {
       __rx28->set_led_enabled(__cfg_pan_servo_id,  false);
@@ -200,10 +204,6 @@ PanTiltRX28Thread::finalize()
       // ignored
     }
   }
-
-  __wt->cancel();
-  __wt->join();
-  delete __wt;
 
   // Setting to NULL deletes instance (RefPtr)
   __rx28 = NULL;
