@@ -217,11 +217,13 @@ PanTiltRX28Thread::finalize()
 void
 PanTiltRX28Thread::update_sensor_values()
 {
-  if (__wt->has_fresh_data()) {
-    float pan = 0, tilt = 0, panvel=0, tiltvel=0;
-    fawkes::Time time;
-    __wt->get_pantilt(pan, tilt, time);
-    __wt->get_velocities(panvel, tiltvel);
+  bool fresh = __wt->has_fresh_data();
+  float pan = 0, tilt = 0, panvel=0, tiltvel=0;
+  fawkes::Time time;
+  __wt->get_pantilt(pan, tilt, time);
+  __wt->get_velocities(panvel, tiltvel);
+
+  if (fresh) {
     __pantilt_if->set_pan(pan);
     __pantilt_if->set_tilt(tilt);
     __pantilt_if->set_pan_velocity(panvel);
@@ -229,17 +231,18 @@ PanTiltRX28Thread::update_sensor_values()
     __pantilt_if->set_enabled(__wt->is_enabled());
     __pantilt_if->set_final(__wt->is_final());
     __pantilt_if->write();
+  }
 
 #ifdef HAVE_TF
-    tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
-    tf::Transform ptr(pr, __translation_pan);
-    tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+  // Always publish updated transforms
+  tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
+  tf::Transform ptr(pr, __translation_pan);
+  tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
 
-    tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
-    tf::Transform ttr(tr, __translation_tilt);
-    tf_publisher->send_transform(ttr, time, __cfg_base_frame, __cfg_tilt_link);
+  tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
+  tf::Transform ttr(tr, __translation_tilt);
+  tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
 #endif
-  }
 }
 
 
@@ -326,6 +329,7 @@ PanTiltRX28Thread::loop()
   }
   if (write_led_if)  __led_if->write();
 
+  __wt->wakeup();
 }
 
 
@@ -387,7 +391,8 @@ PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
 
   __logger           = logger;
 
-  __value_mutex       = new Mutex();
+  __value_mutex      = new Mutex();
+  __rx28_mutex       = new Mutex();
 
   __rx28 = rx28;
   __move_pending     = false;
@@ -416,6 +421,7 @@ PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
 PanTiltRX28Thread::WorkerThread::~WorkerThread()
 {
   delete __value_mutex;
+  delete __rx28_mutex;
 }
 
 
@@ -487,7 +493,6 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt(float pan, float tilt)
 void
 PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float time_sec)
 {
-  MutexLocker lock(__value_mutex);
   __target_pan   = pan;
   __target_tilt  = tilt;
   __move_pending = true;
@@ -521,7 +526,6 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float
     req_tilt_vel = __max_tilt_speed;
   }
 
-  lock.unlock();
   set_velocities(req_pan_vel, req_tilt_vel);
 
   wakeup();
@@ -595,6 +599,8 @@ PanTiltRX28Thread::WorkerThread::set_margins(float pan_margin, float tilt_margin
 void
 PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt)
 {
+  MutexLocker lock(__rx28_mutex);
+
   int pan_ticks  = ((int)__rx28->get_position(__pan_servo_id)  - __pan_zero_offset - RobotisRX28::CENTER_POSITION);
   int tilt_ticks = ((int)__rx28->get_position(__tilt_servo_id) - (int)__tilt_zero_offset - (int)RobotisRX28::CENTER_POSITION);
 
@@ -623,11 +629,17 @@ PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt,
 bool
 PanTiltRX28Thread::WorkerThread::is_final()
 {
-  MutexLocker lock(__value_mutex);
   float pan, tilt;
   get_pantilt(pan, tilt);
-  //__logger->log_debug(name(), "P: %f  T: %f  TP: %f  TT: %f  PM: %f  TM: %f",
-  //	      pan, tilt, __target_pan, __target_tilt, __pan_margin, __tilt_margin);
+  /*
+  __logger->log_debug(name(), "P: %f  T: %f  TP: %f  TT: %f  PM: %f  TM: %f  Final: %s",
+                      pan, tilt, __target_pan, __target_tilt, __pan_margin, __tilt_margin,
+                      (( (fabs(pan  - __target_pan)  <= __pan_margin) &&
+                         (fabs(tilt - __target_tilt) <= __tilt_margin) ) ||
+                       (! __rx28->is_moving(__pan_servo_id) &&
+                        ! __rx28->is_moving(__tilt_servo_id))) ? "YES" : "NO");
+  */
+  
   return  ( (fabs(pan  - __target_pan)  <= __pan_margin) &&
 	    (fabs(tilt - __target_tilt) <= __tilt_margin) ) ||
           (! __rx28->is_moving(__pan_servo_id) &&
@@ -641,7 +653,6 @@ PanTiltRX28Thread::WorkerThread::is_final()
 bool
 PanTiltRX28Thread::WorkerThread::is_enabled()
 {
-  MutexLocker lock(__value_mutex);
   return (__rx28->is_torque_enabled(__pan_servo_id) &&
 	  __rx28->is_torque_enabled(__tilt_servo_id));
 }
@@ -654,6 +665,8 @@ PanTiltRX28Thread::WorkerThread::is_enabled()
 bool
 PanTiltRX28Thread::WorkerThread::has_fresh_data()
 {
+  MutexLocker lock(__rx28_mutex);
+
   bool rv = __fresh_data;
   __fresh_data = false;
   return rv;
@@ -667,12 +680,14 @@ PanTiltRX28Thread::WorkerThread::loop()
     __value_mutex->lock();
     __enable  = false;
     __value_mutex->unlock();
+    MutexLocker lock(__rx28_mutex);
     __rx28->set_led_enabled(__tilt_servo_id, true);
     __rx28->set_torques_enabled(true, 2, __pan_servo_id, __tilt_servo_id);
   } else if (__disable) {
     __value_mutex->lock();
     __disable = false;
     __value_mutex->unlock();
+    MutexLocker lock(__rx28_mutex);
     __rx28->set_led_enabled(__tilt_servo_id, false);
     __rx28->set_torques_enabled(false, 2, __pan_servo_id, __tilt_servo_id);
     if (__led_enable || __led_disable || __velo_pending || __move_pending) usleep(3000);
@@ -682,12 +697,14 @@ PanTiltRX28Thread::WorkerThread::loop()
     __value_mutex->lock();
     __led_enable = false;
     __value_mutex->unlock();    
+    MutexLocker lock(__rx28_mutex);
     __rx28->set_led_enabled(__pan_servo_id, true);
     if (__velo_pending || __move_pending) usleep(3000);
   } else if (__led_disable) {
     __value_mutex->lock();
     __led_disable = false;
     __value_mutex->unlock();    
+    MutexLocker lock(__rx28_mutex);
     __rx28->set_led_enabled(__pan_servo_id, false);    
     if (__velo_pending || __move_pending) usleep(3000);
   }
@@ -698,6 +715,7 @@ PanTiltRX28Thread::WorkerThread::loop()
     unsigned int pan_vel  = __pan_vel;
     unsigned int tilt_vel = __tilt_vel;
     __value_mutex->unlock();
+    MutexLocker lock(__rx28_mutex);
     __rx28->set_goal_speeds(2, __pan_servo_id, pan_vel, __tilt_servo_id, tilt_vel);
     if (__move_pending) usleep(3000);
   }
@@ -712,22 +730,25 @@ PanTiltRX28Thread::WorkerThread::loop()
   }
 
   try {
+    MutexLocker lock(__rx28_mutex);
     __rx28->read_table_values(__pan_servo_id);
     __fresh_data = true;
-    __rx28->read_table_values(__tilt_servo_id);
     __pantilt_time.stamp();
+    __rx28->read_table_values(__tilt_servo_id);
+    // give RX28 a little rest
+    //usleep(1000);
   } catch (Exception &e) {
     __logger->log_warn(name(), "Error while reading table values from servos, exception follows");
     __logger->log_warn(name(), e);
   }
 
-  if (! is_final() ||
-      ! __rx28->is_torque_enabled(__pan_servo_id) ||
-      ! __rx28->is_torque_enabled(__tilt_servo_id)) {
+  //if (! is_final() ||
+  //    ! __rx28->is_torque_enabled(__pan_servo_id) ||
+  //    ! __rx28->is_torque_enabled(__tilt_servo_id)) {
     // while moving, and while the motor is off, wake us up to get new servo
     // position data
-    wakeup();
-  }
+    //wakeup();
+    //}
 }
 
 
@@ -773,5 +794,6 @@ PanTiltRX28Thread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad
     return;
   }
 
+  MutexLocker lock(__rx28_mutex);
   __rx28->goto_positions(2, __pan_servo_id, pan_pos, __tilt_servo_id, tilt_pos);
 }

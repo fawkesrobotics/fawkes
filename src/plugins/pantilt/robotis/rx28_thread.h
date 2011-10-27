@@ -139,6 +139,7 @@ class PanTiltRX28Thread
     void exec_goto_pantilt(float pan, float tilt);
 
   private:
+    fawkes::Mutex               *__rx28_mutex;
     fawkes::RefPtr<RobotisRX28>  __rx28;
     fawkes::Logger              *__logger;
 
