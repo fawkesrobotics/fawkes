@@ -64,6 +64,7 @@ RosTfThread::init()
 
   std::list<TransformInterface *>::iterator i;
   for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+    //logger->log_info(name(), "Opened %s", (*i)->uid());
     bbil_add_data_interface(*i);
   }
   blackboard->register_listener(this);
@@ -131,6 +132,7 @@ RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 
   tfif->read();
 
+
   double *translation = tfif->translation();
   double *rotation = tfif->rotation();
   const Time *time = tfif->timestamp();
@@ -166,9 +168,11 @@ RosTfThread::bb_interface_created(const char *type, const char *id) throw()
 
   TransformInterface *tfif;
   try {
+    //logger->log_info(name(), "Opening %s:%s", type, id);
     tfif = blackboard->open_for_reading<TransformInterface>(id);
   } catch (Exception &e) {
     // ignored
+    logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
     return;
   }
 
@@ -178,6 +182,7 @@ RosTfThread::bb_interface_created(const char *type, const char *id) throw()
     __tfifs.push_back(tfif);
   } catch (Exception &e) {
     blackboard->close(tfif);
+    logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
     return;
   }
 }
@@ -208,6 +213,7 @@ RosTfThread::conditional_close(Interface *interface) throw()
     if (*interface == **i) {
       if (! interface->has_writer() && (interface->num_readers() == 1)) {
         // It's only us
+        logger->log_info(name(), "Last on %s:%s, closing", interface->uid());
         bbil_remove_data_interface(*i);
         blackboard->update_listener(this);
         blackboard->close(*i);
@@ -233,7 +239,7 @@ RosTfThread::tf_message_cb(const ::tf::tfMessage::ConstPtr &msg)
     msg_header_map->find("callerid");
 
   if (it == msg_header_map->end()) {
-    logger->log_warn(name(), "Message recieved without callerid");
+    logger->log_warn(name(), "Message received without callerid");
   } else if (it->second != ros::this_node::getName()) {
     __tf_msg_queues[__active_queue].push(msg);
   }
