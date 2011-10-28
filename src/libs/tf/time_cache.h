@@ -65,7 +65,12 @@ namespace fawkes {
 }
 #endif
 
-enum ExtrapolationMode {  ONE_VALUE, INTERPOLATE, EXTRAPOLATE_BACK, EXTRAPOLATE_FORWARD };
+enum ExtrapolationMode {
+  ONE_VALUE,
+  INTERPOLATE,
+  EXTRAPOLATE_BACK,
+  EXTRAPOLATE_FORWARD
+};
 
 typedef std::pair<fawkes::Time, CompactFrameID> P_TimeAndFrameID;
 
@@ -106,16 +111,17 @@ class TimeCache
 
   TimeCache(float max_storage_time = 10.0);
 
-  bool getData(fawkes::Time time, TransformStorage & data_out, std::string* error_str = 0);
-  bool insertData(const TransformStorage& new_data);
-  void clearList();
-  CompactFrameID getParent(fawkes::Time time, std::string* error_str);
-  P_TimeAndFrameID getLatestTimeAndParent() const;
+  bool get_data(fawkes::Time time, TransformStorage & data_out,
+                std::string* error_str = 0);
+  bool insert_data(const TransformStorage& new_data);
+  void clear_list();
+  CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
+  P_TimeAndFrameID get_latest_time_and_parent() const;
 
   /// Debugging information methods
-  unsigned int getListLength() const;
-  fawkes::Time getLatestTimestamp() const;
-  fawkes::Time getOldestTimestamp() const;
+  unsigned int get_list_length() const;
+  fawkes::Time get_latest_timestamp() const;
+  fawkes::Time get_oldest_timestamp() const;
 
  private:
   typedef std::list<TransformStorage> L_TransformStorage;
@@ -124,13 +130,13 @@ class TimeCache
   float max_storage_time_;
 
 
-  inline uint8_t findClosest(TransformStorage*& one, TransformStorage*& two,
-                             fawkes::Time target_time, std::string* error_str);
+  inline uint8_t find_closest(TransformStorage*& one, TransformStorage*& two,
+                              fawkes::Time target_time, std::string* error_str);
 
   inline void interpolate(const TransformStorage& one, const TransformStorage& two,
                           fawkes::Time time, TransformStorage& output);
 
-  void pruneList();
+  void prune_list();
 };
 
 

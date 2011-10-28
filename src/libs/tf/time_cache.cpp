@@ -121,7 +121,7 @@ TimeCache::TimeCache(float max_storage_time)
 // hoisting these into separate functions causes an ~8% speedup.
 // Removing calling them altogether adds another ~10%
 void
-createExtrapolationException1(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
+create_extrapolation_exception1(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
 {
   if (error_str)
   {
@@ -141,7 +141,7 @@ createExtrapolationException1(fawkes::Time t0, fawkes::Time t1, std::string* err
  * @param error_str upon return contains the error string.
  */
 void
-createExtrapolationException2(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
+create_extrapolation_exception2(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
 {
   if (error_str)
   {
@@ -162,7 +162,7 @@ createExtrapolationException2(fawkes::Time t0, fawkes::Time t1, std::string* err
  * @param error_str upon return contains the error string.
  */
 void
-createExtrapolationException3(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
+create_extrapolation_exception3(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
 {
   if (error_str)
   {
@@ -180,33 +180,28 @@ createExtrapolationException3(fawkes::Time t0, fawkes::Time t1, std::string* err
 /// A helper function for getData
 //Assumes storage is already locked for it
 uint8_t
-TimeCache::findClosest(TransformStorage*& one, TransformStorage*& two, fawkes::Time target_time, std::string* error_str)
+TimeCache::find_closest(TransformStorage*& one, TransformStorage*& two,
+                        fawkes::Time target_time, std::string* error_str)
 {
   //No values stored
-  if (storage_.empty())
-  {
+  if (storage_.empty()) {
     return 0;
   }
 
   //If time == 0 return the latest
-  if (target_time.is_zero())
-  {
+  if (target_time.is_zero()) {
     one = &storage_.front();
     return 1;
   }
 
   // One value stored
-  if (++storage_.begin() == storage_.end())
-  {
+  if (++storage_.begin() == storage_.end()) {
     TransformStorage& ts = *storage_.begin();
-    if (ts.stamp == target_time)
-    {
+    if (ts.stamp == target_time) {
       one = &ts;
       return 1;
-    }
-    else
-    {
-      createExtrapolationException1(target_time, ts.stamp, error_str);
+    } else {
+      create_extrapolation_exception1(target_time, ts.stamp, error_str);
       return 0;
     }
   }
@@ -214,35 +209,26 @@ TimeCache::findClosest(TransformStorage*& one, TransformStorage*& two, fawkes::T
   fawkes::Time latest_time = (*storage_.begin()).stamp;
   fawkes::Time earliest_time = (*(storage_.rbegin())).stamp;
 
-  if (target_time == latest_time)
-  {
+  if (target_time == latest_time) {
     one = &(*storage_.begin());
     return 1;
-  }
-  else if (target_time == earliest_time)
-  {
+  } else if (target_time == earliest_time) {
     one = &(*storage_.rbegin());
     return 1;
-  }
-  // Catch cases that would require extrapolation
-  else if (target_time > latest_time)
-  {
-    createExtrapolationException2(target_time, latest_time, error_str);
+  } else if (target_time > latest_time) {
+    // Catch cases that would require extrapolation
+    create_extrapolation_exception2(target_time, latest_time, error_str);
     return 0;
-  }
-  else if (target_time < earliest_time)
-  {
-    createExtrapolationException3(target_time, earliest_time, error_str);
+  } else if (target_time < earliest_time) {
+    create_extrapolation_exception3(target_time, earliest_time, error_str);
     return 0;
   }
 
   //At least 2 values stored
   //Find the first value less than the target value
   L_TransformStorage::iterator storage_it = storage_.begin();
-  while(storage_it != storage_.end())
-  {
-    if (storage_it->stamp <= target_time)
-      break;
+  while(storage_it != storage_.end()) {
+    if (storage_it->stamp <= target_time)  break;
     storage_it++;
   }
 
@@ -250,8 +236,6 @@ TimeCache::findClosest(TransformStorage*& one, TransformStorage*& two, fawkes::T
   one = &*(storage_it); //Older
   two = &*(--storage_it); //Newer
   return 2;
-
-
 }
 
 
@@ -261,13 +245,14 @@ TimeCache::interpolate(const TransformStorage& one,
                        fawkes::Time time, TransformStorage& output)
 {
   // Check for zero distance case
-  if( two.stamp == one.stamp )
-  {
+  if( two.stamp == one.stamp ) {
     output = two;
     return;
   }
   //Calculate the ratio
-  btScalar ratio = (time.in_sec() - one.stamp.in_sec()) / (two.stamp.in_sec() - one.stamp.in_sec());
+  btScalar ratio =
+    (time.in_sec() - one.stamp.in_sec()) /
+    (two.stamp.in_sec() - one.stamp.in_sec());
 
   //Interpolate translation
   output.translation_.setInterpolate3(one.translation_, two.translation_, ratio);
@@ -287,34 +272,23 @@ TimeCache::interpolate(const TransformStorage& one,
 * @return false if data not available
 */
 bool
-TimeCache::getData(fawkes::Time time, TransformStorage & data_out, std::string* error_str)
+TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
+                    std::string* error_str)
 {
   TransformStorage* p_temp_1 = NULL;
   TransformStorage* p_temp_2 = NULL;
 
-  int num_nodes = findClosest(p_temp_1, p_temp_2, time, error_str);
-  if (num_nodes == 0)
-  {
+  int num_nodes = find_closest(p_temp_1, p_temp_2, time, error_str);
+  if (num_nodes == 0) {
     return false;
-  }
-  else if (num_nodes == 1)
-  {
+  } else if (num_nodes == 1) {
     data_out = *p_temp_1;
-  }
-  else if (num_nodes == 2)
-  {
-    if( p_temp_1->frame_id_ == p_temp_2->frame_id_)
-    {
+  } else if (num_nodes == 2) {
+    if( p_temp_1->frame_id_ == p_temp_2->frame_id_) {
       interpolate(*p_temp_1, *p_temp_2, time, data_out);
-    }
-    else
-    {
+    } else {
       data_out = *p_temp_1;
     }
-  }
-  else
-  {
-    //ROS_BREAK();
   }
 
   return true;
@@ -326,14 +300,13 @@ TimeCache::getData(fawkes::Time time, TransformStorage & data_out, std::string* 
  * @return frame number
  */
 CompactFrameID
-TimeCache::getParent(fawkes::Time time, std::string* error_str)
+TimeCache::get_parent(fawkes::Time time, std::string* error_str)
 {
   TransformStorage* p_temp_1 = NULL;
   TransformStorage* p_temp_2 = NULL;
 
-  int num_nodes = findClosest(p_temp_1, p_temp_2, time, error_str);
-  if (num_nodes == 0)
-  {
+  int num_nodes = find_closest(p_temp_1, p_temp_2, time, error_str);
+  if (num_nodes == 0) {
     return 0;
   }
 
@@ -346,34 +319,31 @@ TimeCache::getParent(fawkes::Time time, std::string* error_str)
  * @return true on success, false otherwise
  */
 bool
-TimeCache::insertData(const TransformStorage& new_data)
+TimeCache::insert_data(const TransformStorage& new_data)
 {
   L_TransformStorage::iterator storage_it = storage_.begin();
 
-  if(storage_it != storage_.end())
-  {
-    if (storage_it->stamp > new_data.stamp + max_storage_time_)
-    {
+  if(storage_it != storage_.end()) {
+    if (storage_it->stamp > new_data.stamp + max_storage_time_) {
       return false;
     }
   }
 
 
-  while(storage_it != storage_.end())
-  {
+  while(storage_it != storage_.end()) {
     if (storage_it->stamp <= new_data.stamp)
       break;
     storage_it++;
   }
   storage_.insert(storage_it, new_data);
 
-  pruneList();
+  prune_list();
   return true;
 }
 
 /** Clear storage. */
 void
-TimeCache::clearList()
+TimeCache::clear_list()
 {
   storage_.clear();
 }
@@ -382,7 +352,7 @@ TimeCache::clearList()
  * @return storage list length
  */
 unsigned int
-TimeCache::getListLength() const
+TimeCache::get_list_length() const
 {
   return storage_.size();
 }
@@ -391,10 +361,9 @@ TimeCache::getListLength() const
  * @return latest time and parent frame number
  */
 P_TimeAndFrameID
-TimeCache::getLatestTimeAndParent() const
+TimeCache::get_latest_time_and_parent() const
 {
-  if (storage_.empty())
-  {
+  if (storage_.empty()) {
     return std::make_pair(fawkes::Time(), 0);
   }
 
@@ -406,7 +375,7 @@ TimeCache::getLatestTimeAndParent() const
  * @return latest timestamp
  */
 fawkes::Time
-TimeCache::getLatestTimestamp() const
+TimeCache::get_latest_timestamp() const
 {
   if (storage_.empty()) return fawkes::Time(); //empty list case
   return storage_.front().stamp;
@@ -416,7 +385,7 @@ TimeCache::getLatestTimestamp() const
  * @return oldest time stamp.
  */
 fawkes::Time
-TimeCache::getOldestTimestamp() const
+TimeCache::get_oldest_timestamp() const
 {
   if (storage_.empty()) return fawkes::Time(); //empty list case
   return storage_.back().stamp;
@@ -424,7 +393,7 @@ TimeCache::getOldestTimestamp() const
 
 /** Prune storage list based on maximum cache lifetime. */
 void
-TimeCache::pruneList()
+TimeCache::prune_list()
 {
   fawkes::Time latest_time = storage_.begin()->stamp;
   

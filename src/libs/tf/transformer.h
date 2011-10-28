@@ -75,28 +75,17 @@ class TimeCache;
 class Transformer
 {
  public:
-  /** The maximum number of time to recurse before assuming the tree
-   *  has a loop. */
   static const unsigned int MAX_GRAPH_DEPTH = 100UL;
   static const float DEFAULT_MAX_EXTRAPOLATION_DISTANCE;
 
-  Transformer(bool interpolating = true,
-              float cache_time_sec = 10.0);
+  Transformer(float cache_time_sec = 10.0);
   virtual ~Transformer(void);
 
-  /** Clear all data. */
   void clear();
 
-  /** Add transform information to the tf data structure.
-   * @param transform The transform to store
-   * @param authority The source of the information for this transform
-   * returns true unless an error occured
-   */
   bool set_transform(const StampedTransform &transform,
                      const std::string &authority = "default_authority");
 
-  /**@brief Check if a frame exists in the tree
-   * @param frame_id_str The frame id in question  */
   bool frame_exists(const std::string& frame_id_str) const;
 
 
@@ -109,19 +98,65 @@ class Transformer
                         const std::string& source_frame,
                         StampedTransform& transform) const;
 
+  void lookup_transform(const std::string& target_frame,
+                        const fawkes::Time& target_time,
+                        const std::string& source_frame,
+                        const fawkes::Time& source_time,
+                        const std::string& fixed_frame,
+                        StampedTransform& transform) const;
+
+  bool can_transform(const std::string& target_frame,
+                     const std::string& source_frame,
+                     const fawkes::Time& time) const;
+
+  bool can_transform(const std::string& target_frame,
+                     const fawkes::Time& target_time,
+                     const std::string& source_frame,
+                     const fawkes::Time& source_time,
+                     const std::string& fixed_frame) const;
+
   const TimeCache *  get_frame_cache(const std::string &frame_id) const;
 
   void set_enabled(bool enabled);
   bool is_enabled() const { return enabled_; };
 
+  int get_latest_common_time(const std::string &source_frame, const std::string &target_frame,
+                             fawkes::Time& time, std::string* error_string = 0) const;
+
+  void transform_quaternion(const std::string& target_frame,
+                            const Stamped<Quaternion>& stamped_in,
+                            Stamped<Quaternion>& stamped_out) const;
+  void transform_vector(const std::string& target_frame,
+                        const Stamped<Vector3>& stamped_in,
+                        Stamped<Vector3>& stamped_out) const;
+  void transform_point(const std::string& target_frame,
+                       const Stamped<Point>& stamped_in, Stamped<Point>& stamped_out) const;
+  void transform_pose(const std::string& target_frame,
+                      const Stamped<Pose>& stamped_in, Stamped<Pose>& stamped_out) const;
+
+  void transform_quaternion(const std::string& target_frame, const fawkes::Time& target_time,
+                            const Stamped<Quaternion>& stamped_in,
+                            const std::string& fixed_frame,
+                            Stamped<Quaternion>& stamped_out) const;
+  void transform_vector(const std::string& target_frame, const fawkes::Time& target_time,
+                       const Stamped<Vector3>& stamped_in,
+                       const std::string& fixed_frame,
+                       Stamped<Vector3>& stamped_out) const;
+  void transform_point(const std::string& target_frame, const fawkes::Time& target_time,
+                      const Stamped<Point>& stamped_in,
+                      const std::string& fixed_frame,
+                      Stamped<Point>& stamped_out) const;
+  void transform_pose(const std::string& target_frame, const fawkes::Time& target_time,
+                     const Stamped<Pose>& stamped_in,
+                     const std::string& fixed_frame,
+                     Stamped<Pose>& stamped_out) const;
+
+
  protected: /* methods */
-  TimeCache *  getFrame(unsigned int frame_number) const;
+  TimeCache *  get_frame(unsigned int frame_number) const;
 
-  CompactFrameID lookupFrameNumber(const std::string &frameid_str) const;
-  CompactFrameID lookupOrInsertFrameNumber(const std::string &frameid_str);
-
-  int getLatestCommonTime(const std::string &source_frame, const std::string &target_frame,
-                          fawkes::Time& time, std::string* error_string) const;
+  CompactFrameID lookup_frame_number(const std::string &frameid_str) const;
+  CompactFrameID lookup_or_insert_frame_number(const std::string &frameid_str);
 
  protected:
   /// Flag to mark the transformer as disabled
@@ -143,10 +178,7 @@ class Transformer
   mutable Mutex *frame_mutex_;
 
   /// How long to cache transform history
-  float cache_time;
-
-  /// whether or not to interpolate or extrapolate
-  bool interpolating;
+  float cache_time_;
 
   /// whether or not to allow extrapolation
   float max_extrapolation_distance_;
@@ -158,15 +190,18 @@ class Transformer
   bool fall_back_to_wall_time_;
 
  private:
-  /**@brief Return the latest rostime which is common across the spanning set
-   * zero if fails to cross */
-  int getLatestCommonTime(CompactFrameID target_frame, CompactFrameID source_frame,
-                          fawkes::Time& time, std::string* error_string) const;
+  /**Return the latest time which is common across the spanning set.
+   * @return zero if fails to cross */
+  int get_latest_common_time(CompactFrameID target_frame, CompactFrameID source_frame,
+                             fawkes::Time& time, std::string* error_string) const;
+
+  bool can_transform_no_lock(CompactFrameID target_id, CompactFrameID source_id,
+                             const fawkes::Time& time) const;
 
   template<typename F>
-    int walkToTopParent(F& f, fawkes::Time time,
-                        CompactFrameID target_id, CompactFrameID source_id,
-                        std::string* error_string) const;
+  int walk_to_top_parent(F& f, fawkes::Time time,
+                         CompactFrameID target_id, CompactFrameID source_id,
+                         std::string* error_string) const;
 
 };
 

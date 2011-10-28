@@ -117,6 +117,36 @@ class StampedTransform : public Transform
   { *static_cast<tf::Transform*>(this) = input; };
 };
 
+
+/** Wrapper class to add time stamp and frame ID to base types. */
+template <typename T>
+class Stamped : public T{
+ public:
+  fawkes::Time stamp; ///< The timestamp associated with this data
+  std::string frame_id; ///< The frame_id associated this data
+
+  /** Default constructor.
+   * Default constructor used only for preallocation.
+   */
+  Stamped() :frame_id ("NO_ID_STAMPED_DEFAULT_CONSTRUCTION"){};
+
+  /** Constructor.
+   * @param input transform
+   * @param timestamp timestamp for this transform
+   * @param frame_id frame ID the transform is relative to
+   */
+  Stamped(const T &input, const fawkes::Time &timestamp,
+          const std::string &frame_id)
+    : T(input), stamp(timestamp), frame_id(frame_id) {};
+
+  /** Set the data element.
+   * @param input data to set this instance to
+   */
+  void set_data(const T& input){*static_cast<T*>(this) = input;};
+};
+
+
+
 /** Comparison operator for StampedTransform.
  * @param a transform to compare
  * @param b transform to compare
