@@ -102,7 +102,8 @@ end
 -- skill queue. The skill queue is executed and intermediate skill status
 -- is S_RUNNING.
 function AgentSkillExecJumpState:do_init()
-   JumpState.do_init(self)
+   local rv = { JumpState.do_init(self) }
+   if next(rv) then return unpack(rv) end
 
    if self.args then
       self.skill_queue:set_args(self.args)
