@@ -175,10 +175,13 @@ bool
 PanTiltRX28Thread::prepare_finalize_user()
 {
   if (__cfg_turn_off) {
+    logger->log_info(name(), "Moving to park position");
     __wt->goto_pantilt_timed(0, __cfg_tilt_max, 2.0);
     usleep(5000); // give some time to start moving
+    
     while (! __wt->is_final()) {
       usleep(100000);
+      __wt->wakeup();
     }
   }
   return true;
@@ -196,15 +199,16 @@ PanTiltRX28Thread::finalize()
   delete __wt;
 
   if (__cfg_turn_off) {
+    logger->log_info(name(), "Turning off PTU");
     try {
       __rx28->set_led_enabled(__cfg_pan_servo_id,  false);
       __rx28->set_led_enabled(__cfg_tilt_servo_id, false);
       __rx28->set_torques_enabled(false, 2, __cfg_pan_servo_id, __cfg_tilt_servo_id);
     } catch (Exception &e) {
-      // ignored
+      logger->log_warn(name(), "Failed to turn of PTU: %s", e.what());
     }
   }
-
+  
   // Setting to NULL deletes instance (RefPtr)
   __rx28 = NULL;
 }
@@ -506,8 +510,8 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float
   float req_pan_vel  = pan_diff  / time_sec;
   float req_tilt_vel = tilt_diff / time_sec;
 
-  __logger->log_debug(name(), "Current: %f/%f Des: %f/%f  Time: %f  Diff: %f/%f  ReqVel: %f/%f",
-		      cpan, ctilt, pan, tilt, time_sec, pan_diff, tilt_diff, req_pan_vel, req_tilt_vel);
+  //__logger->log_debug(name(), "Current: %f/%f Des: %f/%f  Time: %f  Diff: %f/%f  ReqVel: %f/%f",
+  //		      cpan, ctilt, pan, tilt, time_sec, pan_diff, tilt_diff, req_pan_vel, req_tilt_vel);
 
 
   if (req_pan_vel > __max_pan_speed) {
@@ -543,8 +547,8 @@ PanTiltRX28Thread::WorkerThread::set_velocities(float pan_vel, float tilt_vel)
   float pan_tmp  = roundf((pan_vel  / __max_pan_speed)  * RobotisRX28::MAX_SPEED);
   float tilt_tmp = roundf((tilt_vel / __max_tilt_speed) * RobotisRX28::MAX_SPEED);
 
-  __logger->log_debug(name(), "old speed: %u/%u new speed: %f/%f", __pan_vel,
-		      __tilt_vel, pan_tmp, tilt_tmp);
+  //__logger->log_debug(name(), "old speed: %u/%u new speed: %f/%f", __pan_vel,
+  //		      __tilt_vel, pan_tmp, tilt_tmp);
 
   if ((pan_tmp >= 0) && (pan_tmp <= RobotisRX28::MAX_SPEED)) {
     __pan_vel = (unsigned int)pan_tmp;
@@ -631,6 +635,7 @@ PanTiltRX28Thread::WorkerThread::is_final()
 {
   float pan, tilt;
   get_pantilt(pan, tilt);
+
   /*
   __logger->log_debug(name(), "P: %f  T: %f  TP: %f  TT: %f  PM: %f  TM: %f  Final: %s",
                       pan, tilt, __target_pan, __target_tilt, __pan_margin, __tilt_margin,
