@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  rx28_thread.h - RX28 pan/tilt unit act thread
+ *  rx28_thread.cpp - RX28 pan/tilt unit act thread
  *
  *  Created: Thu Jun 18 09:53:49 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -91,14 +91,32 @@ PanTiltRX28Thread::init()
   __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
 
 #ifdef HAVE_TF
-  __cfg_panaxis_height   = config->get_float((__ptu_cfg_prefix + "pan_axis_height").c_str());
-  __cfg_tiltaxis_height  = config->get_float((__ptu_cfg_prefix + "tilt_axis_height").c_str());
-  __cfg_base_frame       = std::string("/") + __ptu_name + "_base";
-  __cfg_pan_link         = std::string("/") + __ptu_name + "_pan";
-  __cfg_tilt_link        = std::string("/") + __ptu_name + "_tilt";
+  float pan_trans_x  =
+    config->get_float((__ptu_cfg_prefix + "pan_trans_x").c_str());
+  float pan_trans_y  =
+    config->get_float((__ptu_cfg_prefix + "pan_trans_y").c_str());
+  float pan_trans_z  =
+    config->get_float((__ptu_cfg_prefix + "pan_trans_z").c_str());
+  float tilt_trans_x =
+    config->get_float((__ptu_cfg_prefix + "tilt_trans_x").c_str());
+  float tilt_trans_y =
+    config->get_float((__ptu_cfg_prefix + "tilt_trans_y").c_str());
+  float tilt_trans_z =
+    config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
 
-  __translation_pan.setValue(0, 0, __cfg_panaxis_height);
-  __translation_tilt.setValue(0, 0, __cfg_tiltaxis_height);
+  
+  std::string frame_id_prefix = std::string("/") + __ptu_name;
+  try {
+    frame_id_prefix =
+      config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
+  } catch (Exception &e) {} // ignore, use default
+
+  __cfg_base_frame = frame_id_prefix + "/base";
+  __cfg_pan_link   = frame_id_prefix + "/pan";
+  __cfg_tilt_link  = frame_id_prefix + "/tilt";
+
+  __translation_pan.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
+  __translation_tilt.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
 #endif
 
   bool pan_servo_found = false, tilt_servo_found = false;

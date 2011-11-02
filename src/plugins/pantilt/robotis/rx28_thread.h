@@ -99,8 +99,6 @@ class PanTiltRX28Thread
   float        __cfg_pan_margin;
   float        __cfg_tilt_margin;
 #ifdef HAVE_TF
-  float        __cfg_panaxis_height;
-  float        __cfg_tiltaxis_height;
   std::string  __cfg_base_frame;
   std::string  __cfg_pan_link;
   std::string  __cfg_tilt_link;
