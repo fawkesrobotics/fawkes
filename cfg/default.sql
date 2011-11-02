@@ -135,8 +135,8 @@ INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/device','string','/
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/read_timeout_ms','unsigned int',50,'Read timeout for EviD100P PTU');
 INSERT INTO "config" VALUES('/hardware/joystick/device_file','string','/dev/input/js0','Joystick device file');
 INSERT INTO "config" VALUES('/hardware/katana/device','string','/dev/ttyUSB0','Device file of serial port the arm is connected to; file path');
-INSERT INTO "config" VALUES('/hardware/katana/kni_conffile','string','/etc/kni/hd300/katana6M180.cfg','KNI configuration file; file path');
 INSERT INTO "config" VALUES('/hardware/katana/auto_calibrate','bool','1','Automatically calibrate on startup?');
+INSERT INTO "config" VALUES('/hardware/katana/kni_conffile','string','/etc/kni3/hd300/katana6M180.cfg','KNI configuration file; file path');
 INSERT INTO "config" VALUES('/hardware/katana/default_max_speed','unsigned int',100,'Default maximum robot arm velocity, can be overridden via BB; [0..255]');
 INSERT INTO "config" VALUES('/hardware/katana/read_timeout_msec','unsigned int',100,'Timeout for read operations; ms');
 INSERT INTO "config" VALUES('/hardware/katana/write_timeout_msec','unsigned int',0,'Timeout for write operations; ms');
@@ -152,6 +152,11 @@ INSERT INTO "config" VALUES('/hardware/katana/offset_x','float',0.0,'x Offset of
 INSERT INTO "config" VALUES('/hardware/katana/offset_y','float',0.0,'y Offset of katana to fawkes coordinate system');
 INSERT INTO "config" VALUES('/hardware/katana/offset_z','float',0.6665,'z Offset of katana to fawkes coordinate system');
 INSERT INTO "config" VALUES('/hardware/katana/distance_scale','float',0.001,'Scale from kni coordinate values to fawkes');
+INSERT INTO "config" VALUES('/hardware/katana/update_interval','float',0.5,'Interval to update the motor position data even if there is no act thread running, required for tf; sec');
+INSERT INTO "config" VALUES('/hardware/katana/openrave/enabled','bool','0','Use OpenRAVE support?');
+INSERT INTO "config" VALUES('/hardware/katana/openrave/use_viewer','bool','1','Use OpenRAVE qtcoin viewer (i.e. see 3D robot model)?');
+INSERT INTO "config" VALUES('/hardware/katana/openrave/auto_load_ik','bool','1','Automatically generate IK database for OpenRAVE robot model?');
+INSERT INTO "config" VALUES('/hardware/katana/openrave/robot_file','string','../fawkes/res/openrave/caesar.robot.xml','robot.xml file to be loaded into OpenRAVE');
 INSERT INTO "config" VALUES('/hardware/laser/urg/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg/type','string','urg','Configuration is for Hokuyo URG laser range finder using URG library');
 INSERT INTO "config" VALUES('/hardware/laser/urg/device','string','/dev/ttyACM0','Device file');

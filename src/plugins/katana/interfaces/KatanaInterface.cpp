@@ -124,7 +124,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0x18, 0xd7, 0xc6, 0x14, 0xa3, 0x5a, 0xa3, 0xd8, 0x82, 0xcf, 0x58, 0x7b, 0xfd, 0xda, 0x70, 0xc};
+  unsigned char tmp_hash[] = {0x30, 0xc1, 0xc4, 0x7b, 0xc, 0xd8, 0x56, 0x21, 0x76, 0x56, 0x8b, 0x6, 0xa1, 0xda, 0x9e, 0x6};
   set_hash(tmp_hash);
 }
 
@@ -198,7 +198,7 @@ KatanaInterface::set_sensor_value(unsigned int index, const uint8_t new_sensor_v
   data->sensor_value[index] = new_sensor_value;
 }
 /** Get x value.
- * X-Coordinate for tool position
+ * DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system.
  * @return x value
  */
@@ -219,7 +219,7 @@ KatanaInterface::maxlenof_x() const
 }
 
 /** Set x value.
- * X-Coordinate for tool position
+ * DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system.
  * @param new_x new x value
  */
@@ -231,7 +231,7 @@ KatanaInterface::set_x(const float new_x)
 }
 
 /** Get y value.
- * Y-Coordinate for tool position
+ * DEPRECATED! Y-Coordinate for tool position
     compared to base coordinate system.
  * @return y value
  */
@@ -252,7 +252,7 @@ KatanaInterface::maxlenof_y() const
 }
 
 /** Set y value.
- * Y-Coordinate for tool position
+ * DEPRECATED! Y-Coordinate for tool position
     compared to base coordinate system.
  * @param new_y new y value
  */
@@ -264,7 +264,7 @@ KatanaInterface::set_y(const float new_y)
 }
 
 /** Get z value.
- * Z-Coordinate for tool position
+ * DEPRECATED! Z-Coordinate for tool position
     compared to base coordinate system.
  * @return z value
  */
@@ -285,7 +285,7 @@ KatanaInterface::maxlenof_z() const
 }
 
 /** Set z value.
- * Z-Coordinate for tool position
+ * DEPRECATED! Z-Coordinate for tool position
     compared to base coordinate system.
  * @param new_z new z value
  */
@@ -297,7 +297,7 @@ KatanaInterface::set_z(const float new_z)
 }
 
 /** Get phi value.
- * Euler angle Phi of tool orientation.
+ * DEPRECATED! Euler angle Phi of tool orientation.
  * @return phi value
  */
 float
@@ -317,7 +317,7 @@ KatanaInterface::maxlenof_phi() const
 }
 
 /** Set phi value.
- * Euler angle Phi of tool orientation.
+ * DEPRECATED! Euler angle Phi of tool orientation.
  * @param new_phi new phi value
  */
 void
@@ -328,7 +328,7 @@ KatanaInterface::set_phi(const float new_phi)
 }
 
 /** Get theta value.
- * Euler angle Theta of tool orientation.
+ * DEPRECATED! Euler angle Theta of tool orientation.
  * @return theta value
  */
 float
@@ -348,7 +348,7 @@ KatanaInterface::maxlenof_theta() const
 }
 
 /** Set theta value.
- * Euler angle Theta of tool orientation.
+ * DEPRECATED! Euler angle Theta of tool orientation.
  * @param new_theta new theta value
  */
 void
@@ -359,7 +359,7 @@ KatanaInterface::set_theta(const float new_theta)
 }
 
 /** Get psi value.
- * Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation..
  * @return psi value
  */
 float
@@ -379,7 +379,7 @@ KatanaInterface::maxlenof_psi() const
 }
 
 /** Set psi value.
- * Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation..
  * @param new_psi new psi value
  */
 void
@@ -1003,7 +1003,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const LinearGotoMessage *m
 
 /* Methods */
 /** Get x value.
- * X-Coordinate for tool position
+ * DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system.
  * @return x value
  */
@@ -1024,7 +1024,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_x() const
 }
 
 /** Set x value.
- * X-Coordinate for tool position
+ * DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system.
  * @param new_x new x value
  */
@@ -1035,7 +1035,7 @@ KatanaInterface::LinearGotoMessage::set_x(const float new_x)
 }
 
 /** Get y value.
- * Y-Coordinate for tool position
+ * DEPRECATED! Y-Coordinate for tool position
     compared to base coordinate system.
  * @return y value
  */
@@ -1056,7 +1056,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_y() const
 }
 
 /** Set y value.
- * Y-Coordinate for tool position
+ * DEPRECATED! Y-Coordinate for tool position
     compared to base coordinate system.
  * @param new_y new y value
  */
@@ -1067,7 +1067,7 @@ KatanaInterface::LinearGotoMessage::set_y(const float new_y)
 }
 
 /** Get z value.
- * Z-Coordinate for tool position
+ * DEPRECATED! Z-Coordinate for tool position
     compared to base coordinate system.
  * @return z value
  */
@@ -1088,7 +1088,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_z() const
 }
 
 /** Set z value.
- * Z-Coordinate for tool position
+ * DEPRECATED! Z-Coordinate for tool position
     compared to base coordinate system.
  * @param new_z new z value
  */
@@ -1099,7 +1099,7 @@ KatanaInterface::LinearGotoMessage::set_z(const float new_z)
 }
 
 /** Get phi value.
- * Euler angle Phi of tool orientation.
+ * DEPRECATED! Euler angle Phi of tool orientation.
  * @return phi value
  */
 float
@@ -1119,7 +1119,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_phi() const
 }
 
 /** Set phi value.
- * Euler angle Phi of tool orientation.
+ * DEPRECATED! Euler angle Phi of tool orientation.
  * @param new_phi new phi value
  */
 void
@@ -1129,7 +1129,7 @@ KatanaInterface::LinearGotoMessage::set_phi(const float new_phi)
 }
 
 /** Get theta value.
- * Euler angle Theta of tool orientation.
+ * DEPRECATED! Euler angle Theta of tool orientation.
  * @return theta value
  */
 float
@@ -1149,7 +1149,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_theta() const
 }
 
 /** Set theta value.
- * Euler angle Theta of tool orientation.
+ * DEPRECATED! Euler angle Theta of tool orientation.
  * @param new_theta new theta value
  */
 void
@@ -1159,7 +1159,7 @@ KatanaInterface::LinearGotoMessage::set_theta(const float new_theta)
 }
 
 /** Get psi value.
- * Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation..
  * @return psi value
  */
 float
@@ -1179,7 +1179,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_psi() const
 }
 
 /** Set psi value.
- * Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation..
  * @param new_psi new psi value
  */
 void
