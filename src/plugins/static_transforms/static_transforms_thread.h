@@ -28,8 +28,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
-
-#include <tf/transform_publisher.h>
+#include <aspect/tf.h>
 
 class StaticTransformsThread
 : public fawkes::Thread,
@@ -37,7 +36,8 @@ class StaticTransformsThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::BlackBoardAspect,
+  public fawkes::TransformAspect
 {
  public:
   StaticTransformsThread();
@@ -53,8 +53,7 @@ class StaticTransformsThread
  private:
   typedef struct {
     std::string name;
-    fawkes::tf::TransformPublisher  *  tf_publisher;
-    fawkes::tf::StampedTransform    *  transform;
+    fawkes::tf::StampedTransform *transform;
   } Entry;
 
   std::list<Entry> __entries;

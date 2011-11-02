@@ -38,7 +38,8 @@ using namespace fawkes;
 /** Constructor. */
 StaticTransformsThread::StaticTransformsThread()
   : Thread("StaticTransformsThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "static")
 {
 }
 
@@ -104,8 +105,6 @@ StaticTransformsThread::init()
           try {
             Entry e;
             e.name = cfg_name;
-            e.tf_publisher =
-              new tf::TransformPublisher(blackboard, cfg_name.c_str());
 
             fawkes::Time time(clock);
             if (use_quaternion) {
@@ -113,8 +112,7 @@ StaticTransformsThread::init()
                               tf::Vector3(tx, ty, tz));
               e.transform = new tf::StampedTransform(t, time, frame, child_frame);
             } else {
-              tf::Quaternion q;
-              q.setEulerZYX(ryaw, rpitch, rroll);
+              tf::Quaternion q; q.setEulerZYX(ryaw, rpitch, rroll);
               tf::Transform t(q, tf::Vector3(tx, ty, tz));
               e.transform = new tf::StampedTransform(t, time, frame, child_frame);
             }
@@ -134,7 +132,6 @@ StaticTransformsThread::init()
           } catch (Exception &e) {
             std::list<Entry>::iterator i;
             for (i = __entries.begin(); i != __entries.end(); ++i) {
-              delete i->tf_publisher;
               delete i->transform;
             }
             __entries.clear();
@@ -166,7 +163,6 @@ StaticTransformsThread::finalize()
 {
   std::list<Entry>::iterator i;
   for (i = __entries.begin(); i != __entries.end(); ++i) {
-    delete i->tf_publisher;
     delete i->transform;
   }
   __entries.clear();
@@ -179,6 +175,6 @@ StaticTransformsThread::loop()
   std::list<Entry>::iterator i;
   for (i = __entries.begin(); i != __entries.end(); ++i) {
     i->transform->stamp.stamp();
-    i->tf_publisher->send_transform(*(i->transform));
+    tf_publisher->send_transform(*(i->transform));
   }
 }
