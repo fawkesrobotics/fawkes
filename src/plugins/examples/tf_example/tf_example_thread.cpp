@@ -85,7 +85,8 @@ TfExampleThread::loop()
                      diff, v.x(), v.y(), v.z(), q.x(), q.y(), q.z(), q.w());
 
     logger->log_info(name(), "World cache size: %zu  Robot cache size: %zu",
-                     world_cache->getListLength(), robot_cache->getListLength());
+                     world_cache->get_list_length(),
+                     robot_cache->get_list_length());
 
   }
 }
