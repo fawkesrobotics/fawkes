@@ -78,25 +78,40 @@ StaticTransformsThread::init()
           std::string frame = config->get_string((cfg_prefix + "frame").c_str());
           std::string child_frame =
             config->get_string((cfg_prefix + "child_frame").c_str());
-          float tx = config->get_float((cfg_prefix + "trans_x").c_str());
-          float ty = config->get_float((cfg_prefix + "trans_y").c_str());
-          float tz = config->get_float((cfg_prefix + "trans_z").c_str());
 
-          bool use_quaternion = true;
-          float rx, ry, rz, rw, ryaw, rpitch, rroll;
-          try {
+          float tx = 0., ty = 0., tz = 0.;
+          if (config->exists((cfg_prefix + "trans_x").c_str()) ||
+              config->exists((cfg_prefix + "trans_y").c_str()) ||
+              config->exists((cfg_prefix + "trans_z").c_str()))
+          {
+            tx = config->get_float((cfg_prefix + "trans_x").c_str());
+            ty = config->get_float((cfg_prefix + "trans_y").c_str());
+            tz = config->get_float((cfg_prefix + "trans_z").c_str());
+          } // else assume no translation
+
+          bool use_quaternion = false;
+          float rx = 0., ry = 0., rz = 0., rw = 0.,
+            ryaw = 0., rpitch = 0., rroll = 0.;
+
+          if (config->exists((cfg_prefix + "rot_x").c_str()) ||
+              config->exists((cfg_prefix + "rot_y").c_str()) ||
+              config->exists((cfg_prefix + "rot_z").c_str()) ||
+              config->exists((cfg_prefix + "rot_w").c_str()) )
+          {
+            use_quaternion = true;
             rx = config->get_float((cfg_prefix + "rot_x").c_str());
             ry = config->get_float((cfg_prefix + "rot_y").c_str());
             rz = config->get_float((cfg_prefix + "rot_z").c_str());
             rw = config->get_float((cfg_prefix + "rot_w").c_str());
-            logger->log_debug(name(), "r=%f,%f,%f,%f", rx, ry, rz, rw);
-          } catch (Exception &e) {
-            // no quaternion or incomplete quaternion, try Euler angles
-            use_quaternion = false;
+
+          } else if (config->exists((cfg_prefix + "rot_roll").c_str()) ||
+                     config->exists((cfg_prefix + "rot_pitch").c_str()) ||
+                     config->exists((cfg_prefix + "rot_yaw").c_str()))
+          {
             ryaw   = config->get_float((cfg_prefix + "rot_yaw").c_str());
             rpitch = config->get_float((cfg_prefix + "rot_pitch").c_str());
             rroll  = config->get_float((cfg_prefix + "rot_roll").c_str());
-          }
+          } // else assume no rotation
 
           if (frame == child_frame) {
             throw Exception("Parent and child frames may not be the same");
