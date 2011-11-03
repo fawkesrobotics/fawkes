@@ -7,8 +7,8 @@ CREATE TABLE config (
   PRIMARY KEY (path)
 );
 INSERT INTO "config" VALUES('/fawkes/mainapp/blackboard_size','unsigned int','2097152','Size of BlackBoard memory segment; bytes');
-INSERT INTO "config" VALUES('/fawkes/mainapp/desired_loop_time','unsigned int',30000,'Desired loop time of main thread, 0 to disable; microseconds');
-INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',30000,'Maximum time a thread may run per loop, 0 to disable; microseconds');
+INSERT INTO "config" VALUES('/fawkes/mainapp/desired_loop_time','unsigned int',33333,'Desired loop time of main thread, 0 to disable; microseconds');
+INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',66666,'Maximum time a thread may run per loop, 0 to disable; microseconds');
 INSERT INTO "config" VALUES('/fawkes/mainapp/net/tcp_port','unsigned int',1910,'Port for Fawkes Network Protocol service; TCP port');
 INSERT INTO "config" VALUES('/fawkes/mainapp/net/service_name','string','Fawkes on %h','Name for Fawkes service, announced via Avahi, %h is replaced by short hostname');
 INSERT INTO "config" VALUES('/fawkes/meta_plugins/nao_default','string','naoqi-motion,naoqi-speechsynth,naoqi-buttons,naoqi-leds','Meta plugin loaded by default on the Nao (and on the Nao only)');
