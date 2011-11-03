@@ -21,6 +21,7 @@
 
 #include "static_transforms_thread.h"
 
+#include <utils/time/time.h>
 #include <set>
 #include <memory>
 
@@ -41,12 +42,14 @@ StaticTransformsThread::StaticTransformsThread()
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
     TransformAspect(TransformAspect::ONLY_PUBLISHER, "static")
 {
+  __last_update = new Time();
 }
 
 
 /** Destructor. */
 StaticTransformsThread::~StaticTransformsThread()
 {
+  delete __last_update;
 }
 
 
@@ -56,8 +59,12 @@ StaticTransformsThread::init()
   std::set<std::string> transforms;
   std::set<std::string> ignored_transforms;
 
-  std::string prefix = "/plugins/static_transforms/";
+  __cfg_update_interval = 1.0;
+  try  {
+    __cfg_update_interval = config->get_float("/plugins/static-transforms/update-interval");
+  } catch (Exception &e) {} // ignored, use default
 
+  std::string prefix = "/plugins/static-transforms/transforms/";
   std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
@@ -170,6 +177,9 @@ StaticTransformsThread::init()
   if ( __entries.empty() ) {
     throw Exception("No transforms configured");
   }
+
+  __last_update->set_clock(clock);
+  __last_update->set_time(0, 0);
 }
 
 
@@ -187,9 +197,14 @@ StaticTransformsThread::finalize()
 void
 StaticTransformsThread::loop()
 {
-  std::list<Entry>::iterator i;
-  for (i = __entries.begin(); i != __entries.end(); ++i) {
-    i->transform->stamp.stamp();
-    tf_publisher->send_transform(*(i->transform));
+  fawkes::Time now(clock);
+  if ((now - __last_update) > __cfg_update_interval) {
+    __last_update->stamp();
+
+    std::list<Entry>::iterator i;
+    for (i = __entries.begin(); i != __entries.end(); ++i) {
+      i->transform->stamp.stamp();
+      tf_publisher->send_transform(*(i->transform));
+    }
   }
 }

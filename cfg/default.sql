@@ -242,4 +242,5 @@ INSERT INTO "config" VALUES('/plugins/openni/fps','unsigned int',30,'Desired fra
 INSERT INTO "config" VALUES('/plugins/openni/run_sensor_server','bool',1,'Should we spawn the sensor server and maintain it? This solves the problem that the XnSensorServer process is not stopped by OpenNI.');
 INSERT INTO "config" VALUES('/plugins/openni/sensor_server_bin','string','/usr/bin/XnSensorServer','Full path to the XnSensorServer binary; path');
 INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinear','De-bayering mode, can be bilinear or nearest_neighbor');
+INSERT INTO "config" VALUES('/plugins/static-transforms/update-interval','float',1.0,'Interval in which to post static transform updates; sec');
 COMMIT;

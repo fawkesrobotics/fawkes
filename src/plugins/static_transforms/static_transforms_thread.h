@@ -30,6 +30,10 @@
 #include <aspect/blackboard.h>
 #include <aspect/tf.h>
 
+namespace fawkes {
+  class Time;
+}
+
 class StaticTransformsThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
@@ -57,6 +61,9 @@ class StaticTransformsThread
   } Entry;
 
   std::list<Entry> __entries;
+
+  float __cfg_update_interval;
+  fawkes::Time *__last_update;
 };
 
 #endif
