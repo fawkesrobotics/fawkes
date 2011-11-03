@@ -47,6 +47,7 @@ function init()
    skiller.ros.graph.init()
    require("luaagent.agentenv")
    luaagent.agentenv.write_graph = skiller.ros.graph.publish
+   luaagent.agentenv.handle_error = agentenv_handle_error
 
 
    --pub_status = roslua.publisher("/luaagent/status", "skiller/SkillStatus")
@@ -89,6 +90,19 @@ function publish_status(fsm)
    m.values.errmsg = fsm.error
    m.values.status = pub_status.msgspec.constants.S_RUNNING.value
    pub_status:publish(m)
+end
+
+--- Error handling function.
+-- This function can be overridden. It is called if the agent's execute fails.
+-- The default implementation just raises an error.
+-- @param err error message
+function agentenv_handle_error(err)
+   if luaagent.ros.nodemon then
+      luaagent.ros.nodemon:set_fatal("exec_fail",
+                                     "Agent execution failed: " .. err)
+   end
+   print_error("Agent execution failed: %s", err)
+   error(err)
 end
 
 
