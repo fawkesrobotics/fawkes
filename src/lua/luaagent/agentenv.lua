@@ -139,17 +139,32 @@ function write_graph(fsm)
 end
 
 
+--- Error handling function.
+-- This function can be overridden. It is called if the agent's execute fails.
+-- The default implementation just raises an error.
+-- @param err error message
+function handle_error(err)
+   error(err)
+end
+
+
 --- Execute current agent.
 -- Calls the agent's execute routine. If this does not exist and the
 -- agent has an FSM the FSM is run via FSM:loop(), otherwise an error
 -- is thrown.
 function execute()
    if agent.execute then
-      agent.execute()
+      local ok, err = pcall(agent.execute)
+      if not ok then
+         handle_error(err)
+      end
    elseif agent.fsm then
-      agent.fsm:loop()
+      local ok, err = pcall(agent.fsm.loop, agent.fsm)
+      if not ok then
+         handle_error(err)
+      end      
    else
-      error("Agent has neither execute() function nor FSM")
+      handle_error("Agent has neither execute() function nor FSM")
    end
 
    predlib.reset()
