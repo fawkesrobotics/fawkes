@@ -60,6 +60,7 @@
 #include <LinearMath/btTransform.h>
 
 #include <string>
+#include <cmath>
 
 namespace fawkes {
   namespace tf {
@@ -168,7 +169,9 @@ static inline bool operator==(const StampedTransform &a, const StampedTransform 
 inline void
 assert_quaternion_valid(const Quaternion & q)
 {
-  if (isnan(q.x()) || isnan(q.y()) || isnan(q.z()) || isnan(q.w())) {
+  if (std::isnan(q.x()) || std::isnan(q.y()) ||
+      std::isnan(q.z()) || std::isnan(q.w()))
+  {
     throw InvalidArgumentException("Quaternion malformed, contains NaN value");
   }
 
