@@ -205,10 +205,6 @@ KatanaActThread::once()
     start_motion(__calib_thread, 0, "Auto calibration enabled, calibrating");
     __katana_if->set_enabled(true);
     __katana_if->write();
-  } else {
-    __katana->switchRobotOff();
-    __katana_if->set_enabled(false);
-    __katana_if->write();
   }
 }
 
