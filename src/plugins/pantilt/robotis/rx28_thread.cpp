@@ -239,13 +239,12 @@ PanTiltRX28Thread::finalize()
 void
 PanTiltRX28Thread::update_sensor_values()
 {
-  bool fresh = __wt->has_fresh_data();
-  float pan = 0, tilt = 0, panvel=0, tiltvel=0;
-  fawkes::Time time;
-  __wt->get_pantilt(pan, tilt, time);
-  __wt->get_velocities(panvel, tiltvel);
+  if (__wt->has_fresh_data()) {
+    float pan = 0, tilt = 0, panvel=0, tiltvel=0;
+    fawkes::Time time;
+    __wt->get_pantilt(pan, tilt, time);
+    __wt->get_velocities(panvel, tiltvel);
 
-  if (fresh) {
     __pantilt_if->set_pan(pan);
     __pantilt_if->set_tilt(tilt);
     __pantilt_if->set_pan_velocity(panvel);
@@ -253,18 +252,18 @@ PanTiltRX28Thread::update_sensor_values()
     __pantilt_if->set_enabled(__wt->is_enabled());
     __pantilt_if->set_final(__wt->is_final());
     __pantilt_if->write();
-  }
 
 #ifdef HAVE_TF
-  // Always publish updated transforms
-  tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
-  tf::Transform ptr(pr, __translation_pan);
-  tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+    // Always publish updated transforms
+    tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
+    tf::Transform ptr(pr, __translation_pan);
+    tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
 
-  tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
-  tf::Transform ttr(tr, __translation_tilt);
-  tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
+    tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
+    tf::Transform ttr(tr, __translation_tilt);
+    tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
 #endif
+  }
 }
 
 
@@ -415,6 +414,7 @@ PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
 
   __value_mutex      = new Mutex();
   __rx28_mutex       = new Mutex();
+  __fresh_data_mutex = new Mutex();
 
   __rx28 = rx28;
   __move_pending     = false;
@@ -444,6 +444,7 @@ PanTiltRX28Thread::WorkerThread::~WorkerThread()
 {
   delete __value_mutex;
   delete __rx28_mutex;
+  delete __fresh_data_mutex;
 }
 
 
@@ -688,7 +689,7 @@ PanTiltRX28Thread::WorkerThread::is_enabled()
 bool
 PanTiltRX28Thread::WorkerThread::has_fresh_data()
 {
-  MutexLocker lock(__rx28_mutex);
+  MutexLocker lock(__fresh_data_mutex);
 
   bool rv = __fresh_data;
   __fresh_data = false;
@@ -755,14 +756,16 @@ PanTiltRX28Thread::WorkerThread::loop()
   try {
     MutexLocker lock(__rx28_mutex);
     __rx28->read_table_values(__pan_servo_id);
-    __fresh_data = true;
-    __pantilt_time.stamp();
     __rx28->read_table_values(__tilt_servo_id);
-    // give RX28 a little rest
-    //usleep(1000);
+    {
+      MutexLocker lock_fresh_data(__fresh_data_mutex);
+      __fresh_data = true;
+      __pantilt_time.stamp();
+    }
   } catch (Exception &e) {
-    __logger->log_warn(name(), "Error while reading table values from servos, exception follows");
-    __logger->log_warn(name(), e);
+    // usually just a timeout, too noisy
+    //__logger->log_warn(name(), "Error while reading table values from servos, exception follows");
+    //__logger->log_warn(name(), e);
   }
 
   //if (! is_final() ||

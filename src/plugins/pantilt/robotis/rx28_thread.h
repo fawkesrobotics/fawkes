@@ -133,6 +133,9 @@ class PanTiltRX28Thread
 
     virtual void loop();
 
+    /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+    protected: virtual void run() { Thread::run(); }
+
   private:
     void exec_goto_pantilt(float pan, float tilt);
 
@@ -169,6 +172,8 @@ class PanTiltRX28Thread
     fawkes::Time  __pantilt_time;
 
     bool __fresh_data;
+    fawkes::Mutex *__fresh_data_mutex;
+
   };
 
   WorkerThread *__wt;
