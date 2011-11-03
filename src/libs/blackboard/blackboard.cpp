@@ -186,6 +186,7 @@ void
 BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
                             ListenerRegisterFlag flag)
 {
+  if (! listener)  return;
   __notifier->update_listener(listener, flag);
 }
 
@@ -198,6 +199,7 @@ BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
 void
 BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 {
+  if (! listener) return;
   __notifier->unregister_listener(listener);
 }
 
@@ -208,6 +210,7 @@ BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 void
 BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 {
+  if (! observer) return;
   __notifier->register_observer(observer);
 }
 
@@ -220,6 +223,7 @@ BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 void
 BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
+  if (! observer) return;
   __notifier->unregister_observer(observer);
 }
 
