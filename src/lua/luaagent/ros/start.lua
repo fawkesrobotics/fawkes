@@ -29,9 +29,11 @@ require("fawkes.depinit")
 require("luaagent.ros")
 require("skiller.ros.topic_initializer")
 require("skiller.ros.service_initializer")
+local srvjsmod = require("skiller.ros.service_jumpstate")
 
 luaagent.ros.init()
 
 agentenv = require("luaagent.agentenv")
+agentenv.add_export("ServiceJumpState", srvjsmod.ServiceJumpState)
 fawkes.depinit.add_module_initializer(skiller.ros.topic_initializer.init_topics)
 fawkes.depinit.add_module_initializer(skiller.ros.service_initializer.init_services)
