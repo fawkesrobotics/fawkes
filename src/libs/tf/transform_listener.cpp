@@ -91,6 +91,7 @@ TransformListener::TransformListener(BlackBoard *bb)
 
     bbio_add_observed_create("TransformInterface", "TF *");
     __bb->register_observer(this);
+    set_enabled(true);
   } else {
     set_enabled(false);
   }
