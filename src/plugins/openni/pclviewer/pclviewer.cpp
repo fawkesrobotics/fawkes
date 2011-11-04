@@ -33,6 +33,7 @@
 #include <utils/system/argparser.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/conversions.h>
+#include <fvutils/base/types.h>
 
 #include <blackboard/remote.h>
 #include <interfaces/ObjectPositionInterface.h>
@@ -50,7 +51,7 @@ using namespace firevision;
 Camera *g_pcl_cam = NULL;
 Camera *g_image_cam = NULL;
 unsigned char *g_rgb_buf = NULL;
-const unsigned char *g_pcl_buf = NULL;
+const pcl_point_t *g_pcl_buf = NULL;
 const unsigned char *g_image_buf = NULL;
 
 GLfloat    g_scale;			/* scaling factor */
@@ -108,9 +109,7 @@ draw_points()
   const unsigned int width  = g_pcl_cam->pixel_width();
   const unsigned int height = g_pcl_cam->pixel_height();
 
-  float *x = (float *)g_pcl_buf;
-  float *y = x + width * height;
-  float *z = y + width * height;
+  const pcl_point_t *pcl = g_pcl_buf;
 
   if (g_transfer_thread) {
     g_transfer_thread->lock_for_read();
@@ -120,30 +119,24 @@ draw_points()
     unsigned char *rgb = g_rgb_buf;
     //unsigned int num_values = 0, zero_values = 0;
     for (unsigned int h = 0; h < height; ++h) {
-      for (unsigned int w = 0; w < width; ++w, rgb += 3) {
+      for (unsigned int w = 0; w < width; ++w, rgb += 3, ++pcl) {
 	//++num_values;
-	if ((*x == 0) && (*y == 0) && (*z == 0)) {
-	  x++; y++; z++;
-	  //++zero_values;
-	  continue;
-	}
-	
-	glColor3f(rgb[0] / 255.,rgb[1] / 255.,rgb[2] / 255.);
-	glVertex3f(*x++, *y++, *z++);
+        register const pcl_point_t &p = *pcl;
+	if ((p.x != 0) || (p.y != 0) || (p.z != 0)) {
+          glColor3f(rgb[0] / 255.,rgb[1] / 255.,rgb[2] / 255.);
+          glVertex3f(p.x, p.y, p.z);
+        }
       }
     }
   } else {
     //unsigned int num_values = 0, zero_values = 0;
     for (unsigned int h = 0; h < height; ++h) {
-      for (unsigned int w = 0; w < width; ++w) {
+      for (unsigned int w = 0; w < width; ++w, ++pcl) {
 	//++num_values;
-	if ((*x == 0) && (*y == 0) && (*z == 0)) {
-	  x++; y++; z++;
-	  //++zero_values;
-	  continue;
-	}
-	
-	glVertex3f(*x++, *y++, *z++);
+        register const pcl_point_t &p = *pcl;
+	if ((p.x != 0) || (p.y != 0) || (p.z != 0)) {
+          glVertex3f(p.x, p.y, p.z);
+        }
       }
     }
   }
@@ -395,7 +388,7 @@ init(ArgumentParser &argp)
     g_transfer_thread = new PclViewerTransferThread();
     g_transfer_thread->add_camera("openni-pointcloud", g_pcl_cam);
 
-    g_pcl_buf = g_transfer_thread->buffer("openni-pointcloud");
+    g_pcl_buf = (const pcl_point_t *)g_transfer_thread->buffer("openni-pointcloud");
 
     if (argp.has_arg("R")) {
       g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image",
@@ -414,7 +407,7 @@ init(ArgumentParser &argp)
     g_pcl_cam = new SharedMemoryCamera("openni-pointcloud");
     g_pcl_cam->open();
     g_pcl_cam->start();
-    g_pcl_buf = g_pcl_cam->buffer();
+    g_pcl_buf = (const pcl_point_t *)g_pcl_cam->buffer();
     if (argp.has_arg("R")) {
       g_image_cam = new SharedMemoryCamera("openni-image");
       g_image_cam->open();

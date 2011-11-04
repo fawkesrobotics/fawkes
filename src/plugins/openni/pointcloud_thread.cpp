@@ -26,6 +26,7 @@
 #include <core/threading/mutex_locker.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/colorspaces.h>
+#include <fvutils/base/types.h>
 
 #include <memory>
 
@@ -104,7 +105,6 @@ OpenNiPointCloudThread::init()
   __focal_length = ((float)zpd / pixel_size) * scale;
   __center_x = (__width  / 2.) - .5f;
   __center_y = (__height / 2.) - .5f;
-  __plane_size = __width * __height;
 
   __depth_gen->StartGenerating();
 
@@ -135,28 +135,25 @@ OpenNiPointCloudThread::loop()
 
   if (is_data_new && (__pcl_buf->num_attached() > 1)) {
     // convert depth to points
-
-    float *xp = (float *)__pcl_buf->buffer();
-    float *yp = xp + __plane_size;
-    float *zp = yp + __plane_size;
+    register pcl_point_t *pcl = (pcl_point_t *)__pcl_buf->buffer();
 
     const float constant = 0.001 / __focal_length;
 
     unsigned int depth_idx = 0;
     for (unsigned int h = 0; h < __height; ++h) {
-      for (unsigned int w = 0; w < __width; ++w, ++depth_idx) {
+      for (unsigned int w = 0; w < __width; ++w, ++depth_idx, ++pcl) {
 	// Check for invalid measurements
 	if (data[depth_idx] == 0 ||
 	    data[depth_idx] == __no_sample_value ||
 	    data[depth_idx] == __shadow_value)
 	{
 	  // invalid
-	  *xp++ = 0; *yp++ = 0; *zp++ = 0;
+          pcl->x = pcl->y = pcl->z = 0.f;
 	} else {
 	  // Fill in XYZ
-	  *xp++ = data[depth_idx] * 0.001;
-	  *yp++ = -(w - __center_x) * data[depth_idx] * constant;
-	  *zp++ = -(h - __center_y) * data[depth_idx] * constant;
+	  pcl->x = data[depth_idx] * 0.001f;
+	  pcl->y = -(w - __center_x) * data[depth_idx] * constant;
+	  pcl->z = -(h - __center_y) * data[depth_idx] * constant;
 	}
       }
     }

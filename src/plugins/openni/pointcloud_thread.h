@@ -64,7 +64,6 @@ class OpenNiPointCloudThread
 
   firevision::SharedMemoryImageBuffer *__pcl_buf;
 
-  unsigned int __plane_size;
   float        __focal_length;
   float        __center_x;
   float        __center_y;
