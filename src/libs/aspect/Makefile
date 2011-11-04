@@ -48,9 +48,11 @@ LIBS_all  = $(LIBDIR)/libfawkesaspects.so
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_webview warning_vision
+.PHONY: warning_webview warning_tf
 warning_webview:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding WebviewAspect$(TNORMAL) (libfawkeswebview not built)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding TransformAspect$(TNORMAL) (libfawkestf not built)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
