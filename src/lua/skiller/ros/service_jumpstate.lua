@@ -65,7 +65,7 @@ local function set_params(msg, input)
 end
 
 local function CALL_init(self)
-   self.fsm.service_client:concexec_start(self.fsm.vars)
+   self.fsm.service_client:concexec_start(self.params or self.fsm.vars)
 end
 
 function ServiceJumpState:setup_subfsm()
