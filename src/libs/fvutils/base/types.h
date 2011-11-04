@@ -93,6 +93,18 @@ typedef enum {
 				 * Center to opponent goal is zero rad. */
 } coordsys_type_t;
 
+
+#pragma pack(push,4)
+/** Structure defining a point in a CARTESIAN_3D_FLOAT buffer */
+typedef struct {
+  float x;	/**< X value */
+  float y;	/**< Y value */
+  float z;	/**< Z value */
+} pcl_point_t;
+#pragma pack(pop)
+
+
+
 } // end namespace firevision
 
 #endif
