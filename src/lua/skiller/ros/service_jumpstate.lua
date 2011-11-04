@@ -65,7 +65,7 @@ local function set_params(msg, input)
 end
 
 local function CALL_init(self)
-   self.fsm.service_client:concexec_start(self.params or self.fsm.vars)
+   self.fsm.service_client:concexec_start(self.fsm.params or self.fsm.vars)
 end
 
 function ServiceJumpState:setup_subfsm()
@@ -84,6 +84,13 @@ function ServiceJumpState:setup_subfsm()
       {"CALL", "FAILED", "service_client:concexec_failed()"}
    }
    self.CALL.init = CALL_init
+end
+
+function ServiceJumpState:do_init()
+   SubFSMJumpState.do_init(self)
+   if self.params then
+      self.subfsm.params = self.params
+   end
 end
 
 function ServiceJumpState:do_exit()
