@@ -87,7 +87,11 @@ function ServiceJumpState:setup_subfsm()
 end
 
 function ServiceJumpState:do_init()
-   SubFSMJumpState.do_init(self)
+   -- Note that this also already calls init() and checks the regular
+   -- non-precondition transitions!
+   local rv = { SubFSMJumpState.do_init(self) }
+   if next(rv) then return unpack(rv) end
+
    if self.params then
       self.subfsm.params = self.params
    end
