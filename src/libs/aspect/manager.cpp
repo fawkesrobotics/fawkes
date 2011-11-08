@@ -43,6 +43,9 @@
 #ifdef HAVE_TF
 #  include <aspect/inifins/tf.h>
 #endif
+#ifdef HAVE_PCL
+#  include <aspect/inifins/pointcloud.h>
+#endif
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -259,6 +262,10 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 #ifdef HAVE_TF
   TransformAspectIniFin *tf_aif = new TransformAspectIniFin(blackboard);
 #endif
+#ifdef HAVE_PCL
+  PointCloudAspectIniFin *pcl_aif = new PointCloudAspectIniFin();
+#endif
+
 
   __default_inifins[prov_aif->get_aspect_name()] = prov_aif;
   __default_inifins[bb_aif->get_aspect_name()] = bb_aif;
@@ -280,6 +287,9 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 #endif
 #ifdef HAVE_TF
   __default_inifins[tf_aif->get_aspect_name()] = tf_aif;
+#endif
+#ifdef HAVE_PCL
+  __default_inifins[pcl_aif->get_aspect_name()] = pcl_aif;
 #endif
 
   std::map<std::string, AspectIniFin *>::iterator i;
