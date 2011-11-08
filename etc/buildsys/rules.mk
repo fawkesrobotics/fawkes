@@ -203,14 +203,14 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	fi
 
 .SECONDEXPANSION:
-$(BINDIR)/%: $$(OBJS_$$*)
+$(BINDIR)/%: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@ $(subst ..,__,$^) $(LDFLAGS_BASE) \
 	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
-	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
+	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$(call nametr,$*))) $(addprefix -L,$(LIBDIRS))
 ifeq ($(WARN_MISSING_MANPAGE),1)
 	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $* does not have a man page$(TNORMAL) ---")
 endif
