@@ -37,9 +37,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-#ifdef HAVE_TF
-#  include <aspect/tf.h>
-#endif
+#include <aspect/tf.h>
 #ifdef HAVE_OPENRAVE
 #  include <plugins/openrave/aspect/openrave.h>
 #endif
@@ -71,9 +69,7 @@ class KatanaActThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-#ifdef HAVE_TF
   public fawkes::TransformAspect,
-#endif
 #ifdef HAVE_OPENRAVE
   public fawkes::OpenRaveAspect,
 #endif

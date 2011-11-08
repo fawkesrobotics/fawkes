@@ -68,10 +68,11 @@ OBJS_all = $(OBJS_katana)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_kni
+.PHONY: warning_tf
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (fawkestf not available)"
 
+.PHONY: warning_kni
 warning_kni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (KNI[-devel] not installed)"
 

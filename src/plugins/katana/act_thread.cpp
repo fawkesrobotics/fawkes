@@ -46,9 +46,7 @@ using namespace fawkes::tf;
 KatanaActThread::KatanaActThread()
   : Thread("KatanaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC),
-#ifdef HAVE_TF
     TransformAspect(TransformAspect::BOTH, "Katana"),
-#endif
     BlackBoardInterfaceListener("KatanaActThread")
 {
   __last_update = new Time();
