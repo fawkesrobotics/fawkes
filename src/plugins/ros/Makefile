@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/ros.mk
+include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_ros = fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -34,7 +35,11 @@ LIBS_ros_tf = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect fawkestf TransformInterface
 OBJS_ros_tf = tf_plugin.o tf_thread.o
 
-OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf)
+LIBS_ros_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect
+OBJS_ros_pcl = pcl_plugin.o pcl_thread.o pcl_adapter.o
+
+OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) $(OBJS_ros_pcl)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -70,6 +75,21 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_rostf
   endif
+
+  ifeq ($(call ros-have-pkg,sensor_msgs),1)
+    ifeq ($(HAVE_PCL),1)
+      export VTK_DIR=$(firstword $(wildcard /usr/lib64/vtk-* /usr/lib/vtk-*))
+      CFLAGS_pcl_adapter += $(CFLAGS_PCL)
+      CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs)
+      CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread)
+      LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(call ros-pkg-lflags,sensor_msgs)
+      PLUGINS_all += $(PLUGINDIR)/ros-pcl.so
+    else
+      WARN_TARGETS += warning_pcl
+    endif
+  else
+    WARN_TARGETS += warning_rospcl
+  endif
 else
   WARN_TARGETS += warning_ros
 endif
@@ -77,7 +97,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_ros warning_webview_msgs warning_fawkestf  warning_rostf
+.PHONY: warning_ros warning_webview_msgs warning_fawkestf warning_rostf warning_pcl warning_rospcl
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Plugins$(TNORMAL) (ROS not found)"
 warning_webview_msgs:
@@ -86,6 +106,10 @@ warning_fawkestf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (fawkestf not available)"
 warning_rostf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (ROS package tf not found)"
+warning_pcl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (pcl[-devel] not installed)"
+warning_rospcl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (ROS package pcl not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
