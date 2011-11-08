@@ -314,7 +314,8 @@ FawkesMainThread::loop()
       set_cancel_state(CANCEL_DISABLED, &old_state);
       try {
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE, __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE, __max_thread_time_usec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );

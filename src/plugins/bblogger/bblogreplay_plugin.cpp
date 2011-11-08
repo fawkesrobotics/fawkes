@@ -145,8 +145,10 @@ BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
 
 	if (hook_str == "pre_loop") {
 	  hook = BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP;
-	} else if (hook_str == "sensor") {
-	  hook = BlockedTimingAspect::WAKEUP_HOOK_SENSOR;
+	} else if (hook_str == "sensor_acquire") {
+	  hook = BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE;
+	} else if (hook_str == "sensor_prepare") {
+	  hook = BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE;
 	} else if (hook_str == "sensor_process") {
 	  hook = BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS;
 	} else if (hook_str == "worldstate") {

@@ -64,17 +64,19 @@ TimeTrackerMainLoopThread::init()
   __last_outp_time->stamp();
 
   __tt = new TimeTracker("time.log");
-  __tt_loopcount   = 0;
-  __ttc_pre_loop   = __tt->add_class("Pre Loop");
-  __ttc_sensor     = __tt->add_class("Sensor");
-  __ttc_worldstate = __tt->add_class("World State");
-  __ttc_think      = __tt->add_class("Think");
-  __ttc_skill      = __tt->add_class("Skill");
-  __ttc_act        = __tt->add_class("Act");
-  __ttc_post_loop  = __tt->add_class("Post Loop");
-  __ttc_netproc    = __tt->add_class("Net Proc");
-  __ttc_full_loop  = __tt->add_class("Full Loop");
-  __ttc_real_loop  = __tt->add_class("Real Loop");
+  __tt_loopcount        = 0;
+  __ttc_pre_loop        = __tt->add_class("Pre Loop");
+  __ttc_sensor_acquire  = __tt->add_class("Sensor Acquire");
+  __ttc_sensor_prepare  = __tt->add_class("Sensor Prepare");
+  __ttc_sensor_process  = __tt->add_class("Sensor Process");
+  __ttc_worldstate      = __tt->add_class("World State");
+  __ttc_think           = __tt->add_class("Think");
+  __ttc_skill           = __tt->add_class("Skill");
+  __ttc_act             = __tt->add_class("Act");
+  __ttc_post_loop       = __tt->add_class("Post Loop");
+  __ttc_netproc         = __tt->add_class("Net Proc");
+  __ttc_full_loop       = __tt->add_class("Full Loop");
+  __ttc_real_loop       = __tt->add_class("Real Loop");
 }
 
 
@@ -106,12 +108,19 @@ TimeTrackerMainLoopThread::loop()
 
   blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
-  TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor)
+  TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor_acquire)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE );
+
+  TIMETRACK_INTER(__ttc_sensor_acquire, __ttc_sensor_prepare)
+
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE );
+
+  TIMETRACK_INTER(__ttc_sensor_prepare, __ttc_sensor_process)
+
   blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
 
-  TIMETRACK_INTER(__ttc_sensor, __ttc_worldstate)
+  TIMETRACK_INTER(__ttc_sensor_process, __ttc_worldstate)
 
   blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
 

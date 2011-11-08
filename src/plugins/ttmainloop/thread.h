@@ -64,7 +64,9 @@ class TimeTrackerMainLoopThread
   fawkes::TimeTracker  *__tt;
   unsigned int  __tt_loopcount;
   unsigned int  __ttc_pre_loop;
-  unsigned int  __ttc_sensor;
+  unsigned int  __ttc_sensor_acquire;
+  unsigned int  __ttc_sensor_prepare;
+  unsigned int  __ttc_sensor_process;
   unsigned int  __ttc_worldstate;
   unsigned int  __ttc_think;
   unsigned int  __ttc_skill;

@@ -42,7 +42,7 @@ using namespace fawkes;
 /** Constructor. */
 OpenNiContextThread::OpenNiContextThread()
   : Thread("OpenNiContextThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     AspectProviderAspect("OpenNiAspect", &__openni_aspect_inifin)
 {
 }

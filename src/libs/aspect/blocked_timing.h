@@ -41,7 +41,10 @@ class BlockedTimingAspect : public virtual Aspect
    */
   typedef enum {
     WAKEUP_HOOK_PRE_LOOP,	/**< before each loop */
-    WAKEUP_HOOK_SENSOR,		/**< sensor thread, recording and processing */
+    WAKEUP_HOOK_SENSOR_ACQUIRE,	/**< sensor acquisition thread,
+                                 *  acquire data from sensor */
+    WAKEUP_HOOK_SENSOR_PREPARE,	/**< sensor data preparation thread,
+                                 * convert acquired data to usable format */
     WAKEUP_HOOK_SENSOR_PROCESS,	/**< sensor data processing thread */
     WAKEUP_HOOK_WORLDSTATE,	/**< world state thread */
     WAKEUP_HOOK_THINK,		/**< think thread (agent) */

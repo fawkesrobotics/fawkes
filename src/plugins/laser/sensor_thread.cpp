@@ -45,7 +45,7 @@ LaserSensorThread::LaserSensorThread(std::string &cfg_name,
 				     std::string &cfg_prefix,
 				     LaserAcquisitionThread *aqt)
   : Thread("LaserSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
   set_name("LaserSensorThread(%s)", cfg_name.c_str());
   __aqt        = aqt;

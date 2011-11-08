@@ -55,7 +55,7 @@ using namespace firevision;
 /** Constructor. */
 FvBaseThread::FvBaseThread()
   : Thread("FvBaseThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     VisionMasterAspect(this)
 {
   // default to 30 seconds

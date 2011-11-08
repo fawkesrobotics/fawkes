@@ -87,7 +87,7 @@ enum LedType {
  /** Constructor. */
 NaoQiLedThread::NaoQiLedThread()
   : Thread("NaoQiLedThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     BlackBoardInterfaceListener("NaoQiLedThread")
 {
 }

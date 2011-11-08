@@ -40,7 +40,7 @@ using namespace fawkes;
  */
 JoystickSensorThread::JoystickSensorThread(JoystickAcquisitionThread *aqt)
   : Thread("JoystickSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
   __aqt    = aqt;
 }

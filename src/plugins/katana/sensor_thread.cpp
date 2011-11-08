@@ -37,7 +37,7 @@ using namespace fawkes;
  */
 KatanaSensorThread::KatanaSensorThread(KatanaActThread *act_thread)
   : Thread("KatanaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
   __act_thread = act_thread;
 }

@@ -50,7 +50,7 @@ using namespace fawkes;
 /** Constructor. */
 RefBoxCommThread::RefBoxCommThread()
   : Thread("RefBoxCommThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
   __refboxproc = NULL;
 }
