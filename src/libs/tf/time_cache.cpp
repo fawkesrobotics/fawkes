@@ -126,8 +126,9 @@ create_extrapolation_exception1(fawkes::Time t0, fawkes::Time t1, std::string* e
   if (error_str)
   {
     char *tmp;
-    if (asprintf(&tmp, "Lookup would require extrapolation at time %s, "
-                 "but only time %s is in the buffer", t0.str(), t1.str()) != -1)
+    if (asprintf(&tmp, "Lookup would require extrapolation at time %li.%li, "
+                 "but only time %li.%li is in the buffer", t0.get_sec(), t0.get_nsec(),
+                 t1.get_sec(), t1.get_nsec()) != -1)
     {
       *error_str = tmp;
       free(tmp);
