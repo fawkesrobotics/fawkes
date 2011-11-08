@@ -127,6 +127,13 @@ class RefPtr
    */
   inline T_CppObject* operator->() const;
 
+  /** Get underlying pointer.
+   * Use with care!
+   * @return pointer to encapsulated object
+   */
+  inline T_CppObject* operator*() const;
+
+
   /** Test whether the RefPtr<> points to any underlying instance.
    *
    * Mimics usage of ordinary pointers:
@@ -192,6 +199,11 @@ class RefPtr
    */
   inline int *  refcount_ptr() const { return __ref_count; }
 
+  /** Get current reference count.
+   * @return current number of owners referencing this RefPtr.
+   */
+  inline int use_count() const { return *__ref_count; }
+
   /** For use only in the internal implementation of sharedptr.
    * Get reference mutex.
    * @return pointer to refcount mutex
@@ -212,6 +224,13 @@ private:
 
 template <class T_CppObject> inline
 T_CppObject* RefPtr<T_CppObject>::operator->() const
+{
+  return __cpp_object;
+}
+
+
+template <class T_CppObject> inline
+T_CppObject* RefPtr<T_CppObject>::operator*() const
 {
   return __cpp_object;
 }
