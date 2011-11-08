@@ -56,19 +56,27 @@ TfExampleThread::finalize()
 }
 
 
+#define SOURCE "/katana/base"
+#define TARGET "/rx28/base"
+
 void
 TfExampleThread::loop()
 {
-  bool world_frame_exists = tf_listener->frame_exists("/world");
-  bool robot_frame_exists = tf_listener->frame_exists("/robot");
+  bool world_frame_exists = tf_listener->frame_exists(SOURCE);
+  bool robot_frame_exists = tf_listener->frame_exists(TARGET);
 
   if (! world_frame_exists || ! robot_frame_exists) {
-    logger->log_warn(name(), "Frame missing: world %s   robot %s",
-                     world_frame_exists ? "exists" : "missing",
-                     robot_frame_exists ? "exists" : "missing");
+    logger->log_warn(name(), "Frame missing: %s %s   %s %s",
+                     SOURCE, world_frame_exists ? "exists" : "missing",
+                     TARGET, robot_frame_exists ? "exists" : "missing");
   } else {
     tf::StampedTransform transform;
-    tf_listener->lookup_transform("/robot", "/world", transform);
+    try {
+      tf_listener->lookup_transform(SOURCE, TARGET, transform);
+    } catch (tf::ExtrapolationException &e) {
+      logger->log_debug(name(), "Extrapolation error");
+      return;
+    }
 
     fawkes::Time now;
     double diff = now - &transform.stamp;
@@ -76,8 +84,8 @@ TfExampleThread::loop()
     tf::Quaternion q = transform.getRotation();
     tf::Vector3 &v   = transform.getOrigin();
 
-    const tf::TimeCache *world_cache = tf_listener->get_frame_cache("/world");
-    const tf::TimeCache *robot_cache = tf_listener->get_frame_cache("/robot");
+    const tf::TimeCache *world_cache = tf_listener->get_frame_cache(SOURCE);
+    const tf::TimeCache *robot_cache = tf_listener->get_frame_cache(TARGET);
 
     logger->log_info(name(), "Transform %s -> %s, %f sec old: "
                      "T(%f,%f,%f)  Q(%f,%f,%f,%f)",
