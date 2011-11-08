@@ -201,9 +201,13 @@ StaticTransformsThread::loop()
   if ((now - __last_update) > __cfg_update_interval) {
     __last_update->stamp();
 
+    // date time stamps slightly into the future so they are valid
+    // for longer and need less frequent updates.
+    fawkes::Time timestamp = now + __cfg_update_interval;
+
     std::list<Entry>::iterator i;
     for (i = __entries.begin(); i != __entries.end(); ++i) {
-      i->transform->stamp.stamp();
+      i->transform->stamp = timestamp;
       tf_publisher->send_transform(*(i->transform));
     }
   }
