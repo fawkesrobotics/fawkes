@@ -19,7 +19,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
 	      fawkesinterface KatanaInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
@@ -44,10 +44,12 @@ endif
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
+else
+  WARN_TARGETS += warning_tf
 endif
 
 ifeq ($(HAVE_LIBKNI),1)
-  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-error
+  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE),1)
@@ -67,6 +69,9 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_kni
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (fawkestf not available)"
+
 warning_kni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (KNI[-devel] not installed)"
 

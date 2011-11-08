@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Robot name="caesar">
   <Translation>-0.0725 0 0.3</Translation>
-  <!--<KinBody prefix="arm_" file="katana.kinbody.xml"> -->
-  <KinBody prefix="arm_" file="../../src/plugins/openrave/manipulators/katana.kinbody.xml">
-     <Translation>0.0725 0 0.1725</Translation>
-  </KinBody>
+
+  <Robot prefix="arm_" file="../../src/plugins/openrave/manipulators/katana.kinbody.xml" name="caesar_katana">
+     <Translation>0.0725 0 0.18</Translation>
+  </Robot>
 
   <KinBody file="caesar2011.kinbody.xml">
     <Joint name="dummy" type="hinge" enable="False">
