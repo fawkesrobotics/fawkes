@@ -29,11 +29,21 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
+#ifdef HAVE_PCL
+#  include <aspect/pointcloud.h>
+#  include <pcl/point_cloud.h>
+#  include <pcl/point_types.h>
+#  include <fvutils/adapters/pcl.h>
+#endif
 #include <plugins/openni/aspect/openni.h>
 
 #include <XnCppWrapper.h>
 
 #include <map>
+
+namespace fawkes {
+  class Time;
+}
 
 namespace firevision {
   class SharedMemoryImageBuffer;
@@ -45,6 +55,9 @@ class OpenNiPointCloudThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
+#ifdef HAVE_PCL
+  public fawkes::PointCloudAspect,
+#endif
   public fawkes::OpenNiAspect
 {
  public:
@@ -72,6 +85,12 @@ class OpenNiPointCloudThread
 
   XnUInt64     __no_sample_value;
   XnUInt64     __shadow_value;
+
+  fawkes::Time *__capture_start;
+
+#ifdef HAVE_PCL
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > __pcl;
+#endif
 };
 
 #endif

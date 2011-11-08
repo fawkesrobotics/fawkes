@@ -15,6 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/pcl.mk
 
 PRESUBDIRS = interfaces utils
 SUBDIRS = skelgui pclviewer
@@ -42,6 +43,15 @@ LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard 
 			  fvutils ObjectPositionInterface
 OBJS_openni_handtracker = handtracker_plugin.o handtracker_thread.o
 
+ifeq ($(HAVE_PCL),1)
+  CFLAGS_pointcloud_thread = $(CFLAGS_PCL)
+  CFLAGS_pointcloud_plugin = $(CFLAGS_PCL)
+  LDFLAGS_openni_pointcloud = $(LDFLAGS_PCL)
+  LIBS_openni_pointcloud += fvutils
+else
+  WARN_TARGETS += warning_pcl
+endif
+
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image) \
 	   $(OBJS_openni_pointcloud) $(OBJS_openni_handtracker)
 
@@ -68,9 +78,11 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_openni
+.PHONY: warning_openni warning_pcl
 warning_openni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenNI Plugins$(TNORMAL) (openni[-devel] not installed)"
+warning_pcl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL part in openni-pointcloud$(TNORMAL) (pcl[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
