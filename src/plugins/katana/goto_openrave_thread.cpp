@@ -99,6 +99,32 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
   __theta = (theta);
   __psi   = (psi);
 
+  __has_target_quaternion = false;
+  __is_target_object = false;
+}
+
+/** Set target position.
+ * @param x X coordinate relative to base
+ * @param y Y coordinate relative to base
+ * @param z Z coordinate relative to base
+ * @param quat_x x value of quaternion for tool's rotation
+ * @param quat_y y value of quaternion for tool's rotation
+ * @param quat_z z value of quaternion for tool's rotation
+ * @param quat_w w value of quaternion for tool's rotation
+ */
+void
+KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
+			     float quat_x, float quat_y, float quat_z, float quat_w)
+{
+  __x      = x;
+  __y      = y;
+  __z      = z;
+  __quat_x = quat_x;
+  __quat_y = quat_y;
+  __quat_z = quat_z;
+  __quat_w = quat_w;
+
+  __has_target_quaternion = true;
   __is_target_object = false;
 }
 
@@ -179,9 +205,17 @@ KatanaGotoOpenRaveThread::once()
     }
   }
   else {
-    _logger->log_debug(name(), "Check IK(%f,%f,%f, %f,%f,%f)",
-		       __x, __y, __z, __phi, __theta, __psi);
-    if( !__OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi) ) {
+    bool success;
+    if( __has_target_quaternion ) {
+      _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
+		         __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
+      success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
+    } else {
+      _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
+		         __x, __y, __z, __phi, __theta, __psi);
+      success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi);
+    }
+    if( !success ) {
       _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
       _finished = true;
       _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
