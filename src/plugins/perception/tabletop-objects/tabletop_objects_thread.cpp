@@ -34,12 +34,6 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
 
-#define TABLE_MAX_X  3.0
-#define TABLE_MAX_Y  3.0
-#define TABLE_MIN_X -3.0
-#define TABLE_MIN_Y -3.0
-
-
 /** @class TabletopObjectsThread "tabletop_objects_thread.h"
  * Main thread of tabletop objects plugin.
  * @author Tim Niemueller
@@ -108,16 +102,6 @@ TabletopObjectsThread::loop()
   grid_.setInputCloud (input_);
   grid_.filter (*temp_cloud);
 
-  // set all colors to white for better distinguishing the pixels
-  /*
-  typename pcl::PointCloud<PointType>::iterator p;
-  for (p = temp_cloud->begin(); p != temp_cloud->end(); ++p) {
-    p->r = 255;
-    p->g = 255;
-    p->b = 255;
-  }
-  */
-
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
 
@@ -136,8 +120,6 @@ TabletopObjectsThread::loop()
   proj.setModelCoefficients(coefficients);
   cloud_proj_.reset(new Cloud());
   proj.filter (*cloud_proj_);
-  //printf("PointCloud after projection has: %zu data points.\n",
-  //       cloud_proj_->points.size());
 
 
   // Estimate 3D convex hull -> TABLE BOUNDARIES
@@ -146,17 +128,6 @@ TabletopObjectsThread::loop()
   hr.setInputCloud(cloud_proj_);
   cloud_hull_.reset(new Cloud());
   hr.reconstruct (*cloud_hull_, vertices_);
-
-  //printf("Found %zu vertices, first has size %zu\n",
-  //       vertices_.size(), vertices_[0].vertices.size());
-
-  /*
-  for (size_t i = 0; i < cloud_proj_->points.size(); ++i) {
-    cloud_proj_->points[i].r =   0;
-    cloud_proj_->points[i].g = 255;
-    cloud_proj_->points[i].b =   0;
-  }
-  */
 
   // Extract all non-plane points
   cloud_filt_.reset(new Cloud());
@@ -176,8 +147,11 @@ TabletopObjectsThread::loop()
   cloud_above_.reset(new Cloud());
   above_condrem.filter(*cloud_above_);
 
-  printf("Before: %zu  After: %zu\n", cloud_filt_->points.size(),
-         cloud_above_->points.size());
+  //printf("Before: %zu  After: %zu\n", cloud_filt_->points.size(),
+  //       cloud_above_->points.size());
+  if (cloud_filt_->points.size() < 50) {
+    logger->log_warn(name(), "Less points than cluster min size");
+  }
 
   // Extract only points on the table plane
   if (! vertices_.empty()) {
@@ -242,7 +216,7 @@ TabletopObjectsThread::loop()
     ec.setInputCloud(cloud_objs_);
     ec.extract(cluster_indices);
 
-    printf("Found %zu clusters\n", cluster_indices.size());
+    logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
 
     uint8_t colors[5][3] = { {255, 0, 0}, {0, 0, 255}, {255, 255, 0}, {255, 0, 255},
                              {0, 255, 255} };
@@ -251,7 +225,7 @@ TabletopObjectsThread::loop()
     colored_clusters->header.frame_id = clusters_->header.frame_id;
     std::vector<pcl::PointIndices>::const_iterator it;
     unsigned int color = 0;
-    unsigned int i = 0;
+    //unsigned int i = 0;
     unsigned int num_points;
     for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
       num_points += it->indices.size();
@@ -273,8 +247,8 @@ TabletopObjectsThread::loop()
         g = (uint8_t)roundf(dg * 255);
         b = (uint8_t)roundf(db * 255);
       }
-      printf("Cluster %u  size: %zu  color %u, %u, %u\n",
-             ++i, it->indices.size(), r, g, b);
+      //printf("Cluster %u  size: %zu  color %u, %u, %u\n",
+      //       ++i, it->indices.size(), r, g, b);
       std::vector<int>::const_iterator pit;
       for (pit = it->indices.begin (); pit != it->indices.end(); pit++) {
         ColorPointType &p1 = colored_clusters->points[cci++];
@@ -295,15 +269,4 @@ TabletopObjectsThread::loop()
 
   *clusters_ = *tmp_clusters;
   pcl_copy_time(finput_, fclusters_);
-
-  // To show differences between cloud_filt and cloud_above
-  // (draw both, increase point size of cloud_above
-  //for (int i = 0; i < cloud_filt_->points.size(); ++i) {
-  //  cloud_filt_->points[i].r = 255;
-  //  cloud_filt_->points[i].g =   0;
-  //  cloud_filt_->points[i].b =   0;
-  //}
-
-  // give rviz time to catch up...
-  //usleep(500000);
 }
