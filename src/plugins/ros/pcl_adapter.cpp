@@ -80,8 +80,8 @@ fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &p,
   is_dense = p->is_dense;
 
   std::vector<sensor_msgs::PointField> pfields;
-  pcl::for_each_type<typename pcl::traits::fieldList<pcl::PointXYZ>::type>
-    (pcl::detail::FieldAdder<pcl::PointXYZ>(pfields));
+  pcl::for_each_type<typename pcl::traits::fieldList<PointT>::type>
+    (pcl::detail::FieldAdder<PointT>(pfields));
 
   pfi.clear();
   pfi.resize(pfields.size());
