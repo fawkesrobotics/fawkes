@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <stdint.h>
 
 namespace pcl {
   template <typename PointT>
