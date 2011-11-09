@@ -2,7 +2,7 @@
 #          Makefile Build System for Fawkes: perception plugins
 #                            -------------------
 #   Created on Sun Jan 14 18:24:42 2007
-#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
-SUBDIRS = base fountain retriever
+SUBDIRS = base fountain retriever tabletop-objects
 
 include $(BUILDSYSDIR)/rules.mk
 
