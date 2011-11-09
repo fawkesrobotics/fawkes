@@ -1,5 +1,5 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: FireVision
+#          Makefile Build System for Fawkes: perception plugins
 #                            -------------------
 #   Created on Sun Jan 14 18:24:42 2007
 #   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
