@@ -79,7 +79,7 @@ RosPointCloudThread::init()
     pi.msg.fields.clear();
     pi.msg.fields.resize(fieldinfo.size());
     for (unsigned int i = 0; i < fieldinfo.size(); ++i) {
-      pi.msg.fields[i].name      = fieldinfo[i].name;
+      pi.msg.fields[i].name     = fieldinfo[i].name;
       pi.msg.fields[i].offset   = fieldinfo[i].offset;
       pi.msg.fields[i].datatype = fieldinfo[i].datatype;
       pi.msg.fields[i].count    = fieldinfo[i].count;
@@ -111,18 +111,24 @@ RosPointCloudThread::loop()
       __adapter->get_data(p->first, width, height, time,
                           &point_data, point_size, num_points);
 
-      size_t data_size = point_size * num_points;
-      pi.msg.data.resize(data_size);
-      memcpy (&pi.msg.data[0], point_data, data_size);
+      if (pi.last_sent != time) {
+        pi.last_sent = time;
 
-      pi.msg.width             = width;
-      pi.msg.height            = height;
-      pi.msg.header.stamp.sec  = time.get_sec();
-      pi.msg.header.stamp.nsec = time.get_nsec();
-      pi.msg.point_step        = point_size;
-      pi.msg.row_step          = point_size * pi.msg.width;
+        size_t data_size = point_size * num_points;
+        pi.msg.data.resize(data_size);
+        memcpy (&pi.msg.data[0], point_data, data_size);
 
-      pi.pub.publish(pi.msg);
+        pi.msg.width             = width;
+        pi.msg.height            = height;
+        pi.msg.header.stamp.sec  = time.get_sec();
+        pi.msg.header.stamp.nsec = time.get_nsec();
+        pi.msg.point_step        = point_size;
+        pi.msg.row_step          = point_size * pi.msg.width;
+
+        pi.pub.publish(pi.msg);
+      //} else {
+        // logger->log_debug(name(), "No update for %s, not sending", p->first.c_str());
+      }
     }
   }
 }
