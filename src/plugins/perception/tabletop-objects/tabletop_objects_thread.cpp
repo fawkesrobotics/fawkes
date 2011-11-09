@@ -134,10 +134,22 @@ TabletopObjectsThread::loop()
   extract_.setNegative(true);
   extract_.filter(*cloud_filt_);
 
-  // remove all pixels below table
+  // Use only points above tables
+  // Why coefficients->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
+  // The model coefficients are in Hessian Normal Form, hence coeff[0..2] are
+  // the normal vector. We need to distinguish the cases where the normal vector
+  // points towards the origin (camera) or away from it. This can be checked
+  // by calculating the distance towards the origin, which conveniently in
+  // dist = N * x + p is just p which is coeff[3]. Therefore, if coeff[3] is
+  // positive, the normal vector points towards the camera and we want all
+  // points with positive distance from the table plane, otherwise it points
+  // away from the origin and we want points with "negative distance".
+  // We make use of the fact that we only have a boring RGB-D camera and
+  // not an X-Ray...
+  pcl::ComparisonOps::CompareOp op =
+    coefficients->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
   typename PlaneDistanceComparison<PointType>::ConstPtr
-    above_comp(new PlaneDistanceComparison<PointType>(coefficients,
-                                                      pcl::ComparisonOps::LT));
+    above_comp(new PlaneDistanceComparison<PointType>(coefficients, op));
   typename pcl::ConditionAnd<PointType>::Ptr
     above_cond(new pcl::ConditionAnd<PointType>());
   above_cond->addComparison(above_comp);
