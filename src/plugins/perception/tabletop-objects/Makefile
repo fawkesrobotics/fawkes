@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
 
-LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils \
+LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils fawkestf \
 			fawkesinterface fawkesblackboard Position3DInterface
 OBJS_tabletop_objects = tabletop_objects_plugin.o tabletop_objects_thread.o
 

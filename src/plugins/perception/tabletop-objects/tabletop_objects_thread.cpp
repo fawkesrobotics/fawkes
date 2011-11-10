@@ -48,7 +48,8 @@ using namespace fawkes;
 
 /** Constructor. */
 TabletopObjectsThread::TabletopObjectsThread()
-  : Thread("TabletopObjectsThread", Thread::OPMODE_CONTINUOUS)
+  : Thread("TabletopObjectsThread", Thread::OPMODE_CONTINUOUS),
+    TransformAspect(TransformAspect::ONLY_LISTENER)
 {
 }
 
@@ -135,8 +136,8 @@ TabletopObjectsThread::finalize()
 void
 TabletopObjectsThread::loop()
 {
-  CloudPtr temp_cloud (new Cloud);
-  CloudPtr temp_cloud2 (new Cloud);
+  CloudPtr temp_cloud(new Cloud);
+  CloudPtr temp_cloud2(new Cloud);
   pcl::ExtractIndices<PointType> extract_;
   std::vector<pcl::Vertices> vertices_;
   CloudPtr cloud_hull_;
@@ -146,11 +147,8 @@ TabletopObjectsThread::loop()
   CloudPtr cloud_objs_;
   pcl::KdTreeFLANN<PointType> kdtree_;
 
-  grid_.setInputCloud (input_);
-  grid_.filter (*temp_cloud);
-
-  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
-  pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
+  grid_.setInputCloud(input_);
+  grid_.filter(*temp_cloud);
 
   if (temp_cloud->points.size() <= 10) {
     // this can happen if run at startup. Since tabletop threads runs continuous
@@ -160,37 +158,101 @@ TabletopObjectsThread::loop()
     return;
   }
 
-  seg_.setInputCloud (temp_cloud);
-  seg_.segment (*inliers, *coefficients);
-
-  extract_.setNegative (false);
-  extract_.setInputCloud (temp_cloud);
-  extract_.setIndices (inliers);
-  extract_.filter (*temp_cloud2);
-
+  pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
+  pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
   Eigen::Vector4f table_centroid;
-  if (inliers->indices.size() > 0) {
-    pcl::compute3DCentroid(*temp_cloud2, table_centroid);
-    set_position(__table_pos_if, true, table_centroid);
-  } else {
-    set_position(__table_pos_if, false, table_centroid);
+
+  // This will search for the first plane which:
+  // 1. has a considerable amount of points (>= 2% of input points)
+  // 2. is parallel to the floor (transformed normal Z dominant axis)
+  // 3. is on a typical table height (between 0.3 to 1.0m in robot frame)
+  // Planes found along the way not satisfying any of the criteria are removed,
+  // the first plane either satisfying all criteria, or violating the first
+  // one end the loop
+  bool happy_with_plane = false;
+  while (! happy_with_plane) {
+    happy_with_plane = true;
+
+    seg_.setInputCloud(temp_cloud);
+    seg_.segment(*inliers, *coeff);
+
+    // 1. check for a minimum number of expected inliers
+    if (inliers->indices.size() < (0.02 * input_->points.size())) {
+      logger->log_warn(name(), "No table in scene, skipping loop");
+      set_position(__table_pos_if, false, table_centroid);
+      return;
+    }
+
+    // 2. Check if normal points "upwards", i.e. along the Z axis, of the
+    // base_link robot frame since tables are usually parallel to the ground...
+    try {
+      tf::Stamped<tf::Vector3>
+        normal(tf::Vector3(coeff->values[0], coeff->values[1], coeff->values[2]),
+               fawkes::Time(0, 0), input_->header.frame_id);
+      tf::Stamped<tf::Vector3> baserel_normal;
+      tf_listener->transform_vector("/base_link", normal, baserel_normal);
+      if (baserel_normal.closestAxis() != 2) {
+        happy_with_plane = false;
+        logger->log_warn(name(), "Table closest axis is not Z, excluding");
+      }
+    } catch (tf::TransformException &e) {
+      logger->log_warn(name(), "Transforming normal failed, exception follows");
+      logger->log_warn(name(), e);
+    }
+
+    // 3. Calculate table centroid, then transform it to the base_link system
+    // to make a table height sanity check, they tend to be at a specific height...
+    try {
+      pcl::compute3DCentroid(*temp_cloud, *inliers, table_centroid);
+      tf::Stamped<tf::Point>
+        centroid(tf::Point(table_centroid[0], table_centroid[1], table_centroid[3]),
+                 fawkes::Time(0, 0), input_->header.frame_id);
+      tf::Stamped<tf::Point> baserel_centroid;
+      tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+      if ((baserel_centroid.z() < 0.3) || (baserel_centroid.z() > 1.0)) {
+        happy_with_plane = false;
+        logger->log_warn(name(), "Table height %f not in range [0.3, 1.0]", baserel_centroid.z());
+      }
+    } catch (tf::TransformException &e) {
+      logger->log_warn(name(), "Transforming centroid failed, exception follows");
+      logger->log_warn(name(), e);
+    }
+
+    if (! happy_with_plane) {
+      // throw away 
+      Cloud extracted;
+      extract_.setNegative(true);
+      extract_.setInputCloud(temp_cloud);
+      extract_.setIndices(inliers);
+      extract_.filter(extracted);
+      *temp_cloud = extracted;
+    }
   }
+
+  // If we got here we found the table
+  set_position(__table_pos_if, true, table_centroid);
+
+  extract_.setNegative(false);
+  extract_.setInputCloud(temp_cloud);
+  extract_.setIndices(inliers);
+  extract_.filter(*temp_cloud2);
+
 
   // Project the model inliers
   pcl::ProjectInliers<PointType> proj;
   proj.setModelType(pcl::SACMODEL_PLANE);
   proj.setInputCloud(temp_cloud2);
-  proj.setModelCoefficients(coefficients);
+  proj.setModelCoefficients(coeff);
   cloud_proj_.reset(new Cloud());
-  proj.filter (*cloud_proj_);
+  proj.filter(*cloud_proj_);
 
 
   // Estimate 3D convex hull -> TABLE BOUNDARIES
   pcl::ConvexHull<PointType> hr;
-  //hr.setAlpha (0.1);  // only for ConcaveHull
+  //hr.setAlpha(0.1);  // only for ConcaveHull
   hr.setInputCloud(cloud_proj_);
   cloud_hull_.reset(new Cloud());
-  hr.reconstruct (*cloud_hull_, vertices_);
+  hr.reconstruct(*cloud_hull_, vertices_);
 
   // Extract all non-plane points
   cloud_filt_.reset(new Cloud());
@@ -198,7 +260,7 @@ TabletopObjectsThread::loop()
   extract_.filter(*cloud_filt_);
 
   // Use only points above tables
-  // Why coefficients->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
+  // Why coeff->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
   // The model coefficients are in Hessian Normal Form, hence coeff[0..2] are
   // the normal vector. We need to distinguish the cases where the normal vector
   // points towards the origin (camera) or away from it. This can be checked
@@ -210,9 +272,9 @@ TabletopObjectsThread::loop()
   // We make use of the fact that we only have a boring RGB-D camera and
   // not an X-Ray...
   pcl::ComparisonOps::CompareOp op =
-    coefficients->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
+    coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
   typename PlaneDistanceComparison<PointType>::ConstPtr
-    above_comp(new PlaneDistanceComparison<PointType>(coefficients, op));
+    above_comp(new PlaneDistanceComparison<PointType>(coeff, op));
   typename pcl::ConditionAnd<PointType>::Ptr
     above_cond(new pcl::ConditionAnd<PointType>());
   above_cond->addComparison(above_comp);
@@ -264,7 +326,7 @@ TabletopObjectsThread::loop()
   tmp_clusters->header.frame_id = clusters_->header.frame_id;
   std::vector<int> &indices = inliers->indices;
   tmp_clusters->height = 1;
-  tmp_clusters->width = indices.size ();
+  tmp_clusters->width = indices.size();
   tmp_clusters->points.resize(indices.size());
   for (size_t i = 0; i < indices.size(); ++i) {
     PointType &p1 = temp_cloud2->points[i];
@@ -326,7 +388,7 @@ TabletopObjectsThread::loop()
         //printf("Cluster %u  size: %zu  color %u, %u, %u\n",
         //       centroid_i, it->indices.size(), r, g, b);
         std::vector<int>::const_iterator pit;
-        for (pit = it->indices.begin (); pit != it->indices.end(); ++pit) {
+        for (pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
           ColorPointType &p1 = colored_clusters->points[cci++];
           PointType &p2 = cloud_objs_->points[*pit];
           p1.x = p2.x;
