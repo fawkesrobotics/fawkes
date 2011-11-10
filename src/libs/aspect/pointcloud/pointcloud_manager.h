@@ -166,8 +166,6 @@ PointCloudManager::add_pointcloud(const char *id,
 {
   if (__clouds.find(id) == __clouds.end()) {
     __clouds[id] = new PointCloudStorageAdapter<PointT>(cloud);
-    printf("Adding pcl %s at %p (w=%u  h=%u  s=%zu)\n", id, *cloud,
-           cloud->width, cloud->height, cloud->points.size());
   } else {
     throw Exception("Cloud %s already registered");
   }
@@ -183,8 +181,6 @@ PointCloudManager::get_pointcloud(const char *id)
     if (!pa) {
       throw Exception("The desired point cloud is of a different type");
     }
-    printf("Returning pcl %s at %p (w=%u  h=%u  s=%zu)\n", id, *(pa->cloud),
-           pa->cloud->width, pa->cloud->height, pa->cloud->points.size());
     return pa->cloud;
   } else {
     throw Exception("No point cloud with ID '%s' registered", id);

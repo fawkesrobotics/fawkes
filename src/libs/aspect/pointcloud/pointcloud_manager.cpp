@@ -148,7 +148,6 @@ PointCloudManager::get_pointcloud_list() const
   rv.clear();
   std::map<std::string, StorageAdapter *>::const_iterator c;
   for (c = __clouds.begin(); c != __clouds.end(); ++c) {
-    printf("Pushing %s\n", c->first.c_str());
     rv.push_back(c->first);
   }
   return rv;
