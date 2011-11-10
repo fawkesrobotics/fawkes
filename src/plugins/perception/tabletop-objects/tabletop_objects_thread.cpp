@@ -226,43 +226,47 @@ TabletopObjectsThread::loop()
     std::vector<pcl::PointIndices>::const_iterator it;
     unsigned int color = 0;
     //unsigned int i = 0;
-    unsigned int num_points;
+    unsigned int num_points = 0;
     for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
       num_points += it->indices.size();
 
-    colored_clusters->points.resize(num_points);
-    unsigned int cci = 0;
+    if (num_points > 0) {
+      colored_clusters->points.resize(num_points);
+      unsigned int cci = 0;
 
-    for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-      uint8_t r, g, b;
-      if (color < 5) {
-        r = colors[color][0];
-        g = colors[color][1];
-        b = colors[color][2];
-        ++color;
-      } else {
-        double dr=0, dg=0, db=0;
-        //pcl::visualization::getRandomColors(dr, dg, db);
-        r = (uint8_t)roundf(dr * 255);
-        g = (uint8_t)roundf(dg * 255);
-        b = (uint8_t)roundf(db * 255);
+      for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
+        uint8_t r, g, b;
+        if (color < 5) {
+          r = colors[color][0];
+          g = colors[color][1];
+          b = colors[color][2];
+          ++color;
+        } else {
+          double dr=0, dg=0, db=0;
+          //pcl::visualization::getRandomColors(dr, dg, db);
+          r = (uint8_t)roundf(dr * 255);
+          g = (uint8_t)roundf(dg * 255);
+          b = (uint8_t)roundf(db * 255);
+        }
+        //printf("Cluster %u  size: %zu  color %u, %u, %u\n",
+        //       ++i, it->indices.size(), r, g, b);
+        std::vector<int>::const_iterator pit;
+        for (pit = it->indices.begin (); pit != it->indices.end(); pit++) {
+          ColorPointType &p1 = colored_clusters->points[cci++];
+          PointType &p2 = cloud_objs_->points[*pit];
+          p1.x = p2.x;
+          p1.y = p2.y;
+          p1.z = p2.z;
+          p1.r = r;
+          p1.g = g;
+          p1.b = b;
+        }
       }
-      //printf("Cluster %u  size: %zu  color %u, %u, %u\n",
-      //       ++i, it->indices.size(), r, g, b);
-      std::vector<int>::const_iterator pit;
-      for (pit = it->indices.begin (); pit != it->indices.end(); pit++) {
-        ColorPointType &p1 = colored_clusters->points[cci++];
-        PointType &p2 = cloud_objs_->points[*pit];
-        p1.x = p2.x;
-        p1.y = p2.y;
-        p1.z = p2.z;
-        p1.r = r;
-        p1.g = g;
-        p1.b = b;
-      }
+
+      *tmp_clusters += *colored_clusters;
+    } else {
+      logger->log_info(name(), "No clustered points found");
     }
-
-    *tmp_clusters += *colored_clusters;
   } else {
     logger->log_info(name(), "Filter left no points for clustering");
   }
