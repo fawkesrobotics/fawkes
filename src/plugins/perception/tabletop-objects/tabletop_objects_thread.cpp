@@ -145,6 +145,14 @@ TabletopObjectsThread::loop()
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
 
+  if (temp_cloud->points.size() <= 10) {
+    // this can happen if run at startup. Since tabletop threads runs continuous
+    // and not synchronized with main loop, but point cloud acquisition thread is
+    // synchronized, we might start before any data has been read
+    logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
+    return;
+  }
+
   seg_.setInputCloud (temp_cloud);
   seg_.segment (*inliers, *coefficients);
 
