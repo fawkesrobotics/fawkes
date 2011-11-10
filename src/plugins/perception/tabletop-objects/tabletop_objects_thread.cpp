@@ -81,6 +81,9 @@ TabletopObjectsThread::init()
 void
 TabletopObjectsThread::finalize()
 {
+  input_.reset();
+  clusters_.reset();
+
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
 }
 
