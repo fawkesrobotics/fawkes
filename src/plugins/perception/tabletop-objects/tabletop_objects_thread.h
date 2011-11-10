@@ -35,6 +35,10 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/voxel_grid.h>
 
+namespace fawkes {
+  class Position3DInterface;
+}
+
 class TabletopObjectsThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
@@ -76,6 +80,7 @@ class TabletopObjectsThread
   pcl::VoxelGrid<PointType> grid_;
   pcl::SACSegmentation<PointType> seg_;
 
+  std::vector<fawkes::Position3DInterface *> __pos_ifs;
 };
 
 #endif

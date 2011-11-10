@@ -33,6 +33,11 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
+#include <pcl/common/centroid.h>
+
+#include <interfaces/Position3DInterface.h>
+
+#define MAX_CENTROIDS 12
 
 /** @class TabletopObjectsThread "tabletop_objects_thread.h"
  * Main thread of tabletop objects plugin.
@@ -60,6 +65,33 @@ TabletopObjectsThread::init()
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
   input_.reset(*finput_);
 
+  try {
+    __pos_ifs.clear();
+    __pos_ifs.resize(MAX_CENTROIDS, NULL);
+    for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
+      char *tmp;
+      if (asprintf(&tmp, "Tabletop Object %u", i) != -1) {
+        // Copy to get memory freed on exception
+        std::string id = tmp;
+        free(tmp);
+        Position3DInterface *iface =
+          blackboard->open_for_writing<Position3DInterface>(id.c_str());
+        __pos_ifs[i] = iface;
+        double rotation[4] = {0., 0., 0., 1.};
+        iface->set_rotation(rotation);
+        iface->write();
+      }
+    }
+  } catch (Exception &e) {
+    for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
+      if (__pos_ifs[i]) {
+        blackboard->close(__pos_ifs[i]);
+      }
+    }
+    __pos_ifs.clear();
+    throw;
+  }
+
   fclusters_ = new pcl::PointCloud<ColorPointType>();
   fclusters_->header.frame_id = finput_->header.frame_id;
   fclusters_->is_dense = false;
@@ -85,6 +117,11 @@ TabletopObjectsThread::finalize()
   clusters_.reset();
 
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
+  
+  for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
+    blackboard->close(__pos_ifs[i]);
+  }
+  __pos_ifs.clear();
 }
 
 
@@ -216,6 +253,10 @@ TabletopObjectsThread::loop()
     p2.g = 255;
   }
 
+  std::vector<Eigen::Vector4f> centroids;
+  centroids.resize(MAX_CENTROIDS);
+  unsigned int centroid_i = 0;
+
   if (cloud_objs_->points.size() > 0) {
     // Creating the KdTree object for the search method of the extraction
     pcl::KdTree<PointType>::Ptr
@@ -231,15 +272,16 @@ TabletopObjectsThread::loop()
     ec.setInputCloud(cloud_objs_);
     ec.extract(cluster_indices);
 
-    logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
+    //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
 
-    uint8_t colors[5][3] = { {255, 0, 0}, {0, 0, 255}, {255, 255, 0}, {255, 0, 255},
-                             {0, 255, 255} };
+    uint8_t colors[MAX_CENTROIDS][3] = {{255, 0, 0}, {0, 0, 255}, {255, 255, 0}, {255, 0, 255},
+                                        {0, 255, 255}, {255, 90, 0}, {176, 0, 30}, {0, 106, 53},
+                                        {137, 82, 39}, {27, 117, 196}, {99, 0, 30}, {56, 23, 90}};
 
     ColorCloudPtr colored_clusters(new ColorCloud());
     colored_clusters->header.frame_id = clusters_->header.frame_id;
     std::vector<pcl::PointIndices>::const_iterator it;
-    unsigned int color = 0;
+    unsigned int cci = 0;
     //unsigned int i = 0;
     unsigned int num_points = 0;
     for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
@@ -247,26 +289,21 @@ TabletopObjectsThread::loop()
 
     if (num_points > 0) {
       colored_clusters->points.resize(num_points);
-      unsigned int cci = 0;
+      for (it = cluster_indices.begin();
+           it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
+           ++it, ++centroid_i)
+      {
+        pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
 
-      for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
         uint8_t r, g, b;
-        if (color < 5) {
-          r = colors[color][0];
-          g = colors[color][1];
-          b = colors[color][2];
-          ++color;
-        } else {
-          double dr=0, dg=0, db=0;
-          //pcl::visualization::getRandomColors(dr, dg, db);
-          r = (uint8_t)roundf(dr * 255);
-          g = (uint8_t)roundf(dg * 255);
-          b = (uint8_t)roundf(db * 255);
-        }
+        r = colors[centroid_i][0];
+        g = colors[centroid_i][1];
+        b = colors[centroid_i][2];
+
         //printf("Cluster %u  size: %zu  color %u, %u, %u\n",
-        //       ++i, it->indices.size(), r, g, b);
+        //       centroid_i, it->indices.size(), r, g, b);
         std::vector<int>::const_iterator pit;
-        for (pit = it->indices.begin (); pit != it->indices.end(); pit++) {
+        for (pit = it->indices.begin (); pit != it->indices.end(); ++pit) {
           ColorPointType &p1 = colored_clusters->points[cci++];
           PointType &p2 = cloud_objs_->points[*pit];
           p1.x = p2.x;
@@ -284,6 +321,31 @@ TabletopObjectsThread::loop()
     }
   } else {
     logger->log_info(name(), "Filter left no points for clustering");
+  }
+
+  for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
+    int visibility_history = __pos_ifs[i]->visibility_history();
+    if (i < centroid_i) { // valid
+      Eigen::Vector4f &c = centroids[i];
+      if (visibility_history >= 0) {
+        __pos_ifs[i]->set_visibility_history(visibility_history + 1);
+      } else {
+        __pos_ifs[i]->set_visibility_history(1);
+      }
+      double translation[3] = { c[0], c[1], c[2] };
+      __pos_ifs[i]->set_translation(translation);
+      __pos_ifs[i]->write();
+    } else {
+      // invalid
+      if (visibility_history <= 0) {
+        __pos_ifs[i]->set_visibility_history(visibility_history - 1);
+      } else {
+        __pos_ifs[i]->set_visibility_history(-1);
+        double translation[3] = { 0, 0, 0 };
+        __pos_ifs[i]->set_translation(translation);
+      }
+      __pos_ifs[i]->write();
+    }
   }
 
   *clusters_ = *tmp_clusters;
