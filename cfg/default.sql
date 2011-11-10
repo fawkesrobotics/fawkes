@@ -243,4 +243,9 @@ INSERT INTO "config" VALUES('/plugins/openni/run_sensor_server','bool',1,'Should
 INSERT INTO "config" VALUES('/plugins/openni/sensor_server_bin','string','/usr/bin/XnSensorServer','Full path to the XnSensorServer binary; path');
 INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinear','De-bayering mode, can be bilinear or nearest_neighbor');
 INSERT INTO "config" VALUES('/plugins/static-transforms/update-interval','float',1.0,'Interval in which to post static transform updates; sec');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/frame','string','/katana/base','Katana Arm to KNI base, parent frame ID');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/child_frame','string','/katana/kni','Katana Arm to KNI base, child frame ID');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/trans_x','float',0.0,'Katana Arm to KNI base, translation X');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/trans_y','float',0.0,'Katana Arm to KNI base, translation Y');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/trans_z','float',0.2015,'Katana Arm to KNI base, translation Z');
 COMMIT;
