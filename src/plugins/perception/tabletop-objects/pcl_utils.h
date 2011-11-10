@@ -92,7 +92,9 @@ class PlaneDistanceComparison : public pcl::ComparisonBase<PointT>
 {
   using pcl::ComparisonBase<PointT>::capable_;
  public:
+  /// Shared pointer.
   typedef boost::shared_ptr<PlaneDistanceComparison<PointT> > Ptr;
+  /// Constant shared pointer.
   typedef boost::shared_ptr<const PlaneDistanceComparison<PointT> > ConstPtr;
  
   /** Constructor.
