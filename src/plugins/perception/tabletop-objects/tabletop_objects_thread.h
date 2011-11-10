@@ -57,6 +57,8 @@ class TabletopObjectsThread
   virtual void finalize();
 
  private:
+  void set_position(fawkes::Position3DInterface *iface,
+                    bool is_visible, Eigen::Vector4f &centroid);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -81,6 +83,7 @@ class TabletopObjectsThread
   pcl::SACSegmentation<PointType> seg_;
 
   std::vector<fawkes::Position3DInterface *> __pos_ifs;
+  fawkes::Position3DInterface *__table_pos_if;
 };
 
 #endif

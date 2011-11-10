@@ -66,6 +66,12 @@ TabletopObjectsThread::init()
   input_.reset(*finput_);
 
   try {
+    double rotation[4] = {0., 0., 0., 1.};
+    __table_pos_if = NULL;
+    __table_pos_if = blackboard->open_for_writing<Position3DInterface>("Tabletop Height");
+    __table_pos_if->set_rotation(rotation);
+    __table_pos_if->write();
+
     __pos_ifs.clear();
     __pos_ifs.resize(MAX_CENTROIDS, NULL);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
@@ -77,12 +83,12 @@ TabletopObjectsThread::init()
         Position3DInterface *iface =
           blackboard->open_for_writing<Position3DInterface>(id.c_str());
         __pos_ifs[i] = iface;
-        double rotation[4] = {0., 0., 0., 1.};
         iface->set_rotation(rotation);
         iface->write();
       }
     }
   } catch (Exception &e) {
+    blackboard->close(__table_pos_if);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
       if (__pos_ifs[i]) {
         blackboard->close(__pos_ifs[i]);
@@ -118,6 +124,7 @@ TabletopObjectsThread::finalize()
 
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
   
+  blackboard->close(__table_pos_if);
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
     blackboard->close(__pos_ifs[i]);
   }
@@ -160,6 +167,14 @@ TabletopObjectsThread::loop()
   extract_.setInputCloud (temp_cloud);
   extract_.setIndices (inliers);
   extract_.filter (*temp_cloud2);
+
+  Eigen::Vector4f table_centroid;
+  if (inliers->indices.size() > 0) {
+    pcl::compute3DCentroid(*temp_cloud2, table_centroid);
+    set_position(__table_pos_if, true, table_centroid);
+  } else {
+    set_position(__table_pos_if, false, table_centroid);
+  }
 
   // Project the model inliers
   pcl::ProjectInliers<PointType> proj;
@@ -332,30 +347,37 @@ TabletopObjectsThread::loop()
   }
 
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    int visibility_history = __pos_ifs[i]->visibility_history();
-    if (i < centroid_i) { // valid
-      Eigen::Vector4f &c = centroids[i];
-      if (visibility_history >= 0) {
-        __pos_ifs[i]->set_visibility_history(visibility_history + 1);
-      } else {
-        __pos_ifs[i]->set_visibility_history(1);
-      }
-      double translation[3] = { c[0], c[1], c[2] };
-      __pos_ifs[i]->set_translation(translation);
-      __pos_ifs[i]->write();
-    } else {
-      // invalid
-      if (visibility_history <= 0) {
-        __pos_ifs[i]->set_visibility_history(visibility_history - 1);
-      } else {
-        __pos_ifs[i]->set_visibility_history(-1);
-        double translation[3] = { 0, 0, 0 };
-        __pos_ifs[i]->set_translation(translation);
-      }
-      __pos_ifs[i]->write();
-    }
+    set_position(__pos_ifs[i], i < centroid_i, centroids[i]);
   }
 
   *clusters_ = *tmp_clusters;
   pcl_copy_time(finput_, fclusters_);
+}
+
+
+void
+TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
+                                    bool is_visible, Eigen::Vector4f &centroid)
+{
+  int visibility_history = iface->visibility_history();
+  if (is_visible) {
+    if (visibility_history >= 0) {
+      iface->set_visibility_history(visibility_history + 1);
+    } else {
+      iface->set_visibility_history(1);
+    }
+    double translation[3] = { centroid[0], centroid[1], centroid[2] };
+    iface->set_translation(translation);
+
+  } else {
+    if (visibility_history <= 0) {
+      iface->set_visibility_history(visibility_history - 1);
+    } else {
+      iface->set_visibility_history(-1);
+      double translation[3] = { 0, 0, 0 };
+      iface->set_translation(translation);
+    }
+  }
+
+  iface->write();  
 }
