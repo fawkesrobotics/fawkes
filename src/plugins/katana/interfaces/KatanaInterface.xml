@@ -123,12 +123,13 @@
     <ref>phi</ref>
     <ref>theta</ref>
     <ref>psi</ref>
+    <field type="float" name="theta_error">Error range of theta rotation, gives more flexibility
+      for IK-solution searching.</field>
+    <field type="float" name="offset_xy">Offset to target. Distance in m (on the way to the target)</field>
     <field type="string" length="32" name="trans_frame">tf frame-id of origin's coordinate system,
       regarding the translation</field>
     <field type="string" length="32" name="rot_frame">tf frame-id of origin's coordinate system,
       regarding the rotation. In most cases, this is the robot's base coordinate system.</field>
-    <field type="float" name="theta_error">Error range of theta rotation, gives more flexibility
-      for IK-solution searching.</field>
   </message>
   <message name="LinearGotoKni">
     <comment>States the next target to navigate to.

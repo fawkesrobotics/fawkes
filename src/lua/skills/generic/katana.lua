@@ -162,6 +162,7 @@ function GOTO:init()
    local theta = math.pi/2
    local psi = 0
    local theta_error = 0
+   local offset = 0
    local frame     = "/base_link" -- default: values given in robot's coordinate system!
    local rot_frame = "/base_link" -- default: values given in robot's coordinate system!
 
@@ -169,8 +170,10 @@ function GOTO:init()
    if self.fsm.vars.theta       ~= nil then theta       = self.fsm.vars.theta end
    if self.fsm.vars.psi         ~= nil then psi         = self.fsm.vars.psi end
    if self.fsm.vars.theta_error ~= nil then theta_error = self.fsm.vars.theta_error end
-   if self.fsm.vars.frame       ~= nil then frame       = self.fsm.vars.frame end
-   if self.fsm.vars.rot_frame   ~= nil then rot_frame   = self.fsm.vars.rot_frame end
+   if self.fsm.vars.offset      ~= nil then offset      = self.fsm.vars.offset end
+
+   if self.fsm.vars.frame          ~= nil then frame          = self.fsm.vars.frame end
+   if self.fsm.vars.rot_frame      ~= nil then rot_frame      = self.fsm.vars.rot_frame end
 
    -- check if distances are too high (means they are in libkni coordinate system)
    if math.abs(x) > 5 or
@@ -180,7 +183,7 @@ function GOTO:init()
       local gm = katanaarm.LinearGotoKniMessage:new(x, y, z, phi, theta, psi)
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
    else
-      local gm = katanaarm.LinearGotoMessage:new(frame, rot_frame, theta_error, x, y, z, phi, theta, psi)
+      local gm = katanaarm.LinearGotoMessage:new(theta_error, offset, frame, rot_frame, x, y, z, phi, theta, psi)
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
    end
 end
