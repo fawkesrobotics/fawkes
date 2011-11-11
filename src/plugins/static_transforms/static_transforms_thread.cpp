@@ -97,7 +97,7 @@ StaticTransformsThread::init()
           } // else assume no translation
 
           bool use_quaternion = false;
-          float rx = 0., ry = 0., rz = 0., rw = 0.,
+          float rx = 0., ry = 0., rz = 0., rw = 1.,
             ryaw = 0., rpitch = 0., rroll = 0.;
 
           if (config->exists((cfg_prefix + "rot_x").c_str()) ||
@@ -130,8 +130,9 @@ StaticTransformsThread::init()
 
             fawkes::Time time(clock);
             if (use_quaternion) {
-              tf::Transform t(tf::Quaternion(rx, ry, rz, rw),
-                              tf::Vector3(tx, ty, tz));
+              tf::Quaternion q(rx, ry, rz, rw);
+              tf::assert_quaternion_valid(q);
+              tf::Transform t(q, tf::Vector3(tx, ty, tz));
               e.transform = new tf::StampedTransform(t, time, frame, child_frame);
             } else {
               tf::Quaternion q; q.setEulerZYX(ryaw, rpitch, rroll);

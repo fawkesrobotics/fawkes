@@ -56,8 +56,8 @@ TfExampleThread::finalize()
 }
 
 
-#define SOURCE "/katana/base"
-#define TARGET "/rx28/base"
+#define SOURCE "/rx28/tilt"
+#define TARGET "/base_link"
 
 void
 TfExampleThread::loop()
@@ -72,17 +72,25 @@ TfExampleThread::loop()
   } else {
     tf::StampedTransform transform;
     try {
-      tf_listener->lookup_transform(SOURCE, TARGET, transform);
+      tf_listener->lookup_transform(TARGET, SOURCE, transform);
     } catch (tf::ExtrapolationException &e) {
       logger->log_debug(name(), "Extrapolation error");
       return;
+    } catch (tf::ConnectivityException &e) {
+      logger->log_debug(name(), "Connectivity exception: %s", e.what());
+      return;	
     }
 
     fawkes::Time now;
-    double diff = now - &transform.stamp;
+    double diff;
+    if (now >= transform.stamp) {
+      diff = now - &transform.stamp;
+    } else {
+      diff = transform.stamp - &now;
+    }
 
     tf::Quaternion q = transform.getRotation();
-    tf::Vector3 &v   = transform.getOrigin();
+    tf::Vector3 v   = transform.getOrigin();
 
     const tf::TimeCache *world_cache = tf_listener->get_frame_cache(SOURCE);
     const tf::TimeCache *robot_cache = tf_listener->get_frame_cache(TARGET);

@@ -36,7 +36,7 @@ namespace fawkes {
  * @param b time to subtract
  * @return a - b
  */
-inline float
+inline double
 time_diff_sec(const timeval &a, const timeval &b)
 {
   //double required if we do not want to loose the usecs
@@ -54,7 +54,7 @@ time_diff_sec(const timeval &a, const timeval &b)
  * @param b_usec microseconds of time to subtract
  * @return a_sec - b_sec  + (a_usec - b_usec) / 1000000.f
  */
-inline float
+inline double
 time_diff_sec(const long int a_sec, const long int a_usec,
 	      const long int b_sec, const long int b_usec)
 {
@@ -69,9 +69,9 @@ time_diff_sec(const long int a_sec, const long int a_usec,
  * @return time in microseconds
  */
 inline long int
-time_sec_to_usec(float sec)
+time_sec_to_usec(double sec)
 {
-  return (long)roundf(sec * 1000000.);
+  return (long)round(sec * 1000000.);
 }
 
 /** Get difference between two time structs in microseconds.
@@ -96,15 +96,15 @@ class Time
   Time(const timeval* tv);
   Time(long sec, long usec, Clock *clock = 0);
   Time(long ms);
-  Time(float sec);
+  Time(double sec);
   Time(Clock *clock);
   Time(const Time &t);
   Time(const Time *t);
   ~Time();
 
-  float in_sec() const;
-  long  in_msec() const;
-  long  in_usec() const;
+  double in_sec() const;
+  long   in_msec() const;
+  long   in_usec() const;
 
   const timeval * get_timeval() const { return &__time; }
   long            get_sec() const  { return __time.tv_sec; }
@@ -118,30 +118,30 @@ class Time
   void set_time(const timeval* tv);
   void set_time(long int sec, long int usec);
   void set_time(long ms);
-  void set_time(float sec);
+  void set_time(double sec);
   void set_time(const Time &t);
   void set_time(const Time *t);
 
   void set_clock(Clock *clock);
 
-  void add(float seconds);
+  void add(double seconds);
 
   Time & stamp();
   Time & stamp_systime();
 
-  Time   operator+(const float sec) const;
+  Time   operator+(const double sec) const;
   Time   operator+(const long int usec) const;
   Time   operator+(const Time& t) const;
   Time   operator+(const Time* t) const;
   Time   operator-(const Time& t) const;
-  float  operator-(const Time* t) const;
+  double operator-(const Time* t) const;
   Time   operator-(const long int usec) const;
-  Time   operator-(const float sec) const;
+  Time   operator-(const double sec) const;
   Time & operator+=(const long int usec);
   Time & operator+=(const Time& t);
-  Time & operator+=(const float sec);
+  Time & operator+=(const double sec);
   Time & operator-=(const Time& t);
-  Time & operator-=(const float sec);
+  Time & operator-=(const double sec);
   Time & operator-=(const long int usec);
   Time & operator=(const Time& t);
   bool   operator==(const Time& t) const;

@@ -156,7 +156,7 @@ Time::Time(long ms)
  * Sets time to given number of ms, use for time range.
  * @param s the Time object is initialized to the time given in seconds
  */
-Time::Time(float s)
+Time::Time(double s)
 {
   time_t sec = (time_t) s;
   suseconds_t usec = (suseconds_t)roundf((s - sec) * 1000000.f);
@@ -228,10 +228,10 @@ Time::~Time()
  * since the epoch, for ranges you get the value as a float second.
  * @return the time in seconds
  */
-float
+double
 Time::in_sec() const
 {
-  return (__time.tv_sec + __time.tv_usec / 1000000.f);
+  return ((double)__time.tv_sec + (double)__time.tv_usec / 1000000.d);
 }
 
 
@@ -293,7 +293,7 @@ Time::set_time(long ms)
  * @param s set the time to this value
  */
 void
-Time::set_time(float s)
+Time::set_time(double s)
 {
   __time.tv_sec  = (time_t)floor(s);
   __time.tv_usec = (suseconds_t)(s - __time.tv_sec) * 1000000;
@@ -334,13 +334,13 @@ Time::set_clock(Clock *clock)
 
 
 /** Add seconds.
- * The effect is equivalent to operator+=(const float sec), but this
+ * The effect is equivalent to operator+=(const double sec), but this
  * can be used when the operator is not available (i.e. wrapper languages)
  * and it does not return itself.
  * @param seconds time in seconds to add
  */
 void
-Time::add(float seconds)
+Time::add(double seconds)
 {
   *this += seconds;
 }
@@ -384,7 +384,7 @@ Time::operator+(const Time* t) const
  * @return the sum
  */
 Time
-Time::operator+(const float sec) const
+Time::operator+(const double sec) const
 {
   Time ret;
   time_t sec_only = (time_t)floor(sec);
@@ -456,7 +456,7 @@ Time::operator-(const Time& t) const
  * @param t the Time that is substracted
  * @return the difference
  */
-float
+double
 Time::operator-(const Time* t) const
 {
   return time_diff_sec(__time, t->__time);
@@ -468,7 +468,7 @@ Time::operator-(const Time* t) const
  * @return the difference
  */
 Time
-Time::operator-(const float sec) const
+Time::operator-(const double sec) const
 {
   Time ret;
   time_t sec_only = (time_t)floor(sec);
@@ -558,12 +558,12 @@ Time::operator+=(const long int usec)
 }
 
 
-/** += operator for float seconds
+/** += operator for double seconds
  * @param sec number of seconds to add
  * @return the sum
  */
 Time &
-Time::operator+=(const float sec)
+Time::operator+=(const double sec)
 {
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
@@ -599,7 +599,7 @@ Time::operator-=(const Time& t)
  * @return reference to this instance  after subtraction 
  */
 Time &
-Time::operator-=(const float sec)
+Time::operator-=(const double sec)
 {
   *this = *this - sec;
   return *this;
