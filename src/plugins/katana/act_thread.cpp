@@ -421,10 +421,12 @@ KatanaActThread::loop()
           // TODO: how to transform euler rotation to quaternion, to be used for tf??
           __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
                                              msg->phi(), msg->theta(), msg->psi());
+          __goto_openrave_thread->set_theta_error(msg->theta_error());
+
           start_motion(__goto_openrave_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s', theta_error:%f",
 		       target.getX(), target.getY(), target.getZ(),
-		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str());
+		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str(), msg->theta_error());
 #endif
         } else {
           tf_listener->transform_point(__cfg_frame_kni, target_local, target);
