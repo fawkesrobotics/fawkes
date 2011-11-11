@@ -62,6 +62,9 @@ class TabletopVisualizationThread
   std::vector<Eigen::Vector4f> table_hull_vertices_;
   std::vector<Eigen::Vector4f> centroids_;
   ros::Publisher *vispub_;
+#ifdef USE_POSEPUB
+  ros::Publisher *posepub_;
+#endif
   size_t last_id_num_;
 };
 

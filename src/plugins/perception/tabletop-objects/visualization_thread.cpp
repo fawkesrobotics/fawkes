@@ -25,6 +25,9 @@
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
+#ifdef USE_POSEPUB
+#  include <geometry_msgs/PointStamped.h>
+#endif
 
 using namespace fawkes;
 
@@ -48,6 +51,10 @@ TabletopVisualizationThread::init()
 {
   vispub_ = new ros::Publisher();
   *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100);
+#ifdef USE_POSEPUB
+  posepub_ = new ros::Publisher();
+  *posepub_ = rosnode->advertise<geometry_msgs::PointStamped>("table_point", 10);
+#endif
   last_id_num_ = 0;
 }
 
@@ -70,6 +77,10 @@ TabletopVisualizationThread::finalize()
 
   vispub_->shutdown();
   delete vispub_;
+#ifdef USE_POSEPUB
+  posepub_->shutdown();
+  delete posepub_;
+#endif
 }
 
 
@@ -166,8 +177,17 @@ TabletopVisualizationThread::loop()
   }
   last_id_num_ = idnum;
 
-
   vispub_->publish(m);
+
+#ifdef USE_POSEPUB
+  geometry_msgs::PointStamped p;
+  p.header.frame_id = frame_id_;
+  p.header.stamp = ros::Time::now();
+  p.point.x = table_centroid_[0];
+  p.point.y = table_centroid_[1];
+  p.point.z = table_centroid_[2];
+  posepub_->publish(p);
+#endif
 }
 
 
