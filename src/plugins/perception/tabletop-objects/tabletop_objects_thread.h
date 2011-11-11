@@ -37,7 +37,12 @@
 
 namespace fawkes {
   class Position3DInterface;
+  class Barrier;
 }
+
+#ifdef HAVE_VISUAL_DEBUGGING
+class TabletopVisualizationThreadBase;
+#endif
 
 class TabletopObjectsThread
 : public fawkes::Thread,
@@ -55,6 +60,10 @@ class TabletopObjectsThread
   virtual void init();
   virtual void loop();
   virtual void finalize();
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  void set_visualization_thread(TabletopVisualizationThreadBase *visthread);
+#endif
 
  private:
   void set_position(fawkes::Position3DInterface *iface,
@@ -84,6 +93,10 @@ class TabletopObjectsThread
 
   std::vector<fawkes::Position3DInterface *> __pos_ifs;
   fawkes::Position3DInterface *__table_pos_if;
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  TabletopVisualizationThreadBase *visthread_;
+#endif
 };
 
 #endif

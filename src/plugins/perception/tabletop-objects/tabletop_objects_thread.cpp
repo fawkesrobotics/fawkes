@@ -21,6 +21,9 @@
 
 #include "tabletop_objects_thread.h"
 #include "pcl_utils.h"
+#ifdef HAVE_VISUAL_DEBUGGING
+#  include "visualization_thread_base.h"
+#endif
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -51,6 +54,9 @@ TabletopObjectsThread::TabletopObjectsThread()
   : Thread("TabletopObjectsThread", Thread::OPMODE_CONTINUOUS),
     TransformAspect(TransformAspect::ONLY_LISTENER)
 {
+#ifdef HAVE_VISUAL_DEBUGGING
+  visthread_ = NULL;
+#endif
 }
 
 
@@ -187,10 +193,11 @@ TabletopObjectsThread::loop()
     // base_link robot frame since tables are usually parallel to the ground...
     try {
       tf::Stamped<tf::Vector3>
-        normal(tf::Vector3(coeff->values[0], coeff->values[1], coeff->values[2]),
-               fawkes::Time(0, 0), input_->header.frame_id);
+        table_normal(tf::Vector3(coeff->values[0], coeff->values[1], coeff->values[2]),
+                     fawkes::Time(0,0), input_->header.frame_id);
+
       tf::Stamped<tf::Vector3> baserel_normal;
-      tf_listener->transform_vector("/base_link", normal, baserel_normal);
+      tf_listener->transform_vector("/base_link", table_normal, baserel_normal);
       if (baserel_normal.closestAxis() != 2) {
         happy_with_plane = false;
         logger->log_warn(name(), "Table closest axis is not Z, excluding");
@@ -411,9 +418,32 @@ TabletopObjectsThread::loop()
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
     set_position(__pos_ifs[i], i < centroid_i, centroids[i]);
   }
+  centroids.resize(centroid_i);
 
   *clusters_ = *tmp_clusters;
   pcl_copy_time(finput_, fclusters_);
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  if (visthread_) {
+    Eigen::Vector4f normal;
+    normal[0] = coeff->values[0];
+    normal[1] = coeff->values[1];
+    normal[2] = coeff->values[2];
+    normal[3] = 0.;
+
+    std::vector<Eigen::Vector4f> hull_vertices;
+    std::vector<int> &v = vertices_[0].vertices;
+    hull_vertices.resize(v.size());
+    for (unsigned int i = 0; i < v.size(); ++i) {
+      hull_vertices[i][0] = cloud_hull_->points[v[i]].x;
+      hull_vertices[i][1] = cloud_hull_->points[v[i]].y;
+      hull_vertices[i][2] = cloud_hull_->points[v[i]].z;
+    }
+
+    visthread_->visualize(input_->header.frame_id,
+                          table_centroid, normal, hull_vertices, centroids);
+  }
+#endif
 }
 
 
@@ -443,3 +473,12 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
 
   iface->write();  
 }
+
+
+#ifdef HAVE_VISUAL_DEBUGGING
+void
+TabletopObjectsThread::set_visualization_thread(TabletopVisualizationThreadBase *visthread)
+{
+  visthread_ = visthread;
+}
+#endif

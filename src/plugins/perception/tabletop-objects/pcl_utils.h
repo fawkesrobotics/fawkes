@@ -169,6 +169,22 @@ pcl_set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &time
 }
 
 
+/** Get time of a point cloud as a fawkes::Time instance.
+ * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to get the time
+ * @param time upon return contains the timestamp of the cloud
+ */
+template <typename PointT>
+inline void
+pcl_get_time(fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
+{
+  fawkes::PointCloudTimestamp pclts;
+  pclts.timestamp = cloud->header.stamp;
+  time.set_time(pclts.time.sec, time.get_usec());
+}
+
+
 /** Copy time from one point cloud to another.
  * @param from point cloud to copy time from
  * @param to point cloud to copy time to

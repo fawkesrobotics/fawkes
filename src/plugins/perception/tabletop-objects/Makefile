@@ -17,8 +17,11 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
+include $(BUILDSYSDIR)/ros.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
+
+ENABLE_VISUAL_DEBUGGING = 1
 
 LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils fawkestf \
 			fawkesinterface fawkesblackboard Position3DInterface
@@ -29,7 +32,7 @@ OBJS_tabletop_objects_standalone = tabletop_objects_standalone.o
 
 OBJS_all    = $(OBJS_tabletop_objects) $(OBJS_tabletop_objects_standalone)
 
-ifeq ($(HAVE_PCL)$(HAVE_OPENNI)$(HAVE_TF),111)
+ifeq ($(HAVE_PCL)$(HAVE_TF),11)
   CFLAGS += $(CFLAGS_TF) $(CFLAGS_PCL) \
 	    -Wno-deprecated -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
@@ -50,22 +53,37 @@ else
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
   endif
-  ifneq ($(HAVE_OPENNI),1)
-    WARN_TARGETS += warning_openni
-  endif
 endif
 
+ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
+  ifeq ($(HAVE_ROS),1)
+    ifeq ($(call ros-have-pkg,visualization_msgs),1)
+      CFLAGS_visualization_thread  = $(CFLAGS_ROS) $(call ros-pkg-cflags,visualization_msgs)
+      CFLAGS += -DHAVE_VISUAL_DEBUGGING
+      LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
+      LIBS_tabletop_objects += fawkesrosaspect
+
+      OBJS_tabletop_objects += visualization_thread_base.o visualization_thread.o
+    else
+      WARN_TARGETS += warning_visualization_msgs
+    endif
+  else
+    WARN_TARGETS += warning_ros
+  endif
+endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf warning_pcl warning_openni
+.PHONY: warning_tf warning_pcl warning_ros warning_visualization_msgs
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (fawkestf not available)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (PCL not available)"
-warning_openni:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)tabletop objects plugin$(TNORMAL) (OpenNI not available)"
+warning_ros:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
+warning_visualization_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging(TNORMAL) (ROS package visualization_msgs not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

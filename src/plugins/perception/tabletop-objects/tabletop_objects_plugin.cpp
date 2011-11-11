@@ -23,6 +23,9 @@
 #include <core/plugin.h>
 
 #include "tabletop_objects_thread.h"
+#ifdef HAVE_VISUAL_DEBUGGING
+#  include "visualization_thread.h"
+#endif
 
 using namespace fawkes;
 
@@ -38,7 +41,13 @@ class TabletopObjectsPlugin : public fawkes::Plugin
   TabletopObjectsPlugin(Configuration *config)
     : Plugin(config)
   {
-    thread_list.push_back(new TabletopObjectsThread());
+    TabletopObjectsThread *tabobjthr = new TabletopObjectsThread();
+    thread_list.push_back(tabobjthr);
+#ifdef HAVE_VISUAL_DEBUGGING
+    TabletopVisualizationThread *visthr = new TabletopVisualizationThread();
+    tabobjthr->set_visualization_thread(visthr);
+    thread_list.push_back(visthr);
+#endif
   }
 };
 
