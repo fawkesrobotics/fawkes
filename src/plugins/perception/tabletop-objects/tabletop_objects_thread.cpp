@@ -212,7 +212,7 @@ TabletopObjectsThread::loop()
     try {
       pcl::compute3DCentroid(*temp_cloud, *inliers, table_centroid);
       tf::Stamped<tf::Point>
-        centroid(tf::Point(table_centroid[0], table_centroid[1], table_centroid[3]),
+        centroid(tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
                  fawkes::Time(0, 0), input_->header.frame_id);
       tf::Stamped<tf::Point> baserel_centroid;
       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
