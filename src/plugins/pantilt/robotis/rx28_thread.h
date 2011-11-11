@@ -84,8 +84,6 @@ class PanTiltRX28Thread
   unsigned int __cfg_disc_timeout_ms;
   unsigned int __cfg_pan_servo_id;
   unsigned int __cfg_tilt_servo_id;
-  int          __cfg_pan_zero_offset;
-  int          __cfg_tilt_zero_offset;
   bool         __cfg_goto_zero_start;
   bool         __cfg_turn_off;
   unsigned int __cfg_cw_compl_margin;
@@ -98,6 +96,8 @@ class PanTiltRX28Thread
   float        __cfg_tilt_max;
   float        __cfg_pan_margin;
   float        __cfg_tilt_margin;
+  float        __cfg_pan_offset;
+  float        __cfg_tilt_offset;
 #ifdef HAVE_TF
   std::string  __cfg_base_frame;
   std::string  __cfg_pan_link;
@@ -114,7 +114,7 @@ class PanTiltRX28Thread
 		 fawkes::RefPtr<RobotisRX28> rx28,
 		 unsigned char pan_servo_id, unsigned char tilt_servo_id,
 		 float &pan_min, float &pan_max, float &tilt_min, float &tilt_max,
-		 int &pan_zero_offset, int &tilt_zero_offset);
+		 float &pan_offset, float &tilt_offset);
 
     ~WorkerThread();
     void goto_pantilt(float pan, float tilt);
@@ -151,8 +151,8 @@ class PanTiltRX28Thread
     float         __pan_max;
     float         __tilt_min;
     float         __tilt_max;
-    int           __pan_zero_offset;
-    int           __tilt_zero_offset;
+    float         __pan_offset;
+    float         __tilt_offset;
     float         __max_pan_speed;
     float         __max_tilt_speed;
     float         __pan_margin;

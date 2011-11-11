@@ -22,6 +22,7 @@
 #include "rx28_thread.h"
 #include "rx28.h"
 
+#include <utils/math/angle.h>
 #include <core/threading/mutex_locker.h>
 #include <interfaces/PanTiltInterface.h>
 #include <interfaces/LedInterface.h>
@@ -75,8 +76,8 @@ PanTiltRX28Thread::init()
   __cfg_disc_timeout_ms  = config->get_uint((__ptu_cfg_prefix + "discover_timeout_ms").c_str());
   __cfg_pan_servo_id     = config->get_uint((__ptu_cfg_prefix + "pan_servo_id").c_str());
   __cfg_tilt_servo_id    = config->get_uint((__ptu_cfg_prefix + "tilt_servo_id").c_str());
-  __cfg_pan_zero_offset  = config->get_int((__ptu_cfg_prefix + "pan_zero_offset").c_str());
-  __cfg_tilt_zero_offset = config->get_int((__ptu_cfg_prefix + "tilt_zero_offset").c_str());
+  __cfg_pan_offset       = deg2rad(config->get_float((__ptu_cfg_prefix + "pan_offset").c_str()));
+  __cfg_tilt_offset      = deg2rad(config->get_float((__ptu_cfg_prefix + "tilt_offset").c_str()));
   __cfg_goto_zero_start  = config->get_bool((__ptu_cfg_prefix + "goto_zero_start").c_str());
   __cfg_turn_off         = config->get_bool((__ptu_cfg_prefix + "turn_off").c_str());
   __cfg_cw_compl_margin  = config->get_uint((__ptu_cfg_prefix + "cw_compl_margin").c_str());
@@ -89,6 +90,7 @@ PanTiltRX28Thread::init()
   __cfg_tilt_max         = config->get_float((__ptu_cfg_prefix + "tilt_max").c_str());
   __cfg_pan_margin       = config->get_float((__ptu_cfg_prefix + "pan_margin").c_str());
   __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
+  
 
 #ifdef HAVE_TF
   float pan_trans_x  =
@@ -169,7 +171,7 @@ PanTiltRX28Thread::init()
   __wt = new WorkerThread(__ptu_name, logger, __rx28,
 			  __cfg_pan_servo_id, __cfg_tilt_servo_id,
 			  __cfg_pan_min, __cfg_pan_max, __cfg_tilt_min, __cfg_tilt_max,
-			  __cfg_pan_zero_offset, __cfg_tilt_zero_offset);
+			  __cfg_pan_offset, __cfg_tilt_offset);
   __wt->set_margins(__cfg_pan_margin, __cfg_tilt_margin);
   __wt->start();
   __wt->set_enabled(true);
@@ -393,8 +395,8 @@ PanTiltRX28Thread::bb_interface_message_received(Interface *interface,
  * @param pan_min maximum pan in rad
  * @param tilt_min minimum tilt in rad
  * @param tilt_max maximum tilt in rad
- * @param pan_zero_offset pan offset from zero in servo ticks
- * @param tilt_zero_offset tilt offset from zero in servo ticks
+ * @param pan_offset pan offset from zero in servo ticks
+ * @param tilt_offset tilt offset from zero in servo ticks
  */
 PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
 					      fawkes::Logger *logger,
@@ -403,8 +405,7 @@ PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
 					      unsigned char tilt_servo_id,
 					      float &pan_min, float &pan_max,
 					      float &tilt_min, float &tilt_max,
-					      int &pan_zero_offset,
-					      int &tilt_zero_offset)
+					      float &pan_offset, float &tilt_offset)
   : Thread("", Thread::OPMODE_WAITFORWAKEUP)
 {
   set_name("RX28WorkerThread(%s)", ptu_name.c_str());
@@ -427,8 +428,8 @@ PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
   __pan_max          = pan_max;
   __tilt_min         = tilt_min;
   __tilt_max         = tilt_max;
-  __pan_zero_offset  = pan_zero_offset;
-  __tilt_zero_offset = tilt_zero_offset;
+  __pan_offset       = pan_offset;
+  __tilt_offset      = tilt_offset;
   __enable           = false;
   __disable          = false;
   __led_enable       = false;
@@ -624,11 +625,11 @@ PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt)
 {
   MutexLocker lock(__rx28_mutex);
 
-  int pan_ticks  = ((int)__rx28->get_position(__pan_servo_id)  - __pan_zero_offset - RobotisRX28::CENTER_POSITION);
-  int tilt_ticks = ((int)__rx28->get_position(__tilt_servo_id) - (int)__tilt_zero_offset - (int)RobotisRX28::CENTER_POSITION);
+  int pan_ticks  = ((int)__rx28->get_position(__pan_servo_id)  - (int)RobotisRX28::CENTER_POSITION);
+  int tilt_ticks = ((int)__rx28->get_position(__tilt_servo_id) - (int)RobotisRX28::CENTER_POSITION);
 
-  pan  = pan_ticks *  RobotisRX28::RAD_PER_POS_TICK;
-  tilt = tilt_ticks * RobotisRX28::RAD_PER_POS_TICK;
+  pan  = pan_ticks *  RobotisRX28::RAD_PER_POS_TICK + __pan_offset;
+  tilt = tilt_ticks * RobotisRX28::RAD_PER_POS_TICK + __tilt_offset;
 }
 
 
@@ -801,12 +802,11 @@ PanTiltRX28Thread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad
   __rx28->get_angle_limits(__pan_servo_id, pan_min, pan_max);
   __rx28->get_angle_limits(__tilt_servo_id, tilt_min, tilt_max);
 
-  int pan_pos  = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * pan_rad)
-                 + RobotisRX28::CENTER_POSITION
-                 + __pan_zero_offset;
-  int tilt_pos = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * tilt_rad)
-                 + RobotisRX28::CENTER_POSITION
-                 + __tilt_zero_offset;
+
+  int pan_pos  = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * (pan_rad - __pan_offset))
+                 + RobotisRX28::CENTER_POSITION;
+  int tilt_pos = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * (tilt_rad - __tilt_offset))
+                 + RobotisRX28::CENTER_POSITION;
 
   if ( (pan_pos < 0) || ((unsigned int)pan_pos < pan_min) || ((unsigned int)pan_pos > pan_max) ) {
     __logger->log_warn(name(), "Pan position out of bounds, min: %u  max: %u  des: %i",
