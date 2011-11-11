@@ -39,6 +39,7 @@
 #include <queue>
 
 // from ROS
+#include <ros/node_handle.h>
 #include <tf/tfMessage.h>
 
 class RosTfThread

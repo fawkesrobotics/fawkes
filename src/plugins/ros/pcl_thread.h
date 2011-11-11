@@ -39,6 +39,7 @@
 #include <list>
 #include <queue>
 
+#include <ros/node_handle.h>
 #include <sensor_msgs/PointCloud2.h>
 
 class RosPointCloudThread
