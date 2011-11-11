@@ -65,7 +65,6 @@ TabletopVisualizationThread::finalize()
     delop.action = visualization_msgs::Marker::DELETE;
     m.markers.push_back(delop);
   }
-  last_id_num_ = idnum;
   vispub_->publish(m);
 
 
