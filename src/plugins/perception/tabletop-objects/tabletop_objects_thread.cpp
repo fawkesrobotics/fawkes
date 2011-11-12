@@ -451,6 +451,20 @@ void
 TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
                                     bool is_visible, Eigen::Vector4f &centroid)
 {
+#ifdef USE_BASELINK_FRAME
+  // For now convert into base_link frame to make it easier to use in agent
+  tf::Stamped<tf::Point> baserel_centroid;
+  try{
+    tf::Stamped<tf::Point>
+      scentroid(tf::Point(centroid[0], centroid[1], centroid[2]),
+                fawkes::Time(0, 0), input_->header.frame_id);
+    tf_listener->transform_point("/base_link", scentroid, baserel_centroid);
+    iface->set_frame("/base_link");
+  } catch (tf::TransformException &e) {
+    is_visible = false;
+  }
+#endif
+
   int visibility_history = iface->visibility_history();
   if (is_visible) {
     if (visibility_history >= 0) {
@@ -458,9 +472,13 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
     } else {
       iface->set_visibility_history(1);
     }
-    double translation[3] = { centroid[0], centroid[1], centroid[2] };
+#ifdef USE_BASELINK_FRAME
+    double translation[3] = { baserel_centroid.x(), baserel_centroid.y(), baserel_centroid.z() };
+#else
+    double translation[3] = { centroid.x(), centroid.y(), centroid.z() };
+#endif
     iface->set_translation(translation);
-
+      
   } else {
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
@@ -470,7 +488,6 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
       iface->set_translation(translation);
     }
   }
-
   iface->write();  
 }
 
