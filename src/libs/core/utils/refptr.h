@@ -147,6 +147,12 @@ class RefPtr
   /// Set underlying instance to 0, decrementing reference count of existing instance appropriately.
   inline void clear();
 
+  /** Reset pointer.
+   * Set underlying instance to 0, decrementing reference count of
+   * existing instance appropriately.
+   */
+  inline void reset();
+
 
   /** Dynamic cast to derived class.
    *
@@ -431,6 +437,13 @@ RefPtr<T_CppObject>::operator bool() const
 
 template <class T_CppObject> inline
 void RefPtr<T_CppObject>::clear()
+{
+  RefPtr<T_CppObject> temp; // swap with an empty RefPtr<> to clear *this
+  this->swap(temp);
+}
+
+template <class T_CppObject> inline
+void RefPtr<T_CppObject>::reset()
 {
   RefPtr<T_CppObject> temp; // swap with an empty RefPtr<> to clear *this
   this->swap(temp);
