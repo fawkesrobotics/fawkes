@@ -88,7 +88,7 @@ warning_pcl:
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
 warning_visualization_msgs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging(TNORMAL) (ROS package visualization_msgs not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS package visualization_msgs not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

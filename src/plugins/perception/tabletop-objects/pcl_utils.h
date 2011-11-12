@@ -201,4 +201,35 @@ pcl_copy_time(fawkes::RefPtr<const pcl::PointCloud<PointT1> > &from,
 }
 
 
+/** Helper struct to avoid deletion of PointClouds.
+ * The input point cloud is accessible using a RefPtr. Since the PCL
+ * expectes Boost shared_ptr, we need to create such a shared pointer.
+ * But destruction of this would cause the deletion of the point cloud,
+ * which we do not want. Therefore, we provide this helper deleter
+ * that causes the PointCloud *not* to be deleted on reset.
+ */
+struct PointCloudNonDeleter {
+  /** Delete operator that does nothing.
+   * @param t object to destroy
+   */
+  template<typename T> void operator()(T*t) {}
+};
+
+template <typename PointT>
+boost::shared_ptr<pcl::PointCloud<PointT> >
+pcl_cloudptr_from_refptr(fawkes::RefPtr<pcl::PointCloud<PointT> > &in)
+{
+  return
+    boost::shared_ptr<pcl::PointCloud<PointT> >(*in, PointCloudNonDeleter());
+}
+
+
+template <typename PointT>
+boost::shared_ptr<const pcl::PointCloud<PointT> >
+pcl_cloudptr_from_refptr(fawkes::RefPtr<const pcl::PointCloud<PointT> > &in)
+{
+  return
+    boost::shared_ptr<const pcl::PointCloud<PointT> >(*in, PointCloudNonDeleter());
+}
+
 #endif

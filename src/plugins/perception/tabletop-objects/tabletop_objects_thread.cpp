@@ -70,7 +70,7 @@ void
 TabletopObjectsThread::init()
 {
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
-  input_.reset(*finput_);
+  input_ = pcl_cloudptr_from_refptr(finput_);
 
   try {
     double rotation[4] = {0., 0., 0., 1.};
@@ -109,7 +109,7 @@ TabletopObjectsThread::init()
   fclusters_->header.frame_id = finput_->header.frame_id;
   fclusters_->is_dense = false;
   pcl_manager->add_pointcloud<ColorPointType>("tabletop-object-clusters", fclusters_);
-  clusters_.reset(*fclusters_);
+  clusters_ = pcl_cloudptr_from_refptr(fclusters_);
 
   grid_.setFilterFieldName("x");
   grid_.setFilterLimits(0.0, 3.0);
@@ -136,6 +136,9 @@ TabletopObjectsThread::finalize()
     blackboard->close(__pos_ifs[i]);
   }
   __pos_ifs.clear();
+
+  finput_.reset();
+  fclusters_.reset();
 }
 
 
