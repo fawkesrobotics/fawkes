@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  pcl_utils.h - PCL utilities
+ *  comparisons.h - PCL utilities: additional comparison functors
  *
  *  Created: Tue Nov 08 17:50:07 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
@@ -19,13 +19,20 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_TABLETOP_OBJECTS_PCL_UTILS_H_
-#define __PLUGINS_PERCEPTION_TABLETOP_OBJECTS_PCL_UTILS_H_
+#ifndef __LIBS_PCL_UTILS_COMPARISONS__H_
+#define __LIBS_PCL_UTILS_COMPARISONS_H_
 
 #include <pcl/point_cloud.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
+
+namespace fawkes {
+  namespace pcl_utils {
+#if 0 /* just to make Emacs auto-indent happy */
+  }
+}
+#endif
 
 
 /** Check if point is inside or outside a given polygon.
@@ -151,85 +158,7 @@ class PlaneDistanceComparison : public pcl::ComparisonBase<PointT>
   PlaneDistanceComparison() {} // not allowed
 };
 
-
-/** Set time of a point cloud from a fawkes::Time instance.
- * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
- * timestamp field (if non-ROS PCL is used).
- * @param cloud cloud of which to set the time
- * @param time time to use
- */
-template <typename PointT>
-inline void
-pcl_set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
-{
-  fawkes::PointCloudTimestamp pclts;
-  pclts.time.sec  = time.get_sec();
-  pclts.time.usec = time.get_usec();
-  cloud->header.stamp = pclts.timestamp;
-}
-
-
-/** Get time of a point cloud as a fawkes::Time instance.
- * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
- * timestamp field (if non-ROS PCL is used).
- * @param cloud cloud of which to get the time
- * @param time upon return contains the timestamp of the cloud
- */
-template <typename PointT>
-inline void
-pcl_get_time(fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
-{
-  fawkes::PointCloudTimestamp pclts;
-  pclts.timestamp = cloud->header.stamp;
-  time.set_time(pclts.time.sec, time.get_usec());
-}
-
-
-/** Copy time from one point cloud to another.
- * @param from point cloud to copy time from
- * @param to point cloud to copy time to
- */
-template <typename PointT1, typename PointT2>
-inline void
-pcl_copy_time(fawkes::RefPtr<const pcl::PointCloud<PointT1> > &from,
-              fawkes::RefPtr<pcl::PointCloud<PointT2> > &to)
-{
-  fawkes::PointCloudTimestamp pclts;
-  pclts.timestamp = from->header.stamp;
-  fawkes::Time t(pclts.time.sec, pclts.time.usec);
-  pcl_set_time(to,t);
-}
-
-
-/** Helper struct to avoid deletion of PointClouds.
- * The input point cloud is accessible using a RefPtr. Since the PCL
- * expectes Boost shared_ptr, we need to create such a shared pointer.
- * But destruction of this would cause the deletion of the point cloud,
- * which we do not want. Therefore, we provide this helper deleter
- * that causes the PointCloud *not* to be deleted on reset.
- */
-struct PointCloudNonDeleter {
-  /** Delete operator that does nothing.
-   * @param t object to destroy
-   */
-  template<typename T> void operator()(T*t) {}
-};
-
-template <typename PointT>
-boost::shared_ptr<pcl::PointCloud<PointT> >
-pcl_cloudptr_from_refptr(fawkes::RefPtr<pcl::PointCloud<PointT> > &in)
-{
-  return
-    boost::shared_ptr<pcl::PointCloud<PointT> >(*in, PointCloudNonDeleter());
-}
-
-
-template <typename PointT>
-boost::shared_ptr<const pcl::PointCloud<PointT> >
-pcl_cloudptr_from_refptr(fawkes::RefPtr<const pcl::PointCloud<PointT> > &in)
-{
-  return
-    boost::shared_ptr<const pcl::PointCloud<PointT> >(*in, PointCloudNonDeleter());
-}
+} // end namespace pclutils
+} // end namespace fawkes
 
 #endif

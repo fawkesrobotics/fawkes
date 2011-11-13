@@ -20,10 +20,12 @@
  */
 
 #include "tabletop_objects_thread.h"
-#include "pcl_utils.h"
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include "visualization_thread_base.h"
 #endif
+
+#include <pcl_utils/utils.h>
+#include <pcl_utils/comparisons.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -70,7 +72,7 @@ void
 TabletopObjectsThread::init()
 {
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
-  input_ = pcl_cloudptr_from_refptr(finput_);
+  input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
   try {
     double rotation[4] = {0., 0., 0., 1.};
@@ -109,7 +111,7 @@ TabletopObjectsThread::init()
   fclusters_->header.frame_id = finput_->header.frame_id;
   fclusters_->is_dense = false;
   pcl_manager->add_pointcloud<ColorPointType>("tabletop-object-clusters", fclusters_);
-  clusters_ = pcl_cloudptr_from_refptr(fclusters_);
+  clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
   grid_.setFilterFieldName("x");
   grid_.setFilterLimits(0.0, 3.0);
@@ -283,8 +285,8 @@ TabletopObjectsThread::loop()
   // not an X-Ray...
   pcl::ComparisonOps::CompareOp op =
     coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
-  typename PlaneDistanceComparison<PointType>::ConstPtr
-    above_comp(new PlaneDistanceComparison<PointType>(coeff, op));
+  typename pcl_utils::PlaneDistanceComparison<PointType>::ConstPtr
+    above_comp(new pcl_utils::PlaneDistanceComparison<PointType>(coeff, op));
   typename pcl::ConditionAnd<PointType>::Ptr
     above_cond(new pcl::ConditionAnd<PointType>());
   above_cond->addComparison(above_comp);
@@ -315,8 +317,8 @@ TabletopObjectsThread::loop()
     typename pcl::ConditionAnd<PointType>::Ptr
       polygon_cond(new pcl::ConditionAnd<PointType>());
 
-    typename PolygonComparison<PointType>::ConstPtr
-      inpoly_comp(new PolygonComparison<PointType>(polygon_cloud));
+    typename pcl_utils::PolygonComparison<PointType>::ConstPtr
+      inpoly_comp(new pcl_utils::PolygonComparison<PointType>(polygon_cloud));
     polygon_cond->addComparison(inpoly_comp);
 
     // build the filter
@@ -424,7 +426,7 @@ TabletopObjectsThread::loop()
   centroids.resize(centroid_i);
 
   *clusters_ = *tmp_clusters;
-  pcl_copy_time(finput_, fclusters_);
+  pcl_utils::copy_time(finput_, fclusters_);
 
 #ifdef HAVE_VISUAL_DEBUGGING
   if (visthread_) {
