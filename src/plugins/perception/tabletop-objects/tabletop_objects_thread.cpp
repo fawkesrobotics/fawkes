@@ -20,6 +20,7 @@
  */
 
 #include "tabletop_objects_thread.h"
+#include "cluster_colors.h"
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include "visualization_thread_base.h"
 #endif
@@ -41,8 +42,6 @@
 #include <pcl/common/centroid.h>
 
 #include <interfaces/Position3DInterface.h>
-
-#define MAX_CENTROIDS 12
 
 /** @class TabletopObjectsThread "tabletop_objects_thread.h"
  * Main thread of tabletop objects plugin.
@@ -347,8 +346,9 @@ TabletopObjectsThread::loop()
     p2.x = p1.x;
     p2.y = p1.y;
     p2.z = p1.z;
-    p2.r = p2.b = 0;
-    p2.g = 255;
+    p2.r = table_color[0];
+    p2.g = table_color[1];
+    p2.b = table_color[2];
   }
 
   std::vector<Eigen::Vector4f> centroids;
@@ -363,18 +363,14 @@ TabletopObjectsThread::loop()
 
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<PointType> ec;
-    ec.setClusterTolerance(0.02); // 2cm
+    ec.setClusterTolerance(0.04); // 2cm
     ec.setMinClusterSize(50);
-    ec.setMaxClusterSize(25000);
+    ec.setMaxClusterSize(500);
     ec.setSearchMethod(kdtree_cl);
     ec.setInputCloud(cloud_objs_);
     ec.extract(cluster_indices);
 
     //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
-
-    uint8_t colors[MAX_CENTROIDS][3] = {{255, 0, 0}, {0, 0, 255}, {255, 255, 0}, {255, 0, 255},
-                                        {0, 255, 255}, {255, 90, 0}, {176, 0, 30}, {0, 106, 53},
-                                        {137, 82, 39}, {27, 117, 196}, {99, 0, 30}, {56, 23, 90}};
 
     ColorCloudPtr colored_clusters(new ColorCloud());
     colored_clusters->header.frame_id = clusters_->header.frame_id;
@@ -393,13 +389,6 @@ TabletopObjectsThread::loop()
       {
         pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
 
-        uint8_t r, g, b;
-        r = colors[centroid_i][0];
-        g = colors[centroid_i][1];
-        b = colors[centroid_i][2];
-
-        //printf("Cluster %u  size: %zu  color %u, %u, %u\n",
-        //       centroid_i, it->indices.size(), r, g, b);
         std::vector<int>::const_iterator pit;
         for (pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
           ColorPointType &p1 = colored_clusters->points[cci++];
@@ -407,9 +396,9 @@ TabletopObjectsThread::loop()
           p1.x = p2.x;
           p1.y = p2.y;
           p1.z = p2.z;
-          p1.r = r;
-          p1.g = g;
-          p1.b = b;
+          p1.r = cluster_colors[centroid_i][0];
+          p1.g = cluster_colors[centroid_i][1];;
+          p1.b = cluster_colors[centroid_i][2];;
         }
       }
 

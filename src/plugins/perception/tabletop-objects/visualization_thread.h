@@ -30,6 +30,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <aspect/tf.h>
 #include <plugins/ros/aspect/ros.h>
 
 namespace ros {
@@ -39,6 +40,7 @@ namespace ros {
 class TabletopVisualizationThread
 : public TabletopVisualizationThreadBase,
   public fawkes::Thread,
+  public fawkes::TransformAspect,
   public fawkes::ROSAspect
 {
  public:

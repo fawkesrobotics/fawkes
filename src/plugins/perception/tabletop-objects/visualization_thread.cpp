@@ -20,6 +20,7 @@
  */
 
 #include "visualization_thread.h"
+#include "cluster_colors.h"
 
 #include <core/threading/mutex_locker.h>
 
@@ -93,30 +94,58 @@ TabletopVisualizationThread::loop()
   unsigned int idnum = 0;
 
   for (size_t i = 0; i < centroids_.size(); ++i) {
-    char *tmp;
-    if (asprintf(&tmp, "TObj %zu", i) != -1) {
-      // Copy to get memory freed on exception
-      std::string id = tmp;
-      free(tmp);
+    try {
+      tf::Stamped<tf::Point>
+        centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]),
+                 fawkes::Time(0, 0), frame_id_);
+      tf::Stamped<tf::Point> baserel_centroid;
+      tf_listener->transform_point("/base_link", centroid, baserel_centroid);
 
-      visualization_msgs::Marker text;
-      text.header.frame_id = frame_id_;
-      text.header.stamp = ros::Time::now();
-      text.ns = "tabletop";
-      text.id = idnum++;
-      text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-      text.action = visualization_msgs::Marker::ADD;
-      text.pose.position.x = centroids_[i][0];
-      text.pose.position.y = centroids_[i][1];
-      text.pose.position.z = centroids_[i][2];
-      text.pose.orientation.w = 1.;
-      text.scale.z = 0.05; // 5cm high
-      text.color.r = text.color.g = text.color.b = 1.0f;
-      text.color.a = 1.0;
-      text.lifetime = ros::Duration(10, 0);
-      text.text = id;
-      m.markers.push_back(text);
-    }
+      char *tmp;
+      if (asprintf(&tmp, "TObj %zu", i) != -1) {
+        // Copy to get memory freed on exception
+        std::string id = tmp;
+        free(tmp);
+
+        visualization_msgs::Marker text;
+        text.header.frame_id = "/base_link";
+        text.header.stamp = ros::Time::now();
+        text.ns = "tabletop";
+        text.id = idnum++;
+        text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        text.action = visualization_msgs::Marker::ADD;
+        text.pose.position.x = baserel_centroid[0];
+        text.pose.position.y = baserel_centroid[1];
+        text.pose.position.z = baserel_centroid[2] + 0.13;
+        text.pose.orientation.w = 1.;
+        text.scale.z = 0.05; // 5cm high
+        text.color.r = text.color.g = text.color.b = 1.0f;
+        text.color.a = 1.0;
+        text.lifetime = ros::Duration(10, 0);
+        text.text = id;
+        m.markers.push_back(text);
+      }
+
+      visualization_msgs::Marker sphere;
+      sphere.header.frame_id = "/base_link";
+      sphere.header.stamp = ros::Time::now();
+      sphere.ns = "tabletop";
+      sphere.id = idnum++;
+      sphere.type = visualization_msgs::Marker::CYLINDER;
+      sphere.action = visualization_msgs::Marker::ADD;
+      sphere.pose.position.x = baserel_centroid[0];
+      sphere.pose.position.y = baserel_centroid[1];
+      sphere.pose.position.z = baserel_centroid[2];
+      sphere.pose.orientation.w = 1.;
+      sphere.scale.x = sphere.scale.y = 0.08;
+      sphere.scale.z = 0.09;
+      sphere.color.r = (float)cluster_colors[i][0] / 255.f;
+      sphere.color.g = (float)cluster_colors[i][1] / 255.f;
+      sphere.color.b = (float)cluster_colors[i][2] / 255.f;
+      sphere.color.a = 1.0;
+      sphere.lifetime = ros::Duration(10, 0);
+      m.markers.push_back(sphere);
+    } catch (tf::TransformException &e) {} // ignored
   }
 
   Eigen::Vector4f normal_end = (table_centroid_ + (normal_ * -0.15));
