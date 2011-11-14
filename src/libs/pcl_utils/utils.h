@@ -20,7 +20,7 @@
  */
 
 #ifndef __LIBS_PCL_UTILS_UTILS_H_
-#define __LIBS_PCL_UTILS_UTILS__H_
+#define __LIBS_PCL_UTILS_UTILS_H_
 
 #include <pcl/point_cloud.h>
 
