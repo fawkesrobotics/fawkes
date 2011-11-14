@@ -53,6 +53,7 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include <signal.h>
 
 namespace fawkes {
   namespace runtime {
@@ -389,6 +390,20 @@ run()
   }
 }
 
+
+/** Quit Fawkes.
+ * You can call this from within Fawkes to quit Fawkes. Use with extreme care an
+ * only rarely.
+ * This sends SIGINT to the local process. This triggers the quit routine but also
+ * takes a currently running init into account. This is prone to the same potential
+ * problems as a SIGINT received otherwise, e.g. a never-ending thread blocking
+ * the main thread from cancelling.
+ */
+void
+quit()
+{
+  kill(getpid(), SIGINT);
+}
 
 void
 print_usage(const char *progname)
