@@ -147,7 +147,11 @@ static ssize_t
 dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, size_t max)
 #else
 static int
+#  if MHD_VERSION <= 0x00040000
+dynamic_reply_data_cb(void *reply, size_t pos, char *buf, int max)
+#  else
 dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, int max)
+#  endif
 #endif
 {
   DynamicWebReply *dreply = static_cast<DynamicWebReply *>(reply);
