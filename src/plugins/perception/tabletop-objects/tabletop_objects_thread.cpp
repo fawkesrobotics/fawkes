@@ -85,7 +85,7 @@ TabletopObjectsThread::init()
     __pos_ifs.resize(MAX_CENTROIDS, NULL);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
       char *tmp;
-      if (asprintf(&tmp, "Tabletop Object %u", i) != -1) {
+      if (asprintf(&tmp, "Tabletop Object %u", i + 1) != -1) {
         // Copy to get memory freed on exception
         std::string id = tmp;
         free(tmp);
