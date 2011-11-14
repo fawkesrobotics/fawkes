@@ -60,6 +60,11 @@ RosTfThread::init()
   __active_queue = 0;
   __seq_num = 0;
 
+  // Must do that before registering listener because we might already
+  // get events right away
+  __sub_tf = rosnode->subscribe("/tf", 100, &RosTfThread::tf_message_cb, this);
+  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
+
   __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("TF *");
 
   std::list<TransformInterface *>::iterator i;
@@ -72,8 +77,6 @@ RosTfThread::init()
   bbio_add_observed_create("TransformInterface", "TF *");
   blackboard->register_observer(this);
 
-  __sub_tf = rosnode->subscribe("/tf", 100, &RosTfThread::tf_message_cb, this);
-  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
 }
 
 
