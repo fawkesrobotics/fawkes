@@ -33,8 +33,7 @@ ifeq ($(HAVE_OPENROBOTINO),1)
   CFLAGS  += $(CFLAGS_OPENROBOTINO)
   LDFLAGS_robotino += $(LDFLAGS_OPENROBOTINO)
 
-  PLUGINS_all = $(PLUGINDIR)/robotino.so
-  # $(PLUGINDIR)/robotino-joystick.so
+  PLUGINS_all = $(PLUGINDIR)/robotino.so $(PLUGINDIR)/robotino-joystick.so
 else
   WARN_TARGETS += warning_openrobotino
 endif

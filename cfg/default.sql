@@ -12,6 +12,7 @@ INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',666
 INSERT INTO "config" VALUES('/fawkes/mainapp/net/tcp_port','unsigned int',1910,'Port for Fawkes Network Protocol service; TCP port');
 INSERT INTO "config" VALUES('/fawkes/mainapp/net/service_name','string','Fawkes on %h','Name for Fawkes service, announced via Avahi, %h is replaced by short hostname');
 INSERT INTO "config" VALUES('/fawkes/meta_plugins/nao_default','string','naoqi-motion,naoqi-speechsynth,naoqi-buttons,naoqi-leds','Meta plugin loaded by default on the Nao (and on the Nao only)');
+INSERT INTO "config" VALUES('/fawkes/meta_plugins/robotino_default','string','robotino,joystick,robotino-joystick,webview','Example default meta plugin for the Robotino');
 INSERT INTO "config" VALUES('/fawkes/bbsync/check_interval','unsigned int',5000,'Interval between checking for remote BB aliveness; ms');
 INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/host','string','localhost','Host name of remote peer; hostname');
 INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/port','unsigned int',1911,'Port of remote peer; TCP port');
@@ -210,6 +211,10 @@ INSERT INTO "config" VALUES('/hardware/roomba/joystick/max_radius','unsigned int
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/max_velocity','unsigned int',500,'Maximum linear velocity; mm/sec');
 INSERT INTO "config" VALUES('/hardware/robotino/hostname','string','127.0.0.1','Hostname to connect to');
 INSERT INTO "config" VALUES('/hardware/robotino/quit_on_disconnect','bool',1,'If true quit Fawkes on disconnect from Robotino Com server, otherwise retry connection. If run from LCD menu should be set to true.');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/axis_forward','unsigned int',1,'Axis index for forward/backward movement.');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/axis_sideward','unsigned int',0,'Axis index for sideward movement.');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/axis_rotation','unsigned int',3,'Axis index for rotational movement.');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/max_velocity','float',800.0,'Maximum velocity factor [0.0-1.0]');
 INSERT INTO "config" VALUES('/hardware/nao/chestbut_triple_long_click_shutdown','bool',1,'If true, triple long click on chest button causes shutdown. This requires the SetUID bit to be set on /sbin/poweroff (or whatever it links to).');
 INSERT INTO "config" VALUES('/plugins/laserht/laser_interface_id','string','Laser','Interface ID of the Laser360Interface to get data from');
 INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',12,'Number of samples to take per data point on the range of 180 deg');
