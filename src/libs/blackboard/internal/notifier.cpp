@@ -254,11 +254,26 @@ BlackBoardNotifier::remove_listener(Interface *interface,
   std::pair<BBilMap::iterator, BBilMap::iterator> ret =
     ilmap.equal_range(interface->uid());
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
-    ilmap.erase(j);
-    break;
+    if (j->second == listener) {
+      ilmap.erase(j);
+      break;
+    }
   }
 }
 
+
+bool
+BlackBoardNotifier::is_in_queue(bool op, BBilQueue &queue, const char *uid,
+                                BlackBoardInterfaceListener *bbil)
+{
+  BBilQueue::iterator q;
+  for (q = queue.begin(); q != queue.end(); ++q) {
+    if ((q->op == op) && (q->uid == uid) && (q->listener == bbil)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void
 BlackBoardNotifier::queue_listener(bool op, Interface *interface,
@@ -472,14 +487,16 @@ BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
     __bbil_writer.equal_range(uid);
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
     BlackBoardInterfaceListener *bbil = j->second;
-    Interface *bbil_iface = bbil->bbil_writer_interface(uid);
-    if (bbil_iface != NULL ) {
-      bbil->bb_interface_writer_added(bbil_iface, event_instance_serial);
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier",
-                          "BBIL[%s] registered for writer events "
-                          "(open) for '%s' but has no such interface",
-                          bbil->bbil_name(), uid);
+    if (! is_in_queue(/* remove op*/ false, __bbil_writer_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_writer_interface(uid);
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_writer_added(bbil_iface, event_instance_serial);
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for writer events "
+                            "(open) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
+      }
     }
   }
 
@@ -508,14 +525,16 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
     __bbil_writer.equal_range(uid);
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
     BlackBoardInterfaceListener *bbil = j->second;
-    Interface *bbil_iface = bbil->bbil_writer_interface(uid);
-    if (bbil_iface != NULL ) {
-      bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier",
-                          "BBIL[%s] registered for writer events "
-                          "(close) for '%s' but has no such interface",
-                          bbil->bbil_name(), uid);
+    if (! is_in_queue(/* remove op*/ false, __bbil_data_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_writer_interface(uid);
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for writer events "
+                            "(close) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
+      }
     }
   }
 
@@ -565,14 +584,16 @@ BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
     __bbil_reader.equal_range(uid);
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
     BlackBoardInterfaceListener *bbil = j->second;
-    Interface *bbil_iface = bbil->bbil_reader_interface(uid);
-    if (bbil_iface != NULL ) {
-      bbil->bb_interface_reader_added(bbil_iface, event_instance_serial);
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier",
-                          "BBIL[%s] registered for reader events "
-                          "(open) for '%s' but has no such interface",
-                          bbil->bbil_name(), uid);
+    if (! is_in_queue(/* remove op*/ false, __bbil_reader_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_reader_interface(uid);
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_reader_added(bbil_iface, event_instance_serial);
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for reader events "
+                            "(open) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
+      }
     }
   }
 
@@ -601,14 +622,16 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
     __bbil_reader.equal_range(uid);
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
     BlackBoardInterfaceListener *bbil = j->second;
-    Interface *bbil_iface = bbil->bbil_reader_interface(uid);
-    if (bbil_iface != NULL ) {
-      bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier",
-                          "BBIL[%s] registered for reader events "
-                          "(close) for '%s' but has no such interface",
-                          bbil->bbil_name(), uid);
+    if (! is_in_queue(/* remove op*/ false, __bbil_data_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_reader_interface(uid);
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for reader events "
+                            "(close) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
+      }
     }
   }
 
@@ -662,14 +685,16 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
     __bbil_data.equal_range(uid);
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
     BlackBoardInterfaceListener *bbil = j->second;
-    Interface *bbil_iface = bbil->bbil_data_interface(uid);
-    if (bbil_iface != NULL ) {
-      bbil->bb_interface_data_changed(bbil_iface);
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier",
-                          "BBIL[%s] registered for data change events "
-                          "for '%s' but has no such interface",
-                          bbil->bbil_name(), uid);
+    if (! is_in_queue(/* remove op*/ false, __bbil_data_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_data_interface(uid);
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_data_changed(bbil_iface);
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for data change events "
+                            "for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
+      }
     }
   }
 
@@ -719,18 +744,20 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
     __bbil_messages.equal_range(uid);
   for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
     BlackBoardInterfaceListener *bbil = j->second;
-    Interface *bbil_iface = bbil->bbil_message_interface(uid);
-    if (bbil_iface != NULL ) {
-      bool abort = bbil->bb_interface_message_received(bbil_iface, message);
-      if (abort) {
-        done = true;
-        break;
-      }
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier",
+    if (! is_in_queue(/* remove op*/ false, __bbil_messages_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_message_interface(uid);
+      if (bbil_iface != NULL ) {
+        bool abort = bbil->bb_interface_message_received(bbil_iface, message);
+        if (abort) {
+          done = true;
+          break;
+        }
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
                           "BBIL[%s] registered for message events "
-                          "for '%s' but has no such interface",
-                          bbil->bbil_name(), uid);
+                            "for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
+      }
     }
   }
 

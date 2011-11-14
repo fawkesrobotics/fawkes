@@ -118,6 +118,9 @@ class BlackBoardNotifier
   void process_data_queue();
   void process_bbio_queue();
 
+  bool is_in_queue(bool op, BBilQueue &queue, const char *uid,
+                   BlackBoardInterfaceListener *bbil);
+
   BBilMap __bbil_data;
   BBilMap __bbil_reader;
   BBilMap __bbil_writer;
