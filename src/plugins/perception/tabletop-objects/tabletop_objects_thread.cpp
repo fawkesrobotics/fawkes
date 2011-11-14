@@ -121,7 +121,7 @@ TabletopObjectsThread::init()
   seg_.setModelType(pcl::SACMODEL_PLANE);
   seg_.setMethodType(pcl::SAC_RANSAC);
   seg_.setMaxIterations(1000);
-  seg_.setDistanceThreshold(0.01);
+  seg_.setDistanceThreshold(0.02);
 }
 
 
