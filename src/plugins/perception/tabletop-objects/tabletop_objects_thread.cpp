@@ -165,7 +165,7 @@ TabletopObjectsThread::loop()
     // this can happen if run at startup. Since tabletop threads runs continuous
     // and not synchronized with main loop, but point cloud acquisition thread is
     // synchronized, we might start before any data has been read
-    logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
+    //logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
     return;
   }
 
@@ -189,7 +189,7 @@ TabletopObjectsThread::loop()
 
     // 1. check for a minimum number of expected inliers
     if (inliers->indices.size() < (0.02 * input_->points.size())) {
-      logger->log_warn(name(), "No table in scene, skipping loop");
+      //logger->log_warn(name(), "No table in scene, skipping loop");
       set_position(__table_pos_if, false, table_centroid);
       return;
     }
@@ -205,11 +205,11 @@ TabletopObjectsThread::loop()
       tf_listener->transform_vector("/base_link", table_normal, baserel_normal);
       if (baserel_normal.closestAxis() != 2) {
         happy_with_plane = false;
-        logger->log_warn(name(), "Table closest axis is not Z, excluding");
+        //logger->log_warn(name(), "Table closest axis is not Z, excluding");
       }
     } catch (tf::TransformException &e) {
-      logger->log_warn(name(), "Transforming normal failed, exception follows");
-      logger->log_warn(name(), e);
+      //logger->log_warn(name(), "Transforming normal failed, exception follows");
+      //logger->log_warn(name(), e);
     }
 
     // 3. Calculate table centroid, then transform it to the base_link system
@@ -223,11 +223,11 @@ TabletopObjectsThread::loop()
       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
       if ((baserel_centroid.z() < 0.3) || (baserel_centroid.z() > 1.0)) {
         happy_with_plane = false;
-        logger->log_warn(name(), "Table height %f not in range [0.3, 1.0]", baserel_centroid.z());
+        //logger->log_warn(name(), "Table height %f not in range [0.3, 1.0]", baserel_centroid.z());
       }
     } catch (tf::TransformException &e) {
-      logger->log_warn(name(), "Transforming centroid failed, exception follows");
-      logger->log_warn(name(), e);
+      //logger->log_warn(name(), "Transforming centroid failed, exception follows");
+      //logger->log_warn(name(), e);
     }
 
     if (! happy_with_plane) {
@@ -299,7 +299,8 @@ TabletopObjectsThread::loop()
   //printf("Before: %zu  After: %zu\n", cloud_filt_->points.size(),
   //       cloud_above_->points.size());
   if (cloud_filt_->points.size() < 50) {
-    logger->log_warn(name(), "Less points than cluster min size");
+    //logger->log_warn(name(), "Less points than cluster min size");
+    return;
   }
 
   // Extract only points on the table plane
