@@ -208,6 +208,8 @@ INSERT INTO "config" VALUES('/hardware/roomba/joystick/axis_speed','unsigned int
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/min_radius','unsigned int',250,'Minimum radius value for driving an arc; mm');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/max_radius','unsigned int',1500,'Maximum radius value for driving an arc; mm');
 INSERT INTO "config" VALUES('/hardware/roomba/joystick/max_velocity','unsigned int',500,'Maximum linear velocity; mm/sec');
+INSERT INTO "config" VALUES('/hardware/robotino/hostname','string','127.0.0.1','Hostname to connect to');
+INSERT INTO "config" VALUES('/hardware/robotino/quit_on_disconnect','bool',1,'If true quit Fawkes on disconnect from Robotino Com server, otherwise retry connection. If run from LCD menu should be set to true.');
 INSERT INTO "config" VALUES('/hardware/nao/chestbut_triple_long_click_shutdown','bool',1,'If true, triple long click on chest button causes shutdown. This requires the SetUID bit to be set on /sbin/poweroff (or whatever it links to).');
 INSERT INTO "config" VALUES('/plugins/laserht/laser_interface_id','string','Laser','Interface ID of the Laser360Interface to get data from');
 INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',12,'Number of samples to take per data point on the range of 180 deg');
