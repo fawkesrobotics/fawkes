@@ -21,5 +21,12 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
   CFLAGS_LIBMICROHTTPD  = -DHAVE_LIBMICROHTTPD $(shell $(PKGCONFIG) --cflags 'libmicrohttpd')
   LDFLAGS_LIBMICROHTTPD = $(shell $(PKGCONFIG) --libs 'libmicrohttpd')
   HAVE_WEBVIEW = 1
+else
+  ifneq ($(wildcard $(SYSROOT)/usr/include/microhttpd.h $(SYSROOT)/usr/local/include/microhttpd.h),)
+    HAVE_LIBMICROHTTPD = 1
+    CFLAGS_LIBMICROHTTPD = -DHAVE_LIBMICROHTTPD
+    LDFLAGS_LIBMICROHTTPD = -lmicrohttpd
+    HAVE_WEBVIEW = 1
+  endif
 endif
 
