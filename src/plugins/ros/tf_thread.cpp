@@ -216,7 +216,7 @@ RosTfThread::conditional_close(Interface *interface) throw()
     if (*interface == **i) {
       if (! interface->has_writer() && (interface->num_readers() == 1)) {
         // It's only us
-        logger->log_info(name(), "Last on %s:%s, closing", interface->uid());
+        logger->log_info(name(), "Last on %s, closing", interface->uid());
         bbil_remove_data_interface(*i);
         blackboard->update_listener(this);
         blackboard->close(*i);
