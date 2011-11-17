@@ -28,7 +28,7 @@
 class LaserMinMergeDataFilter : public LaserDataFilter
 {
  public:
-  LaserMinMergeDataFilter(unsigned int in_data_size, std::vector<float *> in);
+  LaserMinMergeDataFilter(unsigned int in_data_size, std::vector<LaserDataFilter::Buffer *> &in);
 
   virtual void filter();
 };

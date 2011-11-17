@@ -135,7 +135,7 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     const Rectangle& robot_rectangle,
     float z_threshold,
     unsigned int in_data_size,
-    std::vector<float *> in)
+    std::vector<LaserDataFilter::Buffer *> &in)
   : LaserDataFilter(in_data_size, in, in.size()),
     LASER_ROT(laser_rot),
     FIXTURE_ROT(fixture_rot),
@@ -182,8 +182,8 @@ LaserProjectionDataFilter::filter()
 {
   const unsigned int vecsize = std::min(in.size(), out.size());
   for (unsigned int a = 0; a < vecsize; ++a) {
-    float* inbuf  = in[a];
-    float* outbuf = out[a];
+    float* inbuf  = in[a]->values;
+    float* outbuf = out[a]->values;
     memset(outbuf, 0, sizeof(float) * out_data_size);
     for (unsigned int i = 0; i < in_data_size; ++i) {
       const float length = inbuf[i];

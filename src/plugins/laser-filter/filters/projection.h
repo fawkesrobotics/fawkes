@@ -73,7 +73,7 @@ class LaserProjectionDataFilter : public LaserDataFilter
                             const Rectangle& robot_rectangle,
                             float z_threshold,
                             unsigned int in_data_size,
-                            std::vector<float *> in);
+                            std::vector<LaserDataFilter::Buffer *> &in);
   ~LaserProjectionDataFilter();
 
   void filter();

@@ -22,6 +22,7 @@
 
 #include "min_merge.h"
 
+#include <core/exception.h>
 #include <cstring>
 
 /** @class LaserMinMergeDataFilter "min_merge.h"
@@ -36,7 +37,7 @@
  * @param in vector of input arrays
  */
 LaserMinMergeDataFilter::LaserMinMergeDataFilter(unsigned int in_data_size,
-						 std::vector<float *> in)
+						 std::vector<LaserDataFilter::Buffer *> &in)
   : LaserDataFilter(in_data_size, in, 1)
 {
 }
@@ -48,12 +49,18 @@ LaserMinMergeDataFilter::filter()
   const unsigned int vecsize = in.size();
   if (vecsize == 0)  return;
 
-  float *outbuf = out[0];
+  out[0]->frame = in[0]->frame;
 
-  copy_to_outbuf(outbuf, in[0]);
+  copy_to_outbuf(out[0], in[0]);
+  float *outbuf = out[0]->values;
 
   for (unsigned int a = 1; a < vecsize; ++a) {
-    float *inbuf  = in[a];
+    if (in[a]->frame != out[0]->frame) {
+      throw fawkes::Exception("MinMerge frame mismatch: two frames with different frame IDs "
+                              "(first has %s but input buffer %u has %s)",
+                              out[0]->frame.c_str(), a, in[a]->frame.c_str());
+    }
+    float *inbuf  = in[a]->values;
     for (unsigned int i = 0; i < (const unsigned int)out_data_size; ++i) {
       if ( (outbuf[i] == 0) || ((inbuf[i] != 0) && (inbuf[i] < outbuf[i])) ) {
 	outbuf[i] = inbuf[i];

@@ -3,8 +3,7 @@
  *  filter.h - Laser data filter interface
  *
  *  Created: Fri Oct 10 17:11:04 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,19 +23,27 @@
 #define __PLUGINS_LASER_FILTER_FILTER_H_
 
 #include <vector>
+#include <string>
 
 class LaserDataFilter
 {
  public:
+  class Buffer {
+   public:
+    Buffer(size_t num_values = 0);
+    std::string  frame;
+    float       *values;
+  };
+
   LaserDataFilter(unsigned int in_data_size,
-		  std::vector<float *> in, unsigned int out_size);
+                  std::vector<Buffer *> &in, unsigned int out_size);
   virtual ~LaserDataFilter();
 
-  virtual std::vector<float *> & get_out_vector();
-  virtual void                   set_out_vector(std::vector<float *> &out);
-  virtual unsigned int           get_out_data_size();
+  virtual std::vector<Buffer *>  & get_out_vector();
+  virtual void                     set_out_vector(std::vector<Buffer *> &out);
+  virtual unsigned int             get_out_data_size();
 
-  virtual void                   filter()   = 0;
+  virtual void                     filter()   = 0;
 
   void  set_array_ownership(bool own_in, bool own_out);
   /** Check if input arrays are owned by filter.
@@ -49,15 +56,15 @@ class LaserDataFilter
  protected:
   virtual void set_out_data_size(unsigned int data_size);
 
-  void reset_outbuf(float* outbuf);
-  void copy_to_outbuf(float* outbuf, const float* inbuf);
+  void reset_outbuf(Buffer *b);
+  void copy_to_outbuf(Buffer *outbuf, const Buffer *inbuf);
 
 
  protected:
   unsigned int         out_data_size;
   unsigned int         in_data_size;
-  std::vector<float *> in;
-  std::vector<float *> out;
+  std::vector<Buffer *>  in;
+  std::vector<Buffer *>  out;
 
  private:
   bool __own_in;

@@ -33,7 +33,7 @@
  * @param in vector of input arrays
  */
 LaserDataFilterCascade::LaserDataFilterCascade(unsigned int in_data_size,
-					       std::vector<float *> in)
+					       std::vector<Buffer *> &in)
   : LaserDataFilter(in_data_size, in, 0)
 {
   out_data_size = in_data_size;
@@ -56,12 +56,11 @@ LaserDataFilterCascade::~LaserDataFilterCascade()
  * set_array_ownership().
  */
 void
-LaserDataFilterCascade::set_out_vector(std::vector<float *> &out)
+LaserDataFilterCascade::set_out_vector(std::vector<LaserDataFilter::Buffer *> &out)
 {
   __filters.back()->set_out_vector(out);
   this->out = __filters.back()->get_out_vector();
 }
-
 
 
 /** Add a filter to the cascade.

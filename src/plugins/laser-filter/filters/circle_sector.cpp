@@ -45,7 +45,7 @@ using namespace fawkes;
 LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(unsigned int from,
 							 unsigned int to,
 							 unsigned int in_data_size,
-							 std::vector<float *> in)
+							 std::vector<LaserDataFilter::Buffer *> &in)
   : LaserDataFilter(in_data_size, in, in.size())
 {
   __from = from;
@@ -59,9 +59,12 @@ LaserCircleSectorDataFilter::filter()
   const unsigned int vecsize = std::min(in.size(), out.size());
   const unsigned int arrsize = std::min(in_data_size, out_data_size);
   for (unsigned int a = 0; a < vecsize; ++a) {
-    float *inbuf  = in[a];
-    float *outbuf = out[a];
-    reset_outbuf(outbuf);
+
+    reset_outbuf(out[a]);
+    out[a]->frame = in[a]->frame;
+
+    float *inbuf  = in[a]->values;
+    float *outbuf = out[a]->values;
 
     if (__from > __to) {
       for (unsigned int i = __from; i < arrsize; ++i) {
