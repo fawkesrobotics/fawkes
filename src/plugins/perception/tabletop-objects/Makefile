@@ -24,8 +24,9 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 ENABLE_VISUAL_DEBUGGING = 1
 USE_BASELINK_FRAME = 1
 
-LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils fawkestf \
-			fawkesinterface fawkesblackboard Position3DInterface
+LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils \
+			fawkestf fawkesinterface fawkesblackboard \
+			Position3DInterface SwitchInterface
 OBJS_tabletop_objects = tabletop_objects_plugin.o tabletop_objects_thread.o
 
 LIBS_tabletop_objects_standalone = fawkescore fvutils fvcams fawkesutils

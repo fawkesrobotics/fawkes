@@ -37,7 +37,7 @@
 
 namespace fawkes {
   class Position3DInterface;
-  class Barrier;
+  class SwitchInterface;
 }
 
 #ifdef HAVE_VISUAL_DEBUGGING
@@ -93,6 +93,8 @@ class TabletopObjectsThread
 
   std::vector<fawkes::Position3DInterface *> __pos_ifs;
   fawkes::Position3DInterface *__table_pos_if;
+
+  fawkes::SwitchInterface *__switch_if;
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;

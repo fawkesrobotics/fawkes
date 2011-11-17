@@ -27,6 +27,7 @@
 
 #include <pcl_utils/utils.h>
 #include <pcl_utils/comparisons.h>
+#include <utils/time/wait.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -42,6 +43,7 @@
 #include <pcl/common/centroid.h>
 
 #include <interfaces/Position3DInterface.h>
+#include <interfaces/SwitchInterface.h>
 
 /** @class TabletopObjectsThread "tabletop_objects_thread.h"
  * Main thread of tabletop objects plugin.
@@ -80,6 +82,11 @@ TabletopObjectsThread::init()
     __table_pos_if->set_rotation(rotation);
     __table_pos_if->write();
 
+    __switch_if = NULL;
+    __switch_if = blackboard->open_for_writing<SwitchInterface>("tabletop-objects");
+    __switch_if->set_enabled(true);
+    __switch_if->write();
+
     __pos_ifs.clear();
     __pos_ifs.resize(MAX_CENTROIDS, NULL);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
@@ -97,6 +104,7 @@ TabletopObjectsThread::init()
     }
   } catch (Exception &e) {
     blackboard->close(__table_pos_if);
+    blackboard->close(__switch_if);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
       if (__pos_ifs[i]) {
         blackboard->close(__pos_ifs[i]);
@@ -133,6 +141,7 @@ TabletopObjectsThread::finalize()
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
   
   blackboard->close(__table_pos_if);
+  blackboard->close(__switch_if);
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
     blackboard->close(__pos_ifs[i]);
   }
@@ -146,6 +155,27 @@ TabletopObjectsThread::finalize()
 void
 TabletopObjectsThread::loop()
 {
+  while (! __switch_if->msgq_empty()) {
+    if (SwitchInterface::EnableSwitchMessage *msg =
+        __switch_if->msgq_first_safe(msg))
+    {
+      __switch_if->set_enabled(true);
+      __switch_if->write();
+    } else if (SwitchInterface::DisableSwitchMessage *msg =
+               __switch_if->msgq_first_safe(msg))
+    {
+      __switch_if->set_enabled(false);
+      __switch_if->write();
+    }
+
+    __switch_if->msgq_pop();
+  }
+
+  if (! __switch_if->is_enabled()) {
+    TimeWait::wait(250000);
+    return;
+  }
+
   CloudPtr temp_cloud(new Cloud);
   CloudPtr temp_cloud2(new Cloud);
   pcl::ExtractIndices<PointType> extract_;
