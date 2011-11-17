@@ -39,7 +39,7 @@ namespace fawkes {
  */
 template <typename PointT>
 inline void
-set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
+set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &time)
 {
   fawkes::PointCloudTimestamp pclts;
   pclts.time.sec  = time.get_sec();
