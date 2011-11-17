@@ -44,6 +44,9 @@ class Laser720Interface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    char frame[32]; /**< 
+      Coordinate frame in which the data is presented.
+     */
     float distances[720]; /**< 
       The distances in meter of the beams.
      */
@@ -64,6 +67,9 @@ class Laser720Interface : public Interface
 
  public:
   /* Methods */
+  char * frame() const;
+  void set_frame(const char * new_frame);
+  size_t maxlenof_frame() const;
   float * distances() const;
   float distances(unsigned int index) const;
   void set_distances(unsigned int index, const float new_distances);

@@ -10,6 +10,9 @@
       the cartesian point (1,0). The direction in which the angle
       grows is indicated by the clockwise_angle field.
     </comment>
+    <field type="string" length="32" name="frame">
+      Coordinate frame in which the data is presented.
+    </field>
     <field type="float" length="360" name="distances">
       The distances in meter of the beams.
     </field>

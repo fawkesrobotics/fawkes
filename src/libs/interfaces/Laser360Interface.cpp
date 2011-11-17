@@ -52,9 +52,10 @@ Laser360Interface::Laser360Interface() : Interface()
   data      = (Laser360Interface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(IFT_STRING, "frame", 32, data->frame);
   add_fieldinfo(IFT_FLOAT, "distances", 360, &data->distances);
   add_fieldinfo(IFT_BOOL, "clockwise_angle", 1, &data->clockwise_angle);
-  unsigned char tmp_hash[] = {0xf6, 0x3a, 0x26, 0x7b, 0x46, 0x96, 0x74, 0xad, 0x48, 0x1c, 0x32, 0x66, 0x2b, 0xfe, 0x41, 0x43};
+  unsigned char tmp_hash[] = {0x5c, 0x1, 0x85, 0x24, 0x85, 0x28, 0x1f, 0xc6, 0xae, 0x4c, 0x46, 0x66, 0xe9, 0xcb, 0xe9, 0x4e};
   set_hash(tmp_hash);
 }
 
@@ -64,6 +65,41 @@ Laser360Interface::~Laser360Interface()
   free(data_ptr);
 }
 /* Methods */
+/** Get frame value.
+ * 
+      Coordinate frame in which the data is presented.
+    
+ * @return frame value
+ */
+char *
+Laser360Interface::frame() const
+{
+  return data->frame;
+}
+
+/** Get maximum length of frame value.
+ * @return length of frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Laser360Interface::maxlenof_frame() const
+{
+  return 32;
+}
+
+/** Set frame value.
+ * 
+      Coordinate frame in which the data is presented.
+    
+ * @param new_frame new frame value
+ */
+void
+Laser360Interface::set_frame(const char * new_frame)
+{
+  strncpy(data->frame, new_frame, sizeof(data->frame));
+  data_changed = true;
+}
+
 /** Get distances value.
  * 
       The distances in meter of the beams.
