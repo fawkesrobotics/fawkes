@@ -65,6 +65,7 @@ class LaserSensorThread
   unsigned int            __num_values;
 
   std::string             __cfg_name;
+  std::string             __cfg_frame;
   std::string             __cfg_prefix;
 };
 

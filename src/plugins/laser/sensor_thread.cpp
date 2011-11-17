@@ -62,6 +62,8 @@ LaserSensorThread::init()
 
   bool main_sensor  = false;
 
+  __cfg_frame = config->get_string((__cfg_prefix + "frame").c_str());
+
   try {
     main_sensor = config->get_bool((__cfg_prefix + "main_sensor").c_str());
   } catch (Exception &e) {} // ignored, assume no
@@ -74,8 +76,12 @@ LaserSensorThread::init()
 
   if (__num_values == 360) {
     __laser360_if = blackboard->open_for_writing<Laser360Interface>(if_id.c_str());
+    __laser360_if->set_frame(__cfg_frame.c_str());
+    __laser360_if->write();
   } else if (__num_values == 720){
     __laser720_if = blackboard->open_for_writing<Laser720Interface>(if_id.c_str());
+    __laser720_if->set_frame(__cfg_frame.c_str());
+    __laser720_if->write();
   } else {
     throw Exception("Laser acquisition thread must produce either 360 or 720 "
 		    "distance values, but it produces %u", __aqt->get_distance_data_size());
