@@ -62,8 +62,8 @@ SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger *logger,
   bbil_add_data_interface(__reader);
   bbil_add_message_interface(__writer);
 
-  //__reader_bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
-  //__writer_bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  __reader_bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+  __writer_bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 }
 
 
@@ -81,7 +81,7 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface,
 {
   try {
     if ( interface == __writer ) {
-      __logger->log_debug(bbil_name(), "Forwarding message");
+      //__logger->log_debug(bbil_name(), "Forwarding message");
       Message *m = message->clone();
       m->set_hops(message->hops());
       m->ref();
