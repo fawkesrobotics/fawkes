@@ -31,9 +31,10 @@
 using namespace fawkes;
 
 /** @class LaserPointCloudThread "tf_thread.h"
- * Thread to convert laser data to point clouds.
- * This threads opens all existing laser interfaces and converts the data
- * into point clouds.
+ * Thread to exchange transforms between Fawkes and ROS.
+ * This threads connects to Fawkes and ROS to read and write transforms.
+ * Transforms received on one end are republished to the other side. To
+ * Fawkes new frames are published during the sensor hook.
  * @author Tim Niemueller
  */
 
@@ -257,9 +258,14 @@ LaserPointCloudThread::bb_interface_reader_removed(fawkes::Interface *interface,
 
 void
 LaserPointCloudThread::conditional_close(Interface *interface) throw()
-{  
+{
   Laser360Interface *l360if = dynamic_cast<Laser360Interface *>(interface);
   Laser720Interface *l720if = dynamic_cast<Laser720Interface *>(interface);
+
+  bool close = false;
+  InterfaceCloudMapping mapping;
+
+  MutexLocker lock(__mappings.mutex());
 
   fawkes::LockList<InterfaceCloudMapping>::iterator m;
   for (m = __mappings.begin(); m != __mappings.end(); ++m) {
@@ -269,19 +275,27 @@ LaserPointCloudThread::conditional_close(Interface *interface) throw()
     if (match) {
       if (! m->interface->has_writer() && (m->interface->num_readers() == 1)) {
         // It's only us
-        std::string uid = m->interface->uid();
-        logger->log_info(name(), "Last on %s, closing", uid.c_str());
-        try {
-          bbil_remove_data_interface(m->interface);
-          blackboard->update_listener(this);
-          blackboard->close(m->interface);
-        } catch (Exception &e) {
-          logger->log_error(name(), "Failed to unregister or close %s: %s",
-                            uid.c_str(), e.what());
-        }
-        __mappings.erase(m);
+        logger->log_info(name(), "Last on %s, closing", m->interface->uid());
+         close = true;
+         mapping = *m;
+         __mappings.erase(m);
         break;
       }
+    }
+  }
+
+  lock.unlock();
+
+  if (close) {
+    std::string uid = mapping.interface->uid();
+    try {
+      bbil_remove_data_interface(mapping.interface);
+      blackboard->update_listener(this);
+      blackboard->close(mapping.interface);
+      pcl_manager->remove_pointcloud(mapping.id.c_str());
+    } catch (Exception &e) {
+      logger->log_error(name(), "Failed to unregister or close %s: %s",
+                        uid.c_str(), e.what());
     }
   }
 }
