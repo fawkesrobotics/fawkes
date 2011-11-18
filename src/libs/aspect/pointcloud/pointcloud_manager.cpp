@@ -107,7 +107,7 @@ PointCloudManager::PointCloudManager()
 /** Destructor. */
 PointCloudManager::~PointCloudManager()
 {
-  std::map<std::string, StorageAdapter *>::iterator c;
+  LockMap<std::string, StorageAdapter *>::iterator c;
   for (c = __clouds.begin(); c != __clouds.end(); ++c) {
     delete c->second;
   }
@@ -122,7 +122,10 @@ PointCloudManager::~PointCloudManager()
 void
 PointCloudManager::remove_pointcloud(const char *id)
 {
+  MutexLocker lock(__clouds.mutex());
+
   if (__clouds.find(id) != __clouds.end()) {
+    delete __clouds[id];
     __clouds.erase(id);
   }
 }
@@ -134,6 +137,8 @@ PointCloudManager::remove_pointcloud(const char *id)
 bool
 PointCloudManager::exists_pointcloud(const char *id)
 {
+  MutexLocker lock(__clouds.mutex());
+
   return (__clouds.find(id) != __clouds.end());
 }
 
@@ -144,9 +149,11 @@ PointCloudManager::exists_pointcloud(const char *id)
 std::vector<std::string>
 PointCloudManager::get_pointcloud_list() const
 {
+  MutexLocker lock(__clouds.mutex());
+
   std::vector<std::string> rv;
   rv.clear();
-  std::map<std::string, StorageAdapter *>::const_iterator c;
+  LockMap<std::string, StorageAdapter *>::const_iterator c;
   for (c = __clouds.begin(); c != __clouds.end(); ++c) {
     rv.push_back(c->first);
   }
@@ -160,7 +167,7 @@ PointCloudManager::get_pointcloud_list() const
  * and ROS!
  * @return map from ID to storage adapter
  */
-const std::map<std::string, PointCloudManager::StorageAdapter *> &
+const fawkes::LockMap<std::string, PointCloudManager::StorageAdapter *> &
 PointCloudManager::get_pointclouds() const
 {
   return __clouds;
@@ -178,6 +185,8 @@ PointCloudManager::get_pointclouds() const
 const PointCloudManager::StorageAdapter *
 PointCloudManager::get_storage_adapter(const char *id)
 {
+  MutexLocker lock(__clouds.mutex());
+
   if (__clouds.find(id) == __clouds.end()) {
     throw Exception("PointCloud '%s' unknown", id);
   }

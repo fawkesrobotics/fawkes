@@ -27,10 +27,11 @@
 #include <aspect/aspect.h>
 #include <core/exception.h>
 #include <core/utils/refptr.h>
+#include <core/utils/lock_map.h>
+#include <core/threading/mutex_locker.h>
 #include <utils/time/time.h>
 
 #include <vector>
-#include <map>
 #include <string>
 #include <stdint.h>
 
@@ -129,11 +130,11 @@ class PointCloudManager
   };
 
   std::vector<std::string>  get_pointcloud_list() const;
-  const std::map<std::string, StorageAdapter *> &  get_pointclouds() const;
+  const fawkes::LockMap<std::string, StorageAdapter *> &  get_pointclouds() const;
   const StorageAdapter *  get_storage_adapter(const char *id);
 
  private:
-  std::map<std::string, StorageAdapter *>  __clouds;
+  fawkes::LockMap<std::string, StorageAdapter *>  __clouds;
 };
 
 
@@ -164,6 +165,8 @@ void
 PointCloudManager::add_pointcloud(const char *id,
                                   RefPtr<pcl::PointCloud<PointT> > cloud)
 {
+  fawkes::MutexLocker lock(__clouds.mutex());
+
   if (__clouds.find(id) == __clouds.end()) {
     __clouds[id] = new PointCloudStorageAdapter<PointT>(cloud);
   } else {
@@ -175,6 +178,8 @@ template <typename PointT>
 const RefPtr<const pcl::PointCloud<PointT> >
 PointCloudManager::get_pointcloud(const char *id)
 {
+  fawkes::MutexLocker lock(__clouds.mutex());
+
   if (__clouds.find(id) != __clouds.end()) {
     PointCloudStorageAdapter<PointT> *pa =
       dynamic_cast<PointCloudStorageAdapter<PointT> *>(__clouds[id]);
