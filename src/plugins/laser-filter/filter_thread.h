@@ -30,6 +30,9 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 
 #include <string>
 #include <list>
@@ -45,6 +48,9 @@ class LaserFilterThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::BlackBoardAspect
 {
  public:

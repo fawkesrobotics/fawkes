@@ -15,16 +15,34 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 SUBDIRS = deadspots
 
+ifeq ($(HAVE_TF),1)
+  CFLAGS  += $(CFLAGS_TF) -Wno-deprecated-declarations
+  LDFLAGS += $(LDFLAGS_TF)
+else
+  FILTER_OUT += filters/projection.o
+  WARN_TARGETS = warning_tf
+endif
+
 LIBS_laser_filter = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	             fawkesinterface Laser360Interface Laser720Interface fawkesgeometry
+	            fawkesinterface Laser360Interface Laser720Interface \
+		    fawkesgeometry fawkestf
 
 OBJS_laser_filter = $(filter-out deadspots/% $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+OBJS_all = $(OBJS_laser_filter)
+
 PLUGINS_all = $(PLUGINDIR)/laser-filter.so
 
-OBJS_all = $(OBJS_laser_filter)
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_tf
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting projection filter$(TNORMAL) (tf not available)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
 
