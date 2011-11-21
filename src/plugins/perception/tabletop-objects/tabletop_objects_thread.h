@@ -91,10 +91,10 @@ class TabletopObjectsThread
   pcl::VoxelGrid<PointType> grid_;
   pcl::SACSegmentation<PointType> seg_;
 
-  std::vector<fawkes::Position3DInterface *> __pos_ifs;
-  fawkes::Position3DInterface *__table_pos_if;
+  std::vector<fawkes::Position3DInterface *> pos_ifs_;
+  fawkes::Position3DInterface *table_pos_if_;
 
-  fawkes::SwitchInterface *__switch_if;
+  fawkes::SwitchInterface *switch_if_;
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;

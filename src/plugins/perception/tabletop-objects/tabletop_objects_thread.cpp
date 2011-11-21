@@ -77,18 +77,18 @@ TabletopObjectsThread::init()
 
   try {
     double rotation[4] = {0., 0., 0., 1.};
-    __table_pos_if = NULL;
-    __table_pos_if = blackboard->open_for_writing<Position3DInterface>("Tabletop Height");
-    __table_pos_if->set_rotation(rotation);
-    __table_pos_if->write();
+    table_pos_if_ = NULL;
+    table_pos_if_ = blackboard->open_for_writing<Position3DInterface>("Tabletop Height");
+    table_pos_if_->set_rotation(rotation);
+    table_pos_if_->write();
 
-    __switch_if = NULL;
-    __switch_if = blackboard->open_for_writing<SwitchInterface>("tabletop-objects");
-    __switch_if->set_enabled(true);
-    __switch_if->write();
+    switch_if_ = NULL;
+    switch_if_ = blackboard->open_for_writing<SwitchInterface>("tabletop-objects");
+    switch_if_->set_enabled(true);
+    switch_if_->write();
 
-    __pos_ifs.clear();
-    __pos_ifs.resize(MAX_CENTROIDS, NULL);
+    pos_ifs_.clear();
+    pos_ifs_.resize(MAX_CENTROIDS, NULL);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
       char *tmp;
       if (asprintf(&tmp, "Tabletop Object %u", i + 1) != -1) {
@@ -97,20 +97,20 @@ TabletopObjectsThread::init()
         free(tmp);
         Position3DInterface *iface =
           blackboard->open_for_writing<Position3DInterface>(id.c_str());
-        __pos_ifs[i] = iface;
+        pos_ifs_[i] = iface;
         iface->set_rotation(rotation);
         iface->write();
       }
     }
   } catch (Exception &e) {
-    blackboard->close(__table_pos_if);
-    blackboard->close(__switch_if);
+    blackboard->close(table_pos_if_);
+    blackboard->close(switch_if_);
     for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-      if (__pos_ifs[i]) {
-        blackboard->close(__pos_ifs[i]);
+      if (pos_ifs_[i]) {
+        blackboard->close(pos_ifs_[i]);
       }
     }
-    __pos_ifs.clear();
+    pos_ifs_.clear();
     throw;
   }
 
@@ -140,12 +140,12 @@ TabletopObjectsThread::finalize()
 
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
   
-  blackboard->close(__table_pos_if);
-  blackboard->close(__switch_if);
+  blackboard->close(table_pos_if_);
+  blackboard->close(switch_if_);
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    blackboard->close(__pos_ifs[i]);
+    blackboard->close(pos_ifs_[i]);
   }
-  __pos_ifs.clear();
+  pos_ifs_.clear();
 
   finput_.reset();
   fclusters_.reset();
@@ -155,23 +155,23 @@ TabletopObjectsThread::finalize()
 void
 TabletopObjectsThread::loop()
 {
-  while (! __switch_if->msgq_empty()) {
+  while (! switch_if_->msgq_empty()) {
     if (SwitchInterface::EnableSwitchMessage *msg =
-        __switch_if->msgq_first_safe(msg))
+        switch_if_->msgq_first_safe(msg))
     {
-      __switch_if->set_enabled(true);
-      __switch_if->write();
+      switch_if_->set_enabled(true);
+      switch_if_->write();
     } else if (SwitchInterface::DisableSwitchMessage *msg =
-               __switch_if->msgq_first_safe(msg))
+               switch_if_->msgq_first_safe(msg))
     {
-      __switch_if->set_enabled(false);
-      __switch_if->write();
+      switch_if_->set_enabled(false);
+      switch_if_->write();
     }
 
-    __switch_if->msgq_pop();
+    switch_if_->msgq_pop();
   }
 
-  if (! __switch_if->is_enabled()) {
+  if (! switch_if_->is_enabled()) {
     TimeWait::wait(250000);
     return;
   }
@@ -219,7 +219,7 @@ TabletopObjectsThread::loop()
     // 1. check for a minimum number of expected inliers
     if (inliers->indices.size() < (0.02 * input_->points.size())) {
       //logger->log_warn(name(), "No table in scene, skipping loop");
-      set_position(__table_pos_if, false, table_centroid);
+      set_position(table_pos_if_, false, table_centroid);
       return;
     }
 
@@ -271,7 +271,7 @@ TabletopObjectsThread::loop()
   }
 
   // If we got here we found the table
-  set_position(__table_pos_if, true, table_centroid);
+  set_position(table_pos_if_, true, table_centroid);
 
   extract_.setNegative(false);
   extract_.setInputCloud(temp_cloud);
@@ -441,7 +441,7 @@ TabletopObjectsThread::loop()
   }
 
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    set_position(__pos_ifs[i], i < centroid_i, centroids[i]);
+    set_position(pos_ifs_[i], i < centroid_i, centroids[i]);
   }
   centroids.resize(centroid_i);
 
