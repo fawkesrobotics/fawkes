@@ -30,6 +30,7 @@
 #include <aspect/tf.h>
 #include <aspect/pointcloud.h>
 
+#include <Eigen/StdVector>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/segmentation/sac_segmentation.h>

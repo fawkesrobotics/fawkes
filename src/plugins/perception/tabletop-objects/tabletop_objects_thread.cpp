@@ -402,7 +402,7 @@ TabletopObjectsThread::loop()
     p2.b = table_color[2];
   }
 
-  std::vector<Eigen::Vector4f> centroids;
+  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
   centroids.resize(MAX_CENTROIDS);
   unsigned int centroid_i = 0;
 
@@ -477,7 +477,7 @@ TabletopObjectsThread::loop()
     normal[2] = coeff->values[2];
     normal[3] = 0.;
 
-    std::vector<Eigen::Vector4f> hull_vertices;
+    TabletopVisualizationThreadBase::V_Vector4f hull_vertices;
     std::vector<int> &v = vertices_[0].vertices;
     hull_vertices.resize(v.size());
     for (unsigned int i = 0; i < v.size(); ++i) {

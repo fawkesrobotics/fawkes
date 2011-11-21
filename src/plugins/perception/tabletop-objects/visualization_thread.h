@@ -53,21 +53,28 @@ class TabletopVisualizationThread
   virtual void visualize(const std::string &frame_id,
                          Eigen::Vector4f &table_centroid,
                          Eigen::Vector4f &normal,
-                         std::vector<Eigen::Vector4f> &table_hull_vertices,
-                         std::vector<Eigen::Vector4f> &centroids) throw();
+                         V_Vector4f &table_hull_vertices,
+                         V_Vector4f &centroids) throw();
+
+ private:
+  void triangulate_hull();
 
  private:
   fawkes::Mutex mutex_;
   std::string frame_id_;
   Eigen::Vector4f table_centroid_;
   Eigen::Vector4f normal_;
-  std::vector<Eigen::Vector4f> table_hull_vertices_;
-  std::vector<Eigen::Vector4f> centroids_;
+  V_Vector4f table_hull_vertices_;
+  V_Vector4f table_triangle_vertices_;
+  V_Vector4f centroids_;
   ros::Publisher *vispub_;
 #ifdef USE_POSEPUB
   ros::Publisher *posepub_;
 #endif
   size_t last_id_num_;
+
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 

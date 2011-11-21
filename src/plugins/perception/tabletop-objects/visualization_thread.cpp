@@ -30,6 +30,29 @@
 #  include <geometry_msgs/PointStamped.h>
 #endif
 
+extern "C"
+{
+#ifdef HAVE_QHULL_2011
+#  include "libqhull/libqhull.h"
+#  include "libqhull/mem.h"
+#  include "libqhull/qset.h"
+#  include "libqhull/geom.h"
+#  include "libqhull/merge.h"
+#  include "libqhull/poly.h"
+#  include "libqhull/io.h"
+#  include "libqhull/stat.h"
+#else
+#  include "qhull/qhull.h"
+#  include "qhull/mem.h"
+#  include "qhull/qset.h"
+#  include "qhull/geom.h"
+#  include "qhull/merge.h"
+#  include "qhull/poly.h"
+#  include "qhull/io.h"
+#  include "qhull/stat.h"
+#endif
+}
+
 using namespace fawkes;
 
 /** @class TabletopVisualizationThread "visualization_thread.h"
@@ -166,12 +189,13 @@ TabletopVisualizationThread::loop()
   normal.points[1].z = normal_end[2];
   normal.scale.x = 0.02;
   normal.scale.y = 0.04;
-  normal.color.r = 1.0;
+  normal.color.r = 0.4;
   normal.color.g = normal.color.b = 0.f;
   normal.color.a = 1.0;
   normal.lifetime = ros::Duration(10, 0);
   m.markers.push_back(normal);
 
+  // Table surrounding polygon
   visualization_msgs::Marker hull;
   hull.header.frame_id = frame_id_;
   hull.header.stamp = ros::Time::now();
@@ -189,11 +213,40 @@ TabletopVisualizationThread::loop()
   hull.points[table_hull_vertices_.size()].y = table_hull_vertices_[0][1];
   hull.points[table_hull_vertices_.size()].z = table_hull_vertices_[0][2];
   hull.scale.x = 0.01; // 5cm high
-  hull.color.r = 1.0;
+  hull.color.r = 0.4;
   hull.color.g = hull.color.b = 0.f;
   hull.color.a = 1.0;
   hull.lifetime = ros::Duration(10, 0);
   m.markers.push_back(hull);
+
+  triangulate_hull();
+
+  if (! table_triangle_vertices_.empty()) {
+    visualization_msgs::Marker plane;
+    plane.header.frame_id = frame_id_;
+    plane.header.stamp = ros::Time::now();
+    plane.ns = "tabletop";
+    plane.id = idnum++;
+    plane.type = visualization_msgs::Marker::TRIANGLE_LIST;
+    plane.action = visualization_msgs::Marker::ADD;
+    plane.points.resize(table_triangle_vertices_.size());
+
+    for (unsigned int i = 0; i < table_triangle_vertices_.size(); ++i) {
+      plane.points[i].x = table_triangle_vertices_[i][0];
+      plane.points[i].y = table_triangle_vertices_[i][1];
+      plane.points[i].z = table_triangle_vertices_[i][2];
+    }
+    plane.pose.orientation.w = 1.;
+    plane.scale.x = 1.0;
+    plane.scale.y = 1.0;
+    plane.scale.z = 1.0;
+    plane.color.r = ((float)table_color[0] / 255.f) * 0.8;
+    plane.color.g = ((float)table_color[1] / 255.f) * 0.8;
+    plane.color.b = ((float)table_color[2] / 255.f) * 0.8;
+    plane.color.a = 1.0;
+    plane.lifetime = ros::Duration(10, 0);
+    m.markers.push_back(plane);
+  }
 
   for (size_t i = idnum; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
@@ -224,8 +277,8 @@ void
 TabletopVisualizationThread::visualize(const std::string &frame_id,
                                        Eigen::Vector4f &table_centroid,
                                        Eigen::Vector4f &normal,
-                                       std::vector<Eigen::Vector4f> &table_hull_vertices,
-                                       std::vector<Eigen::Vector4f> &centroids) throw()
+                                       V_Vector4f &table_hull_vertices,
+                                       V_Vector4f &centroids) throw()
 {
   MutexLocker lock(&mutex_);
   frame_id_ = frame_id;
@@ -234,4 +287,70 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
   table_hull_vertices_ = table_hull_vertices;
   centroids_ = centroids;
   wakeup();
+}
+
+
+void
+TabletopVisualizationThread::triangulate_hull()
+{
+  // Don't need to, resizing and overwriting them all later
+  //table_triangle_vertices_.clear();
+
+  // True if qhull should free points in qh_freeqhull() or reallocation
+  boolT ismalloc = True;
+  qh DELAUNAY = True;
+
+  int dim = 3;
+  char *flags = const_cast<char *>("qhull Qt Pp");;
+  FILE *outfile = NULL;
+  FILE *errfile = stderr;
+
+  // Array of coordinates for each point
+  coordT *points = (coordT *)calloc(table_hull_vertices_.size() * dim, sizeof(coordT));
+
+  for (size_t i = 0; i < table_hull_vertices_.size(); ++i)
+  {
+    points[i * dim + 0] = (coordT)table_hull_vertices_[i][0];
+    points[i * dim + 1] = (coordT)table_hull_vertices_[i][1];
+    points[i * dim + 2] = (coordT)table_hull_vertices_[i][2];
+  }
+
+  // Compute convex hull
+  int exitcode = qh_new_qhull(dim, table_hull_vertices_.size(), points,
+                              ismalloc, flags, outfile, errfile);
+
+  if (exitcode != 0) {
+    // error, return empty vector
+    // Deallocates memory (also the points)
+    qh_freeqhull(!qh_ALL);
+    int curlong, totlong;
+    qh_memfreeshort (&curlong, &totlong);
+    return;
+  }
+
+  qh_triangulate();
+
+  int num_facets = qh num_facets;
+
+  table_triangle_vertices_.resize(num_facets * dim);
+  facetT *facet;
+  size_t i = 0;
+  FORALLfacets
+  {
+    vertexT *vertex;
+    int vertex_n, vertex_i;
+    FOREACHvertex_i_(facet->vertices)
+    {
+      table_triangle_vertices_[i + vertex_i][0] = vertex->point[0];
+      table_triangle_vertices_[i + vertex_i][1] = vertex->point[1];
+      table_triangle_vertices_[i + vertex_i][2] = vertex->point[2];
+    }
+
+    i += dim;
+  }
+
+  // Deallocates memory (also the points)
+  qh_freeqhull(!qh_ALL);
+  int curlong, totlong;
+  qh_memfreeshort(&curlong, &totlong);
 }

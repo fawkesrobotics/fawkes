@@ -67,7 +67,9 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
       CFLAGS_visualization_thread  = $(CFLAGS_ROS) $(call ros-pkg-cflags,visualization_msgs)
       CFLAGS += -DHAVE_VISUAL_DEBUGGING
       LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
-      LIBS_tabletop_objects += fawkesrosaspect
+
+      # Link with qhull, required by PCL therefore safe to assume it's there
+      LIBS_tabletop_objects += fawkesrosaspect qhull
 
       OBJS_tabletop_objects += visualization_thread_base.o visualization_thread.o
     else

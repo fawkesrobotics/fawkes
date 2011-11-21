@@ -27,18 +27,23 @@
 #endif
 
 #include <Eigen/Core>
+#include <Eigen/StdVector>
 #include <utils/time/time.h>
 
 class TabletopVisualizationThreadBase
 {
  public:
+  /** Aligned vector of vectors/points. */
+  typedef std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > V_Vector4f;
+  // Eigen::aligned_allocator<Eigen::Vector4f> 
+
   virtual ~TabletopVisualizationThreadBase();
 
   virtual void visualize(const std::string &frame_id,
                          Eigen::Vector4f &table_centroid,
                          Eigen::Vector4f &normal,
-                         std::vector<Eigen::Vector4f> &table_hull_vertices,
-                         std::vector<Eigen::Vector4f> &centroids) throw() = 0;
+                         V_Vector4f &table_hull_vertices,
+                         V_Vector4f &centroids) throw() = 0;
 };
 
 #endif
