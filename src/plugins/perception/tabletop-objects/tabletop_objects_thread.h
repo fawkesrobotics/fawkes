@@ -103,6 +103,7 @@ class TabletopObjectsThread
   unsigned int cfg_segm_max_iterations_;
   float cfg_segm_distance_threshold_;
   float cfg_segm_inlier_quota_;
+  float cfg_max_z_angle_deviation_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
   float cfg_cluster_tolerance_;

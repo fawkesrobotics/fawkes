@@ -83,12 +83,13 @@ TabletopObjectsThread::init()
     config->get_float(CFG_PREFIX"table_segmentation_distance_threshold");
   cfg_segm_inlier_quota_ =
     config->get_float(CFG_PREFIX"table_segmentation_inlier_quota");
-  cfg_table_min_height_   = config->get_float(CFG_PREFIX"table_min_height");
-  cfg_table_max_height_   = config->get_float(CFG_PREFIX"table_max_height");
-  cfg_cluster_tolerance_  = config->get_float(CFG_PREFIX"cluster_tolerance");
-  cfg_cluster_min_size_   = config->get_uint(CFG_PREFIX"cluster_min_size");
-  cfg_cluster_max_size_   = config->get_uint(CFG_PREFIX"cluster_max_size");
-  cfg_result_frame_       = config->get_string(CFG_PREFIX"result_frame");
+  cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
+  cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
+  cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
+  cfg_cluster_tolerance_     = config->get_float(CFG_PREFIX"cluster_tolerance");
+  cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
+  cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
+  cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -241,7 +242,7 @@ TabletopObjectsThread::loop()
       return;
     }
 
-    // 2. Check if normal points "upwards", i.e. along the Z axis, of the
+    // 2. Check angle between normal vector and Z axis of the
     // base_link robot frame since tables are usually parallel to the ground...
     try {
       tf::Stamped<tf::Vector3>
@@ -250,9 +251,13 @@ TabletopObjectsThread::loop()
 
       tf::Stamped<tf::Vector3> baserel_normal;
       tf_listener->transform_vector("/base_link", table_normal, baserel_normal);
-      if (baserel_normal.closestAxis() != 2) {
+      tf::Vector3 z_axis(0, 0, copysign(1.0, baserel_normal.z()));
+
+      if (fabs(z_axis.angle(baserel_normal)) > cfg_max_z_angle_deviation_ ) {
         happy_with_plane = false;
-        //logger->log_warn(name(), "Table closest axis is not Z, excluding");
+        logger->log_warn(name(), "Table normal (%f,%f,%f) Z angle deviation |%f| > %f, excluding",
+                         baserel_normal.x(), baserel_normal.y(), baserel_normal.z(),
+                         z_axis.angle(baserel_normal), cfg_max_z_angle_deviation_);
       }
     } catch (tf::TransformException &e) {
       //logger->log_warn(name(), "Transforming normal failed, exception follows");

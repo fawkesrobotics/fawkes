@@ -249,6 +249,7 @@ INSERT INTO "config" VALUES('/perception/tabletop-objects/voxel_leaf_size','floa
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_max_iterations','unsigned int',1000,'Maximum number of iterations to perform for table segmentation');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_distance_threshold','float',0.02,'Segmentation distance threshold; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_inlier_quota','float',0.02,'Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/max_z_angle_deviation','float',0.1,'Maximum angle between Z axis and table normal, takes normal direction into account; rad');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_min_height','float',0.6,'Minimum required height of table; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_max_height','float',0.9,'Maximum height of table; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_tolerance','float',0.04,'Clustering inter-point distance tolerance; m');
