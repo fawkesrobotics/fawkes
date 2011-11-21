@@ -45,6 +45,8 @@
 #include <interfaces/Position3DInterface.h>
 #include <interfaces/SwitchInterface.h>
 
+#define CFG_PREFIX "/perception/tabletop-objects/"
+
 /** @class TabletopObjectsThread "tabletop_objects_thread.h"
  * Main thread of tabletop objects plugin.
  * @author Tim Niemueller
@@ -72,6 +74,22 @@ TabletopObjectsThread::~TabletopObjectsThread()
 void
 TabletopObjectsThread::init()
 {
+  cfg_depth_filter_min_x_ = config->get_float(CFG_PREFIX"depth_filter_min_x");
+  cfg_depth_filter_max_x_ = config->get_float(CFG_PREFIX"depth_filter_max_x");
+  cfg_voxel_leaf_size_    = config->get_float(CFG_PREFIX"voxel_leaf_size");
+  cfg_segm_max_iterations_ =
+    config->get_uint(CFG_PREFIX"table_segmentation_max_iterations");
+  cfg_segm_distance_threshold_ =
+    config->get_float(CFG_PREFIX"table_segmentation_distance_threshold");
+  cfg_segm_inlier_quota_ =
+    config->get_float(CFG_PREFIX"table_segmentation_inlier_quota");
+  cfg_table_min_height_   = config->get_float(CFG_PREFIX"table_min_height");
+  cfg_table_max_height_   = config->get_float(CFG_PREFIX"table_max_height");
+  cfg_cluster_tolerance_  = config->get_float(CFG_PREFIX"cluster_tolerance");
+  cfg_cluster_min_size_   = config->get_uint(CFG_PREFIX"cluster_min_size");
+  cfg_cluster_max_size_   = config->get_uint(CFG_PREFIX"cluster_max_size");
+  cfg_result_frame_       = config->get_string(CFG_PREFIX"result_frame");
+
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
@@ -121,14 +139,14 @@ TabletopObjectsThread::init()
   clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
   grid_.setFilterFieldName("x");
-  grid_.setFilterLimits(0.0, 3.0);
-  grid_.setLeafSize(0.01, 0.01, 0.01);
+  grid_.setFilterLimits(cfg_depth_filter_min_x_, cfg_depth_filter_max_x_);
+  grid_.setLeafSize(cfg_voxel_leaf_size_, cfg_voxel_leaf_size_, cfg_voxel_leaf_size_);
 
   seg_.setOptimizeCoefficients(true);
   seg_.setModelType(pcl::SACMODEL_PLANE);
   seg_.setMethodType(pcl::SAC_RANSAC);
-  seg_.setMaxIterations(1000);
-  seg_.setDistanceThreshold(0.02);
+  seg_.setMaxIterations(cfg_segm_max_iterations_);
+  seg_.setDistanceThreshold(cfg_segm_distance_threshold_);
 }
 
 
@@ -217,7 +235,7 @@ TabletopObjectsThread::loop()
     seg_.segment(*inliers, *coeff);
 
     // 1. check for a minimum number of expected inliers
-    if (inliers->indices.size() < (0.02 * input_->points.size())) {
+    if (inliers->indices.size() < (cfg_segm_inlier_quota_ * input_->points.size())) {
       //logger->log_warn(name(), "No table in scene, skipping loop");
       set_position(table_pos_if_, false, table_centroid);
       return;
@@ -250,9 +268,12 @@ TabletopObjectsThread::loop()
                  fawkes::Time(0, 0), input_->header.frame_id);
       tf::Stamped<tf::Point> baserel_centroid;
       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
-      if ((baserel_centroid.z() < 0.3) || (baserel_centroid.z() > 1.0)) {
+      if ((baserel_centroid.z() < cfg_table_min_height_) ||
+          (baserel_centroid.z() > cfg_table_max_height_))
+      {
         happy_with_plane = false;
-        //logger->log_warn(name(), "Table height %f not in range [0.3, 1.0]", baserel_centroid.z());
+        //logger->log_warn(name(), "Table height %f not in range [%f, %f]", baserel_centroid.z(),
+        //                 cfg_table_min_height_, cfg_table_max_height_);
       }
     } catch (tf::TransformException &e) {
       //logger->log_warn(name(), "Transforming centroid failed, exception follows");
@@ -327,7 +348,7 @@ TabletopObjectsThread::loop()
 
   //printf("Before: %zu  After: %zu\n", cloud_filt_->points.size(),
   //       cloud_above_->points.size());
-  if (cloud_filt_->points.size() < 50) {
+  if (cloud_filt_->points.size() < cfg_cluster_min_size_) {
     //logger->log_warn(name(), "Less points than cluster min size");
     return;
   }
@@ -393,9 +414,9 @@ TabletopObjectsThread::loop()
 
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<PointType> ec;
-    ec.setClusterTolerance(0.04); // 2cm
-    ec.setMinClusterSize(50);
-    ec.setMaxClusterSize(500);
+    ec.setClusterTolerance(cfg_cluster_tolerance_);
+    ec.setMinClusterSize(cfg_cluster_min_size_);
+    ec.setMaxClusterSize(cfg_cluster_max_size_);
     ec.setSearchMethod(kdtree_cl);
     ec.setInputCloud(cloud_objs_);
     ec.extract(cluster_indices);
@@ -476,19 +497,16 @@ void
 TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
                                     bool is_visible, Eigen::Vector4f &centroid)
 {
-#ifdef USE_BASELINK_FRAME
-  // For now convert into base_link frame to make it easier to use in agent
   tf::Stamped<tf::Point> baserel_centroid;
   try{
     tf::Stamped<tf::Point>
       scentroid(tf::Point(centroid[0], centroid[1], centroid[2]),
                 fawkes::Time(0, 0), input_->header.frame_id);
-    tf_listener->transform_point("/base_link", scentroid, baserel_centroid);
-    iface->set_frame("/base_link");
+    tf_listener->transform_point(cfg_result_frame_, scentroid, baserel_centroid);
+    iface->set_frame(cfg_result_frame_.c_str());
   } catch (tf::TransformException &e) {
     is_visible = false;
   }
-#endif
 
   int visibility_history = iface->visibility_history();
   if (is_visible) {
@@ -497,11 +515,7 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
     } else {
       iface->set_visibility_history(1);
     }
-#ifdef USE_BASELINK_FRAME
     double translation[3] = { baserel_centroid.x(), baserel_centroid.y(), baserel_centroid.z() };
-#else
-    double translation[3] = { centroid.x(), centroid.y(), centroid.z() };
-#endif
     iface->set_translation(translation);
       
   } else {

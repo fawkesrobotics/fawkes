@@ -96,6 +96,19 @@ class TabletopObjectsThread
 
   fawkes::SwitchInterface *switch_if_;
 
+  float cfg_depth_filter_min_x_;
+  float cfg_depth_filter_max_x_;
+  float cfg_voxel_leaf_size_;
+  unsigned int cfg_segm_max_iterations_;
+  float cfg_segm_distance_threshold_;
+  float cfg_segm_inlier_quota_;
+  float cfg_table_min_height_;
+  float cfg_table_max_height_;
+  float cfg_cluster_tolerance_;
+  unsigned int cfg_cluster_min_size_;
+  unsigned int cfg_cluster_max_size_;
+  std::string cfg_result_frame_;
+
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;
 #endif

@@ -243,4 +243,16 @@ INSERT INTO "config" VALUES('/plugins/openni/run_sensor_server','bool',1,'Should
 INSERT INTO "config" VALUES('/plugins/openni/sensor_server_bin','string','/usr/bin/XnSensorServer','Full path to the XnSensorServer binary; path');
 INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinear','De-bayering mode, can be bilinear or nearest_neighbor');
 INSERT INTO "config" VALUES('/plugins/static-transforms/update-interval','float',1.0,'Interval in which to post static transform updates; sec');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/depth_filter_min_x','float',0.0,'Minimum X value (i.e. distance to camera) to consider a point; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/depth_filter_max_x','float',3.0,'Maximum X value (i.e. distance to camera) to consider a point; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/voxel_leaf_size','float',0.01,'Leaf size for voxel grid downsampling; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_max_iterations','unsigned int',1000,'Maximum number of iterations to perform for table segmentation');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_distance_threshold','float',0.02,'Segmentation distance threshold; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_inlier_quota','float',0.02,'Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_min_height','float',0.6,'Minimum required height of table; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_max_height','float',0.9,'Maximum height of table; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_tolerance','float',0.04,'Clustering inter-point distance tolerance; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_min_size','unsigned int',50,'Minimum number of points in cluster to consider');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_max_size','unsigned int',500,'Minimum number of points in cluster to consider');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/result_frame','string','/base_link','The frame in which the result should be published; frame');
 COMMIT;
