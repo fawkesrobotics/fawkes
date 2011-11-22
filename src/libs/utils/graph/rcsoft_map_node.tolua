@@ -29,7 +29,7 @@ $#include <vector>
 $using namespace std;
 
 class vector {
-  TOLUA_TEMPLATE_BIND(T, string)
+  TOLUA_TEMPLATE_BIND(T, string, fawkes::RCSoftMapNode)
 
   void clear();
   int size() const;
