@@ -23,12 +23,14 @@
 #include "cluster_colors.h"
 
 #include <core/threading/mutex_locker.h>
+#include <utils/math/angle.h>
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
 #ifdef USE_POSEPUB
 #  include <geometry_msgs/PointStamped.h>
 #endif
+#include <Eigen/Geometry>
 
 extern "C"
 {
@@ -247,6 +249,104 @@ TabletopVisualizationThread::loop()
     plane.lifetime = ros::Duration(10, 0);
     m.markers.push_back(plane);
   }
+
+  // Frustrum
+  visualization_msgs::Marker frustrum;
+  frustrum.header.frame_id = frame_id_;
+  frustrum.header.stamp = ros::Time::now();
+  frustrum.ns = "tabletop";
+  frustrum.id = idnum++;
+  frustrum.type = visualization_msgs::Marker::LINE_LIST;
+  frustrum.action = visualization_msgs::Marker::ADD;
+  frustrum.points.resize(8);
+  frustrum.points[0].x = frustrum.points[2].x = frustrum.points[4].x = frustrum.points[6].x = 0.;
+  frustrum.points[0].y = frustrum.points[2].y = frustrum.points[4].y = frustrum.points[6].y = 0.;
+  frustrum.points[0].z = frustrum.points[2].z = frustrum.points[4].z = frustrum.points[6].z = 0.;
+
+  Eigen::Matrix3f upper_right_m;
+  upper_right_m =
+    Eigen::AngleAxisf(deg2rad(-28.5), Eigen::Vector3f::UnitZ())
+    * Eigen::AngleAxisf(deg2rad(-21.5), Eigen::Vector3f::UnitY());
+  Eigen::Vector3f upper_right = upper_right_m * Eigen::Vector3f(4,0,0);
+
+  Eigen::Matrix3f upper_left_m;
+  upper_left_m =
+    Eigen::AngleAxisf(deg2rad(28.5), Eigen::Vector3f::UnitZ())
+    * Eigen::AngleAxisf(deg2rad(-21.5), Eigen::Vector3f::UnitY());
+  Eigen::Vector3f upper_left = upper_left_m * Eigen::Vector3f(4,0,0);
+
+  Eigen::Matrix3f lower_right_m;
+  lower_right_m =
+    Eigen::AngleAxisf(deg2rad(-28.5), Eigen::Vector3f::UnitZ())
+    * Eigen::AngleAxisf(deg2rad(21.5), Eigen::Vector3f::UnitY());
+  Eigen::Vector3f lower_right = lower_right_m * Eigen::Vector3f(2,0,0);
+
+  Eigen::Matrix3f lower_left_m;
+  lower_left_m =
+    Eigen::AngleAxisf(deg2rad(28.5), Eigen::Vector3f::UnitZ())
+    * Eigen::AngleAxisf(deg2rad(21.5), Eigen::Vector3f::UnitY());
+  Eigen::Vector3f lower_left = lower_left_m * Eigen::Vector3f(2,0,0);
+
+  frustrum.points[1].x = upper_right[0];
+  frustrum.points[1].y = upper_right[1];
+  frustrum.points[1].z = upper_right[2];
+
+  frustrum.points[3].x = lower_right[0];
+  frustrum.points[3].y = lower_right[1];
+  frustrum.points[3].z = lower_right[2];
+
+  frustrum.points[5].x = lower_left[0];
+  frustrum.points[5].y = lower_left[1];
+  frustrum.points[5].z = lower_left[2];
+
+  frustrum.points[7].x = upper_left[0];
+  frustrum.points[7].y = upper_left[1];
+  frustrum.points[7].z = upper_left[2];
+
+  frustrum.scale.x = 0.02;
+  frustrum.color.r = 1.0;
+  frustrum.color.g = frustrum.color.b = 0.f;
+  frustrum.color.a = 1.0;
+  frustrum.lifetime = ros::Duration(10, 0);
+  m.markers.push_back(frustrum);
+
+
+  visualization_msgs::Marker frustrum_triangles;
+  frustrum_triangles.header.frame_id = frame_id_;
+  frustrum_triangles.header.stamp = ros::Time::now();
+  frustrum_triangles.ns = "tabletop";
+  frustrum_triangles.id = idnum++;
+  frustrum_triangles.type = visualization_msgs::Marker::TRIANGLE_LIST;
+  frustrum_triangles.action = visualization_msgs::Marker::ADD;
+  frustrum_triangles.points.resize(6);
+  frustrum_triangles.points[0].x = frustrum_triangles.points[3].x = 0.;
+  frustrum_triangles.points[0].y = frustrum_triangles.points[3].y = 0.;
+  frustrum_triangles.points[0].z = frustrum_triangles.points[3].z = 0.;
+
+  frustrum_triangles.points[1].x = upper_right[0];
+  frustrum_triangles.points[1].y = upper_right[1];
+  frustrum_triangles.points[1].z = upper_right[2];
+
+  frustrum_triangles.points[2].x = lower_right[0];
+  frustrum_triangles.points[2].y = lower_right[1];
+  frustrum_triangles.points[2].z = lower_right[2];
+
+  frustrum_triangles.points[4].x = lower_left[0];
+  frustrum_triangles.points[4].y = lower_left[1];
+  frustrum_triangles.points[4].z = lower_left[2];
+
+  frustrum_triangles.points[5].x = upper_left[0];
+  frustrum_triangles.points[5].y = upper_left[1];
+  frustrum_triangles.points[5].z = upper_left[2];
+
+  frustrum_triangles.scale.x = 1;
+  frustrum_triangles.scale.y = 1;
+  frustrum_triangles.scale.z = 1;
+  frustrum_triangles.color.r = 1.0;
+  frustrum_triangles.color.g = frustrum_triangles.color.b = 0.f;
+  frustrum_triangles.color.a = 0.23;
+  frustrum_triangles.lifetime = ros::Duration(10, 0);
+  m.markers.push_back(frustrum_triangles);
 
   for (size_t i = idnum; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
