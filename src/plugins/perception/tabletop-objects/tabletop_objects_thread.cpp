@@ -41,9 +41,13 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/common/centroid.h>
+#include <pcl/registration/icp.h>
 
 #include <interfaces/Position3DInterface.h>
 #include <interfaces/SwitchInterface.h>
+
+#include <iostream>
+using namespace std;
 
 #define CFG_PREFIX "/perception/tabletop-objects/"
 
@@ -90,6 +94,10 @@ TabletopObjectsThread::init()
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
+
+  cfg_table_model_width  = 1.60;
+  cfg_table_model_height = 0.80;
+  cfg_table_model_step   = 0.05;
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -138,6 +146,14 @@ TabletopObjectsThread::init()
   fclusters_->is_dense = false;
   pcl_manager->add_pointcloud<ColorPointType>("tabletop-object-clusters", fclusters_);
   clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
+
+  ftable_model_ = new Cloud();
+  table_model_ = pcl_utils::cloudptr_from_refptr(ftable_model_);
+  CloudPtr generated = generate_table_model(1.6, 0.8, 0.05);
+  *table_model_ = *generated;
+  ftable_model_->header.frame_id = finput_->header.frame_id;
+  pcl_manager->add_pointcloud("tabletop-table-model", ftable_model_);
+  pcl_utils::set_time(ftable_model_, fawkes::Time(clock));
 
   grid_.setFilterFieldName("x");
   grid_.setFilterLimits(cfg_depth_filter_min_x_, cfg_depth_filter_max_x_);
@@ -321,6 +337,125 @@ TabletopObjectsThread::loop()
   cloud_hull_.reset(new Cloud());
   hr.reconstruct(*cloud_hull_, vertices_);
 
+
+  // Fit table model into projected cloud using ICP
+  CloudPtr table_model = generate_table_model(cfg_table_model_width,
+                                              cfg_table_model_height,
+                                              cfg_table_model_step);
+
+  bool front_line_center_ok = true;
+  tf::Stamped<tf::Point> front_line_center;
+  try {
+    tf::StampedTransform t;
+    fawkes::Time input_time;
+    pcl_utils::get_time(finput_, input_time);
+    tf_listener->lookup_transform("/base_link", finput_->header.frame_id,
+                                  input_time, t);
+
+    logger->log_debug(name(), "Translation %s -> %s (%f,%f,%f)",
+                      finput_->header.frame_id.c_str(), "/base_link",
+                      t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z());
+
+    tf::Quaternion q = t.getRotation();
+    Eigen::Affine3f affine_cloud =
+      Eigen::Translation3f(t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z())
+      * Eigen::Quaternionf(q.w(), q.x(), q.y(), q.z());
+
+    CloudPtr baserel_polygon_cloud(new Cloud());
+    pcl::transformPointCloud(*cloud_hull_, *baserel_polygon_cloud, affine_cloud);
+    
+    Eigen::Vector3f p_left(std::numeric_limits<float>::max(), 0, 0);
+    Eigen::Vector3f p_right(std::numeric_limits<float>::max(), 0, 0);
+    for (size_t i = 0; i < baserel_polygon_cloud->points.size(); ++i) {
+      PointType &p = baserel_polygon_cloud->points[i];
+
+      if ((p.x < p_left[0]) || (p.x < p_right[0])) {
+        if (p.y < 0)  {
+          p_left[0] = p.x;
+          p_left[1] = p.y;
+          p_left[2] = p.z;
+        } else {
+          p_right[0] = p.x;
+          p_right[1] = p.y;
+          p_right[2] = p.z;
+        }
+      }
+    }
+
+    tf::Stamped<tf::Point> baserel_front_line_center;
+    baserel_front_line_center.setX((p_left[0] + p_right[0] + cfg_table_model_height) * 0.5);
+    baserel_front_line_center.setY((p_left[1] + p_right[1]) * 0.5);
+    baserel_front_line_center.setZ((p_left[2] + p_right[2]) * 0.5);
+    baserel_front_line_center.frame_id = t.frame_id;
+    baserel_front_line_center.stamp = t.stamp;
+
+    logger->log_info(name(), "Baserel front left=(%f,%f,%f)  right=(%f,%f,%f)  center=(%f,%f,%f)",
+                     p_left[0], p_left[1], p_left[2],
+                     p_right[0], p_right[1], p_right[2],
+                     baserel_front_line_center.x(), baserel_front_line_center.y(),
+                     baserel_front_line_center.z());
+
+    tf_listener->transform_point(finput_->header.frame_id,
+                                 baserel_front_line_center, front_line_center);
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to transform convex hull cloud: %s", e.what());
+    front_line_center_ok = false;
+  }
+
+  if (front_line_center_ok) {
+    // First create initial transformation guess based on closest polygon line and normal
+    Eigen::Vector3f model_normal(1, 0, 0);
+    Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
+    Eigen::Vector3f rotaxis = model_normal.cross(normal);
+    rotaxis.normalize();
+    // -M_PI/2 because we calc the angle for the normal
+    float angle = acosf(normal.dot(model_normal)) - M_PI/2.f;  
+  
+    Eigen::Affine3f affine =
+      //Eigen::Translation3f(table_centroid[0], table_centroid[1], table_centroid[2])
+      Eigen::Translation3f(front_line_center.x(), front_line_center.y(), front_line_center.z())
+      * Eigen::AngleAxisf(angle, rotaxis);
+
+    CloudPtr sparse_table(new Cloud());
+    pcl::VoxelGrid<PointType> grid_table_icp;
+    grid_table_icp.setLeafSize(0.05, 0.05, 0.05);
+    grid_table_icp.setInputCloud(cloud_proj_);
+    grid_table_icp.filter(*sparse_table);
+
+    logger->log_info(name(), "Proj: %zu  Sparse: %zu  Table: %zu", cloud_proj_->points.size(), sparse_table->points.size(), table_model->points.size());
+
+    logger->log_debug(name(), "Starting ICP");
+    pcl::IterativeClosestPoint<PointType, PointType> icp;
+    // Set the max correspondence distance to 5cm (e.g., correspondences with higher distances will be ignored)
+    //icp.setMaxCorrespondenceDistance(0.05);
+    // Set the maximum number of iterations (criterion 1)
+    icp.setMaximumIterations(50);
+    // Set the transformation epsilon (criterion 2)
+    icp.setTransformationEpsilon(0.01);
+    // Set the euclidean distance difference epsilon (criterion 3)
+    icp.setEuclideanFitnessEpsilon(0.01);
+    icp.setInputCloud(table_model);
+    icp.setInputTarget(sparse_table);
+
+    Cloud final;
+    logger->log_debug(name(), "ICP aligning");
+    icp.align(final, affine.matrix());
+    logger->log_debug(name(), "ICP finished");
+    if (! icp.hasConverged()) {
+      logger->log_warn(name(), "Table ICP did not converge");
+    } else {
+      //Eigen::Matrix4f m = icp.getFinalTransformation();
+      logger->log_warn(name(), "Converged with score %f", icp.getFitnessScore());
+    }
+
+    // to show initial guess:
+    pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
+    // to show final alignment:
+    //*table_model_ = final;
+    table_model_->header.frame_id = finput_->header.frame_id;
+  }
+
+
   // Extract all non-plane points
   cloud_filt_.reset(new Cloud());
   extract_.setNegative(true);
@@ -473,6 +608,7 @@ TabletopObjectsThread::loop()
 
   *clusters_ = *tmp_clusters;
   pcl_utils::copy_time(finput_, fclusters_);
+  pcl_utils::copy_time(finput_, ftable_model_);
 
 #ifdef HAVE_VISUAL_DEBUGGING
   if (visthread_) {
@@ -533,6 +669,102 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
     }
   }
   iface->write();  
+}
+
+
+TabletopObjectsThread::CloudPtr
+TabletopObjectsThread::generate_table_model(const float width, const float height,
+                                            const float thickness, const float step,
+                                            const float max_error)
+{
+  CloudPtr c(new Cloud());
+
+  const float width_2     = fabs(width)     * 0.5;
+  const float height_2    = fabs(height)    * 0.5;
+  const float thickness_2 = fabs(thickness) * 0.5;
+
+  // calculate table points
+  const unsigned int w_base_num = std::max(2u, (unsigned int)floor(width / step));
+  const unsigned int num_w = w_base_num +
+    ((width < w_base_num * step) ? 0 : ((width - w_base_num * step) > max_error ? 2 : 1));
+  const unsigned int h_base_num = std::max(2u, (unsigned int)floor(height / step));
+  const unsigned int num_h = h_base_num +
+    ((height < h_base_num * step) ? 0 : ((height - h_base_num * step) > max_error ? 2 : 1));
+  const unsigned int t_base_num = std::max(2u, (unsigned int)floor(thickness / step));
+  const unsigned int num_t = t_base_num +
+    ((thickness < t_base_num * step) ? 0 : ((thickness - t_base_num * step) > max_error ? 2 : 1));
+
+  logger->log_debug(name(), "Generating table model %fx%fx%f (%ux%ux%u=%u points)",
+                    width, height, thickness,
+                    num_w, num_h, num_t, num_t * num_w * num_h);
+
+  c->height = 1;
+  c->width = num_t * num_w * num_h;
+  c->is_dense = true;
+  c->points.resize(num_t * num_w * num_h);
+
+  unsigned int idx = 0;
+  for (unsigned int t = 0; t < num_t; ++t) {
+    for (unsigned int w = 0; w < num_w; ++w) {
+      for (unsigned int h = 0; h < num_h; ++h) {
+        PointType &p = c->points[idx++];
+
+        p.x = h * step - height_2;
+        if ((h == num_h - 1) && fabs(p.x - height_2) > max_error) p.x = height_2;
+
+        p.y = w * step - width_2;
+        if ((w == num_w - 1) && fabs(p.y - width_2) > max_error)  p.y = width_2;
+
+        p.z = t * step - thickness_2;
+        if ((t == num_t - 1) && fabs(p.z - thickness_2) > max_error)  p.z = thickness_2;
+      }
+    }
+  }
+
+  return c;
+}
+
+TabletopObjectsThread::CloudPtr
+TabletopObjectsThread::generate_table_model(const float width, const float height,
+                                            const float step, const float max_error)
+{
+  CloudPtr c(new Cloud());
+
+  const float width_2     = fabs(width)     * 0.5;
+  const float height_2    = fabs(height)    * 0.5;
+
+  // calculate table points
+  const unsigned int w_base_num = std::max(2u, (unsigned int)floor(width / step));
+  const unsigned int num_w = w_base_num +
+    ((width < w_base_num * step) ? 0 : ((width - w_base_num * step) > max_error ? 2 : 1));
+  const unsigned int h_base_num = std::max(2u, (unsigned int)floor(height / step));
+  const unsigned int num_h = h_base_num +
+    ((height < h_base_num * step) ? 0 : ((height - h_base_num * step) > max_error ? 2 : 1));
+
+  logger->log_debug(name(), "Generating table model %fx%f (%ux%u=%u points)",
+                    width, height, num_w, num_h, num_w * num_h);
+
+  c->height = 1;
+  c->width = num_w * num_h;
+  c->is_dense = true;
+  c->points.resize(num_w * num_h);
+
+  unsigned int idx = 0;
+  for (unsigned int w = 0; w < num_w; ++w) {
+    for (unsigned int h = 0; h < num_h; ++h) {
+      PointType &p = c->points[idx++];
+
+      p.x = h * step - height_2;
+      if ((h == num_h - 1) && fabs(p.x - height_2) > max_error) p.x = height_2;
+
+      p.y = w * step - width_2;
+      if ((w == num_w - 1) && fabs(p.y - width_2) > max_error)  p.y = width_2;
+
+      p.z = 0.;
+    }
+  }
+
+  return c;
 }
 
 

@@ -67,13 +67,6 @@ class TabletopObjectsThread
 #endif
 
  private:
-  void set_position(fawkes::Position3DInterface *iface,
-                    bool is_visible, Eigen::Vector4f &centroid);
-
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
- private:
   typedef pcl::PointXYZ PointType;
   typedef pcl::PointCloud<PointType> Cloud;
   typedef typename Cloud::Ptr CloudPtr;
@@ -84,6 +77,20 @@ class TabletopObjectsThread
   typedef typename ColorCloud::Ptr ColorCloudPtr;
   typedef typename ColorCloud::ConstPtr ColorCloudConstPtr;
 
+ private:
+  void set_position(fawkes::Position3DInterface *iface,
+                    bool is_visible, Eigen::Vector4f &centroid);
+
+  CloudPtr generate_table_model(const float width, const float height,
+                                const float thickness, const float step, const float max_error);
+
+  CloudPtr generate_table_model(const float width, const float height,
+                                const float step, const float max_error = 0.01);
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
+ private:
   fawkes::RefPtr<const pcl::PointCloud<PointType> > finput_;
   fawkes::RefPtr<pcl::PointCloud<ColorPointType> > fclusters_;
   CloudConstPtr input_;
@@ -110,6 +117,13 @@ class TabletopObjectsThread
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
   std::string cfg_result_frame_;
+
+  float cfg_table_model_width;
+  float cfg_table_model_height;
+  float cfg_table_model_step;
+
+  fawkes::RefPtr<Cloud> ftable_model_;
+  CloudPtr table_model_;
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;
