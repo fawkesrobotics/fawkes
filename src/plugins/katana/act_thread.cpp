@@ -82,9 +82,6 @@ KatanaActThread::init()
   __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
   __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
 
-  __cfg_offset_x         = config->get_float("/hardware/katana/offset_x");
-  __cfg_offset_y         = config->get_float("/hardware/katana/offset_y");
-  __cfg_offset_z         = config->get_float("/hardware/katana/offset_z");
   __cfg_distance_scale   = config->get_float("/hardware/katana/distance_scale");
 
   __cfg_update_interval  = config->get_float("/hardware/katana/update_interval");
