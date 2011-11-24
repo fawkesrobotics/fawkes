@@ -31,6 +31,7 @@
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <aspect/tf.h>
+#include <aspect/configurable.h>
 #include <plugins/ros/aspect/ros.h>
 
 namespace ros {
@@ -41,6 +42,7 @@ class TabletopVisualizationThread
 : public TabletopVisualizationThreadBase,
   public fawkes::Thread,
   public fawkes::TransformAspect,
+  public fawkes::ConfigurableAspect,
   public fawkes::ROSAspect
 {
  public:
@@ -72,6 +74,10 @@ class TabletopVisualizationThread
   ros::Publisher *posepub_;
 #endif
   size_t last_id_num_;
+
+  bool  cfg_show_frustrum_;
+  float cfg_horizontal_va_;
+  float cfg_vertical_va_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

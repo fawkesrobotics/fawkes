@@ -55,6 +55,8 @@ extern "C"
 #endif
 }
 
+#define CFG_PREFIX "/perception/tabletop-objects/visualization/"
+
 using namespace fawkes;
 
 /** @class TabletopVisualizationThread "visualization_thread.h"
@@ -75,6 +77,15 @@ TabletopVisualizationThread::TabletopVisualizationThread()
 void
 TabletopVisualizationThread::init()
 {
+  cfg_show_frustrum_ = false;
+  try {
+    cfg_show_frustrum_ = config->get_bool(CFG_PREFIX_VIS"show_frustrum");
+  } catch (Exception &e) {} // ignored, use default
+  if (cfg_show_frustrum_) {
+    cfg_horizontal_va_ = config->get_float(CFG_PREFIX"horizontal_viewing_angle");
+    cfg_vertical_va_ = config->get_float(CFG_PREFIX"vertical_viewing_angle");
+  }
+
   vispub_ = new ros::Publisher();
   *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100);
 #ifdef USE_POSEPUB
@@ -250,103 +261,119 @@ TabletopVisualizationThread::loop()
     m.markers.push_back(plane);
   }
 
-  // Frustrum
-  visualization_msgs::Marker frustrum;
-  frustrum.header.frame_id = frame_id_;
-  frustrum.header.stamp = ros::Time::now();
-  frustrum.ns = "tabletop";
-  frustrum.id = idnum++;
-  frustrum.type = visualization_msgs::Marker::LINE_LIST;
-  frustrum.action = visualization_msgs::Marker::ADD;
-  frustrum.points.resize(8);
-  frustrum.points[0].x = frustrum.points[2].x = frustrum.points[4].x = frustrum.points[6].x = 0.;
-  frustrum.points[0].y = frustrum.points[2].y = frustrum.points[4].y = frustrum.points[6].y = 0.;
-  frustrum.points[0].z = frustrum.points[2].z = frustrum.points[4].z = frustrum.points[6].z = 0.;
+  if (cfg_show_frustrum_) {
+    // Frustrum
+    visualization_msgs::Marker frustrum;
+    frustrum.header.frame_id = frame_id_;
+    frustrum.header.stamp = ros::Time::now();
+    frustrum.ns = "tabletop";
+    frustrum.id = idnum++;
+    frustrum.type = visualization_msgs::Marker::LINE_LIST;
+    frustrum.action = visualization_msgs::Marker::ADD;
+    frustrum.points.resize(8);
+    frustrum.points[0].x = frustrum.points[2].x = frustrum.points[4].x = frustrum.points[6].x = 0.;
+    frustrum.points[0].y = frustrum.points[2].y = frustrum.points[4].y = frustrum.points[6].y = 0.;
+    frustrum.points[0].z = frustrum.points[2].z = frustrum.points[4].z = frustrum.points[6].z = 0.;
 
-  Eigen::Matrix3f upper_right_m;
-  upper_right_m =
-    Eigen::AngleAxisf(deg2rad(-28.5), Eigen::Vector3f::UnitZ())
-    * Eigen::AngleAxisf(deg2rad(-21.5), Eigen::Vector3f::UnitY());
-  Eigen::Vector3f upper_right = upper_right_m * Eigen::Vector3f(4,0,0);
+    const float half_hva = deg2rad(cfg_horizontal_va_ * 0.5);
+    const float half_vva = deg2rad(cfg_vertical_va_ * 0.5);
 
-  Eigen::Matrix3f upper_left_m;
-  upper_left_m =
-    Eigen::AngleAxisf(deg2rad(28.5), Eigen::Vector3f::UnitZ())
-    * Eigen::AngleAxisf(deg2rad(-21.5), Eigen::Vector3f::UnitY());
-  Eigen::Vector3f upper_left = upper_left_m * Eigen::Vector3f(4,0,0);
+    Eigen::Matrix3f upper_right_m;
+    upper_right_m =
+      Eigen::AngleAxisf(-half_hva, Eigen::Vector3f::UnitZ())
+      * Eigen::AngleAxisf(-half_vva, Eigen::Vector3f::UnitY());
+    Eigen::Vector3f upper_right = upper_right_m * Eigen::Vector3f(4,0,0);
 
-  Eigen::Matrix3f lower_right_m;
-  lower_right_m =
-    Eigen::AngleAxisf(deg2rad(-28.5), Eigen::Vector3f::UnitZ())
-    * Eigen::AngleAxisf(deg2rad(21.5), Eigen::Vector3f::UnitY());
-  Eigen::Vector3f lower_right = lower_right_m * Eigen::Vector3f(2,0,0);
+    Eigen::Matrix3f upper_left_m;
+    upper_left_m =
+      Eigen::AngleAxisf(half_hva, Eigen::Vector3f::UnitZ())
+      * Eigen::AngleAxisf(-half_vva, Eigen::Vector3f::UnitY());
+    Eigen::Vector3f upper_left = upper_left_m * Eigen::Vector3f(4,0,0);
 
-  Eigen::Matrix3f lower_left_m;
-  lower_left_m =
-    Eigen::AngleAxisf(deg2rad(28.5), Eigen::Vector3f::UnitZ())
-    * Eigen::AngleAxisf(deg2rad(21.5), Eigen::Vector3f::UnitY());
-  Eigen::Vector3f lower_left = lower_left_m * Eigen::Vector3f(2,0,0);
+    Eigen::Matrix3f lower_right_m;
+    lower_right_m =
+      Eigen::AngleAxisf(-half_hva, Eigen::Vector3f::UnitZ())
+      * Eigen::AngleAxisf(half_vva, Eigen::Vector3f::UnitY());
+    Eigen::Vector3f lower_right = lower_right_m * Eigen::Vector3f(2,0,0);
 
-  frustrum.points[1].x = upper_right[0];
-  frustrum.points[1].y = upper_right[1];
-  frustrum.points[1].z = upper_right[2];
+    Eigen::Matrix3f lower_left_m;
+    lower_left_m =
+      Eigen::AngleAxisf(half_hva, Eigen::Vector3f::UnitZ())
+      * Eigen::AngleAxisf(half_vva, Eigen::Vector3f::UnitY());
+    Eigen::Vector3f lower_left = lower_left_m * Eigen::Vector3f(2,0,0);
 
-  frustrum.points[3].x = lower_right[0];
-  frustrum.points[3].y = lower_right[1];
-  frustrum.points[3].z = lower_right[2];
+    frustrum.points[1].x = upper_right[0];
+    frustrum.points[1].y = upper_right[1];
+    frustrum.points[1].z = upper_right[2];
 
-  frustrum.points[5].x = lower_left[0];
-  frustrum.points[5].y = lower_left[1];
-  frustrum.points[5].z = lower_left[2];
+    frustrum.points[3].x = lower_right[0];
+    frustrum.points[3].y = lower_right[1];
+    frustrum.points[3].z = lower_right[2];
 
-  frustrum.points[7].x = upper_left[0];
-  frustrum.points[7].y = upper_left[1];
-  frustrum.points[7].z = upper_left[2];
+    frustrum.points[5].x = lower_left[0];
+    frustrum.points[5].y = lower_left[1];
+    frustrum.points[5].z = lower_left[2];
 
-  frustrum.scale.x = 0.02;
-  frustrum.color.r = 1.0;
-  frustrum.color.g = frustrum.color.b = 0.f;
-  frustrum.color.a = 1.0;
-  frustrum.lifetime = ros::Duration(10, 0);
-  m.markers.push_back(frustrum);
+    frustrum.points[7].x = upper_left[0];
+    frustrum.points[7].y = upper_left[1];
+    frustrum.points[7].z = upper_left[2];
+
+    frustrum.scale.x = 0.005;
+    frustrum.color.r = 1.0;
+    frustrum.color.g = frustrum.color.b = 0.f;
+    frustrum.color.a = 1.0;
+    frustrum.lifetime = ros::Duration(10, 0);
+    m.markers.push_back(frustrum);
 
 
-  visualization_msgs::Marker frustrum_triangles;
-  frustrum_triangles.header.frame_id = frame_id_;
-  frustrum_triangles.header.stamp = ros::Time::now();
-  frustrum_triangles.ns = "tabletop";
-  frustrum_triangles.id = idnum++;
-  frustrum_triangles.type = visualization_msgs::Marker::TRIANGLE_LIST;
-  frustrum_triangles.action = visualization_msgs::Marker::ADD;
-  frustrum_triangles.points.resize(6);
-  frustrum_triangles.points[0].x = frustrum_triangles.points[3].x = 0.;
-  frustrum_triangles.points[0].y = frustrum_triangles.points[3].y = 0.;
-  frustrum_triangles.points[0].z = frustrum_triangles.points[3].z = 0.;
+    visualization_msgs::Marker frustrum_triangles;
+    frustrum_triangles.header.frame_id = frame_id_;
+    frustrum_triangles.header.stamp = ros::Time::now();
+    frustrum_triangles.ns = "tabletop";
+    frustrum_triangles.id = idnum++;
+    frustrum_triangles.type = visualization_msgs::Marker::TRIANGLE_LIST;
+    frustrum_triangles.action = visualization_msgs::Marker::ADD;
+    frustrum_triangles.points.resize(9);
+    frustrum_triangles.points[0].x =
+      frustrum_triangles.points[3].x = frustrum_triangles.points[6].x = 0.;
+    frustrum_triangles.points[0].y =
+      frustrum_triangles.points[3].y = frustrum_triangles.points[3].y = 0.;
+    frustrum_triangles.points[0].z
+      = frustrum_triangles.points[3].z = frustrum_triangles.points[3].z = 0.;
 
-  frustrum_triangles.points[1].x = upper_right[0];
-  frustrum_triangles.points[1].y = upper_right[1];
-  frustrum_triangles.points[1].z = upper_right[2];
+    frustrum_triangles.points[1].x = upper_right[0];
+    frustrum_triangles.points[1].y = upper_right[1];
+    frustrum_triangles.points[1].z = upper_right[2];
 
-  frustrum_triangles.points[2].x = lower_right[0];
-  frustrum_triangles.points[2].y = lower_right[1];
-  frustrum_triangles.points[2].z = lower_right[2];
+    frustrum_triangles.points[2].x = lower_right[0];
+    frustrum_triangles.points[2].y = lower_right[1];
+    frustrum_triangles.points[2].z = lower_right[2];
 
-  frustrum_triangles.points[4].x = lower_left[0];
-  frustrum_triangles.points[4].y = lower_left[1];
-  frustrum_triangles.points[4].z = lower_left[2];
+    frustrum_triangles.points[4].x = lower_left[0];
+    frustrum_triangles.points[4].y = lower_left[1];
+    frustrum_triangles.points[4].z = lower_left[2];
 
-  frustrum_triangles.points[5].x = upper_left[0];
-  frustrum_triangles.points[5].y = upper_left[1];
-  frustrum_triangles.points[5].z = upper_left[2];
+    frustrum_triangles.points[5].x = upper_left[0];
+    frustrum_triangles.points[5].y = upper_left[1];
+    frustrum_triangles.points[5].z = upper_left[2];
 
-  frustrum_triangles.scale.x = 1;
-  frustrum_triangles.scale.y = 1;
-  frustrum_triangles.scale.z = 1;
-  frustrum_triangles.color.r = 1.0;
-  frustrum_triangles.color.g = frustrum_triangles.color.b = 0.f;
-  frustrum_triangles.color.a = 0.23;
-  frustrum_triangles.lifetime = ros::Duration(10, 0);
-  m.markers.push_back(frustrum_triangles);
+    frustrum_triangles.points[7].x = lower_left[0];
+    frustrum_triangles.points[7].y = lower_left[1];
+    frustrum_triangles.points[7].z = lower_left[2];
+
+    frustrum_triangles.points[8].x = lower_right[0];
+    frustrum_triangles.points[8].y = lower_right[1];
+    frustrum_triangles.points[8].z = lower_right[2];
+
+    frustrum_triangles.scale.x = 1;
+    frustrum_triangles.scale.y = 1;
+    frustrum_triangles.scale.z = 1;
+    frustrum_triangles.color.r = 1.0;
+    frustrum_triangles.color.g = frustrum_triangles.color.b = 0.f;
+    frustrum_triangles.color.a = 0.23;
+    frustrum_triangles.lifetime = ros::Duration(10, 0);
+    m.markers.push_back(frustrum_triangles);
+  } // end show frustrum
 
   for (size_t i = idnum; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
