@@ -257,6 +257,6 @@ INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_min_size','uns
 INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_max_size','unsigned int',500,'Minimum number of points in cluster to consider');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/result_frame','string','/base_link','The frame in which the result should be published; frame');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_frustrum','bool',1,'Show the frustrum according to configured horizontal and vertical viewing angle.');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/horizontal_viewing_angle','float',57.0,'Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/vertical_viewing_angle','float',43.0,'Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/horizontal_viewing_angle','float',57.0,'Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/vertical_viewing_angle','float',43.0,'Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg');
 COMMIT;

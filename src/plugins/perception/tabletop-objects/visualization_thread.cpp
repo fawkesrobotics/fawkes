@@ -55,7 +55,8 @@ extern "C"
 #endif
 }
 
-#define CFG_PREFIX "/perception/tabletop-objects/visualization/"
+#define CFG_PREFIX "/perception/tabletop-objects/"
+#define CFG_PREFIX_VIS "/perception/tabletop-objects/visualization/"
 
 using namespace fawkes;
 
@@ -82,8 +83,8 @@ TabletopVisualizationThread::init()
     cfg_show_frustrum_ = config->get_bool(CFG_PREFIX_VIS"show_frustrum");
   } catch (Exception &e) {} // ignored, use default
   if (cfg_show_frustrum_) {
-    cfg_horizontal_va_ = config->get_float(CFG_PREFIX"horizontal_viewing_angle");
-    cfg_vertical_va_ = config->get_float(CFG_PREFIX"vertical_viewing_angle");
+    cfg_horizontal_va_ = deg2rad(config->get_float(CFG_PREFIX"horizontal_viewing_angle"));
+    cfg_vertical_va_   = deg2rad(config->get_float(CFG_PREFIX"vertical_viewing_angle"));
   }
 
   vispub_ = new ros::Publisher();
