@@ -81,6 +81,8 @@ class TabletopObjectsThread
   void set_position(fawkes::Position3DInterface *iface,
                     bool is_visible, Eigen::Vector4f &centroid);
 
+  CloudPtr simplify_polygon(CloudPtr polygon, float sqr_dist_threshold);
+
   CloudPtr generate_table_model(const float width, const float height,
                                 const float thickness, const float step, const float max_error);
 
@@ -113,6 +115,8 @@ class TabletopObjectsThread
   float cfg_max_z_angle_deviation_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
+  float cfg_horizontal_va_;
+  float cfg_vertical_va_;
   float cfg_cluster_tolerance_;
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
@@ -124,6 +128,8 @@ class TabletopObjectsThread
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
+  fawkes::RefPtr<Cloud> fsimplified_polygon_;
+  CloudPtr simplified_polygon_;
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;

@@ -28,6 +28,7 @@
 #include <pcl_utils/utils.h>
 #include <pcl_utils/comparisons.h>
 #include <utils/time/wait.h>
+#include <utils/math/angle.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -41,7 +42,8 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/common/centroid.h>
-#include <pcl/registration/icp.h>
+#include <pcl/common/transforms.h>
+#include <pcl/common/distances.h>
 
 #include <interfaces/Position3DInterface.h>
 #include <interfaces/SwitchInterface.h>
@@ -90,6 +92,8 @@ TabletopObjectsThread::init()
   cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
   cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
   cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
+  cfg_horizontal_va_         = deg2rad(config->get_float(CFG_PREFIX"horizontal_viewing_angle"));
+  cfg_vertical_va_           = deg2rad(config->get_float(CFG_PREFIX"vertical_viewing_angle"));
   cfg_cluster_tolerance_     = config->get_float(CFG_PREFIX"cluster_tolerance");
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
@@ -149,11 +153,15 @@ TabletopObjectsThread::init()
 
   ftable_model_ = new Cloud();
   table_model_ = pcl_utils::cloudptr_from_refptr(ftable_model_);
-  CloudPtr generated = generate_table_model(1.6, 0.8, 0.05);
-  *table_model_ = *generated;
-  ftable_model_->header.frame_id = finput_->header.frame_id;
+  table_model_->header.frame_id = finput_->header.frame_id;
   pcl_manager->add_pointcloud("tabletop-table-model", ftable_model_);
   pcl_utils::set_time(ftable_model_, fawkes::Time(clock));
+
+  fsimplified_polygon_ = new Cloud();
+  simplified_polygon_ = pcl_utils::cloudptr_from_refptr(fsimplified_polygon_);
+  simplified_polygon_->header.frame_id = finput_->header.frame_id;
+  pcl_manager->add_pointcloud("tabletop-simplified_polygon", fsimplified_polygon_);
+  pcl_utils::set_time(fsimplified_polygon_, fawkes::Time(clock));
 
   grid_.setFilterFieldName("x");
   grid_.setFilterLimits(cfg_depth_filter_min_x_, cfg_depth_filter_max_x_);
@@ -172,8 +180,11 @@ TabletopObjectsThread::finalize()
 {
   input_.reset();
   clusters_.reset();
+  simplified_polygon_.reset();
 
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
+  pcl_manager->remove_pointcloud("tabletop-table-model");
+  pcl_manager->remove_pointcloud("tabletop-simplified-polygon");
   
   blackboard->close(table_pos_if_);
   blackboard->close(switch_if_);
@@ -184,6 +195,8 @@ TabletopObjectsThread::finalize()
 
   finput_.reset();
   fclusters_.reset();
+  ftable_model_.reset();
+  fsimplified_polygon_.reset();
 }
 
 
@@ -214,7 +227,6 @@ TabletopObjectsThread::loop()
   CloudPtr temp_cloud(new Cloud);
   CloudPtr temp_cloud2(new Cloud);
   pcl::ExtractIndices<PointType> extract_;
-  std::vector<pcl::Vertices> vertices_;
   CloudPtr cloud_hull_;
   CloudPtr cloud_proj_;
   CloudPtr cloud_filt_;
@@ -235,7 +247,7 @@ TabletopObjectsThread::loop()
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-  Eigen::Vector4f table_centroid;
+  Eigen::Vector4f table_centroid, baserel_table_centroid;
 
   // This will search for the first plane which:
   // 1. has a considerable amount of points (>= 2% of input points)
@@ -289,6 +301,10 @@ TabletopObjectsThread::loop()
                  fawkes::Time(0, 0), input_->header.frame_id);
       tf::Stamped<tf::Point> baserel_centroid;
       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+      baserel_table_centroid[0] = baserel_centroid.x();
+      baserel_table_centroid[1] = baserel_centroid.y();
+      baserel_table_centroid[2] = baserel_centroid.z();
+
       if ((baserel_centroid.z() < cfg_table_min_height_) ||
           (baserel_centroid.z() > cfg_table_max_height_))
       {
@@ -335,126 +351,252 @@ TabletopObjectsThread::loop()
   //hr.setAlpha(0.1);  // only for ConcaveHull
   hr.setInputCloud(cloud_proj_);
   cloud_hull_.reset(new Cloud());
-  hr.reconstruct(*cloud_hull_, vertices_);
+  hr.reconstruct(*cloud_hull_);
 
+
+  if (cloud_hull_->points.empty()) {
+    logger->log_warn(name(), "Convex hull of table empty, skipping loop");
+    return;
+  }
+
+  CloudPtr simplified_polygon = simplify_polygon(cloud_hull_, 0.02);
+  *simplified_polygon_ = *simplified_polygon;
+  logger->log_debug(name(), "Original polygon: %zu  simplified: %zu", cloud_hull_->points.size(),
+                    simplified_polygon->points.size());
+  *cloud_hull_ = *simplified_polygon;
 
   // Fit table model into projected cloud using ICP
   CloudPtr table_model = generate_table_model(cfg_table_model_width,
                                               cfg_table_model_height,
                                               cfg_table_model_step);
 
-  bool front_line_center_ok = true;
-  tf::Stamped<tf::Point> front_line_center;
+  TabletopVisualizationThreadBase::V_Vector4f good_hull_edges;
+  good_hull_edges.resize(cloud_hull_->points.size() * 2);
+
   try {
+    
+    // Get transform Input camera -> base_link
     tf::StampedTransform t;
     fawkes::Time input_time;
     pcl_utils::get_time(finput_, input_time);
     tf_listener->lookup_transform("/base_link", finput_->header.frame_id,
                                   input_time, t);
 
-    logger->log_debug(name(), "Translation %s -> %s (%f,%f,%f)",
-                      finput_->header.frame_id.c_str(), "/base_link",
-                      t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z());
-
     tf::Quaternion q = t.getRotation();
     Eigen::Affine3f affine_cloud =
       Eigen::Translation3f(t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z())
       * Eigen::Quaternionf(q.w(), q.x(), q.y(), q.z());
 
+    // Transform polygon cloud into base_link frame
     CloudPtr baserel_polygon_cloud(new Cloud());
     pcl::transformPointCloud(*cloud_hull_, *baserel_polygon_cloud, affine_cloud);
-    
-    Eigen::Vector3f p_left(std::numeric_limits<float>::max(), 0, 0);
-    Eigen::Vector3f p_right(std::numeric_limits<float>::max(), 0, 0);
-    for (size_t i = 0; i < baserel_polygon_cloud->points.size(); ++i) {
-      PointType &p = baserel_polygon_cloud->points[i];
 
-      if ((p.x < p_left[0]) || (p.x < p_right[0])) {
-        if (p.y < 0)  {
-          p_left[0] = p.x;
-          p_left[1] = p.y;
-          p_left[2] = p.z;
-        } else {
-          p_right[0] = p.x;
-          p_right[1] = p.y;
-          p_right[2] = p.z;
+    // Setup plane normals for left, right, and lower frustrum
+    // planes for line segment verification
+    Eigen::Vector3f left_frustrum_normal =
+      Eigen::AngleAxisf(  cfg_horizontal_va_ * 0.5, Eigen::Vector3f::UnitZ())
+      * (-1. * Eigen::Vector3f::UnitY());
+
+    Eigen::Vector3f right_frustrum_normal =
+      Eigen::AngleAxisf(- cfg_horizontal_va_ * 0.5, Eigen::Vector3f::UnitZ())
+      * Eigen::Vector3f::UnitY();
+
+    Eigen::Vector3f lower_frustrum_normal =
+      Eigen::AngleAxisf(cfg_vertical_va_ * 0.5, Eigen::Vector3f::UnitY())
+      * Eigen::Vector3f::UnitZ();
+
+    // point and good edge indexes of chosen candidate
+    size_t pidx1, pidx2, geidx1, geidx2;
+    // lower frustrum potential candidate
+    size_t lf_pidx1, lf_pidx2;
+    pidx1 = pidx2 = lf_pidx1 = lf_pidx2 = std::numeric_limits<size_t>::max();
+
+    // Search for good edges and backup edge candidates
+    // Good edges are the ones with either points close to
+    // two separate frustrum planes, and hence the actual line is
+    // well inside the frustrum, or with points inside the frustrum.
+    // Possible backup candidates are lines with both points
+    // close to the lower frustrum plane, i.e. lines cutoff by the
+    // vertical viewing angle. If we cannot determine a suitable edge
+    // otherwise we fallback to this line as it is a good rough guess
+    // to prevent at least worst things during manipulation
+    const size_t psize = cloud_hull_->points.size();
+    size_t good_edge_points = 0;
+    for (size_t i = 0; i < psize; ++i) {
+      PointType &p1p = cloud_hull_->points[i          ];
+      PointType &p2p = cloud_hull_->points[(i+1) % psize];
+
+      Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
+      Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
+
+      PointType &br_p1 = baserel_polygon_cloud->points[i              ];
+      PointType &br_p2 = baserel_polygon_cloud->points[(i + 1) % psize];
+
+      // check if both end points are close to left or right frustrum plane
+      if ( ! (((left_frustrum_normal.dot(p1) < 0.02) &&
+               (left_frustrum_normal.dot(p2) < 0.02)) ||
+              ((right_frustrum_normal.dot(p1) < 0.02) &&
+               (right_frustrum_normal.dot(p2) < 0.02)) ) )
+      {
+        // candidate edge, i.e. it's not too close to left or right frustrum planes
+
+        // check if both end points close to lower frustrum plane
+        if ((lower_frustrum_normal.dot(p1) < 0.01) &&
+            (lower_frustrum_normal.dot(p2) < 0.01)) {
+          // it's a lower frustrum line, keep just in case we do not
+          // find a better one
+          if ( (lf_pidx1 == std::numeric_limits<size_t>::max()) ||
+               (br_p1.x < baserel_polygon_cloud->points[lf_pidx1].x) ||
+               (br_p1.x < baserel_polygon_cloud->points[lf_pidx2].x) ||
+               (br_p2.x < baserel_polygon_cloud->points[lf_pidx1].x) ||
+               (br_p2.x < baserel_polygon_cloud->points[lf_pidx2].x) )
+          {
+            // there was no backup candidate, yet, or this one is closer
+            // to the robot, take it.
+            lf_pidx1 = i;
+            lf_pidx2 = (i + 1) % psize;
+          }
+
+          continue;
+        }
+
+        // Remember as good edge for visualization
+        for (unsigned int j = 0; j < 3; ++j)
+          good_hull_edges[good_edge_points][j] = p1[j];
+        good_hull_edges[good_edge_points][3] = 0.;
+        ++good_edge_points;
+        for (unsigned int j = 0; j < 3; ++j)
+          good_hull_edges[good_edge_points][j] = p2[j];
+        good_hull_edges[good_edge_points][3] = 0.;
+        ++good_edge_points;
+
+        // Check if this good edge is closer to the robot than the
+        // current best
+        if ( (pidx1 == std::numeric_limits<size_t>::max()) ||
+             (br_p1.x < baserel_polygon_cloud->points[pidx1].x) ||
+             (br_p1.x < baserel_polygon_cloud->points[pidx2].x) ||
+             (br_p2.x < baserel_polygon_cloud->points[pidx1].x) ||
+             (br_p2.x < baserel_polygon_cloud->points[pidx2].x) )
+        {
+          //logger->log_debug(name(), "Good edge: (%f,%f,%f) ->  (%f,%f,%f)",
+          //                  p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+          pidx1 = i;
+          pidx2 = (i + 1) % psize;
+          geidx1 = good_edge_points - 2;
+          geidx2 = good_edge_points - 1;
         }
       }
     }
 
-    tf::Stamped<tf::Point> baserel_front_line_center;
-    baserel_front_line_center.setX((p_left[0] + p_right[0] + cfg_table_model_height) * 0.5);
-    baserel_front_line_center.setY((p_left[1] + p_right[1]) * 0.5);
-    baserel_front_line_center.setZ((p_left[2] + p_right[2]) * 0.5);
-    baserel_front_line_center.frame_id = t.frame_id;
-    baserel_front_line_center.stamp = t.stamp;
+    // in the case we have a backup lower frustrum edge check if we should use it
+    // Criteria:
+    // 0. we have a backup point
+    // 1. no other suitable edge was chosen at all
+    // 2. angle(Y_axis, chosen_edge) > threshold
+    // 3.. p1.x or p2.x > centroid.x
+    if (lf_pidx1 != std::numeric_limits<size_t>::max()) {
+      PointType &lp1p = baserel_polygon_cloud->points[lf_pidx1];
+      PointType &lp2p = baserel_polygon_cloud->points[lf_pidx2];
 
-    logger->log_info(name(), "Baserel front left=(%f,%f,%f)  right=(%f,%f,%f)  center=(%f,%f,%f)",
-                     p_left[0], p_left[1], p_left[2],
-                     p_right[0], p_right[1], p_right[2],
-                     baserel_front_line_center.x(), baserel_front_line_center.y(),
-                     baserel_front_line_center.z());
+      Eigen::Vector4f lp1(lp1p.x, lp1p.y, lp1p.z, 0.);
+      Eigen::Vector4f lp2(lp2p.x, lp2p.y, lp2p.z, 0.);
 
-    tf_listener->transform_point(finput_->header.frame_id,
-                                 baserel_front_line_center, front_line_center);
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to transform convex hull cloud: %s", e.what());
-    front_line_center_ok = false;
-  }
+      // None found at all
+      if (pidx1 == std::numeric_limits<size_t>::max()) {
+        pidx1 = lf_pidx1;
+        pidx2 = lf_pidx2;
 
-  if (front_line_center_ok) {
-    // First create initial transformation guess based on closest polygon line and normal
-    Eigen::Vector3f model_normal(1, 0, 0);
+        good_hull_edges[good_edge_points][0] = cloud_hull_->points[lf_pidx1].x;
+        good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx1].y;
+        good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx1].z;
+        geidx1 = good_edge_points++;
+
+        good_hull_edges[good_edge_points][0] = cloud_hull_->points[lf_pidx2].x;
+        good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx2].y;
+        good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx2].z;
+        geidx2 = good_edge_points++;
+
+      } else {
+
+        PointType &p1p = baserel_polygon_cloud->points[pidx1];
+        PointType &p2p = baserel_polygon_cloud->points[pidx2];
+
+        Eigen::Vector4f p1(p1p.x, p1p.y, p1p.z, 0.);
+        Eigen::Vector4f p2(p2p.x, p2p.y, p2p.z, 0.);
+
+        // Unsuitable "good" line until now?
+        if ((pcl::getAngle3D(p2 - p1, Eigen::Vector4f::UnitY()) > M_PI * 0.5) ||
+            (p1[0] > baserel_table_centroid[0]) ||
+            (p2[0] > baserel_table_centroid[0]))
+        {
+          pidx1 = lf_pidx1;
+          pidx2 = lf_pidx2;
+
+          good_hull_edges[good_edge_points][0] = cloud_hull_->points[lf_pidx1].x;
+          good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx1].y;
+          good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx1].z;
+          geidx1 = good_edge_points++;
+
+          good_hull_edges[good_edge_points][0] = cloud_hull_->points[lf_pidx2].x;
+          good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx2].y;
+          good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx2].z;
+          geidx2 = good_edge_points++;
+        }
+      }
+    }
+
+    if (good_edge_points > 0) {
+      good_hull_edges[geidx1][3] = 1.0;
+      good_hull_edges[geidx2][3] = 1.0;
+    }
+    good_hull_edges.resize(good_edge_points);
+
+    // Calculate transformation parameters based on determined
+    // convex hull polygon segment we decided on as "the table edge"
+    PointType &p1p = cloud_hull_->points[pidx1];
+    PointType &p2p = cloud_hull_->points[pidx2];
+
+    Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
+    Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
+    Eigen::Vector3f front_line_center = (p1 + p2) * 0.5;
+
+    // Normal vectors for table model and plane
+    Eigen::Vector3f model_normal = Eigen::Vector3f::UnitX();
     Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
+
+    // Rotational parameters to rotate table model from camera to
+    // determined table position in 3D space
     Eigen::Vector3f rotaxis = model_normal.cross(normal);
     rotaxis.normalize();
     // -M_PI/2 because we calc the angle for the normal
     float angle = acosf(normal.dot(model_normal)) - M_PI/2.f;  
-  
+
+    // Rotational parameters to align table to polygon segment
+    Eigen::Vector3f p1_p2 = p2 - p1;
+    p1_p2.normalize();
+    Eigen::Vector3f p1_p2_90 =
+      Eigen::AngleAxisf(M_PI/2., normal) * p1_p2;
+    p1_p2_90.normalize();
+    float angle_p1_p2 = acosf(p1_p2.dot(Eigen::Vector3f::UnitY()));
+
+    // Translational parameters to align model edge instead of center
+    Eigen::Vector3f move = p1_p2_90 * (cfg_table_model_height * 0.5);
+    front_line_center += move;
+
+    // Transformation to translate model from camera center into actual pose
     Eigen::Affine3f affine =
-      //Eigen::Translation3f(table_centroid[0], table_centroid[1], table_centroid[2])
-      Eigen::Translation3f(front_line_center.x(), front_line_center.y(), front_line_center.z())
+      Eigen::Translation3f(front_line_center.x(), front_line_center.y(),
+                           front_line_center.z())
+      * Eigen::AngleAxisf(-angle_p1_p2, normal)
       * Eigen::AngleAxisf(angle, rotaxis);
 
-    CloudPtr sparse_table(new Cloud());
-    pcl::VoxelGrid<PointType> grid_table_icp;
-    grid_table_icp.setLeafSize(0.05, 0.05, 0.05);
-    grid_table_icp.setInputCloud(cloud_proj_);
-    grid_table_icp.filter(*sparse_table);
-
-    logger->log_info(name(), "Proj: %zu  Sparse: %zu  Table: %zu", cloud_proj_->points.size(), sparse_table->points.size(), table_model->points.size());
-
-    logger->log_debug(name(), "Starting ICP");
-    pcl::IterativeClosestPoint<PointType, PointType> icp;
-    // Set the max correspondence distance to 5cm (e.g., correspondences with higher distances will be ignored)
-    //icp.setMaxCorrespondenceDistance(0.05);
-    // Set the maximum number of iterations (criterion 1)
-    icp.setMaximumIterations(50);
-    // Set the transformation epsilon (criterion 2)
-    icp.setTransformationEpsilon(0.01);
-    // Set the euclidean distance difference epsilon (criterion 3)
-    icp.setEuclideanFitnessEpsilon(0.01);
-    icp.setInputCloud(table_model);
-    icp.setInputTarget(sparse_table);
-
-    Cloud final;
-    logger->log_debug(name(), "ICP aligning");
-    icp.align(final, affine.matrix());
-    logger->log_debug(name(), "ICP finished");
-    if (! icp.hasConverged()) {
-      logger->log_warn(name(), "Table ICP did not converge");
-    } else {
-      //Eigen::Matrix4f m = icp.getFinalTransformation();
-      logger->log_warn(name(), "Converged with score %f", icp.getFitnessScore());
-    }
-
-    // to show initial guess:
+    // to show fitted table model
     pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
-    // to show final alignment:
-    //*table_model_ = final;
     table_model_->header.frame_id = finput_->header.frame_id;
-  }
 
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to transform convex hull cloud: %s", e.what());
+  }
 
   // Extract all non-plane points
   cloud_filt_.reset(new Cloud());
@@ -494,33 +636,21 @@ TabletopObjectsThread::loop()
   }
 
   // Extract only points on the table plane
-  if (! vertices_.empty()) {
-    pcl::PointIndices::Ptr polygon(new pcl::PointIndices());
-    polygon->indices = vertices_[0].vertices;
+  pcl::PointIndices::Ptr polygon(new pcl::PointIndices());
 
-    pcl::PointCloud<PointType> polygon_cloud;
-    pcl::ExtractIndices<PointType> polygon_extract;
+  typename pcl::ConditionAnd<PointType>::Ptr
+    polygon_cond(new pcl::ConditionAnd<PointType>());
 
-    polygon_extract.setInputCloud(cloud_hull_);
-    polygon_extract.setIndices(polygon);
-    polygon_extract.filter(polygon_cloud);
+  typename pcl_utils::PolygonComparison<PointType>::ConstPtr
+    inpoly_comp(new pcl_utils::PolygonComparison<PointType>(*cloud_hull_));
+  polygon_cond->addComparison(inpoly_comp);
 
-    typename pcl::ConditionAnd<PointType>::Ptr
-      polygon_cond(new pcl::ConditionAnd<PointType>());
-
-    typename pcl_utils::PolygonComparison<PointType>::ConstPtr
-      inpoly_comp(new pcl_utils::PolygonComparison<PointType>(polygon_cloud));
-    polygon_cond->addComparison(inpoly_comp);
-
-    // build the filter
-    pcl::ConditionalRemoval<PointType> condrem(polygon_cond);
-    condrem.setInputCloud(cloud_above_);
-    //condrem.setKeepOrganized(true);
-    cloud_objs_.reset(new Cloud());
-    condrem.filter(*cloud_objs_);
-  } else {
-    cloud_objs_.reset(new Cloud(*cloud_above_));
-  }
+  // build the filter
+  pcl::ConditionalRemoval<PointType> condrem(polygon_cond);
+  condrem.setInputCloud(cloud_above_);
+  //condrem.setKeepOrganized(true);
+  cloud_objs_.reset(new Cloud());
+  condrem.filter(*cloud_objs_);
 
   // CLUSTERS
   // extract clusters of OBJECTS
@@ -606,9 +736,10 @@ TabletopObjectsThread::loop()
   }
   centroids.resize(centroid_i);
 
-  *clusters_ = *tmp_clusters;
+  //*clusters_ = *tmp_clusters;
   pcl_utils::copy_time(finput_, fclusters_);
   pcl_utils::copy_time(finput_, ftable_model_);
+  pcl_utils::copy_time(finput_, fsimplified_polygon_);
 
 #ifdef HAVE_VISUAL_DEBUGGING
   if (visthread_) {
@@ -619,16 +750,16 @@ TabletopObjectsThread::loop()
     normal[3] = 0.;
 
     TabletopVisualizationThreadBase::V_Vector4f hull_vertices;
-    std::vector<int> &v = vertices_[0].vertices;
-    hull_vertices.resize(v.size());
-    for (unsigned int i = 0; i < v.size(); ++i) {
-      hull_vertices[i][0] = cloud_hull_->points[v[i]].x;
-      hull_vertices[i][1] = cloud_hull_->points[v[i]].y;
-      hull_vertices[i][2] = cloud_hull_->points[v[i]].z;
+    hull_vertices.resize(cloud_hull_->points.size());
+    for (unsigned int i = 0; i < cloud_hull_->points.size(); ++i) {
+      hull_vertices[i][0] = cloud_hull_->points[i].x;
+      hull_vertices[i][1] = cloud_hull_->points[i].y;
+      hull_vertices[i][2] = cloud_hull_->points[i].z;
+      hull_vertices[i][3] = 0.;
     }
 
     visthread_->visualize(input_->header.frame_id,
-                          table_centroid, normal, hull_vertices, centroids);
+                          table_centroid, normal, hull_vertices, good_hull_edges, centroids);
   }
 #endif
 }
@@ -765,6 +896,54 @@ TabletopObjectsThread::generate_table_model(const float width, const float heigh
   }
 
   return c;
+}
+
+
+TabletopObjectsThread::CloudPtr
+TabletopObjectsThread::simplify_polygon(CloudPtr polygon, float dist_threshold)
+{
+  const float sqr_dist_threshold = dist_threshold * dist_threshold;
+  CloudPtr result(new Cloud());
+  const size_t psize = polygon->points.size();
+  result->points.resize(psize);
+  size_t res_points = 0;
+  size_t i_dist = 1;
+  for (size_t i = 1; i <= psize; ++i) {
+    PointType &p1p = polygon->points[i - i_dist        ];
+
+    if (i == psize) {
+      if (result->points.empty()) {
+        // Simplification failed, got something too "line-ish"
+        return polygon;
+      }
+    }
+
+    PointType &p2p = polygon->points[i % psize];
+    PointType &p3p = (i == psize) ? result->points[0] : polygon->points[(i + 1) % psize];
+
+    Eigen::Vector4f p1(p1p.x, p1p.y, p1p.z, 0);
+    Eigen::Vector4f p2(p2p.x, p2p.y, p2p.z, 0);
+    Eigen::Vector4f p3(p3p.x, p3p.y, p3p.z, 0);
+
+    Eigen::Vector4f line_dir = p3 - p1;
+
+    double sqr_dist = pcl::sqrPointToLineDistance(p2, p1, line_dir);
+    if (sqr_dist < sqr_dist_threshold) {
+      ++i_dist;
+    } else {
+      i_dist = 1;
+      result->points[res_points++] = p2p;
+    }
+  }
+
+  result->header.frame_id = polygon->header.frame_id;
+  result->header.stamp = polygon->header.stamp;
+  result->width  = res_points;
+  result->height = 1;
+  result->is_dense = false;
+  result->points.resize(res_points);
+
+  return result;
 }
 
 
