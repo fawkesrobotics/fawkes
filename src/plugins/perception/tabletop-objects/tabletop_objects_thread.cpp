@@ -199,6 +199,15 @@ TabletopObjectsThread::finalize()
   fsimplified_polygon_.reset();
 }
 
+template <typename PointType>
+inline bool
+comparePoints2D(const PointType &p1, const PointType &p2)
+{
+  double angle1 = atan2(p1.y, p1.x) + M_PI;
+  double angle2 = atan2(p2.y, p2.x) + M_PI;
+  return (angle1 > angle2);
+}
+
 
 void
 TabletopObjectsThread::loop()
@@ -228,6 +237,7 @@ TabletopObjectsThread::loop()
   CloudPtr temp_cloud2(new Cloud);
   pcl::ExtractIndices<PointType> extract_;
   CloudPtr cloud_hull_;
+  CloudPtr model_cloud_hull_;
   CloudPtr cloud_proj_;
   CloudPtr cloud_filt_;
   CloudPtr cloud_above_;
@@ -370,8 +380,10 @@ TabletopObjectsThread::loop()
                                               cfg_table_model_height,
                                               cfg_table_model_step);
 
+#ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase::V_Vector4f good_hull_edges;
   good_hull_edges.resize(cloud_hull_->points.size() * 2);
+#endif
 
   try {
     
@@ -406,7 +418,10 @@ TabletopObjectsThread::loop()
       * Eigen::Vector3f::UnitZ();
 
     // point and good edge indexes of chosen candidate
-    size_t pidx1, pidx2, geidx1, geidx2;
+    size_t pidx1, pidx2;
+#ifdef HAVE_VISUAL_DEBUGGING
+    size_t geidx1, geidx2;
+#endif
     // lower frustrum potential candidate
     size_t lf_pidx1, lf_pidx2;
     pidx1 = pidx2 = lf_pidx1 = lf_pidx2 = std::numeric_limits<size_t>::max();
@@ -421,7 +436,9 @@ TabletopObjectsThread::loop()
     // otherwise we fallback to this line as it is a good rough guess
     // to prevent at least worst things during manipulation
     const size_t psize = cloud_hull_->points.size();
+#ifdef HAVE_VISUAL_DEBUGGING
     size_t good_edge_points = 0;
+#endif
     for (size_t i = 0; i < psize; ++i) {
       PointType &p1p = cloud_hull_->points[i          ];
       PointType &p2p = cloud_hull_->points[(i+1) % psize];
@@ -460,6 +477,7 @@ TabletopObjectsThread::loop()
           continue;
         }
 
+#ifdef HAVE_VISUAL_DEBUGGING
         // Remember as good edge for visualization
         for (unsigned int j = 0; j < 3; ++j)
           good_hull_edges[good_edge_points][j] = p1[j];
@@ -469,6 +487,7 @@ TabletopObjectsThread::loop()
           good_hull_edges[good_edge_points][j] = p2[j];
         good_hull_edges[good_edge_points][3] = 0.;
         ++good_edge_points;
+#endif
 
         // Check if this good edge is closer to the robot than the
         // current best
@@ -482,8 +501,10 @@ TabletopObjectsThread::loop()
           //                  p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
           pidx1 = i;
           pidx2 = (i + 1) % psize;
+#ifdef HAVE_VISUAL_DEBUGGING
           geidx1 = good_edge_points - 2;
           geidx2 = good_edge_points - 1;
+#endif
         }
       }
     }
@@ -506,6 +527,7 @@ TabletopObjectsThread::loop()
         pidx1 = lf_pidx1;
         pidx2 = lf_pidx2;
 
+#ifdef HAVE_VISUAL_DEBUGGING
         good_hull_edges[good_edge_points][0] = cloud_hull_->points[lf_pidx1].x;
         good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx1].y;
         good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx1].z;
@@ -515,6 +537,7 @@ TabletopObjectsThread::loop()
         good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx2].y;
         good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx2].z;
         geidx2 = good_edge_points++;
+#endif
 
       } else {
 
@@ -532,6 +555,7 @@ TabletopObjectsThread::loop()
           pidx1 = lf_pidx1;
           pidx2 = lf_pidx2;
 
+#ifdef HAVE_VISUAL_DEBUGGING
           good_hull_edges[good_edge_points][0] = cloud_hull_->points[lf_pidx1].x;
           good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx1].y;
           good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx1].z;
@@ -541,15 +565,18 @@ TabletopObjectsThread::loop()
           good_hull_edges[good_edge_points][1] = cloud_hull_->points[lf_pidx2].y;
           good_hull_edges[good_edge_points][2] = cloud_hull_->points[lf_pidx2].z;
           geidx2 = good_edge_points++;
+#endif
         }
       }
     }
 
+#ifdef HAVE_VISUAL_DEBUGGING
     if (good_edge_points > 0) {
       good_hull_edges[geidx1][3] = 1.0;
       good_hull_edges[geidx2][3] = 1.0;
     }
     good_hull_edges.resize(good_edge_points);
+#endif
 
     // Calculate transformation parameters based on determined
     // convex hull polygon segment we decided on as "the table edge"
@@ -573,12 +600,36 @@ TabletopObjectsThread::loop()
 
     // Rotational parameters to align table to polygon segment
     Eigen::Vector3f p1_p2 = p2 - p1;
+    Eigen::Vector3f p1_p2_center = (p2 + p1) * 0.5;
     p1_p2.normalize();
     Eigen::Vector3f p1_p2_90 =
       Eigen::AngleAxisf(M_PI/2., normal) * p1_p2;
     p1_p2_90.normalize();
     float angle_p1_p2 = acosf(p1_p2.dot(Eigen::Vector3f::UnitY()));
 
+    // calculate table corner points
+    std::vector<Eigen::Vector3f> tpoints(4);
+    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_width * 0.5);
+    tpoints[1] = p1_p2_center - p1_p2 * (cfg_table_model_width * 0.5);
+    tpoints[2] = tpoints[0] + p1_p2_90 * cfg_table_model_height;
+    tpoints[3] = tpoints[1] + p1_p2_90 * cfg_table_model_height;
+
+    model_cloud_hull_.reset(new Cloud());
+    model_cloud_hull_->points.resize(4);
+    model_cloud_hull_->height = 1;
+    model_cloud_hull_->width = 4;
+    model_cloud_hull_->is_dense = true;
+    for (int i = 0; i < 4; ++i) {
+      model_cloud_hull_->points[i].x = tpoints[i][0];
+      model_cloud_hull_->points[i].y = tpoints[i][1];
+      model_cloud_hull_->points[i].z = tpoints[i][2];
+    }
+    std::sort(model_cloud_hull_->points.begin(),
+              model_cloud_hull_->points.end(), comparePoints2D<PointType>);
+
+
+    // Used for visualization, move table model with anchor in the
+    // center back by halve the table height to align edge.
     // Translational parameters to align model edge instead of center
     Eigen::Vector3f move = p1_p2_90 * (cfg_table_model_height * 0.5);
     front_line_center += move;
@@ -591,7 +642,8 @@ TabletopObjectsThread::loop()
       * Eigen::AngleAxisf(angle, rotaxis);
 
     // to show fitted table model
-    pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
+    //pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
+    *table_model_ = *model_cloud_hull_;
     table_model_->header.frame_id = finput_->header.frame_id;
 
   } catch (Exception &e) {
@@ -758,8 +810,20 @@ TabletopObjectsThread::loop()
       hull_vertices[i][3] = 0.;
     }
 
+    TabletopVisualizationThreadBase::V_Vector4f model_vertices;
+    if (model_cloud_hull_ && ! model_cloud_hull_->points.empty()) {
+      model_vertices.resize(model_cloud_hull_->points.size());
+      for (unsigned int i = 0; i < model_cloud_hull_->points.size(); ++i) {
+        model_vertices[i][0] = model_cloud_hull_->points[i].x;
+        model_vertices[i][1] = model_cloud_hull_->points[i].y;
+        model_vertices[i][2] = model_cloud_hull_->points[i].z;
+        model_vertices[i][3] = 0.;
+      }
+    }
+
     visthread_->visualize(input_->header.frame_id,
-                          table_centroid, normal, hull_vertices, good_hull_edges, centroids);
+                          table_centroid, normal, hull_vertices, model_vertices,
+                          good_hull_edges, centroids);
   }
 #endif
 }

@@ -229,7 +229,7 @@ TabletopVisualizationThread::loop()
   hull.scale.x = 0.005;
   hull.color.r = 0.4;
   hull.color.g = hull.color.b = 0.f;
-  hull.color.a = 1.0;
+  hull.color.a = 0.2;
   hull.lifetime = ros::Duration(10, 0);
   m.markers.push_back(hull);
 
@@ -249,7 +249,7 @@ TabletopVisualizationThread::loop()
     hull_lines.points[i].z = good_table_hull_edges_[i][2];
     hull_lines.colors[i].r = 0.;
     hull_lines.colors[i].b = 0.;
-    hull_lines.colors[i].a = 1.0;
+    hull_lines.colors[i].a = 0.4;
     if (good_table_hull_edges_[i][3] > 0.) {
       hull_lines.colors[i].g = 1.0;
     } else {
@@ -282,6 +282,32 @@ TabletopVisualizationThread::loop()
   hull_points.color.a = 1.0;
   hull_points.lifetime = ros::Duration(10, 0);
   m.markers.push_back(hull_points);
+
+  // Table model surrounding polygon
+  if (! table_model_vertices_.empty()) {
+    visualization_msgs::Marker hull_model;
+    hull_model.header.frame_id = frame_id_;
+    hull_model.header.stamp = ros::Time::now();
+    hull_model.ns = "tabletop";
+    hull_model.id = idnum++;
+    hull_model.type = visualization_msgs::Marker::LINE_STRIP;
+    hull_model.action = visualization_msgs::Marker::ADD;
+    hull_model.points.resize(table_model_vertices_.size() + 1);
+    for (size_t i = 0; i < table_model_vertices_.size(); ++i) {
+      hull_model.points[i].x = table_model_vertices_[i][0];
+      hull_model.points[i].y = table_model_vertices_[i][1];
+      hull_model.points[i].z = table_model_vertices_[i][2];
+    }
+    hull_model.points[table_model_vertices_.size()].x = table_model_vertices_[0][0];
+    hull_model.points[table_model_vertices_.size()].y = table_model_vertices_[0][1];
+    hull_model.points[table_model_vertices_.size()].z = table_model_vertices_[0][2];
+    hull_model.scale.x = 0.0075;
+    hull_model.color.r = 0.5;
+    hull_model.color.g = hull_model.color.b = 0.f;
+    hull_model.color.a = 1.0;
+    hull_model.lifetime = ros::Duration(10, 0);
+    m.markers.push_back(hull_model);
+  }
 
   triangulate_hull();
 
@@ -456,6 +482,7 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
                                        Eigen::Vector4f &table_centroid,
                                        Eigen::Vector4f &normal,
                                        V_Vector4f &table_hull_vertices,
+                                       V_Vector4f &table_model_vertices,
                                        V_Vector4f &good_table_hull_edges,
                                        V_Vector4f &centroids) throw()
 {
@@ -464,6 +491,7 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
   table_centroid_ = table_centroid;
   normal_ = normal;
   table_hull_vertices_ = table_hull_vertices;
+  table_model_vertices_ = table_model_vertices;
   good_table_hull_edges_ = good_table_hull_edges;
   centroids_ = centroids;
   wakeup();
@@ -486,17 +514,17 @@ TabletopVisualizationThread::triangulate_hull()
   FILE *errfile = stderr;
 
   // Array of coordinates for each point
-  coordT *points = (coordT *)calloc(table_hull_vertices_.size() * dim, sizeof(coordT));
+  coordT *points = (coordT *)calloc(table_model_vertices_.size() * dim, sizeof(coordT));
 
-  for (size_t i = 0; i < table_hull_vertices_.size(); ++i)
+  for (size_t i = 0; i < table_model_vertices_.size(); ++i)
   {
-    points[i * dim + 0] = (coordT)table_hull_vertices_[i][0];
-    points[i * dim + 1] = (coordT)table_hull_vertices_[i][1];
-    points[i * dim + 2] = (coordT)table_hull_vertices_[i][2];
+    points[i * dim + 0] = (coordT)table_model_vertices_[i][0];
+    points[i * dim + 1] = (coordT)table_model_vertices_[i][1];
+    points[i * dim + 2] = (coordT)table_model_vertices_[i][2];
   }
 
   // Compute convex hull
-  int exitcode = qh_new_qhull(dim, table_hull_vertices_.size(), points,
+  int exitcode = qh_new_qhull(dim, table_model_vertices_.size(), points,
                               ismalloc, flags, outfile, errfile);
 
   if (exitcode != 0) {
