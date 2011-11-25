@@ -32,6 +32,8 @@
  * @param table_centroid centroid of table
  * @param normal normal vector of table
  * @param table_hull_vertices points of the table hull
+ * @param good_table_hull_edges "good" egdes in table hull, i.e. edges that have
+ * been considered for determining the table orientation
  * @param centroids object cluster centroids
  */
 

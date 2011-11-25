@@ -43,6 +43,7 @@ class TabletopVisualizationThreadBase
                          Eigen::Vector4f &table_centroid,
                          Eigen::Vector4f &normal,
                          V_Vector4f &table_hull_vertices,
+                         V_Vector4f &good_table_hull_edges,
                          V_Vector4f &centroids) throw() = 0;
 };
 

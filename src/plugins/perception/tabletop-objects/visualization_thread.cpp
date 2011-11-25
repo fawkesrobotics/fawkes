@@ -226,12 +226,62 @@ TabletopVisualizationThread::loop()
   hull.points[table_hull_vertices_.size()].x = table_hull_vertices_[0][0];
   hull.points[table_hull_vertices_.size()].y = table_hull_vertices_[0][1];
   hull.points[table_hull_vertices_.size()].z = table_hull_vertices_[0][2];
-  hull.scale.x = 0.01; // 5cm high
+  hull.scale.x = 0.005;
   hull.color.r = 0.4;
   hull.color.g = hull.color.b = 0.f;
   hull.color.a = 1.0;
   hull.lifetime = ros::Duration(10, 0);
   m.markers.push_back(hull);
+
+  // "Good" lines are highlighted
+  visualization_msgs::Marker hull_lines;
+  hull_lines.header.frame_id = frame_id_;
+  hull_lines.header.stamp = ros::Time::now();
+  hull_lines.ns = "tabletop";
+  hull_lines.id = idnum++;
+  hull_lines.type = visualization_msgs::Marker::LINE_LIST;
+  hull_lines.action = visualization_msgs::Marker::ADD;
+  hull_lines.points.resize(good_table_hull_edges_.size());
+  hull_lines.colors.resize(good_table_hull_edges_.size());
+  for (size_t i = 0; i < good_table_hull_edges_.size(); ++i) {
+    hull_lines.points[i].x = good_table_hull_edges_[i][0];
+    hull_lines.points[i].y = good_table_hull_edges_[i][1];
+    hull_lines.points[i].z = good_table_hull_edges_[i][2];
+    hull_lines.colors[i].r = 0.;
+    hull_lines.colors[i].b = 0.;
+    hull_lines.colors[i].a = 1.0;
+    if (good_table_hull_edges_[i][3] > 0.) {
+      hull_lines.colors[i].g = 1.0;
+    } else {
+      hull_lines.colors[i].g = 0.5;
+    }
+  }
+  hull_lines.color.a = 1.0;
+  hull_lines.scale.x = 0.015;
+  hull_lines.lifetime = ros::Duration(10, 0);
+  m.markers.push_back(hull_lines);
+
+  visualization_msgs::Marker hull_points;
+  hull_points.header.frame_id = frame_id_;
+  hull_points.header.stamp = ros::Time::now();
+  hull_points.ns = "tabletop";
+  hull_points.id = idnum++;
+  hull_points.type = visualization_msgs::Marker::SPHERE_LIST;
+  hull_points.action = visualization_msgs::Marker::ADD;
+  hull_points.points.resize(table_hull_vertices_.size());
+  for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
+    hull_points.points[i].x = table_hull_vertices_[i][0];
+    hull_points.points[i].y = table_hull_vertices_[i][1];
+    hull_points.points[i].z = table_hull_vertices_[i][2];
+  }
+  hull_points.scale.x = 0.01;
+  hull_points.scale.y = 0.01;
+  hull_points.scale.z = 0.01;
+  hull_points.color.r = 0.8;
+  hull_points.color.g = hull_points.color.b = 0.f;
+  hull_points.color.a = 1.0;
+  hull_points.lifetime = ros::Duration(10, 0);
+  m.markers.push_back(hull_points);
 
   triangulate_hull();
 
@@ -276,8 +326,8 @@ TabletopVisualizationThread::loop()
     frustrum.points[0].y = frustrum.points[2].y = frustrum.points[4].y = frustrum.points[6].y = 0.;
     frustrum.points[0].z = frustrum.points[2].z = frustrum.points[4].z = frustrum.points[6].z = 0.;
 
-    const float half_hva = deg2rad(cfg_horizontal_va_ * 0.5);
-    const float half_vva = deg2rad(cfg_vertical_va_ * 0.5);
+    const float half_hva = cfg_horizontal_va_ * 0.5;
+    const float half_vva = cfg_vertical_va_ * 0.5;
 
     Eigen::Matrix3f upper_right_m;
     upper_right_m =
@@ -406,6 +456,7 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
                                        Eigen::Vector4f &table_centroid,
                                        Eigen::Vector4f &normal,
                                        V_Vector4f &table_hull_vertices,
+                                       V_Vector4f &good_table_hull_edges,
                                        V_Vector4f &centroids) throw()
 {
   MutexLocker lock(&mutex_);
@@ -413,6 +464,7 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
   table_centroid_ = table_centroid;
   normal_ = normal;
   table_hull_vertices_ = table_hull_vertices;
+  good_table_hull_edges_ = good_table_hull_edges;
   centroids_ = centroids;
   wakeup();
 }
