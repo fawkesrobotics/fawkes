@@ -47,6 +47,14 @@
     <field type="float" name="y">y position of object (meters)</field>
     <field type="float" name="z">z position of object (meters)</field>
   </message>
+  <message name="RotateObjectQuat">
+    <comment>Rotate object in current environment, given a quaternion</comment>
+    <field type="string" length="30" name="name">Name of object</field>
+    <field type="float" name="x">x value of quaternion</field>
+    <field type="float" name="y">y value of quaternion</field>
+    <field type="float" name="z">z value of quaternion</field>
+    <field type="float" name="w">w value of quaternion</field>
+  </message>
   <message name="RotateObject">
     <comment>Rotate object in current environment.</comment>
     <field type="string" length="30" name="name">Name of object</field>

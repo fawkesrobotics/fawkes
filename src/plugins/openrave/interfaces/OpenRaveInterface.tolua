@@ -78,6 +78,29 @@ class OpenRaveInterface : public Interface
     int maxlenof_z() const;
   };
 
+  class RotateObjectQuatMessage : public Message
+  {
+    RotateObjectQuatMessage(char * ini_name, float ini_x, float ini_y, float ini_z, float ini_w);
+    RotateObjectQuatMessage();
+    ~RotateObjectQuatMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float z();
+    void set_z(const float new_z);
+    int maxlenof_z() const;
+    float w();
+    void set_w(const float new_w);
+    int maxlenof_w() const;
+  };
+
   class RotateObjectMessage : public Message
   {
     RotateObjectMessage(char * ini_name, float ini_x, float ini_y, float ini_z);

@@ -70,6 +70,7 @@ class OpenRaveThread
   virtual bool delete_object(const std::string& name);
   virtual bool rename_object(const std::string& name, const std::string& new_name);
   virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, fawkes::OpenRaveRobot* robot=NULL);
+  virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w);
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
   virtual bool set_target_object(const std::string& name, fawkes::OpenRaveRobot* robot, float rot_x = 0);
 

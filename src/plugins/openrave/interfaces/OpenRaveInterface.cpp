@@ -58,9 +58,10 @@ OpenRaveInterface::OpenRaveInterface() : Interface()
   add_messageinfo("ReleaseObjectMessage");
   add_messageinfo("ReleaseAllObjectsMessage");
   add_messageinfo("MoveObjectMessage");
+  add_messageinfo("RotateObjectQuatMessage");
   add_messageinfo("RotateObjectMessage");
   add_messageinfo("RenameObjectMessage");
-  unsigned char tmp_hash[] = {0x8b, 0x75, 0xea, 0xc, 0x65, 0xda, 0x9f, 0x25, 0x2, 0x8c, 0x22, 0x47, 0x2b, 0xee, 0xd1, 0xe5};
+  unsigned char tmp_hash[] = {0x7f, 0x87, 0xdf, 0x38, 0x2b, 0x2d, 0xbe, 0x36, 0x88, 0x5a, 0xf7, 0x95, 0x15, 0xb4, 0x1b, 0xaa};
   set_hash(tmp_hash);
 }
 
@@ -218,6 +219,8 @@ OpenRaveInterface::create_message(const char *type) const
     return new ReleaseAllObjectsMessage();
   } else if ( strncmp("MoveObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new MoveObjectMessage();
+  } else if ( strncmp("RotateObjectQuatMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new RotateObjectQuatMessage();
   } else if ( strncmp("RotateObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new RotateObjectMessage();
   } else if ( strncmp("RenameObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -882,6 +885,232 @@ OpenRaveInterface::MoveObjectMessage::clone() const
 {
   return new OpenRaveInterface::MoveObjectMessage(this);
 }
+/** @class OpenRaveInterface::RotateObjectQuatMessage <interfaces/OpenRaveInterface.h>
+ * RotateObjectQuatMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_name initial value for name
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_z initial value for z
+ * @param ini_w initial value for w
+ */
+OpenRaveInterface::RotateObjectQuatMessage::RotateObjectQuatMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_z, const float ini_w) : Message("RotateObjectQuatMessage")
+{
+  data_size = sizeof(RotateObjectQuatMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RotateObjectQuatMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->name, ini_name, 30);
+  data->x = ini_x;
+  data->y = ini_y;
+  data->z = ini_z;
+  data->w = ini_w;
+  add_fieldinfo(IFT_STRING, "name", 30, data->name);
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "w", 1, &data->w);
+}
+/** Constructor */
+OpenRaveInterface::RotateObjectQuatMessage::RotateObjectQuatMessage() : Message("RotateObjectQuatMessage")
+{
+  data_size = sizeof(RotateObjectQuatMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RotateObjectQuatMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "name", 30, data->name);
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "w", 1, &data->w);
+}
+
+/** Destructor */
+OpenRaveInterface::RotateObjectQuatMessage::~RotateObjectQuatMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+OpenRaveInterface::RotateObjectQuatMessage::RotateObjectQuatMessage(const RotateObjectQuatMessage *m) : Message("RotateObjectQuatMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RotateObjectQuatMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get name value.
+ * Name of object
+ * @return name value
+ */
+char *
+OpenRaveInterface::RotateObjectQuatMessage::name() const
+{
+  return data->name;
+}
+
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRaveInterface::RotateObjectQuatMessage::maxlenof_name() const
+{
+  return 30;
+}
+
+/** Set name value.
+ * Name of object
+ * @param new_name new name value
+ */
+void
+OpenRaveInterface::RotateObjectQuatMessage::set_name(const char * new_name)
+{
+  strncpy(data->name, new_name, sizeof(data->name));
+}
+
+/** Get x value.
+ * x value of quaternion
+ * @return x value
+ */
+float
+OpenRaveInterface::RotateObjectQuatMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRaveInterface::RotateObjectQuatMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * x value of quaternion
+ * @param new_x new x value
+ */
+void
+OpenRaveInterface::RotateObjectQuatMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * y value of quaternion
+ * @return y value
+ */
+float
+OpenRaveInterface::RotateObjectQuatMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRaveInterface::RotateObjectQuatMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * y value of quaternion
+ * @param new_y new y value
+ */
+void
+OpenRaveInterface::RotateObjectQuatMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get z value.
+ * z value of quaternion
+ * @return z value
+ */
+float
+OpenRaveInterface::RotateObjectQuatMessage::z() const
+{
+  return data->z;
+}
+
+/** Get maximum length of z value.
+ * @return length of z value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRaveInterface::RotateObjectQuatMessage::maxlenof_z() const
+{
+  return 1;
+}
+
+/** Set z value.
+ * z value of quaternion
+ * @param new_z new z value
+ */
+void
+OpenRaveInterface::RotateObjectQuatMessage::set_z(const float new_z)
+{
+  data->z = new_z;
+}
+
+/** Get w value.
+ * w value of quaternion
+ * @return w value
+ */
+float
+OpenRaveInterface::RotateObjectQuatMessage::w() const
+{
+  return data->w;
+}
+
+/** Get maximum length of w value.
+ * @return length of w value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRaveInterface::RotateObjectQuatMessage::maxlenof_w() const
+{
+  return 1;
+}
+
+/** Set w value.
+ * w value of quaternion
+ * @param new_w new w value
+ */
+void
+OpenRaveInterface::RotateObjectQuatMessage::set_w(const float new_w)
+{
+  data->w = new_w;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+OpenRaveInterface::RotateObjectQuatMessage::clone() const
+{
+  return new OpenRaveInterface::RotateObjectQuatMessage(this);
+}
 /** @class OpenRaveInterface::RotateObjectMessage <interfaces/OpenRaveInterface.h>
  * RotateObjectMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1229,12 +1458,16 @@ OpenRaveInterface::message_valid(const Message *message) const
   if ( m5 != NULL ) {
     return true;
   }
-  const RotateObjectMessage *m6 = dynamic_cast<const RotateObjectMessage *>(message);
+  const RotateObjectQuatMessage *m6 = dynamic_cast<const RotateObjectQuatMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const RenameObjectMessage *m7 = dynamic_cast<const RenameObjectMessage *>(message);
+  const RotateObjectMessage *m7 = dynamic_cast<const RotateObjectMessage *>(message);
   if ( m7 != NULL ) {
+    return true;
+  }
+  const RenameObjectMessage *m8 = dynamic_cast<const RenameObjectMessage *>(message);
+  if ( m8 != NULL ) {
     return true;
   }
   return false;
