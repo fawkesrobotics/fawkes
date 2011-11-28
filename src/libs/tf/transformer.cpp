@@ -963,9 +963,9 @@ Transformer::can_transform(const std::string& target_frame,
 
   if (mapped_tgt == mapped_src)  return true;
 
-  MutexLocker lock(frame_mutex_);
   if (!frame_exists(mapped_tgt) || !frame_exists(mapped_src))  return false;
 
+  MutexLocker lock(frame_mutex_);
   CompactFrameID target_id = lookup_frame_number(mapped_tgt);
   CompactFrameID source_id = lookup_frame_number(mapped_src);
 
