@@ -161,11 +161,17 @@ LuaAgentContinuousExecutionThread::init()
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
     __lua->add_package("fawkesinterface");
+#ifdef HAVE_TF
+    __lua->add_package("fawkestf");
+#endif
 
     __lua->set_string("AGENT", __cfg_agent.c_str());
     __lua->set_usertype("config", config, "Configuration", "fawkes");
     __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
     __lua->set_usertype("clock", clock, "Clock", "fawkes");
+#ifdef HAVE_TF
+    __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
+#endif
     __lua->set_cfunction("read_interfaces", l_read_interfaces);
     __lua->set_cfunction("write_interfaces", l_write_interfaces);
 

@@ -30,6 +30,9 @@
 #include <aspect/clock.h>
 #include <aspect/blackboard.h>
 #include <aspect/thread_producer.h>
+#ifdef HAVE_TF
+#include <aspect/tf.h>
+#endif
 #include <utils/system/fam.h>
 
 #include <string>
@@ -53,6 +56,9 @@ class LuaAgentContinuousExecutionThread
   public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
   public fawkes::ThreadProducerAspect,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::FamListener
 {
  public:

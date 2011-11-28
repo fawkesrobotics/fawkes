@@ -29,6 +29,9 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 #include <utils/system/fam.h>
 #include <blackboard/interface_listener.h>
 
@@ -51,6 +54,9 @@ class LuaAgentPeriodicExecutionThread
   public fawkes::LoggingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::ConfigurableAspect,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::ClockAspect
 {
  public:
