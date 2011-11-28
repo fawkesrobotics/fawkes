@@ -18,12 +18,18 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
 include $(LIBSRCDIR)/utils/utils.mk
+include $(LIBSRCDIR)/tf/tf.mk
 
 SUBDIRS = consoletool
 
 # Uncomment to enable time tracking for the skiller
 # CFLAGS += -DSKILLER_TIMETRACKING -DSKILLER_TT_MOD=50
 CFLAGS  += $(CFLAGS_LUA)
+
+ifeq ($(HAVE_TF),1)
+  CFLAGS += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
+endif
 
 LIBS_skiller = fawkescore fawkesutils fawkesaspects fawkesnetcomm fawkeslua \
 	       fawkesblackboard fawkesinterface fawkeslogging \

@@ -152,11 +152,17 @@ SkillerExecutionThread::init()
     __lua->add_package("fawkeslogging");
     __lua->add_package("fawkesinterface");
     __lua->add_package("fawkesgeometry");
+#ifdef HAVE_TF
+    __lua->add_package("fawkestf");
+#endif
 
     __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
     __lua->set_usertype("config", config, "Configuration", "fawkes");
     __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
     __lua->set_usertype("clock", clock, "Clock", "fawkes");
+#ifdef HAVE_TF
+    __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
+#endif
 
     __lua_ifi->push_interfaces();
 
