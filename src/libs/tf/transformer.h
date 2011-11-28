@@ -151,12 +151,12 @@ class Transformer
                      const std::string& fixed_frame,
                      Stamped<Pose>& stamped_out) const;
 
-
  protected: /* methods */
   TimeCache *  get_frame(unsigned int frame_number) const;
 
   CompactFrameID lookup_frame_number(const std::string &frameid_str) const;
   CompactFrameID lookup_or_insert_frame_number(const std::string &frameid_str);
+  std::string    lookup_frame_string(unsigned int frame_id_num) const;
 
  protected:
   /// Flag to mark the transformer as disabled
@@ -197,6 +197,7 @@ class Transformer
 
   bool can_transform_no_lock(CompactFrameID target_id, CompactFrameID source_id,
                              const fawkes::Time& time) const;
+  void create_connectivity_error_string(CompactFrameID source_frame, CompactFrameID target_frame, std::string* out) const;
 
   template<typename F>
   int walk_to_top_parent(F& f, fawkes::Time time,

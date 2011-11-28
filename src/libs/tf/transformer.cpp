@@ -330,6 +330,16 @@ Transformer::frame_exists(const std::string& frame_id_str) const
   return frameIDs_.count(frame_id_resolveped);
 }
 
+void
+Transformer::create_connectivity_error_string(CompactFrameID source_frame, CompactFrameID target_frame, std::string* out) const
+{
+  if (!out) return;
+
+  *out = std::string("Could not find a connection between '"+lookup_frame_string(target_frame)+"' and '"+
+                     lookup_frame_string(source_frame)+"' because they are not part of the same tree."+
+                     "Tf has two or more unconnected trees.");
+}
+
 
 /** Walk from frame to top-parent of both.
  * @param f accumulator
@@ -429,7 +439,8 @@ Transformer::walk_to_top_parent(F& f, fawkes::Time time,
       if (error_string)
       {
         std::stringstream ss;
-        //ss << *error_string << ", when looking up transform from frame [" << lookupFrameString(source_id) << "] to frame [" << lookupFrameString(target_id) << "]";
+        ss << "Looking up transform from frame [" << lookup_frame_string(source_id) <<
+          "] to frame [" << lookup_frame_string(target_id) << "] failed";
         *error_string = ss.str();
       }
 
@@ -455,7 +466,7 @@ Transformer::walk_to_top_parent(F& f, fawkes::Time time,
         std::stringstream ss;
         //ss << "The tf tree is invalid because it contains a loop." << std::endl
         //   << allFramesAsString() << std::endl;
-        *error_string = ss.str();
+        *error_string = "The tf tree is invalid because it contains a loop.";
       }
       return LOOKUP_ERROR;
     }
@@ -463,7 +474,7 @@ Transformer::walk_to_top_parent(F& f, fawkes::Time time,
 
   if (frame != top_parent)
   {
-    //createConnectivityErrorString(source_id, target_id, error_string);
+    create_connectivity_error_string(source_id, target_id, error_string);
     return CONNECTIVITY_ERROR;
   }
 
@@ -625,7 +636,7 @@ Transformer::get_latest_common_time(CompactFrameID target_id, CompactFrameID sou
   }
 
   if (common_parent == 0) {
-    //createConnectivityErrorString(source_id, target_id, error_string);
+    create_connectivity_error_string(source_id, target_id, error_string);
     return CONNECTIVITY_ERROR;
   }
 
@@ -827,6 +838,20 @@ Transformer::lookup_or_insert_frame_number(const std::string &frameid_str)
   return retval;
 };
 
+/** Get frame ID given its number.
+ * @param frame_num frame number
+ * @return frame ID string
+ * @exception LookupException thrown if number invalid
+ */
+std::string
+Transformer::lookup_frame_string(unsigned int frame_num) const
+{
+  if (frame_num >= frameIDs_reverse.size()) {
+    throw LookupException("Reverse lookup of frame id %u failed!", frame_num);
+  }
+  else return frameIDs_reverse[frame_num];
+}
+
 
 /** Lookup transform.
  * @param target_frame target frame ID
@@ -874,11 +899,11 @@ void Transformer::lookup_transform(const std::string& target_frame,
     switch (rv)
     {
     case CONNECTIVITY_ERROR:
-      throw ConnectivityException("%s", error_string.c_str());
+      throw ConnectivityException("Connectivity: %s", error_string.c_str());
     case EXTRAPOLATION_ERROR:
-      throw ExtrapolationException("%s", error_string.c_str());
+      throw ExtrapolationException("Extrapolation: %s", error_string.c_str());
     case LOOKUP_ERROR:
-      throw LookupException("%s", error_string.c_str());
+      throw LookupException("Lookup: %s", error_string.c_str());
     default:
       throw Exception("lookup_transform: unknown error code: %d", rv);
       break;
