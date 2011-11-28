@@ -25,7 +25,7 @@ module(..., skillenv.module_init)
 -- Crucial skill information
 name               = "katana_grab_any"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=true}
-depends_skills     = {"katana", "katana_rel", "or_object"}
+depends_skills     = {"katana", "katana_rel", "or_object", "say"}
 depends_interfaces = {
    {v = "katanaarm", type = "KatanaInterface"}
 }
@@ -56,11 +56,12 @@ katana_grab{object=OBJECT, table_height=HEIGHT}
 skillenv.skill_module(...)
 
 -- Constants
-local MIN_APPROACH_OFFSET = 0.10 -- pre-grab position: 10cm before
-local MAX_APPROACH_DIST = 0.05 -- approach: 5cm more than acutal target position (=> 15cm difference to pre-grab pos)
+local MIN_APPROACH_OFFSET = 0.08 -- pre-grab position: 10cm before
+local MAX_APPROACH_DIST = 0.07 -- approach: 5cm more than acutal target position (=> 15cm difference to pre-grab pos)
 local SLOW_DOWN_VELOCITY = 0.3
 local DEF_GRAB_THETA = math.pi/2 -- such that it can grab cylindrical objects
 local MAX_GRAB_THETA_ERROR = 0.5 -- ~17° +-
+local MAX_GRAB_DISTANCE = 0.60
 
 -- functions
 function jc_obj_is_grabable(state)
@@ -109,15 +110,17 @@ fsm:add_transitions {
 
    {"PRE_GRAB_POS", "TO_APPROACH_OBJ", skill=katana, fail_to="FAILED_PRE_GRAB_POS", desc="ready to approach"},
 
-   {"FAILED_PRE_GRAB_POS", "FAILED", true},
+   {"FAILED_PRE_GRAB_POS", "FAILED", fail_to="FAILED", desc="target not in range", skill=say},
 
    {"TO_APPROACH_OBJ", "REPOSITION_OBJ", wait_sec = 1.0},
 
    {"REPOSITION_OBJ", "APPROACH_OBJ", fail_to="APPROACH_OBJ", desc="obj at safe distance", skill=or_object},
    {"REPOSITION_OBJ", "APPROACH_OBJ", "not (vars.object and vars.table_height)", desc="no object given", precond=true},
 
-   {"APPROACH_OBJ", "CHECK_GRABABILITY", skill=katana_rel, fail_to="FAILED", desc="reached max approach distance"},
+   {"APPROACH_OBJ", "CHECK_GRABABILITY", skill=katana_rel, fail_to="FAILED_APPROACH", desc="reached max approach distance"},
    {"APPROACH_OBJ", "STOP_MOVEMENT", jc_obj_is_grabable, desc="obj close enough"},
+
+   {"FAILED_APPROACH", "FAILED", fail_to="FAILED", desc="unreachable", skill=say},
 
    {"STOP_MOVEMENT", "TO_GRAB", skill=katana, args={stop=true}, fail_to="TO_GRAB", desc="stopped"},
    {"CHECK_GRABABILITY", "TO_GRAB", jc_obj_is_grabable, desc="obj close enough"},
@@ -165,6 +168,18 @@ function PRE_GRAB_POS:init()
                 offset= -MIN_APPROACH_OFFSET}
 end
 
+function FAILED_PRE_GRAB_POS:init()
+   local text = "I can't grab it properly, it's too"
+   local x,y = self.fsm.vars.x, self.fsm.vars.y
+   local dist = math.sqrt(x*x + y*y)
+   if dist >= MAX_GRAB_DISTANCE then
+      text = text .. " far away."
+   else
+      text = text .. " close."
+   end
+   self.args = {text=text, wait=true}
+end
+
 function REPOSITION_OBJ:init()
    self.args = {move=true, name=self.fsm.vars.object, x=self.fsm.vars.x + 0.3,
                                                       y=self.fsm.vars.y,
@@ -188,6 +203,11 @@ function APPROACH_OBJ:init()
                 theta_error = 0.5,
                 theta=math.pi/2} --theta=0 -> preferably look forward
 
+end
+
+function FAILED_APPROACH:init()
+   local text = "I can't reach it safley."
+   self.args = {text=text, wait=true}
 end
 
 function GRAB:init()
