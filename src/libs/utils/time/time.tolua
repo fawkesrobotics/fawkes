@@ -40,6 +40,8 @@ class Time
   Time(float sec);
   Time(Clock *clock);
   Time(const Time &t);
+  Time(long sec, long usec);
+  Time(long sec, long usec, Clock *clock);
   ~Time();
 
   float in_sec() const;
