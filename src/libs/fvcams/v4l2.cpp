@@ -1824,6 +1824,11 @@ V4L2Camera::print_info()
         cout << "string";
         break;
 #endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0) || LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,41)
+      case V4L2_CTRL_TYPE_BITMASK:
+        cout << "bitmask";
+        break;
+#endif
     }
     cout << ")" << endl;
 
@@ -1898,6 +1903,11 @@ V4L2Camera::print_info()
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,32)
       case V4L2_CTRL_TYPE_STRING:
         cout << "string";
+        break;
+#endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0) || LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,41)
+      case V4L2_CTRL_TYPE_BITMASK:
+        cout << "bitmask";
         break;
 #endif
     }
