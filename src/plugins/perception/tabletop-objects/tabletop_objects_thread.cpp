@@ -209,6 +209,35 @@ comparePoints2D(const PointType &p1, const PointType &p2)
 }
 
 
+// Criteria for *not* choosing a segment:
+// 1. the existing current best is clearly closer in base-relative X direction
+// 2. the existing current best is longer
+bool
+TabletopObjectsThread::is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p,
+                                              PointType &br_p1p, PointType &br_p2p)
+{
+  // current best base-relative points
+  Eigen::Vector3f cb_br_p1(cb_br_p1p.x, cb_br_p1p.y, cb_br_p1p.z);
+  Eigen::Vector3f cb_br_p2(cb_br_p2p.x, cb_br_p2p.y, cb_br_p2p.z);
+  Eigen::Vector3f cb_br_p1_p2_center = (cb_br_p1 + cb_br_p2) * 0.5;
+
+  Eigen::Vector3f br_p1(br_p1p.x, br_p1p.y, br_p1p.z);
+  Eigen::Vector3f br_p2(br_p2p.x, br_p2p.y, br_p2p.z);
+  Eigen::Vector3f br_p1_p2_center = (br_p2 + br_p1) * 0.5;
+
+  double dist_x = (cb_br_p1_p2_center[0] - br_p1_p2_center[0]);
+
+  // Criteria for *not* choosing a segment:
+  // 1. the existing current best is clearly closer in base-relative X direction
+  // 2. the existing current best is longer
+  if ( (dist_x < -0.25) ||
+       ((abs(dist_x)  <= 0.25) && ((br_p2 - br_p1).norm() < (cb_br_p2 - cb_br_p1).norm())) )
+    return false;
+  else
+    return true;
+}
+
+
 void
 TabletopObjectsThread::loop()
 {
@@ -446,14 +475,14 @@ TabletopObjectsThread::loop()
       Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
       Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
 
-      PointType &br_p1 = baserel_polygon_cloud->points[i              ];
-      PointType &br_p2 = baserel_polygon_cloud->points[(i + 1) % psize];
+      PointType &br_p1p = baserel_polygon_cloud->points[i              ];
+      PointType &br_p2p = baserel_polygon_cloud->points[(i + 1) % psize];
 
       // check if both end points are close to left or right frustrum plane
-      if ( ! (((left_frustrum_normal.dot(p1) < 0.02) &&
-               (left_frustrum_normal.dot(p2) < 0.02)) ||
-              ((right_frustrum_normal.dot(p1) < 0.02) &&
-               (right_frustrum_normal.dot(p2) < 0.02)) ) )
+      if ( ! (((left_frustrum_normal.dot(p1) < 0.03) &&
+               (left_frustrum_normal.dot(p2) < 0.03)) ||
+              ((right_frustrum_normal.dot(p1) < 0.03) &&
+               (right_frustrum_normal.dot(p2) < 0.03)) ) )
       {
         // candidate edge, i.e. it's not too close to left or right frustrum planes
 
@@ -463,10 +492,8 @@ TabletopObjectsThread::loop()
           // it's a lower frustrum line, keep just in case we do not
           // find a better one
           if ( (lf_pidx1 == std::numeric_limits<size_t>::max()) ||
-               (br_p1.x < baserel_polygon_cloud->points[lf_pidx1].x) ||
-               (br_p1.x < baserel_polygon_cloud->points[lf_pidx2].x) ||
-               (br_p2.x < baserel_polygon_cloud->points[lf_pidx1].x) ||
-               (br_p2.x < baserel_polygon_cloud->points[lf_pidx2].x) )
+               is_polygon_edge_better(br_p1p, br_p2p,
+                                      baserel_polygon_cloud->points[lf_pidx1], baserel_polygon_cloud->points[lf_pidx2]))
           {
             // there was no backup candidate, yet, or this one is closer
             // to the robot, take it.
@@ -489,23 +516,33 @@ TabletopObjectsThread::loop()
         ++good_edge_points;
 #endif
 
-        // Check if this good edge is closer to the robot than the
-        // current best
-        if ( (pidx1 == std::numeric_limits<size_t>::max()) ||
-             (br_p1.x < baserel_polygon_cloud->points[pidx1].x) ||
-             (br_p1.x < baserel_polygon_cloud->points[pidx2].x) ||
-             (br_p2.x < baserel_polygon_cloud->points[pidx1].x) ||
-             (br_p2.x < baserel_polygon_cloud->points[pidx2].x) )
-        {
-          //logger->log_debug(name(), "Good edge: (%f,%f,%f) ->  (%f,%f,%f)",
-          //                  p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
-          pidx1 = i;
-          pidx2 = (i + 1) % psize;
-#ifdef HAVE_VISUAL_DEBUGGING
-          geidx1 = good_edge_points - 2;
-          geidx2 = good_edge_points - 1;
-#endif
+        if (pidx1 != std::numeric_limits<size_t>::max()) {
+          // current best base-relative points
+          PointType &cb_br_p1p = baserel_polygon_cloud->points[pidx1];
+          PointType &cb_br_p2p = baserel_polygon_cloud->points[pidx2];
+
+          if (! is_polygon_edge_better(cb_br_p1p, cb_br_p2p, br_p1p, br_p2p))
+          {
+            //logger->log_info(name(), "Skipping: cb(%f,%f)->(%f,%f) c(%f,%f)->(%f,%f)",
+            //                 cb_br_p1p.x, cb_br_p1p.y, cb_br_p2p.x, cb_br_p2p.y,
+            //                 br_p1p.x, br_p1p.y, br_p2p.x, br_p2p.y);
+            continue;
+          } else {
+            //logger->log_info(name(), "Taking: cb(%f,%f)->(%f,%f) c(%f,%f)->(%f,%f)",
+            //                 cb_br_p1p.x, cb_br_p1p.y, cb_br_p2p.x, cb_br_p2p.y,
+            //                 br_p1p.x, br_p1p.y, br_p2p.x, br_p2p.y);
+          }
+        //} else {
+          //logger->log_info(name(), "Taking because we had none");
         }
+
+        // Was not sorted out, therefore promote candidate to current best
+        pidx1 = i;
+        pidx2 = (i + 1) % psize;
+#ifdef HAVE_VISUAL_DEBUGGING
+        geidx1 = good_edge_points - 2;
+        geidx2 = good_edge_points - 1;
+#endif
       }
     }
 
@@ -548,10 +585,11 @@ TabletopObjectsThread::loop()
         Eigen::Vector4f p2(p2p.x, p2p.y, p2p.z, 0.);
 
         // Unsuitable "good" line until now?
-        if ((pcl::getAngle3D(p2 - p1, Eigen::Vector4f::UnitY()) > M_PI * 0.5) ||
-            (p1[0] > baserel_table_centroid[0]) ||
-            (p2[0] > baserel_table_centroid[0]))
+        if (//(pcl::getAngle3D(p2 - p1, Eigen::Vector4f::UnitZ()) > M_PI * 0.5) ||
+            (p1[0] > baserel_table_centroid[0]) || (p2[0] > baserel_table_centroid[0]))
         {
+          //logger->log_warn(name(), "Choosing backup candidate!");
+
           pidx1 = lf_pidx1;
           pidx2 = lf_pidx2;
 

@@ -89,6 +89,8 @@ class TabletopObjectsThread
   CloudPtr generate_table_model(const float width, const float height,
                                 const float step, const float max_error = 0.01);
 
+  bool is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p, PointType &br_p1p, PointType &br_p2p);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
