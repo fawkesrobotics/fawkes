@@ -413,8 +413,8 @@ TabletopObjectsThread::loop()
     
     // Get transform Input camera -> base_link
     tf::StampedTransform t;
-    fawkes::Time input_time;
-    pcl_utils::get_time(finput_, input_time);
+    fawkes::Time input_time(0,0);
+    //pcl_utils::get_time(finput_, input_time);
     tf_listener->lookup_transform("/base_link", finput_->header.frame_id,
                                   input_time, t);
 
