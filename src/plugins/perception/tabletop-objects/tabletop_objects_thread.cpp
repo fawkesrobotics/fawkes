@@ -648,9 +648,9 @@ TabletopObjectsThread::loop()
     // calculate table corner points
     std::vector<Eigen::Vector3f> tpoints(4);
     tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_width * 0.5);
-    tpoints[1] = p1_p2_center - p1_p2 * (cfg_table_model_width * 0.5);
-    tpoints[2] = tpoints[0] + p1_p2_90 * cfg_table_model_height;
-    tpoints[3] = tpoints[1] + p1_p2_90 * cfg_table_model_height;
+    tpoints[1] = tpoints[0] + p1_p2_90 * cfg_table_model_height;
+    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_width * 0.5);
+    tpoints[2] = tpoints[3] + p1_p2_90 * cfg_table_model_height;
 
     model_cloud_hull_.reset(new Cloud());
     model_cloud_hull_->points.resize(4);
@@ -662,8 +662,8 @@ TabletopObjectsThread::loop()
       model_cloud_hull_->points[i].y = tpoints[i][1];
       model_cloud_hull_->points[i].z = tpoints[i][2];
     }
-    std::sort(model_cloud_hull_->points.begin(),
-              model_cloud_hull_->points.end(), comparePoints2D<PointType>);
+    //std::sort(model_cloud_hull_->points.begin(),
+    //          model_cloud_hull_->points.end(), comparePoints2D<PointType>);
 
 
     // Used for visualization, move table model with anchor in the
