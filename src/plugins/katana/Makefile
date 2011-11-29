@@ -31,7 +31,10 @@ endif
 ifeq ($(HAVE_LIBKNI),1)
   CFLAGS_LIBKNI  = -DHAVE_KNI $(shell $(PKGCONFIG) --cflags 'libkni3')
   LDFLAGS_LIBKNI = $(shell $(PKGCONFIG) --libs 'libkni3')
+else
+  WARN_TARGETS += warning_kni
 endif
+
 ifneq ($(PKGCONFIG),)
   HAVE_OPENRAVE := $(if $(or $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}),\
 			     $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/})),1,0)
@@ -48,7 +51,7 @@ else
   WARN_TARGETS += warning_tf
 endif
 
-ifeq ($(HAVE_LIBKNI),1)
+ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
   CFLAGS  += $(CFLAGS_LIBKNI) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
@@ -59,8 +62,6 @@ ifeq ($(HAVE_LIBKNI),1)
   else
     WARN_TARGETS += warning_openrave
   endif
-else
-  WARN_TARGETS += warning_kni
 endif
 
 OBJS_all = $(OBJS_katana)
