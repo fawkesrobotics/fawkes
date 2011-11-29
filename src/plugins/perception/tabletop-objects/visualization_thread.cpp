@@ -257,7 +257,7 @@ TabletopVisualizationThread::loop()
     }
   }
   hull_lines.color.a = 1.0;
-  hull_lines.scale.x = 0.015;
+  hull_lines.scale.x = 0.01;
   hull_lines.lifetime = ros::Duration(10, 0);
   m.markers.push_back(hull_lines);
 
@@ -282,6 +282,35 @@ TabletopVisualizationThread::loop()
   hull_points.color.a = 1.0;
   hull_points.lifetime = ros::Duration(10, 0);
   m.markers.push_back(hull_points);
+
+  // hull texts
+  for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
+
+    char *tmp;
+    if (asprintf(&tmp, "Cvx_%zu", i) != -1) {
+      // Copy to get memory freed on exception
+      std::string id = tmp;
+      free(tmp);
+
+      visualization_msgs::Marker text;
+      text.header.frame_id = frame_id_;
+      text.header.stamp = ros::Time::now();
+      text.ns = "tabletop";
+      text.id = idnum++;
+      text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+      text.action = visualization_msgs::Marker::ADD;
+      text.pose.position.x = table_hull_vertices_[i][0];
+      text.pose.position.y = table_hull_vertices_[i][1];
+      text.pose.position.z = table_hull_vertices_[i][2] + 0.1;
+      text.pose.orientation.w = 1.;
+      text.scale.z = 0.03;
+      text.color.r = text.color.g = text.color.b = 1.0f;
+      text.color.a = 1.0;
+      text.lifetime = ros::Duration(10, 0);
+      text.text = id;
+      m.markers.push_back(text);
+    }
+  }
 
   // Table model surrounding polygon
   if (! table_model_vertices_.empty()) {
@@ -309,9 +338,9 @@ TabletopVisualizationThread::loop()
     m.markers.push_back(hull_model);
   }
 
-  triangulate_hull();
+  //triangulate_hull();
 
-  if (! table_triangle_vertices_.empty()) {
+  if (table_model_vertices_.size() == 4) {
     visualization_msgs::Marker plane;
     plane.header.frame_id = frame_id_;
     plane.header.stamp = ros::Time::now();
@@ -319,12 +348,16 @@ TabletopVisualizationThread::loop()
     plane.id = idnum++;
     plane.type = visualization_msgs::Marker::TRIANGLE_LIST;
     plane.action = visualization_msgs::Marker::ADD;
-    plane.points.resize(table_triangle_vertices_.size());
-
-    for (unsigned int i = 0; i < table_triangle_vertices_.size(); ++i) {
-      plane.points[i].x = table_triangle_vertices_[i][0];
-      plane.points[i].y = table_triangle_vertices_[i][1];
-      plane.points[i].z = table_triangle_vertices_[i][2];
+    plane.points.resize(6);
+    for (unsigned int i = 0; i < 3; ++i) {
+      plane.points[i].x = table_model_vertices_[i][0];
+      plane.points[i].y = table_model_vertices_[i][1];
+      plane.points[i].z = table_model_vertices_[i][2];
+    }
+    for (unsigned int i = 2; i < 5; ++i) {
+      plane.points[i+1].x = table_model_vertices_[i % 4][0];
+      plane.points[i+1].y = table_model_vertices_[i % 4][1];
+      plane.points[i+1].z = table_model_vertices_[i % 4][2];
     }
     plane.pose.orientation.w = 1.;
     plane.scale.x = 1.0;
@@ -501,6 +534,12 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
 void
 TabletopVisualizationThread::triangulate_hull()
 {
+  if (table_model_vertices_.empty()) {
+    table_triangle_vertices_.clear();
+    return;
+  }
+    
+
   // Don't need to, resizing and overwriting them all later
   //table_triangle_vertices_.clear();
 
