@@ -400,14 +400,9 @@ TabletopObjectsThread::loop()
 
   CloudPtr simplified_polygon = simplify_polygon(cloud_hull_, 0.02);
   *simplified_polygon_ = *simplified_polygon;
-  logger->log_debug(name(), "Original polygon: %zu  simplified: %zu", cloud_hull_->points.size(),
-                    simplified_polygon->points.size());
+  //logger->log_debug(name(), "Original polygon: %zu  simplified: %zu", cloud_hull_->points.size(),
+  //                  simplified_polygon->points.size());
   *cloud_hull_ = *simplified_polygon;
-
-  // Fit table model into projected cloud using ICP
-  CloudPtr table_model = generate_table_model(cfg_table_model_width,
-                                              cfg_table_model_height,
-                                              cfg_table_model_step);
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase::V_Vector4f good_hull_edges;
@@ -469,6 +464,7 @@ TabletopObjectsThread::loop()
     size_t good_edge_points = 0;
 #endif
     for (size_t i = 0; i < psize; ++i) {
+      //logger->log_debug(name(), "Checking %zu and %zu of %zu", i, (i+1) % psize, psize);
       PointType &p1p = cloud_hull_->points[i          ];
       PointType &p2p = cloud_hull_->points[(i+1) % psize];
 
@@ -546,6 +542,8 @@ TabletopObjectsThread::loop()
       }
     }
 
+    //logger->log_debug(name(), "Current best is %zu -> %zu", pidx1, pidx2);
+
     // in the case we have a backup lower frustrum edge check if we should use it
     // Criteria:
     // 0. we have a backup point
@@ -607,6 +605,8 @@ TabletopObjectsThread::loop()
         }
       }
     }
+
+    //logger->log_info(name(), "Chose %zu -> %zu", pidx1, pidx2);
 
 #ifdef HAVE_VISUAL_DEBUGGING
     if (good_edge_points > 0) {
@@ -681,11 +681,12 @@ TabletopObjectsThread::loop()
 
     // to show fitted table model
     //pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
-    *table_model_ = *model_cloud_hull_;
-    table_model_->header.frame_id = finput_->header.frame_id;
+    //*table_model_ = *model_cloud_hull_;
+    //table_model_->header.frame_id = finput_->header.frame_id;
 
   } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to transform convex hull cloud: %s", e.what());
+    logger->log_warn(name(), "Failed to transform convex hull cloud, exception follows");
+    logger->log_warn(name(), e);
   }
 
   // Extract all non-plane points
@@ -927,9 +928,9 @@ TabletopObjectsThread::generate_table_model(const float width, const float heigh
   const unsigned int num_t = t_base_num +
     ((thickness < t_base_num * step) ? 0 : ((thickness - t_base_num * step) > max_error ? 2 : 1));
 
-  logger->log_debug(name(), "Generating table model %fx%fx%f (%ux%ux%u=%u points)",
-                    width, height, thickness,
-                    num_w, num_h, num_t, num_t * num_w * num_h);
+  //logger->log_debug(name(), "Generating table model %fx%fx%f (%ux%ux%u=%u points)",
+  //                  width, height, thickness,
+  //                  num_w, num_h, num_t, num_t * num_w * num_h);
 
   c->height = 1;
   c->width = num_t * num_w * num_h;
@@ -974,8 +975,8 @@ TabletopObjectsThread::generate_table_model(const float width, const float heigh
   const unsigned int num_h = h_base_num +
     ((height < h_base_num * step) ? 0 : ((height - h_base_num * step) > max_error ? 2 : 1));
 
-  logger->log_debug(name(), "Generating table model %fx%f (%ux%u=%u points)",
-                    width, height, num_w, num_h, num_w * num_h);
+  //logger->log_debug(name(), "Generating table model %fx%f (%ux%u=%u points)",
+  //                  width, height, num_w, num_h, num_w * num_h);
 
   c->height = 1;
   c->width = num_w * num_h;
