@@ -368,7 +368,8 @@ TabletopObjectsThread::loop()
   }
 
   // If we got here we found the table
-  set_position(table_pos_if_, true, table_centroid);
+  // Do NOT set it here, we will still try to determine the rotation as well
+  // set_position(table_pos_if_, true, table_centroid);
 
   extract_.setNegative(false);
   extract_.setInputCloud(temp_cloud);
@@ -623,18 +624,10 @@ TabletopObjectsThread::loop()
 
     Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
     Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
-    Eigen::Vector3f front_line_center = (p1 + p2) * 0.5;
 
     // Normal vectors for table model and plane
-    Eigen::Vector3f model_normal = Eigen::Vector3f::UnitX();
+    Eigen::Vector3f model_normal = Eigen::Vector3f::UnitZ();
     Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
-
-    // Rotational parameters to rotate table model from camera to
-    // determined table position in 3D space
-    Eigen::Vector3f rotaxis = model_normal.cross(normal);
-    rotaxis.normalize();
-    // -M_PI/2 because we calc the angle for the normal
-    float angle = acosf(normal.dot(model_normal)) - M_PI/2.f;  
 
     // Rotational parameters to align table to polygon segment
     Eigen::Vector3f p1_p2 = p2 - p1;
@@ -643,7 +636,12 @@ TabletopObjectsThread::loop()
     Eigen::Vector3f p1_p2_90 =
       Eigen::AngleAxisf(M_PI/2., normal) * p1_p2;
     p1_p2_90.normalize();
-    float angle_p1_p2 = acosf(p1_p2.dot(Eigen::Vector3f::UnitY()));
+
+    Eigen::Vector3f table_center =
+      p1_p2_center + p1_p2_90 * (cfg_table_model_height * 0.5);
+
+    for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
+    table_centroid[3] = 0.;
 
     // calculate table corner points
     std::vector<Eigen::Vector3f> tpoints(4);
@@ -665,26 +663,61 @@ TabletopObjectsThread::loop()
     //std::sort(model_cloud_hull_->points.begin(),
     //          model_cloud_hull_->points.end(), comparePoints2D<PointType>);
 
-
-    // Used for visualization, move table model with anchor in the
-    // center back by halve the table height to align edge.
-    // Translational parameters to align model edge instead of center
-    Eigen::Vector3f move = p1_p2_90 * (cfg_table_model_height * 0.5);
-    front_line_center += move;
+    // Rotational parameters to rotate table model from camera to
+    // determined table position in 3D space
+    Eigen::Vector3f rotaxis = model_normal.cross(normal);
+    rotaxis.normalize();
+    double angle = acos(normal.dot(model_normal));
 
     // Transformation to translate model from camera center into actual pose
     Eigen::Affine3f affine =
-      Eigen::Translation3f(front_line_center.x(), front_line_center.y(),
-                           front_line_center.z())
-      * Eigen::AngleAxisf(-angle_p1_p2, normal)
+      Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
+                           table_centroid.z())
       * Eigen::AngleAxisf(angle, rotaxis);
 
+    Eigen::Vector3f
+      model_p1(-cfg_table_model_height * 0.5, cfg_table_model_width * 0.5, 0.),
+      model_p2(-cfg_table_model_height * 0.5, -cfg_table_model_width * 0.5, 0.);
+    model_p1 = affine * model_p1;
+    model_p2 = affine * model_p2;
+
+    // Calculate the vector between model_p1 and model_p2
+    Eigen::Vector3f model_p1_p2 = model_p2 - model_p1;
+    model_p1_p2.normalize();
+    // Calculate rotation axis between model_p1 and model_p2
+    Eigen::Vector3f model_rotaxis = model_p1_p2.cross(p1_p2);
+    model_rotaxis.normalize();
+    double angle_p1_p2 = acos(model_p1_p2.dot(p1_p2));
+    //logger->log_info(name(), "Angle: %f  Poly (%f,%f,%f) -> (%f,%f,%f)  model (%f,%f,%f) -> (%f,%f,%f)",
+    //                 angle_p1_p2, p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(),
+    //                 model_p1.x(), model_p1.y(), model_p1.z(), model_p2.x(), model_p2.y(), model_p2.z());
+
+    // Final full transformation of the table within the camera coordinate frame
+    affine =
+      Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
+                           table_centroid.z())
+      * Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
+      * Eigen::AngleAxisf(angle, rotaxis);
+
+
+    // Just the rotational part
+    Eigen::Quaternionf qt;
+    qt = Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
+      * Eigen::AngleAxisf(angle, rotaxis);
+
+    // Set position again, this time with the rotation
+    set_position(table_pos_if_, true, table_centroid, qt);
+
+
     // to show fitted table model
-    //pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
+    CloudPtr table_model = generate_table_model(cfg_table_model_width, cfg_table_model_height, cfg_table_model_step);
+    pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
     //*table_model_ = *model_cloud_hull_;
-    //table_model_->header.frame_id = finput_->header.frame_id;
+    //*table_model_ = *table_model;
+    table_model_->header.frame_id = finput_->header.frame_id;
 
   } catch (Exception &e) {
+    set_position(table_pos_if_, false);
     logger->log_warn(name(), "Failed to transform convex hull cloud, exception follows");
     logger->log_warn(name(), e);
   }
@@ -870,14 +903,16 @@ TabletopObjectsThread::loop()
 
 void
 TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
-                                    bool is_visible, Eigen::Vector4f &centroid)
+                                    bool is_visible, const Eigen::Vector4f &centroid,
+                                    const Eigen::Quaternionf &attitude)
 {
-  tf::Stamped<tf::Point> baserel_centroid;
+  tf::Stamped<tf::Pose> baserel_pose;
   try{
-    tf::Stamped<tf::Point>
-      scentroid(tf::Point(centroid[0], centroid[1], centroid[2]),
-                fawkes::Time(0, 0), input_->header.frame_id);
-    tf_listener->transform_point(cfg_result_frame_, scentroid, baserel_centroid);
+    tf::Stamped<tf::Pose>
+      spose(tf::Pose(tf::Quaternion(attitude.x(), attitude.y(), attitude.z(), attitude.w()),
+                     tf::Vector3(centroid[0], centroid[1], centroid[2])),
+            fawkes::Time(0, 0), input_->header.frame_id);
+    tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
     iface->set_frame(cfg_result_frame_.c_str());
   } catch (tf::TransformException &e) {
     is_visible = false;
@@ -890,16 +925,22 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
     } else {
       iface->set_visibility_history(1);
     }
-    double translation[3] = { baserel_centroid.x(), baserel_centroid.y(), baserel_centroid.z() };
+    tf::Vector3 &origin = baserel_pose.getOrigin();
+    tf::Quaternion quat = baserel_pose.getRotation();
+    double translation[3] = { origin.x(), origin.y(), origin.z() };
+    double rotation[4] = { quat.x(), quat.y(), quat.z(), quat.w() };
     iface->set_translation(translation);
-      
+    iface->set_rotation(rotation);
+  
   } else {
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
     } else {
       iface->set_visibility_history(-1);
       double translation[3] = { 0, 0, 0 };
+      double rotation[4] = { 0, 0, 0, 1 };
       iface->set_translation(translation);
+      iface->set_rotation(rotation);
     }
   }
   iface->write();  

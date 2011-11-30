@@ -79,7 +79,8 @@ class TabletopObjectsThread
 
  private:
   void set_position(fawkes::Position3DInterface *iface,
-                    bool is_visible, Eigen::Vector4f &centroid);
+                    bool is_visible, const Eigen::Vector4f &centroid = Eigen::Vector4f(0, 0, 0, 0),
+                    const Eigen::Quaternionf &rotation = Eigen::Quaternionf(1, 0, 0, 0));
 
   CloudPtr simplify_polygon(CloudPtr polygon, float sqr_dist_threshold);
 
