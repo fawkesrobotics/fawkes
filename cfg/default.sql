@@ -245,16 +245,19 @@ INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinea
 INSERT INTO "config" VALUES('/plugins/static-transforms/update-interval','float',1.0,'Interval in which to post static transform updates; sec');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/depth_filter_min_x','float',0.0,'Minimum X value (i.e. distance to camera) to consider a point; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/depth_filter_max_x','float',3.0,'Maximum X value (i.e. distance to camera) to consider a point; m');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/voxel_leaf_size','float',0.01,'Leaf size for voxel grid downsampling; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/voxel_leaf_size','float',0.02,'Leaf size for voxel grid downsampling; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_max_iterations','unsigned int',1000,'Maximum number of iterations to perform for table segmentation');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_distance_threshold','float',0.02,'Segmentation distance threshold; m');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_inlier_quota','float',0.02,'Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_distance_threshold','float',0.022,'Segmentation distance threshold; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_inlier_quota','float',0.2,'Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/max_z_angle_deviation','float',0.1,'Maximum angle between Z axis and table normal, takes normal direction into account; rad');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_min_height','float',0.6,'Minimum required height of table; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_max_height','float',0.9,'Maximum height of table; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_height','float',0.8,'Table model height, i.e. if the robot is standing in front of the table the dista
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_width','float',1.6,'Table model width, i.e. if the robot is standing in front of the table the distanc
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_step','float',0.05,'Inter-Point step size for creating the table model point cloud; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_tolerance','float',0.04,'Clustering inter-point distance tolerance; m');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_min_size','unsigned int',50,'Minimum number of points in cluster to consider');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_max_size','unsigned int',500,'Minimum number of points in cluster to consider');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_min_size','unsigned int',20,'Minimum number of points in cluster to consider');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_max_size','unsigned int',200,'Minimum number of points in cluster to consider');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/result_frame','string','/base_link','The frame in which the result should be published; frame');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_frustrum','bool',1,'Show the frustrum according to configured horizontal and vertical viewing angle.');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/horizontal_viewing_angle','float',57.0,'Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg');
