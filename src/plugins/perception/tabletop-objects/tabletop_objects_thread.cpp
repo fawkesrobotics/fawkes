@@ -386,6 +386,51 @@ TabletopObjectsThread::loop()
   cloud_proj_.reset(new Cloud());
   proj.filter(*cloud_proj_);
 
+  // ***
+  // In the following cluster the projected table plane. This is done to get
+  // the largest continuous part of the plane to remove outliers, for instance
+  // if the intersection of the plane with a wall or object is taken into the
+  // table points.
+  // To achieve this cluster, if an acceptable cluster was found, extract this
+  // cluster as the new table points. Otherwise continue with the existing
+  // point cloud.
+
+  // further downsample table
+  CloudPtr cloud_table_voxelized(new Cloud());
+  pcl::VoxelGrid<PointType> table_grid;
+  table_grid.setLeafSize(0.04, 0.04, 0.04);
+  table_grid.setInputCloud(cloud_proj_);
+  table_grid.filter(*cloud_table_voxelized);
+
+  // Creating the KdTree object for the search method of the extraction
+  pcl::KdTree<PointType>::Ptr
+    kdtree_table(new pcl::KdTreeFLANN<PointType>());
+  kdtree_table->setInputCloud(cloud_table_voxelized);
+
+  std::vector<pcl::PointIndices> table_cluster_indices;
+  pcl::EuclideanClusterExtraction<PointType> table_ec;
+  table_ec.setClusterTolerance(0.044);
+  table_ec.setMinClusterSize(0.8 * cloud_table_voxelized->points.size());
+  table_ec.setMaxClusterSize(cloud_table_voxelized->points.size());
+  table_ec.setSearchMethod(kdtree_table);
+  table_ec.setInputCloud(cloud_table_voxelized);
+  table_ec.extract(table_cluster_indices);
+
+  if (! table_cluster_indices.empty()) {
+    // take the first, i.e. the largest cluster
+    CloudPtr cloud_table_extracted(new Cloud());
+    pcl::PointIndices::ConstPtr table_cluster_indices_ptr(new pcl::PointIndices(table_cluster_indices[0]));
+    pcl::ExtractIndices<PointType> table_cluster_extract;
+    table_cluster_extract.setNegative(false);
+    table_cluster_extract.setInputCloud(cloud_table_voxelized);
+    table_cluster_extract.setIndices(table_cluster_indices_ptr);
+    table_cluster_extract.filter(*cloud_table_extracted);
+    *cloud_proj_ = *cloud_table_extracted;
+  } else {
+    // Don't mess with the table, clustering didn't help to make it any better
+    logger->log_info(name(), "Table plane clustering did not generate any clusters");
+  }
+
 
   // Estimate 3D convex hull -> TABLE BOUNDARIES
   pcl::ConvexHull<PointType> hr;
@@ -767,7 +812,8 @@ TabletopObjectsThread::loop()
     polygon_cond(new pcl::ConditionAnd<PointType>());
 
   typename pcl_utils::PolygonComparison<PointType>::ConstPtr
-    inpoly_comp(new pcl_utils::PolygonComparison<PointType>(*cloud_hull_));
+    inpoly_comp(new pcl_utils::PolygonComparison<PointType>(
+      (model_cloud_hull_ && ! model_cloud_hull_->points.empty()) ? *model_cloud_hull_ : *cloud_hull_));
   polygon_cond->addComparison(inpoly_comp);
 
   // build the filter
