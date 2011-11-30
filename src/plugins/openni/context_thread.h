@@ -34,6 +34,8 @@
 #include <utils/time/time.h>
 
 #include <sys/types.h>
+#include <map>
+#include <string>
 
 namespace xn {
   class Context;
@@ -80,6 +82,8 @@ class OpenNiContextThread
   fawkes::Time __check_now;
 
   unsigned int __device_no_data_loops;
+
+  std::map<std::string, unsigned int> __dead_loops;
 };
 
 #endif
