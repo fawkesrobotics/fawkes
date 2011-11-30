@@ -823,6 +823,10 @@ TabletopObjectsThread::loop()
   cloud_objs_.reset(new Cloud());
   condrem.filter(*cloud_objs_);
 
+  //CloudPtr table_points(new Cloud());
+  //condrem.setInputCloud(temp_cloud2);
+  //condrem.filter(*table_points);
+  
   // CLUSTERS
   // extract clusters of OBJECTS
 
@@ -830,10 +834,14 @@ TabletopObjectsThread::loop()
   tmp_clusters->header.frame_id = clusters_->header.frame_id;
   std::vector<int> &indices = inliers->indices;
   tmp_clusters->height = 1;
+  //const size_t tsize = table_points->points.size();
+  //tmp_clusters->width = tsize;
+  //tmp_clusters->points.resize(tsize);
   tmp_clusters->width = indices.size();
   tmp_clusters->points.resize(indices.size());
   for (size_t i = 0; i < indices.size(); ++i) {
     PointType &p1 = temp_cloud2->points[i];
+    //PointType &p1 = table_points->points[i];
     ColorPointType &p2 = tmp_clusters->points[i];
     p2.x = p1.x;
     p2.y = p1.y;
