@@ -302,9 +302,11 @@ TabletopObjectsThread::loop()
     seg_.segment(*inliers, *coeff);
 
     // 1. check for a minimum number of expected inliers
-    if (inliers->indices.size() < (cfg_segm_inlier_quota_ * input_->points.size())) {
-      //logger->log_warn(name(), "No table in scene, skipping loop");
-      set_position(table_pos_if_, false, table_centroid);
+    if (inliers->indices.size() < (cfg_segm_inlier_quota_ * temp_cloud->points.size())) {
+      logger->log_warn(name(), "No table in scene, skipping loop (%zu inliers, required %f, voxelized size %zu)",
+                       inliers->indices.size(), (cfg_segm_inlier_quota_ * temp_cloud->points.size()),
+                       temp_cloud->points.size());
+      set_position(table_pos_if_, false);
       return;
     }
 
