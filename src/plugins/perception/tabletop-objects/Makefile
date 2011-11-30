@@ -24,6 +24,9 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 ENABLE_VISUAL_DEBUGGING = 1
 USE_BASELINK_FRAME = 1
 
+# Enable for time measurements
+#CFLAGS += -DUSE_TIMETRACKER
+
 LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils \
 			fawkestf fawkesinterface fawkesblackboard \
 			Position3DInterface SwitchInterface

@@ -29,6 +29,9 @@
 #include <pcl_utils/comparisons.h>
 #include <utils/time/wait.h>
 #include <utils/math/angle.h>
+#ifdef USE_TIMETRACKER
+#  include <utils/time/tracker.h>
+#endif
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -59,6 +62,29 @@ using namespace std;
  */
 
 using namespace fawkes;
+
+
+#ifdef USE_TIMETRACKER
+#define TIMETRACK_START(c)                      \
+  tt_->ping_start(c);				\
+
+#define TIMETRACK_INTER(c1, c2)			\
+ tt_->ping_end(c1);				\
+ tt_->ping_start(c2);
+
+#define TIMETRACK_END(c)			\
+  tt_->ping_end(c);
+
+#define TIMETRACK_ABORT(c)                      \
+  tt_->ping_abort(c);
+
+#else
+
+#define TIMETRACK_START(c)
+#define TIMETRACK_INTER(c1, c2)
+#define TIMETRACK_END(c)
+#define TIMETRACK_ABORT(c)
+#endif
 
 /** Constructor. */
 TabletopObjectsThread::TabletopObjectsThread()
@@ -171,6 +197,28 @@ TabletopObjectsThread::init()
   seg_.setMethodType(pcl::SAC_RANSAC);
   seg_.setMaxIterations(cfg_segm_max_iterations_);
   seg_.setDistanceThreshold(cfg_segm_distance_threshold_);
+
+#ifdef USE_TIMETRACKER
+  tt_ = new TimeTracker();
+  tt_loopcount_ = 0;
+  ttc_full_loop_          = tt_->add_class("Full Loop");
+  ttc_msgproc_            = tt_->add_class("Message Processing");
+  ttc_voxelize_           = tt_->add_class("Downsampling");
+  ttc_plane_              = tt_->add_class("Plane Segmentation");
+  ttc_extract_plane_      = tt_->add_class("Plane Extraction");
+  ttc_plane_downsampling_ = tt_->add_class("Plane Downsampling");
+  ttc_cluster_plane_      = tt_->add_class("Plane Clustering");
+  ttc_convex_hull_        = tt_->add_class("Convex Hull");
+  ttc_simplify_polygon_   = tt_->add_class("Polygon Simplification");
+  ttc_find_edge_          = tt_->add_class("Polygon Edge");
+  ttc_transform_          = tt_->add_class("Transform");
+  ttc_transform_model_    = tt_->add_class("Model Transformation");
+  ttc_extract_non_plane_  = tt_->add_class("Non-Plane Extraction");
+  ttc_polygon_filter_     = tt_->add_class("Polygon Filter");
+  ttc_table_to_output_    = tt_->add_class("Table to Output");
+  ttc_cluster_objects_    = tt_->add_class("Object Clustering");
+  ttc_visualization_      = tt_->add_class("Visualization");
+#endif
 }
 
 
@@ -240,6 +288,9 @@ TabletopObjectsThread::is_polygon_edge_better(PointType &cb_br_p1p, PointType &c
 void
 TabletopObjectsThread::loop()
 {
+  TIMETRACK_START(ttc_full_loop_);
+  TIMETRACK_START(ttc_msgproc_);
+
   while (! switch_if_->msgq_empty()) {
     if (SwitchInterface::EnableSwitchMessage *msg =
         switch_if_->msgq_first_safe(msg))
@@ -260,6 +311,8 @@ TabletopObjectsThread::loop()
     TimeWait::wait(250000);
     return;
   }
+
+  TIMETRACK_INTER(ttc_msgproc_, ttc_voxelize_)
 
   CloudPtr temp_cloud(new Cloud);
   CloudPtr temp_cloud2(new Cloud);
@@ -282,6 +335,8 @@ TabletopObjectsThread::loop()
     //logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
     return;
   }
+
+  TIMETRACK_INTER(ttc_voxelize_, ttc_plane_)
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
@@ -307,6 +362,8 @@ TabletopObjectsThread::loop()
                        inliers->indices.size(), (cfg_segm_inlier_quota_ * temp_cloud->points.size()),
                        temp_cloud->points.size());
       set_position(table_pos_if_, false);
+      TIMETRACK_ABORT(ttc_plane_);
+      TIMETRACK_ABORT(ttc_full_loop_);
       return;
     }
 
@@ -372,6 +429,8 @@ TabletopObjectsThread::loop()
   // Do NOT set it here, we will still try to determine the rotation as well
   // set_position(table_pos_if_, true, table_centroid);
 
+  TIMETRACK_INTER(ttc_plane_, ttc_extract_plane_)
+
   extract_.setNegative(false);
   extract_.setInputCloud(temp_cloud);
   extract_.setIndices(inliers);
@@ -385,6 +444,8 @@ TabletopObjectsThread::loop()
   proj.setModelCoefficients(coeff);
   cloud_proj_.reset(new Cloud());
   proj.filter(*cloud_proj_);
+
+  TIMETRACK_INTER(ttc_extract_plane_, ttc_plane_downsampling_);
 
   // ***
   // In the following cluster the projected table plane. This is done to get
@@ -401,6 +462,8 @@ TabletopObjectsThread::loop()
   table_grid.setLeafSize(0.04, 0.04, 0.04);
   table_grid.setInputCloud(cloud_proj_);
   table_grid.filter(*cloud_table_voxelized);
+
+  TIMETRACK_INTER(ttc_plane_downsampling_, ttc_cluster_plane_);
 
   // Creating the KdTree object for the search method of the extraction
   pcl::KdTree<PointType>::Ptr
@@ -431,6 +494,8 @@ TabletopObjectsThread::loop()
     logger->log_info(name(), "Table plane clustering did not generate any clusters");
   }
 
+  TIMETRACK_INTER(ttc_cluster_plane_, ttc_convex_hull_)
+
 
   // Estimate 3D convex hull -> TABLE BOUNDARIES
   pcl::ConvexHull<PointType> hr;
@@ -442,14 +507,20 @@ TabletopObjectsThread::loop()
 
   if (cloud_hull_->points.empty()) {
     logger->log_warn(name(), "Convex hull of table empty, skipping loop");
+    TIMETRACK_ABORT(ttc_convex_hull_);
+    TIMETRACK_ABORT(ttc_full_loop_);
     return;
   }
+
+  TIMETRACK_INTER(ttc_convex_hull_, ttc_simplify_polygon_)
 
   CloudPtr simplified_polygon = simplify_polygon(cloud_hull_, 0.02);
   *simplified_polygon_ = *simplified_polygon;
   //logger->log_debug(name(), "Original polygon: %zu  simplified: %zu", cloud_hull_->points.size(),
   //                  simplified_polygon->points.size());
   *cloud_hull_ = *simplified_polygon;
+
+  TIMETRACK_INTER(ttc_simplify_polygon_, ttc_find_edge_)
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase::V_Vector4f good_hull_edges;
@@ -663,6 +734,8 @@ TabletopObjectsThread::loop()
     good_hull_edges.resize(good_edge_points);
 #endif
 
+    TIMETRACK_INTER(ttc_find_edge_, ttc_transform_)
+
     // Calculate transformation parameters based on determined
     // convex hull polygon segment we decided on as "the table edge"
     PointType &p1p = cloud_hull_->points[pidx1];
@@ -754,6 +827,7 @@ TabletopObjectsThread::loop()
     // Set position again, this time with the rotation
     set_position(table_pos_if_, true, table_centroid, qt);
 
+    TIMETRACK_INTER(ttc_transform_, ttc_transform_model_)
 
     // to show fitted table model
     CloudPtr table_model = generate_table_model(cfg_table_model_width_, cfg_table_model_height_, cfg_table_model_step_);
@@ -762,16 +836,22 @@ TabletopObjectsThread::loop()
     //*table_model_ = *table_model;
     table_model_->header.frame_id = finput_->header.frame_id;
 
+    TIMETRACK_END(ttc_transform_model_);
+
   } catch (Exception &e) {
     set_position(table_pos_if_, false);
     logger->log_warn(name(), "Failed to transform convex hull cloud, exception follows");
     logger->log_warn(name(), e);
+    TIMETRACK_ABORT(ttc_find_edge_);
   }
 
+  TIMETRACK_START(ttc_extract_non_plane_);
   // Extract all non-plane points
   cloud_filt_.reset(new Cloud());
   extract_.setNegative(true);
   extract_.filter(*cloud_filt_);
+
+  TIMETRACK_INTER(ttc_extract_non_plane_, ttc_polygon_filter_);
 
   // Use only points above tables
   // Why coeff->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
@@ -802,6 +882,8 @@ TabletopObjectsThread::loop()
   //       cloud_above_->points.size());
   if (cloud_filt_->points.size() < cfg_cluster_min_size_) {
     //logger->log_warn(name(), "Less points than cluster min size");
+    TIMETRACK_ABORT(ttc_polygon_filter_);
+    TIMETRACK_ABORT(ttc_full_loop_);
     return;
   }
 
@@ -830,6 +912,8 @@ TabletopObjectsThread::loop()
   // CLUSTERS
   // extract clusters of OBJECTS
 
+  TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_)
+
   ColorCloudPtr tmp_clusters(new ColorCloud());
   tmp_clusters->header.frame_id = clusters_->header.frame_id;
   std::vector<int> &indices = inliers->indices;
@@ -850,6 +934,8 @@ TabletopObjectsThread::loop()
     p2.g = table_color[1];
     p2.b = table_color[2];
   }
+
+  TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
 
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
   centroids.resize(MAX_CENTROIDS);
@@ -915,7 +1001,9 @@ TabletopObjectsThread::loop()
   }
   centroids.resize(centroid_i);
 
-  //*clusters_ = *tmp_clusters;
+  TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
+
+  *clusters_ = *tmp_clusters;
   pcl_utils::copy_time(finput_, fclusters_);
   pcl_utils::copy_time(finput_, ftable_model_);
   pcl_utils::copy_time(finput_, fsimplified_polygon_);
@@ -951,6 +1039,16 @@ TabletopObjectsThread::loop()
     visthread_->visualize(input_->header.frame_id,
                           table_centroid, normal, hull_vertices, model_vertices,
                           good_hull_edges, centroids);
+  }
+#endif
+
+  TIMETRACK_END(ttc_visualization_);
+  TIMETRACK_END(ttc_full_loop_);
+
+#ifdef USE_TIMETRACKER
+  if (++tt_loopcount_ >= 5) {
+    tt_loopcount_ = 0;
+    tt_->print_to_stdout();
   }
 #endif
 }

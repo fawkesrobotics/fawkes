@@ -39,6 +39,9 @@
 namespace fawkes {
   class Position3DInterface;
   class SwitchInterface;
+#ifdef USE_TIMETRACKER
+  class TimeTracker;
+#endif
 }
 
 #ifdef HAVE_VISUAL_DEBUGGING
@@ -132,6 +135,28 @@ class TabletopObjectsThread
   CloudPtr table_model_;
   fawkes::RefPtr<Cloud> fsimplified_polygon_;
   CloudPtr simplified_polygon_;
+
+#ifdef USE_TIMETRACKER
+  fawkes::TimeTracker  *tt_;
+  unsigned int tt_loopcount_;
+  unsigned int ttc_full_loop_;
+  unsigned int ttc_msgproc_;
+  unsigned int ttc_voxelize_;
+  unsigned int ttc_plane_;
+  unsigned int ttc_extract_plane_;
+  unsigned int ttc_plane_downsampling_;
+  unsigned int ttc_cluster_plane_;
+  unsigned int ttc_convex_hull_;
+  unsigned int ttc_simplify_polygon_;
+  unsigned int ttc_find_edge_;
+  unsigned int ttc_transform_;
+  unsigned int ttc_transform_model_;
+  unsigned int ttc_extract_non_plane_;
+  unsigned int ttc_polygon_filter_;
+  unsigned int ttc_table_to_output_;
+  unsigned int ttc_cluster_objects_;
+  unsigned int ttc_visualization_;
+#endif
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;
