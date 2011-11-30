@@ -159,7 +159,7 @@ TabletopObjectsThread::init()
   fsimplified_polygon_ = new Cloud();
   simplified_polygon_ = pcl_utils::cloudptr_from_refptr(fsimplified_polygon_);
   simplified_polygon_->header.frame_id = finput_->header.frame_id;
-  pcl_manager->add_pointcloud("tabletop-simplified_polygon", fsimplified_polygon_);
+  pcl_manager->add_pointcloud("tabletop-simplified-polygon", fsimplified_polygon_);
   pcl_utils::set_time(fsimplified_polygon_, fawkes::Time(clock));
 
   grid_.setFilterFieldName("x");
