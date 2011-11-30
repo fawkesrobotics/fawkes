@@ -92,16 +92,15 @@ TabletopObjectsThread::init()
   cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
   cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
   cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
+  cfg_table_model_width_     = config->get_float(CFG_PREFIX"table_model_width");
+  cfg_table_model_height_    = config->get_float(CFG_PREFIX"table_model_height");
+  cfg_table_model_step_      = config->get_float(CFG_PREFIX"table_model_step");
   cfg_horizontal_va_         = deg2rad(config->get_float(CFG_PREFIX"horizontal_viewing_angle"));
   cfg_vertical_va_           = deg2rad(config->get_float(CFG_PREFIX"vertical_viewing_angle"));
   cfg_cluster_tolerance_     = config->get_float(CFG_PREFIX"cluster_tolerance");
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
-
-  cfg_table_model_width  = 1.60;
-  cfg_table_model_height = 0.80;
-  cfg_table_model_step   = 0.05;
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -638,17 +637,17 @@ TabletopObjectsThread::loop()
     p1_p2_90.normalize();
 
     Eigen::Vector3f table_center =
-      p1_p2_center + p1_p2_90 * (cfg_table_model_height * 0.5);
+      p1_p2_center + p1_p2_90 * (cfg_table_model_height_ * 0.5);
 
     for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
     table_centroid[3] = 0.;
 
     // calculate table corner points
     std::vector<Eigen::Vector3f> tpoints(4);
-    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_width * 0.5);
-    tpoints[1] = tpoints[0] + p1_p2_90 * cfg_table_model_height;
-    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_width * 0.5);
-    tpoints[2] = tpoints[3] + p1_p2_90 * cfg_table_model_height;
+    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_width_ * 0.5);
+    tpoints[1] = tpoints[0] + p1_p2_90 * cfg_table_model_height_;
+    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_width_ * 0.5);
+    tpoints[2] = tpoints[3] + p1_p2_90 * cfg_table_model_height_;
 
     model_cloud_hull_.reset(new Cloud());
     model_cloud_hull_->points.resize(4);
@@ -676,8 +675,8 @@ TabletopObjectsThread::loop()
       * Eigen::AngleAxisf(angle, rotaxis);
 
     Eigen::Vector3f
-      model_p1(-cfg_table_model_height * 0.5, cfg_table_model_width * 0.5, 0.),
-      model_p2(-cfg_table_model_height * 0.5, -cfg_table_model_width * 0.5, 0.);
+      model_p1(-cfg_table_model_height_ * 0.5, cfg_table_model_width_ * 0.5, 0.),
+      model_p2(-cfg_table_model_height_ * 0.5, -cfg_table_model_width_ * 0.5, 0.);
     model_p1 = affine * model_p1;
     model_p2 = affine * model_p2;
 
@@ -710,7 +709,7 @@ TabletopObjectsThread::loop()
 
 
     // to show fitted table model
-    CloudPtr table_model = generate_table_model(cfg_table_model_width, cfg_table_model_height, cfg_table_model_step);
+    CloudPtr table_model = generate_table_model(cfg_table_model_width_, cfg_table_model_height_, cfg_table_model_step_);
     pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
     //*table_model_ = *model_cloud_hull_;
     //*table_model_ = *table_model;

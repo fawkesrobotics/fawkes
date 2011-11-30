@@ -118,16 +118,15 @@ class TabletopObjectsThread
   float cfg_max_z_angle_deviation_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
+  float cfg_table_model_width_;
+  float cfg_table_model_height_;
+  float cfg_table_model_step_;
   float cfg_horizontal_va_;
   float cfg_vertical_va_;
   float cfg_cluster_tolerance_;
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
   std::string cfg_result_frame_;
-
-  float cfg_table_model_width;
-  float cfg_table_model_height;
-  float cfg_table_model_step;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
