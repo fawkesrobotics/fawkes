@@ -553,7 +553,7 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float 
   try {
     KinBodyPtr kb = __env->GetKinBody(name);
 
-    Vector quat(quat_x, quat_y, quat_z, quat_w);
+    Vector quat(quat_w, quat_x, quat_y, quat_z);
 
     Transform transform = kb->GetTransform();
     transform.rot = quat;
