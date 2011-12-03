@@ -27,10 +27,10 @@ name               = "or_object"
 fsm                = SkillHSM:new{name=name, start="INIT"}
 depends_skills     = {}
 depends_interfaces = {
-   {v = "if_openrave", type = "OpenRAVEInterface", id="OpenRAVE"}
+   {v = "if_openrave", type = "OpenRaveInterface", id="OpenRAVE"}
 }
 
-documentation      = [==[OpenRAVE objerct handling skill.
+documentation      = [==[OpenRAVE object handling skill.
 
 This skill provides object manipulation for objects in OpenRAVE.
 It basically allows all the object manipulation posiibilities provided in
@@ -152,10 +152,18 @@ function MOVE:init()
 end
 
 function ROTATE:init()
-   self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.RotateObjectMessage:new( self.fsm.vars.name,
-                                                                                            self.fsm.vars.x,
-                                                                                            self.fsm.vars.y,
-                                                                                            self.fsm.vars.z ))
+   if self.fsm.vars.w then
+      self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.RotateObjectQuatMessage:new( self.fsm.vars.name,
+                                                                                                   self.fsm.vars.x,
+                                                                                                   self.fsm.vars.y,
+                                                                                                   self.fsm.vars.z,
+                                                                                                   self.fsm.vars.w ))
+   else
+      self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.RotateObjectMessage:new( self.fsm.vars.name,
+                                                                                               self.fsm.vars.x,
+                                                                                               self.fsm.vars.y,
+                                                                                               self.fsm.vars.z ))
+   end
 end
 
 function RENAME:init()
