@@ -323,7 +323,7 @@ TabletopObjectsThread::loop()
   CloudPtr cloud_filt_;
   CloudPtr cloud_above_;
   CloudPtr cloud_objs_;
-  pcl::KdTreeFLANN<PointType> kdtree_;
+  pcl::search::KdTree<PointType> kdtree_;
 
   grid_.setInputCloud(input_);
   grid_.filter(*temp_cloud);
@@ -466,8 +466,8 @@ TabletopObjectsThread::loop()
   TIMETRACK_INTER(ttc_plane_downsampling_, ttc_cluster_plane_);
 
   // Creating the KdTree object for the search method of the extraction
-  pcl::KdTree<PointType>::Ptr
-    kdtree_table(new pcl::KdTreeFLANN<PointType>());
+  pcl::search::KdTree<PointType>::Ptr
+    kdtree_table(new pcl::search::KdTree<PointType>());
   kdtree_table->setInputCloud(cloud_table_voxelized);
 
   std::vector<pcl::PointIndices> table_cluster_indices;
@@ -943,8 +943,8 @@ TabletopObjectsThread::loop()
 
   if (cloud_objs_->points.size() > 0) {
     // Creating the KdTree object for the search method of the extraction
-    pcl::KdTree<PointType>::Ptr
-      kdtree_cl(new pcl::KdTreeFLANN<PointType>());
+    pcl::search::KdTree<PointType>::Ptr
+      kdtree_cl(new pcl::search::KdTree<PointType>());
     kdtree_cl->setInputCloud(cloud_objs_);
 
     std::vector<pcl::PointIndices> cluster_indices;
