@@ -20,10 +20,8 @@ endif
 ifndef __buildsys_pcl_mk_
 __buildsys_pcl_mk_ := 1
 
-PCL_VERSION = 1.2
-
 ifneq ($(PKGCONFIG),)
-  HAVE_PCL = $(if $(shell $(PKGCONFIG) --exists 'pcl_common-$(PCL_VERSION)'; echo $${?/1/}),1,0)
+  HAVE_PCL = $(if $(shell $(PKGCONFIG) --exists 'pcl_common'; echo $${?/1/}),1,0)
   HAVE_EIGEN3 = $(if $(shell $(PKGCONFIG) --exists 'eigen3'; echo $${?/1/}),1,0)
 endif
 
@@ -57,15 +55,15 @@ ifeq ($(HAVE_PCL),1)
   # endif
 
   CFLAGS_PCL  += -DHAVE_PCL $(CFLAGS_EIGEN3) \
-		 $(shell $(PKGCONFIG) --cflags 'pcl_common-$(PCL_VERSION)')
+		 $(shell $(PKGCONFIG) --cflags 'pcl_common')
   LDFLAGS_PCL += $(foreach L,common features filters kdtree keypoints octree \
 			range_image range_image_border_extractor registration \
 			sample_consensus segmentation surface, \
-		   $(shell $(PKGCONFIG) --libs 'pcl_$L-$(PCL_VERSION)') ) \
+		   $(shell $(PKGCONFIG) --libs 'pcl_$L') ) \
 		 $(LDFLAGS_EIGEN3)
   # need to fix PCL's pkg-config files first
-  #LDFLAGS_PCL_VIS = $(shell $(PKGCONFIG) --libs 'pcl_visualization-$(PCL_VERSION)')
-  #LDFLAGS_PCL_IO = $(shell $(PKGCONFIG) --libs 'pcl_io-$(PCL_VERSION)')
+  LDFLAGS_PCL_VIS = $(shell $(PKGCONFIG) --libs 'pcl_visualization')
+  LDFLAGS_PCL_IO = $(shell $(PKGCONFIG) --libs 'pcl_io')
 endif
 
 endif # __buildsys_pcl_mk_
