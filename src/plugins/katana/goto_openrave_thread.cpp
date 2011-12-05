@@ -205,16 +205,21 @@ KatanaGotoOpenRaveThread::once()
     }
   }
   else {
-    bool success;
-    if( __has_target_quaternion ) {
-      _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
-		         __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
-      success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
-    } else {
-      _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-		         __x, __y, __z, __phi, __theta, __psi);
-      success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi);
+    bool success = false;
+    try {
+      if( __has_target_quaternion ) {
+        _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
+  		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
+        success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
+      } else {
+        _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
+		           __x, __y, __z, __phi, __theta, __psi);
+        success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi);
+      }
+    } catch(OpenRAVE::openrave_exception &e) {
+      _logger->log_debug(name(), "OpenRAVE exception:%s", e.what());
     }
+
     if( !success ) {
       _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
       _finished = true;
