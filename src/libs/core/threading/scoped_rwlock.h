@@ -39,10 +39,10 @@ class ScopedRWLock
     LOCK_READ	///< Lock for reading
   } LockType;
 
-  ScopedRWLock(RefPtr<ReadWriteLock> rwlock, bool initially_lock = true,
-	      LockType lock_type = LOCK_WRITE);
-  ScopedRWLock(ReadWriteLock *rwlock, bool initially_lock = true,
-	      LockType lock_type = LOCK_WRITE);
+  ScopedRWLock(RefPtr<ReadWriteLock> rwlock, LockType lock_type = LOCK_WRITE,
+               bool initially_lock = true);
+  ScopedRWLock(ReadWriteLock *rwlock, LockType lock_type = LOCK_WRITE,
+               bool initially_lock = true);
   ~ScopedRWLock();
 
   void relock();
