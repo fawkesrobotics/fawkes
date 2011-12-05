@@ -90,7 +90,7 @@ RRDThread::loop()
 void
 RRDThread::generate_graphs()
 {
-  ScopedRWLock lock(__graphs.rwlock(), true, ScopedRWLock::LOCK_READ);
+  ScopedRWLock lock(__graphs.rwlock(), ScopedRWLock::LOCK_READ);
 
   std::vector<fawkes::RRDGraphDefinition *>::iterator g;
   for (g = __graphs.begin(); g != __graphs.end(); ++g) {
@@ -236,7 +236,7 @@ RRDThread::add_graph(RRDGraphDefinition *rrd_graph_def)
 void
 RRDThread::add_data(const char *rrd_name, const char *format, ...)
 {
-  ScopedRWLock lock(__rrds.rwlock(), true, ScopedRWLock::LOCK_READ);
+  ScopedRWLock lock(__rrds.rwlock(), ScopedRWLock::LOCK_READ);
 
   std::vector<RRDDefinition *>::const_iterator d;
   for (d = __rrds.begin(); d != __rrds.end(); ++d) {

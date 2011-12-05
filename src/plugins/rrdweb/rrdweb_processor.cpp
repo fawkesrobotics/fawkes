@@ -76,7 +76,7 @@ RRDWebRequestProcessor::process_request(const char *url,
     const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
     RWLockVector<RRDGraphDefinition *>::const_iterator g;
 
-    ScopedRWLock(graphs.rwlock(), true, ScopedRWLock::LOCK_READ);
+    ScopedRWLock(graphs.rwlock(), ScopedRWLock::LOCK_READ);
 
     if (subpath.find("/graph/") == 0) {
       std::string graph_name = subpath.substr(subpath.find_first_not_of("/", std::string("/graph/").length()));
