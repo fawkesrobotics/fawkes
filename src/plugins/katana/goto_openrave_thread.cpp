@@ -261,6 +261,24 @@ KatanaGotoOpenRaveThread::once()
       //usleep(1000*1000*(sampling + time_last.in_sec() - time_now.in_sec() - 0.005f));
     }
 
+    // check if encoders are close enough to target position
+    short num_motors = _katana->getNumberOfMotors();
+    CKatBase *base = _katana->GetBase();
+    const TKatMOT *mot = base->GetMOT();
+    while (!final) {
+      final = true;
+      update_openrave_data();
+      for (int i=0; i < num_motors; ++i) {
+        if (mot->arr[i].GetPVP()->msf == MSF_MOTCRASHED) {
+          _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
+          break;
+        }
+
+        final &= std::abs(mot->arr[i].GetTPS()->tarpos - mot->arr[i].GetPVP()->pos) < 10;
+      }
+    }
+
+
   } catch (/*KNI*/::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Moving along trajectory failed (ignoring): %s", e.what());
     _finished = true;
