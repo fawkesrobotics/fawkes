@@ -45,7 +45,7 @@ using namespace firevision;
 /** Constructor. */
 OpenNiPointCloudThread::OpenNiPointCloudThread()
   : Thread("OpenNiPointCloudThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
 }
 
