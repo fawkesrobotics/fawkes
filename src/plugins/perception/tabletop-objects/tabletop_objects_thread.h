@@ -136,6 +136,8 @@ class TabletopObjectsThread
   fawkes::RefPtr<Cloud> fsimplified_polygon_;
   CloudPtr simplified_polygon_;
 
+  unsigned int loop_count_;
+
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;
   unsigned int tt_loopcount_;

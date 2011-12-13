@@ -198,6 +198,8 @@ TabletopObjectsThread::init()
   seg_.setMaxIterations(cfg_segm_max_iterations_);
   seg_.setDistanceThreshold(cfg_segm_distance_threshold_);
 
+  loop_count_ = 0;
+
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
   tt_loopcount_ = 0;
@@ -289,6 +291,9 @@ void
 TabletopObjectsThread::loop()
 {
   TIMETRACK_START(ttc_full_loop_);
+
+  ++loop_count_;
+
   TIMETRACK_START(ttc_msgproc_);
 
   while (! switch_if_->msgq_empty()) {
@@ -343,9 +348,9 @@ TabletopObjectsThread::loop()
   Eigen::Vector4f table_centroid, baserel_table_centroid;
 
   // This will search for the first plane which:
-  // 1. has a considerable amount of points (>= 2% of input points)
-  // 2. is parallel to the floor (transformed normal Z dominant axis)
-  // 3. is on a typical table height (between 0.3 to 1.0m in robot frame)
+  // 1. has a considerable amount of points (>= some percentage of input points)
+  // 2. is parallel to the floor (transformed normal angle to Z axis in specified epsilon)
+  // 3. is on a typical table height (at a specified height range in robot frame)
   // Planes found along the way not satisfying any of the criteria are removed,
   // the first plane either satisfying all criteria, or violating the first
   // one end the loop
@@ -353,14 +358,23 @@ TabletopObjectsThread::loop()
   while (! happy_with_plane) {
     happy_with_plane = true;
 
+    if (temp_cloud->points.size() <= 10) {
+      logger->log_warn(name(), "[L %u] no more points for plane detection, skipping loop", loop_count_);
+      set_position(table_pos_if_, false);
+      TIMETRACK_ABORT(ttc_plane_);
+      TIMETRACK_ABORT(ttc_full_loop_);
+      TimeWait::wait(50000);
+      return;
+    }
+
     seg_.setInputCloud(temp_cloud);
     seg_.segment(*inliers, *coeff);
 
     // 1. check for a minimum number of expected inliers
-    if (inliers->indices.size() < (cfg_segm_inlier_quota_ * temp_cloud->points.size())) {
-      logger->log_warn(name(), "No table in scene, skipping loop (%zu inliers, required %f, voxelized size %zu)",
-                       inliers->indices.size(), (cfg_segm_inlier_quota_ * temp_cloud->points.size()),
-                       temp_cloud->points.size());
+    if ((double)inliers->indices.size() < (cfg_segm_inlier_quota_ * (double)temp_cloud->points.size())) {
+      logger->log_warn(name(), "[L %u] no table in scene, skipping loop (%zu inliers, required %f, voxelized size %zu)",
+                       loop_count_, inliers->indices.size(),
+                       (cfg_segm_inlier_quota_ * temp_cloud->points.size()), temp_cloud->points.size());
       set_position(table_pos_if_, false);
       TIMETRACK_ABORT(ttc_plane_);
       TIMETRACK_ABORT(ttc_full_loop_);
@@ -380,8 +394,8 @@ TabletopObjectsThread::loop()
 
       if (fabs(z_axis.angle(baserel_normal)) > cfg_max_z_angle_deviation_ ) {
         happy_with_plane = false;
-        logger->log_warn(name(), "Table normal (%f,%f,%f) Z angle deviation |%f| > %f, excluding",
-                         baserel_normal.x(), baserel_normal.y(), baserel_normal.z(),
+        logger->log_warn(name(), "[L %u] table normal (%f,%f,%f) Z angle deviation |%f| > %f, excluding",
+                         loop_count_, baserel_normal.x(), baserel_normal.y(), baserel_normal.z(),
                          z_axis.angle(baserel_normal), cfg_max_z_angle_deviation_);
       }
     } catch (tf::TransformException &e) {
@@ -409,10 +423,8 @@ TabletopObjectsThread::loop()
         //logger->log_warn(name(), "Table height %f not in range [%f, %f]", baserel_centroid.z(),
         //                 cfg_table_min_height_, cfg_table_max_height_);
       }
-    } catch (tf::TransformException &e) {
-      //logger->log_warn(name(), "Transforming centroid failed, exception follows");
-      //logger->log_warn(name(), e);
     }
+
 
     if (! happy_with_plane) {
       // throw away 
@@ -491,7 +503,7 @@ TabletopObjectsThread::loop()
     *cloud_proj_ = *cloud_table_extracted;
   } else {
     // Don't mess with the table, clustering didn't help to make it any better
-    logger->log_info(name(), "Table plane clustering did not generate any clusters");
+    logger->log_info(name(), "[L %u] table plane clustering did not generate any clusters", loop_count_);
   }
 
   TIMETRACK_INTER(ttc_cluster_plane_, ttc_convex_hull_)
@@ -506,7 +518,7 @@ TabletopObjectsThread::loop()
 
 
   if (cloud_hull_->points.empty()) {
-    logger->log_warn(name(), "Convex hull of table empty, skipping loop");
+    logger->log_warn(name(), "[L %u] convex hull of table empty, skipping loop", loop_count_);
     TIMETRACK_ABORT(ttc_convex_hull_);
     TIMETRACK_ABORT(ttc_full_loop_);
     return;
