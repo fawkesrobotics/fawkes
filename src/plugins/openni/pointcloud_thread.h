@@ -89,6 +89,8 @@ class OpenNiPointCloudThread
   fawkes::Time *__capture_start;
 
 #ifdef HAVE_PCL
+  bool         __cfg_generate_pcl;
+
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > __pcl;
 #endif
 };

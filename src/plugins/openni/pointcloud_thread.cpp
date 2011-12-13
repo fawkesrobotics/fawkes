@@ -116,23 +116,29 @@ OpenNiPointCloudThread::init()
   *__capture_start -= (long int)__depth_gen->GetTimestamp();
 
 #ifdef HAVE_PCL
-  __pcl = new pcl::PointCloud<pcl::PointXYZ>();
-  __pcl->is_dense = false;
-  __pcl->width    = __width;
-  __pcl->height   = __height;
-  __pcl->points.resize(__width * __height);
-  logger->log_debug(name(), "Setting w=%u  h=%u  s=%zu (p %p)",
-                    __pcl->width, __pcl->height, __pcl->points.size(), *__pcl);
-  __pcl->header.frame_id = "/kinect/depth";
+  __cfg_generate_pcl = true;
+  try {
+    __cfg_generate_pcl = config->get_bool("/plugins/openni-pointcloud/generate-pcl");
+  } catch (Exception &e) {}
 
-  pcl_manager->add_pointcloud("openni-pointcloud", __pcl);
+  if (__cfg_generate_pcl) {
+    __pcl = new pcl::PointCloud<pcl::PointXYZ>();
+    __pcl->is_dense = false;
+    __pcl->width    = __width;
+    __pcl->height   = __height;
+    __pcl->points.resize(__width * __height);
+    logger->log_debug(name(), "Setting w=%u  h=%u  s=%zu (p %p)",
+                      __pcl->width, __pcl->height, __pcl->points.size(), *__pcl);
+    __pcl->header.frame_id = "/kinect/depth";
 
-  const RefPtr<const pcl::PointCloud<pcl::PointXYZ> > cloud =
-    pcl_manager->get_pointcloud<pcl::PointXYZ>("openni-pointcloud");
-  logger->log_debug(name(), "In manager it's w=%u  h=%u  s=%zu (p %p) %zu %zu",
-                    cloud->width, cloud->height, cloud->points.size(), *__pcl,
-                    sizeof(pcl::PointCloud<pcl::PointXYZ>), sizeof(std_msgs::Header));
+    pcl_manager->add_pointcloud("openni-pointcloud", __pcl);
 
+    const RefPtr<const pcl::PointCloud<pcl::PointXYZ> > cloud =
+      pcl_manager->get_pointcloud<pcl::PointXYZ>("openni-pointcloud");
+    logger->log_debug(name(), "In manager it's w=%u  h=%u  s=%zu (p %p) %zu %zu",
+                      cloud->width, cloud->height, cloud->points.size(), *__pcl,
+                      sizeof(pcl::PointCloud<pcl::PointXYZ>), sizeof(std_msgs::Header));
+  }
 #endif
 
   depthgen_autoptr.release();
@@ -164,7 +170,11 @@ OpenNiPointCloudThread::loop()
   lock.unlock();
 
   if (is_data_new &&
-      ((__pcl_buf->num_attached() > 1) || (__pcl.use_count() > 1)) )
+      ((__pcl_buf->num_attached() > 1)
+#ifdef HAVE_PCL
+       || (__cfg_generate_pcl && (__pcl.use_count() > 1))
+#endif
+       ))
   {
     // convert depth to points
     register pcl_point_t *pclbuf = (pcl_point_t *)__pcl_buf->buffer();
@@ -176,32 +186,57 @@ OpenNiPointCloudThread::loop()
     __pcl_buf->lock_for_write();
     __pcl_buf->set_capture_time(&ts);
     
-    pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl;
-    pcl.header.seq += 1;
-    fawkes::PointCloudTimestamp pclts;
-    pclts.time.sec  = ts.get_sec();
-    pclts.time.usec = ts.get_usec();
-    pcl.header.stamp = pclts.timestamp;
+#ifdef HAVE_PCL
+    if (__cfg_generate_pcl) {
+      pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl;
+      pcl.header.seq += 1;
+      fawkes::PointCloudTimestamp pclts;
+      pclts.time.sec  = ts.get_sec();
+      pclts.time.usec = ts.get_usec();
+      pcl.header.stamp = pclts.timestamp;
 
-    unsigned int idx = 0;
-    for (unsigned int h = 0; h < __height; ++h) {
-      for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf) {
-	// Check for invalid measurements
-	if (data[idx] == 0 ||
-	    data[idx] == __no_sample_value ||
-	    data[idx] == __shadow_value)
-	{
-	  // invalid
-          pclbuf->x = pclbuf->y = pclbuf->z = 0.f;
-          pcl.points[idx].x = pcl.points[idx].y = pcl.points[idx].z = 0.f;
-	} else {
-	  // Fill in XYZ
-	  pclbuf->x = pcl.points[idx].x = data[idx] * 0.001f;
-	  pclbuf->y = pcl.points[idx].y = -(w - __center_x) * data[idx] * foc;
-	  pclbuf->z = pcl.points[idx].z = -(h - __center_y) * data[idx] * foc;
-	}
+      unsigned int idx = 0;
+      for (unsigned int h = 0; h < __height; ++h) {
+        for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf) {
+          // Check for invalid measurements
+          if (data[idx] == 0 ||
+              data[idx] == __no_sample_value ||
+              data[idx] == __shadow_value)
+          {
+            // invalid
+            pclbuf->x = pclbuf->y = pclbuf->z = 0.f;
+            pcl.points[idx].x = pcl.points[idx].y = pcl.points[idx].z = 0.f;
+          } else {
+            // Fill in XYZ
+            pclbuf->x = pcl.points[idx].x = data[idx] * 0.001f;
+            pclbuf->y = pcl.points[idx].y = -(w - __center_x) * data[idx] * foc;
+            pclbuf->z = pcl.points[idx].z = -(h - __center_y) * data[idx] * foc;
+          }
+        }
       }
+    } else {
+#endif
+      unsigned int idx = 0;
+      for (unsigned int h = 0; h < __height; ++h) {
+        for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf) {
+          // Check for invalid measurements
+          if (data[idx] == 0 ||
+              data[idx] == __no_sample_value ||
+              data[idx] == __shadow_value)
+          {
+            // invalid
+            pclbuf->x = pclbuf->y = pclbuf->z = 0.f;
+          } else {
+            // Fill in XYZ
+            pclbuf->x = data[idx] * 0.001f;
+            pclbuf->y = -(w - __center_x) * data[idx] * foc;
+            pclbuf->z = -(h - __center_y) * data[idx] * foc;
+          }
+        }
+      }
+#ifdef HAVE_PCL
     }
+#endif
 
     __pcl_buf->unlock();
   }
