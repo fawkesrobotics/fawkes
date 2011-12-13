@@ -338,6 +338,7 @@ TabletopObjectsThread::loop()
     // and not synchronized with main loop, but point cloud acquisition thread is
     // synchronized, we might start before any data has been read
     //logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
+    TimeWait::wait(50000);
     return;
   }
 
@@ -378,6 +379,7 @@ TabletopObjectsThread::loop()
       set_position(table_pos_if_, false);
       TIMETRACK_ABORT(ttc_plane_);
       TIMETRACK_ABORT(ttc_full_loop_);
+      TimeWait::wait(50000);
       return;
     }
 
@@ -403,25 +405,33 @@ TabletopObjectsThread::loop()
       //logger->log_warn(name(), e);
     }
 
-    // 3. Calculate table centroid, then transform it to the base_link system
-    // to make a table height sanity check, they tend to be at a specific height...
-    try {
-      pcl::compute3DCentroid(*temp_cloud, *inliers, table_centroid);
-      tf::Stamped<tf::Point>
-        centroid(tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
-                 fawkes::Time(0, 0), input_->header.frame_id);
-      tf::Stamped<tf::Point> baserel_centroid;
-      tf_listener->transform_point("/base_link", centroid, baserel_centroid);
-      baserel_table_centroid[0] = baserel_centroid.x();
-      baserel_table_centroid[1] = baserel_centroid.y();
-      baserel_table_centroid[2] = baserel_centroid.z();
+    if (happy_with_plane) {
+      // ok so far
 
-      if ((baserel_centroid.z() < cfg_table_min_height_) ||
-          (baserel_centroid.z() > cfg_table_max_height_))
-      {
-        happy_with_plane = false;
-        //logger->log_warn(name(), "Table height %f not in range [%f, %f]", baserel_centroid.z(),
-        //                 cfg_table_min_height_, cfg_table_max_height_);
+      // 3. Calculate table centroid, then transform it to the base_link system
+      // to make a table height sanity check, they tend to be at a specific height...
+      try {
+        pcl::compute3DCentroid(*temp_cloud, *inliers, table_centroid);
+        tf::Stamped<tf::Point>
+          centroid(tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
+                   fawkes::Time(0, 0), input_->header.frame_id);
+        tf::Stamped<tf::Point> baserel_centroid;
+        tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+        baserel_table_centroid[0] = baserel_centroid.x();
+        baserel_table_centroid[1] = baserel_centroid.y();
+        baserel_table_centroid[2] = baserel_centroid.z();
+
+        if ((baserel_centroid.z() < cfg_table_min_height_) ||
+            (baserel_centroid.z() > cfg_table_max_height_))
+        {
+          happy_with_plane = false;
+          logger->log_warn(name(), "[L %u] table height %f not in range [%f, %f]",
+                           loop_count_, baserel_centroid.z(),
+                           cfg_table_min_height_, cfg_table_max_height_);
+        }
+      } catch (tf::TransformException &e) {
+        //logger->log_warn(name(), "Transforming centroid failed, exception follows");
+        //logger->log_warn(name(), e);
       }
     }
 
@@ -521,6 +531,7 @@ TabletopObjectsThread::loop()
     logger->log_warn(name(), "[L %u] convex hull of table empty, skipping loop", loop_count_);
     TIMETRACK_ABORT(ttc_convex_hull_);
     TIMETRACK_ABORT(ttc_full_loop_);
+    set_position(table_pos_if_, false);
     return;
   }
 
@@ -574,7 +585,8 @@ TabletopObjectsThread::loop()
     // point and good edge indexes of chosen candidate
     size_t pidx1, pidx2;
 #ifdef HAVE_VISUAL_DEBUGGING
-    size_t geidx1, geidx2;
+    size_t geidx1 = std::numeric_limits<size_t>::max();
+    size_t geidx2 = std::numeric_limits<size_t>::max();
 #endif
     // lower frustrum potential candidate
     size_t lf_pidx1, lf_pidx2;
