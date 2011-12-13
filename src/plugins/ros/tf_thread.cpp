@@ -71,6 +71,8 @@ RosTfThread::init()
   for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
     //logger->log_info(name(), "Opened %s", (*i)->uid());
     bbil_add_data_interface(*i);
+    bbil_add_reader_interface(*i);
+    bbil_add_writer_interface(*i);
   }
   blackboard->register_listener(this);
 
@@ -181,6 +183,8 @@ RosTfThread::bb_interface_created(const char *type, const char *id) throw()
 
   try {
     bbil_add_data_interface(tfif);
+    bbil_add_reader_interface(tfif);
+    bbil_add_writer_interface(tfif);
     blackboard->update_listener(this);
     __tfifs.push_back(tfif);
   } catch (Exception &e) {
@@ -218,6 +222,8 @@ RosTfThread::conditional_close(Interface *interface) throw()
         // It's only us
         logger->log_info(name(), "Last on %s, closing", interface->uid());
         bbil_remove_data_interface(*i);
+        bbil_remove_reader_interface(*i);
+        bbil_remove_writer_interface(*i);
         blackboard->update_listener(this);
         blackboard->close(*i);
         __tfifs.erase(i);
