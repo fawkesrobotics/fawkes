@@ -91,6 +91,8 @@ init(InitOptions options)
 {
   init_options = new InitOptions(options);
 
+  if (init_options->show_help())  return 0;
+
   if ( options.daemonize() ) {
     fawkes::daemon::init(options.daemon_pid_file(), options.basename());
     if (options.daemonize_kill()) {
@@ -309,19 +311,25 @@ init(InitOptions options)
 void
 cleanup()
 {
-  Thread::destroy_main();
+  try {
+    Thread::destroy_main();
+  } catch (Exception &e) {} // ignored, can fire on show_help
 
   if (init_options->daemonize()) {
     fawkes::daemon::cleanup();
   }
 
-  nethandler_plugin->cancel();
-  nethandler_plugin->join();
+  if (nethandler_plugin) {
+    nethandler_plugin->cancel();
+    nethandler_plugin->join();
+  }
 
-  // Must delete network logger first since network manager
-  // has to die before the LibLogger is finalized.
-  logger->remove_logger(network_logger);
-  delete network_logger;
+  if (logger) {
+    // Must delete network logger first since network manager
+    // has to die before the LibLogger is finalized.
+    logger->remove_logger(network_logger);
+    delete network_logger;
+  }
 
   delete main_thread;
   delete argument_parser;
@@ -337,21 +345,22 @@ cleanup()
 
   main_thread = NULL;
   argument_parser = NULL;
+  init_options = NULL;
+  nethandler_config = NULL;
+  nethandler_plugin = NULL;
+  plugin_manager = NULL;
+  network_manager = NULL;
+  config = NULL;
   thread_manager = NULL;
   aspect_manager = NULL;
-  plugin_manager = NULL;
-  nethandler_config = NULL;
-  config = NULL;
-  network_manager = NULL;
-  clock = NULL;
   shm_registry = NULL;
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
-
   logger = NULL;
 
   Clock::finalize();
+  clock = NULL;
 
   // should be last, because of not disabled this hosts the
   // default signal handlers
@@ -362,6 +371,11 @@ cleanup()
 void
 run()
 {
+  if (init_options->show_help()) {
+    print_usage(init_options->basename());
+    return;
+  }
+
   bool defsigs = init_options->default_signal_handlers();
   runner = new FawkesMainThread::Runner(main_thread, defsigs);
 
