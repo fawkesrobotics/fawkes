@@ -38,6 +38,10 @@ LIBS_openni_pointcloud = fawkescore fawkesutils fawkesaspects  fawkesopenniaspec
 			 fvutils fawkesopenni_utils
 OBJS_openni_pointcloud = pointcloud_plugin.o pointcloud_thread.o
 
+LIBS_openni_pcl_frombuf = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
+			 fvutils fawkesopenni_utils
+OBJS_openni_pcl_frombuf = pcl_frombuf_plugin.o pcl_frombuf_thread.o
+
 LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 			  fawkesinterface fawkesopenniaspect fawkesopenni_utils \
 			  fvutils ObjectPositionInterface
@@ -48,12 +52,18 @@ ifeq ($(HAVE_PCL),1)
   CFLAGS_pointcloud_plugin = $(CFLAGS_PCL)
   LDFLAGS_openni_pointcloud = $(LDFLAGS_PCL)
   LIBS_openni_pointcloud += fvutils
+
+  CFLAGS_pcl_frombuf_thread = $(CFLAGS_PCL)
+  CFLAGS_pcl_frombuf_plugin = $(CFLAGS_PCL)
+  LDFLAGS_openni_pcl_frombuf = $(LDFLAGS_PCL)
+  LIBS_openni_pcl_frombuf += fvutils
 else
   WARN_TARGETS += warning_pcl
 endif
 
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_image) \
-	   $(OBJS_openni_pointcloud) $(OBJS_openni_handtracker)
+	   $(OBJS_openni_pointcloud) $(OBJS_openni_handtracker) \
+	   $(OBJS_openni_pcl_frombuf)
 
 # Ordering constraints
 utils: interfaces
@@ -66,11 +76,15 @@ ifeq ($(HAVE_OPENNI),1)
 
   CFLAGS  += $(CFLAGS_OPENNI)
   LDFLAGS += $(LDFLAGS_OPENNI)
-  PLUGINS_all = $(PLUGINDIR)/openni.so \
-		$(PLUGINDIR)/openni-usertracker.so \
-		$(PLUGINDIR)/openni-handtracker.so \
-		$(PLUGINDIR)/openni-image.so \
-		$(PLUGINDIR)/openni-pointcloud.so
+  PLUGINS_all = $(PLUGINDIR)/openni.$(SOEXT) \
+		$(PLUGINDIR)/openni-usertracker.$(SOEXT) \
+		$(PLUGINDIR)/openni-handtracker.$(SOEXT) \
+		$(PLUGINDIR)/openni-image.$(SOEXT) \
+		$(PLUGINDIR)/openni-pointcloud.$(SOEXT)	
+
+  ifeq ($(HAVE_PCL),1)
+    PLUGINS_all += $(PLUGINDIR)/openni-pcl-frombuf.$(SOEXT)
+  endif
 else
   WARN_TARGETS += warning_openni
 endif
@@ -82,7 +96,7 @@ all: $(WARN_TARGETS)
 warning_openni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenNI Plugins$(TNORMAL) (openni[-devel] not installed)"
 warning_pcl:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL part in openni-pointcloud$(TNORMAL) (pcl[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL part in openni-pointcloud and openni-pcl-frombuf$(TNORMAL) (pcl[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
