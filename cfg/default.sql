@@ -252,8 +252,8 @@ INSERT INTO "config" VALUES('/perception/tabletop-objects/table_segmentation_inl
 INSERT INTO "config" VALUES('/perception/tabletop-objects/max_z_angle_deviation','float',0.1,'Maximum angle between Z axis and table normal, takes normal direction into account; rad');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_min_height','float',0.6,'Minimum required height of table; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_max_height','float',0.9,'Maximum height of table; m');
-INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_height','float',0.8,'Table model height, i.e. if the robot is standing in front of the table the dista
-INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_width','float',1.6,'Table model width, i.e. if the robot is standing in front of the table the distanc
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_width','float',0.8,'Table model width, i.e. if the robot is standing in front of the longer edge of the table the distance between the close and the far edge; m');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_length','float',1.6,'Table model length, i.e. if the robot is standing in front of the longer edge of the table the distance between the left and the right edge; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/table_model_step','float',0.05,'Inter-Point step size for creating the table model point cloud; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_tolerance','float',0.04,'Clustering inter-point distance tolerance; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_min_size','unsigned int',20,'Minimum number of points in cluster to consider');

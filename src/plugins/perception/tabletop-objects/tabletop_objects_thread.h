@@ -87,10 +87,10 @@ class TabletopObjectsThread
 
   CloudPtr simplify_polygon(CloudPtr polygon, float sqr_dist_threshold);
 
-  CloudPtr generate_table_model(const float width, const float height,
+  CloudPtr generate_table_model(const float length, const float width,
                                 const float thickness, const float step, const float max_error);
 
-  CloudPtr generate_table_model(const float width, const float height,
+  CloudPtr generate_table_model(const float length, const float width,
                                 const float step, const float max_error = 0.01);
 
   bool is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p, PointType &br_p1p, PointType &br_p2p);
@@ -121,8 +121,8 @@ class TabletopObjectsThread
   float cfg_max_z_angle_deviation_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
+  float cfg_table_model_length_;
   float cfg_table_model_width_;
-  float cfg_table_model_height_;
   float cfg_table_model_step_;
   float cfg_horizontal_va_;
   float cfg_vertical_va_;

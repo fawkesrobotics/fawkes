@@ -118,8 +118,8 @@ TabletopObjectsThread::init()
   cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
   cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
   cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
+  cfg_table_model_length_    = config->get_float(CFG_PREFIX"table_model_length");
   cfg_table_model_width_     = config->get_float(CFG_PREFIX"table_model_width");
-  cfg_table_model_height_    = config->get_float(CFG_PREFIX"table_model_height");
   cfg_table_model_step_      = config->get_float(CFG_PREFIX"table_model_step");
   cfg_horizontal_va_         = deg2rad(config->get_float(CFG_PREFIX"horizontal_viewing_angle"));
   cfg_vertical_va_           = deg2rad(config->get_float(CFG_PREFIX"vertical_viewing_angle"));
@@ -747,27 +747,39 @@ TabletopObjectsThread::loop()
     // Normal vectors for table model and plane
     Eigen::Vector3f model_normal = Eigen::Vector3f::UnitZ();
     Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
+    normal.normalize(); // just in case
+
+    Eigen::Vector3f table_centroid_3f =
+      Eigen::Vector3f(table_centroid[0], table_centroid[1], table_centroid[2]);
 
     // Rotational parameters to align table to polygon segment
     Eigen::Vector3f p1_p2 = p2 - p1;
     Eigen::Vector3f p1_p2_center = (p2 + p1) * 0.5;
     p1_p2.normalize();
-    Eigen::Vector3f p1_p2_90 =
-      Eigen::AngleAxisf(M_PI/2., normal) * p1_p2;
-    p1_p2_90.normalize();
+    Eigen::Vector3f p1_p2_normal_cross = p1_p2.cross(normal);
+    p1_p2_normal_cross.normalize();
+
+    // For N=(A,B,C), and hessian Ax+By+Cz+D=0 and N dot X=(Ax+By+Cz)
+    // we get N dot X + D = 0 -> -D = N dot X
+    double nD = - p1_p2_normal_cross.dot(p1_p2_center);
+    double p1_p2_centroid_dist = p1_p2_normal_cross.dot(table_centroid_3f) + nD;
+    if (p1_p2_centroid_dist < 0) {
+      // normal points to the "wrong" side fo our purpose
+      p1_p2_normal_cross *= -1;
+    }
 
     Eigen::Vector3f table_center =
-      p1_p2_center + p1_p2_90 * (cfg_table_model_height_ * 0.5);
+      p1_p2_center + p1_p2_normal_cross * (cfg_table_model_width_ * 0.5);
 
     for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
     table_centroid[3] = 0.;
 
     // calculate table corner points
     std::vector<Eigen::Vector3f> tpoints(4);
-    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_width_ * 0.5);
-    tpoints[1] = tpoints[0] + p1_p2_90 * cfg_table_model_height_;
-    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_width_ * 0.5);
-    tpoints[2] = tpoints[3] + p1_p2_90 * cfg_table_model_height_;
+    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_length_ * 0.5);
+    tpoints[1] = tpoints[0] + p1_p2_normal_cross * cfg_table_model_width_;
+    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_length_ * 0.5);
+    tpoints[2] = tpoints[3] + p1_p2_normal_cross * cfg_table_model_width_;
 
     model_cloud_hull_.reset(new Cloud());
     model_cloud_hull_->points.resize(4);
@@ -795,8 +807,8 @@ TabletopObjectsThread::loop()
       * Eigen::AngleAxisf(angle, rotaxis);
 
     Eigen::Vector3f
-      model_p1(-cfg_table_model_height_ * 0.5, cfg_table_model_width_ * 0.5, 0.),
-      model_p2(-cfg_table_model_height_ * 0.5, -cfg_table_model_width_ * 0.5, 0.);
+      model_p1(-cfg_table_model_width_ * 0.5, cfg_table_model_length_ * 0.5, 0.),
+      model_p2(-cfg_table_model_width_ * 0.5, -cfg_table_model_length_ * 0.5, 0.);
     model_p1 = affine * model_p1;
     model_p2 = affine * model_p2;
 
@@ -830,7 +842,7 @@ TabletopObjectsThread::loop()
     TIMETRACK_INTER(ttc_transform_, ttc_transform_model_)
 
     // to show fitted table model
-    CloudPtr table_model = generate_table_model(cfg_table_model_width_, cfg_table_model_height_, cfg_table_model_step_);
+    CloudPtr table_model = generate_table_model(cfg_table_model_length_, cfg_table_model_width_, cfg_table_model_step_);
     pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
     //*table_model_ = *model_cloud_hull_;
     //*table_model_ = *table_model;
@@ -1101,29 +1113,29 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
 
 
 TabletopObjectsThread::CloudPtr
-TabletopObjectsThread::generate_table_model(const float width, const float height,
+TabletopObjectsThread::generate_table_model(const float length, const float width,
                                             const float thickness, const float step,
                                             const float max_error)
 {
   CloudPtr c(new Cloud());
 
+  const float length_2    = fabs(length)    * 0.5;
   const float width_2     = fabs(width)     * 0.5;
-  const float height_2    = fabs(height)    * 0.5;
   const float thickness_2 = fabs(thickness) * 0.5;
 
   // calculate table points
+  const unsigned int l_base_num = std::max(2u, (unsigned int)floor(length / step));
+  const unsigned int num_w = l_base_num +
+    ((length < l_base_num * step) ? 0 : ((length - l_base_num * step) > max_error ? 2 : 1));
   const unsigned int w_base_num = std::max(2u, (unsigned int)floor(width / step));
-  const unsigned int num_w = w_base_num +
+  const unsigned int num_h = w_base_num +
     ((width < w_base_num * step) ? 0 : ((width - w_base_num * step) > max_error ? 2 : 1));
-  const unsigned int h_base_num = std::max(2u, (unsigned int)floor(height / step));
-  const unsigned int num_h = h_base_num +
-    ((height < h_base_num * step) ? 0 : ((height - h_base_num * step) > max_error ? 2 : 1));
   const unsigned int t_base_num = std::max(2u, (unsigned int)floor(thickness / step));
   const unsigned int num_t = t_base_num +
     ((thickness < t_base_num * step) ? 0 : ((thickness - t_base_num * step) > max_error ? 2 : 1));
 
   //logger->log_debug(name(), "Generating table model %fx%fx%f (%ux%ux%u=%u points)",
-  //                  width, height, thickness,
+  //                  length, width, thickness,
   //                  num_w, num_h, num_t, num_t * num_w * num_h);
 
   c->height = 1;
@@ -1137,11 +1149,11 @@ TabletopObjectsThread::generate_table_model(const float width, const float heigh
       for (unsigned int h = 0; h < num_h; ++h) {
         PointType &p = c->points[idx++];
 
-        p.x = h * step - height_2;
-        if ((h == num_h - 1) && fabs(p.x - height_2) > max_error) p.x = height_2;
+        p.x = h * step - width_2;
+        if ((h == num_h - 1) && fabs(p.x - width_2) > max_error) p.x = width_2;
 
-        p.y = w * step - width_2;
-        if ((w == num_w - 1) && fabs(p.y - width_2) > max_error)  p.y = width_2;
+        p.y = w * step - length_2;
+        if ((w == num_w - 1) && fabs(p.y - length_2) > max_error)  p.y = length_2;
 
         p.z = t * step - thickness_2;
         if ((t == num_t - 1) && fabs(p.z - thickness_2) > max_error)  p.z = thickness_2;
@@ -1153,24 +1165,24 @@ TabletopObjectsThread::generate_table_model(const float width, const float heigh
 }
 
 TabletopObjectsThread::CloudPtr
-TabletopObjectsThread::generate_table_model(const float width, const float height,
+TabletopObjectsThread::generate_table_model(const float length, const float width,
                                             const float step, const float max_error)
 {
   CloudPtr c(new Cloud());
 
-  const float width_2     = fabs(width)     * 0.5;
-  const float height_2    = fabs(height)    * 0.5;
+  const float length_2     = fabs(length)     * 0.5;
+  const float width_2    = fabs(width)    * 0.5;
 
   // calculate table points
+  const unsigned int l_base_num = std::max(2u, (unsigned int)floor(length / step));
+  const unsigned int num_w = l_base_num +
+    ((length < l_base_num * step) ? 0 : ((length - l_base_num * step) > max_error ? 2 : 1));
   const unsigned int w_base_num = std::max(2u, (unsigned int)floor(width / step));
-  const unsigned int num_w = w_base_num +
+  const unsigned int num_h = w_base_num +
     ((width < w_base_num * step) ? 0 : ((width - w_base_num * step) > max_error ? 2 : 1));
-  const unsigned int h_base_num = std::max(2u, (unsigned int)floor(height / step));
-  const unsigned int num_h = h_base_num +
-    ((height < h_base_num * step) ? 0 : ((height - h_base_num * step) > max_error ? 2 : 1));
 
   //logger->log_debug(name(), "Generating table model %fx%f (%ux%u=%u points)",
-  //                  width, height, num_w, num_h, num_w * num_h);
+  //                  length, width, num_w, num_h, num_w * num_h);
 
   c->height = 1;
   c->width = num_w * num_h;
@@ -1182,11 +1194,11 @@ TabletopObjectsThread::generate_table_model(const float width, const float heigh
     for (unsigned int h = 0; h < num_h; ++h) {
       PointType &p = c->points[idx++];
 
-      p.x = h * step - height_2;
-      if ((h == num_h - 1) && fabs(p.x - height_2) > max_error) p.x = height_2;
+      p.x = h * step - width_2;
+      if ((h == num_h - 1) && fabs(p.x - width_2) > max_error) p.x = width_2;
 
-      p.y = w * step - width_2;
-      if ((w == num_w - 1) && fabs(p.y - width_2) > max_error)  p.y = width_2;
+      p.y = w * step - length_2;
+      if ((w == num_w - 1) && fabs(p.y - length_2) > max_error)  p.y = length_2;
 
       p.z = 0.;
     }
