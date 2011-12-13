@@ -131,14 +131,20 @@ SharedMemoryRegistry::~SharedMemoryRegistry()
 {
   close(__shmfd);
   sem_close(__sem);
-  if (__master) {
-    shm_unlink(__shm_name);
-    sem_unlink(__shm_name);
-  }
 
   free(__shm_name);
 }
 
+
+/** Cleanup existing shared memory segments.
+ * @param name shared memory segment name
+ */
+void
+SharedMemoryRegistry::cleanup(const char *name)
+{
+  shm_unlink(name ? name : DEFAULT_SHM_NAME);
+  sem_unlink(name ? name : DEFAULT_SHM_NAME);
+}
 
 /** Get a snapshot of currently registered segments.
  * @return list of all currently registered segments

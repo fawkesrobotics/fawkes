@@ -249,8 +249,9 @@ init(InitOptions options)
   if ( options.bb_cleanup()) {
     LocalBlackBoard::cleanup(bb_magic_token.c_str(),
 			     /* output with lister? */ true);
+    SharedMemoryRegistry::cleanup();
   }
-  
+
   LocalBlackBoard *lbb = NULL;
   if ( bb_magic_token == "") {
     lbb = new LocalBlackBoard(bb_size);
@@ -397,7 +398,7 @@ print_usage(const char *progname)
 	 "Usage: %s [options]\n"
 	 "where [options] is one or more of:\n"
          " -h                       These help instructions\n"
-         " -C                       Cleanup old BB segments\n"
+         " -C                       Cleanup old BB and shared memory segments\n"
          " -c db-file               Mutable configuration file, created if it "
 	 "does not\n                          "
 	 "exist, if it does must contain valid SQLite database\n"

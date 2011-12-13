@@ -58,6 +58,8 @@ class SharedMemoryRegistry
   void add_segment(int shmid, const char *magic_token);
   void remove_segment(int shmid);
 
+  static void cleanup(const char *name = 0);
+
  private:
   typedef struct {
     SharedMemID segments[MAXNUM_SHM_SEGMS];
