@@ -79,10 +79,13 @@ class TabletopVisualizationThread
 #endif
   size_t last_id_num_;
 
-  bool  cfg_show_frustrum_;
-  float cfg_horizontal_va_;
-  float cfg_vertical_va_;
-
+  bool         cfg_show_frustrum_;
+  float        cfg_horizontal_va_;
+  float        cfg_vertical_va_;
+  bool         cfg_show_cvxhull_vertices_;
+  bool         cfg_show_cvxhull_line_highlighting_;
+  bool         cfg_show_cvxhull_vertex_ids_;
+  unsigned int cfg_duration_;
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

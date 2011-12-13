@@ -79,6 +79,9 @@ void
 TabletopVisualizationThread::init()
 {
   cfg_show_frustrum_ = false;
+  cfg_show_cvxhull_vertices_ = true;
+  cfg_show_cvxhull_line_highlighting_ = true;
+  cfg_show_cvxhull_vertex_ids_ = true;
   try {
     cfg_show_frustrum_ = config->get_bool(CFG_PREFIX_VIS"show_frustrum");
   } catch (Exception &e) {} // ignored, use default
@@ -86,6 +89,20 @@ TabletopVisualizationThread::init()
     cfg_horizontal_va_ = deg2rad(config->get_float(CFG_PREFIX"horizontal_viewing_angle"));
     cfg_vertical_va_   = deg2rad(config->get_float(CFG_PREFIX"vertical_viewing_angle"));
   }
+  cfg_duration_ = 120;
+  try {
+    cfg_duration_ = config->get_uint(CFG_PREFIX_VIS"display_duration");
+  } catch (Exception &e) {} // ignored, use default
+
+  try {
+    cfg_show_cvxhull_vertices_ = config->get_bool(CFG_PREFIX_VIS"show_convex_hull_vertices");
+  } catch (Exception &e) {} // ignored, use default
+  try {
+    cfg_show_cvxhull_line_highlighting_ = config->get_bool(CFG_PREFIX_VIS"show_convex_hull_line_highlighting");
+  } catch (Exception &e) {} // ignored, use default
+  try {
+    cfg_show_cvxhull_vertex_ids_ = config->get_bool(CFG_PREFIX_VIS"show_convex_hull_vertex_ids");
+  } catch (Exception &e) {} // ignored, use default
 
   vispub_ = new ros::Publisher();
   *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100);
@@ -158,7 +175,7 @@ TabletopVisualizationThread::loop()
         text.scale.z = 0.05; // 5cm high
         text.color.r = text.color.g = text.color.b = 1.0f;
         text.color.a = 1.0;
-        text.lifetime = ros::Duration(10, 0);
+        text.lifetime = ros::Duration(cfg_duration_, 0);
         text.text = id;
         m.markers.push_back(text);
       }
@@ -180,7 +197,7 @@ TabletopVisualizationThread::loop()
       sphere.color.g = (float)cluster_colors[i][1] / 255.f;
       sphere.color.b = (float)cluster_colors[i][2] / 255.f;
       sphere.color.a = 1.0;
-      sphere.lifetime = ros::Duration(10, 0);
+      sphere.lifetime = ros::Duration(cfg_duration_, 0);
       m.markers.push_back(sphere);
     } catch (tf::TransformException &e) {} // ignored
   }
@@ -206,109 +223,115 @@ TabletopVisualizationThread::loop()
   normal.color.r = 0.4;
   normal.color.g = normal.color.b = 0.f;
   normal.color.a = 1.0;
-  normal.lifetime = ros::Duration(10, 0);
+  normal.lifetime = ros::Duration(cfg_duration_, 0);
   m.markers.push_back(normal);
 
-  // Table surrounding polygon
-  visualization_msgs::Marker hull;
-  hull.header.frame_id = frame_id_;
-  hull.header.stamp = ros::Time::now();
-  hull.ns = "tabletop";
-  hull.id = idnum++;
-  hull.type = visualization_msgs::Marker::LINE_STRIP;
-  hull.action = visualization_msgs::Marker::ADD;
-  hull.points.resize(table_hull_vertices_.size() + 1);
-  for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
-    hull.points[i].x = table_hull_vertices_[i][0];
-    hull.points[i].y = table_hull_vertices_[i][1];
-    hull.points[i].z = table_hull_vertices_[i][2];
-  }
-  hull.points[table_hull_vertices_.size()].x = table_hull_vertices_[0][0];
-  hull.points[table_hull_vertices_.size()].y = table_hull_vertices_[0][1];
-  hull.points[table_hull_vertices_.size()].z = table_hull_vertices_[0][2];
-  hull.scale.x = 0.005;
-  hull.color.r = 0.4;
-  hull.color.g = hull.color.b = 0.f;
-  hull.color.a = 0.2;
-  hull.lifetime = ros::Duration(10, 0);
-  m.markers.push_back(hull);
-
-  // "Good" lines are highlighted
-  visualization_msgs::Marker hull_lines;
-  hull_lines.header.frame_id = frame_id_;
-  hull_lines.header.stamp = ros::Time::now();
-  hull_lines.ns = "tabletop";
-  hull_lines.id = idnum++;
-  hull_lines.type = visualization_msgs::Marker::LINE_LIST;
-  hull_lines.action = visualization_msgs::Marker::ADD;
-  hull_lines.points.resize(good_table_hull_edges_.size());
-  hull_lines.colors.resize(good_table_hull_edges_.size());
-  for (size_t i = 0; i < good_table_hull_edges_.size(); ++i) {
-    hull_lines.points[i].x = good_table_hull_edges_[i][0];
-    hull_lines.points[i].y = good_table_hull_edges_[i][1];
-    hull_lines.points[i].z = good_table_hull_edges_[i][2];
-    hull_lines.colors[i].r = 0.;
-    hull_lines.colors[i].b = 0.;
-    hull_lines.colors[i].a = 0.4;
-    if (good_table_hull_edges_[i][3] > 0.) {
-      hull_lines.colors[i].g = 1.0;
-    } else {
-      hull_lines.colors[i].g = 0.5;
+  if (cfg_show_cvxhull_line_highlighting_) {
+    // "Good" lines are highlighted
+    visualization_msgs::Marker hull_lines;
+    hull_lines.header.frame_id = frame_id_;
+    hull_lines.header.stamp = ros::Time::now();
+    hull_lines.ns = "tabletop";
+    hull_lines.id = idnum++;
+    hull_lines.type = visualization_msgs::Marker::LINE_LIST;
+    hull_lines.action = visualization_msgs::Marker::ADD;
+    hull_lines.points.resize(good_table_hull_edges_.size());
+    hull_lines.colors.resize(good_table_hull_edges_.size());
+    for (size_t i = 0; i < good_table_hull_edges_.size(); ++i) {
+      hull_lines.points[i].x = good_table_hull_edges_[i][0];
+      hull_lines.points[i].y = good_table_hull_edges_[i][1];
+      hull_lines.points[i].z = good_table_hull_edges_[i][2];
+      hull_lines.colors[i].r = 0.;
+      hull_lines.colors[i].b = 0.;
+      hull_lines.colors[i].a = 0.4;
+      if (good_table_hull_edges_[i][3] > 0.) {
+        hull_lines.colors[i].g = 1.0;
+      } else {
+        hull_lines.colors[i].g = 0.5;
+      }
     }
+    hull_lines.color.a = 1.0;
+    hull_lines.scale.x = 0.01;
+    hull_lines.lifetime = ros::Duration(cfg_duration_, 0);
+    m.markers.push_back(hull_lines);
+  } else {
+    // Table surrounding polygon
+    visualization_msgs::Marker hull;
+    hull.header.frame_id = frame_id_;
+    hull.header.stamp = ros::Time::now();
+    hull.ns = "tabletop";
+    hull.id = idnum++;
+    hull.type = visualization_msgs::Marker::LINE_STRIP;
+    hull.action = visualization_msgs::Marker::ADD;
+    hull.points.resize(table_hull_vertices_.size() + 1);
+    for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
+      hull.points[i].x = table_hull_vertices_[i][0];
+      hull.points[i].y = table_hull_vertices_[i][1];
+      hull.points[i].z = table_hull_vertices_[i][2];
+    }
+    hull.points[table_hull_vertices_.size()].x = table_hull_vertices_[0][0];
+    hull.points[table_hull_vertices_.size()].y = table_hull_vertices_[0][1];
+    hull.points[table_hull_vertices_.size()].z = table_hull_vertices_[0][2];
+    hull.scale.x = 0.005;
+    hull.color.r = 0.4;
+    hull.color.g = hull.color.b = 0.f;
+    hull.color.a = 0.2;
+    hull.lifetime = ros::Duration(cfg_duration_, 0);
+    m.markers.push_back(hull);
   }
-  hull_lines.color.a = 1.0;
-  hull_lines.scale.x = 0.01;
-  hull_lines.lifetime = ros::Duration(10, 0);
-  m.markers.push_back(hull_lines);
 
-  visualization_msgs::Marker hull_points;
-  hull_points.header.frame_id = frame_id_;
-  hull_points.header.stamp = ros::Time::now();
-  hull_points.ns = "tabletop";
-  hull_points.id = idnum++;
-  hull_points.type = visualization_msgs::Marker::SPHERE_LIST;
-  hull_points.action = visualization_msgs::Marker::ADD;
-  hull_points.points.resize(table_hull_vertices_.size());
-  for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
-    hull_points.points[i].x = table_hull_vertices_[i][0];
-    hull_points.points[i].y = table_hull_vertices_[i][1];
-    hull_points.points[i].z = table_hull_vertices_[i][2];
+  if (cfg_show_cvxhull_vertices_) {
+    visualization_msgs::Marker hull_points;
+    hull_points.header.frame_id = frame_id_;
+    hull_points.header.stamp = ros::Time::now();
+    hull_points.ns = "tabletop";
+    hull_points.id = idnum++;
+    hull_points.type = visualization_msgs::Marker::SPHERE_LIST;
+    hull_points.action = visualization_msgs::Marker::ADD;
+    hull_points.points.resize(table_hull_vertices_.size());
+    for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
+      hull_points.points[i].x = table_hull_vertices_[i][0];
+      hull_points.points[i].y = table_hull_vertices_[i][1];
+      hull_points.points[i].z = table_hull_vertices_[i][2];
+    }
+    hull_points.scale.x = 0.01;
+    hull_points.scale.y = 0.01;
+    hull_points.scale.z = 0.01;
+    hull_points.color.r = 0.8;
+    hull_points.color.g = hull_points.color.b = 0.f;
+    hull_points.color.a = 1.0;
+    hull_points.lifetime = ros::Duration(cfg_duration_, 0);
+    m.markers.push_back(hull_points);
   }
-  hull_points.scale.x = 0.01;
-  hull_points.scale.y = 0.01;
-  hull_points.scale.z = 0.01;
-  hull_points.color.r = 0.8;
-  hull_points.color.g = hull_points.color.b = 0.f;
-  hull_points.color.a = 1.0;
-  hull_points.lifetime = ros::Duration(10, 0);
-  m.markers.push_back(hull_points);
 
   // hull texts
-  for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
+  if (cfg_show_cvxhull_vertex_ids_) {
+    for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
 
-    char *tmp;
-    if (asprintf(&tmp, "Cvx_%zu", i) != -1) {
-      // Copy to get memory freed on exception
-      std::string id = tmp;
-      free(tmp);
+      char *tmp;
+      if (asprintf(&tmp, "Cvx_%zu", i) != -1) {
+        // Copy to get memory freed on exception
+        std::string id = tmp;
+        free(tmp);
 
-      visualization_msgs::Marker text;
-      text.header.frame_id = frame_id_;
-      text.header.stamp = ros::Time::now();
-      text.ns = "tabletop";
-      text.id = idnum++;
-      text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-      text.action = visualization_msgs::Marker::ADD;
-      text.pose.position.x = table_hull_vertices_[i][0];
-      text.pose.position.y = table_hull_vertices_[i][1];
-      text.pose.position.z = table_hull_vertices_[i][2] + 0.1;
-      text.pose.orientation.w = 1.;
-      text.scale.z = 0.03;
-      text.color.r = text.color.g = text.color.b = 1.0f;
-      text.color.a = 1.0;
-      text.lifetime = ros::Duration(10, 0);
-      text.text = id;
-      m.markers.push_back(text);
+        visualization_msgs::Marker text;
+        text.header.frame_id = frame_id_;
+        text.header.stamp = ros::Time::now();
+        text.ns = "tabletop";
+        text.id = idnum++;
+        text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        text.action = visualization_msgs::Marker::ADD;
+        text.pose.position.x = table_hull_vertices_[i][0];
+        text.pose.position.y = table_hull_vertices_[i][1];
+        text.pose.position.z = table_hull_vertices_[i][2] + 0.1;
+        text.pose.orientation.w = 1.;
+        text.scale.z = 0.03;
+        text.color.r = text.color.g = text.color.b = 1.0f;
+        text.color.a = 1.0;
+        text.lifetime = ros::Duration(cfg_duration_, 0);
+        text.text = id;
+        m.markers.push_back(text);
+      }
     }
   }
 
@@ -334,7 +357,7 @@ TabletopVisualizationThread::loop()
     hull_model.color.r = 0.5;
     hull_model.color.g = hull_model.color.b = 0.f;
     hull_model.color.a = 1.0;
-    hull_model.lifetime = ros::Duration(10, 0);
+    hull_model.lifetime = ros::Duration(cfg_duration_, 0);
     m.markers.push_back(hull_model);
   }
 
@@ -367,7 +390,7 @@ TabletopVisualizationThread::loop()
     plane.color.g = ((float)table_color[1] / 255.f) * 0.8;
     plane.color.b = ((float)table_color[2] / 255.f) * 0.8;
     plane.color.a = 1.0;
-    plane.lifetime = ros::Duration(10, 0);
+    plane.lifetime = ros::Duration(cfg_duration_, 0);
     m.markers.push_back(plane);
   }
 
@@ -432,7 +455,7 @@ TabletopVisualizationThread::loop()
     frustrum.color.r = 1.0;
     frustrum.color.g = frustrum.color.b = 0.f;
     frustrum.color.a = 1.0;
-    frustrum.lifetime = ros::Duration(10, 0);
+    frustrum.lifetime = ros::Duration(cfg_duration_, 0);
     m.markers.push_back(frustrum);
 
 
@@ -481,7 +504,7 @@ TabletopVisualizationThread::loop()
     frustrum_triangles.color.r = 1.0;
     frustrum_triangles.color.g = frustrum_triangles.color.b = 0.f;
     frustrum_triangles.color.a = 0.23;
-    frustrum_triangles.lifetime = ros::Duration(10, 0);
+    frustrum_triangles.lifetime = ros::Duration(cfg_duration_, 0);
     m.markers.push_back(frustrum_triangles);
   } // end show frustrum
 

@@ -260,6 +260,10 @@ INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_min_size','uns
 INSERT INTO "config" VALUES('/perception/tabletop-objects/cluster_max_size','unsigned int',200,'Minimum number of points in cluster to consider');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/result_frame','string','/base_link','The frame in which the result should be published; frame');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_frustrum','bool',1,'Show the frustrum according to configured horizontal and vertical viewing angle.');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_convex_hull_vertices','bool',1,'Show text with convex hull vertex IDs?');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_convex_hull_line_highlighting','bool',1,'Show highlighted hull lines to understand edge selection? Otherwise plain hull is shown.');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_convex_hull_vertex_ids','bool',1,'Show text with convex hull vertex IDs?');
+INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/display_duration','unsigned int',120,'Time to show marker elements when not updated. Useful to still analyze the seen after program has been terminated; sec');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/horizontal_viewing_angle','float',57.0,'Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/vertical_viewing_angle','float',43.0,'Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg');
 COMMIT;
