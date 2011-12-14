@@ -169,7 +169,7 @@ JoystickForceFeedback::JoystickForceFeedback(const char *device_name)
       if (! test_bit(EV_FF, features)) {
 	close(__fd);
 	__fd = -1;
-	throw Exception("Device '%s' does not support force-feedback");
+	throw Exception("Device '%s' does not support force-feedback", device_name);
       }
 
       long ff_features[NBITS(FF_MAX)];

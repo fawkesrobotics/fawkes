@@ -161,6 +161,7 @@ LuaAgentContinuousExecutionThread::init()
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
     __lua->add_package("fawkesinterface");
+    __lua->add_package("fawkesgeometry");
 
     __lua->set_string("AGENT", __cfg_agent.c_str());
     __lua->set_usertype("config", config, "Configuration", "fawkes");
