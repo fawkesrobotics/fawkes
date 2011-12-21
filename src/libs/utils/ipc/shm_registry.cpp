@@ -205,6 +205,13 @@ SharedMemoryRegistry::add_segment(int shmid, const char *magic_token)
   sem_wait(__sem);
 
   bool valid = false;
+  for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
+    if (__meminfo->segments[i].shmid == shmid) {
+      valid = true;
+      break;
+    }
+  }
+
   for (unsigned int i = 0; !valid && i < MAXNUM_SHM_SEGMS; ++i) {
     if (__meminfo->segments[i].shmid == -1) {
       __meminfo->segments[i].shmid = shmid;
