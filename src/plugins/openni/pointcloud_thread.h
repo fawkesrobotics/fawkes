@@ -73,7 +73,10 @@ class OpenNiPointCloudThread
 
  private:
   xn::DepthGenerator                  *__depth_gen;
+  xn::ImageGenerator                  *__image_gen;
   xn::DepthMetaData                   *__depth_md;
+
+  bool         __cfg_register_depth_image;
 
   firevision::SharedMemoryImageBuffer *__pcl_buf;
 

@@ -33,6 +33,9 @@
 using namespace fawkes;
 using namespace firevision;
 
+#define FRAME_ID_DEPTH "/kinect/depth"
+#define FRAME_ID_IMAGE "/kinect/image"
+
 /** @class OpenNiPointCloudThread "pointcloud_thread.h"
  * OpenNI Point Cloud Provider Thread.
  * This thread provides a point cloud calculated from the depth image
@@ -63,18 +66,29 @@ OpenNiPointCloudThread::init()
 
   __depth_gen = new xn::DepthGenerator();
   std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(__depth_gen);
+  __image_gen = new xn::ImageGenerator();
+  std::auto_ptr<xn::ImageGenerator> imagegen_autoptr(__image_gen);
 
   XnStatus st;
 
   fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_IMAGE, __image_gen);
+  fawkes::openni::setup_map_generator(*__image_gen, config);
   fawkes::openni::setup_map_generator(*__depth_gen, config);
 
   __depth_md = new xn::DepthMetaData();
   __depth_gen->GetMetaData(*__depth_md);
 
+  __cfg_register_depth_image = false;
+  try {
+    __cfg_register_depth_image = config->get_bool("/plugins/openni/register_depth_image");
+  } catch (Exception &e) {}
+
   __pcl_buf = new SharedMemoryImageBuffer("openni-pointcloud",
 					  CARTESIAN_3D_FLOAT,
 					  __depth_md->XRes(), __depth_md->YRes());
+
+  __pcl_buf->set_frame_id(__cfg_register_depth_image ? FRAME_ID_IMAGE : FRAME_ID_DEPTH);
 
   // this is magic from ROS openni_device.cpp, reading code from
   // openni-primesense suggests that SXGA is the base configuration
@@ -101,10 +115,17 @@ OpenNiPointCloudThread::init()
   __width  = __depth_md->XRes();
   __height = __depth_md->YRes();
   float scale = __width / (float)XN_SXGA_X_RES;
-  __focal_length = ((float)zpd / pixel_size) * scale;
+  if (__cfg_register_depth_image) {
+    // magic number taken from ROS/PCL openni_device.cpp
+    const float rgb_focal_length_SXGA = 1050;
+    __focal_length = rgb_focal_length_SXGA * scale;
+  } else {
+    __focal_length = ((float)zpd / pixel_size) * scale;
+  }
   __center_x = (__width  / 2.) - .5f;
   __center_y = (__height / 2.) - .5f;
 
+  __image_gen->StartGenerating();
   __depth_gen->StartGenerating();
 
   __capture_start = new Time(clock);
@@ -114,6 +135,17 @@ OpenNiPointCloudThread::init()
   // arbitrarily define the zero reference point,
   // we can't get any closer than this
   *__capture_start -= (long int)__depth_gen->GetTimestamp();
+
+  __image_gen->WaitAndUpdateData();
+
+  if (__cfg_register_depth_image) {
+    logger->log_info(name(), "Setting depth alternate viewpoint to image");
+    fawkes::openni::setup_alternate_viewpoint(*__depth_gen, *__image_gen);
+  }
+
+  // Fails with "Bad Paramter" on OpenNI 1.3.2.1/PS 5.0.3.3
+  //logger->log_info(name(), "Setting depth/image synchronization");
+  //fawkes::openni::setup_synchronization(*__depth_gen, *__image_gen);
 
 #ifdef HAVE_PCL
   __cfg_generate_pcl = true;
@@ -129,7 +161,7 @@ OpenNiPointCloudThread::init()
     __pcl->points.resize(__width * __height);
     logger->log_debug(name(), "Setting w=%u  h=%u  s=%zu (p %p)",
                       __pcl->width, __pcl->height, __pcl->points.size(), *__pcl);
-    __pcl->header.frame_id = "/kinect/depth";
+    __pcl->header.frame_id = __cfg_register_depth_image ? FRAME_ID_IMAGE : FRAME_ID_DEPTH;
 
     pcl_manager->add_pointcloud("openni-pointcloud", __pcl);
 
@@ -142,13 +174,16 @@ OpenNiPointCloudThread::init()
 #endif
 
   depthgen_autoptr.release();
+  imagegen_autoptr.release();
 }
 
 
 void
 OpenNiPointCloudThread::finalize()
 {
+#ifdef HAVE_PCL
   pcl_manager->remove_pointcloud("openni-pointcloud");
+#endif
 
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
@@ -164,6 +199,7 @@ OpenNiPointCloudThread::loop()
 {
   MutexLocker lock(openni.objmutex_ptr());
   bool is_data_new = __depth_gen->IsDataNew();
+  __depth_gen->GetMetaData(*__depth_md);
   const XnDepthPixel * const data = __depth_md->Data();
   // experimental: unlock here as we do not invoke any methods anymore
   // since data has been updated earlier in the sensor hook we should be safe
@@ -172,7 +208,8 @@ OpenNiPointCloudThread::loop()
   if (is_data_new &&
       ((__pcl_buf->num_attached() > 1)
 #ifdef HAVE_PCL
-       || (__cfg_generate_pcl && (__pcl.use_count() > 1))
+       // 2 is us and the PCL manager of the PointCloudAspect
+       || (__cfg_generate_pcl && (__pcl.use_count() > 2))
 #endif
        ))
   {

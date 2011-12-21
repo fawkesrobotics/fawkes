@@ -239,6 +239,7 @@ INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/port','unsigned int',1
 INSERT INTO "config" VALUES('/plugins/refboxcomm/RemoteBB/interface_id','string','RefBoxComm','Interface of the GameStateInterface on the remote blackboard');
 INSERT INTO "config" VALUES('/plugins/openni/resolution','string','VGA','Resolution, one of QQVGA, CGA, VGA, XVGA, XGA, 720P, SXGA, UXGA, 1080P');
 INSERT INTO "config" VALUES('/plugins/openni/fps','unsigned int',30,'Desired frames per second');
+INSERT INTO "config" VALUES('/plugins/openni/register_depth_image','bool',1,'True to enable depth to image registration, false to disable');
 INSERT INTO "config" VALUES('/plugins/openni/run_sensor_server','bool',1,'Should we spawn the sensor server and maintain it? This solves the problem that the XnSensorServer process is not stopped by OpenNI.');
 INSERT INTO "config" VALUES('/plugins/openni/sensor_server_bin','string','/usr/bin/XnSensorServer','Full path to the XnSensorServer binary; path');
 INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinear','De-bayering mode, can be bilinear or nearest_neighbor');
