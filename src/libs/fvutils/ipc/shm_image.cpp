@@ -145,6 +145,17 @@ SharedMemoryImageBuffer::set_image_id(const char *image_id)
 }
 
 
+/** Set frame ID.
+ * @param frame_id new frame ID
+ */
+void
+SharedMemoryImageBuffer::set_frame_id(const char *frame_id)
+{
+  priv_header->set_frame_id(frame_id);
+  strncpy(raw_header->frame_id, frame_id, FRAME_ID_MAX_LENGTH);
+}
+
+
 /** Get Image ID.
  * @return image id
  */
@@ -152,6 +163,16 @@ const char *
 SharedMemoryImageBuffer::image_id() const
 {
   return _image_id;
+}
+
+
+/** Get frame ID.
+ * @return frame id
+ */
+const char *
+SharedMemoryImageBuffer::frame_id() const
+{
+  return priv_header->frame_id();
 }
 
 
@@ -538,10 +559,12 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader()
 {
   _colorspace = CS_UNKNOWN;
   _image_id = NULL;
+  _frame_id = NULL;
   _width = 0;
   _height = 0;
   _header = NULL;
   _orig_image_id = NULL;
+  _orig_frame_id = NULL;
 }
 
 
@@ -561,8 +584,10 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const char *image_i
   _width      = width;
   _height     = height;
   _header     = NULL;
+  _frame_id   = NULL;
 
   _orig_image_id   = NULL;
+  _orig_frame_id   = NULL;
   _orig_width      = 0;
   _orig_height     = 0;
   _orig_colorspace = CS_UNKNOWN;
@@ -579,12 +604,18 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const SharedMemoryI
   } else {
     _image_id = NULL;
   }
+  if ( h->_frame_id != NULL ) {
+    _frame_id   = strdup(h->_frame_id);
+  } else {
+    _frame_id = NULL;
+  }
   _colorspace = h->_colorspace;
   _width      = h->_width;
   _height     = h->_height;
   _header     = h->_header;
 
   _orig_image_id   = NULL;
+  _orig_frame_id   = NULL;
   _orig_width      = 0;
   _orig_height     = 0;
   _orig_colorspace = CS_UNKNOWN;
@@ -595,7 +626,9 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const SharedMemoryI
 SharedMemoryImageBufferHeader::~SharedMemoryImageBufferHeader()
 {
   if ( _image_id != NULL)  free(_image_id);
+  if ( _frame_id != NULL)  free(_frame_id);
   if ( _orig_image_id != NULL)  free(_orig_image_id);
+  if ( _orig_frame_id != NULL)  free(_orig_frame_id);
 }
 
 
@@ -633,13 +666,14 @@ SharedMemoryImageBufferHeader::matches(void *memptr)
     return true;
 
   } else if (strncmp(h->image_id, _image_id, IMAGE_ID_MAX_LENGTH) == 0) {
-
     if ( (_colorspace == CS_UNKNOWN) ||
 	 (((colorspace_t)h->colorspace == _colorspace) &&
 	  (h->width == _width) &&
-	  (h->height == _height)
+	  (h->height == _height) &&
+          (! _frame_id || (strncmp(h->frame_id, _frame_id, FRAME_ID_MAX_LENGTH) == 0))
 	  )
-	 ) {
+	 )
+    {
       return true;
     } else {
       throw InconsistentImageException("Inconsistent image found in memory (meta)");
@@ -666,6 +700,7 @@ SharedMemoryImageBufferHeader::operator==(const SharedMemoryHeader &s) const
     return false;
   } else {
     return ( (strncmp(_image_id, h->_image_id, IMAGE_ID_MAX_LENGTH) == 0) &&
+             (! _frame_id || (strncmp(_frame_id, h->_frame_id, FRAME_ID_MAX_LENGTH) == 0)) &&
 	     (_colorspace == h->_colorspace) &&
 	     (_width == h->_width) &&
 	     (_height == h->_height) );
@@ -683,6 +718,7 @@ SharedMemoryImageBufferHeader::print_info()
   cout << "SharedMemory Image Info: " << endl;
   printf("    address:  %p\n", _header);
   cout << "    image id:  " << _image_id << endl
+       << "    frame id:  " << (_frame_id ? _frame_id : "NOT SET") << endl
        << "    colorspace: " << _colorspace << endl
        << "    dimensions: " << _width << "x" << _height << endl;
   /*
@@ -715,6 +751,9 @@ SharedMemoryImageBufferHeader::initialize(void *memptr)
   memset(memptr, 0, sizeof(SharedMemoryImageBuffer_header_t));
 
   strncpy(header->image_id, _image_id, IMAGE_ID_MAX_LENGTH);
+  if (_frame_id) {
+    strncpy(header->frame_id, _frame_id, FRAME_ID_MAX_LENGTH);
+  }
   header->colorspace = _colorspace;
   header->width      = _width;
   header->height     = _height;
@@ -734,12 +773,20 @@ SharedMemoryImageBufferHeader::set(void *memptr)
   } else {
     _orig_image_id = NULL;
   }
+  if ( NULL != _orig_frame_id )  free(_orig_frame_id);
+  if ( NULL != _frame_id ) {
+    _orig_frame_id = strdup(_frame_id);
+    free(_frame_id);
+  } else {
+    _orig_frame_id = NULL;
+  }
   _orig_width = _width;
   _orig_height = _height;
   _orig_colorspace = _colorspace;
   _header = header;
 
   _image_id = strndup(header->image_id, IMAGE_ID_MAX_LENGTH);
+  _frame_id = strndup(header->frame_id, FRAME_ID_MAX_LENGTH);
   _width = header->width;
   _height = header->height;
   _colorspace = (colorspace_t)header->colorspace;
@@ -755,6 +802,13 @@ SharedMemoryImageBufferHeader::reset()
   }
   if ( _orig_image_id != NULL ) {
     _image_id = strdup(_orig_image_id);
+  }
+  if ( NULL != _frame_id ) {
+    free(_frame_id);
+    _frame_id = NULL;
+  }
+  if ( _orig_frame_id != NULL ) {
+    _frame_id = strdup(_orig_frame_id);
   }
   _width =_orig_width;
   _height =_orig_height;
@@ -806,6 +860,16 @@ SharedMemoryImageBufferHeader::image_id() const
 }
 
 
+/** Get frame ID.
+ * @return reference coordinate frame ID.
+ */
+const char *
+SharedMemoryImageBufferHeader::frame_id() const
+{
+  return _frame_id;
+}
+
+
 /** Set image id
  * @param image_id image ID
  */
@@ -814,6 +878,17 @@ SharedMemoryImageBufferHeader::set_image_id(const char *image_id)
 {
   if ( _image_id != NULL)  ::free(_image_id);
   _image_id = strdup(image_id);
+}
+
+
+/** Set frame ID.
+ * @param frame_id frame ID
+ */
+void
+SharedMemoryImageBufferHeader::set_frame_id(const char *frame_id)
+{
+  if ( _frame_id != NULL)  ::free(_frame_id);
+  _frame_id = strdup(frame_id);
 }
 
 
@@ -849,8 +924,8 @@ SharedMemoryImageBufferLister::print_header()
   cout << endl << cgreen << "FireVision Shared Memory Segments - Images" << cnormal << endl
        << "========================================================================================" << endl
        << cdarkgray;
-  printf ("%-20s %-10s %-10s %-9s %-16s %-5s %-5s %s\n",
-          "Image ID", "ShmID", "Semaphore", "Bytes", "Color Space", "Width", "Height",
+  printf ("%-20s %-20s %-10s %-10s %-9s %-16s %-5s %-5s %s\n",
+          "Image ID", "Frame ID", "ShmID", "Semaphore", "Bytes", "Color Space", "Width", "Height",
 	  "State");
   cout << cnormal
        << "----------------------------------------------------------------------------------------" << endl;
@@ -888,8 +963,8 @@ SharedMemoryImageBufferLister::print_info(const SharedMemoryHeader *header,
 
   const char *colorspace = colorspace_to_string(h->colorspace());
 
-  printf("%-20s %-10d %-10d %-9u %-16s %-5u %-5u %s%s\n",
-	 h->image_id(), shm_id, semaphore, mem_size, colorspace,
+  printf("%-20s %-20s %-10d %-10d %-9u %-16s %-5u %-5u %s%s\n",
+	 h->image_id(), h->frame_id(), shm_id, semaphore, mem_size, colorspace,
 	 h->width(), h->height(),
 	 (SharedMemory::is_swapable(shm_id) ? "S" : ""),
 	 (SharedMemory::is_destroyed(shm_id) ? "D" : "")
