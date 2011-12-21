@@ -45,7 +45,7 @@ using namespace firevision;
 /** Constructor. */
 OpenNiImageThread::OpenNiImageThread()
   : Thread("OpenNiImageThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
 }
 
@@ -220,6 +220,8 @@ OpenNiImageThread::loop()
   MutexLocker lock(openni.objmutex_ptr());
   bool is_image_new = __image_gen->IsDataNew();
   bool is_depth_new = __depth_gen->IsDataNew();
+  __image_gen->GetMetaData(*__image_md);
+  __depth_gen->GetMetaData(*__depth_md);
   const XnUInt8 * const      image_data = __image_md->Data();
   const XnDepthPixel * const depth_data = __depth_md->Data();
   lock.unlock();
