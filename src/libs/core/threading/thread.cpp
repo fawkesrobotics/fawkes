@@ -269,6 +269,10 @@ Thread::__constructor(const char *name, OpMode op_mode)
   loop_mutex = new Mutex();
   finalize_prepared = false;
 
+  __loop_done = true;
+  __loop_done_mutex = new Mutex();
+  __loop_done_waitcond = new WaitCondition(__loop_done_mutex);
+
   loopinterrupt_antistarve_mutex = new Mutex();
   __prepfin_hold_mutex       = new Mutex();
   __prepfin_hold_waitcond    = new WaitCondition(__prepfin_hold_mutex);
@@ -279,6 +283,9 @@ Thread::__constructor(const char *name, OpMode op_mode)
 /** Virtual destructor. */
 Thread::~Thread()
 {
+  __loop_done_waitcond->wake_all();
+  yield();
+
   delete __sleep_condition;
   delete __sleep_mutex;
   delete loop_mutex;
@@ -288,6 +295,8 @@ Thread::~Thread()
   delete __startup_barrier;
   delete __prepfin_hold_mutex;
   delete __prepfin_hold_waitcond;
+  delete __loop_done_waitcond;
+  delete __loop_done_mutex;
 }
 
 
@@ -925,9 +934,15 @@ Thread::run()
 
     loop_mutex->lock();
     if ( ! finalize_prepared ) {
+      __loop_done = false;
       loop();
     }
     loop_mutex->unlock();
+
+    __loop_done_mutex->lock();
+    __loop_done = true;
+    __loop_done_mutex->unlock();
+    __loop_done_waitcond->wake_all();
 
     test_cancel();
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
@@ -1005,6 +1020,17 @@ Thread::wakeup(Barrier *barrier)
   }
 }
 
+
+/** Wait for the current loop iteration to finish. */
+void
+Thread::wait_loop_done()
+{
+  __loop_done_mutex->lock();
+  while (! __loop_done) {
+    __loop_done_waitcond->wait();
+  }
+  __loop_done_mutex->unlock();
+}
 
 /** Code to execute in the thread.
  * Implement this method to hold the code you want to be executed continously.
