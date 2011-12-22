@@ -381,35 +381,35 @@ init(ArgumentParser &argp)
 
   if (argp.has_arg("n")) {
     argp.parse_hostport("n", fvhost, fvport);
-    g_pcl_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-pointcloud");
+    g_pcl_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-pointcloud-xyz");
     g_pcl_cam->open();
     g_pcl_cam->start();
 
     g_transfer_thread = new PclViewerTransferThread();
-    g_transfer_thread->add_camera("openni-pointcloud", g_pcl_cam);
+    g_transfer_thread->add_camera("openni-pointcloud-xyz", g_pcl_cam);
 
-    g_pcl_buf = (const pcl_point_t *)g_transfer_thread->buffer("openni-pointcloud");
+    g_pcl_buf = (const pcl_point_t *)g_transfer_thread->buffer("openni-pointcloud-xyz");
 
     if (argp.has_arg("R")) {
-      g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image",
+      g_image_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-image-rgb",
 				      argp.has_arg("j"));
       g_image_cam->open();
       g_image_cam->start();
       g_rgb_buf = malloc_buffer(RGB, g_image_cam->pixel_width(),
 				g_image_cam->pixel_height());
-      g_transfer_thread->add_camera("openni-image", g_image_cam);
-      g_image_buf = g_transfer_thread->buffer("openni-image");
+      g_transfer_thread->add_camera("openni-image-rgb", g_image_cam);
+      g_image_buf = g_transfer_thread->buffer("openni-image-rgb");
     }
 
     g_transfer_thread->start();
 
   } else {
-    g_pcl_cam = new SharedMemoryCamera("openni-pointcloud");
+    g_pcl_cam = new SharedMemoryCamera("openni-pointcloud-xyz");
     g_pcl_cam->open();
     g_pcl_cam->start();
     g_pcl_buf = (const pcl_point_t *)g_pcl_cam->buffer();
     if (argp.has_arg("R")) {
-      g_image_cam = new SharedMemoryCamera("openni-image");
+      g_image_cam = new SharedMemoryCamera("openni-image-rgb");
       g_image_cam->open();
       g_image_cam->start();
       g_image_buf = g_image_cam->buffer();
