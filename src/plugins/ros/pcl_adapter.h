@@ -24,6 +24,7 @@
 
 #include <utils/time/time.h>
 
+#include <map>
 #include <vector>
 #include <string>
 #include <stdint.h>
@@ -72,8 +73,13 @@ class RosPointCloudAdapter
                 unsigned int &width, unsigned int &height, fawkes::Time &time,
                 void **data_ptr, size_t &point_size, size_t &num_points);
 
+  void close(const std::string &id);
+
  private:
   fawkes::PointCloudManager *__pcl_manager;
+
+  class StorageAdapter;
+  std::map<std::string, StorageAdapter *> __sas;
 };
 
 

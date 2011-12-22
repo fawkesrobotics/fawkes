@@ -129,6 +129,8 @@ RosPointCloudThread::loop()
       //} else {
         // logger->log_debug(name(), "No update for %s, not sending", p->first.c_str());
       }
+    } else {
+      __adapter->close(p->first);
     }
   }
 }

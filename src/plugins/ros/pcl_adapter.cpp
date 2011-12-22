@@ -29,6 +29,18 @@
 
 using namespace fawkes;
 
+class RosPointCloudAdapter::StorageAdapter
+{
+ public:
+  StorageAdapter(const PointCloudManager::StorageAdapter *a_)
+    : a(a_->clone()) {}
+
+  ~StorageAdapter()
+  { delete a; }
+
+  PointCloudManager::StorageAdapter *a;
+};
+
 /** @class RosPointCloudAdapter "pcl_adapter.h"
  * Standalone PCL to ROS adapter class.
  * Currently, the standalone PCL comes with sensor_msgs and std_msgs
@@ -57,6 +69,11 @@ RosPointCloudAdapter::RosPointCloudAdapter(PointCloudManager *pcl_manager,
 /** Destructor. */
 RosPointCloudAdapter::~RosPointCloudAdapter()
 {
+  std::map<std::string, StorageAdapter *>::iterator i;
+  for (i = __sas.begin(); i != __sas.end(); ++i) {
+    delete i->second;
+  }
+  __sas.clear();
 }
 
 /** Fill information of arbitrary point type.
@@ -106,6 +123,10 @@ RosPointCloudAdapter::get_info(std::string &id,
                                std::string &frame_id, bool &is_dense,
                                V_PointFieldInfo &pfi)
 {
+  if (__sas.find(id) == __sas.end()) {
+    __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
+  }
+
   if (__pcl_manager->exists_pointcloud<pcl::PointXYZ>(id.c_str())) {
     const fawkes::RefPtr<const pcl::PointCloud<pcl::PointXYZ> > p =
       __pcl_manager->get_pointcloud<pcl::PointXYZ>(id.c_str());
@@ -136,12 +157,28 @@ RosPointCloudAdapter::get_data(const std::string &id,
                                unsigned int &width, unsigned int &height, fawkes::Time &time,
                                void **data_ptr, size_t &point_size, size_t &num_points)
 {
-  const PointCloudManager::StorageAdapter *sa =
-    __pcl_manager->get_storage_adapter(id.c_str());
+  if (__sas.find(id) == __sas.end()) {
+    __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
+  }
+
+  const PointCloudManager::StorageAdapter *sa = __sas[id]->a;
   width  = sa->width();
   height = sa->height();
   *data_ptr = sa->data_ptr();
   point_size = sa->point_size();
   num_points = sa->num_points();
   sa->get_time(time);
+}
+
+
+/** Close an adapter.
+ * @param id ID of point cloud to close
+ */
+void
+RosPointCloudAdapter::close(const std::string &id)
+{
+  if (__sas.find(id) != __sas.end()) {
+    delete __sas[id];
+    __sas.erase(id);
+  }
 }
