@@ -63,6 +63,12 @@ void bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer,
 					unsigned char *yuv,
 					unsigned int width, unsigned int height);
 
+void bayerGRBG_to_rgb_nearest_neighbour(const unsigned char *bayer, unsigned char *rgb,
+                                        unsigned int width, unsigned int height);
+
+void bayerGRBG_to_rgb_bilinear(const unsigned char *bayer, unsigned char *rgb,
+                               unsigned int width, unsigned int height);
+
 } // end namespace firevision
 
 #endif
