@@ -20,27 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "openni_plugin.h"
 #include "context_thread.h"
+#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** @class OpenNiPlugin "openni_plugin.h"
- * Plugin to access OpenNI from Fawkes.
+/** Plugin to access OpenNI from Fawkes.
  * This plugin integrates OpenNI and provides access to the OpenNI context
  * to other plugins.
  * @author Tim Niemueller
  */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-OpenNiPlugin::OpenNiPlugin(Configuration *config)
-  : Plugin(config)
+class OpenNiPlugin : public fawkes::Plugin
 {
-  thread_list.push_back(new OpenNiContextThread());
-}
-
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  OpenNiPlugin(Configuration *config) : Plugin(config)
+  {
+    thread_list.push_back(new OpenNiContextThread());
+  }
+};
 
 PLUGIN_DESCRIPTION("OpenNI integration base plugin")
 EXPORT_PLUGIN(OpenNiPlugin)

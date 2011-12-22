@@ -20,28 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "handtracker_plugin.h"
 #include "handtracker_thread.h"
+#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** @class OpenNiHandTrackerPlugin "handtracker_plugin.h"
- * Plugin to track hands using OpenNI.
+/** Plugin to track hands using OpenNI.
  * This plugin uses OpenNI to track hands and publishes the information
  * to the blackboard.
  * @author Tim Niemueller
  */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-OpenNiHandTrackerPlugin::OpenNiHandTrackerPlugin(Configuration *config)
-  : Plugin(config)
+class OpenNiHandTrackerPlugin : public fawkes::Plugin
 {
-  thread_list.push_back(new OpenNiHandTrackerThread());
-}
-
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  OpenNiHandTrackerPlugin(Configuration *config) : Plugin(config)
+  {
+    thread_list.push_back(new OpenNiHandTrackerThread());
+  }
+};
 
 PLUGIN_DESCRIPTION("Hand tracker using OpenNI")
 EXPORT_PLUGIN(OpenNiHandTrackerPlugin)
-
