@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  image_thread.h - OpenNI image provider thread
+ *  depth_thread.h - OpenNI depth provider thread
  *
- *  Created: Thu Mar 17 13:58:25 2011
+ *  Created: Thu Dec 22 11:35:31 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_IMAGE_THREAD_H_
-#define __PLUGINS_OPENNI_IMAGE_THREAD_H_
+#ifndef __PLUGINS_OPENNI_DEPTH_THREAD_H_
+#define __PLUGINS_OPENNI_DEPTH_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
@@ -37,7 +37,7 @@ namespace firevision {
   class SharedMemoryImageBuffer;
 }
 
-class OpenNiImageThread
+class OpenNiDepthThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -46,8 +46,8 @@ class OpenNiImageThread
   public fawkes::OpenNiAspect
 {
  public:
-  OpenNiImageThread();
-  virtual ~OpenNiImageThread();
+  OpenNiDepthThread();
+  virtual ~OpenNiDepthThread();
 
   virtual void init();
   virtual void loop();
@@ -57,23 +57,14 @@ class OpenNiImageThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  xn::ImageGenerator                  *__image_gen;
-  xn::ImageMetaData                   *__image_md;
+  xn::DepthGenerator                  *__depth_gen;
+  xn::DepthMetaData                   *__depth_md;
 
-  firevision::SharedMemoryImageBuffer *__image_buf_yuv;
-  firevision::SharedMemoryImageBuffer *__image_buf_rgb;
+  firevision::SharedMemoryImageBuffer *__depth_buf;
 
-  typedef enum {
-    DEBAYER_BILINEAR,
-    DEBAYER_NEAREST_NEIGHBOR,
-    CONVERT_YUV
-  } CopyMode;
-  CopyMode                             __cfg_copy_mode;
-
-  unsigned short int                   __usb_vendor;
-  unsigned short int                   __usb_product;
-  unsigned int                         __image_width;
-  unsigned int                         __image_height;
+  size_t                               __depth_bufsize;
+  unsigned int                         __depth_width;
+  unsigned int                         __depth_height;
 };
 
 #endif

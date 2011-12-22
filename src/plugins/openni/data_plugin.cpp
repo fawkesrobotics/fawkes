@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  pointcloud_plugin.cpp - Plugin to provide point clouds using OpenNI
+ *  data_plugin.cpp - OpenNI raw data provider for Fawkes
  *
- *  Created: Fri Mar 25 23:45:39 2011
+ *  Created: Thu Dec 22 11:31:32 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,28 +20,32 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "pointcloud_plugin.h"
+#include "image_thread.h"
+#include "depth_thread.h"
 #include "pointcloud_thread.h"
+#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** @class OpenNiPointCloudPlugin "pointcloud_plugin.h"
- * Plugin to provide point clouds acquired using OpenNI.
- * This plugin uses OpenNI to acquire depth images from a camera and calculate
- * point clouds and provide them them via a SharedMemoryImageBuffer.
+/** Plugin provide raw OpenNI data to Fawkes plugins.
+ * This plugin publishes the image, depth, and point cloud data from
+ * OpenNI to other Fawkes plugins.
  * @author Tim Niemueller
  */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-OpenNiPointCloudPlugin::OpenNiPointCloudPlugin(Configuration *config)
-  : Plugin(config)
+class OpenNiDataPlugin : public fawkes::Plugin
 {
-  thread_list.push_back(new OpenNiPointCloudThread());
-}
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  OpenNiDataPlugin(Configuration *config) : Plugin(config)
+  {
+    OpenNiImageThread *img_thread = new OpenNiImageThread();
+    thread_list.push_back(img_thread);
+    thread_list.push_back(new OpenNiDepthThread());
+    thread_list.push_back(new OpenNiPointCloudThread(img_thread));
+  }
+};
 
-
-PLUGIN_DESCRIPTION("Calculate point clouds using OpenNI")
-EXPORT_PLUGIN(OpenNiPointCloudPlugin)
-
+PLUGIN_DESCRIPTION("Image, depth, and point cloud provider")
+EXPORT_PLUGIN(OpenNiDataPlugin)
