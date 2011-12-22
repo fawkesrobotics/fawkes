@@ -91,7 +91,7 @@ class PointCloudManager
     template <typename PointT>
     PointCloudStorageAdapter<PointT> * as_pointtype();
 
-    virtual StorageAdapter * clone() = 0;
+    virtual StorageAdapter * clone() const = 0;
     virtual size_t  point_size() const = 0;
     virtual unsigned int  width() const = 0;
     virtual unsigned int  height() const = 0;
@@ -119,7 +119,7 @@ class PointCloudManager
     /** The point cloud. */
     const RefPtr<pcl::PointCloud<PointT> > cloud;
 
-    virtual StorageAdapter * clone();
+    virtual StorageAdapter * clone() const;
 
     virtual size_t  point_size() const { return sizeof(PointT); }
     virtual unsigned int  width() const { return cloud->width; }
@@ -207,7 +207,7 @@ PointCloudManager::exists_pointcloud(const char *id)
 
 template <typename PointT>
 PointCloudManager::StorageAdapter *
-PointCloudManager::PointCloudStorageAdapter<PointT>::clone()
+PointCloudManager::PointCloudStorageAdapter<PointT>::clone() const
 {
   return new PointCloudStorageAdapter<PointT>(this);
 }
