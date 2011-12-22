@@ -26,6 +26,7 @@
 #define __FIREVISION_UTILS_TYPE_H_
 
 #include <utils/math/types.h>
+#include <stdint.h>
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -101,9 +102,23 @@ typedef struct {
   float y;	/**< Y value */
   float z;	/**< Z value */
 } pcl_point_t;
+
+/** Structure defining a point in a CARTESIAN_3D_FLOAT_RGB buffer */
+typedef struct {
+  float x;	/**< X value */
+  float y;	/**< Y value */
+  float z;	/**< Z value */
+  union {
+    struct {
+      uint8_t b;	/**< B color component value */
+      uint8_t g;	/**< G color component value */
+      uint8_t r;	/**< R color component value */
+      uint8_t _unused;	/**< unused */
+    };
+    float rgb;		/**< Color value as float */
+  };
+} pcl_point_xyzrgb_t;
 #pragma pack(pop)
-
-
 
 } // end namespace firevision
 

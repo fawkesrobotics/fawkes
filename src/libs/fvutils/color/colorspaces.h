@@ -32,7 +32,11 @@ namespace firevision {
 }
 #endif
 
-/** Color spaces. */
+/** Color spaces.
+ * Color spaces have their name for historical reasons, but the proper
+ * name would be buffer format. A colorspace defines a particular layout
+ * of a memory buffer containing an image (or point cloud).
+ */
 typedef enum {
   CS_UNKNOWN            =  0,	/**< Unknown color space */
   RGB                   =  1,	/**< RGB, three bytes per pixel, one byte per color, ordered
@@ -64,7 +68,11 @@ typedef enum {
                                  * (x,y,z) tuples, values as float in meters */
   CARTESIAN_3D_DOUBLE   = 24,	/**< 3D coordinates in a packed format. Row major
                                  * (x,y,z) tuples, values as double in meters */
-  COLORSPACE_N          = 25	/**< number of colorspaces */
+  CARTESIAN_3D_FLOAT_RGB = 25,	/**< 3D coordinates in a packed format. Row major
+                                 * (x,y,z, C) tuples, values as float in meters. C is a float
+                                 * representing the color as RGB data packed as (r,g,b,I) with
+                                 * r, g, b being one unsigned byte each and I is ignored. */
+  COLORSPACE_N          = 26	/**< number of colorspaces */
 } colorspace_t;
 
 
