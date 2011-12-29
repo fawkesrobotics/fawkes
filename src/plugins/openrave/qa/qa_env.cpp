@@ -25,8 +25,8 @@
 ///@cond QA
 
 //#include <openrave-core.h>
-#include <openrave/environment.h>
-#include <utils/logging/console.h>
+#include <plugins/openrave/environment.h>
+#include <logging/console.h>
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -35,9 +35,9 @@ using namespace fawkes;
 using namespace std;
 
 void
-printVector(vector<float> v)
+printVector(std::vector<float> &v)
 {
-  printf("## size:%u \n", v.size());
+  printf("## size:%lu \n", v.size());
   for(unsigned int i=0; i<v.size(); i++)
   {
     printf("## %u:)%f \n", i, v[i]);
@@ -53,19 +53,18 @@ main(int argc, char **argv)
 
   //OpenRAVE::RaveInitialize(true); //optional..should be done automatically if not explicitly implemented
 
-  OpenRAVEEnvironment* env;
-  env = new OpenRAVEEnvironment(cl);
+  OpenRaveEnvironment* env;
+  env = new OpenRaveEnvironment(cl);
   env->create();
 
-  env->enableDebug();
+  env->enable_debug();
 
-  //string robotFile = "../src/plugins/openrave/xml/caesar.robot.xml";
-  string robotFile = "../src/libs/openrave/manipulators/katana.robot.xml";
-  env->addRobot(robotFile);
+  string robotFile = SRCDIR"/../manipulators/katana.robot.xml";
+  env->add_robot(robotFile);
 
   env->lock();
 
-  env->startViewer();
+  env->start_viewer();
 
   usleep(1000*10000);
 
