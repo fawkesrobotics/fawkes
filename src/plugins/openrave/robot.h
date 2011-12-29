@@ -74,6 +74,9 @@ class OpenRaveRobot
   virtual std::vector< std::vector<float> >* get_trajectory_device() const;
 
   virtual bool display_planned_movements() const;
+
+  virtual OpenRAVE::ModuleBasePtr get_basemanip() const;
+
  private:
   void init();
   bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset = false);
@@ -86,6 +89,8 @@ class OpenRaveRobot
   OpenRaveManipulator*	                __manip;
   OpenRaveManipulator*	                __manip_goal;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
+
+  OpenRAVE::ModuleBasePtr               __mod_basemanip;
 
   OpenRAVE::PlannerBase::PlannerParametersPtr   __planner_params;
   std::vector< std::vector<OpenRAVE::dReal> >*            __traj;

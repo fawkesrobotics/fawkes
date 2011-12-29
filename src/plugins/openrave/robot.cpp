@@ -128,6 +128,14 @@ OpenRaveRobot::set_ready()
     throw fawkes::Exception("OpenRAVE Robot: Could not create PlannerParameters. Ex:%s", e.what());
   }
 
+  // create and load BaseManipulation module
+  try {
+    __mod_basemanip = RaveCreateModule(__robot->GetEnv(), "basemanipulation");
+    __robot->GetEnv()->AddModule( __mod_basemanip, __robot->GetName());
+  } catch(const openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Robot: Cannot load BaseManipulation Module. Ex:%s", e.what());
+  }
+
   if(__logger)
     {__logger->log_debug("OpenRAVE Robot", "Robot ready.");}
 }
@@ -437,6 +445,14 @@ OpenRaveRobot::get_trajectory_device() const
   return traj;
 }
 
+/** Return BaseManipulation Module-Pointer.
+ * @return ModuleBasePtr
+ */
+OpenRAVE::ModuleBasePtr
+OpenRaveRobot::get_basemanip() const
+{
+  return __mod_basemanip;
+}
 
 
 /* ###### attach / release kinbodys ###### */
