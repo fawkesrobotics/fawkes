@@ -69,6 +69,14 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
 /** Destructor */
 OpenRaveRobot::~OpenRaveRobot()
 {
+  //unload everything related to this robot from environment
+  try {
+    __robot->GetEnv()->Remove(__mod_basemanip);
+    __robot->GetEnv()->Remove(__robot);
+  } catch(const openrave_exception &e) {
+    if(__logger)
+      {__logger->log_warn("OpenRAVE Robot", "Could not unload robot properly from environment. Ex:%s", e.what());}
+  }
 }
 
 /** Inittialize object attributes */
