@@ -24,12 +24,14 @@
 #ifndef __PLUGINS_OPENRAVE_TYPES_H_
 #define __PLUGINS_OPENRAVE_TYPES_H_
 
-#include <utils/math/types.h>
+#include <vector>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+class OpenRaveManipulator;
 
 /** Euler rotations. */
 typedef enum {
@@ -37,6 +39,38 @@ typedef enum {
   EULER_ZYZ,		/**< ZYZ rotation */
   EULER_ZYX		/**< ZYX rotation */
 } euler_rotation_t;
+
+/** Target types. */
+typedef enum {
+  TARGET_NONE,          /**< No valid target */
+  TARGET_JOINTS,        /**< Target: motor joint values */
+  TARGET_TRANSFORM,     /**< Target: absolute endeffector translation and rotation */
+  TARGET_RELATIVE       /**< Target: relative endeffector translation */
+} target_type_t;
+
+
+/** Struct containing angle of current motor, its number in OpenRAVE and
+ * corresponding motor number of real devices. */
+typedef struct {
+  unsigned int	no;         /**< motor number in OpenRAVE */
+  unsigned int  no_device;  /**< motor number of real device */
+  float		angle;	    /**< radian angle */
+} motor_t;
+
+
+/** Struct containing information about the current target. */
+typedef struct {
+  float x;   /**< translation on x-axis */
+  float y;   /**< translation on y-axis */
+  float z;   /**< translation on z-axis */
+  float qx;  /**< x value of quaternion */
+  float qy;  /**< y value of quaternion */
+  float qz;  /**< z value of quaternion */
+  float qw;  /**< w value of quaternion */
+  bool solvable;               /**< target IK solvable */
+  OpenRaveManipulator* manip;  /**< target manipulator configuration */
+  target_type_t        type;   /**< target type */
+} target_t;
 
 } // end namespace firevision
 
