@@ -25,6 +25,7 @@
 
 #include "environment.h"
 #include "robot.h"
+#include "manipulator.h"
 
 #include <logging/logger.h>
 #include <core/exceptions/software.h>
@@ -247,14 +248,28 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   else if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Planner: initialized");}
 
-  // plan path
-  boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
-  traj->Clear();
-  success = __planner->PlanPath(traj);
+  // plan path with basemanipulator
+  ModuleBasePtr basemanip = robot->get_basemanip();
+  std::stringstream cmdin,cmdout;
+  cmdin << "MoveActiveJoints goal ";
+  std::vector<dReal> v;
+  robot->get_target().manip->get_angles(v);
+  for(size_t i = 0; i < v.size(); ++i) {
+    cmdin << v[i] << " ";
+  }
+  cmdin << " outputtraj";
+  success = basemanip->SendCommand(cmdout,cmdin);
+
   if(!success)
     {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
   else if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+
+  // read returned trajectory
+  boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
+  if( !traj->Read(cmdout, robot->get_robot_ptr()) ) {
+    {throw fawkes::Exception("OpenRAVE Environment: Planner: Cannot read trajectory data.");}
+  }
 
   // re-timing the trajectory with cubic interpolation
   traj->CalcTrajTiming(robot->get_robot_ptr(),TrajectoryBase::CUBIC,true,true);
@@ -289,8 +304,12 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
      } // robot state is restored
 
     // display motion in viewer
-    if( robot->display_planned_movements())
-      {robot->get_robot_ptr()->SetActiveMotion(traj);}
+    if( robot->display_planned_movements()) {
+      if (robot->get_robot_ptr()->GetActiveDOF() == traj->GetDOF())
+        robot->get_robot_ptr()->SetActiveMotion(traj);
+      else
+        robot->get_robot_ptr()->SetMotion(traj);
+    }
   }
 
 }
