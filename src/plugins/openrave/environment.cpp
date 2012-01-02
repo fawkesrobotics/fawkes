@@ -241,7 +241,8 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 {
   bool success;
 
-  // init planner
+  // init planner. This is automatically done by BaseManipulation, but putting it here
+  // helps to identify problem source if any occurs.
   success = __planner->InitPlan(robot->get_robot_ptr(),robot->get_planner_params());
   if(!success)
     {throw fawkes::Exception("OpenRAVE Environment: Planner: init failed");}
@@ -250,20 +251,65 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 
   // plan path with basemanipulator
   ModuleBasePtr basemanip = robot->get_basemanip();
+  target_t target = robot->get_target();
   std::stringstream cmdin,cmdout;
-  cmdin << "MoveActiveJoints goal ";
-  std::vector<dReal> v;
-  robot->get_target().manip->get_angles(v);
-  for(size_t i = 0; i < v.size(); ++i) {
-    cmdin << v[i] << " ";
-  }
-  cmdin << " outputtraj";
-  success = basemanip->SendCommand(cmdout,cmdin);
 
-  if(!success)
-    {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
-  else if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+
+  switch(target.type) {
+    case (TARGET_JOINTS) :
+      cmdin << "MoveActiveJoints goal";
+      {
+        std::vector<dReal> v;
+        target.manip->get_angles(v);
+        for(size_t i = 0; i < v.size(); ++i) {
+          cmdin << " " << v[i];
+        }
+      }
+      break;
+
+    case (TARGET_TRANSFORM) :
+      cmdin << "MoveToHandPosition pose";
+      cmdin << " " << target.qw << " " << target.qx << " " << target.qy << " " << target.qz;
+      cmdin << " " << target.x  << " " << target.y  << " " << target.z;
+      break;
+
+    case (TARGET_RELATIVE) :
+      // for now move to all relative targets in a straigt line
+      cmdin << "MoveHandStraight direction";
+      cmdin << " " << target.x << " " << target.y << " " << target.z;
+      {
+        dReal stepsize = 0.005;
+        dReal length = sqrt(target.x*target.x + target.y*target.y + target.z*target.z);
+        int minsteps = (int)(length/stepsize);
+        if( minsteps > 4 )
+          minsteps -= 4;
+
+        cmdin << " stepsize " << stepsize;
+        cmdin << " minsteps " << minsteps;
+        cmdin << " maxsteps " << (int)(length/stepsize);
+      }
+      break;
+
+    default :
+      throw fawkes::Exception("OpenRAVE Environment: Planner: Invalid target type");
+  }
+
+  cmdin << " outputtraj";
+  //if(__logger)
+  //  __logger->log_debug("OpenRAVE Environment", "Planner: basemanip cmdin:%s", cmdin.str().c_str());
+
+  {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
+    try {
+      success = basemanip->SendCommand(cmdout,cmdin);
+    } catch(openrave_exception &e) {
+      throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
+    }
+    if(!success)
+      {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
+    else if(__logger)
+      {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+  } //unlock environment
 
   // read returned trajectory
   boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));

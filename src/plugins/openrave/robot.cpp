@@ -231,6 +231,28 @@ OpenRaveRobot::display_planned_movements() const
   return __display_planned_movements;
 }
 
+/** Set target, given relative transition.
+ * This is the prefered method to set a target for straight manipulator movement.
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
+{
+  __target.type = TARGET_RELATIVE;
+  __target.x = trans_x;
+  __target.y = trans_y;
+  __target.z = trans_z;
+
+  // Not sure how to check IK solvability yet. Would be nice to have this
+  // checked before planning a path.
+  __target.solvable = true;
+
+  return __target.solvable;
+}
+
 /** Set target, given transition, and rotation as quaternion.
  * @param trans_x x-transition
  * @param trans_y y-transition
@@ -573,7 +595,7 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
     target.trans[2] += __trans_offset_z;
   }
 
-  __target.type = TARGET_JOINTS;
+  __target.type = TARGET_TRANSFORM;
   __target.x  = target.trans[0];
   __target.y  = target.trans[1];
   __target.z  = target.trans[2];
