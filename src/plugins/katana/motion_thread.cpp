@@ -21,8 +21,7 @@
  */
 
 #include "motion_thread.h"
-
-#include <kniBase.h>
+#include "controller.h"
 
 /** @class KatanaMotionThread "motion_thread.h"
  * Katana motion thread base class.
@@ -40,11 +39,11 @@
 
 /** Constructor.
  * @param thread_name name of the thread
- * @param katana katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  */
 KatanaMotionThread::KatanaMotionThread(const char * thread_name,
-				       fawkes::RefPtr<CLMBase> katana,
+				       fawkes::RefPtr<fawkes::KatanaController> katana,
 				       fawkes::Logger *logger)
   : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {

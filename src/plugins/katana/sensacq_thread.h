@@ -27,14 +27,14 @@
 #include <logging/logger.h>
 #include <core/utils/refptr.h>
 
-// Classes from libkni (KNI)
-class CLMBase;
-class CSctBase;
+namespace fawkes {
+  class KatanaController;
+}
 
 class KatanaSensorAcquisitionThread : public fawkes::Thread
 {
  public:
-  KatanaSensorAcquisitionThread(fawkes::RefPtr<CLMBase> katana,
+  KatanaSensorAcquisitionThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 				fawkes::Logger *logger);
 
   void set_enabled(bool enabled);
@@ -44,9 +44,8 @@ class KatanaSensorAcquisitionThread : public fawkes::Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RefPtr<CLMBase>  __katana;
-  CSctBase                *__sensor_ctrl;
-  bool                     __enabled;
+  fawkes::RefPtr<fawkes::KatanaController>  __katana;
+  bool                                      __enabled;
 
   fawkes::Logger          *__logger;
 };

@@ -21,8 +21,7 @@
  */
 
 #include "calib_thread.h"
-
-#include <kniBase.h>
+#include "controller.h"
 
 /** @class KatanaCalibrationThread "calib_thread.h"
  * Katana calibration thread.
@@ -32,10 +31,10 @@
  */
 
 /** Constructor.
- * @param katana katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  */
-KatanaCalibrationThread::KatanaCalibrationThread(fawkes::RefPtr<CLMBase> katana,
+KatanaCalibrationThread::KatanaCalibrationThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 						 fawkes::Logger *logger)
   : KatanaMotionThread("KatanaCalibrationThread", katana, logger)
 {
@@ -47,7 +46,7 @@ KatanaCalibrationThread::once()
   try {
     _katana->calibrate();
     _logger->log_debug(name(), "Calibration successful");
-  } catch (/*KNI*/::Exception &e) {
+  } catch (fawkes::Exception &e) {
     _logger->log_warn(name(), "Calibration failed (ignoring error): %s", e.what());
     _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
   }
