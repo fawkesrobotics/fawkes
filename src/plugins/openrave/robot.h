@@ -70,6 +70,7 @@ class OpenRaveRobot
 
   virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
   virtual target_t get_target() const;
+  virtual OpenRaveManipulator* get_manipulator() const;
   virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
   virtual std::vector< std::vector<OpenRAVE::dReal> >* get_trajectory() const;
   virtual std::vector< std::vector<float> >* get_trajectory_device() const;

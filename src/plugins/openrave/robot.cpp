@@ -435,6 +435,15 @@ OpenRaveRobot::get_target() const
   return __target;
 }
 
+/** Get manipulator.
+ * @return pointer to currentl used OpenRaveManipulator
+ */
+OpenRaveManipulator*
+OpenRaveRobot::get_manipulator() const
+{
+  return __manip;
+}
+
 /** Updates planner parameters and return pointer to it
  * @return PlannerParametersPtr or robot's planner params
  */
