@@ -22,6 +22,7 @@
 
 #include "act_thread.h"
 #include "controller_kni.h"
+#include "controller_openrave.h"
 
 #include <core/threading/mutex_locker.h>
 #include <interfaces/KatanaInterface.h>
@@ -65,7 +66,7 @@ KatanaActThread::init()
   // freed on destruction, therefore no special handling is necessary in init()
   // itself!
 
-  __cfg_controller       = "kni"; //config->get_string("/hardware/katana/controller");
+  __cfg_controller       = config->get_string("/hardware/katana/controller");
   __cfg_device           = config->get_string("/hardware/katana/device");
   __cfg_kni_conffile     = config->get_string("/hardware/katana/kni_conffile");
   __cfg_auto_calibrate   = config->get_bool("/hardware/katana/auto_calibrate");
@@ -113,17 +114,11 @@ KatanaActThread::init()
     }
     kat_ctrl = NULL;
 
+  } else if( __cfg_controller == "openrave") {
+    __katana = new KatanaControllerOpenrave(openrave);
+
   } else {
     throw fawkes::Exception("Invalid controller given: '%s'", __cfg_controller.c_str());
-  }
-
-  // Intialize katana controller
-  try {
-    __katana->init();
-    __katana->set_max_velocity(__cfg_defmax_speed);
-    logger->log_debug(name(), "Katana successfully initialized");
-  } catch(fawkes::Exception &e) {
-    throw; // need try-catch anyway?
   }
 
   // If you have more than one interface: catch exception and close them!
@@ -141,6 +136,16 @@ KatanaActThread::init()
   if(__cfg_OR_enabled)
     {__goto_openrave_thread->init();}
 #endif
+
+  // Intialize katana controller
+  try {
+    __katana->init();
+    __katana->set_max_velocity(__cfg_defmax_speed);
+    logger->log_debug(name(), "Katana successfully initialized");
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "init error. skip: %s", e.what());
+    //throw; // need try-catch anyway?
+  }
 
   __sensacq_thread->start();
 
@@ -292,19 +297,23 @@ void
 KatanaActThread::update_motors(bool refresh)
 {
   try {
-    std::vector<int> encoders;
-    __katana->get_encoders(encoders, refresh);
-    for(unsigned int i=0; i<encoders.size(); i++) {
-      __katana_if->set_encoders(i, encoders.at(i));
+    if( __katana->joint_encoders()) {
+      std::vector<int> encoders;
+      __katana->get_encoders(encoders, refresh);
+      for(unsigned int i=0; i<encoders.size(); i++) {
+        __katana_if->set_encoders(i, encoders.at(i));
+      }
     }
 
-    std::vector<float> angles;
-    __katana->get_angles(angles, false);
-    for(unsigned int i=0; i<angles.size(); i++) {
-      __katana_if->set_angles(i, angles.at(i));
+    if( __katana->joint_angles()) {
+      std::vector<float> angles;
+      __katana->get_angles(angles, false);
+      for(unsigned int i=0; i<angles.size(); i++) {
+        __katana_if->set_angles(i, angles.at(i));
+      }
     }
   } catch (fawkes::Exception &e) {
-    logger->log_warn(name(), "Updating motor values failed: %s", e.what());
+    logger->log_warn(name(), "Updating motor values failed. Ex:%s", e.what());
   }
 }
 
