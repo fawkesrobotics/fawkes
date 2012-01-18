@@ -110,7 +110,7 @@ KatanaActThread::init()
       kat_ctrl->setup(__cfg_device, __cfg_kni_conffile,
                       __cfg_read_timeout, __cfg_write_timeout);
     } catch(fawkes::Exception &e) {
-      logger->log_warn(name(), "some error: %s", e.what());
+      logger->log_warn(name(), "Setup KatanaControllerKni failed. Ex: %s", e.what());
     }
     kat_ctrl = NULL;
 
@@ -143,8 +143,9 @@ KatanaActThread::init()
     __katana->set_max_velocity(__cfg_defmax_speed);
     logger->log_debug(name(), "Katana successfully initialized");
   } catch(fawkes::Exception &e) {
-    logger->log_warn(name(), "init error. skip: %s", e.what());
-    //throw; // need try-catch anyway?
+    logger->log_warn(name(), "Initializing controller failed. Ex: %s", e.what());
+    finalize();
+    throw; // need try-catch anyway?
   }
 
   __sensacq_thread->start();
