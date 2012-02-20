@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_OPENRAVE_ENVIRONMENT_H_
 #define __PLUGINS_OPENRAVE_ENVIRONMENT_H_
 
-#include <rave/rave.h>
+#include <openrave/openrave.h>
 #include <string>
 
 namespace OpenRAVE {
