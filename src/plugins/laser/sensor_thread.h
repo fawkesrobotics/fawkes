@@ -37,8 +37,6 @@ namespace fawkes {
 }
 
 class LaserAcquisitionThread;
-class LaserDataFilterCascade;
-class LaserReverseAngleDataFilter;
 
 class LaserSensorThread
 : public fawkes::Thread,
@@ -63,16 +61,6 @@ class LaserSensorThread
   fawkes::Laser720Interface *__laser720_if;
 
   LaserAcquisitionThread *__aqt;
-
-  LaserDataFilterCascade *__filters720;
-  LaserDataFilterCascade *__filters360;
-
-
-  bool                         __clockwise_angle;
-  fawkes::Laser360Interface   *__reverse360_if;
-  fawkes::Laser720Interface   *__reverse720_if;
-  LaserReverseAngleDataFilter *__reverse360;
-  LaserReverseAngleDataFilter *__reverse720;
 
   unsigned int            __num_values;
 

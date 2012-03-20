@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NaoJointStiffnessInterface" author="Tim Niemueller" year="2008-2011">
+  <data>
+    <comment>
+      This interface provides access to Nao joint stiffness.
+    </comment>
+    <field type="float" name="head_yaw">Head yaw</field>
+    <field type="float" name="head_pitch">Head pitch</field>
+    <field type="float" name="l_shoulder_pitch">Left shoulder pitch</field>
+    <field type="float" name="l_shoulder_roll">Left shoulder roll</field>
+    <field type="float" name="l_elbow_yaw">Left elbow yaw</field>
+    <field type="float" name="l_elbow_roll">Left elbow roll</field>
+    <field type="float" name="l_wrist_yaw">Left wrist yaw</field>
+    <field type="float" name="l_hand">Left hand</field>
+    <field type="float" name="l_hip_yaw_pitch">Left hip yaw pitch</field>
+    <field type="float" name="l_hip_roll">Left hip roll</field>
+    <field type="float" name="l_hip_pitch">Left hip pitch</field>
+    <field type="float" name="l_knee_pitch">Left knee pitch</field>
+    <field type="float" name="l_ankle_pitch">Left ankle pitch</field>
+    <field type="float" name="l_ankle_roll">Left ankle roll</field>
+    <field type="float" name="r_shoulder_pitch">Right shoulder pitch</field>
+    <field type="float" name="r_shoulder_roll">Right shoulder roll</field>
+    <field type="float" name="r_elbow_yaw">Right elbow yaw</field>
+    <field type="float" name="r_elbow_roll">Right elbow roll</field>
+    <field type="float" name="r_wrist_yaw">Right wrist yaw</field>
+    <field type="float" name="r_hand">Right hand</field>
+    <field type="float" name="r_hip_yaw_pitch">Right hip yaw pitch</field>
+    <field type="float" name="r_hip_roll">Right hip roll</field>
+    <field type="float" name="r_hip_pitch">Right hip pitch</field>
+    <field type="float" name="r_knee_pitch">Right knee pitch</field>
+    <field type="float" name="r_ankle_pitch">Right ankle pitch</field>
+    <field type="float" name="r_ankle_roll">Right ankle roll</field>
+    <field type="float" name="minimum">
+      Minimum stiffness of all joints. On the RoboCup version of the Nao this
+      ignores the hand and wrist values.
+    </field>
+  </data>
+  <message name="SetStiffness">
+    <comment>Set selected servo stiffnesses to a specific value.</comment>
+    <field type="uint32" name="servo">
+      A concatenated list of SERVO_* constants from the
+      NaoJointPositionInterface to define the servos that should
+      execute the movement. The list shall consist of binary or'ed
+      SERVO_* constants.
+    </field>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <field type="float" name="time_sec">Time when to reach the stiffness.</field>
+  </message>
+  <message name="SetBodyStiffness">
+    <comment>Set stiffness of all joints to specific value.</comment>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <field type="float" name="time_sec">Time when to reach the stiffness.</field>
+  </message>
+  <message name="SetStiffnesses">
+    <comment>Orders a setting of the servos to the specified angles.</comment>
+    <ref>head_yaw</ref>
+    <ref>head_pitch</ref>
+    <ref>l_shoulder_pitch</ref>
+    <ref>l_shoulder_roll</ref>
+    <ref>l_elbow_yaw</ref>
+    <ref>l_elbow_roll</ref>
+    <ref>l_wrist_yaw</ref>
+    <ref>l_hand</ref>
+    <ref>l_hip_yaw_pitch</ref>
+    <ref>l_hip_roll</ref>
+    <ref>l_hip_pitch</ref>
+    <ref>l_knee_pitch</ref>
+    <ref>l_ankle_pitch</ref>
+    <ref>l_ankle_roll</ref>
+    <ref>r_shoulder_pitch</ref>
+    <ref>r_shoulder_roll</ref>
+    <ref>r_elbow_yaw</ref>
+    <ref>r_wrist_yaw</ref>
+    <ref>r_hand</ref>
+    <ref>r_hip_yaw_pitch</ref>
+    <ref>r_hip_roll</ref>
+    <ref>r_hip_pitch</ref>
+    <ref>r_knee_pitch</ref>
+    <ref>r_ankle_pitch</ref>
+    <ref>r_ankle_roll</ref>
+    <ref>r_elbow_roll</ref>
+    <field type="float" name="time_sec">Time when to reach the stiffness.</field>
+  </message>
+</interface>

@@ -53,6 +53,8 @@ class ColorModelLookupTable : public ColorModel
 
   void load(const char *filename);
 
+  void set_colormap(const YuvColormap &yuvcm);
+
   void reset();
   static std::string compose_filename(const std::string format);
 

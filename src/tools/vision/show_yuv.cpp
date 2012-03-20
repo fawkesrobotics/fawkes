@@ -169,4 +169,6 @@ main( int argc, char **argv )
   free(yuv_buffer);
   delete display;
   delete yuvspace;
+
+  return 0;
 }

@@ -26,7 +26,7 @@ SUBDIRS = consoletool
 CFLAGS  += $(CFLAGS_LUA)
 
 LIBS_skiller = fawkescore fawkesutils fawkesaspects fawkesnetcomm fawkeslua \
-	       fawkesblackboard fawkesinterface \
+	       fawkesblackboard fawkesinterface fawkeslogging \
 	       SkillerInterface SkillerDebugInterface
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 

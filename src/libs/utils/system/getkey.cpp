@@ -33,9 +33,9 @@ set_nonblock_flag()
 {
   int oldflags;
 
-  oldflags  = fcntl( STDIN_FILENO, F_GETFL, 0 );
+  oldflags  = fcntl(STDIN_FILENO, F_GETFL, 0);
   oldflags |= O_NONBLOCK;
-  fcntl( STDIN_FILENO, F_SETFL, oldflags );
+  fcntl(STDIN_FILENO, F_SETFL, oldflags);
 }
 
 
@@ -45,39 +45,50 @@ clear_nonblock_flag()
 {
   int oldflags;
   
-  oldflags  = fcntl( STDIN_FILENO, F_GETFL, 0 );
+  oldflags  = fcntl(STDIN_FILENO, F_GETFL, 0);
   oldflags &= ~O_NONBLOCK; 
-  fcntl( STDIN_FILENO, F_SETFL, oldflags );
+  fcntl(STDIN_FILENO, F_SETFL, oldflags);
 }
 
 
 /** Get value of a single key-press non-blocking.
  * This method checks if a new keypress has happened and returns the value in
  * this case. Otherwise it returns 0. The method does not block.
- * @return key pressed or 0
+ * @param timeout_decisecs If less than 0 wait forever, if 0 non-blocking
+ * (returns 0 if no key pressed immediately, if greater than 0 it is the
+ * timeout in deciseconds.
+ * @return key pressed or 0 (no key read)
  */
 char
-getkey()
+getkey(int timeout_decisecs)
 {
+  bool blocking = (timeout_decisecs != 0);
   char buf[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  ssize_t n = 0;
   struct termios tattr,              // new terminal attributes
-    saved_attributes;              // restore the original settings of the terminal
+    saved_attributes;                // restore the original settings
   
-  set_nonblock_flag();
-  tcgetattr( STDIN_FILENO, &saved_attributes );   // save the original attributes
+  if (! blocking) set_nonblock_flag();
+  tcgetattr(STDIN_FILENO, &saved_attributes);   // save the original attributes
   
-  tcgetattr( STDIN_FILENO, &tattr );		    // set the new attributes for the terminal:
-  tattr.c_lflag   &= ~(ICANON);		    // Clear ICANON
-  tattr.c_lflag   &= ~(ECHO);		            // and ECHO
-  tattr.c_cc[VMIN] = 0;                           // noncanonical, direction transmission
-  tattr.c_cc[VTIME]= 0;                           // of input characters (MIN=0,TIME=0)
-  tcsetattr( STDIN_FILENO, TCSANOW, &tattr );
+  tcgetattr(STDIN_FILENO, &tattr);        // set the new attributes
+  tattr.c_lflag   &= ~(ICANON);		  // Clear ICANON
+  tattr.c_lflag   &= ~(ECHO);		  // and ECHO
+  if (timeout_decisecs < 0) {
+    tattr.c_cc[VMIN] = 1;                 // wait for one byte
+    tattr.c_cc[VTIME]= 0;                 // no timeout
+  } else if (timeout_decisecs > 0) {
+    tattr.c_cc[VMIN] = 0;                 // do not wait for incoming bytes
+    tattr.c_cc[VTIME]= timeout_decisecs;  // timeout
+  } else {
+    tattr.c_cc[VMIN] = 0;                 // do not wait for incoming bytes
+    tattr.c_cc[VTIME]= 0;                 // no timeout
+  }
+  tcsetattr(STDIN_FILENO, TCSANOW, &tattr);
   
-  n = read( STDIN_FILENO, buf, 1 );
+  read(STDIN_FILENO, buf, 1);
   
-  tcsetattr( STDIN_FILENO, TCSANOW, &saved_attributes );
-  clear_nonblock_flag();
+  tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
+  if (! blocking) clear_nonblock_flag();
   
   return buf[0];
 }

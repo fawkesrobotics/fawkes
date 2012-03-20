@@ -20,7 +20,7 @@ endif
 ifndef __buildsys_root_docs_mk_
 __buildsys_root_docs_mk_ := 1
 
-.PHONY: apidoc quickdoc tracdoc uncolored-quickdoc
+.PHONY: apidoc quickdoc tracdoc
 apidoc: api.doxygen
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
@@ -28,6 +28,7 @@ tracdoc: api-trac.doxygen
 %.doxygen:
 	$(SILENT) echo "--> Building documentation ($@). This may take a while..."
 	$(SILENT) rm -rf doc/api
+	$(SILENT) mkdir -p doc/api
 	$(SILENT) $(DOXYGEN) $(DOCDIR)/doxygen/$*$(if $(SUBMODULE_EXTERN),-submodule).doxygen >/dev/null 2>&1
 	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
 		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \

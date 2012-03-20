@@ -23,7 +23,7 @@
 
 #include "msl2010.h"
 #include <netcomm/socket/datagram_multicast.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <string>
 #include <sstream>

@@ -1,10 +1,9 @@
 
-
 /***************************************************************************
  *  shm.h - shared memory segment
  *
- *  Generated: Thu Jan 12 13:12:24 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 12 13:12:24 2006
+ *  Copyright  2005-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -27,6 +26,7 @@
 
 // for size_t
 #include <sys/types.h>
+#include <utils/ipc/shm_registry.h>
 
 namespace fawkes {
 
@@ -57,20 +57,24 @@ class SharedMemory
   SharedMemory(const char *magic_token,
 	       SharedMemoryHeader *header,
 	       bool is_read_only, bool create,
-	       bool destroy_on_delete);
+	       bool destroy_on_delete,
+               const char *registry_name = 0);
 
   SharedMemory(const SharedMemory &s);
 
   virtual ~SharedMemory();
 
-  bool                is_read_only();
-  bool                is_destroyed();
-  bool                is_swapable();
-  bool                is_valid();
-  bool                is_creator();
-  bool                is_protected();
-  void *              memptr();
-  size_t              data_size();
+  bool                is_read_only() const;
+  bool                is_destroyed() const;
+  bool                is_swapable() const;
+  bool                is_valid() const;
+  bool                is_creator() const;
+  bool                is_protected() const;
+  void *              memptr() const;
+  size_t              data_size() const;
+  int                 shmem_id() const;
+  unsigned int        num_attached() const;
+
   void                set(void *memptr);
   void                set_destroy_on_delete(bool destroy);
   void                add_semaphore();
@@ -82,21 +86,26 @@ class SharedMemory
   bool                try_lock_for_write();
   void                unlock();
 
-  void *              ptr(void *addr);
-  void *              addr(void *ptr);
+  void *              ptr(void *addr) const;
+  void *              addr(void *ptr) const;
 
   static void         list(const char *magic_token,
-			   SharedMemoryHeader *header, SharedMemoryLister *lister);
+			   SharedMemoryHeader *header, SharedMemoryLister *lister,
+                           const char *registry_name = 0);
 
   static void         erase(const char *magic_token,
-			    SharedMemoryHeader *header, SharedMemoryLister *lister = 0);
+			    SharedMemoryHeader *header,
+                            SharedMemoryLister *lister = 0,
+                            const char *registry_name = 0);
 
   static void         erase_orphaned(const char *magic_token,
 				     SharedMemoryHeader *header,
-				     SharedMemoryLister *lister = 0);
+				     SharedMemoryLister *lister = 0,
+                                     const char *registry_name = 0);
 
   static bool         exists(const char *magic_token,
-			     SharedMemoryHeader *header);
+			     SharedMemoryHeader *header,
+                             const char *registry_name = 0);
 
   static bool         is_destroyed(int shm_id);
   static bool         is_swapable(int shm_id);
@@ -107,7 +116,8 @@ class SharedMemory
    public:
     SharedMemoryIterator();
     SharedMemoryIterator(const SharedMemoryIterator &shmit);
-    SharedMemoryIterator(const char *magic_token, SharedMemoryHeader *header);
+    SharedMemoryIterator(std::list<SharedMemoryRegistry::SharedMemID> ids,
+			 SharedMemoryHeader *header);
     ~SharedMemoryIterator();
 
     SharedMemoryIterator &      operator++ ();        // prefix
@@ -130,10 +140,11 @@ class SharedMemory
     void attach();
     void reset();
 
+    bool                    __initialized;
     char                   *__magic_token;
-    int                     __max_id;
+    std::list<SharedMemoryRegistry::SharedMemID> __ids;
+    std::list<SharedMemoryRegistry::SharedMemID>::iterator __id_it;
     int                     __cur_shmid;
-    int                     __cur_id;
     SharedMemoryHeader     *__header;
     void                   *__shm_buf;
     void                   *__data_buf;
@@ -142,7 +153,9 @@ class SharedMemory
     size_t                  __segmnattch;
   };
 
-  static SharedMemoryIterator find(const char *magic_token, SharedMemoryHeader *header);
+  static SharedMemoryIterator find(const char *magic_token,
+                                   SharedMemoryHeader *header,
+                                   const char *registry_name = 0);
   static SharedMemoryIterator end();
 
  protected:
@@ -156,7 +169,8 @@ class SharedMemory
   } SharedMemory_header_t;
 
   SharedMemory(const char *magic_token,
-	       bool is_read_only, bool create, bool destroy_on_delete);
+	       bool is_read_only, bool create, bool destroy_on_delete,
+               const char *registry_name = 0);
 
   void attach();
   void free();
@@ -176,6 +190,9 @@ class SharedMemory
 
 
  private:
+  SharedMemoryRegistry *__shm_registry;
+  char *                __registry_name;
+
   void          *__shared_mem;
   int            __shared_mem_id;
   void          *__shared_mem_upper_bound;

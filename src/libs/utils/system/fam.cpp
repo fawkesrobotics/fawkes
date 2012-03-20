@@ -21,7 +21,7 @@
  */
 
 #include <utils/system/fam.h>
-#include <utils/logging/liblogger.h>
+#include <core/exception.h>
 
 #ifdef HAVE_INOTIFY
 #  include <sys/inotify.h>
@@ -181,14 +181,13 @@ FileAlterationMonitor::watch_dir(const char *dirpath)
 	  //LibLogger::log_debug("SkillerExecutionThread", "Skipping file %s", fp.c_str());	  
 	}
       } else {
-	LibLogger::log_debug("FileAlterationMonitor",
-			     "Skipping watch on %s, cannot stat (%s)",
-			     fp.c_str(), strerror(errno));
+	//LibLogger::log_debug("FileAlterationMonitor",
+	//		     "Skipping watch on %s, cannot stat (%s)",
+	//		     fp.c_str(), strerror(errno));
       }
     }
   } else {
-    throw Exception("FileAlterationMonitor",
-		    "Cannot add watch for %s", dirpath);
+    throw Exception(errno, "FileAlterationMonitor: cannot add watch for %s", dirpath);
   }
 
   closedir(d);
@@ -210,8 +209,7 @@ FileAlterationMonitor::watch_file(const char *filepath)
   if ( (iw = inotify_add_watch(__inotify_fd, filepath, mask)) >= 0) {
     __inotify_watches[iw] = filepath;
   } else {
-    throw Exception("FileAlterationMonitor",
-		    "Cannot add watch for file %s", filepath);
+    throw Exception("FileAlterationMonitor: cannot add watch for file %s", filepath);
   }
 #endif
 }
@@ -285,16 +283,16 @@ FileAlterationMonitor::process_events(int timeout)
   int prv = poll(ipfd, 2, timeout);
   if ( prv == -1 ) {
     if ( errno != EINTR ) {
-      LibLogger::log_error("FileAlterationMonitor",
-			   "inotify poll failed: %s (%i)",
-			   strerror(errno), errno);
+      //LibLogger::log_error("FileAlterationMonitor",
+	//		   "inotify poll failed: %s (%i)",
+	//		   strerror(errno), errno);
     } else {
       __interrupted = true;
     }
   } else while ( !__interrupted && (prv > 0) ) {
     // Our fd has an event, we can read
     if ( ipfd[0].revents & POLLERR ) {      
-      LibLogger::log_error("FileAlterationMonitor", "inotify poll error");
+      //LibLogger::log_error("FileAlterationMonitor", "inotify poll error");
     } else if (__interrupted) {
       // interrupted
       return;
@@ -355,8 +353,8 @@ FileAlterationMonitor::process_events(int timeout)
 	      try {
 		watch_dir(fp.c_str());
 	      } catch (Exception &e) {
-		LibLogger::log_warn("FileAlterationMonitor", "Adding watch for %s failed, ignoring.", fp.c_str());
-		LibLogger::log_warn("FileAlterationMonitor", e);
+		//LibLogger::log_warn("FileAlterationMonitor", "Adding watch for %s failed, ignoring.", fp.c_str());
+		//LibLogger::log_warn("FileAlterationMonitor", e);
 	      }
 	    }
 	  }
@@ -364,16 +362,18 @@ FileAlterationMonitor::process_events(int timeout)
 	  i += sizeof(struct inotify_event) + event->len;
 	}
       } else {
-	LibLogger::log_error("FileAlterationMonitor", "inotify failed to read any bytes");
+	//LibLogger::log_error("FileAlterationMonitor", "inotify failed to read any bytes");
       }
     }
 
     prv = poll(ipfd, 2, 0);
   }
 #else
-  LibLogger::log_error("FileAlterationMonitor",
-		       "inotify support not available, but "
-		       "process_events() was called. Ignoring.");
+  //LibLogger::log_error("FileAlterationMonitor",
+//		       "inotify support not available, but "
+//		       "process_events() was called. Ignoring.");
+  throw Exception("FileAlterationMonitor: inotify support not available, "
+		  "but process_events() was called.");
 #endif
 }
 

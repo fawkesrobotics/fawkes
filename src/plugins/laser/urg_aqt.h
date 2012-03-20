@@ -3,7 +3,7 @@
  *  urg_aqt.h - Thread to retrieve laser data from Hokuyo URG
  *
  *  Created: Sat Nov 28 01:29:48 2009
- *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -49,9 +49,13 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   virtual void loop();
 
  private:
+  std::map<std::string, std::string> get_device_info(qrk::UrgCtrl *ctrl);
+
+ private:
   bool __pre_init_done;
   unsigned int __number_of_values;
   qrk::UrgCtrl *__ctrl;
+  int           __fd;
 
   fawkes::TimeWait *__timer;
 
@@ -61,6 +65,7 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   std::map<std::string, std::string> __device_info;
 
   std::string  __cfg_device;
+  std::string  __cfg_serial;
 
   unsigned int __first_ray;
   unsigned int __last_ray;

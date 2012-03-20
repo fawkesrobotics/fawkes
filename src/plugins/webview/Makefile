@@ -20,8 +20,9 @@ include $(BUILDSYSDIR)/download.mk
 include $(LIBSRCDIR)/webview/webview.mk
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
-  LIBS_webview = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm
+  LIBS_webview = crypt fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
+		 fawkeslogging
   OBJS_webview = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview

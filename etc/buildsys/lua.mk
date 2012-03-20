@@ -36,11 +36,44 @@ ifeq ($(HAVE_LUA),1)
   CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_PACKAGE)') -DHAVE_LUA -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
   LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_PACKAGE)')
   ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
-    HAVE_TOLUA = 1
-    TOLUAPP=tolua++
-    TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
+    # Fedora 32 and 64 bit
+    ifeq ($(ARCH),x86_64)
+      ifneq ($(wildcard $(SYSROOT)/usr/lib64/libtolua++-$(LUA_VERSION).$(SOEXT)),)
+        _HAVE_TOLUA_LIB=1
+        TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
+      endif
+    else
+      ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++-$(LUA_VERSION).$(SOEXT)),)
+        _HAVE_TOLUA_LIB=1
+        TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
+      endif
+    endif
+    ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=tolua++
+    endif
+    
+    # Ubuntu
+    ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++$(LUA_VERSION).a),)
+      _HAVE_TOLUA_LIB=1
+       TOLUA_LIBS=tolua++$(LUA_VERSION) stdc++
+    endif
+    # OpenEmbedded/Nao
+    ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++-$(LUA_VERSION).a),)
+      _HAVE_TOLUA_LIB=1
+       TOLUA_LIBS=tolua++-$(LUA_VERSION) stdc++
+    endif
+    ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++$(LUA_VERSION)),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=tolua++$(LUA_VERSION)
+    endif
+    ifeq ($(_HAVE_TOLUA_LIB)$(_HAVE_TOLUA_BIN),11)
+      HAVE_TOLUA = 1
+    endif
   endif
+  # FreeBSD
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/lua$(subst .,,$(LUA_VERSION))/tolua++.h),)
+    # FreeBSD
     HAVE_TOLUA = 1
     TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
     TOLUA_LIBS=tolua++ stdc++
@@ -49,10 +82,10 @@ ifeq ($(HAVE_LUA),1)
 
   ifeq ($(HAVE_TOLUA),1)
 .SECONDEXPANSION:
-%_tolua.cpp: $$(TOLUA_$$(subst /,_,$$*))
+%_tolua.cpp: $$(TOLUA_$$(call nametr,$$*))
 	$(SILENT) echo "$(INDENT_PRINT)--- Generating Lua package C++ file $(@F)"
 	$(SILENT)cat $(addprefix $(SRCDIR)/,$(subst $(SRCDIR)/,,$(filter %.tolua,$^))) > $(patsubst %.cpp,%.pkg,$@)
-	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(subst /,_,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
+	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
 	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
 	awk '/^#if defined/ { f=1 }; f { t = t "\n" $$0 }; !f {print}; f && /^#endif/ {print "extern \"C\" {" t "\n}\n"; f=0}' | \
 	awk '/^\*\/$$/ { print; while ((getline line < "$(BASEDIR)/doc/headers/lichead_c.GPL_WRE") > 0) print line }; ! /^\*\/$$/ { print }' \

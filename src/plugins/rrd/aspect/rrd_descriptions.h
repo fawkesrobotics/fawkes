@@ -3,7 +3,7 @@
  *  rrd_descriptions.h - Fawkes RRD descriptions
  *
  *  Created: Sat Dec 18 02:19:03 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -32,6 +32,8 @@ namespace fawkes {
 }
 #endif
 
+class RRDManager;
+
 class RRDDataSource
 {
  public:
@@ -46,8 +48,8 @@ class RRDDataSource
 
   static const float UNKNOWN;
 
-  RRDDataSource(const char *name, Type type, unsigned int heartbeat,
-		float min, float max);
+  RRDDataSource(const char *name, Type type, unsigned int heartbeat = 30,
+		float min = 0, float max = UNKNOWN);
   RRDDataSource(const char *name, const char *rpn_expression);
   RRDDataSource(const RRDDataSource &other);
   ~RRDDataSource();
@@ -71,12 +73,12 @@ class RRDDataSource
   
 
  private:
-  const char    *__name;
+  char          *__name;
   Type           __type;
   unsigned int   __heartbeat;
   float          __min;
   float          __max;
-  const char    *__rpn_expression;
+  char          *__rpn_expression;
 
   mutable char *  __string;
 };
@@ -123,14 +125,14 @@ class RRDArchive
 class RRDDefinition
 {
  public:
-  RRDDefinition(const char *name, unsigned int step_sec,
-		bool recreate,
-		std::vector<RRDDataSource> &ds);
-
-  RRDDefinition(const char *name, unsigned int step_sec,
-		bool recreate,
+  RRDDefinition(const char *name,
 		std::vector<RRDDataSource> &ds,
-		std::vector<RRDArchive> &rra);
+		unsigned int step_sec = 10, bool recreate = false);
+
+  RRDDefinition(const char *name,
+		std::vector<RRDDataSource> &ds,
+		std::vector<RRDArchive> &rra,
+		unsigned int step_sec = 10, bool recreate = false);
   RRDDefinition(const RRDDefinition &other);
   ~RRDDefinition();
   RRDDefinition & operator=(const RRDDefinition &other);
@@ -157,20 +159,24 @@ class RRDDefinition
   /** Get file name. @return file name */
   const char *                         get_filename() const { return __filename; }
 
+  void set_rrd_manager(RRDManager *rrd_manager);
+
  private:
-  const char                 *__name;
+  char                       *__name;
   unsigned int                __step_sec;
   bool                        __recreate;
   std::vector<RRDDataSource>  __ds;
   std::vector<RRDArchive>     __rra;
   char                       *__filename;
+
+  RRDManager                 *__rrd_manager;
 };
 
 class RRDGraphDataDefinition
 {
  public:
   RRDGraphDataDefinition(const char *name, RRDArchive::ConsolidationFunction cf,
-			 const RRDDefinition *rrd_def, const char *ds_name);
+			 const RRDDefinition *rrd_def, const char *ds_name = NULL);
   RRDGraphDataDefinition(const char *name, const char *rpn_expression);
   RRDGraphDataDefinition(const RRDGraphDataDefinition &other);
   ~RRDGraphDataDefinition();
@@ -190,10 +196,10 @@ class RRDGraphDataDefinition
   RRDArchive::ConsolidationFunction  get_cf() const { return __cf; };
 
  private:
-  const char                              *__name;
+  char                                    *__name;
   const RRDDefinition                     *__rrd_def;
-  const char                              *__ds_name;
-  const char                              *__rpn_expression;
+  char                                    *__ds_name;
+  char                                    *__rpn_expression;
   RRDArchive::ConsolidationFunction        __cf;
 
   mutable char *__string;
@@ -203,7 +209,8 @@ class RRDGraphElement
 {
  public:
   virtual ~RRDGraphElement() {}
-  virtual const char *  to_string() const = 0;
+  virtual RRDGraphElement * clone() const = 0;
+  virtual const char *  to_string() const;
 };
 
 
@@ -212,9 +219,12 @@ class RRDGraphGPrint : public RRDGraphElement
  public:
   RRDGraphGPrint(const char *def_name, RRDArchive::ConsolidationFunction cf,
 		 const char *format);
+  RRDGraphGPrint(const RRDGraphGPrint &other);
   virtual ~RRDGraphGPrint();
 
   RRDGraphGPrint &  operator=(const RRDGraphGPrint &g);
+
+  virtual RRDGraphElement * clone() const { return new RRDGraphGPrint(*this); }
 
   virtual const char *  to_string() const;
 
@@ -226,9 +236,9 @@ class RRDGraphGPrint : public RRDGraphElement
   const char *                       get_format() const { return __format; }
   
  private:
-  const char                        *__def_name;
+  char                              *__def_name;
   RRDArchive::ConsolidationFunction  __cf;
-  const char                        *__format;
+  char                              *__format;
 
   mutable char *__string;
 };
@@ -237,8 +247,11 @@ class RRDGraphLine : public RRDGraphElement
 {
  public:
   RRDGraphLine(const char *def_name, float width, const char *color,
-	       const char *legend, bool stacked);
+	       const char *legend, bool stacked = false);
+  RRDGraphLine(const RRDGraphLine &other);
   virtual ~RRDGraphLine();
+
+  virtual RRDGraphElement * clone() const { return new RRDGraphLine(*this); }
 
   RRDGraphLine &  operator=(const RRDGraphLine &g);
 
@@ -256,10 +269,10 @@ class RRDGraphLine : public RRDGraphElement
   bool          get_stacked() const { return __stacked; }
 
  private:
-  const char  *__def_name;
+  char        *__def_name;
   float        __width;
-  const char  *__color;
-  const char  *__legend;
+  char        *__color;
+  char        *__legend;
   bool         __stacked;
 
   mutable char *__string;
@@ -269,8 +282,11 @@ class RRDGraphArea : public RRDGraphElement
 {
  public:
   RRDGraphArea(const char *def_name, const char *color,
-	       const char *legend, bool stacked);
+	       const char *legend, bool stacked = false);
+  RRDGraphArea(const RRDGraphArea &other);
   virtual ~RRDGraphArea();
+
+  virtual RRDGraphElement * clone() const { return new RRDGraphArea(*this); }
 
   RRDGraphArea &  operator=(const RRDGraphArea &g);
 
@@ -286,9 +302,9 @@ class RRDGraphArea : public RRDGraphElement
   bool          get_stacked() const { return __stacked; }
 
  private:
-  const char *__def_name;
-  const char *__color;
-  const char *__legend;
+  char       *__def_name;
+  char       *__color;
+  char       *__legend;
   bool        __stacked;
 
   mutable char *__string;
@@ -298,11 +314,12 @@ class RRDGraphDefinition
 {
  public:
   RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
-		     time_t start, time_t end, unsigned int step,
 		     const char *title, const char *vertical_label,
-		     unsigned int update_interval, bool slope_mode,
 		     std::vector<RRDGraphDataDefinition> &def,
-		     std::vector<RRDGraphElement *> &elements);
+		     std::vector<RRDGraphElement *> &elements,
+		     time_t start = -600, time_t end = -10, unsigned int step = 10,
+		     unsigned int update_interval = 10, bool slope_mode = false);
+  RRDGraphDefinition(const RRDGraphDefinition &other);
   ~RRDGraphDefinition();
 
   void set_filename(const char *filename);
@@ -340,13 +357,13 @@ class RRDGraphDefinition
   const char *          get_filename() const { return __filename; }
 
  private:
-  const char                          *__name;
+  char                                *__name;
   const RRDDefinition                 *__rrd_def;
   const time_t                         __start;
   const time_t                         __end;
   unsigned int                         __step;
-  const char                          *__title;
-  const char                          *__vertical_label;
+  char                                *__title;
+  char                                *__vertical_label;
   const unsigned int                   __update_interval;
   const bool                           __slope_mode;
   std::vector<RRDGraphDataDefinition>  __defs;

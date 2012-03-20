@@ -23,7 +23,7 @@
 
 #include <aspect/inifins/logger.h>
 #include <aspect/logger.h>
-#include <aspect/logger/employer.h>
+#include <logging/logger_employer.h>
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
 
@@ -52,7 +52,7 @@ LoggerAspectIniFin::init(Thread *thread)
 {
   LoggerAspect *logger_thread;
   logger_thread = dynamic_cast<LoggerAspect *>(thread);
-  if (logger_thread == NULL) {
+  if (logger_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "LoggerAspect, but RTTI says it "
 					  "has not. ", thread->name());
@@ -77,7 +77,7 @@ LoggerAspectIniFin::finalize(Thread *thread)
 {
   LoggerAspect *logger_thread;
   logger_thread = dynamic_cast<LoggerAspect *>(thread);
-  if (logger_thread == NULL) {
+  if (logger_thread == 0) {
     throw CannotFinalizeThreadException("Thread '%s' claims to have the "
 					"LoggerAspect, but RTTI says it "
 					"has not. ", thread->name());

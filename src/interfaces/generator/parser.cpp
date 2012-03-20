@@ -23,6 +23,8 @@
 #include "parser.h"
 #include "exceptions.h"
 
+#include <utils/misc/string_conversions.h>
+
 #include <iostream>
 #include <vector>
 
@@ -72,21 +74,8 @@ InterfaceParser::getFields(xmlpp::Node *node)
   vector<InterfaceField> result;
   NodeSet set = node->find("field");
   for (NodeSet::iterator i = set.begin(); i != set.end(); ++i) {
-    // Get constant name
-    NodeSet nameset = (*i)->find("text()");
-    if ( nameset.size() == 0 ) {
-      throw InterfaceGeneratorInvalidContentException("no name for constant");
-    }
-    const TextNode *comment_node = dynamic_cast<const TextNode *>(nameset[0]);
-    if ( ! comment_node ) {
-      throw InterfaceGeneratorInvalidContentException("comment node not text node for constant");
-    }
-    std::string field_comment = comment_node->get_content();
-    //std::cout << "Field name: " << field_name << std::endl;
-    
-
     InterfaceField f(&enum_constants);
-    f.setComment(field_comment);
+
     const Element * el = dynamic_cast<const Element *>(*i);
     if ( el ) {
       // valid element
@@ -100,6 +89,18 @@ InterfaceParser::getFields(xmlpp::Node *node)
       throw InterfaceGeneratorInvalidContentException("constant is not an element");
     }
 
+    // Get field comment
+    NodeSet nameset = (*i)->find("text()");
+    if ( nameset.size() == 0 ) {
+      throw InterfaceGeneratorInvalidContentException("no comment for field %s", f.getName().c_str());
+    }
+    const TextNode *comment_node = dynamic_cast<const TextNode *>(nameset[0]);
+    if ( ! comment_node ) {
+      throw InterfaceGeneratorInvalidContentException("comment node not text node for constant");
+    }
+    f.setComment(comment_node->get_content());
+
+    //std::cout << "Field name: " << field_name << std::endl;
     try {
       f.valid();
       result.push_back(f);
@@ -306,10 +307,11 @@ InterfaceParser::printParsed(vector<InterfaceConstant> &     constants,
   
   cout << "EnumConstants" << endl;
   for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
-    cout << "  EnumConstant: name=" << (*i).getName() << endl;
-    vector< pair<string,string> > items = (*i).getItems();
-    for (vector< pair<string,string> >::iterator j = items.begin(); j != items.end(); ++j) {
-	cout << "    Item: " << (*j).first << "(" << (*j).second << ")" << endl;
+    cout << "  EnumConstant: name=" << (*i).get_name() << endl;
+    vector<InterfaceEnumConstant::EnumItem> items = (*i).get_items();
+    vector<InterfaceEnumConstant::EnumItem>::iterator j;
+    for (j = items.begin(); j != items.end(); ++j) {
+      cout << "    Item: " << j->name << "(" << j->comment << ")" << endl;
     }
   }
     
@@ -492,6 +494,7 @@ InterfaceParser::parse()
       for (NodeSet::iterator j = items.begin(); j != items.end(); ++j) {
 
 	std::string item_name;
+	std::string item_value;
 	el = dynamic_cast<const Element *>(*j);
 	if ( el ) {
 	  // valid element
@@ -501,6 +504,12 @@ InterfaceParser::parse()
 	    throw InterfaceGeneratorInvalidContentException("no name for enum item");
 	  }
 	  item_name = attr->get_value();
+
+	  Attribute *val_attr;
+	  val_attr = el->get_attribute("value");
+	  if ( val_attr ) {
+	    item_value = val_attr->get_value();
+	  }
 	  
 	} else {
 	  throw InterfaceGeneratorInvalidContentException("enum item is not an element");
@@ -512,7 +521,12 @@ InterfaceParser::parse()
 	}
 	const TextNode *comment_node = dynamic_cast<const TextNode *>(comment_set[0]);
 	if ( comment_node ) {
-	  enum_constant.addItem(item_name, comment_node->get_content());
+	  if (item_value != "") {
+	    enum_constant.add_item(item_name, comment_node->get_content(),
+				   fawkes::StringConversions::to_int(item_value));
+	  } else {
+	    enum_constant.add_item(item_name, comment_node->get_content());
+	  }
 	} else {
 	  throw InterfaceGeneratorInvalidContentException("enum comment not a text node");
 	}
@@ -520,10 +534,12 @@ InterfaceParser::parse()
 
       enum_constants.push_back(enum_constant);
     }
-    for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
-      for (vector<InterfaceEnumConstant>::iterator j = i + 1; j != enum_constants.end(); ++j) {
-	if ( (*i).getName() == (*j).getName() ) {
-	  throw InterfaceGeneratorAmbiguousNameException((*i).getName().c_str(), "enum constant");
+    vector<InterfaceEnumConstant>::iterator i;
+    for (i = enum_constants.begin(); i != enum_constants.end(); ++i) {
+      vector<InterfaceEnumConstant>::iterator j;
+      for (j = i + 1; j != enum_constants.end(); ++j) {
+	if ( i->get_name() == j->get_name() ) {
+	  throw InterfaceGeneratorAmbiguousNameException((*i).get_name().c_str(), "enum constant");
 	}
       }
     }

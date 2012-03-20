@@ -82,7 +82,7 @@ RRDWebRequestProcessor::process_request(const char *url,
       std::string graph_name = subpath.substr(subpath.find_first_not_of("/", std::string("/graph/").length()));
 
       for (g = graphs.begin(); g != graphs.end(); ++g) {
-	if (strcmp((*g)->get_rrd_def()->get_name(), graph_name.c_str()) == 0) {
+	if (strcmp((*g)->get_name(), graph_name.c_str()) == 0) {
           try {
 	    return new DynamicFileWebReply((*g)->get_filename());
 	  } catch (Exception &e) {
@@ -93,14 +93,22 @@ RRDWebRequestProcessor::process_request(const char *url,
       return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "Graph not found");
     } else {
       WebPageReply *r = new WebPageReply("RRD Graphs");
+      r->set_html_header("  <link rel=\"stylesheet\" type=\"text/css\" "
+			 "href=\"/static/css/rrdweb.css\" />\n");
       *r += "<h2>RRD Graphs</h2>\n";
 
       std::string subpath = std::string(url).substr(__baseurl_len);
 
+      unsigned int i = 0;
+      *r += "<table class=\"rrdgrid\">";
       for (g = graphs.begin(); g != graphs.end(); ++g) {
-	r->append_body("<img src=\"/rrd/graph/%s\" />\n",
-		       (*g)->get_rrd_def()->get_name());
+	if ((i % 2) == 0) *r += "  <tr>";
+	r->append_body("<td class=\"%s\"><img src=\"/rrd/graph/%s\" /></td>",
+		       ((i % 2) == 0) ? "left" : "right",
+		       (*g)->get_name());
+	if ((i++ % 2) == 1) *r += "  </tr>\n";
       }
+      *r += "</table>";
 
       return r;
     }

@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cstdarg>
 #include <kniBase.h>
+#include <common/MathHelperFunctions.h>
 
 using namespace fawkes;
 
@@ -70,6 +71,20 @@ KatanaActThread::init()
   __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
   __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
 
+  __cfg_offset_x         = config->get_float("/hardware/katana/offset_x");
+  __cfg_offset_y         = config->get_float("/hardware/katana/offset_y");
+  __cfg_offset_z         = config->get_float("/hardware/katana/offset_z");
+  __cfg_distance_scale   = config->get_float("/hardware/katana/distance_scale");
+
+#ifdef HAVE_OPENRAVE
+  __cfg_OR_enabled       = config->get_bool("/hardware/katana/openrave/enabled");
+  __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
+  __cfg_OR_auto_load_ik  = config->get_bool("/hardware/katana/openrave/auto_load_ik");
+  __cfg_OR_robot_file    = config->get_string("/hardware/katana/openrave/robot_file");
+#else
+  __cfg_OR_enabled       = false;
+#endif
+
   try {
     TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, __cfg_read_timeout, __cfg_write_timeout};
     __device.reset(new CCdlCOM(ccd, __cfg_device.c_str()));
@@ -91,14 +106,31 @@ KatanaActThread::init()
     throw fawkes::Exception(e.what());
   }
 
+  try {
+    __motor_init.resize(__katana->getNumberOfMotors());
+    for(unsigned int i=0; i<__motor_init.size(); i++) {
+      __motor_init.at(i) = *(__katbase->GetMOT()->arr[i].GetInitialParameters());
+    }
+
+    logger->log_debug(name(), "Katana initial motor parameters successfully loaded");
+  } catch (/*KNI*/::Exception &e) {
+    throw fawkes::Exception(e.what());
+  }
+
   // If you have more than one interface: catch exception and close them!
   __katana_if = blackboard->open_for_writing<KatanaInterface>("Katana");
 
   __sensacq_thread.reset(new KatanaSensorAcquisitionThread(__katana, logger));
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
-  __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
   __gripper_thread = new KatanaGripperThread(__katana, logger,
 					     __cfg_gripper_pollint);
+  __motor_control_thread = new KatanaMotorControlThread(__katana, logger, __cfg_goto_pollint);
+  __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
+#ifdef HAVE_OPENRAVE
+  __goto_openrave_thread = new KatanaGotoOpenRaveThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
+  if(__cfg_OR_enabled)
+    {__goto_openrave_thread->init();}
+#endif
 
   __sensacq_thread->start();
 
@@ -109,7 +141,7 @@ KatanaActThread::init()
   __tt.reset(new TimeTracker());
   __tt_count = 0;
   __ttc_read_sensor = __tt->add_class("Read Sensor");
-#endif  
+#endif
 
 }
 
@@ -130,6 +162,12 @@ KatanaActThread::finalize()
   __calib_thread   = NULL;
   __goto_thread    = NULL;
   __gripper_thread = NULL;
+  __motor_control_thread = NULL;
+#ifdef HAVE_OPENRAVE
+   if(__cfg_OR_enabled)
+    {__goto_openrave_thread->finalize();}
+  __goto_openrave_thread = NULL;
+#endif
 
   __katana->freezeRobot();
   __katana = NULL;
@@ -160,9 +198,9 @@ KatanaActThread::update_position(bool refresh)
   double x, y, z, phi, theta, psi;
   try {
     __katana->getCoordinates(x, y, z, phi, theta, psi, refresh);
-    __katana_if->set_x(x);
-    __katana_if->set_y(y);
-    __katana_if->set_z(z);
+    __katana_if->set_x(__cfg_offset_x + __cfg_distance_scale * x);
+    __katana_if->set_y(__cfg_offset_y + __cfg_distance_scale * y);
+    __katana_if->set_z(__cfg_offset_z + __cfg_distance_scale * z);
     __katana_if->set_phi(phi);
     __katana_if->set_theta(theta);
     __katana_if->set_psi(psi);
@@ -216,6 +254,26 @@ KatanaActThread::update_sensors(bool refresh)
   if (refresh) __sensacq_thread->wakeup();
 }
 
+
+/** Update motor encoder and angle data in BB interface.
+ * @param refresh recv new data from arm
+ */
+void
+KatanaActThread::update_motors(bool refresh)
+{
+  try {
+    std::vector<int> encoders = __katana->getRobotEncoders(refresh);
+
+    for(unsigned int i=0; i<encoders.size(); i++) {
+      __katana_if->set_encoders(i, encoders.at(i));
+      __katana_if->set_angles(i, KNI_MHF::enc2rad( encoders.at(i), __motor_init.at(i).angleOffset, __motor_init.at(i).encodersPerCycle, __motor_init.at(i).encoderOffset, __motor_init.at(i).rotationDirection));
+    }
+  } catch (/*KNI*/::Exception &e) {
+    logger->log_warn(name(), "Updating motor values failed: %s", e.what());
+  }
+}
+
+
 /** Start a motion.
  * @param motion_thread motion thread to start
  * @param msgid BB message  ID of message that caused the motion
@@ -262,6 +320,7 @@ KatanaActThread::loop()
 {
   if ( __actmot_thread ) {
     update_position(/* refresh */ false);
+    update_motors(/* refresh */ false);
     __katana_if->write();
     if (! __actmot_thread->finished()) {
       return;
@@ -277,6 +336,13 @@ KatanaActThread::loop()
       __actmot_thread = NULL;
       logger->log_debug(name(), "Motion thread collected");
       __sensacq_thread->set_enabled(true);
+
+#ifdef HAVE_OPENRAVE
+        if(__cfg_OR_enabled)
+          {__goto_openrave_thread->update_openrave_data();}
+#endif
+      update_position(/* refresh */ true);
+      update_motors(/* refresh */ true);
     }
   }
 
@@ -288,29 +354,95 @@ KatanaActThread::loop()
     } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoMessage>()) {
       KatanaInterface::LinearGotoMessage *msg = __katana_if->msgq_first(msg);
 
-      __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
-				msg->phi(), msg->theta(), msg->psi());
-      start_motion(__goto_thread, msg->id(),
-		   "Linear movement to (%f,%f,%f, %f,%f,%f)",
-		   msg->x(), msg->y(), msg->z(),
-		   msg->phi(), msg->theta(), msg->psi());
+      if(__cfg_OR_enabled) {
+#ifdef HAVE_OPENRAVE
+        __goto_openrave_thread->set_target(msg->x(), msg->y(), msg->z(),
+                                           msg->phi(), msg->theta(), msg->psi());
+        start_motion(__goto_openrave_thread, msg->id(),
+		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		     msg->x(), msg->y(), msg->z(),
+		     msg->phi(), msg->theta(), msg->psi());
+#endif
+      } else {
+        __goto_thread->set_target((msg->x() - __cfg_offset_x)/__cfg_distance_scale,
+                                  (msg->y() - __cfg_offset_y)/__cfg_distance_scale,
+                                  (msg->z() - __cfg_offset_z)/__cfg_distance_scale,
+			 	  msg->phi(), msg->theta(), msg->psi());
+        start_motion(__goto_thread, msg->id(),
+		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		     msg->x(), msg->y(), msg->z(),
+		     msg->phi(), msg->theta(), msg->psi());
+      }
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoKniMessage>()) {
+      KatanaInterface::LinearGotoKniMessage *msg = __katana_if->msgq_first(msg);
+
+      float x = msg->x() * __cfg_distance_scale + __cfg_offset_x;
+      float y = msg->y() * __cfg_distance_scale + __cfg_offset_y;
+      float z = msg->z() * __cfg_distance_scale + __cfg_offset_z;
+
+      if( __cfg_OR_enabled ) {
+#ifdef HAVE_OPENRAVE
+          __goto_openrave_thread->set_target(x, y, z,
+				  	     msg->phi(), msg->theta(), msg->psi());
+
+          start_motion(__goto_openrave_thread, msg->id(),
+		       "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		       x, y, z,
+		       msg->phi(), msg->theta(), msg->psi());
+
+#endif
+        } else {
+          __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
+				    msg->phi(), msg->theta(), msg->psi());
+
+          start_motion(__goto_thread, msg->id(),
+		       "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		       x, y, z,
+		       msg->phi(), msg->theta(), msg->psi());
+
+        }
+
+#ifdef HAVE_OPENRAVE
+    } else if (__katana_if->msgq_first_is<KatanaInterface::ObjectGotoMessage>() && __cfg_OR_enabled) {
+      KatanaInterface::ObjectGotoMessage *msg = __katana_if->msgq_first(msg);
+
+      float rot_x = 0.f;
+      if( msg->rot_x() )
+        { rot_x = msg->rot_x(); }
+
+      __goto_openrave_thread->set_target(msg->object(), rot_x);
+      start_motion(__goto_openrave_thread, msg->id(),
+		   "Linear movement to object (%s, %f)", msg->object(), msg->rot_x());
+#endif
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::ParkMessage>()) {
       KatanaInterface::ParkMessage *msg = __katana_if->msgq_first(msg);
 
-      __goto_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
-				__cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
-      start_motion(__goto_thread, msg->id(), "Parking arm");
+      if(__cfg_OR_enabled) {
+#ifdef HAVE_OPENRAVE
+        __goto_openrave_thread->set_target(__cfg_park_x * __cfg_distance_scale + __cfg_offset_x,
+                                           __cfg_park_y * __cfg_distance_scale + __cfg_offset_y,
+                                  	   __cfg_park_z * __cfg_distance_scale + __cfg_offset_z,
+				  	   __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+
+        start_motion(__goto_openrave_thread, msg->id(), "Parking arm");
+#endif
+      } else {
+        __goto_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
+				  __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+        start_motion(__goto_thread, msg->id(), "Parking arm");
+      }
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::OpenGripperMessage>()) {
       KatanaInterface::OpenGripperMessage *msg = __katana_if->msgq_first(msg);
       __gripper_thread->set_mode(KatanaGripperThread::OPEN_GRIPPER);
-      start_motion(__gripper_thread, msg->id(), "Opening gripper");      
+      start_motion(__gripper_thread, msg->id(), "Opening gripper");
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::CloseGripperMessage>()) {
       KatanaInterface::CloseGripperMessage *msg = __katana_if->msgq_first(msg);
       __gripper_thread->set_mode(KatanaGripperThread::CLOSE_GRIPPER);
-      start_motion(__gripper_thread, msg->id(), "Closing gripper");      
+      start_motion(__gripper_thread, msg->id(), "Closing gripper");
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetEnabledMessage>()) {
       KatanaInterface::SetEnabledMessage *msg = __katana_if->msgq_first(msg);
@@ -320,6 +452,11 @@ KatanaActThread::loop()
 	  logger->log_debug(name(), "Turning ON the arm");
 	  __katana->switchRobotOn();
 	  update_position(/* refresh */ true);
+          update_motors(/* refresh */ true);
+#ifdef HAVE_OPENRAVE
+	    if(__cfg_OR_enabled)
+	      {__goto_openrave_thread->update_openrave_data();}
+#endif
 	} else {
 	  logger->log_debug(name(), "Turning OFF the arm");
 	  __katana->switchRobotOff();
@@ -338,6 +475,30 @@ KatanaActThread::loop()
       __katana->setRobotVelocityLimit(max_vel);
       __katana_if->set_max_velocity(max_vel);
 
+    } else if (__katana_if->msgq_first_is<KatanaInterface::SetMotorEncoderMessage>()) {
+      KatanaInterface::SetMotorEncoderMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_encoder(msg->nr(), msg->enc(), false);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::MoveMotorEncoderMessage>()) {
+      KatanaInterface::MoveMotorEncoderMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_encoder(msg->nr(), msg->enc(), true);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::SetMotorAngleMessage>()) {
+      KatanaInterface::SetMotorAngleMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_angle(msg->nr(), msg->angle(), false);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::MoveMotorAngleMessage>()) {
+      KatanaInterface::MoveMotorAngleMessage *msg = __katana_if->msgq_first(msg);
+
+      __motor_control_thread->set_angle(msg->nr(), msg->angle(), true);
+      start_motion(__motor_control_thread, msg->id(), "Moving motor");
+
     } else {
       logger->log_warn(name(), "Unknown message received");
     }
@@ -352,7 +513,7 @@ KatanaActThread::loop()
     __tt_count = 0;
     __tt->print_to_stdout();
   }
-#endif  
+#endif
 }
 
 

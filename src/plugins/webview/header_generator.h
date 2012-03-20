@@ -38,7 +38,8 @@ class WebviewHeaderGenerator : public fawkes::WebPageHeaderGenerator
   WebviewHeaderGenerator(fawkes::WebNavManager *nav_manager);
 
   std::string html_header(std::string &title,
-			  std::string &active_baseurl);
+			  std::string &active_baseurl,
+			  std::string &html_header);
 
  private:
   static const char *PAGE_HEADER;

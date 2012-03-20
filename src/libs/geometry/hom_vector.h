@@ -36,6 +36,7 @@ class HomVector : public HomCoord
   virtual ~HomVector();
 
   float      length() const;
+  float      length_square() const;
   HomVector& set_length(float length);
   HomVector& unit();
 

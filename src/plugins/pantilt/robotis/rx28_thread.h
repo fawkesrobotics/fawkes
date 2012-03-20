@@ -50,6 +50,7 @@ class PanTiltRX28Thread
 		    std::string &ptu_name);
 
   virtual void init();
+  virtual bool prepare_finalize_user();
   virtual void finalize();
   virtual void loop();
 

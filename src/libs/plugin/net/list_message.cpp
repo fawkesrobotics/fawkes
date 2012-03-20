@@ -26,6 +26,7 @@
 #include <netcomm/utils/dynamic_buffer.h>
 #include <netcomm/fawkes/component_ids.h>
 #include <core/exceptions/software.h>
+#include <utils/misc/strndup.h>
 #include <cstdlib>
 #include <cstring>
 

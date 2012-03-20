@@ -23,7 +23,7 @@
 #include "startpage_processor.h"
 #include <webview/page_reply.h>
 
-#include <utils/logging/cache.h>
+#include <logging/cache.h>
 
 #include <string>
 #include <cstring>

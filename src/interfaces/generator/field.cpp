@@ -214,8 +214,9 @@ InterfaceField::setType(const std::string &type)
 {
   is_enum_type = false;
   if ( enum_constants != NULL ) {
-    for (std::vector<InterfaceEnumConstant>::iterator i = enum_constants->begin(); i != enum_constants->end(); ++i) {
-      if ( type == (*i).getName() ) {
+    std::vector<InterfaceEnumConstant>::iterator i;
+    for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+      if ( type == (*i).get_name() ) {
 	is_enum_type = true;
       }
     }

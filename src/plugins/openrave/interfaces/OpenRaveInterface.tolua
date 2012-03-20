@@ -1,0 +1,161 @@
+$#include <interfaces/OpenRaveInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class OpenRaveInterface : public Interface
+{
+
+  class AddObjectMessage : public Message
+  {
+    AddObjectMessage(char * ini_name, char * ini_path);
+    AddObjectMessage();
+    ~AddObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+    char * path();
+    void set_path(const char * new_path);
+    int maxlenof_path() const;
+  };
+
+  class DeleteObjectMessage : public Message
+  {
+    DeleteObjectMessage(char * ini_name);
+    DeleteObjectMessage();
+    ~DeleteObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+  };
+
+  class AttachObjectMessage : public Message
+  {
+    AttachObjectMessage(char * ini_name);
+    AttachObjectMessage();
+    ~AttachObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+  };
+
+  class ReleaseObjectMessage : public Message
+  {
+    ReleaseObjectMessage(char * ini_name);
+    ReleaseObjectMessage();
+    ~ReleaseObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+  };
+
+  class ReleaseAllObjectsMessage : public Message
+  {
+    ReleaseAllObjectsMessage();
+    ~ReleaseAllObjectsMessage();
+
+  };
+
+  class MoveObjectMessage : public Message
+  {
+    MoveObjectMessage(char * ini_name, float ini_x, float ini_y, float ini_z);
+    MoveObjectMessage();
+    ~MoveObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float z();
+    void set_z(const float new_z);
+    int maxlenof_z() const;
+  };
+
+  class RotateObjectMessage : public Message
+  {
+    RotateObjectMessage(char * ini_name, float ini_x, float ini_y, float ini_z);
+    RotateObjectMessage();
+    ~RotateObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float z();
+    void set_z(const float new_z);
+    int maxlenof_z() const;
+  };
+
+  class RenameObjectMessage : public Message
+  {
+    RenameObjectMessage(char * ini_name, char * ini_newName);
+    RenameObjectMessage();
+    ~RenameObjectMessage();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
+    char * newName();
+    void set_newName(const char * new_newName);
+    int maxlenof_newName() const;
+  };
+
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  int maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  int maxlenof_final() const;
+  unsigned int error_code();
+  void set_error_code(const unsigned int new_error_code);
+  int maxlenof_error_code() const;
+  bool is_success();
+  void set_success(const bool new_success);
+  int maxlenof_success() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

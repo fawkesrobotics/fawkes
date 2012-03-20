@@ -23,7 +23,7 @@
 #include "fawkes_logger.h"
 #include <plugins/readylogagent/eclipse_thread.h>
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <core/exception.h>
 
 #include <eclipseclass.h>

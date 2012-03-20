@@ -25,7 +25,6 @@
 #define __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 #include <map>
 #include <string>
@@ -40,8 +39,8 @@ namespace fawkes {
 class BatteryMonitorTreeView : public Gtk::TreeView
 {
  public:
-  BatteryMonitorTreeView( BaseObjectType* cobject,
-			  const Glib::RefPtr< Gnome::Glade::Xml >& ref_xml );
+  BatteryMonitorTreeView(BaseObjectType* cobject,
+                         const Glib::RefPtr<Gtk::Builder> &builder);
   virtual ~BatteryMonitorTreeView();
 
   void add_host( const char* host );

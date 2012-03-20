@@ -52,6 +52,7 @@ ROI::ROI()
 {
   num_hint_points = 1;
   start.x = start.y = width = height = image_width = image_height = line_step = pixel_step = 0;
+  color = C_BACKGROUND;
 }
 
 
@@ -76,6 +77,7 @@ ROI::ROI(unsigned int start_x, unsigned int start_y,
   this->image_height = image_height;
   line_step = image_width;
   pixel_step = 1;
+  color = C_BACKGROUND;
 }
 
 
@@ -92,6 +94,7 @@ ROI::ROI(const ROI &roi)
   line_step       = roi.line_step;
   pixel_step      = roi.pixel_step;
   hint            = roi.hint;
+  color           = roi.color;
   num_hint_points = roi.num_hint_points;  
 }
 
@@ -109,6 +112,7 @@ ROI::ROI(const ROI *roi)
   line_step       = roi->line_step;
   pixel_step      = roi->pixel_step;
   hint            = roi->hint;
+  color           = roi->color;
   num_hint_points = roi->num_hint_points;  
 }
 
@@ -271,7 +275,7 @@ ROI::get_pixel_step() const
  * depend on the color that the classifier used.
  * @return hint
  */
-hint_t
+unsigned int
 ROI::get_hint() const
 {
   return hint;
@@ -283,7 +287,7 @@ ROI::get_hint() const
  * @see getHint()
  */
 void
-ROI::set_hint(hint_t hint)
+ROI::set_hint(unsigned int hint)
 {
   this->hint = hint;
 }
@@ -432,7 +436,7 @@ ROI::operator+=(ROI &roi)
 bool
 ROI::operator<(const ROI &roi) const
 {
-  return (num_hint_points < roi.num_hint_points);
+  return (color < roi.color) || (num_hint_points < roi.num_hint_points);
 }
 
 
@@ -443,7 +447,7 @@ ROI::operator<(const ROI &roi) const
 bool
 ROI::operator>(const ROI &roi) const
 {
-  return (num_hint_points > roi.num_hint_points);
+  return (color > roi.color) || (num_hint_points > roi.num_hint_points);
 }
 
 
@@ -465,6 +469,7 @@ ROI::operator==(const ROI &roi) const
           (line_step == roi.line_step) && 
           (pixel_step == roi.pixel_step) && 
           (hint == roi.hint) && 
+          (color == roi.color) && 
           (num_hint_points == roi.num_hint_points);
 }
 
@@ -498,6 +503,7 @@ ROI::operator=(const ROI &roi)
   this->line_step       = roi.line_step;
   this->pixel_step      = roi.pixel_step;
   this->hint            = roi.hint;
+  this->color           = roi.color;
   this->num_hint_points = roi.num_hint_points;
 
   return *this;

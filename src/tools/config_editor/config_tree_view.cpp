@@ -88,20 +88,20 @@ using namespace fawkes;
 
 /** Constructor.
  * @param cobject pointer to base object type
- * @param ref_xml Glade XML file
+ * @param builder Gtk builder
  */
-ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
-				const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml)
+ConfigTreeView::ConfigTreeView(BaseObjectType* cobject,
+			       const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::TreeView(cobject)
 {
   m_dlg_edit = NULL;
-  ref_xml->get_widget_derived("dlgConfigEdit", m_dlg_edit);
+  builder->get_widget_derived("dlgConfigEdit", m_dlg_edit);
 
   m_dlg_add = NULL;
-  ref_xml->get_widget_derived("dlgConfigAdd", m_dlg_add);
+  builder->get_widget_derived("dlgConfigAdd", m_dlg_add);
 
   m_dlg_remove = NULL;
-  ref_xml->get_widget_derived("dlgConfigRemove", m_dlg_remove);
+  builder->get_widget_derived("dlgConfigRemove", m_dlg_remove);
 
   m_config_tree = Gtk::TreeStore::create(m_config_record);
   m_config_tree->set_sort_column(0, Gtk::SORT_ASCENDING);
@@ -110,7 +110,12 @@ ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
   append_column("Path", m_config_record.node);
 
   Gtk::TreeViewColumn *column = get_column(0);
-  Gtk::CellRendererText *cell = (Gtk::CellRendererText *)column->get_first_cell_renderer();
+  Gtk::CellRendererText *cell =
+#if GTK_VERSION_GE(3,0)
+    (Gtk::CellRendererText *)column->get_first_cell();
+#else
+    (Gtk::CellRendererText *)column->get_first_cell_renderer();
+#endif
 #ifdef GLIBMM_PROPERTIES_ENABLED
   column->add_attribute(cell->property_underline(), m_config_record.is_default);
 #else
@@ -119,11 +124,13 @@ ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
 
   append_column("Value", m_config_record.value_string);
 
+  /*
   Gtk::Menu::MenuList& menulist = m_menu.items();
 
   menulist.push_back( Gtk::Menu_Helpers::MenuElem("Edit", sigc::mem_fun( *this, &ConfigTreeView::on_menu_edit_selected) ) );
   menulist.push_back( Gtk::Menu_Helpers::MenuElem("Remove", sigc::mem_fun( *this, &ConfigTreeView::on_menu_remove_selected) ) );
   menulist.push_back( Gtk::Menu_Helpers::MenuElem("Add", sigc::mem_fun( *this, &ConfigTreeView::on_menu_add_selected) ) );
+  */
 
   m_config = NULL;
   m_own_config = false;
@@ -483,7 +490,7 @@ ConfigTreeView::on_button_press_event_custom(GdkEventButton* event)
   }
   else if ( event->type == GDK_BUTTON_PRESS && (event->button == 3) )
   {
-    m_menu.popup(event->button, event->time);
+    //m_menu.popup(event->button, event->time);
   }
 }
 

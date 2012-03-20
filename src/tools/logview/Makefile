@@ -17,7 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_fflogview = stdc++ fawkescore fawkesutils fawkesnetcomm
+LIBS_fflogview = stdc++ fawkescore fawkesutils fawkesnetcomm fawkeslogging
 OBJS_fflogview = main.o
 
 OBJS_all     =	$(OBJS_fflogview)

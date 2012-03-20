@@ -23,6 +23,7 @@
 #include "bblogfile.h"
 
 #include <core/exceptions/system.h>
+#include <utils/misc/strndup.h>
 #include <blackboard/internal/instance_factory.h>
 
 #include <cstdlib>
@@ -30,6 +31,8 @@
 #include <cstring>
 #ifdef __FreeBSD__
 #  include <sys/endian.h>
+#elif defined(__MACH__) && defined(__APPLE__)
+#  include <sys/_endian.h>
 #else
 #  include <endian.h>
 #endif

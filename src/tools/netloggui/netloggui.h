@@ -24,7 +24,6 @@
 #define __TOOLS_NETLOGGUI_NETLOGGUI_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 namespace fawkes {
   class AvahiThread;
@@ -37,7 +36,7 @@ class NetLogGuiGtkWindow : public Gtk::Window
 {
  public:  
   NetLogGuiGtkWindow(BaseObjectType* cobject,
-		     const Glib::RefPtr<Gnome::Glade::Xml> &refxml);
+		     const Glib::RefPtr<Gtk::Builder> &builder);
   ~NetLogGuiGtkWindow();
 
  private:

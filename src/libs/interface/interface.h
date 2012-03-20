@@ -50,6 +50,7 @@ class InterfaceMediator;
 class MessageMediator;
 class Time;
 class Clock;
+class Mutex;
 
 class InterfaceWriteDeniedException : public Exception
 {
@@ -108,6 +109,13 @@ class Interface
   virtual void            copy_values(const Interface *interface) = 0;
   virtual const char *    enum_tostring(const char *enumtype, int val) const = 0;
 
+  void                    resize_buffers(unsigned int num_buffers);
+  unsigned int            num_buffers() const;
+  void                    copy_shared_to_buffer(unsigned int buffer);
+  void                    copy_private_to_buffer(unsigned int buffer);
+  void                    read_from_buffer(unsigned int buffer);
+  int                     compare_buffers(unsigned int buffer);
+
   void          read();
   void          write();
 
@@ -156,6 +164,16 @@ class Interface
    */
   template <class MessageType>
     MessageType *  msgq_first(MessageType *&msg);
+
+  /** Get first message casted to the desired type without exceptions.
+   * This method allows to combine a call to msgq_first_is() and msgq_first()
+   * into a single call.
+   * @param msg reference to pointer to message of desired type, upon successful
+   * return points to the message. 
+   * @return pointer to message if it is of the desired type, 0 otherwise
+   */
+  template <class MessageType>
+    MessageType * msgq_first_safe(MessageType *&msg) throw();
 
   MessageQueue::MessageIterator  msgq_begin();
   MessageQueue::MessageIterator  msgq_end();
@@ -225,6 +243,10 @@ class Interface
   unsigned int       __mem_serial;
   bool               __write_access;
 
+  void *             __buffers;
+  unsigned int       __num_buffers;
+
+  Mutex             *__data_mutex;
   RefCountRWLock    *__rwlock;
 
   InterfaceMediator *__interface_mediator;
@@ -262,6 +284,15 @@ MessageType *
 Interface::msgq_first(MessageType *&msg)
 {
   msg = this->msgq_first<MessageType>();
+  return msg;
+}
+
+
+template <class MessageType>
+MessageType *
+Interface::msgq_first_safe(MessageType *&msg) throw()
+{
+  msg = dynamic_cast<MessageType *>(__message_queue->first());
   return msg;
 }
 

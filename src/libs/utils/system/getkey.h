@@ -28,7 +28,7 @@
 #include <stdio.h>
 
 namespace fawkes {
-  char getkey();
+  char getkey(int timeout_decisecs = 0);
 } // end namespace fawkes
 
 #endif

@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--Generated with glade3 3.4.5 on Wed Nov  5 19:35:59 2008 -->
+<interface>
+  <object class="GtkWindow" id="wnd_netloggui">
+    <property name="width_request">800</property>
+    <property name="height_request">600</property>
+    <property name="title" translatable="yes">Fawkes NetLog GUI</property>
+    <child>
+      <object class="GtkVBox" id="vbox_main">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkToolbar" id="toolbar">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkToolButton" id="tb_connection">
+                <property name="visible">True</property>
+                <property name="stock_id">gtk-connect</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="tb_exit">
+                <property name="visible">True</property>
+                <property name="stock_id">gtk-quit</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="toolbutton2">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="tb_clear">
+                <property name="visible">True</property>
+                <property name="stock_id">gtk-clear</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="lab_no_connection">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">&lt;b&gt;No Fawkes instance found&lt;/b&gt;</property>
+            <property name="use_markup">True</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -98,6 +98,22 @@ LineSegment::p2() const
   return m_p2;
 }
 
+/** Project a point on this LineSegment
+ * @param p a point
+ * @return the projected point
+ */
+HomPoint 
+LineSegment::project(const HomPoint &p) const
+{
+  HomVector direction = (m_p2 - m_p1).unit();
+  float factor = direction * (p - m_p1);
+  if (factor <= 0.0)
+	return m_p1;
+  if (factor >= length())
+	return m_p2;
+  return m_p1 + (direction * factor);
+}
+
 void
 LineSegment::register_primitives()
 {

@@ -50,18 +50,23 @@ class LocalBlackBoard : public BlackBoard
 		  bool master = true);
   virtual ~LocalBlackBoard();
 
-  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier);
-  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier);
+  virtual Interface *  open_for_reading(const char *interface_type,
+					const char *identifier);
+  virtual Interface *  open_for_writing(const char *interface_type,
+					const char *identifier);
   virtual void         close(Interface *interface);
 
   virtual InterfaceInfoList *  list_all();
+  virtual InterfaceInfoList *  list(const char *type_pattern,
+				    const char *id_pattern);
   virtual bool                 is_alive() const throw();
   virtual bool                 try_aliveness_restore() throw();
 
-  virtual std::list<Interface *> open_multiple_for_reading(const char *type_pattern,
-							   const char *id_pattern = "*");
+  virtual std::list<Interface *>
+    open_multiple_for_reading(const char *type_pattern,
+			      const char *id_pattern = "*");
   virtual void register_listener(BlackBoardInterfaceListener *listener,
-			 unsigned int flags);
+				 unsigned int flags);
   virtual void unregister_listener(BlackBoardInterfaceListener *listener);
 
   virtual void register_observer(BlackBoardInterfaceObserver *observer,

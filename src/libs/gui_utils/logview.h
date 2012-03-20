@@ -25,11 +25,8 @@
 #define __LIBS_GUI_UTILS_LOGVIEW_H_
 
 #include <gtkmm.h>
-#ifdef HAVE_GLADEMM
-#  include <libglademm/xml.h>
-#endif
 
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -46,10 +43,8 @@ class LogView
  public:
   LogView();
   LogView(const char *hostname, unsigned short int port);
-#ifdef HAVE_GLADEMM
   LogView(BaseObjectType* cobject,
-	  const Glib::RefPtr<Gnome::Glade::Xml>& ref_glade);
-#endif
+	  const Glib::RefPtr<Gtk::Builder> &builder);
   ~LogView();
 
   void set_client(FawkesNetworkClient *client);
@@ -65,11 +60,15 @@ class LogView
 
  private:
   virtual void on_row_inserted(const Gtk::TreeModel::Path& path,
-			       const Gtk::TreeModel::iterator& iter);
+  			       const Gtk::TreeModel::iterator& iter);
   virtual void on_message_received(FawkesNetworkMessage *msg);
   virtual void on_client_connected();
   virtual void on_client_disconnected();
+#if GTK_VERSION_GE(3,0)
+  virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
+#else
   virtual void on_expose_notify(GdkEventExpose *event);
+#endif
 
   void ctor(const char *hostname = NULL, unsigned short int port = 0);
 
@@ -78,6 +77,7 @@ class LogView
   {
    public:
     LogRecord();
+
     Gtk::TreeModelColumn<Glib::ustring> loglevel;
     Gtk::TreeModelColumn<Glib::ustring> time;
     Gtk::TreeModelColumn<Glib::ustring> component;

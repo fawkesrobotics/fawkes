@@ -24,6 +24,7 @@
 #ifndef __LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 #define __LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 
+#include <cstddef>
 #include <glibmm/dispatcher.h>
 #include <blackboard/interface_listener.h>
 #include <core/utils/lock_queue.h>
@@ -36,6 +37,10 @@ class InterfaceDispatcher
 {
  public:
   InterfaceDispatcher(const char *listener_name, fawkes::Interface *iface,
+		      bool message_enqueueing = true);
+
+  InterfaceDispatcher(const char *listener_name_prefix,
+                      std::list<fawkes::Interface *> ifaces,
 		      bool message_enqueueing = true);
 
   void set_message_enqueueing(bool enqueue);
@@ -66,6 +71,8 @@ class InterfaceDispatcher
   virtual void on_reader_added();
   virtual void on_reader_removed();
 
+ private:
+  void setup_signals();
 
  private:
   bool                                           __message_enqueueing;

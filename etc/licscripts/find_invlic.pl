@@ -50,8 +50,8 @@ sub check_file()
     return;
   }
 
-  # Only operate on .h, .c and .cpp files
-  if ( $entry !~ /\.(cpp|h|c|lua)$/ ) {
+  # Only operate on certain files
+  if ( $entry !~ /\.(cpp|h|c|cxx|hpp|ext_h|lua|py)$/ ) {
     return;
   }
 

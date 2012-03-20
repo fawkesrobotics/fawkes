@@ -24,9 +24,6 @@
 #define __TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
 
 #include <gtkmm.h>
-#ifdef HAVE_GLADEMM
-#  include <libglademm/xml.h>
-#endif
 #include <list>
 #include <interfaces/Position2DTrackInterface.h>
 #include <interfaces/SwitchInterface.h>
@@ -55,10 +52,8 @@ class LaserDrawingArea
   } draw_mode_t;
 
   LaserDrawingArea();
-#ifdef HAVE_GLADEMM
   LaserDrawingArea(BaseObjectType* cobject,
-		   const Glib::RefPtr<Gnome::Glade::Xml>& refxml);
-#endif
+		   const Glib::RefPtr<Gtk::Builder> &builder);
   ~LaserDrawingArea();
 
   void set_laser360_if(fawkes::Laser360Interface *laser_if);
@@ -81,23 +76,28 @@ class LaserDrawingArea
 
   void set_rotation(float rot_rad);
   void set_draw_mode(draw_mode_t mode);
+  void set_connected(bool connected);
   
   void toggle_break_drawing();
 
  protected:
-  virtual bool on_expose_event(GdkEventExpose* event);
+#if GTK_VERSION_GE(3,0)
+  virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
+#else
+  virtual bool on_expose_event(GdkEventExpose *event);
+#endif
   virtual bool on_scroll_event(GdkEventScroll *event);
   virtual bool on_motion_notify_event(GdkEventMotion *event);
   virtual bool on_button_press_event(GdkEventButton *event);
 
   void draw_beams(Glib::RefPtr<Gdk::Window> &window,
-		  Cairo::RefPtr<Cairo::Context> &cr);
+		  const Cairo::RefPtr<Cairo::Context> &cr);
   void draw_segments(Glib::RefPtr<Gdk::Window> &window,
-		     Cairo::RefPtr<Cairo::Context> &cr);
+		     const Cairo::RefPtr<Cairo::Context> &cr);
   void draw_scalebox(Glib::RefPtr<Gdk::Window> &window,
-		     Cairo::RefPtr<Cairo::Context> &cr);
+		     const Cairo::RefPtr<Cairo::Context> &cr);
   void draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
-			 Cairo::RefPtr<Cairo::Context> &cr);
+			 const Cairo::RefPtr<Cairo::Context> &cr);
   std::pair<float,float> transform_coords_from_fawkes(float p_x, float p_y);
 
 
@@ -115,6 +115,7 @@ class LaserDrawingArea
   std::list<fawkes::ObjectPositionInterface*>* __l_objpos_if_misc;
   std::list<fawkes::Position2DTrackInterface*>* __l_track_if;
 
+  bool                       __connected;
   draw_mode_t                __draw_mode;
 
   float                      __zoom_factor;

@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<!--*- mode: xml -*-->
+<interface>
+  <object class="GtkWindow" id="wndMain">
+    <property name="width_request">350</property>
+    <property name="height_request">400</property>
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">FUSE Viewer</property>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="spacing">1</property>
+        <child>
+          <object class="GtkVPaned" id="vpaned1">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="position">90</property>
+            <property name="position_set">True</property>
+            <child>
+              <object class="GtkScrolledWindow" id="swFuseList">
+                <property name="height_request">120</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+                <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                <property name="shadow_type">GTK_SHADOW_IN</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">False</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkViewport" id="vpImage">
+                <property name="visible">True</property>
+                <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                <property name="shadow_type">GTK_SHADOW_OUT</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkExpander" id="exdSave">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child>
+              <object class="GtkVBox" id="vbox2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkHBox" id="hboxTypePlace">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkAspectFrame" id="afSaveType">
+                        <property name="visible">True</property>
+                        <property name="label_xalign">0</property>
+                        <property name="label_yalign">0</property>
+                        <property name="shadow_type">GTK_SHADOW_NONE</property>
+                        <property name="xalign">0</property>
+                        <property name="yalign">0</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="fcbSaveTo">
+                        <property name="visible">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hboxSave">
+                    <property name="visible">True</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="cbtAutoSave">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Auto save</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="padding">9</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btSaveImage">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="label" translatable="yes">Save image</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Save image</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStatusbar" id="stb">
+            <property name="visible">True</property>
+            <property name="spacing">2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

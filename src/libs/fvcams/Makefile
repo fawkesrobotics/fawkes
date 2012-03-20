@@ -19,14 +19,14 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
-LDFLAGS  += $(VISION_LDFLAGS)
+LDFLAGS  += $(VISION_LDFLAGS) $(VISION_CAM_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
 LDFLAGS_libfvcams = $(VISION_CAM_LDFLAGS)
 
-LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils
+LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils fawkeslogging
 OBJS_libfvcams = camera.o          \
                  control/control.o \
                  control/color.o   \
@@ -42,60 +42,67 @@ OBJS_libfvcams = camera.o          \
                  control/factory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)
-OBJS_libfvcams += control/visca.o
+  OBJS_libfvcams += control/visca.o
 endif
 ifeq ($(HAVE_EVID100P_CTRL),1)
-OBJS_libfvcams += control/sony_evid100p.o
+  OBJS_libfvcams += control/sony_evid100p.o
 endif
 ifeq ($(HAVE_DPPTU_CTRL),1)
-OBJS_libfvcams += control/dp_ptu.o
+  OBJS_libfvcams += control/dp_ptu.o
 endif
 ifeq ($(HAVE_FIREWIRE_CAM),1)
-OBJS_libfvcams += firewire.o
+  OBJS_libfvcams += firewire.o
 endif
 ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
-OBJS_libfvcams += bumblebee2.o
+  OBJS_libfvcams += bumblebee2.o
 endif
 ifeq ($(HAVE_PIKE_CAM),1)
-OBJS_libfvcams += pike.o
+  OBJS_libfvcams += pike.o
 endif
 ifeq ($(HAVE_LEUTRON_CAM),1)
-OBJS_libfvcams += leutron.o
-# Leutron headers are in a bad shape...
-CFLAGS += -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+  OBJS_libfvcams += leutron.o
+  # Leutron headers are in a bad shape...
+  CFLAGS += -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
 endif
 ifeq ($(HAVE_V4L1_CAM),1)
-OBJS_libfvcams += v4l1.o
+  OBJS_libfvcams += v4l1.o
 endif
 ifeq ($(HAVE_V4L2_CAM),1)
-OBJS_libfvcams += v4l2.o
+  OBJS_libfvcams += v4l2.o
 endif
 ifeq ($(HAVE_V4L_CAM),1)
-OBJS_libfvcams += v4l.o
+  OBJS_libfvcams += v4l.o
 endif
 ifeq ($(HAVE_NAO_CAM),1)
-OBJS_libfvcams += nao.o
+  OBJS_libfvcams += nao.o
 endif
 ifeq ($(HAVE_FILELOADER_CAM),1)
-OBJS_libfvcams += fileloader.o
+  OBJS_libfvcams += fileloader.o
 endif
 ifeq ($(HAVE_NETWORK_CAM),1)
-OBJS_libfvcams += net.o
+  OBJS_libfvcams += net.o
 endif
 ifeq ($(HAVE_SHMEM_CAM),1)
-OBJS_libfvcams += shmem.o
+  OBJS_libfvcams += shmem.o
 endif
 ifeq ($(HAVE_SWISSRANGER_CAM),1)
-OBJS_libfvcams += swissranger.o
+  OBJS_libfvcams += swissranger.o
+  CFLAGS  += $(CFLAGS_SWISSRANGER)
+  LDFLAGS += $(LDFLAGS_SWISSRANGER)
 endif
 ifeq ($(HAVE_LIBV4L2),1)
-CFLAGS  += $(CFLAGS_LIBV4L2)
-LDFLAGS += $(LDFLAGS_LIBV4L2)
+  CFLAGS  += $(CFLAGS_LIBV4L2)
+  LDFLAGS += $(LDFLAGS_LIBV4L2)
 endif
 
 ifneq ($(HAVE_FIREWIRE_CAM),1)
   ifneq ($(realpath $(SRCDIR)/firewire.cpp),)
     WARN_TARGETS += warning_firewire
+  endif
+endif
+ifneq ($(HAVE_V4L1_CAM),1)
+  ifneq ($(HAVE_V4L1_FAIL_REASON),)
+    WARN_TARGETS += warning_v4l1
   endif
 endif
 ifneq ($(HAVE_V4L2_CAM),1)
@@ -121,7 +128,7 @@ LIBS_all = $(LIBDIR)/libfvcams.so
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_firewire warning_leutron warning_libjpeg warning_v4l2
+.PHONY: warning_firewire warning_leutron warning_libjpeg warning_v4l1 warning_v4l2
 warning_firewire:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)";
 
@@ -130,6 +137,9 @@ warning_leutron:
 
 warning_libjpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No JPEG support in file loader$(TNORMAL) (install libjpeg[-devel])";
+
+warning_v4l1:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No V4L1 support$(TNORMAL) ($(HAVE_V4L1_FAIL_REASON))";
 
 warning_v4l2:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No V4L2 support$(TNORMAL) ($(HAVE_V4L2_FAIL_REASON))";

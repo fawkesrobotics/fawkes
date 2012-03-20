@@ -67,10 +67,17 @@ HomVector::~HomVector()
  */
 float
 HomVector::length() const
-{
-  float length = sqrt( x() * x() + y() * y() + z() * z() );
+{  
+  return sqrt( length_square() );
+}
 
-  return length;
+/** Calculates the squared length length of the vector (faster than length
+ * @return the squared length
+ */
+float
+HomVector::length_square() const
+{
+  return x() * x() + y() * y() + z() * z();
 }
 
 /** Brings the vector to unit-length.

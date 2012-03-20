@@ -94,8 +94,29 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
   __refresh_thread->refresh_cam();
 }
 
+/** Constructor for Gtk::Builder.
+ * Constructor that can be used to instantiate an ImageWidget as a
+ * derived widget from a Gtk builder file.
+ *
+ * Note: The ImageWidget (and its internal buffer) is set to the size
+ * as in the UI file, in case no camera is set afterwards. Use @see
+ * ImageWidget::set_size() to resize the ImageWidget afterwards.
+ *
+ * @param cobject pointer to the base object
+ * @param builder Builder
+ */
+ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gtk::Builder> builder)
+  : Gtk::Image(cobject)
+{
+  __cam            = NULL;
+  __cam_enabled    = false;
+  __cam_mutex      = new fawkes::Mutex;
+  __refresh_thread = NULL;
+//   set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
+}
+
 #ifdef HAVE_GLADEMM
-/**
+/** Constructor for Glade.
  * Constructor that can be used to instantiate an ImageWidget as a
  * derived widget from a Glade file.
  *

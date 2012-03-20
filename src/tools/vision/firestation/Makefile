@@ -21,14 +21,14 @@ include $(BUILDSYSDIR)/gui.mk
 include $(BUILDCONFDIR)/netcomm/netcomm.mk
 
 CFLAGS   = $(VISION_CFLAGS)
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GUI)
 INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
 LIBS_firestation = stdc++ m fawkescore fawkesutils fawkesgeometry fvutils \
-		   fawkesnetcomm fvmodels fvclassifiers fvcams fvwidgets \
+		   fawkesnetcomm fvmodels fvcams fvwidgets \
 		   fawkesguiutils
 ifeq ($(HAVE_BULB_CREATOR),1)
   LIBS_firestation += fvbulbcalib
@@ -40,7 +40,7 @@ OBJS_firestation = color_train_widget.o         \
 		   main.o
 OBJS_all += $(OBJS_firestation)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_AVAHI),111)
+ifeq ($(HAVE_GUI)$(HAVE_AVAHI),11)
   BINS_gui += $(BINDIR)/firestation
   INST_RESDIRS = guis/firestation
   MANPAGES_gui += $(MANDIR)/man1/firestation.1

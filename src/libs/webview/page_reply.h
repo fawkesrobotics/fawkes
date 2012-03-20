@@ -45,6 +45,8 @@ class WebPageReply : public StaticWebReply
 		    WebPageHeaderGenerator *headergen,
 		    WebPageFooterGenerator *footergen);
 
+  virtual void set_html_header(std::string h);
+
  protected:
   WebPageReply(response_code_t code);
 
@@ -57,6 +59,7 @@ class WebPageReply : public StaticWebReply
   static const char *PAGE_FOOTER;
 
   std::string __merged_body;
+  std::string __html_header;
 };
 
 } // end namespace fawkes

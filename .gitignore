@@ -9,6 +9,8 @@
 /bin/
 /bin_*/
 /cfg/*.db
+/cfg/*.key
+/cfg/*.crt
 /doc/api
 /doc/man
 /lib/
@@ -21,4 +23,5 @@
 # Eclipse project files, some are using it...
 .cproject
 .project
+.settings
 

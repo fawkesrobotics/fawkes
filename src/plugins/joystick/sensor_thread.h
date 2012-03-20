@@ -49,6 +49,10 @@ class JoystickSensorThread
   virtual void finalize();
   virtual void loop();
 
+  /** Get joystick interface.
+   * @return joystick interface */
+  fawkes::JoystickInterface * joystick_interface() const { return __joystick_if; }
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 

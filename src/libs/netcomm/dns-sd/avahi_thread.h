@@ -3,7 +3,7 @@
  *  avahi_thread.h - Avahi Thread
  *
  *  Created: Wed Nov 08 11:17:06 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -163,7 +163,8 @@ class AvahiThread
   void wake_poller();
 
   /* publisher private methods */
-  AvahiEntryGroup * create_service(const NetworkService &service, AvahiEntryGroup *exgroup);
+  AvahiEntryGroup * create_service(const NetworkService &service,
+				   AvahiEntryGroup *exgroup);
   void group_reset(AvahiEntryGroup *g);
   void group_erase(AvahiEntryGroup *g);
   void name_collision(AvahiEntryGroup *g);

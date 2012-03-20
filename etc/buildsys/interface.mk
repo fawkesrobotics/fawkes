@@ -71,6 +71,7 @@ ifneq ($(INTERFACES_all),)
 	$(eval INST_HDRS_SUBDIR_interfaces_lib$I  = interfaces)			\
 	$(eval OBJS_all                    += $$(OBJS_interfaces_lib$I))	\
 	$(eval INTERFACES_SRCS             += $(SRCDIR)/$I.cpp)			\
+	$(eval INTERFACES_TOLUA            += $(SRCDIR)/$I.tolua)		\
 	$(eval INTERFACES_HDRS             += $(IFACESRCDIR)/$I.h)		\
 	$(eval INTERFACES_LIBS             += $(IFACEDIR)/lib$I.so)		\
 	$(eval INTERFACES_TOUCH            += $(SRCDIR)/$(OBJDIR)/$I.touch)	\
@@ -101,6 +102,7 @@ ifeq ($(OBJSSUBMAKE),1)
 
 $(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
 $(INTERFACES_HDRS): $(IFACESRCDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
+$(INTERFACES_TOLUA): $(SRCDIR)/%.tolua: $(SRCDIR)/$(OBJDIR)/%.touch
 
 $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
@@ -109,11 +111,11 @@ $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 	$(if $(filter-out $(IFACESRCDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h)
   else
     ifneq ($(abspath $(IFACESRCDIR)),$(abspath $(SRCDIR)))
-	if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
-		$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
+	$(SILENT) if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
+		echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
 	else \
-		$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
 		cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h; \
 		touch $(SRCDIR)/$*.cpp; \
 	fi
@@ -127,7 +129,7 @@ $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 endif # OBJSSUBMAKE != 1
 
 ifneq ($(PLUGINS_all),)
-$(PLUGINS_all): | $(INTERFACES_LIBS)
+$(PLUGINS_all:%.so=%.$(SOEXT)): | $(INTERFACES_LIBS:%.so=%.$(SOEXT))
 endif
 ifneq ($(filter-out $(BINDIR)/ffifacegen,$(BINS_all)),)
 $(BINS_all): | $(INTERFACES_LIBS)
@@ -136,7 +138,7 @@ endif
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBS_all_tolua)
 
-$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.so: | $(IFACEDIR)/lib%.so
+$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.$(SOEXT): | $(IFACEDIR)/lib%.$(SOEXT)
 
 else
 all: warning_tolua_wrapper

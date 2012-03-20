@@ -40,8 +40,12 @@ using namespace fawkes;
 const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "<html>\n"
   " <head>\n"
+  "  <meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" />\n"
+  "  <meta http-equiv=\"Content-Language\" content=\"en-us\" />\n"
   "  <title>%s (%s)</title>\n"
-  "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/webview.css\" />\n"
+  "  <link rel=\"icon\" type=\"image/png\" href=\"/static/images/favicon.png\" />\n"
+  "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/webview.css\" />\n"
+  "%s"
   " </head>\n"
   " <body>\n"
   "  <div id=\"header\">"
@@ -58,13 +62,16 @@ WebviewHeaderGenerator::WebviewHeaderGenerator(WebNavManager *nav_manager)
 
 std::string
 WebviewHeaderGenerator::html_header(std::string &title,
-				    std::string &active_baseurl)
+				    std::string &active_baseurl,
+				    std::string &html_header)
 {
   fawkes::HostInfo hi;
 
   std::string rv = "";
   char *s;
-  if ( asprintf(&s, PAGE_HEADER, title.c_str(), hi.short_name()) != -1 ) {
+  if ( asprintf(&s, PAGE_HEADER, title.c_str(), hi.short_name(),
+		html_header.c_str()) != -1 )
+  {
     rv = s;
     free(s);
   }

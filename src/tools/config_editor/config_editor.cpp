@@ -35,30 +35,30 @@
 using namespace std;
 using namespace fawkes;
 
-/** @class FawkesConfigEditor tools/config_editor/config_editor.h
+/** @class FawkesConfigEditor "config_editor.h"
  * Graphical configuration editor.
  *
  * @author Daniel Beck
  */
 
 /** Constructor.
- * @param ref_xml Glade XML file
+ * @param builder Gtk builder
  */
-FawkesConfigEditor::FawkesConfigEditor( Glib::RefPtr<Gnome::Glade::Xml> ref_xml )
+FawkesConfigEditor::FawkesConfigEditor(Glib::RefPtr<Gtk::Builder> builder)
 {
-  ref_xml->get_widget("wndMain", m_wnd_main);
-  ref_xml->get_widget("btnExit", m_btn_exit);
+  builder->get_widget("wndMain", m_wnd_main);
+  builder->get_widget("btnExit", m_btn_exit);
 
   m_trv_config = NULL;
-  ref_xml->get_widget_derived("trvConfig", m_trv_config);
-  m_trv_config->register_plugin( new RetrieverConfigPlugin( RESDIR"/guis/config_editor/retriever_config_plugin.glade" ) );
-  m_trv_config->register_plugin(new NaoStiffnessConfigPlugin(RESDIR"/guis/config_editor/naostiffness_config_plugin.glade"));
+  builder->get_widget_derived("trvConfig", m_trv_config);
+  m_trv_config->register_plugin( new RetrieverConfigPlugin( RESDIR"/guis/config_editor/retriever_config_plugin.ui" ) );
+  m_trv_config->register_plugin(new NaoStiffnessConfigPlugin(RESDIR"/guis/config_editor/naostiffness_config_plugin.ui"));
 
   m_btn_exit->signal_clicked().connect( sigc::mem_fun( *this, &FawkesConfigEditor::on_btn_exit_clicked) );
 
-  m_service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect");
-  m_service_selector->signal_connected().connect( sigc::mem_fun( *this, &FawkesConfigEditor::on_connected) );
-  m_service_selector->signal_disconnected().connect( sigc::mem_fun( *this, &FawkesConfigEditor::on_disconnected) );
+  m_service_selector = new ServiceSelectorCBE(builder, "cbeHosts", "btnConnect");
+  m_service_selector->signal_connected().connect(sigc::mem_fun(*this, &FawkesConfigEditor::on_connected));
+  m_service_selector->signal_disconnected().connect(sigc::mem_fun( *this, &FawkesConfigEditor::on_disconnected));
 }
 
 /** Destructor. */

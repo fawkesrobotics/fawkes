@@ -24,7 +24,6 @@
 #define __TOOLS_WORLDINFO_VIEWER_WORLDINFO_VIEWER_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 #include <cairomm/context.h>
 
 class FieldView;
@@ -35,8 +34,8 @@ namespace fawkes {
 class WorldInfoViewer : public Gtk::Window
 {
  public:
-  WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-		   fawkes::WorldInfoDataContainer* data_container );
+  WorldInfoViewer(Glib::RefPtr<Gtk::Builder> builder,
+                  fawkes::WorldInfoDataContainer* data_container );
   virtual ~WorldInfoViewer();
   
   Gtk::Window& get_window() const;
@@ -63,9 +62,6 @@ class WorldInfoViewer : public Gtk::Window
     Gtk::TreeModelColumn<bool> show_ball;
     Gtk::TreeModelColumn<bool> show_opponents;
   };
-
-  Gtk::Widget* get_widget( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-			   const char* widget_name ) const;
 
   // signal handlers
   void on_show_pose_toggled( const Glib::ustring& path );

@@ -63,7 +63,7 @@ $(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%),$(if $(SOV
 
 ifdef __buildsys_lua_mk_
 # Lua libraries do not set an SOVER, it's not checked anyway
-$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval NOSOVER_lua_$(subst /,_,$L)=1)))
+$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval NOSOVER_lua_$(call nametr,$L)=1)))
 endif
 
 # Dependencies
@@ -74,8 +74,8 @@ endif
 ifeq ($(MAKELEVEL),1)
   EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) $(MANPAGES_gui)
 endif
-all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
-gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
+all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
+gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
 uncolored-all: all
 uncolored-gui: gui
 
@@ -101,13 +101,13 @@ clean: presubdirs subdirs
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf "$(SRCDIR)/$(OBJDIR)" ; fi
 	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf "$(DEPDIR)" ; fi
 	$(SILENT)$(foreach B,$(BINS_all),rm -f $(B);)
-	$(SILENT)$(foreach L,$(LIBS_all),rm -f $(addsuffix *,$(L));)
-	$(SILENT)$(foreach P,$(PLUGINS_all),rm -f $(P);)
+	$(SILENT)$(foreach L,$(LIBS_all:%.so=%.$(SOEXT)),rm -f $(addsuffix *,$(L));)
+	$(SILENT)$(foreach P,$(PLUGINS_all:%.so=%.$(SOEXT)),rm -f $(P);)
 	$(SILENT)$(foreach M,$(MANPAGES_all),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
 	$(SILENT)$(foreach B,$(BINS_gui),rm -f $(B);)
-	$(SILENT)$(foreach L,$(LIBS_gui),rm -f $(L);)
-	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -f $(P);)
+	$(SILENT)$(foreach L,$(LIBS_gui:%.so=%.$(SOEXT)),rm -f $(L);)
+	$(SILENT)$(foreach P,$(PLUGINS_gui:%.so=%.$(SOEXT)),rm -f $(P);)
 	$(SILENT)$(foreach M,$(MANPAGES_gui),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 	$(SILENT)$(foreach E,$(CLEAN_FILES),rm -rf $(E);)
@@ -115,8 +115,8 @@ clean: presubdirs subdirs
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
 qa: presubdirs subdirs
-	$(SILENT) if [ -d "$(subst /.objs,,$(realpath $(CURDIR)))/qa" ]; then \
-		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(realpath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(realpath $(CURDIR)))/qa)"; \
+	$(SILENT) if [ -d "$(subst /.objs,,$(abspath $(CURDIR)))/qa" ]; then \
+		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(abspath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(abspath $(CURDIR)))/qa)"; \
 		$(MAKE) --no-print-directory --no-keep-going -C "$(subst /.objs,,$(CURDIR))/qa" \
 			SRCDIR="$(subst /.objs,,$(CURDIR))/qa" $(MFLAGS) INDENT="$(INDENT)$(INDENT_STRING)" \
 			OBJSSUBMAKE=0 || exit $$?; \
@@ -127,16 +127,23 @@ endif
 presubdirs: $(PRESUBDIRS)
 subdirs: $(SUBDIRS)
 
+ifneq ($(MAKECMDGOALS),clean)
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(MANPAGES_all)$(TARGETS_all)$(EXTRA_ALL),)
+subdirs: | $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL)
+$(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL): | presubdirs
+  endif
+endif
+
 ifneq ($(PRESUBDIRS)$(SUBDIRS),)
 $(PRESUBDIRS) $(SUBDIRS):
-	$(SILENTSYMB) if [ ! -d "$(realpath $(SRCDIR)/$(@))" ]; then \
+	$(SILENTSYMB) if [ ! -d "$(abspath $(SRCDIR)/$(@))" ]; then \
 		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL) ---"; \
 		exit 1; \
 	else \
 		echo -e "$(INDENT_PRINT)--> Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
-		$(MAKE) --no-print-directory --no-keep-going -C "$(realpath $(SRCDIR)/$@)" \
+		$(MAKE) --no-print-directory --no-keep-going -C "$(abspath $(SRCDIR)/$@)" \
 		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
-		SRCDIR="$(realpath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
+		SRCDIR="$(abspath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
 		fi \
@@ -199,31 +206,31 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
-	$(LDFLAGS_BASE) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
+	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
+	-o $@ $(subst ..,__,$^) $(LDFLAGS_BASE) \
+	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 ifeq ($(WARN_MISSING_MANPAGE),1)
 	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $* does not have a man page$(TNORMAL) ---")
 endif
 
-$(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
+$(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) -o $@$(if $(NOSOVER_$(subst /,_,$*)),,.$(SOVER_$(subst /,_,$*))) $(subst ..,__,$^) \
-	$(if $(NOSOVER_$(subst /,_,$*)),,-Wl,-soname=$(@F).$(SOVER_$(subst /,_,$*))) \
-	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) \
-	$(if $(call seq,$(origin LDFLAGS_$(subst /,_,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(subst /,_,$*))) \
-	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS))
-	$(if $(NOSOVER_$(subst /,_,$*)),, \
-	$(SILENT) ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@; \
-	ln -fs $(@F).$(SOVER_$(subst /,_,$*)) $@.$(firstword $(call split,.,$(SOVER_$(subst /,_,$*)))); \
+	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
+	-o $@$(if $(NOSOVER_$(call nametr,$*)),,.$(SOVER_$(call nametr,$*))) $(subst ..,__,$^) \
+	$(if $(NOSOVER_$(call nametr,$*)),,-Wl,-soname=$(@F).$(SOVER_$(call nametr,$*))) \
+	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(call nametr,$*)) \
+	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$(call nametr,$*))) $(addprefix -L,$(LIBDIRS))
+	$(if $(NOSOVER_$(call nametr,$*)),, \
+	$(SILENT) ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@; \
+	ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@.$(firstword $(call split,.,$(SOVER_$(call nametr,$*)))); \
 	)
 
 ### Check if there are special additions
-ifneq ($(realpath $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
+ifneq ($(wildcard $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
   include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk
 else
   ifneq ($(SECONDARY_BUILDSYSDIR),)

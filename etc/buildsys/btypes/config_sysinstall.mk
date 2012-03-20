@@ -35,7 +35,7 @@ SYSCONFDIR     = /etc/fawkes
 #   separating the (many) interface libs from the normal libdir and avoiding
 #   the need to add an entry per command to /etc/ld.so.conf.d/ (or similar)
 CFLAGS_BASE    = $(CFLAGS_MINIMUM)
-LDFLAGS_BASE   = $(LDFLAGS_MINIMUM) -Wl,-R$(EXEC_LIBDIR)/fawkes/interfaces
+LDFLAGS_BASE   = $(LDFLAGS_MINIMUM) -Wl,-rpath=$(EXEC_LIBDIR)/fawkes/interfaces
 
 # Note: the install scripts make the assumption that FFLIBDIR, RESDIR and INCDIR
 # paths (with EXEC_ prefix) are specific to Fawkes and can be deleted completely

@@ -31,6 +31,7 @@
 
 #include <interface/interface_info.h>
 
+#include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
@@ -72,6 +73,7 @@ RemoteBlackBoard::RemoteBlackBoard(FawkesNetworkClient *client)
   __wait_mutex = new Mutex();
   __wait_cond  = new WaitCondition(__wait_mutex);
 
+  __inbound_thread = NULL;
   __m = NULL;
 }
 
@@ -107,6 +109,7 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
   __wait_mutex = new Mutex();
   __wait_cond  = new WaitCondition(__wait_mutex);
 
+  __inbound_thread = NULL;
   __m = NULL;
 }
 
@@ -184,6 +187,15 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
     throw Exception("Cannot instantiate remote interface, connection is dead");
   }
 
+  __mutex->lock();
+  if (__inbound_thread != NULL &&
+      Thread::current_thread() &&
+      strcmp(Thread::current_thread()->name(), __inbound_thread) == 0)
+  {
+    throw Exception("Cannot call open_interface() from inbound handler");
+  }
+  __mutex->unlock();
+
   bb_iopen_msg_t *om = (bb_iopen_msg_t *)calloc(1, sizeof(bb_iopen_msg_t));
   strncpy(om->type, type, __INTERFACE_TYPE_SIZE);
   strncpy(om->id, identifier, __INTERFACE_ID_SIZE);
@@ -195,9 +207,11 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
 
   __wait_mutex->lock();
   __fnc->enqueue(omsg);
-  while (! __m ||
-	 ((__m->msgid() != MSG_BB_OPEN_SUCCESS) &&
-	  (__m->msgid() != MSG_BB_OPEN_FAILURE))) {
+  while (is_alive() &&
+	 (! __m ||
+	   ((__m->msgid() != MSG_BB_OPEN_SUCCESS) &&
+	   (__m->msgid() != MSG_BB_OPEN_FAILURE))))
+  {
     if ( __m ) {
       __m->unref();
       __m = NULL;
@@ -205,6 +219,11 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
     __wait_cond->wait();
   }
   __wait_mutex->unlock();
+
+  if (!is_alive()) {
+    throw Exception("Connection died while trying to open %s::%s",
+		    type, identifier);
+  }
 
   if ( __m->msgid() == MSG_BB_OPEN_SUCCESS ) {
     // We got the interface, create internal storage and prepare instance for return
@@ -221,7 +240,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
     } else if ( error == BB_ERR_HASH_MISMATCH ) {
       throw Exception("Hash mismatch for interface %s:%s", type, identifier);
     } else if ( error == BB_ERR_UNKNOWN_TYPE ) {
-      throw Exception("Type %s unknoen (%s:%s)", type, type, identifier);
+      throw Exception("Type %s unknown (%s::%s)", type, type, identifier);
     } else if ( error == BB_ERR_WRITER_EXISTS ) {
       throw BlackBoardWriterActiveException(identifier, type);
     } else {
@@ -243,7 +262,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
   Interface *iface = __instance_factory->new_interface_instance(type, identifier);
   try {
     open_interface(type, identifier, writer, iface);
-  } catch (...) {
+  } catch (Exception &e) {
     __instance_factory->delete_interface_instance(iface);
     throw;
   }
@@ -364,7 +383,14 @@ RemoteBlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 InterfaceInfoList *
 RemoteBlackBoard::list_all()
 {
-  MutexLocker lock(__mutex);
+  __mutex->lock();
+  if (__inbound_thread != NULL &&
+      strcmp(Thread::current_thread()->name(), __inbound_thread) == 0)
+  {
+    throw Exception("Cannot call list_all() from inbound handler");
+  }
+  __mutex->unlock();
+
   InterfaceInfoList *infl = new InterfaceInfoList();
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
@@ -396,6 +422,57 @@ RemoteBlackBoard::list_all()
 }
 
 
+InterfaceInfoList *
+RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
+{
+  __mutex->lock();
+  if (__inbound_thread != NULL &&
+      strcmp(Thread::current_thread()->name(), __inbound_thread) == 0)
+  {
+    throw Exception("Cannot call list() from inbound handler");
+  }
+  __mutex->unlock();
+
+  InterfaceInfoList *infl = new InterfaceInfoList();
+
+  bb_ilistreq_msg_t *om =
+    (bb_ilistreq_msg_t *)calloc(1, sizeof(bb_ilistreq_msg_t));
+  strncpy(om->type_pattern, type_pattern, __INTERFACE_TYPE_SIZE);
+  strncpy(om->id_pattern, id_pattern, __INTERFACE_ID_SIZE);
+
+  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
+							MSG_BB_LIST,
+							om,
+							sizeof(bb_ilistreq_msg_t));
+
+  __wait_mutex->lock();
+  __fnc->enqueue(omsg);
+  while (! __m ||
+	 (__m->msgid() != MSG_BB_INTERFACE_LIST)) {
+    if ( __m ) {
+      __m->unref();
+      __m = NULL;
+    }
+    __wait_cond->wait();
+  }
+  __wait_mutex->unlock();
+
+  BlackBoardInterfaceListContent *bbilc =
+    __m->msgc<BlackBoardInterfaceListContent>();
+  while ( bbilc->has_next() ) {
+    size_t iisize;
+    bb_iinfo_msg_t *ii = bbilc->next(&iisize);
+    infl->append(ii->type, ii->id, ii->hash,  ii->serial,
+		 ii->has_writer, ii->num_readers);
+  }
+
+  __m->unref();
+  __m = NULL;
+
+  return infl;
+}
+
+
 /** We are no longer registered in Fawkes network client.
  * Ignored.
  * @param id the id of the calling client
@@ -410,6 +487,10 @@ void
 RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
 				   unsigned int id) throw()
 {
+  __mutex->lock();
+  __inbound_thread = Thread::current_thread()->name();
+  __mutex->unlock();
+
   if ( m->cid() == FAWKES_CID_BLACKBOARD ) {
     unsigned int msgid = m->msgid();
     try {
@@ -443,6 +524,12 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
 	if ( __proxies.find(ntohl(esm->serial)) != __proxies.end() ) {
 	  __proxies[ntohl(esm->serial)]->writer_removed(ntohl(esm->event_serial));
 	}
+      } else if (msgid == MSG_BB_INTERFACE_CREATED) {
+	bb_ievent_msg_t *em = m->msg<bb_ievent_msg_t>();
+	__notifier->notify_of_interface_created(em->type, em->id);
+      } else if (msgid == MSG_BB_INTERFACE_DESTROYED) {
+	bb_ievent_msg_t *em = m->msg<bb_ievent_msg_t>();
+	__notifier->notify_of_interface_destroyed(em->type, em->id);
       } else {
 	__wait_mutex->lock();
 	__m = m;
@@ -454,6 +541,10 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
       // Bam, you're dead. Ok, not now, we just ignore that this shit happened...
     }
   }
+
+  __mutex->lock();
+  __inbound_thread = NULL;
+  __mutex->unlock();
 }
 
 
@@ -468,6 +559,7 @@ RemoteBlackBoard::connection_died(unsigned int id) throw()
   }
   __proxies.clear();
   __proxies.unlock();
+  __wait_cond->wake_all();
 }
 
 

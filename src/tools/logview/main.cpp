@@ -23,8 +23,8 @@
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <netcomm/fawkes/component_ids.h>
-#include <netcomm/utils/network_logger.h>
-#include <utils/logging/console.h>
+#include <logging/network.h>
+#include <logging/console.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
 

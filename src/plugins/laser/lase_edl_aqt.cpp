@@ -25,6 +25,7 @@
 
 #include <core/threading/mutex.h>
 
+#include <vector>
 #include <cstdlib>
 #include <cmath>
 #include <string>
@@ -320,6 +321,40 @@ LaseEdlAcquisitionThread::calc_angle_step(unsigned int rotation_freq,
 void
 LaseEdlAcquisitionThread::init_bus()
 {
+  FILE *f = fopen("/proc/pcan", "r");
+  if (! f) {
+    throw Exception("Cannot open /proc/pcan, PCAN driver not loaded?");
+  }
+  std::vector<std::string> config_lines;
+  std::vector<std::string> device_lines;
+  char tmp[128];
+  while (fgets(tmp, sizeof(tmp), f)) {
+    if (tmp[0] == '*') {
+      config_lines.push_back(tmp);
+    } else if (tmp[0] != '\n') {
+      device_lines.push_back(tmp);
+    }
+  }
+  fclose(f);
+
+  std::vector<std::string>::iterator l;
+  for (l = config_lines.begin(); l != config_lines.end(); ++l) {
+    // proc is found
+    std::string::size_type pos = 0;
+    while ((pos = l->find("[", pos)) != std::string::npos) {
+      pos += 1;
+      std::string::size_type pos_end = l->find("]", pos);
+      if (pos_end != std::string::npos) {
+	std::string item = l->substr(pos, pos_end - pos);
+	if (item == "net") {
+	  throw Exception("PCAN driver has been compiled in netdev mode, but "
+			  "chardev mode is required. Please read the plugin "
+			  "documentation and recompile the PCAN driver.");
+	}
+      }
+    }
+  }
+
   __handle = CAN_Open(__cfg_interface_type, 0, __cfg_port, __cfg_irq);
   if (__handle == NULL) {
     throw Exception("Cannot open CAN bus");

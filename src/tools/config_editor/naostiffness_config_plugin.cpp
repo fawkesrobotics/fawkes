@@ -43,44 +43,44 @@ using Gtk::ComboBox;
 /** Constructor.
  * Allows to construct a dialog by means of get_widget_derived(...).
  * @param cobject base object pointer
- * @param ref_xml Glade XML object representing the Glade input file
+ * @param builder Gtk builder
  */
 NaoStiffnessConfigDialog::NaoStiffnessConfigDialog(BaseObjectType *cobject,
-                                                   const Glib::RefPtr<Gnome::Glade::Xml> &ref_xml)
+                                                   const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Dialog(cobject)
 {
-  ref_xml->get_widget("hy", __hy);
-  ref_xml->get_widget("hp", __hp);
+  builder->get_widget("hy", __hy);
+  builder->get_widget("hp", __hp);
 
-  ref_xml->get_widget("lsp", __lsp);
-  ref_xml->get_widget("rsp", __rsp);
-  ref_xml->get_widget("lsr", __lsr);
-  ref_xml->get_widget("rsr", __rsr);
-  ref_xml->get_widget("ley", __ley);
-  ref_xml->get_widget("rey", __rey);
-  ref_xml->get_widget("ler", __ler);
-  ref_xml->get_widget("rer", __rer);
+  builder->get_widget("lsp", __lsp);
+  builder->get_widget("rsp", __rsp);
+  builder->get_widget("lsr", __lsr);
+  builder->get_widget("rsr", __rsr);
+  builder->get_widget("ley", __ley);
+  builder->get_widget("rey", __rey);
+  builder->get_widget("ler", __ler);
+  builder->get_widget("rer", __rer);
 
-  ref_xml->get_widget("lhyp", __lhyp);
-  ref_xml->get_widget("rhyp", __rhyp);
-  ref_xml->get_widget("lhr", __lhr);
-  ref_xml->get_widget("rhr", __rhr);
-  ref_xml->get_widget("lhp", __lhp);
-  ref_xml->get_widget("rhp", __rhp);
-  ref_xml->get_widget("lkp", __lkp);
-  ref_xml->get_widget("rkp", __rkp);
-  ref_xml->get_widget("lar", __lar);
-  ref_xml->get_widget("rar", __rar);
-  ref_xml->get_widget("lap", __lap);
-  ref_xml->get_widget("rap", __rap);
+  builder->get_widget("lhyp", __lhyp);
+  builder->get_widget("rhyp", __rhyp);
+  builder->get_widget("lhr", __lhr);
+  builder->get_widget("rhr", __rhr);
+  builder->get_widget("lhp", __lhp);
+  builder->get_widget("rhp", __rhp);
+  builder->get_widget("lkp", __lkp);
+  builder->get_widget("rkp", __rkp);
+  builder->get_widget("lar", __lar);
+  builder->get_widget("rar", __rar);
+  builder->get_widget("lap", __lap);
+  builder->get_widget("rap", __rap);
 
-  ref_xml->get_widget("checkbutton_default", __def);
-  ref_xml->get_widget("checkbutton_lock", __lck);
+  builder->get_widget("checkbutton_default", __def);
+  builder->get_widget("checkbutton_lock", __lck);
 
   __lck->signal_toggled().connect(mem_fun(*this, &NaoStiffnessConfigDialog::on_checkbutton_lock_toggled));
   on_checkbutton_lock_toggled();
 
-  ref_xml->get_widget("combobox_behaviour", __bhv);
+  builder->get_widget("combobox_behaviour", __bhv);
   __bhv->set_active(0);
   __bhv->get_active()->get_value(0, __cur_bhv);
   __bhv->signal_changed().connect(mem_fun(*this, &NaoStiffnessConfigDialog::on_combobox_behaviour_changed));
@@ -258,10 +258,10 @@ void NaoStiffnessConfigDialog::set_load_vals(sigc::slot<void> cb)
  */
 
 /** Constructor.
- * @param glade_path path to the Glade file for the plugin's dialog
+ * @param ui_path path to the UI file for the plugin's dialog
  */
-NaoStiffnessConfigPlugin::NaoStiffnessConfigPlugin(string glade_path)
-  : ConfigEditorPlugin(STIFFNESS_CFG_PATH, glade_path)
+NaoStiffnessConfigPlugin::NaoStiffnessConfigPlugin(string ui_path)
+  : ConfigEditorPlugin(STIFFNESS_CFG_PATH, ui_path)
 {
 }
 
@@ -415,7 +415,7 @@ Gtk::Dialog*
 NaoStiffnessConfigPlugin::load_dialog()
 {
   NaoStiffnessConfigDialog *dlg = NULL;
-  m_ref_xml->get_widget_derived("PluginDialog", dlg);
+  m_builder->get_widget_derived("PluginDialog", dlg);
   dlg->set_load_vals(mem_fun(*this, &NaoStiffnessConfigPlugin::load_vals));
 
   return dlg;

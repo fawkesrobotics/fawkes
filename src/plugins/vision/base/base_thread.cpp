@@ -28,7 +28,7 @@
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <core/threading/barrier.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <fvutils/system/camargp.h>
 #include <fvutils/ipc/shm_image.h>

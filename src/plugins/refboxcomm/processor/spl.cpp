@@ -25,7 +25,7 @@
 #include "state_handler.h"
 #include <core/exception.h>
 #include <netcomm/socket/datagram.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #ifdef USE_SPL_GC6
 #  include <interfaces/SoccerPenaltyInterface.h>
@@ -234,7 +234,7 @@ SplRefBoxProcessor::refbox_process()
       }
     }
   } catch (fawkes::Exception &e) {
-    if ( e.errno() != EAGAIN ) {
+    if ( e.get_errno() != EAGAIN ) {
       __logger->log_warn("SplRefBoxProcessor", "Receiving failed, exception follows");
       __logger->log_warn("SplRefBoxProcessor", e);
     } // else just no data available this time

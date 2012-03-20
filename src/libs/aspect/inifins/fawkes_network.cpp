@@ -50,7 +50,7 @@ FawkesNetworkAspectIniFin::init(Thread *thread)
 {
   FawkesNetworkAspect *fnet_thread;
   fnet_thread = dynamic_cast<FawkesNetworkAspect *>(thread);
-  if (fnet_thread == NULL) {
+  if (fnet_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "FawkesNetworkAspect, but RTTI says it "
 					  "has not. ", thread->name());

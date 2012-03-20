@@ -21,6 +21,7 @@
  */
 
 #include <plugins/webview/webview_plugin.h>
+#include <core/exception.h>
 
 #include "webview_thread.h"
 

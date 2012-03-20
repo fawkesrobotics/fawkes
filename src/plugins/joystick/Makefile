@@ -18,18 +18,27 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_joystick = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		fawkesinterface JoystickInterface
-OBJS_joystick = joystick_plugin.o sensor_thread.o acquisition_thread.o
+OBJS_joystick = joystick_plugin.o sensor_thread.o acquisition_thread.o \
+		bb_handler.o force_feedback.o act_thread.o
 
 LIBS_ffjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		  fawkesinterface JoystickInterface
-OBJS_ffjoystick = ffjoystick.o acquisition_thread.o
+		  fawkesinterface fawkeslogging JoystickInterface
+OBJS_ffjoystick = ffjoystick.o acquisition_thread.o remote_bb_poster.o \
+		  bb_handler.o force_feedback.o act_thread.o
 
-OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick)
+LIBS_ffkbjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		    fawkesinterface fawkeslogging JoystickInterface
+OBJS_ffkbjoystick = ffkbjoystick.o remote_bb_poster.o bb_handler.o
+
+OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick)
+
+BINS_all     += $(BINDIR)/ffkbjoystick
+MANPAGES_all += $(MANDIR)/man1/ffkbjoystick.1
 
 ifeq ($(OS),Linux)
-  BINS_all      = $(BINDIR)/ffjoystick
-  PLUGINS_all   = $(PLUGINDIR)/joystick.so
-  MANPAGES_all  = $(MANDIR)/man1/ffjoystick.1
+  BINS_all     += $(BINDIR)/ffjoystick
+  PLUGINS_all  += $(PLUGINDIR)/joystick.so
+  MANPAGES_all += $(MANDIR)/man1/ffjoystick.1
 else
   WARN_TARGETS += warning_onlylinux
 endif

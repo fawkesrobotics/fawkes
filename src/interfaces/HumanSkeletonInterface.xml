@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="HumanSkeletonInterface" author="Tim Niemueller" year="2007-2011">
+  <constants>
+    <enum name="State">
+      <comment>
+        Current tracking state for the skeleton.
+      </comment>
+      <item name="STATE_INVALID">
+        This interface does not represent a valid skeleton at the moment.
+      </item>
+      <item name="STATE_DETECTING_POSE">
+	The user's pose is currently being determined. This usually indicates
+	that the tracker is looking for a particular calibration pose.
+      </item>
+      <item name="STATE_CALIBRATING">
+        The tracker is currently calibrating for the recognized human.
+      </item>
+      <item name="STATE_TRACKING">
+        The user is being tracked and the skeleton contains valid data.
+      </item>
+    </enum>
+
+
+  </constants>
+  <data>
+    <comment>
+    </comment>
+    <field type="State" name="state">Current state.</field>
+    <field type="uint32" name="user_id">Tracking ID of this user.</field>
+    <field type="int32" name="visibility_history">
+      The visibility history indicates the persistence of user sightings.
+      A positive value indicates the number of successful consecutive sightings
+      of the user (center of mass not equal to zero), the absolute of a negative
+      value gives the number of consecutive negative (non-) sightings. The value
+      is zero only if uninitialized.
+    </field>
+
+    <field type="string" length="32" name="pose">Detected user pose.</field>
+
+    <field type="float" length="3" name="com">Center of mass.</field>
+
+    <field type="float" length="3" name="pos_head">Head position vector.</field>
+    <field type="float" name="pos_head_confidence">
+      Head position confidence.</field>
+    <field type="float" length="3" name="pos_neck">Neck position vector.</field>
+    <field type="float" name="pos_neck_confidence">
+      Neck position confidence.</field>
+    <field type="float" length="3" name="pos_torso">Torso position vector.</field>
+    <field type="float" name="pos_torso_confidence">
+      Torso position confidence.</field>
+    <field type="float" length="3" name="pos_waist">Waist position vector.</field>
+    <field type="float" name="pos_waist_confidence">
+      Waist position confidence.</field>
+
+    <field type="float" length="3" name="pos_left_collar">
+      Left position vector.</field>
+    <field type="float" name="pos_left_collar_confidence">
+      Left position confidence.</field>
+    <field type="float" length="3" name="pos_left_shoulder">
+      Left shoulder position vector.</field>
+    <field type="float" name="pos_left_shoulder_confidence">
+      Left shoulder position confidence.</field>
+    <field type="float" length="3" name="pos_left_elbow">
+      Left elbow position vector.</field>
+    <field type="float" name="pos_left_elbow_confidence">
+      Left elbow position confidence.</field>
+    <field type="float" length="3" name="pos_left_wrist">
+      Left wrist position vector.</field>
+    <field type="float" name="pos_left_wrist_confidence">
+      Left wrist position confidence.</field>
+    <field type="float" length="3" name="pos_left_hand">
+      Left hand position vector.</field>
+    <field type="float" name="pos_left_hand_confidence">
+      Left hand position confidence.</field>
+    <field type="float" length="3" name="pos_left_fingertip">
+      Left fingertip position vector.</field>
+    <field type="float" name="pos_left_fingertip_confidence">
+      Left fingertip position confidence.</field>
+
+    <field type="float" length="3" name="pos_right_collar">
+      Right collar position vector.</field>
+    <field type="float" name="pos_right_collar_confidence">
+      Right collar position confidence.</field>
+    <field type="float" length="3" name="pos_right_shoulder">
+      Right shoulder position vector.</field>
+    <field type="float" name="pos_right_shoulder_confidence">
+      Right shoulder position confidence.</field>
+    <field type="float" length="3" name="pos_right_elbow">
+      Right elbow position vector.</field>
+    <field type="float" name="pos_right_elbow_confidence">
+      Right elbow position confidence.</field>
+    <field type="float" length="3" name="pos_right_wrist">
+      Right wrist position vector.</field>
+    <field type="float" name="pos_right_wrist_confidence">
+      Right wrist position confidence.</field>
+    <field type="float" length="3" name="pos_right_hand">
+      Right hand position vector.</field>
+    <field type="float" name="pos_right_hand_confidence">
+      Right hand position confidence.</field>
+    <field type="float" length="3" name="pos_right_fingertip">
+      Right fingertip position vector.</field>
+    <field type="float" name="pos_right_fingertip_confidence">
+      Right fingertip position confidence.</field>
+
+    <field type="float" length="3" name="pos_left_hip">
+      Left hip position vector.</field>
+    <field type="float" name="pos_left_hip_confidence">
+      Left hip position confidence.</field>
+    <field type="float" length="3" name="pos_left_knee">
+      Left knee position vector.</field>
+    <field type="float" name="pos_left_knee_confidence">
+      Left knee position confidence.</field>
+    <field type="float" length="3" name="pos_left_ankle">
+      Left ankle position vector.</field>
+    <field type="float" name="pos_left_ankle_confidence">
+      Left ankle position confidence.</field>
+    <field type="float" length="3" name="pos_left_foot">
+      Left foot position vector.</field>
+    <field type="float" name="pos_left_foot_confidence">
+      Left foot position confidence.</field>
+
+    <field type="float" length="3" name="pos_right_hip">
+      Right hip position vector.</field>
+    <field type="float" name="pos_right_hip_confidence">
+      Right hip position confidence.</field>
+    <field type="float" length="3" name="pos_right_knee">
+      Right knee position vector.</field>
+    <field type="float" name="pos_right_knee_confidence">
+      Right knee position confidence.</field>
+    <field type="float" length="3" name="pos_right_ankle">
+      Right ankle position vector.</field>
+    <field type="float" name="pos_right_ankle_confidence">
+      Right ankle position confidence.</field>
+    <field type="float" length="3" name="pos_right_foot">
+      Right foot position vector.</field>
+    <field type="float" name="pos_right_foot_confidence">
+      Right foot position confidence.</field>
+
+
+    <field type="float" length="9" name="ori_head">Head position vector.</field>
+    <field type="float" name="ori_head_confidence">
+      Head position confidence.</field>
+    <field type="float" length="9" name="ori_neck">Neck position vector.</field>
+    <field type="float" name="ori_neck_confidence">
+      Neck position confidence.</field>
+    <field type="float" length="9" name="ori_torso">Torso position vector.</field>
+    <field type="float" name="ori_torso_confidence">
+      Torso position confidence.</field>
+    <field type="float" length="9" name="ori_waist">Waist position vector.</field>
+    <field type="float" name="ori_waist_confidence">
+      Waist position confidence.</field>
+
+    <field type="float" length="9" name="ori_left_collar">
+      Left position vector.</field>
+    <field type="float" name="ori_left_collar_confidence">
+      Left position confidence.</field>
+    <field type="float" length="9" name="ori_left_shoulder">
+      Left shoulder position vector.</field>
+    <field type="float" name="ori_left_shoulder_confidence">
+      Left shoulder position confidence.</field>
+    <field type="float" length="9" name="ori_left_elbow">
+      Left elbow position vector.</field>
+    <field type="float" name="ori_left_elbow_confidence">
+      Left elbow position confidence.</field>
+    <field type="float" length="9" name="ori_left_wrist">
+      Left wrist position vector.</field>
+    <field type="float" name="ori_left_wrist_confidence">
+      Left wrist position confidence.</field>
+    <field type="float" length="9" name="ori_left_hand">
+      Left hand position vector.</field>
+    <field type="float" name="ori_left_hand_confidence">
+      Left hand position confidence.</field>
+    <field type="float" length="9" name="ori_left_fingertip">
+      Left fingertip position vector.</field>
+    <field type="float" name="ori_left_fingertip_confidence">
+      Left fingertip position confidence.</field>
+
+    <field type="float" length="9" name="ori_right_collar">
+      Right collar position vector.</field>
+    <field type="float" name="ori_right_collar_confidence">
+      Right collar position confidence.</field>
+    <field type="float" length="9" name="ori_right_shoulder">
+      Right shoulder position vector.</field>
+    <field type="float" name="ori_right_shoulder_confidence">
+      Right shoulder position confidence.</field>
+    <field type="float" length="9" name="ori_right_elbow">
+      Right elbow position vector.</field>
+    <field type="float" name="ori_right_elbow_confidence">
+      Right elbow position confidence.</field>
+    <field type="float" length="9" name="ori_right_wrist">
+      Right wrist position vector.</field>
+    <field type="float" name="ori_right_wrist_confidence">
+      Right wrist position confidence.</field>
+    <field type="float" length="9" name="ori_right_hand">
+      Right hand position vector.</field>
+    <field type="float" name="ori_right_hand_confidence">
+      Right hand position confidence.</field>
+    <field type="float" length="9" name="ori_right_fingertip">
+      Right fingertip position vector.</field>
+    <field type="float" name="ori_right_fingertip_confidence">
+      Right fingertip position confidence.</field>
+
+    <field type="float" length="9" name="ori_left_hip">
+      Left hip position vector.</field>
+    <field type="float" name="ori_left_hip_confidence">
+      Left hip position confidence.</field>
+    <field type="float" length="9" name="ori_left_knee">
+      Left knee position vector.</field>
+    <field type="float" name="ori_left_knee_confidence">
+      Left knee position confidence.</field>
+    <field type="float" length="9" name="ori_left_ankle">
+      Left ankle position vector.</field>
+    <field type="float" name="ori_left_ankle_confidence">
+      Left ankle position confidence.</field>
+    <field type="float" length="9" name="ori_left_foot">
+      Left foot position vector.</field>
+    <field type="float" name="ori_left_foot_confidence">
+      Left foot position confidence.</field>
+
+    <field type="float" length="9" name="ori_right_hip">
+      Right hip position vector.</field>
+    <field type="float" name="ori_right_hip_confidence">
+      Right hip position confidence.</field>
+    <field type="float" length="9" name="ori_right_knee">
+      Right knee position vector.</field>
+    <field type="float" name="ori_right_knee_confidence">
+      Right knee position confidence.</field>
+    <field type="float" length="9" name="ori_right_ankle">
+      Right ankle position vector.</field>
+    <field type="float" name="ori_right_ankle_confidence">
+      Right ankle position confidence.</field>
+    <field type="float" length="9" name="ori_right_foot">
+      Right foot position vector.</field>
+    <field type="float" name="ori_right_foot_confidence">
+      Right foot position confidence.</field>
+
+  </data>
+</interface>

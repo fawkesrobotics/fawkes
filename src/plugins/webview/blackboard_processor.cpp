@@ -78,7 +78,29 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
     std::string subpath = std::string(url).substr(__baseurl_len);
 
     WebPageReply *r = new WebPageReply("BlackBoard");
-    *r += "<h2>BlackBoard interfaces:</h2>\n";
+    r->set_html_header("  <link type=\"text/css\" href=\"/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
+		       "  <script type=\"text/javascript\" src=\"/static/js/jquery.min.js\"></script>\n"
+		       "  <script type=\"text/javascript\" src=\"/static/js/jquery-ui.custom.min.js\"></script>\n");
+
+    *r += "<script type=\"text/javascript\">\n"
+      "  $(function(){\n"
+      "    $(\"#blackboard-interfaces-title\").click(function(){\n"
+      "	     if ( $(\"#blackboard-interfaces\").is(\":visible\") ) {\n"
+      "        $(\"#blackboard-interfaces\").hide(\"blind\");\n"
+      "        $(\"#blackboard-interfaces-icon\").attr(\"src\", \"/static/images/icon-triangle-e.png\");\n"
+      "      } else {\n"
+      "	       $(\"#blackboard-interfaces\").show(\"blind\");\n"
+      "        $(\"#blackboard-interfaces-icon\").attr(\"src\", \"/static/images/icon-triangle-s.png\");\n"
+      "      }\n"
+      "    });\n"
+      "    $(\"#blackboard-interfaces\").hide();\n"
+      "  });\n"
+      "</script>\n"
+      "<div id=\"blackboard-box\">\n"
+      "  <div><a id=\"blackboard-interfaces-title\" href=\"#\"><img id=\"blackboard-interfaces-icon\" "
+      "class=\"blackboard-interfaces-icon\" src=\"/static/images/icon-triangle-e.png\" />"
+      "BlackBoard Interfaces</a></div>\n"
+      "  <div id=\"blackboard-interfaces\">\n";
 
     bool found_some = false;
     InterfaceInfoList *iil = __blackboard->list_all();
@@ -101,13 +123,13 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
       *r += "<b>No interfaces found.</b>\n";
     }
 
+    *r += "  </div>\n"
+      "</div>\n";
+
     if (subpath.find("/view/") == 0) {
       std::string iuid = subpath.substr(subpath.find_first_not_of("/", std::string("/view/").length()));
       std::string iftype = iuid.substr(0, iuid.find("::"));
       std::string ifname = iuid.substr(iuid.find("::") + 2);
-
-
-      r->append_body("<a href=\"%s\">Clear detailed</a>\n", __baseurl);
 
       r->append_body("<h2>Interface: %s</h2>\n", iuid.c_str());
       if (__interfaces.find(iuid) == __interfaces.end()) {
@@ -121,6 +143,32 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
       if (__interfaces.find(iuid) != __interfaces.end()) {
 	Interface *iface = __interfaces[iuid];
 	iface->read();
+
+	/*
+	*r += "<script type=\"text/javascript\">\n"
+	  "  $(function(){\n"
+	  "    $(\"#blackboard-interface-details-title\").click(function(){\n"
+	  "	     if ( $(\"#blackboard-interface-details\").is(\":visible\") ) {\n"
+	  "        $(\"#blackboard-interface-details\").hide(\"blind\");\n"
+	  "        $(\"#blackboard-interfaces-icon\").attr(\"src\", "
+	  "\"/static/images/icon-triangle-e.png\");\n"
+	  "      } else {\n"
+	  "	       $(\"#blackboard-interface-details\").show(\"blind\");\n"
+	  "        $(\"#blackboard-interfaces-icon\").attr(\"src\", "
+	  "\"/static/images/icon-triangle-s.png\");\n"
+	  "      }\n"
+	  "    });\n"
+	  "    $(\"#blackboard-interface-details\").hide();\n"
+	  "  });\n"
+	  "</script>\n"
+	  "<div id=\"blackboard-box\">\n"
+	  "  <div><a id=\"blackboard-interface-details-title\" href=\"#\">"
+	  "<img id=\"blackboard-interfaces-icon\" "
+	  "class=\"blackboard-interfaces-icon\" "
+	  "src=\"/static/images/icon-triangle-e.png\" />"
+	  "Interface details</a></div>\n"
+	  "  <div id=\"blackboard-interface-details\">\n";
+	*/
 
 	r->append_body("<table>\n"
 		       " <tr><td><b>Type:</b></td><td>%s</td></tr>\n"
@@ -137,6 +185,11 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
 		       iface->num_readers(), iface->serial(),
 		       iface->datasize(), iface->hash_printable(),
 		       iface->changed() ? "yes" : "no", iface->timestamp()->str());
+
+	/*
+	*r += "  </div>\n"
+	  "</div>\n";
+	*/
 
 	r->append_body("<table>\n"
 		       " <tr>\n"
@@ -158,8 +211,10 @@ WebviewBlackBoardRequestProcessor::process_request(const char *url,
 	  *r += " </tr>\n";
 	}
 	r->append_body("</table>\n");
+	r->append_body("<p><a href=\"%s\">Clear detailed</a></p>\n", __baseurl);
       }
     }
+
 
     return r;
   } else {

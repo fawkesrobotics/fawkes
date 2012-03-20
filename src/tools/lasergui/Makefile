@@ -36,7 +36,7 @@ ifeq ($(BUILD_TYPE),maemo)
   endif
 else
   OBJS_lasergui = lasergui.o
-  BUILD_LASERGUI = $(HAVE_GLADE_GUI)
+  BUILD_LASERGUI = $(HAVE_GUI)
 endif
 OBJS_lasergui += laser_drawing_area.o visdisplay.o
 OBJS_all = $(OBJS_lasergui)

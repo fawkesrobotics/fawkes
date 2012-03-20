@@ -142,7 +142,7 @@ PanTiltRX28Thread::init()
   __wt->start();
   __wt->set_enabled(true);
   if ( __cfg_goto_zero_start ) {
-    __wt->goto_pantilt(0, 0);
+    __wt->goto_pantilt_timed(0, 0, 3.0);
   }
 
   bbil_add_message_interface(__pantilt_if);
@@ -157,10 +157,21 @@ PanTiltRX28Thread::init()
 }
 
 
+bool
+PanTiltRX28Thread::prepare_finalize_user()
+{
+  if (__cfg_turn_off) {
+    __wt->goto_pantilt_timed(0, __cfg_tilt_max, 2.0);
+    while (! __wt->is_final()) {
+      usleep(100000);
+    }
+  }
+  return true;
+}
+
 void
 PanTiltRX28Thread::finalize()
 {
-  logger->log_debug(name(), "Finalizing");
   blackboard->unregister_listener(this);
   blackboard->close(__pantilt_if);
   blackboard->close(__led_if);

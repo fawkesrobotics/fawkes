@@ -33,8 +33,6 @@
 #include <netcomm/socket/datagram_multicast.h>
 #include <netcomm/utils/resolver.h>
 
-#include <utils/logging/liblogger.h>
-
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <cstdlib>
@@ -908,8 +906,8 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     try {
       inbound_bytes = decryptor->decrypt();
     } catch (MessageDecryptionException &e) {
-      LibLogger::log_warn("WorldInfoTransceiver", "Message decryption failed, ignoring");
-      LibLogger::log_warn("WorldInfoTransceiver", e);
+      //LibLogger::log_warn("WorldInfoTransceiver", "Message decryption failed, ignoring");
+      //LibLogger::log_warn("WorldInfoTransceiver", e);
       continue;
     }
 
@@ -926,12 +924,12 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     worldinfo_header_t *header = (worldinfo_header_t *)in_buffer;
     if ( ntohs(header->beef) != 0xBEEF ) {
       // throw WorldInfoException("Incorrect message received, wrong key?");
-      LibLogger::log_warn("WorldInfoTransceiver", "Invalid message received (no 0xBEEF), ignoring");
+      //LibLogger::log_warn("WorldInfoTransceiver", "Invalid message received (no 0xBEEF), ignoring");
       continue;
     }
 
     if ( header->version != WORLDINFO_VERSION ) {
-      LibLogger::log_warn("WorldInfoTransceiver", "Unsupported version of world info data received, ignoring");
+      //LibLogger::log_warn("WorldInfoTransceiver", "Unsupported version of world info data received, ignoring");
       continue;
     }
 
@@ -941,7 +939,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     if ( sequence_numbers.find(from.sin_addr.s_addr) != sequence_numbers.end() ) {
       if ( cseq <= sequence_numbers[from.sin_addr.s_addr] ) {
 	// Already received (loop) or replay attack, just ignore
-	LibLogger::log_warn("WorldInfoTransceiver", "Received packet twice, ignoring");
+	//LibLogger::log_warn("WorldInfoTransceiver", "Received packet twice, ignoring");
 	continue;
       }
     }
@@ -967,9 +965,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       //printf("Message type: %u   size: %u  ntype: %u  nsize: %u\n",
       //     msg_type, msg_size, msgh->type, msgh->size);
       if ( inbound_bytes < msg_size ) {
-	LibLogger::log_warn("WorldInfoTransceiver", "Truncated packet received or protocol "
-			    "error, ignoring rest of packet (got %zu bytes, but expected "
-			    "%zu bytes)", inbound_bytes, msg_size);
+	//LibLogger::log_warn("WorldInfoTransceiver", "Truncated packet received or protocol "
+	//		    "error, ignoring rest of packet (got %zu bytes, but expected "
+	//		    "%zu bytes)", inbound_bytes, msg_size);
 	break;
       }
       switch ( msg_type ) {
@@ -982,9 +980,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 			      pose_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid pose message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_pose_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid pose message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_pose_message_t));
 	}
 	break;
 
@@ -997,9 +995,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 				  velo_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid velocity message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_velocity_message_t));
+	 // LibLogger::log_warn("WorldInfoTransceiver", "Invalid velocity message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_velocity_message_t));
 	}
 	break;
 
@@ -1013,9 +1011,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 				  ball_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball pos message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_relballpos_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball pos message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_relballpos_message_t));
 	}
 	break;
 
@@ -1029,9 +1027,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 					 ball_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid global ball pos message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_globballpos_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid global ball pos message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_globballpos_message_t));
 	}
 	break;
 
@@ -1044,9 +1042,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 				       bvel_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball velocity message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_relballvelo_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball velocity message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_relballvelo_message_t));
 	}
 	break;
 
@@ -1059,9 +1057,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 					      bvel_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid global ball velocity message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_globballvelo_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid global ball velocity message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_globballvelo_message_t));
 	}
 	break;
 
@@ -1074,9 +1072,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 				       oppp_msg->covariance);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent pose message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_opppose_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent pose message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_opppose_message_t));
 	}
 	break;
 
@@ -1087,9 +1085,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	    (*hit)->opponent_disapp_rcvd(hostname, oppd_msg->uid);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent disappeared message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_oppdisappeared_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent disappeared message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_oppdisappeared_message_t));
 	}
 	break;
 
@@ -1106,9 +1104,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 				   (worldinfo_gamestate_half_t)gs_msg->half);
 	  }
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid gamestate message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_gamestate_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid gamestate message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_gamestate_message_t));
 	}
 	break;
 
@@ -1121,9 +1119,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  }
 
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid penalty message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_penalty_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid penalty message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_penalty_message_t));
 	}
 	break;
 
@@ -1159,9 +1157,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 
 	    if ( fat_msg->num_opponents > WORLDINFO_FATMSG_NUMOPPS ) {
 	      // We can't handle this
-	      LibLogger::log_warn("WorldInfoTransceiver", "Too many opponents marked valid in message "
-				  "(got %zu but expected a maximum of %zu), ignoring",
-				  fat_msg->num_opponents, WORLDINFO_FATMSG_NUMOPPS);
+	      //LibLogger::log_warn("WorldInfoTransceiver", "Too many opponents marked valid in message "
+		//		  "(got %zu but expected a maximum of %zu), ignoring",
+		//		  fat_msg->num_opponents, WORLDINFO_FATMSG_NUMOPPS);
 	    } else {
 	      for ( unsigned int i = 0; i < fat_msg->num_opponents; ++i ) {
 		(*hit)->opponent_pose_rcvd(hostname,
@@ -1173,16 +1171,16 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	    }
 	  } // end for each handler
 	} else {
-	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid fat message received "
-			      "(got %zu bytes but expected %zu bytes), ignoring",
-			      msg_size, sizeof(worldinfo_fat_message_t));
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Invalid fat message received "
+	//		      "(got %zu bytes but expected %zu bytes), ignoring",
+	//		      msg_size, sizeof(worldinfo_fat_message_t));
 	}
 	break;
 
 
-      default:
-	  LibLogger::log_warn("WorldInfoTransceiver", "Unknown message type %u received "
-			      ", ignoring", msg_type);
+      //default:
+	  //LibLogger::log_warn("WorldInfoTransceiver", "Unknown message type %u received "
+	//		      ", ignoring", msg_type);
       }
       // there is more to process
       inbound_bytes  -= msg_size;

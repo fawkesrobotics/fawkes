@@ -26,7 +26,7 @@
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <algorithm>
 #include <tolua++.h>
@@ -60,29 +60,21 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param watch_dirs true to watch added package and C package dirs for
- * changes
  * @param enable_tracebacks if true an error function is installed at the top
  * of the stackand used for pcalls where errfunc is 0.
  */
-LuaContext::LuaContext(bool watch_dirs, bool enable_tracebacks)
+LuaContext::LuaContext(bool enable_tracebacks)
 {
   __owns_L = true;
   __enable_tracebacks = enable_tracebacks;
+  __fam = NULL;
+  __fam_thread = NULL;
 
-  if ( watch_dirs ) {
-    __fam = new FileAlterationMonitor();
-    __fam->add_filter("^[^.].*\\.lua$"); 
-    __fam->add_listener(this);
-  } else {
-    __fam = NULL;
-  }
   __lua_mutex = new Mutex();
 
   __start_script = NULL;
   __L = init_state();
 }
-
 
 /** Wrapper contstructor.
  * This wraps around an existing Lua state. It does not initialize the state in
@@ -99,18 +91,58 @@ LuaContext::LuaContext(lua_State *L)
   __lua_mutex = new Mutex();
   __start_script = NULL;
   __fam = NULL;
+  __fam_thread = NULL;
 }
 
 /** Destructor. */
 LuaContext::~LuaContext()
 {
   __lua_mutex->lock();
-  delete __fam;
+  if (__fam_thread) {
+    __fam_thread->cancel();
+    __fam_thread->join();
+    delete __fam_thread;
+  }
   delete __lua_mutex;
   if ( __start_script )  free(__start_script);
   if ( __owns_L) {
     lua_close(__L);
   }
+}
+
+
+/** Setup file alteration monitor.
+ * Setup an internal file alteration monitor that can react to changes
+ * on Lua files and packages.
+ * @param auto_restart automatically restart the Lua context in case
+ * of an event
+ * @param conc_thread true to run a concurrent thread for event
+ * processing. If and only if you set this to false, ensure that
+ * process_fam_events() periodically.
+ */
+void
+LuaContext::setup_fam(bool auto_restart, bool conc_thread)
+{
+  __fam = new FileAlterationMonitor();
+  __fam->add_filter("^[^.].*\\.lua$"); 
+  if (auto_restart) {
+    __fam->add_listener(this);
+  }
+  if (conc_thread) {
+    __fam_thread = new FamThread(__fam);
+    __fam_thread->start();
+  }
+}
+
+
+/** Get file alteration monitor.
+ * @return reference counted pointer to file alteration monitor. Note
+ * that the pointer might be invalid if setup_fam() has not been called.
+ */
+RefPtr<FileAlterationMonitor>
+LuaContext::get_fam() const
+{
+  return __fam;
 }
 
 
@@ -167,6 +199,12 @@ LuaContext::init_state()
   for ( __integers_it = __integers.begin(); __integers_it != __integers.end(); ++__integers_it) {
     lua_pushinteger(L, __integers_it->second);
     lua_setglobal(L, __integers_it->first.c_str());
+  }
+
+  for ( __cfuncs_it = __cfuncs.begin(); __cfuncs_it != __cfuncs.end(); ++__cfuncs_it)
+  {
+    lua_pushcfunction(L, __cfuncs_it->second);
+    lua_setglobal(L, __cfuncs_it->first.c_str());
   }
 
   LuaContext *tmpctx = new LuaContext(L);
@@ -520,20 +558,23 @@ LuaContext::pcall(int nargs, int nresults, int errfunc)
 void
 LuaContext::assert_unique_name(const char *name, std::string type)
 {
-  if ( (type != "usertype") && (__usertypes.find(name) != __usertypes.end()) ) {
+  if ( (type == "usertype") && (__usertypes.find(name) != __usertypes.end()) ) {
     throw Exception("User type entry already exists for name %s", name);
   }
-  if ( (type != "string") && (__strings.find(name) != __strings.end()) ) {
+  if ( (type == "string") && (__strings.find(name) != __strings.end()) ) {
     throw Exception("String entry already exists for name %s", name);
   }
-  if ( (type != "boolean") && (__booleans.find(name) != __booleans.end()) ) {
+  if ( (type == "boolean") && (__booleans.find(name) != __booleans.end()) ) {
     throw Exception("Boolean entry already exists for name %s", name);
   }
-  if ( (type != "number") && (__numbers.find(name) != __numbers.end()) ) {
+  if ( (type == "number") && (__numbers.find(name) != __numbers.end()) ) {
     throw Exception("Number entry already exists for name %s", name);
   }
-  if ( (type != "integer") && (__integers.find(name) != __integers.end()) ) {
+  if ( (type == "integer") && (__integers.find(name) != __integers.end()) ) {
     throw Exception("Integer entry already exists for name %s", name);
+  }
+  if ( (type == "cfunction") && (__cfuncs.find(name) != __cfuncs.end()) ) {
+    throw Exception("C function entry already exists for name %s", name);
   }
 }
 
@@ -628,6 +669,23 @@ LuaContext::set_integer(const char *name, lua_Integer value)
   __integers[name] = value;
 
   lua_pushinteger(__L, value);
+  lua_setglobal(__L, name);
+}
+
+
+/** Assign cfunction to global variable.
+ * @param name name of global variable to assign the value to
+ * @param f function
+ */
+void
+LuaContext::set_cfunction(const char *name, lua_CFunction f)
+{
+  MutexLocker lock(__lua_mutex);
+  assert_unique_name(name, "cfunction");
+
+  __cfuncs[name] = f;
+
+  lua_pushcfunction(__L, f);
   lua_setglobal(__L, name);
 }
 
@@ -775,6 +833,17 @@ LuaContext::push_usertype(void *data, const char *type_name,
   }
 
   tolua_pushusertype(__L, data, type_n.c_str());
+}
+
+
+/** Push C function on top of stack.
+ * @param f C Function to push
+ */
+void
+LuaContext::push_cfunction(lua_CFunction f)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushcfunction(__L, f);
 }
 
 
@@ -965,6 +1034,7 @@ LuaContext::remove_global(const char *name)
   __booleans.erase(name);
   __numbers.erase(name);
   __integers.erase(name);
+  __cfuncs.erase(name);
 
   lua_pushnil(__L);
   lua_setglobal(__L, name);

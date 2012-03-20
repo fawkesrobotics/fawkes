@@ -24,7 +24,6 @@
 #define __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 #include <fvutils/base/roi.h>
 #include <fvutils/color/colorspaces.h>
 #include <netcomm/dns-sd/avahi_thread.h>
@@ -47,7 +46,7 @@ class FuseTransferWidget;
 class Firestation : public Gtk::Window
 {
  public:
-  Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
+  Firestation(Glib::RefPtr<Gtk::Builder> builder);
   virtual ~Firestation();
 
   Gtk::Window& get_window() const;
@@ -103,9 +102,6 @@ class Firestation : public Gtk::Window
     MODE_MIRROR_CALIB,
     MODE_MIRROR_CALIB_EVAL
   } OpMode;
-
-  Gtk::Widget* get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-			  const char* widget_name) const;
 
   void save_image();
   void exit();

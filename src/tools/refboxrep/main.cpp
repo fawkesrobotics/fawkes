@@ -25,8 +25,12 @@
 #include "refbox_state_sender.h"
 #include "refbox_state_writer.h"
 #include "msl2007.h"
-#include "msl2008.h"
-#include "msl2010.h"
+#ifdef HAVE_MSL2008
+#  include "msl2008.h"
+#endif
+#ifdef HAVE_MSL2010
+#  include "msl2010.h"
+#endif
 #include "spl.h"
 
 #include <vector>
@@ -148,9 +152,12 @@ main(int argc, char **argv)
   if ( strcmp(argp.arg("l"), "msl2007") == 0 || strcmp(argp.arg("l"), "midsize") == 0 ) {
     MidsizeRefBoxRepeater mrr(*rss, "127.0.0.1", 28097);
     mrr.run();
+#ifdef HAVE_MSL2008
   } else if ( strcmp(argp.arg("l"), "msl2008") == 0 ) {
     Msl2008RefBoxRepeater m8rr(*rss, "230.0.0.1", 30000);
     m8rr.run();
+#endif
+#ifdef HAVE_MSL2010
   } else if ( strcmp(argp.arg("l"), "msl2010") == 0 ) {
     if ( argp.has_arg("u") ) {
       //Msl2010RefBoxRepeater m10rr(*rss, "127.0.0.1", port, false);
@@ -163,6 +170,7 @@ main(int argc, char **argv)
       //Msl2010RefBoxRepeater m10rr(*rss, "230.0.0.1", 30010);
       m10rr.run();
     }
+#endif
   } else if ( strcmp(argp.arg("l"), "spl") == 0 ) {
     SplRefBoxRepeater nrr(*rss, "255.255.255.0", 3838, our_team, our_goal);
     nrr.run();

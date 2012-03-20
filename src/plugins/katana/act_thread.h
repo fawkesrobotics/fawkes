@@ -26,14 +26,17 @@
 #include "motion_thread.h"
 #include "calib_thread.h"
 #include "goto_thread.h"
+#include "goto_openrave_thread.h"
 #include "gripper_thread.h"
 #include "sensacq_thread.h"
+#include "motor_control_thread.h"
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <plugins/openrave/aspect/openrave.h>
 #include <blackboard/interface_listener.h>
 #include <core/utils/refptr.h>
 #ifdef USE_TIMETRACKER
@@ -52,6 +55,7 @@ class CCplSerialCRC;
 class CLMBase;
 class CKatBase;
 class CSctBase;
+class TMotInit;
 
 class KatanaActThread
 : public fawkes::Thread,
@@ -59,6 +63,9 @@ class KatanaActThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
+#ifdef HAVE_OPENRAVE
+  public fawkes::OpenRaveAspect,
+#endif
   public fawkes::BlackBoardInterfaceListener
 {
  public:
@@ -82,6 +89,7 @@ class KatanaActThread
   void stop_motion();
   void update_position(bool refresh);
   void update_sensors(bool refresh);
+  void update_motors(bool refresh);
   void start_motion(fawkes::RefPtr<KatanaMotionThread> motion_thread,
 		    unsigned int msgid, const char *logmsg, ...);
 
@@ -103,17 +111,33 @@ class KatanaActThread
   float          __cfg_park_theta;
   float          __cfg_park_psi;
 
+  float          __cfg_offset_x;
+  float          __cfg_offset_y;
+  float          __cfg_offset_z;
+  float          __cfg_distance_scale;
+
+  bool           __cfg_OR_enabled;
+  bool           __cfg_OR_use_viewer;
+  bool           __cfg_OR_auto_load_ik;
+  std::string    __cfg_OR_robot_file;
+
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
   fawkes::RefPtr<KatanaCalibrationThread>      __calib_thread;
   fawkes::RefPtr<KatanaGotoThread>             __goto_thread;
   fawkes::RefPtr<KatanaGripperThread>          __gripper_thread;
+  fawkes::RefPtr<KatanaMotorControlThread>     __motor_control_thread;
+#ifdef HAVE_OPENRAVE
+  fawkes::RefPtr<KatanaGotoOpenRaveThread>     __goto_openrave_thread;
+#endif
 
   fawkes::RefPtr<CLMBase>        __katana;
   std::auto_ptr<CCdlCOM>         __device;
   std::auto_ptr<CCplSerialCRC>   __protocol;
   CKatBase                      *__katbase;
   CSctBase                      *__sensor_ctrl;
+  std::vector<TMotInit>          __motor_init;
+
 #ifdef USE_TIMETRACKER
   std::auto_ptr<fawkes::TimeTracker> __tt;
   unsigned int __tt_count;

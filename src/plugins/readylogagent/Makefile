@@ -20,7 +20,8 @@ include $(BASEDIR)/src/plugins/readylogagent/eclipse.mk
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
 
-LIBS_readylogagent = fawkesaspects eclipse TestInterface
+LIBS_readylogagent = fawkescore fawkesinterface fawkesblackboard \
+                     fawkesaspects eclipse TestInterface
 OBJS_readylogagent = plugin.o				\
 		     control_thread.o			\
 		     eclipse_thread.o			\

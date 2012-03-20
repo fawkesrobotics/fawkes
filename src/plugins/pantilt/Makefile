@@ -17,16 +17,18 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+PRESUBDIRS = interfaces
+SUBDIRS = tool
+
+# Sub directory name that contain PTU drivers
+DRIVERS = dirperc robotis sony
+
 LIBS_pantilt = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	       fawkesinterface PanTiltInterface LedInterface
-OBJS_pantilt = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
+OBJS_pantilt = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(foreach d,$(DRIVERS),$(SRCDIR)/$d/*.cpp )))))
 
 PLUGINS_all = $(PLUGINDIR)/pantilt.so
-
 OBJS_all = $(OBJS_pantilt)
-
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BUILDSYSDIR)/interface.mk
 
 include $(BUILDSYSDIR)/base.mk
 

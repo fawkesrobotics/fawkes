@@ -283,13 +283,13 @@ CppInterfaceGenerator::write_enum_constants_tostring_cpp(FILE *f)
 	    "%s::tostring_%s(%s value) const\n"
 	    "{\n"
 	    "  switch (value) {\n",
-	    i->getName().c_str(), class_name.c_str(), i->getName().c_str(),
-	    i->getName().c_str());
-    vector< pair<string,string> > items = (*i).getItems();
-    vector< pair<string,string> >::iterator j;
+	    i->get_name().c_str(), class_name.c_str(), i->get_name().c_str(),
+	    i->get_name().c_str());
+    vector<InterfaceEnumConstant::EnumItem> items = i->get_items();
+    vector<InterfaceEnumConstant::EnumItem>::iterator j;
     for (j = items.begin(); j != items.end(); ++j) {
       fprintf(f, "  case %s: return \"%s\";\n",
-	      j->first.c_str(), j->first.c_str());
+	      j->name.c_str(), j->name.c_str());
     }
     fprintf(f,
 	    "  default: return \"UNKNOWN\";\n"
@@ -314,11 +314,16 @@ CppInterfaceGenerator::write_constants_h(FILE *f)
     fprintf(f,
 	    "  /** %s */\n"
 	    "  typedef enum {\n",
-	    (*i).getComment().c_str());
-    vector< pair<string,string> > items = (*i).getItems();
-    vector< pair<string,string> >::iterator j = items.begin();
+	    (*i).get_comment().c_str());
+    vector<InterfaceEnumConstant::EnumItem> items = i->get_items();
+    vector<InterfaceEnumConstant::EnumItem>::iterator j = items.begin();
     while (j != items.end()) {
-      fprintf(f, "    %s /**< %s */", (*j).first.c_str(), (*j).second.c_str());
+      if (j->has_custom_value) {
+	fprintf(f, "    %s = %i /**< %s */", j->name.c_str(),
+		j->custom_value, j->comment.c_str());
+      } else {
+	fprintf(f, "    %s /**< %s */", j->name.c_str(), j->comment.c_str());
+      }
       ++j;
       if ( j != items.end() ) {
 	fprintf(f, ",\n");
@@ -326,9 +331,9 @@ CppInterfaceGenerator::write_constants_h(FILE *f)
 	fprintf(f, "\n");
       }
     }
-    fprintf(f, "  } %s;\n", (*i).getName().c_str());
+    fprintf(f, "  } %s;\n", (*i).get_name().c_str());
     fprintf(f, "  const char * tostring_%s(%s value) const;\n\n",
-	    i->getName().c_str(), i->getName().c_str());
+	    i->get_name().c_str(), i->get_name().c_str());
   }
 }
 
@@ -481,7 +486,7 @@ CppInterfaceGenerator::write_enum_tostring_method_cpp(FILE *f)
 	    "  if (strcmp(enumtype, \"%s\") == 0) {\n"
 	    "    return tostring_%s((%s)val);\n"
 	    "  }\n",
-	    i->getName().c_str(), i->getName().c_str(), i->getName().c_str());
+	    i->get_name().c_str(), i->get_name().c_str(), i->get_name().c_str());
   }
   fprintf(f,
 	  "  throw UnknownTypeException(\"Unknown enum type %%s\", enumtype);\n"
@@ -866,7 +871,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      "  if (index > %s) {\n"
 	      "    throw Exception(\"Index value %%u out of bounds (0..%s)\", index);\n"
 	      "  }\n"
-	      "  return data->%s[index];\n"
+	      "  return %sdata->%s[index];\n"
 	      "}\n\n",
 	      (*i).getName().c_str(),
 	      (*i).getComment().c_str(),
@@ -876,6 +881,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      inclusion_prefix.c_str(), classname.c_str(),
 	      ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
 	      i->getLength().c_str(), i->getLength().c_str(),
+	      (*i).isEnumType() ? (std::string("(") + interface_classname + "::" +
+				   i->getPlainAccessType() + ")").c_str() : "",
 	      (*i).getName().c_str() );
     }
 

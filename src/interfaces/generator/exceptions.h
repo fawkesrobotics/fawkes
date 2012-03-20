@@ -32,12 +32,16 @@
 class InterfaceGeneratorInvalidDocumentException : public fawkes::Exception {
  public:
   /** Constructor
-   * @param msg message
+   * @param format message format string, followed by the appropriate number of
+   * arguments. Cf. printf man page for valid format.
    */
-  InterfaceGeneratorInvalidDocumentException(const char *msg)
-    : fawkes::Exception("Interface document invalid.")
+  InterfaceGeneratorInvalidDocumentException(const char *format, ...)
+    : fawkes::Exception()
   {
-    append(msg);
+    va_list arg;
+    va_start(arg, format);
+    append_va(format, arg);
+    va_end(arg);
   }
 };
 
@@ -48,12 +52,16 @@ class InterfaceGeneratorInvalidDocumentException : public fawkes::Exception {
 class InterfaceGeneratorInvalidContentException : public fawkes::Exception {
  public:
   /** Constructor
-   * @param msg message
+   * @param format message format string, followed by the appropriate number of
+   * arguments. Cf. printf man page for valid format.
    */
-  InterfaceGeneratorInvalidContentException(const char *msg)
+  InterfaceGeneratorInvalidContentException(const char *format, ...)
     : fawkes::Exception()
   {
-    append("Invalid content: %s", msg);
+    va_list arg;
+    va_start(arg, format);
+    append_va(format, arg);
+    va_end(arg);
   }
 };
 

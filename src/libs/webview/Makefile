@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 ifeq ($(HAVE_LIBMICROHTTPD),1)
   LDFLAGS += $(LDFLAGS_LIBMICROHTTPD)
   CFLAGS  += $(CFLAGS_LIBMICROHTTPD)
-  LIBS_libfawkeswebview = stdc++ fawkescore fawkesutils
+  LIBS_libfawkeswebview = stdc++ fawkescore fawkesutils fawkeslogging
   OBJS_libfawkeswebview = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
   LIBS_all  = $(LIBDIR)/libfawkeswebview.so
 else

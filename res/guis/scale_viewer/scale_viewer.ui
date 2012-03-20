@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkWindow" id="wnd_main">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImage" id="img_image">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="stock">gtk-missing-image</property>
+      </object>
+    </child>
+  </object>
+</interface>

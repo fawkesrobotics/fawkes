@@ -32,7 +32,8 @@
 #include <netcomm/fawkes/message.h>
 #include <netcomm/utils/exceptions.h>
 
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
+#include <utils/misc/string_conversions.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -1470,14 +1471,14 @@ NetworkConfiguration::NetConfValueIterator::next()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::valid()
+NetworkConfiguration::NetConfValueIterator::valid() const
 {
   return ( (i != NULL) || (msg != NULL) );
 }
 
 
 const char *
-NetworkConfiguration::NetConfValueIterator::path()
+NetworkConfiguration::NetConfValueIterator::path() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1492,7 +1493,7 @@ NetworkConfiguration::NetConfValueIterator::path()
 
 
 const char *
-NetworkConfiguration::NetConfValueIterator::type()
+NetworkConfiguration::NetConfValueIterator::type() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1515,7 +1516,7 @@ NetworkConfiguration::NetConfValueIterator::type()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::is_float()
+NetworkConfiguration::NetConfValueIterator::is_float() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1529,7 +1530,7 @@ NetworkConfiguration::NetConfValueIterator::is_float()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::is_uint()
+NetworkConfiguration::NetConfValueIterator::is_uint() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1543,7 +1544,7 @@ NetworkConfiguration::NetConfValueIterator::is_uint()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::is_int()
+NetworkConfiguration::NetConfValueIterator::is_int() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1557,7 +1558,7 @@ NetworkConfiguration::NetConfValueIterator::is_int()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::is_bool()
+NetworkConfiguration::NetConfValueIterator::is_bool() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1571,7 +1572,7 @@ NetworkConfiguration::NetConfValueIterator::is_bool()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::is_string()
+NetworkConfiguration::NetConfValueIterator::is_string() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1585,7 +1586,7 @@ NetworkConfiguration::NetConfValueIterator::is_string()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::is_default()
+NetworkConfiguration::NetConfValueIterator::is_default() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1630,7 +1631,7 @@ NetworkConfiguration::NetConfValueIterator::is_default()
 
 
 float
-NetworkConfiguration::NetConfValueIterator::get_float()
+NetworkConfiguration::NetConfValueIterator::get_float() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1649,7 +1650,7 @@ NetworkConfiguration::NetConfValueIterator::get_float()
 
 
 unsigned int
-NetworkConfiguration::NetConfValueIterator::get_uint()
+NetworkConfiguration::NetConfValueIterator::get_uint() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1668,7 +1669,7 @@ NetworkConfiguration::NetConfValueIterator::get_uint()
 
 
 int
-NetworkConfiguration::NetConfValueIterator::get_int()
+NetworkConfiguration::NetConfValueIterator::get_int() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1687,7 +1688,7 @@ NetworkConfiguration::NetConfValueIterator::get_int()
 
 
 bool
-NetworkConfiguration::NetConfValueIterator::get_bool()
+NetworkConfiguration::NetConfValueIterator::get_bool() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1706,7 +1707,7 @@ NetworkConfiguration::NetConfValueIterator::get_bool()
 
 
 std::string
-NetworkConfiguration::NetConfValueIterator::get_string()
+NetworkConfiguration::NetConfValueIterator::get_string() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {
@@ -1726,7 +1727,39 @@ NetworkConfiguration::NetConfValueIterator::get_string()
 
 
 std::string
-NetworkConfiguration::NetConfValueIterator::get_comment()
+NetworkConfiguration::NetConfValueIterator::get_as_string() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on "
+				 "invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_STRING_VALUE) {
+      config_string_value_msg_t *sm = msg->msgge<config_string_value_msg_t>();
+      return sm->s;
+    } else if (msg->msgid() == MSG_CONFIG_BOOL_VALUE) {
+      config_bool_value_msg_t *bm = msg->msg<config_bool_value_msg_t>();
+      return (bm->b != 0) ? "true" : "false";
+    } else if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
+      config_int_value_msg_t *im = msg->msg<config_int_value_msg_t>();
+      return StringConversions::to_string(im->i);
+    } else if (msg->msgid() == MSG_CONFIG_UINT_VALUE) {
+      config_uint_value_msg_t *im = msg->msg<config_uint_value_msg_t>();
+      return StringConversions::to_string(im->u);
+    } else if (msg->msgid() == MSG_CONFIG_FLOAT_VALUE) {
+      config_float_value_msg_t *fm = msg->msg<config_float_value_msg_t>();
+      return StringConversions::to_string(fm->f);
+    } else {
+      throw Exception("NetConfValueIterator::get_as_string: unknown type");
+    }
+  } else {
+    return i->get_as_string();
+  }
+}
+
+
+std::string
+NetworkConfiguration::NetConfValueIterator::get_comment() const
 {
   if ( i == NULL ) {
     if ( msg == NULL ) {

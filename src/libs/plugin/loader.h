@@ -36,7 +36,7 @@ namespace fawkes {
 
 class Module;
 class Configuration;
-class PluginLoaderData;
+class ModuleManager;
 
 class PluginLoadException : public Exception
 {
@@ -71,12 +71,16 @@ class PluginLoader {
 
   bool     is_loaded(const char *plugin_name);
 
+  ModuleManager *  get_module_manager() const;
+
  private:
   Module * open_module(const char *plugin_name);
   Plugin * create_instance(const char *plugin_name, Module *module);
 
  private:
-  PluginLoaderData *d;
+  class Data;
+
+  Data *d;
   Configuration    *__config;
 };
 

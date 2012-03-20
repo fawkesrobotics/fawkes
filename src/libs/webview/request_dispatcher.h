@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 struct MHD_Connection;
+struct MHD_Response;
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -39,6 +40,7 @@ class WebUrlManager;
 class WebPageHeaderGenerator;
 class WebPageFooterGenerator;
 class StaticWebReply;
+class WebUserVerifier;
 
 class WebRequestDispatcher
 {
@@ -46,6 +48,7 @@ class WebRequestDispatcher
   WebRequestDispatcher(WebUrlManager *url_manager,
 		       WebPageHeaderGenerator *headergen = 0,
 		       WebPageFooterGenerator *footergen = 0);
+  ~WebRequestDispatcher();
 
   static int process_request_cb(void *callback_data,
 				struct MHD_Connection * connection,
@@ -56,9 +59,13 @@ class WebRequestDispatcher
 				size_t *upload_data_size,
 				void  **session_data);
 
+  void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+
  private:
+  struct MHD_Response *  prepare_static_response(StaticWebReply *sreply);
   int queue_static_reply(struct MHD_Connection * connection,
 			 StaticWebReply *sreply);
+  int queue_basic_auth_fail(struct MHD_Connection * connection);
   int process_request(struct MHD_Connection * connection,
 		      const char *url,
 		      const char *method,
@@ -68,11 +75,14 @@ class WebRequestDispatcher
 		      void **session_data);
 
  private:
-  WebUrlManager                                *__url_manager;
+  WebUrlManager            *__url_manager;
 
-  std::string                                   __active_baseurl;
-  WebPageHeaderGenerator                       *__page_header_generator;
-  WebPageFooterGenerator                       *__page_footer_generator;
+  std::string               __active_baseurl;
+  WebPageHeaderGenerator   *__page_header_generator;
+  WebPageFooterGenerator   *__page_footer_generator;
+
+  char                     *__realm;
+  WebUserVerifier          *__user_verifier;
 };
 
 } // end namespace fawkes

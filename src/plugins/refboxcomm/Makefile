@@ -18,7 +18,6 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 HAVE_LIBXMLPP   = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
-HAVE_SPL        = $(if $(filter nao%,$(BUILD_TYPE)),1)
 
 LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesnetcomm \
@@ -37,13 +36,10 @@ else
   WARN_TARGETS += warning_libxmlpp
 endif
 
-ifeq ($(HAVE_SPL),1)
-  CFLAGS += -DHAVE_SPL
-  LIBS_refboxcomm += SoccerPenaltyInterface
-  OBJS_refboxcomm += processor/spl.o
-else
-  WARN_TARGETS += warning_spl
-endif
+# SPL can always be built
+CFLAGS += -DHAVE_SPL
+LIBS_refboxcomm += SoccerPenaltyInterface
+OBJS_refboxcomm += processor/spl.o
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
@@ -52,8 +48,6 @@ all: $(WARN_TARGETS)
 .PHONY: warning_libxmlpp warning_spl
 warning_libxmlpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting MSL2010 support$(TNORMAL) (libxml++[-devel] not installed)"
-warning_spl:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting SPL support$(TNORMAL) (not building in nao environment)"
 
 endif
 

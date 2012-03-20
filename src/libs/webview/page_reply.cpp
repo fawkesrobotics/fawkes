@@ -76,6 +76,18 @@ WebPageReply::WebPageReply(response_code_t code)
 }
 
 
+/** Set HTML header text.
+ * The given text is placed in the head section of the HTML page. You can use it
+ * for example to add custom stylesheets or JavaScript.
+ * @param h header to set
+ */
+void
+WebPageReply::set_html_header(std::string h)
+{
+  __html_header = h;
+}
+
+
 /** Pack web page reply.
  * This method creates the final page by calling the header and footer generators
  * if supplied (otherwise a standard header is chosen) and the body.
@@ -89,7 +101,8 @@ WebPageReply::pack(std::string active_baseurl,
 		   WebPageHeaderGenerator *headergen,
 		   WebPageFooterGenerator *footergen)
 {
-  if (headergen)  __merged_body += headergen->html_header(_title, active_baseurl);
+  if (headergen)
+    __merged_body += headergen->html_header(_title, active_baseurl, __html_header);
   else {
     fawkes::HostInfo hi;
     char *s;

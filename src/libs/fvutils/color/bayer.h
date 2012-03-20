@@ -40,13 +40,28 @@ typedef enum {
   BAYER_PATTERN_BGGR = 0x42474752	/**< BGGR */
 } bayer_pattern_t;
 
-void bayerGBRG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer, unsigned char *yuv,
-						 unsigned int width, unsigned int height);
+void bayerGBRG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
+						 unsigned char *yuv,
+						 unsigned int width,
+						 unsigned int height);
+
+void bayerGRBG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
+						 unsigned char *yuv,
+						 unsigned int width,
+						 unsigned int height);
+void bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
+						 unsigned char *yuv,
+						 unsigned int width,
+						 unsigned int height);
 
 void bayerGBRG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned char *yuv,
 					unsigned int width, unsigned int height);
 void bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *yuv,
 					 unsigned int width, unsigned int height);
+
+void bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer,
+					unsigned char *yuv,
+					unsigned int width, unsigned int height);
 
 } // end namespace firevision
 

@@ -15,72 +15,6 @@ class HumanoidMotionInterface : public Interface
     STANDUP_FRONT
   } StandupEnum;
 
-  typedef enum {
-    WALK,
-    KICK
-  } StiffnessMotionPatternEnum;
-
-  class SetWalkParamsMessage : public Message
-  {
-    SetWalkParamsMessage(float ini_max_step_length, float ini_max_step_height, float ini_max_step_side, float ini_max_step_turn, float ini_zmp_offset_forward, float ini_zmp_offset_sideward, float ini_l_hip_roll_compensation, float ini_r_hip_roll_compensation, float ini_hip_height, float ini_torso_sideward_orientation);
-    SetWalkParamsMessage();
-    ~SetWalkParamsMessage();
-
-    float max_step_length();
-    void set_max_step_length(const float new_max_step_length);
-    int maxlenof_max_step_length() const;
-    float max_step_height();
-    void set_max_step_height(const float new_max_step_height);
-    int maxlenof_max_step_height() const;
-    float max_step_side();
-    void set_max_step_side(const float new_max_step_side);
-    int maxlenof_max_step_side() const;
-    float max_step_turn();
-    void set_max_step_turn(const float new_max_step_turn);
-    int maxlenof_max_step_turn() const;
-    float zmp_offset_forward();
-    void set_zmp_offset_forward(const float new_zmp_offset_forward);
-    int maxlenof_zmp_offset_forward() const;
-    float zmp_offset_sideward();
-    void set_zmp_offset_sideward(const float new_zmp_offset_sideward);
-    int maxlenof_zmp_offset_sideward() const;
-    float l_hip_roll_compensation();
-    void set_l_hip_roll_compensation(const float new_l_hip_roll_compensation);
-    int maxlenof_l_hip_roll_compensation() const;
-    float r_hip_roll_compensation();
-    void set_r_hip_roll_compensation(const float new_r_hip_roll_compensation);
-    int maxlenof_r_hip_roll_compensation() const;
-    float hip_height();
-    void set_hip_height(const float new_hip_height);
-    int maxlenof_hip_height() const;
-    float torso_sideward_orientation();
-    void set_torso_sideward_orientation(const float new_torso_sideward_orientation);
-    int maxlenof_torso_sideward_orientation() const;
-  };
-
-  class SetWalkArmsParamsMessage : public Message
-  {
-    SetWalkArmsParamsMessage(bool ini_arms_enabled, float ini_shoulder_pitch_median, float ini_shoulder_pitch_amplitude, float ini_elbow_roll_median, float ini_elbow_roll_amplitude);
-    SetWalkArmsParamsMessage();
-    ~SetWalkArmsParamsMessage();
-
-    bool is_arms_enabled();
-    void set_arms_enabled(const bool new_arms_enabled);
-    int maxlenof_arms_enabled() const;
-    float shoulder_pitch_median();
-    void set_shoulder_pitch_median(const float new_shoulder_pitch_median);
-    int maxlenof_shoulder_pitch_median() const;
-    float shoulder_pitch_amplitude();
-    void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
-    int maxlenof_shoulder_pitch_amplitude() const;
-    float elbow_roll_median();
-    void set_elbow_roll_median(const float new_elbow_roll_median);
-    int maxlenof_elbow_roll_median() const;
-    float elbow_roll_amplitude();
-    void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
-    int maxlenof_elbow_roll_amplitude() const;
-  };
-
   class StopMessage : public Message
   {
     StopMessage();
@@ -90,35 +24,29 @@ class HumanoidMotionInterface : public Interface
 
   class WalkStraightMessage : public Message
   {
-    WalkStraightMessage(float ini_distance, unsigned int ini_num_samples);
+    WalkStraightMessage(float ini_distance);
     WalkStraightMessage();
     ~WalkStraightMessage();
 
     float distance();
     void set_distance(const float new_distance);
     int maxlenof_distance() const;
-    unsigned int num_samples();
-    void set_num_samples(const unsigned int new_num_samples);
-    int maxlenof_num_samples() const;
   };
 
   class WalkSidewaysMessage : public Message
   {
-    WalkSidewaysMessage(float ini_distance, unsigned int ini_num_samples);
+    WalkSidewaysMessage(float ini_distance);
     WalkSidewaysMessage();
     ~WalkSidewaysMessage();
 
     float distance();
     void set_distance(const float new_distance);
     int maxlenof_distance() const;
-    unsigned int num_samples();
-    void set_num_samples(const unsigned int new_num_samples);
-    int maxlenof_num_samples() const;
   };
 
   class WalkArcMessage : public Message
   {
-    WalkArcMessage(float ini_angle, float ini_radius, unsigned int ini_num_samples);
+    WalkArcMessage(float ini_angle, float ini_radius);
     WalkArcMessage();
     ~WalkArcMessage();
 
@@ -128,16 +56,13 @@ class HumanoidMotionInterface : public Interface
     float radius();
     void set_radius(const float new_radius);
     int maxlenof_radius() const;
-    unsigned int num_samples();
-    void set_num_samples(const unsigned int new_num_samples);
-    int maxlenof_num_samples() const;
   };
 
-  class WalkMessage : public Message
+  class WalkVelocityMessage : public Message
   {
-    WalkMessage(float ini_x, float ini_y, float ini_theta, float ini_speed);
-    WalkMessage();
-    ~WalkMessage();
+    WalkVelocityMessage(float ini_x, float ini_y, float ini_theta, float ini_speed);
+    WalkVelocityMessage();
+    ~WalkVelocityMessage();
 
     float x();
     void set_x(const float new_x);
@@ -155,16 +80,13 @@ class HumanoidMotionInterface : public Interface
 
   class TurnMessage : public Message
   {
-    TurnMessage(float ini_angle, unsigned int ini_num_samples);
+    TurnMessage(float ini_angle);
     TurnMessage();
     ~TurnMessage();
 
     float angle();
     void set_angle(const float new_angle);
     int maxlenof_angle() const;
-    unsigned int num_samples();
-    void set_num_samples(const unsigned int new_num_samples);
-    int maxlenof_num_samples() const;
   };
 
   class KickMessage : public Message
@@ -183,24 +105,16 @@ class HumanoidMotionInterface : public Interface
 
   class ParkMessage : public Message
   {
-    ParkMessage(float ini_time_sec);
     ParkMessage();
     ~ParkMessage();
 
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
   };
 
   class GetUpMessage : public Message
   {
-    GetUpMessage(float ini_time_sec);
     GetUpMessage();
     ~GetUpMessage();
 
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
   };
 
   class StandupMessage : public Message
@@ -214,11 +128,11 @@ class HumanoidMotionInterface : public Interface
     int maxlenof_from_pos() const;
   };
 
-  class YawPitchHeadMessage : public Message
+  class MoveHeadMessage : public Message
   {
-    YawPitchHeadMessage(float ini_yaw, float ini_pitch, float ini_time_sec);
-    YawPitchHeadMessage();
-    ~YawPitchHeadMessage();
+    MoveHeadMessage(float ini_yaw, float ini_pitch, float ini_speed);
+    MoveHeadMessage();
+    ~MoveHeadMessage();
 
     float yaw();
     void set_yaw(const float new_yaw);
@@ -226,139 +140,17 @@ class HumanoidMotionInterface : public Interface
     float pitch();
     void set_pitch(const float new_pitch);
     int maxlenof_pitch() const;
-    float time_sec();
-    void set_time_sec(const float new_time_sec);
-    int maxlenof_time_sec() const;
+    float speed();
+    void set_speed(const float new_speed);
+    int maxlenof_speed() const;
   };
 
-  class SetStiffnessParamsMessage : public Message
-  {
-    SetStiffnessParamsMessage(StiffnessMotionPatternEnum ini_motion_pattern, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll);
-    SetStiffnessParamsMessage();
-    ~SetStiffnessParamsMessage();
-
-    StiffnessMotionPatternEnum motion_pattern();
-    void set_motion_pattern(const StiffnessMotionPatternEnum new_motion_pattern);
-    int maxlenof_motion_pattern() const;
-    float head_yaw();
-    void set_head_yaw(const float new_head_yaw);
-    int maxlenof_head_yaw() const;
-    float head_pitch();
-    void set_head_pitch(const float new_head_pitch);
-    int maxlenof_head_pitch() const;
-    float l_shoulder_pitch();
-    void set_l_shoulder_pitch(const float new_l_shoulder_pitch);
-    int maxlenof_l_shoulder_pitch() const;
-    float l_shoulder_roll();
-    void set_l_shoulder_roll(const float new_l_shoulder_roll);
-    int maxlenof_l_shoulder_roll() const;
-    float l_elbow_yaw();
-    void set_l_elbow_yaw(const float new_l_elbow_yaw);
-    int maxlenof_l_elbow_yaw() const;
-    float l_elbow_roll();
-    void set_l_elbow_roll(const float new_l_elbow_roll);
-    int maxlenof_l_elbow_roll() const;
-    float l_hip_yaw_pitch();
-    void set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch);
-    int maxlenof_l_hip_yaw_pitch() const;
-    float l_hip_roll();
-    void set_l_hip_roll(const float new_l_hip_roll);
-    int maxlenof_l_hip_roll() const;
-    float l_hip_pitch();
-    void set_l_hip_pitch(const float new_l_hip_pitch);
-    int maxlenof_l_hip_pitch() const;
-    float l_knee_pitch();
-    void set_l_knee_pitch(const float new_l_knee_pitch);
-    int maxlenof_l_knee_pitch() const;
-    float l_ankle_pitch();
-    void set_l_ankle_pitch(const float new_l_ankle_pitch);
-    int maxlenof_l_ankle_pitch() const;
-    float l_ankle_roll();
-    void set_l_ankle_roll(const float new_l_ankle_roll);
-    int maxlenof_l_ankle_roll() const;
-    float r_hip_yaw_pitch();
-    void set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch);
-    int maxlenof_r_hip_yaw_pitch() const;
-    float r_hip_roll();
-    void set_r_hip_roll(const float new_r_hip_roll);
-    int maxlenof_r_hip_roll() const;
-    float r_hip_pitch();
-    void set_r_hip_pitch(const float new_r_hip_pitch);
-    int maxlenof_r_hip_pitch() const;
-    float r_knee_pitch();
-    void set_r_knee_pitch(const float new_r_knee_pitch);
-    int maxlenof_r_knee_pitch() const;
-    float r_ankle_pitch();
-    void set_r_ankle_pitch(const float new_r_ankle_pitch);
-    int maxlenof_r_ankle_pitch() const;
-    float r_ankle_roll();
-    void set_r_ankle_roll(const float new_r_ankle_roll);
-    int maxlenof_r_ankle_roll() const;
-    float r_shoulder_pitch();
-    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
-    int maxlenof_r_shoulder_pitch() const;
-    float r_shoulder_roll();
-    void set_r_shoulder_roll(const float new_r_shoulder_roll);
-    int maxlenof_r_shoulder_roll() const;
-    float r_elbow_yaw();
-    void set_r_elbow_yaw(const float new_r_elbow_yaw);
-    int maxlenof_r_elbow_yaw() const;
-    float r_elbow_roll();
-    void set_r_elbow_roll(const float new_r_elbow_roll);
-    int maxlenof_r_elbow_roll() const;
-  };
-
-  bool is_walking();
-  void set_walking(const bool new_walking);
-  int maxlenof_walking() const;
-  LegEnum supporting_leg();
-  void set_supporting_leg(const LegEnum new_supporting_leg);
-  int maxlenof_supporting_leg() const;
-  float max_step_length();
-  void set_max_step_length(const float new_max_step_length);
-  int maxlenof_max_step_length() const;
-  float max_step_height();
-  void set_max_step_height(const float new_max_step_height);
-  int maxlenof_max_step_height() const;
-  float max_step_side();
-  void set_max_step_side(const float new_max_step_side);
-  int maxlenof_max_step_side() const;
-  float max_step_turn();
-  void set_max_step_turn(const float new_max_step_turn);
-  int maxlenof_max_step_turn() const;
-  float zmp_offset_forward();
-  void set_zmp_offset_forward(const float new_zmp_offset_forward);
-  int maxlenof_zmp_offset_forward() const;
-  float zmp_offset_sideward();
-  void set_zmp_offset_sideward(const float new_zmp_offset_sideward);
-  int maxlenof_zmp_offset_sideward() const;
-  float l_hip_roll_compensation();
-  void set_l_hip_roll_compensation(const float new_l_hip_roll_compensation);
-  int maxlenof_l_hip_roll_compensation() const;
-  float r_hip_roll_compensation();
-  void set_r_hip_roll_compensation(const float new_r_hip_roll_compensation);
-  int maxlenof_r_hip_roll_compensation() const;
-  float hip_height();
-  void set_hip_height(const float new_hip_height);
-  int maxlenof_hip_height() const;
-  float torso_sideward_orientation();
-  void set_torso_sideward_orientation(const float new_torso_sideward_orientation);
-  int maxlenof_torso_sideward_orientation() const;
+  bool is_moving();
+  void set_moving(const bool new_moving);
+  int maxlenof_moving() const;
   bool is_arms_enabled();
   void set_arms_enabled(const bool new_arms_enabled);
   int maxlenof_arms_enabled() const;
-  float shoulder_pitch_median();
-  void set_shoulder_pitch_median(const float new_shoulder_pitch_median);
-  int maxlenof_shoulder_pitch_median() const;
-  float shoulder_pitch_amplitude();
-  void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
-  int maxlenof_shoulder_pitch_amplitude() const;
-  float elbow_roll_median();
-  void set_elbow_roll_median(const float new_elbow_roll_median);
-  int maxlenof_elbow_roll_median() const;
-  float elbow_roll_amplitude();
-  void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
-  int maxlenof_elbow_roll_amplitude() const;
   unsigned int msgid();
   void set_msgid(const unsigned int new_msgid);
   int maxlenof_msgid() const;

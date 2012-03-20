@@ -24,7 +24,6 @@
 #define __TOOLS_CONFIG_EDITOR_CONFIG_TREE_VIEW_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 #include <string>
 
 namespace fawkes {
@@ -40,7 +39,8 @@ class ConfigEditorPlugin;
 class ConfigTreeView : public Gtk::TreeView
 {
  public:
-  ConfigTreeView(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml);
+  ConfigTreeView(BaseObjectType* cobject,
+                 const Glib::RefPtr<Gtk::Builder>& builder);
   virtual ~ConfigTreeView();
 
   void set_config(fawkes::Configuration* config);

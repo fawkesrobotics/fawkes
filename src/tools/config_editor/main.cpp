@@ -22,8 +22,13 @@
 
 #include <core/exception.h>
 #include <tools/config_editor/config_editor.h>
-#include <libglademm/xml.h>
 #include <iostream>
+
+#if GTK_VERSION_GE(3,0)
+#  define UI_FILE RESDIR"/guis/config_editor/config_editor.ui"
+#else
+#  define UI_FILE RESDIR"/guis/config_editor/config_editor_gtk2.ui"
+#endif
 
 using namespace std;
 
@@ -32,26 +37,33 @@ int main(int argc, char** argv)
   std::locale::global( std::locale( "" ) ); 
 
   try
-    {
-      Gtk::Main kit(argc, argv);
+  {
+    Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/guis/config_editor/config_editor.glade");
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file(UI_FILE);
 #else
-      std::auto_ptr<Gnome::Glade::XmlError> error;
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/guis/config_editor/config_editor.glade", "", "", error);
-      if (error.get()) {
-        throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
-      }
+    std::auto_ptr<Gtk::BuilderError> error;
+    Glib::RefPtr<Gtk::Builder> builder =
+      Gtk::Builder::create_from_file(UI_FILE, error);
+    if (error.get()) {
+      printf("Failed to load UI file: %s", error->what().c_str());
+      exit(-1);
+    }
 #endif
 
-      FawkesConfigEditor fce(ref_xml);
+    FawkesConfigEditor fce(builder);
 
-      kit.run( fce.get_window() );
-    }
+    kit.run(fce.get_window());
+  }
+  catch (Gtk::BuilderError &e)
+  {
+    printf("Failed to instantiate window: %s\n", e.what().c_str());
+  }
   catch (const std::exception& e)
-    {
-      cerr << "Error: " << e.what() << endl;
-    }
-  
+  {
+    cerr << "Error: " << e.what() << endl;
+  }
+
   return 0;
 }

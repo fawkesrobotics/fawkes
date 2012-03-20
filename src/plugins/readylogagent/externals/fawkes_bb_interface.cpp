@@ -360,20 +360,20 @@ construct_struct_args( const InterfaceFieldIterator& begin,
       break;
     }
 
-    case IFT_INT:
-      args[ field_idx ] = EC_word( field_iter.get_int() );
+    case IFT_INT32:
+      args[ field_idx ] = EC_word( field_iter.get_int32() );
       break;
 
-    case IFT_UINT:
-      args[ field_idx ] = EC_word( (long) field_iter.get_uint() );
+    case IFT_UINT32:
+      args[ field_idx ] = EC_word( (long) field_iter.get_uint32() );
       break;
 
-    case IFT_LONGINT:
-      args[ field_idx ] = EC_word( field_iter.get_longint() );
+    case IFT_INT64:
+      args[ field_idx ] = EC_word( field_iter.get_int64() );
       break;
 
-    case IFT_LONGUINT:
-      args[ field_idx ] = EC_word( (long) field_iter.get_longuint() );
+    case IFT_UINT64:
+      args[ field_idx ] = EC_word( (long) field_iter.get_uint64() );
       break;
 
     case IFT_FLOAT:
@@ -437,40 +437,40 @@ parse_struct_args( EC_word data_struct,
       break;
     }
 
-    case IFT_INT: {
+    case IFT_INT32: {
       long val;
       if ( EC_succeed == arg.is_long( &val ) )
-      { field_iter.set_int( (int) val ); }
+      { field_iter.set_int32( (int) val ); }
       else
       { throw TypeMismatchException( "Wrong data type for %d-the argument\n", field_idx ); }
 
       break;
     }
 
-    case IFT_UINT: {
+    case IFT_UINT32: {
       long val;
       if ( EC_succeed == arg.is_long( &val ) )
-      { field_iter.set_uint( (unsigned int) val ); }
+      { field_iter.set_uint32( (unsigned int) val ); }
       else
       { throw TypeMismatchException( "Wrong data type for %d-the argument\n", field_idx ); }
 
       break;
     }
 
-    case IFT_LONGINT: {
+    case IFT_INT64: {
       long val;
       if ( EC_succeed == arg.is_long( &val ) )
-      { field_iter.set_longint( val ); }
+      { field_iter.set_int64( val ); }
       else
       { throw TypeMismatchException( "Wrong data type for %d-the argument\n", field_idx ); }
 
       break;
     }
 
-    case IFT_LONGUINT: {
+    case IFT_UINT64: {
       long val;
       if ( EC_succeed == arg.is_long( &val ) )
-      { field_iter.set_longuint( (long unsigned int) val ); }
+      { field_iter.set_uint64( (long unsigned int) val ); }
       else
       { throw TypeMismatchException( "Wrong data type for %d-the argument\n", field_idx ); }
 

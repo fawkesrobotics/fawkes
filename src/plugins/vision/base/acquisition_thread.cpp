@@ -29,7 +29,7 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 #endif
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 
 #include <fvcams/shmem.h>
 #include <fvutils/color/conversions.h>
@@ -95,6 +95,11 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 FvAcquisitionThread::~FvAcquisitionThread()
 {
   __camera->close();
+
+  for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
+    delete __shmit->second;
+  }
+  __shm.clear();
 
   delete vision_threads;
   delete __camera;

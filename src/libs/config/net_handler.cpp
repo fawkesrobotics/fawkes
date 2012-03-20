@@ -24,7 +24,7 @@
 #include <config/net_handler.h>
 #include <config/net_messages.h>
 #include <config/net_list_content.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
@@ -53,7 +53,7 @@ ConfigNetworkHandler::ConfigNetworkHandler(Configuration *config,
 					 FawkesNetworkHub *hub)
   : Thread("ConfigNetworkHandler", Thread::OPMODE_WAITFORWAKEUP),
     FawkesNetworkHandler(FAWKES_CID_CONFIGMANAGER),
-    ConfigurationChangeHandler()
+    ConfigurationChangeHandler("")
 {
   __config = config;
   __hub    = hub;
@@ -539,18 +539,56 @@ ConfigNetworkHandler::config_tag_changed(const char *new_tag)
 
 
 void
-ConfigNetworkHandler::config_value_changed(const char *path, bool is_default, int value)
+ConfigNetworkHandler::config_value_changed(const Configuration::ValueIterator *v)
 {
+  const char *path = v->path();
+  bool is_default  = v->is_default();
+
   __subscribers.lock();
   for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
     try {
-      config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path, is_default);
-      r->i = value;
-      __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
-		  r, sizeof(config_int_value_msg_t));
+      if (v->is_string()) {
+	std::string value = v->get_string();
+	size_t s_length = value.length();
+	config_string_value_msg_t *r =
+	  prepare_string_msg<config_string_value_msg_t>(path, is_default,
+							s_length);
+	strcpy(r->s, value.c_str());
+	__hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
+		    r, sizeof(config_string_value_msg_t) + s_length);
+      } else if (v->is_bool()) {
+	bool value = v->get_bool();
+	config_bool_value_msg_t *r =
+	  prepare_msg<config_bool_value_msg_t>(path, is_default);
+	r->b = (value ? 1 : 0);
+	__hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
+		    r, sizeof(config_bool_value_msg_t));
+      } else if (v->is_int()) {
+	int value = v->get_int();
+	config_int_value_msg_t *r =
+	  prepare_msg<config_int_value_msg_t>(path, is_default);
+	r->i = value;
+	__hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
+		    r, sizeof(config_int_value_msg_t));
+      } else if (v->is_uint()) {
+	unsigned int value = v->get_uint();
+	config_uint_value_msg_t *r =
+	  prepare_msg<config_uint_value_msg_t>(path, is_default);
+	r->u = value;
+	__hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
+		    r, sizeof(config_uint_value_msg_t));
+      } else if (v->is_float()) {
+	float value = v->get_float();
+	config_float_value_msg_t *r =
+	  prepare_msg<config_float_value_msg_t>(path, is_default);
+	r->f = value;
+	__hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
+		    r, sizeof(config_float_value_msg_t));
+      }
+
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
-			  "config_value_changed[int]: Value for %s could not be sent "
+			  "config_value_changed: Value for %s could not be sent "
 			  "to client %u", path, *__sit);
       LibLogger::log_warn("ConfigNetworkHandler", e);
     }
@@ -560,106 +598,25 @@ ConfigNetworkHandler::config_value_changed(const char *path, bool is_default, in
 
 
 void
-ConfigNetworkHandler::config_value_changed(const char *path, bool is_default, unsigned int value)
+ConfigNetworkHandler::config_comment_changed(const Configuration::ValueIterator *v)
 {
+  const char *path = v->path();
+  bool is_default  = v->is_default();
+  std::string comment = v->get_comment();
   __subscribers.lock();
   for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
     try {
-      config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path, is_default);
-      r->u = value;
-      __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
-		  r, sizeof(config_uint_value_msg_t));
-    } catch (Exception &e) {
-      LibLogger::log_warn("ConfigNetworkHandler",
-			  "config_value_changed[uint]: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
-      LibLogger::log_warn("ConfigNetworkHandler", e);
-    }
-  }
-  __subscribers.unlock();
-}
-
-
-void
-ConfigNetworkHandler::config_value_changed(const char *path, bool is_default, float value)
-{
-  __subscribers.lock();
-  for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
-    try {
-      config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path, is_default);
-      r->f = value;
-      __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
-		  r, sizeof(config_float_value_msg_t));
-    } catch (Exception &e) {
-      LibLogger::log_warn("ConfigNetworkHandler",
-			  "config_value_changed[float]: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
-      LibLogger::log_warn("ConfigNetworkHandler", e);
-    }
-  }
-  __subscribers.unlock();
-}
-
-
-void
-ConfigNetworkHandler::config_value_changed(const char *path, bool is_default, bool value)
-{
-  __subscribers.lock();
-  for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
-    try {
-      config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path, is_default);
-      r->b = (value ? 1 : 0);
-      __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
-		  r, sizeof(config_bool_value_msg_t));
-    } catch (Exception &e) {
-      LibLogger::log_warn("ConfigNetworkHandler",
-			  "config_value_changed[bool]: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
-      LibLogger::log_warn("ConfigNetworkHandler", e);
-    }
-  }
-  __subscribers.unlock();
-}
-
-
-void
-ConfigNetworkHandler::config_value_changed(const char *path, bool is_default, const char *value)
-{
-  __subscribers.lock();
-  for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
-    try {
-      size_t s_length = strlen(value);
-      config_string_value_msg_t *r = prepare_string_msg<config_string_value_msg_t>(path, is_default, s_length);
-      strcpy(r->s, value);
-      __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
-		  r, sizeof(config_string_value_msg_t) + s_length);
-    } catch (Exception &e) {
-      LibLogger::log_warn("ConfigNetworkHandler",
-			  "config_value_changed[string]: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
-      LibLogger::log_warn("ConfigNetworkHandler", e);
-    }
-  }
-  __subscribers.unlock();
-}
-
-
-void
-ConfigNetworkHandler::config_comment_changed(const char *path, bool is_default, const char *comment)
-{
-  __subscribers.lock();
-  for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
-    try {
-      size_t s_length = strlen(comment);
-      config_comment_msg_t *r = prepare_string_msg<config_comment_msg_t>(path, is_default, s_length);
-      strcpy(r->s, comment);
+      size_t s_length = comment.length();
+      config_comment_msg_t *r =
+	prepare_string_msg<config_comment_msg_t>(path, is_default, s_length);
+      strcpy(r->s, comment.c_str());
 
       __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_COMMENT_VALUE,
 		  r, sizeof(config_comment_msg_t) + s_length);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
-			  "config_value_changed[string]: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
+			  "config_comment_changed[string]: Value for %s could "
+			  "not be sent to client %u", path, *__sit);
       LibLogger::log_warn("ConfigNetworkHandler", e);
     }
   }
@@ -668,14 +625,15 @@ ConfigNetworkHandler::config_comment_changed(const char *path, bool is_default, 
 
 
 void
-ConfigNetworkHandler::config_value_erased(const char *path, bool is_default)
+ConfigNetworkHandler::config_value_erased(const char *path)
 {
   __subscribers.lock();
   for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
     try {
-      config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path, is_default);
+      config_value_erased_msg_t *r =
+	prepare_msg<config_value_erased_msg_t>(path, false);
       __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
-		r, sizeof(config_value_erased_msg_t));
+		  r, sizeof(config_value_erased_msg_t));
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "configValueErased: Value for %s could not be sent "

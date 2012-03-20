@@ -38,15 +38,15 @@ using namespace firevision;
 /** Constructor.
  * Allows to construct a dialog by means of get_widget_derived( ... ).
  * @param cobject base object pointer
- * @param ref_xml Glade XML object representing the Glade input file
+ * @param builder Gtk builder
  */
 RetrieverConfigDialog::RetrieverConfigDialog( BaseObjectType* cobject,
-					      const Glib::RefPtr< Gnome::Glade::Xml >& ref_xml )
+					      const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Dialog( cobject )
 {
-  ref_xml->get_widget("trvCameras", m_trv_cameras);
-  ref_xml->get_widget("btnAdd", m_btn_add_camera);
-  ref_xml->get_widget("btnDelete", m_btn_delete_camera);
+  builder->get_widget("trvCameras", m_trv_cameras);
+  builder->get_widget("btnAdd", m_btn_add_camera);
+  builder->get_widget("btnDelete", m_btn_delete_camera);
 
   m_btn_add_camera->signal_clicked().connect( sigc::mem_fun( *this, &RetrieverConfigDialog::on_add_clicked ) );
   m_btn_delete_camera->signal_clicked().connect( sigc::mem_fun( *this, &RetrieverConfigDialog::on_delete_clicked ) );
@@ -163,10 +163,10 @@ RetrieverConfigDialog::on_delete_clicked()
  */
 
 /** Constructor.
- * @param glade_path path to the Glade file for the plugin's dialog
+ * @param ui_path path to the UI file for the plugin's dialog
  */
-RetrieverConfigPlugin::RetrieverConfigPlugin( string glade_path )
-  : ConfigEditorPlugin( "/firevision/retriever", glade_path )
+RetrieverConfigPlugin::RetrieverConfigPlugin(string ui_path)
+  : ConfigEditorPlugin( "/firevision/retriever", ui_path )
 {
 }
 
@@ -237,7 +237,7 @@ Gtk::Dialog*
 RetrieverConfigPlugin::load_dialog()
 {
   RetrieverConfigDialog* dlg = NULL;
-  m_ref_xml->get_widget_derived( "PluginDialog", dlg);
+  m_builder->get_widget_derived( "PluginDialog", dlg);
 
   return dlg;
 }

@@ -46,19 +46,17 @@ ConfigRemoveDialog::ConfigRemoveDialog(Gtk::Label *lbl_path, Gtk::CheckButton *c
   m_chb_is_default = chb_is_default;
 }
 
-#ifdef HAVE_GLADEMM
 /** Constructor.
  * @param cobject pointer to base object type
- * @param ref_xml Glade XML file
+ * @param builder Gtk builder
  */
-ConfigRemoveDialog::ConfigRemoveDialog( BaseObjectType* cobject,
-					const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml )
+ConfigRemoveDialog::ConfigRemoveDialog(BaseObjectType* cobject,
+                                       const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::Dialog(cobject)
 {
-  ref_xml->get_widget("lblPath", m_lbl_path);
-  ref_xml->get_widget("chbIsDefaultRemove", m_chb_is_default);
+  builder->get_widget("lblPath", m_lbl_path);
+  builder->get_widget("chbIsDefaultRemove", m_chb_is_default);
 }
-#endif
 
 /** Destructor. */
 ConfigRemoveDialog::~ConfigRemoveDialog()

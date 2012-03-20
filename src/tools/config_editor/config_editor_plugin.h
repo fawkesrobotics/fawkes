@@ -26,7 +26,6 @@
 #include <string>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 namespace fawkes {
   class Configuration;
@@ -35,8 +34,7 @@ namespace fawkes {
 class ConfigEditorPlugin
 {
  public:
-  ConfigEditorPlugin( std::string config_path,
-		      std::string glade_file );
+  ConfigEditorPlugin(std::string config_path, std::string ui_file );
   virtual ~ConfigEditorPlugin();
 
   void initialize();
@@ -53,11 +51,10 @@ class ConfigEditorPlugin
   virtual Gtk::Dialog* load_dialog() =0;
 
   Gtk::Dialog* m_dialog;
-  Glib::RefPtr< Gnome::Glade::Xml > m_ref_xml;
+  Glib::RefPtr<Gtk::Builder> m_builder;
 
   std::string            m_config_path;
   fawkes::Configuration* m_config;
-
 };
 
 #endif /* __TOOLS_CONFIG_EDITOR_CONFIG_EDITOR_PLUGIN_H_ */

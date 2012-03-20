@@ -189,13 +189,8 @@ BlackBoardSynchronizationThread::read_config_combos(std::string prefix, bool wri
 
     if ( (sf = id.find("=")) != std::string::npos) {
       // we got a mapping
-      if ( writing ) {
-	combo.writer_id = id.substr(0, sf);
-	combo.reader_id = id.substr(sf + 1);
-      } else {
-	combo.reader_id = id.substr(0, sf);
-	combo.writer_id = id.substr(sf + 1);
-      }
+      combo.reader_id = id.substr(0, sf);
+      combo.writer_id = id.substr(sf + 1);
     }
 
     __combos[varname] = combo;

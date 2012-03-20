@@ -3,7 +3,7 @@
  *  avahi_thread.cpp - Avahi thread
  *
  *  Created: Wed Nov 08 11:19:25 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -27,6 +27,7 @@
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
+#include <utils/misc/string_conversions.h>
 
 #include <avahi-client/lookup.h>
 #include <avahi-client/publish.h>
@@ -74,6 +75,9 @@ AvahiThread::AvahiThread()
 AvahiThread::~AvahiThread()
 {
   delete init_wc;
+
+  remove_pending_services();
+  remove_pending_browsers();
 
   erase_groups();
   erase_browsers();
@@ -267,21 +271,47 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
     }
   }
 
-  // only IPv4 for now
   AvahiStringList *al = NULL;
   const std::list<std::string> &l = service.txt();
   for (std::list<std::string>::const_iterator j = l.begin(); j != l.end(); ++j) {
     al = avahi_string_list_add(al, j->c_str());
   }
-  if ( avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
-					    AVAHI_PUBLISH_USE_MULTICAST,
-					    service.name(), service.type(),
-					    service.domain(), service.host(),
-					    service.port(), al) < 0) {
-    avahi_string_list_free(al);
-    throw Exception("Adding Avahi services failed");
+
+  // only IPv4 for now
+  int rv = AVAHI_ERR_COLLISION;
+  for (int i = 1; (i <= 100) && (rv == AVAHI_ERR_COLLISION); ++i) {
+    std::string name = service.name();
+    if (i > 1) {
+      name += " ";
+      name += StringConversions::to_string(i);
+    }
+    
+    rv = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC,
+					      AVAHI_PROTO_INET,
+					      AVAHI_PUBLISH_USE_MULTICAST,
+					      name.c_str(), service.type(),
+					      service.domain(),
+					      service.host(),
+					      service.port(), al);
+
+    if ((i > 1) && (rv >= 0)) {
+      service.set_modified_name(name.c_str());
+    }
   }
+
   avahi_string_list_free(al);
+
+  if (rv < 0) {
+    throw Exception("Adding Avahi/mDNS-SD service failed: %s", avahi_strerror(rv));
+  }
+
+  /*
+  if (service.modified_name() != 0) {
+    LibLogger::log_warn("FawkesNetworkManager", "Network service name collision, "
+			"modified to '%s' (from '%s')", service.modified_name(),
+			service.name());
+  }
+  */
 
   /* Tell the server to register the service */
   if (avahi_entry_group_commit(group) < 0) {
@@ -295,7 +325,7 @@ void
 AvahiThread::recreate_services()
 {
   for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    (*__sit).second = create_service((*__sit).first, (*__sit).second);
+    (*__sit).second = create_service(__sit->first, __sit->second);
   }
 }
 
@@ -316,6 +346,8 @@ AvahiThread::create_pending_services()
 void
 AvahiThread::remove_pending_services()
 {
+  Thread::CancelState old_state;
+  set_cancel_state(CANCEL_DISABLED, &old_state);
   __pending_remove_services.lock();
   while ( ! __pending_remove_services.empty()) {
     NetworkService &s = __pending_remove_services.front();
@@ -326,6 +358,7 @@ AvahiThread::remove_pending_services()
     __pending_remove_services.pop();
   }
   __pending_remove_services.unlock();
+  set_cancel_state(old_state);
 }
 
 
@@ -357,8 +390,8 @@ void
 AvahiThread::erase_groups()
 {
   for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    group_erase((*__sit).second);
-    (*__sit).second = NULL;
+    if (__sit->second)  group_erase(__sit->second);
+    __sit->second = NULL;
   }
 }
 
@@ -525,6 +558,8 @@ AvahiThread::create_pending_browsers()
 void
 AvahiThread::remove_pending_browsers()
 {
+  Thread::CancelState old_state;
+  set_cancel_state(CANCEL_DISABLED, &old_state);
   __pending_browser_removes.lock();
   while ( ! __pending_browser_removes.empty()) {
     std::string &s = __pending_browser_removes.front();
@@ -533,6 +568,7 @@ AvahiThread::remove_pending_browsers()
     __pending_browser_removes.pop();
   }
   __pending_browser_removes.unlock();
+  set_cancel_state(old_state);
 }
 
 

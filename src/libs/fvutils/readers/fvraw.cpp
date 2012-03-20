@@ -150,8 +150,8 @@ FvRawReader::is_FvRaw(const char *filename)
 	return true;
       }
     }
+    fclose(f);
   }
-  fclose(f);
   return false;
 }
 

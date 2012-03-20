@@ -25,6 +25,7 @@
 #ifndef __FIREVISION_FVUTILS_FILETYPE_H_
 #define __FIREVISION_FVUTILS_FILETYPE_H_
 
+#include <core/exception.h>
 #include <utils/system/filetype.h>
 #include <fvutils/readers/fvraw.h>
 #include <fvutils/colormap/cmfile.h>
@@ -38,7 +39,16 @@ namespace firevision {
 inline std::string
 fv_filetype_file(const char *filename)
 {
-  std::string rv = fawkes::filetype_file(filename);
+  std::string rv;
+
+  try {
+    rv = fawkes::filetype_file(filename);
+  } catch (fawkes::Exception &e) {
+    // Some error occured, most likely libmagic was not available at compile
+    // time, assume data to make our own checks, we just cannot detect JPG
+    // and PNG in this case.
+    rv = "data";
+  }
 
   if ( rv == "data" ) {
     if ( FvRawReader::is_FvRaw(filename) ) {

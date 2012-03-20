@@ -63,6 +63,8 @@ RRDWebThread::init()
 void
 RRDWebThread::finalize()
 {
+  webview_url_manager->unregister_baseurl(RRD_URL_PREFIX);
+  webview_nav_manager->remove_nav_entry(RRD_URL_PREFIX);
   delete __processor;
 }
 

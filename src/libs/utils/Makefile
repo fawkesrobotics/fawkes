@@ -19,25 +19,29 @@ include $(BUILDSYSDIR)/lua.mk
 
 FILTER_OUT=%_tolua.o
 
-ifneq ($(realpath $(SYSROOT)/usr/include/magic.h),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/magic.h $(SYSROOT)/opt/local/include/magic.h),)
   HAVE_LIBMAGIC = 1
+  LIBS_LIBMAGIC = magic
+  CFLAGS_LIBMAGIC = -DHAVE_LIBMAGIC
 else
-  ERROR_TARGETS += error_libmagic
+  WARN_TARGETS += warning_libmagic
 endif
 
-HAVE_LIBXMLPP = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+ifneq ($(PKGCONFIG),)
+  HAVE_LIBXMLPP = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+endif
 ifeq ($(HAVE_LIBXMLPP),1)
   CFLAGS_LIBXMLPP=$(shell $(PKGCONFIG) --cflags 'libxml++-2.6')
   LDFLAGS_LIBXMLPP=$(shell $(PKGCONFIG) --libs 'libxml++-2.6')
 
-  CFLAGS  += $(CFLAGS_LIBXMLPP)
-  LDFLAGS += $(LDFLAGS_LIBXMLPP)
+  CFLAGS  += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBMAGIC)
+  LDFLAGS += $(LDFLAGS_LIBXMLPP) $(LDFLAGS_LIBMAGIC)
 else
   FILTER_OUT += graph/%.o
   WARN_TARGETS += warning_libxmlpp
 endif
 
-LIBS_libfawkesutils = stdc++ m fawkescore magic $(if $(filter Linux,$(OS)),dl)
+LIBS_libfawkesutils = stdc++ m rt fawkescore $(LIBS_LIBMAGIC) $(if $(filter-out Darwin,$(OS)),rt) $(if $(filter Linux,$(OS)),dl pthread)
 OBJS_libfawkesutils =	$(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 HDRS_libfawkesutils = $(subst $(SRCDIR)/,,$(filter-out $(patsubst %.o,%.h,$(FILTER_OUT)),$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h)))
 
@@ -49,27 +53,25 @@ LIBS_lua_fawkesutils = fawkescore fawkesutils $(TOLUA_LIBS)
 OBJS_lua_fawkesutils = fawkesutils_tolua.o
 
 OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)
-ifeq ($(HAVE_LIBMAGIC),1)
-  LIBS_all  = $(LIBDIR)/libfawkesutils.so
-  ifeq ($(HAVE_TOLUA),1)
-    LIBS_all += $(LUALIBDIR)/fawkesutils.so
-    TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
-  else
-    WARN_TARGETS += warning_tolua_wrapper
-  endif
+LIBS_all  = $(LIBDIR)/libfawkesutils.so
+ifeq ($(HAVE_TOLUA),1)
+  LIBS_all += $(LUALIBDIR)/fawkesutils.so
+  TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
+else
+  WARN_TARGETS += warning_tolua_wrapper
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(ERROR_TARGETS) $(WARN_TARGETS)
-.PHONY: error_libmagic warning_libxmlpp
-error_libmagic:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (file-devel not installed)"
-	$(SILENT)exit 1
+all: $(WARN_TARGETS)
+.PHONY: warning_libmagic warning_libxmlpp
+warning_libmagic:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Restricted file type detection support$(TNORMAL) (file[-devel] (libmagic) not installed)"
+
 warning_libxmlpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Graph utils cannot be built$(TNORMAL) (libxml++[-devel] not installed)"
 endif
 
-$(LUALIBDIR)/fawkesutils.so: | $(LIBDIR)/libfawkesutils.so
+$(LUALIBDIR)/fawkesutils.$(SOEXT): | $(LIBDIR)/libfawkesutils.$(SOEXT)
 
 include $(BUILDSYSDIR)/base.mk
 

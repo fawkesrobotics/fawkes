@@ -20,7 +20,14 @@ include $(BUILDSYSDIR)/lua.mk
 HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_OPENCV),1)
   CFLAGS += -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS += $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
+
+  # We only need that one library, therefore set it directly instead of
+  # using pkg-config to get all the libraries
+  ifeq ($(shell $(PKGCONFIG) --atleast-version 2.2.0 'opencv'; echo $$?),0)
+    LDFLAGS += -lopencv_core
+  else
+    LDFLAGS += -lcxcore
+  endif
 endif
 
 SUBDIRS = gtk
@@ -64,7 +71,7 @@ endif
 
 $(LUALIBDIR)/fawkesgeometry.so: | $(LIBDIR)/libfawkesgeometry.so
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
-gtk: | $(LIBDIR)/libfawkesgeometry.so
+gtk: | $(LIBDIR)/libfawkesgeometry.$(SOEXT)
 endif
 
 include $(BUILDSYSDIR)/base.mk

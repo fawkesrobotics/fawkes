@@ -151,7 +151,7 @@ CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
  */
 FileReadException::FileReadException(const char *filename, int errno,
 				     const char *additional_msg) throw()
-  : Exception(errno, "Could read from file '%s' %s%s%s", filename,
+  : Exception(errno, "Could not read from file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {
@@ -164,7 +164,7 @@ FileReadException::FileReadException(const char *filename, int errno,
  */
 FileReadException::FileReadException(const char *filename,
 				     const char *additional_msg) throw()
-  : Exception("Could read from file '%s' %s%s%s", filename,
+  : Exception("Could not read from file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {
@@ -185,7 +185,7 @@ FileReadException::FileReadException(const char *filename,
  */
 FileWriteException::FileWriteException(const char *filename, int errno,
 				       const char *additional_msg) throw()
-  : Exception(errno, "Could write to file '%s' %s%s%s", filename,
+  : Exception(errno, "Could not write to file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {
@@ -198,7 +198,7 @@ FileWriteException::FileWriteException(const char *filename, int errno,
  */
 FileWriteException::FileWriteException(const char *filename,
 				       const char *additional_msg) throw()
-  : Exception("Could write to file '%s' %s%s%s", filename,
+  : Exception("Could not write to file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {

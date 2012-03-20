@@ -24,7 +24,7 @@
 #include "file.h"
 
 #include <blackboard/blackboard.h>
-#include <utils/logging/logger.h>
+#include <logging/logger.h>
 #include <core/exceptions/system.h>
 #include <interfaces/SwitchInterface.h>
 
@@ -36,6 +36,8 @@
 #include <fcntl.h>
 #ifdef __FreeBSD__
 #  include <sys/endian.h>
+#elif defined(__MACH__) && defined(__APPLE__)
+#  include <sys/_endian.h>
 #else
 #  include <endian.h>
 #endif

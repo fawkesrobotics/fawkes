@@ -60,6 +60,8 @@ class RemoteBlackBoard
   virtual void         close(Interface *interface);
 
   virtual InterfaceInfoList *  list_all();
+  virtual InterfaceInfoList *  list(const char *type_pattern,
+				    const char *id_pattern);
   virtual bool                 is_alive() const throw();
   virtual bool                 try_aliveness_restore() throw();
 
@@ -104,6 +106,8 @@ class RemoteBlackBoard
 
   Mutex         *__wait_mutex;
   WaitCondition *__wait_cond;
+
+  const char *__inbound_thread;
 };
 
 } // end namespace fawkes

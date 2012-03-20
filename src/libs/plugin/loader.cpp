@@ -23,7 +23,6 @@
 
 #include <plugin/loader.h>
 
-#include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
 
@@ -35,7 +34,7 @@ namespace fawkes {
 #endif
 
 /// @cond QA
-class PluginLoaderData
+class PluginLoader::Data
 {
  public:
   ModuleManager  *mm;
@@ -120,9 +119,9 @@ PluginUnloadException::PluginUnloadException(const char *plugin_name,
  */
 PluginLoader::PluginLoader(const char *plugin_base_dir, Configuration *config)
 {
-  d = new PluginLoaderData();
+  d = new Data();
   __config = config;
-  d->mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, plugin_base_dir);
+  d->mm = new ModuleManager(plugin_base_dir);
 }
 
 /** Destructor */
@@ -130,6 +129,18 @@ PluginLoader::~PluginLoader()
 {
   delete d->mm;
   delete d;
+}
+
+
+/** Get module manager.
+ * This should be used rarely, but may be useful, for example, to pass specific
+ * module opening flags in some situations.
+ * @return internally used module manager
+ */
+ModuleManager *
+PluginLoader::get_module_manager() const
+{
+  return d->mm;
 }
 
 

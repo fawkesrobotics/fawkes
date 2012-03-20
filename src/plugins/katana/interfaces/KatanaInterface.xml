@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="KatanaInterface" author="Tim Niemueller" year="2009">
+  <constants>
+    <constant type="uint32" name="SENSOR_IR_RIGHT_INNER_MIDDLE" value="0">
+      IR reflex sensor, right finger, inner middle.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_RIGHT_INNER_FRONT" value="1">
+      IR reflex sensor, right finger, inner front.
+    </constant>
+    <constant type="uint32" name="SENSOR_RESERVED_2" value="2">
+      Reserved for future use.
+    </constant>
+    <constant type="uint32" name="SENSOR_COND_BOTH" value="3">
+      Conductivity, both fingers, user specific.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_RIGHT_OUTER_FRONT" value="4">
+      IR reflex sensor, right finger, outer front.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_RIGHT_BOTTOM_FRONT" value="5">
+      IR reflex sensor, right finger, bottom front.
+    </constant>
+    <constant type="uint32" name="SENSOR_FORCE_RIGHT_REAR" value="6">
+      Force sensor, right finger, rear.
+    </constant>
+    <constant type="uint32" name="SENSOR_FORCE_RIGHT_FRONT" value="7">
+      Force sensor, right finger, front.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_LEFT_INNER_MIDDLE" value="8">
+      IR reflex sensor, left finger, inner middle.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_LEFT_INNER_FRONT" value="9">
+      IR reflex sensor, left finger, inner front.
+    </constant>
+    <constant type="uint32" name="SENSOR_RESERVED_10" value="10">
+      Reserved for future use.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_CENTER_GRIPPER" value="11">
+      IR reflex sensor, center, gripper.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_LEFT_OUTER_FRONT" value="12">
+      IR reflex sensor, left finger, outer front.
+    </constant>
+    <constant type="uint32" name="SENSOR_IR_LEFT_BOTTOM_FRONT" value="13">
+      IR reflex sensor, left finger, bottom front.
+    </constant>
+    <constant type="uint32" name="SENSOR_FORCE_LEFT_REAR" value="14">
+      Force sensor, left finger, rear.
+    </constant>
+    <constant type="uint32" name="SENSOR_FORCE_LEFT_FRONT" value="15">
+      Force sensor, left finger, front.
+    </constant>
+    <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
+	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+    <constant type="uint32" value="0" name="ERROR_NONE">No error.</constant>
+    <constant type="uint32" value="1" name="ERROR_UNSPECIFIC">
+      Some unspecified error occured.
+    </constant>
+    <constant type="uint32" value="2" name="ERROR_CMD_START_FAILED">
+      Command failed to start (non-blocking operations).
+    </constant>
+    <constant type="uint32" value="4" name="ERROR_NO_SOLUTION">
+      Solution (inverse kinematics) could not be calculated.
+    </constant>
+    <constant type="uint32" value="8" name="ERROR_COMMUNICATION">
+      Communication with arm failed (too often).
+    </constant>
+    <constant type="uint32" value="16" name="ERROR_MOTOR_CRASHED">
+      Motor crashed.
+    </constant>
+  </constants>
+  <data>
+    <comment>
+      Interface to access component providing access to a Neuronics
+      Katana arm.
+    </comment>
+
+    <field type="byte" length="16" name="sensor_value">Sensor
+    values. Use SENSOR_* indexes for accessing the values.</field>
+
+    <field type="float" name="x">X-Coordinate for tool position
+    compared to base coordinate system.</field>
+    <field type="float" name="y">Y-Coordinate for tool position
+    compared to base coordinate system.</field>
+    <field type="float" name="z">Z-Coordinate for tool position
+    compared to base coordinate system.</field>
+
+    <field type="float" name="phi">Euler angle Phi of tool orientation.</field>
+    <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
+    <field type="float" name="psi">Euler angle Psi of tool orientation..</field>
+
+    <field type="int32" length="6" name="encoders">Encoder values of motors</field>
+    <field type="float" length="6" name="angles">Angle values of motors</field>
+
+    <field type="uint32" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last goto command has been finished,
+      false if it is still running</field>
+    <field type="uint32" name="error_code">Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination).</field>
+
+    <field type="bool" name="enabled">Are motors enabled?</field>
+    <field type="bool" name="calibrated">Has arm been calibrated?</field>
+    <field type="byte" name="max_velocity">Maximum velocity</field>
+    <field type="byte" name="num_motors">Number of motors</field>
+  </data>
+  <message name="Stop">
+    <comment>Stop motion immediately.</comment>
+  </message>
+  <message name="Flush">
+    <comment>Flush the message queue. This implicitly stops running motions.</comment>
+  </message>
+  <message name="Park">
+    <comment>Move arm into save parking position.</comment>
+  </message>
+  <message name="LinearGoto">
+    <comment>States the next target to navigate to.</comment>
+    <ref>x</ref>
+    <ref>y</ref>
+    <ref>z</ref>
+    <ref>phi</ref>
+    <ref>theta</ref>
+    <ref>psi</ref>
+  </message>
+  <message name="LinearGotoKni">
+    <comment>States the next target to navigate to.
+       Uses values in libkni coordinate system, mainly to provide functionality for old skills</comment>
+    <field type="float" name="x">X-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="y">Y-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="z">Z-Coordinate for tool position
+    compared to base libkni coordinate system.</field>
+    <field type="float" name="phi">Euler angle Phi of tool orientation.</field>
+    <field type="float" name="theta">Euler angle Theta of tool orientation.</field>
+    <field type="float" name="psi">Euler angle Psi of tool orientation.</field>
+  </message>
+  <message name="ObjectGoto">
+    <comment>States the next target object to navigate to with OpenRAVE support</comment>
+    <field type="string" length="32" name="object">Name of object</field>
+    <field type="float" name="rot_x">Rotation of object on its x-axis</field>
+  </message>
+  <message name="Calibrate">
+    <comment>Start calibration routine.</comment>
+  </message>
+  <message name="OpenGripper">
+    <comment>Start calibration routine.</comment>
+  </message>
+  <message name="CloseGripper">
+    <comment>Start calibration routine.</comment>
+  </message>
+  <message name="SetEnabled">
+    <comment>Start calibration routine.</comment>
+    <ref>enabled</ref>
+  </message>
+  <message name="SetMaxVelocity">
+    <comment>Sets maximum velocity for the arm. Set to 0 to use default.</comment>
+    <ref>max_velocity</ref>
+  </message>
+  <message name="SetMotorEncoder">
+    <comment>Sets absolute motor encoder</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="uint32" name="enc">Encoder value</field>
+  </message>
+  <message name="MoveMotorEncoder">
+    <comment>Increases/Decreases motor encoder by a given value</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="uint32" name="enc">Encoder value</field>
+  </message>
+  <message name="SetMotorAngle">
+    <comment>Sets absolute motor angle</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="float" name="angle">Angle value (positive: increase; negative: decrease)</field>
+  </message>
+  <message name="MoveMotorAngle">
+    <comment>Increases/Decreases motor angle by a given value</comment>
+    <field type="uint32" name="nr">Motor number</field>
+    <field type="float" name="angle">Angle value (positive: increase; negative: decrease)</field>
+  </message>
+</interface>

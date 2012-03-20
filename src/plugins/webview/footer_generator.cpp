@@ -22,6 +22,7 @@
 
 #include "footer_generator.h"
 
+#include <core/version.h>
 #include <utils/misc/string_conversions.h>
 
 /** @class WebviewFooterGenerator "footer_generator.h"
@@ -46,6 +47,11 @@ WebviewFooterGenerator::html_footer()
 {
   std::string f = std::string("\n  <div id=\"footer\">\n")
     + "    <hr />\n";
+
+  f += "    <div id=\"version\"><a href=\"http://www.fawkesrobotics.org\" "
+    "rel=\"external\">Fawkes ";
+  f += FAWKES_VERSION_STRING;
+  f += "</a></div>\n";
   WebviewServiceBrowseHandler::ServiceList sl = __service_browser->service_list();
   if (! sl.empty()) {
     f += "    <div class=\"instances\"><ul>";

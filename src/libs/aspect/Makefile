@@ -17,7 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/webview/webview.mk
 
-LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin
+LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
+			fawkesconfig fawkesplugin fawkeslogging
 
 ifneq ($(HAVE_WEBVIEW),1)
   OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/webview.cpp $(SRCDIR)/inifins/webview.cpp))

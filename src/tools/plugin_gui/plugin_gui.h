@@ -25,7 +25,6 @@
 #define __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 namespace fawkes {
   class PluginTreeView;
@@ -37,7 +36,8 @@ namespace fawkes {
 class PluginGuiGtkWindow : public Gtk::Window
 {
  public:
-  PluginGuiGtkWindow(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
+  PluginGuiGtkWindow(BaseObjectType* cobject,
+                     const Glib::RefPtr<Gtk::Builder> builder);
   virtual ~PluginGuiGtkWindow();
 
  private:

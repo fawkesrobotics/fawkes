@@ -26,7 +26,6 @@
 #include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 #ifdef HAVE_GCONFMM
 #  include <gconfmm.h>
 #  define GCONF_PREFIX "/apps/fawkes/skillgui"
@@ -52,7 +51,8 @@ class SkillGuiGraphDrawingArea;
 class SkillGuiGtkWindow : public Gtk::Window
 {
  public:  
-  SkillGuiGtkWindow(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> &refxml);
+  SkillGuiGtkWindow(BaseObjectType* cobject,
+                    const Glib::RefPtr<Gtk::Builder> &builder);
   ~SkillGuiGtkWindow();
 
  private:
@@ -103,7 +103,11 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::Button            *but_stop;
   Gtk::ToggleButton      *but_continuous;
   Gtk::Button            *but_clearlog;
+#if GTK_VERSION_GE(3,0)
+  Gtk::ComboBox          *cbe_skillstring;
+#else
   Gtk::ComboBoxEntry     *cbe_skillstring;
+#endif
   Gtk::Label             *lab_status;
   Gtk::Label             *lab_alive;
   Gtk::Label             *lab_continuous;
@@ -126,13 +130,8 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_zoomfit;
   Gtk::ToolButton        *tb_zoomreset;
 
-  Gtk::MenuToolButton    *tb_graphdir;
+  Gtk::ToolButton        *tb_graphdir;
   Gtk::ToggleToolButton  *tb_graphcolored;
-  Gtk::MenuItem          *mi_graphdir;
-  Gtk::MenuItem          *mi_bottom_top;
-  Gtk::MenuItem          *mi_top_bottom;
-  Gtk::MenuItem          *mi_left_right;
-  Gtk::MenuItem          *mi_right_left;
 
   Glib::RefPtr<Gtk::ListStore> __sks_list;
 

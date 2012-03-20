@@ -30,11 +30,12 @@
 #include <core/threading/thread_initializer.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #ifdef HAVE_INOTIFY
 #  include <utils/system/fam_thread.h>
 #endif
 #include <config/config.h>
+#include <utils/system/dynamic_module/module_manager.h>
 
 #include <algorithm>
 #include <cstring>
@@ -78,26 +79,37 @@ private:
  * and removed from appropriately.
  * @param config Fawkes configuration
  * @param meta_plugin_prefix Path prefix for meta plugins
+ * @param module_flags flags to use to open plugin modules
+ * @param init_cache true to initialize the plugin cache, false to skip this
+ * step. Note that some functions like transmitting a list of available plugins
+ * is unavailable until the cache has been initialized. You can defer
+ * initialization of the cache if required.
  */
 PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     Configuration *config,
-			     const char *meta_plugin_prefix)
+			     const char *meta_plugin_prefix,
+			     Module::ModuleFlags module_flags,
+			     bool init_cache)
   : ConfigurationChangeHandler(meta_plugin_prefix)
 {
+  __mutex = new Mutex();
   this->thread_collector = thread_collector;
   plugin_loader = new PluginLoader(PLUGINDIR, config);
+  plugin_loader->get_module_manager()->set_open_flags(module_flags);
   next_plugin_id = 1;
   __config = config;
   __meta_plugin_prefix = meta_plugin_prefix;
 
-  init_pinfo_cache();
+  if (init_cache) {
+    init_pinfo_cache();
+  }
 
   __config->add_change_handler(this);
 
 #ifdef HAVE_INOTIFY
   __fam_thread = new FamThread();
   RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
-  fam->add_filter("^[^.].*\\.so$");
+  fam->add_filter("^[^.].*\\."SOEXT"$");
   fam->add_listener(this);
   fam->watch_dir(PLUGINDIR);
   __fam_thread->start();
@@ -128,9 +140,21 @@ PluginManager::~PluginManager()
   plugins.clear();
   plugin_ids.clear();
   delete plugin_loader;
+  delete __mutex;
 }
 
 
+/** Set flags to open modules with.
+ * @param flags flags to pass to modules when opening them
+ */
+void
+PluginManager::set_module_flags(Module::ModuleFlags flags)
+{
+  plugin_loader->get_module_manager()->set_open_flags(flags);
+}
+
+
+/** Initialize plugin info cache. */
 void
 PluginManager::init_pinfo_cache()
 {
@@ -138,8 +162,7 @@ PluginManager::init_pinfo_cache()
 
   DIR *plugin_dir;
   struct dirent* dirp;
-  /* constant for this somewhere? */
-  const char *file_ext = ".so";
+  const char *file_ext = "."SOEXT;
 
   if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
     throw Exception(errno, "Plugin directory %s could not be opened", PLUGINDIR);
@@ -414,62 +437,35 @@ PluginManager::config_tag_changed(const char *new_tag)
 }
 
 void
-PluginManager::config_value_changed(const char *path, bool is_default, int value)
+PluginManager::config_value_changed(const Configuration::ValueIterator *v)
 {
-  LibLogger::log_warn("PluginManager", "Integer value changed in meta plugins "
-		      "path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, unsigned int value)
-{
-  LibLogger::log_warn("PluginManager", "Unsigned integer value changed in meta "
-		      "plugins path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, float value)
-{
-  LibLogger::log_warn("PluginManager", "Float value changed in meta "
-		      "plugins path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, bool value)
-{
-  LibLogger::log_warn("PluginManager", "Boolean value changed in meta "
-		      "plugins path prefix at %s, ignoring", path);
-}
-
-void
-PluginManager::config_comment_changed(const char *path, bool is_default, const char *comment)
-{
-  // ignored
-}
-
-void
-PluginManager::config_value_changed(const char *path, bool is_default, const char *value)
-{
-  __pinfo_cache.lock();
-  std::string p = std::string(path).substr(__meta_plugin_prefix.length());
-  std::string s = std::string("Meta: ") + value;
-  std::list<std::pair<std::string, std::string> >::iterator i;
-  bool found = false;
-  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
-    if (p == i->first) {
-      i->second = s;
-      found = true;
-      break;
+  if (v->is_string()) {
+    __pinfo_cache.lock();
+    std::string p = std::string(v->path()).substr(__meta_plugin_prefix.length());
+    std::string s = std::string("Meta: ") + v->get_string();
+    std::list<std::pair<std::string, std::string> >::iterator i;
+    bool found = false;
+    for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+      if (p == i->first) {
+	i->second = s;
+	found = true;
+	break;
+      }
     }
+    if (! found) {
+      __pinfo_cache.push_back(make_pair(p, s));
+    }
+    __pinfo_cache.unlock();
   }
-  if (! found) {
-    __pinfo_cache.push_back(make_pair(p, s));
-  }
-  __pinfo_cache.unlock();
 }
 
 void
-PluginManager::config_value_erased(const char *path, bool is_default)
+PluginManager::config_comment_changed(const Configuration::ValueIterator *v)
+{
+}
+
+void
+PluginManager::config_value_erased(const char *path)
 {
   __pinfo_cache.lock();
   std::string p = std::string(path).substr(__meta_plugin_prefix.length());
@@ -487,8 +483,7 @@ PluginManager::config_value_erased(const char *path, bool is_default)
 void
 PluginManager::fam_event(const char *filename, unsigned int mask)
 {
-  /* constant for this somewhere? */
-  const char *file_ext = ".so";
+  const char *file_ext = "."SOEXT;
 
   const char *pos = strstr(filename, file_ext);
   std::string p = std::string(filename).substr(0, strlen(filename) - strlen(file_ext));
@@ -592,6 +587,38 @@ PluginManager::notify_unloaded(const char *plugin_name)
     }
   }
   __listeners.unlock();
+}
+
+
+/** Lock plugin manager.
+ * This is an utility method that you can use for mutual access to the plugin
+ * manager. The mutex is not used internally, but meant to be used from
+ * callers.
+ */
+void
+PluginManager::lock()
+{
+  __mutex->lock();
+}
+
+
+/** Try to lock plugin manager.
+ * This is an utility method that you can use for mutual access to the plugin
+ * manager. The mutex is not used internally, but meant to be used from
+ * callers.
+ * @return true if the lock was acquired, false otherwise
+ */
+bool
+PluginManager::try_lock()
+{
+  return __mutex->try_lock();
+}
+
+/** Unlock plugin manager. */
+void
+PluginManager::unlock()
+{
+  __mutex->unlock();
 }
 
 } // end namespace fawkes

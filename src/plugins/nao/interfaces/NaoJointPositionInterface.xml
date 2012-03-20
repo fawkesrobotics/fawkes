@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NaoJointPositionInterface" author="Tim Niemueller" year="2008-2011">
+  <constants>
+    <constant type="uint32" name="SERVO_head_yaw" value="1">Head yaw servo</constant>
+    <constant type="uint32" name="SERVO_head_pitch" value="2">Head pitch</constant>
+    <constant type="uint32" name="SERVO_l_shoulder_pitch" value="4">Left shoulder pitch</constant>
+    <constant type="uint32" name="SERVO_l_shoulder_roll" value="8">Left shoulder roll</constant>
+    <constant type="uint32" name="SERVO_l_elbow_yaw" value="16">Left elbow yaw</constant>
+    <constant type="uint32" name="SERVO_l_elbow_roll" value="32">Left elbow roll</constant>
+    <constant type="uint32" name="SERVO_l_wrist_yaw" value="64">Left wrist yaw</constant>
+    <constant type="uint32" name="SERVO_l_hand" value="128">Left hand</constant>
+    <constant type="uint32" name="SERVO_l_hip_yaw_pitch" value="256">Left hip yaw pitch</constant>
+    <constant type="uint32" name="SERVO_l_hip_roll" value="512">Left hip roll</constant>
+    <constant type="uint32" name="SERVO_l_hip_pitch" value="1024">Left hip pitch</constant>
+    <constant type="uint32" name="SERVO_l_knee_pitch" value="2048">Left knee pitch</constant>
+    <constant type="uint32" name="SERVO_l_ankle_pitch" value="4096">Left ankle pitch</constant>
+    <constant type="uint32" name="SERVO_l_ankle_roll" value="8192">Left ankle roll</constant>
+    <constant type="uint32" name="SERVO_r_shoulder_pitch" value="16384">Right shoulder pitch</constant>
+    <constant type="uint32" name="SERVO_r_shoulder_roll" value="32768">Right shoulder roll</constant>
+    <constant type="uint32" name="SERVO_r_elbow_yaw" value="65536">Right elbow yaw</constant>
+    <constant type="uint32" name="SERVO_r_elbow_roll" value="131072">Right elbow roll</constant>
+    <constant type="uint32" name="SERVO_r_wrist_yaw" value="262144">Right wrist yaw</constant>
+    <constant type="uint32" name="SERVO_r_hand" value="524288">Right hand</constant>
+    <constant type="uint32" name="SERVO_r_hip_yaw_pitch" value="1048576">Right hip yaw pitch</constant>
+    <constant type="uint32" name="SERVO_r_hip_roll" value="2097152">Right hip roll</constant>
+    <constant type="uint32" name="SERVO_r_hip_pitch" value="4194304">Right hip pitch</constant>
+    <constant type="uint32" name="SERVO_r_knee_pitch" value="8388608">Right knee pitch</constant>
+    <constant type="uint32" name="SERVO_r_ankle_pitch" value="16777216">Right ankle pitch</constant>
+    <constant type="uint32" name="SERVO_r_ankle_roll" value="33554432">Right ankle roll</constant>
+    <!-- Note: if you add servos appropriately increase SERVO_max! -->
+    <constant type="uint32" name="SERVO_min" value="1">Minimum value for servos</constant>
+    <constant type="uint32" name="SERVO_max" value="33554432">Maximum value for servos</constant>
+
+    <enum name="RobotType">
+      <comment>
+        Enumeration describing the actual version of the robot that's being
+	used.
+      </comment>
+      <item name="ROBOTYPE_ACADEMIC">
+        Academic version with 25 DoF and touch sensors.
+      </item>
+      <item name="ROBOTYPE_ROBOCUP">
+	RoboCup version with 21 DoF.
+      </item>
+    </enum>
+  </constants>
+
+  <data>
+    <comment>
+      This interface provides access to Nao joint positions and movements.
+    </comment>
+    <field type="RobotType" name="robot_type">Robot type.</field>
+    <field type="uint8" length="4" name="robot_version">
+      Robot version. Fields are in ascending array index major, minor, micro and
+      patch level. Currently only the first two are used by Aldebaran, but due to
+      struct alignment we add two extra bytes.
+    </field>
+    <field type="float" name="head_yaw">Head yaw</field>
+    <field type="float" name="head_pitch">Head pitch</field>
+    <field type="float" name="l_shoulder_pitch">Left shoulder pitch</field>
+    <field type="float" name="l_shoulder_roll">Left shoulder roll</field>
+    <field type="float" name="l_elbow_yaw">Left elbow yaw</field>
+    <field type="float" name="l_elbow_roll">Left elbow roll</field>
+    <field type="float" name="l_wrist_yaw">Left wrist yaw</field>
+    <field type="float" name="l_hand">Left hand</field>
+    <field type="float" name="l_hip_yaw_pitch">Left hip yaw pitch</field>
+    <field type="float" name="l_hip_roll">Left hip roll</field>
+    <field type="float" name="l_hip_pitch">Left hip pitch</field>
+    <field type="float" name="l_knee_pitch">Left knee pitch</field>
+    <field type="float" name="l_ankle_pitch">Left ankle pitch</field>
+    <field type="float" name="l_ankle_roll">Left ankle roll</field>
+    <field type="float" name="r_shoulder_pitch">Right shoulder pitch</field>
+    <field type="float" name="r_shoulder_roll">Right shoulder roll</field>
+    <field type="float" name="r_elbow_yaw">Right elbow yaw</field>
+    <field type="float" name="r_elbow_roll">Right elbow roll</field>
+    <field type="float" name="r_wrist_yaw">Right wrist yaw</field>
+    <field type="float" name="r_hand">Right hand</field>
+    <field type="float" name="r_hip_yaw_pitch">Right hip yaw pitch</field>
+    <field type="float" name="r_hip_roll">Right hip roll</field>
+    <field type="float" name="r_hip_pitch">Right hip pitch</field>
+    <field type="float" name="r_knee_pitch">Right knee pitch</field>
+    <field type="float" name="r_ankle_pitch">Right ankle pitch</field>
+    <field type="float" name="r_ankle_roll">Right ankle roll</field>
+    <field type="int32" name="time">
+      Current reference time in ms. For real hardware this is the DCM time.
+      Times in messages are always offsets to the current time and the current
+      time is added before executing the command.
+    </field>
+  </data>
+  <message name="SetServo">
+    <comment>Set selected servos to a specific value.</comment>
+    <field type="uint32" name="servo">A concatenated list of SERVO_* constants to
+      define the servos that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants.</field>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <ref>time</ref>
+  </message>
+  <message name="SetServos">
+    <comment>Orders a setting of the servos to the specified angles.</comment>
+    <ref>head_yaw</ref>
+    <ref>head_pitch</ref>
+    <ref>l_shoulder_pitch</ref>
+    <ref>l_shoulder_roll</ref>
+    <ref>l_elbow_yaw</ref>
+    <ref>l_elbow_roll</ref>
+    <ref>l_hip_yaw_pitch</ref>
+    <ref>l_hip_roll</ref>
+    <ref>l_hip_pitch</ref>
+    <ref>l_knee_pitch</ref>
+    <ref>l_ankle_pitch</ref>
+    <ref>l_ankle_roll</ref>
+    <ref>l_wrist_yaw</ref>
+    <ref>l_hand</ref>
+    <ref>r_shoulder_pitch</ref>
+    <ref>r_shoulder_roll</ref>
+    <ref>r_elbow_yaw</ref>
+    <ref>r_elbow_roll</ref>
+    <ref>r_wrist_yaw</ref>
+    <ref>r_hand</ref>
+    <ref>r_hip_yaw_pitch</ref>
+    <ref>r_hip_roll</ref>
+    <ref>r_hip_pitch</ref>
+    <ref>r_knee_pitch</ref>
+    <ref>r_ankle_pitch</ref>
+    <ref>r_ankle_roll</ref>
+    <ref>time</ref>
+  </message>
+  <message name="MoveServo">
+    <comment>
+      Orders a setting of the given servo to the specified angles with
+      the given speed.
+    </comment>
+    <field type="uint32" name="servo">
+      A concatenated list of SERVO_* constants to define the servos
+      that should execute the movement. The list shall consist of
+      binary or'ed SERVO_* constants.
+    </field>
+    <field type="float" name="value">Servo value to set for servos.</field>
+    <field type="float" name="speed">
+      Fraction of max speed in range [0.0..1.0].
+    </field>
+  </message>
+  <message name="MoveServos">
+    <comment>Orders a smooth motion of the servos.</comment>
+    <ref>head_yaw</ref>
+    <ref>head_pitch</ref>
+    <ref>l_shoulder_pitch</ref>
+    <ref>l_shoulder_roll</ref>
+    <ref>l_elbow_yaw</ref>
+    <ref>l_elbow_roll</ref>
+    <ref>l_wrist_yaw</ref>
+    <ref>l_hand</ref>
+    <ref>l_hip_yaw_pitch</ref>
+    <ref>l_hip_roll</ref>
+    <ref>l_hip_pitch</ref>
+    <ref>l_knee_pitch</ref>
+    <ref>l_ankle_pitch</ref>
+    <ref>l_ankle_roll</ref>
+    <ref>r_shoulder_pitch</ref>
+    <ref>r_shoulder_roll</ref>
+    <ref>r_elbow_yaw</ref>
+    <ref>r_elbow_roll</ref>
+    <ref>r_wrist_yaw</ref>
+    <ref>r_hand</ref>
+    <ref>r_hip_yaw_pitch</ref>
+    <ref>r_hip_roll</ref>
+    <ref>r_hip_pitch</ref>
+    <ref>r_knee_pitch</ref>
+    <ref>r_ankle_pitch</ref>
+    <ref>r_ankle_roll</ref>
+    <field type="float" name="speed">
+      Fraction of max speed in range [0.0..1.0].
+    </field>
+  </message>
+</interface>

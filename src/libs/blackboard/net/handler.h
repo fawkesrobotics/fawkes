@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  network_handler.h - BlackBoard Network Handler
+ *  handler.h - BlackBoard Network Handler
  *
  *  Created: Sat Mar 01 15:57:59 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -32,11 +32,15 @@
 #include <list>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class Interface;
 class BlackBoard;
 class FawkesNetworkHub;
 class BlackBoardNetHandlerInterfaceListener;
+class BlackBoardNetHandlerInterfaceObserver;
 
 class BlackBoardNetworkHandler
 : public Thread,
@@ -70,6 +74,8 @@ class BlackBoardNetworkHandler
 
   std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>  __listeners;
   std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>::iterator  __lit;
+
+  BlackBoardNetHandlerInterfaceObserver *__observer;
 
   // Map from instance serial to clid
   LockMap<unsigned int, unsigned int > __serial_to_clid;

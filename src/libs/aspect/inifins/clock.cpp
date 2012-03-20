@@ -50,7 +50,7 @@ ClockAspectIniFin::init(Thread *thread)
 {
   ClockAspect *clock_thread;
   clock_thread = dynamic_cast<ClockAspect *>(thread);
-  if (clock_thread == NULL) {
+  if (clock_thread == 0) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
 					  "ClockAspect, but RTTI says it "
 					  "has not. ", thread->name());

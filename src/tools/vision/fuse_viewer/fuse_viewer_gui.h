@@ -31,7 +31,6 @@
 #include <map>
 
 #include <gtkmm.h>
-#include <libglademm/xml.h>
 
 namespace firevision {
   class NetworkCamera;
@@ -45,7 +44,8 @@ namespace fawkes {
 class FuseViewerGtkWindow : public Gtk::Window
 {
 public:
-  FuseViewerGtkWindow(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
+  FuseViewerGtkWindow(BaseObjectType* cobject,
+                      const Glib::RefPtr<Gtk::Builder> builder);
   virtual ~FuseViewerGtkWindow();
 
 private:

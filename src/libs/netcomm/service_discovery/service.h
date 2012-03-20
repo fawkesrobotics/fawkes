@@ -72,8 +72,10 @@ class NetworkService
   void                set_txt(std::list<std::string> &txtlist);
 
   void                set_name(const char *new_name);
+  void                set_modified_name(const char *new_name) const;
 
   const char *        name() const;
+  const char *        modified_name() const;
   const char *        type() const;
   const char *        domain() const;
   const char *        host() const;
@@ -95,6 +97,7 @@ class NetworkService
   struct sockaddr    *_addr;
   socklen_t           _addr_size;
 
+  mutable char *      _modified_name;
 };
 
 } // end namespace fawkes

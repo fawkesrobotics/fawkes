@@ -25,7 +25,7 @@
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
 #include <core/threading/mutex.h>
-#include <utils/logging/component.h>
+#include <logging/component.h>
 #ifdef SKILLER_TIMETRACKING
 #  include <utils/time/tracker.h>
 #endif
@@ -133,7 +133,10 @@ SkillerExecutionThread::init()
     __skiller_if = blackboard->open_for_writing<SkillerInterface>("Skiller");
     __skdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("Skiller");
     
-    __lua  = new LuaContext(__cfg_watch_files);
+    __lua  = new LuaContext();
+    if (__cfg_watch_files) {
+      __lua->setup_fam(/* auto restart */ true, /* conc thread */ false);
+    }
 
     __lua_ifi = new LuaInterfaceImporter(__lua, blackboard, config, logger);
     __lua_ifi->open_reading_interfaces(reading_prefix);
@@ -146,6 +149,7 @@ SkillerExecutionThread::init()
 
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
+    __lua->add_package("fawkeslogging");
     __lua->add_package("fawkesinterface");
     __lua->add_package("fawkesgeometry");
 
@@ -228,7 +232,7 @@ SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
 void
 SkillerExecutionThread::publish_skill_status(std::string &curss)
 {
-  const char *sst = "Unknown";
+  //const char *sst = "Unknown";
   LUA_INTEGER running = 0, final = 0, failed = 0;
 
   SkillerInterface::SkillStatusEnum old_status = __skiller_if->status();
@@ -238,7 +242,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
 
     if ( curss == "" ) {
       // nothing running, we're inactive
-      sst = "S_INACTIVE/empty";
+      //sst = "S_INACTIVE/empty";
       __skiller_if->set_status(SkillerInterface::S_INACTIVE);
 
     } else {                                  // Stack:
@@ -258,17 +262,17 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       }
 
       if ( failed > 0 ) {
-	sst = "S_FAILED";
+	//sst = "S_FAILED";
 	new_status = SkillerInterface::S_FAILED;
       } else if ( (final > 0) && (running == 0) ) {
-	sst = "S_FINAL";
+	//sst = "S_FINAL";
 	new_status = SkillerInterface::S_FINAL;
       } else if ( running > 0 ) {
-	sst = "S_RUNNING";
+	//sst = "S_RUNNING";
 	new_status = SkillerInterface::S_RUNNING;
       } else {
 	// all zero
-	sst = "S_INACTIVE";
+	//sst = "S_INACTIVE";
 	new_status = SkillerInterface::S_INACTIVE;
       }
     }

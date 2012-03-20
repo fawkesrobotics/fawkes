@@ -100,7 +100,7 @@ namespace fawkes {
   static std::string clightcyan = c_lightcyan;
 
   /** Print light gray on console. */
-  static const char *c_lightgray = "\033[0;37m";
+  static const char *c_lightgray = "\033[2;37m";
   /** Print light gray on console. */
   static std::string clightgray = c_lightgray;
 

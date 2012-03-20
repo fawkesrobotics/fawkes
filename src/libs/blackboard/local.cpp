@@ -149,6 +149,13 @@ LocalBlackBoard::list_all()
 }
 
 
+InterfaceInfoList *
+LocalBlackBoard::list(const char *type_pattern, const char *id_pattern)
+{
+  return __im->list(type_pattern, id_pattern);
+}
+
+
 bool
 LocalBlackBoard::is_alive() const throw()
 {

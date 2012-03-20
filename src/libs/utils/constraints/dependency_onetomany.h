@@ -77,7 +77,7 @@ template <class Provider, class Dependant>
 template <class Provider, class Dependant>
   OneToManyDependency<Provider, Dependant>::OneToManyDependency()
 {
-  _provider = NULL;
+  _provider = 0;
   _dependants.clear();
 }
 
@@ -100,7 +100,7 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::add(Provider *p)
 {
-  if ( (_provider != NULL) && (p != _provider) ) {
+  if ( (_provider != 0) && (p != _provider) ) {
     throw DependencyViolationException("Different provider already set");
   } else {
     _provider = p;
@@ -118,7 +118,7 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::add(Dependant *d)
 {
-  if (_provider == NULL) {
+  if (_provider == 0) {
     throw DependencyViolationException("No provider set, cannot accept dependant");
   } else {
     _dependants.push_back(d);
@@ -139,7 +139,7 @@ OneToManyDependency<Provider, Dependant>::remove(Provider *p)
     throw DependencyViolationException("There are still dependants of provider, "
 				       "cannot accept removal of provider");
   }
-  if ( p == _provider )  _provider = NULL;
+  if ( p == _provider )  _provider = 0;
 }
 
 
@@ -150,7 +150,7 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::remove(Dependant *d)
 {
-  if ( d != NULL ) {
+  if ( d != 0 ) {
     _dependants.remove(d);
   }
 }
@@ -164,7 +164,7 @@ template <class Provider, class Dependant>
 bool
 OneToManyDependency<Provider, Dependant>::can_add(Provider *p)
 {
-  return ( (_provider == NULL) || (p == _provider) );
+  return ( (_provider == 0) || (p == _provider) );
 }
 
 
@@ -176,7 +176,7 @@ template <class Provider, class Dependant>
 bool
 OneToManyDependency<Provider, Dependant>::can_add(Dependant *d)
 {
-  return (_provider != NULL);
+  return (_provider != 0);
 }
 
 
@@ -205,7 +205,7 @@ OneToManyDependency<Provider, Dependant>::can_remove(Dependant *d)
 
 
 /** Get provider.
- * @return provider if set, NULL otherwise
+ * @return provider if set, 0 otherwise
  */
 template <class Provider, class Dependant>
 Provider *

@@ -1,0 +1,357 @@
+<?xml version="1.0"?>
+<!--Generated with glade3 3.4.5 on Sat Mar 21 14:11:46 2009 -->
+<interface>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">8</property>
+    <property name="lower">0</property>
+    <property name="page_increment">0</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">8</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment2">
+    <property name="upper">8</property>
+    <property name="lower">0</property>
+    <property name="page_increment">0</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">8</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment3">
+    <property name="upper">8</property>
+    <property name="lower">0</property>
+    <property name="page_increment">0</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">8</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment4">
+    <property name="upper">255</property>
+    <property name="lower">0</property>
+    <property name="page_increment">0</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">127</property>
+  </object>
+  <object class="GtkWindow" id="wndMain">
+    <property name="title" translatable="yes">YUV Viewer</property>
+    <property name="resizable">False</property>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkHBox" id="hbox1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkTable" id="table1">
+                <property name="visible">True</property>
+                <property name="n_rows">4</property>
+                <property name="n_columns">4</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="yuv_vp">
+                    <property name="width_request">256</property>
+                    <property name="height_request">256</property>
+                    <property name="visible">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">4</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="u_value">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">127</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="v_value">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">2</property>
+                    <property name="label" translatable="yes">127</property>
+                  </object>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label3">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="yalign">0</property>
+                    <property name="xpad">2</property>
+                    <property name="ypad">2</property>
+                    <property name="label" translatable="yes">V: 255</property>
+                  </object>
+                  <packing>
+                    <property name="x_options">GTK_FILL</property>
+                    <property name="y_options">GTK_FILL</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label4">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="yalign">1</property>
+                    <property name="xpad">2</property>
+                    <property name="ypad">2</property>
+                    <property name="label" translatable="yes">0</property>
+                  </object>
+                  <packing>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                    <property name="x_options">GTK_FILL</property>
+                    <property name="y_options">GTK_FILL</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label5">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">U: 0</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                    <property name="x_options">GTK_FILL</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label6">
+                    <property name="visible">True</property>
+                    <property name="yalign">1</property>
+                    <property name="label" translatable="yes">255</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                    <property name="x_options">GTK_FILL</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkTable" id="table2">
+                    <property name="visible">True</property>
+                    <property name="n_rows">3</property>
+                    <property name="n_columns">2</property>
+                    <child>
+                      <object class="GtkSpinButton" id="v_res">
+                        <property name="visible">True</property>
+                        <property name="adjustment">adjustment1</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                        <property name="x_options"/>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="u_res">
+                        <property name="visible">True</property>
+                        <property name="adjustment">adjustment2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="x_options"/>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label9">
+                        <property name="visible">True</property>
+                        <property name="tooltip-text" translatable="yes">Y resolution in [bit]</property>
+                        <property name="xpad">2</property>
+                        <property name="label" translatable="yes">V Res:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label8">
+                        <property name="visible">True</property>
+                        <property name="tooltip-text" translatable="yes">Y resolution in [bit]</property>
+                        <property name="xpad">2</property>
+                        <property name="label" translatable="yes">U Res:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="y_res">
+                        <property name="visible">True</property>
+                        <property name="adjustment">adjustment3</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="x_options"/>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label7">
+                        <property name="visible">True</property>
+                        <property name="tooltip-text" translatable="yes">Y resolution in [bit]</property>
+                        <property name="xpad">2</property>
+                        <property name="label" translatable="yes">Y Res:</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <property name="xpad">1</property>
+                    <property name="ypad">3</property>
+                    <property name="label" translatable="yes">current color:</property>
+                    <property name="wrap_mode">PANGO_WRAP_WORD_CHAR</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox2">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkViewport" id="cur_vp">
+                        <property name="width_request">60</property>
+                        <property name="height_request">40</property>
+                        <property name="visible">True</property>
+                        <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                        <property name="shadow_type">GTK_SHADOW_NONE</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <property name="xpad">2</property>
+                    <property name="label" translatable="yes">Y Value:</property>
+                    <property name="wrap_mode">PANGO_WRAP_WORD_CHAR</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">2</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHScale" id="y_scale">
+                    <property name="width_request">120</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="has_focus">True</property>
+                    <property name="adjustment">adjustment4</property>
+                    <property name="digits">0</property>
+                    <property name="value_pos">GTK_POS_RIGHT</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="padding">2</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox3">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkViewport" id="seg_vp">
+                    <property name="width_request">255</property>
+                    <property name="height_request">255</property>
+                    <property name="visible">True</property>
+                    <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                    <property name="shadow_type">GTK_SHADOW_NONE</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
