@@ -124,7 +124,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0xd2, 0xdd, 0x26, 0x27, 00, 0xe7, 0x37, 0xd4, 0xc0, 0x2f, 0x3a, 0x5a, 0xa5, 0xf4, 0x25, 0x3e};
+  unsigned char tmp_hash[] = {0xa7, 0x93, 0xa8, 0x7, 0xe3, 0x29, 0x69, 0x35, 0xb, 0x82, 0xe1, 0xfd, 0x30, 0x72, 0x14, 0x81};
   set_hash(tmp_hash);
 }
 
@@ -942,6 +942,7 @@ KatanaInterface::ParkMessage::clone() const
 /** Constructor with initial values.
  * @param ini_theta_error initial value for theta_error
  * @param ini_offset_xy initial value for offset_xy
+ * @param ini_straight initial value for straight
  * @param ini_trans_frame initial value for trans_frame
  * @param ini_rot_frame initial value for rot_frame
  * @param ini_x initial value for x
@@ -951,7 +952,7 @@ KatanaInterface::ParkMessage::clone() const
  * @param ini_theta initial value for theta
  * @param ini_psi initial value for psi
  */
-KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_theta_error, const float ini_offset_xy, const char * ini_trans_frame, const char * ini_rot_frame, const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoMessage")
+KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_theta_error, const float ini_offset_xy, const bool ini_straight, const char * ini_trans_frame, const char * ini_rot_frame, const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoMessage")
 {
   data_size = sizeof(LinearGotoMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -960,6 +961,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_theta_erro
   data_ts   = (message_data_ts_t *)data_ptr;
   data->theta_error = ini_theta_error;
   data->offset_xy = ini_offset_xy;
+  data->straight = ini_straight;
   strncpy(data->trans_frame, ini_trans_frame, 32);
   strncpy(data->rot_frame, ini_rot_frame, 32);
   data->x = ini_x;
@@ -970,6 +972,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_theta_erro
   data->psi = ini_psi;
   add_fieldinfo(IFT_FLOAT, "theta_error", 1, &data->theta_error);
   add_fieldinfo(IFT_FLOAT, "offset_xy", 1, &data->offset_xy);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
   add_fieldinfo(IFT_STRING, "trans_frame", 32, data->trans_frame);
   add_fieldinfo(IFT_STRING, "rot_frame", 32, data->rot_frame);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
@@ -989,6 +992,7 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMes
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_FLOAT, "theta_error", 1, &data->theta_error);
   add_fieldinfo(IFT_FLOAT, "offset_xy", 1, &data->offset_xy);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
   add_fieldinfo(IFT_STRING, "trans_frame", 32, data->trans_frame);
   add_fieldinfo(IFT_STRING, "rot_frame", 32, data->rot_frame);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
@@ -1078,6 +1082,36 @@ void
 KatanaInterface::LinearGotoMessage::set_offset_xy(const float new_offset_xy)
 {
   data->offset_xy = new_offset_xy;
+}
+
+/** Get straight value.
+ * Move in a straight line?
+ * @return straight value
+ */
+bool
+KatanaInterface::LinearGotoMessage::is_straight() const
+{
+  return data->straight;
+}
+
+/** Get maximum length of straight value.
+ * @return length of straight value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_straight() const
+{
+  return 1;
+}
+
+/** Set straight value.
+ * Move in a straight line?
+ * @param new_straight new straight value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_straight(const bool new_straight)
+{
+  data->straight = new_straight;
 }
 
 /** Get trans_frame value.

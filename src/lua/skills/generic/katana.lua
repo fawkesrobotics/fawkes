@@ -158,22 +158,14 @@ end
 function GOTO:init()
    local x, y, z = self.fsm.vars.x, self.fsm.vars.y, self.fsm.vars.z
    --local phi, theta, psi = 0, 0, 0
-   local phi = math.pi/2 + math.atan2(y,x)
-   local theta = math.pi/2
-   local psi = 0
-   local theta_error = 0
-   local offset = 0
-   local frame     = "/base_link" -- default: values given in robot's coordinate system!
-   local rot_frame = "/base_link" -- default: values given in robot's coordinate system!
-
-   if self.fsm.vars.phi         ~= nil then phi         = self.fsm.vars.phi end
-   if self.fsm.vars.theta       ~= nil then theta       = self.fsm.vars.theta end
-   if self.fsm.vars.psi         ~= nil then psi         = self.fsm.vars.psi end
-   if self.fsm.vars.theta_error ~= nil then theta_error = self.fsm.vars.theta_error end
-   if self.fsm.vars.offset      ~= nil then offset      = self.fsm.vars.offset end
-
-   if self.fsm.vars.frame          ~= nil then frame          = self.fsm.vars.frame end
-   if self.fsm.vars.rot_frame      ~= nil then rot_frame      = self.fsm.vars.rot_frame end
+   local phi         = self.fsm.vars.phi         or math.pi/2 + math.atan2(y,x)
+   local theta       = self.fsm.vars.theta       or math.pi/2
+   local psi         = self.fsm.vars.psi         or 0
+   local theta_error = self.fsm.vars.theta_error or 0
+   local offset      = self.fsm.vars.offset      or 0
+   local straight    = self.fsm.vars.straight    or false
+   local frame       = self.fsm.vars.frame       or "/base_link" -- default: values given in robot's coordinate system!
+   local rot_frame   = self.fsm.vars.rot_frame   or "/base_link" -- default: values given in robot's coordinate system!
 
    -- check if distances are too high (means they are in libkni coordinate system)
    if math.abs(x) > 5 or
@@ -183,7 +175,7 @@ function GOTO:init()
       local gm = katanaarm.LinearGotoKniMessage:new(x, y, z, phi, theta, psi)
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
    else
-      local gm = katanaarm.LinearGotoMessage:new(theta_error, offset, frame, rot_frame, x, y, z, phi, theta, psi)
+      local gm = katanaarm.LinearGotoMessage:new(theta_error, offset, straight, frame, rot_frame, x, y, z, phi, theta, psi)
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
    end
 end

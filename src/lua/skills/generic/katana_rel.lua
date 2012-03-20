@@ -75,6 +75,7 @@ function MOVE:init()
    -- setting it right here could cause katana-skill to fail.
 
    local theta_error = self.fsm.vars.theta_error or 0.0
+   local straight    = self.fsm.vars.straight    or false
 
-   self.args = {x=x, y=y, z=z, theta=theta, frame="/katana/kni", theta_error=theta_error}
+   self.args = {x=x, y=y, z=z, theta=theta, frame="/katana/kni", theta_error=theta_error, straight=straight}
 end

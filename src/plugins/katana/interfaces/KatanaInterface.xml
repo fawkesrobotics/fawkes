@@ -126,6 +126,7 @@
     <field type="float" name="theta_error">Error range of theta rotation, gives more flexibility
       for IK-solution searching.</field>
     <field type="float" name="offset_xy">Offset to target. Distance in m (on the way to the target)</field>
+    <field type="bool" name="straight">Move in a straight line?</field>
     <field type="string" length="32" name="trans_frame">tf frame-id of origin's coordinate system,
       regarding the translation</field>
     <field type="string" length="32" name="rot_frame">tf frame-id of origin's coordinate system,
