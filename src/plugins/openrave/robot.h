@@ -61,6 +61,7 @@ class OpenRaveRobot
   virtual bool release_all_objects();
 
   virtual bool set_target_rel(float trans_x, float trans_y, float trans_z);
+  virtual bool set_target_straight(float trans_x, float trans_y, float trans_z);
   virtual bool set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
   virtual bool set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset = false);
   virtual bool set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset = false);

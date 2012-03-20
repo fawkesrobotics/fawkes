@@ -253,6 +253,24 @@ OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
   return __target.solvable;
 }
 
+/** Set target for a straight movement, given transition.
+ * This is the a wrapper for "set_target_rel", to be able to call for a
+ * straight arm movement by giving non-relative transition.
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
+{
+  Transform trans = __arm->GetEndEffectorTransform();
+
+  return set_target_rel( trans.trans[0] - trans_x,
+                         trans.trans[1] - trans_y,
+                         trans.trans[2] - trans_z);
+}
+
 /** Set target, given transition, and rotation as quaternion.
  * @param trans_x x-transition
  * @param trans_y y-transition
