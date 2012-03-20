@@ -849,6 +849,11 @@ MirrorCalibTool::~MirrorCalibTool()
   if (img_yuv_mask_) {
     delete[] img_yuv_mask_;
   }
+#ifdef HAVE_BULB_CREATOR
+  if (bulb_) {
+    delete bulb_;
+  }
+#endif
 }
 
 
