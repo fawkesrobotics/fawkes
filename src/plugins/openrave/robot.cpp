@@ -266,9 +266,9 @@ OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
 {
   Transform trans = __arm->GetEndEffectorTransform();
 
-  return set_target_rel( trans.trans[0] - trans_x,
-                         trans.trans[1] - trans_y,
-                         trans.trans[2] - trans_z);
+  return set_target_rel( trans_x - trans.trans[0],
+                         trans_y - trans.trans[1],
+                         trans_z - trans.trans[2]);
 }
 
 /** Set target, given transition, and rotation as quaternion.
