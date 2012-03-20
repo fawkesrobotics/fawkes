@@ -27,6 +27,7 @@
 #include <plugins/openrave/aspect/openrave_inifin.h>
 
 #include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/aspect_provider.h>
@@ -39,6 +40,7 @@ namespace fawkes {
 
 class OpenRaveThread
 : public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::AspectProviderAspect,
