@@ -216,9 +216,27 @@ KatanaActThread::update_position(bool refresh)
 {
   try {
     __katana->read_coordinates(refresh);
-    __katana_if->set_x(__cfg_distance_scale * __katana->x());
-    __katana_if->set_y(__cfg_distance_scale * __katana->y());
-    __katana_if->set_z(__cfg_distance_scale * __katana->z());
+    if( __cfg_controller == "kni") {
+      __katana_if->set_x(__cfg_distance_scale * __katana->x());
+      __katana_if->set_y(__cfg_distance_scale * __katana->y());
+      __katana_if->set_z(__cfg_distance_scale * __katana->z());
+    } else if( __cfg_controller == "openrave") {
+
+      if( !tf_listener->frame_exists(__cfg_frame_openrave) ) {
+        logger->log_warn(name(), "tf frames not existing: '%s'. Skipping transform to kni coordinates.",
+                         __cfg_frame_openrave.c_str() );
+      } else {
+        Stamped<Point> target;
+        Stamped<Point> target_local(Point(__katana->x(), __katana->y(), __katana->z()),
+                                    fawkes::Time(0,0), __cfg_frame_openrave);
+
+        tf_listener->transform_point(__cfg_frame_kni, target_local, target);
+
+        __katana_if->set_x(target.getX());
+        __katana_if->set_y(target.getY());
+        __katana_if->set_z(target.getZ());
+      }
+    }
     __katana_if->set_phi(__katana->phi());
     __katana_if->set_theta(__katana->theta());
     __katana_if->set_psi(__katana->psi());
