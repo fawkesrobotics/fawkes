@@ -23,8 +23,8 @@
 #ifndef __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
 #define __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
 
-#include <gvc.h>
 #include <cairomm/cairomm.h>
+#include <gvc.h>
 
 class SkillGuiCairoRenderInstructor
 {
