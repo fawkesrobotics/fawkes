@@ -1170,7 +1170,11 @@ Firestation::mc_load_mask()
 #endif
   filter_mirror->set_name("Robot Mask");
   filter_mirror->add_pattern("*.pnm");
+#if GTK_VERSION_GE(3,0)
   m_fcd_mc_load_mask->add_filter(filter_mirror);
+#else
+  m_fcd_mc_load_mask->add_filter(*filter_mirror);
+#endif
 
   int result = m_fcd_mc_load_mask->run();
 
