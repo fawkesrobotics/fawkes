@@ -650,7 +650,7 @@ class MirrorCalibTool::CartesianImage
 }; // CartesianImage
 
 
-/** @class MirrorCalibTool::ConvexPolygon tools/firestation/mirror_calib.h
+/** @class MirrorCalibTool::ConvexPolygon libs/fvmodels/mirror/mirror_calib.h
  * Represents a convex polygon. It is defined by a sequence of points in
  * clock-wise-order.
  */
