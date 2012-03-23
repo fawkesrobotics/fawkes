@@ -17,11 +17,14 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+PRESUBDIRS = interfaces
+
 # Uncomment to enable simple time tracking
 #CFLAGS += -DUSE_TIMETRACKER
 
 LIBS_robotino = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-		fawkesblackboard fawkesinterface MotorInterface
+		fawkesblackboard fawkesinterface MotorInterface \
+		BatteryInterface RobotinoSensorInterface
 OBJS_robotino = robotino_plugin.o sensor_thread.o act_thread.o
 
 LIBS_robotino_joystick = m fawkescore fawkesutils fawkesaspects \

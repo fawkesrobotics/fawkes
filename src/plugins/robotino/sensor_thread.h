@@ -27,6 +27,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/blackboard.h>
 
 #include <string>
 
@@ -38,11 +39,17 @@ namespace rec {
   }
 }
 
+namespace fawkes {
+  class BatteryInterface;
+  class RobotinoSensorInterface;
+}
+
 class RobotinoSensorThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect
 {
   friend class RobotinoActThread;
  public:
@@ -60,6 +67,9 @@ class RobotinoSensorThread
   bool        cfg_quit_on_disconnect_;
   rec::robotino::com::Com *com_;
   unsigned int last_seqnum_;
+
+  fawkes::BatteryInterface        *batt_if_;
+  fawkes::RobotinoSensorInterface *sens_if_;
 };
 
 
