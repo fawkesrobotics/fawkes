@@ -56,6 +56,8 @@ RobotinoActThread::init()
   com_ = sensor_thread_->com_;
   omni_drive_ = new rec::robotino::com::OmniDrive();
 
+  last_seqnum_ = 0;
+
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
 
@@ -65,12 +67,12 @@ RobotinoActThread::finalize()
 {
   blackboard->close(motor_if_);
   if (com_->isConnected()) {
-    rec::iocontrol::remotestate::SetState setState;
-    setState.speedSetPoint[0] = 0.;
-    setState.speedSetPoint[1] = 0.;
-    setState.speedSetPoint[2] = 0.;
+    rec::iocontrol::remotestate::SetState set_state;
+    set_state.speedSetPoint[0] = 0.;
+    set_state.speedSetPoint[1] = 0.;
+    set_state.speedSetPoint[2] = 0.;
 
-    com_->setSetState( setState );
+    com_->setSetState( set_state );
   }
   com_ = NULL;
 }
@@ -80,7 +82,10 @@ void
 RobotinoActThread::loop()
 {
   if (com_->isConnected()) {
+    rec::iocontrol::remotestate::SetState set_state;
+    bool send_set_state = false;
     while (! motor_if_->msgq_empty()) {
+
       if (MotorInterface::TransRotMessage *msg =
           motor_if_->msgq_first_safe(msg))
       {
@@ -88,15 +93,31 @@ RobotinoActThread::loop()
         omni_drive_->project(&m1, &m2, &m3,
                              msg->vx(), msg->vy(), msg->omega());
 
-        rec::iocontrol::remotestate::SetState setState;
-        setState.speedSetPoint[0] = m1;
-        setState.speedSetPoint[1] = m2;
-        setState.speedSetPoint[2] = m3;
-        com_->setSetState( setState );        
+        set_state.speedSetPoint[0] = m1;
+        set_state.speedSetPoint[1] = m2;
+        set_state.speedSetPoint[2] = m3;
+        send_set_state = true;
+      }
+      else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
+      {
+        set_state.resetPosition[0] = set_state.resetPosition[1] =
+          set_state.resetPosition[2] = true;
+        send_set_state = true;
       }
 
       motor_if_->msgq_pop();
     }
+
+    if (send_set_state)  com_->setSetState( set_state );        
+
+    rec::iocontrol::remotestate::SensorState sensor_state = com_->sensorState();
+    if (sensor_state.sequenceNumber != last_seqnum_) {
+      motor_if_->set_odometry_position_x(sensor_state.odometryX);
+      motor_if_->set_odometry_position_y(sensor_state.odometryY);
+      motor_if_->set_odometry_orientation(sensor_state.odometryPhi);
+      motor_if_->write();
+    }
+
   } else {
     if (! motor_if_->msgq_empty()) {
       logger->log_warn(name(), "Motor commands received while not connected");

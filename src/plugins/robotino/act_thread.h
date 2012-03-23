@@ -67,6 +67,7 @@ class RobotinoActThread
   RobotinoSensorThread           *sensor_thread_;
   rec::robotino::com::Com        *com_;
   rec::robotino::com::OmniDrive  *omni_drive_;
+  unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;
 };
 
