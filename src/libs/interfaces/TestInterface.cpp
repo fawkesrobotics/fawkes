@@ -57,12 +57,10 @@ TestInterface::TestInterface() : Interface()
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
   add_fieldinfo(IFT_INT32, "result", 1, &data->result);
   add_fieldinfo(IFT_UINT32, "test_uint", 1, &data->test_uint);
-  add_fieldinfo(IFT_UINT64, "test_ulint", 1, &data->test_ulint);
-  add_fieldinfo(IFT_INT64, "test_lint", 1, &data->test_lint);
   add_messageinfo("SetTestIntMessage");
   add_messageinfo("SetTestStringMessage");
   add_messageinfo("CalculateMessage");
-  unsigned char tmp_hash[] = {0x76, 0x67, 0x99, 0x23, 0x8, 0xa7, 0xba, 0xe0, 0x34, 0x70, 0x34, 0xf8, 0xe6, 0x99, 0x7d, 0x99};
+  unsigned char tmp_hash[] = {0xe4, 0xe2, 0x1, 0xa9, 0xc8, 0x87, 0x8d, 0x3d, 0xa3, 0xab, 0xc9, 0xcd, 0xf3, 0xf, 0x5a, 0x33};
   set_hash(tmp_hash);
 }
 
@@ -268,68 +266,6 @@ void
 TestInterface::set_test_uint(const uint32_t new_test_uint)
 {
   data->test_uint = new_test_uint;
-  data_changed = true;
-}
-
-/** Get test_ulint value.
- * Test unsigned long int
- * @return test_ulint value
- */
-uint64_t
-TestInterface::test_ulint() const
-{
-  return data->test_ulint;
-}
-
-/** Get maximum length of test_ulint value.
- * @return length of test_ulint value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-TestInterface::maxlenof_test_ulint() const
-{
-  return 1;
-}
-
-/** Set test_ulint value.
- * Test unsigned long int
- * @param new_test_ulint new test_ulint value
- */
-void
-TestInterface::set_test_ulint(const uint64_t new_test_ulint)
-{
-  data->test_ulint = new_test_ulint;
-  data_changed = true;
-}
-
-/** Get test_lint value.
- * Test long int
- * @return test_lint value
- */
-int64_t
-TestInterface::test_lint() const
-{
-  return data->test_lint;
-}
-
-/** Get maximum length of test_lint value.
- * @return length of test_lint value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-TestInterface::maxlenof_test_lint() const
-{
-  return 1;
-}
-
-/** Set test_lint value.
- * Test long int
- * @param new_test_lint new test_lint value
- */
-void
-TestInterface::set_test_lint(const int64_t new_test_lint)
-{
-  data->test_lint = new_test_lint;
   data_changed = true;
 }
 

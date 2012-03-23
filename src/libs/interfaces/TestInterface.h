@@ -59,8 +59,6 @@ class TestInterface : public Interface
     char test_string[30]; /**< A test sring */
     int32_t result; /**< Result of operation add operation from Calculate message. */
     uint32_t test_uint; /**< Test uint32 */
-    uint64_t test_ulint; /**< Test unsigned long int */
-    int64_t test_lint; /**< Test long int */
   } TestInterface_data_t;
 #pragma pack(pop)
 
@@ -178,12 +176,6 @@ class TestInterface : public Interface
   uint32_t test_uint() const;
   void set_test_uint(const uint32_t new_test_uint);
   size_t maxlenof_test_uint() const;
-  uint64_t test_ulint() const;
-  void set_test_ulint(const uint64_t new_test_ulint);
-  size_t maxlenof_test_ulint() const;
-  int64_t test_lint() const;
-  void set_test_lint(const int64_t new_test_lint);
-  size_t maxlenof_test_lint() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
