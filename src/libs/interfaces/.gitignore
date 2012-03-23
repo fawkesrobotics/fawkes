@@ -6,4 +6,5 @@ NaoSensorInterface.h
 OpenRaveInterface.h
 PanTiltInterface.h
 SkillerDebugInterface.h
+RobotinoSensorInterface.h
 Roomba500Interface.h

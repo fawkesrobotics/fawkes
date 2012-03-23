@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="RobotinoSensorInterface" author="Tim Niemueller" year="2012">
+  <data>
+    <comment>Sensor information of a Robotino robot</comment>
+    <field type="float" name="mot_velocity" length="3">Velocities of the wheels.</field>
+    <field type="int32" name="mot_position" length="3">Positions of the wheels.</field>
+    <field type="float" name="mot_current" length="3">Motor currents.</field>
+    <field type="bool" name="bumper">Bumper pressed indicator.</field>
+    <field type="float" name="distance" length="9">Distance sensor values.</field>
+    <field type="bool" name="digital_in" length="8">Digital input values.</field>
+    <field type="float" name="analog_in" length="8">Analog input values.</field>
+  </data>
+</interface>
