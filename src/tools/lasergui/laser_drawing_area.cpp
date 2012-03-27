@@ -54,8 +54,6 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
 {
   __draw_mode = MODE_LINES;
   __zoom_factor = 50;
-  __laser360_if = NULL;
-  __laser720_if = NULL;
   __l_objpos_if_persons = NULL;
   __l_objpos_if_legs = NULL;
   __l_objpos_if_misc = NULL;
@@ -90,8 +88,6 @@ LaserDrawingArea::LaserDrawingArea()
 {
   __draw_mode = MODE_LINES;
   __zoom_factor = 50;
-  __laser360_if = NULL;
-  __laser720_if = NULL;
   __l_objpos_if_persons = NULL;
   __l_objpos_if_legs = NULL;
   __l_objpos_if_misc = NULL;
@@ -161,26 +157,48 @@ LaserDrawingArea::set_connected(bool connected)
 }
 
 
-/** Set 360 degree laser interface.
- * @param laser_if laser interface
+/** Set new laser interfaces.
+ *
+ * This is also the place where colors are determined the following way:
+ * <pre>
+ *  1. 000 ->   0   0   0
+ *  2. 001 -> 255   0   0
+ *  3. 010 ->   0 255   0
+ *  4. 011 -> 255 255   0
+ *  5. 100 ->   0   0 255
+ *  6. 101 -> 255   0 255
+ *  7. 110 -> 255 255   0
+ *  8. 000 ->   0   0   0
+ *  9. 001 -> 127   0   0
+ * 10. 010 ->   0 127   0
+ * 11. 011 -> 127 127   0
+ * 12. 100 ->   0   0 127
+ * 13. 101 -> 127   0 127
+ * 14. 110 -> 127 127   0
+ * ...
+ * </pre>
+ *
+ * @param ifs The interfaces of the lasers that should be visualized.
  */
 void
-LaserDrawingArea::set_laser360_if(Laser360Interface *laser_if)
+LaserDrawingArea::set_laser_ifs(const std::list<fawkes::Interface*>& ifs)
 {
-  __laser360_if = laser_if;
-  __laser720_if = NULL;
-  queue_draw();
-}
-
-
-/** Set 720 degree laser interface.
- * @param laser_if laser interface
- */
-void
-LaserDrawingArea::set_laser720_if(Laser720Interface *laser_if)
-{
-  __laser720_if = laser_if;
-  __laser360_if = NULL;
+  __laser_ifs.clear();
+  unsigned char color_counter = 0;
+  unsigned char intensity = 255;
+  for (std::list<fawkes::Interface*>::const_iterator it = ifs.begin();
+       it != ifs.end(); ++it) {
+    if ((color_counter & 0x1 & 0x2 & 0x4) != 0) {
+      intensity /= 2;
+    }
+    Color c;
+    c.r = ((color_counter & 0x1) != 0) ? intensity : 0;
+    c.g = ((color_counter & 0x2) != 0) ? intensity : 0;
+    c.b = ((color_counter & 0x4) != 0) ? intensity : 0;
+    const InterfaceColorPair p = std::make_pair(*it, c);
+    __laser_ifs.push_back(p);
+    ++color_counter;
+  }
   queue_draw();
 }
 
@@ -189,8 +207,7 @@ LaserDrawingArea::set_laser720_if(Laser720Interface *laser_if)
 void
 LaserDrawingArea::reset_laser_ifs()
 {
-  __laser360_if = NULL;
-  __laser720_if = NULL;
+  __laser_ifs.clear();
   __l_objpos_if_persons = NULL;
   __l_objpos_if_legs = NULL;
   __l_objpos_if_misc = NULL;
@@ -295,6 +312,20 @@ LaserDrawingArea::set_rotation(float rot_rad)
 }
 
 
+bool
+LaserDrawingArea::all_laser_ifs_have_writer() const
+{
+  for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
+       it != __laser_ifs.end(); ++it) {
+    fawkes::Interface* itf = it->first;
+    if (!itf->has_writer()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
 #if GTK_VERSION_GE(3,0)
 /** Expose event handler.
  * @param cr Cairo context for drawing
@@ -358,7 +389,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       cr->get_text_extents(t, te);
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
-    } else if ( (__laser360_if == NULL) && (__laser720_if == NULL) ) {
+    } else if ( __laser_ifs.empty() ) {
       Cairo::TextExtents te;
       std::string t = "No interface opened";
       cr->set_source_rgb(1, 0, 0);
@@ -366,27 +397,50 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       cr->get_text_extents(t, te);
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
-    } else if ( (__laser360_if && ! __laser360_if->has_writer()) ||
-		(__laser720_if && ! __laser720_if->has_writer()) ) {
+    } else if (! all_laser_ifs_have_writer() ) {
       Cairo::TextExtents te;
       std::string t = "No writer for ";
-      if (__laser360_if) t += __laser360_if->uid();
-      if (__laser720_if) t += __laser720_if->uid();
+      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
+           it != __laser_ifs.end(); ++it) {
+        fawkes::Interface* itf = it->first;
+        if (!itf->has_writer()) {
+          t += itf->uid();
+          t += ' ';
+        }
+      }
       cr->set_source_rgb(1, 0, 0);
       cr->set_font_size(20);
       cr->get_text_extents(t, te);
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
     } else {
-
       if (! __break_drawing) {
-	if (__laser360_if)  __laser360_if->read();
-	if (__laser720_if)  __laser720_if->read();
+        for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
+             it != __laser_ifs.end(); ++it) {
+          fawkes::Interface* laser_if = it->first;
+          laser_if->read();
+        }
       }
 
-      draw_beams(window, cr);
+      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
+           it != __laser_ifs.end(); ++it) {
+        const fawkes::Interface* laser_if = it->first;
+        const Color& color = it->second;
+        cr->save();
+        cr->set_source_rgb(color.r, color.g, color.b);
+        draw_beams(laser_if, window, cr);
+        cr->restore();
+      }
       if (__robot_drawer)  __robot_drawer->draw_robot(window, cr);
-      draw_segments(window, cr);
+      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
+           it != __laser_ifs.end(); ++it) {
+        const fawkes::Interface* laser_if = it->first;
+        const Color& color = it->second;
+        cr->save();
+        cr->set_source_rgb(color.r, color.g, color.b);
+        draw_segments(laser_if, window, cr);
+        cr->restore();
+      }
       draw_persons_legs(window, cr);
 
       if(__switch_if != NULL && __switch_if->has_writer()){
@@ -451,21 +505,37 @@ LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window> &window,
 }
 
 
-/** Draw Beams.
+/** Draw Beams of an interface.
  * Draws the beams as lines, circles or hull, depending on draw mode.
+ * @param itf either Laser360Interface or Laser720Interface
  * @param window Gdk window
  * @param cr Cairo context to draw to. It is assumed that possible transformations
  * have been setup before.
  */
 void
-LaserDrawingArea::draw_beams(Glib::RefPtr<Gdk::Window> &window,
+LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
+                             Glib::RefPtr<Gdk::Window> &window,
 			     const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  float *distances = __laser360_if ? __laser360_if->distances() : __laser720_if->distances();
-  size_t nd = __laser360_if ? __laser360_if->maxlenof_distances() : __laser720_if->maxlenof_distances();
+  float *distances;
+  size_t nd;
+  bool clockwise;
+  const fawkes::Laser360Interface* itf360 = NULL;
+  const fawkes::Laser720Interface* itf720 = NULL;
+  if ((itf360 = dynamic_cast<const fawkes::Laser360Interface*>(itf))) {
+    distances = itf360->distances();
+    nd = itf360->maxlenof_distances();
+    clockwise = itf360->is_clockwise_angle();
+  } else if ((itf720 = dynamic_cast<const fawkes::Laser720Interface*>(itf))) {
+    distances = itf720->distances();
+    nd = itf720->maxlenof_distances();
+    clockwise = itf720->is_clockwise_angle();
+  } else {
+    throw fawkes::Exception("Interface is neither Laser360Interface nor Laser720Interface");
+  }
+
   const float nd_factor = 360.0 / nd;
 
-  bool clockwise = __laser360_if ? __laser360_if->is_clockwise_angle() : __laser720_if->is_clockwise_angle();
 
   float *revdists = NULL;
   if (! clockwise) {
@@ -817,17 +887,29 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 
 
 /** Draw laser segments as produced by leg tracker application.
+ * @param itf either Laser360Interface or Laser720Interface
  * @param window Gdk window
  * @param cr Cairo context to draw to. It is assumed that possible transformations
  * have been setup before.
  */
 void
-LaserDrawingArea::draw_segments(Glib::RefPtr<Gdk::Window> &window,
+LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
+                                Glib::RefPtr<Gdk::Window> &window,
 				const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  float *distances = __laser360_if ? __laser360_if->distances() : __laser720_if->distances();
   size_t nd = __laser_segmentation_if->maxlenof_distances();
   const float nd_factor = 360.0 / nd;
+
+  float *distances;
+  const fawkes::Laser360Interface* itf360 = NULL;
+  const fawkes::Laser720Interface* itf720 = NULL;
+  if ((itf360 = dynamic_cast<const fawkes::Laser360Interface*>(itf))) {
+    distances = itf360->distances();
+  } else if ((itf720 = dynamic_cast<const fawkes::Laser720Interface*>(itf))) {
+    distances = itf720->distances();
+  } else {
+    throw fawkes::Exception("Interface is neither Laser360Interface nor Laser720Interface");
+  }
 
   cr->save();
   /* DRAW SEGMENTS (draw the segment interiors again with other color*/

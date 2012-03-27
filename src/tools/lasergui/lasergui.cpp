@@ -35,13 +35,16 @@
 
 
 #include <gui_utils/service_chooser_dialog.h>
-#include <gui_utils/interface_chooser_dialog.h>
+#include <gui_utils/multi_interface_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>
 #include <gui_utils/connection_dispatcher.h>
 #include <gui_utils/robot/allemaniacs_athome.h>
 
 #include <gtkmm/main.h>
 #include <list>
+#include <memory>
+#include <set>
+#include <map>
 #include <utils/misc/string_conversions.h>
 
 
@@ -59,6 +62,20 @@ using namespace fawkes;
 class LaserGuiGtkWindow : public Gtk::Window
 {
  public:
+  /** Typedef of fawkes::Interface to override Glib::Interface. */
+  typedef fawkes::Interface Interface;
+  /** Shorthand for pair of interface type and ID. */
+  typedef MultiInterfaceChooserDialog::TypeIdPair TypeIdPair;
+  /** Shorthand for set of pairs of interface type and ID. */
+  typedef MultiInterfaceChooserDialog::TypeIdPairList TypeIdPairList;
+  /** For each interface, an interface dispatcher is opened that listens for
+   * data changes. */
+  typedef std::pair<Interface*, InterfaceDispatcher*> InterfaceDispatcherPair;
+  /** A list of interfaces and their respective dispatchers.
+   * Note that this is a list and not a map from interface to dispatcher only
+   * to keep the ordering specified by the user in the GUI. */
+  typedef std::list<InterfaceDispatcherPair> InterfaceDispatcherPairList;
+
   /** Constructor for Gtk::Builder.
    * @param cobject C base object
    * @param builder Gtk Builder
@@ -67,9 +84,7 @@ class LaserGuiGtkWindow : public Gtk::Window
 		    const Glib::RefPtr<Gtk::Builder> &builder)
     : Gtk::Window(cobject), __athome_drawer(true)
   {
-    __laser_if_type = "Laser360Interface";
-    __laser_if_id   = "Laser";
-    __ifd = NULL;
+    __laser_if_names.push_back(std::make_pair("Laser360Interface", "Laser"));
 
     builder->get_widget_derived("da_laser", __area);
     builder->get_widget("tb_connection", __tb_connection);
@@ -132,7 +147,6 @@ class LaserGuiGtkWindow : public Gtk::Window
 
   }
 
-
   /** Event handler for connection button. */
   virtual void on_select_clicked()
   {
@@ -145,90 +159,87 @@ class LaserGuiGtkWindow : public Gtk::Window
       md.set_title("Interface Selection Failed");
       md.run();
     } else {
-      InterfaceChooserDialog ifcd(*this, __bb, "Laser*Interface", "*",
-				  "Select Laser Interface");
-      if (ifcd.run()) {
-	Glib::ustring type, id;
-	ifcd.get_selected_interface(type, id);
-
-	open_interface(type, id);
+      std::auto_ptr<MultiInterfaceChooserDialog> ifcd(
+          MultiInterfaceChooserDialog::create(*this,
+                                              __bb,
+                                              "Laser*Interface",
+                                              "*",
+                                              __laser_if_names));
+      if (ifcd->run()) {
+        const TypeIdPairList interfaces = ifcd->get_selected_interfaces();
+        open_interfaces(interfaces);
       }
     }
   }
 
-  /** Open interface.
-   * Tries to open the interface, and on success replaces the existing
-   * instances.
-   * @param type type of interface to open
-   * @param id id of interface to open
+  /** Open interfaces.
+   * Tries to open the interfaces.
+   * Even if it fails, the old interfaces are closed.
+   * @param types_and_ids types and ids of interfaces to open
    */
   void
-  open_interface(Glib::ustring &type, Glib::ustring &id)
+  open_interfaces(const TypeIdPairList& types_and_ids)
   {
-    __bb->unregister_listener(__ifd);
-    if (type == "Laser720Interface") {
-      try {
-	Laser720Interface *laser720 =
-	  __bb->open_for_reading<Laser720Interface>(id.c_str());
-	__area->set_laser720_if(NULL);
-	__area->set_laser360_if(NULL);
-	__area->set_laser720_if(laser720);
-	__bb->close(__laser720_if);
-	__bb->close(__laser360_if);
-	__laser720_if = laser720;
-	__laser360_if = NULL;
-	__laser_if_type = type;
-	__laser_if_id = id;
-	__bb->unregister_listener(__ifd);
-	delete __ifd;
-	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", laser720);
-	__ifd->signal_data_changed().connect(
-	     sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
+    __area->reset_laser_ifs();
+    for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
+         it != __laser_ifs.end(); ++it) {
+      __bb->unregister_listener(it->second);
+      delete it->second;
+      __bb->close(it->first);
+    }
+    __laser_ifs.clear();
+    __laser_if_names = types_and_ids;
 
-      } catch (Exception &e) {
-	std::string msg = std::string("Failed to open interface: ") + e.what();
-	Gtk::MessageDialog md(*this, msg, /* markup */ false,
-			      Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			      /* modal */ true);
-	md.set_title("Opening Interface Failed");
-	md.run();
-      }
-    } else if (type == "Laser360Interface") {
+    // Open interfaces.
+    for (TypeIdPairList::const_iterator it = types_and_ids.begin();
+         it != types_and_ids.end(); ++it)
+    {
+      const Glib::ustring& type = it->first;
+      const Glib::ustring& id = it->second;
+      Interface* itf;
       try {
-	Laser360Interface *laser360 =
-	  __bb->open_for_reading<Laser360Interface>(id.c_str());
-	__area->set_laser720_if(NULL);
-	__area->set_laser360_if(NULL);
-	__area->set_laser360_if(laser360);
-	__bb->close(__laser720_if);
-	__bb->close(__laser360_if);
-	__laser360_if = laser360;
-	__laser720_if = NULL;
-	__laser_if_type = type;
-	__laser_if_id = id;
-	__bb->unregister_listener(__ifd);
-	delete __ifd;
-	__ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", laser360);
-	__ifd->signal_data_changed().connect(
-	     sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
-      } catch (Exception &e) {
-	std::string msg = std::string("Failed to open interface: ") + e.what();
-	Gtk::MessageDialog md(*this, msg, /* markup */ false,
-			      Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			      /* modal */ true);
-	md.set_title("Opening Interface Failed");
-	md.run();
+        if (type == "Laser720Interface") {
+          itf = __bb->open_for_reading<Laser720Interface>(id.c_str());
+        } else if (type == "Laser360Interface") {
+          itf = __bb->open_for_reading<Laser360Interface>(id.c_str());
+        }
+      } catch (const Exception& e) {
+        std::string msg = std::string("Failed to open interface: ") + e.what();
+        Gtk::MessageDialog md(*this, msg, /* markup */ false,
+                              Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+                              /* modal */ true);
+        md.set_title("Opening Interface Failed");
+        md.run();
+        continue;
       }
-    } else {
-      std::string msg = std::string("Unknown interface type ") + type;
-      Gtk::MessageDialog md(*this, msg, /* markup */ false,
-			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-				/* modal */ true);
-      md.set_title("Opening Interface Failed");
-      md.run();
+      InterfaceDispatcher* itfd = new InterfaceDispatcher("LaserInterfaceDispatcher", itf);
+      itfd->signal_data_changed().connect(
+          sigc::hide(sigc::mem_fun(*__area, &LaserDrawingArea::queue_draw)));
+      try {
+        __bb->register_listener(itfd, BlackBoard::BBIL_FLAG_DATA);
+      } catch (const Exception& e) {
+        std::string msg = std::string("Failed to register interface dispatcher: ") + e.what();
+        Gtk::MessageDialog md(*this, msg, /* markup */ false,
+                              Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+                              /* modal */ true);
+        md.set_title("Registrating Interface Dispatcher Failed");
+        md.run();
+        delete itfd;
+        __bb->close(itf);
+        continue;
+      }
+      const InterfaceDispatcherPair p = std::make_pair(itf, itfd);
+      __laser_ifs.push_back(p);
     }
 
-    __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA);
+    // Inform the drawing area.
+    std::list<Interface*> keys;
+    for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
+         it != __laser_ifs.end(); ++it)
+    {
+      keys.push_back(it->first);
+    }
+    __area->set_laser_ifs(keys);
   }
 
   /** Event handler for connected event. */
@@ -236,8 +247,7 @@ class LaserGuiGtkWindow : public Gtk::Window
   {
     try {
       __bb = new RemoteBlackBoard(__connection_dispatcher.get_client());
-      __laser360_if = NULL;
-      __laser720_if = NULL;
+      __laser_ifs.clear();
       __l_objpos_if_persons = NULL;
       __l_objpos_if_legs = NULL;
       __l_objpos_if_misc = NULL;
@@ -251,7 +261,7 @@ class LaserGuiGtkWindow : public Gtk::Window
       //__laser_if = __bb->open_for_reading<Laser360Interface>("LegtrackerAveragedLaser");
 
       __area->set_connected(true);
-      open_interface(__laser_if_type, __laser_if_id);
+      open_interfaces(__laser_if_names);
 
       __line_if = __bb->open_for_reading<ObjectPositionInterface>("LaserLine");
       __area->set_line_if(__line_if);
@@ -286,16 +296,18 @@ class LaserGuiGtkWindow : public Gtk::Window
       __area->queue_draw();
       __area->set_connected(false);
       if ( __bb ) {
-	__bb->close(__laser360_if);
-	__bb->close(__laser720_if);
+        __area->reset_laser_ifs();
+        for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
+             it != __laser_ifs.end(); ++it) {
+          __bb->unregister_listener(it->second);
+          delete it->second;
+          __bb->close(it->first);
+        }
 	__bb->close(__line_if);
 	__bb->close(__visdis_if);
-	delete __ifd;
 	delete __bb;
-	__laser360_if = NULL;
-	__laser720_if = NULL;
+        __laser_ifs.clear();
 	__bb = NULL;
-	__ifd = NULL;
 	__line_if = NULL;
 	__visdis_if = NULL;
       }
@@ -310,10 +322,13 @@ class LaserGuiGtkWindow : public Gtk::Window
     __area->set_line_if(NULL);
     __area->set_visdisp_if(NULL);
     __area->queue_draw();
-    if(__laser360_if)
-      __bb->close(__laser360_if);
-    if(__laser720_if)
-      __bb->close(__laser720_if);
+    for (InterfaceDispatcherPairList::const_iterator it = __laser_ifs.begin();
+         it != __laser_ifs.end(); ++it) {
+      __bb->unregister_listener(it->second);
+      delete it->second;
+      __bb->close(it->first);
+    }
+    __laser_ifs.clear();
     if(__laser_segmentation_if)
       __bb->close(__laser_segmentation_if);
     if(__switch_if)
@@ -353,11 +368,8 @@ class LaserGuiGtkWindow : public Gtk::Window
 
 
     delete __bb;
-    delete __ifd;
     __bb = NULL;
-    __ifd = NULL;
-    __laser360_if = NULL;
-    __laser720_if = NULL;
+    __laser_ifs.clear();
     __l_objpos_if_persons = NULL;
     __l_objpos_if_legs = NULL;
     __l_objpos_if_misc = NULL;
@@ -527,13 +539,11 @@ class LaserGuiGtkWindow : public Gtk::Window
 
  private:
   BlackBoard                        *__bb;
-  Laser360Interface                 *__laser360_if;
-  Laser720Interface                 *__laser720_if;
+  InterfaceDispatcherPairList        __laser_ifs;
   Laser720Interface                 *__laser_segmentation_if;
   SwitchInterface                   *__switch_if;
   ObjectPositionInterface           *__target_if;
   
-  InterfaceDispatcher               *__ifd;
   std::list<ObjectPositionInterface*>* __l_objpos_if_persons;
   std::list<ObjectPositionInterface*>* __l_objpos_if_legs;
   std::list<ObjectPositionInterface*>* __l_objpos_if_misc;
@@ -562,8 +572,7 @@ class LaserGuiGtkWindow : public Gtk::Window
   Gtk::Dialog                        *__dlg_ltopen;
   Gtk::ProgressBar                   *__pgb_ltopen;
 
-  Glib::ustring                       __laser_if_type;
-  Glib::ustring                       __laser_if_id;
+  TypeIdPairList                      __laser_if_names;
 };
 
 int

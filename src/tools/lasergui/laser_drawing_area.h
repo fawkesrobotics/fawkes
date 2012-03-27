@@ -56,8 +56,7 @@ class LaserDrawingArea
 		   const Glib::RefPtr<Gtk::Builder> &builder);
   ~LaserDrawingArea();
 
-  void set_laser360_if(fawkes::Laser360Interface *laser_if);
-  void set_laser720_if(fawkes::Laser720Interface *laser_if);
+  void set_laser_ifs(const std::list<fawkes::Interface*>& laser_if);
   void reset_laser_ifs();
   void set_objpos_if(std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_persons,
 		     std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_legs,
@@ -90,9 +89,11 @@ class LaserDrawingArea
   virtual bool on_motion_notify_event(GdkEventMotion *event);
   virtual bool on_button_press_event(GdkEventButton *event);
 
-  void draw_beams(Glib::RefPtr<Gdk::Window> &window,
+  void draw_beams(const fawkes::Interface* itf,
+                  Glib::RefPtr<Gdk::Window> &window,
 		  const Cairo::RefPtr<Cairo::Context> &cr);
-  void draw_segments(Glib::RefPtr<Gdk::Window> &window,
+  void draw_segments(const fawkes::Interface* itf,
+                     Glib::RefPtr<Gdk::Window> &window,
 		     const Cairo::RefPtr<Cairo::Context> &cr);
   void draw_scalebox(Glib::RefPtr<Gdk::Window> &window,
 		     const Cairo::RefPtr<Cairo::Context> &cr);
@@ -102,11 +103,20 @@ class LaserDrawingArea
 
 
  private:
-  fawkes::Laser360Interface *__laser360_if;
-  fawkes::Laser720Interface *__laser720_if;
-  fawkes::Laser720Interface *__laser_segmentation_if;
-  fawkes::SwitchInterface           *__switch_if;
-  fawkes::ObjectPositionInterface           *__target_if;
+  struct Color {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+  };
+  typedef std::pair<fawkes::Interface*, Color> InterfaceColorPair;
+  typedef std::list<InterfaceColorPair> InterfaceColorPairList;
+
+  bool all_laser_ifs_have_writer() const;
+
+  InterfaceColorPairList               __laser_ifs;
+  fawkes::Laser720Interface           *__laser_segmentation_if;
+  fawkes::SwitchInterface             *__switch_if;
+  fawkes::ObjectPositionInterface     *__target_if;
 
   fawkes::ObjectPositionInterface *__line_if;
 
