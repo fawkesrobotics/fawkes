@@ -20,28 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "usertracker_plugin.h"
 #include "usertracker_thread.h"
+#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** @class OpenNiUserTrackerPlugin "usertracker_plugin.h"
- * Plugin to track users using OpenNI.
+/** Plugin to track users using OpenNI.
  * This plugin uses OpenNI to track users and publishes the information
  * to the blackboard.
  * @author Tim Niemueller
  */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-OpenNiUserTrackerPlugin::OpenNiUserTrackerPlugin(Configuration *config)
-  : Plugin(config)
+class OpenNiUserTrackerPlugin : public fawkes::Plugin
 {
-  thread_list.push_back(new OpenNiUserTrackerThread());
-}
-
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  OpenNiUserTrackerPlugin(Configuration *config) : Plugin(config)
+  {
+    thread_list.push_back(new OpenNiUserTrackerThread());
+  }
+};
 
 PLUGIN_DESCRIPTION("User tracker using OpenNI")
 EXPORT_PLUGIN(OpenNiUserTrackerPlugin)
-

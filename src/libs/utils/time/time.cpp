@@ -404,6 +404,31 @@ Time::operator+(const double sec) const
 }
 
 
+/** Operator to add usec value.
+ * @param usec microseconds to add
+ * @return new resulting instance
+ */
+Time
+Time::operator+(const long int usec) const
+{
+  Time ret;
+  if ( __time.tv_usec + usec >= 1000000 )
+  {
+    //usec + __time.tv_usec might be more than 1 second
+    long int tmp_usec = __time.tv_usec + usec;
+    ret.__time.tv_usec  = tmp_usec % 1000000;
+    ret.__time.tv_sec   = __time.tv_sec + (tmp_usec / 1000000);
+  }
+  else
+  {
+    ret.__time.tv_sec   = __time.tv_sec;
+    ret.__time.tv_usec += usec;
+  }
+
+  return ret;
+}
+
+
 /** Operator that substracts one Time from another.
  * @param t the Time that is substracted
  * @return the difference
@@ -435,6 +460,56 @@ double
 Time::operator-(const Time* t) const
 {
   return time_diff_sec(__time, t->__time);
+}
+
+
+/** Operator that subtracts some time.
+ * @param sec number of seconds to subtract
+ * @return the difference
+ */
+Time
+Time::operator-(const double sec) const
+{
+  Time ret;
+  time_t sec_only = (time_t)floor(sec);
+  suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
+  if (__time.tv_usec < usec_only)
+  {
+    ret.__time.tv_usec = 1000000 + __time.tv_usec - usec_only;
+    ret.__time.tv_sec = __time.tv_sec - sec_only - 1;
+  }
+  else
+  {
+    ret.__time.tv_usec = __time.tv_usec - usec_only;
+    ret.__time.tv_sec = __time.tv_sec - sec_only;
+  }
+
+  return ret;
+}
+
+
+/** Operator that subtracts some time.
+ * @param usec number of microseconds to subtract
+ * @return the difference
+ */
+Time
+Time::operator-(const long int usec) const
+{
+  Time ret;
+  time_t sec_only = usec / 1000000;
+  suseconds_t usec_only = usec % 1000000;
+  if (__time.tv_usec < usec_only)
+  {
+    ret.__time.tv_usec = 1000000 + __time.tv_usec - usec_only;
+    ret.__time.tv_sec = __time.tv_sec - sec_only - 1;
+  }
+  else
+  {
+    ret.__time.tv_usec = __time.tv_usec - usec_only;
+    ret.__time.tv_sec = __time.tv_sec - sec_only;
+  }
+
+  return ret;
 }
 
 
@@ -509,12 +584,36 @@ Time::operator+=(const double sec)
 
 /** -= operator.
  * @param t the other time
- * @return reference to this instance
+ * @return reference to this instance  after subtraction 
  */
 Time &
 Time::operator-=(const Time& t)
 {
   *this = *this - t;
+  return *this;
+}
+
+
+/** -= operator.
+ * @param sec seconds to subtract
+ * @return reference to this instance  after subtraction 
+ */
+Time &
+Time::operator-=(const double sec)
+{
+  *this = *this - sec;
+  return *this;
+}
+
+
+/** -= operator.
+ * @param usec microseconds to subtract
+ * @return reference to this instance after subtraction 
+ */
+Time &
+Time::operator-=(const long int usec)
+{
+  *this = *this - usec;
   return *this;
 }
 

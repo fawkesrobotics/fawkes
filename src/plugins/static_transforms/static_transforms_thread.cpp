@@ -39,7 +39,7 @@ using namespace fawkes;
 /** Constructor. */
 StaticTransformsThread::StaticTransformsThread()
   : Thread("StaticTransformsThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     TransformAspect(TransformAspect::ONLY_PUBLISHER, "static")
 {
   __last_update = new Time();

@@ -29,7 +29,9 @@
 #include "filters/min_circle.h"
 #include "filters/circle_sector.h"
 #include "filters/min_merge.h"
-#include "filters/projection.h"
+#ifdef HAVE_TF
+#  include "filters/projection.h"
+#endif
 
 #include <core/threading/barrier.h>
 #include <core/threading/mutex.h>
@@ -40,6 +42,7 @@
 
 #include <cstring>
 #include <memory>
+#include <cstdio>
 
 using namespace fawkes;
 
@@ -98,9 +101,6 @@ LaserFilterThread::init()
 	throw Exception("Filter value %s is not a string", i->path());
       }
 
-      logger->log_debug(name(), "Adding filter %s (%s)",
-			filter_name.c_str(), i->get_string().c_str());
-
       filters[filter_name] = i->get_string();
     }
     if (filters.empty()) {
@@ -109,15 +109,20 @@ LaserFilterThread::init()
 
     if (filters.size() == 1) {
       std::string filter_name = filters.begin()->first;
+      logger->log_debug(name(), "Adding filter %s (%s)",
+			filter_name.c_str(), filters[filter_name].c_str());
       __filter = create_filter(filters[filter_name], fpfx + filter_name + "/",
 			       __in[0].is_360 ? 360 : 720, __in_bufs);
     } else {
-      LaserDataFilterCascade *cascade = new LaserDataFilterCascade(__in[0].is_360 ? 360 : 720,
-								   __in_bufs);
+      LaserDataFilterCascade *cascade =
+        new LaserDataFilterCascade(__in[0].is_360 ? 360 : 720, __in_bufs);
 
       try {
 	std::map<std::string, std::string>::iterator f;
 	for (f = filters.begin(); f != filters.end(); ++f) {
+          logger->log_debug(name(), "Adding filter %s (%s) %zu %zu",
+                            f->first.c_str(), f->second.c_str(), __in_bufs.size(),
+                            cascade->get_out_vector().size());
 	  cascade->add_filter(create_filter(f->second, fpfx + f->first + "/",
 					    cascade->get_out_data_size(),
 					    cascade->get_out_vector()));
@@ -194,17 +199,33 @@ LaserFilterThread::loop()
   }
 
   // Read input interfaces
-  std::vector<LaserInterface>::iterator i;
-  for (i = __in.begin(); i != __in.end(); ++i) {
-    i->interface->read();
+  const size_t in_num = __in.size();
+  for (size_t i = 0; i != in_num; ++i) {
+    __in[i].interface->read();
+    if (__in[i].is_360) {
+      __in_bufs[i]->frame = __in[i].interface_typed.as360->frame();
+    } else {
+      __in_bufs[i]->frame = __in[i].interface_typed.as720->frame();
+    }
   }
 
   // Filter!
-  __filter->filter();
+  try {
+    __filter->filter();
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Filtering failed, exception follows");
+    logger->log_warn(name(), e);
+  }
 
   // Write output interfaces
-  for (i = __out.begin(); i != __out.end(); ++i) {
-    i->interface->write();
+  const size_t num = __out.size();
+  for (size_t i = 0; i < num; ++i) {
+    if (__out[i].is_360) {
+      __out[i].interface_typed.as360->set_frame(__out_bufs[i]->frame.c_str());
+    } else {
+      __out[i].interface_typed.as720->set_frame(__out_bufs[i]->frame.c_str());
+    }
+    __out[i].interface->write();
   }
 
   if (__wait_barrier) {
@@ -239,7 +260,7 @@ LaserFilterThread::wait_done()
 void
 LaserFilterThread::open_interfaces(std::string prefix,
 				   std::vector<LaserInterface> &ifs,
-				   std::vector<float *> &bufs, bool writing)
+				   std::vector<LaserDataFilter::Buffer *> &bufs, bool writing)
 {
   std::auto_ptr<Configuration::ValueIterator> in(config->search(prefix.c_str()));
   while (in->next()) {
@@ -292,8 +313,10 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser360Interface *laser360 = 
 	    blackboard->open_for_writing<Laser360Interface>(ifs[i].id.c_str());
 
+          ifs[i].interface_typed.as360 = laser360;
 	  ifs[i].interface = laser360;
-	  bufs[i] = laser360->distances();
+          bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->values = laser360->distances();
 	  
 	} else {
 	  if (must_360) {
@@ -305,8 +328,10 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser720Interface *laser720 = 
 	    blackboard->open_for_writing<Laser720Interface>(ifs[i].id.c_str());
 
+          ifs[i].interface_typed.as720 = laser720;
 	  ifs[i].interface = laser720;
-	  bufs[i] = laser720->distances();
+          bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->values = laser720->distances();
 	}
       }
     } else {
@@ -316,16 +341,22 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser360Interface *laser360 =
 	    blackboard->open_for_reading<Laser360Interface>(ifs[i].id.c_str());
 
+          ifs[i].interface_typed.as360 = laser360;
 	  ifs[i].interface = laser360;
-	  bufs[i] = laser360->distances();
+          bufs[i] = new LaserDataFilter::Buffer();
+          bufs[i]->frame  = laser360->frame();
+	  bufs[i]->values = laser360->distances();
 	  
 	} else {
 	  logger->log_debug(name(), "Opening reading Laser720Interface::%s", ifs[i].id.c_str());
 	  Laser720Interface *laser720 =
 	    blackboard->open_for_reading<Laser720Interface>(ifs[i].id.c_str());
 
+          ifs[i].interface_typed.as720 = laser720;
 	  ifs[i].interface = laser720;
-	  bufs[i] = laser720->distances();
+          bufs[i] = new LaserDataFilter::Buffer();
+          bufs[i]->frame  = laser720->frame();
+	  bufs[i]->values = laser720->distances();
 	}
       }
     }
@@ -342,7 +373,8 @@ LaserFilterThread::open_interfaces(std::string prefix,
 
 LaserDataFilter *
 LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
-				 unsigned int in_data_size, std::vector<float *> &inbufs)
+				 unsigned int in_data_size,
+                                 std::vector<LaserDataFilter::Buffer *> &inbufs)
 {
   if (filter_type == "720to360") {
     bool average = false;
@@ -367,21 +399,23 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
   } else if (filter_type == "min_merge") {
     return new LaserMinMergeDataFilter(in_data_size, inbufs);
   } else if (filter_type == "projection") {
-    const LaserProjectionDataFilter::Rotation laser_rot(config->get_float((prefix + "x_rot_laser").c_str()),
-                                                  config->get_float((prefix + "y_rot_laser").c_str()),
-                                                  config->get_float((prefix + "z_rot_laser").c_str()));
-    const LaserProjectionDataFilter::Rotation fixture_rot(config->get_float((prefix + "x_rot_fixture").c_str()),
-                                                          config->get_float((prefix + "y_rot_fixture").c_str()),
-                                                          config->get_float((prefix + "z_rot_fixture").c_str()));
-    const LaserProjectionDataFilter::Translation trans(config->get_float((prefix + "x_trans").c_str()),
-                                                       config->get_float((prefix + "y_trans").c_str()),
-                                                       config->get_float((prefix + "z_trans").c_str()));
-    const LaserProjectionDataFilter::Rectangle robot_rect(config->get_float((prefix + "x_min").c_str()),
-                                                          config->get_float((prefix + "x_max").c_str()),
-                                                          config->get_float((prefix + "y_min").c_str()),
-                                                          config->get_float((prefix + "y_max").c_str()));
-    const float z_threshold = config->get_float((prefix + "z_threshold").c_str());
-    return new LaserProjectionDataFilter(laser_rot, fixture_rot, trans, robot_rect, z_threshold, in_data_size, inbufs);
+#ifdef HAVE_TF
+    const float not_from_x = config->get_float((prefix + "not_from_x").c_str());
+    const float not_to_x = config->get_float((prefix + "not_to_x").c_str());
+    const float not_from_y = config->get_float((prefix + "not_from_y").c_str());
+    const float not_to_y = config->get_float((prefix + "not_to_y").c_str());
+    const float only_from_z = config->get_float((prefix + "only_from_z").c_str());
+    const float only_to_z = config->get_float((prefix + "only_to_z").c_str());
+    const std::string frame =
+      config->get_string((prefix + "target_frame").c_str());
+    return new LaserProjectionDataFilter(tf_listener, frame,
+                                         not_from_x, not_to_x,
+                                         not_from_y, not_to_y,
+                                         only_from_z, only_to_z,
+                                         in_data_size, inbufs);
+#else
+    throw Exception("Projection filter unavailable, tf missing");
+#endif
   } else {
     throw Exception("Unknown filter type %s", filter_type.c_str());
   }

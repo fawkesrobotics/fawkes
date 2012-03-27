@@ -6,6 +6,9 @@
       This interface provides access to data of a laser scanner that produces
       720 beams per scan.
     </comment>
+    <field type="string" length="32" name="frame">
+      Coordinate frame in which the data is presented.
+    </field>
     <field type="float" length="720" name="distances">
       The distances in meter of the beams.
     </field>

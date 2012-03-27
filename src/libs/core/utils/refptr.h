@@ -127,6 +127,13 @@ class RefPtr
    */
   inline T_CppObject* operator->() const;
 
+  /** Get underlying pointer.
+   * Use with care!
+   * @return pointer to encapsulated object
+   */
+  inline T_CppObject* operator*() const;
+
+
   /** Test whether the RefPtr<> points to any underlying instance.
    *
    * Mimics usage of ordinary pointers:
@@ -139,6 +146,12 @@ class RefPtr
 
   /// Set underlying instance to 0, decrementing reference count of existing instance appropriately.
   inline void clear();
+
+  /** Reset pointer.
+   * Set underlying instance to 0, decrementing reference count of
+   * existing instance appropriately.
+   */
+  inline void reset();
 
 
   /** Dynamic cast to derived class.
@@ -192,6 +205,11 @@ class RefPtr
    */
   inline int *  refcount_ptr() const { return __ref_count; }
 
+  /** Get current reference count.
+   * @return current number of owners referencing this RefPtr.
+   */
+  inline int use_count() const { return *__ref_count; }
+
   /** For use only in the internal implementation of sharedptr.
    * Get reference mutex.
    * @return pointer to refcount mutex
@@ -212,6 +230,13 @@ private:
 
 template <class T_CppObject> inline
 T_CppObject* RefPtr<T_CppObject>::operator->() const
+{
+  return __cpp_object;
+}
+
+
+template <class T_CppObject> inline
+T_CppObject* RefPtr<T_CppObject>::operator*() const
 {
   return __cpp_object;
 }
@@ -412,6 +437,13 @@ RefPtr<T_CppObject>::operator bool() const
 
 template <class T_CppObject> inline
 void RefPtr<T_CppObject>::clear()
+{
+  RefPtr<T_CppObject> temp; // swap with an empty RefPtr<> to clear *this
+  this->swap(temp);
+}
+
+template <class T_CppObject> inline
+void RefPtr<T_CppObject>::reset()
 {
   RefPtr<T_CppObject> temp; // swap with an empty RefPtr<> to clear *this
   this->swap(temp);

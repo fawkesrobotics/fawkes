@@ -274,6 +274,20 @@ TimeTracker::ping_end(unsigned int cls)
 }
 
 
+/** End of given class task without recording.
+ * End the duration but do not take the time into the result measurements.
+ * @param cls class ID to signal end of task
+ */
+void
+TimeTracker::ping_abort(unsigned int cls)
+{
+  if (cls >= __class_times.size()) return;
+
+  free(__class_times[cls].back());
+  __class_times[cls].pop_back();
+}
+
+
 void
 TimeTracker::average_and_deviation(vector<struct timeval *> &values,
 				   double &average_sec, double &average_ms,

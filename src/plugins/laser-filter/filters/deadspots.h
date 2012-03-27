@@ -39,14 +39,14 @@ class LaserDeadSpotsDataFilter : public LaserDataFilter
  public:
   LaserDeadSpotsDataFilter(fawkes::Configuration *config, fawkes::Logger *logger,
 			   std::string prefix,
-			   unsigned int data_size, std::vector<float *> in);
+			   unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
   ~LaserDeadSpotsDataFilter();
 
   void filter();
 
  private:
   void calc_spots();
-  void set_out_vector(std::vector<float *> &out);
+  void set_out_vector(std::vector<LaserDataFilter::Buffer *> &out);
 
 
  private:

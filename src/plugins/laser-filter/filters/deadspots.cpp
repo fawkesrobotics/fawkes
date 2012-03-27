@@ -55,7 +55,7 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(fawkes::Configuration *config
 						   fawkes::Logger *logger,
 						   std::string prefix,
 						   unsigned int in_data_size,
-						   std::vector<float *> in)
+						   std::vector<LaserDataFilter::Buffer *> &in)
   : LaserDataFilter(in_data_size, in, in.size())
 {
   __logger = logger;
@@ -117,7 +117,7 @@ LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
 
 
 void
-LaserDeadSpotsDataFilter::set_out_vector(std::vector<float *> &out)
+LaserDeadSpotsDataFilter::set_out_vector(std::vector<LaserDataFilter::Buffer *> &out)
 {
   LaserDataFilter::set_out_vector(out);
   calc_spots();
@@ -147,8 +147,9 @@ LaserDeadSpotsDataFilter::filter()
 {
   const unsigned int vecsize = std::min(in.size(), out.size());
   for (unsigned int a = 0; a < vecsize; ++a) {
-    float *inbuf  = in[a];
-    float *outbuf = out[a];
+    out[a]->frame = in[a]->frame;
+    float *inbuf  = in[a]->values;
+    float *outbuf = out[a]->values;
 
     unsigned int start = 0;
     for (unsigned int i = 0; i < __num_spots; ++i) {

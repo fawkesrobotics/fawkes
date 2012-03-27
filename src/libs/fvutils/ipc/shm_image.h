@@ -44,6 +44,7 @@ namespace firevision {
 /** Shared memory header struct for FireVision images. */
 typedef struct {
   char          image_id[IMAGE_ID_MAX_LENGTH];/**< image ID */
+  char          frame_id[FRAME_ID_MAX_LENGTH];/**< coordinate frame ID */
   unsigned int  colorspace;		/**< color space */
   unsigned int  width;			/**< width */
   unsigned int  height;			/**< height */
@@ -88,20 +89,24 @@ class SharedMemoryImageBufferHeader
   virtual bool         operator==(const fawkes::SharedMemoryHeader &s) const;
 
   void                 set_image_id(const char *image_id);
+  void                 set_frame_id(const char *frame_id);
   colorspace_t         colorspace() const;
   unsigned int         width() const;
   unsigned int         height() const;
   const char *         image_id() const;
+  const char *         frame_id() const;
 
   SharedMemoryImageBuffer_header_t * raw_header();
 
  private:
   char          *_image_id;
+  char          *_frame_id;
   colorspace_t   _colorspace;
   unsigned int   _width;
   unsigned int   _height;
 
   char          *_orig_image_id;
+  char          *_orig_frame_id;
   colorspace_t   _orig_colorspace;
   unsigned int   _orig_width;
   unsigned int   _orig_height;
@@ -138,6 +143,7 @@ class SharedMemoryImageBuffer : public fawkes::SharedMemory
   ~SharedMemoryImageBuffer();
 
   const char *     image_id() const;
+  const char *     frame_id() const;
   unsigned char *  buffer() const;
   colorspace_t     colorspace() const;
   unsigned int     width() const;
@@ -162,6 +168,7 @@ class SharedMemoryImageBuffer : public fawkes::SharedMemory
   void             set_circle(int x, int y, unsigned int r);
   void             set_circle_found(bool found);
   bool             set_image_id(const char *image_id);
+  void             set_frame_id(const char *frame_id);
 
   fawkes::Time     capture_time() const;
   void             capture_time(long int *sec, long int *usec) const;

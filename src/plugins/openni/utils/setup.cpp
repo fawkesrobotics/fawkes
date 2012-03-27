@@ -103,5 +103,63 @@ setup_map_generator(xn::MapGenerator &generator,
 }
 
 
+/** Setup alternate viewpoint for generator.
+ * This function checks if the @p gen generator supports @p target
+ * as its alternative viewpoint. If it is supported it is setup. If not,
+ * an exception is thrown.
+ * @param gen generator which to setup to the alternate viewpoint
+ * @param target generator whose frame to use as alternate viewpoint
+ */
+void
+setup_alternate_viewpoint(xn::Generator &gen, xn::Generator &target)
+{
+  if (gen.GetAlternativeViewPointCap().IsViewPointAs(target)) {
+    // already setup
+    return;
+  }
+
+  if (! gen.GetAlternativeViewPointCap().IsViewPointSupported(target)) {
+    throw Exception("Alternate viewpoint '%s' is not supported by %s",
+                    target.GetName(), gen.GetName());
+  }
+
+  XnStatus status = gen.GetAlternativeViewPointCap().SetViewPoint(target);
+
+  if (status != XN_STATUS_OK) {
+    throw Exception("Setting alternate viewpoint '%s' by %s failed: %s",
+                    target.GetName(), gen.GetName(), xnGetStatusString(status));
+  }
+}
+
+
+/** Setup synchronization of two generators.
+ * @param gen generator which to setup synchronization for
+ * @param target generator whose frame to use as synchronization source
+ */
+void
+setup_synchronization(xn::Generator &gen, xn::Generator &target)
+{
+  if (gen.GetFrameSyncCap().IsFrameSyncedWith(target)) {
+    // already setup
+    return;
+  }
+  if (! gen.IsCapabilitySupported(XN_CAPABILITY_FRAME_SYNC)) {
+    throw Exception("Generator '%s' does not support frame synchronization",
+                    gen.GetName());
+  }
+
+  if (! gen.GetFrameSyncCap().CanFrameSyncWith(target)) {
+    throw Exception("Generator '%s' cannot synchronize with '%s'",
+                    gen.GetName(), target.GetName());
+  }
+
+  XnStatus status = gen.GetFrameSyncCap().FrameSyncWith(target);
+
+  if (status != XN_STATUS_OK) {
+    throw Exception("Setting synchronization of '%s' with '%s' failed: %s",
+                    target.GetName(), gen.GetName(), xnGetStatusString(status));
+  }
+}
+
 } // end namespace fawkes::openni
 } // end namespace fawkes

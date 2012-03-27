@@ -33,8 +33,6 @@
 
 #include <XnCppWrapper.h>
 
-#include <map>
-
 namespace firevision {
   class SharedMemoryImageBuffer;
 }
@@ -60,13 +58,10 @@ class OpenNiImageThread
 
  private:
   xn::ImageGenerator                  *__image_gen;
-  xn::DepthGenerator                  *__depth_gen;
-
   xn::ImageMetaData                   *__image_md;
-  xn::DepthMetaData                   *__depth_md;
 
-  firevision::SharedMemoryImageBuffer *__image_buf;
-  firevision::SharedMemoryImageBuffer *__depth_buf;
+  firevision::SharedMemoryImageBuffer *__image_buf_yuv;
+  firevision::SharedMemoryImageBuffer *__image_buf_rgb;
 
   typedef enum {
     DEBAYER_BILINEAR,
@@ -75,14 +70,10 @@ class OpenNiImageThread
   } CopyMode;
   CopyMode                             __cfg_copy_mode;
 
-  size_t                               __depth_bufsize;
-
   unsigned short int                   __usb_vendor;
   unsigned short int                   __usb_product;
   unsigned int                         __image_width;
   unsigned int                         __image_height;
-  unsigned int                         __depth_width;
-  unsigned int                         __depth_height;
 };
 
 #endif

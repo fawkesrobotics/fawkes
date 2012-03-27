@@ -28,7 +28,8 @@
 #include <list>
 
 #define MAGIC_TOKEN_SIZE 16
-#define MAXNUM_SHM_SEGMS 32
+#define MAXNUM_SHM_SEGMS 64
+#define DEFAULT_SHM_NAME "/fawkes-shmem-registry"
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -56,6 +57,8 @@ class SharedMemoryRegistry
 
   void add_segment(int shmid, const char *magic_token);
   void remove_segment(int shmid);
+
+  static void cleanup(const char *name = 0);
 
  private:
   typedef struct {

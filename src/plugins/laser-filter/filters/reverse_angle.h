@@ -28,7 +28,7 @@
 class LaserReverseAngleDataFilter : public LaserDataFilter
 {
  public:
-  LaserReverseAngleDataFilter(unsigned int data_size, std::vector<float *> in);
+  LaserReverseAngleDataFilter(unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
 
   void filter();
 

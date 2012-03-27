@@ -83,6 +83,8 @@ class Thread {
   void wakeup();
   void wakeup(Barrier *barrier);
 
+  void wait_loop_done();
+
   OpMode        opmode() const;
   pthread_t     thread_id() const;
   bool          started() const;
@@ -155,6 +157,10 @@ class Thread {
   WaitCondition *__sleep_condition;
   unsigned int   __pending_wakeups;
   Barrier       *__barrier;
+
+  bool           __loop_done;
+  Mutex         *__loop_done_mutex;
+  WaitCondition *__loop_done_waitcond;
 
   bool           __prepfin_hold;
   Mutex         *__prepfin_hold_mutex;

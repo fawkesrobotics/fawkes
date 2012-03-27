@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="Position3DInterface" author="Tim Niemueller" year="2011">
+  <data>
+    <comment>
+      Storage for a 3D pose in Euclidean space.
+    </comment>
+    <field type="string" length="32" name="frame">
+      Reference coordinate frame for the data.
+    </field>
+    <field type="int32" name="visibility_history">
+      The visibilitiy history indicates the number of consecutive positive or negative
+      sightings. If the history is negative, there have been as many negative sightings
+      (object not visible) as the absolute value of the history. A positive value denotes
+      as many positive sightings. 0 shall only be used during the initialization of the
+      interface or if the visibility history is not updated.
+    </field>
+    <field type="double" length="4" name="rotation">
+      Rotation quaternion relative to reference frame, ordered as (x, y, z, w).
+    </field>
+    <field type="double" length="3" name="translation">
+      Translation vector from the reference frame's origin, ordered as (x, y, z).
+    </field>
+  </data>
+</interface>

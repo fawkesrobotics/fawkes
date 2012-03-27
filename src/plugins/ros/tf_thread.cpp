@@ -37,7 +37,7 @@ using namespace fawkes;
 /** Constructor. */
 RosTfThread::RosTfThread()
   : Thread("RosTfThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     TransformAspect(TransformAspect::ONLY_PUBLISHER, "ROS"),
     BlackBoardInterfaceListener("RosTfThread")
 {

@@ -29,15 +29,27 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
+#ifdef HAVE_PCL
+#  include <aspect/pointcloud.h>
+#  include <pcl/point_cloud.h>
+#  include <pcl/point_types.h>
+#  include <fvutils/adapters/pcl.h>
+#endif
 #include <plugins/openni/aspect/openni.h>
 
 #include <XnCppWrapper.h>
 
 #include <map>
 
+namespace fawkes {
+  class Time;
+}
+
 namespace firevision {
   class SharedMemoryImageBuffer;
 }
+
+class OpenNiImageThread;
 
 class OpenNiPointCloudThread
 : public fawkes::Thread,
@@ -45,10 +57,13 @@ class OpenNiPointCloudThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
+#ifdef HAVE_PCL
+  public fawkes::PointCloudAspect,
+#endif
   public fawkes::OpenNiAspect
 {
  public:
-  OpenNiPointCloudThread();
+  OpenNiPointCloudThread(OpenNiImageThread *img_thread);
   virtual ~OpenNiPointCloudThread();
 
   virtual void init();
@@ -59,13 +74,34 @@ class OpenNiPointCloudThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  xn::DepthGenerator                  *__depth_gen;
-  xn::DepthMetaData                   *__depth_md;
+  void fill_xyz_no_pcl(fawkes::Time &ts, const XnDepthPixel * const data);
+  void fill_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel * const data);
+  void fill_xyz_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel * const data);
+  void fill_rgb_no_pcl();
 
-  firevision::SharedMemoryImageBuffer *__pcl_buf;
+#ifdef HAVE_PCL
+  void fill_xyz(fawkes::Time &ts, const XnDepthPixel * const depth_data);
+  void fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data);
+  void fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data);
+  void fill_rgb(pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb);
+#endif
 
-  unsigned int __plane_size;
+ private:
+  OpenNiImageThread *__img_thread;
+
+  xn::DepthGenerator  *__depth_gen;
+  xn::ImageGenerator  *__image_gen;
+  xn::DepthMetaData   *__depth_md;
+
+  bool         __cfg_register_depth_image;
+
+  firevision::SharedMemoryImageBuffer *__pcl_xyz_buf;
+  firevision::SharedMemoryImageBuffer *__pcl_xyzrgb_buf;
+
+  firevision::SharedMemoryImageBuffer *__image_rgb_buf;
+
   float        __focal_length;
+  float        __foc_const; // focal length constant used in conversion
   float        __center_x;
   float        __center_y;
   unsigned int __width;
@@ -73,6 +109,15 @@ class OpenNiPointCloudThread
 
   XnUInt64     __no_sample_value;
   XnUInt64     __shadow_value;
+
+  fawkes::Time *__capture_start;
+
+#ifdef HAVE_PCL
+  bool         __cfg_generate_pcl;
+
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> >    __pcl_xyz;
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > __pcl_xyzrgb;
+#endif
 };
 
 #endif

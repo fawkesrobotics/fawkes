@@ -273,6 +273,9 @@ OpenNiUserTrackerThread::loop()
     } else if (new_state == HumanSkeletonInterface::STATE_DETECTING_POSE) {
       update_com(i->first, i->second);
       needs_write = true;
+    } else if (new_state == HumanSkeletonInterface::STATE_CALIBRATING) {
+      update_com(i->first, i->second);
+      needs_write = true;
     }
 
     if (needs_write) {

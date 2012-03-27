@@ -23,11 +23,16 @@
 #ifndef __PLUGINS_LASER_FILTER_FILTER_THREAD_H_
 #define __PLUGINS_LASER_FILTER_FILTER_THREAD_H_
 
+#include "filters/filter.h"
+
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 
 #include <string>
 #include <list>
@@ -38,13 +43,14 @@ namespace fawkes {
   class Laser720Interface;
 }
 
-class LaserDataFilter;
-
 class LaserFilterThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::BlackBoardAspect
 {
  public:
@@ -63,15 +69,19 @@ class LaserFilterThread
   typedef struct {
     bool               is_360;
     std::string        id;
+    union {
+      fawkes::Laser360Interface *as360;
+      fawkes::Laser720Interface *as720;
+    } interface_typed;
     fawkes::Interface *interface;
   } LaserInterface;
 
   void open_interfaces(std::string prefix, std::vector<LaserInterface> &ifs,
-		       std::vector<float *> &bufs, bool writing);
+		       std::vector<LaserDataFilter::Buffer *> &bufs, bool writing);
 
   LaserDataFilter *  create_filter(std::string filter_type, std::string prefix,
 				   unsigned int in_data_size,
-				   std::vector<float *> &inbufs);
+				   std::vector<LaserDataFilter::Buffer *> &inbufs);
 
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -81,8 +91,8 @@ class LaserFilterThread
   std::vector<LaserInterface> __in;
   std::vector<LaserInterface> __out;
 
-  std::vector<float *>  __in_bufs;
-  std::vector<float *>  __out_bufs;
+  std::vector<LaserDataFilter::Buffer *>  __in_bufs;
+  std::vector<LaserDataFilter::Buffer *>  __out_bufs;
 
   LaserDataFilter *__filter;
 

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  image_plugin.h - Plugin to provide images acquired using OpenNI
+ *  laser_pointcloud_plugin.cpp - Convert laser data to pointclouds
  *
- *  Created: Thu Mar 17 13:39:04 2011
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Nov 15 00:52:44 2011
+ *  Copyright  2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,15 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_IMAGE_PLUGIN_H_
-#define __PLUGINS_OPENNI_IMAGE_PLUGIN_H_
-
 #include <core/plugin.h>
 
-class OpenNiImagePlugin : public fawkes::Plugin
+#include "laser_pointcloud_thread.h"
+
+using namespace fawkes;
+
+/** Plugin to convert laser data to point clouds.
+ * @author Tim Niemueller
+ */
+class LaserPointCloudPlugin : public fawkes::Plugin
 {
  public:
-  OpenNiImagePlugin(fawkes::Configuration *config);
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  LaserPointCloudPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new LaserPointCloudThread());
+  }
 };
 
-#endif
+PLUGIN_DESCRIPTION("Converts laser data to point clouds")
+EXPORT_PLUGIN(LaserPointCloudPlugin)

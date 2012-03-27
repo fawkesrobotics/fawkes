@@ -69,9 +69,9 @@ time_diff_sec(const long int a_sec, const long int a_usec,
  * @return time in microseconds
  */
 inline long int
-time_sec_to_usec(float sec)
+time_sec_to_usec(double sec)
 {
-  return (long)roundf(sec * 1000000.);
+  return (long)round(sec * 1000000.);
 }
 
 /** Get difference between two time structs in microseconds.
@@ -130,14 +130,19 @@ class Time
   Time & stamp_systime();
 
   Time   operator+(const double sec) const;
+  Time   operator+(const long int usec) const;
   Time   operator+(const Time& t) const;
   Time   operator+(const Time* t) const;
   Time   operator-(const Time& t) const;
-  double  operator-(const Time* t) const;
+  double operator-(const Time* t) const;
+  Time   operator-(const long int usec) const;
+  Time   operator-(const double sec) const;
   Time & operator+=(const long int usec);
   Time & operator+=(const Time& t);
   Time & operator+=(const double sec);
   Time & operator-=(const Time& t);
+  Time & operator-=(const double sec);
+  Time & operator-=(const long int usec);
   Time & operator=(const Time& t);
   bool   operator==(const Time& t) const;
   bool   operator==(const Time* t) const;

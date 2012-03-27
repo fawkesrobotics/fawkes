@@ -4,6 +4,9 @@ namespace fawkes {
 class Laser720Interface : public Interface
 {
 
+  char * frame();
+  void set_frame(const char * new_frame);
+  int maxlenof_frame() const;
   float distances(int index);
   void set_distances(unsigned int index, const float new_distances);
   int maxlenof_distances() const;

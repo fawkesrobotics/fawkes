@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  pointcloud_plugin.h - Plugin to provide point clouds using OpenNI
+ *  pc_frombuf_plugin.cpp - Create PCL point clouds from OpenNI buffer
  *
- *  Created: Fri Mar 25 23:47:35 2011
+ *  Created: Fri Dec 02 19:53:18 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,15 +20,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_POINTCLOUD_PLUGIN_H_
-#define __PLUGINS_OPENNI_POINTCLOUD_PLUGIN_H_
-
 #include <core/plugin.h>
+#include "pcl_frombuf_thread.h"
 
-class OpenNiPointCloudPlugin : public fawkes::Plugin
+using namespace fawkes;
+
+/** Create PCL from pointcloud buffer.
+ * @author Tim Niemueller
+ */
+class OpenNiPclOnlyPlugin : public fawkes::Plugin
 {
  public:
-  OpenNiPointCloudPlugin(fawkes::Configuration *config);
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  OpenNiPclOnlyPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new OpenNiPclOnlyThread());
+  }
 };
 
-#endif
+
+PLUGIN_DESCRIPTION("Generate PCL pointclouds from buffer")
+EXPORT_PLUGIN(OpenNiPclOnlyPlugin)
+

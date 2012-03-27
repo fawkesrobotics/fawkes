@@ -126,7 +126,9 @@ class PTUJoystickControl
 
     if (!__ptu_if) {
       throw Exception("No suitable PanTiltInterface found");
-    }
+    } 
+
+    __resolution = 0.1f;
   }
 
 
@@ -178,16 +180,25 @@ class PTUJoystickControl
 	  if (key == 0) continue;
 
           if (key == tilt_up) {
-            new_tilt = std::min(tilt + 0.1f, __ptu_if->max_tilt());
+            new_tilt = std::min(tilt + __resolution, __ptu_if->max_tilt());
           } else if (key == tilt_down) {
-            new_tilt = std::max(tilt - 0.1f, __ptu_if->min_tilt());
+            new_tilt = std::max(tilt - __resolution, __ptu_if->min_tilt());
           } else if (key == 67) {
-            new_pan = std::max(pan - 0.1f, __ptu_if->min_pan());
+            new_pan = std::max(pan - __resolution, __ptu_if->min_pan());
           } else if (key == 68) {
-            new_pan = std::min(pan + 0.1f, __ptu_if->max_pan());
+            new_pan = std::min(pan + __resolution, __ptu_if->max_pan());
           } else continue;
 
 	}
+      } else if (key == '0') {
+        new_pan = new_tilt = 0.f;
+      } else if (key == '9') {
+        new_pan = 0;
+        new_tilt = M_PI / 2.;
+      } else if (key == 'r') {
+        __resolution = 0.1f;
+      } else if (key == 'R') {
+        __resolution = 0.01f;
       } else if (key == '+') {
         new_speed = std::min(speed + 0.1, 1.0);
       } else if (key == '-') {
@@ -224,6 +235,7 @@ class PTUJoystickControl
   ArgumentParser __argp;
   BlackBoard *__bb;
   PanTiltInterface *__ptu_if;
+  float __resolution;
 };
 
 

@@ -44,6 +44,9 @@ void get_resolution(fawkes::Configuration *config,
 void setup_map_generator(xn::MapGenerator &generator,
 			 fawkes::Configuration *config);
 
+void setup_alternate_viewpoint(xn::Generator &gen, xn::Generator &target);
+void setup_synchronization(xn::Generator &gen, xn::Generator &target);
+
 /** Find existing or create new node.
  * This method will first try to find an existing node of the given type.
  * If this fails, it tries to create a new node of the desired type (leaving
@@ -57,7 +60,7 @@ void setup_map_generator(xn::MapGenerator &generator,
  */
 template<class ProdNodeClass>
 void find_or_create_node(fawkes::LockPtr<xn::Context> &openni,
-			 XnProductionNodeType type, ProdNodeClass &node)
+			 XnProductionNodeType type, ProdNodeClass *node)
 {
   XnStatus st;
   if ((st = openni->FindExistingNode(type, *node)) != XN_STATUS_OK) {

@@ -66,7 +66,7 @@ int  init(InitOptions options);
 void run();
 void cleanup();
 
-void print_usage(const char **progname);
+void print_usage(const char *progname);
 
 } // end namespace runtime
 } // end namespace fawkes

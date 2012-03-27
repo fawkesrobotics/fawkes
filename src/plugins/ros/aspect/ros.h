@@ -26,7 +26,6 @@
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
-#include <ros/node_handle.h>
 
 namespace ros {
   class NodeHandle;

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  handtracker_plugin.h - Plugin to track hands using OpenNI
+ *  pcl_plugin.cpp - Exchange point clouds between Fawkes and ROS
  *
- *  Created: Thu Mar 31 16:38:37 2011 (RoboCup German Open 2011)
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Nov 07 02:21:36 2011
+ *  Copyright  2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,15 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_HANDTRACKER_PLUGIN_H_
-#define __PLUGINS_OPENNI_HANDTRACKER_PLUGIN_H_
-
 #include <core/plugin.h>
 
-class OpenNiHandTrackerPlugin : public fawkes::Plugin
+#include "pcl_thread.h"
+
+using namespace fawkes;
+
+/** Plugin exchange transforms between Fawkes and ROS.
+ * @author Tim Niemueller
+ */
+class RosPointCloudPlugin : public fawkes::Plugin
 {
  public:
-  OpenNiHandTrackerPlugin(fawkes::Configuration *config);
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  RosPointCloudPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new RosPointCloudThread());
+  }
 };
 
-#endif
+PLUGIN_DESCRIPTION("ROS point cloud exchange plugin")
+EXPORT_PLUGIN(RosPointCloudPlugin)

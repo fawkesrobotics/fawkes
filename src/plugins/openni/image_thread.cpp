@@ -28,6 +28,7 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/bayer.h>
 #include <fvutils/color/yuv.h>
+#include <fvutils/color/yuvrgb.h>
 
 #include <memory>
 
@@ -36,7 +37,7 @@ using namespace firevision;
 
 /** @class OpenNiImageThread "image_thread.h"
  * OpenNI Image Provider Thread.
- * This thread provides RGB and depth images from the camera via a
+ * This thread provides YUV and RGB images from the camera via
  * SharedMemoryImageBuffer to other FireVision plugins.
  *
  * @author Tim Niemueller
@@ -45,7 +46,7 @@ using namespace firevision;
 /** Constructor. */
 OpenNiImageThread::OpenNiImageThread()
   : Thread("OpenNiImageThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
 }
 
@@ -66,16 +67,11 @@ OpenNiImageThread::init()
   __image_gen = new xn::ImageGenerator();
   std::auto_ptr<xn::ImageGenerator> imagegen_autoptr(__image_gen);
 
-  __depth_gen = new xn::DepthGenerator();
-  std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(__depth_gen);
-
   XnStatus st;
 
   fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_IMAGE, __image_gen);
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
 
   fawkes::openni::setup_map_generator(*__image_gen, config);
-  fawkes::openni::setup_map_generator(*__depth_gen, config);
 
   __usb_vendor = 0;
   __usb_product = 0;
@@ -153,15 +149,11 @@ OpenNiImageThread::init()
   }
 
   __image_md = new xn::ImageMetaData();
-  __depth_md = new xn::DepthMetaData();
 
   __image_gen->GetMetaData(*__image_md);
-  __depth_gen->GetMetaData(*__depth_md);
 
   __image_width  = __image_md->XRes();
   __image_height = __image_md->YRes();
-  __depth_width  = __image_md->XRes();
-  __depth_height = __image_md->YRes();
 
   /*
   const char *pixel_format = "unknown";
@@ -181,20 +173,18 @@ OpenNiImageThread::init()
 		    pixel_format, __image_md->XRes(), __image_md->YRes(), input_format);
   */
 
-  __image_buf = new SharedMemoryImageBuffer("openni-image", YUV422_PLANAR,
-					    __image_md->XRes(),
-					    __image_md->YRes());
+  __image_buf_yuv =
+    new SharedMemoryImageBuffer("openni-image-yuv", YUV422_PLANAR,
+                                __image_md->XRes(), __image_md->YRes());
 
-  __depth_buf = new SharedMemoryImageBuffer("openni-depth", RAW16,
-  					    __depth_md->XRes(), __depth_md->YRes());
-  __depth_bufsize = colorspace_buffer_size(RAW16,
-					   __depth_md->XRes(), __depth_md->YRes());
+  __image_buf_rgb =
+    new SharedMemoryImageBuffer("openni-image-rgb", RGB,
+                                __image_md->XRes(), __image_md->YRes());
+
 
   __image_gen->StartGenerating();
-  __depth_gen->StartGenerating();
 
   imagegen_autoptr.release();
-  depthgen_autoptr.release();
 }
 
 
@@ -204,13 +194,9 @@ OpenNiImageThread::finalize()
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
   delete __image_gen;
-  delete __depth_gen;
-
   delete __image_md;
-  delete __depth_md;
-
-  delete __image_buf;
-  delete __depth_buf;
+  delete __image_buf_yuv;
+  delete __image_buf_rgb;
 }
 
 
@@ -219,26 +205,34 @@ OpenNiImageThread::loop()
 {
   MutexLocker lock(openni.objmutex_ptr());
   bool is_image_new = __image_gen->IsDataNew();
-  bool is_depth_new = __depth_gen->IsDataNew();
+  __image_gen->GetMetaData(*__image_md);
   const XnUInt8 * const      image_data = __image_md->Data();
-  const XnDepthPixel * const depth_data = __depth_md->Data();
   lock.unlock();
 
-  if (is_image_new && (__image_buf->num_attached() > 1)) {
+  if (is_image_new && (__image_buf_yuv->num_attached() > 1)) {
     if (__cfg_copy_mode == DEBAYER_BILINEAR) {
-      bayerGRBG_to_yuv422planar_bilinear(image_data, __image_buf->buffer(),
+      bayerGRBG_to_yuv422planar_bilinear(image_data, __image_buf_yuv->buffer(),
 					 __image_width, __image_height);
     } else if (__cfg_copy_mode == CONVERT_YUV) {
-      yuv422packed_to_yuv422planar(image_data, __image_buf->buffer(),
+      yuv422packed_to_yuv422planar(image_data, __image_buf_yuv->buffer(),
 				   __image_width, __image_height);
     } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
       bayerGRBG_to_yuv422planar_nearest_neighbour(image_data,
-						  __image_buf->buffer(),
+						  __image_buf_yuv->buffer(),
 						  __image_width, __image_height);
     }
   }
 
-  if (is_depth_new && (__depth_buf->num_attached() > 1)) {
-    memcpy(__depth_buf->buffer(), depth_data, __depth_bufsize);
+  if (is_image_new && (__image_buf_rgb->num_attached() > 1)) {
+    if (__cfg_copy_mode == DEBAYER_BILINEAR) {
+      bayerGRBG_to_rgb_bilinear(image_data, __image_buf_rgb->buffer(),
+                                __image_width, __image_height);
+    } else if (__cfg_copy_mode == CONVERT_YUV) {
+      yuv422packed_to_rgb_plainc(image_data, __image_buf_rgb->buffer(),
+                                 __image_width, __image_height);
+    } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
+      bayerGRBG_to_rgb_nearest_neighbour(image_data, __image_buf_rgb->buffer(),
+                                         __image_width, __image_height);
+    }
   }
 }

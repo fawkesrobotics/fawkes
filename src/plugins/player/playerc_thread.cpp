@@ -46,7 +46,7 @@ using namespace fawkes;
 /** Constructor. */
 PlayerClientThread::PlayerClientThread()
   : Thread("PlayerClientThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
   __client = NULL;
 }

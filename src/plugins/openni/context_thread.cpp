@@ -42,7 +42,7 @@ using namespace fawkes;
 /** Constructor. */
 OpenNiContextThread::OpenNiContextThread()
   : Thread("OpenNiContextThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     AspectProviderAspect("OpenNiAspect", &__openni_aspect_inifin)
 {
 }
@@ -211,21 +211,40 @@ OpenNiContextThread::verify_active()
       if (have_gen) {
 	const XnProductionNodeDescription &pnd = (*n).GetDescription();
 	// do not verify on device nodes for now, always reports inactive :-/
-	if (! generator.IsGenerating() && (pnd.Type != XN_NODE_TYPE_DEVICE) ) {
-	  logger->log_warn(name(), "Inactive node '%s' (%s, %s/%s), trying to activate",
-			   (*n).GetInstanceName(), type_to_string(pnd.Type),
-			   pnd.strVendor, pnd.strName);
-	  generator.StartGenerating();
+        if (pnd.Type != XN_NODE_TYPE_DEVICE) {
+          if (! generator.IsGenerating()) {
+            logger->log_warn(name(), "Inactive node '%s' (%s, %s/%s), trying to activate",
+                             (*n).GetInstanceName(), type_to_string(pnd.Type),
+                             pnd.strVendor, pnd.strName);
+            generator.StartGenerating();
+
+          } else if (! generator.IsDataNew()) {
+            if (__dead_loops.find((*n).GetInstanceName()) != __dead_loops.end()) {
+              __dead_loops[(*n).GetInstanceName()] += 1;
+            } else {
+              __dead_loops[(*n).GetInstanceName()]  = 1;
+            }
+
+          } else if (__dead_loops.find((*n).GetInstanceName()) != __dead_loops.end()) {
+            __dead_loops.erase((*n).GetInstanceName());
+          }
+
+          /* The following does not work atm because IsDataNew() always reports false.
+             While this could be because the WaitNoneUpdateAll() did not yet update the
+             device node, event the timestamp does not change, therefore rendering this
+             way to detect death of a device node unusable.
+
 	} else if (pnd.Type == XN_NODE_TYPE_DEVICE) {
 	  // as an alternative, verify how often it has not been updated
 	  if (generator.IsDataNew()) {
 	    __device_no_data_loops = 0;
 	  } else {
-	    if (++__device_no_data_loops > 3) {
+	    if (++__device_no_data_loops > 10) {
 	      logger->log_warn(name(), "Device '%s' had no fresh data for long time. "
 			       "Reload maybe necessary.", (*n).GetInstanceName());
 	    }
 	  }
+          */
 	}
 
 	xn::ErrorStateCapability ecap = generator.GetErrorStateCap();
@@ -234,6 +253,14 @@ OpenNiContextThread::verify_active()
 			   xnGetStatusString(ecap.GetErrorState()));
 	}
       }
+    }
+  }
+
+  std::map<std::string, unsigned int>::iterator d;
+  for (d = __dead_loops.begin(); d != __dead_loops.end(); ++d) {
+    if (d->second >= 3) {
+      logger->log_warn(name(), "Node '%s' had no fresh data for long time (%u tests)",
+                       d->first.c_str(), d->second);
     }
   }
 }

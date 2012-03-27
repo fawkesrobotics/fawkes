@@ -808,4 +808,199 @@ bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned char *yu
 }
 
 
+void
+bayerGRBG_to_rgb_nearest_neighbour(const unsigned char *bayer, unsigned char *rgb,
+                                   unsigned int width, unsigned int height)
+{
+  for (register unsigned int h = 0; h < height; h += 2) {
+    // g  r  ... line
+    for (register unsigned int w = 0; w < width; w += 2) {
+      *rgb++ = bayer[1];
+      *rgb++ = bayer[width];
+      *rgb++ = *bayer;
+      ++bayer;
+
+      *rgb++ = *bayer;
+      *rgb++ = bayer[-1];
+      *rgb++ = bayer[width - 1];
+      ++bayer;
+    }
+
+    // b  g  ... line
+    for (register unsigned int w = 0; w < width; w += 2) {
+      *rgb++ = *(bayer-width+1);
+      *rgb++ = bayer[1];
+      *rgb++ = *bayer;
+      ++bayer;
+
+      *rgb++ = *(bayer-width);
+      *rgb++ = *bayer;
+      *rgb++ = bayer[-1];
+      ++bayer;
+    }
+  }
+}
+
+
+void
+bayerGRBG_to_rgb_bilinear(const unsigned char *bayer, unsigned char *rgb,
+                          unsigned int width, unsigned int height)
+{
+  // first line is special
+  // g  r  ... line
+  // not full data in first columns
+  *rgb++ = bayer[1];
+  *rgb++ = *bayer;
+  *rgb++ = bayer[width];
+  ++bayer;
+
+  // correct:
+  // g = (bayer[-1] + bayer[width] + bayer[1]) / 3;
+  // faster:
+  *rgb++ = *bayer;
+  *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+  *rgb++ = (bayer[width - 1] + bayer[width + 1]) >> 1;
+  ++bayer;
+
+  // rest of first line
+  for (unsigned int w = 2; w < width - 2; w += 2) {
+    *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+    *rgb++ = *bayer;
+    *rgb++ = bayer[width];
+    ++bayer;
+
+    // correct:
+    // g = (bayer[-1] + bayer[width] + bayer[1]) / 3;
+    // faster:
+    *rgb++ = *bayer;
+    *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+    *rgb++ = (bayer[width - 1] + bayer[width + 1]) >> 1;
+    ++bayer;
+  }
+
+  // not full data in last columns
+  *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+  *rgb++ = *bayer;
+  *rgb++ = bayer[width];
+  ++bayer;
+
+  *rgb++ = *bayer;
+  *rgb++ = (bayer[-1] + bayer[width]) >> 1;
+  *rgb++ = bayer[width - 1];
+  ++bayer;
+
+  for ( unsigned int h = 1; h < height - 1; h += 2) {
+    // b  g  ... line
+    // correct: g = (*(bayer-width) + bayer[1] + bayer[width]) / 3;
+    // faster:
+    *rgb++ = (*(bayer-width+1) + bayer[width+1]) >> 1;
+    *rgb++ = (*(bayer-width) + bayer[1]) >> 1;
+    *rgb++ = *bayer;
+    ++bayer;
+
+    *rgb++ = (*(bayer-width) + bayer[width]) >> 1;
+    *rgb++ = *bayer;
+    *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+    ++bayer;
+
+    for (unsigned int w = 2; w < width - 2; w += 2) {
+      *rgb++ = (*(bayer-width-1) + *(bayer-width+1) + bayer[width-1] + bayer[width+1]) >> 2;
+      *rgb++ = (*(bayer-width) + bayer[1] + bayer[width] + bayer[-1]) >> 2;
+      *rgb++ = *bayer;
+      ++bayer;
+
+      *rgb++ = (*(bayer-width) + bayer[width]) >> 1;
+      *rgb++ = *bayer;
+      *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+      ++bayer;
+    }
+
+    *rgb++ = (*(bayer-width-1) + *(bayer-width+1) + bayer[width-1] + bayer[width+1]) >> 2;
+    *rgb++ = (*(bayer-width) + bayer[1] + bayer[width] + bayer[-1]) >> 2;
+    *rgb++ = *bayer;
+    ++bayer;
+
+    *rgb++ = (*(bayer-width) + bayer[width]) >> 1;
+    *rgb++ = *bayer;
+    *rgb++ = bayer[-1];
+    ++bayer;
+
+
+    // g  r  ... line
+    *rgb++ = bayer[1];
+    *rgb++ = *bayer;
+    *rgb++ = (bayer[width] + *(bayer-width)) >> 1;
+    ++bayer;
+
+    *rgb++ = *bayer;
+    *rgb++ = (*(bayer-width) + bayer[1] + bayer[width] + bayer[-1]) >> 2;
+    *rgb++ = (*(bayer-width-1) + *(bayer-width+1) + bayer[width - 1] + bayer[width + 1]) >> 2;
+    ++bayer;
+
+    for (unsigned int w = 2; w < width - 2; w += 2) {
+      *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+      *rgb++ = *bayer;
+      *rgb++ = (bayer[width] + *(bayer-width)) >> 1;
+      ++bayer;
+
+      *rgb++ = *bayer;
+      *rgb++ = (*(bayer-width) + bayer[1] + bayer[width] + bayer[-1]) >> 2;
+      *rgb++ = (*(bayer-width-1) + *(bayer-width+1) + bayer[width-1] + bayer[width+1]) >> 2;
+      ++bayer;
+    }
+
+    *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+    *rgb++ = *bayer;
+    *rgb++ = (bayer[width] + *(bayer-width)) >> 1;
+    ++bayer;
+
+    // correct: g = (*(bayer-width) + bayer[width] + bayer[-1]) / 3;
+    // faster:
+    *rgb++ = *bayer;
+    *rgb++ = (*(bayer-width) + bayer[-1]) >> 1;
+    *rgb++ = (*(bayer-width-1) + bayer[width-1]) >> 1;
+    ++bayer;
+  }
+
+  // last b  g  ... line
+  // correct: g = (*(bayer-width) + bayer[1] + bayer[width]) / 3;
+  // faster:
+  *rgb++ = *(bayer-width+1);
+  *rgb++ = (*(bayer-width) + bayer[1]) >> 1;
+  *rgb++ = *bayer;
+  ++bayer;
+
+  *rgb++ = *(bayer-width);
+  *rgb++ = *bayer;
+  *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+  ++bayer;
+
+  for (unsigned int w = 2; w < width - 2; w += 2) {
+    // correct: g = (*(bayer-width) + bayer[1] + bayer[-1]) / 3
+    // faster:
+    *rgb++ = (*(bayer-width-1) + *(bayer-width+1)) >> 1;
+    *rgb++ = (*(bayer-width) + bayer[-1]) >> 1;
+    *rgb++ = *bayer;
+    ++bayer;
+
+    *rgb++ = *(bayer-width);
+    *rgb++ = *bayer;
+    *rgb++ = (bayer[-1] + bayer[1]) >> 1;
+    ++bayer;
+  }
+
+  // correct: g = (*(bayer-width) + bayer[1] + bayer[-1]) / 3;
+  // faster:
+  *rgb++ = (*(bayer-width-1) + *(bayer-width+1)) >> 1;
+  *rgb++ = (*(bayer-width) + bayer[-1]) >> 1;
+  *rgb++ = *bayer;
+  ++bayer;
+
+  *rgb++ = *(bayer-width);
+  *rgb++ = *bayer;
+  *rgb++ = bayer[-1];
+  ++bayer;
+}
+
+
 } // end namespace firevision

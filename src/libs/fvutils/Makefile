@@ -17,6 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
+include $(BUILDSYSDIR)/pcl.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
@@ -41,15 +42,23 @@ else
 endif
 
 ifneq ($(HAVE_OPENCV),1)
-WARN_TARGETS += warning_opencv
-FILTER_OUT   += recognition/faces.o $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/recognition/forest/*.cpp)))
-FILTER_OUT   += adapters/iplimage.o
+  WARN_TARGETS += warning_opencv
+  FILTER_OUT   += recognition/faces.o $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/recognition/forest/*.cpp)))
+  FILTER_OUT   += adapters/iplimage.o
 else
-CFLAGS  += $(CFLAGS_OPENCV)
-LDFLAGS += $(LDFLAGS_OPENCV)
+  CFLAGS  += $(CFLAGS_OPENCV)
+  LDFLAGS += $(LDFLAGS_OPENCV)
   ifneq ($(wildcard $(LIBSRCDIR)/fvutils/recognition/forest/forest.h),)
     LDFLAGS += $(LDFLAGS_OPENCV_GUI)
   endif
+endif
+
+ifneq ($(HAVE_PCL),1)
+  WARN_TARGETS += warning_pcl
+  FILTER_OUT   += adapters/pcl.o
+else
+  CFLAGS  += $(CFLAGS_PCL)
+  LDFLAGS += $(LDFLAGS_PCL)
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -60,6 +69,8 @@ warning_libpng:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PNG support$(TNORMAL) (No libpng[-devel] installed)"
 warning_opencv:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenCV dependent stuff in the fvutils$(TNORMAL) (No opencv[-devel] installed)"
+warning_pcl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL adapter$(TNORMAL) (pcl[-devel] not installed)"
 endif
 
 # We are lazy in the utils...

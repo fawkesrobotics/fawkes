@@ -37,7 +37,7 @@ using namespace fawkes;
  */
 RoombaSensorThread::RoombaSensorThread(Roomba500Thread *roomba500_thread)
   : Thread("RoombaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
   __roomba500_thread = roomba500_thread;
 }

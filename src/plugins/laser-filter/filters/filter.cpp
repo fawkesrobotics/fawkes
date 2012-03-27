@@ -3,8 +3,7 @@
  *  filter.cpp - Laser data filter interface
  *
  *  Created: Fri Oct 10 17:12:29 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -58,13 +57,24 @@
  * Number of entries in output arrays.
  */
 
+/** @class LaserDataFilter::Buffer "filter.h"
+ * Laser data buffer.
+ * A buffer comprises the value array and a reference frame ID.
+ *
+ * @var std::string LaserDataFilter::Buffer::frame
+ * The reference coordinate frame ID.
+ *
+ * @var float *  LaserDataFilter::Buffer::values
+ * The data array.
+ */
+
 /** Constructor.
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  * @param out_size number of value arrays to generate in out vector
  */
 LaserDataFilter::LaserDataFilter(unsigned int in_data_size,
-				 std::vector<float *> in, unsigned int out_size)
+				 std::vector<Buffer *> &in, unsigned int out_size)
 {
   this->in            = in;
   this->in_data_size  = in_data_size;
@@ -72,7 +82,7 @@ LaserDataFilter::LaserDataFilter(unsigned int in_data_size,
 
   if (out_size > 0)  out.resize(out_size);
   for (unsigned int i = 0; i < out_size; ++i) {
-    out[i] = (float *)malloc(out_data_size * sizeof(float));
+    out[i] = new Buffer(out_data_size);
   }
 
   __own_in  = false;
@@ -85,26 +95,29 @@ LaserDataFilter::~LaserDataFilter()
 {
   if (__own_in) {
     for (unsigned int i = 0; i < in.size(); ++i) {
-      free(in[i]);
+      free(in[i]->values);
+      delete in[i];
     }
   }
   if (__own_out) {
     for (unsigned int i = 0; i < out.size(); ++i) {
-      free(out[i]);
+      free(out[i]->values);
+      delete out[i];
     }
   }
 }
 
 
 /** Get filtered data array
- * @return a float array of the same size as the last array given to filter()
- * or NULL if filter() was never called.
+ * @return a Buffer with an array of the same size as the last array
+ * given to filter() or NULL if filter() was never called.
  */
-std::vector<float *> &
+std::vector<LaserDataFilter::Buffer *> &
 LaserDataFilter::get_out_vector()
 {
   return out;
 }
+
 
 /** Set filtered data array
  * @param out vector of output values. The vector is only accepted if it has
@@ -113,7 +126,7 @@ LaserDataFilter::get_out_vector()
  * set_array_ownership().
  */
 void
-LaserDataFilter::set_out_vector(std::vector<float *> &out)
+LaserDataFilter::set_out_vector(std::vector<Buffer *> &out)
 {
   if (this->out.size() != out.size()) {
     throw fawkes::Exception("Filter out vector size mismatch: %zu vs. %zu",
@@ -122,7 +135,8 @@ LaserDataFilter::set_out_vector(std::vector<float *> &out)
 
   if (__own_out) {
     for (unsigned int i = 0; i < this->out.size(); ++i) {
-      free(this->out[i]);
+      free(this->out[i]->values);
+      delete this->out[i];
     }
   }
   this->out.clear();
@@ -145,8 +159,8 @@ LaserDataFilter::set_out_data_size(unsigned int data_size)
   if (out_data_size != data_size) {
     if (__own_out) {
       for (unsigned int i = 0; i < out.size(); ++i) {
-	free(out[i]);
-	out[i] = (float *)malloc(data_size * sizeof(float));
+	free(out[i]->values);
+	out[i]->values = (float *)malloc(data_size * sizeof(float));
       }
     }
   }
@@ -169,9 +183,9 @@ LaserDataFilter::get_out_data_size()
  * @param outbuf array of out_data_size
  */
 void
-LaserDataFilter::reset_outbuf(float* outbuf)
+LaserDataFilter::reset_outbuf(Buffer *outbuf)
 {
-  memset(outbuf, 0, sizeof(float) * out_data_size);
+  memset(outbuf->values, 0, sizeof(float) * out_data_size);
 }
 
 /** Copies the readings from inbuf to outbuf.
@@ -180,15 +194,15 @@ LaserDataFilter::reset_outbuf(float* outbuf)
  * @param outbuf array of out_data_size (= in_data_size) readings
  */
 void
-LaserDataFilter::copy_to_outbuf(float* outbuf, const float* inbuf)
+LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer *outbuf,
+                                const LaserDataFilter::Buffer *inbuf)
 {
   if (in_data_size != out_data_size) {
     throw fawkes::Exception("copy_to_outbuf() requires equal "\
                             "input and output data size");
   }
-  memcpy(outbuf, inbuf, sizeof(float) * out_data_size);
+  memcpy(outbuf->values, inbuf->values, sizeof(float) * out_data_size);
 }
-
 
 
 /** Set input/output array ownership.
@@ -201,4 +215,16 @@ LaserDataFilter::set_array_ownership(bool own_in, bool own_out)
 {
   __own_in  = own_in;
   __own_out = own_out;
+}
+
+
+/** Constructor.
+ * @param num_values if not zero allocates the values arrays with the
+ * given number of elements
+ */
+LaserDataFilter::Buffer::Buffer(size_t num_values)
+{
+  if (num_values > 0) {
+    values = (float *)malloc(num_values * sizeof(float));
+  }
 }

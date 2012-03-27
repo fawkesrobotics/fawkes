@@ -25,8 +25,12 @@
 
 #include "filter.h"
 
-#include <vector>
-#include <utility>
+#ifndef HAVE_TF
+#  error LaserProjectionDataFilter only availabe with TF
+#endif
+
+#include <tf/transform_listener.h>
+
 #include <string>
 
 namespace fawkes {
@@ -37,57 +41,33 @@ namespace fawkes {
 class LaserProjectionDataFilter : public LaserDataFilter
 {
  public:
-  struct Rotation {
-    Rotation(float x_rot_degree, float y_rot_degree, float z_rot_degree)
-        : x(x_rot_degree), y(y_rot_degree), z(z_rot_degree)
-    { }
-
-    float x;
-    float y;
-    float z;
-  };
-
-  struct Translation {
-    Translation(float x_trans_degree, float y_trans_degree, float z_trans_degree)
-        : x(x_trans_degree), y(y_trans_degree), z(z_trans_degree)
-    { }
-
-    float x; 
-    float y;
-    float z;
-  };
-  struct Rectangle {
-    Rectangle(float x_min, float x_max, float y_min, float y_max)
-        : x_min(x_min), x_max(x_max), y_min(y_min), y_max(y_max)
-    { }
-
-    float x_min;
-    float x_max;
-    float y_min;
-    float y_max;
-  };
-
-  LaserProjectionDataFilter(const Rotation& laser_rot,
-                            const Rotation& fixture_rot,
-                            const Translation& trans,
-                            const Rectangle& robot_rectangle,
-                            float z_threshold,
+  LaserProjectionDataFilter(fawkes::tf::TransformListener *tf_listener,
+                            std::string target_frame,
+                            float not_from_x, float not_to_x,
+                            float not_from_y, float not_to_y,
+                            float only_from_z, float only_to_z,
                             unsigned int in_data_size,
-                            std::vector<float *> in);
+                            std::vector<LaserDataFilter::Buffer *> &in);
   ~LaserProjectionDataFilter();
 
   void filter();
 
  private:
-  inline void transform(const float angle, const float length,
-                        float& new_angle, float& new_length,
-                        bool& in_robot_rect, bool& too_low);
+  inline void set_output(float *outbuf, fawkes::tf::Point &p);
 
-  const Rotation    LASER_ROT;
-  const Rotation    FIXTURE_ROT;
-  const Translation TRANS;
-  const Rectangle   ROBOT;
-  const float       Z_THRESHOLD;
+ private:
+  fawkes::tf::TransformListener *tf_listener_;
+  const std::string target_frame_;
+  const float not_from_x_, not_to_x_;
+  const float not_from_y_, not_to_y_;
+  const float only_from_z_, only_to_z_;
+
+  float sin_angles360[360];
+  float cos_angles360[360];
+  float sin_angles720[720];
+  float cos_angles720[720];
+
+  float index_factor_;
 };
 
 #endif

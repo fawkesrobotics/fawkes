@@ -39,7 +39,7 @@
  */
 Laser720to360DataFilter::Laser720to360DataFilter(bool average,
 						 unsigned int in_data_size,
-						 std::vector<float *> in)
+						 std::vector<LaserDataFilter::Buffer *> &in)
   : LaserDataFilter(in_data_size, in, in.size())
 {
   if (in_data_size != 720) {
@@ -55,11 +55,12 @@ Laser720to360DataFilter::filter()
 {
   const unsigned int vecsize = std::min(in.size(), out.size());
   for (unsigned int a = 0; a < vecsize; ++a) {
-    float *inbuf  = in[a];
-    float *outbuf = out[a];
+    out[a]->frame = in[a]->frame;
+    float *inbuf  = in[a]->values;
+    float *outbuf = out[a]->values;
 
     if (__average) {
-      outbuf[0] = (inbuf[719] / inbuf[0]) / 2.0;
+      outbuf[0] = (inbuf[719] + inbuf[0]) / 2.0;
       for (unsigned int i = 1; i < 360; ++i) {
 	outbuf[i] = (inbuf[i * 2 - 1] + inbuf[i * 2 + 1]) / 2.0;
       }

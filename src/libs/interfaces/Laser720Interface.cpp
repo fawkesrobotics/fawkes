@@ -49,9 +49,10 @@ Laser720Interface::Laser720Interface() : Interface()
   data      = (Laser720Interface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(IFT_STRING, "frame", 32, data->frame);
   add_fieldinfo(IFT_FLOAT, "distances", 720, &data->distances);
   add_fieldinfo(IFT_BOOL, "clockwise_angle", 1, &data->clockwise_angle);
-  unsigned char tmp_hash[] = {0x8a, 0x9, 0x94, 0x1a, 0xe4, 0x3c, 0xa5, 0xde, 0x5, 0xe7, 0x8c, 0x6e, 0x3b, 0x7f, 0x34, 0x5};
+  unsigned char tmp_hash[] = {0xca, 0x5e, 0xf1, 0x60, 0x74, 0x77, 0x8d, 0x9b, 0x5c, 0x81, 0x53, 0x5f, 0xc1, 0xf6, 0x89, 0x69};
   set_hash(tmp_hash);
 }
 
@@ -61,6 +62,41 @@ Laser720Interface::~Laser720Interface()
   free(data_ptr);
 }
 /* Methods */
+/** Get frame value.
+ * 
+      Coordinate frame in which the data is presented.
+    
+ * @return frame value
+ */
+char *
+Laser720Interface::frame() const
+{
+  return data->frame;
+}
+
+/** Get maximum length of frame value.
+ * @return length of frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Laser720Interface::maxlenof_frame() const
+{
+  return 32;
+}
+
+/** Set frame value.
+ * 
+      Coordinate frame in which the data is presented.
+    
+ * @param new_frame new frame value
+ */
+void
+Laser720Interface::set_frame(const char * new_frame)
+{
+  strncpy(data->frame, new_frame, sizeof(data->frame));
+  data_changed = true;
+}
+
 /** Get distances value.
  * 
       The distances in meter of the beams.

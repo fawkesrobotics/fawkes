@@ -49,6 +49,7 @@ class TimeTracker {
   void ping(unsigned int cls);
   void ping_start(unsigned int cls);
   void ping_end(unsigned int cls);
+  void ping_abort(unsigned int cls);
 
   void ping(std::string comment = "");
   void reset(std::string comment = "");
