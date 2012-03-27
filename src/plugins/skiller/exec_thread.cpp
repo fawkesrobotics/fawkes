@@ -152,11 +152,17 @@ SkillerExecutionThread::init()
     __lua->add_package("fawkeslogging");
     __lua->add_package("fawkesinterface");
     __lua->add_package("fawkesgeometry");
+#ifdef HAVE_TF
+    __lua->add_package("fawkestf");
+#endif
 
     __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
     __lua->set_usertype("config", config, "Configuration", "fawkes");
     __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
     __lua->set_usertype("clock", clock, "Clock", "fawkes");
+#ifdef HAVE_TF
+    __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
+#endif
 
     __lua_ifi->push_interfaces();
 
@@ -176,7 +182,7 @@ SkillerExecutionThread::init()
 
   // We want to know if our reader leaves and closes the interface
   bbil_add_reader_interface(__skiller_if);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_READER);
+  blackboard->register_listener(this);
 
 #ifdef SKILLER_TIMETRACKING
   __tt           = new TimeTracker();

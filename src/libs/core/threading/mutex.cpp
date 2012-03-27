@@ -54,11 +54,22 @@ namespace fawkes {
  */
 
 
-/** Constructor */
-Mutex::Mutex()
+/** Constructor.
+ * @param type mutex type 
+ */
+Mutex::Mutex(Type type)
 {
   mutex_data = new MutexData();
-  pthread_mutex_init(&(mutex_data->mutex), NULL);
+
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init(&attr);
+  if (type == RECURSIVE) {
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+  } else {
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
+  }
+
+  pthread_mutex_init(&(mutex_data->mutex), &attr);
 }
 
 /** Destructor */

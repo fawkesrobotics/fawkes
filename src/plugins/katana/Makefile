@@ -15,6 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 
@@ -38,6 +39,11 @@ endif
 ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS_OPENRAVE    = $(shell openrave-config --cflags-only-I) -DHAVE_OPENRAVE
   LDFLAGS_OPENRAVE   = $(shell openrave-config --libs-core)
+endif
+
+ifeq ($(HAVE_TF),1)
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
 endif
 
 ifeq ($(HAVE_LIBKNI),1)

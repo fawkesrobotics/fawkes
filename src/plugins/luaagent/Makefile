@@ -17,8 +17,14 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
 include $(LIBSRCDIR)/utils/utils.mk
+include $(LIBSRCDIR)/tf/tf.mk
 
 CFLAGS  += $(CFLAGS_LUA)
+
+ifeq ($(HAVE_TF),1)
+  CFLAGS += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
+endif
 
 LIBS_luaagent = fawkescore fawkesutils fawkesaspects fawkeslua fawkesblackboard \
 		fawkesinterface fawkeslogging SkillerInterface SkillerDebugInterface

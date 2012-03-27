@@ -24,6 +24,7 @@
 #include <core/threading/thread_list.h>
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/barrier.h>
 #include <core/threading/interruptible_barrier.h>
 #include <core/exceptions/software.h>
@@ -162,11 +163,11 @@ ThreadList::operator= (const ThreadList &tl)
 void
 ThreadList::wakeup()
 {
-  lock();
+  MutexLocker lock(mutex());
+
   for (iterator i = begin(); i != end(); ++i) {
     (*i)->wakeup();
   }
-  unlock();
 }
 
 
@@ -189,11 +190,11 @@ ThreadList::wakeup_unlocked()
 void
 ThreadList::wakeup(Barrier *barrier)
 {
-  lock();
+  MutexLocker lock(mutex());
+
   for (iterator i = begin(); i != end(); ++i) {
     (*i)->wakeup(barrier);
   }
-  unlock();
 }
 
 
@@ -235,11 +236,12 @@ ThreadList::wakeup_and_wait(unsigned int timeout_sec, unsigned int timeout_nanos
     throw NullPointerException("ThreadList::wakeup_and_wait() can only be called if "
 			       "barrier is maintained");
   }
-  lock();
+
+  MutexLocker lock(mutex());
+
   try {
     wakeup_unlocked(__wnw_barrier);
   } catch (Exception &e) {
-    unlock();
     throw;
   }
   if ( ! __wnw_barrier->wait(timeout_sec, timeout_nanosec) ) {
@@ -279,10 +281,8 @@ ThreadList::wakeup_and_wait(unsigned int timeout_sec, unsigned int timeout_nanos
 		      bad_threads.front()->name(),
 		      (float)timeout_sec + (float)timeout_nanosec / 1000000000.);
     }
-    unlock();
     throw Exception("%s", s.c_str());
   }
-  unlock();
 }
 
 
@@ -293,11 +293,11 @@ ThreadList::wakeup_and_wait(unsigned int timeout_sec, unsigned int timeout_nanos
 void
 ThreadList::set_maintain_barrier(bool maintain_barrier)
 {
-  lock();
+  MutexLocker lock(mutex());
+
   delete __wnw_barrier;
   __wnw_barrier = NULL;
   if ( maintain_barrier )  update_barrier();
-  unlock();
 }
 
 
@@ -311,7 +311,8 @@ ThreadList::set_maintain_barrier(bool maintain_barrier)
 void
 ThreadList::try_recover(std::list<std::string> &recovered_threads)
 {
-  lock();
+  MutexLocker lock(mutex());
+
   bool changed = false;
   __wnw_bbit = __wnw_bad_barriers.begin();
   while (__wnw_bbit != __wnw_bad_barriers.end()) {
@@ -336,7 +337,6 @@ ThreadList::try_recover(std::list<std::string> &recovered_threads)
     }
   }
   if ( changed )  update_barrier();
-  unlock();
 }
 
 /** Initialize threads.
@@ -502,7 +502,8 @@ ThreadList::stop()
 bool
 ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
 {
-  __finalize_mutex->lock();
+  MutexLocker lock(__finalize_mutex);
+
   bool can_finalize = true;
   CannotFinalizeThreadException cfte("Cannot finalize one or more threads");
   bool threw_exception = false;
@@ -523,7 +524,6 @@ ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
       threw_exception = true;
     }
   }
-  __finalize_mutex->unlock();
   if ( threw_exception ) {
     throw cfte;
   }
@@ -577,11 +577,11 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
 void
 ThreadList::cancel_finalize()
 {
-  __finalize_mutex->lock();
+  MutexLocker lock(__finalize_mutex);
+
   for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     (*i)->cancel_finalize();
   }
-  __finalize_mutex->unlock();
 }
 
 
@@ -709,10 +709,9 @@ ThreadList::push_front_locked(Thread *thread)
 {
   if ( __sealed ) throw ThreadListSealedException("push_front_locked");
 
-  lock();
+  MutexLocker lock(mutex());
   LockList<Thread *>::push_front(thread);
   if ( __wnw_barrier)  update_barrier();
-  unlock();
 }
 
 
@@ -743,10 +742,9 @@ ThreadList::push_back_locked(Thread *thread)
 {
   if ( __sealed ) throw ThreadListSealedException("push_back_locked");
 
-  lock();
+  MutexLocker lock(mutex());
   LockList<Thread *>::push_back(thread);
   if ( __wnw_barrier)  update_barrier();
-  unlock();
 }
 
 
@@ -784,10 +782,9 @@ ThreadList::remove_locked(Thread *thread)
 {
   if ( __sealed ) throw ThreadListSealedException("remove_locked");
 
-  lock();
+  MutexLocker lock(mutex());
   LockList<Thread *>::remove(thread);
   if ( __wnw_barrier)  update_barrier();
-  unlock();
 }
 
 

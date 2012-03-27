@@ -186,9 +186,7 @@ BBLoggerThread::init()
   bbil_add_data_interface(__iface);
   bbil_add_writer_interface(__iface);
 
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_DATA |
-				BlackBoard::BBIL_FLAG_WRITER |
-				BlackBoard::BBIL_FLAG_MESSAGES);
+  blackboard->register_listener(this);
 
   logger->log_info(name(), "Logging %s to %s%s", __iface->uid(), __filename,
 		   __is_master ? " as master" : "");

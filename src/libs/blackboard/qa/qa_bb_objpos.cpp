@@ -33,7 +33,7 @@
 #include <interfaces/ObjectPositionInterface.h>
 
 #include <core/exceptions/system.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 #include <utils/time/tracker.h>
 
 #include <signal.h>

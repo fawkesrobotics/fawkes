@@ -313,15 +313,15 @@ FawkesMainThread::loop()
       CancelState old_state;
       set_cancel_state(CANCEL_DISABLED, &old_state);
       try {
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_nanosec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_nanosec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
       } catch (Exception &e) {
 	if (__enable_looptime_warnings) {
 	  __multi_logger->log_error("FawkesMainThread", e);
@@ -360,7 +360,9 @@ FawkesMainThread::loop()
       __loop_end->stamp_systime();
       float loop_time = *__loop_end - __loop_start;
       if(__enable_looptime_warnings) {
-	if (loop_time > __desired_loop_time_sec) {
+        // give some extra 10% to eliminate frequent false warnings due to regular
+        // time jitter (TimeWait might not be all that precise)
+	if (loop_time > 1.1 * __desired_loop_time_sec) {
 	  __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
 				   "desired: %f sec (%u usec),  actual: %f sec",
 				   __desired_loop_time_sec, __desired_loop_time_usec,

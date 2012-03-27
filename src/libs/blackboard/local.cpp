@@ -59,7 +59,6 @@ LocalBlackBoard::LocalBlackBoard(size_t memsize,
 {
   __memmgr = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION, master);
 
-  __notifier = new BlackBoardNotifier();
   __msgmgr = new BlackBoardMessageManager(__notifier);
   __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
 
@@ -76,7 +75,6 @@ LocalBlackBoard::LocalBlackBoard(size_t memsize)
 {
   __memmgr = new BlackBoardMemoryManager(memsize);
 
-  __notifier = new BlackBoardNotifier();
   __msgmgr = new BlackBoardMessageManager(__notifier);
   __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
 
@@ -97,7 +95,6 @@ LocalBlackBoard::~LocalBlackBoard()
   delete __im;
   delete __msgmgr;
   delete __memmgr;
-  delete __notifier;
 }
 
 
@@ -167,33 +164,6 @@ bool
 LocalBlackBoard::try_aliveness_restore() throw()
 {
   return true;
-}
-
-void
-LocalBlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
-{
-  __notifier->register_listener(listener, flags);
-}
-
-
-void
-LocalBlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
-{
-  __notifier->unregister_listener(listener);
-}
-
-
-void
-LocalBlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
-{
-  __notifier->register_observer(observer, flags);
-}
-
-
-void
-LocalBlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
-{
-  __notifier->unregister_observer(observer);
 }
 
 

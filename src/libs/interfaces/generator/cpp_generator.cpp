@@ -625,6 +625,8 @@ CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceF
       type = "BYTE";
     } else if ( i->getType() == "float" ) {
       type = "FLOAT";
+    } else if ( i->getType() == "double" ) {
+      type = "DOUBLE";
     } else if ( i->getType() == "string" ) {
       type = "STRING";
       dataptr = "";

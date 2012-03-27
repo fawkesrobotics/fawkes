@@ -31,7 +31,7 @@
 #include <interfaces/TestInterface.h>
 
 #include <core/exceptions/system.h>
-#include <utils/logging/liblogger.h>
+#include <logging/liblogger.h>
 
 #include <signal.h>
 #include <cstdlib>

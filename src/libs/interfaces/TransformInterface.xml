@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="TransformInterface" author="Tim Niemueller" year="2011">
+  <data>
+    <comment>
+      This interface is used to publish transforms. It aims to be as
+      compatible as possible with ROS' tf library and is used
+      extensively by the Fawkes tf library.
+
+      For this to work properly it is crucial to have correct
+      timestamp set (cf. Interface::set_timestamp()). Set this as
+      close as possible to the time of when the data, from which the
+      transform is computed, has been acquired.
+    </comment>
+    <field type="string" length="32" name="frame">
+      Parent frame ID. The given transform is relative to the origin
+      of this coordinate frame.
+    </field>
+    <field type="string" length="32" name="child_frame">
+      The ID of the child frame. The child frame's origin is at the
+      given point in the parent frame denoted by the transform.
+    </field>
+    <field type="double" length="3" name="translation">
+      This array denotes the translation vector of the transform. The
+      element indexes are ordered x, y, z, i.e. translation[0] is the
+      X value of the translation vector.
+    </field>
+    <field type="double" length="4" name="rotation">
+      This array denotes the rotation quaternion of the transform. The
+      element indexes are ordered x, y, z, w, i.e. translation[0] is
+      the X value of the rotation quaternion and translation[3] is the
+      W value.
+    </field>
+  </data>
+</interface>

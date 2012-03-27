@@ -92,8 +92,8 @@ namespace fawkes {
  * false to not lock
  * @param lock_type locking type, lock either for writing or for reading
  */
-ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock> rwlock, bool initially_lock,
-			   ScopedRWLock::LockType lock_type)
+ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock> rwlock, ScopedRWLock::LockType lock_type,
+                           bool initially_lock)
 {
   __rawrwlock = 0;
   __refrwlock = rwlock;
@@ -115,8 +115,8 @@ ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock> rwlock, bool initially_lock,
  * false to not lock
  * @param lock_type locking type, lock either for writing or for reading
  */
-ScopedRWLock::ScopedRWLock(ReadWriteLock *rwlock, bool initially_lock,
-			   ScopedRWLock::LockType lock_type)
+ScopedRWLock::ScopedRWLock(ReadWriteLock *rwlock, ScopedRWLock::LockType lock_type,
+                           bool initially_lock)
 {
   __rawrwlock = rwlock;
   __lock_type = lock_type;

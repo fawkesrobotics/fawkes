@@ -65,13 +65,6 @@ class LocalBlackBoard : public BlackBoard
   virtual std::list<Interface *>
     open_multiple_for_reading(const char *type_pattern,
 			      const char *id_pattern = "*");
-  virtual void register_listener(BlackBoardInterfaceListener *listener,
-				 unsigned int flags);
-  virtual void unregister_listener(BlackBoardInterfaceListener *listener);
-
-  virtual void register_observer(BlackBoardInterfaceObserver *observer,
-			 unsigned int flags);
-  virtual void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   virtual void start_nethandler(FawkesNetworkHub *hub);
 
@@ -85,7 +78,6 @@ class LocalBlackBoard : public BlackBoard
   BlackBoardMemoryManager    *__memmgr;
   BlackBoardMessageManager   *__msgmgr;
   BlackBoardNetworkHandler   *__nethandler;
-  BlackBoardNotifier         *__notifier;
 };
 
 

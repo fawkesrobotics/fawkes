@@ -41,6 +41,7 @@ typedef enum {
   IFT_INT64,		/**< 64 bit integer field */
   IFT_UINT64,		/**< 64 bit unsigned integer field */
   IFT_FLOAT,		/**< float field */
+  IFT_DOUBLE,		/**< double field */
   IFT_STRING,		/**< string field */
   IFT_BYTE,		/**< byte field, alias for uint8 */
   IFT_ENUM		/**< field with interface specific enum type */

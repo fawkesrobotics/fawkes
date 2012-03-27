@@ -14,8 +14,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_ballposlog = fawkesaspects ObjectPositionInterface
+LIBS_ballposlog = fawkescore fawkesaspects fawkesblackboard fawkesinterface ObjectPositionInterface
 OBJS_ballposlog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_ballposlog)

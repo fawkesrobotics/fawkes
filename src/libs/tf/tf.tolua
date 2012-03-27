@@ -1,0 +1,278 @@
+
+/***************************************************************************
+ *  tf.tolua - tf tolua++ template
+ *
+ *  Created: Mon Nov 28 11:19:12 2011
+ *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
+ */
+
+
+$#include <tf/types_lua.h>
+$#include <tf/transformer.h>
+
+namespace fawkes {
+  namespace tf {
+
+class Vector3 {
+ public:
+  Vector3();
+  Vector3(double x, double y, double z);
+
+  double dot(const Vector3 &q) const;
+  double length2() const;
+  double length() const;
+  double distance2(const Vector3 &v) const;
+  double distance(const Vector3 &v) const;
+  Vector3 & normalize();
+  Vector3   normalized();
+  double angle(const Vector3 &v) const;
+  Vector3 absolute() const;
+  Vector3 cross(const Vector3 &v) const;
+  double triple(const Vector3 &v1, Vector3 &v2) const;
+  int minAxis() const;
+  int maxAxis() const;
+  int furthestAxis() const;
+  int closestAxis() const;
+  void setInterpolate3(const Vector3 &v0, const Vector3 &v1, double rt);
+  Vector3 lerp(const Vector3 &v, const double &t) const;
+
+  const double & x();
+  const double & y();
+  const double & z();
+
+  void setX(double x);
+  void setY(double x);
+  void setZ(double x);
+  void setValue(double x, double y, double z);
+  void setZero();
+  bool isZero() const;
+  bool fuzzyZero() const;
+};
+
+class Quaternion
+{
+ public:
+  Quaternion();
+  Quaternion(double x, double y, double z, double w);
+  Quaternion(Vector3 axis, const double angle);
+  Quaternion(const double yaw, const double pitch, const double roll);
+  static const Quaternion & getIdentity();
+
+  void setRotation(Vector3 axis, const double angle);
+  void setEuler(const double yaw, const double pitch, const double roll);
+
+  bool operator==(const Quaternion &q) const;
+
+  double dot(const Quaternion &q) const;
+  double length2() const;
+  double length() const;
+  Quaternion & normalize();
+  Quaternion   normalized();
+  double angle(const Quaternion &q) const;
+  double getAngle() const;
+  Vector3 getAxis() const;
+  Quaternion inverse() const;
+  Quaternion slerp(const Quaternion &q, const double t) const;
+
+  const double & x();
+  const double & y();
+  const double & z();
+  const double & w();
+
+  void setX(double x);
+  void setY(double x);
+  void setZ(double x);
+  void setW(double x);
+  void setValue(double x, double y, double z, double w);
+
+};
+
+class Transform
+{
+ public:
+  Transform(const Quaternion &q);
+  Transform(const Quaternion &q, const Vector3 &c);
+  Transform(const Transform &other);
+  static const Transform & getIdentity();
+
+  void mult(const Transform &t1, const Transform &t2);
+  Vector3 operator*(const Vector3 &x) const;
+  Quaternion operator*(const Quaternion &q) const;
+
+  Vector3 & getOrigin();
+  Quaternion getRotation() const;
+
+  void setOrigin(const Vector3 &origin);
+  void setRotation(const Quaternion &q);
+  void setIdentity();
+
+  Transform inverse() const;
+  Transform inverseTimes(const Transform &t) const;
+};
+
+// This is not actually true but the easiest way to convince tolua++
+// that they're basically the same
+class Point : public Vector3
+{
+ public:
+  Point();
+  Point(double x, double y, double z);
+};
+
+// This is not actually true but the easiest way to convince tolua++
+// that they're basically the same
+class Pose : public Transform
+{
+ public:
+  Pose(const Quaternion &q);
+  Pose(const Quaternion &q, const Vector3 &c);
+  Pose(const Pose &other);
+  static const Pose & getIdentity();
+};
+
+class StampedTransform : public Transform
+{
+ public:
+  fawkes::Time stamp;
+  std::string  frame_id;
+  std::string  child_frame_id;
+
+  StampedTransform();
+  StampedTransform(const tf::Transform &input, const fawkes::Time &timestamp,
+                   const std::string &frame_id, const std::string &child_frame_id);
+
+  void set_data(const Transform &input);
+
+};
+
+
+class Stamped : public T
+{
+  TOLUA_TEMPLATE_BIND(T, fawkes::tf::Quaternion, fawkes::tf::Vector3, fawkes::tf::Point, fawkes::tf::Pose)
+
+ public:
+  fawkes::Time stamp;
+  std::string  frame_id;
+
+  Stamped();
+
+  Stamped(const T &input, const fawkes::Time &timestamp,
+          const std::string &frame_id);
+
+  void set_data(const T& input){*static_cast<T*>(this) = input;};
+};
+
+class StampedQuaternion : public Stamped<Quaternion>
+{
+  StampedQuaternion();
+  StampedQuaternion(const Quaternion &input, const fawkes::Time &timestamp,
+          const std::string &frame_id);
+};
+
+class StampedVector3 : public Stamped<Vector3>
+{
+  StampedVector3();
+  StampedVector3(const Vector3 &input, const fawkes::Time &timestamp,
+          const std::string &frame_id);
+};
+
+class StampedPoint : public Stamped<Point>
+{
+  StampedPoint();
+  StampedPoint(const Point &input, const fawkes::Time &timestamp,
+          const std::string &frame_id);
+};
+
+class StampedPose : public Stamped<Pose>
+{
+  StampedPose();
+  StampedPose(const Pose &input, const fawkes::Time &timestamp,
+          const std::string &frame_id);
+};
+
+class Transformer
+{
+ public:
+  void clear();
+  bool frame_exists(const std::string& frame_id_str) const;
+
+  void lookup_transform(const std::string& target_frame,
+                        const std::string& source_frame,
+                        const fawkes::Time& time,
+                        StampedTransform& transform) const;
+
+  void lookup_transform(const std::string& target_frame,
+                        const std::string& source_frame,
+                        StampedTransform& transform) const;
+
+  void lookup_transform(const std::string& target_frame,
+                        const fawkes::Time& target_time,
+                        const std::string& source_frame,
+                        const fawkes::Time& source_time,
+                        const std::string& fixed_frame,
+                        StampedTransform& transform) const;
+
+  bool can_transform(const std::string& target_frame,
+                     const std::string& source_frame,
+                     const fawkes::Time& time) const;
+
+  bool can_transform(const std::string& target_frame,
+                     const fawkes::Time& target_time,
+                     const std::string& source_frame,
+                     const fawkes::Time& source_time,
+                     const std::string& fixed_frame) const;
+
+  void transform_quaternion(const std::string& target_frame,
+                            const StampedQuaternion& stamped_in,
+                            StampedQuaternion& stamped_out) const;
+  void transform_vector(const std::string& target_frame,
+                        const StampedVector3& stamped_in,
+                        StampedVector3& stamped_out) const;
+  void transform_point(const std::string& target_frame,
+                       const StampedPoint& stamped_in,
+                       StampedPoint& stamped_out) const;
+  void transform_pose(const std::string& target_frame,
+                      const StampedPose& stamped_in,
+                      StampedPose& stamped_out) const;
+
+  void transform_quaternion(const std::string& target_frame,
+                            const fawkes::Time& target_time,
+                            const StampedQuaternion& stamped_in,
+                            const std::string& fixed_frame,
+                            StampedQuaternion& stamped_out) const;
+  void transform_vector(const std::string& target_frame,
+                        const fawkes::Time& target_time,
+                        const StampedVector3& stamped_in,
+                        const std::string& fixed_frame,
+                        StampedVector3& stamped_out) const;
+  void transform_point(const std::string& target_frame,
+                       const fawkes::Time& target_time,
+                       const StampedPoint& stamped_in,
+                       const std::string& fixed_frame,
+                       StampedPoint& stamped_out) const;
+  void transform_pose(const std::string& target_frame,
+                      const fawkes::Time& target_time,
+                      const StampedPose& stamped_in,
+                      const std::string& fixed_frame,
+                      StampedPose& stamped_out) const;
+
+};
+
+  }
+}

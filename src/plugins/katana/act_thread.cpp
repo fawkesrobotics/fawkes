@@ -24,6 +24,8 @@
 
 #include <core/threading/mutex_locker.h>
 #include <interfaces/KatanaInterface.h>
+#include <utils/math/angle.h>
+#include <utils/time/time.h>
 
 #include <algorithm>
 #include <cstdarg>
@@ -31,6 +33,7 @@
 #include <common/MathHelperFunctions.h>
 
 using namespace fawkes;
+using namespace fawkes::tf;
 
 /** @class KatanaActThread "act_thread.h"
  * Katana act thread.
@@ -43,8 +46,18 @@ using namespace fawkes;
 KatanaActThread::KatanaActThread()
   : Thread("KatanaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC),
+#ifdef HAVE_TF
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Katana"),
+#endif
     BlackBoardInterfaceListener("KatanaActThread")
 {
+  __last_update = new Time();
+}
+
+/** Destructor. */
+KatanaActThread::~KatanaActThread()
+{
+  delete __last_update;
 }
 
 
@@ -76,6 +89,8 @@ KatanaActThread::init()
   __cfg_offset_z         = config->get_float("/hardware/katana/offset_z");
   __cfg_distance_scale   = config->get_float("/hardware/katana/distance_scale");
 
+  __cfg_update_interval  = config->get_float("/hardware/katana/update_interval");
+
 #ifdef HAVE_OPENRAVE
   __cfg_OR_enabled       = config->get_bool("/hardware/katana/openrave/enabled");
   __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
@@ -84,6 +99,9 @@ KatanaActThread::init()
 #else
   __cfg_OR_enabled       = false;
 #endif
+
+  __last_update->set_clock(clock);
+  __last_update->set_time(0, 0);
 
   try {
     TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, __cfg_read_timeout, __cfg_write_timeout};
@@ -135,7 +153,7 @@ KatanaActThread::init()
   __sensacq_thread->start();
 
   bbil_add_message_interface(__katana_if);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
   __tt.reset(new TimeTracker());
@@ -185,6 +203,8 @@ KatanaActThread::once()
 {
   if ( __cfg_auto_calibrate ) {
     start_motion(__calib_thread, 0, "Auto calibration enabled, calibrating");
+    __katana_if->set_enabled(true);
+    __katana_if->write();
   }
 }
 
@@ -207,6 +227,28 @@ KatanaActThread::update_position(bool refresh)
   } catch (/*KNI*/::Exception &e) {
     logger->log_warn(name(), "Updating position values failed: %s", e.what());
   }
+
+#ifdef HAVE_TF
+  float *a = __katana_if->angles();
+  fawkes::Time now(clock);
+
+  static const float  p90 = deg2rad(90);
+  static const float p180 = deg2rad(180);
+
+  Transform bs_j1(Quaternion(a[0],      0,        0), Vector3(0, 0, 0.141));
+  Transform j1_j2(Quaternion(0,      a[1] -  p90, 0), Vector3(0, 0, 0.064));
+  Transform j2_j3(Quaternion(0,      a[2] + p180, 0), Vector3(0, 0, 0.190));
+  Transform j3_j4(Quaternion(0,     -a[3] - p180, 0), Vector3(0, 0, 0.139));
+  Transform j4_j5(Quaternion(-a[4],     0,        0), Vector3(0, 0, 0.120));
+  Transform j5_gr(Quaternion(0,      -p90,        0), Vector3(0, 0, 0.065));
+
+  tf_publisher->send_transform(bs_j1, now, "/katana/base", "/katana/j1");
+  tf_publisher->send_transform(j1_j2, now, "/katana/j1", "/katana/j2");
+  tf_publisher->send_transform(j2_j3, now, "/katana/j2", "/katana/j3");
+  tf_publisher->send_transform(j3_j4, now, "/katana/j3", "/katana/j4");
+  tf_publisher->send_transform(j4_j5, now, "/katana/j4", "/katana/j5");
+  tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper");
+#endif  
 }
 
 
@@ -319,8 +361,8 @@ void
 KatanaActThread::loop()
 {
   if ( __actmot_thread ) {
-    update_position(/* refresh */ false);
     update_motors(/* refresh */ false);
+    update_position(/* refresh */ false);
     __katana_if->write();
     if (! __actmot_thread->finished()) {
       return;
@@ -338,11 +380,22 @@ KatanaActThread::loop()
       __sensacq_thread->set_enabled(true);
 
 #ifdef HAVE_OPENRAVE
-        if(__cfg_OR_enabled)
-          {__goto_openrave_thread->update_openrave_data();}
+      if(__cfg_OR_enabled) { __goto_openrave_thread->update_openrave_data(); }
 #endif
+      update_motors(/* refresh */ true);
+      update_position(/* refresh */ true);
+    }
+  } else if (!__katana_if->is_enabled()) {
       update_position(/* refresh */ true);
       update_motors(/* refresh */ true);
+
+  } else {
+    // update every once in a while to keep transforms updated
+    fawkes::Time now(clock);
+    if ((now - __last_update) >= __cfg_update_interval) {
+      __last_update->stamp();
+      update_position(/* refresh */ false);
+      update_motors(/* refresh */ false);
     }
   }
 

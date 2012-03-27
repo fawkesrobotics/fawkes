@@ -15,14 +15,13 @@
 
 BASEDIR = ..
 
-SUBDIRS = libs interfaces mainapp plugins tools
+SUBDIRS = libs mainapp plugins tools
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/rules.mk
 
 # Explicit dependencies, this is needed to have make bail out if there is any
 # error. This is also necessary for working parallel build (i.e. for dual core)
-interfaces mainapp plugins tools: libs
-mainapp plugins tools: interfaces
+mainapp plugins tools: libs
 tools: mainapp plugins
 

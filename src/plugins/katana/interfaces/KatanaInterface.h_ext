@@ -68,15 +68,15 @@ class KatanaInterface : public Interface
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint8_t sensor_value[16]; /**< Sensor
     values. Use SENSOR_* indexes for accessing the values. */
-    float x; /**< X-Coordinate for tool position
+    float x; /**< DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system. */
-    float y; /**< Y-Coordinate for tool position
+    float y; /**< DEPRECATED! Y-Coordinate for tool position
     compared to base coordinate system. */
-    float z; /**< Z-Coordinate for tool position
+    float z; /**< DEPRECATED! Z-Coordinate for tool position
     compared to base coordinate system. */
-    float phi; /**< Euler angle Phi of tool orientation. */
-    float theta; /**< Euler angle Theta of tool orientation. */
-    float psi; /**< Euler angle Psi of tool orientation.. */
+    float phi; /**< DEPRECATED! Euler angle Phi of tool orientation. */
+    float theta; /**< DEPRECATED! Euler angle Theta of tool orientation. */
+    float psi; /**< DEPRECATED! Euler angle Psi of tool orientation.. */
     int32_t encoders[6]; /**< Encoder values of motors */
     float angles[6]; /**< Angle values of motors */
     uint32_t msgid; /**< The ID of the message that is currently being
@@ -171,15 +171,15 @@ class KatanaInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float x; /**< X-Coordinate for tool position
+      float x; /**< DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system. */
-      float y; /**< Y-Coordinate for tool position
+      float y; /**< DEPRECATED! Y-Coordinate for tool position
     compared to base coordinate system. */
-      float z; /**< Z-Coordinate for tool position
+      float z; /**< DEPRECATED! Z-Coordinate for tool position
     compared to base coordinate system. */
-      float phi; /**< Euler angle Phi of tool orientation. */
-      float theta; /**< Euler angle Theta of tool orientation. */
-      float psi; /**< Euler angle Psi of tool orientation.. */
+      float phi; /**< DEPRECATED! Euler angle Phi of tool orientation. */
+      float theta; /**< DEPRECATED! Euler angle Theta of tool orientation. */
+      float psi; /**< DEPRECATED! Euler angle Psi of tool orientation.. */
     } LinearGotoMessage_data_t;
 #pragma pack(pop)
 

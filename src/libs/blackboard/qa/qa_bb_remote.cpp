@@ -133,8 +133,8 @@ public:
     bbil_add_data_interface(__reader);
     bbil_add_message_interface(__writer);
 
-    __reader_bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
-    __writer_bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+    __reader_bb->register_listener(this);
+    __writer_bb->register_listener(this);
   }
 
 
@@ -252,6 +252,7 @@ main(int argc, char **argv)
     cout << "Trying to open second writer.. " << flush;
     TestInterface *ti_writer_two;
     ti_writer_two = rbb->open_for_writing<TestInterface>("SomeID");
+    rbb->close(ti_writer_two);
     cout << "BUG: Detection of second writer did NOT work!" << endl;
     exit(2);
   } catch (BlackBoardWriterActiveException &e) {

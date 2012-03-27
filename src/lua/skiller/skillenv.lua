@@ -93,6 +93,7 @@ local skill_env_template = {
    logger   = logger,
    config   = config,
    clock    = clock,
+   tf       = tf,
 
    -- Packages
    math     = math,
@@ -553,6 +554,10 @@ function module_init(m)
    m.SkillJumpState    = shsmmod.SkillJumpState
    m.SubFSMJumpState   = shsmmod.SubFSMJumpState
    m.WaitState         = wsmod.WaitState
+
+   m.config            = config
+   m.clock             = clock
+   m.tf                = tf
 end
 
 

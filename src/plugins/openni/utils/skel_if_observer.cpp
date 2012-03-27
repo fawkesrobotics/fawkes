@@ -70,7 +70,7 @@ SkelIfObserver::SkelIfObserver(BlackBoard *bb, UserMap &users)
   }
 
   bbio_add_observed_create("HumanSkeletonInterface", "OpenNI Human *");
-  __bb->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+  __bb->register_observer(this);
 }
 
 

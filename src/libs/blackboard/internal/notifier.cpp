@@ -95,221 +95,209 @@ BlackBoardNotifier::~BlackBoardNotifier()
   delete __bbio_mutex;
 }
 
-
 /** Register BB event listener.
  * @param listener BlackBoard event listener to register
- * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
- * and BBIL_FLAG_INTERFACE. Only for the given types the event listener is registered.
- * BBIL_FLAG_ALL can be supplied to register for all events.
+ * @param flag concatenation of flags denoting which queue entries should be
+ * processed
  */
 void
 BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
-				      unsigned int flags)
+                                      BlackBoard::ListenerRegisterFlag flag)
 {
-  if ( flags & BlackBoard::BBIL_FLAG_DATA ) {
-    __bbil_data_mutex->lock();
-    if (__bbil_data_events > 0) {
-      LibLogger::log_warn("BlackBoardNotifier", "Registering interface listener %s "
-			  "for data events queued",
-			  listener->bbil_name());
-      __bbil_data_queue.push_back(std::make_pair(true, listener));
-    } else {
-      add_listener(listener, listener->bbil_data_interfaces(), __bbil_data);
-    }
-    __bbil_data_mutex->unlock();
-  }
-  if ( flags & BlackBoard::BBIL_FLAG_MESSAGES ) {
-    __bbil_messages_mutex->lock();
-    BlackBoardInterfaceListener::InterfaceLockMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockMap *im = listener->bbil_message_interfaces();
-    MutexLocker lock(im->mutex());
-    for (i = im->begin(); i != im->end(); ++i) {
-      if ( ! i->second->is_writer() ||
-	   (__bbil_messages.find(i->first) != __bbil_messages.end()) ) {
-	__bbil_messages_mutex->unlock();
-	throw Exception("An interface listener has already been registered for %s",
-			i->first.c_str());
+  update_listener(listener, flag);
+}
+
+
+/** Update BB event listener.
+ * @param listener BlackBoard event listener to update subscriptions of
+ * @param flag concatenation of flags denoting which queue entries should be
+ * processed
+ */
+void
+BlackBoardNotifier::update_listener(BlackBoardInterfaceListener *listener,
+                                    BlackBoard::ListenerRegisterFlag flag)
+{
+  const BlackBoardInterfaceListener::InterfaceQueue & queue =
+    listener->bbil_acquire_queue();
+
+  BlackBoardInterfaceListener::InterfaceQueue::const_iterator i = queue.begin();
+
+  for (i = queue.begin(); i != queue.end(); ++i) {
+    switch (i->type) {
+    case BlackBoardInterfaceListener::DATA:
+      if (flag & BlackBoard::BBIL_FLAG_DATA) {
+        proc_listener_maybe_queue(i->op, i->interface, listener,
+                                  __bbil_data_mutex, __bbil_data_events,
+                                  __bbil_data, __bbil_data_queue, "data");
       }
+      break;
+    case BlackBoardInterfaceListener::MESSAGES:
+      if (flag & BlackBoard::BBIL_FLAG_MESSAGES) {
+        proc_listener_maybe_queue(i->op, i->interface, listener,
+                                  __bbil_messages_mutex, __bbil_messages_events,
+                                  __bbil_messages, __bbil_messages_queue,
+                                  "messages");
+      }
+      break;
+    case BlackBoardInterfaceListener::READER:
+      if (flag & BlackBoard::BBIL_FLAG_READER) {
+      proc_listener_maybe_queue(i->op, i->interface, listener,
+                                __bbil_reader_mutex, __bbil_reader_events,
+                                __bbil_reader, __bbil_reader_queue, "reader");
+      }
+      break;
+    case BlackBoardInterfaceListener::WRITER:
+      if (flag & BlackBoard::BBIL_FLAG_WRITER) {
+      proc_listener_maybe_queue(i->op, i->interface, listener,
+                                __bbil_writer_mutex, __bbil_writer_events,
+                                __bbil_writer, __bbil_writer_queue, "writer");
+      }
+      break;
+    default: break;
     }
-    for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_messages[i->first] = listener;
-    }
-    __bbil_messages_mutex->unlock();
   }
-  if ( flags & BlackBoard::BBIL_FLAG_READER ) {
-    __bbil_reader_mutex->lock();
-    if (__bbil_reader_events > 0) {
-      LibLogger::log_warn("BlackBoardNotifier", "Registering interface listener %s "
-			  "for reader events queued",
-			  listener->bbil_name());
-      __bbil_reader_queue.push_back(std::make_pair(true, listener));
+
+  listener->bbil_release_queue(flag);
+}
+
+void
+BlackBoardNotifier::proc_listener_maybe_queue(bool op,
+                                              Interface *interface,
+                                              BlackBoardInterfaceListener *listener,
+                                              Mutex *mutex, unsigned int &events,
+                                              BBilMap &map, BBilQueue &queue,
+                                              const char *hint)
+{
+  MutexLocker lock(mutex);
+  if (events > 0) {
+    LibLogger::log_warn("BlackBoardNotifier", "Registering interface "
+                        "listener %s for %s events (queued)",
+                        listener->bbil_name(), hint);
+
+    queue_listener(op, interface, listener, queue);
+  } else {
+    if (op) { // add
+      add_listener(interface, listener, map);
     } else {
-      add_listener(listener, listener->bbil_reader_interfaces(), __bbil_reader);
+      remove_listener(interface, listener, map);
     }
-    __bbil_reader_mutex->unlock();
-  }
-  if ( flags & BlackBoard::BBIL_FLAG_WRITER ) {
-    __bbil_writer_mutex->lock();
-    if (__bbil_writer_events > 0) {
-      LibLogger::log_warn("BlackBoardNotifier", "Registering interface listener %s "
-			  "for writer events queued",
-			  listener->bbil_name());
-      __bbil_writer_queue.push_back(std::make_pair(true, listener));
-    } else {
-      add_listener(listener, listener->bbil_writer_interfaces(), __bbil_writer);
-    }
-    __bbil_writer_mutex->unlock();
   }
 }
 
 
 /** Unregister BB interface listener.
- * This will remove the given BlackBoard interface listener from any event that it was
- * previously registered for.
+ * This will remove the given BlackBoard interface listener from any
+ * event that it was previously registered for.
  * @param listener BlackBoard event listener to remove
  */
 void
 BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  remove_listener(listener, __bbil_writer_mutex, __bbil_writer_events,
-		  __bbil_writer_queue, __bbil_writer);
-  remove_listener(listener, __bbil_reader_mutex, __bbil_reader_events,
-		  __bbil_reader_queue, __bbil_reader);
-  remove_listener(listener, __bbil_data_mutex, __bbil_data_events,
-		  __bbil_data_queue, __bbil_data);
-  remove_message_listener(listener);
+  const BlackBoardInterfaceListener::InterfaceMaps maps =
+    listener->bbil_acquire_maps();
+
+  BlackBoardInterfaceListener::InterfaceMap::const_iterator i;
+  for (i = maps.data.begin(); i != maps.data.end(); ++i) {
+    proc_listener_maybe_queue(false, i->second, listener,
+                              __bbil_data_mutex, __bbil_data_events,
+                              __bbil_data, __bbil_data_queue, "data");
+  }
+
+  for (i = maps.messages.begin(); i != maps.messages.end(); ++i) {
+    proc_listener_maybe_queue(false, i->second, listener,
+                              __bbil_messages_mutex, __bbil_messages_events,
+                              __bbil_messages, __bbil_messages_queue,
+                              "messages");
+  }
+
+  for (i = maps.reader.begin(); i != maps.reader.end(); ++i) {
+    proc_listener_maybe_queue(false, i->second, listener,
+                              __bbil_reader_mutex, __bbil_reader_events,
+                              __bbil_reader, __bbil_reader_queue, "reader");
+  }
+
+  for (i = maps.writer.begin(); i != maps.writer.end(); ++i) {
+    proc_listener_maybe_queue(false, i->second, listener,
+                              __bbil_writer_mutex, __bbil_writer_events,
+                              __bbil_writer, __bbil_writer_queue, "writer");
+  }
+
+  listener->bbil_release_maps();
 }
 
-/** Add listener for specified map..
+/** Add listener for specified map.
  * @param listener interface listener for events
  * @param im map of interfaces to listen for
  * @param ilmap internal map to add listener to
  */
 void
-BlackBoardNotifier::add_listener(BlackBoardInterfaceListener *listener,
-				 BlackBoardInterfaceListener::InterfaceLockMap *im,
-				 BBilMap &ilmap)
+BlackBoardNotifier::add_listener(Interface *interface,
+                                 BlackBoardInterfaceListener *listener,
+                                 BBilMap &ilmap)
 {
-  BlackBoardInterfaceListener::InterfaceLockMapIterator i;
-  im->lock();
-  for (i = im->begin(); i != im->end(); ++i) {
-    ilmap[i->first].push_back(listener);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    ilmap.equal_range(interface->uid());
+
+  BBilMap::value_type v = std::make_pair(interface->uid(), listener);
+  BBilMap::iterator f = std::find(ret.first, ret.second, v);
+
+  if (f == ret.second) {
+    ilmap.insert(std::make_pair(interface->uid(), listener));
   }
-  im->unlock();
 }
 
 void
-BlackBoardNotifier::remove_listener(BlackBoardInterfaceListener *listener,
-				    Mutex *mutex, unsigned int events,
-				    BBilQueue &queue, BBilMap &ilmap)
+BlackBoardNotifier::remove_listener(Interface *interface,
+                                    BlackBoardInterfaceListener *listener,
+                                    BBilMap &ilmap)
 {
-  MutexLocker lock(mutex);
-  if (events > 0) {
-    //LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface listener %s queued",
-    //			  listener->bbil_name());
-
-    BBilQueue::iterator re;
-    if ( (re = find(queue.begin(), queue.end(),
-		    std::make_pair(true, listener))) != queue.end()) {
-      // if there is an entry in the register queue, remove it!
-      queue.erase(re);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    ilmap.equal_range(interface->uid());
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    if (j->second == listener) {
+      ilmap.erase(j);
+      break;
     }
-    queue.push_back(std::make_pair(false, listener));
-  } else {
-    remove_listener(ilmap, listener);
   }
 }
 
 
-/** Remove listener from map.
- * @param ilmap interface listener map to remove the listener from
- * @param listener listener to remove
- */
-void
-BlackBoardNotifier::remove_listener(BBilMap &ilmap, BlackBoardInterfaceListener *listener)
+bool
+BlackBoardNotifier::is_in_queue(bool op, BBilQueue &queue, const char *uid,
+                                BlackBoardInterfaceListener *bbil)
 {
-  BBilMapIterator i, tmp;
-
-  i = ilmap.begin();;
-  while (i != ilmap.end()) {
-    BBilListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == listener ) {
-	j = i->second.erase(j);
-      } else {
-	++j;
-      }
-    }
-    if ( i->second.empty() ) {
-      tmp = i;
-      ++i;
-      ilmap.erase(tmp);
-    } else {
-      ++i;
+  BBilQueue::iterator q;
+  for (q = queue.begin(); q != queue.end(); ++q) {
+    if ((q->op == op) && (q->uid == uid) && (q->listener == bbil)) {
+      return true;
     }
   }
+  return false;
 }
-
 
 void
-BlackBoardNotifier::remove_message_listener_map(BlackBoardInterfaceListener *listener)
+BlackBoardNotifier::queue_listener(bool op, Interface *interface,
+                                   BlackBoardInterfaceListener *listener,
+                                   BBilQueue &queue)
 {
-  BBilMessageLockMapIterator i, tmp;
-
-  i = __bbil_messages.begin();;
-  while (i != __bbil_messages.end()) {
-    if ( i->second == listener ) {
-      // found!
-      tmp = i;
-      ++i;
-      __bbil_messages.erase(tmp);
-    } else {
-      ++i;
-    }
-  }
+  BBilQueueEntry qe = { op, interface->uid(), interface, listener };
+  queue.push_back(qe);
 }
 
-
-void
-BlackBoardNotifier::remove_message_listener(BlackBoardInterfaceListener *listener)
-{
-  __bbil_messages_mutex->lock();
-  if (__bbil_messages_events > 0) {
-    //LibLogger::log_warn("BlackBoardNotifier", "UN-registering interface (message) listener %s queued",
-    //			listener->bbil_name());
-
-    BBilQueue::iterator re;
-    if ( (re = find(__bbil_messages_queue.begin(), __bbil_messages_queue.end(),
-		    std::make_pair(true, listener))) != __bbil_messages_queue.end()) {
-      // if there is an entry in the register queue, remove it!
-      __bbil_messages_queue.erase(re);
-    }
-    __bbil_messages_queue.push_back(std::make_pair(false, listener));
-  } else {
-    remove_message_listener_map(listener);
-  }
-  __bbil_messages_mutex->unlock();
-}
 
 
 /** Register BB interface observer.
  * @param observer BlackBoard interface observer to register
- * @param flags an or'ed combination of BBIO_FLAG_CREATED, BBIO_FLAG_DESTROYED
  */
 void
-BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer,
-				      unsigned int flags)
+BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer)
 {
   __bbio_mutex->lock();
   if (__bbio_events > 0) {
-    __bbio_queue.push_back(std::make_pair(flags, observer));
+    __bbio_queue.push_back(std::make_pair(1, observer));
   } else {
-    if ( flags & BlackBoard::BBIO_FLAG_CREATED ) {
-      add_observer(observer, observer->bbio_get_observed_create(), __bbio_created);
-    }
-    if ( flags & BlackBoard::BBIO_FLAG_DESTROYED ) {
-      add_observer(observer, observer->bbio_get_observed_destroy(), __bbio_destroyed);
-    }
+    add_observer(observer, observer->bbio_get_observed_create(), __bbio_created);
+    add_observer(observer, observer->bbio_get_observed_destroy(), __bbio_destroyed);
   }
   __bbio_mutex->unlock();
 }
@@ -465,9 +453,8 @@ BlackBoardNotifier::process_bbio_queue()
     } else {
       while (! __bbio_queue.empty()) {
 	BBioQueueEntry &e = __bbio_queue.front();
-	if (e.first & BlackBoard::BBIO_FLAG_CREATED) { // register create
+	if (e.first) { // register
 	  add_observer(e.second, e.second->bbio_get_observed_create(), __bbio_created);
-	} else if (e.first & BlackBoard::BBIO_FLAG_DESTROYED) { // register destroy
 	  add_observer(e.second, e.second->bbio_get_observed_destroy(), __bbio_destroyed);
 	} else {       // unregister
 	  remove_observer(__bbio_created, e.second);
@@ -492,27 +479,23 @@ BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
 					   unsigned int event_instance_serial) throw()
 {
   __bbil_writer_mutex->lock();
-  if ( (__bbil_writer_events > 0) && ! __bbil_writer_queue.empty() ) {
-    __bbil_writer_waitcond->wait();
-  }
   __bbil_writer_events += 1;
   __bbil_writer_mutex->unlock();
 
-  BBilMapIterator lhmi;
-  BBilListIterator i, l;
   const char *uid = interface->uid();
-  if ( (lhmi = __bbil_writer.find(uid)) != __bbil_writer.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    __bbil_writer.equal_range(uid);
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    BlackBoardInterfaceListener *bbil = j->second;
+    if (! is_in_queue(/* remove op*/ false, __bbil_writer_queue, uid, bbil)) {
       Interface *bbil_iface = bbil->bbil_writer_interface(uid);
       if (bbil_iface != NULL ) {
-	bbil->bb_interface_writer_added(bbil_iface, event_instance_serial);
+        bbil->bb_interface_writer_added(bbil_iface, event_instance_serial);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier",
-			    "BBIL[%s] registered for writer events "
-			    "(open) for '%s' but has no such interface",
-			    bbil->bbil_name(), uid);
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for writer events "
+                            "(open) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
       }
     }
   }
@@ -534,29 +517,23 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
 					     unsigned int event_instance_serial) throw()
 {
   __bbil_writer_mutex->lock();
-  if ( (__bbil_writer_events > 0) && ! __bbil_writer_queue.empty() ) {
-    __bbil_writer_waitcond->wait();
-  }
   __bbil_writer_events += 1;
   __bbil_writer_mutex->unlock();
 
-  BBilMapIterator lhmi;
-  BBilListIterator i, l;
   const char *uid = interface->uid();
-  if ( (lhmi = __bbil_writer.find(uid)) != __bbil_writer.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    __bbil_writer.equal_range(uid);
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    BlackBoardInterfaceListener *bbil = j->second;
+    if (! is_in_queue(/* remove op*/ false, __bbil_data_queue, uid, bbil)) {
       Interface *bbil_iface = bbil->bbil_writer_interface(uid);
-      if (bbil_iface != NULL) {
-	if (bbil_iface->serial() != event_instance_serial) {
-	  bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
-	}
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier",
-			    "BBIL[%s] registered for writer events "
-			    "(close) for '%s' but has no such interface",
-			    bbil->bbil_name(), uid);
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for writer events "
+                            "(close) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
       }
     }
   }
@@ -576,10 +553,10 @@ BlackBoardNotifier::process_writer_queue()
     } else {
       while (! __bbil_writer_queue.empty()) {
 	BBilQueueEntry &e = __bbil_writer_queue.front();
-	if (e.first) { // register
-	  add_listener(e.second, e.second->bbil_writer_interfaces(), __bbil_writer);
-	} else {       // unregister
-	  remove_listener(__bbil_writer, e.second);
+	if (e.op) { // register
+	  add_listener(e.interface, e.listener, __bbil_writer);
+	} else {    // unregister
+	  remove_listener(e.interface, e.listener, __bbil_writer);
 	}
 	__bbil_writer_queue.pop_front();
       }
@@ -599,27 +576,23 @@ BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
 					   unsigned int event_instance_serial) throw()
 {
   __bbil_reader_mutex->lock();
-  if ( (__bbil_reader_events > 0) && ! __bbil_reader_queue.empty() ) {
-    __bbil_reader_waitcond->wait();
-  }
   __bbil_reader_events += 1;
   __bbil_reader_mutex->unlock();
 
-  BBilMapIterator lhmi;
-  BBilListIterator i, l;
   const char *uid = interface->uid();
-  if ( (lhmi = __bbil_reader.find(uid)) != __bbil_reader.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    __bbil_reader.equal_range(uid);
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    BlackBoardInterfaceListener *bbil = j->second;
+    if (! is_in_queue(/* remove op*/ false, __bbil_reader_queue, uid, bbil)) {
       Interface *bbil_iface = bbil->bbil_reader_interface(uid);
       if (bbil_iface != NULL ) {
-	bbil->bb_interface_reader_added(bbil_iface, event_instance_serial);
+        bbil->bb_interface_reader_added(bbil_iface, event_instance_serial);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier",
-			    "BBIL[%s] registered for reader events "
-			    "(open) for '%s' but has no such interface",
-			    bbil->bbil_name(), uid);
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for reader events "
+                            "(open) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
       }
     }
   }
@@ -641,29 +614,23 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
 					     unsigned int event_instance_serial) throw()
 {
   __bbil_reader_mutex->lock();
-  if ( (__bbil_reader_events > 0) && ! __bbil_reader_queue.empty() ) {
-    __bbil_reader_waitcond->wait();
-  }
   __bbil_reader_events += 1;
   __bbil_reader_mutex->unlock();
 
-  BBilMapIterator lhmi;
-  BBilListIterator i, l;
   const char *uid = interface->uid();
-  if ( (lhmi = __bbil_reader.find(uid)) != __bbil_reader.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    __bbil_reader.equal_range(uid);
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    BlackBoardInterfaceListener *bbil = j->second;
+    if (! is_in_queue(/* remove op*/ false, __bbil_data_queue, uid, bbil)) {
       Interface *bbil_iface = bbil->bbil_reader_interface(uid);
-      if (bbil_iface != NULL) {
-	if (bbil_iface->serial() != event_instance_serial) {
-	  bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
-	}
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier",
-			    "BBIL[%s] registered for reader events "
-			    "(close) for '%s' but has no such interface",
-			    bbil->bbil_name(), uid);
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for reader events "
+                            "(close) for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
       }
     }
   }
@@ -684,10 +651,10 @@ BlackBoardNotifier::process_reader_queue()
     } else {
       while (! __bbil_reader_queue.empty()) {
 	BBilQueueEntry &e = __bbil_reader_queue.front();
-	if (e.first) { // register
-	  add_listener(e.second, e.second->bbil_reader_interfaces(), __bbil_reader);
-	} else {       // unregister
-	  remove_listener(__bbil_reader, e.second);
+	if (e.op) { // register
+	  add_listener(e.interface, e.listener, __bbil_reader);
+	} else {    // unregister
+	  remove_listener(e.interface, e.listener, __bbil_reader);
 	}
 	__bbil_reader_queue.pop_front();
       }
@@ -710,27 +677,23 @@ void
 BlackBoardNotifier::notify_of_data_change(const Interface *interface)
 {
   __bbil_data_mutex->lock();
-  if ( (__bbil_data_events > 0) && ! __bbil_data_queue.empty() ) {
-    __bbil_data_waitcond->wait();
-  }
   __bbil_data_events += 1;
   __bbil_data_mutex->unlock();
 
-  BBilMapIterator lhmi;
-  BBilListIterator i, l;
   const char *uid = interface->uid();
-  if ( (lhmi = __bbil_data.find(uid)) != __bbil_data.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    __bbil_data.equal_range(uid);
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    BlackBoardInterfaceListener *bbil = j->second;
+    if (! is_in_queue(/* remove op*/ false, __bbil_data_queue, uid, bbil)) {
       Interface *bbil_iface = bbil->bbil_data_interface(uid);
-      if (bbil_iface != NULL) {
-	bbil->bb_interface_data_changed(bbil_iface);
+      if (bbil_iface != NULL ) {
+        bbil->bb_interface_data_changed(bbil_iface);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier",
-			    "BBIL[%s] registered for data change events "
-			    "for '%s' but has no such interface",
-			    bbil->bbil_name(), uid);
+        LibLogger::log_warn("BlackBoardNotifier",
+                            "BBIL[%s] registered for data change events "
+                            "for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
       }
     }
   }
@@ -743,10 +706,10 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
     } else {
       while (! __bbil_data_queue.empty()) {
 	BBilQueueEntry &e = __bbil_data_queue.front();
-	if (e.first) { // register
-	  add_listener(e.second, e.second->bbil_data_interfaces(), __bbil_data);
-	} else {       // unregister
-	  remove_listener(__bbil_data, e.second);
+	if (e.op) { // register
+	  add_listener(e.interface, e.listener,  __bbil_data);
+	} else {    // unregister
+	  remove_listener(e.interface, e.listener,  __bbil_data);
 	}
 	__bbil_data_queue.pop_front();
       }
@@ -764,39 +727,38 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
  * that for you.
  * @param interface interface whose subscribers to notify
  * @param message message which is being received
- * @return true if any of the listeners did return true, false if none returned
- * true at all.
+ * @return false if any listener returned false, true otherwise
  * @see BlackBoardInterfaceListener::bb_interface_message_received()
  */
 bool
 BlackBoardNotifier::notify_of_message_received(const Interface *interface, Message *message)
 {
   __bbil_messages_mutex->lock();
-  if ( (__bbil_messages_events > 0) && ! __bbil_messages_queue.empty() ) {
-    __bbil_messages_waitcond->wait();
-  }
   __bbil_messages_events += 1;
   __bbil_messages_mutex->unlock();
 
-  bool rv = false;
+  bool done = true;
 
   const char *uid = interface->uid();
-  if ( __bbil_messages.find(uid) != __bbil_messages.end() ) {
-    BlackBoardInterfaceListener *bbil = __bbil_messages[uid];
-
-    Interface *bbil_iface = bbil->bbil_message_interface(uid);
-    if (bbil_iface != NULL ) {
-      if ( bbil->bb_interface_message_received(bbil_iface, message) ) {
-	  rv = true;
+  std::pair<BBilMap::iterator, BBilMap::iterator> ret =
+    __bbil_messages.equal_range(uid);
+  for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
+    BlackBoardInterfaceListener *bbil = j->second;
+    if (! is_in_queue(/* remove op*/ false, __bbil_messages_queue, uid, bbil)) {
+      Interface *bbil_iface = bbil->bbil_message_interface(uid);
+      if (bbil_iface != NULL ) {
+        bool abort = bbil->bb_interface_message_received(bbil_iface, message);
+        if (abort) {
+          done = true;
+          break;
+        }
+      } else {
+        LibLogger::log_warn("BlackBoardNotifier",
+                          "BBIL[%s] registered for message events "
+                            "for '%s' but has no such interface",
+                            bbil->bbil_name(), uid);
       }
-    } else {
-      LibLogger::log_warn("BlackBoardNotifier", "BBIL[%s] registered "
-			  "for message received events for '%s' "
-			  "but has no such interface",
-			  bbil->bbil_name(), uid);
     }
-  } else {
-    rv = true;
   }
 
   __bbil_messages_mutex->lock();
@@ -807,8 +769,11 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
     } else {
       while (! __bbil_messages_queue.empty()) {
 	BBilQueueEntry &e = __bbil_messages_queue.front();
-	// register never queues for message event listeners, only unregister does
-	remove_message_listener_map(e.second);
+	if (e.op) { // register
+	  add_listener(e.interface, e.listener,  __bbil_messages);
+	} else {    // unregister
+	  remove_listener(e.interface, e.listener,  __bbil_messages);
+	}
 	__bbil_messages_queue.pop_front();
       }
       __bbil_messages_waitcond->wake_all();
@@ -816,7 +781,7 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
   }
   __bbil_messages_mutex->unlock();
 
-  return rv;
+  return done;
 }
 
 } // end namespace fawkes

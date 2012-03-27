@@ -81,7 +81,7 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface,
 {
   try {
     if ( interface == __writer ) {
-      __logger->log_debug(bbil_name(), "Forwarding message");
+      //__logger->log_debug(bbil_name(), "Forwarding message");
       Message *m = message->clone();
       m->set_hops(message->hops());
       m->ref();

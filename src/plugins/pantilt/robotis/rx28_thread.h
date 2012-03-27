@@ -3,7 +3,7 @@
  *  rx28_thread.h - RX28 pan/tilt unit act thread
  *
  *  Created: Thu Jun 18 09:52:16 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -25,7 +25,11 @@
 
 #include "../act_thread.h"
 
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 #include <blackboard/interface_listener.h>
+#include <utils/time/time.h>
 
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
@@ -36,12 +40,17 @@
 namespace fawkes {
   class PanTiltInterface;
   class LedInterface;
+  class ReadWriteLock;
+  class WaitCondition;
 }
 
 class RobotisRX28;
 
 class PanTiltRX28Thread
 : public PanTiltActThread,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::BlackBoardInterfaceListener
 {
  public:
@@ -77,8 +86,6 @@ class PanTiltRX28Thread
   unsigned int __cfg_disc_timeout_ms;
   unsigned int __cfg_pan_servo_id;
   unsigned int __cfg_tilt_servo_id;
-  int          __cfg_pan_zero_offset;
-  int          __cfg_tilt_zero_offset;
   bool         __cfg_goto_zero_start;
   bool         __cfg_turn_off;
   unsigned int __cfg_cw_compl_margin;
@@ -91,6 +98,21 @@ class PanTiltRX28Thread
   float        __cfg_tilt_max;
   float        __cfg_pan_margin;
   float        __cfg_tilt_margin;
+  float        __cfg_pan_offset;
+  float        __cfg_tilt_offset;
+  float        __cfg_pan_start;
+  float        __cfg_tilt_start;
+#ifdef HAVE_TF
+  std::string  __cfg_base_frame;
+  std::string  __cfg_pan_link;
+  std::string  __cfg_tilt_link;
+
+  fawkes::tf::Vector3  __translation_pan;
+  fawkes::tf::Vector3  __translation_tilt;
+#endif
+
+  float         __last_pan;
+  float         __last_tilt;
 
   class WorkerThread : public fawkes::Thread
   {
@@ -99,12 +121,13 @@ class PanTiltRX28Thread
 		 fawkes::RefPtr<RobotisRX28> rx28,
 		 unsigned char pan_servo_id, unsigned char tilt_servo_id,
 		 float &pan_min, float &pan_max, float &tilt_min, float &tilt_max,
-		 int &pan_zero_offset, int &tilt_zero_offset);
+		 float &pan_offset, float &tilt_offset);
 
     ~WorkerThread();
     void goto_pantilt(float pan, float tilt);
     void goto_pantilt_timed(float pan, float tilt, float time_sec);
     void get_pantilt(float &pan, float &tilt);
+    void get_pantilt(float &pan, float &tilt, fawkes::Time &time);
     void set_velocities(float pan_vel, float tilt_vel);
     void get_velocities(float &pan_vel, float &tilt_vel);
     void set_margins(float pan_margin, float tilt_margin);
@@ -114,15 +137,21 @@ class PanTiltRX28Thread
     void set_led_enabled(bool enabled);
     void stop_motion();
     bool has_fresh_data();
+    void wait_for_fresh_data();
 
     virtual void loop();
+
+    /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+    protected: virtual void run() { Thread::run(); }
 
   private:
     void exec_goto_pantilt(float pan, float tilt);
 
   private:
+    fawkes::ReadWriteLock       *__rx28_rwlock;
     fawkes::RefPtr<RobotisRX28>  __rx28;
     fawkes::Logger              *__logger;
+    fawkes::WaitCondition       *__update_waitcond;
 
     unsigned char __pan_servo_id;
     unsigned char __tilt_servo_id;
@@ -131,14 +160,14 @@ class PanTiltRX28Thread
     float         __pan_max;
     float         __tilt_min;
     float         __tilt_max;
-    int           __pan_zero_offset;
-    int           __tilt_zero_offset;
+    float         __pan_offset;
+    float         __tilt_offset;
     float         __max_pan_speed;
     float         __max_tilt_speed;
     float         __pan_margin;
     float         __tilt_margin;
 
-    fawkes::Mutex *__value_mutex;
+    fawkes::ReadWriteLock *__value_rwlock;
     bool  __move_pending;
     float __target_pan;
     float __target_tilt;
@@ -149,8 +178,11 @@ class PanTiltRX28Thread
     unsigned int __tilt_vel;
     bool  __led_enable;
     bool  __led_disable;
+    fawkes::Time  __pantilt_time;
 
     bool __fresh_data;
+    fawkes::Mutex *__fresh_data_mutex;
+
   };
 
   WorkerThread *__wt;

@@ -3,7 +3,7 @@
  *  exec_thread.h - Fawkes Skiller: Execution Thread
  *
  *  Created: Mon Feb 18 10:28:38 2008
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -29,6 +29,9 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 #include <utils/system/fam.h>
 #include <blackboard/interface_listener.h>
 
@@ -55,6 +58,9 @@ class SkillerExecutionThread
   public fawkes::BlackBoardAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::BlackBoardInterfaceListener
 {
  public:

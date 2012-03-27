@@ -123,7 +123,7 @@ class JoystickBlackBoardLogger
     */
 
     bbil_add_data_interface(__joystick_if);
-    __bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+    __bb->register_listener(this);
   }
 
   /** Destructor. */
@@ -213,7 +213,7 @@ class JoystickBlackBoardActListener
     __msgproc = new JoystickActThread::MessageProcessor(aqt, __joystick_if);
     __msgproc->process();
     bbil_add_message_interface(__joystick_if);
-    __bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+    __bb->register_listener(this);
   }
 
   /** Destructor. */
