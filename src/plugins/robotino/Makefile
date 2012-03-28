@@ -16,6 +16,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/pcl.mk
 
 PRESUBDIRS = interfaces
 
@@ -32,16 +33,31 @@ LIBS_robotino_joystick = m fawkescore fawkesutils fawkesaspects \
 			 JoystickInterface MotorInterface
 OBJS_robotino_joystick = robotino_joystick_plugin.o joystick_thread.o
 
+LIBS_robotino_ir_pcl = m fawkescore fawkesutils fawkesaspects \
+			 fawkesblackboard fawkesinterface \
+			 RobotinoSensorInterface
+OBJS_robotino_ir_pcl = robotino_ir_pcl_plugin.o ir_pcl_thread.o
+
 ifeq ($(HAVE_OPENROBOTINO),1)
   CFLAGS  += $(CFLAGS_OPENROBOTINO)
   LDFLAGS_robotino += $(LDFLAGS_OPENROBOTINO)
 
   PLUGINS_all = $(PLUGINDIR)/robotino.so $(PLUGINDIR)/robotino-joystick.so
+
+  ifeq ($(HAVE_PCL),1)
+    CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL)
+    CFLAGS_ir_pcl_thread = $(CFLAGS_robotino_ir_pcl_plugin)
+    LDFLAGS_robotino_ir_pcl += $(LDFLAGS_PCL)
+
+    PLUGINS_all += $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT)
+  else
+    WARN_TARGETS += warning_pcl
+  endif
 else
   WARN_TARGETS += warning_openrobotino
 endif
 
-OBJS_all = $(OBJS_robotino) $(OBJS_robotino_joystick)
+OBJS_all = $(OBJS_robotino) $(OBJS_robotino_joystick) $(OBJS_robotino_ir_pcl)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
@@ -50,6 +66,8 @@ all: $(WARN_TARGETS)
 .PHONY: warning_openrobotino
 warning_openrobotino:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino support$(TNORMAL) (OpenRobotino API not found)"
+warning_pcl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino PCL plugins$(TNORMAL) (PCL not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
