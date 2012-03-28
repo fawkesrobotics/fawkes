@@ -3,7 +3,7 @@
  *  sensor_thread.h - Robotino sensor thread
  *
  *  Created: Sun Nov 13 15:33:04 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -30,6 +30,9 @@
 #include <aspect/blackboard.h>
 
 #include <string>
+#include <vector>
+
+#define NUM_IR_SENSORS 9
 
 namespace rec {
   namespace robotino {
@@ -62,7 +65,10 @@ class RobotinoSensorThread
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
- private:
+ private: // methods
+  void update_distances(float *distances);
+
+ private: // members
   std::string cfg_hostname_;
   bool        cfg_quit_on_disconnect_;
   rec::robotino::com::Com *com_;
@@ -70,6 +76,9 @@ class RobotinoSensorThread
 
   fawkes::BatteryInterface        *batt_if_;
   fawkes::RobotinoSensorInterface *sens_if_;
+
+  // Voltage to distance data points
+  std::vector<std::pair<double, double> > voltage_to_dist_dps_;
 };
 
 
