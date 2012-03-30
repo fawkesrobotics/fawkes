@@ -231,7 +231,7 @@ Time::~Time()
 double
 Time::in_sec() const
 {
-  return ((double)__time.tv_sec + (double)__time.tv_usec / 1000000.d);
+  return ((double)__time.tv_sec + (double)__time.tv_usec / 1000000.);
 }
 
 
