@@ -162,7 +162,7 @@ endif
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C++)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
-	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(CFLAGS_$*) $(CFLAGS)  \
+	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS))  \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
 	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(DEPFILE).td > $(DEPFILE).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
@@ -174,7 +174,7 @@ endif
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
-	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(CFLAGS_$*) $(CFLAGS) \
+	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS)) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
 	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(DEPFILE).td > $(DEPFILE).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \

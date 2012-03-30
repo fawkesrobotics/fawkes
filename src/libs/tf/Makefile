@@ -23,7 +23,7 @@ LIBS_libfawkestf = fawkescore fawkesutils fawkesblackboard fawkesinterface \
 OBJS_libfawkestf = $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 HDRS_libfawkestf = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
-CFLAGS_fawkestf_tolua = -Wno-unused-function $(CFLAGS_LUA)
+CFLAGS_fawkestf_tolua = -Wno-unused-function $(CFLAGS_LUA) $(CFLAGS)
 TOLUA_fawkestf = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua)
 LDFLAGS_lua_fawkestf = $(LDFLAGS_LUA)
 LIBS_lua_fawkestf = fawkescore fawkesutils fawkestf $(TOLUA_LIBS)
