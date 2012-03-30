@@ -67,7 +67,8 @@ endif
 ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
   ifeq ($(HAVE_ROS),1)
     ifeq ($(call ros-have-pkg,visualization_msgs),1)
-      CFLAGS_visualization_thread  = $(CFLAGS_ROS) $(call ros-pkg-cflags,visualization_msgs)
+      CFLAGS_visualization_thread  = -DHAVE_VISUAL_DEBUGGING $(CFLAGS_ROS) $(CFLAGS_TF) \
+				     $(CFLAGS_EIGEN3) $(call ros-pkg-cflags,visualization_msgs)
       CFLAGS += -DHAVE_VISUAL_DEBUGGING
       LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
 

@@ -72,13 +72,14 @@ class TabletopObjectsThread
  private:
   typedef pcl::PointXYZ PointType;
   typedef pcl::PointCloud<PointType> Cloud;
-  typedef typename Cloud::Ptr CloudPtr;
-  typedef typename Cloud::ConstPtr CloudConstPtr;
 
   typedef pcl::PointXYZRGB ColorPointType;
   typedef pcl::PointCloud<ColorPointType> ColorCloud;
-  typedef typename ColorCloud::Ptr ColorCloudPtr;
-  typedef typename ColorCloud::ConstPtr ColorCloudConstPtr;
+  typedef Cloud::Ptr CloudPtr;
+  typedef Cloud::ConstPtr CloudConstPtr;
+
+  typedef ColorCloud::Ptr ColorCloudPtr;
+  typedef ColorCloud::ConstPtr ColorCloudConstPtr;
 
  private:
   void set_position(fawkes::Position3DInterface *iface,
