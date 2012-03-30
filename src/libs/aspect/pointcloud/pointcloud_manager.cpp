@@ -67,6 +67,10 @@ namespace fawkes {
  * Clone this storage adapter.
  * @return cloned copy
  *
+ * @fn const char * PointCloudManager::StorageAdapter::get_typename()
+ * Get typename of storage adapter.
+ * @return type name
+ *
  * @fn size_t PointCloudManager::StorageAdapter::point_size() const
  * Get size of a point.
  * @return size in bytes of a single point
@@ -91,6 +95,12 @@ namespace fawkes {
  * Get last capture time.
  * @param time upon return contains last capture time
  */
+
+
+/** Virtual empty destructor. */
+PointCloudManager::StorageAdapter::~StorageAdapter()
+{
+}
 
 
 /** @class PointCloudManager::PointCloudStorageAdapter <aspect/pointcloud/pointcloud_manager.h>
