@@ -39,7 +39,14 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/vtk/vtkVersion.h),)
   CFLAGS_VTK = -I/usr/include/vtk
 endif
 
-
+ifneq ($(HAVE_PCL),1)
+  # Give it another shot, name might contain version
+  ALTERNATE_NAME=$(shell $(PKGCONFIG) pkg-config --list-all | grep pcl_common | awk '{ print $$1 }')
+  ifneq ($(ALTERNATE_NAME),)
+    PCL_VERSION_SUFFIX=$(patsubst pcl_common%,%,$(ALTERNATE_NAME))
+    HAVE_PCL=1
+  endif
+endif
 
 ifeq ($(HAVE_PCL),1)
   # if we have ROS, by default use std_msgs and sensor_msgs from there, rather
@@ -55,15 +62,15 @@ ifeq ($(HAVE_PCL),1)
   # endif
 
   CFLAGS_PCL  += -DHAVE_PCL $(CFLAGS_EIGEN3) \
-		 $(shell $(PKGCONFIG) --cflags 'pcl_common')
+		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)')
   LDFLAGS_PCL += $(foreach L,common features filters kdtree keypoints octree \
 			range_image range_image_border_extractor registration \
 			sample_consensus segmentation surface, \
-		   $(shell $(PKGCONFIG) --libs 'pcl_$L') ) \
+		   $(shell $(PKGCONFIG) --libs 'pcl_$L$(PCL_VERSION_SUFFIX)') ) \
 		 $(LDFLAGS_EIGEN3)
   # need to fix PCL's pkg-config files first
-  LDFLAGS_PCL_VIS = $(shell $(PKGCONFIG) --libs 'pcl_visualization')
-  LDFLAGS_PCL_IO = $(shell $(PKGCONFIG) --libs 'pcl_io')
+  LDFLAGS_PCL_VIS = $(shell $(PKGCONFIG) --libs 'pcl_visualizationi$(PCL_VERSION_SUFFIX)')
+  LDFLAGS_PCL_IO = $(shell $(PKGCONFIG) --libs 'pcl_io$(PCL_VERSION_SUFFIX)')
 endif
 
 endif # __buildsys_pcl_mk_
