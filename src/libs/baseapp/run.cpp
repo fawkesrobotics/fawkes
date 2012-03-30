@@ -314,10 +314,6 @@ init(InitOptions options)
 void
 cleanup()
 {
-  try {
-    Thread::destroy_main();
-  } catch (Exception &e) {} // ignored, can fire on show_help
-
   if (init_options->daemonize()) {
     fawkes::daemon::cleanup();
   }
@@ -364,6 +360,10 @@ cleanup()
 
   Clock::finalize();
   clock = NULL;
+
+  try {
+    Thread::destroy_main();
+  } catch (Exception &e) {} // ignored, can fire on show_help
 
   // should be last, because of not disabled this hosts the
   // default signal handlers
