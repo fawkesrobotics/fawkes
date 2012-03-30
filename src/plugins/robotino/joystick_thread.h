@@ -48,6 +48,7 @@ class RobotinoJoystickThread
 
   virtual void init();
   virtual void loop();
+  virtual bool prepare_finalize_user();
   virtual void finalize();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */

@@ -64,10 +64,16 @@ RobotinoJoystickThread::init()
 }
 
 
+bool
+RobotinoJoystickThread::prepare_finalize_user()
+{
+  stop();
+  return true;
+}
+
 void
 RobotinoJoystickThread::finalize()
 {
-  stop();
   blackboard->close(motor_if_);
   blackboard->close(joystick_if_);
 }
