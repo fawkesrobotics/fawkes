@@ -40,7 +40,7 @@ using namespace fawkes;
 /** Constructor. */
 RobotinoSensorThread::RobotinoSensorThread()
   : Thread("RobotinoSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
 }
 
@@ -120,6 +120,7 @@ RobotinoSensorThread::loop()
   } else if (com_->connectionState() == rec::robotino::com::Com::NotConnected) {
     // retry connection
     if (cfg_quit_on_disconnect_) {
+      logger->log_warn(name(), "Connection lost, quitting (as per config)");
       fawkes::runtime::quit();
     } else {
       com_->connect(/* blocking */ false);
