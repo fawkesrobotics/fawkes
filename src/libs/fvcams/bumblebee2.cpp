@@ -232,7 +232,7 @@ Bumblebee2Camera::print_info()
   FirewireCamera::print_info();
 
   printf("Serial: %u\n", serial_no());
-#if __WORDSIZE == 64
+#if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64)
   printf("GUID:   0x%016lx\n", (long unsigned int)guid());
 #else
   printf("GUID:   0x%016llx\n", guid());

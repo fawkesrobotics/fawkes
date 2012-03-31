@@ -876,11 +876,7 @@ Time::str(bool utc) const
 
   // heuristic to distinguish times and time ranges
   if (__time.tv_sec < 1000000000) {
-#ifdef __FreeBSD__
-    snprintf(__timestr, TIMESTR_SIZE, "%i:%li", __time.tv_sec, __time.tv_usec);
-#else
     snprintf(__timestr, TIMESTR_SIZE, "%li:%li", __time.tv_sec, (long)__time.tv_usec);
-#endif
   } else {
     tm time_tm;
     if ( utc ) {
@@ -906,11 +902,7 @@ Time::str_r(char *s, bool utc)
 {
   // heuristic to distinguish times and time ranges
   if (__time.tv_sec < 1000000000) {
-#ifdef __FreeBSD__
-    snprintf(s, TIMESTR_SIZE, "%i:%li", __time.tv_sec, __time.tv_usec);
-#else
     snprintf(s, TIMESTR_SIZE, "%li:%li", __time.tv_sec, (long)__time.tv_usec);
-#endif
   } else {
     tm time_tm;
     if ( utc ) {
