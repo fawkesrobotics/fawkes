@@ -27,6 +27,7 @@ local shsmmod    = require("skiller.skillhsm")
 local wsmod      = require("fawkes.fsm.waitstate")
 local depinit    = require("fawkes.depinit")
 local predlib    = require("fawkes.predlib")
+local gmod       = require("fawkes.dotgraph")
 local grapher    = require("fawkes.fsm.grapher")
 
 local skills        = {}
@@ -312,21 +313,21 @@ end
 
 function write_skill_dep(skdbg)
    if skdbg:graph_fsm() ~= "SKILL_DEP" then
-      local graph = "digraph skill_dependencies { \n"
+      local g = gmod.digraph("skill_dependencies")
+
       for _,s in ipairs(skills) do
          if s ~= nil then
-	    graph = graph .. string.format("   %s;\n", s.name)
+	    local n = gmod.node(g, s.name)
             if s.depends_skills ~= nil then
                for _,sdep in ipairs(s.depends_skills) do
-		  graph = graph .. string.format("   %s -> %s;\n", s.name, sdep)
+	          local e = gmod.edge(g, s.name, sdep)
                end
             end
          end
       end
-      graph = graph .. "}"
 
       skdbg:set_graph_fsm("SKILL_DEP")
-      skdbg:set_graph(graph)
+      skdbg:set_graph(gmod.generate(g))
       skdbg:write()
    end
 end
