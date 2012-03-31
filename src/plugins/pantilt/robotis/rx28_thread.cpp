@@ -410,7 +410,7 @@ PanTiltRX28Thread::bb_interface_message_received(Interface *interface,
  * @param pan_servo_id servo ID of the pan servo
  * @param tilt_servo_id servo ID of the tilt servo
  * @param pan_min minimum pan in rad
- * @param pan_min maximum pan in rad
+ * @param pan_max maximum pan in rad
  * @param tilt_min minimum tilt in rad
  * @param tilt_max maximum tilt in rad
  * @param pan_offset pan offset from zero in servo ticks
@@ -533,6 +533,7 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt(float pan, float tilt)
 /** Goto desired pan/tilt values in a specified time.
  * @param pan pan in radians
  * @param tilt tilt in radians
+ * @param time_sec time when to reach the desired pan/tilt values
  */
 void
 PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float time_sec)
@@ -624,8 +625,8 @@ PanTiltRX28Thread::WorkerThread::get_velocities(float &pan_vel, float &tilt_vel)
 
 
 /** Set desired velocities.
- * @param pan_vel pan velocity
- * @param tilt_vel tilt velocity
+ * @param pan_margin pan margin
+ * @param tilt_margin tilt margin
  */
 void
 PanTiltRX28Thread::WorkerThread::set_margins(float pan_margin, float tilt_margin)
@@ -851,6 +852,9 @@ PanTiltRX28Thread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad
 }
 
 
+/** Wait for fresh data to be received.
+ * Blocks the calling thread.
+ */
 void
 PanTiltRX28Thread::WorkerThread::wait_for_fresh_data()
 {

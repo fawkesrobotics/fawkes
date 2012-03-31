@@ -74,10 +74,11 @@ class OpenNiUserTrackerThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  /** Per user info struct. */
   typedef struct {
-    bool                                       valid;
-    fawkes::HumanSkeletonInterface            *skel_if;
-    fawkes::HumanSkeletonProjectionInterface  *proj_if;
+    bool                                       valid;	/**< true if valid */
+    fawkes::HumanSkeletonInterface            *skel_if;	/**< Skeleton interface */
+    fawkes::HumanSkeletonProjectionInterface  *proj_if;	/**< Projection interface. */
   } UserInfo;
 
   typedef std::map<XnUserID, UserInfo>  UserMap;

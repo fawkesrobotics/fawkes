@@ -134,7 +134,8 @@ class MirrorCalibTool::StepResult {
   }
 
   /** Assignment.
-   * @param copy */
+   * @param copy result to assign
+   * @return reference to this instance */
   StepResult& operator=(const StepResult& copy)
   {
     if (this != &copy) {
@@ -427,16 +428,39 @@ class MirrorCalibTool::CartesianImage
   {
   }
 
-  inline unsigned char* buf() { return buf_; } /**< Buffer. */
-  inline const unsigned char* mask() const { return mask_; } /**< Mask. */
-  inline const unsigned char* buf() const { return buf_; } /**< Buffer. */
-  inline const PixelPoint& center() const { return center_; } /**< Center of buffer. */
-  inline const int width() const { return width_; } /**< Width of buffer. */
-  inline const int height() const { return height_; } /**< Height of buffer. */
-  inline const PolarAngle phi() const { return phi_; } /**< Buffer. */
+  /** Get Buffer.
+   * @return buffer
+   */
+  inline unsigned char* buf() { return buf_; }
+  /** Mask.
+   * @return mask
+   */
+  inline const unsigned char* mask() const { return mask_; }
+  /** Buffer.
+   * @return const buffer
+   */
+  inline const unsigned char* buf() const { return buf_; }
+  /** Center of buffer.
+   * @return center point of buffer
+   */
+  inline const PixelPoint& center() const { return center_; }
+  /** Width of buffer.
+   * @return width of buffer
+   */
+  inline const int width() const { return width_; }
+  /** Height of buffer.
+   * @return height of buffer
+   */
+  inline const int height() const { return height_; }
+  /** Phi angle.
+   * @return Phi angle
+   */
+  inline const PolarAngle phi() const { return phi_; }
 
   /** Converts a cartesian point to a pixel point.
-   * @param p The point. */
+   * @param p The point.
+   * @return converted point
+   */
   inline PixelPoint
   to_pixel(const CartesianPoint& p) const
   {
@@ -445,7 +469,9 @@ class MirrorCalibTool::CartesianImage
   }
 
   /** Converts a pixel point to a cartesian point.
-   * @param p The point. */
+   * @param p The point.
+   * @return converted point
+   */
   inline CartesianPoint
   to_cartesian(const PixelPoint& p) const
   {
@@ -454,7 +480,9 @@ class MirrorCalibTool::CartesianImage
   }
 
   /** Indicates whether the image contains a pixel point.
-   * @param p The point. */
+   * @param p The point.
+   * @return true if pixel point is in image, false otherwise
+   */
   inline bool
   contains(const PixelPoint& p) const
   {
@@ -462,15 +490,19 @@ class MirrorCalibTool::CartesianImage
   }
 
   /** Indicates whether the image contains a cartesian point.
-   * @param p The point. */
+   * @param p The point.
+   * @return true if cartesian point is in image, false otherwise
+   */
   inline bool
   contains(const CartesianPoint& p) const
   {
     return contains(to_pixel(p));
   }
 
-  /** Returns the luminance at a given point.
-   * @param p The point. */
+  /** Get luminance at a given point.
+   * @param p The point.
+   * @return luminance at given point
+   */
   inline unsigned char
   get(const CartesianPoint& p) const
   {
@@ -492,11 +524,17 @@ class MirrorCalibTool::CartesianImage
     }
   }
 
-  /** Maximum cartesian X coordinate of the image. */
+  /** Get Maximum cartesian X coordinate of the image.
+   * @return Maximum cartesian X coordinate of the image.
+   */
   inline int max_x() const { return std::max(center().x, width() - center().x); }
-  /** Maximum cartesian Y coordinate of the image. */
+  /** Get Maximum cartesian Y coordinate of the image.
+   * @return Maximum cartesian Y coordinate of the image.
+   */
   inline int max_y() const { return std::max(center().y, height() - center().y); }
-  /** Maximum polar radius of the image. */
+  /** Maximum polar radius of the image.
+   * @return Maximum polar radius of the image.
+   */
   inline PolarRadius max_radius() const {
     return static_cast<PolarRadius>(sqrt(max_x()*max_x() + max_y()*max_y()));
   }
@@ -529,10 +567,11 @@ class MirrorCalibTool::CartesianImage
     set_color(to_pixel(p), luma, chrominance);
   }
 
-  /** Returns the relative amount of BRIGHT pixels in the rectangle denoted
-   * by the bottom-left (x1, y1) and the top-right (x2, y2).
+  /** Get relative amount of bright pixels.
    * @param from One point of the rectangle.
-   * @param to Opposite point of the rectangle. */
+   * @param to Opposite point of the rectangle.
+   * @return relative amount of BRIGHT pixels in the rectangle denoted
+   * by the bottom-left (x1, y1) and the top-right (x2, y2). */
   float
   bright_fraction(const CartesianPoint& from,
                   const CartesianPoint& to) const
@@ -560,7 +599,9 @@ class MirrorCalibTool::CartesianImage
 
   /** Indicates whether at pixel point p there is a highlighted line.
    * @param p The assumed center point of the line.
-   * @param length The length of the line. */
+   * @param length The length of the line
+   * @return true if pixel belongs to line, false otherwise
+   */
   bool
   is_line(const CartesianPoint& p,
           int length) const
@@ -655,8 +696,12 @@ class MirrorCalibTool::CartesianImage
  * clock-wise-order.
  */
 
-/** Returns true if the point is inside the convex polygon.
- * The point r is converted to PixelPoint wrt img. */
+/** Check if point is inside convex polygon.
+ * The point r is converted to PixelPoint wrt img.
+ * @param img image in which to check
+ * @param r cartesian point to check
+ * @return true if the point is inside the convex polygon
+ */
 bool
 MirrorCalibTool::ConvexPolygon::contains(const CartesianImage& img,
                                          const CartesianPoint& r) const
@@ -665,11 +710,13 @@ MirrorCalibTool::ConvexPolygon::contains(const CartesianImage& img,
 }
 
 
-/** Returns true if the point is inside the convex polygon.
+/** Check if pixel point is inside convex polygon.
  * This is the case if for all points p, q in the polygon p_1, ..., p_n
  * where p = p_i, q = p_{i+1} for some i or p = p_n, q = p_1 it holds
  * (p, q, r) does not form a left turn (if they do, they are
  * counter-clock-wise).
+ * @param r point to check
+ * @return true if the point is inside the convex polygon
  */
 bool
 MirrorCalibTool::ConvexPolygon::contains(const PixelPoint& r) const
@@ -706,7 +753,9 @@ class MirrorCalibTool::Hole {
   {
   }
 
-  /** The size of the hole in pixels. */
+  /** The size of the hole in pixels.
+   * @return radius of hole
+   */
   inline PolarRadius size() const { return to_length - from_length; }
 }; // Hole
 
@@ -754,7 +803,9 @@ class MirrorCalibTool::Image
   }
 
   /** Assignment.
-   * @param copy */
+   * @param copy image to copy
+   * @return this image
+   */
   Image& operator=(const Image& copy)
   {
     if (this != &copy) {
@@ -785,26 +836,63 @@ class MirrorCalibTool::Image
     }
   }
 
-  inline unsigned char* yuv_buffer() { return yuv_buffer_; } /**< YUV buffer. */
-  inline const unsigned char* yuv_buffer() const { return yuv_buffer_; } /**< YUV buffer. */
-  inline size_t buflen() const { return buflen_; } /**< YUV buffer's length. */
-  inline int width() const { return width_; } /**< YUV buffer's width. */
-  inline int height() const { return height_; } /**< YUV buffer's height. */
-  inline PolarAngle ori() const { return ori_; } /**< Angle of marks wrt X axis. */
-  inline StepResultList& results() { return results_; } /**< List of results. */
-  inline const StepResultList& results() const { return results_; } /**< List of results. */
-  inline const MarkList& premarks() { return premarks_; } /**< The premarks. */
-  inline MarkList& marks() { return marks_; } /**< The (final) marks. */
-  inline const MarkList& marks() const { return marks_; } /**< The (final) marks. */
+  /** YUV buffer.
+   * @return YUV buffer
+   */
+  inline unsigned char* yuv_buffer() { return yuv_buffer_; }
+  /** YUV buffer.
+   * @return 
+   */
+  inline const unsigned char* yuv_buffer() const { return yuv_buffer_; }
+  /** YUV buffer's length.
+   * @return YUV buffer's length
+   */
+  inline size_t buflen() const { return buflen_; }
+  /** YUV buffer's width.
+   * @return YUV buffer's width
+   */
+  inline int width() const { return width_; }
+  /** YUV buffer's height.
+   * @return YUV buffer's height
+   */
+  inline int height() const { return height_; }
+  /** Angle of marks wrt X axis.
+   * @return Angle of marks wrt X axis
+   */
+  inline PolarAngle ori() const { return ori_; }
+  /** List of results.
+   * @return List of results
+   */
+  inline StepResultList& results() { return results_; }
+  /** List of results.
+   * @return List of results
+   */
+  inline const StepResultList& results() const { return results_; }
+  /** The premarks.
+   * @return The premarks
+   */
+  inline const MarkList& premarks() { return premarks_; }
+  /** The (final) marks.
+   * @return 
+   */
+  inline MarkList& marks() { return marks_; }
+  /** The (final) marks.
+   * @return The (final) marks
+   */
+  inline const MarkList& marks() const { return marks_; }
 
   /** Appends a result.
    * @param r The new result. */
   inline void add_result(const StepResult& r) { results_.push_back(r); }
   /** Returns the i-th result.
-   * @param i The index of the result starting with 0. */
+   * @param i The index of the result starting with 0.
+   * @return result
+   */
   inline StepResult& result(int i) { return results_[i]; }
   /** Returns the i-th result.
-   * @param i The index of the result starting with 0. */
+   * @param i The index of the result starting with 0.
+   * @return result
+   */
   inline const StepResult& result(int i) const { return results_[i]; }
   /** The premarks.
    * @param premarks The list of premarks. */
@@ -870,6 +958,7 @@ MirrorCalibTool::~MirrorCalibTool()
  * with them is then a bit easier (because then their polar angle is always
  * 0.0).
  * @param ori The orientation.
+ * @return angle
  */
 MirrorCalibTool::PolarAngle
 MirrorCalibTool::relativeOrientationToImageRotation(PolarAngle ori)
@@ -883,6 +972,7 @@ MirrorCalibTool::relativeOrientationToImageRotation(PolarAngle ori)
  * See the documentation of relativeOrientationToImageRotation() of which this
  * is the inverse.
  * @param ori The orientation.
+ * @return angle
  */
 MirrorCalibTool::PolarAngle
 MirrorCalibTool::imageRotationToRelativeOrientation(PolarAngle ori)
@@ -1088,7 +1178,9 @@ MirrorCalibTool::make_grayscale(unsigned char* buf,
 }
 
 
-/** Returns a string that describes what's done in next_step(). */
+/** Get description of next step.
+ * @return string that describes what's done in next_step().
+ */
 const char*
 MirrorCalibTool::get_state_description() const
 {
@@ -1105,7 +1197,9 @@ MirrorCalibTool::get_state_description() const
 }
 
 
-/** Finds the first marks. This is the first step in finding marks. */
+/** Finds the first marks. This is the first step in finding marks.
+ * @return mark list
+ */
 MirrorCalibTool::MarkList
 MirrorCalibTool::premark(const StepResult& prev,
                          const unsigned char* yuv_mask,
@@ -1118,7 +1212,9 @@ MirrorCalibTool::premark(const StepResult& prev,
 }
 
 
-/** Finds the first marks. This is the first step in finding marks. */
+/** Finds the first marks. This is the first step in finding marks.
+ * @return mark list
+ */
 MirrorCalibTool::MarkList
 MirrorCalibTool::premark(const ConvexPolygon& polygon,
                          const StepResult& prev,
@@ -1146,7 +1242,9 @@ MirrorCalibTool::premark(const ConvexPolygon& polygon,
 }
 
 
-/** Searches for holes between the pre-marks. Helper for mark(). */
+/** Searches for holes between the pre-marks. Helper for mark().
+ * @return holes
+ */
 MirrorCalibTool::HoleList
 MirrorCalibTool::search_holes(const MarkList& premarks)
 {
@@ -1808,9 +1906,10 @@ MirrorCalibTool::set_last_yuv_buffer(const unsigned char* last_buf)
 }
 
 
-/**
- * Returns the last created YUV buffer. This is the result of the most recent
- * step. Memory management is done by MirrorCalibTool.
+/** Get last created YUV buffer.
+ * This is the result of the most recent step. Memory management is
+ * done by MirrorCalibTool.
+ * @return most recent result's YUV buffer
  */
 const unsigned char*
 MirrorCalibTool::get_last_yuv_buffer() const
@@ -1819,8 +1918,7 @@ MirrorCalibTool::get_last_yuv_buffer() const
 }
 
 
-/**
- * Returns the assumed distance and orientation of a pixel point.
+/** Get the assumed distance and orientation of a pixel point.
  * @param x The X coordinate of the pixel that is to be evaluated.
  * @param y The Y coordinate of the pixel that is to be evaluated.
  * @param dist_ret The distance in the real world to the pixel.

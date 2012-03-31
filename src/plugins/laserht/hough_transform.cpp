@@ -168,6 +168,7 @@ HoughTransform::reset()
  */
 
 /** Constructor.
+ * @param ht hough transform the node belongs to
  * @param dims number of remaining dimensions (including the own)
  * @param value the initial value of the node
  */

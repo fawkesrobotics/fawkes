@@ -66,8 +66,12 @@ class MirrorCalibTool
   const unsigned char* get_last_yuv_buffer() const;
   const char* get_state_description() const;
 
-  inline int center_x() const { return img_center_x_; } /**< Center X accessor. */
-  inline int center_y() const { return img_center_y_; } /**< Center Y accessor. */
+  /** Center X accessor.
+   * @return center X value  */
+  inline int center_x() const { return img_center_x_; }
+  /** Center Y accessor.
+   * @return center Y value  */
+  inline int center_y() const { return img_center_y_; }
 
   void eval(unsigned int x,
             unsigned int y,
@@ -105,6 +109,7 @@ class MirrorCalibTool
 
   enum StepName { SHARPENING, EDGE_DETECTION, COMBINATION, CENTERING,
                   PRE_MARKING, FINAL_MARKING, DONE };
+  /// @cond INTERNALS
   struct CalibrationState {
     StepName              step;
     ImageList::size_type  image_index;
@@ -112,6 +117,7 @@ class MirrorCalibTool
     CalibrationState()
     : step(SHARPENING), image_index(0), centering_done(false) {};
   };
+  /// @endcond
 
   void goto_next_state();
   void set_last_yuv_buffer(const unsigned char* last_buf);

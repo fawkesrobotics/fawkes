@@ -67,32 +67,33 @@ class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
   void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
  private:
+  /// @cond INTERNALS
   class ImageRecord : public Gtk::TreeModelColumnRecord
+  {
+  public:
+    ImageRecord()
     {
-    public:
-      ImageRecord()
-        {
-          add(display_text);
-          add(service_name);
-          add(host_name);
-          add(port);
-          add(colorspace);
-          add(image_id);
-          add(width);
-          add(height);
-          add(buffer_size);
-        }
+      add(display_text);
+      add(service_name);
+      add(host_name);
+      add(port);
+      add(colorspace);
+      add(image_id);
+      add(width);
+      add(height);
+      add(buffer_size);
+    }
 
-      Gtk::TreeModelColumn<Glib::ustring> display_text;
-      Gtk::TreeModelColumn<Glib::ustring> service_name;
-      Gtk::TreeModelColumn<Glib::ustring> host_name;
-      Gtk::TreeModelColumn<unsigned int> port;
-      Gtk::TreeModelColumn<Glib::ustring> image_id;
-      Gtk::TreeModelColumn<unsigned int> colorspace;
-      Gtk::TreeModelColumn<unsigned int> width;
-      Gtk::TreeModelColumn<unsigned int> height;
-      Gtk::TreeModelColumn<unsigned int> buffer_size;
-    };
+    Gtk::TreeModelColumn<Glib::ustring> display_text;
+    Gtk::TreeModelColumn<Glib::ustring> service_name;
+    Gtk::TreeModelColumn<Glib::ustring> host_name;
+    Gtk::TreeModelColumn<unsigned int> port;
+    Gtk::TreeModelColumn<Glib::ustring> image_id;
+    Gtk::TreeModelColumn<unsigned int> colorspace;
+    Gtk::TreeModelColumn<unsigned int> width;
+    Gtk::TreeModelColumn<unsigned int> height;
+    Gtk::TreeModelColumn<unsigned int> buffer_size;
+  };
 
   struct ClientData
   {
@@ -102,6 +103,7 @@ class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
     uint16_t port;
     bool active;
   };
+  /// @endcond
 
   bool on_image_event(GdkEvent *event);
   void on_add_host_manually();

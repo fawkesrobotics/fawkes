@@ -76,7 +76,7 @@ class KatanaInterface : public Interface
     compared to base coordinate system. */
     float phi; /**< DEPRECATED! Euler angle Phi of tool orientation. */
     float theta; /**< DEPRECATED! Euler angle Theta of tool orientation. */
-    float psi; /**< DEPRECATED! Euler angle Psi of tool orientation.. */
+    float psi; /**< DEPRECATED! Euler angle Psi of tool orientation. */
     int32_t encoders[6]; /**< Encoder values of motors */
     float angles[6]; /**< Angle values of motors */
     uint32_t msgid; /**< The ID of the message that is currently being
@@ -179,7 +179,7 @@ class KatanaInterface : public Interface
     compared to base coordinate system. */
       float phi; /**< DEPRECATED! Euler angle Phi of tool orientation. */
       float theta; /**< DEPRECATED! Euler angle Theta of tool orientation. */
-      float psi; /**< DEPRECATED! Euler angle Psi of tool orientation.. */
+      float psi; /**< DEPRECATED! Euler angle Psi of tool orientation. */
     } LinearGotoMessage_data_t;
 #pragma pack(pop)
 

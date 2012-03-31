@@ -54,6 +54,9 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+/** Constructor.
+ * @param parent_manager parent thread manager
+ */
 ThreadManager::ThreadManagerAspectCollector::ThreadManagerAspectCollector(ThreadManager *parent_manager)
 {
   __parent_manager = parent_manager;

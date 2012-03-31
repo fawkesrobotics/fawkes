@@ -377,6 +377,7 @@ class NaoGuiGtkWindow : public Gtk::Window
   Gtk::Button *but_lfoot_bumper;
   Gtk::Button *but_rfoot_bumper;
 
+  /// @cond INTERNALS
   typedef struct {
     Gtk::Label  *lab_enabled;
     Gtk::Label  *lab_history;
@@ -385,6 +386,7 @@ class NaoGuiGtkWindow : public Gtk::Window
     Gtk::Label  *lab_long;
     Gtk::Label  *lab_total;
   } ButtonLabelSet;
+  /// @endcond
   std::map<std::string, ButtonLabelSet> button_labels;
   std::map<std::string, fawkes::SwitchInterface *> button_ifs;
 

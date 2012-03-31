@@ -60,12 +60,14 @@ class LaserHtSensorProcThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  /// @cond INTERNALS
   typedef struct {
     float angle;
     float dist;
     float x;
     float y;
   } laser_reading_t;
+  /// @endcond
 
   void fit_line(const std::vector<laser_reading_t> &points,
 		const unsigned int first_index,

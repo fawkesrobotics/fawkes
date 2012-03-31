@@ -55,9 +55,10 @@ class StaticTransformsThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  /** Static transform entry to publish. */
   typedef struct {
-    std::string name;
-    fawkes::tf::StampedTransform *transform;
+    std::string name;	/**< Transform name */
+    fawkes::tf::StampedTransform *transform;	/**< Transform. */
   } Entry;
 
   std::list<Entry> __entries;

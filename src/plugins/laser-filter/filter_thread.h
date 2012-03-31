@@ -66,6 +66,7 @@ class LaserFilterThread
   void set_wait_barrier(fawkes::Barrier *barrier);
 
  private:
+  /// @cond INTERNALS
   typedef struct {
     bool               is_360;
     std::string        id;
@@ -75,6 +76,7 @@ class LaserFilterThread
     } interface_typed;
     fawkes::Interface *interface;
   } LaserInterface;
+  /// @endcond
 
   void open_interfaces(std::string prefix, std::vector<LaserInterface> &ifs,
 		       std::vector<LaserDataFilter::Buffer *> &bufs, bool writing);

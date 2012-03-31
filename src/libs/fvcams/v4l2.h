@@ -154,14 +154,14 @@ class V4L2Camera:
 
   struct FrameBuffer
   {
-    unsigned char *buffer;
-    unsigned int size;
+    unsigned char *buffer;	///< buffer
+    unsigned int size;		///< buffer size
   };
 
   struct ControlParameterInt
   {
-    bool set;
-    int value;
+    bool set;	///< true if set
+    int value;	///< value
   };
 
   int _dev;                          ///< Device file descriptor

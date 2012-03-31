@@ -103,11 +103,13 @@ class LaserDrawingArea
 
 
  private:
+  /// @cond INTERNALS
   struct Color {
     unsigned char r;
     unsigned char g;
     unsigned char b;
   };
+  /// @endcond
   typedef std::pair<fawkes::Interface*, Color> InterfaceColorPair;
   typedef std::list<InterfaceColorPair> InterfaceColorPairList;
 

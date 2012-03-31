@@ -74,6 +74,7 @@ class LaserPointCloudThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  /// @cond INTERNALS
   typedef struct {
     std::string id;
     bool is_360;
@@ -85,6 +86,7 @@ class LaserPointCloudThread
 
     fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > cloud;
   } InterfaceCloudMapping;
+  /// @endcond
 
   fawkes::LockList<InterfaceCloudMapping> __mappings;
 

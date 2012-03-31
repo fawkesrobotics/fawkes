@@ -40,6 +40,7 @@ class FittedCircle
 
 private:
   int count;
+  /// @cond INTERNALS
   struct circle_matrix
   {
     float A00, A01, A02;
@@ -48,6 +49,7 @@ private:
 
     float  b0,  b1,  b2;
   } circle_matrices[2];
+  /// @endcond
   int current_circle;
   bool point_added;
 

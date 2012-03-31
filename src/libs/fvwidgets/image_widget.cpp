@@ -610,6 +610,12 @@ ImageWidget::RefThread::stop()
 }
 
 
+/** Set save on refresh.
+ * @param enabled true to enable, false to disable
+ * @param path save path
+ * @param type save type
+ * @param img_num image number to save
+ */
 void
 ImageWidget::RefThread::save_on_refresh(bool enabled, std::string path, Glib::ustring type, unsigned int img_num)
 {
@@ -622,6 +628,9 @@ ImageWidget::RefThread::save_on_refresh(bool enabled, std::string path, Glib::us
   }
 }
 
+/** Get image number.
+ * @return image number
+ */
 unsigned int
 ImageWidget::RefThread::get_img_num()
 {

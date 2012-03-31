@@ -85,7 +85,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   {
    public:
     SkillStringRecord();
+    /// @cond INTERNALS
     Gtk::TreeModelColumn<Glib::ustring> skillstring;
+    /// @endcond
   };
   SkillStringRecord __sks_record;
 

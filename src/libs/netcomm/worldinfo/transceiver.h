@@ -188,12 +188,14 @@ class WorldInfoTransceiver
   bool gamestate_changed;
   worldinfo_gamestate_message_t gamestate_msg;
 
+  /// @cond INTERNALS
   typedef struct {
     uint32_t uid;
     float  distance;
     float  bearing;
     float *covariance;
   } opponent_t;
+  /// @endcond
   std::list<opponent_t> opponents;
   std::list<opponent_t>::iterator oppit;
 

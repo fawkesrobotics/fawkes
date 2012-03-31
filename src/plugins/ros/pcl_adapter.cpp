@@ -29,17 +29,24 @@
 
 using namespace fawkes;
 
+/// @cond INTERNALS
+/** ROS to PCL storage adapter. */
 class RosPointCloudAdapter::StorageAdapter
 {
  public:
+  /** Constructor.
+   * @param a_ adapter to clone */
   StorageAdapter(const PointCloudManager::StorageAdapter *a_)
     : a(a_->clone()) {}
 
+  /** Destructor. */
   ~StorageAdapter()
   { delete a; }
 
+  /** PCL Point cloud storage adapter to encapsulate. */ 
   PointCloudManager::StorageAdapter *a;
 };
+/// @endcond
 
 /** @class RosPointCloudAdapter "pcl_adapter.h"
  * Standalone PCL to ROS adapter class.

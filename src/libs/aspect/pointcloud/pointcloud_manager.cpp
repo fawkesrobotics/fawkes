@@ -63,7 +63,7 @@ namespace fawkes {
  * @return transformed PointCloudStorageAdapter
  * @exception Exception thrown if storage adapter is not of requested point type or does not exist
  * 
- * @fn PointCloudManager::StorageAdapter * PointCloudManager::StorageAdapter::clone()
+ * @fn PointCloudManager::StorageAdapter * PointCloudManager::StorageAdapter::clone() const
  * Clone this storage adapter.
  * @return cloned copy
  *

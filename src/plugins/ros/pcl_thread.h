@@ -65,11 +65,13 @@ class RosPointCloudThread
  private:
   RosPointCloudAdapter *__adapter;
 
+  /// @cond INTERNALS
   typedef struct {
     ros::Publisher           pub;
     sensor_msgs::PointCloud2 msg;
     fawkes::Time             last_sent;
   } PublisherInfo;
+  /// @endcond
   std::map<std::string, PublisherInfo> __pubs;
 
 };

@@ -61,9 +61,11 @@ class SharedMemoryRegistry
   static void cleanup(const char *name = 0);
 
  private:
+  /// @cond INTERNALS
   typedef struct {
     SharedMemID segments[MAXNUM_SHM_SEGMS];
   } MemInfo;
+  /// @endcond
 
   bool  __master;
   int   __shmfd;

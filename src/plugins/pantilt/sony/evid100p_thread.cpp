@@ -241,7 +241,7 @@ PanTiltSonyEviD100PThread::bb_interface_message_received(Interface *interface,
  * @param logger logger
  * @param cam Visca controller object
  * @param pan_min minimum pan in rad
- * @param pan_min maximum pan in rad
+ * @param pan_max maximum pan in rad
  * @param tilt_min minimum tilt in rad
  * @param tilt_max maximum tilt in rad
  */

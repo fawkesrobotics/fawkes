@@ -70,12 +70,14 @@ class BlackBoardNotifier
 				unsigned int event_instance_serial) throw();
 
  private:
+  /// @cond INTERNALS
   typedef struct {
     bool                           op;
     std::string                    uid;
     Interface                    * interface;
     BlackBoardInterfaceListener  * listener;
   } BBilQueueEntry;
+  /// @endcond INTERNALS
   typedef std::list< BBilQueueEntry > BBilQueue;
 
   typedef std::multimap<std::string, BlackBoardInterfaceListener *> BBilMap;

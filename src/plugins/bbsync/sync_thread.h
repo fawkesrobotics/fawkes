@@ -64,29 +64,45 @@ class BlackBoardSynchronizationThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  /** Interface combo struct */
   typedef struct {
-    std::string type;
-    std::string reader_id;
-    std::string writer_id;
-    bool remote_writer;
+    std::string type;		/**< Combo type */
+    std::string reader_id;	/**< reader interface ID */
+    std::string writer_id;	/**< writer interface ID */
+    bool remote_writer;		/**< true if remote writer */
   } combo_t;
 
   class InterfaceInfo {
    public:
+    /** Combo configuration */
     combo_t            *combo;
+    /** Writing interface */
     fawkes::Interface  *writer;
+    /** Blackboard to read from */
     fawkes::BlackBoard *reader_bb;
+    /** Blackboard to write to */
     fawkes::BlackBoard *writer_bb;
 
+    /** Constructor. */
     InterfaceInfo()
       : combo(NULL), writer(NULL), reader_bb(NULL), writer_bb(NULL)
     {}
 
+    /** Constructor.
+     * @param pcombo combo configuration
+     * @param pwriter Writing interface
+     * @param preader_bb Blackboard to read from
+     * @param pwriter_bb Blackboard to write to
+     */
     InterfaceInfo(combo_t *pcombo, fawkes::Interface  *pwriter,
 		  fawkes::BlackBoard *preader_bb, fawkes::BlackBoard *pwriter_bb)
       : combo(pcombo), writer(pwriter), reader_bb(preader_bb), writer_bb(pwriter_bb)
     {}
 
+    /** Assignment operator.
+     * @param ii interface info to assign
+     * @return reference to this instance
+     */
     InterfaceInfo & operator=(const InterfaceInfo &ii)
     {
       combo=ii.combo; writer=ii.writer; reader_bb=ii.reader_bb; writer_bb=ii.writer_bb;

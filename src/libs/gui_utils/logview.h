@@ -78,12 +78,14 @@ class LogView
    public:
     LogRecord();
 
+    /// @cond INTERNALS
     Gtk::TreeModelColumn<Glib::ustring> loglevel;
     Gtk::TreeModelColumn<Glib::ustring> time;
     Gtk::TreeModelColumn<Glib::ustring> component;
     Gtk::TreeModelColumn<Glib::ustring> message;
     Gtk::TreeModelColumn<Gdk::Color>    foreground;
     Gtk::TreeModelColumn<Gdk::Color>    background;
+    /// @endcond
   };
 
   LogRecord __record;

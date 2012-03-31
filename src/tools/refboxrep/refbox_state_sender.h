@@ -79,11 +79,13 @@ class RefBoxStateSender
   fawkes::worldinfo_gamestate_goalcolor_t __our_goal_color;
   fawkes::worldinfo_gamestate_half_t      __half;
 
+  /// @cond INTERNALS
   typedef struct {
     unsigned int player;
     unsigned int penalty;
     unsigned int seconds_remaining;
   } rss_penalty_t;
+  /// @endcond
   std::map<unsigned int, rss_penalty_t> __penalties;
   std::map<unsigned int, rss_penalty_t>::iterator __pit;
 

@@ -57,12 +57,14 @@ class RetrieverConfigDialog : public Gtk::Dialog
       add( save_path );
     }
     
+    /// @cond INTERNALS
     Gtk::TreeModelColumn< Glib::ustring >  name;
     Gtk::TreeModelColumn< Glib::ustring >  type;
     Gtk::TreeModelColumn< Glib::ustring >  id;
     Gtk::TreeModelColumn< Glib::ustring >  params;
     Gtk::TreeModelColumn< bool >           record_images;
     Gtk::TreeModelColumn< Glib::ustring >  save_path;
+    /// @endcond
   };
 
   // signal handler

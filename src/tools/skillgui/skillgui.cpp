@@ -760,6 +760,7 @@ SkillGuiGtkWindow::on_graphcolor_toggled()
 }
 
 
+/** Constructor. */
 SkillGuiGtkWindow::SkillStringRecord::SkillStringRecord()
 {
   add(skillstring);

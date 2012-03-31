@@ -125,6 +125,7 @@ class WorldInfoDataContainer
 
 
  private:
+  /// @cond INTERNALS
 
   /* data structures for internal storage */
   /* Ball */
@@ -205,6 +206,8 @@ class WorldInfoDataContainer
   private:
     std::map<unsigned int, HomPoint> m_glob_opp_positions;
   };
+
+  /// @endcond
 
   /* private methods */
   unsigned int get_host_id(std::string host);

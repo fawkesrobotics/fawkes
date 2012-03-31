@@ -53,6 +53,7 @@ class XabslSkillWrapper : public xabsl::BasicBehavior
  private:
   bool __execute;
 
+  /// @cond INTERNALS
   class ParameterValueBase
   {
    public:
@@ -85,6 +86,7 @@ class XabslSkillWrapper : public xabsl::BasicBehavior
    private:
     T __value;
   };
+  /// @endcond
 
   std::map<std::string, ParameterValueBase *> __param_values;
   ParameterList __params;

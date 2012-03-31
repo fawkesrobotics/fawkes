@@ -63,13 +63,31 @@ class WorldModelObjPosMajorityFuser
   /** Wrapper that compares by the Opi's id(). */
   class OpiWrapper {
    public:
+    /** Wrapper creator.
+     * @param opi Object position interface to compare to */
     OpiWrapper(Opi* opi) : opi_(opi) { assert(opi != NULL); }
+    /** Dereferencing operator.
+     * @return pointer to object position interface. */
     operator Opi*() const { return opi_; }
 
+    /** Equality operator.
+     * @param o other object position wrapper to compare to
+     * @return true of the interfaces are the same, false otherwise
+     */
     bool operator == (const OpiWrapper& o) const { return cmp(o) == 0; }
+
+    /** Less than operator.
+     * @param o other object position wrapper to compare to
+     * @return true of the the given interface is small than this one
+     */
     bool operator < (const OpiWrapper& o) const { return cmp(o) < 0; }
 
+    /** Call operator.
+     * @return wrapped interface */
     Opi* opi() { return opi_; }
+
+    /** Const call operator.
+     * @return const wrapped interface */
     const Opi* opi() const { return opi_; }
 
    private:

@@ -56,36 +56,40 @@ class Firestation : public Gtk::Window
   {
   public:
     ShmColumnRecord()
-      {
-	add(m_id); add(m_name);
-      };
+    {
+      add(m_id); add(m_name);
+    };
+    /// @cond INTERNALS
     Gtk::TreeModelColumn<int> m_id;
     Gtk::TreeModelColumn<Glib::ustring> m_name;
+    /// @endcond
   };
 
   class FuseColumnRecord : public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    FuseColumnRecord()
     {
-    public:
-      FuseColumnRecord()
-	{
-	  add(m_id); add(m_name);
-	  add(m_service_name); add(m_service_domain);
-	  add(m_service_hostname); add(m_service_port);
-	  add(m_image_id); add(m_image_width), add(m_image_height);
-	  add(m_image_colorspace);
-	};
-      Gtk::TreeModelColumn<int> m_id;
-      Gtk::TreeModelColumn<Glib::ustring> m_name;
-      Gtk::TreeModelColumn<Glib::ustring> m_service_name;
-      Gtk::TreeModelColumn<Glib::ustring> m_service_type;
-      Gtk::TreeModelColumn<Glib::ustring> m_service_domain;
-      Gtk::TreeModelColumn<Glib::ustring> m_service_hostname;
-      Gtk::TreeModelColumn<unsigned short int> m_service_port;
-      Gtk::TreeModelColumn<Glib::ustring> m_image_id;
-      Gtk::TreeModelColumn<unsigned int> m_image_width;
-      Gtk::TreeModelColumn<unsigned int> m_image_height;
-      Gtk::TreeModelColumn<Glib::ustring> m_image_colorspace;
-   };
+      add(m_id); add(m_name);
+      add(m_service_name); add(m_service_domain);
+      add(m_service_hostname); add(m_service_port);
+      add(m_image_id); add(m_image_width), add(m_image_height);
+      add(m_image_colorspace);
+    };
+    /// @cond INTERNALS
+    Gtk::TreeModelColumn<int> m_id;
+    Gtk::TreeModelColumn<Glib::ustring> m_name;
+    Gtk::TreeModelColumn<Glib::ustring> m_service_name;
+    Gtk::TreeModelColumn<Glib::ustring> m_service_type;
+    Gtk::TreeModelColumn<Glib::ustring> m_service_domain;
+    Gtk::TreeModelColumn<Glib::ustring> m_service_hostname;
+    Gtk::TreeModelColumn<unsigned short int> m_service_port;
+    Gtk::TreeModelColumn<Glib::ustring> m_image_id;
+    Gtk::TreeModelColumn<unsigned int> m_image_width;
+    Gtk::TreeModelColumn<unsigned int> m_image_height;
+    Gtk::TreeModelColumn<Glib::ustring> m_image_colorspace;
+    /// @endcond
+  };
 
   typedef enum
   {

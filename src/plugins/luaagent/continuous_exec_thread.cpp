@@ -277,6 +277,9 @@ LuaAgentContinuousExecutionThread::fam_event(const char *filename,
 }
 
 
+/** Constructor.
+ * @param lua Lua context to use
+ */
 LuaAgentContinuousExecutionThread::LuaThread::LuaThread(fawkes::LuaContext *lua)
   : Thread("LuaAgentContinuousExecutionThread::LuaThread",
 	   Thread::OPMODE_CONTINUOUS)
@@ -287,6 +290,7 @@ LuaAgentContinuousExecutionThread::LuaThread::LuaThread(fawkes::LuaContext *lua)
 }
 
 
+/** Loop method continuously calling agentenv.execute() in Lua. */
 void
 LuaAgentContinuousExecutionThread::LuaThread::loop()
 {

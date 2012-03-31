@@ -81,6 +81,7 @@ class FuseTransferWidget : firevision::FuseClientHandler
 	  add(type);
 	}
       
+      /// @cond INTERNALS
       typedef enum
       {
 	LUT_COLORMAP,
@@ -97,6 +98,7 @@ class FuseTransferWidget : firevision::FuseClientHandler
       Gtk::TreeModelColumn<unsigned int> depth;
       Gtk::TreeModelColumn<unsigned int> bytes_per_cell;
       Gtk::TreeModelColumn<LutRecord::LutType> type;
+      /// @endcond
     };
 
   // signal handler
@@ -111,6 +113,7 @@ class FuseTransferWidget : firevision::FuseClientHandler
   void local_lut_selected();
   void remote_lut_selected();
 
+  /// @cond INTERNALS
   struct ClientData
   {
     firevision::FuseClient* client;
@@ -119,6 +122,7 @@ class FuseTransferWidget : firevision::FuseClientHandler
     uint16_t port;
     bool active;
   };
+  /// @endcond
 
   fawkes::LockQueue<ClientData> m_new_clients;
   fawkes::LockQueue<firevision::FuseClient*> m_delete_clients;

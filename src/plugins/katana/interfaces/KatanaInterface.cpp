@@ -124,7 +124,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0x30, 0xc1, 0xc4, 0x7b, 0xc, 0xd8, 0x56, 0x21, 0x76, 0x56, 0x8b, 0x6, 0xa1, 0xda, 0x9e, 0x6};
+  unsigned char tmp_hash[] = {0xa7, 0xb5, 0x23, 0xee, 0x17, 0x10, 0xe9, 0x71, 0x7c, 0x85, 0x3b, 0x4d, 0xb, 0x9, 0x50, 0xaf};
   set_hash(tmp_hash);
 }
 
@@ -359,7 +359,7 @@ KatanaInterface::set_theta(const float new_theta)
 }
 
 /** Get psi value.
- * DEPRECATED! Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation.
  * @return psi value
  */
 float
@@ -379,7 +379,7 @@ KatanaInterface::maxlenof_psi() const
 }
 
 /** Set psi value.
- * DEPRECATED! Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation.
  * @param new_psi new psi value
  */
 void
@@ -1159,7 +1159,7 @@ KatanaInterface::LinearGotoMessage::set_theta(const float new_theta)
 }
 
 /** Get psi value.
- * DEPRECATED! Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation.
  * @return psi value
  */
 float
@@ -1179,7 +1179,7 @@ KatanaInterface::LinearGotoMessage::maxlenof_psi() const
 }
 
 /** Set psi value.
- * DEPRECATED! Euler angle Psi of tool orientation..
+ * DEPRECATED! Euler angle Psi of tool orientation.
  * @param new_psi new psi value
  */
 void

@@ -88,7 +88,7 @@
 
     <field type="float" name="phi">DEPRECATED! Euler angle Phi of tool orientation.</field>
     <field type="float" name="theta">DEPRECATED! Euler angle Theta of tool orientation.</field>
-    <field type="float" name="psi">DEPRECATED! Euler angle Psi of tool orientation..</field>
+    <field type="float" name="psi">DEPRECATED! Euler angle Psi of tool orientation.</field>
 
     <field type="int32" length="6" name="encoders">Encoder values of motors</field>
     <field type="float" length="6" name="angles">Angle values of motors</field>

@@ -56,11 +56,13 @@ class WorldInfoViewer : public Gtk::Window
       add(show_opponents);
     }
     
+    /// @cond INTERNALS
     Gtk::TreeModelColumn<Glib::ustring> hostname;
     Gtk::TreeModelColumn<Glib::ustring> fqdn;
     Gtk::TreeModelColumn<bool> show_pose;
     Gtk::TreeModelColumn<bool> show_ball;
     Gtk::TreeModelColumn<bool> show_opponents;
+    /// @endcond
   };
 
   // signal handlers

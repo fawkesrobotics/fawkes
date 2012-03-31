@@ -47,7 +47,9 @@ using namespace firevision;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param img_thread OpenNI image thread, used for XYZRGB point clouds
+ */
 OpenNiPointCloudThread::OpenNiPointCloudThread(OpenNiImageThread *img_thread)
   : Thread("OpenNiPointCloudThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)

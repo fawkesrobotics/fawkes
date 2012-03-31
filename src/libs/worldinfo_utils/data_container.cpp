@@ -31,6 +31,8 @@
 using namespace std;
 namespace fawkes {
 
+/// @cond INTERNALS
+
 WorldInfoDataContainer::BallRecord::BallRecord()
 {
   m_is_global = false;
@@ -240,6 +242,7 @@ WorldInfoDataContainer::OpponentsRecord::positions()
   return m_glob_opp_positions;
 }
 
+/// @endcond
 
 /** @class WorldInfoDataContainer <worldinfo_utils/data_container.h>
  * Data container to store and exchange worldinfo data.
