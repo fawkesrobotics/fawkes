@@ -310,6 +310,27 @@ function write_skill_list(skdbg)
    end
 end
 
+function write_skill_dep(skdbg)
+   if skdbg:graph_fsm() ~= "SKILL_DEP" then
+      local graph = "digraph skill_dependencies { \n"
+      for _,s in ipairs(skills) do
+         if s ~= nil then
+	    graph = graph .. string.format("   %s;\n", s.name)
+            if s.depends_skills ~= nil then
+               for _,sdep in ipairs(s.depends_skills) do
+		  graph = graph .. string.format("   %s -> %s;\n", s.name, sdep)
+               end
+            end
+         end
+      end
+      graph = graph .. "}"
+
+      skdbg:set_graph_fsm("SKILL_DEP")
+      skdbg:set_graph(graph)
+      skdbg:write()
+   end
+end
+
 function update_grapher_config(skdbg, graphdir, colored)
    local params_changed = false
 
@@ -344,6 +365,8 @@ function write_skiller_debug(skdbg, what, graphdir, colored)
 
    if what == "LIST" then
       write_skill_list(skdbg)
+   elseif what == "SKILL_DEP" then
+      write_skill_dep(skdbg)
    elseif graphing_enabled then
       local sname = what
       if what == "ACTIVE" then
@@ -426,7 +449,7 @@ end
 -- execution, while maintaining access to all of the skills public variables and
 -- functions and preventing (accidental) modification of the skill module.
 -- @param skill_module module table of the skill
--- 
+--
 function create_skill_functable(skill_module)
    local t = {}
    local mt = { __call  = skill_module.wrapped_function,
