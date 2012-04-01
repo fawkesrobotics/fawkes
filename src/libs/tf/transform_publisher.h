@@ -71,7 +71,7 @@ class TransformPublisher
 {
  public:
   TransformPublisher(BlackBoard *bb, const char *bb_iface_id);
-  ~TransformPublisher();
+  virtual ~TransformPublisher();
 
   virtual void send_transform(const StampedTransform &transform);
 

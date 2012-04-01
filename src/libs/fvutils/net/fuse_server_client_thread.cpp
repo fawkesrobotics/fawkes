@@ -43,6 +43,7 @@
 #include <netinet/in.h>
 #include <cstring>
 #include <cstdlib>
+#include <unistd.h>
 
 using namespace fawkes;
 

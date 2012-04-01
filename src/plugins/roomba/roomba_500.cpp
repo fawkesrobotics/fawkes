@@ -33,6 +33,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 #ifdef HAVE_BLUEZ
 #  include <bluetooth/bluetooth.h>
@@ -1068,7 +1069,7 @@ Roomba500::set_motors(bool main, bool side, bool vacuum,
  */
 void
 Roomba500::set_leds(bool debris, bool spot, bool dock, bool check_robot,
-		    char clean_color, char clean_intensity)
+		    unsigned char clean_color, unsigned char clean_intensity)
 {
   assert_control();
 

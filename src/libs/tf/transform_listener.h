@@ -78,7 +78,7 @@ class TransformListener
 {
  public:
   TransformListener(BlackBoard *bb);
-  ~TransformListener();
+  virtual ~TransformListener();
 
   // for BlackBoardInterfaceObserver
   virtual void bb_interface_created(const char *type, const char *id) throw();

@@ -476,7 +476,7 @@ class Roomba500
   void set_motors(bool main = true, bool side = true, bool vacuum = true,
 		  bool main_backward = false, bool side_backward = false);
   void set_leds(bool debris, bool spot, bool dock, bool check_robot,
-		char clean_color, char clean_intensity);
+		unsigned char clean_color, unsigned char clean_intensity);
 
   void set_digit_leds(const char digits[4]);
 

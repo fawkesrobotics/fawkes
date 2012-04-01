@@ -274,10 +274,10 @@ InterfaceParser::printPseudoMaps(vector<InterfacePseudoMap> &pseudo_maps)
 	 << "  keytype=" << i->getKeyType() << endl;
     InterfacePseudoMap::RefList &reflist = i->getRefList();
 
-    InterfacePseudoMap::RefList::iterator i;
-    for (i = reflist.begin(); i != reflist.end(); ++i) {
-      cout << "    Ref:  field=" << i->first
-	   << "  key=" << i->second << endl;
+    InterfacePseudoMap::RefList::iterator j;
+    for (j = reflist.begin(); j != reflist.end(); ++j) {
+      cout << "    Ref:  field=" << j->first
+	   << "  key=" << j->second << endl;
     }
 
     cout << endl;

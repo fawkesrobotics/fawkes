@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cerrno>
 #include <sys/file.h>
+#include <unistd.h>
 #ifdef HAVE_LIBUDEV
 #  include <cstring>
 #  include <libudev.h>

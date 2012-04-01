@@ -104,7 +104,7 @@ KatanaActThread::init()
   __last_update->set_time(0, 0);
 
   try {
-    TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, __cfg_read_timeout, __cfg_write_timeout};
+    TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, (int)__cfg_read_timeout, (int)__cfg_write_timeout};
     __device.reset(new CCdlCOM(ccd, __cfg_device.c_str()));
 
     __protocol.reset(new CCplSerialCRC());

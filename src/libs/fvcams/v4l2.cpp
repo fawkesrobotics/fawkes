@@ -49,6 +49,7 @@ using fawkes::LibLogger;
 #ifdef HAVE_LIBV4L2
 #  include <libv4l2.h>
 #else
+#  include <unistd.h>
 #  define v4l2_fd_open(fd, flags) (fd)
 #  define v4l2_close ::close
 #  define v4l2_dup dup

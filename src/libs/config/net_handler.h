@@ -37,6 +37,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <cstring>
 
 namespace fawkes {
 

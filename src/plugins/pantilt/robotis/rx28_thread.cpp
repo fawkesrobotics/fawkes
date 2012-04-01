@@ -32,6 +32,7 @@
 
 #include <cstdarg>
 #include <cmath>
+#include <unistd.h>
 
 using namespace fawkes;
 

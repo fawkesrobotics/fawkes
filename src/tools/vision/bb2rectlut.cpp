@@ -36,6 +36,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <unistd.h>
 
 using namespace fawkes;
 using namespace firevision;

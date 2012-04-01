@@ -52,6 +52,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <unistd.h>
 
 namespace fawkes {
   namespace runtime {

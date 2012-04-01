@@ -26,6 +26,7 @@
 #include <core/macros.h>
 
 #include <cstdio>
+#include <unistd.h>
 
 using namespace fawkes;
 

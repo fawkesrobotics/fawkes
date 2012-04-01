@@ -24,6 +24,7 @@
 #include <fvutils/system/camargp.h>
 #include <cerrno>
 #include <cstdlib>
+#include <unistd.h>
 
 using namespace std;
 using namespace firevision;

@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <cstring>
+#include <unistd.h>
 
 using namespace fawkes;
 
