@@ -31,7 +31,7 @@ class SkelGuiTextureDrawer
 {
  public:
   SkelGuiTextureDrawer(unsigned int width, unsigned int height);
-  ~SkelGuiTextureDrawer();
+  virtual ~SkelGuiTextureDrawer();
 
   virtual void fill_texture() = 0;
 
