@@ -40,7 +40,8 @@ else
 endif
 
 ifneq ($(HAVE_PCL),1)
-  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/pcl.cpp $(SRCDIR)/inifins/pcl.cpp $(SRCDIR)/pointcloud/pointcloud_manager.cpp))
+  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/pointcloud.cpp \
+		     $(SRCDIR)/inifins/pointcloud.cpp $(SRCDIR)/pointcloud/pointcloud_manager.cpp))
   WARN_TARGETS += warning_pcl
 else
   CFLAGS  += $(CFLAGS_PCL)
