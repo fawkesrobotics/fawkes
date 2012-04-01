@@ -31,8 +31,8 @@ class LaserDataFilter
   class Buffer {
    public:
     Buffer(size_t num_values = 0);
-    std::string  frame;
-    float       *values;
+    std::string  frame;		///< reference coordinate frame ID
+    float       *values;	///< values
   };
 
   LaserDataFilter(unsigned int in_data_size,

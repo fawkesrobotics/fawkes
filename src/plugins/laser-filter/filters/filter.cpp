@@ -60,12 +60,6 @@
 /** @class LaserDataFilter::Buffer "filter.h"
  * Laser data buffer.
  * A buffer comprises the value array and a reference frame ID.
- *
- * @var std::string LaserDataFilter::Buffer::frame
- * The reference coordinate frame ID.
- *
- * @var float *  LaserDataFilter::Buffer::values
- * The data array.
  */
 
 /** Constructor.

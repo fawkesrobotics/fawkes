@@ -73,7 +73,7 @@ class RosTfThread
                                            unsigned int instance_serial) throw();
 
  private:
-  void tf_message_cb(const tf::tfMessage::ConstPtr &msg);
+  void tf_message_cb(const ::tf::tfMessage::ConstPtr &msg);
   void conditional_close(fawkes::Interface *interface) throw();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */

@@ -140,16 +140,16 @@ class MirrorCalibTool
                        unsigned char* dst, int widt, int height);
   static void make_contrast(unsigned char* buf, size_t buflen);
   static void make_grayscale(unsigned char* buf, size_t buflen);
-  static MarkList premark(const StepResult& prev, const unsigned char* yuv_mask,
+  static MirrorCalibTool::MarkList premark(const StepResult& prev, const unsigned char* yuv_mask,
                           StepResult& result, PolarAngle phi,
                           const PixelPoint& center);
-  static MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
+  static MirrorCalibTool::MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
                           const unsigned char* yuv_mask, StepResult& result,
                           PolarAngle phi, const PixelPoint& center);
-  static HoleList search_holes(const MarkList& premarks);
-  static HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
-  static MarkList determine_marks(const HoleList& holes);
-  static MarkList mark(const MarkList& premarks, const unsigned char* yuv_mask,
+  static MirrorCalibTool::HoleList search_holes(const MarkList& premarks);
+  static MirrorCalibTool::HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
+  static MirrorCalibTool::MarkList determine_marks(const HoleList& holes);
+  static MirrorCalibTool::MarkList mark(const MarkList& premarks, const unsigned char* yuv_mask,
                        StepResult& result, PolarAngle phi,
                        const PixelPoint& center);
 

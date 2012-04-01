@@ -58,7 +58,7 @@ namespace fawkes {
  * Check if storage adapter is for specified point type.
  * @return true if storage adapter is for specified point type, false otherwise
  *
- * @fn PointCloudManager::PointCloudStorageAdapter * PointCloudManager::StorageAdapter::as_pointtype() const
+ * @fn template <PointT> PointCloudManager::PointCloudStorageAdapter<PointT> * PointCloudManager::StorageAdapter::as_pointtype() const
  * Transform to specific PointCloudStorageAdapter.
  * @return transformed PointCloudStorageAdapter
  * @exception Exception thrown if storage adapter is not of requested point type or does not exist

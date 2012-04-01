@@ -533,6 +533,15 @@ TabletopVisualizationThread::loop()
 }
 
 
+/** Visualize the given data.
+ * @param frame_id coordinate frame ID
+ * @param table_centroid table centroid
+ * @param normal table normal vector
+ * @param table_hull_vertices vertices of the table convex hull
+ * @param table_model_vertices vertices belonging to the table model
+ * @param good_table_hull_edges good chosen edges
+ * @param centroids object centroids
+ */
 void
 TabletopVisualizationThread::visualize(const std::string &frame_id,
                                        Eigen::Vector4f &table_centroid,
