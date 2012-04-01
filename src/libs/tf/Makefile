@@ -29,7 +29,7 @@ LDFLAGS_lua_fawkestf = $(LDFLAGS_LUA)
 LIBS_lua_fawkestf = fawkescore fawkesutils fawkestf $(TOLUA_LIBS)
 OBJS_lua_fawkestf = fawkestf_tolua.o
 
-OBJS_all = $(OBJS_libfawkestf)
+OBJS_all = $(OBJS_libfawkestf) $(OBJS_lua_fawkestf)
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)

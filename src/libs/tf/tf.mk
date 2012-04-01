@@ -24,7 +24,10 @@ endif
 
 ifeq ($(HAVE_BULLET),1)
   HAVE_TF = 1
-  CFLAGS_TF  = -DHAVE_TF -std=c++0x $(CFLAGS_BULLET) \
+  CFLAGS_TF  = -DHAVE_TF $(CFLAGS_BULLET) \
 	       -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX
   LDFLAGS_TF = $(LDFLAGS_BULLET) -lm
+  ifneq ($(OS),FreeBSD)
+    CFLAGS_TF += -std=c++0x
+  endif
 endif
