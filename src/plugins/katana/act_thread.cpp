@@ -33,7 +33,9 @@
 #include <common/MathHelperFunctions.h>
 
 using namespace fawkes;
+#ifdef HAVE_TF
 using namespace fawkes::tf;
+#endif
 
 /** @class KatanaActThread "act_thread.h"
  * Katana act thread.
