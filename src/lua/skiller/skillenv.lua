@@ -315,14 +315,35 @@ function write_skill_dep(skdbg)
    if skdbg:graph_fsm() ~= "SKILL_DEP" then
       local g = gmod.digraph("skill_dependencies")
 
+      -- set attributes of graph
+      gmod.setv(g, "rankdir", "LR")
+      gmod.setv(g, "penwidth", "1.0")
+      gmod.setv(g, "compound")
+
+      -- set attributes of default nodes and edges (will probably apply to all here)
+      local defnode = gmod.get_current_default_node(g)
+      local defedge = gmod.get_current_default_edge(g)
+      gmod.setv(defnode, "penwidth", "1.0")
+      gmod.setv(defnode, "shape", "rect")
+      gmod.setv(defnode, "style", "rounded,filled")
+      gmod.setv(defnode, "color", "#8080ff")
+      gmod.setv(defnode, "fillcolor", "#e6e6ff")
+      gmod.setv(defedge, "penwidth", "1.0")
+      gmod.setv(defedge, "color", "#8080ff")
+
       for _,s in ipairs(skills) do
          if s ~= nil then
 	    local n = gmod.node(g, s.name)
-            if s.depends_skills ~= nil then
+            if s.depends_skills ~= nil and
+	       #(s.depends_skills) > 0 then
                for _,sdep in ipairs(s.depends_skills) do
 	          local e = gmod.edge(g, s.name, sdep)
                end
-            end
+            else
+	       gmod.align(g, "basic", s.name)
+	       gmod.setv(n, "color", "#80c65e")
+	       gmod.setv(n, "fillcolor", "#dfffd0")
+	    end
          end
       end
 
