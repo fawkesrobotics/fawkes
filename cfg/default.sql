@@ -108,8 +108,8 @@ INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/read_timeout_ms','unsig
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/discover_timeout_ms','unsigned int',30,'Discover timeout for RX28 PTU');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_servo_id','unsigned int',1,'Pan servo ID for RX28 PTU');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_servo_id','unsigned int',2,'Tilt servo ID for RX28 PTU');
-INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_zero_offset','int',-82,'Pan zero offset for RX28 PTU');
-INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_zero_offset','int',0,'Tilt zero offset for RX28 PTU');
+INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_offset','float',24.05,'Pan offset for RX28 PTU; deg');
+INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_offset','float',3.56,'Tilt zero offset for RX28 PTU; deg');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/turn_off','bool','1','Turn off RX28 PTU when unloading the plugin?');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/goto_zero_start','bool','1','Move RX28 PTU to (0,0) on start?');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/cw_compl_margin','unsigned int',0,'Clockwise compliance margin for RX28 PTU');
@@ -129,6 +129,8 @@ INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_trans_z','float',0.
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_trans_x','float',0.0,'TILT servo base to joint translation X; m');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_trans_y','float',0.0,'TILT servo base to joint translation Y; m');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_trans_z','float',0.039,'TILT servo base to joint translation Z; m');
+INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/pan_start','float',0.0,'PAN default start; rad');
+INSERT INTO "config" VALUES('/hardware/pantilt/ptus/RX28/tilt_start','float',0.0,'TILT default start; rad');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/type','string','EviD100P','Type of PTU; one of RX28, EviD100P and DirectedPerceptionASCII');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/active','bool','0','Is this PTU active?');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/device','string','/dev/ttyUSB1','Device file for EviD100P PTU');
