@@ -33,7 +33,9 @@
 #ifdef HAVE_OPENRAVE
 
 #include <plugins/openrave/robot.h>
+#include <plugins/openrave/environment.h>
 #include <plugins/openrave/manipulators/katana6M180.h>
+#include <plugins/openrave/manipulators/neuronics_katana.h>
 #include <plugins/openrave/types.h>
 
 #include <vector>
@@ -169,21 +171,28 @@ void
 KatanaGotoOpenRaveThread::init()
 {
   try {
-    __OR_robot = _openrave->add_robot(__cfg_robot_file, __cfg_autoload_IK);
+    __OR_robot = _openrave->add_robot(__cfg_robot_file, false);
 
     // configure manipulator
     // TODO: from config parameters? neccessary?
-    __OR_manip = new OpenRaveManipulatorKatana6M180(6, 5);
+
+    __OR_manip = new OpenRaveManipulatorNeuronicsKatana(5, 5);
     __OR_manip->add_motor(0,0);
     __OR_manip->add_motor(1,1);
     __OR_manip->add_motor(2,2);
-    __OR_manip->add_motor(4,3);
-    __OR_manip->add_motor(5,4);
+    __OR_manip->add_motor(3,3);
+    __OR_manip->add_motor(4,4);
 
     // Set manipulator and offsets.
     // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
     // offsetX: katana.kinbody is setup 0.0725 on +x axis
     _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+    __OR_robot->get_robot_ptr()->SetActiveManipulator("arm_kni");
+
+    if( __cfg_autoload_IK ) {
+      _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_TranslationDirection5D);
+    }
+
   } catch (Exception& e) {
     // TODO: not just simple throw....
     throw;
@@ -206,76 +215,8 @@ KatanaGotoOpenRaveThread::finalize()
 void
 KatanaGotoOpenRaveThread::once()
 {
-  // Fetch motor encoder values
-  if( !update_motor_data() ) {
-    _logger->log_warn("KatanaGotoThread", "Fetching current motor values failed");
+  if( !plan_target() ) {
     _finished = true;
-    return;
-  }
-
-  // Set starting point for planner, convert encoder values to angles if necessary
-  if( !_katana->joint_angles() ) {
-    encToRad(__motor_encoders, __motor_angles);
-  }
-  __OR_manip->set_angles_device(__motor_angles);
-
-  // Checking if target has IK solution
-  if( __is_target_object) {
-    _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
-
-    if( !_openrave->set_target_object(__target_object, __OR_robot) ) {
-      _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
-      _finished = true;
-      _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
-      return;
-    }
-  }
-  else {
-    bool success = false;
-    try {
-      if( __has_target_quaternion ) {
-        _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
-  		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
-        success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
-      } else if( __move_straight) {
-        _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
-	 	           __x, __y, __z);
-        success = __OR_robot->set_target_straight(__x, __y, __z);
-      } else {
-        float theta_error = 0.0f;
-        while( !success && (theta_error <= __theta_error)) {
-          _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-	  	             __x, __y, __z, __phi, __theta+theta_error, __psi);
-          success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta+theta_error, __psi);
-          if( !success ) {
-            _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-                               __x, __y, __z, __phi, __theta-theta_error, __psi);
-            success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta-theta_error, __psi);
-          }
-
-          theta_error += 0.01;
-        }
-      }
-    } catch(OpenRAVE::openrave_exception &e) {
-      _logger->log_debug(name(), "OpenRAVE exception:%s", e.what());
-    }
-
-    if( !success ) {
-      _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
-      _finished = true;
-      _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
-      return;
-    }
-  }
-
-  // Run planner
-  float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
-  try {
-    _openrave->run_planner(__OR_robot, sampling);
-  } catch (fawkes::Exception &e) {
-    _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
     return;
   }
 
@@ -288,7 +229,6 @@ KatanaGotoOpenRaveThread::once()
     while (!final) {
       time_last.stamp_systime();
       final = move_katana();
-
       update_openrave_data();
       time_now.stamp_systime();
 
@@ -332,6 +272,84 @@ KatanaGotoOpenRaveThread::once()
   _finished = true;
 }
 
+
+/** Peform path-planning on target.
+ * @return true if ik solvable and path planned, false otherwise
+ */
+bool
+KatanaGotoOpenRaveThread::plan_target()
+{
+  // Fetch motor encoder values
+  if( !update_motor_data() ) {
+    _logger->log_warn("KatanaGotoThread", "Fetching current motor values failed");
+    return false;
+  }
+
+  // Set starting point for planner, convert encoder values to angles if necessary
+  if( !_katana->joint_angles() ) {
+    encToRad(__motor_encoders, __motor_angles);
+  }
+  __OR_manip->set_angles_device(__motor_angles);
+
+  // Checking if target has IK solution
+  if( __is_target_object) {
+    _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
+
+    if( !_openrave->set_target_object(__target_object, __OR_robot) ) {
+      _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
+      _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
+      return false;
+    }
+  }
+  else {
+    bool success = false;
+    try {
+      if( __has_target_quaternion ) {
+        _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
+  		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
+        success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
+      } else if( __move_straight) {
+        _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
+	 	           __x, __y, __z);
+        success = __OR_robot->set_target_straight(__x, __y, __z);
+      } else {
+        float theta_error = 0.0f;
+        while( !success && (theta_error <= __theta_error)) {
+          _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
+	  	             __x, __y, __z, __phi, __theta+theta_error, __psi);
+          success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta+theta_error, __psi);
+          if( !success ) {
+            _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
+                               __x, __y, __z, __phi, __theta-theta_error, __psi);
+            success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta-theta_error, __psi);
+          }
+
+          theta_error += 0.01;
+        }
+      }
+    } catch(OpenRAVE::openrave_exception &e) {
+      _logger->log_debug(name(), "OpenRAVE exception:%s", e.what());
+    }
+
+    if( !success ) {
+      _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
+      _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
+      return false;
+    }
+  }
+
+  // Run planner
+  float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
+  try {
+    _openrave->run_planner(__OR_robot, sampling);
+  } catch (fawkes::Exception &e) {
+    _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
+    _error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
+    return false;
+  }
+
+  return true;
+}
 
 /** Update data of arm in OpenRAVE model */
 void

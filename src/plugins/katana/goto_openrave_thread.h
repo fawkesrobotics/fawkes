@@ -34,7 +34,7 @@
 #ifdef HAVE_OPENRAVE
 namespace fawkes {
   class OpenRaveRobot;
-  class OpenRaveManipulatorKatana6M180;
+  class OpenRaveManipulator;
 }
 #endif
 
@@ -60,13 +60,14 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   void set_theta_error(float error);
   void set_move_straight(bool move_straight);
 
+  virtual bool plan_target();
   virtual void update_openrave_data();
   virtual bool update_motor_data();
   virtual bool move_katana();
 
  private:
-  fawkes::OpenRaveRobot*                        __OR_robot;
-  fawkes::OpenRaveManipulatorKatana6M180*       __OR_manip;
+  fawkes::OpenRaveRobot*        __OR_robot;
+  fawkes::OpenRaveManipulator*  __OR_manip;
 
   std::string                                   __target_object;
   std::vector< std::vector<float> >*            __target_traj;

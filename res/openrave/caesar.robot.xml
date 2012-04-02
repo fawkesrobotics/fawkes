@@ -2,7 +2,7 @@
 <Robot name="caesar">
   <Translation>-0.0725 0 0.33</Translation>
 
-  <Robot prefix="arm_" file="../../src/plugins/openrave/manipulators/katana.kinbody.xml" name="caesar_katana">
+  <Robot prefix="arm_" file="/usr/local/share/openrave-0.6/robots/neuronics-katana.zae" name="caesar_katana">
      <Translation>0.0725 0 0.145</Translation>
   </Robot>
 
@@ -21,9 +21,9 @@
 
 
 
-  <Manipulator name="arm">
+  <Manipulator name="arm_kni">
     <effector>arm_Gripper_Base</effector>
-    <translation>0 0 0.1303</translation>
+    <translation>0 0.1303 0</translation>
     <base>arm_Base</base>
     <joints>arm_gj1</joints>
     <closingdirection>-1</closingdirection>
