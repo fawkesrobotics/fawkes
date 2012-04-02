@@ -75,6 +75,8 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katan
   __cfg_autoload_IK( autoload_IK ),
   __cfg_use_viewer( use_viewer ),
   __is_target_object( 0 ),
+  __has_target_quaternion( 0 ),
+  __move_straight( 0 ),
   _openrave( openrave )
 {
 }
@@ -101,6 +103,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
 
   __has_target_quaternion = false;
   __is_target_object = false;
+  __move_straight = false;
 }
 
 /** Set target position.
@@ -126,6 +129,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
 
   __has_target_quaternion = true;
   __is_target_object = false;
+  __move_straight = false;
 }
 
 /** Set target position.
@@ -138,6 +142,27 @@ KatanaGotoOpenRaveThread::set_target(const std::string& object_name, float rot_x
 
   __is_target_object = true;
 }
+
+/** Set theta error
+ * @param error error in radians
+ */
+void
+KatanaGotoOpenRaveThread::set_theta_error(float error)
+{
+  __theta_error = error;
+}
+
+/** Set if arm should move straight.
+ * Make sure to call this after(!) a "set_target" method, as they
+ * set "__move_straight" attribute to its default value.
+ * @param move_straight true, if arm should move straight
+ */
+void
+KatanaGotoOpenRaveThread::set_move_straight(bool move_straight)
+{
+  __move_straight = move_straight;
+}
+
 
 void
 KatanaGotoOpenRaveThread::init()
@@ -211,10 +236,24 @@ KatanaGotoOpenRaveThread::once()
         _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
   		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
         success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
+      } else if( __move_straight) {
+        _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
+	 	           __x, __y, __z);
+        success = __OR_robot->set_target_straight(__x, __y, __z);
       } else {
-        _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-		           __x, __y, __z, __phi, __theta, __psi);
-        success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta, __psi);
+        float theta_error = 0.0f;
+        while( !success && (theta_error <= __theta_error)) {
+          _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
+	  	             __x, __y, __z, __phi, __theta+theta_error, __psi);
+          success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta+theta_error, __psi);
+          if( !success ) {
+            _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
+                               __x, __y, __z, __phi, __theta-theta_error, __psi);
+            success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta-theta_error, __psi);
+          }
+
+          theta_error += 0.01;
+        }
       }
     } catch(OpenRAVE::openrave_exception &e) {
       _logger->log_debug(name(), "OpenRAVE exception:%s", e.what());

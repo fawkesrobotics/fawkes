@@ -49,10 +49,19 @@ class KatanaInterface : public Interface
 
   class LinearGotoMessage : public Message
   {
-    LinearGotoMessage(char * ini_trans_frame, char * ini_rot_frame, float ini_x, float ini_y, float ini_z, float ini_phi, float ini_theta, float ini_psi);
+    LinearGotoMessage(float ini_theta_error, float ini_offset_xy, bool ini_straight, char * ini_trans_frame, char * ini_rot_frame, float ini_x, float ini_y, float ini_z, float ini_phi, float ini_theta, float ini_psi);
     LinearGotoMessage();
     ~LinearGotoMessage();
 
+    float theta_error();
+    void set_theta_error(const float new_theta_error);
+    int maxlenof_theta_error() const;
+    float offset_xy();
+    void set_offset_xy(const float new_offset_xy);
+    int maxlenof_offset_xy() const;
+    bool is_straight();
+    void set_straight(const bool new_straight);
+    int maxlenof_straight() const;
     char * trans_frame();
     void set_trans_frame(const char * new_trans_frame);
     int maxlenof_trans_frame() const;
