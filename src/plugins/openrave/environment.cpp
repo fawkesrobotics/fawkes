@@ -25,6 +25,7 @@
 
 #include "environment.h"
 #include "robot.h"
+#include "manipulator.h"
 
 #include <logging/logger.h>
 #include <core/exceptions/software.h>
@@ -240,21 +241,81 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 {
   bool success;
 
-  // init planner
+  // init planner. This is automatically done by BaseManipulation, but putting it here
+  // helps to identify problem source if any occurs.
   success = __planner->InitPlan(robot->get_robot_ptr(),robot->get_planner_params());
   if(!success)
     {throw fawkes::Exception("OpenRAVE Environment: Planner: init failed");}
   else if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Planner: initialized");}
 
-  // plan path
+  // plan path with basemanipulator
+  ModuleBasePtr basemanip = robot->get_basemanip();
+  target_t target = robot->get_target();
+  std::stringstream cmdin,cmdout;
+
+
+  switch(target.type) {
+    case (TARGET_JOINTS) :
+      cmdin << "MoveActiveJoints goal";
+      {
+        std::vector<dReal> v;
+        target.manip->get_angles(v);
+        for(size_t i = 0; i < v.size(); ++i) {
+          cmdin << " " << v[i];
+        }
+      }
+      break;
+
+    case (TARGET_TRANSFORM) :
+      cmdin << "MoveToHandPosition pose";
+      cmdin << " " << target.qw << " " << target.qx << " " << target.qy << " " << target.qz;
+      cmdin << " " << target.x  << " " << target.y  << " " << target.z;
+      break;
+
+    case (TARGET_RELATIVE) :
+      // for now move to all relative targets in a straigt line
+      cmdin << "MoveHandStraight direction";
+      cmdin << " " << target.x << " " << target.y << " " << target.z;
+      {
+        dReal stepsize = 0.005;
+        dReal length = sqrt(target.x*target.x + target.y*target.y + target.z*target.z);
+        int minsteps = (int)(length/stepsize);
+        if( minsteps > 4 )
+          minsteps -= 4;
+
+        cmdin << " stepsize " << stepsize;
+        cmdin << " minsteps " << minsteps;
+        cmdin << " maxsteps " << (int)(length/stepsize);
+      }
+      break;
+
+    default :
+      throw fawkes::Exception("OpenRAVE Environment: Planner: Invalid target type");
+  }
+
+  cmdin << " outputtraj";
+  //if(__logger)
+  //  __logger->log_debug("OpenRAVE Environment", "Planner: basemanip cmdin:%s", cmdin.str().c_str());
+
+  {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
+    try {
+      success = basemanip->SendCommand(cmdout,cmdin);
+    } catch(openrave_exception &e) {
+      throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
+    }
+    if(!success)
+      {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
+    else if(__logger)
+      {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+  } //unlock environment
+
+  // read returned trajectory
   boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
-  traj->Clear();
-  success = __planner->PlanPath(traj);
-  if(!success)
-    {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
-  else if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+  if( !traj->Read(cmdout, robot->get_robot_ptr()) ) {
+    {throw fawkes::Exception("OpenRAVE Environment: Planner: Cannot read trajectory data.");}
+  }
 
   // re-timing the trajectory with cubic interpolation
   traj->CalcTrajTiming(robot->get_robot_ptr(),TrajectoryBase::CUBIC,true,true);
@@ -289,8 +350,12 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
      } // robot state is restored
 
     // display motion in viewer
-    if( robot->display_planned_movements())
-      {robot->get_robot_ptr()->SetActiveMotion(traj);}
+    if( robot->display_planned_movements()) {
+      if (robot->get_robot_ptr()->GetActiveDOF() == traj->GetDOF())
+        robot->get_robot_ptr()->SetActiveMotion(traj);
+      else
+        robot->get_robot_ptr()->SetMotion(traj);
+    }
   }
 
 }
@@ -539,26 +604,21 @@ OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float t
   return true;
 }
 
-/** Rotate object along its axis.
- * Rotation angles should be given in radians.
+/** Rotate object by a quaternion.
  * @param name name of the object
- * @param rot_x 1st rotation, along x-axis
- * @param rot_y 2nd rotation, along y-axis
- * @param rot_z 3rd rotation, along z-axis
+ * @param quat_x x value of quaternion
+ * @param quat_y y value of quaternion
+ * @param quat_z z value of quaternion
+ * @param quat_w w value of quaternion
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z)
+OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w)
 {
   try {
     KinBodyPtr kb = __env->GetKinBody(name);
 
-    Vector q1 = quatFromAxisAngle(Vector(rot_x, 0.f, 0.f));
-    Vector q2 = quatFromAxisAngle(Vector(0.f, rot_y, 0.f));
-    Vector q3 = quatFromAxisAngle(Vector(0.f, 0.f, rot_z));
-
-    Vector q12  = quatMultiply (q1, q2);
-    Vector quat = quatMultiply (q12, q3);
+    Vector quat(quat_w, quat_x, quat_y, quat_z);
 
     Transform transform = kb->GetTransform();
     transform.rot = quat;
@@ -571,6 +631,27 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float r
   }
 
   return true;
+}
+
+/** Rotate object along its axis.
+ * Rotation angles should be given in radians.
+ * @param name name of the object
+ * @param rot_x 1st rotation, along x-axis
+ * @param rot_y 2nd rotation, along y-axis
+ * @param rot_z 3rd rotation, along z-axis
+ * @return true if successful
+ */
+bool
+OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z)
+{
+  Vector q1 = quatFromAxisAngle(Vector(rot_x, 0.f, 0.f));
+  Vector q2 = quatFromAxisAngle(Vector(0.f, rot_y, 0.f));
+  Vector q3 = quatFromAxisAngle(Vector(0.f, 0.f, rot_z));
+
+  Vector q12  = quatMultiply (q1, q2);
+  Vector quat = quatMultiply (q12, q3);
+
+  return rotate_object(name, quat.x, quat.y, quat.z, quat.w);
 }
 
 } // end of namespace fawkes

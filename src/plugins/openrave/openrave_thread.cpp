@@ -42,7 +42,8 @@ using namespace fawkes;
 
 /** Constructor. */
 OpenRaveThread::OpenRaveThread()
-  : Thread("OpenRaveThread", Thread::OPMODE_CONTINUOUS),
+  : Thread("OpenRaveThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
     AspectProviderAspect("OpenRaveAspect", &__or_aspectIniFin),
   __or_aspectIniFin( this ),
   __OR_env( 0 ),
@@ -241,6 +242,16 @@ bool OpenRaveThread::rename_object(const std::string& name, const std::string& n
  * @return true if successful */
 bool OpenRaveThread::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot) {
   return __OR_env->move_object(name, trans_x, trans_y, trans_z, robot); }
+
+/** Rotate object by a quaternion.
+ * @param name name of the object
+ * @param quat_x x value of quaternion
+ * @param quat_y y value of quaternion
+ * @param quat_z z value of quaternion
+ * @param quat_w w value of quaternion
+ * @return true if successful */
+bool OpenRaveThread::rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w) {
+  return __OR_env->rotate_object(name, quat_x, quat_y, quat_z, quat_w); }
 
 /** Rotate object along its axis.
  * Rotation angles should be given in radians.

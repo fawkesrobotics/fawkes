@@ -232,6 +232,49 @@ class OpenRaveInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class RotateObjectQuatMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char name[30]; /**< Name of object */
+      float x; /**< x value of quaternion */
+      float y; /**< y value of quaternion */
+      float z; /**< z value of quaternion */
+      float w; /**< w value of quaternion */
+    } RotateObjectQuatMessage_data_t;
+#pragma pack(pop)
+
+    RotateObjectQuatMessage_data_t *data;
+
+   public:
+    RotateObjectQuatMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_z, const float ini_w);
+    RotateObjectQuatMessage();
+    ~RotateObjectQuatMessage();
+
+    RotateObjectQuatMessage(const RotateObjectQuatMessage *m);
+    /* Methods */
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float z() const;
+    void set_z(const float new_z);
+    size_t maxlenof_z() const;
+    float w() const;
+    void set_w(const float new_w);
+    size_t maxlenof_w() const;
+    virtual Message * clone() const;
+  };
+
   class RotateObjectMessage : public Message
   {
    private:
