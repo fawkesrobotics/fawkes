@@ -28,7 +28,7 @@
 class KatanaMotorControlThread : public KatanaMotionThread
 {
  public:
-  KatanaMotorControlThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
+  KatanaMotorControlThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger,
 		   unsigned int poll_interval_ms);
 
   virtual void set_encoder(unsigned int nr, int value, bool inc=false);

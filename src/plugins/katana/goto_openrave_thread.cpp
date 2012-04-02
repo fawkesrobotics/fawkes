@@ -23,9 +23,10 @@
 
 #include "goto_openrave_thread.h"
 #include "conversion.h"
+#include "controller.h"
+#include "exception.h"
 
 #include <cstdlib>
-#include <kniBase.h>
 
 #include <utils/time/time.h>
 
@@ -50,7 +51,7 @@ using namespace fawkes;
 #ifdef HAVE_OPENRAVE
 
 /** Constructor.
- * @param katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  * @param openrave pointer to OpenRaveConnector aspect
  * @param poll_interval_ms interval in ms between two checks if the
@@ -59,7 +60,7 @@ using namespace fawkes;
  * @param autoload_IK true, if IK databas should be automatically generated (recommended)
  * @param use_viewer true, if viewer should be started (default: false)
  */
-KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katana,
+KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 				   fawkes::Logger *logger,
                                    fawkes::OpenRaveConnector* openrave,
 				   unsigned int poll_interval_ms,
@@ -183,11 +184,9 @@ KatanaGotoOpenRaveThread::init()
     // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
     // offsetX: katana.kinbody is setup 0.0725 on +x axis
     _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
-  } catch (fawkes::Exception& e) {
+  } catch (Exception& e) {
     // TODO: not just simple throw....
     throw;
-  } catch (/*KNI*/::Exception &e) {
-    _logger->log_warn(name(), "Fetching position values failed: %s", e.what());
   }
 
   if( __cfg_use_viewer)
@@ -214,8 +213,10 @@ KatanaGotoOpenRaveThread::once()
     return;
   }
 
-  // Convert encoder values to angles, and set starting point for planner
-  encToRad(__motor_encoders, __motor_angles);
+  // Set starting point for planner, convert encoder values to angles if necessary
+  if( !_katana->joint_angles() ) {
+    encToRad(__motor_encoders, __motor_angles);
+  }
   __OR_manip->set_angles_device(__motor_angles);
 
   // Checking if target has IK solution
@@ -301,28 +302,24 @@ KatanaGotoOpenRaveThread::once()
     }
 
     // check if encoders are close enough to target position
-    short num_motors = _katana->getNumberOfMotors();
-    CKatBase *base = _katana->GetBase();
-    const TKatMOT *mot = base->GetMOT();
+    final = false;
     while (!final) {
       final = true;
       update_openrave_data();
-      for (int i=0; i < num_motors; ++i) {
-        if (mot->arr[i].GetPVP()->msf == MSF_MOTCRASHED) {
-          _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
-          break;
-        }
-
-        final &= std::abs(mot->arr[i].GetTPS()->tarpos - mot->arr[i].GetPVP()->pos) < 10;
+      try {
+        final = _katana->final();
+      } catch (fawkes::KatanaMotorCrashedException &e) {
+        _logger->log_warn("KatanaMotorControlTrhead", e.what());
+        _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
+        break;
       }
     }
 
-
-  } catch (/*KNI*/::Exception &e) {
+  } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Moving along trajectory failed (ignoring): %s", e.what());
     _finished = true;
     _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
-    _katana->freezeRobot();
+    _katana->stop();
     return;
   }
 
@@ -347,14 +344,19 @@ KatanaGotoOpenRaveThread::update_openrave_data()
     return;
   }
 
-  // Convert encoder values to angles, and set starting point for planner
-  encToRad(__motor_encoders, __motor_angles);
+  // Convert encoder values to angles if necessary
+  if( !_katana->joint_angles() ) {
+    encToRad(__motor_encoders, __motor_angles);
+  }
   __OR_manip->set_angles_device(__motor_angles);
 
   std::vector<OpenRAVE::dReal> angles;
   __OR_manip->get_angles(angles);
 
-  __OR_robot->get_robot_ptr()->SetActiveDOFValues(angles);
+  {
+    OpenRAVE::EnvironmentMutex::scoped_lock lock(__OR_robot->get_robot_ptr()->GetEnv()->GetMutex());
+    __OR_robot->get_robot_ptr()->SetActiveDOFValues(angles);
+  }
 }
 
 /** Update motors and fetch current encoder values.
@@ -363,22 +365,20 @@ KatanaGotoOpenRaveThread::update_openrave_data()
 bool
 KatanaGotoOpenRaveThread::update_motor_data()
 {
-  CKatBase *base = _katana->GetBase();
   short num_errors  = 0;
 
   // update motors
   while (1) {
     //usleep(__poll_interval_usec);
     try {
-      base->GetSCT()->arr[0].recvDAT(); // update sensor values
-      base->recvMPS(); // get position for all motors
-      base->recvGMS(); // get status flags for all motors
-    } catch (/*KNI*/::Exception &e) {
+      _katana->read_sensor_data(); // update sensor data
+      _katana->read_motor_data(); // update motor data
+    } catch (Exception &e) {
       if (++num_errors <= 10) {
-        _logger->log_warn("KatanaGotoThread", "Receiving MPS/GMS failed, retrying");
+        _logger->log_warn("KatanaGotoThread", "Receiving motor data failed, retrying");
         continue;
       } else {
-        _logger->log_warn("KatanaGotoThread", "Receiving MPS/GMS failed too often, aborting");
+        _logger->log_warn("KatanaGotoThread", "Receiving motor data failed too often, aborting");
         _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
         return 0;
       }
@@ -386,18 +386,22 @@ KatanaGotoOpenRaveThread::update_motor_data()
     break;
   }
 
-  // fetch encoder values
+  // fetch joint values
   num_errors = 0;
   while (1) {
     //usleep(__poll_interval_usec);
     try {
-      __motor_encoders = _katana->getRobotEncoders(false); //fetch encoder values, param refreshEncoders=false
-    } catch (/*KNI*/::Exception &e) {
+      if( _katana->joint_angles()) {
+        _katana->get_angles(__motor_angles, false);    //fetch encoder values, param refreshEncoders=false
+      } else {
+        _katana->get_encoders(__motor_encoders, false);    //fetch encoder values, param refreshEncoders=false
+      }
+    } catch (Exception &e) {
       if (++num_errors <= 10) {
-        _logger->log_warn("KatanaGotoThread", "Receiving encoder values failed, retrying");
+        _logger->log_warn("KatanaGotoThread", "Receiving motor %s failed, retrying", _katana->joint_angles() ? "angles" : "encoders");
         continue;
       } else {
-        _logger->log_warn("KatanaGotoThread", "Receiving encoder values failed, aborting");
+        _logger->log_warn("KatanaGotoThread", "Receiving motor %s failed, aborting", _katana->joint_angles() ? "angles" : "encoders");
         _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
         return 0;
       }
@@ -419,7 +423,8 @@ bool
 KatanaGotoOpenRaveThread::move_katana()
 {
   for (unsigned int i = 0; i < __it->size(); ++i) {
-    _katana->moveMotorTo(i, __it->at(i));
+    // non-blocking command
+    _katana->move_motor_to(i, __it->at(i), /*blocking*/false);
   }
   return (++__it == __target_traj->end());
 }

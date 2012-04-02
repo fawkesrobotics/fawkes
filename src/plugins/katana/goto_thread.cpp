@@ -21,9 +21,10 @@
  */
 
 #include "goto_thread.h"
+#include "controller.h"
+#include "exception.h"
 
 #include <cstdlib>
-#include <kniBase.h>
 
 /** @class KatanaGotoThread "goto_thread.h"
  * Katana linear goto thread.
@@ -32,12 +33,12 @@
  */
 
 /** Constructor.
- * @param katana katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  */
-KatanaGotoThread::KatanaGotoThread(fawkes::RefPtr<CLMBase> katana,
+KatanaGotoThread::KatanaGotoThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 				   fawkes::Logger *logger,
 				   unsigned int poll_interval_ms)
   : KatanaMotionThread("KatanaGotoThread", katana, logger)
@@ -70,56 +71,49 @@ void
 KatanaGotoThread::once()
 {
   try {
-    // non-blocking call to KNI
-    _katana->moveRobotTo(__x, __y, __z, __phi, __theta, __psi);
-  } catch (KNI::NoSolutionException &e) {
+    // non-blocking call
+    _katana->move_to(__x, __y, __z, __phi, __theta, __psi);
+  } catch (fawkes::KatanaNoSolutionException &e) {
     _logger->log_warn("KatanaGotoThread", "Initiating goto failed (no solution, ignoring): %s", e.what());
     _finished = true;
     _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
     return;
-  } catch (/*KNI*/::Exception &e) {
+  } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Initiating goto failed (ignoring): %s", e.what());
     _finished = true;
     _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
     return;
   }
 
-  // Check for finished motion
+ // check if final
   bool final = false;
-  short num_motors = _katana->getNumberOfMotors();
-  CKatBase *base = _katana->GetBase();
-  const TKatMOT *mot = base->GetMOT();
   short num_errors  = 0;
-
-  while (! final) {
-      usleep(__poll_interval_usec);
-      final = true;
-      try {
-	base->GetSCT()->arr[0].recvDAT(); // update sensor values
-	base->recvMPS(); // get position for all motors
-	base->recvGMS(); // get status flags for all motors
-      } catch (/*KNI*/::Exception &e) {
-	if (++num_errors <= 10) {
-	  _logger->log_warn("KatanaGripperThread", "Receiving MPS/GMS failed, retrying");
-	  continue;
-	} else {
-	  _logger->log_warn("KatanaGripperThread", "Receiving MPS/GMS failed too often, aborting");
-	  _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
-	  break;
-	}
-      }
-
-      for (int i=0; i < num_motors; ++i) {
-	if (mot->arr[i].GetPVP()->msf == MSF_MOTCRASHED) {
-	  _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
-	  break;
-	}
-
-	final &= std::abs(mot->arr[i].GetTPS()->tarpos - mot->arr[i].GetPVP()->pos) < 100;
+  while ( !final ) {
+    usleep(__poll_interval_usec);
+    try {
+      _katana->read_sensor_data();
+      _katana->read_motor_data();
+    } catch (fawkes::Exception &e) {
+      if (++num_errors <= 10) {
+        _logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
+        continue;
+      } else {
+        _logger->log_warn("KatanaMotorControlThread", "Receiving sensor/motor data failed too often, aborting");
+        _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
+        break;
       }
     }
 
-    _logger->log_debug(name(), "Position (%f,%f,%f, %f,%f,%f) reached",
+    try {
+      final = _katana->final();
+    } catch (fawkes::KatanaMotorCrashedException &e) {
+      _logger->log_warn("KatanaMotorControlTrhead", e.what());
+      _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
+      break;
+    }
+  }
+
+  _logger->log_debug(name(), "Position (%f,%f,%f, %f,%f,%f) reached",
 		       __x, __y, __z, __phi, __theta, __psi);
 
   _finished = true;

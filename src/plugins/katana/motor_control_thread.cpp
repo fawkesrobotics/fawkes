@@ -21,9 +21,10 @@
  */
 
 #include "motor_control_thread.h"
+#include "controller.h"
+#include "exception.h"
 
 #include <cstdlib>
-#include <kniBase.h>
 
 /** @class KatanaMotorControlThread "goto_thread.h"
  * Katana motor control thread.
@@ -32,12 +33,12 @@
  */
 
 /** Constructor.
- * @param katana katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  */
-KatanaMotorControlThread::KatanaMotorControlThread(fawkes::RefPtr<CLMBase> katana,
+KatanaMotorControlThread::KatanaMotorControlThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 				   fawkes::Logger *logger,
 				   unsigned int poll_interval_ms)
   : KatanaMotionThread("KatanaMotorControlThread", katana, logger)
@@ -80,63 +81,58 @@ KatanaMotorControlThread::set_angle(unsigned int nr, float value, bool inc)
 void
 KatanaMotorControlThread::once()
 {
-  unsigned short num_motors = _katana->getNumberOfMotors();
-  if(  __nr > num_motors ) {
-    _logger->log_warn("KatanaMotorControlThread", "Motor number out of range");
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
-    return;
-  }
-
   try {
     // non-blocking call to KNI
     if( __is_encoder ) {
       if( __is_inc )
-        _katana->moveMotorByEnc(__nr, __encoder);
+
+        _katana->move_motor_by(__nr, __encoder);
       else
-        _katana->moveMotorToEnc(__nr, __encoder);
+        _katana->move_motor_to(__nr, __encoder);
     } else {
       if( __is_inc )
-        _katana->moveMotorBy(__nr, __angle);
+        _katana->move_motor_by(__nr, __angle);
       else
-        _katana->moveMotorTo(__nr, __angle);
+        _katana->move_motor_to(__nr, __angle);
     }
-  } catch (/*KNI*/::Exception &e) {
+  } catch (fawkes::KatanaOutOfRangeException &e) {
+    _logger->log_warn("KatanaMotorControlThread", "Motor %u out of range. Ex%s", __nr, e.what());
+    _finished = true;
+    _error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
+    return;
+  } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaMotorControlThread", "Moving motor %u failed (ignoring): %s", __nr, e.what());
     _finished = true;
     _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
     return;
   }
 
-  // TODO: need check for motion end? -> How send 5 commands in a row then?
-  // Check for finished motion
+  // check if final
   bool final = false;
-  const TKatMOT* mot = _katana->GetBase()->GetMOT();
   short num_errors  = 0;
-
-  while (! final) {
+  while ( !final ) {
     usleep(__poll_interval_usec);
-    final = true;
     try {
-      mot->arr[__nr].recvPVP(); // get position data for motor
-    } catch (/*KNI*/::Exception &e) {
+      _katana->read_sensor_data();
+      _katana->read_motor_data();
+    } catch (fawkes::Exception &e) {
       if (++num_errors <= 10) {
-        _logger->log_warn("KatanaMotorControlThread", "Receiving PVP for motor %u failed, retrying", __nr);
+        _logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
         continue;
       } else {
-        _logger->log_warn("KatanaMotorControlThread", "Receiving PVP for motor %u failed too often, aborting", __nr);
+        _logger->log_warn("KatanaMotorControlThread", "Receiving sensor/motor data failed too often, aborting");
         _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
         break;
       }
     }
 
-
-    if (mot->arr[__nr].GetPVP()->msf == MSF_MOTCRASHED) {
+    try {
+      final = _katana->final();
+    } catch (fawkes::KatanaMotorCrashedException &e) {
+      _logger->log_warn("KatanaMotorControlTrhead", e.what());
       _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
       break;
     }
-
-    final &= std::abs(mot->arr[__nr].GetTPS()->tarpos - mot->arr[__nr].GetPVP()->pos) < 100;
   }
 
   _logger->log_debug(name(), "Successfully moved motor %u", __nr);

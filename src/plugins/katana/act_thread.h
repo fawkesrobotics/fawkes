@@ -52,15 +52,8 @@
 namespace fawkes {
   class KatanaInterface;
   class Time;
+  class KatanaController;
 }
-
-// Classes from libkni (KNI)
-class CCdlCOM;
-class CCplSerialCRC;
-class CLMBase;
-class CKatBase;
-class CSctBase;
-class TMotInit;
 
 class KatanaActThread
 : public fawkes::Thread,
@@ -104,6 +97,7 @@ class KatanaActThread
  private:
   fawkes::KatanaInterface *__katana_if;
 
+  std::string    __cfg_controller;
   std::string    __cfg_device;
   std::string    __cfg_kni_conffile;
   bool           __cfg_auto_calibrate;
@@ -142,12 +136,8 @@ class KatanaActThread
   fawkes::RefPtr<KatanaGotoOpenRaveThread>     __goto_openrave_thread;
 #endif
 
-  fawkes::RefPtr<CLMBase>        __katana;
-  std::auto_ptr<CCdlCOM>         __device;
-  std::auto_ptr<CCplSerialCRC>   __protocol;
-  CKatBase                      *__katbase;
-  CSctBase                      *__sensor_ctrl;
-  std::vector<TMotInit>          __motor_init;
+  fawkes::RefPtr<fawkes::KatanaController>      __katana;
+
   fawkes::Time                  *__last_update;
 
 #ifdef USE_TIMETRACKER
