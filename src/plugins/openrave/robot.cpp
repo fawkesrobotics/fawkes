@@ -431,8 +431,9 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target(OpenRAVE::IkParameterization ik_param)
+OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
 {
+  __arm = __robot->GetActiveManipulator();
   std::vector<OpenRAVE::dReal> target_angles;
 
   __target.ikparam = ik_param;
@@ -654,11 +655,30 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
   __target.qy = target.rot[2];
   __target.qz = target.rot[3];
 
-  std::vector<OpenRAVE::dReal> target_angles;
+  // check for supported IK types
+  __arm = __robot->GetActiveManipulator();
+  if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
+    __logger->log_debug("OR TMP", "6D suppport");
+    // arm supports 6D ik. Perfect!
+    std::vector<OpenRAVE::dReal> target_angles;
 
-  __target.ikparam = IkParameterization(target);
-  __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,true);
-  __target.manip->set_angles(target_angles);
+    __target.ikparam = IkParameterization(target);
+    __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,true);
+    __target.manip->set_angles(target_angles);
+
+  } else if( __arm->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
+    __logger->log_debug("OR TMP", "5D suppport");
+    // arm has only 5 DOF.
+    std::vector<OpenRAVE::dReal> target_angles;
+
+    __target.ikparam = get_5dof_ikparam(target);
+    __target.solvable = set_target_ikparam(__target.ikparam);
+
+  } else {
+    __logger->log_debug("OR TMP", "No IK suppport");
+    //other IK types not supported yet
+    __target.solvable = false;
+  }
 
   return __target.solvable;
 }
@@ -703,6 +723,58 @@ OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rot
   Vector quat = quatMultiply (q12, q3);
 
   return set_target_transform(trans, quat, no_offset);
+}
+
+/** Get IkParameterization for a 5DOF arm given a 6D Transform.
+ * @param trans The 6D OpenRAVE::Transform
+ * @return the calculated 5DOF IkParameterization
+ */
+OpenRAVE::IkParameterization
+OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
+{
+  /* The initial pose (that means NOT all joints=0, but the manipulator's coordinate-system
+     matching the world-coordinate-system) of an arm in OpenRAVE has its gripper pointing to the z-axis.
+     Imagine a tube between the grippers. That tube lies on the y-axis.
+     For 5DOF-IK one needs another manipulator definition, that has it's z-axis lying on that
+     'tube', i.e. it needs to be lying between the fingers. That is achieved by rotating the
+     coordinate-system first by +-90° around z-axis, then +90° on the rotated x-axis.
+  */
+
+  // get direction vector for TranslationDirection5D
+  /* Rotate Vector(0, +-1, 0) by target.rot. First need to figure out which of "+-"
+     Now if the first rotation on z-axis was +90°, we need a (0,-1,0) direction vector.
+     If it was -90°, we need (0, 1, 0). So just take the inverse of the first rotation
+     and apply it to (1,0,0)
+  */
+  Vector dir(1,0,0);
+  {
+    RobotBasePtr tmp_robot = __robot;
+    RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
+
+    //reset robot joints
+    std::vector<dReal> zero_joints(tmp_robot->GetActiveDOF(), (dReal)0.0);
+    tmp_robot->SetActiveDOFValues(zero_joints);
+
+    // revert the rotations for the 5DOF manipulator specifition. See long comment above.
+    // First rotate back -90° on x-axis (revert 2nd rotation)
+    Transform cur_pos = __arm->GetEndEffectorTransform();
+    Vector v1 = quatFromAxisAngle(Vector(-M_PI/2, 0, 0));
+    v1 = quatMultiply(cur_pos.rot, v1);
+
+    // Now get the inverse of 1st rotation and get our (0, +-1, 0) direction
+    v1 = quatInverse(v1);
+    TransformMatrix mat = matrixFromQuat(v1);
+    dir = mat.rotate(dir);
+  }  // robot state is restored
+
+  // now rotate direction by target
+  TransformMatrix mat = matrixFromQuat(trans.rot);
+  dir = mat.rotate(dir);
+
+  IkParameterization ikparam = __arm->GetIkParameterization(IKP_TranslationDirection5D);
+  ikparam.SetTranslationDirection5D(RAY(trans.trans, dir));
+
+  return ikparam;
 }
 
 } // end of namespace fawkes
