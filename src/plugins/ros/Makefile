@@ -16,9 +16,10 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/ros.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_ros = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesrosaspect
+           fawkesinterface fawkesrosaspect
 OBJS_ros = ros_plugin.o node_thread.o
 
 LIBS_ros_talkerpub = fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -29,7 +30,11 @@ LIBS_ros_webview = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		   fawkesinterface fawkesrosaspect fawkeswebview
 OBJS_ros_webview = webview_plugin.o webview_thread.o webview_reqproc.o
 
-OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview)
+LIBS_ros_tf = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect fawkestf TransformInterface
+OBJS_ros_tf = tf_plugin.o tf_thread.o
+
+OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -52,6 +57,19 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_webview_msgs
   endif
+
+  ifeq ($(call ros-have-pkg,tf),1)
+    ifeq ($(HAVE_TF),1)
+      CFLAGS_tf_thread += $(CFLAGS_TF) $(call ros-pkg-cflags,tf)
+      CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
+      LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(call ros-pkg-lflags,tf)
+      PLUGINS_all += $(PLUGINDIR)/ros-tf.so
+    else
+      WARN_TARGETS += warning_fawkestf
+    endif
+  else
+    WARN_TARGETS += warning_rostf
+  endif
 else
   WARN_TARGETS += warning_ros
 endif
@@ -59,11 +77,15 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_ros warning_webview_msgs
+.PHONY: warning_ros warning_webview_msgs warning_fawkestf  warning_rostf
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Plugins$(TNORMAL) (ROS not found)"
 warning_webview_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Webview Plugin$(TNORMAL) (ROS package webview_msgs not found)"
+warning_fawkestf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (fawkestf not available)"
+warning_rostf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (ROS package tf not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

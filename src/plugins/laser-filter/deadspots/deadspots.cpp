@@ -118,7 +118,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
     tmp.resize(__num_measurements, INITIAL_MEASUREMENT);
     __measurements.resize(__num_beams, tmp);
   
-    __blackboard->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+    __blackboard->register_listener(this);
   }
 
   /** Wait for the calibration to be finished. */

@@ -34,7 +34,14 @@ class Mutex
   friend class WaitCondition;
 
  public:
-  Mutex();
+  /** Mutex type. */
+  typedef enum {
+    NORMAL,	///< This type of mutex does not detect deadlock.
+    RECURSIVE	///< A thread attempting to relock this mutex without
+    		///< first unlocking it shall succeed in locking the mutex.
+  } Type;
+
+  Mutex(Type type = NORMAL);
   ~Mutex();
 
   void lock();

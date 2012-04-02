@@ -16,10 +16,11 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/openrave/openrave.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
 	      fawkesinterface KatanaInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
@@ -31,10 +32,19 @@ endif
 ifeq ($(HAVE_LIBKNI),1)
   CFLAGS_LIBKNI  = -DHAVE_KNI $(shell $(PKGCONFIG) --cflags 'libkni3')
   LDFLAGS_LIBKNI = $(shell $(PKGCONFIG) --libs 'libkni3')
+else
+  WARN_TARGETS += warning_kni
 endif
 
-ifeq ($(HAVE_LIBKNI),1)
-  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-error
+ifeq ($(HAVE_TF),1)
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
+else
+  WARN_TARGETS += warning_tf
+endif
+
+ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
+  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE),1)
@@ -44,14 +54,16 @@ ifeq ($(HAVE_LIBKNI),1)
   else
     WARN_TARGETS += warning_openrave
   endif
-else
-  WARN_TARGETS += warning_kni
 endif
 
 OBJS_all = $(OBJS_katana)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
+
+.PHONY: warning_tf
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (fawkestf not available)"
 
 .PHONY: warning_kni
 warning_kni:

@@ -230,6 +230,7 @@ InterfaceFieldIterator::get_typename() const
     case IFT_INT64:    return "int64";
     case IFT_UINT64:   return "uint64";
     case IFT_FLOAT:    return "float";
+    case IFT_DOUBLE:   return "double";
     case IFT_BYTE:     return "byte";
     case IFT_STRING:   return "string";
     case IFT_ENUM:     return __infol->enumtype;
@@ -338,6 +339,9 @@ InterfaceFieldIterator::get_value_string()
 	    break;
 	  case IFT_FLOAT:
 	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
+	    break;
+	  case IFT_DOUBLE:
+	    rv = asprintf(&tmp2, "%s%f", tmp1, ((double *)__infol->value)[i]);
 	    break;
 	  case IFT_BYTE:
 	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)__infol->value)[i]);
@@ -601,6 +605,28 @@ InterfaceFieldIterator::get_float(unsigned int index) const
 }
 
 
+/** Get value of current field as double.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type float
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+double
+InterfaceFieldIterator::get_double(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_DOUBLE ) {
+    throw TypeMismatchException("Requested value is not of type double");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((double *)__infol->value)[index];
+  }
+}
+
+
 /** Get value of current field as byte.
  * @return field value
  * @param index array index (only use if field is an array)
@@ -614,7 +640,7 @@ InterfaceFieldIterator::get_byte(unsigned int index) const
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_BYTE ) {
-    throw TypeMismatchException("Requested value is not of type float");
+    throw TypeMismatchException("Requested value is not of type byte");
   } else if (index >= __infol->length) {
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
@@ -836,6 +862,25 @@ InterfaceFieldIterator::get_floats() const
 }
 
 
+/** Get value of current field as double array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type double or field
+ * is not an array (length is 1)
+ */
+double *
+InterfaceFieldIterator::get_doubles() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_DOUBLE ) {
+    throw TypeMismatchException("Requested value is not of type double");
+  } else {
+    return (double *)__infol->value;
+  }
+}
+
+
 /** Get value of current field as byte array.
  * @return field value
  * @exception NullPointerException invalid iterator, possibly end iterator
@@ -848,7 +893,7 @@ InterfaceFieldIterator::get_bytes() const
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_BYTE ) {
-    throw TypeMismatchException("Requested value is not of type float");
+    throw TypeMismatchException("Requested value is not of type byte");
   } else {
     return (uint8_t *)__infol->value;
   }
@@ -1122,6 +1167,29 @@ InterfaceFieldIterator::set_float(float v, unsigned int index)
 }
 
 
+/** Set value of current field as double.
+ * @param v the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type double
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_double(double v, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_DOUBLE ) {
+    throw TypeMismatchException("Field to be written is not of type double");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    char* dst = (char *) __infol->value + index * sizeof(double);
+    memcpy((void *) dst, &v, sizeof(double));
+  }
+}
+
+
 /** Set value of current field as byte.
  * @param v the new value
  * @param index array index (only use if field is an array)
@@ -1351,6 +1419,26 @@ InterfaceFieldIterator::set_floats(float *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(float));
+  }
+}
+
+/** Set value of current field as double array.
+ * @param v an array of doubles
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type double or field
+ * is not an array (length is 1)
+ */
+void
+InterfaceFieldIterator::set_doubles(double *v)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_DOUBLE ) {
+    throw TypeMismatchException("Field to be written is not of type double");
+  } else if (__infol->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else {
+    memcpy(__infol->value, v, __infol->length * sizeof(double));
   }
 }
 

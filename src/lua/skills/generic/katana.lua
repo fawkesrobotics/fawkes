@@ -50,11 +50,17 @@ Immediately stop any running motion.
 katana{gripper="open"/"close"}
 Open or close the gripper.
 
-katana{x=..., y=..., z=..., phi=..., theta=..., psi=...}
+katana{x=..., y=..., z=..., phi=..., theta=..., psi=...[, frame=...] [, rot_frame=...]}
 Move robot to the specified position.
 The (x,y,z) is the position of the tool attached to the arm, relative
 to the arms base. The (phi, theta, psi) angles are the Euler angles of
 the tool.
+"frame" refers to the tf frame which is origin of the target coordinates..
+This is usually the robot's coordinate system (frame), as values shared in interfaces
+should be in that coordinate system. This parameter is optional.
+"rot_frame" refers to the tf frame which is origin of the tool rotation.
+This is an optional value and rarely set. Default is robot's coordinate system,
+as it is the easiest to reproduce a rotation from there on.
 ]==]
 
 -- Initialize as skill module
@@ -154,11 +160,15 @@ function GOTO:init()
    --local phi, theta, psi = 0, 0, 0
    local phi = math.pi/2 + math.atan2(y,x)
    local theta = math.pi/2
-   local psi = -math.pi/2
+   local psi = 0
+   local frame     = "/base_link" -- default: values given in robot's coordinate system!
+   local rot_frame = "/base_link" -- default: values given in robot's coordinate system!
 
-   if self.fsm.vars.phi   ~= nil then phi   = self.fsm.vars.phi end
-   if self.fsm.vars.theta ~= nil then theta = self.fsm.vars.theta end
-   if self.fsm.vars.psi   ~= nil then psi   = self.fsm.vars.psi end
+   if self.fsm.vars.phi       ~= nil then phi       = self.fsm.vars.phi end
+   if self.fsm.vars.theta     ~= nil then theta     = self.fsm.vars.theta end
+   if self.fsm.vars.psi       ~= nil then psi       = self.fsm.vars.psi end
+   if self.fsm.vars.frame     ~= nil then frame     = self.fsm.vars.frame end
+   if self.fsm.vars.rot_frame ~= nil then rot_frame = self.fsm.vars.rot_frame end
 
    -- check if distances are too high (means they are in libkni coordinate system)
    if math.abs(x) > 5 or
@@ -168,7 +178,7 @@ function GOTO:init()
       local gm = katanaarm.LinearGotoKniMessage:new(x, y, z, phi, theta, psi)
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
    else
-      local gm = katanaarm.LinearGotoMessage:new(x, y, z, phi, theta, psi)
+      local gm = katanaarm.LinearGotoMessage:new(frame, rot_frame, x, y, z, phi, theta, psi)
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(gm)
    end
 end

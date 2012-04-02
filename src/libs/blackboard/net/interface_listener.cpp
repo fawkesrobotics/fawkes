@@ -70,7 +70,7 @@ BlackBoardNetHandlerInterfaceListener::BlackBoardNetHandlerInterfaceListener(Bla
   __fnh = hub;
   __clid = clid;
 
-  __blackboard->register_listener(this, BlackBoard::BBIL_FLAG_ALL);
+  __blackboard->register_listener(this);
 }
 
 

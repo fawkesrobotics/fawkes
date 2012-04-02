@@ -62,8 +62,8 @@ SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger *logger,
   bbil_add_data_interface(__reader);
   bbil_add_message_interface(__writer);
 
-  __reader_bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
-  __writer_bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  //__reader_bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+  //__writer_bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 }
 
 

@@ -17,11 +17,10 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
-SUBDIRS = core utils interface netcomm blackboard config logging lua plugin \
-	  aspect geometry webview worldinfo_utils gui_utils baseapp \
+SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
+	  plugin lua aspect geometry webview worldinfo_utils gui_utils baseapp \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
-	  eclipse_externals \
-	  $(subst $(CURDIR)/,,$(wildcard interfaces))
+	  eclipse_externals
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -43,9 +42,10 @@ utils: core
 interface: core utils
 blackboard: core utils interface netcomm logging
 netcomm: core utils
+interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
-aspect: core utils blackboard netcomm config plugin webview logging
+aspect: core utils blackboard netcomm config plugin webview logging tf
 geometry: core
 worldinfo_utils: core netcomm geometry
 lua: core utils blackboard config logging
@@ -56,6 +56,7 @@ naoutils: core utils
 webview: core utils logging
 baseapp: core utils aspect config netcomm blackboard plugin logging
 eclipse_externals: blackboard interface utils
+tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
 fvfilters: fvmodels

@@ -24,6 +24,7 @@
 #ifndef __BLACKBOARD_NOTIFIER_H_
 #define __BLACKBOARD_NOTIFIER_H_
 
+#include <blackboard/blackboard.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 
@@ -46,10 +47,13 @@ class BlackBoardNotifier
   BlackBoardNotifier();
   virtual ~BlackBoardNotifier();
 
-  void register_listener(BlackBoardInterfaceListener *listener, unsigned int flags);
+  void register_listener(BlackBoardInterfaceListener *listener,
+                         BlackBoard::ListenerRegisterFlag flag);
+  void update_listener(BlackBoardInterfaceListener *listener,
+                       BlackBoard::ListenerRegisterFlag flag);
   void unregister_listener(BlackBoardInterfaceListener *listener);
 
-  void register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags);
+  void register_observer(BlackBoardInterfaceObserver *observer);
   void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   void notify_of_data_change(const Interface *interface);
@@ -66,39 +70,42 @@ class BlackBoardNotifier
 				unsigned int event_instance_serial) throw();
 
  private:
-  typedef std::list< BlackBoardInterfaceListener * >  BBilList;
-  typedef std::map< std::string, BBilList >            BBilMap;
-
-  typedef std::pair< bool, BlackBoardInterfaceListener *> BBilQueueEntry;
+  typedef struct {
+    bool                           op;
+    std::string                    uid;
+    Interface                    * interface;
+    BlackBoardInterfaceListener  * listener;
+  } BBilQueueEntry;
   typedef std::list< BBilQueueEntry > BBilQueue;
 
-  typedef std::map< std::string, BlackBoardInterfaceListener * > BBilMessageLockMap;
-  typedef std::map< std::string, BlackBoardInterfaceListener * >::iterator BBilMessageLockMapIterator;
-
+  typedef std::multimap<std::string, BlackBoardInterfaceListener *> BBilMap;
   typedef std::pair<BlackBoardInterfaceObserver *, std::list<std::string> > BBioPair;
-  typedef std::list< BBioPair>                   BBioList;
+  typedef std::list< BBioPair>                  BBioList;
   typedef std::map< std::string, BBioList >     BBioMap;
 
   // Type to observer, add flags, 0 to remove
   typedef std::pair< unsigned int, BlackBoardInterfaceObserver *> BBioQueueEntry;
   typedef std::list< BBioQueueEntry > BBioQueue;
 
-  typedef BBilList::iterator    BBilListIterator;
   typedef BBilMap::iterator     BBilMapIterator;
 
   typedef BBioList::iterator    BBioListIterator;
   typedef BBioMap::iterator     BBioMapIterator;
 
-  void add_listener(BlackBoardInterfaceListener *listener,
-		    BlackBoardInterfaceListener::InterfaceLockMap *im,
-		    BBilMap &ilmap);
+  void proc_listener_maybe_queue(bool op, Interface *interface,
+                                 BlackBoardInterfaceListener *listener,
+                                 Mutex *mutex, unsigned int &events,
+                                 BBilMap &map, BBilQueue &queue,
+                                 const char *hint);
 
-  void remove_listener(BlackBoardInterfaceListener *listener,
-		       Mutex *mutex, unsigned int events,
-		       BBilQueue &queue, BBilMap &ilmap);
-  void remove_listener(BBilMap &ifmap, BlackBoardInterfaceListener *listener);
-  void remove_message_listener(BlackBoardInterfaceListener *listener);
-  void remove_message_listener_map(BlackBoardInterfaceListener *listener);
+  void add_listener(Interface *interface, BlackBoardInterfaceListener *listener,
+                    BBilMap &ilmap);
+  void remove_listener(Interface *interface, BlackBoardInterfaceListener *listener,
+                       BBilMap &ilmap);
+  void queue_listener(bool op, Interface *interface,
+                      BlackBoardInterfaceListener *listener, BBilQueue &queue);
+
+
 
   void add_observer(BlackBoardInterfaceObserver *observer,
 		    BlackBoardInterfaceObserver::ObservedInterfaceLockMap *its,
@@ -114,39 +121,39 @@ class BlackBoardNotifier
   BBilMap __bbil_data;
   BBilMap __bbil_reader;
   BBilMap __bbil_writer;
-  BBilMessageLockMap __bbil_messages;
+  BBilMap __bbil_messages;
 
-  Mutex         *__bbil_unregister_mutex;
-  WaitCondition *__bbil_unregister_waitcond;
-  BBilQueue      __bbil_unregister_queue;
+  Mutex *__bbil_unregister_mutex;
+  WaitCondition  *__bbil_unregister_waitcond;
+  BBilQueue       __bbil_unregister_queue;
 
-  Mutex         *__bbil_writer_mutex;
-  WaitCondition *__bbil_writer_waitcond;
-  unsigned int   __bbil_writer_events;
-  BBilQueue      __bbil_writer_queue;
+  Mutex *__bbil_writer_mutex;
+  WaitCondition  *__bbil_writer_waitcond;
+  unsigned int    __bbil_writer_events;
+  BBilQueue       __bbil_writer_queue;
 
-  Mutex         *__bbil_reader_mutex;
-  WaitCondition *__bbil_reader_waitcond;
-  unsigned int   __bbil_reader_events;
-  BBilQueue      __bbil_reader_queue;
+  Mutex *__bbil_reader_mutex;
+  WaitCondition  *__bbil_reader_waitcond;
+  unsigned int    __bbil_reader_events;
+  BBilQueue       __bbil_reader_queue;
 
-  Mutex         *__bbil_data_mutex;
-  WaitCondition *__bbil_data_waitcond;
-  unsigned int   __bbil_data_events;
-  BBilQueue      __bbil_data_queue;
+  Mutex *__bbil_data_mutex;
+  WaitCondition  *__bbil_data_waitcond;
+  unsigned int    __bbil_data_events;
+  BBilQueue       __bbil_data_queue;
 
-  Mutex         *__bbil_messages_mutex;
-  WaitCondition *__bbil_messages_waitcond;
-  unsigned int   __bbil_messages_events;
-  BBilQueue      __bbil_messages_queue;
+  Mutex *__bbil_messages_mutex;
+  WaitCondition  *__bbil_messages_waitcond;
+  unsigned int    __bbil_messages_events;
+  BBilQueue       __bbil_messages_queue;
 
   BBioMap        __bbio_created;
   BBioMap        __bbio_destroyed;
 
-  Mutex         *__bbio_mutex;
-  WaitCondition *__bbio_waitcond;
-  unsigned int   __bbio_events;
-  BBioQueue      __bbio_queue;
+  Mutex *__bbio_mutex;
+  WaitCondition  *__bbio_waitcond;
+  unsigned int    __bbio_events;
+  BBioQueue       __bbio_queue;
 
 };
 

@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/webview/webview.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
 			fawkesconfig fawkesplugin fawkeslogging
@@ -28,6 +29,15 @@ else
   LIBS_libfawkesaspects += fawkeswebview
 endif
 
+ifneq ($(HAVE_TF),1)
+  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/tf.cpp $(SRCDIR)/inifins/tf.cpp))
+  WARN_TARGETS += warning_tf
+else
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
+  LIBS_libfawkesaspects += fawkestf
+endif
+
 OBJS_libfawkesaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 HDRS_libfawkesaspects = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 INST_HDRS_SUBDIR_libfawkesaspects = aspect
@@ -38,9 +48,11 @@ LIBS_all  = $(LIBDIR)/libfawkesaspects.so
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_webview warning_vision
+.PHONY: warning_webview warning_tf
 warning_webview:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding WebviewAspect$(TNORMAL) (libfawkeswebview not built)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding TransformAspect$(TNORMAL) (libfawkestf not built)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

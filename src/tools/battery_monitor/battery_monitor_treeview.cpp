@@ -177,7 +177,7 @@ BatteryMonitorTreeView::add_host( const char* h )
 							&BatteryMonitorTreeView::on_writer_added ) );
       id->signal_writer_removed().connect( sigc::mem_fun( *this,
 							  &BatteryMonitorTreeView::on_writer_removed ) );
-      rbb->register_listener( id, BlackBoard::BBIL_FLAG_DATA || BlackBoard::BBIL_FLAG_WRITER );
+      rbb->register_listener( id, BlackBoard::BBIL_FLAG_DATA | BlackBoard::BBIL_FLAG_WRITER );
     }
     catch ( Exception& e )
     {

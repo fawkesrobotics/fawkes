@@ -25,7 +25,11 @@
 
 #include "../act_thread.h"
 
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 #include <blackboard/interface_listener.h>
+#include <utils/time/time.h>
 
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
@@ -42,6 +46,9 @@ class RobotisRX28;
 
 class PanTiltRX28Thread
 : public PanTiltActThread,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
   public fawkes::BlackBoardInterfaceListener
 {
  public:
@@ -91,6 +98,14 @@ class PanTiltRX28Thread
   float        __cfg_tilt_max;
   float        __cfg_pan_margin;
   float        __cfg_tilt_margin;
+#ifdef HAVE_TF
+  std::string  __cfg_base_frame;
+  std::string  __cfg_pan_link;
+  std::string  __cfg_tilt_link;
+
+  fawkes::tf::Vector3  __translation_pan;
+  fawkes::tf::Vector3  __translation_tilt;
+#endif
 
   class WorkerThread : public fawkes::Thread
   {
@@ -105,6 +120,7 @@ class PanTiltRX28Thread
     void goto_pantilt(float pan, float tilt);
     void goto_pantilt_timed(float pan, float tilt, float time_sec);
     void get_pantilt(float &pan, float &tilt);
+    void get_pantilt(float &pan, float &tilt, fawkes::Time &time);
     void set_velocities(float pan_vel, float tilt_vel);
     void get_velocities(float &pan_vel, float &tilt_vel);
     void set_margins(float pan_margin, float tilt_margin);
@@ -117,10 +133,14 @@ class PanTiltRX28Thread
 
     virtual void loop();
 
+    /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+    protected: virtual void run() { Thread::run(); }
+
   private:
     void exec_goto_pantilt(float pan, float tilt);
 
   private:
+    fawkes::Mutex               *__rx28_mutex;
     fawkes::RefPtr<RobotisRX28>  __rx28;
     fawkes::Logger              *__logger;
 
@@ -149,8 +169,11 @@ class PanTiltRX28Thread
     unsigned int __tilt_vel;
     bool  __led_enable;
     bool  __led_disable;
+    fawkes::Time  __pantilt_time;
 
     bool __fresh_data;
+    fawkes::Mutex *__fresh_data_mutex;
+
   };
 
   WorkerThread *__wt;

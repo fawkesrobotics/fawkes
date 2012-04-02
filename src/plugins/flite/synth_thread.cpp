@@ -56,7 +56,7 @@ FliteSynthThread::init()
   __voice = register_cmu_us_kal(NULL);
 
   bbil_add_message_interface(__speechsynth_if);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  blackboard->register_listener(this);
 
   say("Speech synth loaded");
 }

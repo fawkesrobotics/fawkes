@@ -32,11 +32,11 @@ LIBS_qa_bb_messaging = TestInterface fawkescore fawkesblackboard fawkesinterface
 OBJS_qa_bb_messaging = qa_bb_messaging.o
 
 LIBS_qa_bb_openall = TestInterface fawkescore fawkesblackboard fawkesinterface \
-			fawkesutils
+			fawkesutils fawkeslogging
 OBJS_qa_bb_openall = qa_bb_openall.o
 
 LIBS_qa_bb_notify = TestInterface fawkescore fawkesblackboard fawkesinterface \
-			fawkesutils
+			fawkesutils fawkeslogging
 OBJS_qa_bb_notify = qa_bb_notify.o
 
 LIBS_qa_bb_listall = TestInterface fawkescore fawkesblackboard fawkesinterface
@@ -47,7 +47,7 @@ LIBS_qa_bb_remote = TestInterface fawkescore fawkesblackboard fawkesinterface \
 OBJS_qa_bb_remote = qa_bb_remote.o
 
 LIBS_qa_bb_objpos = fawkescore fawkesblackboard fawkesinterface ObjectPositionInterface \
-			fawkesutils fawkesnetcomm
+			fawkesutils fawkesnetcomm fawkeslogging
 OBJS_qa_bb_objpos = qa_bb_objpos.o
 
 OBJS_all =	$(OBJS_qa_bb_memmgr) 		\

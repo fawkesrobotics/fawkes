@@ -155,9 +155,10 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
 
       std::list<Interface *> interfaces = __blackboard->open_multiple_for_reading(iftype.c_str(), ifname.c_str());
       __reading_multi_ifs[varname] = interfaces;
-      InterfaceObserver *observer = new InterfaceObserver(this, varname, iftype.c_str(), ifname.c_str());
+      InterfaceObserver *observer =
+        new InterfaceObserver(this, varname, iftype.c_str(), ifname.c_str());
       __observers[varname] = observer;
-      __blackboard->register_observer(observer, BlackBoard::BBIO_FLAG_CREATED);
+      __blackboard->register_observer(observer);
     }
   }
   delete vi;

@@ -32,11 +32,15 @@
 #include "motor_control_thread.h"
 
 #include <core/threading/thread.h>
+#include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-#include <plugins/openrave/aspect/openrave.h>
+#include <aspect/tf.h>
+#ifdef HAVE_OPENRAVE
+#  include <plugins/openrave/aspect/openrave.h>
+#endif
 #include <blackboard/interface_listener.h>
 #include <core/utils/refptr.h>
 #ifdef USE_TIMETRACKER
@@ -47,6 +51,7 @@
 
 namespace fawkes {
   class KatanaInterface;
+  class Time;
 }
 
 // Classes from libkni (KNI)
@@ -59,10 +64,12 @@ class TMotInit;
 
 class KatanaActThread
 : public fawkes::Thread,
+  public fawkes::ClockAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
+  public fawkes::TransformAspect,
 #ifdef HAVE_OPENRAVE
   public fawkes::OpenRaveAspect,
 #endif
@@ -70,6 +77,7 @@ class KatanaActThread
 {
  public:
   KatanaActThread();
+  ~KatanaActThread();
 
   virtual void init();
   virtual void finalize();
@@ -111,15 +119,18 @@ class KatanaActThread
   float          __cfg_park_theta;
   float          __cfg_park_psi;
 
-  float          __cfg_offset_x;
-  float          __cfg_offset_y;
-  float          __cfg_offset_z;
   float          __cfg_distance_scale;
+
+  float          __cfg_update_interval;
+
+  std::string    __cfg_frame_kni;
+  std::string    __cfg_frame_openrave;
 
   bool           __cfg_OR_enabled;
   bool           __cfg_OR_use_viewer;
   bool           __cfg_OR_auto_load_ik;
   std::string    __cfg_OR_robot_file;
+
 
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
@@ -137,6 +148,7 @@ class KatanaActThread
   CKatBase                      *__katbase;
   CSctBase                      *__sensor_ctrl;
   std::vector<TMotInit>          __motor_init;
+  fawkes::Time                  *__last_update;
 
 #ifdef USE_TIMETRACKER
   std::auto_ptr<fawkes::TimeTracker> __tt;

@@ -60,21 +60,24 @@ namespace fawkes {
 }
 #endif
 
-ArgumentParser       *argument_parser = NULL;
-FawkesMainThread     *main_thread = NULL;
-MultiLogger          *logger = NULL;
-NetworkLogger        *network_logger = NULL;
-BlackBoard           *blackboard = NULL;
-SQLiteConfiguration  *config = NULL;
-PluginManager        *plugin_manager = NULL;
-AspectManager        *aspect_manager = NULL;
-ThreadManager        *thread_manager = NULL;
-FawkesNetworkManager *network_manager = NULL;
-ConfigNetworkHandler *nethandler_config = NULL;
-PluginNetworkHandler *nethandler_plugin = NULL;
-Clock                *clock = NULL;
-SharedMemoryRegistry *shm_registry;
-InitOptions          *init_options = NULL;
+ArgumentParser            * argument_parser = NULL;
+FawkesMainThread          * main_thread = NULL;
+MultiLogger               * logger = NULL;
+NetworkLogger             * network_logger = NULL;
+BlackBoard                * blackboard = NULL;
+SQLiteConfiguration       * config = NULL;
+PluginManager             * plugin_manager = NULL;
+AspectManager             * aspect_manager = NULL;
+ThreadManager             * thread_manager = NULL;
+FawkesNetworkManager      * network_manager = NULL;
+ConfigNetworkHandler      * nethandler_config = NULL;
+PluginNetworkHandler      * nethandler_plugin = NULL;
+Clock                     * clock = NULL;
+SharedMemoryRegistry      * shm_registry;
+InitOptions               * init_options = NULL;
+
+// this is NOT shared to the outside
+FawkesMainThread::Runner  * runner = NULL;
 
 int
 init(int argc, char **argv)
@@ -349,16 +352,21 @@ cleanup()
   logger = NULL;
 
   Clock::finalize();
+
+  // should be last, because of not disabled this hosts the
+  // default signal handlers
+  delete runner;
+  runner = 0;
 }
 
 void
 run()
 {
-  FawkesMainThread::Runner fawkes(main_thread,
-                                  init_options->default_signal_handlers());
+  bool defsigs = init_options->default_signal_handlers();
+  runner = new FawkesMainThread::Runner(main_thread, defsigs);
 
   try {
-    fawkes.run();
+    runner->run();
   } catch (Exception &e) {
     printf("Running Fawkes failed\n");
     e.print_trace();

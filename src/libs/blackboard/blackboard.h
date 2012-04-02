@@ -32,6 +32,9 @@
 #include <typeinfo>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class BlackBoardInterfaceManager;
 class BlackBoardMemoryManager;
@@ -46,10 +49,13 @@ class FawkesNetworkHub;
 class BlackBoard
 {
  public:
+  BlackBoard();
   virtual ~BlackBoard();
 
-  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier) = 0;
-  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier) = 0;
+  virtual Interface *  open_for_reading(const char *interface_type,
+                                        const char *identifier) = 0;
+  virtual Interface *  open_for_writing(const char *interface_type,
+                                        const char *identifier) = 0;
   virtual void         close(Interface *interface) = 0;
 
   virtual InterfaceInfoList *  list_all() = 0;
@@ -58,11 +64,13 @@ class BlackBoard
   virtual bool                 is_alive() const throw() = 0;
   virtual bool                 try_aliveness_restore() throw() = 0;
 
-  virtual std::list<Interface *>  open_multiple_for_reading(const char *type_pattern,
-							    const char *id_pattern = "*") = 0;
+  virtual std::list<Interface *>
+    open_multiple_for_reading(const char *type_pattern,
+                              const char *id_pattern = "*") = 0;
 
   template <class InterfaceType>
-    std::list<InterfaceType *>    open_multiple_for_reading(const char *id_pattern = "*");
+  std::list<InterfaceType *>
+    open_multiple_for_reading(const char *id_pattern = "*");
 
   template <class InterfaceType>
     InterfaceType * open_for_reading(const char *identifier);
@@ -70,45 +78,50 @@ class BlackBoard
   template <class InterfaceType>
     InterfaceType * open_for_writing(const char *identifier);
 
-  static const unsigned int BBIL_FLAG_DATA;
-  static const unsigned int BBIL_FLAG_MESSAGES;
-  static const unsigned int BBIL_FLAG_READER;
-  static const unsigned int BBIL_FLAG_WRITER;
-  static const unsigned int BBIL_FLAG_ALL;
-
-  static const unsigned int BBIO_FLAG_CREATED;
-  static const unsigned int BBIO_FLAG_DESTROYED;
-  static const unsigned int BBIO_FLAG_ALL;
+  /** Flags to constrain listener registraion/updates. */
+  typedef enum {
+    BBIL_FLAG_DATA = 1,		///< consider data events
+    BBIL_FLAG_MESSAGES = 2,	///< consider message received events
+    BBIL_FLAG_READER = 4,	///< consider reader events
+    BBIL_FLAG_WRITER = 8,	///< consider writer events
+    BBIL_FLAG_ALL = 15,		///< consider all events
+  } ListenerRegisterFlag;
 
   virtual void register_listener(BlackBoardInterfaceListener *listener,
-				 unsigned int flags) = 0;
-  virtual void unregister_listener(BlackBoardInterfaceListener *listener) = 0;
+                                 ListenerRegisterFlag flag = BBIL_FLAG_ALL);
+  virtual void update_listener(BlackBoardInterfaceListener *listener,
+                                 ListenerRegisterFlag flag = BBIL_FLAG_ALL);
+  virtual void unregister_listener(BlackBoardInterfaceListener *listener);
 
-  virtual void register_observer(BlackBoardInterfaceObserver *observer,
-				 unsigned int flags) = 0;
-  virtual void unregister_observer(BlackBoardInterfaceObserver *observer) = 0;
+  virtual void register_observer(BlackBoardInterfaceObserver *observer);
+  virtual void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   std::string  demangle_fawkes_interface_name(const char *type);
+
+ protected:
+  BlackBoardNotifier *__notifier;	///< Notifier for BB events.
 };
 
 
 /** Get interface of given type.
- * This will open a new interface for reading just like the non-template version of
- * open_for_reading(). But with the template method you will get a correctly typed object
- * that you can use. An TypeMismatchException is thrown if the string representation
- * of the type and the actual class type of the interface do not match.
+ * This will open a new interface for reading just like the
+ * non-template version of open_for_reading(). But with the template
+ * method you will get a correctly typed object that you can use. An
+ * TypeMismatchException is thrown if the string representation of the
+ * type and the actual class type of the interface do not match.
  * @param identifier identifier of the interface
  * @return new fully initialized interface instance of requested type
  * @exception OutOfMemoryException thrown if there is not enough free space for
  * the requested interface.
- * @exception TypeMismatchException thrown if type in interface_type and the actual class
- * type do not fit.
+ * @exception TypeMismatchException thrown if type in interface_type
+ * and the actual class type do not fit.
  */
 template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_reading(const char *identifier)
 {
-  std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  std::string type_name =
+    demangle_fawkes_interface_name(typeid(InterfaceType).name());
   Interface *interface = open_for_reading(type_name.c_str(), identifier);
   return static_cast<InterfaceType *>(interface);
 }
@@ -127,8 +140,10 @@ template <class InterfaceType>
 std::list<InterfaceType *>
 BlackBoard::open_multiple_for_reading(const char *id_pattern)
 {
-  std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  std::list<Interface *> il = open_multiple_for_reading(type_name.c_str(), id_pattern);
+  std::string type_name =
+    demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  std::list<Interface *> il =
+    open_multiple_for_reading(type_name.c_str(), id_pattern);
   std::list<InterfaceType *> rv;
   for (std::list<Interface *>::iterator i = il.begin(); i != il.end(); ++i) {
     rv.push_back(static_cast<InterfaceType *>(*i));
@@ -139,27 +154,56 @@ BlackBoard::open_multiple_for_reading(const char *id_pattern)
 
 
 /** Get writer interface of given type.
- * This will open a new interface for writing just like the non-template version of
- * open_for_writing(). But with the template method you will get a correctly typed object
- * that you can use. An TypeMismatchException is thrown if the string representation
- * of the type and the actual class type of the interface do not match.
+ * This will open a new interface for writing just like the
+ * non-template version of open_for_writing(). But with the template
+ * method you will get a correctly typed object that you can use. An
+ * TypeMismatchException is thrown if the string representation of the
+ * type and the actual class type of the interface do not match.
  * @param identifier identifier of the interface
  * @return new fully initialized interface instance of requested type
  * @exception OutOfMemoryException thrown if there is not enough free space for
  * the requested interface.
  * @exception BlackBoardWriterActiveException thrown if there is already a writing
  * instance with the same type/id
- * @exception TypeMismatchException thrown if type in interface_type and the actual class
- * type do not fit.
+ * @exception TypeMismatchException thrown if type in interface_type
+ * and the actual class type do not fit.
  */
 template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_writing(const char *identifier)
 {
-  std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  std::string type_name =
+    demangle_fawkes_interface_name(typeid(InterfaceType).name());
   Interface *interface = open_for_writing(type_name.c_str(), identifier);
   return static_cast<InterfaceType *>(interface);;
 }
+
+
+/** Concatenation of register flags.
+ * @param a flags to concatenate
+ * @param b other flags to concatenate
+ * @return concatenated flags
+ */
+inline BlackBoard::ListenerRegisterFlag
+operator|(const BlackBoard::ListenerRegisterFlag &a,
+          const BlackBoard::ListenerRegisterFlag &b)
+{
+  return (BlackBoard::ListenerRegisterFlag)((int)a | (int)b);
+}
+
+
+/** Testing of register flags.
+ * @param a flags to test
+ * @param b flags to test for
+ * @return resulting flags
+ */
+inline BlackBoard::ListenerRegisterFlag
+operator&(const BlackBoard::ListenerRegisterFlag &a,
+          const BlackBoard::ListenerRegisterFlag &b)
+{
+  return (BlackBoard::ListenerRegisterFlag)((int)a & (int)b);
+}
+
 
 } // end namespace fawkes
 

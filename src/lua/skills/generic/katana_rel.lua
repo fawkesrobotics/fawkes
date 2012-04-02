@@ -74,5 +74,5 @@ function MOVE:init()
    -- phi is defined by x and y, and automatically calculated by katana skill. value needs to be precise, therefore
    -- setting it right here could cause katana-skill to fail.
 
-   self.args = {x=x, y=y, z=z, theta=theta}
+   self.args = {x=x, y=y, z=z, theta=theta, frame="/katana/kni"}
 end
