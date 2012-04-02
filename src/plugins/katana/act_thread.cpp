@@ -413,23 +413,35 @@ KatanaActThread::loop()
                          trans_frame_exists ? "" : "', '",
                          rot_frame_exists   ? "" : msg->rot_frame() );
       } else {
-        tf::Stamped<Point> target;
-        tf::Stamped<Point> target_local(tf::Point(msg->x(), msg->y(), msg->z()),
-                                        fawkes::Time(0,0), msg->trans_frame());
-
+        Stamped<Point> target;
+        Stamped<Point> target_local(Point(msg->x(), msg->y(), msg->z()),
+                                    fawkes::Time(0,0), msg->trans_frame());
         if( __cfg_OR_enabled ) {
 #ifdef HAVE_OPENRAVE
           tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
+          if( msg->offset_xy() != 0.f ) {
+            Vector3 offset(target.getX(), target.getY(), 0.f);
+            offset = (offset/offset.length()) * msg->offset_xy(); // Vector3 does not support a set_length method
+            target += offset;
+          }
           // TODO: how to transform euler rotation to quaternion, to be used for tf??
           __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
                                              msg->phi(), msg->theta(), msg->psi());
+          __goto_openrave_thread->set_theta_error(msg->theta_error());
+          __goto_openrave_thread->set_move_straight(msg->is_straight());
+
           start_motion(__goto_openrave_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s', theta_error:%f, straight:%u",
 		       target.getX(), target.getY(), target.getZ(),
-		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str());
+		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str(), msg->theta_error(), msg->is_straight());
 #endif
         } else {
           tf_listener->transform_point(__cfg_frame_kni, target_local, target);
+          if( msg->offset_xy() != 0.f ) {
+            Vector3 offset(target.getX(), target.getY(), 0.f);
+            offset = (offset/offset.length()) * msg->offset_xy(); // Vector3 does not support a set_length method
+            target += offset;
+          }
           __goto_thread->set_target(target.getX() / __cfg_distance_scale,
                                     target.getY() / __cfg_distance_scale,
                                     target.getZ() / __cfg_distance_scale,
