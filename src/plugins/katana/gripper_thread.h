@@ -28,7 +28,7 @@
 class KatanaGripperThread : public KatanaMotionThread
 {
  public:
-  KatanaGripperThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger,
+  KatanaGripperThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger,
 		      unsigned int poll_interval_ms);
 
   /** Gripper execution mode. */

@@ -21,8 +21,9 @@
  */
 
 #include "gripper_thread.h"
+#include "controller.h"
+#include "exception.h"
 
-#include <kniBase.h>
 
 /** @class KatanaGripperThread "gripper_thread.h"
  * Katana gripper thread.
@@ -31,12 +32,12 @@
  */
 
 /** Constructor.
- * @param katana katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  */
-KatanaGripperThread::KatanaGripperThread(fawkes::RefPtr<CLMBase> katana,
+KatanaGripperThread::KatanaGripperThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 					 fawkes::Logger *logger,
 					 unsigned int poll_interval_ms)
   : KatanaMotionThread("KatanaGripperThread", katana, logger)
@@ -60,55 +61,49 @@ void
 KatanaGripperThread::once()
 {
   try {
-    // non-blocking call to KNI
+    // non-blocking call
     if (__mode == CLOSE_GRIPPER) {
-      _katana->closeGripper(/* wait */ false);
+      _katana->gripper_close(/* wait */ false);
     } else {
-      _katana->openGripper(/* wait */ false);
+      _katana->gripper_open(/* wait */ false);
     }
 
-  } catch (/*KNI*/::Exception &e) {
+  } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGripperThread", "Starting gripper motion failed (ignoring): %s", e.what());
     _finished = true;
     _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
     return;
   }
 
-  CKatBase *base = _katana->GetBase();
-  const TKatMOT *motors = base->GetMOT();
-  CMotBase *gripmot = &motors->arr[motors->cnt - 1];
-  const TMotPVP *grippvp = gripmot->GetPVP();
+  // check if final
   bool final = false;
-  short last_pos    = 0;
-  short num_samepos = 0;
   short num_errors  = 0;
-  while (! final) {
+  while ( !final ) {
+    usleep(__poll_interval_usec);
     try {
-      base->GetSCT()->arr[0].recvDAT(); // update sensor values
-      gripmot->recvPVP();
-    } catch (/*KNI*/::Exception &e) {
+      _katana->read_sensor_data();
+      _katana->read_motor_data();
+    } catch (fawkes::Exception &e) {
       if (++num_errors <= 10) {
-	_logger->log_warn("KatanaGripperThread", "Receiving PVP failed, retrying");
-	continue;
+        _logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
+        continue;
       } else {
-	_logger->log_warn("KatanaGripperThread", "Receiving PVP failed too often, aborting");
-	_error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
-	break;
+        _logger->log_warn("KatanaMotorControlThread", "Receiving sensor/motor data failed too often, aborting");
+        _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
+        break;
       }
     }
-    if (grippvp->pos == last_pos) {
-      if (++num_samepos >= 3) {
-	_logger->log_debug(name(), "Gripper did not move for 3 cycles, considering as final");
-	final = true;
-      }
-    } else {
-      //_logger->log_debug(name(), "Gripper still moving %i != %i", last_pos, grippvp->pos);
-      last_pos = grippvp->pos;
-      num_samepos = 0;
-      usleep(__poll_interval_usec);
+
+    try {
+      final = _katana->final();
+    } catch (fawkes::KatanaMotorCrashedException &e) {
+      _logger->log_warn("KatanaMotorControlTrhead", e.what());
+      _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
+      break;
     }
   }
 
   _logger->log_debug("KatanaGripperThread", "Gripper motion finished");
+
   _finished = true;
 }

@@ -28,7 +28,7 @@
 class KatanaCalibrationThread : public KatanaMotionThread
 {
  public:
-  KatanaCalibrationThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger);
+  KatanaCalibrationThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger);
 
   virtual void once();
 

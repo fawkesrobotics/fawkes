@@ -28,15 +28,18 @@
 #include <core/utils/refptr.h>
 #include <interfaces/KatanaInterface.h>
 
-// Classes from libkni (KNI)
-class CLMBase;
+#include <unistd.h>
+
+namespace fawkes {
+  class KatanaController;
+}
 
 class KatanaMotionThread
 : public fawkes::Thread
 {
  public:
   KatanaMotionThread(const char *thread_name,
-		     fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger);
+		     fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger);
 
   bool finished() const;
   virtual void reset();
@@ -44,7 +47,7 @@ class KatanaMotionThread
 
  protected:
   /** Katana object for interaction with the arm */
-  fawkes::RefPtr<CLMBase>  _katana;
+  fawkes::RefPtr<fawkes::KatanaController>  _katana;
   /** Set to true when motion is finished, to false on reset */
   bool                     _finished;
   /** Logger */
