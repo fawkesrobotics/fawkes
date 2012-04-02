@@ -25,7 +25,7 @@
 
 #include "types.h"
 
-#include <rave/rave.h>
+#include <openrave/openrave.h>
 #include <vector>
 
 namespace fawkes {
