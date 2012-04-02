@@ -219,7 +219,7 @@ OpenRaveEnvironment::start_viewer()
  * @param iktype IK type of solver (default: Transform6D; use TranslationDirection5D for 5DOF arms)
  */
 void
-OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterization::Type iktype)
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterizationType iktype)
 {
   RobotBasePtr robotBase = robot->get_robot_ptr();
 

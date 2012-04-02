@@ -15,6 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/openrave/openrave.mk
 
 PRESUBDIRS = interfaces
 
@@ -31,14 +32,6 @@ ifeq ($(HAVE_LIBKNI),1)
   CFLAGS_LIBKNI  = -DHAVE_KNI $(shell $(PKGCONFIG) --cflags 'libkni3')
   LDFLAGS_LIBKNI = $(shell $(PKGCONFIG) --libs 'libkni3')
 endif
-ifneq ($(PKGCONFIG),)
-  HAVE_OPENRAVE := $(if $(or $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}),\
-			     $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/})),1,0)
-endif
-ifeq ($(HAVE_OPENRAVE),1)
-  CFLAGS_OPENRAVE    = $(shell openrave-config --cflags-only-I) -DHAVE_OPENRAVE
-  LDFLAGS_OPENRAVE   = $(shell openrave-config --libs-core)
-endif
 
 ifeq ($(HAVE_LIBKNI),1)
   CFLAGS  += $(CFLAGS_LIBKNI) -Wno-error
@@ -46,7 +39,7 @@ ifeq ($(HAVE_LIBKNI),1)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE),1)
     LIBS_katana += fawkesopenrave fawkesopenraveaspect
-    CFLAGS  += $(CFLAGS_OPENRAVE)
+    CFLAGS  += $(CFLAGS_OPENRAVE) -DHAVE_OPENRAVE
     LDFLAGS += $(LDFLAGS_OPENRAVE)
   else
     WARN_TARGETS += warning_openrave
