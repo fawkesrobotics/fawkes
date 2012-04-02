@@ -267,6 +267,11 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       }
       break;
 
+    case (TARGET_IKPARAM) :
+      cmdin << "MoveToHandPosition ikparam";
+      cmdin << " " << target.ikparam;
+      break;
+
     case (TARGET_TRANSFORM) :
       cmdin << "MoveToHandPosition pose";
       cmdin << " " << target.qw << " " << target.qx << " " << target.qy << " " << target.qz;

@@ -181,6 +181,7 @@ OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float devic
   __robot->SetActiveDOFValues(angles);
 
   // get model's current transition and compare
+  __arm = __robot->GetActiveManipulator();
   Transform trans = __arm->GetEndEffectorTransform();
   __trans_offset_x = trans.trans[0] - device_trans_x;
   __trans_offset_y = trans.trans[1] - device_trans_y;
@@ -264,6 +265,7 @@ OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
 bool
 OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
 {
+  __arm = __robot->GetActiveManipulator();
   Transform trans = __arm->GetEndEffectorTransform();
 
   return set_target_rel( trans_x - trans.trans[0],
@@ -418,6 +420,27 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
   }
 
   return foundIK;
+}
+
+/** Set target by giving IkParameterizaion of target.
+ * OpenRAVE::IkParameterization is the desired type to be calculated with
+ * by OpenRAVE. Each oter type (i.e. Transform) is implicitly transformed
+ * to an IkParameterization before continuing to check for Ik solution and
+ * planning, i.e. by the BaseManipulation module.
+ * @param ik_param the OpenRAVE::IkParameterization of the target
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRaveRobot::set_target(OpenRAVE::IkParameterization ik_param)
+{
+  std::vector<OpenRAVE::dReal> target_angles;
+
+  __target.ikparam = ik_param;
+  __target.type = TARGET_IKPARAM;
+  __target.solvable = __arm->FindIKSolution(ik_param,target_angles,true);
+  __target.manip->set_angles(target_angles);
+
+  return __target.solvable;
 }
 
 
@@ -633,7 +656,8 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
 
   std::vector<OpenRAVE::dReal> target_angles;
 
-  __target.solvable = __arm->FindIKSolution(IkParameterization(target),target_angles,true);
+  __target.ikparam = IkParameterization(target);
+  __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,true);
   __target.manip->set_angles(target_angles);
 
   return __target.solvable;
