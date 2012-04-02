@@ -51,6 +51,9 @@ class RobotinoSensorInterface : public Interface
     float distance[9]; /**< Distance sensor values. */
     bool digital_in[8]; /**< Digital input values. */
     float analog_in[8]; /**< Analog input values. */
+    bool gyro_available; /**< True if gyro is available */
+    float gyro_angle; /**< Gyro angle value; rad */
+    float gyro_rate; /**< Gyro rate value; rad/sec */
   } RobotinoSensorInterface_data_t;
 #pragma pack(pop)
 
@@ -98,6 +101,15 @@ class RobotinoSensorInterface : public Interface
   void set_analog_in(unsigned int index, const float new_analog_in);
   void set_analog_in(const float * new_analog_in);
   size_t maxlenof_analog_in() const;
+  bool is_gyro_available() const;
+  void set_gyro_available(const bool new_gyro_available);
+  size_t maxlenof_gyro_available() const;
+  float gyro_angle() const;
+  void set_gyro_angle(const float new_gyro_angle);
+  size_t maxlenof_gyro_angle() const;
+  float gyro_rate() const;
+  void set_gyro_rate(const float new_gyro_rate);
+  size_t maxlenof_gyro_rate() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

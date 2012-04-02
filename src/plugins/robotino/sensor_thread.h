@@ -40,6 +40,14 @@ namespace rec {
       class Com;
     }
   }
+  namespace sharedmemory {
+    template<typename SharedType> class SharedMemory;
+  }
+  namespace iocontrol {
+    namespace robotstate {
+      class State;
+    }
+  }
 }
 
 namespace fawkes {
@@ -73,6 +81,8 @@ class RobotinoSensorThread
   bool        cfg_quit_on_disconnect_;
   rec::robotino::com::Com *com_;
   unsigned int last_seqnum_;
+  rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
+  rec::iocontrol::robotstate::State *state_;
 
   fawkes::BatteryInterface        *batt_if_;
   fawkes::RobotinoSensorInterface *sens_if_;

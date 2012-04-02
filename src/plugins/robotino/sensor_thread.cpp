@@ -22,7 +22,9 @@
 
 #include "sensor_thread.h"
 #include <rec/robotino/com/Com.h>
+#include <rec/sharedmemory/sharedmemory.h>
 #include <rec/iocontrol/remotestate/SensorState.h>
+#include <rec/iocontrol/robotstate/State.h>
 #include <baseapp/run.h>
 
 #include <interfaces/BatteryInterface.h>
@@ -59,6 +61,10 @@ RobotinoSensorThread::init()
 
   batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
   sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
+
+  statemem_ =  new rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State>
+    (rec::iocontrol::robotstate::State::sharedMemoryKey);
+  state_ = statemem_->getData();
 
   // taken from Robotino API2 DistanceSensorImpl.hpp
   voltage_to_dist_dps_.push_back(std::make_pair(0.3 , 0.41));
@@ -101,6 +107,17 @@ RobotinoSensorThread::loop()
       sens_if_->set_bumper(sensor_state.bumper);
       sens_if_->set_digital_in(sensor_state.dIn);
       sens_if_->set_analog_in(sensor_state.aIn);
+      if (state_->gyro.port == rec::serialport::UNDEFINED) {
+        if (sens_if_->is_gyro_available()) {
+          sens_if_->set_gyro_available(false);
+          sens_if_->set_gyro_angle(0.);
+          sens_if_->set_gyro_rate(0.);
+        }
+      } else {
+        sens_if_->set_gyro_available(true);
+        sens_if_->set_gyro_angle(state_->gyro.angle);
+        sens_if_->set_gyro_rate(state_->gyro.rate);
+      }
 
       update_distances(sensor_state.distanceSensor);
 

@@ -27,7 +27,8 @@ PRESUBDIRS = interfaces
 
 LIBS_robotino = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 		fawkesblackboard fawkesinterface MotorInterface \
-		BatteryInterface RobotinoSensorInterface
+		BatteryInterface RobotinoSensorInterface \
+		rec_iocontrol_robotstate rec_iocontrol_remotestate
 OBJS_robotino = robotino_plugin.o sensor_thread.o act_thread.o
 
 LIBS_robotino_joystick = m fawkescore fawkesutils fawkesaspects \
@@ -48,6 +49,8 @@ OBJS_robotino_ros_joints = robotino_ros_joints_plugin.o ros_joints_thread.o
 ifeq ($(HAVE_OPENROBOTINO),1)
   CFLAGS  += $(CFLAGS_OPENROBOTINO)
   LDFLAGS_robotino += $(LDFLAGS_OPENROBOTINO)
+
+  CFLAGS_sensor_thread = $(CFLAGS) -Wno-reorder -Wno-unused-function
 
   PLUGINS_all = $(PLUGINDIR)/robotino.so $(PLUGINDIR)/robotino-joystick.so
 

@@ -25,6 +25,15 @@ class RobotinoSensorInterface : public Interface
   float analog_in(int index);
   void set_analog_in(unsigned int index, const float new_analog_in);
   int maxlenof_analog_in() const;
+  bool is_gyro_available();
+  void set_gyro_available(const bool new_gyro_available);
+  int maxlenof_gyro_available() const;
+  float gyro_angle();
+  void set_gyro_angle(const float new_gyro_angle);
+  int maxlenof_gyro_angle() const;
+  float gyro_rate();
+  void set_gyro_rate(const float new_gyro_rate);
+  int maxlenof_gyro_rate() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
