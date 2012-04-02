@@ -24,11 +24,15 @@
 #include "exception.h"
 
 #include <core/exceptions/software.h>
+
+#ifdef HAVE_OPENRAVE
 #include <plugins/openrave/environment.h>
 #include <plugins/openrave/robot.h>
 #include <plugins/openrave/manipulator.h>
 
 using namespace OpenRAVE;
+#endif
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -39,6 +43,8 @@ namespace fawkes {
  * with the real Katana arm.
  * @author Bahram Maleki-Fard
  */
+
+#ifdef HAVE_OPENRAVE
 
 /** Constructor.
  * @param openrave pointer to OpenRaveConnector aspect.
@@ -388,5 +394,7 @@ KatanaControllerOpenrave::check_init()
     // init() will throw an exception if it fails
   }
 }
+
+#endif // HAVE_OPENRAVE
 
 } // end of namespace fawkes

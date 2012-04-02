@@ -65,6 +65,7 @@ class OpenRaveRobot
   virtual bool set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
   virtual bool set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset = false);
   virtual bool set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset = false);
+  virtual bool set_target_ikparam(OpenRAVE::IkParameterization ik_param);
   virtual void set_target_angles( std::vector<float>& angles ); // just temporary
 
   virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x);
@@ -84,6 +85,7 @@ class OpenRaveRobot
   void init();
   bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset = false);
   bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset = false);
+  OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
 
   fawkes::Logger*	                __logger;
 

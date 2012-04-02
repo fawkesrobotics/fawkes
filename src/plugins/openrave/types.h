@@ -24,7 +24,10 @@
 #ifndef __PLUGINS_OPENRAVE_TYPES_H_
 #define __PLUGINS_OPENRAVE_TYPES_H_
 
+#include <openrave/openrave.h>
+
 #include <vector>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -45,7 +48,8 @@ typedef enum {
   TARGET_NONE,          /**< No valid target */
   TARGET_JOINTS,        /**< Target: motor joint values */
   TARGET_TRANSFORM,     /**< Target: absolute endeffector translation and rotation */
-  TARGET_RELATIVE       /**< Target: relative endeffector translation */
+  TARGET_RELATIVE,      /**< Target: relative endeffector translation */
+  TARGET_IKPARAM        /**< Target: OpenRAVE::IkParameterization string */
 } target_type_t;
 
 
@@ -70,6 +74,7 @@ typedef struct {
   bool solvable;               /**< target IK solvable */
   OpenRaveManipulator* manip;  /**< target manipulator configuration */
   target_type_t        type;   /**< target type */
+  OpenRAVE::IkParameterization ikparam;  /**< OpenRAVE::IkParameterization; each target is implicitly transformed to one by OpenRAVE */
 } target_t;
 
 } // end namespace firevision

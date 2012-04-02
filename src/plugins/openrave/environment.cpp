@@ -267,6 +267,11 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       }
       break;
 
+    case (TARGET_IKPARAM) :
+      cmdin << "MoveToHandPosition ikparam";
+      cmdin << " " << target.ikparam;
+      break;
+
     case (TARGET_TRANSFORM) :
       cmdin << "MoveToHandPosition pose";
       cmdin << " " << target.qw << " " << target.qx << " " << target.qy << " " << target.qz;
@@ -294,6 +299,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       throw fawkes::Exception("OpenRAVE Environment: Planner: Invalid target type");
   }
 
+  cmdin << " execute 0";
   cmdin << " outputtraj";
   //if(__logger)
   //  __logger->log_debug("OpenRAVE Environment", "Planner: basemanip cmdin:%s", cmdin.str().c_str());

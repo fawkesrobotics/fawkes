@@ -117,7 +117,11 @@ KatanaActThread::init()
     kat_ctrl = NULL;
 
   } else if( __cfg_controller == "openrave") {
+#ifdef HAVE_OPENRAVE
     __katana = new KatanaControllerOpenrave(openrave);
+#else
+    throw fawkes::Exception("Cannot use controller 'openrave', OpenRAVE not installed!");
+#endif
 
   } else {
     throw fawkes::Exception("Invalid controller given: '%s'", __cfg_controller.c_str());
@@ -454,7 +458,9 @@ KatanaActThread::loop()
                                              msg->phi(), msg->theta(), msg->psi());
           __goto_openrave_thread->set_theta_error(msg->theta_error());
           __goto_openrave_thread->set_move_straight(msg->is_straight());
-
+ #ifdef EARLY_PLANNING
+          __goto_openrave_thread->plan_target();
+ #endif
           start_motion(__goto_openrave_thread, msg->id(),
 		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s', theta_error:%f, straight:%u",
 		       target.getX(), target.getY(), target.getZ(),
@@ -494,7 +500,9 @@ KatanaActThread::loop()
           tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
           __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
 				  	     msg->phi(), msg->theta(), msg->psi());
-
+ #ifdef EARLY_PLANNING
+          __goto_openrave_thread->plan_target();
+ #endif
           start_motion(__goto_openrave_thread, msg->id(),
 		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
 		       target.getX(), target.getY(), target.getZ(),
@@ -519,6 +527,9 @@ KatanaActThread::loop()
         { rot_x = msg->rot_x(); }
 
       __goto_openrave_thread->set_target(msg->object(), rot_x);
+ #ifdef EARLY_PLANNING
+      __goto_openrave_thread->plan_target();
+ #endif
       start_motion(__goto_openrave_thread, msg->id(),
 		   "Linear movement to object (%s, %f)", msg->object(), msg->rot_x());
 #endif
@@ -537,7 +548,9 @@ KatanaActThread::loop()
 
         __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
 				  	   __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
-
+ #ifdef EARLY_PLANNING
+        __goto_openrave_thread->plan_target();
+ #endif
         start_motion(__goto_openrave_thread, msg->id(), "Parking arm");
 #endif
       } else {
