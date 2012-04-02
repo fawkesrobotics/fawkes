@@ -28,7 +28,9 @@
 #include <core/utils/refptr.h>
 #include <plugins/openrave/aspect/openrave.h>
 
+#ifdef HAVE_OPENRAVE
 #include <openrave/openrave.h>
+#endif
 
 #include <string>
 #include <memory>
@@ -42,6 +44,7 @@ namespace fawkes {
 
 class KatanaControllerOpenrave : public KatanaController
 {
+#ifdef HAVE_OPENRAVE
  public:
   KatanaControllerOpenrave(fawkes::OpenRaveConnector* openrave);
   virtual ~KatanaControllerOpenrave();
@@ -105,6 +108,7 @@ class KatanaControllerOpenrave : public KatanaController
   void check_init();
 
   bool motor_oor(unsigned short id);
+#endif //HAVE_OPENRAVE
 };
 
 

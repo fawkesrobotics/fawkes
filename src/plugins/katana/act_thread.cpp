@@ -115,7 +115,11 @@ KatanaActThread::init()
     kat_ctrl = NULL;
 
   } else if( __cfg_controller == "openrave") {
+#ifdef HAVE_OPENRAVE
     __katana = new KatanaControllerOpenrave(openrave);
+#else
+    throw fawkes::Exception("Cannot use controller 'openrave', OpenRAVE not installed!");
+#endif
 
   } else {
     throw fawkes::Exception("Invalid controller given: '%s'", __cfg_controller.c_str());
