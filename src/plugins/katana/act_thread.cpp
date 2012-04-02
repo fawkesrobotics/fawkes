@@ -48,9 +48,7 @@ using namespace fawkes::tf;
 KatanaActThread::KatanaActThread()
   : Thread("KatanaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC),
-#ifdef HAVE_TF
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Katana"),
-#endif
+    TransformAspect(TransformAspect::BOTH, "Katana"),
     BlackBoardInterfaceListener("KatanaActThread")
 {
   __last_update = new Time();
@@ -86,12 +84,12 @@ KatanaActThread::init()
   __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
   __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
 
-  __cfg_offset_x         = config->get_float("/hardware/katana/offset_x");
-  __cfg_offset_y         = config->get_float("/hardware/katana/offset_y");
-  __cfg_offset_z         = config->get_float("/hardware/katana/offset_z");
   __cfg_distance_scale   = config->get_float("/hardware/katana/distance_scale");
 
   __cfg_update_interval  = config->get_float("/hardware/katana/update_interval");
+
+  __cfg_frame_kni        = config->get_string("/plugins/static-transforms/transforms/katana_kni/child_frame");
+  __cfg_frame_openrave   = config->get_string("/plugins/static-transforms/transforms/openrave/child_frame");
 
 #ifdef HAVE_OPENRAVE
   __cfg_OR_enabled       = config->get_bool("/hardware/katana/openrave/enabled");
@@ -220,9 +218,9 @@ KatanaActThread::update_position(bool refresh)
   double x, y, z, phi, theta, psi;
   try {
     __katana->getCoordinates(x, y, z, phi, theta, psi, refresh);
-    __katana_if->set_x(__cfg_offset_x + __cfg_distance_scale * x);
-    __katana_if->set_y(__cfg_offset_y + __cfg_distance_scale * y);
-    __katana_if->set_z(__cfg_offset_z + __cfg_distance_scale * z);
+    __katana_if->set_x(__cfg_distance_scale * x);
+    __katana_if->set_y(__cfg_distance_scale * y);
+    __katana_if->set_z(__cfg_distance_scale * z);
     __katana_if->set_phi(phi);
     __katana_if->set_theta(theta);
     __katana_if->set_psi(psi);
@@ -230,7 +228,6 @@ KatanaActThread::update_position(bool refresh)
     logger->log_warn(name(), "Updating position values failed: %s", e.what());
   }
 
-#ifdef HAVE_TF
   float *a = __katana_if->angles();
   fawkes::Time now(clock);
 
@@ -250,7 +247,6 @@ KatanaActThread::update_position(bool refresh)
   tf_publisher->send_transform(j3_j4, now, "/katana/j3", "/katana/j4");
   tf_publisher->send_transform(j4_j5, now, "/katana/j4", "/katana/j5");
   tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper");
-#endif  
 }
 
 
@@ -409,53 +405,72 @@ KatanaActThread::loop()
     } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoMessage>()) {
       KatanaInterface::LinearGotoMessage *msg = __katana_if->msgq_first(msg);
 
-      if(__cfg_OR_enabled) {
-#ifdef HAVE_OPENRAVE
-        __goto_openrave_thread->set_target(msg->x(), msg->y(), msg->z(),
-                                           msg->phi(), msg->theta(), msg->psi());
-        start_motion(__goto_openrave_thread, msg->id(),
-		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
-		     msg->x(), msg->y(), msg->z(),
-		     msg->phi(), msg->theta(), msg->psi());
-#endif
+      bool trans_frame_exists = tf_listener->frame_exists(msg->trans_frame());
+      bool rot_frame_exists   = tf_listener->frame_exists(msg->rot_frame());
+      if( !trans_frame_exists || !rot_frame_exists ) {
+        logger->log_warn(name(), "tf frames not existing: '%s%s%s'. Skipping message.",
+                         trans_frame_exists ? "" : msg->trans_frame(),
+                         trans_frame_exists ? "" : "', '",
+                         rot_frame_exists   ? "" : msg->rot_frame() );
       } else {
-        __goto_thread->set_target((msg->x() - __cfg_offset_x)/__cfg_distance_scale,
-                                  (msg->y() - __cfg_offset_y)/__cfg_distance_scale,
-                                  (msg->z() - __cfg_offset_z)/__cfg_distance_scale,
-			 	  msg->phi(), msg->theta(), msg->psi());
-        start_motion(__goto_thread, msg->id(),
-		     "Linear movement to (%f,%f,%f, %f,%f,%f)",
-		     msg->x(), msg->y(), msg->z(),
-		     msg->phi(), msg->theta(), msg->psi());
+        tf::Stamped<Point> target;
+        tf::Stamped<Point> target_local(tf::Point(msg->x(), msg->y(), msg->z()),
+                                        fawkes::Time(0,0), msg->trans_frame());
+
+        if( __cfg_OR_enabled ) {
+#ifdef HAVE_OPENRAVE
+          tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
+          // TODO: how to transform euler rotation to quaternion, to be used for tf??
+          __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
+                                             msg->phi(), msg->theta(), msg->psi());
+          start_motion(__goto_openrave_thread, msg->id(),
+		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+		       target.getX(), target.getY(), target.getZ(),
+		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str());
+#endif
+        } else {
+          tf_listener->transform_point(__cfg_frame_kni, target_local, target);
+          __goto_thread->set_target(target.getX() / __cfg_distance_scale,
+                                    target.getY() / __cfg_distance_scale,
+                                    target.getZ() / __cfg_distance_scale,
+                                    msg->phi(), msg->theta(), msg->psi());
+          start_motion(__goto_thread, msg->id(),
+		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+		       target.getX(), target.getY(), target.getZ(),
+		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_kni.c_str());
+        }
       }
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::LinearGotoKniMessage>()) {
       KatanaInterface::LinearGotoKniMessage *msg = __katana_if->msgq_first(msg);
 
-      float x = msg->x() * __cfg_distance_scale + __cfg_offset_x;
-      float y = msg->y() * __cfg_distance_scale + __cfg_offset_y;
-      float z = msg->z() * __cfg_distance_scale + __cfg_offset_z;
+      float x = msg->x() * __cfg_distance_scale;
+      float y = msg->y() * __cfg_distance_scale;
+      float z = msg->z() * __cfg_distance_scale;
+
+      tf::Stamped<Point> target;
+      tf::Stamped<Point> target_local(tf::Point(x, y, z),
+                                      fawkes::Time(0,0), __cfg_frame_kni);
 
       if( __cfg_OR_enabled ) {
 #ifdef HAVE_OPENRAVE
-          __goto_openrave_thread->set_target(x, y, z,
+          tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
+          __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
 				  	     msg->phi(), msg->theta(), msg->psi());
 
           start_motion(__goto_openrave_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f)",
-		       x, y, z,
-		       msg->phi(), msg->theta(), msg->psi());
-
+		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+		       target.getX(), target.getY(), target.getZ(),
+		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str());
 #endif
         } else {
           __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
 				    msg->phi(), msg->theta(), msg->psi());
 
           start_motion(__goto_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f)",
+		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
 		       x, y, z,
-		       msg->phi(), msg->theta(), msg->psi());
-
+		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_kni.c_str());
         }
 
 #ifdef HAVE_OPENRAVE
@@ -476,9 +491,14 @@ KatanaActThread::loop()
 
       if(__cfg_OR_enabled) {
 #ifdef HAVE_OPENRAVE
-        __goto_openrave_thread->set_target(__cfg_park_x * __cfg_distance_scale + __cfg_offset_x,
-                                           __cfg_park_y * __cfg_distance_scale + __cfg_offset_y,
-                                  	   __cfg_park_z * __cfg_distance_scale + __cfg_offset_z,
+        tf::Stamped<Point> target;
+        tf::Stamped<Point> target_local(tf::Point(__cfg_park_x * __cfg_distance_scale,
+                                                  __cfg_park_y * __cfg_distance_scale,
+                                                  __cfg_park_z * __cfg_distance_scale),
+                                        fawkes::Time(0,0), __cfg_frame_kni);
+        tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
+
+        __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
 				  	   __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
 
         start_motion(__goto_openrave_thread, msg->id(), "Parking arm");

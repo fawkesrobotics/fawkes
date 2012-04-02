@@ -171,6 +171,10 @@ class KatanaInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char trans_frame[32]; /**< tf frame-id of origin's coordinate system,
+      regarding the translation */
+      char rot_frame[32]; /**< tf frame-id of origin's coordinate system,
+      regarding the rotation. In most cases, this is the robot's base coordinate system. */
       float x; /**< DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system. */
       float y; /**< DEPRECATED! Y-Coordinate for tool position
@@ -186,12 +190,18 @@ class KatanaInterface : public Interface
     LinearGotoMessage_data_t *data;
 
    public:
-    LinearGotoMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi);
+    LinearGotoMessage(const char * ini_trans_frame, const char * ini_rot_frame, const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi);
     LinearGotoMessage();
     ~LinearGotoMessage();
 
     LinearGotoMessage(const LinearGotoMessage *m);
     /* Methods */
+    char * trans_frame() const;
+    void set_trans_frame(const char * new_trans_frame);
+    size_t maxlenof_trans_frame() const;
+    char * rot_frame() const;
+    void set_rot_frame(const char * new_rot_frame);
+    size_t maxlenof_rot_frame() const;
     float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;

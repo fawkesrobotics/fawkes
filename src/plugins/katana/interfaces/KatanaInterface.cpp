@@ -124,7 +124,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0xa7, 0xb5, 0x23, 0xee, 0x17, 0x10, 0xe9, 0x71, 0x7c, 0x85, 0x3b, 0x4d, 0xb, 0x9, 0x50, 0xaf};
+  unsigned char tmp_hash[] = {0xee, 0xea, 0xce, 0x96, 0x25, 0x3b, 0xd3, 0x21, 0x3c, 0x7, 0x7f, 0x40, 0xd2, 0xfe, 0x51, 0x73};
   set_hash(tmp_hash);
 }
 
@@ -940,6 +940,8 @@ KatanaInterface::ParkMessage::clone() const
 
 
 /** Constructor with initial values.
+ * @param ini_trans_frame initial value for trans_frame
+ * @param ini_rot_frame initial value for rot_frame
  * @param ini_x initial value for x
  * @param ini_y initial value for y
  * @param ini_z initial value for z
@@ -947,19 +949,23 @@ KatanaInterface::ParkMessage::clone() const
  * @param ini_theta initial value for theta
  * @param ini_psi initial value for psi
  */
-KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoMessage")
+KatanaInterface::LinearGotoMessage::LinearGotoMessage(const char * ini_trans_frame, const char * ini_rot_frame, const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoMessage")
 {
   data_size = sizeof(LinearGotoMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->trans_frame, ini_trans_frame, 32);
+  strncpy(data->rot_frame, ini_rot_frame, 32);
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
   data->phi = ini_phi;
   data->theta = ini_theta;
   data->psi = ini_psi;
+  add_fieldinfo(IFT_STRING, "trans_frame", 32, data->trans_frame);
+  add_fieldinfo(IFT_STRING, "rot_frame", 32, data->rot_frame);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -975,6 +981,8 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMes
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "trans_frame", 32, data->trans_frame);
+  add_fieldinfo(IFT_STRING, "rot_frame", 32, data->rot_frame);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -1002,6 +1010,70 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const LinearGotoMessage *m
 }
 
 /* Methods */
+/** Get trans_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the translation
+ * @return trans_frame value
+ */
+char *
+KatanaInterface::LinearGotoMessage::trans_frame() const
+{
+  return data->trans_frame;
+}
+
+/** Get maximum length of trans_frame value.
+ * @return length of trans_frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_trans_frame() const
+{
+  return 32;
+}
+
+/** Set trans_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the translation
+ * @param new_trans_frame new trans_frame value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_trans_frame(const char * new_trans_frame)
+{
+  strncpy(data->trans_frame, new_trans_frame, sizeof(data->trans_frame));
+}
+
+/** Get rot_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the rotation. In most cases, this is the robot's base coordinate system.
+ * @return rot_frame value
+ */
+char *
+KatanaInterface::LinearGotoMessage::rot_frame() const
+{
+  return data->rot_frame;
+}
+
+/** Get maximum length of rot_frame value.
+ * @return length of rot_frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_rot_frame() const
+{
+  return 32;
+}
+
+/** Set rot_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the rotation. In most cases, this is the robot's base coordinate system.
+ * @param new_rot_frame new rot_frame value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_rot_frame(const char * new_rot_frame)
+{
+  strncpy(data->rot_frame, new_rot_frame, sizeof(data->rot_frame));
+}
+
 /** Get x value.
  * DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system.

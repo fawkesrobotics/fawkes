@@ -37,9 +37,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-#ifdef HAVE_TF
-#  include <aspect/tf.h>
-#endif
+#include <aspect/tf.h>
 #ifdef HAVE_OPENRAVE
 #  include <plugins/openrave/aspect/openrave.h>
 #endif
@@ -71,9 +69,7 @@ class KatanaActThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-#ifdef HAVE_TF
   public fawkes::TransformAspect,
-#endif
 #ifdef HAVE_OPENRAVE
   public fawkes::OpenRaveAspect,
 #endif
@@ -123,17 +119,18 @@ class KatanaActThread
   float          __cfg_park_theta;
   float          __cfg_park_psi;
 
-  float          __cfg_offset_x;
-  float          __cfg_offset_y;
-  float          __cfg_offset_z;
   float          __cfg_distance_scale;
 
   float          __cfg_update_interval;
+
+  std::string    __cfg_frame_kni;
+  std::string    __cfg_frame_openrave;
 
   bool           __cfg_OR_enabled;
   bool           __cfg_OR_use_viewer;
   bool           __cfg_OR_auto_load_ik;
   std::string    __cfg_OR_robot_file;
+
 
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;

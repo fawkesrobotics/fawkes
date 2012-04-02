@@ -55,6 +55,7 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   virtual void finalize();
 
   void set_target(float x, float y, float z, float phi, float theta, float psi);
+  void set_target(float x, float y, float z, float quat_x, float quat_y, float quat_z, float quat_w);
   void set_target(const std::string& object_name, float rot_x);
 
   virtual void update_openrave_data();
@@ -77,11 +78,13 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   bool                  __cfg_use_viewer;
 
   bool                  __is_target_object;
+  bool                  __has_target_quaternion;
 
   fawkes::OpenRaveConnector*    _openrave;
 
   float __x, __y, __z;
   float __phi, __theta, __psi;
+  float __quat_x, __quat_y, __quat_z, __quat_w;
   unsigned int __poll_interval_usec;
 
 #endif //HAVE_OPENRAVE
