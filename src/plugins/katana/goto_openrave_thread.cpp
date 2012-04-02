@@ -215,10 +215,17 @@ KatanaGotoOpenRaveThread::finalize()
 void
 KatanaGotoOpenRaveThread::once()
 {
+#ifndef EARLY_PLANNING
   if( !plan_target() ) {
     _finished = true;
     return;
   }
+#else
+  if( _error_code != fawkes::KatanaInterface::ERROR_NONE ) {
+    _finished = true;
+    return;
+  }
+#endif
 
   // Get trajectories and move katana along them
   __target_traj = __OR_robot->get_trajectory_device();
@@ -279,9 +286,12 @@ KatanaGotoOpenRaveThread::once()
 bool
 KatanaGotoOpenRaveThread::plan_target()
 {
+  _error_code = fawkes::KatanaInterface::ERROR_NONE;
+
   // Fetch motor encoder values
   if( !update_motor_data() ) {
     _logger->log_warn("KatanaGotoThread", "Fetching current motor values failed");
+    _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
     return false;
   }
 

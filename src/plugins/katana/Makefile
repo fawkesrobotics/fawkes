@@ -44,7 +44,11 @@ else
 endif
 
 ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
-  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
+  # Set flag -DEARLY_PLANNING if you want the run the path-planning part outside of
+  # the motion-thread. This is a temporary solution until the source of yet unresolved error
+  # in Qt/Coin/OpenRAVE is found and fixed. This behaviour is NOT preferred, as the planning
+  # will then be executed in a non-continuous thread!
+  CFLAGS  += $(CFLAGS_LIBKNI) -DEARLY_PLANNING -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE),1)
