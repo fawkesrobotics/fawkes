@@ -51,7 +51,7 @@ ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
   CFLAGS  += $(CFLAGS_LIBKNI) -DEARLY_PLANNING -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
-  ifeq ($(HAVE_OPENRAVE),1)
+  ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_katana += fawkesopenrave fawkesopenraveaspect
     CFLAGS  += $(CFLAGS_OPENRAVE) -DHAVE_OPENRAVE
     LDFLAGS += $(LDFLAGS_OPENRAVE)
@@ -75,7 +75,7 @@ warning_kni:
 
 .PHONY: warning_openrave
 warning_openrave:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Katana Plugin$(TNORMAL) (OpenRAVE not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Katana Plugin$(TNORMAL) (openrave plugin not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
