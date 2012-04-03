@@ -79,7 +79,7 @@ void
 KatanaControllerKni::init()
 {
   try {
-    TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, __cfg_read_timeout, __cfg_write_timeout};
+    TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, (int)__cfg_read_timeout, (int)__cfg_write_timeout};
     __device.reset(new CCdlCOM(ccd, __cfg_device.c_str()));
 
     __protocol.reset(new CCplSerialCRC());
@@ -109,7 +109,7 @@ void
 KatanaControllerKni::set_max_velocity(unsigned int vel)
 {
   try {
-    __katana->setRobotVelocityLimit(vel);
+    __katana->setRobotVelocityLimit((int)vel);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
