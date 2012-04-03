@@ -286,8 +286,6 @@ KatanaGotoOpenRaveThread::once()
 bool
 KatanaGotoOpenRaveThread::plan_target()
 {
-  _error_code = fawkes::KatanaInterface::ERROR_NONE;
-
   // Fetch motor encoder values
   if( !update_motor_data() ) {
     _logger->log_warn("KatanaGotoThread", "Fetching current motor values failed");
@@ -358,6 +356,7 @@ KatanaGotoOpenRaveThread::plan_target()
     return false;
   }
 
+  _error_code = fawkes::KatanaInterface::ERROR_NONE;
   return true;
 }
 

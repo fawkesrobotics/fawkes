@@ -227,6 +227,7 @@ KatanaControllerOpenrave::move_to(std::vector<float> angles, bool blocking)
     __OR_manip->get_angles(v);
     EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     __robot->SetActiveDOFValues(v);
+    usleep(2000);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -255,6 +256,7 @@ KatanaControllerOpenrave::move_motor_to(unsigned short id, float angle, bool blo
     __OR_manip->get_angles(v);
     EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     __robot->SetActiveDOFValues(v);
+    usleep(2000);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -283,6 +285,7 @@ KatanaControllerOpenrave::move_motor_by(unsigned short id, float angle, bool blo
     __OR_manip->get_angles(v);
     EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     __robot->SetActiveDOFValues(v);
+    usleep(2000);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
