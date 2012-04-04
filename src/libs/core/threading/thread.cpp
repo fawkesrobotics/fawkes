@@ -947,9 +947,14 @@ Thread::run()
     test_cancel();
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
       if ( __barrier ) {
-	__barrier->wait();
 	__sleep_mutex->lock();
-	if (__pending_wakeups == 0)  __barrier = NULL;
+        Barrier *b = __barrier;
+        __barrier = NULL;
+	__sleep_mutex->unlock();
+
+	b->wait();
+
+	__sleep_mutex->lock();
       } else {
 	__sleep_mutex->lock();
       }
@@ -1007,8 +1012,9 @@ Thread::wakeup(Barrier *barrier)
   }
 
   MutexLocker lock(__sleep_mutex);
-  if ( ! __waiting_for_wakeup && __barrier && (__barrier != barrier)) {
-    throw Exception("Thread %s already running with other barrier, cannot wakeup", __name);
+  if ( ! __waiting_for_wakeup && __barrier) {
+    throw Exception("Thread %s already running with barrier, cannot wakeup %i  %p", __name,
+                    __waiting_for_wakeup, __barrier);
   }
 
   __pending_wakeups += 1;

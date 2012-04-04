@@ -88,7 +88,7 @@ class InterruptibleBarrierData
  * @param count the number of threads to wait for
  */
 InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
-  : Barrier()
+  : Barrier(count)
 {
   _count = count;
   if ( _count == 0 ) {
@@ -112,7 +112,7 @@ InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
  * @param count the number of threads to wait for
  */
 InterruptibleBarrier::InterruptibleBarrier(Mutex *mutex, unsigned int count)
-  : Barrier()
+  : Barrier(count)
 {
   _count = count;
   if ( _count == 0 ) {
@@ -246,7 +246,7 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
 
   if ( __data->threads_left == 0 ) {
     // first to come
-    __timeout = __interrupted = false;
+    __timeout = __interrupted = __wait_at_barrier = false;
     __data->threads_left = _count;
     __passed_threads->clear();
   } else {
@@ -256,6 +256,7 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
       return true;
     }
   }
+
   --__data->threads_left;
   try {
     __passed_threads->push_back_locked(Thread::current_thread());
@@ -266,10 +267,13 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   }
 
   bool local_timeout = false;
+  bool waker = (__data->threads_left == 0);
+
   while ( __data->threads_left && !__interrupted && !__timeout && ! local_timeout) {
     local_timeout = ! __data->waitcond->reltimed_wait(timeout_sec, timeout_nanosec);
   }
-  if (local_timeout) __timeout = true;
+  if (local_timeout)  __timeout = true;
+
   if ( __interrupted ) {
     if (likely(__data->own_mutex))  __data->mutex->unlock();
     throw InterruptedException("InterruptibleBarrier forcefully interrupted, only "
@@ -277,8 +281,16 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
 			       _count - __data->threads_left, _count);
   }
 
-  __data->waitcond->wake_all();
+  if (waker || local_timeout) {
+    __wait_at_barrier = waker;
+    __data->waitcond->wake_all();
+  }
+
   if (likely(__data->own_mutex))  __data->mutex->unlock();
+
+  if (__wait_at_barrier) {
+    Barrier::wait();
+  }
 
   return ! __timeout;
 }

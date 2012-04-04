@@ -206,12 +206,26 @@ ThreadList::wakeup(Barrier *barrier)
 void
 ThreadList::wakeup_unlocked(Barrier *barrier)
 {
+  Exception *exc = NULL;
   unsigned int count = 1;
   for (iterator i = begin(); i != end(); ++i) {
     if ( ! (*i)->flagged_bad() ) {
-      (*i)->wakeup(barrier);
+      try {
+        (*i)->wakeup(barrier);
+      } catch (Exception &e) {
+        if (! exc) {
+          exc = new Exception(e);
+        } else {
+          exc->append(e);
+        }
+      }
       ++count;
     }
+  }
+  if (exc) {
+    Exception te(*exc);
+    delete exc;
+    throw te;
   }
   if (count != barrier->count()) {
     throw Exception("ThreadList(%s)::wakeup(): barrier has count (%u) different "

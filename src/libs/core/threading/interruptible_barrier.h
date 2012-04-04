@@ -62,6 +62,7 @@ class InterruptibleBarrier : public Barrier
 
   bool __interrupted;
   bool __timeout;
+  bool __wait_at_barrier;
 };
 
 
