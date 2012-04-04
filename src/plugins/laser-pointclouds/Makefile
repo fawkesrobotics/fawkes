@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
 
-LIBS_laser_pointclouds = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_laser_pointclouds = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 			 fawkesinterface Laser360Interface Laser720Interface \
 
 OBJS_laser_pointclouds = laser_pointcloud_plugin.o laser_pointcloud_thread.o
