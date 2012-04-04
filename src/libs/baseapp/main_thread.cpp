@@ -23,14 +23,11 @@
 
 #include <baseapp/main_thread.h>
 
-#include <baseapp/thread_manager.h>
-
 #include <core/threading/interruptible_barrier.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <core/version.h>
 #include <config/sqlite.h>
-#include <logging/multi.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
 #include <netcomm/fawkes/network_manager.h>
@@ -310,25 +307,16 @@ FawkesMainThread::loop()
 	__multi_logger->log_warn("FawkesMainThread", e);
       }
     } else {
-
-      CancelState old_state;
-      set_cancel_state(CANCEL_DISABLED, &old_state);
-      try {
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE, __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE, __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
-	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
-      } catch (Exception &e) {
-	if (__enable_looptime_warnings) {
-	  __multi_logger->log_error("FawkesMainThread", e);
-	}
-      }
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE, __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE, __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec);
+      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec);
     }
     __mainloop_mutex->unlock();
     set_cancel_state(old_state);
@@ -338,7 +326,7 @@ FawkesMainThread::loop()
     __thread_manager->try_recover(__recovered_threads);
     if ( ! __recovered_threads.empty() ) {
       // threads have been recovered!
-      __multi_logger->log_error(name(), "Threads recovered %zu", __recovered_threads.size());
+      //__multi_logger->log_error(name(), "Threads recovered %zu", __recovered_threads.size());
       if(__enable_looptime_warnings) {
 	if ( __recovered_threads.size() == 1 ) {
 	  __multi_logger->log_warn("FawkesMainThread", "The thread %s could be "

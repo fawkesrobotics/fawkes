@@ -24,9 +24,12 @@
 #ifndef __LIBS_BASEAPP_MAIN_THREAD_H_
 #define __LIBS_BASEAPP_MAIN_THREAD_H_
 
+#include <baseapp/thread_manager.h>
 #include <core/threading/thread.h>
 #include <aspect/mainloop/employer.h>
+#include <aspect/blocked_timing.h>
 #include <utils/system/signal.h>
+#include <logging/multi.h>
 
 #include <list>
 #include <string>
@@ -39,7 +42,6 @@ namespace fawkes {
 class Configuration;
 class SQLiteConfiguration;
 class ConfigNetworkHandler;
-class MultiLogger;
 class NetworkLogger;
 class Clock;
 class TimeWait;
@@ -95,6 +97,22 @@ class FawkesMainThread
 
  private:
   void destruct();
+
+  inline void safe_wake(BlockedTimingAspect::WakeupHook hook, unsigned int timeout_usec)
+  {
+    try {
+      __thread_manager->wakeup_and_wait(hook, timeout_usec);
+    } catch (Exception &e) {
+      if (__enable_looptime_warnings) {
+        //__multi_logger->log_error("FawkesMainThread",
+        //                          "Error while processing hook %s, exception follows",
+        //                          BlockedTimingAspect::blocked_timing_hook_to_string(hook));
+        __multi_logger->log_error("FawkesMainThread", e);
+      }
+
+    }
+  }
+
 
   Configuration        *__config;
   MultiLogger          *__multi_logger;

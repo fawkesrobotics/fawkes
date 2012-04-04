@@ -506,7 +506,7 @@ ThreadManager::force_remove(fawkes::Thread *thread)
 
 void
 ThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
-				     unsigned int timeout_usec)
+                               unsigned int timeout_usec)
 {
   MutexLocker lock(__threads.mutex());
 
