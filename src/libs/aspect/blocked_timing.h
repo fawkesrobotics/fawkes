@@ -57,6 +57,8 @@ class BlockedTimingAspect : public virtual Aspect
   BlockedTimingAspect(WakeupHook wakeup_hook);
   virtual ~BlockedTimingAspect();
 
+  static const char *  blocked_timing_hook_to_string(WakeupHook hook);
+
   WakeupHook blockedTimingAspectHook() const;
 
  private:

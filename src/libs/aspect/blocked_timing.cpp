@@ -23,6 +23,7 @@
 
 #include <aspect/blocked_timing.h>
 #include <core/threading/thread.h>
+#include <core/exception.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -72,6 +73,29 @@ BlockedTimingAspect::WakeupHook
 BlockedTimingAspect::blockedTimingAspectHook() const
 {
   return __wakeup_hook;
+}
+
+
+/** Get string for wakeup hook.
+ * @param hook wakeup hook to get string for
+ * @return string representation of hook
+ */
+const char *
+BlockedTimingAspect::blocked_timing_hook_to_string(WakeupHook hook)
+{
+  switch (hook) {
+  case WAKEUP_HOOK_PRE_LOOP:       return "WAKEUP_HOOK_PRE_LOOP";
+  case WAKEUP_HOOK_SENSOR_ACQUIRE: return "WAKEUP_HOOK_SENSOR_ACQUIRE";
+  case WAKEUP_HOOK_SENSOR_PREPARE: return "WAKEUP_HOOK_SENSOR_PREPARE";
+  case WAKEUP_HOOK_SENSOR_PROCESS: return "WAKEUP_HOOK_SENSOR_PROCESS";
+  case WAKEUP_HOOK_WORLDSTATE:     return "WAKEUP_HOOK_WORLDSTATE";
+  case WAKEUP_HOOK_THINK:          return "WAKEUP_HOOK_THINK";
+  case WAKEUP_HOOK_SKILL:          return "WAKEUP_HOOK_SKILL";
+  case WAKEUP_HOOK_ACT:            return "WAKEUP_HOOK_ACT";
+  case WAKEUP_HOOK_ACT_EXEC:       return "WAKEUP_HOOK_ACT_EXEC";
+  case WAKEUP_HOOK_POST_LOOP:      return "WAKEUP_HOOK_POST_LOOP";
+  default: throw Exception("Unknown blocked timing wakeup hook");
+  }
 }
 
 } // end namespace fawkes
