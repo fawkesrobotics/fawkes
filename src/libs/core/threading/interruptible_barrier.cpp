@@ -126,6 +126,53 @@ InterruptibleBarrier::InterruptibleBarrier(Mutex *mutex, unsigned int count)
   __timeout     = false;
 }
 
+/** Invalid constructor.
+ * This will throw an exception if called as it is illegal to copy
+ * a barrier.
+ * @param barrier to copy
+ */
+InterruptibleBarrier::InterruptibleBarrier(const InterruptibleBarrier &b)
+  : Barrier()
+{
+  throw Exception("Barriers cannot be copied");
+}
+
+
+/** Invalid constructor.
+ * This will throw an exception if called as it is illegal to copy
+ * a barrier.
+ * @param barrier to copy
+ */
+InterruptibleBarrier::InterruptibleBarrier(const InterruptibleBarrier *b)
+  : Barrier()
+{
+  throw Exception("Barriers cannot be copied");
+}
+
+
+/** Invalid assignment operator.
+ * This will throw an exception if called as it is illegal to assign
+ * a barrier.
+ * @param barrier to copy
+ */
+InterruptibleBarrier &
+InterruptibleBarrier::operator=(const InterruptibleBarrier &b)
+{
+  throw Exception("Barriers cannot be assigned");
+}
+
+/** Invalid assignment operator.
+ * This will throw an exception if called as it is illegal to assign
+ * a barrier.
+ * @param barrier to copy
+ */
+InterruptibleBarrier &
+InterruptibleBarrier::operator=(const InterruptibleBarrier *b)
+{
+  throw Exception("Barriers cannot be assigned");
+}
+
+
 /** Destructor */
 InterruptibleBarrier::~InterruptibleBarrier()
 {

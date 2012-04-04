@@ -51,6 +51,12 @@ class InterruptibleBarrier : public Barrier
   RefPtr<ThreadList>  passed_threads();
 
  private:
+  InterruptibleBarrier(const InterruptibleBarrier &b);
+  InterruptibleBarrier(const InterruptibleBarrier *b);
+  InterruptibleBarrier &  operator=(const InterruptibleBarrier &b);
+  InterruptibleBarrier &  operator=(const InterruptibleBarrier *b);
+
+ private:
   InterruptibleBarrierData *__data;
   RefPtr<ThreadList>        __passed_threads;
 
