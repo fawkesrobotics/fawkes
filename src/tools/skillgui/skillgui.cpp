@@ -45,6 +45,8 @@
 using namespace fawkes;
 
 #define ACTIVE_SKILL "Active Skill"
+#define SKILL_DOT "Skills dot graph"
+#define SKILL_SEP_LINE "----------------"
 
 /** @class SkillGuiGtkWindow "skillgui.h"
  * Skill GUI main window.
@@ -104,7 +106,7 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 
   builder->get_widget_derived("img_throbber", __throbber);
   builder->get_widget_derived("trv_plugins",  __trv_plugins);
-  
+
   Gtk::SeparatorToolItem *spacesep;
   builder->get_widget("tb_spacesep", spacesep);
   spacesep->set_expand();
@@ -225,7 +227,7 @@ SkillGuiGtkWindow::on_config_changed()
   __sks_list->clear();
   for (Gnome::Conf::SListHandle_ValueString::const_iterator i = l.begin(); i != l.end(); ++i) {
     Gtk::TreeModel::Row row  = *__sks_list->append();
-    row[__sks_record.skillstring] = *i;    
+    row[__sks_record.skillstring] = *i;
   }
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -246,8 +248,10 @@ void
 SkillGuiGtkWindow::on_skill_changed()
 {
   Glib::ustring skill = cb_graphlist->get_active_text();
-  if ( skill == ACTIVE_SKILL ) {
+  if ( skill == ACTIVE_SKILL || skill == SKILL_SEP_LINE ) {
     skill = "ACTIVE";
+  } else if( skill == SKILL_DOT ) {
+    skill = "SKILL_DEP";
   }
   SkillerDebugInterface::SetGraphMessage *sgm = new SkillerDebugInterface::SetGraphMessage(skill.c_str());
   __skdbg_if->msgq_enqueue(sgm);
@@ -270,7 +274,7 @@ SkillGuiGtkWindow::on_connection_clicked()
     ssd.run_and_connect();
   } else {
     connection_dispatcher.get_client()->disconnect();
-  } 
+  }
 }
 
 
@@ -469,7 +473,7 @@ SkillGuiGtkWindow::on_exec_clicked()
       if (ok) {
 	Gtk::TreeModel::Row row  = *__sks_list->prepend();
 	row[__sks_record.skillstring] = sks;
-	
+
 	std::list<Glib::ustring> l;
 	for (Gtk::TreeIter i = children.begin(); i != children.end(); ++i) {
 	  Gtk::TreeModel::Row row = *i;
@@ -568,9 +572,13 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 #if GTK_VERSION_GE(3,0)
 	cb_graphlist->remove_all();
 	cb_graphlist->append(ACTIVE_SKILL);
+	cb_graphlist->append(SKILL_DOT);
+	cb_graphlist->append(SKILL_SEP_LINE);
 #else
 	cb_graphlist->clear_items();
 	cb_graphlist->append_text(ACTIVE_SKILL);
+	cb_graphlist->append_text(SKILL_DOT);
+	cb_graphlist->append_text(SKILL_SEP_LINE);
 #endif
 	cb_graphlist->set_active_text(ACTIVE_SKILL);
 #if GTK_VERSION_GE(2,14)
