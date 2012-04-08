@@ -31,6 +31,7 @@
 #include <core/exceptions/software.h>
 
 #include <openrave-core.h>
+#include <openrave/planningutils.h>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 
@@ -318,27 +319,22 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   } //unlock environment
 
   // read returned trajectory
-  boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
-  if( !traj->Read(cmdout, robot->get_robot_ptr()) ) {
+  TrajectoryBasePtr traj = RaveCreateTrajectory(__env, "");
+  traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
+  if( !traj->deserialize(cmdout) ) {
     {throw fawkes::Exception("OpenRAVE Environment: Planner: Cannot read trajectory data.");}
   }
 
-  // re-timing the trajectory with cubic interpolation
-  traj->CalcTrajTiming(robot->get_robot_ptr(),TrajectoryBase::CUBIC,true,true);
+  // re-timing the trajectory
+  planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
 
-  // sampling trajectory
-  std::vector<TrajectoryBase::TPOINT> points;
-  for(dReal time = 0; time <= traj->GetTotalDuration(); time += (dReal)sampling) {
-    TrajectoryBase::TPOINT point;
-    traj->SampleTrajectory(time,point);
-    points.push_back(point);
-  }
-
-  // setting robots trajectory
+  // sampling trajectory and setting robots trajectory
   std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
   trajRobot->clear();
-  for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
-    trajRobot->push_back((*it).q);
+  for(dReal time = 0; time <= traj->GetDuration(); time += (dReal)sampling) {
+    std::vector<dReal> point;
+    traj->Sample(point,time);
+    trajRobot->push_back(point);
   }
 
   // viewer options
@@ -349,18 +345,15 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
     {
       RobotBasePtr tmp_robot = robot->get_robot_ptr();
       RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
-        for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
-          tmp_robot->SetActiveDOFValues((*it).q);
+        for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
+          tmp_robot->SetActiveDOFValues((*it));
           __graph_handle.push_back(__env->plot3(RaveVector<float>(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans), 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
 
     // display motion in viewer
     if( robot->display_planned_movements()) {
-      if (robot->get_robot_ptr()->GetActiveDOF() == traj->GetDOF())
-        robot->get_robot_ptr()->SetActiveMotion(traj);
-      else
-        robot->get_robot_ptr()->SetMotion(traj);
+      robot->get_robot_ptr()->GetController()->SetPath(traj);
     }
   }
 
@@ -376,12 +369,13 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
  * @param robot pointer to OpenRaveRobot object of robot to use
  */
 void
-OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot)
+OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot, float sampling)
 {
   std::string filename = SRCDIR"/python/graspplanning.py";
   std::string funcname = "runGrasp";
 
-  boost::shared_ptr<Trajectory> traj(RaveCreateTrajectory(__env, robot->get_robot_ptr()->GetActiveDOF()));
+  TrajectoryBasePtr traj = RaveCreateTrajectory(__env, "");
+  traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
 
   FILE* py_file = fopen(filename.c_str(), "r");
   if (py_file == NULL)
@@ -444,7 +438,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
         }
         std::stringstream resval;
         resval << PyString_AsString(py_value);
-        if (!traj->Read(resval, robot->get_robot_ptr()) ) {
+        if (!traj->deserialize(resval) ) {
           Py_DECREF(py_value);
           Py_DECREF(py_func);
           Py_Finalize();
@@ -480,16 +474,16 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
   if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Graspplanning: path planned");}
 
-  // re-timing the trajectory with cubic interpolation
-  traj->CalcTrajTiming(robot->get_robot_ptr(),TrajectoryBase::CUBIC,true,true);
+  // re-timing the trajectory with
+  planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
 
-  // setting robots trajectory
-  std::vector<TrajectoryBase::TPOINT> points = traj->GetPoints();
+  // sampling trajectory and setting robots trajectory
   std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
   trajRobot->clear();
-
-  for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
-    trajRobot->push_back((*it).q);
+  for(dReal time = 0; time <= traj->GetDuration(); time += (dReal)sampling) {
+    std::vector<dReal> point;
+    traj->Sample(point,time);
+    trajRobot->push_back(point);
   }
 
   // viewer options
@@ -500,18 +494,15 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
     {
       RobotBasePtr tmp_robot = robot->get_robot_ptr();
       RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
-        for(std::vector<TrajectoryBase::TPOINT>::iterator it = points.begin(); it!=points.end(); ++it) {
-          tmp_robot->SetActiveDOFValues((*it).q);
+        for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
+          tmp_robot->SetActiveDOFValues((*it));
           __graph_handle.push_back(__env->plot3(RaveVector<float>(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans), 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
 
     // display motion in viewer
     if( robot->display_planned_movements()) {
-      if (robot->get_robot_ptr()->GetActiveDOF() == traj->GetDOF())
-        robot->get_robot_ptr()->SetActiveMotion(traj);
-      else
-        robot->get_robot_ptr()->SetMotion(traj);
+      robot->get_robot_ptr()->GetController()->SetPath(traj);
     }
   }
 }

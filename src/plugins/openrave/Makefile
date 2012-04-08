@@ -37,7 +37,7 @@ ifneq ($(HAVE_OPENRAVE),1)
 endif
 
 ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
-  CFLAGS  += $(CFLAGS_OPENRAVE) $(CFLAGS_PYTHON) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
+  CFLAGS  += $(CFLAGS_OPENRAVE) $(CFLAGS_PYTHON)
   LDFLAGS += $(LDFLAGS_OPENRAVE) $(LDFLAGS_PYTHON)
   PLUGINS_all = $(PLUGINDIR)/openrave.so
   LIBS_all = $(LIBDIR)/libfawkesopenrave.so

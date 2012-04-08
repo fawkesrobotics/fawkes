@@ -58,7 +58,7 @@ class OpenRaveEnvironment
   virtual void start_viewer();
   virtual void load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterizationType iktype=OpenRAVE::IKP_Transform6D);
   virtual void run_planner(OpenRaveRobot* robot, float sampling=0.01f);
-  virtual void run_graspplanning(const std::string& target_name, OpenRaveRobot* robot);
+  virtual void run_graspplanning(const std::string& target_name, OpenRaveRobot* robot, float sampling=0.01f);
 
   virtual void add_robot(const std::string& filename);
   virtual void add_robot(OpenRAVE::RobotBasePtr robot);

@@ -48,7 +48,7 @@ ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
   # the motion-thread. This is a temporary solution until the source of yet unresolved error
   # in Qt/Coin/OpenRAVE is found and fixed. This behaviour is NOT preferred, as the planning
   # will then be executed in a non-continuous thread!
-  CFLAGS  += $(CFLAGS_LIBKNI) -DEARLY_PLANNING -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
+  CFLAGS  += $(CFLAGS_LIBKNI) -DEARLY_PLANNING
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
