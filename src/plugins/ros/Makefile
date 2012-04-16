@@ -2,7 +2,7 @@
 #               Makefile Build System for Fawkes: ROS Plugin
 #                            -------------------
 #   Created on Thu May 05 18:23:31 2011
-#   Copyright (C) 2006-2011 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2012 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -39,7 +39,12 @@ LIBS_ros_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect
 OBJS_ros_pcl = pcl_plugin.o pcl_thread.o pcl_adapter.o
 
-OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) $(OBJS_ros_pcl)
+LIBS_ros_images = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	          fawkesinterface fawkesrosaspect fvutils
+OBJS_ros_images = image_plugin.o image_thread.o
+
+OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
+	   $(OBJS_ros_pcl) $(OBJS_ros_images)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -78,7 +83,6 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     ifeq ($(HAVE_PCL),1)
-      export VTK_DIR=$(firstword $(wildcard /usr/lib64/vtk-* /usr/lib/vtk-*))
       CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS)
       CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
       CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread) $(CFLAGS)
@@ -87,9 +91,19 @@ ifeq ($(HAVE_ROS),1)
     else
       WARN_TARGETS += warning_pcl
     endif
+
+    ifeq ($(call ros-have-pkg,image_transport),1)
+      CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
+      CFLAGS_image_plugin = $(CFLAGS_image_thread)
+      LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
+      PLUGINS_all += $(PLUGINDIR)/ros-images.so
+    else
+      WARN_TARGETS += warning_images
+    endif
   else
-    WARN_TARGETS += warning_rospcl
+    WARN_TARGETS += warning_rospcl warning_images
   endif
+
 else
   WARN_TARGETS += warning_ros
 endif
@@ -110,6 +124,8 @@ warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (pcl[-devel] not installed)"
 warning_rospcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (ROS package pcl not found)"
+warning_images:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (ROS package image_transport not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
