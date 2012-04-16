@@ -53,8 +53,16 @@ ifneq ($(PKGCONFIG),)
   HAVE_SDL = $(if $(shell $(PKGCONFIG) --exists 'sdl'; echo $${?/1/}),1,0)
   HAVE_LIBPNG = $(if $(shell $(PKGCONFIG) --exists 'libpng'; echo $${?/1/}),1,0)
   HAVE_LIBV4L2 = $(if $(shell $(PKGCONFIG) --exists 'libv4l2'; echo $${?/1/}),1,0)
-  HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
   HAVE_LIBUSB = $(if $(shell $(PKGCONFIG) --exists 'libusb'; echo $${?/1/}),1,0)
+  HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
+  ifneq ($(HAVE_OPENCV),1)
+    # Give it another shot, name might contain version
+    _OPENCV_ALTERNATE_NAME=$(shell $(PKGCONFIG) pkg-config --list-all | grep 'opencv' | awk '{ print $$1 }')
+    ifneq ($(_OPENCV_ALTERNATE_NAME),)
+      OPENCV_VERSION_SUFFIX=$(patsubst opencv%,%,$(_OPENCV_ALTERNATE_NAME))
+      HAVE_OPENCV=1
+    endif
+  endif
 endif
 ifeq ($(HAVE_LIBDC1394),1)
   HAVE_FIREWIRE_CAM   = 1
@@ -82,11 +90,11 @@ endif
 ifeq ($(HAVE_OPENCV),1)
   # Specify LDFLAGS manually, too many libs depending on old Gtk atm
   # (filter-out -lhighgui -lcvaux,(shell $(PKGCONFIG) --libs 'opencv'))
-  VERSION_OPENCV          = $(shell $(PKGCONFIG) --modversion 'opencv')
+  VERSION_OPENCV          = $(shell $(PKGCONFIG) --modversion 'opencv$(OPENCV_VERSION_SUFFIX)')
   VERSION_SPLITTED_OPENCV = $(call split,.,$(VERSION_OPENCV))
   VERSION_MAJOR_OPENCV    = $(word 1,$(VERSION_SPLITTED_OPENCV))
   VERSION_MINOR_OPENCV    = $(word 2,$(VERSION_SPLITTED_OPENCV))
-  CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
+  CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv$(OPENCV_VERSION_SUFFIX)')
   ifeq ($(filter-out 2.0 2.1,$(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV)),)
     LDFLAGS_OPENCV     = -lcxcore
     LDFLAGS_OPENCV_GUI = -lhighgui
