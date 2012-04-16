@@ -18,6 +18,7 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDSYSDIR)/ros.mk
+include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
 
@@ -77,12 +78,22 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
 
       OBJS_tabletop_objects += visualization_thread_base.o visualization_thread.o
     else
+      ENABLE_VISUAL_DEBUGGING = 0
       WARN_TARGETS += warning_visualization_msgs
     endif
   else
+    ENABLE_VISUAL_DEBUGGING = 0
     WARN_TARGETS += warning_ros
   endif
 endif
+
+ifneq ($(ENABLE_VISUAL_DEBUGGING),1)
+  $(warning HAVE: $(call boost-have-lib,thread)  CFLAGS: $(call boost-lib-cflags,thread)  LDFLAGS: $(call boost-lib-ldflags,thread)")
+  CFLAGS  += $(call boost-lib-cflags,thread)
+  LDFLAGS += $(call boost-lib-ldflags,thread)
+endif
+
+
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
