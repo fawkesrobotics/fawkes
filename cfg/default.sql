@@ -22,6 +22,7 @@ INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/reading/laser','stri
 INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/reading/speechsynth','string','SpeechSynthInterface::Flite',NULL);
 INSERT INTO "config" VALUES('/firevision/fountain/tcp_port','unsigned int',2208,'Fountain TCP Port; TCP port');
 INSERT INTO "config" VALUES('/firevision/retriever_example/camera/cam0','string','file:file:file=../../RCSoft5/src/modules/robocup/firevision/images/office-ball-kabel-wirrwarr.raw',NULL);
+INSERT INTO "config" VALUES('/firevision/retriever_example/camera/cam0/frame','string','/camera_link','Camera coordinate frame ID');
 INSERT INTO "config" VALUES('/worldinfo/multicast_addr','string','224.16.0.1','Multicast address to send world info messages to.');
 INSERT INTO "config" VALUES('/worldinfo/udp_port','unsigned int','2806','UDP port to listen for and send world info messages to; UDP port');
 INSERT INTO "config" VALUES('/worldinfo/encryption_key','string','AllemaniACsX0rz','Default encryption key for world info.');
