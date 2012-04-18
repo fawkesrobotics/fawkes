@@ -27,6 +27,7 @@
 #include <plugins/openrave/aspect/openrave_inifin.h>
 
 #include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/aspect_provider.h>
@@ -39,6 +40,7 @@ namespace fawkes {
 
 class OpenRaveThread
 : public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::AspectProviderAspect,
@@ -70,6 +72,7 @@ class OpenRaveThread
   virtual bool delete_object(const std::string& name);
   virtual bool rename_object(const std::string& name, const std::string& new_name);
   virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, fawkes::OpenRaveRobot* robot=NULL);
+  virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w);
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
   virtual bool set_target_object(const std::string& name, fawkes::OpenRaveRobot* robot, float rot_x = 0);
 

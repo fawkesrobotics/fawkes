@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  qa_robot.cpp - QA for OpenRAVE Environment class
+ *  qa_modules.cpp - QA for OpenRAVE Environment class
  *
  *  Created: Thu Sep 16 14:50:34 2010
  *  Copyright  2010  Bahram Maleki-Fard, AllemaniACs RoboCup Team
@@ -24,14 +24,16 @@
 // Do not include in api reference
 ///@cond QA
 
+#include <openrave/openrave.h>
+
 #include <plugins/openrave/environment.h>
 #include <plugins/openrave/robot.h>
-#include <plugins/openrave/manipulators/katana6M180.h>
 #include <logging/console.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <list>
 
 using namespace fawkes;
 using namespace std;
@@ -58,57 +60,56 @@ main(int argc, char **argv)
 
   ConsoleLogger* cl = new ConsoleLogger();
 
-  OpenRaveManipulator* manip = new OpenRaveManipulatorKatana6M180(6, 5);
   OpenRaveRobot* robot = new OpenRaveRobot(cl);
   OpenRaveEnvironment* env = new OpenRaveEnvironment(cl);
 
+  vector<OpenRAVE::RobotBasePtr> robots;
+  list<OpenRAVE::ModuleBasePtr> modules;
+
+
+
   env->create();
+
+  env->get_env_ptr()->GetModules(modules);
+  env->get_env_ptr()->GetRobots(robots);
+  cl->log_debug("qa_modules", "Environment created");
+  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
+
+
+
 
   try {
     robot->load(robotFile, env);
   } catch (Exception &e) {
-    cl->log_error("qa_robot", "error:%s", e.what());
+    cl->log_error("qa_modules", "error:%s", e.what());
     return 0;
   }
 
-  // configure manip
-  manip->add_motor(0,0);
-  manip->add_motor(1,1);
-  manip->add_motor(2,2);
-  manip->add_motor(4,3);
-  manip->add_motor(5,4);
-  robot->set_manipulator(manip);
+  env->get_env_ptr()->GetModules(modules);
+  env->get_env_ptr()->GetRobots(robots);
+  cl->log_debug("qa_modules", "Robot loaded");
+  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
+
+
 
   env->add_robot(robot);
   robot->set_ready();
-  env->lock();
+
+  env->get_env_ptr()->GetModules(modules);
+  env->get_env_ptr()->GetRobots(robots);
+  cl->log_debug("qa_modules", "Robot initialized");
+  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
 
 
-  vector<float> val, v;
-  val.push_back(0.1);
-  val.push_back(0.2);
-  val.push_back(0.3);
-  val.push_back(0.4);
-  val.push_back(0.5);
 
-  manip->set_angles_device(val);
-  manip->get_angles(v);
-  printVector(v);
-  manip->get_angles_device(v);
-  printVector(v);
+  delete robot;
+
+  env->get_env_ptr()->GetModules(modules);
+  env->get_env_ptr()->GetRobots(robots);
+  cl->log_debug("qa_modules", "Robot Destroyed");
+  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
 
 
-  env->start_viewer();
-
-  //print angles taken from OpenRAVE Model (can be modified in GUI)
-  while(1) {
-    robot->update_manipulator();
-    manip->get_angles(v);
-    printVector(v);
-    manip->get_angles_device(v);
-    printVector(v);
-    usleep(1000*500);
-  }
 
 
   env->destroy();

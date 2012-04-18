@@ -29,19 +29,18 @@ OBJS_libfawkesopenrave = environment.o robot.o manipulator.o manipulators/katana
 
 OBJS_all    = $(OBJS_openrave) $(OBJS_libfawkesopenrave)
 
-ifeq ($(HAVE_PYTHON),1)
-  CFLAGS  += $(CFLAGS_PYTHON)
-  LDFLAGS += $(LDFLAGS_PYTHON)
-else
+ifneq ($(HAVE_PYTHON),1)
   WARN_TARGETS += warning_python
 endif
-ifeq ($(HAVE_OPENRAVE),1)
-  CFLAGS  += $(CFLAGS_OPENRAVE) -Wno-deprecated -Wno-deprecated-declarations -Wno-unused-but-set-variable
-  LDFLAGS += $(LDFLAGS_OPENRAVE)
+ifneq ($(HAVE_OPENRAVE),1)
+  WARN_TARGETS += warning_openrave
+endif
+
+ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
+  CFLAGS  += $(CFLAGS_OPENRAVE) $(CFLAGS_PYTHON)
+  LDFLAGS += $(LDFLAGS_OPENRAVE) $(LDFLAGS_PYTHON)
   PLUGINS_all = $(PLUGINDIR)/openrave.so
   LIBS_all = $(LIBDIR)/libfawkesopenrave.so
-else
-  WARN_TARGETS += warning_openrave
 endif
 
 $(PLUGINDIR)/openrave.$(SOEXT): | $(LIBDIR)/libfawkesopenrave.$(SOEXT)

@@ -24,7 +24,7 @@
 // Do not include in api reference
 ///@cond QA
 
-#include <openrave/manipulators/katana6M180.h>
+#include <plugins/openrave/manipulators/katana6M180.h>
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -35,7 +35,7 @@ using namespace std;
 void
 printVector(vector<float> v)
 {
-  printf("## size:%u \n", v.size());
+  printf("## size:%lu \n", v.size());
   for(unsigned int i=0; i<v.size(); i++)
   {
     printf("## %u:)%f \n", i, v[i]);
@@ -47,22 +47,22 @@ main(int argc, char **argv)
 {
   printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
-  OpenRAVEManipulator m(6, 5);
-  OpenRAVEManipulatorKatana6M180 k(6, 5);
+  OpenRaveManipulator m(6, 5);
+  OpenRaveManipulatorKatana6M180 k(6, 5);
   vector<float> v;
   vector<float> val;
 
-  m.addMotor(0,0);
-  m.addMotor(1,1);
-  m.addMotor(2,2);
-  m.addMotor(4,3);
-  m.addMotor(5,4);
+  m.add_motor(0,0);
+  m.add_motor(1,1);
+  m.add_motor(2,2);
+  m.add_motor(4,3);
+  m.add_motor(5,4);
 
-  k.addMotor(0,0);
-  k.addMotor(1,1);
-  k.addMotor(2,2);
-  k.addMotor(4,3);
-  k.addMotor(5,4);
+  k.add_motor(0,0);
+  k.add_motor(1,1);
+  k.add_motor(2,2);
+  k.add_motor(4,3);
+  k.add_motor(5,4);
 
   val.push_back(0.1);
   val.push_back(0.2);
@@ -71,39 +71,39 @@ main(int argc, char **argv)
   val.push_back(0.5);
 
   //set angles
-  m.setAnglesDevice(val);
-  k.setAnglesDevice(val);
+  m.set_angles_device(val);
+  k.set_angles_device(val);
 
   //print angles
-  m.getAngles(v);
+  m.get_angles(v);
   printVector(v);
 
-  m.getAnglesDevice(v);
+  m.get_angles_device(v);
   printVector(v);
 
-  k.getAngles(v);
+  k.get_angles(v);
   printVector(v);
 
-  k.getAnglesDevice(v);
+  k.get_angles_device(v);
   printVector(v);
 
 
   // test manipulator pointer. same as above, set angles, then print
-  OpenRAVEManipulator* p;
+  OpenRaveManipulator* p;
 
-  p = new OpenRAVEManipulatorKatana6M180(6, 5);
-  p->addMotor(0,0);
-  p->addMotor(1,1);
-  p->addMotor(2,2);
-  p->addMotor(4,3);
-  p->addMotor(5,4);
+  p = new OpenRaveManipulatorKatana6M180(6, 5);
+  p->add_motor(0,0);
+  p->add_motor(1,1);
+  p->add_motor(2,2);
+  p->add_motor(4,3);
+  p->add_motor(5,4);
 
-  p->setAnglesDevice(val);
+  p->set_angles_device(val);
 
-  p->getAngles(v);
+  p->get_angles(v);
   printVector(v);
 
-  p->getAnglesDevice(v);
+  p->get_angles_device(v);
   printVector(v);
 
 

@@ -25,7 +25,7 @@
 
 #include "types.h"
 
-#include <rave/rave.h>
+#include <openrave/openrave.h>
 #include <vector>
 
 namespace fawkes {
@@ -60,36 +60,46 @@ class OpenRaveRobot
   virtual bool release_object(const std::string& name, fawkes::OpenRaveEnvironment* env);
   virtual bool release_all_objects();
 
-  virtual bool set_target_quat	 (float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
+  virtual bool set_target_rel(float trans_x, float trans_y, float trans_z);
+  virtual bool set_target_straight(float trans_x, float trans_y, float trans_z);
+  virtual bool set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset = false);
   virtual bool set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset = false);
   virtual bool set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset = false);
+  virtual bool set_target_ikparam(OpenRAVE::IkParameterization ik_param);
   virtual void set_target_angles( std::vector<float>& angles ); // just temporary
 
   virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x);
 
-  virtual void get_target_angles(std::vector<OpenRAVE::dReal>& to); // not needed
   virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
+  virtual target_t get_target() const;
+  virtual OpenRaveManipulator* get_manipulator() const;
   virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
   virtual std::vector< std::vector<OpenRAVE::dReal> >* get_trajectory() const;
   virtual std::vector< std::vector<float> >* get_trajectory_device() const;
 
   virtual bool display_planned_movements() const;
+
+  virtual OpenRAVE::ModuleBasePtr get_basemanip() const;
+
  private:
   void init();
   bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset = false);
   bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset = false);
+  OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
 
   fawkes::Logger*	                __logger;
 
-  OpenRAVE::RobotBasePtr                __robot;
   std::string                           __name;
-  OpenRaveManipulator*	                __manip;
-  OpenRaveManipulator*	                __manip_goal;
+  OpenRAVE::RobotBasePtr                __robot;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
+  OpenRaveManipulator*	                __manip;
+  target_t                              __target;
+
+
+  OpenRAVE::ModuleBasePtr               __mod_basemanip;
 
   OpenRAVE::PlannerBase::PlannerParametersPtr   __planner_params;
-  std::vector< std::vector<OpenRAVE::dReal> >*            __traj;
-  std::vector<OpenRAVE::dReal>                            __angles_target;
+  std::vector< std::vector<OpenRAVE::dReal> >*  __traj;
 
   float         __trans_offset_x;
   float         __trans_offset_y;

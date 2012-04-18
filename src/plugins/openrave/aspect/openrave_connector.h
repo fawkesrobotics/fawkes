@@ -138,6 +138,16 @@ class OpenRaveConnector
   */
   virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot=NULL) = 0;
 
+  /** Rotate object by a quaternion.
+  * @param name name of the object
+  * @param quat_x x value of quaternion
+  * @param quat_y y value of quaternion
+  * @param quat_z z value of quaternion
+  * @param quat_w w value of quaternion
+  * @return true if successful
+  */
+  virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w) = 0;
+
   /** Rotate object along its axis.
   * Rotation angles should be given in radians.
   * @param name name of the object

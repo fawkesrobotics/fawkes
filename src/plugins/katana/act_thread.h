@@ -37,9 +37,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-#ifdef HAVE_TF
-#  include <aspect/tf.h>
-#endif
+#include <aspect/tf.h>
 #ifdef HAVE_OPENRAVE
 #  include <plugins/openrave/aspect/openrave.h>
 #endif
@@ -54,15 +52,8 @@
 namespace fawkes {
   class KatanaInterface;
   class Time;
+  class KatanaController;
 }
-
-// Classes from libkni (KNI)
-class CCdlCOM;
-class CCplSerialCRC;
-class CLMBase;
-class CKatBase;
-class CSctBase;
-class TMotInit;
 
 class KatanaActThread
 : public fawkes::Thread,
@@ -71,9 +62,7 @@ class KatanaActThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-#ifdef HAVE_TF
   public fawkes::TransformAspect,
-#endif
 #ifdef HAVE_OPENRAVE
   public fawkes::OpenRaveAspect,
 #endif
@@ -108,6 +97,7 @@ class KatanaActThread
  private:
   fawkes::KatanaInterface *__katana_if;
 
+  std::string    __cfg_controller;
   std::string    __cfg_device;
   std::string    __cfg_kni_conffile;
   bool           __cfg_auto_calibrate;
@@ -123,17 +113,18 @@ class KatanaActThread
   float          __cfg_park_theta;
   float          __cfg_park_psi;
 
-  float          __cfg_offset_x;
-  float          __cfg_offset_y;
-  float          __cfg_offset_z;
   float          __cfg_distance_scale;
 
   float          __cfg_update_interval;
+
+  std::string    __cfg_frame_kni;
+  std::string    __cfg_frame_openrave;
 
   bool           __cfg_OR_enabled;
   bool           __cfg_OR_use_viewer;
   bool           __cfg_OR_auto_load_ik;
   std::string    __cfg_OR_robot_file;
+
 
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
@@ -145,12 +136,8 @@ class KatanaActThread
   fawkes::RefPtr<KatanaGotoOpenRaveThread>     __goto_openrave_thread;
 #endif
 
-  fawkes::RefPtr<CLMBase>        __katana;
-  std::auto_ptr<CCdlCOM>         __device;
-  std::auto_ptr<CCplSerialCRC>   __protocol;
-  CKatBase                      *__katbase;
-  CSctBase                      *__sensor_ctrl;
-  std::vector<TMotInit>          __motor_init;
+  fawkes::RefPtr<fawkes::KatanaController>      __katana;
+
   fawkes::Time                  *__last_update;
 
 #ifdef USE_TIMETRACKER

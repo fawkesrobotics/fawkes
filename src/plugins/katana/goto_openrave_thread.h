@@ -34,7 +34,7 @@
 #ifdef HAVE_OPENRAVE
 namespace fawkes {
   class OpenRaveRobot;
-  class OpenRaveManipulatorKatana6M180;
+  class OpenRaveManipulator;
 }
 #endif
 
@@ -44,7 +44,7 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
 #ifdef HAVE_OPENRAVE
 
  public:
-  KatanaGotoOpenRaveThread(fawkes::RefPtr<CLMBase> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
+  KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
 		   unsigned int poll_interval_ms,
                    std::string robot_file,
                    bool autoload_IK,
@@ -55,15 +55,19 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   virtual void finalize();
 
   void set_target(float x, float y, float z, float phi, float theta, float psi);
+  void set_target(float x, float y, float z, float quat_x, float quat_y, float quat_z, float quat_w);
   void set_target(const std::string& object_name, float rot_x);
+  void set_theta_error(float error);
+  void set_move_straight(bool move_straight);
 
+  virtual bool plan_target();
   virtual void update_openrave_data();
   virtual bool update_motor_data();
   virtual bool move_katana();
 
  private:
-  fawkes::OpenRaveRobot*                        __OR_robot;
-  fawkes::OpenRaveManipulatorKatana6M180*       __OR_manip;
+  fawkes::OpenRaveRobot*        __OR_robot;
+  fawkes::OpenRaveManipulator*  __OR_manip;
 
   std::string                                   __target_object;
   std::vector< std::vector<float> >*            __target_traj;
@@ -77,11 +81,14 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   bool                  __cfg_use_viewer;
 
   bool                  __is_target_object;
+  bool                  __has_target_quaternion;
+  bool                  __move_straight;
 
   fawkes::OpenRaveConnector*    _openrave;
 
   float __x, __y, __z;
-  float __phi, __theta, __psi;
+  float __phi, __theta, __psi, __theta_error;
+  float __quat_x, __quat_y, __quat_z, __quat_w;
   unsigned int __poll_interval_usec;
 
 #endif //HAVE_OPENRAVE

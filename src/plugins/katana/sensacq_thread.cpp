@@ -21,9 +21,9 @@
  */
 
 #include "sensacq_thread.h"
+#include "controller.h"
 
 #include <cstdlib>
-#include <kniBase.h>
 
 using namespace fawkes;
 
@@ -36,18 +36,16 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param katana katana linear motion base class
+ * @param katana katana controller base class
  * @param logger logger
  */
-KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(fawkes::RefPtr<CLMBase> katana,
+KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(fawkes::RefPtr<fawkes::KatanaController> katana,
 							     fawkes::Logger *logger)
   : Thread("KatanaSensorAcqusitionThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   __katana  = katana;
   __logger  = logger;
   __enabled = false;
-
-  __sensor_ctrl = &__katana->GetBase()->GetSCT()->arr[0];
 }
 
 
@@ -72,11 +70,9 @@ KatanaSensorAcquisitionThread::loop()
 {
   if (__enabled) {
     try {
-      __sensor_ctrl->recvDAT();
-    } catch (/*KNI*/::ParameterReadingException &e) {
-      __logger->log_warn(name(), "Failed to read parameters: %s", e.what());
-    } catch (/*KNI*/::Exception &e) {
-      __logger->log_warn(name(), "Updating sensor values failed: %s", e.what());
+      __katana->read_sensor_data();
+    } catch (Exception &e) {
+      __logger->log_warn(name(), e.what());
     }
   }
 }

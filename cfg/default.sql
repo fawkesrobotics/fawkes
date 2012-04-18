@@ -136,6 +136,7 @@ INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/active','bool','0',
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/device','string','/dev/ttyUSB1','Device file for EviD100P PTU');
 INSERT INTO "config" VALUES('/hardware/pantilt/ptus/EviD100P/read_timeout_ms','unsigned int',50,'Read timeout for EviD100P PTU');
 INSERT INTO "config" VALUES('/hardware/joystick/device_file','string','/dev/input/js0','Joystick device file');
+INSERT INTO "config" VALUES('/hardware/katana/controller','string','kni','Controller for the katana arm. Needs to be one of these values: "kni", "openrave".');
 INSERT INTO "config" VALUES('/hardware/katana/device','string','/dev/ttyUSB0','Device file of serial port the arm is connected to; file path');
 INSERT INTO "config" VALUES('/hardware/katana/auto_calibrate','bool','1','Automatically calibrate on startup?');
 INSERT INTO "config" VALUES('/hardware/katana/kni_conffile','string','/etc/kni3/hd300/katana6M180.cfg','KNI configuration file; file path');
@@ -150,9 +151,6 @@ INSERT INTO "config" VALUES('/hardware/katana/park_z','float',442.759186,'Z posi
 INSERT INTO "config" VALUES('/hardware/katana/park_phi','float',1.809579,'Phi position for parking');
 INSERT INTO "config" VALUES('/hardware/katana/park_theta','float',0.357964,'Theta position for parking');
 INSERT INTO "config" VALUES('/hardware/katana/park_psi','float',-0.271071,'Psi position for parking');
-INSERT INTO "config" VALUES('/hardware/katana/offset_x','float',0.0,'x Offset of katana to fawkes coordinate system');
-INSERT INTO "config" VALUES('/hardware/katana/offset_y','float',0.0,'y Offset of katana to fawkes coordinate system');
-INSERT INTO "config" VALUES('/hardware/katana/offset_z','float',0.6665,'z Offset of katana to fawkes coordinate system');
 INSERT INTO "config" VALUES('/hardware/katana/distance_scale','float',0.001,'Scale from kni coordinate values to fawkes');
 INSERT INTO "config" VALUES('/hardware/katana/update_interval','float',0.5,'Interval to update the motor position data even if there is no act thread running, required for tf; sec');
 INSERT INTO "config" VALUES('/hardware/katana/openrave/enabled','bool','0','Use OpenRAVE support?');
@@ -246,6 +244,11 @@ INSERT INTO "config" VALUES('/plugins/openni/run_sensor_server','bool',1,'Should
 INSERT INTO "config" VALUES('/plugins/openni/sensor_server_bin','string','/usr/bin/XnSensorServer','Full path to the XnSensorServer binary; path');
 INSERT INTO "config" VALUES('/plugins/openni-image/debayering','string','bilinear','De-bayering mode, can be bilinear or nearest_neighbor');
 INSERT INTO "config" VALUES('/plugins/static-transforms/update-interval','float',1.0,'Interval in which to post static transform updates; sec');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/frame','string','/katana/base','Katana Arm to KNI base, parent frame ID');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/child_frame','string','/katana/kni','Katana Arm to KNI base, child frame ID');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/trans_x','float',0.0,'Katana Arm to KNI base, translation X');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/trans_y','float',0.0,'Katana Arm to KNI base, translation Y');
+INSERT INTO "config" VALUES('/plugins/static-transforms/transforms/katana_kni/trans_z','float',0.2015,'Katana Arm to KNI base, translation Z');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/depth_filter_min_x','float',0.0,'Minimum X value (i.e. distance to camera) to consider a point; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/depth_filter_max_x','float',3.0,'Maximum X value (i.e. distance to camera) to consider a point; m');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/voxel_leaf_size','float',0.02,'Leaf size for voxel grid downsampling; m');

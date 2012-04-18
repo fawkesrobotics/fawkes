@@ -15,11 +15,12 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/openrave/openrave.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
 	      fawkesinterface KatanaInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
@@ -31,34 +32,32 @@ endif
 ifeq ($(HAVE_LIBKNI),1)
   CFLAGS_LIBKNI  = -DHAVE_KNI $(shell $(PKGCONFIG) --cflags 'libkni3')
   LDFLAGS_LIBKNI = $(shell $(PKGCONFIG) --libs 'libkni3')
-endif
-ifneq ($(PKGCONFIG),)
-  HAVE_OPENRAVE := $(if $(or $(shell $(PKGCONFIG) --exists 'openrave'; echo $${?/1/}),\
-			     $(shell $(PKGCONFIG) --exists 'openrave-0.3'; echo $${?/1/})),1,0)
-endif
-ifeq ($(HAVE_OPENRAVE),1)
-  CFLAGS_OPENRAVE    = $(shell openrave-config --cflags-only-I) -DHAVE_OPENRAVE
-  LDFLAGS_OPENRAVE   = $(shell openrave-config --libs-core)
+else
+  WARN_TARGETS += warning_kni
 endif
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
+else
+  WARN_TARGETS += warning_tf
 endif
 
-ifeq ($(HAVE_LIBKNI),1)
-  CFLAGS  += $(CFLAGS_LIBKNI) -Wno-error
+ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
+  # Set flag -DEARLY_PLANNING if you want the run the path-planning part outside of
+  # the motion-thread. This is a temporary solution until the source of yet unresolved error
+  # in Qt/Coin/OpenRAVE is found and fixed. This behaviour is NOT preferred, as the planning
+  # will then be executed in a non-continuous thread!
+  CFLAGS  += $(CFLAGS_LIBKNI) -DEARLY_PLANNING
   LDFLAGS += $(LDFLAGS_LIBKNI)
   PLUGINS_all = $(PLUGINDIR)/katana.so
-  ifeq ($(HAVE_OPENRAVE),1)
+  ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_katana += fawkesopenrave fawkesopenraveaspect
-    CFLAGS  += $(CFLAGS_OPENRAVE)
+    CFLAGS  += $(CFLAGS_OPENRAVE) -DHAVE_OPENRAVE
     LDFLAGS += $(LDFLAGS_OPENRAVE)
   else
     WARN_TARGETS += warning_openrave
   endif
-else
-  WARN_TARGETS += warning_kni
 endif
 
 OBJS_all = $(OBJS_katana)
@@ -66,13 +65,17 @@ OBJS_all = $(OBJS_katana)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
+.PHONY: warning_tf
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (fawkestf not available)"
+
 .PHONY: warning_kni
 warning_kni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Katana Plugin$(TNORMAL) (KNI[-devel] not installed)"
 
 .PHONY: warning_openrave
 warning_openrave:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Katana Plugin$(TNORMAL) (OpenRAVE not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Katana Plugin$(TNORMAL) (openrave plugin not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

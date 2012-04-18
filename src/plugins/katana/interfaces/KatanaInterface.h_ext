@@ -171,6 +171,14 @@ class KatanaInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float theta_error; /**< Error range of theta rotation, gives more flexibility
+      for IK-solution searching. */
+      float offset_xy; /**< Offset to target. Distance in m (on the way to the target) */
+      bool straight; /**< Move in a straight line? */
+      char trans_frame[32]; /**< tf frame-id of origin's coordinate system,
+      regarding the translation */
+      char rot_frame[32]; /**< tf frame-id of origin's coordinate system,
+      regarding the rotation. In most cases, this is the robot's base coordinate system. */
       float x; /**< DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system. */
       float y; /**< DEPRECATED! Y-Coordinate for tool position
@@ -186,12 +194,27 @@ class KatanaInterface : public Interface
     LinearGotoMessage_data_t *data;
 
    public:
-    LinearGotoMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi);
+    LinearGotoMessage(const float ini_theta_error, const float ini_offset_xy, const bool ini_straight, const char * ini_trans_frame, const char * ini_rot_frame, const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi);
     LinearGotoMessage();
     ~LinearGotoMessage();
 
     LinearGotoMessage(const LinearGotoMessage *m);
     /* Methods */
+    float theta_error() const;
+    void set_theta_error(const float new_theta_error);
+    size_t maxlenof_theta_error() const;
+    float offset_xy() const;
+    void set_offset_xy(const float new_offset_xy);
+    size_t maxlenof_offset_xy() const;
+    bool is_straight() const;
+    void set_straight(const bool new_straight);
+    size_t maxlenof_straight() const;
+    char * trans_frame() const;
+    void set_trans_frame(const char * new_trans_frame);
+    size_t maxlenof_trans_frame() const;
+    char * rot_frame() const;
+    void set_rot_frame(const char * new_rot_frame);
+    size_t maxlenof_rot_frame() const;
     float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;

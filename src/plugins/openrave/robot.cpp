@@ -69,6 +69,16 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
 /** Destructor */
 OpenRaveRobot::~OpenRaveRobot()
 {
+  delete __target.manip;
+
+  //unload everything related to this robot from environment
+  try {
+    __robot->GetEnv()->Remove(__mod_basemanip);
+    __robot->GetEnv()->Remove(__robot);
+  } catch(const openrave_exception &e) {
+    if(__logger)
+      {__logger->log_warn("OpenRAVE Robot", "Could not unload robot properly from environment. Ex:%s", e.what());}
+  }
 }
 
 /** Inittialize object attributes */
@@ -128,6 +138,14 @@ OpenRaveRobot::set_ready()
     throw fawkes::Exception("OpenRAVE Robot: Could not create PlannerParameters. Ex:%s", e.what());
   }
 
+  // create and load BaseManipulation module
+  try {
+    __mod_basemanip = RaveCreateModule(__robot->GetEnv(), "basemanipulation");
+    __robot->GetEnv()->AddModule( __mod_basemanip, __robot->GetName());
+  } catch(const openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Robot: Cannot load BaseManipulation Module. Ex:%s", e.what());
+  }
+
   if(__logger)
     {__logger->log_debug("OpenRAVE Robot", "Robot ready.");}
 }
@@ -163,6 +181,7 @@ OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float devic
   __robot->SetActiveDOFValues(angles);
 
   // get model's current transition and compare
+  __arm = __robot->GetActiveManipulator();
   Transform trans = __arm->GetEndEffectorTransform();
   __trans_offset_x = trans.trans[0] - device_trans_x;
   __trans_offset_y = trans.trans[1] - device_trans_y;
@@ -171,7 +190,7 @@ OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float devic
 
 /** Set pointer to OpenRaveManipulator object.
  *  Make sure this is called AFTER all manipulator settings have
- *  been set (assures that __manip_goal has the same settings).
+ *  been set (assures that __target.manip has the same settings).
  * @param manip pointer to OpenRaveManipulator object
  * @param display_movements true, if movements should be displayed in viewer.
  *  Better be "false" if want to sync OpenRAVE models with device
@@ -180,7 +199,7 @@ void
 OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_movements)
 {
   __manip = manip;
-  __manip_goal = new OpenRaveManipulator(*__manip);
+  __target.manip = new OpenRaveManipulator(*__manip);
 
   __display_planned_movements = display_movements;
 }
@@ -211,6 +230,47 @@ bool
 OpenRaveRobot::display_planned_movements() const
 {
   return __display_planned_movements;
+}
+
+/** Set target, given relative transition.
+ * This is the prefered method to set a target for straight manipulator movement.
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
+{
+  __target.type = TARGET_RELATIVE;
+  __target.x = trans_x;
+  __target.y = trans_y;
+  __target.z = trans_z;
+
+  // Not sure how to check IK solvability yet. Would be nice to have this
+  // checked before planning a path.
+  __target.solvable = true;
+
+  return __target.solvable;
+}
+
+/** Set target for a straight movement, given transition.
+ * This is the a wrapper for "set_target_rel", to be able to call for a
+ * straight arm movement by giving non-relative transition.
+ * @param trans_x x-transition
+ * @param trans_y y-transition
+ * @param trans_z z-transition
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
+{
+  __arm = __robot->GetActiveManipulator();
+  Transform trans = __arm->GetEndEffectorTransform();
+
+  return set_target_rel( trans_x - trans.trans[0],
+                         trans_y - trans.trans[1],
+                         trans_z - trans.trans[2]);
 }
 
 /** Set target, given transition, and rotation as quaternion.
@@ -293,6 +353,8 @@ OpenRaveRobot::set_target_euler(euler_rotation_t type, float trans_x, float tran
         break;
 
     default :
+        __target.type = TARGET_NONE;
+        __target.solvable = false;
         return false;
   }
 
@@ -360,6 +422,28 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
   return foundIK;
 }
 
+/** Set target by giving IkParameterizaion of target.
+ * OpenRAVE::IkParameterization is the desired type to be calculated with
+ * by OpenRAVE. Each oter type (i.e. Transform) is implicitly transformed
+ * to an IkParameterization before continuing to check for Ik solution and
+ * planning, i.e. by the BaseManipulation module.
+ * @param ik_param the OpenRAVE::IkParameterization of the target
+ * @return true if solvable, false otherwise
+ */
+bool
+OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
+{
+  __arm = __robot->GetActiveManipulator();
+  std::vector<OpenRAVE::dReal> target_angles;
+
+  __target.ikparam = ik_param;
+  __target.type = TARGET_IKPARAM;
+  __target.solvable = __arm->FindIKSolution(ik_param,target_angles,true);
+  __target.manip->set_angles(target_angles);
+
+  return __target.solvable;
+}
+
 
 // just temporary! no IK check etc involved
 /** Set target angles directly.
@@ -368,7 +452,7 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
 void
 OpenRaveRobot::set_target_angles( std::vector<float>& angles )
 {
-  __manip_goal->set_angles(angles);
+  __target.manip->set_angles(angles);
 }
 
 
@@ -384,14 +468,22 @@ OpenRaveRobot::get_robot_ptr() const
   return __robot;
 }
 
-// not needed
-/** Get target angles.
- * @param to vector that should be filled with angles
+/** Get target.
+ * @return target struct
  */
-void
-OpenRaveRobot::get_target_angles(std::vector<OpenRAVE::dReal>& to)
+target_t
+OpenRaveRobot::get_target() const
 {
-  to = __angles_target;
+  return __target;
+}
+
+/** Get manipulator.
+ * @return pointer to currentl used OpenRaveManipulator
+ */
+OpenRaveManipulator*
+OpenRaveRobot::get_manipulator() const
+{
+  return __manip;
 }
 
 /** Updates planner parameters and return pointer to it
@@ -400,8 +492,8 @@ OpenRaveRobot::get_target_angles(std::vector<OpenRAVE::dReal>& to)
 OpenRAVE::PlannerBase::PlannerParametersPtr
 OpenRaveRobot::get_planner_params() const
 {
-  __manip_goal->get_angles(__planner_params->vgoalconfig);
   __manip->get_angles(__planner_params->vinitialconfig);
+  __target.manip->get_angles(__planner_params->vgoalconfig);
 
   __robot->SetActiveDOFValues(__planner_params->vinitialconfig);
 
@@ -409,7 +501,7 @@ OpenRaveRobot::get_planner_params() const
 }
 
 /** Return pointer to trajectory of motion from
- * __manip to __manip_goal with OpenRAVE-model angle format
+ * __manip to __target.manip with OpenRAVE-model angle format
  * @return pointer to trajectory
  */
 std::vector< std::vector<dReal> >*
@@ -419,7 +511,7 @@ OpenRaveRobot::get_trajectory() const
 }
 
 /** Return pointer to trajectory of motion from
- * __manip to __manip_goal with device angle format
+ * __manip to __target.manip with device angle format
  * @return pointer to trajectory
  */
 std::vector< std::vector<float> >*
@@ -437,6 +529,14 @@ OpenRaveRobot::get_trajectory_device() const
   return traj;
 }
 
+/** Return BaseManipulation Module-Pointer.
+ * @return ModuleBasePtr
+ */
+OpenRAVE::ModuleBasePtr
+OpenRaveRobot::get_basemanip() const
+{
+  return __mod_basemanip;
+}
 
 
 /* ###### attach / release kinbodys ###### */
@@ -527,7 +627,7 @@ OpenRaveRobot::release_all_objects()
 
 /** Set target, given transformation (transition, and rotation as quaternion).
  * Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __manip_goal
+ * then set target angles to manipulator configuration __target.manip
  * @param trans transformation vector
  * @param rotQuat rotation vector; a quaternion
  * @param no_offset if true, do not include manipulator offset (default: false)
@@ -546,10 +646,41 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
     target.trans[2] += __trans_offset_z;
   }
 
-  bool success = __arm->FindIKSolution(IkParameterization(target),__angles_target,true);
-  __manip_goal->set_angles(__angles_target);
+  __target.type = TARGET_TRANSFORM;
+  __target.x  = target.trans[0];
+  __target.y  = target.trans[1];
+  __target.z  = target.trans[2];
+  __target.qw = target.rot[0];
+  __target.qx = target.rot[1];
+  __target.qy = target.rot[2];
+  __target.qz = target.rot[3];
 
-  return success;
+  // check for supported IK types
+  __arm = __robot->GetActiveManipulator();
+  if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
+    __logger->log_debug("OR TMP", "6D suppport");
+    // arm supports 6D ik. Perfect!
+    std::vector<OpenRAVE::dReal> target_angles;
+
+    __target.ikparam = IkParameterization(target);
+    __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,true);
+    __target.manip->set_angles(target_angles);
+
+  } else if( __arm->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
+    __logger->log_debug("OR TMP", "5D suppport");
+    // arm has only 5 DOF.
+    std::vector<OpenRAVE::dReal> target_angles;
+
+    __target.ikparam = get_5dof_ikparam(target);
+    __target.solvable = set_target_ikparam(__target.ikparam);
+
+  } else {
+    __logger->log_debug("OR TMP", "No IK suppport");
+    //other IK types not supported yet
+    __target.solvable = false;
+  }
+
+  return __target.solvable;
 }
 
 /** Set target, given 3 consecutive axis rotations.
@@ -559,7 +690,7 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
  * See public setTargetEuler methods to get a better understanding.
  *
  * Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __manip_goal
+ * then set target angles to manipulator configuration __target.manip
  * @param rotations 3x3 matrix given as one row.
  * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
@@ -568,6 +699,9 @@ bool
 OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset)
 {
   if( rotations.size() != 9 ) {
+    __target.type = TARGET_NONE;
+    __target.solvable = false;
+
     if(__logger)
       {__logger->log_error("OpenRAVE Robot", "Bad size of rotations vector. Is %i, expected 9", rotations.size());}
     return false;
@@ -589,6 +723,58 @@ OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rot
   Vector quat = quatMultiply (q12, q3);
 
   return set_target_transform(trans, quat, no_offset);
+}
+
+/** Get IkParameterization for a 5DOF arm given a 6D Transform.
+ * @param trans The 6D OpenRAVE::Transform
+ * @return the calculated 5DOF IkParameterization
+ */
+OpenRAVE::IkParameterization
+OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
+{
+  /* The initial pose (that means NOT all joints=0, but the manipulator's coordinate-system
+     matching the world-coordinate-system) of an arm in OpenRAVE has its gripper pointing to the z-axis.
+     Imagine a tube between the grippers. That tube lies on the y-axis.
+     For 5DOF-IK one needs another manipulator definition, that has it's z-axis lying on that
+     'tube', i.e. it needs to be lying between the fingers. That is achieved by rotating the
+     coordinate-system first by +-90° around z-axis, then +90° on the rotated x-axis.
+  */
+
+  // get direction vector for TranslationDirection5D
+  /* Rotate Vector(0, +-1, 0) by target.rot. First need to figure out which of "+-"
+     Now if the first rotation on z-axis was +90°, we need a (0,-1,0) direction vector.
+     If it was -90°, we need (0, 1, 0). So just take the inverse of the first rotation
+     and apply it to (1,0,0)
+  */
+  Vector dir(1,0,0);
+  {
+    RobotBasePtr tmp_robot = __robot;
+    RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
+
+    //reset robot joints
+    std::vector<dReal> zero_joints(tmp_robot->GetActiveDOF(), (dReal)0.0);
+    tmp_robot->SetActiveDOFValues(zero_joints);
+
+    // revert the rotations for the 5DOF manipulator specifition. See long comment above.
+    // First rotate back -90° on x-axis (revert 2nd rotation)
+    Transform cur_pos = __arm->GetEndEffectorTransform();
+    Vector v1 = quatFromAxisAngle(Vector(-M_PI/2, 0, 0));
+    v1 = quatMultiply(cur_pos.rot, v1);
+
+    // Now get the inverse of 1st rotation and get our (0, +-1, 0) direction
+    v1 = quatInverse(v1);
+    TransformMatrix mat = matrixFromQuat(v1);
+    dir = mat.rotate(dir);
+  }  // robot state is restored
+
+  // now rotate direction by target
+  TransformMatrix mat = matrixFromQuat(trans.rot);
+  dir = mat.rotate(dir);
+
+  IkParameterization ikparam = __arm->GetIkParameterization(IKP_TranslationDirection5D);
+  ikparam.SetTranslationDirection5D(RAY(trans.trans, dir));
+
+  return ikparam;
 }
 
 } // end of namespace fawkes

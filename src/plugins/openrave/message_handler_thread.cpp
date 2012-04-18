@@ -118,6 +118,12 @@ OpenRaveMessageHandlerThread::loop()
         { __if_openrave->set_success(true); }
       __if_openrave->set_final(true);
 
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::RotateObjectQuatMessage>()) {
+      OpenRaveInterface::RotateObjectQuatMessage *msg = __if_openrave->msgq_first(msg);
+      if( __or_thread->rotate_object(msg->name(), msg->x(), msg->y(), msg->z(), msg->w()) )
+        { __if_openrave->set_success(true); }
+      __if_openrave->set_final(true);
+
     } else if (__if_openrave->msgq_first_is<OpenRaveInterface::RotateObjectMessage>()) {
       OpenRaveInterface::RotateObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->rotate_object(msg->name(), msg->x(), msg->y(), msg->z()) )

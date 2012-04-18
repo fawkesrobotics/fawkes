@@ -124,7 +124,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0xa7, 0xb5, 0x23, 0xee, 0x17, 0x10, 0xe9, 0x71, 0x7c, 0x85, 0x3b, 0x4d, 0xb, 0x9, 0x50, 0xaf};
+  unsigned char tmp_hash[] = {0x69, 0xac, 0x9f, 0x78, 0x6, 0xc, 0x38, 0x65, 0x84, 0xce, 0xc1, 0xc3, 0x61, 0xb5, 0xae, 0xdb};
   set_hash(tmp_hash);
 }
 
@@ -940,6 +940,11 @@ KatanaInterface::ParkMessage::clone() const
 
 
 /** Constructor with initial values.
+ * @param ini_theta_error initial value for theta_error
+ * @param ini_offset_xy initial value for offset_xy
+ * @param ini_straight initial value for straight
+ * @param ini_trans_frame initial value for trans_frame
+ * @param ini_rot_frame initial value for rot_frame
  * @param ini_x initial value for x
  * @param ini_y initial value for y
  * @param ini_z initial value for z
@@ -947,19 +952,29 @@ KatanaInterface::ParkMessage::clone() const
  * @param ini_theta initial value for theta
  * @param ini_psi initial value for psi
  */
-KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoMessage")
+KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_theta_error, const float ini_offset_xy, const bool ini_straight, const char * ini_trans_frame, const char * ini_rot_frame, const float ini_x, const float ini_y, const float ini_z, const float ini_phi, const float ini_theta, const float ini_psi) : Message("LinearGotoMessage")
 {
   data_size = sizeof(LinearGotoMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  data->theta_error = ini_theta_error;
+  data->offset_xy = ini_offset_xy;
+  data->straight = ini_straight;
+  strncpy(data->trans_frame, ini_trans_frame, 32);
+  strncpy(data->rot_frame, ini_rot_frame, 32);
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
   data->phi = ini_phi;
   data->theta = ini_theta;
   data->psi = ini_psi;
+  add_fieldinfo(IFT_FLOAT, "theta_error", 1, &data->theta_error);
+  add_fieldinfo(IFT_FLOAT, "offset_xy", 1, &data->offset_xy);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
+  add_fieldinfo(IFT_STRING, "trans_frame", 32, data->trans_frame);
+  add_fieldinfo(IFT_STRING, "rot_frame", 32, data->rot_frame);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -975,6 +990,11 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage() : Message("LinearGotoMes
   memset(data_ptr, 0, data_size);
   data      = (LinearGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "theta_error", 1, &data->theta_error);
+  add_fieldinfo(IFT_FLOAT, "offset_xy", 1, &data->offset_xy);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
+  add_fieldinfo(IFT_STRING, "trans_frame", 32, data->trans_frame);
+  add_fieldinfo(IFT_STRING, "rot_frame", 32, data->rot_frame);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -1002,6 +1022,162 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const LinearGotoMessage *m
 }
 
 /* Methods */
+/** Get theta_error value.
+ * Error range of theta rotation, gives more flexibility
+      for IK-solution searching.
+ * @return theta_error value
+ */
+float
+KatanaInterface::LinearGotoMessage::theta_error() const
+{
+  return data->theta_error;
+}
+
+/** Get maximum length of theta_error value.
+ * @return length of theta_error value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_theta_error() const
+{
+  return 1;
+}
+
+/** Set theta_error value.
+ * Error range of theta rotation, gives more flexibility
+      for IK-solution searching.
+ * @param new_theta_error new theta_error value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_theta_error(const float new_theta_error)
+{
+  data->theta_error = new_theta_error;
+}
+
+/** Get offset_xy value.
+ * Offset to target. Distance in m (on the way to the target)
+ * @return offset_xy value
+ */
+float
+KatanaInterface::LinearGotoMessage::offset_xy() const
+{
+  return data->offset_xy;
+}
+
+/** Get maximum length of offset_xy value.
+ * @return length of offset_xy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_offset_xy() const
+{
+  return 1;
+}
+
+/** Set offset_xy value.
+ * Offset to target. Distance in m (on the way to the target)
+ * @param new_offset_xy new offset_xy value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_offset_xy(const float new_offset_xy)
+{
+  data->offset_xy = new_offset_xy;
+}
+
+/** Get straight value.
+ * Move in a straight line?
+ * @return straight value
+ */
+bool
+KatanaInterface::LinearGotoMessage::is_straight() const
+{
+  return data->straight;
+}
+
+/** Get maximum length of straight value.
+ * @return length of straight value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_straight() const
+{
+  return 1;
+}
+
+/** Set straight value.
+ * Move in a straight line?
+ * @param new_straight new straight value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_straight(const bool new_straight)
+{
+  data->straight = new_straight;
+}
+
+/** Get trans_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the translation
+ * @return trans_frame value
+ */
+char *
+KatanaInterface::LinearGotoMessage::trans_frame() const
+{
+  return data->trans_frame;
+}
+
+/** Get maximum length of trans_frame value.
+ * @return length of trans_frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_trans_frame() const
+{
+  return 32;
+}
+
+/** Set trans_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the translation
+ * @param new_trans_frame new trans_frame value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_trans_frame(const char * new_trans_frame)
+{
+  strncpy(data->trans_frame, new_trans_frame, sizeof(data->trans_frame));
+}
+
+/** Get rot_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the rotation. In most cases, this is the robot's base coordinate system.
+ * @return rot_frame value
+ */
+char *
+KatanaInterface::LinearGotoMessage::rot_frame() const
+{
+  return data->rot_frame;
+}
+
+/** Get maximum length of rot_frame value.
+ * @return length of rot_frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::LinearGotoMessage::maxlenof_rot_frame() const
+{
+  return 32;
+}
+
+/** Set rot_frame value.
+ * tf frame-id of origin's coordinate system,
+      regarding the rotation. In most cases, this is the robot's base coordinate system.
+ * @param new_rot_frame new rot_frame value
+ */
+void
+KatanaInterface::LinearGotoMessage::set_rot_frame(const char * new_rot_frame)
+{
+  strncpy(data->rot_frame, new_rot_frame, sizeof(data->rot_frame));
+}
+
 /** Get x value.
  * DEPRECATED! X-Coordinate for tool position
     compared to base coordinate system.

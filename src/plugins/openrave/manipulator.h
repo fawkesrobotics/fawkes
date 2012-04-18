@@ -23,20 +23,14 @@
 #ifndef __PLUGINS_OPENRAVE_MANIPULATOR_H_
 #define __PLUGINS_OPENRAVE_MANIPULATOR_H_
 
+#include "types.h"
+
 #include <vector>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-/** Struct containing angle of current motor, its number in OpenRAVE and
- * corresponding motor number of real devices. */
-typedef struct {
-  unsigned int	no;       /**< motor number in OpenRAVE*/
-  unsigned int  no_device;  /**< motor number of real device */
-  float		angle;	  /**< radian angle */
-} motor_t;
 
 class OpenRaveManipulator
 {
