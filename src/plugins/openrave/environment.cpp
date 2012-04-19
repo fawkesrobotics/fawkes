@@ -347,7 +347,9 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
         for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
           tmp_robot->SetActiveDOFValues((*it));
-          __graph_handle.push_back(__env->plot3(RaveVector<float>(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans), 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+          const OpenRAVE::Vector &trans = tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
+          float transa[4] = { trans.x, trans.y, trans.z, trans.w };
+          __graph_handle.push_back(__env->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
 
@@ -367,6 +369,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
  * python script (shortened and modified from officiel OpenRAVE graspplanning.py) to do the work.
  * @param target_name name of targeted object (KinBody)
  * @param robot pointer to OpenRaveRobot object of robot to use
+ * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
 OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot, float sampling)
@@ -496,7 +499,9 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
       RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
         for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
           tmp_robot->SetActiveDOFValues((*it));
-          __graph_handle.push_back(__env->plot3(RaveVector<float>(tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans), 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+          const OpenRAVE::Vector &trans = tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
+          float transa[4] = { trans.x, trans.y, trans.z, trans.w };
+          __graph_handle.push_back(__env->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
 
