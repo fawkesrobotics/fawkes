@@ -20,6 +20,9 @@ endif
 ifndef __buildsys_pcl_mk_
 __buildsys_pcl_mk_ := 1
 
+PCL_LIB_DIRS=/usr/lib64 /usr/lib /usr/lib32 \
+             /usr/local/lib64 /usr/local/lib
+
 ifneq ($(PKGCONFIG),)
   HAVE_PCL = $(if $(shell $(PKGCONFIG) --exists 'pcl_common'; echo $${?/1/}),1,0)
   HAVE_EIGEN3 = $(if $(shell $(PKGCONFIG) --exists 'eigen3'; echo $${?/1/}),1,0)
@@ -63,14 +66,21 @@ ifeq ($(HAVE_PCL),1)
 
   CFLAGS_PCL  += -DHAVE_PCL $(CFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)')
-  LDFLAGS_PCL += $(foreach L,common features filters kdtree keypoints octree \
-			range_image range_image_border_extractor registration \
-			sample_consensus segmentation surface, \
-		   $(shell $(PKGCONFIG) --libs 'pcl_$L$(PCL_VERSION_SUFFIX)') ) \
-		 $(LDFLAGS_EIGEN3)
-  # need to fix PCL's pkg-config files first
-  LDFLAGS_PCL_VIS = $(shell $(PKGCONFIG) --libs 'pcl_visualizationi$(PCL_VERSION_SUFFIX)')
-  LDFLAGS_PCL_IO = $(shell $(PKGCONFIG) --libs 'pcl_io$(PCL_VERSION_SUFFIX)')
+  LDFLAGS_PCL += $(LDFLAGS_EIGEN3) \
+		 $(shell $(PKGCONFIG) --libs 'pcl_common$(PCL_VERSION_SUFFIX)')
+
+  pcl-have-lib    = $(if $(shell $(PKGCONFIG) --exists 'pcl_$1$(PCL_VERSION_SUFFIX)'; echo $${?/1/}),1,0)
+  pcl-lib-cflags  = $(shell $(PKGCONFIG) --cflags 'pcl_$1$(PCL_VERSION_SUFFIX)')
+  pcl-lib-ldflags = $(shell $(PKGCONFIG) --libs 'pcl_$1$(PCL_VERSION_SUFFIX)')
+
+  pcl-have-libs    = $(if $(strip $(subst 1,,$(foreach c,$1,$(call pcl-have-lib,$c)))),0,1)
+  pcl-libs-cflags  = $(shell $(PKGCONFIG) --cflags $(foreach c,$1,'pcl_$c$(PCL_VERSION_SUFFIX)' ))
+  pcl-libs-ldflags = $(shell $(PKGCONFIG) --libs $(foreach c,$1,'pcl_$c$(PCL_VERSION_SUFFIX)' ))
+
+  pcl-missing-libs = $(strip $(foreach c,$1,$(if $(subst 1,,$(call pcl-have-lib,$c)),$c)))
+
+else
+  pcl-have-lib = 0
 endif
 
 endif # __buildsys_pcl_mk_
