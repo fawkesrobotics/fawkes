@@ -53,7 +53,7 @@ ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_katana += fawkesopenrave fawkesopenraveaspect
-    CFLAGS  += $(CFLAGS_OPENRAVE) -DHAVE_OPENRAVE
+    CFLAGS  += $(CFLAGS_OPENRAVE)
     LDFLAGS += $(LDFLAGS_OPENRAVE)
   else
     WARN_TARGETS += warning_openrave

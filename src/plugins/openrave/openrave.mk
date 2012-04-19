@@ -13,35 +13,44 @@
 #
 #*****************************************************************************
 
-# Required OpenRAVE version.
-# Currently 0.6.2, so VER=0.6 and all minor than 0.6.2 are filtered out
-OPENRAVE_VER = 0.6
-OPENRAVE_VER_FILTER = 0.6.0 0.6.1
+include $(BUILDSYSDIR)/boost.mk
+
+OPENRAVE_MIN_VERSION=0.6.4
 
 #Check for OpenRAVE
 ifneq ($(PKGCONFIG),)
-  PKG_OPENRAVE = 'openrave'
-  ifneq ($(shell $(PKGCONFIG) --exists $(PKG_OPENRAVE); echo $${?/1/}),)
-    EXISTS_OPENRAVE = 1
-  else
-    PKG_OPENRAVE ='openrave'$(OPENRAVE_VER)
-    EXISTS_OPENRAVE := $(if $(shell $(PKGCONFIG) --exists $(PKG_OPENRAVE); echo $${?/1/}),1,0)
+  HAVE_OPENRAVE = $(shell $(PKGCONFIG) --atleast-version $(OPENRAVE_MIN_VERSION) 'openrave-core'; echo $${?/1/})
+  ifneq ($(HAVE_OPENRAVE),1)
+    # Give it another shot, name might contain version
+    _OPENRAVE_ALTERNATE_NAME=$(shell $(PKGCONFIG) --list-all | grep 'openrave-core' | awk '{ print $$1 }')
+    ifneq ($(_OPENRAVE_ALTERNATE_NAME),)
+      OPENRAVE_VERSION_SUFFIX=$(patsubst openrave-core%,%,$(_OPENRAVE_ALTERNATE_NAME))
+      HAVE_OPENRAVE=1
+    endif
   endif
 
-  HAVE_PYTHON := $(if $(shell $(PKGCONFIG) --exists 'python'; echo $${?/1/}),1,0)
+  HAVE_BOOST_THREAD = $(call boost-have-lib,thread)
+  ifneq ($(HAVE_BOOST_THREAD),1)
+    HAVE_OPENRAVE = 0
+  endif
+
+  ifeq ($(HAVE_OPENRAVE),1)
+    HAVE_PYTHON := $(if $(shell $(PKGCONFIG) --exists 'python'; echo $${?/1/}),1,0)
+  endif
 endif
 
-ifeq ($(EXISTS_OPENRAVE),1)
-  MODVERSION_OPENRAVE  = $(shell $(PKGCONFIG) --modversion $(PKG_OPENRAVE))
-
-  ifeq ($(if $(filter-out $(OPENRAVE_VER)%,$(MODVERSION_OPENRAVE)),,1)$(if $(filter-out $(OPENRAVE_VER_FILTER),$(MODVERSION_OPENRAVE)),1,),11)
-    HAVE_OPENRAVE    = 1
-    CFLAGS_OPENRAVE  = $(shell $(PKG_OPENRAVE)-config --cflags-only-I)
-    LDFLAGS_OPENRAVE = $(shell $(PKG_OPENRAVE)-config --libs-core)
-  endif
+ifeq ($(HAVE_OPENRAVE),1)
+  CFLAGS_OPENRAVE  = -DHAVE_OPENRAVE \
+                     $(shell $(PKGCONFIG) --cflags 'openrave-core$(OPENRAVE_VERSION_SUFFIX)') \
+                     $(shell $(PKGCONFIG) --cflags 'openrave$(OPENRAVE_VERSION_SUFFIX)') \
+                     $(call boost-lib-cflags,thread)
+  LDFLAGS_OPENRAVE = $(shell $(PKGCONFIG) --libs 'openrave-core$(OPENRAVE_VERSION_SUFFIX)') \
+                     $(shell $(PKGCONFIG) --libs 'openrave$(OPENRAVE_VERSION_SUFFIX)') \
+                     $(call boost-lib-ldflags,thread)
 endif
 
 ifeq ($(HAVE_PYTHON),1)
-  CFLAGS_PYTHON    = $(shell python-config --includes)
-  LDFLAGS_PYTHON   = $(shell python-config --libs)
+  CFLAGS_PYTHON    = -DHAVE_PYTHON $(shell $(PKGCONFIG) --cflags 'python')
+  LDFLAGS_PYTHON   = $(shell $(PKGCONFIG) --libs 'python')
 endif
+

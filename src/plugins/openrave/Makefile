@@ -35,6 +35,9 @@ endif
 ifneq ($(HAVE_OPENRAVE),1)
   WARN_TARGETS += warning_openrave
 endif
+ifneq ($(HAVE_BOOST_THREAD),1)
+  WARN_TARGETS += warning_boost_thread
+endif
 
 ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
   CFLAGS  += $(CFLAGS_OPENRAVE) $(CFLAGS_PYTHON)
@@ -48,12 +51,13 @@ $(PLUGINDIR)/openrave.$(SOEXT): | $(LIBDIR)/libfawkesopenrave.$(SOEXT)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_openrave
+.PHONY: warning_openrave warning_python warning_boost_thread
 warning_openrave:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (OpenRAVE not installed)"
-
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (OpenRAVE not found)"
 warning_python:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (python not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (python not found)"
+warning_boost_thread:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE Plugin$(TNORMAL) (Boost thread library not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
