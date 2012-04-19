@@ -24,6 +24,8 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 ENABLE_VISUAL_DEBUGGING = 1
 USE_BASELINK_FRAME = 1
 
+REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
+
 # Enable for time measurements
 #CFLAGS += -DUSE_TIMETRACKER
 
@@ -38,19 +40,25 @@ OBJS_tabletop_objects_standalone = tabletop_objects_standalone.o
 OBJS_all    = $(OBJS_tabletop_objects) $(OBJS_tabletop_objects_standalone)
 
 ifeq ($(HAVE_PCL)$(HAVE_TF),11)
-  CFLAGS += $(CFLAGS_TF) $(CFLAGS_PCL) \
-	    -Wno-deprecated -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+  ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS)),1)
+    CFLAGS += $(CFLAGS_TF) $(CFLAGS_PCL) \
+	      $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS)) \
+	      -Wno-deprecated -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
-  LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL)
+    LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) \
+	       $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
 
-  # for standalone:
-  # $(CFLAGS_VTK) $(CFLAGS_OPENNI)
-  # $(LDFLAGS_OPENNI) 
-  #  -lpcl_io -lpcl_visualization -lboost_thread-mt 
-  #  -lvtkCommon -lvtkRendering -lvtkFiltering
+    # for standalone:
+    # $(CFLAGS_VTK) $(CFLAGS_OPENNI)
+    # $(LDFLAGS_OPENNI) 
+    #  -lpcl_io -lpcl_visualization -lboost_thread-mt 
+    #  -lvtkCommon -lvtkRendering -lvtkFiltering
 
-  PLUGINS_all = $(PLUGINDIR)/tabletop-objects.$(SOEXT)
-  #BINS_all = $(BINDIR)/tabletop-objects-standalone
+    PLUGINS_all = $(PLUGINDIR)/tabletop-objects.$(SOEXT)
+    #BINS_all = $(BINDIR)/tabletop-objects-standalone
+  else
+    WARN_TARGETS += warning_pcl_components
+  endif
 else
   ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl
@@ -91,6 +99,8 @@ warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (fawkestf not available)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (PCL not available)"
+warning_pcl_components:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (missing PCL components: $(call pcl-missing-libs,$(REQUIRED_PCL_LIBS)))"
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
 warning_visualization_msgs:
