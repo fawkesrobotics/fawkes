@@ -1,0 +1,122 @@
+
+/***************************************************************************
+ *  RobotinoSensorInterface.h - Fawkes BlackBoard Interface - RobotinoSensorInterface
+ *
+ *  Templated created:   Thu Oct 12 10:49:19 2006
+ *  Copyright  2012  Tim Niemueller
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+#ifndef __INTERFACES_ROBOTINOSENSORINTERFACE_H_
+#define __INTERFACES_ROBOTINOSENSORINTERFACE_H_
+
+#include <interface/interface.h>
+#include <interface/message.h>
+#include <interface/field_iterator.h>
+
+namespace fawkes {
+
+class RobotinoSensorInterface : public Interface
+{
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(RobotinoSensorInterface)
+ /// @endcond
+ public:
+  /* constants */
+
+ private:
+#pragma pack(push,4)
+  /** Internal data storage, do NOT modify! */
+  typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    float mot_velocity[3]; /**< Velocities of the wheels. */
+    int32_t mot_position[3]; /**< Positions of the wheels. */
+    float mot_current[3]; /**< Motor currents. */
+    bool bumper; /**< Bumper pressed indicator. */
+    float distance[9]; /**< Distance sensor values. */
+    bool digital_in[8]; /**< Digital input values. */
+    float analog_in[8]; /**< Analog input values. */
+    bool gyro_available; /**< True if gyro is available */
+    float gyro_angle; /**< Gyro angle value; rad */
+    float gyro_rate; /**< Gyro rate value; rad/sec */
+  } RobotinoSensorInterface_data_t;
+#pragma pack(pop)
+
+  RobotinoSensorInterface_data_t *data;
+
+ public:
+  /* messages */
+  virtual bool message_valid(const Message *message) const;
+ private:
+  RobotinoSensorInterface();
+  ~RobotinoSensorInterface();
+
+ public:
+  /* Methods */
+  float * mot_velocity() const;
+  float mot_velocity(unsigned int index) const;
+  void set_mot_velocity(unsigned int index, const float new_mot_velocity);
+  void set_mot_velocity(const float * new_mot_velocity);
+  size_t maxlenof_mot_velocity() const;
+  int32_t * mot_position() const;
+  int32_t mot_position(unsigned int index) const;
+  void set_mot_position(unsigned int index, const int32_t new_mot_position);
+  void set_mot_position(const int32_t * new_mot_position);
+  size_t maxlenof_mot_position() const;
+  float * mot_current() const;
+  float mot_current(unsigned int index) const;
+  void set_mot_current(unsigned int index, const float new_mot_current);
+  void set_mot_current(const float * new_mot_current);
+  size_t maxlenof_mot_current() const;
+  bool is_bumper() const;
+  void set_bumper(const bool new_bumper);
+  size_t maxlenof_bumper() const;
+  float * distance() const;
+  float distance(unsigned int index) const;
+  void set_distance(unsigned int index, const float new_distance);
+  void set_distance(const float * new_distance);
+  size_t maxlenof_distance() const;
+  bool * is_digital_in() const;
+  bool is_digital_in(unsigned int index) const;
+  void set_digital_in(unsigned int index, const bool new_digital_in);
+  void set_digital_in(const bool * new_digital_in);
+  size_t maxlenof_digital_in() const;
+  float * analog_in() const;
+  float analog_in(unsigned int index) const;
+  void set_analog_in(unsigned int index, const float new_analog_in);
+  void set_analog_in(const float * new_analog_in);
+  size_t maxlenof_analog_in() const;
+  bool is_gyro_available() const;
+  void set_gyro_available(const bool new_gyro_available);
+  size_t maxlenof_gyro_available() const;
+  float gyro_angle() const;
+  void set_gyro_angle(const float new_gyro_angle);
+  size_t maxlenof_gyro_angle() const;
+  float gyro_rate() const;
+  void set_gyro_rate(const float new_gyro_rate);
+  size_t maxlenof_gyro_rate() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
+
+};
+
+} // end namespace fawkes
+
+#endif

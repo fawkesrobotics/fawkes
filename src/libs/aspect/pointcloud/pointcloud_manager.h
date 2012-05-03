@@ -34,6 +34,8 @@
 #include <vector>
 #include <string>
 #include <stdint.h>
+#include <typeinfo>
+#include <cstring>
 
 namespace pcl {
   template <typename PointT>
@@ -82,8 +84,7 @@ class PointCloudManager
 
   class StorageAdapter {
   public:
-    /** Virtual empty destructor. */
-    virtual ~StorageAdapter() {}
+    virtual ~StorageAdapter();
 
     template <typename PointT>
     bool is_pointtype() const;
@@ -91,6 +92,7 @@ class PointCloudManager
     template <typename PointT>
     PointCloudStorageAdapter<PointT> * as_pointtype();
 
+    virtual const char * get_typename() = 0;
     virtual StorageAdapter * clone() const = 0;
     virtual size_t  point_size() const = 0;
     virtual unsigned int  width() const = 0;
@@ -121,6 +123,7 @@ class PointCloudManager
 
     virtual StorageAdapter * clone() const;
 
+    virtual const char * get_typename() { return typeid(this).name(); }
     virtual size_t  point_size() const { return sizeof(PointT); }
     virtual unsigned int  width() const { return cloud->width; }
     virtual unsigned int  height() const { return cloud->height; }
@@ -183,7 +186,15 @@ PointCloudManager::get_pointcloud(const char *id)
   if (__clouds.find(id) != __clouds.end()) {
     PointCloudStorageAdapter<PointT> *pa =
       dynamic_cast<PointCloudStorageAdapter<PointT> *>(__clouds[id]);
+
     if (!pa) {
+      // workaround for older compilers
+      if (strcmp(__clouds[id]->get_typename(),
+                 typeid(PointCloudStorageAdapter<PointT> *).name()) == 0)
+      {
+        return static_cast<PointCloudStorageAdapter<PointT> *>(__clouds[id])->cloud;
+      }
+
       throw Exception("The desired point cloud is of a different type");
     }
     return pa->cloud;

@@ -18,6 +18,7 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDSYSDIR)/ros.mk
+include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/openni/openni.mk
 
@@ -75,7 +76,8 @@ endif
 ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
   ifeq ($(HAVE_ROS),1)
     ifeq ($(call ros-have-pkg,visualization_msgs),1)
-      CFLAGS_visualization_thread  = $(CFLAGS_ROS) $(call ros-pkg-cflags,visualization_msgs)
+      CFLAGS_visualization_thread  = -DHAVE_VISUAL_DEBUGGING $(CFLAGS_ROS) $(CFLAGS_TF) \
+				     $(CFLAGS_EIGEN3) $(call ros-pkg-cflags,visualization_msgs)
       CFLAGS += -DHAVE_VISUAL_DEBUGGING
       LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
 
@@ -84,12 +86,22 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
 
       OBJS_tabletop_objects += visualization_thread_base.o visualization_thread.o
     else
+      ENABLE_VISUAL_DEBUGGING = 0
       WARN_TARGETS += warning_visualization_msgs
     endif
   else
+    ENABLE_VISUAL_DEBUGGING = 0
     WARN_TARGETS += warning_ros
   endif
 endif
+
+ifneq ($(ENABLE_VISUAL_DEBUGGING),1)
+  $(warning HAVE: $(call boost-have-lib,thread)  CFLAGS: $(call boost-lib-cflags,thread)  LDFLAGS: $(call boost-lib-ldflags,thread)")
+  CFLAGS  += $(call boost-lib-cflags,thread)
+  LDFLAGS += $(call boost-lib-ldflags,thread)
+endif
+
+
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

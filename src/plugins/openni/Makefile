@@ -44,13 +44,13 @@ LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard 
 OBJS_openni_handtracker = handtracker_plugin.o handtracker_thread.o
 
 ifeq ($(HAVE_PCL),1)
-  CFLAGS_pointcloud_thread  = $(CFLAGS_PCL)
-  CFLAGS_data_plugin        = $(CFLAGS_PCL)
+  CFLAGS_pointcloud_thread  = $(CFLAGS) $(CFLAGS_PCL)
+  CFLAGS_data_plugin        = $(CFLAGS) $(CFLAGS_PCL)
   LDFLAGS_openni_data       = $(LDFLAGS_PCL)
   LIBS_openni_data         += fvutils
 
-  CFLAGS_pcl_frombuf_thread = $(CFLAGS_PCL)
-  CFLAGS_pcl_frombuf_plugin = $(CFLAGS_PCL)
+  CFLAGS_pcl_frombuf_thread = $(CFLAGS) $(CFLAGS_PCL)
+  CFLAGS_pcl_frombuf_plugin = $(CFLAGS) $(CFLAGS_PCL)
   LDFLAGS_openni_pcl_frombuf = $(LDFLAGS_PCL)
   LIBS_openni_pcl_frombuf += fvutils
 else

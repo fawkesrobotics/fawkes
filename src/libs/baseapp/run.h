@@ -65,6 +65,7 @@ int  init(int argc, char **argv);
 int  init(InitOptions options);
 void run();
 void cleanup();
+void quit();
 
 void print_usage(const char *progname);
 

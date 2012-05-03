@@ -1,9 +1,9 @@
+
 /***************************************************************************
- *  getkey.h - getkey returns a keypress in non-blocking manner
+ *  robotino_joystick_plugin.cpp - Plugin for Robotino joystick control
  *
- *  Created: Thu Jun 04 19:08:13 2009
- *  Copyright  2009  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
- *             2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Nov 13 23:20:35 2011
+ *  Copyright  2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,11 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_GETKEY_H
-#define __UTILS_SYSTEM_GETKEY_H
+#include <core/plugin.h>
 
-namespace fawkes {
-  char getkey(int timeout_decisecs = 0);
-} // end namespace fawkes
+#include "joystick_thread.h"
 
-#endif
+using namespace fawkes;
+
+/** Plugin to remote control a Robotino using a joystick.
+ * @author Tim Niemueller
+ */
+class RobotinoJoystickPlugin : public fawkes::Plugin
+{
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  RobotinoJoystickPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new RobotinoJoystickThread());
+  }
+};
+
+PLUGIN_DESCRIPTION("Robotino joystick control")
+EXPORT_PLUGIN(RobotinoJoystickPlugin)

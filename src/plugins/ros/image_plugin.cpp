@@ -1,9 +1,9 @@
+
 /***************************************************************************
- *  getkey.h - getkey returns a keypress in non-blocking manner
+ *  image_plugin.cpp - Exchange point clouds between Fawkes and ROS
  *
- *  Created: Thu Jun 04 19:08:13 2009
- *  Copyright  2009  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
- *             2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Apr 10 22:09:24 2012
+ *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,11 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_GETKEY_H
-#define __UTILS_SYSTEM_GETKEY_H
+#include <core/plugin.h>
 
-namespace fawkes {
-  char getkey(int timeout_decisecs = 0);
-} // end namespace fawkes
+#include "image_thread.h"
 
-#endif
+using namespace fawkes;
+
+/** Plugin exchange transforms between Fawkes and ROS.
+ * @author Tim Niemueller
+ */
+class RosImagesPlugin : public fawkes::Plugin
+{
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  RosImagesPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new RosImagesThread());
+  }
+};
+
+PLUGIN_DESCRIPTION("Export Fawkes images to ROS")
+EXPORT_PLUGIN(RosImagesPlugin)

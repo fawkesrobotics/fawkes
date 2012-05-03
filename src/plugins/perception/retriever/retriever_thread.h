@@ -27,7 +27,10 @@
 
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <aspect/clock.h>
 #include <aspect/vision.h>
+
+#include <string>
 
 namespace fawkes {
   class TimeTracker;
@@ -43,10 +46,11 @@ class FvRetrieverThread
 : public fawkes::Thread,
   public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect,
-  public fawkes::VisionAspect
+  public fawkes::VisionAspect,
+  public fawkes::ClockAspect
 {
  public:
-  FvRetrieverThread(const char *camera_string, const char *id);
+  FvRetrieverThread(std::string camera_string, std::string cfg_name, std::string cfg_prefix);
   virtual ~FvRetrieverThread();
 
   virtual void init();
@@ -57,8 +61,10 @@ class FvRetrieverThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  char *__id;
-  char *__camera_string;
+  std::string cfg_name_;
+  std::string cfg_prefix_;
+  std::string camera_string_;
+  fawkes::Time *cap_time_;
 
   firevision::Camera *cam;
   firevision::SharedMemoryImageBuffer *shm;

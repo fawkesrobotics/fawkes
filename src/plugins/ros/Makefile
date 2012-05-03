@@ -2,7 +2,7 @@
 #               Makefile Build System for Fawkes: ROS Plugin
 #                            -------------------
 #   Created on Thu May 05 18:23:31 2011
-#   Copyright (C) 2006-2011 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2012 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -39,7 +39,12 @@ LIBS_ros_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect
 OBJS_ros_pcl = pcl_plugin.o pcl_thread.o pcl_adapter.o
 
-OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) $(OBJS_ros_pcl)
+LIBS_ros_images = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	          fawkesinterface fawkesrosaspect fvutils
+OBJS_ros_images = image_plugin.o image_thread.o
+
+OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
+	   $(OBJS_ros_pcl) $(OBJS_ros_images)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -47,14 +52,14 @@ ifeq ($(HAVE_ROS),1)
   CFLAGS  += $(CFLAGS_ROS)
   LDFLAGS += $(LDFLAGS_ROS)
 
-  CFLAGS_talkerpub_thread += $(shell rospack export --lang=cpp --attrib=cflags std_msgs)
+  CFLAGS_talkerpub_thread += $(shell rospack export --lang=cpp --attrib=cflags std_msgs) $(CFLAGS)
   LDFLAGS_ros_talkerpub += $(LDFLAGS) $(shell rospack export --lang=cpp --attrib=lflags std_msgs)
 
   PLUGINS_all = $(PLUGINDIR)/ros.so \
 		$(PLUGINDIR)/ros-talkerpub.so
 
   ifeq ($(call ros-have-pkg,webview_msgs),1)
-    CFLAGS_webview_thread += $(call ros-pkg-cflags,webview_msgs)
+    CFLAGS_webview_thread += $(call ros-pkg-cflags,webview_msgs) $(CFLAGS)
     CFLAGS_webview_plugin = $(CFLAGS_webview_thread)
     CFLAGS_webview_reqproc = $(CFLAGS_webview_thread)
     LDFLAGS_ros_webview += $(LDFLAGS) $(call ros-pkg-lflags,webview_msgs)
@@ -65,7 +70,7 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,tf),1)
     ifeq ($(HAVE_TF),1)
-      CFLAGS_tf_thread += $(CFLAGS_TF) $(call ros-pkg-cflags,tf)
+      CFLAGS_tf_thread += $(CFLAGS_TF) $(call ros-pkg-cflags,tf) $(CFLAGS) -Wno-strict-aliasing
       CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
       LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(call ros-pkg-lflags,tf)
       PLUGINS_all += $(PLUGINDIR)/ros-tf.so
@@ -78,18 +83,27 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     ifeq ($(HAVE_PCL),1)
-      export VTK_DIR=$(firstword $(wildcard /usr/lib64/vtk-* /usr/lib/vtk-*))
-      CFLAGS_pcl_adapter += $(CFLAGS_PCL)
-      CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs)
-      CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread)
+      CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS)
+      CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
+      CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread) $(CFLAGS)
       LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(call ros-pkg-lflags,sensor_msgs)
       PLUGINS_all += $(PLUGINDIR)/ros-pcl.so
     else
       WARN_TARGETS += warning_pcl
     endif
+
+    ifeq ($(call ros-have-pkg,image_transport),1)
+      CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
+      CFLAGS_image_plugin = $(CFLAGS_image_thread)
+      LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
+      PLUGINS_all += $(PLUGINDIR)/ros-images.so
+    else
+      WARN_TARGETS += warning_images
+    endif
   else
-    WARN_TARGETS += warning_rospcl
+    WARN_TARGETS += warning_rospcl warning_images
   endif
+
 else
   WARN_TARGETS += warning_ros
 endif
@@ -110,6 +124,8 @@ warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (pcl[-devel] not installed)"
 warning_rospcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (ROS package pcl not found)"
+warning_images:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (ROS package image_transport not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

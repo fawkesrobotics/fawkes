@@ -903,9 +903,9 @@ TabletopObjectsThread::loop()
   // not an X-Ray...
   pcl::ComparisonOps::CompareOp op =
     coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
-  typename pcl_utils::PlaneDistanceComparison<PointType>::ConstPtr
+  pcl_utils::PlaneDistanceComparison<PointType>::ConstPtr
     above_comp(new pcl_utils::PlaneDistanceComparison<PointType>(coeff, op));
-  typename pcl::ConditionAnd<PointType>::Ptr
+  pcl::ConditionAnd<PointType>::Ptr
     above_cond(new pcl::ConditionAnd<PointType>());
   above_cond->addComparison(above_comp);
   pcl::ConditionalRemoval<PointType> above_condrem(above_cond);
@@ -926,10 +926,10 @@ TabletopObjectsThread::loop()
   // Extract only points on the table plane
   pcl::PointIndices::Ptr polygon(new pcl::PointIndices());
 
-  typename pcl::ConditionAnd<PointType>::Ptr
+  pcl::ConditionAnd<PointType>::Ptr
     polygon_cond(new pcl::ConditionAnd<PointType>());
 
-  typename pcl_utils::PolygonComparison<PointType>::ConstPtr
+  pcl_utils::PolygonComparison<PointType>::ConstPtr
     inpoly_comp(new pcl_utils::PolygonComparison<PointType>(
       (model_cloud_hull_ && ! model_cloud_hull_->points.empty()) ? *model_cloud_hull_ : *cloud_hull_));
   polygon_cond->addComparison(inpoly_comp);

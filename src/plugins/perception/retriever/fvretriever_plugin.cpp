@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <set>
+
 using namespace fawkes;
 using namespace firevision;
 
@@ -43,26 +45,51 @@ FvRetrieverPlugin::FvRetrieverPlugin(Configuration *config)
   : Plugin(config)
 {
 
+  std::set<std::string> configs;
+  std::set<std::string> ignored_configs;
+
   std::string prefix = "/firevision/retriever/camera/";
+
   Configuration::ValueIterator *vi = config->search(prefix.c_str());
-
   while (vi->next()) {
-    if ( ! vi->is_string() ) {
-      throw TypeMismatchException("Only values of type string are valid for camera"
-				  " argument strings, but got %s for %s",
-				  vi->type(), vi->path());
+
+    std::string cfg_name = std::string(vi->path()).substr(prefix.length());
+    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+
+    if ( (configs.find(cfg_name) == configs.end()) &&
+	 (ignored_configs.find(cfg_name) == ignored_configs.end()) )
+    {
+
+      std::string cfg_prefix = prefix + cfg_name + "/";
+
+      if ( ! vi->is_string() ) {
+        throw TypeMismatchException("Only values of type string are valid for camera"
+                                    " argument strings, but got %s for %s",
+                                    vi->type(), vi->path());
+      }
+
+      bool active = true;
+      try {
+	active = config->get_bool((cfg_prefix + "active").c_str());
+      } catch (Exception &e) {} // ignored, assume enabled
+
+      if (active) {
+        thread_list.push_back(new FvRetrieverThread(vi->get_string().c_str(),
+                                                    cfg_name, cfg_prefix));
+        configs.insert(cfg_name);
+      } else {
+        //printf("Ignoring laser config %s\n", cfg_name.c_str());
+        ignored_configs.insert(cfg_name);
+      }
     }
-
-    std::string id = std::string(vi->path()).substr(prefix.length());
-
-    thread_list.push_back(new FvRetrieverThread(vi->get_string().c_str(), id.c_str()));
   }
+
+  delete vi;
 
   if ( thread_list.empty() ) {
     throw Exception("No cameras have been set for fvretriever");
   }
 
-  delete vi;
 }
 
 PLUGIN_DESCRIPTION("Reads images from cameras and stores them in shared memory")

@@ -20,6 +20,13 @@
  */
 
 #include <utils/system/getkey.h>
+#include <core/exception.h>
+#include <cerrno>
+#include <cstdio>
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+
 
 namespace fawkes {
 
@@ -85,12 +92,16 @@ getkey(int timeout_decisecs)
   }
   tcsetattr(STDIN_FILENO, TCSANOW, &tattr);
   
-  read(STDIN_FILENO, buf, 1);
+  ssize_t read_bytes = read(STDIN_FILENO, buf, 1);
   
   tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
   if (! blocking) clear_nonblock_flag();
   
-  return buf[0];
+  if (read_bytes == 1) {
+    return buf[0];
+  } else {
+    throw Exception(errno, "Failed to read key from keyboard (getkey)");
+  }
 }
 
 } // end namespace fawkes

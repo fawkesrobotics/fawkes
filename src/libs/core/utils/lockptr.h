@@ -135,6 +135,12 @@ class LockPtr
    */
   inline T_CppObject* operator->() const;
 
+  /** Get underlying pointer.
+   * Use with care!
+   * @return pointer to encapsulated object
+   */
+  inline T_CppObject* operator*() const;
+
   /** Test whether the LockPtr<> points to any underlying instance.
    *
    * Mimics usage of ordinary pointers:
@@ -251,6 +257,12 @@ T_CppObject* LockPtr<T_CppObject>::operator->() const
 }
 
 template <class T_CppObject> inline
+T_CppObject* LockPtr<T_CppObject>::operator*() const
+{
+  return __cpp_object;
+}
+
+template <class T_CppObject> inline
 LockPtr<T_CppObject>::LockPtr()
 :
   __cpp_object(0),
@@ -258,6 +270,7 @@ LockPtr<T_CppObject>::LockPtr()
   __ref_count(0),
   __ref_mutex(0)
 {}
+
 
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::~LockPtr()

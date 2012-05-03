@@ -1,0 +1,71 @@
+$#include <interfaces/RobotinoSensorInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class RobotinoSensorInterface : public Interface
+{
+
+  float mot_velocity(int index);
+  void set_mot_velocity(unsigned int index, const float new_mot_velocity);
+  int maxlenof_mot_velocity() const;
+  int mot_position(int index);
+  void set_mot_position(unsigned int index, const int new_mot_position);
+  int maxlenof_mot_position() const;
+  float mot_current(int index);
+  void set_mot_current(unsigned int index, const float new_mot_current);
+  int maxlenof_mot_current() const;
+  bool is_bumper();
+  void set_bumper(const bool new_bumper);
+  int maxlenof_bumper() const;
+  float distance(int index);
+  void set_distance(unsigned int index, const float new_distance);
+  int maxlenof_distance() const;
+  bool is_digital_in(int index);
+  void set_digital_in(unsigned int index, const bool new_digital_in);
+  int maxlenof_digital_in() const;
+  float analog_in(int index);
+  void set_analog_in(unsigned int index, const float new_analog_in);
+  int maxlenof_analog_in() const;
+  bool is_gyro_available();
+  void set_gyro_available(const bool new_gyro_available);
+  int maxlenof_gyro_available() const;
+  float gyro_angle();
+  void set_gyro_angle(const float new_gyro_angle);
+  int maxlenof_gyro_angle() const;
+  float gyro_rate();
+  void set_gyro_rate(const float new_gyro_rate);
+  int maxlenof_gyro_rate() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

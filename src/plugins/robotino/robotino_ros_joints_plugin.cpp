@@ -1,9 +1,9 @@
+
 /***************************************************************************
- *  getkey.h - getkey returns a keypress in non-blocking manner
+ *  robotino_ros_joints_plugin.cpp - Plugin to export ROS joint info
  *
- *  Created: Thu Jun 04 19:08:13 2009
- *  Copyright  2009  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
- *             2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Mar 30 10:52:22 2012
+ *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,11 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_GETKEY_H
-#define __UTILS_SYSTEM_GETKEY_H
+#include <core/plugin.h>
 
-namespace fawkes {
-  char getkey(int timeout_decisecs = 0);
-} // end namespace fawkes
+#include "ros_joints_thread.h"
 
-#endif
+using namespace fawkes;
+
+/** Plugin to publish Robotino joint info via ROS.
+ * @author Tim Niemueller
+ */
+class RobotinoRosJointsPlugin : public fawkes::Plugin
+{
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  RobotinoRosJointsPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new RobotinoRosJointsThread());
+  }
+};
+
+PLUGIN_DESCRIPTION("Publish Robotino joint info via ROS (for model)")
+EXPORT_PLUGIN(RobotinoRosJointsPlugin)

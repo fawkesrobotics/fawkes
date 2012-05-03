@@ -64,13 +64,13 @@ OBJS_fvbb2info = bb2info.o
 
 LIBS_fvviewer = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams fvutils fvwidgets fvfilters
 OBJS_fvviewer = viewer.o
-CFLAGS_viewer    += $(CFLAGS_GTKMM) $(CFLAGS_SDL)
+CFLAGS_viewer    = $(CFLAGS) $(CFLAGS_GTKMM) $(CFLAGS_SDL)
 LDFLAGS_fvviewer += $(LDFLAGS_GTKMM) $(LDFLAGS_SDL)
 
 LIBS_fvscaled_viewer = $(VISION_CAM_LIBS) stdc++ fawkescore \
 	fawkesutils fvcams fvutils
 OBJS_fvscaled_viewer = scaled_viewer.o
-CFLAGS_scaled_viewer    += $(CFLAGS_GUI)
+CFLAGS_scaled_viewer    = $(CFLAGS) $(CFLAGS_GUI)
 LDFLAGS_fvscaled_viewer += $(LDFLAGS_GUI)
 
 LIBS_fvnet = stdc++ fawkescore fawkesutils fawkesnetcomm fvutils
@@ -78,7 +78,7 @@ OBJS_fvnet = net.o
 
 LIBS_fvshowyuv = stdc++ fvutils fvwidgets
 OBJS_fvshowyuv = show_yuv.o
-CFLAGS_show_yuv += $(CFLAGS_SDL)
+CFLAGS_show_yuv = $(CFLAGS) $(CFLAGS_SDL)
 LDFLAGS_fvshowyuv += $(LDFLAGS_SDL)
 
 LIBS_fvcmpp = stdc++ m fawkesutils fvutils

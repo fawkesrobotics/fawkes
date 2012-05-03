@@ -43,16 +43,19 @@ using namespace firevision;
 
 /** Constructor.
  * @param camera_string camera argument string for camera to open
- * @param id ID used to form thread name (FvRetrieverThread_[ID]) and shared
+ * @param cfg_name ID used to form thread name (FvRetrieverThread_[ID]) and shared
  * memory image segment ID (retriever_[ID]).
+ * @param cfg_prefix configuration prefix path
  */
-FvRetrieverThread::FvRetrieverThread(const char *camera_string, const char *id)
+FvRetrieverThread::FvRetrieverThread(std::string camera_string,
+                                     std::string cfg_name, std::string cfg_prefix)
   : Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP),
     VisionAspect(VisionAspect::CYCLIC)
 {
-  __id = strdup(id);
-  __camera_string = strdup(camera_string);
-  set_name("FvRetrieverThread_%s", id);
+  cfg_name_ = cfg_name;
+  cfg_prefix_ = cfg_prefix;
+  camera_string_ = camera_string;
+  set_name("FvRetrieverThread_%s", cfg_name_.c_str());
   seq_writer = NULL;
 }
 
@@ -60,8 +63,6 @@ FvRetrieverThread::FvRetrieverThread(const char *camera_string, const char *id)
 /** Destructor. */
 FvRetrieverThread::~FvRetrieverThread()
 {
-  free(__camera_string);
-  free(__id);
 }
 
 
@@ -69,15 +70,15 @@ void
 FvRetrieverThread::init()
 {
   try {
-    logger->log_debug(name(), "Registering for camera '%s'", __camera_string);
-    cam = vision_master->register_for_camera(__camera_string, this);
+    logger->log_debug(name(), "Registering for camera '%s'", camera_string_.c_str());
+    cam = vision_master->register_for_camera(camera_string_.c_str(), this);
   } catch (Exception &e) {
     e.append("FvRetrieverThread::init() failed");
     throw;
   }
   try {
     char *imgbufname;
-    if ( asprintf(&imgbufname, "retriever_%s", __id) == -1 ) {
+    if ( asprintf(&imgbufname, "retriever_%s", cfg_name_.c_str()) == -1 ) {
       throw Exception("Cannot allocate buffer name");
     }
     shm = new SharedMemoryImageBuffer(imgbufname, cam->colorspace(),
@@ -92,6 +93,11 @@ FvRetrieverThread::init()
     cam = NULL;
     throw;
   }
+
+  try {
+    std::string frame_id = config->get_string((cfg_prefix_ + "frame").c_str());
+    shm->set_frame_id(frame_id.c_str());
+  } catch (Exception &e) {/* ignored, not critical */}
 
   seq_writer = NULL;
   try {
@@ -137,11 +143,16 @@ FvRetrieverThread::init()
 
   __cam_has_timestamp_support = true;
   try {
-    cam->capture_time();
+    fawkes::Time *t = cam->capture_time();
+    if (t->is_zero()) {
+      throw NotImplementedException("");
+    }
+    cap_time_ = NULL;
   }
   catch (NotImplementedException &e)
   {
     __cam_has_timestamp_support = false;
+    cap_time_ = new Time(clock);
   }
 }
 
@@ -156,6 +167,7 @@ FvRetrieverThread::finalize()
   delete seq_writer;
   delete __tt;
   delete __cm;
+  delete cap_time_;
 }
 
 
@@ -183,7 +195,12 @@ FvRetrieverThread::loop()
     // no time tracker
     cam->capture();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size());
-    if (__cam_has_timestamp_support) shm->set_capture_time(cam->capture_time());
+    if (__cam_has_timestamp_support) {
+      shm->set_capture_time(cam->capture_time());
+    } else {
+      cap_time_->stamp();
+      shm->set_capture_time(cap_time_);
+    }
     cam->dispose_buffer();
   }
 
