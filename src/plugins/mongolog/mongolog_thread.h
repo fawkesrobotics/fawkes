@@ -76,6 +76,8 @@ class MongoLogThread
   };
   */
 
+
+  /** Mongo Logger interface listener. */
   class InterfaceListener : public fawkes::BlackBoardInterfaceListener
   {
    public:

@@ -61,6 +61,7 @@ class MongoDBThread::ClientConf
   std::vector<mongo::HostAndPort> __replicaset_hostports;
   std::list<mongo::HostAndPort>   __synccluster_hostports;
 
+  /// @cond INTERNALS
   typedef struct _AuthInfo {
     _AuthInfo(std::string dbname, std::string username, std::string clearpwd)
     { this->dbname = dbname; this->username = username;
@@ -69,6 +70,7 @@ class MongoDBThread::ClientConf
     std::string username;
     std::string clearpwd;
   } AuthInfo;    
+  /// @endcond
 
   std::list<AuthInfo> __auth_infos;
 };

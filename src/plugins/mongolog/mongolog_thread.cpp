@@ -110,7 +110,7 @@ MongoLogThread::init()
 						     __collections, logger);
   }
 
-  blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+  blackboard->register_observer(this);
 
   config->set_string("/plugins/mongorrd/databases/mongolog", __database);
 }
@@ -169,6 +169,14 @@ MongoLogThread::bb_interface_created(const char *type, const char *id) throw()
 
 
 
+/** Constructor.
+ * @param blackboard blackboard
+ * @param interface interface to listen for
+ * @param mongodb MongoDB client to write to
+ * @param database name of database to write to
+ * @param colls collections
+ * @param logger logger
+ */
 MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
 						     Interface *interface,
 						     mongo::DBClientBase *mongodb,
@@ -202,6 +210,7 @@ MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
 }
 
 
+/** Destructor. */
 MongoLogThread::InterfaceListener::~InterfaceListener()
 {
   __blackboard->unregister_listener(this);
@@ -347,6 +356,19 @@ MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interfac
 	subb.doneFast();
       } else {
 	document.append(i.get_name(), i.get_float());
+      }
+      break;
+
+    case IFT_DOUBLE:
+      if (is_array) {
+	double *doubles = i.get_doubles();
+	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	for (size_t l = 0; l < length; ++l) {
+	  subb.append(doubles[l]);
+	}
+	subb.doneFast();
+      } else {
+	document.append(i.get_name(), i.get_double());
       }
       break;
 

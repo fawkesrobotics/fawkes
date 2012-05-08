@@ -77,6 +77,7 @@ class MongoRRDThread
   fawkes::RRDGraphDefinition *__indexes_graph;
   fawkes::RRDGraphDefinition *__locks_graph;
 
+  /// @cond INTERNALS
   typedef struct {
     std::string                 db_name;
     std::string                 rrd_name;
@@ -86,6 +87,7 @@ class MongoRRDThread
     fawkes::RRDGraphDefinition *graph2;
     fawkes::RRDGraphDefinition *graph3;
   } DbStatsInfo;
+  /// @endcond
 
   typedef std::map<std::string, DbStatsInfo> DbStatsMap;
   DbStatsMap __dbstats;
