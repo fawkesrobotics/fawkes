@@ -13,8 +13,13 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard /usr/include/mongo/client/dbclient.h),)
-  HAVE_MONGODB=1
-  LIBS_MONGODB=mongoclient boost_thread-mt boost_filesystem-mt boost_system-mt
+include $(BUILDSYSDIR)/boost.mk
+
+ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/client/dbclient.h),)
+  ifeq ($(call boost-have-libs,thread system filesystem),1)
+    HAVE_MONGODB = 1
+    CFLAGS_MONGODB  = -DHAVE_MONGODB
+    LDFLAGS_MONGODB = -lmongoclient -lm $(call boost-libs-ldflags,thread system filesystem)
+  endif
 endif
 

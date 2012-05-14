@@ -19,8 +19,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_mongorrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesconfig fawkesmongodbaspect fawkesrrdaspect $(LIBS_MONGODB)
+		fawkesconfig fawkesmongodbaspect fawkesrrdaspect
 OBJS_mongorrd = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+CFLAGS  += $(CFLAGS_MONGODB)
+LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongorrd)
 

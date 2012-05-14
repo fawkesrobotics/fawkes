@@ -22,8 +22,11 @@ PRESUBDIRS = aspect
 
 INCDIRS += $(INCDIRS_MONGODB)
 
-LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect $(LIBS_MONGODB)
+LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect
 OBJS_mongodb = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+CFLAGS  += $(CFLAGS_MONGODB)
+LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb)
 

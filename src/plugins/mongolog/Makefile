@@ -19,8 +19,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_mongolog = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect $(LIBS_MONGODB)
+		fawkesutils fawkeslogging fawkesmongodbaspect
 OBJS_mongolog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+CFLAGS  += $(CFLAGS_MONGODB)
+LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongolog)
 
