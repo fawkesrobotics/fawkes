@@ -23,14 +23,16 @@ __buildsys_boost_mk_ := 1
 BOOST_LIB_DIRS=/usr/lib64 /usr/lib /usr/lib32 \
 	       /usr/local/lib64 /usr/local/lib
 BOOST_INCLUDE_DIRS=
-BOOST_USE_MULTITHREADED = 1
-ifeq ($(BOOST_USE_MULTITHREADED),1)
-  BOOST_LIBRARY_SUFFIX=-mt
+BOOST_LIBRARY_SUFFIX=-mt
+ifeq ($(OS),FreeBSD)
+  BOOST_LIBRARY_SUFFIX=
 endif
 
-
-boost-have-lib    = $(if $(wildcard $(foreach l,$(BOOST_LIB_DIRS),$l/libboost_$1$(BOOST_LIBRARY_SUFFIX).$(SOEXT) )),1)
+boost-have-lib    = $(if $(wildcard $(foreach l,$(BOOST_LIB_DIRS),$l/libboost_$1$(BOOST_LIBRARY_SUFFIX).$(SOEXT) )),1,0)
 boost-lib-cflags  = $(addprefix -I,$(wildcard $(BOOST_INCLUDE_DIRS)))
 boost-lib-ldflags = $(if $(call boost-have-lib,$1),-lboost_$1$(BOOST_LIBRARY_SUFFIX))
+
+boost-have-libs    = $(if $(strip $(subst 1,,$(foreach c,$1,$(call boost-have-lib,$c)))),0,1)
+boost-libs-ldflags = $(foreach l,$1,$(if $(call boost-have-lib,$l),-lboost_$l$(BOOST_LIBRARY_SUFFIX)) )
 
 endif # __buildsys_boost_mk_
