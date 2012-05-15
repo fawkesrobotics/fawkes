@@ -23,15 +23,20 @@ PRESUBDIRS = aspect
 INCDIRS += $(INCDIRS_MONGODB)
 
 LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect
-OBJS_mongodb = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_mongodb = mongodb_plugin.o mongodb_thread.o
+
+LIBS_mongorrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
+                fawkesconfig fawkesmongodbaspect fawkesrrdaspect
+OBJS_mongorrd = mongorrd_plugin.o mongorrd_thread.o
+
 
 CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
-OBJS_all    = $(OBJS_mongodb)
+OBJS_all    = $(OBJS_mongodb) $(OBJS_mongorrd)
 
 ifeq ($(HAVE_MONGODB),1)
-  PLUGINS_all = $(PLUGINDIR)/mongodb.so
+  PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongorrd.$(SOEXT)
 else
   WARN_TARGETS += warning_mongodb
 endif
@@ -41,7 +46,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_mongodb
 warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Plugins$(TNORMAL) (mongodb[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
