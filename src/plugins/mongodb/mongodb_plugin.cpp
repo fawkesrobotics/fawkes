@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  mongodb_plugin.h - Fawkes MongoDB Plugin
+ *  mongodb_plugin.cpp - Fawkes MongoDB Plugin
  *
  *  Created: Sun Dec 05 23:22:23 2010 (Steelers vs. Baltimore, Touchdown!)
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
@@ -20,28 +20,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mongodb_plugin.h"
+#include <core/plugin.h>
+
 #include "mongodb_thread.h"
 
 using namespace fawkes;
 
-/** @class MongoDBPlugin <plugins/mongodb/mongodb_plugin.h>
- * MongoDB Connector Plugin.
+/** MongoDB Connector Plugin.
  * This plugin provides access to MongoDB for other Fawkes plugins. If
  * enabled it also writes log messages to the database.
  *
  * @author Tim Niemueller
  */
-
-/** Constructor.
- * @param config Fawkes configuration
- */
-MongoDBPlugin::MongoDBPlugin(Configuration *config)
-  : Plugin(config)
+class MongoDBPlugin : public fawkes::Plugin
 {
-  thread_list.push_back(new MongoDBThread());
-}
-
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  MongoDBPlugin(Configuration *config) : Plugin(config)
+  {
+    thread_list.push_back(new MongoDBThread());
+  }
+};
 
 PLUGIN_DESCRIPTION("MongoDB Connector Plugin")
 EXPORT_PLUGIN(MongoDBPlugin)
