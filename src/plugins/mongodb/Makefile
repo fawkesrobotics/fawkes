@@ -25,18 +25,18 @@ INCDIRS += $(INCDIRS_MONGODB)
 LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect
 OBJS_mongodb = mongodb_plugin.o mongodb_thread.o
 
-LIBS_mongorrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
+LIBS_mongodb_rrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
                 fawkesconfig fawkesmongodbaspect fawkesrrdaspect
-OBJS_mongorrd = mongorrd_plugin.o mongorrd_thread.o
+OBJS_mongodb_rrd = mongorrd_plugin.o mongorrd_thread.o
 
 
 CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
-OBJS_all    = $(OBJS_mongodb) $(OBJS_mongorrd)
+OBJS_all    = $(OBJS_mongodb) $(OBJS_mongodb_rrd)
 
 ifeq ($(HAVE_MONGODB),1)
-  PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongorrd.$(SOEXT)
+  PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongodb-rrd.$(SOEXT)
 else
   WARN_TARGETS += warning_mongodb
 endif
