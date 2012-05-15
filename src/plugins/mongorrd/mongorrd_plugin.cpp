@@ -3,7 +3,7 @@
  *  mongorrd_plugin.cpp - Fawkes MongoDB RRD Plugin
  *
  *  Created: Wed Dec 08 23:04:33 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,27 +20,26 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mongorrd_plugin.h"
 #include "mongorrd_thread.h"
+#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** @class MongoRRDPlugin "mongorrd_plugin.h"
- * MongoDB RRD Plugin.
+/** MongoDB RRD Plugin.
  * This plugin records MongoDB performance data using RRDs.
- *
  * @author Tim Niemueller
  */
-
+class MongoRRDPlugin : public fawkes::Plugin
+{
+ public:
 /** Constructor.
  * @param config Fawkes configuration
  */
-MongoRRDPlugin::MongoRRDPlugin(Configuration *config)
-  : Plugin(config)
-{
-  thread_list.push_back(new MongoRRDThread());
-}
-
+  MongoRRDPlugin(Configuration *config) : Plugin(config)
+  {
+    thread_list.push_back(new MongoRRDThread());
+  }
+};
 
 PLUGIN_DESCRIPTION("Log MongoDB performance data using RRD")
 EXPORT_PLUGIN(MongoRRDPlugin)
