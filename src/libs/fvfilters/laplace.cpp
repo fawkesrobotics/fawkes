@@ -3,8 +3,7 @@
  *  laplace.cpp - Implementation of a laplace filter
  *
  *  Created: Thu Jun 16 16:30:23 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,9 +24,16 @@
 
 #include <core/exception.h>
 
-#include <ippi.h>
 #include <cmath>
 #include <cstdlib>
+
+#ifdef HAVE_IPP
+#  include <ippi.h>
+#elif defined(HAVE_OPENCV)
+#  include <cv.h>
+#else
+#  error "Neither IPP nor OpenCV available"
+#endif
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -45,6 +51,7 @@ FilterLaplace::FilterLaplace()
   : Filter("FilterLaplace")
 {
   kernel = NULL;
+  kernel_float = NULL;
 }
 
 
@@ -59,6 +66,12 @@ FilterLaplace::FilterLaplace(float sigma, unsigned int size, float scale)
   kernel_size = size;
   kernel = (int *)malloc( size * size * sizeof(int) );
   calculate_kernel( kernel, sigma, size, scale );
+#ifdef HAVE_OPENCV
+  kernel_float = (float *)malloc(size * size * sizeof(float));
+  for (unsigned int i = 0; i < size * size; ++i) {
+    kernel_float[i] = kernel[i];
+  }
+#endif
 }
 
 
@@ -68,12 +81,16 @@ FilterLaplace::~FilterLaplace()
   if ( kernel != NULL ) {
     free( kernel );
   }
+  if ( kernel_float != NULL ) {
+    free( kernel_float );
+  }
 }
 
 
 void
 FilterLaplace::apply()
 {
+#if defined(HAVE_IPP)
   IppiSize size;
   size.width = src_roi[0]->width - kernel_size;
   size.height = src_roi[0]->height - kernel_size;
@@ -128,6 +145,31 @@ FilterLaplace::apply()
   }
   std::cout << std::endl;
   */
+#elif defined(HAVE_OPENCV)
+  if ((dst == NULL) || (dst == src[0])) {
+    throw fawkes::Exception("OpenCV-based Sobel filter cannot be in-place");
+  }
+
+  cv::Mat srcm(src_roi[0]->width, src_roi[0]->height, CV_8UC1,
+               src[0] +
+                 (src_roi[0]->start.y * src_roi[0]->line_step) +
+                 (src_roi[0]->start.x * src_roi[0]->pixel_step),
+               src_roi[0]->line_step);
+
+  cv::Mat dstm(dst_roi->width, dst_roi->height, CV_8UC1,
+               dst +
+                 (dst_roi->start.y * dst_roi->line_step) +
+                 (dst_roi->start.x * dst_roi->pixel_step),
+               dst_roi->line_step);
+
+  if ( kernel_float == NULL ) {
+    cv::Laplacian(srcm, dstm, /* ddepth */ CV_8UC1, /* ksize */ 5);
+  } else {
+    cv::Mat kernel(kernel_size, kernel_size, CV_32F, kernel_float);
+    cv::Point kanchor((kernel_size + 1) / 2, (kernel_size + 1) / 2);
+    cv::filter2D(srcm, dstm, /* ddepth */ -1, kernel, kanchor);
+  }
+#endif
 }
 
 

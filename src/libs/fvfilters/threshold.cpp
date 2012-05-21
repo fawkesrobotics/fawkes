@@ -6,8 +6,7 @@
  *                  will be set to the max_replace value
  *
  *  Created: Tue Jun 07 14:30:10 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -29,7 +28,14 @@
 #include <core/exception.h>
 
 #include <cstddef>
-#include <ippi.h>
+
+#ifdef HAVE_IPP
+#  include <ippi.h>
+#elif defined(HAVE_OPENCV)
+#  include <cv.h>
+#else
+#  error "Neither IPP nor OpenCV available"
+#endif
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -37,7 +43,11 @@ namespace firevision {
 #endif
 
 /** @class FilterThreshold <fvfilters/threshold.h>
- * Threshold filter
+ * Threshold filter.
+ * Implementation for threshold filter, this filter will luminance
+ * values below a given threshold to the given min_replace value,
+ * values above a given max threshold will be set to the max_replace
+ * value
  */
 
 /** Constructor.
@@ -54,6 +64,12 @@ FilterThreshold::FilterThreshold(unsigned char min, unsigned char min_replace,
   this->max = max;
   this->min_replace = min_replace;
   this->max_replace = max_replace;
+#if defined(HAVE_OPENCV)
+  if (min_replace != 0) {
+    throw fawkes::Exception("OpenCV-based threshold filter only allows min_replace=0");
+  }
+#endif
+
 }
 
 
@@ -77,6 +93,7 @@ FilterThreshold::set_thresholds(unsigned char min, unsigned char min_replace,
 void
 FilterThreshold::apply()
 {
+#if defined(HAVE_IPP)
   IppiSize size;
   size.width = src_roi[0]->width;
   size.height = src_roi[0]->height;
@@ -107,6 +124,28 @@ FilterThreshold::apply()
   if ( status != ippStsNoErr ) {
     throw fawkes::Exception("Threshold filter failed with %i\n", status);
   }
+
+#elif defined(HAVE_OPENCV)
+  if ((dst == NULL) || (dst == src[0])) {
+    throw fawkes::Exception("OpenCV-based threshold filter cannot be in-place");
+  }
+
+  cv::Mat srcm(src_roi[0]->width, src_roi[0]->height, CV_8UC1,
+               src[0] +
+                 (src_roi[0]->start.y * src_roi[0]->line_step) +
+                 (src_roi[0]->start.x * src_roi[0]->pixel_step),
+               src_roi[0]->line_step);
+
+  cv::Mat dstm(dst_roi->width, dst_roi->height, CV_8UC1,
+               dst +
+                 (dst_roi->start.y * dst_roi->line_step) +
+                 (dst_roi->start.x * dst_roi->pixel_step),
+               dst_roi->line_step);
+
+  cv::threshold(srcm, dstm, max, max_replace, cv::THRESH_BINARY);
+  cv::threshold(srcm, dstm, min, 0, cv::THRESH_TOZERO);
+
+#endif
 
 }
 

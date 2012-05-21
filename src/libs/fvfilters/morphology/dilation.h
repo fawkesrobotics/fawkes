@@ -3,8 +3,7 @@
  *  dilation.h - header for morphological dilation filter
  *
  *  Created: Thu May 25 15:29:05 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

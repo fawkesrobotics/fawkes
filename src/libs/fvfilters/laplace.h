@@ -3,8 +3,7 @@
  *  laplace.h - Header of the laplace filter
  *
  *  Created: Thu Jun 16 16:28:38 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef HAVE_IPP
-#error "IPP not installed"
+#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#error "Neither IPP nor OpenCV installed"
 #endif
 
 #ifndef __FIREVISION_FILTER_LAPLACE_H_
@@ -49,6 +48,9 @@ class FilterLaplace : public Filter
 
  private:
   int           *kernel;
+  // only used for OpenCV, but adding unconditional to avoid weird
+  // problems with differently sized class type sizes of macro missing
+  float         *kernel_float;
   unsigned int   kernel_size;
 };
 

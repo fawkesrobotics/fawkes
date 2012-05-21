@@ -3,8 +3,7 @@
  *  erosion.h - header for morphological erosion filter
  *
  *  Created: Fri May 26 12:12:39 2006
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

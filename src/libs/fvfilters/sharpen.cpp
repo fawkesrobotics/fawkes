@@ -3,8 +3,7 @@
  *  sharpen.cpp - Implementation of the sharpen filter
  *
  *  Created: Thu Jun 16 16:13:15 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,7 +24,13 @@
 
 #include <core/exception.h>
 
-#include <ippi.h>
+#ifdef HAVE_IPP
+#  include <ippi.h>
+#elif defined(HAVE_OPENCV)
+#  include <cv.h>
+#else
+#  error "Neither IPP nor OpenCV available"
+#endif
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -47,6 +52,7 @@ FilterSharpen::FilterSharpen()
 void
 FilterSharpen::apply()
 {
+#if defined(HAVE_IPP)
   IppiSize size;
   size.width = src_roi[0]->width;
   size.height = src_roi[0]->height;
@@ -61,6 +67,34 @@ FilterSharpen::apply()
   if ( status != ippStsNoErr ) {
     throw fawkes::Exception("Sharpen filter failed with %i\n", status);
   }
+#elif defined(HAVE_OPENCV)
+  if ((dst == NULL) || (dst == src[0])) {
+    throw fawkes::Exception("OpenCV-based Sobel filter cannot be in-place");
+  }
+
+  cv::Mat srcm(src_roi[0]->width, src_roi[0]->height, CV_8UC1,
+               src[0] +
+                 (src_roi[0]->start.y * src_roi[0]->line_step) +
+                 (src_roi[0]->start.x * src_roi[0]->pixel_step),
+               src_roi[0]->line_step);
+
+  cv::Mat dstm(dst_roi->width, dst_roi->height, CV_8UC1,
+               dst +
+                 (dst_roi->start.y * dst_roi->line_step) +
+                 (dst_roi->start.x * dst_roi->pixel_step),
+               dst_roi->line_step);
+
+  cv::Mat kernel(3, 3, CV_32F);
+  float *kernel_f = (float *)kernel.ptr();
+  kernel_f[0] = -0.125; kernel_f[1] = -0.125; kernel_f[2] = -0.125;
+  kernel_f[3] = -0.125; kernel_f[4] = 2.0;    kernel_f[5] = -0.125;
+  kernel_f[6] = -0.125; kernel_f[7] = -0.125; kernel_f[8] = -0.125;
+
+  cv::Point kanchor(1, 1);
+
+  cv::filter2D(srcm, dstm, /* ddepth */ -1, kernel, kanchor);
+
+#endif
 
 }
 
