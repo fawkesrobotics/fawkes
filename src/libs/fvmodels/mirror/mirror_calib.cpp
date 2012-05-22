@@ -917,13 +917,11 @@ class MirrorCalibTool::Image
 /** Constructor. */
 MirrorCalibTool::MirrorCalibTool()
   : img_yuv_buffer_(0),
-    img_center_x_(500),
-    img_center_y_(500),
+    img_center_x_(-1),
+    img_center_y_(-1),
     img_yuv_mask_(0),
     state_(CalibrationState())
-#ifdef HAVE_BULB_CREATOR
   , bulb_(0)
-#endif
 {
 }
 
@@ -937,11 +935,9 @@ MirrorCalibTool::~MirrorCalibTool()
   if (img_yuv_mask_) {
     delete[] img_yuv_mask_;
   }
-#ifdef HAVE_BULB_CREATOR
   if (bulb_) {
     delete bulb_;
   }
-#endif
 }
 
 
@@ -992,25 +988,18 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
   if (img_yuv_mask_) {
     delete[] img_yuv_mask_;
   }
-#if 0 // delete the enclosed code?
-  size_t hack_size = 2 * 1000 * 1000;
-  if (!source_images_.empty()) {
-    size_t width = static_cast<size_t>(source_images_.front().width());
-    size_t height = static_cast<size_t>(source_images_.front().height());
-    hack_size = 2 * width * height;
-  }
-  img_yuv_mask_ = new unsigned char[hack_size];
-#endif
   PNMReader reader(mask_file_name);
   size_t size = colorspace_buffer_size(reader.colorspace(),
                                        reader.pixel_width(),
                                        reader.pixel_height());
   img_yuv_mask_ = new unsigned char[size];
-#if 0 // delete the enclosed code?
-  if (size != hack_size) {
-    throw fawkes::Exception("Size hack didn't work. PNM-Mask has unexpected size.");
+  if (img_center_x_ == -1) {
+    img_center_x_ = reader.pixel_width() / 2;
   }
-#endif
+  if (img_center_y_ == -1) {
+    img_center_y_ = reader.pixel_height() / 2;
+  }
+  printf("center = %d, %d\n", img_center_x_, img_center_y_);
   reader.set_buffer(img_yuv_mask_);
   reader.read();
 }
@@ -1035,6 +1024,12 @@ MirrorCalibTool::push_back(const unsigned char* yuv_buffer,
 {
   ori = relativeOrientationToImageRotation(ori);
   Image src_img(yuv_buffer, buflen, width, height, ori);
+   if (img_center_x_ == -1) {
+    img_center_x_ = width / 2;
+  }
+  if (img_center_y_ == -1) {
+    img_center_y_ = height / 2;
+  }
   source_images_.push_back(src_img);
 }
 
@@ -1043,8 +1038,8 @@ MirrorCalibTool::push_back(const unsigned char* yuv_buffer,
 void
 MirrorCalibTool::abort()
 {
-  img_center_x_       = 500;
-  img_center_y_       = 500;
+  img_center_x_       = -1;
+  img_center_y_       = -1;
   state_              = CalibrationState();
   source_images_.clear();
   premarks_.clear();
@@ -1804,7 +1799,6 @@ MirrorCalibTool::interpolate(PolarRadius radius,
 }
 
 
-#ifdef HAVE_BULB_CREATOR
 /**
  * Generates a new bulb based on the given data.
  * @param width The width of the image.
@@ -1896,7 +1890,6 @@ MirrorCalibTool::generate(int width,
   }
   return bulb;
 }
-#endif
 
 
 void
@@ -1928,7 +1921,6 @@ void
 MirrorCalibTool::eval(unsigned int x, unsigned int y,
                       float* dist_ret, float* ori_ret)
 {
-#ifdef HAVE_BULB_CREATOR
   if (!bulb_) {
     printf("No bulb loaded, cannot evaluate.\n");
     return;
@@ -1938,7 +1930,6 @@ MirrorCalibTool::eval(unsigned int x, unsigned int y,
 
   *dist_ret = coord.r;
   *ori_ret = coord.phi;
-#endif
 }
 
 
@@ -1948,9 +1939,7 @@ MirrorCalibTool::eval(unsigned int x, unsigned int y,
 void
 MirrorCalibTool::load(const char* filename)
 {
-#ifdef HAVE_BULB_CREATOR
   bulb_ = new Bulb(filename);
-#endif
 }
 
 
@@ -1960,7 +1949,6 @@ MirrorCalibTool::load(const char* filename)
 void
 MirrorCalibTool::save(const char* filename)
 {
-#ifdef HAVE_BULB_CREATOR
   if (state_.step == DONE) {
     const Image& src_img = source_images_[state_.image_index];
     const PixelPoint center(img_center_x_, img_center_y_);
@@ -1969,7 +1957,6 @@ MirrorCalibTool::save(const char* filename)
   } else {
     std::cout << "Can't save in the middle of the calibration" << std::endl;
   }
-#endif
 }
 
 

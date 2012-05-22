@@ -23,6 +23,9 @@
 #ifndef __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 #define __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 
+/* XXX HAVE_MIRROR_CALIB should rather be defined by the Makefile. */
+#define HAVE_MIRROR_CALIB
+
 #include <gtkmm.h>
 #include <fvutils/base/roi.h>
 #include <fvutils/color/colorspaces.h>
@@ -224,7 +227,7 @@ class Firestation : public Gtk::Window
   bool m_enable_scaling;
   float m_scale_factor;
 
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
   firevision::MirrorCalibTool* m_calib_tool;
 #endif
   ColorTrainWidget* m_ctw;
