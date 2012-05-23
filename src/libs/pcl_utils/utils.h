@@ -41,10 +41,15 @@ template <typename PointT>
 inline void
 set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &time)
 {
+#if HAVE_ROS_PCL
+  cloud->header.stamp.sec  = time.get_sec();
+  cloud->header.stamp.nsec = time.get_usec() * 1000;
+#else
   fawkes::PointCloudTimestamp pclts;
   pclts.time.sec  = time.get_sec();
   pclts.time.usec = time.get_usec();
   cloud->header.stamp = pclts.timestamp;
+#endif
 }
 
 
@@ -56,11 +61,35 @@ set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &ti
  */
 template <typename PointT>
 inline void
-get_time(fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
+get_time(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
 {
+#if HAVE_ROS_PCL
+  time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
+#else
   fawkes::PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
   time.set_time(pclts.time.sec, time.get_usec());
+#endif
+}
+
+
+/** Get time of a point cloud as a fawkes::Time instance.
+ * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to get the time
+ * @param time upon return contains the timestamp of the cloud
+ */
+template <typename PointT>
+inline void
+get_time(const fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
+{
+#if HAVE_ROS_PCL
+  time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
+#else
+  fawkes::PointCloudTimestamp pclts;
+  pclts.timestamp = cloud->header.stamp;
+  time.set_time(pclts.time.sec, time.get_usec());
+#endif
 }
 
 
@@ -73,10 +102,7 @@ inline void
 copy_time(fawkes::RefPtr<const pcl::PointCloud<PointT1> > &from,
           fawkes::RefPtr<pcl::PointCloud<PointT2> > &to)
 {
-  fawkes::PointCloudTimestamp pclts;
-  pclts.timestamp = from->header.stamp;
-  fawkes::Time t(pclts.time.sec, pclts.time.usec);
-  pcl_utils::set_time(to,t);
+  to->header.stamp = from->header.stamp;
 }
 
 
