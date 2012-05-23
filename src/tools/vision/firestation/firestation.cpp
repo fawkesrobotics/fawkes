@@ -32,7 +32,7 @@
 #include <fvcams/shmem.h>
 #include <fvcams/net.h>
 
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
 #include <fvmodels/mirror/mirror_calib.h>
 #endif
 
@@ -226,11 +226,11 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
 
 
   // --- mirror calibration -----------------------------------------
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
   m_calib_tool = new firevision::MirrorCalibTool();
 #endif
 
-#if !defined(HAVE_BULB_CREATOR) or !defined(HAVE_IPP)
+#ifndef HAVE_MIRROR_CALIB
   Gtk::Notebook *nb;
   Gtk::HBox *box;
   builder->get_widget("ntbOptions", nb);
@@ -239,11 +239,9 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
   box->set_sensitive(false);
 #endif
 
-  Gtk::Scale* m_scl_mc_line;
   builder->get_widget("sclMcLine", m_scl_mc_line);
   m_scl_mc_line->signal_change_value().connect( sigc::mem_fun(*this, &Firestation::mc_on_line_angle_changed) );
 
-  Gtk::Button* m_btn_mc_load_mask;
   builder->get_widget("btnMcLoadMask", m_btn_mc_load_mask);
   m_btn_mc_load_mask->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load_mask) );
 
@@ -259,23 +257,19 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
   m_btn_mc_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_save) );
 
-  Gtk::Button* m_btn_mc_memorize;
+  builder->get_widget("btnMcSetCenter", m_btn_mc_set_center);
+  m_btn_mc_set_center->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_set_center) );
+
   builder->get_widget("btnMcMemorize", m_btn_mc_memorize);
   m_btn_mc_memorize->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_memorize) );
 
-  Gtk::Button* m_btn_mc_simulate_clicks;
   builder->get_widget("btnMcSimulateClicks", m_btn_mc_simulate_clicks);
   m_btn_mc_simulate_clicks->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_simulate_clicks) );
 
-  Gtk::Entry* m_ent_mc_dist;
   builder->get_widget("entCalibDist", m_ent_mc_dist);
-  Gtk::Entry* m_ent_mc_ori;
   builder->get_widget("entCalibOri", m_ent_mc_ori);
 
   // ----------------------------------------------------------------
-  Gtk::FileChooserDialog* m_fcd_mc_load_mask;
-  Gtk::FileChooserDialog* m_fcd_mc_save;
-  Gtk::FileChooserDialog* m_fcd_mc_load;
   builder->get_widget("fcdMcLoadMask", m_fcd_mc_load_mask);
   builder->get_widget("fcdCalibSave", m_fcd_mc_save);
   builder->get_widget("fcdCalibLoad", m_fcd_mc_load);
@@ -363,7 +357,7 @@ Firestation::~Firestation()
   delete m_camera;
   delete m_img_writer;
 
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
   delete m_calib_tool;
 #endif
   delete m_ctw;
@@ -1020,23 +1014,31 @@ Firestation::image_click(GdkEventButton* event)
 
     case MODE_MIRROR_CALIB:
       {
-#ifdef HAVE_IPP
-        m_calib_tool->next_step();
-        const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
-        memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
-        memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
-        m_calib_tool->draw_mark_lines(m_yuv_draw_buffer);
-        draw_image();
-        m_stb_status->push(m_calib_tool->get_state_description());
+#ifdef HAVE_MIRROR_CALIB
+        if (m_btn_mc_set_center->get_active()) {
+          m_calib_tool->set_center(image_x, image_y);
+          m_btn_mc_set_center->set_active(false);
+          mc_draw_line();
+          printf("Setting center to %d, %d\n", image_x, image_y);
+        } else {
+          printf("Using center to %d, %d\n", m_calib_tool->center_x(), m_calib_tool->center_y());
+          m_calib_tool->next_step();
+          const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
+          memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
+          memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
+          m_calib_tool->draw_mark_lines(m_yuv_draw_buffer);
+          draw_image();
+          m_stb_status->push(m_calib_tool->get_state_description());
+        }
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
 	break;
       }
 
     case MODE_MIRROR_CALIB_EVAL:
       {
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
 	float dist;
 	float phi;
 	m_calib_tool->eval(image_x, image_y, &dist, &phi);
@@ -1046,7 +1048,7 @@ Firestation::image_click(GdkEventButton* event)
             rad2deg(phi), dist);
         //printf("Distance: %2f\t Phi: %2f\n", dist, phi);
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
 	break;
       }
@@ -1127,7 +1129,7 @@ void
 Firestation::mc_draw_line()
 {
   if (m_img_src != SRC_NONE) {
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
     memcpy(m_yuv_draw_buffer, m_yuv_orig_buffer, m_img_size);
     MirrorCalibTool::draw_line(m_yuv_draw_buffer,
                                mc_line_angle_deg,
@@ -1137,7 +1139,7 @@ Firestation::mc_draw_line()
                                m_img_height);
     draw_image();
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
   }
 }
@@ -1182,12 +1184,12 @@ Firestation::mc_load_mask()
     {
     case Gtk::RESPONSE_OK:
       {
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
 	std::string filename = m_fcd_mc_load_mask->get_filename();
 	m_calib_tool->load_mask( filename.c_str() );
 	//m_op_mode = MODE_MIRROR_CALIB_EVAL;
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
 	break;
       }
@@ -1198,6 +1200,14 @@ Firestation::mc_load_mask()
     }
 
   m_fcd_mc_load_mask->hide();
+}
+
+/** Enters MODE_MIRROR_CALIB mode which waits for a click to mark the
+ * preliminary center of the image. */
+void
+Firestation::mc_set_center()
+{
+  m_op_mode = MODE_MIRROR_CALIB;
 }
 
 /** Start the mirror calibration process. */
@@ -1211,7 +1221,7 @@ Firestation::mc_memorize()
     }
   else */ if (m_img_src != SRC_NONE)
     {
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
       double ori = mc_line_angle_deg;
       std::cout << "Starting calibration for ori = " << ori << std::endl;
       m_calib_tool->push_back(m_yuv_orig_buffer, m_img_size,
@@ -1230,35 +1240,8 @@ Firestation::mc_memorize()
       // robots perspective. But due to the mirroring, that's the right side in the
       // image, so we take -90 degrees.
       mc_draw_line();
-#if 0
-      bool show;
-      float next_dist;
-      float next_ori;
-      show = m_calib_tool->get_next(&next_dist, &next_ori);
-
-      if (show)
-        {
-          char* next_dist_char = (char*) malloc(10);
-          char* next_ori_char = (char*) malloc(10);
-
-          sprintf(next_dist_char, "%2f", next_dist);
-          sprintf(next_ori_char, "%2f", next_ori);
-          m_ent_mc_dist->set_text(Glib::ustring(next_dist_char));
-          m_ent_mc_ori->set_text(Glib::ustring(next_ori_char));
-
-          free(next_dist_char);
-          free(next_ori_char);
-        }
-      else
-        {
-          m_ent_mc_dist->set_text("");
-          m_ent_mc_ori->set_text("");
-        }
-
-      m_stb_status->push("Entering mirror calibration mode");
-#endif
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
   }
 }
@@ -1302,12 +1285,12 @@ Firestation::mc_load()
     {
     case Gtk::RESPONSE_OK:
       {
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
 	std::string filename = m_fcd_mc_load->get_filename();
 	m_calib_tool->load( filename.c_str() );
 	m_op_mode = MODE_MIRROR_CALIB_EVAL;
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
 	break;
       }
@@ -1332,12 +1315,12 @@ Firestation::mc_save()
     {
     case(Gtk::RESPONSE_OK):
       {
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
 	std::string filename = m_fcd_mc_save->get_filename();
 
 	m_calib_tool->save( filename.c_str() );
 #else
-        printf("IPP not installed; mirror calibration does not work.\n");
+        printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
 	break;
       }

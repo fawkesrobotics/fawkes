@@ -135,6 +135,7 @@ class Firestation : public Gtk::Window
 
   double mc_line_angle_deg;
   void mc_load_mask();
+  void mc_set_center();
   void mc_memorize();
   void mc_simulate_clicks();
   void mc_draw_line();
@@ -182,6 +183,7 @@ class Firestation : public Gtk::Window
   Gtk::FileChooserDialog* m_fcd_mc_save;
   Gtk::FileChooserDialog* m_fcd_mc_load;
   Gtk::Button* m_btn_mc_load_mask;
+  Gtk::ToggleButton* m_btn_mc_set_center;
   Gtk::Button* m_btn_mc_memorize;
   Gtk::Button* m_btn_mc_simulate_clicks;
   Gtk::Scale* m_scl_mc_line;
@@ -224,7 +226,7 @@ class Firestation : public Gtk::Window
   bool m_enable_scaling;
   float m_scale_factor;
 
-#ifdef HAVE_IPP
+#ifdef HAVE_MIRROR_CALIB
   firevision::MirrorCalibTool* m_calib_tool;
 #endif
   ColorTrainWidget* m_ctw;

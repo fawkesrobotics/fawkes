@@ -25,3 +25,7 @@
 .project
 .settings
 
+# Vim files
+.*.swp
+.*.swo
+

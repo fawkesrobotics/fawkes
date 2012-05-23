@@ -24,17 +24,17 @@
 #ifndef __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 #define __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 
-#ifndef HAVE_IPP
-#error "IPP not installed"
+///@cond MACRO
+#if !(defined(HAVE_IPP) or defined(HAVE_OPENCV))
+#error "Neither IPP nor OpenCV are installed."
 #endif
+///@endcond
 
 #include <geometry/hom_point.h>
 #include <utils/math/angle.h>
 #include <fvutils/base/types.h>
 
-#ifdef HAVE_BULB_CREATOR
 #include <fvmodels/mirror/bulb.h>
-#endif
 
 #include <iostream>
 #include <vector>
@@ -65,6 +65,14 @@ class MirrorCalibTool
   void next_step();
   const unsigned char* get_last_yuv_buffer() const;
   const char* get_state_description() const;
+
+  /** Sets preliminary center point.
+   * @param x X-coordinate
+   * @param y Y-coordinate  */
+  inline void set_center(int x, int y) { 
+    img_center_x_ = x;
+    img_center_y_ = y;
+  }
 
   /** Center X accessor.
    * @return center X value  */
@@ -146,10 +154,10 @@ class MirrorCalibTool
   static MirrorCalibTool::MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
                           const unsigned char* yuv_mask, StepResult& result,
                           PolarAngle phi, const PixelPoint& center);
-  static MirrorCalibTool::HoleList search_holes(const MarkList& premarks);
-  static MirrorCalibTool::HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
-  static MirrorCalibTool::MarkList determine_marks(const HoleList& holes);
-  static MirrorCalibTool::MarkList mark(const MarkList& premarks, const unsigned char* yuv_mask,
+  static HoleList search_holes(const MarkList& premarks);
+  static HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
+  static MarkList determine_marks(const HoleList& holes);
+  static MarkList mark(const MarkList& premarks, const unsigned char* yuv_mask,
                        StepResult& result, PolarAngle phi,
                        const PixelPoint& center);
 
@@ -158,11 +166,9 @@ class MirrorCalibTool
   static PolarAnglePair find_nearest_neighbors(PolarAngle angle,
                                                const MarkMap& mark_map);
   static RealDistance interpolate(PolarRadius radius, const MarkList& marks);
-#ifdef HAVE_BULB_CREATOR
   static Bulb generate(int width, int height,
                        const PixelPoint& center,
                        const MarkMap& mark_map);
-#endif
 
   unsigned char*   img_yuv_buffer_;
   int              img_center_x_;
@@ -176,9 +182,7 @@ class MirrorCalibTool
   
   const unsigned char* last_yuv_buffer_;
 
-#ifdef HAVE_BULB_CREATOR
   Bulb* bulb_;
-#endif
 };
 
 }

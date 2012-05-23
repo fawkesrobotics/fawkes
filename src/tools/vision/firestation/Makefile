@@ -52,6 +52,11 @@ else
   endif
 endif
 
+ifneq ($(HAVE_IPP)$(HAVE_OPENCV),00)
+  CFLAGS  += $(CFLAGS_OPENCV) -DHAVE_MIRROR_CALIB
+  LDFLAGS += $(LDFLAGS_OPENCV)
+endif
+
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 gui: $(WARN_TARGETS)

@@ -59,8 +59,7 @@ eclipse_externals: blackboard interface utils
 tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
-fvfilters: fvmodels
-fvmodels: fvclassifiers geometry
+fvmodels: fvfilters fvclassifiers geometry
 fvstereo: fvcams
 ifneq ($(CLASSIFIERS_DEPS),)
 fvclassifiers: $(CLASSIFIERS_DEPS)
