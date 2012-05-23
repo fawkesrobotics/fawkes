@@ -90,10 +90,8 @@ RobotinoIrPclThread::loop()
 
     pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_xyz_;
     pcl.header.seq += 1;
-    fawkes::PointCloudTimestamp pclts;
-    pclts.time.sec  = ct->get_sec();
-    pclts.time.usec = ct->get_usec();
-    pcl.header.stamp = pclts.timestamp;
+
+    pcl_utils::set_time(pcl_xyz_, *ct);
 
     for (unsigned int i = 0; i < pcl_xyz_->width; ++i) {
       if (distances[i] == 0.) {

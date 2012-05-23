@@ -29,6 +29,7 @@
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/pointcloud.h>
+#include <pcl_utils/utils.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
