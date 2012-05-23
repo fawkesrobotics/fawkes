@@ -29,7 +29,9 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
 #include <fvutils/color/rgb.h>
-#include <pcl_utils/utils.h>
+#ifdef HAVE_PCL
+#  include <pcl_utils/utils.h>
+#endif
 
 #include <memory>
 
