@@ -24,15 +24,11 @@
 #ifndef __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 #define __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 
-#if 0
-#ifndef HAVE_IPP
-#error "IPP not installed"
-#endif
-#endif
-
+///@cond MACRO
 #if !(defined(HAVE_IPP) or defined(HAVE_OPENCV))
 #error "Neither IPP nor OpenCV are installed."
 #endif
+///@endcond
 
 #include <geometry/hom_point.h>
 #include <utils/math/angle.h>
