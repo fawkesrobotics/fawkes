@@ -28,7 +28,7 @@ ros-pkg-msg-cflags = -I$(call ros-pkg-path,$(1))/msg_gen/cpp/include \
 ros-pkg-cflags = $(call ros-pkg-msg-cflags,$(1)) \
 	$(shell rospack export --lang=cpp --attrib=cflags $(1) 2>/dev/null)
 ros-pkg-lflags = $(shell rospack export --lang=cpp --attrib=lflags $(1) 2>/dev/null)
-ros-have-pkg = $(if $(shell rospack find $(1) >/dev/null 2>&1; echo $${?/255/}),1,0)
+ros-have-pkg = $(if $(shell rospack find $(1) 2>&1 >/dev/null; echo $${?/0/}),0,1)
 
 HAVE_ROSPACK := $(if $(shell type -p rospack; echo $${?/1/}),1,0)
 
