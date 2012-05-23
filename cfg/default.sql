@@ -162,6 +162,7 @@ INSERT INTO "config" VALUES('/hardware/katana/openrave/robot_file','string','../
 INSERT INTO "config" VALUES('/hardware/laser/urg/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg/type','string','urg','Configuration is for Hokuyo URG laser range finder using URG library');
 INSERT INTO "config" VALUES('/hardware/laser/urg/device','string','/dev/ttyACM0','Device file');
+INSERT INTO "config" VALUES('/hardware/laser/urg/frame','string','/base_laser','Coordinate frame in which the laser data is published');
 INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/type','string','urg_gbx','Configuration is for Hokuyo URG laser range finder using the Gearbox library');
 INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/device','string','/dev/ttyACM0','Device file');
