@@ -257,6 +257,9 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
   m_btn_mc_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_save) );
 
+  builder->get_widget("btnMcSetCenter", m_btn_mc_set_center);
+  m_btn_mc_set_center->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_set_center) );
+
   builder->get_widget("btnMcMemorize", m_btn_mc_memorize);
   m_btn_mc_memorize->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_memorize) );
 
@@ -1012,13 +1015,21 @@ Firestation::image_click(GdkEventButton* event)
     case MODE_MIRROR_CALIB:
       {
 #ifdef HAVE_MIRROR_CALIB
-        m_calib_tool->next_step();
-        const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
-        memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
-        memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
-        m_calib_tool->draw_mark_lines(m_yuv_draw_buffer);
-        draw_image();
-        m_stb_status->push(m_calib_tool->get_state_description());
+        if (m_btn_mc_set_center->get_active()) {
+          m_calib_tool->set_center(image_x, image_y);
+          m_btn_mc_set_center->set_active(false);
+          mc_draw_line();
+          printf("Setting center to %d, %d\n", image_x, image_y);
+        } else {
+          printf("Using center to %d, %d\n", m_calib_tool->center_x(), m_calib_tool->center_y());
+          m_calib_tool->next_step();
+          const unsigned char* last_yuv = m_calib_tool->get_last_yuv_buffer();
+          memcpy(m_yuv_draw_buffer, last_yuv, m_img_size);
+          memcpy(m_yuv_orig_buffer, last_yuv, m_img_size);
+          m_calib_tool->draw_mark_lines(m_yuv_draw_buffer);
+          draw_image();
+          m_stb_status->push(m_calib_tool->get_state_description());
+        }
 #else
         printf("IPP and OpenCV not installed; mirror calibration does not work.\n");
 #endif
@@ -1189,6 +1200,14 @@ Firestation::mc_load_mask()
     }
 
   m_fcd_mc_load_mask->hide();
+}
+
+/** Enters MODE_MIRROR_CALIB mode which waits for a click to mark the
+ * preliminary center of the image. */
+void
+Firestation::mc_set_center()
+{
+  m_op_mode = MODE_MIRROR_CALIB;
 }
 
 /** Start the mirror calibration process. */

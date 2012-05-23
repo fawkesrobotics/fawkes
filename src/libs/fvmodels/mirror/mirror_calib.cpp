@@ -43,7 +43,15 @@
 #include <cstdio>
 #include <cassert>
 
-//#define FILTER_HOLES
+/* If defined, the center point is re-calculated by averaging the first
+ * marks. */
+//#define RECALCULATE_CENTER_POINT
+
+#define FILTER_HOLES
+
+/* If defined, very small holes are ignored. These small holes occur because a
+ * single mark is sometimes recognized as *two* different marks due to the edge
+ * detection. */
 #define FILTER_MINI_HOLES
 
 using namespace fawkes;
@@ -57,7 +65,8 @@ namespace firevision {
  * The input is N pairs (degree,image) and (optionally) a filter mask.
  * The calibration runs in multiple phases:
  * (1) Edge detection.
- * (2) Assume center point in the middle of the image.
+ * (2) Assume center point in the middle of the image unless it is set
+ *     explicitly.
  * (3) Pre-marking: Find the edges that lie at `degree' wrt. Y axis in image.
  * (4) Final marking: Try to filter false-positive marks.
  * (5) Centering: Average the first marks in each direction to get the `real'
@@ -81,16 +90,19 @@ namespace firevision {
  */
 
 namespace {
-  const unsigned int  ORIENTATION_COUNT         = (ORI_DEG_360 - ORI_DEG_0);
-  const unsigned int  MARK_COUNT                = 7;
-  const float         MARK_DISTANCE             = 29.7;
-  const unsigned char DARK                      = 0;
-  const unsigned char BRIGHT                    = 255;
-  const unsigned char MARK_LUMA                 = 128;
-  const unsigned char MARK_CHROMINANCE          = 255;
-  const int           MIN_WIDTH_OF_BIGGEST_LINE = 200;
-  const float         APPROX_LINE_WIDTH_LOSS    = 0.05f;
-  const float         MIN_BRIGHT_FRACTION       = 0.20f;
+  const unsigned int  ORIENTATION_COUNT                 = (ORI_DEG_360 - ORI_DEG_0);
+  const unsigned int  MARK_COUNT                        = 6;
+  const float         MARK_DISTANCE                     = 29.7;
+  const float         CARPET_DISTANCE_FROM_ROBOT_CENTER = 5.0;
+  const unsigned char DARK                              = 0;
+  const unsigned char BRIGHT                            = 255;
+  const unsigned char MARK_LUMA                         = 128;
+  const unsigned char MARK_CHROMINANCE                  = 255;
+  const int           MIN_WIDTH_OF_BIGGEST_LINE         = 50;
+  const float         APPROX_LINE_WIDTH_LOSS            = 0.20f;
+  const float         MIN_BRIGHT_FRACTION               = 0.20f;
+  const int           HIGHLIGHT_RADIUS                  = 2;
+  const int           FALSE_POSITIVE_HOLE_SIZE          = 5;
 }
 
 
@@ -663,8 +675,9 @@ class MirrorCalibTool::CartesianImage
   void
   highlight_pixel(const PixelPoint& p)
   {
-    for (int xx = p.x-5; xx <= p.x+5; xx++) {
-      for (int yy = p.y-5; yy <= p.y+5; yy++) {
+    const int R = HIGHLIGHT_RADIUS;
+    for (int xx = p.x-R; xx <= p.x+R; xx++) {
+      for (int yy = p.y-R; yy <= p.y+R; yy++) {
         const PixelPoint pp(xx, yy);
         if (contains(pp)) {
           set_color(pp, MARK_LUMA, MARK_CHROMINANCE);
@@ -679,8 +692,9 @@ class MirrorCalibTool::CartesianImage
   void
   highlight_point(const CartesianPoint& p)
   {
-    for (int xx = p.x-5; xx <= p.x+5; xx++) {
-      for (int yy = p.y-5; yy <= p.y+5; yy++) {
+    const int R = HIGHLIGHT_RADIUS;
+    for (int xx = p.x-R; xx <= p.x+R; xx++) {
+      for (int yy = p.y-R; yy <= p.y+R; yy++) {
         const CartesianPoint hp(xx, yy);
         if (contains(hp)) {
           set_color(hp, MARK_LUMA, MARK_CHROMINANCE);
@@ -999,7 +1013,6 @@ MirrorCalibTool::load_mask(const char* mask_file_name)
   if (img_center_y_ == -1) {
     img_center_y_ = reader.pixel_height() / 2;
   }
-  printf("center = %d, %d\n", img_center_x_, img_center_y_);
   reader.set_buffer(img_yuv_mask_);
   reader.read();
 }
@@ -1271,7 +1284,7 @@ MirrorCalibTool::filter_biggest_holes(const HoleList& holes,
 restart: // XXX ugly :-)
   for (HoleList::iterator it = biggest.begin(); it != biggest.end(); it++)
   {
-    if (it->size() <= 5) {
+    if (it->size() <= FALSE_POSITIVE_HOLE_SIZE) {
       biggest.erase(it);
       goto restart;
     }
@@ -1306,7 +1319,7 @@ restart: // XXX ugly :-)
   {
     const Hole& hole = *it;
 #ifdef FILTER_MINI_HOLES
-    if (hole.size() < 5) {
+    if (hole.size() < FALSE_POSITIVE_HOLE_SIZE) {
       // very small holes are usually false-positives
       continue;
     }
@@ -1418,9 +1431,11 @@ MirrorCalibTool::goto_next_state()
       if (state_.image_index + 1 < source_images_.size()) {
         state_.step        = PRE_MARKING;
         state_.image_index++;
+#ifdef RECALCULATE_CENTER_POINT
       } else if (!state_.centering_done) {
         state_.step        = CENTERING;
         state_.image_index = 0;
+#endif
       } else {
         state_.step        = DONE;
         state_.image_index = 0;
@@ -1696,12 +1711,12 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
   bool min2_init = false;
   AngleList::size_type min2_index = 0;
   for (int i = 0; static_cast<AngleList::size_type>(i) < diffs.size(); i++) {
-    if (!min1_init || abs(diffs[min1_index]) >= abs(diffs[i])) {
+    if (!min1_init || fabs(diffs[min1_index]) >= fabs(diffs[i])) {
       min2_index = min1_index;
       min2_init  = min1_init;
       min1_index = i;
       min1_init  = true;
-    } else if (!min2_init || abs(diffs[min2_index]) >= abs(diffs[i])) {
+    } else if (!min2_init || fabs(diffs[min2_index]) >= fabs(diffs[i])) {
       min2_index = i;
       min2_init  = true;
     }
@@ -1747,7 +1762,7 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
 MirrorCalibTool::RealDistance
 MirrorCalibTool::calculate_real_distance(int n)
 {
-  return static_cast<int>(MARK_DISTANCE +
+  return static_cast<int>(CARPET_DISTANCE_FROM_ROBOT_CENTER +
                           static_cast<float>(n + 1) * MARK_DISTANCE);
 }
 
@@ -1829,9 +1844,9 @@ MirrorCalibTool::generate(int width,
       const PolarAnglePair nearest_neighbors =
         find_nearest_neighbors(ori_to_robot, mark_map);
       const PolarAngle diff1 =
-        abs(normalize_mirror_rad(nearest_neighbors.first - ori_to_robot));
+        fabs(normalize_mirror_rad(nearest_neighbors.first - ori_to_robot));
       const PolarAngle diff2 =
-        abs(normalize_mirror_rad(nearest_neighbors.second - ori_to_robot));
+        fabs(normalize_mirror_rad(nearest_neighbors.second - ori_to_robot));
       const PolarAngle norm = diff1 + diff2;
       assert(norm != 0.0);
       const double weight1 = 1.0 - diff1 / norm;

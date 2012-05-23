@@ -135,6 +135,7 @@ class Firestation : public Gtk::Window
 
   double mc_line_angle_deg;
   void mc_load_mask();
+  void mc_set_center();
   void mc_memorize();
   void mc_simulate_clicks();
   void mc_draw_line();
@@ -182,6 +183,7 @@ class Firestation : public Gtk::Window
   Gtk::FileChooserDialog* m_fcd_mc_save;
   Gtk::FileChooserDialog* m_fcd_mc_load;
   Gtk::Button* m_btn_mc_load_mask;
+  Gtk::ToggleButton* m_btn_mc_set_center;
   Gtk::Button* m_btn_mc_memorize;
   Gtk::Button* m_btn_mc_simulate_clicks;
   Gtk::Scale* m_scl_mc_line;

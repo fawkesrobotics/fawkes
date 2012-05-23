@@ -1207,6 +1207,20 @@
                         <property name="position">0</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkToggleButton" id="btnMcSetCenter">
+                        <property name="label" translatable="yes">Set Center Point</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
 		    <child>
 		      <object class="GtkHScale" id="sclMcLine">
 			<property name="width_request">150</property>
@@ -1214,7 +1228,7 @@
 			<property name="can_focus">True</property>
                         <property name="adjustment">adjustment10</property>
                         <!-- <property name="adjustment">0 -180 180 0.5 0.5 0</property> -->
-                        <property name="position">1</property>
+                        <property name="position">2</property>
 		      </object>
 		    </child>
                     <child>
@@ -1228,7 +1242,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -1242,7 +1256,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -1256,7 +1270,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">4</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
@@ -1270,7 +1284,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">5</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                   </object>
