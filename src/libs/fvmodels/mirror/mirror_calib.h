@@ -96,7 +96,6 @@ class MirrorCalibTool
   class CartesianPoint;
   class CartesianImage;
   class Hole;
-  class HoleList;
   class Image;
   typedef std::vector<Hole> HoleList;
   typedef double PolarAngle;
