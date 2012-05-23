@@ -193,7 +193,8 @@ endif
 SOEXT               = so
 
 # Required if BASEDIR != EXEC_BASEDIR
-export LD_LIBRARY_PATH=$(call merge,:, $(LIBDIRS_BASE) $(LIBDIRS))
+SYS_LD_LIBRARY_PATH:=$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH= $(call merge,:, $(LIBDIRS_BASE) $(LIBDIRS) $(SYS_LD_LIBRARY_PATH))
 
 # Function to convert file to variable pattern
 nametr = $(subst /,_,$(subst -,_,$1))
