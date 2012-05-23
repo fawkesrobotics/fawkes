@@ -25,6 +25,7 @@
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
+#include <pcl_utils/utils.h>
 
 #include <memory>
 
@@ -98,10 +99,7 @@ OpenNiPclOnlyThread::loop()
 
       pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl;
       pcl.header.seq += 1;
-      fawkes::PointCloudTimestamp pclts;
-      pclts.time.sec  = capture_time.get_sec();
-      pclts.time.usec = capture_time.get_usec();
-      pcl.header.stamp = pclts.timestamp;
+      pcl_utils::set_time(__pcl, capture_time);
 
       unsigned int idx = 0;
       for (unsigned int h = 0; h < __height; ++h) {

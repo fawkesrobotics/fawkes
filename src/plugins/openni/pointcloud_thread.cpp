@@ -29,6 +29,7 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
 #include <fvutils/color/rgb.h>
+#include <pcl_utils/utils.h>
 
 #include <memory>
 
@@ -347,10 +348,7 @@ OpenNiPointCloudThread::fill_xyz(fawkes::Time &ts, const XnDepthPixel * const de
 {
   pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl_xyz;
   pcl.header.seq += 1;
-  fawkes::PointCloudTimestamp pclts;
-  pclts.time.sec  = ts.get_sec();
-  pclts.time.usec = ts.get_usec();
-  pcl.header.stamp = pclts.timestamp;
+  pcl_utils::set_time(__pcl_xyz, ts);
 
   __pcl_xyz_buf->lock_for_write();
   __pcl_xyz_buf->set_capture_time(&ts);
@@ -386,10 +384,7 @@ OpenNiPointCloudThread::fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const
 {
   pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb = **__pcl_xyzrgb;
   pcl_rgb.header.seq += 1;
-  fawkes::PointCloudTimestamp pclts;
-  pclts.time.sec  = ts.get_sec();
-  pclts.time.usec = ts.get_usec();
-  pcl_rgb.header.stamp = pclts.timestamp;
+  pcl_utils::set_time(__pcl_xyzrgb, ts);
 
   __pcl_xyzrgb_buf->lock_for_write();
   __pcl_xyzrgb_buf->set_capture_time(&ts);
@@ -425,17 +420,14 @@ OpenNiPointCloudThread::fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const
 void
 OpenNiPointCloudThread::fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data)
 {
-  fawkes::PointCloudTimestamp pclts;
-  pclts.time.sec  = ts.get_sec();
-  pclts.time.usec = ts.get_usec();
 
   pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb = **__pcl_xyzrgb;
   pcl_rgb.header.seq += 1;
-  pcl_rgb.header.stamp = pclts.timestamp;
+  pcl_utils::set_time(__pcl_xyzrgb, ts);
 
   pcl::PointCloud<pcl::PointXYZ> &pcl_xyz = **__pcl_xyz;
   pcl_xyz.header.seq += 1;
-  pcl_xyz.header.stamp = pclts.timestamp;
+  pcl_utils::set_time(__pcl_xyz, ts);
 
   __pcl_xyz_buf->lock_for_write();
   __pcl_xyz_buf->set_capture_time(&ts);
