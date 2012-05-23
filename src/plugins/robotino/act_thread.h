@@ -69,6 +69,10 @@ class RobotinoActThread
   rec::robotino::com::OmniDrive  *omni_drive_;
   unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;
+
+  float        cfg_max_vx_;
+  float        cfg_max_vy_;
+  float        cfg_max_omega_;
 };
 
 

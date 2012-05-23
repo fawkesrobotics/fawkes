@@ -31,7 +31,6 @@
 #define CFG_AXIS_FORWARD   CFG_PREFIX"axis_forward"
 #define CFG_AXIS_SIDEWARD  CFG_PREFIX"axis_sideward"
 #define CFG_AXIS_ROTATION  CFG_PREFIX"axis_rotation"
-#define CFG_MAX_VELOCITY   CFG_PREFIX"max_velocity"
 
 using namespace fawkes;
 
@@ -56,7 +55,6 @@ RobotinoJoystickThread::init()
   cfg_axis_forward_   = config->get_uint(CFG_AXIS_FORWARD);
   cfg_axis_sideward_  = config->get_uint(CFG_AXIS_SIDEWARD);
   cfg_axis_rotation_  = config->get_uint(CFG_AXIS_ROTATION);
-  cfg_max_velocity_   = config->get_float(CFG_MAX_VELOCITY);
 
   motor_if_ = blackboard->open_for_reading<MotorInterface>("Robotino");
   joystick_if_ =
@@ -107,9 +105,9 @@ RobotinoJoystickThread::loop()
                fabsf(joystick_if_->axis(cfg_axis_rotation_)) < 0.2) {
       stop();
     } else {
-      float vx  = joystick_if_->axis(cfg_axis_forward_) *  cfg_max_velocity_;
-      float vy = joystick_if_->axis(cfg_axis_sideward_) *  cfg_max_velocity_;
-      float omega = joystick_if_->axis(cfg_axis_rotation_) *  cfg_max_velocity_;
+      float vx  = joystick_if_->axis(cfg_axis_forward_);
+      float vy = joystick_if_->axis(cfg_axis_sideward_);
+      float omega = joystick_if_->axis(cfg_axis_rotation_);
 
       send_transrot(vx, vy, omega);
     }

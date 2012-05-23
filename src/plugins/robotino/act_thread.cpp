@@ -24,6 +24,7 @@
 #include "sensor_thread.h"
 
 #include <interfaces/MotorInterface.h>
+#include <utils/math/angle.h>
 
 #include <rec/robotino/com/Com.h>
 #include <rec/robotino/com/OmniDrive.h>
@@ -58,6 +59,11 @@ RobotinoActThread::init()
 
   last_seqnum_ = 0;
 
+  // * 1000: OpenRobotino takes mm/sec
+  cfg_max_vx_    = config->get_float("/hardware/robotino/max_vx") * 1000.;
+  cfg_max_vy_    = config->get_float("/hardware/robotino/max_vy") * 1000.;
+  cfg_max_omega_ = config->get_float("/hardware/robotino/max_omega");
+
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
 
@@ -91,7 +97,9 @@ RobotinoActThread::loop()
       {
         float m1, m2, m3;
         omni_drive_->project(&m1, &m2, &m3,
-                             msg->vx(), msg->vy(), msg->omega());
+                             msg->vx() * cfg_max_vx_,
+			     msg->vy() * cfg_max_vy_,
+			     msg->omega() * cfg_max_omega_);
 
         set_state.speedSetPoint[0] = m1;
         set_state.speedSetPoint[1] = m2;
@@ -112,9 +120,9 @@ RobotinoActThread::loop()
 
     rec::iocontrol::remotestate::SensorState sensor_state = com_->sensorState();
     if (sensor_state.sequenceNumber != last_seqnum_) {
-      motor_if_->set_odometry_position_x(sensor_state.odometryX);
-      motor_if_->set_odometry_position_y(sensor_state.odometryY);
-      motor_if_->set_odometry_orientation(sensor_state.odometryPhi);
+      motor_if_->set_odometry_position_x(sensor_state.odometryX / 1000.f);
+      motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
+      motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
       motor_if_->write();
     }
 
