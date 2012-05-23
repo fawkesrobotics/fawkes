@@ -174,7 +174,7 @@ FilterSobel::apply()
     throw fawkes::Exception("Sobel filter failed with %i", status);
   }
 #elif defined(HAVE_OPENCV)
-  cv::Mat srcm(src_roi[0]->width, src_roi[0]->height, CV_8UC1,
+  cv::Mat srcm(src_roi[0]->height, src_roi[0]->width, CV_8UC1,
                src[0] +
                  (src_roi[0]->start.y * src_roi[0]->line_step) +
                  (src_roi[0]->start.x * src_roi[0]->pixel_step),
@@ -182,7 +182,7 @@ FilterSobel::apply()
 
   if (dst == NULL) { dst = src[0]; dst_roi = src_roi[0]; }
 
-  cv::Mat dstm(dst_roi->width, dst_roi->height, CV_8UC1,
+  cv::Mat dstm(dst_roi->height, dst_roi->width, CV_8UC1,
                dst +
                  (dst_roi->start.y * dst_roi->line_step) +
                  (dst_roi->start.x * dst_roi->pixel_step),
