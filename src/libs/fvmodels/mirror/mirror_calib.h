@@ -30,10 +30,6 @@
 #endif
 #endif
 
-/* XXX HAVE_OPENCV is needed by the fvfilters headers, but it should be defined
- * by the Makefile. */
-#define HAVE_OPENCV
-
 #if !(defined(HAVE_IPP) or defined(HAVE_OPENCV))
 #error "Neither IPP nor OpenCV are installed."
 #endif

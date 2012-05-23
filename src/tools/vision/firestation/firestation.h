@@ -23,9 +23,6 @@
 #ifndef __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 #define __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 
-/* XXX HAVE_MIRROR_CALIB should rather be defined by the Makefile. */
-#define HAVE_MIRROR_CALIB
-
 #include <gtkmm.h>
 #include <fvutils/base/roi.h>
 #include <fvutils/color/colorspaces.h>

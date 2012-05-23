@@ -28,6 +28,11 @@ ifneq ($(HAVE_SHAPE_MODELS),1)
   MODELS_FILTEROUT += shape/%
 endif
 
+ifeq ($(HAVE_IPP)$(HAVE_OPENCV),01)
+  CFLAGS  += $(CFLAGS_OPENCV)
+  LDFLAGS += $(LDFLAGS_OPENCV)
+endif
+
 ifeq ($(HAVE_IPP)$(HAVE_OPENCV),00)
   MODELS_FILTEROUT += mirror/mirror_calib%
 endif
