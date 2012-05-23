@@ -20,6 +20,10 @@ endif
 ifndef __buildsys_pcl_mk_
 __buildsys_pcl_mk_ := 1
 
+
+# It might be a ROS PCL installation, we need to pull in std_msgs
+include $(BUILDSYSDIR)/ros.mk
+
 PCL_LIB_DIRS=/usr/lib64 /usr/lib /usr/lib32 \
              /usr/local/lib64 /usr/local/lib
 
@@ -68,6 +72,22 @@ ifeq ($(HAVE_PCL),1)
 		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)')
   LDFLAGS_PCL += $(LDFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --libs 'pcl_common$(PCL_VERSION_SUFFIX)')
+
+  ROS_PCL=$(filter /opt/ros%,$(shell $(PKGCONFIG) --variable=prefix 'pcl_common$(PCL_VERSION_SUFFIX)'))
+  ifneq ($(ROS_PCL),)
+    ifneq ($(HAVE_ROS),1)
+      HAVE_PCL=
+      PCL_ERROR = ROS PCL installation, but ROS not found
+    else
+      ifneq ($(call ros-have-pkg,std_msgs),1)
+        HAVE_PCL=
+        PCL_ERROR = ROS PCL installation, but std_msgs not found
+      else
+        CFLAGS_PCL  += -DHAVE_ROS_PCL $(CFLAGS_ROS)  $(call ros-pkg-cflags,std_msgs)
+        LDFLAGS_PCL += $(LDFLAGS_ROS) $(call ros-pkg-lflags,std_msgs)
+      endif
+    endif
+  endif
 
   pcl-have-lib    = $(if $(shell $(PKGCONFIG) --exists 'pcl_$1$(PCL_VERSION_SUFFIX)'; echo $${?/1/}),1,0)
   pcl-lib-cflags  = $(shell $(PKGCONFIG) --cflags 'pcl_$1$(PCL_VERSION_SUFFIX)')
