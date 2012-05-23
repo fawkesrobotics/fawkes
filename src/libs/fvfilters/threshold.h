@@ -3,8 +3,7 @@
  *  threshold.h - Header of threshold filter
  *
  *  Created: Tue Jun 07 14:25:53 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef HAVE_IPP
-#error "IPP not installed"
+#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#error "Neither IPP nor OpenCV installed"
 #endif
 
 #ifndef __FIREVISION_FILTER_THRESHOLD_H_

@@ -3,8 +3,7 @@
  *  sobel.cpp - Implementation of a Sobel filter
  *
  *  Created: Thu May 12 13:20:43 2005
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,7 +24,13 @@
 
 #include <core/exception.h>
 
-#include <ippi.h>
+#ifdef HAVE_IPP
+#  include <ippi.h>
+#elif defined(HAVE_OPENCV)
+#  include <cv.h>
+#else
+#  error "Neither IPP nor OpenCV available"
+#endif
 
 
 namespace firevision {
@@ -52,8 +57,14 @@ FilterSobel::FilterSobel(orientation_t ori)
  * lines concatenated into an one dimensional array.
  * @param ori requested orientation of the filter
  */
-void
-FilterSobel::generate_kernel(int *k, orientation_t ori)
+static inline void
+generate_kernel(
+#ifdef HAVE_IPP
+                int *k,
+#else
+                float *k,
+#endif
+                orientation_t ori)
 {
   // k is the kernel
   switch (ori) {
@@ -99,11 +110,10 @@ FilterSobel::generate_kernel(int *k, orientation_t ori)
     k[6] = -2;    k[7] = -1;    k[8] =  0;
     break;
   default:
-    // cout << "FilterSobel: Cannote generate kernel for the given orientation." << endl;
+    throw fawkes::Exception("Cannot generate Sobel kernel for the given orientation");
     break;
   }
 }
-
 
 void
 FilterSobel::apply()
@@ -111,6 +121,7 @@ FilterSobel::apply()
   shrink_region(src_roi[0], 3);
   shrink_region(dst_roi, 3);
 
+#if defined(HAVE_IPP)
   IppiSize size;
   size.width = src_roi[0]->width;
   size.height = src_roi[0]->height;
@@ -160,8 +171,57 @@ FilterSobel::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw fawkes::Exception("Sobel filter failed with %i\n", status);
+    throw fawkes::Exception("Sobel filter failed with %i", status);
   }
+#elif defined(HAVE_OPENCV)
+  cv::Mat srcm(src_roi[0]->width, src_roi[0]->height, CV_8UC1,
+               src[0] +
+                 (src_roi[0]->start.y * src_roi[0]->line_step) +
+                 (src_roi[0]->start.x * src_roi[0]->pixel_step),
+               src_roi[0]->line_step);
+
+  if (dst == NULL) { dst = src[0]; dst_roi = src_roi[0]; }
+
+  cv::Mat dstm(dst_roi->width, dst_roi->height, CV_8UC1,
+               dst +
+                 (dst_roi->start.y * dst_roi->line_step) +
+                 (dst_roi->start.x * dst_roi->pixel_step),
+               dst_roi->line_step);
+
+  if (ori[0] == ORI_HORIZONTAL) {
+    if ((dst == NULL) || (dst == src[0])) {
+      throw fawkes::Exception("OpenCV-based Sobel filter cannot be in-place");
+    }
+
+    cv::Sobel(srcm, dstm, /* ddepth */ -1, /* xorder */ 1, /* yorder */ 0,
+              /* ksize */ 3, /* scale */ 1);
+  } else if (ori[0] == ORI_VERTICAL) {
+    if ((dst == NULL) || (dst == src[0])) {
+      throw fawkes::Exception("OpenCV-based Sobel filter cannot be in-place");
+    }
+
+    cv::Sobel(srcm, dstm, /* ddepth */ -1, /* xorder */ 0, /* yorder */ 1,
+              /* ksize */ 3, /* scale */ 1);
+  } else if ( (ori[0] == ORI_DEG_0) ||
+	      (ori[0] == ORI_DEG_45) ||
+	      (ori[0] == ORI_DEG_90) ||
+	      (ori[0] == ORI_DEG_135) ||
+	      (ori[0] == ORI_DEG_180) ||
+	      (ori[0] == ORI_DEG_225) ||
+	      (ori[0] == ORI_DEG_270) ||
+	      (ori[0] == ORI_DEG_315) ||
+	      (ori[0] == ORI_DEG_360)
+	      )
+  {
+    cv::Mat kernel(3, 3, CV_32F);
+    generate_kernel((float *)kernel.ptr(), ori[0]);
+ 
+    cv::filter2D(srcm, dstm, /* ddepth */ -1, kernel, cv::Point(1, 1));
+  } else {
+    throw fawkes::Exception("Unknown filter sobel orientation");
+
+  }
+#endif
 
 }
 
