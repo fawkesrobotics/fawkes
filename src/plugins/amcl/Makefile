@@ -16,12 +16,33 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	    fawkesblackboard
-OBJS_amcl = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+LIBS_libfawkes_amcl_pf = m
+OBJS_libfawkes_amcl_pf = pf/pf.o pf/pf_kdtree.o pf/pf_pdf.o pf/pf_vector.o \
+			 pf/eig3.o pf/pf_draw.o
 
-OBJS_all    = $(OBJS_amcl)
-PLUGINS_all = $(PLUGINDIR)/amcl.so
+LIBS_libfawkes_amcl_map = m
+OBJS_libfawkes_amcl_map = map/map.o map/map_cspace.o map/map_range.o \
+			  map/map_store.o map/map_draw.o
+
+LIBS_libfawkes_amcl_sensors = m fawkes_amcl_pf fawkes_amcl_map
+OBJS_libfawkes_amcl_sensors = sensors/amcl_sensor.o sensors/amcl_odom.o \
+			      sensors/amcl_laser.o
+
+LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
+	    fawkesblackboard \
+	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors
+OBJS_amcl = amcl_plugin.o amcl_thread.o
+
+OBJS_all    = $(OBJS_amcl) $(OBJS_libfawkes_amcl_pf) \
+	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors)
+PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
+LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
+	      $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
+	      $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT)
+
+# Ordering constraints
+$(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
+$(PLUGINS_all): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
 
 include $(BUILDSYSDIR)/base.mk
 
