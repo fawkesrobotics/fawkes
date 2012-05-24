@@ -124,6 +124,7 @@ RobotinoActThread::loop()
       motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
       motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
       motor_if_->write();
+      last_seqnum_ = sensor_state.sequenceNumber;
     }
 
   } else {
