@@ -22,7 +22,6 @@
 #include "laserscan_thread.h"
 
 #include <core/threading/mutex_locker.h>
-#include <utils/time/time.h>
 #include <utils/math/angle.h>
 
 #include <ros/this_node.h>
@@ -54,6 +53,23 @@ RosLaserScanThread::~RosLaserScanThread()
   delete __seq_num_mutex;
 }
 
+
+std::string
+RosLaserScanThread::topic_name(const char *if_id, const char *suffix)
+{
+  std::string topic_name = std::string("fawkes_scans/") + if_id + "_" + suffix;
+  std::string::size_type pos = 0;
+  while ((pos = topic_name.find("-", pos)) != std::string::npos) {
+    topic_name.replace(pos, 1, "_");
+  }
+  pos = 0;
+  while ((pos = topic_name.find(" ", pos)) != std::string::npos) {
+    topic_name.replace(pos, 1, "_");
+  }
+  return topic_name;
+}
+
+
 void
 RosLaserScanThread::init()
 {
@@ -64,7 +80,6 @@ RosLaserScanThread::init()
   // get events right away
   __sub_ls = rosnode->subscribe("scan", 100,
                                 &RosLaserScanThread::laser_scan_message_cb, this);
-  __pub_ls = rosnode->advertise<sensor_msgs::LaserScan>("scan", 10);
 
   __ls360_ifs =
     blackboard->open_multiple_for_reading<Laser360Interface>("*");
@@ -73,10 +88,28 @@ RosLaserScanThread::init()
 
   std::list<Laser360Interface *>::iterator i360;
   for (i360 = __ls360_ifs.begin(); i360 != __ls360_ifs.end(); ++i360) {
+    (*i360)->read();
     logger->log_info(name(), "Opened %s", (*i360)->uid());
     bbil_add_data_interface(*i360);
     bbil_add_reader_interface(*i360);
     bbil_add_writer_interface(*i360);
+
+    std::string topname = topic_name((*i360)->id(), "360");
+
+    PublisherInfo pi;
+    pi.pub =
+      rosnode->advertise<sensor_msgs::LaserScan>(topname, 1);
+
+    logger->log_info(name(), "Publishing laser scan %s at %s",
+                     (*i360)->uid(), topname.c_str());
+
+    pi.msg.header.frame_id = (*i360)->frame();
+    pi.msg.angle_min = 0;
+    pi.msg.angle_max = 2*M_PI;
+    pi.msg.angle_increment = deg2rad(1);
+    pi.msg.ranges.resize(360);
+
+    __pubs[(*i360)->uid()] = pi;
   }
   std::list<Laser720Interface *>::iterator i720;
   for (i720 = __ls720_ifs.begin(); i720 != __ls720_ifs.end(); ++i720) {
@@ -84,6 +117,23 @@ RosLaserScanThread::init()
     bbil_add_data_interface(*i720);
     bbil_add_reader_interface(*i720);
     bbil_add_writer_interface(*i720);
+
+    std::string topname = topic_name((*i720)->id(), "720");
+
+    PublisherInfo pi;
+    pi.pub =
+      rosnode->advertise<sensor_msgs::LaserScan>(topname, 1);
+
+    logger->log_info(name(), "Publishing laser scan %s at %s",
+                     (*i720)->uid(), topname.c_str());
+
+    pi.msg.header.frame_id = (*i720)->frame();
+    pi.msg.angle_min = 0;
+    pi.msg.angle_max = 2*M_PI;
+    pi.msg.angle_increment = deg2rad(0.5);
+    pi.msg.ranges.resize(720);
+
+    __pubs[(*i720)->uid()] = pi;
   }
   blackboard->register_listener(this);
 
@@ -100,7 +150,11 @@ RosLaserScanThread::finalize()
   blackboard->unregister_observer(this);
 
   __sub_ls.shutdown();
-  __pub_ls.shutdown();
+
+  std::map<std::string, PublisherInfo>::iterator p;
+  for (p = __pubs.begin(); p != __pubs.end(); ++p) {
+    p->second.pub.shutdown();
+  }
 
   std::list<Laser360Interface *>::iterator i360;
   for (i360 = __ls360_ifs.begin(); i360 != __ls360_ifs.end(); ++i360) {
@@ -186,12 +240,14 @@ RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) thro
   Laser360Interface *ls360if = dynamic_cast<Laser360Interface *>(interface);
   Laser720Interface *ls720if = dynamic_cast<Laser720Interface *>(interface);
 
+  PublisherInfo &pi = __pubs[interface->uid()];
+  sensor_msgs::LaserScan &msg = pi.msg;
+
   if (ls360if) {
     ls360if->read();
 
     const Time *time = ls360if->timestamp();
 
-    sensor_msgs::LaserScan msg;
     __seq_num_mutex->lock();
     msg.header.seq = ++__seq_num;
     __seq_num_mutex->unlock();
@@ -206,7 +262,8 @@ RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) thro
     msg.ranges.resize(360);
     memcpy(&msg.ranges[0], ls360if->distances(), 360*sizeof(float));
 
-    __pub_ls.publish(msg);
+    pi.pub.publish(pi.msg);
+
   } else if (ls720if) {
     ls720if->read();
 
@@ -227,7 +284,7 @@ RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) thro
     msg.ranges.resize(720);
     memcpy(&msg.ranges[0], ls720if->distances(), 720*sizeof(float));
 
-    __pub_ls.publish(msg);
+    pi.pub.publish(pi.msg);
   }
 
 }
@@ -255,6 +312,23 @@ RosLaserScanThread::bb_interface_created(const char *type, const char *id) throw
       bbil_add_data_interface(ls360if);
       bbil_add_reader_interface(ls360if);
       bbil_add_writer_interface(ls360if);
+
+      std::string topname = topic_name(ls360if->id(), "360");
+
+      PublisherInfo pi;
+      pi.pub = rosnode->advertise<sensor_msgs::LaserScan>(topname, 1);
+
+      logger->log_info(name(), "Publishing laser scan %s at %s",
+                       ls360if->uid(), topname.c_str());
+
+      pi.msg.header.frame_id = ls360if->frame();
+      pi.msg.angle_min = 0;
+      pi.msg.angle_max = 2*M_PI;
+      pi.msg.angle_increment = deg2rad(1);
+      pi.msg.ranges.resize(360);
+
+      __pubs[ls360if->uid()] = pi;    
+
       blackboard->update_listener(this);
       __ls360_ifs.push_back(ls360if);
     } catch (Exception &e) {
@@ -279,6 +353,23 @@ RosLaserScanThread::bb_interface_created(const char *type, const char *id) throw
       bbil_add_data_interface(ls720if);
       bbil_add_reader_interface(ls720if);
       bbil_add_writer_interface(ls720if);
+
+      std::string topname = topic_name(ls720if->id(), "720");
+
+      PublisherInfo pi;
+      pi.pub = rosnode->advertise<sensor_msgs::LaserScan>(topname, 1);
+
+      logger->log_info(name(), "Publishing laser scan %s at %s",
+                       ls720if->uid(), topname.c_str());
+
+      pi.msg.header.frame_id = ls720if->frame();
+      pi.msg.angle_min = 0;
+      pi.msg.angle_max = 2*M_PI;
+      pi.msg.angle_increment = deg2rad(0.5);
+      pi.msg.ranges.resize(720);
+
+      __pubs[ls720if->uid()] = pi;
+
       blackboard->update_listener(this);
       __ls720_ifs.push_back(ls720if);
     } catch (Exception &e) {

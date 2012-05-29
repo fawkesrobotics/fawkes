@@ -33,6 +33,7 @@
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
 #include <core/threading/mutex.h>
+#include <utils/time/time.h>
 
 #include <list>
 #include <queue>
@@ -71,6 +72,7 @@ class RosLaserScanThread
  private:
   void laser_scan_message_cb(const sensor_msgs::LaserScan::ConstPtr &msg);
   void conditional_close(fawkes::Interface *interface) throw();
+  std::string topic_name(const char *if_id, const char *suffix);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -80,7 +82,14 @@ class RosLaserScanThread
   std::list<fawkes::Laser720Interface *> __ls720_ifs;
 
   ros::Subscriber __sub_ls;
-  ros::Publisher  __pub_ls;
+
+  /// @cond INTERNALS
+  typedef struct {
+    ros::Publisher           pub;
+    sensor_msgs::LaserScan   msg;
+  } PublisherInfo;
+  /// @endcond
+  std::map<std::string, PublisherInfo> __pubs;
 
   fawkes::Mutex *__ls_msg_queue_mutex;
   unsigned int __active_queue;
