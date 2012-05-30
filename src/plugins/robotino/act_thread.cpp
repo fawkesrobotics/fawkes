@@ -45,6 +45,9 @@ using namespace fawkes;
  */
 RobotinoActThread::RobotinoActThread(RobotinoSensorThread *sensor_thread)
   : Thread("RobotinoActThread", Thread::OPMODE_WAITFORWAKEUP),
+#ifdef HAVE_TF
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Robotino Odometry"),
+#endif
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   sensor_thread_ = sensor_thread;
@@ -124,6 +127,19 @@ RobotinoActThread::loop()
       motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
       motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
       motor_if_->write();
+
+#ifdef HAVE_TF
+      fawkes::Time now(clock);
+
+      tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),
+                                     deg2rad(sensor_state.odometryPhi)),
+                      tf::Vector3(sensor_state.odometryX / 1000.f,
+                                  sensor_state.odometryY / 1000.f,
+                                  0));
+
+      tf_publisher->send_transform(t, now, "/base_link", "/robotino_odometry");
+#endif
+
       last_seqnum_ = sensor_state.sequenceNumber;
     }
 

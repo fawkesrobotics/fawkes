@@ -28,6 +28,10 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/clock.h>
+#ifdef HAVE_TF
+#  include <aspect/tf.h>
+#endif
 
 #include <string>
 
@@ -48,9 +52,13 @@ class RobotinoSensorThread;
 
 class RobotinoActThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+  public fawkes::ClockAspect,
+#ifdef HAVE_TF
+  public fawkes::TransformAspect,
+#endif
+  public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect
 {
  public:
