@@ -28,6 +28,8 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 
+#include "map/map.h"
+
 class AmclThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
@@ -47,6 +49,21 @@ class AmclThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  void read_map();
+
+ private:
+  std::string  cfg_map_file_;
+  float        cfg_resolution_;
+  float        cfg_origin_x_;
+  float        cfg_origin_y_;
+  float        cfg_origin_theta_;
+  float        cfg_occupied_thresh_;
+  float        cfg_free_thresh_;
+
+  unsigned int map_width_;
+  unsigned int map_height_;
+
+  map_t       *map_;
 };
 
 #endif

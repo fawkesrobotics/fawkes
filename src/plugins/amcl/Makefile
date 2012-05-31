@@ -29,7 +29,7 @@ OBJS_libfawkes_amcl_sensors = sensors/amcl_sensor.o sensors/amcl_odom.o \
 			      sensors/amcl_laser.o
 
 LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	    fawkesblackboard \
+	    fawkesblackboard fvutils \
 	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors
 OBJS_amcl = amcl_plugin.o amcl_thread.o
 

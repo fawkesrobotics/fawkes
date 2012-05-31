@@ -283,4 +283,11 @@ INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/show_con
 INSERT INTO "config" VALUES('/perception/tabletop-objects/visualization/display_duration','unsigned int',120,'Time to show marker elements when not updated. Useful to still analyze the seen after program has been terminated; sec');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/horizontal_viewing_angle','float',57.0,'Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg');
 INSERT INTO "config" VALUES('/perception/tabletop-objects/vertical_viewing_angle','float',43.0,'Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg');
+INSERT INTO "config" VALUES('/plugins/amcl/map_file','string','map.png','Image file containing the map, must be a PNG file and a path relative to the config dir');
+INSERT INTO "config" VALUES('/plugins/amcl/resolution','float',0.1,'Resolution of the map; meters per pixel ');
+INSERT INTO "config" VALUES('/plugins/amcl/origin_x','float',0.0,'The X coordinate of the 2-D pose of the lower-left pixel in the map, as (x, y, yaw), with yaw as counterclockwise rotation (yaw=0 means no rotation) around Z axis. Many parts of the system currently ignore yaw.; m');
+INSERT INTO "config" VALUES('/plugins/amcl/origin_y','float',0.0,'The Y coordinate of the 2-D pose of the lower-left pixel in the map, as (x, y, yaw), with yaw as counterclockwise rotation (yaw=0 means no rotation) around Z axis. Many parts of the system currently ignore yaw.; m');
+INSERT INTO "config" VALUES('/plugins/amcl/origin_theta','float',0.0,'The yaw of the 2-D pose of the lower-left pixel in the map, as (x, y, yaw), with yaw as counterclockwise rotation (yaw=0 means no rotation) around Z axis. Many parts of the system currently ignore yaw.; rad');
+INSERT INTO "config" VALUES('/plugins/amcl/occupied_threshold','float',0.65,'Pixels with occupancy probability greater than this threshold are considered completely occupied. Occupancy probability is the luminance value divided by 255.');
+INSERT INTO "config" VALUES('/plugins/amcl/free_threshold','float',0.2,'Pixels with occupancy probability less than this threshold are considered completely free.');
 COMMIT;
