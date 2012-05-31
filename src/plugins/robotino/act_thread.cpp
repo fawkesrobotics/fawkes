@@ -123,6 +123,17 @@ RobotinoActThread::loop()
 
     rec::iocontrol::remotestate::SensorState sensor_state = com_->sensorState();
     if (sensor_state.sequenceNumber != last_seqnum_) {
+      float vx, vy, omega;
+      omni_drive_->unproject(&vx, &vy, &omega,
+                             sensor_state.actualVelocity[0],
+                             sensor_state.actualVelocity[1],
+                             sensor_state.actualVelocity[2]);
+
+      // div by 1000 to convert from mm to m
+      motor_if_->set_vx(vx / 1000.);
+      motor_if_->set_vy(vy / 1000.);
+      motor_if_->set_omega(deg2rad(omega));
+
       motor_if_->set_odometry_position_x(sensor_state.odometryX / 1000.f);
       motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
       motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
