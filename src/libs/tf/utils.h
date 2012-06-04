@@ -1,8 +1,9 @@
+
 /***************************************************************************
- *  transform_listener.h - Fawkes transform listener (based on ROS tf)
+ *  utils.h - Fawkes tf utils
  *
- *  Created: Mon Oct 24 18:09:47 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Jun  1 14:07:00 2012
+ *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -49,57 +50,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_LISTENER_H_
-#define __LIBS_TF_TRANSFORM_LISTENER_H_
+#ifndef __LIBS_TF_TF_H_
+#define __LIBS_TF_TF_H_
 
 #include <tf/types.h>
-#include <tf/transformer.h>
-
-#include <blackboard/interface_listener.h>
-#include <blackboard/interface_observer.h>
-
-#include <list>
 
 namespace fawkes {
-
-  class BlackBoard;
-  class TransformInterface;
-
   namespace tf {
 #if 0 /* just to make Emacs auto-indent happy */
   }
 }
 #endif
 
-class TransformListener
-: public Transformer,
-  public BlackBoardInterfaceObserver,
-  public BlackBoardInterfaceListener
+/** Resolve transform name.
+ * @param prefix prefix to prepend to frame name
+ * @param frame_name frame name
+ * @return resolved frame name
+ */
+std::string
+resolve(const std::string& prefix, const std::string& frame_name)
 {
- public:
-  TransformListener(BlackBoard *bb);
-  virtual ~TransformListener();
-
-  std::string resolve(const std::string& frame_name);
-
-  // for BlackBoardInterfaceObserver
-  virtual void bb_interface_created(const char *type, const char *id) throw();
-
-  // for BlackBoardInterfaceListener
-  virtual void bb_interface_data_changed(Interface *interface) throw();
-  virtual void bb_interface_writer_removed(Interface *interface,
-                                           unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(Interface *interface,
-                                           unsigned int instance_serial) throw();
-
- private:
-  void conditional_close(Interface *interface) throw();
-
- private:
-  BlackBoard *__bb;
-  std::list<TransformInterface *> __tfifs;
-
-};
+  if (frame_name.size() > 0) {
+    if (frame_name[0] == '/') {
+      return frame_name;
+    }
+  }
+  if (prefix.size() > 0) {
+    if (prefix[0] == '/') {
+      std::string composite = prefix;
+      composite.append("/");
+      composite.append(frame_name);
+      return composite;
+    } else {
+      std::string composite;
+      composite = "/";
+      composite.append(prefix);
+      composite.append("/");
+      composite.append(frame_name);
+      return composite;
+    }
+  } else {
+    std::string composite;
+    composite = "/";
+    composite.append(frame_name);
+    return composite;
+  }
+}
 
 } // end namespace tf
 } // end namespace fawkes
