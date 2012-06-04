@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  amcl_thread.cpp - Thread to perform localization
  *
@@ -22,36 +21,88 @@
 #ifndef __PLUGINS_AMCL_AMCL_THREAD_H_
 #define __PLUGINS_AMCL_AMCL_THREAD_H_
 
+#define NEW_UNIFORM_SAMPLING 1
+
+#include "map/map.h"
+#include "pf/pf.h"
+#include "pf/pf_vector.h"
+#include "sensors/amcl_odom.h"
+#include "sensors/amcl_laser.h"
+
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <aspect/tf.h>
+#include <aspect/blackboard.h>
 
-#include "map/map.h"
+#include <interfaces/Laser360Interface.h>
+#include <interfaces/Position3DInterface.h>
+
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cmath>
+
+#ifdef HAVE_ROS
+#  include <plugins/ros/aspect/ros.h>
+#  include <ros/publisher.h>
+#  include <ros/subscriber.h>
+#  include <geometry_msgs/PoseWithCovarianceStamped.h>
+#endif
+
+
+/// Pose hypothesis
+typedef struct {
+  /// Total weight (weights sum to 1)
+  double weight;
+  /// Mean of pose esimate
+  pf_vector_t pf_pose_mean;
+  /// Covariance of pose estimate
+  pf_matrix_t pf_pose_cov;
+} amcl_hyp_t;
+
+namespace fawkes {
+  class Mutex;
+}
 
 class AmclThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect
+  public fawkes::BlockedTimingAspect,
+  public fawkes::BlackBoardAspect,
+#ifdef HAVE_ROS
+  public fawkes::ROSAspect,
+#endif
+  public fawkes::TransformAspect
 {
- public:
+public:
   AmclThread();
   virtual ~AmclThread();
 
   virtual void init();
   virtual void loop();
   virtual void finalize();
-
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run();}
 
  private:
   void read_map();
+  bool get_odom_pose(fawkes::tf::Stamped<fawkes::tf::Pose>& odom_pose,
+                     double& x, double& y, double& yaw,
+                     const fawkes::Time* t, const std::string& f);
+  void apply_initial_pose();
+  static pf_vector_t uniform_pose_generator(void* arg);
+#ifdef HAVE_ROS
+  void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
+#endif
 
- private:
+private:
+  fawkes::Mutex *conf_mutex_;
+
   std::string  cfg_map_file_;
   float        cfg_resolution_;
   float        cfg_origin_x_;
@@ -60,10 +111,107 @@ class AmclThread
   float        cfg_occupied_thresh_;
   float        cfg_free_thresh_;
 
+  std::string cfg_laser_ifname_;
+  std::string cfg_pose_ifname_;
+
   unsigned int map_width_;
   unsigned int map_height_;
 
-  map_t       *map_;
+  fawkes::tf::Transform latest_tf_;
+
+  amcl::odom_model_t  odom_model_type_;
+  amcl::laser_model_t laser_model_type_;
+
+  int max_beams_, min_particles_, max_particles_;
+
+  bool sent_first_transform_;
+  bool latest_tf_valid_;
+  map_t* map_;
+  pf_t *pf_;
+  int resample_count_;
+
+  double gui_publish_period;
+  double save_pose_period;
+  double cloud_pub_interval;
+  double transform_tolerance_;
+  fawkes::Time save_pose_last_time;
+
+  fawkes::Laser360Interface* laser_if_;
+  fawkes::Position3DInterface * pos3d_if_;
+
+#ifdef HAVE_ROS
+  ros::Publisher pose_pub_;
+  ros::Publisher particlecloud_pub_;
+  ros::Subscriber initial_pose_sub_;
+#endif
+
+  amcl_hyp_t* initial_pose_hyp_;
+  bool first_map_received_;
+  bool first_reconfigure_call_;
+
+  char* mapdata;
+  int sx, sy;
+  double resolution;
+
+  amcl::AMCLLaser* single_laser_;
+  bool laser_update_;
+
+  // Particle filter
+  double pf_err_, pf_z_;
+  bool pf_init_;
+  pf_vector_t pf_odom_pose_;
+  //double d_thresh_, a_thresh_;
+  //int resample_interval_;
+  double laser_min_range_;
+  double laser_max_range_;
+
+  amcl::AMCLOdom* odom_;
+  amcl::AMCLLaser* laser_;
+
+  fawkes::Time last_cloud_pub_time;
+  fawkes::Time last_laser_received_ts_;
+  double last_covariance_[36];
+
+
+
+  float save_pose_rate;
+  float laser_min_range;
+  float laser_max_range;
+  float pf_err;
+  float pf_z;
+  float alpha1_;
+  float alpha2_;
+  float alpha3_;
+  float alpha4_;
+  float alpha5_;
+  float z_hit_;
+  float z_short_;
+  float z_max_;
+  float z_rand_;
+  float sigma_hit_;
+  float lambda_short_;
+  float laser_likelihood_max_dist_;
+  float d_thresh_;
+  float a_thresh_;
+  float alpha_slow_;
+  float alpha_fast_;
+  float init_pose_[3];
+  float init_cov_[3];
+  float angle_increment_;
+
+  bool use_map_topic;
+  bool first_map_only;
+
+  unsigned int resample_interval_;
+
+  std::string odom_frame_id_;
+  std::string base_frame_id_;
+  std::string global_frame_id_;
+  std::string laser_frame_id_;
+
+#if NEW_UNIFORM_SAMPLING
+    static std::vector<std::pair<int,int> > free_space_indices;
+#endif
 };
 
 #endif

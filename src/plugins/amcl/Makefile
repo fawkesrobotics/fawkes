@@ -15,6 +15,8 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/ros.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_libfawkes_amcl_pf = m
 OBJS_libfawkes_amcl_pf = pf/pf.o pf/pf_kdtree.o pf/pf_pdf.o pf/pf_vector.o \
@@ -27,22 +29,58 @@ OBJS_libfawkes_amcl_map = map/map.o map/map_cspace.o map/map_range.o \
 LIBS_libfawkes_amcl_sensors = m fawkes_amcl_pf fawkes_amcl_map
 OBJS_libfawkes_amcl_sensors = sensors/amcl_sensor.o sensors/amcl_odom.o \
 			      sensors/amcl_laser.o
-
 LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
 	    fawkesblackboard fvutils \
+	    Laser360Interface Position3DInterface \
 	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors
 OBJS_amcl = amcl_plugin.o amcl_thread.o
 
 OBJS_all    = $(OBJS_amcl) $(OBJS_libfawkes_amcl_pf) \
 	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors)
-PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
-LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
-	      $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
-	      $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT)
+
+ifeq ($(HAVE_TF),1)
+  CFLAGS_amcl_thread  = $(CFLAGS) $(CFLAGS_TF)
+  CFLAGS_amcl_plugin  = $(CFLAGS_amcl_thread)
+  LDFLAGS_amcl       += $(LDFLAGS_TF)
+  LIBS_amcl          += fawkestf
+
+  ifeq ($(HAVE_ROS),1)
+    ifeq ($(call ros-have-pkg,geometry_msgs),1)
+      CFLAGS_amcl_thread += $(CFLAGS_ROS) \
+        $(call ros-pkg-cflags,geometry_msgs)
+      CFLAGS_amcl_plugin += $(CFLAGS_amcl_thread)
+      LDFLAGS_amcl += $(LDFLAGS_ROS) $(call ros-pkg-lflags,geometry_msgs)
+      LIBS_amcl += fawkesrosaspect
+    else
+      WARN_TARGET += warning_geometry_msgs
+    endif
+  else
+    WARN_TARGET += warning_ros
+  endif
+
+  PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
+  LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
+	        $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
+	        $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT)
+else
+  WARN_TARGETS = warning_tf
+endif
+
 
 # Ordering constraints
 $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
 $(PLUGINS_all): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
 
-include $(BUILDSYSDIR)/base.mk
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
 
+.PHONY: warning_tf warning_ros warning_geometry_msgs
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting amcl plugin and libs$(TNORMAL) (tf not available)"
+warning_ros:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (ROS not found)"
+warning_geometry_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (package geometry_msgs not found)"
+endif
+
+include $(BUILDSYSDIR)/base.mk
