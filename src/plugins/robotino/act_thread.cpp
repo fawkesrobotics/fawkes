@@ -148,7 +148,7 @@ RobotinoActThread::loop()
                                   sensor_state.odometryY / 1000.f,
                                   0));
 
-      tf_publisher->send_transform(t, now, "/base_link", "/robotino_odometry");
+      tf_publisher->send_transform(t, now, "/robotino_odometry", "/base_link");
 #endif
 
       last_seqnum_ = sensor_state.sequenceNumber;
