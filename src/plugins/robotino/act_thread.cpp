@@ -62,11 +62,6 @@ RobotinoActThread::init()
 
   last_seqnum_ = 0;
 
-  // * 1000: OpenRobotino takes mm/sec
-  cfg_max_vx_    = config->get_float("/hardware/robotino/max_vx") * 1000.;
-  cfg_max_vy_    = config->get_float("/hardware/robotino/max_vy") * 1000.;
-  cfg_max_omega_ = config->get_float("/hardware/robotino/max_omega");
-
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
 
@@ -100,9 +95,8 @@ RobotinoActThread::loop()
       {
         float m1, m2, m3;
         omni_drive_->project(&m1, &m2, &m3,
-                             msg->vx() * cfg_max_vx_,
-			     msg->vy() * cfg_max_vy_,
-			     msg->omega() * cfg_max_omega_);
+                             msg->vx() * 1000., msg->vy() * 1000.,
+			     rad2deg(msg->omega()));
 
         set_state.speedSetPoint[0] = m1;
         set_state.speedSetPoint[1] = m2;
