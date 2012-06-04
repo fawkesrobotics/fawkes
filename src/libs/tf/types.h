@@ -69,6 +69,8 @@ namespace fawkes {
 }
 #endif
 
+/** Scalar datatype. */
+typedef btScalar Scalar;
 /** Representaton of orientation or rotation depending on context. */
 typedef btQuaternion Quaternion;
 /** Representation of a translation. */
@@ -79,6 +81,8 @@ typedef btVector3 Point;
 typedef btTransform Transform;
 /** Representation of pose (position and orientation). */
 typedef btTransform Pose;
+/** Representation of 3x3 matrix. */
+typedef btMatrix3x3 Matrix3x3;
 
 /// Internally used to reference frames efficiently
 typedef uint32_t CompactFrameID;
