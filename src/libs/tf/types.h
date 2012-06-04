@@ -186,6 +186,55 @@ assert_quaternion_valid(const Quaternion & q)
   }
 };
 
+/** Construct a Quaternion from fixed angles.
+ * @param roll The roll about the X axis
+ * @param pitch The pitch about the Y axis
+ * @param yaw The yaw about the Z axis
+ * @return The quaternion constructed
+ */
+static inline Quaternion
+create_quaternion_from_rpy(double roll, double pitch, double yaw)
+{
+  Quaternion q;
+  q.setEulerZYX(yaw, pitch, roll);
+  return q;
+}
+
+/** Construct a Quaternion from yaw only.
+ * @param yaw The yaw about the Z axis
+ * @return The quaternion constructed
+ */
+static inline Quaternion
+create_quaternion_from_yaw(double yaw)
+{
+  Quaternion q;
+  q.setEulerZYX(yaw, 0.0, 0.0);
+  return q;
+}
+
+
+/** Helper function for getting yaw from a Quaternion.
+ * @param bt_q quaternion to get yaw from
+ * @return yaw value
+ */
+static inline double get_yaw(const Quaternion& bt_q){
+  Scalar useless_pitch, useless_roll, yaw;
+  Matrix3x3(bt_q).getEulerZYX(yaw, useless_pitch, useless_roll);
+  return yaw;
+}
+
+/** Helper function for getting yaw from a pose
+ * @param t pose to get yaw from
+ * @return yaw value
+ */
+static inline double get_yaw(Pose& t)
+{
+  double yaw, pitch, roll;
+  Matrix3x3 mat = t.getBasis();
+  mat.getEulerYPR(yaw,pitch,roll);
+  return yaw;
+}
+
 
 } // end namespace tf
 } // end namespace fawkes
