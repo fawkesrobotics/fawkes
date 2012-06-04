@@ -214,9 +214,9 @@ INSERT INTO "config" VALUES('/hardware/robotino/quit_on_disconnect','bool',1,'If
 INSERT INTO "config" VALUES('/hardware/robotino/joystick/axis_forward','unsigned int',1,'Axis index for forward/backward movement.');
 INSERT INTO "config" VALUES('/hardware/robotino/joystick/axis_sideward','unsigned int',0,'Axis index for sideward movement.');
 INSERT INTO "config" VALUES('/hardware/robotino/joystick/axis_rotation','unsigned int',3,'Axis index for rotational movement.');
-INSERT INTO "config" VALUES('/hardware/robotino/max_vx','float',1.0,'Maximum velocity forward; m');
-INSERT INTO "config" VALUES('/hardware/robotino/max_vy','float',1.0,'Maximum velocity sideward; m');
-INSERT INTO "config" VALUES('/hardware/robotino/max_omega','float',360.0,'Maximum rotation; deg');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/max_vx','float',1.5,'Maximum velocity forward; m/s');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/max_vy','float',1.5,'Maximum velocity sideward; m/s');
+INSERT INTO "config" VALUES('/hardware/robotino/joystick/max_omega','float',1.57,'Maximum rotation; rad/s');
 INSERT INTO "config" VALUES('/hardware/nao/chestbut_triple_long_click_shutdown','bool',1,'If true, triple long click on chest button causes shutdown. This requires the SetUID bit to be set on /sbin/poweroff (or whatever it links to).');
 INSERT INTO "config" VALUES('/plugins/laserht/laser_interface_id','string','Laser','Interface ID of the Laser360Interface to get data from');
 INSERT INTO "config" VALUES('/plugins/laserht/line/num_samples','unsigned int',12,'Number of samples to take per data point on the range of 180 deg');
