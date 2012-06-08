@@ -68,12 +68,20 @@ RosTfThread::init()
   __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("TF *");
 
   std::list<TransformInterface *>::iterator i;
+  std::list<TransformInterface *>::iterator own_if = __tfifs.end();
   for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
     //logger->log_info(name(), "Opened %s", (*i)->uid());
-    bbil_add_data_interface(*i);
-    bbil_add_reader_interface(*i);
-    bbil_add_writer_interface(*i);
+    if (strcmp((*i)->id(), "TF ROS") == 0) {
+      // that's our own Fawkes publisher, do NOT republish what we receive...
+      own_if = i;
+      blackboard->close(*i);
+    } else {
+      bbil_add_data_interface(*i);
+      bbil_add_reader_interface(*i);
+      bbil_add_writer_interface(*i);
+    }
   }
+  if (own_if != __tfifs.end()) __tfifs.erase(own_if);
   blackboard->register_listener(this);
 
   bbio_add_observed_create("TransformInterface", "TF *");
