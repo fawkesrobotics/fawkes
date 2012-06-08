@@ -229,6 +229,8 @@ HokuyoUrgAcquisitionThread::init()
   }
 
   int scan_msec = __ctrl->scanMsec();
+  float distance_min = 0.;
+  float distance_max = 0.;
 
   try {
     __first_ray     = config->get_uint((__cfg_prefix + "first_ray").c_str());
@@ -243,6 +245,8 @@ HokuyoUrgAcquisitionThread::init()
     __last_ray      = p.area_max;
     __front_ray     = p.area_front;
     __slit_division = p.area_total;
+    distance_min    = p.distance_min / 1000.;
+    distance_max    = p.distance_max / 1000.;
   }
 
   __step_per_angle = __slit_division / 360.;
@@ -256,6 +260,8 @@ HokuyoUrgAcquisitionThread::init()
   logger->log_info(name(), "Step/Angle:    %f", __step_per_angle);
   logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
   logger->log_info(name(), "Angular Range: %f deg", __angular_range);
+  logger->log_info(name(), "Min dist:      %f m", distance_min);
+  logger->log_info(name(), "Max dist:      %f m", distance_max);
 
   // that should be 1000 really to convert msec -> usec. But empirically
   // the results are slightly better with 990 as factor.
