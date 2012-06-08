@@ -91,6 +91,7 @@ public:
 
  private:
   void read_map();
+  bool set_laser_pose();
   bool get_odom_pose(fawkes::tf::Stamped<fawkes::tf::Pose>& odom_pose,
                      double& x, double& y, double& yaw,
                      const fawkes::Time* t, const std::string& f);
@@ -116,6 +117,7 @@ private:
 
   unsigned int map_width_;
   unsigned int map_height_;
+  bool laser_pose_set_;
 
   fawkes::tf::Transform latest_tf_;
 
@@ -153,8 +155,6 @@ private:
   int sx, sy;
   double resolution;
 
-  amcl::AMCLLaser* single_laser_;
-  bool laser_update_;
 
   // Particle filter
   double pf_err_, pf_z_;
@@ -167,6 +167,7 @@ private:
 
   amcl::AMCLOdom* odom_;
   amcl::AMCLLaser* laser_;
+  bool laser_update_;
 
   fawkes::Time last_cloud_pub_time;
   fawkes::Time last_laser_received_ts_;

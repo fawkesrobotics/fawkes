@@ -271,9 +271,7 @@ void AmclThread::init()
     logger->log_info(name(), "Done initializing likelihood field model.");
   }
 
-  single_laser_ = new amcl::AMCLLaser(max_beams_, map_);
-
-  //cloud_pub_interval.fromSec(1.0);
+  laser_pose_set_ = set_laser_pose();
 
 #ifdef HAVE_ROS
   pose_pub_ =
@@ -297,64 +295,23 @@ void AmclThread::init()
 void
 AmclThread::loop()
 {
+  if (!laser_pose_set_) {
+    if (set_laser_pose()) {
+      laser_pose_set_ = true;
+    } else {
+      logger->log_warn(name(), "Could not determine laser pose, skipping loop");
+      return;
+    }
+  }
+
   laser_if_->read();
+  if (! laser_if_->changed()) {
+    logger->log_warn(name(), "Laser data unchanged, skipping loop");
+    return;
+  }
   float* laser_distances = laser_if_->distances();
 
   MutexLocker lock(conf_mutex_);
-
-  //logger->log_debug(name(), "Transform 1");
-  tf::Stamped<tf::Pose>
-    ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
-          Time(), laser_frame_id_);
-  tf::Stamped<tf::Pose> laser_pose;
-  try {
-    tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
-  } catch (fawkes::tf::LookupException& e) {
-    logger->log_error(name(), "Failed to lookup transform from %s to %s.",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
-    return;
-  } catch (fawkes::tf::TransformException& e) {
-    logger->log_error(name(), "Transform error from %s to %s, exception follows.",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
-    return;
-  } catch (fawkes::Exception& e) {
-    logger->log_error(name(), "Generic exception for transform from %s to %s.",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
-    return;
-  }
-
-  laser_update_ = true;
-
-  /*
-  tf::Stamped<tf::Pose>
-    ident(tf::Transform(tf::Quaternion(0, 0, 0, 1),
-                        tf::Vector3(0, 0, 0)), Time(), laser_frame_id_);
-  tf::Stamped<tf::Pose> laser_pose;
-
-  try {
-    tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
-  } catch (tf::TransformException& e) {
-    logger->log_error(name(), "Couldn't transform from %s to %s, "
-                      "even though the message notifier is in use",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
-    return;
-  }
-  */
-
-  pf_vector_t laser_pose_v;
-  laser_pose_v.v[0] = laser_pose.getOrigin().x();
-  laser_pose_v.v[1] = laser_pose.getOrigin().y();
-
-  // laser mounting angle gets computed later -> set to 0 here!
-  laser_pose_v.v[2] = 0;
-  single_laser_->SetLaserPose(laser_pose_v);
-  //logger->log_debug(name(),
-  //		      "Received laser's pose wrt robot: %.3f %.3f %.3f",
-  //		      laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
 
   // Where was the robot when this scan was taken?
   tf::Stamped<tf::Pose> odom_pose;
@@ -424,7 +381,7 @@ AmclThread::loop()
   // If the robot has moved, update the filter
   if (laser_update_) {
     amcl::AMCLLaserData ldata;
-    ldata.sensor = single_laser_;
+    ldata.sensor = laser_;
     ldata.range_count = laser_if_->maxlenof_distances();
 
     double angle_min = 0;
@@ -457,7 +414,7 @@ AmclThread::loop()
       ldata.ranges[i][1] = angle_min + (i * angle_increment);
     }
 
-    single_laser_->UpdateSensor(pf_, (amcl::AMCLSensorData*) &ldata);
+    laser_->UpdateSensor(pf_, (amcl::AMCLSensorData*) &ldata);
 
     laser_update_ = false;
 
@@ -721,6 +678,72 @@ AmclThread::read_map()
 
   }
   free(img_buffer);
+}
+
+
+bool
+AmclThread::set_laser_pose()
+{
+  //logger->log_debug(name(), "Transform 1");
+  fawkes::Time now(clock);
+  tf::Stamped<tf::Pose>
+    ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
+          &now, laser_frame_id_);
+  tf::Stamped<tf::Pose> laser_pose;
+  try {
+    tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
+    /*
+    tf::Quaternion q = laser_pose.getRotation();
+    logger->log_debug(name(), "Laser transform: (%f, %f, %f)  (%f, %f, %f, %f)",
+                      laser_pose.getOrigin().x(), laser_pose.getOrigin().y(),
+                      laser_pose.getOrigin().z(), q.x(), q.y(), q.z(), q.w());
+    */
+  } catch (fawkes::tf::LookupException& e) {
+    logger->log_error(name(), "Failed to lookup transform from %s to %s.",
+                      laser_frame_id_.c_str(), base_frame_id_.c_str());
+    logger->log_error(name(), e);
+    return false;
+  } catch (fawkes::tf::TransformException& e) {
+    logger->log_error(name(), "Transform error from %s to %s, exception follows.",
+                      laser_frame_id_.c_str(), base_frame_id_.c_str());
+    logger->log_error(name(), e);
+    return false;
+  } catch (fawkes::Exception& e) {
+    logger->log_error(name(), "Generic exception for transform from %s to %s.",
+                      laser_frame_id_.c_str(), base_frame_id_.c_str());
+    logger->log_error(name(), e);
+    return false;
+  }
+
+  /*
+  tf::Stamped<tf::Pose>
+    ident(tf::Transform(tf::Quaternion(0, 0, 0, 1),
+                        tf::Vector3(0, 0, 0)), Time(), laser_frame_id_);
+  tf::Stamped<tf::Pose> laser_pose;
+
+  try {
+    tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
+  } catch (tf::TransformException& e) {
+    logger->log_error(name(), "Couldn't transform from %s to %s, "
+                      "even though the message notifier is in use",
+                      laser_frame_id_.c_str(), base_frame_id_.c_str());
+    logger->log_error(name(), e);
+    return;
+  }
+  */
+
+  pf_vector_t laser_pose_v;
+  laser_pose_v.v[0] = laser_pose.getOrigin().x();
+  laser_pose_v.v[1] = laser_pose.getOrigin().y();
+
+  // laser mounting angle gets computed later -> set to 0 here!
+  laser_pose_v.v[2] = 0;
+  laser_->SetLaserPose(laser_pose_v);
+  //logger->log_debug(name(),
+  //		      "Received laser's pose wrt robot: %.3f %.3f %.3f",
+  //		      laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
+
+  return true;
 }
 
 void
