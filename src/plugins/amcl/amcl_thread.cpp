@@ -39,6 +39,7 @@
 #ifdef HAVE_ROS
 #  include <ros/node_handle.h>
 #  include <geometry_msgs/PoseArray.h>
+#  include <nav_msgs/OccupancyGrid.h>
 #endif
 
 // compute linear index for given map coords
@@ -285,6 +286,9 @@ void AmclThread::init()
   initial_pose_sub_ =
     rosnode->subscribe("initialpose", 2,
 		       &AmclThread::initial_pose_received, this);
+  map_pub_ = rosnode->advertise<nav_msgs::OccupancyGrid>("map", 1, true);
+
+  publish_map();
 #endif
 
   laser_if_ =
@@ -658,7 +662,12 @@ void AmclThread::finalize()
   delete initial_pose_hyp_;
   initial_pose_hyp_ = NULL;
 
+#ifdef HAVE_ROS
   pose_pub_.shutdown();
+  particlecloud_pub_.shutdown();
+  initial_pose_sub_.shutdown();
+  map_pub_.shutdown();
+#endif
 }
 
 bool
@@ -729,6 +738,42 @@ AmclThread::read_map()
 
   }
   free(img_buffer);
+}
+
+void
+AmclThread::publish_map()
+{
+  nav_msgs::OccupancyGrid msg;
+  msg.info.map_load_time = ros::Time::now();
+  msg.header.stamp = ros::Time::now();
+  msg.header.frame_id = "map";
+
+  msg.info.width  = map_width_;
+  msg.info.height = map_height_;
+  msg.info.resolution = cfg_resolution_;
+  msg.info.origin.position.x = 0.; //map_->origin_x;
+  msg.info.origin.position.y = 0.; //map_->origin_y;
+  msg.info.origin.position.z = 0.0;
+  tf::Quaternion q(tf::create_quaternion_from_yaw(0.));
+  msg.info.origin.orientation.x = q.x();
+  msg.info.origin.orientation.y = q.y();
+  msg.info.origin.orientation.z = q.z();
+  msg.info.origin.orientation.w = q.w();
+
+  // Allocate space to hold the data
+  msg.data.resize(msg.info.width * msg.info.height);
+
+  for (unsigned int i = 0; i < msg.info.width * msg.info.height; ++i) {
+    if (map_->cells[i].occ_state == +1) {
+      msg.data[i] = +100;
+    } else if (map_->cells[i].occ_state == 0) {
+      msg.data[i] =    0;
+    } else {
+      msg.data[i] =   -1;
+    }
+  }
+
+  map_pub_.publish(msg);
 }
 
 

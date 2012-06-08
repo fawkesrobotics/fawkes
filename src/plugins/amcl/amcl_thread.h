@@ -99,6 +99,7 @@ public:
   static pf_vector_t uniform_pose_generator(void* arg);
 #ifdef HAVE_ROS
   void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
+  void publish_map();
 #endif
 
 private:
@@ -145,6 +146,7 @@ private:
   ros::Publisher pose_pub_;
   ros::Publisher particlecloud_pub_;
   ros::Subscriber initial_pose_sub_;
+  ros::Publisher map_pub_;
 #endif
 
   amcl_hyp_t* initial_pose_hyp_;
