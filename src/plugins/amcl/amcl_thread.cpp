@@ -141,7 +141,8 @@ void AmclThread::init()
   a_thresh_ = config->get_float(CFG_PREFIX"a_thresh");
   alpha_slow_ = config->get_float(CFG_PREFIX"alpha_slow");
   alpha_fast_ = config->get_float(CFG_PREFIX"alpha_fast");
-  angle_increment_ = config->get_float(CFG_PREFIX"angle_increment");
+  angle_increment_ = deg2rad(config->get_float(CFG_PREFIX"angle_increment"));
+
 
   max_beams_ = config->get_uint(CFG_PREFIX"max_beams");
   min_particles_ = config->get_uint(CFG_PREFIX"min_particles");
@@ -316,9 +317,11 @@ AmclThread::loop()
   // Where was the robot when this scan was taken?
   tf::Stamped<tf::Pose> odom_pose;
   pf_vector_t pose;
-  Time t(0, 0);
+  Time latest(0, 0);
+  // cannot use laser_if_->timestamp() here, since odometry is updated in
+  // last cycle of main loop while laser is newer -> tf extrapolation
   if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
-                     &t, base_frame_id_)) 
+                     &latest, base_frame_id_)) 
   {
     logger->log_error(name(), "Couldn't determine robot's pose "
                       "associated with laser scan");
@@ -341,12 +344,22 @@ AmclThread::loop()
       fabs(delta.v[2]) > a_thresh_;
 
     if (update) {
+      /*
+      logger->log_info(name(), "(%f,%f,%f) vs. (%f,%f,%f)  diff (%f|%i,%f|%i,%f|%i)",
+                       pose.v[0], pose.v[1], pose.v[2],
+                       pf_odom_pose_.v[0], pf_odom_pose_.v[1], pf_odom_pose_.v[2],
+                       fabs(delta.v[0]), fabs(delta.v[0]) > d_thresh_,
+                       fabs(delta.v[1]), fabs(delta.v[1]) > d_thresh_,
+                       fabs(delta.v[2]), fabs(delta.v[2]) > a_thresh_);
+      */
+
       laser_update_ = true;
     }
   }
 
   bool force_publication = false;
   if (!pf_init_) {
+    //logger->log_debug(name(), "! PF init");
     // Pose at last filter update
     pf_odom_pose_ = pose;
 
@@ -359,6 +372,7 @@ AmclThread::loop()
 
     resample_count_ = 0;
   } else if (pf_init_ && laser_update_) {
+    //logger->log_debug(name(), "PF init && laser update");
     //printf("pose\n");
     //pf_vector_fprintf(pose, stdout, "%.3f");
 
@@ -380,12 +394,39 @@ AmclThread::loop()
   bool resampled = false;
   // If the robot has moved, update the filter
   if (laser_update_) {
+    //logger->log_warn(name(), "laser update");
+
     amcl::AMCLLaserData ldata;
     ldata.sensor = laser_;
     ldata.range_count = laser_if_->maxlenof_distances();
 
-    double angle_min = 0;
-    double angle_increment = deg2rad(angle_increment_);
+    double laser_angle_min = 0;
+
+    // To account for lasers that are mounted upside-down, we determine the
+    // min, max, and increment angles of the laser in the base frame.
+    //
+    // Construct min and max angles of laser, in the base_link frame.
+    Time latest(0, 0);
+    tf::Quaternion q;
+    q.setEulerZYX(laser_angle_min, 0.0, 0.0);
+    tf::Stamped<tf::Quaternion> min_q(q, latest, laser_frame_id_);
+    q.setEulerZYX(laser_angle_min + angle_increment_, 0.0, 0.0);
+    tf::Stamped<tf::Quaternion> inc_q(q, latest, laser_frame_id_);
+    try
+    {
+      tf_listener->transform_quaternion(base_frame_id_, min_q, min_q);
+      tf_listener->transform_quaternion(base_frame_id_, inc_q, inc_q);
+    }
+    catch(Exception &e)
+    {
+      logger->log_warn(name(), "Unable to transform min/max laser angles "
+                       "into base frame");
+      logger->log_warn(name(), e);
+      return;
+    }
+
+    double angle_min = tf::get_yaw(min_q);
+    double angle_increment = tf::get_yaw(inc_q) - angle_min;
 
     // wrapping angle to [-pi .. pi]
     angle_increment = fmod(angle_increment + 5 * M_PI, 2 * M_PI) - M_PI;
@@ -422,12 +463,12 @@ AmclThread::loop()
 
     // Resample the particles
     if (!(++resample_count_ % resample_interval_)) {
-      //logger->log_info(name(), "Resample INFO!");
+      //logger->log_info(name(), "Resample!");
       pf_update_resample(pf_);
       resampled = true;
     }
     pf_sample_set_t* set = (pf_->sets) + pf_->current_set;
-    logger->log_debug(name(), "Num samples: %d", set->sample_count);
+    //logger->log_debug(name(), "Num samples: %d", set->sample_count);
 
 #ifdef HAVE_ROS
     // Publish the resulting cloud
@@ -437,8 +478,7 @@ AmclThread::loop()
     cloud_msg.header.frame_id = global_frame_id_;
     cloud_msg.poses.resize(set->sample_count);
     for (int i = 0; i < set->sample_count; i++) {
-      tf::Quaternion q(tf::Vector3(0,0,1),
-		       set->samples[i].pose.v[2]);
+      tf::Quaternion q(tf::create_quaternion_from_yaw(set->samples[i].pose.v[2]));
       cloud_msg.poses[i].position.x = set->samples[i].pose.v[0];
       cloud_msg.poses[i].position.y = set->samples[i].pose.v[1];
       cloud_msg.poses[i].position.z = 0.;
@@ -482,12 +522,12 @@ AmclThread::loop()
     }
 
     if (max_weight > 0.0) {
+      /*
       logger->log_debug(name(), "Max weight pose: %.3f %.3f %.3f",
 			hyps[max_weight_hyp].pf_pose_mean.v[0],
 			hyps[max_weight_hyp].pf_pose_mean.v[1],
 			hyps[max_weight_hyp].pf_pose_mean.v[2]);
 
-      /*
 	puts("");
 	pf_matrix_fprintf(hyps[max_weight_hyp].pf_pose_cov, stdout, "%6.3f");
 	puts("");
@@ -525,10 +565,12 @@ AmclThread::loop()
       pose_pub_.publish(p);
 #endif
       //last_published_pose = p;
-      //logger->log_debug(name(), "New pose: %6.3f %6.3f %6.3f",
-      //		hyps[max_weight_hyp].pf_pose_mean.v[0],
-      //		hyps[max_weight_hyp].pf_pose_mean.v[1],
-      //		hyps[max_weight_hyp].pf_pose_mean.v[2]);
+      /*
+      logger->log_debug(name(), "New pose: %6.3f %6.3f %6.3f",
+      		hyps[max_weight_hyp].pf_pose_mean.v[0],
+      		hyps[max_weight_hyp].pf_pose_mean.v[1],
+      		hyps[max_weight_hyp].pf_pose_mean.v[2]);
+      */
 
       // subtracting base to odom from map to base and send map to odom instead
       tf::Stamped<tf::Pose> odom_to_map;
@@ -538,13 +580,13 @@ AmclThread::loop()
           tmp_tf(tf::create_quaternion_from_yaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
                  tf::Vector3(hyps[max_weight_hyp].pf_pose_mean.v[0],
                              hyps[max_weight_hyp].pf_pose_mean.v[1], 0.0));
+        Time latest(0, 0);
 	tf::Stamped<tf::Pose> tmp_tf_stamped(tmp_tf.inverse(),
-                                             laser_if_->timestamp(),
-                                             base_frame_id_);
+                                             latest, base_frame_id_);
 	tf_listener->transform_pose(odom_frame_id_,
                                     tmp_tf_stamped, odom_to_map);
       } catch (Exception &e) {
-	logger->log_debug(name(),
+	logger->log_warn(name(),
 			  "Failed to subtract base to odom transform");
 	return;
       }
@@ -560,7 +602,7 @@ AmclThread::loop()
       tf::StampedTransform tmp_tf_stamped(latest_tf_.inverse(),
 					  transform_expiration,
 					  global_frame_id_, odom_frame_id_);
-      this->tf_publisher->send_transform(tmp_tf_stamped);
+      tf_publisher->send_transform(tmp_tf_stamped);
       sent_first_transform_ = true;
     } else {
       logger->log_error(name(), "No pose!");
@@ -634,7 +676,9 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose>& odom_pose, double& x,
   x = odom_pose.getOrigin().x();
   y = odom_pose.getOrigin().y();
   double pitch, roll;
-  odom_pose.getBasis().getEulerYPR(yaw, pitch, roll);
+  odom_pose.getBasis().getEulerZYX(yaw, pitch, roll);
+
+  //logger->log_info(name(), "Odom pose: (%f, %f, %f)", x, y, yaw);
 
   return true;
 }
@@ -810,7 +854,7 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
     return;
   }
 
-  fawkes::Time now(clock);
+  fawkes::Time latest(0, 0);
   fawkes::Time msg_time(msg->header.stamp.sec,
 			msg->header.stamp.nsec / 1000);
   
@@ -818,7 +862,7 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
   // intervening odometric change.
   tf::StampedTransform tx_odom;
   try {
-    tf_listener->lookup_transform(base_frame_id_, now,
+    tf_listener->lookup_transform(base_frame_id_, latest,
 				  base_frame_id_, msg_time,
 				  global_frame_id_, tx_odom);
   } catch(tf::TransformException &e) {
@@ -830,6 +874,9 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
       logger->log_warn(name(), "Failed to transform initial pose "
 		       "in time (%s)", e.what());
     tx_odom.setIdentity();
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to transform initial pose in time");
+    logger->log_warn(name(), e);
   }
 
   tf::Pose pose_old, pose_new;
@@ -846,8 +893,7 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
 
   // Transform into the global frame
 
-  logger->log_info(name(), "Setting pose (%s): %.3f %.3f %.3f",
-		   now.str(),
+  logger->log_info(name(), "Setting pose: %.3f %.3f %.3f",
 		   pose_new.getOrigin().x(),
 		   pose_new.getOrigin().y(),
 		   tf::get_yaw(pose_new));
