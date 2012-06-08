@@ -204,7 +204,7 @@ StaticTransformsThread::loop()
 
     // date time stamps slightly into the future so they are valid
     // for longer and need less frequent updates.
-    fawkes::Time timestamp = now + __cfg_update_interval;
+    fawkes::Time timestamp = now + (__cfg_update_interval * 1.1);
 
     std::list<Entry>::iterator i;
     for (i = __entries.begin(); i != __entries.end(); ++i) {
