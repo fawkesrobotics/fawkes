@@ -41,6 +41,9 @@
 #  include <geometry_msgs/PoseArray.h>
 #endif
 
+// compute linear index for given map coords
+#define MAP_IDX(sx, i, j) ((sx) * (j) + (i))
+
 #define CFG_PREFIX "/plugins/amcl/"
 
 using namespace fawkes;
@@ -448,9 +451,10 @@ AmclThread::loop()
       // amcl doesn't (yet) have a concept of min range.  So we'll map short
       // readings to max range.
       if (laser_distances[i] <= range_min)
-	ldata.ranges[i][0] = ldata.range_max;
+        ldata.ranges[i][0] = ldata.range_max;
       else
 	ldata.ranges[i][0] = laser_distances[i];
+
       // Compute bearing
       ldata.ranges[i][1] = angle_min + (i * angle_increment);
     }
@@ -708,15 +712,18 @@ AmclThread::read_map()
   for (unsigned int h = 0; h < map_height_; ++h) {
     for (unsigned int w = 0; w < map_width_; ++w) {
       unsigned int i = h * map_width_ + w;
-      float y = img_buffer[i] / 255.;
+      float y = (255 - img_buffer[i]) / 255.;
+
+      // Note that we invert the graphics-ordering of the pixels to
+      // produce a map with cell (0,0) in the lower-left corner.
 
       if (y > cfg_occupied_thresh_) {
-	map_->cells[i].occ_state = 1;
+	map_->cells[MAP_IDX(map_width_, w, map_height_ - h - 1)].occ_state = +1;
       } else if (y <= cfg_free_thresh_) {
-	map_->cells[i].occ_state = 0;
-	free_space_indices.push_back(std::make_pair(w,h));
+	map_->cells[MAP_IDX(map_width_, w, map_height_ - h - 1)].occ_state =  0;
+	free_space_indices.push_back(std::make_pair(w,map_height_ - h - 1));
       } else {
-	map_->cells[i].occ_state = -1;
+	map_->cells[MAP_IDX(map_width_, w, map_height_ - h - 1)].occ_state = -1;
       }
     }
 
