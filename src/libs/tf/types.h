@@ -230,8 +230,7 @@ static inline double get_yaw(const Quaternion& bt_q){
 static inline double get_yaw(Pose& t)
 {
   double yaw, pitch, roll;
-  Matrix3x3 mat = t.getBasis();
-  mat.getEulerYPR(yaw,pitch,roll);
+  t.getBasis().getEulerZYX(yaw,pitch,roll);
   return yaw;
 }
 
