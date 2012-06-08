@@ -112,9 +112,9 @@ void AmclThread::init()
   first_map_received_ = false;
   first_reconfigure_call_ = true;
 
-  init_pose_[0] = 55.0;
-  init_pose_[1] = 5.0;
-  init_pose_[2] = 5.0;
+  init_pose_[0] = 0.0;
+  init_pose_[1] = 0.0;
+  init_pose_[2] = 0.0;
   init_cov_[0] = 0.5 * 0.5;
   init_cov_[1] = 0.5 * 0.5;
   init_cov_[2] = (M_PI / 12.0) * (M_PI / 12.0);
@@ -180,46 +180,29 @@ void AmclThread::init()
     odom_model_type_ = amcl::ODOM_MODEL_DIFF;
   }
 
-  float tmp_pos;
-  tmp_pos = config->get_float(CFG_PREFIX"init_pose_x");
-  if (!::isnan(tmp_pos))
-    init_pose_[0] = tmp_pos;
-  else {
-    logger->log_warn(name(), "ignoring NAN in initial pose X position");
-  }
+  try {
+    init_pose_[0] = config->get_float(CFG_PREFIX"init_pose_x");
+  } catch (Exception &e) {} // ignored, use default
 
-  tmp_pos = config->get_float(CFG_PREFIX"init_pose_y");
-  if (!::isnan(tmp_pos))
-    init_pose_[1] = tmp_pos;
-  else {
-    logger->log_warn(name(), "ignoring NAN in initial pose Y position");
-  }
+  try {
+    init_pose_[1] = config->get_float(CFG_PREFIX"init_pose_y");
+  } catch (Exception &e) {} // ignored, use default
 
-  tmp_pos = config->get_float(CFG_PREFIX"init_pose_a");
-  if (!::isnan(tmp_pos))
-    init_pose_[2] = tmp_pos;
-  else {
-    logger->log_warn(name(), "ignoring NAN in initial pose YAW position");
-  }
+  try {
+    init_pose_[2] = config->get_float(CFG_PREFIX"init_pose_a");
+  } catch (Exception &e) {} // ignored, use default
 
-  tmp_pos = config->get_float(CFG_PREFIX"init_cov_xx");
-  if (!::isnan(tmp_pos))
-    init_cov_[0] = tmp_pos;
-  else {
-    logger->log_warn(name(), "ignoring NAN in initial covariance XX");
-  }
-  tmp_pos = config->get_float(CFG_PREFIX"init_cov_yy");
-  if (!::isnan(tmp_pos))
-    init_cov_[1] = tmp_pos;
-  else {
-    logger->log_warn(name(), "ignoring NAN in initial covariance YY");
-  }
-  tmp_pos = config->get_float(CFG_PREFIX"init_cov_aa");
-  if (!::isnan(tmp_pos))
-    init_cov_[2] = tmp_pos;
-  else {
-    logger->log_warn(name(), "ignoring NAN in initial covariance AA");
-  }
+  try {
+    init_cov_[0] = config->get_float(CFG_PREFIX"init_cov_xx");
+  } catch (Exception &e) {} // ignored, use default
+
+  try {
+    init_cov_[1] = config->get_float(CFG_PREFIX"init_cov_yy");
+  } catch (Exception &e) {} // ignored, use default
+
+  try {
+    init_cov_[2] = config->get_float(CFG_PREFIX"init_cov_aa");
+  } catch (Exception &e) {} // ignored, use default
 
   transform_tolerance_ = config->get_float(CFG_PREFIX"transform_tolerance");
 
@@ -253,14 +236,14 @@ void AmclThread::init()
   //btMatrix3x3(q).getRPY(unused_roll, unused_pitch, yaw);
 
   // TODO: meaningful initial pose
-  pf_init_pose_mean.v[0] = 1.0;
-  pf_init_pose_mean.v[1] = 1.0;
-  pf_init_pose_mean.v[2] = 1.57;
+  pf_init_pose_mean.v[0] = init_pose_[0];
+  pf_init_pose_mean.v[1] = init_pose_[1];
+  pf_init_pose_mean.v[2] = init_pose_[2];
 
   pf_matrix_t pf_init_pose_cov = pf_matrix_zero();
-  pf_init_pose_cov.m[0][0] = last_covariance_[6 * 0 + 0];
-  pf_init_pose_cov.m[1][1] = last_covariance_[6 * 1 + 1];
-  pf_init_pose_cov.m[2][2] = last_covariance_[6 * 5 + 5];
+  pf_init_pose_cov.m[0][0] = init_cov_[0]; //last_covariance_[6 * 0 + 0];
+  pf_init_pose_cov.m[1][1] = init_cov_[1]; //last_covariance_[6 * 1 + 1];
+  pf_init_pose_cov.m[2][2] = init_cov_[2]; //last_covariance_[6 * 5 + 5];
   pf_init(pf_, pf_init_pose_mean, pf_init_pose_cov);
   pf_init_ = false;
 
