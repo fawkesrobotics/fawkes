@@ -62,6 +62,12 @@ RobotinoActThread::init()
 
   last_seqnum_ = 0;
 
+  // reset odometry once on startup
+  rec::iocontrol::remotestate::SetState set_state;
+  set_state.setOdometry = true;
+  set_state.odometryX = set_state.odometryY = set_state.odometryPhi = 0;
+  com_->setSetState(set_state);
+
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
 
@@ -105,15 +111,15 @@ RobotinoActThread::loop()
       }
       else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
       {
-        set_state.resetPosition[0] = set_state.resetPosition[1] =
-          set_state.resetPosition[2] = true;
+        set_state.setOdometry = true;
+        set_state.odometryX = set_state.odometryY = set_state.odometryPhi = 0;
         send_set_state = true;
       }
 
       motor_if_->msgq_pop();
     }
 
-    if (send_set_state)  com_->setSetState( set_state );        
+    if (send_set_state)  com_->setSetState(set_state);
 
     rec::iocontrol::remotestate::SensorState sensor_state = com_->sensorState();
     if (sensor_state.sequenceNumber != last_seqnum_) {
