@@ -56,9 +56,13 @@ LIBS_ros_cmdvel = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesrosaspect MotorInterface
 OBJS_ros_cmdvel = cmdvel_thread.o cmdvel_plugin.o
 
+LIBS_ros_navigator = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		     fawkesinterface fawkesrosaspect NavigatorInterface
+OBJS_ros_navigator = navigator_plugin.o navigator_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
-	   $(OBJS_ros_cmdvel)
+	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -146,6 +150,27 @@ ifeq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_geometry_msgs
   endif
 
+  ifeq ($(call ros-have-pkg,move_base_msgs),1)
+    ifeq ($(call ros-have-pkg,actionlib),1)
+      ifeq ($(HAVE_TF),1)
+        CFLAGS_navigator_thread += $(call ros-pkg-cflags,move_base_msgs) \
+				   $(call ros-pkg-cflags,actionlib) \
+				   $(CFLAGS) $(CFLAGS_TF)
+        CFLAGS_navigator_plugin = $(CFLAGS_navigator_thread)
+        LDFLAGS_ros_navigator += $(call ros-pkg-lflags,move_base_msgs) \
+				 $(call ros-pkg-lflags,actionlib) \
+				 $(LDFLAGS_TF)
+        PLUGINS_all += $(PLUGINDIR)/ros-navigator.so
+      else
+        WARN_TARGETS += warning_navigator_tf
+      endif
+    else
+      WARN_TARGETS += warning_actionlib
+    endif
+  else
+    WARN_TARGETS += warning_move_base_msgs
+  endif
+
 else
   WARN_TARGETS += warning_ros
 endif
@@ -176,6 +201,12 @@ warning_odometry:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS odometry Plugin$(TNORMAL) (Fawkes TF library not available)"
 warning_geometry_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS cmdvel Plugin$(TNORMAL) (ROS package geometry_msgs not found)"
+warning_move_base_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (ROS package move_base_msgs not found)"
+warning_navigator_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (Fawkes TF library not available)"
+warning_actionlib:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (ROS package actionlib not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
