@@ -26,7 +26,7 @@ LIBS_libfawkes_amcl_map = m
 OBJS_libfawkes_amcl_map = map/map.o map/map_cspace.o map/map_range.o \
 			  map/map_store.o map/map_draw.o
 
-LIBS_libfawkes_amcl_sensors = m fawkes_amcl_pf fawkes_amcl_map
+LIBS_libfawkes_amcl_sensors = m fawkescore fawkes_amcl_pf fawkes_amcl_map
 OBJS_libfawkes_amcl_sensors = sensors/amcl_sensor.o sensors/amcl_odom.o \
 			      sensors/amcl_laser.o
 LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
@@ -37,6 +37,9 @@ OBJS_amcl = amcl_plugin.o amcl_thread.o
 
 OBJS_all    = $(OBJS_amcl) $(OBJS_libfawkes_amcl_pf) \
 	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors)
+
+# throw exceptions instead of aborting
+CFLAGS += -DUSE_ASSERT_EXCEPTION
 
 ifeq ($(HAVE_TF),1)
   CFLAGS_amcl_thread  = $(CFLAGS) $(CFLAGS_TF)

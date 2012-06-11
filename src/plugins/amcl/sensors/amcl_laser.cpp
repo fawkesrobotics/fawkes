@@ -34,7 +34,11 @@
 #include <sys/types.h> // required by Darwin
 #include <math.h>
 #include <stdlib.h>
-#include <assert.h>
+#ifdef USE_ASSERT_EXCEPTION
+#  include <core/assert_exception.h>
+#else
+#  include <assert.h>
+#endif
 #include <unistd.h>
 
 #include "amcl_laser.h"

@@ -314,7 +314,7 @@ AmclThread::loop()
 
   laser_if_->read();
   if (! laser_if_->changed()) {
-    logger->log_warn(name(), "Laser data unchanged, skipping loop");
+    //logger->log_warn(name(), "Laser data unchanged, skipping loop");
     return;
   }
   float* laser_distances = laser_if_->distances();
@@ -463,7 +463,13 @@ AmclThread::loop()
       ldata.ranges[i][1] = angle_min + (i * angle_increment);
     }
 
-    laser_->UpdateSensor(pf_, (amcl::AMCLSensorData*) &ldata);
+    try {
+      laser_->UpdateSensor(pf_, (amcl::AMCLSensorData*) &ldata);
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Failed to update laser sensor data, "
+                       "exception follows");
+      logger->log_warn(name(), e);
+    }
 
     laser_update_ = false;
 
