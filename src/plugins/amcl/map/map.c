@@ -32,7 +32,6 @@
  * Date: 6 Feb 2003
  **************************************************************************/
 
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
