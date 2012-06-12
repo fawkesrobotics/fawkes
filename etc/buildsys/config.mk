@@ -32,7 +32,6 @@ ifneq ($(wildcard $(BASEDIR)/../.gitmodules),)
     SUBMODULE = 1
     SUBMODULE_INTERN=1
     TOP_BASEDIR = $(BASEDIR)/..
-    include $(TOP_BASEDIR)/etc/buildsys/config.mk
   endif
 else
   ifneq ($(wildcard $(BASEDIR)/.gitmodules),)
@@ -236,6 +235,12 @@ else
     endif
   endif
 endif
+
+### If we are in the fawkes sub module include the top config 
+ifeq ($(SUBMODULE_INTERN),1)
+  include $(TOP_BASEDIR)/etc/buildsys/config.mk
+endif
+
 
 ### Check if there is a local config for this directory
 ifneq ($(SRCDIR),.)
