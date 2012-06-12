@@ -1727,8 +1727,8 @@ MirrorCalibTool::find_nearest_neighbors(PolarAngle angle,
   if (!min2_init) {
     throw fawkes::Exception("Second minimum diff. angle not found");
   }
-  PolarAngle min1;
-  PolarAngle min2;
+  PolarAngle min1 = 0.0;
+  PolarAngle min2 = 0.0;
   AngleList::size_type i = 0;
   for (MarkMap::const_iterator it = mark_map.begin();
        it != mark_map.end(); it++)
