@@ -143,6 +143,7 @@ void AmclThread::init()
     config->get_float(CFG_PREFIX"laser_likelihood_max_dist");
   d_thresh_ = config->get_float(CFG_PREFIX"d_thresh");
   a_thresh_ = config->get_float(CFG_PREFIX"a_thresh");
+  t_thresh_ = config->get_float(CFG_PREFIX"t_thresh");
   alpha_slow_ = config->get_float(CFG_PREFIX"alpha_slow");
   alpha_fast_ = config->get_float(CFG_PREFIX"alpha_fast");
   angle_increment_ = deg2rad(config->get_float(CFG_PREFIX"angle_increment"));
@@ -278,6 +279,9 @@ void AmclThread::init()
 
   laser_pose_set_ = set_laser_pose();
 
+  last_move_time_ = new Time(clock);
+  last_move_time_->stamp();
+
 #ifdef HAVE_ROS
   pose_pub_ =
     rosnode->advertise<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2);
@@ -344,13 +348,16 @@ AmclThread::loop()
     delta.v[1] = pose.v[1] - pf_odom_pose_.v[1];
     delta.v[2] = angle_diff(pose.v[2], pf_odom_pose_.v[2]);
 
+    fawkes::Time now(clock);
+
     // See if we should update the filter
     bool update =
       fabs(delta.v[0]) > d_thresh_ ||
       fabs(delta.v[1]) > d_thresh_ ||
       fabs(delta.v[2]) > a_thresh_;
-
+      
     if (update) {
+      last_move_time_->stamp();
       /*
       logger->log_info(name(), "(%f,%f,%f) vs. (%f,%f,%f)  diff (%f|%i,%f|%i,%f|%i)",
                        pose.v[0], pose.v[1], pose.v[2],
@@ -360,6 +367,8 @@ AmclThread::loop()
                        fabs(delta.v[2]), fabs(delta.v[2]) > a_thresh_);
       */
 
+      laser_update_ = true;
+    } else if ((now - last_move_time_) <= t_thresh_) {
       laser_update_ = true;
     }
   }
@@ -668,6 +677,11 @@ void AmclThread::finalize()
   delete initial_pose_hyp_;
   initial_pose_hyp_ = NULL;
 
+  delete last_move_time_;
+
+  blackboard->close(laser_if_);
+  blackboard->close(pos3d_if_);
+
 #ifdef HAVE_ROS
   pose_pub_.shutdown();
   particlecloud_pub_.shutdown();
@@ -974,5 +988,7 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
   initial_pose_hyp_->pf_pose_mean = pf_init_pose_mean;
   initial_pose_hyp_->pf_pose_cov = pf_init_pose_cov;
   apply_initial_pose();
+
+  last_move_time_->stamp();
 }
 #endif

@@ -194,6 +194,7 @@ private:
   float laser_likelihood_max_dist_;
   float d_thresh_;
   float a_thresh_;
+  float t_thresh_;
   float alpha_slow_;
   float alpha_fast_;
   float init_pose_[3];
@@ -204,6 +205,8 @@ private:
   bool first_map_only;
 
   unsigned int resample_interval_;
+
+  fawkes::Time *last_move_time_;
 
   std::string odom_frame_id_;
   std::string base_frame_id_;

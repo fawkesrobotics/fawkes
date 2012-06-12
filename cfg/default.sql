@@ -314,8 +314,9 @@ INSERT INTO "config" VALUES('/plugins/amcl/laser_interface_id','string','Laser u
 INSERT INTO "config" VALUES('/plugins/amcl/pose_interface_id','string','Pose','Pose interface ID');
 INSERT INTO "config" VALUES('/plugins/amcl/laser_model_type','string','beam','Laser Model type... check alternatives with ROS');
 INSERT INTO "config" VALUES('/plugins/amcl/odom_model_type','string','omni','Odometry Model type - differential or omni');
-INSERT INTO "config" VALUES('/plugins/amcl/d_thresh','float',0.2,'Update minimum D Thresh');
-INSERT INTO "config" VALUES('/plugins/amcl/a_thresh','float',0.5,'Update minimum A Thresh - should be PI/6');
+INSERT INTO "config" VALUES('/plugins/amcl/d_thresh','float',0.2,'Update minimum D Thresh; m');
+INSERT INTO "config" VALUES('/plugins/amcl/a_thresh','float',0.5,'Update minimum A Thresh - should be PI/6; rad');
+INSERT INTO "config" VALUES('/plugins/amcl/t_thresh','float',3.0,'Time to keep updating after stopping; sec');
 INSERT INTO "config" VALUES('/plugins/amcl/odom_frame_id','string','/robotino_odometry','Odometry Frame ID');
 INSERT INTO "config" VALUES('/plugins/amcl/base_frame_id','string','/base_link','Base Frame ID');
 INSERT INTO "config" VALUES('/plugins/amcl/global_frame_id','string','/map','Global Frame ID');
