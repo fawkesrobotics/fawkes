@@ -162,8 +162,6 @@ private:
   double pf_err_, pf_z_;
   bool pf_init_;
   pf_vector_t pf_odom_pose_;
-  //double d_thresh_, a_thresh_;
-  //int resample_interval_;
   double laser_min_range_;
   double laser_max_range_;
 

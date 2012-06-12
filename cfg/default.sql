@@ -296,8 +296,8 @@ INSERT INTO "config" VALUES('/plugins/amcl/laser_max_range','float',-1.0,'Laser 
 INSERT INTO "config" VALUES('/plugins/amcl/max_beams','unsigned int',30,'Laser Maximum Beams');
 INSERT INTO "config" VALUES('/plugins/amcl/min_particles','unsigned int',100,'Minimum Particles');
 INSERT INTO "config" VALUES('/plugins/amcl/max_particles','unsigned int',5000,'Maximum Particles');
-INSERT INTO "config" VALUES('/plugins/amcl/pf_err','float',0.01,'Pf error');
-INSERT INTO "config" VALUES('/plugins/amcl/pf_z','float',0.99,'Pf Z Value');
+INSERT INTO "config" VALUES('/plugins/amcl/kld_err','float',0.01,'Pf error');
+INSERT INTO "config" VALUES('/plugins/amcl/kld_z','float',0.99,'Pf Z Value');
 INSERT INTO "config" VALUES('/plugins/amcl/alpha1','float',0.6,'Alpha1_ Value');
 INSERT INTO "config" VALUES('/plugins/amcl/alpha2','float',0.6,'Alpha2_ Value');
 INSERT INTO "config" VALUES('/plugins/amcl/alpha3','float',0.6,'Alpha3_ Value');

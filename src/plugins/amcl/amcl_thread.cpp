@@ -126,8 +126,8 @@ void AmclThread::init()
   save_pose_rate = config->get_float(CFG_PREFIX"save_pose_rate");
   laser_min_range = config->get_float(CFG_PREFIX"laser_min_range");
   laser_max_range = config->get_float(CFG_PREFIX"laser_max_range");
-  pf_err = config->get_float(CFG_PREFIX"pf_err");
-  pf_z = config->get_float(CFG_PREFIX"pf_z");
+  pf_err = config->get_float(CFG_PREFIX"kld_err");
+  pf_z = config->get_float(CFG_PREFIX"kld_z");
   alpha1_ = config->get_float(CFG_PREFIX"alpha1");
   alpha2_ = config->get_float(CFG_PREFIX"alpha2");
   alpha3_ = config->get_float(CFG_PREFIX"alpha3");
