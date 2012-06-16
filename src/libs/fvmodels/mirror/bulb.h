@@ -1,10 +1,10 @@
+
 /***************************************************************************
  *  bulb.h - class defining a light bulb as mirror
  *
  *  Created: Thu Jul 21 14:25:00 2005
- *  Copyright 2005-2006 Tim Niemueller [www.niemueller.de]
+ *  Copyright 2005-2012 Tim Niemueller [www.niemueller.de]
  *            2005      Martin Heracles
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -107,6 +107,8 @@ class Bulb : public MirrorModel
   void save(const char * filename);
   
   static std::string composeFilename(const char * format);
+
+  const fawkes::polar_coord_2d_t * get_lut() const;
 
  protected:
 
