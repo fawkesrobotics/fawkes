@@ -300,6 +300,9 @@ void AmclThread::init()
   pos3d_if_ =
     blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
 
+  pos3d_if_->set_frame(global_frame_id_.c_str());
+  pos3d_if_->write();
+
   apply_initial_pose();
 }
 
@@ -641,17 +644,26 @@ AmclThread::loop()
     tf_publisher->send_transform(tmp_tf_stamped);
 
     // Is it time to save our last pose to the param server
-    /*
-      Time now(clock);
-      if ((save_pose_period > 0.0) &&
+    Time now(clock);
+    // We need to apply the last transform to the latest odom pose to get
+    // the latest map pose to store.  We'll take the covariance from
+    // last_published_pose.
+    tf::Pose map_pose = latest_tf_.inverse() * odom_pose;
+    tf::Quaternion map_att = map_pose.getRotation();
+
+    double trans[3] = {map_pose.getOrigin().x(), map_pose.getOrigin().y(), 0};
+    double rot[4] = { map_att.x(), map_att.y(), map_att.z(), map_att.w() };
+    
+    pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() + 1);
+    pos3d_if_->set_translation(trans);
+    pos3d_if_->set_rotation(rot);
+    pos3d_if_->write();
+
+      /*
+    if ((save_pose_period > 0.0) &&
       (now - save_pose_last_time) >= save_pose_period) {
-      // We need to apply the last transform to the latest odom pose to get
-      // the latest map pose to store.  We'll take the covariance from
-      // last_published_pose.
-      tf::Pose map_pose = latest_tf_.inverse() * odom_pose;
       double yaw, pitch, roll;
       map_pose.getBasis().getEulerYPR(yaw, pitch, roll);
-
       private_nh_.setParam("initial_pose_x", map_pose.getOrigin().x());
       private_nh_.setParam("initial_pose_y", map_pose.getOrigin().y());
       private_nh_.setParam("initial_pose_a", yaw);
