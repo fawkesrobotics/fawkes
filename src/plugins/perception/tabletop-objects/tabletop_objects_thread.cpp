@@ -346,7 +346,7 @@ TabletopObjectsThread::loop()
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-  Eigen::Vector4f table_centroid, baserel_table_centroid;
+  Eigen::Vector4f table_centroid, baserel_table_centroid(0,0,0,0);
 
   // This will search for the first plane which:
   // 1. has a considerable amount of points (>= some percentage of input points)
