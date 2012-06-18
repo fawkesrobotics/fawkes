@@ -217,6 +217,7 @@ TransformInterface::set_translation(unsigned int index, const double new_transla
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->translation[index] = new_translation;
+  data_changed = true;
 }
 /** Get rotation value.
  * 
@@ -296,6 +297,7 @@ TransformInterface::set_rotation(unsigned int index, const double new_rotation)
     throw Exception("Index value %u out of bounds (0..4)", index);
   }
   data->rotation[index] = new_rotation;
+  data_changed = true;
 }
 /* =========== message create =========== */
 Message *

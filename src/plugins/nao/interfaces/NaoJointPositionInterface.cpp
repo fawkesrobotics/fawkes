@@ -265,6 +265,7 @@ NaoJointPositionInterface::set_robot_version(unsigned int index, const uint8_t n
     throw Exception("Index value %u out of bounds (0..4)", index);
   }
   data->robot_version[index] = new_robot_version;
+  data_changed = true;
 }
 /** Get head_yaw value.
  * Head yaw

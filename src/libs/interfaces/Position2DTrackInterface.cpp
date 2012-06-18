@@ -134,6 +134,7 @@ Position2DTrackInterface::set_track_x_positions(unsigned int index, const float 
     throw Exception("Index value %u out of bounds (0..30)", index);
   }
   data->track_x_positions[index] = new_track_x_positions;
+  data_changed = true;
 }
 /** Get track_y_positions value.
  * 
@@ -205,6 +206,7 @@ Position2DTrackInterface::set_track_y_positions(unsigned int index, const float 
     throw Exception("Index value %u out of bounds (0..30)", index);
   }
   data->track_y_positions[index] = new_track_y_positions;
+  data_changed = true;
 }
 /** Get track_timestamps value.
  * 
@@ -276,6 +278,7 @@ Position2DTrackInterface::set_track_timestamps(unsigned int index, const int32_t
     throw Exception("Index value %u out of bounds (0..30)", index);
   }
   data->track_timestamps[index] = new_track_timestamps;
+  data_changed = true;
 }
 /** Get valid value.
  * True, if this track is valid.

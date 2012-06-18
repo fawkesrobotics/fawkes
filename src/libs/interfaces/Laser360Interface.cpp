@@ -166,6 +166,7 @@ Laser360Interface::set_distances(unsigned int index, const float new_distances)
     throw Exception("Index value %u out of bounds (0..360)", index);
   }
   data->distances[index] = new_distances;
+  data_changed = true;
 }
 /** Get clockwise_angle value.
  * 

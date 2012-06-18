@@ -367,6 +367,7 @@ HumanSkeletonInterface::set_com(unsigned int index, const float new_com)
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->com[index] = new_com;
+  data_changed = true;
 }
 /** Get pos_head value.
  * Head position vector.
@@ -426,6 +427,7 @@ HumanSkeletonInterface::set_pos_head(unsigned int index, const float new_pos_hea
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_head[index] = new_pos_head;
+  data_changed = true;
 }
 /** Get pos_head_confidence value.
  * 
@@ -518,6 +520,7 @@ HumanSkeletonInterface::set_pos_neck(unsigned int index, const float new_pos_nec
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_neck[index] = new_pos_neck;
+  data_changed = true;
 }
 /** Get pos_neck_confidence value.
  * 
@@ -610,6 +613,7 @@ HumanSkeletonInterface::set_pos_torso(unsigned int index, const float new_pos_to
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_torso[index] = new_pos_torso;
+  data_changed = true;
 }
 /** Get pos_torso_confidence value.
  * 
@@ -702,6 +706,7 @@ HumanSkeletonInterface::set_pos_waist(unsigned int index, const float new_pos_wa
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_waist[index] = new_pos_waist;
+  data_changed = true;
 }
 /** Get pos_waist_confidence value.
  * 
@@ -798,6 +803,7 @@ HumanSkeletonInterface::set_pos_left_collar(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_collar[index] = new_pos_left_collar;
+  data_changed = true;
 }
 /** Get pos_left_collar_confidence value.
  * 
@@ -894,6 +900,7 @@ HumanSkeletonInterface::set_pos_left_shoulder(unsigned int index, const float ne
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_shoulder[index] = new_pos_left_shoulder;
+  data_changed = true;
 }
 /** Get pos_left_shoulder_confidence value.
  * 
@@ -990,6 +997,7 @@ HumanSkeletonInterface::set_pos_left_elbow(unsigned int index, const float new_p
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_elbow[index] = new_pos_left_elbow;
+  data_changed = true;
 }
 /** Get pos_left_elbow_confidence value.
  * 
@@ -1086,6 +1094,7 @@ HumanSkeletonInterface::set_pos_left_wrist(unsigned int index, const float new_p
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_wrist[index] = new_pos_left_wrist;
+  data_changed = true;
 }
 /** Get pos_left_wrist_confidence value.
  * 
@@ -1182,6 +1191,7 @@ HumanSkeletonInterface::set_pos_left_hand(unsigned int index, const float new_po
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_hand[index] = new_pos_left_hand;
+  data_changed = true;
 }
 /** Get pos_left_hand_confidence value.
  * 
@@ -1278,6 +1288,7 @@ HumanSkeletonInterface::set_pos_left_fingertip(unsigned int index, const float n
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_fingertip[index] = new_pos_left_fingertip;
+  data_changed = true;
 }
 /** Get pos_left_fingertip_confidence value.
  * 
@@ -1374,6 +1385,7 @@ HumanSkeletonInterface::set_pos_right_collar(unsigned int index, const float new
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_collar[index] = new_pos_right_collar;
+  data_changed = true;
 }
 /** Get pos_right_collar_confidence value.
  * 
@@ -1470,6 +1482,7 @@ HumanSkeletonInterface::set_pos_right_shoulder(unsigned int index, const float n
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_shoulder[index] = new_pos_right_shoulder;
+  data_changed = true;
 }
 /** Get pos_right_shoulder_confidence value.
  * 
@@ -1566,6 +1579,7 @@ HumanSkeletonInterface::set_pos_right_elbow(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_elbow[index] = new_pos_right_elbow;
+  data_changed = true;
 }
 /** Get pos_right_elbow_confidence value.
  * 
@@ -1662,6 +1676,7 @@ HumanSkeletonInterface::set_pos_right_wrist(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_wrist[index] = new_pos_right_wrist;
+  data_changed = true;
 }
 /** Get pos_right_wrist_confidence value.
  * 
@@ -1758,6 +1773,7 @@ HumanSkeletonInterface::set_pos_right_hand(unsigned int index, const float new_p
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_hand[index] = new_pos_right_hand;
+  data_changed = true;
 }
 /** Get pos_right_hand_confidence value.
  * 
@@ -1854,6 +1870,7 @@ HumanSkeletonInterface::set_pos_right_fingertip(unsigned int index, const float 
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_fingertip[index] = new_pos_right_fingertip;
+  data_changed = true;
 }
 /** Get pos_right_fingertip_confidence value.
  * 
@@ -1950,6 +1967,7 @@ HumanSkeletonInterface::set_pos_left_hip(unsigned int index, const float new_pos
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_hip[index] = new_pos_left_hip;
+  data_changed = true;
 }
 /** Get pos_left_hip_confidence value.
  * 
@@ -2046,6 +2064,7 @@ HumanSkeletonInterface::set_pos_left_knee(unsigned int index, const float new_po
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_knee[index] = new_pos_left_knee;
+  data_changed = true;
 }
 /** Get pos_left_knee_confidence value.
  * 
@@ -2142,6 +2161,7 @@ HumanSkeletonInterface::set_pos_left_ankle(unsigned int index, const float new_p
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_ankle[index] = new_pos_left_ankle;
+  data_changed = true;
 }
 /** Get pos_left_ankle_confidence value.
  * 
@@ -2238,6 +2258,7 @@ HumanSkeletonInterface::set_pos_left_foot(unsigned int index, const float new_po
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_left_foot[index] = new_pos_left_foot;
+  data_changed = true;
 }
 /** Get pos_left_foot_confidence value.
  * 
@@ -2334,6 +2355,7 @@ HumanSkeletonInterface::set_pos_right_hip(unsigned int index, const float new_po
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_hip[index] = new_pos_right_hip;
+  data_changed = true;
 }
 /** Get pos_right_hip_confidence value.
  * 
@@ -2430,6 +2452,7 @@ HumanSkeletonInterface::set_pos_right_knee(unsigned int index, const float new_p
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_knee[index] = new_pos_right_knee;
+  data_changed = true;
 }
 /** Get pos_right_knee_confidence value.
  * 
@@ -2526,6 +2549,7 @@ HumanSkeletonInterface::set_pos_right_ankle(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_ankle[index] = new_pos_right_ankle;
+  data_changed = true;
 }
 /** Get pos_right_ankle_confidence value.
  * 
@@ -2622,6 +2646,7 @@ HumanSkeletonInterface::set_pos_right_foot(unsigned int index, const float new_p
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->pos_right_foot[index] = new_pos_right_foot;
+  data_changed = true;
 }
 /** Get pos_right_foot_confidence value.
  * 
@@ -2714,6 +2739,7 @@ HumanSkeletonInterface::set_ori_head(unsigned int index, const float new_ori_hea
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_head[index] = new_ori_head;
+  data_changed = true;
 }
 /** Get ori_head_confidence value.
  * 
@@ -2806,6 +2832,7 @@ HumanSkeletonInterface::set_ori_neck(unsigned int index, const float new_ori_nec
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_neck[index] = new_ori_neck;
+  data_changed = true;
 }
 /** Get ori_neck_confidence value.
  * 
@@ -2898,6 +2925,7 @@ HumanSkeletonInterface::set_ori_torso(unsigned int index, const float new_ori_to
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_torso[index] = new_ori_torso;
+  data_changed = true;
 }
 /** Get ori_torso_confidence value.
  * 
@@ -2990,6 +3018,7 @@ HumanSkeletonInterface::set_ori_waist(unsigned int index, const float new_ori_wa
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_waist[index] = new_ori_waist;
+  data_changed = true;
 }
 /** Get ori_waist_confidence value.
  * 
@@ -3086,6 +3115,7 @@ HumanSkeletonInterface::set_ori_left_collar(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_collar[index] = new_ori_left_collar;
+  data_changed = true;
 }
 /** Get ori_left_collar_confidence value.
  * 
@@ -3182,6 +3212,7 @@ HumanSkeletonInterface::set_ori_left_shoulder(unsigned int index, const float ne
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_shoulder[index] = new_ori_left_shoulder;
+  data_changed = true;
 }
 /** Get ori_left_shoulder_confidence value.
  * 
@@ -3278,6 +3309,7 @@ HumanSkeletonInterface::set_ori_left_elbow(unsigned int index, const float new_o
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_elbow[index] = new_ori_left_elbow;
+  data_changed = true;
 }
 /** Get ori_left_elbow_confidence value.
  * 
@@ -3374,6 +3406,7 @@ HumanSkeletonInterface::set_ori_left_wrist(unsigned int index, const float new_o
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_wrist[index] = new_ori_left_wrist;
+  data_changed = true;
 }
 /** Get ori_left_wrist_confidence value.
  * 
@@ -3470,6 +3503,7 @@ HumanSkeletonInterface::set_ori_left_hand(unsigned int index, const float new_or
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_hand[index] = new_ori_left_hand;
+  data_changed = true;
 }
 /** Get ori_left_hand_confidence value.
  * 
@@ -3566,6 +3600,7 @@ HumanSkeletonInterface::set_ori_left_fingertip(unsigned int index, const float n
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_fingertip[index] = new_ori_left_fingertip;
+  data_changed = true;
 }
 /** Get ori_left_fingertip_confidence value.
  * 
@@ -3662,6 +3697,7 @@ HumanSkeletonInterface::set_ori_right_collar(unsigned int index, const float new
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_collar[index] = new_ori_right_collar;
+  data_changed = true;
 }
 /** Get ori_right_collar_confidence value.
  * 
@@ -3758,6 +3794,7 @@ HumanSkeletonInterface::set_ori_right_shoulder(unsigned int index, const float n
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_shoulder[index] = new_ori_right_shoulder;
+  data_changed = true;
 }
 /** Get ori_right_shoulder_confidence value.
  * 
@@ -3854,6 +3891,7 @@ HumanSkeletonInterface::set_ori_right_elbow(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_elbow[index] = new_ori_right_elbow;
+  data_changed = true;
 }
 /** Get ori_right_elbow_confidence value.
  * 
@@ -3950,6 +3988,7 @@ HumanSkeletonInterface::set_ori_right_wrist(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_wrist[index] = new_ori_right_wrist;
+  data_changed = true;
 }
 /** Get ori_right_wrist_confidence value.
  * 
@@ -4046,6 +4085,7 @@ HumanSkeletonInterface::set_ori_right_hand(unsigned int index, const float new_o
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_hand[index] = new_ori_right_hand;
+  data_changed = true;
 }
 /** Get ori_right_hand_confidence value.
  * 
@@ -4142,6 +4182,7 @@ HumanSkeletonInterface::set_ori_right_fingertip(unsigned int index, const float 
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_fingertip[index] = new_ori_right_fingertip;
+  data_changed = true;
 }
 /** Get ori_right_fingertip_confidence value.
  * 
@@ -4238,6 +4279,7 @@ HumanSkeletonInterface::set_ori_left_hip(unsigned int index, const float new_ori
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_hip[index] = new_ori_left_hip;
+  data_changed = true;
 }
 /** Get ori_left_hip_confidence value.
  * 
@@ -4334,6 +4376,7 @@ HumanSkeletonInterface::set_ori_left_knee(unsigned int index, const float new_or
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_knee[index] = new_ori_left_knee;
+  data_changed = true;
 }
 /** Get ori_left_knee_confidence value.
  * 
@@ -4430,6 +4473,7 @@ HumanSkeletonInterface::set_ori_left_ankle(unsigned int index, const float new_o
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_ankle[index] = new_ori_left_ankle;
+  data_changed = true;
 }
 /** Get ori_left_ankle_confidence value.
  * 
@@ -4526,6 +4570,7 @@ HumanSkeletonInterface::set_ori_left_foot(unsigned int index, const float new_or
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_left_foot[index] = new_ori_left_foot;
+  data_changed = true;
 }
 /** Get ori_left_foot_confidence value.
  * 
@@ -4622,6 +4667,7 @@ HumanSkeletonInterface::set_ori_right_hip(unsigned int index, const float new_or
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_hip[index] = new_ori_right_hip;
+  data_changed = true;
 }
 /** Get ori_right_hip_confidence value.
  * 
@@ -4718,6 +4764,7 @@ HumanSkeletonInterface::set_ori_right_knee(unsigned int index, const float new_o
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_knee[index] = new_ori_right_knee;
+  data_changed = true;
 }
 /** Get ori_right_knee_confidence value.
  * 
@@ -4814,6 +4861,7 @@ HumanSkeletonInterface::set_ori_right_ankle(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_ankle[index] = new_ori_right_ankle;
+  data_changed = true;
 }
 /** Get ori_right_ankle_confidence value.
  * 
@@ -4910,6 +4958,7 @@ HumanSkeletonInterface::set_ori_right_foot(unsigned int index, const float new_o
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->ori_right_foot[index] = new_ori_right_foot;
+  data_changed = true;
 }
 /** Get ori_right_foot_confidence value.
  * 
