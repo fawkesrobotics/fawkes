@@ -50,6 +50,7 @@ void
 CLIPSThread::init()
 {
   CLIPS::init();
+  __clips_aspect_inifin.set_logger(logger);
   logger->log_info(name(), "CLIPS initialized");
 }
 

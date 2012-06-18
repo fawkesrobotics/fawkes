@@ -23,12 +23,67 @@
 
 #include <plugins/clips/aspect/clips_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <logging/logger.h>
 #include <clipsmm.h>
+
+extern "C" {
+#include <clips/clips.h>
+}
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+/// @cond INTERNALS
+
+class CLIPSLogger
+{
+ public:
+  CLIPSLogger(Logger *logger)
+  {
+    logger_ = logger;
+  }
+
+  void log(const char *str)
+  {
+    if (strcmp(str, "\n") == 0) {
+      logger_->log_info("CLIPS", "%s", buffer_.c_str());
+      buffer_.clear();
+    } else {
+      buffer_ += str;
+    }
+  }
+
+ private:
+  Logger *logger_;
+  std::string buffer_;
+};
+
+static int
+log_router_query(void *env, char *logical_name)
+{
+  if (strcmp(logical_name, "l") == 0) return TRUE;
+  if (strcmp(logical_name, "stdout") == 0) return TRUE;
+  return FALSE;
+}
+
+static int
+log_router_print(void *env, char *logical_name, char *str)
+{
+  void *rc = GetEnvironmentRouterContext(env);
+  CLIPSLogger *logger = static_cast<CLIPSLogger *>(rc);
+  logger->log(str);
+  return TRUE;
+}
+
+static int
+log_router_exit(void *env, int exit_code)
+{
+  return TRUE;
+}
+
+/// @endcond
 
 /** @class CLIPSAspectIniFin <plugins/clips/aspect/clips_inifin.h>
  * CLIPSAspect initializer/finalizer.
@@ -41,6 +96,13 @@ namespace fawkes {
 CLIPSAspectIniFin::CLIPSAspectIniFin()
   : AspectIniFin("CLIPSAspect")
 {
+  logger_ = NULL;
+}
+
+/** Destructor. */
+CLIPSAspectIniFin::~CLIPSAspectIniFin()
+{
+  delete logger_;
 }
 
 void
@@ -59,6 +121,17 @@ CLIPSAspectIniFin::init(Thread *thread)
   struct sigaction oldact;
   if (sigaction(SIGINT, NULL, &oldact) == 0) {
     LockPtr<CLIPS::Environment> clips(new CLIPS::Environment());
+
+    void *env = clips->cobj();
+    EnvAddRouterWithContext(env, (char *)"fawkeslog",
+                            /* exclusive */ 50,
+                            log_router_query,
+                            log_router_print,
+                            /* getc */   NULL,
+                            /* ungetc */ NULL,
+                            log_router_exit,
+                            logger_);
+
     clips_thread->init_CLIPSAspect(clips);
     // restore old action
     sigaction(SIGINT, &oldact, NULL);
@@ -80,6 +153,17 @@ CLIPSAspectIniFin::finalize(Thread *thread)
 					"has not. ", thread->name());
   }
   clips_thread->finalize_CLIPSAspect();
+}
+
+
+
+/** Set the logger to use for logging (print to "l" output).
+ * @param logger logger to use
+ */
+void
+CLIPSAspectIniFin::set_logger(Logger *logger)
+{
+  logger_ = new CLIPSLogger(logger);
 }
 
 } // end namespace fawkes

@@ -32,14 +32,22 @@ namespace fawkes {
 }
 #endif
 
+class Logger;
+class CLIPSLogger;
+
 class CLIPSAspectIniFin : public AspectIniFin
 {
  public:
   CLIPSAspectIniFin();
+  ~CLIPSAspectIniFin();
 
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
+  void set_logger(Logger *logger);
+
+ private:
+  CLIPSLogger *logger_;
 };
 
 } // end namespace fawkes
