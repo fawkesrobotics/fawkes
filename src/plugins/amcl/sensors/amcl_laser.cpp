@@ -174,8 +174,10 @@ double AMCLLaser::BeamModel(AMCLLaserData *data, pf_sample_set_t* set)
 
       // TODO: outlier rejection for short readings
 
-      assert(pz <= 1.0);
-      assert(pz >= 0.0);
+      //assert(pz <= 1.0);
+      //assert(pz >= 0.0);
+      if ( (pz < 0.) || (pz > 1.) )  pz = 0.;
+
       //      p *= pz;
       // here we have an ad-hoc weighting scheme for combining beam probs
       // works well, though...
@@ -255,8 +257,10 @@ double AMCLLaser::LikelihoodFieldModel(AMCLLaserData *data, pf_sample_set_t* set
 
       // TODO: outlier rejection for short readings
 
-      assert(pz <= 1.0);
-      assert(pz >= 0.0);
+      //assert(pz <= 1.0);
+      //assert(pz >= 0.0);
+      if ( (pz < 0.) || (pz > 1.) )  pz = 0.;
+
       //      p *= pz;
       // here we have an ad-hoc weighting scheme for combining beam probs
       // works well, though...
