@@ -22,6 +22,8 @@
 
 #include "mongolog_plugin.h"
 #include "mongolog_thread.h"
+#include "image_thread.h"
+#include "pcl_thread.h"
 #include "mongolog_logger_thread.h"
 
 using namespace fawkes;
@@ -40,12 +42,16 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
   : Plugin(config)
 {
   thread_list.push_back(new MongoLogThread());
+  thread_list.push_back(new MongoLogPointCloudThread());
+  thread_list.push_back(new MongoLogImagesThread());
 
   bool enable_logger = true;
   try {
     enable_logger = config->get_bool("/plugins/mongolog/enable_logger");
   } catch (Exception &e) {}
-  if (enable_logger) thread_list.push_back(new MongoLogLoggerThread());
+  if (enable_logger) {
+    thread_list.push_back(new MongoLogLoggerThread());
+  }
 }
 
 

@@ -86,7 +86,8 @@ class MongoLogThread
 		      mongo::DBClientBase *mongodb,
 		      std::string &database,
 		      fawkes::LockSet<std::string> &colls,
-		      fawkes::Logger *logger);
+		      fawkes::Logger *logger,
+          fawkes::Time *now);
     ~InterfaceListener();
 
     // for BlackBoardInterfaceListener
@@ -100,13 +101,14 @@ class MongoLogThread
     std::string          __collection;
     std::string         &__database;
     fawkes::LockSet<std::string> &__collections;
+    fawkes::Time        *now_;
   };
 
 
   fawkes::LockMap<std::string, InterfaceListener *> __listeners;
   fawkes::LockSet<std::string> __collections;
   std::string __database;
-
+  fawkes::Time        *now_;
 };
 
 #endif

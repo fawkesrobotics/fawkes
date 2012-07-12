@@ -16,10 +16,11 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDSYSDIR)/pcl.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_mongolog = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect
+		fawkesutils fawkeslogging fawkesmongodbaspect fvutils $(LIBS_MONGODB)
 OBJS_mongolog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 CFLAGS  += $(CFLAGS_MONGODB)
@@ -28,6 +29,8 @@ LDFLAGS += $(LDFLAGS_MONGODB)
 OBJS_all    = $(OBJS_mongolog)
 
 ifeq ($(HAVE_MONGODB),1)
+  CFLAGS += $(CFLAGS_PCL)
+  LDFLAGS += $(LDFLAGS_PCL)
   PLUGINS_all = $(PLUGINDIR)/mongolog.so
 else
   WARN_TARGETS += warning_mongodb
