@@ -70,6 +70,7 @@ class MongoLogImagesThread
  private:
   /// @cond INTERNALS
   typedef struct {
+    std::string				 topic_name;
     fawkes::Time                         last_sent;
     firevision::SharedMemoryImageBuffer *img;
   } ImageInfo;

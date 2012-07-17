@@ -63,7 +63,6 @@ MongoLogPointCloudThread::init()
     logger->log_info(name(), "No database configured, writing to %s",
 		     __database.c_str());
   }
-  __collection = __database + ".pointclouds";
   __mongodb    = mongodb_client;
 
   __adapter = new MongoLogPointCloudAdapter(pcl_manager, logger);
@@ -73,6 +72,14 @@ MongoLogPointCloudThread::init()
   std::vector<std::string>::iterator p;
   for (p = pcls.begin(); p != pcls.end(); ++p) {
     PointCloudInfo pi;
+
+    std::string topic_name = std::string("PointClouds.") + *p;
+    std::string::size_type pos = 0;
+    while ((pos = topic_name.find("-", pos)) != std::string::npos) {
+      topic_name.replace(pos, 1, "_");
+    }
+
+    pi.topic_name = topic_name;
 
     logger->log_info(name(), "MongoLog of point cloud %s", p->c_str());
 
@@ -102,7 +109,11 @@ MongoLogPointCloudThread::init()
 void
 MongoLogPointCloudThread::finalize()
 {
+  logger->log_debug(name(), "Finalizing MongoLogPointCloudThread");
+
   delete __adapter;
+
+  logger->log_debug(name(), "Finalized MongoLogPointCloudthread");
 }
 
 
@@ -119,33 +130,36 @@ MongoLogPointCloudThread::loop()
       __adapter->get_data(p->first, width, height, time,
                           &point_data, point_size, num_points);
       size_t data_size = point_size * num_points;
-      pi.msg.data.resize(data_size);
 
       if (pi.last_sent != time) {
         pi.last_sent = time;
 
         BSONObjBuilder document;
-        document.appendTimestamp("timestamp", time.in_msec());
-        BSONArrayBuilder subb(document.subobjStart("pointcloud"));
-        document.append("frame_id", pi.msg.header.frame_id);
-        document.append("is_dense", pi.msg.is_dense);
-        document.append("width", width);
-        document.append("height", height);
-        document.append("point_size", (unsigned int)point_size);
-        document.append("num_points", (unsigned int)num_points);
-        document.appendBinData("point_data", (int) data_size, BinDataGeneral, point_data);
-        BSONArrayBuilder subb2(document.subarrayStart("field_info"));
+        document.append("timestamp", (long long) time.in_msec());
+        BSONObjBuilder subb(document.subobjStart("pointcloud"));
+        subb.append("frame_id", pi.msg.header.frame_id);
+        subb.append("is_dense", pi.msg.is_dense);
+        subb.append("width", width);
+        subb.append("height", height);
+        subb.append("point_size", (unsigned int)point_size);
+        subb.append("num_points", (unsigned int)num_points);
+
+//        subb.appendBinData("point_data", (int) data_size, BinDataGeneral, point_data);
+	// fix for mongodb version < 2.0.1
+        subb.appendBinData("point_data", (int) data_size, BinDataGeneral, (char*) point_data);
+        BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
         for (unsigned int i = 0; i < pi.msg.fields.size(); i++) {
-          BSONObjBuilder fi(document.subobjStart("field_info_"+i));
-          document.append("name", pi.msg.fields[i].name);
-          document.append("offset", pi.msg.fields[i].offset);
-          document.append("datatype", pi.msg.fields[i].datatype);
-          document.append("count", pi.msg.fields[i].count);
+          BSONObjBuilder fi(subb2.subobjStart());
+          fi.append("name", pi.msg.fields[i].name);
+          fi.append("offset", pi.msg.fields[i].offset);
+          fi.append("datatype", pi.msg.fields[i].datatype);
+          fi.append("count", pi.msg.fields[i].count);
           fi.doneFast();
         }
         subb2.doneFast();
         subb.doneFast();
-         __mongodb->insert(__collection, document.obj());
+	__collection = __database + "." + pi.topic_name;
+        __mongodb->insert(__collection, document.obj());
 
     } else {
       __adapter->close(p->first);

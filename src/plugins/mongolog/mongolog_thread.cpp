@@ -127,12 +127,19 @@ MongoLogThread::finalize()
   }
   __configs.clear();
   */
+
+  logger->log_debug(name(), "Finalizing MongoLogThread");
+
+  blackboard->unregister_observer(this);
+
   config->erase("/plugins/mongorrd/databases/mongolog");
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = __listeners.begin(); i != __listeners.end(); ++i) {
     delete i->second;
   }
   __listeners.clear();
+
+  logger->log_debug(name(), "Finalized MongoLogThread");
 }
 
 
@@ -229,7 +236,7 @@ MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interfac
 
   // write interface data
   BSONObjBuilder document;
-  document.appendTimestamp("timestamp", now_->in_msec());
+  document.append("timestamp", (long long) now_->in_msec());
   InterfaceFieldIterator i;
   for (i = interface->fields(); i != interface->fields_end(); ++i) {
     size_t length = i.get_length();
