@@ -65,7 +65,6 @@ MongoLogImagesThread::init()
     logger->log_info(name(), "No database configured, writing to %s",
 		     __database.c_str());
   }
-  __collection = __database + ".images";
   __mongodb    = mongodb_client;
 
   last_update_ = new Time(clock);
@@ -76,12 +75,13 @@ MongoLogImagesThread::init()
 void
 MongoLogImagesThread::finalize()
 {
+  logger->log_debug(name(), "Finalizing MongoLogImagesThread");
   std::map<std::string, ImageInfo>::iterator p;
   for (p = imgs_.begin(); p != imgs_.end(); ++p) {
-    logger->log_info(name(), "Closing image %s", p->first.c_str());
     delete p->second.img;
   }
   imgs_.clear();
+  logger->log_debug(name(), "Finalized MongoLogImagesThread");
 }
 
 
@@ -99,22 +99,30 @@ MongoLogImagesThread::loop()
     ImageInfo &imginfo = p->second;
 
     fawkes::Time cap_time = imginfo.img->capture_time();
+    logger->log_debug(name(), "Image %s last_sent: %f <=> capture_time: %f",
+                     p->first.c_str(), imginfo.last_sent.in_sec(), cap_time.in_sec());
+
+
     if ((imginfo.last_sent != cap_time)) {
       BSONObjBuilder document;
       imginfo.last_sent = cap_time;
-      document.appendTimestamp("timestamp", cap_time.in_msec());
+      document.append("timestamp", (long long) cap_time.in_msec());
 
-      BSONArrayBuilder subb(document.subobjStart("image"));
-      document.append("image_id", imginfo.img->image_id());
-      document.append("width", imginfo.img->width());
-      document.append("height", imginfo.img->height());
-      document.append("colorspace", colorspace_to_string(imginfo.img->colorspace()));
-      document.appendBinData("data", (int) imginfo.img->data_size(), BinDataGeneral, imginfo.img->buffer());
+      BSONObjBuilder subb(document.subobjStart("image"));
+      subb.append("image_id", imginfo.img->image_id());
+      subb.append("width", imginfo.img->width());
+      subb.append("height", imginfo.img->height());
+      subb.append("colorspace", colorspace_to_string(imginfo.img->colorspace()));
+
+//      subb.appendBinData("data", (int) imginfo.img->data_size(), BinDataGeneral, imginfo.img->buffer());
+      // fix for mongodb version < 2.0.1
+      subb.appendBinData("data", (int) imginfo.img->data_size(), BinDataGeneral, (char*) imginfo.img->buffer());
       subb.doneFast();
+      __collection = __database + "."  + imginfo.topic_name;
       __mongodb->insert(__collection, document.obj());
     }
   }
- 
+
 }
 
 
@@ -142,7 +150,14 @@ MongoLogImagesThread::update_images()
       logger->log_info(name(), "Creating MongoLog for new image %s",
                        i->c_str());
 
+      std::string topic_name = std::string("Images.") + *i;
+      std::string::size_type pos = 0;
+      while ((pos = topic_name.find("-", pos)) != std::string::npos) {
+        topic_name.replace(pos, 1, "_");
+      }
+
       ImageInfo &imginfo = imgs_[*i];
+      imginfo.topic_name = topic_name;
       imginfo.img = new SharedMemoryImageBuffer(i->c_str());
     }
   }
@@ -161,13 +176,13 @@ MongoLogImagesThread::get_sets(std::set<std::string> &missing_images,
     }
   }
 
-  std::set<std::string> image_buffers;
+   std::set<std::string> image_buffers;
   SharedMemoryImageBufferHeader *h = new SharedMemoryImageBufferHeader();
   SharedMemory::SharedMemoryIterator i =
     SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
   SharedMemory::SharedMemoryIterator endi = SharedMemory::end();
 							    
-  while ( i != endi ) {
+   while ( i != endi ) {
     const SharedMemoryImageBufferHeader *ih =
       dynamic_cast<const SharedMemoryImageBufferHeader *>(*i);
     if ( ih ) {

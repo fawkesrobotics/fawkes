@@ -69,6 +69,7 @@ class MongoLogPointCloudThread
 
   /// @cond INTERNALS
   typedef struct {
+    std::string		     topic_name;
     sensor_msgs::PointCloud2 msg;
     fawkes::Time             last_sent;
   } PointCloudInfo;
