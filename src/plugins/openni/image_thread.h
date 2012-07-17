@@ -74,6 +74,8 @@ class OpenNiImageThread
   unsigned short int                   __usb_product;
   unsigned int                         __image_width;
   unsigned int                         __image_height;
+
+  fawkes::Time *__capture_start;
 };
 
 #endif
