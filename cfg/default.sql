@@ -168,6 +168,7 @@ INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/type','string','urg_gbx','C
 INSERT INTO "config" VALUES('/hardware/laser/urg_gbx/device','string','/dev/ttyACM0','Device file');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/main_sensor','bool',1,'Make this the default sensor, i.e. interface ID "Laser"?');
+INSERT INTO "config" VALUES('/hardware/laser/lase_edl/frame','string','/base_laser','Coordinate frame in which the laser data is published');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/clockwise_angle','bool',1,'Reverse default angle direction to clockwise?');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/type','string','lase_edl','Configuration is for Lase EDL laser range finder');
 INSERT INTO "config" VALUES('/hardware/laser/lase_edl/interface_type','string','usb','Interface type, currently only usb');
