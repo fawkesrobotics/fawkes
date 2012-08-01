@@ -43,8 +43,13 @@ LIBS_ros_images = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	          fawkesinterface fawkesrosaspect fvutils
 OBJS_ros_images = image_plugin.o image_thread.o
 
+LIBS_ros_laserscan = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	          fawkesinterface fawkesrosaspect fvutils Laser360Interface \
+		  Laser720Interface
+OBJS_ros_laserscan = laserscan_plugin.o laserscan_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
-	   $(OBJS_ros_pcl) $(OBJS_ros_images)
+	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -100,8 +105,14 @@ ifeq ($(HAVE_ROS),1)
     else
       WARN_TARGETS += warning_images
     endif
+
+    CFLAGS_laserscan_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
+    CFLAGS_laserscan_plugin = $(CFLAGS_laserscan_thread) $(CFLAGS)
+    LDFLAGS_ros_laserscan += $(call ros-pkg-lflags,sensor_msgs)
+    PLUGINS_all += $(PLUGINDIR)/ros-laserscan.so
+
   else
-    WARN_TARGETS += warning_rospcl warning_images
+    WARN_TARGETS += warning_rospcl warning_images warning_laserscan
   endif
 
 else
@@ -126,6 +137,8 @@ warning_rospcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (ROS package pcl not found)"
 warning_images:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (ROS package image_transport not found)"
+warning_laserscan:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS laser scan plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
