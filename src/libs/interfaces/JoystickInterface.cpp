@@ -366,6 +366,7 @@ JoystickInterface::set_axis(unsigned int index, const float new_axis)
     throw Exception("Index value %u out of bounds (0..8)", index);
   }
   data->axis[index] = new_axis;
+  data_changed = true;
 }
 /** Get ff_effects value.
  * 

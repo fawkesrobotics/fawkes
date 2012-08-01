@@ -303,6 +303,7 @@ HumanSkeletonProjectionInterface::set_proj_com(unsigned int index, const float n
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_com[index] = new_proj_com;
+  data_changed = true;
 }
 /** Get proj_head value.
  * Head position vector.
@@ -362,6 +363,7 @@ HumanSkeletonProjectionInterface::set_proj_head(unsigned int index, const float 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_head[index] = new_proj_head;
+  data_changed = true;
 }
 /** Get proj_neck value.
  * Neck position vector.
@@ -421,6 +423,7 @@ HumanSkeletonProjectionInterface::set_proj_neck(unsigned int index, const float 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_neck[index] = new_proj_neck;
+  data_changed = true;
 }
 /** Get proj_torso value.
  * Torso position vector.
@@ -480,6 +483,7 @@ HumanSkeletonProjectionInterface::set_proj_torso(unsigned int index, const float
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_torso[index] = new_proj_torso;
+  data_changed = true;
 }
 /** Get proj_waist value.
  * Waist position vector.
@@ -539,6 +543,7 @@ HumanSkeletonProjectionInterface::set_proj_waist(unsigned int index, const float
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_waist[index] = new_proj_waist;
+  data_changed = true;
 }
 /** Get proj_left_collar value.
  * 
@@ -602,6 +607,7 @@ HumanSkeletonProjectionInterface::set_proj_left_collar(unsigned int index, const
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_collar[index] = new_proj_left_collar;
+  data_changed = true;
 }
 /** Get proj_left_shoulder value.
  * 
@@ -665,6 +671,7 @@ HumanSkeletonProjectionInterface::set_proj_left_shoulder(unsigned int index, con
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_shoulder[index] = new_proj_left_shoulder;
+  data_changed = true;
 }
 /** Get proj_left_elbow value.
  * 
@@ -728,6 +735,7 @@ HumanSkeletonProjectionInterface::set_proj_left_elbow(unsigned int index, const 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_elbow[index] = new_proj_left_elbow;
+  data_changed = true;
 }
 /** Get proj_left_wrist value.
  * 
@@ -791,6 +799,7 @@ HumanSkeletonProjectionInterface::set_proj_left_wrist(unsigned int index, const 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_wrist[index] = new_proj_left_wrist;
+  data_changed = true;
 }
 /** Get proj_left_hand value.
  * 
@@ -854,6 +863,7 @@ HumanSkeletonProjectionInterface::set_proj_left_hand(unsigned int index, const f
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_hand[index] = new_proj_left_hand;
+  data_changed = true;
 }
 /** Get proj_left_fingertip value.
  * 
@@ -917,6 +927,7 @@ HumanSkeletonProjectionInterface::set_proj_left_fingertip(unsigned int index, co
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_fingertip[index] = new_proj_left_fingertip;
+  data_changed = true;
 }
 /** Get proj_right_collar value.
  * 
@@ -980,6 +991,7 @@ HumanSkeletonProjectionInterface::set_proj_right_collar(unsigned int index, cons
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_collar[index] = new_proj_right_collar;
+  data_changed = true;
 }
 /** Get proj_right_shoulder value.
  * 
@@ -1043,6 +1055,7 @@ HumanSkeletonProjectionInterface::set_proj_right_shoulder(unsigned int index, co
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_shoulder[index] = new_proj_right_shoulder;
+  data_changed = true;
 }
 /** Get proj_right_elbow value.
  * 
@@ -1106,6 +1119,7 @@ HumanSkeletonProjectionInterface::set_proj_right_elbow(unsigned int index, const
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_elbow[index] = new_proj_right_elbow;
+  data_changed = true;
 }
 /** Get proj_right_wrist value.
  * 
@@ -1169,6 +1183,7 @@ HumanSkeletonProjectionInterface::set_proj_right_wrist(unsigned int index, const
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_wrist[index] = new_proj_right_wrist;
+  data_changed = true;
 }
 /** Get proj_right_hand value.
  * 
@@ -1232,6 +1247,7 @@ HumanSkeletonProjectionInterface::set_proj_right_hand(unsigned int index, const 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_hand[index] = new_proj_right_hand;
+  data_changed = true;
 }
 /** Get proj_right_fingertip value.
  * 
@@ -1295,6 +1311,7 @@ HumanSkeletonProjectionInterface::set_proj_right_fingertip(unsigned int index, c
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_fingertip[index] = new_proj_right_fingertip;
+  data_changed = true;
 }
 /** Get proj_left_hip value.
  * 
@@ -1358,6 +1375,7 @@ HumanSkeletonProjectionInterface::set_proj_left_hip(unsigned int index, const fl
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_hip[index] = new_proj_left_hip;
+  data_changed = true;
 }
 /** Get proj_left_knee value.
  * 
@@ -1421,6 +1439,7 @@ HumanSkeletonProjectionInterface::set_proj_left_knee(unsigned int index, const f
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_knee[index] = new_proj_left_knee;
+  data_changed = true;
 }
 /** Get proj_left_ankle value.
  * 
@@ -1484,6 +1503,7 @@ HumanSkeletonProjectionInterface::set_proj_left_ankle(unsigned int index, const 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_ankle[index] = new_proj_left_ankle;
+  data_changed = true;
 }
 /** Get proj_left_foot value.
  * 
@@ -1547,6 +1567,7 @@ HumanSkeletonProjectionInterface::set_proj_left_foot(unsigned int index, const f
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_left_foot[index] = new_proj_left_foot;
+  data_changed = true;
 }
 /** Get proj_right_hip value.
  * 
@@ -1610,6 +1631,7 @@ HumanSkeletonProjectionInterface::set_proj_right_hip(unsigned int index, const f
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_hip[index] = new_proj_right_hip;
+  data_changed = true;
 }
 /** Get proj_right_knee value.
  * 
@@ -1673,6 +1695,7 @@ HumanSkeletonProjectionInterface::set_proj_right_knee(unsigned int index, const 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_knee[index] = new_proj_right_knee;
+  data_changed = true;
 }
 /** Get proj_right_ankle value.
  * 
@@ -1736,6 +1759,7 @@ HumanSkeletonProjectionInterface::set_proj_right_ankle(unsigned int index, const
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_ankle[index] = new_proj_right_ankle;
+  data_changed = true;
 }
 /** Get proj_right_foot value.
  * 
@@ -1799,6 +1823,7 @@ HumanSkeletonProjectionInterface::set_proj_right_foot(unsigned int index, const 
     throw Exception("Index value %u out of bounds (0..2)", index);
   }
   data->proj_right_foot[index] = new_proj_right_foot;
+  data_changed = true;
 }
 /* =========== message create =========== */
 Message *

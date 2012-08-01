@@ -206,6 +206,7 @@ Position3DInterface::set_rotation(unsigned int index, const double new_rotation)
     throw Exception("Index value %u out of bounds (0..4)", index);
   }
   data->rotation[index] = new_rotation;
+  data_changed = true;
 }
 /** Get translation value.
  * 
@@ -273,6 +274,7 @@ Position3DInterface::set_translation(unsigned int index, const double new_transl
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->translation[index] = new_translation;
+  data_changed = true;
 }
 /* =========== message create =========== */
 Message *

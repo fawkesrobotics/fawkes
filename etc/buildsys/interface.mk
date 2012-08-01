@@ -108,6 +108,7 @@ $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
   ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
 	$(SILENT)$(BINDIR)/ffifacegen -d $(SRCDIR) $<
+	$(SILENT)mkdir -p $(IFACESRCDIR)
 	$(if $(filter-out $(IFACESRCDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h)
   else
     ifneq ($(abspath $(IFACESRCDIR)),$(abspath $(SRCDIR)))

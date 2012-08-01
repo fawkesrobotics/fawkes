@@ -124,6 +124,7 @@ RobotinoSensorInterface::set_mot_velocity(unsigned int index, const float new_mo
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->mot_velocity[index] = new_mot_velocity;
+  data_changed = true;
 }
 /** Get mot_position value.
  * Positions of the wheels.
@@ -183,6 +184,7 @@ RobotinoSensorInterface::set_mot_position(unsigned int index, const int32_t new_
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->mot_position[index] = new_mot_position;
+  data_changed = true;
 }
 /** Get mot_current value.
  * Motor currents.
@@ -242,6 +244,7 @@ RobotinoSensorInterface::set_mot_current(unsigned int index, const float new_mot
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->mot_current[index] = new_mot_current;
+  data_changed = true;
 }
 /** Get bumper value.
  * Bumper pressed indicator.
@@ -332,6 +335,7 @@ RobotinoSensorInterface::set_distance(unsigned int index, const float new_distan
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->distance[index] = new_distance;
+  data_changed = true;
 }
 /** Get digital_in value.
  * Digital input values.
@@ -391,6 +395,7 @@ RobotinoSensorInterface::set_digital_in(unsigned int index, const bool new_digit
     throw Exception("Index value %u out of bounds (0..8)", index);
   }
   data->digital_in[index] = new_digital_in;
+  data_changed = true;
 }
 /** Get analog_in value.
  * Analog input values.
@@ -450,6 +455,7 @@ RobotinoSensorInterface::set_analog_in(unsigned int index, const float new_analo
     throw Exception("Index value %u out of bounds (0..8)", index);
   }
   data->analog_in[index] = new_analog_in;
+  data_changed = true;
 }
 /** Get gyro_available value.
  * True if gyro is available
