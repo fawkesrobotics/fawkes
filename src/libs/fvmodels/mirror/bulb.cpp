@@ -423,6 +423,18 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
 }
 
 
+/** Get the raw lookup table.
+ * Returns a pointer to the raw lookup table buffer ordered in row-major
+ * mappings from pixels to polar coordinates.
+ * @return raw lookup table
+ */
+const fawkes::polar_coord_2d_t *
+Bulb::get_lut() const
+{
+  return lut;
+}
+
+
 /** Set a world point mapping.
  * This modifies the mapping in the LUT. An exception is thrown if the coordinates
  * are out of range or the distance is zero.
