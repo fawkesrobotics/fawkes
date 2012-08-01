@@ -99,7 +99,9 @@ public:
   static pf_vector_t uniform_pose_generator(void* arg);
 #ifdef HAVE_ROS
   void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
+#  ifdef USE_MAP_PUB
   void publish_map();
+#  endif
 #endif
 
 private:

@@ -39,7 +39,7 @@ OBJS_all    = $(OBJS_amcl) $(OBJS_libfawkes_amcl_pf) \
 	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors)
 
 # throw exceptions instead of aborting
-CFLAGS += -DUSE_ASSERT_EXCEPTION
+CFLAGS += -DUSE_ASSERT_EXCEPTION -DUSE_MAP_PUB
 
 ifeq ($(HAVE_TF),1)
   CFLAGS_amcl_thread  = $(CFLAGS) $(CFLAGS_TF)
@@ -49,11 +49,18 @@ ifeq ($(HAVE_TF),1)
 
   ifeq ($(HAVE_ROS),1)
     ifeq ($(call ros-have-pkg,geometry_msgs),1)
-      CFLAGS_amcl_thread += $(CFLAGS_ROS) \
-        $(call ros-pkg-cflags,geometry_msgs)
-      CFLAGS_amcl_plugin += $(CFLAGS_amcl_thread)
-      LDFLAGS_amcl += $(LDFLAGS_ROS) $(call ros-pkg-lflags,geometry_msgs)
-      LIBS_amcl += fawkesrosaspect
+      ifeq ($(call ros-have-pkg,nav_msgs),1)
+        CFLAGS_amcl_thread += $(CFLAGS_ROS) \
+          $(call ros-pkg-cflags,geometry_msgs) \
+          $(call ros-pkg-cflags,nav_msgs)
+        CFLAGS_amcl_plugin += $(CFLAGS_amcl_thread)
+        LDFLAGS_amcl += $(LDFLAGS_ROS) \
+          $(call ros-pkg-lflags,geometry_msgs) \
+          $(call ros-pkg-lflags,nav_msgs)
+        LIBS_amcl += fawkesrosaspect
+      else
+        WARN_TARGET += warning_nav_msgs
+      endif
     else
       WARN_TARGET += warning_geometry_msgs
     endif
@@ -84,6 +91,8 @@ warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (ROS not found)"
 warning_geometry_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (package geometry_msgs not found)"
+warning_nav_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (package nav_msgs not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

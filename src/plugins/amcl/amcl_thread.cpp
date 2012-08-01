@@ -39,7 +39,9 @@
 #ifdef HAVE_ROS
 #  include <ros/node_handle.h>
 #  include <geometry_msgs/PoseArray.h>
-#  include <nav_msgs/OccupancyGrid.h>
+#  ifdef USE_MAP_PUB
+#    include <nav_msgs/OccupancyGrid.h>
+#  endif
 #endif
 
 // compute linear index for given map coords
@@ -290,9 +292,10 @@ void AmclThread::init()
   initial_pose_sub_ =
     rosnode->subscribe("initialpose", 2,
 		       &AmclThread::initial_pose_received, this);
+#  ifdef USE_MAP_PUB
   map_pub_ = rosnode->advertise<nav_msgs::OccupancyGrid>("map", 1, true);
-
   publish_map();
+#  endif
 #endif
 
   laser_if_ =
@@ -772,6 +775,8 @@ AmclThread::read_map()
   free(img_buffer);
 }
 
+#ifdef HAVE_ROS
+#  ifdef USE_MAP_PUB
 void
 AmclThread::publish_map()
 {
@@ -807,6 +812,8 @@ AmclThread::publish_map()
 
   map_pub_.publish(msg);
 }
+#  endif
+#endif
 
 
 bool
