@@ -1,0 +1,8 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/static-transforms
+---
+plugins/static_transforms:
+  # Interval in which to post static transform updates; sec
+  update_interval: 1.0

@@ -1,0 +1,94 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
+---
+/hardware/pantilt/ptus:
+  RX28:
+    # Type of PTU; one of RX28 EviD100P and DirectedPerceptionASCII
+    type: RX28
+
+    # Is this PTU active?
+    active: true
+
+    # Device file for RX28 PTU
+    device: /dev/ttyUSB0
+
+    # Read timeout for RX28 PTU
+    read_timeout_ms: 30
+
+    # Discover timeout for RX28 PTU
+    discover_timeout_ms: 30
+
+    # Pan servo ID for RX28 PTU
+    pan_servo_id: 1
+    # Tilt servo ID for RX28 PTU
+    tilt_servo_id: 2
+
+    # Pan offset for RX28 PTU; deg
+    pan_offset: 24.05
+    # Tilt zero offset for RX28 PTU; deg
+    tilt_offset: 3.56
+
+    # Turn off RX28 PTU when unloading the plugin?
+    turn_off: true
+    # Move RX28 PTU to given position on start?
+    goto_zero_start: true
+    # PAN default start; rad
+    pan_start: 0.0
+    # TILT default start; rad
+    tilt_start: 0.0
+
+    # Clockwise compliance margin for RX28 PTU
+    cw_compl_margin: 0
+    # Counter-clockwise compliance margin for RX28 PTU
+    ccw_compl_margin: 0
+    # Clockwise compliance slope for RX28 PTU
+    cw_compl_slope: 96
+    # Counter-clockwise compliance slope for RX28 PTU
+    ccw_compl_slope: 96
+
+    # Minimum pan for RX28 PTU
+    pan_min: -2.2
+    # Maximum pan for RX28 PTU
+    pan_max: 2.2
+
+    # Minimum tilt for RX28 PTU
+    tilt_min: -1.6
+    # Maximum tilt for RX28 PTU
+    tilt_max: 1.6
+
+    # Tolerance between desired and actual pan value to consider RX28 PTU motion finished; rad
+    pan_margin: 0.1
+    # Tolerance between desired and actual tilt value to consider RX28 PTU motion finished; rad
+    tilt_margin: 0.1
+
+    # Frame ID base string; will be prefixed by / if missing;
+    # and suffixed with .base, .pan, and .tilt repsectively
+    frame_id_prefix: !frame /rx28
+
+    # PAN servo base to joint translation X; m
+    pan_trans_x: -0.002
+    # PAN servo base to joint translation Y; m
+    pan_trans_y: 0.0
+    # PAN servo base to joint translation Z; m
+    pan_trans_z: 0.042
+    # TILT servo base to joint translation X; m
+    tilt_trans_x: 0.0
+    # TILT servo base to joint translation Y; m
+    tilt_trans_y: 0.0
+    # TILT servo base to joint translation Z; m
+    tilt_trans_z: 0.039
+
+  # Type of PTU; one of RX28, EviD100P and DirectedPerceptionASCII
+  EviD100P:
+    type: EviD100P
+
+    # Is this PTU active?
+    active: false
+
+    # Device file for EviD100P PTU
+    device: /dev/ttyUSB1
+
+    # Read timeout for EviD100P PTU
+    read_timeout_ms: 50

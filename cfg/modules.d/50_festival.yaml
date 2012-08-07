@@ -1,0 +1,8 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/festival
+---
+plugins/festival:
+  # Voice to use for Festival speech synth
+  voice: "nitech_us_bdl_arctic_hts"

@@ -1,0 +1,29 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/bbsync
+---
+fawkes/bbsync:
+  # Interval between checking for remote BB aliveness; ms
+  check_interval: 5000
+
+  peers:
+    localhost:
+      # Is peer active? If omitted 1 is assumed.
+      active: true
+
+      # Host name of remote peer; hostname
+      host: localhost
+
+      # Port of remote peer; TCP port
+      port: !tcp-port 1911
+
+      # Interval in which to check for aliveness,
+      # if omitted defaults to 5 seconds; ms
+      check_interval: 1000
+
+      # Interface to synchronize, reading instance on remote,
+      # mapped to remote instance locally
+      reading:
+        laser: Laser360Interface::Laser
+        speechsynth: SpeechSynthInterface::Flite

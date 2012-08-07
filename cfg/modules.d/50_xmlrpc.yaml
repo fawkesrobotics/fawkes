@@ -1,0 +1,8 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/xmlrpc
+---
+xmlrpc:
+  # TCP port for XML-RPC HTTP requests; TCP port
+  port: !tcp-port 3008

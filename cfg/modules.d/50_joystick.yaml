@@ -1,0 +1,8 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
+---
+/hardware/joystick:
+  # Joystick device file
+  device_file: /dev/input/js0

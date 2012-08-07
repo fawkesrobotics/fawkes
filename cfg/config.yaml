@@ -1,0 +1,40 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+# Configuration meta information document
+include:
+  # reads files ending in .yaml from modules.d config subdir
+  - modules.d/
+  # Reads the host-specific configuration file, no failure if missing
+  - !ignore-missing host.yaml
+---
+# Main configuration document
+
+fawkes:
+
+  # Main app relevant settings
+  mainapp:
+    # Size of BlackBoard memory segment; bytes
+    blackboard_size: 2097152
+    # Desired loop time of main thread, 0 to disable; microseconds
+    desired_loop_time: 33333
+
+    # Maximum time a thread may run per loop, 0 to disable; microseconds
+    max_thread_time: 66666
+
+    net:
+      # Port for Fawkes Network Protocol service; TCP port
+      tcp_port: !tcp-port 1910
+
+      # Name for Fawkes service, announced via Avahi,
+      # %h is replaced by short hostname
+      service_name: "Fawkes on %h"
+
+
+# Log level for ballposlog example plugin; sum of any of
+# debug=0, info=1, warn=2, error=4, none=8
+ballposlog/log_level: 0
+
+
+# More configuration values can be found in the files mentioned
+# above in the meta config document regarding includes.

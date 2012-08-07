@@ -1,0 +1,27 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/webview
+---
+webview:
+  # TCP port for Webview HTTP requests; TCP port
+  port: !tcp-port 8088
+
+  # Encrypt connections?
+  use_ssl: false
+
+  # Create self-signed certificate if key and certificate files not found?
+  ssl_create: true
+
+  # Key file name, if not absolute relative to config dir.
+  ssl_key: webview.key
+
+  # Certificate file name, if not absolute relative to config dir.
+  ssl_cert: webview.crt
+
+  # Use basic authentication?
+  use_basic_auth: false
+
+  # Example user, delete or change password!
+  users:
+    fawkes: fawkes

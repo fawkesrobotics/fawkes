@@ -1,0 +1,77 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/katana
+---
+hardware/katana:
+  # Device file of serial port the arm is connected to; file path
+  device: /dev/ttyUSB0
+
+  # Automatically calibrate on startup?
+  auto_calibrate: true
+
+  # KNI configuration file; file path
+  kni_conffile: /etc/kni3/hd300/katana6M180.cfg
+
+  # Default maximum robot arm velocity, can be overridden via BB; [0..255]
+  default_max_speed: 100
+
+  # Timeout for read operations; ms
+  read_timeout_msec: 100
+
+  # Timeout for write operations; ms
+  write_timeout_msec: 0
+
+  # Interval between gripper final checks; ms
+  gripper_pollint_msec: 50
+
+  # Interval between goto final checks; ms
+  goto_pollint_msec: 50
+
+  # X position for parking
+  park_x: 66.863892
+
+  # Y position for parking
+  park_y: 16.27648
+
+  # Z position for parking
+  park_z: 442.759186
+
+  # Phi position for parking
+  park_phi: 1.809579
+
+  # Theta position for parking
+  park_theta: 0.357964
+
+  # Psi position for parking
+  park_psi: -0.271071
+
+  # x Offset of katana to fawkes coordinate system
+  offset_x: 0.0
+
+  # y Offset of katana to fawkes coordinate system
+  offset_y: 0.0
+
+  # z Offset of katana to fawkes coordinate system
+  offset_z: 0.6665
+
+  # Scale from kni coordinate values to fawkes
+  distance_scale: 0.001
+
+  # Interval to update the motor position data even if there is no 
+  # act thread running, required for tf; sec
+  update_interval: 0.5
+
+  
+  openrave:
+    # Use OpenRAVE support?
+    enabled: false
+
+    # Use OpenRAVE qtcoin viewer (i.e. see 3D robot model)?
+    use_viewer: true
+
+    # Automatically generate IK database for OpenRAVE robot model?
+    auto_load_ik: true
+
+    # robot/xml file to be loaded into OpenRAVE
+    robot_file: ../fawkes/res/openrave/caesar.robot.xml
