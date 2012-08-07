@@ -130,9 +130,13 @@ MongoLogThread::finalize()
 
   logger->log_debug(name(), "Finalizing MongoLogThread");
 
+
   blackboard->unregister_observer(this);
 
-  config->erase("/plugins/mongorrd/databases/mongolog");
+  // sometimes causes errors
+  // config->erase("/plugins/mongorrd/databases/mongolog");
+
+
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = __listeners.begin(); i != __listeners.end(); ++i) {
     delete i->second;

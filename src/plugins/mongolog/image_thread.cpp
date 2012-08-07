@@ -99,9 +99,6 @@ MongoLogImagesThread::loop()
     ImageInfo &imginfo = p->second;
 
     fawkes::Time cap_time = imginfo.img->capture_time();
-    logger->log_debug(name(), "Image %s last_sent: %f <=> capture_time: %f",
-                     p->first.c_str(), imginfo.last_sent.in_sec(), cap_time.in_sec());
-
 
     if ((imginfo.last_sent != cap_time)) {
       BSONObjBuilder document;

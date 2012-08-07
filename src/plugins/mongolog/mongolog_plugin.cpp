@@ -42,8 +42,22 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
   : Plugin(config)
 {
   thread_list.push_back(new MongoLogThread());
-  thread_list.push_back(new MongoLogPointCloudThread());
-  thread_list.push_back(new MongoLogImagesThread());
+
+  bool enable_pcls = true;
+  try {
+    enable_pcls = config->get_bool("/plugins/mongolog/enable_pcls");
+  } catch (Exception &e) {}
+  if (enable_pcls) {
+    thread_list.push_back(new MongoLogPointCloudThread());
+  }
+
+  bool enable_images = true;
+  try {
+    enable_images = config->get_bool("/plugins/mongolog/enable_images");
+  } catch (Exception &e) {}
+  if (enable_images) {
+    thread_list.push_back(new MongoLogImagesThread());
+  }
 
   bool enable_logger = true;
   try {
