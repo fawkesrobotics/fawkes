@@ -127,25 +127,30 @@ class YamlConfiguration::Node
   std::map<std::string, Node *>::const_iterator  end() const
   { return children_.end(); }
 
-  Node * find(std::queue<std::string> &q)
+  Node * find(std::queue<std::string> &q, std::string path = "")
   {
     std::string pel = q.front();
+    std::string next_path = path + "/" + pel;
     if (children_.find(pel) == children_.end()) {
-      throw Exception("YamlConfig: path element %s not found", pel.c_str());
+      throw ConfigEntryNotFoundException(next_path.c_str());
     }
     q.pop();
     if (q.empty()) {
       return children_[pel];
     } else {
-      return children_[pel]->find(q);
+      return children_[pel]->find(q, next_path);
     }
   }
 
 
   Node * find(const char *path)
   {
-    std::queue<std::string> pel_q = split_to_queue(path);
-    return find(pel_q);
+    try {
+      std::queue<std::string> pel_q = split_to_queue(path);
+      return find(pel_q);
+    } catch (Exception &e) {
+      throw;
+    }
   }
 
   void operator=(const Node &n)
@@ -935,6 +940,9 @@ static inline T
 get_value_as(YamlConfiguration::Node *root, const char *path)
 {
   YamlConfiguration::Node *n = root->find(path);
+  if (n->has_children()) {
+    throw ConfigEntryNotFoundException(path);
+  }
   return n->get_value<T>();
 }
 
@@ -980,6 +988,9 @@ static inline bool
 is_type(YamlConfiguration::Node *root, const char *path)
 {
   YamlConfiguration::Node *n = root->find(path);
+  if (n->has_children()) {
+    throw ConfigEntryNotFoundException(path);
+  }
   return n->is_type<T>();
 }
 
@@ -1034,6 +1045,9 @@ Configuration::ValueIterator *
 YamlConfiguration::get_value(const char *path)
 {
   YamlConfiguration::Node *n = root_->find(path);
+  if (n->has_children()) {
+    throw ConfigEntryNotFoundException(path);
+  }
   std::map<std::string, Node *> nodes;
   nodes[path] = n;
   return new YamlValueIterator(nodes);
@@ -1182,24 +1196,22 @@ YamlConfiguration::iterator()
 }
 
 
-/** Iterator for modified values.
- * Returns an iterator that can be used to iterate over all values that have been
- * modified in the default database in the last load (added, erased or changed).
- * @return iterator over all values
- */
-Configuration::ValueIterator *
-YamlConfiguration::modified_iterator()
-{
-  return NULL;
-}
-
 Configuration::ValueIterator *
 YamlConfiguration::search(const char *path)
 {
-  Node *n = root_->find(path);
-  std::map<std::string, Node *> nodes;
-  n->enum_leafs(nodes, path);
-  return new YamlValueIterator(nodes);
+  std::string tmp_path = path;
+  std::string::size_type tl = tmp_path.length();
+  if ((tl > 0) && (tmp_path[tl - 1] == '/')) {
+    tmp_path.resize(tl - 1);
+  }
+  try {
+    Node *n = root_->find(tmp_path.c_str());
+    std::map<std::string, Node *> nodes;
+    n->enum_leafs(nodes, tmp_path);
+    return new YamlValueIterator(nodes);
+  } catch (Exception &e) {
+    return new YamlValueIterator();
+  }
 }
 
 /** Split string into vector of strings at delimiting character.

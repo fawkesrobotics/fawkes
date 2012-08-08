@@ -38,7 +38,7 @@ main(int argc, char **argv)
 
   try {
     cout << "Loading configuration..." << flush;
-    config->load("config.yaml", "");
+    config->load("config.yaml");
     cout << "done" << endl;
   } catch (CouldNotOpenConfigException &e) {
     cout << "failed" << endl;
@@ -69,6 +69,13 @@ main(int argc, char **argv)
 
   printf("=== Printing values with prefix /webview ===\n");
   i = config->search("/webview");
+  while (i->next()) {
+    printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+  }
+  delete i;
+
+  printf("=== Printing values with prefix /hardware/laser/ ===\n");
+  i = config->search("/hardware/laser/");
   while (i->next()) {
     printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
   }
