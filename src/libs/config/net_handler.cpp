@@ -174,14 +174,18 @@ ConfigNetworkHandler::loop()
 
       __config->lock();
       ConfigListContent *content = new ConfigListContent();
-      Configuration::ValueIterator *i = __config->iterator_default();
+      Configuration::ValueIterator *i = __config->iterator();
       while ( i->next() ) {
-	content->append(i);
+	if (i->is_default()) {
+	  content->append(i);
+	}
       }
       delete i;
-      i = __config->iterator_hostspecific();
+      i = __config->iterator();
       while ( i->next() ) {
-	content->append(i);
+	if (! i->is_default()) {
+	  content->append(i);
+	}
       }
       delete i;
       __hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_LIST, content);

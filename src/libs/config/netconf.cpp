@@ -1351,6 +1351,13 @@ NetworkConfiguration::iterator()
 }
 
 
+/** Iterator for all default values.
+ * Returns an iterator that can be used to iterate over all default values in
+ * the current default configuration. Note that this might return less paths than
+ * available, because the values for which no default entry exists are not
+ * returned.
+ * @return iterator over all default values
+ */
 Configuration::ValueIterator *
 NetworkConfiguration::iterator_default()
 {
@@ -1362,6 +1369,13 @@ NetworkConfiguration::iterator_default()
 }
 
 
+/** Iterator for all host-specific values.
+ * Returns an iterator that can be used to iterate over all host-specific values
+ * in the current configuration. Note that this might return less paths than
+ * available, because the default values for which no host-specific entry exists
+ * are not returned.
+ * @return iterator over all host-specific values
+ */
 Configuration::ValueIterator *
 NetworkConfiguration::iterator_hostspecific()
 {

@@ -1152,18 +1152,6 @@ YamlConfiguration::iterator()
 }
 
 
-Configuration::ValueIterator *
-YamlConfiguration::iterator_default()
-{
-  return NULL;
-}
-
-Configuration::ValueIterator *
-YamlConfiguration::iterator_hostspecific()
-{
-  return NULL;
-}
-
 /** Iterator for modified values.
  * Returns an iterator that can be used to iterate over all values that have been
  * modified in the default database in the last load (added, erased or changed).
