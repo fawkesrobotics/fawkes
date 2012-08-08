@@ -641,14 +641,38 @@ YamlConfiguration::~YamlConfiguration()
 
 
 void
-YamlConfiguration::load(const char *name, const char *defaults_name,
+YamlConfiguration::load(const char *file_path,
 			const char *tag)
 {
+
+  if (file_path == NULL) {
+    file_path = "config.yaml";
+  }
+
   std::string filename;
-  if (name[0] == '/') {
-    filename = name;
+  if (file_path[0] == '/') {
+    filename = file_path;
   } else {
-    filename += std::string(CONFDIR) + "/" + name;
+
+    const char *try_paths[] = {__userconfdir, __sysconfdir};
+    int try_paths_len = 2;
+
+
+    for (int i = 0; i < try_paths_len; ++i) {
+      char *path;
+      if (asprintf(&path, "%s/%s", try_paths[i], file_path) != -1) {
+	if (access(path, R_OK) == 0) {
+	  filename = path;
+	  free(path);
+	  break;
+	}
+	free(path);
+      }
+    }
+    if (filename == "") {
+      throw Exception("YamlConfig: cannot find configuration file %s/%s or %s/%s",
+		      __userconfdir, file_path, __sysconfdir, file_path);
+    }
   }
 
   root_ = new Node("root");
@@ -1140,6 +1164,12 @@ void
 YamlConfiguration::unlock()
 {
   mutex->unlock();
+}
+
+
+void
+YamlConfiguration::try_dump()
+{
 }
 
 

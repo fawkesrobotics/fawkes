@@ -108,17 +108,8 @@ NetworkConfiguration::~NetworkConfiguration()
 }
 
 
-/** Load configuration.
- * This is a noop for the NetworkConfiguration.
- * @param name name of the host-based database. This should be a name of the form
- * hostname.db, where hostname is the unqualified part of the hostname.
- * @param defaults_name name of the default database. Should be defaults.db
- * @param tag optional tag to restore
- */
 void
-NetworkConfiguration::load(const char *name,
-			   const char *defaults_name,
-			   const char *tag)
+NetworkConfiguration::load(const char *file_path, const char *tag)
 {
 }
 
@@ -1337,6 +1328,12 @@ void
 NetworkConfiguration::unlock()
 {
   mutex->unlock();
+}
+
+
+void
+NetworkConfiguration::try_dump()
+{
 }
 
 

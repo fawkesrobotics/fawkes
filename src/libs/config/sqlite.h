@@ -45,7 +45,7 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          copy(Configuration *copyconf);
 
-  virtual void          load(const char *filename, const char *defaults_filename,
+  virtual void          load(const char *filename,
 			     const char *tag = NULL);
 
   void load(const char *tag = NULL);

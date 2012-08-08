@@ -98,7 +98,7 @@ class Configuration
   virtual void          add_change_handler(ConfigurationChangeHandler *h);
   virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
-  virtual void          load(const char *name, const char *defaults_name,
+  virtual void          load(const char *file_path,
 			     const char *tag = NULL)                      = 0;
 
   virtual void          tag(const char *tag)                              = 0;
@@ -160,6 +160,8 @@ class Configuration
   virtual void            lock()                                          = 0;
   virtual bool            try_lock()                                      = 0;
   virtual void            unlock()                                        = 0;
+
+  virtual void            try_dump()                                      = 0;
 
  protected:
   /** List that contains pointers to ConfigurationChangeHandler */

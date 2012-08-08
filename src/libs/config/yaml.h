@@ -52,7 +52,7 @@ class YamlConfiguration : public Configuration
 
   virtual void          copy(Configuration *copyconf);
 
-  virtual void          load(const char *filename, const char *defaults_filename,
+  virtual void          load(const char *file_path,
 			     const char *tag = NULL);
 
   virtual void          tag(const char *tag);
@@ -106,7 +106,7 @@ class YamlConfiguration : public Configuration
   bool try_lock();
   void unlock();
 
-  ValueIterator * modified_iterator();
+  virtual void            try_dump();
 
  private:
   class Node;

@@ -37,15 +37,11 @@ namespace fawkes {
  * @fn Configuration::~Configuration()
  * Virtual empty destructor.
  *
- * @fn void Configuration::load(const char *name, const char *defaults_name, const char *tag)
+ * @fn void Configuration::load(const char *file_path, const char *tag)
  * Load configuration.
  * Loads configuration data, or opens a file, depending on the implementation. After
  * this call access to all other methods shall be possible.
- * @param name name of the host-based configuration. If this does not exist it shall
- * be created from the default configuration. The name depends on the implementation and
- * could be a filename.
- * @param defaults_name name of the default database. As for the name this depends on
- * the actual implementation.
+ * @param file_path path of the configuration file.
  * @param tag this optional parameter can denote a specific config version to load. This
  * will cause the host-specific database to be flushed and filled with the values for
  * the given tag. All values that did not exist for the tag are copied over from the
@@ -287,6 +283,13 @@ namespace fawkes {
  * @fn void Configuration::unlock()
  * Unlock the config.
  * Modifications and queries are possible again.
+ *
+ * @fn void Configuration::try_dump()
+ * Try to dump configuration.
+ * For configuration methods that transform configuration files in a binary
+ * format this can be used to write out the text representation on shutdown
+ * of Fawkes.
+ * @exception Exception thrown if dumping fails
  *
  */
 
