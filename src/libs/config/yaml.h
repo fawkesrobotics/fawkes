@@ -113,6 +113,44 @@ class YamlConfiguration : public Configuration
  private:
   class Node;
 
+ public:
+  class YamlValueIterator : public Configuration::ValueIterator
+ {
+  public:
+   YamlValueIterator();
+   YamlValueIterator(std::map<std::string, Node *> &nodes);
+
+   virtual ~YamlValueIterator() {}
+   virtual bool          next();
+   virtual bool          valid() const;
+    
+   virtual const char *  path() const;
+   virtual const char *  type() const;
+    
+   virtual bool          is_float() const;
+   virtual bool          is_uint() const;
+   virtual bool          is_int() const;
+   virtual bool          is_bool() const;
+   virtual bool          is_string() const;
+
+   virtual float         get_float() const;
+   virtual unsigned int  get_uint() const;
+   virtual int           get_int() const;
+   virtual bool          get_bool() const;
+   virtual std::string   get_string() const;
+   virtual std::string   get_as_string() const;
+
+   virtual std::string   get_comment() const;
+
+   virtual bool          is_default() const;
+
+  private:
+   bool                                    first_;
+   std::map<std::string, Node *>           nodes_;
+   std::map<std::string, Node *>::iterator current_;
+ };
+
+ private:
   class LoadQueueEntry {
    public:
     LoadQueueEntry(std::string fn, bool im)

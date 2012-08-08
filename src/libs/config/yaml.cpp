@@ -47,6 +47,7 @@ namespace fawkes {
 #define YAML_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
 
 
+
 /// @cond INTERNALS
 
 class YamlConfiguration::Node
@@ -313,6 +314,25 @@ class YamlConfiguration::Node
     return scalar_value_;
   }
 
+  bool has_children() const
+  {
+    return ! children_.empty();
+  }
+
+
+  void enum_leafs(std::map<std::string, Node *> &nodes, std::string prefix = "")
+  {
+    std::map<std::string, Node *>::iterator c;
+    for (c = children_.begin(); c != children_.end(); ++c) {
+      std::string path = prefix + "/" + c->first;
+      if (c->second->has_children()) {
+	c->second->enum_leafs(nodes, path);
+      } else {
+	nodes[path] = c->second;
+      }
+    }
+  }
+
   void print(std::string indent = "")
   {
     std::cout << indent << name_ << " : ";
@@ -341,6 +361,190 @@ class YamlConfiguration::Node
 
 /// @endcond
 
+/** @class YamlConfiguration::YamlValueIterator <config/yaml.h>
+ * Iterator for YAML config trees.
+ * This iterator is used by YamlConfiguration as a result value
+ * for queries. Its use is opaque and knowledge of
+ * Configuration::ValueIterator will suffice for interaction.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * Creates an iterator representing the invalid iterator.
+ */
+YamlConfiguration::YamlValueIterator::YamlValueIterator()
+  : first_(true)
+{
+  current_ = nodes_.end();
+}
+
+
+/** Initializing constructor.
+ * @param nodes nodes to iterate over
+ */
+YamlConfiguration::YamlValueIterator::YamlValueIterator(std::map<std::string, Node *> &nodes)
+  : first_(true), nodes_(nodes)
+{
+  current_ = nodes_.end();
+}
+
+bool
+YamlConfiguration::YamlValueIterator::next()
+{
+  if (first_) {
+    first_ = false;
+    current_ = nodes_.begin();
+  } else {
+    ++current_;
+  }
+  return (current_ != nodes_.end());
+}
+
+bool
+YamlConfiguration::YamlValueIterator::valid() const
+{
+  return (current_ != nodes_.end());
+}
+    
+const char *
+YamlConfiguration::YamlValueIterator::path() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get path of invalid iterator");
+  }
+  return current_->first.c_str();
+}
+
+const char *
+YamlConfiguration::YamlValueIterator::type() const
+{
+  if (is_uint()) {
+    return "unsigned int";
+  } else if (is_int()) {
+    return "int";
+  } else if (is_float()) {
+    return "float";
+  } else if (is_bool()) {
+    return "bool";
+  } else if (is_string()) {
+    return "string";
+  } else {
+    throw Exception("YamlValueIterator: value is of no known type");
+  }
+}
+    
+bool
+YamlConfiguration::YamlValueIterator::is_float() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  return current_->second->is_type<float>();
+}
+
+bool
+YamlConfiguration::YamlValueIterator::is_uint() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  return current_->second->is_type<unsigned int>();
+}
+
+bool
+YamlConfiguration::YamlValueIterator::is_int() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  return current_->second->is_type<int>();
+}
+
+bool
+YamlConfiguration::YamlValueIterator::is_bool() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  return current_->second->is_type<bool>();
+}
+
+bool
+YamlConfiguration::YamlValueIterator::is_string() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  return current_->second->is_type<std::string>();
+}
+
+float
+YamlConfiguration::YamlValueIterator::get_float() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_value<float>();
+}
+
+unsigned int
+YamlConfiguration::YamlValueIterator::get_uint() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_value<unsigned int>();
+}
+
+int
+YamlConfiguration::YamlValueIterator::get_int() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_value<int>();
+}
+
+bool
+YamlConfiguration::YamlValueIterator::get_bool() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_value<bool>();
+}
+
+std::string
+YamlConfiguration::YamlValueIterator::get_string() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_value<std::string>();
+}
+
+std::string
+YamlConfiguration::YamlValueIterator::get_as_string() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_value<std::string>();
+}
+
+std::string
+YamlConfiguration::YamlValueIterator::get_comment() const
+{
+  return "";
+}
+
+bool
+YamlConfiguration::YamlValueIterator::is_default() const
+{
+  return true;
+}
+
+
 
 /** @class YamlConfiguration <config/yaml.h>
  * Configuration store using YAML documents.
@@ -351,6 +555,7 @@ class YamlConfiguration::Node
 /** Constructor. */
 YamlConfiguration::YamlConfiguration()
 {
+  root_ = NULL;
   mutex = new Mutex();
 
   __sysconfdir   = NULL;
@@ -383,6 +588,7 @@ YamlConfiguration::YamlConfiguration()
 YamlConfiguration::YamlConfiguration(const char *sysconfdir,
                                      const char *userconfdir)
 {
+  root_ = NULL;
   mutex = new Mutex();
 
   __sysconfdir   = strdup(sysconfdir);
@@ -418,12 +624,18 @@ YamlConfiguration::YamlConfiguration(const char *sysconfdir,
 /** Destructor. */
 YamlConfiguration::~YamlConfiguration()
 {
+  delete root_;
+  root_ = NULL;
 
   if (__host_file)    free(__host_file);
   if (__default_file) free(__default_file);
   if (__default_sql)  free(__default_sql);
   if (__sysconfdir)   free(__sysconfdir);
   if (__userconfdir)  free(__userconfdir);
+#ifndef USE_REGEX_CPP
+  regfree(&__path_regex);
+  regfree(&__yaml_regex);
+#endif
   delete mutex;
 }
 
@@ -797,7 +1009,10 @@ YamlConfiguration::is_default(const char *path)
 Configuration::ValueIterator *
 YamlConfiguration::get_value(const char *path)
 {
-  return NULL;
+  YamlConfiguration::Node *n = root_->find(path);
+  std::map<std::string, Node *> nodes;
+  nodes[path] = n;
+  return new YamlValueIterator(nodes);
 }
 
 
@@ -931,7 +1146,9 @@ YamlConfiguration::unlock()
 Configuration::ValueIterator *
 YamlConfiguration::iterator()
 {
-  return NULL;
+  std::map<std::string, Node *> nodes;
+  root_->enum_leafs(nodes);
+  return new YamlValueIterator(nodes);
 }
 
 
@@ -961,7 +1178,10 @@ YamlConfiguration::modified_iterator()
 Configuration::ValueIterator *
 YamlConfiguration::search(const char *path)
 {
-  return NULL;
+  Node *n = root_->find(path);
+  std::map<std::string, Node *> nodes;
+  n->enum_leafs(nodes, path);
+  return new YamlValueIterator(nodes);
 }
 
 /** Split string into vector of strings at delimiting character.

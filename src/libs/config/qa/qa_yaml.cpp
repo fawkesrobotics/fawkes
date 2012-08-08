@@ -51,6 +51,28 @@ main(int argc, char **argv)
   std::string s = config->get_string("/hardware/roomba/connection_type");
   printf("Roomba connection type: %s\n", s.c_str());
 
+  Configuration::ValueIterator *i = config->get_value("/hardware/roomba/connection_type");
+  if (i->next() && i->is_string()) {
+    printf("Again as iterator: %s\n", i->get_string().c_str());
+  } else {
+    printf("!!! Failed, iterator value is not a string\n");
+  }
+  delete i;
+
+  printf("=== Printing ALL values ===\n");
+  i = config->iterator();
+  while (i->next()) {
+    printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+  }
+  delete i;
+
+
+  printf("=== Printing values with prefix /webview ===\n");
+  i = config->search("/webview");
+  while (i->next()) {
+    printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+  }
+  delete i;
 
   delete config;
 
