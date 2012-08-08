@@ -231,7 +231,7 @@ ConsoleLogger::log_warn(const char *component, Exception &e)
 void
 ConsoleLogger::log_error(const char *component, Exception &e)
 {
-  if (log_level <= LL_DEBUG ) {
+  if (log_level <= LL_ERROR ) {
     struct timeval now;
     gettimeofday(&now, NULL);
     mutex->lock();
@@ -341,7 +341,7 @@ ConsoleLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
 void
 ConsoleLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
 {
-  if (log_level <= LL_DEBUG ) {
+  if (log_level <= LL_ERROR ) {
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
