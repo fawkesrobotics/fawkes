@@ -27,7 +27,7 @@
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <core/version.h>
-#include <config/sqlite.h>
+#include <config/config.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
 #include <netcomm/fawkes/network_manager.h>
@@ -70,7 +70,7 @@ namespace fawkes {
  * to load on startup.
  * @param default_plugin additional default plugin name
  */
-FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
+FawkesMainThread::FawkesMainThread(Configuration *config,
 				   MultiLogger *multi_logger,
 				   ThreadManager *thread_manager,
 				   PluginManager *plugin_manager,
@@ -81,7 +81,6 @@ FawkesMainThread::FawkesMainThread(SQLiteConfiguration *config,
   __plugin_manager    = plugin_manager;
   __thread_manager    = thread_manager;
   __multi_logger      = multi_logger;
-  __sqlite_conf       = config;
   __config            = config;
 
   __mainloop_thread   = NULL;
@@ -153,7 +152,7 @@ void
 FawkesMainThread::destruct()
 {
   try {
-    __sqlite_conf->try_dump();
+    __config->try_dump();
   } catch (CouldNotOpenFileException &e) {
     if (e.get_errno() == EACCES) {
       __multi_logger->log_warn("FawkesMainThread", "Cannot write to dump file, "
@@ -248,9 +247,9 @@ FawkesMainThread::once()
 	__multi_logger->log_error("FawkesMainThread", e);
       }
     } catch (Exception &e) {
-	__multi_logger->log_error("FawkesMainThread", "Failed to load default "
-				  "plugins, exception follows");
-	__multi_logger->log_error("FawkesMainThread", e);
+      __multi_logger->log_error("FawkesMainThread", "Failed to load default "
+				"plugins, exception follows");
+      __multi_logger->log_error("FawkesMainThread", e);
     }
   }
 
