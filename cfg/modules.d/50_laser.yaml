@@ -8,7 +8,7 @@ hardware/laser:
   # URG using vendor library
   urg:
     # Enable this configuration?
-    active: 0
+    active: false
 
     # Configuration is for Hokuyo URG laser range finder using URG library
     type: urg
@@ -20,7 +20,7 @@ hardware/laser:
   # URG using Gearbox
   urg_gbx:
     # Enable this configuration?
-    active: 0
+    active: false
 
     # Configuration is for Hokuyo URG laser range finder using the Gearbox library
     type: urg_gbx
@@ -31,13 +31,13 @@ hardware/laser:
   # Lase EDL via CAN-Bus
   lase_edl:
     # Enable this configuration?
-    active: 0
+    active: false
 
     # Make this the default sensor, i.e. interface ID Laser?
-    main_sensor: 1
+    main_sensor: false
 
     # Reverse default angle direction to clockwise?
-    clockwise_angle: 1
+    clockwise_angle: true
 
     # Configuration is for Lase EDL laser range finder
     type: lase_edl
@@ -46,10 +46,10 @@ hardware/laser:
     interface_type: usb
 
     # Use default settings from flash?
-    use_default: 0
+    use_default: false
 
     # Store default settings in flash?
-    set_default: 0
+    set_default: false
 
     # Canonical resolution, if set overrides rotation_freq and angle_step; one of low (1 deg, 20 Hz) or high (0/5 deg, 15 Hz)
     canonical_resolution: high

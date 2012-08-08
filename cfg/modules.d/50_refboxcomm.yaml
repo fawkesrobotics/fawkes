@@ -8,7 +8,7 @@ plugins/refboxcomm:
   processor: RemoteBB
 
   # Beep when data is received that changes the game state?
-  beep_on_change: 1
+  beep_on_change: true
 
   # Beep duration; sec
   beep_duration: 0.5

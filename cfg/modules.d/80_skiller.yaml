@@ -9,7 +9,7 @@ skiller:
 
   # Watch lua files for modification and automatically reload
   # Lua if files have been changed; true to enable
-  watch_files: 1
+  watch_files: true
 
   interfaces:
     test:

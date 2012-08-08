@@ -21,19 +21,19 @@ hardware/roomba:
   bttype: firefly
 
   # If RooTooth is auto-detected, save bluetooth address to config for faster connections
-  btsave: 1
+  btsave: true
 
   # Try to enable fast mode on startup. Startup takes longer. Disable if
   # you have RooTooth powered on most of the time anyway and not plug it
   # in just before you launch. Only supported for FireFly RooTooth.
-  btfast: 1
+  btfast: true
 
   # Query data in each loop instead of streaming. More reliably with RooTooth,
   # can be disabled for serial connection for slightly better performance.
-  query_mode: 1
+  query_mode: true
 
   # Play fanfare when connection has been established. Disable when testing late at night...
-  play_fanfare: 1
+  play_fanfare: true
 
   joystick:
     # Button bit for main brush button.
@@ -63,3 +63,4 @@ hardware/roomba:
     max_radius: 1500
     # Maximum linear velocity; mm/sec
     max_velocity: 500
+

@@ -8,15 +8,15 @@ fawkes/bblogger:
   scenario: qatest
 
   # Automatically create a configuration for replay?
-  generate_replay_config: 1
+  generate_replay_config: true
 
   qatest:
     # Enable buffering for this scenario?
-    buffering: 1
+    buffering: true
 
     # Flush file stream after each chunk? Can severely influence
     # performance, but when enabled allows real-time log watching.
-    flushing: 0
+    flushing: false
 
     interfaces/test: TestInterface::BBLoggerTest
 
@@ -26,10 +26,10 @@ fawkes/bblogreplay:
   scenario: qatest
 
   # Loop replay by default?
-  loop: 0
+  loop: false
 
   # Non-blocking replay in blocked timing mode by default?
-  non_blocking: 0
+  non_blocking: false
 
   # Grace period for differences in offset and elapsed time to still allow replay
   grace_period: 0.001
@@ -39,7 +39,7 @@ fawkes/bblogreplay:
     logs/qatest/file: laser-Laser360Interface-Laser-2010-02-21-22-22-29.log
 
     # loop the replay on default for the scenario
-    logs/qatest/loop: 1
+    logs/qatest/loop: true
 
     # Hook at which to replay the log data
     logs/qatest/hook: sensor

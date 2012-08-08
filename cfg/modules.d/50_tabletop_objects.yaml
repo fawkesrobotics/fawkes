@@ -55,16 +55,16 @@ perception/tabletop_objects:
   result_frame: "/base_link"
 
   # Show the frustrum according to configured horizontal and vertical viewing angle.
-  visualization/show_frustrum: 1
+  visualization/show_frustrum: true
 
   # Show text with convex hull vertex IDs?
-  visualization/show_convex_hull_vertices: 1
+  visualization/show_convex_hull_vertices: true
 
   # Show highlighted hull lines to understand edge selection? Otherwise plain hull is shown.
-  visualization/show_convex_hull_line_highlighting: 1
+  visualization/show_convex_hull_line_highlighting: true
 
   # Show text with convex hull vertex IDs?
-  visualization/show_convex_hull_vertex_ids: 1
+  visualization/show_convex_hull_vertex_ids: true
 
   # Time to show marker elements when not updated. Useful to still analyze
   # the seen after program has been terminated; sec

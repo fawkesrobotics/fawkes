@@ -14,7 +14,7 @@ plugins/laserht:
   line/r_scale: 0.02
 
   # Enable debugging display via VisualDisplay2DInterface::LaserGUI
-  line/enable_display: 1
+  line/enable_display: true
 
   # Minimum number of votes for a line to consider it
   line/vote_threshold: 50

@@ -5,7 +5,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/luaagent
 ---
 luaagent:
   agent: "naojoystick"
-  watch_files: 1
+  watch_files: true
   interfaces:
     naojoystick:
       reading:
