@@ -59,39 +59,20 @@ class YamlConfiguration : public Configuration
   virtual std::list<std::string> tags();
 
   virtual bool          exists(const char *path);
-  virtual bool          is_float(const char *path)
-  { return is_type<float>(path); }
-  virtual bool          is_uint(const char *path)
-  { return is_type<unsigned int>(path); }
-  virtual bool          is_int(const char *path)
-  { return is_type<int>(path); }
-  virtual bool          is_bool(const char *path)
-  { return is_type<bool>(path); }
-  virtual bool          is_string(const char *path)
-  { return is_type<std::string>(path); }
-
-  template<typename T>
-    bool is_type(const char *path) const;
-  template<typename T>
-    T get_value(const char *path) const;
-  template<typename T>
-    void get_array(const char *path, std::vector<T> &rv, bool append=false) const;
-  template<typename T>
-    void get_array(const YAML::Node &n, std::vector<T> &rv, bool append=false) const;
+  virtual bool          is_float(const char *path);
+  virtual bool          is_uint(const char *path);
+  virtual bool          is_int(const char *path);
+  virtual bool          is_bool(const char *path);
+  virtual bool          is_string(const char *path);
 
   virtual bool          is_default(const char *path);
 
   virtual std::string     get_type(const char *path);
-  virtual float           get_float(const char *path)
-  { return get_value<float>(path); }
-  virtual unsigned int    get_uint(const char *path)
-  { return get_value<unsigned int>(path); }
-  virtual int             get_int(const char *path)
-  { return get_value<int>(path); }
-  virtual bool            get_bool(const char *path)
-  { return get_value<bool>(path); }
-  virtual std::string     get_string(const char *path)
-  { return get_value<std::string>(path); }
+  virtual float           get_float(const char *path);
+  virtual unsigned int    get_uint(const char *path);
+  virtual int             get_int(const char *path);
+  virtual bool            get_bool(const char *path);
+  virtual std::string     get_string(const char *path);
   virtual ValueIterator * get_value(const char *path);
   virtual std::string     get_comment(const char *path);
   virtual std::string     get_default_comment(const char *path);
@@ -146,6 +127,7 @@ class YamlConfiguration : public Configuration
   void read_config_doc(const YAML::Node &doc, Node *&node);
   void verify_name(const char *name) const;
   static std::vector<std::string> split(const std::string &s, char delim = '/');
+  static std::queue<std::string> split_to_queue(const std::string &s, char delim = '/');
 
   Node  *root_;
 
@@ -169,69 +151,6 @@ class YamlConfiguration : public Configuration
   char *__default_file;
   char *__default_sql;
 };
-
-/** Check if value is of given type T.
- * @param path path to query
- * @return true if value is of desired type, false otherwise
- */
-template<typename T>
-bool
-YamlConfiguration::is_type(const char *path) const
-{
-  //Node *n = query(path);
-
-  return false;
-}
-
-
-/** Retrieve value casted to given type T.
- * @param path path to query
- * @return value casted as desired
- * @throw YAML::ScalarInvalid thrown if value does not exist or is of
- * a different type.
- */
-template<typename T>
-T
-YamlConfiguration::get_value(const char *path) const
-{
-  return 0;
-}
-
-/** Retrieve array for values of given type T.
- * @param n node containing the sequence
- * @param rv return value, will be populated with values upon return
- * @param append true to append to passed in result vector, otherwise it is cleared before use
- * @throw YAML::ScalarInvalid thrown if a value does not exist or is of
- * a different type.
- */
-template<typename T>
-void
-YamlConfiguration::get_array(const YAML::Node &n, std::vector<T> &rv, bool append) const
-{
-  if (! append)  rv.clear();
-  const typename std::vector<T>::size_type s = n.size();
-  for (typename std::vector<T>::size_type i = 0; i < s; ++i) {
-    const YAML::Node &c = n[i];
-    T value;
-    c >> value;
-    rv.push_back(value);
-  }
-}
-
-
-/** Retrieve array for values of given type T.
- * @param path path to query
- * @param rv return value, will be populated with values upon return
- * @throw YAML::ScalarInvalid thrown if a value does not exist or is of
- * a different type.
- */
-template<typename T>
-void
-YamlConfiguration::get_array(const char *path, std::vector<T> &rv, bool append) const
-{
-  std::auto_ptr<YAML::Node> n = query(path);
-  get_array(*n, rv, append);
-}
 
 
 } // end namespace fawkes

@@ -126,6 +126,27 @@ class YamlConfiguration::Node
   std::map<std::string, Node *>::const_iterator  end() const
   { return children_.end(); }
 
+  Node * find(std::queue<std::string> &q)
+  {
+    std::string pel = q.front();
+    if (children_.find(pel) == children_.end()) {
+      throw Exception("YamlConfig: path element %s not found", pel.c_str());
+    }
+    q.pop();
+    if (q.empty()) {
+      return children_[pel];
+    } else {
+      return children_[pel]->find(q);
+    }
+  }
+
+
+  Node * find(const char *path)
+  {
+    std::queue<std::string> pel_q = split_to_queue(path);
+    return find(pel_q);
+  }
+
   void operator=(const Node &n)
   {
     name_      = n.name_;
@@ -191,6 +212,21 @@ class YamlConfiguration::Node
       // might want to have custom exception here later
       throw Exception("YamlConfig: value or type error on %s", name_.c_str());
     }
+  }
+
+
+  /** Check if value is of given type T.
+   * @param path path to query
+   * @return value casted as desired
+   * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+   * a different type.
+   */
+  template<typename T>
+  bool
+  is_type() const
+  {
+    T rv;
+    return YAML::Convert(scalar_value_, rv);
   }
 
 
@@ -615,18 +651,19 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, Node *&node)
 void
 YamlConfiguration::copy(Configuration *copyconf)
 {
+  throw NotImplementedException("YamlConfig does not support copying of a configuration");
 }
 
 void
 YamlConfiguration::tag(const char *tag)
 {
+  throw NotImplementedException("YamlConfig does not support tagging a configuration");
 }
 
 std::list<std::string>
 YamlConfiguration::tags()
 {
-  std::list<std::string> rv;
-  return rv;
+  throw NotImplementedException("YamlConfig does not support tagging a configuration");
 }
 
 
@@ -647,6 +684,98 @@ std::string
 YamlConfiguration::get_comment(const char *path)
 {
   return "";
+}
+
+
+/** Retrieve value casted to given type T.
+ * @param root root node of the tree to search
+ * @param path path to query
+ * @return value casted as desired
+ * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+ * a different type.
+ */
+template<typename T>
+static inline T
+get_value_as(YamlConfiguration::Node *root, const char *path)
+{
+  YamlConfiguration::Node *n = root->find(path);
+  return n->get_value<T>();
+}
+
+
+float
+YamlConfiguration::get_float(const char *path)
+{
+  return get_value_as<float>(root_, path);
+}
+
+unsigned int
+YamlConfiguration::get_uint(const char *path)
+{
+  return get_value_as<unsigned int>(root_, path);
+}
+
+int
+YamlConfiguration::get_int(const char *path)
+{
+  return get_value_as<int>(root_, path);
+}
+
+bool
+YamlConfiguration::get_bool(const char *path)
+{
+  return get_value_as<bool>(root_, path);
+}
+
+std::string
+YamlConfiguration::get_string(const char *path)
+{
+  return get_value_as<std::string>(root_, path);
+}
+
+
+/** Check if value is of given type T.
+ * @param root root node of the tree to search
+ * @param path path to query
+ * @return true if value is of desired type, false otherwise
+ */
+template<typename T>
+static inline bool
+is_type(YamlConfiguration::Node *root, const char *path)
+{
+  YamlConfiguration::Node *n = root->find(path);
+  return n->is_type<T>();
+}
+
+
+bool
+YamlConfiguration::is_float(const char *path)
+{
+  return is_type<float>(root_, path);
+}
+
+bool
+YamlConfiguration::is_uint(const char *path)
+{
+  return is_type<unsigned int>(root_, path);
+}
+
+bool
+YamlConfiguration::is_int(const char *path)
+{
+  return is_type<int>(root_, path);
+}
+
+bool
+YamlConfiguration::is_bool(const char *path)
+{
+  return is_type<bool>(root_, path);
+}
+
+bool
+YamlConfiguration::is_string(const char *path)
+{
+  return is_type<std::string>(root_, path);
 }
 
 
@@ -853,6 +982,25 @@ YamlConfiguration::split(const std::string &s, char delim)
   return elems;
 }
 
+
+/** Split string into queue of strings at delimiting character.
+ * @param s string to split
+ * @param delim character delimiting strings
+ * @return vector of strings resulting from the parsed string. Empty
+ * values are removed.
+ */
+std::queue<std::string>
+YamlConfiguration::split_to_queue(const std::string &s, char delim)
+{
+  std::queue<std::string> elems;
+  std::stringstream ss(s);
+  std::string item;
+  while(std::getline(ss, item, delim)) {
+    if (item != "")  elems.push(item);
+  }
+  return elems;
+}
+
 void
 YamlConfiguration::verify_name(const char *name) const
 {
@@ -877,7 +1025,8 @@ YamlConfiguration::verify_name(const char *name) const
 YamlConfiguration::Node *
 YamlConfiguration::query(const char *path) const
 {
-  return NULL;
+  std::queue<std::string> pel_q = split_to_queue(path);
+  return root_->find(pel_q);
 }
 
 

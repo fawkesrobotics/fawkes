@@ -45,6 +45,12 @@ main(int argc, char **argv)
     e.print_trace();
   }
 
+  unsigned int u = config->get_uint("/fawkes/mainapp/blackboard_size");
+  printf("Blackboard size: %u\n", u);
+
+  std::string s = config->get_string("/hardware/roomba/connection_type");
+  printf("Roomba connection type: %s\n", s.c_str());
+
 
   delete config;
 
