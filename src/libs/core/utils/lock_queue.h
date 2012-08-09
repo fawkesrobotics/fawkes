@@ -30,22 +30,57 @@
 
 namespace fawkes {
 
+/** @class LockQueue <core/utils/lock_queue.h>
+ * Queue with a lock.
+ * This class provides a queue that has an intrinsic lock. The lock can be applied
+ * with the regular locking methods.
+ *
+ * @see Mutex
+ * @ingroup FCL
+ * @author Tim Niemueller
+ */
 template <typename Type>
 class LockQueue : public std::queue<Type>
 {
  public:
+  /** Constructor. */
   LockQueue();
+
+  /** Copy constructor.
+   * @param ll LockQueue to copy
+   */
   LockQueue(const LockQueue<Type> &ll);
+
+  /** Destructor. */
   virtual ~LockQueue();
 
+  /** Lock queue. */
   void           lock() const;
-  bool           try_lock() const;
-  void           unlock() const;
-  RefPtr<Mutex>  mutex() const;
 
+  /** Try to lock queue.
+   * @return true, if the lock has been aquired, false otherwise.
+   */
+  bool           try_lock() const;
+
+  /** Unlock list. */
+  void           unlock() const;
+
+  /** Get access to the internal mutex.
+   * Can be used with MutexLocker.
+   * @return internal mutex
+   */
+  RefPtr<Mutex>  mutex() const
+  { return __mutex; }
+
+  /** Push element to queue with lock protection.
+   * @param x element to add
+   */
   void     push_locked(const Type& x);
+
+  /** Pop element from queue with lock protection. */
   void     pop_locked();
 
+  /** Clear the queue. */
   void clear();
 
   // not needed, no change to mutex required (thus "incomplete" BigThree)
@@ -56,40 +91,25 @@ class LockQueue : public std::queue<Type>
 };
 
 
-/** @class LockQueue core/utils/lock_queue.h
- * Queue with a lock.
- * This class provides a queue that has an intrinsic lock. The lock can be applied
- * with the regular locking methods.
- *
- * @see Mutex
- * @ingroup FCL
- * @author Tim Niemueller
- */
 
 
-/** Constructor. */
 template <typename Type>
 LockQueue<Type>::LockQueue()
   : __mutex(new Mutex())
 {}
 
 
-/** Copy constructor.
- * @param ll LockQueue to copy
- */
 template <typename Type>
 LockQueue<Type>::LockQueue(const LockQueue<Type> &ll)
   : std::queue<Type>::queue(ll), __mutex(new Mutex())
 {}
 
 
-/** Destructor. */
 template <typename Type>
 LockQueue<Type>::~LockQueue()
 {}
 
 
-/** Lock queue. */
 template <typename Type>
 void
 LockQueue<Type>::lock() const
@@ -98,9 +118,6 @@ LockQueue<Type>::lock() const
 }
 
 
-/** Try to lock queue.
- * @return true, if the lock has been aquired, false otherwise.
- */
 template <typename Type>
 bool
 LockQueue<Type>::try_lock() const
@@ -109,7 +126,6 @@ LockQueue<Type>::try_lock() const
 }
 
 
-/** Unlock list. */
 template <typename Type>
 void
 LockQueue<Type>::unlock() const
@@ -118,9 +134,6 @@ LockQueue<Type>::unlock() const
 }
 
 
-/** Push element to queue with lock protection.
- * @param x element to add
- */
 template <typename Type>
 void
 LockQueue<Type>::push_locked(const Type& x)
@@ -131,8 +144,6 @@ LockQueue<Type>::push_locked(const Type& x)
 }
 
 
-/** Pop element from queue with lock protection.
- */
 template <typename Type>
 void
 LockQueue<Type>::pop_locked()
@@ -142,7 +153,6 @@ LockQueue<Type>::pop_locked()
   __mutex->unlock();
 }
 
-/** Clear the queue. */
 template <typename Type>
 void
 LockQueue<Type>::clear()
@@ -152,18 +162,6 @@ LockQueue<Type>::clear()
     std::queue<Type>::pop();
   }
   __mutex->unlock();
-}
-
-
-/** Get access to the internal mutex.
- * Can be used with MutexLocker.
- * @return internal mutex
- */
-template <typename Type>
-RefPtr<Mutex>
-LockQueue<Type>::mutex() const
-{
-  return __mutex;
 }
 
 
