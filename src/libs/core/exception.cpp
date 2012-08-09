@@ -671,6 +671,28 @@ Exception::what() const throw()
 }
 
 
+/** Get primary string (does not implicitly print the back trace).
+ * Messages are stored in a list. The first entry in this list is called primary
+ * message. This is why it is important to have a meaningful first message!
+ * @return Returns a constant char pointer with the message. The message is
+ * private to the exception and may not be modified or freed (hence const)
+ * If no message has been set "Unknown error" is returned. This method may be
+ * overidden by other exceptions.
+ * This method is also called by the runtime system if the exception was not
+ * caught and resulted in a program termination.
+ * @return string describing the general cause of the current error
+ */
+const char *
+Exception::what_no_backtrace() const throw()
+{
+  if ( messages != NULL ) {
+    return messages->msg;
+  } else {
+    return "Unknown error";
+  }
+}
+
+
 /** Get iterator for messages.
  * @return iterator for messages
  */
