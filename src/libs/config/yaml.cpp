@@ -117,7 +117,7 @@ YamlConfiguration::YamlValueIterator::is_float() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->is_type<float>();
+  return current_->second->get_type() == Node::Type::FLOAT;
 }
 
 bool
@@ -126,7 +126,7 @@ YamlConfiguration::YamlValueIterator::is_uint() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->is_type<unsigned int>();
+  return current_->second->get_type() == Node::Type::UINT32;
 }
 
 bool
@@ -135,7 +135,7 @@ YamlConfiguration::YamlValueIterator::is_int() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->is_type<int>();
+  return current_->second->get_type() == Node::Type::INT32;
 }
 
 bool
@@ -144,7 +144,7 @@ YamlConfiguration::YamlValueIterator::is_bool() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->is_type<bool>();
+  return current_->second->get_type() == Node::Type::BOOL;
 }
 
 bool
@@ -153,7 +153,7 @@ YamlConfiguration::YamlValueIterator::is_string() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->is_type<std::string>();
+  return current_->second->get_type() == Node::Type::STRING;
 }
 
 float
