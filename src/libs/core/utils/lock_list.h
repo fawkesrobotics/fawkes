@@ -31,30 +31,6 @@
 namespace fawkes {
 
 
-template <typename Type>
-class LockList : public std::list<Type>
-{
- public:
-  LockList();
-  LockList(const LockList<Type> &ll);
-  virtual ~LockList();
-  virtual void  lock() const;
-  virtual bool  try_lock() const;
-  virtual void  unlock() const;
-  RefPtr<Mutex> mutex() const;
-
-  void     push_back_locked(const Type& x);
-  void     push_front_locked(const Type& x);
-  void     remove_locked(const Type& x);
-
-  LockList<Type> &  operator=(const LockList<Type> &ll);
-  LockList<Type> &  operator=(const std::list<Type> &l);
- private:
-  mutable RefPtr<Mutex> __mutex;
-
-};
-
-
 /** @class LockList <core/utils/lock_list.h>
  * List with a lock.
  * This class provides a list that has an intrinsic lock. The lock can be applied
@@ -64,31 +40,89 @@ class LockList : public std::list<Type>
  * @ingroup FCL
  * @author Tim Niemueller
  */
+template <typename Type>
+class LockList : public std::list<Type>
+{
+ public:
+  /** Constructor. */
+  LockList();
+
+  /** Copy constructor.
+   * @param ll LockList to copy
+   */
+  LockList(const LockList<Type> &ll);
+
+  /** Destructor. */
+  virtual ~LockList() {}
 
 
-/** Constructor. */
+  /** Lock list. */
+  virtual void  lock() const;
+
+  /** Try to lock list.
+   * @return true, if the lock has been aquired, false otherwise.
+   */
+  virtual bool  try_lock() const;
+
+  /** Unlock list. */
+  virtual void  unlock() const;
+
+  /** Get access to the internal mutex.
+   * Can be used with MutexLocker.
+   * @return internal mutex
+   */
+  RefPtr<Mutex> mutex() const;
+
+  /** Push element to list at back with lock protection.
+   * @param x element to add
+   */
+  void     push_back_locked(const Type& x);
+
+  /** Push element to list at front with lock protection.
+   * @param x element to add
+   */
+  void     push_front_locked(const Type& x);
+
+  /** Remove element from list with lock protection.
+   * @param x element to remove
+   */
+  void     remove_locked(const Type& x);
+
+  /** Copy values from another LockList.
+   * Copies the values one by one. Both instances are locked during the copying and
+   * this instance is cleared before copying.
+   * @param ll list to copy
+   * @return reference to this instance
+   */
+  LockList<Type> &  operator=(const LockList<Type> &ll);
+
+  /** Copy values from a standard list.
+   * Copies the values one by one. This instance is locked during the copying and
+   * cleared.
+   * @param l list to copy
+   * @return reference to this instance
+   */
+  LockList<Type> &  operator=(const std::list<Type> &l);
+ private:
+  mutable RefPtr<Mutex> __mutex;
+
+};
+
+
+
+
 template <typename Type>
 LockList<Type>::LockList()
   : __mutex(new Mutex())
 {}
 
 
-/** Copy constructor.
- * @param ll LockList to copy
- */
 template <typename Type>
 LockList<Type>::LockList(const LockList<Type> &ll)
   : std::list<Type>::list(ll), __mutex(new Mutex())
 {}
 
 
-/** Destructor. */
-template <typename Type>
-LockList<Type>::~LockList()
-{}
-
-
-/** Lock list. */
 template <typename Type>
 void
 LockList<Type>::lock() const
@@ -97,9 +131,6 @@ LockList<Type>::lock() const
 }
 
 
-/** Try to lock list.
- * @return true, if the lock has been aquired, false otherwise.
- */
 template <typename Type>
 bool
 LockList<Type>::try_lock() const
@@ -108,7 +139,6 @@ LockList<Type>::try_lock() const
 }
 
 
-/** Unlock list. */
 template <typename Type>
 void
 LockList<Type>::unlock() const
@@ -117,9 +147,6 @@ LockList<Type>::unlock() const
 }
 
 
-/** Push element to list at back with lock protection.
- * @param x element to add
- */
 template <typename Type>
 void
 LockList<Type>::push_back_locked(const Type& x)
@@ -130,9 +157,6 @@ LockList<Type>::push_back_locked(const Type& x)
 }
 
 
-/** Push element to list at front with lock protection.
- * @param x element to add
- */
 template <typename Type>
 void
 LockList<Type>::push_front_locked(const Type& x)
@@ -143,9 +167,6 @@ LockList<Type>::push_front_locked(const Type& x)
 }
 
 
-/** Remove element from list with lock protection.
- * @param x element to remove
- */
 template <typename Type>
 void
 LockList<Type>::remove_locked(const Type& x)
@@ -156,10 +177,6 @@ LockList<Type>::remove_locked(const Type& x)
 }
 
 
-/** Get access to the internal mutex.
- * Can be used with MutexLocker.
- * @return internal mutex
- */
 template <typename Type>
 RefPtr<Mutex>
 LockList<Type>::mutex() const
@@ -168,12 +185,6 @@ LockList<Type>::mutex() const
 }
 
 
-/** Copy values from another LockList.
- * Copies the values one by one. Both instances are locked during the copying and
- * this instance is cleared before copying.
- * @param ll list to copy
- * @return reference to this instance
- */
 template <typename Type>
 LockList<Type> &
 LockList<Type>::operator=(const LockList<Type> &ll)
@@ -192,12 +203,6 @@ LockList<Type>::operator=(const LockList<Type> &ll)
 }
 
 
-/** Copy values from a standard list.
- * Copies the values one by one. This instance is locked during the copying and
- * cleared.
- * @param l list to copy
- * @return reference to this instance
- */
 template <typename Type>
 LockList<Type> &
 LockList<Type>::operator=(const std::list<Type> &l)
