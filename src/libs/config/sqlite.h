@@ -48,8 +48,6 @@ class SQLiteConfiguration : public Configuration
   virtual void          load(const char *filename,
 			     const char *tag = NULL);
 
-  void load(const char *tag = NULL);
-
   virtual void          tag(const char *tag);
   virtual std::list<std::string> tags();
 

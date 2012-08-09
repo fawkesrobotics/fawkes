@@ -621,24 +621,23 @@ SQLiteConfiguration::load(const char *file_path,
   const char *try_paths[] = {__sysconfdir, __userconfdir};
   int try_paths_len = 2;
 
-  char *host_name;
+  char *host_name = NULL;
 
-  HostInfo hostinfo;
-  if ( asprintf(&host_name, "%s.db", hostinfo.short_name()) == -1 ) {
-    host_name = strdup(hostinfo.short_name());
-  }
+  if (strcmp(file_path, ":memory:") == 0) {
+    __host_file = strdup(":memory:");
 
-  // determine host file
-  if (host_name[0] == '/') {
-    // absolute path, take as is
-    if (sqlite3_open(host_name, &db) == SQLITE_OK) {
-      __host_file = strdup(host_name);
-    } else {
+    if (sqlite3_open(file_path, &db) != SQLITE_OK) {
       CouldNotOpenConfigException ce(sqlite3_errmsg(db));
-      ce.append("Failed to open host db (absolute)");
+      ce.append("Failed to open memory database");
       throw ce;
     }
   } else {
+    HostInfo hostinfo;
+    if ( asprintf(&host_name, "%s.db", hostinfo.short_name()) == -1 ) {
+      host_name = strdup(hostinfo.short_name());
+    }
+
+    // determine host file
     // try sysconfdir and userconfdir
     for (int i = 0; i < try_paths_len; ++i) {
       char *path;
@@ -651,12 +650,13 @@ SQLiteConfiguration::load(const char *file_path,
 	}
       }
     }
-    if (__host_file == NULL) {
-      CouldNotOpenConfigException ce(sqlite3_errmsg(db));
-      ce.append("Failed to open host db (paths)");
-      free(host_name);
-      throw ce;
-    }
+  }
+
+  if (__host_file == NULL) {
+    CouldNotOpenConfigException ce(sqlite3_errmsg(db));
+    ce.append("Failed to open host db (paths)");
+    if (host_name) free(host_name);
+    throw ce;
   }
 
   if (file_path == NULL) {
@@ -668,7 +668,7 @@ SQLiteConfiguration::load(const char *file_path,
     try {
       attach_default(":memory:");
     } catch (...) {
-      free(host_name);
+      if (host_name)  free(host_name);
       throw;
     }
     __default_file = strdup(":memory:");
@@ -711,7 +711,7 @@ SQLiteConfiguration::load(const char *file_path,
 	attach_default(defaults_db);
 	__default_file = defaults_db;
       } catch (...) {
-	free(host_name);
+	if (host_name)  free(host_name);
 	free(defaults_db);
 	throw;
       }
@@ -733,7 +733,7 @@ SQLiteConfiguration::load(const char *file_path,
     free(defaults_db);
 
     if (__default_file == NULL) {
-      free(host_name);
+      if (host_name)  free(host_name);
       throw CouldNotOpenConfigException("Could not create default filename");
     }
   }
@@ -741,23 +741,11 @@ SQLiteConfiguration::load(const char *file_path,
   init_dbs();
 
   if ( __default_sql )  import_default(__default_sql);
-  free(host_name);
+  if (host_name)  free(host_name);
 
   opened = true;
 
   mutex->unlock();
-}
-
-
-/** Load config from default files.
- * Default file is "shorthostname.db" (shorthostname replaced by the
- * short host name returned by uname) and default.db).
- * @param tag optional tag to restore
- */
-void
-SQLiteConfiguration::load(const char *tag)
-{
-  load(NULL, tag);
 }
 
 

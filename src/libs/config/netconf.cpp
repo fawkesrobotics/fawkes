@@ -1268,7 +1268,7 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       }
 
       mirror_config = new SQLiteConfiguration();
-      mirror_config->load(":memory:", ":memory:");
+      mirror_config->load(":memory:");
 
       __mirror_init_barrier = new InterruptibleBarrier(2);
       mutex->lock();
