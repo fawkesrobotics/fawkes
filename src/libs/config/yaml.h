@@ -161,20 +161,23 @@ class YamlConfiguration : public Configuration
   Node *  query(const char *path) const;
   void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue);
   void read_config_doc(const YAML::Node &doc, Node *&node);
-  void verify_name(const char *name) const;
+  Node * read_yaml_file(std::string filename, bool ignore_missing,
+			std::queue<LoadQueueEntry> &load_queue);
+  void write_host_file();
   static std::vector<std::string> split(const std::string &s, char delim = '/');
   static std::queue<std::string> split_to_queue(const std::string &s, char delim = '/');
 
   Node  *root_;
 
+  Node  *host_root_;
+  std::string host_file_;
+
  private:
   Mutex *mutex;
 
 #ifdef USE_REGEX_CPP
-  std::regex __path_regex;
   std::regex __yaml_regex;
 #else
-  regex_t    __path_regex;
   regex_t    __yaml_regex;
 #endif
 
@@ -183,9 +186,6 @@ class YamlConfiguration : public Configuration
 
   char *__sysconfdir;
   char *__userconfdir;
-  char *__host_file;
-  char *__default_file;
-  char *__default_sql;
 };
 
 
