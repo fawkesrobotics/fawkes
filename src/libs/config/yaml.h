@@ -177,8 +177,12 @@ class YamlConfiguration : public Configuration
 
 #ifdef USE_REGEX_CPP
   std::regex __yaml_regex;
+  std::regex __url_regex;
+  std::regex __frame_regex;
 #else
   regex_t    __yaml_regex;
+  regex_t    __url_regex;
+  regex_t    __frame_regex;
 #endif
 
   typedef std::map<std::string, YAML::Node *> DocMap;

@@ -47,6 +47,10 @@ namespace fawkes {
 
 #define PATH_REGEX "^[a-zA-Z0-9_-]+$"
 #define YAML_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
+// from https://www.ietf.org/rfc/rfc3986.txt
+#define URL_REGEX "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+#define FRAME_REGEX "^(/[a-zA-Z_][a-zA-Z0-9_-]*)+$"
+
 
 /** @class YamlConfiguration::YamlValueIterator <config/yaml.h>
  * Iterator for YAML config trees.
@@ -241,9 +245,17 @@ YamlConfiguration::YamlConfiguration()
 
 #ifdef USE_REGEX_CPP
   __yaml_regex =  std::regex(YAML_REGEX, std::regex_constants::extended);
+  __url_regex =  std::regex(URL_REGEX, std::regex_constants::extended);
+  __frame_regex =  std::regex(FRAME_REGEX, std::regex_constants::extended);
 #else
   if (regcomp(&__yaml_regex, YAML_REGEX, REG_EXTENDED) != 0) {
-    throw std::runtime_error("Failed to compile YAML regex");
+    throw Exception("Failed to compile YAML regex");
+  }
+  if (regcomp(&__url_regex, URL_REGEX, REG_EXTENDED) != 0) {
+    throw Exception("Failed to compile URL regex");
+  }
+  if (regcomp(&__frame_regex, FRAME_REGEX, REG_EXTENDED) != 0) {
+    throw Exception("Failed to compile frame regex");
   }
 #endif
 }
@@ -267,9 +279,17 @@ YamlConfiguration::YamlConfiguration(const char *sysconfdir,
 
 #ifdef USE_REGEX_CPP
   __yaml_regex =  std::regex(YAML_REGEX, std::regex_constants::extended);
+  __url_regex =  std::regex(URL_REGEX, std::regex_constants::extended);
+  __frame_regex =  std::regex(FRAME_REGEX, std::regex_constants::extended);
 #else
   if (regcomp(&__yaml_regex, YAML_REGEX, REG_EXTENDED) != 0) {
-    throw std::runtime_error("Failed to compile YAML regex");
+    throw Exception("Failed to compile YAML regex");
+  }
+  if (regcomp(&__url_regex, URL_REGEX, REG_EXTENDED) != 0) {
+    throw Exception("Failed to compile URL regex");
+  }
+  if (regcomp(&__frame_regex, FRAME_REGEX, REG_EXTENDED) != 0) {
+    throw Exception("Failed to compile frame regex");
   }
 #endif
 
@@ -298,6 +318,8 @@ YamlConfiguration::~YamlConfiguration()
   if (__userconfdir)  free(__userconfdir);
 #ifndef USE_REGEX_CPP
   regfree(&__yaml_regex);
+  regfree(&__url_regex);
+  regfree(&__frame_regex);
 #endif
   delete mutex;
 }
@@ -578,7 +600,38 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, Node *&node)
 	throw Exception("YamlConfig: Invalid TCP/UDP port number "
 			"(%u out of allowed range)", p);
       }
+    } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/url") {
+      std::string scalar;
+      if (doc.GetScalar(scalar)) {
+#ifdef USE_REGEX_CPP
+	if (regex_search(scalar, __url_regex)) {
+#  if 0
+	  // just for emacs auto-indentation
+	}
+#  endif
+#else
+	if (regexec(&__url_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
+	  throw Exception("YamlConfig: %s is not a valid URL", scalar.c_str());
+	}
+#endif
+      }
+    } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/frame") {
+      std::string scalar;
+      if (doc.GetScalar(scalar)) {
+#ifdef USE_REGEX_CPP
+	if (regex_search(scalar, __frame_regex)) {
+#  if 0
+	  // just for emacs auto-indentation
+	}
+#  endif
+#else
+	if (regexec(&__frame_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
+	  throw Exception("YamlConfig: %s is not a valid frame ID", scalar.c_str());
+	}
+#endif
+      }
     }
+
   }
 }
 
