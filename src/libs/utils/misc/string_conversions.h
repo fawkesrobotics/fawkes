@@ -41,6 +41,8 @@ class StringConversions
   static std::string to_string(float f);
   static std::string to_string(double d);
   static std::string to_string(bool b);
+  static std::string to_string(std::string &s)
+  { return s; }
 
   static unsigned int to_uint(std::string s);
   static int          to_int(std::string s);
