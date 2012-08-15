@@ -47,6 +47,9 @@ KatanaControllerKni::KatanaControllerKni()
   __cfg_kni_conffile = "/etc/kni3/hd300/katana6M180.cfg";
   __cfg_read_timeout = 100;
   __cfg_write_timeout = 0;
+
+  __gripper_last_pos.clear();
+  __gripper_last_pos.resize(2);
 }
 
 /** Destructor. */
@@ -232,6 +235,10 @@ KatanaControllerKni::gripper_open(bool blocking)
   __active_motors.clear();
   __active_motors.resize(1);
   __active_motors[0] = __katbase->GetMOT()->cnt - 1;
+
+  __gripper_last_pos.clear();
+  __gripper_last_pos[0] = __katbase->GetMOT()->arr[__active_motors[0]].GetPVP()->pos;
+  __gripper_last_pos[1] = 0; //counter
 }
 
 void
@@ -246,6 +253,10 @@ KatanaControllerKni::gripper_close(bool blocking)
   __active_motors.clear();
   __active_motors.resize(1);
   __active_motors[0] = __katbase->GetMOT()->cnt - 1;
+
+  __gripper_last_pos.clear();
+  __gripper_last_pos[0] = __katbase->GetMOT()->arr[__active_motors[0]].GetPVP()->pos;
+  __gripper_last_pos[1] = 0; //counter
 }
 
 void
@@ -443,7 +454,20 @@ KatanaControllerKni::motor_final(unsigned short id)
   if (mot.GetPVP()->msf == MSF_MOTCRASHED)
     throw fawkes::KatanaMotorCrashedException("Motor %u crashed.", id);
 
-  return std::abs(mot.GetTPS()->tarpos - mot.GetPVP()->pos) < 10;
+  // extra check for gripper, consider final if not moved for a while
+  unsigned short gripper_not_moved = 0;
+  if (id == __katbase->GetMOT()->cnt - 1) {
+    if (__gripper_last_pos[0] == mot.GetPVP()->pos) {
+      __gripper_last_pos[1] += 1;
+    } else {
+      __gripper_last_pos[0] = mot.GetPVP()->pos;
+      __gripper_last_pos[1] = 0;
+    }
+    gripper_not_moved = __gripper_last_pos[1];
+  }
+
+  return (std::abs(mot.GetTPS()->tarpos - mot.GetPVP()->pos) < 10)
+      or (gripper_not_moved > 3);
 }
 
 } // end of namespace fawkes
