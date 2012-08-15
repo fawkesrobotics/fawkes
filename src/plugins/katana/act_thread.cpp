@@ -118,6 +118,9 @@ KatanaActThread::init()
 
   } else if( __cfg_controller == "openrave") {
 #ifdef HAVE_OPENRAVE
+    if(!__cfg_OR_enabled) {
+      throw fawkes::Exception("Cannot use controller 'openrave', OpenRAVE is deactivated by config flag!");
+    }
     __katana = new KatanaControllerOpenrave(openrave);
 #else
     throw fawkes::Exception("Cannot use controller 'openrave', OpenRAVE not installed!");
