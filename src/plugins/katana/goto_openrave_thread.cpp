@@ -59,6 +59,7 @@ using namespace fawkes;
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  * @param robot_file path to robot's xml-file
+ * @param arm_model arm model used in robot_file, either "5dof" or "6dof_dummy"
  * @param autoload_IK true, if IK databas should be automatically generated (recommended)
  * @param use_viewer true, if viewer should be started (default: false)
  */
@@ -67,6 +68,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
                                    fawkes::OpenRaveConnector* openrave,
 				   unsigned int poll_interval_ms,
                                    std::string robot_file,
+                                   std::string arm_model,
                                    bool autoload_IK,
                                    bool use_viewer)
   : KatanaMotionThread("KatanaGotoOpenRaveThread", katana, logger),
@@ -75,6 +77,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __target_object( "" ),
   __target_traj( 0 ),
   __cfg_robot_file( robot_file ),
+  __cfg_arm_model( arm_model ),
   __cfg_autoload_IK( autoload_IK ),
   __cfg_use_viewer( use_viewer ),
   __is_target_object( 0 ),
@@ -175,22 +178,39 @@ KatanaGotoOpenRaveThread::init()
 
     // configure manipulator
     // TODO: from config parameters? neccessary?
+    if( __cfg_arm_model == "5dof" ) {
+      __OR_manip = new OpenRaveManipulatorNeuronicsKatana(5, 5);
+      __OR_manip->add_motor(0,0);
+      __OR_manip->add_motor(1,1);
+      __OR_manip->add_motor(2,2);
+      __OR_manip->add_motor(3,3);
+      __OR_manip->add_motor(4,4);
 
-    __OR_manip = new OpenRaveManipulatorNeuronicsKatana(5, 5);
-    __OR_manip->add_motor(0,0);
-    __OR_manip->add_motor(1,1);
-    __OR_manip->add_motor(2,2);
-    __OR_manip->add_motor(3,3);
-    __OR_manip->add_motor(4,4);
+      // Set manipulator and offsets.
+      // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
+      // offsetX: katana.kinbody is setup 0.0725 on +x axis
+      _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+      __OR_robot->get_robot_ptr()->SetActiveManipulator("arm_kni");
 
-    // Set manipulator and offsets.
-    // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
-    // offsetX: katana.kinbody is setup 0.0725 on +x axis
-    _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
-    __OR_robot->get_robot_ptr()->SetActiveManipulator("arm_kni");
+      if( __cfg_autoload_IK ) {
+        _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_TranslationDirection5D);
+      }
+    } else if ( __cfg_arm_model == "6dof_dummy" ) {
+      __OR_manip = new OpenRaveManipulatorKatana6M180(6, 5);
+      __OR_manip->add_motor(0,0);
+      __OR_manip->add_motor(1,1);
+      __OR_manip->add_motor(2,2);
+      __OR_manip->add_motor(4,3);
+      __OR_manip->add_motor(5,4);
 
-    if( __cfg_autoload_IK ) {
-      _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_TranslationDirection5D);
+      // Set manipulator and offsets.
+      // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
+      // offsetX: katana.kinbody is setup 0.0725 on +x axis
+      _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+
+      if( __cfg_autoload_IK ) {
+        _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_Transform6D);
+      }
     }
 
   } catch (Exception& e) {

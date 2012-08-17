@@ -124,6 +124,7 @@ class KatanaActThread
   bool           __cfg_OR_use_viewer;
   bool           __cfg_OR_auto_load_ik;
   std::string    __cfg_OR_robot_file;
+  std::string    __cfg_OR_arm_model;
 
 
   std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;

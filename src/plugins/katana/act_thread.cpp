@@ -97,6 +97,7 @@ KatanaActThread::init()
   __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
   __cfg_OR_auto_load_ik  = config->get_bool("/hardware/katana/openrave/auto_load_ik");
   __cfg_OR_robot_file    = config->get_string("/hardware/katana/openrave/robot_file");
+  __cfg_OR_arm_model     = config->get_string("/hardware/katana/openrave/arm_model");
 #else
   __cfg_OR_enabled       = false;
 #endif
@@ -141,7 +142,8 @@ KatanaActThread::init()
   __motor_control_thread = new KatanaMotorControlThread(__katana, logger, __cfg_goto_pollint);
   __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
 #ifdef HAVE_OPENRAVE
-  __goto_openrave_thread = new KatanaGotoOpenRaveThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
+  __goto_openrave_thread = new KatanaGotoOpenRaveThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file,
+                                                        __cfg_OR_arm_model, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
   if(__cfg_OR_enabled)
     {__goto_openrave_thread->init();}
 #endif

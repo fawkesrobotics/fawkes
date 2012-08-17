@@ -47,6 +47,7 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
 		   unsigned int poll_interval_ms,
                    std::string robot_file,
+                   std::string arm_model,
                    bool autoload_IK,
                    bool use_viewer);
 
@@ -77,6 +78,7 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   std::vector< float >  __motor_angles;
 
   const std::string     __cfg_robot_file;
+  const std::string     __cfg_arm_model;
   bool                  __cfg_autoload_IK;
   bool                  __cfg_use_viewer;
 
