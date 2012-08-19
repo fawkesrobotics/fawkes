@@ -29,6 +29,6 @@ require("fawkes.interface_initializer")
 
 agentenv = require("luaagent.agentenv")
 fawkes.depinit.add_module_initializer(fawkes.interface_initializer.init_interfaces)
-
+agentenv.init(AGENT)
 
 logger:log_debug("Lua startup completed")
