@@ -25,7 +25,9 @@ require("fawkes.logprint")
 local skillstati = require("skiller.skillstati")
 local hsmmod = require("luaagent.agenthsm")
 local skqmod = require("luaagent.skillqueue")
+local agjsmod  = require("luaagent.jumpstates")
 local fsmjsmod = require("fawkes.fsm.jumpstate")
+local shsmmod  = require("fawkes.fsm.subfsmjumpstate")
 local fsmstmod = require("fawkes.fsm.state")
 local skillenv = require("skiller.skillenv")
 local predlib  = require("fawkes.predlib")
@@ -35,17 +37,36 @@ local agent = nil
 
 local graphing_enabled = true
 
+local module_exports = {
+   AgentHSM                = hsmmod.AgentHSM,
+   AgentSkillExecJumpState = agjsmod.AgentSkillExecJumpState,
+   SkillQueue              = skqmod.SkillQueue,
+   JumpState               = fsmjsmod.JumpState,
+   SubFSMJumpState         = shsmmod.SubFSMJumpState,
+   config                  = config
+}
+
+add_module_initializer = skillenv.add_module_initializer
+
+--- Add an export for module initialization.
+-- All exports are exported to modules when they are initialized.
+-- @param key key of the export, i.e. the name with which the value will be
+-- available in the skill module
+-- @param value the value of the exported entry
+function add_export(key, value)
+   module_exports[key] = value
+end
+
 --- Initialize agent module.
 -- Exports some basic features like AgentHSM, SkillQueue, JumpState etc.
 -- into the given module.
 -- @param m Module to initialize
 function module_init(m)
    fawkes.modinit.module_init(m)
-   m.AgentHSM   = hsmmod.AgentHSM
-   m.SkillQueue = skqmod.SkillQueue
-   m.State      = fsmstmod.State
-   m.JumpState  = fsmjsmod.JumpState
-   m.config     = config
+
+   for k, v in pairs(module_exports) do
+      m[k] = v
+   end
 
    for k,v in pairs(skillstati) do
       if string.match(k, "^S_([%a_]+)$") then m[k] = v end
@@ -70,14 +91,19 @@ end
 -- Loads the given agent. If it has a init() routine this is called,
 -- otherwise if the agent as a FSM this is reset.
 function init(agentname)
-   agent = require("agents." .. agentname)
+   local ok
+   ok, agent = pcall(require, "agents." .. agentname)
+   if not ok then agent = require(agentname) end
+
    assert(agent, "Agent " .. agentname .. " could not be loaded")
 
    if agent.init then
       agent.init()
    elseif agent.fsm then
       agent.fsm:reset()
-      skillenv.write_fsm_graph(agent.fsm, interfaces.writing.agdbg)
+      if interfaces then
+	 skillenv.write_fsm_graph(agent.fsm, interfaces.writing.agdbg)
+      end
    end
 end
 
@@ -105,8 +131,8 @@ end
 --- Write graph of current agent.
 -- If the current agent supplies a FSM its graph is written to the
 -- agent debug interface (interfaces.writing.agdbg).
-function write_graph()
-   if agent.fsm then
+function write_graph(fsm)
+   if fsm then
       skillenv.write_fsm_graph(agent.fsm, interfaces.writing.agdbg)
    end
 end
@@ -128,6 +154,6 @@ function execute()
    predlib.reset()
 
    if graphing_enabled then
-      write_graph()
+      write_graph(agent.fsm)
    end
 end

@@ -28,7 +28,7 @@ module(..., fawkes.modinit.module_init)
 require("fawkes.fsm.jumpstate")
 require("luaagent.skillqueue")
 local skillstati = require("skiller.skillstati")
-local skjsmod = require("skiller.skill_jumpstates")
+local skjsmod = require("skiller.skill_jumpstate")
 
 -- Convenience shortcuts
 local JumpState      = fawkes.fsm.jumpstate.JumpState
@@ -43,41 +43,8 @@ local SkillQueue     = luaagent.skillqueue.SkillQueue
 -- loop() function. You need to add transitions with jump conditions for state
 -- transitions and cannot return a state to switch to after the loop.
 -- @author Tim Niemueller
-AgentSkillExecJumpState = { add_transition        = JumpState.add_transition,
-			    add_precondition      = JumpState.add_precondition,
-			    add_precond_trans     = JumpState.add_precond_trans,
-			    get_transitions       = JumpState.get_transitions,
-			    clear_transitions     = JumpState.clear_transitions,
-			    try_transitions       = JumpState.try_transitions,
-			    last_transition       = JumpState.last_transition,
-			    init                  = JumpState.init,
-			    loop                  = JumpState.loop,
-			    exit                  = JumpState.exit,
-			    setup_timeout         = JumpState.setup_timeout,
-			    jumpcond_timeout      = JumpState.jumpcond_timeout,
-			    init_timeout          = JumpState.init_timeout,
-			    set_transition_labels = SkillJumpState.set_transition_labels
-			  }
+AgentSkillExecJumpState = { set_transition_labels = SkillJumpState.set_transition_labels }
 
-
---- Fires if skill(s) finished successfully.
-function AgentSkillExecJumpState:jumpcond_final()
-   return self.skill_status == skillstati.S_FINAL
-end
-
-
---- Fires if any called skill failed.
-function AgentSkillExecJumpState:jumpcond_failure()
-   return self.skill_status == skillstati.S_FAILED
-end
-
---- Fires if the skills are finished.
--- @return true if the status is not S_RUNNING and not S_INACTIVE,
--- i.e. at least one skill failed or all succeeded.
-function AgentSkillExecJumpState:jumpcond_finished()
-   return self.skill_status ~= skillstati.S_RUNNING
-      and self.skill_status ~= skillstati.S_INACTIVE
-end
 
 
 --- Create new state.
@@ -86,10 +53,10 @@ end
 function AgentSkillExecJumpState:new(o)
    assert(o, "AgentSkillExecJumpState requires a table as argument")
    assert(o.name, "AgentSkillExecJumpState requires a name")
-   assert(o.final_state, "AgentSkillExecJumpState requires state to go to on success for state " .. o.name)
-   assert(o.failure_state, "AgentSkillExecJumpState requires state to go to on failure for state " .. o.name)
    assert(not getmetatable(o), "Meta table already set for object")
+
    setmetatable(o, self)
+   setmetatable(self, JumpState)
    self.__index = self
 
    o.transitions   = o.transitions or {}
@@ -101,11 +68,9 @@ function AgentSkillExecJumpState:new(o)
    o.skills = o.skills or {}
    o.loops  = o.loops or {}
    o.inits  = o.inits or {}
-   o.skill_queue = SkillQueue:new{name=o.name, skills=o.skills}
+   o.skill_queue = SkillQueue:new{name=o.name, skills=skills}
 
    o.skill_status = skillstati.S_RUNNING
-
-   o:setup_timeout()
 
    o:set_transition_labels()
 
@@ -121,7 +86,6 @@ end
 function AgentSkillExecJumpState:add_skill(skillname, params)
    self.skill_queue:add_skill(skillname, params)
 end
-
 
 
 --- Init state.
@@ -173,11 +137,12 @@ function AgentSkillExecJumpState:prepare()
    end
 
    local skills = (#self.skills == 1) and "Skill" or "Skills"
-   if self.final_state == self.failure_state then
-      self.transition = self:add_transition(self.final_state, self.jumpcond_finished, skills .. " finished")
-   else
-      self.final_transition   = self:add_transition(self.final_state, self.jumpcond_final, skills .. " succeeded")
-      self.failure_transition = self:add_transition(self.failure_state, self.jumpcond_failure, skills .. " failed")
+   if self.final_state and self.failure_state and self.final_state == self.failure_state then
+      self.transition = self:add_transition(self.final_state, self.finished, skills .. " finished")
+   elseif self.final_state then
+      self.final_transition   = self:add_transition(self.final_state, self.final, skills .. " succeeded")
+   elseif self.failure_state then
+      self.failure_transition = self:add_transition(self.failure_state, self.failed, skills .. " failed")
    end
 
    self:set_transition_labels()
@@ -188,3 +153,23 @@ function AgentSkillExecJumpState:reset()
    JumpState.reset(self)
    self.skill_status = skillstati.S_INACTIVE
 end
+
+--- Fires if skill(s) finished successfully.
+function AgentSkillExecJumpState:final()
+   return self.skill_status == skillstati.S_FINAL
+end
+
+
+--- Fires if any called skill failed.
+function AgentSkillExecJumpState:failed()
+   return self.skill_status == skillstati.S_FAILED
+end
+
+--- Fires if the skills are finished.
+-- @return true if the status is not S_RUNNING and not S_INACTIVE,
+-- i.e. at least one skill failed or all succeeded.
+function AgentSkillExecJumpState:finished()
+   return self.skill_status ~= skillstati.S_RUNNING
+      and self.skill_status ~= skillstati.S_INACTIVE
+end
+

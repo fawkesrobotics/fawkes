@@ -25,8 +25,6 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
-local skillstati = require("skiller.skillstati")
-
 
 --- @class SkillQueue
 -- The SkillQueue takes a number of skills. Upon execution a skill string is formed
@@ -76,11 +74,11 @@ function SkillQueue:status(skiller)
    assert(skiller, "SkillQueue:status: Interface not set")
 
    if self.skillstring == "" then
-      return skillstati.S_INACTIVE
+      return S_INACTIVE
    elseif self.skillstring == skiller:skill_string() then
       return skiller:status()
    else
-      return skillstati.S_INACTIVE
+      return S_INACTIVE
    end
 end
 
@@ -173,7 +171,7 @@ function SkillQueue:stop(skiller)
    assert(skiller, "SkillQueue:execute: Interface not set")
 
    local msg = skiller.StopExecMessage:new()
-   skiller:msgq_enqueue_copy(msg)
+   skiller:msgq_enqueue_copy(msg)  
 end
 
 --- Reset skill queue.
