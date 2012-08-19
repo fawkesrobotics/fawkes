@@ -158,7 +158,7 @@ LuaAgentPeriodicExecutionThread::init()
 
     __lua_ifi->push_interfaces();
 
-    __lua->set_start_script(LUADIR"/luaagent/start.lua");
+    __lua->set_start_script(LUADIR"/luaagent/fawkes/start.lua");
   } catch (Exception &e) {
     init_failure_cleanup();
     throw;

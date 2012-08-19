@@ -181,7 +181,7 @@ LuaAgentContinuousExecutionThread::init()
     __lua_ifi->read_to_buffer();
     __lua_ifi->push_interfaces();
 
-    __lua->set_start_script(LUADIR"/luaagent/start.lua");
+    __lua->set_start_script(LUADIR"/luaagent/fawkes/start.lua");
 
     __lua_thread = new LuaThread(__lua);
     thread_collector->add(__lua_thread);
