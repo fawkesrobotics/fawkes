@@ -49,11 +49,14 @@ end
 
 require("fawkes.logprint")
 fawkes.logprint.init(logger)
+require("fawkes.depinit")
 
 require("fawkes.mathext")
+local ifinitmod = require("fawkes.interface_initializer")
 
 skillenv = require("skiller.skillenv")
-require("skiller.skillhsm")
+
+fawkes.depinit.add_module_initializer(ifinitmod.init_interfaces)
 
 skillenv.init(SKILLSPACE)
 
