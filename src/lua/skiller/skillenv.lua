@@ -166,8 +166,7 @@ function init(skillspace)
       end
    end
 
-   local ok = pcall(require, "skills." .. SKILLSPACE)
-   if not ok then require(SKILLSPACE) end
+   require("skills." .. SKILLSPACE)
 end
 
 --- Generate a sandbox for skill execution.

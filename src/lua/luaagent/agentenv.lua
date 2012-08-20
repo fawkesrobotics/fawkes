@@ -93,8 +93,7 @@ end
 -- otherwise if the agent as a FSM this is reset.
 function init(agentname)
    local ok
-   ok, agent = pcall(require, "agents." .. agentname)
-   if not ok then agent = require(agentname) end
+   agent = require("agents." .. agentname)
 
    assert(agent, "Agent " .. agentname .. " could not be loaded")
 
