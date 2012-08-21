@@ -69,13 +69,13 @@ OpenRaveManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float an
       _angle = angle + M_PI;
       break;
     case 1:
-      _angle = angle;
+      _angle = angle + M_PI/2;
       break;
     case 2:
       _angle = angle + M_PI;
       break;
     case 3:
-      _angle = M_PI/2 - angle;
+      _angle = M_PI - angle;
       break;
     case 4:
       _angle = 1.5*M_PI - angle;
@@ -103,13 +103,13 @@ OpenRaveManipulatorKatana6M180::angle_device_to_OR(unsigned int number, float an
       _angle = angle - M_PI;
       break;
     case 1:
-      _angle = angle;
+      _angle = angle - M_PI/2;
       break;
     case 2:
       _angle = angle - M_PI;
       break;
     case 3:
-      _angle = M_PI/2 - angle;
+      _angle = M_PI - angle;
       break;
     case 4:
       _angle = 1.5*M_PI - angle;

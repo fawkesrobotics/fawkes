@@ -22,7 +22,6 @@
   <Body name="L2" type="dynamic">
     <offsetfrom>Base</offsetfrom>
     <Translation>0.0 0.0 0.2015</Translation>
-    <RotationAxis>0 1 0 90</RotationAxis>
     <Geom type="trimesh">
       <Data>L2.wrl 0.001</Data>
       <Render>L2.wrl 0.001</Render>
@@ -41,12 +40,11 @@
     <Translation>0.0 0.0 0.139</Translation>
     <RotationAxis>0 1 0 90</RotationAxis>
     <Geom type="box">
-      <extents>0.001 0.001 0.001</extents>
+      <extents>0.00001 0.00001 0.00001</extents>
     </Geom>
   </Body>
   <Body name="L4" type="dynamic">
     <offsetfrom>L3</offsetfrom>
-    <RotationAxis>0 1 0 -90</RotationAxis>
     <Translation>0.0 0.0 0.139</Translation>
     <Geom type="trimesh">
       <Data>L4.wrl 0.001</Data>
@@ -159,7 +157,7 @@
     <Body>L1</Body>
     <Body>L2</Body>
     <offsetfrom>L2</offsetfrom>
-    <limitsdeg>-18.7 124.2</limitsdeg>
+    <limitsdeg>-108.7 34.2</limitsdeg>
     <axis>0 -1 0</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
@@ -180,7 +178,7 @@
     <Body>dummylink</Body>
     <offsetfrom>dummylink</offsetfrom>
     <!-- <limitsdeg>-0.01 0.01</limitsdeg> -->
-    <limitsdeg>-1.15 1.15</limitsdeg>
+    <limitsdeg>-0.01 0.01</limitsdeg>
     <axis>0 0 -1</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
@@ -189,7 +187,7 @@
     <Body>dummylink</Body>
     <Body>L4</Body>
     <offsetfrom>L4</offsetfrom>
-    <limitsdeg>-206.45 26.45</limitsdeg>
+    <limitsdeg>-116.45 116.45</limitsdeg>
     <axis>0 -1 0</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
