@@ -35,6 +35,13 @@
       <Translation>0.1675 -0.18 0.02</Translation>
     </Geom>
 
+    <!-- cover plate on horizontal casts (on caesar_base); just the front delimiter for now -->
+    <Geom type="box">
+      <DiffuseColor>0 0 0</DiffuseColor>
+      <Extents>0.0075 0.2 0.002</Extents>
+      <Translation>0.3075 0 0.042</Translation>
+    </Geom>
+
     <!-- vertical casts, e.g. back rack -->
     <Geom type="box">
       <DiffuseColor>0.5 0.5 0.5</DiffuseColor>
