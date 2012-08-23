@@ -149,7 +149,24 @@ void AmclThread::init()
   alpha_slow_ = config->get_float(CFG_PREFIX"alpha_slow");
   alpha_fast_ = config->get_float(CFG_PREFIX"alpha_fast");
   angle_increment_ = deg2rad(config->get_float(CFG_PREFIX"angle_increment"));
-
+  try {
+    angle_min_idx_ = config->get_uint(CFG_PREFIX"angle_min_idx");
+    if (angle_min_idx_ > 359) {
+      throw Exception("Angle min index out of bounds");
+    }
+  } catch (Exception &e) {
+    angle_min_idx_ = 0;
+  }
+  try {
+    angle_max_idx_ = config->get_uint(CFG_PREFIX"angle_max_idx");
+    if (angle_max_idx_ > 359) {
+      throw Exception("Angle max index out of bounds");
+    }
+  } catch (Exception &e) {
+    angle_max_idx_ = 359;
+  }
+  angle_range_ = (unsigned int)abs(angle_max_idx_ - angle_min_idx_);
+  angle_min_ = deg2rad(angle_min_idx_);
 
   max_beams_ = config->get_uint(CFG_PREFIX"max_beams");
   min_particles_ = config->get_uint(CFG_PREFIX"min_particles");
@@ -420,9 +437,7 @@ AmclThread::loop()
 
     amcl::AMCLLaserData ldata;
     ldata.sensor = laser_;
-    ldata.range_count = laser_if_->maxlenof_distances();
-
-    double laser_angle_min = 0;
+    ldata.range_count = angle_range_ + 1;
 
     // To account for lasers that are mounted upside-down, we determine the
     // min, max, and increment angles of the laser in the base frame.
@@ -430,9 +445,9 @@ AmclThread::loop()
     // Construct min and max angles of laser, in the base_link frame.
     Time latest(0, 0);
     tf::Quaternion q;
-    q.setEulerZYX(laser_angle_min, 0.0, 0.0);
+    q.setEulerZYX(angle_min_, 0.0, 0.0);
     tf::Stamped<tf::Quaternion> min_q(q, latest, laser_frame_id_);
-    q.setEulerZYX(laser_angle_min + angle_increment_, 0.0, 0.0);
+    q.setEulerZYX(angle_min_ + angle_increment_, 0.0, 0.0);
     tf::Stamped<tf::Quaternion> inc_q(q, latest, laser_frame_id_);
     try
     {
@@ -465,17 +480,19 @@ AmclThread::loop()
       range_min = 0.0;
     // The AMCLLaserData destructor will free this memory
     ldata.ranges = new double[ldata.range_count][2];
-
-    for (int i = 0; i < ldata.range_count; i++) {
+    
+    const unsigned int maxlen_dist = laser_if_->maxlenof_distances();
+    for (int i = 0; i < ldata.range_count; ++i) {
+      unsigned int idx = (angle_min_idx_ + i) % maxlen_dist;
       // amcl doesn't (yet) have a concept of min range.  So we'll map short
       // readings to max range.
-      if (laser_distances[i] <= range_min)
+      if (laser_distances[idx] <= range_min)
         ldata.ranges[i][0] = ldata.range_max;
       else
-	ldata.ranges[i][0] = laser_distances[i];
+        ldata.ranges[i][0] = laser_distances[idx];
 
       // Compute bearing
-      ldata.ranges[i][1] = angle_min + (i * angle_increment);
+      ldata.ranges[i][1] = angle_min + (idx * angle_increment);
     }
 
     try {
@@ -872,7 +889,7 @@ AmclThread::set_laser_pose()
   laser_pose_v.v[1] = laser_pose.getOrigin().y();
 
   // laser mounting angle gets computed later -> set to 0 here!
-  laser_pose_v.v[2] = 0;
+  laser_pose_v.v[2] = tf::get_yaw(laser_pose.getRotation());
   laser_->SetLaserPose(laser_pose_v);
   //logger->log_debug(name(),
   //		      "Received laser's pose wrt robot: %.3f %.3f %.3f",

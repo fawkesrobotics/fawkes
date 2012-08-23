@@ -202,6 +202,10 @@ private:
   float init_pose_[3];
   float init_cov_[3];
   float angle_increment_;
+  float angle_min_;
+  unsigned int angle_min_idx_;
+  unsigned int angle_max_idx_;
+  unsigned int angle_range_;
 
   bool use_map_topic;
   bool first_map_only;
