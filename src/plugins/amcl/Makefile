@@ -40,7 +40,13 @@ LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
 	    fawkes_amcl_utils
 OBJS_amcl = amcl_plugin.o amcl_thread.o
 
-OBJS_all    = $(OBJS_amcl) $(OBJS_libfawkes_amcl_pf) \
+LIBS_map_lasergen = fawkescore fawkesutils fawkesaspects fawkesinterface \
+		    fawkesblackboard  \
+		    Laser360Interface Position3DInterface \
+		    fawkes_amcl_map fawkes_amcl_utils
+OBJS_map_lasergen = map_lasergen_plugin.o map_lasergen_thread.o
+
+OBJS_all    = $(OBJS_amcl) $(OBJS_map_lasergen) $(OBJS_libfawkes_amcl_pf) \
 	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors) \
 	      $(OBJS_libfawkes_amcl_utils)
 
@@ -52,6 +58,11 @@ ifeq ($(HAVE_TF),1)
   CFLAGS_amcl_plugin  = $(CFLAGS_amcl_thread)
   LDFLAGS_amcl       += $(LDFLAGS_TF)
   LIBS_amcl          += fawkestf
+
+  CFLAGS_map_lasergen_thread = $(CFLAGS) $(CFLAGS_TF)
+  CFLAGS_map_lasergen_plugin = $(CFLAGS) $(CFLAGS_TF)
+  LDFLAGS_map_lasergen      += $(LDFLAGS_TF)
+  LIBS_map_lasergen         += fawkestf
 
   ifeq ($(HAVE_ROS),1)
     ifeq ($(call ros-have-pkg,geometry_msgs),1)
@@ -74,7 +85,8 @@ ifeq ($(HAVE_TF),1)
     WARN_TARGET += warning_ros
   endif
 
-  PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
+  PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT) \
+		$(PLUGINDIR)/map-lasergen.$(SOEXT)
   LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
 	        $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
 	        $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) \
