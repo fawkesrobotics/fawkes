@@ -90,7 +90,6 @@ public:
  protected: virtual void run() { Thread::run();}
 
  private:
-  void read_map();
   bool set_laser_pose();
   bool get_odom_pose(fawkes::tf::Stamped<fawkes::tf::Pose>& odom_pose,
                      double& x, double& y, double& yaw,

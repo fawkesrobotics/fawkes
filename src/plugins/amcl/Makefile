@@ -29,14 +29,20 @@ OBJS_libfawkes_amcl_map = map/map.o map/map_cspace.o map/map_range.o \
 LIBS_libfawkes_amcl_sensors = m fawkescore fawkes_amcl_pf fawkes_amcl_map
 OBJS_libfawkes_amcl_sensors = sensors/amcl_sensor.o sensors/amcl_odom.o \
 			      sensors/amcl_laser.o
+
+LIBS_libfawkes_amcl_utils = fawkescore fawkesconfig fvutils fawkes_amcl_map
+OBJS_libfawkes_amcl_utils = amcl_utils.o
+
 LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	    fawkesblackboard fvutils \
+	    fawkesblackboard  \
 	    Laser360Interface Position3DInterface \
-	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors
+	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors \
+	    fawkes_amcl_utils
 OBJS_amcl = amcl_plugin.o amcl_thread.o
 
 OBJS_all    = $(OBJS_amcl) $(OBJS_libfawkes_amcl_pf) \
-	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors)
+	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors) \
+	      $(OBJS_libfawkes_amcl_utils)
 
 # throw exceptions instead of aborting
 CFLAGS += -DUSE_ASSERT_EXCEPTION -DUSE_MAP_PUB
@@ -71,7 +77,8 @@ ifeq ($(HAVE_TF),1)
   PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
   LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
 	        $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
-	        $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT)
+	        $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) \
+		$(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
 else
   WARN_TARGETS = warning_tf
 endif
@@ -79,7 +86,7 @@ endif
 
 # Ordering constraints
 $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
-$(PLUGINS_all): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
+$(PLUGINS_all) $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

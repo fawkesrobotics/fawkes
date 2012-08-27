@@ -28,9 +28,9 @@
  */
 
 #include "amcl_thread.h"
+#include "amcl_utils.h"
 
 #include <utils/math/angle.h>
-#include <fvutils/readers/png.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <cstdlib>
@@ -43,11 +43,6 @@
 #    include <nav_msgs/OccupancyGrid.h>
 #  endif
 #endif
-
-// compute linear index for given map coords
-#define MAP_IDX(sx, i, j) ((sx) * (j) + (i))
-
-#define CFG_PREFIX "/plugins/amcl/"
 
 using namespace fawkes;
 
@@ -94,18 +89,27 @@ AmclThread::~AmclThread()
 
 void AmclThread::init()
 {
-  cfg_map_file_ =
-    std::string(CONFDIR) + "/" + config->get_string(CFG_PREFIX"map_file");
-  cfg_resolution_ = config->get_float(CFG_PREFIX"resolution");
-  cfg_origin_x_ = config->get_float(CFG_PREFIX"origin_x");
-  cfg_origin_y_ = config->get_float(CFG_PREFIX"origin_y");
-  cfg_origin_theta_ = config->get_float(CFG_PREFIX"origin_theta");
-  cfg_occupied_thresh_ = config->get_float(CFG_PREFIX"occupied_threshold");
-  cfg_free_thresh_ = config->get_float(CFG_PREFIX"free_threshold");
+  fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
+				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
+				cfg_free_thresh_);
+
   cfg_laser_ifname_ = config->get_string(CFG_PREFIX"laser_interface_id");
   cfg_pose_ifname_ = config->get_string(CFG_PREFIX"pose_interface_id");
 
-  read_map();
+  map_ = fawkes::amcl::read_map(cfg_map_file_.c_str(),
+				cfg_origin_x_, cfg_origin_y_, cfg_resolution_,
+				cfg_occupied_thresh_, cfg_free_thresh_, free_space_indices);
+  map_width_  = map_->size_x;
+  map_height_ = map_->size_y;
+
+  FILE *f = fopen("/tmp/amcl_thread_map.txt", "w");
+  for (unsigned int h = 0; h < map_height_; ++h) {
+    for (unsigned int w = 0; w < map_width_; ++w) {
+      fprintf(f, "%i ", map_->cells[h * map_width_ + w].occ_state);
+    }
+    fprintf(f, "\n");
+  }
+  fclose(f);
 
   sent_first_transform_ = false;
   latest_tf_valid_ = false;
@@ -182,27 +186,27 @@ void AmclThread::init()
   tmp_model_type = config->get_string(CFG_PREFIX"laser_model_type");
 
   if (tmp_model_type == "beam")
-    laser_model_type_ = amcl::LASER_MODEL_BEAM;
+    laser_model_type_ = ::amcl::LASER_MODEL_BEAM;
   else if (tmp_model_type == "likelihood_field")
-    laser_model_type_ = amcl::LASER_MODEL_LIKELIHOOD_FIELD;
+    laser_model_type_ = ::amcl::LASER_MODEL_LIKELIHOOD_FIELD;
   else {
     logger->log_warn(name(),
 		     "Unknown laser model type \"%s\"; "
                      "defaulting to likelihood_field model",
 		     tmp_model_type.c_str());
-    laser_model_type_ = amcl::LASER_MODEL_LIKELIHOOD_FIELD;
+    laser_model_type_ = ::amcl::LASER_MODEL_LIKELIHOOD_FIELD;
   }
 
   tmp_model_type = config->get_string(CFG_PREFIX"odom_model_type");
   if (tmp_model_type == "diff")
-    odom_model_type_ = amcl::ODOM_MODEL_DIFF;
+    odom_model_type_ = ::amcl::ODOM_MODEL_DIFF;
   else if (tmp_model_type == "omni")
-    odom_model_type_ = amcl::ODOM_MODEL_OMNI;
+    odom_model_type_ = ::amcl::ODOM_MODEL_OMNI;
   else {
     logger->log_warn(name(),
 		     "Unknown odom model type \"%s\"; defaulting to diff model",
 		     tmp_model_type.c_str());
-    odom_model_type_ = amcl::ODOM_MODEL_DIFF;
+    odom_model_type_ = ::amcl::ODOM_MODEL_DIFF;
   }
 
   try {
@@ -274,17 +278,17 @@ void AmclThread::init()
 
   // Instantiate the sensor objects
   // Odometry
-  odom_ = new amcl::AMCLOdom();
+  odom_ = new ::amcl::AMCLOdom();
 
-  if (odom_model_type_ == amcl::ODOM_MODEL_OMNI)
+  if (odom_model_type_ == ::amcl::ODOM_MODEL_OMNI)
     odom_->SetModelOmni(alpha1_, alpha2_, alpha3_, alpha4_, alpha5_);
   else
     odom_->SetModelDiff(alpha1_, alpha2_, alpha3_, alpha4_);
 
   // Laser
-  laser_ = new amcl::AMCLLaser(max_beams_, map_);
+  laser_ = new ::amcl::AMCLLaser(max_beams_, map_);
 
-  if (laser_model_type_ == amcl::LASER_MODEL_BEAM) {
+  if (laser_model_type_ == ::amcl::LASER_MODEL_BEAM) {
     laser_->SetModelBeam(z_hit_, z_short_, z_max_, z_rand_, sigma_hit_,
 			 lambda_short_, 0.0);
   } else {
@@ -415,7 +419,7 @@ AmclThread::loop()
     //printf("pose\n");
     //pf_vector_fprintf(pose, stdout, "%.3f");
 
-    amcl::AMCLOdomData odata;
+    ::amcl::AMCLOdomData odata;
     odata.pose = pose;
     // HACK
     // Modify the delta in the action data so the filter gets
@@ -424,7 +428,7 @@ AmclThread::loop()
 
     // Use the action data to update the filter
     //logger->log_debug(name(), "Updating Odometry");
-    odom_->UpdateAction(pf_, (amcl::AMCLSensorData*) &odata);
+    odom_->UpdateAction(pf_, (::amcl::AMCLSensorData*) &odata);
 
     // Pose at last filter update
     //this->pf_odom_pose = pose;
@@ -435,7 +439,7 @@ AmclThread::loop()
   if (laser_update_) {
     //logger->log_warn(name(), "laser update");
 
-    amcl::AMCLLaserData ldata;
+    ::amcl::AMCLLaserData ldata;
     ldata.sensor = laser_;
     ldata.range_count = angle_range_ + 1;
 
@@ -496,7 +500,7 @@ AmclThread::loop()
     }
 
     try {
-      laser_->UpdateSensor(pf_, (amcl::AMCLSensorData*) &ldata);
+      laser_->UpdateSensor(pf_, (::amcl::AMCLSensorData*) &ldata);
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to update laser sensor data, "
                        "exception follows");
@@ -748,49 +752,6 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose>& odom_pose, double& x,
   return true;
 }
 
-void
-AmclThread::read_map()
-{
-  firevision::PNGReader png_reader(cfg_map_file_.c_str());
-  map_width_ = png_reader.pixel_width();
-  map_height_ = png_reader.pixel_height();
-  logger->log_info(name(), "Reading map of size %ux%u", map_width_,
-		   map_height_);
-  unsigned char *img_buffer = malloc_buffer(firevision::YUV422_PLANAR,
-					    map_width_, map_height_);
-  png_reader.set_buffer(img_buffer);
-  png_reader.read();
-
-  map_ = map_alloc();
-  map_->size_x = map_width_;
-  map_->size_y = map_height_;
-  map_->scale = cfg_resolution_;
-  map_->origin_x = cfg_origin_x_ + (map_->size_x / 2) * map_->scale;
-  map_->origin_y = cfg_origin_y_ + (map_->size_y / 2) * map_->scale;
-  map_->cells =
-    (map_cell_t*) malloc(sizeof(map_cell_t) * map_->size_x * map_->size_y);
-
-  for (unsigned int h = 0; h < map_height_; ++h) {
-    for (unsigned int w = 0; w < map_width_; ++w) {
-      unsigned int i = h * map_width_ + w;
-      float y = (255 - img_buffer[i]) / 255.;
-
-      // Note that we invert the graphics-ordering of the pixels to
-      // produce a map with cell (0,0) in the lower-left corner.
-
-      if (y > cfg_occupied_thresh_) {
-	map_->cells[MAP_IDX(map_width_, w, map_height_ - h - 1)].occ_state = +1;
-      } else if (y <= cfg_free_thresh_) {
-	map_->cells[MAP_IDX(map_width_, w, map_height_ - h - 1)].occ_state =  0;
-	free_space_indices.push_back(std::make_pair(w,map_height_ - h - 1));
-      } else {
-	map_->cells[MAP_IDX(map_width_, w, map_height_ - h - 1)].occ_state = -1;
-      }
-    }
-
-  }
-  free(img_buffer);
-}
 
 #ifdef HAVE_ROS
 #  ifdef USE_MAP_PUB
@@ -820,7 +781,7 @@ AmclThread::publish_map()
   for (unsigned int i = 0; i < msg.info.width * msg.info.height; ++i) {
     if (map_->cells[i].occ_state == +1) {
       msg.data[i] = +100;
-    } else if (map_->cells[i].occ_state == 0) {
+    } else if (map_->cells[i].occ_state == -1) {
       msg.data[i] =    0;
     } else {
       msg.data[i] =   -1;
@@ -935,7 +896,7 @@ AmclThread::uniform_pose_generator(void* arg)
     int i, j;
     i = MAP_GXWX(map, p.v[0]);
     j = MAP_GYWY(map, p.v[1]);
-    if (MAP_VALID(map,i,j) && (map->cells[MAP_INDEX(map,i,j)].occ_state == 0))
+    if (MAP_VALID(map,i,j) && (map->cells[MAP_INDEX(map,i,j)].occ_state == -1))
       break;
   }
 #endif
