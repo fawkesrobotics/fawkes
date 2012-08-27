@@ -175,12 +175,6 @@ private:
   double last_covariance_[36];
 
 
-
-  float save_pose_rate;
-  float laser_min_range;
-  float laser_max_range;
-  float pf_err;
-  float pf_z;
   float alpha1_;
   float alpha2_;
   float alpha3_;
@@ -205,9 +199,6 @@ private:
   unsigned int angle_min_idx_;
   unsigned int angle_max_idx_;
   unsigned int angle_range_;
-
-  bool use_map_topic;
-  bool first_map_only;
 
   unsigned int resample_interval_;
 

@@ -129,11 +129,11 @@ void AmclThread::init()
   init_cov_[1] = 0.5 * 0.5;
   init_cov_[2] = (M_PI / 12.0) * (M_PI / 12.0);
 
-  save_pose_rate = config->get_float(CFG_PREFIX"save_pose_rate");
-  laser_min_range = config->get_float(CFG_PREFIX"laser_min_range");
-  laser_max_range = config->get_float(CFG_PREFIX"laser_max_range");
-  pf_err = config->get_float(CFG_PREFIX"kld_err");
-  pf_z = config->get_float(CFG_PREFIX"kld_z");
+  save_pose_period = config->get_float(CFG_PREFIX"save_pose_rate");
+  laser_min_range_ = config->get_float(CFG_PREFIX"laser_min_range");
+  laser_max_range_ = config->get_float(CFG_PREFIX"laser_max_range");
+  pf_err_ = config->get_float(CFG_PREFIX"kld_err");
+  pf_z_ = config->get_float(CFG_PREFIX"kld_z");
   alpha1_ = config->get_float(CFG_PREFIX"alpha1");
   alpha2_ = config->get_float(CFG_PREFIX"alpha2");
   alpha3_ = config->get_float(CFG_PREFIX"alpha3");
@@ -264,7 +264,6 @@ void AmclThread::init()
   //btScalar unused_pitch, unused_roll, yaw;
   //btMatrix3x3(q).getRPY(unused_roll, unused_pitch, yaw);
 
-  // TODO: meaningful initial pose
   pf_init_pose_mean.v[0] = init_pose_[0];
   pf_init_pose_mean.v[1] = init_pose_[1];
   pf_init_pose_mean.v[2] = init_pose_[2];
