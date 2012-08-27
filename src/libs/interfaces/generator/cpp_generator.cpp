@@ -945,6 +945,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      "    throw Exception(\"Index value %%u out of bounds (0..%s)\", index);\n"
 	      "  }\n"
 	      "  data->%s[index] = new_%s;\n"
+              "%s"
 	      "}\n",
 	      (*i).getName().c_str(),
 	      (*i).getComment().c_str(),	    
@@ -952,7 +953,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      inclusion_prefix.c_str(), classname.c_str(), (*i).getName().c_str(),
 	      (*i).getPlainAccessType().c_str(), i->getName().c_str(),
 	      i->getLength().c_str(), i->getLength().c_str(),
-	      i->getName().c_str(), i->getName().c_str());
+	      i->getName().c_str(), i->getName().c_str(),
+              write_data_changed ? "  data_changed = true;\n" : "");
     }
   }
 }

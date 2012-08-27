@@ -45,8 +45,7 @@ namespace firevision {
  * @param offset_x x offset between lines
  * @param offset_y y offset between lines
  * @param roi the grid will only be calculated within the roi (if NULL the roi
- *            will be from 0,0 to width,height). The object will be deleted by
- *            ScanlineGrid!
+ *            will be from 0,0 to width,height).
  * @param horizontal_grid if true x will be increased before y
  */
 ScanlineGrid::ScanlineGrid(unsigned int width, unsigned int height,
@@ -64,10 +63,6 @@ ScanlineGrid::ScanlineGrid(unsigned int width, unsigned int height,
  */
 ScanlineGrid::~ScanlineGrid()
 {
-  if (roi) //Has to be set, but still...
-  {
-    delete roi;
-  }
 }
 
 point_t
@@ -188,8 +183,6 @@ ScanlineGrid::set_pan_tilt(float pan, float tilt)
 void
 ScanlineGrid::set_roi(ROI *roi)
 {
-  delete this->roi;
-
   if (!roi) this->roi = new ROI(0, 0, this->width, this->height, this->width, this->height);
   else
   {

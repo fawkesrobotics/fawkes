@@ -864,6 +864,7 @@ NaoSensorInterface::set_ultrasonic_distance_left(unsigned int index, const float
     throw Exception("Index value %u out of bounds (0..4)", index);
   }
   data->ultrasonic_distance_left[index] = new_ultrasonic_distance_left;
+  data_changed = true;
 }
 /** Get ultrasonic_distance_right value.
  * 
@@ -935,6 +936,7 @@ NaoSensorInterface::set_ultrasonic_distance_right(unsigned int index, const floa
     throw Exception("Index value %u out of bounds (0..4)", index);
   }
   data->ultrasonic_distance_right[index] = new_ultrasonic_distance_right;
+  data_changed = true;
 }
 /** Get ultrasonic_direction value.
  * 

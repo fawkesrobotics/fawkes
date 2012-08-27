@@ -196,6 +196,7 @@ KatanaInterface::set_sensor_value(unsigned int index, const uint8_t new_sensor_v
     throw Exception("Index value %u out of bounds (0..16)", index);
   }
   data->sensor_value[index] = new_sensor_value;
+  data_changed = true;
 }
 /** Get x value.
  * DEPRECATED! X-Coordinate for tool position
@@ -447,6 +448,7 @@ KatanaInterface::set_encoders(unsigned int index, const int32_t new_encoders)
     throw Exception("Index value %u out of bounds (0..6)", index);
   }
   data->encoders[index] = new_encoders;
+  data_changed = true;
 }
 /** Get angles value.
  * Angle values of motors
@@ -506,6 +508,7 @@ KatanaInterface::set_angles(unsigned int index, const float new_angles)
     throw Exception("Index value %u out of bounds (0..6)", index);
   }
   data->angles[index] = new_angles;
+  data_changed = true;
 }
 /** Get msgid value.
  * The ID of the message that is currently being

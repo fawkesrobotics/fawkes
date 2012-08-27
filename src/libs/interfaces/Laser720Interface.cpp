@@ -163,6 +163,7 @@ Laser720Interface::set_distances(unsigned int index, const float new_distances)
     throw Exception("Index value %u out of bounds (0..720)", index);
   }
   data->distances[index] = new_distances;
+  data_changed = true;
 }
 /** Get clockwise_angle value.
  * 

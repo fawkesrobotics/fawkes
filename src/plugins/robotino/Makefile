@@ -52,6 +52,14 @@ ifeq ($(HAVE_OPENROBOTINO),1)
 
   CFLAGS_sensor_thread = $(CFLAGS) -Wno-reorder -Wno-unused-function
 
+  ifeq ($(HAVE_TF),1)
+    CFLAGS_robotino_plugin  = $(CFLAGS) $(CFLAGS_TF)
+    CFLAGS_act_thread       = $(CFLAGS_robotino_plugin)
+    CFLAGS_sensor_thread   += $(CFLAGS_TF)
+    LDFLAGS_robotino += $(LDFLAGS_TF)
+    LIBS_robotino    += fawkestf
+  endif
+
   PLUGINS_all = $(PLUGINDIR)/robotino.so $(PLUGINDIR)/robotino-joystick.so
 
   ifeq ($(HAVE_PCL),1)

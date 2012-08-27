@@ -65,6 +65,9 @@ class RobotinoJoystickThread
   unsigned int cfg_axis_forward_;
   unsigned int cfg_axis_sideward_;
   unsigned int cfg_axis_rotation_;
+  float        cfg_max_vx_;
+  float        cfg_max_vy_;
+  float        cfg_max_omega_;
 };
 
 

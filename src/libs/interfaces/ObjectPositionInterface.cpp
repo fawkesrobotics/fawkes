@@ -604,6 +604,7 @@ ObjectPositionInterface::set_dbs_covariance(unsigned int index, const float new_
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->dbs_covariance[index] = new_dbs_covariance;
+  data_changed = true;
 }
 /** Get world_x value.
  * 
@@ -796,6 +797,7 @@ ObjectPositionInterface::set_world_xyz_covariance(unsigned int index, const floa
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->world_xyz_covariance[index] = new_world_xyz_covariance;
+  data_changed = true;
 }
 /** Get relative_x value.
  * 
@@ -976,6 +978,7 @@ ObjectPositionInterface::set_relative_xyz_covariance(unsigned int index, const f
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->relative_xyz_covariance[index] = new_relative_xyz_covariance;
+  data_changed = true;
 }
 /** Get extent_x value.
  * 
@@ -1261,6 +1264,7 @@ ObjectPositionInterface::set_world_xyz_velocity_covariance(unsigned int index, c
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->world_xyz_velocity_covariance[index] = new_world_xyz_velocity_covariance;
+  data_changed = true;
 }
 /** Get relative_x_velocity value.
  * 
@@ -1441,6 +1445,7 @@ ObjectPositionInterface::set_relative_xyz_velocity_covariance(unsigned int index
     throw Exception("Index value %u out of bounds (0..9)", index);
   }
   data->relative_xyz_velocity_covariance[index] = new_relative_xyz_velocity_covariance;
+  data_changed = true;
 }
 /* =========== message create =========== */
 Message *

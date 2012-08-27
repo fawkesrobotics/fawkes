@@ -45,6 +45,9 @@ using namespace fawkes;
  */
 RobotinoActThread::RobotinoActThread(RobotinoSensorThread *sensor_thread)
   : Thread("RobotinoActThread", Thread::OPMODE_WAITFORWAKEUP),
+#ifdef HAVE_TF
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Robotino Odometry"),
+#endif
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   sensor_thread_ = sensor_thread;
@@ -59,10 +62,11 @@ RobotinoActThread::init()
 
   last_seqnum_ = 0;
 
-  // * 1000: OpenRobotino takes mm/sec
-  cfg_max_vx_    = config->get_float("/hardware/robotino/max_vx") * 1000.;
-  cfg_max_vy_    = config->get_float("/hardware/robotino/max_vy") * 1000.;
-  cfg_max_omega_ = config->get_float("/hardware/robotino/max_omega");
+  // reset odometry once on startup
+  rec::iocontrol::remotestate::SetState set_state;
+  set_state.setOdometry = true;
+  set_state.odometryX = set_state.odometryY = set_state.odometryPhi = 0;
+  com_->setSetState(set_state);
 
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
@@ -97,9 +101,8 @@ RobotinoActThread::loop()
       {
         float m1, m2, m3;
         omni_drive_->project(&m1, &m2, &m3,
-                             msg->vx() * cfg_max_vx_,
-			     msg->vy() * cfg_max_vy_,
-			     msg->omega() * cfg_max_omega_);
+                             msg->vx() * 1000., msg->vy() * 1000.,
+			     rad2deg(msg->omega()));
 
         set_state.speedSetPoint[0] = m1;
         set_state.speedSetPoint[1] = m2;
@@ -108,22 +111,46 @@ RobotinoActThread::loop()
       }
       else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
       {
-        set_state.resetPosition[0] = set_state.resetPosition[1] =
-          set_state.resetPosition[2] = true;
+        set_state.setOdometry = true;
+        set_state.odometryX = set_state.odometryY = set_state.odometryPhi = 0;
         send_set_state = true;
       }
 
       motor_if_->msgq_pop();
     }
 
-    if (send_set_state)  com_->setSetState( set_state );        
+    if (send_set_state)  com_->setSetState(set_state);
 
     rec::iocontrol::remotestate::SensorState sensor_state = com_->sensorState();
     if (sensor_state.sequenceNumber != last_seqnum_) {
+      float vx, vy, omega;
+      omni_drive_->unproject(&vx, &vy, &omega,
+                             sensor_state.actualVelocity[0],
+                             sensor_state.actualVelocity[1],
+                             sensor_state.actualVelocity[2]);
+
+      // div by 1000 to convert from mm to m
+      motor_if_->set_vx(vx / 1000.);
+      motor_if_->set_vy(vy / 1000.);
+      motor_if_->set_omega(deg2rad(omega));
+
       motor_if_->set_odometry_position_x(sensor_state.odometryX / 1000.f);
       motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
       motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
       motor_if_->write();
+
+#ifdef HAVE_TF
+      fawkes::Time now(clock);
+
+      tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),
+                                     deg2rad(sensor_state.odometryPhi)),
+                      tf::Vector3(sensor_state.odometryX / 1000.f,
+                                  sensor_state.odometryY / 1000.f,
+                                  0));
+
+      tf_publisher->send_transform(t, now, "/robotino_odometry", "/base_link");
+#endif
+
       last_seqnum_ = sensor_state.sequenceNumber;
     }
 

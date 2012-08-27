@@ -1244,8 +1244,9 @@ V4L2Camera::dispose_buffer()
       //TODO: Test if the next buffer is also the latest buffer (VIDIOC_QUERYBUF)
       if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer))
       {
+        int errno_save = errno;
         close();
-        throw Exception("V4L2Cam: Enqueuing buffer failed");
+        throw Exception(errno_save, "V4L2Cam: Enqueuing buffer failed");
       }
       break;
     }

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  act_thread.cpp - Robotino act thread
+ *  joystick_thread.cpp - Robotino joystick thread
  *
  *  Created: Sun Nov 13 16:07:40 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
@@ -56,6 +56,10 @@ RobotinoJoystickThread::init()
   cfg_axis_sideward_  = config->get_uint(CFG_AXIS_SIDEWARD);
   cfg_axis_rotation_  = config->get_uint(CFG_AXIS_ROTATION);
 
+  cfg_max_vx_    = config->get_float(CFG_PREFIX"max_vx");
+  cfg_max_vy_    = config->get_float(CFG_PREFIX"max_vy");
+  cfg_max_omega_ = config->get_float(CFG_PREFIX"max_omega");
+
   motor_if_ = blackboard->open_for_reading<MotorInterface>("Robotino");
   joystick_if_ =
     blackboard->open_for_reading<JoystickInterface>("Joystick");
@@ -105,9 +109,9 @@ RobotinoJoystickThread::loop()
                fabsf(joystick_if_->axis(cfg_axis_rotation_)) < 0.2) {
       stop();
     } else {
-      float vx  = joystick_if_->axis(cfg_axis_forward_);
-      float vy = joystick_if_->axis(cfg_axis_sideward_);
-      float omega = joystick_if_->axis(cfg_axis_rotation_);
+      float vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_max_vx_;
+      float vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_max_vy_;
+      float omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_max_omega_;
 
       send_transrot(vx, vy, omega);
     }
