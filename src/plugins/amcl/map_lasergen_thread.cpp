@@ -49,7 +49,12 @@ void MapLaserGenThread::init()
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
 				cfg_free_thresh_);
+
   cfg_laser_ifname_ = config->get_string(CFG_PREFIX"laser_interface_id");
+
+  odom_frame_id_  = config->get_string(CFG_PREFIX"odom_frame_id");
+  base_frame_id_  = config->get_string(CFG_PREFIX"base_frame_id");
+  laser_frame_id_ = config->get_string(CFG_PREFIX"laser_frame_id");
 
   std::vector<std::pair<int, int> > free_space_indices;
   map_ = fawkes::amcl::read_map(cfg_map_file_.c_str(),
@@ -66,9 +71,8 @@ void MapLaserGenThread::init()
   laser_if_ = blackboard->open_for_writing<Laser360Interface>(cfg_laser_ifname_.c_str());
   pos3d_if_ = blackboard->open_for_writing<Position3DInterface>("Map LaserGen Groundtruth");
 
-  pos_x = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
-  pos_y = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
-  std::string frame = config->get_string(CFG_PREFIX"map-lasergen/frame");
+  pos_x_ = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
+  pos_y_ = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
 
   cfg_add_noise_ = false;
   try {
@@ -85,14 +89,13 @@ void MapLaserGenThread::init()
 #endif
   }
 
-  laser_if_->set_frame(frame.c_str());
+  laser_if_->set_frame(laser_frame_id_.c_str());
 }
 
 
 void
 MapLaserGenThread::loop()
 {
-  /*
   if (!laser_pose_set_) {
     if (set_laser_pose()) {
       laser_pose_set_ = true;
@@ -101,11 +104,10 @@ MapLaserGenThread::loop()
       return;
     }
   }
-  */
 
   float dists[360];
   for (unsigned int i = 0; i < 360; ++i) {
-    dists[i] = map_calc_range(map_, pos_x, pos_y, deg2rad(i), 100.);
+    dists[i] = map_calc_range(map_, laser_pos_x_, laser_pos_y_, deg2rad(i), 100.);
   }
 #ifdef HAVE_RANDOM
   if (cfg_add_noise_) {
@@ -117,8 +119,8 @@ MapLaserGenThread::loop()
   laser_if_->set_distances(dists);
   laser_if_->write();
 
-  pos3d_if_->set_translation(0, pos_x);
-  pos3d_if_->set_translation(1, pos_y);
+  pos3d_if_->set_translation(0, pos_x_);
+  pos3d_if_->set_translation(1, pos_y_);
   pos3d_if_->write();
 
   tf::Transform
@@ -129,7 +131,7 @@ MapLaserGenThread::loop()
 
   tf::StampedTransform tmp_tf_stamped(tmp_tf,
 				      transform_expiration,
-				      "/robotino_odometry", "/base_link");
+				      odom_frame_id_, base_frame_id_);
 
   tf_publisher->send_transform(tmp_tf_stamped);
 }
@@ -143,4 +145,31 @@ void MapLaserGenThread::finalize()
 
   blackboard->close(laser_if_);
   blackboard->close(pos3d_if_);
+}
+
+
+bool
+MapLaserGenThread::set_laser_pose()
+{
+  fawkes::Time now(clock);
+  tf::Stamped<tf::Pose>
+    ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
+          &now, laser_frame_id_);
+  tf::Stamped<tf::Pose> laser_pose;
+  try {
+    tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
+  } catch (fawkes::Exception& e) {
+    return false;
+  }
+
+  laser_pos_x_ = pos_x_ + laser_pose.getOrigin().x();
+  laser_pos_y_ = pos_y_ + laser_pose.getOrigin().y();
+
+  //laser_pose_v.v[2] = tf::get_yaw(laser_pose.getRotation());
+
+  logger->log_debug(name(), "Pos: (%f,%f)  LaserTF: (%f,%f)  LaserPos:(%f,%f)",
+		    pos_x_, pos_y_, laser_pose.getOrigin().x(), laser_pose.getOrigin().y(),
+		    laser_pos_x_,laser_pos_y_);
+
+  return true;
 }

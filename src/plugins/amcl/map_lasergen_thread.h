@@ -59,6 +59,9 @@ public:
  protected: virtual void run() { Thread::run();}
 
  private:
+  bool set_laser_pose();
+
+ private:
   std::string  cfg_map_file_;
   float        cfg_resolution_;
   float        cfg_origin_x_;
@@ -68,6 +71,9 @@ public:
   float        cfg_free_thresh_;
 
   std::string  cfg_laser_ifname_;
+  std::string  laser_frame_id_;
+  std::string  odom_frame_id_;
+  std::string  base_frame_id_;
 
   unsigned int map_width_;
   unsigned int map_height_;
@@ -75,8 +81,10 @@ public:
 
   fawkes::tf::Transform latest_tf_;
 
-  float pos_x;
-  float pos_y;
+  float pos_x_;
+  float pos_y_;
+  float laser_pos_x_;
+  float laser_pos_y_;
   map_t* map_;
 
   bool cfg_add_noise_;
@@ -88,9 +96,6 @@ public:
 
   fawkes::Laser360Interface* laser_if_;
   fawkes::Position3DInterface * pos3d_if_;
-
-  std::string base_frame_id_;
-  std::string laser_frame_id_;
 };
 
 #endif
