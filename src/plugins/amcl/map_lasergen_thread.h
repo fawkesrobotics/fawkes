@@ -84,8 +84,10 @@ public:
 
   float pos_x_;
   float pos_y_;
+  float pos_theta_;
   float laser_pos_x_;
   float laser_pos_y_;
+  float laser_pos_theta_;
   map_t* map_;
 
   bool cfg_add_noise_;

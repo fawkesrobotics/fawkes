@@ -64,15 +64,16 @@ void MapLaserGenThread::init()
   map_width_  = map_->size_x;
   map_height_ = map_->size_y;
 
-  logger->log_info(name(), "Size: %ux%u (%zu of %u cells free, this are %f%%)",
+  logger->log_info(name(), "Size: %ux%u (%zu of %u cells free, this are %.1f%%)",
 		   map_width_, map_height_, free_space_indices.size(),
 		   (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
   laser_if_ = blackboard->open_for_writing<Laser360Interface>(cfg_laser_ifname_.c_str());
   pos3d_if_ = blackboard->open_for_writing<Position3DInterface>("Map LaserGen Groundtruth");
 
-  pos_x_ = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
-  pos_y_ = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
+  pos_x_     = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
+  pos_y_     = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
+  pos_theta_ = config->get_float(CFG_PREFIX"map-lasergen/pos_theta");
 
   cfg_add_noise_ = false;
   try {
@@ -104,6 +105,17 @@ MapLaserGenThread::loop()
   if (!laser_pose_set_) {
     if (set_laser_pose()) {
       laser_pose_set_ = true;
+
+
+      tf::Quaternion q(tf::create_quaternion_from_yaw(pos_theta_));
+      pos3d_if_->set_translation(0, pos_x_);
+      pos3d_if_->set_translation(1, pos_y_);
+      pos3d_if_->set_rotation(0, q.x());
+      pos3d_if_->set_rotation(1, q.y());
+      pos3d_if_->set_rotation(2, q.z());
+      pos3d_if_->set_rotation(3, q.w());
+      pos3d_if_->write();
+
     } else {
       logger->log_warn(name(), "Could not determine laser pose, skipping loop");
       return;
@@ -112,7 +124,8 @@ MapLaserGenThread::loop()
 
   float dists[360];
   for (unsigned int i = 0; i < 360; ++i) {
-    dists[i] = map_calc_range(map_, laser_pos_x_, laser_pos_y_, deg2rad(i), 100.);
+    dists[i] = map_calc_range(map_, laser_pos_x_, laser_pos_y_,
+			      normalize_rad(deg2rad(i) + laser_pos_theta_), 100.);
   }
 #ifdef HAVE_RANDOM
   if (cfg_add_noise_) {
@@ -124,15 +137,6 @@ MapLaserGenThread::loop()
   laser_if_->set_distances(dists);
   laser_if_->write();
 
-  pos3d_if_->set_translation(0, pos_x_);
-  pos3d_if_->set_translation(1, pos_y_);
-  pos3d_if_->write();
-
-  tf::Transform
-    tmp_tf(tf::create_quaternion_from_yaw(0), tf::Vector3(0,0,0));
-
-  Time transform_expiration =
-    (Time(clock) + 1.0);
 
   if (cfg_send_zero_odom_) {
     tf::Transform
@@ -175,12 +179,13 @@ MapLaserGenThread::set_laser_pose()
 
   laser_pos_x_ = pos_x_ + laser_pose.getOrigin().x();
   laser_pos_y_ = pos_y_ + laser_pose.getOrigin().y();
+  laser_pos_theta_ = pos_theta_ + tf::get_yaw(laser_pose.getRotation());
 
-  //laser_pose_v.v[2] = tf::get_yaw(laser_pose.getRotation());
-
-  logger->log_debug(name(), "Pos: (%f,%f)  LaserTF: (%f,%f)  LaserPos:(%f,%f)",
-		    pos_x_, pos_y_, laser_pose.getOrigin().x(), laser_pose.getOrigin().y(),
-		    laser_pos_x_,laser_pos_y_);
+  logger->log_debug(name(), "Pos: (%f,%f,%f)  LaserTF: (%f,%f,%f)  LaserPos:(%f,%f,%f)",
+		    pos_x_, pos_y_, pos_theta_,
+		    laser_pose.getOrigin().x(), laser_pose.getOrigin().y(),
+		    tf::get_yaw(laser_pose.getRotation()),
+		    laser_pos_x_, laser_pos_y_, laser_pos_theta_);
 
   return true;
 }
