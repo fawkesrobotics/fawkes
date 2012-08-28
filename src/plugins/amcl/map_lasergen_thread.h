@@ -31,6 +31,11 @@
 #include <aspect/tf.h>
 #include <aspect/blackboard.h>
 
+#if __cplusplus > 201100L
+#  define HAVE_RANDOM
+#  include <random>
+#endif
+
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Position3DInterface.h>
 
@@ -73,6 +78,13 @@ public:
   float pos_x;
   float pos_y;
   map_t* map_;
+
+  bool cfg_add_noise_;
+  float cfg_noise_sigma_;
+#ifdef HAVE_RANDOM
+  std::mt19937 noise_rg_;
+  std::normal_distribution<float> noise_nd_;
+#endif
 
   fawkes::Laser360Interface* laser_if_;
   fawkes::Position3DInterface * pos3d_if_;

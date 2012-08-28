@@ -59,8 +59,8 @@ ifeq ($(HAVE_TF),1)
   LDFLAGS_amcl       += $(LDFLAGS_TF)
   LIBS_amcl          += fawkestf
 
-  CFLAGS_map_lasergen_thread = $(CFLAGS) $(CFLAGS_TF)
-  CFLAGS_map_lasergen_plugin = $(CFLAGS) $(CFLAGS_TF)
+  CFLAGS_map_lasergen_thread = -std=c++11 $(CFLAGS) $(CFLAGS_TF)
+  CFLAGS_map_lasergen_plugin = $(CFLAGS_map_lasergen_thread)
   LDFLAGS_map_lasergen      += $(LDFLAGS_TF)
   LIBS_map_lasergen         += fawkestf
 

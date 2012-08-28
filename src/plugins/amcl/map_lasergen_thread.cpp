@@ -59,16 +59,33 @@ void MapLaserGenThread::init()
   map_width_  = map_->size_x;
   map_height_ = map_->size_y;
 
-  logger->log_info(name(), "Size: %ux%u (%zu/%u free)", map_width_, map_height_,
-		   free_space_indices.size(), map_width_ * map_height_);
+  logger->log_info(name(), "Size: %ux%u (%zu of %u cells free, this are %f%%)",
+		   map_width_, map_height_, free_space_indices.size(),
+		   (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
   laser_if_ = blackboard->open_for_writing<Laser360Interface>(cfg_laser_ifname_.c_str());
   pos3d_if_ = blackboard->open_for_writing<Position3DInterface>("Map LaserGen Groundtruth");
 
-  pos_x = pos_y = 2.3;
+  pos_x = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
+  pos_y = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
+  std::string frame = config->get_string(CFG_PREFIX"map-lasergen/frame");
 
-  laser_if_->set_frame("/base_laser");
+  cfg_add_noise_ = false;
+  try {
+    cfg_add_noise_ = config->get_bool(CFG_PREFIX"map-lasergen/add_gaussian_noise");
+  } catch (Exception &e) {}; // ignored
+  if (cfg_add_noise_) {
+#ifndef HAVE_RANDOM
+    throw Exception("Noise has been enabled but C++11 <random> no available at compile time");
+#else
+    cfg_noise_sigma_ = config->get_float(CFG_PREFIX"map-lasergen/noise_sigma");
+    std::random_device rd;
+    noise_rg_ = std::mt19937(rd());
+    noise_nd_ = std::normal_distribution<float>(0.0, cfg_noise_sigma_);
+#endif
+  }
 
+  laser_if_->set_frame(frame.c_str());
 }
 
 
@@ -90,6 +107,13 @@ MapLaserGenThread::loop()
   for (unsigned int i = 0; i < 360; ++i) {
     dists[i] = map_calc_range(map_, pos_x, pos_y, deg2rad(i), 100.);
   }
+#ifdef HAVE_RANDOM
+  if (cfg_add_noise_) {
+    for (unsigned int i = 0; i < 360; ++i) {
+      dists[i] += noise_nd_(noise_rg_);
+    }
+  }
+#endif
   laser_if_->set_distances(dists);
   laser_if_->write();
 

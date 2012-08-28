@@ -333,4 +333,9 @@ INSERT INTO "config" VALUES('/plugins/amcl/init_cov_xx','float',0.0,'Initial Cov
 INSERT INTO "config" VALUES('/plugins/amcl/init_cov_yy','float',0.0,'Initial Covariance yy');
 INSERT INTO "config" VALUES('/plugins/amcl/init_cov_aa','float',0.0,'Initial Covariance aa');
 INSERT INTO "config" VALUES('/plugins/amcl/angle_increment','float',1.0,'angle_increment');
+INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/pos_x','float',2.3,'X position to simulate');
+INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/pos_y','float',2.3,'Y position to simulate');
+INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/frame','string','/base_laser','Coordinate frame for laser data.');
+INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/add_gaussian_noise','bool',1,'Add gaussian noise to values?');
+INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/noise_sigma','float',0.02,'Sigma for normal distribution of noise');
 COMMIT;
