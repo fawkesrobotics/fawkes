@@ -338,4 +338,5 @@ INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/pos_y','float',2.3,'Y po
 INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/frame','string','/base_laser','Coordinate frame for laser data.');
 INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/add_gaussian_noise','bool',1,'Add gaussian noise to values?');
 INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/noise_sigma','float',0.02,'Sigma for normal distribution of noise');
+INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/send_zero_odom','bool',1,'Send odometry updates with zero movement in each cycle?');
 COMMIT;

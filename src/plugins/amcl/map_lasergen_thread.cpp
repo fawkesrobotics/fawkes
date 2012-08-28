@@ -89,6 +89,11 @@ void MapLaserGenThread::init()
 #endif
   }
 
+  cfg_send_zero_odom_ = false;
+  try {
+    cfg_send_zero_odom_ = config->get_bool(CFG_PREFIX"map-lasergen/send_zero_odom");
+  } catch (Exception &e) {}; // ignored
+
   laser_if_->set_frame(laser_frame_id_.c_str());
 }
 
@@ -129,11 +134,17 @@ MapLaserGenThread::loop()
   Time transform_expiration =
     (Time(clock) + 1.0);
 
-  tf::StampedTransform tmp_tf_stamped(tmp_tf,
-				      transform_expiration,
-				      odom_frame_id_, base_frame_id_);
+  if (cfg_send_zero_odom_) {
+    tf::Transform
+      tmp_tf(tf::create_quaternion_from_yaw(0), tf::Vector3(0,0,0));
+    Time transform_expiration =
+      (Time(clock) + 1.0);
 
-  tf_publisher->send_transform(tmp_tf_stamped);
+    tf::StampedTransform tmp_tf_stamped(tmp_tf,
+					transform_expiration,
+					odom_frame_id_, base_frame_id_);
+    tf_publisher->send_transform(tmp_tf_stamped);
+  }
 }
 
 void MapLaserGenThread::finalize()

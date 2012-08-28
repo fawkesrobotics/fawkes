@@ -69,6 +69,7 @@ public:
   float        cfg_origin_theta_;
   float        cfg_occupied_thresh_;
   float        cfg_free_thresh_;
+  bool         cfg_send_zero_odom_;
 
   std::string  cfg_laser_ifname_;
   std::string  laser_frame_id_;
