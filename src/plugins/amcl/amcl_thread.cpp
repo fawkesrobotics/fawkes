@@ -275,6 +275,10 @@ void AmclThread::init()
   pf_init(pf_, pf_init_pose_mean, pf_init_pose_cov);
   pf_init_ = false;
 
+  initial_pose_hyp_ = new amcl_hyp_t();
+  initial_pose_hyp_->pf_pose_mean = pf_init_pose_mean;
+  initial_pose_hyp_->pf_pose_cov = pf_init_pose_cov;
+
   // Instantiate the sensor objects
   // Odometry
   odom_ = new ::amcl::AMCLOdom();
@@ -336,6 +340,7 @@ AmclThread::loop()
   if (!laser_pose_set_) {
     if (set_laser_pose()) {
       laser_pose_set_ = true;
+      apply_initial_pose();
     } else {
       logger->log_warn(name(), "Could not determine laser pose, skipping loop");
       return;
@@ -804,21 +809,15 @@ AmclThread::set_laser_pose()
   tf::Stamped<tf::Pose> laser_pose;
   try {
     tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
-    /*
-    tf::Quaternion q = laser_pose.getRotation();
-    logger->log_debug(name(), "Laser transform: (%f, %f, %f)  (%f, %f, %f, %f)",
-                      laser_pose.getOrigin().x(), laser_pose.getOrigin().y(),
-                      laser_pose.getOrigin().z(), q.x(), q.y(), q.z(), q.w());
-    */
   } catch (fawkes::tf::LookupException& e) {
-    logger->log_error(name(), "Failed to lookup transform from %s to %s.",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
+    //logger->log_error(name(), "Failed to lookup transform from %s to %s.",
+    //                  laser_frame_id_.c_str(), base_frame_id_.c_str());
+    //logger->log_error(name(), e);
     return false;
   } catch (fawkes::tf::TransformException& e) {
-    logger->log_error(name(), "Transform error from %s to %s, exception follows.",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
+    //logger->log_error(name(), "Transform error from %s to %s, exception follows.",
+    //                  laser_frame_id_.c_str(), base_frame_id_.c_str());
+    //logger->log_error(name(), e);
     return false;
   } catch (fawkes::Exception& e) {
     logger->log_error(name(), "Generic exception for transform from %s to %s.",
@@ -862,9 +861,25 @@ void
 AmclThread::apply_initial_pose()
 {
   if (initial_pose_hyp_ != NULL && map_ != NULL) {
+    logger->log_info(name(), "Applying pose: %.3f %.3f %.3f "
+		   "(cov: %.3f %.3f %.3f, %.3f %.3f %.3f, %.3f %.3f %.3f)",
+		     initial_pose_hyp_->pf_pose_mean.v[0],
+		     initial_pose_hyp_->pf_pose_mean.v[1],
+		     initial_pose_hyp_->pf_pose_mean.v[2],
+		     initial_pose_hyp_->pf_pose_cov.m[0][0],
+		     initial_pose_hyp_->pf_pose_cov.m[0][1],
+		     initial_pose_hyp_->pf_pose_cov.m[0][2],
+		     initial_pose_hyp_->pf_pose_cov.m[1][0],
+		     initial_pose_hyp_->pf_pose_cov.m[1][1],
+		     initial_pose_hyp_->pf_pose_cov.m[1][2],
+		     initial_pose_hyp_->pf_pose_cov.m[2][0],
+		     initial_pose_hyp_->pf_pose_cov.m[2][1],
+		     initial_pose_hyp_->pf_pose_cov.m[2][2]);
     pf_init(pf_, initial_pose_hyp_->pf_pose_mean,
 	    initial_pose_hyp_->pf_pose_cov);
     pf_init_ = false;
+  } else {
+    logger->log_warn(name(), "Called apply initial pose but no pose to apply");
   }
 }
 
@@ -948,7 +963,6 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
   }
 
   tf::Pose pose_old, pose_new;
-  //tf::poseMsgToTF(msg->pose.pose, pose_old);
   pose_old =
     tf::Transform(tf::Quaternion(msg->pose.pose.orientation.x,
 				 msg->pose.pose.orientation.y,
