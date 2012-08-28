@@ -28,7 +28,6 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <core/threading/wait_condition.h>
 #include <core/utils/lock_hashset.h>
 #include <core/utils/lock_hashmap.h>
 #include <logging/liblogger.h>
@@ -56,42 +55,29 @@ BlackBoardNotifier::BlackBoardNotifier()
 {
   __bbil_writer_events     = 0;
   __bbil_writer_mutex      = new Mutex();
-  __bbil_writer_waitcond   = new WaitCondition(__bbil_writer_mutex);
 
   __bbil_reader_events     = 0;
   __bbil_reader_mutex      = new Mutex();
-  __bbil_reader_waitcond   = new WaitCondition(__bbil_reader_mutex);
 
   __bbil_data_events       = 0;
   __bbil_data_mutex        = new Mutex();
-  __bbil_data_waitcond     = new WaitCondition(__bbil_data_mutex);
 
   __bbil_messages_events   = 0;
   __bbil_messages_mutex    = new Mutex();
-  __bbil_messages_waitcond = new WaitCondition(__bbil_messages_mutex);
 
   __bbio_events            = 0;
   __bbio_mutex             = new Mutex();
-  __bbio_waitcond          = new WaitCondition(__bbio_mutex);
 }
 
 
 /** Destructor */
 BlackBoardNotifier::~BlackBoardNotifier()
 {
-  delete __bbil_writer_waitcond;
   delete __bbil_writer_mutex;
-
-  delete __bbil_reader_waitcond;
   delete __bbil_reader_mutex;
-
-  delete __bbil_data_waitcond;
   delete __bbil_data_mutex;
-
-  delete __bbil_messages_waitcond;
   delete __bbil_messages_mutex;
 
-  delete __bbio_waitcond;
   delete __bbio_mutex;
 }
 
@@ -449,7 +435,7 @@ BlackBoardNotifier::process_bbio_queue()
 {
   if ( ! __bbio_queue.empty() ) {
     if (__bbio_events > 0 ) {
-      __bbio_waitcond->wait();
+      return;
     } else {
       while (! __bbio_queue.empty()) {
 	BBioQueueEntry &e = __bbio_queue.front();
@@ -462,7 +448,6 @@ BlackBoardNotifier::process_bbio_queue()
 	}
 	__bbio_queue.pop_front();
       }
-      __bbio_waitcond->wake_all();
     }
   }
 }
@@ -549,7 +534,7 @@ BlackBoardNotifier::process_writer_queue()
 {
   if ( ! __bbil_writer_queue.empty() ) {
     if (__bbil_writer_events > 0 ) {
-      __bbil_writer_waitcond->wait();
+      return;
     } else {
       while (! __bbil_writer_queue.empty()) {
 	BBilQueueEntry &e = __bbil_writer_queue.front();
@@ -560,7 +545,6 @@ BlackBoardNotifier::process_writer_queue()
 	}
 	__bbil_writer_queue.pop_front();
       }
-      __bbil_writer_waitcond->wake_all();
     }
   }
 }
@@ -647,7 +631,7 @@ BlackBoardNotifier::process_reader_queue()
 {
   if ( ! __bbil_reader_queue.empty() ) {
     if (__bbil_reader_events > 0 ) {
-      __bbil_reader_waitcond->wait();
+      return;
     } else {
       while (! __bbil_reader_queue.empty()) {
 	BBilQueueEntry &e = __bbil_reader_queue.front();
@@ -658,7 +642,6 @@ BlackBoardNotifier::process_reader_queue()
 	}
 	__bbil_reader_queue.pop_front();
       }
-      __bbil_reader_waitcond->wake_all();
     }
   }
 }
@@ -701,9 +684,7 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
   __bbil_data_mutex->lock();
   __bbil_data_events -= 1;
   if ( ! __bbil_data_queue.empty() ) {
-    if (__bbil_data_events > 0 ) {
-      __bbil_data_waitcond->wait();
-    } else {
+    if (__bbil_data_events == 0 ) {
       while (! __bbil_data_queue.empty()) {
 	BBilQueueEntry &e = __bbil_data_queue.front();
 	if (e.op) { // register
@@ -713,7 +694,6 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
 	}
 	__bbil_data_queue.pop_front();
       }
-      __bbil_data_waitcond->wake_all();
     }
   }
   __bbil_data_mutex->unlock();
@@ -764,9 +744,7 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
   __bbil_messages_mutex->lock();
   __bbil_messages_events -= 1;
   if ( ! __bbil_messages_queue.empty() ) {
-    if (__bbil_messages_events > 0 ) {
-      __bbil_messages_waitcond->wait();
-    } else {
+    if (__bbil_messages_events == 0 ) {
       while (! __bbil_messages_queue.empty()) {
 	BBilQueueEntry &e = __bbil_messages_queue.front();
 	if (e.op) { // register
@@ -776,7 +754,6 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
 	}
 	__bbil_messages_queue.pop_front();
       }
-      __bbil_messages_waitcond->wake_all();
     }
   }
   __bbil_messages_mutex->unlock();
