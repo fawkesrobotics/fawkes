@@ -31,7 +31,7 @@
 #include <aspect/tf.h>
 #include <aspect/blackboard.h>
 
-#if __cplusplus > 201100L
+#if __cplusplus > 201100L || defined(__GXX_EXPERIMENTAL_CXX0X__)
 #  define HAVE_RANDOM
 #  include <random>
 #endif
