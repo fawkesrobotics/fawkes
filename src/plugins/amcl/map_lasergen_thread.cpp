@@ -66,6 +66,7 @@ void MapLaserGenThread::init()
 
   logger->log_info(name(), "Size: %ux%u (%zu of %u cells free, this are %.1f%%)",
 		   map_width_, map_height_, free_space_indices.size(),
+                   map_width_ * map_height_,
 		   (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
   laser_if_ = blackboard->open_for_writing<Laser360Interface>(cfg_laser_ifname_.c_str());

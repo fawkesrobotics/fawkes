@@ -104,6 +104,7 @@ void AmclThread::init()
 
   logger->log_info(name(), "Size: %ux%u (%zu of %u cells free, this are %.1f%%)",
                    map_width_, map_height_, free_space_indices.size(),
+		   map_width_ * map_height_,
                    (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
   sent_first_transform_ = false;
