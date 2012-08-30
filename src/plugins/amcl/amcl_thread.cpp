@@ -102,14 +102,9 @@ void AmclThread::init()
   map_width_  = map_->size_x;
   map_height_ = map_->size_y;
 
-  FILE *f = fopen("/tmp/amcl_thread_map.txt", "w");
-  for (unsigned int h = 0; h < map_height_; ++h) {
-    for (unsigned int w = 0; w < map_width_; ++w) {
-      fprintf(f, "%i ", map_->cells[h * map_width_ + w].occ_state);
-    }
-    fprintf(f, "\n");
-  }
-  fclose(f);
+  logger->log_info(name(), "Size: %ux%u (%zu of %u cells free, this are %.1f%%)",
+                   map_width_, map_height_, free_space_indices.size(),
+                   (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
   sent_first_transform_ = false;
   latest_tf_valid_ = false;
@@ -577,10 +572,10 @@ AmclThread::loop()
 
     if (max_weight > 0.0) {
       /*
-      logger->log_debug(name(), "Max weight pose: %.3f %.3f %.3f",
+      logger->log_debug(name(), "Max weight pose: %.3f %.3f %.3f (weight: %f)",
 			hyps[max_weight_hyp].pf_pose_mean.v[0],
 			hyps[max_weight_hyp].pf_pose_mean.v[1],
-			hyps[max_weight_hyp].pf_pose_mean.v[2]);
+			hyps[max_weight_hyp].pf_pose_mean.v[2], max_weight);
 
 	puts("");
 	pf_matrix_fprintf(hyps[max_weight_hyp].pf_pose_cov, stdout, "%6.3f");
@@ -850,9 +845,9 @@ AmclThread::set_laser_pose()
   // laser mounting angle gets computed later -> set to 0 here!
   laser_pose_v.v[2] = tf::get_yaw(laser_pose.getRotation());
   laser_->SetLaserPose(laser_pose_v);
-  //logger->log_debug(name(),
-  //		      "Received laser's pose wrt robot: %.3f %.3f %.3f",
-  //		      laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
+  logger->log_debug(name(),
+  		      "Received laser's pose wrt robot: %.3f %.3f %.3f",
+  		      laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
 
   return true;
 }
