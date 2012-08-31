@@ -211,6 +211,8 @@ KatanaGotoOpenRaveThread::init()
       if( __cfg_autoload_IK ) {
         _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_Transform6D);
       }
+    } else {
+      throw fawkes::Exception("Unknown entry for 'arm_model':%s", __cfg_arm_model.c_str());
     }
 
   } catch (Exception& e) {
@@ -439,9 +441,9 @@ KatanaGotoOpenRaveThread::update_motor_data()
     //usleep(__poll_interval_usec);
     try {
       if( _katana->joint_angles()) {
-        _katana->get_angles(__motor_angles, false);    //fetch encoder values, param refreshEncoders=false
+        _katana->get_angles(__motor_angles, true);    //fetch encoder values, param refreshEncoders=false
       } else {
-        _katana->get_encoders(__motor_encoders, false);    //fetch encoder values, param refreshEncoders=false
+        _katana->get_encoders(__motor_encoders, true);    //fetch encoder values, param refreshEncoders=false
       }
     } catch (Exception &e) {
       if (++num_errors <= 10) {
