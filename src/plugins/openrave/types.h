@@ -75,6 +75,7 @@ typedef struct {
   OpenRaveManipulator* manip;  /**< target manipulator configuration */
   target_type_t        type;   /**< target type */
   OpenRAVE::IkParameterization ikparam;  /**< OpenRAVE::IkParameterization; each target is implicitly transformed to one by OpenRAVE */
+  std::string plannerparams;  /**< additional string to be passed to planner, i.e. BaseManipulation module */
 } target_t;
 
 } // end namespace firevision

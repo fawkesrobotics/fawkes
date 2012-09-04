@@ -302,6 +302,10 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       throw fawkes::Exception("OpenRAVE Environment: Planner: Invalid target type");
   }
 
+  //add additional planner parameters
+  if( !target.plannerparams.empty() ) {
+    cmdin << " " << target.plannerparams;
+  }
   cmdin << " execute 0";
   cmdin << " outputtraj";
   //if(__logger)

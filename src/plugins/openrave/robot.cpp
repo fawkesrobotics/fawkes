@@ -444,6 +444,18 @@ OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
   return __target.solvable;
 }
 
+/** Set additional planner parameters.
+ * BaseManipulation module accepts many arguments that can be passed.
+ * Planner parameters can be important to plan a path according to ones
+ * needs, e.g. set deviations, optimizer iterations, etc.
+ * Do not mistake it with the single argument "plannerparams" of BaseManipulation.
+ * @param params complete string of additional arguments.
+ */
+void
+OpenRaveRobot::set_target_plannerparams(std::string& params)
+{
+  __target.plannerparams = params;
+}
 
 // just temporary! no IK check etc involved
 /** Set target angles directly.
