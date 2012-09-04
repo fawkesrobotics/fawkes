@@ -113,6 +113,8 @@ class KatanaControllerKni : public KatanaController
 
   bool motor_oor(unsigned short id);
   bool motor_final(unsigned short id);
+  void cleanup_active_motors();
+  void add_active_motor(unsigned short id);
 
 };
 

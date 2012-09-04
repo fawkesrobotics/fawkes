@@ -129,6 +129,7 @@ KatanaControllerKni::final()
   for(unsigned int i=0; i<__active_motors.size(); i++) {
     final &= motor_final(__active_motors.at(i));
   }
+  cleanup_active_motors();
   return final;
 }
 
@@ -291,15 +292,15 @@ KatanaControllerKni::move_motor_to(unsigned short id, int enc, bool blocking)
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorToEnc(id, enc);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 void
@@ -308,15 +309,15 @@ KatanaControllerKni::move_motor_to(unsigned short id, float angle, bool blocking
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorTo(id, angle);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 void
@@ -325,15 +326,15 @@ KatanaControllerKni::move_motor_by(unsigned short id, int enc, bool blocking)
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorByEnc(id, enc);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 void
@@ -342,15 +343,15 @@ KatanaControllerKni::move_motor_by(unsigned short id, float angle, bool blocking
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorBy(id, angle);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 
@@ -468,6 +469,28 @@ KatanaControllerKni::motor_final(unsigned short id)
 
   return (std::abs(mot.GetTPS()->tarpos - mot.GetPVP()->pos) < 10)
       or (gripper_not_moved > 3);
+}
+
+void
+KatanaControllerKni::cleanup_active_motors()
+{
+  for(unsigned int i=0; i<__active_motors.size(); ++i) {
+    if( motor_final(__active_motors.at(i)) ) {
+      __active_motors.erase(__active_motors.begin()+i);
+      --i;
+    }
+  }
+}
+
+void
+KatanaControllerKni::add_active_motor(unsigned short id)
+{
+  for(unsigned int i=0; i<__active_motors.size(); ++i) {
+    if( __active_motors.at(i) == id ) {
+      return;
+    }
+  }
+  __active_motors.push_back(id);
 }
 
 } // end of namespace fawkes
