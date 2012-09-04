@@ -331,9 +331,6 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
     {throw fawkes::Exception("OpenRAVE Environment: Planner: Cannot read trajectory data.");}
   }
 
-  // re-timing the trajectory
-  planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
-
   // sampling trajectory and setting robots trajectory
   std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
   trajRobot->clear();
