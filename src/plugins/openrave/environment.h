@@ -52,7 +52,7 @@ class OpenRaveEnvironment
   virtual void destroy();
   virtual void lock();
 
-  virtual void enable_debug();
+  virtual void enable_debug(OpenRAVE::DebugLevel level=OpenRAVE::Level_Debug);
   virtual void disable_debug();
 
   virtual void start_viewer();

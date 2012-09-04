@@ -128,9 +128,9 @@ OpenRaveEnvironment::lock()
 
 /** Enable debugging messages of OpenRAVE. */
 void
-OpenRaveEnvironment::enable_debug()
+OpenRaveEnvironment::enable_debug(OpenRAVE::DebugLevel level)
 {
-  RaveSetDebugLevel(Level_Debug);
+  RaveSetDebugLevel(level);
 }
 
 /** Disable debugging messages of OpenRAVE. */
