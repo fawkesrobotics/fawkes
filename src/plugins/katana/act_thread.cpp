@@ -411,11 +411,12 @@ KatanaActThread::loop()
       logger->log_debug(name(), "Motion thread collected");
       __sensacq_thread->set_enabled(true);
 
+      update_motors(/* refresh */ true);
+      update_position(/* refresh */ true);
+
 #ifdef HAVE_OPENRAVE
       if(__cfg_OR_enabled) { __goto_openrave_thread->update_openrave_data(); }
 #endif
-      update_motors(/* refresh */ true);
-      update_position(/* refresh */ true);
     }
   } else if (!__katana_if->is_enabled()) {
       update_position(/* refresh */ true);
