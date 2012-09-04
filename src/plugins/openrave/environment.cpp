@@ -254,6 +254,8 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   ModuleBasePtr basemanip = robot->get_basemanip();
   target_t target = robot->get_target();
   std::stringstream cmdin,cmdout;
+  cmdin << std::setprecision(std::numeric_limits<dReal>::digits10+1);
+  cmdout << std::setprecision(std::numeric_limits<dReal>::digits10+1);
 
 
   switch(target.type) {
@@ -440,6 +442,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
           throw fawkes::Exception("OpenRAVE Environment: Graspplanning: No grasping path found.");
         }
         std::stringstream resval;
+        resval << std::setprecision(std::numeric_limits<dReal>::digits10+1);
         resval << PyString_AsString(py_value);
         if (!traj->deserialize(resval) ) {
           Py_DECREF(py_value);
