@@ -50,6 +50,15 @@ using namespace fawkes;
  * @author Bahram Maleki-Fard (OpenRAVE extension)
  */
 
+/// @cond SELFEXPLAINING
+const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS =
+                  "minimumgoalpaths 16 postprocessingparameters <_nmaxiterations>100</_nmaxiterations>"
+                  "<_postprocessing planner=\"parabolicsmoother\"><_nmaxiterations>200</_nmaxiterations>"
+                  "</_postprocessing>\n";
+const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS_STRAIGHT =
+                  "maxdeviationangle 0.05";
+/// @endcond
+
 #ifdef HAVE_OPENRAVE
 
 /** Constructor.
@@ -322,6 +331,7 @@ KatanaGotoOpenRaveThread::plan_target()
   __OR_manip->set_angles_device(__motor_angles);
 
   // Checking if target has IK solution
+  __plannerparams = DEFAULT_PLANNERPARAMS;
   if( __is_target_object) {
     _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
 
@@ -342,6 +352,7 @@ KatanaGotoOpenRaveThread::plan_target()
         _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
 	 	           __x, __y, __z);
         success = __OR_robot->set_target_straight(__x, __y, __z);
+        __plannerparams = DEFAULT_PLANNERPARAMS_STRAIGHT;
       } else {
         float theta_error = 0.0f;
         while( !success && (theta_error <= __theta_error)) {
@@ -367,6 +378,7 @@ KatanaGotoOpenRaveThread::plan_target()
       return false;
     }
   }
+  __OR_robot->set_target_plannerparams(__plannerparams);
 
   // Run planner
   float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?

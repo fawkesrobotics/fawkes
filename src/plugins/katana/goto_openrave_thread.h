@@ -66,6 +66,9 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   virtual bool update_motor_data();
   virtual bool move_katana();
 
+  static const std::string DEFAULT_PLANNERPARAMS;
+  static const std::string DEFAULT_PLANNERPARAMS_STRAIGHT;
+
  private:
   fawkes::OpenRaveRobot*        __OR_robot;
   fawkes::OpenRaveManipulator*  __OR_manip;
@@ -85,6 +88,7 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   bool                  __is_target_object;
   bool                  __has_target_quaternion;
   bool                  __move_straight;
+  std::string           __plannerparams;
 
   fawkes::OpenRaveConnector*    _openrave;
 
