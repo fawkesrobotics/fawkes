@@ -273,7 +273,7 @@ KatanaActThread::update_position(bool refresh)
   tf_publisher->send_transform(j2_j3, now, "/katana/j2", "/katana/j3");
   tf_publisher->send_transform(j3_j4, now, "/katana/j3", "/katana/j4");
   tf_publisher->send_transform(j4_j5, now, "/katana/j4", "/katana/j5");
-  tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper");
+  tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper"); //remember to adjust name in message-processing on change
 }
 
 
@@ -460,8 +460,14 @@ KatanaActThread::loop()
             target += offset;
           }
           // TODO: how to transform euler rotation to quaternion, to be used for tf??
-          __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
-                                             msg->phi(), msg->theta(), msg->psi());
+          if( strcmp(msg->trans_frame(), "/katana/gripper")==0 ) {
+            __goto_openrave_thread->set_target(msg->x(), msg->y(), msg->z(),
+                                               msg->phi(), msg->theta(), msg->psi());
+            __goto_openrave_thread->set_arm_extension(true);
+          } else {
+            __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
+                                               msg->phi(), msg->theta(), msg->psi());
+          }
           __goto_openrave_thread->set_theta_error(msg->theta_error());
           __goto_openrave_thread->set_move_straight(msg->is_straight());
  #ifdef EARLY_PLANNING

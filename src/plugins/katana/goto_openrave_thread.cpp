@@ -92,6 +92,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __is_target_object( 0 ),
   __has_target_quaternion( 0 ),
   __move_straight( 0 ),
+  __is_arm_extension( 0 ),
   _openrave( openrave )
 {
 }
@@ -119,6 +120,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
   __has_target_quaternion = false;
   __is_target_object = false;
   __move_straight = false;
+  __is_arm_extension = false;
 }
 
 /** Set target position.
@@ -145,6 +147,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
   __has_target_quaternion = true;
   __is_target_object = false;
   __move_straight = false;
+  __is_arm_extension = false;
 }
 
 /** Set target position.
@@ -178,6 +181,16 @@ KatanaGotoOpenRaveThread::set_move_straight(bool move_straight)
   __move_straight = move_straight;
 }
 
+/** Set if target is taken as arm extension.
+ * Make sure to call this after(!) a "set_target" method, as they
+ * set "__move_straight" attribute to its default value.
+ * @param arm_extension true, if target is regarded as arm extension
+ */
+void
+KatanaGotoOpenRaveThread::set_arm_extension(bool arm_extension)
+{
+  __is_arm_extension = arm_extension;
+}
 
 void
 KatanaGotoOpenRaveThread::init()
@@ -348,10 +361,14 @@ KatanaGotoOpenRaveThread::plan_target()
         _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
   		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
         success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
-      } else if( __move_straight) {
+      } else if( __move_straight ) {
         _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
 	 	           __x, __y, __z);
-        success = __OR_robot->set_target_straight(__x, __y, __z);
+        if( __is_arm_extension ) {
+          success = __OR_robot->set_target_rel(__x, __y, __z, true);
+        } else {
+          success = __OR_robot->set_target_straight(__x, __y, __z);
+        }
         __plannerparams = DEFAULT_PLANNERPARAMS_STRAIGHT;
       } else {
         float theta_error = 0.0f;
