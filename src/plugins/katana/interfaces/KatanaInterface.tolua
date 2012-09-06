@@ -171,6 +171,17 @@ class KatanaInterface : public Interface
     int maxlenof_max_velocity() const;
   };
 
+  class SetPlannerParamsMessage : public Message
+  {
+    SetPlannerParamsMessage(char * ini_plannerparams);
+    SetPlannerParamsMessage();
+    ~SetPlannerParamsMessage();
+
+    char * plannerparams();
+    void set_plannerparams(const char * new_plannerparams);
+    int maxlenof_plannerparams() const;
+  };
+
   class SetMotorEncoderMessage : public Message
   {
     SetMotorEncoderMessage(unsigned int ini_nr, unsigned int ini_enc);

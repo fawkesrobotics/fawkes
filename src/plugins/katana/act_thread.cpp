@@ -616,6 +616,15 @@ KatanaActThread::loop()
       }
       __katana_if->set_max_velocity(max_vel);
 
+    } else if (__katana_if->msgq_first_is<KatanaInterface::SetPlannerParamsMessage>()) {
+      KatanaInterface::SetPlannerParamsMessage *msg = __katana_if->msgq_first(msg);
+
+      if( __cfg_OR_enabled ) {
+#ifdef HAVE_OPENRAVE
+        __goto_openrave_thread->set_plannerparams(msg->plannerparams());
+#endif
+      }
+
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetMotorEncoderMessage>()) {
       KatanaInterface::SetMotorEncoderMessage *msg = __katana_if->msgq_first(msg);
 

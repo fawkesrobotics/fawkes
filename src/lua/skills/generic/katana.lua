@@ -79,16 +79,24 @@ function jc_next_msg(state)
    return  katanaarm:msgid() > state.fsm.vars.msgid
 end
 
+--- Set planner parameters
+-- @return msgid of sent SetPlannerParamsMessage
+function set_planner_params(params)
+   return katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new(params))
+end
+
+
 -- States
 fsm:add_transitions{
    closure={katanaarm=katanaarm},
    {"DECIDE_MODE", "FAILED", "not katanaarm:has_writer()", precond=true, desc="no writer"},
    {"DECIDE_MODE", "TURNONOFF", "vars.enable ~= nil", precond=true, desc="enable parm"},
    {"DECIDE_MODE", "CALIBRATE", "vars.calibrate", precond=true, desc="calib parm"},
-   {"DECIDE_MODE", "VELOCITY", "vars.velocity ~= nil", desc="max velocity", precond=true},
+   {"DECIDE_MODE", "VELOCITY", "vars.velocity ~= nil", precond=true, desc="max velocity"},
    {"DECIDE_MODE", "GOTO", "vars.x ~= nil and vars.y ~= nil and vars.z ~= nil",
     desc="goto parms", precond=true},
    {"DECIDE_MODE", "GOTO_OBJECT", "vars.object ~= nil", desc="goto obj params", precond=true},
+   {"DECIDE_MODE", "PLANNERPARAMS", "vars.plannerparams ~= nil", precond=true, desc="planner params"},
    {"DECIDE_MODE", "STOP", "vars.stop", precond=true},
    {"DECIDE_MODE", "PARK", "vars.park", precond=true},
    {"DECIDE_MODE", "GRIPPER", "vars.gripper", precond=true},
@@ -99,6 +107,7 @@ fsm:add_transitions{
    {"TURNONOFF", "CHECKERR", true},
    {"STOP", "CHECKERR", true},
    {"VELOCITY", "CHECKERR", true},
+   {"PLANNERPARAMS", "CHECKERR", true},
    {"GOTO", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GOTO_OBJECT", "CHECKERR", jc_arm_is_final, desc="final"},
    {"GOTO", "FAILED", jc_next_msg, desc="next msg"},
@@ -138,6 +147,10 @@ function GRIPPER:init()
    else
       self.fsm.vars.msgid = katanaarm:msgq_enqueue_copy(katanaarm.CloseGripperMessage:new())
    end
+end
+
+function PLANNERPARAMS:init()
+   self.fsm.vars.msgid = set_planner_params(self.fsm.vars.plannerparams)
 end
 
 function CHECKERR:init()
