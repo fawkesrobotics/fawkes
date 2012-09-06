@@ -48,7 +48,8 @@ typedef enum {
   TARGET_NONE,          /**< No valid target */
   TARGET_JOINTS,        /**< Target: motor joint values */
   TARGET_TRANSFORM,     /**< Target: absolute endeffector translation and rotation */
-  TARGET_RELATIVE,      /**< Target: relative endeffector translation */
+  TARGET_RELATIVE,      /**< Target: relative endeffector translation, based on robot's coordinate system */
+  TARGET_RELATIVE_EXT,  /**< Target: relative endeffector translation, based on arm extension */
   TARGET_IKPARAM        /**< Target: OpenRAVE::IkParameterization string */
 } target_type_t;
 

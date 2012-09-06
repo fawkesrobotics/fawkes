@@ -258,6 +258,18 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   cmdin << std::setprecision(std::numeric_limits<dReal>::digits10+1);
   cmdout << std::setprecision(std::numeric_limits<dReal>::digits10+1);
 
+  if( target.type == TARGET_RELATIVE_EXT ) {
+    Transform t = robot->get_robot_ptr()->GetActiveManipulator()->GetEndEffectorTransform();
+    //initial pose of arm looks at +z. Target values are referring to robot's coordinating system,
+    //which have this direction vector if taken as extension of manipulator (rotate -90° on y-axis)
+    Vector dir(target.y,target.z,target.x);
+    TransformMatrix mat = matrixFromQuat(t.rot);
+    dir = mat.rotate(dir);
+    target.type = TARGET_RELATIVE;
+    target.x = dir[0];
+    target.y = dir[1];
+    target.z = dir[2];
+  }
 
   switch(target.type) {
     case (TARGET_JOINTS) :

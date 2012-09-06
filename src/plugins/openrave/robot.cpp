@@ -241,12 +241,17 @@ OpenRaveRobot::display_planned_movements() const
  * @param trans_x x-transition
  * @param trans_y y-transition
  * @param trans_z z-transition
+ * @param is_extension true, if base coordination system lies in arm extension
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
+OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension)
 {
-  __target.type = TARGET_RELATIVE;
+  if( is_extension ) {
+    __target.type = TARGET_RELATIVE_EXT;
+  } else {
+    __target.type = TARGET_RELATIVE;
+  }
   __target.x = trans_x;
   __target.y = trans_y;
   __target.z = trans_z;
