@@ -198,7 +198,7 @@ void
 KatanaControllerKni::read_motor_data()
 {
   try {
-    if( __active_motors.size() < 1 ) {
+    if( __active_motors.size() == (unsigned short)__katana->getNumberOfMotors() ) {
       __katbase->recvMPS(); // get position for all motors
       __katbase->recvGMS(); // get status flags for all motors
     } else {
@@ -263,6 +263,8 @@ KatanaControllerKni::gripper_close(bool blocking)
 void
 KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, float psi, bool blocking)
 {
+  cleanup_active_motors();
+
   try {
     __katana->moveRobotTo(__x, __y, __z, __phi, __theta, __psi, blocking);
   } catch (KNI::NoSolutionException &e) {
@@ -272,18 +274,41 @@ KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, 
     return;
   }
 
-  __active_motors.clear();
-  __active_motors.resize(0); // resize to 0 to update all motor data
+  for(short i=0; i<__katana->getNumberOfMotors(); ++i) {
+    add_active_motor(i);
+  }
 }
 
 void
 KatanaControllerKni::move_to(std::vector<int> encoders, bool blocking)
 {
+  cleanup_active_motors();
+
+  try {
+    __katana->moveRobotToEnc(encoders);
+  } catch (/*KNI*/::Exception &e) {
+    throw fawkes::Exception("KNI Exception:%s", e.what());
+  }
+
+  for(unsigned short i=0; i<encoders.size(); ++i) {
+    add_active_motor(i);
+  }
 }
 
 void
 KatanaControllerKni::move_to(std::vector<float> angles, bool blocking)
 {
+  std::vector<int> encoders;
+
+  try {
+    for(unsigned int i=0; i<angles.size(); i++) {
+      encoders.push_back(KNI_MHF::rad2enc( (double)angles.at(i), __motor_init.at(i).angleOffset, __motor_init.at(i).encodersPerCycle, __motor_init.at(i).encoderOffset, __motor_init.at(i).rotationDirection));
+    }
+  } catch (/*KNI*/::Exception &e) {
+    throw fawkes::Exception("KNI Exception:%s", e.what());
+  }
+
+  move_to(encoders, blocking);
 }
 
 void

@@ -483,10 +483,14 @@ KatanaGotoOpenRaveThread::update_motor_data()
 bool
 KatanaGotoOpenRaveThread::move_katana()
 {
-  for (unsigned int i = 0; i < __it->size(); ++i) {
-    // non-blocking command
-    _katana->move_motor_to(i, __it->at(i), /*blocking*/false);
+  if( _katana->joint_angles() ) {
+    _katana->move_to(*__it, /*blocking*/false);
+  } else {
+    std::vector<int> enc;
+    _katana->get_encoders(enc);
+    _katana->move_to(enc, /*blocking*/false);
   }
+
   return (++__it == __target_traj->end());
 }
 
