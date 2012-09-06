@@ -93,6 +93,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __has_target_quaternion( 0 ),
   __move_straight( 0 ),
   __is_arm_extension( 0 ),
+  __plannerparams( "default" ),
   _openrave( openrave )
 {
 }
@@ -190,6 +191,24 @@ void
 KatanaGotoOpenRaveThread::set_arm_extension(bool arm_extension)
 {
   __is_arm_extension = arm_extension;
+}
+
+/** Set plannerparams.
+ * @param params plannerparameters. For further information, check openrave plugin, or OpenRAVE documentaiton.
+ */
+void
+KatanaGotoOpenRaveThread::set_plannerparams(std::string& params)
+{
+  __plannerparams = params;
+}
+
+/** Set plannerparams.
+ * @param params plannerparameters. For further information, check openrave plugin, or OpenRAVE documentaiton.
+ */
+void
+KatanaGotoOpenRaveThread::set_plannerparams(const char* params)
+{
+  __plannerparams = params;
 }
 
 void
@@ -344,7 +363,9 @@ KatanaGotoOpenRaveThread::plan_target()
   __OR_manip->set_angles_device(__motor_angles);
 
   // Checking if target has IK solution
-  __plannerparams = DEFAULT_PLANNERPARAMS;
+  if( __plannerparams.compare("default") == 0 ) {
+    __plannerparams = DEFAULT_PLANNERPARAMS;
+  }
   if( __is_target_object) {
     _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
 
@@ -369,7 +390,9 @@ KatanaGotoOpenRaveThread::plan_target()
         } else {
           success = __OR_robot->set_target_straight(__x, __y, __z);
         }
-        __plannerparams = DEFAULT_PLANNERPARAMS_STRAIGHT;
+        if( __plannerparams.compare("default") == 0 ) {
+          __plannerparams = DEFAULT_PLANNERPARAMS_STRAIGHT;
+        }
       } else {
         float theta_error = 0.0f;
         while( !success && (theta_error <= __theta_error)) {

@@ -61,6 +61,8 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   void set_theta_error(float error);
   void set_move_straight(bool move_straight);
   void set_arm_extension(bool arm_extension);
+  void set_plannerparams(std::string& params);
+  void set_plannerparams(const char* params);
 
   virtual bool plan_target();
   virtual void update_openrave_data();
