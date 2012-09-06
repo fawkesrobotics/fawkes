@@ -241,6 +241,7 @@ void
 OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 {
   bool success;
+  EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
 
   // init planner. This is automatically done by BaseManipulation, but putting it here
   // helps to identify problem source if any occurs.
@@ -311,18 +312,15 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   //if(__logger)
   //  __logger->log_debug("OpenRAVE Environment", "Planner: basemanip cmdin:%s", cmdin.str().c_str());
 
-  {
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
-    try {
-      success = basemanip->SendCommand(cmdout,cmdin);
-    } catch(openrave_exception &e) {
-      throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
-    }
-    if(!success)
-      {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
-    else if(__logger)
-      {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
-  } //unlock environment
+  try {
+    success = basemanip->SendCommand(cmdout,cmdin);
+  } catch(openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
+  }
+  if(!success)
+    {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
 
   // read returned trajectory
   TrajectoryBasePtr traj = RaveCreateTrajectory(__env, "");
@@ -526,6 +524,7 @@ bool
 OpenRaveEnvironment::add_object(const std::string& name, const std::string& filename)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->ReadKinBodyXMLFile(filename);
     kb->SetName(name);
     __env->AddKinBody(kb);
@@ -546,6 +545,7 @@ bool
 OpenRaveEnvironment::delete_object(const std::string& name)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
     __env->Remove(kb);
   } catch(const OpenRAVE::openrave_exception &e) {
@@ -566,6 +566,7 @@ bool
 OpenRaveEnvironment::rename_object(const std::string& name, const std::string& new_name)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
     kb->SetName(new_name);
   } catch(const OpenRAVE::openrave_exception &e) {
@@ -590,6 +591,7 @@ bool
 OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
 
     Transform transform = kb->GetTransform();
@@ -622,6 +624,7 @@ bool
 OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
 
     Vector quat(quat_w, quat_x, quat_y, quat_z);
