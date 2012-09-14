@@ -446,13 +446,14 @@ class KatanaInterface : public Interface
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char plannerparams[1024]; /**< Planner parameters */
+      bool straight; /**< Parameters for straight movement? */
     } SetPlannerParamsMessage_data_t;
 #pragma pack(pop)
 
     SetPlannerParamsMessage_data_t *data;
 
    public:
-    SetPlannerParamsMessage(const char * ini_plannerparams);
+    SetPlannerParamsMessage(const char * ini_plannerparams, const bool ini_straight);
     SetPlannerParamsMessage();
     ~SetPlannerParamsMessage();
 
@@ -461,6 +462,9 @@ class KatanaInterface : public Interface
     char * plannerparams() const;
     void set_plannerparams(const char * new_plannerparams);
     size_t maxlenof_plannerparams() const;
+    bool is_straight() const;
+    void set_straight(const bool new_straight);
+    size_t maxlenof_straight() const;
     virtual Message * clone() const;
   };
 

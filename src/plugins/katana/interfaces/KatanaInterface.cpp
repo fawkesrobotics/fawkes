@@ -125,7 +125,7 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0x26, 0x13, 0x8b, 0x1b, 0x83, 0xb7, 0x9, 0xf1, 0xbc, 0xab, 0xe4, 0x4c, 0xfb, 0xfb, 0xda, 0x17};
+  unsigned char tmp_hash[] = {0x63, 0x62, 0xb0, 0x97, 0x9, 0x8f, 0x58, 0x40, 0x61, 0xdc, 0x9a, 0xcc, 0xa, 0x97, 0xf8, 0xcd};
   set_hash(tmp_hash);
 }
 
@@ -2097,8 +2097,9 @@ KatanaInterface::SetMaxVelocityMessage::clone() const
 
 /** Constructor with initial values.
  * @param ini_plannerparams initial value for plannerparams
+ * @param ini_straight initial value for straight
  */
-KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const char * ini_plannerparams) : Message("SetPlannerParamsMessage")
+KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const char * ini_plannerparams, const bool ini_straight) : Message("SetPlannerParamsMessage")
 {
   data_size = sizeof(SetPlannerParamsMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -2106,7 +2107,9 @@ KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const char * i
   data      = (SetPlannerParamsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->plannerparams, ini_plannerparams, 1024);
+  data->straight = ini_straight;
   add_fieldinfo(IFT_STRING, "plannerparams", 1024, data->plannerparams);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
 }
 /** Constructor */
 KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage() : Message("SetPlannerParamsMessage")
@@ -2117,6 +2120,7 @@ KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage() : Message("S
   data      = (SetPlannerParamsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "plannerparams", 1024, data->plannerparams);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
 }
 
 /** Destructor */
@@ -2166,6 +2170,36 @@ void
 KatanaInterface::SetPlannerParamsMessage::set_plannerparams(const char * new_plannerparams)
 {
   strncpy(data->plannerparams, new_plannerparams, sizeof(data->plannerparams));
+}
+
+/** Get straight value.
+ * Parameters for straight movement?
+ * @return straight value
+ */
+bool
+KatanaInterface::SetPlannerParamsMessage::is_straight() const
+{
+  return data->straight;
+}
+
+/** Get maximum length of straight value.
+ * @return length of straight value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetPlannerParamsMessage::maxlenof_straight() const
+{
+  return 1;
+}
+
+/** Set straight value.
+ * Parameters for straight movement?
+ * @param new_straight new straight value
+ */
+void
+KatanaInterface::SetPlannerParamsMessage::set_straight(const bool new_straight)
+{
+  data->straight = new_straight;
 }
 
 /** Clone this message.

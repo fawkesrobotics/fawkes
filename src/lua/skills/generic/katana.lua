@@ -81,8 +81,9 @@ end
 
 --- Set planner parameters
 -- @return msgid of sent SetPlannerParamsMessage
-function set_planner_params(params)
-   return katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new(params))
+function set_planner_params(params, straight)
+   local s = straight or false
+   return katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new(params, s))
 end
 
 
@@ -150,7 +151,7 @@ function GRIPPER:init()
 end
 
 function PLANNERPARAMS:init()
-   self.fsm.vars.msgid = set_planner_params(self.fsm.vars.plannerparams)
+   self.fsm.vars.msgid = set_planner_params(self.fsm.vars.plannerparams, self.fsm.vars.straight)
 end
 
 function CHECKERR:init()

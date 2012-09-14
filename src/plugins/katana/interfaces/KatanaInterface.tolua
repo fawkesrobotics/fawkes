@@ -173,13 +173,16 @@ class KatanaInterface : public Interface
 
   class SetPlannerParamsMessage : public Message
   {
-    SetPlannerParamsMessage(char * ini_plannerparams);
+    SetPlannerParamsMessage(char * ini_plannerparams, bool ini_straight);
     SetPlannerParamsMessage();
     ~SetPlannerParamsMessage();
 
     char * plannerparams();
     void set_plannerparams(const char * new_plannerparams);
     int maxlenof_plannerparams() const;
+    bool is_straight();
+    void set_straight(const bool new_straight);
+    int maxlenof_straight() const;
   };
 
   class SetMotorEncoderMessage : public Message

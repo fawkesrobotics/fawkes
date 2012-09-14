@@ -94,6 +94,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __move_straight( 0 ),
   __is_arm_extension( 0 ),
   __plannerparams( "default" ),
+  __plannerparams_straight( "default" ),
   _openrave( openrave )
 {
 }
@@ -195,20 +196,30 @@ KatanaGotoOpenRaveThread::set_arm_extension(bool arm_extension)
 
 /** Set plannerparams.
  * @param params plannerparameters. For further information, check openrave plugin, or OpenRAVE documentaiton.
+ * @param straight true, if these params are for straight movement
  */
 void
-KatanaGotoOpenRaveThread::set_plannerparams(std::string& params)
+KatanaGotoOpenRaveThread::set_plannerparams(std::string& params, bool straight)
 {
-  __plannerparams = params;
+  if( straight ) {
+    __plannerparams_straight = params;
+  } else {
+    __plannerparams = params;
+  }
 }
 
 /** Set plannerparams.
  * @param params plannerparameters. For further information, check openrave plugin, or OpenRAVE documentaiton.
+ * @param straight true, if these params are for straight movement
  */
 void
-KatanaGotoOpenRaveThread::set_plannerparams(const char* params)
+KatanaGotoOpenRaveThread::set_plannerparams(const char* params, bool straight)
 {
-  __plannerparams = params;
+  if( straight ) {
+    __plannerparams_straight = params;
+  } else {
+    __plannerparams = params;
+  }
 }
 
 void
@@ -390,8 +401,8 @@ KatanaGotoOpenRaveThread::plan_target()
         } else {
           success = __OR_robot->set_target_straight(__x, __y, __z);
         }
-        if( __plannerparams.compare("default") == 0 ) {
-          __plannerparams = DEFAULT_PLANNERPARAMS_STRAIGHT;
+        if( __plannerparams_straight.compare("default") == 0 ) {
+          __plannerparams_straight = DEFAULT_PLANNERPARAMS_STRAIGHT;
         }
       } else {
         float theta_error = 0.0f;
@@ -418,7 +429,11 @@ KatanaGotoOpenRaveThread::plan_target()
       return false;
     }
   }
-  __OR_robot->set_target_plannerparams(__plannerparams);
+  if( __move_straight ) {
+    __OR_robot->set_target_plannerparams(__plannerparams_straight);
+  } else {
+    __OR_robot->set_target_plannerparams(__plannerparams);
+  }
 
   // Run planner
   float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
