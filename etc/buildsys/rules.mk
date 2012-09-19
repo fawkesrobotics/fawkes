@@ -134,7 +134,16 @@ $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_AL
   endif
 endif
 
+# Either presubdirs *or* subdirs have been specified
 ifneq ($(PRESUBDIRS)$(SUBDIRS),)
+
+  ifneq ($(SUBDIRS),)
+    ifneq ($(PRESUBDIRS),)
+      # Both, subdirs *and* presubdirs have been specified
+$(SUBDIRS): | $(PRESUBDIRS)
+    endif
+  endif
+
 $(PRESUBDIRS) $(SUBDIRS):
 	$(SILENTSYMB) if [ ! -d "$(abspath $(SRCDIR)/$(@))" ]; then \
 		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL) ---"; \
