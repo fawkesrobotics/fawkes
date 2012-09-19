@@ -97,6 +97,23 @@ resolve(const std::string& prefix, const std::string& frame_name)
   }
 }
 
+/** Create an ident pose in the given frame.
+ * An ident pose is with no translation and Quaternion (0,0,0,1), i.e. with
+ * all Euler angles zero.
+ * @param frame frame for which to get the ident transform
+ * @param t time for when to get the ident transform, defaults to (0,0) which
+ * means "latest possible time" for TF transforms.
+ * @return ident pose in given frame at given time
+ */
+Stamped<Pose>
+ident(std::string frame, Time t = Time(0,0))
+{
+  return
+    tf::Stamped<tf::Pose>(tf::Transform(tf::Quaternion(0, 0, 0, 1),
+					tf::Vector3(0, 0, 0)),
+			  t, frame);
+}
+
 } // end namespace tf
 } // end namespace fawkes
 
