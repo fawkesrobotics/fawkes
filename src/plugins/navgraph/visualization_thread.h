@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  vispathplan_thread.h - Visualization for pathplan via rviz
+ *  visualization_thread.h - Visualization for pathplan via rviz
  *
  *  Created: Fri Nov 11 21:17:24 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -27,25 +27,42 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <plugins/ros/aspect/ros.h>
+#include <utils/graph/rcsoft_map_node.h>
 
 #include <ros/publisher.h>
 
-class PathplanVisualizationThread
+namespace fawkes {
+  class RCSoftMapGraph;
+}
+
+class NavGraphVisualizationThread
 : public fawkes::Thread,
   public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect,
   public fawkes::ROSAspect
 {
  public:
-  PathplanVisualizationThread();
+  NavGraphVisualizationThread();
 
   virtual void init();
   virtual void loop();
   virtual void finalize();
 
+  void set_plan(std::vector<fawkes::RCSoftMapNode> plan);
+  void set_target_node(std::string target_node);
+  void reset_plan();
+
+ private:
+  void publish();
+
  private:
   size_t last_id_num_;
   ros::Publisher vispub_;
+
+  std::vector<fawkes::RCSoftMapNode> plan_;
+  std::string target_node_;
+
+  fawkes::RCSoftMapGraph *graph_;
 };
 
 

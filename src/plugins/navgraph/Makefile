@@ -16,6 +16,9 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
+include $(BUILDSYSDIR)/ros.mk
+
+ENABLE_VISUALIZATION = 1
 
 CFLAGS += -std=c++0x
 
@@ -32,6 +35,28 @@ ifeq ($(HAVE_TF),1)
   LIBS_navgraph          += fawkestf
 
   PLUGINS_all = $(PLUGINDIR)/navgraph.$(SOEXT)
+
+
+  ifeq ($(ENABLE_VISUALIZATION),1)
+    ifeq ($(HAVE_ROS),1)
+      ifeq ($(call ros-have-pkg,visualization_msgs),1)
+        CFLAGS  += -DHAVE_VISUALIZATION $(CFLAGS_ROS)
+	CFLAGS_visualization_thread = $(CFLAGS) $(call ros-pkg-cflags,visualization_msgs)
+        LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
+
+        LIBS_navgraph += fawkesrosaspect
+
+        OBJS_navgraph += visualization_thread.o
+    else
+      ENABLE_VISUALIZATION = 0
+      WARN_TARGETS += warning_visualization_msgs
+    endif
+  else
+    ENABLE_VISUALIZATION = 0
+    WARN_TARGETS += warning_ros
+  endif
+endif
+
 else
   WARN_TARGETS = warning_tf
 endif
@@ -40,9 +65,13 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf
+.PHONY: warning_tf warning_ros warning_visualization_msgs
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph plugin$(TNORMAL) (tf not available)"
+warning_ros:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
+warning_visualization_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS package visualization_msgs not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

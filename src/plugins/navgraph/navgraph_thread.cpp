@@ -37,7 +37,20 @@ NavGraphThread::NavGraphThread()
   : Thread("NavGraphThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
+#ifdef HAVE_VISUALIZATION
+  vt_ = NULL;
+#endif
 }
+
+#ifdef HAVE_VISUALIZATION
+/** Constructor. */
+NavGraphThread::NavGraphThread(NavGraphVisualizationThread *vt)
+  : Thread("NavGraphThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+{
+  vt_ = vt;
+}
+#endif
 
 /** Destructor. */
 NavGraphThread::~NavGraphThread()
@@ -176,7 +189,11 @@ NavGraphThread::generate_plan(std::string goal_name)
       m += " - " + plan_[i].name();
     }
     logger->log_info(name(), "%s", m.c_str());
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->set_plan(plan_);
+#endif
   }
+
 }
 
 void
@@ -187,6 +204,10 @@ NavGraphThread::generate_plan(float x, float y, float ori)
   generate_plan(close_to_goal.name());
 
   plan_.push_back(RCSoftMapNode("free-target", x, y, ori));
+
+#ifdef HAVE_VISUALIZATION
+  if (vt_)  vt_->set_plan(plan_);
+#endif
 }
 
 
@@ -225,6 +246,11 @@ NavGraphThread::stop_motion()
   }
   exec_active_ = false;
   pp_nav_if_->set_final(true);
+
+#ifdef HAVE_VISUALIZATION
+  if (vt_)  vt_->reset_plan();
+#endif
+
 }
 
 
@@ -260,6 +286,9 @@ NavGraphThread::send_next_goal()
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to send cartesian goto for next goal, exception follows");
     logger->log_warn(name(), e);
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->reset_plan();
+#endif
   }
 }
 

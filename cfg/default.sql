@@ -341,4 +341,5 @@ INSERT INTO "config" VALUES('/plugins/navgraph/global_frame','string','/map','Gl
 INSERT INTO "config" VALUES('/plugins/navgraph/navigator_interface_id','string','Navigator','Blackboard interface ID for navigator interface of locomotion component');
 INSERT INTO "config" VALUES('/plugins/navgraph/graph_file','string','/home/tim/robotics/rcsoftx/cfg/adot/maps/adot-converted.plan','Graph file to use for path planning');
 INSERT INTO "config" VALUES('/plugins/navgraph/tolerance','float',0.25,'Distance between actual and target position to consider traveling to a node finished; m');
+INSERT INTO "config" VALUES('/plugins/navgraph/visualization','bool',1,'Visualize graph and current actions?');
 COMMIT;

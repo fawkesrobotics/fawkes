@@ -21,6 +21,10 @@
 #ifndef __PLUGINS_NAVGRAPH_NAVGRAPH_THREAD_H_
 #define __PLUGINS_NAVGRAPH_NAVGRAPH_THREAD_H_
 
+#ifdef HAVE_VISUALIZATION
+#  include "visualization_thread.h"
+#endif
+
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
@@ -47,6 +51,9 @@ class NavGraphThread
   public fawkes::TransformAspect
 {
 public:
+#ifdef HAVE_VISUALIZATION
+  NavGraphThread(NavGraphVisualizationThread *vt);
+#endif
   NavGraphThread();
   virtual ~NavGraphThread();
 
@@ -81,7 +88,9 @@ public:
   bool exec_active_;
   std::vector<fawkes::RCSoftMapNode> plan_;
 
-
+#ifdef HAVE_VISUALIZATION
+  NavGraphVisualizationThread *vt_;
+#endif
 };
 
 #endif
