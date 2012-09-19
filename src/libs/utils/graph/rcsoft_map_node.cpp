@@ -71,6 +71,20 @@ RCSoftMapNode::RCSoftMapNode(std::string name, float x, float y,
 }
 
 
+/** Constructor.
+ * @param name name of the node
+ * @param x World X coordinate of the node
+ * @param y World Y position of the node
+ * @param ori orientation of node
+ */
+RCSoftMapNode::RCSoftMapNode(std::string name, float x, float y, float ori)
+{
+  __name       = name;
+  __x          = x;
+  __y          = y;
+}
+
+
 /** Get node name.
  * @return node name
  */

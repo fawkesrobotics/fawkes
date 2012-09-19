@@ -43,6 +43,8 @@ class RCSoftMapNode
 		std::vector<std::string> properties,
 		std::vector<std::string> aliases);
 
+  RCSoftMapNode(std::string name, float x, float y, float ori);
+
 
   const std::string &        name() const;
   float                      x() const;

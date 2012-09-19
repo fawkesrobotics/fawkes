@@ -50,7 +50,7 @@ class RCSoftMapGraph
   fawkes::RCSoftMapNode               root_node();
 
   fawkes::RCSoftMapNode               closest_node(float pos_x, float pos_y,
-						   std::string property);
+						   std::string property = "");
 
   std::vector<fawkes::RCSoftMapNode>  search_nodes(std::string property);
 
