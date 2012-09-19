@@ -219,6 +219,7 @@ function SkillJumpState:do_init()
    self.skill_status = skillstati.S_RUNNING
 
 
+   self:init()
    for _, s in ipairs(self.skills) do
       local set_already = false
       local args = {}
@@ -242,7 +243,6 @@ function SkillJumpState:do_init()
 
       s.__args = args
    end
-   self:init()
 
    if self.skills then
       local t = {}
