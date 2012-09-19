@@ -2,9 +2,10 @@
 /***************************************************************************
  *  astar.h - Implementation of A*
  *
- *  Generated: Mon Sep 15 18:39:00 2002
- *  Copyright  2002-2007  Stefan Jacobs, Martin Liebenberg
- *
+ *  Created: Mon Sep 15 18:39:00 2002
+ *  Copyright  2007  Martin Liebenberg
+ *             2002  Stefan Jacobs
+ *             2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -32,30 +33,27 @@
 
 namespace fawkes {
 
-
 class AStar
 {
  public:
   AStar ();
   ~AStar();
 
-  std::vector< AStarState * > solve( AStarState * initialState );
+  std::vector<AStarState *> solve( AStarState * initialState );
 
  private:
-
-  struct Cmp {
+  struct CmpSearchStateCost {
     bool operator() ( AStarState * a1, AStarState * a2 ) const
-    { return (a1->totalEstimatedCost >= a2->totalEstimatedCost); }
+    { return (a1->total_estimated_cost >= a2->total_estimated_cost); }
   };
   
-  std::priority_queue< AStarState *, std::vector< AStarState * >, Cmp > openList;
-  std::map< const long, AStarState*> closedList;
+  std::priority_queue<AStarState *, std::vector<AStarState *>, CmpSearchStateCost> open_list;
+  std::map<const size_t, AStarState*> closed_list;
 
   AStarState * search();
   
-  std::vector< AStarState * > getSolutionSequence( AStarState * node );
-  std::vector< AStarState * > solution;
-  
+  std::vector<AStarState *> solution_sequence(AStarState * node);
+  std::vector<AStarState *> solution;
 };
 
 

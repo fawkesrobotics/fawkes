@@ -3,8 +3,9 @@
  *  astar_state.h - Abstract class of a astar state.
  *
  *  Generated: Mon Sep 15 18:48:00 2002
- *  Copyright  2002-2007  Stefan Jacobs, Martin Liebenberg
- *
+ *  Copyright  2002  Stefan Jacobs
+ *             2007  Martin Liebenberg
+ *             2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,6 +26,7 @@
 #define _ASTAR_ABSTRACT_STATE_H_
 
 #include <vector>
+#include <cstdlib>
 
 namespace fawkes {
 
@@ -49,9 +51,9 @@ class AStarState
   
   /** Generates a unique key for this state.
    * There has to be a unique key for each state (fast closed list -> bottleneck!)
-   * @return unique long key
+   * @return unique key
    */
-  virtual long calculateKey() = 0;
+  virtual size_t key() = 0;
   
   /** Estimate the heuristic cost to the goal.
    * @return estimated cost as double
@@ -61,23 +63,21 @@ class AStarState
   /** Check, wether we reached a goal or not.
    * @return true, if this state is a goal, else false
    */
-  virtual bool isGoal() = 0;
+  virtual bool is_goal() = 0;
   
   /** Generate all successors and put them to this vector.
    *  @return a vector of pointers of AStarState to a successor
    */
-  virtual std::vector< AStarState * > generateChildren() = 0;
+  virtual std::vector<AStarState *> children() = 0;
 
   /** Predecessor. */
-  AStarState *father;
+  AStarState *parent;
 
   /** Past cost. */
-  double pastCost;
+  double past_cost;
   /** Total estimated cost. */
-  double totalEstimatedCost;
-  
-  /** The unique key of this state. */
-  long key;
+  double total_estimated_cost;
+
 };
 
 } // end namespace fawkes

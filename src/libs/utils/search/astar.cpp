@@ -2,9 +2,10 @@
 /***************************************************************************
  *  astar.cpp - Implementation of A*
  *
- *  Generated: Mon Sep 15 18:38:00 2002
- *  Copyright  2002-2007  Stefan Jacobs, Martin Liebenberg
- *
+ *  Created: Mon Sep 15 18:38:00 2002
+ *  Copyright  2007  Martin Liebenberg
+ *             2002  Stefan Jacobs
+ *             2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,26 +24,25 @@
 
 #include <utils/search/astar.h>
 
-
 namespace fawkes {
 
 /** @class AStar <utils/search/astar.h>
- *  This is an implementation of the A* search algorithm.
+ * This is an implementation of the A* search algorithm.
  * 
  * @author Stefan Jacobs, Martin Liebenberg
  */
-/** @var AStar::closedList
- * 	 This is AStars closedList.	
+/** @var AStar::closed_list
+ * 	 This is AStars closed_list.	
  */
 /** @var AStar::solution
  * 	This is the final solution vector.
  */
-/** @var AStar::openList
+/** @var AStar::open_list
  *   	This is AStars openlist.
  */
-/** @struct AStar::Cmp <utils/search/astar.h>
+/** @struct AStar::CmpSearchStateCost <utils/search/astar.h>
  * Comparison structure to be used for the ordering on AStar::openList.
- * @fn AStar::Cmp::operator() ( AStarState * a1, AStarState * a2 ) const
+ * @fn AStar::CmpSearchStateCost::operator() ( AStarState * a1, AStarState * a2 ) const
  * 	The relation >= of this ordering.
  * @param a1 the left operand
  * @param a2 the right operand
@@ -55,48 +55,41 @@ namespace fawkes {
  */
 AStar::AStar()
 {
-  while ( openList.size() > 0 )
-    {
-      openList.pop();
-    }
-  closedList.clear();
-  solution.clear();
 }
 
-  /** Destructor.
-   *  This destructs the AStarObject.
-   */
+/** Destructor.
+ *  This destructs the AStarObject.
+ */
 AStar::~AStar()
 {
-  
-   AStarState * best = 0;
-  while ( openList.size() > 0 )
-    {
-      best = openList.top();
-      openList.pop();
-      delete best;
-    }
-  closedList.clear();
+  AStarState * best = 0;
+  while ( ! open_list.empty() )
+  {
+    best = open_list.top();
+    open_list.pop();
+    delete best;
+  }
+  closed_list.clear();
 }
 
-  /** Solves a situation given by the initial state with AStar, and
-   *  returns a vector of AStarStates that solve the problem.
-   * @param initialState pointer of AStarState to the initial state
-   * @return a vector of pointers of AStarState with the solution sequence
-   */
+/** Solves a situation given by the initial state with AStar, and
+ *  returns a vector of AStarStates that solve the problem.
+ * @param initialState pointer of AStarState to the initial state
+ * @return a vector of pointers of AStarState with the solution sequence
+ */
 std::vector< AStarState * > AStar::solve( AStarState * initialState )
 {
   AStarState * best = 0;
-  while ( openList.size() > 0 )
-    {
-      best = openList.top();
-      openList.pop();
-      delete best;
-    }
-  closedList.clear();
+  while ( open_list.size() > 0 )
+  {
+    best = open_list.top();
+    open_list.pop();
+    delete best;
+  }
+  closed_list.clear();
 
-  openList.push( initialState );
-  return getSolutionSequence( search() );
+  open_list.push( initialState );
+  return solution_sequence( search() );
 }
 
 
@@ -108,63 +101,64 @@ AStarState * AStar::search( )
   std::vector< AStarState * > children;
 
   // while the openlist not is empty
-  while ( openList.size() > 0 )
+  while ( open_list.size() > 0 )
+  {
+    // take the best state, and check if it is on closed list
+    do
     {
-      // take the best state, and check if it is on closed list
-      do
-	{
-	  if ( openList.size() > 0 )
-	    {
-	      best = openList.top();
-	      openList.pop( );
-	    }
-	  else
-	    return 0;
-	  key = best->calculateKey( );
-	}
-      while ( closedList.find( key ) != closedList.end() );
-      
-      // put best state on closed list
-      closedList[key] = best;
-      
-      // check if its a goal.
-      if ( best->isGoal( ) ) 
-       {
-	    return best;
-       }
-      // generate all its children
-      children = best->generateChildren( );
-      for ( unsigned int i = 0; i < children.size(); i++ )
-	   openList.push( children[i] );
+      if ( open_list.size() > 0 )
+      {
+	best = open_list.top();
+	open_list.pop( );
+      }
+      else
+	return 0;
+      key = best->key( );
     }
+    while ( closed_list.find( key ) != closed_list.end() );
+      
+    // put best state on closed list
+    closed_list[key] = best;
+      
+    // check if its a goal.
+    if ( best->is_goal( ) ) 
+    {
+      return best;
+    }
+    // generate all its children
+    children = best->children( );
+    for ( unsigned int i = 0; i < children.size(); i++ )
+      open_list.push( children[i] );
+  }
   return 0;
 }
 
 
-  /** Generates a solution sequence for a given state
-   * Initial solution is in solution[0]!
-   * @param node a pointer of AStarState to the goal
-   * @return the path from solution to initial solution
-   */
-std::vector< AStarState * > AStar::getSolutionSequence( AStarState * node )
+/** Generates a solution sequence for a given state
+ * Initial solution is in solution[0]!
+ * @param node a pointer of AStarState to the goal
+ * @return the path from solution to initial solution
+ */
+std::vector<AStarState *>
+AStar::solution_sequence(AStarState * node)
 {
   solution.clear();
   AStarState * state = node;
   
   while ( state != 0 )
-    {
-      closedList.erase(state->key);
-      solution.insert( solution.begin(), state );
-      state = state->father;
-    }
-   
-   //delete the states, which are not part of the solution
-   while ( closedList.size() > 0 )
-    {
-      state = closedList.begin()->second;
-      closedList.erase(state->key);
-      delete state;
-     }
+  {
+    closed_list.erase(state->key());
+    solution.insert( solution.begin(), state );
+    state = state->parent;
+  }
+
+  //delete the states, which are not part of the solution
+  while ( closed_list.size() > 0 )
+  {
+    state = closed_list.begin()->second;
+    closed_list.erase(state->key());
+    delete state;
+  }
   return solution;
 }
 
