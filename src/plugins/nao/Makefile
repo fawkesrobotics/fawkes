@@ -101,7 +101,7 @@ else
 endif
 
 # Ordering constraints
-$(LIBDIR)/libnaofawkes.so $(PLUGINS_all): | $(LIBDIR)/libfawkesnaoqibroker.so
+$(LIBDIR)/libnaofawkes.so $(PLUGINS_all): | $(LIBDIR)/libfawkesnaoqibroker.so interfaces
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
