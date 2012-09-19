@@ -15,7 +15,7 @@
 
 include $(BUILDSYSDIR)/boost.mk
 
-OPENRAVE_MIN_VERSION=0.6.4
+OPENRAVE_MIN_VERSION=0.7.0
 
 #Check for OpenRAVE
 ifneq ($(PKGCONFIG),)

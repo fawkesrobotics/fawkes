@@ -148,7 +148,7 @@ void
 OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
   try{
-    __env->AddRobot(robot);
+    __env->Add(robot);
     if(__logger)
       {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
   } catch(openrave_exception &e) {
@@ -539,7 +539,7 @@ OpenRaveEnvironment::add_object(const std::string& name, const std::string& file
     EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->ReadKinBodyXMLFile(filename);
     kb->SetName(name);
-    __env->AddKinBody(kb);
+    __env->Add(kb);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
       __logger->log_warn("OpenRAVE Environment", "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
