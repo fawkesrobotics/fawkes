@@ -60,11 +60,12 @@ NavGraphThread::~NavGraphThread()
 void
 NavGraphThread::init()
 {
-  cfg_graph_file_   = config->get_string("/plugins/navgraph/graph_file");
-  cfg_base_frame_   = config->get_string("/plugins/navgraph/base_frame");
-  cfg_global_frame_ = config->get_string("/plugins/navgraph/global_frame");
-  cfg_nav_if_id_    = config->get_string("/plugins/navgraph/navigator_interface_id");
-  cfg_tolerance_    = config->get_float("/plugins/navgraph/tolerance");
+  cfg_graph_file_      = config->get_string("/plugins/navgraph/graph_file");
+  cfg_base_frame_      = config->get_string("/plugins/navgraph/base_frame");
+  cfg_global_frame_    = config->get_string("/plugins/navgraph/global_frame");
+  cfg_nav_if_id_       = config->get_string("/plugins/navgraph/navigator_interface_id");
+  cfg_tolerance_       = config->get_float("/plugins/navgraph/tolerance");
+  cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
 
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
@@ -79,11 +80,13 @@ NavGraphThread::init()
 
   exec_active_ = false;
   last_node_   = "";
+  cmd_sent_at_ = new Time(clock);
 }
 
 void
 NavGraphThread::finalize()
 {
+  delete cmd_sent_at_;
   delete astar_;
   delete map_graph_;
   blackboard->close(pp_nav_if_);
@@ -135,6 +138,11 @@ NavGraphThread::loop()
 	pp_nav_if_->set_final(true);
 	needs_write = true;
       } else {
+	send_next_goal();
+      }
+    } else {
+      fawkes::Time now(clock);
+      if ((now - cmd_sent_at_) > cfg_resend_interval_) {
 	send_next_goal();
       }
     }
@@ -291,6 +299,7 @@ NavGraphThread::send_next_goal()
 						 tf::get_yaw(tpose.getRotation()));
   try {
     nav_if_->msgq_enqueue(gotomsg);
+    cmd_sent_at_->stamp();
 
 #ifdef HAVE_VISUALIZATION
     if (vt_)  vt_->set_current_edge(last_node_, next_target.name());

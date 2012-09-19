@@ -39,6 +39,7 @@
 
 namespace fawkes {
   class AStar;
+  class Time;
 }
 
 class NavGraphThread
@@ -78,6 +79,7 @@ public:
   std::string  cfg_global_frame_; 
   std::string  cfg_nav_if_id_; 
   float        cfg_tolerance_; 
+  float        cfg_resend_interval_; 
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
@@ -88,6 +90,8 @@ public:
   bool exec_active_;
   std::string last_node_;
   std::vector<fawkes::RCSoftMapNode> plan_;
+
+  fawkes::Time *cmd_sent_at_;
 
 #ifdef HAVE_VISUALIZATION
   NavGraphVisualizationThread *vt_;
