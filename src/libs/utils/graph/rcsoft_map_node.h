@@ -58,6 +58,14 @@ class RCSoftMapNode
   bool has_alias(std::string property);
   bool is_valid() const;
 
+  /** Check nodes for equality.
+   * Nodes are equal if they have the same name.
+   * @param n node to compare with
+   * @return true if the node is the same as this one, false otherwise
+   */
+  bool operator==(const RCSoftMapNode &n) const
+  { return __name == n.__name; }
+
  private:
   std::string __name;
   float       __x;
