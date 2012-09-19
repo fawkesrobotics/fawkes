@@ -25,7 +25,7 @@ module(..., skillenv.module_init)
 -- Crucial skill information
 name               = "katana_grab_any"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=true}
-depends_skills     = {"katana", "katana_rel", "or_object", "say"}
+depends_skills     = {"katana", "katana_rel", "katana_approach", "or_object", "say"}
 depends_interfaces = {
    {v = "katanaarm", type = "KatanaInterface"}
 }
@@ -61,7 +61,7 @@ local MAX_APPROACH_DIST = 0.07 -- approach: 5cm more than acutal target position
 local SLOW_DOWN_VELOCITY = 0.3
 local DEF_GRAB_THETA = math.pi/2 -- such that it can grab cylindrical objects
 local MAX_GRAB_THETA_ERROR = 0.5 -- ~17° +-
-local MAX_GRAB_DISTANCE = 0.60
+local MAX_GRAB_DISTANCE = 0.55
 
 -- functions
 function jc_obj_is_grabable(state)
@@ -113,19 +113,24 @@ fsm:add_transitions {
    {"FAILED_PRE_GRAB_POS", "FAILED", fail_to="FAILED", desc="target not in range", skill=say},
 
    {"TO_APPROACH_OBJ", "REPOSITION_OBJ", wait_sec = 1.0},
+  -- {"TO_APPROACH_OBJ", "APPROACH_OBJ", wait_sec = 1.0},
+   --{"TO_APPROACH_OBJ", "FINAL", wait_sec = 1.0}, --TODO: skipp approach and stuff
 
    {"REPOSITION_OBJ", "APPROACH_OBJ", fail_to="APPROACH_OBJ", desc="obj at safe distance", skill=or_object},
    {"REPOSITION_OBJ", "APPROACH_OBJ", "not (vars.object and vars.table_height)", desc="no object given", precond=true},
 
-   {"APPROACH_OBJ", "CHECK_GRABABILITY", skill=katana_rel, fail_to="FAILED_APPROACH", desc="reached max approach distance"},
+   --{"APPROACH_OBJ", "CHECK_GRABABILITY", skill=katana_rel, fail_to="APPROACH_AGAIN", desc="reached max approach distance"},
+   {"APPROACH_OBJ", "CHECK_GRABABILITY", skill=katana_approach, fail_to="APPROACH_AGAIN", desc="reached max approach distance"},
    {"APPROACH_OBJ", "STOP_MOVEMENT", jc_obj_is_grabable, desc="obj close enough"},
+   {"APPROACH_AGAIN", "CHECK_GRABABILITY", skill=katana_rel, fail_to="FAILED_APPROACH", desc="reached max approach distance"},
+   {"APPROACH_AGAIN", "STOP_MOVEMENT", jc_obj_is_grabable, desc="obj close enough"},
 
    {"FAILED_APPROACH", "FAILED", fail_to="FAILED", desc="unreachable", skill=say},
 
    {"STOP_MOVEMENT", "TO_GRAB", skill=katana, args={stop=true}, fail_to="TO_GRAB", desc="stopped"},
    {"CHECK_GRABABILITY", "TO_GRAB", jc_obj_is_grabable, desc="obj close enough"},
    --{"CHECK_GRABABILITY", "FAILED", true, desc="obj out of range"},
-   {"CHECK_GRABABILITY", "TO_GRAB", true, desc="obj out of range"},
+   {"CHECK_GRABABILITY", "TO_GRAB", true, desc="obj probably out of range"},
 
    {"TO_GRAB", "GRAB", wait_sec = 2.0},
 
@@ -159,6 +164,7 @@ function PRE_GRAB_POS:init()
    local theta = DEF_GRAB_THETA
    local frame = self.fsm.vars.frame or "/base_link"
 
+   katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new("", false))
    self.args = {x=self.fsm.vars.x,
                 y=self.fsm.vars.y,
                 z=self.fsm.vars.z,
@@ -188,6 +194,14 @@ end
 
 
 function APPROACH_OBJ:init()
+   katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new("default", true))
+   self.args = {dist = MIN_APPROACH_OFFSET + MAX_APPROACH_DIST,
+                min = MIN_APPROACH_OFFSET,
+                max = MAX_APPROACH_DIST, --goes this much further(!) than "dist"!
+                orth_lower = 0.01,
+                orth_upper = 0.01}
+
+   --[[
    -- get direction vector of manipulator, set length to MAX_APPROACH_DIST, move relatively to there
    katanaarm:read()
 
@@ -200,9 +214,26 @@ function APPROACH_OBJ:init()
    self.args = {x = vector_to_target:x(),
                 y = vector_to_target:y(),
                 z = 0,
+                straight=true,
                 theta_error = 0.5,
                 theta=math.pi/2} --theta=0 -> preferably look forward
+   --]]
+end
 
+function APPROACH_AGAIN:init()
+   katanaarm:read()
+
+   local vector_to_target = fawkes.HomVector:new(0, 0, 1)
+   vector_to_target:rotate_y(math.pi/2) --look straight forward
+   vector_to_target:rotate_z(katanaarm:phi() - math.pi/2)
+   vector_to_target:set_length(MIN_APPROACH_OFFSET + MAX_APPROACH_DIST)
+
+   katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new("default", false))
+   self.args = {x = vector_to_target:x(),
+                y = vector_to_target:y(),
+                z = 0,
+                theta_error = 0.5,
+                theta=math.pi/2} --theta=0 -> preferably look forward
 end
 
 function FAILED_APPROACH:init()
