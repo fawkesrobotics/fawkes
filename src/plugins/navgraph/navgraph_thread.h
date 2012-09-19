@@ -86,6 +86,7 @@ public:
   fawkes::AStar *astar_;
 
   bool exec_active_;
+  std::string last_node_;
   std::vector<fawkes::RCSoftMapNode> plan_;
 
 #ifdef HAVE_VISUALIZATION

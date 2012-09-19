@@ -78,6 +78,7 @@ NavGraphThread::init()
   astar_     = new AStar();
 
   exec_active_ = false;
+  last_node_   = "";
 }
 
 void
@@ -126,6 +127,8 @@ NavGraphThread::loop()
   if (exec_active_) {
     // check if current was target reached
     if (node_reached()) {
+      logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
+      last_node_ = plan_[0].name();
       plan_.erase(plan_.begin());
       if (plan_.empty()) {
 	stop_motion();
@@ -244,6 +247,7 @@ NavGraphThread::stop_motion()
     logger->log_warn(name(), "Failed to stop motion, exception follows");
     logger->log_warn(name(), e);
   }
+  last_node_ = "";
   exec_active_ = false;
   pp_nav_if_->set_final(true);
 
@@ -277,12 +281,20 @@ NavGraphThread::send_next_goal()
     throw;
   }
 
+  logger->log_info(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
+                  tpose.getOrigin().x(), tpose.getOrigin().y(),
+                  tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
+
   NavigatorInterface::CartesianGotoMessage *gotomsg =
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
   try {
     nav_if_->msgq_enqueue(gotomsg);
+
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
+#endif
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to send cartesian goto for next goal, exception follows");
     logger->log_warn(name(), e);

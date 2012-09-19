@@ -48,6 +48,9 @@ NavGraphVisualizationThread::init()
   logger->log_debug(name(), "Visualizing base graph");
 
   std::string filename = config->get_string("/plugins/navgraph/graph_file");
+  if (filename[0] != '/') {
+    filename = std::string(CONFDIR) + "/" + filename;
+  }
 
   graph_ = new RCSoftMapGraph(filename);
 
@@ -85,7 +88,7 @@ void
 NavGraphVisualizationThread::set_plan(std::vector<fawkes::RCSoftMapNode> plan)
 {
   plan_ = plan;
-  target_node_ = "";
+  plan_to_ = plan_from_ = "";
   wakeup();
 }
 
@@ -94,7 +97,7 @@ void
 NavGraphVisualizationThread::reset_plan()
 {
   plan_.clear();
-  target_node_ = "";
+  plan_to_ = plan_from_ = "";
   wakeup();
 }
 
@@ -104,9 +107,10 @@ NavGraphVisualizationThread::reset_plan()
  * @param to node name of the target node
  */
 void
-NavGraphVisualizationThread::set_target_node(std::string target_node)
+NavGraphVisualizationThread::set_current_edge(std::string from, std::string to)
 {
-  target_node_ = target_node;
+  plan_from_ = from;
+  plan_to_ = to;
   wakeup();
 }
 
@@ -164,8 +168,8 @@ NavGraphVisualizationThread::publish()
   cur_line.id = last_id_num_++;
   cur_line.type = visualization_msgs::Marker::LINE_LIST;
   cur_line.action = visualization_msgs::Marker::ADD;
-  cur_line.color.r = 0.f;
-  cur_line.color.g = cur_line.color.b = 1.f;
+  cur_line.color.r = cur_line.color.g = 1.f;
+  cur_line.color.b = 0.f;
   cur_line.color.a = 1.0;
   cur_line.scale.x = 0.05;
   cur_line.lifetime = ros::Duration(0, 0);
@@ -189,12 +193,17 @@ NavGraphVisualizationThread::publish()
     sphere.scale.z = 0.05;
     if (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end()) {
       sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.1;
-      sphere.color.r = 1.f;
+      if (plan_to_ == nodes[i].name()) {
+        sphere.color.r = sphere.color.g = 1.f;
+      } else {
+        sphere.color.r = 1.f;
+        sphere.color.g = 0.f;
+      }
     } else {
       sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.05;
       sphere.color.r = 0.5;
     }
-    sphere.color.g = sphere.color.b = 0.f;
+    sphere.color.b = 0.f;
     sphere.color.a = 1.0;
     sphere.lifetime = ros::Duration(0, 0);
     m.markers.push_back(sphere);
@@ -239,7 +248,9 @@ NavGraphVisualizationThread::publish()
 
 	  RCSoftMapNode child_node = graph_->node(children[j]);
 
-	  if (target_node_ == nodes[i].name() || target_node_ == children[j]) {
+	  if ( (plan_to_   == nodes[i].name() && plan_from_ == children[j]) ||
+               (plan_from_ == nodes[i].name() && plan_to_   == children[j]) )
+          {
 	    // it's the current line
 	    cur_line.points.push_back(p1);
 	    cur_line.points.push_back(p2);

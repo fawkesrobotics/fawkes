@@ -49,7 +49,7 @@ class NavGraphVisualizationThread
   virtual void finalize();
 
   void set_plan(std::vector<fawkes::RCSoftMapNode> plan);
-  void set_target_node(std::string target_node);
+  void set_current_edge(std::string from, std::string to);
   void reset_plan();
 
  private:
@@ -60,7 +60,8 @@ class NavGraphVisualizationThread
   ros::Publisher vispub_;
 
   std::vector<fawkes::RCSoftMapNode> plan_;
-  std::string target_node_;
+  std::string plan_to_;
+  std::string plan_from_;
 
   fawkes::RCSoftMapGraph *graph_;
 };
