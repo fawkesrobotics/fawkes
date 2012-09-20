@@ -210,9 +210,8 @@ MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
   // sanitize interface ID to be suitable for MongoDB
   std::string id = interface->id();
   size_t pos = 0;
-  size_t at;
-  while((at = id.find(" ", pos)) != string::npos) {
-    id.replace(at, 1, "_");
+  while((pos = id.find_first_of(" -", pos)) != string::npos) {
+    id.replace(pos, 1, "_");
     pos = pos + 1;
   }
   __collection = __database + "." + interface->type() + "." + id;

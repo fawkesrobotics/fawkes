@@ -151,9 +151,10 @@ MongoLogImagesThread::update_images()
                        i->c_str());
 
       std::string topic_name = std::string("Images.") + *i;
-      std::string::size_type pos = 0;
-      while ((pos = topic_name.find("-", pos)) != std::string::npos) {
+      size_t pos = 0;
+      while ((pos = topic_name.find_first_of(" -", pos)) != std::string::npos) {
         topic_name.replace(pos, 1, "_");
+        pos = pos + 1;
       }
 
       ImageInfo &imginfo = imgs_[*i];
