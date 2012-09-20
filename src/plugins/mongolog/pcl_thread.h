@@ -44,6 +44,10 @@
 
 #include <sensor_msgs/PointCloud2.h>
 
+namespace mongo {
+  class GridFS;
+}
+
 class MongoLogPointCloudThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
@@ -77,6 +81,7 @@ class MongoLogPointCloudThread
   std::map<std::string, PointCloudInfo> __pcls;
 
   mongo::DBClientBase *__mongodb;
+  mongo::GridFS       *__mongogrid;
   std::string          __collection;
   std::string          __database;
 };

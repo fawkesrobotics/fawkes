@@ -29,6 +29,7 @@
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
+#include <mongo/client/gridfs.h>
 
 using namespace fawkes;
 using namespace mongo;
@@ -64,6 +65,7 @@ MongoLogPointCloudThread::init()
 		     __database.c_str());
   }
   __mongodb    = mongodb_client;
+  __mongogrid  = new GridFS(*__mongodb, __database, "GridFS.PointClouds");
 
   __adapter = new MongoLogPointCloudAdapter(pcl_manager, logger);
 
@@ -144,9 +146,10 @@ MongoLogPointCloudThread::loop()
         subb.append("point_size", (unsigned int)point_size);
         subb.append("num_points", (unsigned int)num_points);
 
-//        subb.appendBinData("point_data", (int) data_size, BinDataGeneral, point_data);
-	// fix for mongodb version < 2.0.1
-        subb.appendBinData("point_data", (int) data_size, BinDataGeneral, (char*) point_data);
+        std::stringstream name;
+        name << pi.topic_name << "_" << time.in_msec();
+        subb.append("data", __mongogrid->storeFile((char*) point_data, data_size, name.str()));
+
         BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
         for (unsigned int i = 0; i < pi.msg.fields.size(); i++) {
           BSONObjBuilder fi(subb2.subobjStart());

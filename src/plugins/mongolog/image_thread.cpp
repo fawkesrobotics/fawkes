@@ -30,6 +30,7 @@
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
+#include <mongo/client/gridfs.h>
 
 using namespace fawkes;
 using namespace firevision;
@@ -66,6 +67,7 @@ MongoLogImagesThread::init()
 		     __database.c_str());
   }
   __mongodb    = mongodb_client;
+  __mongogrid  = new GridFS(*__mongodb, __database, "GridFS.Images");
 
   last_update_ = new Time(clock);
   now_ = new Time(clock);
@@ -111,9 +113,10 @@ MongoLogImagesThread::loop()
       subb.append("height", imginfo.img->height());
       subb.append("colorspace", colorspace_to_string(imginfo.img->colorspace()));
 
-//      subb.appendBinData("data", (int) imginfo.img->data_size(), BinDataGeneral, imginfo.img->buffer());
-      // fix for mongodb version < 2.0.1
-      subb.appendBinData("data", (int) imginfo.img->data_size(), BinDataGeneral, (char*) imginfo.img->buffer());
+      std::stringstream name;
+      name << imginfo.topic_name << "_" << cap_time.in_msec();
+      subb.append("data", __mongogrid->storeFile((char*) imginfo.img->buffer(), imginfo.img->data_size(), name.str()));
+
       subb.doneFast();
       __collection = __database + "."  + imginfo.topic_name;
       __mongodb->insert(__collection, document.obj());

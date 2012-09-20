@@ -43,6 +43,10 @@ namespace firevision {
   class SharedMemoryImageBuffer;
 }
 
+namespace mongo {
+  class GridFS;
+}
+
 class MongoLogImagesThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
@@ -80,6 +84,7 @@ class MongoLogImagesThread
   fawkes::Time *last_update_;
   fawkes::Time *now_;
   mongo::DBClientBase *__mongodb;
+  mongo::GridFS       *__mongogrid;
   std::string          __collection;
   std::string          __database;
 };
