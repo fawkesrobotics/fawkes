@@ -48,6 +48,7 @@ class NavGraphVisualizationThread
   virtual void loop();
   virtual void finalize();
 
+  void set_graph(fawkes::TopologicalMapGraph *graph);
   void set_plan(std::vector<fawkes::TopologicalMapNode> plan);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();

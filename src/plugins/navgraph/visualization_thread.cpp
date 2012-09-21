@@ -39,21 +39,13 @@ typedef std::multimap<std::string, std::string> ConnMap;
 NavGraphVisualizationThread::NavGraphVisualizationThread()
   : fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
 {
+  graph_ = NULL;
 }
 
 
 void
 NavGraphVisualizationThread::init()
 {
-  logger->log_debug(name(), "Visualizing base graph");
-
-  std::string filename = config->get_string("/plugins/navgraph/graph_file");
-  if (filename[0] != '/') {
-    filename = std::string(CONFDIR) + "/" + filename;
-  }
-
-  graph_ = new RCSoftMapGraph(filename);
-
   vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100, /* latching */ true);
 
   publish();
@@ -62,8 +54,6 @@ NavGraphVisualizationThread::init()
 void
 NavGraphVisualizationThread::finalize()
 {
-  delete graph_;
-
   visualization_msgs::MarkerArray m;
 
   for (size_t i = 0; i < last_id_num_; ++i) {
@@ -137,7 +127,9 @@ NavGraphVisualizationThread::loop()
 void
 NavGraphVisualizationThread::publish()
 {
-  std::vector<fawkes::RCSoftMapNode> nodes = graph_->nodes();
+  if (! graph_) return;
+
+  std::vector<fawkes::TopologicalMapNode> nodes = graph_->nodes();
   last_id_num_ = 0;
 
   std::map<std::string, fawkes::TopologicalMapNode> nodemap;
@@ -188,7 +180,7 @@ NavGraphVisualizationThread::publish()
 
   for (size_t i = 0; i < nodes.size(); ++i) {
     // Copy to get memory freed on exception
-    logger->log_info(name(), "Publishing node %s", nodes[i].name().c_str());
+    //logger->log_info(name(), "Publishing node %s", nodes[i].name().c_str());
 
     visualization_msgs::Marker sphere;
     sphere.header.frame_id = "/map";

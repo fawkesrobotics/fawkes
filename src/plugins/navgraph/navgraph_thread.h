@@ -59,6 +59,7 @@ public:
   virtual ~NavGraphThread();
 
   virtual void init();
+  virtual void once();
   virtual void loop();
   virtual void finalize();
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */

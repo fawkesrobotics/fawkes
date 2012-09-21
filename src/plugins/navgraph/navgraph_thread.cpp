@@ -94,6 +94,14 @@ NavGraphThread::finalize()
 }
 
 void
+NavGraphThread::once()
+{
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->set_graph(graph_);
+#endif
+}
+
+void
 NavGraphThread::loop()
 {
   // process messages
