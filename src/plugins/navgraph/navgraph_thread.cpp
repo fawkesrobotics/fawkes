@@ -75,7 +75,7 @@ NavGraphThread::init()
     cfg_graph_file_ = std::string(CONFDIR) + "/" + cfg_graph_file_;
   }
 
-  map_graph_ = new RCSoftMapGraph(cfg_graph_file_);
+  graph_ = load_rcsoft_graph(cfg_graph_file_);
   astar_     = new AStar();
 
   exec_active_ = false;
@@ -88,7 +88,7 @@ NavGraphThread::finalize()
 {
   delete cmd_sent_at_;
   delete astar_;
-  delete map_graph_;
+  delete graph_;
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
 }
@@ -170,9 +170,9 @@ NavGraphThread::generate_plan(std::string goal_name)
   }
 
 
-  RCSoftMapNode init =
-    map_graph_->closest_node(pose.getOrigin().x(), pose.getOrigin().y());
-  RCSoftMapNode goal = map_graph_->node(goal_name);
+  TopologicalMapNode init =
+    graph_->closest_node(pose.getOrigin().x(), pose.getOrigin().y());
+  TopologicalMapNode goal = graph_->node(goal_name);
 
 
   logger->log_debug(name(), "Starting at (%f,%f), closest node is '%s'",
@@ -181,7 +181,7 @@ NavGraphThread::generate_plan(std::string goal_name)
   plan_.clear();
   
   NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, map_graph_);
+    new NavGraphSearchState(init, goal, 0, NULL, graph_);
 
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
 
@@ -210,11 +210,13 @@ NavGraphThread::generate_plan(std::string goal_name)
 void
 NavGraphThread::generate_plan(float x, float y, float ori)
 {
-  RCSoftMapNode close_to_goal = map_graph_->closest_node(x, y);
+  TopologicalMapNode close_to_goal = graph_->closest_node(x, y);
   
   generate_plan(close_to_goal.name());
 
-  plan_.push_back(RCSoftMapNode("free-target", x, y, ori));
+  TopologicalMapNode n("free-target", x, y);
+  n.set_property("ori", ori);
+  plan_.push_back(n);
 
 #ifdef HAVE_VISUALIZATION
   if (vt_)  vt_->set_plan(plan_);
@@ -233,7 +235,7 @@ NavGraphThread::start_plan()
   } else {    
     exec_active_ = true;
 
-    RCSoftMapNode &final_target = plan_.back();
+    TopologicalMapNode &final_target = plan_.back();
 
     pp_nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
     pp_nav_if_->set_final(false);
@@ -273,7 +275,7 @@ NavGraphThread::send_next_goal()
     throw Exception("Cannot send next goal if plan is empty");
   }
 
-  RCSoftMapNode &next_target = plan_.front();
+  TopologicalMapNode &next_target = plan_.front();
 
   // get current position of robot in map frame
   tf::Stamped<tf::Pose> tpose;
@@ -321,7 +323,7 @@ NavGraphThread::node_reached()
     throw Exception("Cannot check node reached if plan is empty");
   }
 
-  RCSoftMapNode &cur_target = plan_.front();
+  TopologicalMapNode &cur_target = plan_.front();
 
   // get current position of robot in map frame
   tf::Stamped<tf::Pose> pose;

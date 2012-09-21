@@ -27,12 +27,12 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <plugins/ros/aspect/ros.h>
-#include <utils/graph/rcsoft_map_node.h>
+#include <utils/graph/topological_map_node.h>
 
 #include <ros/publisher.h>
 
 namespace fawkes {
-  class RCSoftMapGraph;
+  class TopologicalMapGraph;
 }
 
 class NavGraphVisualizationThread
@@ -48,7 +48,7 @@ class NavGraphVisualizationThread
   virtual void loop();
   virtual void finalize();
 
-  void set_plan(std::vector<fawkes::RCSoftMapNode> plan);
+  void set_plan(std::vector<fawkes::TopologicalMapNode> plan);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();
 
@@ -59,11 +59,11 @@ class NavGraphVisualizationThread
   size_t last_id_num_;
   ros::Publisher vispub_;
 
-  std::vector<fawkes::RCSoftMapNode> plan_;
+  std::vector<fawkes::TopologicalMapNode> plan_;
   std::string plan_to_;
   std::string plan_from_;
 
-  fawkes::RCSoftMapGraph *graph_;
+  fawkes::TopologicalMapGraph *graph_;
 };
 
 

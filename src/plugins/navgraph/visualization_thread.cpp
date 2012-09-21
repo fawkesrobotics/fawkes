@@ -21,7 +21,7 @@
 
 #include "visualization_thread.h"
 
-#include <utils/graph/rcsoft_map_graph.h>
+#include <utils/graph/topological_map_graph.h>
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -81,11 +81,23 @@ NavGraphVisualizationThread::finalize()
 }
 
 
+/** Set the graph.
+ * @param graph graph to use
+ */
+void
+NavGraphVisualizationThread::set_graph(TopologicalMapGraph *graph)
+{
+  graph_ = graph;
+  plan_.clear();
+  plan_to_ = plan_from_ = "";
+  wakeup();
+}
+
 /** Set current plan.
  * @param plan current plan
  */
 void
-NavGraphVisualizationThread::set_plan(std::vector<fawkes::RCSoftMapNode> plan)
+NavGraphVisualizationThread::set_plan(std::vector<fawkes::TopologicalMapNode> plan)
 {
   plan_ = plan;
   plan_to_ = plan_from_ = "";
@@ -128,7 +140,7 @@ NavGraphVisualizationThread::publish()
   std::vector<fawkes::RCSoftMapNode> nodes = graph_->nodes();
   last_id_num_ = 0;
 
-  std::map<std::string, fawkes::RCSoftMapNode> nodemap;
+  std::map<std::string, fawkes::TopologicalMapNode> nodemap;
   for (unsigned int i = 0; i < nodes.size(); ++i) {
     nodemap[nodes[i].name()] = nodes[i];
   }
@@ -226,7 +238,7 @@ NavGraphVisualizationThread::publish()
     text.text = nodes[i].name();
     m.markers.push_back(text);
 
-    std::vector<std::string> children = nodes[i].children();
+    std::vector<std::string> children = nodes[i].reachable_nodes();
     for (unsigned int j = 0; j < children.size(); ++j) {
       std::pair<ConnMap::iterator, ConnMap::iterator>
         ret = conns.equal_range(children[j]);
@@ -246,7 +258,7 @@ NavGraphVisualizationThread::publish()
           p2.y =  nodemap[children[j]].y();
           p2.z = 0.;
 
-	  RCSoftMapNode child_node = graph_->node(children[j]);
+	  TopologicalMapNode child_node = graph_->node(children[j]);
 
 	  if ( (plan_to_   == nodes[i].name() && plan_from_ == children[j]) ||
                (plan_from_ == nodes[i].name() && plan_to_   == children[j]) )

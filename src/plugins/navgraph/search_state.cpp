@@ -38,9 +38,9 @@ using namespace fawkes;
  * @param parent parent search state
  * @param map_graph map graph
  */
-NavGraphSearchState::NavGraphSearchState(RCSoftMapNode node, RCSoftMapNode goal,
+NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
 					 double new_cost, NavGraphSearchState * parent,
-					 RCSoftMapGraph *map_graph)
+					 TopologicalMapGraph *map_graph)
 {
   node_ = node;
   goal_ = goal;
@@ -64,7 +64,7 @@ NavGraphSearchState::~NavGraphSearchState()
 /** Get graph node corresponding to this search state.
  * @return graph node corresponding to this search state
  */
-fawkes::RCSoftMapNode &
+fawkes::TopologicalMapNode &
 NavGraphSearchState::node()
 {
   return node_;
@@ -92,10 +92,10 @@ NavGraphSearchState::children()
   std::vector< AStarState * > children;
   children.clear();
 
-  std::vector<std::string> descendants = node_.children();
+  std::vector<std::string> descendants = node_.reachable_nodes();
 
   for (unsigned int i = 0; i < descendants.size(); ++i) {
-    RCSoftMapNode d = map_graph_->node(descendants[i]);
+    TopologicalMapNode d = map_graph_->node(descendants[i]);
     distance = sqrt(pow(node_.x() - d.x(), 2) +
 		    pow(node_.y() - d.y(), 2) );
     children.push_back(new NavGraphSearchState(d, goal_, 

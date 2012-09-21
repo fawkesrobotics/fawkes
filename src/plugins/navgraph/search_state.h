@@ -34,17 +34,17 @@ public:
   //     newCost is the new cost of this generated state
   //     map_graphs is the collection of all graphs
   //
-  NavGraphSearchState(fawkes::RCSoftMapNode node, fawkes::RCSoftMapNode goal,
+  NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
 		      double new_cost, NavGraphSearchState * parent,
-		      fawkes::RCSoftMapGraph *map_graph);
+		      fawkes::TopologicalMapGraph *map_graph);
 
   /// standard destructor
   ~NavGraphSearchState();
 
-  fawkes::RCSoftMapNode & node();
+  fawkes::TopologicalMapNode & node();
 
  private:
-  fawkes::RCSoftMapNode * next_node_to(double x, double y);
+  fawkes::TopologicalMapNode * next_node_to(double x, double y);
 
   size_t key() { return key_; }
 
@@ -54,12 +54,12 @@ public:
   std::vector<AStarState *> children();
 
   // state information
-  fawkes::RCSoftMapNode  node_;
+  fawkes::TopologicalMapNode  node_;
 
   // goal information
-  fawkes::RCSoftMapNode  goal_;
+  fawkes::TopologicalMapNode  goal_;
 
-  fawkes::RCSoftMapGraph *map_graph_;
+  fawkes::TopologicalMapGraph *map_graph_;
 
   size_t key_;
 };

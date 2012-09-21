@@ -35,7 +35,7 @@
 
 #include <interfaces/NavigatorInterface.h>
 
-#include <utils/graph/rcsoft_map_graph.h>
+#include <utils/graph/topological_map_graph.h>
 
 namespace fawkes {
   class AStar;
@@ -84,12 +84,12 @@ public:
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
 
-  fawkes::RCSoftMapGraph *map_graph_;
+  fawkes::TopologicalMapGraph *graph_;
   fawkes::AStar *astar_;
 
   bool exec_active_;
   std::string last_node_;
-  std::vector<fawkes::RCSoftMapNode> plan_;
+  std::vector<fawkes::TopologicalMapNode> plan_;
 
   fawkes::Time *cmd_sent_at_;
 
