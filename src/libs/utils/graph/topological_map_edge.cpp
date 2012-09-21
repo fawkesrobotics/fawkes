@@ -1,12 +1,9 @@
 
 /***************************************************************************
- *  map_graph.h - Map graph for storing pathplan information
+ *  topological_map_edge.cpp - Topological graph
  *
- *  Created: Tue Jun 30 09:25:09 2009 (RoboCup 2009, Graz)
- *  Copyright  2009  Tim Niemueller [www.niemueller.de]
- *
- *  $Id: rcsoft_map_graph.h 2710 2009-06-30 12:47:20Z tim $
- *
+ *  Created: Fri Sep 21 16:11:50 2012
+ *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,23 +20,45 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_GRAPH_RCSOFT_MAP_GRAPH_H_
-#define __UTILS_GRAPH_RCSOFT_MAP_GRAPH_H_
-
-#include <utils/graph/topological_map_graph.h>
-
-namespace xmlpp {
-  class DomParser;
-  class Node;
-}
+#include <utils/graph/topological_map_edge.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-extern TopologicalMapGraph *  load_rcsoft_graph(std::string filename);
+TopologicalMapEdge::TopologicalMapEdge()
+{
+  directed_ = false;
+}
+
+
+TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to,
+                                       std::map<std::string, std::string> properties,
+                                       bool directed)
+{
+  from_ = from;
+  to_ = to;
+  properties_ = properties;
+  directed_ = directed;
+}
+
+
+TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to, bool directed)
+{
+  from_ = from;
+  to_ = to;
+  directed_ = directed;
+}
+
+std::string
+TopologicalMapEdge::property(std::string prop)
+{
+  if (properties_.find(prop) != properties_.end()) {
+    return properties_[prop];
+  } else {
+    return "";
+  }
+}
 
 } // end of namespace fawkes
-
-#endif
