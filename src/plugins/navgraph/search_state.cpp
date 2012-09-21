@@ -74,7 +74,8 @@ NavGraphSearchState::node()
 double
 NavGraphSearchState::estimate()
 {
-  return 0.0;
+  return sqrtf(powf(node_.x() - goal_.x(), 2) +
+               powf(node_.y() - goal_.y(), 2));
 }
 
 
