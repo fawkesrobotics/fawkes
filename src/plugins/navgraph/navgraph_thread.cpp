@@ -317,6 +317,10 @@ NavGraphThread::send_next_goal()
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to send cartesian goto for next goal, exception follows");
     logger->log_warn(name(), e);
+    exec_active_ = false;
+    pp_nav_if_->set_final(true);
+    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
+    pp_nav_if_->write();
 #ifdef HAVE_VISUALIZATION
     if (vt_)  vt_->reset_plan();
 #endif
