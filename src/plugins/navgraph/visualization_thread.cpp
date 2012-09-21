@@ -111,9 +111,11 @@ NavGraphVisualizationThread::reset_plan()
 void
 NavGraphVisualizationThread::set_current_edge(std::string from, std::string to)
 {
-  plan_from_ = from;
-  plan_to_ = to;
-  wakeup();
+  if (plan_from_ != from || plan_to_ != to) {
+    plan_from_ = from;
+    plan_to_ = to;
+    wakeup();
+  }
 }
 
 
