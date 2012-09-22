@@ -12,13 +12,30 @@
 #
 #*****************************************************************************
 
+include $(BUILDSYSDIR)/ros.mk
 
-ifneq ($(PKGCONFIG),)
-  HAVE_BULLET = $(if $(shell $(PKGCONFIG) --exists 'bullet'; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_BULLET),1)
-    CFLAGS_BULLET  = $(shell $(PKGCONFIG) --cflags 'bullet')
-    # we're only interested in the math part
-    LDFLAGS_BULLET = -lLinearMath
+# if we can find a ROS bullet version we use that version. It is patched
+# and required for the ROS integration. When mixing the system and ROS
+# bullet version we will get a segfault when shutting down fawkes, always.
+USE_ROS_BULLET=0
+ifeq ($(HAVE_ROS),1)
+  ifeq ($(call ros-have-pkg,bullet),1)
+    USE_ROS_BULLET=1
+  endif
+endif
+
+ifeq ($(USE_ROS_BULLET),1)
+  HAVE_BULLET=1
+  CFLAGS_BULLET  = $(call ros-pkg-cflags,bullet) -Wno-deprecated-declarations
+  LDFLAGS_BULLET = $(call ros-pkg-lflags,bullet)
+else
+  ifneq ($(PKGCONFIG),)
+    HAVE_BULLET = $(if $(shell $(PKGCONFIG) --exists 'bullet'; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_BULLET),1)
+      CFLAGS_BULLET  = $(shell $(PKGCONFIG) --cflags 'bullet')
+      # we're only interested in the math part
+      LDFLAGS_BULLET = -lLinearMath
+    endif
   endif
 endif
 
