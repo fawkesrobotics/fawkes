@@ -313,10 +313,32 @@ NavGraphThread::send_next_goal()
 
   TopologicalMapNode &next_target = plan_.front();
 
+  float ori = 0.;
+  if (plan_.size() == 1 && next_target.has_property("orientation")) {
+    // take the given orientation for the final node
+    ori = next_target.property_as_float("orientation");
+  } else {
+    // get current position of robot in map frame
+    tf::Stamped<tf::Pose> pose;
+    tf::Stamped<tf::Pose> ident = tf::ident(cfg_base_frame_);
+    try {
+      tf_listener->transform_pose(cfg_global_frame_, ident, pose);
+    } catch (Exception &e) {
+      logger->log_warn(name(),
+		       "Failed to compute pose, cannot compute facing direction", e.what());
+      throw;
+    }
+
+    // set direction facing from current to next target position, best
+    // chance to reach the destination without turning at the end
+    ori = atan2f(next_target.y() - pose.getOrigin().y(),
+		 next_target.x() - pose.getOrigin().x());
+  }
+
   // get current position of robot in map frame
   tf::Stamped<tf::Pose> tpose;
   tf::Stamped<tf::Pose>
-    tposeglob(tf::Transform(tf::Quaternion(0, 0, 0, 1),
+    tposeglob(tf::Transform(tf::create_quaternion_from_yaw(ori),
 			    tf::Vector3(next_target.x(), next_target.y(), 0)),
 	  Time(0,0), cfg_global_frame_);
   try {
