@@ -43,7 +43,11 @@ operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
 
   const YAML::Node &yamlnode = n.second();
 
+#ifdef HAVE_OLD_YAMLCPP
+  if (yamlnode.GetType() != YAML::CT_MAP) {
+#else
   if (yamlnode.Type() != YAML::NodeType::Map) {
+#endif
     throw Exception("Node %s is not a map!?", name.c_str());
   }
 
@@ -68,11 +72,19 @@ operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
 
     YAML::Iterator p;
     for (p = props.begin(); p != props.end(); ++p) {
+#ifdef HAVE_OLD_YAMLCPP
+      if (p->GetType() == YAML::CT_SCALAR) {
+#else
       if (p->Type() == YAML::NodeType::Scalar) {
+#endif
         std::string key;
         *p >> key;
         node.set_property(key, "true");
+#ifdef HAVE_OLD_YAMLCPP
+      } else if (p->GetType() == YAML::CT_MAP) {
+#else
       } else if (p->Type() == YAML::NodeType::Map) {
+#endif
         for (YAML::Iterator i = p->begin(); i != p->end(); ++i) {
           std::string key, value;
           i.first() >> key;
@@ -97,7 +109,11 @@ operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
  */
 static void
 operator >> (const YAML::Iterator& n, TopologicalMapEdge &edge) {
+#ifdef HAVE_OLD_YAMLCPP
+  if (n->GetType() != YAML::CT_SEQUENCE || n->size() != 2) {
+#else
   if (n->Type() != YAML::NodeType::Sequence || n->size() != 2) {
+#endif
     throw Exception("Invalid edge");
   }
   std::string from, to;
@@ -107,7 +123,11 @@ operator >> (const YAML::Iterator& n, TopologicalMapEdge &edge) {
   edge.set_from(from);
   edge.set_to(to);
 
+#ifdef HAVE_OLD_YAMLCPP
+  if (n->GetTag() == "tag:fawkesrobotics.org,navgraph/dir") {
+#else
   if (n->Tag() == "tag:fawkesrobotics.org,navgraph/dir") {
+#endif
     edge.set_directed(true);
   }
 }
