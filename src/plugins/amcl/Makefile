@@ -99,6 +99,7 @@ endif
 # Ordering constraints
 $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
 $(PLUGINS_all) $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
+$(PLUGINS_all): | $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
