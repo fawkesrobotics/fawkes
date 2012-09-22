@@ -21,6 +21,7 @@
  */
 
 #include <utils/graph/topological_map_graph.h>
+#include <core/exception.h>
 
 #include <algorithm>
 #include <cmath>
@@ -183,9 +184,56 @@ TopologicalMapGraph::reachable_nodes(std::string node_name) const
 }
 
 
+/** Make sure each edge exists only once. */
+void
+TopologicalMapGraph::assert_unique_edges()
+{
+  for (size_t i = 0; i < edges_.size(); ++i) {
+    for (size_t j = i+1; j < edges_.size(); ++j) {
+      if (edges_[i].from() == edges_[j].from() &&
+          edges_[i].to() == edges_[j].to())
+      {
+        throw Exception("Edge '%s - %s' is defined twice",
+                        edges_[i].from().c_str(), edges_[i].to().c_str());
+      }
+      if (edges_[i].from() == edges_[j].to() &&
+          edges_[i].to() == edges_[j].from() &&
+          (!edges_[i].is_directed() || !edges_[j].is_directed()))
+      {
+        throw Exception("Edge '%s - %s' and '%s - %s' both exist "
+                        "and at least one is not directed",
+                        edges_[i].from().c_str(), edges_[i].to().c_str(),
+                        edges_[j].from().c_str(), edges_[j].to().c_str());
+      }
+    }
+  }
+}
+
+/** Make sure each node in the edges exists. */
+void
+TopologicalMapGraph::assert_valid_edges()
+{
+  for (size_t i = 0; i < edges_.size(); ++i) {
+    if (! node_exists(edges_[i].from())) {
+      throw Exception("Node '%s' for edge '%s' -> '%s' does not exist",
+                      edges_[i].from().c_str(), edges_[i].from().c_str(),
+                      edges_[i].to().c_str());
+    }
+
+    if (! node_exists(edges_[i].to())) {
+      throw Exception("Node '%s' for edge '%s' -> '%s' does not exist",
+                      edges_[i].to().c_str(), edges_[i].from().c_str(),
+                      edges_[i].to().c_str());
+    }
+  }
+}
+
+
 void
 TopologicalMapGraph::calc_reachability()
 {
+  assert_unique_edges();
+  assert_valid_edges();
   std::vector<TopologicalMapNode>::iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     i->set_reachable_nodes(reachable_nodes(i->name()));

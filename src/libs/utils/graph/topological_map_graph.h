@@ -62,6 +62,10 @@ class TopologicalMapGraph
   void calc_reachability();
 
  private:
+  void assert_unique_edges();
+  void assert_valid_edges();
+
+ private:
   TopologicalMapNode              root_node_;
   std::string                     graph_name_;
   std::vector<TopologicalMapNode> nodes_;
