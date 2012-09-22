@@ -27,12 +27,24 @@ namespace fawkes {
 }
 #endif
 
+/** @class TopologicalMapEdge <utils/graph/topological_map_edge.h>
+ * Topological graph edge.
+ * @author Tim Niemueller
+ */
+
+/** Constructor for an invalid edge. */
 TopologicalMapEdge::TopologicalMapEdge()
 {
   directed_ = false;
 }
 
 
+/** Constructor.
+ * @param from originating node name
+ * @param to target node name
+ * @param properties properties of the new node
+ * @param directed true if the edge is directed, false for bidirectional edges
+ */
 TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to,
                                        std::map<std::string, std::string> properties,
                                        bool directed)
@@ -44,6 +56,11 @@ TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to,
 }
 
 
+/** Constructor.
+ * @param from originating node name
+ * @param to target node name
+ * @param directed true if the edge is directed, false for bidirectional edges
+ */
 TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to, bool directed)
 {
   from_ = from;
@@ -51,6 +68,9 @@ TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to, bool di
   directed_ = directed;
 }
 
+/** Set originating node name.
+ * @param from originating node name
+ */
 void
 TopologicalMapEdge::set_from(std::string from)
 {
@@ -58,6 +78,9 @@ TopologicalMapEdge::set_from(std::string from)
 }
 
 
+/** Set target node name.
+ * @param to target node name
+ */
 void
 TopologicalMapEdge::set_to(std::string to)
 {
@@ -65,12 +88,19 @@ TopologicalMapEdge::set_to(std::string to)
 }
 
 
+/** Set directed state.
+ * @param directed true if the edge is directed, false for bidirectional edges
+ */
 void
 TopologicalMapEdge::set_directed(bool directed)
 {
   directed_ = directed;
 }
 
+/** Get specified property as string.
+ * @param prop property key
+ * @return property value as string
+ */
 std::string
 TopologicalMapEdge::property(std::string prop)
 {

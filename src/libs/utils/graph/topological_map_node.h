@@ -43,12 +43,18 @@ class TopologicalMapNode {
 
   TopologicalMapNode(std::string name, float x, float y);
 
+  /** Get name of node.
+   * @return name of node */
   const std::string &  name() const
   { return name_; }
 
+  /** Get X coordinate in global frame.
+   * @return X coordinate in global frame */
   float x() const
   { return x_; }
 
+  /** Get Y coordinate in global frame.
+   * @return Y coordinate in global frame */
   float y() const
   { return y_; }
 
@@ -56,12 +62,22 @@ class TopologicalMapNode {
   void set_y(float y);
   void set_name(std::string name);
 
+  /** Get all properties.
+   * @return property map
+   */
   std::map<std::string, std::string> &  properties()
   { return properties_; }
 
+  /** Check if node has specified property.
+   * @param property property key
+   * @return true if node has specified property, false otherwise
+   */
   bool has_property(std::string property)
   { return properties_.find(property) != properties_.end(); }
 
+  /** Check if node is valid, i.e. it has a name.
+   * @return true if node is valid, false otherwise
+   */
   bool is_valid() const
   { return name_ != ""; }
 
@@ -72,12 +88,24 @@ class TopologicalMapNode {
 
   std::string property(std::string prop);
 
+  /** Get property converted to float.
+   * @param prop property key
+   * @return property value
+   */
   float property_as_float(std::string prop)
   { return StringConversions::to_float(property(prop)); }
 
+  /** Get property converted to int.
+   * @param prop property key
+   * @return property value
+   */
   int property_as_int(std::string prop)
   { return StringConversions::to_int(property(prop)); }
 
+  /** Get property converted to bol.
+   * @param prop property key
+   * @return property value
+   */
   bool property_as_bool(std::string prop)
   { return StringConversions::to_bool(property(prop)); }
 
@@ -90,6 +118,10 @@ class TopologicalMapNode {
   { return name_ == n.name_; }
 
   void set_reachable_nodes(std::vector<std::string> reachable_nodes);
+
+  /** Get reachable nodes.
+   * @return vector of directly reachable nodes.
+   */
   const std::vector<std::string> &  reachable_nodes() const
   { return reachable_nodes_; }
     

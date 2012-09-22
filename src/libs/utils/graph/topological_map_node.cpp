@@ -27,11 +27,23 @@ namespace fawkes {
 }
 #endif
 
+/** @class TopologicalMapNode <utils/graph/topological_map_node.h>
+ * Topological graph node.
+ * @author Tim Niemueller
+ */
+
+/** Constructor for invalid node. */
 TopologicalMapNode::TopologicalMapNode()
 {
 }
 
 
+/** Constructor.
+ * @param name name of the node
+ * @param x x coordinate in global frame of node
+ * @param y y coordinate in global frame of node
+ * @param properties properties for the new node
+ */
 TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y,
                                        std::map<std::string, std::string> properties)
 {
@@ -42,6 +54,11 @@ TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y,
 }
 
 
+/** Constructor.
+ * @param name name of the node
+ * @param x x coordinate in global frame of node
+ * @param y y coordinate in global frame of node
+ */
 TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y)
 {
   name_ = name;
@@ -50,12 +67,18 @@ TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y)
 }
 
 
+/** Set X position.
+ * @param x X coordinate in global frame for node.
+ */
 void
 TopologicalMapNode::set_x(float x)
 {
   x_ = x;
 }
 
+/** Set Y position.
+ * @param y Y coordinate in global frame for node.
+ */
 void
 TopologicalMapNode::set_y(float y)
 {
@@ -63,6 +86,9 @@ TopologicalMapNode::set_y(float y)
 }
 
 
+/** Set name of node.
+ * @param name new name for node
+ */
 void
 TopologicalMapNode::set_name(std::string name)
 {
@@ -70,6 +96,10 @@ TopologicalMapNode::set_name(std::string name)
 }
 
 
+/** Get specified property as string.
+ * @param prop property key
+ * @return property value as string
+ */
 std::string
 TopologicalMapNode::property(std::string prop)
 {
@@ -81,24 +111,41 @@ TopologicalMapNode::property(std::string prop)
 }
 
 
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
 void
 TopologicalMapNode::set_property(std::string property, std::string value)
 {
   properties_[property] = value;
 }
 
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
 void
 TopologicalMapNode::set_property(std::string property, float value)
 {
   properties_[property] = StringConversions::to_string(value);
 }
 
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
 void
 TopologicalMapNode::set_property(std::string property, int value)
 {
   properties_[property] = StringConversions::to_string(value);
 }
 
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
 void
 TopologicalMapNode::set_property(std::string property, bool value)
 {
@@ -106,6 +153,9 @@ TopologicalMapNode::set_property(std::string property, bool value)
 }
 
 
+/** Set directly reachable nodes of node.
+ * @param reachable_nodes vector of directly reachable nodes
+ */
 void
 TopologicalMapNode::set_reachable_nodes(std::vector<std::string> reachable_nodes)
 {

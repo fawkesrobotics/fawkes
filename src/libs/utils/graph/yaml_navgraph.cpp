@@ -32,6 +32,10 @@ namespace fawkes {
 }
 #endif
 
+/** Read topological map node from YAML iterator.
+ * @param n iterator to node representing a topological map graph node
+ * @param node node to fill
+ */
 static void
 operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
   std::string name;
@@ -87,6 +91,10 @@ operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
   node.set_name(name);
 }
 
+/** Read topological map edge from YAML iterator.
+ * @param n iterator to node representing a topological map graph edge
+ * @param edge edge to fill
+ */
 static void
 operator >> (const YAML::Iterator& n, TopologicalMapEdge &edge) {
   if (n->Type() != YAML::NodeType::Sequence || n->size() != 2) {
@@ -108,6 +116,8 @@ operator >> (const YAML::Iterator& n, TopologicalMapEdge &edge) {
 
 /** Load topological map graph stored in RCSoft format.
  * @param filename path to the file to read
+ * @return topological map graph read from file
+ * @exception Exception thrown on any error to read the graph file
  */
 TopologicalMapGraph *
 load_yaml_navgraph(std::string filename)

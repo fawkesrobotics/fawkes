@@ -31,16 +31,37 @@ namespace fawkes {
 }
 #endif
 
+/** @class TopologicalMapGraph <utils/graph/topological_map_graph.h>
+ * Topological map graph.
+ * This class represents a topological graph using 2D map coordinates
+ * with nodes and edges. Both can be annotated with certain free-form
+ * properties which can be used at run-time for example to instruct
+ * the robot behavior.
+ *
+ * This class is based on KBSG RCSoft's MapGraph but has been
+ * abstracted and improved.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param graph_name Name of the graph, for example to handle multiple
+ * graphs, e.g. for multiple levels of a building.
+ */
 TopologicalMapGraph::TopologicalMapGraph(std::string graph_name)
 {
   graph_name_ = graph_name;
 }
 
+
+/** Virtual empty destructor. */
 TopologicalMapGraph::~TopologicalMapGraph()
 {
 }
 
-  
+
+/** Get graph name.
+ * @return graph name
+ */
 std::string
 TopologicalMapGraph::name() const
 {
@@ -48,6 +69,9 @@ TopologicalMapGraph::name() const
 }
 
 
+/** Get nodes of the graph.
+ * @return const reference to vector of nodes of this graph
+ */
 const std::vector<TopologicalMapNode> &
 TopologicalMapGraph::nodes() const
 {
@@ -55,6 +79,9 @@ TopologicalMapGraph::nodes() const
 }
 
 
+/** Get edges of the graph.
+ * @return const reference to vector of edges of this graph
+ */
 const std::vector<TopologicalMapEdge> &
 TopologicalMapGraph::edges() const
 {
@@ -62,6 +89,11 @@ TopologicalMapGraph::edges() const
 }
 
 
+/** Get a specified node.
+ * @param name name of the node to get
+ * @return the node representation of the searched node, if not
+ * found returns an invalid node.
+ */
 TopologicalMapNode
 TopologicalMapGraph::node(std::string name) const
 {
@@ -73,6 +105,9 @@ TopologicalMapGraph::node(std::string name) const
 }
 
 
+/** Get the root node of the graph.
+ * @return root node
+ */
 TopologicalMapNode
 TopologicalMapGraph::root_node() const
 {
@@ -80,6 +115,14 @@ TopologicalMapGraph::root_node() const
 }
 
 
+/** Get node closest to a specified point with a certain property.
+ * @param pos_x X coordinate in global (map) frame
+ * @param pos_y X coordinate in global (map) frame
+ * @param property property the node must have to be considered,
+ * empty string to not check for any property
+ * @return node closest to the given point in the global frame, or an
+ * invalid node if such a node cannot be found
+ */
 TopologicalMapNode
 TopologicalMapGraph::closest_node(float pos_x, float pos_y,
                                   std::string property)
@@ -108,6 +151,10 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y,
 }
 
 
+/** Check if a certain node exists.
+ * @param name name of the node to look for
+ * @return true if a node with the given name exists, false otherwise
+ */
 bool
 TopologicalMapGraph::node_exists(std::string name) const
 {
@@ -118,6 +165,10 @@ TopologicalMapGraph::node_exists(std::string name) const
   return false;
 }
 
+/** Search nodes for given property.
+ * @param property property name to look for
+ * @return vector of nodes having the specified property
+ */
 std::vector<TopologicalMapNode>
 TopologicalMapGraph::search_nodes(std::string property)
 {
@@ -135,6 +186,10 @@ TopologicalMapGraph::search_nodes(std::string property)
   }
 }
 
+
+/** Set root node name.
+ * @param node_id name of the root node
+ */
 void
 TopologicalMapGraph::set_root(std::string node_id)
 {
@@ -142,12 +197,18 @@ TopologicalMapGraph::set_root(std::string node_id)
 }
 
 
+/** Add a node.
+ * @param node node to add
+ */
 void
 TopologicalMapGraph::add_node(TopologicalMapNode node)
 {
   nodes_.push_back(node);
 }
 
+/** Add an edge
+ * @param edge edge to add
+ */
 void
 TopologicalMapGraph::add_edge(TopologicalMapEdge edge)
 {
@@ -155,6 +216,10 @@ TopologicalMapGraph::add_edge(TopologicalMapEdge edge)
 }
 
 
+/** Get nodes reachable from specified nodes.
+ * @param node_name name of the node to get reachable nodes for
+ * @return vector of names of nodes reachable from the specified node
+ */
 std::vector<std::string>
 TopologicalMapGraph::reachable_nodes(std::string node_name) const
 {
@@ -229,6 +294,10 @@ TopologicalMapGraph::assert_valid_edges()
 }
 
 
+/** Calculate eachability relations.
+ * This will set the directly reachable nodes on each
+ * of the graph nodes. 
+ */
 void
 TopologicalMapGraph::calc_reachability()
 {

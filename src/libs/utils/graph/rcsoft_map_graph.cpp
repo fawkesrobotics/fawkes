@@ -124,6 +124,8 @@ get_node(xmlpp::Node *node)
 
 /** Load topological map graph stored in RCSoft format.
  * @param filename path to the file to read
+ * @return topological map graph read from file
+ * @exception Exception thrown on any error to read the graph file
  */
 TopologicalMapGraph *
 load_rcsoft_graph(std::string filename)
