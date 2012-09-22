@@ -57,8 +57,8 @@ ifeq ($(HAVE_ROS),1)
   CFLAGS  += $(CFLAGS_ROS)
   LDFLAGS += $(LDFLAGS_ROS)
 
-  CFLAGS_talkerpub_thread += $(shell rospack export --lang=cpp --attrib=cflags std_msgs) $(CFLAGS)
-  LDFLAGS_ros_talkerpub += $(LDFLAGS) $(shell rospack export --lang=cpp --attrib=lflags std_msgs)
+  CFLAGS_talkerpub_thread += $(call ros-pkg-cflags,std_msgs) $(CFLAGS)
+  LDFLAGS_ros_talkerpub += $(LDFLAGS) $(call ros-pkg-lflags,std_msgs)
 
   PLUGINS_all = $(PLUGINDIR)/ros.so \
 		$(PLUGINDIR)/ros-talkerpub.so
