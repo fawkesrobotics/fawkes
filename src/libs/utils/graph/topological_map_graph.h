@@ -64,6 +64,7 @@ class TopologicalMapGraph
  private:
   void assert_unique_edges();
   void assert_valid_edges();
+  void assert_unique_nodes();
 
  private:
   TopologicalMapNode              root_node_;

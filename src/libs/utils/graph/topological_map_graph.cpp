@@ -24,6 +24,7 @@
 #include <core/exception.h>
 
 #include <algorithm>
+#include <list>
 #include <cmath>
 
 namespace fawkes {
@@ -249,6 +250,26 @@ TopologicalMapGraph::reachable_nodes(std::string node_name) const
 }
 
 
+/** Make sure each node exists only once. */
+void
+TopologicalMapGraph::assert_unique_nodes()
+{
+  std::list<std::string> names;
+  std::vector<TopologicalMapNode>::iterator i;
+  for (i = nodes_.begin(); i != nodes_.end(); ++i) {
+    names.push_back(i->name());
+  }
+  names.sort();
+  std::list<std::string>::iterator n;
+  std::string last_name = "";
+  for (n = names.begin(); n != names.end(); ++n) {
+    if (*n == last_name) {
+      throw Exception("Node '%s' exists at least twice", last_name.c_str());
+    }
+    last_name = *n;
+  }
+}
+
 /** Make sure each edge exists only once. */
 void
 TopologicalMapGraph::assert_unique_edges()
@@ -301,6 +322,7 @@ TopologicalMapGraph::assert_valid_edges()
 void
 TopologicalMapGraph::calc_reachability()
 {
+  assert_unique_nodes();
   assert_unique_edges();
   assert_valid_edges();
   std::vector<TopologicalMapNode>::iterator i;
