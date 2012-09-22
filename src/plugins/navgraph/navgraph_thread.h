@@ -36,6 +36,7 @@
 #include <interfaces/NavigatorInterface.h>
 
 #include <utils/graph/topological_map_graph.h>
+#include <utils/system/fam.h>
 
 namespace fawkes {
   class AStar;
@@ -49,7 +50,8 @@ class NavGraphThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::TransformAspect
+  public fawkes::TransformAspect,
+  public fawkes::FamListener
 {
 public:
 #ifdef HAVE_VISUALIZATION
@@ -62,6 +64,9 @@ public:
   virtual void once();
   virtual void loop();
   virtual void finalize();
+
+  virtual void fam_event(const char *filename, unsigned int mask);
+
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run();}
 
@@ -82,6 +87,7 @@ public:
   std::string  cfg_nav_if_id_; 
   float        cfg_tolerance_; 
   float        cfg_resend_interval_; 
+  bool         cfg_monitor_file_;
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
@@ -94,6 +100,8 @@ public:
   std::vector<fawkes::TopologicalMapNode> plan_;
 
   fawkes::Time *cmd_sent_at_;
+
+  fawkes::FileAlterationMonitor *fam_;
 
 #ifdef HAVE_VISUALIZATION
   NavGraphVisualizationThread *vt_;

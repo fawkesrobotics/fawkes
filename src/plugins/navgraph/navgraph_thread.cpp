@@ -70,6 +70,10 @@ NavGraphThread::init()
   cfg_tolerance_       = config->get_float("/plugins/navgraph/tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
 
+  cfg_monitor_file_ = false;
+  try {
+    cfg_monitor_file_ = config->get_bool("/plugins/navgraph/monitor_file");
+  } catch (Exception &e) {} // ignored
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
   nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
@@ -80,6 +84,13 @@ NavGraphThread::init()
 
   graph_ = load_graph(cfg_graph_file_);
   astar_ = new AStar();
+
+  if (cfg_monitor_file_) {
+    logger->log_info(name(), "Enabling graph file monitoring");
+    fam_ = new FileAlterationMonitor();
+    fam_->watch_file(cfg_graph_file_.c_str());
+    fam_->add_listener(this);
+  }
 
   exec_active_ = false;
   last_node_   = "";
@@ -136,6 +147,10 @@ NavGraphThread::loop()
     }
 
     pp_nav_if_->msgq_pop();
+  }
+
+  if (cfg_monitor_file_) {
+    fam_->process_events();
   }
 
   if (exec_active_) {
@@ -370,4 +385,40 @@ NavGraphThread::node_reached()
 		    pow(pose.getOrigin().y() - cur_target.y(), 2));
 
   return (dist <= cfg_tolerance_);
+}
+
+
+void
+NavGraphThread::fam_event(const char *filename, unsigned int mask)
+{
+  logger->log_info(name(), "Graph changed on disk, reloading");
+
+  try {
+    TopologicalMapGraph *old_graph = graph_;
+    graph_ = load_yaml_navgraph(cfg_graph_file_);
+    delete old_graph;
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Loading new graph failed, exception follows");
+    logger->log_warn(name(), e);
+    return;
+  }
+
+#ifdef HAVE_VISUALIZATION
+  if (vt_)  vt_->set_graph(graph_);
+#endif
+
+  if (exec_active_) {
+    // store the goal and restart it after the graph has been reloaded
+
+    stop_motion();
+    TopologicalMapNode goal = plan_.back();
+
+    if (goal.name() == "free-target") {
+      generate_plan(goal.x(), goal.y(), goal.property_as_float("orientation"));
+    } else {
+      generate_plan(goal.name());
+    }
+
+    start_plan();
+  }
 }
