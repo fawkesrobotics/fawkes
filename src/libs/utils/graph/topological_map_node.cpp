@@ -49,6 +49,27 @@ TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y)
   y_ = y;
 }
 
+
+void
+TopologicalMapNode::set_x(float x)
+{
+  x_ = x;
+}
+
+void
+TopologicalMapNode::set_y(float y)
+{
+  y_ = y;
+}
+
+
+void
+TopologicalMapNode::set_name(std::string name)
+{
+  name_ = name;
+}
+
+
 std::string
 TopologicalMapNode::property(std::string prop)
 {

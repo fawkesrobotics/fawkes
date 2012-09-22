@@ -122,7 +122,7 @@ get_node(xmlpp::Node *node)
 
 
 
-/** Constructor.
+/** Load topological map graph stored in RCSoft format.
  * @param filename path to the file to read
  */
 TopologicalMapGraph *

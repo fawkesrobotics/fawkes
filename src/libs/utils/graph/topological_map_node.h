@@ -52,6 +52,10 @@ class TopologicalMapNode {
   float y() const
   { return y_; }
 
+  void set_x(float x);
+  void set_y(float y);
+  void set_name(std::string name);
+
   std::map<std::string, std::string> &  properties()
   { return properties_; }
 

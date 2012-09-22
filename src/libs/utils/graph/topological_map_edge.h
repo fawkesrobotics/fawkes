@@ -50,10 +50,12 @@ class TopologicalMapEdge {
   const std::string &  to() const
   { return to_; }
 
+  void set_from(std::string from);
+  void set_to(std::string to);
+  void set_directed(bool directed);
+
   std::map<std::string, std::string> &  properties()
-  {
-    return properties_;
-  }
+  { return properties_; }
 
   bool has_property(std::string property);
   bool is_valid() const
@@ -74,12 +76,22 @@ class TopologicalMapEdge {
   { return StringConversions::to_bool(property(prop)); }
 
   /** Check edges for equality.
-   * Edges are equal if they have the same origination and destination nodes.
+   * Edges are equal if they have the same origination and destination
+   * nodes and the same directed status.
    * @param n node to compare with
    * @return true if the node is the same as this one, false otherwise
    */
   bool operator==(const TopologicalMapEdge &e) const
-  { return from_ == e.from_ && to_ == e.to_; }
+  { return from_ == e.from_ && to_ == e.to_ && directed_ == e.directed_; }
+
+
+  /** Less than operator based on node from and to names.
+   * One edge is less than another if this is true for their respective names.
+   * @param n node to compare with
+   * @return true if this node is less than the given one
+   */
+  bool operator<(const TopologicalMapEdge &e) const
+  { return (from_ == e.from_ && to_ < e.to_) || (from_ < e.from_); }
 
  private:
   std::string from_;

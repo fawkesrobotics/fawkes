@@ -51,6 +51,26 @@ TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to, bool di
   directed_ = directed;
 }
 
+void
+TopologicalMapEdge::set_from(std::string from)
+{
+  from_ = from;
+}
+
+
+void
+TopologicalMapEdge::set_to(std::string to)
+{
+  to_ = to;
+}
+
+
+void
+TopologicalMapEdge::set_directed(bool directed)
+{
+  directed_ = directed;
+}
+
 std::string
 TopologicalMapEdge::property(std::string prop)
 {
