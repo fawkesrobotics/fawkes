@@ -235,33 +235,18 @@ NavGraphThread::generate_plan(std::string goal_name)
   if (plan_.empty()) {
     logger->log_error(name(), "Failed to generate plan to travel to '%s'",
 		      goal_name.c_str());
-  } else {
-    std::string m = "Route: " + plan_[0].name();
-    for (unsigned int i = 1; i < plan_.size(); ++i) {
-      m += " - " + plan_[i].name();
-    }
-    logger->log_info(name(), "%s", m.c_str());
-#ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->set_plan(plan_);
-#endif
   }
-
 }
 
 void
 NavGraphThread::generate_plan(float x, float y, float ori)
 {
   TopologicalMapNode close_to_goal = graph_->closest_node(x, y);
-  
   generate_plan(close_to_goal.name());
 
   TopologicalMapNode n("free-target", x, y);
-  n.set_property("ori", ori);
+  n.set_property("orientation", ori);
   plan_.push_back(n);
-
-#ifdef HAVE_VISUALIZATION
-  if (vt_)  vt_->set_plan(plan_);
-#endif
 }
 
 
@@ -274,6 +259,16 @@ NavGraphThread::start_plan()
     pp_nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
     logger->log_warn(name(), "Cannot start empty plan.");
   } else {    
+
+    std::string m = plan_[0].name();
+    for (unsigned int i = 1; i < plan_.size(); ++i) {
+      m += " - " + plan_[i].name();
+    }
+    logger->log_info(name(), "Starting route: %s", m.c_str());
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->set_plan(plan_);
+#endif
+
     exec_active_ = true;
 
     TopologicalMapNode &final_target = plan_.back();

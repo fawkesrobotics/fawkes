@@ -48,6 +48,7 @@ NavGraphVisualizationThread::init()
 {
   vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100, /* latching */ true);
 
+  last_id_num_ = 0;
   publish();
 }
 
@@ -132,20 +133,15 @@ NavGraphVisualizationThread::publish()
   if (! graph_) return;
 
   std::vector<fawkes::TopologicalMapNode> nodes = graph_->nodes();
-  last_id_num_ = 0;
-
-  std::map<std::string, fawkes::TopologicalMapNode> nodemap;
-  for (unsigned int i = 0; i < nodes.size(); ++i) {
-    nodemap[nodes[i].name()] = nodes[i];
-  }
-  ConnMap conns;
+  std::vector<fawkes::TopologicalMapEdge> edges = graph_->edges();
+  size_t id_num = 0;
 
   visualization_msgs::MarkerArray m;
   visualization_msgs::Marker lines;
   lines.header.frame_id = "/map";
   lines.header.stamp = ros::Time::now();
   lines.ns = "navgraph";
-  lines.id = last_id_num_++;
+  lines.id = id_num++;
   lines.type = visualization_msgs::Marker::LINE_LIST;
   lines.action = visualization_msgs::Marker::ADD;
   lines.color.r = 0.5;
@@ -158,7 +154,7 @@ NavGraphVisualizationThread::publish()
   plan_lines.header.frame_id = "/map";
   plan_lines.header.stamp = ros::Time::now();
   plan_lines.ns = "navgraph";
-  plan_lines.id = last_id_num_++;
+  plan_lines.id = id_num++;
   plan_lines.type = visualization_msgs::Marker::LINE_LIST;
   plan_lines.action = visualization_msgs::Marker::ADD;
   plan_lines.color.r = 1.0;
@@ -171,7 +167,7 @@ NavGraphVisualizationThread::publish()
   cur_line.header.frame_id = "/map";
   cur_line.header.stamp = ros::Time::now();
   cur_line.ns = "navgraph";
-  cur_line.id = last_id_num_++;
+  cur_line.id = id_num++;
   cur_line.type = visualization_msgs::Marker::LINE_LIST;
   cur_line.action = visualization_msgs::Marker::ADD;
   cur_line.color.r = cur_line.color.g = 1.f;
@@ -181,14 +177,11 @@ NavGraphVisualizationThread::publish()
   cur_line.lifetime = ros::Duration(0, 0);
 
   for (size_t i = 0; i < nodes.size(); ++i) {
-    // Copy to get memory freed on exception
-    //logger->log_info(name(), "Publishing node %s", nodes[i].name().c_str());
-
     visualization_msgs::Marker sphere;
     sphere.header.frame_id = "/map";
     sphere.header.stamp = ros::Time::now();
     sphere.ns = "navgraph";
-    sphere.id = last_id_num_++;
+    sphere.id = id_num++;
     sphere.type = visualization_msgs::Marker::SPHERE;
     sphere.action = visualization_msgs::Marker::ADD;
     sphere.pose.position.x =  nodes[i].x();
@@ -218,59 +211,197 @@ NavGraphVisualizationThread::publish()
     text.header.frame_id = "/map";
     text.header.stamp = ros::Time::now();
     text.ns = "navgraph";
-    text.id = last_id_num_++;
+    text.id = id_num++;
     text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
     text.action = visualization_msgs::Marker::ADD;
     text.pose.position.x =  nodes[i].x();
     text.pose.position.y =  nodes[i].y();
     text.pose.position.z = 0.08;
     text.pose.orientation.w = 1.;
-    text.scale.z = 0.1; // 5cm high
+    text.scale.z = 0.15; // 15cm high
     text.color.r = text.color.g = text.color.b = 1.0f;
     text.color.a = 1.0;
     text.lifetime = ros::Duration(0, 0);
     text.text = nodes[i].name();
     m.markers.push_back(text);
 
-    std::vector<std::string> children = nodes[i].reachable_nodes();
-    for (unsigned int j = 0; j < children.size(); ++j) {
-      std::pair<ConnMap::iterator, ConnMap::iterator>
-        ret = conns.equal_range(children[j]);
+  }
 
-      ConnMap::value_type v = std::make_pair(children[j], nodes[i].name());
-      ConnMap::iterator f = std::find(ret.first, ret.second, v);
+  if (! plan_.empty() && plan_.back().name() == "free-target") {
+    TopologicalMapNode &target_node = plan_[plan_.size() - 1];
 
-      if (f == ret.second) {
-        if (nodemap.find(children[j]) != nodemap.end()) {
-          geometry_msgs::Point p1;
-          p1.x =  nodes[i].x();
-          p1.y =  nodes[i].y();
-          p1.z = 0.;
+    // we are traveling to a free target
+    visualization_msgs::Marker sphere;
+    sphere.header.frame_id = "/map";
+    sphere.header.stamp = ros::Time::now();
+    sphere.ns = "navgraph";
+    sphere.id = id_num++;
+    sphere.type = visualization_msgs::Marker::SPHERE;
+    sphere.action = visualization_msgs::Marker::ADD;
+    sphere.pose.position.x =  target_node.x();
+    sphere.pose.position.y =  target_node.y();
+    sphere.pose.position.z = 0.;
+    sphere.pose.orientation.w = 1.;
+    sphere.scale.y = 0.05;
+    sphere.scale.z = 0.05;
+    sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.1;
+    sphere.color.r = 1.;
+    sphere.color.g = 0.5f;
+    sphere.color.b = 0.f;
+    sphere.color.a = 1.0;
+    sphere.lifetime = ros::Duration(0, 0);
+    m.markers.push_back(sphere);
 
-          geometry_msgs::Point p2;
-          p2.x =  nodemap[children[j]].x();
-          p2.y =  nodemap[children[j]].y();
-          p2.z = 0.;
+    visualization_msgs::Marker text;
+    text.header.frame_id = "/map";
+    text.header.stamp = ros::Time::now();
+    text.ns = "navgraph";
+    text.id = id_num++;
+    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    text.action = visualization_msgs::Marker::ADD;
+    text.pose.position.x =  target_node.x();
+    text.pose.position.y =  target_node.y();
+    text.pose.position.z = 0.08;
+    text.pose.orientation.w = 1.;
+    text.scale.z = 0.15; // 15cm high
+    text.color.r = text.color.g = text.color.b = 1.0f;
+    text.color.a = 1.0;
+    text.lifetime = ros::Duration(0, 0);
+    text.text = "Free Target";
+    m.markers.push_back(text);
 
-	  TopologicalMapNode child_node = graph_->node(children[j]);
+    if (plan_.size() >= 2) {
+      TopologicalMapNode &last_graph_node = plan_[plan_.size() - 2];
+      
+      geometry_msgs::Point p1;
+      p1.x =  last_graph_node.x();
+      p1.y =  last_graph_node.y();
+      p1.z = 0.;
 
-	  if ( (plan_to_   == nodes[i].name() && plan_from_ == children[j]) ||
-               (plan_from_ == nodes[i].name() && plan_to_   == children[j]) )
-          {
-	    // it's the current line
-	    cur_line.points.push_back(p1);
-	    cur_line.points.push_back(p2);
-	  } else if ((std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end()) &&
-		     (std::find(plan_.begin(), plan_.end(), child_node) != plan_.end()))
-	  {
-	    plan_lines.points.push_back(p1);
-	    plan_lines.points.push_back(p2);
-	  } else {
-	    lines.points.push_back(p1);
-	    lines.points.push_back(p2);
-	  }
+      geometry_msgs::Point p2;
+      p2.x =  target_node.x();
+      p2.y =  target_node.y();
+      p2.z = 0.;
 
-          conns.insert(std::make_pair(nodes[i].name(), children[j]));
+      visualization_msgs::Marker arrow;
+      arrow.header.frame_id = "/map";
+      arrow.header.stamp = ros::Time::now();
+      arrow.ns = "navgraph";
+      arrow.id = id_num++;
+      arrow.type = visualization_msgs::Marker::ARROW;
+      arrow.action = visualization_msgs::Marker::ADD;
+      arrow.color.a = 1.0;
+      arrow.lifetime = ros::Duration(0, 0);
+      arrow.points.push_back(p1);
+      arrow.points.push_back(p2);
+
+      if (plan_from_ == last_graph_node.name() && plan_to_ == target_node.name())
+      {
+        // it's the current line
+        arrow.color.r = arrow.color.g = 1.f;
+        arrow.color.b = 0.f;
+        arrow.scale.x = 0.1; // shaft radius
+        arrow.scale.y = 0.3; // head radius
+      } else {
+        // it's in the current plan
+        arrow.color.r = 1.0;
+        arrow.color.g = 0.5f;
+        arrow.color.b = 0.f;
+        arrow.scale.x = 0.07; // shaft radius
+        arrow.scale.y = 0.2; // head radius
+      }
+      m.markers.push_back(arrow);
+    }
+  }
+    
+
+  for (size_t i = 0; i < edges.size(); ++i) {
+    TopologicalMapEdge &edge = edges[i];
+    if (graph_->node_exists(edge.from()) && graph_->node_exists(edge.to())) {
+      TopologicalMapNode from = graph_->node(edge.from());
+      TopologicalMapNode to   = graph_->node(edge.to());
+
+      geometry_msgs::Point p1;
+      p1.x =  from.x();
+      p1.y =  from.y();
+      p1.z = 0.;
+
+      geometry_msgs::Point p2;
+      p2.x =  to.x();
+      p2.y =  to.y();
+      p2.z = 0.;
+
+
+      if (edge.is_directed()) {
+        visualization_msgs::Marker arrow;
+        arrow.header.frame_id = "/map";
+        arrow.header.stamp = ros::Time::now();
+        arrow.ns = "navgraph";
+        arrow.id = id_num++;
+        arrow.type = visualization_msgs::Marker::ARROW;
+        arrow.action = visualization_msgs::Marker::ADD;
+        arrow.color.a = 1.0;
+        arrow.lifetime = ros::Duration(0, 0);
+        arrow.points.push_back(p1);
+        arrow.points.push_back(p2);
+
+        if (plan_from_ == from.name() && plan_to_ == to.name())
+        {
+          // it's the current line
+          arrow.color.r = arrow.color.g = 1.f;
+          arrow.color.b = 0.f;
+          arrow.scale.x = 0.1; // shaft radius
+          arrow.scale.y = 0.3; // head radius
+        } else {
+          bool in_plan = false;
+          for (size_t p = 0; p < plan_.size(); ++p) {
+            if (plan_[p] == from && (p < plan_.size() - 1 && plan_[p+1] == to)) {
+              in_plan = true;
+              break;
+            }
+          }
+
+          if (in_plan) {
+            // it's in the current plan
+            arrow.color.r = 1.0;
+            arrow.color.g = arrow.color.b = 0.f;
+            arrow.scale.x = 0.07; // shaft radius
+            arrow.scale.y = 0.2; // head radius
+          } else {
+            // regular
+            arrow.color.r = 0.5;
+            arrow.color.g = arrow.color.b = 0.f;
+            arrow.scale.x = 0.04; // shaft radius
+            arrow.scale.y = 0.15; // head radius
+          }
+        }
+        m.markers.push_back(arrow);
+      } else {
+        if ( (plan_to_   == from.name() && plan_from_ == to.name()) ||
+             (plan_from_ == from.name() && plan_to_   == to.name()) )
+        {
+          // it's the current line
+          cur_line.points.push_back(p1);
+          cur_line.points.push_back(p2);
+        } else {
+          bool in_plan = false;
+          for (size_t p = 0; p < plan_.size(); ++p) {
+            if (plan_[p] == from &&
+                ((p > 0 && plan_[p-1] == to) || (p < plan_.size() - 1 && plan_[p+1] == to)))
+            {
+              in_plan = true;
+              break;
+            }
+          }
+
+          if (in_plan) {
+            // it's in the current plan
+            plan_lines.points.push_back(p1);
+            plan_lines.points.push_back(p2);
+          } else {
+            lines.points.push_back(p1);
+            lines.points.push_back(p2);
+          }
         }
       }
     }
@@ -279,6 +410,18 @@ NavGraphVisualizationThread::publish()
   m.markers.push_back(lines);
   m.markers.push_back(plan_lines);
   m.markers.push_back(cur_line);
+
+  for (size_t i = id_num; i < last_id_num_; ++i) {
+    visualization_msgs::Marker delop;
+    delop.header.frame_id = "/map";
+    delop.header.stamp = ros::Time::now();
+    delop.ns = "navgraph";
+    delop.id = i;
+    delop.action = visualization_msgs::Marker::DELETE;
+    m.markers.push_back(delop);
+  }
+
+  last_id_num_ = id_num;
 
   vispub_.publish(m);
 }
