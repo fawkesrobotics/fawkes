@@ -20,10 +20,13 @@
 
 #include "navgraph_thread.h"
 
+#include <utils/graph/yaml_navgraph.h>
 #include <utils/search/astar.h>
 #include <tf/utils.h>
 
 #include "search_state.h"
+
+#include <fstream>
 
 using namespace fawkes;
 
@@ -75,8 +78,8 @@ NavGraphThread::init()
     cfg_graph_file_ = std::string(CONFDIR) + "/" + cfg_graph_file_;
   }
 
-  graph_ = load_rcsoft_graph(cfg_graph_file_);
-  astar_     = new AStar();
+  graph_ = load_graph(cfg_graph_file_);
+  astar_ = new AStar();
 
   exec_active_ = false;
   last_node_   = "";
@@ -161,7 +164,22 @@ NavGraphThread::loop()
   }
 }
 
+TopologicalMapGraph *
+NavGraphThread::load_graph(std::string filename)
+{
+  std::ifstream inf(filename);
+  std::string firstword;
+  inf >> firstword;
+  inf.close();
 
+  if (firstword == "%YAML") {
+    return load_yaml_navgraph(filename);
+  } else if (firstword == "<Graph>") {
+    return load_rcsoft_graph(filename);
+  } else {
+    throw Exception("Unknown graph format");
+  }
+}
 
 void
 NavGraphThread::generate_plan(std::string goal_name)

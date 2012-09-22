@@ -72,6 +72,7 @@ public:
   void start_plan();
   void send_next_goal();
   bool node_reached();
+  fawkes::TopologicalMapGraph * load_graph(std::string filename);
 
 
  private:
