@@ -401,7 +401,14 @@ NavGraphThread::node_reached()
   float dist = sqrt(pow(pose.getOrigin().x() - cur_target.x(), 2) +
 		    pow(pose.getOrigin().y() - cur_target.y(), 2));
 
-  return (dist <= cfg_tolerance_);
+  float tolerance = 0.;
+  if (cur_target.has_property("tolerance")) {
+    tolerance = cur_target.property_as_float("tolerance");
+  }
+  // can be no or invalid tolerance
+  if (tolerance == 0.)  tolerance = cfg_tolerance_;
+
+  return (dist <= tolerance);
 }
 
 
