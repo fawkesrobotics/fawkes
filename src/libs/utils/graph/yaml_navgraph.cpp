@@ -37,28 +37,26 @@ namespace fawkes {
  * @param node node to fill
  */
 static void
-operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
+operator >> (const YAML::Node& n, TopologicalMapNode &node) {
   std::string name;
-  n.first() >> name;
-
-  const YAML::Node &yamlnode = n.second();
+  n["name"] >> name;
 
 #ifdef HAVE_OLD_YAMLCPP
-  if (yamlnode.GetType() != YAML::CT_MAP) {
+  if (n.GetType() != YAML::CT_MAP) {
 #else
-  if (yamlnode.Type() != YAML::NodeType::Map) {
+  if (n.Type() != YAML::NodeType::Map) {
 #endif
     throw Exception("Node %s is not a map!?", name.c_str());
   }
 
   try {
-    if (yamlnode["pos"].size() != 2) {
+    if (n["pos"].size() != 2) {
       throw Exception("Invalid position for node %s, "
                       "must be list of [x,y] coordinates", name.c_str());
     }
     float x, y;
-    yamlnode["pos"][0] >> x;
-    yamlnode["pos"][1] >> y;
+    n["pos"][0] >> x;
+    n["pos"][1] >> y;
 
     node.set_x(x);
     node.set_y(y);
@@ -67,7 +65,7 @@ operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
   }
 
   try {
-    const YAML::Node &props = yamlnode["properties"];
+    const YAML::Node &props = n["properties"];
     std::map<std::string, std::string> properties;
 
     YAML::Iterator p;
@@ -108,25 +106,25 @@ operator >> (const YAML::Iterator& n, TopologicalMapNode &node) {
  * @param edge edge to fill
  */
 static void
-operator >> (const YAML::Iterator& n, TopologicalMapEdge &edge) {
+operator >> (const YAML::Node& n, TopologicalMapEdge &edge) {
 #ifdef HAVE_OLD_YAMLCPP
-  if (n->GetType() != YAML::CT_SEQUENCE || n->size() != 2) {
+  if (n.GetType() != YAML::CT_SEQUENCE || n.size() != 2) {
 #else
-  if (n->Type() != YAML::NodeType::Sequence || n->size() != 2) {
+  if (n.Type() != YAML::NodeType::Sequence || n.size() != 2) {
 #endif
     throw Exception("Invalid edge");
   }
   std::string from, to;
-  (*n)[0] >> from;
-  (*n)[1] >> to;
+  n[0] >> from;
+  n[1] >> to;
 
   edge.set_from(from);
   edge.set_to(to);
 
 #ifdef HAVE_OLD_YAMLCPP
-  if (n->GetTag() == "tag:fawkesrobotics.org,navgraph/dir") {
+  if (n.GetTag() == "tag:fawkesrobotics.org,navgraph/dir") {
 #else
-  if (n->Tag() == "tag:fawkesrobotics.org,navgraph/dir") {
+  if (n.Tag() == "tag:fawkesrobotics.org,navgraph/dir") {
 #endif
     edge.set_directed(true);
   }
@@ -156,21 +154,17 @@ load_yaml_navgraph(std::string filename)
 
   TopologicalMapGraph *graph = new TopologicalMapGraph(graph_name);
 
-
-  YAML::Iterator n;
-  for (n = doc["nodes"].begin(); n != doc["nodes"].end(); ++n) {
-    std::string name;
-    n.first() >> name;
+  const YAML::Node &nodes = doc["nodes"];
+  for (YAML::Iterator n = nodes.begin(); n != nodes.end(); ++n) {
     TopologicalMapNode node;
-    n >> node;
+    *n >> node;
     graph->add_node(node);
   }
 
-  YAML::Iterator e;
   const YAML::Node &edges = doc["connections"];
-  for (e = edges.begin(); e != edges.end(); ++e) {
+  for (YAML::Iterator e = edges.begin(); e != edges.end(); ++e) {
     TopologicalMapEdge edge;
-    e >> edge;
+    *e >> edge;
     graph->add_edge(edge);
   }
 
