@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 include $(BUILDSYSDIR)/pcl.mk
 
-CFLAGS   += $(VISION_CFLAGS)
+CFLAGS   += $(VISION_CFLAGS) -Wno-unknown-pragmas -Wno-deprecated-declarations
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)

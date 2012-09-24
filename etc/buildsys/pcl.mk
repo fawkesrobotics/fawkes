@@ -50,7 +50,7 @@ ifneq ($(HAVE_PCL),1)
   # Give it another shot, name might contain version
   _PCL_ALTERNATE_NAME=$(shell $(PKGCONFIG) pkg-config --list-all | grep pcl_common | awk '{ print $$1 }')
   ifneq ($(_PCL_ALTERNATE_NAME),)
-    PCL_VERSION_SUFFIX=$(patsubst pcl_common%,%,$(_PCL_ALTERNATE_NAME))
+    PCL_VERSION_SUFFIX=$(patsubst pcl_common%,%,$(lastword $(_PCL_ALTERNATE_NAME)))
     HAVE_PCL=1
   endif
 endif

@@ -69,7 +69,7 @@ pclviewer: utils
 ifeq ($(HAVE_OPENNI),1)
   PRESUBDIRS += aspect
 
-  CFLAGS  += $(CFLAGS_OPENNI)
+  CFLAGS  += $(CFLAGS_OPENNI) -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_OPENNI)
   PLUGINS_all = $(PLUGINDIR)/openni.$(SOEXT) \
 		$(PLUGINDIR)/openni-usertracker.$(SOEXT) \

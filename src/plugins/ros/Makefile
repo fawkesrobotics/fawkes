@@ -54,7 +54,7 @@ OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
 
-  CFLAGS  += $(CFLAGS_ROS)
+  CFLAGS  += $(CFLAGS_ROS) -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_ROS)
 
   CFLAGS_talkerpub_thread += $(shell rospack export --lang=cpp --attrib=cflags std_msgs) $(CFLAGS)
