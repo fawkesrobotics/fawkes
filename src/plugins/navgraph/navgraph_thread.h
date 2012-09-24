@@ -96,6 +96,7 @@ public:
   fawkes::AStar *astar_;
 
   bool exec_active_;
+  bool target_reached_;
   std::string last_node_;
   std::vector<fawkes::TopologicalMapNode> plan_;
 

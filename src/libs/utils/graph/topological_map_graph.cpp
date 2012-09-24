@@ -25,7 +25,10 @@
 
 #include <algorithm>
 #include <list>
+#include <set>
+#include <queue>
 #include <cmath>
+#include <cstdio>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -315,6 +318,50 @@ TopologicalMapGraph::assert_valid_edges()
 }
 
 
+
+void
+TopologicalMapGraph::assert_connected()
+{
+  std::set<std::string> traversed;
+  std::set<std::string> nodeset;
+  std::queue<TopologicalMapNode> q;
+  q.push(nodes_.front());
+
+  while (! q.empty()) {
+    TopologicalMapNode &n = q.front();
+    traversed.insert(n.name());
+
+    std::vector<std::string> reachable = n.reachable_nodes();
+    std::vector<std::string>::iterator r;
+    for (r = reachable.begin(); r != reachable.end(); ++r) {
+      if (traversed.find(*r) == traversed.end()) q.push(node(*r));
+    }
+    q.pop();
+  }
+
+  std::vector<TopologicalMapNode>::iterator n;
+  for (n = nodes_.begin(); n != nodes_.end(); ++n) {
+    nodeset.insert(n->name());
+  }
+
+  if (traversed.size() != nodeset.size()) {
+    std::set<std::string> nodediff;
+    std::set_difference(nodeset.begin(), nodeset.end(),
+			traversed.begin(), traversed.end(),
+			std::inserter(nodediff, nodediff.begin()));
+
+    std::set<std::string>::iterator d = nodediff.begin();
+    std::string unconnected = *d;
+    for (++d; d != nodediff.end(); ++d) {
+      unconnected += ", " + *d;
+    }
+    throw Exception("The graph is not fully connected, cannot reach (%s) from '%s' for example",
+		    unconnected.c_str(), nodes_[0].name().c_str());
+  }
+}
+
+
+
 /** Calculate eachability relations.
  * This will set the directly reachable nodes on each
  * of the graph nodes. 
@@ -329,6 +376,7 @@ TopologicalMapGraph::calc_reachability()
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     i->set_reachable_nodes(reachable_nodes(i->name()));
   }
+  assert_connected();
 }
 
 

@@ -343,4 +343,5 @@ INSERT INTO "config" VALUES('/plugins/navgraph/graph_file','string','/home/tim/r
 INSERT INTO "config" VALUES('/plugins/navgraph/tolerance','float',0.25,'Distance between actual and target position to consider traveling to a node finished; m');
 INSERT INTO "config" VALUES('/plugins/navgraph/visualization','bool',1,'Visualize graph and current actions?');
 INSERT INTO "config" VALUES('/plugins/navgraph/resend_interval','float',0.25,'Interval in which the resend the goto command; sec');
+INSERT INTO "config" VALUES('/plugins/navgraph/monitor_file','bool',1,'Monitor graph file and automatically reload on change?');
 COMMIT;

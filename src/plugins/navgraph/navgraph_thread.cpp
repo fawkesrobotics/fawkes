@@ -92,9 +92,10 @@ NavGraphThread::init()
     fam_->add_listener(this);
   }
 
-  exec_active_ = false;
-  last_node_   = "";
-  cmd_sent_at_ = new Time(clock);
+  exec_active_    = false;
+  target_reached_ = false;
+  last_node_      = "";
+  cmd_sent_at_    = new Time(clock);
 }
 
 void
@@ -155,14 +156,26 @@ NavGraphThread::loop()
 
   if (exec_active_) {
     // check if current was target reached
-    if (node_reached()) {
+    if (target_reached_) {
+      // reached the target, check if colli/navi/local planner is final
+      nav_if_->read();
+      if (nav_if_->is_final()) {
+	target_reached_ = false;
+	exec_active_ = false;
+	pp_nav_if_->set_final(true);
+	needs_write = true;
+      }
+    } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
       last_node_ = plan_[0].name();
       plan_.erase(plan_.begin());
       if (plan_.empty()) {
-	stop_motion();
-	pp_nav_if_->set_final(true);
-	needs_write = true;
+	target_reached_ = true;
+	nav_if_->read();
+	if (nav_if_->is_final()) {
+	  pp_nav_if_->set_final(true);
+	  needs_write = true;
+	}
       } else {
 	send_next_goal();
       }
@@ -188,8 +201,10 @@ NavGraphThread::load_graph(std::string filename)
   inf.close();
 
   if (firstword == "%YAML") {
+    logger->log_info(name(), "Loading YAML graph from %s", filename.c_str());
     return load_yaml_navgraph(filename);
   } else if (firstword == "<Graph>") {
+    logger->log_info(name(), "Loading RCSoft graph from %s", filename.c_str());
     return load_rcsoft_graph(filename);
   } else {
     throw Exception("Unknown graph format");
@@ -253,6 +268,7 @@ NavGraphThread::generate_plan(float x, float y, float ori)
 void
 NavGraphThread::start_plan()
 {
+  target_reached_ = false;
   if (plan_.empty()) {
     exec_active_ = false;
     pp_nav_if_->set_final(true);
@@ -295,6 +311,7 @@ NavGraphThread::stop_motion()
   }
   last_node_ = "";
   exec_active_ = false;
+  target_reached_ = false;
   pp_nav_if_->set_final(true);
 
 #ifdef HAVE_VISUALIZATION
