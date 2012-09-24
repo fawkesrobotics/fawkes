@@ -88,6 +88,7 @@ public:
   float        cfg_tolerance_; 
   float        cfg_resend_interval_; 
   bool         cfg_monitor_file_;
+  float        cfg_target_time_;
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
@@ -97,6 +98,8 @@ public:
 
   bool exec_active_;
   bool target_reached_;
+  float target_time_;
+  fawkes::Time *target_reached_at_;
   std::string last_node_;
   std::vector<fawkes::TopologicalMapNode> plan_;
 

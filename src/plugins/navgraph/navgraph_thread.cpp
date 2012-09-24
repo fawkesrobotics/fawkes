@@ -69,6 +69,7 @@ NavGraphThread::init()
   cfg_nav_if_id_       = config->get_string("/plugins/navgraph/navigator_interface_id");
   cfg_tolerance_       = config->get_float("/plugins/navgraph/tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
+  cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
 
   cfg_monitor_file_ = false;
   try {
@@ -92,10 +93,11 @@ NavGraphThread::init()
     fam_->add_listener(this);
   }
 
-  exec_active_    = false;
-  target_reached_ = false;
-  last_node_      = "";
-  cmd_sent_at_    = new Time(clock);
+  exec_active_       = false;
+  target_reached_    = false;
+  last_node_         = "";
+  cmd_sent_at_       = new Time(clock);
+  target_reached_at_ = new Time(clock);
 }
 
 void
@@ -104,6 +106,7 @@ NavGraphThread::finalize()
   delete cmd_sent_at_;
   delete astar_;
   delete graph_;
+  delete target_reached_at_;
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
 }
@@ -159,7 +162,8 @@ NavGraphThread::loop()
     if (target_reached_) {
       // reached the target, check if colli/navi/local planner is final
       nav_if_->read();
-      if (nav_if_->is_final()) {
+      fawkes::Time now(clock);
+      if (nav_if_->is_final() || ((now - target_reached_at_) >= target_time_)) {
 	target_reached_ = false;
 	exec_active_ = false;
 	pp_nav_if_->set_final(true);
@@ -168,14 +172,24 @@ NavGraphThread::loop()
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
       last_node_ = plan_[0].name();
-      plan_.erase(plan_.begin());
-      if (plan_.empty()) {
-	target_reached_ = true;
+      if (plan_.size() == 1) {
+	target_time_ = 0;
+	if (plan_[0].has_property("target-time")) {
+	  target_time_ = plan_[0].property_as_float("target-time");
+	}
+	if (target_time_ == 0)  target_time_ = cfg_target_time_;
+
 	nav_if_->read();
 	if (nav_if_->is_final()) {
+	  exec_active_ = false;
+	  target_reached_ = false;
 	  pp_nav_if_->set_final(true);
 	  needs_write = true;
+	} else {
+	  target_reached_ = true;
+	  target_reached_at_->stamp();
 	}
+	plan_.erase(plan_.begin());
       } else {
 	send_next_goal();
       }
