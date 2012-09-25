@@ -138,6 +138,11 @@ class Transformer
   void transform_pose(const std::string& target_frame,
                       const Stamped<Pose>& stamped_in, Stamped<Pose>& stamped_out) const;
 
+  bool transform_origin(const std::string& source_frame,
+                        const std::string& target_frame,
+                        Stamped<Pose>& stamped_out,
+                        const fawkes::Time time = fawkes::Time(0,0)) const;
+
   void transform_quaternion(const std::string& target_frame, const fawkes::Time& target_time,
                             const Stamped<Quaternion>& stamped_in,
                             const std::string& fixed_frame,

@@ -52,6 +52,7 @@
 #include <tf/transformer.h>
 #include <tf/time_cache.h>
 #include <tf/exceptions.h>
+#include <tf/utils.h>
 
 #include <core/threading/mutex_locker.h>
 #include <iostream>
@@ -1158,6 +1159,40 @@ Transformer::transform_pose(const std::string& target_frame,
   stamped_out.set_data(transform * stamped_in);
   stamped_out.stamp = transform.stamp;
   stamped_out.frame_id = target_frame;
+}
+
+
+/** Transform ident pose from one frame to another.
+ * This utility method can be used to transform the ident pose,
+ * i.e. the origin of one frame, into another. Note that this method
+ * does not throw an exception on error, rather the success of the
+ * transformation is indicated by a return value.
+ *
+ * For example, if the source frame is the base frame
+ * (e.g. /base_link), and the target frame is the global frame
+ * (e.g. /map), then the result would be the robot's global position.
+ * @param source_frame frame whose origin to transform
+ * @param target_frame frame in which you want to know the position of
+ * the origin of the source frame
+ * @param stamped_out upon successful completion (check return value)
+ * stamped pose of origin of source frame in target frame
+ * @param time time for when to do the transformation, by default take
+ * the latest matching transformation.
+ * @return true if the transform could be successfully determined,
+ * false otherwise.
+ */
+bool
+Transformer::transform_origin(const std::string& source_frame,
+                              const std::string& target_frame,
+                              Stamped<Pose>& stamped_out, const fawkes::Time time) const
+{
+  tf::Stamped<tf::Pose> ident = tf::ident(source_frame, time);
+  try {
+    transform_pose(target_frame, ident, stamped_out);
+    return true;
+  } catch (Exception &e) {
+    return false;
+  }
 }
 
 
