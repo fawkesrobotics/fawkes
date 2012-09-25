@@ -41,7 +41,8 @@ ifeq ($(HAVE_TF),1)
     ifeq ($(HAVE_ROS),1)
       ifeq ($(call ros-have-pkg,visualization_msgs),1)
         CFLAGS  += -DHAVE_VISUALIZATION $(CFLAGS_ROS)
-	CFLAGS_visualization_thread = $(CFLAGS) $(call ros-pkg-cflags,visualization_msgs)
+	CFLAGS_visualization_thread = $(CFLAGS) $(CFLAGS_TF) \
+				      $(call ros-pkg-cflags,visualization_msgs)
         LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
 
         LIBS_navgraph += fawkesrosaspect

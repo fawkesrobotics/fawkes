@@ -22,6 +22,7 @@
 #include "visualization_thread.h"
 
 #include <utils/graph/topological_map_graph.h>
+#include <tf/types.h>
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -176,6 +177,7 @@ NavGraphVisualizationThread::publish()
   cur_line.scale.x = 0.05;
   cur_line.lifetime = ros::Duration(0, 0);
 
+
   for (size_t i = 0; i < nodes.size(); ++i) {
     visualization_msgs::Marker sphere;
     sphere.header.frame_id = "/map";
@@ -206,6 +208,44 @@ NavGraphVisualizationThread::publish()
     sphere.color.a = 1.0;
     sphere.lifetime = ros::Duration(0, 0);
     m.markers.push_back(sphere);
+
+    if (nodes[i].has_property("orientation")) {
+      float ori = nodes[i].property_as_float("orientation");
+      logger->log_debug(name(), "Node %s has orientation %f", nodes[i].name().c_str(), ori);
+      visualization_msgs::Marker arrow;
+      arrow.header.frame_id = "/map";
+      arrow.header.stamp = ros::Time::now();
+      arrow.ns = "navgraph";
+      arrow.id = id_num++;
+      arrow.type = visualization_msgs::Marker::ARROW;
+      arrow.action = visualization_msgs::Marker::ADD;
+      arrow.pose.position.x =  nodes[i].x();
+      arrow.pose.position.y =  nodes[i].y();
+      arrow.pose.position.z = 0.;
+      tf::Quaternion q = tf::create_quaternion_from_yaw(ori);
+      arrow.pose.orientation.x = q.x();
+      arrow.pose.orientation.y = q.y();
+      arrow.pose.orientation.z = q.z();
+      arrow.pose.orientation.w = q.w();
+      arrow.scale.x = 0.1;
+      arrow.scale.y = 0.5;
+      arrow.scale.z = 0.07;
+      if (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end()) {
+	if (plan_to_ == nodes[i].name()) {
+	  arrow.color.r = arrow.color.g = 1.f;
+	} else {
+	  arrow.color.r = 1.f;
+	  arrow.color.g = 0.f;
+	}
+      } else {
+	arrow.color.r = 0.5;
+      }
+      arrow.color.b = 0.f;
+      arrow.color.a = 1.0;
+      arrow.lifetime = ros::Duration(0, 0);
+      m.markers.push_back(arrow);
+    }
+
 
     visualization_msgs::Marker text;
     text.header.frame_id = "/map";
