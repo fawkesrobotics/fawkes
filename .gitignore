@@ -1,4 +1,5 @@
 # Generic globs
+core*
 *~
 .deps_*
 .objs_*
