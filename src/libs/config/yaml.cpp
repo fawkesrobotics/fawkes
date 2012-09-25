@@ -28,6 +28,7 @@
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
 #include <logging/liblogger.h>
+#include <utils/system/fam_thread.h>
 
 #include <queue>
 #include <fstream>
@@ -238,6 +239,7 @@ YamlConfiguration::YamlValueIterator::is_default() const
 YamlConfiguration::YamlConfiguration()
 {
   root_ = host_root_ = NULL;
+  fam_thread_ = NULL;
   mutex = new Mutex();
 
   __sysconfdir   = NULL;
@@ -273,6 +275,7 @@ YamlConfiguration::YamlConfiguration(const char *sysconfdir,
                                      const char *userconfdir)
 {
   root_ = host_root_ = NULL;
+  fam_thread_ = NULL;
   mutex = new Mutex();
 
   __sysconfdir   = strdup(sysconfdir);
@@ -313,6 +316,12 @@ YamlConfiguration::~YamlConfiguration()
   delete root_;
   delete host_root_;
   root_ = host_root_ = NULL;
+
+  if (fam_thread_) {
+    fam_thread_->cancel();
+    fam_thread_->join();
+    delete fam_thread_;
+  }
 
   if (__sysconfdir)   free(__sysconfdir);
   if (__userconfdir)  free(__userconfdir);
@@ -360,51 +369,35 @@ YamlConfiguration::load(const char *file_path,
     }
   }
 
-  root_ = new Node();
+  config_file_ = filename;
 
-  std::queue<LoadQueueEntry> load_queue;
-  load_queue.push(LoadQueueEntry(filename, false));
+  host_file_ = "";
+  std::list<std::string> files, dirs;
+  read_yaml_config(filename, host_file_, root_, host_root_, files, dirs);
 
-  while (! load_queue.empty()) {
-    LoadQueueEntry &qe = load_queue.front();
-
-    LibLogger::log_debug("YamlConfiguration",
-			 "Reading YAML file '%s' (ignore missing: %s)",
-			 qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
-
-    Node *sub_root = read_yaml_file(qe.filename, qe.ignore_missing, load_queue);
-
-    if (sub_root) {
-      *root_ += sub_root;
-      delete sub_root;
-    }
-
-    load_queue.pop();
+  fam_thread_ = new FamThread();
+  RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
+  fam->add_filter("^[^.].*\\.yaml$");
+  std::list<std::string>::iterator f;
+  for (f = files.begin(); f != files.end(); ++f) {
+    LibLogger::log_info("YC", "Watching %s", f->c_str());
+    fam->watch_file(f->c_str());
   }
-
-  if (host_file_ != "") {
-    LibLogger::log_debug("YamlConfiguration",
-			 "Reading Host YAML file '%s'", host_file_.c_str());
-    std::queue<LoadQueueEntry> host_load_queue;
-    host_root_ = read_yaml_file(host_file_, true, host_load_queue);
-    if (! host_load_queue.empty()) {
-      throw CouldNotOpenConfigException("YamlConfig: includes are not allowed "
-					"in host document");
-    }
-    if (host_root_)  *root_ += host_root_;
-    else host_root_ = new Node();
-  } else {
-    host_root_ = new Node();
+  for (f = dirs.begin(); f != dirs.end(); ++f) {
+    LibLogger::log_info("YC", "Watching DIR %s", f->c_str());
+    fam->watch_dir(f->c_str());
   }
+  fam->add_listener(this);
+  fam_thread_->start();
 
   //root_->print();
-
 }
 
 
 YamlConfiguration::Node *
 YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
-				  std::queue<LoadQueueEntry> &load_queue)
+				  std::queue<LoadQueueEntry> &load_queue,
+                                  std::string &host_file)
 {
   if (access(filename.c_str(), R_OK) == -1) {
     if (ignore_missing) {
@@ -435,7 +428,7 @@ YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
     // empty -> ignore
   } else if (have_doc1 && have_doc2) {
     // we have a meta info and a config document
-    read_meta_doc(doc1, load_queue);
+    read_meta_doc(doc1, load_queue, host_file);
     read_config_doc(doc2, sub_root);
   } else {
     // only one, assume this to be the config document
@@ -445,6 +438,104 @@ YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
   return sub_root;
 }
 
+
+void
+YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file,
+                                    Node *& root, Node *& host_root,
+                                    std::list<std::string> &files, std::list<std::string> &dirs)
+{
+  root = new Node();
+
+  std::queue<LoadQueueEntry> load_queue;
+  load_queue.push(LoadQueueEntry(filename, false));
+
+  while (! load_queue.empty()) {
+    LoadQueueEntry &qe = load_queue.front();
+
+    if (qe.is_dir) {
+      dirs.push_back(qe.filename);
+    } else {
+      LibLogger::log_debug("YamlConfiguration",
+                           "Reading YAML file '%s' (ignore missing: %s)",
+                           qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
+
+      Node *sub_root = read_yaml_file(qe.filename, qe.ignore_missing, load_queue, host_file);
+
+      if (sub_root) {
+        files.push_back(qe.filename);
+        *root += sub_root;
+        delete sub_root;
+      }
+    }
+
+    load_queue.pop();
+  }
+
+  if (host_file != "") {
+    LibLogger::log_debug("YamlConfiguration",
+			 "Reading Host YAML file '%s'", host_file.c_str());
+    std::queue<LoadQueueEntry> host_load_queue;
+    host_root = read_yaml_file(host_file, true, host_load_queue, host_file);
+    if (! host_load_queue.empty()) {
+      throw CouldNotOpenConfigException("YamlConfig: includes are not allowed "
+					"in host document");
+    }
+    if (host_root) {
+      *root += host_root;
+      files.push_back(host_file);
+    } else host_root = new Node();
+  } else {
+    host_root = new Node();
+  }
+}
+
+
+void
+YamlConfiguration::fam_event(const char *filename, unsigned int mask)
+{
+  try {
+    std::string host_file = "";
+    std::list<std::string> files, dirs;
+    Node *root, *host_root;
+    read_yaml_config(config_file_, host_file, root, host_root, files, dirs);
+
+    std::list<std::string> changes = Node::diff(root_, root);
+
+    if (! changes.empty()) {
+      Node *old_root = root_;
+      Node *old_host_root = host_root_;
+      root_ = root;
+      host_root_ = host_root;
+      host_file_ = host_file;
+      delete old_root;
+      delete old_host_root;
+
+      std::list<std::string>::iterator c;
+      for (c = changes.begin(); c != changes.end(); ++c) {
+        notify_handlers(c->c_str());
+      }
+    }
+
+    // includes might have changed to include a new empty file
+    // so even though no value changes were seen, we might very
+    // well have new files we need to watch (or files we do no
+    // longer have to watch, so always reset and re-add.
+    RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
+    fam->reset();
+    std::list<std::string>::iterator f;
+    for (f = files.begin(); f != files.end(); ++f) {
+      fam->watch_file(f->c_str());
+    }
+    for (f = dirs.begin(); f != dirs.end(); ++f) {
+      fam->watch_dir(f->c_str());
+    }
+
+  } catch (Exception &e) {
+    LibLogger::log_warn("YamlConfiguration",
+                        "Failed to reload changed config, exception follows");
+    LibLogger::log_warn("YamlConfiguration", e);
+  }
+}
 
 /** Create absolute config path.
  * If the @p path starts with / it is considered to be absolute. Otherwise
@@ -463,7 +554,8 @@ static std::string abs_cfg_path(std::string &path)
 
 
 void
-YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue)
+YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
+                                 std::string &host_file)
 {
   try {
     const YAML::Node &includes = doc["include"];
@@ -476,11 +568,11 @@ YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &lo
       }
 
       if (it->Tag() == "tag:fawkesrobotics.org,cfg/host-specific") {
-	if (host_file_ != "") {
+	if (host_file != "") {
 	  throw Exception("YamlConfig: Only one host-specific file can be specified");
 	}
-	it->GetScalar(host_file_);
-	host_file_ = abs_cfg_path(host_file_);
+	it->GetScalar(host_file);
+	host_file = abs_cfg_path(host_file);
 	continue;
       }
 
@@ -506,6 +598,8 @@ YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &lo
 	  throw Exception(errno, "YamlConfig: failed to open directory %s",
 			  dirname.c_str());
 	}
+
+        load_queue.push(LoadQueueEntry(dirname, ignore_missing, true));
 
 	std::list<std::string> files;
 
@@ -808,13 +902,17 @@ YamlConfiguration::is_default(const char *path)
 Configuration::ValueIterator *
 YamlConfiguration::get_value(const char *path)
 {
-  YamlConfiguration::Node *n = root_->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
+  try {
+    YamlConfiguration::Node *n = root_->find(path);
+    if (n->has_children()) {
+      return new YamlValueIterator();
+    }
+    std::map<std::string, Node *> nodes;
+    nodes[path] = n;
+    return new YamlValueIterator(nodes);
+  } catch (ConfigEntryNotFoundException &e) {
+    return new YamlValueIterator();
   }
-  std::map<std::string, Node *> nodes;
-  nodes[path] = n;
-  return new YamlValueIterator(nodes);
 }
 
 

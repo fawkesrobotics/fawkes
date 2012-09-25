@@ -257,6 +257,57 @@ class YamlConfiguration::Node
     return *this;
   }
 
+  bool operator==(const Node &n) const
+  {
+    return (name_ == n.name_) && (type_ == n.type_) && (scalar_value_ == n.scalar_value_);
+  }
+
+  bool operator!=(const Node &n) const
+  {
+    return (name_ != n.name_) || (type_ != n.type_) || (scalar_value_ != n.scalar_value_);
+  }
+
+  /** Check for differences in two trees.
+   * This returns a list of all changes that have occured in b opposed
+   * to b. This means keys which have been added or changed in b compared to
+   * a. It also includes keys which have been removed from a, i.e. which exist
+   * in b but not in a.
+   * @param a root node of first tree
+   * @param b root node of second tree
+   * @return list of paths to leaf nodes that changed
+   */
+  static std::list<std::string> diff(const Node *a, const Node *b)
+  {
+    std::list<std::string> rv;
+
+    std::map<std::string, Node *> na, nb;
+    a->enum_leafs(na);
+    b->enum_leafs(nb);
+    
+    std::map<std::string, Node *>::iterator i;
+    for (i = na.begin(); i != na.end(); ++i) {
+      if (nb.find(i->first) == nb.end()) {
+        // this is a new key in a
+        printf("A %s NOT in B\n", i->first.c_str());
+        rv.push_back(i->first);
+      } else if (*i->second != *nb[i->first]) {
+        // different values/types
+        printf("A %s modified\n", i->first.c_str());
+        rv.push_back(i->first);
+      }
+    }
+
+    for (i = nb.begin(); i != nb.end(); ++i) {
+      if (na.find(i->first) == na.end()) {
+        // this is a new key in b
+        printf("B %s NOT in A\n", i->first.c_str());
+        rv.push_back(i->first);
+      }
+    }
+
+    return rv;
+  }
+
   /** Retrieve value casted to given type T.
    * @param path path to query
    * @return value casted as desired
@@ -414,9 +465,9 @@ class YamlConfiguration::Node
   }
 
 
-  void enum_leafs(std::map<std::string, Node *> &nodes, std::string prefix = "")
+  void enum_leafs(std::map<std::string, Node *> &nodes, std::string prefix = "") const
   {
-    std::map<std::string, Node *>::iterator c;
+    std::map<std::string, Node *>::const_iterator c;
     for (c = children_.begin(); c != children_.end(); ++c) {
       std::string path = prefix + "/" + c->first;
       if (c->second->has_children()) {

@@ -25,6 +25,7 @@
 #define __CONFIG_YAML_H_
 
 #include <config/config.h>
+#include <utils/system/fam.h>
 
 #include <yaml-cpp/yaml.h>
 #ifdef USE_REGEX_CPP
@@ -42,8 +43,11 @@
 namespace fawkes {
 
 class Mutex;
+class FamThread;
 
-class YamlConfiguration : public Configuration
+class YamlConfiguration
+: public Configuration,
+  public FamListener
 {
  public:
   YamlConfiguration();
@@ -108,6 +112,8 @@ class YamlConfiguration : public Configuration
 
   virtual void            try_dump();
 
+  virtual void fam_event(const char *filename, unsigned int mask);
+
  private:
   class Node;
 
@@ -151,26 +157,32 @@ class YamlConfiguration : public Configuration
  private:
   class LoadQueueEntry {
    public:
-    LoadQueueEntry(std::string fn, bool im)
-    : filename(fn), ignore_missing(im) {}
+  LoadQueueEntry(std::string fn, bool im, bool id = false)
+    : filename(fn), ignore_missing(im), is_dir(id) {}
 
     std::string filename;
     bool ignore_missing;
+    bool is_dir;
   };
 
   Node *  query(const char *path) const;
-  void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue);
+  void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
+                     std::string &host_file);
   void read_config_doc(const YAML::Node &doc, Node *&node);
   Node * read_yaml_file(std::string filename, bool ignore_missing,
-			std::queue<LoadQueueEntry> &load_queue);
+			std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
+  void read_yaml_config(std::string filename, std::string &host_file,
+                        Node *& root, Node *& host_root,
+                        std::list<std::string> &files, std::list<std::string> &dirs);
   void write_host_file();
   static std::vector<std::string> split(const std::string &s, char delim = '/');
   static std::queue<std::string> split_to_queue(const std::string &s, char delim = '/');
 
-  Node  *root_;
-
-  Node  *host_root_;
+  std::string config_file_;
   std::string host_file_;
+
+  Node  *root_;
+  Node  *host_root_;
 
  private:
   Mutex *mutex;
@@ -190,6 +202,8 @@ class YamlConfiguration : public Configuration
 
   char *__sysconfdir;
   char *__userconfdir;
+
+  FamThread *fam_thread_;
 };
 
 
