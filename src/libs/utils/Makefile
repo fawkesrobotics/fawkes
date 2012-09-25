@@ -42,11 +42,11 @@ else
   WARN_TARGETS += warning_libxmlpp
 endif
 ifeq ($(HAVE_YAMLCPP),1)
-  HAVE_YAMLCPP_0_3_0 = $(if $(shell $(PKGCONFIG) --atleast-version='0.3.0' 'yaml-cpp'; echo $${?/1/}),1,0)
+  HAVE_YAMLCPP_0_2_6 = $(if $(shell $(PKGCONFIG) --atleast-version='0.2.6' 'yaml-cpp'; echo $${?/1/}),1,0)
 
   CFLAGS_YAMLCPP  = -DHAVE_YAMLCPP $(shell $(PKGCONFIG) --cflags 'yaml-cpp')
   LDFLAGS_YAMLCPP = $(shell $(PKGCONFIG) --libs 'yaml-cpp')
-  ifneq ($(HAVE_YAMLCPP_0_3_0),1)
+  ifneq ($(HAVE_YAMLCPP_0_2_6),1)
     CFLAGS_YAMLCPP += -DHAVE_OLD_YAMLCPP
   endif
 
