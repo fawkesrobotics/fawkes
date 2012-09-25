@@ -64,43 +64,53 @@ operator >> (const YAML::Node& n, TopologicalMapNode &node) {
     throw fawkes::Exception("Failed to parse node: %s", e.what());
   }
 
+
+  bool has_properties = true;
   try {
-    const YAML::Node &props = n["properties"];
-    if (props.Type() != YAML::NodeType::Sequence) {
-      throw Exception("Properties must be a list");
-    }
-
-    std::map<std::string, std::string> properties;
-
-    YAML::Iterator p;
-    for (p = props.begin(); p != props.end(); ++p) {
-#ifdef HAVE_OLD_YAMLCPP
-      if (p->GetType() == YAML::CT_SCALAR) {
-#else
-      if (p->Type() == YAML::NodeType::Scalar) {
-#endif
-        std::string key;
-        *p >> key;
-        node.set_property(key, "true");
-#ifdef HAVE_OLD_YAMLCPP
-      } else if (p->GetType() == YAML::CT_MAP) {
-#else
-      } else if (p->Type() == YAML::NodeType::Map) {
-#endif
-        for (YAML::Iterator i = p->begin(); i != p->end(); ++i) {
-          std::string key, value;
-          i.first() >> key;
-          i.second() >> value;
-          node.set_property(key, value);
-        }
-      } else {
-        throw Exception("Invalid property for node '%s'", name.c_str());
-      }
-    }
-    
+    has_properties = (n.FindValue("properties") != NULL);
   } catch (YAML::Exception &e) {
-    //printf("Parsing failure: %s\n", e.what());
-  } // ignored
+    has_properties = false;
+  }
+
+  if (has_properties) {
+    try {
+      const YAML::Node &props = n["properties"];
+      if (props.Type() != YAML::NodeType::Sequence) {
+	throw Exception("Properties must be a list");
+      }
+
+      std::map<std::string, std::string> properties;
+
+      YAML::Iterator p;
+      for (p = props.begin(); p != props.end(); ++p) {
+#ifdef HAVE_OLD_YAMLCPP
+	if (p->GetType() == YAML::CT_SCALAR) {
+#else
+	if (p->Type() == YAML::NodeType::Scalar) {
+#endif
+	  std::string key;
+	  *p >> key;
+	  node.set_property(key, "true");
+#ifdef HAVE_OLD_YAMLCPP
+	} else if (p->GetType() == YAML::CT_MAP) {
+#else
+	} else if (p->Type() == YAML::NodeType::Map) {
+#endif
+	  for (YAML::Iterator i = p->begin(); i != p->end(); ++i) {
+	    std::string key, value;
+	    i.first() >> key;
+	    i.second() >> value;
+	    node.set_property(key, value);
+	  }
+	} else {
+	  throw Exception("Invalid property for node '%s'", name.c_str());
+	}
+      }    
+    } catch (YAML::Exception &e) {
+      throw Exception("Failed to read propery of %s: %s",
+		      name.c_str(), e.what());
+    } // ignored
+  }
 
   node.set_name(name);
 }
