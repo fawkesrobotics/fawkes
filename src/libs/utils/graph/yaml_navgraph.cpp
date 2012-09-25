@@ -66,6 +66,10 @@ operator >> (const YAML::Node& n, TopologicalMapNode &node) {
 
   try {
     const YAML::Node &props = n["properties"];
+    if (props.Type() != YAML::NodeType::Sequence) {
+      throw Exception("Properties must be a list");
+    }
+
     std::map<std::string, std::string> properties;
 
     YAML::Iterator p;
