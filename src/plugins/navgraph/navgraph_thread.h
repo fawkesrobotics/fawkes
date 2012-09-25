@@ -73,6 +73,7 @@ public:
  private:
   void generate_plan(std::string goal);
   void generate_plan(float x, float y, float ori);
+  void optimize_plan();
   void stop_motion();
   void start_plan();
   void send_next_goal();

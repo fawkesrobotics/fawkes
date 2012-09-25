@@ -140,6 +140,7 @@ NavGraphThread::loop()
 
       pp_nav_if_->set_msgid(msg->id());
       generate_plan(msg->x(), msg->y(), msg->orientation());
+      optimize_plan();
       start_plan();
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceGotoMessage>()) {
@@ -148,6 +149,7 @@ NavGraphThread::loop()
 
       pp_nav_if_->set_msgid(msg->id());
       generate_plan(msg->place());
+      optimize_plan();
       start_plan();
     }
 
@@ -276,6 +278,45 @@ NavGraphThread::generate_plan(float x, float y, float ori)
   TopologicalMapNode n("free-target", x, y);
   n.set_property("orientation", ori);
   plan_.push_back(n);
+}
+
+
+/** Optimize the current plan.
+ * Note that after generating a plan, the robot first needs to
+ * travel to the first actual node from a free position within
+ * the environment. It can happen, that this closest node lies
+ * in the opposite direction of the second node, hence the robot
+ * needs to "go back" first, and only then starts following
+ * the path. We can optimize this by removing the first node,
+ * so that the robot directly travels to the second node which
+ * "lies on the way".
+ */
+void
+NavGraphThread::optimize_plan()
+{
+  if (plan_.size() > 1) {
+    // get current position of robot in map frame
+    tf::Stamped<tf::Pose> pose;
+    tf::Stamped<tf::Pose> ident = tf::ident(cfg_base_frame_);
+    try {
+      tf_listener->transform_pose(cfg_global_frame_, ident, pose);
+    } catch (Exception &e) {
+      logger->log_warn(name(),
+                       "Failed to compute pose, cannot optimize plan", e.what());
+      return;
+    }
+
+    double sqr_dist_a = ( pow(pose.getOrigin().x() - plan_[0].x(), 2) +
+                          pow(pose.getOrigin().y() - plan_[0].y(), 2) );
+    double sqr_dist_b = ( pow(plan_[0].x() - plan_[1].x(), 2) +
+                          pow(plan_[0].y() - plan_[1].y(), 2) );
+    double sqr_dist_c = ( pow(pose.getOrigin().x() - plan_[1].x(), 2) +
+                          pow(pose.getOrigin().y() - plan_[1].y(), 2) );
+
+    if (sqr_dist_a + sqr_dist_b >= sqr_dist_c){
+      plan_.erase(plan_.begin());
+    }
+  }
 }
 
 
@@ -475,8 +516,10 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
 
     if (goal.name() == "free-target") {
       generate_plan(goal.x(), goal.y(), goal.property_as_float("orientation"));
+      optimize_plan();
     } else {
       generate_plan(goal.name());
+      optimize_plan();
     }
 
     start_plan();
