@@ -84,6 +84,7 @@ NavGraphThread::init()
   }
 
   graph_ = load_graph(cfg_graph_file_);
+  log_graph();
   astar_ = new AStar();
 
   if (cfg_monitor_file_) {
@@ -164,8 +165,7 @@ NavGraphThread::loop()
       nav_if_->read();
       fawkes::Time now(clock);
       if (nav_if_->is_final() || ((now - target_reached_at_) >= target_time_)) {
-	target_reached_ = false;
-	exec_active_ = false;
+	stop_motion();
 	pp_nav_if_->set_final(true);
 	needs_write = true;
       }
@@ -189,10 +189,10 @@ NavGraphThread::loop()
 	  target_reached_ = true;
 	  target_reached_at_->stamp();
 	}
-	plan_.erase(plan_.begin());
-      } else {
-	send_next_goal();
       }
+      plan_.erase(plan_.begin());
+
+      if (! plan_.empty())  send_next_goal();
     } else {
       fawkes::Time now(clock);
       if ((now - cmd_sent_at_) > cfg_resend_interval_) {
@@ -288,6 +288,11 @@ NavGraphThread::start_plan()
     pp_nav_if_->set_final(true);
     pp_nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
     logger->log_warn(name(), "Cannot start empty plan.");
+
+#ifdef HAVE_VISUALIZATION
+  if (vt_)  vt_->reset_plan();
+#endif
+
   } else {    
 
     std::string m = plan_[0].name();
@@ -475,5 +480,23 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
     }
 
     start_plan();
+  }
+}
+
+
+void
+NavGraphThread::log_graph()
+{
+  std::vector<TopologicalMapNode> nodes = graph_->nodes();
+  std::vector<TopologicalMapNode>::iterator n;
+  for (n = nodes.begin(); n != nodes.end(); ++n) {
+    logger->log_info(name(), "Node %s @ (%f,%f)",
+		     n->name().c_str(), n->x(), n->y());
+
+    std::map<std::string, std::string> &props = n->properties();
+    std::map<std::string, std::string>::iterator p;
+    for (p = props.begin(); p != props.end(); ++p) {
+      logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
+    }
   }
 }
