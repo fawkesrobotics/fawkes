@@ -50,8 +50,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TF_H_
-#define __LIBS_TF_TF_H_
+#ifndef __LIBS_TF_UTILS_H_
+#define __LIBS_TF_UTILS_H_
 
 #include <tf/types.h>
 
@@ -67,7 +67,7 @@ namespace fawkes {
  * @param frame_name frame name
  * @return resolved frame name
  */
-std::string
+inline std::string
 resolve(const std::string& prefix, const std::string& frame_name)
 {
   if (frame_name.size() > 0) {
@@ -105,7 +105,7 @@ resolve(const std::string& prefix, const std::string& frame_name)
  * means "latest possible time" for TF transforms.
  * @return ident pose in given frame at given time
  */
-Stamped<Pose>
+inline Stamped<Pose>
 ident(std::string frame, Time t = Time(0,0))
 {
   return
