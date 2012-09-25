@@ -339,9 +339,10 @@ INSERT INTO "config" VALUES('/plugins/amcl/map-lasergen/send_zero_odom','bool',1
 INSERT INTO "config" VALUES('/plugins/navgraph/base_frame','string','/base_link','Base Frame ID');
 INSERT INTO "config" VALUES('/plugins/navgraph/global_frame','string','/map','Global Frame ID');
 INSERT INTO "config" VALUES('/plugins/navgraph/navigator_interface_id','string','Navigator','Blackboard interface ID for navigator interface of locomotion component');
-INSERT INTO "config" VALUES('/plugins/navgraph/graph_file','string','/home/tim/robotics/rcsoftx/cfg/adot/maps/adot-converted.plan','Graph file to use for path planning');
+INSERT INTO "config" VALUES('/plugins/navgraph/graph_file','string','kbsg-new.plan','Graph file to use for path planning');
 INSERT INTO "config" VALUES('/plugins/navgraph/tolerance','float',0.25,'Distance between actual and target position to consider traveling to a node finished; m');
 INSERT INTO "config" VALUES('/plugins/navgraph/visualization','bool',1,'Visualize graph and current actions?');
 INSERT INTO "config" VALUES('/plugins/navgraph/resend_interval','float',0.25,'Interval in which the resend the goto command; sec');
-INSERT INTO "config" VALUES('/plugins/navgraph/monitor_file','bool',1,'Monitor graph file and automatically reload on change?');
+INSERT INTO "config" VALUES('/plugins/navgraph/target_time','float',2.5,'Time to keep moving after the target tolerance has been reached; sec');
+INSERT INTO "config" VALUES('/plugins/navgraph/monitor_file','bool',1,'Monitor graph file and automatically reload on changes?');
 COMMIT;
