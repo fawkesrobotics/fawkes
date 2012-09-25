@@ -230,17 +230,12 @@ NavGraphThread::load_graph(std::string filename)
 void
 NavGraphThread::generate_plan(std::string goal_name)
 {
-  // get current position of robot in map frame
   tf::Stamped<tf::Pose> pose;
-  tf::Stamped<tf::Pose> ident = tf::ident(cfg_base_frame_);
-  try {
-    tf_listener->transform_pose(cfg_global_frame_, ident, pose);
-  } catch (Exception &e) {
+  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
     logger->log_warn(name(),
-		     "Failed to compute pose, cannot generate plan", e.what());
-    throw;
+		     "Failed to compute pose, cannot generate plan");
+    return;
   }
-
 
   TopologicalMapNode init =
     graph_->closest_node(pose.getOrigin().x(), pose.getOrigin().y());
@@ -297,13 +292,9 @@ NavGraphThread::optimize_plan()
   if (plan_.size() > 1) {
     // get current position of robot in map frame
     tf::Stamped<tf::Pose> pose;
-    tf::Stamped<tf::Pose> ident = tf::ident(cfg_base_frame_);
-    try {
-      tf_listener->transform_pose(cfg_global_frame_, ident, pose);
-    } catch (Exception &e) {
+    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
       logger->log_warn(name(),
-                       "Failed to compute pose, cannot optimize plan", e.what());
-      return;
+                       "Failed to compute pose, cannot optimize plan");
     }
 
     double sqr_dist_a = ( pow(pose.getOrigin().x() - plan_[0].x(), 2) +
@@ -395,24 +386,19 @@ NavGraphThread::send_next_goal()
     // take the given orientation for the final node
     ori = next_target.property_as_float("orientation");
   } else {
-    // get current position of robot in map frame
     tf::Stamped<tf::Pose> pose;
-    tf::Stamped<tf::Pose> ident = tf::ident(cfg_base_frame_);
-    try {
-      tf_listener->transform_pose(cfg_global_frame_, ident, pose);
-    } catch (Exception &e) {
+    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
       logger->log_warn(name(),
-		       "Failed to compute pose, cannot compute facing direction", e.what());
-      throw;
+		       "Failed to compute pose, cannot compute facing direction");
+    } else {
+      // set direction facing from current to next target position, best
+      // chance to reach the destination without turning at the end
+      ori = atan2f(next_target.y() - pose.getOrigin().y(),
+                   next_target.x() - pose.getOrigin().x());
     }
-
-    // set direction facing from current to next target position, best
-    // chance to reach the destination without turning at the end
-    ori = atan2f(next_target.y() - pose.getOrigin().y(),
-		 next_target.x() - pose.getOrigin().x());
   }
 
-  // get current position of robot in map frame
+  // get target position in map frame
   tf::Stamped<tf::Pose> tpose;
   tf::Stamped<tf::Pose>
     tposeglob(tf::Transform(tf::create_quaternion_from_yaw(ori),
@@ -459,20 +445,18 @@ bool
 NavGraphThread::node_reached()
 {
   if (plan_.empty()) {
-    throw Exception("Cannot check node reached if plan is empty");
+    logger->log_error(name(), "Cannot check node reached if plan is empty");
+    return true;
   }
 
   TopologicalMapNode &cur_target = plan_.front();
 
   // get current position of robot in map frame
   tf::Stamped<tf::Pose> pose;
-  tf::Stamped<tf::Pose> ident = tf::ident(cfg_base_frame_);
-  try {
-    tf_listener->transform_pose(cfg_global_frame_, ident, pose);
-  } catch (Exception &e) {
+  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
     logger->log_warn(name(),
-		     "Failed to compute pose, cannot generate plan", e.what());
-    throw;
+		     "Failed to compute pose, cannot generate plan");
+    return false;
   }
 
   float dist = sqrt(pow(pose.getOrigin().x() - cur_target.x(), 2) +
