@@ -155,6 +155,7 @@ class YamlConfiguration
  };
 
  private:
+  /// @cond INTERNALS
   class LoadQueueEntry {
    public:
   LoadQueueEntry(std::string fn, bool im, bool id = false)
@@ -164,6 +165,7 @@ class YamlConfiguration
     bool ignore_missing;
     bool is_dir;
   };
+  /// @endcond
 
   Node *  query(const char *path) const;
   void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
