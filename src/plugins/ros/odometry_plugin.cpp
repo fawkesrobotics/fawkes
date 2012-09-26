@@ -4,7 +4,6 @@
  *
  *  Created: Fri Jun 1 13:29:39 CEST
  *  Copyright  2012  Sebastian Reuter
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,18 +25,19 @@
 
 using namespace fawkes;
 
+/** Plugin to publish odometry to ROS. */
 class ROSOdometryPlugin : public fawkes::Plugin
 {
  public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-	ROSOdometryPlugin(Configuration *config)
+  ROSOdometryPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new ROSOdometryThread());
   }
 };
 
-PLUGIN_DESCRIPTION("sends Odometry Data to ROS")
+PLUGIN_DESCRIPTION("Send odometry data to ROS")
 EXPORT_PLUGIN(ROSOdometryPlugin)

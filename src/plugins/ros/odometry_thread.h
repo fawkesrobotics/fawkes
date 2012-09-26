@@ -28,41 +28,39 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/blackboard.h>
 #include <plugins/ros/aspect/ros.h>
-#include <nav_msgs/Odometry.h>
 #include <ros/node_handle.h>
 
 
 namespace fawkes {
-class MotorInterface;
+  class MotorInterface;
 }
 
-class ROSOdometryThread: public fawkes::Thread,
-		public fawkes::BlockedTimingAspect,
-		public fawkes::LoggingAspect,
-		public fawkes::ConfigurableAspect,
-		public fawkes::BlackBoardAspect,
-		public fawkes::ROSAspect {
-public:
-	 ROSOdometryThread();
+class ROSOdometryThread
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ROSAspect
+{
+ public:
+  ROSOdometryThread();
 
-	virtual void init();
-	virtual void loop();
-	virtual bool prepare_finalize_user();
-	virtual void finalize();
+  virtual void init();
+  virtual void loop();
+  virtual void finalize();
 
-	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-protected:
-	virtual void run() {
-		Thread::run();
-	}
+  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
-private:
-	void sendOdometryToROS(); //publishs Odometry Data on odom Topic
-	nav_msgs::Odometry createOdometryMessage(); //creates the Odometry Message from MotorInterface
+ private:
+  void publish_odom();
 
 private:
-	fawkes::MotorInterface *motor_if_;
-	ros::Publisher __pub;
+  fawkes::MotorInterface *motor_if_;
+  ros::Publisher pub_;
+  std::string cfg_odom_frame_id_;
+  std::string cfg_base_frame_id_;
 };
 
 #endif
