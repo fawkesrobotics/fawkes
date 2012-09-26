@@ -96,7 +96,6 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
 endif
 
 ifneq ($(ENABLE_VISUAL_DEBUGGING),1)
-  $(warning HAVE: $(call boost-have-lib,thread)  CFLAGS: $(call boost-lib-cflags,thread)  LDFLAGS: $(call boost-lib-ldflags,thread)")
   CFLAGS  += $(call boost-lib-cflags,thread)
   LDFLAGS += $(call boost-lib-ldflags,thread)
 endif
