@@ -26,58 +26,60 @@
 //using namespace ros;
 using namespace fawkes;
 
-/** @class PluginTemplateThread "plugin_template_thread.h"
- * Introductional example thread which makes the robotino drive along a 8-shaped course
- * @author Daniel Ewert
+/** @class ROSCmdVelThread "cmdvel_thread.h"
+ * Thread to translate ROS twist messages to navigator transrot messages.
+ * @author Sebastian Reuter
  */
 
 /** Constructor. */
-ROSCmdVelThread::ROSCmdVelThread() :
-		Thread("ROSCmdVelThread", Thread::OPMODE_WAITFORWAKEUP), BlockedTimingAspect(
-				BlockedTimingAspect::WAKEUP_HOOK_SKILL) {
-}
-
-void ROSCmdVelThread::init() {
-
-	//logger->log_info(name(), "ros_cmdvel starts up");
-	//Blackboard
-	motor_if_ = blackboard->open_for_reading<MotorInterface>("Robotino");
-	//ROS
-	__sub = rosnode->subscribe("cmd_vel",100,&ROSCmdVelThread::callback,this);
-}
-
-void ROSCmdVelThread::callback(const geometry_msgs::Twist::ConstPtr &msg)
+ROSCmdVelThread::ROSCmdVelThread()
+  : Thread("ROSCmdVelThread", Thread::OPMODE_WAITFORWAKEUP)
 {
-	//logger->log_info(name(),"bekomme Daten von ROS");
-	//float vx = msg->linear.x;
-	//float vy = msg->linear.y;
-	//float omega = msg->angular.z;
-	send_transrot(msg->linear.x,msg->linear.y,msg->angular.z);
 }
 
-bool ROSCmdVelThread::prepare_finalize_user() {
-	stop();
-	return true;
+void
+ROSCmdVelThread::init()
+{
+  std::string motor_if_id = config->get_string("/ros/cmdvel/motor_interface_id");
+  motor_if_ = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
+  sub_ = rosnode->subscribe("cmd_vel", 10, &ROSCmdVelThread::twist_msg_cb, this);
 }
 
-void ROSCmdVelThread::finalize() {
-	blackboard->close(motor_if_);
-	__sub.shutdown();
+void
+ROSCmdVelThread::twist_msg_cb(const geometry_msgs::Twist::ConstPtr &msg)
+{
+  send_transrot(msg->linear.x, msg->linear.y, msg->angular.z);
 }
 
-void ROSCmdVelThread::send_transrot(float vx, float vy, float omega) {
-	MotorInterface::TransRotMessage *msg = new MotorInterface::TransRotMessage(
-			vx, vy, omega);
-	(*motor_if_).msgq_enqueue(msg);
+bool
+ROSCmdVelThread::prepare_finalize_user()
+{
+  stop();
+  return true;
 }
 
-void ROSCmdVelThread::stop() {
-	send_transrot(0., 0., 0.);
+void
+ROSCmdVelThread::finalize()
+{
+  blackboard->close(motor_if_);
+  sub_.shutdown();
 }
 
-void ROSCmdVelThread::loop() {
-	//alles aktualisieren
-	//logger->log_info(name(), "Spin");
-	//ros::spinOnce();
+void
+ROSCmdVelThread::send_transrot(float vx, float vy, float omega)
+{
+  MotorInterface::TransRotMessage *msg =
+    new MotorInterface::TransRotMessage(vx, vy, omega);
+  motor_if_->msgq_enqueue(msg);
 }
 
+void
+ROSCmdVelThread::stop()
+{
+  send_transrot(0., 0., 0.);
+}
+
+void
+ROSCmdVelThread::loop()
+{
+}

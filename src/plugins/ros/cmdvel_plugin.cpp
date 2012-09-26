@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  cmdvel_plugin.cpp - Translate ROS Twist messages to Navgiator transrot
+ *  cmdvel_plugin.cpp - Translate ROS Twist messages to Navigator transrot
  *
  *  Created: Fri Jun 1 13:29:39 CEST 2012
  *  Copyright  2012  Sebastian Reuter
@@ -25,18 +25,19 @@
 
 using namespace fawkes;
 
+/** Plugin to translate ROS Twist messages to Navigator transrot. */
 class ROSCmdVelPlugin : public fawkes::Plugin
 {
  public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-	ROSCmdVelPlugin(Configuration *config)
+  ROSCmdVelPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new ROSCmdVelThread());
   }
 };
 
-PLUGIN_DESCRIPTION("executes cmd_vel Topic Commands from ROS")
+PLUGIN_DESCRIPTION("Translate ROS Twist to Fawkes TransRot")
 EXPORT_PLUGIN(ROSCmdVelPlugin)

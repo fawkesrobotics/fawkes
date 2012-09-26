@@ -33,37 +33,35 @@
 
 
 namespace fawkes {
-class MotorInterface;
+  class MotorInterface;
 }
 
-class ROSCmdVelThread: public fawkes::Thread,
-		public fawkes::BlockedTimingAspect,
-		public fawkes::LoggingAspect,
-		public fawkes::ConfigurableAspect,
-		public fawkes::BlackBoardAspect,
-		public fawkes::ROSAspect {
-public:
-	ROSCmdVelThread();
+class ROSCmdVelThread
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ROSAspect
+{
+ public:
+  ROSCmdVelThread();
 
-	virtual void init();
-	virtual void loop();
-	virtual bool prepare_finalize_user();
-	virtual void finalize();
+  virtual void init();
+  virtual void loop();
+  virtual bool prepare_finalize_user();
+  virtual void finalize();
 
-	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-protected:
-	virtual void run() {
-		Thread::run();
-	}
+  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
 private:
-	void stop(); //stops all Motors
-	void send_transrot(float vx, float vy, float omega); //sends Controls to the Motors
-	void callback(const geometry_msgs::Twist::ConstPtr &msg);
+  void stop(); //stops all Motors
+  void send_transrot(float vx, float vy, float omega); //sends Controls to the Motors
+  void twist_msg_cb(const geometry_msgs::Twist::ConstPtr &msg);
 
-private:
-	fawkes::MotorInterface *motor_if_;
-	ros::Subscriber __sub;
+ private:
+  fawkes::MotorInterface *motor_if_;
+  ros::Subscriber sub_;
 };
 
 #endif
