@@ -48,8 +48,12 @@ LIBS_ros_laserscan = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  Laser720Interface
 OBJS_ros_laserscan = laserscan_plugin.o laserscan_thread.o
 
+LIBS_ros_odometry = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		    fawkesinterface fawkestf fawkesrosaspect MotorInterface
+OBJS_ros_odometry = odometry_plugin.o odometry_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
-	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan)
+	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -115,6 +119,19 @@ ifeq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_rospcl warning_images warning_laserscan
   endif
 
+  ifeq ($(call ros-have-pkg,nav_msgs),1)
+    ifeq ($(HAVE_TF),1)
+      CFLAGS_odometry_thread += $(call ros-pkg-cflags,nav_msgs) $(CFLAGS) $(CFLAGS_TF)
+      CFLAGS_odometry_plugin = $(CFLAGS_odometry_thread)
+      LDFLAGS_ros_odometry += $(call ros-pkg-lflags,nav_msgs) $(LDFLAGS_TF)
+      PLUGINS_all += $(PLUGINDIR)/ros-odometry.so
+    else
+      WARN_TARGETS += warning_odometry_tf
+    endif
+  else
+    WARN_TARGETS += warning_nav_msgs
+  endif
+
 else
   WARN_TARGETS += warning_ros
 endif
@@ -139,6 +156,10 @@ warning_images:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (ROS package image_transport not found)"
 warning_laserscan:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS laser scan plugin$(TNORMAL) (ROS package sensor_msgs not found)"
+warning_nav_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS odometry Plugin$(TNORMAL) (ROS package nav_msgs not found)"
+warning_odometry:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS odometry Plugin$(TNORMAL) (Fawkes TF library not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
