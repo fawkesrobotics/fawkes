@@ -641,6 +641,7 @@ AmclThread::loop()
 			  "Failed to subtract base to odom transform");
 	return;
       }
+
       latest_tf_ =
         tf::Transform(tf::Quaternion(odom_to_map.getRotation()),
                       tf::Point(odom_to_map.getOrigin()));
@@ -654,6 +655,26 @@ AmclThread::loop()
 					  transform_expiration,
 					  global_frame_id_, odom_frame_id_);
       tf_publisher->send_transform(tmp_tf_stamped);
+
+
+      // We need to apply the last transform to the latest odom pose to get
+      // the latest map pose to store.  We'll take the covariance from
+      // last_published_pose.
+      tf::Pose map_pose = latest_tf_.inverse() * odom_pose;
+      tf::Quaternion map_att = map_pose.getRotation();
+
+      double trans[3] = {map_pose.getOrigin().x(), map_pose.getOrigin().y(), 0};
+      double rot[4] = { map_att.x(), map_att.y(), map_att.z(), map_att.w() };
+    
+      if (pos3d_if_->visibility_history() >= 0) {
+	pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() + 1);
+      } else {
+	pos3d_if_->set_visibility_history(1);
+      }
+      pos3d_if_->set_translation(trans);
+      pos3d_if_->set_rotation(rot);
+      pos3d_if_->write();
+
       sent_first_transform_ = true;
     } else {
       logger->log_error(name(), "No pose!");
@@ -679,7 +700,11 @@ AmclThread::loop()
     double trans[3] = {map_pose.getOrigin().x(), map_pose.getOrigin().y(), 0};
     double rot[4] = { map_att.x(), map_att.y(), map_att.z(), map_att.w() };
     
-    pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() + 1);
+    if (pos3d_if_->visibility_history() >= 0) {
+      pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() + 1);
+    } else {
+      pos3d_if_->set_visibility_history(1);
+    }
     pos3d_if_->set_translation(trans);
     pos3d_if_->set_rotation(rot);
     pos3d_if_->write();
@@ -701,8 +726,14 @@ AmclThread::loop()
       save_pose_last_time = now;
       }
     */
+  } else {
+    if (pos3d_if_->visibility_history() <= 0) {
+      pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() - 1);
+    } else {
+      pos3d_if_->set_visibility_history(-1);
+    }
+    pos3d_if_->write();
   }
-
 }
 
 void AmclThread::finalize()
