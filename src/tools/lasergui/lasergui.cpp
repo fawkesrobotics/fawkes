@@ -196,12 +196,14 @@ class LaserGuiGtkWindow : public Gtk::Window
     {
       const Glib::ustring& type = it->first;
       const Glib::ustring& id = it->second;
-      Interface* itf;
+      Interface* itf = NULL;
       try {
         if (type == "Laser720Interface") {
           itf = __bb->open_for_reading<Laser720Interface>(id.c_str());
         } else if (type == "Laser360Interface") {
           itf = __bb->open_for_reading<Laser360Interface>(id.c_str());
+        } else {
+          throw Exception("Invalid interface type %s", type.c_str());
         }
       } catch (const Exception& e) {
         std::string msg = std::string("Failed to open interface: ") + e.what();

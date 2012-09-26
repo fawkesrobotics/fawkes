@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <utils/misc/string_conversions.h>
 #include <cstdio>
+#include <cmath>
 
 //#define LASERGUI_DEBUG_PRINT_TRACKS
 #define CFG_PRINT_NR_TRACKELEMENTS 5
@@ -555,7 +556,7 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
 
   if ( __draw_mode == MODE_LINES ) {
     for (size_t i = 0; i < nd; i += __resolution) {
-      if ( distances[i] == 0 )  continue;
+      if ( distances[i] == 0 || ! std::isfinite(distances[i]) )  continue;
       const float anglerad = deg2rad(i * nd_factor);
       cr->move_to(0, 0);
       cr->line_to(distances[i] *  sin(anglerad),
@@ -924,7 +925,7 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
     if ( __draw_mode == MODE_POINTS ) {
       for (size_t i = 0; i < nd; i += __resolution) {
 	if( segmentations[i]==0) continue;  // dont draw the segment borders
-	if ( distances[i] == 0 )  continue;
+	if ( distances[i] == 0 || ! std::isfinite(distances[i]))  continue;
 	float anglerad = deg2rad(i * nd_factor);
 	cr->move_to(0, 0);
 	cr->line_to(distances[i] *  sin(anglerad),

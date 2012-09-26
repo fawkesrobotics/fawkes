@@ -57,8 +57,8 @@ ifeq ($(HAVE_ROS),1)
   CFLAGS  += $(CFLAGS_ROS) -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_ROS)
 
-  CFLAGS_talkerpub_thread += $(shell rospack export --lang=cpp --attrib=cflags std_msgs) $(CFLAGS)
-  LDFLAGS_ros_talkerpub += $(LDFLAGS) $(shell rospack export --lang=cpp --attrib=lflags std_msgs)
+  CFLAGS_talkerpub_thread += $(call ros-pkg-cflags,std_msgs) $(CFLAGS)
+  LDFLAGS_ros_talkerpub += $(LDFLAGS) $(call ros-pkg-lflags,std_msgs)
 
   PLUGINS_all = $(PLUGINDIR)/ros.so \
 		$(PLUGINDIR)/ros-talkerpub.so
@@ -75,9 +75,10 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,tf),1)
     ifeq ($(HAVE_TF),1)
-      CFLAGS_tf_thread += $(CFLAGS_TF) $(call ros-pkg-cflags,tf) $(CFLAGS) -Wno-strict-aliasing
+      CFLAGS_tf_thread += $(CFLAGS) $(CFLAGS_TF) \
+			  $(call ros-pkg-cflags,tf) -Wno-strict-aliasing
       CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
-      LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(call ros-pkg-lflags,tf)
+      LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(patsubst %bullet/lib,,$(call ros-pkg-lflags,tf))
       PLUGINS_all += $(PLUGINDIR)/ros-tf.so
     else
       WARN_TARGETS += warning_fawkestf

@@ -69,6 +69,8 @@ namespace fawkes {
 }
 #endif
 
+/** Scalar datatype. */
+typedef btScalar Scalar;
 /** Representaton of orientation or rotation depending on context. */
 typedef btQuaternion Quaternion;
 /** Representation of a translation. */
@@ -79,6 +81,8 @@ typedef btVector3 Point;
 typedef btTransform Transform;
 /** Representation of pose (position and orientation). */
 typedef btTransform Pose;
+/** Representation of 3x3 matrix. */
+typedef btMatrix3x3 Matrix3x3;
 
 /// Internally used to reference frames efficiently
 typedef uint32_t CompactFrameID;
@@ -181,6 +185,54 @@ assert_quaternion_valid(const Quaternion & q)
                                    "should be 1.0", magnitude);
   }
 };
+
+/** Construct a Quaternion from fixed angles.
+ * @param roll The roll about the X axis
+ * @param pitch The pitch about the Y axis
+ * @param yaw The yaw about the Z axis
+ * @return The quaternion constructed
+ */
+static inline Quaternion
+create_quaternion_from_rpy(double roll, double pitch, double yaw)
+{
+  Quaternion q;
+  q.setEulerZYX(yaw, pitch, roll);
+  return q;
+}
+
+/** Construct a Quaternion from yaw only.
+ * @param yaw The yaw about the Z axis
+ * @return The quaternion constructed
+ */
+static inline Quaternion
+create_quaternion_from_yaw(double yaw)
+{
+  Quaternion q;
+  q.setEulerZYX(yaw, 0.0, 0.0);
+  return q;
+}
+
+
+/** Helper function for getting yaw from a Quaternion.
+ * @param bt_q quaternion to get yaw from
+ * @return yaw value
+ */
+static inline double get_yaw(const Quaternion& bt_q){
+  Scalar useless_pitch, useless_roll, yaw;
+  Matrix3x3(bt_q).getEulerZYX(yaw, useless_pitch, useless_roll);
+  return yaw;
+}
+
+/** Helper function for getting yaw from a pose
+ * @param t pose to get yaw from
+ * @return yaw value
+ */
+static inline double get_yaw(Pose& t)
+{
+  double yaw, pitch, roll;
+  t.getBasis().getEulerZYX(yaw,pitch,roll);
+  return yaw;
+}
 
 
 } // end namespace tf

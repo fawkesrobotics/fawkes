@@ -36,6 +36,7 @@
 #include <cerrno>
 #include <sys/file.h>
 #include <unistd.h>
+#include <limits>
 #ifdef HAVE_LIBUDEV
 #  include <cstring>
 #  include <libudev.h>
@@ -229,6 +230,8 @@ HokuyoUrgAcquisitionThread::init()
   }
 
   int scan_msec = __ctrl->scanMsec();
+  float distance_min = 0.;
+  float distance_max = 0.;
 
   try {
     __first_ray     = config->get_uint((__cfg_prefix + "first_ray").c_str());
@@ -243,6 +246,8 @@ HokuyoUrgAcquisitionThread::init()
     __last_ray      = p.area_max;
     __front_ray     = p.area_front;
     __slit_division = p.area_total;
+    distance_min    = p.distance_min / 1000.;
+    distance_max    = p.distance_max / 1000.;
   }
 
   __step_per_angle = __slit_division / 360.;
@@ -256,6 +261,8 @@ HokuyoUrgAcquisitionThread::init()
   logger->log_info(name(), "Step/Angle:    %f", __step_per_angle);
   logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
   logger->log_info(name(), "Angular Range: %f deg", __angular_range);
+  logger->log_info(name(), "Min dist:      %f m", distance_min);
+  logger->log_info(name(), "Max dist:      %f m", distance_max);
 
   // that should be 1000 really to convert msec -> usec. But empirically
   // the results are slightly better with 990 as factor.
@@ -300,8 +307,63 @@ HokuyoUrgAcquisitionThread::loop()
       unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
       unsigned int idx = front_idx % __slit_division;
       if ( (idx >= __first_ray) && (idx <= __last_ray) ) {
-	// div by 1000.f: mm -> m
-	_distances[a] = values[idx] / 1000.f;
+        switch (values[idx]) // See the SCIP2.0 reference on page 12, Table 3
+        {
+        case 0: // Detected object is possibly at 22m
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 1: // Reflected light has low intensity
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 2: // Reflected light has low intensity
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 6: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 7: // Distance data on the preceding and succeeding steps have errors
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 8: // Intensity difference of two waves
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 9: // The same step had error in the last two scan
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 10: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 11: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 12: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 13: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 14: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 15: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 16: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 17: // Others
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 18: // Error reading due to strong reflective object
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        case 19: // Non-Measurable step
+          _distances[a] = std::numeric_limits<float>::quiet_NaN();
+          break;
+        default:
+          // div by 1000.f: mm -> m
+          _distances[a] = values[idx] / 1000.f;
+        }
       }
     }
     _data_mutex->unlock();

@@ -39,7 +39,6 @@ namespace fawkes {
 class Interface;
 class Message;
 class Mutex;
-class WaitCondition;
 
 class BlackBoardNotifier
 {
@@ -129,26 +128,21 @@ class BlackBoardNotifier
   BBilMap __bbil_messages;
 
   Mutex *__bbil_unregister_mutex;
-  WaitCondition  *__bbil_unregister_waitcond;
   BBilQueue       __bbil_unregister_queue;
 
   Mutex *__bbil_writer_mutex;
-  WaitCondition  *__bbil_writer_waitcond;
   unsigned int    __bbil_writer_events;
   BBilQueue       __bbil_writer_queue;
 
   Mutex *__bbil_reader_mutex;
-  WaitCondition  *__bbil_reader_waitcond;
   unsigned int    __bbil_reader_events;
   BBilQueue       __bbil_reader_queue;
 
   Mutex *__bbil_data_mutex;
-  WaitCondition  *__bbil_data_waitcond;
   unsigned int    __bbil_data_events;
   BBilQueue       __bbil_data_queue;
 
   Mutex *__bbil_messages_mutex;
-  WaitCondition  *__bbil_messages_waitcond;
   unsigned int    __bbil_messages_events;
   BBilQueue       __bbil_messages_queue;
 
@@ -156,7 +150,6 @@ class BlackBoardNotifier
   BBioMap        __bbio_destroyed;
 
   Mutex *__bbio_mutex;
-  WaitCondition  *__bbio_waitcond;
   unsigned int    __bbio_events;
   BBioQueue       __bbio_queue;
 

@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 # base + hardware drivers + perception + functional + integration
 SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser flite joystick openrave katana pantilt roomba nao robotino \
-	  perception \
+	  perception amcl \
 	  skiller luaagent worldmodel laserht laser-filter laser-pointclouds \
 	  static_transforms \
 	  openni refboxcomm ros player xmlrpc \
