@@ -25,7 +25,7 @@ OBJS_laser_pointclouds = laser_pointcloud_plugin.o laser_pointcloud_thread.o
 OBJS_all = $(OBJS_laser_pointclouds)
 
 ifeq ($(HAVE_PCL),1)
-  CFLAGS  += $(CFLAGS_PCL)
+  CFLAGS  += $(CFLAGS_PCL) -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_PCL)
 
   PLUGINS_all = $(PLUGINDIR)/laser-pointclouds.so
