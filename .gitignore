@@ -1,5 +1,6 @@
 # Generic globs
-core*
+/core*
+/bin/core*
 *~
 .deps_*
 .objs_*
