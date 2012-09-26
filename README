@@ -1,0 +1,38 @@
+Fawkes Robot Software Framework
+===============================
+
+Fawkes is a component-based Software Framework for Robotic Real-Time
+Applications for various Platforms and Domains.
+
+It is developed and is used for cognitive robotics real-time
+applications like soccer and service robotics. It supports fast
+information exchange and efficient combination and coordination of
+different components to suit the needs of mobile robots operating in
+uncertain environments.
+
+Today, Fawkes consists of an efficient communication middleware with a
+hybrid blackboard and messaging design, a flexible set of software
+libraries to make developing robotic functionalities reasonably
+simple, and a coherent development and run-time environment with tools
+that make integrating and running robotic applications achievable.
+But Fawkes also comprises a large set of plugins, software components
+that implement typical robot functionality like self-localization,
+path planning, perception, or behavior execution and monitoring.
+Several robot platforms like the Robotino, Nao, or Roomba are
+supported out-of-the-box. Fawkes also integrates with other software
+frameworks like ROS or Player and integrates third party software like
+MongoDB, RRDtool, CLIPS, or OpenNI. By using ideas from
+aspect-oriented programming, and run-time requirement assertion by the
+framework, it is easy to access these resources with only a few lines
+of code.
+
+You can find more information, news, and current projects on the
+Fawkes website [1]. Documentation of the development tools, the
+plugins, and how to start are available on the Fawkes Trac page [2].
+
+Please do not hesitate to contact us should you have questions, for
+example considering if Fawkes would fit your robot application [3].
+
+[1] http://www.fawkesrobotics.org
+[2] http://trac.fawkesrobotics.org
+[3] http://www.fawkesrobotics.org/about/contact/
