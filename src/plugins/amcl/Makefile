@@ -59,7 +59,7 @@ ifeq ($(HAVE_TF),1)
   LDFLAGS_amcl       += $(LDFLAGS_TF)
   LIBS_amcl          += fawkestf
 
-  CFLAGS_map_lasergen_thread = -std=c++0x $(CFLAGS) $(CFLAGS_TF)
+  CFLAGS_map_lasergen_thread = $(CFLAGS) $(CFLAGS_TF) $(CFLAGS_CPP11)
   CFLAGS_map_lasergen_plugin = $(CFLAGS_map_lasergen_thread)
   LDFLAGS_map_lasergen      += $(LDFLAGS_TF)
   LIBS_map_lasergen         += fawkestf
@@ -85,14 +85,20 @@ ifeq ($(HAVE_TF),1)
     WARN_TARGET += warning_ros
   endif
 
-  PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT) \
-		$(PLUGINDIR)/map-lasergen.$(SOEXT)
+  PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
   LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
 	        $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
 	        $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) \
 		$(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
+
+
+  ifeq ($(HAVE_CPP11),1)
+    PLUGINS_all += $(PLUGINDIR)/map-lasergen.$(SOEXT) 
+  else
+    WARN_TARGETS += warning_cpp11
+  endif
 else
-  WARN_TARGETS = warning_tf
+  WARN_TARGETS += warning_tf
 endif
 
 
@@ -113,6 +119,8 @@ warning_geometry_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (package geometry_msgs not found)"
 warning_nav_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS interaction$(TNORMAL) (package nav_msgs not found)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting map-lasergen plugin$(TNORMAL) (C++11 not supported by compiler)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
