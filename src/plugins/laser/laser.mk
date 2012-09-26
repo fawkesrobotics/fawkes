@@ -31,10 +31,17 @@ else
 endif
 
 
-HAVE_URG_GBX=$(if $(shell $(PKGCONFIG) --exists 'flexiport' 'hokuyo_aist'; echo $${?/1/}),1,0)
+HAVE_URG_GBX=$(if $(shell $(PKGCONFIG) --exists 'flexiport' 'hokuyoaist'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_URG_GBX),1)
-  CFLAGS_URG_GBX  = -DHAVE_URG_GBX $(shell $(PKGCONFIG) --cflags 'flexiport' 'hokuyo_aist')
-  LDFLAGS_URG_GBX = $(shell $(PKGCONFIG) --libs 'flexiport' 'hokuyo_aist')
+  CFLAGS_URG_GBX  = -DHAVE_URG_GBX $(shell $(PKGCONFIG) --cflags 'flexiport' 'hokuyoaist')
+  LDFLAGS_URG_GBX = $(shell $(PKGCONFIG) --libs 'flexiport' 'hokuyoaist')
+else
+  # Test for 9.11
+  HAVE_URG_GBX=$(if $(shell $(PKGCONFIG) --exists 'flexiport' 'hokuyo_aist'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_URG_GBX),1)
+    CFLAGS_URG_GBX  = -DHAVE_URG_GBX -DHAVE_URG_GBX_9_11 $(shell $(PKGCONFIG) --cflags 'flexiport' 'hokuyo_aist')
+    LDFLAGS_URG_GBX = $(shell $(PKGCONFIG) --libs 'flexiport' 'hokuyo_aist')
+  endif
 endif
 
 

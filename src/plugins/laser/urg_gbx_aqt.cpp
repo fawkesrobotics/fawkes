@@ -24,7 +24,11 @@
 
 #include <core/threading/mutex.h>
 
-#include <hokuyo_aist/hokuyo_aist.h>
+#ifdef HAVE_URG_GBX_9_11
+#  include <hokuyo_aist/hokuyo_aist.h>
+#else
+#  include <hokuyoaist/hokuyoaist.h>
+#endif
 #include <flexiport/flexiport.h>
 
 #include <memory>
@@ -33,7 +37,11 @@
 #include <string>
 #include <cstdio>
 
+#ifdef HAVE_URG_GBX_9_11
 using namespace hokuyo_aist;
+#else
+using namespace hokuyoaist;
+#endif
 using namespace fawkes;
 
 
@@ -78,25 +86,46 @@ HokuyoUrgGbxAcquisitionThread::init()
 
   __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
 
+#ifdef HAVE_URG_GBX_9_11
   __laser = new HokuyoLaser();
   std::auto_ptr<HokuyoLaser> laser(__laser);
+#else
+  __laser = new Sensor();
+  std::auto_ptr<Sensor> laser(__laser);
+#endif
   std::string port_options = "type=serial,device=" + __cfg_device + ",timeout=1";
   try {
+#ifdef HAVE_URG_GBX_9_11
     __laser->Open(port_options);
+#else
+    __laser->open(port_options);
+#endif
   } catch (flexiport::PortException &e) {
     throw Exception("Connecting to URG laser failed: %s", e.what());
   }
 
+#ifdef HAVE_URG_GBX_9_11
   HokuyoSensorInfo info;
   __laser->GetSensorInfo(&info);
-  __data = new HokuyoData();
 
+  __data = new HokuyoData();
   __first_ray      = info.firstStep;
   __last_ray       = info.lastStep;
-  __num_rays       = __last_ray - __first_ray;
   __front_ray      = info.frontStep;
-  __front_idx      = __front_ray - __first_ray;
+
+#else
+  SensorInfo info;
+  __laser->get_sensor_info(info);
+  __data = new ScanData();
+
+  __first_ray      = info.first_step;
+  __last_ray       = info.last_step;
+  __front_ray      = info.front_step;
+#endif
+
   __slit_division  = info.steps;
+  __num_rays       = __last_ray - __first_ray;
+  __front_idx      = __front_ray - __first_ray;
 
   __step_per_angle = __slit_division / 360.;
   __angle_per_step = 360. / __slit_division;
@@ -116,7 +145,11 @@ HokuyoUrgGbxAcquisitionThread::init()
   logger->log_info(name(), "Angular Range: %f deg", __angular_range);
 
   alloc_distances(__number_of_values);
+#ifdef HAVE_URG_GBX_9_11
   __laser->SetPower(true);
+#else
+  __laser->set_power(true);
+#endif
 
   laser.release();
 }
@@ -129,7 +162,11 @@ HokuyoUrgGbxAcquisitionThread::finalize()
   _distances = NULL;
 
   logger->log_debug(name(), "Stopping laser");
+#ifdef HAVE_URG_GBX_9_11
   __laser->SetPower(false);
+#else
+  __laser->set_power(false);
+#endif
   delete __laser;
   delete __data;
 }
@@ -153,13 +190,22 @@ HokuyoUrgGbxAcquisitionThread::loop()
 
   try {
     // GetNewRanges is causes scans/sec to be halfed
+#ifdef HAVE_URG_GBX_9_11
     __laser->GetRanges(__data);
   } catch (HokuyoError &he) {
+#else
+    __laser->get_ranges(*__data);
+  } catch (BaseError &he) {
+#endif
     logger->log_warn(name(), "Failed to read data: %s", he.what());
     return;
   }
 
+#ifdef HAVE_URG_GBX_9_11
   const uint32_t *ranges = __data->Ranges();
+#else
+  const uint32_t *ranges = __data->ranges();
+#endif
 
   _data_mutex->lock();
 

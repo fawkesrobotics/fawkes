@@ -28,10 +28,17 @@
 #include <string>
 #include <map>
 
+#ifdef HAVE_URG_GBX_9_11
 namespace hokuyo_aist {
   class HokuyoLaser;
   class HokuyoData;
 }
+#else
+namespace hokuyoaist {
+  class Sensor;
+  class ScanData;
+}
+#endif
 
 class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
 {
@@ -48,8 +55,13 @@ class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
  private:
   bool __pre_init_done;
   unsigned int __number_of_values;
+#ifdef HAVE_URG_GBX_9_11
   hokuyo_aist::HokuyoLaser *__laser;
   hokuyo_aist::HokuyoData  *__data;
+#else
+  hokuyoaist::Sensor *__laser;
+  hokuyoaist::ScanData  *__data;
+#endif
 
   std::string  __cfg_name;
   std::string  __cfg_prefix;
