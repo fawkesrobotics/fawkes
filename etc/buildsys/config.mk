@@ -142,12 +142,6 @@ else
   endif
 endif
 
-### GCC version information, currently unused and thus commented out
-#ifeq ($(CC),gcc)
-#  GCC_VERSION=$(shell LANG=C $CC -v 2>&1 | grep "gcc version" | awk '{ print $3 }')
-#  GCC_VERSION_MAJOR=$(shell LANG=C $(CC) -v 2>&1 | grep "gcc version" | awk '{ print $$3 }' | awk -F. '{ print $$1 }')
-#endif
-
 FAWKES_VERSION_MAJOR = $(lastword $(shell grep "\#define FAWKES_VERSION_MAJOR" $(LIBSRCDIR)/core/version.h))
 FAWKES_VERSION_MINOR = $(lastword $(shell grep "\#define FAWKES_VERSION_MINOR" $(LIBSRCDIR)/core/version.h))
 FAWKES_VERSION_MICRO = $(lastword $(shell grep "\#define FAWKES_VERSION_MICRO" $(LIBSRCDIR)/core/version.h))
@@ -156,7 +150,7 @@ FAWKES_VERSION       = $(FAWKES_VERSION_MAJOR).$(FAWKES_VERSION_MINOR)$(subst .0
 
 ### Features ###
 # If gcc is used, enable OpenMP?
-GCC_USE_OPENMP=0
+USE_OPENMP=0
 # Build for 32 Bit, even on a 64 Bit machine
 DO_32BIT_BUILD=0
 # Warn if a binary has no man page?
@@ -178,13 +172,11 @@ CFLAGS_DEFS      = -DBINDIR=\"$(EXEC_BINDIR)\" -DLIBDIR=\"$(EXEC_LIBDIR)\" \
 		   -DTMPDIR=\"$(EXEC_TMPDIR)\" -DSRCDIR=\"$(abspath $(SRCDIR))\" \
 		   -DBUILDTYPE=\"$(BUILD_TYPE)\" -DSOEXT=\"$(SOEXT)\"
 
-CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP) $(CFLAGS_DEFS)
-LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic -fPIC -Wl,--no-undefined $(LDFLAGS_OPENMP) -lstdc++
+CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_DEFS)
+LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic -fPIC -Wl,--no-undefined -lstdc++
 CFLAGS_BASE      = $(CFLAGS_MINIMUM) $(CFLAGS_EXTRA)
 LDFLAGS_BASE     =  $(LDFLAGS_MINIMUM) $(LDFLAGS_RPATH)
 LDFLAGS_SHARED   = -shared
-CFLAGS_OPENMP  = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-fopenmp)
-LDFLAGS_OPENMP = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-lgomp)
 ifeq ($(OS),FreeBSD)
   DEFAULT_INCLUDES += -I/usr/local/include
   LDFLAGS_BASE     += -L/usr/local/lib -lpthread
