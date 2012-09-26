@@ -52,8 +52,13 @@ LIBS_ros_odometry = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkestf fawkesrosaspect MotorInterface
 OBJS_ros_odometry = odometry_plugin.o odometry_thread.o
 
+LIBS_ros_cmdvel = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		  fawkesinterface fawkesrosaspect MotorInterface
+OBJS_ros_cmdvel = cmdvel_thread.o cmdvel_plugin.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
-	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry)
+	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
+	   $(OBJS_ros_cmdvel)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -132,6 +137,15 @@ ifeq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_nav_msgs
   endif
 
+  ifeq ($(call ros-have-pkg,geometry_msgs),1)
+    CFLAGS_cmdvel_thread += $(call ros-pkg-cflags,geometry_msgs) $(CFLAGS) $(CFLAGS_TF)
+    CFLAGS_cmdvel_plugin = $(CFLAGS_cmdvel_thread)
+    LDFLAGS_ros_cmdvel += $(call ros-pkg-lflags,geometry_msgs) $(LDFLAGS_TF)
+    PLUGINS_all += $(PLUGINDIR)/ros-cmdvel.so
+  else
+    WARN_TARGETS += warning_geometry_msgs
+  endif
+
 else
   WARN_TARGETS += warning_ros
 endif
@@ -160,6 +174,8 @@ warning_nav_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS odometry Plugin$(TNORMAL) (ROS package nav_msgs not found)"
 warning_odometry:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS odometry Plugin$(TNORMAL) (Fawkes TF library not available)"
+warning_geometry_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS cmdvel Plugin$(TNORMAL) (ROS package geometry_msgs not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
