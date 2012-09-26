@@ -17,6 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/ros.mk
 include $(BUILDSYSDIR)/pcl.mk
+include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_ros = fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -156,10 +157,12 @@ ifeq ($(HAVE_ROS),1)
       ifeq ($(HAVE_TF),1)
         CFLAGS_navigator_thread += $(call ros-pkg-cflags,move_base_msgs) \
 				   $(call ros-pkg-cflags,actionlib) \
+				   $(call boost-lib-cflags,thread) \
 				   $(CFLAGS) $(CFLAGS_TF)
         CFLAGS_navigator_plugin = $(CFLAGS_navigator_thread)
         LDFLAGS_ros_navigator += $(call ros-pkg-lflags,move_base_msgs) \
 				 $(call ros-pkg-lflags,actionlib) \
+				 $(call boost-lib-ldflags,thread) \
 				 $(LDFLAGS_TF)
         PLUGINS_all += $(PLUGINDIR)/ros-navigator.so
       else
