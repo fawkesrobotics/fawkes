@@ -21,6 +21,7 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
   CFLAGS  += $(CFLAGS_LIBMICROHTTPD)
   LIBS_libfawkeswebview = stdc++ fawkescore fawkesutils fawkeslogging
   OBJS_libfawkeswebview = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+  HDRS_libfawkeswebview = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
   LIBS_all  = $(LIBDIR)/libfawkeswebview.so
 else
   WARN_TARGETS += warning_libmicrohttpd
