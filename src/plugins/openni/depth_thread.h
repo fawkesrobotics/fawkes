@@ -65,6 +65,8 @@ class OpenNiDepthThread
   size_t                               __depth_bufsize;
   unsigned int                         __depth_width;
   unsigned int                         __depth_height;
+
+  fawkes::Time 			      *__capture_start;
 };
 
 #endif

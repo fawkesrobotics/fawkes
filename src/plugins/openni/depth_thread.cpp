@@ -81,6 +81,15 @@ OpenNiDepthThread::init()
 
   __depth_gen->StartGenerating();
 
+  __capture_start = new Time(clock);
+  __capture_start->stamp_systime();
+  // Update once to get timestamp
+  __depth_gen->WaitAndUpdateData();
+  // arbitrarily define the zero reference point,
+  // we can't get any closer than this
+  *__capture_start -= (long int)__depth_gen->GetTimestamp();
+  
+  
   depthgen_autoptr.release();
 }
 
@@ -103,9 +112,12 @@ OpenNiDepthThread::loop()
   bool is_depth_new = __depth_gen->IsDataNew();
   __depth_gen->GetMetaData(*__depth_md);
   const XnDepthPixel * const depth_data = __depth_md->Data();
+  fawkes::Time ts = *__capture_start + (long int)__depth_gen->GetTimestamp();
   lock.unlock();
 
   if (is_depth_new && (__depth_buf->num_attached() > 1)) {
     memcpy(__depth_buf->buffer(), depth_data, __depth_bufsize);
   }
+
+  __depth_buf->set_capture_time(&ts);
 }

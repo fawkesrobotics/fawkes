@@ -184,6 +184,14 @@ OpenNiImageThread::init()
 
   __image_gen->StartGenerating();
 
+  __capture_start = new Time(clock);
+  __capture_start->stamp_systime();
+  // Update once to get timestamp
+  __image_gen->WaitAndUpdateData();
+  // arbitrarily define the zero reference point,
+  // we can't get any closer than this
+  *__capture_start -= (long int)__image_gen->GetTimestamp();
+  
   imagegen_autoptr.release();
 }
 
@@ -207,6 +215,7 @@ OpenNiImageThread::loop()
   bool is_image_new = __image_gen->IsDataNew();
   __image_gen->GetMetaData(*__image_md);
   const XnUInt8 * const      image_data = __image_md->Data();
+  fawkes::Time ts = *__capture_start + (long int)__image_gen->GetTimestamp();
   lock.unlock();
 
   if (is_image_new && (__image_buf_yuv->num_attached() > 1)) {
@@ -221,6 +230,7 @@ OpenNiImageThread::loop()
 						  __image_buf_yuv->buffer(),
 						  __image_width, __image_height);
     }
+    __image_buf_yuv->set_capture_time(&ts);
   }
 
   if (is_image_new && (__image_buf_rgb->num_attached() > 1)) {
@@ -234,5 +244,6 @@ OpenNiImageThread::loop()
       bayerGRBG_to_rgb_nearest_neighbour(image_data, __image_buf_rgb->buffer(),
                                          __image_width, __image_height);
     }
+    __image_buf_rgb->set_capture_time(&ts);
   }
 }
