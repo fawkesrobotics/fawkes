@@ -50,6 +50,8 @@ using namespace fawkes;
  * @author Bahram Maleki-Fard (OpenRAVE extension)
  */
 
+#ifdef HAVE_OPENRAVE
+
 /// @cond SELFEXPLAINING
 const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS =
                   "minimumgoalpaths 16 postprocessingparameters <_nmaxiterations>100</_nmaxiterations>"
@@ -59,7 +61,6 @@ const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS_STRAIGHT =
                   "maxdeviationangle 0.05";
 /// @endcond
 
-#ifdef HAVE_OPENRAVE
 
 /** Constructor.
  * @param katana katana controller base class
