@@ -423,9 +423,12 @@ SkillerExecutionThread::loop()
 	__skiller_if->set_exclusive_controller(m->sender_id());
 	write_skiller_if = true;
 	excl_ctrl = m->sender_id();
+      } else if (excl_ctrl == m->sender_id()) {
+        // ignored
       } else {
-	logger->log_warn("SkillerExecutionThread", "%s tried to acquire exclusive control, "
-			 "but another controller exists already", m->sender_thread_name());
+	logger->log_warn("SkillerExecutionThread", "%s tried to acquire "
+                         "exclusive control, but another controller exists "
+                         "already", m->sender_thread_name());
       }
 
     } else if ( __skiller_if->msgq_first_is<SkillerInterface::ReleaseControlMessage>() ) {
