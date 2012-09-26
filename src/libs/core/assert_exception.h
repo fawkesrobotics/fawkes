@@ -29,7 +29,7 @@
 #ifdef _ASSERT_H
 #  undef assert
 #else
-#  if defined __cplusplus && __GNUC_PREREQ (2,95)
+#  if defined __cplusplus && __GNUC__ >= 3
 #    define __ASSERT_VOID_CAST static_cast<void>
 #  else
 #    define __ASSERT_VOID_CAST (void)
