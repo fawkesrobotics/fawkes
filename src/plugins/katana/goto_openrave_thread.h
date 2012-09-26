@@ -47,6 +47,7 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
 		   unsigned int poll_interval_ms,
                    std::string robot_file,
+                   std::string arm_model,
                    bool autoload_IK,
                    bool use_viewer);
 
@@ -59,11 +60,17 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   void set_target(const std::string& object_name, float rot_x);
   void set_theta_error(float error);
   void set_move_straight(bool move_straight);
+  void set_arm_extension(bool arm_extension);
+  void set_plannerparams(std::string& params, bool straight=false);
+  void set_plannerparams(const char* params, bool straight=false);
 
   virtual bool plan_target();
   virtual void update_openrave_data();
   virtual bool update_motor_data();
   virtual bool move_katana();
+
+  static const std::string DEFAULT_PLANNERPARAMS;
+  static const std::string DEFAULT_PLANNERPARAMS_STRAIGHT;
 
  private:
   fawkes::OpenRaveRobot*        __OR_robot;
@@ -77,12 +84,16 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   std::vector< float >  __motor_angles;
 
   const std::string     __cfg_robot_file;
+  const std::string     __cfg_arm_model;
   bool                  __cfg_autoload_IK;
   bool                  __cfg_use_viewer;
 
   bool                  __is_target_object;
   bool                  __has_target_quaternion;
   bool                  __move_straight;
+  bool                  __is_arm_extension;
+  std::string           __plannerparams;
+  std::string           __plannerparams_straight;
 
   fawkes::OpenRaveConnector*    _openrave;
 

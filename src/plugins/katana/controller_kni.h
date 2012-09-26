@@ -109,9 +109,12 @@ class KatanaControllerKni : public KatanaController
   std::vector<TMotInit>          __motor_init;
 
   std::vector<short>             __active_motors;
+  std::vector<int>               __gripper_last_pos;
 
   bool motor_oor(unsigned short id);
   bool motor_final(unsigned short id);
+  void cleanup_active_motors();
+  void add_active_motor(unsigned short id);
 
 };
 

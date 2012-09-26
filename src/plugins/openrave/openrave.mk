@@ -15,17 +15,20 @@
 
 include $(BUILDSYSDIR)/boost.mk
 
-OPENRAVE_MIN_VERSION=0.6.4
+OPENRAVE_MIN_VERSION=0.7.0
 
 #Check for OpenRAVE
 ifneq ($(PKGCONFIG),)
-  HAVE_OPENRAVE = $(shell $(PKGCONFIG) --atleast-version $(OPENRAVE_MIN_VERSION) 'openrave-core'; echo $${?/1/})
+  HAVE_OPENRAVE = $(if $(shell $(PKGCONFIG) --atleast-version $(OPENRAVE_MIN_VERSION) 'openrave-core'; echo $${?/1/}),1,0)
   ifneq ($(HAVE_OPENRAVE),1)
     # Give it another shot, name might contain version
-    _OPENRAVE_ALTERNATE_NAME=$(shell $(PKGCONFIG) --list-all | grep 'openrave-core' | awk '{ print $$1 }')
+    VERSION_SPLITTED = $(call split,.,$(OPENRAVE_MIN_VERSION))
+    VERSION_MAJOR    = $(word 1,$(VERSION_SPLITTED))
+    VERSION_MINOR    = $(word 2,$(VERSION_SPLITTED))
+    OPENRAVE_VERSION_INFIX = $(VERSION_MAJOR).$(VERSION_MINOR)
+    _OPENRAVE_ALTERNATE_NAME = $(shell $(PKGCONFIG) --list-all | grep 'openrave$(OPENRAVE_VERSION_INFIX)-core' | awk '{ print $$1 }')
     ifneq ($(_OPENRAVE_ALTERNATE_NAME),)
-      OPENRAVE_VERSION_SUFFIX=$(patsubst openrave-core%,%,$(_OPENRAVE_ALTERNATE_NAME))
-      HAVE_OPENRAVE=1
+      HAVE_OPENRAVE = $(if $(shell $(PKGCONFIG) --atleast-version $(OPENRAVE_MIN_VERSION) '$(_OPENRAVE_ALTERNATE_NAME)'; echo $${?/1/}),1,0)
     endif
   endif
 
@@ -41,11 +44,11 @@ endif
 
 ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS_OPENRAVE  = -DHAVE_OPENRAVE \
-                     $(shell $(PKGCONFIG) --cflags 'openrave-core$(OPENRAVE_VERSION_SUFFIX)') \
-                     $(shell $(PKGCONFIG) --cflags 'openrave$(OPENRAVE_VERSION_SUFFIX)') \
+                     $(shell $(PKGCONFIG) --cflags 'openrave$(OPENRAVE_VERSION_INFIX)-core') \
+                     $(shell $(PKGCONFIG) --cflags 'openrave$(OPENRAVE_VERSION_INFIX)') \
                      $(call boost-lib-cflags,thread)
-  LDFLAGS_OPENRAVE = $(shell $(PKGCONFIG) --libs 'openrave-core$(OPENRAVE_VERSION_SUFFIX)') \
-                     $(shell $(PKGCONFIG) --libs 'openrave$(OPENRAVE_VERSION_SUFFIX)') \
+  LDFLAGS_OPENRAVE = $(shell $(PKGCONFIG) --libs 'openrave$(OPENRAVE_VERSION_INFIX)-core') \
+                     $(shell $(PKGCONFIG) --libs 'openrave$(OPENRAVE_VERSION_INFIX)') \
                      $(call boost-lib-ldflags,thread)
 endif
 
@@ -53,4 +56,3 @@ ifeq ($(HAVE_PYTHON),1)
   CFLAGS_PYTHON    = -DHAVE_PYTHON $(shell $(PKGCONFIG) --cflags 'python')
   LDFLAGS_PYTHON   = $(shell $(PKGCONFIG) --libs 'python')
 endif
-

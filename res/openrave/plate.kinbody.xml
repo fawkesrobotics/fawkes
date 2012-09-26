@@ -1,0 +1,13 @@
+<KinBody name="BasicPlate">
+
+  <Body name="Body1" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>1000</density>
+    </Mass>
+    <Geom type="box">
+      <extents>0.3 1.0 0.01</extents>
+      <translation>0 0 0</translation>
+      <diffusecolor>1.0 0.94 0.66</diffusecolor>
+    </Geom>
+  </Body>
+</KinBody>

@@ -47,6 +47,9 @@ KatanaControllerKni::KatanaControllerKni()
   __cfg_kni_conffile = "/etc/kni3/hd300/katana6M180.cfg";
   __cfg_read_timeout = 100;
   __cfg_write_timeout = 0;
+
+  __gripper_last_pos.clear();
+  __gripper_last_pos.resize(2);
 }
 
 /** Destructor. */
@@ -126,6 +129,7 @@ KatanaControllerKni::final()
   for(unsigned int i=0; i<__active_motors.size(); i++) {
     final &= motor_final(__active_motors.at(i));
   }
+  cleanup_active_motors();
   return final;
 }
 
@@ -194,7 +198,7 @@ void
 KatanaControllerKni::read_motor_data()
 {
   try {
-    if( __active_motors.size() < 1 ) {
+    if( __active_motors.size() == (unsigned short)__katana->getNumberOfMotors() ) {
       __katbase->recvMPS(); // get position for all motors
       __katbase->recvGMS(); // get status flags for all motors
     } else {
@@ -232,6 +236,10 @@ KatanaControllerKni::gripper_open(bool blocking)
   __active_motors.clear();
   __active_motors.resize(1);
   __active_motors[0] = __katbase->GetMOT()->cnt - 1;
+
+  __gripper_last_pos.clear();
+  __gripper_last_pos[0] = __katbase->GetMOT()->arr[__active_motors[0]].GetPVP()->pos;
+  __gripper_last_pos[1] = 0; //counter
 }
 
 void
@@ -246,11 +254,17 @@ KatanaControllerKni::gripper_close(bool blocking)
   __active_motors.clear();
   __active_motors.resize(1);
   __active_motors[0] = __katbase->GetMOT()->cnt - 1;
+
+  __gripper_last_pos.clear();
+  __gripper_last_pos[0] = __katbase->GetMOT()->arr[__active_motors[0]].GetPVP()->pos;
+  __gripper_last_pos[1] = 0; //counter
 }
 
 void
 KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, float psi, bool blocking)
 {
+  cleanup_active_motors();
+
   try {
     __katana->moveRobotTo(__x, __y, __z, __phi, __theta, __psi, blocking);
   } catch (KNI::NoSolutionException &e) {
@@ -260,18 +274,41 @@ KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, 
     return;
   }
 
-  __active_motors.clear();
-  __active_motors.resize(0); // resize to 0 to update all motor data
+  for(short i=0; i<__katana->getNumberOfMotors(); ++i) {
+    add_active_motor(i);
+  }
 }
 
 void
 KatanaControllerKni::move_to(std::vector<int> encoders, bool blocking)
 {
+  cleanup_active_motors();
+
+  try {
+    __katana->moveRobotToEnc(encoders);
+  } catch (/*KNI*/::Exception &e) {
+    throw fawkes::Exception("KNI Exception:%s", e.what());
+  }
+
+  for(unsigned short i=0; i<encoders.size(); ++i) {
+    add_active_motor(i);
+  }
 }
 
 void
 KatanaControllerKni::move_to(std::vector<float> angles, bool blocking)
 {
+  std::vector<int> encoders;
+
+  try {
+    for(unsigned int i=0; i<angles.size(); i++) {
+      encoders.push_back(KNI_MHF::rad2enc( (double)angles.at(i), __motor_init.at(i).angleOffset, __motor_init.at(i).encodersPerCycle, __motor_init.at(i).encoderOffset, __motor_init.at(i).rotationDirection));
+    }
+  } catch (/*KNI*/::Exception &e) {
+    throw fawkes::Exception("KNI Exception:%s", e.what());
+  }
+
+  move_to(encoders, blocking);
 }
 
 void
@@ -280,15 +317,15 @@ KatanaControllerKni::move_motor_to(unsigned short id, int enc, bool blocking)
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorToEnc(id, enc);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 void
@@ -297,15 +334,15 @@ KatanaControllerKni::move_motor_to(unsigned short id, float angle, bool blocking
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorTo(id, angle);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 void
@@ -314,15 +351,15 @@ KatanaControllerKni::move_motor_by(unsigned short id, int enc, bool blocking)
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorByEnc(id, enc);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 void
@@ -331,15 +368,15 @@ KatanaControllerKni::move_motor_by(unsigned short id, float angle, bool blocking
   if( motor_oor(id) )
     throw fawkes::KatanaOutOfRangeException("Motor out of range.");
 
+  cleanup_active_motors();
+
   try {
     __katana->moveMotorBy(id, angle);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = id;
+  add_active_motor(id);
 }
 
 
@@ -443,7 +480,42 @@ KatanaControllerKni::motor_final(unsigned short id)
   if (mot.GetPVP()->msf == MSF_MOTCRASHED)
     throw fawkes::KatanaMotorCrashedException("Motor %u crashed.", id);
 
-  return std::abs(mot.GetTPS()->tarpos - mot.GetPVP()->pos) < 10;
+  // extra check for gripper, consider final if not moved for a while
+  unsigned short gripper_not_moved = 0;
+  if (id == __katbase->GetMOT()->cnt - 1) {
+    if (__gripper_last_pos[0] == mot.GetPVP()->pos) {
+      __gripper_last_pos[1] += 1;
+    } else {
+      __gripper_last_pos[0] = mot.GetPVP()->pos;
+      __gripper_last_pos[1] = 0;
+    }
+    gripper_not_moved = __gripper_last_pos[1];
+  }
+
+  return (std::abs(mot.GetTPS()->tarpos - mot.GetPVP()->pos) < 10)
+      or (gripper_not_moved > 3);
+}
+
+void
+KatanaControllerKni::cleanup_active_motors()
+{
+  for(unsigned int i=0; i<__active_motors.size(); ++i) {
+    if( motor_final(__active_motors.at(i)) ) {
+      __active_motors.erase(__active_motors.begin()+i);
+      --i;
+    }
+  }
+}
+
+void
+KatanaControllerKni::add_active_motor(unsigned short id)
+{
+  for(unsigned int i=0; i<__active_motors.size(); ++i) {
+    if( __active_motors.at(i) == id ) {
+      return;
+    }
+  }
+  __active_motors.push_back(id);
 }
 
 } // end of namespace fawkes

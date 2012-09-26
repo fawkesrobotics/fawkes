@@ -1,0 +1,13 @@
+<KinBody name="BoundaryCylinder">
+
+  <Body name="Body1" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>1000</density>
+    </Mass>
+    <Geom type="cylinder">
+      <Radius>0.04</Radius>
+      <Height>0.14</Height>
+      <RotationAxis>1 0 0 90</RotationAxis>
+    </Geom>
+  </Body>
+</KinBody>

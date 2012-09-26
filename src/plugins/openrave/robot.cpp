@@ -73,6 +73,7 @@ OpenRaveRobot::~OpenRaveRobot()
 
   //unload everything related to this robot from environment
   try {
+    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
     __robot->GetEnv()->Remove(__mod_basemanip);
     __robot->GetEnv()->Remove(__robot);
   } catch(const openrave_exception &e) {
@@ -175,6 +176,7 @@ OpenRaveRobot::set_ready()
 void
 OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float device_trans_z)
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   // get device's current angles, and set them for OpenRAVE model
   std::vector<dReal> angles;
   __manip->get_angles(angles);
@@ -209,6 +211,7 @@ OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_
 void
 OpenRaveRobot::update_manipulator()
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   std::vector<dReal> angles;
   __robot->GetActiveDOFValues(angles);
   __manip->set_angles(angles);
@@ -218,6 +221,7 @@ OpenRaveRobot::update_manipulator()
 void
 OpenRaveRobot::update_model()
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   std::vector<dReal> angles;
   __manip->get_angles(angles);
   __robot->SetActiveDOFValues(angles);
@@ -237,12 +241,17 @@ OpenRaveRobot::display_planned_movements() const
  * @param trans_x x-transition
  * @param trans_y y-transition
  * @param trans_z z-transition
+ * @param is_extension true, if base coordination system lies in arm extension
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
+OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension)
 {
-  __target.type = TARGET_RELATIVE;
+  if( is_extension ) {
+    __target.type = TARGET_RELATIVE_EXT;
+  } else {
+    __target.type = TARGET_RELATIVE;
+  }
   __target.x = trans_x;
   __target.y = trans_y;
   __target.z = trans_z;
@@ -265,6 +274,7 @@ OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z)
 bool
 OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
   Transform trans = __arm->GetEndEffectorTransform();
 
@@ -433,6 +443,7 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
 bool
 OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
   std::vector<OpenRAVE::dReal> target_angles;
 
@@ -444,6 +455,18 @@ OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
   return __target.solvable;
 }
 
+/** Set additional planner parameters.
+ * BaseManipulation module accepts many arguments that can be passed.
+ * Planner parameters can be important to plan a path according to ones
+ * needs, e.g. set deviations, optimizer iterations, etc.
+ * Do not mistake it with the single argument "plannerparams" of BaseManipulation.
+ * @param params complete string of additional arguments.
+ */
+void
+OpenRaveRobot::set_target_plannerparams(std::string& params)
+{
+  __target.plannerparams = params;
+}
 
 // just temporary! no IK check etc involved
 /** Set target angles directly.
@@ -492,6 +515,7 @@ OpenRaveRobot::get_manipulator() const
 OpenRAVE::PlannerBase::PlannerParametersPtr
 OpenRaveRobot::get_planner_params() const
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __manip->get_angles(__planner_params->vinitialconfig);
   __target.manip->get_angles(__planner_params->vgoalconfig);
 
@@ -656,6 +680,7 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
   __target.qz = target.rot[3];
 
   // check for supported IK types
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
   if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
     __logger->log_debug("OR TMP", "6D suppport");
@@ -746,6 +771,7 @@ OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
      If it was -90°, we need (0, 1, 0). So just take the inverse of the first rotation
      and apply it to (1,0,0)
   */
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   Vector dir(1,0,0);
   {
     RobotBasePtr tmp_robot = __robot;

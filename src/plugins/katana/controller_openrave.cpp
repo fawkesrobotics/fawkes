@@ -30,6 +30,8 @@
 #include <plugins/openrave/robot.h>
 #include <plugins/openrave/manipulator.h>
 
+#include <cmath>
+
 using namespace OpenRAVE;
 #endif
 
@@ -170,10 +172,16 @@ KatanaControllerOpenrave::read_coordinates(bool refresh)
     __x = tf.trans[0];
     __y = tf.trans[1];
     __z = tf.trans[2];
-    //transform quat to euler!
-    __phi = 0;
-    __theta = 0;
-    __psi = 0;
+    //transform quat to euler.
+    TransformMatrix m = matrixFromQuat(tf.rot);
+    std::vector<dReal> v;
+    __OR_manip->get_angles_device(v);
+    __phi = v.at(0) - 0.5*M_PI; //phi is directly derivable from joint0
+    __psi = 0.5*M_PI - v.at(4); //psi is directly derivable from joint4
+    __theta = acos(m.m[10]);
+    //theta has correct range from 0-360°, but need to check if sign is also correct. use sinus for that
+    if( asin(m.m[2] / sin(__phi)) < 0.0 )
+      __theta *= -1.0;
   } catch( /*OpenRAVE*/::openrave_exception &e ) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }

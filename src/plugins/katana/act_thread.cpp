@@ -97,6 +97,7 @@ KatanaActThread::init()
   __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
   __cfg_OR_auto_load_ik  = config->get_bool("/hardware/katana/openrave/auto_load_ik");
   __cfg_OR_robot_file    = config->get_string("/hardware/katana/openrave/robot_file");
+  __cfg_OR_arm_model     = config->get_string("/hardware/katana/openrave/arm_model");
 #else
   __cfg_OR_enabled       = false;
 #endif
@@ -118,6 +119,9 @@ KatanaActThread::init()
 
   } else if( __cfg_controller == "openrave") {
 #ifdef HAVE_OPENRAVE
+    if(!__cfg_OR_enabled) {
+      throw fawkes::Exception("Cannot use controller 'openrave', OpenRAVE is deactivated by config flag!");
+    }
     __katana = new KatanaControllerOpenrave(openrave);
 #else
     throw fawkes::Exception("Cannot use controller 'openrave', OpenRAVE not installed!");
@@ -138,7 +142,8 @@ KatanaActThread::init()
   __motor_control_thread = new KatanaMotorControlThread(__katana, logger, __cfg_goto_pollint);
   __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
 #ifdef HAVE_OPENRAVE
-  __goto_openrave_thread = new KatanaGotoOpenRaveThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
+  __goto_openrave_thread = new KatanaGotoOpenRaveThread(__katana, logger, openrave, __cfg_goto_pollint, __cfg_OR_robot_file,
+                                                        __cfg_OR_arm_model, __cfg_OR_auto_load_ik, __cfg_OR_use_viewer);
   if(__cfg_OR_enabled)
     {__goto_openrave_thread->init();}
 #endif
@@ -268,7 +273,7 @@ KatanaActThread::update_position(bool refresh)
   tf_publisher->send_transform(j2_j3, now, "/katana/j2", "/katana/j3");
   tf_publisher->send_transform(j3_j4, now, "/katana/j3", "/katana/j4");
   tf_publisher->send_transform(j4_j5, now, "/katana/j4", "/katana/j5");
-  tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper");
+  tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper"); //remember to adjust name in message-processing on change
 }
 
 
@@ -406,11 +411,12 @@ KatanaActThread::loop()
       logger->log_debug(name(), "Motion thread collected");
       __sensacq_thread->set_enabled(true);
 
+      update_motors(/* refresh */ true);
+      update_position(/* refresh */ true);
+
 #ifdef HAVE_OPENRAVE
       if(__cfg_OR_enabled) { __goto_openrave_thread->update_openrave_data(); }
 #endif
-      update_motors(/* refresh */ true);
-      update_position(/* refresh */ true);
     }
   } else if (!__katana_if->is_enabled()) {
       update_position(/* refresh */ true);
@@ -454,8 +460,14 @@ KatanaActThread::loop()
             target += offset;
           }
           // TODO: how to transform euler rotation to quaternion, to be used for tf??
-          __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
-                                             msg->phi(), msg->theta(), msg->psi());
+          if( strcmp(msg->trans_frame(), "/katana/gripper")==0 ) {
+            __goto_openrave_thread->set_target(msg->x(), msg->y(), msg->z(),
+                                               msg->phi(), msg->theta(), msg->psi());
+            __goto_openrave_thread->set_arm_extension(true);
+          } else {
+            __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
+                                               msg->phi(), msg->theta(), msg->psi());
+          }
           __goto_openrave_thread->set_theta_error(msg->theta_error());
           __goto_openrave_thread->set_move_straight(msg->is_straight());
  #ifdef EARLY_PLANNING
@@ -603,6 +615,15 @@ KatanaActThread::loop()
         logger->log_warn(name(), "Failed setting max velocity. Ex:%s", e.what());
       }
       __katana_if->set_max_velocity(max_vel);
+
+    } else if (__katana_if->msgq_first_is<KatanaInterface::SetPlannerParamsMessage>()) {
+      KatanaInterface::SetPlannerParamsMessage *msg = __katana_if->msgq_first(msg);
+
+      if( __cfg_OR_enabled ) {
+#ifdef HAVE_OPENRAVE
+        __goto_openrave_thread->set_plannerparams(msg->plannerparams());
+#endif
+      }
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetMotorEncoderMessage>()) {
       KatanaInterface::SetMotorEncoderMessage *msg = __katana_if->msgq_first(msg);

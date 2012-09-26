@@ -48,7 +48,8 @@ typedef enum {
   TARGET_NONE,          /**< No valid target */
   TARGET_JOINTS,        /**< Target: motor joint values */
   TARGET_TRANSFORM,     /**< Target: absolute endeffector translation and rotation */
-  TARGET_RELATIVE,      /**< Target: relative endeffector translation */
+  TARGET_RELATIVE,      /**< Target: relative endeffector translation, based on robot's coordinate system */
+  TARGET_RELATIVE_EXT,  /**< Target: relative endeffector translation, based on arm extension */
   TARGET_IKPARAM        /**< Target: OpenRAVE::IkParameterization string */
 } target_type_t;
 
@@ -75,6 +76,7 @@ typedef struct {
   OpenRaveManipulator* manip;  /**< target manipulator configuration */
   target_type_t        type;   /**< target type */
   OpenRAVE::IkParameterization ikparam;  /**< OpenRAVE::IkParameterization; each target is implicitly transformed to one by OpenRAVE */
+  std::string plannerparams;  /**< additional string to be passed to planner, i.e. BaseManipulation module */
 } target_t;
 
 } // end namespace firevision

@@ -128,9 +128,9 @@ OpenRaveEnvironment::lock()
 
 /** Enable debugging messages of OpenRAVE. */
 void
-OpenRaveEnvironment::enable_debug()
+OpenRaveEnvironment::enable_debug(OpenRAVE::DebugLevel level)
 {
-  RaveSetDebugLevel(Level_Debug);
+  RaveSetDebugLevel(level);
 }
 
 /** Disable debugging messages of OpenRAVE. */
@@ -148,7 +148,7 @@ void
 OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
   try{
-    __env->AddRobot(robot);
+    __env->Add(robot);
     if(__logger)
       {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
   } catch(openrave_exception &e) {
@@ -241,6 +241,7 @@ void
 OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
 {
   bool success;
+  EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
 
   // init planner. This is automatically done by BaseManipulation, but putting it here
   // helps to identify problem source if any occurs.
@@ -254,7 +255,21 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   ModuleBasePtr basemanip = robot->get_basemanip();
   target_t target = robot->get_target();
   std::stringstream cmdin,cmdout;
+  cmdin << std::setprecision(std::numeric_limits<dReal>::digits10+1);
+  cmdout << std::setprecision(std::numeric_limits<dReal>::digits10+1);
 
+  if( target.type == TARGET_RELATIVE_EXT ) {
+    Transform t = robot->get_robot_ptr()->GetActiveManipulator()->GetEndEffectorTransform();
+    //initial pose of arm looks at +z. Target values are referring to robot's coordinating system,
+    //which have this direction vector if taken as extension of manipulator (rotate -90° on y-axis)
+    Vector dir(target.y,target.z,target.x);
+    TransformMatrix mat = matrixFromQuat(t.rot);
+    dir = mat.rotate(dir);
+    target.type = TARGET_RELATIVE;
+    target.x = dir[0];
+    target.y = dir[1];
+    target.z = dir[2];
+  }
 
   switch(target.type) {
     case (TARGET_JOINTS) :
@@ -300,23 +315,24 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
       throw fawkes::Exception("OpenRAVE Environment: Planner: Invalid target type");
   }
 
+  //add additional planner parameters
+  if( !target.plannerparams.empty() ) {
+    cmdin << " " << target.plannerparams;
+  }
   cmdin << " execute 0";
   cmdin << " outputtraj";
   //if(__logger)
   //  __logger->log_debug("OpenRAVE Environment", "Planner: basemanip cmdin:%s", cmdin.str().c_str());
 
-  {
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
-    try {
-      success = basemanip->SendCommand(cmdout,cmdin);
-    } catch(openrave_exception &e) {
-      throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
-    }
-    if(!success)
-      {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
-    else if(__logger)
-      {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
-  } //unlock environment
+  try {
+    success = basemanip->SendCommand(cmdout,cmdin);
+  } catch(openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
+  }
+  if(!success)
+    {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
 
   // read returned trajectory
   TrajectoryBasePtr traj = RaveCreateTrajectory(__env, "");
@@ -324,9 +340,6 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   if( !traj->deserialize(cmdout) ) {
     {throw fawkes::Exception("OpenRAVE Environment: Planner: Cannot read trajectory data.");}
   }
-
-  // re-timing the trajectory
-  planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
 
   // sampling trajectory and setting robots trajectory
   std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
@@ -440,6 +453,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
           throw fawkes::Exception("OpenRAVE Environment: Graspplanning: No grasping path found.");
         }
         std::stringstream resval;
+        resval << std::setprecision(std::numeric_limits<dReal>::digits10+1);
         resval << PyString_AsString(py_value);
         if (!traj->deserialize(resval) ) {
           Py_DECREF(py_value);
@@ -522,9 +536,10 @@ bool
 OpenRaveEnvironment::add_object(const std::string& name, const std::string& filename)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->ReadKinBodyXMLFile(filename);
     kb->SetName(name);
-    __env->AddKinBody(kb);
+    __env->Add(kb);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
       __logger->log_warn("OpenRAVE Environment", "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
@@ -542,6 +557,7 @@ bool
 OpenRaveEnvironment::delete_object(const std::string& name)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
     __env->Remove(kb);
   } catch(const OpenRAVE::openrave_exception &e) {
@@ -562,6 +578,7 @@ bool
 OpenRaveEnvironment::rename_object(const std::string& name, const std::string& new_name)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
     kb->SetName(new_name);
   } catch(const OpenRAVE::openrave_exception &e) {
@@ -586,6 +603,7 @@ bool
 OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
 
     Transform transform = kb->GetTransform();
@@ -618,6 +636,7 @@ bool
 OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w)
 {
   try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
     KinBodyPtr kb = __env->GetKinBody(name);
 
     Vector quat(quat_w, quat_x, quat_y, quat_z);

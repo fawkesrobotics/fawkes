@@ -2,7 +2,7 @@
 <Robot name="caesar">
   <Translation>-0.0725 0 0.33</Translation>
 
-  <Robot prefix="arm_" file="/usr/local/share/openrave-0.6/robots/neuronics-katana.zae" name="caesar_katana">
+  <Robot prefix="arm_" file="neuronics-katana.zae" name="caesar_katana">
      <Translation>0.0725 0 0.145</Translation>
   </Robot>
 

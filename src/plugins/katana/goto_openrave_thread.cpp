@@ -50,6 +50,15 @@ using namespace fawkes;
  * @author Bahram Maleki-Fard (OpenRAVE extension)
  */
 
+/// @cond SELFEXPLAINING
+const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS =
+                  "minimumgoalpaths 16 postprocessingparameters <_nmaxiterations>100</_nmaxiterations>"
+                  "<_postprocessing planner=\"parabolicsmoother\"><_nmaxiterations>200</_nmaxiterations>"
+                  "</_postprocessing>\n";
+const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS_STRAIGHT =
+                  "maxdeviationangle 0.05";
+/// @endcond
+
 #ifdef HAVE_OPENRAVE
 
 /** Constructor.
@@ -59,6 +68,7 @@ using namespace fawkes;
  * @param poll_interval_ms interval in ms between two checks if the
  * final position has been reached
  * @param robot_file path to robot's xml-file
+ * @param arm_model arm model used in robot_file, either "5dof" or "6dof_dummy"
  * @param autoload_IK true, if IK databas should be automatically generated (recommended)
  * @param use_viewer true, if viewer should be started (default: false)
  */
@@ -67,6 +77,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
                                    fawkes::OpenRaveConnector* openrave,
 				   unsigned int poll_interval_ms,
                                    std::string robot_file,
+                                   std::string arm_model,
                                    bool autoload_IK,
                                    bool use_viewer)
   : KatanaMotionThread("KatanaGotoOpenRaveThread", katana, logger),
@@ -75,11 +86,15 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __target_object( "" ),
   __target_traj( 0 ),
   __cfg_robot_file( robot_file ),
+  __cfg_arm_model( arm_model ),
   __cfg_autoload_IK( autoload_IK ),
   __cfg_use_viewer( use_viewer ),
   __is_target_object( 0 ),
   __has_target_quaternion( 0 ),
   __move_straight( 0 ),
+  __is_arm_extension( 0 ),
+  __plannerparams( "default" ),
+  __plannerparams_straight( "default" ),
   _openrave( openrave )
 {
 }
@@ -107,6 +122,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
   __has_target_quaternion = false;
   __is_target_object = false;
   __move_straight = false;
+  __is_arm_extension = false;
 }
 
 /** Set target position.
@@ -133,6 +149,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
   __has_target_quaternion = true;
   __is_target_object = false;
   __move_straight = false;
+  __is_arm_extension = false;
 }
 
 /** Set target position.
@@ -166,6 +183,44 @@ KatanaGotoOpenRaveThread::set_move_straight(bool move_straight)
   __move_straight = move_straight;
 }
 
+/** Set if target is taken as arm extension.
+ * Make sure to call this after(!) a "set_target" method, as they
+ * set "__move_straight" attribute to its default value.
+ * @param arm_extension true, if target is regarded as arm extension
+ */
+void
+KatanaGotoOpenRaveThread::set_arm_extension(bool arm_extension)
+{
+  __is_arm_extension = arm_extension;
+}
+
+/** Set plannerparams.
+ * @param params plannerparameters. For further information, check openrave plugin, or OpenRAVE documentaiton.
+ * @param straight true, if these params are for straight movement
+ */
+void
+KatanaGotoOpenRaveThread::set_plannerparams(std::string& params, bool straight)
+{
+  if( straight ) {
+    __plannerparams_straight = params;
+  } else {
+    __plannerparams = params;
+  }
+}
+
+/** Set plannerparams.
+ * @param params plannerparameters. For further information, check openrave plugin, or OpenRAVE documentaiton.
+ * @param straight true, if these params are for straight movement
+ */
+void
+KatanaGotoOpenRaveThread::set_plannerparams(const char* params, bool straight)
+{
+  if( straight ) {
+    __plannerparams_straight = params;
+  } else {
+    __plannerparams = params;
+  }
+}
 
 void
 KatanaGotoOpenRaveThread::init()
@@ -175,22 +230,41 @@ KatanaGotoOpenRaveThread::init()
 
     // configure manipulator
     // TODO: from config parameters? neccessary?
+    if( __cfg_arm_model == "5dof" ) {
+      __OR_manip = new OpenRaveManipulatorNeuronicsKatana(5, 5);
+      __OR_manip->add_motor(0,0);
+      __OR_manip->add_motor(1,1);
+      __OR_manip->add_motor(2,2);
+      __OR_manip->add_motor(3,3);
+      __OR_manip->add_motor(4,4);
 
-    __OR_manip = new OpenRaveManipulatorNeuronicsKatana(5, 5);
-    __OR_manip->add_motor(0,0);
-    __OR_manip->add_motor(1,1);
-    __OR_manip->add_motor(2,2);
-    __OR_manip->add_motor(3,3);
-    __OR_manip->add_motor(4,4);
+      // Set manipulator and offsets.
+      // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
+      // offsetX: katana.kinbody is setup 0.0725 on +x axis
+      _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+      __OR_robot->get_robot_ptr()->SetActiveManipulator("arm_kni");
 
-    // Set manipulator and offsets.
-    // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
-    // offsetX: katana.kinbody is setup 0.0725 on +x axis
-    _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
-    __OR_robot->get_robot_ptr()->SetActiveManipulator("arm_kni");
+      if( __cfg_autoload_IK ) {
+        _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_TranslationDirection5D);
+      }
+    } else if ( __cfg_arm_model == "6dof_dummy" ) {
+      __OR_manip = new OpenRaveManipulatorKatana6M180(6, 5);
+      __OR_manip->add_motor(0,0);
+      __OR_manip->add_motor(1,1);
+      __OR_manip->add_motor(2,2);
+      __OR_manip->add_motor(4,3);
+      __OR_manip->add_motor(5,4);
 
-    if( __cfg_autoload_IK ) {
-      _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_TranslationDirection5D);
+      // Set manipulator and offsets.
+      // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
+      // offsetX: katana.kinbody is setup 0.0725 on +x axis
+      _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+
+      if( __cfg_autoload_IK ) {
+        _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_Transform6D);
+      }
+    } else {
+      throw fawkes::Exception("Unknown entry for 'arm_model':%s", __cfg_arm_model.c_str());
     }
 
   } catch (Exception& e) {
@@ -300,6 +374,9 @@ KatanaGotoOpenRaveThread::plan_target()
   __OR_manip->set_angles_device(__motor_angles);
 
   // Checking if target has IK solution
+  if( __plannerparams.compare("default") == 0 ) {
+    __plannerparams = DEFAULT_PLANNERPARAMS;
+  }
   if( __is_target_object) {
     _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
 
@@ -316,10 +393,17 @@ KatanaGotoOpenRaveThread::plan_target()
         _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
   		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
         success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
-      } else if( __move_straight) {
+      } else if( __move_straight ) {
         _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
 	 	           __x, __y, __z);
-        success = __OR_robot->set_target_straight(__x, __y, __z);
+        if( __is_arm_extension ) {
+          success = __OR_robot->set_target_rel(__x, __y, __z, true);
+        } else {
+          success = __OR_robot->set_target_straight(__x, __y, __z);
+        }
+        if( __plannerparams_straight.compare("default") == 0 ) {
+          __plannerparams_straight = DEFAULT_PLANNERPARAMS_STRAIGHT;
+        }
       } else {
         float theta_error = 0.0f;
         while( !success && (theta_error <= __theta_error)) {
@@ -344,6 +428,11 @@ KatanaGotoOpenRaveThread::plan_target()
       _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
       return false;
     }
+  }
+  if( __move_straight ) {
+    __OR_robot->set_target_plannerparams(__plannerparams_straight);
+  } else {
+    __OR_robot->set_target_plannerparams(__plannerparams);
   }
 
   // Run planner
@@ -449,10 +538,14 @@ KatanaGotoOpenRaveThread::update_motor_data()
 bool
 KatanaGotoOpenRaveThread::move_katana()
 {
-  for (unsigned int i = 0; i < __it->size(); ++i) {
-    // non-blocking command
-    _katana->move_motor_to(i, __it->at(i), /*blocking*/false);
+  if( _katana->joint_angles() ) {
+    _katana->move_to(*__it, /*blocking*/false);
+  } else {
+    std::vector<int> enc;
+    _katana->get_encoders(enc);
+    _katana->move_to(enc, /*blocking*/false);
   }
+
   return (++__it == __target_traj->end());
 }
 

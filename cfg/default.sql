@@ -159,6 +159,7 @@ INSERT INTO "config" VALUES('/hardware/katana/openrave/enabled','bool','0','Use 
 INSERT INTO "config" VALUES('/hardware/katana/openrave/use_viewer','bool','1','Use OpenRAVE qtcoin viewer (i.e. see 3D robot model)?');
 INSERT INTO "config" VALUES('/hardware/katana/openrave/auto_load_ik','bool','1','Automatically generate IK database for OpenRAVE robot model?');
 INSERT INTO "config" VALUES('/hardware/katana/openrave/robot_file','string','../fawkes/res/openrave/caesar.robot.xml','robot.xml file to be loaded into OpenRAVE');
+INSERT INTO "config" VALUES('/hardware/katana/openrave/arm_model','string','5dof','choose which arm model should be used, default 5dof-katana from OpenRAVE, or our 6dof-katana with dummy joint. Needs to be one of these: "5dof", "6dof_dummy"');
 INSERT INTO "config" VALUES('/hardware/laser/urg/active','bool',0,'Enable this configuration?');
 INSERT INTO "config" VALUES('/hardware/laser/urg/type','string','urg','Configuration is for Hokuyo URG laser range finder using URG library');
 INSERT INTO "config" VALUES('/hardware/laser/urg/device','string','/dev/ttyACM0','Device file');

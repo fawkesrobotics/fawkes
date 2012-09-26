@@ -167,6 +167,12 @@
     <comment>Sets maximum velocity for the arm. Set to 0 to use default.</comment>
     <ref>max_velocity</ref>
   </message>
+  <message name="SetPlannerParams">
+    <comment>Set plannerparams that can be added to OpenRAVE's BaseManipulation module.
+       Set to "default" if want to use default values (defined in plugin-thread)</comment>
+    <field type="string" length="1024" name="plannerparams">Planner parameters</field>
+    <field type="bool" name="straight">Parameters for straight movement?</field>
+  </message>
   <message name="SetMotorEncoder">
     <comment>Sets absolute motor encoder</comment>
     <field type="uint32" name="nr">Motor number</field>

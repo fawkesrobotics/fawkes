@@ -59,23 +59,29 @@ fsm:add_transitions {
 }
 
 function MOVE:init()
+   katanaarm:read()
+
    -- get relative position (translation)
    local x = self.fsm.vars.x or 0.0
    local y = self.fsm.vars.y or 0.0
    local z = self.fsm.vars.z or 0.0
 
-   -- calculate global position (translation)
-   x = x + katanaarm:x()
-   y = y + katanaarm:y()
-   z = z + katanaarm:z()
-
    -- get rotation
-   local theta, psi = katanaarm:theta(), katanaarm:psi()
+   local psi = katanaarm:theta(), katanaarm:psi()
    -- phi is defined by x and y, and automatically calculated by katana skill. value needs to be precise, therefore
    -- setting it right here could cause katana-skill to fail.
 
+   local theta       = self.fsm.vars.theta or katanaarm:theta()
    local theta_error = self.fsm.vars.theta_error or 0.0
    local straight    = self.fsm.vars.straight    or false
+   local frame       = self.fsm.vars.frame or "/katana/kni"
 
-   self.args = {x=x, y=y, z=z, theta=theta, frame="/katana/kni", theta_error=theta_error, straight=straight}
+   if frame ~= "/katana/gripper" then
+     -- calculate global position (translation)
+      x = x + katanaarm:x()
+      y = y + katanaarm:y()
+      z = z + katanaarm:z()
+   end
+
+   self.args = {x=x, y=y, z=z, theta=theta, frame=frame, theta_error=theta_error, straight=straight}
 end

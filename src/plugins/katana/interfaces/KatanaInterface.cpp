@@ -120,11 +120,12 @@ KatanaInterface::KatanaInterface() : Interface()
   add_messageinfo("CloseGripperMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetMaxVelocityMessage");
+  add_messageinfo("SetPlannerParamsMessage");
   add_messageinfo("SetMotorEncoderMessage");
   add_messageinfo("MoveMotorEncoderMessage");
   add_messageinfo("SetMotorAngleMessage");
   add_messageinfo("MoveMotorAngleMessage");
-  unsigned char tmp_hash[] = {0x69, 0xac, 0x9f, 0x78, 0x6, 0xc, 0x38, 0x65, 0x84, 0xce, 0xc1, 0xc3, 0x61, 0xb5, 0xae, 0xdb};
+  unsigned char tmp_hash[] = {0x63, 0x62, 0xb0, 0x97, 0x9, 0x8f, 0x58, 0x40, 0x61, 0xdc, 0x9a, 0xcc, 0xa, 0x97, 0xf8, 0xcd};
   set_hash(tmp_hash);
 }
 
@@ -761,6 +762,8 @@ KatanaInterface::create_message(const char *type) const
     return new SetEnabledMessage();
   } else if ( strncmp("SetMaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetMaxVelocityMessage();
+  } else if ( strncmp("SetPlannerParamsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetPlannerParamsMessage();
   } else if ( strncmp("SetMotorEncoderMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetMotorEncoderMessage();
   } else if ( strncmp("MoveMotorEncoderMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -2085,6 +2088,130 @@ KatanaInterface::SetMaxVelocityMessage::clone() const
 {
   return new KatanaInterface::SetMaxVelocityMessage(this);
 }
+/** @class KatanaInterface::SetPlannerParamsMessage <interfaces/KatanaInterface.h>
+ * SetPlannerParamsMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_plannerparams initial value for plannerparams
+ * @param ini_straight initial value for straight
+ */
+KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const char * ini_plannerparams, const bool ini_straight) : Message("SetPlannerParamsMessage")
+{
+  data_size = sizeof(SetPlannerParamsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetPlannerParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->plannerparams, ini_plannerparams, 1024);
+  data->straight = ini_straight;
+  add_fieldinfo(IFT_STRING, "plannerparams", 1024, data->plannerparams);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
+}
+/** Constructor */
+KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage() : Message("SetPlannerParamsMessage")
+{
+  data_size = sizeof(SetPlannerParamsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetPlannerParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "plannerparams", 1024, data->plannerparams);
+  add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
+}
+
+/** Destructor */
+KatanaInterface::SetPlannerParamsMessage::~SetPlannerParamsMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const SetPlannerParamsMessage *m) : Message("SetPlannerParamsMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetPlannerParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get plannerparams value.
+ * Planner parameters
+ * @return plannerparams value
+ */
+char *
+KatanaInterface::SetPlannerParamsMessage::plannerparams() const
+{
+  return data->plannerparams;
+}
+
+/** Get maximum length of plannerparams value.
+ * @return length of plannerparams value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetPlannerParamsMessage::maxlenof_plannerparams() const
+{
+  return 1024;
+}
+
+/** Set plannerparams value.
+ * Planner parameters
+ * @param new_plannerparams new plannerparams value
+ */
+void
+KatanaInterface::SetPlannerParamsMessage::set_plannerparams(const char * new_plannerparams)
+{
+  strncpy(data->plannerparams, new_plannerparams, sizeof(data->plannerparams));
+}
+
+/** Get straight value.
+ * Parameters for straight movement?
+ * @return straight value
+ */
+bool
+KatanaInterface::SetPlannerParamsMessage::is_straight() const
+{
+  return data->straight;
+}
+
+/** Get maximum length of straight value.
+ * @return length of straight value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KatanaInterface::SetPlannerParamsMessage::maxlenof_straight() const
+{
+  return 1;
+}
+
+/** Set straight value.
+ * Parameters for straight movement?
+ * @param new_straight new straight value
+ */
+void
+KatanaInterface::SetPlannerParamsMessage::set_straight(const bool new_straight)
+{
+  data->straight = new_straight;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KatanaInterface::SetPlannerParamsMessage::clone() const
+{
+  return new KatanaInterface::SetPlannerParamsMessage(this);
+}
 /** @class KatanaInterface::SetMotorEncoderMessage <interfaces/KatanaInterface.h>
  * SetMotorEncoderMessage Fawkes BlackBoard Interface Message.
  * 
@@ -2632,20 +2759,24 @@ KatanaInterface::message_valid(const Message *message) const
   if ( m10 != NULL ) {
     return true;
   }
-  const SetMotorEncoderMessage *m11 = dynamic_cast<const SetMotorEncoderMessage *>(message);
+  const SetPlannerParamsMessage *m11 = dynamic_cast<const SetPlannerParamsMessage *>(message);
   if ( m11 != NULL ) {
     return true;
   }
-  const MoveMotorEncoderMessage *m12 = dynamic_cast<const MoveMotorEncoderMessage *>(message);
+  const SetMotorEncoderMessage *m12 = dynamic_cast<const SetMotorEncoderMessage *>(message);
   if ( m12 != NULL ) {
     return true;
   }
-  const SetMotorAngleMessage *m13 = dynamic_cast<const SetMotorAngleMessage *>(message);
+  const MoveMotorEncoderMessage *m13 = dynamic_cast<const MoveMotorEncoderMessage *>(message);
   if ( m13 != NULL ) {
     return true;
   }
-  const MoveMotorAngleMessage *m14 = dynamic_cast<const MoveMotorAngleMessage *>(message);
+  const SetMotorAngleMessage *m14 = dynamic_cast<const SetMotorAngleMessage *>(message);
   if ( m14 != NULL ) {
+    return true;
+  }
+  const MoveMotorAngleMessage *m15 = dynamic_cast<const MoveMotorAngleMessage *>(message);
+  if ( m15 != NULL ) {
     return true;
   }
   return false;
