@@ -126,7 +126,9 @@ OpenRaveEnvironment::lock()
   EnvironmentMutex::scoped_lock lock(__env->GetMutex());
 }
 
-/** Enable debugging messages of OpenRAVE. */
+/** Enable debugging messages of OpenRAVE.
+ * @param level debug level to set for OpenRAVE
+ */
 void
 OpenRaveEnvironment::enable_debug(OpenRAVE::DebugLevel level)
 {
