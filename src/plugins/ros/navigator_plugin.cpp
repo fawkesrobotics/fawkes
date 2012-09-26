@@ -24,22 +24,21 @@
 
 using namespace fawkes;
 
-/** Ros Navigator plugin for the Robotino.
+/** Send locomotion commands to ROS.
  * @author Sebastian Reuter
  */
-
 class RosNavigatorPlugin : public fawkes::Plugin
 {
  public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-	RosNavigatorPlugin(Configuration *config)
+  RosNavigatorPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosNavigatorThread());
   }
 };
 
-PLUGIN_DESCRIPTION("Ros navigator plugin")
+PLUGIN_DESCRIPTION("Send locomotion commands to ROS")
 EXPORT_PLUGIN(RosNavigatorPlugin)

@@ -56,17 +56,19 @@ class RosNavigatorThread
   virtual void init();
   virtual void finalize();
   virtual void loop();
-  void getStatus();
-  void sendRosMessage();
-  typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
  private:
+  void check_status();
+  void send_goal();
+
+ private:
+  typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+
   fawkes::NavigatorInterface *nav_if_;
-  MoveBaseClient *ac;
-  move_base_msgs::MoveBaseGoal goal;
-  int iterator;
-  bool isFirst;
-  bool connected_history;
+  MoveBaseClient *ac_;
+  move_base_msgs::MoveBaseGoal goal_;
+  bool cmd_sent_;
+  bool connected_history_;
 };
 
 #endif /* __ROS_NAVIGATOR_THREAD_H_ */
