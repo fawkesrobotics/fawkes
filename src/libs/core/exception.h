@@ -56,6 +56,7 @@ class Exception : public std::exception {
   const char *  type_id() const;
 
   virtual const char* what() const throw();
+  virtual const char* what_no_backtrace() const throw();
 
   Exception& operator=(const Exception &exc) throw();
 

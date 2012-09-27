@@ -1,0 +1,47 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/skiller
+---
+skiller:
+  # Skill space
+  skillspace: nao
+
+  # Watch lua files for modification and automatically reload
+  # Lua if files have been changed; true to enable
+  watch_files: true
+
+  interfaces:
+    test:
+      reading:
+        navigator: NavigatorInterface::Navigator
+        pose: ObjectPositionInterface::WM Pose
+        speechsynth: SpeechSynthInterface::Flite
+        katanaarm: KatanaInterface::Katana
+        ptu_RX28: PanTiltInterface::PanTilt RX28
+        ptu_EviD100P: PanTiltInterface::PanTilt EviD100P
+    nao:
+      navigator: NavigatorInterface::Navigator
+      pose: ObjectPositionInterface::WM Pose
+      wm_ball: ObjectPositionInterface::WM Ball
+      gamestate: GameStateInterface::WM GameState
+      speechsynth: SpeechSynthInterface::Nao SpeechSynth
+      naomotion: HumanoidMotionInterface::NaoQi Motion
+      naosensors: NaoSensorInterface::Nao Sensors
+      naostiffness: NaoJointStiffnessInterface::Nao Joint Stiffness
+      naojoints: NaoJointPositionInterface::Nao Joint Positions
+      chestbutton: SwitchInterface::Nao Button Chest
+      lfootbumper: SwitchInterface::Nao Button Foot Left
+      rfootbumper: SwitchInterface::Nao Button Foot Right
+      chestled_blue: LedInterface::Nao LED ChestBoard/Blue
+      chestled_red: LedInterface::Nao LED ChestBoard/Red
+      chestled_green: LedInterface::Nao LED ChestBoard/Green
+      lfootled_blue: LedInterface::Nao LED LFoot/Blue
+      lfootled_red: LedInterface::Nao LED LFoot/Red
+      lfootled_green: LedInterface::Nao LED LFoot/Green
+      rfootled_blue: LedInterface::Nao LED RFoot/Blue
+      rfootled_red: LedInterface::Nao LED RFoot/Red
+      rfootled_green: LedInterface::Nao LED RFoot/Green
+      ear_leds: LedInterface::Nao LED Ears/*/*
+      face_leds: LedInterface::Nao LED Face/*/*/*
+      penalty: SoccerPenaltyInterface::SPL Penalty

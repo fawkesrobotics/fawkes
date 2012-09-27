@@ -1,0 +1,9 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Platforms/Nao
+---
+hardware/nao:
+  # If true, triple long click on chest button causes shutdown. This
+  # requires the SetUID bit to be set on /sbin/poweroff (or whatever it links to).
+  chestbut_triple_long_click_shutdown: true

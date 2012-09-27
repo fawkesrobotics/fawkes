@@ -2,7 +2,7 @@
 #               Makefile Build System for Fawkes: Config Library
 #                            -------------------
 #   Created on Tue Jun 21 15:04:39 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2012 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -14,9 +14,15 @@
 #*****************************************************************************
 
 ifneq ($(PKGCONFIG),)
-  HAVE_SQLITE    := $(if $(shell $(PKGCONFIG) --exists 'sqlite3'; echo $${?/1/}),1,0)
+  HAVE_SQLITE    = $(if $(shell $(PKGCONFIG) --exists 'sqlite3'; echo $${?/1/}),1,0)
+  HAVE_YAMLCPP   = $(if $(shell $(PKGCONFIG) --exists 'yaml-cpp'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_SQLITE),1)
-  CFLAGS += -DHAVE_SQLITE
+  CFLAGS_SQLITE  = -DHAVE_SQLITE $(shell $(PKGCONFIG) --cflags 'sqlite3')
+  LDFLAGS_SQLITE = $(shell $(PKGCONFIG) --libs 'sqlite3')
+endif
+ifeq ($(HAVE_YAMLCPP),1)
+  CFLAGS_YAMLCPP  = -DHAVE_YAMLCPP $(shell $(PKGCONFIG) --cflags 'yaml-cpp')
+  LDFLAGS_YAMLCPP = $(shell $(PKGCONFIG) --libs 'yaml-cpp')
 endif
 

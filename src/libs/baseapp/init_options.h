@@ -54,8 +54,7 @@ class InitOptions
   InitOptions &  show_help(bool show_help);
   InitOptions &  user(const char *username);
   InitOptions &  group(const char *groupname);
-  InitOptions &  default_config(const char *default_config);
-  InitOptions &  host_config(const char *host_config);
+  InitOptions &  config_file(const char *config_file);
   InitOptions &  bb_cleanup(bool bb_cleanup);
   InitOptions &  init_plugin_cache(bool init_plugin_cache);
   InitOptions &  load_plugins(const char *plugin_list);
@@ -94,8 +93,7 @@ class InitOptions
   bool has_groupname() const;
   const char * groupname() const;
 
-  const char * host_config() const;
-  const char * default_config() const;
+  const char * config_file() const;
 
   Module::ModuleFlags plugin_module_flags() const;
 
@@ -123,8 +121,7 @@ class InitOptions
   bool                __has_groupname;
   char               *__groupname;
 
-  char               *__default_config;
-  char               *__host_config;
+  char               *__config_file;
 
   bool                __daemonize;
   char               *__daemon_pid_file;

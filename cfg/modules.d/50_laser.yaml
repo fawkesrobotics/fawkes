@@ -1,0 +1,97 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser
+---
+hardware/laser:
+
+  # URG using vendor library
+  urg:
+    # Enable this configuration?
+    active: false
+
+    # Configuration is for Hokuyo URG laser range finder using URG library
+    type: urg
+
+    # Device file
+    device: /dev/ttyACM0
+
+
+  # URG using Gearbox
+  urg_gbx:
+    # Enable this configuration?
+    active: false
+
+    # Configuration is for Hokuyo URG laser range finder using the Gearbox library
+    type: urg_gbx
+
+    # Device file
+    device: /dev/ttyACM0
+
+  # Lase EDL via CAN-Bus
+  lase_edl:
+    # Enable this configuration?
+    active: false
+
+    # Make this the default sensor, i.e. interface ID Laser?
+    main_sensor: false
+
+    # Reverse default angle direction to clockwise?
+    clockwise_angle: true
+
+    # Configuration is for Lase EDL laser range finder
+    type: lase_edl
+
+    # Interface type, currently only usb
+    interface_type: usb
+
+    # Use default settings from flash?
+    use_default: false
+
+    # Store default settings in flash?
+    set_default: false
+
+    # Canonical resolution, if set overrides rotation_freq and angle_step; one of low (1 deg, 20 Hz) or high (0/5 deg, 15 Hz)
+    canonical_resolution: high
+
+    # Maximum rotation frequency; Hz
+    rotation_freq: 20
+
+    # Angle step; 1/16th degree
+    angle_step: 16
+
+    # Max pulse frequency; Hz
+    max_pulse_freq: 10800
+
+    # Profile format, 0x0100 only distances, 0x0400 only echoes, 0x0500 both
+    profile_format: 256
+
+    # CAN ID of laser
+    can_id: 683
+
+    # CAN ID response
+    can_id_resp: 1808
+
+    # Sensor ID in laser
+    sensor_id: 16
+
+    # Sensor ID response
+    sensor_id_resp: 3
+
+    # Baud rate key, 0x14 for 1 MBit/s
+    btr0btr1: 20
+
+    # Port, 0 for default
+    port: 0
+
+    # IRQ, 0 for default
+    irq: 0
+
+    # Number of times to try initialization
+    num_init_tries: 5
+
+    # Rotation of the laser towards front; degree
+    mount_rotation: 180
+
+    # If true, the fflaser_calibrate tool must be used to gain information about dead spots, which are then extracted with a filter
+    use_dead_spots_filter: false

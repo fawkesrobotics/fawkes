@@ -101,9 +101,13 @@ ConfigListContent::append(Configuration::ValueIterator *i)
     throw TypeMismatchException("Invalid type of config iterator value");
   }
 
-  std::string comment = i->get_comment();
-  if (comment != "") {
-    append_comment(i->path(), comment.c_str(), i->is_default());
+  try {
+    std::string comment = i->get_comment();
+    if (comment != "") {
+      append_comment(i->path(), comment.c_str(), i->is_default());
+    }
+  } catch (NotImplementedException &e) {
+    // ignored
   }
 }
 

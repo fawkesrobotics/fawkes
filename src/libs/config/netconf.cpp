@@ -108,17 +108,8 @@ NetworkConfiguration::~NetworkConfiguration()
 }
 
 
-/** Load configuration.
- * This is a noop for the NetworkConfiguration.
- * @param name name of the host-based database. This should be a name of the form
- * hostname.db, where hostname is the unqualified part of the hostname.
- * @param defaults_name name of the default database. Should be defaults.db
- * @param tag optional tag to restore
- */
 void
-NetworkConfiguration::load(const char *name,
-			   const char *defaults_name,
-			   const char *tag)
+NetworkConfiguration::load(const char *file_path, const char *tag)
 {
 }
 
@@ -1277,7 +1268,7 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       }
 
       mirror_config = new SQLiteConfiguration();
-      mirror_config->load(":memory:", ":memory:");
+      mirror_config->load(":memory:");
 
       __mirror_init_barrier = new InterruptibleBarrier(2);
       mutex->lock();
@@ -1340,6 +1331,12 @@ NetworkConfiguration::unlock()
 }
 
 
+void
+NetworkConfiguration::try_dump()
+{
+}
+
+
 Configuration::ValueIterator *
 NetworkConfiguration::iterator()
 {
@@ -1351,6 +1348,13 @@ NetworkConfiguration::iterator()
 }
 
 
+/** Iterator for all default values.
+ * Returns an iterator that can be used to iterate over all default values in
+ * the current default configuration. Note that this might return less paths than
+ * available, because the values for which no default entry exists are not
+ * returned.
+ * @return iterator over all default values
+ */
 Configuration::ValueIterator *
 NetworkConfiguration::iterator_default()
 {
@@ -1362,6 +1366,13 @@ NetworkConfiguration::iterator_default()
 }
 
 
+/** Iterator for all host-specific values.
+ * Returns an iterator that can be used to iterate over all host-specific values
+ * in the current configuration. Note that this might return less paths than
+ * available, because the default values for which no host-specific entry exists
+ * are not returned.
+ * @return iterator over all host-specific values
+ */
 Configuration::ValueIterator *
 NetworkConfiguration::iterator_hostspecific()
 {

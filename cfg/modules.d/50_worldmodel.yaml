@@ -1,0 +1,62 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+worldmodel:
+  confspace: trunk
+
+  # Enable sending of world info messages?
+  wi_send:
+    trunk:
+      enable_send: false
+
+  interfaces:
+    trunk:
+      pose:
+        type: ObjectPositionInterface
+        from_id: Pose
+        to_id: WM Pose
+        method: copy
+      obstacles:
+        type: ObjectPositionInterface
+        from_id: "*Obstacle*"
+        to_id: WM Obstacle %u
+        method: copy
+      ball:
+        type: ObjectPositionInterface
+        from_id: "*Ball*"
+        to_id: WM Ball
+        method: average
+      gamestate:
+        type: GameStateInterface
+        from_id: WI GameState
+        to_id: WM GameState
+        method: copy
+
+worldinfo:
+  # Multicast address to send world info messages to.
+  multicast_addr: !ipv4-addr 224.16.0.1
+
+  # UDP port to listen for and send world info messages to; UDP port
+  udp_port: !udp-port 2806
+
+  # Default encryption key for world info.
+  encryption_key: "AllemaniACsX0rz"
+
+  # Default encryption initialization vector for world info.
+  encryption_iv: "DoesAnyOneCare"
+
+  # Send legacy fat message?
+  enable_fatmsg: false
+
+  # Time to sleep between two send.receive operations; miliseconds
+  sleep_time_msec: 10
+
+  # Maximum number of messages to process per receive
+  max_msgs_per_recv: 20
+
+  # Time of inactivity after which the world info message
+  # sequence number is resetted; sec
+  flush_time_sec: 5
+
+  # Enable loopback for multicast messages?
+  multicast_loopback: true

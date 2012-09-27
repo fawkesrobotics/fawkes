@@ -31,7 +31,7 @@ namespace fawkes {
   class MultiLogger;
   class NetworkLogger;
   class BlackBoard;
-  class SQLiteConfiguration;
+  class Configuration;
   class FawkesMainThread;
   class PluginManager;
   class AspectManager;
@@ -52,7 +52,7 @@ extern FawkesMainThread     *main_thread;
 extern MultiLogger          *logger;
 extern NetworkLogger        *network_logger;
 extern BlackBoard           *blackboard;
-extern SQLiteConfiguration  *config;
+extern Configuration        *config;
 extern Clock                *clock;
 extern PluginManager        *plugin_manager;
 extern AspectManager        *aspect_manager;

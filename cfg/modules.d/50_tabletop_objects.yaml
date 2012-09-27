@@ -1,0 +1,78 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
+---
+perception/tabletop_objects:
+  # Minimum X value (i.e. distance to camera) to consider a point; m
+  depth_filter_min_x: 0.0
+
+  # Maximum X value (i.e. distance to camera) to consider a point; m
+  depth_filter_max_x: 3.0
+
+  # Leaf size for voxel grid downsampling; m
+  voxel_leaf_size: 0.02
+
+  # Maximum number of iterations to perform for table segmentation
+  table_segmentation_max_iterations: 1000
+
+  # Segmentation distance threshold; m
+  table_segmentation_distance_threshold: 0.022
+
+  # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
+  table_segmentation_inlier_quota: 0.12
+
+  # Maximum angle between Z axis and table normal, takes normal direction into account; rad
+  max_z_angle_deviation: 0.1
+
+  # Minimum required height of table; m
+  table_min_height: 0.6
+
+  # Maximum height of table; m
+  table_max_height: 0.9
+
+  # Table model width, i.e. if the robot is standing in front of the
+  # longer edge of the table the distance between the close and the far edge; m
+  table_model_width: 0.8
+
+  # Table model length, i.e. if the robot is standing in front of the longer
+  # edge of the table the distance between the left and the right edge; m
+  table_model_length: 1.6
+
+  # Inter_Point step size for creating the table model point cloud; m
+  table_model_step: 0.05
+
+  # Clustering inter-point distance tolerance; m
+  cluster_tolerance: 0.044
+
+  # Minimum number of points in cluster to consider
+  cluster_min_size: 20
+
+  # Minimum number of points in cluster to consider
+  cluster_max_size: 200
+
+  # The frame in which the result should be published; frame
+  result_frame: "/base_link"
+
+  # Show the frustrum according to configured horizontal and vertical viewing angle.
+  visualization/show_frustrum: true
+
+  # Show text with convex hull vertex IDs?
+  visualization/show_convex_hull_vertices: true
+
+  # Show highlighted hull lines to understand edge selection? Otherwise plain hull is shown.
+  visualization/show_convex_hull_line_highlighting: true
+
+  # Show text with convex hull vertex IDs?
+  visualization/show_convex_hull_vertex_ids: true
+
+  # Time to show marker elements when not updated. Useful to still analyze
+  # the seen after program has been terminated; sec
+  visualization/display_duration: 120
+
+  # Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg
+  horizontal_viewing_angle: 57.0
+
+  # Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg
+  vertical_viewing_angle: 43.0
+

@@ -56,7 +56,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          add_change_handler(ConfigurationChangeHandler *h);
   virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
-  virtual void          load(const char *filename, const char *defaults_filename,
+  virtual void          load(const char *file_path,
 			     const char *tag = NULL);
 
   virtual void          tag(const char *tag);
@@ -158,6 +158,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   void lock();
   bool try_lock();
   void unlock();
+
+  virtual void try_dump();
 
  private:
   void send_get(const char *path, unsigned int msgid);

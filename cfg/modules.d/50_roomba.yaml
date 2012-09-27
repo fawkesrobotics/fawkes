@@ -1,0 +1,66 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/roomba
+---
+hardware/roomba:
+  # Connection type to use, one of rootooth or serial
+  connection_type: serial
+
+  # Operating mode, one of passive, safe, or full
+  mode: safe
+
+  # Device file for the serial connection to the Roomba/
+  device: /dev/ttyUSB0
+
+  # Bluetooth name pattern of RooTooth/
+  btname: "FireFly-*"
+
+  # Hardware type of RooTooth/ New Sparkfun models are firefly,
+  # older RoboDynamics ones are mitsumi (currently untested).
+  bttype: firefly
+
+  # If RooTooth is auto-detected, save bluetooth address to config for faster connections
+  btsave: true
+
+  # Try to enable fast mode on startup. Startup takes longer. Disable if
+  # you have RooTooth powered on most of the time anyway and not plug it
+  # in just before you launch. Only supported for FireFly RooTooth.
+  btfast: true
+
+  # Query data in each loop instead of streaming. More reliably with RooTooth,
+  # can be disabled for serial connection for slightly better performance.
+  query_mode: true
+
+  # Play fanfare when connection has been established. Disable when testing late at night...
+  play_fanfare: true
+
+  joystick:
+    # Button bit for main brush button.
+    but_main_brush: 1
+    # Button bit for side brush button.
+    but_side_brush: 2
+    # Button bit for vacuuming button.
+    but_vacuuming: 4
+
+    # Button bit for dock button.
+    but_dock: 8
+    # Button bit for spot cleaning.
+    but_spot: 16
+    # Button bit for setting the mode.
+    but_mode: 32
+
+    # Axis index for forward/backward axis.
+    axis_forward: 0
+    # Axis index for sideward.turn movement.
+    axis_sideward: 1
+    # Axis index for speed setting.
+    axis_speed: 2
+
+    # Minimum radius value for driving an arc; mm
+    min_radius: 250
+    # Maximum radius value for driving an arc; mm
+    max_radius: 1500
+    # Maximum linear velocity; mm/sec
+    max_velocity: 500
+

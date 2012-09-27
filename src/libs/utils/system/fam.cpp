@@ -215,6 +215,19 @@ FileAlterationMonitor::watch_file(const char *filepath)
 }
 
 
+/** Remove all currently active watches. */
+void
+FileAlterationMonitor::reset()
+{
+#ifdef HAVE_INOTIFY
+  std::map<int, std::string>::iterator wit;
+  for (wit = __inotify_watches.begin(); wit != __inotify_watches.end(); ++wit) {
+    inotify_rm_watch(__inotify_fd, wit->first);
+  }
+  __inotify_watches.clear();
+#endif
+}
+
 /** Add a filter.
  * Filters are applied to path names that triggered an event. All
  * pathnames are checked against this regex and if any does not match

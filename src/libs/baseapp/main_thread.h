@@ -40,7 +40,7 @@ namespace fawkes {
 }
 #endif
 class Configuration;
-class SQLiteConfiguration;
+class Configuration;
 class ConfigNetworkHandler;
 class NetworkLogger;
 class Clock;
@@ -60,7 +60,7 @@ class FawkesMainThread
   public MainLoopEmployer
 {
  public:
-  FawkesMainThread(SQLiteConfiguration *config,
+  FawkesMainThread(Configuration *config,
 		   MultiLogger *multi_logger,
 		   ThreadManager *thread_manager,
 		   PluginManager *plugin_manager,
@@ -129,7 +129,6 @@ class FawkesMainThread
   char                 *__default_plugin;
   char                 *__load_plugins;
 
-  SQLiteConfiguration  *__sqlite_conf;
   ThreadManager        *__thread_manager;
   PluginManager        *__plugin_manager;
   Mutex                *__plugin_mutex;

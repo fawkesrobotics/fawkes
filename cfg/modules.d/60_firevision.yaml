@@ -1,0 +1,16 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/FireVision
+---
+# Fountain TCP Port; TCP port
+firevision:
+  fountain:
+    tcp_port: !tcp-port 2208
+
+# Retriever camera example
+retriever_example:
+  camera:
+    cam0:
+      string: file:file:file=../../RCSoft5/src/modules/robocup/firevision/images/office-ball-kabel-wirrwarr.raw
+      frame: !frame /camera_link

@@ -1,0 +1,6 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+fawkes/meta_plugins:
+  # Meta plugin loaded by default on the Nao (and on the Nao only)
+  nao_default: naoqi-motion,naoqi-speechsynth,naoqi-buttons,naoqi-leds

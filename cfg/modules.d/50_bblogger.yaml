@@ -1,0 +1,45 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/bblogger
+---
+fawkes/bblogger:
+  # Current logging scenario
+  scenario: qatest
+
+  # Automatically create a configuration for replay?
+  generate_replay_config: true
+
+  qatest:
+    # Enable buffering for this scenario?
+    buffering: true
+
+    # Flush file stream after each chunk? Can severely influence
+    # performance, but when enabled allows real-time log watching.
+    flushing: false
+
+    interfaces/test: TestInterface::BBLoggerTest
+
+
+# specify scenario for log replay
+fawkes/bblogreplay:
+  scenario: qatest
+
+  # Loop replay by default?
+  loop: false
+
+  # Non-blocking replay in blocked timing mode by default?
+  non_blocking: false
+
+  # Grace period for differences in offset and elapsed time to still allow replay
+  grace_period: 0.001
+
+  qatest:
+    # log file to be replayed if scenario specified
+    logs/qatest/file: laser-Laser360Interface-Laser-2010-02-21-22-22-29.log
+
+    # loop the replay on default for the scenario
+    logs/qatest/loop: true
+
+    # Hook at which to replay the log data
+    logs/qatest/hook: sensor

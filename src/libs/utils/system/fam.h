@@ -77,6 +77,7 @@ class FileAlterationMonitor
   void watch_dir(const char *dirpath);
   void watch_file(const char *filepath);
   void add_filter(const char *regex);
+  void reset();
 
   void process_events(int timeout = 0);
   void interrupt();

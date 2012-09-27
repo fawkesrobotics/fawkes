@@ -64,8 +64,7 @@ InitOptions::InitOptions(const char *basename)
   __username = NULL;
   __has_groupname = false;
   __groupname = NULL;
-  __default_config = NULL;
-  __host_config = NULL;
+  __config_file = NULL;
   __daemonize = false;
   __daemon_pid_file = NULL;
   __daemonize_kill = false;
@@ -117,13 +116,9 @@ InitOptions::InitOptions(const InitOptions &options)
     __groupname = strdup(options.__groupname);    
   }
 
-  __default_config = NULL;
-  if (options.__default_config) {
-    __default_config = strdup(options.__default_config);
-  }
-  __host_config = NULL;
-  if (options.__host_config) {
-    __host_config = strdup(options.__host_config);
+  __config_file = NULL;
+  if (options.__config_file) {
+    __config_file = strdup(options.__config_file);
   }
   __daemonize = options.__daemonize;
   __daemon_pid_file = NULL;
@@ -161,7 +156,7 @@ InitOptions::InitOptions(int argc, char **argv)
 
   fawkes::runtime::argument_parser =
     new ArgumentParser(argc, argv,
-		       "hCc:d:q::l:L:p:P:u:g:D::ks",
+		       "hCc:dq::l:L:p:P:u:g:D::ks",
 		       long_options);
 
   ArgumentParser *argp = fawkes::runtime::argument_parser;
@@ -179,9 +174,11 @@ InitOptions::InitOptions(int argc, char **argv)
   }
 
   const char *tmp;
-  __log_level = Logger::LL_DEBUG;
-  if ( argp->has_arg("q") ) {
-    __log_level = Logger::LL_INFO;
+  __log_level = Logger::LL_INFO;
+  if ( argp->has_arg("d") ) {
+    __log_level = Logger::LL_DEBUG;
+  } else if ( argp->has_arg("q") ) {
+    __log_level = Logger::LL_WARN;
     if ( (tmp = argp->arg("q")) != NULL ) {
       for (unsigned int i = 0; i < strlen(tmp); ++i) {
 	if ( tmp[i] == 'q' ) {
@@ -230,13 +227,9 @@ InitOptions::InitOptions(int argc, char **argv)
   }
 
 
-  __default_config = NULL;
-  __host_config = NULL;
-  if (argp->arg("d")) {
-    __default_config = strdup(argp->arg("d"));
-  }
+  __config_file = NULL;
   if (argp->arg("c")) {
-    __host_config = strdup(argp->arg("c"));
+    __config_file = strdup(argp->arg("c"));
   }
 
   __daemonize = argp->has_arg("D");
@@ -274,8 +267,7 @@ InitOptions::~InitOptions()
   if (__has_username)          free(__username);
   if (__has_groupname)         free(__groupname);
   if (__has_load_plugin_list)  free(__load_plugin_list);
-  if (__default_config)        free(__default_config);
-  if (__host_config)           free(__host_config);
+  if (__config_file)           free(__config_file);
   if (__daemon_pid_file)       free(__daemon_pid_file);
 }
 
@@ -339,20 +331,12 @@ InitOptions::operator=(const InitOptions &options)
     __groupname = strdup(options.__groupname);    
   }
 
-  if (__default_config) {
-    free(__default_config);
-    __default_config = NULL;
+  if (__config_file) {
+    free(__config_file);
+    __config_file = NULL;
   }
-  if (options.__default_config) {
-    __default_config = strdup(options.__default_config);
-  }
-
-  if (__host_config) {
-    free(__host_config);
-    __host_config = NULL;
-  }
-  if (options.__host_config) {
-    __host_config = strdup(options.__host_config);
+  if (options.__config_file) {
+    __config_file = strdup(options.__config_file);
   }
 
   __daemonize = options.__daemonize;
@@ -557,36 +541,19 @@ InitOptions::group(const char *groupname)
   return *this;
 }
 
-/** Set default config name.
- * @param default_config default config name
+/** Set config file path.
+ * @param config_file config file path
  * @return reference to this instance
  */
 InitOptions &
-InitOptions::default_config(const char *default_config)
+InitOptions::config_file(const char *config_file)
 {
-  if (__default_config) {
-    free(__default_config);
-    __default_config = NULL;
+  if (__config_file) {
+    free(__config_file);
+    __config_file = NULL;
   }
-  if (default_config) {
-    __default_config = strdup(default_config);
-  }
-  return *this;
-}
-
-/** Set host config name.
- * @param host_config host config name
- * @return reference to this instance
- */
-InitOptions &
-InitOptions::host_config(const char *host_config)
-{
-  if (__host_config) {
-    free(__host_config);
-    __host_config = NULL;
-  }
-  if (host_config) {
-    __host_config = strdup(host_config);
+  if (config_file) {
+    __config_file = strdup(config_file);
   }
   return *this;
 }
@@ -848,23 +815,13 @@ InitOptions::groupname() const
 }
 
 
-/** Get default config.
- * @return default config
+/** Get config file path.
+ * @return config file path
  */
 const char *
-InitOptions::default_config() const
+InitOptions::config_file() const
 {
-  return __default_config;
-}
-
-
-/** Get host config.
- * @return host config
- */
-const char *
-InitOptions::host_config() const
-{
-  return __host_config;
+  return __config_file;
 }
 
 

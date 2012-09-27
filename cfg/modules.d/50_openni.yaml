@@ -1,0 +1,25 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/openni
+---
+plugins/openni:
+  # Resolution, one of QQVGA, CGA, VGA, XVGA, XGA, 720P, SXGA, UXGA, 1080P
+  resolution: VGA
+
+  # Desired frames per second
+  fps: 30
+
+  # True to enable depth to image registration, false to disable
+  register_depth_image: true
+
+  # Should we spawn the sensor server and maintain it? This solves
+  # the problem that the XnSensorServer process is not stopped by OpenNI.
+  run_sensor_server: true
+
+  # Full path to the XnSensorServer binary; path
+  sensor_server_bin: /usr/bin/XnSensorServer
+
+plugins/openni_image:
+  # De-bayering mode, can be bilinear or nearest_neighbor
+  debayering: bilinear

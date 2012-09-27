@@ -36,6 +36,11 @@ namespace fawkes {
 /** @class StringConversions <utils/misc/string_conversions.h>
  * Utility class that holds string methods.
  * @author Tim Niemueller
+ *
+ * @fn static std::string StringConversions::to_string(std::string &s)
+ * No-op conversion of string.
+ * @param s value to convert
+ * @return string the very same string
  */
 
 /** Convert string to all-uppercase string.

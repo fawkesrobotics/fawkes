@@ -1,0 +1,37 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/refboxcomm
+---
+plugins/refboxcomm:
+  # Processor to use to connect to refbox, one of MSL, SPL and RemoteBB
+  processor: RemoteBB
+
+  # Beep when data is received that changes the game state?
+  beep_on_change: true
+
+  # Beep duration; sec
+  beep_duration: 0.5
+
+  # Beep frequency; Hz
+  beep_frequency: 2000
+
+  MSL:
+    # Multicast address the MSL refbox sends to
+    host: 230.0.0.1
+
+    # The UDP port the MSL refbox multicasts to
+    port: !udp-port 30000
+
+  SPL:
+    port: !tcp-port 3838
+
+  RemoteBB:
+    # The host to connect to for the remote blackboard
+    host: localhost
+
+    # Port on the remote host to connect to
+    port: !tcp-port 1911
+
+    # Interface of the GameStateInterface on the remote blackboard
+    interface_id: RefBoxComm

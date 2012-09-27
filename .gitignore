@@ -13,6 +13,7 @@
 /cfg/*.db
 /cfg/*.key
 /cfg/*.crt
+/cfg/host.yaml
 /doc/api
 /doc/man
 /lib/

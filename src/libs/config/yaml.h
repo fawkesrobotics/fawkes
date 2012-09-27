@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  sqlite.h - Fawkes configuration stored in a SQLite database
+ *  yaml.h - Fawkes configuration stored in one or more YAML files
  *
- *  Created: Wed Dec 06 17:20:41 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Aug 01 15:44:33 2012
+ *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,31 +21,42 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_SQLITE_H_
-#define __CONFIG_SQLITE_H_
+#ifndef __CONFIG_YAML_H_
+#define __CONFIG_YAML_H_
 
 #include <config/config.h>
-#include <utils/system/hostinfo.h>
-#include <list>
-#include <string>
+#include <utils/system/fam.h>
 
-struct sqlite3;
-struct sqlite3_stmt;
+#include <yaml-cpp/yaml.h>
+#ifdef USE_REGEX_CPP
+// we do not use it atm because it does not work as epxect atm,
+// cf. https://bugzilla.redhat.com/show_bug.cgi?id=718711
+#  include <regex>
+#else
+#  include <regex.h>
+#endif
+#include <memory>
+#include <string>
+#include <vector>
+#include <queue>
 
 namespace fawkes {
 
 class Mutex;
+class FamThread;
 
-class SQLiteConfiguration : public Configuration
+class YamlConfiguration
+: public Configuration,
+  public FamListener
 {
  public:
-  SQLiteConfiguration();
-  SQLiteConfiguration(const char *sysconfdir, const char *userconfdir = NULL);
-  virtual ~SQLiteConfiguration();
+  YamlConfiguration();
+  YamlConfiguration(const char *sysconfdir, const char *userconfdir = NULL);
+  virtual ~YamlConfiguration();
 
   virtual void          copy(Configuration *copyconf);
 
-  virtual void          load(const char *filename,
+  virtual void          load(const char *file_path,
 			     const char *tag = NULL);
 
   virtual void          tag(const char *tag);
@@ -92,97 +103,111 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          erase_default(const char *path);
 
-  /** Transaction type.
-   * See SQLite Documentation for BEGIN TRANSACTION.
-   */
-  typedef enum {
-    TRANSACTION_DEFERRED,	/**< Deferred transaction, lock acquired late. */
-    TRANSACTION_IMMEDIATE,	/**< Immediately acquire lock, reading remains possible. */
-    TRANSACTION_EXCLUSIVE	/**< Immediately acquire lock, no more reading or writing possible. */
-  } transaction_type_t;
-
-  void transaction_begin(transaction_type_t ttype = TRANSACTION_DEFERRED);
-  void transaction_commit();
-  void transaction_rollback();
-
- public:
- class SQLiteValueIterator : public Configuration::ValueIterator
-  {
-    friend class SQLiteConfiguration;
-   protected:
-    SQLiteValueIterator(::sqlite3_stmt *stmt, void *p = NULL);
-   public:
-    virtual ~SQLiteValueIterator();
-    virtual bool          next();
-    virtual bool          valid() const;
-    
-    virtual const char *  path() const;
-    virtual const char *  type() const;
-    
-    virtual bool          is_float() const;
-    virtual bool          is_uint() const;
-    virtual bool          is_int() const;
-    virtual bool          is_bool() const;
-    virtual bool          is_string() const;
-
-    virtual bool          is_default() const;
-
-    virtual float         get_float() const;
-    virtual unsigned int  get_uint() const;
-    virtual int           get_int() const;
-    virtual bool          get_bool() const;
-    virtual std::string   get_string() const;
-
-    virtual std::string   get_as_string() const;
-
-    virtual std::string   get_comment() const;
-
-    std::string           get_modtype() const;
-    std::string           get_oldvalue() const;
-
-   private:
-    ::sqlite3_stmt *__stmt;
-    void *__p;
-  };
-
   ValueIterator * iterator();
-  ValueIterator * iterator_default();
-  ValueIterator * iterator_hostspecific();
   ValueIterator * search(const char *path);
 
   void lock();
   bool try_lock();
   void unlock();
 
-  SQLiteValueIterator * modified_iterator();
+  virtual void            try_dump();
 
-  void try_dump();
-
- private:
-  void            init_dbs();
-  std::string     get_type(const char *table, const char *path);
-  bool            exists(const char *sql, const char *path);
-  ::sqlite3_stmt *  get_value(const char *type, const char *path);
-  ::sqlite3_stmt *  prepare_update(const char *sql, const char *path);
-  ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
-				       const char *path);
-  void execute_insert_or_update(sqlite3_stmt *stmt);
-  void dump(::sqlite3 *tdb, const char *dumpfile);
-  void import(::sqlite3 *tdb, const char *dumpfile);
-  void import_default(const char *default_dump);
-  void attach_default(const char *db_file);
+  virtual void fam_event(const char *filename, unsigned int mask);
 
  private:
-  ::sqlite3 *db;
-  bool opened;
+  class Node;
+
+ public:
+  class YamlValueIterator : public Configuration::ValueIterator
+ {
+  public:
+   YamlValueIterator();
+   YamlValueIterator(std::map<std::string, Node *> &nodes);
+
+   virtual ~YamlValueIterator() {}
+   virtual bool          next();
+   virtual bool          valid() const;
+    
+   virtual const char *  path() const;
+   virtual const char *  type() const;
+    
+   virtual bool          is_float() const;
+   virtual bool          is_uint() const;
+   virtual bool          is_int() const;
+   virtual bool          is_bool() const;
+   virtual bool          is_string() const;
+
+   virtual float         get_float() const;
+   virtual unsigned int  get_uint() const;
+   virtual int           get_int() const;
+   virtual bool          get_bool() const;
+   virtual std::string   get_string() const;
+   virtual std::string   get_as_string() const;
+
+   virtual std::string   get_comment() const;
+
+   virtual bool          is_default() const;
+
+  private:
+   bool                                    first_;
+   std::map<std::string, Node *>           nodes_;
+   std::map<std::string, Node *>::iterator current_;
+ };
+
+ private:
+  /// @cond INTERNALS
+  class LoadQueueEntry {
+   public:
+  LoadQueueEntry(std::string fn, bool im, bool id = false)
+    : filename(fn), ignore_missing(im), is_dir(id) {}
+
+    std::string filename;
+    bool ignore_missing;
+    bool is_dir;
+  };
+  /// @endcond
+
+  Node *  query(const char *path) const;
+  void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
+                     std::string &host_file);
+  void read_config_doc(const YAML::Node &doc, Node *&node);
+  Node * read_yaml_file(std::string filename, bool ignore_missing,
+			std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
+  void read_yaml_config(std::string filename, std::string &host_file,
+                        Node *& root, Node *& host_root,
+                        std::list<std::string> &files, std::list<std::string> &dirs);
+  void write_host_file();
+  static std::vector<std::string> split(const std::string &s, char delim = '/');
+  static std::queue<std::string> split_to_queue(const std::string &s, char delim = '/');
+
+  std::string config_file_;
+  std::string host_file_;
+
+  Node  *root_;
+  Node  *host_root_;
+
+ private:
   Mutex *mutex;
+
+#ifdef USE_REGEX_CPP
+  std::regex __yaml_regex;
+  std::regex __url_regex;
+  std::regex __frame_regex;
+#else
+  regex_t    __yaml_regex;
+  regex_t    __url_regex;
+  regex_t    __frame_regex;
+#endif
+
+  typedef std::map<std::string, YAML::Node *> DocMap;
+  mutable DocMap __documents;
 
   char *__sysconfdir;
   char *__userconfdir;
-  char *__host_file;
-  char *__default_file;
-  char *__default_sql;
+
+  FamThread *fam_thread_;
 };
+
 
 } // end namespace fawkes
 

@@ -1,0 +1,27 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laserht
+---
+plugins/laserht:
+  # Interface ID of the Laser360Interface to get data from
+  laser_interface_id: "Laser"
+
+  # Number of samples to take per data point on the range of 180 deg
+  line/num_samples: 12
+
+  # Distance scale for r parameter of line; m
+  line/r_scale: 0.02
+
+  # Enable debugging display via VisualDisplay2DInterface::LaserGUI
+  line/enable_display: true
+
+  # Minimum number of votes for a line to consider it
+  line/vote_threshold: 50
+
+  # Max/ distance between line found via HT and a laser reading to consider it for line fitting; m
+  line/dist_threshold: 0.05
+
+  # Max. error allowed in the fitting step
+  line/fitting_error_threshold: 20
+

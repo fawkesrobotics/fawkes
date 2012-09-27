@@ -1,0 +1,21 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/luaagent
+---
+luaagent:
+  agent: "naojoystick"
+  watch_files: true
+  interfaces:
+    naojoystick:
+      reading:
+        joystick: "JoystickInterface::Joystick"
+        naosensors: "NaoSensorInterface::Nao Sensors"
+        naomotion: "HumanoidMotionInterface::NaoQi Motion"
+        naojoints: "NaoJointPositionInterface::Nao Joint Positions"
+        naostiffness: "NaoJointStiffnessInterface::Nao Joint Stiffness"
+        wm_ball: "ObjectPositionInterface::WM Ball"
+        chestbutton: "SwitchInterface::Nao Button Chest"
+        lfootbumper: "SwitchInterface::Nao Button Foot Left"
+        rfootbumper: "SwitchInterface::Nao Button Foot Right"
+        penalty: "SoccerPenaltyInterface::SPL Penalty"
