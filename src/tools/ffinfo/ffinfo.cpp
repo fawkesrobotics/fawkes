@@ -32,11 +32,8 @@
 int
 main(int argc, char **argv)
 {
-  printf("Fawkes %u.%u", FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR);
-  if (FAWKES_VERSION_MICRO > 0) {
-    printf(".%u", FAWKES_VERSION_MICRO);
-  }
-  printf("\n");
+  printf("Fawkes %u.%u.%u\n",
+	 FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR, FAWKES_VERSION_MICRO);
 
   return 0;
 }
