@@ -39,7 +39,13 @@
 #include <limits>
 #ifdef HAVE_LIBUDEV
 #  include <cstring>
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 #  include <libudev.h>
+#  ifdef __cplusplus
+}
+#  endif
 #endif
 
 using namespace qrk;
