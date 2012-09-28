@@ -4,3 +4,7 @@
 fawkes/meta_plugins:
   # Meta plugin loaded by default on the Nao (and on the Nao only)
   nao_default: naoqi-motion,naoqi-speechsynth,naoqi-buttons,naoqi-leds
+
+  # Meta plugin with useful base plugins for the Robotino
+  robotino_default: robotino,joystick,robotino-joystick,webview
+

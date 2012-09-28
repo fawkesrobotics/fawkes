@@ -1,0 +1,31 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/roomba
+---
+hardware/robotino:
+  # Host to connect to
+  hostname: 127.0.0.1
+
+  # If true quit Fawkes on disconnect from Robotino Com server, otherwise
+  # retry connection. If run from LCD menu should be set to true.
+  quit_on_disconnect: true
+
+  joystick:
+    # Axis index for forward/backward movement
+    axis_forward: 1
+
+    # Axis index for sideward movement
+    axis_sideward: 0
+
+    # Axis index for rotational movement
+    axis_rotation: 3
+
+    # Maximum velocity forward; m/s
+    max_vx: 1.5
+
+    # Maximum velocity sideward; m/s
+    max_vy: 1.5
+
+    # Maximum rotation; rad/s
+    max_omega: 1.57

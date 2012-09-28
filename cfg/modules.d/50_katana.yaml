@@ -4,6 +4,9 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/katana
 ---
 hardware/katana:
+  # Controller, must be one of kni or openrave
+  controller: kni
+
   # Device file of serial port the arm is connected to; file path
   device: /dev/ttyUSB0
 
@@ -46,15 +49,6 @@ hardware/katana:
   # Psi position for parking
   park_psi: -0.271071
 
-  # x Offset of katana to fawkes coordinate system
-  offset_x: 0.0
-
-  # y Offset of katana to fawkes coordinate system
-  offset_y: 0.0
-
-  # z Offset of katana to fawkes coordinate system
-  offset_z: 0.6665
-
   # Scale from kni coordinate values to fawkes
   distance_scale: 0.001
 
@@ -75,3 +69,7 @@ hardware/katana:
 
     # robot/xml file to be loaded into OpenRAVE
     robot_file: ../fawkes/res/openrave/caesar.robot.xml
+
+    # Arm model 5 DoF Katana from OpenRAVE, or 6 DoF-katana with dummy joint
+    # Must be one of 5dof, 6dof_dummy
+    arm_model: 5dof

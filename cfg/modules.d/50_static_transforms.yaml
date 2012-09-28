@@ -6,3 +6,14 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/static-transforms
 plugins/static_transforms:
   # Interval in which to post static transform updates; sec
   update_interval: 1.0
+
+
+  transforms:
+    katana_kni:
+      # Katana Arm to KNI base, frame IDs
+      frame: !frame /katana/base
+      child_frame: /katana/kni
+      # Katana Arm to KNI base, translation
+      trans_x: 0.0
+      trans_y: 0.0
+      trans_z: 0.2015

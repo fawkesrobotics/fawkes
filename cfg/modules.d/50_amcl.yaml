@@ -1,0 +1,131 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
+---
+plugins/amcl:
+  # Image file containing the map, must be a PNG file
+  # If path starts with slash (/) it's considered to be absolute,
+  # otherwise relative to the config directory
+  map_file: map.png','');
+  # Resolution of the map; meters per pixel
+  resolution: 0.05,' ');
+
+  # The 2-D pose of the lower-left pixel in the map, as (x, y, yaw),
+  # with yaw as counterclockwise rotation (yaw=0 means no rotation)
+  # around Z axis. Many parts of the system currently ignore yaw.; m
+  origin_x: 0.0
+  origin_y: 0.0
+  origin_theta: 0.0
+
+  # Pixels with occupancy probability greater than this threshold are
+  # considered completely occupied. Occupancy probability is the
+  # luminance value divided by 255.
+  occupied_threshold: 0.65
+
+  # Pixels with occupancy probability less than this threshold are
+  # considered completely free
+  free_threshold: 0.2
+
+  # Laser Minimum Range, beams shorter than this are ignored
+  laser_min_range: 0.01
+
+  # Laser Maximum Range, beams longer than this are ignored
+  laser_max_range: 5.6
+
+  # Maximum number of beams to consider
+  max_beams: 30
+
+  # Minimum and maximum number of particles
+  min_particles: 100
+  max_particles: 2000
+
+  # Error
+  kld_err: 0.01
+  kld_z: 0.99
+
+  # Motion model parameters, alph5 is only used for omni-drive model
+  # Expected noise in rotation estimate from rotational component
+  alpha1: 0.2
+  # Expected noise in rotation estimate from translational component
+  alpha2: 0.2
+  # Expected noise in translation estimate from translational component
+  alpha3: 0.2
+  # Expected noise in translation estimate from rotational component
+  alpha4: 0.2
+  # Translation-related noise parameter for omni model
+  alpha5: 0.2
+
+  # A priori probabilities for a hit, short, max, or random reading.
+  # Must sum up to 1. For likelihood field model only z_hit and z_rand are used
+  z_hit: 0.95
+  z_short: 0.1
+  z_max: 0.05
+  z_rand: 0.05
+
+  # Sigma of gaussian distribution for hitting a map obstacle
+  sigma_hit: 0.2
+  # Lambda for short readings
+  lambda_short: 0.1
+
+  # Maximum discovery distance for likelihood field model
+  laser_likelihood_max_dist: 2.0
+
+  # Laser model type, must be beam or likelihood_field
+  laser_model_type: likelihood_field
+
+  # Odometry model type, must be diff or omni
+  odom_model_type: omni
+
+  # Thresholds for considering laser updates to update particle filter.
+  # If any of the conditions is met the particle filter is updated.
+  # Minimum distance odometry must change; m
+  d_thresh: 0.2
+  # Minimum angle odometry must change; rad
+  a_thresh: 0.5
+  # Time to keep updating after motion has stopped; sec
+  t_thresh: 3.0
+
+  # Laser blackboard interface ID
+  laser_interface_id: Laser urg filtered
+  # Pose blackboard interface ID
+  pose_interface_id: Pose
+
+  # Coordinate frame IDs
+  odom_frame_id: !frame /robotino_odometry
+  base_frame_id: !frame /base_link
+  global_frame_id: !frame /map
+  laser_frame_id: !frame /base_laser
+
+  # Laser angle increment between two consecutive beams
+  angle_increment: 1.0
+
+  # Resampling module interval
+  resample_interval: 1
+
+  # Transform tolerance time; sec
+  transform_tolerance: 2.0
+
+  # Recovery alpha values for robustness against kidnapping.
+  # Good valus are 0.001 and 0.01.
+  alpha_slow: 0.0
+  alpha_fast: 0.0
+
+  # Initial pose (x, y, yaw)
+  init_pose_x: 0.0
+  init_pose_y: 0.0
+  init_pose_a: 0.0
+
+  # Parameters for fake laser generation
+  map-lasergen:
+    # Position for which to generate laser data
+    pos_x: 2.3
+    pos_y: 2.3
+    pos_theta: 0.78
+
+    # Add gaussian noise to laser distances? If yes, what sigma?
+    add_gaussian_noise: true
+    noise_sigma: 0.02
+
+    # Should the plugin send (fake) zero odometry?
+    send_zero_odom: true

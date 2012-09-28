@@ -8,9 +8,11 @@ fawkes/bbsync:
   check_interval: 5000
 
   peers:
+
+    # Example peer that connects to a second Fawkes on the local host
     localhost:
-      # Is peer active? If omitted 1 is assumed.
-      active: true
+      # Is peer active? If omitted true is assumed.
+      active: false
 
       # Host name of remote peer; hostname
       host: localhost
