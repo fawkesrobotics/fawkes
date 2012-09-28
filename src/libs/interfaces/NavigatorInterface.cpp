@@ -93,6 +93,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
+  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
   add_messageinfo("StopMessage");
   add_messageinfo("TurnMessage");
   add_messageinfo("CartesianGotoMessage");
@@ -103,7 +104,8 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetMaxVelocityMessage");
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
-  unsigned char tmp_hash[] = {0x90, 0x6b, 0x4d, 0xeb, 0x52, 0x4d, 0x53, 0x73, 0x4c, 0xbc, 0x82, 0x5, 0x80, 0x81, 0xf1, 0x39};
+  add_messageinfo("SetDriveModeMessage");
+  unsigned char tmp_hash[] = {0xfb, 0xb8, 0x77, 0x94, 0x41, 0xdb, 0x47, 0xaf, 0xb3, 0xbe, 0x56, 0x14, 0x1f, 0x49, 0x77, 0x7f};
   set_hash(tmp_hash);
 }
 
@@ -111,6 +113,35 @@ NavigatorInterface::NavigatorInterface() : Interface()
 NavigatorInterface::~NavigatorInterface()
 {
   free(data_ptr);
+}
+/** Convert DriveMode constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+NavigatorInterface::tostring_DriveMode(DriveMode value) const
+{
+  switch (value) {
+  case MovingNotAllowed: return "MovingNotAllowed";
+  case CarefulForward: return "CarefulForward";
+  case SlowForward: return "SlowForward";
+  case ModerateForward: return "ModerateForward";
+  case FastForward: return "FastForward";
+  case CarefulAllowBackward: return "CarefulAllowBackward";
+  case SlowAllowBackward: return "SlowAllowBackward";
+  case ModerateAllowBackward: return "ModerateAllowBackward";
+  case FastAllowBackward: return "FastAllowBackward";
+  case CarefulBackward: return "CarefulBackward";
+  case SlowBackward: return "SlowBackward";
+  case ModerateBackward: return "ModerateBackward";
+  case FastBackward: return "FastBackward";
+  case ESCAPE: return "ESCAPE";
+  case SlowDribbleBall: return "SlowDribbleBall";
+  case ModerateDribbleBall: return "ModerateDribbleBall";
+  case FastDribbleBall: return "FastDribbleBall";
+  case OVERRIDE: return "OVERRIDE";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get flags value.
@@ -534,6 +565,37 @@ NavigatorInterface::set_escaping_enabled(const bool new_escaping_enabled)
   data_changed = true;
 }
 
+/** Get drive_mode value.
+ * Current drive mode
+ * @return drive_mode value
+ */
+NavigatorInterface::DriveMode
+NavigatorInterface::drive_mode() const
+{
+  return (NavigatorInterface::DriveMode)data->drive_mode;
+}
+
+/** Get maximum length of drive_mode value.
+ * @return length of drive_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_drive_mode() const
+{
+  return 1;
+}
+
+/** Set drive_mode value.
+ * Current drive mode
+ * @param new_drive_mode new drive_mode value
+ */
+void
+NavigatorInterface::set_drive_mode(const DriveMode new_drive_mode)
+{
+  data->drive_mode = new_drive_mode;
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 NavigatorInterface::create_message(const char *type) const
@@ -558,6 +620,8 @@ NavigatorInterface::create_message(const char *type) const
     return new SetEscapingMessage();
   } else if ( strncmp("SetSecurityDistanceMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetSecurityDistanceMessage();
+  } else if ( strncmp("SetDriveModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetDriveModeMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -582,6 +646,9 @@ NavigatorInterface::copy_values(const Interface *other)
 const char *
 NavigatorInterface::enum_tostring(const char *enumtype, int val) const
 {
+  if (strcmp(enumtype, "DriveMode") == 0) {
+    return tostring_DriveMode((DriveMode)val);
+  }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
@@ -1646,6 +1713,96 @@ NavigatorInterface::SetSecurityDistanceMessage::clone() const
 {
   return new NavigatorInterface::SetSecurityDistanceMessage(this);
 }
+/** @class NavigatorInterface::SetDriveModeMessage <interfaces/NavigatorInterface.h>
+ * SetDriveModeMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_drive_mode initial value for drive_mode
+ */
+NavigatorInterface::SetDriveModeMessage::SetDriveModeMessage(const DriveMode ini_drive_mode) : Message("SetDriveModeMessage")
+{
+  data_size = sizeof(SetDriveModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetDriveModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->drive_mode = ini_drive_mode;
+  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+}
+/** Constructor */
+NavigatorInterface::SetDriveModeMessage::SetDriveModeMessage() : Message("SetDriveModeMessage")
+{
+  data_size = sizeof(SetDriveModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetDriveModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+}
+
+/** Destructor */
+NavigatorInterface::SetDriveModeMessage::~SetDriveModeMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetDriveModeMessage::SetDriveModeMessage(const SetDriveModeMessage *m) : Message("SetDriveModeMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetDriveModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get drive_mode value.
+ * Current drive mode
+ * @return drive_mode value
+ */
+NavigatorInterface::DriveMode
+NavigatorInterface::SetDriveModeMessage::drive_mode() const
+{
+  return (NavigatorInterface::DriveMode)data->drive_mode;
+}
+
+/** Get maximum length of drive_mode value.
+ * @return length of drive_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetDriveModeMessage::maxlenof_drive_mode() const
+{
+  return 1;
+}
+
+/** Set drive_mode value.
+ * Current drive mode
+ * @param new_drive_mode new drive_mode value
+ */
+void
+NavigatorInterface::SetDriveModeMessage::set_drive_mode(const DriveMode new_drive_mode)
+{
+  data->drive_mode = new_drive_mode;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetDriveModeMessage::clone() const
+{
+  return new NavigatorInterface::SetDriveModeMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1691,6 +1848,10 @@ NavigatorInterface::message_valid(const Message *message) const
   }
   const SetSecurityDistanceMessage *m9 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
   if ( m9 != NULL ) {
+    return true;
+  }
+  const SetDriveModeMessage *m10 = dynamic_cast<const SetDriveModeMessage *>(message);
+  if ( m10 != NULL ) {
     return true;
   }
   return false;

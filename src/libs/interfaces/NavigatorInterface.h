@@ -49,6 +49,29 @@ class NavigatorInterface : public Interface
   static const uint32_t FLAG_SECURITY_DISTANCE;
   static const uint32_t FLAG_ESCAPING;
 
+  /** Drive modes enum */
+  typedef enum {
+    MovingNotAllowed /**< Moving not allowed constant */,
+    CarefulForward /**< Moving careful forward constant */,
+    SlowForward /**< Moving slow forward constant */,
+    ModerateForward /**< Moving moderate forward constant */,
+    FastForward /**< Moving fast forward constant */,
+    CarefulAllowBackward /**< Moving careful allow backward conatant */,
+    SlowAllowBackward /**< Moving slow allow backward constant */,
+    ModerateAllowBackward /**< Moving moderate allow backward constant */,
+    FastAllowBackward /**< Moving fast allow backward constant */,
+    CarefulBackward /**< Moving careful backward constant */,
+    SlowBackward /**< Moving slow backward constant */,
+    ModerateBackward /**< Moving moderate backward constant */,
+    FastBackward /**< Moving fast backward constant */,
+    ESCAPE /**< Escape constant */,
+    SlowDribbleBall /**< Moving slow dribble ball constant */,
+    ModerateDribbleBall /**< Moving moderate dribble ball constant */,
+    FastDribbleBall /**< Moving fast dribble ball constant */,
+    OVERRIDE /**< Override constant */
+  } DriveMode;
+  const char * tostring_DriveMode(DriveMode value) const;
+
  private:
 #pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
@@ -77,6 +100,7 @@ class NavigatorInterface : public Interface
 	navigation components with integrated collision avoidance, to
 	check whether the navigator should stop when an obstacle
 	obstructs the path, or if it should escape. */
+    int32_t drive_mode; /**< Current drive mode */
   } NavigatorInterface_data_t;
 #pragma pack(pop)
 
@@ -377,6 +401,33 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetDriveModeMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t drive_mode; /**< Current drive mode */
+    } SetDriveModeMessage_data_t;
+#pragma pack(pop)
+
+    SetDriveModeMessage_data_t *data;
+
+   public:
+    SetDriveModeMessage(const DriveMode ini_drive_mode);
+    SetDriveModeMessage();
+    ~SetDriveModeMessage();
+
+    SetDriveModeMessage(const SetDriveModeMessage *m);
+    /* Methods */
+    DriveMode drive_mode() const;
+    void set_drive_mode(const DriveMode new_drive_mode);
+    size_t maxlenof_drive_mode() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   NavigatorInterface();
@@ -423,6 +474,9 @@ class NavigatorInterface : public Interface
   bool is_escaping_enabled() const;
   void set_escaping_enabled(const bool new_escaping_enabled);
   size_t maxlenof_escaping_enabled() const;
+  DriveMode drive_mode() const;
+  void set_drive_mode(const DriveMode new_drive_mode);
+  size_t maxlenof_drive_mode() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

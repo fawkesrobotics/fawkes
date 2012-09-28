@@ -15,6 +15,27 @@ class NavigatorInterface : public Interface
   static const unsigned int FLAG_SECURITY_DISTANCE;
   static const unsigned int FLAG_ESCAPING;
 
+  typedef enum {
+    MovingNotAllowed,
+    CarefulForward,
+    SlowForward,
+    ModerateForward,
+    FastForward,
+    CarefulAllowBackward,
+    SlowAllowBackward,
+    ModerateAllowBackward,
+    FastAllowBackward,
+    CarefulBackward,
+    SlowBackward,
+    ModerateBackward,
+    FastBackward,
+    ESCAPE,
+    SlowDribbleBall,
+    ModerateDribbleBall,
+    FastDribbleBall,
+    OVERRIDE
+  } DriveMode;
+
   class StopMessage : public Message
   {
     StopMessage();
@@ -138,6 +159,17 @@ class NavigatorInterface : public Interface
     int maxlenof_security_distance() const;
   };
 
+  class SetDriveModeMessage : public Message
+  {
+    SetDriveModeMessage(DriveMode ini_drive_mode);
+    SetDriveModeMessage();
+    ~SetDriveModeMessage();
+
+    DriveMode drive_mode();
+    void set_drive_mode(const DriveMode new_drive_mode);
+    int maxlenof_drive_mode() const;
+  };
+
   unsigned int flags();
   void set_flags(const unsigned int new_flags);
   int maxlenof_flags() const;
@@ -177,6 +209,9 @@ class NavigatorInterface : public Interface
   bool is_escaping_enabled();
   void set_escaping_enabled(const bool new_escaping_enabled);
   int maxlenof_escaping_enabled() const;
+  DriveMode drive_mode();
+  void set_drive_mode(const DriveMode new_drive_mode);
+  int maxlenof_drive_mode() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
