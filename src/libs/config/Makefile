@@ -20,30 +20,28 @@ include $(BUILDSYSDIR)/lua.mk
 ifneq ($(HAVE_SQLITE),1)
   ERROR_TARGETS += error_sqlite
 else
-  CFLAGS  += $(CFLAGS_SQLITE)
-  LDFLAGS += $(LDFLAGS_SQLITE)
-  LIBS_all  = $(LIBDIR)/libfawkesconfig.so
-  ifeq ($(HAVE_TOLUA),1)
-    LIBS_all += $(LUALIBDIR)/fawkesconfig.so
-    TARGETS_all += $(SRCDIR)/fawkesconfig_tolua.cpp
+  ifneq ($(HAVE_YAMLCPP),1)
+    ERROR_TARGETS += error_yamlcpp
+  else
+    CFLAGS  += $(CFLAGS_SQLITE) $(CFLAGS_YAMLCPP)
+    LDFLAGS += $(LDFLAGS_SQLITE) $(LDFLAGS_YAMLCPP)
+    LIBS_all  = $(LIBDIR)/libfawkesconfig.so
+    ifeq ($(HAVE_TOLUA),1)
+      LIBS_all += $(LUALIBDIR)/fawkesconfig.so
+      TARGETS_all += $(SRCDIR)/fawkesconfig_tolua.cpp
+    endif
   endif
-endif
-ifeq ($(HAVE_YAMLCPP),1)
-  CFLAGS  += $(CFLAGS_YAMLCPP)
-  LDFLAGS += $(LDFLAGS_YAMLCPP)
-else
-  WARN_TARGETS += warning_yaml
-  FILTER_OUT += yaml.o
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(ERROR_TARGETS)
-.PHONY: error_sqlite warning_yaml
+.PHONY: error_sqlite error_yamlcpp
 error_sqlite:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Fawkes config library cannot be built$(TNORMAL) (SQLite 3 not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Fawkes config library cannot be built$(TNORMAL) (SQLite 3 not found)"
 	$(SILENT)exit 1
-warning_yaml:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting YAML config support$(TNORMAL) (yaml-cpp not found)"
+error_yamlcpp:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Fawkes config library cannot be built$(TNORMAL) (yaml-cpp not found)"
+	$(SILENT)exit 2
 endif
 
 LIBS_libfawkesconfig = stdc++ fawkescore fawkesutils fawkesnetcomm fawkeslogging
