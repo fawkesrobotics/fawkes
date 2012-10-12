@@ -46,6 +46,7 @@ function module_init(m)
    m.State      = fsmstmod.State
    m.JumpState  = fsmjsmod.JumpState
    m.config     = config
+   m.tf         = tf
 
    for k,v in pairs(skillstati) do
       if string.match(k, "^S_([%a_]+)$") then m[k] = v end
