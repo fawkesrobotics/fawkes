@@ -63,6 +63,8 @@ module(..., fawkes.modinit.module_init)
 require("fawkes.fsm.jumpstate")
 local skillstati = require("skiller.skillstati")
 
+local skillenv = require("skiller.skillenv")
+
 -- Convenience shortcuts
 local JumpState     = fawkes.fsm.jumpstate.JumpState
 
@@ -89,6 +91,11 @@ function SkillJumpState:new(o)
    --    o.subskills and not o.skill and not o.skills,
    -- "SkillJumpState " .. o.name .. " may only operate in a specific mode")
    assert(o.skills, "No skills given")
+   for _,s in ipairs(o.skills) do
+      if type(s[1]) == "string" then
+         s[1] = skillenv.get_skill_module(s[1])
+      end
+   end
 
    setmetatable(o, self)
    setmetatable(self, JumpState)
