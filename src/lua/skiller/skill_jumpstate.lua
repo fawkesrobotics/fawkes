@@ -225,7 +225,7 @@ function SkillJumpState:do_init()
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
 
-
+   self.args = {}
    self:init()
    for _, s in ipairs(self.skills) do
       local set_already = false
@@ -245,7 +245,7 @@ function SkillJumpState:do_init()
       end
 
       -- Set args from "self.args[skill] = {arg1=arg,...}"
-      if self.args and (self.args[s[1]] or self.args[s[1].name]) then
+      if self.args[s[1]] or self.args[s[1].name] then
          sargs = self.args[s[1]] or self.args[s[1].name]
          if type(sargs) == "table" then
             set_already = true
