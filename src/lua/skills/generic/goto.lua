@@ -168,6 +168,6 @@ function GOTO:init()
    -- reset counter
    self.fsm.vars.counter = 0
 
-   self.args = {x=relx, y=rely, ori=relori}
+   self.args[relgoto] = {x=relx, y=rely, ori=relori}
 end
 
