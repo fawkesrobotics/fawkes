@@ -229,7 +229,7 @@ function SkillJumpState:do_init()
             set_already = true
             if type(k) == "number" and type(v) == "table" then
                for k2, v2 in pairs(v) do
-                  args[k2] = self.fsm.vars[v2]
+                  args[k2] = v2
                end
             else
                args[k] = v
