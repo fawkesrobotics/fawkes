@@ -238,10 +238,13 @@ function SkillJumpState:do_init()
       end
 
       -- Set args from "self.args[skill] = {arg1=arg,...}"
-      if self.args and self.args[s[1]] and type(self.args[s[1]]) == "table" then
-         set_already = true
-         for k, v in pairs(self.args[s[1]]) do
-            args[k] = v
+      if self.args and (self.args[s[1]] or self.args[s[1].name]) then
+         sargs = self.args[s[1]] or self.args[s[1].name]
+         if type(sargs) == "table" then
+            set_already = true
+            for k, v in pairs(sargs) do
+               args[k] = v
+            end
          end
       end
 
