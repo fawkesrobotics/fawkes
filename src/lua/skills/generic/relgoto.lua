@@ -67,10 +67,6 @@ skillenv.skill_module(...)
 
 
 -- Jumpconditions
-function jumpcond_paramfail(state)
-   return state.fsm.vars.param_fail
-end
-
 function jumpcond_navifail(state)
    return (state.fsm.vars.msgid == 0
 	   or (state.fsm.vars.msgid ~= navigator:msgid() and state.wait_start > 25)
@@ -93,9 +89,9 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions{
-   {"RELGOTO", "FAILED", jumpcond_paramfail, desc="Invalid/insufficient parameters"},
-   {"RELGOTO", "FAILED", jumpcond_navifail,  desc="Navigator failure"},
-   {"RELGOTO", "FINAL",  jumpcond_navifinal, desc="Position reached"}
+   {"RELGOTO", "FAILED", cond="vars.param_fail", desc="Invalid/insufficient parameters"},
+   {"RELGOTO", "FAILED", cond=jumpcond_navifail,  desc="Navigator failure"},
+   {"RELGOTO", "FINAL",  cond=jumpcond_navifinal, desc="Position reached"}
 }
 
 function RELGOTO:init()
