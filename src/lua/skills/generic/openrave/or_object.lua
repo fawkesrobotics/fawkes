@@ -86,41 +86,61 @@ local DEFAULT_MARGIN = 0.2
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Jumpconditions
 -- Check if message handling is final
 function jc_msg_final(state)
    return state.fsm.vars.msgid == if_openrave:msgid() and
           if_openrave:is_final()
 end
 
+-- States
+fsm:define_states{
+   export_to=_M,
+   closure={if_openrave=if_openrave},
+
+   {"INIT", JumpState},
+
+   {"ADD",         JumpState},
+   {"DELETE",      JumpState},
+   {"ATTACH",      JumpState},
+   {"RELEASE",     JumpState},
+   {"RELEASE_ALL", JumpState},
+   {"MOVE",        JumpState},
+   {"ROTATE",      JumpState},
+   {"RENAME",      JumpState},
+
+   {"CHECK", JumpState}
+}
+
+-- Transitions
 fsm:add_transitions {
-   closure={p=p, if_openrave=if_openrave},
-   {"INIT", "RELEASE_ALL", "vars.release_all", precond=true, desc="release all"}, -- put here, because do not need name for it
-   {"INIT", "FAILED", "not vars.name", precond=true, desc="no object name given"},
+   {"INIT", "RELEASE_ALL", cond="vars.release_all", precond_only=true, desc="release all"}, -- put here, because do not need name for it
+   {"INIT", "FAILED", cond="not vars.name", precond_only=true, desc="no object name given"},
 
-   {"INIT", "ADD", "vars.add", precond=true, desc="add"},
-   {"INIT", "DELETE", "vars.delete", precond=true, desc="delete"},
-   {"INIT", "ATTACH", "vars.attach", precond=true, desc="attach"},
-   {"INIT", "RELEASE", "vars.release", precond=true, desc="release"},
-   {"INIT", "MOVE", "vars.move", precond=true, desc="move"},
-   {"INIT", "ROTATE", "vars.rotate", precond=true, desc="rotate"},
-   {"INIT", "RENAME", "vars.rename", precond=true, desc="rename"},
+   {"INIT", "ADD", cond="vars.add", precond_only=true, desc="add"},
+   {"INIT", "DELETE", cond="vars.delete", precond_only=true, desc="delete"},
+   {"INIT", "ATTACH", cond="vars.attach", precond_only=true, desc="attach"},
+   {"INIT", "RELEASE", cond="vars.release", precond_only=true, desc="release"},
+   {"INIT", "MOVE", cond="vars.move", precond_only=true, desc="move"},
+   {"INIT", "ROTATE", cond="vars.rotate", precond_only=true, desc="rotate"},
+   {"INIT", "RENAME", cond="vars.rename", precond_only=true, desc="rename"},
 
-   {"ADD", "FAILED", "not (vars.path)", precond=true, desc="insufficient arguments"},
-   {"MOVE", "FAILED", "not (vars.x and vars.y and vars.z)", precond=true, desc="insufficient arguments"},
-   {"ROTATE", "FAILED", "not (vars.x and vars.y and vars.z)", precond=true, desc="insufficient arguments"},
-   {"RENAME", "FAILED", "not (vars.new_name)", precond=true, desc="insufficient arguments"},
+   {"ADD", "FAILED", cond="not (vars.path)", precond_only=true, desc="insufficient arguments"},
+   {"MOVE", "FAILED", cond="not (vars.x and vars.y and vars.z)", precond_only=true, desc="insufficient arguments"},
+   {"ROTATE", "FAILED", cond="not (vars.x and vars.y and vars.z)", precond_only=true, desc="insufficient arguments"},
+   {"RENAME", "FAILED", cond="not (vars.new_name)", precond_only=true, desc="insufficient arguments"},
 
-   {"ADD", "CHECK", jc_msg_final, desc="final"},
-   {"DELETE", "CHECK", jc_msg_final, desc="final"},
-   {"ATTACH", "CHECK", jc_msg_final, desc="final"},
-   {"RELEASE", "CHECK", jc_msg_final, desc="final"},
-   {"RELEASE_ALL", "CHECK", jc_msg_final, desc="final"},
-   {"MOVE", "CHECK", jc_msg_final, desc="final"},
-   {"ROTATE", "CHECK", jc_msg_final, desc="final"},
-   {"RENAME", "CHECK", jc_msg_final, desc="final"},
+   {"ADD", "CHECK", cond=jc_msg_final, desc="final"},
+   {"DELETE", "CHECK", cond=jc_msg_final, desc="final"},
+   {"ATTACH", "CHECK", cond=jc_msg_final, desc="final"},
+   {"RELEASE", "CHECK", cond=jc_msg_final, desc="final"},
+   {"RELEASE_ALL", "CHECK", cond=jc_msg_final, desc="final"},
+   {"MOVE", "CHECK", cond=jc_msg_final, desc="final"},
+   {"ROTATE", "CHECK", cond=jc_msg_final, desc="final"},
+   {"RENAME", "CHECK", cond=jc_msg_final, desc="final"},
 
-   {"CHECK", "FINAL", "if_openrave:is_success()", desc="command succeeded"},
-   {"CHECK", "FAILED", true, desc="command failed"}
+   {"CHECK", "FINAL", cond="if_openrave:is_success()", desc="command succeeded"},
+   {"CHECK", "FAILED", cond=true, desc="command failed"}
 }
 
 function ADD:init()
