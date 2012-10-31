@@ -51,23 +51,32 @@ skillenv.skill_module(...)
 -- Constants
 local SLOW_DOWN_VELOCITY = 0.5
 
--- functions
+-- States
+fsm:define_states{
+   export_to=_M,
+   closure={katanaarm=katanaarm},
+
+   {"INIT", JumpState},
+   {"MOVE", SkillJumpState, skills={{katana}},
+   	    final_to="TO_OPEN_GRIPPER", fail_to="MOVE_WITH_THETA"},
+   {"MOVE_WITH_THETA", SkillJumpState, skills={{katana}},
+	    final_to="TO_OPEN_GRIPPER", fail_to="FAILED"},
+   {"OPEN_GRIPPER", SkillJumpState, skills={{katana}},
+   	    final_to="RELEASE_OBJECT", fail_to="FAILED"},
+   {"RELEASE_OBJECT", SkillJumpState, skills={{katana}},
+   	    final_to="FINAL", fail_to="FAILED"},
+
+   {"TO_OPEN_GRIPPER", JumpState}
+
+}
+-- Transitions
 fsm:add_transitions {
-   closure={p=p, katanaarm=katanaarm},
+   {"INIT", "FAILED", cond="not katanaarm:has_writer()", desc="no writer", precond_only=true},
 
-   {"INIT", "FAILED", "not katanaarm:has_writer()", desc="no writer", precond=true},
+   {"INIT", "MOVE", cond="vars.x and vars.y and vars.z", desc="move katana"},
+   {"INIT", "FAILED", cond=true, desc="insufficient arguments"},
 
-   {"INIT", "MOVE", "vars.x and vars.y and vars.z", desc="move katana"},
-   {"INIT", "FAILED", true, desc="insufficient arguments"},
-
-   {"MOVE", "TO_OPEN_GRIPPER", skill=katana, fail_to="MOVE_WITH_THETA", desc="reached destination"},
-   {"MOVE_WITH_THETA", "TO_OPEN_GRIPPER", skill=katana, fail_to="FAILED", desc="reached destination"},
-
-   {"TO_OPEN_GRIPPER", "OPEN_GRIPPER", wait_sec=3.0},
-
-   {"OPEN_GRIPPER", "RELEASE_OBJECT", fail_to="FAILED", skill=katana, desc="opened gripper"},
-
-   {"RELEASE_OBJECT", "FINAL", fail_to="FAILED", skill=or_object, desc="released"}
+   {"TO_OPEN_GRIPPER", "OPEN_GRIPPER", timeout=3.0}
 }
 
 function MOVE:init()
