@@ -40,28 +40,40 @@ angle: angle in rad to turn
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Jumpconditions
+
+function jumpcond_navifail(state)
+   return state.fsm.vars.msgid == 0 or state.fsm.vars.msgid < navigator:msgid()
+end
+
+function jumpcond_navifinal(state)
+   return state.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
+end
+
 -- States
-fsm:new_jump_state("TURN")
+fsm:define_states{
+   export_to=_M,
+
+   {"TURN", JumpState}
+}
+
+-- set interfaces to be checked for "no writer"
+TURN.nowriter_interfaces = {navigator}
+
+-- Transitions
+fsm:add_transitions{
+   {"TURN", "FAILED", cond=JumpState.jumpcond_nowriter, desc="No writer for navigator interface", precond_only=true},
+   {"TURN", "FAILED", cond=jumpcond_navifail, desc="Navigator failure"},
+   {"TURN", "FINAL", cond=jumpcond_navifinal, desc="Turn finished"}
+}
 
 function TURN:init()
    local angle    = self.fsm.vars.angle or 0
-   local velocity = self.fsm.vars.angle or 0
+   local velocity = self.fsm.vars.velocity or 0
 
    -- cartesian goto
    local m = navigator.TurnMessage:new(angle, velocity)
    self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
 end
 
-function TURN:jumpcond_navifail()
-   return self.fsm.vars.msgid == 0 or self.fsm.vars.msgid < navigator:msgid()
-end
 
-function TURN:jumpcond_navifinal()
-   return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
-end
-
-TURN.nowriter_interfaces = {navigator}
-
-TURN:add_precond_trans(FAILED, JumpState.jumpcond_nowriter, "No navigator writer")
-TURN:add_transition(FAILED, TURN.jumpcond_navifail, "Navigator failure")
-TURN:add_transition(FINAL, TURN.jumpcond_navifinal, "Turn finished")
