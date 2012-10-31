@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "transrot"
-fsm                = SkillHSM:new{name=name, start="TRANSROT", debug=true}
+fsm                = SkillHSM:new{name=name, start="TRANSROT", debug=false}
 depends_skills     = nil
 depends_interfaces = {
    {v = "motor", type = "MotorInterface"}
@@ -37,13 +37,22 @@ documentation      = [==[Trans/rot via MotorInterface.
 skillenv.skill_module(...)
 
 -- States
-fsm:add_transitions{
+fsm:define_states{
+   export_to=_M,
    closure={motor=motor},
-   {"TRANSROT", "FAILED", "not motor:has_writer()", desc="No writer for motor", precond=true},
-   {"TRANSROT", "FINAL", "vars.vx == 0.0 and vars.vy == 0.0 and vars.omega == 0.0", desc="Stop"},
-   {"TRANSROT", "WAIT_ABORT", "vars.time_sec == nil", desc="Keep going"},
-   {"TRANSROT", "WAIT_TIME", "vars.time_sec ~= nil", desc="Wait Time"},
-   {"WAIT_TIME", "FINAL", wait_sec=1, desc="Time over"},
+
+   {"TRANSROT",   JumpState},
+   {"WAIT_ABORT", JumpState},
+   {"WAIT_TIME",  JumpState}
+}
+
+-- Transitions
+fsm:add_transitions{
+   {"TRANSROT", "FAILED", cond="not motor:has_writer()", desc="No writer for motor", precond_only=true},
+   {"TRANSROT", "FINAL", cond="vars.vx == 0.0 and vars.vy == 0.0 and vars.omega == 0.0", desc="Stop"},
+   {"TRANSROT", "WAIT_ABORT", cond="vars.time_sec == nil", desc="Keep going"},
+   {"TRANSROT", "WAIT_TIME", cond="vars.time_sec ~= nil", desc="Wait Time"},
+   {"WAIT_TIME", "FINAL", timeout=1, desc="Time over"},
 }
 
 function send_transrot(vx, vy, omega)
