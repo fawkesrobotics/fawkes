@@ -47,15 +47,21 @@ katana_rel{x=X, y=Y, z=Z}
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- States
+fsm:define_states{
+   export_to=_M,
+   closure={katanaarm=katanaarm},
 
-fsm:add_transitions {
-   closure={p=p, katanaarm=katanaarm},
-   {"INIT", "FAILED", "not katanaarm:has_writer()", precond=true, desc="no writer"},
-   {"INIT", "FAILED", "(not vars.x) and (not vars.y) and (not vars.z)", precond=true, desc="insufficient arguments"},
+   {"INIT", JumpState},
+   {"MOVE", SkillJumpState, skills={{katana}},
+            final_to="FINAL", fail_to="FAILED"}
+}
 
-   {"INIT", "MOVE", true, precond=true, desc="move"},
+fsm:add_transitions{
+   {"INIT", "FAILED", cond="not katanaarm:has_writer()", precond_only=true, desc="no writer"},
+   {"INIT", "FAILED", cond="(not vars.x) and (not vars.y) and (not vars.z)", precond_only=true, desc="insufficient arguments"},
 
-   {"MOVE", "FINAL", skill=katana, fail_to="FAILED", desc="final"}
+   {"INIT", "MOVE", cond=true, precond_only=true, desc="move"}
 }
 
 function MOVE:init()
