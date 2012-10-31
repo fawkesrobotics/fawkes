@@ -37,7 +37,7 @@ depends_interfaces = {
 documentation      = [==[Ball interception skill.
 
 This skill moves the robot into a certain position and orientation
-wrt. to the current positions of the ball and the robot, respectively. 
+wrt. to the current positions of the ball and the robot, respectively.
 
 Parameters:
 
@@ -76,13 +76,21 @@ local function ball_moved(state)
 end
 
 -- States
-fsm:add_transitions{
+fsm:define_states{
+   export_to=_M,
    closure={p=p},
+
+   {"PARSE_ARGS",   JumpState},
+   {"DO_INTERCEPT", SkillJumpState, skills={{relgoto}},
+            final_to="CHECK", fail_to="FAILED"},
+   {"CHECK",        JumpState}
+}
+-- Transitions
+fsm:add_transitions{
    {"PARSE_ARGS", "FINAL",
     cond="p.ball_visible and p.ball_close and p.ball_infront", precond=true},
    {"PARSE_ARGS", "DO_INTERCEPT", cond="p.ball_visible"},
-   {"PARSE_ARGS", "FAILED", cond="not p.ball_visible"},
-   {"DO_INTERCEPT", "CHECK", skill=relgoto},
+   {"PARSE_ARGS", "FAILED", cond=true},
    {"DO_INTERCEPT", "CHECK", cond="self.wait > 60"}, -- needs some testing
    {"CHECK", "FINAL", cond="p.ball_visible and p.ball_close and p.ball_infront"},
    {"CHECK", "FAILED", cond="not( p.ball_visible and p.ball_close and p.ball_infront )"}
@@ -99,7 +107,7 @@ function PARSE_ARGS:init()
 						     self.fsm.vars.ball_dir_y )
       self.fsm.vars.ball_dir:unit()
    end
-   
+
 end
 
 function DO_INTERCEPT:init()
