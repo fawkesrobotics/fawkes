@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "ppgoto"
-fsm                = SkillHSM:new{name=name, start="PPGOTO", debug=true}
+fsm                = SkillHSM:new{name=name, start="PPGOTO", debug=false}
 depends_skills     = nil
 depends_interfaces = {
    {v = "ppnavi", type = "NavigatorInterface"}
@@ -56,8 +56,37 @@ place:     name of a place
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Jumpconditions
+function jumpcond_paramfail(state)
+   return state.fsm.vars.param_fail
+end
+
+function jumpcond_navifail(state)
+   return (state.fsm.vars.msgid == 0
+	   or (state.fsm.vars.msgid ~= ppnavi:msgid() and state.wait_start > 20)
+	   or not ppnavi:has_writer()
+	   or state.failed)
+end
+
+function jumpcond_navifinal(state)
+   --printf("msgid: %d/%d  final: %s", state.fsm.vars.msgid, ppnavi:msgid(), tostring(ppnavi:is_final()))
+   return state.fsm.vars.msgid == ppnavi:msgid() and ppnavi:is_final()
+end
+
 -- States
-fsm:new_jump_state("PPGOTO")
+fsm:define_states{
+   export_to=_M,
+
+   {"PPGOTO", JumpState}
+}
+
+-- Transitions
+fsm:add_transitions{
+   {"PPGOTO", "FAILED", cond=jumpcond_paramfail, desc="Invalid/insufficient parameters"},
+   {"PPGOTO", "FAILED", cond=jumpcond_navifail, desc="Navigator failure"},
+   {"PPGOTO", "FINAL", cond=jumpcond_navifinal, desc="Position reached"}
+
+}
 
 function PPGOTO:init()
    if ppnavi:has_writer() then
@@ -95,22 +124,5 @@ function PPGOTO:reset()
    --ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
 end
 
-function PPGOTO:jumpcond_paramfail()
-   return self.fsm.vars.param_fail
-end
 
-function PPGOTO:jumpcond_navifail()
-   return (self.fsm.vars.msgid == 0
-	   or (self.fsm.vars.msgid ~= ppnavi:msgid() and self.wait_start > 20)
-	   or not ppnavi:has_writer()
-	   or self.failed)
-end
 
-function PPGOTO:jumpcond_navifinal()
-   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, ppnavi:msgid(), tostring(ppnavi:is_final()))
-   return self.fsm.vars.msgid == ppnavi:msgid() and ppnavi:is_final()
-end
-
-PPGOTO:add_transition(FAILED, PPGOTO.jumpcond_paramfail, "Invalid/insufficient parameters")
-PPGOTO:add_transition(FAILED, PPGOTO.jumpcond_navifail, "Navigator failure")
-PPGOTO:add_transition(FINAL, PPGOTO.jumpcond_navifinal, "Position reached")
