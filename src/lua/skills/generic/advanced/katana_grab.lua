@@ -112,7 +112,7 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "FAILED", cond="not katanaarm:has_writer()", desc="no writer", precond_only=true},
+   {"INIT", "FAILED", precond_only="not katanaarm:has_writer()", desc="no writer"},
 
    {"DECIDE", "PRE_GRAB_OBJ", cond="vars.object", desc="object given"},
    {"DECIDE", "PRE_GRAB_POS", cond="vars.x and vars.y and vars.z", desc="pose given"},
@@ -120,7 +120,7 @@ fsm:add_transitions {
 
    --{"START_APPROACH_OBJ", "CHECK_GRABABILITY", cond=true, precond_only=true}, --TODO: skip approach for now
 
-   {"SLOW_DOWN", "TO_APPROACH_OBJ", cond=true, precond_only=true}, --TODO: max_velocity crashes, so skip for now
+   {"SLOW_DOWN", "TO_APPROACH_OBJ", precond_only=true}, --TODO: max_velocity crashes, so skip for now
 
    {"TO_APPROACH_OBJ", "APPROACH_OBJ", timeout=2.0},
 
@@ -132,7 +132,7 @@ fsm:add_transitions {
 
    {"TO_GRAB", "GRAB", timeout=2.0},
 
-   {"ATTACH_OBJECT", "FINAL", cond="not vars.object", desc="no object given", precond_only=true}
+   {"ATTACH_OBJECT", "FINAL", precond_only="not vars.object", desc="no object given"}
 }
 
 function INIT:init()

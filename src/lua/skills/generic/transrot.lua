@@ -48,7 +48,7 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions{
-   {"TRANSROT", "FAILED", cond="not motor:has_writer()", desc="No writer for motor", precond_only=true},
+   {"TRANSROT", "FAILED", precond_only="not motor:has_writer()", desc="No writer for motor"},
    {"TRANSROT", "FINAL", cond="vars.vx == 0.0 and vars.vy == 0.0 and vars.omega == 0.0", desc="Stop"},
    {"TRANSROT", "WAIT_ABORT", cond="vars.time_sec == nil", desc="Keep going"},
    {"TRANSROT", "WAIT_TIME", cond="vars.time_sec ~= nil", desc="Wait Time"},

@@ -71,7 +71,7 @@ fsm:define_states{
 }
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "FAILED", cond="not katanaarm:has_writer()", desc="no writer", precond_only=true},
+   {"INIT", "FAILED", precond_only="not katanaarm:has_writer()", desc="no writer"},
 
    {"INIT", "MOVE", cond="vars.x and vars.y and vars.z", desc="move katana"},
    {"INIT", "FAILED", cond=true, desc="insufficient arguments"},
