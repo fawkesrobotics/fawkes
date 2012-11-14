@@ -89,5 +89,5 @@ function MOVE:init()
       z = z + katanaarm:z()
    end
 
-   self.args = {x=x, y=y, z=z, theta=theta, frame=frame, theta_error=theta_error, straight=straight}
+   self.args[katana] = {x=x, y=y, z=z, theta=theta, frame=frame, theta_error=theta_error, straight=straight}
 end
