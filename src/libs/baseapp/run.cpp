@@ -146,7 +146,24 @@ init(InitOptions options)
 
   // *** setup base thread and shm registry
   Thread::init_main();
-  shm_registry = new SharedMemoryRegistry(true);
+
+  shm_registry = NULL;
+  struct passwd *uid_pw = getpwuid(getuid());
+  if (uid_pw == NULL) {
+    shm_registry = new SharedMemoryRegistry();
+  } else {
+    char *registry_name;
+    if (asprintf(&registry_name, USER_SHM_NAME, uid_pw->pw_name) == -1) {
+      shm_registry = new SharedMemoryRegistry();
+    } else {
+      shm_registry = new SharedMemoryRegistry(registry_name);
+      free(registry_name);
+    }
+  }
+
+  if (! shm_registry) {
+    throw Exception("Failed to create shared memory registry");
+  }
 
   // *** setup logging
   if (options.has_loggers()) {
