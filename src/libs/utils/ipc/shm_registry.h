@@ -30,6 +30,7 @@
 #define MAGIC_TOKEN_SIZE 16
 #define MAXNUM_SHM_SEGMS 64
 #define DEFAULT_SHM_NAME "/fawkes-shmem-registry"
+#define USER_SHM_NAME "/fawkes-shmem-registry-%s"
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -46,8 +47,7 @@ class SharedMemoryRegistry
   } SharedMemID;
 
  public:
-  SharedMemoryRegistry(bool master = false,
-		       const char *name = 0);
+  SharedMemoryRegistry(const char *name = 0);
   ~SharedMemoryRegistry();
 
   std::list<SharedMemoryRegistry::SharedMemID> get_snapshot() const;
