@@ -75,7 +75,15 @@ EclipseAgentThread::init()
   {
     // ignore
   }
-
+  
+  try{
+  //set default module in which goals called from the top-level will be executed
+  ec_set_option_ptr(EC_OPTION_DEFAULT_MODULE, (void*) "elevator");
+    
+  }
+  catch (...){
+    throw fawkes::Exception( "Failed to set default ECLiPSe module");
+  }
   // initialize ECLiPSe context
   if ( 0 != ec_init() )
   { throw fawkes::Exception( "Failed to initialize ECLiPSe context" ); }
@@ -83,16 +91,16 @@ EclipseAgentThread::init()
   free( eclipse_dir );
 
   // register external predicates
-  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( "eclipse", 0 ) ) )
+/*  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( "elevator", 0 ) ) )
   { throw Exception( "Registering external predicate read_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( "eclipse", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( "elevator", 0 ) ) )
   { throw Exception( "Registering external predicate write_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( "eclipse", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( "elevator", 0 ) ) )
   { throw Exception( "Registering external predicate send_message/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( "eclipse", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( "elevator", 0 ) ) )
   { throw Exception( "Registering external predicate recv_messages/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( "eclipse", 0 ) ) )
-  { throw Exception( "Registering external predicate log/2 failed" ); }
+ if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( "eclipse", 0 ) ) )
+  { throw Exception( "Registering external predicate log/2 failed" ); } */
 
   m_initialized = true;
 
@@ -150,10 +158,22 @@ EclipseAgentThread::init()
   }
 
   // load utility predicates
-  load_file( ECLIPSE_CODE_DIR"/utils/logging.ecl" );
+  //load_file( ECLIPSE_CODE_DIR"/utils/logging.ecl" );
 
   // load interpreter and agent
-  load_file( ECLIPSE_CODE_DIR"/interpreter/dummy.ecl" );
+  load_file( ECLIPSE_CODE_DIR"/interpreter/elevator.ecl" );
+
+   // register external predicates
+  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( "elevator", 0 ) ) )
+  { throw Exception( "Registering external predicate read_interface/2 failed" ); }
+  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( "elevator", 0 ) ) )
+  { throw Exception( "Registering external predicate write_interface/2 failed" ); }
+  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( "elevator", 0 ) ) )
+  { throw Exception( "Registering external predicate send_message/2 failed" ); }
+  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( "elevator", 0 ) ) )
+  { throw Exception( "Registering external predicate recv_messages/2 failed" ); }
+	if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( "elevator", 0 ) ) )
+  { throw Exception( "Registering external predicate log/2 failed" ); }
 }
 
 void
