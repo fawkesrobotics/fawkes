@@ -20,6 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+:- external(log/2, p_log).
+
 :- log(ll_info, "Loading logging utils").
 
 log_debug(S) :-
