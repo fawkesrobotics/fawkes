@@ -1,0 +1,41 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/static-transforms
+---
+plugins/static-transforms:
+  transforms:
+    kinect_image:
+      frame: !frame /rx28/tilt
+      child_frame: !frame /kinect/image
+      trans_x: 0.0
+      trans_y: -0.012
+      trans_z: 0.085
+    kinect_depth:
+      frame: !frame /rx28/tilt
+      child_frame: /kinect/depth
+      trans_x: 0.0
+      trans_y: 0.012
+      trans_z: 0.085
+    rx28:
+      frame: /base_link
+      child_frame: /rx28/base
+      trans_x: -0.178
+      trans_y:  0.0
+      trans_z:  1.452
+
+    rx28_pan:
+      frame: /rx28/base
+      child_frame: /rx28/pan
+      trans_x: -0.002
+      trans_y:  0.0
+      trans_z:  0.042
+    rx28_tilt:
+      frame: /rx28/base
+      child_frame: /rx28/tilt
+      trans_x: 0.0
+      trans_y: 0.0
+      trans_z: 0.039
+      rot_yaw: 0.0
+      rot_pitch: 0.87
+      rot_roll: 0.0
