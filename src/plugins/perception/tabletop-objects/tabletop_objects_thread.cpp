@@ -521,6 +521,9 @@ TabletopObjectsThread::loop()
 
   // Estimate 3D convex hull -> TABLE BOUNDARIES
   pcl::ConvexHull<PointType> hr;
+#if defined(PCL_VERSION_COMPARE) && PCL_VERSION_COMPARE(>=,1,5,0) 
+  hr.setDimension(2);
+#endif
   //hr.setAlpha(0.1);  // only for ConcaveHull
   hr.setInputCloud(cloud_proj_);
   cloud_hull_.reset(new Cloud());
