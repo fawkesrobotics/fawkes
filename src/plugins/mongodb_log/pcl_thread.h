@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  image_thread.h - Thread to log images to MongoDB
+ *  pcl_thread.h - Thread to log point clouds to MongoDB
  *
- *  Created: Tue Apr 10 22:12:27 2012
+ *  Created: Mon Nov 07 02:26:35 2011
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
  *             2012       Bastian Klingen
  ****************************************************************************/
@@ -20,8 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGOLOG_IMAGE_THREAD_H_
-#define __PLUGINS_MONGOLOG_IMAGE_THREAD_H_
+#ifndef __PLUGINS_MONGODB_LOG_PCL_THREAD_H_
+#define __PLUGINS_MONGODB_LOG_PCL_THREAD_H_
+
+#include "pcl_adapter.h"
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -30,32 +32,32 @@
 #include <aspect/logging.h>
 #include <aspect/pointcloud.h>
 #include <plugins/mongodb/aspect/mongodb.h>
+#include <blackboard/interface_listener.h>
+#include <blackboard/interface_observer.h>
+#include <interfaces/TransformInterface.h>
 #include <core/threading/mutex.h>
 
 #include <list>
 #include <queue>
-#include <set>
-#include <string>
 
-namespace firevision {
-  class SharedMemoryImageBuffer;
-}
+#include <sensor_msgs/PointCloud2.h>
 
 namespace mongo {
   class GridFS;
 }
 
-class MongoLogImagesThread
+class MongoLogPointCloudThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
+  public fawkes::PointCloudAspect,
   public fawkes::MongoDBAspect
 {
  public:
-  MongoLogImagesThread();
-  virtual ~MongoLogImagesThread();
+  MongoLogPointCloudThread();
+  virtual ~MongoLogPointCloudThread();
 
   virtual void init();
   virtual void loop();
@@ -65,22 +67,17 @@ class MongoLogImagesThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void update_images();
-  void get_sets(std::set<std::string> &missing_images,
-                std::set<std::string> &unbacked_images);
+  MongoLogPointCloudAdapter *__adapter;
 
- private:
   /// @cond INTERNALS
   typedef struct {
-    std::string				 topic_name;
-    fawkes::Time                         last_sent;
-    firevision::SharedMemoryImageBuffer *img;
-  } ImageInfo;
+    std::string		     topic_name;
+    sensor_msgs::PointCloud2 msg;
+    fawkes::Time             last_sent;
+  } PointCloudInfo;
   /// @endcond
-  std::map<std::string, ImageInfo> imgs_;
+  std::map<std::string, PointCloudInfo> __pcls;
 
-  fawkes::Time *last_update_;
-  fawkes::Time *now_;
   mongo::DBClientBase *__mongodb;
   mongo::GridFS       *__mongogrid;
   std::string          __collection;

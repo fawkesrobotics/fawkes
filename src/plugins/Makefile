@@ -17,11 +17,11 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 # base + hardware drivers + perception + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb mongodb mongolog \
+SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser flite joystick openrave katana pantilt roomba nao robotino \
 	  perception \
 	  skiller luaagent worldmodel laserht laser-filter laser-pointclouds \
-	  static_transforms mongodb mongolog \
+	  static_transforms mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc \
 	  readylogagent
 	  #festival
@@ -32,6 +32,6 @@ luaagent: skiller
 rrdweb: rrd
 katana: openrave
 perception: ros
-mongolog: mongodb
+mongodb_log: mongodb
 mongodb: rrd
 

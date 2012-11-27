@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  mongolog_plugin.cpp - Fawkes MongoDB Logging Plugin
+ *  mongowb_log_plugin.cpp - Fawkes MongoDB Logging Plugin
  *
  *  Created: Wed Dec 08 23:04:33 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,15 +19,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mongolog_plugin.h"
-#include "mongolog_thread.h"
+#include "mongodb_log_plugin.h"
+#include "mongodb_log_thread.h"
 #include "image_thread.h"
 #include "pcl_thread.h"
-#include "mongolog_logger_thread.h"
+#include "mongodb_log_logger_thread.h"
 
 using namespace fawkes;
 
-/** @class MongoLogPlugin "mongolog_plugin.h"
+/** @class MongoLogPlugin "mongodb_log_plugin.h"
  * MongoDB Logging Plugin.
  * This plugin provides logging of BlackBoard data to MongoDB.
  *
@@ -44,7 +44,7 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
 
   bool enable_pcls = true;
   try {
-    enable_pcls = config->get_bool("/plugins/mongolog/enable_pcls");
+    enable_pcls = config->get_bool("/plugins/mongodb-log/enable_pcls");
   } catch (Exception &e) {}
   if (enable_pcls) {
     thread_list.push_back(new MongoLogPointCloudThread());
@@ -52,7 +52,7 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
 
   bool enable_images = true;
   try {
-    enable_images = config->get_bool("/plugins/mongolog/enable_images");
+    enable_images = config->get_bool("/plugins/mongodb-log/enable_images");
   } catch (Exception &e) {}
   if (enable_images) {
     thread_list.push_back(new MongoLogImagesThread());
@@ -60,7 +60,7 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
 
   bool enable_logger = true;
   try {
-    enable_logger = config->get_bool("/plugins/mongolog/enable_logger");
+    enable_logger = config->get_bool("/plugins/mongodb-log/enable_logger");
   } catch (Exception &e) {}
   if (enable_logger) {
     thread_list.push_back(new MongoLogLoggerThread());

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  mongolog_thread.cpp - MongoDB Logging Thread
+ *  mongodb_log_thread.cpp - MongoDB Logging Thread
  *
  *  Created: Wed Dec 08 23:09:29 2010
  *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mongolog_thread.h"
+#include "mongodb_log_thread.h"
 
 #include <core/threading/mutex_locker.h>
 #include <cstdlib>
@@ -92,7 +92,7 @@ MongoLogThread::init()
   now_ = new Time(clock);
   __database = "fflog";
   try {
-    __database = config->get_string("/plugins/mongolog/database");
+    __database = config->get_string("/plugins/mongodb-log/database");
   } catch (Exception &e) {
     logger->log_info(name(), "No database configured, writing to %s",
 		     __database.c_str());
@@ -113,7 +113,7 @@ MongoLogThread::init()
 
   blackboard->register_observer(this);
 
-  config->set_string("/plugins/mongorrd/databases/mongolog", __database);
+  config->set_string("/plugins/mongorrd/databases/mongodb-log", __database);
 }
 
 
@@ -134,7 +134,7 @@ MongoLogThread::finalize()
   blackboard->unregister_observer(this);
 
   // sometimes causes errors
-  // config->erase("/plugins/mongorrd/databases/mongolog");
+  // config->erase("/plugins/mongorrd/databases/mongodb-log");
 
 
   std::map<std::string, InterfaceListener *>::iterator i;

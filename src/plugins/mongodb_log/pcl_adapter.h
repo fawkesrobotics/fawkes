@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGOLOG_PCL_ADAPTER_H_
-#define __PLUGINS_MONGOLOG_PCL_ADAPTER_H_
+#ifndef __PLUGINS_MONGODB_LOG_PCL_ADAPTER_H_
+#define __PLUGINS_MONGODB_LOG_PCL_ADAPTER_H_
 
 #include <utils/time/time.h>
 

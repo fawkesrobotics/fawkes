@@ -19,19 +19,19 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
-LIBS_mongolog = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
+LIBS_mongodb_log = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils $(LIBS_MONGODB)
-OBJS_mongolog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_mongodb_log = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
-OBJS_all    = $(OBJS_mongolog)
+OBJS_all    = $(OBJS_mongodb_log)
 
 ifeq ($(HAVE_MONGODB),1)
   CFLAGS += $(CFLAGS_PCL)
   LDFLAGS += $(LDFLAGS_PCL)
-  PLUGINS_all = $(PLUGINDIR)/mongolog.so
+  PLUGINS_all = $(PLUGINDIR)/mongodb-log.so
 else
   WARN_TARGETS += warning_mongodb
 endif
@@ -41,7 +41,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_mongodb
 warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoLog Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Logging Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

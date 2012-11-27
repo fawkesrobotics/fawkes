@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  mongolog_plugin.h - Fawkes MongoDB Logging Plugin
+ *  mongodb_log_plugin.h - Fawkes MongoDB Logging Plugin
  *
  *  Created: Wed Dec 08 23:03:53 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGOLOG_MONGOLOG_PLUGIN_H_
-#define __PLUGINS_MONGOLOG_MONGOLOG_PLUGIN_H_
+#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_PLUGIN_H_
+#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_PLUGIN_H_
 
 #include <core/plugin.h>
 

@@ -59,7 +59,7 @@ MongoLogImagesThread::init()
 {
   __database = "fflog";
   try {
-    __database = config->get_string("/plugins/mongolog/database");
+    __database = config->get_string("/plugins/mongodb-log/database");
   } catch (Exception &e) {
     logger->log_info(name(), "No database configured, writing to %s",
 		     __database.c_str());
