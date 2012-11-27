@@ -4,7 +4,6 @@
  *
  *  Created: Wed Dec 08 23:04:33 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

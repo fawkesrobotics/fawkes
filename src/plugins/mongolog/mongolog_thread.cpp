@@ -3,8 +3,8 @@
  *  mongolog_thread.cpp - MongoDB Logging Thread
  *
  *  Created: Wed Dec 08 23:09:29 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

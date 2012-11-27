@@ -2,11 +2,9 @@
 /***************************************************************************
  *  pcl_thread.h - Thread to log point clouds to MongoDB
  *
- *  adapted from ros/pcl_thread.h
- *
  *  Created: Mon Nov 07 02:26:35 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *  Modified: Thu Jul 12 09:51:00 2012 by Bastian Klingen
+ *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -2,11 +2,9 @@
 /***************************************************************************
  *  image_thread.h - Thread to log images to MongoDB
  *
- *  adapted from ros/image_thread.h
- *
  *  Created: Tue Apr 10 22:12:27 2012
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
- *  Modified: Thu Jul 12 10:00:00 2012 by Bastian Klingen
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

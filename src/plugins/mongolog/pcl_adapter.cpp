@@ -1,12 +1,10 @@
 
 /***************************************************************************
- *  pcl_adapter.cpp - PCL exchange publisher manager
- *
- *  adapted from ros/pcl_adapter.cpp
+ *  pcl_adapter.cpp - Adapter to receive information about point clouds
  *
  *  Created: Tue Nov 08 00:38:34 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *  Modified: Thu Jul 12 09:51:00 2012 by Bastian Klingen
+ *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
