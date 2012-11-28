@@ -94,6 +94,11 @@ namespace fawkes {
  * Check if a value is of type string
  * @param path path to value
  * @return true if the value exists and is of type string
+ *
+ * @fn bool Configuration::is_list(const char *path)
+ * Check if a value is a list.
+ * @param path path to value
+ * @return true if the value exists and is a list
  * 
  * @fn bool Configuration::is_default(const char *path)
  * Check if a value was read from the default config.
@@ -122,6 +127,31 @@ namespace fawkes {
  * 
  * @fn std::string Configuration::get_string(const char *path)
  * Get value from configuration which is of type string
+ * @param path path to value
+ * @return value
+ *
+ * @fn std::vector<float> Configuration::get_floats(const char *path)
+ * Get list of values from configuration which is of type float
+ * @param path path to value
+ * @return value
+ * 
+ * @fn std::vector<unsigned int> Configuration::get_uints(const char *path)
+ * Get list of values from configuration which is of type unsigned int
+ * @param path path to value
+ * @return value
+ * 
+ * @fn std::vector<int> Configuration::get_ints(const char *path)
+ * Get list of values from configuration which is of type int
+ * @param path path to value
+ * @return value
+ * 
+ * @fn std::vector<bool> Configuration::get_bools(const char *path)
+ * Get list of values from configuration which is of type bool
+ * @param path path to value
+ * @return value
+ * 
+ * @fn std::vector<std::string> Configuration::get_strings(const char *path)
+ * Get list of values from configuration which is of type string
  * @param path path to value
  * @return value
  *
@@ -186,6 +216,38 @@ namespace fawkes {
  * Just takes an good ol' char array instead of a std::string.
  * @param path path to value
  * @param s new string value
+ *
+ * @fn void Configuration::set_floats(const char *path, std::vector<float> &f)
+ * Set new value in configuration of type float
+ * @param path path to value
+ * @param f new float values
+ * 
+ * @fn void Configuration::set_uints(const char *path, std::vector<unsigned int> &uint)
+ * Set new value in configuration of type unsigned int
+ * @param path path to value
+ * @param uint new unsigned int values
+ * 
+ * @fn void Configuration::set_ints(const char *path, std::vector<int> &i)
+ * Set new value in configuration of type int
+ * @param path path to value
+ * @param i new int values
+ * 
+ * @fn void Configuration::set_bools(const char *path, std::vector<bool> b)
+ * Set new value in configuration of type bool
+ * @param path path to value
+ * @param b new bool values
+ * 
+ * @fn void Configuration::set_strings(const char *path, std::vector<std::string> &s)
+ * Set new value in configuration of type string
+ * @param path path to value
+ * @param s new string values
+ *
+ * @fn void Configuration::set_strings(const char *path, std::vector<const char *> &s)
+ * Set new value in configuration of type string. Works like the aforementioned method.
+ * Just takes an good ol' char array instead of a std::string.
+ * @param path path to value
+ * @param s new string values
+
  *
  * @fn void Configuration::set_comment(const char *path, std::string &comment)
  * Set new comment for existing value.
@@ -421,6 +483,10 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  * Check if current value is a string.
  * @return true, if value is a string, false otherwise
  *
+ * @fn bool Configuration::ValueIterator::is_list()
+ * Check if a value is a list.
+ * @return true if the value exists and is a list
+ *
  * @fn bool Configuration::ValueIterator::is_default() const
  * Check if current value was read from the default config.
  * @return true, if value was read from the default config, false otherwise
@@ -443,6 +509,26 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  *
  * @fn std::string Configuration::ValueIterator::get_string() const
  * Get string value.
+ * @return value
+ *
+ * @fn std::vector<float> Configuration::ValueIterator::get_floats()
+ * Get list of values from configuration which is of type float
+ * @return value
+ * 
+ * @fn std::vector<unsigned int> Configuration::ValueIterator::get_uints()
+ * Get list of values from configuration which is of type unsigned int
+ * @return value
+ * 
+ * @fn std::vector<int> Configuration::ValueIterator::get_ints()
+ * Get list of values from configuration which is of type int
+ * @return value
+ * 
+ * @fn std::vector<bool> Configuration::ValueIterator::get_bools()
+ * Get list of values from configuration which is of type bool
+ * @return value
+ * 
+ * @fn std::vector<std::string> Configuration::ValueIterator::get_strings()
+ * Get list of values from configuration which is of type string
  * @return value
  *
  * @fn std::string Configuration::ValueIterator::get_comment() const

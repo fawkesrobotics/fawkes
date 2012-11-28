@@ -240,6 +240,11 @@ NetworkConfiguration::is_string(const char *path)
   return (get_type(path) == "string");
 }
 
+bool
+NetworkConfiguration::is_list(const char *path)
+{
+  return false;
+}
 
 void
 NetworkConfiguration::send_get(const char *path, unsigned int msgid)
@@ -516,6 +521,36 @@ NetworkConfiguration::get_string(const char *path)
   mutex->unlock();
 
   return s;
+}
+
+std::vector<float>
+NetworkConfiguration::get_floats(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<unsigned int>
+NetworkConfiguration::get_uints(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<int>
+NetworkConfiguration::get_ints(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<bool>
+NetworkConfiguration::get_bools(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<std::string>
+NetworkConfiguration::get_strings(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
 }
 
 
@@ -892,6 +927,43 @@ void
 NetworkConfiguration::set_default_string(const char *path, std::string &s)
 {
   set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, s.c_str());
+}
+
+
+void
+NetworkConfiguration::set_floats(const char *path, std::vector<float> &f)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_uints(const char *path, std::vector<unsigned int> &u)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_ints(const char *path, std::vector<int> &i)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_bools(const char *path, std::vector<bool> &b)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_strings(const char *path, std::vector<std::string> &s)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_strings(const char *path, std::vector<const char *> &s)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
 }
 
 
@@ -1597,6 +1669,13 @@ NetworkConfiguration::NetConfValueIterator::is_string() const
 
 
 bool
+NetworkConfiguration::NetConfValueIterator::is_list() const
+{
+  return false;
+}
+
+
+bool
 NetworkConfiguration::NetConfValueIterator::is_default() const
 {
   if ( i == NULL ) {
@@ -1734,6 +1813,37 @@ NetworkConfiguration::NetConfValueIterator::get_string() const
   } else {
     return i->get_string();
   }
+}
+
+
+std::vector<float>
+NetworkConfiguration::NetConfValueIterator::get_floats() const
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<unsigned int>
+NetworkConfiguration::NetConfValueIterator::get_uints() const
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<int>
+NetworkConfiguration::NetConfValueIterator::get_ints() const
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<bool>
+NetworkConfiguration::NetConfValueIterator::get_bools() const
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<std::string>
+NetworkConfiguration::NetConfValueIterator::get_strings() const
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
 }
 
 

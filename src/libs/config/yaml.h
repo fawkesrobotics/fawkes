@@ -68,6 +68,7 @@ class YamlConfiguration
   virtual bool          is_int(const char *path);
   virtual bool          is_bool(const char *path);
   virtual bool          is_string(const char *path);
+  virtual bool          is_list(const char *path);
 
   virtual bool          is_default(const char *path);
 
@@ -77,6 +78,11 @@ class YamlConfiguration
   virtual int             get_int(const char *path);
   virtual bool            get_bool(const char *path);
   virtual std::string     get_string(const char *path);
+  virtual std::vector<float>         get_floats(const char *path);
+  virtual std::vector<unsigned int>  get_uints(const char *path);
+  virtual std::vector<int>           get_ints(const char *path);
+  virtual std::vector<bool>          get_bools(const char *path);
+  virtual std::vector<std::string>   get_strings(const char *path);
   virtual ValueIterator * get_value(const char *path);
   virtual std::string     get_comment(const char *path);
   virtual std::string     get_default_comment(const char *path);
@@ -87,6 +93,12 @@ class YamlConfiguration
   virtual void          set_bool(const char *path, bool b);
   virtual void          set_string(const char *path, std::string &s);
   virtual void          set_string(const char *path, const char *s);
+  virtual void          set_floats(const char *path, std::vector<float> &f);
+  virtual void          set_uints(const char *path, std::vector<unsigned int> &uint);
+  virtual void          set_ints(const char *path, std::vector<int> &i);
+  virtual void          set_bools(const char *path, std::vector<bool> &b);
+  virtual void          set_strings(const char *path, std::vector<std::string> &s);
+  virtual void          set_strings(const char *path, std::vector<const char *> &s);
   virtual void          set_comment(const char *path, std::string &comment);
   virtual void          set_comment(const char *path, const char *comment);
 
@@ -136,12 +148,18 @@ class YamlConfiguration
    virtual bool          is_int() const;
    virtual bool          is_bool() const;
    virtual bool          is_string() const;
+   virtual bool          is_list() const;
 
    virtual float         get_float() const;
    virtual unsigned int  get_uint() const;
    virtual int           get_int() const;
    virtual bool          get_bool() const;
    virtual std::string   get_string() const;
+   virtual std::vector<float>         get_floats() const;
+   virtual std::vector<unsigned int>  get_uints() const;
+   virtual std::vector<int>           get_ints() const;
+   virtual std::vector<bool>          get_bools() const;
+   virtual std::vector<std::string>   get_strings() const;
    virtual std::string   get_as_string() const;
 
    virtual std::string   get_comment() const;

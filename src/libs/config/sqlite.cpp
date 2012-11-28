@@ -24,6 +24,7 @@
 #include <config/sqlite.h>
 #include <core/threading/mutex.h>
 #include <core/exceptions/system.h>
+#include <core/exceptions/software.h>
 
 #include <sqlite3.h>
 
@@ -990,6 +991,13 @@ SQLiteConfiguration::is_string(const char *path)
 
 
 bool
+SQLiteConfiguration::is_list(const char *path)
+{
+  return false;
+}
+
+
+bool
 SQLiteConfiguration::is_default(const char *path)
 {
   mutex->lock();
@@ -1156,6 +1164,40 @@ SQLiteConfiguration::get_string(const char *path)
     mutex->unlock();
     throw;
   }
+}
+
+
+
+std::vector<float>
+SQLiteConfiguration::get_floats(const char *path)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+
+std::vector<unsigned int>
+SQLiteConfiguration::get_uints(const char *path)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+
+std::vector<int>
+SQLiteConfiguration::get_ints(const char *path)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+std::vector<bool>
+SQLiteConfiguration::get_bools(const char *path)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+std::vector<std::string>
+SQLiteConfiguration::get_strings(const char *path)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
 }
 
 
@@ -1484,6 +1526,42 @@ SQLiteConfiguration::set_string(const char *path, std::string &s)
   set_string(path, s.c_str());
 }
 
+
+void
+SQLiteConfiguration::set_floats(const char *path, std::vector<float> &f)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+void
+SQLiteConfiguration::set_uints(const char *path, std::vector<unsigned int> &u)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+void
+SQLiteConfiguration::set_ints(const char *path, std::vector<int> &i)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+void
+SQLiteConfiguration::set_bools(const char *path, std::vector<bool> &b)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+void
+SQLiteConfiguration::set_strings(const char *path, std::vector<std::string> &s)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+void
+SQLiteConfiguration::set_strings(const char *path, std::vector<const char *> &s)
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
 
 void
 SQLiteConfiguration::set_comment(const char *path, const char *comment)
@@ -2099,9 +2177,6 @@ SQLiteConfiguration::SQLiteValueIterator::type() const
 }
 
 
-/** Check if current value is a float.
- * @return true, if value is a float, false otherwise
- */
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_float() const
 {
@@ -2109,18 +2184,12 @@ SQLiteConfiguration::SQLiteValueIterator::is_float() const
 }
 
 
-/** Check if current value is a unsigned int.
- * @return true, if value is a unsigned int, false otherwise
- */
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_uint() const
 {
   return (strcmp("unsigned int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
-/** Check if current value is a int.
- * @return true, if value is a int, false otherwise
- */
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_int() const
 {
@@ -2128,9 +2197,6 @@ SQLiteConfiguration::SQLiteValueIterator::is_int() const
 }
 
 
-/** Check if current value is a bool.
- * @return true, if value is a bool, false otherwise
- */
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_bool() const
 {
@@ -2138,13 +2204,16 @@ SQLiteConfiguration::SQLiteValueIterator::is_bool() const
 }
 
 
-/** Check if current value is a string.
- * @return true, if value is a string, false otherwise
- */
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_string() const
 {
   return (strcmp("string", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
+}
+
+bool
+SQLiteConfiguration::SQLiteValueIterator::is_list() const
+{
+  return false;
 }
 
 bool
@@ -2206,6 +2275,36 @@ SQLiteConfiguration::SQLiteValueIterator::get_string() const
   return (const char *)sqlite3_column_text(__stmt, 2);
 }
 
+
+std::vector<float>
+SQLiteConfiguration::SQLiteValueIterator::get_floats() const
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+std::vector<unsigned int>
+SQLiteConfiguration::SQLiteValueIterator::get_uints() const
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+std::vector<int>
+SQLiteConfiguration::SQLiteValueIterator::get_ints() const
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+std::vector<bool>
+SQLiteConfiguration::SQLiteValueIterator::get_bools() const
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
+
+std::vector<std::string>
+SQLiteConfiguration::SQLiteValueIterator::get_strings() const
+{
+  throw NotImplementedException("SQLiteConf: list values are not supported");
+}
 
 /** Get value as string.
  * @return value

@@ -161,6 +161,16 @@ YamlConfiguration::YamlValueIterator::is_string() const
   return current_->second->get_type() == Node::Type::STRING;
 }
 
+bool
+YamlConfiguration::YamlValueIterator::is_list() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  return current_->second->get_type() == Node::Type::SEQUENCE;
+}
+
+
 float
 YamlConfiguration::YamlValueIterator::get_float() const
 {
@@ -214,6 +224,52 @@ YamlConfiguration::YamlValueIterator::get_as_string() const
   }
   return current_->second->get_value<std::string>();
 }
+
+std::vector<float>
+YamlConfiguration::YamlValueIterator::get_floats() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_list<float>();
+}
+
+std::vector<unsigned int>
+YamlConfiguration::YamlValueIterator::get_uints() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_list<unsigned int>();
+}
+
+std::vector<int>
+YamlConfiguration::YamlValueIterator::get_ints() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_list<int>();
+}
+
+std::vector<bool>
+YamlConfiguration::YamlValueIterator::get_bools() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_list<bool>();
+}
+
+std::vector<std::string>
+YamlConfiguration::YamlValueIterator::get_strings() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->get_list<std::string>();
+}
+
 
 std::string
 YamlConfiguration::YamlValueIterator::get_comment() const
@@ -380,11 +436,11 @@ YamlConfiguration::load(const char *file_path,
   fam->add_filter("^[^.].*\\.yaml$");
   std::list<std::string>::iterator f;
   for (f = files.begin(); f != files.end(); ++f) {
-    LibLogger::log_info("YC", "Watching %s", f->c_str());
+    //LibLogger::log_info("YC", "Watching %s", f->c_str());
     fam->watch_file(f->c_str());
   }
   for (f = dirs.begin(); f != dirs.end(); ++f) {
-    LibLogger::log_info("YC", "Watching DIR %s", f->c_str());
+    //LibLogger::log_info("YC", "Watching DIR %s", f->c_str());
     fam->watch_dir(f->c_str());
   }
   fam->add_listener(this);
@@ -679,6 +735,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, Node *&node)
 	read_config_doc(it.second(), tmp);
       }
     }
+
   } else if (doc.Type() == YAML::NodeType::Scalar) {
     if (doc.Tag() == "tag:fawkesrobotics.org,cfg/tcp-port" ||
 	doc.Tag() == "tag:fawkesrobotics.org,cfg/udp-port")
@@ -806,6 +863,24 @@ get_value_as(YamlConfiguration::Node *root, const char *path)
   return n->get_value<T>();
 }
 
+/** Retrieve value casted to given type T.
+ * @param root root node of the tree to search
+ * @param path path to query
+ * @return value casted as desired
+ * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+ * a different type.
+ */
+template<typename T>
+static inline std::vector<T>
+get_list(YamlConfiguration::Node *root, const char *path)
+{
+  YamlConfiguration::Node *n = root->find(path);
+  if (n->has_children()) {
+    throw ConfigEntryNotFoundException(path);
+  }
+  return n->get_list<T>();
+}
+
 
 float
 YamlConfiguration::get_float(const char *path)
@@ -835,6 +910,39 @@ std::string
 YamlConfiguration::get_string(const char *path)
 {
   return get_value_as<std::string>(root_, path);
+}
+
+
+std::vector<float>
+YamlConfiguration::get_floats(const char *path)
+{
+  return get_list<float>(root_, path);
+}
+
+
+std::vector<unsigned int>
+YamlConfiguration::get_uints(const char *path)
+{
+  return get_list<unsigned int>(root_, path);
+}
+
+
+std::vector<int>
+YamlConfiguration::get_ints(const char *path)
+{
+  return get_list<int>(root_, path);
+}
+
+std::vector<bool>
+YamlConfiguration::get_bools(const char *path)
+{
+  return get_list<bool>(root_, path);
+}
+
+std::vector<std::string>
+YamlConfiguration::get_strings(const char *path)
+{
+  return get_list<std::string>(root_, path);
 }
 
 
@@ -883,6 +991,17 @@ bool
 YamlConfiguration::is_string(const char *path)
 {
   return is_type<std::string>(root_, path);
+}
+
+
+bool
+YamlConfiguration::is_list(const char *path)
+{
+  YamlConfiguration::Node *n = root_->find(path);
+  if (n->has_children()) {
+    throw ConfigEntryNotFoundException(path);
+  }
+  return (n->get_type() == Node::Type::SEQUENCE);
 }
 
 
@@ -961,6 +1080,54 @@ void
 YamlConfiguration::set_string(const char *path, std::string &s)
 {
   set_string(path, s.c_str());
+}
+
+void
+YamlConfiguration::set_floats(const char *path, std::vector<float> &f)
+{
+  root_->set_list(path, f);
+  host_root_->set_list(path, f);
+  write_host_file();
+}
+
+void
+YamlConfiguration::set_uints(const char *path, std::vector<unsigned int> &u)
+{
+  root_->set_list(path, u);
+  host_root_->set_list(path, u);
+  write_host_file();
+}
+
+void
+YamlConfiguration::set_ints(const char *path, std::vector<int> &i)
+{
+  root_->set_list(path, i);
+  host_root_->set_list(path, i);
+  write_host_file();
+}
+
+void
+YamlConfiguration::set_bools(const char *path, std::vector<bool> &b)
+{
+  root_->set_list(path, b);
+  host_root_->set_list(path, b);
+  write_host_file();
+}
+
+void
+YamlConfiguration::set_strings(const char *path, std::vector<std::string> &s)
+{
+  root_->set_list(path, s);
+  host_root_->set_list(path, s);
+  write_host_file();
+}
+
+void
+YamlConfiguration::set_strings(const char *path, std::vector<const char *> &s)
+{
+  root_->set_list(path, s);
+  host_root_->set_list(path, s);
+  write_host_file();
 }
 
 void

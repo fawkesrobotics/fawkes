@@ -94,7 +94,10 @@ ConfigNetworkHandler::send_inv_value(unsigned int clid, const char *path)
 void
 ConfigNetworkHandler::send_value(unsigned int clid, Configuration::ValueIterator *i)
 {
-  if ( i->is_float() ) {
+  if ( i->is_list() ) {
+    // to be continued...
+    return;
+  } else if ( i->is_float() ) {
     try {
       config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(i->path(), i->is_default());
       r->f = i->get_float();
