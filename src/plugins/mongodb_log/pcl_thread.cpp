@@ -29,6 +29,8 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
 
+#include <fnmatch.h>
+
 using namespace fawkes;
 using namespace mongo;
 
@@ -62,6 +64,17 @@ MongoLogPointCloudThread::init()
     logger->log_info(name(), "No database configured, writing to %s",
 		     __database.c_str());
   }
+
+  std::vector<std::string> includes;
+  try {
+    includes = config->get_strings("/plugins/mongodb-log/pointclouds/includes");
+  } catch (Exception &e) {} // ignored, no include rules
+  std::vector<std::string> excludes;
+
+  try {
+    excludes = config->get_strings("/plugins/mongodb-log/pointclouds/excludes");
+  } catch (Exception &e) {} // ignored, no include rules
+
   __mongodb    = mongodb_client;
   __mongogrid  = new GridFS(*__mongodb, __database, "GridFS.PointClouds");
 
@@ -70,7 +83,32 @@ MongoLogPointCloudThread::init()
   std::vector<std::string> pcls = pcl_manager->get_pointcloud_list();
 
   std::vector<std::string>::iterator p;
+  std::vector<std::string>::iterator f;
   for (p = pcls.begin(); p != pcls.end(); ++p) {
+    bool include = includes.empty();
+    if (! include) {
+      for (f = includes.begin(); f != includes.end(); ++f) {
+	if (fnmatch(f->c_str(), p->c_str(), 0) != FNM_NOMATCH) {
+	  logger->log_debug(name(), "Include match %s to %s", f->c_str(), p->c_str());
+	  include = true;
+	  break;
+	}
+      }
+    }
+    if (include) {
+      for (f = excludes.begin(); f != excludes.end(); ++f) {
+	if (fnmatch(f->c_str(), p->c_str(), 0) != FNM_NOMATCH) {
+	  logger->log_debug(name(), "Exclude match %s to %s", f->c_str(), p->c_str());
+	  include = false;
+	  break;
+	}
+      }
+    }
+    if (! include) {
+      logger->log_info(name(), "Excluding point cloud %s", p->c_str());
+      continue;
+    }
+
     PointCloudInfo pi;
 
     std::string topic_name = std::string("PointClouds.") + *p;
@@ -95,7 +133,7 @@ MongoLogPointCloudThread::init()
     pi.msg.is_dense = is_dense;
     pi.msg.fields.clear();
     pi.msg.fields.resize(fieldinfo.size());
-    for (unsigned int i = 0; i < fieldinfo.size(); ++i) {
+    for (unsigned int i = 0; i < fieldinfo.size(); ++i) {		       
       pi.msg.fields[i].name     = fieldinfo[i].name;
       pi.msg.fields[i].offset   = fieldinfo[i].offset;
       pi.msg.fields[i].datatype = fieldinfo[i].datatype;

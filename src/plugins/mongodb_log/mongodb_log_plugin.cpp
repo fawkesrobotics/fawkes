@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  mongowb_log_plugin.cpp - Fawkes MongoDB Logging Plugin
+ *  mongodb_log_plugin.cpp - Fawkes MongoDB Logging Plugin
  *
  *  Created: Wed Dec 08 23:04:33 2010
  *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
@@ -44,7 +44,7 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
 
   bool enable_pcls = true;
   try {
-    enable_pcls = config->get_bool("/plugins/mongodb-log/enable_pcls");
+    enable_pcls = config->get_bool("/plugins/mongodb-log/enable-pointclouds");
   } catch (Exception &e) {}
   if (enable_pcls) {
     thread_list.push_back(new MongoLogPointCloudThread());
@@ -52,7 +52,7 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
 
   bool enable_images = true;
   try {
-    enable_images = config->get_bool("/plugins/mongodb-log/enable_images");
+    enable_images = config->get_bool("/plugins/mongodb-log/enable-images");
   } catch (Exception &e) {}
   if (enable_images) {
     thread_list.push_back(new MongoLogImagesThread());
@@ -60,7 +60,7 @@ MongoLogPlugin::MongoLogPlugin(Configuration *config)
 
   bool enable_logger = true;
   try {
-    enable_logger = config->get_bool("/plugins/mongodb-log/enable_logger");
+    enable_logger = config->get_bool("/plugins/mongodb-log/enable-logger");
   } catch (Exception &e) {}
   if (enable_logger) {
     thread_list.push_back(new MongoLogLoggerThread());
