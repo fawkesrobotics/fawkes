@@ -32,6 +32,7 @@
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
 #endif
+#include <utils/time/tracker_macros.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -63,28 +64,6 @@ using namespace std;
 
 using namespace fawkes;
 
-
-#ifdef USE_TIMETRACKER
-#define TIMETRACK_START(c)                      \
-  tt_->ping_start(c);				\
-
-#define TIMETRACK_INTER(c1, c2)			\
- tt_->ping_end(c1);				\
- tt_->ping_start(c2);
-
-#define TIMETRACK_END(c)			\
-  tt_->ping_end(c);
-
-#define TIMETRACK_ABORT(c)                      \
-  tt_->ping_abort(c);
-
-#else
-
-#define TIMETRACK_START(c)
-#define TIMETRACK_INTER(c1, c2)
-#define TIMETRACK_END(c)
-#define TIMETRACK_ABORT(c)
-#endif
 
 /** Constructor. */
 TabletopObjectsThread::TabletopObjectsThread()
