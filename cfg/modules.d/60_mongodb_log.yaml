@@ -1,0 +1,19 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/mongodb-log
+---
+plugins/mongodb-log:
+
+  database: fflog
+
+  enable-images: false
+  enable-pointclouds: true
+  enable-logger: false
+
+  # if no inclusion rule is set, all pointclouds are included unless excluded
+  # if an inclusion rule exists, only matching pointclouds are included unless excluded
+  # if there is an exclude rule, then excludes are processed last
+  pointclouds:
+    includes: [openni-pointcloud-xyz]
+ 
