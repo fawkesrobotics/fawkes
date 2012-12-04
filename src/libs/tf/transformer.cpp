@@ -265,7 +265,8 @@ struct TransformAccum
  * @param cache_time time in seconds to cache incoming transforms
  */
 Transformer::Transformer(float cache_time)
-  : cache_time_(cache_time),
+  : enabled_(true),
+    cache_time_(cache_time),
     fall_back_to_wall_time_(false)
 {
   max_extrapolation_distance_ = DEFAULT_MAX_EXTRAPOLATION_DISTANCE;
