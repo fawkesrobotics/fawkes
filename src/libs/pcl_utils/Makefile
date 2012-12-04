@@ -20,7 +20,7 @@ LIBS_libfawkespclutils = fawkescore
 OBJS_libfawkespclutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
 HDRS_libfawkespclutils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
-OBJS_all = $(OBJS_libfawkespclutils)
+OBJS_all = $(OBJS_libfawkespcl_utils)
 
 ifeq ($(HAVE_PCL),1)
   CFLAGS  += $(CFLAGS_PCL)

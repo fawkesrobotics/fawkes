@@ -88,7 +88,7 @@ get_time(const fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &ti
 #else
   fawkes::PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
-  time.set_time(pclts.time.sec, time.get_usec());
+  time.set_time(pclts.time.sec, pclts.time.usec);
 #endif
 }
 
@@ -122,7 +122,7 @@ struct PointCloudNonDeleter {
 
 template <typename PointT>
 typename pcl::PointCloud<PointT>::Ptr
-cloudptr_from_refptr(fawkes::RefPtr<pcl::PointCloud<PointT> > &in)
+cloudptr_from_refptr(const fawkes::RefPtr<pcl::PointCloud<PointT> > &in)
 {
   return
     boost::shared_ptr<pcl::PointCloud<PointT> >(*in, PointCloudNonDeleter());
@@ -131,7 +131,7 @@ cloudptr_from_refptr(fawkes::RefPtr<pcl::PointCloud<PointT> > &in)
 
 template <typename PointT>
 typename pcl::PointCloud<PointT>::ConstPtr
-cloudptr_from_refptr(fawkes::RefPtr<const pcl::PointCloud<PointT> > &in)
+cloudptr_from_refptr(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &in)
 {
   return
     boost::shared_ptr<const pcl::PointCloud<PointT> >(*in, PointCloudNonDeleter());

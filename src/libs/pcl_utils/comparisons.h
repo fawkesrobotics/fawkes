@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_PCL_UTILS_COMPARISONS__H_
+#ifndef __LIBS_PCL_UTILS_COMPARISONS_H_
 #define __LIBS_PCL_UTILS_COMPARISONS_H_
 
 #include <pcl/point_cloud.h>
