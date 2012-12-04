@@ -76,7 +76,7 @@ MongoLogPointCloudThread::init()
   } catch (Exception &e) {} // ignored, no include rules
 
   __mongodb    = mongodb_client;
-  __mongogrid  = new GridFS(*__mongodb, __database, "GridFS.PointClouds");
+  __mongogrid  = new GridFS(*__mongodb, __database);
 
   __adapter = new MongoLogPointCloudAdapter(pcl_manager, logger);
 
