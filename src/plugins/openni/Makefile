@@ -16,6 +16,8 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
+include $(BUILDCONFDIR)/tf/tf.mk
+
 
 PRESUBDIRS = interfaces utils
 SUBDIRS = skelgui pclviewer
@@ -31,7 +33,7 @@ LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard 
 OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 
 LIBS_openni_data = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
-		    fvutils fawkesopenni_utils
+		    fvutils fawkesopenni_utils fawkestf
 OBJS_openni_data = data_plugin.o image_thread.o depth_thread.o pointcloud_thread.o
 
 LIBS_openni_pcl_frombuf = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
@@ -43,18 +45,23 @@ LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard 
 			  fvutils ObjectPositionInterface
 OBJS_openni_handtracker = handtracker_plugin.o handtracker_thread.o
 
-ifeq ($(HAVE_PCL),1)
-  CFLAGS_pointcloud_thread  = $(CFLAGS) $(CFLAGS_PCL)
-  CFLAGS_data_plugin        = $(CFLAGS) $(CFLAGS_PCL)
-  LDFLAGS_openni_data       = $(LDFLAGS_PCL)
-  LIBS_openni_data         += fvutils
+ifeq ($(HAVE_PCL)$(HAVE_TF),11)
+  CFLAGS_pointcloud_thread  = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
+  CFLAGS_data_plugin        = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
+  LDFLAGS_openni_data       = $(LDFLAGS_PCL) $(LDFLAGS_TF)
+  LIBS_openni_data         += fvutils fawkestf
 
-  CFLAGS_pcl_frombuf_thread = $(CFLAGS) $(CFLAGS_PCL)
-  CFLAGS_pcl_frombuf_plugin = $(CFLAGS) $(CFLAGS_PCL)
-  LDFLAGS_openni_pcl_frombuf = $(LDFLAGS_PCL)
-  LIBS_openni_pcl_frombuf += fvutils
+  CFLAGS_pcl_frombuf_thread = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
+  CFLAGS_pcl_frombuf_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
+  LDFLAGS_openni_pcl_frombuf = $(LDFLAGS_PCL) $(LDFLAGS_TF)
+  LIBS_openni_pcl_frombuf += fvutils fawkestf
 else
-  WARN_TARGETS += warning_pcl
+  ifneq ($(HAVE_PCL),1)
+    WARN_TARGETS += warning_pcl
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_data) \
@@ -86,11 +93,13 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_openni warning_pcl
+.PHONY: warning_openni warning_pcl warning_tf
 warning_openni:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenNI Plugins$(TNORMAL) (openni[-devel] not installed)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL part in openni-pointcloud and openni-pcl-frombuf$(TNORMAL) (pcl[-devel] not installed)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (tf framework not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

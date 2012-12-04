@@ -31,6 +31,10 @@
 #include <aspect/blocked_timing.h>
 #include <plugins/openni/aspect/openni.h>
 
+// OpenNI relies on GNU extension to detect Linux
+#if defined(__linux__) && not defined(linux)
+#  define linux true
+#endif
 #include <XnCppWrapper.h>
 
 namespace firevision {

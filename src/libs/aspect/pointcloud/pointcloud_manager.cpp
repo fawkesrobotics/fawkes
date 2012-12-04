@@ -48,67 +48,6 @@ namespace fawkes {
  *
  */
 
-/** @class PointCloudManager::StorageAdapter <aspect/pointcloud/pointcloud_manager.h>
- * Adapter base class.
- * The adapter base class is required to store point clouds of
- * arbitrary point types.
- * @author Tim Niemueller
- *
- * @fn bool PointCloudManager::StorageAdapter::is_pointtype() const
- * Check if storage adapter is for specified point type.
- * @return true if storage adapter is for specified point type, false otherwise
- *
- * @fn template <PointT> PointCloudManager::PointCloudStorageAdapter<PointT> * PointCloudManager::StorageAdapter::as_pointtype() const
- * Transform to specific PointCloudStorageAdapter.
- * @return transformed PointCloudStorageAdapter
- * @exception Exception thrown if storage adapter is not of requested point type or does not exist
- * 
- * @fn PointCloudManager::StorageAdapter * PointCloudManager::StorageAdapter::clone() const
- * Clone this storage adapter.
- * @return cloned copy
- *
- * @fn const char * PointCloudManager::StorageAdapter::get_typename()
- * Get typename of storage adapter.
- * @return type name
- *
- * @fn size_t PointCloudManager::StorageAdapter::point_size() const
- * Get size of a point.
- * @return size in bytes of a single point
- *
- * @fn unsigned int PointCloudManager::StorageAdapter::width() const
- * Get width of point cloud.
- * @return width of point cloud
- *
- * @fn unsigned int PointCloudManager::StorageAdapter::height() const
- * Get height of point cloud.
- * @return height of point cloud
- *
- * @fn size_t PointCloudManager::StorageAdapter::num_points() const
- * Get numer of points in point cloud.
- * @return number of points
- *
- * @fn void * PointCloudManager::StorageAdapter::data_ptr() const
- * Get pointer on data.
- * @return pointer on data
- *
- * @fn  void PointCloudManager::StorageAdapter::get_time(fawkes::Time &time) const
- * Get last capture time.
- * @param time upon return contains last capture time
- */
-
-
-/** Virtual empty destructor. */
-PointCloudManager::StorageAdapter::~StorageAdapter()
-{
-}
-
-
-/** @class PointCloudManager::PointCloudStorageAdapter <aspect/pointcloud/pointcloud_manager.h>
- * Adapter class for PCL point types.
- * The adapter class is required to store point clouds of arbitrary point types.
- * @author Tim Niemueller
- */
-
 /** Constructor. */
 PointCloudManager::PointCloudManager()
 {
@@ -117,7 +56,7 @@ PointCloudManager::PointCloudManager()
 /** Destructor. */
 PointCloudManager::~PointCloudManager()
 {
-  LockMap<std::string, StorageAdapter *>::iterator c;
+  LockMap<std::string, pcl_utils::StorageAdapter *>::iterator c;
   for (c = __clouds.begin(); c != __clouds.end(); ++c) {
     delete c->second;
   }
@@ -163,7 +102,7 @@ PointCloudManager::get_pointcloud_list() const
 
   std::vector<std::string> rv;
   rv.clear();
-  LockMap<std::string, StorageAdapter *>::const_iterator c;
+  LockMap<std::string, pcl_utils::StorageAdapter *>::const_iterator c;
   for (c = __clouds.begin(); c != __clouds.end(); ++c) {
     rv.push_back(c->first);
   }
@@ -177,7 +116,7 @@ PointCloudManager::get_pointcloud_list() const
  * and ROS!
  * @return map from ID to storage adapter
  */
-const fawkes::LockMap<std::string, PointCloudManager::StorageAdapter *> &
+const fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> &
 PointCloudManager::get_pointclouds() const
 {
   return __clouds;
@@ -192,7 +131,7 @@ PointCloudManager::get_pointclouds() const
  * @return storage adapter for given ID
  * @exception Exception thrown if ID is unknown
  */
-const PointCloudManager::StorageAdapter *
+const pcl_utils::StorageAdapter *
 PointCloudManager::get_storage_adapter(const char *id)
 {
   MutexLocker lock(__clouds.mutex());

@@ -17,6 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_mongodb_log = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
@@ -28,20 +29,32 @@ LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb_log)
 
-ifeq ($(HAVE_MONGODB),1)
-  CFLAGS += $(CFLAGS_PCL)
-  LDFLAGS += $(LDFLAGS_PCL)
+ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
+  CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB)
+  LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
   PLUGINS_all = $(PLUGINDIR)/mongodb-log.so
 else
-  WARN_TARGETS += warning_mongodb
+  ifneq ($(HAVE_MONGODB),1)
+    WARN_TARGETS += warning_mongodb
+  endif
+  ifneq ($(HAVE_PCL),1)
+    WARN_TARGETS += warning_pcl
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb
+.PHONY: warning_mongodb warning_pcl warning_tf
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Logging Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+warning_pcl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (pcl[-devel] not installed)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (tf framework not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

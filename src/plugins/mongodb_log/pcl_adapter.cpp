@@ -38,7 +38,7 @@ class MongoLogPointCloudAdapter::StorageAdapter
  public:
   /** Constructor.
    * @param a_ adapter to clone */
-  StorageAdapter(const PointCloudManager::StorageAdapter *a_)
+  StorageAdapter(const pcl_utils::StorageAdapter *a_)
     : a(a_->clone()) {}
 
   /** Destructor. */
@@ -46,7 +46,7 @@ class MongoLogPointCloudAdapter::StorageAdapter
   { delete a; }
 
   /** PCL Point cloud storage adapter to encapsulate. */ 
-  PointCloudManager::StorageAdapter *a;
+  pcl_utils::StorageAdapter *a;
 };
 /// @endcond
 
@@ -161,7 +161,7 @@ MongoLogPointCloudAdapter::get_data(const std::string &id,
     __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
   }
 
-  const PointCloudManager::StorageAdapter *sa = __sas[id]->a;
+  const pcl_utils::StorageAdapter *sa = __sas[id]->a;
   width  = sa->width();
   height = sa->height();
   *data_ptr = sa->data_ptr();
