@@ -50,7 +50,6 @@
  */
 
 #include <tf/transform_listener.h>
-#include <tf/utils.h>
 
 #include <blackboard/blackboard.h>
 #include <interfaces/TransformInterface.h>
@@ -114,16 +113,6 @@ TransformListener::~TransformListener()
   }
 }
 
-
-/** Resolve transform name.
- * @param frame_name frame name
- * @return resolved frame name
- */
-std::string
-TransformListener::resolve(const std::string& frame_name)
-{
-  return fawkes::tf::resolve("", frame_name);
-}
 
 void
 TransformListener::bb_interface_created(const char *type, const char *id) throw()

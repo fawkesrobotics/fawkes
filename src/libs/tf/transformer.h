@@ -92,6 +92,7 @@ class Transformer
 
   bool frame_exists(const std::string& frame_id_str) const;
 
+  std::string resolve(const std::string& frame_name);
 
   void lookup_transform(const std::string& target_frame,
                         const std::string& source_frame,

@@ -52,6 +52,7 @@
 #include <tf/transformer.h>
 #include <tf/time_cache.h>
 #include <tf/exceptions.h>
+#include <tf/utils.h>
 
 #include <core/threading/mutex_locker.h>
 #include <iostream>
@@ -317,6 +318,15 @@ Transformer::clear()
   }
 }
 
+/** Resolve transform name.
+ * @param frame_name frame name
+ * @return resolved frame name
+ */
+std::string
+Transformer::resolve(const std::string& frame_name)
+{
+  return fawkes::tf::resolve("", frame_name);
+}
 
 /** Check if frame exists.
  * @param frame_id_str frame ID

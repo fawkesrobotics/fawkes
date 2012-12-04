@@ -80,8 +80,6 @@ class TransformListener
   TransformListener(BlackBoard *bb);
   virtual ~TransformListener();
 
-  std::string resolve(const std::string& frame_name);
-
   // for BlackBoardInterfaceObserver
   virtual void bb_interface_created(const char *type, const char *id) throw();
 
