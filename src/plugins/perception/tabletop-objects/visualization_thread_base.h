@@ -45,7 +45,10 @@ class TabletopVisualizationThreadBase
                          V_Vector4f &table_hull_vertices,
                          V_Vector4f &table_model_vertices,
                          V_Vector4f &good_table_hull_edges,
-                         V_Vector4f &centroids) throw() = 0;
+                         V_Vector4f &centroids,
+                         V_Vector4f &cylinder_params,
+                         std::vector<double> &obj_confidence,
+                         std::vector<signed int>& best_obj_guess) throw() = 0;
 };
 
 #endif

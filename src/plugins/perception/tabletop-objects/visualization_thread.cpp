@@ -32,8 +32,7 @@
 #endif
 #include <Eigen/Geometry>
 
-extern "C"
-{
+extern "C" {
 #ifdef HAVE_QHULL_2011
 #  include "libqhull/libqhull.h"
 #  include "libqhull/mem.h"
@@ -69,7 +68,7 @@ using namespace fawkes;
 
 /** Constructor. */
 TabletopVisualizationThread::TabletopVisualizationThread()
-  : fawkes::Thread("TabletopVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
+: fawkes::Thread("TabletopVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   set_coalesce_wakeups(true);
 }
@@ -187,19 +186,41 @@ TabletopVisualizationThread::loop()
       sphere.id = idnum++;
       sphere.type = visualization_msgs::Marker::CYLINDER;
       sphere.action = visualization_msgs::Marker::ADD;
+
+      /*
+       sphere.scale.x = sphere.scale.y = 0.08;
+       sphere.scale.z = 0.09;
+       */
+      sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[i][0];
+      sphere.scale.z = cylinder_params_[i][1];
+      //if (obj_confidence_[i] >= 0.5)
+      std::cout << "VISUALIZING OBJECT " << i << ". BEST GUESS = "
+          << best_obj_guess_[i] << std::endl;
+      if (best_obj_guess_[i] < 0) {
+        std::cout << "RED" << std::endl;
+        sphere.color.r = 1.0;
+        sphere.color.g = 0.0;
+        sphere.color.b = 0.0;
+      } else {
+        std::cout << "GREEN" << std::endl;
+        sphere.color.r = 0.0;
+        sphere.color.g = 1.0;
+        sphere.color.b = 0.0;
+      }
+      /*
+       sphere.color.r = (float)cluster_colors[i][0] / 255.f;
+       sphere.color.g = (float)cluster_colors[i][1] / 255.f;
+       sphere.color.b = (float)cluster_colors[i][2] / 255.f;
+       */
+      sphere.color.a = 1.0;
       sphere.pose.position.x = baserel_centroid[0];
       sphere.pose.position.y = baserel_centroid[1];
       sphere.pose.position.z = baserel_centroid[2];
       sphere.pose.orientation.w = 1.;
-      sphere.scale.x = sphere.scale.y = 0.08;
-      sphere.scale.z = 0.09;
-      sphere.color.r = (float)cluster_colors[i][0] / 255.f;
-      sphere.color.g = (float)cluster_colors[i][1] / 255.f;
-      sphere.color.b = (float)cluster_colors[i][2] / 255.f;
-      sphere.color.a = 1.0;
       sphere.lifetime = ros::Duration(cfg_duration_, 0);
       m.markers.push_back(sphere);
-    } catch (tf::TransformException &e) {} // ignored
+    } catch (Exception &e) {
+    } // ignored
   }
 
   Eigen::Vector4f normal_end = (table_centroid_ + (normal_ * -0.15));
@@ -547,12 +568,11 @@ TabletopVisualizationThread::loop()
 
 void
 TabletopVisualizationThread::visualize(const std::string &frame_id,
-                                       Eigen::Vector4f &table_centroid,
-                                       Eigen::Vector4f &normal,
-                                       V_Vector4f &table_hull_vertices,
-                                       V_Vector4f &table_model_vertices,
-                                       V_Vector4f &good_table_hull_edges,
-                                       V_Vector4f &centroids) throw()
+    Eigen::Vector4f &table_centroid, Eigen::Vector4f &normal,
+    V_Vector4f &table_hull_vertices, V_Vector4f &table_model_vertices,
+    V_Vector4f &good_table_hull_edges, V_Vector4f &centroids,
+    V_Vector4f &cylinder_params, std::vector<double> &obj_confidence,
+    std::vector<signed int>& best_obj_guess) throw ()
 {
   MutexLocker lock(&mutex_);
   frame_id_ = frame_id;
@@ -562,6 +582,9 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
   table_model_vertices_ = table_model_vertices;
   good_table_hull_edges_ = good_table_hull_edges;
   centroids_ = centroids;
+  cylinder_params_ = cylinder_params;
+  obj_confidence_ = obj_confidence;
+  best_obj_guess_ = best_obj_guess;
   wakeup();
 }
 

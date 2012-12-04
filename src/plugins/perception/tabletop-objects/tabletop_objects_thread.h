@@ -37,6 +37,15 @@
 #include <Eigen/StdVector>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/features/normal_3d.h>
+
+#include <pcl/ModelCoefficients.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+
+#include <pcl/filters/statistical_outlier_removal.h>
 
 namespace fawkes {
   class Position3DInterface;
@@ -90,14 +99,13 @@ class TabletopObjectsThread
                     const Eigen::Quaternionf &rotation = Eigen::Quaternionf(1, 0, 0, 0));
 
   CloudPtr simplify_polygon(CloudPtr polygon, float sqr_dist_threshold);
-
   CloudPtr generate_table_model(const float length, const float width,
                                 const float thickness, const float step, const float max_error);
-
   CloudPtr generate_table_model(const float length, const float width,
                                 const float step, const float max_error = 0.01);
-
   bool is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p, PointType &br_p1p, PointType &br_p2p);
+  bool compute_bounding_box_scores(Eigen::Vector3f& cluster_dim, std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& scores);
+  double compute_similarity(double d1, double d2);
 
   void convert_colored_input();
 
@@ -112,6 +120,16 @@ class TabletopObjectsThread
   CloudPtr           converted_input_;
   CloudConstPtr      input_;
   pcl::PointCloud<ColorPointType>::Ptr clusters_;
+
+  std::vector<fawkes::RefPtr<pcl::PointCloud<ColorPointType> > > f_obj_clusters_;
+  std::vector<pcl::PointCloud<ColorPointType>::Ptr> obj_clusters_;
+  std::vector<double> obj_shape_confidence_;
+
+  std::vector<std::vector<double>> obj_likelihoods_;
+  std::vector<signed int> best_obj_guess_;
+  int NUM_KNOWN_OBJS_;
+
+  std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > known_obj_dimensions_;
 
   pcl::VoxelGrid<PointType> grid_;
   pcl::SACSegmentation<PointType> seg_;
