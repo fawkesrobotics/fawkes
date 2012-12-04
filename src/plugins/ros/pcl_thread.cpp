@@ -108,7 +108,9 @@ RosPointCloudThread::loop()
       void *point_data;
       size_t point_size, num_points;
       fawkes::Time time;
-      __adapter->get_data(p->first, width, height, time,
+      fawkes::Time now(time);
+      std::string frame_id;
+      __adapter->get_data(p->first, frame_id, width, height, time,
                           &point_data, point_size, num_points);
 
       if (pi.last_sent != time) {
@@ -120,6 +122,7 @@ RosPointCloudThread::loop()
 
         pi.msg.width             = width;
         pi.msg.height            = height;
+	pi.msg.header.frame_id   = frame_id;
         pi.msg.header.stamp.sec  = time.get_sec();
         pi.msg.header.stamp.nsec = time.get_nsec();
         pi.msg.point_step        = point_size;

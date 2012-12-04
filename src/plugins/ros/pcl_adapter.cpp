@@ -160,7 +160,7 @@ RosPointCloudAdapter::get_info(std::string &id,
  * @param num_points upon return contains number of points
  */
 void
-RosPointCloudAdapter::get_data(const std::string &id,
+RosPointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
                                unsigned int &width, unsigned int &height, fawkes::Time &time,
                                void **data_ptr, size_t &point_size, size_t &num_points)
 {
@@ -169,6 +169,7 @@ RosPointCloudAdapter::get_data(const std::string &id,
   }
 
   const pcl_utils::StorageAdapter *sa = __sas[id]->a;
+  frame_id = sa->frame_id();
   width  = sa->width();
   height = sa->height();
   *data_ptr = sa->data_ptr();

@@ -27,7 +27,6 @@
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/pointcloud.h>
 #include <plugins/ros/aspect/ros.h>
 #include <core/threading/mutex.h>
 
