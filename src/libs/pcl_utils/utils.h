@@ -23,6 +23,8 @@
 #define __LIBS_PCL_UTILS_UTILS_H_
 
 #include <pcl/point_cloud.h>
+#include <core/utils/refptr.h>
+#include <utils/time/time.h>
 
 namespace fawkes {
   namespace pcl_utils {
@@ -30,6 +32,16 @@ namespace fawkes {
   }
 }
 #endif
+
+/** Union to pack fawkes::Time into the pcl::PointCloud timestamp. */
+typedef union {
+  struct {
+    uint64_t sec  : 44;	///< seconds part of time
+    uint64_t usec : 20;	///< microseconds part of time
+  } time;		///< Access timestamp as time
+  uint64_t timestamp;	///< Access timestamp as number only
+} PointCloudTimestamp;
+
 
 /** Set time of a point cloud from a fawkes::Time instance.
  * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
@@ -39,22 +51,49 @@ namespace fawkes {
  */
 template <typename PointT>
 inline void
-set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &time)
+set_time(pcl::PointCloud<PointT> &cloud, const fawkes::Time &time)
 {
 #if HAVE_ROS_PCL
-  cloud->header.stamp.sec  = time.get_sec();
-  cloud->header.stamp.nsec = time.get_usec() * 1000;
+  cloud.header.stamp.sec  = time.get_sec();
+  cloud.header.stamp.nsec = time.get_usec() * 1000;
 #else
-  fawkes::PointCloudTimestamp pclts;
+  PointCloudTimestamp pclts;
   pclts.time.sec  = time.get_sec();
   pclts.time.usec = time.get_usec();
-  cloud->header.stamp = pclts.timestamp;
+  cloud.header.stamp = pclts.timestamp;
 #endif
 }
 
+/** Set time of a point cloud from a fawkes::Time instance.
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to set the time
+ * @param time time to use
+ */
+template <typename PointT>
+inline void
+set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &time)
+{
+  set_time<PointT>(**cloud, time);
+}
+
+/** Set time of a point cloud from a fawkes::Time instance.
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to set the time
+ * @param time time to use
+ */
+template <typename PointT>
+inline void
+set_time(boost::shared_ptr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &time)
+{
+  set_time<PointT>(*cloud, time);
+}
+
+
 
 /** Get time of a point cloud as a fawkes::Time instance.
- * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
  * timestamp field (if non-ROS PCL is used).
  * @param cloud cloud of which to get the time
  * @param time upon return contains the timestamp of the cloud
@@ -66,15 +105,15 @@ get_time(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Ti
 #if HAVE_ROS_PCL
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
-  fawkes::PointCloudTimestamp pclts;
+  PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
-  time.set_time(pclts.time.sec, time.get_usec());
+  time.set_time(pclts.time.sec, pclts.time.usec);
 #endif
 }
 
 
 /** Get time of a point cloud as a fawkes::Time instance.
- * This uses the fawkes::PointCloudTimestamp struct to set the time in the PCL
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
  * timestamp field (if non-ROS PCL is used).
  * @param cloud cloud of which to get the time
  * @param time upon return contains the timestamp of the cloud
@@ -86,8 +125,28 @@ get_time(const fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &ti
 #if HAVE_ROS_PCL
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
-  fawkes::PointCloudTimestamp pclts;
+  PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
+  time.set_time(pclts.time.sec, pclts.time.usec);
+#endif
+}
+
+
+/** Get time of a point cloud as a fawkes::Time instance.
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to get the time
+ * @param time upon return contains the timestamp of the cloud
+ */
+template <typename PointT>
+inline void
+get_time(const pcl::PointCloud<PointT> &cloud, fawkes::Time &time)
+{
+#if HAVE_ROS_PCL
+  time.set_time(cloud.header.stamp.sec, cloud.header.stamp.nsec / 1000);
+#else
+  PointCloudTimestamp pclts;
+  pclts.timestamp = cloud.header.stamp;
   time.set_time(pclts.time.sec, pclts.time.usec);
 #endif
 }

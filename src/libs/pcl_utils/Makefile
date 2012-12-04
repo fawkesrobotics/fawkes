@@ -14,30 +14,37 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/pcl.mk
 
-LIBS_libfawkespclutils = fawkescore
-OBJS_libfawkespclutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
-HDRS_libfawkespclutils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
+LIBS_libfawkespcl_utils = fawkescore fawkestf
+OBJS_libfawkespcl_utils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
+HDRS_libfawkespcl_utils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
 OBJS_all = $(OBJS_libfawkespcl_utils)
 
-ifeq ($(HAVE_PCL),1)
-  CFLAGS  += $(CFLAGS_PCL)
-  LDFLAGS += $(LDFLAGS_PCL)
-  # Currently there is no code to be compiled
-  #LIBS_all = $(LIBDIR)/libfawkespclutils.so
+ifeq ($(HAVE_PCL)$(HAVE_TF),11)
+  CFLAGS  += $(CFLAGS_PCL) $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF)
+  LIBS_all = $(LIBDIR)/libfawkespcl_utils.$(SOEXT)
 else
-  WARN_TARGETS += warning_pcl
+  ifneq ($(HAVE_PCL),1)
+    WARN_TARGETS += warning_pcl
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_pcl
-warning_bullet:
+.PHONY: warning_pcl warning_tf
+warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (pcl[-devel] not installed)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (tf framework not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
