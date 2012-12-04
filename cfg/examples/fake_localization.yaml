@@ -1,0 +1,13 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/static-transforms
+---
+plugins/static-transforms:
+  transforms:
+    fake_loc:
+      frame: !frame /map
+      child_frame: /base_link
+      trans_x: 0.0
+      trans_y: 0.0
+      trans_z: 0.0
