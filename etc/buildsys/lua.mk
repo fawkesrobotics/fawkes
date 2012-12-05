@@ -67,6 +67,15 @@ ifeq ($(HAVE_LUA),1)
       _HAVE_TOLUA_BIN=1
       TOLUAPP=tolua++$(LUA_VERSION)
     endif
+    # Arch Linux
+    ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++.a),)
+      _HAVE_TOLUA_LIB=1
+      TOLUA_LIBS=tolua++ stdc++
+    endif
+    ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=tolua++
+    endif
     ifeq ($(_HAVE_TOLUA_LIB)$(_HAVE_TOLUA_BIN),11)
       HAVE_TOLUA = 1
     endif
