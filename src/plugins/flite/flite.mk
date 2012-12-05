@@ -17,6 +17,13 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/flite/flite.h $(SYSROOT)/usr/local/incl
   HAVE_FLITE=1
 endif
 
+ifeq ($(HAVE_FLITE),1)
+  ifeq ($(DISTRO),arch)
+    CFLAGS_FLITE += -lflite_cmu_us_kal -lflite_usenglish -lflite_cmulex -lflite
+    LDFLAGS_FLITE += -lflite_cmu_us_kal -lflite_usenglish -lflite_cmulex -lflite
+  endif
+endif
+
 ifneq ($(PKGCONFIG),)
   HAVE_ALSA = $(if $(shell $(PKGCONFIG) --exists 'alsa'; echo $${?/1/}),1,0)
   CFLAGS_ALSA  = $(shell $(PKGCONFIG) --cflags 'alsa')
