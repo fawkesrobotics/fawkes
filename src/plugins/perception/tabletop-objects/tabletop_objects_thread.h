@@ -39,6 +39,7 @@
 namespace fawkes {
   class Position3DInterface;
   class SwitchInterface;
+  class Time;
 #ifdef USE_TIMETRACKER
   class TimeTracker;
 #endif
@@ -112,6 +113,8 @@ class TabletopObjectsThread
   fawkes::Position3DInterface *table_pos_if_;
 
   fawkes::SwitchInterface *switch_if_;
+
+  fawkes::Time *last_pcl_time_;
 
   float cfg_depth_filter_min_x_;
   float cfg_depth_filter_max_x_;

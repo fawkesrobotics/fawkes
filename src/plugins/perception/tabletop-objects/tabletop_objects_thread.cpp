@@ -180,6 +180,8 @@ TabletopObjectsThread::init()
 
   loop_count_ = 0;
 
+  last_pcl_time_ = new Time(clock);
+
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
   tt_loopcount_ = 0;
@@ -294,10 +296,22 @@ TabletopObjectsThread::loop()
 
   if (! switch_if_->is_enabled()) {
     TimeWait::wait(250000);
+    TIMETRACK_ABORT(ttc_full_loop_);
     return;
   }
 
-  TIMETRACK_INTER(ttc_msgproc_, ttc_voxelize_)
+  TIMETRACK_END(ttc_msgproc_);
+
+  fawkes::Time pcl_time;
+  pcl_utils::get_time(finput_, pcl_time);
+  if (*last_pcl_time_ == pcl_time) {
+    TimeWait::wait(20000);
+    TIMETRACK_ABORT(ttc_full_loop_);
+    return;
+  }
+  *last_pcl_time_ = pcl_time;
+
+  TIMETRACK_START(ttc_voxelize_);
 
   CloudPtr temp_cloud(new Cloud);
   CloudPtr temp_cloud2(new Cloud);
