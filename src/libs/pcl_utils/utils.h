@@ -152,6 +152,46 @@ get_time(const pcl::PointCloud<PointT> &cloud, fawkes::Time &time)
 }
 
 
+/** Get time of a point cloud as a fawkes::Time instance.
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to get the time
+ * @param time upon return contains the timestamp of the cloud
+ */
+template <typename PointT>
+inline void
+get_time(const boost::shared_ptr<pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
+{
+#if HAVE_ROS_PCL
+  time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
+#else
+  PointCloudTimestamp pclts;
+  pclts.timestamp = cloud->header.stamp;
+  time.set_time(pclts.time.sec, pclts.time.usec);
+#endif
+}
+
+
+/** Get time of a point cloud as a fawkes::Time instance.
+ * This uses the PointCloudTimestamp struct to set the time in the PCL
+ * timestamp field (if non-ROS PCL is used).
+ * @param cloud cloud of which to get the time
+ * @param time upon return contains the timestamp of the cloud
+ */
+template <typename PointT>
+inline void
+get_time(const boost::shared_ptr<const pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
+{
+#if HAVE_ROS_PCL
+  time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
+#else
+  PointCloudTimestamp pclts;
+  pclts.timestamp = cloud->header.stamp;
+  time.set_time(pclts.time.sec, pclts.time.usec);
+#endif
+}
+
+
 /** Copy time from one point cloud to another.
  * @param from point cloud to copy time from
  * @param to point cloud to copy time to
@@ -160,6 +200,19 @@ template <typename PointT1, typename PointT2>
 inline void
 copy_time(fawkes::RefPtr<const pcl::PointCloud<PointT1> > &from,
           fawkes::RefPtr<pcl::PointCloud<PointT2> > &to)
+{
+  to->header.stamp = from->header.stamp;
+}
+
+
+/** Copy time from one point cloud to another.
+ * @param from point cloud to copy time from
+ * @param to point cloud to copy time to
+ */
+template <typename PointT1, typename PointT2>
+inline void
+copy_time(boost::shared_ptr<const pcl::PointCloud<PointT1> > &from,
+	  fawkes::RefPtr<pcl::PointCloud<PointT2> > &to)
 {
   to->header.stamp = from->header.stamp;
 }
