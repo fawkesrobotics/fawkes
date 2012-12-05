@@ -336,29 +336,42 @@ TabletopVisualizationThread::loop()
   }
 
   // Table model surrounding polygon
-  if (! table_model_vertices_.empty()) {
-    visualization_msgs::Marker hull_model;
-    hull_model.header.frame_id = frame_id_;
-    hull_model.header.stamp = ros::Time::now();
-    hull_model.ns = "tabletop";
-    hull_model.id = idnum++;
-    hull_model.type = visualization_msgs::Marker::LINE_STRIP;
-    hull_model.action = visualization_msgs::Marker::ADD;
-    hull_model.points.resize(table_model_vertices_.size() + 1);
-    for (size_t i = 0; i < table_model_vertices_.size(); ++i) {
-      hull_model.points[i].x = table_model_vertices_[i][0];
-      hull_model.points[i].y = table_model_vertices_[i][1];
-      hull_model.points[i].z = table_model_vertices_[i][2];
+  if (! (table_model_vertices_.empty() && table_hull_vertices_.empty())) {
+    visualization_msgs::Marker hull;
+    hull.header.frame_id = frame_id_;
+    hull.header.stamp = ros::Time::now();
+    hull.ns = "tabletop";
+    hull.id = idnum++;
+    hull.type = visualization_msgs::Marker::LINE_STRIP;
+    hull.action = visualization_msgs::Marker::ADD;
+
+    if (! table_model_vertices_.empty()) {
+      hull.points.resize(table_model_vertices_.size() + 1);
+      for (size_t i = 0; i < table_model_vertices_.size(); ++i) {
+	hull.points[i].x = table_model_vertices_[i][0];
+	hull.points[i].y = table_model_vertices_[i][1];
+	hull.points[i].z = table_model_vertices_[i][2];
+      }
+      hull.points[table_model_vertices_.size()].x = table_model_vertices_[0][0];
+      hull.points[table_model_vertices_.size()].y = table_model_vertices_[0][1];
+      hull.points[table_model_vertices_.size()].z = table_model_vertices_[0][2];
+    } else if (! table_hull_vertices_.empty()) {
+      hull.points.resize(table_hull_vertices_.size() + 1);
+      for (size_t i = 0; i < table_hull_vertices_.size(); ++i) {
+	hull.points[i].x = table_hull_vertices_[i][0];
+	hull.points[i].y = table_hull_vertices_[i][1];
+	hull.points[i].z = table_hull_vertices_[i][2];
+      }
+      hull.points[table_hull_vertices_.size()].x = table_hull_vertices_[0][0];
+      hull.points[table_hull_vertices_.size()].y = table_hull_vertices_[0][1];
+      hull.points[table_hull_vertices_.size()].z = table_hull_vertices_[0][2];
     }
-    hull_model.points[table_model_vertices_.size()].x = table_model_vertices_[0][0];
-    hull_model.points[table_model_vertices_.size()].y = table_model_vertices_[0][1];
-    hull_model.points[table_model_vertices_.size()].z = table_model_vertices_[0][2];
-    hull_model.scale.x = 0.0075;
-    hull_model.color.r = 0.5;
-    hull_model.color.g = hull_model.color.b = 0.f;
-    hull_model.color.a = 1.0;
-    hull_model.lifetime = ros::Duration(cfg_duration_, 0);
-    m.markers.push_back(hull_model);
+    hull.scale.x = 0.0075;
+    hull.color.r = 0.5;
+    hull.color.g = hull.color.b = 0.f;
+    hull.color.a = 1.0;
+    hull.lifetime = ros::Duration(cfg_duration_, 0);
+    m.markers.push_back(hull);
   }
 
   //triangulate_hull();
@@ -394,7 +407,7 @@ TabletopVisualizationThread::loop()
     m.markers.push_back(plane);
   }
 
-  if (cfg_show_frustrum_) {
+  if (cfg_show_frustrum_ && ! table_model_vertices_.empty()) {
     // Frustrum
     visualization_msgs::Marker frustrum;
     frustrum.header.frame_id = frame_id_;

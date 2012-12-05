@@ -759,121 +759,128 @@ TabletopObjectsThread::loop()
     good_hull_edges.resize(good_edge_points);
 #endif
 
-    TIMETRACK_INTER(ttc_find_edge_, ttc_transform_)
-
-    // Calculate transformation parameters based on determined
-    // convex hull polygon segment we decided on as "the table edge"
-    PointType &p1p = cloud_hull_->points[pidx1];
-    PointType &p2p = cloud_hull_->points[pidx2];
-
-    Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
-    Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
-
-    // Normal vectors for table model and plane
-    Eigen::Vector3f model_normal = Eigen::Vector3f::UnitZ();
-    Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
-    normal.normalize(); // just in case
-
-    Eigen::Vector3f table_centroid_3f =
-      Eigen::Vector3f(table_centroid[0], table_centroid[1], table_centroid[2]);
-
-    // Rotational parameters to align table to polygon segment
-    Eigen::Vector3f p1_p2 = p2 - p1;
-    Eigen::Vector3f p1_p2_center = (p2 + p1) * 0.5;
-    p1_p2.normalize();
-    Eigen::Vector3f p1_p2_normal_cross = p1_p2.cross(normal);
-    p1_p2_normal_cross.normalize();
-
-    // For N=(A,B,C), and hessian Ax+By+Cz+D=0 and N dot X=(Ax+By+Cz)
-    // we get N dot X + D = 0 -> -D = N dot X
-    double nD = - p1_p2_normal_cross.dot(p1_p2_center);
-    double p1_p2_centroid_dist = p1_p2_normal_cross.dot(table_centroid_3f) + nD;
-    if (p1_p2_centroid_dist < 0) {
-      // normal points to the "wrong" side fo our purpose
-      p1_p2_normal_cross *= -1;
-    }
-
-    Eigen::Vector3f table_center =
-      p1_p2_center + p1_p2_normal_cross * (cfg_table_model_width_ * 0.5);
-
-    for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
-    table_centroid[3] = 0.;
-
-    // calculate table corner points
-    std::vector<Eigen::Vector3f> tpoints(4);
-    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_length_ * 0.5);
-    tpoints[1] = tpoints[0] + p1_p2_normal_cross * cfg_table_model_width_;
-    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_length_ * 0.5);
-    tpoints[2] = tpoints[3] + p1_p2_normal_cross * cfg_table_model_width_;
+    TIMETRACK_END(ttc_find_edge_);
 
     model_cloud_hull_.reset(new Cloud());
-    model_cloud_hull_->points.resize(4);
-    model_cloud_hull_->height = 1;
-    model_cloud_hull_->width = 4;
-    model_cloud_hull_->is_dense = true;
-    for (int i = 0; i < 4; ++i) {
-      model_cloud_hull_->points[i].x = tpoints[i][0];
-      model_cloud_hull_->points[i].y = tpoints[i][1];
-      model_cloud_hull_->points[i].z = tpoints[i][2];
+    if ((pidx1 != std::numeric_limits<size_t>::max()) &&
+	(pidx2 != std::numeric_limits<size_t>::max()) )
+    {
+
+      TIMETRACK_START(ttc_transform_);
+
+      // Calculate transformation parameters based on determined
+      // convex hull polygon segment we decided on as "the table edge"
+      PointType &p1p = cloud_hull_->points[pidx1];
+      PointType &p2p = cloud_hull_->points[pidx2];
+
+      Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
+      Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
+
+      // Normal vectors for table model and plane
+      Eigen::Vector3f model_normal = Eigen::Vector3f::UnitZ();
+      Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
+      normal.normalize(); // just in case
+
+      Eigen::Vector3f table_centroid_3f =
+	Eigen::Vector3f(table_centroid[0], table_centroid[1], table_centroid[2]);
+
+      // Rotational parameters to align table to polygon segment
+      Eigen::Vector3f p1_p2 = p2 - p1;
+      Eigen::Vector3f p1_p2_center = (p2 + p1) * 0.5;
+      p1_p2.normalize();
+      Eigen::Vector3f p1_p2_normal_cross = p1_p2.cross(normal);
+      p1_p2_normal_cross.normalize();
+
+      // For N=(A,B,C), and hessian Ax+By+Cz+D=0 and N dot X=(Ax+By+Cz)
+      // we get N dot X + D = 0 -> -D = N dot X
+      double nD = - p1_p2_normal_cross.dot(p1_p2_center);
+      double p1_p2_centroid_dist = p1_p2_normal_cross.dot(table_centroid_3f) + nD;
+      if (p1_p2_centroid_dist < 0) {
+	// normal points to the "wrong" side fo our purpose
+	p1_p2_normal_cross *= -1;
+      }
+
+      Eigen::Vector3f table_center =
+	p1_p2_center + p1_p2_normal_cross * (cfg_table_model_width_ * 0.5);
+
+      for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
+      table_centroid[3] = 0.;
+
+      // calculate table corner points
+      std::vector<Eigen::Vector3f> tpoints(4);
+      tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_length_ * 0.5);
+      tpoints[1] = tpoints[0] + p1_p2_normal_cross * cfg_table_model_width_;
+      tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_length_ * 0.5);
+      tpoints[2] = tpoints[3] + p1_p2_normal_cross * cfg_table_model_width_;
+
+      model_cloud_hull_->points.resize(4);
+      model_cloud_hull_->height = 1;
+      model_cloud_hull_->width = 4;
+      model_cloud_hull_->is_dense = true;
+      for (int i = 0; i < 4; ++i) {
+	model_cloud_hull_->points[i].x = tpoints[i][0];
+	model_cloud_hull_->points[i].y = tpoints[i][1];
+	model_cloud_hull_->points[i].z = tpoints[i][2];
+      }
+      //std::sort(model_cloud_hull_->points.begin(),
+      //          model_cloud_hull_->points.end(), comparePoints2D<PointType>);
+
+      // Rotational parameters to rotate table model from camera to
+      // determined table position in 3D space
+      Eigen::Vector3f rotaxis = model_normal.cross(normal);
+      rotaxis.normalize();
+      double angle = acos(normal.dot(model_normal));
+
+      // Transformation to translate model from camera center into actual pose
+      Eigen::Affine3f affine =
+	Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
+			     table_centroid.z())
+	* Eigen::AngleAxisf(angle, rotaxis);
+
+      Eigen::Vector3f
+	model_p1(-cfg_table_model_width_ * 0.5, cfg_table_model_length_ * 0.5, 0.),
+	model_p2(-cfg_table_model_width_ * 0.5, -cfg_table_model_length_ * 0.5, 0.);
+      model_p1 = affine * model_p1;
+      model_p2 = affine * model_p2;
+
+      // Calculate the vector between model_p1 and model_p2
+      Eigen::Vector3f model_p1_p2 = model_p2 - model_p1;
+      model_p1_p2.normalize();
+      // Calculate rotation axis between model_p1 and model_p2
+      Eigen::Vector3f model_rotaxis = model_p1_p2.cross(p1_p2);
+      model_rotaxis.normalize();
+      double angle_p1_p2 = acos(model_p1_p2.dot(p1_p2));
+      //logger->log_info(name(), "Angle: %f  Poly (%f,%f,%f) -> (%f,%f,%f)  model (%f,%f,%f) -> (%f,%f,%f)",
+      //                 angle_p1_p2, p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(),
+      //                 model_p1.x(), model_p1.y(), model_p1.z(), model_p2.x(), model_p2.y(), model_p2.z());
+
+      // Final full transformation of the table within the camera coordinate frame
+      affine =
+	Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
+			     table_centroid.z())
+	* Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
+	* Eigen::AngleAxisf(angle, rotaxis);
+
+
+      // Just the rotational part
+      Eigen::Quaternionf qt;
+      qt = Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
+	* Eigen::AngleAxisf(angle, rotaxis);
+
+      // Set position again, this time with the rotation
+      set_position(table_pos_if_, true, table_centroid, qt);
+
+      TIMETRACK_INTER(ttc_transform_, ttc_transform_model_)
+
+	// to show fitted table model
+	CloudPtr table_model = generate_table_model(cfg_table_model_length_, cfg_table_model_width_, cfg_table_model_step_);
+      pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
+      //*table_model_ = *model_cloud_hull_;
+      //*table_model_ = *table_model;
+      table_model_->header.frame_id = finput_->header.frame_id;
+
+      TIMETRACK_END(ttc_transform_model_);
     }
-    //std::sort(model_cloud_hull_->points.begin(),
-    //          model_cloud_hull_->points.end(), comparePoints2D<PointType>);
-
-    // Rotational parameters to rotate table model from camera to
-    // determined table position in 3D space
-    Eigen::Vector3f rotaxis = model_normal.cross(normal);
-    rotaxis.normalize();
-    double angle = acos(normal.dot(model_normal));
-
-    // Transformation to translate model from camera center into actual pose
-    Eigen::Affine3f affine =
-      Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
-                           table_centroid.z())
-      * Eigen::AngleAxisf(angle, rotaxis);
-
-    Eigen::Vector3f
-      model_p1(-cfg_table_model_width_ * 0.5, cfg_table_model_length_ * 0.5, 0.),
-      model_p2(-cfg_table_model_width_ * 0.5, -cfg_table_model_length_ * 0.5, 0.);
-    model_p1 = affine * model_p1;
-    model_p2 = affine * model_p2;
-
-    // Calculate the vector between model_p1 and model_p2
-    Eigen::Vector3f model_p1_p2 = model_p2 - model_p1;
-    model_p1_p2.normalize();
-    // Calculate rotation axis between model_p1 and model_p2
-    Eigen::Vector3f model_rotaxis = model_p1_p2.cross(p1_p2);
-    model_rotaxis.normalize();
-    double angle_p1_p2 = acos(model_p1_p2.dot(p1_p2));
-    //logger->log_info(name(), "Angle: %f  Poly (%f,%f,%f) -> (%f,%f,%f)  model (%f,%f,%f) -> (%f,%f,%f)",
-    //                 angle_p1_p2, p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(),
-    //                 model_p1.x(), model_p1.y(), model_p1.z(), model_p2.x(), model_p2.y(), model_p2.z());
-
-    // Final full transformation of the table within the camera coordinate frame
-    affine =
-      Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
-                           table_centroid.z())
-      * Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
-      * Eigen::AngleAxisf(angle, rotaxis);
-
-
-    // Just the rotational part
-    Eigen::Quaternionf qt;
-    qt = Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
-      * Eigen::AngleAxisf(angle, rotaxis);
-
-    // Set position again, this time with the rotation
-    set_position(table_pos_if_, true, table_centroid, qt);
-
-    TIMETRACK_INTER(ttc_transform_, ttc_transform_model_)
-
-    // to show fitted table model
-    CloudPtr table_model = generate_table_model(cfg_table_model_length_, cfg_table_model_width_, cfg_table_model_step_);
-    pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
-    //*table_model_ = *model_cloud_hull_;
-    //*table_model_ = *table_model;
-    table_model_->header.frame_id = finput_->header.frame_id;
-
-    TIMETRACK_END(ttc_transform_model_);
 
   } catch (Exception &e) {
     set_position(table_pos_if_, false);
