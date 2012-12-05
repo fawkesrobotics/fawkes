@@ -190,7 +190,7 @@ TabletopObjectsThread::init()
   pcl::PointCloud<ColorPointType>::Ptr tmp_cloud;
   for (int i = 0; i < MAX_CENTROIDS; i++) {
     f_tmp_cloud = new pcl::PointCloud<ColorPointType>();
-    f_tmp_cloud->header.frame_id = finput_->header.frame_id;
+    f_tmp_cloud->header.frame_id = input_->header.frame_id;
     f_tmp_cloud->is_dense = false;
     std::string obj_id;
     if (asprintf(&tmp_name, "obj_cluster_%u", i) != -1) {
@@ -1327,7 +1327,7 @@ TabletopObjectsThread::loop()
     std::cout << "obj " << i << " has " << (f_obj_clusters_[i])->size()
 	      << " points. Frame: "
 	      << (f_obj_clusters_[i])->header.frame_id.c_str() << std::endl;
-    pcl_utils::copy_time(finput_, f_obj_clusters_[i]);
+    pcl_utils::copy_time(input_, f_obj_clusters_[i]);
   }
 
 #ifdef HAVE_VISUAL_DEBUGGING
