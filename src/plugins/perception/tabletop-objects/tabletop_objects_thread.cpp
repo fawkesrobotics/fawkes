@@ -505,6 +505,10 @@ TabletopObjectsThread::loop()
     table_cluster_extract.setIndices(table_cluster_indices_ptr);
     table_cluster_extract.filter(*cloud_table_extracted);
     *cloud_proj_ = *cloud_table_extracted;
+
+    // recompute based on the new chosen table cluster
+    pcl::compute3DCentroid(*cloud_proj_, table_centroid);
+
   } else {
     // Don't mess with the table, clustering didn't help to make it any better
     logger->log_info(name(), "[L %u] table plane clustering did not generate any clusters", loop_count_);
@@ -907,7 +911,6 @@ TabletopObjectsThread::loop()
   above_cond->addComparison(above_comp);
   pcl::ConditionalRemoval<PointType> above_condrem(above_cond);
   above_condrem.setInputCloud(cloud_filt_);
-  //above_condrem.setKeepOrganized(true);
   cloud_above_.reset(new Cloud());
   above_condrem.filter(*cloud_above_);
 
@@ -945,30 +948,19 @@ TabletopObjectsThread::loop()
   // CLUSTERS
   // extract clusters of OBJECTS
 
-  TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_)
+  TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_);
 
   ColorCloudPtr tmp_clusters(new ColorCloud());
   tmp_clusters->header.frame_id = clusters_->header.frame_id;
-  std::vector<int> &indices = inliers->indices;
-  tmp_clusters->height = 1;
-  //const size_t tsize = table_points->points.size();
-  //tmp_clusters->width = tsize;
-  //tmp_clusters->points.resize(tsize);
-  tmp_clusters->width = indices.size();
-  tmp_clusters->points.resize(indices.size());
-  for (size_t i = 0; i < indices.size(); ++i) {
-    PointType &p1 = temp_cloud2->points[i];
-    //PointType &p1 = table_points->points[i];
+  *tmp_clusters = *cloud_proj_;
+  for (size_t i = 0; i < tmp_clusters->points.size(); ++i) {
     ColorPointType &p2 = tmp_clusters->points[i];
-    p2.x = p1.x;
-    p2.y = p1.y;
-    p2.z = p1.z;
     p2.r = table_color[0];
     p2.g = table_color[1];
     p2.b = table_color[2];
   }
 
-  TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
+  TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_);
 
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
   centroids.resize(MAX_CENTROIDS);
