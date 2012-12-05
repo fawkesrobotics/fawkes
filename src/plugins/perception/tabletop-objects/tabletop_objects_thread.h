@@ -128,6 +128,9 @@ class TabletopObjectsThread
   float cfg_segm_distance_threshold_;
   float cfg_segm_inlier_quota_;
   float cfg_max_z_angle_deviation_;
+  float cfg_table_min_cluster_quota_;
+  float cfg_table_downsample_leaf_size_;
+  float cfg_table_cluster_tolerance_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
   float cfg_table_model_length_;

@@ -94,6 +94,12 @@ TabletopObjectsThread::init()
     config->get_float(CFG_PREFIX"table_segmentation_distance_threshold");
   cfg_segm_inlier_quota_ =
     config->get_float(CFG_PREFIX"table_segmentation_inlier_quota");
+  cfg_table_min_cluster_quota_ =
+    config->get_float(CFG_PREFIX"table_min_cluster_quota");
+  cfg_table_downsample_leaf_size_ =
+    config->get_float(CFG_PREFIX"table_downsample_leaf_size");
+  cfg_table_cluster_tolerance_ =
+    config->get_float(CFG_PREFIX"table_cluster_tolerance");
   cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
   cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
   cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
@@ -500,7 +506,9 @@ TabletopObjectsThread::loop()
   // further downsample table
   CloudPtr cloud_table_voxelized(new Cloud());
   pcl::VoxelGrid<PointType> table_grid;
-  table_grid.setLeafSize(0.04, 0.04, 0.04);
+  table_grid.setLeafSize(cfg_table_downsample_leaf_size_,
+			 cfg_table_downsample_leaf_size_,
+			 cfg_table_downsample_leaf_size_);
   table_grid.setInputCloud(cloud_proj_);
   table_grid.filter(*cloud_table_voxelized);
 
@@ -513,8 +521,9 @@ TabletopObjectsThread::loop()
 
   std::vector<pcl::PointIndices> table_cluster_indices;
   pcl::EuclideanClusterExtraction<PointType> table_ec;
-  table_ec.setClusterTolerance(0.044);
-  table_ec.setMinClusterSize(0.8 * cloud_table_voxelized->points.size());
+  table_ec.setClusterTolerance(cfg_table_cluster_tolerance_);
+  table_ec.setMinClusterSize(cfg_table_min_cluster_quota_
+			     * cloud_table_voxelized->points.size());
   table_ec.setMaxClusterSize(cloud_table_voxelized->points.size());
   table_ec.setSearchMethod(kdtree_table);
   table_ec.setInputCloud(cloud_table_voxelized);
