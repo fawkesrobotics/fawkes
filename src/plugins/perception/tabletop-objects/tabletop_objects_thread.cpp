@@ -897,6 +897,25 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_extract_non_plane_, ttc_polygon_filter_);
 
+  // Check if the viewpoint, i.e. the input point clouds frame origin,
+  // if above or below the table centroid. If it is above, we want to point
+  // the normal towards the viewpoint in the next steps, otherwise it
+  // should point away from the sensor. "Above" is relative to the base link
+  // frame, i.e. the frame that is based on the ground support plane with the
+  // Z axis pointing upwards
+  bool viewpoint_above = true;
+  try {
+    tf::Stamped<tf::Point>
+      origin(tf::Point(0, 0, 0), fawkes::Time(0, 0), input_->header.frame_id);
+    tf::Stamped<tf::Point> baserel_viewpoint;
+    tf_listener->transform_point("/base_link", origin, baserel_viewpoint);
+
+    viewpoint_above = (baserel_viewpoint.z() > table_centroid[2]);
+  } catch (tf::TransformException &e) {
+    logger->log_warn(name(), "[L %u] could not transform viewpoint to base link",
+		     loop_count_);
+  }
+
   // Use only points above tables
   // Why coeff->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
   // The model coefficients are in Hessian Normal Form, hence coeff[0..2] are
@@ -910,7 +929,9 @@ TabletopObjectsThread::loop()
   // We make use of the fact that we only have a boring RGB-D camera and
   // not an X-Ray...
   pcl::ComparisonOps::CompareOp op =
-    coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
+    viewpoint_above
+    ? (coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT)
+    : (coeff->values[3] < 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT);
   pcl_utils::PlaneDistanceComparison<PointType>::ConstPtr
     above_comp(new pcl_utils::PlaneDistanceComparison<PointType>(coeff, op));
   pcl::ConditionAnd<PointType>::Ptr
