@@ -131,6 +131,7 @@ class TabletopObjectsThread
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
   std::string cfg_result_frame_;
+  std::string cfg_input_pointcloud_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;

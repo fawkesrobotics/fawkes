@@ -106,8 +106,9 @@ TabletopObjectsThread::init()
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
+  cfg_input_pointcloud_      = config->get_string(CFG_PREFIX"input_pointcloud");
 
-  finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
+  finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
   try {

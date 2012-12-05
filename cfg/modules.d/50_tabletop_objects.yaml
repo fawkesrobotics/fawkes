@@ -4,6 +4,9 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
 ---
 perception/tabletop-objects:
+  # ID of input point cloud
+  input_pointcloud: openni-pointcloud-xyz
+
   # Minimum X value (i.e. distance to camera) to consider a point; m
   depth_filter_min_x: 0.0
 
