@@ -1057,6 +1057,7 @@ TabletopObjectsThread::loop()
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
 
   *clusters_ = *tmp_clusters;
+  fclusters_->header.frame_id = finput_->header.frame_id;
   pcl_utils::copy_time(finput_, fclusters_);
   pcl_utils::copy_time(finput_, ftable_model_);
   pcl_utils::copy_time(finput_, fsimplified_polygon_);
