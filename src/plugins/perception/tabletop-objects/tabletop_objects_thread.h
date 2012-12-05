@@ -97,13 +97,18 @@ class TabletopObjectsThread
 
   bool is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p, PointType &br_p1p, PointType &br_p2p);
 
+  void convert_colored_input();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   fawkes::RefPtr<const pcl::PointCloud<PointType> > finput_;
+  fawkes::RefPtr<const pcl::PointCloud<ColorPointType> > fcoloredinput_;
   fawkes::RefPtr<pcl::PointCloud<ColorPointType> > fclusters_;
-  CloudConstPtr input_;
+  ColorCloudConstPtr colored_input_;
+  CloudPtr           converted_input_;
+  CloudConstPtr      input_;
   pcl::PointCloud<ColorPointType>::Ptr clusters_;
 
   pcl::VoxelGrid<PointType> grid_;
@@ -148,6 +153,7 @@ class TabletopObjectsThread
   unsigned int tt_loopcount_;
   unsigned int ttc_full_loop_;
   unsigned int ttc_msgproc_;
+  unsigned int ttc_convert_;
   unsigned int ttc_voxelize_;
   unsigned int ttc_plane_;
   unsigned int ttc_extract_plane_;

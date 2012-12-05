@@ -108,8 +108,22 @@ TabletopObjectsThread::init()
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_input_pointcloud_      = config->get_string(CFG_PREFIX"input_pointcloud");
 
-  finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
-  input_ = pcl_utils::cloudptr_from_refptr(finput_);
+  if (pcl_manager->exists_pointcloud<PointType>(cfg_input_pointcloud_.c_str())) {
+    finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
+    input_ = pcl_utils::cloudptr_from_refptr(finput_);
+  } else if (pcl_manager->exists_pointcloud<ColorPointType>(cfg_input_pointcloud_.c_str())) {
+    logger->log_warn(name(), "XYZ/RGB input point cloud, conversion required");
+    fcoloredinput_ =
+      pcl_manager->get_pointcloud<ColorPointType>(cfg_input_pointcloud_.c_str());
+    colored_input_ = pcl_utils::cloudptr_from_refptr(fcoloredinput_);
+    converted_input_.reset(new Cloud());
+    input_ = converted_input_;
+    converted_input_->header.frame_id = colored_input_->header.frame_id;
+    converted_input_->header.stamp    = colored_input_->header.stamp;
+  } else {
+    throw Exception("Point cloud '%s' does not exist or not XYZ or XYZ/RGB PCL",
+		    cfg_input_pointcloud_.c_str());
+  }
 
   try {
     double rotation[4] = {0., 0., 0., 1.};
@@ -151,20 +165,20 @@ TabletopObjectsThread::init()
   }
 
   fclusters_ = new pcl::PointCloud<ColorPointType>();
-  fclusters_->header.frame_id = finput_->header.frame_id;
+  fclusters_->header.frame_id = input_->header.frame_id;
   fclusters_->is_dense = false;
   pcl_manager->add_pointcloud<ColorPointType>("tabletop-object-clusters", fclusters_);
   clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
   ftable_model_ = new Cloud();
   table_model_ = pcl_utils::cloudptr_from_refptr(ftable_model_);
-  table_model_->header.frame_id = finput_->header.frame_id;
+  table_model_->header.frame_id = input_->header.frame_id;
   pcl_manager->add_pointcloud("tabletop-table-model", ftable_model_);
   pcl_utils::set_time(ftable_model_, fawkes::Time(clock));
 
   fsimplified_polygon_ = new Cloud();
   simplified_polygon_ = pcl_utils::cloudptr_from_refptr(fsimplified_polygon_);
-  simplified_polygon_->header.frame_id = finput_->header.frame_id;
+  simplified_polygon_->header.frame_id = input_->header.frame_id;
   pcl_manager->add_pointcloud("tabletop-simplified-polygon", fsimplified_polygon_);
   pcl_utils::set_time(fsimplified_polygon_, fawkes::Time(clock));
 
@@ -187,6 +201,7 @@ TabletopObjectsThread::init()
   tt_loopcount_ = 0;
   ttc_full_loop_          = tt_->add_class("Full Loop");
   ttc_msgproc_            = tt_->add_class("Message Processing");
+  ttc_convert_            = tt_->add_class("Input Conversion");
   ttc_voxelize_           = tt_->add_class("Downsampling");
   ttc_plane_              = tt_->add_class("Plane Segmentation");
   ttc_extract_plane_      = tt_->add_class("Plane Extraction");
@@ -303,13 +318,23 @@ TabletopObjectsThread::loop()
   TIMETRACK_END(ttc_msgproc_);
 
   fawkes::Time pcl_time;
-  pcl_utils::get_time(finput_, pcl_time);
+  if (colored_input_) {
+    pcl_utils::get_time(colored_input_, pcl_time);
+  } else {
+    pcl_utils::get_time(input_, pcl_time);
+  }
   if (*last_pcl_time_ == pcl_time) {
     TimeWait::wait(20000);
     TIMETRACK_ABORT(ttc_full_loop_);
     return;
   }
   *last_pcl_time_ = pcl_time;
+
+  if (colored_input_) {
+    TIMETRACK_START(ttc_convert_);
+    convert_colored_input();
+    TIMETRACK_END(ttc_convert_);
+  }
 
   TIMETRACK_START(ttc_voxelize_);
 
@@ -556,8 +581,8 @@ TabletopObjectsThread::loop()
     // Get transform Input camera -> base_link
     tf::StampedTransform t;
     fawkes::Time input_time(0,0);
-    //pcl_utils::get_time(finput_, input_time);
-    tf_listener->lookup_transform("/base_link", finput_->header.frame_id,
+    //pcl_utils::get_time(input_, input_time);
+    tf_listener->lookup_transform("/base_link", input_->header.frame_id,
                                   input_time, t);
 
     tf::Quaternion q = t.getRotation();
@@ -877,7 +902,7 @@ TabletopObjectsThread::loop()
       pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
       //*table_model_ = *model_cloud_hull_;
       //*table_model_ = *table_model;
-      table_model_->header.frame_id = finput_->header.frame_id;
+      table_model_->header.frame_id = input_->header.frame_id;
 
       TIMETRACK_END(ttc_transform_model_);
     }
@@ -980,9 +1005,14 @@ TabletopObjectsThread::loop()
 
   ColorCloudPtr tmp_clusters(new ColorCloud());
   tmp_clusters->header.frame_id = clusters_->header.frame_id;
-  *tmp_clusters = *cloud_proj_;
-  for (size_t i = 0; i < tmp_clusters->points.size(); ++i) {
+  tmp_clusters->points.resize(cloud_proj_->points.size());
+  for (size_t i = 0; i < cloud_proj_->points.size(); ++i) {
+    PointType &p1      = cloud_proj_->points[i];
     ColorPointType &p2 = tmp_clusters->points[i];
+    p2.x = p1.x;
+    p2.y = p1.y;
+    p2.z = p1.z;
+
     p2.r = table_color[0];
     p2.g = table_color[1];
     p2.b = table_color[2];
@@ -1057,10 +1087,10 @@ TabletopObjectsThread::loop()
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
 
   *clusters_ = *tmp_clusters;
-  fclusters_->header.frame_id = finput_->header.frame_id;
-  pcl_utils::copy_time(finput_, fclusters_);
-  pcl_utils::copy_time(finput_, ftable_model_);
-  pcl_utils::copy_time(finput_, fsimplified_polygon_);
+  fclusters_->header.frame_id = input_->header.frame_id;
+  pcl_utils::copy_time(input_, fclusters_);
+  pcl_utils::copy_time(input_, ftable_model_);
+  pcl_utils::copy_time(input_, fsimplified_polygon_);
 
 #ifdef HAVE_VISUAL_DEBUGGING
   if (visthread_) {
@@ -1297,6 +1327,28 @@ TabletopObjectsThread::simplify_polygon(CloudPtr polygon, float dist_threshold)
   return result;
 }
 
+
+void
+TabletopObjectsThread::convert_colored_input()
+{
+  converted_input_->header.seq      = colored_input_->header.seq;
+  converted_input_->header.frame_id = colored_input_->header.frame_id;
+  converted_input_->header.stamp    = colored_input_->header.stamp;
+  converted_input_->width           = colored_input_->width;
+  converted_input_->height          = colored_input_->height;
+  converted_input_->is_dense        = colored_input_->is_dense;
+
+  const size_t size = colored_input_->points.size();
+  converted_input_->points.resize(size);
+  for (size_t i = 0; i < size; ++i) {
+    const ColorPointType &in = colored_input_->points[i];
+    PointType &out           = converted_input_->points[i];
+
+    out.x = in.x;
+    out.y = in.y;
+    out.z = in.z;
+  }
+}
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void
