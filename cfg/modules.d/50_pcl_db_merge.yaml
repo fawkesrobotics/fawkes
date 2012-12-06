@@ -1,0 +1,15 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
+---
+perception/pcl-db-merge:
+  # Global reference frame to which to transform point clouds
+  # for initial alignment, typically /map or /base_link
+  global-frame: !frame /map
+
+  # mongodb-log database from which to read data 
+  database-name: "fflog"
+
+  # ID of the output point cloud by which it is registered with the PCL manager
+  output-pcl-id: db-merged

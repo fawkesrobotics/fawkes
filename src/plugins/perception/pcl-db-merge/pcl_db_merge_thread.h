@@ -70,6 +70,7 @@ class PointCloudDBMergeThread
 
   std::string cfg_database_name_;
   std::string cfg_global_frame_;
+  std::string cfg_output_id_;
 
   PointCloudDBMergePipeline<pcl::PointXYZ>     *pl_xyz_;
   PointCloudDBMergePipeline<pcl::PointXYZRGB>  *pl_xyzrgb_;

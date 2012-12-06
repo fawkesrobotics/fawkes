@@ -51,14 +51,20 @@ PointCloudDBMergeThread::~PointCloudDBMergeThread()
 void
 PointCloudDBMergeThread::init()
 {
+  pl_xyz_ = NULL;
+  pl_xyzrgb_ = NULL;
+  merge_if_ = NULL;
+  msg_waker_ = NULL;
+
+  cfg_database_name_ = config->get_string(CFG_PREFIX"database-name");
+  cfg_global_frame_  = config->get_string(CFG_PREFIX"global-frame");
+  cfg_output_id_     = config->get_string(CFG_PREFIX"output-pcl-id");
+
   foutput_ = new pcl::PointCloud<pcl::PointXYZRGB>();
   //foutput_->header.frame_id = finput_->header.frame_id;
   foutput_->is_dense = false;
-  pcl_manager->add_pointcloud<pcl::PointXYZRGB>("db-merged", foutput_);
+  pcl_manager->add_pointcloud<pcl::PointXYZRGB>(cfg_output_id_.c_str(), foutput_);
   output_ = pcl_utils::cloudptr_from_refptr(foutput_);
-
-  cfg_database_name_ = "fflog";
-  cfg_global_frame_  = "/map";
 
   
   pl_xyz_ =
@@ -88,7 +94,7 @@ PointCloudDBMergeThread::finalize()
   delete pl_xyzrgb_;
 
   output_.reset();
-  pcl_manager->remove_pointcloud("db-merged");
+  pcl_manager->remove_pointcloud(cfg_output_id_.c_str());
   foutput_.reset();
 }
 
