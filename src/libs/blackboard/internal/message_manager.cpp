@@ -66,7 +66,6 @@ BlackBoardMessageManager::transmit(Message *message)
   try {
     Interface *writer = __im->writer_for_mem_serial(message->recipient());
     if (__notifier->notify_of_message_received(writer, message)) {
-      message->ref();
       writer->msgq_append(message);
     }
   } catch (BlackBoardNoWritingInstanceException &e) {
