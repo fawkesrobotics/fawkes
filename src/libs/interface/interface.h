@@ -142,6 +142,7 @@ class Interface
   void          msgq_pop();
   Message *     msgq_first();
   bool          msgq_empty();
+  void          msgq_append(Message *message);
 
   /** Check if first message has desired type.
    * @return true, if message has desired type, false otherwise
@@ -216,7 +217,6 @@ class Interface
   interface_data_ts_t  *data_ts;
 
  private:
-  void msgq_append(Message *message);
   void set_type_id(const char *type, const char *id);
   void set_instance_serial(unsigned short instance_serial);
   void set_mediators(InterfaceMediator *iface_mediator,
