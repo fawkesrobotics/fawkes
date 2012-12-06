@@ -38,7 +38,7 @@ using namespace fawkes;
 ROSNodeThread::ROSNodeThread()
   : Thread("ROSNodeThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
-    AspectProviderAspect("ROSAspect", &__ros_aspect_inifin)
+    AspectProviderAspect("ROSAspect", &ros_aspect_inifin_)
 {
 }
 
@@ -52,6 +52,16 @@ ROSNodeThread::~ROSNodeThread()
 void
 ROSNodeThread::init()
 {
+  cfg_async_spinning_ = false;
+  try {
+    cfg_async_spinning_ = config->get_bool("/ros/async-spinning");
+  } catch (Exception &e) {} // ignored, use default
+
+  cfg_async_num_threads_ = 4;
+  try {
+    cfg_async_num_threads_ = config->get_uint("/ros/async-num-threads");
+  } catch (Exception &e) {} // ignored, use default
+
   if (! ros::isInitialized()) {
     int argc = 1;
     const char *argv[] = {"fawkes"};
@@ -65,24 +75,35 @@ ROSNodeThread::init()
     logger->log_warn(name(), "ROS node already *started*");
   }
 
-  __rosnode = new ros::NodeHandle();
+  rosnode_ = new ros::NodeHandle();
 
-  __ros_aspect_inifin.set_rosnode(__rosnode);
+  ros_aspect_inifin_.set_rosnode(rosnode_);
+
+  if (cfg_async_spinning_) {
+    async_spinner_ = new ros::AsyncSpinner(cfg_async_num_threads_);
+    async_spinner_->start();
+  }
 }
 
 
 void
 ROSNodeThread::finalize()
 {
-  __rosnode->shutdown();
+  if (cfg_async_spinning_) {
+    async_spinner_->stop();
+    delete async_spinner_;
+  }
+  rosnode_->shutdown();
 
-  __rosnode.clear();
-  __ros_aspect_inifin.set_rosnode(__rosnode);
+  rosnode_.clear();
+  ros_aspect_inifin_.set_rosnode(rosnode_);
 }
 
 
 void
 ROSNodeThread::loop()
 {
-  ros::spinOnce();
+  if (! cfg_async_spinning_) {
+    ros::spinOnce();
+  }
 }
