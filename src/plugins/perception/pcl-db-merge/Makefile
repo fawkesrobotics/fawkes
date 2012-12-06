@@ -21,6 +21,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 PRESUBDIRS = interfaces
+SUBDIRS = ros
 
 # Add -DUSE_TIMETRACKER to enable time tracking
 CFLAGS += -DUSE_TIMETRACKER
@@ -56,6 +57,9 @@ else
     WARN_TARGETS += warning_tf
   endif
 endif
+
+ros: interfaces
+
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
