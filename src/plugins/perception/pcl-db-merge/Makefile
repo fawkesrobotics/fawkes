@@ -20,11 +20,14 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
+PRESUBDIRS = interfaces
+
 # Add -DUSE_TIMETRACKER to enable time tracking
 CFLAGS += -DUSE_TIMETRACKER
 
 LIBS_pcl_db_merge = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf fawkespcl_utils
+		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf fawkespcl_utils \
+		PclDatabaseMergeInterface
 OBJS_pcl_db_merge = pcl_db_merge_plugin.o pcl_db_merge_thread.o mongodb_tf_transformer.o
 
 OBJS_all    = $(OBJS_pcl_db_merge)

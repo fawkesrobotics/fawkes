@@ -20,24 +20,23 @@
  */
 
 #include "pcl_db_merge_thread.h"
+#include <interfaces/PclDatabaseMergeInterface.h>
 
+#include <blackboard/utils/on_message_waker.h>
 
-#include <unistd.h>
-
-using namespace std;
 using namespace fawkes;
 
 #define CFG_PREFIX "/perception/pcl-db-merge/"
 
-/** @class PointCloudDBMergeThread "tabletop_objects_thread.h"
- * Main thread of tabletop objects plugin.
+/** @class PointCloudDBMergeThread "pcl_db_merge_thread.h"
+ * Thread to merge point clouds from database on request.
  * @author Tim Niemueller
  */
 
 
 /** Constructor. */
 PointCloudDBMergeThread::PointCloudDBMergeThread()
-  : Thread("PointCloudDBMergeThread", Thread::OPMODE_CONTINUOUS)
+  : Thread("PointCloudDBMergeThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -78,18 +77,24 @@ PointCloudDBMergeThread::init()
 						    cfg_database_name_,
 						    cfg_global_frame_,
 						    output_, logger);
-}
 
+  try {
+    merge_if_ =
+      blackboard->open_for_writing<PclDatabaseMergeInterface>("PCL Database Merge");
 
-void
-PointCloudDBMergeThread::once()
-{
-  //loop();
+    msg_waker_ = new BlackBoardOnMessageWaker(blackboard, merge_if_, this);
+  } catch (Exception &e) {
+    finalize();
+    throw;
+  }
 }
 
 void
 PointCloudDBMergeThread::finalize()
 {
+  delete msg_waker_;
+  blackboard->close(merge_if_);
+
   delete pl_xyz_;
   delete pl_xyzrgb_;
 
@@ -103,11 +108,43 @@ void
 PointCloudDBMergeThread::loop()
 {
   std::vector<long long> times;
+  std::string collection;
+  //= "PointClouds.openni_pointcloud_xyz";
+
+  if (merge_if_->msgq_empty()) return;
+
+  if (PclDatabaseMergeInterface::MergeMessage *msg =
+        merge_if_->msgq_first_safe(msg))
+  {
+    merge_if_->set_final(false);
+    merge_if_->set_msgid(msg->id());
+    merge_if_->set_error("");
+    merge_if_->write();
+
+    int64_t *timestamps = msg->timestamps();
+    for (size_t i = 0; i < msg->maxlenof_timestamps(); ++i) {
+      if (timestamps[i] > 0) {
+	times.push_back(timestamps[i]);
+      }
+    }
+    collection = msg->collection();
+  }
+
+  merge_if_->msgq_pop();
+
+  /* For testing
+  collection = "PointClouds.openni_pointcloud_xyz";
+  times.clear();
   times.push_back(1354200347715);
   times.push_back(1354200406578);
   times.push_back(1354200473345);
+  */
 
-  std::string collection = "PointClouds.openni_pointcloud_xyz";
+  logger->log_info(name(), "Restoring from '%s' for the following times",
+		   collection.c_str());
+  for (size_t i = 0; i < times.size(); ++i) {
+    logger->log_info(name(), "  %lli", times[i]);
+  }
 
   if (pl_xyz_->applicable(times, collection)) {
     pl_xyz_->merge(times, collection);
@@ -115,12 +152,14 @@ PointCloudDBMergeThread::loop()
     pl_xyzrgb_->merge(times, collection);
   } else {
     logger->log_warn(name(), "No applicable merging pipeline known");
+    merge_if_->set_error("Invalid input data");
   }
 
   foutput_->header.frame_id = cfg_global_frame_;
   Time now(clock);
   pcl_utils::set_time(foutput_, now);
 
-  usleep(1000000);
+  merge_if_->set_final(true);
+  merge_if_->write();
 }
 

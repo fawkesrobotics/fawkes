@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="PclDatabaseMergeInterface" author="Tim Niemueller" year="2012">
+  <data>
+    <comment>
+      Instruct the pcl-db-merge plugin and receive information.
+    </comment>
+    <field type="uint32" name="msgid">
+      The ID of the message that is currently being processed, or 0 if
+      no message is being processed.
+    </field>
+    <field type="bool" name="final">
+      True, if the last goto command has been finished, false if it is
+      still running.
+    </field>
+    <field type="string" length="256" name="error">
+      Error description if reconstruction fails.
+    </field>
+  </data>
+  <message name="Merge">
+    <comment>Order the merging of point clouds</comment>
+    <field type="int64" name="timestamps" length="4">
+      Timestamps for which to retrieve the most recent point clouds
+      and merge them.
+    </field>
+    <field type="string" length="256" name="collection">
+      Collection name from which to read the point clouds. Shall NOT
+      include the database name.
+    </field>
+  </message>
+</interface>

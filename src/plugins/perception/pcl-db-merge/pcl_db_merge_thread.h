@@ -36,6 +36,8 @@
 #include <pcl/point_cloud.h>
 
 namespace fawkes {
+  class PclDatabaseMergeInterface;
+  class BlackBoardOnMessageWaker;
 #ifdef USE_TIMETRACKER
   class TimeTracker;
 #endif
@@ -56,7 +58,6 @@ class PointCloudDBMergeThread
   virtual ~PointCloudDBMergeThread();
 
   virtual void init();
-  virtual void once();
   virtual void loop();
   virtual void finalize();
 
@@ -65,6 +66,9 @@ class PointCloudDBMergeThread
  protected: virtual void run() { Thread::run(); }
 
  private: // members
+  fawkes::PclDatabaseMergeInterface *merge_if_;
+  fawkes::BlackBoardOnMessageWaker  *msg_waker_;
+
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foutput_;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_;
 
