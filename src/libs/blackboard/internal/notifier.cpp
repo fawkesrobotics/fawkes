@@ -717,7 +717,7 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
   __bbil_messages_events += 1;
   __bbil_messages_mutex->unlock();
 
-  bool done = true;
+  bool enqueue = true;
 
   const char *uid = interface->uid();
   std::pair<BBilMap::iterator, BBilMap::iterator> ret =
@@ -727,9 +727,9 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
     if (! is_in_queue(/* remove op*/ false, __bbil_messages_queue, uid, bbil)) {
       Interface *bbil_iface = bbil->bbil_message_interface(uid);
       if (bbil_iface != NULL ) {
-        bool abort = bbil->bb_interface_message_received(bbil_iface, message);
+        bool abort = ! bbil->bb_interface_message_received(bbil_iface, message);
         if (abort) {
-          done = true;
+          enqueue = false;
           break;
         }
       } else {
@@ -758,7 +758,7 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
   }
   __bbil_messages_mutex->unlock();
 
-  return done;
+  return enqueue;
 }
 
 } // end namespace fawkes
