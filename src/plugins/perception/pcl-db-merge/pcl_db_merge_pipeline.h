@@ -123,37 +123,45 @@ class PointCloudDBMergePipeline
     pcl::for_each_type<typename pcl::traits::fieldList<PointType>::type>
       (pcl::detail::FieldAdder<PointType>(pfields));
 
-    for (unsigned int i = 0; i < num_clouds; ++i) {
-      std::auto_ptr<mongo::DBClientCursor> cursor =
-	mongodb_client_->query(database_name_ + "." + collection,
-			       QUERY("timestamp" << mongo::LTE << times[i])
-			       .sort("timestamp", -1),
-			       /* limit */ 1);
+    try {
+      for (unsigned int i = 0; i < num_clouds; ++i) {
+	std::cout << "Query: " << QUERY("timestamp" << mongo::LTE << times[i])
+	  .sort("timestamp", -1) << std::endl;
+	std::auto_ptr<mongo::DBClientCursor> cursor =
+	  mongodb_client_->query(database_name_ + "." + collection,
+				 QUERY("timestamp" << mongo::LTE << times[i])
+				 .sort("timestamp", -1),
+				 /* limit */ 1);
 
-      if (cursor->more()) {
-	mongo::BSONObj p = cursor->next();
-	mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
-	std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
+	if (cursor->more()) {
+	  mongo::BSONObj p = cursor->next();
+	  mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
+	  std::cout << p << std::endl;
+	  std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
 
-	for (unsigned int i = 0; i < pfields.size(); ++i) {
-	  sensor_msgs::PointField &pf = pfields[i];
+	  for (unsigned int i = 0; i < pfields.size(); ++i) {
+	    sensor_msgs::PointField &pf = pfields[i];
 
-	  bool found = false;
-	  for (unsigned int j = 0; j < fields.size(); ++j) {
-	    if ((fields[j]["name"].String() == pf.name) &&
-		(fields[j]["offset"].Int() == (int)pf.offset) &&
-		(fields[j]["datatype"].Int() == pf.datatype) &&
-		(fields[j]["count"].Int() == (int)pf.count) )
-	    {
-	      found = true;
-	      break;
+	    bool found = false;
+	    for (unsigned int j = 0; j < fields.size(); ++j) {
+	      if ((fields[j]["name"].String() == pf.name) &&
+		  (fields[j]["offset"].Int() == (int)pf.offset) &&
+		  (fields[j]["datatype"].Int() == pf.datatype) &&
+		  (fields[j]["count"].Int() == (int)pf.count) )
+	      {
+		found = true;
+		break;
+	      }
 	    }
+	    if (! found)  return false;
 	  }
-	  if (! found)  return false;
+	} else {
+	  return false;
 	}
-      } else {
-	return false;
       }
+    } catch (mongo::DBException &e) {
+      logger_->log_warn(name_, "MongoDB query failed: %s", e.what());
+      return false;
     }
 
     return true;
