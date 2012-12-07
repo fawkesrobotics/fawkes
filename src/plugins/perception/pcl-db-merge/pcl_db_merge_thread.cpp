@@ -134,6 +134,15 @@ PointCloudDBMergeThread::loop()
   times.push_back(1354200473345);
   */
 
+  if (times.empty()) {
+    logger->log_warn(name(), "Called for merge from %s, but no times given",
+                     collection.c_str());
+    merge_if_->set_final(true);
+    merge_if_->set_error("Called for merge, but no non-zero times given");
+    merge_if_->write();
+    return;
+  }
+
   logger->log_info(name(), "Restoring from '%s' for the following times",
 		   collection.c_str());
   for (size_t i = 0; i < times.size(); ++i) {

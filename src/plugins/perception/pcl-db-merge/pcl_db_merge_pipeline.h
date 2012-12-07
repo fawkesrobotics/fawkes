@@ -511,6 +511,10 @@ class PointCloudDBMergePipeline
     tablesegm.setInputCloud(cloud);
     tablesegm.segment(*inliers, *coeff);
 
+    if (! coeff || coeff->values.empty()) {
+      return;
+    }
+
     pcl::ExtractIndices<PointType> extract;
     Cloud extracted;
     extract.setNegative(true);
