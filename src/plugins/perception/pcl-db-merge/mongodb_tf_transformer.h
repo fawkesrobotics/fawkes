@@ -25,7 +25,7 @@
 #include <tf/types.h>
 #include <tf/transformer.h>
 
-#include <client/dbclient.h>
+#include <mongo/client/dbclient.h>
 
 #include <string>
 

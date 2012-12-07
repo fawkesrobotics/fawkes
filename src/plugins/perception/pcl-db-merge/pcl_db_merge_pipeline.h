@@ -61,8 +61,8 @@
 #  include <pcl/registration/ndt.h>
 #endif
 
-#include <client/dbclient.h>
-#include <client/gridfs.h>
+#include <mongo/client/dbclient.h>
+#include <mongo/client/gridfs.h>
 
 static const uint8_t cluster_colors[12][3] =
   { {176, 0, 30}, {0, 0, 255}, {255, 90, 0}, {137, 82, 39}, {56, 23, 90}, {99, 0, 30},
