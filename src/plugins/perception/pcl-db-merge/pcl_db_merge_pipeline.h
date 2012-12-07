@@ -29,6 +29,7 @@
 #include <pcl/point_cloud.h>
 
 #include <logging/logger.h>
+#include <config/config.h>
 #include <pcl_utils/utils.h>
 #include <pcl_utils/transforms.h>
 #include <pcl_utils/storage_adapter.h>
@@ -41,6 +42,8 @@
 #define USE_ALIGNMENT
 #define USE_ICP_ALIGNMENT
 // define USE_NDT_ALIGNMENT
+
+#define CFG_PREFIX "/perception/pcl-db-merge/"
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -83,15 +86,61 @@ class PointCloudDBMergePipeline
   typedef typename ColorCloud::ConstPtr ColorCloudConstPtr;
 
  public:
- PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client, std::string &database_name,
-			   std::string &global_frame, ColorCloudPtr output,
-			   fawkes::Logger *logger)
-   : mongodb_client_(mongodb_client), database_name_(database_name),
-    global_frame_(global_frame), output_(output), logger_(logger)
+ PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client,
+			   fawkes::Configuration *config, fawkes::Logger *logger,
+			   ColorCloudPtr output)
+   : mongodb_client_(mongodb_client), config_(config), logger_(logger), output_(output)
   {
     name_ = "PCL_DB_MergePL";
+
+    cfg_database_name_     = config->get_string(CFG_PREFIX"database-name");
+    cfg_global_frame_      = config->get_string(CFG_PREFIX"global-frame");
+    cfg_pcl_age_tolerance_ =
+      (long)round(config->get_float(CFG_PREFIX"pcl-age-tolerance") * 1000.);
+    std::vector<float> transform_range = config->get_floats(CFG_PREFIX"transform-range");
+    if (transform_range.size() != 2) {
+      throw fawkes::Exception("Transform range must be a list with exactly two elements");
+    }
+    if (transform_range[1] < transform_range[0]) {
+      throw fawkes::Exception("Transform range start cannot be smaller than end");
+    }
+    cfg_transform_range_[0] = (long)round(transform_range[0] * 1000.);
+    cfg_transform_range_[1] = (long)round(transform_range[1] * 1000.);
+    cfg_passthrough_filter_axis_ = config->get_string(CFG_PREFIX"passthrough-filter/axis");
+    std::vector<float> passthrough_filter_limits =
+      config->get_floats(CFG_PREFIX"passthrough-filter/limits");
+    if (passthrough_filter_limits.size() != 2) {
+      throw fawkes::Exception("Pasthrough filter limits must be a list "
+			      "with exactly two elements");
+    }
+    if (passthrough_filter_limits[1] < passthrough_filter_limits[0]) {
+      throw fawkes::Exception("Passthrough filter limits start cannot be smaller than end");
+    }
+    cfg_passthrough_filter_limits_[0] = passthrough_filter_limits[0];
+    cfg_passthrough_filter_limits_[1] = passthrough_filter_limits[1];
+    cfg_downsample_leaf_size_ = config->get_float(CFG_PREFIX"downsample-leaf-size");
+    cfg_plane_rem_max_iter_ =
+      config->get_float(CFG_PREFIX"plane-removal/segmentation-max-iterations");
+    cfg_plane_rem_dist_thresh_ =
+      config->get_float(CFG_PREFIX"plane-removal/segmentation-distance-threshold");
+    cfg_icp_ransac_iterations_ =
+      config->get_uint(CFG_PREFIX"icp/ransac-iterations");
+    cfg_icp_max_correspondance_distance_ =
+      config->get_float(CFG_PREFIX"icp/max-correspondance-distance");
+    cfg_icp_max_iterations_ =
+      config->get_uint(CFG_PREFIX"icp/max-iterations");
+    cfg_icp_transformation_eps_ =
+      config->get_float(CFG_PREFIX"icp/transformation-epsilon");
+    cfg_icp_euclidean_fitness_eps_ =
+      config->get_float(CFG_PREFIX"icp/euclidean-fitness-epsilon");
+
+    logger_->log_info(name_, "Age Tolerance: %lli  Limits: [%f, %f]  tf range: [%lli, %lli]",
+		      cfg_pcl_age_tolerance_, cfg_passthrough_filter_limits_[0],
+		      cfg_passthrough_filter_limits_[1], cfg_transform_range_[0],
+		      cfg_transform_range_[1]);
+
     mongodb_gridfs_ =
-      new mongo::GridFS(*mongodb_client_, database_name);
+      new mongo::GridFS(*mongodb_client_, cfg_database_name_);
       use_alignment_ = true;
 #ifdef USE_TIMETRACKER
     tt_ = new fawkes::TimeTracker();
@@ -125,18 +174,16 @@ class PointCloudDBMergePipeline
 
     try {
       for (unsigned int i = 0; i < num_clouds; ++i) {
-	std::cout << "Query: " << QUERY("timestamp" << mongo::LTE << times[i])
-	  .sort("timestamp", -1) << std::endl;
 	std::auto_ptr<mongo::DBClientCursor> cursor =
-	  mongodb_client_->query(database_name_ + "." + collection,
-				 QUERY("timestamp" << mongo::LTE << times[i])
+	  mongodb_client_->query(cfg_database_name_ + "." + collection,
+				 QUERY("timestamp" << mongo::LTE << times[i]
+                           << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
 				 .sort("timestamp", -1),
 				 /* limit */ 1);
 
 	if (cursor->more()) {
 	  mongo::BSONObj p = cursor->next();
 	  mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
-	  std::cout << p << std::endl;
 	  std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
 
 	  for (unsigned int i = 0; i < pfields.size(); ++i) {
@@ -205,8 +252,9 @@ class PointCloudDBMergePipeline
     for (unsigned int i = 0; i < num_clouds; ++i) {
 
       std::auto_ptr<mongo::DBClientCursor> cursor =
-	mongodb_client_->query(database_name_ + "." + collection,
-			       QUERY("timestamp" << mongo::LTE << times[i])
+	mongodb_client_->query(cfg_database_name_ + "." + collection,
+			       QUERY("timestamp" << mongo::LTE << times[i]
+                               << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
 			       .sort("timestamp", -1),
 			       /* limit */ 1);
 
@@ -248,20 +296,20 @@ class PointCloudDBMergePipeline
     for (unsigned int i = 0; i < num_clouds; ++i) {
       // retrieve transforms
       fawkes::tf::MongoDBTransformer
-	transformer(mongodb_client_, database_name_);
+	transformer(mongodb_client_, cfg_database_name_);
 
-      transformer.restore(/* start */  actual_times[i] - 1000,
-			  /* end */    actual_times[i] + 1000);
+      transformer.restore(/* start */  actual_times[i] + cfg_transform_range_[0],
+			  /* end */    actual_times[i] + cfg_transform_range_[1]);
 
 
       // transform point clouds to common frame
       fawkes::Time actual_time((long)actual_times[i]);
       try {
-	fawkes::pcl_utils::transform_pointcloud(global_frame_, *pcls[i], transformer);
-      } catch (fawkes::tf::TransformException &e) {
+	fawkes::pcl_utils::transform_pointcloud(cfg_global_frame_, *pcls[i], transformer);
+      } catch (fawkes::Exception &e) {
 	logger_->log_warn(name_, "Failed to transform from %s to %s",
 			 pcls[i]->header.frame_id.c_str(),
-			 global_frame_.c_str());
+			 cfg_global_frame_.c_str());
 	logger_->log_warn(name_, e);
       }
       *non_aligned[i] = *pcls[i];
@@ -281,12 +329,15 @@ class PointCloudDBMergePipeline
       // FILTER and DOWNSAMPLE
 
       pcl::PassThrough<PointType> pass;
-      pass.setFilterFieldName("z");
-      pass.setFilterLimits(0.6, 1.2);
+      pass.setFilterFieldName(cfg_passthrough_filter_axis_.c_str());
+      pass.setFilterLimits(cfg_passthrough_filter_limits_[0],
+			   cfg_passthrough_filter_limits_[1]);
 
       //pcl::ApproximateVoxelGrid<PointType> downsample;
       pcl::VoxelGrid<PointType> downsample;
-      downsample.setLeafSize(0.01, 0.01, 0.01);
+      downsample.setLeafSize(cfg_downsample_leaf_size_,
+			     cfg_downsample_leaf_size_,
+			     cfg_downsample_leaf_size_);
 
       CloudPtr filtered_z(new Cloud());
 
@@ -517,17 +568,17 @@ class PointCloudDBMergePipeline
     icp.setInputCloud(source);
     icp.setInputTarget(target);
 
-    icp.setRANSACIterations(5000);
+    icp.setRANSACIterations(cfg_icp_ransac_iterations_);
 
     // Set the max correspondence distance to 5cm
     // (e.g., correspondences with higher distances will be ignored)
-    icp.setMaxCorrespondenceDistance(0.1);
+    icp.setMaxCorrespondenceDistance(cfg_icp_max_correspondance_distance_);
     // Set the maximum number of iterations (criterion 1)
-    icp.setMaximumIterations(200);
+    icp.setMaximumIterations(cfg_icp_max_iterations_);
     // Set the transformation epsilon (criterion 2)
-    icp.setTransformationEpsilon(1e-7);
+    icp.setTransformationEpsilon(cfg_icp_transformation_eps_);
     // Set the euclidean distance difference epsilon (criterion 3)
-    icp.setEuclideanFitnessEpsilon(1e-7);
+    icp.setEuclideanFitnessEpsilon(cfg_icp_euclidean_fitness_eps_);
 
     logger_->log_info(name_, "Aligning");
     icp.align(final);
@@ -574,6 +625,7 @@ class PointCloudDBMergePipeline
     for (unsigned int i = 0; i < num_clouds; ++i) {
       num_points += clouds[i]->points.size();
     }
+    output_->header.frame_id = cfg_global_frame_;
     output_->points.resize(num_points);
     output_->height = 1;
     output_->width = num_points;
@@ -602,14 +654,29 @@ class PointCloudDBMergePipeline
  private: // members
   const char *name_;
 
+  std::string  cfg_database_name_;
+  std::string  cfg_global_frame_;
+  long         cfg_pcl_age_tolerance_;
+  long         cfg_transform_range_[2];
+  std::string  cfg_passthrough_filter_axis_;
+  float        cfg_passthrough_filter_limits_[2];
+  float        cfg_downsample_leaf_size_;
+  float        cfg_plane_rem_max_iter_;
+  float        cfg_plane_rem_dist_thresh_;
+  unsigned int cfg_icp_ransac_iterations_;
+  float        cfg_icp_max_correspondance_distance_;
+  unsigned int cfg_icp_max_iterations_;
+  float        cfg_icp_transformation_eps_;
+  float        cfg_icp_euclidean_fitness_eps_;
+
   mongo::DBClientBase *mongodb_client_;
   mongo::GridFS *mongodb_gridfs_;
 
-  std::string database_name_;
-  std::string global_frame_;
+  fawkes::Configuration *config_;
+  fawkes::Logger        *logger_;
+
   ColorCloudPtr output_;
 
-  fawkes::Logger *logger_;
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker *tt_;
   unsigned int tt_loopcount_;

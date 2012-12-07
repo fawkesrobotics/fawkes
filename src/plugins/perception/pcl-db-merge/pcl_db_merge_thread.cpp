@@ -26,8 +26,6 @@
 
 using namespace fawkes;
 
-#define CFG_PREFIX "/perception/pcl-db-merge/"
-
 /** @class PointCloudDBMergeThread "pcl_db_merge_thread.h"
  * Thread to merge point clouds from database on request.
  * @author Tim Niemueller
@@ -55,8 +53,6 @@ PointCloudDBMergeThread::init()
   merge_if_ = NULL;
   msg_waker_ = NULL;
 
-  cfg_database_name_ = config->get_string(CFG_PREFIX"database-name");
-  cfg_global_frame_  = config->get_string(CFG_PREFIX"global-frame");
   cfg_output_id_     = config->get_string(CFG_PREFIX"output-pcl-id");
 
   foutput_ = new pcl::PointCloud<pcl::PointXYZRGB>();
@@ -68,15 +64,13 @@ PointCloudDBMergeThread::init()
   
   pl_xyz_ =
     new PointCloudDBMergePipeline<pcl::PointXYZ>(mongodb_client,
-						 cfg_database_name_,
-						 cfg_global_frame_,
-						 output_, logger);
+						 config, logger,
+						 output_);
 
   pl_xyzrgb_ =
     new PointCloudDBMergePipeline<pcl::PointXYZRGB>(mongodb_client,
-						    cfg_database_name_,
-						    cfg_global_frame_,
-						    output_, logger);
+						    config, logger,
+						    output_);
 
   try {
     merge_if_ =
@@ -155,7 +149,6 @@ PointCloudDBMergeThread::loop()
     merge_if_->set_error("Invalid input data");
   }
 
-  foutput_->header.frame_id = cfg_global_frame_;
   Time now(clock);
   pcl_utils::set_time(foutput_, now);
 
