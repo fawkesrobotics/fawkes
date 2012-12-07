@@ -118,6 +118,13 @@ PointCloudDBMergeROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Reque
     delete mm;
     return true;
   }
+  if (req.timestamps.empty()) {
+    logger->log_warn(name(), "No times given in request");
+    resp.ok = false;
+    resp.error = "No times given in request";
+    delete mm;
+    return true;
+  }
 
   int64_t timestamps[mm->maxlenof_timestamps()];
   for (size_t i = 0; i < req.timestamps.size(); ++i) {
@@ -154,7 +161,12 @@ bool
 PointCloudDBMergeROSCommThread::record_cb(hybris_c1_msgs::RecordData::Request  &req,
 					  hybris_c1_msgs::RecordData::Response &resp)
 {
-  resp.ok = true;
+  ros::Time begin = ros::Time::now();
+  ros::Time end   = begin + req.range;
+  //ros::Time::sleepUntil(end);
+  resp.begin = begin;
+  resp.end   = end;
+  resp.ok    = true;
   return true;
 }
 
