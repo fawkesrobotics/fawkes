@@ -71,6 +71,13 @@ static const uint8_t cluster_colors[12][3] =
   { {176, 0, 30}, {0, 0, 255}, {255, 90, 0}, {137, 82, 39}, {56, 23, 90}, {99, 0, 30},
     {255, 0, 0}, {0, 255, 0}, {255, 255, 0}, {255, 0, 255}, {0, 255, 255}, {27, 117, 196}};
 
+typedef enum {
+  APPLICABLE = 0,
+  TYPE_MISMATCH,
+  NO_POINTCLOUD,
+  QUERY_FAILED
+} ApplicabilityStatus;
+
 template <typename PointType>
 class PointCloudDBMergePipeline
 {
@@ -163,7 +170,7 @@ class PointCloudDBMergePipeline
     delete mongodb_gridfs_;
   }
 
-  bool
+  ApplicabilityStatus
   applicable(std::vector<long long> &times, std::string &collection)
   {
     const unsigned int num_clouds = times.size();
@@ -200,18 +207,20 @@ class PointCloudDBMergePipeline
 		break;
 	      }
 	    }
-	    if (! found)  return false;
+	    if (! found) {
+	      return TYPE_MISMATCH;
+	    }
 	  }
 	} else {
-	  return false;
+	  return NO_POINTCLOUD;
 	}
       }
     } catch (mongo::DBException &e) {
       logger_->log_warn(name_, "MongoDB query failed: %s", e.what());
-      return false;
+      return QUERY_FAILED;
     }
 
-    return true;
+    return APPLICABLE;
   }
 
 
@@ -695,5 +704,16 @@ class PointCloudDBMergePipeline
   bool use_alignment_;
 };
 
+inline const char *
+to_string(ApplicabilityStatus status)
+{
+  switch (status) {
+  case APPLICABLE:    return "Applicable";
+  case TYPE_MISMATCH: return "PointCloud in database does not match type";
+  case NO_POINTCLOUD: return "For at least one time no pointcloud found";
+  case QUERY_FAILED:  return "MongoDB query failed";
+  default:            return "Unknown error";
+  }
+}
 
 #endif
