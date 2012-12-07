@@ -566,26 +566,25 @@ MongoRRDThread::loop()
 	BSONObj dbstats;
 	if (mongodb_client->simpleCommand(i->second.db_name, &dbstats, "dbStats"))
 	{
-	  int collections, objects, dataSize, storageSize, numExtents,
-	    indexes, indexSize, fileSize;
-	  double avgObjSize;
+	  int collections, objects, numExtents, indexes, indexSize;
+	  double avgObjSize, dataSize, storageSize, fileSize;
 
 	  try {
 	    collections = dbstats["collections"].Int();
 	    objects     = dbstats["objects"].Int();
 	    avgObjSize  = dbstats["avgObjSize"].Double();
-	    dataSize    = dbstats["dataSize"].Int();
-	    storageSize = dbstats["storageSize"].Int();
+	    dataSize    = dbstats["dataSize"].Double();
+	    storageSize = dbstats["storageSize"].Double();
 	    numExtents  = dbstats["numExtents"].Int();
 	    indexes     = dbstats["indexes"].Int();
 	    indexSize   = dbstats["indexSize"].Int();
-	    fileSize    = dbstats["fileSize"].Int();
+	    fileSize    = dbstats["fileSize"].Double();
 
 	    //logger->log_debug(name(), "type = %i", dbstats["fileSize"].type());
 
 	    try {
 	      rrd_manager->add_data(i->second.rrd_name.c_str(),
-				    "N:%i:%i:%f:%i:%i:%i:%i:%i:%i", collections,
+				    "N:%i:%i:%f:%f:%f:%i:%i:%i:%f", collections,
 				    objects, avgObjSize, dataSize, storageSize,
 				    numExtents, indexes, indexSize, fileSize);
 	    } catch (Exception &e) {
