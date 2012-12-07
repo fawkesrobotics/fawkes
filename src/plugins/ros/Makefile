@@ -37,7 +37,7 @@ LIBS_ros_tf = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros_tf = tf_plugin.o tf_thread.o
 
 LIBS_ros_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesrosaspect fawkestf fawkespcl_utils
+	      fawkesinterface fawkesrosaspect fawkestf
 OBJS_ros_pcl = pcl_plugin.o pcl_thread.o pcl_adapter.o
 
 LIBS_ros_images = fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -57,7 +57,7 @@ LIBS_ros_cmdvel = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesrosaspect MotorInterface
 OBJS_ros_cmdvel = cmdvel_thread.o cmdvel_plugin.o
 
-LIBS_ros_navigator = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_ros_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		     fawkesinterface fawkesrosaspect NavigatorInterface
 OBJS_ros_navigator = navigator_plugin.o navigator_thread.o
 

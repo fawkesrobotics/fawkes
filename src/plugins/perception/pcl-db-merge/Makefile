@@ -27,7 +27,7 @@ SUBDIRS = ros
 CFLAGS += -DUSE_TIMETRACKER
 
 LIBS_pcl_db_merge = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf fawkespcl_utils \
+		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf \
 		PclDatabaseMergeInterface
 OBJS_pcl_db_merge = pcl_db_merge_plugin.o pcl_db_merge_thread.o mongodb_tf_transformer.o
 
