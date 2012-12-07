@@ -272,9 +272,12 @@ class PointCloudDBMergePipeline
 	mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
 	std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
 
-	logger_->log_info(name_, "Restoring XYZ point cloud");
-	// reconstruct point cloud
+	long long timestamp = p["timestamp"].Long();
+	double age = (double) (times[i] - timestamp) / 1000.;
+	logger_->log_info(name_, "Restoring point cloud at %lli with age %f sec",
+			  age);
 
+	// reconstruct point cloud
 	CloudPtr lpcl(new Cloud());
 	pcls[i] = lpcl;
 
@@ -530,17 +533,19 @@ class PointCloudDBMergePipeline
     convex_hull.reconstruct(*hull);
 
     // Use only points above tables
-    // Why coeff->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
+    // Why coeff->values[3] < 0 ? ComparisonOps::GT : ComparisonOps::LT?
     // The model coefficients are in Hessian Normal Form, hence coeff[0..2] are
     // the normal vector. We need to distinguish the cases where the normal vector
     // points towards the origin (camera) or away from it. This can be checked
     // by calculating the distance towards the origin, which conveniently in
     // dist = N * x + p is just p which is coeff[3]. Therefore, if coeff[3] is
-    // positive, the normal vector points towards the camera and we want all
+    // negative, the normal vector points towards the frame origin and we want all
     // points with positive distance from the table plane, otherwise it points
     // away from the origin and we want points with "negative distance".
     // We make use of the fact that we only have a boring RGB-D camera and
     // not an X-Ray...
+    // Note that this assumes that the global frame's XY plane is the ground support
+    // plane!
     pcl::ComparisonOps::CompareOp op =
       coeff->values[3] < 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
     typename fawkes::pcl_utils::PlaneDistanceComparison<PointType>::ConstPtr

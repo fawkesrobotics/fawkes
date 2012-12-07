@@ -6,6 +6,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
 perception/pcl-db-merge:
   # Global reference frame to which to transform point clouds
   # for initial alignment, typically /map or /base_link
+  # Note that this frame's XY plane is the ground support plane
   global-frame: !frame /map
 
   # mongodb-log database from which to read data 
@@ -15,7 +16,7 @@ perception/pcl-db-merge:
   output-pcl-id: db-merged
 
   # Maximum age of point clouds restored from database; sec
-  pcl-age-tolerance: 120.0
+  pcl-age-tolerance: 5.0
 
   # Transform range to restore from database. Must be a list of two elements.
   # From the time instructed via the blackboard the values are added to determine
