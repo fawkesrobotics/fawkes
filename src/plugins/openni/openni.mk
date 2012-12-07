@@ -17,7 +17,7 @@ ifneq ($(PKGCONFIG),)
   HAVE_OPENNI = $(if $(shell $(PKGCONFIG) --exists 'openni-dev'; echo $${?/1/}),1,0)
   ifeq ($(HAVE_OPENNI),1)
     CFLAGS_OPENNI  = $(shell $(PKGCONFIG) --cflags 'openni-dev')
-    LDFLAGS_OPENNI = $(shell $(PKGCONFIG) --libs 'openni-dev')
+    LDFLAGS_OPENNI = $(shell $(PKGCONFIG) --libs 'openni-dev') -lpthread
   endif
 endif
 
