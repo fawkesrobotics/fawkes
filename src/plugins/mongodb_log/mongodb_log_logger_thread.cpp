@@ -106,7 +106,9 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
 
     free(msg);
 
-    mongodb_client->insert(__collection, b.obj());
+    try {
+      mongodb_client->insert(__collection, b.obj());
+    } catch (mongo::DBException &e) {} // ignored
   }
 }
 
@@ -132,7 +134,9 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
       b.append("component", component);
       b.appendDate("time", nowd);
       b.append("message", std::string("[EXCEPTION] ") + *i);
-      mongodb_client->insert(__collection, b.obj());
+      try {
+        mongodb_client->insert(__collection, b.obj());
+      } catch (mongo::DBException &e) {} // ignored
     }
   }
 }
@@ -250,7 +254,9 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
     b.append("component", component);
     b.appendDate("time", nowd);
     b.append("message", msg);
-    mongodb_client->insert(__collection, b.obj());
+    try {
+      mongodb_client->insert(__collection, b.obj());
+    } catch (mongo::DBException &e) {} // ignored
 
     free(msg);
 
@@ -277,7 +283,9 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
       b.append("component", component);
       b.appendDate("time", nowd);
       b.append("message", std::string("[EXCEPTION] ") + *i);
-      mongodb_client->insert(__collection, b.obj());
+      try {
+        mongodb_client->insert(__collection, b.obj());
+      } catch (mongo::DBException &e) {} // ignored
     }
   }
 }

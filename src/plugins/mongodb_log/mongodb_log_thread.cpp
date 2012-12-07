@@ -237,185 +237,193 @@ MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interfac
   now_->stamp();
   interface->read();
 
-  // write interface data
-  BSONObjBuilder document;
-  document.append("timestamp", (long long) now_->in_msec());
-  InterfaceFieldIterator i;
-  for (i = interface->fields(); i != interface->fields_end(); ++i) {
-    size_t length = i.get_length();
-    bool is_array = (length > 1);
+  try {
+    // write interface data
+    BSONObjBuilder document;
+    document.append("timestamp", (long long) now_->in_msec());
+    InterfaceFieldIterator i;
+    for (i = interface->fields(); i != interface->fields_end(); ++i) {
+      size_t length = i.get_length();
+      bool is_array = (length > 1);
 
-    switch (i.get_type()) {
-    case IFT_BOOL:
-      if (is_array) {
-	bool *bools = i.get_bools();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(bools[l]);
+      switch (i.get_type()) {
+      case IFT_BOOL:
+	if (is_array) {
+	  bool *bools = i.get_bools();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(bools[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_bool());
 	}
-	subb.doneFast();
-      } else {
-	document.append(i.get_name(), i.get_bool());
-      }
-      break;
+	break;
 
-    case IFT_INT8:
-      if (is_array) {
-        int8_t *ints = i.get_int8s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_int8());
-      }
-      break;
+      case IFT_INT8:
+	if (is_array) {
+	  int8_t *ints = i.get_int8s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_int8());
+	}
+	break;
 
-    case IFT_UINT8:
-      if (is_array) {
-        uint8_t *ints = i.get_uint8s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_uint8());
-      }
-      break;
+      case IFT_UINT8:
+	if (is_array) {
+	  uint8_t *ints = i.get_uint8s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_uint8());
+	}
+	break;
 
-    case IFT_INT16:
-      if (is_array) {
-        int16_t *ints = i.get_int16s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_int16());
-      }
-      break;
+      case IFT_INT16:
+	if (is_array) {
+	  int16_t *ints = i.get_int16s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_int16());
+	}
+	break;
 
-    case IFT_UINT16:
-      if (is_array) {
-        uint16_t *ints = i.get_uint16s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_uint16());
-      }
-      break;
+      case IFT_UINT16:
+	if (is_array) {
+	  uint16_t *ints = i.get_uint16s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_uint16());
+	}
+	break;
 
-    case IFT_INT32:
-      if (is_array) {
-        int32_t *ints = i.get_int32s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_int32());
-      }
-      break;
+      case IFT_INT32:
+	if (is_array) {
+	  int32_t *ints = i.get_int32s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_int32());
+	}
+	break;
 
-    case IFT_UINT32:
-      if (is_array) {
-        uint32_t *ints = i.get_uint32s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_uint32());
-      }
-      break;
+      case IFT_UINT32:
+	if (is_array) {
+	  uint32_t *ints = i.get_uint32s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_uint32());
+	}
+	break;
 
-    case IFT_INT64:
-      if (is_array) {
-        int64_t *ints = i.get_int64s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append((long long int)ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), (long long int)i.get_int64());
-      }
-      break;
+      case IFT_INT64:
+	if (is_array) {
+	  int64_t *ints = i.get_int64s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append((long long int)ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), (long long int)i.get_int64());
+	}
+	break;
 
-    case IFT_UINT64:
-      if (is_array) {
-        uint64_t *ints = i.get_uint64s();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append((long long int)ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), (long long int)i.get_uint64());
-      }
-      break;
+      case IFT_UINT64:
+	if (is_array) {
+	  uint64_t *ints = i.get_uint64s();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append((long long int)ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), (long long int)i.get_uint64());
+	}
+	break;
 
-    case IFT_FLOAT:
-      if (is_array) {
-        float *floats = i.get_floats();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(floats[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_float());
-      }
-      break;
+      case IFT_FLOAT:
+	if (is_array) {
+	  float *floats = i.get_floats();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(floats[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_float());
+	}
+	break;
 
-    case IFT_DOUBLE:
-      if (is_array) {
-        double *doubles = i.get_doubles();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(doubles[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_double());
-      }
-      break;
+      case IFT_DOUBLE:
+	if (is_array) {
+	  double *doubles = i.get_doubles();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(doubles[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_double());
+	}
+	break;
 
-    case IFT_STRING:
-      document.append(i.get_name(), i.get_string());
-      break;
+      case IFT_STRING:
+	document.append(i.get_name(), i.get_string());
+	break;
 
-    case IFT_BYTE:
-      if (is_array) {
-        document.appendBinData(i.get_name(), length,
-			       BinDataGeneral, i.get_bytes());
-      } else {
-        document.append(i.get_name(), i.get_byte());
-      }
-      break;
+      case IFT_BYTE:
+	if (is_array) {
+	  document.appendBinData(i.get_name(), length,
+				 BinDataGeneral, i.get_bytes());
+	} else {
+	  document.append(i.get_name(), i.get_byte());
+	}
+	break;
 
-    case IFT_ENUM:
-      if (is_array) {
-        int32_t *ints = i.get_enums();
-        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-        for (size_t l = 0; l < length; ++l) {
-          subb.append(ints[l]);
-        }
-        subb.doneFast();
-      } else {
-        document.append(i.get_name(), i.get_enum());
+      case IFT_ENUM:
+	if (is_array) {
+	  int32_t *ints = i.get_enums();
+	  BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+	  for (size_t l = 0; l < length; ++l) {
+	    subb.append(ints[l]);
+	  }
+	  subb.doneFast();
+	} else {
+	  document.append(i.get_name(), i.get_enum());
+	}
+	break;
       }
-      break;
     }
-  }
 
-  __mongodb->insert(__collection, document.obj());
+    __mongodb->insert(__collection, document.obj());
+  } catch (mongo::DBException &e) {
+    __logger->log_warn(bbil_name(), "Failed to log to %s: %s",
+                       __collection.c_str(), e.what());
+  } catch (std::exception &e) {
+    __logger->log_warn(bbil_name(), "Failed to log to %s: %s (*)",
+                       __collection.c_str(), e.what());
+  }
 }

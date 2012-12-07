@@ -199,7 +199,12 @@ MongoLogPointCloudThread::loop()
         subb2.doneFast();
         subb.doneFast();
 	__collection = __database + "." + pi.topic_name;
-        __mongodb->insert(__collection, document.obj());
+        try {
+          __mongodb->insert(__collection, document.obj());
+        } catch (mongo::DBException &e) {
+          logger->log_warn(this->name(), "Failed to insert into %s: %s",
+                           __collection.c_str(), e.what());
+        }
 
     } else {
       __adapter->close(p->first);
