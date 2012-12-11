@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  mongodb_log_thread.cpp - MongoDB Logging Thread
+ *  mongodb_log_bb_thread.cpp - MongoDB blackboard logging Thread
  *
  *  Created: Wed Dec 08 23:09:29 2010
  *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mongodb_log_thread.h"
+#include "mongodb_log_bb_thread.h"
 
 #include <core/threading/mutex_locker.h>
 #include <cstdlib>
@@ -32,7 +32,7 @@ using namespace mongo;
 using namespace fawkes;
 
 
-/** @class MongoLogThread "mongodb_thread.h"
+/** @class MongoLogBlackboardThread "mongodb_thread.h"
  * MongoDB Logging Thread.
  * This thread registers to interfaces specified with patterns in the
  * configurationa and logs any changes to MongoDB.
@@ -41,20 +41,20 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-MongoLogThread::MongoLogThread()
-  : Thread("MongoLogThread", Thread::OPMODE_WAITFORWAKEUP)
+MongoLogBlackboardThread::MongoLogBlackboardThread()
+  : Thread("MongoLogBlackboardThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
 
 /** Destructor. */
-MongoLogThread::~MongoLogThread()
+MongoLogBlackboardThread::~MongoLogBlackboardThread()
 {
 }
 
 
 void
-MongoLogThread::init()
+MongoLogBlackboardThread::init()
 {
   now_ = new Time(clock);
   __database = "fflog";
@@ -85,9 +85,9 @@ MongoLogThread::init()
 
 
 void
-MongoLogThread::finalize()
+MongoLogBlackboardThread::finalize()
 {
-  logger->log_debug(name(), "Finalizing MongoLogThread");
+  logger->log_debug(name(), "Finalizing MongoLogBlackboardThread");
 
   blackboard->unregister_observer(this);
 
@@ -104,18 +104,18 @@ MongoLogThread::finalize()
   }
   __listeners.clear();
 
-  logger->log_debug(name(), "Finalized MongoLogThread");
+  logger->log_debug(name(), "Finalized MongoLogBlackboardThread");
 }
 
 
 void
-MongoLogThread::loop()
+MongoLogBlackboardThread::loop()
 {
 }
 
 // for BlackBoardInterfaceObserver
 void
-MongoLogThread::bb_interface_created(const char *type, const char *id) throw()
+MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id) throw()
 {
   MutexLocker lock(__listeners.mutex());
 
@@ -152,7 +152,7 @@ MongoLogThread::bb_interface_created(const char *type, const char *id) throw()
  * @param logger logger
  * @param now Time
  */
-MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
+MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
 						     Interface *interface,
 						     mongo::DBClientBase *mongodb,
 						     std::string &database,
@@ -187,13 +187,14 @@ MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
 
 
 /** Destructor. */
-MongoLogThread::InterfaceListener::~InterfaceListener()
+MongoLogBlackboardThread::InterfaceListener::~InterfaceListener()
 {
   __blackboard->unregister_listener(this);
 }
 
 void
-MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+MongoLogBlackboardThread::InterfaceListener::bb_interface_data_changed(Interface *interface)
+  throw()
 {
   now_->stamp();
   interface->read();

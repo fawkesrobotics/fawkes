@@ -20,9 +20,9 @@
  */
 
 #include "mongodb_log_plugin.h"
-#include "mongodb_log_thread.h"
-#include "image_thread.h"
-#include "pcl_thread.h"
+#include "mongodb_log_bb_thread.h"
+#include "mongodb_log_image_thread.h"
+#include "mongodb_log_pcl_thread.h"
 #include "mongodb_log_logger_thread.h"
 
 using namespace fawkes;
@@ -40,7 +40,7 @@ using namespace fawkes;
 MongoLogPlugin::MongoLogPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new MongoLogThread());
+  thread_list.push_back(new MongoLogBlackboardThread());
 
   bool enable_pcls = true;
   try {

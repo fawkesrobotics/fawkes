@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  image_thread.cpp - Thread to log images to MongoDB
+ *  mongodb_log_image_thread.cpp - Thread to log images to MongoDB
  *
  *  Created: Tue Apr 10 22:12:38 2012
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "image_thread.h"
+#include "mongodb_log_image_thread.h"
 
 #include <core/threading/mutex_locker.h>
 #include <fvutils/ipc/shm_image.h>
@@ -34,7 +34,7 @@ using namespace fawkes;
 using namespace firevision;
 using namespace mongo;
 
-/** @class MongoLogImagesThread "image_thread.h"
+/** @class MongoLogImagesThread "mongodb_log_image_thread.h"
  * Thread to export Fawkes images to MongoDB.
  * @author Tim Niemueller
  * @author Bastian Klingen

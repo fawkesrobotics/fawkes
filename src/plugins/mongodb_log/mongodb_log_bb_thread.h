@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  mongodb_log_thread.h - MongoDB logging thread
+ *  mongodb_log_bb_thread.h - MongoDB blackboard logging thread
  *
  *  Created: Wed Dec 08 23:08:14 2010
  *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_THREAD_H_
-#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_THREAD_H_
+#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_BB_THREAD_H_
+#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_BB_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -38,7 +38,7 @@
 #include <string>
 
 
-class MongoLogThread
+class MongoLogBlackboardThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -48,8 +48,8 @@ class MongoLogThread
   public fawkes::BlackBoardInterfaceObserver
 {
  public:
-  MongoLogThread();
-  virtual ~MongoLogThread();
+  MongoLogBlackboardThread();
+  virtual ~MongoLogBlackboardThread();
 
   virtual void init();
   virtual void loop();

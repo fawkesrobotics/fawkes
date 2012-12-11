@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  pcl_thread.cpp - Thread to log point clouds to MongoDB
+ *  mongodb_log_pcl_thread.cpp - Thread to log point clouds to MongoDB
  *
  *  Created: Mon Nov 07 02:58:40 2011
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "pcl_thread.h"
+#include "mongodb_log_pcl_thread.h"
 
 #include <core/threading/mutex_locker.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -34,7 +34,7 @@
 using namespace fawkes;
 using namespace mongo;
 
-/** @class MongoLogPointCloudThread "pcl_thread.h"
+/** @class MongoLogPointCloudThread "mongodb_log_pcl_thread.h"
  * Thread to store point clouds to MongoDB.
  * @author Tim Niemueller
  * @author Bastian Klingen

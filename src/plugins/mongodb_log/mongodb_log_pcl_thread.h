@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  pcl_thread.h - Thread to log point clouds to MongoDB
+ *  mongodb_log_pcl_thread.h - Thread to log point clouds to MongoDB
  *
  *  Created: Mon Nov 07 02:26:35 2011
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_LOG_PCL_THREAD_H_
-#define __PLUGINS_MONGODB_LOG_PCL_THREAD_H_
+#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_PCL_THREAD_H_
+#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_PCL_THREAD_H_
 
 #include "pcl_adapter.h"
 
