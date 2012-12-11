@@ -56,39 +56,6 @@ MongoLogThread::~MongoLogThread()
 void
 MongoLogThread::init()
 {
-  /*
-  std::set<std::string> ignored_configs;
-
-  std::string prefix = "/plugins/mongodb/clients/";
-
-  std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
-  while (i->next()) {
-    std::string cfg_name = std::string(i->path()).substr(prefix.length());
-    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
-
-    if ( (__configs.find(cfg_name) == __configs.end()) &&
-	 (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
-
-      std::string cfg_prefix = prefix + cfg_name + "/";
-
-      try {
-	ClientConf *conf = new ClientConf(config, logger, cfg_name, cfg_prefix);
-	__configs[cfg_name] = conf;
-	logger->log_info(name(), "Added MongoDB client configuration %s",
-			 cfg_name.c_str());
-      } catch (Exception &e) {
-	logger->log_warn(name(), "Invalid MongoDB client config %s, ignoring, "
-			 "exception follows.", cfg_name.c_str());
-	ignored_configs.insert(cfg_name);
-      }
-    }
-  }
-
-  if (__configs.empty()) {
-    throw Exception("No active MongoDB configurations found");
-  }
-  */
-
   now_ = new Time(clock);
   __database = "fflog";
   try {
@@ -120,22 +87,16 @@ MongoLogThread::init()
 void
 MongoLogThread::finalize()
 {
-  /*
-  std::map<std::string, ClientConf *>::iterator i;
-  for (i = __configs.begin(); i != __configs.end(); ++i) {
-    delete i->second;
-  }
-  __configs.clear();
-  */
-
   logger->log_debug(name(), "Finalizing MongoLogThread");
-
 
   blackboard->unregister_observer(this);
 
-  // sometimes causes errors
-  // config->erase("/plugins/mongorrd/databases/mongodb-log");
-
+  try {
+    config->erase("/plugins/mongorrd/databases/mongodb-log");
+  } catch (fawkes::Exception &e) {
+    logger->log_warn(name(), "Failed to erase mongodb-rrd config, exception follows");
+    logger->log_warn(name(), e);
+  }
 
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = __listeners.begin(); i != __listeners.end(); ++i) {
