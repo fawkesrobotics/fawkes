@@ -212,6 +212,7 @@ class YamlConfiguration::Node
   void operator=(const Node &n)
   {
     name_        = n.name_;
+    type_        = n.type_;
     children_    = n.children_;    
     list_values_ = n.list_values_;
   }
@@ -539,7 +540,7 @@ class YamlConfiguration::Node
 
   void set_scalar(const std::string &s) {
     scalar_value_ = s;
-    determine_scalar_type();
+    type_ = determine_scalar_type();
   }
 
   void set_scalar_list(const std::vector<std::string> &s) {
