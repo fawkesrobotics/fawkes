@@ -94,20 +94,20 @@ class MongoLogBlackboardThread
     virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
    private:
-    fawkes::BlackBoard  *__blackboard;
-    fawkes::Interface   *__interface;
-    mongo::DBClientBase *__mongodb;
-    fawkes::Logger      *__logger;
-    std::string          __collection;
-    std::string         &__database;
-    fawkes::LockSet<std::string> &__collections;
+    fawkes::BlackBoard  *blackboard_;
+    fawkes::Interface   *interface_;
+    mongo::DBClientBase *mongodb_;
+    fawkes::Logger      *logger_;
+    std::string          collection_;
+    std::string         &database_;
+    fawkes::LockSet<std::string> &collections_;
     fawkes::Time        *now_;
   };
 
 
-  fawkes::LockMap<std::string, InterfaceListener *> __listeners;
-  fawkes::LockSet<std::string> __collections;
-  std::string __database;
+  fawkes::LockMap<std::string, InterfaceListener *> listeners_;
+  fawkes::LockSet<std::string> collections_;
+  std::string database_;
   fawkes::Time        *now_;
 };
 

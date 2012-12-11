@@ -81,10 +81,10 @@ class MongoLogImagesThread
 
   fawkes::Time *last_update_;
   fawkes::Time *now_;
-  mongo::DBClientBase *__mongodb;
-  mongo::GridFS       *__mongogrid;
-  std::string          __collection;
-  std::string          __database;
+  mongo::DBClientBase *mongodb_;
+  mongo::GridFS       *gridfs_;
+  std::string          collection_;
+  std::string          database_;
 };
 
 #endif

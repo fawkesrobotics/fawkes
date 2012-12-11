@@ -67,7 +67,7 @@ class MongoLogPointCloudThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  MongoLogPointCloudAdapter *__adapter;
+  MongoLogPointCloudAdapter *adapter_;
 
   /// @cond INTERNALS
   typedef struct {
@@ -76,12 +76,12 @@ class MongoLogPointCloudThread
     fawkes::Time             last_sent;
   } PointCloudInfo;
   /// @endcond
-  std::map<std::string, PointCloudInfo> __pcls;
+  std::map<std::string, PointCloudInfo> pcls_;
 
-  mongo::DBClientBase *__mongodb;
-  mongo::GridFS       *__mongogrid;
-  std::string          __collection;
-  std::string          __database;
+  mongo::DBClientBase *mongodb_;
+  mongo::GridFS       *gridfs_;
+  std::string          collection_;
+  std::string          database_;
 };
 
 #endif

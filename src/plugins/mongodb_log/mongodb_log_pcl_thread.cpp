@@ -57,12 +57,12 @@ MongoLogPointCloudThread::~MongoLogPointCloudThread()
 void
 MongoLogPointCloudThread::init()
 {
-  __database = "fflog";
+  database_ = "fflog";
   try {
-    __database = config->get_string("/plugins/mongodb-log/database");
+    database_ = config->get_string("/plugins/mongodb-log/database");
   } catch (Exception &e) {
     logger->log_info(name(), "No database configured, writing to %s",
-		     __database.c_str());
+		     database_.c_str());
   }
 
   std::vector<std::string> includes;
@@ -75,10 +75,10 @@ MongoLogPointCloudThread::init()
     excludes = config->get_strings("/plugins/mongodb-log/pointclouds/excludes");
   } catch (Exception &e) {} // ignored, no include rules
 
-  __mongodb    = mongodb_client;
-  __mongogrid  = new GridFS(*__mongodb, __database);
+  mongodb_    = mongodb_client;
+  gridfs_  = new GridFS(*mongodb_, database_);
 
-  __adapter = new MongoLogPointCloudAdapter(pcl_manager, logger);
+  adapter_ = new MongoLogPointCloudAdapter(pcl_manager, logger);
 
   std::vector<std::string> pcls = pcl_manager->get_pointcloud_list();
 
@@ -126,7 +126,7 @@ MongoLogPointCloudThread::init()
     unsigned int width, height;
     bool is_dense;
     MongoLogPointCloudAdapter::V_PointFieldInfo fieldinfo;
-    __adapter->get_info(*p, width, height, frame_id, is_dense, fieldinfo);
+    adapter_->get_info(*p, width, height, frame_id, is_dense, fieldinfo);
     pi.msg.header.frame_id = frame_id;
     pi.msg.width = width;
     pi.msg.height = height;
@@ -140,7 +140,7 @@ MongoLogPointCloudThread::init()
       pi.msg.fields[i].count    = fieldinfo[i].count;
     }
 
-    __pcls[*p] = pi;
+    pcls_[*p] = pi;
   }
 }
 
@@ -150,7 +150,7 @@ MongoLogPointCloudThread::finalize()
 {
   logger->log_debug(name(), "Finalizing MongoLogPointCloudThread");
 
-  delete __adapter;
+  delete adapter_;
 
   logger->log_debug(name(), "Finalized MongoLogPointCloudthread");
 }
@@ -160,13 +160,13 @@ void
 MongoLogPointCloudThread::loop()
 {
   std::map<std::string, PointCloudInfo>::iterator p;
-  for (p = __pcls.begin(); p != __pcls.end(); ++p) {
+  for (p = pcls_.begin(); p != pcls_.end(); ++p) {
     PointCloudInfo &pi = p->second;
       unsigned int width, height;
       void *point_data;
       size_t point_size, num_points;
       fawkes::Time time;
-      __adapter->get_data(p->first, width, height, time,
+      adapter_->get_data(p->first, width, height, time,
                           &point_data, point_size, num_points);
       size_t data_size = point_size * num_points;
 
@@ -185,7 +185,7 @@ MongoLogPointCloudThread::loop()
 
         std::stringstream name;
         name << pi.topic_name << "_" << time.in_msec();
-        subb.append("data", __mongogrid->storeFile((char*) point_data, data_size, name.str()));
+        subb.append("data", gridfs_->storeFile((char*) point_data, data_size, name.str()));
 
         BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
         for (unsigned int i = 0; i < pi.msg.fields.size(); i++) {
@@ -198,16 +198,16 @@ MongoLogPointCloudThread::loop()
         }
         subb2.doneFast();
         subb.doneFast();
-	__collection = __database + "." + pi.topic_name;
+	collection_ = database_ + "." + pi.topic_name;
         try {
-          __mongodb->insert(__collection, document.obj());
+          mongodb_->insert(collection_, document.obj());
         } catch (mongo::DBException &e) {
           logger->log_warn(this->name(), "Failed to insert into %s: %s",
-                           __collection.c_str(), e.what());
+                           collection_.c_str(), e.what());
         }
 
     } else {
-      __adapter->close(p->first);
+      adapter_->close(p->first);
     }
   }
 }

@@ -57,15 +57,15 @@ MongoLogImagesThread::~MongoLogImagesThread()
 void
 MongoLogImagesThread::init()
 {
-  __database = "fflog";
+  database_ = "fflog";
   try {
-    __database = config->get_string("/plugins/mongodb-log/database");
+    database_ = config->get_string("/plugins/mongodb-log/database");
   } catch (Exception &e) {
     logger->log_info(name(), "No database configured, writing to %s",
-		     __database.c_str());
+		     database_.c_str());
   }
-  __mongodb    = mongodb_client;
-  __mongogrid  = new GridFS(*__mongodb, __database, "GridFS.Images");
+  mongodb_    = mongodb_client;
+  gridfs_  = new GridFS(*mongodb_, database_, "GridFS.Images");
 
   last_update_ = new Time(clock);
   now_ = new Time(clock);
@@ -113,11 +113,11 @@ MongoLogImagesThread::loop()
 
       std::stringstream name;
       name << imginfo.topic_name << "_" << cap_time.in_msec();
-      subb.append("data", __mongogrid->storeFile((char*) imginfo.img->buffer(), imginfo.img->data_size(), name.str()));
+      subb.append("data", gridfs_->storeFile((char*) imginfo.img->buffer(), imginfo.img->data_size(), name.str()));
 
       subb.doneFast();
-      __collection = __database + "."  + imginfo.topic_name;
-      __mongodb->insert(__collection, document.obj());
+      collection_ = database_ + "."  + imginfo.topic_name;
+      mongodb_->insert(collection_, document.obj());
     }
   }
 

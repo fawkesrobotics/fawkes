@@ -57,12 +57,12 @@ void
 MongoLogBlackboardThread::init()
 {
   now_ = new Time(clock);
-  __database = "fflog";
+  database_ = "fflog";
   try {
-    __database = config->get_string("/plugins/mongodb-log/database");
+    database_ = config->get_string("/plugins/mongodb-log/database");
   } catch (Exception &e) {
     logger->log_info(name(), "No database configured, writing to %s",
-		     __database.c_str());
+		     database_.c_str());
   }
 
   bbio_add_observed_create("*", "*");
@@ -73,14 +73,14 @@ MongoLogBlackboardThread::init()
   std::list<Interface *>::iterator i;
   for (i = current_interfaces.begin(); i != current_interfaces.end(); ++i) {
     logger->log_debug(name(), "Opening %s", (*i)->uid());
-    __listeners[(*i)->uid()] = new InterfaceListener(blackboard, *i,
-						     mongodb_client, __database,
-						     __collections, logger, now_);
+    listeners_[(*i)->uid()] = new InterfaceListener(blackboard, *i,
+						     mongodb_client, database_,
+						     collections_, logger, now_);
   }
 
   blackboard->register_observer(this);
 
-  config->set_string("/plugins/mongorrd/databases/mongodb-log", __database);
+  config->set_string("/plugins/mongorrd/databases/mongodb-log", database_);
 }
 
 
@@ -99,10 +99,10 @@ MongoLogBlackboardThread::finalize()
   }
 
   std::map<std::string, InterfaceListener *>::iterator i;
-  for (i = __listeners.begin(); i != __listeners.end(); ++i) {
+  for (i = listeners_.begin(); i != listeners_.end(); ++i) {
     delete i->second;
   }
-  __listeners.clear();
+  listeners_.clear();
 
   logger->log_debug(name(), "Finalized MongoLogBlackboardThread");
 }
@@ -117,16 +117,16 @@ MongoLogBlackboardThread::loop()
 void
 MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  MutexLocker lock(__listeners.mutex());
+  MutexLocker lock(listeners_.mutex());
 
   try {
     Interface *interface = blackboard->open_for_reading(type, id);
-    if (__listeners.find(interface->uid()) == __listeners.end()) {
+    if (listeners_.find(interface->uid()) == listeners_.end()) {
       logger->log_debug(name(), "Opening new %s", interface->uid());
-      __listeners[interface->uid()] = new InterfaceListener(blackboard, interface,
+      listeners_[interface->uid()] = new InterfaceListener(blackboard, interface,
 							    mongodb_client,
-							    __database,
-							    __collections,
+							    database_,
+							    collections_,
 							    logger,
                   now_);
     } else {
@@ -153,20 +153,19 @@ MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id)
  * @param now Time
  */
 MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
-						     Interface *interface,
-						     mongo::DBClientBase *mongodb,
-						     std::string &database,
-						     LockSet<std::string> &colls,
-						     Logger *logger,
-                 Time *now)
+							       Interface *interface,
+							       mongo::DBClientBase *mongodb,
+							       std::string &database,
+							       LockSet<std::string> &colls,
+							       Logger *logger, Time *now)
   : BlackBoardInterfaceListener("MongoLogListener-%s", interface->uid()),
-    __database(database), __collections(colls)
+    database_(database), collections_(colls)
 {
-  __blackboard = blackboard;
-  __interface  = interface;
-  __mongodb    = mongodb;
-  __logger     = logger;
-  now_         = now;
+  blackboard_ = blackboard;
+  interface_  = interface;
+  mongodb_    = mongodb;
+  logger_     = logger;
+  now_        = now;
 
   // sanitize interface ID to be suitable for MongoDB
   std::string id = interface->id();
@@ -175,21 +174,21 @@ MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *black
     id.replace(pos, 1, "_");
     pos = pos + 1;
   }
-  __collection = __database + "." + interface->type() + "." + id;
-  if (__collections.find(__collection) != __collections.end()) {
+  collection_ = database_ + "." + interface->type() + "." + id;
+  if (collections_.find(collection_) != collections_.end()) {
     throw Exception("Collection named %s already used, cannot log %s",
-		    __collection.c_str(), interface->uid());
+		    collection_.c_str(), interface->uid());
   }
 
   bbil_add_data_interface(interface);
-  __blackboard->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+  blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
 }
 
 
 /** Destructor. */
 MongoLogBlackboardThread::InterfaceListener::~InterfaceListener()
 {
-  __blackboard->unregister_listener(this);
+  blackboard_->unregister_listener(this);
 }
 
 void
@@ -380,12 +379,12 @@ MongoLogBlackboardThread::InterfaceListener::bb_interface_data_changed(Interface
       }
     }
 
-    __mongodb->insert(__collection, document.obj());
+    mongodb_->insert(collection_, document.obj());
   } catch (mongo::DBException &e) {
-    __logger->log_warn(bbil_name(), "Failed to log to %s: %s",
-                       __collection.c_str(), e.what());
+    logger_->log_warn(bbil_name(), "Failed to log to %s: %s",
+                       collection_.c_str(), e.what());
   } catch (std::exception &e) {
-    __logger->log_warn(bbil_name(), "Failed to log to %s: %s (*)",
-                       __collection.c_str(), e.what());
+    logger_->log_warn(bbil_name(), "Failed to log to %s: %s (*)",
+                       collection_.c_str(), e.what());
   }
 }
