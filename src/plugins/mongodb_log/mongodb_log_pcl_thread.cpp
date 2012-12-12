@@ -65,6 +65,11 @@ MongoLogPointCloudThread::init()
 		     database_.c_str());
   }
 
+  cfg_chunk_size_ = 2097152; // 2 MB
+  try {
+    cfg_chunk_size_ = config->get_uint("/plugins/mongodb-log/pointclouds/chunk-size");
+  } catch (Exception &e) {} // ignored, use default
+
   std::vector<std::string> includes;
   try {
     includes = config->get_strings("/plugins/mongodb-log/pointclouds/includes");
@@ -77,6 +82,7 @@ MongoLogPointCloudThread::init()
 
   mongodb_    = mongodb_client;
   gridfs_  = new GridFS(*mongodb_, database_);
+  gridfs_->setChunkSize(cfg_chunk_size_);
 
   adapter_ = new MongoLogPointCloudAdapter(pcl_manager, logger);
 
@@ -149,6 +155,7 @@ void
 MongoLogPointCloudThread::finalize()
 {
   delete adapter_;
+  delete gridfs_;
 }
 
 

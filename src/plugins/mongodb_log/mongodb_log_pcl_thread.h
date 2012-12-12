@@ -82,6 +82,8 @@ class MongoLogPointCloudThread
   mongo::GridFS       *gridfs_;
   std::string          collection_;
   std::string          database_;
+
+  unsigned int         cfg_chunk_size_;
 };
 
 #endif

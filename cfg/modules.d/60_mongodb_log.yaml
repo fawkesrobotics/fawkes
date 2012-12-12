@@ -15,6 +15,13 @@ plugins/mongodb-log:
   # if an inclusion rule exists, only matching pointclouds are included unless excluded
   # if there is an exclude rule, then excludes are processed last
   pointclouds:
+    # GridFS chunk size for point clouds, 2 MB
+    chunk-size: 2097152
+
+    # if no inclusion rule is set, all pointclouds are included unless
+    # excluded if an inclusion rule exists, only matching pointclouds
+    # are included unless excluded if there is an exclude rule, then
+    # excludes are processed last
     includes: [openni-pointcloud-xyz]
   
 
