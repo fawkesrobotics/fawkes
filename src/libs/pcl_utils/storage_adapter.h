@@ -86,9 +86,15 @@ class PointCloudStorageAdapter : public StorageAdapter
   /** The point cloud. */
   const RefPtr<pcl::PointCloud<PointT> > cloud;
 
+  /** Get PCL shared pointer to cloud.
+   * @return PCL shared pointer to cloud
+   */
   typename pcl::PointCloud<PointT>::Ptr cloud_ptr()
   { return pcl_utils::cloudptr_from_refptr(cloud); }
 
+  /** Get PCL const shared pointer to cloud.
+   * @return PCL const shared pointer to cloud
+   */
   typename pcl::PointCloud<PointT>::ConstPtr cloud_const_ptr()
   { return pcl_utils::cloudptr_from_refptr(cloud); }
 

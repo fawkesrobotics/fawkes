@@ -76,9 +76,21 @@ namespace fawkes {
  * Get last capture time.
  * @param time upon return contains last capture time
  *
- * @fn std::string & frame_id() const
+ * @fn std::string & StorageAdapter::frame_id() const
  * Get frame ID of point cloud.
  * @return Frame ID of point cloud.
+ *
+ * @fn void StorageAdapter::transform(const std::string &target_frame, const tf::Transformer &transformer)
+ * Transform point cloud.
+ * @param target_frame frame to transform to
+ * @param transformer transformer to get transform from
+ *
+ * @fn void StorageAdapter::transform(const std::string &target_frame, const Time &target_time, const std::string &fixed_frame, const tf::Transformer &transformer)
+ * Transform point cloud.
+ * @param target_frame frame to transform to
+ * @param target_time time for which to transform
+ * @param fixed_frame frame fixed over time
+ * @param transformer transformer to get transform from
  */
 
 
