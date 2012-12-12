@@ -148,11 +148,7 @@ MongoLogPointCloudThread::init()
 void
 MongoLogPointCloudThread::finalize()
 {
-  logger->log_debug(name(), "Finalizing MongoLogPointCloudThread");
-
   delete adapter_;
-
-  logger->log_debug(name(), "Finalized MongoLogPointCloudthread");
 }
 
 

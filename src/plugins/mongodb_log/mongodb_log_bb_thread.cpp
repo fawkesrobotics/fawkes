@@ -87,8 +87,6 @@ MongoLogBlackboardThread::init()
 void
 MongoLogBlackboardThread::finalize()
 {
-  logger->log_debug(name(), "Finalizing MongoLogBlackboardThread");
-
   blackboard->unregister_observer(this);
 
   try {
@@ -103,8 +101,6 @@ MongoLogBlackboardThread::finalize()
     delete i->second;
   }
   listeners_.clear();
-
-  logger->log_debug(name(), "Finalized MongoLogBlackboardThread");
 }
 
 

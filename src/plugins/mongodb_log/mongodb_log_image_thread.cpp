@@ -75,13 +75,11 @@ MongoLogImagesThread::init()
 void
 MongoLogImagesThread::finalize()
 {
-  logger->log_debug(name(), "Finalizing MongoLogImagesThread");
   std::map<std::string, ImageInfo>::iterator p;
   for (p = imgs_.begin(); p != imgs_.end(); ++p) {
     delete p->second.img;
   }
   imgs_.clear();
-  logger->log_debug(name(), "Finalized MongoLogImagesThread");
 }
 
 
