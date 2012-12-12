@@ -148,11 +148,18 @@ TabletopVisualizationThread::loop()
 
   for (size_t i = 0; i < centroids_.size(); ++i) {
     try {
-      tf::Stamped<tf::Point>
-        centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]),
-                 fawkes::Time(0, 0), frame_id_);
-      tf::Stamped<tf::Point> baserel_centroid;
-      tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+
+      /*
+       tf::Stamped<tf::Point> centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]), fawkes::Time(0, 0), frame_id_);
+       tf::Stamped<tf::Point> baserel_centroid;
+       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+       */
+
+      tf::Stamped<tf::Point> centroid(
+          tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]),
+          fawkes::Time(0, 0), "/base_link");
+      tf::Stamped<tf::Point> camrel_centroid;
+      tf_listener->transform_point(frame_id_, centroid, camrel_centroid);
 
       char *tmp;
       if (asprintf(&tmp, "TObj %zu", i) != -1) {
@@ -167,9 +174,12 @@ TabletopVisualizationThread::loop()
         text.id = idnum++;
         text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
         text.action = visualization_msgs::Marker::ADD;
-        text.pose.position.x = baserel_centroid[0];
-        text.pose.position.y = baserel_centroid[1];
-        text.pose.position.z = baserel_centroid[2] + 0.13;
+        /*        text.pose.position.x = baserel_centroid[0];
+         text.pose.position.y = baserel_centroid[1];
+         text.pose.position.z = baserel_centroid[2] + 0.17;*/
+        text.pose.position.x = centroid[0];
+        text.pose.position.y = centroid[1];
+        text.pose.position.z = centroid[2] + 0.17;
         text.pose.orientation.w = 1.;
         text.scale.z = 0.05; // 5cm high
         text.color.r = text.color.g = text.color.b = 1.0f;
@@ -194,15 +204,11 @@ TabletopVisualizationThread::loop()
       sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[i][0];
       sphere.scale.z = cylinder_params_[i][1];
       //if (obj_confidence_[i] >= 0.5)
-      std::cout << "VISUALIZING OBJECT " << i << ". BEST GUESS = "
-          << best_obj_guess_[i] << std::endl;
       if (best_obj_guess_[i] < 0) {
-        std::cout << "RED" << std::endl;
         sphere.color.r = 1.0;
         sphere.color.g = 0.0;
         sphere.color.b = 0.0;
       } else {
-        std::cout << "GREEN" << std::endl;
         sphere.color.r = 0.0;
         sphere.color.g = 1.0;
         sphere.color.b = 0.0;
@@ -213,10 +219,25 @@ TabletopVisualizationThread::loop()
        sphere.color.b = (float)cluster_colors[i][2] / 255.f;
        */
       sphere.color.a = 1.0;
-      sphere.pose.position.x = baserel_centroid[0];
-      sphere.pose.position.y = baserel_centroid[1];
-      sphere.pose.position.z = baserel_centroid[2];
+
+      /*
+       sphere.pose.position.x = baserel_centroid[0];
+       sphere.pose.position.y = baserel_centroid[1];
+       sphere.pose.position.z = baserel_centroid[2];
+       */
+      sphere.pose.position.x = centroid[0];
+      sphere.pose.position.y = centroid[1];
+      sphere.pose.position.z = centroid[2];
+      //////////////
+      tf::Quaternion table_quat(tf::Vector3(0, 1, 0), cylinder_params_[2][0]);
+/*
+      sphere.pose.orientation.x = table_quat.getX();
+      sphere.pose.orientation.y = table_quat.getY();
+      sphere.pose.orientation.z = table_quat.getZ();
+      sphere.pose.orientation.w = table_quat.getW();
+*/
       sphere.pose.orientation.w = 1.;
+      //////////////
       sphere.lifetime = ros::Duration(cfg_duration_, 0);
       m.markers.push_back(sphere);
     } catch (Exception &e) {
@@ -357,7 +378,7 @@ TabletopVisualizationThread::loop()
   }
 
   // Table model surrounding polygon
-  if (! (table_model_vertices_.empty() && table_hull_vertices_.empty())) {
+  if (!(table_model_vertices_.empty() && table_hull_vertices_.empty())) {
     visualization_msgs::Marker hull;
     hull.header.frame_id = frame_id_;
     hull.header.stamp = ros::Time::now();
@@ -412,23 +433,23 @@ TabletopVisualizationThread::loop()
       plane.points[i].z = table_model_vertices_[i][2];
     }
     for (unsigned int i = 2; i < 5; ++i) {
-      plane.points[i+1].x = table_model_vertices_[i % 4][0];
-      plane.points[i+1].y = table_model_vertices_[i % 4][1];
-      plane.points[i+1].z = table_model_vertices_[i % 4][2];
+      plane.points[i + 1].x = table_model_vertices_[i % 4][0];
+      plane.points[i + 1].y = table_model_vertices_[i % 4][1];
+      plane.points[i + 1].z = table_model_vertices_[i % 4][2];
     }
     plane.pose.orientation.w = 1.;
     plane.scale.x = 1.0;
     plane.scale.y = 1.0;
     plane.scale.z = 1.0;
-    plane.color.r = ((float)table_color[0] / 255.f) * 0.8;
-    plane.color.g = ((float)table_color[1] / 255.f) * 0.8;
-    plane.color.b = ((float)table_color[2] / 255.f) * 0.8;
+    plane.color.r = ((float) table_color[0] / 255.f) * 0.8;
+    plane.color.g = ((float) table_color[1] / 255.f) * 0.8;
+    plane.color.b = ((float) table_color[2] / 255.f) * 0.8;
     plane.color.a = 1.0;
     plane.lifetime = ros::Duration(cfg_duration_, 0);
     m.markers.push_back(plane);
   }
 
-  if (cfg_show_frustrum_ && ! table_model_vertices_.empty()) {
+  if (cfg_show_frustrum_ && !table_model_vertices_.empty()) {
     // Frustrum
     visualization_msgs::Marker frustrum;
     frustrum.header.frame_id = frame_id_;

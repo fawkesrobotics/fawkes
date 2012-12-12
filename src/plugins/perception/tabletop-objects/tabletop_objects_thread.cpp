@@ -229,6 +229,8 @@ TabletopObjectsThread::init()
 
   ////////////////////////////////////////////////////////////
 
+  table_inclination_ = 0.0;
+
   ftable_model_ = new Cloud();
   table_model_ = pcl_utils::cloudptr_from_refptr(ftable_model_);
   table_model_->header.frame_id = input_->header.frame_id;
@@ -1101,8 +1103,20 @@ TabletopObjectsThread::loop()
   pcl::StatisticalOutlierRemoval<PointType> sor;
   sor.setInputCloud(cloud_objs_);
   sor.setMeanK(5);
-  sor.setStddevMulThresh(0.5);
+  sor.setStddevMulThresh(0.2);
   sor.filter(*cloud_objs_);
+
+  int transforming = 0;
+  tf::StampedTransform trans_to_base, trans_from_base;
+  try {
+    transforming++;
+    tf_listener->lookup_transform(cloud_objs_->header.frame_id, "/base_link",
+        fawkes::Time(0, 0), trans_from_base);
+    tf_listener->lookup_transform("/base_link", cloud_objs_->header.frame_id,
+        fawkes::Time(0, 0), trans_to_base);
+  } catch (Exception &e) {
+    return;
+  }
 
   //OBJECTS
   if (cloud_objs_->points.size() > 0) {
@@ -1132,171 +1146,195 @@ TabletopObjectsThread::loop()
 
     if (num_points > 0) {
       colored_clusters->points.resize(num_points);
-      for (it = cluster_indices.begin(); it != cluster_indices.end() &&
-	     centroid_i < MAX_CENTROIDS; ++it, ++centroid_i) {
-	std::cout << "Object cluster " << centroid_i << ":" << std::endl;
-	pcl::compute3DCentroid(*cloud_objs_, it->indices,
-			       centroids[centroid_i]);
+      for (it = cluster_indices.begin(); it != cluster_indices.end()
+          && centroid_i < MAX_CENTROIDS; ++it, ++centroid_i) {
+        std::cout << "********************Processing obj_" << centroid_i
+            << "********************" << std::endl;
 
-	ColorCloudPtr single_cluster(new ColorCloud());
-	single_cluster->header.frame_id = clusters_->header.frame_id;
-	single_cluster->width = it->indices.size();
-	single_cluster->height = 1;
-	single_cluster->points.resize(it->indices.size());
-	unsigned int sci = 0;
+        //Centroids in cam frame:
+        //pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
 
-	std::vector<int>::const_iterator pit;
-	for (pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
-	  ColorPointType &p1 = single_cluster->points[sci++];
-	  ColorPointType &p2 = colored_clusters->points[cci++];
-	  PointType &p3 = cloud_objs_->points[*pit];
-	  p1.x = p2.x = p3.x;
-	  p1.y = p2.y = p3.y;
-	  p1.z = p2.z = p3.z;
-	  p1.r = p2.r = cluster_colors[centroid_i][0];
-	  p1.g = p2.g = cluster_colors[centroid_i][1];
-	  p1.b = p2.b = cluster_colors[centroid_i][2];
-	}
+        ColorCloudPtr single_cluster(new ColorCloud());
+        ColorCloudPtr obj_in_base_frame(new ColorCloud());
+        single_cluster->header.frame_id = clusters_->header.frame_id;
+        single_cluster->width = it->indices.size();
+        single_cluster->height = 1;
+        single_cluster->points.resize(it->indices.size());
 
-	ColorPointType* pnt_min = new ColorPointType();
-	ColorPointType* pnt_max = new ColorPointType();
-	Eigen::Vector3f obj_dim;
-	std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > obj_size_scores;
-	pcl::getMinMax3D(*single_cluster, *pnt_min, *pnt_max);
-	obj_dim[0] = fabs(pnt_max->x - pnt_min->x);
-	obj_dim[1] = fabs(pnt_max->y - pnt_min->y);
-	obj_dim[2] = fabs(pnt_max->z - pnt_min->z);
-	compute_bounding_box_scores(obj_dim, obj_size_scores);
+        obj_in_base_frame->header.frame_id = "/base_link";
+        obj_in_base_frame->width = it->indices.size();
+        obj_in_base_frame->height = 1;
+        obj_in_base_frame->points.resize(it->indices.size());
+        unsigned int sci = 0;
 
-	std::cout << "Object dimensions:" << std::endl;
-	std::cout << obj_dim[0] << " " << obj_dim[1] << " " << obj_dim[2]
-		  << std::endl;
-	std::cout << "Similarity to known objects:" << std::endl;
-	for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-	  std::cout << "Obj " << os << ": " << obj_size_scores[os][0]
-		    << " in x, " << obj_size_scores[os][1] << " in y, "
-		    << obj_size_scores[os][2] << " in z." << std::endl;
-	  obj_likelihoods_[centroid_i][os] = obj_size_scores[os][0]
-	    * obj_size_scores[os][1] * obj_size_scores[os][2];
-	}
+        std::vector<int>::const_iterator pit;
+        for (pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
+          ColorPointType &p1 = single_cluster->points[sci++];
+          ColorPointType &p2 = colored_clusters->points[cci++];
+          PointType &p3 = cloud_objs_->points[*pit];
+          p1.x = p2.x = p3.x;
+          p1.y = p2.y = p3.y;
+          p1.z = p2.z = p3.z;
+          p1.r = p2.r = cluster_colors[centroid_i][0];
+          p1.g = p2.g = cluster_colors[centroid_i][1];
+          p1.b = p2.b = cluster_colors[centroid_i][2];
+        }
+        //*obj_clusters_[obj_i++] = *colored_clusters;
+        *obj_clusters_[obj_i++] = *single_cluster;
 
-	//*obj_clusters_[obj_i++] = *colored_clusters;
-	*obj_clusters_[obj_i++] = *single_cluster;
+        Eigen::Affine3f affine_table = Eigen::Translation3f(
+            trans_to_base.getOrigin()[0], trans_to_base.getOrigin()[1],
+            trans_to_base.getOrigin()[2]) * Eigen::Quaternionf(
+            trans_to_base.getRotation().getW(),
+            trans_to_base.getRotation().getX(),
+            trans_to_base.getRotation().getY(),
+            trans_to_base.getRotation().getZ());
+        pcl::transformPointCloud(*single_cluster, *obj_in_base_frame,
+            affine_table);
 
-	//Fit cylinder:
-	pcl::NormalEstimation<ColorPointType, pcl::Normal> ne;
-	pcl::SACSegmentationFromNormals<ColorPointType, pcl::Normal> seg;
-	pcl::ExtractIndices<ColorPointType> extract;
-	pcl::ExtractIndices < pcl::Normal > extract_normals;
-	pcl::PointCloud<pcl::Normal>::Ptr obj_normals(
-							  new pcl::PointCloud<pcl::Normal>);
-	pcl::search::KdTree<ColorPointType>::Ptr tree_cyl(
-							      new pcl::search::KdTree<ColorPointType>());
-	pcl::ModelCoefficients::Ptr coefficients_cylinder(
-							      new pcl::ModelCoefficients);
-	pcl::PointIndices::Ptr inliers_cylinder(new pcl::PointIndices);
+        pcl::compute3DCentroid(*obj_in_base_frame, centroids[centroid_i]);
 
-	// Estimate point normals
-	ne.setSearchMethod(tree_cyl);
-	ne.setInputCloud(single_cluster);
-	ne.setKSearch(10);
-	ne.compute(*obj_normals);
+        ColorPointType* pnt_min = new ColorPointType();
+        ColorPointType* pnt_max = new ColorPointType();
+        Eigen::Vector3f obj_dim;
+        std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>
+            > obj_size_scores;
+        pcl::getMinMax3D(*obj_in_base_frame, *pnt_min, *pnt_max);
+        obj_dim[0] = fabs(pnt_max->x - pnt_min->x);
+        obj_dim[1] = fabs(pnt_max->y - pnt_min->y);
+        obj_dim[2] = fabs(pnt_max->z - pnt_min->z);
+        compute_bounding_box_scores(obj_dim, obj_size_scores);
 
-	///////////////////////////////////////////////////////////////
-	// Create the segmentation object for cylinder segmentation and set all the parameters
-	seg.setOptimizeCoefficients(true);
-	seg.setModelType(pcl::SACMODEL_CYLINDER);
-	seg.setMethodType(pcl::SAC_RANSAC);
-	seg.setNormalDistanceWeight(0.1);
-	seg.setMaxIterations(10000);
-	seg.setDistanceThreshold(0.03);
-	seg.setRadiusLimits(0, 0.1);
+        std::cout << "Computed object dimensions:" << std::endl;
+        std::cout << obj_dim[0] << " " << obj_dim[1] << " " << obj_dim[2]
+            << std::endl;
+        std::cout << "Size similarity to known objects:" << std::endl;
+        for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
+          std::cout << "** Cup " << os << ": " << obj_size_scores[os][0]
+              << " in x, " << obj_size_scores[os][1] << " in y, "
+              << obj_size_scores[os][2] << " in z." << std::endl;
+          obj_likelihoods_[centroid_i][os] = obj_size_scores[os][0]
+              * obj_size_scores[os][1] * obj_size_scores[os][2];
+        }
+        std::cout << std::endl;
 
-	seg.setInputCloud(single_cluster);
-	seg.setInputNormals(obj_normals);
+        //Fit cylinder:
+        pcl::NormalEstimation<ColorPointType, pcl::Normal> ne;
+        pcl::SACSegmentationFromNormals<ColorPointType, pcl::Normal> seg;
+        pcl::ExtractIndices<ColorPointType> extract;
+        pcl::ExtractIndices < pcl::Normal > extract_normals;
+        pcl::PointCloud<pcl::Normal>::Ptr obj_normals(
+            new pcl::PointCloud<pcl::Normal>);
+        pcl::search::KdTree<ColorPointType>::Ptr tree_cyl(
+            new pcl::search::KdTree<ColorPointType>());
+        pcl::ModelCoefficients::Ptr coefficients_cylinder(
+            new pcl::ModelCoefficients);
+        pcl::PointIndices::Ptr inliers_cylinder(new pcl::PointIndices);
 
-	// Obtain the cylinder inliers and coefficients
+        // Estimate point normals
+        ne.setSearchMethod(tree_cyl);
+        ne.setInputCloud(obj_in_base_frame);
+        ne.setKSearch(10);
+        ne.compute(*obj_normals);
 
-	seg.segment(*inliers_cylinder, *coefficients_cylinder);
-	//std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
-	//Getting max and min z values from cylinder inliers.
-	extract.setInputCloud(single_cluster);
-	extract.setIndices(inliers_cylinder);
-	extract.setNegative(false);
-	pcl::PointCloud<ColorPointType>::Ptr cloud_cylinder(
-							    new pcl::PointCloud<ColorPointType>());
-	extract.filter(*cloud_cylinder);
-	cylinder_params[centroid_i][0] = 0;
-	cylinder_params[centroid_i][1] = 0;
-	if (cloud_cylinder->points.empty()) {
-	  std::cout << "No cylinder inliers!!" << std::endl;
-	  obj_shape_confidence_[centroid_i] = 0.0;
-	} else {
-	  std::cout << "Cylinder inliers ratio = "
-		    << cloud_cylinder->points.size() << "/"
-		    << single_cluster->points.size() << std::endl;
-	  obj_shape_confidence_[centroid_i]
-	    = (double) (cloud_cylinder->points.size())
-	    / (single_cluster->points.size() * 1.0);
-	  std::cout << "Shape confidence = "
-		    << obj_shape_confidence_[centroid_i] << std::endl;
-	  ColorPointType* pnt_min = new ColorPointType();
-	  ColorPointType* pnt_max = new ColorPointType();
-	  pcl::getMinMax3D(*cloud_cylinder, *pnt_min, *pnt_max);
-	  std::cout << "min/max z limits: " << pnt_min->z << ", "
-		    << pnt_max->z << std::endl;
-	  std::cout << "Cylinder hight according to cylinder inliers: "
-		    << pnt_max->z - pnt_min->z << std::endl;
-	  std::cout << "Cylinder hight according to bounding box: "
-		    << obj_dim[2] << std::endl;
-	  std::cerr << "Cylinder radius according to cylinder fitting: "
-		    << (*coefficients_cylinder).values[6] << std::endl;
-	  std::cerr << "Cylinder radius according to bounding box y: "
-		    << obj_dim[1] / 2 << std::endl;
-	  //Cylinder radius:
-	  //cylinder_params[centroid_i][0] = (*coefficients_cylinder).values[6];
-	  cylinder_params[centroid_i][0] = obj_dim[1] / 2;
-	  //Cylinder height:
-	  //cylinder_params[centroid_i][1] = (pnt_max->z - pnt_min->z);
-	  cylinder_params[centroid_i][1] = obj_dim[2];
+        ///////////////////////////////////////////////////////////////
+        // Create the segmentation object for cylinder segmentation and set all the parameters
+        seg.setOptimizeCoefficients(true);
+        seg.setModelType(pcl::SACMODEL_CYLINDER);
+        seg.setMethodType(pcl::SAC_RANSAC);
+        seg.setNormalDistanceWeight(0.1);
+        seg.setMaxIterations(10000);
+        seg.setDistanceThreshold(0.035);
+        seg.setRadiusLimits(0, 0.1);
 
-	  //Overriding computed centroids with estimated cylinder center:
-	  centroids[centroid_i][0] = pnt_min->x + 0.5 * (pnt_max->x
-							 - pnt_min->x);
-	  centroids[centroid_i][1] = pnt_min->y + 0.5 * (pnt_max->y
-							 - pnt_min->y);
-	  centroids[centroid_i][2] = pnt_min->z + 0.5 * (pnt_max->z
-							 - pnt_min->z);
-	}
-	signed int detected_obj_id = -1;
-	double best_confidence = 0.0;
-	std::cout << "FINAL OBJECT LIKELIHOODS FOR THIS CLUSTER:"
-		  << std::endl;
-	for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-	  obj_likelihoods_[centroid_i][os] = 0.6
-	    * obj_likelihoods_[centroid_i][os] + (0.4
-						  * obj_shape_confidence_[centroid_i]);
-	  std::cout << "Overall similarity to obj " << os << ": "
-		    << obj_likelihoods_[centroid_i][os] << std::endl;
-	  if (obj_likelihoods_[centroid_i][os] > best_confidence) {
-	    best_confidence = obj_likelihoods_[centroid_i][os];
-	    detected_obj_id = os;
-	  }
-	}
-	if (best_confidence > 0.5) {
-	  best_obj_guess_[centroid_i] = detected_obj_id;
-	  std::cout
-	    << "********************MATCH FOUND!!********************"
-	    << std::endl;
-	  std::cout << "Object seems to be cup number " << detected_obj_id
-		    << std::endl;
-	} else {
-	  best_obj_guess_[centroid_i] = -1;
-	  std::cout << "This should be negative: "
-		    << best_obj_guess_[centroid_i] << std::endl;
-	}
+        seg.setInputCloud(obj_in_base_frame);
+        seg.setInputNormals(obj_normals);
 
-	std::cout << "*****" << std::endl;
+        // Obtain the cylinder inliers and coefficients
+
+        seg.segment(*inliers_cylinder, *coefficients_cylinder);
+        //std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+        //Getting max and min z values from cylinder inliers.
+        extract.setInputCloud(obj_in_base_frame);
+        extract.setIndices(inliers_cylinder);
+        extract.setNegative(false);
+        pcl::PointCloud<ColorPointType>::Ptr cloud_cylinder(
+            new pcl::PointCloud<ColorPointType>());
+        extract.filter(*cloud_cylinder);
+        cylinder_params[centroid_i][0] = 0;
+        cylinder_params[centroid_i][1] = 0;
+        if (cloud_cylinder->points.empty()) {
+          std::cout << "No cylinder inliers!!" << std::endl;
+          obj_shape_confidence_[centroid_i] = 0.0;
+        } else {
+          obj_shape_confidence_[centroid_i]
+              = (double) (cloud_cylinder->points.size())
+                  / (obj_in_base_frame->points.size() * 1.0);
+          std::cout << "Cylinder fit confidence = "
+              << cloud_cylinder->points.size() << "/"
+              << obj_in_base_frame->points.size() << " = "
+              << obj_shape_confidence_[centroid_i] << std::endl;
+
+          ColorPointType* pnt_min = new ColorPointType();
+          ColorPointType* pnt_max = new ColorPointType();
+          pcl::getMinMax3D(*cloud_cylinder, *pnt_min, *pnt_max);
+          std::cout << "Cylinder hight according to cylinder inliers: "
+              << pnt_max->z - pnt_min->z << std::endl;
+          std::cout << "Cylinder hight according to bounding box: "
+              << obj_dim[2] << std::endl;
+          std::cerr << "Cylinder radius according to cylinder fitting: "
+              << (*coefficients_cylinder).values[6] << std::endl;
+          std::cerr << "Cylinder radius according to bounding box y: "
+              << obj_dim[1] / 2 << std::endl;
+          //Cylinder radius:
+          //cylinder_params[centroid_i][0] = (*coefficients_cylinder).values[6];
+          cylinder_params[centroid_i][0] = obj_dim[1] / 2;
+          //Cylinder height:
+          //cylinder_params[centroid_i][1] = (pnt_max->z - pnt_min->z);
+          cylinder_params[centroid_i][1] = obj_dim[2];
+
+          //cylinder_params[centroid_i][2] = table_inclination_;
+
+          //Overriding computed centroids with estimated cylinder center:
+          centroids[centroid_i][0] = pnt_min->x + 0.5 * (pnt_max->x
+              - pnt_min->x);
+          centroids[centroid_i][1] = pnt_min->y + 0.5 * (pnt_max->y
+              - pnt_min->y);
+          centroids[centroid_i][2] = pnt_min->z + 0.5 * (pnt_max->z
+              - pnt_min->z);
+        }
+
+        std::cout << std::endl;
+        signed int detected_obj_id = -1;
+        double best_confidence = 0.0;
+        for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
+          std::cout << "** Similarity to known cup " << os << ":" << std::endl;
+          std::cout << "Size similarity = "
+              << obj_likelihoods_[centroid_i][os] << std::endl;
+          obj_likelihoods_[centroid_i][os] = 0.5
+              * obj_likelihoods_[centroid_i][os] + (0.5
+              * obj_shape_confidence_[centroid_i]);
+          std::cout << "Overall similarity = "
+              << obj_likelihoods_[centroid_i][os] << std::endl;
+          if (obj_likelihoods_[centroid_i][os] > best_confidence) {
+            best_confidence = obj_likelihoods_[centroid_i][os];
+            detected_obj_id = os;
+          }
+        }
+        std::cout << "********************Object Result********************"
+            << std::endl;
+        if (best_confidence > 0.6) {
+          best_obj_guess_[centroid_i] = detected_obj_id;
+
+          std::cout << "MATCH FOUND!! -------------------------> Cup number "
+              << detected_obj_id << std::endl;
+        } else {
+          best_obj_guess_[centroid_i] = -1;
+          std::cout << "No match found." << std::endl;
+        }
+
+        std::cout << "*****************************************************"
+            << std::endl << std::endl;
       }
 
       *tmp_clusters += *colored_clusters;
@@ -1324,9 +1362,6 @@ TabletopObjectsThread::loop()
   pcl_utils::copy_time(input_, fsimplified_polygon_);
 
   for (unsigned int i = 0; i < f_obj_clusters_.size(); i++) {
-    std::cout << "obj " << i << " has " << (f_obj_clusters_[i])->size()
-	      << " points. Frame: "
-	      << (f_obj_clusters_[i])->header.frame_id.c_str() << std::endl;
     pcl_utils::copy_time(input_, f_obj_clusters_[i]);
   }
 
@@ -1377,19 +1412,19 @@ TabletopObjectsThread::loop()
 
 bool
 TabletopObjectsThread::compute_bounding_box_scores(
-						   Eigen::Vector3f& cluster_dim,
-						   std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& scores)
+    Eigen::Vector3f& cluster_dim,
+    std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& scores)
 {
 
   scores.resize(NUM_KNOWN_OBJS_);
 
   for (int i = 0; i < NUM_KNOWN_OBJS_; i++) {
     scores[i][0] = compute_similarity(cluster_dim[0],
-				      known_obj_dimensions_[i][0]);
+        known_obj_dimensions_[i][0]);
     scores[i][1] = compute_similarity(cluster_dim[1],
-				      known_obj_dimensions_[i][1]);
+        known_obj_dimensions_[i][1]);
     scores[i][2] = compute_similarity(cluster_dim[2],
-				      known_obj_dimensions_[i][2]);
+        known_obj_dimensions_[i][2]);
   }
   return true;
 }
@@ -1397,7 +1432,7 @@ TabletopObjectsThread::compute_bounding_box_scores(
 double
 TabletopObjectsThread::compute_similarity(double d1, double d2)
 {
-  return exp(-50 * ((d1 - d2) * (d1 - d2)));
+  return exp(-50.0 * ((d1 - d2) * (d1 - d2)));
 }
 
 void

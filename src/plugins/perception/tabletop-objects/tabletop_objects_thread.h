@@ -129,6 +129,8 @@ class TabletopObjectsThread
   std::vector<signed int> best_obj_guess_;
   int NUM_KNOWN_OBJS_;
 
+  double table_inclination_;
+
   std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > known_obj_dimensions_;
 
   pcl::VoxelGrid<PointType> grid_;
