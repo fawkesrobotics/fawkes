@@ -31,6 +31,8 @@ namespace mongo {
 }
 
 namespace fawkes {
+  class MongoDBConnCreator;
+
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
@@ -47,9 +49,11 @@ class MongoDBAspect : public virtual Aspect
 
  protected:
   mongo::DBClientBase *mongodb_client;
+  MongoDBConnCreator  *mongodb_connmgr;
 
  private:
-  void init_MongoDBAspect(mongo::DBClientBase *mongodb_client);
+  void init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
+			  MongoDBConnCreator  *mongodb_connmgr);
 
  private:
   char *__config_name;

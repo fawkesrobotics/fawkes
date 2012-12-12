@@ -22,6 +22,7 @@
  */
 
 #include <plugins/mongodb/aspect/mongodb.h>
+#include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -56,6 +57,10 @@ namespace fawkes {
  * initialized).
  */
 
+/** @var fawkes::MongoDBConnCreator *  MongoDBAspect::mongodb_connmgr
+ * Connection manager to retrieve more client connections from if necessary.
+ */
+
 /** Constructor.
  * @param config_name optional configuration name from which the
  * configuration for the database is read from the global configuration.
@@ -78,12 +83,15 @@ MongoDBAspect::~MongoDBAspect()
  * This set the MongoDB client to access MongoDB.
  * It is guaranteed that this is called for a MongoDBThread before start
  * is called (when running regularly inside Fawkes).
- * @param bb MongoDB to use
+ * @param mongodb_client MongoDB connection
+ * @param mongodb_connmgr MongoDB connection manager
  */
 void
-MongoDBAspect::init_MongoDBAspect(mongo::DBClientBase *mongodb_client)
+MongoDBAspect::init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
+				  MongoDBConnCreator *mongodb_connmgr)
 {
-  this->mongodb_client = mongodb_client;
+  this->mongodb_client  = mongodb_client;
+  this->mongodb_connmgr = mongodb_connmgr;
 }
 
 } // end namespace fawkes

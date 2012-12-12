@@ -55,7 +55,7 @@ class MongoDBThread
   virtual void loop();
   virtual void finalize();
 
-  virtual mongo::DBClientBase *  create_client(const char *config_name);
+  virtual mongo::DBClientBase *  create_client(const char *config_name = 0);
   virtual void delete_client(mongo::DBClientBase *client);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
