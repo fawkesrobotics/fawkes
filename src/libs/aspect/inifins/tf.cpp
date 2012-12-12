@@ -25,6 +25,11 @@
 #include <aspect/tf.h>
 
 namespace fawkes {
+
+  namespace tf {
+    class Transformer;
+  }
+
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
@@ -36,11 +41,14 @@ namespace fawkes {
 
 /** Constructor.
  * @param blackboard blackboard instance to pass to threads
+ * @param transformer system-wide shared transformer to pass to threads
  */
-TransformAspectIniFin::TransformAspectIniFin(BlackBoard *blackboard)
+TransformAspectIniFin::TransformAspectIniFin(BlackBoard *blackboard,
+					     tf::Transformer *transformer)
   : AspectIniFin("TransformAspect")
 {
-  __blackboard = blackboard;
+  __blackboard  = blackboard;
+  __transformer = transformer;
 }
 
 void
@@ -54,7 +62,7 @@ TransformAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  transform_thread->init_TransformAspect(__blackboard);
+  transform_thread->init_TransformAspect(__blackboard, __transformer);
 }
 
 void

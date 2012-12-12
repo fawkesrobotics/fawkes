@@ -23,8 +23,12 @@
 #ifndef __ASPECT_TF_H_
 #define __ASPECT_TF_H_
 
+#ifndef HAVE_TF
+#  error TF not available. Forgot to add CFLAGS_TF?
+#endif
+
 #include <aspect/aspect.h>
-#include <tf/transform_listener.h>
+#include <tf/transformer.h>
 #include <tf/transform_publisher.h>
 
 namespace fawkes {
@@ -48,16 +52,17 @@ class TransformAspect : public virtual Aspect
   TransformAspect(Mode mode = ONLY_LISTENER, const char *tf_bb_iface_id = 0);
   virtual ~TransformAspect();
 
-  void init_TransformAspect(BlackBoard *blackboard);
+  void init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer);
   void finalize_TransformAspect();
 
  protected:
-  tf::TransformListener   * tf_listener;
+  tf::Transformer         * tf_listener;
   tf::TransformPublisher  * tf_publisher;
 
  private:
   Mode  __tf_aspect_mode;
   char *__tf_aspect_bb_iface_id;
+  bool  __own_tf_listener;
 };
 
 } // end namespace fawkes
