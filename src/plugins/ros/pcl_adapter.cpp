@@ -152,6 +152,7 @@ RosPointCloudAdapter::get_info(std::string &id,
 
 /** Get current data of point cloud.
  * @param id ID of point cloud to get info from
+ * @param frame_id upon return contains the frame ID of the point cloud
  * @param width upon return contains width of point cloud
  * @param height upon return contains width of point cloud
  * @param time capture time
