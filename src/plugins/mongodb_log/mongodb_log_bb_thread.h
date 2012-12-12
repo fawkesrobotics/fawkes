@@ -62,21 +62,6 @@ class MongoLogBlackboardThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  /* we assume Mongo client to be thread-safe for now, that is not absolutely
-   * clear and I could not google a definite answer
-  class MongoWriter
-  {
-   public:
-    MongoWriter(fawkes::Logger *logger, mongo::DBClientBase *client);
-
-    void write(std::string &collection, mongo::BSONObj &obj);
-
-   private:
-    Mutex *__mutex;
-  };
-  */
-
-
   /** Mongo Logger interface listener. */
   class InterfaceListener : public fawkes::BlackBoardInterfaceListener
   {
@@ -87,8 +72,11 @@ class MongoLogBlackboardThread
 		      std::string &database,
 		      fawkes::LockSet<std::string> &colls,
 		      fawkes::Logger *logger,
-          fawkes::Time *now);
+		      fawkes::Time *now);
     ~InterfaceListener();
+
+    mongo::DBClientBase * mongodb_client() const
+    { return mongodb_; }
 
     // for BlackBoardInterfaceListener
     virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();

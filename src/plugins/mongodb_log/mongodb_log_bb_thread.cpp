@@ -23,6 +23,7 @@
 #include "mongodb_log_bb_thread.h"
 
 #include <core/threading/mutex_locker.h>
+#include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <cstdlib>
 
 // from MongoDB
@@ -70,12 +71,11 @@ MongoLogBlackboardThread::init()
   std::list<Interface *> current_interfaces =
     blackboard->open_multiple_for_reading("*", "*");
 
-  std::list<Interface *>::iterator i;
-  for (i = current_interfaces.begin(); i != current_interfaces.end(); ++i) {
-    logger->log_debug(name(), "Opening %s", (*i)->uid());
-    listeners_[(*i)->uid()] = new InterfaceListener(blackboard, *i,
-						     mongodb_client, database_,
-						     collections_, logger, now_);
+      logger->log_debug(name(), "Adding %s", (*i)->uid());
+      mongo::DBClientBase *mc = mongodb_connmgr->create_client();
+      listeners_[(*i)->uid()] = new InterfaceListener(blackboard, *i, mc, database_,
+						      collections_, logger, now_);
+    }
   }
 
   blackboard->register_observer(this);
@@ -98,7 +98,9 @@ MongoLogBlackboardThread::finalize()
 
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = listeners_.begin(); i != listeners_.end(); ++i) {
+    mongo::DBClientBase *mc = i->second->mongodb_client();
     delete i->second;
+    mongodb_connmgr->delete_client(mc);
   }
   listeners_.clear();
 }
@@ -119,12 +121,10 @@ MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id)
     Interface *interface = blackboard->open_for_reading(type, id);
     if (listeners_.find(interface->uid()) == listeners_.end()) {
       logger->log_debug(name(), "Opening new %s", interface->uid());
-      listeners_[interface->uid()] = new InterfaceListener(blackboard, interface,
-							    mongodb_client,
-							    database_,
-							    collections_,
-							    logger,
-                  now_);
+      mongo::DBClientBase *mc = mongodb_connmgr->create_client();
+      listeners_[interface->uid()] = new InterfaceListener(blackboard, interface, mc,
+							   database_, collections_,
+							   logger, now_);
     } else {
       logger->log_warn(name(), "Interface %s already opened", interface->uid());
       blackboard->close(interface);
