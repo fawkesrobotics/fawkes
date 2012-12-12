@@ -82,11 +82,11 @@ TransformStorage::TransformStorage()
 TransformStorage::TransformStorage(const StampedTransform& data,
                                    CompactFrameID frame_id,
                                    CompactFrameID child_frame_id)
-: rotation_(data.getRotation())
-, translation_(data.getOrigin())
+: rotation(data.getRotation())
+, translation(data.getOrigin())
 , stamp(data.stamp)
-, frame_id_(frame_id)
-, child_frame_id_(child_frame_id)
+, frame_id(frame_id)
+, child_frame_id(child_frame_id)
 { }
 
 
@@ -256,14 +256,14 @@ TimeCache::interpolate(const TransformStorage& one,
     (two.stamp.in_sec() - one.stamp.in_sec());
 
   //Interpolate translation
-  output.translation_.setInterpolate3(one.translation_, two.translation_, ratio);
+  output.translation.setInterpolate3(one.translation, two.translation, ratio);
 
   //Interpolate rotation
-  output.rotation_ = slerp( one.rotation_, two.rotation_, ratio);
+  output.rotation = slerp( one.rotation, two.rotation, ratio);
 
   output.stamp = one.stamp;
-  output.frame_id_ = one.frame_id_;
-  output.child_frame_id_ = one.child_frame_id_;
+  output.frame_id = one.frame_id;
+  output.child_frame_id = one.child_frame_id;
 }
 
 /** Get data.
@@ -285,7 +285,7 @@ TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
   } else if (num_nodes == 1) {
     data_out = *p_temp_1;
   } else if (num_nodes == 2) {
-    if( p_temp_1->frame_id_ == p_temp_2->frame_id_) {
+    if( p_temp_1->frame_id == p_temp_2->frame_id) {
       interpolate(*p_temp_1, *p_temp_2, time, data_out);
     } else {
       data_out = *p_temp_1;
@@ -311,7 +311,7 @@ TimeCache::get_parent(fawkes::Time time, std::string* error_str)
     return 0;
   }
 
-  return p_temp_1->frame_id_;
+  return p_temp_1->frame_id;
 }
 
 
@@ -369,7 +369,7 @@ TimeCache::get_latest_time_and_parent() const
   }
 
   const TransformStorage& ts = storage_.front();
-  return std::make_pair(ts.stamp, ts.frame_id_);
+  return std::make_pair(ts.stamp, ts.frame_id);
 }
 
 /** Get latest timestamp from cache.

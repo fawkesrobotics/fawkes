@@ -84,19 +84,19 @@ class TransformStorage
 
   TransformStorage& operator=(const TransformStorage& rhs)
   {
-    rotation_ = rhs.rotation_;
-    translation_ = rhs.translation_;
+    rotation = rhs.rotation;
+    translation = rhs.translation;
     stamp = rhs.stamp;
-    frame_id_ = rhs.frame_id_;
-    child_frame_id_ = rhs.child_frame_id_;
+    frame_id = rhs.frame_id;
+    child_frame_id = rhs.child_frame_id;
     return *this;
   }
 
-  btQuaternion rotation_;	///< rotation quaternio
-  btVector3 translation_;	///< translation vector
+  btQuaternion rotation;	///< rotation quaternio
+  btVector3 translation;	///< translation vector
   fawkes::Time stamp;		///< time stamp
-  CompactFrameID frame_id_;	///< parent/reference frame number
-  CompactFrameID child_frame_id_;	///< child frame number
+  CompactFrameID frame_id;	///< parent/reference frame number
+  CompactFrameID child_frame_id;	///< child frame number
 };
 
 

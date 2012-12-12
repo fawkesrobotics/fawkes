@@ -187,7 +187,7 @@ struct TransformAccum
       return 0;
     }
 
-    return st.frame_id_;
+    return st.frame_id;
   }
 
   /** Accumulate.
@@ -197,13 +197,13 @@ struct TransformAccum
   {
     if (source)
     {
-      source_to_top_vec = quatRotate(st.rotation_, source_to_top_vec) + st.translation_;
-      source_to_top_quat = st.rotation_ * source_to_top_quat;
+      source_to_top_vec = quatRotate(st.rotation, source_to_top_vec) + st.translation;
+      source_to_top_quat = st.rotation * source_to_top_quat;
     }
     else
     {
-      target_to_top_vec = quatRotate(st.rotation_, target_to_top_vec) + st.translation_;
-      target_to_top_quat = st.rotation_ * target_to_top_quat;
+      target_to_top_vec = quatRotate(st.rotation, target_to_top_vec) + st.translation;
+      target_to_top_quat = st.rotation * target_to_top_quat;
     }
   }
 
