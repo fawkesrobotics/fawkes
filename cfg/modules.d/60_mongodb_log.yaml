@@ -16,4 +16,14 @@ plugins/mongodb-log:
   # if there is an exclude rule, then excludes are processed last
   pointclouds:
     includes: [openni-pointcloud-xyz]
+  
+
+  blackboard:
+    # Inclusion and exclusion rules apply to the interface ID only, not to
+    # the type.
+    # Note that the empty list or no list at all causes the logging of
+    # all interfaces (unless an exclude rule applies).
+    # logging, the latter causes logging of everything in the blackboard
+    includes: ["*"]
+    excludes: []
  

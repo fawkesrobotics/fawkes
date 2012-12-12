@@ -97,6 +97,8 @@ class MongoLogBlackboardThread
   fawkes::LockSet<std::string> collections_;
   std::string database_;
   fawkes::Time        *now_;
+
+  std::vector<std::string> excludes_;
 };
 
 #endif

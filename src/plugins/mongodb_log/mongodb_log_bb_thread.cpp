@@ -29,6 +29,8 @@
 // from MongoDB
 #include <mongo/client/dbclient.h>
 
+#include <fnmatch.h>
+
 using namespace mongo;
 using namespace fawkes;
 
@@ -66,10 +68,38 @@ MongoLogBlackboardThread::init()
 		     database_.c_str());
   }
 
-  bbio_add_observed_create("*", "*");
+  std::vector<std::string> includes;
+  try {
+    includes = config->get_strings("/plugins/mongodb-log/blackboard/includes");
+  } catch (Exception &e) {} // ignored, no include rules
+  try {
+    excludes_ = config->get_strings("/plugins/mongodb-log/blackboard/excludes");
+  } catch (Exception &e) {} // ignored, no include rules
 
-  std::list<Interface *> current_interfaces =
-    blackboard->open_multiple_for_reading("*", "*");
+  if (includes.empty()) {
+    includes.push_back("*");
+  }
+
+  std::vector<std::string>::iterator i;
+  std::vector<std::string>::iterator e;
+  for (i = includes.begin(); i != includes.end(); ++i) {
+    bbio_add_observed_create("*", i->c_str());
+
+    std::list<Interface *> current_interfaces =
+      blackboard->open_multiple_for_reading("*", i->c_str());
+    
+    std::list<Interface *>::iterator i;
+    for (i = current_interfaces.begin(); i != current_interfaces.end(); ++i) {
+      bool exclude = false;
+      for (e = excludes_.begin(); e != excludes_.end(); ++e) {
+	if (fnmatch(e->c_str(), (*i)->id(), 0) != FNM_NOMATCH) {
+	  logger->log_debug(name(), "Excluding '%s' by config rule", (*i)->uid());
+	  blackboard->close(*i);
+	  exclude = true;
+	  break;
+	}
+      }
+      if (exclude) continue;
 
       logger->log_debug(name(), "Adding %s", (*i)->uid());
       mongo::DBClientBase *mc = mongodb_connmgr->create_client();
@@ -116,6 +146,14 @@ void
 MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id) throw()
 {
   MutexLocker lock(listeners_.mutex());
+
+  std::vector<std::string>::iterator e;
+  for (e = excludes_.begin(); e != excludes_.end(); ++e) {
+    if (fnmatch(e->c_str(), id, 0) != FNM_NOMATCH) {
+      logger->log_debug(name(), "Ignoring excluded interface '%s::%s'", type, id);
+      return;
+    }
+  }
 
   try {
     Interface *interface = blackboard->open_for_reading(type, id);
