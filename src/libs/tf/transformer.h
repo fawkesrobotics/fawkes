@@ -85,6 +85,11 @@ class Transformer
   Transformer(float cache_time_sec = 10.0);
   virtual ~Transformer(void);
 
+  float get_cache_time() const;
+  void lock();
+  bool try_lock();
+  void unlock();
+
   void clear();
 
   bool set_transform(const StampedTransform &transform,
@@ -121,6 +126,7 @@ class Transformer
                      const std::string& fixed_frame) const;
 
   const TimeCache *  get_frame_cache(const std::string &frame_id) const;
+  const std::vector<TimeCache *> &  get_frame_caches() const;
 
   void set_enabled(bool enabled);
   bool is_enabled() const { return enabled_; };
@@ -156,12 +162,11 @@ class Transformer
                      const std::string& fixed_frame,
                      Stamped<Pose>& stamped_out) const;
 
- protected: /* methods */
-  TimeCache *  get_frame(unsigned int frame_number) const;
-
-  CompactFrameID lookup_frame_number(const std::string &frameid_str) const;
-  CompactFrameID lookup_or_insert_frame_number(const std::string &frameid_str);
-  std::string    lookup_frame_string(unsigned int frame_id_num) const;
+  TimeCache *               get_frame(unsigned int frame_number) const;
+  CompactFrameID            lookup_frame_number(const std::string &frameid_str) const;
+  CompactFrameID            lookup_or_insert_frame_number(const std::string &frameid_str);
+  std::string               lookup_frame_string(unsigned int frame_id_num) const;
+  std::vector<std::string>  get_frame_id_mappings() const;
 
  protected:
   /// Flag to mark the transformer as disabled

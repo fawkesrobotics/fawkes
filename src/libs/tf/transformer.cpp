@@ -303,6 +303,47 @@ Transformer::set_enabled(bool enabled)
   enabled_ = enabled;
 }
 
+
+/** Get maximum caching time.
+ * @return maximum caching time in seconds
+ */
+float
+Transformer::get_cache_time() const
+{
+  return cache_time_;
+}
+
+/** Lock transformer.
+ * No new transforms can be added and no lookups can be performed
+ * while the lock is held.
+ */
+void
+Transformer::lock()
+{
+  frame_mutex_->lock();
+}
+
+
+/** Try to acquire lock.
+ * @return true if lock has been acquired, alse otherwise
+ */
+bool
+Transformer::try_lock()
+{
+  return frame_mutex_->try_lock();
+}
+
+
+/** Unlock.
+ * Release currently held lock.
+ */
+void
+Transformer::unlock()
+{
+  frame_mutex_->unlock();
+}
+
+
 /** Clear cached transforms. */
 void
 Transformer::clear()
@@ -803,6 +844,16 @@ Transformer::get_frame_cache(const std::string &frame_id) const
 }
 
 
+/** An accessor to get access to all frame caches at once.
+ * @return vector of time caches
+ */
+const std::vector<TimeCache *> &
+Transformer::get_frame_caches() const
+{
+  return frames_;
+}
+
+
 /** String to number for frame lookup.
  * @param frameid_str frame ID
  * @return frame number
@@ -861,6 +912,15 @@ Transformer::lookup_frame_string(unsigned int frame_num) const
     throw LookupException("Reverse lookup of frame id %u failed!", frame_num);
   }
   else return frameIDs_reverse[frame_num];
+}
+
+/** Get mappings from frame ID to names.
+ * @return vector of mappings from frame IDs to names
+ */
+std::vector<std::string>
+Transformer::get_frame_id_mappings() const
+{
+  return frameIDs_reverse;
 }
 
 
