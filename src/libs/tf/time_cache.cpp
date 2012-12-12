@@ -378,7 +378,7 @@ TimeCache::get_latest_time_and_parent() const
 fawkes::Time
 TimeCache::get_latest_timestamp() const
 {
-  if (storage_.empty()) return fawkes::Time(); //empty list case
+  if (storage_.empty()) return fawkes::Time(0,0); //empty list case
   return storage_.front().stamp;
 }
 
@@ -388,7 +388,7 @@ TimeCache::get_latest_timestamp() const
 fawkes::Time
 TimeCache::get_oldest_timestamp() const
 {
-  if (storage_.empty()) return fawkes::Time(); //empty list case
+  if (storage_.empty()) return fawkes::Time(0,0); //empty list case
   return storage_.back().stamp;
 }
 
