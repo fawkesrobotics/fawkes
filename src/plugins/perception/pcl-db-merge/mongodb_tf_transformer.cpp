@@ -39,6 +39,7 @@ namespace fawkes {
 
 /** Constructor.
  * @param mongodb_client MongoDB database client
+ * @param database_name name of database to restore transforms from
  */
 MongoDBTransformer::MongoDBTransformer(mongo::DBClientBase *mongodb_client,
 				       std::string database_name)
@@ -52,6 +53,13 @@ MongoDBTransformer::~MongoDBTransformer()
 {
 }
 
+/** Restore transforms from database.
+ * @param start start time of range to restore
+ * @param end end time of range to restore
+ * @param new_start the new start time to which the transform times
+ * will be reset, i.e. from the transforms time stamp the @p start
+ * time is subtracted and @p new_start is added.
+ */
 void
 MongoDBTransformer::restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time &new_start)
 {
@@ -59,6 +67,41 @@ MongoDBTransformer::restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time
 }
 
 
+void
+MongoDBTransformer::restore_tf_doc(BSONObj &doc,
+				   long long start_msec, long long new_start_msec)
+{
+  std::vector<BSONElement> trans = doc["translation"].Array();
+  std::vector<BSONElement> rot = doc["rotation"].Array();
+  double rx, ry, rz, rw, tx, ty, tz;
+  std::string frame, child_frame;
+  long timestamp = new_start_msec + (doc["timestamp"].Long() - start_msec);
+  Time time(timestamp);
+  rx = rot[0].Double();
+  ry = rot[1].Double();
+  rz = rot[2].Double();
+  rw = rot[3].Double();
+  tx = trans[0].Double();
+  ty = trans[1].Double();
+  tz = trans[2].Double();
+  frame = doc["frame"].String();
+  child_frame = doc["child_frame"].String();
+
+  tf::Quaternion q(rx, ry, rz, rw);
+  tf::assert_quaternion_valid(q);
+  tf::Transform t(q, tf::Vector3(tx, ty, tz));
+  tf::StampedTransform transform(t, time, frame, child_frame);
+  set_transform(transform);
+}
+
+
+/** Restore transforms from database.
+ * @param start_msec start time of range to restore since the epoch in msec
+ * @param end_msec end time of range to restore since the epoch in msec
+ * @param new_start_msec the new start time since the epoch in msec to which the
+ * transform times will be reset, i.e. from the transforms time stamp the
+ * @p start time is subtracted and @p new_start is added.
+ */
 void
 MongoDBTransformer::restore(long long start_msec, long long end_msec, long long new_start_msec)
 {
@@ -71,40 +114,30 @@ MongoDBTransformer::restore(long long start_msec, long long end_msec, long long 
   
   std::auto_ptr<DBClientCursor> cursor;
   BSONObj doc;
-  //long long buffered = start_msec;
   std::list<std::string>::iterator c;
-  for(c = collections.begin(); c != collections.end(); ++c) {
-    if (c->find(database_ + ".TransformInterface.") != 0)  continue;
+  for (c = collections.begin(); c != collections.end(); ++c) {
+    if ((c->find(database_ + ".TransformInterface.") != 0 ) &&
+	(c->find(database_ + ".tf") != 0) )
+    {
+      continue;
+    }
 
     cursor = mongodb_client_->query(*c,
 	     QUERY("timestamp" << GTE << start_msec << LT << end_msec).sort("timestamp"));
 
     while (cursor->more()) {
       doc = cursor->next();
-      std::vector<BSONElement> trans = doc["translation"].Array();
-      std::vector<BSONElement> rot = doc["rotation"].Array();
-      double rx, ry, rz, rw, tx, ty, tz;
-      std::string frame, child_frame;
-      long timestamp = new_start_msec + (doc["timestamp"].Long() - start_msec);
-      Time time(timestamp);
-      rx = rot[0].Double();
-      ry = rot[1].Double();
-      rz = rot[2].Double();
-      rw = rot[3].Double();
-      tx = trans[0].Double();
-      ty = trans[1].Double();
-      tz = trans[2].Double();
-      frame = doc["frame"].String();
-      child_frame = doc["child_frame"].String();
- 
-      tf::Quaternion q(rx, ry, rz, rw);
-      tf::assert_quaternion_valid(q);
-      tf::Transform t(q, tf::Vector3(tx, ty, tz));
-      tf::StampedTransform transform(t, time, frame, child_frame);
-      set_transform(transform);
- 
-      //if(doc["timestamp"].Number() > buffered)
-      //  buffered = doc["timestamp"].Number();
+      if (doc.hasField("transforms")) {
+	// multi transforms document
+	BSONObj::iterator i = doc.getObjectField("transforms").begin();
+	while (i.more()) {
+	  BSONElement e = i.next();
+	  BSONObj o = e.Obj();
+	  restore_tf_doc(o, start_msec, new_start_msec);
+	}
+     } else {
+	restore_tf_doc(doc, start_msec, new_start_msec);
+      }
     }
   }
 }

@@ -78,6 +78,11 @@ typedef enum {
   QUERY_FAILED
 } ApplicabilityStatus;
 
+/** Point cloud merging pipeline.
+ * This class can merge multiple point clouds which are restored from
+ * a MongoDB database created by mongodb-log.
+ * @author Tim Niemueller
+ */
 template <typename PointType>
 class PointCloudDBMergePipeline
 {
@@ -93,6 +98,12 @@ class PointCloudDBMergePipeline
   typedef typename ColorCloud::ConstPtr ColorCloudConstPtr;
 
  public:
+  /** Constructor.
+   * @param mongodb_client MongoDB client
+   * @param config configuration
+   * @param logger Logger
+   * @param output output point cloud
+   */
  PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client,
 			   fawkes::Configuration *config, fawkes::Logger *logger,
 			   ColorCloudPtr output)
@@ -165,11 +176,20 @@ class PointCloudDBMergePipeline
 #endif
   }
 
+  /** Destructor. */
   ~PointCloudDBMergePipeline()
   {
     delete mongodb_gridfs_;
   }
 
+  /** Check if this pipeline instance is suitable for the given times.
+   * Retrieves information about the point clouds for the specified
+   * \p times and checks if this pipeline (depending on the template
+   * parameter) is suitable for the processing of these pipelines.
+   * @param times times for which to check the point clouds
+   * @param collection collection from which to retrieve the information
+   * @return applicability status
+   */
   ApplicabilityStatus
   applicable(std::vector<long long> &times, std::string &collection)
   {
@@ -224,6 +244,10 @@ class PointCloudDBMergePipeline
   }
 
 
+  /** Merge point clouds.
+   * @param times times for which to retrieve the point clouds.
+   * @param collection collection from which to retrieve the data
+   */
   void
   merge(std::vector<long long> &times, std::string &collection)
   {

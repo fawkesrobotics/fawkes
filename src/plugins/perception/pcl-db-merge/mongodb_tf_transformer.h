@@ -29,10 +29,6 @@
 
 #include <string>
 
-namespace mongo {
-  class DBClientBase;
-}
-
 namespace fawkes {
   namespace tf {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -48,12 +44,20 @@ class MongoDBTransformer
 		     std::string database_name);
   virtual ~MongoDBTransformer();
 
+  /** Restore transforms from database.
+   * @param start start time of range to restore
+   * @param end end time of range to restore
+   */
   void restore(fawkes::Time &start, fawkes::Time &end)
   { fawkes::Time no_new_start(0,0); restore(start, end, no_new_start); }
 
   void restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time &new_start);
   void restore(long long start_msec, long long end_msec,
 	       long long new_start_msec = 0);
+
+ private:
+  void restore_tf_doc(mongo::BSONObj &doc,
+		      long long start_msec, long long new_start_msec);
 
  private:
   mongo::DBClientBase *mongodb_client_;
