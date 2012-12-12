@@ -623,7 +623,9 @@ class YamlConfiguration::Node
   void emit(std::string &filename)
   {
     if (access(filename.c_str(), W_OK) != 0) {
-      throw Exception(errno, "YamlConfig: cannot write host file");
+      if (errno != ENOENT) {
+        throw Exception(errno, "YamlConfig: cannot write host file");
+      }
     }
 
     std::ofstream fout(filename.c_str());
