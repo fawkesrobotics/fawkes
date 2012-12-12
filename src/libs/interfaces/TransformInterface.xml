@@ -12,11 +12,11 @@
       close as possible to the time of when the data, from which the
       transform is computed, has been acquired.
     </comment>
-    <field type="string" length="32" name="frame">
+    <field type="string" length="64" name="frame">
       Parent frame ID. The given transform is relative to the origin
       of this coordinate frame.
     </field>
-    <field type="string" length="32" name="child_frame">
+    <field type="string" length="64" name="child_frame">
       The ID of the child frame. The child frame's origin is at the
       given point in the parent frame denoted by the transform.
     </field>
