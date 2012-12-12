@@ -21,7 +21,8 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_mongodb_log = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect fvutils $(LIBS_MONGODB)
+		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
+		fawkestf
 OBJS_mongodb_log = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 CFLAGS  += $(CFLAGS_MONGODB)

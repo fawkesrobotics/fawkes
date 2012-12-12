@@ -23,6 +23,7 @@
 #include "mongodb_log_image_thread.h"
 #include "mongodb_log_pcl_thread.h"
 #include "mongodb_log_logger_thread.h"
+#include "mongodb_log_tf_thread.h"
 
 #include <core/plugin.h>
 
@@ -71,6 +72,14 @@ class MongoLogPlugin : public fawkes::Plugin
     } catch (Exception &e) {}
     if (enable_logger) {
       thread_list.push_back(new MongoLogLoggerThread());
+    }
+
+    bool enable_tf = true;
+    try {
+    enable_tf = config->get_bool("/plugins/mongodb-log/enable-transforms");
+    } catch (Exception &e) {}
+    if (enable_tf) {
+      thread_list.push_back(new MongoLogTransformsThread());
     }
 
     if (thread_list.empty()) {

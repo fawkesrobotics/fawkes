@@ -14,9 +14,15 @@ plugins/mongodb-log:
   # Stores (text) log messages to the database
   enable-logger: false
 
-  # if no inclusion rule is set, all pointclouds are included unless excluded
-  # if an inclusion rule exists, only matching pointclouds are included unless excluded
-  # if there is an exclude rule, then excludes are processed last
+  # Enable specialized transforms logger?  Transforms can either be
+  # stored using the blackboard logger, or using the specialized
+  # transforms logger. The former will allow easy restoration to an
+  # interface. The latter supports more efficient storage by combining
+  # all transforms regarding a particular frame for a certain period
+  # in time to a single document.
+  enable-transforms: true
+
+  
   pointclouds:
     # GridFS chunk size for point clouds, 2 MB
     chunk-size: 2097152
@@ -37,3 +43,10 @@ plugins/mongodb-log:
     includes: ["*"]
     excludes: []
  
+
+  transforms:
+    collection: tf
+    
+    # Interval to store at a time, if 0 copy everything currently held by
+    # transformer; sec
+    storage-interval: 0
