@@ -566,25 +566,24 @@ MongoRRDThread::loop()
 	BSONObj dbstats;
 	if (mongodb_client->simpleCommand(i->second.db_name, &dbstats, "dbStats"))
 	{
-	  int collections, objects, numExtents, indexes, indexSize;
-	  double avgObjSize, dataSize, storageSize, fileSize;
+	  long int collections, objects, numExtents, indexes, dataSize,
+	    storageSize, indexSize, fileSize;
+	  double avgObjSize;
 
 	  try {
-	    collections = dbstats["collections"].Int();
-	    objects     = dbstats["objects"].Int();
+	    collections = dbstats["collections"].numberLong();
+	    objects     = dbstats["objects"].numberLong();
 	    avgObjSize  = dbstats["avgObjSize"].Double();
-	    dataSize    = dbstats["dataSize"].Double();
-	    storageSize = dbstats["storageSize"].Double();
-	    numExtents  = dbstats["numExtents"].Int();
-	    indexes     = dbstats["indexes"].Int();
-	    indexSize   = dbstats["indexSize"].Int();
-	    fileSize    = dbstats["fileSize"].Double();
-
-	    //logger->log_debug(name(), "type = %i", dbstats["fileSize"].type());
+	    dataSize    = dbstats["dataSize"].numberLong();
+	    storageSize = dbstats["storageSize"].numberLong();
+	    numExtents  = dbstats["numExtents"].numberLong();
+	    indexes     = dbstats["indexes"].numberLong();
+	    indexSize   = dbstats["indexSize"].numberLong();
+	    fileSize    = dbstats["fileSize"].numberLong();
 
 	    try {
 	      rrd_manager->add_data(i->second.rrd_name.c_str(),
-				    "N:%i:%i:%f:%f:%f:%i:%i:%i:%f", collections,
+				    "N:%li:%li:%f:%li:%li:%li:%li:%li:%li", collections,
 				    objects, avgObjSize, dataSize, storageSize,
 				    numExtents, indexes, indexSize, fileSize);
 	    } catch (Exception &e) {
@@ -593,6 +592,9 @@ MongoRRDThread::loop()
 	      logger->log_warn(name(), e);
 	    }
 
+	  } catch (mongo::MsgAssertionException &ue) {
+	    logger->log_warn(name(), "Failed to update MongoDB RRD for database "
+			     "%s: %s", i->second.db_name.c_str(), ue.what());
 	  } catch (mongo::UserException &ue) {
 	    logger->log_warn(name(), "Failed to update MongoDB RRD for database "
 			     "%s: %s", i->second.db_name.c_str(), ue.what());
