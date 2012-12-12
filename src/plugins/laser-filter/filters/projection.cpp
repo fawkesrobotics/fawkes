@@ -44,7 +44,7 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param tf_listener transform listener to get transform from
+ * @param tf transformer to get transform from
  * @param target_frame target coordinate fram to project into
  * @param not_from_x lower X boundary of ignored rectangle
  * @param not_to_x upper X boundary of ignored rectangle
@@ -56,7 +56,7 @@ using namespace fawkes;
  * @param in vector of input arrays
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
-    tf::TransformListener *tf_listener,
+    tf::Transformer *tf,
     std::string target_frame,
     float not_from_x, float not_to_x,
     float not_from_y, float not_to_y,
@@ -64,7 +64,7 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     unsigned int in_data_size,
     std::vector<LaserDataFilter::Buffer *> &in)
   : LaserDataFilter(in_data_size, in, in.size()),
-    tf_listener_(tf_listener), target_frame_(target_frame),
+    tf_(tf), target_frame_(target_frame),
     not_from_x_(not_from_x), not_to_x_(not_to_x),
     not_from_y_(not_from_y), not_to_y_(not_to_y),
     only_from_z_(only_from_z), only_to_z_(only_to_z)
@@ -133,8 +133,8 @@ LaserProjectionDataFilter::filter()
     tf::StampedTransform t;
     tf::Point p;
 
-    tf_listener_->lookup_transform(target_frame_, in[a]->frame,
-                                   fawkes::Time(0, 0), t);
+    tf_->lookup_transform(target_frame_, in[a]->frame,
+			  fawkes::Time(0, 0), t);
 
     if (in_data_size == 360) {
       for (unsigned int i = 0; i < 360; ++i) {

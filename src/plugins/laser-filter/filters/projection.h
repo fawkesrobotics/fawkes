@@ -29,7 +29,7 @@
 #  error LaserProjectionDataFilter only availabe with TF
 #endif
 
-#include <tf/transform_listener.h>
+#include <tf/transformer.h>
 
 #include <string>
 
@@ -41,7 +41,7 @@ namespace fawkes {
 class LaserProjectionDataFilter : public LaserDataFilter
 {
  public:
-  LaserProjectionDataFilter(fawkes::tf::TransformListener *tf_listener,
+  LaserProjectionDataFilter(fawkes::tf::Transformer *tf,
                             std::string target_frame,
                             float not_from_x, float not_to_x,
                             float not_from_y, float not_to_y,
@@ -56,7 +56,7 @@ class LaserProjectionDataFilter : public LaserDataFilter
   inline void set_output(float *outbuf, fawkes::tf::Point &p);
 
  private:
-  fawkes::tf::TransformListener *tf_listener_;
+  fawkes::tf::Transformer *tf_;
   const std::string target_frame_;
   const float not_from_x_, not_to_x_;
   const float not_from_y_, not_to_y_;
