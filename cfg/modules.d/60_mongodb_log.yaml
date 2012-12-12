@@ -7,8 +7,11 @@ plugins/mongodb-log:
 
   database: fflog
 
+  enable-blackboard: true
   enable-images: false
   enable-pointclouds: true
+
+  # Stores (text) log messages to the database
   enable-logger: false
 
   # if no inclusion rule is set, all pointclouds are included unless excluded

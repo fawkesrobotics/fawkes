@@ -109,8 +109,6 @@ MongoLogBlackboardThread::init()
   }
 
   blackboard->register_observer(this);
-
-  config->set_string("/plugins/mongorrd/databases/mongodb-log", database_);
 }
 
 
@@ -118,13 +116,6 @@ void
 MongoLogBlackboardThread::finalize()
 {
   blackboard->unregister_observer(this);
-
-  try {
-    config->erase("/plugins/mongorrd/databases/mongodb-log");
-  } catch (fawkes::Exception &e) {
-    logger->log_warn(name(), "Failed to erase mongodb-rrd config, exception follows");
-    logger->log_warn(name(), e);
-  }
 
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = listeners_.begin(); i != listeners_.end(); ++i) {
