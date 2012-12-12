@@ -104,12 +104,18 @@ class TransformStorage
 class TimeCache
 {
  public:
+  /** List of stored transforms. */
+  typedef std::list<TransformStorage> L_TransformStorage;
+
   /// Number of nano-seconds to not interpolate below.
   static const int MIN_INTERPOLATION_DISTANCE = 5;
   /// Maximum length of linked list, to make sure not to be able to use unlimited memory.
   static const unsigned int MAX_LENGTH_LINKED_LIST = 1000000;
 
   TimeCache(float max_storage_time = 10.0);
+  TimeCache(const TimeCache &t);
+  TimeCache(const TimeCache *t);
+  TimeCache(const TimeCache *t, fawkes::Time &look_back_until);
 
   bool get_data(fawkes::Time time, TransformStorage & data_out,
                 std::string* error_str = 0);
@@ -118,13 +124,15 @@ class TimeCache
   CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
   P_TimeAndFrameID get_latest_time_and_parent() const;
 
+  const L_TransformStorage & get_storage() const;
+  L_TransformStorage         get_storage_copy() const;
+
   /// Debugging information methods
   unsigned int get_list_length() const;
   fawkes::Time get_latest_timestamp() const;
   fawkes::Time get_oldest_timestamp() const;
 
  private:
-  typedef std::list<TransformStorage> L_TransformStorage;
   L_TransformStorage storage_;
 
   float max_storage_time_;

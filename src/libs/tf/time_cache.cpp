@@ -113,6 +113,40 @@ TimeCache::TimeCache(float max_storage_time)
 : max_storage_time_(max_storage_time)
 {}
 
+
+/** Copy constructor.
+ * @param t time cache to copy
+ */
+TimeCache::TimeCache(const TimeCache &t)
+  : storage_(t.storage_), max_storage_time_(t.max_storage_time_)
+{}
+
+/** Copy constructor.
+ * @param t time cache to copy
+ */
+TimeCache::TimeCache(const TimeCache *t)
+  : storage_(t->storage_), max_storage_time_(t->max_storage_time_)
+{}
+
+
+/** Conditional copy constructor.
+ * This copy constructor takes an additional argument that denotes
+ * how far to go back in time to copy data. Only times larger than
+ * the given time will be copied to the new time cache.
+ * @param t time cache to copy
+ * @param look_back_until time to look back for transforms 
+ */
+TimeCache::TimeCache(const TimeCache *t, fawkes::Time &look_back_until)
+  : max_storage_time_(t->max_storage_time_)
+{
+  L_TransformStorage::const_iterator storage_it = t->storage_.begin();
+  while (storage_it != t->storage_.end()) {
+    if (storage_it->stamp <= look_back_until)  break;
+    storage_.push_back(*storage_it);
+    ++storage_it;
+  }
+}
+
 /** Create extrapolation error string.
  * @param t0 requested time
  * @param t1 available time
@@ -356,6 +390,25 @@ unsigned int
 TimeCache::get_list_length() const
 {
   return storage_.size();
+}
+
+
+/** Get storage list.
+ * @return reference to list of storage elements
+ */
+const TimeCache::L_TransformStorage &
+TimeCache::get_storage() const
+{
+  return storage_;
+}
+
+/** Get copy of storage elements.
+ * @return copied list of storage elements
+ */
+TimeCache::L_TransformStorage
+TimeCache::get_storage_copy() const
+{
+  return storage_;
 }
 
 /** Get latest time and parent frame number.
