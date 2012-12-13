@@ -22,14 +22,16 @@
 
 #include "mongodb_log_pcl_thread.h"
 
+// Fawkes
 #include <core/threading/mutex_locker.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <utils/time/wait.h>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
 
 #include <fnmatch.h>
+#include <unistd.h>
 
 using namespace fawkes;
 using namespace mongo;
@@ -42,9 +44,9 @@ using namespace mongo;
 
 /** Constructor. */
 MongoLogPointCloudThread::MongoLogPointCloudThread()
-  : Thread("MongoLogPointCloudThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+  : Thread("MongoLogPointCloudThread", Thread::OPMODE_CONTINUOUS)
 {
+  set_prepfin_conc_loop(true);
 }
 
 /** Destructor. */
@@ -65,10 +67,14 @@ MongoLogPointCloudThread::init()
 		     database_.c_str());
   }
 
+  cfg_storage_interval_ =
+    config->get_float("/plugins/mongodb-log/pointclouds/storage-interval");
+
   cfg_chunk_size_ = 2097152; // 2 MB
   try {
     cfg_chunk_size_ = config->get_uint("/plugins/mongodb-log/pointclouds/chunk-size");
   } catch (Exception &e) {} // ignored, use default
+  logger->log_info(name(), "Chunk size: %u", cfg_chunk_size_);
 
   std::vector<std::string> includes;
   try {
@@ -82,7 +88,7 @@ MongoLogPointCloudThread::init()
 
   mongodb_    = mongodb_client;
   gridfs_  = new GridFS(*mongodb_, database_);
-  gridfs_->setChunkSize(cfg_chunk_size_);
+  //gridfs_->setChunkSize(cfg_chunk_size_);
 
   adapter_ = new MongoLogPointCloudAdapter(pcl_manager, logger);
 
@@ -148,6 +154,17 @@ MongoLogPointCloudThread::init()
 
     pcls_[*p] = pi;
   }
+
+  wait_  = new TimeWait(clock, cfg_storage_interval_ * 1000000.);
+  mutex_ = new Mutex();
+}
+
+
+bool
+MongoLogPointCloudThread::prepare_finalize_user()
+{
+  mutex_->lock();
+  return true;
 }
 
 
@@ -156,13 +173,19 @@ MongoLogPointCloudThread::finalize()
 {
   delete adapter_;
   delete gridfs_;
+  delete wait_;
+  delete mutex_;
 }
 
 
 void
 MongoLogPointCloudThread::loop()
 {
+  MutexLocker lock(mutex_);
+  fawkes::Time loop_start(clock);
+  wait_->mark_start();
   std::map<std::string, PointCloudInfo>::iterator p;
+  unsigned int num_stored = 0;
   for (p = pcls_.begin(); p != pcls_.end(); ++p) {
     PointCloudInfo &pi = p->second;
       unsigned int width, height;
@@ -175,6 +198,8 @@ MongoLogPointCloudThread::loop()
 
       if (pi.last_sent != time) {
         pi.last_sent = time;
+
+        fawkes::Time start(clock);
 
         BSONObjBuilder document;
         document.append("timestamp", (long long) time.in_msec());
@@ -204,13 +229,28 @@ MongoLogPointCloudThread::loop()
 	collection_ = database_ + "." + pi.topic_name;
         try {
           mongodb_->insert(collection_, document.obj());
+	  ++num_stored;
         } catch (mongo::DBException &e) {
           logger->log_warn(this->name(), "Failed to insert into %s: %s",
                            collection_.c_str(), e.what());
         }
 
+    fawkes::Time end(clock);
+    float diff = (end - &start) * 1000.;
+    logger->log_debug(this->name(), "Stored point cloud %s (time %li) in %.1f ms",
+		      p->first.c_str(), time.in_msec(), diff);
+
     } else {
-      adapter_->close(p->first);
+	logger->log_debug(this->name(), "Point cloud %s did not change",
+			  p->first.c_str());
+	//adapter_->close(p->first);
     }
+
   }
+  mutex_->unlock();
+  // -1 to subtract "NO PARENT" pseudo cache
+  fawkes::Time loop_end(clock);
+  logger->log_debug(name(), "Stored %u of %zu point clouds in %.1f ms",
+		    num_stored, pcls_.size(), (loop_end - &loop_start) * 1000.);
+  wait_->wait();
 }

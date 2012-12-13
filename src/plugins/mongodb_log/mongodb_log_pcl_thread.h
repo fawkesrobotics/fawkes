@@ -26,7 +26,6 @@
 #include "pcl_adapter.h"
 
 #include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
@@ -42,6 +41,11 @@
 
 #include <sensor_msgs/PointCloud2.h>
 
+namespace fawkes {
+  class Mutex;
+  class TimeWait;
+}
+
 namespace mongo {
   class GridFS;
 }
@@ -51,7 +55,6 @@ class MongoLogPointCloudThread
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
   public fawkes::PointCloudAspect,
   public fawkes::MongoDBAspect
 {
@@ -61,6 +64,7 @@ class MongoLogPointCloudThread
 
   virtual void init();
   virtual void loop();
+  virtual bool prepare_finalize_user();
   virtual void finalize();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -83,7 +87,11 @@ class MongoLogPointCloudThread
   std::string          collection_;
   std::string          database_;
 
+  fawkes::Mutex       *mutex_;
+  fawkes::TimeWait    *wait_;
+
   unsigned int         cfg_chunk_size_;
+  float                cfg_storage_interval_;
 };
 
 #endif

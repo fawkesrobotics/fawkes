@@ -32,6 +32,9 @@ plugins/mongodb-log:
     # are included unless excluded if there is an exclude rule, then
     # excludes are processed last
     includes: [openni-pointcloud-xyz]
+
+    # Interval in which to store point clouds; sec
+    storage-interval: 0.5
   
 
   blackboard:
@@ -47,6 +50,6 @@ plugins/mongodb-log:
   transforms:
     collection: tf
     
-    # Interval to store at a time, if 0 copy everything currently held by
-    # transformer; sec
-    storage-interval: 0
+    # Interval to store at a time; sec
+    storage-interval: 2.0
+
