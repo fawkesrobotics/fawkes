@@ -105,6 +105,8 @@ MongoDBTransformer::restore_tf_doc(BSONObj &doc,
 void
 MongoDBTransformer::restore(long long start_msec, long long end_msec, long long new_start_msec)
 {
+  cache_time_ = (double)(end_msec - start_msec) / 1000.;
+
   if (new_start_msec == 0) {
     new_start_msec = start_msec;
   }
