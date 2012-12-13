@@ -161,12 +161,14 @@ bool
 PointCloudDBMergeROSCommThread::record_cb(hybris_c1_msgs::RecordData::Request  &req,
 					  hybris_c1_msgs::RecordData::Response &resp)
 {
+  logger->log_info(name(), "Recording ordered for %f sec", req.range.toSec());
   ros::Time begin = ros::Time::now();
   ros::Time end   = begin + req.range;
-  //ros::Time::sleepUntil(end);
+  ros::Time::sleepUntil(end);
   resp.begin = begin;
   resp.end   = end;
   resp.ok    = true;
+  logger->log_info(name(), "Recording done");
   return true;
 }
 
