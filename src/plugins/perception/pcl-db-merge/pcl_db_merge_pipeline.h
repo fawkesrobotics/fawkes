@@ -299,7 +299,7 @@ class PointCloudDBMergePipeline
 	long long timestamp = p["timestamp"].Long();
 	double age = (double) (times[i] - timestamp) / 1000.;
 	logger_->log_info(name_, "Restoring point cloud at %lli with age %f sec",
-			  age);
+			  timestamp, age);
 
 	// reconstruct point cloud
 	CloudPtr lpcl(new Cloud());
@@ -392,12 +392,12 @@ class PointCloudDBMergePipeline
 
       // ALIGN using ICP including table
       for (unsigned int i = 1; i < num_clouds; ++i) {
-	logger_->log_info(name_, "Aligning cloud %u to %u", i, 0);
+	logger_->log_info(name_, "Aligning cloud %u to %u", i, i-1);
 	Eigen::Matrix4f transform;
 	CloudConstPtr source, target;
 
 	source = non_aligned_downsampled[i];
-	target = non_aligned_downsampled[0];
+	target = non_aligned_downsampled[i-1];
 
 #  ifdef USE_ICP_ALIGNMENT
 	align_icp(source, target, transform);
@@ -436,7 +436,7 @@ class PointCloudDBMergePipeline
 	CloudConstPtr source, target;
 
 	source = aligned_downsampled_remplane[i];
-	target = aligned_downsampled_remplane[0];
+	target = aligned_downsampled_remplane[i-1];
 	
 	align_icp(source, target, transform);
 
