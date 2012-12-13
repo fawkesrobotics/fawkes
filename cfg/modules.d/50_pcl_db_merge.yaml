@@ -21,7 +21,10 @@ perception/pcl-db-merge:
   # Transform range to restore from database. Must be a list of two elements.
   # From the time instructed via the blackboard the values are added to determine
   # the start and end times of the range; sec
-  transform-range: [-1.0, 1.0]
+  # Note that if you use the specialized transform logger of mongodb-log you
+  # should set the values to minus and plus double the storage interval, e.g.
+  # if the storage interval is 5 sec, set the range to [-10, 10].
+  transform-range: [-4.0, 4.0]
 
   passthrough-filter:
     axis: z
