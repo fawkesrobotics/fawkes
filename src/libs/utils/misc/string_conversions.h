@@ -46,6 +46,7 @@ class StringConversions
 
   static unsigned int to_uint(std::string s);
   static int          to_int(std::string s);
+  static long         to_long(std::string s);
   static float        to_float(std::string s);
   static double       to_double(std::string s);
   static bool         to_bool(std::string s);
