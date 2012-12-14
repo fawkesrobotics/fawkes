@@ -228,10 +228,13 @@ class PointCloudDBMergePipeline
 	      }
 	    }
 	    if (! found) {
+	      logger_->log_warn(name_, "Type mismatch for pointcloud "
+				"at timestamp %lli", times[i]);
 	      return TYPE_MISMATCH;
 	    }
 	  }
 	} else {
+	  logger_->log_warn(name_, "No pointclouds for timestamp %lli", times[i]);
 	  return NO_POINTCLOUD;
 	}
       }
@@ -336,7 +339,10 @@ class PointCloudDBMergePipeline
 
       transformer.restore(/* start */  actual_times[i] + cfg_transform_range_[0],
 			  /* end */    actual_times[i] + cfg_transform_range_[1]);
-
+      logger_->log_debug(name_, "Restored transforms for %zu frames for range (%li..%li)",
+			 transformer.get_frame_caches().size(),
+			 /* start */  actual_times[i] + cfg_transform_range_[0],
+			 /* end */    actual_times[i] + cfg_transform_range_[1]);
 
       // transform point clouds to common frame
       fawkes::Time actual_time((long)actual_times[i]);
