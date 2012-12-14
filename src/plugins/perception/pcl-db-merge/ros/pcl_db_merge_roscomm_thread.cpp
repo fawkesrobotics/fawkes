@@ -126,15 +126,14 @@ PointCloudDBMergeROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Reque
     return true;
   }
 
-  int64_t timestamps[mm->maxlenof_timestamps()];
+  size_t num_timestamps = mm->maxlenof_timestamps();
+  std::vector<int64_t> timestamps(num_timestamps, 0);
   for (size_t i = 0; i < req.timestamps.size(); ++i) {
     timestamps[i] = (int64_t)req.timestamps[i].sec * 1000L
       + (int64_t)req.timestamps[i].nsec / 1000000L;
   }
-  for (size_t i = req.timestamps.size(); i < mm->maxlenof_timestamps(); ++i) {
-    timestamps[i] = 0.;
-  }
-  mm->set_timestamps(timestamps);
+  sort(timestamps.begin(), timestamps.begin() + req.timestamps.size());
+  mm->set_timestamps(&timestamps[0]);
   mm->set_collection(req.collection.c_str());
 
   mm->ref();
