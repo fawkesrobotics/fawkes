@@ -34,7 +34,7 @@ namespace firevision {
 class PNGWriter : public Writer
 {
  private:
-  bool __isBGR; 
+  colorspace_t colorspace_;
  public:
   PNGWriter();
   PNGWriter(const char *filename, unsigned int width, unsigned int height);

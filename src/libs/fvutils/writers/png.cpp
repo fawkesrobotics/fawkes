@@ -69,18 +69,11 @@ PNGWriter::~PNGWriter()
 void
 PNGWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
 {
-  if( cspace == BGR ) 
-    {
-      __isBGR = true; 
-      this->buffer = buffer; 
-    }
-  else if (cspace == YUV422_PLANAR) {
-    this->buffer = buffer;
-    __isBGR  = false; 
-  } else {
-    __isBGR = false;
+  if( cspace != BGR && cspace != RGB && cspace != YUV422_PLANAR) {
     throw Exception("Color space not supported, can only write YUV422_PLANAR images");
   }
+  this->buffer = buffer; 
+  colorspace_ = cspace;
 }
 
 
@@ -143,7 +136,7 @@ PNGWriter::write()
   vp = YUV422_PLANAR_V_PLANE(buffer, width, height);
 
   for (unsigned int i = 0; i < height; ++i) {
-    if( !__isBGR ) {
+    if( colorspace_ == YUV422_PLANAR ) {
       // pack row
       row_p = row;
       for (unsigned int j = 0; j < (width / 2); ++j) {
@@ -163,10 +156,12 @@ PNGWriter::write()
 	y1 = *yp++;
 	pixel_yuv_to_rgb(y1, u, v, &row_p[0], &row_p[1], &row_p[2]);      
       }
-    } else  {
+    } else if (colorspace_ == BGR) {
       convert_line_bgr_rgb( (buffer + width*3*i), row,
 			    width,  height ); 
 
+    } else { // RGB
+      memcpy(row, (buffer + width*3*i), width*3);
     }
     png_write_row(png_ptr, row);
   }
