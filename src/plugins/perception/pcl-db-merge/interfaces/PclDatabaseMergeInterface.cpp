@@ -52,7 +52,7 @@ PclDatabaseMergeInterface::PclDatabaseMergeInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_STRING, "error", 256, data->error);
   add_messageinfo("MergeMessage");
-  unsigned char tmp_hash[] = {0x71, 0x11, 0xd, 0xe3, 0xb1, 0x24, 0x11, 0x14, 0x5e, 0xe3, 0x95, 0x62, 0x75, 0x44, 0xe5, 0x3};
+  unsigned char tmp_hash[] = {0xa1, 0xdd, 0x2a, 0xc, 0x6c, 0x13, 0x95, 0xdf, 0x63, 0x8f, 0xa3, 0x5b, 0x7a, 0xc, 0x3a, 0xb6};
   set_hash(tmp_hash);
 }
 
@@ -223,9 +223,9 @@ PclDatabaseMergeInterface::MergeMessage::MergeMessage(const int64_t * ini_timest
   memset(data_ptr, 0, data_size);
   data      = (MergeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  memcpy(data->timestamps, ini_timestamps, sizeof(int64_t) * 4);
+  memcpy(data->timestamps, ini_timestamps, sizeof(int64_t) * 12);
   strncpy(data->collection, ini_collection, 256);
-  add_fieldinfo(IFT_INT64, "timestamps", 4, &data->timestamps);
+  add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
   add_fieldinfo(IFT_STRING, "collection", 256, data->collection);
 }
 /** Constructor */
@@ -236,7 +236,7 @@ PclDatabaseMergeInterface::MergeMessage::MergeMessage() : Message("MergeMessage"
   memset(data_ptr, 0, data_size);
   data      = (MergeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_INT64, "timestamps", 4, &data->timestamps);
+  add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
   add_fieldinfo(IFT_STRING, "collection", 256, data->collection);
 }
 
@@ -284,8 +284,8 @@ PclDatabaseMergeInterface::MergeMessage::timestamps() const
 int64_t
 PclDatabaseMergeInterface::MergeMessage::timestamps(unsigned int index) const
 {
-  if (index > 4) {
-    throw Exception("Index value %u out of bounds (0..4)", index);
+  if (index > 12) {
+    throw Exception("Index value %u out of bounds (0..12)", index);
   }
   return data->timestamps[index];
 }
@@ -297,7 +297,7 @@ PclDatabaseMergeInterface::MergeMessage::timestamps(unsigned int index) const
 size_t
 PclDatabaseMergeInterface::MergeMessage::maxlenof_timestamps() const
 {
-  return 4;
+  return 12;
 }
 
 /** Set timestamps value.
@@ -310,7 +310,7 @@ PclDatabaseMergeInterface::MergeMessage::maxlenof_timestamps() const
 void
 PclDatabaseMergeInterface::MergeMessage::set_timestamps(const int64_t * new_timestamps)
 {
-  memcpy(data->timestamps, new_timestamps, sizeof(int64_t) * 4);
+  memcpy(data->timestamps, new_timestamps, sizeof(int64_t) * 12);
 }
 
 /** Set timestamps value at given index.
@@ -324,8 +324,8 @@ PclDatabaseMergeInterface::MergeMessage::set_timestamps(const int64_t * new_time
 void
 PclDatabaseMergeInterface::MergeMessage::set_timestamps(unsigned int index, const int64_t new_timestamps)
 {
-  if (index > 4) {
-    throw Exception("Index value %u out of bounds (0..4)", index);
+  if (index > 12) {
+    throw Exception("Index value %u out of bounds (0..12)", index);
   }
   data->timestamps[index] = new_timestamps;
 }

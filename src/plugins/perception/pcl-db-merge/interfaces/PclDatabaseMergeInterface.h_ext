@@ -70,7 +70,7 @@ class PclDatabaseMergeInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      int64_t timestamps[4]; /**< 
+      int64_t timestamps[12]; /**< 
       Timestamps for which to retrieve the most recent point clouds
       and merge them.
      */

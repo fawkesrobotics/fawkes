@@ -19,7 +19,7 @@
   </data>
   <message name="Merge">
     <comment>Order the merging of point clouds</comment>
-    <field type="int64" name="timestamps" length="4">
+    <field type="int64" name="timestamps" length="12">
       Timestamps for which to retrieve the most recent point clouds
       and merge them.
     </field>
