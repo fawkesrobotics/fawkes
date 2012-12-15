@@ -20,6 +20,8 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
+SUBDIRS=tools
+
 LIBS_mongodb_log = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
 		fawkestf

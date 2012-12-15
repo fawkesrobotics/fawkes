@@ -1,0 +1,75 @@
+ffmongodb-save-imgs(1)
+======================
+
+NAME
+----
+ffmongodb-save-imgs - Save PNG files from database images
+
+SYNOPSIS
+--------
+[verse]
+'ffmongodb-save-imgs' [-h] [-o dir] [-f] [-d database] -c <collection> items...
+
+DESCRIPTION
+-----------
+This program connects to a local MongoDB database and extracts raw RGB images
+from a collection (typically recorded via the mongodb-log plugin), and stores
+them as a series of PNG images.
+
+OPTIONS
+-------
+  *-h*::
+	Show help instructions.
+
+  *-o* 'directory'::
+	Write PNG images to the given output directory.
+
+  *-f*::
+	Use the filenames as stored in the database. If not given the images
+	will be saved as a numbered sequence of the form 00000001, 00000002
+	etc.
+
+  *-d* 'database'::
+	Name of the database to read from.
+
+  *-c* 'collection'::
+	Name of the collection to read from.
+
+  'items'::
+	Timestamps and time ranges for which to extract the images. Timestamps
+	are given as the time since the epoch in milisecond precision. If two
+	timestamps are given concatenated by ".." they are treated as start
+	and end times of a time range.
+
+VIDEO FROM AN IMAGE SEQUENCE
+----------------------------
+You can generate videos from an image sequence for example using a command
+like this:
+
+ *ffmpeg -r 24 -b:v 500000 -i openni-image-rgb-%08d.png video.mp4*::
+	Create video.mp4  with 24fps at a bit rate of 500kbit from images of
+	the given name pattern. Note that for older ffmpeg version the
+	bitrate must be specified with just -b.
+
+EXAMPLES
+--------
+
+ *ffmongodb-save-imgs -c openni_image_rgb 0..1355421345807*::
+	Extract all images until 1355421345807.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
