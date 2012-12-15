@@ -90,6 +90,7 @@ class MongoLogPointCloudThread
   fawkes::Mutex       *mutex_;
   fawkes::TimeWait    *wait_;
 
+  bool                 cfg_flush_after_write_;
   unsigned int         cfg_chunk_size_;
   float                cfg_storage_interval_;
 };

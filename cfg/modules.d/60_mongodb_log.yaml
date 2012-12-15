@@ -33,6 +33,11 @@ plugins/mongodb-log:
     # excludes are processed last
     includes: [openni-pointcloud-xyz]
 
+    # Flush/fsync the database after each write. While this introduces
+    # a longer per-write time, it avoids the problem that there are
+    # sometimes long flushing delays
+    flush-after-write: true
+    
     # Interval in which to store point clouds; sec
     storage-interval: 0.5
   
