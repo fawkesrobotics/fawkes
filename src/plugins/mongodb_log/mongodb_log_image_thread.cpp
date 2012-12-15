@@ -25,10 +25,13 @@
 #include <core/threading/mutex_locker.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/colorspaces.h>
+#include <utils/time/wait.h>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
+
+#include <fnmatch.h>
 
 using namespace fawkes;
 using namespace firevision;
@@ -42,9 +45,9 @@ using namespace mongo;
 
 /** Constructor. */
 MongoLogImagesThread::MongoLogImagesThread()
-  : Thread("MongoLogImagesThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+  : Thread("MongoLogImagesThread", Thread::OPMODE_CONTINUOUS)
 {
+  set_prepfin_conc_loop(true);
 }
 
 /** Destructor. */
@@ -64,12 +67,38 @@ MongoLogImagesThread::init()
     logger->log_info(name(), "No database configured, writing to %s",
 		     database_.c_str());
   }
+
+  cfg_storage_interval_ =
+    config->get_float("/plugins/mongodb-log/images/storage-interval");
+
+  cfg_chunk_size_ = 2097152; // 2 MB
+  try {
+    cfg_chunk_size_ = config->get_uint("/plugins/mongodb-log/images/chunk-size");
+  } catch (Exception &e) {} // ignored, use default
+  logger->log_info(name(), "Chunk size: %u", cfg_chunk_size_);
+
+  try {
+    includes_ = config->get_strings("/plugins/mongodb-log/images/includes");
+  } catch (Exception &e) {} // ignored, no include rules
+  try {
+    excludes_ = config->get_strings("/plugins/mongodb-log/images/excludes");
+  } catch (Exception &e) {} // ignored, no include rules
+
   mongodb_    = mongodb_client;
-  gridfs_  = new GridFS(*mongodb_, database_, "GridFS.Images");
+  gridfs_  = new GridFS(*mongodb_, database_);
 
   last_update_ = new Time(clock);
   now_ = new Time(clock);
+  wait_  = new TimeWait(clock, cfg_storage_interval_ * 1000000.);
+  mutex_ = new Mutex();
   update_images();
+}
+
+bool
+MongoLogImagesThread::prepare_finalize_user()
+{
+  mutex_->lock();
+  return true;
 }
 
 void
@@ -80,12 +109,22 @@ MongoLogImagesThread::finalize()
     delete p->second.img;
   }
   imgs_.clear();
+  delete gridfs_;
+  delete wait_;
+  delete mutex_;
+  delete now_;
+  delete last_update_;
 }
 
 
 void
 MongoLogImagesThread::loop()
 {
+  MutexLocker lock(mutex_);
+  fawkes::Time loop_start(clock);
+  wait_->mark_start();
+  unsigned int num_stored = 0;
+
   now_->stamp();
   if (*now_ - last_update_ >= 5.0) {
     *last_update_ = now_;
@@ -115,10 +154,21 @@ MongoLogImagesThread::loop()
 
       subb.doneFast();
       collection_ = database_ + "."  + imginfo.topic_name;
-      mongodb_->insert(collection_, document.obj());
+      try {
+	mongodb_->insert(collection_, document.obj());
+	++num_stored;
+      } catch (mongo::DBException &e) {
+	logger->log_warn(this->name(), "Failed to insert image %s into %s: %s",
+			 imginfo.img->image_id(), collection_.c_str(), e.what());
+      }
     }
   }
 
+  mutex_->unlock();
+  fawkes::Time loop_end(clock);
+  logger->log_debug(name(), "Stored %u of %zu images in %.1f ms",
+		    num_stored, imgs_.size(), (loop_end - &loop_start) * 1000.);
+  wait_->wait();
 }
 
 
@@ -143,8 +193,31 @@ MongoLogImagesThread::update_images()
   if (! missing_images.empty()) {
     std::set<std::string>::iterator i;
     for (i = missing_images.begin(); i != missing_images.end(); ++i) {
-      logger->log_info(name(), "Creating MongoLog for new image %s",
-                       i->c_str());
+
+      std::vector<std::string>::iterator f;
+      bool include = includes_.empty();
+      if (! include) {
+	for (f = includes_.begin(); f != includes_.end(); ++f) {
+	  if (fnmatch(f->c_str(), i->c_str(), 0) != FNM_NOMATCH) {
+	    include = true;
+	    break;
+	  }
+	}
+      }
+      if (include) {
+	for (f = excludes_.begin(); f != excludes_.end(); ++f) {
+	  if (fnmatch(f->c_str(), i->c_str(), 0) != FNM_NOMATCH) {
+	    include = false;
+	    break;
+	  }
+	}
+      }
+      if (! include) {
+	//logger->log_info(name(), "Excluding image %s", i->c_str());
+	continue;
+      }
+
+      logger->log_info(name(), "Starting to log image %s", i->c_str());
 
       std::string topic_name = std::string("Images.") + *i;
       size_t pos = 0;

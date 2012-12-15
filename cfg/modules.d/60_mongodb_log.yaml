@@ -40,7 +40,18 @@ plugins/mongodb-log:
     
     # Interval in which to store point clouds; sec
     storage-interval: 0.5
-  
+
+  images:
+    # GridFS chunk size for point clouds, 2 MB
+    chunk-size: 2097152
+
+    # if no inclusion rule is set, all images are included unless
+    # excluded; if an inclusion rule exists, only matching images
+    # are included unless excluded
+    includes: [openni-image-rgb]
+
+    # Interval in which to store point clouds; sec
+    storage-interval: 0.25
 
   blackboard:
     # Inclusion and exclusion rules apply to the interface ID only, not to
@@ -55,6 +66,7 @@ plugins/mongodb-log:
   transforms:
     collection: tf
     
-    # Interval to store at a time; sec
+    # Interval to store at a time, if 0 copy everything currently held by
+    # transformer; sec
     storage-interval: 2.0
 

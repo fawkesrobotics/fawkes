@@ -41,6 +41,11 @@ namespace firevision {
   class SharedMemoryImageBuffer;
 }
 
+namespace fawkes {
+  class Mutex;
+  class TimeWait;
+}
+
 namespace mongo {
   class GridFS;
 }
@@ -50,7 +55,6 @@ class MongoLogImagesThread
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
   public fawkes::MongoDBAspect
 {
  public:
@@ -59,6 +63,7 @@ class MongoLogImagesThread
 
   virtual void init();
   virtual void loop();
+  virtual bool prepare_finalize_user();
   virtual void finalize();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -85,6 +90,15 @@ class MongoLogImagesThread
   mongo::GridFS       *gridfs_;
   std::string          collection_;
   std::string          database_;
+
+  fawkes::Mutex       *mutex_;
+  fawkes::TimeWait    *wait_;
+
+  std::vector<std::string> includes_;
+  std::vector<std::string> excludes_;
+
+  unsigned int         cfg_chunk_size_;
+  float                cfg_storage_interval_;
 };
 
 #endif
