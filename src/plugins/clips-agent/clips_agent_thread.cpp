@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  clips_agent_thread.cpp -  RobotinoClipsAgent environment providing Thread
+ *  clips_agent_thread.cpp -  CLIPS-based agent main thread
  *
  *  Created: Sat Jun 16 14:40:56 2012 (Mexico City)
  *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
@@ -54,14 +54,14 @@ ClipsAgentThread::init()
   cfg_use_sim_ = false;
 
   try {
-    cfg_clips_debug_ = config->get_bool("/plugins/clips-agent/clips-debug");
+    cfg_clips_debug_ = config->get_bool("/clips-agent/clips-debug");
   } catch (Exception &e) {} // ignore, use default
   try {
-    cfg_use_sim_ = config->get_bool("/plugins/clips-agent/use-sim");
+    cfg_use_sim_ = config->get_bool("/clips-agent/use-sim");
   } catch (Exception &e) {} // ignore, use default
   try {
     cfg_skill_sim_time_ =
-      config->get_float("/plugins/clips-agent/skill-sim-time");
+      config->get_float("/clips-agent/skill-sim-time");
   } catch (Exception &e) {} // ignore, use default
 
   cfg_clips_dir_ = std::string(SRCDIR) + "/clips/";
@@ -82,6 +82,7 @@ ClipsAgentThread::init()
   clips->add_function("get-clips-dirs", sigc::slot<CLIPS::Values>(sigc::mem_fun(*this, &ClipsAgentThread::clips_get_clips_dirs)));
   clips->add_function("now", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &ClipsAgentThread::clips_now)));
   clips->add_function("call-skill", sigc::slot<void, std::string, CLIPS::Values>(sigc::mem_fun( *this, &ClipsAgentThread::clips_call_skill)));
+  clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
 
   if (!clips->batch_evaluate(cfg_clips_dir_ + "init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
@@ -100,6 +101,7 @@ ClipsAgentThread::init()
     clips->assert_fact("(enable-skills)");
   }
 
+  clips->assert_fact("(init)");
   clips->refresh_agenda();
   clips->run();
 
@@ -209,4 +211,32 @@ void
 ClipsAgentThread::clips_call_skill(std::string skill_name, CLIPS::Values args)
 {
   logger->log_info(name(), "Call skill %s", skill_name.c_str());
+}
+
+
+void
+ClipsAgentThread::clips_load_config(std::string cfg_prefix)
+{
+  std::auto_ptr<Configuration::ValueIterator> v(config->search(cfg_prefix.c_str()));
+  while (v->next()) {
+    std::string type = "";
+    std::string value = v->get_as_string();
+
+    if (v->is_float())       type = "FLOAT";
+    else if (v->is_uint())   type = "UINT";
+    else if (v->is_int())    type = "INT";
+    else if (v->is_bool())   type = "BOOL";
+    else if (v->is_string()) {
+      type = "STRING";
+      value = std::string("\"") + value + "\"";
+    } else {
+      logger->log_warn(name(), "Config value at '%s' of unknown type '%s'",
+		       v->path(), v->type());
+    }
+
+    //logger->log_info(name(), "ASSERT (confval (path \"%s\") (type %s) (value %s)",
+    //		     v->path(), type.c_str(), v->get_as_string().c_str());
+    clips->assert_fact_f("(confval (path \"%s\") (type %s) (value %s))",
+			 v->path(), type.c_str(), value.c_str());
+  }
 }

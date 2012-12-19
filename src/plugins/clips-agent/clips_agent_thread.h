@@ -66,6 +66,7 @@ class ClipsAgentThread
   CLIPS::Values  clips_get_clips_dirs();
   CLIPS::Values  clips_now();
   void           clips_call_skill(std::string skill_name, CLIPS::Values args);
+  void           clips_load_config(std::string cfg_prefix);
 
  private:
   std::string cfg_clips_dir_;
