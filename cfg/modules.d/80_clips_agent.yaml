@@ -8,3 +8,5 @@ clips-agent:
   skill-sim: true
   skill-sim-time: 2.0
 
+  # debug level is a number of: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
+  debug-level: 3

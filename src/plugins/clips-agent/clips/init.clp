@@ -9,7 +9,7 @@
 
 (defglobal
   ?*CLIPS_DIRS* = (get-clips-dirs)
-  ?*DEBUG* = 1  ;debug levels: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
+  ?*DEBUG* = 2  ;debug levels: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
   ?*CONFIG_PREFIX* = "/clips-agent"
 )
 
@@ -43,13 +43,20 @@
   (confval (path "/clips-agent/clips-debug") (type BOOL) (value ?v))
   =>
   (if (eq ?v true) then
-    (printout t "CLIPS Agent: enabling debugging" crlf)
+    (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
     (watch facts)
     (watch rules)
+    ;(dribble-on "trace.txt")
   )
 )
 
-;(dribble-on "trace.txt")
+(defrule debug-level
+  (init)
+  (confval (path "/clips-agent/debug-level") (type UINT) (value ?v))
+  =>
+  (printout t "Setting debug level to " ?v " (was " ?*DEBUG* ")" crlf)
+  (bind ?*DEBUG* ?v)
+)
 
 
 (reset)
