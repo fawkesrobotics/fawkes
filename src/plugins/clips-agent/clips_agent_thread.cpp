@@ -35,7 +35,8 @@ using namespace fawkes;
 /** Constructor. */
 ClipsAgentThread::ClipsAgentThread()
   : Thread("ClipsAgentThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
+    CLIPSAspect("CLIPS (agent)")
 {
 }
 
