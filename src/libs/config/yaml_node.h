@@ -462,7 +462,6 @@ class YamlConfiguration::Node
     }
   }
 
-
   Type::value get_type() const
   {
     return type_;
@@ -505,32 +504,24 @@ class YamlConfiguration::Node
 
   Type::value determine_scalar_type()
   {
-    try {
-      get_uint();
-      return Type::UINT32;
-    } catch (Exception &e) {}
-
-    try {
-      get_int();
+    if (is_type<unsigned int>()) {
+      int v = get_int();
+      if (v >= 0) {
+	return Type::UINT32;
+      } else {
+	return Type::INT32;
+      }
+    } else if (is_type<int>()) {
       return Type::INT32;
-    } catch (Exception &e) {}
-
-    try {
-      get_float();
+    } else if (is_type<float>()) {
       return Type::FLOAT;
-    } catch (Exception &e) {}
-
-    try {
-      get_bool();
+    } else if (is_type<bool>()) {
       return Type::BOOL;
-    } catch (Exception &e) {}
-
-    try {
-      get_string();
+    } else if (is_type<std::string>()) {
       return Type::STRING;
-    } catch (Exception &e) {}
-
-    return Type::UNKNOWN; 
+    } else {
+      return Type::UNKNOWN; 
+    }
   }
 
   std::string get_string()

@@ -958,7 +958,15 @@ YamlConfiguration::is_float(const char *path)
 bool
 YamlConfiguration::is_uint(const char *path)
 {
-  return is_type<unsigned int>(root_, path);
+  YamlConfiguration::Node *n = root_->find(path);
+  if (n->has_children()) {
+    throw ConfigEntryNotFoundException(path);
+  }
+
+  if (! n->is_type<unsigned int>())  return false;
+
+  int v = n->get_value<int>();
+  return (v >= 0);
 }
 
 bool
