@@ -33,7 +33,6 @@ namespace fawkes {
 #endif
 
 class Logger;
-class CLIPSLogger;
 
 class CLIPSAspectIniFin : public AspectIniFin
 {
@@ -47,7 +46,7 @@ class CLIPSAspectIniFin : public AspectIniFin
   void set_logger(Logger *logger);
 
  private:
-  CLIPSLogger *logger_;
+  Logger *logger_;
 };
 
 } // end namespace fawkes

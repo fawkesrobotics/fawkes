@@ -42,8 +42,13 @@ namespace fawkes {
  * CLIPS environment for exclusive usage.
  */
 
-/** Constructor. */
-CLIPSAspect::CLIPSAspect()
+/** Constructor.
+ * @param log_component_name a component name that is shown in log
+ * messages. It is strongly recommended to set this to something unique.
+ * If left out will be set to "CLIPS".
+ */
+CLIPSAspect::CLIPSAspect(const char *log_component_name)
+  : CLIPSAspect_log_component_name_(log_component_name)
 {
   add_aspect("CLIPSAspect");
 }
@@ -74,6 +79,16 @@ void
 CLIPSAspect::finalize_CLIPSAspect()
 {
   clips.clear();
+}
+
+
+/** Get logging component name.
+ * @return log component name, might be NULL.
+ */
+const char *
+CLIPSAspect::get_CLIPSAspect_log_component_name() const
+{
+  return CLIPSAspect_log_component_name_;
 }
 
 } // end namespace fawkes

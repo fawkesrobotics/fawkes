@@ -40,15 +40,36 @@ namespace fawkes {
 class CLIPSLogger
 {
  public:
-  CLIPSLogger(Logger *logger)
+  CLIPSLogger(Logger *logger, const char *component = NULL)
   {
     logger_ = logger;
+    if (component) {
+      component_ = strdup(component);
+    } else {
+      component_ = NULL;
+    }
   }
 
-  void log(const char *str)
+  ~CLIPSLogger()
+  {
+    if (component_) {
+      free(component_);
+    }
+  }
+
+  void log(const char *logical_name, const char *str)
   {
     if (strcmp(str, "\n") == 0) {
-      logger_->log_info("CLIPS", "%s", buffer_.c_str());
+      if (strcmp(logical_name, "logdebug") == 0) {
+	logger_->log_debug(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      } else if (strcmp(logical_name, "logwarn") == 0) {
+	logger_->log_warn(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      } else if (strcmp(logical_name, "logerror") == 0) {
+	logger_->log_error(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      } else {
+	logger_->log_info(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      }
+
       buffer_.clear();
     } else {
       buffer_ += str;
@@ -57,13 +78,35 @@ class CLIPSLogger
 
  private:
   Logger *logger_;
+  char *component_;
   std::string buffer_;
 };
+
+class CLIPSContextMaintainer {
+ public:
+  CLIPSContextMaintainer(Logger *logger, const char *log_component_name)
+  {
+    this->logger = new CLIPSLogger(logger, log_component_name);
+  }
+
+  ~CLIPSContextMaintainer()
+  {
+    delete logger;
+  }
+
+ public:
+  CLIPSLogger *logger;
+};
+
 
 static int
 log_router_query(void *env, char *logical_name)
 {
   if (strcmp(logical_name, "l") == 0) return TRUE;
+  if (strcmp(logical_name, "loginfo") == 0) return TRUE;
+  if (strcmp(logical_name, "logdebug") == 0) return TRUE;
+  if (strcmp(logical_name, "logwarn") == 0) return TRUE;
+  if (strcmp(logical_name, "logerror") == 0) return TRUE;
   if (strcmp(logical_name, "stdout") == 0) return TRUE;
   return FALSE;
 }
@@ -73,7 +116,7 @@ log_router_print(void *env, char *logical_name, char *str)
 {
   void *rc = GetEnvironmentRouterContext(env);
   CLIPSLogger *logger = static_cast<CLIPSLogger *>(rc);
-  logger->log(str);
+  logger->log(logical_name, str);
   return TRUE;
 }
 
@@ -102,7 +145,7 @@ CLIPSAspectIniFin::CLIPSAspectIniFin()
 /** Destructor. */
 CLIPSAspectIniFin::~CLIPSAspectIniFin()
 {
-  delete logger_;
+  logger_ = NULL;
 }
 
 void
@@ -122,7 +165,14 @@ CLIPSAspectIniFin::init(Thread *thread)
   if (sigaction(SIGINT, NULL, &oldact) == 0) {
     LockPtr<CLIPS::Environment> clips(new CLIPS::Environment());
 
+    CLIPSContextMaintainer *cm =
+      new CLIPSContextMaintainer(logger_,
+				 clips_thread->get_CLIPSAspect_log_component_name());
+
     void *env = clips->cobj();
+
+    SetEnvironmentContext(env, cm);
+
     EnvAddRouterWithContext(env, (char *)"fawkeslog",
                             /* exclusive */ 50,
                             log_router_query,
@@ -130,7 +180,7 @@ CLIPSAspectIniFin::init(Thread *thread)
                             /* getc */   NULL,
                             /* ungetc */ NULL,
                             log_router_exit,
-                            logger_);
+                            cm->logger);
 
     clips_thread->init_CLIPSAspect(clips);
     // restore old action
@@ -152,6 +202,15 @@ CLIPSAspectIniFin::finalize(Thread *thread)
 					"CLIPSAspect, but RTTI says it "
 					"has not. ", thread->name());
   }
+
+  void *env = clips_thread->clips->cobj();
+  CLIPSContextMaintainer *cm =
+    static_cast<CLIPSContextMaintainer *>(GetEnvironmentContext(env));
+
+  EnvDeleteRouter(env, (char *)"fawkeslog");
+  SetEnvironmentContext(env, NULL);
+  delete cm;
+
   clips_thread->finalize_CLIPSAspect();
 }
 
@@ -163,7 +222,7 @@ CLIPSAspectIniFin::finalize(Thread *thread)
 void
 CLIPSAspectIniFin::set_logger(Logger *logger)
 {
-  logger_ = new CLIPSLogger(logger);
+  logger_ = logger;
 }
 
 } // end namespace fawkes
