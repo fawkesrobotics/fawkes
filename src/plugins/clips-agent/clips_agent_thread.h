@@ -32,13 +32,14 @@
 #include <plugins/clips/aspect/clips.h>
 #include <utils/time/time.h>
 
+#include <interfaces/SkillerInterface.h>
+
 #include <clipsmm.h>
 
 #include <map>
 #include <string>
 
 namespace fawkes {
-  class SkillerInterface;
   class SwitchInterface;
 }
 
@@ -67,12 +68,12 @@ class ClipsAgentThread
   CLIPS::Values  clips_now();
   void           clips_call_skill(std::string skill_name, CLIPS::Values args);
   void           clips_load_config(std::string cfg_prefix);
+  void           clips_skill_call_ext(std::string skill_name, std::string skill_string);
+  const char *   status_string(fawkes::SkillerInterface::SkillStatusEnum status);
 
  private:
   std::string cfg_clips_dir_;
-  bool        cfg_clips_debug_;
-  bool        cfg_use_sim_;
-  bool        cfg_sim_randomize_;
+  bool        cfg_skill_sim_;
   float       cfg_skill_sim_time_;
 
   fawkes::SkillerInterface *skiller_if_;
@@ -83,16 +84,10 @@ class ClipsAgentThread
   typedef struct {
     fawkes::Time             start_time;
     std::string              skill_string;
-    std::vector<std::string> args;
   } SkillExecInfo;
 
   std::map<std::string, SkillExecInfo> active_skills_;
   bool          started_;
-  bool          skill_started_;
-  fawkes::Time *skill_start_time_;
-
-  bool          worldmodel_changed_;
-
 };
 
 #endif

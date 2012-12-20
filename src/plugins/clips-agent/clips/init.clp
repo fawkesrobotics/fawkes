@@ -29,6 +29,7 @@
 (load* (resolve-file utils.clp))
 (load* (resolve-file time.clp))
 (load* (resolve-file config.clp))
+(load* (resolve-file skills.clp))
 
 
 (defrule load-config

@@ -26,3 +26,11 @@
   )
   (return ?list)
 )
+
+(deffunction is-even-int (?num)
+  (return (eq (mod ?num 2) 0))
+)
+
+(deffunction is-odd-int (?num)
+  (return (eq (mod ?num 2) 1))
+)

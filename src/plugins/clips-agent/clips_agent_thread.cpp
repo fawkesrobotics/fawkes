@@ -21,7 +21,6 @@
 
 #include "clips_agent_thread.h"
 
-#include <interfaces/SkillerInterface.h>
 #include <interfaces/SwitchInterface.h>
 
 using namespace fawkes;
@@ -50,15 +49,11 @@ ClipsAgentThread::~ClipsAgentThread()
 void
 ClipsAgentThread::init()
 {
-  cfg_clips_debug_ = false;
   cfg_skill_sim_time_ = 2.0;
-  cfg_use_sim_ = false;
+  cfg_skill_sim_ = false;
 
   try {
-    cfg_clips_debug_ = config->get_bool("/clips-agent/clips-debug");
-  } catch (Exception &e) {} // ignore, use default
-  try {
-    cfg_use_sim_ = config->get_bool("/clips-agent/use-sim");
+    cfg_skill_sim_ = config->get_bool("/clips-agent/skill-sim");
   } catch (Exception &e) {} // ignore, use default
   try {
     cfg_skill_sim_time_ =
@@ -82,7 +77,7 @@ ClipsAgentThread::init()
 
   clips->add_function("get-clips-dirs", sigc::slot<CLIPS::Values>(sigc::mem_fun(*this, &ClipsAgentThread::clips_get_clips_dirs)));
   clips->add_function("now", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &ClipsAgentThread::clips_now)));
-  clips->add_function("call-skill", sigc::slot<void, std::string, CLIPS::Values>(sigc::mem_fun( *this, &ClipsAgentThread::clips_call_skill)));
+  clips->add_function("skill-call-ext", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_skill_call_ext)));
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
 
   if (!clips->batch_evaluate(cfg_clips_dir_ + "init.clp")) {
@@ -92,34 +87,21 @@ ClipsAgentThread::init()
     throw Exception("Failed to initialize CLIPS environment, batch file failed.");
   }
 
-  if (cfg_clips_debug_) {
-    clips->assert_fact("(enable-debug)");
-  }
-
-  if (cfg_use_sim_) {
-    clips->assert_fact("(enable-sim)");
-  } else {
-    clips->assert_fact("(enable-skills)");
-  }
-
   clips->assert_fact("(init)");
   clips->refresh_agenda();
   clips->run();
 
   ctrl_recheck_ = true;
 
+  clips->assert_fact("(start)");
   started_ = false;
-  skill_started_ = false;
-  skill_start_time_ = new Time(clock);
 }
 
 
 void
 ClipsAgentThread::finalize()
 {
-  delete skill_start_time_;
-
-  if (skiller_if_->has_writer()) {
+  if ( ! cfg_skill_sim_ && skiller_if_->has_writer()) {
     SkillerInterface::ReleaseControlMessage *msg =
       new SkillerInterface::ReleaseControlMessage();
     skiller_if_->msgq_enqueue(msg);
@@ -135,7 +117,8 @@ ClipsAgentThread::loop()
 {
   skiller_if_->read();
 
-  if ((skiller_if_->exclusive_controller() == 0) && skiller_if_->has_writer())
+  if (! cfg_skill_sim_ &&
+      (skiller_if_->exclusive_controller() == 0) && skiller_if_->has_writer())
   {
     if (ctrl_recheck_) {
       logger->log_info(name(), "Acquiring exclusive skiller control");
@@ -164,16 +147,34 @@ ClipsAgentThread::loop()
 
   Time now(clock);
   if (! active_skills_.empty()) {
+    skiller_if_->read();
+
     std::list<std::string> finished_skills;
     std::map<std::string, SkillExecInfo>::iterator as;
     for (as = active_skills_.begin(); as != active_skills_.end(); ++as) {
       const std::string   &as_name = as->first;
       const SkillExecInfo &as_info = as->second;
 
-      if ((now - as_info.start_time) >= cfg_skill_sim_time_) {
-	logger->log_warn(name(), "Skill '%s' is final", as_name.c_str());
-	clips->assert_fact_f("(skill-finished (name %s) (status FINAL))", as_name.c_str());
-	finished_skills.push_back(as_name);
+      if (cfg_skill_sim_) {
+	if ((now - as_info.start_time) >= cfg_skill_sim_time_) {
+	  logger->log_warn(name(), "Simulated skill '%s' final", as_name.c_str());
+	  clips->assert_fact_f("(skill-update (name \"%s\") (status FINAL))",
+			       as_name.c_str());
+	  finished_skills.push_back(as_name);
+	} else {
+	  clips->assert_fact_f("(skill-update (name \"%s\") (status RUNNING))",
+			       as_name.c_str());
+	}
+      } else {
+	if (as_info.skill_string == skiller_if_->skill_string()) {
+	  clips->assert_fact_f("(skill-update (name \"%s\") (status %s))", as_name.c_str(),
+			       status_string(skiller_if_->status()));
+	}
+	if (skiller_if_->status() == SkillerInterface::S_FINAL ||
+	    skiller_if_->status() == SkillerInterface::S_FAILED)
+	{
+	  finished_skills.push_back(as_name);
+	}
       }
     }
 
@@ -187,6 +188,17 @@ ClipsAgentThread::loop()
   clips->run();
 }
 
+
+const char *
+ClipsAgentThread::status_string(SkillerInterface::SkillStatusEnum status)
+{
+  switch (status) {
+  case SkillerInterface::S_FINAL:   return "FINAL";
+  case SkillerInterface::S_FAILED:  return "FAILED";
+  case SkillerInterface::S_RUNNING: return "RUNNING";
+  default: return "IDLE";
+  }
+}
 
 CLIPS::Values
 ClipsAgentThread::clips_now()
@@ -209,9 +221,29 @@ ClipsAgentThread::clips_get_clips_dirs()
 
 
 void
-ClipsAgentThread::clips_call_skill(std::string skill_name, CLIPS::Values args)
+ClipsAgentThread::clips_skill_call_ext(std::string skill_name, std::string skill_string)
 {
-  logger->log_info(name(), "Call skill %s", skill_name.c_str());
+  if (active_skills_.find(skill_name) != active_skills_.end()) {
+    logger->log_warn(name(), "Skill %s called again while already active",
+		     skill_name.c_str());
+  }
+
+  if (cfg_skill_sim_) {
+    logger->log_info(name(), "Simulating skill %s", skill_string.c_str());
+
+  } else {
+    logger->log_info(name(), "Calling skill %s", skill_string.c_str());
+
+    SkillerInterface::ExecSkillContinuousMessage *msg =
+      new SkillerInterface::ExecSkillContinuousMessage(skill_string.c_str());
+      
+    skiller_if_->msgq_enqueue(msg);
+  }
+
+  SkillExecInfo sei;
+  sei.start_time   = clock->now();
+  sei.skill_string = skill_string;
+  active_skills_[skill_name] = sei;
 }
 
 
