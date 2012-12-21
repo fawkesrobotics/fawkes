@@ -50,11 +50,15 @@ void
 ClipsAgentThread::init()
 {
   cfg_auto_start_ = false;
+  cfg_assert_time_each_loop_ = false;
   cfg_skill_sim_time_ = 2.0;
   cfg_skill_sim_ = false;
 
   try {
     cfg_auto_start_ = config->get_bool("/clips-agent/auto-start");
+  } catch (Exception &e) {} // ignore, use default
+  try {
+    cfg_assert_time_each_loop_ = config->get_bool("/clips-agent/assert-time-each-loop");
   } catch (Exception &e) {} // ignore, use default
   try {
     cfg_skill_sim_ = config->get_bool("/clips-agent/skill-sim");
@@ -149,7 +153,9 @@ ClipsAgentThread::loop()
 
   // might be used to trigger loop events
   // must be cleaned up each loop from within the CLIPS code
-  //clips->assert_fact("(time (now))");
+  if (cfg_assert_time_each_loop_) {
+    clips->assert_fact("(time (now))");
+  }
 
 
   Time now(clock);
