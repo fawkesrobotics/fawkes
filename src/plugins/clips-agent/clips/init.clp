@@ -38,6 +38,14 @@
   (load-config ?*CONFIG_PREFIX*)
 )
 
+(defrule load-agent
+  (init)
+  (confval (path "/clips-agent/agent") (type STRING) (value ?v))
+  =>
+  (printout t "Loading agent '" ?v "'" crlf)
+  (load* (resolve-file (str-cat ?v ".clp")))
+)
+
 (defrule enable-debug
   (init)
   (confval (path "/clips-agent/clips-debug") (type BOOL) (value ?v))
@@ -57,7 +65,6 @@
   (printout t "Setting debug level to " ?v " (was " ?*DEBUG* ")" crlf)
   (bind ?*DEBUG* ?v)
 )
-
 
 (reset)
 (run)
