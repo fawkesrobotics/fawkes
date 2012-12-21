@@ -72,6 +72,7 @@ class ClipsAgentThread
   const char *   status_string(fawkes::SkillerInterface::SkillStatusEnum status);
 
  private:
+  bool        cfg_auto_start_;
   std::string cfg_clips_dir_;
   bool        cfg_skill_sim_;
   float       cfg_skill_sim_time_;

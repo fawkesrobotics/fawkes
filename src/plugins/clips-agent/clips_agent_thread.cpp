@@ -49,9 +49,13 @@ ClipsAgentThread::~ClipsAgentThread()
 void
 ClipsAgentThread::init()
 {
+  cfg_auto_start_ = false;
   cfg_skill_sim_time_ = 2.0;
   cfg_skill_sim_ = false;
 
+  try {
+    cfg_auto_start_ = config->get_bool("/clips-agent/auto-start");
+  } catch (Exception &e) {} // ignore, use default
   try {
     cfg_skill_sim_ = config->get_bool("/clips-agent/skill-sim");
   } catch (Exception &e) {} // ignore, use default
@@ -92,9 +96,12 @@ ClipsAgentThread::init()
   clips->run();
 
   ctrl_recheck_ = true;
-
-  clips->assert_fact("(start)");
   started_ = false;
+
+  if (cfg_auto_start_) {
+    clips->assert_fact("(start)");
+    started_ = true;
+  }
 }
 
 
