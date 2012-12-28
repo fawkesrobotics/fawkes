@@ -45,11 +45,7 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          copy(Configuration *copyconf);
 
-  virtual void          load(const char *filename,
-			     const char *tag = NULL);
-
-  virtual void          tag(const char *tag);
-  virtual std::list<std::string> tags();
+  virtual void          load(const char *filename);
 
   virtual bool          exists(const char *path);
   virtual bool          is_float(const char *path);

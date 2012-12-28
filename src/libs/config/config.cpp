@@ -37,21 +37,12 @@ namespace fawkes {
  * @fn Configuration::~Configuration()
  * Virtual empty destructor.
  *
- * @fn void Configuration::load(const char *file_path, const char *tag)
+ * @fn void Configuration::load(const char *file_path)
  * Load configuration.
  * Loads configuration data, or opens a file, depending on the implementation. After
  * this call access to all other methods shall be possible.
  * @param file_path path of the configuration file.
- * @param tag this optional parameter can denote a specific config version to load. This
- * will cause the host-specific database to be flushed and filled with the values for
- * the given tag. All values that did not exist for the tag are copied over from the
- * default database.
  * 
- * @fn void Configuration::tag(const char *tag)
- * Tag this configuration version.
- * This creates a new tagged version of the current config. The tagged config can be
- * accessed via load().
- * @param tag tag for this version
  *
  * @fn void Configuration::copy(Configuration *copyconf)
  * Copy all values from the given configuration.
@@ -60,10 +51,6 @@ namespace fawkes {
  * created, but values existent in current config but not in the copie config
  * will remain unchanged.
  * @param copyconf configuration to copy
- * 
- * @fn std::list<std::string> Configuration::tags()
- * List of tags.
- * @return list of tags
  * 
  * @fn bool Configuration::exists(const char *path)
  * Check if a given value exists.

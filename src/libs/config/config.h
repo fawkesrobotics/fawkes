@@ -105,11 +105,7 @@ class Configuration
   virtual void          add_change_handler(ConfigurationChangeHandler *h);
   virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
-  virtual void          load(const char *file_path,
-			     const char *tag = NULL)                      = 0;
-
-  virtual void          tag(const char *tag)                              = 0;
-  virtual std::list<std::string> tags()                                   = 0;
+  virtual void          load(const char *file_path)                       = 0;
 
   virtual bool          exists(const char *path)                          = 0;
   virtual bool          is_float(const char *path)                        = 0;

@@ -56,11 +56,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          add_change_handler(ConfigurationChangeHandler *h);
   virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
-  virtual void          load(const char *file_path,
-			     const char *tag = NULL);
-
-  virtual void          tag(const char *tag);
-  virtual std::list<std::string> tags();
+  virtual void          load(const char *file_path);
 
   virtual bool          exists(const char *path);
   virtual bool          is_float(const char *path);

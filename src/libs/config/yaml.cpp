@@ -391,8 +391,7 @@ YamlConfiguration::~YamlConfiguration()
 
 
 void
-YamlConfiguration::load(const char *file_path,
-			const char *tag)
+YamlConfiguration::load(const char *file_path)
 {
 
   if (file_path == NULL) {
@@ -801,19 +800,6 @@ YamlConfiguration::copy(Configuration *copyconf)
 {
   throw NotImplementedException("YamlConfig does not support copying of a configuration");
 }
-
-void
-YamlConfiguration::tag(const char *tag)
-{
-  throw NotImplementedException("YamlConfig does not support tagging a configuration");
-}
-
-std::list<std::string>
-YamlConfiguration::tags()
-{
-  throw NotImplementedException("YamlConfig does not support tagging a configuration");
-}
-
 
 bool
 YamlConfiguration::exists(const char *path)

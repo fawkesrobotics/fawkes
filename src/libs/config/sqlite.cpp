@@ -44,7 +44,6 @@ namespace fawkes {
 
 #define TABLE_HOST_CONFIG "config"
 #define TABLE_DEFAULT_CONFIG "defaults.config"
-#define TABLE_HOST_TAGGED "tagged_config"
 
 #define SQL_CREATE_TABLE_HOST_CONFIG					\
   "CREATE TABLE IF NOT EXISTS config (\n"				\
@@ -62,16 +61,6 @@ namespace fawkes {
   "  value     NOT NULL,\n"						\
   "  comment   TEXT,\n"							\
   "  PRIMARY KEY (path)\n"						\
-  ")"
-
-#define SQL_CREATE_TABLE_TAGGED_CONFIG					\
-  "CREATE TABLE IF NOT EXISTS tagged_config (\n"			\
-  "  tag       TEXT NOT NULL,\n"					\
-  "  path      TEXT NOT NULL,\n"					\
-  "  type      TEXT NOT NULL,\n"					\
-  "  value     NOT NULL,\n"						\
-  "  comment   TEXT,\n"							\
-  "  PRIMARY KEY (tag, path)\n"						\
   ")"
 
 #define SQL_CREATE_TABLE_MODIFIED_CONFIG				\
@@ -140,14 +129,6 @@ namespace fawkes {
 
 #define SQL_INSERT_DEFAULT_VALUE					\
   "INSERT INTO defaults.config (path, type, value) VALUES (?, ?, ?)"
-
-#define SQL_SELECT_TAGS							\
-  "SELECT tag FROM tagged_config GROUP BY tag"
-
-#define SQL_INSERT_TAG							\
-  "INSERT INTO tagged_config "						\
-  "(tag, path, type, value, comment) "					\
-  "SELECT \"%s\",* FROM config"
 
 #define SQL_SELECT_ALL							\
   "SELECT *, 0 AS is_default FROM config UNION "			\
@@ -286,13 +267,10 @@ SQLiteConfiguration::~SQLiteConfiguration()
 
 /** Initialize the configuration database(s).
  * Initialize databases. If the host-specific database already exists
- * an exception is thrown. You have to delete it before calling init().
- * First the host-specific database is created. It will contain two tables,
- * on is named 'config' and the other one is named 'tagged'. The 'config'
- * table will hold the current configuration for this machine. The 'tagged'
- * table contains the same fields as config with an additional "tag" field.
- * To tag a given revision of the config you give it a name, copy all values
- * over to the 'tagged' table with "tag" set to the desired name.
+ * an exception is thrown. You have to delete it before calling
+ * init().  First the host-specific database is created. It will
+ * contain one table, named 'config'. The 'config' table will hold the
+ * current configuration for this machine.
  *
  * The 'config' table is created with the following schema:
  * @code
@@ -317,18 +295,6 @@ SQLiteConfiguration::~SQLiteConfiguration()
  * )
  * @endcode
  *
- * After this the 'tagged' table is created with the following schema:
- * @code
- * CREATE TABLE IF NOT EXISTS tagged_config (
- *   tag       TEXT NOT NULL,
- *   path      TEXT NOT NULL,
- *   type      TEXT NOT NULL,
- *   value     NOT NULL,
- *   comment   TEXT
- *   PRIMARY KEY (tag, path)
- * )
- * @endcode
- *
  * If no default database exists it is created. The database is kept in a file
  * called default.db. It contains a single table called 'config' with the same
  * structure as the 'config' table in the host-specific database.
@@ -338,8 +304,7 @@ SQLiteConfiguration::init_dbs()
 {
   char *errmsg;
   if ( (sqlite3_exec(db, SQL_CREATE_TABLE_HOST_CONFIG, NULL, NULL, &errmsg) != SQLITE_OK) ||
-       (sqlite3_exec(db, SQL_CREATE_TABLE_DEFAULT_CONFIG, NULL, NULL, &errmsg) != SQLITE_OK) ||
-       (sqlite3_exec(db, SQL_CREATE_TABLE_TAGGED_CONFIG, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+       (sqlite3_exec(db, SQL_CREATE_TABLE_DEFAULT_CONFIG, NULL, NULL, &errmsg) != SQLITE_OK) ) {
     CouldNotOpenConfigException ce(sqlite3_errmsg(db));
     sqlite3_close(db);
     throw ce;
@@ -609,8 +574,7 @@ SQLiteConfiguration::attach_default(const char *db_file)
 
 
 void
-SQLiteConfiguration::load(const char *file_path,
-			  const char *tag)
+SQLiteConfiguration::load(const char *file_path)
 {
   mutex->lock();
 
@@ -780,56 +744,6 @@ SQLiteConfiguration::copy(Configuration *copyconf)
   delete i;
   transaction_commit();
   copyconf->unlock();
-}
-
-
-/** Tag this configuration version.
- * This creates a new tagged version of the current config. The tagged config can be
- * accessed via load().
- * @param tag tag for this version
- */
-void
-SQLiteConfiguration::tag(const char *tag)
-{
-  char *insert_sql;
-  char *errmsg;
-
-  mutex->lock();
-
-  if ( asprintf(&insert_sql, SQL_INSERT_TAG, tag) == -1 ) {
-    mutex->unlock();
-    throw ConfigurationException("Could not create insert statement for tagging");
-  }
-
-  if (sqlite3_exec(db, insert_sql, NULL, NULL, &errmsg) != SQLITE_OK) {
-    ConfigurationException ce("Could not insert tag", sqlite3_errmsg(db));
-    free(insert_sql);
-    mutex->unlock();
-    throw ce;
-  }
-
-  free(insert_sql);
-  mutex->unlock();
-}
-
-
-std::list<std::string>
-SQLiteConfiguration::tags()
-{
-  mutex->lock();
-  std::list<std::string> l;
-  sqlite3_stmt *stmt;
-  const char   *tail;
-  if ( sqlite3_prepare(db, SQL_SELECT_TAGS, -1, &stmt, &tail) != SQLITE_OK ) {
-    mutex->unlock();
-    throw ConfigurationException("get_type: Preparation SQL failed");
-  }
-  while ( sqlite3_step(stmt) == SQLITE_ROW ) {
-    l.push_back((char *)sqlite3_column_text(stmt, 0));
-  }
-  sqlite3_finalize(stmt);
-  mutex->unlock();
-  return l;
 }
 
 

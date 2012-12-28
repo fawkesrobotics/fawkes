@@ -109,7 +109,7 @@ NetworkConfiguration::~NetworkConfiguration()
 
 
 void
-NetworkConfiguration::load(const char *file_path, const char *tag)
+NetworkConfiguration::load(const char *file_path)
 {
 }
 
@@ -143,26 +143,6 @@ NetworkConfiguration::copy(Configuration *copyconf)
   delete i;
   copyconf->unlock();
 }
-
-
-void
-NetworkConfiguration::tag(const char *tag)
-{
-  mutex->lock();
-
-  mutex->unlock();
-}
-
-
-std::list<std::string>
-NetworkConfiguration::tags()
-{
-  mutex->lock();
-  std::list<std::string> l;
-  mutex->unlock();
-  return l;
-}
-
 
 bool
 NetworkConfiguration::exists(const char *path)
