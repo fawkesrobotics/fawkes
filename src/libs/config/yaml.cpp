@@ -74,7 +74,7 @@ YamlConfiguration::YamlValueIterator::YamlValueIterator()
 /** Initializing constructor.
  * @param nodes nodes to iterate over
  */
-YamlConfiguration::YamlValueIterator::YamlValueIterator(std::map<std::string, Node *> &nodes)
+YamlConfiguration::YamlValueIterator::YamlValueIterator(std::map<std::string, YamlConfigurationNode *> &nodes)
   : first_(true), nodes_(nodes)
 {
   current_ = nodes_.end();
@@ -113,7 +113,7 @@ YamlConfiguration::YamlValueIterator::type() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot get type of invalid iterator");
   }
-  return Node::Type::to_string(current_->second->get_type());
+  return YamlConfigurationNode::Type::to_string(current_->second->get_type());
 }
     
 bool
@@ -122,7 +122,7 @@ YamlConfiguration::YamlValueIterator::is_float() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == Node::Type::FLOAT;
+  return current_->second->get_type() == YamlConfigurationNode::Type::FLOAT;
 }
 
 bool
@@ -131,7 +131,7 @@ YamlConfiguration::YamlValueIterator::is_uint() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == Node::Type::UINT32;
+  return current_->second->get_type() == YamlConfigurationNode::Type::UINT32;
 }
 
 bool
@@ -140,7 +140,7 @@ YamlConfiguration::YamlValueIterator::is_int() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == Node::Type::INT32;
+  return current_->second->get_type() == YamlConfigurationNode::Type::INT32;
 }
 
 bool
@@ -149,7 +149,7 @@ YamlConfiguration::YamlValueIterator::is_bool() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == Node::Type::BOOL;
+  return current_->second->get_type() == YamlConfigurationNode::Type::BOOL;
 }
 
 bool
@@ -158,7 +158,7 @@ YamlConfiguration::YamlValueIterator::is_string() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == Node::Type::STRING;
+  return current_->second->get_type() == YamlConfigurationNode::Type::STRING;
 }
 
 bool
@@ -167,7 +167,7 @@ YamlConfiguration::YamlValueIterator::is_list() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == Node::Type::SEQUENCE;
+  return current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE;
 }
 
 
@@ -449,7 +449,7 @@ YamlConfiguration::load(const char *file_path)
 }
 
 
-YamlConfiguration::Node *
+YamlConfigurationNode *
 YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
 				  std::queue<LoadQueueEntry> &load_queue,
                                   std::string &host_file)
@@ -476,7 +476,7 @@ YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
 				      e.msg.c_str());
   }
 
-  Node *sub_root = NULL;
+  YamlConfigurationNode *sub_root = NULL;
 
   if (! have_doc1) {
     //throw Exception("YamlConfig: file %s contains no document", filename.c_str());
@@ -496,10 +496,10 @@ YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
 
 void
 YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file,
-                                    Node *& root, Node *& host_root,
+                                    YamlConfigurationNode *& root, YamlConfigurationNode *& host_root,
                                     std::list<std::string> &files, std::list<std::string> &dirs)
 {
-  root = new Node();
+  root = new YamlConfigurationNode();
 
   std::queue<LoadQueueEntry> load_queue;
   load_queue.push(LoadQueueEntry(filename, false));
@@ -514,7 +514,7 @@ YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file
                            "Reading YAML file '%s' (ignore missing: %s)",
                            qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
 
-      Node *sub_root = read_yaml_file(qe.filename, qe.ignore_missing, load_queue, host_file);
+      YamlConfigurationNode *sub_root = read_yaml_file(qe.filename, qe.ignore_missing, load_queue, host_file);
 
       if (sub_root) {
         files.push_back(qe.filename);
@@ -538,9 +538,9 @@ YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file
     if (host_root) {
       *root += host_root;
       files.push_back(host_file);
-    } else host_root = new Node();
+    } else host_root = new YamlConfigurationNode();
   } else {
-    host_root = new Node();
+    host_root = new YamlConfigurationNode();
   }
 }
 
@@ -551,14 +551,14 @@ YamlConfiguration::fam_event(const char *filename, unsigned int mask)
   try {
     std::string host_file = "";
     std::list<std::string> files, dirs;
-    Node *root, *host_root;
+    YamlConfigurationNode *root, *host_root;
     read_yaml_config(config_file_, host_file, root, host_root, files, dirs);
 
-    std::list<std::string> changes = Node::diff(root_, root);
+    std::list<std::string> changes = YamlConfigurationNode::diff(root_, root);
 
     if (! changes.empty()) {
-      Node *old_root = root_;
-      Node *old_host_root = host_root_;
+      YamlConfigurationNode *old_root = root_;
+      YamlConfigurationNode *old_host_root = host_root_;
       root_ = root;
       host_root_ = host_root;
       host_file_ = host_file;
@@ -691,24 +691,24 @@ YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &lo
 
 
 void
-YamlConfiguration::read_config_doc(const YAML::Node &doc, Node *&node)
+YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node)
 {
   if (! node) {
-    node = new Node("root");
+    node = new YamlConfigurationNode("root");
   }
 
   if (doc.Type() == YAML::NodeType::Map) {
     for (YAML::Iterator it = doc.begin(); it != doc.end(); ++it) {
       std::string key;
       it.first() >> key;
-      Node *in = node;
+      YamlConfigurationNode *in = node;
       if (key.find("/") != std::string::npos) {
 	// we need to split and find the proper insertion node
-	std::vector<std::string> pel = split(key);
+	std::vector<std::string> pel = yaml_config::split(key);
 	for (size_t i = 0; i < pel.size() - 1; ++i) {
-	  Node *n = (*in)[pel[i]];
+	  YamlConfigurationNode *n = (*in)[pel[i]];
 	  if (! n) {
-	    n = new Node(pel[i]);
+	    n = new YamlConfigurationNode(pel[i]);
 	    in->add_child(pel[i], n);
 	  }
 	  in = n;
@@ -717,7 +717,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, Node *&node)
 	key = pel.back();
       }
 
-      Node *tmp = (*in)[key];
+      YamlConfigurationNode *tmp = (*in)[key];
       if (tmp) {
 	if (tmp->is_scalar() && it.second().Type() != YAML::NodeType::Scalar)
 	{
@@ -729,7 +729,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, Node *&node)
 	  tmp->set_scalar(s);
 	}
       } else {
-	Node *tmp = new Node(key, it.second());
+	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it.second());
 	in->add_child(key, tmp);
 	read_config_doc(it.second(), tmp);
       }
@@ -805,7 +805,7 @@ bool
 YamlConfiguration::exists(const char *path)
 {
   try {
-    YamlConfiguration::Node *n = root_->find(path);
+    YamlConfigurationNode *n = root_->find(path);
     return ! n->has_children();
   } catch (Exception &e) {
     return false;
@@ -816,12 +816,12 @@ YamlConfiguration::exists(const char *path)
 std::string
 YamlConfiguration::get_type(const char *path)
 {
-  YamlConfiguration::Node *n = root_->find(path);
+  YamlConfigurationNode *n = root_->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
 
-  return Node::Type::to_string(n->get_type());
+  return YamlConfigurationNode::Type::to_string(n->get_type());
 }
 
 std::string
@@ -840,9 +840,9 @@ YamlConfiguration::get_comment(const char *path)
  */
 template<typename T>
 static inline T
-get_value_as(YamlConfiguration::Node *root, const char *path)
+get_value_as(YamlConfigurationNode *root, const char *path)
 {
-  YamlConfiguration::Node *n = root->find(path);
+  YamlConfigurationNode *n = root->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -858,9 +858,9 @@ get_value_as(YamlConfiguration::Node *root, const char *path)
  */
 template<typename T>
 static inline std::vector<T>
-get_list(YamlConfiguration::Node *root, const char *path)
+get_list(YamlConfigurationNode *root, const char *path)
 {
-  YamlConfiguration::Node *n = root->find(path);
+  YamlConfigurationNode *n = root->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -939,9 +939,9 @@ YamlConfiguration::get_strings(const char *path)
  */
 template<typename T>
 static inline bool
-is_type(YamlConfiguration::Node *root, const char *path)
+is_type(YamlConfigurationNode *root, const char *path)
 {
-  YamlConfiguration::Node *n = root->find(path);
+  YamlConfigurationNode *n = root->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -958,7 +958,7 @@ YamlConfiguration::is_float(const char *path)
 bool
 YamlConfiguration::is_uint(const char *path)
 {
-  YamlConfiguration::Node *n = root_->find(path);
+  YamlConfigurationNode *n = root_->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -991,11 +991,11 @@ YamlConfiguration::is_string(const char *path)
 bool
 YamlConfiguration::is_list(const char *path)
 {
-  YamlConfiguration::Node *n = root_->find(path);
+  YamlConfigurationNode *n = root_->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
-  return (n->get_type() == Node::Type::SEQUENCE);
+  return (n->get_type() == YamlConfigurationNode::Type::SEQUENCE);
 }
 
 
@@ -1016,11 +1016,11 @@ Configuration::ValueIterator *
 YamlConfiguration::get_value(const char *path)
 {
   try {
-    YamlConfiguration::Node *n = root_->find(path);
+    YamlConfigurationNode *n = root_->find(path);
     if (n->has_children()) {
       return new YamlValueIterator();
     }
-    std::map<std::string, Node *> nodes;
+    std::map<std::string, YamlConfigurationNode *> nodes;
     nodes[path] = n;
     return new YamlValueIterator(nodes);
   } catch (ConfigEntryNotFoundException &e) {
@@ -1238,11 +1238,10 @@ YamlConfiguration::try_dump()
 Configuration::ValueIterator *
 YamlConfiguration::iterator()
 {
-  std::map<std::string, Node *> nodes;
+  std::map<std::string, YamlConfigurationNode *> nodes;
   root_->enum_leafs(nodes);
   return new YamlValueIterator(nodes);
 }
-
 
 Configuration::ValueIterator *
 YamlConfiguration::search(const char *path)
@@ -1253,8 +1252,8 @@ YamlConfiguration::search(const char *path)
     tmp_path.resize(tl - 1);
   }
   try {
-    Node *n = root_->find(tmp_path.c_str());
-    std::map<std::string, Node *> nodes;
+    YamlConfigurationNode *n = root_->find(tmp_path.c_str());
+    std::map<std::string, YamlConfigurationNode *> nodes;
     n->enum_leafs(nodes, tmp_path);
     return new YamlValueIterator(nodes);
   } catch (Exception &e) {
@@ -1262,52 +1261,16 @@ YamlConfiguration::search(const char *path)
   }
 }
 
-/** Split string into vector of strings at delimiting character.
- * @param s string to split
- * @param delim character delimiting strings
- * @return vector of strings resulting from the parsed string. Empty
- * values are removed.
- */
-std::vector<std::string>
-YamlConfiguration::split(const std::string &s, char delim)
-{
-  std::vector<std::string> elems;
-  std::stringstream ss(s);
-  std::string item;
-  while(std::getline(ss, item, delim)) {
-    if (item != "")  elems.push_back(item);
-  }
-  return elems;
-}
-
-
-/** Split string into queue of strings at delimiting character.
- * @param s string to split
- * @param delim character delimiting strings
- * @return vector of strings resulting from the parsed string. Empty
- * values are removed.
- */
-std::queue<std::string>
-YamlConfiguration::split_to_queue(const std::string &s, char delim)
-{
-  std::queue<std::string> elems;
-  std::stringstream ss(s);
-  std::string item;
-  while(std::getline(ss, item, delim)) {
-    if (item != "")  elems.push(item);
-  }
-  return elems;
-}
 
 /** Query node for a specific path.
  * @param path path to retrieve node for
  * @return node representing requested path query result, if the path only
  * consists of collection and path name returns the whole document.
  */
-YamlConfiguration::Node *
+YamlConfigurationNode *
 YamlConfiguration::query(const char *path) const
 {
-  std::queue<std::string> pel_q = split_to_queue(path);
+  std::queue<std::string> pel_q = yaml_config::split_to_queue(path);
   return root_->find(pel_q);
 }
 

@@ -44,6 +44,7 @@ namespace fawkes {
 
 class Mutex;
 class FamThread;
+class YamlConfigurationNode;
 
 class YamlConfiguration
 : public Configuration,
@@ -122,15 +123,12 @@ class YamlConfiguration
 
   virtual void fam_event(const char *filename, unsigned int mask);
 
- private:
-  class Node;
-
  public:
   class YamlValueIterator : public Configuration::ValueIterator
  {
   public:
    YamlValueIterator();
-   YamlValueIterator(std::map<std::string, Node *> &nodes);
+   YamlValueIterator(std::map<std::string, YamlConfigurationNode *> &nodes);
 
    virtual ~YamlValueIterator() {}
    virtual bool          next();
@@ -164,8 +162,8 @@ class YamlConfiguration
 
   private:
    bool                                    first_;
-   std::map<std::string, Node *>           nodes_;
-   std::map<std::string, Node *>::iterator current_;
+   std::map<std::string, YamlConfigurationNode *>           nodes_;
+   std::map<std::string, YamlConfigurationNode *>::iterator current_;
  };
 
  private:
@@ -181,24 +179,22 @@ class YamlConfiguration
   };
   /// @endcond
 
-  Node *  query(const char *path) const;
+  YamlConfigurationNode *  query(const char *path) const;
   void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
                      std::string &host_file);
-  void read_config_doc(const YAML::Node &doc, Node *&node);
-  Node * read_yaml_file(std::string filename, bool ignore_missing,
+  void read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node);
+  YamlConfigurationNode * read_yaml_file(std::string filename, bool ignore_missing,
 			std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
   void read_yaml_config(std::string filename, std::string &host_file,
-                        Node *& root, Node *& host_root,
+                        YamlConfigurationNode *& root, YamlConfigurationNode *& host_root,
                         std::list<std::string> &files, std::list<std::string> &dirs);
   void write_host_file();
-  static std::vector<std::string> split(const std::string &s, char delim = '/');
-  static std::queue<std::string> split_to_queue(const std::string &s, char delim = '/');
 
   std::string config_file_;
   std::string host_file_;
 
-  Node  *root_;
-  Node  *host_root_;
+  YamlConfigurationNode  *root_;
+  YamlConfigurationNode  *host_root_;
 
  private:
   Mutex *mutex;
