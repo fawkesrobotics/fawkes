@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  netconf.h - Fawkes remote configuration access via Fawkes net
+ *  memory.h - Fawkes in-memory configuration
  *
- *  Created: Sun Jan 07 15:01:50 2007
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Dec 29 12:15:48 2012
+ *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,40 +21,27 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_NETCONF_H_
-#define __CONFIG_NETCONF_H_
+#ifndef __CONFIG_MEMORY_H_
+#define __CONFIG_MEMORY_H_
 
 #include <config/config.h>
-#include <netcomm/fawkes/client_handler.h>
-#include <core/exception.h>
+#include <config/yaml.h>
 
-#include <map>
-#include <list>
 #include <string>
+#include <vector>
 
 namespace fawkes {
 
+class YamlConfigurationNode;
 class Mutex;
-class InterruptibleBarrier;
-class FawkesNetworkClient;
-class MemoryConfiguration;
 
-class CannotEnableMirroringException : public Exception
+class MemoryConfiguration : public Configuration
 {
  public:
-  CannotEnableMirroringException(const char *msg);
-};
-
-class NetworkConfiguration : public Configuration, public FawkesNetworkClientHandler
-{
- public:
-  NetworkConfiguration(FawkesNetworkClient *c, unsigned int mirror_timeout_sec = 15);
-  virtual ~NetworkConfiguration();
+  MemoryConfiguration();
+  virtual ~MemoryConfiguration();
 
   virtual void          copy(Configuration *copyconf);
-
-  virtual void          add_change_handler(ConfigurationChangeHandler *h);
-  virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
   virtual void          load(const char *file_path);
 
@@ -68,6 +55,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
   virtual bool          is_default(const char *path);
 
+  virtual std::string     get_type(const char *path);
   virtual float           get_float(const char *path);
   virtual unsigned int    get_uint(const char *path);
   virtual int             get_int(const char *path);
@@ -81,7 +69,6 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual ValueIterator * get_value(const char *path);
   virtual std::string     get_comment(const char *path);
   virtual std::string     get_default_comment(const char *path);
-  virtual std::string     get_type(const char *path);
 
   virtual void          set_float(const char *path, float f);
   virtual void          set_uint(const char *path, unsigned int uint);
@@ -106,63 +93,10 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          set_default_bool(const char *path, bool b);
   virtual void          set_default_string(const char *path, std::string &s);
   virtual void          set_default_string(const char *path, const char *s);
-  virtual void          set_default_comment(const char *path, std::string &comment);
   virtual void          set_default_comment(const char *path, const char *comment);
+  virtual void          set_default_comment(const char *path, std::string &comment);
 
   virtual void          erase_default(const char *path);
-
-  virtual void          deregistered(unsigned int id) throw();
-  virtual void          inbound_received(FawkesNetworkMessage *msg,
-					 unsigned int id) throw();
-  virtual void          connection_died(unsigned int id) throw();
-  virtual void          connection_established(unsigned int id) throw();
-
-  virtual void          set_mirror_mode(bool mirror);
-
- class NetConfValueIterator : public Configuration::ValueIterator
-  {
-    friend class NetworkConfiguration;
-   protected:
-    NetConfValueIterator(Configuration::ValueIterator *i);
-    NetConfValueIterator(FawkesNetworkMessage *m);
-    NetConfValueIterator();
-   public:
-    virtual ~NetConfValueIterator();
-    virtual bool          next();
-    virtual bool          valid() const;
-
-    virtual const char *  path() const;
-    virtual const char *  type() const;
-
-    virtual bool          is_float() const;
-    virtual bool          is_uint() const;
-    virtual bool          is_int() const;
-    virtual bool          is_bool() const;
-    virtual bool          is_string() const;
-    virtual bool          is_list() const;
-
-    virtual bool          is_default() const;
-
-    virtual float         get_float() const;
-    virtual unsigned int  get_uint() const;
-    virtual int           get_int() const;
-    virtual bool          get_bool() const;
-    virtual std::string   get_string() const;
-    virtual std::vector<float>         get_floats() const;
-    virtual std::vector<unsigned int>  get_uints() const;
-    virtual std::vector<int>           get_ints() const;
-    virtual std::vector<bool>          get_bools() const;
-    virtual std::vector<std::string>   get_strings() const;
-    virtual std::string   get_as_string() const;
-
-    virtual std::string   get_comment() const;
-
-   private:
-    Configuration::ValueIterator *i;
-    FawkesNetworkMessage  *msg;
-    bool iterated_once;
-    char *_path;
-  };
 
   ValueIterator * iterator();
   ValueIterator * iterator_default();
@@ -173,36 +107,17 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   bool try_lock();
   void unlock();
 
-  virtual void try_dump();
+  virtual void            try_dump();
 
  private:
-  void send_get(const char *path, unsigned int msgid);
+  YamlConfigurationNode *  query(const char *path) const;
 
-  void set_float_internal(unsigned int msg_type, const char *path, float f);
-  void set_uint_internal(unsigned int msg_type, const char *path,
-			 unsigned int uint);
-  void set_int_internal(unsigned int msg_type, const char *path, int i);
-  void set_bool_internal(unsigned int msg_type, const char *path, bool b);
-  void set_string_internal(unsigned int msg_type, const char *path,
-			   const char *s);
-  void set_comment_internal(unsigned int msg_type, const char *path,
-			    const char *s);
+  YamlConfigurationNode  *root_;
 
-  void erase_internal(const char *path, bool is_default);
-
-
-  FawkesNetworkClient  *c;
-  FawkesNetworkMessage *msg;
-  Mutex *mutex;
-  InterruptibleBarrier *__mirror_init_barrier;
-
-  bool __mirror_mode;
-  bool __mirror_mode_before_connection_dead;
-  unsigned int __mirror_timeout_sec;
-  MemoryConfiguration *mirror_config;
-
-  bool __connected;
+ private:
+  Mutex *mutex_;
 };
+
 
 } // end namespace fawkes
 

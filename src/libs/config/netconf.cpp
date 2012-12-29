@@ -23,7 +23,7 @@
 
 #include <config/netconf.h>
 #include <config/net_messages.h>
-#include <config/sqlite.h>
+#include <config/memory.h>
 #include <config/net_list_content.h>
 
 #include <core/threading/mutex.h>
@@ -1071,7 +1071,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_LIST:
 	// put all values into mirror database
 	{
-	  mirror_config->transaction_begin();
+	  //mirror_config->transaction_begin();
 	  ConfigListContent *clc = m->msgc<ConfigListContent>();
 	  while ( clc->has_next() ) {
 	    size_t cle_size = 0;
@@ -1146,7 +1146,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	      break;
 	    }
 	  }
-	  mirror_config->transaction_commit();
+	  //mirror_config->transaction_commit();
 	  delete clc;
 	}
 
@@ -1319,8 +1319,7 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 	throw CannotEnableMirroringException("Client connection is dead");
       }
 
-      mirror_config = new SQLiteConfiguration();
-      mirror_config->load(":memory:");
+      mirror_config = new MemoryConfiguration();
 
       __mirror_init_barrier = new InterruptibleBarrier(2);
       mutex->lock();
