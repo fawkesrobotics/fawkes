@@ -280,7 +280,10 @@ YamlConfiguration::YamlValueIterator::get_comment() const
 bool
 YamlConfiguration::YamlValueIterator::is_default() const
 {
-  return false;
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+  }
+  return current_->second->is_default();
 }
 
 

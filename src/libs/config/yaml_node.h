@@ -84,20 +84,20 @@ class YamlConfigurationNode
     }
   };
 
- YamlConfigurationNode() : name_("root") {}
+ YamlConfigurationNode() : name_("root"), is_default_(false) {}
 
   YamlConfigurationNode(const YamlConfigurationNode &n)
     : name_(n.name_), type_(n.type_), scalar_value_(n.scalar_value_),
-    list_values_(n.list_values_)
+    list_values_(n.list_values_), is_default_(n.is_default_)
   {}
 
   YamlConfigurationNode(const YamlConfigurationNode *n)
     : name_(n->name_), type_(n->type_), scalar_value_(n->scalar_value_),
-    list_values_(n->list_values_)
+    list_values_(n->list_values_), is_default_(n->is_default_)
   {}
 
   YamlConfigurationNode(std::string name, const YAML::Node &node)
-    : name_(name)
+    : name_(name), is_default_(false)
   {
     node.GetScalar(scalar_value_);
     switch (node.Type()) {
@@ -588,6 +588,22 @@ class YamlConfigurationNode
   }
 
 
+  bool is_default() const
+  {
+    return is_default_;
+  }
+
+  void set_default(const char *path, bool is_default)
+  {
+    YamlConfigurationNode *n = find(path);
+    n->set_default(is_default);
+  }
+
+  void set_default(bool is_default)
+  {
+    is_default_ = is_default_;
+  }
+
   void enum_leafs(std::map<std::string, YamlConfigurationNode *> &nodes,
 		  std::string prefix = "") const
   {
@@ -660,10 +676,10 @@ class YamlConfigurationNode
 
   std::string name_;
   Type::value type_;
-  bool is_list_;
   std::string scalar_value_;
   std::map<std::string, YamlConfigurationNode *> children_;
   std::vector<std::string> list_values_;
+  bool is_default_;
 };
 
 /// @endcond
