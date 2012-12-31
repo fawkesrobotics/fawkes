@@ -70,6 +70,7 @@ class ClipsAgentThread
   void           clips_load_config(std::string cfg_prefix);
   void           clips_skill_call_ext(std::string skill_name, std::string skill_string);
   const char *   status_string(fawkes::SkillerInterface::SkillStatusEnum status);
+  void           clips_blackboard_add_interface(std::string type, std::string id);
 
  private:
   bool        cfg_auto_start_;
@@ -90,6 +91,9 @@ class ClipsAgentThread
 
   std::map<std::string, SkillExecInfo> active_skills_;
   bool          started_;
+
+  typedef std::multimap<std::string, fawkes::Interface *> InterfaceMap;
+  InterfaceMap interfaces_;
 };
 
 #endif

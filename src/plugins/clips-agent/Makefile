@@ -39,7 +39,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_clips
 warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Robotino CLIPS Agent Plugin$(TNORMAL) (CLIPS not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS agent plugin$(TNORMAL) (CLIPS not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
