@@ -24,7 +24,7 @@ LUA_VERSION = 5.1
 
 # Check for Lua (Fedora packages lua and lua-devel)
 ifneq ($(PKGCONFIG),)
-  LUA_PACKAGE = $(firstword $(foreach P,lua lua$(LUA_VERSION) lua-$(LUA_VERSION),$(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) $(P); echo $${?/1/}),$(P))))
+  LUA_PACKAGE = $(firstword $(foreach P,lua$(LUA_VERSION) lua-$(LUA_VERSION) lua,$(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) $(P); echo $${?/1/}),$(P))))
   HAVE_LUA = $(if $(LUA_PACKAGE),1,0)
 endif
 
