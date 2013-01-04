@@ -57,7 +57,7 @@ ifneq ($(PKGCONFIG),)
   HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
   ifneq ($(HAVE_OPENCV),1)
     # Give it another shot, name might contain version
-    _OPENCV_ALTERNATE_NAME=$(shell $(PKGCONFIG) pkg-config --list-all | grep 'opencv' | awk '{ print $$1 }')
+    _OPENCV_ALTERNATE_NAME=$(shell $(PKGCONFIG) --list-all | grep 'opencv' | awk '{ print $$1 }')
     ifneq ($(_OPENCV_ALTERNATE_NAME),)
       OPENCV_VERSION_SUFFIX=$(patsubst opencv%,%,$(_OPENCV_ALTERNATE_NAME))
       HAVE_OPENCV=1
