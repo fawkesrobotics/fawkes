@@ -67,8 +67,8 @@ NavGraphThread::init()
   cfg_base_frame_      = config->get_string("/plugins/navgraph/base_frame");
   cfg_global_frame_    = config->get_string("/plugins/navgraph/global_frame");
   cfg_nav_if_id_       = config->get_string("/plugins/navgraph/navigator_interface_id");
-  cfg_tolerance_       = config->get_float("/plugins/navgraph/tolerance");
-  cfg_final_tolerance_ = config->get_float("/plugins/navgraph/final_tolerance");
+  cfg_travel_tolerance_ = config->get_float("/plugins/navgraph/travel_tolerance");
+  cfg_target_tolerance_ = config->get_float("/plugins/navgraph/target_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
 
@@ -464,15 +464,15 @@ NavGraphThread::node_reached()
 		    pow(pose.getOrigin().y() - cur_target.y(), 2));
 
   float tolerance = 0.;
-  if (cur_target.has_property("tolerance")) {
-    tolerance = cur_target.property_as_float("tolerance");
+  if (cur_target.has_property("travel_tolerance")) {
+    tolerance = cur_target.property_as_float("travel_tolerance");
   }
-  float default_tolerance = cfg_tolerance_;
+  float default_tolerance = cfg_travel_tolerance_;
   // use a different tolerance for the final node
   if (plan_.size() == 1) {
-    default_tolerance = cfg_final_tolerance_;
-    if (cur_target.has_property("final_tolerance")) {
-      tolerance = cur_target.property_as_float("final_tolerance");
+    default_tolerance = cfg_target_tolerance_;
+    if (cur_target.has_property("target_tolerance")) {
+      tolerance = cur_target.property_as_float("target_tolerance");
     }
   }
   // can be no or invalid tolerance
