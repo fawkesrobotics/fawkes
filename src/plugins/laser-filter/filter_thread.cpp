@@ -91,9 +91,15 @@ LaserFilterThread::init()
     std::string fpfx = __cfg_prefix + "filters/";
     std::auto_ptr<Configuration::ValueIterator> i(config->search(fpfx.c_str()));
     while (i->next()) {
-      std::string filter_name = std::string(i->path()).substr(fpfx.length());
-      if (filter_name.find("/") != std::string::npos) {
-	// If it contains a slash we assume it is a parameter for a filter
+      
+      std::string suffix = std::string(i->path()).substr(fpfx.length());
+      std::string filter_name = std::string(suffix.substr(0,suffix.find("/")));
+      std::string conf_key = std::string(suffix.substr(suffix.find("/")+1,suffix.length()));
+      
+      
+      logger->log_debug(name(),"filter_name is %s", filter_name.c_str());
+      logger->log_debug(name(),"conf_key is %s", conf_key.c_str());
+      if (conf_key != "type") {
 	continue;
       }
 
@@ -101,6 +107,7 @@ LaserFilterThread::init()
 	throw Exception("Filter value %s is not a string", i->path());
       }
 
+	
       filters[filter_name] = i->get_string();
     }
     if (filters.empty()) {
