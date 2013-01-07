@@ -1514,7 +1514,7 @@ MirrorCalibTool::next_step()
         apply_or(prev1.yuv_buffer(), prev2.yuv_buffer(), result.yuv_buffer(),
                  prev1.width(), prev1.height());
         make_grayscale(result.yuv_buffer(), result.buflen());
-        assert(memcmp(prev1.yuv_buffer(),
+        /*assert(memcmp(prev1.yuv_buffer(),
                       prev2.yuv_buffer(),
                       result.buflen()));
         assert(memcmp(result.yuv_buffer(),
@@ -1522,7 +1522,7 @@ MirrorCalibTool::next_step()
                       result.buflen()));
         assert(memcmp(result.yuv_buffer(),
                       prev1.yuv_buffer(),
-                      result.buflen()));
+                      result.buflen()));*/
       }
       src_img.add_result(result);
       set_last_yuv_buffer(result.yuv_buffer());
