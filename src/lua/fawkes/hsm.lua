@@ -163,9 +163,11 @@ end
 -- a table with two entries, the first holding the timeout in seconds, and the
 -- second the name of the state to advance to if the timeout runs out.
 -- <br /><br />
--- A boolean field precond can be set to true, to cause checknig of the jump
--- condition already just before entering the state (and before executing its
--- init() method).
+-- Instead of setting the condition in the cond field, one can set it in the
+-- precond field to treat it additionally as a precondition, or set in in the
+-- precond_only field, to treat it exclusively as a precondition. Preconditions
+-- cause checknig of the jump condition already just before entering the state
+-- (and before executing its init() method).
 -- <br /><br />
 -- A dotattr string field can be set with dot graph attributes for rendering.
 -- A desc string field can be set to an alternative description of the
@@ -184,7 +186,7 @@ function HSM:add_transitions(trans)
 	 local to    = assert(self.states[t[2]],
 			      "Destination state does not exist for transition "
 				 .. trans_string)
-	 local cond  = t[3] or t.cond
+	 local cond  = t[3] or t.cond or t.precond or t.precond_only
 	 assert(cond or t.timeout,
 		"You must have a condition or a timeout for transition "
 		   .. trans_string)

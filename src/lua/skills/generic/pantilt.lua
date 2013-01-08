@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "pantilt"
-fsm                = SkillHSM:new{name=name, start="DECIDE_MODE", debug=true}
+fsm                = SkillHSM:new{name=name, start="DECIDE_MODE", debug=false}
 depends_skills     = nil
 depends_interfaces = {
    {v = "ptu_RX28", id = "PanTilt RX28", type = "PanTiltInterface"},
@@ -67,8 +67,11 @@ question.
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Constants / Module variables
 local ptus = { RX28 = ptu_RX28, EviD100P = ptu_EviD100P }
 local default_ptu = "RX28"
+
+-- Global functions
 
 --- Get selected PTU interface.
 -- @param ptu_name name of the desired PTU, nil to select default
@@ -79,6 +82,8 @@ function ptu_interface(ptu_name)
    assert(rv, "No valid PTU chosen")
    return rv
 end
+
+-- Jumpconditions
 
 --- Check if arm motion is final.
 -- @return true if motion is final, false otherwise
@@ -100,28 +105,41 @@ function jc_next_msg(state)
 end
 
 -- States
-fsm:add_transitions{
+fsm:define_states{
+   export_to=_M,
    closure={ptu=ptu_interface},
-   {"DECIDE_MODE", "FAILED", "not ptu(vars.ptu):has_writer()", precond=true, desc="no writer"},
-   {"DECIDE_MODE", "TURNONOFF", "vars.enable ~= nil", precond=true, desc="enable parm"},
-   {"DECIDE_MODE", "CALIBRATE", "vars.calibrate", precond=true, desc="calib parm"},
-   {"DECIDE_MODE", "GOTO", "vars.pan ~= nil and vars.tilt ~= nil",
-    desc="goto parms", precond=true},
-   {"DECIDE_MODE", "STOP", "vars.stop", precond=true},
-   {"DECIDE_MODE", "PARK", "vars.park", precond=true},
-   {"DECIDE_MODE", "SPEED", "vars.max_speed", precond=true},
-   {"DECIDE_MODE", "FAILED", true, precond=true, desc="No valid command"},
-   {"CALIBRATE", "CHECKERR", jc_ptu_is_final, desc="final"},
-   {"CALIBRATE", "FAILED", jc_next_msg, desc="next msg"},
-   {"TURNONOFF", "CHECKERR", true},
-   {"STOP", "CHECKERR", true},
-   {"SPEED", "CHECKERR", true},
-   {"GOTO", "CHECKERR", jc_ptu_is_final, desc="final"},
-   {"GOTO", "FAILED", jc_next_msg, desc="next msg"},
-   {"PARK", "CHECKERR", jc_ptu_is_final, desc="final"},
-   {"PARK", "FAILED", jc_next_msg, desc="next msg"},
-   {"CHECKERR", "FINAL", "ptu(vars.ptu):error_code() == ptu(vars.ptu).ERROR_NONE", desc="no error"},
-   {"CHECKERR", "FAILED", "ptu(vars.ptu):error_code() ~= ptu(vars.ptu).ERROR_NONE", desc="error"},
+
+   {"DECIDE_MODE", JumpState},
+   {"CALIBRATE",   JumpState},
+   {"TURNONOFF",   JumpState},
+   {"STOP",        JumpState},
+   {"SPEED",       JumpState},
+   {"GOTO",        JumpState},
+   {"PARK",        JumpState},
+   {"CHECKERR",    JumpState}
+}
+-- Transitions
+fsm:add_transitions{
+   {"DECIDE_MODE", "FAILED", cond="not ptu(vars.ptu):has_writer()", precond_only=true, desc="no writer"},
+   {"DECIDE_MODE", "TURNONOFF", cond="vars.enable ~= nil", precond_only=true, desc="enable parm"},
+   {"DECIDE_MODE", "CALIBRATE", cond="vars.calibrate", precond_only=true, desc="calib parm"},
+   {"DECIDE_MODE", "GOTO", cond="vars.pan ~= nil and vars.tilt ~= nil",
+    desc="goto parms", precond_only=true},
+   {"DECIDE_MODE", "STOP", cond="vars.stop", precond_only=true},
+   {"DECIDE_MODE", "PARK", cond="vars.park", precond_only=true},
+   {"DECIDE_MODE", "SPEED", cond="vars.max_speed", precond_only=true},
+   {"DECIDE_MODE", "FAILED", cond=true, precond_only=true, desc="No valid command"},
+   {"CALIBRATE", "CHECKERR", cond=jc_ptu_is_final, desc="final"},
+   {"CALIBRATE", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"TURNONOFF", "CHECKERR", cond=true},
+   {"STOP", "CHECKERR", cond=true},
+   {"SPEED", "CHECKERR", cond=true},
+   {"GOTO", "CHECKERR", cond=jc_ptu_is_final, desc="final"},
+   {"GOTO", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"PARK", "CHECKERR", cond=jc_ptu_is_final, desc="final"},
+   {"PARK", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"CHECKERR", "FINAL", cond="ptu(vars.ptu):error_code() == ptu(vars.ptu).ERROR_NONE", desc="no error"},
+   {"CHECKERR", "FAILED", cond="ptu(vars.ptu):error_code() ~= ptu(vars.ptu).ERROR_NONE", desc="error"},
 }
 
 function CALIBRATE:init()

@@ -65,8 +65,34 @@ the navigator started processing another goto message.
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+
+-- Jumpconditions
+function jumpcond_navifail(state)
+   return (state.fsm.vars.msgid == 0
+	   or (state.fsm.vars.msgid ~= navigator:msgid() and state.wait_start > 25)
+	   or not navigator:has_writer()
+	   or state.failed)
+end
+
+function jumpcond_navifinal(state)
+   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
+   return state.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
+end
+
+
 -- States
-fsm:new_jump_state("RELGOTO")
+fsm:define_states{
+   export_to=_M,
+
+   {"RELGOTO", JumpState}
+}
+
+-- Transitions
+fsm:add_transitions{
+   {"RELGOTO", "FAILED", cond="vars.param_fail", desc="Invalid/insufficient parameters"},
+   {"RELGOTO", "FAILED", cond=jumpcond_navifail,  desc="Navigator failure"},
+   {"RELGOTO", "FINAL",  cond=jumpcond_navifinal, desc="Position reached"}
+}
 
 function RELGOTO:init()
    if navigator:has_writer() then
@@ -111,22 +137,8 @@ function RELGOTO:reset()
    --navigator:msgq_enqueue_copy(navigator.StopMessage:new())
 end
 
-function RELGOTO:jumpcond_paramfail()
-   return self.fsm.vars.param_fail
-end
 
-function RELGOTO:jumpcond_navifail()
-   return (self.fsm.vars.msgid == 0
-	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 25)
-	   or not navigator:has_writer()
-	   or self.failed)
-end
 
-function RELGOTO:jumpcond_navifinal()
-   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
-   return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
-end
 
-RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_paramfail, "Invalid/insufficient parameters")
-RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_navifail, "Navigator failure")
-RELGOTO:add_transition(FINAL, RELGOTO.jumpcond_navifinal, "Position reached")
+
+

@@ -63,6 +63,8 @@ module(..., fawkes.modinit.module_init)
 require("fawkes.fsm.jumpstate")
 local skillstati = require("skiller.skillstati")
 
+local skillenv = require("skiller.skillenv")
+
 -- Convenience shortcuts
 local JumpState     = fawkes.fsm.jumpstate.JumpState
 
@@ -89,6 +91,11 @@ function SkillJumpState:new(o)
    --    o.subskills and not o.skill and not o.skills,
    -- "SkillJumpState " .. o.name .. " may only operate in a specific mode")
    assert(o.skills, "No skills given")
+   for _,s in ipairs(o.skills) do
+      if type(s[1]) == "string" then
+         s[1] = skillenv.get_skill_module(s[1])
+      end
+   end
 
    setmetatable(o, self)
    setmetatable(self, JumpState)
@@ -218,7 +225,7 @@ function SkillJumpState:do_init()
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
 
-
+   self.args = {}
    self:init()
    for _, s in ipairs(self.skills) do
       local set_already = false
@@ -229,9 +236,20 @@ function SkillJumpState:do_init()
             set_already = true
             if type(k) == "number" and type(v) == "table" then
                for k2, v2 in pairs(v) do
-                  args[k2] = self.fsm.vars[v2]
+                  args[k2] = v2
                end
             else
+               args[k] = v
+            end
+         end
+      end
+
+      -- Set args from "self.args[skill] = {arg1=arg,...}"
+      if self.args[s[1]] or self.args[s[1].name] then
+         sargs = self.args[s[1]] or self.args[s[1].name]
+         if type(sargs) == "table" then
+            set_already = true
+            for k, v in pairs(sargs) do
                args[k] = v
             end
          end

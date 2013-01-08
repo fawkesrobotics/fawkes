@@ -1,6 +1,6 @@
 
 ----------------------------------------------------------------------------
---  katana_grap.lua - Katana grabbing skill
+--  katana_grab.lua - Katana grabbing skill
 --
 --  Created: Thu Mar 03 14:32:47 2011
 --  Copyright  2011  Bahram Maleki-Fard
@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "katana_grab"
-fsm                = SkillHSM:new{name=name, start="INIT", debug=true}
+fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
 depends_skills     = {"katana", "katana_rel", "or_object"}
 depends_interfaces = {
    {v = "katanaarm", type = "KatanaInterface"}
@@ -48,7 +48,7 @@ skillenv.skill_module(...)
 local MAX_APPROACH_DIST = 0.1 --0.1 -- 10cm
 local SLOW_DOWN_VELOCITY = 0.3
 
--- functions
+-- Jumpconditions
 function jc_obj_is_grabable(state)
    --TODO: check sensor values, but which ones and what values?
    katanaarm:read()
@@ -79,41 +79,60 @@ function jc_obj_is_grabable(state)
    return ce > 120
 end
 
+-- States
+fsm:define_states{
+   export_to=_M,
+   closure={katanaarm=katanaarm},
+
+   {"INIT",     SkillJumpState, skills={{katana}},
+                final_to="DECIDE", fail_to="FAILED"},
+   {"DECIDE",   JumpState},
+
+   {"PRE_GRAB_POS", SkillJumpState, skills={{katana}},
+                final_to="START_APPROACH_OBJ", fail_to="FAILED"},
+   {"PRE_GRAB_OBJ", SkillJumpState, skills={{katana}},
+                final_to="START_APPROACH_OBJ", fail_to="FAILED"},
+   {"START_APPROACH_OBJ", SkillJumpState, skills={{or_object}},
+                final_to="SLOW_DOWN", fail_to="SLOW_DOWN"},
+   {"SLOW_DOWN", SkillJumpState, skills={{katana}},
+                final_to="TO_APPROACH_OBJ", fail_to="APPROACH_OBJ"},
+   {"APPROACH_OBJ", SkillJumpState, skills={{katana_rel}},
+                final_to="CHECK_GRABABILITY", fail_to="FAILED"},
+   {"STOP_MOVEMENT", SkillJumpState, skills={{katana}},
+                final_to="TO_GRAB", fail_to="FAILED"},
+   {"GRAB", SkillJumpState, skills={{katana}},
+                final_to="ATTACH_OBJECT", fail_to="FAILED"},
+   {"ATTACH_OBJECT", SkillJumpState, skills={{or_object}},
+                final_to="FINAL", fail_to="FAILED"},
+
+   {"TO_APPROACH_OBJ", JumpState},
+   {"CHECK_GRABABILITY", JumpState},
+   {"TO_GRAB", JumpState},
+}
+
+-- Transitions
 fsm:add_transitions {
-   closure={p=p, katanaarm=katanaarm},
+   {"INIT", "FAILED", cond="not katanaarm:has_writer()", desc="no writer", precond_only=true},
 
-   {"INIT", "DECIDE", skill=katana, fail_to="FAILED", desc="gripper open"},
-   {"INIT", "FAILED", "not katanaarm:has_writer()", desc="no writer", precond=true},
+   {"DECIDE", "PRE_GRAB_OBJ", cond="vars.object", desc="object given"},
+   {"DECIDE", "PRE_GRAB_POS", cond="vars.x and vars.y and vars.z", desc="pose given"},
+   {"DECIDE", "FAILED", cond=true, desc="insufficient arguments"},
 
-   {"DECIDE", "PRE_GRAB_OBJ", "vars.object", desc="object given"},
-   {"DECIDE", "PRE_GRAB_POS", "vars.x and vars.y and vars.z", desc="pose given"},
-   {"DECIDE", "FAILED", true, desc="insufficient arguments"},
+   --{"START_APPROACH_OBJ", "CHECK_GRABABILITY", cond=true, precond_only=true}, --TODO: skip approach for now
 
-   {"PRE_GRAB_POS", "START_APPROACH_OBJ", skill=katana, fail_to="FAILED", desc="ready to approach"},
-   {"PRE_GRAB_OBJ", "START_APPROACH_OBJ", skill=katana, fail_to="FAILED", desc="ready to approach"},
+   {"SLOW_DOWN", "TO_APPROACH_OBJ", cond=true, precond_only=true}, --TODO: max_velocity crashes, so skip for now
 
-   {"START_APPROACH_OBJ", "SLOW_DOWN", skill=or_object, fail_to="SLOW_DOWN", desc="attached object"},
-   --{"START_APPROACH_OBJ", "CHECK_GRABABILITY", true, precond=true}, --TODO: skip approach for now
+   {"TO_APPROACH_OBJ", "APPROACH_OBJ", timeout=2.0},
 
-   {"SLOW_DOWN", "TO_APPROACH_OBJ", skill=katana, fail_to="APPROACH_OBJ", desc="slowed down"},
-   {"SLOW_DOWN", "TO_APPROACH_OBJ", true, precond=true}, --max_velocity crashes allways
+   {"APPROACH_OBJ", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
 
-   {"TO_APPROACH_OBJ", "APPROACH_OBJ", wait_sec = 2.0},
+   {"CHECK_GRABABILITY", "TO_GRAB", cond=jc_obj_is_grabable, desc="obj close enough"},
+   --{"CHECK_GRABABILITY", "FAILED", cond=true, desc="obj out of range"},
+   {"CHECK_GRABABILITY", "TO_GRAB", cond=true, desc="obj out of range"},
 
-   {"APPROACH_OBJ", "CHECK_GRABABILITY", skill=katana_rel, fail_to="FAILED", desc="reached max approach distance"},
-   {"APPROACH_OBJ", "STOP_MOVEMENT", jc_obj_is_grabable, desc="obj close enough"},
+   {"TO_GRAB", "GRAB", timeout=2.0},
 
-   {"STOP_MOVEMENT", "TO_GRAB", skill=katana, args={stop=true}, fail_to="FAILED", desc="stopped"},
-   {"CHECK_GRABABILITY", "TO_GRAB", jc_obj_is_grabable, desc="obj close enough"},
-   --{"CHECK_GRABABILITY", "FAILED", true, desc="obj out of range"},
-   {"CHECK_GRABABILITY", "TO_GRAB", true, desc="obj out of range"},
-
-   {"TO_GRAB", "GRAB", wait_sec = 2.0},
-
-   {"GRAB", "ATTACH_OBJECT", skill=katana, fail_to="FAILED", desc="grabbed object"},
-
-   {"ATTACH_OBJECT", "FINAL", fail_to="FAILED", skill=or_object, desc="attached"},
-   {"ATTACH_OBJECT", "FINAL", "not vars.object", desc="no object given", precond=true}
+   {"ATTACH_OBJECT", "FINAL", cond="not vars.object", desc="no object given", precond_only=true}
 }
 
 function INIT:init()

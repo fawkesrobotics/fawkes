@@ -68,7 +68,8 @@ local DEFAULT_MARGIN = 0.2
 -- Initialize as skill module
 skillenv.skill_module(...)
 
-local function check_target_distance(state)
+-- Jumpconditions
+local function jumpcond_resend_command(state)
    if navigator:msgid() ~= relgoto.fsm.vars.msgid then
       return false
    end
@@ -118,18 +119,29 @@ local function check_target_distance(state)
    end
 end
 
-fsm:add_transitions{
-   closure={p=p},
-   {"GOTO", "FINAL", skill=relgoto, fail_to="FAILED"},
-   {"GOTO", "GOTO", cond=check_target_distance}
+
+-- States
+fsm:define_states{
+   export_to=_M,
+
+   {"GOTO", SkillJumpState, skills={{relgoto}},
+            final_to="FINAL", fail_to="FAILED"}
 }
+
+-- Transitions
+fsm:add_transitions{
+   --{"GOTO", final="FINAL", fail="FAILED", {relgoto} },
+   {"GOTO", "GOTO", cond=jumpcond_resend_command, desc="recalculated current goto params"}
+}
+
+
 
 function GOTO:init()
    local x   = self.fsm.vars.x   or self.fsm.vars[1] or pose:world_x()
    local y   = self.fsm.vars.y   or self.fsm.vars[2] or pose:world_y()
    local ori = self.fsm.vars.ori or self.fsm.vars[3] or DEFAULT_ORI
    self.fsm.vars.margin = self.fsm.vars.margin or DEFAULT_MARGIN
-   
+
    -- global robot pose
    local rx, ry, rori = pose:world_x(), pose:world_y(), pose:world_z()
 
@@ -156,6 +168,6 @@ function GOTO:init()
    -- reset counter
    self.fsm.vars.counter = 0
 
-   self.args = {x=relx, y=rely, ori=relori}
+   self.args[relgoto] = {x=relx, y=rely, ori=relori}
 end
-   
+
