@@ -55,7 +55,11 @@ ROSNodeThread::init()
   if (! ros::isInitialized()) {
     int argc = 1;
     const char *argv[] = {"fawkes"};
-    ros::init(argc, (char **)argv, "fawkes",
+    std::string node_name = "fawkes";
+    try {
+      node_name = config->get_string("/ros/node-name");
+    } catch (Exception &e) {} // ignored, use default
+    ros::init(argc, (char **)argv, node_name,
 	      (uint32_t)ros::init_options::NoSigintHandler);
   } else {
     logger->log_warn(name(), "ROS node already initialized");
