@@ -24,7 +24,7 @@ LUA_VERSION = 5.1
 
 # Check for Lua (Fedora packages lua and lua-devel)
 ifneq ($(PKGCONFIG),)
-  LUA_PACKAGE = $(firstword $(foreach P,lua lua$(LUA_VERSION) lua-$(LUA_VERSION),$(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) $(P); echo $${?/1/}),$(P))))
+  LUA_PACKAGE = $(firstword $(foreach P,lua$(LUA_VERSION) lua-$(LUA_VERSION) lua,$(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) $(P); echo $${?/1/}),$(P))))
   HAVE_LUA = $(if $(LUA_PACKAGE),1,0)
 endif
 
@@ -66,6 +66,15 @@ ifeq ($(HAVE_LUA),1)
     ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++$(LUA_VERSION)),)
       _HAVE_TOLUA_BIN=1
       TOLUAPP=tolua++$(LUA_VERSION)
+    endif
+    # Arch Linux
+    ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++.a),)
+      _HAVE_TOLUA_LIB=1
+      TOLUA_LIBS=tolua++ stdc++
+    endif
+    ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=tolua++
     endif
     ifeq ($(_HAVE_TOLUA_LIB)$(_HAVE_TOLUA_BIN),11)
       HAVE_TOLUA = 1
