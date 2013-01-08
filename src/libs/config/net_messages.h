@@ -91,9 +91,10 @@ namespace fawkes {
  */
 typedef struct {
   char path[CONFIG_MSG_PATH_LENGTH];		/**< path to config value. */
-  uint32_t   is_default :  1;			/**< 1 if value is a default value, 0
+  uint16_t   is_default :  1;			/**< 1 if value is a default value, 0
 						 * otherwise, only for get response */
-  uint32_t   reserved   : 31;			/**< Reserved for future use. */
+  uint16_t   reserved   : 15;			/**< Reserved for future use. */
+  uint16_t   num_values;			/**< Number of valus in list. */
 } config_descriptor_t;
 
 /** Get value message. */
@@ -116,36 +117,11 @@ typedef struct {
   config_descriptor_t  cp;	/**< value descriptor */
 } config_value_erased_msg_t;
 
-/** Float value message */
+/** String value header indicating the string length. */
 typedef struct {
-  config_descriptor_t  cp;	/**< value descriptor */
-  float f;			/**< value */
-} config_float_value_msg_t;
-
-/** Unsigned int value message */
-typedef struct {
-  config_descriptor_t  cp;	/**< value descriptor */
-  uint32_t u;			/**< value */
-} config_uint_value_msg_t;
-
-/** Integer value message */
-typedef struct {
-  config_descriptor_t  cp;	/**< value descriptor */
-  int32_t i;			/**< value */
-} config_int_value_msg_t;
-
-/** Boolean value message */
-typedef struct {
-  config_descriptor_t  cp;	/**< value descriptor */
-  uint32_t b;			/**< value */
-} config_bool_value_msg_t;
-
-/** String value message */
-typedef struct {
-  config_descriptor_t  cp;		/**< value descriptor */
   uint16_t s_length;	/**< Length of following string */
-  char s[2];		/**< string value, 0-terminated */
-} config_string_value_msg_t;
+  uint16_t reserved;	/**< Reserved for future use */
+} config_string_value_t;
 
 
 /** Comment message */
@@ -173,44 +149,6 @@ typedef struct {
   uint32_t   type       : 8;	/**< type of entity, uses MSG_CONFIG_*_VALUE message IDs */
   uint32_t   reserved   : 24;	/**< reserved for future use */
 } config_list_entity_header_t;
-
-/** Config list float entity. */
-typedef struct {
-  config_list_entity_header_t  header;	/**< config entity header */
-  float    f;				/**< float value */
-} config_list_float_entity_t;
-
-/** Config list unsigned int entity. */
-typedef struct {
-  config_list_entity_header_t  header;	/**< config entity header */
-  uint32_t u;				/**< uint value */
-} config_list_uint_entity_t;
-
-/** Config list int entity. */
-typedef struct {
-  config_list_entity_header_t  header;	/**< config entity header */
-  int32_t i;				/**< float value */
-} config_list_int_entity_t;
-
-/** Config list bool entity. */
-typedef struct {
-  config_list_entity_header_t  header;	/**< config entity header */
-  int32_t b;				/**< 0 is false, everything else is true */
-} config_list_bool_entity_t;
-
-/** Config list string entity. */
-typedef struct {
-  config_list_entity_header_t  header;		/**< config entity header */
-  uint16_t s_length;	/**< length of following string value */
-  char     s[2];	/**< string value, 0-terminated */
-} config_list_string_entity_t;
-
-/** Config list comment entity. */
-typedef struct {
-  config_list_entity_header_t  header;		/**< config entity header */
-  uint16_t s_length;	/**< Length of following comment string */
-  char     s[2];	/**< Comment value, 0-terminated */
-} config_list_comment_entity_t;
 
 } // end namespace fawkes
 

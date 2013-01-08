@@ -82,6 +82,7 @@ class Configuration
     virtual bool          is_bool() const                                 = 0;
     virtual bool          is_string() const                               = 0;
     virtual bool          is_list() const                                 = 0;
+    virtual size_t        get_list_size() const                           = 0;
 
     virtual float         get_float() const                               = 0;
     virtual unsigned int  get_uint() const                                = 0;

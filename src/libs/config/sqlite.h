@@ -133,6 +133,7 @@ class SQLiteConfiguration : public Configuration
     virtual bool          is_bool() const;
     virtual bool          is_string() const;
     virtual bool          is_list() const;
+    virtual size_t        get_list_size() const;
 
     virtual bool          is_default() const;
 

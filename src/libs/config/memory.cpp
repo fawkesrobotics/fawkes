@@ -504,7 +504,9 @@ MemoryConfiguration::iterator()
 }
 
 
-
+/** Get iterator over default values.
+ * @return iterator that only mentions default values
+ */
 Configuration::ValueIterator *
 MemoryConfiguration::iterator_default()
 {
@@ -524,6 +526,9 @@ MemoryConfiguration::iterator_default()
   return new YamlConfiguration::YamlValueIterator(nodes);
 }
 
+/** Get iterator over host-specific values.
+ * @return iterator that only mentions host-specific (non-default) values
+ */
 Configuration::ValueIterator *
 MemoryConfiguration::iterator_hostspecific()
 {

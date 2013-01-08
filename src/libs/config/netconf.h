@@ -31,6 +31,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <stdint.h>
 
 namespace fawkes {
 
@@ -140,6 +141,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual bool          is_bool() const;
     virtual bool          is_string() const;
     virtual bool          is_list() const;
+    virtual size_t        get_list_size() const;
 
     virtual bool          is_default() const;
 
@@ -178,15 +180,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
  private:
   void send_get(const char *path, unsigned int msgid);
 
-  void set_float_internal(unsigned int msg_type, const char *path, float f);
-  void set_uint_internal(unsigned int msg_type, const char *path,
-			 unsigned int uint);
-  void set_int_internal(unsigned int msg_type, const char *path, int i);
-  void set_bool_internal(unsigned int msg_type, const char *path, bool b);
-  void set_string_internal(unsigned int msg_type, const char *path,
-			   const char *s);
-  void set_comment_internal(unsigned int msg_type, const char *path,
-			    const char *s);
+  void set_value_internal(unsigned int msg_type, const char *path, uint16_t num_values,
+			  size_t data_size, void *data);
 
   void erase_internal(const char *path, bool is_default);
 

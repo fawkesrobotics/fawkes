@@ -79,6 +79,16 @@ ConfigListContent::~ConfigListContent()
   }
 }
 
+/// @cond INTERNAL
+template <typename T>
+static inline void
+copy_data_vector(T *in, T *out, const size_t num_values)
+{
+  for (unsigned int j = 0; j < num_values; ++j) {
+    out[j] = in[j];
+  }
+}
+/// @endcond
 
 /** Append from iterator.
  * Appends the value the iterator points to.
@@ -87,141 +97,95 @@ ConfigListContent::~ConfigListContent()
 void
 ConfigListContent::append(Configuration::ValueIterator *i)
 {
+  unsigned int num_values = (i->is_list() ? i->get_list_size() : 1);
+  size_t data_size = 0;
+  char *data;
+
+  config_list_entity_header_t cle;
+  memset(&cle, 0, sizeof(cle));
+  strncpy(cle.cp.path, i->path(), CONFIG_MSG_PATH_LENGTH);
+  cle.type = MSG_CONFIG_FLOAT_VALUE;
+  cle.cp.is_default = (i->is_default() ? 1 : 0);
+  cle.cp.num_values = (i->is_list() ? i->get_list_size() : 0);
+
   if ( i->is_float() ) {
-    append_float(i->path(), i->get_float(), i->is_default());
-  } else if ( i->is_int() ) {
-    append_int(i->path(), i->get_int(), i->is_default());
+    cle.type = MSG_CONFIG_FLOAT_VALUE;
+    data_size = num_values * sizeof(float);
   } else if ( i->is_uint() ) {
-    append_uint(i->path(), i->get_uint(), i->is_default());
+    cle.type = MSG_CONFIG_UINT_VALUE;
+    data_size = num_values * sizeof(uint32_t);
+  } else if ( i->is_int() ) {
+    cle.type = MSG_CONFIG_INT_VALUE;
+    data_size = num_values * sizeof(int32_t);
   } else if ( i->is_bool() ) {
-    append_bool(i->path(), i->get_bool(), i->is_default());
+    cle.type = MSG_CONFIG_BOOL_VALUE;
+    data_size = num_values * sizeof(int32_t);
   } else if ( i->is_string() ) {
-    append_string(i->path(), i->get_string().c_str(), i->is_default());
+    cle.type = MSG_CONFIG_STRING_VALUE;
+    if (num_values > 1) {
+      std::vector<std::string> values = i->get_strings();
+      for (unsigned int j = 0; j < values.size(); ++j) {
+	data_size += sizeof(config_string_value_t) + values[j].length() + 1;
+      }
+    } else {
+      data_size = sizeof(config_string_value_t) + i->get_string().length() + 1;
+    }
   } else {
     throw TypeMismatchException("Invalid type of config iterator value");
   }
 
-  try {
-    std::string comment = i->get_comment();
-    if (comment != "") {
-      append_comment(i->path(), comment.c_str(), i->is_default());
+  data = (char *)malloc(sizeof(config_list_entity_header_t) + data_size);
+  memcpy(data, &cle, sizeof(config_list_entity_header_t));
+
+  if ( i->is_float() ) {
+    if (num_values > 1) {
+      copy_data_vector(&i->get_floats()[0], (float *)(data + sizeof(cle)), num_values);
+    } else {
+      *((float *)(data + sizeof(cle))) = i->get_float();
     }
-  } catch (NotImplementedException &e) {
-    // ignored
+  } else if ( i->is_uint() ) {
+    if (num_values > 1) {
+      copy_data_vector(&i->get_uints()[0], (uint32_t *)(data + sizeof(cle)), num_values);
+    } else {
+      *((uint32_t *)(data + sizeof(cle))) = i->get_uint();
+    }
+  } else if ( i->is_int() ) {
+    if (num_values > 1) {
+      copy_data_vector(&i->get_ints()[0], (int32_t *)(data + sizeof(cle)), num_values);
+    } else {
+      *((int32_t *)(data + sizeof(cle))) = i->get_int();
+    }
+  } else if ( i->is_bool() ) {
+    if (num_values > 1) {
+      std::vector<bool> values = i->get_bools();
+      int32_t *msg_values = (int32_t *)(data + sizeof(cle));
+      for (unsigned int j = 0; j < values.size(); ++j) {
+	msg_values[j] = values[j] ? 1 : 0;
+      }
+
+    } else {
+      *((int32_t *)(data + sizeof(cle))) = i->get_bool() ? 1 : 0;
+    }
+  } else if ( i->is_string() ) {
+    if (num_values > 1) {
+      std::vector<std::string> values = i->get_strings();
+      char *tmpdata = (char *)data + sizeof(cle);
+      for (unsigned int j = 0; j < values.size(); ++j) {
+	config_string_value_t *csv = (config_string_value_t *)tmpdata;
+	csv->s_length = values[j].length();
+	char *msg_string = tmpdata + sizeof(config_string_value_t);
+	strcpy(msg_string, values[j].c_str());
+	tmpdata += sizeof(config_string_value_t) + values[j].length() + 1;
+      }
+    } else {
+      config_string_value_t *csv = (config_string_value_t *)((char *)data + sizeof(cle));
+      csv->s_length = i->get_string().length();
+      char *msg_string = data + sizeof(cle) + sizeof(config_string_value_t);
+      strcpy(msg_string, i->get_string().c_str());
+    }
   }
-}
 
-/** Append float value.
- * @param path of value
- * @param f float value
- * @param def_val true if this is a default value, false otherwise
- */
-void
-ConfigListContent::append_float(const char *path, float f, bool def_val)
-{
-  config_list_float_entity_t cle;
-  memset(&cle, 0, sizeof(cle));
-  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.header.type = MSG_CONFIG_FLOAT_VALUE;
-  cle.header.cp.is_default = (def_val ? 1 : 0);
-  cle.f = f;
-  config_list->append(&cle, sizeof(cle));
-}
-
-
-/** Append integer value.
- * @param path of value
- * @param i integer value
- * @param def_val true if this is a default value, false otherwise
- */
-void
-ConfigListContent::append_int(const char *path, int i, bool def_val)
-{
-  config_list_int_entity_t cle;
-  memset(&cle, 0, sizeof(cle));
-  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.header.type = MSG_CONFIG_INT_VALUE;
-  cle.header.cp.is_default = (def_val ? 1 : 0);
-  cle.i = i;
-  config_list->append(&cle, sizeof(cle));
-}
-
-
-/** Append unsigned integer value.
- * @param path of value
- * @param u unsigned integer value
- * @param def_val true if this is a default value, false otherwise
- */
-void
-ConfigListContent::append_uint(const char *path, unsigned int u, bool def_val)
-{
-  config_list_uint_entity_t cle;
-  memset(&cle, 0, sizeof(cle));
-  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.header.type = MSG_CONFIG_UINT_VALUE;
-  cle.header.cp.is_default = (def_val ? 1 : 0);
-  cle.u = u;
-  config_list->append(&cle, sizeof(cle));
-}
-
-
-/** Append boolean value.
- * @param path of value
- * @param b boolean value
- * @param def_val true if this is a default value, false otherwise
- */
-void
-ConfigListContent::append_bool(const char *path, bool b, bool def_val)
-{
-  config_list_bool_entity_t cle;
-  memset(&cle, 0, sizeof(cle));
-  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.header.type = MSG_CONFIG_BOOL_VALUE;
-  cle.header.cp.is_default = (def_val ? 1 : 0);
-  cle.b = b;
-  config_list->append(&cle, sizeof(cle));
-}
-
-
-/** Append string value.
- * @param path of value
- * @param s string value
- * @param def_val true if this is a default value, false otherwise
- */
-void
-ConfigListContent::append_string(const char *path, const char *s, bool def_val)
-{
-  size_t s_length = strlen(s);
-  size_t sl = sizeof(config_list_string_entity_t) + s_length;
-  config_list_string_entity_t *cle = (config_list_string_entity_t *)calloc(1, sl);
-  strncpy(cle->header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle->header.type = MSG_CONFIG_STRING_VALUE;
-  cle->header.cp.is_default = (def_val ? 1 : 0);
-  cle->s_length = s_length;
-  strcpy(cle->s, s);
-  config_list->append(cle, sl);
-  free(cle);
-}
-
-
-/** Append comment.
- * @param path of value
- * @param s comment
- * @param def_val true if this is a default value, false otherwise
- */
-void
-ConfigListContent::append_comment(const char *path, const char *s, bool def_val)
-{
-  size_t s_length = strlen(s);
-  size_t sl = sizeof(config_list_string_entity_t) + s_length;
-  config_list_comment_entity_t *cle = (config_list_comment_entity_t *)calloc(1, sl);
-  strncpy(cle->header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle->header.type = MSG_CONFIG_COMMENT_VALUE;
-  cle->header.cp.is_default = (def_val ? 1 : 0);
-  cle->s_length = s_length;
-  strcpy(cle->s, s);
-  config_list->append(cle, sl);
-  free(cle);
+  config_list->append(data, sizeof(cle) + data_size);
 }
 
 
@@ -229,7 +193,7 @@ void
 ConfigListContent::serialize()
 {
   _payload_size = sizeof(msg) + config_list->buffer_size();
-  _payload = malloc(_payload_size);
+  _payload = calloc(1, _payload_size);
   copy_payload(0, &msg, sizeof(msg));
   copy_payload(sizeof(msg), config_list->buffer(), config_list->buffer_size());
 }

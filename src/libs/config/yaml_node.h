@@ -84,7 +84,7 @@ class YamlConfigurationNode
     }
   };
 
- YamlConfigurationNode() : name_("root"), is_default_(false) {}
+ YamlConfigurationNode() : name_("root"), type_(Type::UNKNOWN), is_default_(false) {}
 
   YamlConfigurationNode(const YamlConfigurationNode &n)
     : name_(n.name_), type_(n.type_), scalar_value_(n.scalar_value_),
@@ -97,7 +97,7 @@ class YamlConfigurationNode
   {}
 
   YamlConfigurationNode(std::string name, const YAML::Node &node)
-    : name_(name), is_default_(false)
+    : name_(name), type_(Type::UNKNOWN), is_default_(false)
   {
     node.GetScalar(scalar_value_);
     switch (node.Type()) {
@@ -361,7 +361,6 @@ class YamlConfigurationNode
   }
 
   /** Retrieve value casted to given type T.
-   * @param path path to query
    * @return value casted as desired
    * @throw YAML::ScalarInvalid thrown if value does not exist or is of
    * a different type.
@@ -385,6 +384,20 @@ class YamlConfigurationNode
       rv[i] = t;
     }
     return rv;
+  }
+
+  /** Retrieve list size.
+   * @return size of list
+   * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+   * a different type.
+   */
+  size_t
+  get_list_size() const
+  {
+    if (type_ != Type::SEQUENCE) {
+      throw Exception("YamlConfiguration: value of %s is not a list", name_.c_str());
+    }
+    return list_values_.size();
   }
 
   /** Set value of given type T.

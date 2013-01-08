@@ -143,6 +143,7 @@ class YamlConfiguration
    virtual bool          is_bool() const;
    virtual bool          is_string() const;
    virtual bool          is_list() const;
+   virtual size_t        get_list_size() const;
 
    virtual float         get_float() const;
    virtual unsigned int  get_uint() const;

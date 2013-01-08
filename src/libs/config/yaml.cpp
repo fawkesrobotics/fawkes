@@ -122,7 +122,7 @@ YamlConfiguration::YamlValueIterator::is_float() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == YamlConfigurationNode::Type::FLOAT;
+  return (current_->second->is_type<float>());
 }
 
 bool
@@ -131,7 +131,7 @@ YamlConfiguration::YamlValueIterator::is_uint() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == YamlConfigurationNode::Type::UINT32;
+  return (current_->second->is_type<unsigned int>());
 }
 
 bool
@@ -140,7 +140,7 @@ YamlConfiguration::YamlValueIterator::is_int() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == YamlConfigurationNode::Type::INT32;
+  return (current_->second->is_type<int>());
 }
 
 bool
@@ -149,7 +149,7 @@ YamlConfiguration::YamlValueIterator::is_bool() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == YamlConfigurationNode::Type::BOOL;
+  return (current_->second->is_type<bool>());
 }
 
 bool
@@ -158,7 +158,7 @@ YamlConfiguration::YamlValueIterator::is_string() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot check type on invalid iterator");
   }
-  return current_->second->get_type() == YamlConfigurationNode::Type::STRING;
+  return (current_->second->is_type<std::string>());
 }
 
 bool
@@ -170,6 +170,18 @@ YamlConfiguration::YamlValueIterator::is_list() const
   return current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE;
 }
 
+
+size_t
+YamlConfiguration::YamlValueIterator::get_list_size() const
+{
+  if (current_ == nodes_.end()) {
+    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+  }
+  if (current_->second->get_type() != YamlConfigurationNode::Type::SEQUENCE) {
+    throw Exception("YamlValueIterator: cannot get list size of non-list value");
+  }
+  return current_->second->get_list_size();
+}
 
 float
 YamlConfiguration::YamlValueIterator::get_float() const

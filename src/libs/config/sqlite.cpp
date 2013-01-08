@@ -2130,6 +2130,13 @@ SQLiteConfiguration::SQLiteValueIterator::is_list() const
   return false;
 }
 
+
+size_t
+SQLiteConfiguration::SQLiteValueIterator::get_list_size() const
+{
+  return 0;
+}
+
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_default() const
 {

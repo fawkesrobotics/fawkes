@@ -474,6 +474,11 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  * Check if a value is a list.
  * @return true if the value exists and is a list
  *
+ * @fn size_t Configuration::ValueIterator::get_list_size()
+ * Get number of elements in list value.
+ * @return number of elements in list value
+ * @throw Exception thrown if the element is not a list.
+ *
  * @fn bool Configuration::ValueIterator::is_default() const
  * Check if current value was read from the default config.
  * @return true, if value was read from the default config, false otherwise
