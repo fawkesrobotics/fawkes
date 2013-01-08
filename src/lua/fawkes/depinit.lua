@@ -3,8 +3,9 @@
 --  depinit.lua - Dependency initializer functions
 --
 --  Created: Sun Mar 08 12:28:44 2009 (Wesel am Niederrhein)
---  Copyright  2009  Tim Niemueller [www.niemueller.de]
---
+--  Copyright  2009-2010  Tim Niemueller [www.niemueller.de]
+--             2010       Carnegie Mellon University
+--             2010       Intel Research Pittsburgh
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
@@ -25,33 +26,26 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
+local module_initializers = {}
 
-function init_interfaces(name, dependencies, table)
-   assert(type(dependencies) == "table", "Type of dependencies not table")
-   assert(interfaces and type(interfaces) == "table", "Interfaces not initialized")
-   for _,t in ipairs(dependencies) do
-      assert(type(t) == "table", "Non-table element in interface dependencies")
-      assert(t.v, "Interface dependency does not have a variable name (v) field")
-      assert(t.type, "Interface dependency does not have a type field")
-      if t.id then
-	 local uid = t.type .. "::" .. t.id
-	 if interfaces.reading_by_uid[uid] then
-	    table[t.v] = interfaces.reading_by_uid[uid]
-	 elseif interfaces.writing_by_uid[uid] then
-	    table[t.v] = interfaces.writing_by_uid[uid]
-	 else
-	    error("No interface available with the UID " .. uid ..
-		  ", required by ".. name)
-	 end
-      else
-	 if interfaces.reading[t.v] then
-	    table[t.v] = interfaces.reading[t.v]
-	 elseif interfaces.writing[t.v] then
-	    table[t.v] = interfaces.writing[t.v]
-	 else
-	    error("No interface available with the variable name " .. t.v ..
-		  ", required by ".. name)
-	 end
-      end
+--- Add a module initializer.
+-- Module initializers are called as part of the skill_module() call in skill
+-- modules. They are called after basic initializations have been run. They
+-- can be used for example to initialize, check, and assert dependencies.
+-- @param di dependency initializer, must be a function which takes two
+-- arguments. The module m, and a table to which fields should be added (the
+-- index metatable). The initializer should not set values directly on the
+-- module.
+function add_module_initializer(di)
+   table.insert(module_initializers, di)
+end
+
+
+--- Initialize module with registered initializers.
+-- @param module module table to initialize, considered read-only
+-- @param table add anythin you want to export to a module to this table
+function init_module(module, table)
+   for _, mi in ipairs(module_initializers) do
+      mi(module, table)
    end
 end

@@ -25,7 +25,7 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
---- @class State
+--- State
 -- State for an FSM.
 State = {}
 

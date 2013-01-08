@@ -1,0 +1,12 @@
+= lua_error_skill: Lua run-time error while executing skill string =
+
+== Cause ==
+The error is caused by a Lua run-time error which occured while executing the skill string. The skill string itself compiled just fine, but during the execution the Lua interpreter raised an error. Typical causes are programming errors in skill code, for example referencing nil values.
+
+== Solution ==
+To solve the problem analyze the human readable error message, it contains the the input skill string and the information from the Lua interpreter.
+
+== Recovery Strategy ==
+No recovery is necessary, the skiller is usable again immediately, the executed skill is considered to have failed and the input string will be discarded. Note however, that an agent program must take the failed skill into account.
+
+From the perspective of the agent, such an error may be fatal because it is a programming error that cannot be solved automatically and for which alternative execution paths of the behavior might not exist.

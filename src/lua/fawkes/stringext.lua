@@ -19,25 +19,26 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-local _G = _G;
-local string = string;
+local _G = _G
+local string = string
+local table  = table
 
-module("fawkes.stringext");
+module("fawkes.stringext")
 
 -- Concatenate a list of strings to one string with the given delimiter.
 -- @param delimiter string to separate strings
 -- @param list the list of strings to concatenate
 -- @return string with concatenated strings
 function string.join(delimiter, list)
-   local len = #list;
+   local len = #list
    if len == 0 then 
-      return "";
+      return ""
    end
-   local rv = list[1];
+   local rv = list[1]
    for i = 2, len do
-      rv = rv .. delimiter .. list[i];
+      rv = rv .. delimiter .. list[i]
    end
-   return rv;
+   return rv
 end
 
 
@@ -45,16 +46,19 @@ end
 -- @param delimiter string to split the string at
 -- @param text text to split
 -- @return list of substrings
-function string.split(delimiter, text)
-   local list = {};
-   local pos = 1;
+function string.split(text, delimiter)
+   local list = {}
+   local pos = 1
    if delimiter == "" then
       error("delimiter matches empty string!")
    end
    while 1 do
       local first, last = string.find(text, delimiter, pos)
       if first then -- found?
-	 table.insert(list, string.sub(text, pos, first-1))
+	 local s = string.sub(text, pos, first-1)
+	 if first > 1 or #s > 0 then
+	    table.insert(list, s)
+	 end
 	 pos = last+1
       else
 	 table.insert(list, string.sub(text, pos))

@@ -3,8 +3,9 @@
 --  subfsmjumpstate.lua - HSM state to execute Sub-FSMs
 --
 --  Created: Fri Mar 20 11:12:11 2009
---  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
---
+--  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
@@ -31,23 +32,11 @@ require("fawkes.fsm.jumpstate")
 local JumpState     = fawkes.fsm.jumpstate.JumpState
 
 
---- @class SubFSMJumpState
+--- SubFSMJumpState
 -- This special jump state allows for executing another FSM/HSM while the state
 -- is active. It can execute transition based on the state of the sub-FSM.
 -- @author Tim Niemueller
-SubFSMJumpState = { add_transition     = JumpState.add_transition,
-		    add_precondition   = JumpState.add_precondition,
-		    add_precond_trans  = JumpState.add_precond_trans,
-		    get_transition     = JumpState.get_transition,
-		    get_transitions    = JumpState.get_transitions,
-		    clear_transitions  = JumpState.clear_transitions,
-		    try_transitions    = JumpState.try_transitions,
-		    last_transition    = JumpState.last_transition,
-		    init               = JumpState.init,
-		    loop               = JumpState.loop,
-		    exit               = JumpState.exit,
-		    prepare            = JumpState.prepare
-		 }
+SubFSMJumpState = {}
 
 
 --- Create new state.
@@ -60,19 +49,19 @@ function SubFSMJumpState:new(o)
    assert(o.subfsm, "SubFSMJumpState " .. o.name .. " requires a sub-FSM")
    assert(not getmetatable(o), "Meta table already set for SubFSMJumpState " .. o.name)
    setmetatable(o, self)
+   setmetatable(self, JumpState)
    self.__index = self
 
    o.transitions   = o.transitions or {}
    o.dotattr       = o.dotattr or {}
-   o.preconditions = {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
 
    if o.subfsm.exit_state and o.exit_to then
-      o.final_transition = o:add_transition(o.exit_to, o.jumpcond_fsm_done, "FSM succeeded")
+      o.final_transition = o:add_new_transition(o.exit_to, o.jumpcond_fsm_done, "FSM succeeded")
    end
    if o.subfsm.fail_state and o.fail_to then
-      o.failure_transition = o:add_transition(o.fail_to, o.jumpcond_fsm_failed, "FSM failed")
+      o.failure_transition = o:add_new_transition(o.fail_to, o.jumpcond_fsm_failed, "FSM failed")
    end
 
    return o
@@ -94,10 +83,11 @@ end
 -- preconditions, but not for regular transitions. This is done because the
 -- sub-FSM hasn't been run, yet.
 function SubFSMJumpState:do_init(...)
-   local rv = { self:try_transitions(self.preconditions) }
+   local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
    self.subfsm:reset()
    self:init(...)
+   for k, v in pairs(self.fsm.vars) do self.subfsm.vars[k] = v end
 end
 
 --- Execute loop.
@@ -111,10 +101,22 @@ end
 --- Resets the sub-FSM.
 function SubFSMJumpState:do_exit()
    JumpState.do_exit(self)
+   if self.subfsm.error and self.subfsm.error ~= "" then
+      self.fsm.error = self.subfsm.error
+   end
 end
 
 -- Resets the sub-FSM.
 function SubFSMJumpState:reset()
    JumpState.reset(self)
    self.subfsm:reset()
+end
+
+
+--- Get string representation.
+-- @return string of the form SubFSMJumpState[FSM/State]@Current, where FSM
+-- will be replaced by the FSM's name, State by this state's name and Current
+-- by the name of the current state of the sub-FSM.
+function SubFSMJumpState:__tostring()
+   return string.format("SubFSMJumpState[%s/%s]@%s", self.fsm.name, self.name, self.fsm.current.name)
 end

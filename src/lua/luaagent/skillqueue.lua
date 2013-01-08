@@ -4,7 +4,8 @@
 --
 --  Created: Fri Jan 02 16:31:14 2009
 --  Copyright  2008-2009  Tim Niemueller [http://www.niemueller.de]
---
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
@@ -24,8 +25,6 @@ require("fawkes.modinit")
 --- Skill Queue for agents.
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
-
-local skillstati = require("skiller.skillstati")
 
 
 --- @class SkillQueue
@@ -76,11 +75,11 @@ function SkillQueue:status(skiller)
    assert(skiller, "SkillQueue:status: Interface not set")
 
    if self.skillstring == "" then
-      return skillstati.S_INACTIVE
+      return S_INACTIVE
    elseif self.skillstring == skiller:skill_string() then
       return skiller:status()
    else
-      return skillstati.S_INACTIVE
+      return S_INACTIVE
    end
 end
 
@@ -113,15 +112,32 @@ end
 function SkillQueue:skill_string()
    local rva = {}
    for _,s in ipairs(self.skills) do
+      local skill_name = s[1]
       local params = ""
-      if s.args or s[2] then -- has params
-	 local subp = {}
-	 for k,v in pairs(s.args or s[2]) do
+      local subp = {}
+      local t = s
+      if s.args then t = s.args end
+      for k,v in pairs(t) do
+	 if k ~= 1 then
 	    if type(v) == "table" then
-	       -- FSM variable
-	       assert(self.fsm, "SkillQueue: FSM not set and fsmp parameter used")
-	       for k2,v2 in ipairs(v) do
-		  table.insert(subp, string.format("%s = %q", k2, self.fsm.vars[v2]))
+               if tonumber(k) then
+		  -- FSM variable
+		  assert(self.fsm, "SkillQueue: FSM not set and fsm parameter used")
+		  for k2,v2 in pairs(v) do
+		     --printf("Least commitment: %s = %q", k2, self.fsm.vars[v2])
+		     table.insert(subp, string.format("%s = %q", k2, self.fsm.vars[v2]))
+		  end
+	       else
+		  local array = {}
+		  for _,v2 in ipairs(v) do
+		     table.insert(array, string.format("%q", tostring(v2)))
+		  end
+		  for k2,v2 in pairs(v) do
+		     if not tonumber(k2) then
+			table.insert(array, string.format("%s = %q", k2, tostring(v2)))
+		     end
+		  end
+		  table.insert(subp, string.format("%s = {%s}", k, table.concat(array, ", ")))
 	       end
 	    elseif type(v) == "boolean" then
 	       table.insert(subp, string.format("%s = %s", k, tostring(v)))
@@ -140,9 +156,9 @@ function SkillQueue:skill_string()
 	    end
 	    --]]
 	 end
-	 params = table.concat(subp, ", ")
       end
-      table.insert(rva, string.format("%s{%s}", s[1], params))
+      params = table.concat(subp, ", ")
+      table.insert(rva, string.format("%s{%s}", skill_name, params))
    end
 
    return table.concat(rva, "; ")
@@ -153,8 +169,8 @@ end
 -- Forms a skill string and send it to the skiller via the BlackBoard.
 -- @param skiller skiller interface, if non is given the global variable
 -- interfaces.reading.skiller is tried.
-function SkillQueue:execute(skiller)
-   local skiller = skiller or interfaces.reading.skiller
+function SkillQueue:execute()
+   local skiller = interfaces.reading.skiller
    assert(skiller, "SkillQueue:execute: Interface not set")
 
    self.skillstring = self:skill_string()
@@ -168,12 +184,12 @@ end
 -- Sends a StopExecMessage to the skiller.
 -- @param skiller skiller interface, if non is given the global variable
 -- interfaces.reading.skiller is tried.
-function SkillQueue:stop(skiller)
-   local skiller = skiller or interfaces.reading.skiller
-   assert(skiller, "SkillQueue:execute: Interface not set")
+function SkillQueue:stop()
+   local skiller = interfaces.reading.skiller
+   assert(skiller, "SkillQueue:stop(): Interface not set")
 
    local msg = skiller.StopExecMessage:new()
-   skiller:msgq_enqueue_copy(msg)
+   skiller:msgq_enqueue_copy(msg)  
 end
 
 --- Reset skill queue.
@@ -187,10 +203,11 @@ function SkillQueue:reset()
 end
 
 
-function SkillQueue.oneshot(skills, skiller)
-   local skiller = skiller or interfaces.reading.skiller
-   local s = SkillQueue:new{name="oneshot", skills=skills}
-   local skillstring = s:skill_string()
-   local msg = skiller.ExecSkillMessage:new(skillstring)
-   skiller:msgq_enqueue_copy(msg)
+--- Get error string for failed skill.
+-- @return error string
+function SkillQueue:error()
+   local skiller = interfaces.reading.skiller
+   assert(skiller, "SkillQueue:stop(): Interface not set")
+
+   return skiller:error()
 end

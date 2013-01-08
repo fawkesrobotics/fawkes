@@ -166,7 +166,7 @@ SkillerExecutionThread::init()
 
     __lua_ifi->push_interfaces();
 
-    __lua->set_start_script(LUADIR"/skiller/start.lua");
+    __lua->set_start_script(LUADIR"/skiller/fawkes/start.lua");
   
     __skiller_if->set_skill_string("");
     __skiller_if->set_status(SkillerInterface::S_INACTIVE);

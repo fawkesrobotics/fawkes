@@ -3,8 +3,9 @@
 --  logprint.lua - Print functions for logger
 --
 --  Created: Sat May 24 18:48:42 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
---
+--  Copyright  2008-2010  Tim Niemueller [www.niemueller.de]
+--             2010       Carnegie Mellon University
+--             2010       Intel Labs Pittsburgh
 ------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
@@ -23,14 +24,11 @@
 local _G = _G
 -- these functions we need to register all the others
 local pairs = pairs
-local type  = type
+local string = string
+local print = print
+local require = require
 
 module(...)
-
--- we want all functions here, basically what register_global_funcs does for others
-for k,v in pairs(_G) do
-   _M[k] = v
-end
 
 require("fawkes.stringext")
 
@@ -40,12 +38,18 @@ local logger = nil
 -- @param logger_ logger to use
 function init(logger_)
    logger = logger_
+   _M.print       = logger_print_info_unformatted
+   _M.printf      = logger_printf
+   _M.print_debug = logger_print_debug
+   _M.print_info  = logger_print_info
+   _M.print_warn  = logger_print_warn
+   _M.print_error = logger_print_error
 end
 
 --- Write to log with log level debug.
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_debug(format, ...)
+function logger_print_debug(format, ...)
    logger:log_debug(string.format(format, ...))
 end
 
@@ -53,7 +57,7 @@ end
 --- Write to log with log level info.
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_info(format, ...)
+function logger_print_info(format, ...)
    logger:log_info(string.format(format, ...))
 end
 
@@ -61,7 +65,7 @@ end
 --- Write to log with log level warn.
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_warn(format, ...)
+function logger_print_warn(format, ...)
    logger:log_warn(string.format(format, ...))
 end
 
@@ -69,14 +73,14 @@ end
 --- Write to log with log level error.
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_error(format, ...)
+function logger_print_error(format, ...)
    logger:log_error(string.format(format, ...))
 end
 
 
 --- Write unformatted to log with log level info.
 -- @param ... Anything, will be converted to string
-function print_info_unformatted(...)
+function logger_print_info_unformatted(...)
    logger:log_info(string.join(", ", {...}))
 end
 
@@ -84,7 +88,7 @@ end
 --- Print formatted string.
 -- Uses string.format to format the string and print_info to print it.
 -- @param format format of the string
-function printf(format, ...)
+function logger_printf(format, ...)
    logger:log_info(string.format(format, ...))
 end
 
@@ -97,13 +101,13 @@ end
 --- Register print functions for module.
 -- @param m module
 function register_print_funcs(m)
-   if logger then
-      m.print_debug = print_debug
-      m.print_info  = print_info
-      m.print_warn  = print_warn
-      m.print_error = print_error
-      m.print       = print_info_unformatted
-      m.printf      = printf
+   if _M.printf then
+      m.print_debug = _M.print_debug
+      m.print_info  = _M.print_info
+      m.print_warn  = _M.print_warn
+      m.print_error = _M.print_error
+      m.print       = _M.print
+      m.printf      = _M.printf
    else
       m.print_debug = fallback_printf
       m.print_info  = fallback_printf

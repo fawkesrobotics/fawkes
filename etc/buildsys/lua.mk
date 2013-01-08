@@ -36,6 +36,7 @@ ifeq ($(HAVE_LUA),1)
   CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_PACKAGE)') -DHAVE_LUA -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
   LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_PACKAGE)')
   ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
+
     # Fedora 32 and 64 bit
     ifeq ($(ARCH),x86_64)
       ifneq ($(wildcard $(SYSROOT)/usr/lib64/libtolua++-$(LUA_VERSION).$(SOEXT)),)
@@ -58,6 +59,7 @@ ifeq ($(HAVE_LUA),1)
       _HAVE_TOLUA_LIB=1
        TOLUA_LIBS=tolua++$(LUA_VERSION) stdc++ lua$(LUA_VERSION)
     endif
+
     # OpenEmbedded/Nao
     ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++-$(LUA_VERSION).a),)
       _HAVE_TOLUA_LIB=1
@@ -67,6 +69,7 @@ ifeq ($(HAVE_LUA),1)
       _HAVE_TOLUA_BIN=1
       TOLUAPP=tolua++$(LUA_VERSION)
     endif
+
     # Arch Linux
     ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++.a),)
       _HAVE_TOLUA_LIB=1
@@ -76,6 +79,17 @@ ifeq ($(HAVE_LUA),1)
       _HAVE_TOLUA_BIN=1
       TOLUAPP=tolua++
     endif
+
+    # Gentoo (on x86_64, lib is a symlink to lib64)
+    ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++.$(SOEXT)),)
+      _HAVE_TOLUA_LIB=1
+      TOLUA_LIBS=tolua++ stdc++
+    endif
+    ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=tolua++
+    endif
+
     ifeq ($(_HAVE_TOLUA_LIB)$(_HAVE_TOLUA_BIN),11)
       HAVE_TOLUA = 1
     endif

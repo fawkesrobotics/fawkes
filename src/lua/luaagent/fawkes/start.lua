@@ -23,18 +23,12 @@ require("fawkes.logprint")
 fawkes.logprint.init(logger)
 
 require("fawkes.mathext")
+require("fawkes.depinit")
+
+require("fawkes.interface_initializer")
 
 agentenv = require("luaagent.agentenv")
-
---skiller = interfaces.reading.skiller
-
-for k,i in pairs(interfaces.reading) do
-   fawkes.logprint.print_debug("Interface %s opened for reading as %s", i:uid(), k)
-end
-for k,i in pairs(interfaces.writing) do
-   fawkes.logprint.print_debug("Interface %s opened for reading as %s", i:uid(), k)
-end
-
+fawkes.depinit.add_module_initializer(fawkes.interface_initializer.init_interfaces)
 agentenv.init(AGENT)
 
 logger:log_debug("Lua startup completed")
