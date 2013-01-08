@@ -108,10 +108,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
   cle.cp.is_default = (i->is_default() ? 1 : 0);
   cle.cp.num_values = (i->is_list() ? i->get_list_size() : 0);
 
-  if ( i->is_float() ) {
-    cle.type = MSG_CONFIG_FLOAT_VALUE;
-    data_size = num_values * sizeof(float);
-  } else if ( i->is_uint() ) {
+  if ( i->is_uint() ) {
     cle.type = MSG_CONFIG_UINT_VALUE;
     data_size = num_values * sizeof(uint32_t);
   } else if ( i->is_int() ) {
@@ -120,6 +117,9 @@ ConfigListContent::append(Configuration::ValueIterator *i)
   } else if ( i->is_bool() ) {
     cle.type = MSG_CONFIG_BOOL_VALUE;
     data_size = num_values * sizeof(int32_t);
+  } else if ( i->is_float() ) {
+    cle.type = MSG_CONFIG_FLOAT_VALUE;
+    data_size = num_values * sizeof(float);
   } else if ( i->is_string() ) {
     cle.type = MSG_CONFIG_STRING_VALUE;
     if (num_values > 1) {
@@ -137,13 +137,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
   data = (char *)malloc(sizeof(config_list_entity_header_t) + data_size);
   memcpy(data, &cle, sizeof(config_list_entity_header_t));
 
-  if ( i->is_float() ) {
-    if (num_values > 1) {
-      copy_data_vector(&i->get_floats()[0], (float *)(data + sizeof(cle)), num_values);
-    } else {
-      *((float *)(data + sizeof(cle))) = i->get_float();
-    }
-  } else if ( i->is_uint() ) {
+  if ( i->is_uint() ) {
     if (num_values > 1) {
       copy_data_vector(&i->get_uints()[0], (uint32_t *)(data + sizeof(cle)), num_values);
     } else {
@@ -165,6 +159,12 @@ ConfigListContent::append(Configuration::ValueIterator *i)
 
     } else {
       *((int32_t *)(data + sizeof(cle))) = i->get_bool() ? 1 : 0;
+    }
+  } else if ( i->is_float() ) {
+    if (num_values > 1) {
+      copy_data_vector(&i->get_floats()[0], (float *)(data + sizeof(cle)), num_values);
+    } else {
+      *((float *)(data + sizeof(cle))) = i->get_float();
     }
   } else if ( i->is_string() ) {
     if (num_values > 1) {

@@ -94,22 +94,7 @@ ConfigNetworkHandler::send_inv_value(unsigned int clid, const char *path)
 void
 ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIterator *i)
 {
-  if ( i->is_float() ) {  
-    try {
-      float *values;
-      uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
-      size_t data_size = 0;
-      void *m = prepare_value_msg<float>(i->path(), i->is_default(), i->is_list(), num_values,
-					 data_size, (void *&)values);
-      values[0] = i->get_float();
-      __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
-    } catch (Exception &e) {
-      LibLogger::log_warn("ConfigNetworkHandler",
-			  "send_value: Value %s could not be sent",
-			  i->path());
-      LibLogger::log_warn("ConfigNetworkHandler", e);
-    }
-  } else if ( i->is_uint() ) {
+  if ( i->is_uint() ) {
     try {
       uint32_t *values;
       uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
@@ -148,6 +133,21 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 					    num_values, data_size, (void *&)values);
       values[0] = i->get_bool() ? 1 : 0;
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, m, data_size);
+    } catch (Exception &e) {
+      LibLogger::log_warn("ConfigNetworkHandler",
+			  "send_value: Value %s could not be sent",
+			  i->path());
+      LibLogger::log_warn("ConfigNetworkHandler", e);
+    }
+  } else if ( i->is_float() ) {  
+    try {
+      float *values;
+      uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
+      size_t data_size = 0;
+      void *m = prepare_value_msg<float>(i->path(), i->is_default(), i->is_list(), num_values,
+					 data_size, (void *&)values);
+      values[0] = i->get_float();
+      __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "send_value: Value %s could not be sent",
