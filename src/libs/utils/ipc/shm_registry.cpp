@@ -56,15 +56,11 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param master if true, the shared memory is first deleted, if it
- * existed, and then created fresh. It is resized to contain one
- * struct and initialized as an empty registry.
  * @param name name of the shared memory region. Must follow the rules
  * set by shm_open(). If NULL defaults to "/fawkes-shmem-registry".
  */
-SharedMemoryRegistry::SharedMemoryRegistry(bool master, const char *name)
+SharedMemoryRegistry::SharedMemoryRegistry(const char *name)
 {
-  __master   = false;
   __shm_name = name ? strdup(name) : strdup(DEFAULT_SHM_NAME);
 
   __sem = sem_open(__shm_name, O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP, 1);
@@ -122,6 +118,8 @@ SharedMemoryRegistry::SharedMemoryRegistry(bool master, const char *name)
     }
   }
 
+  __master   = created;
+
   sem_post(__sem);
 }
 
@@ -131,6 +129,9 @@ SharedMemoryRegistry::~SharedMemoryRegistry()
 {
   close(__shmfd);
   sem_close(__sem);
+  if (__master) {
+    shm_unlink(__shm_name);
+  }
 
   free(__shm_name);
 }

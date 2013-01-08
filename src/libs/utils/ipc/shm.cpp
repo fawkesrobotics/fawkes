@@ -271,7 +271,7 @@ SharedMemory::SharedMemory(const char *magic_token,
   if (registry_name) {
     __registry_name = strdup(registry_name);
   }
-  __shm_registry = new SharedMemoryRegistry(false, registry_name);
+  __shm_registry = new SharedMemoryRegistry(registry_name);
 }
 
 
@@ -319,7 +319,7 @@ SharedMemory::SharedMemory(const SharedMemory &s)
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry(false, __registry_name);
+  __shm_registry = new SharedMemoryRegistry(__registry_name);
 }
 
 
@@ -392,7 +392,7 @@ SharedMemory::SharedMemory(const char *magic_token,
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry(false, __registry_name);
+  __shm_registry = new SharedMemoryRegistry(__registry_name);
 }
 
 
@@ -1238,7 +1238,7 @@ SharedMemory::find(const char *magic_token, SharedMemoryHeader *header,
                    const char *registry_name)
 {
   try {
-    SharedMemoryRegistry shm_registry(false, registry_name);
+    SharedMemoryRegistry shm_registry(registry_name);
     return SharedMemoryIterator(shm_registry.find_segments(magic_token), header);
   } catch (Exception &e) {
     return end();
