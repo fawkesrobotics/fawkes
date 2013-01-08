@@ -38,7 +38,7 @@ int main(int argc, char** argv)
   
   HostInfo* host_info = new HostInfo();
   Configuration* config = new SQLiteConfiguration(CONFDIR);
-  config->load(host_info->short_name(), "default");
+  config->load(host_info->short_name());
   delete host_info;
 
   std::string addr;
