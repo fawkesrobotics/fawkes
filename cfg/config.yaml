@@ -4,7 +4,7 @@
 # Configuration meta information document
 include:
   # reads files ending in .yaml from modules.d config subdir
-  - !ignore-missing modules.d/
+  - !ignore-missing conf.d/
   # Reads the host-specific configuration file, no failure if missing
   - !host-specific host.yaml
 ---
