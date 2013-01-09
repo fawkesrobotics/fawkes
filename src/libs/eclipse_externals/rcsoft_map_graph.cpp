@@ -4,7 +4,6 @@
  *
  *  Created: Mon Mar 21 17:23:57 2011
  *  Copyright  2011  Daniel Beck
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,7 +21,7 @@
 
 #include "rcsoft_map_graph.h"
 
-#include <utils/graph/rcsoft_map_graph.h>
+#include <utils/graph/topological_map_graph.h>
 #include <core/exception.h>
 #include <eclipseclass.h>
 #include <cstdio>
@@ -49,7 +48,7 @@ public:
    */
   void load( const char* file )
   {
-    m_map_graph = new RCSoftMapGraph( std::string(file) );
+    m_map_graph = new TopologicalMapGraph( std::string(file) );
   }
 
   /** Query status.
@@ -60,16 +59,16 @@ public:
     return m_map_graph ? true : false;
   }
 
-  /** Access the RCSoftMapGraph instance.
-   * @return the RCSoftMapGraph instance
+  /** Access the TopologicalMapGraph instance.
+   * @return the TopologicalMapGraph instance
    */
-  RCSoftMapGraph* map_graph()
+  TopologicalMapGraph* map_graph()
   {
     return m_map_graph;
   }
 
 private:
-  RCSoftMapGraph* m_map_graph;
+  TopologicalMapGraph* m_map_graph;
 
 };
 
@@ -125,7 +124,7 @@ p_map_graph_get_node_coords3()
     return EC_fail;
   }
 
-  RCSoftMapNode node = g_map_graph.map_graph()->node( string(nodename) );
+  TopologicalMapNode node = g_map_graph.map_graph()->node( string(nodename) );
   
   // x-coordinate
   if ( EC_succeed != EC_arg( 2 ).unify( EC_word( (double) node.x() ) ) )
@@ -157,25 +156,16 @@ p_map_graph_get_node_coords4()
     return EC_fail;
   }
 
-  RCSoftMapNode node = g_map_graph.map_graph()->node( string(nodename) );
+  TopologicalMapNode node = g_map_graph.map_graph()->node( string(nodename) );
 
   // check for orientation property
   int result = EC_succeed;
-  vector< string >::iterator pit;
-  for ( pit = node.properties().begin();
-	pit != node.properties().end();
-	++pit )
-  {
-    if ( 0 == strncmp( (*pit).c_str(), "Orientation", 11 ) )
-    {
-      double ori = atof( (*pit).substr( 11 ).c_str() );
-      result = EC_arg( 4 ).unify( EC_word( ori ) );
-      break;
-    }
+  if (node.has_property("orientation")) {
+    double ori = node.property_as_float("orientation");
+    result = EC_arg( 4 ).unify( EC_word( ori ) );
+  } else {
+    result = EC_arg( 4 ).unify( EC_atom( (char*) "false" ) );
   }
-
-  if ( node.properties().end() == pit )
-  { result = EC_arg( 4 ).unify( EC_atom( (char*) "false" ) ); }
 
   if ( EC_succeed != result)
   { return EC_fail; }
@@ -193,10 +183,10 @@ p_map_graph_get_nodes()
     return EC_fail;
   }
 
-  vector< RCSoftMapNode > nodes = g_map_graph.map_graph()->nodes();
+  vector< TopologicalMapNode > nodes = g_map_graph.map_graph()->nodes();
   EC_word tail = nil();
 
-  for ( vector< RCSoftMapNode >::iterator nit = nodes.begin();
+  for ( vector< TopologicalMapNode >::iterator nit = nodes.begin();
 	nit != nodes.end();
 	++nit )
   {
@@ -238,7 +228,7 @@ p_map_graph_get_closest_node()
     return EC_fail;
   }
 
-  RCSoftMapNode node = g_map_graph.map_graph()->closest_node( (float) x,
+  TopologicalMapNode node = g_map_graph.map_graph()->closest_node( (float) x,
 							      (float) y,
 							      "" );
 
@@ -267,10 +257,10 @@ p_map_graph_search_nodes()
     return EC_fail;
   }
 
-  vector< RCSoftMapNode > nodes = g_map_graph.map_graph()->search_nodes( string(property) );
+  vector< TopologicalMapNode > nodes = g_map_graph.map_graph()->search_nodes( string(property) );
   EC_word tail = nil();
 
-  for ( vector< RCSoftMapNode >::iterator nit = nodes.begin();
+  for ( vector< TopologicalMapNode >::iterator nit = nodes.begin();
 	nit != nodes.end();
 	++nit )
   {
@@ -305,8 +295,8 @@ p_map_graph_get_children()
     return EC_fail;
   }
 
-  RCSoftMapNode node = g_map_graph.map_graph()->node( nodename );
-  vector< string > children = node.children();
+  TopologicalMapNode node = g_map_graph.map_graph()->node( nodename );
+  vector< string > children = node.reachable_nodes();
   EC_word tail = nil();
   for ( vector< string >::iterator nit = children.begin();
 	nit != children.end();
