@@ -87,7 +87,8 @@ public:
   std::string  cfg_base_frame_;
   std::string  cfg_global_frame_; 
   std::string  cfg_nav_if_id_; 
-  float        cfg_tolerance_; 
+  float        cfg_travel_tolerance_; 
+  float        cfg_target_tolerance_; 
   float        cfg_resend_interval_; 
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
