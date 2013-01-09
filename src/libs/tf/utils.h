@@ -50,8 +50,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TF_H_
-#define __LIBS_TF_TF_H_
+#ifndef __LIBS_TF_UTILS_H_
+#define __LIBS_TF_UTILS_H_
 
 #include <tf/types.h>
 
@@ -67,7 +67,7 @@ namespace fawkes {
  * @param frame_name frame name
  * @return resolved frame name
  */
-std::string
+inline std::string
 resolve(const std::string& prefix, const std::string& frame_name)
 {
   if (frame_name.size() > 0) {
@@ -95,6 +95,23 @@ resolve(const std::string& prefix, const std::string& frame_name)
     composite.append(frame_name);
     return composite;
   }
+}
+
+/** Create an ident pose in the given frame.
+ * An ident pose is with no translation and Quaternion (0,0,0,1), i.e. with
+ * all Euler angles zero.
+ * @param frame frame for which to get the ident transform
+ * @param t time for when to get the ident transform, defaults to (0,0) which
+ * means "latest possible time" for TF transforms.
+ * @return ident pose in given frame at given time
+ */
+inline Stamped<Pose>
+ident(std::string frame, Time t = Time(0,0))
+{
+  return
+    tf::Stamped<tf::Pose>(tf::Transform(tf::Quaternion(0, 0, 0, 1),
+					tf::Vector3(0, 0, 0)),
+			  t, frame);
 }
 
 } // end namespace tf

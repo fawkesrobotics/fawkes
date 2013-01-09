@@ -1,12 +1,9 @@
 
 /***************************************************************************
- *  map_graph.h - Map graph for storing pathplan information
+ *  yaml_navgraph.h - Nav graph stored in a YAML file
  *
- *  Created: Tue Jun 30 09:25:09 2009 (RoboCup 2009, Graz)
- *  Copyright  2009  Tim Niemueller [www.niemueller.de]
- *
- *  $Id: rcsoft_map_graph.h 2710 2009-06-30 12:47:20Z tim $
- *
+ *  Created: Thu Sep 20 18:31:06 2012
+ *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,22 +20,19 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_GRAPH_RCSOFT_MAP_GRAPH_H_
-#define __UTILS_GRAPH_RCSOFT_MAP_GRAPH_H_
+#ifndef __UTILS_GRAPH_YAML_NAVGRAPH_H_
+#define __UTILS_GRAPH_YAML_NAVGRAPH_H_
 
-#include <utils/graph/topological_map_graph.h>
-
-namespace xmlpp {
-  class DomParser;
-  class Node;
-}
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-extern TopologicalMapGraph *  load_rcsoft_graph(std::string filename);
+class TopologicalMapGraph;
+
+extern TopologicalMapGraph *  load_yaml_navgraph(std::string filename);
 
 } // end of namespace fawkes
 

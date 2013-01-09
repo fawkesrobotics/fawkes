@@ -52,8 +52,12 @@
 #ifndef __LIBS_TF_TYPES_H_
 #define __LIBS_TF_TYPES_H_
 
-#include <tf/exceptions.h>
+#ifndef HAVE_TF
+#  error HAVE_TF not defined, forgot CFLAGS_TF in Makefile or bullet no installed?
+#endif
+
 #include <utils/time/time.h>
+#include <tf/exceptions.h>
 
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btVector3.h>

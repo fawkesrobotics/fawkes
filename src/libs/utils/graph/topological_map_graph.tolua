@@ -1,12 +1,9 @@
 
 /***************************************************************************
- *  rcsoft_map_node.tolua - Node used in RCSoftMapGraph (tolua++)
+ *  topological_map_graph.tolua - Topolocial Map graph (tolua++)
  *
- *  Created: Tue Jun 30 12:12:44 2009 (RoboCup 2009, Graz)
+ *  Created: Tue Jun 30 12:08:58 2009 (RoboCup 2009, Graz)
  *  Copyright  2009  Tim Niemueller [www.niemueller.de]
- *
- *  $Id: angle.h 1945 2009-03-03 01:38:59Z tim $
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,47 +20,29 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-$#include <utils/graph/rcsoft_map_node.h>
-$#include <string>
+$#include <utils/graph/topological_map_graph.h>
 $#include <vector>
+$#include <string>
 $using namespace std;
-
-class vector {
-  TOLUA_TEMPLATE_BIND(T, string, fawkes::RCSoftMapNode)
-
-  void clear();
-  int size() const;
-
-  const T& operator[](int index) const;
-  T& operator[](int index);
-  void push_back(T val);
-
-  vector();
-  ~vector();
-};
+$using namespace fawkes;
 
 namespace fawkes {
 
-class RCSoftMapNode
+class TopologicalMapGraph
 {
  public:
-  RCSoftMapNode();
-  RCSoftMapNode(string name, double x, double y,
-		vector<string> children,
-		vector<string> properties,
-		vector<string> aliases);
+  TopologicalMapGraph(string graph_name);
+  ~TopologicalMapGraph();
 
+  string                              name();
+  vector<fawkes::TopologicalMapNode>  nodes();
+  TopologicalMapNode                  node(string name_or_alias);
+  TopologicalMapNode                  root_node();
 
-  string name() const;
-  float       x() const;
-  float       y() const;
+  fawkes::TopologicalMapNode          closest_node(float pos_x, float pos_y,
+				 	           string property);
 
-  vector<string> & properties();
-  vector<string> & aliases();
-  vector<string> & children();
-
-  bool has_property(string property);
-  bool has_alias(string property);
+  vector<fawkes::TopologicalMapNode>  search_nodes(string property);
 };
 
 }
