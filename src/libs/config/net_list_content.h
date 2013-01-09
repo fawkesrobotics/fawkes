@@ -40,12 +40,6 @@ class ConfigListContent : public FawkesNetworkMessageContent
 		    void *payload, size_t payload_size);
   virtual ~ConfigListContent();
 
-  void append_float(const char *path, float f, bool def_val = false);
-  void append_int(const char *path, int i, bool def_val = false);
-  void append_uint(const char *path, unsigned int u, bool def_val = false);
-  void append_bool(const char *path, bool b, bool def_val = false);
-  void append_string(const char *path, const char *s, bool def_val = false);
-  void append_comment(const char *path, const char *s, bool def_val = false);
   void append(Configuration::ValueIterator *i);
 
   virtual void serialize();

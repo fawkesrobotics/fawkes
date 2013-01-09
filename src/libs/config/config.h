@@ -29,6 +29,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <vector>
 
 namespace fawkes {
 
@@ -80,12 +81,19 @@ class Configuration
     virtual bool          is_int() const                                  = 0;
     virtual bool          is_bool() const                                 = 0;
     virtual bool          is_string() const                               = 0;
+    virtual bool          is_list() const                                 = 0;
+    virtual size_t        get_list_size() const                           = 0;
 
     virtual float         get_float() const                               = 0;
     virtual unsigned int  get_uint() const                                = 0;
     virtual int           get_int() const                                 = 0;
     virtual bool          get_bool() const                                = 0;
     virtual std::string   get_string() const                              = 0;
+    virtual std::vector<float>         get_floats() const                 = 0;
+    virtual std::vector<unsigned int>  get_uints() const                  = 0;
+    virtual std::vector<int>           get_ints() const                   = 0;
+    virtual std::vector<bool>          get_bools() const                  = 0;
+    virtual std::vector<std::string>   get_strings() const                = 0;
     virtual std::string   get_as_string() const                           = 0;
 
     virtual std::string   get_comment() const                             = 0;
@@ -98,11 +106,7 @@ class Configuration
   virtual void          add_change_handler(ConfigurationChangeHandler *h);
   virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
-  virtual void          load(const char *file_path,
-			     const char *tag = NULL)                      = 0;
-
-  virtual void          tag(const char *tag)                              = 0;
-  virtual std::list<std::string> tags()                                   = 0;
+  virtual void          load(const char *file_path)                       = 0;
 
   virtual bool          exists(const char *path)                          = 0;
   virtual bool          is_float(const char *path)                        = 0;
@@ -110,6 +114,7 @@ class Configuration
   virtual bool          is_int(const char *path)                          = 0;
   virtual bool          is_bool(const char *path)                         = 0;
   virtual bool          is_string(const char *path)                       = 0;
+  virtual bool          is_list(const char *path)                         = 0;
 
   virtual bool          is_default(const char *path)                      = 0;
 
@@ -118,6 +123,11 @@ class Configuration
   virtual int             get_int(const char *path)                       = 0;
   virtual bool            get_bool(const char *path)                      = 0;
   virtual std::string     get_string(const char *path)                    = 0;
+  virtual std::vector<float>         get_floats(const char *path)         = 0;
+  virtual std::vector<unsigned int>  get_uints(const char *path)          = 0;
+  virtual std::vector<int>           get_ints(const char *path)           = 0;
+  virtual std::vector<bool>          get_bools(const char *path)          = 0;
+  virtual std::vector<std::string>   get_strings(const char *path)        = 0;
   virtual ValueIterator * get_value(const char *path)                     = 0;
   virtual std::string     get_type(const char *path)                      = 0;
   virtual std::string     get_comment(const char *path)                   = 0;
@@ -129,6 +139,12 @@ class Configuration
   virtual void          set_bool(const char *path, bool b)                = 0;
   virtual void          set_string(const char *path, std::string &s)      = 0;
   virtual void          set_string(const char *path, const char *s)       = 0;
+  virtual void          set_floats(const char *path, std::vector<float> &f)              = 0;
+  virtual void          set_uints(const char *path, std::vector<unsigned int> &uint)     = 0;
+  virtual void          set_ints(const char *path, std::vector<int> &i)                  = 0;
+  virtual void          set_bools(const char *path, std::vector<bool> &b)                = 0;
+  virtual void          set_strings(const char *path, std::vector<std::string> &s)      = 0;
+  virtual void          set_strings(const char *path, std::vector<const char *> &s)       = 0;
   virtual void          set_comment(const char *path,
 				    const char *comment)                  = 0;
   virtual void          set_comment(const char *path,

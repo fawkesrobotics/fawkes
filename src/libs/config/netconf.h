@@ -31,13 +31,14 @@
 #include <map>
 #include <list>
 #include <string>
+#include <stdint.h>
 
 namespace fawkes {
 
 class Mutex;
 class InterruptibleBarrier;
 class FawkesNetworkClient;
-class SQLiteConfiguration;
+class MemoryConfiguration;
 
 class CannotEnableMirroringException : public Exception
 {
@@ -56,11 +57,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          add_change_handler(ConfigurationChangeHandler *h);
   virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
-  virtual void          load(const char *file_path,
-			     const char *tag = NULL);
-
-  virtual void          tag(const char *tag);
-  virtual std::list<std::string> tags();
+  virtual void          load(const char *file_path);
 
   virtual bool          exists(const char *path);
   virtual bool          is_float(const char *path);
@@ -68,6 +65,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual bool          is_int(const char *path);
   virtual bool          is_bool(const char *path);
   virtual bool          is_string(const char *path);
+  virtual bool          is_list(const char *path);
 
   virtual bool          is_default(const char *path);
 
@@ -76,6 +74,11 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual int             get_int(const char *path);
   virtual bool            get_bool(const char *path);
   virtual std::string     get_string(const char *path);
+  virtual std::vector<float>         get_floats(const char *path);
+  virtual std::vector<unsigned int>  get_uints(const char *path);
+  virtual std::vector<int>           get_ints(const char *path);
+  virtual std::vector<bool>          get_bools(const char *path);
+  virtual std::vector<std::string>   get_strings(const char *path);
   virtual ValueIterator * get_value(const char *path);
   virtual std::string     get_comment(const char *path);
   virtual std::string     get_default_comment(const char *path);
@@ -87,6 +90,12 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          set_bool(const char *path, bool b);
   virtual void          set_string(const char *path, std::string &s);
   virtual void          set_string(const char *path, const char *s);
+  virtual void          set_floats(const char *path, std::vector<float> &f);
+  virtual void          set_uints(const char *path, std::vector<unsigned int> &uint);
+  virtual void          set_ints(const char *path, std::vector<int> &i);
+  virtual void          set_bools(const char *path, std::vector<bool> &b);
+  virtual void          set_strings(const char *path, std::vector<std::string> &s);
+  virtual void          set_strings(const char *path, std::vector<const char *> &s);
   virtual void          set_comment(const char *path, std::string &comment);
   virtual void          set_comment(const char *path, const char *comment);
 
@@ -131,6 +140,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual bool          is_int() const;
     virtual bool          is_bool() const;
     virtual bool          is_string() const;
+    virtual bool          is_list() const;
+    virtual size_t        get_list_size() const;
 
     virtual bool          is_default() const;
 
@@ -139,6 +150,11 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual int           get_int() const;
     virtual bool          get_bool() const;
     virtual std::string   get_string() const;
+    virtual std::vector<float>         get_floats() const;
+    virtual std::vector<unsigned int>  get_uints() const;
+    virtual std::vector<int>           get_ints() const;
+    virtual std::vector<bool>          get_bools() const;
+    virtual std::vector<std::string>   get_strings() const;
     virtual std::string   get_as_string() const;
 
     virtual std::string   get_comment() const;
@@ -164,15 +180,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
  private:
   void send_get(const char *path, unsigned int msgid);
 
-  void set_float_internal(unsigned int msg_type, const char *path, float f);
-  void set_uint_internal(unsigned int msg_type, const char *path,
-			 unsigned int uint);
-  void set_int_internal(unsigned int msg_type, const char *path, int i);
-  void set_bool_internal(unsigned int msg_type, const char *path, bool b);
-  void set_string_internal(unsigned int msg_type, const char *path,
-			   const char *s);
-  void set_comment_internal(unsigned int msg_type, const char *path,
-			    const char *s);
+  void set_value_internal(unsigned int msg_type, const char *path, uint16_t num_values,
+			  size_t data_size, void *data);
 
   void erase_internal(const char *path, bool is_default);
 
@@ -185,7 +194,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   bool __mirror_mode;
   bool __mirror_mode_before_connection_dead;
   unsigned int __mirror_timeout_sec;
-  SQLiteConfiguration *mirror_config;
+  MemoryConfiguration *mirror_config;
 
   bool __connected;
 };

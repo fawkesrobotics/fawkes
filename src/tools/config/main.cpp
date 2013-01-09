@@ -115,26 +115,61 @@ print_header()
 void
 print_line(Configuration::ValueIterator *i, bool show_comment = false)
 {
-  if ( i->is_float() ) {
-    printf("%s %-55s| %-8s| %-14f\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_float());
-  } else if ( i->is_uint() ) {
-    printf("%s %-55s| %-8s| %-14u\n", (i->is_default() ? "*" : " "), i->path(), "uint", i->get_uint());
-  } else if ( i->is_int() ) {
-    printf("%s %-55s| %-8s| %-14i\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_int());
-  } else if ( i->is_bool() ) {
-    printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), (i->get_bool() ? "true" : "false"));
-  } else if ( i->is_string() ) {
-    printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_string().c_str());
-  }
-
-  if (show_comment) {
-    try {
-      std::string comment = i->get_comment();
-      if (comment != "") {
-	printf("C %-55s: %s\n", i->path(), comment.c_str());
+  if (i->is_list()) {
+    printf("%s %-55s| %-8s| LIST (values below)\n", (i->is_default() ? "*" : " "),
+	   i->path(), i->type());
+    if ( i->is_uint() ) {
+      std::vector<unsigned int> values = i->get_uints();
+      for (size_t j = 0; j < values.size(); ++j) {
+	printf("  %-67s%-14u\n", "", values[j]);
       }
-    } catch (Exception &e) {
-      // maybe there is no comment, ignore it...
+    } else if ( i->is_int() ) {
+      std::vector<int> values = i->get_ints();
+      for (size_t j = 0; j < values.size(); ++j) {
+	printf("  %-67s%-14i\n", "", values[j]);
+      }
+    } else if ( i->is_bool() ) {
+      std::vector<bool> values = i->get_bools();
+      for (size_t j = 0; j < values.size(); ++j) {
+	printf("  %-67s%-14s\n", "", values[j] ? "true" : "false");
+      }
+    } else if ( i->is_float() ) {
+      std::vector<float> values = i->get_floats();
+      for (size_t j = 0; j < values.size(); ++j) {
+	printf("  %-67s%-14f\n", "", values[j]);
+      }
+    } else if ( i->is_string() ) {
+      std::vector<std::string> values = i->get_strings();
+      for (size_t j = 0; j < values.size(); ++j) {
+	printf("  %-67s%-14s\n", "", values[j].c_str());
+      }
+    } else {
+      printf("%s %-55s| UNKNOWN LIST TYPE\n", (i->is_default() ? "*" : " "), i->path());
+    }
+  } else {
+    if ( i->is_uint() ) {
+      printf("%s %-55s| %-8s| %-14u\n", (i->is_default() ? "*" : " "), i->path(), "uint", i->get_uint());
+    } else if ( i->is_int() ) {
+      printf("%s %-55s| %-8s| %-14i\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_int());
+    } else if ( i->is_bool() ) {
+      printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), (i->get_bool() ? "true" : "false"));
+    } else if ( i->is_float() ) {
+      printf("%s %-55s| %-8s| %-14f\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_float());
+    } else if ( i->is_string() ) {
+      printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_string().c_str());
+    } else {
+      printf("%s %-55s| UNKNOWN TYPE\n", (i->is_default() ? "*" : " "), i->path());
+    }
+
+    if (show_comment) {
+      try {
+	std::string comment = i->get_comment();
+	if (comment != "") {
+	  printf("C %-55s: %s\n", i->path(), comment.c_str());
+	}
+      } catch (Exception &e) {
+	// maybe there is no comment, ignore it...
+      }
     }
   }
 }
@@ -145,16 +180,20 @@ print_line(Configuration::ValueIterator *i, bool show_comment = false)
 void
 print_value(Configuration::ValueIterator *i, bool show_comment = false)
 {
-  if ( i->is_float() ) {
-    printf("%-14f\n", i->get_float());
-  } else if ( i->is_uint() ) {
-    printf("%-14u\n", i->get_uint());
-  } else if ( i->is_int() ) {
-    printf("%-14i\n", i->get_int());
-  } else if ( i->is_bool() ) {
-    printf("%-14s\n", (i->get_bool() ? "true" : "false"));
-  } else if ( i->is_string() ) {
-    printf("%-14s\n", i->get_string().c_str());
+  if ( i->is_list()) {
+    printf("%-14s\n", "LIST");
+  } else {
+    if ( i->is_uint() ) {
+      printf("%-14u\n", i->get_uint());
+    } else if ( i->is_int() ) {
+      printf("%-14i\n", i->get_int());
+    } else if ( i->is_bool() ) {
+      printf("%-14s\n", (i->get_bool() ? "true" : "false"));
+    } else if ( i->is_float() ) {
+      printf("%-14f\n", i->get_float());
+    } else if ( i->is_string() ) {
+      printf("%-14s\n", i->get_string().c_str());
+    }
   }
 }
 

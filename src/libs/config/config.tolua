@@ -54,9 +54,6 @@ class Configuration
     bool          is_default();
   };
 
-  void          tag(const char *tag);
-  std::list<std::string> tags();
-
   bool          exists(const char *path);
   bool          is_float(const char *path);
   bool          is_uint(const char *path);

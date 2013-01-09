@@ -23,7 +23,7 @@
 
 #include <config/netconf.h>
 #include <config/net_messages.h>
-#include <config/sqlite.h>
+#include <config/memory.h>
 #include <config/net_list_content.h>
 
 #include <core/threading/mutex.h>
@@ -109,7 +109,7 @@ NetworkConfiguration::~NetworkConfiguration()
 
 
 void
-NetworkConfiguration::load(const char *file_path, const char *tag)
+NetworkConfiguration::load(const char *file_path)
 {
 }
 
@@ -143,26 +143,6 @@ NetworkConfiguration::copy(Configuration *copyconf)
   delete i;
   copyconf->unlock();
 }
-
-
-void
-NetworkConfiguration::tag(const char *tag)
-{
-  mutex->lock();
-
-  mutex->unlock();
-}
-
-
-std::list<std::string>
-NetworkConfiguration::tags()
-{
-  mutex->lock();
-  std::list<std::string> l;
-  mutex->unlock();
-  return l;
-}
-
 
 bool
 NetworkConfiguration::exists(const char *path)
@@ -240,6 +220,11 @@ NetworkConfiguration::is_string(const char *path)
   return (get_type(path) == "string");
 }
 
+bool
+NetworkConfiguration::is_list(const char *path)
+{
+  return false;
+}
 
 void
 NetworkConfiguration::send_get(const char *path, unsigned int msgid)
@@ -296,8 +281,13 @@ NetworkConfiguration::get_float(const char *path)
     try {
       send_get(path, MSG_CONFIG_GET_FLOAT);
 
-      config_float_value_msg_t *fm = msg->msg<config_float_value_msg_t>();
-      f = fm->f;
+      config_descriptor_t *d = msg->msgge<config_descriptor_t>();
+      if (d->num_values > 0) {
+	msg->unref();
+	msg = NULL;
+	throw Exception("NetworkConfiguration: received list of and not a single value");
+      }
+      f = *(float *)((char *)msg->payload() + sizeof(config_descriptor_t));
 
       msg->unref();
       msg = NULL;
@@ -346,8 +336,13 @@ NetworkConfiguration::get_uint(const char *path)
     try {
       send_get(path, MSG_CONFIG_GET_UINT);
 
-      config_uint_value_msg_t *um = msg->msg<config_uint_value_msg_t>();
-      u = um->u;
+      config_descriptor_t *d = msg->msgge<config_descriptor_t>();
+      if (d->num_values > 0) {
+	msg->unref();
+	msg = NULL;
+	throw Exception("NetworkConfiguration: received list of and not a single value");
+      }
+      u = *(uint32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
 
       msg->unref();
       msg = NULL;
@@ -396,8 +391,13 @@ NetworkConfiguration::get_int(const char *path)
     try {
       send_get(path, MSG_CONFIG_GET_INT);
 
-      config_int_value_msg_t *im = msg->msg<config_int_value_msg_t>();
-      i = im->i;
+      config_descriptor_t *d = msg->msgge<config_descriptor_t>();
+      if (d->num_values > 0) {
+	msg->unref();
+	msg = NULL;
+	throw Exception("NetworkConfiguration: received list of and not a single value");
+      }
+      i = *(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
 
       msg->unref();
       msg = NULL;
@@ -446,8 +446,13 @@ NetworkConfiguration::get_bool(const char *path)
     try {
       send_get(path, MSG_CONFIG_GET_BOOL);
 
-      config_bool_value_msg_t *bm = msg->msg<config_bool_value_msg_t>();
-      b = (bm->b != 0);
+      config_descriptor_t *d = msg->msgge<config_descriptor_t>();
+      if (d->num_values > 0) {
+	msg->unref();
+	msg = NULL;
+	throw Exception("NetworkConfiguration: received list of and not a single value");
+      }
+      b = (*(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t)) != 0);
 
       msg->unref();
       msg = NULL;
@@ -496,8 +501,15 @@ NetworkConfiguration::get_string(const char *path)
     try {
       send_get(path, MSG_CONFIG_GET_STRING);
 
-      config_string_value_msg_t *sm = msg->msgge<config_string_value_msg_t>();
-      s = sm->s;
+      config_descriptor_t *d = msg->msgge<config_descriptor_t>();
+      if (d->num_values > 0) {
+	msg->unref();
+	msg = NULL;
+	throw Exception("NetworkConfiguration: received list of and not a single value");
+      }
+      config_string_value_t *sv =
+	(config_string_value_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+      s = (char *)sv + sizeof(config_string_value_t);
 
       msg->unref();
       msg = NULL;
@@ -516,6 +528,36 @@ NetworkConfiguration::get_string(const char *path)
   mutex->unlock();
 
   return s;
+}
+
+std::vector<float>
+NetworkConfiguration::get_floats(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<unsigned int>
+NetworkConfiguration::get_uints(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<int>
+NetworkConfiguration::get_ints(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<bool>
+NetworkConfiguration::get_bools(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+std::vector<std::string>
+NetworkConfiguration::get_strings(const char *path)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
 }
 
 
@@ -669,8 +711,9 @@ NetworkConfiguration::get_value(const char *path)
 
 
 void
-NetworkConfiguration::set_float_internal(unsigned int msg_type,
-					 const char *path, float f)
+NetworkConfiguration::set_value_internal(unsigned int msg_type,
+					 const char *path, uint16_t num_values,
+					 size_t data_size, void *data)
 {
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_float: "
@@ -682,12 +725,16 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
   }
 
   mutex->lock();
+  size_t msg_size = sizeof(config_descriptor_t) + data_size;
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msg_type,
-							sizeof(config_float_value_msg_t));
-  config_float_value_msg_t *fm = omsg->msg<config_float_value_msg_t>();
-  strncpy(fm->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  fm->f = f;
+							msg_type, msg_size);
+  config_descriptor_t *cd = omsg->msgge<config_descriptor_t>();
+  strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH);
+  cd->num_values = num_values;
+
+  void *mdata = ((char *)msg->payload() + sizeof(config_descriptor_t));
+  memcpy(mdata, data, data_size);
+
   c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
@@ -696,263 +743,165 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
   mutex->unlock();
 }
 
-
 void
 NetworkConfiguration::set_float(const char *path, float f)
 {
-  set_float_internal(MSG_CONFIG_SET_FLOAT, path, f);
+  set_value_internal(MSG_CONFIG_SET_FLOAT, path, 0, sizeof(float), &f);
 }
 
 
 void
 NetworkConfiguration::set_default_float(const char *path, float f)
 {
-  set_float_internal(MSG_CONFIG_SET_DEFAULT_FLOAT, path, f);
-}
-
-
-void
-NetworkConfiguration::set_uint_internal(unsigned int msg_type,
-					const char *path, unsigned int uint)
-{
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_uint: "
-			       "Maximum length for path exceeded");
-  }
-  if ( ! __connected ) {
-    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
-				  "client connection is not alive");
-  }
-
-  mutex->lock();
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msg_type,
-							sizeof(config_uint_value_msg_t));
-  config_uint_value_msg_t *m = omsg->msg<config_uint_value_msg_t>();
-  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  m->u = uint;
-  c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
-    msg->unref();
-    msg = NULL;
-  }
-  mutex->unlock();
+  set_value_internal(MSG_CONFIG_SET_DEFAULT_FLOAT, path, 0, sizeof(float), &f);
 }
 
 
 void
 NetworkConfiguration::set_uint(const char *path, unsigned int uint)
 {
-  set_uint_internal(MSG_CONFIG_SET_UINT, path, uint);
+  set_value_internal(MSG_CONFIG_SET_UINT, path, 0, sizeof(uint32_t), &uint);
 }
 
 
 void
 NetworkConfiguration::set_default_uint(const char *path, unsigned int uint)
 {
-  set_uint_internal(MSG_CONFIG_SET_DEFAULT_UINT, path, uint);
-}
-
-
-void
-NetworkConfiguration::set_int_internal(unsigned int msg_type,
-				       const char *path, int i)
-{
-  if ( ! __connected ) {
-    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
-				  "client connection is not alive");
-  }
-
-  mutex->lock();
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msg_type,
-							sizeof(config_int_value_msg_t));
-  config_int_value_msg_t *m = omsg->msg<config_int_value_msg_t>();
-  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  m->i = i;
-  c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
-    msg->unref();
-    msg = NULL;
-  }
-  mutex->unlock();
+  set_value_internal(MSG_CONFIG_SET_DEFAULT_UINT, path, 0, sizeof(uint32_t), &uint);
 }
 
 
 void
 NetworkConfiguration::set_int(const char *path, int i)
 {
-  set_int_internal(MSG_CONFIG_SET_INT, path, i);
+  set_value_internal(MSG_CONFIG_SET_INT, path, 0, sizeof(int32_t), &i);
 }
 
 
 void
 NetworkConfiguration::set_default_int(const char *path, int i)
 {
-  set_int_internal(MSG_CONFIG_SET_DEFAULT_INT, path, i);
-}
-
-
-void
-NetworkConfiguration::set_bool_internal(unsigned int msg_type,
-					const char *path, bool b)
-{
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_bool: "
-			       "Maximum length for path exceeded");
-  }
-  if ( ! __connected ) {
-    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
-				  "client connection is not alive");
-  }
-
-  mutex->lock();
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msg_type,
-							sizeof(config_bool_value_msg_t));
-  config_bool_value_msg_t *m = omsg->msg<config_bool_value_msg_t>();
-  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  m->b = (b ? 1 : 0);
-  c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
-    msg->unref();
-    msg = NULL;
-  }
-  mutex->unlock();
+  set_value_internal(MSG_CONFIG_SET_DEFAULT_INT, path, 0, sizeof(int32_t), &i);
 }
 
 
 void
 NetworkConfiguration::set_bool(const char *path, bool b)
 {
-  set_bool_internal(MSG_CONFIG_SET_BOOL, path, b);
+  int32_t bs[1] = { b ? 1 : 0 };
+  set_value_internal(MSG_CONFIG_SET_BOOL, path, 0, sizeof(int32_t), bs);
 }
 
 
 void
 NetworkConfiguration::set_default_bool(const char *path, bool b)
 {
-  set_bool_internal(MSG_CONFIG_SET_DEFAULT_BOOL, path, b);
-}
-
-
-void
-NetworkConfiguration::set_string_internal(unsigned int msg_type,
-					  const char *path,
-					  const char *s)
-{
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_string: "
-			       "Maximum length for path exceeded");
-  }
-  if ( ! __connected ) {
-    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
-				  "client connection is not alive");
-  }
-
-  mutex->lock();
-  size_t s_length = strlen(s);
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msg_type,
-							sizeof(config_string_value_msg_t) + s_length);
-  config_string_value_msg_t *m = omsg->msgge<config_string_value_msg_t>();
-  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  strcpy(m->s, s);
-  c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
-    msg->unref();
-    msg = NULL;
-  }
-  mutex->unlock();
+  int32_t bs[1] = { b ? 1 : 0 };
+  set_value_internal(MSG_CONFIG_SET_DEFAULT_BOOL, path, 0, sizeof(int32_t), bs);
 }
 
 
 void
 NetworkConfiguration::set_string(const char *path, const char *s)
 {
-  set_string_internal(MSG_CONFIG_SET_STRING, path, s);
+  size_t s_length = strlen(s);
+  size_t data_size = sizeof(config_string_value_t) + s_length;
+  void *data = malloc(data_size);
+  config_string_value_t *sv = (config_string_value_t *)data;
+  sv->s_length = s_length;
+  strncpy((char *)sv + sizeof(config_string_value_t), s, s_length);
+  set_value_internal(MSG_CONFIG_SET_STRING, path, 0, data_size, data);
+  free(data);
 }
 
 
 void
 NetworkConfiguration::set_default_string(const char *path, const char *s)
 {
-  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, s);
+  size_t s_length = strlen(s);
+  size_t data_size = sizeof(config_string_value_t) + s_length;
+  void *data = malloc(data_size);
+  config_string_value_t *sv = (config_string_value_t *)data;
+  sv->s_length = s_length;
+  strncpy((char *)sv + sizeof(config_string_value_t), s, s_length);
+  set_value_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, 0, data_size, data);
+  free(data);
 }
 
 
 void
 NetworkConfiguration::set_string(const char *path, std::string &s)
 {
-  set_string_internal(MSG_CONFIG_SET_STRING, path, s.c_str());
+  set_string(path, s.c_str());
 }
 
 
 void
 NetworkConfiguration::set_default_string(const char *path, std::string &s)
 {
-  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, s.c_str());
+  set_default_string(path, s.c_str());
 }
 
 
 void
-NetworkConfiguration::set_comment_internal(unsigned int msg_type,
-					  const char *path,
-					  const char *s)
+NetworkConfiguration::set_floats(const char *path, std::vector<float> &f)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_comment: "
-			       "Maximum length for path exceeded");
-  }
-  if ( ! __connected ) {
-    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
-				  "client connection is not alive");
-  }
-
-  mutex->lock();
-  size_t s_length = strlen(s);
-  size_t sl = sizeof(config_comment_msg_t) + s_length;
-
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msg_type, sl);
-  config_comment_msg_t *m = omsg->msgge<config_comment_msg_t>();
-  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  m->s_length = s_length;
-  strcpy(m->s, s);
-  c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
-    msg->unref();
-    msg = NULL;
-  }
-  mutex->unlock();
+  throw NotImplementedException("NetworkConf: list values are not supported");
 }
+
+void
+NetworkConfiguration::set_uints(const char *path, std::vector<unsigned int> &u)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_ints(const char *path, std::vector<int> &i)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_bools(const char *path, std::vector<bool> &b)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_strings(const char *path, std::vector<std::string> &s)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
+void
+NetworkConfiguration::set_strings(const char *path, std::vector<const char *> &s)
+{
+  throw NotImplementedException("NetworkConf: list values are not supported");
+}
+
 
 
 void
 NetworkConfiguration::set_comment(const char *path, const char *comment)
 {
-  set_comment_internal(MSG_CONFIG_SET_COMMENT, path, comment);
 }
 
 
 void
 NetworkConfiguration::set_default_comment(const char *path, const char *comment)
 {
-  set_comment_internal(MSG_CONFIG_SET_DEFAULT_COMMENT, path, comment);
 }
 
 
 void
 NetworkConfiguration::set_comment(const char *path, std::string &comment)
 {
-  set_comment_internal(MSG_CONFIG_SET_COMMENT, path, comment.c_str());
 }
 
 
 void
 NetworkConfiguration::set_default_comment(const char *path, std::string &comment)
 {
-  set_comment_internal(MSG_CONFIG_SET_DEFAULT_COMMENT, path, comment.c_str());
 }
 
 
@@ -1019,82 +968,124 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_LIST:
 	// put all values into mirror database
 	{
-	  mirror_config->transaction_begin();
+	  //mirror_config->transaction_begin();
 	  ConfigListContent *clc = m->msgc<ConfigListContent>();
 	  while ( clc->has_next() ) {
 	    size_t cle_size = 0;
 	    config_list_entity_header_t *cle = clc->next(&cle_size);
 	    switch ( cle->type ) {
 	    case MSG_CONFIG_FLOAT_VALUE:
-	      if ( cle_size == sizeof(config_list_float_entity_t) ) {
-		config_list_float_entity_t *clev = (config_list_float_entity_t *)cle;
-		if ( cle->cp.is_default ) {
-		  mirror_config->set_default_float(cle->cp.path, clev->f);
+	      {
+		float *msg_values =
+		  (float *)((char *)cle + sizeof(config_list_entity_header_t));
+		if (cle->cp.num_values > 1) {
+		  std::vector<float> values(cle->cp.num_values, 0);
+		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		    values[j] = msg_values[j];
+		  }
+		  mirror_config->set_floats(cle->cp.path, values);
 		} else {
-		  mirror_config->set_float(cle->cp.path, clev->f);
+		  if ( cle->cp.is_default ) {
+		    mirror_config->set_default_float(cle->cp.path, *msg_values);
+		  } else {
+		    mirror_config->set_float(cle->cp.path, *msg_values);
+		  }
 		}
 	      }
 	      break;
 
 	    case MSG_CONFIG_INT_VALUE:
-	      if ( cle_size == sizeof(config_list_int_entity_t) ) {
-		config_list_int_entity_t *clev = (config_list_int_entity_t *)cle;
-		if ( cle->cp.is_default ) {
-		  mirror_config->set_default_int(cle->cp.path, clev->i);
+	      {
+		int32_t *msg_values =
+		  (int32_t *)((char *)cle + sizeof(config_list_entity_header_t));
+		if (cle->cp.num_values > 1) {
+		  std::vector<int32_t> values(cle->cp.num_values, 0);
+		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		    values[j] = msg_values[j];
+		  }
+		  mirror_config->set_ints(cle->cp.path, values);
 		} else {
-		  mirror_config->set_int(cle->cp.path, clev->i);
+		  if ( cle->cp.is_default ) {
+		    mirror_config->set_default_int(cle->cp.path, *msg_values);
+		  } else {
+		    mirror_config->set_int(cle->cp.path, *msg_values);
+		  }
 		}
 	      }
 	      break;
 
 	    case MSG_CONFIG_UINT_VALUE:
-	      if ( cle_size == sizeof(config_list_uint_entity_t) ) {
-		config_list_uint_entity_t *clev = (config_list_uint_entity_t *)cle;
-		if ( cle->cp.is_default ) {
-		  mirror_config->set_default_uint(cle->cp.path, clev->u);
+	      {
+		uint32_t *msg_values =
+		  (uint32_t *)((char *)cle + sizeof(config_list_entity_header_t));
+		if (cle->cp.num_values > 1) {
+		  std::vector<uint32_t> values(cle->cp.num_values, 0);
+		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		    values[j] = msg_values[j];
+		  }
+		  mirror_config->set_uints(cle->cp.path, values);
 		} else {
-		  mirror_config->set_uint(cle->cp.path, clev->u);
+		  if ( cle->cp.is_default ) {
+		    mirror_config->set_default_uint(cle->cp.path, *msg_values);
+		  } else {
+		    mirror_config->set_uint(cle->cp.path, *msg_values);
+		  }
 		}
 	      }
 	      break;
 
 	    case MSG_CONFIG_BOOL_VALUE:
-	      if ( cle_size == sizeof(config_list_bool_entity_t) ) {
-		config_list_bool_entity_t *clev = (config_list_bool_entity_t *)cle;
-		if ( cle->cp.is_default ) {
-		  mirror_config->set_default_bool(cle->cp.path, clev->b != 0);
+	      {
+		int32_t *msg_values =
+		  (int32_t *)((char *)cle + sizeof(config_list_entity_header_t));
+		if (cle->cp.num_values > 1) {
+		  std::vector<bool> values(cle->cp.num_values, 0);
+		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		    values[j] = (msg_values[j] != 0);
+		  }
+		  mirror_config->set_bools(cle->cp.path, values);
 		} else {
-		  mirror_config->set_bool(cle->cp.path, clev->b != 0);
+		  if ( cle->cp.is_default ) {
+		    mirror_config->set_default_bool(cle->cp.path, (*msg_values != 0));
+		  } else {
+		    mirror_config->set_bool(cle->cp.path, (*msg_values != 0));
+		  }
 		}
 	      }
 	      break;
 
 	    case MSG_CONFIG_STRING_VALUE:
-	      if ( cle_size >= sizeof(config_list_string_entity_t) ) {
-		config_list_string_entity_t *clev = (config_list_string_entity_t *)cle;
-		if ( cle->cp.is_default ) {
-		  mirror_config->set_default_string(cle->cp.path, clev->s);
+	      {
+		char *tmpdata = (char *)cle + sizeof(config_list_entity_header_t);
+		if (cle->cp.num_values > 1) {
+		  std::vector<std::string> values(cle->cp.num_values, "");
+		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		    config_string_value_t *csv = (config_string_value_t *)tmpdata;
+		    char *msg_string = tmpdata + sizeof(config_string_value_t);
+		    values[j] = std::string(msg_string, csv->s_length);
+		    tmpdata += sizeof(config_string_value_t) + csv->s_length + 1;
+		  }
+		  mirror_config->set_strings(cle->cp.path, values);
 		} else {
-		  mirror_config->set_string(cle->cp.path, clev->s);
+		  config_string_value_t *csv = (config_string_value_t *)tmpdata;
+		  char *msg_string = tmpdata + sizeof(config_string_value_t);
+		  if ( cle->cp.is_default ) {
+		    mirror_config->set_default_string(cle->cp.path,
+						      std::string(msg_string, csv->s_length).c_str());
+		  } else {
+		    mirror_config->set_string(cle->cp.path,
+					      std::string(msg_string, csv->s_length).c_str());
+		  }
 		}
 	      }
 	      break;
 
 	    case MSG_CONFIG_COMMENT_VALUE:
-	      if ( cle_size >= sizeof(config_list_comment_entity_t) ) {
-		config_list_comment_entity_t *clev = (config_list_comment_entity_t *)cle;
-		if ( cle->cp.is_default ) {
-		  mirror_config->set_default_comment(cle->cp.path, clev->s);
-		} else {
-		  mirror_config->set_comment(cle->cp.path, clev->s);
-		}
-	      } else {
-		LibLogger::log_warn("NetworkConfiguration", "[mirroring]::inboundReceived: ignoring bad comment");
-	      }
+	      // ignored
 	      break;
 	    }
 	  }
-	  mirror_config->transaction_commit();
+	  //mirror_config->transaction_commit();
 	  delete clc;
 	}
 
@@ -1125,11 +1116,21 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 
       case MSG_CONFIG_FLOAT_VALUE:
 	try {
-	  config_float_value_msg_t *fm = m->msg<config_float_value_msg_t>();
-	  if (fm->cp.is_default == 1) {
-	    mirror_config->set_default_float(fm->cp.path, fm->f);
+	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
+	  if (cd->num_values > 1) {
+	    float *fs = (float *)((char *)msg->payload() + sizeof(config_descriptor_t));
+	    std::vector<float> floats(cd->num_values, 0.0);
+	    for (unsigned int i = 0; i < cd->num_values; ++i) {
+	      floats[i] = fs[i];
+	    }
+	    mirror_config->set_floats(cd->path, floats);
 	  } else {
-	    mirror_config->set_float(fm->cp.path, fm->f);
+	    float f = *(float *)((char *)msg->payload() + sizeof(config_descriptor_t));
+	    if (cd->is_default == 1) {
+	      mirror_config->set_default_float(cd->path, f);
+	    } else {
+	      mirror_config->set_float(cd->path, f);
+	    }
 	  }
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
@@ -1139,11 +1140,23 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 
       case MSG_CONFIG_UINT_VALUE:
 	try {
-	  config_uint_value_msg_t *um = m->msg<config_uint_value_msg_t>();
-	  if (um->cp.is_default == 1) {
-	    mirror_config->set_default_uint(um->cp.path, um->u);
+	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
+	  if (cd->num_values > 1) {
+	    uint32_t *vs = (uint32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+	    std::vector<unsigned int> values(cd->num_values, 0);
+	    for (unsigned int i = 0; i < cd->num_values; ++i) {
+	      values[i] = vs[i];
+	    }
+	    mirror_config->set_uints(cd->path, values);
 	  } else {
-	    mirror_config->set_uint(um->cp.path, um->u);
+	    unsigned int u =
+	      *(uint32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+
+	    if (cd->is_default == 1) {
+	      mirror_config->set_default_uint(cd->path, u);
+	    } else {
+	      mirror_config->set_uint(cd->path, u);
+	    }
 	  }
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
@@ -1153,11 +1166,23 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 
       case MSG_CONFIG_INT_VALUE:
 	try {
-	  config_int_value_msg_t *im = m->msg<config_int_value_msg_t>();
-	  if (im->cp.is_default == 1) {
-	    mirror_config->set_default_int(im->cp.path, im->i);
+	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
+	  if (cd->num_values > 1) {
+	    int32_t *vs = (int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+	    std::vector<int> values(cd->num_values, 0);
+	    for (unsigned int i = 0; i < cd->num_values; ++i) {
+	      values[i] = vs[i];
+	    }
+	    mirror_config->set_ints(cd->path, values);
 	  } else {
-	    mirror_config->set_int(im->cp.path, im->i);
+	    unsigned int i =
+	      *(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+
+	    if (cd->is_default == 1) {
+	      mirror_config->set_default_int(cd->path, i);
+	    } else {
+	      mirror_config->set_int(cd->path, i);
+	    }
 	  }
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
@@ -1167,11 +1192,23 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 
       case MSG_CONFIG_BOOL_VALUE:
 	try {
-	  config_bool_value_msg_t *bm = m->msg<config_bool_value_msg_t>();
-	  if (bm->cp.is_default == 1) {
-	    mirror_config->set_default_bool(bm->cp.path, (bm->b != 0));
+	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
+	  if (cd->num_values > 1) {
+	    int32_t *vs = (int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+	    std::vector<bool> values(cd->num_values, 0);
+	    for (unsigned int i = 0; i < cd->num_values; ++i) {
+	      values[i] = (vs[i] != 0);
+	    }
+	    mirror_config->set_bools(cd->path, values);
 	  } else {
-	    mirror_config->set_bool(bm->cp.path, (bm->b != 0));
+	    unsigned int i =
+	      *(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+
+	    if (cd->is_default == 1) {
+	      mirror_config->set_default_bool(cd->path, (i != 0));
+	    } else {
+	      mirror_config->set_bool(cd->path, (i != 0));
+	    }
 	  }
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
@@ -1181,11 +1218,31 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 
       case MSG_CONFIG_STRING_VALUE:
 	try {
-	  config_string_value_msg_t *sm = m->msgge<config_string_value_msg_t>();
-	  if (sm->cp.is_default == 1) {
-	    mirror_config->set_default_string(sm->cp.path, sm->s);
+	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
+	  if (cd->num_values > 1) {
+	    std::vector<std::string> values(cd->num_values, "");
+	    size_t pos = sizeof(config_descriptor_t);
+	    for (unsigned int i = 0; i < cd->num_values; ++i) {
+	      config_string_value_t *vs =
+		(config_string_value_t *)((char *)msg->payload() + pos);
+	      char *msg_string =
+		((char *)msg->payload() + pos) + sizeof(config_string_value_t);
+	      values[i] = std::string(msg_string, vs->s_length);
+	      pos += sizeof(config_string_value_t) + vs->s_length + 1;
+	    }
+	    mirror_config->set_strings(cd->path, values);
 	  } else {
-	    mirror_config->set_string(sm->cp.path, sm->s);
+	    config_string_value_t *sv =
+	      (config_string_value_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+	    char *msg_string =
+	      (char *)msg->payload() + sizeof(config_string_value_t);
+
+	    std::string value = std::string(msg_string, sv->s_length);
+	    if (cd->is_default == 1) {
+	      mirror_config->set_default_string(cd->path, value);
+	    } else {
+	      mirror_config->set_string(cd->path, value);
+	    }
 	  }
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
@@ -1267,8 +1324,7 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 	throw CannotEnableMirroringException("Client connection is dead");
       }
 
-      mirror_config = new SQLiteConfiguration();
-      mirror_config->load(":memory:");
+      mirror_config = new MemoryConfiguration();
 
       __mirror_init_barrier = new InterruptibleBarrier(2);
       mutex->lock();
@@ -1597,6 +1653,36 @@ NetworkConfiguration::NetConfValueIterator::is_string() const
 
 
 bool
+NetworkConfiguration::NetConfValueIterator::is_list() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+    return cd->num_values > 0;
+  } else {
+    return i->is_list();
+  }
+}
+
+
+size_t
+NetworkConfiguration::NetConfValueIterator::get_list_size() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+    return cd->num_values;
+  } else {
+    return i->get_list_size();
+  }
+}
+
+
+bool
 NetworkConfiguration::NetConfValueIterator::is_default() const
 {
   if ( i == NULL ) {
@@ -1606,29 +1692,13 @@ NetworkConfiguration::NetConfValueIterator::is_default() const
       unsigned int msgid = msg->msgid();
       switch (msgid) {
       case MSG_CONFIG_FLOAT_VALUE:
-	{
-	  config_float_value_msg_t *m = msg->msg<config_float_value_msg_t>();
-	  return m->cp.is_default;
-	}
       case MSG_CONFIG_UINT_VALUE:
-	{
-	  config_uint_value_msg_t *m = msg->msg<config_uint_value_msg_t>();
-	  return m->cp.is_default;
-	}
       case MSG_CONFIG_INT_VALUE:
-	{
-	  config_int_value_msg_t *m = msg->msg<config_int_value_msg_t>();
-	  return m->cp.is_default;
-	}
       case MSG_CONFIG_BOOL_VALUE:
-	{
-	  config_bool_value_msg_t *m = msg->msg<config_bool_value_msg_t>();
-	  return m->cp.is_default;
-	}
       case MSG_CONFIG_STRING_VALUE:
 	{
-	  config_string_value_msg_t *m = msg->msgge<config_string_value_msg_t>();
-	  return m->cp.is_default;
+	  config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+	  return cd->is_default;
 	}
       }
 
@@ -1649,8 +1719,11 @@ NetworkConfiguration::NetConfValueIterator::get_float() const
       throw NullPointerException("You may not access value methods on invalid iterator");
     }
     if (msg->msgid() == MSG_CONFIG_FLOAT_VALUE) {
-      config_float_value_msg_t *fm = msg->msg<config_float_value_msg_t>();
-      return fm->f;
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values > 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_float: list received");
+      }
+      return *(float *)((char *)msg->payload() + sizeof(config_descriptor_t));
     } else {
       throw TypeMismatchException("NetConfValueIterator::get_float: type mismatch");
     }
@@ -1668,8 +1741,11 @@ NetworkConfiguration::NetConfValueIterator::get_uint() const
       throw NullPointerException("You may not access value methods on invalid iterator");
     }
     if (msg->msgid() == MSG_CONFIG_UINT_VALUE) {
-      config_uint_value_msg_t *um = msg->msg<config_uint_value_msg_t>();
-      return um->u;
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values > 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_uint: list received");
+      }
+      return *(uint32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
     } else {
       throw TypeMismatchException("NetConfValueIterator::get_uint: type mismatch");
     }
@@ -1687,8 +1763,11 @@ NetworkConfiguration::NetConfValueIterator::get_int() const
       throw NullPointerException("You may not access value methods on invalid iterator");
     }
     if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
-      config_int_value_msg_t *im = msg->msg<config_int_value_msg_t>();
-      return im->i;
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values > 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_int: list received");
+      }
+      return *(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
     } else {
       throw TypeMismatchException("NetConfValueIterator::get_int: type mismatch");
     }
@@ -1706,8 +1785,11 @@ NetworkConfiguration::NetConfValueIterator::get_bool() const
       throw NullPointerException("You may not access value methods on invalid iterator");
     }
     if (msg->msgid() == MSG_CONFIG_BOOL_VALUE) {
-      config_bool_value_msg_t *bm = msg->msg<config_bool_value_msg_t>();
-      return (bm->b != 0);
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values > 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_int: list received");
+      }
+      return (*(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t)) != 0);
     } else {
       throw TypeMismatchException("NetConfValueIterator::get_bool: type mismatch");
     }
@@ -1725,14 +1807,165 @@ NetworkConfiguration::NetConfValueIterator::get_string() const
       throw NullPointerException("You may not access value methods on invalid iterator");
     }
     if (msg->msgid() == MSG_CONFIG_STRING_VALUE) {
-      config_string_value_msg_t *sm = msg->msgge<config_string_value_msg_t>();
-      return sm->s;
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values > 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_int: list received");
+      }
+      config_string_value_t *sv =
+	(config_string_value_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
+      char *msg_string =
+	(char *)msg->payload() + sizeof(config_string_value_t);
+      return std::string(msg_string, sv->s_length);
     } else {
       throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
 				  MSG_CONFIG_STRING_VALUE, msg->msgid());
     }
   } else {
     return i->get_string();
+  }
+}
+
+
+std::vector<float>
+NetworkConfiguration::NetConfValueIterator::get_floats() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_FLOAT_VALUE) {
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values <= 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_floats: not a list");
+      }
+      float *data = (float *)((char *)cd + sizeof(config_descriptor_t));
+      std::vector<float> rv(cd->num_values, 0);
+
+      for (unsigned int j = 0; j < cd->num_values; ++j) {
+	rv[j] = data[j];
+      }
+      return rv;
+    } else {
+      throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
+				  MSG_CONFIG_STRING_VALUE, msg->msgid());
+    }
+  } else {
+    return i->get_floats();
+  }
+}
+
+std::vector<unsigned int>
+NetworkConfiguration::NetConfValueIterator::get_uints() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_UINT_VALUE) {
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values <= 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_uints: not a list");
+      }
+      uint32_t *data = (uint32_t *)((char *)cd + sizeof(config_descriptor_t));
+      std::vector<unsigned int> rv(cd->num_values, 0);
+
+      for (unsigned int j = 0; j < cd->num_values; ++j) {
+	rv[j] = data[j];
+      }
+      return rv;
+    } else {
+      throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
+				  MSG_CONFIG_STRING_VALUE, msg->msgid());
+    }
+  } else {
+    return i->get_uints();
+  }
+}
+
+std::vector<int>
+NetworkConfiguration::NetConfValueIterator::get_ints() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values <= 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_ints: not a list");
+      }
+      int32_t *data = (int32_t *)((char *)cd + sizeof(config_descriptor_t));
+      std::vector<int> rv(cd->num_values, 0);
+
+      for (unsigned int j = 0; j < cd->num_values; ++j) {
+	rv[j] = data[j];
+      }
+      return rv;
+    } else {
+      throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
+				  MSG_CONFIG_STRING_VALUE, msg->msgid());
+    }
+  } else {
+    return i->get_ints();
+  }
+}
+
+std::vector<bool>
+NetworkConfiguration::NetConfValueIterator::get_bools() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values <= 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_ints: not a list");
+      }
+      int32_t *data = (int32_t *)((char *)cd + sizeof(config_descriptor_t));
+      std::vector<bool> rv(cd->num_values, 0);
+
+      for (unsigned int j = 0; j < cd->num_values; ++j) {
+	rv[j] = (data[j] != 0);
+      }
+      return rv;
+    } else {
+      throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
+				  MSG_CONFIG_STRING_VALUE, msg->msgid());
+    }
+  } else {
+    return i->get_bools();
+  }
+}
+
+std::vector<std::string>
+NetworkConfiguration::NetConfValueIterator::get_strings() const
+{
+  if ( i == NULL ) {
+    if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+    }
+    if (msg->msgid() == MSG_CONFIG_STRING_VALUE) {
+      config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
+      if (cd->num_values <= 1) {
+	throw TypeMismatchException("NetConfValueIterator::get_strings: not a list");
+      }
+      std::vector<std::string> rv(cd->num_values, "");
+      char *tmpdata = (char *)cd + sizeof(config_descriptor_t);
+
+      for (unsigned int j = 0; j < cd->num_values; ++j) {
+	config_string_value_t *sv = (config_string_value_t *)tmpdata;
+	char *msg_string = tmpdata + sizeof(config_string_value_t);
+	rv[j] = std::string(msg_string, sv->s_length);
+	tmpdata += sizeof(config_string_value_t) + sv->s_length + 1;
+      }
+      return rv;
+    } else {
+      throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
+				  MSG_CONFIG_STRING_VALUE, msg->msgid());
+    }
+  } else {
+    return i->get_strings();
   }
 }
 
@@ -1746,20 +1979,15 @@ NetworkConfiguration::NetConfValueIterator::get_as_string() const
 				 "invalid iterator");
     }
     if (msg->msgid() == MSG_CONFIG_STRING_VALUE) {
-      config_string_value_msg_t *sm = msg->msgge<config_string_value_msg_t>();
-      return sm->s;
+      return get_string();
     } else if (msg->msgid() == MSG_CONFIG_BOOL_VALUE) {
-      config_bool_value_msg_t *bm = msg->msg<config_bool_value_msg_t>();
-      return (bm->b != 0) ? "true" : "false";
+      return get_bool() ? "true" : "false";
     } else if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
-      config_int_value_msg_t *im = msg->msg<config_int_value_msg_t>();
-      return StringConversions::to_string(im->i);
+      return StringConversions::to_string(get_int());
     } else if (msg->msgid() == MSG_CONFIG_UINT_VALUE) {
-      config_uint_value_msg_t *im = msg->msg<config_uint_value_msg_t>();
-      return StringConversions::to_string(im->u);
+      return StringConversions::to_string(get_uint());
     } else if (msg->msgid() == MSG_CONFIG_FLOAT_VALUE) {
-      config_float_value_msg_t *fm = msg->msg<config_float_value_msg_t>();
-      return StringConversions::to_string(fm->f);
+      return StringConversions::to_string(get_float());
     } else {
       throw Exception("NetConfValueIterator::get_as_string: unknown type");
     }

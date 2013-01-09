@@ -69,27 +69,32 @@ class ConfigNetworkHandler
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void send_value(unsigned int clid, Configuration::ValueIterator *i);
+  void send_value(unsigned int clid, const Configuration::ValueIterator *i);
   void send_inv_value(unsigned int clid, const char *path);
 
   template <typename T>
-    T *  prepare_msg(const char *path, bool is_default)
-    {
-      T * m = (T *)calloc(1, sizeof(T));
-      strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-      m->cp.is_default = is_default;
-      return m;
-    }
+  T *  prepare_msg(const char *path, bool is_default)
+  {
+    T * m = (T *)calloc(1, sizeof(T));
+    strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+    m->cp.is_default = is_default;
+    return m;
+  }
 
   template <typename T>
-    T *  prepare_string_msg(const char *path, bool is_default, size_t s_length)
-    {
-      T * m = (T *)calloc(1, sizeof(T) + s_length);
-      strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-      m->cp.is_default = is_default;
-      m->s_length = s_length;
-      return m;
-    }
+  void *
+    prepare_value_msg(const char *path, bool is_default, bool is_list,
+		      uint16_t num_values, size_t &datasize, void * &data)
+  {
+    size_t data_size = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
+    void* m = calloc(1, data_size);
+    config_descriptor_t *cd = (config_descriptor_t *)m;
+    strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH);
+    cd->is_default = is_default;
+    cd->num_values = is_list ? num_values : 0;
+    data = (void *)((char *)m + sizeof(config_descriptor_t));
+    return m;
+  }
 
   Configuration                       *__config;
   FawkesNetworkHub                    *__hub;

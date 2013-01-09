@@ -37,8 +37,34 @@
 namespace fawkes {
 
 /// @cond INTERNALS
+namespace yaml_config {
+  static inline
+    std::vector<std::string> split(const std::string &s, char delim = '/')
+  {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+      if (item != "")  elems.push_back(item);
+    }
+    return elems;
+  }
 
-class YamlConfiguration::Node
+  static inline
+    std::queue<std::string> split_to_queue(const std::string &s, char delim = '/')
+  {
+    std::queue<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+      if (item != "")  elems.push(item);
+    }
+    return elems;
+  }
+}
+
+
+class YamlConfigurationNode
 {
  public:
   struct Type {
@@ -52,30 +78,32 @@ class YamlConfiguration::Node
       case BOOL:     return "bool";
       case STRING:   return "string";
       case SEQUENCE: return "SEQUENCE";
-      case MAP:      return "MAPE";
+      case MAP:      return "MAP";
       default:       return "UNKNOWN";
       }
     }
   };
 
-  Node() : name_("root") {}
+ YamlConfigurationNode() : name_("root"), type_(Type::UNKNOWN), is_default_(false) {}
 
-  Node(const Node &n)
-    : name_(n.name_), type_(n.type_), scalar_value_(n.scalar_value_)
+  YamlConfigurationNode(const YamlConfigurationNode &n)
+    : name_(n.name_), type_(n.type_), scalar_value_(n.scalar_value_),
+    list_values_(n.list_values_), is_default_(n.is_default_)
   {}
 
-  Node(const Node *n)
-    : name_(n->name_), type_(n->type_), scalar_value_(n->scalar_value_)
+  YamlConfigurationNode(const YamlConfigurationNode *n)
+    : name_(n->name_), type_(n->type_), scalar_value_(n->scalar_value_),
+    list_values_(n->list_values_), is_default_(n->is_default_)
   {}
 
-  Node(std::string name, const YAML::Node &node)
-    : name_(name)
+  YamlConfigurationNode(std::string name, const YAML::Node &node)
+    : name_(name), type_(Type::UNKNOWN), is_default_(false)
   {
     node.GetScalar(scalar_value_);
     switch (node.Type()) {
     case YAML::NodeType::Null:      type_ = Type::NONE; break;
     case YAML::NodeType::Scalar:    type_ = determine_scalar_type(); break;
-    case YAML::NodeType::Sequence:  type_ = Type::SEQUENCE; break;
+    case YAML::NodeType::Sequence:  type_ = Type::SEQUENCE; set_sequence(node); break;
     case YAML::NodeType::Map:       type_ = Type::MAP; break;
     default:
       type_ = Type::UNKNOWN; break;
@@ -83,42 +111,42 @@ class YamlConfiguration::Node
   }
 
 
-  Node(std::string name)
-    : name_(name), type_(Type::NONE) {}
+  YamlConfigurationNode(std::string name)
+    : name_(name), type_(Type::NONE), is_default_(false) {}
 
-  ~Node()
+  ~YamlConfigurationNode()
   {
-    std::map<std::string, Node *>::iterator i;
+    std::map<std::string, YamlConfigurationNode *>::iterator i;
     for (i = children_.begin(); i != children_.end(); ++i) {
       delete i->second;
     }
   }
 
-  void add_child(std::string &p, Node *n) {
+  void add_child(std::string &p, YamlConfigurationNode *n) {
     type_ = Type::MAP;
     children_[p] = n;
   }
 
-  std::map<std::string, Node *>::iterator  begin()
+  std::map<std::string, YamlConfigurationNode *>::iterator  begin()
   { return children_.begin(); }
 
-  std::map<std::string, Node *>::iterator  end()
+  std::map<std::string, YamlConfigurationNode *>::iterator  end()
   { return children_.end(); }
 
-  std::map<std::string, Node *>::size_type size() const
+  std::map<std::string, YamlConfigurationNode *>::size_type size() const
   { return children_.size(); }
 
 
-  std::map<std::string, Node *>::const_iterator  begin() const
+  std::map<std::string, YamlConfigurationNode *>::const_iterator  begin() const
   { return children_.begin(); }
 
-  std::map<std::string, Node *>::const_iterator  end() const
+  std::map<std::string, YamlConfigurationNode *>::const_iterator  end() const
   { return children_.end(); }
 
-  Node * find(std::queue<std::string> &q)
+  YamlConfigurationNode * find(std::queue<std::string> &q)
   {
 
-    Node *n = this;
+    YamlConfigurationNode *n = this;
     std::string path;
 
     while (! q.empty()) {
@@ -137,15 +165,15 @@ class YamlConfiguration::Node
     return n;
   }
 
-  Node * find_or_insert(const char *path)
+  YamlConfigurationNode * find_or_insert(const char *path)
   {
-    std::queue<std::string> q = split_to_queue(path);
+    std::queue<std::string> q = yaml_config::split_to_queue(path);
 
-    Node *n = this;
+    YamlConfigurationNode *n = this;
     while (! q.empty()) {
       std::string pel = q.front();
       if (n->children_.find(pel) == n->children_.end()) {
-	n->add_child(pel, new Node(pel));
+	n->add_child(pel, new YamlConfigurationNode(pel));
       }
       n = n->children_[pel];
       q.pop();
@@ -156,11 +184,11 @@ class YamlConfiguration::Node
 
   void erase(const char *path)
   {
-    std::queue<std::string> q = split_to_queue(path);
-    std::stack<Node *> qs;
+    std::queue<std::string> q = yaml_config::split_to_queue(path);
+    std::stack<YamlConfigurationNode *> qs;
     std::string full_path;
 
-    Node *n = this;
+    YamlConfigurationNode *n = this;
     while (! q.empty()) {
 
       std::string pel = q.front();
@@ -179,9 +207,9 @@ class YamlConfiguration::Node
       throw Exception("YamlConfig: cannot erase non-leaf value");
     }
 
-    Node *child = n;
+    YamlConfigurationNode *child = n;
     while (! qs.empty()) {
-      Node *en = qs.top();
+      YamlConfigurationNode *en = qs.top();
 
       en->children_.erase(child->name());
 
@@ -197,28 +225,30 @@ class YamlConfiguration::Node
 
 
 
-  Node * find(const char *path)
+  YamlConfigurationNode * find(const char *path)
   {
     try {
-      std::queue<std::string> pel_q = split_to_queue(path);
+      std::queue<std::string> pel_q = yaml_config::split_to_queue(path);
       return find(pel_q);
     } catch (Exception &e) {
       throw;
     }
   }
 
-  void operator=(const Node &n)
+  void operator=(const YamlConfigurationNode &n)
   {
-    name_      = n.name_;
-    children_  = n.children_;    
+    name_        = n.name_;
+    type_        = n.type_;
+    children_    = n.children_;    
+    list_values_ = n.list_values_;
   }
 
-  bool operator< (const Node &n) const
+  bool operator< (const YamlConfigurationNode &n) const
   { return this->name_ < n.name_; }
 
-  Node * operator[] (const std::string &p)
+  YamlConfigurationNode * operator[] (const std::string &p)
   {
-    std::map<std::string, Node *>::iterator i;
+    std::map<std::string, YamlConfigurationNode *>::iterator i;
      if ((i = children_.find(p)) != children_.end()) {
       return i->second;
     } else {
@@ -226,16 +256,16 @@ class YamlConfiguration::Node
     }
   }
 
-  Node & operator+= (const Node *n)
+  YamlConfigurationNode & operator+= (const YamlConfigurationNode *n)
   {
     if (! n) return *this;
 
-    Node *add_to = this;
+    YamlConfigurationNode *add_to = this;
 
     if (n->name() != "root") {
-      std::map<std::string, Node *>::iterator i;
+      std::map<std::string, YamlConfigurationNode *>::iterator i;
       if ((i = children_.find(n->name())) == children_.end()) {
-	children_[n->name()] = new Node(n);
+	children_[n->name()] = new YamlConfigurationNode(n);
       }
       add_to = children_[n->name()];
     }
@@ -248,7 +278,7 @@ class YamlConfiguration::Node
       add_to->set_scalar(n->get_scalar());
     } else {    
     
-      std::map<std::string, Node *>::const_iterator i;
+      std::map<std::string, YamlConfigurationNode *>::const_iterator i;
       for (i = n->begin(); i != n->end(); ++i) {
 	*add_to += i->second;
       }
@@ -257,12 +287,12 @@ class YamlConfiguration::Node
     return *this;
   }
 
-  bool operator==(const Node &n) const
+  bool operator==(const YamlConfigurationNode &n) const
   {
     return (name_ == n.name_) && (type_ == n.type_) && (scalar_value_ == n.scalar_value_);
   }
 
-  bool operator!=(const Node &n) const
+  bool operator!=(const YamlConfigurationNode &n) const
   {
     return (name_ != n.name_) || (type_ != n.type_) || (scalar_value_ != n.scalar_value_);
   }
@@ -276,23 +306,23 @@ class YamlConfiguration::Node
    * @param b root node of second tree
    * @return list of paths to leaf nodes that changed
    */
-  static std::list<std::string> diff(const Node *a, const Node *b)
+  static std::list<std::string> diff(const YamlConfigurationNode *a, const YamlConfigurationNode *b)
   {
     std::list<std::string> rv;
 
-    std::map<std::string, Node *> na, nb;
+    std::map<std::string, YamlConfigurationNode *> na, nb;
     a->enum_leafs(na);
     b->enum_leafs(nb);
     
-    std::map<std::string, Node *>::iterator i;
+    std::map<std::string, YamlConfigurationNode *>::iterator i;
     for (i = na.begin(); i != na.end(); ++i) {
       if (nb.find(i->first) == nb.end()) {
         // this is a new key in a
-        printf("A %s NOT in B\n", i->first.c_str());
+        // printf("A %s NOT in B\n", i->first.c_str());
         rv.push_back(i->first);
       } else if (*i->second != *nb[i->first]) {
         // different values/types
-        printf("A %s modified\n", i->first.c_str());
+        // printf("A %s modified\n", i->first.c_str());
         rv.push_back(i->first);
       }
     }
@@ -300,7 +330,7 @@ class YamlConfiguration::Node
     for (i = nb.begin(); i != nb.end(); ++i) {
       if (na.find(i->first) == na.end()) {
         // this is a new key in b
-        printf("B %s NOT in A\n", i->first.c_str());
+        // printf("B %s NOT in A\n", i->first.c_str());
         rv.push_back(i->first);
       }
     }
@@ -318,6 +348,9 @@ class YamlConfiguration::Node
   T
   get_value() const
   {
+    if (type_ == Type::SEQUENCE) {
+      throw Exception("YamlConfiguration: value of %s is a list", name_.c_str());
+    }
     T rv;
     if (YAML::Convert(scalar_value_, rv)) {
       return rv;
@@ -328,6 +361,46 @@ class YamlConfiguration::Node
   }
 
   /** Retrieve value casted to given type T.
+   * @return value casted as desired
+   * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+   * a different type.
+   */
+  template<typename T>
+  std::vector<T>
+  get_list() const
+  {
+    if (type_ != Type::SEQUENCE) {
+      throw Exception("YamlConfiguration: value of %s is not a list", name_.c_str());
+    }
+    std::vector<T> rv;
+    const typename std::vector<T>::size_type N = list_values_.size();
+    rv.resize(N);
+    for (typename std::vector<T>::size_type i = 0; i < N; ++i) {
+      T t;
+      if (! YAML::Convert(list_values_[i], t)) {
+	// might want to have custom exception here later
+	throw Exception("YamlConfig: value or type error on %s", name_.c_str());
+      }
+      rv[i] = t;
+    }
+    return rv;
+  }
+
+  /** Retrieve list size.
+   * @return size of list
+   * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+   * a different type.
+   */
+  size_t
+  get_list_size() const
+  {
+    if (type_ != Type::SEQUENCE) {
+      throw Exception("YamlConfiguration: value of %s is not a list", name_.c_str());
+    }
+    return list_values_.size();
+  }
+
+  /** Set value of given type T.
    * @param path path to query
    * @return value casted as desired
    * @throw YAML::ScalarInvalid thrown if value does not exist or is of
@@ -337,14 +410,37 @@ class YamlConfiguration::Node
   void
   set_value(const char *path, T t)
   {
-    Node *n = find_or_insert(path);
+    YamlConfigurationNode *n = find_or_insert(path);
     if (n->has_children()) {
       throw Exception("YamlConfig: cannot set value on non-leaf path node %s", path);
     }
     n->set_scalar(StringConversions::to_string(t));
   }
 
-  /** Retrieve value casted to given type T.
+  /** Set list of given type T.
+   * @param path path to query
+   * @return value casted as desired
+   * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+   * a different type.
+   */
+  template<typename T>
+  void
+  set_list(const char *path, std::vector<T> &t)
+  {
+    YamlConfigurationNode *n = find_or_insert(path);
+    if (n->has_children()) {
+      throw Exception("YamlConfig: cannot set value on non-leaf path node %s", path);
+    }
+    std::vector<std::string> v;
+    typename std::vector<T>::size_type N = t.size();
+    v.resize(N);
+    for (typename std::vector<T>::size_type i = 0; i < N; ++i) {
+      v[i] = StringConversions::to_string(t[i]);
+    }
+    n->set_scalar_list(v);
+  }
+
+  /** Set value of given type T.
    * @param path path to query
    * @return value casted as desired
    * @throw YAML::ScalarInvalid thrown if value does not exist or is of
@@ -360,6 +456,29 @@ class YamlConfiguration::Node
     set_scalar(StringConversions::to_string(t));
   }
 
+
+  /** Set list of values of given type T.
+   * @param path path to query
+   * @return value casted as desired
+   * @throw YAML::ScalarInvalid thrown if value does not exist or is of
+   * a different type.
+   */
+  template<typename T>
+  void
+  set_list(std::vector<T> &t)
+  {
+    if (has_children()) {
+      throw Exception("YamlConfig: cannot set value on non-leaf path node %s", name_.c_str());
+    }
+    std::vector<std::string> v;
+    typename std::vector<T>::size_type N = t.size();
+    v.resize(N);
+    for (typename std::vector<T>::size_type i = 0; i < N; ++i) {
+      v[i] = StringConversions::to_string(t[i]);
+    }
+    set_scalar_list(v);
+  }
+
   /** Check if value is of given type T.
    * @param path path to query
    * @return value casted as desired
@@ -371,9 +490,16 @@ class YamlConfiguration::Node
   is_type() const
   {
     T rv;
-    return YAML::Convert(scalar_value_, rv);
+    if (type_ == Type::SEQUENCE) {
+      if (! list_values_.empty()) {
+	return YAML::Convert(list_values_[0], rv);
+      } else {
+	return false;
+      }
+    } else {
+      return YAML::Convert(scalar_value_, rv);
+    }
   }
-
 
   Type::value get_type() const
   {
@@ -417,32 +543,24 @@ class YamlConfiguration::Node
 
   Type::value determine_scalar_type()
   {
-    try {
-      get_uint();
-      return Type::UINT32;
-    } catch (Exception &e) {}
-
-    try {
-      get_int();
+    if (is_type<unsigned int>()) {
+      int v = get_int();
+      if (v >= 0) {
+	return Type::UINT32;
+      } else {
+	return Type::INT32;
+      }
+    } else if (is_type<int>()) {
       return Type::INT32;
-    } catch (Exception &e) {}
-
-    try {
-      get_float();
+    } else if (is_type<float>()) {
       return Type::FLOAT;
-    } catch (Exception &e) {}
-
-    try {
-      get_bool();
+    } else if (is_type<bool>()) {
       return Type::BOOL;
-    } catch (Exception &e) {}
-
-    try {
-      get_string();
+    } else if (is_type<std::string>()) {
       return Type::STRING;
-    } catch (Exception &e) {}
-
-    return Type::UNKNOWN; 
+    } else {
+      return Type::UNKNOWN; 
+    }
   }
 
   std::string get_string()
@@ -452,11 +570,29 @@ class YamlConfiguration::Node
 
   void set_scalar(const std::string &s) {
     scalar_value_ = s;
-    determine_scalar_type();
+    type_ = determine_scalar_type();
+  }
+
+  void set_scalar_list(const std::vector<std::string> &s) {
+    list_values_ = s;
+    type_ = Type::SEQUENCE;
   }
 
   const std::string & get_scalar() const {
     return scalar_value_;
+  }
+
+  void set_sequence(const YAML::Node &n)
+  {
+    if (n.Type() != YAML::NodeType::Sequence) {
+      throw Exception("Cannot initialize list from non-sequence");
+    }
+    type_ = Type::SEQUENCE;
+    list_values_.resize(n.size());
+    unsigned int i = 0;
+    for (YAML::Iterator it = n.begin(); it != n.end(); ++it) {
+      *it >> list_values_[i++];
+    }
   }
 
   bool has_children() const
@@ -465,9 +601,26 @@ class YamlConfiguration::Node
   }
 
 
-  void enum_leafs(std::map<std::string, Node *> &nodes, std::string prefix = "") const
+  bool is_default() const
   {
-    std::map<std::string, Node *>::const_iterator c;
+    return is_default_;
+  }
+
+  void set_default(const char *path, bool is_default)
+  {
+    YamlConfigurationNode *n = find(path);
+    n->set_default(is_default);
+  }
+
+  void set_default(bool is_default)
+  {
+    is_default_ = is_default_;
+  }
+
+  void enum_leafs(std::map<std::string, YamlConfigurationNode *> &nodes,
+		  std::string prefix = "") const
+  {
+    std::map<std::string, YamlConfigurationNode *>::const_iterator c;
     for (c = children_.begin(); c != children_.end(); ++c) {
       std::string path = prefix + "/" + c->first;
       if (c->second->has_children()) {
@@ -483,7 +636,7 @@ class YamlConfiguration::Node
     std::cout << indent << name_ << " : ";
     if (! children_.empty()) {
       std::cout << std::endl;
-      std::map<std::string, Node *>::iterator c;
+      std::map<std::string, YamlConfigurationNode *>::iterator c;
       for (c = children_.begin(); c != children_.end(); ++c) {
 	c->second->print(indent + "  ");
       }
@@ -497,7 +650,7 @@ class YamlConfiguration::Node
     if (! children_.empty()) {
       ye << YAML::BeginMap;
 
-      std::map<std::string, Node *>::iterator c;
+      std::map<std::string, YamlConfigurationNode *>::iterator c;
       for (c = children_.begin(); c != children_.end(); ++c) {
 	if (c->second->has_children()) {
 	  // recurse
@@ -517,7 +670,9 @@ class YamlConfiguration::Node
   void emit(std::string &filename)
   {
     if (access(filename.c_str(), W_OK) != 0) {
-      throw Exception(errno, "YamlConfig: cannot write host file");
+      if (errno != ENOENT) {
+        throw Exception(errno, "YamlConfig: cannot write host file");
+      }
     }
 
     std::ofstream fout(filename.c_str());
@@ -535,7 +690,9 @@ class YamlConfiguration::Node
   std::string name_;
   Type::value type_;
   std::string scalar_value_;
-  std::map<std::string, Node *> children_;
+  std::map<std::string, YamlConfigurationNode *> children_;
+  std::vector<std::string> list_values_;
+  bool is_default_;
 };
 
 /// @endcond
