@@ -1,0 +1,41 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/navgraph
+---
+plugins/navgraph:
+
+  # Base TF Frame ID
+  base_frame: !frame /base_link
+
+  # Global TF Frame ID
+  global_frame: /map
+
+  # Blackboard interface ID for navigator interface of locomotion component
+  navigator_interface_id: Navigator
+
+  # Graph file to use for path planning
+  graph_file: example.yaml
+
+  # Max. distance between actual and target positions to deem the target
+  # reached. This value is for intermediate nodes on a path; m
+  # The value can be overwritten per node in the graph file.
+  travel-tolerance: 0.25
+
+  # Max. distance between actual and target positions to deem the target
+  # reached. This value is for the last node on a path; m
+  # The value can be overwritten per node in the graph file.
+  target-tolerance: 0.25
+
+  # Visualize graph and current actions?
+  visualization: true
+
+  # Interval in which the resend the goto command; sec
+  resend_interval: 0.25
+
+  # Time to keep moving after the target tolerance has been reached; sec
+  target_time: 2.5
+
+  # Monitor graph file and automatically reload on changes?
+  monitor_file: true
+
