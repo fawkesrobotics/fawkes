@@ -219,7 +219,7 @@ namespace fawkes {
  * @param path path to value
  * @param i new int values
  * 
- * @fn void Configuration::set_bools(const char *path, std::vector<bool> b)
+ * @fn void Configuration::set_bools(const char *path, std::vector<bool> &b)
  * Set new value in configuration of type bool
  * @param path path to value
  * @param b new bool values
@@ -470,11 +470,11 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  * Check if current value is a string.
  * @return true, if value is a string, false otherwise
  *
- * @fn bool Configuration::ValueIterator::is_list()
+ * @fn bool Configuration::ValueIterator::is_list() const
  * Check if a value is a list.
  * @return true if the value exists and is a list
  *
- * @fn size_t Configuration::ValueIterator::get_list_size()
+ * @fn size_t Configuration::ValueIterator::get_list_size() const
  * Get number of elements in list value.
  * @return number of elements in list value
  * @throw Exception thrown if the element is not a list.
@@ -503,23 +503,23 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  * Get string value.
  * @return value
  *
- * @fn std::vector<float> Configuration::ValueIterator::get_floats()
+ * @fn std::vector<float> Configuration::ValueIterator::get_floats() const
  * Get list of values from configuration which is of type float
  * @return value
  * 
- * @fn std::vector<unsigned int> Configuration::ValueIterator::get_uints()
+ * @fn std::vector<unsigned int> Configuration::ValueIterator::get_uints() const
  * Get list of values from configuration which is of type unsigned int
  * @return value
  * 
- * @fn std::vector<int> Configuration::ValueIterator::get_ints()
+ * @fn std::vector<int> Configuration::ValueIterator::get_ints() const
  * Get list of values from configuration which is of type int
  * @return value
  * 
- * @fn std::vector<bool> Configuration::ValueIterator::get_bools()
+ * @fn std::vector<bool> Configuration::ValueIterator::get_bools() const
  * Get list of values from configuration which is of type bool
  * @return value
  * 
- * @fn std::vector<std::string> Configuration::ValueIterator::get_strings()
+ * @fn std::vector<std::string> Configuration::ValueIterator::get_strings() const
  * Get list of values from configuration which is of type string
  * @return value
  *
