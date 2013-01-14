@@ -1,0 +1,25 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-agent
+---
+clips-agent:
+  clips-debug: false
+  skill-sim: false
+  skill-sim-time: 2.0
+
+  # debug level is a number of: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
+  debug-level: 3
+
+  # Automatically assert the (start) fact after successful initialization,
+  # otherwise wait until the an enalble message has been received
+  auto-start: true
+
+  # If set to true, will trigger the assertion of a (time (now)) fact in
+  # each loop. This can be used to trigger loop events in CLIPS.
+  assert-time-each-loop: false
+
+  # Agent name. On startup the clips-agent will try to resolve a file named
+  # <agent name>.clp. It must be in the CLIPS path directories.
+  #agent: test
+
