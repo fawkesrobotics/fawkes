@@ -84,10 +84,13 @@ class ClipsAgentThread
 
   bool          ctrl_recheck_;
 
+  /// @cond INTERNALS
   typedef struct {
+
     fawkes::Time             start_time;
     std::string              skill_string;
   } SkillExecInfo;
+  /// @endcond
 
   std::map<std::string, SkillExecInfo> active_skills_;
   bool          started_;
