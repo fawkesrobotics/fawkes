@@ -31,7 +31,7 @@ function graph(name, graphtype)
    assert(name and type(name) == "string", "Invalid name passed for graph")
    local graphtype = graphtype or "graph"
    local g = {name=name, graphtype=graphtype, is_graph=true,
-	      nodes={}, subgraphs={}, edges={}, attr={}}
+	      nodes={}, subgraphs={}, edges={}, attr={}, ranks={}}
    g.default_node = node(g, "")
    g.default_edge = edge(g, "", "")
    return g
@@ -101,6 +101,12 @@ function edge(graph, from, to)
    return e
 end
 
+function align(graph, group, name)
+   if not graph.ranks[group] then
+      graph.ranks[group] = {}
+   end
+   table.insert(graph.ranks[group], name)
+end
 
 function generate_attrappendix(attr)
    local attrstrings = {}
@@ -170,6 +176,16 @@ local function generate_edge(edge, indent)
    return s
 end
 
+local function generate_rank(rank, indent)
+   local s = ""
+   s = s .. indent .. "{rank=same;\n"
+   for _,n in ipairs(rank) do
+      s = s .. indent .. "\t" .. sanitize_node_name(n) .. ";\n"
+   end
+   s = s .. indent .. "}\n"
+   return s
+end
+
 local function generate_graph(graph, indent)
    local indent = indent or ""
    local s = indent .. graph.graphtype .. " " .. graph.name .. " {\n"
@@ -199,7 +215,10 @@ local function generate_graph(graph, indent)
       end
    end
 
-   s = s .. indent .. "};\n";
+   for _,r in pairs(graph.ranks) do
+      s = s .. generate_rank(r, indent .. "\t")
+   end
+   s = s .. indent .. "}\n";
 
    return s
 end
