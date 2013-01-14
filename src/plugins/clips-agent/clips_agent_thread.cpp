@@ -50,6 +50,8 @@ ClipsAgentThread::~ClipsAgentThread()
 void
 ClipsAgentThread::init()
 {
+  skiller_if_ = NULL;
+
   cfg_auto_start_ = false;
   cfg_assert_time_each_loop_ = false;
   cfg_skill_sim_time_ = 2.0;
@@ -71,15 +73,17 @@ ClipsAgentThread::init()
 
   cfg_clips_dir_ = std::string(SRCDIR) + "/clips/";
 
-  skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
+  if (! cfg_skill_sim_) {
+    skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
 
-  if (! skiller_if_->has_writer()) {
-    blackboard->close(skiller_if_);
-    throw Exception("Skiller has no writer, aborting");
-    
-  } else if (skiller_if_->exclusive_controller() != 0) {
-    blackboard->close(skiller_if_);
-    throw Exception("Skiller already has a different exclusive controller");
+    if (! skiller_if_->has_writer()) {
+      blackboard->close(skiller_if_);
+      throw Exception("Skiller has no writer, aborting");
+      
+    } else if (skiller_if_->exclusive_controller() != 0) {
+      blackboard->close(skiller_if_);
+      throw Exception("Skiller already has a different exclusive controller");
+    }
   }
 
   switch_if_ = blackboard->open_for_reading<SwitchInterface>("Clips Agent Start");
@@ -128,21 +132,22 @@ ClipsAgentThread::finalize()
 void
 ClipsAgentThread::loop()
 {
-  skiller_if_->read();
+  if (! cfg_skill_sim_) {
+    skiller_if_->read();
 
-  if (! cfg_skill_sim_ &&
-      (skiller_if_->exclusive_controller() == 0) && skiller_if_->has_writer())
-  {
-    if (ctrl_recheck_) {
-      logger->log_info(name(), "Acquiring exclusive skiller control");
-      SkillerInterface::AcquireControlMessage *msg =
-        new SkillerInterface::AcquireControlMessage();
-      skiller_if_->msgq_enqueue(msg);
-      ctrl_recheck_ = false;
-    } else {
-      ctrl_recheck_ = true;
+    if ((skiller_if_->exclusive_controller() == 0) && skiller_if_->has_writer())
+    {
+      if (ctrl_recheck_) {
+	logger->log_info(name(), "Acquiring exclusive skiller control");
+	SkillerInterface::AcquireControlMessage *msg =
+	  new SkillerInterface::AcquireControlMessage();
+	skiller_if_->msgq_enqueue(msg);
+	ctrl_recheck_ = false;
+      } else {
+	ctrl_recheck_ = true;
+      }
+      return;
     }
-    return;
   }
 
   if (! started_) {
@@ -162,7 +167,7 @@ ClipsAgentThread::loop()
 
   Time now(clock);
   if (! active_skills_.empty()) {
-    skiller_if_->read();
+    if (! cfg_skill_sim_)  skiller_if_->read();
 
     std::list<std::string> finished_skills;
     std::map<std::string, SkillExecInfo>::iterator as;
