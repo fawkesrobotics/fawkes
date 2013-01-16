@@ -13,7 +13,7 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard /usr/include/sys/inotify.h),)
+ifneq ($(wildcard /usr/include/sys/inotify.h $(SYSROOT)/usr/include/*-linux-gnu/sys/inotify.h),)
   HAVE_INOTIFY=1
   CFLAGS += -DHAVE_INOTIFY
 endif

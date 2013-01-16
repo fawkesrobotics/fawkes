@@ -77,16 +77,21 @@ else
   WARN_TARGETS += warning_tolua_wrapper
 endif
 
+ifneq ($(HAVE_INOTIFY),1)
+  WARN_TARGETS += warning_inotify
+endif
+
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_libmagic warning_libxmlpp
+.PHONY: warning_libmagic warning_libxmlpp warning_yamlcpp warning_inotify
 warning_libmagic:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Restricted file type detection support$(TNORMAL) (file[-devel] (libmagic) not installed)"
-
 warning_libxmlpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)RCSoft graph utils cannot be built$(TNORMAL) (libxml++[-devel] not installed)"
 warning_yamlcpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)YAML navgraph utils cannot be built$(TNORMAL) (yaml-cpp[-devel] not installed)"
+warning_inotify:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)File monitoring utils cannot be built$(TNORMAL) (inotify headers not found)"
 endif
 
 $(LUALIBDIR)/fawkesutils.$(SOEXT): | $(LIBDIR)/libfawkesutils.$(SOEXT)
