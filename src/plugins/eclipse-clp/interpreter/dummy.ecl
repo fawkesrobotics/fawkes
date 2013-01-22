@@ -21,6 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+:- module(dummy).
+:- use_module("../utils/logging").
+
 :- log_info("Loading dummy interpreter").
 
 :- dynamic update/1.
