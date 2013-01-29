@@ -23,6 +23,9 @@
 #ifndef __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_BB_INTERFACE_H_
 #define __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_BB_INTERFACE_H_
 
+
+extern "C" int p_test();
+extern "C" int p_blackboard_add_interface();
 extern "C" int p_read_interface();
 extern "C" int p_write_interface();
 extern "C" int p_send_message();

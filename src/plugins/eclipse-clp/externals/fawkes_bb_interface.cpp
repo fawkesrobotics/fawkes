@@ -22,7 +22,6 @@
 
 #include "fawkes_bb_interface.h"
 #include <plugins/eclipse-clp/eclipse_thread.h>
-
 #include <core/exceptions/software.h>
 #include <interface/interface.h>
 #include <interfaces/ObjectPositionInterface.h>
@@ -35,6 +34,8 @@
 #include <map>
 #include <string>
 #include <list>
+#include <typeinfo>
+
 
 using namespace std;
 using namespace fawkes;
@@ -48,6 +49,41 @@ void parse_struct_args( EC_word iface_struct,
 			const InterfaceFieldIterator& begin,
 			const InterfaceFieldIterator& end,
 			unsigned int num_fields );
+
+int p_test(){
+// test(+Type, +Id, -fail)
+
+
+return EC_fail;
+}
+
+int
+p_blackboard_add_interface(){
+  // blackboard_add_interface(+TypeStr, +IdStr, -DataStruct)
+  char* id;
+  char* type;
+  EclipseAgentThread* eclipse = EclipseAgentThread::instance();
+  fawkes::Logger* logger  = eclipse->get_logger();
+  const char* s = typeid(EclipseAgentThread).name();
+  logger->log_info(eclipse->name(), "eclipseClass name: %s",s);
+  logger->log_info( eclipse->name(), "I'm now in p_blackboard_add_interface");
+  if ( EC_succeed != EC_arg( 1 ).is_string( &type ) )
+  {
+    printf( "First argument of blackboard_add_interface/3 is not a string\n" );
+    return EC_fail;
+  }
+
+  if ( EC_succeed != EC_arg( 2 ).is_string( &id ) )
+  {
+    printf( "Secound argument of blackboard_add_interface/3 is not a string\n" );
+    return EC_fail;
+  }
+  logger->log_info( eclipse->name(), "Input of add_interface ok");
+  //eclipse->katze(5);
+  //EC_word res = eclipse->blackBoard_add_interface(id, type);
+  //return unify(ec_arg(3), res);
+  return 0;
+}
 
 int
 p_read_interface()
