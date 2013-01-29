@@ -3,6 +3,7 @@
  */
 :- module(elevator).
 :- use_module("../utils/logging").
+:- use_module("../utils/tktools").
 :- use_module("golog").
 
 
@@ -80,7 +81,6 @@ holds(on(M), doo(E,S)) :-
 	golog:holds(on(M), S), not E = turnoff(M).
 holds(next_floor(N),S) :- /*writeln(holds(next_floor(N),S)),*/ golog:holds(on(N),S).
 
-
 %the acutal program being performed (called from eclipse_thread.cpp)
 run :-
     (
@@ -90,11 +90,12 @@ run :-
       log_info("Terminated")
       )      
       ;*/
+      attach_tktools,
+      tools,
       log_info("Request: doo(control,s0,S)"), 
-		  doo(control,s0,S),
+		  trace(doo(control,s0,S)),
       log_info("logging result now"),
-		  log_info("Result: %w",[S])
-          
+		  log_info("Result: %w",[S])   
     ).
 		
 
