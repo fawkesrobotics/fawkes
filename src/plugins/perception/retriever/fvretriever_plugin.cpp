@@ -59,26 +59,20 @@ FvRetrieverPlugin::FvRetrieverPlugin(Configuration *config)
     if ( (configs.find(cfg_name) == configs.end()) &&
 	 (ignored_configs.find(cfg_name) == ignored_configs.end()) )
     {
-
       std::string cfg_prefix = prefix + cfg_name + "/";
-
-      if ( ! vi->is_string() ) {
-        throw TypeMismatchException("Only values of type string are valid for camera"
-                                    " argument strings, but got %s for %s",
-                                    vi->type(), vi->path());
-      }
 
       bool active = true;
       try {
 	active = config->get_bool((cfg_prefix + "active").c_str());
       } catch (Exception &e) {} // ignored, assume enabled
+      std::string cam_string = config->get_string((cfg_prefix + "string").c_str());
 
       if (active) {
-        thread_list.push_back(new FvRetrieverThread(vi->get_string().c_str(),
+        thread_list.push_back(new FvRetrieverThread(cam_string,
                                                     cfg_name, cfg_prefix));
         configs.insert(cfg_name);
       } else {
-        //printf("Ignoring laser config %s\n", cfg_name.c_str());
+        //printf("Ignoring retriever config %s\n", cfg_name.c_str());
         ignored_configs.insert(cfg_name);
       }
     }
