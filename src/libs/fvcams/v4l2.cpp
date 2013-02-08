@@ -660,7 +660,8 @@ V4L2Camera::select_format()
   if (_height)
     format.fmt.pix.height = _height;
 
-  if (v4l2_ioctl(_dev, VIDIOC_S_FMT, &format))
+  int s_fmt_rv = v4l2_ioctl(_dev, VIDIOC_S_FMT, &format);
+  if (s_fmt_rv != 0 && errno != EBUSY)
   {
     //throw Exception(errno, "Failed to set video format");
     //}
