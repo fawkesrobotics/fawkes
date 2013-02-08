@@ -57,7 +57,7 @@ LIBS_ros_cmdvel = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesrosaspect MotorInterface
 OBJS_ros_cmdvel = cmdvel_thread.o cmdvel_plugin.o
 
-LIBS_ros_navigator = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_ros_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		     fawkesinterface fawkesrosaspect NavigatorInterface
 OBJS_ros_navigator = navigator_plugin.o navigator_thread.o
 
