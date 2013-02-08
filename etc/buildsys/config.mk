@@ -75,7 +75,7 @@ endif
 BUILD_TYPE ?= fawkes
 ARCH=$(shell uname -m)
 OS=$(shell uname -s)
-DISTRO=$(shell sed -n "/ID/ s/ID=//p" /etc/os-release)
+DISTRO=$(shell sed -n "/^ID=/ s/ID=//p" /etc/os-release)
 
 
 ### Directories
