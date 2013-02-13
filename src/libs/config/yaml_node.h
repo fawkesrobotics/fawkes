@@ -335,6 +335,35 @@ class YamlConfigurationNode
     }
   }
 
+  /** Get the list elements as string.
+   * The first element determines the type of the list.
+   * @return value string as list, i.e. as space-separated list of items
+   */
+  std::string
+  get_list_as_string() const
+  {
+    if (type_ != Type::SEQUENCE) {
+      throw fawkes::Exception("YamlConfiguration: value of %s is not a list", name_.c_str());
+    }
+    if (list_values_.empty())  return "";
+
+    std::string rv = "";
+    bool is_string = (determine_scalar_type() == Type::STRING);
+    if (is_string) {
+      rv = " \"" + list_values_[0] + "\"";
+      for (size_t i = 1; i < list_values_.size(); ++i) {
+	rv += " \"" + list_values_[i] + "\"";
+      }
+    } else {
+      rv = list_values_[0];
+      for (size_t i = 1; i < list_values_.size(); ++i) {
+	rv += " " + list_values_[i];
+      }
+    }
+
+    return rv;
+  }
+
   /** Retrieve value casted to given type T.
    * @return value casted as desired
    * @throw YAML::ScalarInvalid thrown if value does not exist or is of
@@ -496,27 +525,27 @@ class YamlConfigurationNode
   }
 
 
-  float get_float()
+  float get_float() const
   {
     return get_value<float>();
   }
 
-  unsigned int get_uint()
+  unsigned int get_uint() const
   {
     return get_value<unsigned int>();
   }
 
-  int get_int()
+  int get_int() const
   {
     return get_value<int>();
   }
 
-  bool get_bool()
+  bool get_bool() const
   {
     return get_value<bool>();
   }
 
-  Type::value determine_scalar_type()
+  Type::value determine_scalar_type() const
   {
     if (is_type<unsigned int>()) {
       int v = get_int();
@@ -538,7 +567,7 @@ class YamlConfigurationNode
     }
   }
 
-  std::string get_string()
+  std::string get_string() const
   {
     return get_value<std::string>();
   }

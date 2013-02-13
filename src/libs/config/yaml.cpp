@@ -235,7 +235,11 @@ YamlConfiguration::YamlValueIterator::get_as_string() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot get value of invalid iterator");
   }
-  return current_->second->get_value<std::string>();
+  if (current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE) {
+    return current_->second->get_list_as_string();
+  } else {
+    return current_->second->get_value<std::string>();
+  }
 }
 
 std::vector<float>
