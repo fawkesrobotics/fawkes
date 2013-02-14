@@ -80,8 +80,9 @@ void
 SkillerExecutionThread::init_failure_cleanup()
 {
   try {
-    if ( __skiller_if ) blackboard->close(__skiller_if);
-    if ( __skdbg_if )   blackboard->close(__skdbg_if);
+    if ( __skiller_if ) 	blackboard->close(__skiller_if);
+    if ( __skdbg_if )   	blackboard->close(__skdbg_if);
+    if ( __skdbg_if_layouted) 	blackboard->close(__skdbg_if_layouted);
 
     delete __lua_ifi;
     delete __clog;
@@ -125,13 +126,15 @@ SkillerExecutionThread::init()
   __lua_ifi = NULL;
   __skiller_if = NULL;
   __skdbg_if = NULL;
+  __skdbg_if_layouted = NULL;
 
   std::string reading_prefix = "/skiller/interfaces/" + __cfg_skillspace + "/reading/";
   std::string writing_prefix = "/skiller/interfaces/" + __cfg_skillspace + "/writing/";
 
   try {
-    __skiller_if = blackboard->open_for_writing<SkillerInterface>("Skiller");
-    __skdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("Skiller");
+    __skiller_if = 	  blackboard->open_for_writing<SkillerInterface>("Skiller");
+    __skdbg_if   = 	  blackboard->open_for_writing<SkillerDebugInterface>("Skiller");
+    __skdbg_if_layouted = blackboard->open_for_writing<SkillerDebugInterface>("SkillerLayouted");
     
     __lua  = new LuaContext();
     if (__cfg_watch_files) {
@@ -142,6 +145,7 @@ SkillerExecutionThread::init()
     __lua_ifi->open_reading_interfaces(reading_prefix);
     __lua_ifi->open_writing_interfaces(writing_prefix);
     __lua_ifi->add_interface("skdbg", __skdbg_if);
+    __lua_ifi->add_interface("skdbg_layouted", __skdbg_if_layouted);
     __lua_ifi->add_interface("skiller", __skiller_if);
 
     __lua->add_package_dir(LUADIR);
@@ -175,6 +179,9 @@ SkillerExecutionThread::init()
     __skdbg_if->set_graph("");
     __skdbg_if->set_graph_fsm("ACTIVE");
 
+    __skdbg_if_layouted->set_graph("");
+    __skdbg_if_layouted->set_graph_fsm("ACTIVE");
+
   } catch (Exception &e) {
     init_failure_cleanup();
     throw;
@@ -207,6 +214,7 @@ SkillerExecutionThread::finalize()
   blackboard->unregister_listener(this);
   blackboard->close(__skiller_if);
   blackboard->close(__skdbg_if);
+  blackboard->close(__skdbg_if_layouted);
 
   delete __lua;
   delete __clog;
@@ -329,7 +337,7 @@ void
 SkillerExecutionThread::publish_skdbg()
 {
   try {
-    __lua->do_string("skillenv.write_skiller_debug(interfaces.writing.skdbg, \"%s\", \"%s\", %s)",
+    __lua->do_string("skillenv.write_skiller_debug(interfaces.writing.skdbg, interfaces.writing.skdbg_layouted, \"%s\", \"%s\", %s)",
 		     __skdbg_what.c_str(), __skdbg_graphdir.c_str(),
 		     __skdbg_graphcolored ? "true" : "false");
   } catch (Exception &e) {

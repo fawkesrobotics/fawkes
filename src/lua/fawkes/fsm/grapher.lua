@@ -21,6 +21,7 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("fawkes.modinit")
+require("gv")
 
 --- Module to create DOT graphs.
 -- @author Tim Niemueller
@@ -31,6 +32,7 @@ local colored_output = true
 local rankdir = "TB"
 local integrated_subfsm = true
 local params_changed = false
+local generate_detailed_output = true
 
 
 --- Enable/disable colored output.
@@ -87,6 +89,13 @@ function set_integrated_subfsm(integrated)
 end
 
 local subfsm_num
+function set_generate_detailed_output(new_generate_detailed_output)
+   generate_detailed_output = new_generate_detailed_output
+end
+
+function get_generate_detailed_output()
+   return generate_detailed_output
+end
 
 local function generate_dotgraph(fsm, g, subgraph_name)
    assert(fsm, "Grapher requires valid FSM")
@@ -379,10 +388,21 @@ local function generate_dotgraph(fsm, g, subgraph_name)
    return g
 end
 
+local function layout_dotgraph(graph)
+   graph_handle = gv.readstring(graph)
+   gv.layout(graph_handle, "dot")
+   return gv.renderdata(graph_handle, "dot")
+end
+
 --- Generate DOT graph.
 -- @param fsm FSM to produce the graph for
 -- @return string containing the graph in the DOT language
-function dotgraph(fsm)
+function dotgraph(fsm, layout)
    local g = generate_dotgraph(fsm)
-   return gmod.generate(g)
+   local s = gmod.generate(g)
+   if layout then
+      return layout_dotgraph(s)
+   else
+      return s
+   end
 end
