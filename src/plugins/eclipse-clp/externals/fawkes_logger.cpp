@@ -27,6 +27,7 @@
 #include <core/exception.h>
 
 #include <eclipseclass.h>
+//#include "../eclipse_class_include.h"
 
 #include <cstring>
 #include <cstdio>

@@ -26,7 +26,8 @@
 #include <interface/interface.h>
 #include <interfaces/ObjectPositionInterface.h>
 
-#include <eclipseclass.h>
+//#include <eclipseclass.h>
+#include "../eclipse_class_include.h"
 
 #include <cstdio>
 #include <cstdlib>
