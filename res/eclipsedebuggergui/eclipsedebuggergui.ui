@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkMenu" id="menu_graphdir">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+  </object>
+  <object class="GtkWindow" id="wnd_eclipsedebuggergui">
+    <property name="width_request">800</property>
+    <property name="height_request">600</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Eclipse Debugger GUI</property>
+  </object>
+</interface>
