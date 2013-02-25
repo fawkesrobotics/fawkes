@@ -1,0 +1,289 @@
+<KinBody name="KinovaJacoKinbody">
+<!--
+  <RotationAxis>1 0 0 90</RotationAxis>
+-->
+
+  <!-- Base Cylinder -->
+  <Body name="Base" type="dynamic">
+    <Geom type="cylinder">
+      <Radius>0.03725</Radius>
+      <Height>0.15</Height>
+      <Translation>0 0.075 0</Translation>
+      <Diffusecolor>0.2 0.2 0.2</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- Link1
+       Sits right on top of "Base" with the same diameter, so the combined(!) height (which determines
+       the center of Link2) is important here! Height of Base and L1 are therefore estimated-->
+  <Body name="L1" type="dynamic">
+    <offsetfrom>Base</offsetfrom>
+    <Translation>0 0.15 0</Translation>
+    <Geom type="cylinder">
+      <Radius>0.03725</Radius>
+      <Height>0.048</Height>
+      <Translation>0 0.024 0</Translation>
+      <Diffusecolor>0.4 0.2 0.2</Diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <Extents>0.01 0.055 0.03725</Extents>
+      <Translation>0.02 0.07 0</Translation>
+      <Diffusecolor>0.4 0.2 0.2</Diffusecolor>
+    </Geom>
+    <Geom type="cylinder">
+      <Radius>0.03725</Radius>
+      <Height>0.03725</Height>
+      <Translation>0.018625 0.1225 0</Translation>
+      <RotationAxis>0 0 1 90</RotationAxis>
+      <Diffusecolor>0.4 0.2 0.2</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- Link2
+       The long link of the Jaco arm (41cm)-->
+  <Body name="L2" type="dynamic">
+    <offsetfrom>Base</offsetfrom>
+    <Translation>0 0.2725 0</Translation>
+    <Geom type="cylinder">
+      <Radius>0.03725</Radius>
+      <Height>0.04</Height>
+      <Translation>-0.02 0 0</Translation>
+      <RotationAxis>0 0 1 90</RotationAxis>
+      <Diffusecolor>0.2 0.4 0.2</Diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <Extents>0.01 0.205 0.03725</Extents>
+      <Translation>-0.03 0.205 0</Translation>
+      <Diffusecolor>0.2 0.4 0.2</Diffusecolor>
+    </Geom>
+    <Geom type="cylinder">
+      <Radius>0.03725</Radius>
+      <Height>0.04</Height>
+      <Translation>-0.02 0.410 0</Translation>
+      <RotationAxis>0 0 1 90</RotationAxis>
+      <Diffusecolor>0.2 0.4 0.2</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- Link3
+       The medium link that connects to the short 45° links -->
+  <Body name="L3" type="dynamic">
+    <offsetfrom>L2</offsetfrom>
+    <Translation>0 0.410 0</Translation>
+    <Geom type="cylinder">
+      <Radius>0.03725</Radius>
+      <Height>0.04855</Height>
+      <Translation>0.024275 0 0</Translation>
+      <RotationAxis>0 0 1 90</RotationAxis>
+      <Diffusecolor>0.2 0.2 0.4</Diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <Extents>0.0145 0.10365 0.029</Extents>
+      <Translation>0.0258 0.10365 0</Translation>
+      <Diffusecolor>0.2 0.2 0.4</Diffusecolor>
+    </Geom>
+    <Geom type="cylinder">
+      <Radius>0.029</Radius>
+      <Height>0.03</Height>
+      <Translation>0.0113 0.1923 0</Translation>
+      <Diffusecolor>0.2 0.2 0.4</Diffusecolor>
+    </Geom>
+    <Geom type="sphere">
+      <Radius>0.029</Radius>
+      <Translation>0.0113 0.1773 0</Translation>
+      <Diffusecolor>0.2 0.2 0.4</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+  <!-- Link4
+       First "curved" link. The midpoints of the two cylindric "end-splat" can be derived
+       from a vector with length 80.4mm , and rotating it by 55° (see Jaco doc). So if
+       "splat" is (x,y), then the second one is (cos55*x - sin55*y, sin55*x + cos55*y).
+
+       Here we are working with axis-orthogonal vector (80.4, 0), and we "start" this <Body>
+       with the first splat. That means that the center of the first splat is (0,0), and the second
+       one (0,0) - ( 80.4,0) + (cos55*80.4 - 0, sin55*80.4 + 0)
+         =         (-80.4,0) + (46.11554548 , 65.85982436)
+
+       Remember, that we need to shift 11.3mm down to be starting from the center of the last splat of L3.
+
+       Depending on the height h of those splats (especially the rotated one), we need to shift the center
+       of the cylinder by (h/2)*(cos35, -sin35)
+
+
+   -->
+  <Body name="L4" type="dynamic">
+    <offsetfrom>L3</offsetfrom>
+    <Translation>0.0113 0.2073</Translation>
+
+    <Geom type="cylinder">
+      <Radius>0.029</Radius>
+      <Height>0.03</Height>
+      <Translation>0 0.015 0</Translation>
+      <Diffusecolor>0.6 0.6 0.2</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.029</Radius>
+      <!-- Flat splat -->
+      <!--
+      <Height>0.0001</Height>
+      <Translation>-0.034284455 0.065859824 0</Translation>
+      -->
+
+      <!-- Splat with height 3cm -->
+      <Height>0.03</Height>
+      <Translation>-0.02199718 0.05725617 0</Translation>
+
+      <RotationAxis>0 0 1 55</RotationAxis>
+      <Diffusecolor>0.6 0.6 0.2</Diffusecolor>
+    </Geom>
+
+    <Geom type="sphere">
+      <Radius>0.029</Radius>
+      <Translation>0.0 0.04 0</Translation>
+      <Diffusecolor>0.6 0.6 0.2</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+  <!-- Link5
+       Second "curved" link.
+       Like link 4. Create similar link, then rotate whole by 55°
+  -->
+  <Body name="L5" type="dynamic">
+    <offsetfrom>L4</offsetfrom>
+    <Translation>-0.034284455 0.065859824 0</Translation>
+    <RotationAxis>0 0 1 55</RotationAxis>
+
+    <Geom type="cylinder">
+      <Radius>0.029</Radius>
+      <Height>0.03</Height>
+      <Translation>0 0.015 0</Translation>
+      <Diffusecolor>0.2 0.6 0.6</Diffusecolor>
+    </Geom>
+    <Geom type="cylinder">
+      <Radius>0.029</Radius>
+      <Height>0.03</Height>
+      <Translation>0.02199718 0.05725617 0</Translation>
+      <RotationAxis>0 0 1 -55</RotationAxis>
+      <Diffusecolor>0.2 0.6 0.6</Diffusecolor>
+    </Geom>
+    <Geom type="sphere">
+      <Radius>0.029</Radius>
+      <Translation>0.0 0.04 0</Translation>
+      <Diffusecolor>0.2 0.6 0.6</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- Gripper -->
+  <Body name="Gripper_Base" type="dynamic">
+    <offsetfrom>L5</offsetfrom>
+    <Translation>0.034284455 0.065859824 0</Translation>
+    <RotationAxis>0 0 1 -55</RotationAxis>
+
+    <Geom type="cylinder">
+      <Radius>0.029</Radius>
+      <Height>0.02</Height>
+      <Translation>0 0.01 0</Translation>
+      <Diffusecolor>0.8 0.4 0.2</Diffusecolor>
+    </Geom>
+
+    <!-- base cylinders for fingers -->
+    <!--
+    <Geom type="cylinder">
+      <Radius>0.02</Radius>
+      <Height>0.06</Height>
+      <Translation>0.02 0.05 0.02</Translation>
+      <RotationAxis>1 0 0 30</RotationAxis>
+      <RotationAxis>0 1 0 60</RotationAxis>
+      <Diffusecolor>0.8 0.4 0.2</Diffusecolor>
+    </Geom>
+    <Geom type="cylinder">
+      <Radius>0.02</Radius>
+      <Height>0.06</Height>
+      <Translation>-0.02 0.05 0.02</Translation>
+      <RotationAxis>1 0 0 30</RotationAxis>
+      <RotationAxis>0 1 0 -60</RotationAxis>
+      <Diffusecolor>0.8 0.4 0.2</Diffusecolor>
+    </Geom>
+    <Geom type="cylinder">
+      <Radius>0.02</Radius>
+      <Height>0.06</Height>
+      <Translation>0 0.05 -0.02</Translation>
+      <RotationAxis>1 0 0 30</RotationAxis>
+      <RotationAxis>0 1 0 180</RotationAxis>
+      <Diffusecolor>0.8 0.4 0.2</Diffusecolor>
+    </Geom>
+    -->
+  </Body>
+
+
+  <Joint name="j1" type="hinge" circular="true">
+    <Body>Base</Body>
+    <Body>L1</Body>
+    <offsetfrom>L1</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 1 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j2" type="hinge" circular="true">
+    <Body>L1</Body>
+    <Body>L2</Body>
+    <offsetfrom>L2</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>1 0 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j3" type="hinge" circular="true">
+    <Body>L2</Body>
+    <Body>L3</Body>
+    <offsetfrom>L3</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>1 0 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j4" type="hinge" circular="true">
+    <Body>L3</Body>
+    <Body>L4</Body>
+    <offsetfrom>L4</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 1 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j5" type="hinge" circular="true">
+    <Body>L4</Body>
+    <Body>L5</Body>
+    <offsetfrom>L5</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 1 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j6" type="hinge" circular="true">
+    <Body>L5</Body>
+    <Body>Gripper_Base</Body>
+    <offsetfrom>Gripper_Base</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 1 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+</KinBody>
