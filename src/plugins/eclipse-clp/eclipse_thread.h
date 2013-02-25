@@ -73,7 +73,7 @@ class EclipseAgentThread
   std::vector< fawkes::Interface* > m_reading_ifaces;
   std::vector< fawkes::Interface* > m_writing_ifaces;
 
-  std::map< std::string, fawkes::Interface* > m_registered_interfaces;
+  std::multimap< std::string, fawkes::Interface* > m_registered_interfaces;
 };
 
 #endif /* __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_ */
