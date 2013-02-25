@@ -104,14 +104,6 @@ EclipseAgentThread::init()
   load_file( agent_path.c_str() );
 
    // register external predicates
-  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( agent.c_str(), 0 ) ) )
-  { throw Exception( "Registering external predicate read_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( agent.c_str(), 0 ) ) )
-  { throw Exception( "Registering external predicate write_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( agent.c_str(), 0 ) ) )
-  { throw Exception( "Registering external predicate send_message/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( agent.c_str(), 0 ) ) )
-  { throw Exception( "Registering external predicate recv_messages/2 failed" ); }
 	if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate log/2 failed" ); }
 
