@@ -523,7 +523,7 @@ class MirrorCalibTool::CartesianImage
     }
     PixelPoint pp = to_pixel(p);
     const YUV_t ignr(0);
-    if (mask() == 0 ||
+    if (mask() != 0 ||
         (YUV422_PLANAR_Y_AT(mask(), width(), pp.x, pp.y) != ignr.Y &&
          YUV422_PLANAR_U_AT(mask(), width(), height(), pp.x, pp.y) != ignr.U &&
          YUV422_PLANAR_V_AT(mask(), width(), height(), pp.x, pp.y) != ignr.V)) {
