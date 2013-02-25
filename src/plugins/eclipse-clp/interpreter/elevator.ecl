@@ -12,6 +12,7 @@
 :- dynamic update/1.
 :- dynamic terminate/1.
 
+
 %% event handlers
 handle_update(update) :-
         log_debug("Event: UPDATE"),
@@ -90,12 +91,11 @@ run :-
       log_info("Terminated")
       )      
       ;*/
-      attach_tktools,
-      tools,
       log_info("Request: doo(control,s0,S)"), 
-		  trace(doo(control,s0,S)),
-      log_info("logging result now"),
-		  log_info("Result: %w",[S])   
+      doo(control,s0,S),
+		  log_info("Result: %w",[S]),
+      repeat, %will loop infinitly, needed for testing tktool attachment
+      fail   
     ).
 		
 
