@@ -80,10 +80,8 @@ p_blackboard_add_interface(){
     return EC_fail;
   }
   logger->log_info( eclipse->name(), "Input of add_interface ok");
-  //eclipse->katze(5);
-  //EC_word res = eclipse->blackBoard_add_interface(id, type);
-  //return unify(ec_arg(3), res);
-  return 0;
+  EC_word res = eclipse->blackboard_add_interface(id, type);
+  return unify( EC_arg(3), res );
 }
 
 int
