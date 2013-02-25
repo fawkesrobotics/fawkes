@@ -71,6 +71,7 @@ class EclipseAgentThread
   static EclipseAgentThread* m_instance;
 
   bool m_initialized;
+  std::string agent;
 
   std::vector< fawkes::Interface* > m_reading_ifaces;
   std::vector< fawkes::Interface* > m_writing_ifaces;

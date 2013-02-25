@@ -76,7 +76,7 @@ EclipseAgentThread::init()
   }
   
 
-  std::string agent = strdup( config->get_string( "/eclipse-clp/agent" ).c_str() );
+  agent = strdup( config->get_string( "/eclipse-clp/agent" ).c_str() );
 
   try{
   //set default module in which goals called from the top-level will be executed
