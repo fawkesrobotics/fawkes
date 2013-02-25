@@ -23,11 +23,14 @@
 
 :- module(dummy).
 :- use_module("../utils/logging").
+:- use_module("../externals/blackboard").
 
 :- log_info("Loading dummy interpreter").
 
 :- dynamic update/1.
 :- dynamic terminate/1.
+
+:- local initialization(init).
 
 %% event handlers
 handle_update(update) :-
@@ -42,6 +45,10 @@ handle_terminate(terminate) :-
 %% setup event handlers
 :- set_event_handler(update, handle_update/1).
 :- set_event_handler(terminate, handle_terminate/1).
+
+init :- bb_connect("deepblue"),
+        bb_open_interface(r, "TestInterface", "eclipse_clp_test"),
+        bb_read_interfaces.
 
 run :-
         shelf_create(summands(0,0), Shelf),
@@ -79,11 +86,10 @@ process_events(Shelf) :-
         ).
 
 read_result(R) :-
-        read_interface("eclipse_clp_test", D),
-        arg(result of data_TestInterface, D, R).
+        bb_read_interfaces,
+        bb_read_interface("eclipse_clp_test", "result", R).
 
 send_calculate_msg(N1, N2) :-
-        send_message("eclipse_clp_test",
-                     data_TestInterface_CalculateMessage{summand:N1, addend:N2}).
+        bb_send_message("eclipse_clp_test", "CalculateMessage", [["summand",N1], ["addend",N2]]).
 
 :- log_info( "Loading dummy interpreter done" ).
