@@ -65,7 +65,6 @@ class EclipseAgentThread
 
  private: /* methods */
   bool load_file( const char* filename );
-  bool register_interface( fawkes::Interface* interface );
 
  private: /* members */
   static EclipseAgentThread* m_instance;
