@@ -71,22 +71,22 @@ ifeq ($(HAVE_OPENROBOTINO),1)
   else
     WARN_TARGETS += warning_pcl
   endif
-
-  ifeq ($(HAVE_ROS),1)
-    ifeq ($(call ros-have-pkg,sensor_msgs),1)
-      CFLAGS_ros_joints_thread          = $(CFLAGS) $(CFLAGS_ROS) $(call ros-pkg-cflags,sensor_msgs)
-      CFLAGS_robotino_ros_joints_plugin = $(CFLAGS_ros_joints_thread)
-      LDFLAGS_robotino_ros_joints      += $(LDFLAGS_ROS) $(call ros-pkg-lflags,sensor_msgs)
-
-      PLUGINS_all += $(PLUGINDIR)/robotino-ros-joints.$(SOEXT)
-    else
-      WARN_TARGETS += warning_sensor_msgs
-    endif
-  else
-    WARN_TARGETS += warning_ros
-  endif
 else
   WARN_TARGETS += warning_openrobotino
+endif
+
+ifeq ($(HAVE_ROS),1)
+  ifeq ($(call ros-have-pkg,sensor_msgs),1)
+    CFLAGS_ros_joints_thread          = $(CFLAGS) $(CFLAGS_ROS) $(call ros-pkg-cflags,sensor_msgs)
+    CFLAGS_robotino_ros_joints_plugin = $(CFLAGS_ros_joints_thread)
+    LDFLAGS_robotino_ros_joints      += $(LDFLAGS_ROS) $(call ros-pkg-lflags,sensor_msgs)
+
+    PLUGINS_all += $(PLUGINDIR)/robotino-ros-joints.$(SOEXT)
+  else
+    WARN_TARGETS += warning_sensor_msgs
+  endif
+else
+  WARN_TARGETS += warning_ros
 endif
 
 OBJS_all = $(OBJS_robotino) $(OBJS_robotino_joystick) $(OBJS_robotino_ir_pcl) \
