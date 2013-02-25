@@ -26,7 +26,7 @@
 
 #include <interfaces/TestInterface.h>
 #include <core/exception.h>
-//#include <eclipseclass.h>
+#include <eclipseclass.h>
 
 #include <cstdio>
 #include <cstdlib>
