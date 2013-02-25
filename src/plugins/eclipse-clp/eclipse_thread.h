@@ -28,8 +28,6 @@
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
-#include "eclipse_class_include.h"
-//#include <eclipseclass.h>
 
 
 #include <map>
