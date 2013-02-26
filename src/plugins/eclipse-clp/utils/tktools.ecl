@@ -37,7 +37,7 @@ attach_tktools :- log_debug("Attaching tktools, please enter the following host 
   log_debug("tktools attached successfully").
 
 
-connecting(H, P) :- log_debug(H / P),
+connecting(H, P) :- log_debug( "%s / %d", [H, P]),
                     bb_read_interfaces,
                     bb_write_interface("eclipse_clp_connect", "port", P),
                     bb_write_interface("eclipse_clp_connect", "host", H),
