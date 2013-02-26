@@ -88,9 +88,13 @@ WebviewStaticRequestProcessor::process_request(const char *url,
 	return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN, "Access forbidden");
       } else {
 	char tmp[1024];
-	strerror_r(errno, tmp, sizeof(tmp));
-	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	if (strerror_r(errno, tmp, sizeof(tmp)) == 0) {
+	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
 				     "File access failed: %s",  tmp);
+	} else {
+	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+				     "File access failed: Unknown error");
+	}
       }
     } else {
       if (strncmp(realfile, __htdocs_dir, __htdocs_dir_len) == 0) {
