@@ -137,30 +137,6 @@ EclipseAgentThread::post_event( const char* event )
   free( atom );
 }
 
-/** Read all registered interfaces. */
-void
-EclipseAgentThread::read_interfaces()
-{
-  for ( vector< Interface* >::iterator i = m_reading_ifaces.begin();
-	i != m_reading_ifaces.end();
-	++i )
-  { (*i)->read(); }
-
-  for ( vector< Interface* >::iterator i = m_writing_ifaces.begin();
-	i != m_writing_ifaces.end();
-	++i )
-  { (*i)->read(); }
-}
-
-/** Write the registered interface that have been opened for writing. */
-void
-EclipseAgentThread::write_interfaces()
-{
-  for ( vector< Interface* >::iterator i = m_writing_ifaces.begin();
-	i != m_writing_ifaces.end();
-	++i )
-  { (*i)->write(); }
-}
 
 /** Load a file into the ECLiPSe context.
  * @param filename the name of the file
@@ -181,22 +157,6 @@ EclipseAgentThread::load_file( const char* filename )
   return true;
 }
 
-
-
-
-/** Get the registered interface with the given id.
- * @param id the interface id
- * @return the interface or NULL if no interface with the given id is registerd
- */
-fawkes::Interface*
-EclipseAgentThread::get_registered_interface( const char* id )
-{
-  map< string, fawkes::Interface* >::iterator i = m_registered_interfaces.find( string( id ) );
-
-  if ( i == m_registered_interfaces.end() ) { return NULL; }
-
-  return i->second;
-}
 
 /** Get the logger.
  * @return the logger

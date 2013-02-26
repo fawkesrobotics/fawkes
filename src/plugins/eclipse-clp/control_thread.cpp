@@ -90,7 +90,5 @@ AgentControlThread::loop()
 
   m_test_iface->write();
 
-  m_eclipse_thread->read_interfaces();
   m_eclipse_thread->post_event( "update" );
-  m_eclipse_thread->write_interfaces();
 }

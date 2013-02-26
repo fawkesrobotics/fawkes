@@ -30,7 +30,6 @@
 
 
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -53,10 +52,6 @@ class EclipseAgentThread
   virtual void once();
 
   void post_event( const char* );
-  void read_interfaces();
-  void write_interfaces();
-
-  fawkes::Interface* get_registered_interface( const char* id );
   fawkes::Logger*    get_logger();
 
   static EclipseAgentThread* instance();
@@ -70,10 +65,6 @@ class EclipseAgentThread
   bool m_initialized;
   std::string agent;
 
-  std::vector< fawkes::Interface* > m_reading_ifaces;
-  std::vector< fawkes::Interface* > m_writing_ifaces;
-
-  std::multimap< std::string, fawkes::Interface* > m_registered_interfaces;
 };
 
 #endif /* __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_ */

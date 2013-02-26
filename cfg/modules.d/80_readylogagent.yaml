@@ -8,13 +8,3 @@ readylogagent:
   
   #Basedirectory of ECLiPSe
   eclipse_dir: /home/gesche/fawkes/eclipsecdt
-
-  interfaces:
-    elevator:
-      reading:
-        readylog: TestInterface::readylog_test
-      writing: 
-        connection: EclipseDebuggerInterface::readylog_connect
-    dummy:
-      reading:
-        readylog: TestInterface::readylog_test
