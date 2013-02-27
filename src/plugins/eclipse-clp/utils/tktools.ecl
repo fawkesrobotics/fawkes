@@ -10,7 +10,7 @@
 
 :- local initialization(init).
 
-init :- bb_connect("deepblue"),
+init :- bb_connect("localhost"),
         bb_open_interface(w,"EclipseDebuggerInterface","eclipse_clp_connect"),
         event_after_every(msg_check, 1).
 

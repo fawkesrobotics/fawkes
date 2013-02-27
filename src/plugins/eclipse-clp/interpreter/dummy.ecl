@@ -46,7 +46,7 @@ handle_terminate(terminate) :-
 :- set_event_handler(update, handle_update/1).
 :- set_event_handler(terminate, handle_terminate/1).
 
-init :- bb_connect("deepblue"),
+init :- bb_connect("localhost"),
         bb_open_interface(r, "TestInterface", "eclipse_clp_test"),
         bb_read_interfaces.
 
