@@ -59,9 +59,9 @@ EclipseDebugger::on_connect()
       __debugger_if->read();
       char* host = __debugger_if->host();
       unsigned int port = __debugger_if->port();
-      std::stringstream command;
-      command << "tktools -h " << host << " -p " << port;      
-      system(command.str().c_str());
+      std::stringstream portstr;
+      portstr << port;
+      execlp("tktools", "tktools", "-h", host, "-p", portstr.str().c_str(), (char *) 0);
     }
 
   } catch (Exception &e) {
