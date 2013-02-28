@@ -98,6 +98,8 @@ class TabletopObjectsThread
 
   bool is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p, PointType &br_p1p, PointType &br_p2p);
 
+  std::vector<pcl::PointIndices> extract_object_clusters(CloudConstPtr input);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
