@@ -956,26 +956,7 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_)
 
-  ColorCloudPtr tmp_clusters(new ColorCloud());
-  tmp_clusters->header.frame_id = clusters_->header.frame_id;
-  std::vector<int> &indices = inliers->indices;
-  tmp_clusters->height = 1;
-  //const size_t tsize = table_points->points.size();
-  //tmp_clusters->width = tsize;
-  //tmp_clusters->points.resize(tsize);
-  tmp_clusters->width = indices.size();
-  tmp_clusters->points.resize(indices.size());
-  for (size_t i = 0; i < indices.size(); ++i) {
-    PointType &p1 = temp_cloud2->points[i];
-    //PointType &p1 = table_points->points[i];
-    ColorPointType &p2 = tmp_clusters->points[i];
-    p2.x = p1.x;
-    p2.y = p1.y;
-    p2.z = p1.z;
-    p2.r = table_color[0];
-    p2.g = table_color[1];
-    p2.b = table_color[2];
-  }
+  ColorCloudPtr tmp_clusters = colorize_cluster(temp_cloud2, inliers->indices, table_color);
 
   TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
 
@@ -991,7 +972,6 @@ TabletopObjectsThread::loop()
     ColorCloudPtr colored_clusters(new ColorCloud());
     colored_clusters->header.frame_id = clusters_->header.frame_id;
     std::vector<pcl::PointIndices>::const_iterator it;
-    unsigned int cci = 0;
     //unsigned int i = 0;
     unsigned int num_points = 0;
     for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
@@ -1005,17 +985,7 @@ TabletopObjectsThread::loop()
       {
         pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
 
-        std::vector<int>::const_iterator pit;
-        for (pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
-          ColorPointType &p1 = colored_clusters->points[cci++];
-          PointType &p2 = cloud_objs_->points[*pit];
-          p1.x = p2.x;
-          p1.y = p2.y;
-          p1.z = p2.z;
-          p1.r = cluster_colors[centroid_i][0];
-          p1.g = cluster_colors[centroid_i][1];;
-          p1.b = cluster_colors[centroid_i][2];;
-        }
+        *colored_clusters += *colorize_cluster(cloud_objs_, cluster_colors[centroid_i]);
       }
 
       *tmp_clusters += *colored_clusters;
@@ -1102,6 +1072,33 @@ TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
        //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
 
        return cluster_indices;
+}
+
+TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster(
+    CloudConstPtr input_cloud,
+    const std::vector<int> &cluster,
+    const uint8_t color[]) {
+  return colorize_cluster(CloudConstPtr(new Cloud(*input_cloud, cluster)), color);
+}
+
+TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster(
+    CloudConstPtr input_cloud,
+    const uint8_t color[]) {
+  ColorCloudPtr result(new ColorCloud());
+  result->resize(input_cloud->size());
+  Cloud::const_iterator pit;
+  uint i = 0;
+  for (pit = input_cloud->begin(); pit != input_cloud->end(); ++pit, ++i) {
+    ColorPointType &p1 = result->points[i];
+    const PointType &p2 = *pit;
+    p1.x = p2.x;
+    p1.y = p2.y;
+    p1.z = p2.z;
+    p1.r = color[0];
+    p1.g = color[1];
+    p1.b = color[2];
+  }
+  return result;
 }
 
 void

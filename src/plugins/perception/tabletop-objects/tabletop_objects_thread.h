@@ -100,6 +100,10 @@ class TabletopObjectsThread
 
   std::vector<pcl::PointIndices> extract_object_clusters(CloudConstPtr input);
 
+  ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const std::vector<int> &cluster, const uint8_t color[]);
+
+  ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const uint8_t color[]);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
