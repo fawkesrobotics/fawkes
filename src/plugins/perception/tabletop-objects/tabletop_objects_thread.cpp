@@ -960,36 +960,13 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
 
-  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
-  centroids.resize(MAX_CENTROIDS);
-  unsigned int centroid_i = 0;
+  centroids_.resize(MAX_CENTROIDS);
+  unsigned int object_count = 0;
+  reset_obj_ids();
 
   if (cloud_objs_->points.size() > 0) {
-    std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(cloud_objs_);
-
-    //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
-
-    ColorCloudPtr colored_clusters(new ColorCloud());
-    colored_clusters->header.frame_id = clusters_->header.frame_id;
-    std::vector<pcl::PointIndices>::const_iterator it;
-    //unsigned int i = 0;
-    unsigned int num_points = 0;
-    for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
-      num_points += it->indices.size();
-
-    if (num_points > 0) {
-      colored_clusters->points.resize(num_points);
-      for (it = cluster_indices.begin();
-           it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
-           ++it, ++centroid_i)
-      {
-        pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
-
-        *colored_clusters += *colorize_cluster(cloud_objs_, cluster_colors[centroid_i]);
-      }
-
-      *tmp_clusters += *colored_clusters;
-    } else {
+    object_count = add_objects(cloud_objs_, tmp_clusters);
+    if (object_count == 0) {
       logger->log_info(name(), "No clustered points found");
     }
   } else {
@@ -997,9 +974,9 @@ TabletopObjectsThread::loop()
   }
 
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    set_position(pos_ifs_[i], i < centroid_i, centroids[i]);
+    set_position(pos_ifs_[i], i < object_count, centroids_[i]);
   }
-  centroids.resize(centroid_i);
+  centroids_.resize(object_count);
 
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
 
@@ -1038,7 +1015,7 @@ TabletopObjectsThread::loop()
 
     visthread_->visualize(input_->header.frame_id,
                           table_centroid, normal, hull_vertices, model_vertices,
-                          good_hull_edges, centroids);
+                          good_hull_edges, centroids_);
   }
 #endif
 
@@ -1074,7 +1051,46 @@ TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
        return cluster_indices;
 }
 
-TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster(
+void TabletopObjectsThread::reset_obj_ids() {
+//  free_obj_ids_ new std::queue<int>(MAX_CENTROIDS);
+//  for (unsigned int i = 0; i < free_obj_ids_.size(); i++)
+//    free_obj_ids_.pop();
+  while (!free_obj_ids_.empty())
+    free_obj_ids_.pop();
+  for (int i = 0; i < MAX_CENTROIDS; i++) {
+    free_obj_ids_.push(i);
+  }
+}
+
+unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
+  std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
+
+  std::vector<pcl::PointIndices>::const_iterator it;
+  //unsigned int i = 0;
+  unsigned int num_points = 0;
+  for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+    num_points += it->indices.size();
+
+  if (num_points > 0) {
+    for (it = cluster_indices.begin();
+        it != cluster_indices.end() && !free_obj_ids_.empty();
+        ++it)
+    {
+      int centroid_i = free_obj_ids_.front();
+      free_obj_ids_.pop();
+      // calculate each centroid and save it to the vector centroids
+      pcl::compute3DCentroid(*input_cloud, it->indices, centroids_[centroid_i]);
+      *tmp_clusters += *colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
+    }
+  }
+  else {
+    logger->log_info(name(), "No clustered points found");
+    return 0;
+  }
+  return cluster_indices.size();
+}
+
+TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster (
     CloudConstPtr input_cloud,
     const std::vector<int> &cluster,
     const uint8_t color[]) {

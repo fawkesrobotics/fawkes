@@ -104,6 +104,10 @@ class TabletopObjectsThread
 
   ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const uint8_t color[]);
 
+  unsigned int add_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
+
+  void reset_obj_ids();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
@@ -146,6 +150,9 @@ class TabletopObjectsThread
   CloudPtr simplified_polygon_;
 
   unsigned int loop_count_;
+
+  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids_;
+  std::queue<unsigned int> free_obj_ids_;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;
