@@ -215,7 +215,11 @@ class SkillGuiBatchRenderer
   {
 
     FILE *f = fopen(infile.c_str(), "r");
+#ifdef GRAPHVIZ_ATLEAST_230
+    Agraph_t *g = agread(f,0);
+#else
     Agraph_t *g = agread(f);
+#endif
     if (g) {
       gvLayout(gvc, g, (char *)"dot");
       gvRender(gvc, g, (char *)"skillguicairo", NULL);
@@ -236,7 +240,7 @@ class SkillGuiBatchRenderer
   void run()
   {
     struct dirent *d;
-    
+
     while ((d = readdir(directory)) != NULL) {
       if (fnmatch("*.dot", d->d_name, FNM_PATHNAME | FNM_PERIOD) == 0) {
 	char infile_real[PATH_MAX];
@@ -276,7 +280,7 @@ class SkillGuiBatchRenderer
       return CAIRO_STATUS_WRITE_ERROR;
     }
   }
-  
+
   /** Post-process files. Only valid for PNGs. */
   void postprocess()
   {
