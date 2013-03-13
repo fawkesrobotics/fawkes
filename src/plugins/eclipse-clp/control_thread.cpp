@@ -54,6 +54,7 @@ AgentControlThread::init()
 {
   // open & register interfaces
   m_test_iface = blackboard->open_for_writing< TestInterface >("eclipse_clp_test");
+  m_debug_iface = blackboard->open_for_reading< EclipseDebuggerInterface >("eclipse_clp_connect");
 }
 
 bool
@@ -74,7 +75,9 @@ AgentControlThread::finalize()
 void
 AgentControlThread::loop()
 {
-  m_test_iface->read();
+  if (m_debug_iface->has_writer()){
+    m_eclipse_thread->post_event( "check_debug_msg" ); //if the debug interface has a writer (so tktools module is loaded), then post event to check for tktool connection request within eclipse
+  }
 
   while ( !m_test_iface->msgq_empty() )
   {

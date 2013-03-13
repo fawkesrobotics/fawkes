@@ -27,6 +27,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/blackboard.h>
 #include <aspect/logging.h>
+#include <interfaces/EclipseDebuggerInterface.h>
 
 namespace fawkes {
   class TestInterface;
@@ -53,6 +54,7 @@ class AgentControlThread
   EclipseAgentThread* m_eclipse_thread;
 
   fawkes::TestInterface* m_test_iface;
+  fawkes::EclipseDebuggerInterface* m_debug_iface;
 };
 
 #endif /* __PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H_ */

@@ -22,7 +22,8 @@ CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
 
 LIBS_eclipse_clp = fawkescore fawkesinterface fawkesblackboard \
-                     fawkesaspects fawkesutils eclipse TestInterface
+                     fawkesaspects fawkesutils eclipse TestInterface \
+                     EclipseDebuggerInterface
 OBJS_eclipse_clp = plugin.o control_thread.o eclipse_thread.o \
 		     externals/fawkes_logger.o       \
 		     externals/blackboard.o
