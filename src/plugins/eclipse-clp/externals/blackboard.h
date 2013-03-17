@@ -27,6 +27,7 @@
 extern "C" int p_connect_to_blackboard();
 extern "C" int p_disconnect_from_blackboard();
 extern "C" int p_is_alive();
+extern "C" int p_is_connected();
 
 extern "C" int p_open_interface();
 extern "C" int p_close_interface();

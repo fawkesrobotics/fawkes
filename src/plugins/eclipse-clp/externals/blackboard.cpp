@@ -26,6 +26,7 @@
 #include <blackboard/remote.h>
 
 #include <eclipseclass.h>
+#include <plugins/eclipse-clp/eclipse_thread.h>
 
 #include <vector>
 
@@ -60,6 +61,13 @@ public:
   void connect( const char* host )
   {
     m_blackboard = new RemoteBlackBoard( host, 1910 );
+  }
+
+
+   /** Get local blackboard from EclipseAgentThread. */
+  void connect()
+  {
+    m_blackboard = EclipseAgentThread::instance()->get_blackboard();
   }
 
   /** Query connection status.
@@ -120,18 +128,33 @@ p_connect_to_blackboard()
     return EC_fail;
   }
 
+  // get remote/local blackboard mode (r for remote, l for local)
+  EC_atom mode;
+
+  if ( EC_succeed != EC_arg( 1 ).is_atom( &mode ) )
+  {
+    printf( "p_connect_to_blackboard(): no blackboard mode given\n" );
+    return EC_fail;
+  }
+
   // get hostname
   char* hostname;
 
-  if ( EC_succeed != EC_arg( 1 ).is_string( &hostname ) )
+  if ( EC_succeed != EC_arg( 2 ).is_string( &hostname ) )
   {
-    printf( "p_connect_to_blackboard(): first argument is not a string\n" );
+    printf( "p_connect_to_blackboard(): secound argument is not a string\n" );
     return EC_fail;
   }
 
   try
   {
-    g_blackboard.connect( hostname );
+    if ( 0 == strcmp( "r", mode.name() ) ){
+      g_blackboard.connect( hostname );
+    }else{
+      if ( 0 == strcmp( "l", mode.name() ) ){
+        g_blackboard.connect();
+      }
+    }
   }
   catch ( Exception& e )
   {
@@ -173,6 +196,15 @@ p_is_alive()
   { return EC_fail; }
 }
 
+int
+p_is_connected()
+{
+  if ( g_blackboard.connected() ){
+    return EC_succeed;
+  }else{
+    return EC_fail;
+  }
+}
 
 int
 p_open_interface()
