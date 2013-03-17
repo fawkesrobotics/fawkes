@@ -29,12 +29,12 @@
 #include <aspect/blackboard.h>
 
 
-
 #include <string>
 #include <vector>
 
 namespace fawkes {
   class Interface;
+  class EclExternalBlackBoard;
 }
 
 class EclipseAgentThread 
@@ -43,7 +43,9 @@ class EclipseAgentThread
   public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect
 {
+
  public:
+  friend class fawkes::EclExternalBlackBoard;
   EclipseAgentThread();
   virtual ~EclipseAgentThread();
 
@@ -64,6 +66,9 @@ class EclipseAgentThread
 
   bool m_initialized;
   std::string agent;
+
+ protected:
+   fawkes::BlackBoard* get_blackboard(){ return blackboard; }
 
 };
 
