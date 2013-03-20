@@ -24,7 +24,7 @@
 :- module(tktools).
 :- lib(remote_tools).
 
-:- use_module("../externals/blackboard"). 
+:- use_module("../externals/blackboard").
 :- use_module("../utils/logging").
 :- export(attach_tktools/0).
 :- reexport remote_tools.
@@ -33,7 +33,7 @@
 
 :- local initialization(init).
 
-init :- bb_connect("localhost"),
+init :- bb_ensure_connected,
         bb_open_interface(w,"EclipseDebuggerInterface","eclipse_clp_connect").
 
 
