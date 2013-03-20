@@ -22,7 +22,8 @@
 
 %% module definition
 :- module(blackboard).
-:- export bb_connect/1.
+:- export bb_connect_remote/1.
+:- export bb_connect/0.
 :- export bb_disconnect/0.
 :- export bb_is_alive/0.
 :- export bb_open_interface/3.
@@ -37,9 +38,11 @@
 :- export bb_recv_messages/2.
 
 %% definition of external predicates
-:- external(bb_connect/1, p_connect_to_blackboard).
+:- external(bb_connect_remote/1, p_connect_to_remote_blackboard).
+:- external(bb_connect/0, p_connect_to_eclipse_blackboard).
 :- external(bb_disconnect/0, p_disconnect_from_blackboard).
 :- external(bb_is_alive/0, p_is_alive).
+:- external(bb_is_connected/0, p_is_connected).
 :- external(bb_open_interface/3, p_open_interface).
 :- external(bb_close_interface/1, p_close_interface).
 :- external(bb_has_writer/1, p_has_writer).
@@ -57,3 +60,6 @@ bb_open_interface_writing(Type, Id) :-
 
 bb_open_interface_reading(Type, Id) :-
         bb_open_interface(r, Type, Id).
+
+bb_ensure_connected(Host) :- bb_is_connected ; bb_connect(r, Host).
+bb_ensure_connected :- bb_is_connected ; bb_connect(l,_)
