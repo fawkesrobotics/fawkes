@@ -24,7 +24,8 @@
 #ifndef __ECLIPSE_EXTERNALS_BLACKBOARD_H_
 #define __ECLIPSE_EXTERNALS_BLACKBOARD_H_
 
-extern "C" int p_connect_to_blackboard();
+extern "C" int p_connect_to_remote_blackboard();
+extern "C" int p_connect_to_eclipse_blackboard();
 extern "C" int p_disconnect_from_blackboard();
 extern "C" int p_is_alive();
 extern "C" int p_is_connected();

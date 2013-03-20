@@ -120,20 +120,11 @@ EclExternalBlackBoard g_blackboard;
 bool process_message_args(Message* msg, EC_word arg_list);
 
 int
-p_connect_to_blackboard()
+p_connect_to_remote_blackboard()
 {
   if ( g_blackboard.connected() )
   {
-    printf( "p_connect_to_blackboard(): already connected\n" );
-    return EC_fail;
-  }
-
-  // get remote/local blackboard mode (r for remote, l for local)
-  EC_atom mode;
-
-  if ( EC_succeed != EC_arg( 1 ).is_atom( &mode ) )
-  {
-    printf( "p_connect_to_blackboard(): no blackboard mode given\n" );
+    printf( "p_connect_to_remote_blackboard(): already connected\n" );
     return EC_fail;
   }
 
@@ -142,19 +133,13 @@ p_connect_to_blackboard()
 
   if ( EC_succeed != EC_arg( 2 ).is_string( &hostname ) )
   {
-    printf( "p_connect_to_blackboard(): secound argument is not a string\n" );
+    printf( "p_connect_to_remote_blackboard(): first argument is not a string\n" );
     return EC_fail;
   }
 
   try
   {
-    if ( 0 == strcmp( "r", mode.name() ) ){
-      g_blackboard.connect( hostname );
-    }else{
-      if ( 0 == strcmp( "l", mode.name() ) ){
-        g_blackboard.connect();
-      }
-    }
+    g_blackboard.connect( hostname );
   }
   catch ( Exception& e )
   {
@@ -165,6 +150,28 @@ p_connect_to_blackboard()
   return EC_succeed;
 }
 
+
+int
+p_connect_to_eclipse_blackboard()
+{
+  if ( g_blackboard.connected() )
+  {
+    printf( "p_connect_to_eclipse_blackboard(): already connected\n" );
+    return EC_fail;
+  }
+
+  try
+  {
+    g_blackboard.connect();
+  }
+  catch ( Exception& e )
+  {
+    e.print_trace();
+    return EC_fail;
+  }
+
+  return EC_succeed;
+}
 
 int
 p_disconnect_from_blackboard()
