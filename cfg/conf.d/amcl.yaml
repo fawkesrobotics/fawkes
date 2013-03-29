@@ -7,9 +7,9 @@ plugins/amcl:
   # Image file containing the map, must be a PNG file
   # If path starts with slash (/) it's considered to be absolute,
   # otherwise relative to the config directory
-  map_file: map.png','');
+  map_file: map.png
   # Resolution of the map; meters per pixel
-  resolution: 0.05,' ');
+  resolution: 0.05
 
   # The 2-D pose of the lower-left pixel in the map, as (x, y, yaw),
   # with yaw as counterclockwise rotation (yaw=0 means no rotation)
