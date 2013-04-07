@@ -27,8 +27,9 @@
 :- use_module("../externals/blackboard").
 :- use_module("../utils/logging").
 :- export(attach_tktools/0).
+:- export(ensure_attached/0).
 :- reexport remote_tools.
-
+:- dynamic(attached/0).
 :- log_info("Loading tktools").
 
 :- local initialization(init).
@@ -49,7 +50,7 @@ handle_check_debug_msg(check_debug_msg) :- bb_read_interfaces,
 eval_list([]).
 eval_list([Head|Tail]) :- eval_msg(Head), eval_list(Tail).
 
-eval_msg(["ConnectionMessage"|_]) :- attach_tktools.
+eval_msg(["ConnectionMessage"|_]) :- attach_tktools,asserta(attached).
 eval_msg(_). % a fail in a event handle would lead to bugs, so just ignore everything which is not a connection message (shouldn't happen anyhow)
 
 
@@ -63,5 +64,8 @@ connecting(H, P) :- log_debug( "%s / %d", [H, P]),
                     bb_write_interface("eclipse_clp_connect", "port", P),
                     bb_write_interface("eclipse_clp_connect", "host", H),
                     bb_write_interfaces.
+
+%after this succeeds, trace/1 and other debug predicates can be called
+ensure_attached :- (attached, log_info("successfully attached")) ; ( sleep(0.5), ensure_attached ).
 
 :- log_info( "Loading dummy interpreter done" ).
