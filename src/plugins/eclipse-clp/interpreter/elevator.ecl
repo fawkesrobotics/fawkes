@@ -113,8 +113,9 @@ run :-
       log_info("Terminated")
       )      
       ;*/
+      ensure_attached,
       log_info("Request: doo(control,s0,S)"), 
-      doo(control,s0,S),
+      trace(doo(control,s0,S)),
 		  log_info("Result: %w",[S]),
       repeat, %will loop infinitly, needed for testing tktool attachment
       fail   
