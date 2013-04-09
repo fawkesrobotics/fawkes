@@ -82,7 +82,7 @@ ifeq ($(HAVE_LIBPNG),1)
   LDFLAGS_LIBPNG = $(shell $(PKGCONFIG) --libs 'libpng')
 endif
 
-ifeq ($(HAVE_LIBPNG),1)
+ifeq ($(HAVE_LIBV4L2),1)
   CFLAGS_LIBV4L2  = -DHAVE_LIBV4L2 $(shell $(PKGCONFIG) --cflags 'libv4l2')
   LDFLAGS_LIBV4L2 = $(shell $(PKGCONFIG) --libs 'libv4l2')
 endif
