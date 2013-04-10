@@ -64,10 +64,21 @@ init :- bb_ensure_connected,!,
 run :-
     (
       log_debug("Writing message to Skiller"),
-      bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", "say{text=\"Hello world\"}"]]),
+      %bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", "say{text=\"Hello world\"}"]]),
+      exec_skill("say","text=\"Hello there\""),
       repeat, %will loop infinitly, needed for testing tktool attachment
       fail
     ).
+
+exec_skill(Skill, Arguments) :-
+    append_strings(Skill, "{", Str1),
+    append_strings(Str1, Arguments, Str2),
+    log_info("finished string2"),
+    append_strings(Str2, "}", Str3),
+    log_info("finished string3"),
+    bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Str3]]).
+
+exec_skill2(Skillmsg) :- bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Skillmsg]]).
 
 
 :- log_info("Loading skillexec agent done").
