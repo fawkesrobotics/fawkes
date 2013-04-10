@@ -46,7 +46,16 @@ handle_terminate(terminate) :-
 
 handle_check_interfaces_msg(check_interfaces_msg) :-
         log_debug("Event: INTERFACES"),
-        bb_read_interfaces.
+        bb_read_interfaces,
+        bb_recv_messages("eclipse_clp_skillexec", List),
+        eval_list(List). 
+
+%check for SetTestStringMessage - this is only neccessary to use the skilltester tool
+eval_list([]).
+eval_list([Head|Tail]) :- eval_msg(Head), eval_list(Tail).
+
+eval_msg(["SetTestStringMessage"|[[[Msg|[Skill]]]]]) :- exec_skill2(Skill).
+eval_msg(_). % a fail in a event handle would lead to bugs, so just ignore everything which is not a connection message (shouldn't happen anyhow)
 
 %% setup event handlers
 :- set_event_handler(update, handle_update/1).
@@ -55,6 +64,7 @@ handle_check_interfaces_msg(check_interfaces_msg) :-
 
 init :- bb_ensure_connected,!,
         bb_open_interface(r,"SkillerInterface","Skiller"),
+        bb_open_interface(w,"TestInterface","eclipse_clp_skillexec"),
         bb_read_interfaces,
         bb_read_interface("Skiller","exclusive_controller",0),
         bb_send_message("Skiller", "AcquireControlMessage", []),
