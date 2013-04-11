@@ -29,6 +29,7 @@
 #endif
 
 #include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 #include <fstream>
 #include <stack>
 #include <cerrno>
@@ -37,32 +38,6 @@
 namespace fawkes {
 
 /// @cond INTERNALS
-namespace yaml_config {
-  static inline
-    std::vector<std::string> split(const std::string &s, char delim = '/')
-  {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while(std::getline(ss, item, delim)) {
-      if (item != "")  elems.push_back(item);
-    }
-    return elems;
-  }
-
-  static inline
-    std::queue<std::string> split_to_queue(const std::string &s, char delim = '/')
-  {
-    std::queue<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while(std::getline(ss, item, delim)) {
-      if (item != "")  elems.push(item);
-    }
-    return elems;
-  }
-}
-
 
 class YamlConfigurationNode
 {
@@ -167,7 +142,7 @@ class YamlConfigurationNode
 
   YamlConfigurationNode * find_or_insert(const char *path)
   {
-    std::queue<std::string> q = yaml_config::split_to_queue(path);
+    std::queue<std::string> q = str_split_to_queue(path);
 
     YamlConfigurationNode *n = this;
     while (! q.empty()) {
@@ -184,7 +159,7 @@ class YamlConfigurationNode
 
   void erase(const char *path)
   {
-    std::queue<std::string> q = yaml_config::split_to_queue(path);
+    std::queue<std::string> q = str_split_to_queue(path);
     std::stack<YamlConfigurationNode *> qs;
     std::string full_path;
 
@@ -228,7 +203,7 @@ class YamlConfigurationNode
   YamlConfigurationNode * find(const char *path)
   {
     try {
-      std::queue<std::string> pel_q = yaml_config::split_to_queue(path);
+      std::queue<std::string> pel_q = str_split_to_queue(path);
       return find(pel_q);
     } catch (Exception &e) {
       throw;
