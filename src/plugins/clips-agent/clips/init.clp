@@ -43,7 +43,10 @@
   (confval (path "/clips-agent/agent") (type STRING) (value ?v))
   =>
   (printout t "Loading agent '" ?v "'" crlf)
-  (load* (resolve-file (str-cat ?v ".clp")))
+  (bind ?agent-file (resolve-file (str-cat ?v ".clp")))
+  (if ?agent-file
+    then (batch* ?agent-file)
+    else (printout logerror "Cannot find agent file ?v" crlf))
 )
 
 (defrule enable-debug
