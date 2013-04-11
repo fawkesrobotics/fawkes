@@ -265,6 +265,10 @@ ClipsAgentThread::loop()
 	  value = std::string("\"") + value + "\"";
 	} else {
 	  value = f.get_value_string();
+          std::string::size_type pos;
+          while ((pos = value.find(",")) != std::string::npos) {
+            value = value.erase(pos, 1);
+          }
 	}
 	fact += std::string(" (") + f.get_name() + " " + value + ")";
       }
