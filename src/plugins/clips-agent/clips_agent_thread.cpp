@@ -450,6 +450,8 @@ ClipsAgentThread::clips_blackboard_add_interface(std::string type, std::string i
 		       type.c_str());
       blackboard->close(iface);
     } else {
+      logger->log_info(name(), "Added interface %s", iface->uid());
+      logger->log_info(name(), "Deftemplate:\n%s", deftemplate.c_str());
       interfaces_.insert(std::make_pair(type, iface));
     }
   } else {
