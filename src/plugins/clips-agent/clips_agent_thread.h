@@ -75,9 +75,9 @@ class ClipsAgentThread
  private:
   bool        cfg_auto_start_;
   bool        cfg_assert_time_each_loop_;
-  std::string cfg_clips_dir_;
   bool        cfg_skill_sim_;
   float       cfg_skill_sim_time_;
+  std::vector<std::string> cfg_clips_dirs_;
 
   fawkes::SkillerInterface *skiller_if_;
   fawkes::SwitchInterface *switch_if_;

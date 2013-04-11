@@ -22,6 +22,7 @@
 #include "clips_agent_thread.h"
 
 #include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 #include <interfaces/SwitchInterface.h>
 
 using namespace fawkes;
@@ -71,7 +72,43 @@ ClipsAgentThread::init()
       config->get_float("/clips-agent/skill-sim-time");
   } catch (Exception &e) {} // ignore, use default
 
-  cfg_clips_dir_ = std::string(SRCDIR) + "/clips/";
+  cfg_clips_dirs_.clear();
+  cfg_clips_dirs_.push_back(std::string(SRCDIR) + "/clips/");
+
+  try {
+    std::string clips_dirs =
+      config->get_string("/clips-agent/clips-dirs");
+
+    logger->log_warn(name(), "CLIPS dirs: %s", clips_dirs.c_str());
+
+    std::vector<std::string> dirs = str_split(clips_dirs, ':');
+    if (dirs.size() > 0) {
+      cfg_clips_dirs_.resize(dirs.size() + 1);
+      cfg_clips_dirs_[dirs.size()] = std::string(SRCDIR) + "/clips/";
+      logger->log_warn(name(), "Default: %s", cfg_clips_dirs_[dirs.size()].c_str());
+      for (size_t i = 0; i < dirs.size(); ++i) {
+	std::string::size_type pos;
+	if ((pos = dirs[i].find("@BASEDIR@")) != std::string::npos) {
+	  dirs[i].replace(pos, 9, BASEDIR);
+	}
+	if ((pos = dirs[i].find("@RESDIR@")) != std::string::npos) {
+	  dirs[i].replace(pos, 8, RESDIR);
+	}
+	if ((pos = dirs[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
+	  dirs[i].replace(pos, 16, FAWKES_BASEDIR);
+	}
+	if ((pos = dirs[i].find("@CONFDIR@")) != std::string::npos) {
+	  dirs[i].replace(pos, 9, CONFDIR);
+	}
+
+	if (dirs[i][dirs.size()-1] != '/') {
+	  dirs[i] += "/";
+	}
+	logger->log_warn(name(), "DIR: %s\n", dirs[i].c_str());
+	cfg_clips_dirs_[i] = dirs[i];
+      }
+    }
+  } catch (Exception &e) {} // ignore, use default
 
   if (! cfg_skill_sim_) {
     skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
@@ -94,7 +131,7 @@ ClipsAgentThread::init()
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
   clips->add_function("blackboard-add-interface", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_blackboard_add_interface)));
 
-  if (!clips->batch_evaluate(cfg_clips_dir_ + "init.clp")) {
+  if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
                       "batch file failed.");
     blackboard->close(skiller_if_);
@@ -267,8 +304,10 @@ ClipsAgentThread::clips_now()
 CLIPS::Values
 ClipsAgentThread::clips_get_clips_dirs()
 {
-  CLIPS::Values rv;
-  rv.push_back(cfg_clips_dir_);
+  CLIPS::Values rv(cfg_clips_dirs_.size(), CLIPS::Value(""));
+  for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
+    rv[i] = cfg_clips_dirs_[i];
+  }
   return rv;
 }
 

@@ -16,7 +16,7 @@
 (deffunction resolve-file (?file)
   (foreach ?d ?*CLIPS_DIRS*
 	   (bind ?fn (str-cat ?d ?file))
-	   (printout t "Testing" ?fn crlf)
+	   (printout t "Testing file " ?fn crlf)
 	   (if (open ?fn file-clips-tmp)
 	    then
 	     (close file-clips-tmp)
