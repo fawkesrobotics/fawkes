@@ -30,10 +30,10 @@
 #include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
 #ifdef HAVE_PCL
-#  include <aspect/pointcloud.h>
 #  include <pcl/point_cloud.h>
 #  include <pcl/point_types.h>
 #  include <fvutils/adapters/pcl.h>
+#  include <aspect/pointcloud.h>
 #endif
 #include <plugins/openni/aspect/openni.h>
 

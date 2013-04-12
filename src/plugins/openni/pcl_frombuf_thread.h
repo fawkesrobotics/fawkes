@@ -23,6 +23,10 @@
 #ifndef __PLUGINS_OPENNI_PCL_FROMBUF_THREAD_H_
 #define __PLUGINS_OPENNI_PCL_FROMBUF_THREAD_H_
 
+// must be first for reliable ROS detection
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
 #include <aspect/logging.h>
@@ -30,8 +34,6 @@
 #include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/pointcloud.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <fvutils/adapters/pcl.h>
 #include <plugins/openni/aspect/openni.h>
 #include <utils/time/time.h>
