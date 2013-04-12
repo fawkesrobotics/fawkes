@@ -41,7 +41,7 @@ template <typename PointT>
 inline void
 set_time(fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, const fawkes::Time &time)
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   cloud->header.stamp.sec  = time.get_sec();
   cloud->header.stamp.nsec = time.get_usec() * 1000;
 #else
@@ -63,7 +63,7 @@ template <typename PointT>
 inline void
 get_time(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
   fawkes::PointCloudTimestamp pclts;
@@ -83,7 +83,7 @@ template <typename PointT>
 inline void
 get_time(const fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &time)
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
   fawkes::PointCloudTimestamp pclts;
