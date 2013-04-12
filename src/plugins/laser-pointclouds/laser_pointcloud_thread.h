@@ -22,6 +22,10 @@
 #ifndef __PLUGINS_LASER_POINTCLOUDS_LASER_POINTCLOUD_THREAD_H_
 #define __PLUGINS_LASER_POINTCLOUDS_LASER_POINTCLOUD_THREAD_H_
 
+// must be first for reliable ROS detection
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -30,9 +34,6 @@
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 #include <core/utils/lock_list.h>
-
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 
 namespace fawkes {
   class Interface;
