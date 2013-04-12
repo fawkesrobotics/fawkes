@@ -228,7 +228,7 @@ template <typename PointT>
 void
 PointCloudManager::PointCloudStorageAdapter<PointT>::get_time(fawkes::Time &time) const
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
   fawkes::PointCloudTimestamp pclts;
