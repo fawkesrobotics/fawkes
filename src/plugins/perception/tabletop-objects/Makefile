@@ -102,6 +102,10 @@ ifneq ($(ENABLE_VISUAL_DEBUGGING),1)
   LDFLAGS += $(call boost-lib-ldflags,thread)
 endif
 
+# Required for weirdo PCL (on Fedora with ROS headers)
+CFLAGS  += $(call boost-lib-cflags,system)
+LDFLAGS += $(call boost-lib-ldflags,system)
+
 
 
 ifeq ($(OBJSSUBMAKE),1)

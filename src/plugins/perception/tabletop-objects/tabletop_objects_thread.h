@@ -22,6 +22,10 @@
 #ifndef __PLUGINS_PERCEPTION_TABLETOP_OBJECTS_THREAD_H_
 #define __PLUGINS_PERCEPTION_TABLETOP_OBJECTS_THREAD_H_
 
+// must be first for reliable ROS detection
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
@@ -31,8 +35,6 @@
 #include <aspect/pointcloud.h>
 
 #include <Eigen/StdVector>
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/voxel_grid.h>
 
