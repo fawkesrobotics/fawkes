@@ -33,6 +33,10 @@
 #include <cstring>
 #include <vector>
 
+namespace fawkes{
+  class EclExternalBlackBoard;
+};
+
 using namespace std;
 using namespace fawkes;
 
@@ -62,6 +66,7 @@ EclipseAgentThread::~EclipseAgentThread()
 void
 EclipseAgentThread::init()
 {
+  fawkes::EclExternalBlackBoard::create_initial_object(blackboard);
   // set ECLiPSe installation directory
   char* eclipse_dir = NULL;
   try
