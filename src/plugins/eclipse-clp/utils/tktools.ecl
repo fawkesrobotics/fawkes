@@ -39,7 +39,7 @@ init :- bb_ensure_connected,
 
 
 %% event handlers
-handle_check_debug_msg(check_debug_msg) :- bb_read_interfaces,
+handle_check_debug_msg(check_debug_msg) :- log_debug("checking debug msg"), bb_read_interfaces,
                                bb_recv_messages("eclipse_clp_connect", List),
                                eval_list(List). 
 %% set event handlers
@@ -66,7 +66,7 @@ connecting(H, P) :- log_debug( "%s / %d", [H, P]),
                     bb_write_interfaces.
 
 %after this succeeds, trace/1 and other debug predicates can be called
-ensure_attached :- log_info("Waiting for eclipsedebugger to connect, please start eclipsedebuger"), ensure_attached_.
+ensure_attached :- log_info("Waiting for eclipsedebugger to connect, please start eclipsedebugger"), ensure_attached_.
 ensure_attached_ :- (attached(_), log_info("eclipsedebugger successfully connected")) ; ( sleep(0.5), ensure_attached_ ).
 
-:- log_info( "Loading dummy interpreter done" ).
+:- log_info( "Loading tktools done" ).
