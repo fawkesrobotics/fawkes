@@ -54,7 +54,7 @@ handle_check_interfaces_msg(check_interfaces_msg) :-
 eval_list([]).
 eval_list([Head|Tail]) :- eval_msg(Head), eval_list(Tail).
 
-eval_msg(["SetTestStringMessage"|[[[Msg|[Skill]]]]]) :- exec_skill2(Skill).
+eval_msg(["SetTestStringMessage"|[[["test_string"|[Skill]]]]]) :- exec_skill2(Skill).
 eval_msg(_). % a fail in a event handle would lead to bugs, so just ignore everything which is not a connection message (shouldn't happen anyhow)
 
 %% setup event handlers
@@ -83,9 +83,7 @@ run :-
 exec_skill(Skill, Arguments) :-
     append_strings(Skill, "{", Str1),
     append_strings(Str1, Arguments, Str2),
-    log_info("finished string2"),
     append_strings(Str2, "}", Str3),
-    log_info("finished string3"),
     bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Str3]]).
 
 exec_skill2(Skillmsg) :- bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Skillmsg]]).
