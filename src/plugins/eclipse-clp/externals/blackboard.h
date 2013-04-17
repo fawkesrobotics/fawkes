@@ -24,8 +24,48 @@
 #ifndef __ECLIPSE_EXTERNALS_BLACKBOARD_H_
 #define __ECLIPSE_EXTERNALS_BLACKBOARD_H_
 
+#include <blackboard/remote.h>
+#include <vector>
+
+#include <cstdio>
+
+/** @class fawkes::EclExternalBlackBoard
+ * Wrapper class for using the blackboard in the implementation of the external
+ * predicates.
+ * @author Daniel Beck
+ */
+namespace fawkes
+{
+class EclExternalBlackBoard
+{
+private:
+  /** Constructor. */
+  EclExternalBlackBoard();
+
+  /** Constructor. */
+  EclExternalBlackBoard( BlackBoard* );
+public:
+  /** Destructor. */
+  ~EclExternalBlackBoard();
+
+
+  static void create_initial_object(BlackBoard *bb);
+  static EclExternalBlackBoard* instance();
+  void connect( const char* );
+  bool connected();
+  void disconnect();
+  static BlackBoard* blackboard_instance();
+  std::vector< Interface* >& interfaces();
+
+private:
+  static EclExternalBlackBoard*  m_instance;
+  std::vector< Interface* >      m_interfaces;
+  static BlackBoard*             m_blackboard;
+};
+}
+
+
 extern "C" int p_connect_to_remote_blackboard();
-extern "C" int p_connect_to_eclipse_blackboard();
 extern "C" int p_disconnect_from_blackboard();
 extern "C" int p_is_alive();
 extern "C" int p_is_connected();

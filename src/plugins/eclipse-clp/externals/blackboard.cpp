@@ -23,106 +23,131 @@
 
 #include "blackboard.h"
 
-#include <blackboard/remote.h>
 
 #include <eclipseclass.h>
-#include <plugins/eclipse-clp/eclipse_thread.h>
 
-#include <vector>
 
-#include <cstdio>
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes{
 /** @class fawkes::EclExternalBlackBoard
  * Wrapper class for using the blackboard in the implementation of the external
  * predicates.
  * @author Daniel Beck
  */
-namespace fawkes
-{
-class EclExternalBlackBoard
-{
-public:
+
+BlackBoard* EclExternalBlackBoard::m_blackboard = NULL;
+EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
+
   /** Constructor. */
-  EclExternalBlackBoard() : m_blackboard( 0 ) {}
+  EclExternalBlackBoard::EclExternalBlackBoard(){
+    if (m_instance == NULL){
+      m_instance = this;
+    }else{
+      throw Exception( "There is already an instance of type EclExternalBlackBoard instantiated" );
+    }
+  }
+
+  /** Constructor. */
+  EclExternalBlackBoard::EclExternalBlackBoard(BlackBoard* blackboard) {
+    if (m_instance == NULL){;
+      m_instance = this;
+      m_blackboard = blackboard;
+    }else{
+      throw Exception( "There is already an instance of type EclExternalBlackBoard instantiated" );
+    }
+  }
+
   /** Destructor. */
-  ~EclExternalBlackBoard() {
+  EclExternalBlackBoard::~EclExternalBlackBoard() {
     for ( std::vector< Interface* >::iterator iit = m_interfaces.begin();
 	  iit != m_interfaces.end();
 	  ++iit )
     { m_blackboard->close( *iit ); }
-    delete m_blackboard;
+    delete m_instance;
+    //delete m_blackboard;
   }
+
+  /** Creates the initial EclExternalBlackBoard object
+   * @param bb pointer to the BlackBoard to be used
+   */
+  void EclExternalBlackBoard::create_initial_object(BlackBoard *bb) {
+      m_instance = new EclExternalBlackBoard(bb);
+  }
+
+
+  /** Get the EclExternalBlackBoard instance.
+  * @return the instance
+  */
+  EclExternalBlackBoard* EclExternalBlackBoard::instance()
+  {
+    if ( !m_instance )
+    { throw Exception( "No instance of type EclExternalBlackBoard instantiated" ); }
+
+    return m_instance;
+  }
+
 
   /** Open remote blackboard connection.
    * @param host the host running Fawkes
    */
-  void connect( const char* host )
+  void EclExternalBlackBoard::connect( const char* host )
   {
     m_blackboard = new RemoteBlackBoard( host, 1910 );
   }
 
 
-   /** Get local blackboard from EclipseAgentThread. */
-  void connect()
-  {
-    m_blackboard = EclipseAgentThread::instance()->get_blackboard();
-  }
-
   /** Query connection status.
    * @return true if connected; false otherwise
    */
-  bool connected()
+  bool EclExternalBlackBoard::connected()
   {
     return m_blackboard ? true : false;
   }
 
   /** Disconnect remote blackboard connection. */
-  void disconnect()
+  void EclExternalBlackBoard::disconnect()
   {
     for ( std::vector< Interface* >::iterator iit = m_interfaces.begin();
 	  iit != m_interfaces.end();
 	  ++iit )
     { m_blackboard->close( *iit ); }
-    delete m_blackboard;
-    m_blackboard = 0;
+    //delete m_blackboard;
+    //m_blackboard = 0;
   }
 
   /** Access the BlackBoard instance.
    * @return the blackboard instance
    */
-  BlackBoard* instance()
+  BlackBoard* EclExternalBlackBoard::blackboard_instance()
   {
+    if ( !m_blackboard )
+    { throw Exception( "No instance of type BlackBoard instantiated" ); }
+
     return m_blackboard;
   }
 
   /** Obtain the list of opened interfaces.
    * @return list of opened interfaces
    */
-  std::vector< Interface* >& interfaces()
+  std::vector< Interface* >& EclExternalBlackBoard::interfaces()
   {
     return m_interfaces;
   }
-
-private:
-  BlackBoard*                m_blackboard;
-  std::vector< Interface* >  m_interfaces;
-};
 
 }
 
 using namespace std;
 using namespace fawkes;
 
-EclExternalBlackBoard g_blackboard;
 
 bool process_message_args(Message* msg, EC_word arg_list);
 
 int
 p_connect_to_remote_blackboard()
 {
-  if ( g_blackboard.connected() )
+  if ( EclExternalBlackBoard::instance()->connected() )
   {
     printf( "p_connect_to_remote_blackboard(): already connected\n" );
     return EC_fail;
@@ -139,7 +164,7 @@ p_connect_to_remote_blackboard()
 
   try
   {
-    g_blackboard.connect( hostname );
+    EclExternalBlackBoard::instance()->connect( hostname );
   }
   catch ( Exception& e )
   {
@@ -150,39 +175,17 @@ p_connect_to_remote_blackboard()
   return EC_succeed;
 }
 
-
-int
-p_connect_to_eclipse_blackboard()
-{
-  if ( g_blackboard.connected() )
-  {
-    printf( "p_connect_to_eclipse_blackboard(): already connected\n" );
-    return EC_fail;
-  }
-
-  try
-  {
-    g_blackboard.connect();
-  }
-  catch ( Exception& e )
-  {
-    e.print_trace();
-    return EC_fail;
-  }
-
-  return EC_succeed;
-}
 
 int
 p_disconnect_from_blackboard()
 {
-  if ( !g_blackboard.connected() )
+  if ( !EclExternalBlackBoard::instance()->connected() )
   {
     printf( "p_disconnect_from_blackboard(): not connected\n" );
     return EC_fail;
   }
 
-  g_blackboard.disconnect();
+  EclExternalBlackBoard::instance()->disconnect();
 
   return EC_succeed;
 }
@@ -191,13 +194,13 @@ p_disconnect_from_blackboard()
 int
 p_is_alive()
 {
-  if ( !g_blackboard.connected() )
+  if ( !EclExternalBlackBoard::instance()->connected() )
   {
     printf( "p_is_alive(): not connected\n" );
     return EC_fail;
   }
 
-  if ( g_blackboard.instance()->is_alive() )
+  if ( EclExternalBlackBoard::instance()->blackboard_instance()->is_alive() )
   { return EC_succeed; }
   else
   { return EC_fail; }
@@ -206,7 +209,7 @@ p_is_alive()
 int
 p_is_connected()
 {
-  if ( g_blackboard.connected() ){
+  if ( EclExternalBlackBoard::instance()->connected() ){
     return EC_succeed;
   }else{
     return EC_fail;
@@ -216,7 +219,7 @@ p_is_connected()
 int
 p_open_interface()
 {
-  if ( !g_blackboard.connected() )
+  if ( !EclExternalBlackBoard::instance()->connected() )
   {
     printf("p_open_interface(): not connected\n" );
     return EC_fail;
@@ -249,11 +252,11 @@ p_open_interface()
     Interface* iface;
 
     if ( 0 == strcmp( "w", mode.name() ) )
-    { iface = g_blackboard.instance()->open_for_writing( interface_type, interface_id ); }
+    {  iface = EclExternalBlackBoard::instance()->blackboard_instance()->open_for_writing( interface_type, interface_id ); }
     else
-    { iface = g_blackboard.instance()->open_for_reading( interface_type, interface_id ); }
+    { iface = EclExternalBlackBoard::instance()->blackboard_instance()->open_for_reading( interface_type, interface_id ); }
 
-    g_blackboard.interfaces().push_back( iface );
+    EclExternalBlackBoard::instance()->interfaces().push_back( iface );
   }
   catch (Exception& e)
   {
@@ -268,7 +271,7 @@ p_open_interface()
 int
 p_close_interface()
 {
-  if ( !g_blackboard.connected() )
+  if ( !EclExternalBlackBoard::instance()->connected() )
   {
     printf("p_close_interface(): not connected\n" );
     return EC_fail;
@@ -285,16 +288,16 @@ p_close_interface()
 
   bool iface_found = false;
 
-  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( (*it)->id(), interface_id ) )
 
     {
       iface_found = true;
-      g_blackboard.instance()->close( *it );
-      g_blackboard.interfaces().erase( it );
+      EclExternalBlackBoard::instance()->blackboard_instance()->close( *it );
+      EclExternalBlackBoard::instance()->interfaces().erase( it );
       break;
     }
   }
@@ -317,8 +320,8 @@ p_has_writer()
     return EC_fail;
   }
 
-  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( (*it)->id(), interface_id ) )
@@ -339,7 +342,7 @@ p_has_writer()
 int
 p_instance_serial()
 {
-  if ( !g_blackboard.connected() )
+  if ( !EclExternalBlackBoard::instance()->connected() )
   {
     printf( "p_instance_serial(): not connected to blackboard\n" );
     return EC_fail;
@@ -352,8 +355,8 @@ p_instance_serial()
     return EC_fail;
   }
 
-  for ( vector< Interface* >::iterator iit = g_blackboard.interfaces().begin();
-	iit != g_blackboard.interfaces().end();
+  for ( vector< Interface* >::iterator iit = EclExternalBlackBoard::instance()->interfaces().begin();
+	iit != EclExternalBlackBoard::instance()->interfaces().end();
 	++iit )
   {
     if ( 0 == strcmp( (*iit)->id(), interface_id ) )
@@ -375,8 +378,8 @@ p_instance_serial()
 int
 p_read_interfaces()
 {
-  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     (*it)->read();
@@ -388,8 +391,8 @@ p_read_interfaces()
 int
 p_write_interfaces()
 {
-  for ( vector< Interface* >::iterator it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( (*it)->is_writer() )
@@ -418,8 +421,8 @@ p_read_from_interface()
   }
 
   vector< Interface* >::iterator it;
-  for ( it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -574,7 +577,7 @@ p_read_from_interface()
     }
   }
 
-  if ( it == g_blackboard.interfaces().end() )
+  if ( it == EclExternalBlackBoard::instance()->interfaces().end() )
   {
     printf( "p_read_from_interface(): no interface with id %s found\n",
 	    interface_id );
@@ -604,8 +607,8 @@ p_write_to_interface()
   }
 
   vector< Interface* >::iterator it;
-  for ( it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -812,7 +815,7 @@ p_write_to_interface()
     }
   }
 
-  if ( it == g_blackboard.interfaces().end() )
+  if ( it == EclExternalBlackBoard::instance()->interfaces().end() )
   {
     printf( "p_write_to_interface(): no interface with id %s found\n",
 	    interface_id );
@@ -844,8 +847,8 @@ p_send_message()
   }
 
   vector< Interface* >::iterator it;
-  for ( it = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( it = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -882,7 +885,7 @@ p_send_message()
     }
   }
 
-  if ( it == g_blackboard.interfaces().end() )
+  if ( it == EclExternalBlackBoard::instance()->interfaces().end() )
   {
     printf( "p_send_message(): no interface with name %s\n", interface_id );
     return EC_fail;
@@ -905,8 +908,8 @@ p_recv_messages()
 
   vector< Interface* >::iterator it;
 
-  for ( it  = g_blackboard.interfaces().begin();
-	it != g_blackboard.interfaces().end();
+  for ( it  = EclExternalBlackBoard::instance()->interfaces().begin();
+	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
     if ( 0 == strcmp( interface_id, (*it)->id() ) )
@@ -1007,7 +1010,7 @@ p_recv_messages()
     }
   }
 
-  if ( it == g_blackboard.interfaces().end() )
+  if ( it == EclExternalBlackBoard::instance()->interfaces().end() )
   {
     printf( "p_recv_messages(): no interface with id %s found\n", interface_id );
     return EC_fail;
