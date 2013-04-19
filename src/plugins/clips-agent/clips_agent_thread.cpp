@@ -342,6 +342,9 @@ ClipsAgentThread::clips_load_config(std::string cfg_prefix)
 {
   std::auto_ptr<Configuration::ValueIterator> v(config->search(cfg_prefix.c_str()));
   while (v->next()) {
+    // currently cannot easily do list values, hence skip
+    if (v->is_list())  continue;
+
     std::string type = "";
     std::string value = v->get_as_string();
 
