@@ -27,6 +27,9 @@
 #include <aspect/inifins/inifin.h>
 #include <plugins/clips/aspect/clips.h>
 
+#include <map>
+#include <string>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -46,7 +49,17 @@ class CLIPSAspectIniFin : public AspectIniFin
   void set_logger(Logger *logger);
 
  private:
+  LockPtr<CLIPS::Environment> new_env(const char *log_component_name);
+
+ private:
   Logger *logger_;
+  typedef struct {
+    bool        exclusive;
+    std::string exclusive_holder;
+    LockPtr<CLIPS::Environment> env;
+  } ClipsEnvData;
+  std::map<std::string, ClipsEnvData > envs_;
+
 };
 
 } // end namespace fawkes
