@@ -568,13 +568,6 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
   Exception me("One or more threads failed to finalize");
   for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     try {
-      finalizer->finalize(*i);
-    } catch (CannotFinalizeThreadException &e) {
-      error = true;
-      me.append("Could not finalize thread '%s' in list '%s'", (*i)->name(), __name);
-      me.append(e);
-    }
-    try {
       (*i)->finalize();
     } catch (CannotFinalizeThreadException &e) {
       error = true;
@@ -585,6 +578,13 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
       me.append(e);
     } catch (...) {
       me.append("Thread[%s]::finalize() threw unsupported exception", (*i)->name());
+    }
+    try {
+      finalizer->finalize(*i);
+    } catch (CannotFinalizeThreadException &e) {
+      error = true;
+      me.append("Could not finalize thread '%s' in list '%s'", (*i)->name(), __name);
+      me.append(e);
     }
   }
   if ( error ) {
