@@ -71,8 +71,12 @@ class LockPtr
    * This takes ownership of @a cpp_object, so it will be deleted when the 
    * last LockPtr is deleted, for instance when it goes out of scope.
    * @param cpp_object C++ object to take ownership of
+   * @param recursive_mutex true to create a recursive mutex (with deadlock prevention
+   * when locked from the same thread) for the object mutex, false to create a normal
+   * mutex
+   * @see Mutex
    */
-  explicit inline LockPtr(T_CppObject* cpp_object);
+  explicit inline LockPtr(T_CppObject* cpp_object, bool recursive_mutex = false);
 
   /** Copy constructor
    * This increments the shared reference count.
@@ -302,7 +306,7 @@ LockPtr<T_CppObject>::~LockPtr()
 
 
 template <class T_CppObject> inline
-LockPtr<T_CppObject>::LockPtr(T_CppObject* cpp_object)
+LockPtr<T_CppObject>::LockPtr(T_CppObject* cpp_object, bool recursive_mutex)
 : __cpp_object(cpp_object),
   __obj_mutex(0),
   __ref_count(0),
@@ -311,8 +315,8 @@ LockPtr<T_CppObject>::LockPtr(T_CppObject* cpp_object)
   if(cpp_object)
   {
     __ref_count = new int;
-    __ref_mutex = new Mutex();
-    __obj_mutex = new Mutex();
+    __ref_mutex = new Mutex(Mutex::RECURSIVE);
+    __obj_mutex = new Mutex(recursive_mutex ? Mutex::RECURSIVE : Mutex::NORMAL);
     *__ref_count = 1; //This will be decremented in the destructor.
   }
 }
