@@ -29,8 +29,13 @@ ifeq ($(BOOST_USE_MULTITHREADED),1)
 endif
 
 
-boost-have-lib    = $(if $(wildcard $(foreach l,$(BOOST_LIB_DIRS),$l/libboost_$1$(BOOST_LIBRARY_SUFFIX).$(SOEXT) )),1)
-boost-lib-cflags  = $(addprefix -I,$(wildcard $(BOOST_INCLUDE_DIRS)))
-boost-lib-ldflags = $(if $(call boost-have-lib,$1),-lboost_$1$(BOOST_LIBRARY_SUFFIX))
+boost-have-libfile = $(if $(wildcard $(foreach l,$(BOOST_LIB_DIRS),$l/libboost_$1$(BOOST_LIBRARY_SUFFIX).$(SOEXT) )),1)
+boost-have-lib     = $(if $(or $(call boost-have-libfile,$1),$(wildcard $(foreach i,$(BOOST_INCLUDE_DIRS) /usr/include /usr/local/include,$i/boost/$1.hpp))),1)
+boost-lib-cflags   = $(addprefix -I,$(wildcard $(BOOST_INCLUDE_DIRS)))
+boost-lib-ldflags  = $(if $(call boost-have-libfile,$1),-lboost_$1$(BOOST_LIBRARY_SUFFIX))
+
+boost-have-libs    = $(if $(strip $(subst 1,,$(foreach l,$1,$(or $(call boost-have-lib,$l),0)))),,1)
+boost-libs-cflags  = $(foreach l,$1,$(call boost-lib-cflags,$l))
+boost-libs-ldflags = $(foreach l,$1,$(call boost-lib-ldflags,$l))
 
 endif # __buildsys_boost_mk_
