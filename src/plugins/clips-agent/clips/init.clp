@@ -51,14 +51,12 @@
 
 (defrule enable-debug
   (init)
-  (confval (path "/clips-agent/clips-debug") (type BOOL) (value ?v))
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
   =>
-  (if (eq ?v true) then
-    (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
-    (watch facts)
-    (watch rules)
-    ;(dribble-on "trace.txt")
-  )
+  (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
+  (watch facts)
+  (watch rules)
+  ;(dribble-on "trace.txt")
 )
 
 (defrule debug-level
