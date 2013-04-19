@@ -132,11 +132,6 @@ ClipsAgentThread::init()
 
   ctrl_recheck_ = true;
   started_ = false;
-
-  if (cfg_auto_start_) {
-    clips->assert_fact("(start)");
-    started_ = true;
-  }
 }
 
 
@@ -157,6 +152,11 @@ ClipsAgentThread::finalize()
 void
 ClipsAgentThread::loop()
 {
+  if (! started_ && cfg_auto_start_) {
+    clips->assert_fact("(start)");
+    started_ = true;
+  }
+
   if (! cfg_skill_sim_) {
     skiller_if_->read();
 
