@@ -73,42 +73,30 @@ ClipsAgentThread::init()
   } catch (Exception &e) {} // ignore, use default
 
   cfg_clips_dirs_.clear();
-  cfg_clips_dirs_.push_back(std::string(SRCDIR) + "/clips/");
-
   try {
-    std::string clips_dirs =
-      config->get_string("/clips-agent/clips-dirs");
-
-    logger->log_warn(name(), "CLIPS dirs: %s", clips_dirs.c_str());
-
-    std::vector<std::string> dirs = str_split(clips_dirs, ':');
-    if (dirs.size() > 0) {
-      cfg_clips_dirs_.resize(dirs.size() + 1);
-      cfg_clips_dirs_[dirs.size()] = std::string(SRCDIR) + "/clips/";
-      logger->log_warn(name(), "Default: %s", cfg_clips_dirs_[dirs.size()].c_str());
-      for (size_t i = 0; i < dirs.size(); ++i) {
-	std::string::size_type pos;
-	if ((pos = dirs[i].find("@BASEDIR@")) != std::string::npos) {
-	  dirs[i].replace(pos, 9, BASEDIR);
-	}
-	if ((pos = dirs[i].find("@RESDIR@")) != std::string::npos) {
-	  dirs[i].replace(pos, 8, RESDIR);
-	}
-	if ((pos = dirs[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
-	  dirs[i].replace(pos, 16, FAWKES_BASEDIR);
-	}
-	if ((pos = dirs[i].find("@CONFDIR@")) != std::string::npos) {
-	  dirs[i].replace(pos, 9, CONFDIR);
-	}
-
-	if (dirs[i][dirs.size()-1] != '/') {
-	  dirs[i] += "/";
-	}
-	logger->log_warn(name(), "DIR: %s\n", dirs[i].c_str());
-	cfg_clips_dirs_[i] = dirs[i];
+    cfg_clips_dirs_ = config->get_strings("/clips-agent/clips-dirs");
+    for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
+      std::string::size_type pos;
+      if ((pos = cfg_clips_dirs_[i].find("@BASEDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 9, BASEDIR);
       }
+      if ((pos = cfg_clips_dirs_[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 16, FAWKES_BASEDIR);
+      }
+      if ((pos = cfg_clips_dirs_[i].find("@RESDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 8, RESDIR);
+      }
+      if ((pos = cfg_clips_dirs_[i].find("@CONFDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 9, CONFDIR);
+      }
+      if (cfg_clips_dirs_[i][cfg_clips_dirs_.size()-1] != '/') {
+	cfg_clips_dirs_[i] += "/";
+      }
+      logger->log_warn(name(), "DIR: %s", cfg_clips_dirs_[i].c_str());
     }
   } catch (Exception &e) {} // ignore, use default
+
+  cfg_clips_dirs_.push_back(std::string(SRCDIR) + "/clips/");
 
   if (! cfg_skill_sim_) {
     skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");

@@ -20,7 +20,7 @@ clips-agent:
   assert-time-each-loop: false
 
   # Directory where to look for CLIPS files
-  clips-dirs: "@BASEDIR@/src/clips-agents:@BASEDIR@/testagent"
+  clips-dirs: ["@BASEDIR@/src/clips-agents", "@BASEDIR@/testagent"]
   
   # Agent name. On startup the clips-agent will try to resolve a file named
   # <agent name>.clp. It must be in the CLIPS path directories.
