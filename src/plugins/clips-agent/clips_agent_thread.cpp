@@ -138,6 +138,12 @@ ClipsAgentThread::init()
 void
 ClipsAgentThread::finalize()
 {
+  clips->remove_function("get-clips-dirs");
+  clips->remove_function("now");
+  clips->remove_function("skill-call-ext");
+  clips->remove_function("load-config");
+  clips->remove_function("blackboard-add-interface");
+
   if ( ! cfg_skill_sim_ && skiller_if_->has_writer()) {
     SkillerInterface::ReleaseControlMessage *msg =
       new SkillerInterface::ReleaseControlMessage();
