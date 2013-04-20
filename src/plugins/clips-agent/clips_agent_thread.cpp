@@ -347,9 +347,6 @@ ClipsAgentThread::clips_load_config(std::string cfg_prefix)
 {
   std::auto_ptr<Configuration::ValueIterator> v(config->search(cfg_prefix.c_str()));
   while (v->next()) {
-    // currently cannot easily do list values, hence skip
-    if (v->is_list())  continue;
-
     std::string type = "";
     std::string value = v->get_as_string();
 
@@ -359,16 +356,26 @@ ClipsAgentThread::clips_load_config(std::string cfg_prefix)
     else if (v->is_bool())   type = "BOOL";
     else if (v->is_string()) {
       type = "STRING";
-      value = std::string("\"") + value + "\"";
+      if (! v->is_list()) {
+	value = std::string("\"") + value + "\"";
+      }
     } else {
       logger->log_warn(name(), "Config value at '%s' of unknown type '%s'",
 		       v->path(), v->type());
     }
 
-    //logger->log_info(name(), "ASSERT (confval (path \"%s\") (type %s) (value %s)",
-    //		     v->path(), type.c_str(), v->get_as_string().c_str());
-    clips->assert_fact_f("(confval (path \"%s\") (type %s) (value %s))",
-			 v->path(), type.c_str(), value.c_str());
+    if (v->is_list()) {
+      logger->log_info(name(), "(confval (path \"%s\") (type %s) (is-list TRUE) (list-value %s))",
+		       v->path(), type.c_str(), value.c_str());
+      clips->assert_fact_f("(confval (path \"%s\") (type %s) (is-list TRUE) (list-value %s))",
+			    v->path(), type.c_str(), value.c_str());
+    } else {
+      //logger_->log_info(name(), "(confval (path \"%s\") (type %s) (value %s))",
+      //       v->path(), type.c_str(), value.c_str());
+      clips->assert_fact_f("(confval (path \"%s\") (type %s) (value %s))",
+			    v->path(), type.c_str(), value.c_str());
+    }
+
   }
 }
 
