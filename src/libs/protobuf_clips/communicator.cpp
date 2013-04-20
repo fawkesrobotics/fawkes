@@ -90,14 +90,20 @@ ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
 /** Destructor. */
 ClipsProtobufCommunicator::~ClipsProtobufCommunicator()
 {
-  fawkes::MutexLocker lock(&clips_mutex_);
-  avail_fact_->retract();
-  avail_fact_.reset();
+  {
+    fawkes::MutexLocker lock(&clips_mutex_);
 
-  for (auto f : functions_) {
-    clips_->remove_function(f);
+    CLIPS::DefaultFacts::pointer df = clips_->get_default_facts("protobuf-available");
+    if (df) df->retract();
+
+    avail_fact_->retract();
+    avail_fact_.reset();
+
+    for (auto f : functions_) {
+      clips_->remove_function(f);
+    }
+    functions_.clear();
   }
-  functions_.clear();
 
   for (auto c : clients_) {
     delete c.second;
@@ -143,6 +149,7 @@ ClipsProtobufCommunicator::setup_clips()
   ADD_FUNCTION("pb-connect", (sigc::slot<long int, std::string, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_client_connect))));
   ADD_FUNCTION("pb-disconnect", (sigc::slot<void, long int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_disconnect))));
 
+  clips_->build("(deffacts protobuf-available (protobuf-available))");
   avail_fact_ = clips_->assert_fact("(protobuf-available)");
 }
 
