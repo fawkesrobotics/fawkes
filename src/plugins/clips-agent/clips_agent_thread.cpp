@@ -127,7 +127,7 @@ ClipsAgentThread::init()
     throw Exception("Failed to initialize CLIPS environment, batch file failed.");
   }
 
-  clips->assert_fact("(init)");
+  clips->assert_fact("(agent-init)");
   clips->refresh_agenda();
   clips->run();
 

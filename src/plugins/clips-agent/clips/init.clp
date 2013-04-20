@@ -16,7 +16,7 @@
 (deffunction resolve-file (?file)
   (foreach ?d ?*CLIPS_DIRS*
 	   (bind ?fn (str-cat ?d ?file))
-	   (printout t "Testing file " ?fn crlf)
+	   ;(printout t "Testing file " ?fn crlf)
 	   (if (open ?fn file-clips-tmp)
 	    then
 	     (close file-clips-tmp)
@@ -33,13 +33,13 @@
 
 
 (defrule load-config
-  (init)
+  (agent-init)
   =>
   (load-config ?*CONFIG_PREFIX*)
 )
 
 (defrule load-agent
-  (init)
+  (agent-init)
   (confval (path "/clips-agent/agent") (type STRING) (value ?v))
   =>
   (printout t "Loading agent '" ?v "'" crlf)
@@ -50,7 +50,7 @@
 )
 
 (defrule enable-debug
-  (init)
+  (agent-init)
   (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
   =>
   (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
@@ -60,7 +60,7 @@
 )
 
 (defrule debug-level
-  (init)
+  (agent-init)
   (confval (path "/clips-agent/debug-level") (type UINT) (value ?v))
   =>
   (printout t "Setting debug level to " ?v " (was " ?*DEBUG* ")" crlf)
