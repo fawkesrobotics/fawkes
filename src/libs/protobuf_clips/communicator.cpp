@@ -586,15 +586,19 @@ ClipsProtobufCommunicator::clips_pb_send(long int client_id, void *msgptr)
     //logger_->log_warn("RefBox", "Cannot send to %li: invalid message", client_id);
     return;
   }
-  if (!server_)  return;
 
   try {
     fawkes::MutexLocker lock(&map_mutex_);
 
-    if (server_clients_.find(client_id) != server_clients_.end()) {
+    if (server_ && server_clients_.find(client_id) != server_clients_.end()) {
+      //printf("***** SENDING via SERVER\n");
       server_->send(server_clients_[client_id], *m);
     } else if (clients_.find(client_id) != clients_.end()) {
+      //printf("***** SENDING via CLIENT\n");
       clients_[client_id]->send(*m);
+    } else {
+      //printf("Client ID %li is unknown, cannot send message of type %s\n",
+      //     client_id, (*m)->GetTypeName().c_str());
     }
   } catch (google::protobuf::FatalException &e) {
     //logger_->log_warn("RefBox", "Failed to send message of type %s: %s",
