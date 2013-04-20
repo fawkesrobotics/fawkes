@@ -76,6 +76,7 @@ ClipsProtobufThread::init()
   } // ignore, use default
 
   pb_comm_ = new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_);
+  clips->batch_evaluate(SRCDIR"/clips/protobuf.clp");
 }
 
 
