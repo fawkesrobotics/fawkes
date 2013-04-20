@@ -46,7 +46,7 @@
   (bind ?agent-file (resolve-file (str-cat ?v ".clp")))
   (if ?agent-file
     then (batch* ?agent-file)
-    else (printout logerror "Cannot find agent file ?v" crlf))
+    else (printout logerror "Cannot find agent file " ?v crlf))
 )
 
 (defrule enable-debug
