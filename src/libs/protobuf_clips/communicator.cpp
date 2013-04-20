@@ -755,8 +755,6 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
 						ClipsProtobufCommunicator::ClientType ct,
 						unsigned int client_id)
 {
-  fawkes::MutexLocker lock(&clips_mutex_);
-
   CLIPS::Template::pointer temp = clips_->get_template("protobuf-msg");
   if (temp) {
     void *ptr = new std::shared_ptr<google::protobuf::Message>(msg);
@@ -846,7 +844,8 @@ ClipsProtobufCommunicator::handle_server_client_msg(ProtobufStreamServer::Client
 						    uint16_t component_id, uint16_t msg_type,
 						    std::shared_ptr<google::protobuf::Message> msg)
 {
-  fawkes::MutexLocker lock(&map_mutex_);
+  fawkes::MutexLocker lock(&clips_mutex_);
+  fawkes::MutexLocker lock2(&map_mutex_);
   RevServerClientMap::iterator c;
   if ((c = rev_server_clients_.find(client)) != rev_server_clients_.end()) {
     clips_assert_message(client_endpoints_[c->second],
@@ -890,6 +889,7 @@ ClipsProtobufCommunicator::handle_peer_msg(boost::asio::ip::udp::endpoint &endpo
 					   uint16_t component_id, uint16_t msg_type,
 					   std::shared_ptr<google::protobuf::Message> msg)
 {
+  fawkes::MutexLocker lock(&clips_mutex_);
   std::pair<std::string, unsigned short> endpp =
     std::make_pair(endpoint.address().to_string(), endpoint.port());
   clips_assert_message(endpp, component_id, msg_type, msg, CT_PEER);
@@ -941,6 +941,7 @@ ClipsProtobufCommunicator::handle_client_msg(long int client_id,
 					     uint16_t comp_id, uint16_t msg_type,
 					     std::shared_ptr<google::protobuf::Message> msg)
 {
+  fawkes::MutexLocker lock(&clips_mutex_);
   std::pair<std::string, unsigned short> endpp = std::make_pair(std::string(), 0);
   clips_assert_message(endpp, comp_id, msg_type, msg, CT_CLIENT, client_id);
 }
