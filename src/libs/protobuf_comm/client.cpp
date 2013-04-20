@@ -251,7 +251,7 @@ ProtobufStreamClient::handle_read_message(const boost::system::error_code& error
 	message_register_->deserialize(in_frame_header_, in_data_);
       sig_rcvd_(comp_id, msg_type, m);
     } catch (std::runtime_error &e) {
-      printf("Deserializing of message failed: %s\n", e.what());
+      //printf("Deserializing of message failed: %s\n", e.what());
       sig_recv_failed_(comp_id, msg_type, e.what());
     }
 
