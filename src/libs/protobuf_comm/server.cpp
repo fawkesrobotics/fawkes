@@ -72,8 +72,10 @@ ProtobufStreamServer::Session::Session(ClientID id, ProtobufStreamServer *parent
 ProtobufStreamServer::Session::~Session()
 {
   boost::system::error_code err;
-  socket_.shutdown(ip::tcp::socket::shutdown_both, err);
-  socket_.close();
+  if (socket_.is_open()) {
+    socket_.shutdown(ip::tcp::socket::shutdown_both, err);
+    socket_.close();
+  }
   free(in_data_);
 }
 
@@ -135,8 +137,10 @@ void
 ProtobufStreamServer::Session::disconnect()
 {
   boost::system::error_code err;
-  socket_.shutdown(ip::tcp::socket::shutdown_both, err);
-  socket_.close();
+  if (socket_.is_open()) {
+    socket_.shutdown(ip::tcp::socket::shutdown_both, err);
+    socket_.close();
+  }
 }
 
 

@@ -190,8 +190,10 @@ void
 ProtobufStreamClient::disconnect_nosig()
 {
   boost::system::error_code err;
-  socket_.shutdown(ip::tcp::socket::shutdown_both, err);
-  socket_.close();
+  if (socket_.is_open()) {
+    socket_.shutdown(ip::tcp::socket::shutdown_both, err);
+    socket_.close();
+  }
   connected_ = false;
 }
 
