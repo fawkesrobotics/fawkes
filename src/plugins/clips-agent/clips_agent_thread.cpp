@@ -97,7 +97,7 @@ ClipsAgentThread::init()
     }
   } catch (Exception &e) {} // ignore, use default
 
-  cfg_clips_dirs_.push_back(std::string(SRCDIR) + "/clips/");
+  cfg_clips_dirs_.insert(cfg_clips_dirs_.begin(), std::string(SRCDIR) + "/clips/");
 
   if (! cfg_skill_sim_) {
     skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
