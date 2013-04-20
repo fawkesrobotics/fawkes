@@ -24,6 +24,7 @@
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
 #include <interfaces/SwitchInterface.h>
+#include <core/threading/mutex_locker.h>
 
 using namespace fawkes;
 
@@ -138,6 +139,8 @@ ClipsAgentThread::init()
 void
 ClipsAgentThread::finalize()
 {
+  MutexLocker lock(clips.objmutex_ptr());
+
   clips->remove_function("get-clips-dirs");
   clips->remove_function("now");
   clips->remove_function("skill-call-ext");
@@ -158,6 +161,8 @@ ClipsAgentThread::finalize()
 void
 ClipsAgentThread::loop()
 {
+  MutexLocker lock(clips.objmutex_ptr());
+
   if (! started_ && cfg_auto_start_) {
     clips->assert_fact("(start)");
     started_ = true;
