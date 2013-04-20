@@ -7,3 +7,6 @@ clips-protobuf:
   env-name: agent
   proto-dirs: ["@BASEDIR@/testagent/llsf2012/msgs"]
 
+
+  unwatch-facts: [protobuf-msg]
+  unwatch-rules: [protobuf-cleanup-message]
