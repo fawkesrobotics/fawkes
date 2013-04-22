@@ -71,11 +71,11 @@ init :- bb_ensure_connected,!,
         log_debug("skillexec.ecl: acquired control.").
 
 %the acutal program being performed (called from eclipse_thread.cpp)
-run :-
+cycle :-
     (
       log_debug("Writing message to Skiller"),
       %bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", "say{text=\"Hello world\"}"]]),
-      exec_skill("say","text=\"Hello there\""),
+      exec_skill("say","text=\"In Cycle\""),
       repeat, %will loop infinitly, needed for testing tktool attachment
       fail
     ).
