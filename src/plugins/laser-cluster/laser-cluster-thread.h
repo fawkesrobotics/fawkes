@@ -31,6 +31,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/tf.h>
 #include <aspect/pointcloud.h>
 
@@ -51,6 +52,7 @@ class LaserClusterThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
+  public fawkes::BlockedTimingAspect,
   public fawkes::TransformAspect,
   public fawkes::PointCloudAspect
 {

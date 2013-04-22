@@ -85,7 +85,8 @@ using namespace fawkes;
 
 /** Constructor. */
 LaserClusterThread::LaserClusterThread()
-  : Thread("LaserClusterThread", Thread::OPMODE_CONTINUOUS),
+  : Thread("LaserClusterThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
     TransformAspect(TransformAspect::ONLY_LISTENER)
 {
 }
