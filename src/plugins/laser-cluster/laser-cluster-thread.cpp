@@ -291,13 +291,30 @@ LaserClusterThread::loop()
 
   TIMETRACK_INTER(ttc_extract_lines_, ttc_clustering_);
 
+  clusters_->points.resize(noline_cloud->points.size());
+  clusters_->height = 1;
+  clusters_->width  = noline_cloud->points.size();
+
+  // copy points and set to white
+  for (size_t p = 0; p < clusters_->points.size(); ++p) {
+    ColorPointType &out_point = clusters_->points[p];
+    PointType &in_point  = noline_cloud->points[p];
+    out_point.x = in_point.x;
+    out_point.y = in_point.y;
+    out_point.z = in_point.z;
+    out_point.r = out_point.g = out_point.b = 1.0;
+  }
+
+  //logger->log_info(name(), "[L %u] remaining: %zu",
+  //		   loop_count_, noline_cloud->points.size());
+
+  std::vector<pcl::PointIndices> cluster_indices;
   if (noline_cloud->points.size() > 0) {
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<PointType>::Ptr
       kdtree_cl(new pcl::search::KdTree<PointType>());
     kdtree_cl->setInputCloud(noline_cloud);
 
-    std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<PointType> ec;
     ec.setClusterTolerance(cfg_cluster_tolerance_);
     ec.setMinClusterSize(cfg_cluster_min_size_);
@@ -306,15 +323,37 @@ LaserClusterThread::loop()
     ec.setInputCloud(noline_cloud);
     ec.extract(cluster_indices);
 
-    logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
+    //logger->log_info(name(), "Found %zu clusters", cluster_indices.size());
+
+    unsigned int i = 0;
+    for (auto cluster : cluster_indices) {
+      Eigen::Vector4f centroid;
+      pcl::compute3DCentroid(*noline_cloud, cluster.indices, centroid);
+
+      //logger->log_info(name(), "  Cluster %u with %zu points at (%f, %f, %f)",
+      //	         i, cluster.indices.size(), centroid.x(), centroid.y(), centroid.z());
+
+      // color points of cluster
+      for (auto ci : cluster.indices) {
+	ColorPointType &out_point = clusters_->points[ci];
+	out_point.r = cluster_colors[i+1][0];
+	out_point.g = cluster_colors[i+1][1];;
+	out_point.b = cluster_colors[i+1][2];;
+      }
+
+      ++i;
+    }
 
   } else {
     logger->log_info(name(), "Filter left no points for clustering");
   }
 
   //*clusters_ = *tmp_clusters;
+  if (finput_->header.frame_id == "") {
+    logger->log_error(name(), "Empty frame ID");
+  }
+  fclusters_->header.frame_id = finput_->header.frame_id;
   pcl_utils::copy_time(finput_, fclusters_);
-
 
   TIMETRACK_END(ttc_clustering_);
   TIMETRACK_END(ttc_full_loop_);
