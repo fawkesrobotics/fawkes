@@ -215,7 +215,7 @@ class SkillGuiBatchRenderer
   {
 
     FILE *f = fopen(infile.c_str(), "r");
-#ifdef GRAPHVIZ_ATLEAST_230
+#if defined(GRAPHVIZ_ATLEAST_230) && defined(WITH_CGRAPH)
     Agraph_t *g = agread(f,0);
 #else
     Agraph_t *g = agread(f);

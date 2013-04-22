@@ -26,6 +26,7 @@ ifneq ($(PKGCONFIG),)
   ifeq ($(HAVE_GRAPHVIZ),1)
     _GRAPHVIZ_VERSION_OK = $(if $(shell $(PKGCONFIG) --atleast-version=2.22 'libgvc'; echo $${?/1/}),1,0)
     GRAPHVIZ_ATLEAST_230 = $(if $(shell $(PKGCONFIG) --atleast-version=2.30 'libgvc'; echo $${?/1/}),1,0)
+    GRAPHVIZ_HAVE_GRAPH  = $(if $(shell $(PKGCONFIG) --exists 'libgraph'; echo $${?/1/}),1,0)
     ifneq ($(_GRAPHVIZ_VERSION_OK),1)
       HAVE_GRAPHVIZ=0
       GUI_ERROR += (Graphviz too old, need at least version 2.22)
@@ -45,7 +46,14 @@ ifneq ($(PKGCONFIG),)
   endif
   ifeq ($(HAVE_GRAPHVIZ),1)
     CFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
-    LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
+    ifeq ($(GRAPHVIZ_HAVE_GRAPH),1)
+      LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
+    else
+      # "--libs 'libgvc'" requires -lgraph, even if only cgraph is installed. Not fixed in stable releases yet
+      LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libcgraph') -lgvc
+      # add WITH_CGRAPH, in case something is wrong with libgvc. Should be provided by "/usr/include/graphviz/types.h"
+      CFLAGS_GRAPHVIZ += -DWITH_CGRAPH
+    endif
     ifeq ($(GRAPHVIZ_ATLEAST_230),1)
       CFLAGS_GRAPHVIZ += -DGRAPHVIZ_ATLEAST_230
     endif
