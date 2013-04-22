@@ -1,0 +1,42 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-cluster
+---
+laser-cluster:
+
+  line_removal: false
+  
+  # Maximum number of iterations to perform for line segmentation
+  line_segmentation_max_iterations: 250
+
+  # Segmentation distance threshold; m
+  line_segmentation_distance_threshold: 0.1
+
+  # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
+  line_segmentation_min_inliers: 30
+
+  # Clustering inter-point distance tolerance; m
+  cluster_tolerance: 0.1
+
+  # Minimum number of points in cluster to consider
+  cluster_min_size: 4
+
+  # Minimum number of points in cluster to consider
+  cluster_max_size: 25
+
+  # not that these values are in the sensor frame!
+  cluster_min_x:  0.02
+  cluster_max_x:  0.8
+  cluster_min_y: -0.7
+  cluster_max_y:  0.7
+
+  # How much must a cluster detection deviate from the previous to consider
+  # this to be a different cluster (and thus restart the visibility history)
+  cluster_switch_tolerance: 0.2
+  
+  # The frame in which the result should be published; frame
+  result_frame: /base_link
+
+  # input laser cloud
+  input_cloud: urg-filtered
