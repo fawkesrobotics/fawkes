@@ -102,14 +102,15 @@ LaserClusterThread::~LaserClusterThread()
 void
 LaserClusterThread::init()
 {
-  cfg_depth_filter_min_x_ = config->get_float(CFG_PREFIX"depth_filter_min_x");
-  cfg_depth_filter_max_x_ = config->get_float(CFG_PREFIX"depth_filter_max_x");
-  cfg_segm_max_iterations_ =
-    config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
-  cfg_segm_distance_threshold_ =
-    config->get_float(CFG_PREFIX"line_segmentation_distance_threshold");
-  cfg_segm_inlier_quota_ =
-    config->get_float(CFG_PREFIX"line_segmentation_inlier_quota");
+  cfg_line_removal_ = config->get_bool(CFG_PREFIX"line_removal");
+  if (cfg_line_removal_) {
+    cfg_segm_max_iterations_ =
+      config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
+    cfg_segm_distance_threshold_ =
+      config->get_float(CFG_PREFIX"line_segmentation_distance_threshold");
+    cfg_segm_min_inliers_ =
+      config->get_uint(CFG_PREFIX"line_segmentation_min_inliers");
+  }
   cfg_cluster_tolerance_     = config->get_float(CFG_PREFIX"cluster_tolerance");
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
@@ -234,14 +235,39 @@ LaserClusterThread::loop()
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
 
-  while (noline_cloud->points.size () > cfg_cluster_min_size_) {
-    // Segment the largest planar component from the remaining cloud
-    seg_.setInputCloud (noline_cloud);
-    seg_.segment(*inliers, *coeff);
-    if (inliers->indices.size () == 0) {
-      // no line found
-      break;
+  if (cfg_line_removal_) {
+    while (noline_cloud->points.size () > cfg_cluster_min_size_) {
+      // Segment the largest planar component from the remaining cloud
+      //logger->log_info(name(), "[L %u] %zu points left",
+      //	               loop_count_, noline_cloud->points.size());
+      
+      seg_.setInputCloud (noline_cloud);
+      seg_.segment(*inliers, *coeff);
+      if (inliers->indices.size () == 0) {
+	// no line found
+	break;
+      }
+
+      // check for a minimum number of expected inliers
+      if ((double)inliers->indices.size() < cfg_segm_min_inliers_) {
+	//logger->log_warn(name(), "[L %u] no more lines (%zu inliers, required %u)",
+	//		   loop_count_, inliers->indices.size(), cfg_segm_min_inliers_);
+	break;
+      }
+
+      //logger->log_info(name(), "[L %u] Removing line with %zu inliers",
+      //	         loop_count_, inliers->indices.size());
+
+      // Remove the linear inliers, extract the rest
+      CloudPtr cloud_f(new Cloud());
+      pcl::ExtractIndices<PointType> extract;
+      extract.setInputCloud(noline_cloud);
+      extract.setIndices(inliers);
+      extract.setNegative(true);
+      extract.filter(*cloud_f);
+      *noline_cloud = *cloud_f;
     }
+  }
 
     // check for a minimum number of expected inliers
     if ((double)inliers->indices.size()

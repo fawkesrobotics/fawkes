@@ -96,11 +96,12 @@ class LaserClusterThread
 
   fawkes::SwitchInterface *switch_if_;
 
+  bool         cfg_line_removal_;
   float        cfg_depth_filter_min_x_;
   float        cfg_depth_filter_max_x_;
   unsigned int cfg_segm_max_iterations_;
   float        cfg_segm_distance_threshold_;
-  float        cfg_segm_inlier_quota_;
+  unsigned int cfg_segm_min_inliers_;
   float        cfg_cluster_tolerance_;
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
