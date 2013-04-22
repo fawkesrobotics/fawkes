@@ -39,6 +39,7 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/filters/passthrough.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/common/centroid.h>
@@ -207,7 +208,6 @@ LaserClusterThread::loop()
 
   TIMETRACK_INTER(ttc_msgproc_, ttc_extract_lines_);
 
-  CloudPtr noline_cloud(new Cloud());
 
   //pcl::search::KdTree<PointType> kdtree;
 
@@ -220,8 +220,16 @@ LaserClusterThread::loop()
     return;
   }
 
-  // copy
-  *noline_cloud = *input_;
+  CloudPtr noline_cloud(new Cloud());
+  {
+    // Erase non-finite points
+    pcl::PassThrough<PointType> passthrough;
+    passthrough.setInputCloud(input_);
+    passthrough.filter(*noline_cloud);
+  }
+
+  //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
+  //		     loop_count_, input_->points.size(), noline_cloud->points.size());
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
