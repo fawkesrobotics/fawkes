@@ -61,6 +61,7 @@ RobotinoActThread::init()
   omni_drive_ = new rec::robotino::com::OmniDrive();
 
   last_seqnum_ = 0;
+  last_msg_time_ = clock->now();
 
   // reset odometry once on startup
   rec::iocontrol::remotestate::SetState set_state;
@@ -68,6 +69,12 @@ RobotinoActThread::init()
   set_state.odometryX = set_state.odometryY = set_state.odometryPhi = 0;
   com_->setSetState(set_state);
 
+  //get config values
+  cfg_deadman_threshold_ = config->get_float("/hardware/robotino/deadman_time_threshold");
+  
+  msg_received_ = false;
+  msg_zero_vel_ = false;
+  
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
 
@@ -96,8 +103,7 @@ RobotinoActThread::loop()
     bool send_set_state = false;
     while (! motor_if_->msgq_empty()) {
 
-      if (MotorInterface::TransRotMessage *msg =
-          motor_if_->msgq_first_safe(msg))
+      if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
       {
         float m1, m2, m3;
         omni_drive_->project(&m1, &m2, &m3,
@@ -108,6 +114,13 @@ RobotinoActThread::loop()
         set_state.speedSetPoint[1] = m2;
         set_state.speedSetPoint[2] = m3;
         send_set_state = true;
+        
+        last_msg_time_ = clock->now();
+	msg_received_ = true;
+	
+	if ( m1==0.0 && m2==0.0 && m3==0.0 ) msg_zero_vel_ = true;
+	else msg_zero_vel_ = false;
+
       }
       else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
       {
@@ -117,6 +130,20 @@ RobotinoActThread::loop()
       }
 
       motor_if_->msgq_pop();
+    }//while
+
+    // deadman switch to set the velocities to zero if no new message arrives
+    double diff =  ( clock->now() - (&last_msg_time_) );
+
+    
+    if( diff >= cfg_deadman_threshold_ && msg_received_ && !msg_zero_vel_ ){
+
+    	logger->log_error(name(), "Time-Gap between TransRotMsgs too large (%f sec.) is motion_planner working ?", diff);
+        set_state.speedSetPoint[0] = 0.0;
+        set_state.speedSetPoint[1] = 0.0;
+        set_state.speedSetPoint[2] = 0.0;
+        send_set_state = true;
+	msg_received_ = false;
     }
 
     if (send_set_state)  com_->setSetState(set_state);
@@ -139,6 +166,7 @@ RobotinoActThread::loop()
       motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
       motor_if_->write();
 
+
 #ifdef HAVE_TF
       fawkes::Time now(clock);
 
@@ -154,7 +182,9 @@ RobotinoActThread::loop()
       last_seqnum_ = sensor_state.sequenceNumber;
     }
 
-  } else {
+  }// connected
+
+  else {
     if (! motor_if_->msgq_empty()) {
       logger->log_warn(name(), "Motor commands received while not connected");
       motor_if_->msgq_flush();

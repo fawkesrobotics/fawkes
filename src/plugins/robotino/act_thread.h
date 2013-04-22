@@ -72,11 +72,15 @@ class RobotinoActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  RobotinoSensorThread           *sensor_thread_;
+ RobotinoSensorThread           *sensor_thread_;
   rec::robotino::com::Com        *com_;
   rec::robotino::com::OmniDrive  *omni_drive_;
   unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;
+  float        			  cfg_deadman_threshold_;
+  bool        			  msg_received_;
+  bool        			  msg_zero_vel_;
+  fawkes::Time 			  last_msg_time_;
 };
 
 
