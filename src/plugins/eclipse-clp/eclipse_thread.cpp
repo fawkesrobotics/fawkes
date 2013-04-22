@@ -25,6 +25,7 @@
 #include "externals/fawkes_logger.h"
 
 #include <interfaces/TestInterface.h>
+#include <core/threading/mutex_locker.h>
 #include <core/exception.h>
 #include <eclipseclass.h>
 
@@ -52,20 +53,23 @@ EclipseAgentThread* EclipseAgentThread::m_instance = NULL;
 
 /** Constructor. */
 EclipseAgentThread::EclipseAgentThread()
-  : Thread( "ECLiPSe thread", fawkes::Thread::OPMODE_CONTINUOUS ),
+  : Thread( "ECLiPSe thread", fawkes::Thread::OPMODE_WAITFORWAKEUP ),
     m_initialized( false )
 {
   m_instance = this;
+  mutex = new fawkes::Mutex();
 }
 
 /** Destructor. */
 EclipseAgentThread::~EclipseAgentThread()
 {
+  delete mutex;
 }
 
 void
 EclipseAgentThread::init()
 {
+  _running = false;
   fawkes::EclExternalBlackBoard::create_initial_object(blackboard);
   // set ECLiPSe installation directory
   char* eclipse_dir = NULL;
@@ -120,12 +124,39 @@ EclipseAgentThread::finalize()
   ec_cleanup();
 }
 
+/*
 void
 EclipseAgentThread::once()
 {
   post_goal( "run" );
   if ( EC_succeed != EC_resume() )
   { throw Exception( "Error running agent program" ); }
+}
+*/
+
+bool EclipseAgentThread::running()
+{
+  MutexLocker lock(mutex);
+  return _running;
+}
+
+void
+EclipseAgentThread::loop()
+{
+  logger->log_info(name(), "In loop()");
+  if (!running()){
+    mutex->lock();
+    _running = true;
+    mutex->unlock();
+
+    post_goal( "cycle" );
+    if ( EC_succeed != EC_resume() )
+    { throw Exception( "Error running agent program" ); }
+
+    mutex->lock();
+    _running = false;
+    mutex->unlock();
+  }
 }
 
 /** Post an event to the ECLiPSe context.

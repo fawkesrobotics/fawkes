@@ -24,16 +24,17 @@
 #define __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <core/threading/mutex.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
   class Interface;
+  class Mutex;
 }
 
 class EclipseAgentThread 
@@ -49,7 +50,8 @@ class EclipseAgentThread
 
   virtual void init();
   virtual void finalize();
-  virtual void once();
+  //virtual void once();
+  virtual void loop();
 
   void post_event( const char* );
   fawkes::Logger*    get_logger();
@@ -58,12 +60,15 @@ class EclipseAgentThread
 
  private: /* methods */
   bool load_file( const char* filename );
+  bool running();
 
  private: /* members */
   static EclipseAgentThread* m_instance;
 
+  bool _running;
   bool m_initialized;
   std::string agent;
+  fawkes::Mutex* mutex;
 
 };
 
