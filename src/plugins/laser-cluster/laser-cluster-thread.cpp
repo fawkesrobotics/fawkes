@@ -123,7 +123,8 @@ LaserClusterThread::init()
   try {
     double rotation[4] = {0., 0., 0., 1.};
     cluster_pos_if_ = NULL;
-    cluster_pos_if_ = blackboard->open_for_writing<Position3DInterface>("Laser Cluster");
+    cluster_pos_if_ =
+      blackboard->open_for_writing<Position3DInterface>("Euclidean Laser Cluster");
     cluster_pos_if_->set_rotation(rotation);
     cluster_pos_if_->write();
 
