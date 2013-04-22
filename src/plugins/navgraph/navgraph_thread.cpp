@@ -69,6 +69,7 @@ NavGraphThread::init()
   cfg_nav_if_id_       = config->get_string("/plugins/navgraph/navigator_interface_id");
   cfg_travel_tolerance_ = config->get_float("/plugins/navgraph/travel_tolerance");
   cfg_target_tolerance_ = config->get_float("/plugins/navgraph/target_tolerance");
+  cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
 
@@ -461,7 +462,7 @@ NavGraphThread::node_reached()
   }
 
   float dist = sqrt(pow(pose.getOrigin().x() - cur_target.x(), 2) +
-		    pow(pose.getOrigin().y() - cur_target.y(), 2));
+		    pow( pose.getOrigin().y() - cur_target.y(), 2));
 
   float tolerance = 0.;
   if (cur_target.has_property("travel_tolerance")) {
@@ -474,7 +475,18 @@ NavGraphThread::node_reached()
     if (cur_target.has_property("target_tolerance")) {
       tolerance = cur_target.property_as_float("target_tolerance");
     }
+    if (cur_target.has_property("orientation")) {
+      float ori_tolerance = cfg_orientation_tolerance_; //cur_target.property_as_float("orientation_tolerance");
+      float ori_diff =  fabs( tf::get_yaw( pose.getRotation()) - cur_target.property_as_float("orientation") );
+      
+      if (tolerance == 0.)  tolerance = default_tolerance;
+      
+      logger->log_info(name(), "Ori=%f Rot=%f Diff=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose.getRotation() ), ori_diff);
+      return (dist <= tolerance) && (ori_diff <= ori_tolerance);
+    }
   }
+
+
   // can be no or invalid tolerance
   if (tolerance == 0.)  tolerance = default_tolerance;
 
