@@ -111,6 +111,7 @@ class LaserClusterThread
   float        cfg_cluster_max_x_;
   float        cfg_cluster_min_y_;
   float        cfg_cluster_max_y_;
+  float        cfg_cluster_switch_tolerance_;
 
   unsigned int loop_count_;
 

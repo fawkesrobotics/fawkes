@@ -123,6 +123,7 @@ LaserClusterThread::init()
   cfg_cluster_max_x_         = config->get_float(CFG_PREFIX"cluster_max_x");
   cfg_cluster_min_y_         = config->get_float(CFG_PREFIX"cluster_min_y");
   cfg_cluster_max_y_         = config->get_float(CFG_PREFIX"cluster_max_y");
+  cfg_cluster_switch_tolerance_ = config->get_float(CFG_PREFIX"cluster_switch_tolerance");
 
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -447,7 +448,12 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
 
   int visibility_history = iface->visibility_history();
   if (is_visible) {
-    if (visibility_history >= 0) {
+    Eigen::Vector4f last_centroid(iface->translation(0), iface->translation(1),
+				  iface->translation(2), 0.);
+    bool different_cluster =
+      fabs((last_centroid - centroid).norm()) > cfg_cluster_switch_tolerance_;
+
+    if (! different_cluster && visibility_history >= 0) {
       iface->set_visibility_history(visibility_history + 1);
     } else {
       iface->set_visibility_history(1);
