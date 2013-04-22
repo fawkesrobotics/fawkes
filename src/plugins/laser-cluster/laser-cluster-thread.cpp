@@ -50,6 +50,9 @@
 #include <interfaces/SwitchInterface.h>
 
 #include <iostream>
+#include <limits>
+#include <cmath>
+
 using namespace std;
 
 #define CFG_PREFIX "/laser-cluster/"
@@ -116,6 +119,10 @@ LaserClusterThread::init()
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_input_pcl_             = config->get_string(CFG_PREFIX"input_cloud");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
+  cfg_cluster_min_x_         = config->get_float(CFG_PREFIX"cluster_min_x");
+  cfg_cluster_max_x_         = config->get_float(CFG_PREFIX"cluster_max_x");
+  cfg_cluster_min_y_         = config->get_float(CFG_PREFIX"cluster_min_y");
+  cfg_cluster_max_y_         = config->get_float(CFG_PREFIX"cluster_max_y");
 
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -342,7 +349,64 @@ LaserClusterThread::loop()
     }
 
   } else {
-    logger->log_info(name(), "Filter left no points for clustering");
+    //logger->log_info(name(), "Filter left no points for clustering");
+  }
+
+  if (! cluster_indices.empty()) {
+    double min_angle = std::numeric_limits<double>::max();
+    unsigned int min_index = std::numeric_limits<unsigned int>::max();
+    Eigen::Vector4f min_centroid;
+    for (unsigned int i = 0; i < cluster_indices.size(); ++i) {
+      Eigen::Vector4f centroid;
+      pcl::compute3DCentroid(*noline_cloud, cluster_indices[i].indices, centroid);
+      if ( (centroid.x() >= cfg_cluster_min_x_) && (centroid.x() <= cfg_cluster_max_x_) &&
+	   (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
+      {
+	double abs_angle = fabs(std::atan2(centroid.y(), centroid.x()));
+	if (min_index != std::numeric_limits<unsigned int>::max()) {
+	  logger->log_info(name(), "[L %u] (%f,%f,%f)|%f vs. (%f,%f,%f)|%f: %s", loop_count_,
+			   centroid.x(), centroid.y(), centroid.z(), abs_angle,
+			   min_centroid.x(), min_centroid.y(), min_centroid.z(), min_angle,
+			   (abs_angle < min_angle) ? "true" : "false");
+	}
+	if (abs_angle < min_angle) {
+	  min_index    = i;
+	  min_angle    = abs_angle;
+	  min_centroid = centroid;
+	}
+      } else {
+	/*
+	logger->log_info(name(), "[L %u] Cluster %u out of bounds (%f,%f) "
+			 "not in ((%f,%f),(%f,%f))",
+			 loop_count_, centroid.x(), centroid.y(),
+			 cfg_cluster_min_x_, cfg_cluster_max_x_,
+			 cfg_cluster_min_y_, cfg_cluster_max_y_);
+	*/
+      }
+    }
+
+    if (min_index != std::numeric_limits<unsigned int>::max()) {
+      //logger->log_debug(name(), "[L %u] Cluster at (%f,%f,%f)", loop_count_,
+      //	       min_centroid.x(), min_centroid.y(), min_centroid.z());
+      set_position(cluster_pos_if_, true, min_centroid);
+
+      // color points of cluster
+      for (auto ci : cluster_indices[min_index].indices) {
+	ColorPointType &out_point = clusters_->points[ci];
+	out_point.r = cluster_colors[0][0];
+	out_point.g = cluster_colors[0][1];;
+	out_point.b = cluster_colors[0][2];;
+      }
+
+    } else {
+      //logger->log_warn(name(), "No acceptable cluster found, %zu clusters",
+      //	         cluster_indices.size());
+      set_position(cluster_pos_if_, false);
+    }
+  } else {
+    //logger->log_warn(name(), "No clusters found, %zu remaining points",
+    //	     noline_cloud->points.size());
+    set_position(cluster_pos_if_, false);
   }
 
   //*clusters_ = *tmp_clusters;

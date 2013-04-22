@@ -107,6 +107,10 @@ class LaserClusterThread
   unsigned int cfg_cluster_max_size_;
   std::string  cfg_input_pcl_;
   std::string  cfg_result_frame_;
+  float        cfg_cluster_min_x_;
+  float        cfg_cluster_max_x_;
+  float        cfg_cluster_min_y_;
+  float        cfg_cluster_max_y_;
 
   unsigned int loop_count_;
 
