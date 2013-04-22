@@ -270,22 +270,18 @@ LaserClusterThread::loop()
     }
   }
 
-    // check for a minimum number of expected inliers
-    if ((double)inliers->indices.size()
-	< (cfg_segm_inlier_quota_ * (double)input_->points.size()))
-    {
-      logger->log_warn(name(), "[L %u] no lines (%zu inliers, required %f)",
-                       loop_count_, inliers->indices.size(),
-                       (cfg_segm_inlier_quota_ * input_->points.size()));
-      break;
-    }
+  {
+    CloudPtr tmp_cloud(new Cloud());
+    // Erase non-finite points
+    pcl::PassThrough<PointType> passthrough;
+    passthrough.setInputCloud(noline_cloud);
+    passthrough.filter(*tmp_cloud);
 
-    // Remove the linear inliers, extract the rest
-    CloudPtr cloud_f(new Cloud());
-    pcl::ExtractIndices<PointType> extract;
-    extract.setNegative(true);
-    extract.filter(*cloud_f);
-    *noline_cloud = *cloud_f;
+    if (noline_cloud->points.size() != tmp_cloud->points.size()) {
+      //logger->log_error(name(), "[L %u] new non-finite points total: %zu   finite: %zu",
+      //	          loop_count_, noline_cloud->points.size(), tmp_cloud->points.size());
+      *noline_cloud = *tmp_cloud;
+    }
   }
 
   // What remains in the cloud are now potential clusters
