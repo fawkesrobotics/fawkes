@@ -44,6 +44,23 @@ class MotorInterface : public Interface
 
   };
 
+  class SetOdometryMessage : public Message
+  {
+    SetOdometryMessage(float ini_x, float ini_y, float ini_odometry_orientation);
+    SetOdometryMessage();
+    ~SetOdometryMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float odometry_orientation();
+    void set_odometry_orientation(const float new_odometry_orientation);
+    int maxlenof_odometry_orientation() const;
+  };
+
   class DriveRPMMessage : public Message
   {
     DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear);
