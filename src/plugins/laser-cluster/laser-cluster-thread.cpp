@@ -218,7 +218,7 @@ LaserClusterThread::loop()
   }
 
   if (! switch_if_->is_enabled()) {
-    TimeWait::wait(250000);
+    //TimeWait::wait(250000);
     return;
   }
 
@@ -232,7 +232,7 @@ LaserClusterThread::loop()
     // and not synchronized with main loop, but point cloud acquisition thread is
     // synchronized, we might start before any data has been read
     //logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
-    TimeWait::wait(50000);
+    //TimeWait::wait(50000);
     return;
   }
 
