@@ -365,12 +365,12 @@ LaserClusterThread::loop()
 	   (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
       {
 	double abs_angle = fabs(std::atan2(centroid.y(), centroid.x()));
-	if (min_index != std::numeric_limits<unsigned int>::max()) {
-	  logger->log_info(name(), "[L %u] (%f,%f,%f)|%f vs. (%f,%f,%f)|%f: %s", loop_count_,
-			   centroid.x(), centroid.y(), centroid.z(), abs_angle,
-			   min_centroid.x(), min_centroid.y(), min_centroid.z(), min_angle,
-			   (abs_angle < min_angle) ? "true" : "false");
-	}
+	//if (min_index != std::numeric_limits<unsigned int>::max()) {
+	  //logger->log_info(name(), "[L %u] (%f,%f,%f)|%f vs. (%f,%f,%f)|%f: %s", loop_count_,
+	  //		   centroid.x(), centroid.y(), centroid.z(), abs_angle,
+	  //		   min_centroid.x(), min_centroid.y(), min_centroid.z(), min_angle,
+	  //		   (abs_angle < min_angle) ? "true" : "false");
+	//}
 	if (abs_angle < min_angle) {
 	  min_index    = i;
 	  min_angle    = abs_angle;
