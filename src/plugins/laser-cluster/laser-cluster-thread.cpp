@@ -139,7 +139,12 @@ LaserClusterThread::init()
 
     switch_if_ = NULL;
     switch_if_ = blackboard->open_for_writing<SwitchInterface>("laser-cluster");
-    switch_if_->set_enabled(true);
+
+    bool autostart = true;
+    try {
+      autostart = config->get_bool(CFG_PREFIX"auto-start");
+    } catch (Exception &e) {} // ignored, use default
+    switch_if_->set_enabled(autostart);
     switch_if_->write();
   } catch (Exception &e) {
     blackboard->close(cluster_pos_if_);

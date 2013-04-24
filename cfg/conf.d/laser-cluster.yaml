@@ -5,6 +5,9 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-cluster
 ---
 laser-cluster:
 
+  # Automatically start, i.e. set enabled to true?
+  auto-start: false
+
   line_removal: false
   
   # Maximum number of iterations to perform for line segmentation
