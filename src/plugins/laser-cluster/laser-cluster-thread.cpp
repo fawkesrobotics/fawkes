@@ -124,6 +124,7 @@ LaserClusterThread::init()
   cfg_cluster_min_y_         = config->get_float(CFG_PREFIX"cluster_min_y");
   cfg_cluster_max_y_         = config->get_float(CFG_PREFIX"cluster_max_y");
   cfg_cluster_switch_tolerance_ = config->get_float(CFG_PREFIX"cluster_switch_tolerance");
+  cfg_offset_x_               = config->get_float(CFG_PREFIX"offset_x");
 
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -435,6 +436,10 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
                                     const Eigen::Quaternionf &attitude)
 {
   tf::Stamped<tf::Pose> baserel_pose;
+
+  //apply correction
+  centroid[0]+=cfg_offset_x_;
+
   try{
     tf::Stamped<tf::Pose>
       spose(tf::Pose(tf::Quaternion(attitude.x(), attitude.y(), attitude.z(), attitude.w()),

@@ -40,3 +40,7 @@ laser-cluster:
 
   # input laser cloud
   input_cloud: urg-filtered
+
+
+  # transpose the x-position of the detected cluster by the given offset
+  offset_x: 0.0
