@@ -437,13 +437,14 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
 {
   tf::Stamped<tf::Pose> baserel_pose;
 
-  //apply correction
-  centroid[0]+=cfg_offset_x_;
-
   try{
+    // Note that we add a correction offset to the centroid X value.
+    // This offset is determined empirically and just turns out to be helpful
+    // in certain situations.
+
     tf::Stamped<tf::Pose>
       spose(tf::Pose(tf::Quaternion(attitude.x(), attitude.y(), attitude.z(), attitude.w()),
-                     tf::Vector3(centroid[0], centroid[1], centroid[2])),
+                     tf::Vector3(centroid[0] + cfg_offset_x_, centroid[1], centroid[2])),
             fawkes::Time(0, 0), input_->header.frame_id);
     tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
     iface->set_frame(cfg_result_frame_.c_str());
