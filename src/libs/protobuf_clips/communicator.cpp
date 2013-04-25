@@ -458,7 +458,12 @@ ClipsProtobufCommunicator::clips_pb_field_value(void *msgptr, std::string field_
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!*m) return CLIPS::Value("INVALID-MESSAGE", CLIPS::TYPE_SYMBOL);
+  if (!(m && *m)) {
+		if (logger_) {
+			logger_->log_warn("CLIPS-Protobuf", "Invalid message when setting %s", field_name.c_str());
+		}
+		return CLIPS::Value("INVALID-MESSAGE", CLIPS::TYPE_SYMBOL);
+	}
 
   const Descriptor *desc       = (*m)->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByName(field_name);
