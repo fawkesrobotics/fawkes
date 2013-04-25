@@ -449,7 +449,7 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
 
     tf::Stamped<tf::Pose>
       spose(tf::Pose(tf::Quaternion(attitude.x(), attitude.y(), attitude.z(), attitude.w()),
-                     tf::Vector3(centroid[0] + cfg_offset_x_, centroid[1], centroid[2])),
+                     tf::Vector3(centroid[0], centroid[1], centroid[2])),
             fawkes::Time(0, 0), input_->header.frame_id);
     tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
     iface->set_frame(cfg_result_frame_.c_str());
@@ -459,7 +459,9 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
 
   int visibility_history = iface->visibility_history();
   if (is_visible) {
-    Eigen::Vector4f last_centroid(iface->translation(0), iface->translation(1),
+	  //we have to subtract the previously added offset to be
+	  //able to compare against the current centroid
+    Eigen::Vector4f last_centroid(iface->translation(0) -cfg_offset_x_, iface->translation(1),
 				  iface->translation(2), 0.);
     bool different_cluster =
       fabs((last_centroid - centroid).norm()) > cfg_cluster_switch_tolerance_;
@@ -471,7 +473,9 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     }
     tf::Vector3 &origin = baserel_pose.getOrigin();
     tf::Quaternion quat = baserel_pose.getRotation();
-    double translation[3] = { origin.x(), origin.y(), origin.z() };
+
+    //add the offset and publish
+    double translation[3] = { origin.x() + cfg_offset_x_, origin.y(), origin.z() };
     double rotation[4] = { quat.x(), quat.y(), quat.z(), quat.w() };
     iface->set_translation(translation);
     iface->set_rotation(rotation);
