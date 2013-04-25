@@ -71,5 +71,5 @@
   (declare (salience -4000))
   ?sf <- (skill (status FINAL|FAILED))
   =>
-  (modify ?sf (status IDLE))
+  (retract ?sf)
 )
