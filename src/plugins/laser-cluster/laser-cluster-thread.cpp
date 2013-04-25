@@ -454,6 +454,8 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
     iface->set_frame(cfg_result_frame_.c_str());
   } catch (tf::TransformException &e) {
+	  logger->log_warn(name(),"Transform exception:");
+	  logger->log_warn(name(),e);
     is_visible = false;
   }
 
