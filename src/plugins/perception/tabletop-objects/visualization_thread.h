@@ -58,7 +58,7 @@ class TabletopVisualizationThread
                          V_Vector4f &table_hull_vertices,
                          V_Vector4f &table_model_vertices,
                          V_Vector4f &good_table_hull_edges,
-                         V_Vector4f &centroids) throw();
+                         M_Vector4f &centroids) throw();
 
  private:
   void triangulate_hull();
@@ -72,7 +72,7 @@ class TabletopVisualizationThread
   V_Vector4f table_model_vertices_;
   V_Vector4f good_table_hull_edges_;
   V_Vector4f table_triangle_vertices_;
-  V_Vector4f centroids_;
+  M_Vector4f centroids_;
   ros::Publisher *vispub_;
 #ifdef USE_POSEPUB
   ros::Publisher *posepub_;

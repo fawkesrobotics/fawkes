@@ -38,6 +38,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/voxel_grid.h>
 
+#include <map>
+
 namespace fawkes {
   class Position3DInterface;
   class SwitchInterface;
@@ -83,6 +85,10 @@ class TabletopObjectsThread
   typedef ColorCloud::Ptr ColorCloudPtr;
   typedef ColorCloud::ConstPtr ColorCloudConstPtr;
 
+  typedef std::map<unsigned int, Eigen::Vector4f, std::less<unsigned int>,
+      Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
+      CentroidMap;
+
  private:
   void set_position(fawkes::Position3DInterface *iface,
                     bool is_visible, const Eigen::Vector4f &centroid = Eigen::Vector4f(0, 0, 0, 0),
@@ -107,6 +113,7 @@ class TabletopObjectsThread
   unsigned int add_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
 
   void reset_obj_ids();
+  unsigned int next_id();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -151,8 +158,11 @@ class TabletopObjectsThread
 
   unsigned int loop_count_;
 
-  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids_;
+  CentroidMap centroids_;
+//  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids_;
   std::queue<unsigned int> free_obj_ids_;
+  std::vector<bool> object_is_active;
+  bool first_run_;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;
@@ -180,5 +190,6 @@ class TabletopObjectsThread
   TabletopVisualizationThreadBase *visthread_;
 #endif
 };
+
 
 #endif

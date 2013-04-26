@@ -146,17 +146,17 @@ TabletopVisualizationThread::loop()
   visualization_msgs::MarkerArray m;
 
   unsigned int idnum = 0;
-
-  for (size_t i = 0; i < centroids_.size(); ++i) {
+  unsigned int i = 0;
+  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); it++, i++) {
     try {
       tf::Stamped<tf::Point>
-        centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]),
+        centroid(tf::Point(it->second[0], it->second[1], it->second[2]),
                  fawkes::Time(0, 0), frame_id_);
       tf::Stamped<tf::Point> baserel_centroid;
       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
 
       char *tmp;
-      if (asprintf(&tmp, "TObj %zu", i) != -1) {
+      if (asprintf(&tmp, "TObj %u", it->first) != -1) {
         // Copy to get memory freed on exception
         std::string id = tmp;
         free(tmp);
@@ -549,7 +549,7 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
                                        V_Vector4f &table_hull_vertices,
                                        V_Vector4f &table_model_vertices,
                                        V_Vector4f &good_table_hull_edges,
-                                       V_Vector4f &centroids) throw()
+                                       M_Vector4f &centroids) throw()
 {
   MutexLocker lock(&mutex_);
   frame_id_ = frame_id;

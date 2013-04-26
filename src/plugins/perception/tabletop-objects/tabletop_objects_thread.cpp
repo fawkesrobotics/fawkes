@@ -47,6 +47,12 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/transforms.h>
 #include <pcl/common/distances.h>
+#include <pcl/registration/distances.h>
+
+#include <utils/hungarian_method/hungarian.h>
+#include <utils/munkres/matrix.hpp>
+#include <utils/munkres/munkres.h>
+
 
 #include <interfaces/Position3DInterface.h>
 #include <interfaces/SwitchInterface.h>
@@ -199,6 +205,11 @@ TabletopObjectsThread::init()
   seg_.setDistanceThreshold(cfg_segm_distance_threshold_);
 
   loop_count_ = 0;
+
+  object_is_active.resize(MAX_CENTROIDS);
+  for (std::vector<bool>::iterator it = object_is_active.begin(); it != object_is_active.end(); it++)
+    *it = false;
+  first_run_ = true;
 
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
@@ -960,9 +971,7 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
 
-  centroids_.resize(MAX_CENTROIDS);
   unsigned int object_count = 0;
-  reset_obj_ids();
 
   if (cloud_objs_->points.size() > 0) {
     object_count = add_objects(cloud_objs_, tmp_clusters);
@@ -974,9 +983,12 @@ TabletopObjectsThread::loop()
   }
 
   for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    set_position(pos_ifs_[i], i < object_count, centroids_[i]);
+    set_position(pos_ifs_[i], false);
   }
-  centroids_.resize(object_count);
+  unsigned int i = 0;
+  for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++, i++) {
+    set_position(pos_ifs_[i], true, it->second);
+  }
 
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
 
@@ -1062,9 +1074,14 @@ void TabletopObjectsThread::reset_obj_ids() {
   }
 }
 
+unsigned int TabletopObjectsThread::next_id() {
+  static unsigned int id = 0;
+  return id++;
+}
 unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
+  unsigned int object_count = 0;
+  unsigned int max_id = 0;
   std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
-
   std::vector<pcl::PointIndices>::const_iterator it;
   //unsigned int i = 0;
   unsigned int num_points = 0;
@@ -1072,22 +1089,81 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
     num_points += it->indices.size();
 
   if (num_points > 0) {
+    std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> new_centroids(MAX_CENTROIDS);
+    unsigned int centroid_i = 0;
     for (it = cluster_indices.begin();
-        it != cluster_indices.end() && !free_obj_ids_.empty();
-        ++it)
+        it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
+        ++it, ++object_count, ++centroid_i)
     {
-      int centroid_i = free_obj_ids_.front();
-      free_obj_ids_.pop();
+      if (centroid_i > max_id) max_id = centroid_i;
       // calculate each centroid and save it to the vector centroids
-      pcl::compute3DCentroid(*input_cloud, it->indices, centroids_[centroid_i]);
-      *tmp_clusters += *colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
+      pcl::compute3DCentroid(*input_cloud, it->indices, new_centroids[centroid_i]);
+//      *tmp_clusters += *colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
     }
+    new_centroids.resize(max_id+1);
+    std::vector<unsigned int> assignment(new_centroids.size());
+    if (first_run_) {
+      // get a new id for every object since we didn't have objects before
+    for (unsigned int i = 0; i < assignment.size(); i++)
+      assignment[i] = next_id();
+    }
+    else { // !first_run_
+      Munkres munkres;
+      std::vector<unsigned int> obj_ids(centroids_.size());
+      unsigned int rows = new_centroids.size();
+      unsigned int cols = centroids_.size();
+      Matrix<double> cost(rows, cols);
+      double max_distance = 0;
+      for (unsigned int row = 0; row < rows; row++) {
+        unsigned int col = 0;
+        for (CentroidMap::iterator col_it = centroids_.begin();
+            col_it != centroids_.end();
+            col_it++, col++) {
+          double distance = pcl::distances::l2(new_centroids[row], col_it->second);
+          if (max_distance < distance)
+            max_distance = distance;
+//          logger->log_warn(name(), "distance %u-%u: %f", row, col_it->first, distance);
+          cost(row,col) = distance;
+          obj_ids[col] = col_it->first;
+        }
+      }
+      munkres.solve(cost);
+      for (unsigned int row = 0; row < rows; row++) {
+        unsigned int assigned = 0;
+        for (unsigned int col = 0; col < cols; col++) {
+          if (cost(row,col) == 0) {
+            assignment[row] = obj_ids[col];
+            assigned++;
+//            logger->log_warn(name(), "Munkres: %u assigned to %u", row, obj_ids[col]);
+          }
+        }
+        if (assigned == 0) {
+          // object wasn't assigned, therefore it was not recognized in the previous loop
+          // create as new object
+          assignment[row] = next_id();
+//          logger->log_warn(name(), "Munkres: %u assignments for object %u", assigned, row);
+        } else if (assigned > 1) {
+          logger->log_error(name(), "Munkres: %u assignments for object %u", assigned, row);
+        }
+      }
+    }
+    centroids_.clear();
+    for (unsigned int i = 0; i < new_centroids.size(); i++) {
+      centroids_[assignment[i]] = new_centroids[i];
+    }
+
+    for (unsigned int i = 0; i < new_centroids.size(); i++) {
+      *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[assignment[i]]);
+    }
+
+    if (object_count > 0)
+      first_run_ = false;
   }
   else {
     logger->log_info(name(), "No clustered points found");
     return 0;
   }
-  return cluster_indices.size();
+  return object_count;
 }
 
 TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster (
@@ -1305,7 +1381,6 @@ TabletopObjectsThread::simplify_polygon(CloudPtr polygon, float dist_threshold)
 
   return result;
 }
-
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void
