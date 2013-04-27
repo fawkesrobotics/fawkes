@@ -84,6 +84,8 @@ LibLogger::finalize()
 {
   delete logger;
   delete mutex;
+  logger = NULL;
+  mutex  = NULL;
 }
 
 
