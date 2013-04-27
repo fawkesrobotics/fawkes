@@ -29,6 +29,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <string>
 
 namespace fawkes {
 
@@ -58,6 +59,26 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
  *
  * @author Tim Niemueller
  */
+
+/** Convert a string to a log level.
+ * @param log_level log level as string
+ * @return log level
+ */
+Logger::LogLevel
+LoggerFactory::string_to_loglevel(const char *log_level)
+{
+  std::string ll = log_level;
+
+  if (ll == "info" || ll == "INFO") {
+    return Logger::LL_INFO;
+  } else if (ll == "warn" || ll == "WARN") {
+    return Logger::LL_WARN;
+  } else if (ll == "error" || ll == "ERROR") {
+    return Logger::LL_ERROR;
+  } else {
+    return Logger::LL_DEBUG;
+  }
+}
 
 /** Get logger instance.
  * Get an instance of a logger of the given type. The argument string is used for
@@ -118,20 +139,28 @@ LoggerFactory::instance(const char *type, const char *as)
  * @exception UnknownLoggerTypeException thrown if any of the loggers was unknown.
  */
 MultiLogger *
-LoggerFactory::multilogger_instance(const char *as)
+LoggerFactory::multilogger_instance(const char *as, Logger::LogLevel default_ll)
 {
   MultiLogger *m = new MultiLogger();
+  m->set_loglevel(default_ll);
 
   char *logger_string = strdup(as);
   char *str = logger_string;
   char *saveptr, *r;
-  const char *type, *args;
-  char *typeargs_saveptr;
+  const char *type, *args, *level;
+  char *typeargs_saveptr, *level_saveptr, *type_str;
   const char *logger_delim = ";";
   const char *logger_typeargs_delim = ":";
+  const char *logger_level_delim = "/";
   while ((r = strtok_r(str, logger_delim, &saveptr)) != NULL ) {
-    type = strtok_r(r, logger_typeargs_delim, &typeargs_saveptr);
-    args = strtok_r(NULL, logger_typeargs_delim, &typeargs_saveptr);
+    type  = strtok_r(r, logger_typeargs_delim, &typeargs_saveptr);
+    args  = strtok_r(NULL, logger_typeargs_delim, &typeargs_saveptr);
+
+    type_str = strdup(type);
+
+    type  = strtok_r(type_str, logger_level_delim, &level_saveptr);
+    level = strtok_r(NULL, logger_level_delim, &level_saveptr);
+
     if ( type == NULL ) {
       throw UnknownLoggerTypeException();
     }
@@ -142,13 +171,20 @@ LoggerFactory::multilogger_instance(const char *as)
     try {
       Logger *l = instance(type, args);
       m->add_logger(l);
+      if (level) {
+	Logger::LogLevel ll = string_to_loglevel(level);
+	l->set_loglevel(ll);
+      }
     } catch (Exception &e) {
       e.append("Could not open logger '%s:%s'", type, args);
+      free(type_str);
       free(logger_string);
       delete m;
       throw;
     }
     str = NULL;
+
+    free(type_str);
   }
 
   free(logger_string);
