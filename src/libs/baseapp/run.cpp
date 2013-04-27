@@ -234,6 +234,23 @@ init(InitOptions options)
     }
   }
 
+  if (! options.has_loggers()) {
+    // Allow configuration override from config
+    if (config->exists("/fawkes/mainapp/loggers")) {
+      try {
+        std::string loggers = config->get_string("/fawkes/mainapp/loggers");
+        MultiLogger *new_logger =
+	  LoggerFactory::multilogger_instance(loggers.c_str(), options.log_level());
+        logger = new_logger;
+        LibLogger::finalize();
+        LibLogger::init(new_logger);
+      } catch (Exception &e) {
+        logger->log_warn("FawkesMainThread", "Loggers set in config file, "
+			 "but failed to read, exception follows.");
+        logger->log_warn("FawkesMainThread", e);
+      }
+    }
+  }
 
   // *** Determine network parameters
   unsigned int net_tcp_port     = 1910;
