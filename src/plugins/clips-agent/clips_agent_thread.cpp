@@ -272,7 +272,6 @@ ClipsAgentThread::loop()
 	fact += std::string(" (") + f.get_name() + " " + value + ")";
       }
       fact += ")";
-      //logger->log_debug(name(), "Interface fact: %s", fact.c_str());
       clips->assert_fact(fact);
     }
   }
@@ -481,6 +480,7 @@ ClipsAgentThread::clips_blackboard_add_interface(std::string type, std::string i
       try {
 	iface = blackboard->open_for_reading(type.c_str(), id.c_str());      
 	interfaces_.insert(std::make_pair(type, iface));
+        logger->log_info(name(), "Added interface %s", iface->uid());
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to open interface %s:%s, exception follows",
 			 type.c_str(), id.c_str());
