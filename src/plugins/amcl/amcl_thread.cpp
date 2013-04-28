@@ -798,10 +798,10 @@ AmclThread::publish_map()
   msg.info.width  = map_width_;
   msg.info.height = map_height_;
   msg.info.resolution = cfg_resolution_;
-  msg.info.origin.position.x = 0.; //map_->origin_x;
-  msg.info.origin.position.y = 0.; //map_->origin_y;
+  msg.info.origin.position.x = cfg_origin_x_;
+  msg.info.origin.position.y = cfg_origin_y_;
   msg.info.origin.position.z = 0.0;
-  tf::Quaternion q(tf::create_quaternion_from_yaw(0.));
+  tf::Quaternion q(tf::create_quaternion_from_yaw(cfg_origin_theta_));
   msg.info.origin.orientation.x = q.x();
   msg.info.origin.orientation.y = q.y();
   msg.info.origin.orientation.z = q.z();
