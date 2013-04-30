@@ -956,7 +956,10 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_)
 
-  ColorCloudPtr tmp_clusters = colorize_cluster(temp_cloud2, inliers->indices, table_color);
+  std::vector<int> indices(inliers->indices);
+  for (uint i = 0; i < indices.size(); i++)
+    indices[i] = i;
+  ColorCloudPtr tmp_clusters = colorize_cluster(temp_cloud2, indices, table_color);
 
   TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
 
