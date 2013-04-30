@@ -102,8 +102,6 @@ class TabletopObjectsThread
 
   ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const std::vector<int> &cluster, const uint8_t color[]);
 
-  ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const uint8_t color[]);
-
   unsigned int add_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
 
   void reset_obj_ids();

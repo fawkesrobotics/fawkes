@@ -1094,19 +1094,12 @@ TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster (
     CloudConstPtr input_cloud,
     const std::vector<int> &cluster,
     const uint8_t color[]) {
-  return colorize_cluster(CloudConstPtr(new Cloud(*input_cloud, cluster)), color);
-}
-
-TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster(
-    CloudConstPtr input_cloud,
-    const uint8_t color[]) {
   ColorCloudPtr result(new ColorCloud());
-  result->resize(input_cloud->size());
-  Cloud::const_iterator pit;
+  result->resize(cluster.size());
   uint i = 0;
-  for (pit = input_cloud->begin(); pit != input_cloud->end(); ++pit, ++i) {
-    ColorPointType &p1 = result->points[i];
-    const PointType &p2 = *pit;
+  for (std::vector<int>::const_iterator it = cluster.begin(); it != cluster.end(); ++it, ++i) {
+    ColorPointType &p1 = result->points.at(i);
+    const PointType &p2 = input_cloud->points.at(*it);
     p1.x = p2.x;
     p1.y = p2.y;
     p1.z = p2.z;
