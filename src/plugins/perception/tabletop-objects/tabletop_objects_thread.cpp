@@ -49,7 +49,6 @@
 #include <pcl/common/distances.h>
 #include <pcl/registration/distances.h>
 
-#include <utils/hungarian_method/hungarian.h>
 #include <utils/munkres/matrix.hpp>
 #include <utils/munkres/munkres.h>
 
@@ -206,9 +205,6 @@ TabletopObjectsThread::init()
 
   loop_count_ = 0;
 
-  object_is_active.resize(MAX_CENTROIDS);
-  for (std::vector<bool>::iterator it = object_is_active.begin(); it != object_is_active.end(); it++)
-    *it = false;
   first_run_ = true;
 
 #ifdef USE_TIMETRACKER
@@ -1063,17 +1059,6 @@ TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
        return cluster_indices;
 }
 
-void TabletopObjectsThread::reset_obj_ids() {
-//  free_obj_ids_ new std::queue<int>(MAX_CENTROIDS);
-//  for (unsigned int i = 0; i < free_obj_ids_.size(); i++)
-//    free_obj_ids_.pop();
-  while (!free_obj_ids_.empty())
-    free_obj_ids_.pop();
-  for (int i = 0; i < MAX_CENTROIDS; i++) {
-    free_obj_ids_.push(i);
-  }
-}
-
 unsigned int TabletopObjectsThread::next_id() {
   static unsigned int id = 0;
   return id++;
@@ -1083,7 +1068,6 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
   unsigned int max_id = 0;
   std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
   std::vector<pcl::PointIndices>::const_iterator it;
-  //unsigned int i = 0;
   unsigned int num_points = 0;
   for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     num_points += it->indices.size();

@@ -112,7 +112,6 @@ class TabletopObjectsThread
 
   unsigned int add_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
 
-  void reset_obj_ids();
   unsigned int next_id();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -159,9 +158,6 @@ class TabletopObjectsThread
   unsigned int loop_count_;
 
   CentroidMap centroids_;
-//  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids_;
-  std::queue<unsigned int> free_obj_ids_;
-  std::vector<bool> object_is_active;
   bool first_run_;
 
 #ifdef USE_TIMETRACKER
