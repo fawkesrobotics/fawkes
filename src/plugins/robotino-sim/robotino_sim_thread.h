@@ -29,6 +29,10 @@
 #include <aspect/blocked_timing.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 
+//from Gazebo
+#include <gazebo/transport/TransportTypes.hh>
+#include <gazebo/msgs/MessageTypes.hh>
+
 namespace fawkes {
   class Position3DInterface;
 }
@@ -39,8 +43,8 @@ class RobotinoSimThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect
-//public fawkes::GazeboAspect
+  public fawkes::BlockedTimingAspect,
+  public fawkes::GazeboAspect
 {
  public:
   RobotinoSimThread();
