@@ -18,6 +18,8 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
+include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
+include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
 LIBS_robotino_sim = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
@@ -29,6 +31,8 @@ OBJS_all    = $(OBJS_robotino_sim)
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
+  CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
   PLUGINS_all = $(PLUGINDIR)/robotino_sim.so
 else

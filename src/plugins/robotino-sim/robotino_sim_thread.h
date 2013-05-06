@@ -39,8 +39,8 @@ class RobotinoSimThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GazeboAspect
+  public fawkes::BlockedTimingAspect
+//public fawkes::GazeboAspect
 {
  public:
   RobotinoSimThread();

@@ -53,6 +53,7 @@ RobotinoSimThread::finalize()
 
 void
 RobotinoSimThread::loop()
+
 {
   logger->log_info(name(), "Robotino-Sim plugin active");
 }
