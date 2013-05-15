@@ -75,6 +75,13 @@ AgentControlThread::finalize()
 void
 AgentControlThread::loop()
 {
+  /* call eclipse thread (that thread has no blocked timing aspect
+   * and is therefore not called by the mainapp, so this has to be
+   * done here)
+  */
+  m_eclipse_thread->loop();
+
+
   if (m_debug_iface->has_writer()){
     m_eclipse_thread->post_event( "check_debug_msg" ); //if the debug interface has a writer (so tktools module is loaded), then post event to check for tktool connection request within eclipse
   }
