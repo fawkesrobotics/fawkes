@@ -24,7 +24,7 @@
 
 // from Gazebo
 #include <gazebo/transport/Transport.hh>
-#include <gazebo/gazebo_plugin.h>
+#include <plugins/gazebo/gazebo_plugin.h>
 
 using namespace fawkes;
 
