@@ -1552,27 +1552,27 @@ V4L2Camera::set_fps(unsigned int fps)
 unsigned int
 V4L2Camera::lens_x_corr()
 {
-  return get_one_control("lens x", V4L2_CID_HCENTER/*_DEPRECATED*/);
+  return get_one_control("lens x", V4L2_CID_PAN_RESET);
 }
 
 unsigned int
 V4L2Camera::lens_y_corr()
 {
-  return get_one_control("lens y", V4L2_CID_VCENTER/*_DEPRECATED*/);
+  return get_one_control("lens y", V4L2_CID_TILT_RESET);
 }
 
 void
 V4L2Camera::set_lens_x_corr(unsigned int x_corr)
 {
   LibLogger::log_debug("V4L2Cam", "Setting horizontal lens correction to %d", x_corr);
-  set_one_control("lens x", V4L2_CID_HCENTER/*_DEPRECATED*/, x_corr);
+  set_one_control("lens x", V4L2_CID_PAN_RESET, x_corr);
 }
 
 void
 V4L2Camera::set_lens_y_corr(unsigned int y_corr)
 {
   LibLogger::log_debug("V4L2Cam", "Setting vertical lens correction to %d", y_corr);
-  set_one_control("lens x", V4L2_CID_VCENTER/*_DEPRECATED*/, y_corr);
+  set_one_control("lens x", V4L2_CID_TILT_RESET, y_corr);
 }
 
 
