@@ -32,7 +32,7 @@ using namespace gazebo;
  * Thread simulate the Robotino in Gazebo 
  * by sending needed informations to the Robotino-plugin in Gazebo
  * and recieving sensordata from Gazebo
- * @author Tim Niemueller
+ * @author Frederik Zwilling
  */
 
 /** Constructor. */
@@ -63,7 +63,12 @@ void
 RobotinoSimThread::loop()
 {
   if(robotControlPub->HasConnections())
-    logger->log_info(name(), "Have a connetion");
+  {
+    logger->log_info(name(), "Try sending a message");
+    msgs::Header helloMessage;
+    helloMessage.set_str_id("Hello Gazebo-World!!!");
+    robotControlPub->Publish(helloMessage);
+  } 
   else
     logger->log_info(name(), "Have no connetion");
 }
