@@ -52,6 +52,25 @@ namespace fawkes {
 class TabletopVisualizationThreadBase;
 #endif
 
+class OldCentroid {
+public:
+  OldCentroid(const unsigned int &id, const Eigen::Vector4f &centroid)
+  : id_(id), age_(0), centroid_(centroid) { }
+  OldCentroid(const OldCentroid &other)
+  : id_(other.getId()), age_(other.getAge()), centroid_(other.getCentroid()) { }
+  virtual ~OldCentroid() { }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  unsigned int getId() const { return id_; }
+  const Eigen::Vector4f& getCentroid() const { return centroid_; }
+  unsigned int getAge() const { return age_; }
+  void age() { age_++; }
+
+protected:
+  unsigned int id_;
+  unsigned int age_;
+  Eigen::Vector4f centroid_;
+};
+
 class TabletopObjectsThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
