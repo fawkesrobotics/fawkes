@@ -22,8 +22,11 @@
 
 #include <tf/types.h>
 #include <interfaces/Position3DInterface.h>
+#include <gazebo/transport/Node.hh>
+#include <gazebo/msgs/msgs.hh>
 
 using namespace fawkes;
+using namespace gazebo;
 
 /** @class RobotinoSimThread "robotino-sim_thread.h"
  * Thread simulate the Robotino in Gazebo 
@@ -42,18 +45,25 @@ RobotinoSimThread::RobotinoSimThread()
 void
 RobotinoSimThread::init()
 {
-  //pose_if_ = blackboard->open_for_reading<Position3DInterface>("Pose");
+  //get a connection to gazebo (copied from gazeboscene)
+  logger->log_debug(name(), "Creating Gazebo publishers and waiting for connection");
+  robotControlPub = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/Message/");
+  //robotControlPub->WaitForConnection();
+  logger->log_debug(name(), "Gazebo publishers created and connected");
 }
 
 void
 RobotinoSimThread::finalize()
 {
-  //blackboard->close(pose_if_);
+  //reset?
+  robotControlPub.reset();
 }
 
 void
 RobotinoSimThread::loop()
-
 {
-  logger->log_info(name(), "Robotino-Sim plugin active");
+  if(robotControlPub->HasConnections())
+    logger->log_info(name(), "Have a connetion");
+  else
+    logger->log_info(name(), "Have no connetion");
 }

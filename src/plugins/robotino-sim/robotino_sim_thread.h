@@ -53,7 +53,7 @@ class RobotinoSimThread
   virtual void loop();
   virtual void finalize();
  private:
-  fawkes::Position3DInterface *pose_if_;
+  gazebo::transport::PublisherPtr robotControlPub;
 };
 
 #endif
