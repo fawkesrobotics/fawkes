@@ -57,6 +57,7 @@
 #include <interfaces/SwitchInterface.h>
 
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 #define CFG_PREFIX "/perception/tabletop-objects/"
@@ -132,6 +133,8 @@ TabletopObjectsThread::init()
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
+  cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
+  cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -206,6 +209,8 @@ TabletopObjectsThread::init()
   loop_count_ = 0;
 
   first_run_ = true;
+
+  old_centroids_.clear();
 
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
@@ -1126,14 +1131,53 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
         }
         if (assigned == 0) {
           // object wasn't assigned, therefore it was not recognized in the previous loop
-          // create as new object
+          // first, check if there is an old centroid close enough
+          for (OldCentroidVector::iterator it = old_centroids_.begin();
+              it != old_centroids_.end(); it++) {
+            double distance = pcl::distances::l2(new_centroids[row], it->getCentroid());
+            if (distance < cfg_centroid_max_distance_) {
+              logger->log_warn(name(), "old ID found: %u, distance: %f", it->getId(), distance);
+              assignment[row] = it->getId();
+              old_centroids_.erase(it);
+              assigned = 1;
+              break;
+            } else {
+            }
+          }
+          if (assigned == 0) {
+          // we still don't have an id, create as new object
           assignment[row] = next_id();
 //          logger->log_warn(name(), "Munkres: %u assignments for object %u", assigned, row);
+          }
         } else if (assigned > 1) {
           logger->log_error(name(), "Munkres: %u assignments for object %u", assigned, row);
         }
       }
-    }
+      // find unused centroids, i.e. centroids in centroids_ but not in new_centroids
+      // and save them for later
+      unsigned int col = 0;
+      for (CentroidMap::const_iterator it = centroids_.begin(); it != centroids_.end(); it++, col++) {
+        unsigned int assigned = 0;
+        for (unsigned int row = 0; row < rows; row++) {
+          if (cost(row,col) == 0) {
+            assigned++;
+          }
+        }
+        if (assigned == 0) {
+          old_centroids_.push_back(OldCentroid(obj_ids.at(col), Eigen::Vector4f(it->second)));
+        }
+      }
+      for (OldCentroidVector::iterator it = old_centroids_.begin();
+          it != old_centroids_.end(); it++) {
+        it->age();
+      }
+      // delete centroids which are older than cfg_centroid_max_age_
+      old_centroids_.erase(
+          std::remove_if(old_centroids_.begin(), old_centroids_.end(),
+              [&](const OldCentroid &centroid)->bool { return centroid.getAge() > cfg_centroid_max_age_; }
+          ),
+          old_centroids_.end());
+    } // !first_run_
     centroids_.clear();
     for (unsigned int i = 0; i < new_centroids.size(); i++) {
       centroids_[assignment[i]] = new_centroids[i];

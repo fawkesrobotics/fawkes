@@ -39,6 +39,7 @@
 #include <pcl/filters/voxel_grid.h>
 
 #include <map>
+#include <list>
 
 namespace fawkes {
   class Position3DInterface;
@@ -107,6 +108,7 @@ class TabletopObjectsThread
   typedef std::map<unsigned int, Eigen::Vector4f, std::less<unsigned int>,
       Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
       CentroidMap;
+  typedef std::list<OldCentroid, Eigen::aligned_allocator<OldCentroid> > OldCentroidVector;
 
  private:
   void set_position(fawkes::Position3DInterface *iface,
@@ -166,6 +168,8 @@ class TabletopObjectsThread
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
   std::string cfg_result_frame_;
+  uint cfg_centroid_max_age_;
+  float cfg_centroid_max_distance_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
@@ -175,6 +179,7 @@ class TabletopObjectsThread
   unsigned int loop_count_;
 
   CentroidMap centroids_;
+  OldCentroidVector old_centroids_;
   bool first_run_;
 
 #ifdef USE_TIMETRACKER
