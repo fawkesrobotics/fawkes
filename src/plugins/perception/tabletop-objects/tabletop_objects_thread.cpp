@@ -981,12 +981,12 @@ TabletopObjectsThread::loop()
     logger->log_info(name(), "Filter left no points for clustering");
   }
 
-  for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    set_position(pos_ifs_[i], false);
-  }
   unsigned int i = 0;
   for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++, i++) {
     set_position(pos_ifs_[i], true, it->second);
+  }
+  for(; i< MAX_CENTROIDS; i++) {
+    set_position(pos_ifs_[i], false);
   }
 
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
