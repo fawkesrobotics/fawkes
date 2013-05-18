@@ -34,7 +34,7 @@
 #include <gazebo/msgs/MessageTypes.hh>
 
 namespace fawkes {
-  class Position3DInterface;
+  class MotorInterface;
 }
 
 class RobotinoSimThread
@@ -53,7 +53,12 @@ class RobotinoSimThread
   virtual void loop();
   virtual void finalize();
  private:
-  gazebo::transport::PublisherPtr robotControlPub;
+  //Publisher to send messages to gazebo
+  gazebo::transport::PublisherPtr stringPub;
+  gazebo::transport::PublisherPtr motorMovePub;
+
+  //read interfaces
+  fawkes::MotorInterface *motor_if_;
 };
 
 #endif

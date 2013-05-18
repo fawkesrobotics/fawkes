@@ -21,7 +21,7 @@
 #include "robotino_sim_thread.h"
 
 #include <tf/types.h>
-#include <interfaces/Position3DInterface.h>
+#include <interfaces/MotorInterface.h>
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
 
@@ -45,10 +45,15 @@ RobotinoSimThread::RobotinoSimThread()
 void
 RobotinoSimThread::init()
 {
+  //Open interfaces to read
+  //TODO: figure out id
+  motor_if_ = blackboard->open_for_reading<MotorInterface>("Figure Out");
+
   //get a connection to gazebo (copied from gazeboscene)
   logger->log_debug(name(), "Creating Gazebo publishers and waiting for connection");
-  robotControlPub = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/Message/");
-  //robotControlPub->WaitForConnection();
+  stringPub = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/String/");
+  motorMovePub = gazebonode->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
+  //stringPub->WaitForConnection();
   logger->log_debug(name(), "Gazebo publishers created and connected");
 }
 
@@ -56,18 +61,26 @@ void
 RobotinoSimThread::finalize()
 {
   //reset?
-  robotControlPub.reset();
+  stringPub.reset();
+  motorMovePub.reset();
 }
 
 void
 RobotinoSimThread::loop()
 {
-  if(robotControlPub->HasConnections())
+  if(stringPub->HasConnections())
   {
-    logger->log_info(name(), "Try sending a message");
+    logger->log_info(name(), "Try sending messages");
+    //Hello world message
     msgs::Header helloMessage;
     helloMessage.set_str_id("Hello Gazebo-World!!!");
-    robotControlPub->Publish(helloMessage);
+    stringPub->Publish(helloMessage);
+    //MotorMove
+    msgs::Vector3d motorMove;
+    motorMove.set_x(1);
+    motorMove.set_y(2);
+    motorMove.set_z(4);
+    motorMovePub->Publish(motorMove);
   } 
   else
     logger->log_info(name(), "Have no connetion");
