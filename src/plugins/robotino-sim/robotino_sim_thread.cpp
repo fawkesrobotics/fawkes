@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *  robotino-sim_thread.cpp - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
  *
@@ -21,9 +22,13 @@
 #include "robotino_sim_thread.h"
 
 #include <tf/types.h>
-#include <interfaces/MotorInterface.h>
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
+
+#include <interfaces/MotorInterface.h>
+#include <interfaces/BatteryInterface.h>
+#include <interfaces/RobotinoSensorInterface.h>
+
 
 using namespace fawkes;
 using namespace gazebo;
@@ -45,9 +50,10 @@ RobotinoSimThread::RobotinoSimThread()
 void
 RobotinoSimThread::init()
 {
-  //Open interfaces to read
-  //TODO: figure out id
-  motor_if_ = blackboard->open_for_reading<MotorInterface>("Figure Out");
+  //Open interfaces
+  motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
+  batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
+  sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
   //get a connection to gazebo (copied from gazeboscene)
   logger->log_debug(name(), "Creating Gazebo publishers and waiting for connection");
@@ -60,6 +66,9 @@ RobotinoSimThread::init()
 void
 RobotinoSimThread::finalize()
 {
+  blackboard->close(motor_if_);
+  blackboard->close(batt_if_);
+  blackboard->close(sens_if_);
   //reset?
   stringPub.reset();
   motorMovePub.reset();

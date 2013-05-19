@@ -35,6 +35,8 @@
 
 namespace fawkes {
   class MotorInterface;
+  class BatteryInterface;
+  class RobotinoSensorInterface;
 }
 
 class RobotinoSimThread
@@ -57,8 +59,13 @@ class RobotinoSimThread
   gazebo::transport::PublisherPtr stringPub;
   gazebo::transport::PublisherPtr motorMovePub;
 
+  //provided interfaces
+  fawkes::BatteryInterface        *batt_if_;
+  fawkes::RobotinoSensorInterface *sens_if_;
+  fawkes::MotorInterface         *motor_if_;
+  
   //read interfaces
-  fawkes::MotorInterface *motor_if_;
+  //fawkes::MotorInterface *motor_if_;
 };
 
 #endif
