@@ -85,11 +85,19 @@ RobotinoSimThread::loop()
     helloMessage.set_str_id("Hello Gazebo-World!!!");
     stringPub->Publish(helloMessage);
     //MotorMove
-    msgs::Vector3d motorMove;
-    motorMove.set_x(1);
-    motorMove.set_y(2);
-    motorMove.set_z(4);
-    motorMovePub->Publish(motorMove);
+    if(!motor_if_->msgq_empty())
+    {
+      if (MotorInterface::TransRotMessage *msg =
+          motor_if_->msgq_first_safe(msg))
+      {
+        msgs::Vector3d motorMove;
+	motorMove.set_x(msg->vx());
+	motorMove.set_y(msg->vy());
+	motorMove.set_z(msg->omega());
+	motorMovePub->Publish(motorMove);
+      }
+      motor_if_->msgq_pop();
+    }
   } 
   else
     logger->log_info(name(), "Have no connetion");
