@@ -114,5 +114,7 @@ void RobotinoSimThread::OnGyroMsg(ConstVector3dPtr &msg)
 {
   float yaw = msg->z();
   logger->log_info(name(), "Got GyroMsg! Yaw=%f\n", yaw);
-  
+  sens_if_->set_gyro_available(true);
+  sens_if_->set_gyro_angle(yaw);
+  sens_if_->write();
 }
