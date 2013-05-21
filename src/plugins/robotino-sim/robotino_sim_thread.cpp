@@ -22,8 +22,11 @@
 #include "robotino_sim_thread.h"
 
 #include <tf/types.h>
+#include <stdio.h>
+
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
+#include <gazebo/transport/transport.hh>
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/BatteryInterface.h>
@@ -56,9 +59,13 @@ RobotinoSimThread::init()
   sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
   //get a connection to gazebo (copied from gazeboscene)
-  logger->log_debug(name(), "Creating Gazebo publishers and waiting for connection");
+  logger->log_debug(name(), "Creating Gazebo publishers");
   stringPub = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/String/");
   motorMovePub = gazebonode->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
+
+  logger->log_debug(name(), "Try Suscribing");
+  gyroSub = gazebonode->Subscribe(std::string("~/RobotinoSim/Gyro/"), &RobotinoSimThread::OnGyroMsg, this);
+
   //stringPub->WaitForConnection();
   logger->log_debug(name(), "Gazebo publishers created and connected");
 }
@@ -101,4 +108,11 @@ RobotinoSimThread::loop()
   } 
   else
     logger->log_info(name(), "Have no connetion");
+}
+
+void RobotinoSimThread::OnGyroMsg(ConstVector3dPtr &msg)
+{
+  float yaw = msg->z();
+  logger->log_info(name(), "Got GyroMsg! Yaw=%f\n", yaw);
+  
 }
