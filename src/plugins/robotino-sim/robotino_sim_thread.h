@@ -71,8 +71,12 @@ class RobotinoSimThread
   fawkes::RobotinoSensorInterface *sens_if_;
   fawkes::MotorInterface         *motor_if_;
   
-  //read interfaces
-  //fawkes::MotorInterface *motor_if_;
+  //Helper variables:
+  //motorMovements last sent to gazebo
+  float vx, vy, vomega;
+
+  //Helper functions:
+  void sendMotorMove();
 };
 
 #endif

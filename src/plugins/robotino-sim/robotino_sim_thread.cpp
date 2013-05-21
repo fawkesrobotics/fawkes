@@ -68,6 +68,15 @@ RobotinoSimThread::init()
 
   //stringPub->WaitForConnection();
   logger->log_debug(name(), "Gazebo publishers created and connected");
+  
+  if(stringPub->HasConnections())
+  {
+    logger->log_info(name(), "Try sending messages");
+    //Hello world message
+    msgs::Header helloMessage;
+    helloMessage.set_str_id("Hello Gazebo-World!!!");
+    stringPub->Publish(helloMessage);
+  }
 }
 
 void
@@ -84,30 +93,7 @@ RobotinoSimThread::finalize()
 void
 RobotinoSimThread::loop()
 {
-  if(stringPub->HasConnections())
-  {
-    logger->log_info(name(), "Try sending messages");
-    //Hello world message
-    msgs::Header helloMessage;
-    helloMessage.set_str_id("Hello Gazebo-World!!!");
-    stringPub->Publish(helloMessage);
-    //MotorMove
-    if(!motor_if_->msgq_empty())
-    {
-      if (MotorInterface::TransRotMessage *msg =
-          motor_if_->msgq_first_safe(msg))
-      {
-        msgs::Vector3d motorMove;
-	motorMove.set_x(msg->vx());
-	motorMove.set_y(msg->vy());
-	motorMove.set_z(msg->omega());
-	motorMovePub->Publish(motorMove);
-      }
-      motor_if_->msgq_pop();
-    }
-  } 
-  else
-    logger->log_info(name(), "Have no connetion");
+  sendMotorMove();
 }
 
 void RobotinoSimThread::OnGyroMsg(ConstVector3dPtr &msg)
@@ -117,4 +103,29 @@ void RobotinoSimThread::OnGyroMsg(ConstVector3dPtr &msg)
   sens_if_->set_gyro_available(true);
   sens_if_->set_gyro_angle(yaw);
   sens_if_->write();
+}
+
+void RobotinoSimThread::sendMotorMove()
+{
+  if(motorMovePub->HasConnections() && !motor_if_->msgq_empty())
+  {
+    if (MotorInterface::TransRotMessage *msg =
+	motor_if_->msgq_first_safe(msg))
+    {
+      //send command only if changed
+      //TODO: send if there is a new connection
+      if(msg->vx() != vx || msg->vy() != vy || msg->omega() != vomega)
+      {
+	vx = msg->vx();
+	vy = msg->vy();
+	vomega = msg->omega();
+	msgs::Vector3d motorMove;
+	motorMove.set_x(vx);
+	motorMove.set_y(vy);
+	motorMove.set_z(vomega);
+	motorMovePub->Publish(motorMove);
+      }    
+    }
+    motor_if_->msgq_pop();
+  }
 }
