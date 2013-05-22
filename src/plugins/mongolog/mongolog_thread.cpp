@@ -89,6 +89,7 @@ MongoLogThread::init()
   }
   */
 
+  now_ = new Time(clock);
   __database = "fflog";
   try {
     __database = config->get_string("/plugins/mongolog/database");
@@ -107,7 +108,7 @@ MongoLogThread::init()
     logger->log_debug(name(), "Opening %s", (*i)->uid());
     __listeners[(*i)->uid()] = new InterfaceListener(blackboard, *i,
 						     mongodb_client, __database,
-						     __collections, logger);
+						     __collections, logger, now_);
   }
 
   blackboard->register_observer(this);
@@ -126,12 +127,23 @@ MongoLogThread::finalize()
   }
   __configs.clear();
   */
-  config->erase("/plugins/mongorrd/databases/mongolog");
+
+  logger->log_debug(name(), "Finalizing MongoLogThread");
+
+
+  blackboard->unregister_observer(this);
+
+  // sometimes causes errors
+  // config->erase("/plugins/mongorrd/databases/mongolog");
+
+
   std::map<std::string, InterfaceListener *>::iterator i;
   for (i = __listeners.begin(); i != __listeners.end(); ++i) {
     delete i->second;
   }
   __listeners.clear();
+
+  logger->log_debug(name(), "Finalized MongoLogThread");
 }
 
 
@@ -154,7 +166,8 @@ MongoLogThread::bb_interface_created(const char *type, const char *id) throw()
 							    mongodb_client,
 							    __database,
 							    __collections,
-							    logger);
+							    logger,
+                  now_);
     } else {
       logger->log_warn(name(), "Interface %s already opened", interface->uid());
       blackboard->close(interface);
@@ -176,13 +189,15 @@ MongoLogThread::bb_interface_created(const char *type, const char *id) throw()
  * @param database name of database to write to
  * @param colls collections
  * @param logger logger
+ * @param now Time
  */
 MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
 						     Interface *interface,
 						     mongo::DBClientBase *mongodb,
 						     std::string &database,
 						     LockSet<std::string> &colls,
-						     Logger *logger)
+						     Logger *logger,
+                 Time *now)
   : BlackBoardInterfaceListener("MongoLogListener-%s", interface->uid()),
     __database(database), __collections(colls)
 {
@@ -190,13 +205,13 @@ MongoLogThread::InterfaceListener::InterfaceListener(BlackBoard *blackboard,
   __interface  = interface;
   __mongodb    = mongodb;
   __logger     = logger;
+  now_         = now;
 
   // sanitize interface ID to be suitable for MongoDB
   std::string id = interface->id();
   size_t pos = 0;
-  size_t at;
-  while((at = id.find(" ", pos)) != string::npos) {
-    id.replace(at, 1, "_");
+  while((pos = id.find_first_of(" -", pos)) != string::npos) {
+    id.replace(pos, 1, "_");
     pos = pos + 1;
   }
   __collection = __database + "." + interface->type() + "." + id;
@@ -219,10 +234,12 @@ MongoLogThread::InterfaceListener::~InterfaceListener()
 void
 MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interface) throw()
 {
+  now_->stamp();
   interface->read();
 
   // write interface data
   BSONObjBuilder document;
+  document.append("timestamp", (long long) now_->in_msec());
   InterfaceFieldIterator i;
   for (i = interface->fields(); i != interface->fields_end(); ++i) {
     size_t length = i.get_length();
@@ -244,131 +261,131 @@ MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interfac
 
     case IFT_INT8:
       if (is_array) {
-	int8_t *ints = i.get_int8s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        int8_t *ints = i.get_int8s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_int8());
+        document.append(i.get_name(), i.get_int8());
       }
       break;
 
     case IFT_UINT8:
       if (is_array) {
-	uint8_t *ints = i.get_uint8s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        uint8_t *ints = i.get_uint8s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_uint8());
+        document.append(i.get_name(), i.get_uint8());
       }
       break;
 
     case IFT_INT16:
       if (is_array) {
-	int16_t *ints = i.get_int16s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        int16_t *ints = i.get_int16s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_int16());
+        document.append(i.get_name(), i.get_int16());
       }
       break;
 
     case IFT_UINT16:
       if (is_array) {
-	uint16_t *ints = i.get_uint16s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        uint16_t *ints = i.get_uint16s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_uint16());
+        document.append(i.get_name(), i.get_uint16());
       }
       break;
 
     case IFT_INT32:
       if (is_array) {
-	int32_t *ints = i.get_int32s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        int32_t *ints = i.get_int32s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_int32());
+        document.append(i.get_name(), i.get_int32());
       }
       break;
 
     case IFT_UINT32:
       if (is_array) {
-	uint32_t *ints = i.get_uint32s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        uint32_t *ints = i.get_uint32s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_uint32());
+        document.append(i.get_name(), i.get_uint32());
       }
       break;
 
     case IFT_INT64:
       if (is_array) {
-	int64_t *ints = i.get_int64s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append((long long int)ints[l]);
-	}
-	subb.doneFast();
+        int64_t *ints = i.get_int64s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append((long long int)ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), (long long int)i.get_int64());
+        document.append(i.get_name(), (long long int)i.get_int64());
       }
       break;
 
     case IFT_UINT64:
       if (is_array) {
-	uint64_t *ints = i.get_uint64s();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append((long long int)ints[l]);
-	}
-	subb.doneFast();
+        uint64_t *ints = i.get_uint64s();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append((long long int)ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), (long long int)i.get_uint64());
+        document.append(i.get_name(), (long long int)i.get_uint64());
       }
       break;
 
     case IFT_FLOAT:
       if (is_array) {
-	float *floats = i.get_floats();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(floats[l]);
-	}
-	subb.doneFast();
+        float *floats = i.get_floats();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(floats[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_float());
+        document.append(i.get_name(), i.get_float());
       }
       break;
 
     case IFT_DOUBLE:
       if (is_array) {
-	double *doubles = i.get_doubles();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(doubles[l]);
-	}
-	subb.doneFast();
+        double *doubles = i.get_doubles();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(doubles[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_double());
+        document.append(i.get_name(), i.get_double());
       }
       break;
 
@@ -378,23 +395,23 @@ MongoLogThread::InterfaceListener::bb_interface_data_changed(Interface *interfac
 
     case IFT_BYTE:
       if (is_array) {
-	document.appendBinData(i.get_name(), length,
+        document.appendBinData(i.get_name(), length,
 			       BinDataGeneral, i.get_bytes());
       } else {
-	document.append(i.get_name(), i.get_byte());
+        document.append(i.get_name(), i.get_byte());
       }
       break;
 
     case IFT_ENUM:
       if (is_array) {
-	int32_t *ints = i.get_enums();
-	BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-	for (size_t l = 0; l < length; ++l) {
-	  subb.append(ints[l]);
-	}
-	subb.doneFast();
+        int32_t *ints = i.get_enums();
+        BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
+        for (size_t l = 0; l < length; ++l) {
+          subb.append(ints[l]);
+        }
+        subb.doneFast();
       } else {
-	document.append(i.get_name(), i.get_enum());
+        document.append(i.get_name(), i.get_enum());
       }
       break;
     }
