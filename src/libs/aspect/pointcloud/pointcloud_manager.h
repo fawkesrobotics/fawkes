@@ -134,29 +134,6 @@ PointCloudManager::exists_pointcloud(const char *id)
 
 }
 
-template <typename PointT>
-PointCloudManager::StorageAdapter *
-PointCloudManager::PointCloudStorageAdapter<PointT>::clone() const
-{
-  return new PointCloudStorageAdapter<PointT>(this);
-}
-
-
-template <typename PointT>
-void
-PointCloudManager::PointCloudStorageAdapter<PointT>::get_time(fawkes::Time &time) const
-{
-#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
-  time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
-#else
-  fawkes::PointCloudTimestamp pclts;
-  pclts.timestamp = cloud->header.stamp;
-  time.set_time(pclts.time.sec, time.get_usec());
-#endif
-}
-
-
-
 } // end namespace fawkes
 
 #endif
