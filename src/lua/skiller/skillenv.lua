@@ -334,17 +334,18 @@ end
 -- fsm is nil the graph is reset to the empty string.
 -- @param fsm FSM to get graph from
 -- @param interface skiller interface
-function write_fsm_graph(fsm, interface)
+function write_fsm_graph(fsm, interface, layout)
    assert(interface, "skillenv.write_fsm_graph: no interface!")
    if fsm then
-      if fsm:changed() then
+      if fsm:changed() or layout then
 	 --print_warn("Writing graph %s to interface", fsm.name)
 	 --interface:set_graph_fsm(fsm.name)
-	 local graph = fsm:graph()
+	 local graph = fsm:graph(layout)
 	 if #graph > interface:maxlenof_graph() then
 	    print_error("%s's graph exceeds maximum size (%d vs. %d)",
 			fsm.name, #graph, interface:maxlenof_graph())
 	 end
+
 	 interface:set_graph(graph)
 	 interface:write()
       end
@@ -455,7 +456,7 @@ function update_grapher_config(skdbg, graphdir, colored)
    return params_changed
 end
 
-function write_skiller_debug(skdbg, what, graphdir, colored)
+function write_skiller_debug(skdbg, skdbg_layouted, what, graphdir, colored)
    local skdbg = skdbg or interfaces.writing.skdbg
    assert(skdbg, "write_skiler_debug: No SkillerDebugInterface given")
 
@@ -480,7 +481,8 @@ function write_skiller_debug(skdbg, what, graphdir, colored)
 	    skdbg:set_graph_fsm(what)
 	 end
 
-	 write_fsm_graph(fsm, skdbg)
+	 write_fsm_graph(fsm, skdbg, false)
+	 write_fsm_graph(fsm, skdbg_layouted, true)
       else
 	 if what ~= cur_what then
 	    print_warn("Could not write FSM graph, FSM for %s not found", what)

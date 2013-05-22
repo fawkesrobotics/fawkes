@@ -107,6 +107,7 @@ class SkillerExecutionThread
 
   fawkes::SkillerInterface      *__skiller_if;
   fawkes::SkillerDebugInterface *__skdbg_if;
+  fawkes::SkillerDebugInterface *__skdbg_if_layouted;
 
   fawkes::LuaContext  *__lua;
   fawkes::LuaInterfaceImporter  *__lua_ifi;
