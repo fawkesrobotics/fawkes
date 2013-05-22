@@ -1184,7 +1184,7 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
     }
 
     for (unsigned int i = 0; i < new_centroids.size(); i++) {
-      *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[assignment[i]]);
+      *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[assignment[i] % MAX_CENTROIDS]);
     }
 
     if (object_count > 0)
