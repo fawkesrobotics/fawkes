@@ -589,6 +589,8 @@ function skill_fsm_execute_wrapper(fsm)
 		return skillstati.S_FINAL
 	     elseif fsm.fail_state and fsm.current.name == fsm.fail_state then
 		return skillstati.S_FAILED
+	     elseif fsm.error and fsm.error ~= "" then
+		return skillstati.S_FAILED
 	     else
 		return skillstati.S_RUNNING
 	     end

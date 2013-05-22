@@ -22,7 +22,7 @@
 require("fawkes.modinit")
 module(..., fawkes.modinit.register_all);
 
-skillenv.use_skill("skills.generic.relgoto")
-skillenv.use_skill("skills.generic.goto")
+--skillenv.use_skill("skills.generic.relgoto")
+--skillenv.use_skill("skills.generic.goto")
+--skillenv.use_skill("skills.generic.hsmtest")
 skillenv.use_skill("skills.generic.say")
-skillenv.use_skill("skills.generic.hsmtest")

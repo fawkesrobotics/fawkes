@@ -253,7 +253,13 @@ function FSM:loop()
       -- FSM was just reset, initialize start state
       self.current = self.states[self.start]
       assert(self.current, "Start state " .. tostring(self.start) .. " does not exist")
-      self:trans(self.current:do_init())
+      local ok, state_or_err =
+	 xpcall(function() return self.current:do_init() end, debug.traceback)
+      if ok then
+         self:trans(state_or_err)
+      else
+         self:set_error("Init failed: " .. tostring(state_or_err))
+      end
       self.state_changed = true
    end
    if self.current.name ~= self.fail_state then
@@ -261,7 +267,14 @@ function FSM:loop()
       -- if self.debug then
       --    print_debug(self.name .. ": Executing loop for state " .. self.current.name)
       -- end
-      self:trans(self.current:do_loop())
+      local ok, state_or_err =
+	 xpcall(function() return self.current:do_loop() end, debug.traceback)
+      if ok then
+         self:trans(state_or_err)
+      else
+         self:set_error("Loop exception: " .. tostring(state_or_err))
+	 self:trans(self.states[self.fail_state])
+      end
    elseif self.error == "" and self.previous then
       local t = self.previous:last_transition()
       if t and t.description then
@@ -300,10 +313,25 @@ function FSM:trans(next_state, ...)
 	 print_debug("%s: Transition %s -> %s",
 		     self.name, self.current.name, next_state.name)
       end
-      self.current:do_exit()
+      local ok, err =
+	 xpcall(function() return self.current:do_exit() end, debug.traceback)
+      if not ok then
+         self:set_error("Exit exception: " .. tostring(err))
+      end
       self.previous = self.current
       self.current  = next_state
-      return self:trans(next_state:do_init(...))
+      local init_ok, state_or_err =
+	 xpcall(function() return next_state:do_init() end, debug.traceback)
+      if ok then
+	 return self:trans(state_or_err)
+      elseif next_state == self.states[self.fail_state] then
+	 -- ouch, we're fucked
+	 print_error("Failed to init fail state: %s", tostring(state_or_err))
+	 return nil
+      else
+	 self:set_error("Init of successor failed: " .. tostring(state_or_err))
+	 return self:trans(self.states[self.fail_state])
+      end
    end
 end
 

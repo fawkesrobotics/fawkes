@@ -5,7 +5,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/skiller
 ---
 skiller:
   # Skill space
-  skillspace: nao
+  skillspace: test
 
   # Watch lua files for modification and automatically reload
   # Lua if files have been changed; true to enable
