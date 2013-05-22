@@ -29,6 +29,7 @@
 #endif
 
 #include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 #include <fstream>
 #include <stack>
 #include <cerrno>
@@ -37,32 +38,6 @@
 namespace fawkes {
 
 /// @cond INTERNALS
-namespace yaml_config {
-  static inline
-    std::vector<std::string> split(const std::string &s, char delim = '/')
-  {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while(std::getline(ss, item, delim)) {
-      if (item != "")  elems.push_back(item);
-    }
-    return elems;
-  }
-
-  static inline
-    std::queue<std::string> split_to_queue(const std::string &s, char delim = '/')
-  {
-    std::queue<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while(std::getline(ss, item, delim)) {
-      if (item != "")  elems.push(item);
-    }
-    return elems;
-  }
-}
-
 
 class YamlConfigurationNode
 {
@@ -167,7 +142,7 @@ class YamlConfigurationNode
 
   YamlConfigurationNode * find_or_insert(const char *path)
   {
-    std::queue<std::string> q = yaml_config::split_to_queue(path);
+    std::queue<std::string> q = str_split_to_queue(path);
 
     YamlConfigurationNode *n = this;
     while (! q.empty()) {
@@ -184,7 +159,7 @@ class YamlConfigurationNode
 
   void erase(const char *path)
   {
-    std::queue<std::string> q = yaml_config::split_to_queue(path);
+    std::queue<std::string> q = str_split_to_queue(path);
     std::stack<YamlConfigurationNode *> qs;
     std::string full_path;
 
@@ -228,7 +203,7 @@ class YamlConfigurationNode
   YamlConfigurationNode * find(const char *path)
   {
     try {
-      std::queue<std::string> pel_q = yaml_config::split_to_queue(path);
+      std::queue<std::string> pel_q = str_split_to_queue(path);
       return find(pel_q);
     } catch (Exception &e) {
       throw;
@@ -358,6 +333,35 @@ class YamlConfigurationNode
       // might want to have custom exception here later
       throw Exception("YamlConfig: value or type error on %s", name_.c_str());
     }
+  }
+
+  /** Get the list elements as string.
+   * The first element determines the type of the list.
+   * @return value string as list, i.e. as space-separated list of items
+   */
+  std::string
+  get_list_as_string() const
+  {
+    if (type_ != Type::SEQUENCE) {
+      throw fawkes::Exception("YamlConfiguration: value of %s is not a list", name_.c_str());
+    }
+    if (list_values_.empty())  return "";
+
+    std::string rv = "";
+    bool is_string = (determine_scalar_type() == Type::STRING);
+    if (is_string) {
+      rv = " \"" + list_values_[0] + "\"";
+      for (size_t i = 1; i < list_values_.size(); ++i) {
+	rv += " \"" + list_values_[i] + "\"";
+      }
+    } else {
+      rv = list_values_[0];
+      for (size_t i = 1; i < list_values_.size(); ++i) {
+	rv += " " + list_values_[i];
+      }
+    }
+
+    return rv;
   }
 
   /** Retrieve value casted to given type T.
@@ -521,27 +525,27 @@ class YamlConfigurationNode
   }
 
 
-  float get_float()
+  float get_float() const
   {
     return get_value<float>();
   }
 
-  unsigned int get_uint()
+  unsigned int get_uint() const
   {
     return get_value<unsigned int>();
   }
 
-  int get_int()
+  int get_int() const
   {
     return get_value<int>();
   }
 
-  bool get_bool()
+  bool get_bool() const
   {
     return get_value<bool>();
   }
 
-  Type::value determine_scalar_type()
+  Type::value determine_scalar_type() const
   {
     if (is_type<unsigned int>()) {
       int v = get_int();
@@ -563,7 +567,7 @@ class YamlConfigurationNode
     }
   }
 
-  std::string get_string()
+  std::string get_string() const
   {
     return get_value<std::string>();
   }

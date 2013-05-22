@@ -27,6 +27,8 @@
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
 
+#include <string>
+
 namespace CLIPS {
   class Environment;
 }
@@ -41,10 +43,12 @@ class CLIPSAspect : public virtual Aspect
   friend class CLIPSAspectIniFin;
 
  public:
-  CLIPSAspect(const char *log_component_name = 0);
+  CLIPSAspect(const char *env_name, bool create = true,
+	      bool exclusive = false, const char *log_component_name = 0);
   virtual ~CLIPSAspect();
 
  protected:
+  const std::string           clips_env_name;
   LockPtr<CLIPS::Environment> clips;
 
  private:
@@ -53,6 +57,8 @@ class CLIPSAspect : public virtual Aspect
   void finalize_CLIPSAspect();
 
  private:
+  bool         CLIPSAspect_create_;
+  bool         CLIPSAspect_exclusive_;
   const char * CLIPSAspect_log_component_name_;
 };
 

@@ -60,11 +60,17 @@ class CLIPSLogger
   void log(const char *logical_name, const char *str)
   {
     if (strcmp(str, "\n") == 0) {
-      if (strcmp(logical_name, "logdebug") == 0) {
+      if (strcmp(logical_name, "debug") == 0 || strcmp(logical_name, "logdebug") == 0 ||
+	  strcmp(logical_name, WTRACE) == 0)
+      {
 	logger_->log_debug(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
-      } else if (strcmp(logical_name, "logwarn") == 0) {
+      } else if (strcmp(logical_name, "warn") == 0 || strcmp(logical_name, "logwarn") == 0 ||
+		 strcmp(logical_name, WWARNING) == 0)
+      {
 	logger_->log_warn(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
-      } else if (strcmp(logical_name, "logerror") == 0) {
+      } else if (strcmp(logical_name, "error") == 0 || strcmp(logical_name, "logerror") == 0 ||
+		 strcmp(logical_name, WERROR) == 0)
+      {
 	logger_->log_error(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
       } else {
 	logger_->log_info(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
@@ -103,11 +109,19 @@ static int
 log_router_query(void *env, char *logical_name)
 {
   if (strcmp(logical_name, "l") == 0) return TRUE;
+  if (strcmp(logical_name, "info") == 0) return TRUE;
+  if (strcmp(logical_name, "debug") == 0) return TRUE;
+  if (strcmp(logical_name, "warn") == 0) return TRUE;
+  if (strcmp(logical_name, "error") == 0) return TRUE;
   if (strcmp(logical_name, "loginfo") == 0) return TRUE;
   if (strcmp(logical_name, "logdebug") == 0) return TRUE;
   if (strcmp(logical_name, "logwarn") == 0) return TRUE;
   if (strcmp(logical_name, "logerror") == 0) return TRUE;
   if (strcmp(logical_name, "stdout") == 0) return TRUE;
+  if (strcmp(logical_name, WTRACE) == 0) return TRUE;
+  if (strcmp(logical_name, WWARNING) == 0) return TRUE;
+  if (strcmp(logical_name, WERROR) == 0) return TRUE;
+  if (strcmp(logical_name, WDISPLAY) == 0) return TRUE;
   return FALSE;
 }
 
@@ -148,26 +162,19 @@ CLIPSAspectIniFin::~CLIPSAspectIniFin()
   logger_ = NULL;
 }
 
-void
-CLIPSAspectIniFin::init(Thread *thread)
-{
-  CLIPSAspect *clips_thread;
-  clips_thread = dynamic_cast<CLIPSAspect *>(thread);
-  if (clips_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "CLIPSAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
 
+LockPtr<CLIPS::Environment>
+CLIPSAspectIniFin::new_env(const char *log_component_name)
+{
   // CLIPS overwrites the SIGINT handler, restore it after
   // initializing the environment
   struct sigaction oldact;
   if (sigaction(SIGINT, NULL, &oldact) == 0) {
-    LockPtr<CLIPS::Environment> clips(new CLIPS::Environment());
+    LockPtr<CLIPS::Environment> clips(new CLIPS::Environment(),
+				      /* recursive mutex */ true);
 
     CLIPSContextMaintainer *cm =
-      new CLIPSContextMaintainer(logger_,
-				 clips_thread->get_CLIPSAspect_log_component_name());
+      new CLIPSContextMaintainer(logger_, log_component_name);
 
     void *env = clips->cobj();
 
@@ -182,13 +189,72 @@ CLIPSAspectIniFin::init(Thread *thread)
                             log_router_exit,
                             cm->logger);
 
-    clips_thread->init_CLIPSAspect(clips);
     // restore old action
     sigaction(SIGINT, &oldact, NULL);
+
+    return clips;
   } else {
-    throw CannotInitializeThreadException("CLIPS for %s: Unable to backup "
-                                          "SIGINT sigaction for restoration.",
-                                          thread->name());
+    throw CannotInitializeThreadException("CLIPS: Unable to backup "
+                                          "SIGINT sigaction for restoration.");
+  }
+}
+
+void
+CLIPSAspectIniFin::init(Thread *thread)
+{
+  CLIPSAspect *clips_thread;
+  clips_thread = dynamic_cast<CLIPSAspect *>(thread);
+  if (clips_thread == NULL) {
+    throw CannotInitializeThreadException("Thread '%s' claims to have the "
+					  "CLIPSAspect, but RTTI says it "
+					  "has not. ", thread->name());
+  }
+  
+  LockPtr<CLIPS::Environment> clips;
+
+  if (envs_.find(clips_thread->clips_env_name) != envs_.end()) {
+    ClipsEnvData &envd = envs_[clips_thread->clips_env_name];
+
+    if (clips_thread->CLIPSAspect_exclusive_) {
+      throw CannotInitializeThreadException("Thread '%s' requires exclusive access "
+					    "to already existing CLIPS environment '%s'",
+					    thread->name(),
+					    clips_thread->clips_env_name.c_str());
+    }
+    if (envd.exclusive) {
+      throw CannotInitializeThreadException("Thread '%s' requires (shared) access "
+					    "to already existing CLIPS environment '%s' "
+					    "that has exclusive access set by thread '%s'",
+					    thread->name(),
+					    clips_thread->clips_env_name.c_str(),
+					    envd.exclusive_holder.c_str());
+    }
+    clips = envd.env;
+  } else if (clips_thread->CLIPSAspect_create_) {
+    clips = new_env(clips_thread->get_CLIPSAspect_log_component_name());
+
+    ClipsEnvData envd;
+    envd.exclusive = clips_thread->CLIPSAspect_exclusive_;
+    if (envd.exclusive) {
+      envd.exclusive_holder = thread->name();
+    }
+    envd.env = clips;
+    envs_[clips_thread->clips_env_name] = envd;
+
+  } else {
+    throw CannotInitializeThreadException("CLIPS environment '%s' does not exist and"
+					  "creation has been disabled by thread '%s'",
+					  clips_thread->clips_env_name.c_str(),
+					  thread->name());
+  }
+
+  if (clips) {
+    clips_thread->init_CLIPSAspect(clips);
+  } else {
+    throw CannotInitializeThreadException("Failed to initialize CLIPS environment '%s' "
+					  "for thread '%s'",
+					  clips_thread->clips_env_name.c_str(),
+					  thread->name());
   }
 }
 
@@ -212,6 +278,15 @@ CLIPSAspectIniFin::finalize(Thread *thread)
   delete cm;
 
   clips_thread->finalize_CLIPSAspect();
+
+  if (envs_.find(clips_thread->clips_env_name) != envs_.end()) {
+    ClipsEnvData &envd = envs_[clips_thread->clips_env_name];
+    if (envd.env.refcount() == 1) { // only the env data references the environment
+      //logger_->log_debug("CLIPSAspectIniFin", "Destroying environment %s",
+      //		   clips_thread->clips_env_name.c_str());
+      envs_.erase(clips_thread->clips_env_name);
+    }
+  }
 }
 
 

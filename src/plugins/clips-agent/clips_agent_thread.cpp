@@ -22,7 +22,9 @@
 #include "clips_agent_thread.h"
 
 #include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 #include <interfaces/SwitchInterface.h>
+#include <core/threading/mutex_locker.h>
 
 using namespace fawkes;
 
@@ -36,7 +38,7 @@ using namespace fawkes;
 ClipsAgentThread::ClipsAgentThread()
   : Thread("ClipsAgentThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
-    CLIPSAspect("CLIPS (agent)")
+    CLIPSAspect("agent", /* create */ true, /* excl */ false, "CLIPS (agent)")
 {
 }
 
@@ -71,7 +73,31 @@ ClipsAgentThread::init()
       config->get_float("/clips-agent/skill-sim-time");
   } catch (Exception &e) {} // ignore, use default
 
-  cfg_clips_dir_ = std::string(SRCDIR) + "/clips/";
+  cfg_clips_dirs_.clear();
+  try {
+    cfg_clips_dirs_ = config->get_strings("/clips-agent/clips-dirs");
+    for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
+      std::string::size_type pos;
+      if ((pos = cfg_clips_dirs_[i].find("@BASEDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 9, BASEDIR);
+      }
+      if ((pos = cfg_clips_dirs_[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 16, FAWKES_BASEDIR);
+      }
+      if ((pos = cfg_clips_dirs_[i].find("@RESDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 8, RESDIR);
+      }
+      if ((pos = cfg_clips_dirs_[i].find("@CONFDIR@")) != std::string::npos) {
+	cfg_clips_dirs_[i].replace(pos, 9, CONFDIR);
+      }
+      if (cfg_clips_dirs_[i][cfg_clips_dirs_.size()-1] != '/') {
+	cfg_clips_dirs_[i] += "/";
+      }
+      logger->log_warn(name(), "DIR: %s", cfg_clips_dirs_[i].c_str());
+    }
+  } catch (Exception &e) {} // ignore, use default
+
+  cfg_clips_dirs_.insert(cfg_clips_dirs_.begin(), std::string(SRCDIR) + "/clips/");
 
   if (! cfg_skill_sim_) {
     skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
@@ -94,30 +120,33 @@ ClipsAgentThread::init()
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
   clips->add_function("blackboard-add-interface", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_blackboard_add_interface)));
 
-  if (!clips->batch_evaluate(cfg_clips_dir_ + "init.clp")) {
+  if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
                       "batch file failed.");
     blackboard->close(skiller_if_);
     throw Exception("Failed to initialize CLIPS environment, batch file failed.");
   }
 
-  clips->assert_fact("(init)");
+  clips->assert_fact("(agent-init)");
   clips->refresh_agenda();
   clips->run();
 
   ctrl_recheck_ = true;
   started_ = false;
-
-  if (cfg_auto_start_) {
-    clips->assert_fact("(start)");
-    started_ = true;
-  }
 }
 
 
 void
 ClipsAgentThread::finalize()
 {
+  MutexLocker lock(clips.objmutex_ptr());
+
+  clips->remove_function("get-clips-dirs");
+  clips->remove_function("now");
+  clips->remove_function("skill-call-ext");
+  clips->remove_function("load-config");
+  clips->remove_function("blackboard-add-interface");
+
   if ( ! cfg_skill_sim_ && skiller_if_->has_writer()) {
     SkillerInterface::ReleaseControlMessage *msg =
       new SkillerInterface::ReleaseControlMessage();
@@ -132,6 +161,13 @@ ClipsAgentThread::finalize()
 void
 ClipsAgentThread::loop()
 {
+  MutexLocker lock(clips.objmutex_ptr());
+
+  if (! started_ && cfg_auto_start_) {
+    clips->assert_fact("(start)");
+    started_ = true;
+  }
+
   if (! cfg_skill_sim_) {
     skiller_if_->read();
 
@@ -228,6 +264,10 @@ ClipsAgentThread::loop()
 	  value = std::string("\"") + value + "\"";
 	} else {
 	  value = f.get_value_string();
+          std::string::size_type pos;
+          while ((pos = value.find(",")) != std::string::npos) {
+            value = value.erase(pos, 1);
+          }
 	}
 	fact += std::string(" (") + f.get_name() + " " + value + ")";
       }
@@ -267,8 +307,10 @@ ClipsAgentThread::clips_now()
 CLIPS::Values
 ClipsAgentThread::clips_get_clips_dirs()
 {
-  CLIPS::Values rv;
-  rv.push_back(cfg_clips_dir_);
+  CLIPS::Values rv(cfg_clips_dirs_.size(), CLIPS::Value(""));
+  for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
+    rv[i] = cfg_clips_dirs_[i];
+  }
   return rv;
 }
 
@@ -314,16 +356,26 @@ ClipsAgentThread::clips_load_config(std::string cfg_prefix)
     else if (v->is_bool())   type = "BOOL";
     else if (v->is_string()) {
       type = "STRING";
-      value = std::string("\"") + value + "\"";
+      if (! v->is_list()) {
+	value = std::string("\"") + value + "\"";
+      }
     } else {
       logger->log_warn(name(), "Config value at '%s' of unknown type '%s'",
 		       v->path(), v->type());
     }
 
-    //logger->log_info(name(), "ASSERT (confval (path \"%s\") (type %s) (value %s)",
-    //		     v->path(), type.c_str(), v->get_as_string().c_str());
-    clips->assert_fact_f("(confval (path \"%s\") (type %s) (value %s))",
-			 v->path(), type.c_str(), value.c_str());
+    if (v->is_list()) {
+      logger->log_info(name(), "(confval (path \"%s\") (type %s) (is-list TRUE) (list-value %s))",
+		       v->path(), type.c_str(), value.c_str());
+      clips->assert_fact_f("(confval (path \"%s\") (type %s) (is-list TRUE) (list-value %s))",
+			    v->path(), type.c_str(), value.c_str());
+    } else {
+      //logger_->log_info(name(), "(confval (path \"%s\") (type %s) (value %s))",
+      //       v->path(), type.c_str(), value.c_str());
+      clips->assert_fact_f("(confval (path \"%s\") (type %s) (value %s))",
+			    v->path(), type.c_str(), value.c_str());
+    }
+
   }
 }
 
@@ -411,6 +463,8 @@ ClipsAgentThread::clips_blackboard_add_interface(std::string type, std::string i
 		       type.c_str());
       blackboard->close(iface);
     } else {
+      logger->log_info(name(), "Added interface %s", iface->uid());
+      logger->log_info(name(), "Deftemplate:\n%s", deftemplate.c_str());
       interfaces_.insert(std::make_pair(type, iface));
     }
   } else {

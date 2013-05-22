@@ -29,6 +29,7 @@
 #include <core/exceptions/software.h>
 #include <logging/liblogger.h>
 #include <utils/system/fam_thread.h>
+#include <utils/misc/string_split.h>
 
 #include <queue>
 #include <fstream>
@@ -234,7 +235,11 @@ YamlConfiguration::YamlValueIterator::get_as_string() const
   if (current_ == nodes_.end()) {
     throw Exception("YamlValueIterator: cannot get value of invalid iterator");
   }
-  return current_->second->get_value<std::string>();
+  if (current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE) {
+    return current_->second->get_list_as_string();
+  } else {
+    return current_->second->get_value<std::string>();
+  }
 }
 
 std::vector<float>
@@ -719,7 +724,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
       YamlConfigurationNode *in = node;
       if (key.find("/") != std::string::npos) {
 	// we need to split and find the proper insertion node
-	std::vector<std::string> pel = yaml_config::split(key);
+	std::vector<std::string> pel = str_split(key);
 	for (size_t i = 0; i < pel.size() - 1; ++i) {
 	  YamlConfigurationNode *n = (*in)[pel[i]];
 	  if (! n) {
@@ -1285,7 +1290,7 @@ YamlConfiguration::search(const char *path)
 YamlConfigurationNode *
 YamlConfiguration::query(const char *path) const
 {
-  std::queue<std::string> pel_q = yaml_config::split_to_queue(path);
+  std::queue<std::string> pel_q = str_split_to_queue(path);
   return root_->find(pel_q);
 }
 

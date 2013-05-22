@@ -16,7 +16,7 @@
 (deffunction resolve-file (?file)
   (foreach ?d ?*CLIPS_DIRS*
 	   (bind ?fn (str-cat ?d ?file))
-	   (printout t "Testing" ?fn crlf)
+	   ;(printout t "Testing file " ?fn crlf)
 	   (if (open ?fn file-clips-tmp)
 	    then
 	     (close file-clips-tmp)
@@ -33,38 +33,56 @@
 
 
 (defrule load-config
-  (init)
+  (agent-init)
   =>
   (load-config ?*CONFIG_PREFIX*)
 )
 
 (defrule load-agent
-  (init)
+  (agent-init)
   (confval (path "/clips-agent/agent") (type STRING) (value ?v))
   =>
   (printout t "Loading agent '" ?v "'" crlf)
-  (load* (resolve-file (str-cat ?v ".clp")))
+  (bind ?agent-file (resolve-file (str-cat ?v ".clp")))
+  (if ?agent-file
+    then (batch* ?agent-file)
+    else (printout logerror "Cannot find agent file " ?v crlf))
 )
 
 (defrule enable-debug
-  (init)
-  (confval (path "/clips-agent/clips-debug") (type BOOL) (value ?v))
+  (agent-init)
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
   =>
-  (if (eq ?v true) then
-    (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
-    (watch facts)
-    (watch rules)
-    ;(dribble-on "trace.txt")
-  )
+  (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
+  (watch facts)
+  (watch rules)
+  ;(dribble-on "trace.txt")
 )
 
 (defrule debug-level
-  (init)
+  (agent-init)
   (confval (path "/clips-agent/debug-level") (type UINT) (value ?v))
   =>
   (printout t "Setting debug level to " ?v " (was " ?*DEBUG* ")" crlf)
   (bind ?*DEBUG* ?v)
 )
 
-(reset)
-(run)
+(defrule silence-debug-facts
+  (declare (salience -1000))
+  (agent-init)
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
+  (confval (path "/clips-agent/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
+  =>
+  (printout t "Disabling watching of the following facts: " ?lv crlf)
+  (foreach ?v ?lv (unwatch facts (sym-cat ?v)))
+)
+
+(defrule silence-debug-rules
+  (declare (salience -1000))
+  (agent-init)
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
+  (confval (path "/clips-agent/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
+  =>
+  (printout t "Disabling watching of the following rules: " ?lv crlf)
+  (foreach ?v ?lv (unwatch rules (sym-cat ?v)))
+)

@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/fvconf.mk
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect geometry webview worldinfo_utils gui_utils baseapp \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
-	  eclipse_externals
+	  eclipse_externals protobuf_comm protobuf_clips
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -64,6 +64,7 @@ fvstereo: fvcams
 ifneq ($(CLASSIFIERS_DEPS),)
 fvclassifiers: $(CLASSIFIERS_DEPS)
 endif
+protobuf_clips: protobuf_comm
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk

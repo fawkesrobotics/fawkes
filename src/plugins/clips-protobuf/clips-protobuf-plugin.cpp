@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  clips_thread.cpp -  CLIPS environment providing Thread
+ *  clips-protobuf-plugin.cpp - Agent plugin based on CLIPS
  *
- *  Created: Sat Jun 16 14:40:56 2012 
- *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Apr 16 13:00:01 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,48 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "clips_thread.h"
-
-#include <clipsmm.h>
+#include "clips-protobuf-thread.h"
+#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** @class CLIPSThread "clips_thread.h"
- * CLIPS environment thread.
- *
+/** CLIPS agent plugin.
  * @author Tim Niemueller
  */
-
-/** Constructor. */
-CLIPSThread::CLIPSThread()
-  : Thread("CLIPSThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect("CLIPSAspect", &__clips_aspect_inifin)
+class ClipsProtobufPlugin : public fawkes::Plugin
 {
-}
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  ClipsProtobufPlugin(Configuration *config) : Plugin(config)
+  {
+    std::string cfg_clips_env = config->get_string("/clips-protobuf/env-name");
+    thread_list.push_back(new ClipsProtobufThread(cfg_clips_env));
+  }
+};
 
 
-/** Destructor. */
-CLIPSThread::~CLIPSThread()
-{
-}
-
-
-void
-CLIPSThread::init()
-{
-  CLIPS::init();
-  __clips_aspect_inifin.set_logger(logger);
-  //logger->log_info(name(), "CLIPS initialized");
-}
-
-
-void
-CLIPSThread::finalize()
-{
-}
-
-
-void
-CLIPSThread::loop()
-{
-}
+PLUGIN_DESCRIPTION("Protobuf communication for CLIPS")
+EXPORT_PLUGIN(ClipsProtobufPlugin)

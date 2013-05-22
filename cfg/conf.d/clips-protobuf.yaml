@@ -1,0 +1,12 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-protobuf
+---
+clips-protobuf:
+  env-name: agent
+  proto-dirs: ["@BASEDIR@/testagent/llsf2012/msgs"]
+
+
+  unwatch-facts: [protobuf-msg]
+  unwatch-rules: [protobuf-cleanup-message]

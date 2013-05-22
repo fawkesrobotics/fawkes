@@ -27,6 +27,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
+#include <utils/misc/string_split.h>
 
 #include <yaml-cpp/exceptions.h>
 
@@ -576,7 +577,7 @@ MemoryConfiguration::search(const char *path)
 YamlConfigurationNode *
 MemoryConfiguration::query(const char *path) const
 {
-  std::queue<std::string> pel_q = yaml_config::split_to_queue(path);
+  std::queue<std::string> pel_q = str_split_to_queue(path);
   return root_->find(pel_q);
 }
 
