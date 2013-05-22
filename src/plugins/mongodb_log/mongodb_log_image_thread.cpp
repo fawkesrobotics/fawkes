@@ -104,6 +104,7 @@ MongoLogImagesThread::prepare_finalize_user()
 void
 MongoLogImagesThread::finalize()
 {
+  logger->log_debug(name(), "Finalizing MongoLogImagesThread");
   std::map<std::string, ImageInfo>::iterator p;
   for (p = imgs_.begin(); p != imgs_.end(); ++p) {
     delete p->second.img;
@@ -224,6 +225,12 @@ MongoLogImagesThread::update_images()
       while ((pos = topic_name.find_first_of(" -", pos)) != std::string::npos) {
         topic_name.replace(pos, 1, "_");
         pos = pos + 1;
+      }
+
+      std::string topic_name = std::string("Images.") + *i;
+      std::string::size_type pos = 0;
+      while ((pos = topic_name.find("-", pos)) != std::string::npos) {
+        topic_name.replace(pos, 1, "_");
       }
 
       ImageInfo &imginfo = imgs_[*i];
