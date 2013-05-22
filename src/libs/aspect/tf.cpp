@@ -22,6 +22,7 @@
  */
 
 #include <aspect/tf.h>
+#include <tf/transform_listener.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -83,9 +84,10 @@ TransformAspect::~TransformAspect()
 /** Init transform aspect.
  * This creates the listener and potentially publisher.
  * @param blackboard blackboard used to create listener and/or publisher.
+ * @param transformer system-wide shared transformer to pass to threads
  */
 void
-TransformAspect::init_TransformAspect(BlackBoard *blackboard)
+TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer)
 {
   if (((__tf_aspect_mode == ONLY_PUBLISHER) || (__tf_aspect_mode == BOTH)) &&
       (__tf_aspect_bb_iface_id == NULL))
@@ -98,8 +100,10 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard)
   }
 
   if ((__tf_aspect_mode == ONLY_LISTENER) || (__tf_aspect_mode == BOTH)) {
-    tf_listener = new tf::TransformListener(blackboard);
+    __own_tf_listener = false;
+    tf_listener = transformer;
   } else {
+    __own_tf_listener = true;
     tf_listener = new tf::TransformListener(NULL);
   }
 
@@ -117,7 +121,9 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard)
 void
 TransformAspect::finalize_TransformAspect()
 {
-  delete tf_listener;
+  if (__own_tf_listener) {
+    delete tf_listener;
+  }
   delete tf_publisher;
   tf_listener = 0;
   tf_publisher = 0;

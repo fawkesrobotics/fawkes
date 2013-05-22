@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  mongolog_plugin.h - Fawkes MongoDB Logging Plugin
+ *  pcl_db_merge_plugin_roscomm.cpp - ROS communication for pcl-db-merge
  *
- *  Created: Wed Dec 08 23:03:53 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Dec 06 13:51:31 2012
+ *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,15 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGOLOG_MONGOLOG_PLUGIN_H_
-#define __PLUGINS_MONGOLOG_MONGOLOG_PLUGIN_H_
-
 #include <core/plugin.h>
 
-class MongoLogPlugin : public fawkes::Plugin
+#include "pcl_db_merge_roscomm_thread.h"
+
+using namespace fawkes;
+
+/** Plugin to segment a tabletop via PCL.
+ * @author Tim Niemueller
+ */
+class PointCloudDBMergeROSCommPlugin : public fawkes::Plugin
 {
  public:
-  MongoLogPlugin(fawkes::Configuration *config);
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  PointCloudDBMergeROSCommPlugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new PointCloudDBMergeROSCommThread());
+  }
 };
 
-#endif
+PLUGIN_DESCRIPTION("ROS communication for pcl-db-merge")
+EXPORT_PLUGIN(PointCloudDBMergeROSCommPlugin)

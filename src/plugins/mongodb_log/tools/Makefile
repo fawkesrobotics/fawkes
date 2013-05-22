@@ -1,8 +1,8 @@
 #*****************************************************************************
 #           Makefile Build System for Fawkes: MongoDB Logging Plugin
 #                            -------------------
-#   Created on Wed Dec 08 22:52:40 2010
-#   Copyright (C) 2006-2010 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri Dec 14 00:43:40 2012
+#   Copyright (C) 2006-2012 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,25 +13,28 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
-LIBS_mongolog = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect fvutils $(LIBS_MONGODB)
-OBJS_mongolog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_ffmongodb_save_imgs = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
+			   fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
+			   fawkestf
+OBJS_ffmongodb_save_imgs = ffmongodb_save_imgs.o
 
 CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
-OBJS_all    = $(OBJS_mongolog)
+OBJS_all    = $(OBJS_ffmongodb_save_imgs)
 
 ifeq ($(HAVE_MONGODB),1)
-  CFLAGS += $(CFLAGS_PCL)
-  LDFLAGS += $(LDFLAGS_PCL)
-  PLUGINS_all = $(PLUGINDIR)/mongolog.so
+  CFLAGS_ffmongodb_save_imgs  = $(CFLAGS) $(CFLAGS_MONGODB)
+  LDFLAGS_ffmongodb_save_imgs = $(LDFLAGS) $(LDFLAGS_MONGODB)
+  BINS_all = $(BINDIR)/ffmongodb-save-imgs
+  MANPAGES_all =  $(MANDIR)/man1/ffmongodb-save-imgs.1
 else
   WARN_TARGETS += warning_mongodb
 endif
@@ -41,7 +44,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_mongodb
 warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoLog Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Logging Tools$(TNORMAL) (mongodb[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

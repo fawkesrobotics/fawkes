@@ -198,6 +198,16 @@ StringConversions::to_int(std::string s)
   return atoi(s.c_str());
 }
 
+/** Convert string to a long int value
+ * @param s string to convert
+ * @return value as represented by string
+ */
+long
+StringConversions::to_long(std::string s)
+{
+  return atol(s.c_str());
+}
+
 
 /** Convert string to a float value
  * @param s string to convert

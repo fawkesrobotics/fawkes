@@ -52,6 +52,10 @@ class BlockedTimingExecutor;
 class MainLoopEmployer;
 class AspectIniFin;
 
+namespace tf {
+  class Transformer;
+}
+
 class AspectManager : public ThreadInitializer, public ThreadFinalizer
 {
  public:
@@ -78,7 +82,8 @@ class AspectManager : public ThreadInitializer, public ThreadFinalizer
 				NetworkNameResolver *nnresolver,
 				ServicePublisher *service_publisher,
 				ServiceBrowser *service_browser,
-				PluginManager *pmanager);
+				PluginManager *pmanager,
+				tf::Transformer *tf_listener);
 
  private:
   std::map<std::string, AspectIniFin *> __inifins;

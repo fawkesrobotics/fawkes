@@ -26,6 +26,10 @@
 #include <aspect/inifins/inifin.h>
 
 namespace fawkes {
+  namespace tf {
+    class Transformer;
+  }
+
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
@@ -35,13 +39,14 @@ class BlackBoard;
 class TransformAspectIniFin : public AspectIniFin
 {
  public:
-  TransformAspectIniFin(BlackBoard *blackboard);
+  TransformAspectIniFin(BlackBoard *blackboard, tf::Transformer *transformer);
 
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
  private:
-  BlackBoard *__blackboard;
+  BlackBoard      *__blackboard;
+  tf::Transformer *__transformer;
 };
 
 } // end namespace fawkes

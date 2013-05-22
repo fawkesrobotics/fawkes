@@ -82,11 +82,11 @@ TransformStorage::TransformStorage()
 TransformStorage::TransformStorage(const StampedTransform& data,
                                    CompactFrameID frame_id,
                                    CompactFrameID child_frame_id)
-: rotation_(data.getRotation())
-, translation_(data.getOrigin())
+: rotation(data.getRotation())
+, translation(data.getOrigin())
 , stamp(data.stamp)
-, frame_id_(frame_id)
-, child_frame_id_(child_frame_id)
+, frame_id(frame_id)
+, child_frame_id(child_frame_id)
 { }
 
 
@@ -112,6 +112,40 @@ TransformStorage::TransformStorage(const TransformStorage& rhs)
 TimeCache::TimeCache(float max_storage_time)
 : max_storage_time_(max_storage_time)
 {}
+
+
+/** Copy constructor.
+ * @param t time cache to copy
+ */
+TimeCache::TimeCache(const TimeCache &t)
+  : storage_(t.storage_), max_storage_time_(t.max_storage_time_)
+{}
+
+/** Copy constructor.
+ * @param t time cache to copy
+ */
+TimeCache::TimeCache(const TimeCache *t)
+  : storage_(t->storage_), max_storage_time_(t->max_storage_time_)
+{}
+
+
+/** Conditional copy constructor.
+ * This copy constructor takes an additional argument that denotes
+ * how far to go back in time to copy data. Only times larger than
+ * the given time will be copied to the new time cache.
+ * @param t time cache to copy
+ * @param look_back_until time to look back for transforms 
+ */
+TimeCache::TimeCache(const TimeCache *t, fawkes::Time &look_back_until)
+  : max_storage_time_(t->max_storage_time_)
+{
+  L_TransformStorage::const_iterator storage_it = t->storage_.begin();
+  while (storage_it != t->storage_.end()) {
+    if (storage_it->stamp <= look_back_until)  break;
+    storage_.push_back(*storage_it);
+    ++storage_it;
+  }
+}
 
 /** Create extrapolation error string.
  * @param t0 requested time
@@ -256,14 +290,14 @@ TimeCache::interpolate(const TransformStorage& one,
     (two.stamp.in_sec() - one.stamp.in_sec());
 
   //Interpolate translation
-  output.translation_.setInterpolate3(one.translation_, two.translation_, ratio);
+  output.translation.setInterpolate3(one.translation, two.translation, ratio);
 
   //Interpolate rotation
-  output.rotation_ = slerp( one.rotation_, two.rotation_, ratio);
+  output.rotation = slerp( one.rotation, two.rotation, ratio);
 
   output.stamp = one.stamp;
-  output.frame_id_ = one.frame_id_;
-  output.child_frame_id_ = one.child_frame_id_;
+  output.frame_id = one.frame_id;
+  output.child_frame_id = one.child_frame_id;
 }
 
 /** Get data.
@@ -285,7 +319,7 @@ TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
   } else if (num_nodes == 1) {
     data_out = *p_temp_1;
   } else if (num_nodes == 2) {
-    if( p_temp_1->frame_id_ == p_temp_2->frame_id_) {
+    if( p_temp_1->frame_id == p_temp_2->frame_id) {
       interpolate(*p_temp_1, *p_temp_2, time, data_out);
     } else {
       data_out = *p_temp_1;
@@ -311,7 +345,7 @@ TimeCache::get_parent(fawkes::Time time, std::string* error_str)
     return 0;
   }
 
-  return p_temp_1->frame_id_;
+  return p_temp_1->frame_id;
 }
 
 
@@ -358,6 +392,25 @@ TimeCache::get_list_length() const
   return storage_.size();
 }
 
+
+/** Get storage list.
+ * @return reference to list of storage elements
+ */
+const TimeCache::L_TransformStorage &
+TimeCache::get_storage() const
+{
+  return storage_;
+}
+
+/** Get copy of storage elements.
+ * @return copied list of storage elements
+ */
+TimeCache::L_TransformStorage
+TimeCache::get_storage_copy() const
+{
+  return storage_;
+}
+
 /** Get latest time and parent frame number.
  * @return latest time and parent frame number
  */
@@ -369,7 +422,7 @@ TimeCache::get_latest_time_and_parent() const
   }
 
   const TransformStorage& ts = storage_.front();
-  return std::make_pair(ts.stamp, ts.frame_id_);
+  return std::make_pair(ts.stamp, ts.frame_id);
 }
 
 /** Get latest timestamp from cache.
@@ -378,7 +431,7 @@ TimeCache::get_latest_time_and_parent() const
 fawkes::Time
 TimeCache::get_latest_timestamp() const
 {
-  if (storage_.empty()) return fawkes::Time(); //empty list case
+  if (storage_.empty()) return fawkes::Time(0,0); //empty list case
   return storage_.front().stamp;
 }
 
@@ -388,7 +441,7 @@ TimeCache::get_latest_timestamp() const
 fawkes::Time
 TimeCache::get_oldest_timestamp() const
 {
-  if (storage_.empty()) return fawkes::Time(); //empty list case
+  if (storage_.empty()) return fawkes::Time(0,0); //empty list case
   return storage_.back().stamp;
 }
 

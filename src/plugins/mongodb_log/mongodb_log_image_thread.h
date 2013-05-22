@@ -2,11 +2,9 @@
 /***************************************************************************
  *  image_thread.h - Thread to log images to MongoDB
  *
- *  adapted from ros/image_thread.h
- *
  *  Created: Tue Apr 10 22:12:27 2012
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
- *  Modified: Thu Jul 12 10:00:00 2012 by Bastian Klingen
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGOLOG_IMAGE_THREAD_H_
-#define __PLUGINS_MONGOLOG_IMAGE_THREAD_H_
+#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_IMAGE_THREAD_H_
+#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_IMAGE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -43,6 +41,11 @@ namespace firevision {
   class SharedMemoryImageBuffer;
 }
 
+namespace fawkes {
+  class Mutex;
+  class TimeWait;
+}
+
 namespace mongo {
   class GridFS;
 }
@@ -52,7 +55,6 @@ class MongoLogImagesThread
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
   public fawkes::MongoDBAspect
 {
  public:
@@ -61,6 +63,7 @@ class MongoLogImagesThread
 
   virtual void init();
   virtual void loop();
+  virtual bool prepare_finalize_user();
   virtual void finalize();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -83,10 +86,19 @@ class MongoLogImagesThread
 
   fawkes::Time *last_update_;
   fawkes::Time *now_;
-  mongo::DBClientBase *__mongodb;
-  mongo::GridFS       *__mongogrid;
-  std::string          __collection;
-  std::string          __database;
+  mongo::DBClientBase *mongodb_;
+  mongo::GridFS       *gridfs_;
+  std::string          collection_;
+  std::string          database_;
+
+  fawkes::Mutex       *mutex_;
+  fawkes::TimeWait    *wait_;
+
+  std::vector<std::string> includes_;
+  std::vector<std::string> excludes_;
+
+  unsigned int         cfg_chunk_size_;
+  float                cfg_storage_interval_;
 };
 
 #endif

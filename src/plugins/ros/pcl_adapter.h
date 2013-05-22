@@ -69,7 +69,7 @@ class RosPointCloudAdapter
                 std::string &frame_id, bool &is_dense,
                 V_PointFieldInfo &pfi);
 
-  void get_data(const std::string &id,
+  void get_data(const std::string &id, std::string &frame_id,
                 unsigned int &width, unsigned int &height, fawkes::Time &time,
                 void **data_ptr, size_t &point_size, size_t &num_points);
 

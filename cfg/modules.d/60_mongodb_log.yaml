@@ -1,0 +1,72 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/mongodb-log
+---
+plugins/mongodb-log:
+
+  database: fflog
+
+  enable-blackboard: true
+  enable-images: false
+  enable-pointclouds: true
+
+  # Stores (text) log messages to the database
+  enable-logger: false
+
+  # Enable specialized transforms logger?  Transforms can either be
+  # stored using the blackboard logger, or using the specialized
+  # transforms logger. The former will allow easy restoration to an
+  # interface. The latter supports more efficient storage by combining
+  # all transforms regarding a particular frame for a certain period
+  # in time to a single document.
+  enable-transforms: true
+
+  
+  pointclouds:
+    # GridFS chunk size for point clouds, 2 MB
+    chunk-size: 2097152
+
+    # if no inclusion rule is set, all pointclouds are included unless
+    # excluded if an inclusion rule exists, only matching pointclouds
+    # are included unless excluded if there is an exclude rule, then
+    # excludes are processed last
+    includes: [openni-pointcloud-xyz]
+
+    # Flush/fsync the database after each write. While this introduces
+    # a longer per-write time, it avoids the problem that there are
+    # sometimes long flushing delays
+    flush-after-write: true
+    
+    # Interval in which to store point clouds; sec
+    storage-interval: 0.5
+
+  images:
+    # GridFS chunk size for point clouds, 2 MB
+    chunk-size: 2097152
+
+    # if no inclusion rule is set, all images are included unless
+    # excluded; if an inclusion rule exists, only matching images
+    # are included unless excluded
+    includes: [openni-image-rgb]
+
+    # Interval in which to store point clouds; sec
+    storage-interval: 0.25
+
+  blackboard:
+    # Inclusion and exclusion rules apply to the interface ID only, not to
+    # the type.
+    # Note that the empty list or no list at all causes the logging of
+    # all interfaces (unless an exclude rule applies).
+    # logging, the latter causes logging of everything in the blackboard
+    includes: ["*"]
+    excludes: []
+ 
+
+  transforms:
+    collection: tf
+    
+    # Interval to store at a time, if 0 copy everything currently held by
+    # transformer; sec
+    storage-interval: 2.0
+

@@ -41,6 +41,7 @@
 namespace fawkes {
   class Position3DInterface;
   class SwitchInterface;
+  class Time;
 #ifdef USE_TIMETRACKER
   class TimeTracker;
 #endif
@@ -98,13 +99,18 @@ class TabletopObjectsThread
 
   bool is_polygon_edge_better(PointType &cb_br_p1p, PointType &cb_br_p2p, PointType &br_p1p, PointType &br_p2p);
 
+  void convert_colored_input();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   fawkes::RefPtr<const pcl::PointCloud<PointType> > finput_;
+  fawkes::RefPtr<const pcl::PointCloud<ColorPointType> > fcoloredinput_;
   fawkes::RefPtr<pcl::PointCloud<ColorPointType> > fclusters_;
-  CloudConstPtr input_;
+  ColorCloudConstPtr colored_input_;
+  CloudPtr           converted_input_;
+  CloudConstPtr      input_;
   pcl::PointCloud<ColorPointType>::Ptr clusters_;
 
   pcl::VoxelGrid<PointType> grid_;
@@ -115,6 +121,8 @@ class TabletopObjectsThread
 
   fawkes::SwitchInterface *switch_if_;
 
+  fawkes::Time *last_pcl_time_;
+
   float cfg_depth_filter_min_x_;
   float cfg_depth_filter_max_x_;
   float cfg_voxel_leaf_size_;
@@ -122,6 +130,9 @@ class TabletopObjectsThread
   float cfg_segm_distance_threshold_;
   float cfg_segm_inlier_quota_;
   float cfg_max_z_angle_deviation_;
+  float cfg_table_min_cluster_quota_;
+  float cfg_table_downsample_leaf_size_;
+  float cfg_table_cluster_tolerance_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
   float cfg_table_model_length_;
@@ -133,6 +144,7 @@ class TabletopObjectsThread
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
   std::string cfg_result_frame_;
+  std::string cfg_input_pointcloud_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
@@ -146,6 +158,7 @@ class TabletopObjectsThread
   unsigned int tt_loopcount_;
   unsigned int ttc_full_loop_;
   unsigned int ttc_msgproc_;
+  unsigned int ttc_convert_;
   unsigned int ttc_voxelize_;
   unsigned int ttc_plane_;
   unsigned int ttc_extract_plane_;

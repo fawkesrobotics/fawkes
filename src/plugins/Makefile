@@ -35,6 +35,6 @@ katana: openrave
 perception: ros
 amcl: ros
 clips-agent: clips
-mongolog: mongodb
+mongodb_log: mongodb
 mongodb: rrd
 

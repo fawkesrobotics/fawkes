@@ -892,10 +892,12 @@ Interface::msgq_enqueue_copy(Message *message)
 
 /** Enqueue message.
  * This will enqueue the message without transmitting it via the
- * message mediator.
+ * message mediator. It can be useful, for example, to enqueue the
+ * message from an event callback.
  *
  * This can only be called on a writing interface instance.
- * @param message message to enqueue
+ *
+ * @param message message to enqueue, reference count will be incremented.
  */
 void
 Interface::msgq_append(Message *message)
@@ -905,6 +907,7 @@ Interface::msgq_append(Message *message)
 					"reading instance of an interface (append).");
   }
 
+  message->ref();
   __message_queue->append(message);
 }
 

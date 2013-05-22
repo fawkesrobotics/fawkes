@@ -1,10 +1,10 @@
 
 /***************************************************************************
- *  mongolog_thread.h - MongoDB logging thread
+ *  mongodb_log_bb_thread.h - MongoDB blackboard logging thread
  *
  *  Created: Wed Dec 08 23:08:14 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGOLOG_MONGOLOG_THREAD_H_
-#define __PLUGINS_MONGOLOG_MONGOLOG_THREAD_H_
+#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_BB_THREAD_H_
+#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_BB_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -38,7 +38,7 @@
 #include <string>
 
 
-class MongoLogThread
+class MongoLogBlackboardThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -48,8 +48,8 @@ class MongoLogThread
   public fawkes::BlackBoardInterfaceObserver
 {
  public:
-  MongoLogThread();
-  virtual ~MongoLogThread();
+  MongoLogBlackboardThread();
+  virtual ~MongoLogBlackboardThread();
 
   virtual void init();
   virtual void loop();
@@ -62,21 +62,6 @@ class MongoLogThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  /* we assume Mongo client to be thread-safe for now, that is not absolutely
-   * clear and I could not google a definite answer
-  class MongoWriter
-  {
-   public:
-    MongoWriter(fawkes::Logger *logger, mongo::DBClientBase *client);
-
-    void write(std::string &collection, mongo::BSONObj &obj);
-
-   private:
-    Mutex *__mutex;
-  };
-  */
-
-
   /** Mongo Logger interface listener. */
   class InterfaceListener : public fawkes::BlackBoardInterfaceListener
   {
@@ -87,28 +72,33 @@ class MongoLogThread
 		      std::string &database,
 		      fawkes::LockSet<std::string> &colls,
 		      fawkes::Logger *logger,
-          fawkes::Time *now);
+		      fawkes::Time *now);
     ~InterfaceListener();
+
+    mongo::DBClientBase * mongodb_client() const
+    { return mongodb_; }
 
     // for BlackBoardInterfaceListener
     virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
    private:
-    fawkes::BlackBoard  *__blackboard;
-    fawkes::Interface   *__interface;
-    mongo::DBClientBase *__mongodb;
-    fawkes::Logger      *__logger;
-    std::string          __collection;
-    std::string         &__database;
-    fawkes::LockSet<std::string> &__collections;
+    fawkes::BlackBoard  *blackboard_;
+    fawkes::Interface   *interface_;
+    mongo::DBClientBase *mongodb_;
+    fawkes::Logger      *logger_;
+    std::string          collection_;
+    std::string         &database_;
+    fawkes::LockSet<std::string> &collections_;
     fawkes::Time        *now_;
   };
 
 
-  fawkes::LockMap<std::string, InterfaceListener *> __listeners;
-  fawkes::LockSet<std::string> __collections;
-  std::string __database;
+  fawkes::LockMap<std::string, InterfaceListener *> listeners_;
+  fawkes::LockSet<std::string> collections_;
+  std::string database_;
   fawkes::Time        *now_;
+
+  std::vector<std::string> excludes_;
 };
 
 #endif

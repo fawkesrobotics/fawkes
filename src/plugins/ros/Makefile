@@ -37,7 +37,7 @@ LIBS_ros_tf = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros_tf = tf_plugin.o tf_thread.o
 
 LIBS_ros_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesrosaspect
+	      fawkesinterface fawkesrosaspect fawkestf
 OBJS_ros_pcl = pcl_plugin.o pcl_thread.o pcl_adapter.o
 
 LIBS_ros_images = fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -103,10 +103,11 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     ifeq ($(HAVE_PCL),1)
-      CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS)
-      CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
+      CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS)
+      CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) \
+			   $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS)
       CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread) $(CFLAGS)
-      LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(call ros-pkg-lflags,sensor_msgs)
+      LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(call ros-pkg-lflags,sensor_msgs)
       PLUGINS_all += $(PLUGINDIR)/ros-pcl.so
     else
       WARN_TARGETS += warning_pcl

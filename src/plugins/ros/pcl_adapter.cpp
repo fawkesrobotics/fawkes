@@ -36,7 +36,7 @@ class RosPointCloudAdapter::StorageAdapter
  public:
   /** Constructor.
    * @param a_ adapter to clone */
-  StorageAdapter(const PointCloudManager::StorageAdapter *a_)
+  StorageAdapter(const pcl_utils::StorageAdapter *a_)
     : a(a_->clone()) {}
 
   /** Destructor. */
@@ -44,7 +44,7 @@ class RosPointCloudAdapter::StorageAdapter
   { delete a; }
 
   /** PCL Point cloud storage adapter to encapsulate. */ 
-  PointCloudManager::StorageAdapter *a;
+  pcl_utils::StorageAdapter *a;
 };
 /// @endcond
 
@@ -152,6 +152,7 @@ RosPointCloudAdapter::get_info(std::string &id,
 
 /** Get current data of point cloud.
  * @param id ID of point cloud to get info from
+ * @param frame_id upon return contains the frame ID of the point cloud
  * @param width upon return contains width of point cloud
  * @param height upon return contains width of point cloud
  * @param time capture time
@@ -160,7 +161,7 @@ RosPointCloudAdapter::get_info(std::string &id,
  * @param num_points upon return contains number of points
  */
 void
-RosPointCloudAdapter::get_data(const std::string &id,
+RosPointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
                                unsigned int &width, unsigned int &height, fawkes::Time &time,
                                void **data_ptr, size_t &point_size, size_t &num_points)
 {
@@ -168,7 +169,8 @@ RosPointCloudAdapter::get_data(const std::string &id,
     __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
   }
 
-  const PointCloudManager::StorageAdapter *sa = __sas[id]->a;
+  const pcl_utils::StorageAdapter *sa = __sas[id]->a;
+  frame_id = sa->frame_id();
   width  = sa->width();
   height = sa->height();
   *data_ptr = sa->data_ptr();

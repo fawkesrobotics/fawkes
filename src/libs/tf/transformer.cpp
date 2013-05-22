@@ -187,7 +187,7 @@ struct TransformAccum
       return 0;
     }
 
-    return st.frame_id_;
+    return st.frame_id;
   }
 
   /** Accumulate.
@@ -197,13 +197,13 @@ struct TransformAccum
   {
     if (source)
     {
-      source_to_top_vec = quatRotate(st.rotation_, source_to_top_vec) + st.translation_;
-      source_to_top_quat = st.rotation_ * source_to_top_quat;
+      source_to_top_vec = quatRotate(st.rotation, source_to_top_vec) + st.translation;
+      source_to_top_quat = st.rotation * source_to_top_quat;
     }
     else
     {
-      target_to_top_vec = quatRotate(st.rotation_, target_to_top_vec) + st.translation_;
-      target_to_top_quat = st.rotation_ * target_to_top_quat;
+      target_to_top_vec = quatRotate(st.rotation, target_to_top_vec) + st.translation;
+      target_to_top_quat = st.rotation * target_to_top_quat;
     }
   }
 
@@ -266,7 +266,8 @@ struct TransformAccum
  * @param cache_time time in seconds to cache incoming transforms
  */
 Transformer::Transformer(float cache_time)
-  : cache_time_(cache_time),
+  : enabled_(true),
+    cache_time_(cache_time),
     fall_back_to_wall_time_(false)
 {
   max_extrapolation_distance_ = DEFAULT_MAX_EXTRAPOLATION_DISTANCE;
@@ -302,6 +303,47 @@ Transformer::set_enabled(bool enabled)
   enabled_ = enabled;
 }
 
+
+/** Get maximum caching time.
+ * @return maximum caching time in seconds
+ */
+float
+Transformer::get_cache_time() const
+{
+  return cache_time_;
+}
+
+/** Lock transformer.
+ * No new transforms can be added and no lookups can be performed
+ * while the lock is held.
+ */
+void
+Transformer::lock()
+{
+  frame_mutex_->lock();
+}
+
+
+/** Try to acquire lock.
+ * @return true if lock has been acquired, alse otherwise
+ */
+bool
+Transformer::try_lock()
+{
+  return frame_mutex_->try_lock();
+}
+
+
+/** Unlock.
+ * Release currently held lock.
+ */
+void
+Transformer::unlock()
+{
+  frame_mutex_->unlock();
+}
+
+
 /** Clear cached transforms. */
 void
 Transformer::clear()
@@ -317,6 +359,15 @@ Transformer::clear()
   }
 }
 
+/** Resolve transform name.
+ * @param frame_name frame name
+ * @return resolved frame name
+ */
+std::string
+Transformer::resolve(const std::string& frame_name)
+{
+  return fawkes::tf::resolve("", frame_name);
+}
 
 /** Check if frame exists.
  * @param frame_id_str frame ID
@@ -793,6 +844,16 @@ Transformer::get_frame_cache(const std::string &frame_id) const
 }
 
 
+/** An accessor to get access to all frame caches at once.
+ * @return vector of time caches
+ */
+const std::vector<TimeCache *> &
+Transformer::get_frame_caches() const
+{
+  return frames_;
+}
+
+
 /** String to number for frame lookup.
  * @param frameid_str frame ID
  * @return frame number
@@ -851,6 +912,15 @@ Transformer::lookup_frame_string(unsigned int frame_num) const
     throw LookupException("Reverse lookup of frame id %u failed!", frame_num);
   }
   else return frameIDs_reverse[frame_num];
+}
+
+/** Get mappings from frame ID to names.
+ * @return vector of mappings from frame IDs to names
+ */
+std::vector<std::string>
+Transformer::get_frame_id_mappings() const
+{
+  return frameIDs_reverse;
 }
 
 

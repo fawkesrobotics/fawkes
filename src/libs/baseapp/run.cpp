@@ -44,7 +44,9 @@
 #include <plugin/manager.h>
 #include <plugin/net/handler.h>
 #include <aspect/manager.h>
-
+#ifdef HAVE_TF
+#  include <tf/transform_listener.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -79,6 +81,7 @@ PluginNetworkHandler      * nethandler_plugin = NULL;
 Clock                     * clock = NULL;
 SharedMemoryRegistry      * shm_registry;
 InitOptions               * init_options = NULL;
+tf::Transformer           * tf_listener = NULL;
 
 // this is NOT shared to the outside
 FawkesMainThread::Runner  * runner = NULL;
@@ -293,6 +296,10 @@ init(InitOptions options)
   }
   blackboard = lbb;
 
+#ifdef HAVE_TF
+  tf_listener        = new tf::TransformListener(blackboard);
+#endif
+
   aspect_manager     = new AspectManager();
   thread_manager     = new ThreadManager(aspect_manager, aspect_manager);
 
@@ -335,7 +342,7 @@ init(InitOptions options)
 					   network_manager->nnresolver(),
 					   network_manager->service_publisher(),
 					   network_manager->service_browser(),
-					   plugin_manager);
+					   plugin_manager, tf_listener);
 
   
 
@@ -362,13 +369,17 @@ cleanup()
   }
 
   delete main_thread;
-  delete argument_parser;
-  delete init_options;
   delete nethandler_config;
   delete nethandler_plugin;
   delete plugin_manager;
-  delete network_manager;
+#ifdef HAVE_TF
+  delete tf_listener;
+#endif
+  delete blackboard;
   delete config;
+  delete argument_parser;
+  delete init_options;
+  delete network_manager;
   delete thread_manager;
   delete aspect_manager;
   delete shm_registry;
@@ -384,6 +395,7 @@ cleanup()
   thread_manager = NULL;
   aspect_manager = NULL;
   shm_registry = NULL;
+  blackboard = NULL;
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();

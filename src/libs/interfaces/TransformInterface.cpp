@@ -55,11 +55,11 @@ TransformInterface::TransformInterface() : Interface()
   data      = (TransformInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_STRING, "frame", 32, data->frame);
-  add_fieldinfo(IFT_STRING, "child_frame", 32, data->child_frame);
+  add_fieldinfo(IFT_STRING, "frame", 64, data->frame);
+  add_fieldinfo(IFT_STRING, "child_frame", 64, data->child_frame);
   add_fieldinfo(IFT_DOUBLE, "translation", 3, &data->translation);
   add_fieldinfo(IFT_DOUBLE, "rotation", 4, &data->rotation);
-  unsigned char tmp_hash[] = {0x97, 0xc8, 0x15, 0xe9, 0xcb, 0xd2, 0x33, 0x33, 0xf3, 0xfe, 0x49, 0x72, 0x92, 0x99, 0xd9, 0xeb};
+  unsigned char tmp_hash[] = {0xfd, 0xf6, 0x19, 0x45, 0x14, 0xa9, 0x28, 0xd2, 0xfd, 0x73, 0xd8, 0xc9, 0xf5, 0xc8, 0x55, 0x2};
   set_hash(tmp_hash);
 }
 
@@ -89,7 +89,7 @@ TransformInterface::frame() const
 size_t
 TransformInterface::maxlenof_frame() const
 {
-  return 32;
+  return 64;
 }
 
 /** Set frame value.
@@ -126,7 +126,7 @@ TransformInterface::child_frame() const
 size_t
 TransformInterface::maxlenof_child_frame() const
 {
-  return 32;
+  return 64;
 }
 
 /** Set child_frame value.

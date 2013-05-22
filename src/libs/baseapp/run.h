@@ -41,25 +41,30 @@ namespace fawkes {
   class ConfigNetworkHandler;
   class PluginNetworkHandler;
 
+  namespace tf {
+    class Transformer;
+  }
+
   namespace runtime {
 #if 0 /* just to make Emacs auto-indent happy */
   }
 }
 #endif
 
-extern ArgumentParser       *argument_parser;
-extern FawkesMainThread     *main_thread;
-extern MultiLogger          *logger;
-extern NetworkLogger        *network_logger;
-extern BlackBoard           *blackboard;
-extern Configuration        *config;
-extern Clock                *clock;
-extern PluginManager        *plugin_manager;
-extern AspectManager        *aspect_manager;
-extern ThreadManager        *thread_manager;
-extern FawkesNetworkManager *network_manager;
-extern ConfigNetworkHandler *nethandler_config;
-extern PluginNetworkHandler *nethandler_plugin;
+extern ArgumentParser        *argument_parser;
+extern FawkesMainThread      *main_thread;
+extern MultiLogger           *logger;
+extern NetworkLogger         *network_logger;
+extern BlackBoard            *blackboard;
+extern Configuration         *config;
+extern Clock                 *clock;
+extern PluginManager         *plugin_manager;
+extern AspectManager         *aspect_manager;
+extern ThreadManager         *thread_manager;
+extern FawkesNetworkManager  *network_manager;
+extern ConfigNetworkHandler  *nethandler_config;
+extern PluginNetworkHandler  *nethandler_plugin;
+extern tf::Transformer       *tf_listener; 
 
 int  init(int argc, char **argv);
 int  init(InitOptions options);

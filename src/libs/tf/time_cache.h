@@ -84,19 +84,19 @@ class TransformStorage
 
   TransformStorage& operator=(const TransformStorage& rhs)
   {
-    rotation_ = rhs.rotation_;
-    translation_ = rhs.translation_;
+    rotation = rhs.rotation;
+    translation = rhs.translation;
     stamp = rhs.stamp;
-    frame_id_ = rhs.frame_id_;
-    child_frame_id_ = rhs.child_frame_id_;
+    frame_id = rhs.frame_id;
+    child_frame_id = rhs.child_frame_id;
     return *this;
   }
 
-  btQuaternion rotation_;	///< rotation quaternio
-  btVector3 translation_;	///< translation vector
+  btQuaternion rotation;	///< rotation quaternio
+  btVector3 translation;	///< translation vector
   fawkes::Time stamp;		///< time stamp
-  CompactFrameID frame_id_;	///< parent/reference frame number
-  CompactFrameID child_frame_id_;	///< child frame number
+  CompactFrameID frame_id;	///< parent/reference frame number
+  CompactFrameID child_frame_id;	///< child frame number
 };
 
 
@@ -104,12 +104,18 @@ class TransformStorage
 class TimeCache
 {
  public:
+  /** List of stored transforms. */
+  typedef std::list<TransformStorage> L_TransformStorage;
+
   /// Number of nano-seconds to not interpolate below.
   static const int MIN_INTERPOLATION_DISTANCE = 5;
   /// Maximum length of linked list, to make sure not to be able to use unlimited memory.
   static const unsigned int MAX_LENGTH_LINKED_LIST = 1000000;
 
   TimeCache(float max_storage_time = 10.0);
+  TimeCache(const TimeCache &t);
+  TimeCache(const TimeCache *t);
+  TimeCache(const TimeCache *t, fawkes::Time &look_back_until);
 
   bool get_data(fawkes::Time time, TransformStorage & data_out,
                 std::string* error_str = 0);
@@ -118,13 +124,15 @@ class TimeCache
   CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
   P_TimeAndFrameID get_latest_time_and_parent() const;
 
+  const L_TransformStorage & get_storage() const;
+  L_TransformStorage         get_storage_copy() const;
+
   /// Debugging information methods
   unsigned int get_list_length() const;
   fawkes::Time get_latest_timestamp() const;
   fawkes::Time get_oldest_timestamp() const;
 
  private:
-  typedef std::list<TransformStorage> L_TransformStorage;
   L_TransformStorage storage_;
 
   float max_storage_time_;

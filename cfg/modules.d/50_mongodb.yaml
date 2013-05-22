@@ -1,0 +1,12 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/mongodb
+---
+plugins/mongodb:
+
+  clients:
+    default:
+      active: true
+      mode: connection
+      hostport: localhost:27017

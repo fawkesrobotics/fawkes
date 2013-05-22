@@ -188,6 +188,7 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 
     if ( __notifier->notify_of_message_received(__interface, im) ) {
       __interface->msgq_append(im);
+      im->unref();
     }
   } catch (Exception &e) {
     e.append("Failed to enqueue interface message for %s, ignoring", __interface->uid());

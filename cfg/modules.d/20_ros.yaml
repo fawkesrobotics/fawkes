@@ -1,0 +1,14 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
+---
+ros:
+  # Spin the ROS main loop asynchronously from the Fawkes main loop?
+  # Synchronous is preferred. But this will block the ROSNodeThread for
+  # example for long running service calls (where a Fawkes plugin provides
+  # the service, since it is executed in the thread).
+  async-spinning: true
+
+  # Number of threads for asynchronous spinning
+  async-num-threads: 4

@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mongolog_logger_thread.h"
+#include "mongodb_log_logger_thread.h"
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
@@ -31,7 +31,7 @@
 using namespace mongo;
 using namespace fawkes;
 
-/** @class MongoLogLoggerThread "mongolog_logger_thread.h"
+/** @class MongoLogLoggerThread "mongodb_log_logger_thread.h"
  * Thread that provides a logger writing to MongoDB.
  * This thread provides a logger, which writes log information to a
  * MongoDB collection.
@@ -106,7 +106,9 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
 
     free(msg);
 
-    mongodb_client->insert(__collection, b.obj());
+    try {
+      mongodb_client->insert(__collection, b.obj());
+    } catch (mongo::DBException &e) {} // ignored
   }
 }
 
@@ -132,7 +134,9 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
       b.append("component", component);
       b.appendDate("time", nowd);
       b.append("message", std::string("[EXCEPTION] ") + *i);
-      mongodb_client->insert(__collection, b.obj());
+      try {
+        mongodb_client->insert(__collection, b.obj());
+      } catch (mongo::DBException &e) {} // ignored
     }
   }
 }
@@ -250,7 +254,9 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
     b.append("component", component);
     b.appendDate("time", nowd);
     b.append("message", msg);
-    mongodb_client->insert(__collection, b.obj());
+    try {
+      mongodb_client->insert(__collection, b.obj());
+    } catch (mongo::DBException &e) {} // ignored
 
     free(msg);
 
@@ -277,7 +283,9 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
       b.append("component", component);
       b.appendDate("time", nowd);
       b.append("message", std::string("[EXCEPTION] ") + *i);
-      mongodb_client->insert(__collection, b.obj());
+      try {
+        mongodb_client->insert(__collection, b.obj());
+      } catch (mongo::DBException &e) {} // ignored
     }
   }
 }

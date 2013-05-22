@@ -31,6 +31,8 @@
 #include <core/threading/mutex_locker.h>
 #include <utils/time/time.h>
 
+#include <pcl_utils/storage_adapter.h>
+
 #include <vector>
 #include <string>
 #include <stdint.h>
@@ -46,16 +48,6 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-/** Union to pack fawkes::Time into the pcl::PointCloud timestamp. */
-typedef union {
-  struct {
-    uint64_t sec  : 44;	///< seconds part of time
-    uint64_t usec : 20;	///< microseconds part of time
-  } time;		///< Access timestamp as time
-  uint64_t timestamp;	///< Access timestamp as number only
-} PointCloudTimestamp;
-
 
 class PointCloudManager
 {
@@ -79,89 +71,15 @@ class PointCloudManager
   template <typename PointT>
   bool exists_pointcloud(const char *id);
 
-  template <typename PointT>
-    class PointCloudStorageAdapter;
-
-  class StorageAdapter {
-  public:
-    virtual ~StorageAdapter();
-
-    template <typename PointT>
-    bool is_pointtype() const;
-
-    template <typename PointT>
-    PointCloudStorageAdapter<PointT> * as_pointtype();
-
-    virtual const char * get_typename() = 0;
-    virtual StorageAdapter * clone() const = 0;
-    virtual size_t  point_size() const = 0;
-    virtual unsigned int  width() const = 0;
-    virtual unsigned int  height() const = 0;
-    virtual size_t  num_points() const = 0;
-    virtual void *  data_ptr() const = 0;
-    virtual void get_time(fawkes::Time &time) const = 0;
-  };
-
-  template <typename PointT>
-    class PointCloudStorageAdapter : public StorageAdapter
-  {
-   public:
-    /** Constructor.
-     * @param cloud cloud to encapsulate.
-     */
-    PointCloudStorageAdapter(RefPtr<pcl::PointCloud<PointT> > cloud)
-      : cloud(cloud) {}
-
-    /** Copy constructor.
-     * @param p storage adapter to copy
-     */
-    PointCloudStorageAdapter(const PointCloudStorageAdapter<PointT> *p)
-      : cloud(p->cloud) {}
-
-    /** The point cloud. */
-    const RefPtr<pcl::PointCloud<PointT> > cloud;
-
-    virtual StorageAdapter * clone() const;
-
-    virtual const char * get_typename() { return typeid(this).name(); }
-    virtual size_t  point_size() const { return sizeof(PointT); }
-    virtual unsigned int  width() const { return cloud->width; }
-    virtual unsigned int  height() const { return cloud->height; }
-    virtual size_t  num_points() const { return cloud->points.size(); }
-    virtual void *  data_ptr() const  { return &cloud->points[0]; }
-    virtual void get_time(fawkes::Time &time) const;
-  };
 
   std::vector<std::string>  get_pointcloud_list() const;
-  const fawkes::LockMap<std::string, StorageAdapter *> &  get_pointclouds() const;
-  const StorageAdapter *  get_storage_adapter(const char *id);
+  const fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> &  get_pointclouds() const;
+  const pcl_utils::StorageAdapter *  get_storage_adapter(const char *id);
 
  private:
-  fawkes::LockMap<std::string, StorageAdapter *>  __clouds;
+  fawkes::LockMap<std::string, pcl_utils::StorageAdapter *>  __clouds;
 };
 
-
-template <typename PointT>
-bool
-PointCloudManager::StorageAdapter::is_pointtype() const
-{
-  const PointCloudStorageAdapter<PointT> *pa =
-    dynamic_cast<const PointCloudStorageAdapter<PointT> *>(this);
-  return (!!pa);
-}
-
-
-template <typename PointT>
-PointCloudManager::PointCloudStorageAdapter<PointT> *
-PointCloudManager::StorageAdapter::as_pointtype()
-{
-  PointCloudStorageAdapter<PointT> *pa =
-    dynamic_cast<PointCloudStorageAdapter<PointT> *>(this);
-  if (!pa) {
-    throw Exception("PointCloud storage adapter is not of anticipated type");
-  }
-  return pa;
-}
 
 template <typename PointT>
 void
@@ -171,7 +89,7 @@ PointCloudManager::add_pointcloud(const char *id,
   fawkes::MutexLocker lock(__clouds.mutex());
 
   if (__clouds.find(id) == __clouds.end()) {
-    __clouds[id] = new PointCloudStorageAdapter<PointT>(cloud);
+    __clouds[id] = new pcl_utils::PointCloudStorageAdapter<PointT>(cloud);
   } else {
     throw Exception("Cloud %s already registered");
   }
@@ -184,15 +102,15 @@ PointCloudManager::get_pointcloud(const char *id)
   fawkes::MutexLocker lock(__clouds.mutex());
 
   if (__clouds.find(id) != __clouds.end()) {
-    PointCloudStorageAdapter<PointT> *pa =
-      dynamic_cast<PointCloudStorageAdapter<PointT> *>(__clouds[id]);
+    pcl_utils::PointCloudStorageAdapter<PointT> *pa =
+      dynamic_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(__clouds[id]);
 
     if (!pa) {
       // workaround for older compilers
       if (strcmp(__clouds[id]->get_typename(),
-                 typeid(PointCloudStorageAdapter<PointT> *).name()) == 0)
+                 typeid(pcl_utils::PointCloudStorageAdapter<PointT> *).name()) == 0)
       {
-        return static_cast<PointCloudStorageAdapter<PointT> *>(__clouds[id])->cloud;
+        return static_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(__clouds[id])->cloud;
       }
 
       throw Exception("The desired point cloud is of a different type");

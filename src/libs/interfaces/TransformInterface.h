@@ -44,11 +44,11 @@ class TransformInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    char frame[32]; /**< 
+    char frame[64]; /**< 
       Parent frame ID. The given transform is relative to the origin
       of this coordinate frame.
      */
-    char child_frame[32]; /**< 
+    char child_frame[64]; /**< 
       The ID of the child frame. The child frame's origin is at the
       given point in the parent frame denoted by the transform.
      */

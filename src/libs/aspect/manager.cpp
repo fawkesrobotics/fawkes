@@ -220,6 +220,7 @@ AspectManager::prepare_finalize(Thread *thread)
  * @param service_publisher service publisher for NetworkAspect
  * @param service_browser service browser for NetworkAspect
  * @param pmanager plugin manager for PluginDirectorAspect
+ * @param tf_listener transformer for TransformAspect
  */
 void
 AspectManager::register_default_inifins(BlackBoard *blackboard,
@@ -234,7 +235,8 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 					NetworkNameResolver *nnresolver,
 					ServicePublisher *service_publisher,
 					ServiceBrowser *service_browser,
-					PluginManager *pmanager)
+					PluginManager *pmanager,
+					tf::Transformer *tf_listener)
 {
   if (! __default_inifins.empty())  return;
 
@@ -260,7 +262,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   WebviewAspectIniFin *web_aif = new WebviewAspectIniFin();
 #endif
 #ifdef HAVE_TF
-  TransformAspectIniFin *tf_aif = new TransformAspectIniFin(blackboard);
+  TransformAspectIniFin *tf_aif = new TransformAspectIniFin(blackboard, tf_listener);
 #endif
 #ifdef HAVE_PCL
   PointCloudAspectIniFin *pcl_aif = new PointCloudAspectIniFin();

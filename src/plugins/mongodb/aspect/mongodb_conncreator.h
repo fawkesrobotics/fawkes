@@ -47,7 +47,7 @@ class MongoDBConnCreator
    * @exception thrown if the initialization fails or the configuration for
    * the given name does not exist.
    */
-  virtual mongo::DBClientBase *  create_client(const char *config_name) = 0;
+  virtual mongo::DBClientBase *  create_client(const char *config_name = 0) = 0;
 
   /** Delete a client.
    * @param client client to delete

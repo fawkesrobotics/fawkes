@@ -37,6 +37,7 @@
 
 namespace ros {
   class NodeHandle;
+  class AsyncSpinner;
 }
 
 class ROSNodeThread
@@ -59,9 +60,13 @@ class ROSNodeThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::LockPtr<ros::NodeHandle>  __rosnode;
-  fawkes::ROSAspectIniFin           __ros_aspect_inifin;
+  bool cfg_async_spinning_;
+  unsigned int cfg_async_num_threads_;
 
+  fawkes::LockPtr<ros::NodeHandle>  rosnode_;
+  fawkes::ROSAspectIniFin           ros_aspect_inifin_;
+
+  ros::AsyncSpinner                *async_spinner_;
 };
 
 #endif

@@ -32,6 +32,7 @@
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
 #endif
+#include <utils/time/tracker_macros.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -64,28 +65,6 @@ using namespace std;
 using namespace fawkes;
 
 
-#ifdef USE_TIMETRACKER
-#define TIMETRACK_START(c)                      \
-  tt_->ping_start(c);				\
-
-#define TIMETRACK_INTER(c1, c2)			\
- tt_->ping_end(c1);				\
- tt_->ping_start(c2);
-
-#define TIMETRACK_END(c)			\
-  tt_->ping_end(c);
-
-#define TIMETRACK_ABORT(c)                      \
-  tt_->ping_abort(c);
-
-#else
-
-#define TIMETRACK_START(c)
-#define TIMETRACK_INTER(c1, c2)
-#define TIMETRACK_END(c)
-#define TIMETRACK_ABORT(c)
-#endif
-
 /** Constructor. */
 TabletopObjectsThread::TabletopObjectsThread()
   : Thread("TabletopObjectsThread", Thread::OPMODE_CONTINUOUS),
@@ -115,6 +94,12 @@ TabletopObjectsThread::init()
     config->get_float(CFG_PREFIX"table_segmentation_distance_threshold");
   cfg_segm_inlier_quota_ =
     config->get_float(CFG_PREFIX"table_segmentation_inlier_quota");
+  cfg_table_min_cluster_quota_ =
+    config->get_float(CFG_PREFIX"table_min_cluster_quota");
+  cfg_table_downsample_leaf_size_ =
+    config->get_float(CFG_PREFIX"table_downsample_leaf_size");
+  cfg_table_cluster_tolerance_ =
+    config->get_float(CFG_PREFIX"table_cluster_tolerance");
   cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
   cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
   cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
@@ -127,9 +112,24 @@ TabletopObjectsThread::init()
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
+  cfg_input_pointcloud_      = config->get_string(CFG_PREFIX"input_pointcloud");
 
-  finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
-  input_ = pcl_utils::cloudptr_from_refptr(finput_);
+  if (pcl_manager->exists_pointcloud<PointType>(cfg_input_pointcloud_.c_str())) {
+    finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
+    input_ = pcl_utils::cloudptr_from_refptr(finput_);
+  } else if (pcl_manager->exists_pointcloud<ColorPointType>(cfg_input_pointcloud_.c_str())) {
+    logger->log_warn(name(), "XYZ/RGB input point cloud, conversion required");
+    fcoloredinput_ =
+      pcl_manager->get_pointcloud<ColorPointType>(cfg_input_pointcloud_.c_str());
+    colored_input_ = pcl_utils::cloudptr_from_refptr(fcoloredinput_);
+    converted_input_.reset(new Cloud());
+    input_ = converted_input_;
+    converted_input_->header.frame_id = colored_input_->header.frame_id;
+    converted_input_->header.stamp    = colored_input_->header.stamp;
+  } else {
+    throw Exception("Point cloud '%s' does not exist or not XYZ or XYZ/RGB PCL",
+		    cfg_input_pointcloud_.c_str());
+  }
 
   try {
     double rotation[4] = {0., 0., 0., 1.};
@@ -171,20 +171,20 @@ TabletopObjectsThread::init()
   }
 
   fclusters_ = new pcl::PointCloud<ColorPointType>();
-  fclusters_->header.frame_id = finput_->header.frame_id;
+  fclusters_->header.frame_id = input_->header.frame_id;
   fclusters_->is_dense = false;
   pcl_manager->add_pointcloud<ColorPointType>("tabletop-object-clusters", fclusters_);
   clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
   ftable_model_ = new Cloud();
   table_model_ = pcl_utils::cloudptr_from_refptr(ftable_model_);
-  table_model_->header.frame_id = finput_->header.frame_id;
+  table_model_->header.frame_id = input_->header.frame_id;
   pcl_manager->add_pointcloud("tabletop-table-model", ftable_model_);
   pcl_utils::set_time(ftable_model_, fawkes::Time(clock));
 
   fsimplified_polygon_ = new Cloud();
   simplified_polygon_ = pcl_utils::cloudptr_from_refptr(fsimplified_polygon_);
-  simplified_polygon_->header.frame_id = finput_->header.frame_id;
+  simplified_polygon_->header.frame_id = input_->header.frame_id;
   pcl_manager->add_pointcloud("tabletop-simplified-polygon", fsimplified_polygon_);
   pcl_utils::set_time(fsimplified_polygon_, fawkes::Time(clock));
 
@@ -200,11 +200,14 @@ TabletopObjectsThread::init()
 
   loop_count_ = 0;
 
+  last_pcl_time_ = new Time(clock);
+
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
   tt_loopcount_ = 0;
   ttc_full_loop_          = tt_->add_class("Full Loop");
   ttc_msgproc_            = tt_->add_class("Message Processing");
+  ttc_convert_            = tt_->add_class("Input Conversion");
   ttc_voxelize_           = tt_->add_class("Downsampling");
   ttc_plane_              = tt_->add_class("Plane Segmentation");
   ttc_extract_plane_      = tt_->add_class("Plane Extraction");
@@ -314,10 +317,32 @@ TabletopObjectsThread::loop()
 
   if (! switch_if_->is_enabled()) {
     TimeWait::wait(250000);
+    TIMETRACK_ABORT(ttc_full_loop_);
     return;
   }
 
-  TIMETRACK_INTER(ttc_msgproc_, ttc_voxelize_)
+  TIMETRACK_END(ttc_msgproc_);
+
+  fawkes::Time pcl_time;
+  if (colored_input_) {
+    pcl_utils::get_time(colored_input_, pcl_time);
+  } else {
+    pcl_utils::get_time(input_, pcl_time);
+  }
+  if (*last_pcl_time_ == pcl_time) {
+    TimeWait::wait(20000);
+    TIMETRACK_ABORT(ttc_full_loop_);
+    return;
+  }
+  *last_pcl_time_ = pcl_time;
+
+  if (colored_input_) {
+    TIMETRACK_START(ttc_convert_);
+    convert_colored_input();
+    TIMETRACK_END(ttc_convert_);
+  }
+
+  TIMETRACK_START(ttc_voxelize_);
 
   CloudPtr temp_cloud(new Cloud);
   CloudPtr temp_cloud2(new Cloud);
@@ -481,7 +506,9 @@ TabletopObjectsThread::loop()
   // further downsample table
   CloudPtr cloud_table_voxelized(new Cloud());
   pcl::VoxelGrid<PointType> table_grid;
-  table_grid.setLeafSize(0.04, 0.04, 0.04);
+  table_grid.setLeafSize(cfg_table_downsample_leaf_size_,
+			 cfg_table_downsample_leaf_size_,
+			 cfg_table_downsample_leaf_size_);
   table_grid.setInputCloud(cloud_proj_);
   table_grid.filter(*cloud_table_voxelized);
 
@@ -494,8 +521,9 @@ TabletopObjectsThread::loop()
 
   std::vector<pcl::PointIndices> table_cluster_indices;
   pcl::EuclideanClusterExtraction<PointType> table_ec;
-  table_ec.setClusterTolerance(0.044);
-  table_ec.setMinClusterSize(0.8 * cloud_table_voxelized->points.size());
+  table_ec.setClusterTolerance(cfg_table_cluster_tolerance_);
+  table_ec.setMinClusterSize(cfg_table_min_cluster_quota_
+			     * cloud_table_voxelized->points.size());
   table_ec.setMaxClusterSize(cloud_table_voxelized->points.size());
   table_ec.setSearchMethod(kdtree_table);
   table_ec.setInputCloud(cloud_table_voxelized);
@@ -511,6 +539,10 @@ TabletopObjectsThread::loop()
     table_cluster_extract.setIndices(table_cluster_indices_ptr);
     table_cluster_extract.filter(*cloud_table_extracted);
     *cloud_proj_ = *cloud_table_extracted;
+
+    // recompute based on the new chosen table cluster
+    pcl::compute3DCentroid(*cloud_proj_, table_centroid);
+
   } else {
     // Don't mess with the table, clustering didn't help to make it any better
     logger->log_info(name(), "[L %u] table plane clustering did not generate any clusters", loop_count_);
@@ -561,8 +593,8 @@ TabletopObjectsThread::loop()
     // Get transform Input camera -> base_link
     tf::StampedTransform t;
     fawkes::Time input_time(0,0);
-    //pcl_utils::get_time(finput_, input_time);
-    tf_listener->lookup_transform("/base_link", finput_->header.frame_id,
+    //pcl_utils::get_time(input_, input_time);
+    tf_listener->lookup_transform("/base_link", input_->header.frame_id,
                                   input_time, t);
 
     tf::Quaternion q = t.getRotation();
@@ -764,121 +796,128 @@ TabletopObjectsThread::loop()
     good_hull_edges.resize(good_edge_points);
 #endif
 
-    TIMETRACK_INTER(ttc_find_edge_, ttc_transform_)
-
-    // Calculate transformation parameters based on determined
-    // convex hull polygon segment we decided on as "the table edge"
-    PointType &p1p = cloud_hull_->points[pidx1];
-    PointType &p2p = cloud_hull_->points[pidx2];
-
-    Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
-    Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
-
-    // Normal vectors for table model and plane
-    Eigen::Vector3f model_normal = Eigen::Vector3f::UnitZ();
-    Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
-    normal.normalize(); // just in case
-
-    Eigen::Vector3f table_centroid_3f =
-      Eigen::Vector3f(table_centroid[0], table_centroid[1], table_centroid[2]);
-
-    // Rotational parameters to align table to polygon segment
-    Eigen::Vector3f p1_p2 = p2 - p1;
-    Eigen::Vector3f p1_p2_center = (p2 + p1) * 0.5;
-    p1_p2.normalize();
-    Eigen::Vector3f p1_p2_normal_cross = p1_p2.cross(normal);
-    p1_p2_normal_cross.normalize();
-
-    // For N=(A,B,C), and hessian Ax+By+Cz+D=0 and N dot X=(Ax+By+Cz)
-    // we get N dot X + D = 0 -> -D = N dot X
-    double nD = - p1_p2_normal_cross.dot(p1_p2_center);
-    double p1_p2_centroid_dist = p1_p2_normal_cross.dot(table_centroid_3f) + nD;
-    if (p1_p2_centroid_dist < 0) {
-      // normal points to the "wrong" side fo our purpose
-      p1_p2_normal_cross *= -1;
-    }
-
-    Eigen::Vector3f table_center =
-      p1_p2_center + p1_p2_normal_cross * (cfg_table_model_width_ * 0.5);
-
-    for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
-    table_centroid[3] = 0.;
-
-    // calculate table corner points
-    std::vector<Eigen::Vector3f> tpoints(4);
-    tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_length_ * 0.5);
-    tpoints[1] = tpoints[0] + p1_p2_normal_cross * cfg_table_model_width_;
-    tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_length_ * 0.5);
-    tpoints[2] = tpoints[3] + p1_p2_normal_cross * cfg_table_model_width_;
+    TIMETRACK_END(ttc_find_edge_);
 
     model_cloud_hull_.reset(new Cloud());
-    model_cloud_hull_->points.resize(4);
-    model_cloud_hull_->height = 1;
-    model_cloud_hull_->width = 4;
-    model_cloud_hull_->is_dense = true;
-    for (int i = 0; i < 4; ++i) {
-      model_cloud_hull_->points[i].x = tpoints[i][0];
-      model_cloud_hull_->points[i].y = tpoints[i][1];
-      model_cloud_hull_->points[i].z = tpoints[i][2];
+    if ((pidx1 != std::numeric_limits<size_t>::max()) &&
+	(pidx2 != std::numeric_limits<size_t>::max()) )
+    {
+
+      TIMETRACK_START(ttc_transform_);
+
+      // Calculate transformation parameters based on determined
+      // convex hull polygon segment we decided on as "the table edge"
+      PointType &p1p = cloud_hull_->points[pidx1];
+      PointType &p2p = cloud_hull_->points[pidx2];
+
+      Eigen::Vector3f p1(p1p.x, p1p.y, p1p.z);
+      Eigen::Vector3f p2(p2p.x, p2p.y, p2p.z);
+
+      // Normal vectors for table model and plane
+      Eigen::Vector3f model_normal = Eigen::Vector3f::UnitZ();
+      Eigen::Vector3f normal(coeff->values[0], coeff->values[1], coeff->values[2]);
+      normal.normalize(); // just in case
+
+      Eigen::Vector3f table_centroid_3f =
+	Eigen::Vector3f(table_centroid[0], table_centroid[1], table_centroid[2]);
+
+      // Rotational parameters to align table to polygon segment
+      Eigen::Vector3f p1_p2 = p2 - p1;
+      Eigen::Vector3f p1_p2_center = (p2 + p1) * 0.5;
+      p1_p2.normalize();
+      Eigen::Vector3f p1_p2_normal_cross = p1_p2.cross(normal);
+      p1_p2_normal_cross.normalize();
+
+      // For N=(A,B,C), and hessian Ax+By+Cz+D=0 and N dot X=(Ax+By+Cz)
+      // we get N dot X + D = 0 -> -D = N dot X
+      double nD = - p1_p2_normal_cross.dot(p1_p2_center);
+      double p1_p2_centroid_dist = p1_p2_normal_cross.dot(table_centroid_3f) + nD;
+      if (p1_p2_centroid_dist < 0) {
+	// normal points to the "wrong" side fo our purpose
+	p1_p2_normal_cross *= -1;
+      }
+
+      Eigen::Vector3f table_center =
+	p1_p2_center + p1_p2_normal_cross * (cfg_table_model_width_ * 0.5);
+
+      for (unsigned int i = 0; i < 3; ++i)  table_centroid[i] = table_center[i];
+      table_centroid[3] = 0.;
+
+      // calculate table corner points
+      std::vector<Eigen::Vector3f> tpoints(4);
+      tpoints[0] = p1_p2_center + p1_p2 * (cfg_table_model_length_ * 0.5);
+      tpoints[1] = tpoints[0] + p1_p2_normal_cross * cfg_table_model_width_;
+      tpoints[3] = p1_p2_center - p1_p2 * (cfg_table_model_length_ * 0.5);
+      tpoints[2] = tpoints[3] + p1_p2_normal_cross * cfg_table_model_width_;
+
+      model_cloud_hull_->points.resize(4);
+      model_cloud_hull_->height = 1;
+      model_cloud_hull_->width = 4;
+      model_cloud_hull_->is_dense = true;
+      for (int i = 0; i < 4; ++i) {
+	model_cloud_hull_->points[i].x = tpoints[i][0];
+	model_cloud_hull_->points[i].y = tpoints[i][1];
+	model_cloud_hull_->points[i].z = tpoints[i][2];
+      }
+      //std::sort(model_cloud_hull_->points.begin(),
+      //          model_cloud_hull_->points.end(), comparePoints2D<PointType>);
+
+      // Rotational parameters to rotate table model from camera to
+      // determined table position in 3D space
+      Eigen::Vector3f rotaxis = model_normal.cross(normal);
+      rotaxis.normalize();
+      double angle = acos(normal.dot(model_normal));
+
+      // Transformation to translate model from camera center into actual pose
+      Eigen::Affine3f affine =
+	Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
+			     table_centroid.z())
+	* Eigen::AngleAxisf(angle, rotaxis);
+
+      Eigen::Vector3f
+	model_p1(-cfg_table_model_width_ * 0.5, cfg_table_model_length_ * 0.5, 0.),
+	model_p2(-cfg_table_model_width_ * 0.5, -cfg_table_model_length_ * 0.5, 0.);
+      model_p1 = affine * model_p1;
+      model_p2 = affine * model_p2;
+
+      // Calculate the vector between model_p1 and model_p2
+      Eigen::Vector3f model_p1_p2 = model_p2 - model_p1;
+      model_p1_p2.normalize();
+      // Calculate rotation axis between model_p1 and model_p2
+      Eigen::Vector3f model_rotaxis = model_p1_p2.cross(p1_p2);
+      model_rotaxis.normalize();
+      double angle_p1_p2 = acos(model_p1_p2.dot(p1_p2));
+      //logger->log_info(name(), "Angle: %f  Poly (%f,%f,%f) -> (%f,%f,%f)  model (%f,%f,%f) -> (%f,%f,%f)",
+      //                 angle_p1_p2, p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(),
+      //                 model_p1.x(), model_p1.y(), model_p1.z(), model_p2.x(), model_p2.y(), model_p2.z());
+
+      // Final full transformation of the table within the camera coordinate frame
+      affine =
+	Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
+			     table_centroid.z())
+	* Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
+	* Eigen::AngleAxisf(angle, rotaxis);
+
+
+      // Just the rotational part
+      Eigen::Quaternionf qt;
+      qt = Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
+	* Eigen::AngleAxisf(angle, rotaxis);
+
+      // Set position again, this time with the rotation
+      set_position(table_pos_if_, true, table_centroid, qt);
+
+      TIMETRACK_INTER(ttc_transform_, ttc_transform_model_)
+
+	// to show fitted table model
+	CloudPtr table_model = generate_table_model(cfg_table_model_length_, cfg_table_model_width_, cfg_table_model_step_);
+      pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
+      //*table_model_ = *model_cloud_hull_;
+      //*table_model_ = *table_model;
+      table_model_->header.frame_id = input_->header.frame_id;
+
+      TIMETRACK_END(ttc_transform_model_);
     }
-    //std::sort(model_cloud_hull_->points.begin(),
-    //          model_cloud_hull_->points.end(), comparePoints2D<PointType>);
-
-    // Rotational parameters to rotate table model from camera to
-    // determined table position in 3D space
-    Eigen::Vector3f rotaxis = model_normal.cross(normal);
-    rotaxis.normalize();
-    double angle = acos(normal.dot(model_normal));
-
-    // Transformation to translate model from camera center into actual pose
-    Eigen::Affine3f affine =
-      Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
-                           table_centroid.z())
-      * Eigen::AngleAxisf(angle, rotaxis);
-
-    Eigen::Vector3f
-      model_p1(-cfg_table_model_width_ * 0.5, cfg_table_model_length_ * 0.5, 0.),
-      model_p2(-cfg_table_model_width_ * 0.5, -cfg_table_model_length_ * 0.5, 0.);
-    model_p1 = affine * model_p1;
-    model_p2 = affine * model_p2;
-
-    // Calculate the vector between model_p1 and model_p2
-    Eigen::Vector3f model_p1_p2 = model_p2 - model_p1;
-    model_p1_p2.normalize();
-    // Calculate rotation axis between model_p1 and model_p2
-    Eigen::Vector3f model_rotaxis = model_p1_p2.cross(p1_p2);
-    model_rotaxis.normalize();
-    double angle_p1_p2 = acos(model_p1_p2.dot(p1_p2));
-    //logger->log_info(name(), "Angle: %f  Poly (%f,%f,%f) -> (%f,%f,%f)  model (%f,%f,%f) -> (%f,%f,%f)",
-    //                 angle_p1_p2, p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(),
-    //                 model_p1.x(), model_p1.y(), model_p1.z(), model_p2.x(), model_p2.y(), model_p2.z());
-
-    // Final full transformation of the table within the camera coordinate frame
-    affine =
-      Eigen::Translation3f(table_centroid.x(), table_centroid.y(),
-                           table_centroid.z())
-      * Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
-      * Eigen::AngleAxisf(angle, rotaxis);
-
-
-    // Just the rotational part
-    Eigen::Quaternionf qt;
-    qt = Eigen::AngleAxisf(angle_p1_p2, model_rotaxis)
-      * Eigen::AngleAxisf(angle, rotaxis);
-
-    // Set position again, this time with the rotation
-    set_position(table_pos_if_, true, table_centroid, qt);
-
-    TIMETRACK_INTER(ttc_transform_, ttc_transform_model_)
-
-    // to show fitted table model
-    CloudPtr table_model = generate_table_model(cfg_table_model_length_, cfg_table_model_width_, cfg_table_model_step_);
-    pcl::transformPointCloud(*table_model, *table_model_, affine.matrix());
-    //*table_model_ = *model_cloud_hull_;
-    //*table_model_ = *table_model;
-    table_model_->header.frame_id = finput_->header.frame_id;
-
-    TIMETRACK_END(ttc_transform_model_);
 
   } catch (Exception &e) {
     set_position(table_pos_if_, false);
@@ -895,6 +934,25 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_extract_non_plane_, ttc_polygon_filter_);
 
+  // Check if the viewpoint, i.e. the input point clouds frame origin,
+  // if above or below the table centroid. If it is above, we want to point
+  // the normal towards the viewpoint in the next steps, otherwise it
+  // should point away from the sensor. "Above" is relative to the base link
+  // frame, i.e. the frame that is based on the ground support plane with the
+  // Z axis pointing upwards
+  bool viewpoint_above = true;
+  try {
+    tf::Stamped<tf::Point>
+      origin(tf::Point(0, 0, 0), fawkes::Time(0, 0), input_->header.frame_id);
+    tf::Stamped<tf::Point> baserel_viewpoint;
+    tf_listener->transform_point("/base_link", origin, baserel_viewpoint);
+
+    viewpoint_above = (baserel_viewpoint.z() > table_centroid[2]);
+  } catch (tf::TransformException &e) {
+    logger->log_warn(name(), "[L %u] could not transform viewpoint to base link",
+		     loop_count_);
+  }
+
   // Use only points above tables
   // Why coeff->values[3] > 0 ? ComparisonOps::GT : ComparisonOps::LT?
   // The model coefficients are in Hessian Normal Form, hence coeff[0..2] are
@@ -908,7 +966,9 @@ TabletopObjectsThread::loop()
   // We make use of the fact that we only have a boring RGB-D camera and
   // not an X-Ray...
   pcl::ComparisonOps::CompareOp op =
-    coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT;
+    viewpoint_above
+    ? (coeff->values[3] > 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT)
+    : (coeff->values[3] < 0 ? pcl::ComparisonOps::GT : pcl::ComparisonOps::LT);
   pcl_utils::PlaneDistanceComparison<PointType>::ConstPtr
     above_comp(new pcl_utils::PlaneDistanceComparison<PointType>(coeff, op));
   pcl::ConditionAnd<PointType>::Ptr
@@ -916,7 +976,6 @@ TabletopObjectsThread::loop()
   above_cond->addComparison(above_comp);
   pcl::ConditionalRemoval<PointType> above_condrem(above_cond);
   above_condrem.setInputCloud(cloud_filt_);
-  //above_condrem.setKeepOrganized(true);
   cloud_above_.reset(new Cloud());
   above_condrem.filter(*cloud_above_);
 
@@ -954,30 +1013,24 @@ TabletopObjectsThread::loop()
   // CLUSTERS
   // extract clusters of OBJECTS
 
-  TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_)
+  TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_);
 
   ColorCloudPtr tmp_clusters(new ColorCloud());
   tmp_clusters->header.frame_id = clusters_->header.frame_id;
-  std::vector<int> &indices = inliers->indices;
-  tmp_clusters->height = 1;
-  //const size_t tsize = table_points->points.size();
-  //tmp_clusters->width = tsize;
-  //tmp_clusters->points.resize(tsize);
-  tmp_clusters->width = indices.size();
-  tmp_clusters->points.resize(indices.size());
-  for (size_t i = 0; i < indices.size(); ++i) {
-    PointType &p1 = temp_cloud2->points[i];
-    //PointType &p1 = table_points->points[i];
+  tmp_clusters->points.resize(cloud_proj_->points.size());
+  for (size_t i = 0; i < cloud_proj_->points.size(); ++i) {
+    PointType &p1      = cloud_proj_->points[i];
     ColorPointType &p2 = tmp_clusters->points[i];
     p2.x = p1.x;
     p2.y = p1.y;
     p2.z = p1.z;
+
     p2.r = table_color[0];
     p2.g = table_color[1];
     p2.b = table_color[2];
   }
 
-  TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_)
+  TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_);
 
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
   centroids.resize(MAX_CENTROIDS);
@@ -1046,9 +1099,10 @@ TabletopObjectsThread::loop()
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
 
   *clusters_ = *tmp_clusters;
-  pcl_utils::copy_time(finput_, fclusters_);
-  pcl_utils::copy_time(finput_, ftable_model_);
-  pcl_utils::copy_time(finput_, fsimplified_polygon_);
+  fclusters_->header.frame_id = input_->header.frame_id;
+  pcl_utils::copy_time(input_, fclusters_);
+  pcl_utils::copy_time(input_, ftable_model_);
+  pcl_utils::copy_time(input_, fsimplified_polygon_);
 
 #ifdef HAVE_VISUAL_DEBUGGING
   if (visthread_) {
@@ -1285,6 +1339,28 @@ TabletopObjectsThread::simplify_polygon(CloudPtr polygon, float dist_threshold)
   return result;
 }
 
+
+void
+TabletopObjectsThread::convert_colored_input()
+{
+  converted_input_->header.seq      = colored_input_->header.seq;
+  converted_input_->header.frame_id = colored_input_->header.frame_id;
+  converted_input_->header.stamp    = colored_input_->header.stamp;
+  converted_input_->width           = colored_input_->width;
+  converted_input_->height          = colored_input_->height;
+  converted_input_->is_dense        = colored_input_->is_dense;
+
+  const size_t size = colored_input_->points.size();
+  converted_input_->points.resize(size);
+  for (size_t i = 0; i < size; ++i) {
+    const ColorPointType &in = colored_input_->points[i];
+    PointType &out           = converted_input_->points[i];
+
+    out.x = in.x;
+    out.y = in.y;
+    out.z = in.z;
+  }
+}
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void
