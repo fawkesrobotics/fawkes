@@ -112,7 +112,20 @@ RosNavigatorThread::send_goal()
 void
 RosNavigatorThread::loop()
 {
-  if(ac_->isServerConnected()){
+  if (! ac_->isServerConnected()) {
+    if (! nav_if_->msgq_empty()) {
+      logger->log_warn(name(), "Command received while ROS ActionServer "
+		       "not reachable, ignoring");
+      nav_if_->msgq_flush();
+    }
+
+    if (connected_history_){
+      delete ac_;
+      ac_ = new MoveBaseClient("move_base", false);
+      connected_history_ = false;
+    }
+
+  } else {
 
     connected_history_ = true;
     // process incoming messages from fawkes
@@ -158,7 +171,9 @@ RosNavigatorThread::loop()
         nav_if_->set_msgid(msg->id());
       }
 
-      else if (NavigatorInterface::SetSecurityDistanceMessage *msg = nav_if_->msgq_first_safe(msg)) {
+      else if (NavigatorInterface::SetSecurityDistanceMessage *msg =
+	         nav_if_->msgq_first_safe(msg))
+      {
         logger->log_info(name(),"velocity message received %f",msg->security_distance ());
         nav_if_->set_security_distance (msg->security_distance ());
         
@@ -173,14 +188,5 @@ RosNavigatorThread::loop()
 
     check_status();
 
-  } // if
-  else{
-    logger->log_info(name(),"ROS-ActionServer is not up yet");
-
-    if (connected_history_){
-      delete ac_;
-      ac_ = new MoveBaseClient("move_base", false);
-      connected_history_ = false;
-    }
   }
-} // function
+}
