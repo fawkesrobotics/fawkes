@@ -54,7 +54,7 @@ OutOfMemoryException::OutOfMemoryException() throw()
 /** @class InterruptedException <core/exceptions/system.h>
  * The current system call has been interrupted (for instance by a signal).
  * Throw this exception if you use libc functions which return EINTR or store
- * EINTR in errno.
+ * EINTR in errnum.
  * @ingroup Exceptions
  */
 /** Constructor */
@@ -112,12 +112,12 @@ TimeoutException::TimeoutException(const char *format, ...) throw()
 
 /** Constructor with error number.
  * @param filename name of file which could not be opened
- * @param errno error number
+ * @param errnum error number
  * @param additional_msg optional additional message
  */
-CouldNotOpenFileException::CouldNotOpenFileException(const char *filename, int errno,
+CouldNotOpenFileException::CouldNotOpenFileException(const char *filename, int errnum,
 						     const char *additional_msg) throw()
-  : Exception(errno, "Could not open file '%s' %s%s%s", filename,
+  : Exception(errnum, "Could not open file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {
@@ -146,12 +146,12 @@ CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
 
 /** Constructor with error number.
  * @param filename name of file which could not be read
- * @param errno error number
+ * @param errnum error number
  * @param additional_msg optional additional message
  */
-FileReadException::FileReadException(const char *filename, int errno,
+FileReadException::FileReadException(const char *filename, int errnum,
 				     const char *additional_msg) throw()
-  : Exception(errno, "Could not read from file '%s' %s%s%s", filename,
+  : Exception(errnum, "Could not read from file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {
@@ -180,12 +180,12 @@ FileReadException::FileReadException(const char *filename,
 
 /** Constructor with error number.
  * @param filename name of file which could not be written to
- * @param errno error number
+ * @param errnum error number
  * @param additional_msg optional additional message
  */
-FileWriteException::FileWriteException(const char *filename, int errno,
+FileWriteException::FileWriteException(const char *filename, int errnum,
 				       const char *additional_msg) throw()
-  : Exception(errno, "Could not write to file '%s' %s%s%s", filename,
+  : Exception(errnum, "Could not write to file '%s' %s%s%s", filename,
 	      (additional_msg) ? "(" : "", (additional_msg) ? additional_msg : "",
 	      (additional_msg) ? ")" : "")
 {
