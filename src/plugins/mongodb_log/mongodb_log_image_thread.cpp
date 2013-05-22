@@ -227,12 +227,6 @@ MongoLogImagesThread::update_images()
         pos = pos + 1;
       }
 
-      std::string topic_name = std::string("Images.") + *i;
-      std::string::size_type pos = 0;
-      while ((pos = topic_name.find("-", pos)) != std::string::npos) {
-        topic_name.replace(pos, 1, "_");
-      }
-
       ImageInfo &imginfo = imgs_[*i];
       imginfo.topic_name = topic_name;
       imginfo.img = new SharedMemoryImageBuffer(i->c_str());
