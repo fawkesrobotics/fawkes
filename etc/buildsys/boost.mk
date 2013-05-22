@@ -37,7 +37,4 @@ boost-have-libs    = $(if $(strip $(subst 1,,$(foreach l,$1,$(or $(call boost-ha
 boost-libs-cflags  = $(foreach l,$1,$(call boost-lib-cflags,$l))
 boost-libs-ldflags = $(foreach l,$1,$(call boost-lib-ldflags,$l))
 
-boost-have-libs    = $(if $(strip $(subst 1,,$(foreach c,$1,$(call boost-have-lib,$c)))),0,1)
-boost-libs-ldflags = $(foreach l,$1,$(if $(call boost-have-lib,$l),-lboost_$l$(BOOST_LIBRARY_SUFFIX)) )
-
 endif # __buildsys_boost_mk_
