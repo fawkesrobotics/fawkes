@@ -1093,6 +1093,7 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
 //      *tmp_clusters += *colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
     }
     new_centroids.resize(max_id+1);
+    // assignment: assign an object id to each centroid
     std::vector<unsigned int> assignment(new_centroids.size());
     if (first_run_) {
       // get a new id for every object since we didn't have objects before
@@ -1101,25 +1102,28 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
     }
     else { // !first_run_
       Munkres munkres;
-      std::vector<unsigned int> obj_ids(centroids_.size());
+      // create cost matrix,
+      // save new centroids in rows, last centroids in columns
+      // distance between new centroid i and last centroid j in cost[i][j]
       unsigned int rows = new_centroids.size();
       unsigned int cols = centroids_.size();
+      // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
+      std::vector<unsigned int> obj_ids(centroids_.size());
       Matrix<double> cost(rows, cols);
-      double max_distance = 0;
-      for (unsigned int row = 0; row < rows; row++) {
+      for (unsigned int row = 0; row < rows; row++) { // rows
         unsigned int col = 0;
         for (CentroidMap::iterator col_it = centroids_.begin();
             col_it != centroids_.end();
-            col_it++, col++) {
+            col_it++, col++) { // columns
           double distance = pcl::distances::l2(new_centroids[row], col_it->second);
-          if (max_distance < distance)
-            max_distance = distance;
 //          logger->log_warn(name(), "distance %u-%u: %f", row, col_it->first, distance);
           cost(row,col) = distance;
           obj_ids[col] = col_it->first;
         }
       }
       munkres.solve(cost);
+      // get assignments
+      // a 0 entry in cost[i][j] is an assignment of row i to col j
       for (unsigned int row = 0; row < rows; row++) {
         unsigned int assigned = 0;
         for (unsigned int col = 0; col < cols; col++) {
@@ -1136,18 +1140,15 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
               it != old_centroids_.end(); it++) {
             double distance = pcl::distances::l2(new_centroids[row], it->getCentroid());
             if (distance < cfg_centroid_max_distance_) {
-              logger->log_warn(name(), "old ID found: %u, distance: %f", it->getId(), distance);
               assignment[row] = it->getId();
               old_centroids_.erase(it);
               assigned = 1;
               break;
-            } else {
             }
           }
           if (assigned == 0) {
           // we still don't have an id, create as new object
           assignment[row] = next_id();
-//          logger->log_warn(name(), "Munkres: %u assignments for object %u", assigned, row);
           }
         } else if (assigned > 1) {
           logger->log_error(name(), "Munkres: %u assignments for object %u", assigned, row);
@@ -1178,11 +1179,12 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
           ),
           old_centroids_.end());
     } // !first_run_
+    // save all (new) centroids to centroids_
     centroids_.clear();
     for (unsigned int i = 0; i < new_centroids.size(); i++) {
       centroids_[assignment[i]] = new_centroids[i];
     }
-
+    // colorize clusters
     for (unsigned int i = 0; i < new_centroids.size(); i++) {
       *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[assignment[i] % MAX_CENTROIDS]);
     }
