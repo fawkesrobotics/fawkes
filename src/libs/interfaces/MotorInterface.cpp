@@ -81,6 +81,7 @@ MotorInterface::MotorInterface() : Interface()
   add_messageinfo("SetMotorStateMessage");
   add_messageinfo("AcquireControlMessage");
   add_messageinfo("ResetOdometryMessage");
+  add_messageinfo("SetOdometryMessage");
   add_messageinfo("DriveRPMMessage");
   add_messageinfo("GotoMessage");
   add_messageinfo("TransMessage");
@@ -88,7 +89,7 @@ MotorInterface::MotorInterface() : Interface()
   add_messageinfo("TransRotMessage");
   add_messageinfo("OrbitMessage");
   add_messageinfo("LinTransRotMessage");
-  unsigned char tmp_hash[] = {0x4d, 0x9b, 0xb8, 0x1e, 0xb7, 0x9e, 0xc1, 0xea, 0xc6, 0xad, 0xf9, 0x6, 0xd7, 0x6d, 0xa4, 0xa5};
+  unsigned char tmp_hash[] = {0x13, 0xbd, 0x9f, 0x7b, 0xb5, 0x3, 0xab, 0xf7, 0x94, 0xa8, 0x7a, 0x1c, 0x5f, 0x70, 0xb3, 0x47};
   set_hash(tmp_hash);
 }
 
@@ -604,6 +605,8 @@ MotorInterface::create_message(const char *type) const
     return new AcquireControlMessage();
   } else if ( strncmp("ResetOdometryMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ResetOdometryMessage();
+  } else if ( strncmp("SetOdometryMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetOdometryMessage();
   } else if ( strncmp("DriveRPMMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new DriveRPMMessage();
   } else if ( strncmp("GotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -923,6 +926,164 @@ Message *
 MotorInterface::ResetOdometryMessage::clone() const
 {
   return new MotorInterface::ResetOdometryMessage(this);
+}
+/** @class MotorInterface::SetOdometryMessage <interfaces/MotorInterface.h>
+ * SetOdometryMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_odometry_orientation initial value for odometry_orientation
+ */
+MotorInterface::SetOdometryMessage::SetOdometryMessage(const float ini_x, const float ini_y, const float ini_odometry_orientation) : Message("SetOdometryMessage")
+{
+  data_size = sizeof(SetOdometryMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->x = ini_x;
+  data->y = ini_y;
+  data->odometry_orientation = ini_odometry_orientation;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "odometry_orientation", 1, &data->odometry_orientation);
+}
+/** Constructor */
+MotorInterface::SetOdometryMessage::SetOdometryMessage() : Message("SetOdometryMessage")
+{
+  data_size = sizeof(SetOdometryMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "odometry_orientation", 1, &data->odometry_orientation);
+}
+
+/** Destructor */
+MotorInterface::SetOdometryMessage::~SetOdometryMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::SetOdometryMessage::SetOdometryMessage(const SetOdometryMessage *m) : Message("SetOdometryMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetOdometryMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get x value.
+ * Translation in x direction in m
+ * @return x value
+ */
+float
+MotorInterface::SetOdometryMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::SetOdometryMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * Translation in x direction in m
+ * @param new_x new x value
+ */
+void
+MotorInterface::SetOdometryMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Translation in y direction in m
+ * @return y value
+ */
+float
+MotorInterface::SetOdometryMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::SetOdometryMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * Translation in y direction in m
+ * @param new_y new y value
+ */
+void
+MotorInterface::SetOdometryMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get odometry_orientation value.
+ * OdometryOrientation in m
+ * @return odometry_orientation value
+ */
+float
+MotorInterface::SetOdometryMessage::odometry_orientation() const
+{
+  return data->odometry_orientation;
+}
+
+/** Get maximum length of odometry_orientation value.
+ * @return length of odometry_orientation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::SetOdometryMessage::maxlenof_odometry_orientation() const
+{
+  return 1;
+}
+
+/** Set odometry_orientation value.
+ * OdometryOrientation in m
+ * @param new_odometry_orientation new odometry_orientation value
+ */
+void
+MotorInterface::SetOdometryMessage::set_odometry_orientation(const float new_odometry_orientation)
+{
+  data->odometry_orientation = new_odometry_orientation;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::SetOdometryMessage::clone() const
+{
+  return new MotorInterface::SetOdometryMessage(this);
 }
 /** @class MotorInterface::DriveRPMMessage <interfaces/MotorInterface.h>
  * DriveRPMMessage Fawkes BlackBoard Interface Message.
@@ -1981,32 +2142,36 @@ MotorInterface::message_valid(const Message *message) const
   if ( m2 != NULL ) {
     return true;
   }
-  const DriveRPMMessage *m3 = dynamic_cast<const DriveRPMMessage *>(message);
+  const SetOdometryMessage *m3 = dynamic_cast<const SetOdometryMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const GotoMessage *m4 = dynamic_cast<const GotoMessage *>(message);
+  const DriveRPMMessage *m4 = dynamic_cast<const DriveRPMMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const TransMessage *m5 = dynamic_cast<const TransMessage *>(message);
+  const GotoMessage *m5 = dynamic_cast<const GotoMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const RotMessage *m6 = dynamic_cast<const RotMessage *>(message);
+  const TransMessage *m6 = dynamic_cast<const TransMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const TransRotMessage *m7 = dynamic_cast<const TransRotMessage *>(message);
+  const RotMessage *m7 = dynamic_cast<const RotMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const OrbitMessage *m8 = dynamic_cast<const OrbitMessage *>(message);
+  const TransRotMessage *m8 = dynamic_cast<const TransRotMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const LinTransRotMessage *m9 = dynamic_cast<const LinTransRotMessage *>(message);
+  const OrbitMessage *m9 = dynamic_cast<const OrbitMessage *>(message);
   if ( m9 != NULL ) {
+    return true;
+  }
+  const LinTransRotMessage *m10 = dynamic_cast<const LinTransRotMessage *>(message);
+  if ( m10 != NULL ) {
     return true;
   }
   return false;

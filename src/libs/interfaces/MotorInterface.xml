@@ -94,6 +94,12 @@
     <comment>Resets the the odometry. It sets OdometryDistance, OdometryPositionX, 
       OdometryPositionY and OdometryOrientation to zero.</comment>
   </message>
+  <message name="SetOdometry">
+    <comment>Sets the odometry. It sets OdometeyPositionX,OdometryPositionY and OdometryOrientation based on given translation and new OdometryOrientation.</comment>
+    <field type="float" name="x">Translation in x direction in m</field>
+    <field type="float" name="y">Translation in y direction in m</field>
+    <field type="float" name="odometry_orientation">OdometryOrientation in m</field>
+  </message>
   <message name="DriveRPM">
     <comment>Directly set RPM, used for debugging, only use if you know what
              you are doing. Usage is discouraged.</comment>

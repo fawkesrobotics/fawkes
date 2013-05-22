@@ -193,6 +193,41 @@ class MotorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetOdometryMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float x; /**< Translation in x direction in m */
+      float y; /**< Translation in y direction in m */
+      float odometry_orientation; /**< OdometryOrientation in m */
+    } SetOdometryMessage_data_t;
+#pragma pack(pop)
+
+    SetOdometryMessage_data_t *data;
+
+   public:
+    SetOdometryMessage(const float ini_x, const float ini_y, const float ini_odometry_orientation);
+    SetOdometryMessage();
+    ~SetOdometryMessage();
+
+    SetOdometryMessage(const SetOdometryMessage *m);
+    /* Methods */
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float odometry_orientation() const;
+    void set_odometry_orientation(const float new_odometry_orientation);
+    size_t maxlenof_odometry_orientation() const;
+    virtual Message * clone() const;
+  };
+
   class DriveRPMMessage : public Message
   {
    private:
