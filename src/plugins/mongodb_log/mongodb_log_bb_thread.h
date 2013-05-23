@@ -75,6 +75,8 @@ class MongoLogBlackboardThread
 		      fawkes::Time *now);
     ~InterfaceListener();
 
+    /** Get MongoDB Client.
+     * @return MongoDB client */
     mongo::DBClientBase * mongodb_client() const
     { return mongodb_; }
 
