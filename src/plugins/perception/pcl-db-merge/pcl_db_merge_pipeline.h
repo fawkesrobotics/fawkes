@@ -25,6 +25,8 @@
 
 #include "mongodb_tf_transformer.h"
 
+#include <Eigen/Core>
+
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 

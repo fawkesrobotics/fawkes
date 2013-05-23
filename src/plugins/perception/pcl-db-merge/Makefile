@@ -26,6 +26,13 @@ SUBDIRS = ros
 # Add -DUSE_TIMETRACKER to enable time tracking
 CFLAGS += -DUSE_TIMETRACKER
 
+ifeq ($(PCL_USES_OPENMP),1)
+  ifneq ($(USE_OPENMP),1)
+    CFLAGS  += $(CFLAGS_OPENMP)
+    LDFLAGS += $(LDFLAGS_OPENMP)
+  endif
+endif
+
 LIBS_pcl_db_merge = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf \
 		PclDatabaseMergeInterface
