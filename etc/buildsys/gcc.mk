@@ -36,10 +36,11 @@ ifeq ($(call gte,$(GCC_VERSION_MAJOR),4),$(true))
   endif
 endif
 
-ifeq ($(USE_OPENMP),1)
-  CFLAGS_OPENMP  = -fopenmp
-  LDFLAGS_OPENMP = -lgomp
+OPENMP_LIBRARY = gomp
+CFLAGS_OPENMP  = -fopenmp
+LDFLAGS_OPENMP = -l$(OPENMP_LIBRARY)
 
+ifeq ($(USE_OPENMP),1)
   CFLAGS_MINIMUM  += $(CFLAGS_OPENMP)
   LDFLAGS_MINIMUM += $(LDFLAGS_OPENMP)
 endif
