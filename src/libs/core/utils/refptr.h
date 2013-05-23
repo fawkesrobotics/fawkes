@@ -164,7 +164,15 @@ class RefPtr
    * @return refptr to object casted to given type
    */
   template <class T_CastFrom>
-  static inline RefPtr<T_CppObject> cast_dynamic(const RefPtr<T_CastFrom>& src);
+  static inline RefPtr<T_CppObject> cast_dynamic(const RefPtr<T_CastFrom>& src)
+  {
+    T_CppObject *const cpp_object = dynamic_cast<T_CppObject*>(src.operator->());
+
+    if(cpp_object) //Check whether dynamic_cast<> succeeded so we don't pass a null object with a used refcount:
+      return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
+    else
+      return RefPtr<T_CppObject>();
+  }
 
   /** Static cast to derived class.
    *
@@ -176,7 +184,12 @@ class RefPtr
    * @return refptr to object casted to given type
    */
   template <class T_CastFrom>
-  static inline RefPtr<T_CppObject> cast_static(const RefPtr<T_CastFrom>& src);
+  static inline RefPtr<T_CppObject> cast_static(const RefPtr<T_CastFrom>& src)
+  {
+    T_CppObject *const cpp_object = static_cast<T_CppObject*>(src.operator->());
+
+    return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
+  }
 
   /** Cast to non-const.
    *
@@ -188,7 +201,12 @@ class RefPtr
    * @return refptr to object casted to given type
    */
   template <class T_CastFrom>
-  static inline RefPtr<T_CppObject> cast_const(const RefPtr<T_CastFrom>& src);
+  static inline RefPtr<T_CppObject> cast_const(const RefPtr<T_CastFrom>& src)
+  {
+    T_CppObject *const cpp_object = const_cast<T_CppObject*>(src.operator->());
+
+    return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
+  }
 
   /** For use only in the internal implementation of sharedptr.
    * @param cpp_object C++ object to wrap
@@ -447,42 +465,6 @@ void RefPtr<T_CppObject>::reset()
 {
   RefPtr<T_CppObject> temp; // swap with an empty RefPtr<> to clear *this
   this->swap(temp);
-}
-
-template <class T_CppObject>
-  template <class T_CastFrom>
-inline
-RefPtr<T_CppObject>
-RefPtr<T_CppObject>::cast_dynamic(const RefPtr<T_CastFrom>& src)
-{
-  T_CppObject *const cpp_object = dynamic_cast<T_CppObject*>(src.operator->());
-
-  if(cpp_object) //Check whether dynamic_cast<> succeeded so we don't pass a null object with a used refcount:
-    return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
-  else
-    return RefPtr<T_CppObject>();
-}
-
-template <class T_CppObject>
-  template <class T_CastFrom>
-inline
-RefPtr<T_CppObject>
-RefPtr<T_CppObject>::cast_static(const RefPtr<T_CastFrom>& src)
-{
-  T_CppObject *const cpp_object = static_cast<T_CppObject*>(src.operator->());
-
-  return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
-}
-
-template <class T_CppObject>
-  template <class T_CastFrom>
-inline
-RefPtr<T_CppObject>
-RefPtr<T_CppObject>::cast_const(const RefPtr<T_CastFrom>& src)
-{
-  T_CppObject *const cpp_object = const_cast<T_CppObject*>(src.operator->());
-
-  return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
 }
 
 
