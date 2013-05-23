@@ -68,12 +68,13 @@ class ClipsProtobufCommunicator
   void disable_server();
   void disable_peer();
 
+  /** Get Protobuf server.
+   * @return protobuf server */
   protobuf_comm::ProtobufStreamServer *  server() const
   { return server_; }
 
   /** Get the communicator's message register.
-   * @return message register
-   */
+   * @return message register */
   protobuf_comm::MessageRegister &  message_register()
   { return *message_register_; }
 
