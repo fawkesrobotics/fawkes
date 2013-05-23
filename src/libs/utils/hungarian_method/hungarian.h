@@ -37,12 +37,14 @@ namespace fawkes {
 }
 #endif
 
+/// @cond INTERNAL
 typedef struct {
   int num_rows;
   int num_cols;
   int** cost;
   int** assignment;  
 } hungarian_problem_t;
+/// @endcond
 
 class HungarianMethod
 {

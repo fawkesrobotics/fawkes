@@ -43,7 +43,12 @@ namespace fawkes {
 // 'faked' class member
 //hungarian_problem_t hp;
 
-// Constructor
+/** @class HungarianMethod <utils/hungarian_method/hungarian.h>
+ * Hungarian method assignment solver.
+ * @author Stefan Schiffer
+ */
+
+/** Constructor. */
 HungarianMethod::HungarianMethod()
 {
   p            = (hungarian_problem_t *)malloc(sizeof(hungarian_problem_t));
@@ -52,12 +57,17 @@ HungarianMethod::HungarianMethod()
   available_ = false;
 }
 
-// Destructor
+/** Destructor. */
 HungarianMethod::~HungarianMethod()
 {
   ::free(p);
 }
 
+/** Print matrix to stdout.
+ * @param C values
+ * @param rows number of rows
+ * @param cols number of columns
+ */
 void 
 HungarianMethod::print_matrix( int** C, int rows, int cols ) 
 {
@@ -76,6 +86,12 @@ HungarianMethod::print_matrix( int** C, int rows, int cols )
   std::cerr << std::endl;
 }
 
+/** Convert an array to a matrix.
+ * @param m array to convert
+ * @param rows number of rows in array
+ * @param cols number of columns in array
+ * @return matrix from array
+ */
 int** 
 HungarianMethod::array_to_matrix(int* m, int rows, int cols) 
 {
@@ -92,6 +108,7 @@ HungarianMethod::array_to_matrix(int* m, int rows, int cols)
 }
 
 
+/** Print the assignment matrix. */
 void 
 HungarianMethod::print_assignment() 
 {
@@ -101,6 +118,7 @@ HungarianMethod::print_assignment()
   }
 }
 
+/** Print the cost matrix. */
 void
 HungarianMethod::print_cost_matrix() 
 {
@@ -110,6 +128,8 @@ HungarianMethod::print_cost_matrix()
   }
 }
 
+/** Print the current status.
+ * Prints cost matrix followed by assignment. */
 void
 HungarianMethod::print_status()
 {
@@ -117,10 +137,13 @@ HungarianMethod::print_status()
   print_assignment();
 }
 
-int hungarian_imax(int a, int b) {
-  return (a<b)?b:a;
-}
-
+/** Initialize hungarian method.
+ * @param cost_matrix initial cost matrix
+ * @param rows number of rows in matrix
+ * @param cols number of columns in matrix
+ * @param mode One of HUNGARIAN_MODE_MINIMIZE_COST and HUNGARIAN_MODE_MAXIMIZE_UTIL
+ * @return number of rows in quadratic matrix
+ */
 int
 HungarianMethod::init( int** cost_matrix, int rows, int cols, int mode ) 
 {
@@ -135,7 +158,7 @@ HungarianMethod::init( int** cost_matrix, int rows, int cols, int mode )
 
   // is the number of cols  not equal to number of rows ? 
   // if yes, expand with 0-cols / 0-cols
-  rows = hungarian_imax(cols, rows);
+  rows = std::max(cols, rows);
   cols = rows;
   
   p->num_rows = rows;
@@ -197,6 +220,7 @@ HungarianMethod::init( int** cost_matrix, int rows, int cols, int mode )
   return rows;
 }
 
+/** Free space alloacted by method. */
 void
 HungarianMethod::free() 
 {
@@ -220,7 +244,7 @@ HungarianMethod::free()
 }
 
 
-
+/** Solve the assignment problem. */
 void
 HungarianMethod::solve()
 {
@@ -518,6 +542,10 @@ HungarianMethod::solve()
 }
 
 
+/** Get column assignment.
+ * @param col column index
+ * @return column assignment, or -1 if @p col is out of bounds.
+ */
 int
 HungarianMethod::get_column_assignment( const int & col )
 {
@@ -529,6 +557,10 @@ HungarianMethod::get_column_assignment( const int & col )
 }
 
 
+/** Get row assignment.
+ * @param row row index
+ * @return row assignment, or -1 if @p row is out of bounds.
+ */
 int
 HungarianMethod::get_row_assignment( const int & row )
 {
@@ -539,6 +571,9 @@ HungarianMethod::get_row_assignment( const int & row )
   return -1;
 }
 
+/** Check if data is available.
+ * @return true if data is available, false otherwise
+ */
 bool
 HungarianMethod::is_available()
 {
@@ -546,7 +581,11 @@ HungarianMethod::is_available()
 }
 
 
-int*
+/** Get assignment and size.
+ * @param size number of rows/columns in quadratic matrix
+ * @return pointer to columns.
+ */
+int *
 HungarianMethod::get_assignment(int & size)
 {
   size=p->num_rows;
