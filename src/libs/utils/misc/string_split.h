@@ -26,8 +26,13 @@
 
 namespace fawkes {
 
+/** Split string by delimiter.
+ * @param s string to split
+ * @param delim delimiter
+ * @return vector of split strings
+ */
 static inline
-  std::vector<std::string> str_split(const std::string &s, char delim = '/')
+std::vector<std::string> str_split(const std::string &s, char delim = '/')
 {
   std::vector<std::string> elems;
   std::stringstream ss(s);
@@ -38,8 +43,13 @@ static inline
   return elems;
 }
 
+/** Split string by delimiter.
+ * @param s string to split
+ * @param delim delimiter
+ * @return queue of split strings
+ */
 static inline
-  std::queue<std::string> str_split_to_queue(const std::string &s, char delim = '/')
+std::queue<std::string> str_split_to_queue(const std::string &s, char delim = '/')
 {
   std::queue<std::string> elems;
   std::stringstream ss(s);
