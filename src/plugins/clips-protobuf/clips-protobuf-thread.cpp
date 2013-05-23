@@ -31,7 +31,9 @@ using namespace protobuf_clips;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param env_name CLIPS environment name to which to register
+ */
 ClipsProtobufThread::ClipsProtobufThread(std::string &env_name)
   : Thread("ClipsProtobufThread", Thread::OPMODE_WAITFORWAKEUP),
     CLIPSAspect(env_name.c_str(), /* create */ true, /* excl */ false)
