@@ -44,7 +44,7 @@ namespace firevision {
 class ColorModelLuminance : public ColorModel
 {
  public:
-  ColorModelLuminance(const unsigned int threshold_white_low = 170);
+  ColorModelLuminance(const unsigned int threshold_white_low = THRESHOLD_WHITE_Y_LOW);
 
   color_t       determine(unsigned int y,
 			  unsigned int u,

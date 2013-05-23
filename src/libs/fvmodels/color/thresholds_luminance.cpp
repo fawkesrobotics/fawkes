@@ -67,9 +67,9 @@ ColorModelLuminance::get_name()
 void
 ColorModelLuminance::print_thresholds()
 {
-  cout << "ColorModelThresholds" << endl
+  cout << "ColorModelLuminance" << endl
        << "==========================================================" << endl
-       << "Orange:  u_low=" << THRESHOLD_WHITE_Y_LOW
+       << "White:  y_low=" << threshold_white_low_
        << endl;
 }
 
