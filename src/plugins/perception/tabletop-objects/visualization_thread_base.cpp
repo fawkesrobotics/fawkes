@@ -26,7 +26,7 @@
  * This is only required to create a level of indirection to cope
  * with the re-defined msgs problem in PCL.
  *
- * @fn void TabletopVisualizationThreadBase::visualize(std::string &frame_id, Eigen::Vector4f &table_centroid, Eigen::Vector4f &normal, std::vector<Eigen::Vector4f> &table_hull_vertices, std::vector<Eigen::Vector4f> &centroids, V_Vector4f &cylinder_params, std::vector<double> &obj_confidence, std::vector<signed int>& best_obj_guess) throw()
+ * @fn void TabletopVisualizationThreadBase::visualize(std::string &frame_id, Eigen::Vector4f &table_centroid, Eigen::Vector4f &normal, std::vector<Eigen::Vector4f> &table_hull_vertices, V_Vector4f &table_model_vertices, V_Vector4f &good_table_hull_edges, std::vector<Eigen::Vector4f> &centroids) throw()
  * Visualize the given data.
  * @param frame_id reference frame ID
  * @param table_centroid centroid of table
@@ -36,9 +36,6 @@
  * @param good_table_hull_edges "good" egdes in table hull, i.e. edges that have
  * been considered for determining the table orientation
  * @param centroids object cluster centroids
- * @param cylinder_params parameters of detected cylinders
- * @param obj_confidence object type confidence
- * @param best_obj_guess best known object type
  */
 
 /** Virtual empty destructor. */
