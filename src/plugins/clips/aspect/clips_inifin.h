@@ -53,12 +53,14 @@ class CLIPSAspectIniFin : public AspectIniFin
 
  private:
   Logger *logger_;
+  /// @cond INTERNAL
   typedef struct {
     bool        exclusive;
     std::string exclusive_holder;
     LockPtr<CLIPS::Environment> env;
   } ClipsEnvData;
   std::map<std::string, ClipsEnvData > envs_;
+  /// @endcond
 
 };
 

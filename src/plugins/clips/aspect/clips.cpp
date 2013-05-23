@@ -50,7 +50,7 @@ namespace fawkes {
  * @param env_name CLIPS environment name, the environment name is unique, if
  * you request an environment already occupied by another the @p exclusive parameter
  * defines whether an error is thrown or if the environment is shared 
- * @param true to create the CLIPS environment, false to throw an exception if the
+ * @param create true to create the CLIPS environment, false to throw an exception if the
  * environment has not already been created. If true, an error is thrown if
  * the environment already exists.
  * @param exclusive require exclusive (non-shared) access to the environment.
