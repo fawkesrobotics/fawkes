@@ -90,6 +90,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 /** Constructor.
  * @param address IPv4 broadcast address to send to
  * @param port IPv4 UDP port to listen on and to send to
+ * @param proto_path list of file system paths where to look for proto files
  */ 
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port,
 					     std::vector<std::string> &proto_path)
@@ -109,6 +110,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
  * @param address IPv4 address to send to
  * @param send_to_port IPv4 UDP port to send data to
  * @param recv_on_port IPv4 UDP port to receive data on
+ * @param proto_path list of file system paths where to look for proto files
  */
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     unsigned short send_to_port,
@@ -126,6 +128,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 /** Constructor.
  * @param address IPv4 broadcast address to send to
  * @param port IPv4 UDP port to listen on and to send to
+ * @param mr message register to query for message types
  */ 
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port,
 					     MessageRegister *mr)
@@ -144,6 +147,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
  * @param address IPv4 address to send to
  * @param send_to_port IPv4 UDP port to send data to
  * @param recv_on_port IPv4 UDP port to receive data on
+ * @param mr message register to query for message types
  */
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     unsigned short send_to_port,

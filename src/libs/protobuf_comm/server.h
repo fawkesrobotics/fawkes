@@ -121,12 +121,15 @@ class ProtobufStreamServer
   class Session : public boost::enable_shared_from_this<Session>
   {
    public:
+    /** Shortcut for shared pointer of session. */
     typedef boost::shared_ptr<Session> Ptr;
 
     Session(ClientID id, ProtobufStreamServer *parent,
 	    boost::asio::io_service &io_service);
     ~Session();
 
+    /** Get underlying socket.
+     * @return socket */
     boost::asio::ip::tcp::socket & socket() { return socket_; }
 
     /** Get client ID.
