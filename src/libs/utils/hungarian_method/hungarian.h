@@ -52,62 +52,31 @@ class HungarianMethod
   HungarianMethod();
   ~HungarianMethod();
 
-  /** initialize hungarian_problem.
-   *  initialize the hungarian_problem structure and init 
-   *  the  cost matrices (missing lines or columns are filled with 0).
-   *  @returns the size of the quadratic(!) assignment matrix. **/
   int init( int** cost_matrix, 
 	    int rows, int cols, int mode);
   
-  /** Free the memory allocated by init. */
   void free();
 
-  /** This method computes the optimal assignment. */
   void solve();
 
-  /** solve done and not freed yet. */
   bool is_available();
 
-  /** return assignment for col. 
-   */
-  int get_column_assignment( const int & col );
-
-  /** return assignment for row. 
-   */
-  int get_row_assignment( const int & row );
-
-  /** return assignment-array,
-      @param int &size: size of array
-   */
+  int  get_column_assignment( const int & col );
+  int  get_row_assignment( const int & row );
   int* get_assignment(int & size);
 
-  /** create Matrix from Array. 
-   */
   int** array_to_matrix(int* m, int rows, int cols);
 
-  /** Print the computed optimal assignment. 
-   */
   void print_assignment();
-
-  
-  /** Print the cost matrix. 
-   */
   void print_cost_matrix();
-
-  /** Print cost matrix and assignment matrix. 
-   */
   void print_status();
 
-  /** our problem instance member. 
-   */
+  /** our problem instance member.  */
   hungarian_problem_t * p;
 
  protected:
   void print_matrix( int** C, int rows, int cols );
 
-  // ///////////////////////////////////////////////////////////////////
-  //  PRIVATE
-  // ///////////////////////////////////////////////////////////////////
  private:
   bool available_;
   int  num_cols_;

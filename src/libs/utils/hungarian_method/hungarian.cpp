@@ -244,7 +244,9 @@ HungarianMethod::free()
 }
 
 
-/** Solve the assignment problem. */
+/** Solve the assignment problem.
+ * This method computes the optimal assignment.
+ */
 void
 HungarianMethod::solve()
 {
@@ -572,6 +574,7 @@ HungarianMethod::get_row_assignment( const int & row )
 }
 
 /** Check if data is available.
+ * solve done and not freed yet.
  * @return true if data is available, false otherwise
  */
 bool

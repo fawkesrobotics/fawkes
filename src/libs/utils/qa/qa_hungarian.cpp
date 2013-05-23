@@ -1,27 +1,27 @@
-/* ***************************************************************************
- *                                                                           
- *                                            ####   ####           .-""-.   
- *       # #                             #   #    # #    #         /[] _ _\  
- *       # #                                 #    # #             _|_o_LII|_ 
- * ,###, # #  ### ## ## ##   ###  ## ##  #   #    # #       ###  / | ==== | \
- * #   # # # #   # ## ## #  #   #  ## #  #   ###### #      #     |_| ==== |_|
- * #   # # # ####  #  #  #  #   #  #  #  #   #    # #      ####   ||" ||  || 
- * #   # # # #     #  #  #  #   #  #  #  #   #    # #    #    #   ||'----'|| 
- * '###'# # # #### #  #  ##  ### # #  ## ## #      # ####  ###   /__|    |__\
- *                                                                           
- * ***************************************************************************
+
+/***************************************************************************
+ *  hungarian.cpp - Hungarian Method
  *
- *           $Id$
+ *  Created: Thu Apr 18 17:09:58 2013
+ *  Copyright  2004  Cyrill Stachniss
+ *             2008  Stefan Schiffer
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
  *
- *   description: definition of object for hungarian method
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- *     re-author: Stefan Schiffer <mailto:schiffer[at]cs.rwth-aachen.de>
- *
- * ***************************************************************************
- *
- *   based on: libhungarian by Cyrill Stachniss, 2004
- *
- *   Solving the Minimum Assignment Problem using the 
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+/*   Solving the Minimum Assignment Problem using the 
  *   Hungarian Method.
  *
  *   ** This file may be freely copied and distributed! **
@@ -36,13 +36,7 @@
  *   but WITHOUT ANY WARRANTY; without even the implied 
  *   warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
  *   PURPOSE.  
- *
- * ***************************************************************************
- *
- * last modified: $Date$
- *            by: $Author$
- *
- * **************************************************************************/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
