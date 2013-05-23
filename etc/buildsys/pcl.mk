@@ -24,8 +24,7 @@ __buildsys_pcl_mk_ := 1
 # It might be a ROS PCL installation, we need to pull in std_msgs
 include $(BUILDSYSDIR)/ros.mk
 
-PCL_LIB_DIRS=/usr/lib64 /usr/lib /usr/lib32 \
-             /usr/local/lib64 /usr/local/lib
+PCL_LIB_DIRS=$(shell ld --verbose 2>&1 | grep SEARCH | sed 's/SEARCH_DIR("\([^"]*\)");/\1/g')
 
 ifneq ($(PKGCONFIG),)
   HAVE_PCL = $(if $(shell $(PKGCONFIG) --exists 'pcl_common'; echo $${?/1/}),1,0)
@@ -69,7 +68,8 @@ ifeq ($(HAVE_PCL),1)
   # endif
 
   CFLAGS_PCL  += -DHAVE_PCL $(CFLAGS_EIGEN3) \
-		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)')
+		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)') \
+		 -Wno-unknown-pragmas
   LDFLAGS_PCL += $(LDFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --libs 'pcl_common$(PCL_VERSION_SUFFIX)')
 
@@ -86,6 +86,13 @@ ifeq ($(HAVE_PCL),1)
         CFLAGS_PCL  += -DHAVE_ROS_PCL $(CFLAGS_ROS)  $(call ros-pkg-cflags,std_msgs)
         LDFLAGS_PCL += $(LDFLAGS_ROS) $(call ros-pkg-lflags,std_msgs)
       endif
+    endif
+  endif
+
+  PCL_COMMON_LIB = $(firstword $(wildcard $(addsuffix /libpcl_common.$(SOEXT),$(PCL_LIB_DIRS))))
+  ifneq ($(PCL_COMMON_LIB),)
+    ifneq ($(OPENMP_LIBRARY),)
+      PCL_USES_OPENMP = $(if $(shell ldd $(PCL_COMMON_LIB) | grep lib$(OPENMP_LIBRARY).$(SOEXT)),1)
     endif
   endif
 
