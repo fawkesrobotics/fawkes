@@ -606,7 +606,7 @@ Roomba500::send(Roomba500::OpCode opcode,
 void
 Roomba500::recv(size_t index, size_t num_bytes, unsigned int timeout_ms)
 {
-  timeval timeout = {0, timeout_ms  * 1000};
+  timeval timeout = {0, (suseconds_t)timeout_ms  * 1000};
 
   fd_set read_fds;
   FD_ZERO(&read_fds);
