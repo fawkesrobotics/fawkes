@@ -1162,6 +1162,22 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
         }
       }
 
+      // check if a centroid was moved further than cfg_centroid_max_distance_
+      // this can happen if a centroid appears and another one disappears in the same loop
+      // (then, the old centroid is assigned to the new one)
+      for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+        // only check those centroids with the same id in centroids_ and tmp_centroids
+        if (tmp_centroids.count(it->first)) {
+          double distance = pcl::distances::l2(it->second, tmp_centroids[it->first]);
+          if (distance > cfg_centroid_max_distance_) {
+            //logger->log_debug(name(), "%u: moved by %f", it->first, distance);
+            // save the centroid because we don't use it now
+            old_centroids_.push_back(OldCentroid(it->first, it->second));
+            tmp_centroids.erase(it->first);
+          }
+        }
+      }
+
       // age all old centroids
       for (OldCentroidVector::iterator it = old_centroids_.begin();
           it != old_centroids_.end(); it++) {
