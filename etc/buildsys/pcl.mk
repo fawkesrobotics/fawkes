@@ -69,7 +69,7 @@ ifeq ($(HAVE_PCL),1)
 
   CFLAGS_PCL  += -DHAVE_PCL $(CFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)') \
-		 -Wno-unknown-pragmas
+		 -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS_PCL += $(LDFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --libs 'pcl_common$(PCL_VERSION_SUFFIX)')
 
