@@ -1072,7 +1072,6 @@ unsigned int TabletopObjectsThread::next_id() {
 }
 unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
   unsigned int object_count = 0;
-  unsigned int max_id = 0;
   std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
   std::vector<pcl::PointIndices>::const_iterator it;
   unsigned int num_points = 0;
@@ -1084,15 +1083,15 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
     unsigned int centroid_i = 0;
     for (it = cluster_indices.begin();
         it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
-        ++it, ++object_count, ++centroid_i)
+        ++it, ++centroid_i)
     {
-      if (centroid_i > max_id) max_id = centroid_i;
       // calculate each centroid and save it to the vector centroids
       pcl::compute3DCentroid(*input_cloud, it->indices, new_centroids[centroid_i]);
 //      *tmp_clusters += *colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
     }
-    new_centroids.resize(max_id+1);
-    // assignment: assign an object id to each centroid
+    object_count = centroid_i;
+    new_centroids.resize(object_count);
+
     CentroidMap tmp_centroids;
     if (first_run_) {
       // get a new id for every object since we didn't have objects before
