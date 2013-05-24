@@ -219,6 +219,7 @@ LaserClusterThread::loop()
 
   if (! switch_if_->is_enabled()) {
     //TimeWait::wait(250000);
+    set_position(cluster_pos_if_, false);
     return;
   }
 
