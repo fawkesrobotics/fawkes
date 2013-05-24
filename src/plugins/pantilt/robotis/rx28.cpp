@@ -344,7 +344,7 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
 void
 RobotisRX28::recv(const unsigned char exp_length, unsigned int timeout_ms)
 {
-  timeval timeout = {0, (timeout_ms == 0xFFFFFFFF ? __default_timeout_ms : timeout_ms)  * 1000};
+  timeval timeout = {0, (suseconds_t)(timeout_ms == 0xFFFFFFFF ? __default_timeout_ms : timeout_ms)  * 1000};
 
   fd_set read_fds;
   FD_ZERO(&read_fds);

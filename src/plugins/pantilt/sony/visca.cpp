@@ -448,7 +448,7 @@ void
 Visca::recv_packet(unsigned int timeout_ms)
 {
   // wait for message
-  timeval timeout = {0, timeout_ms * 1000};
+  timeval timeout = {0, (suseconds_t)timeout_ms * 1000};
 
   fd_set read_fds;
   FD_ZERO(&read_fds);
