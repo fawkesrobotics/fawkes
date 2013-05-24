@@ -32,8 +32,7 @@ include $(BUILDSYSDIR)/rules.mk
 luaagent: skiller
 rrdweb: rrd
 katana: openrave
-perception: ros
-amcl: ros
+amcl perception robotino: ros
 mongodb_log: mongodb
 mongodb: rrd
 clips-agent clips-protobuf: clips
