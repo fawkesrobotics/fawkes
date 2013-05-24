@@ -54,8 +54,8 @@ inline void
 set_time(pcl::PointCloud<PointT> &cloud, const fawkes::Time &time)
 {
 #if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
-  cloud->header.stamp.sec  = time.get_sec();
-  cloud->header.stamp.nsec = time.get_usec() * 1000;
+  cloud.header.stamp.sec  = time.get_sec();
+  cloud.header.stamp.nsec = time.get_usec() * 1000;
 #else
   PointCloudTimestamp pclts;
   pclts.time.sec  = time.get_sec();
@@ -142,7 +142,7 @@ template <typename PointT>
 inline void
 get_time(const pcl::PointCloud<PointT> &cloud, fawkes::Time &time)
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud.header.stamp.sec, cloud.header.stamp.nsec / 1000);
 #else
   PointCloudTimestamp pclts;
@@ -162,7 +162,7 @@ template <typename PointT>
 inline void
 get_time(const boost::shared_ptr<pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
   PointCloudTimestamp pclts;
@@ -182,7 +182,7 @@ template <typename PointT>
 inline void
 get_time(const boost::shared_ptr<const pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
 {
-#if HAVE_ROS_PCL
+#if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
   PointCloudTimestamp pclts;
