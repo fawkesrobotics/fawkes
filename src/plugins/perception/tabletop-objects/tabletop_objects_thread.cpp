@@ -49,8 +49,7 @@
 #include <pcl/common/distances.h>
 #include <pcl/registration/distances.h>
 
-#include <utils/munkres/matrix.hpp>
-#include <utils/munkres/munkres.h>
+#include <utils/hungarian_method/hungarian.h>
 
 
 #include <interfaces/Position3DInterface.h>
@@ -1094,80 +1093,76 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
     }
     new_centroids.resize(max_id+1);
     // assignment: assign an object id to each centroid
-    std::vector<unsigned int> assignment(new_centroids.size());
+    CentroidMap tmp_centroids;
     if (first_run_) {
       // get a new id for every object since we didn't have objects before
-    for (unsigned int i = 0; i < assignment.size(); i++)
-      assignment[i] = next_id();
+      for (unsigned int i = 0; i < new_centroids.size(); i++) {
+        unsigned int id = next_id();
+        tmp_centroids[id] = new_centroids[i];
+        *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
+      }
     }
     else { // !first_run_
-      Munkres munkres;
+      hungarian_problem_t hp;
+      // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
+      std::vector<unsigned int> obj_ids(centroids_.size());
       // create cost matrix,
       // save new centroids in rows, last centroids in columns
       // distance between new centroid i and last centroid j in cost[i][j]
-      unsigned int rows = new_centroids.size();
-      unsigned int cols = centroids_.size();
-      // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
-      std::vector<unsigned int> obj_ids(centroids_.size());
-      Matrix<double> cost(rows, cols);
-      for (unsigned int row = 0; row < rows; row++) { // rows
+      hp.num_rows = new_centroids.size();
+      hp.num_cols = centroids_.size();
+      hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
+      for (int i = 0; i < hp.num_rows; i++)
+        hp.cost[i] = (int*) calloc(hp.num_cols, sizeof(int));
+      for (int row = 0; row < hp.num_rows; row++) { // new centroids
         unsigned int col = 0;
         for (CentroidMap::iterator col_it = centroids_.begin();
             col_it != centroids_.end();
-            col_it++, col++) { // columns
+            col_it++, col++) { // old centroids
           double distance = pcl::distances::l2(new_centroids[row], col_it->second);
-//          logger->log_warn(name(), "distance %u-%u: %f", row, col_it->first, distance);
-          cost(row,col) = distance;
+          hp.cost[row][col] = (int)(distance * 1000);
           obj_ids[col] = col_it->first;
         }
       }
-      munkres.solve(cost);
+      HungarianMethod solver;
+      solver.init(hp.cost, hp.num_rows, hp.num_cols, HUNGARIAN_MODE_MINIMIZE_COST);
+      solver.solve();
       // get assignments
-      // a 0 entry in cost[i][j] is an assignment of row i to col j
-      for (unsigned int row = 0; row < rows; row++) {
-        unsigned int assigned = 0;
-        for (unsigned int col = 0; col < cols; col++) {
-          if (cost(row,col) == 0) {
-            assignment[row] = obj_ids[col];
-            assigned++;
-//            logger->log_warn(name(), "Munkres: %u assigned to %u", row, obj_ids[col]);
-          }
+      int assignment_size;
+      int *assignment = solver.get_assignment(assignment_size);
+      for (int row = 0; row < assignment_size; row++) {
+        if (row >= hp.num_rows) { // object has disappeared
+          old_centroids_.push_back(OldCentroid(obj_ids.at(assignment[row]), centroids_.at(obj_ids[assignment[row]])));
         }
-        if (assigned == 0) {
-          // object wasn't assigned, therefore it was not recognized in the previous loop
-          // first, check if there is an old centroid close enough
-          for (OldCentroidVector::iterator it = old_centroids_.begin();
-              it != old_centroids_.end(); it++) {
-            double distance = pcl::distances::l2(new_centroids[row], it->getCentroid());
-            if (distance < cfg_centroid_max_distance_) {
-              assignment[row] = it->getId();
-              old_centroids_.erase(it);
-              assigned = 1;
-              break;
+        else {
+          unsigned int id;
+          if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
+            bool assigned = false;
+            // first, check if there is an old centroid close enough
+            for (OldCentroidVector::iterator it = old_centroids_.begin();
+                it != old_centroids_.end(); it++) {
+              double distance = pcl::distances::l2(new_centroids[row], it->getCentroid());
+              if (distance < cfg_centroid_max_distance_) {
+                id = it->getId();
+                old_centroids_.erase(it);
+                assigned = true;
+                break;
+              }
+            }
+            if (!assigned) {
+              // we still don't have an id, create as new object
+              id = next_id();
             }
           }
-          if (assigned == 0) {
-          // we still don't have an id, create as new object
-          assignment[row] = next_id();
+          else {
+            id = obj_ids[assignment[row]];
           }
-        } else if (assigned > 1) {
-          logger->log_error(name(), "Munkres: %u assignments for object %u", assigned, row);
+          tmp_centroids[id] = new_centroids[row];
+          *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
         }
       }
-      // find unused centroids, i.e. centroids in centroids_ but not in new_centroids
-      // and save them for later
-      unsigned int col = 0;
-      for (CentroidMap::const_iterator it = centroids_.begin(); it != centroids_.end(); it++, col++) {
-        unsigned int assigned = 0;
-        for (unsigned int row = 0; row < rows; row++) {
-          if (cost(row,col) == 0) {
-            assigned++;
-          }
-        }
-        if (assigned == 0) {
-          old_centroids_.push_back(OldCentroid(obj_ids.at(col), Eigen::Vector4f(it->second)));
-        }
-      }
+
+      // age all old centroids
       for (OldCentroidVector::iterator it = old_centroids_.begin();
           it != old_centroids_.end(); it++) {
         it->age();
@@ -1179,15 +1174,8 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
           ),
           old_centroids_.end());
     } // !first_run_
-    // save all (new) centroids to centroids_
-    centroids_.clear();
-    for (unsigned int i = 0; i < new_centroids.size(); i++) {
-      centroids_[assignment[i]] = new_centroids[i];
-    }
-    // colorize clusters
-    for (unsigned int i = 0; i < new_centroids.size(); i++) {
-      *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[assignment[i] % MAX_CENTROIDS]);
-    }
+
+    centroids_ = tmp_centroids;
 
     if (object_count > 0)
       first_run_ = false;
