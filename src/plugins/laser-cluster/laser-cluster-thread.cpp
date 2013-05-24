@@ -241,6 +241,8 @@ LaserClusterThread::loop()
   {
     // Erase non-finite points
     pcl::PassThrough<PointType> passthrough;
+    passthrough.setFilterFieldName("x");
+    passthrough.setFilterLimits(0.0, cfg_cluster_max_x_);
     passthrough.setInputCloud(input_);
     passthrough.filter(*noline_cloud);
   }
