@@ -96,7 +96,6 @@ AgentControlThread::loop()
 
     m_test_iface->msgq_pop();
   }
-  m_eclipse_thread->post_event( "check_interfaces_msg" );
   m_test_iface->write();
 
 
