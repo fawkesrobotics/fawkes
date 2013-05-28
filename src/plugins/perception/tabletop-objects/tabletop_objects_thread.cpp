@@ -151,29 +151,9 @@ TabletopObjectsThread::init()
     switch_if_->write();
 
     pos_ifs_.clear();
-    pos_ifs_.resize(MAX_CENTROIDS, NULL);
-    for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-      char *tmp;
-      if (asprintf(&tmp, "Tabletop Object %u", i + 1) != -1) {
-        // Copy to get memory freed on exception
-        std::string id = tmp;
-        free(tmp);
-        Position3DInterface *iface =
-          blackboard->open_for_writing<Position3DInterface>(id.c_str());
-        pos_ifs_[i] = iface;
-        iface->set_rotation(rotation);
-        iface->write();
-      }
-    }
   } catch (Exception &e) {
     blackboard->close(table_pos_if_);
     blackboard->close(switch_if_);
-    for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-      if (pos_ifs_[i]) {
-        blackboard->close(pos_ifs_[i]);
-      }
-    }
-    pos_ifs_.clear();
     throw;
   }
 
@@ -248,8 +228,8 @@ TabletopObjectsThread::finalize()
   
   blackboard->close(table_pos_if_);
   blackboard->close(switch_if_);
-  for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    blackboard->close(pos_ifs_[i]);
+  for (PosIfsMap::iterator it = pos_ifs_.begin(); it != pos_ifs_.end(); it++) {
+    blackboard->close(it->second);
   }
   pos_ifs_.clear();
 
@@ -985,12 +965,33 @@ TabletopObjectsThread::loop()
     logger->log_info(name(), "Filter left no points for clustering");
   }
 
-  unsigned int i = 0;
-  for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++, i++) {
-    set_position(pos_ifs_[i], true, it->second);
+  // set all pos_ifs not in centroids_ to 'not visible'
+  for (PosIfsMap::const_iterator it = pos_ifs_.begin(); it != pos_ifs_.end(); it++) {
+    if (!centroids_.count(it->first))
+      set_position(it->second, false);
   }
-  for(; i< MAX_CENTROIDS; i++) {
-    set_position(pos_ifs_[i], false);
+
+  // set positions of all visible centroids
+  for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+    if (!pos_ifs_.count(it->first)) { // pos_if doesn't exist, create it first
+      try {
+            char *tmp;
+            if (asprintf(&tmp, "Tabletop Object %u",  it->first) != -1) {
+              // Copy to get memory freed on exception
+              std::string id = tmp;
+              free(tmp);
+              Position3DInterface *iface =
+                blackboard->open_for_writing<Position3DInterface>(id.c_str());
+              pos_ifs_[it->first] = iface;
+          }
+        } catch (Exception &e) {
+            if (pos_ifs_[it->first]) {
+              blackboard->close(pos_ifs_[it->first]);
+            }
+          throw;
+        }
+    }
+    set_position(pos_ifs_[it->first], true, it->second);
   }
 
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)

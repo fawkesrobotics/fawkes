@@ -109,6 +109,7 @@ class TabletopObjectsThread
       Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
       CentroidMap;
   typedef std::list<OldCentroid, Eigen::aligned_allocator<OldCentroid> > OldCentroidVector;
+  typedef std::map<unsigned int, fawkes::Position3DInterface *> PosIfsMap;
 
  private:
   void set_position(fawkes::Position3DInterface *iface,
@@ -145,7 +146,7 @@ class TabletopObjectsThread
   pcl::VoxelGrid<PointType> grid_;
   pcl::SACSegmentation<PointType> seg_;
 
-  std::vector<fawkes::Position3DInterface *> pos_ifs_;
+  PosIfsMap pos_ifs_;
   fawkes::Position3DInterface *table_pos_if_;
 
   fawkes::SwitchInterface *switch_if_;
