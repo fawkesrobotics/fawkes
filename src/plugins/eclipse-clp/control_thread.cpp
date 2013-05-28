@@ -81,10 +81,13 @@ AgentControlThread::loop()
   */
   m_eclipse_thread->loop();
 
-
+  //if the debug interface has a writer (so tktools module is loaded),
+  //then post event to check for tktool connection request within eclipse
   if (m_debug_iface->has_writer()){
-    m_eclipse_thread->post_event( "check_debug_msg" ); //if the debug interface has a writer (so tktools module is loaded), then post event to check for tktool connection request within eclipse
+    m_eclipse_thread->post_event( "check_debug_msg" );
   }
+
+  // this is only used by the dummy agent
   while ( !m_test_iface->msgq_empty() )
   {
     if ( m_test_iface->msgq_first_is< TestInterface::CalculateMessage >() )
