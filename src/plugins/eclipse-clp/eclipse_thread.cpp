@@ -143,7 +143,6 @@ bool EclipseAgentThread::running()
 void
 EclipseAgentThread::loop()
 {
-  logger->log_info(name(), "In loop()");
   if (!running()){
     mutex->lock();
     _running = true;
