@@ -146,8 +146,7 @@ TabletopVisualizationThread::loop()
   visualization_msgs::MarkerArray m;
 
   unsigned int idnum = 0;
-  unsigned int i = 0;
-  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); it++, i++) {
+  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
     try {
       tf::Stamped<tf::Point>
         centroid(tf::Point(it->second[0], it->second[1], it->second[2]),
@@ -193,9 +192,9 @@ TabletopVisualizationThread::loop()
       sphere.pose.orientation.w = 1.;
       sphere.scale.x = sphere.scale.y = 0.08;
       sphere.scale.z = 0.09;
-      sphere.color.r = (float)cluster_colors[i][0] / 255.f;
-      sphere.color.g = (float)cluster_colors[i][1] / 255.f;
-      sphere.color.b = (float)cluster_colors[i][2] / 255.f;
+      sphere.color.r = (float)cluster_colors[it->first % MAX_CENTROIDS][0] / 255.f;
+      sphere.color.g = (float)cluster_colors[it->first % MAX_CENTROIDS][1] / 255.f;
+      sphere.color.b = (float)cluster_colors[it->first % MAX_CENTROIDS][2] / 255.f;
       sphere.color.a = 1.0;
       sphere.lifetime = ros::Duration(cfg_duration_, 0);
       m.markers.push_back(sphere);
