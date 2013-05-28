@@ -44,23 +44,9 @@ handle_terminate(terminate) :-
         bb_send_message("Skiller", "ReleaseControlMessage", []),
         asserta(terminate(1)).
 
-handle_check_interfaces_msg(check_interfaces_msg) :-
-        log_debug("Event: INTERFACES"),
-        bb_read_interfaces,
-        bb_recv_messages("eclipse_clp_skillexec", List),
-        eval_list(List). 
-
-%check for SetTestStringMessage - this is only neccessary to use the skilltester tool
-eval_list([]).
-eval_list([Head|Tail]) :- eval_msg(Head), eval_list(Tail).
-
-eval_msg(["SetTestStringMessage"|[[["test_string"|[Skill]]]]]) :- exec_skill2(Skill).
-eval_msg(_). % a fail in a event handle would lead to bugs, so just ignore everything which is not a connection message (shouldn't happen anyhow)
-
 %% setup event handlers
 :- set_event_handler(update, handle_update/1).
 :- set_event_handler(terminate, handle_terminate/1).
-:- set_event_handler(check_interfaces_msg, handle_check_interfaces_msg/1).
 
 init :- bb_ensure_connected,!,
         bb_open_interface(r,"SkillerInterface","Skiller"),
@@ -73,12 +59,29 @@ init :- bb_ensure_connected,!,
 %the acutal program being performed (called from eclipse_thread.cpp)
 cycle :-
     (
-      log_debug("Writing message to Skiller"),
-      %bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", "say{text=\"Hello world\"}"]]),
-      exec_skill("say","text=\"In Cycle\""),
-      repeat, %will loop infinitly, needed for testing tktool attachment
-      fail
+      bb_read_interfaces,
+      check_for_msg,
+      run_agent_once,
+      bb_write_interfaces
     ).
+
+% this predicate is called at the start of the think-hook
+% if an agent is writer to some interface, it should check for new messages here
+check_for_msg :-
+        bb_recv_messages("eclipse_clp_skillexec", List),
+        eval_list(List).
+
+% check for SetTestStringMessage - this is only neccessary to use the skilltester tool
+eval_list([]).
+eval_list([Head|Tail]) :- eval_msg(Head), eval_list(Tail).
+
+eval_msg(["SetTestStringMessage"|[[["test_string"|[Skill]]]]]) :- exec_skill2(Skill).
+eval_msg(_). % check only. If no msg is there, still succeed.
+
+
+run_agent_once :-
+      log_debug("Writing message to Skiller"),
+      exec_skill("say","text=\"In Cycle\"").
 
 exec_skill(Skill, Arguments) :-
     append_strings(Skill, "{", Str1),
