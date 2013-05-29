@@ -196,11 +196,25 @@ NavGraphThread::loop()
       }
       plan_.erase(plan_.begin());
 
-      if (! plan_.empty())  send_next_goal();
+      if (! plan_.empty()) {
+        try {
+          logger->log_info(name(), "Sending next goal after node reached");
+          send_next_goal();
+        } catch (Exception &e) {
+          logger->log_warn(name(), "Failed to send next goal (node reached)");
+          logger->log_warn(name(), e);
+        }
+      }
     } else {
       fawkes::Time now(clock);
       if ((now - cmd_sent_at_) > cfg_resend_interval_) {
-	send_next_goal();
+        try {
+          logger->log_info(name(), "Re-sending goal");
+	  send_next_goal();
+        } catch (Exception &e) {
+          logger->log_warn(name(), "Failed to send next goal (resending)");
+          logger->log_warn(name(), e);
+        }
       }
     }
   }
@@ -347,7 +361,13 @@ NavGraphThread::start_plan()
     pp_nav_if_->set_dest_x(final_target.x());
     pp_nav_if_->set_dest_y(final_target.y());
 
-    send_next_goal();
+    try {
+      logger->log_info(name(), "Sending next goal on plan start");
+      send_next_goal();
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Failed to send next goal (start plan)");
+      logger->log_warn(name(), e);
+    }
   }
 }
 
@@ -481,7 +501,7 @@ NavGraphThread::node_reached()
       
       if (tolerance == 0.)  tolerance = default_tolerance;
       
-      logger->log_info(name(), "Ori=%f Rot=%f Diff=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose.getRotation() ), ori_diff);
+      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose.getRotation() ), ori_diff);
       return (dist <= tolerance) && (ori_diff <= ori_tolerance);
     }
   }
