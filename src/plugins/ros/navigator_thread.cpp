@@ -110,6 +110,13 @@ RosNavigatorThread::send_goal()
 }
 
 void
+RosNavigatorThread::stop_goals()
+{
+  //cancel all existing goals and send Goal={0/0/0}
+  ac_->cancelAllGoals();
+}
+
+void
 RosNavigatorThread::loop()
 {
   if (! ac_->isServerConnected()) {
@@ -139,6 +146,10 @@ RosNavigatorThread::loop()
         nav_if_->set_dest_ori(0);
 
         nav_if_->set_msgid(msg->id());
+        nav_if_->msgq_pop();
+        nav_if_->write();
+
+        stop_goals();
       }
 
       // cartesian goto
@@ -150,6 +161,11 @@ RosNavigatorThread::loop()
         nav_if_->set_dest_ori(msg->orientation());
 
         nav_if_->set_msgid(msg->id());
+
+        nav_if_->msgq_pop();
+        nav_if_->write();
+
+        send_goal();
       }
 
       // polar goto
@@ -161,6 +177,11 @@ RosNavigatorThread::loop()
         nav_if_->set_dest_ori(msg->phi());
 
         nav_if_->set_msgid(msg->id());
+
+        nav_if_->msgq_pop();
+        nav_if_->write();
+
+        send_goal();
       }
 
       // max velocity
@@ -169,6 +190,11 @@ RosNavigatorThread::loop()
         nav_if_->set_max_velocity(msg->max_velocity());
         
         nav_if_->set_msgid(msg->id());
+        
+        nav_if_->msgq_pop();
+        nav_if_->write();
+
+        send_goal();
       }
 
       else if (NavigatorInterface::SetSecurityDistanceMessage *msg =
@@ -178,12 +204,13 @@ RosNavigatorThread::loop()
         nav_if_->set_security_distance (msg->security_distance ());
         
         nav_if_->set_msgid(msg->id());
+        
+        nav_if_->msgq_pop();
+        nav_if_->write();
+
+        send_goal();
       }
 
-      nav_if_->msgq_pop();
-      nav_if_->write();
-
-      send_goal();
     } // while
 
     check_status();

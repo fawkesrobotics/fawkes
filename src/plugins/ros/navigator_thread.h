@@ -60,6 +60,7 @@ class RosNavigatorThread
  private:
   void check_status();
   void send_goal();
+  void stop_goals();
 
  private:
   typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
