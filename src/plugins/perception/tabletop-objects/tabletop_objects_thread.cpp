@@ -1130,52 +1130,42 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
       // get assignments
       int assignment_size;
       int *assignment = solver.get_assignment(assignment_size);
+      unsigned int id;
       for (int row = 0; row < assignment_size; row++) {
         if (row >= hp.num_rows) { // object has disappeared
           old_centroids_.push_back(OldCentroid(obj_ids.at(assignment[row]), centroids_.at(obj_ids[assignment[row]])));
+          continue;
         }
-        else {
-          unsigned int id;
-          if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
-            bool assigned = false;
-            // first, check if there is an old centroid close enough
-            for (OldCentroidVector::iterator it = old_centroids_.begin();
-                it != old_centroids_.end(); it++) {
-              double distance = pcl::distances::l2(new_centroids[row], it->getCentroid());
-              if (distance < cfg_centroid_max_distance_) {
-                id = it->getId();
-                old_centroids_.erase(it);
-                assigned = true;
-                break;
-              }
-            }
-            if (!assigned) {
-              // we still don't have an id, create as new object
-              id = next_id();
+        else if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
+          bool assigned = false;
+          // first, check if there is an old centroid close enough
+          for (OldCentroidVector::iterator it = old_centroids_.begin();
+              it != old_centroids_.end(); it++) {
+            if (pcl::distances::l2(new_centroids[row], it->getCentroid()) <= cfg_centroid_max_distance_) {
+              id = it->getId();
+              old_centroids_.erase(it);
+              assigned = true;
+              break;
             }
           }
-          else {
-            id = obj_ids[assignment[row]];
+          if (!assigned) {
+            // we still don't have an id, create as new object
+            id = next_id();
           }
-          tmp_centroids[id] = new_centroids[row];
-          *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
         }
-      }
-
-      // check if a centroid was moved further than cfg_centroid_max_distance_
-      // this can happen if a centroid appears and another one disappears in the same loop
-      // (then, the old centroid is assigned to the new one)
-      for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
-        // only check those centroids with the same id in centroids_ and tmp_centroids
-        if (tmp_centroids.count(it->first)) {
-          double distance = pcl::distances::l2(it->second, tmp_centroids[it->first]);
-          if (distance > cfg_centroid_max_distance_) {
-            //logger->log_debug(name(), "%u: moved by %f", it->first, distance);
+        else { // object has been assigned to an existing id
+          id = obj_ids[assignment[row]];
+          // check if centroid was moved further than cfg_centroid_max_distance_
+          // this can happen if a centroid appears and another one disappears in the same loop
+          // (then, the old centroid is assigned to the new one)
+          if (pcl::distances::l2(centroids_[id], new_centroids[row]) > cfg_centroid_max_distance_) {
             // save the centroid because we don't use it now
-            old_centroids_.push_back(OldCentroid(it->first, it->second));
-            tmp_centroids.erase(it->first);
+            old_centroids_.push_back(OldCentroid(id, centroids_[id]));
+            continue;
           }
         }
+        tmp_centroids[id] = new_centroids[row];
+        *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
 
       // age all old centroids
