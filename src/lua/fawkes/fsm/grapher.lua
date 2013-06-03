@@ -21,7 +21,8 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("fawkes.modinit")
-require("gv")
+local gv_warned = false
+local gv_ok, gv = pcall(require, "gv")
 
 --- Module to create DOT graphs.
 -- @author Tim Niemueller
@@ -389,6 +390,10 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 end
 
 local function layout_dotgraph(graph)
+   if not gv_ok or not gv and not gv_warned then
+      print_warn("Module gv not found, is graphviz-lua installed?")
+      gv_warned = true
+   end
    graph_handle = gv.readstring(graph)
    gv.layout(graph_handle, "dot")
    return gv.renderdata(graph_handle, "dot")
