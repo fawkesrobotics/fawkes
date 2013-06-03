@@ -698,7 +698,12 @@ function skill_module(module_name)
       assert(mt.__call == nil, "Module metatable already has an __call function/table.")
    end
 
-   local indextable = {}
+   local indextable = {
+      -- Skiller related stuff
+      logger   = logger,
+      config   = config,
+      clock    = clock
+   }
 
    for k,v in pairs(skillstati) do
       if string.match(k, "^S_([%a_]+)$") then indextable[k] = v end
