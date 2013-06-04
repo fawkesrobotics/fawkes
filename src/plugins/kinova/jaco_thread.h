@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  kinova_jaco_thread.h - Kinova plugin Jaco thread
+ *  jaco_thread.h - Kinova plugin Jaco thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_KINOVA_JACO_THREAD_H_
-#define __PLUGINS_KINOVA_KINOVA_JACO_THREAD_H_
+#ifndef __PLUGINS_KINOVA_JACO_THREAD_H_
+#define __PLUGINS_KINOVA_JACO_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -37,7 +37,7 @@ namespace fawkes {
 }
 */
 
-class KinovaJacoThread
+class JacoThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -45,8 +45,8 @@ class KinovaJacoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaJacoThread();
-  virtual ~KinovaJacoThread();
+  JacoThread();
+  virtual ~JacoThread();
 
   virtual void init();
   virtual void finalize();

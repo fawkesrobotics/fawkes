@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  kinova_jaco_thread.cpp - Kinova plugin Jaco Thread
+ *  jaco_thread.cpp - Kinova plugin Jaco Thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,11 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "kinova_jaco_thread.h"
+#include "jaco_thread.h"
 
 using namespace fawkes;
 
-/** @class KinovaJacoThread "kinova_jaco_thread.h"
+/** @class JacoThread "jaco_thread.h"
  * Jaco Arm control thread.
  *
  * @author Bahram Maleki-Fard
@@ -33,29 +33,29 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaJacoThread::KinovaJacoThread()
-  : Thread("KinovaJacoThread", Thread::OPMODE_WAITFORWAKEUP),
+JacoThread::JacoThread()
+  : Thread("JacoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
 }
 
 
 /** Destructor. */
-KinovaJacoThread::~KinovaJacoThread()
+JacoThread::~JacoThread()
 {
 }
 
 void
-KinovaJacoThread::init()
+JacoThread::init()
 {
 }
 
 void
-KinovaJacoThread::finalize()
+JacoThread::finalize()
 {
 }
 
 void
-KinovaJacoThread::loop()
+JacoThread::loop()
 {
 }

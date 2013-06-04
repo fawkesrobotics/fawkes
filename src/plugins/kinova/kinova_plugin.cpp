@@ -22,7 +22,7 @@
 
 #include "kinova_plugin.h"
 
-#include "kinova_jaco_thread.h"
+#include "jaco_thread.h"
 
 using namespace fawkes;
 
@@ -38,7 +38,7 @@ using namespace fawkes;
 KinovaPlugin::KinovaPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new KinovaJacoThread());
+  thread_list.push_back(new JacoThread());
 }
 
 
