@@ -31,11 +31,10 @@
 
 #include <string>
 
-/*
 namespace fawkes {
-  class KinovaJacoInterface;
+  class JacoArm;
+  //class KinovaJacoInterface;
 }
-*/
 
 class JacoThread
 : public fawkes::Thread,
@@ -56,6 +55,8 @@ class JacoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+   fawkes::JacoArm *__arm;
+
   //fawkes::KinovaJacoInterface   *__if_jaco;
 };
 

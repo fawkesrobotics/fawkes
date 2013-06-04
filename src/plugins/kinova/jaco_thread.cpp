@@ -21,6 +21,7 @@
  */
 
 #include "jaco_thread.h"
+#include "kinova_api.h"
 
 using namespace fawkes;
 
@@ -37,6 +38,7 @@ JacoThread::JacoThread()
   : Thread("JacoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
+  __arm = NULL;
 }
 
 
@@ -48,11 +50,15 @@ JacoThread::~JacoThread()
 void
 JacoThread::init()
 {
+  __arm = new JacoArm();
+
+  //__arm->_get_device_handle();
 }
 
 void
 JacoThread::finalize()
 {
+  delete __arm;
 }
 
 void
