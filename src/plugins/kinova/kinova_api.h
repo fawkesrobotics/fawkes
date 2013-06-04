@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_KINOVA_KINOVA_API_H_
 #define __PLUGINS_KINOVA_KINOVA_API_H_
 
+#include <libusb.h>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -35,6 +37,12 @@ class JacoArm
   virtual ~JacoArm();
 
  private:
+   static libusb_context  *__lusb_ctx;
+
+   libusb_device_handle   *__lusb_devh;
+
+   void _init_libusb();
+   void _get_device_handle();
 };
 
 } // end of namespace fawkes
