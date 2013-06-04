@@ -81,3 +81,6 @@ perception/tabletop-objects:
 
   # max distance an old centroid may have moved
   centroid_max_distance: 0.041
+
+  # min age of a centroid ID before it is used again
+  centroid_id_min_age: 5

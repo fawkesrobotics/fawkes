@@ -132,7 +132,7 @@ class TabletopObjectsThread
 
   unsigned int add_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
 
-  unsigned int next_id();
+  bool next_id(unsigned int &id);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -148,6 +148,8 @@ class TabletopObjectsThread
 
   PosIfsMap pos_ifs_;
   fawkes::Position3DInterface *table_pos_if_;
+
+  std::list<unsigned int> free_ids_;
 
   fawkes::SwitchInterface *switch_if_;
 
@@ -171,6 +173,7 @@ class TabletopObjectsThread
   std::string cfg_result_frame_;
   uint cfg_centroid_max_age_;
   float cfg_centroid_max_distance_;
+  unsigned int cfg_centroid_id_min_age_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;

@@ -134,6 +134,7 @@ TabletopObjectsThread::init()
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
   cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
+  cfg_centroid_id_min_age_      = config->get_uint(CFG_PREFIX"centroid_id_min_age");
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -190,6 +191,8 @@ TabletopObjectsThread::init()
   first_run_ = true;
 
   old_centroids_.clear();
+  for (unsigned int i = 0; i < MAX_CENTROIDS; i++)
+    free_ids_.push_back(i);
 
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
@@ -1067,9 +1070,18 @@ TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
        return cluster_indices;
 }
 
-unsigned int TabletopObjectsThread::next_id() {
-  static unsigned int id = 0;
-  return id++;
+bool TabletopObjectsThread::next_id(unsigned int &id) {
+  if (free_ids_.empty()) {
+    logger->log_debug(name(), "free_ids is empty");
+    return false;
+  }
+  unsigned int next_id = free_ids_.front();
+  if (pos_ifs_.count(next_id) && pos_ifs_[next_id]->visibility_history() > -1*static_cast<int>(cfg_centroid_id_min_age_)) {
+    return false;
+  }
+  id = next_id;
+  free_ids_.pop_front();
+  return true;
 }
 unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
   unsigned int object_count = 0;
@@ -1097,7 +1109,9 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
     if (first_run_) {
       // get a new id for every object since we didn't have objects before
       for (unsigned int i = 0; i < new_centroids.size(); i++) {
-        unsigned int id = next_id();
+        unsigned int id;
+        if (!next_id(id))
+          break;
         tmp_centroids[id] = new_centroids[i];
         *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
@@ -1133,7 +1147,9 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
       unsigned int id;
       for (int row = 0; row < assignment_size; row++) {
         if (row >= hp.num_rows) { // object has disappeared
-          old_centroids_.push_back(OldCentroid(obj_ids.at(assignment[row]), centroids_.at(obj_ids[assignment[row]])));
+          id = obj_ids.at(assignment[row]);
+          free_ids_.push_back(id);
+          old_centroids_.push_back(OldCentroid(id, centroids_.at(id)));
           continue;
         }
         else if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
@@ -1144,13 +1160,15 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
             if (pcl::distances::l2(new_centroids[row], it->getCentroid()) <= cfg_centroid_max_distance_) {
               id = it->getId();
               old_centroids_.erase(it);
+              free_ids_.remove_if([&id](const unsigned int &i) { return id == i; });
               assigned = true;
               break;
             }
           }
           if (!assigned) {
             // we still don't have an id, create as new object
-            id = next_id();
+            if (!next_id(id))
+              continue;
           }
         }
         else { // object has been assigned to an existing id
@@ -1160,11 +1178,14 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
           // (then, the old centroid is assigned to the new one)
           if (pcl::distances::l2(centroids_[id], new_centroids[row]) > cfg_centroid_max_distance_) {
             // save the centroid because we don't use it now
+            free_ids_.push_back(id);
             old_centroids_.push_back(OldCentroid(id, centroids_[id]));
             continue;
           }
         }
         tmp_centroids[id] = new_centroids[row];
+        // remove id from old_centroids_ because we don't want the same id twices
+        old_centroids_.remove_if([&id](const OldCentroid& centroid){ return centroid.getId() == id; });
         *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
 
