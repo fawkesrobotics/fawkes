@@ -65,6 +65,8 @@ class JacoArm
   JacoArm();
   virtual ~JacoArm();
 
+   void print_message(message_t &msg);
+
  private:
    static libusb_context  *__lusb_ctx;
 
@@ -74,9 +76,8 @@ class JacoArm
    void _get_device_handle();
    void _claim_interface();
 
+   int _cmd_out_in(message_t &msg, int cmd_size_in);
    position_cart_t _get_cart_pos();
-
-   int _cmd_out_in(message_t msg, int cmd_size_in);
 };
 
 } // end of namespace fawkes

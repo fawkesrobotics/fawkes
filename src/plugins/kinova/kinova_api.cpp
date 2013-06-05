@@ -184,7 +184,7 @@ JacoArm::_get_cart_pos()
 
 /** Perform an outgoing and then ingoing command.*/
 int
-JacoArm::_cmd_out_in(message_t msg, int cmd_size_in)
+JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
 {
   int r, transferred;
 
@@ -214,5 +214,22 @@ JacoArm::_cmd_out_in(message_t msg, int cmd_size_in)
   printf("sent interrupt %04x\n", *((uint16_t *) msg.data));
 
   return 1;
+}
+
+void
+JacoArm::print_message(message_t &msg)
+{
+  message_header_t h = msg.header;
+  float *b = msg.body;
+  printf("header: %i  %i  %i  %i \n", h.IdPacket, h.PacketQuantity, h.CommandId, h.CommandSize);
+  printf("body (7 rows, 8 colums, each entry 4 Byte float) \n");
+  for(unsigned int i=0; i<7; ++i) {
+    for(unsigned int j=0; j<8; ++j) {
+      printf("%f   ", *b);
+      ++b;
+    }
+    printf("\n");
+  }
+
 }
 } // end of namespace fawkes
