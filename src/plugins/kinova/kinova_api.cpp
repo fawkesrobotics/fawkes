@@ -166,39 +166,53 @@ JacoArm::_get_cart_pos()
 {
   message_t msg;
   position_cart_t pos;
-  int r, transferred;
 
   msg.header.IdPacket = 1;
   msg.header.PacketQuantity = 1;
   msg.header.CommandId = CMD_GET_CART_POS;
   msg.header.CommandSize = 8;
 
-  r = libusb_interrupt_transfer(__lusb_devh, EP_OUT, msg.data, INTR_LENGTH, &transferred, 1000);
-  if (r < 0) {
-    fprintf(stderr, "intr error %d\n", r);
+  int r = _cmd_out_in(msg, 40);
+  if( r < 0 ) {
+    fprintf(stderr, "some error occured %d\n", r);
     return pos;
   }
-  if (transferred < INTR_LENGTH) {
-    fprintf(stderr, "short write (%d)\n", r);
-    return pos;
-  }
-  printf("sent interrupt \n");
-
-  msg.header.CommandSize = 40;
-  r = libusb_interrupt_transfer(__lusb_devh, EP_IN, msg.data, INTR_LENGTH, &transferred, 1000);
-  if (r < 0) {
-    fprintf(stderr, "intr error %d\n", r);
-    return pos;
-  }
-  if (transferred < INTR_LENGTH) {
-    fprintf(stderr, "short read (%d)\n", r);
-    return pos;
-  }
-
-  printf("sent interrupt %04x\n", *((uint16_t *) msg.data));
 
   memcpy(&pos, msg.body, sizeof(pos));
   return pos;
 }
 
+/** Perform an outgoing and then ingoing command.*/
+int
+JacoArm::_cmd_out_in(message_t msg, int cmd_size_in)
+{
+  int r, transferred;
+
+  r = libusb_interrupt_transfer(__lusb_devh, EP_OUT, msg.data, INTR_LENGTH, &transferred, 1000);
+  if (r < 0) {
+    fprintf(stderr, "intr error %d\n", r);
+    return r;
+  }
+  if (transferred < INTR_LENGTH) {
+    fprintf(stderr, "short write (%d)\n", r);
+    return -1;
+  }
+  printf("sent interrupt \n");
+
+  msg.header.CommandSize = cmd_size_in;
+
+  r = libusb_interrupt_transfer(__lusb_devh, EP_IN, msg.data, INTR_LENGTH, &transferred, 1000);
+  if (r < 0) {
+    fprintf(stderr, "intr error %d\n", r);
+    return r;
+  }
+  if (transferred < INTR_LENGTH) {
+    fprintf(stderr, "short read (%d)\n", r);
+    return -1;
+  }
+
+  printf("sent interrupt %04x\n", *((uint16_t *) msg.data));
+
+  return 1;
+}
 } // end of namespace fawkes
