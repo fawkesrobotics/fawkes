@@ -29,9 +29,21 @@
 #define VENDOR_ID       0x22CD
 #define PRODUCT_ID      0x0000
 
-#define EP_INTR         2
+#define EP_IN           (2 | LIBUSB_ENDPOINT_IN)
+#define EP_OUT          (2 | LIBUSB_ENDPOINT_OUT)
 #define INTR_LENGTH	64
 
+/* send data with little endianness
+ *
+ * HEADER  8 Bytes
+ * DATA   56 Bytes
+ *
+ * HEADER
+ *      2 idPacket
+ *      2 PacketQuantity
+ *      2 CommandID
+ *      2 CommandSize
+ */
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -52,6 +64,8 @@ JacoArm::JacoArm() :
   _init_libusb();
 
   _get_device_handle();
+
+  _claim_interface();
 }
 
 /** Destructor. */
@@ -59,7 +73,8 @@ JacoArm::~JacoArm()
 {
   printf("destroy usb handle ... ");
   if( __lusb_devh != NULL ) {
-    // Close libusb session
+    libusb_release_interface(__lusb_devh, 0);
+    printf("interface released ... now handle ... ");
     libusb_close(__lusb_devh);
     printf("DONE \n");
   } else {printf("NOT INITIALIZED \n");}
@@ -126,6 +141,20 @@ JacoArm::_get_device_handle()
     printf("FAILED \n");
     throw fawkes::Exception("Kinova_API: Failed get handle for Jaco arm!" );
   } else {printf("DONE \n"); }
+}
+
+void
+JacoArm::_claim_interface()
+{
+  if( !__lusb_devh )
+    throw fawkes::Exception("Kinova_API: Failed claiming interface, no handle for Jaco arm!" );
+
+  printf("claim interface ... ");
+  int r = libusb_claim_interface(__lusb_devh, 0);
+  if( r<0 ) {
+    printf("FAILED \n");
+    throw fawkes::Exception("Kinova_API: Could not claim interface 0! Error code: %i.", r);
+  } else {printf("DONE \n");}
 }
 
 } // end of namespace fawkes

@@ -43,6 +43,7 @@ class JacoArm
 
    void _init_libusb();
    void _get_device_handle();
+   void _claim_interface();
 };
 
 } // end of namespace fawkes
