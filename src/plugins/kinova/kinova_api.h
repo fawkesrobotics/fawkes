@@ -30,6 +30,24 @@ namespace fawkes {
 }
 #endif
 
+typedef struct message_header_struct {
+  int IdPacket;
+  int PacketQuantity;
+  int CommandId;
+  int CommandSize;
+} message_header_t;
+
+typedef struct message_struct {
+  union {
+    unsigned char data[64];
+    struct {
+      message_header_t header; //8 Byte
+      float body[14]; //56 Byte
+    };
+  };
+} message_t;
+
+
 class JacoArm
 {
  public:
