@@ -30,6 +30,17 @@ namespace fawkes {
 }
 #endif
 
+typedef struct position_cart_struct {
+  float Position[3];
+  float Rotation[3];
+  float FingerPosition[3];
+} position_cart_t;
+
+typedef struct position_ang_struct {
+  float Joints[6];
+  float FingerPosition[3];
+} position_ang_t;
+
 typedef struct message_header_struct {
   int IdPacket;
   int PacketQuantity;
@@ -62,6 +73,8 @@ class JacoArm
    void _init_libusb();
    void _get_device_handle();
    void _claim_interface();
+
+   position_cart_t _get_cart_pos();
 };
 
 } // end of namespace fawkes

@@ -24,6 +24,8 @@
 #include <core/exceptions/software.h>
 
 #include <stdio.h>
+#include <cstring>
+
 //#include <libusb.h>
 
 #define VENDOR_ID       0x22CD
@@ -32,6 +34,8 @@
 #define EP_IN           (2 | LIBUSB_ENDPOINT_IN)
 #define EP_OUT          (2 | LIBUSB_ENDPOINT_OUT)
 #define INTR_LENGTH	64
+
+#define CMD_GET_CART_POS        104
 
 /* send data with little endianness
  *
@@ -155,6 +159,46 @@ JacoArm::_claim_interface()
     printf("FAILED \n");
     throw fawkes::Exception("Kinova_API: Could not claim interface 0! Error code: %i.", r);
   } else {printf("DONE \n");}
+}
+
+position_cart_t
+JacoArm::_get_cart_pos()
+{
+  message_t msg;
+  position_cart_t pos;
+  int r, transferred;
+
+  msg.header.IdPacket = 1;
+  msg.header.PacketQuantity = 1;
+  msg.header.CommandId = CMD_GET_CART_POS;
+  msg.header.CommandSize = 8;
+
+  r = libusb_interrupt_transfer(__lusb_devh, EP_OUT, msg.data, INTR_LENGTH, &transferred, 1000);
+  if (r < 0) {
+    fprintf(stderr, "intr error %d\n", r);
+    return pos;
+  }
+  if (transferred < INTR_LENGTH) {
+    fprintf(stderr, "short write (%d)\n", r);
+    return pos;
+  }
+  printf("sent interrupt \n");
+
+  msg.header.CommandSize = 40;
+  r = libusb_interrupt_transfer(__lusb_devh, EP_IN, msg.data, INTR_LENGTH, &transferred, 1000);
+  if (r < 0) {
+    fprintf(stderr, "intr error %d\n", r);
+    return pos;
+  }
+  if (transferred < INTR_LENGTH) {
+    fprintf(stderr, "short read (%d)\n", r);
+    return pos;
+  }
+
+  printf("sent interrupt %04x\n", *((uint16_t *) msg.data));
+
+  memcpy(&pos, msg.body, sizeof(pos));
+  return pos;
 }
 
 } // end of namespace fawkes
