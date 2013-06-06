@@ -21,7 +21,7 @@ namespace firevision
 #endif
 
 /** @class ColorModelThresholds <fvmodels/color/thresholds.h>
- * Really simple thresholds-based model with some hard-coded thresholds. Was
+ * Really simple thresholds-based model with variable thresholds. 
  * just for initial development of color models.
  */
 
@@ -30,7 +30,9 @@ ColorModelBlack::determine(unsigned int y,
 				unsigned int u,
 				unsigned int v) const
 {
-	if ( y <= this->thrashold && u <= this->thrashold && v <= this->thrashold ) {
+	if ( y <= this->thrashold 
+		&& u >= 90 && u <= 150 
+		&& v >= 90 && v <= 150) {
 		return C_BLACK;
 	} else {
 		return C_OTHER;
