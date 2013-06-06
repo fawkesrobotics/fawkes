@@ -350,9 +350,9 @@ ClipsAgentThread::clips_load_config(std::string cfg_prefix)
     std::string type = "";
     std::string value = v->get_as_string();
 
-    if (v->is_float())       type = "FLOAT";
-    else if (v->is_uint())   type = "UINT";
+    if      (v->is_uint())   type = "UINT";
     else if (v->is_int())    type = "INT";
+    else if (v->is_float())  type = "FLOAT";
     else if (v->is_bool())   type = "BOOL";
     else if (v->is_string()) {
       type = "STRING";
