@@ -25,9 +25,12 @@
 
 $#include <tf/types_lua.h>
 $#include <tf/transformer.h>
+$#include <tf/types.h>
 
 namespace fawkes {
   namespace tf {
+
+double get_yaw(const Quaternion &bt_q);
 
 class Vector3 {
  public:
