@@ -307,7 +307,7 @@ ClipsAgentThread::clips_now()
 CLIPS::Values
 ClipsAgentThread::clips_get_clips_dirs()
 {
-  CLIPS::Values rv(cfg_clips_dirs_.size(), CLIPS::Value(""));
+  CLIPS::Values rv(cfg_clips_dirs_.size(), CLIPS::Value(std::string("")));
   for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
     rv[i] = cfg_clips_dirs_[i];
   }
