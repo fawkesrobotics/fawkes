@@ -173,7 +173,6 @@ class TabletopObjectsThread
   std::string cfg_result_frame_;
   uint cfg_centroid_max_age_;
   float cfg_centroid_max_distance_;
-  unsigned int cfg_centroid_id_min_age_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;

@@ -134,7 +134,6 @@ TabletopObjectsThread::init()
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
   cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
-  cfg_centroid_id_min_age_      = config->get_uint(CFG_PREFIX"centroid_id_min_age");
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -163,8 +162,6 @@ TabletopObjectsThread::init()
           blackboard->open_for_writing<Position3DInterface>(id.c_str());
         pos_ifs_[i] = iface;
         iface->set_rotation(rotation);
-        iface->set_visibility_history(-1*cfg_centroid_id_min_age_);
-        logger->log_debug(name(), "visibility: %d", iface->visibility_history());
         iface->write();
       }
     }
@@ -1079,11 +1076,7 @@ bool TabletopObjectsThread::next_id(unsigned int &id) {
     logger->log_debug(name(), "free_ids is empty");
     return false;
   }
-  unsigned int next_id = free_ids_.front();
-  if (pos_ifs_[next_id]->visibility_history() > -1*static_cast<int>(cfg_centroid_id_min_age_)) {
-    return false;
-  }
-  id = next_id;
+  id = free_ids_.front();
   free_ids_.pop_front();
   return true;
 }
@@ -1152,7 +1145,6 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
       for (int row = 0; row < assignment_size; row++) {
         if (row >= hp.num_rows) { // object has disappeared
           id = obj_ids.at(assignment[row]);
-          free_ids_.push_back(id);
           old_centroids_.push_back(OldCentroid(id, centroids_.at(id)));
           continue;
         }
@@ -1164,7 +1156,6 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
             if (pcl::distances::l2(new_centroids[row], it->getCentroid()) <= cfg_centroid_max_distance_) {
               id = it->getId();
               old_centroids_.erase(it);
-              free_ids_.remove_if([&id](const unsigned int &i) { return id == i; });
               assigned = true;
               break;
             }
@@ -1182,14 +1173,12 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
           // (then, the old centroid is assigned to the new one)
           if (pcl::distances::l2(centroids_[id], new_centroids[row]) > cfg_centroid_max_distance_) {
             // save the centroid because we don't use it now
-            free_ids_.push_back(id);
             old_centroids_.push_back(OldCentroid(id, centroids_[id]));
             continue;
           }
         }
         tmp_centroids[id] = new_centroids[row];
         // remove id from old_centroids_ because we don't want the same id twices
-        old_centroids_.remove_if([&id](const OldCentroid& centroid){ return centroid.getId() == id; });
         *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
 
@@ -1201,7 +1190,13 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
       // delete centroids which are older than cfg_centroid_max_age_
       old_centroids_.erase(
           std::remove_if(old_centroids_.begin(), old_centroids_.end(),
-              [&](const OldCentroid &centroid)->bool { return centroid.getAge() > cfg_centroid_max_age_; }
+              [&free_ids_, &cfg_centroid_max_age_](const OldCentroid &centroid)->bool {
+                if (centroid.getAge() > cfg_centroid_max_age_) {
+                  free_ids_.push_back(centroid.getId());
+                  return true;
+                }
+                return false;
+               }
           ),
           old_centroids_.end());
     } // !first_run_
