@@ -134,6 +134,7 @@ TabletopObjectsThread::init()
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
   cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
+  cfg_centroid_min_distance_ = config->get_float(CFG_PREFIX"centroid_min_distance");
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -1199,6 +1200,21 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
                }
           ),
           old_centroids_.end());
+
+      // delete old centroids which are too close to current centroids
+      old_centroids_.erase(
+          std::remove_if(old_centroids_.begin(), old_centroids_.end(),
+              [&](const OldCentroid &old)->bool {
+                for (CentroidMap::const_iterator it = tmp_centroids.begin(); it != tmp_centroids.end(); it++) {
+                  if (pcl::distances::l2(it->second, old.getCentroid()) < cfg_centroid_min_distance_) {
+                    logger->log_debug(name(), "remove old centroid %u; too close to %u", old.getId(), it->first);
+                    free_ids_.push_back(old.getId());
+                    return true;
+                  }
+                }
+                return false;
+          }),
+        old_centroids_.end());
     } // !first_run_
 
     centroids_ = tmp_centroids;

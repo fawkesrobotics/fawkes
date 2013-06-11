@@ -81,3 +81,6 @@ perception/tabletop-objects:
 
   # max distance an old centroid may have moved
   centroid_max_distance: 0.041
+
+  # min distance between two centroids, old centroids will be deleted if they are closer
+  centroid_min_distance: 0.01
