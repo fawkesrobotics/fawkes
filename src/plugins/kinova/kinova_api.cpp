@@ -37,6 +37,19 @@
 
 #define CMD_GET_CART_POS        104
 
+
+#define USB_CMD(ep,msg)         \
+  (libusb_interrupt_transfer(__lusb_devh, ep, msg.data, INTR_LENGTH, &transferred, 1000))
+
+#define USB_CMD_IN(msg)         (USB_CMD(EP_IN,msg))
+#define USB_CMD_OUT(msg)        (USB_CMD(EP_OUT,msg))
+
+#define USB_MSG(msg,pid,pquant,cmdid,cmdsize) { \
+  msg.header.IdPacket = pid;                    \
+  msg.header.PacketQuantity = pquant;           \
+  msg.header.CommandId = cmdid;                 \
+  msg.header.CommandSize = cmdsize;           }
+
 /* send data with little endianness
  *
  * HEADER  8 Bytes
@@ -165,11 +178,7 @@ int
 JacoArm::_get_cart_pos(position_cart_t &pos)
 {
   message_t msg;
-
-  msg.header.IdPacket = 1;
-  msg.header.PacketQuantity = 1;
-  msg.header.CommandId = CMD_GET_CART_POS;
-  msg.header.CommandSize = 8;
+  USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 8)
 
   int r = _cmd_out_in(msg, 36);
   if( r >= 0 )
@@ -183,9 +192,10 @@ int
 JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
 {
   int r, transferred;
+
   //printf("\n cmd_out_in send message: \n");
   //print_message(msg);
-  r = libusb_interrupt_transfer(__lusb_devh, EP_OUT, msg.data, INTR_LENGTH, &transferred, 1000);
+  r = USB_CMD(EP_OUT, msg);
   if (r < 0) {
     fprintf(stderr, "intr error %d\n", r);
     return r;
@@ -200,7 +210,7 @@ JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
 
   //printf("\n cmd_out_in send modified message: \n");
   //print_message(msg);
-  r = libusb_interrupt_transfer(__lusb_devh, EP_IN, msg.data, INTR_LENGTH, &transferred, 1000);
+  r = USB_CMD_IN(msg);
   if (r < 0) {
     fprintf(stderr, "intr error %d\n", r);
     return r;
