@@ -982,7 +982,7 @@ TabletopObjectsThread::loop()
   unsigned int object_count = 0;
 
   if (cloud_objs_->points.size() > 0) {
-    object_count = add_objects(cloud_objs_, tmp_clusters);
+    object_count = cluster_objects(cloud_objs_, tmp_clusters);
     if (object_count == 0) {
       logger->log_info(name(), "No clustered points found");
     }
@@ -1085,7 +1085,7 @@ bool TabletopObjectsThread::next_id(unsigned int &id) {
   free_ids_.pop_front();
   return true;
 }
-unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
+unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
   unsigned int object_count = 0;
   std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
   std::vector<pcl::PointIndices>::const_iterator it;
@@ -1207,6 +1207,7 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
                }
           ),
           old_centroids_.end());
+
 
       // delete old centroids which are too close to current centroids
       old_centroids_.erase(
