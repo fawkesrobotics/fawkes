@@ -36,6 +36,7 @@
 #define INTR_LENGTH	64
 
 #define CMD_GET_CART_POS        104
+#define CMD_GET_ANG_POS         105
 
 
 #define USB_CMD(ep,msg)         \
@@ -187,6 +188,19 @@ JacoArm::_get_cart_pos(position_cart_t &pos)
   return r;
 }
 
+int
+JacoArm::_get_ang_pos(position_ang_t &pos)
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 8)
+
+  int r = _cmd_out_in(msg, 36);
+  if( r >= 0 )
+    memcpy(&pos, msg.body, sizeof(pos));
+
+  return r;
+}
+
 /** Perform an outgoing and then ingoing command.*/
 int
 JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
@@ -253,6 +267,17 @@ JacoArm::get_cart_pos() {
   int r = _get_cart_pos(pos);
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get cartesian position! libusb error code: %i.", r);
+  }
+
+  return pos;
+}
+
+position_ang_t
+JacoArm::get_ang_pos() {
+  position_ang_t pos;
+  int r = _get_ang_pos(pos);
+  if( r < 0 ) {
+    throw fawkes::Exception("Kinova_API: Could not get angular position! libusb error code: %i.", r);
   }
 
   return pos;

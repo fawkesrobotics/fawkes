@@ -81,6 +81,7 @@ class JacoArm
 
    int _cmd_out_in(message_t &msg, int cmd_size_in);
    int _get_cart_pos(position_cart_t &pos);
+   int _get_ang_pos(position_ang_t &pos);
 };
 
 } // end of namespace fawkes
