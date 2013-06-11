@@ -42,10 +42,10 @@ typedef struct position_ang_struct {
 } position_ang_t;
 
 typedef struct message_header_struct {
-  int IdPacket;
-  int PacketQuantity;
-  int CommandId;
-  int CommandSize;
+  short IdPacket;
+  short PacketQuantity;
+  short CommandId;
+  short CommandSize;
 } message_header_t;
 
 typedef struct message_struct {
@@ -67,6 +67,9 @@ class JacoArm
 
    void print_message(message_t &msg);
 
+   position_cart_t get_cart_pos();
+   position_ang_t get_ang_pos();
+
  private:
    static libusb_context  *__lusb_ctx;
 
@@ -77,7 +80,7 @@ class JacoArm
    void _claim_interface();
 
    int _cmd_out_in(message_t &msg, int cmd_size_in);
-   position_cart_t _get_cart_pos();
+   int _get_cart_pos(position_cart_t &pos);
 };
 
 } // end of namespace fawkes

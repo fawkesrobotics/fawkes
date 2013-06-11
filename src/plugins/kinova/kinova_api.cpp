@@ -161,25 +161,21 @@ JacoArm::_claim_interface()
   } else {printf("DONE \n");}
 }
 
-position_cart_t
-JacoArm::_get_cart_pos()
+int
+JacoArm::_get_cart_pos(position_cart_t &pos)
 {
   message_t msg;
-  position_cart_t pos;
 
   msg.header.IdPacket = 1;
   msg.header.PacketQuantity = 1;
   msg.header.CommandId = CMD_GET_CART_POS;
   msg.header.CommandSize = 8;
 
-  int r = _cmd_out_in(msg, 40);
-  if( r < 0 ) {
-    fprintf(stderr, "some error occured %d\n", r);
-    return pos;
-  }
+  int r = _cmd_out_in(msg, 36);
+  if( r >= 0 )
+    memcpy(&pos, msg.body, sizeof(pos));
 
-  memcpy(&pos, msg.body, sizeof(pos));
-  return pos;
+  return r;
 }
 
 /** Perform an outgoing and then ingoing command.*/
@@ -187,7 +183,8 @@ int
 JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
 {
   int r, transferred;
-
+  //printf("\n cmd_out_in send message: \n");
+  //print_message(msg);
   r = libusb_interrupt_transfer(__lusb_devh, EP_OUT, msg.data, INTR_LENGTH, &transferred, 1000);
   if (r < 0) {
     fprintf(stderr, "intr error %d\n", r);
@@ -197,10 +194,12 @@ JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
     fprintf(stderr, "short write (%d)\n", r);
     return -1;
   }
-  printf("sent interrupt \n");
+  //printf("sent interrupt, transferred %i \n", transferred);
 
   msg.header.CommandSize = cmd_size_in;
 
+  //printf("\n cmd_out_in send modified message: \n");
+  //print_message(msg);
   r = libusb_interrupt_transfer(__lusb_devh, EP_IN, msg.data, INTR_LENGTH, &transferred, 1000);
   if (r < 0) {
     fprintf(stderr, "intr error %d\n", r);
@@ -211,10 +210,16 @@ JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
     return -1;
   }
 
-  printf("sent interrupt %04x\n", *((uint16_t *) msg.data));
+  //printf("sent interrupt %04x, transfered %i \n", *((uint16_t *) msg.data), transferred);
 
   return 1;
 }
+
+
+
+
+
+
 
 void
 JacoArm::print_message(message_t &msg)
@@ -230,6 +235,16 @@ JacoArm::print_message(message_t &msg)
     }
     printf("\n");
   }
+}
 
+position_cart_t
+JacoArm::get_cart_pos() {
+  position_cart_t pos;
+  int r = _get_cart_pos(pos);
+  if( r < 0 ) {
+    throw fawkes::Exception("Kinova_API: Could not get cartesian position! libusb error code: %i.", r);
+  }
+
+  return pos;
 }
 } // end of namespace fawkes
