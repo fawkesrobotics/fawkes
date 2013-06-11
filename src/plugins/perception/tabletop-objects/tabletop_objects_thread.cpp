@@ -233,6 +233,9 @@ TabletopObjectsThread::init()
   ttc_table_to_output_    = tt_->add_class("Table to Output");
   ttc_cluster_objects_    = tt_->add_class("Object Clustering");
   ttc_visualization_      = tt_->add_class("Visualization");
+  ttc_hungarian_          = tt_->add_class("Hungarian Method (centroids)");
+  ttc_old_centroids_      = tt_->add_class("Old Centroid Removal");
+  ttc_obj_extraction_      = tt_->add_class("Object Extraction");
 #endif
 }
 
@@ -1053,6 +1056,7 @@ TabletopObjectsThread::loop()
 
 std::vector<pcl::PointIndices>
 TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
+  TIMETRACK_START(ttc_obj_extraction_);
   // Creating the KdTree object for the search method of the extraction
        pcl::search::KdTree<PointType>::Ptr
        kdtree_cl(new pcl::search::KdTree<PointType>());
@@ -1068,7 +1072,7 @@ TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
        ec.extract(cluster_indices);
 
        //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
-
+       TIMETRACK_END(ttc_obj_extraction_);
        return cluster_indices;
 }
 
@@ -1115,6 +1119,7 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
       }
     }
     else { // !first_run_
+      TIMETRACK_START(ttc_hungarian_);
       hungarian_problem_t hp;
       // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
       std::vector<unsigned int> obj_ids(centroids_.size());
@@ -1183,6 +1188,8 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
         *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
 
+      TIMETRACK_INTER(ttc_hungarian_, ttc_old_centroids_)
+
       // age all old centroids
       for (OldCentroidVector::iterator it = old_centroids_.begin();
           it != old_centroids_.end(); it++) {
@@ -1215,6 +1222,8 @@ unsigned int TabletopObjectsThread::add_objects(CloudConstPtr input_cloud, Color
                 return false;
           }),
         old_centroids_.end());
+
+      TIMETRACK_END(ttc_old_centroids_);
     } // !first_run_
 
     centroids_ = tmp_centroids;
