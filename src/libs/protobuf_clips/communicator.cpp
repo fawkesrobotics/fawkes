@@ -1006,8 +1006,6 @@ ClipsProtobufCommunicator::handle_server_client_connected(ProtobufStreamServer::
   fawkes::MutexLocker lock(&clips_mutex_);
   clips_->assert_fact_f("(protobuf-server-client-connected %li %s %u)", client_id,
 			endpoint.address().to_string().c_str(), endpoint.port());
-  clips_->refresh_agenda();
-  clips_->run();
 }
 
 
@@ -1029,8 +1027,6 @@ ClipsProtobufCommunicator::handle_server_client_disconnected(ProtobufStreamServe
   if (client_id >= 0) {
     fawkes::MutexLocker lock(&clips_mutex_);
     clips_->assert_fact_f("(protobuf-server-client-disconnected %li)", client_id);
-    clips_->refresh_agenda();
-    clips_->run();
   }
 }
 
@@ -1133,8 +1129,6 @@ ClipsProtobufCommunicator::handle_client_connected(long int client_id)
 {
   fawkes::MutexLocker lock(&clips_mutex_);
   clips_->assert_fact_f("(protobuf-client-connected %li)", client_id);
-  clips_->refresh_agenda();
-  clips_->run();
 }
 
 void
@@ -1143,8 +1137,6 @@ ClipsProtobufCommunicator::handle_client_disconnected(long int client_id,
 {
   fawkes::MutexLocker lock(&clips_mutex_);
   clips_->assert_fact_f("(protobuf-client-disconnected %li)", client_id);
-  clips_->refresh_agenda();
-  clips_->run();
 }
 
 void
