@@ -48,6 +48,7 @@ JacoInterface::JacoInterface() : Interface()
   data      = (JacoInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(IFT_BOOL, "connected", 1, &data->connected);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -60,7 +61,7 @@ JacoInterface::JacoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  unsigned char tmp_hash[] = {0x53, 0x4e, 0xe3, 0x1c, 0x76, 0x8c, 0x46, 0xe9, 0x76, 0x93, 0x97, 0xeb, 0x6b, 0xc6, 0xc2, 0x53};
+  unsigned char tmp_hash[] = {0x3, 0x15, 0x3d, 0x5a, 0xc0, 0xce, 0xc4, 0x41, 0xd6, 0x68, 0x32, 0xe1, 0x86, 0x5b, 0xce, 0x90};
   set_hash(tmp_hash);
 }
 
@@ -70,6 +71,37 @@ JacoInterface::~JacoInterface()
   free(data_ptr);
 }
 /* Methods */
+/** Get connected value.
+ * Is JacoArm connected/ready?
+ * @return connected value
+ */
+bool
+JacoInterface::is_connected() const
+{
+  return data->connected;
+}
+
+/** Get maximum length of connected value.
+ * @return length of connected value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::maxlenof_connected() const
+{
+  return 1;
+}
+
+/** Set connected value.
+ * Is JacoArm connected/ready?
+ * @param new_connected new connected value
+ */
+void
+JacoInterface::set_connected(const bool new_connected)
+{
+  data->connected = new_connected;
+  data_changed = true;
+}
+
 /** Get x value.
  * X-Coordinate of tool translation.
  * @return x value

@@ -4,6 +4,9 @@ namespace fawkes {
 class JacoInterface : public Interface
 {
 
+  bool is_connected();
+  void set_connected(const bool new_connected);
+  int maxlenof_connected() const;
   float x();
   void set_x(const float new_x);
   int maxlenof_x() const;

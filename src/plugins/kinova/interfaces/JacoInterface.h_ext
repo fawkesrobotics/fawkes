@@ -44,6 +44,7 @@ class JacoInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    bool connected; /**< Is JacoArm connected/ready? */
     float x; /**< X-Coordinate of tool translation. */
     float y; /**< Y-Coordinate op tool translation. */
     float z; /**< Z-Coordinate of tool translation. */
@@ -72,6 +73,9 @@ class JacoInterface : public Interface
 
  public:
   /* Methods */
+  bool is_connected() const;
+  void set_connected(const bool new_connected);
+  size_t maxlenof_connected() const;
   float x() const;
   void set_x(const float new_x);
   size_t maxlenof_x() const;

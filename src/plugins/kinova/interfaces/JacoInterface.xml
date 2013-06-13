@@ -6,6 +6,8 @@
       Interface providing access to a Kinova Jaco arm.
     </comment>
 
+    <field type="bool" name="connected">Is JacoArm connected/ready?</field>
+
     <field type="float" name="x">X-Coordinate of tool translation.</field>
     <field type="float" name="y">Y-Coordinate op tool translation.</field>
     <field type="float" name="z">Z-Coordinate of tool translation.</field>
