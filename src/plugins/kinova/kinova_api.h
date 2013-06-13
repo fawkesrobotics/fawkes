@@ -47,9 +47,9 @@ class JacoArm
   void stop_api_ctrl();
 
   void set_target(basic_traj_t &traj);
-  //void set_target_cart(float x, float y, float z, float euler_1, float euler_2, float euler_3, float finger_1, float finger_2, float finger_3);
+  void set_target_cart(float x, float y, float z, float euler_1, float euler_2, float euler_3, float finger_1, float finger_2, float finger_3);
   void set_target_cart(float coord[], float fingers[3]);
-  //void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float finger_1, float finger_2, float finger_3);
+  void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float finger_1, float finger_2, float finger_3);
   void set_target_ang(float joints[], float fingers[3]);
 
  private:
