@@ -27,7 +27,7 @@
 
 using namespace fawkes;
 
-/** @class InfoThread "info_thread.h"
+/** @class KinovaInfoThread "info_thread.h"
  * Jaco Arm information thread.
  * This thread basically provides all informationen to interfaces.
  *
@@ -37,8 +37,8 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-InfoThread::InfoThread()
-  : Thread("InfoThread", Thread::OPMODE_WAITFORWAKEUP),
+KinovaInfoThread::KinovaInfoThread()
+  : Thread("KinovaInfoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __arm = NULL;
@@ -47,12 +47,12 @@ InfoThread::InfoThread()
 
 
 /** Destructor. */
-InfoThread::~InfoThread()
+KinovaInfoThread::~KinovaInfoThread()
 {
 }
 
 void
-InfoThread::init()
+KinovaInfoThread::init()
 {
   try {
     __if_jaco = blackboard->open_for_writing<JacoInterface>("JacoArm");
@@ -62,7 +62,7 @@ InfoThread::init()
 }
 
 void
-InfoThread::finalize()
+KinovaInfoThread::finalize()
 {
   try {
     blackboard->close(__if_jaco);
@@ -72,17 +72,17 @@ InfoThread::finalize()
 }
 
 void
-InfoThread::register_arm(JacoArm *arm) {
+KinovaInfoThread::register_arm(JacoArm *arm) {
   __arm = arm;
 }
 
 void
-InfoThread::unregister_arm() {
+KinovaInfoThread::unregister_arm() {
   __arm = NULL;
 }
 
 void
-InfoThread::loop()
+KinovaInfoThread::loop()
 {
   if(__arm != NULL) {
     __if_jaco->set_connected(true);

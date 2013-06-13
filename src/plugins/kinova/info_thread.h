@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_INFO_THREAD_H_
-#define __PLUGINS_KINOVA_INFO_THREAD_H_
+#ifndef __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
+#define __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
 
 #include "types.h"
 
@@ -38,7 +38,7 @@ namespace fawkes {
   class JacoInterface;
 }
 
-class InfoThread
+class KinovaInfoThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -46,8 +46,8 @@ class InfoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  InfoThread();
-  virtual ~InfoThread();
+  KinovaInfoThread();
+  virtual ~KinovaInfoThread();
 
   virtual void init();
   virtual void finalize();
