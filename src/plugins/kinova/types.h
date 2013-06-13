@@ -31,6 +31,20 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+typedef enum position_type_enum {
+  POSITION_NO_MOVEMENT  = 0, // No Movements
+  POSITION_CARTESIAN    = 1, // Cartesian Position Control
+  POSITION_ANGULAR      = 2, // Position Angular Control
+  SPEED_CARTESIAN       = 7, // Cartesian speed control
+  SPEED_ANGULAR         = 8, // Cartesian Angular control
+  TIME_DELA             = 12 // Insert Delay
+} position_type_t;
+
+typedef enum hand_mode_enum {
+  NO_MOVEMENT   = 0, // Finger movements disabled
+  MODE_POSITION = 1, // Finger position control
+  MODE_SPEED    = 2  // Finger Speed Control
+} hand_mode_t;
 
 typedef struct position_cart_struct {
   float Position[3];
@@ -42,6 +56,14 @@ typedef struct position_ang_struct {
   float Joints[6];
   float FingerPosition[3];
 } position_ang_t;
+
+typedef struct basic_traj_struct {
+  float target[6];
+  float fingers[3];
+  float time_delay;
+  hand_mode_t hand_mode;
+  position_type_t pos_type;
+} basic_traj_t;
 
 typedef struct message_header_struct {
   short IdPacket;
@@ -59,6 +81,7 @@ typedef struct message_struct {
     };
   };
 } message_t;
+
 
 } // end namespace firevision
 
