@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_KINOVA_JACO_THREAD_H_
 #define __PLUGINS_KINOVA_JACO_THREAD_H_
 
+#include "info_thread.h"
+
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -33,10 +35,9 @@
 
 namespace fawkes {
   class JacoArm;
-  //class KinovaJacoInterface;
 }
 
-class JacoThread
+class KinovaJacoThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -44,8 +45,8 @@ class JacoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoThread();
-  virtual ~JacoThread();
+  KinovaJacoThread(KinovaInfoThread *info_thread);
+  virtual ~KinovaJacoThread();
 
   virtual void init();
   virtual void finalize();
@@ -55,9 +56,9 @@ class JacoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-   fawkes::JacoArm *__arm;
+  fawkes::JacoArm *__arm;
 
-  //fawkes::KinovaJacoInterface   *__if_jaco;
+  KinovaInfoThread   *__info_thread;
 };
 
 

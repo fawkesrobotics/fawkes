@@ -39,8 +39,9 @@ using namespace fawkes;
 KinovaPlugin::KinovaPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new KinovaInfoThread());
-  thread_list.push_back(new JacoThread());
+  KinovaInfoThread *info_thread = new KinovaInfoThread();
+  thread_list.push_back(info_thread);
+  thread_list.push_back(new KinovaJacoThread(info_thread));
 }
 
 

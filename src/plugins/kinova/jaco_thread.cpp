@@ -25,7 +25,7 @@
 
 using namespace fawkes;
 
-/** @class JacoThread "jaco_thread.h"
+/** @class KinovaJacoThread "jaco_thread.h"
  * Jaco Arm control thread.
  *
  * @author Bahram Maleki-Fard
@@ -34,34 +34,42 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoThread::JacoThread()
-  : Thread("JacoThread", Thread::OPMODE_WAITFORWAKEUP),
+KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread)
+  : Thread("KinovaJacoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
   __arm = NULL;
+  __info_thread = info_thread;
 }
 
 
 /** Destructor. */
-JacoThread::~JacoThread()
+KinovaJacoThread::~KinovaJacoThread()
 {
 }
 
 void
-JacoThread::init()
+KinovaJacoThread::init()
 {
-  __arm = new JacoArm();
+  try {
+    // create new JacoArm object (connects to arm via libusb)
+    __arm = new JacoArm();
 
-  //__arm->_get_device_handle();
+    // register arm in KinovaInfoThread
+    __info_thread->register_arm(__arm);
+
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
+  }
 }
 
 void
-JacoThread::finalize()
+KinovaJacoThread::finalize()
 {
   delete __arm;
 }
 
 void
-JacoThread::loop()
+KinovaJacoThread::loop()
 {
 }
