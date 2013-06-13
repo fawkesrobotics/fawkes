@@ -37,7 +37,7 @@ typedef enum position_type_enum {
   POSITION_ANGULAR      = 2, // Position Angular Control
   SPEED_CARTESIAN       = 7, // Cartesian speed control
   SPEED_ANGULAR         = 8, // Cartesian Angular control
-  TIME_DELA             = 12 // Insert Delay
+  TIME_DELAY            = 12 // Insert Delay
 } position_type_t;
 
 typedef enum hand_mode_enum {

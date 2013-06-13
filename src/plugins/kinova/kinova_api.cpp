@@ -39,6 +39,7 @@
 #define CMD_GET_ANG_POS         105
 #define CMD_START_API_CTRL      302
 #define CMD_STOP_API_CTRL       303
+#define CMD_SEND_BASIC_TRAJ     308
 
 #define USB_CMD(ep,msg)         \
   (libusb_interrupt_transfer(__lusb_devh, ep, msg.data, INTR_LENGTH, &transferred, 1000))
@@ -267,6 +268,23 @@ JacoArm::_get_ang_pos(position_ang_t &pos)
   return r;
 }
 
+int
+JacoArm::_send_basic_traj(basic_traj_t &traj)
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_SEND_BASIC_TRAJ, sizeof(traj))
+  memcpy(msg.data, &traj, sizeof(traj));
+
+  int r, transferred;
+  r = USB_CMD(EP_OUT, msg);
+  if( r < 0 ) {
+    fprintf(stderr, "intr error %d\n", r);
+  } else if( transferred < INTR_LENGTH ) {
+    fprintf(stderr, "short write (%d)\n", r);
+    r = -1;
+  }
+  return r;
+}
 
 
 /* /================================================\
@@ -327,4 +345,40 @@ JacoArm::stop_api_ctrl()
     throw fawkes::Exception("Kinova_API: Could not stop API control! libusb error code: %i.", r);
   }
 }
+
+void
+JacoArm::set_target(basic_traj_t &traj)
+{
+  int r = _send_basic_traj(traj);
+  if( r < 0 ) {
+    throw fawkes::Exception("Kinova_API: Could not send basic trajectory! libusb error code: %i.", r);
+  }
+}
+
+void
+JacoArm::set_target_cart(float coord[], float fingers[])
+{
+  basic_traj_t traj;
+  memcpy(traj.target, coord, 6);
+  memcpy(traj.fingers, fingers, 3);
+  traj.time_delay = 0;
+  traj.hand_mode = MODE_POSITION;
+  traj.pos_type = POSITION_CARTESIAN;
+
+  set_target(traj);
+}
+
+void
+JacoArm::set_target_ang(float joints[], float fingers[])
+{
+  basic_traj_t traj;
+  memcpy(traj.target, joints, 6);
+  memcpy(traj.fingers, fingers, 3);
+  traj.time_delay = 0;
+  traj.hand_mode = MODE_POSITION;
+  traj.pos_type = POSITION_ANGULAR;
+
+  set_target(traj);
+}
+
 } // end of namespace fawkes
