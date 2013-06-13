@@ -40,8 +40,8 @@ class JacoArm
 
   void print_message(message_t &msg);
 
-  position_cart_t get_cart_pos();
-  position_ang_t get_ang_pos();
+  position_t get_cart_pos();
+  position_t get_ang_pos();
 
   void start_api_ctrl();
   void stop_api_ctrl();
@@ -66,8 +66,8 @@ class JacoArm
   int _cmd_out(short cmd);
 
   // Jaco specific commands
-  int _get_cart_pos(position_cart_t &pos);
-  int _get_ang_pos(position_ang_t &pos);
+  int _get_cart_pos(position_t &pos);
+  int _get_ang_pos(position_t &pos);
   int _send_basic_traj(basic_traj_t &traj);
 };
 

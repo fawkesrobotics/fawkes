@@ -243,12 +243,12 @@ JacoArm::_cmd_out(short cmd)
  *   Jaco specific commands (private)
  * \================================================/*/
 int
-JacoArm::_get_cart_pos(position_cart_t &pos)
+JacoArm::_get_cart_pos(position_t &pos)
 {
   message_t msg;
   USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 8)
 
-  int r = _cmd_out_in(msg, 36);
+  int r = _cmd_out_in(msg, sizeof(pos));
   if( r >= 0 )
     memcpy(&pos, msg.body, sizeof(pos));
 
@@ -256,12 +256,12 @@ JacoArm::_get_cart_pos(position_cart_t &pos)
 }
 
 int
-JacoArm::_get_ang_pos(position_ang_t &pos)
+JacoArm::_get_ang_pos(position_t &pos)
 {
   message_t msg;
   USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 8)
 
-  int r = _cmd_out_in(msg, 36);
+  int r = _cmd_out_in(msg, sizeof(pos));
   if( r >= 0 )
     memcpy(&pos, msg.body, sizeof(pos));
 
@@ -306,9 +306,9 @@ JacoArm::print_message(message_t &msg)
   }
 }
 
-position_cart_t
+position_t
 JacoArm::get_cart_pos() {
-  position_cart_t pos;
+  position_t pos;
   int r = _get_cart_pos(pos);
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get cartesian position! libusb error code: %i.", r);
@@ -317,9 +317,9 @@ JacoArm::get_cart_pos() {
   return pos;
 }
 
-position_ang_t
+position_t
 JacoArm::get_ang_pos() {
-  position_ang_t pos;
+  position_t pos;
   int r = _get_ang_pos(pos);
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get angular position! libusb error code: %i.", r);
@@ -359,8 +359,8 @@ void
 JacoArm::set_target_cart(float coord[], float fingers[])
 {
   basic_traj_t traj;
-  memcpy(traj.target, coord, 6);
-  memcpy(traj.fingers, fingers, 3);
+  memcpy(&traj.target, coord, 6);
+  memcpy(traj.target.FingerPosition, fingers, 3);
   traj.time_delay = 0;
   traj.hand_mode = MODE_POSITION;
   traj.pos_type = POSITION_CARTESIAN;
@@ -372,8 +372,8 @@ void
 JacoArm::set_target_ang(float joints[], float fingers[])
 {
   basic_traj_t traj;
-  memcpy(traj.target, joints, 6);
-  memcpy(traj.fingers, fingers, 3);
+  memcpy(&traj.target, joints, 6);
+  memcpy(traj.target.FingerPosition, fingers, 3);
   traj.time_delay = 0;
   traj.hand_mode = MODE_POSITION;
   traj.pos_type = POSITION_ANGULAR;
@@ -385,15 +385,15 @@ void
 JacoArm::set_target_cart(float x, float y, float z, float euler_1, float euler_2, float euler_3, float finger_1, float finger_2, float finger_3)
 {
   basic_traj_t traj;
-  traj.target[0] = x;
-  traj.target[1] = y;
-  traj.target[2] = z;
-  traj.target[3] = euler_1;
-  traj.target[4] = euler_2;
-  traj.target[5] = euler_3;
-  traj.fingers[0] = finger_1;
-  traj.fingers[1] = finger_2;
-  traj.fingers[2] = finger_3;
+  traj.target.Position[0] = x;
+  traj.target.Position[1] = y;
+  traj.target.Position[2] = z;
+  traj.target.Rotation[0] = euler_1;
+  traj.target.Rotation[1] = euler_2;
+  traj.target.Rotation[2] = euler_3;
+  traj.target.FingerPosition[0] = finger_1;
+  traj.target.FingerPosition[1] = finger_2;
+  traj.target.FingerPosition[2] = finger_3;
   traj.time_delay = 0;
   traj.hand_mode = MODE_POSITION;
   traj.pos_type = POSITION_CARTESIAN;
@@ -405,15 +405,15 @@ void
 JacoArm::set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float finger_1, float finger_2, float finger_3)
 {
   basic_traj_t traj;
-  traj.target[0] = j1;
-  traj.target[1] = j2;
-  traj.target[2] = j3;
-  traj.target[3] = j4;
-  traj.target[4] = j5;
-  traj.target[5] = j6;
-  traj.fingers[0] = finger_1;
-  traj.fingers[1] = finger_2;
-  traj.fingers[2] = finger_3;
+  traj.target.Joints[0] = j1;
+  traj.target.Joints[1] = j2;
+  traj.target.Joints[2] = j3;
+  traj.target.Joints[3] = j4;
+  traj.target.Joints[4] = j5;
+  traj.target.Joints[5] = j6;
+  traj.target.FingerPosition[0] = finger_1;
+  traj.target.FingerPosition[1] = finger_2;
+  traj.target.FingerPosition[2] = finger_3;
   traj.time_delay = 0;
   traj.hand_mode = MODE_POSITION;
   traj.pos_type = POSITION_ANGULAR;

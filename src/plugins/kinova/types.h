@@ -46,20 +46,20 @@ typedef enum hand_mode_enum {
   MODE_SPEED    = 2  // Finger Speed Control
 } hand_mode_t;
 
-typedef struct position_cart_struct {
-  float Position[3];
-  float Rotation[3];
-  float FingerPosition[3];
-} position_cart_t;
 
-typedef struct position_ang_struct {
-  float Joints[6];
+typedef struct position_struct {
+  union {
+    float Joints[6];
+    struct {
+      float Position[3];
+      float Rotation[3];
+    };
+  };
   float FingerPosition[3];
-} position_ang_t;
+} position_t;
 
 typedef struct basic_traj_struct {
-  float target[6];
-  float fingers[3];
+  position_t target;
   float time_delay;
   hand_mode_t hand_mode;
   position_type_t pos_type;
