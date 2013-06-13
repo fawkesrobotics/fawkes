@@ -6,19 +6,19 @@
       Interface providing access to a Kinova Jaco arm.
     </comment>
 
-    <field type="float" name="x">X-Coordinate for tool translation.</field>
-    <field type="float" name="y">Y-Coordinate for tool translation.</field>
-    <field type="float" name="z">Z-Coordinate for tool translation.</field>
+    <field type="float" name="x">X-Coordinate of tool translation.</field>
+    <field type="float" name="y">Y-Coordinate op tool translation.</field>
+    <field type="float" name="z">Z-Coordinate of tool translation.</field>
 
-    <field type="float" name="euler1">1st Euler angle tool rotation.</field>
-    <field type="float" name="euler2">2nd Euler angle tool rotation.</field>
-    <field type="float" name="euler3">3d Euler angle rotation.</field>
+    <field type="float" name="euler1">1st Euler angle of tool rotation.</field>
+    <field type="float" name="euler2">2nd Euler angle of tool rotation.</field>
+    <field type="float" name="euler3">3rd Euler angle of tool rotation.</field>
 
-    <field type="float" length="6" name="angles">Angle values of motors</field>
+    <field type="float" length="6" name="joints">Angle values of joints</field>
 
-    <field type="float" name="finger1">Angular value for finger 1.</field>
-    <field type="float" name="finger2">Angular value for finger 2.</field>
-    <field type="float" name="finger3">Angular value for finger 3.</field>
+    <field type="float" name="finger1">Angular value of finger 1.</field>
+    <field type="float" name="finger2">Angular value of finger 2.</field>
+    <field type="float" name="finger3">Angular value of finger 3.</field>
 
     <field type="uint32" name="msgid">The ID of the message that is currently being
       processed, or 0 if no message is being processed.</field>

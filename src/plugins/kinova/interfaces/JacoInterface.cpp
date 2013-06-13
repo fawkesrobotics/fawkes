@@ -54,13 +54,13 @@ JacoInterface::JacoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "euler1", 1, &data->euler1);
   add_fieldinfo(IFT_FLOAT, "euler2", 1, &data->euler2);
   add_fieldinfo(IFT_FLOAT, "euler3", 1, &data->euler3);
-  add_fieldinfo(IFT_FLOAT, "angles", 6, &data->angles);
+  add_fieldinfo(IFT_FLOAT, "joints", 6, &data->joints);
   add_fieldinfo(IFT_FLOAT, "finger1", 1, &data->finger1);
   add_fieldinfo(IFT_FLOAT, "finger2", 1, &data->finger2);
   add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  unsigned char tmp_hash[] = {0xfe, 0xd0, 0x43, 0xc3, 0x87, 0xda, 0x4, 0xdf, 0x47, 0x6a, 0xbf, 0x1e, 0x55, 0xed, 0x2c, 0x99};
+  unsigned char tmp_hash[] = {0x53, 0x4e, 0xe3, 0x1c, 0x76, 0x8c, 0x46, 0xe9, 0x76, 0x93, 0x97, 0xeb, 0x6b, 0xc6, 0xc2, 0x53};
   set_hash(tmp_hash);
 }
 
@@ -71,7 +71,7 @@ JacoInterface::~JacoInterface()
 }
 /* Methods */
 /** Get x value.
- * X-Coordinate for tool translation.
+ * X-Coordinate of tool translation.
  * @return x value
  */
 float
@@ -91,7 +91,7 @@ JacoInterface::maxlenof_x() const
 }
 
 /** Set x value.
- * X-Coordinate for tool translation.
+ * X-Coordinate of tool translation.
  * @param new_x new x value
  */
 void
@@ -102,7 +102,7 @@ JacoInterface::set_x(const float new_x)
 }
 
 /** Get y value.
- * Y-Coordinate for tool translation.
+ * Y-Coordinate op tool translation.
  * @return y value
  */
 float
@@ -122,7 +122,7 @@ JacoInterface::maxlenof_y() const
 }
 
 /** Set y value.
- * Y-Coordinate for tool translation.
+ * Y-Coordinate op tool translation.
  * @param new_y new y value
  */
 void
@@ -133,7 +133,7 @@ JacoInterface::set_y(const float new_y)
 }
 
 /** Get z value.
- * Z-Coordinate for tool translation.
+ * Z-Coordinate of tool translation.
  * @return z value
  */
 float
@@ -153,7 +153,7 @@ JacoInterface::maxlenof_z() const
 }
 
 /** Set z value.
- * Z-Coordinate for tool translation.
+ * Z-Coordinate of tool translation.
  * @param new_z new z value
  */
 void
@@ -164,7 +164,7 @@ JacoInterface::set_z(const float new_z)
 }
 
 /** Get euler1 value.
- * 1st Euler angle tool rotation.
+ * 1st Euler angle of tool rotation.
  * @return euler1 value
  */
 float
@@ -184,7 +184,7 @@ JacoInterface::maxlenof_euler1() const
 }
 
 /** Set euler1 value.
- * 1st Euler angle tool rotation.
+ * 1st Euler angle of tool rotation.
  * @param new_euler1 new euler1 value
  */
 void
@@ -195,7 +195,7 @@ JacoInterface::set_euler1(const float new_euler1)
 }
 
 /** Get euler2 value.
- * 2nd Euler angle tool rotation.
+ * 2nd Euler angle of tool rotation.
  * @return euler2 value
  */
 float
@@ -215,7 +215,7 @@ JacoInterface::maxlenof_euler2() const
 }
 
 /** Set euler2 value.
- * 2nd Euler angle tool rotation.
+ * 2nd Euler angle of tool rotation.
  * @param new_euler2 new euler2 value
  */
 void
@@ -226,7 +226,7 @@ JacoInterface::set_euler2(const float new_euler2)
 }
 
 /** Get euler3 value.
- * 3d Euler angle rotation.
+ * 3rd Euler angle of tool rotation.
  * @return euler3 value
  */
 float
@@ -246,7 +246,7 @@ JacoInterface::maxlenof_euler3() const
 }
 
 /** Set euler3 value.
- * 3d Euler angle rotation.
+ * 3rd Euler angle of tool rotation.
  * @param new_euler3 new euler3 value
  */
 void
@@ -256,68 +256,68 @@ JacoInterface::set_euler3(const float new_euler3)
   data_changed = true;
 }
 
-/** Get angles value.
- * Angle values of motors
- * @return angles value
+/** Get joints value.
+ * Angle values of joints
+ * @return joints value
  */
 float *
-JacoInterface::angles() const
+JacoInterface::joints() const
 {
-  return data->angles;
+  return data->joints;
 }
 
-/** Get angles value at given index.
- * Angle values of motors
+/** Get joints value at given index.
+ * Angle values of joints
  * @param index index of value
- * @return angles value
+ * @return joints value
  * @exception Exception thrown if index is out of bounds
  */
 float
-JacoInterface::angles(unsigned int index) const
+JacoInterface::joints(unsigned int index) const
 {
   if (index > 6) {
     throw Exception("Index value %u out of bounds (0..6)", index);
   }
-  return data->angles[index];
+  return data->joints[index];
 }
 
-/** Get maximum length of angles value.
- * @return length of angles value, can be length of the array or number of 
+/** Get maximum length of joints value.
+ * @return length of joints value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-JacoInterface::maxlenof_angles() const
+JacoInterface::maxlenof_joints() const
 {
   return 6;
 }
 
-/** Set angles value.
- * Angle values of motors
- * @param new_angles new angles value
+/** Set joints value.
+ * Angle values of joints
+ * @param new_joints new joints value
  */
 void
-JacoInterface::set_angles(const float * new_angles)
+JacoInterface::set_joints(const float * new_joints)
 {
-  memcpy(data->angles, new_angles, sizeof(float) * 6);
+  memcpy(data->joints, new_joints, sizeof(float) * 6);
   data_changed = true;
 }
 
-/** Set angles value at given index.
- * Angle values of motors
- * @param new_angles new angles value
+/** Set joints value at given index.
+ * Angle values of joints
+ * @param new_joints new joints value
  * @param index index for of the value
  */
 void
-JacoInterface::set_angles(unsigned int index, const float new_angles)
+JacoInterface::set_joints(unsigned int index, const float new_joints)
 {
   if (index > 6) {
     throw Exception("Index value %u out of bounds (0..6)", index);
   }
-  data->angles[index] = new_angles;
+  data->joints[index] = new_joints;
   data_changed = true;
 }
 /** Get finger1 value.
- * Angular value for finger 1.
+ * Angular value of finger 1.
  * @return finger1 value
  */
 float
@@ -337,7 +337,7 @@ JacoInterface::maxlenof_finger1() const
 }
 
 /** Set finger1 value.
- * Angular value for finger 1.
+ * Angular value of finger 1.
  * @param new_finger1 new finger1 value
  */
 void
@@ -348,7 +348,7 @@ JacoInterface::set_finger1(const float new_finger1)
 }
 
 /** Get finger2 value.
- * Angular value for finger 2.
+ * Angular value of finger 2.
  * @return finger2 value
  */
 float
@@ -368,7 +368,7 @@ JacoInterface::maxlenof_finger2() const
 }
 
 /** Set finger2 value.
- * Angular value for finger 2.
+ * Angular value of finger 2.
  * @param new_finger2 new finger2 value
  */
 void
@@ -379,7 +379,7 @@ JacoInterface::set_finger2(const float new_finger2)
 }
 
 /** Get finger3 value.
- * Angular value for finger 3.
+ * Angular value of finger 3.
  * @return finger3 value
  */
 float
@@ -399,7 +399,7 @@ JacoInterface::maxlenof_finger3() const
 }
 
 /** Set finger3 value.
- * Angular value for finger 3.
+ * Angular value of finger 3.
  * @param new_finger3 new finger3 value
  */
 void

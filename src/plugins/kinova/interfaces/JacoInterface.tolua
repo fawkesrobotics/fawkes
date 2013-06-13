@@ -22,9 +22,9 @@ class JacoInterface : public Interface
   float euler3();
   void set_euler3(const float new_euler3);
   int maxlenof_euler3() const;
-  float angles(int index);
-  void set_angles(unsigned int index, const float new_angles);
-  int maxlenof_angles() const;
+  float joints(int index);
+  void set_joints(unsigned int index, const float new_joints);
+  int maxlenof_joints() const;
   float finger1();
   void set_finger1(const float new_finger1);
   int maxlenof_finger1() const;

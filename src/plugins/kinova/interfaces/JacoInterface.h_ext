@@ -44,16 +44,16 @@ class JacoInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    float x; /**< X-Coordinate for tool translation. */
-    float y; /**< Y-Coordinate for tool translation. */
-    float z; /**< Z-Coordinate for tool translation. */
-    float euler1; /**< 1st Euler angle tool rotation. */
-    float euler2; /**< 2nd Euler angle tool rotation. */
-    float euler3; /**< 3d Euler angle rotation. */
-    float angles[6]; /**< Angle values of motors */
-    float finger1; /**< Angular value for finger 1. */
-    float finger2; /**< Angular value for finger 2. */
-    float finger3; /**< Angular value for finger 3. */
+    float x; /**< X-Coordinate of tool translation. */
+    float y; /**< Y-Coordinate op tool translation. */
+    float z; /**< Z-Coordinate of tool translation. */
+    float euler1; /**< 1st Euler angle of tool rotation. */
+    float euler2; /**< 2nd Euler angle of tool rotation. */
+    float euler3; /**< 3rd Euler angle of tool rotation. */
+    float joints[6]; /**< Angle values of joints */
+    float finger1; /**< Angular value of finger 1. */
+    float finger2; /**< Angular value of finger 2. */
+    float finger3; /**< Angular value of finger 3. */
     uint32_t msgid; /**< The ID of the message that is currently being
       processed, or 0 if no message is being processed. */
     bool final; /**< True, if the last goto command has been finished,
@@ -90,11 +90,11 @@ class JacoInterface : public Interface
   float euler3() const;
   void set_euler3(const float new_euler3);
   size_t maxlenof_euler3() const;
-  float * angles() const;
-  float angles(unsigned int index) const;
-  void set_angles(unsigned int index, const float new_angles);
-  void set_angles(const float * new_angles);
-  size_t maxlenof_angles() const;
+  float * joints() const;
+  float joints(unsigned int index) const;
+  void set_joints(unsigned int index, const float new_joints);
+  void set_joints(const float * new_joints);
+  size_t maxlenof_joints() const;
   float finger1() const;
   void set_finger1(const float new_finger1);
   size_t maxlenof_finger1() const;
