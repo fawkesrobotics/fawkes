@@ -23,41 +23,14 @@
 #ifndef __PLUGINS_KINOVA_KINOVA_API_H_
 #define __PLUGINS_KINOVA_KINOVA_API_H_
 
+#include "types.h"
+
 #include <libusb.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-typedef struct position_cart_struct {
-  float Position[3];
-  float Rotation[3];
-  float FingerPosition[3];
-} position_cart_t;
-
-typedef struct position_ang_struct {
-  float Joints[6];
-  float FingerPosition[3];
-} position_ang_t;
-
-typedef struct message_header_struct {
-  short IdPacket;
-  short PacketQuantity;
-  short CommandId;
-  short CommandSize;
-} message_header_t;
-
-typedef struct message_struct {
-  union {
-    unsigned char data[64];
-    struct {
-      message_header_t header; //8 Byte
-      float body[14]; //56 Byte
-    };
-  };
-} message_t;
-
 
 class JacoArm
 {
