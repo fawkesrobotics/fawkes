@@ -118,6 +118,7 @@ MultiLogger::add_logger(Logger *logger)
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
   data->loggers.lock();
   data->loggers.push_back(logger);
+  logger->set_loglevel(log_level);
   data->loggers.sort();
   data->loggers.unique();
   data->loggers.unlock();
@@ -146,6 +147,7 @@ MultiLogger::set_loglevel(LogLevel level)
 {
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+  log_level = level;
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     (*data->logit)->set_loglevel(level);

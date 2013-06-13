@@ -26,6 +26,7 @@
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
+#include <logging/logger.h>
 
 #include <cstddef>
 
@@ -38,14 +39,14 @@ class UnknownLoggerTypeException : public Exception
   UnknownLoggerTypeException(const char *msg = NULL);
 };
 
-class Logger;
 class MultiLogger;
 
 class LoggerFactory
 {
  public:
   static Logger * instance(const char *type, const char *as);
-  static MultiLogger *multilogger_instance(const char *as);
+  static MultiLogger *multilogger_instance(const char *as,
+					   Logger::LogLevel default_ll = Logger::LL_DEBUG);
 
   /** Get typed instance of logger.
    * Creates a new instance and converts it to the requested type. If the type
@@ -58,6 +59,9 @@ class LoggerFactory
    */
   template <class L>
     static L* instance(const char *type, const char *as);
+
+ private:
+  static Logger::LogLevel string_to_loglevel(const char *log_level);
 };
 
 
