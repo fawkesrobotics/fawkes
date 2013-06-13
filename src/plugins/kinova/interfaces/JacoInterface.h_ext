@@ -1,0 +1,122 @@
+
+/***************************************************************************
+ *  JacoInterface.h - Fawkes BlackBoard Interface - JacoInterface
+ *
+ *  Templated created:   Thu Oct 12 10:49:19 2006
+ *  Copyright  2013  Bahram Maleki-Fard
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+#ifndef __INTERFACES_JACOINTERFACE_H_
+#define __INTERFACES_JACOINTERFACE_H_
+
+#include <interface/interface.h>
+#include <interface/message.h>
+#include <interface/field_iterator.h>
+
+namespace fawkes {
+
+class JacoInterface : public Interface
+{
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(JacoInterface)
+ /// @endcond
+ public:
+  /* constants */
+
+ private:
+#pragma pack(push,4)
+  /** Internal data storage, do NOT modify! */
+  typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    float x; /**< X-Coordinate for tool translation. */
+    float y; /**< Y-Coordinate for tool translation. */
+    float z; /**< Z-Coordinate for tool translation. */
+    float euler1; /**< 1st Euler angle tool rotation. */
+    float euler2; /**< 2nd Euler angle tool rotation. */
+    float euler3; /**< 3d Euler angle rotation. */
+    float angles[6]; /**< Angle values of motors */
+    float finger1; /**< Angular value for finger 1. */
+    float finger2; /**< Angular value for finger 2. */
+    float finger3; /**< Angular value for finger 3. */
+    uint32_t msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
+    bool final; /**< True, if the last goto command has been finished,
+      false if it is still running */
+  } JacoInterface_data_t;
+#pragma pack(pop)
+
+  JacoInterface_data_t *data;
+
+ public:
+  /* messages */
+  virtual bool message_valid(const Message *message) const;
+ private:
+  JacoInterface();
+  ~JacoInterface();
+
+ public:
+  /* Methods */
+  float x() const;
+  void set_x(const float new_x);
+  size_t maxlenof_x() const;
+  float y() const;
+  void set_y(const float new_y);
+  size_t maxlenof_y() const;
+  float z() const;
+  void set_z(const float new_z);
+  size_t maxlenof_z() const;
+  float euler1() const;
+  void set_euler1(const float new_euler1);
+  size_t maxlenof_euler1() const;
+  float euler2() const;
+  void set_euler2(const float new_euler2);
+  size_t maxlenof_euler2() const;
+  float euler3() const;
+  void set_euler3(const float new_euler3);
+  size_t maxlenof_euler3() const;
+  float * angles() const;
+  float angles(unsigned int index) const;
+  void set_angles(unsigned int index, const float new_angles);
+  void set_angles(const float * new_angles);
+  size_t maxlenof_angles() const;
+  float finger1() const;
+  void set_finger1(const float new_finger1);
+  size_t maxlenof_finger1() const;
+  float finger2() const;
+  void set_finger2(const float new_finger2);
+  size_t maxlenof_finger2() const;
+  float finger3() const;
+  void set_finger3(const float new_finger3);
+  size_t maxlenof_finger3() const;
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final() const;
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
+
+};
+
+} // end namespace fawkes
+
+#endif

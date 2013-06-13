@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="JacoInterface" author="Bahram Maleki-Fard" year="2013">
+  <data>
+    <comment>
+      Interface providing access to a Kinova Jaco arm.
+    </comment>
+
+    <field type="float" name="x">X-Coordinate for tool translation.</field>
+    <field type="float" name="y">Y-Coordinate for tool translation.</field>
+    <field type="float" name="z">Z-Coordinate for tool translation.</field>
+
+    <field type="float" name="euler1">1st Euler angle tool rotation.</field>
+    <field type="float" name="euler2">2nd Euler angle tool rotation.</field>
+    <field type="float" name="euler3">3d Euler angle rotation.</field>
+
+    <field type="float" length="6" name="angles">Angle values of motors</field>
+
+    <field type="float" name="finger1">Angular value for finger 1.</field>
+    <field type="float" name="finger2">Angular value for finger 2.</field>
+    <field type="float" name="finger3">Angular value for finger 3.</field>
+
+    <field type="uint32" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last goto command has been finished,
+      false if it is still running</field>
+  </data>
+</interface>

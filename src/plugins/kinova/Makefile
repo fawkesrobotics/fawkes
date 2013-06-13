@@ -18,9 +18,9 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-#PRESUBDIRS = aspect interfaces
+PRESUBDIRS = interfaces
 
-LIBS_kinova = fawkescore fawkesaspects
+LIBS_kinova = fawkescore fawkesaspects fawkesblackboard fawkesinterface JacoInterface
 OBJS_kinova = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 ifeq ($(HAVE_LIBUSB),1)

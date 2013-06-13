@@ -1,0 +1,77 @@
+$#include <interfaces/JacoInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class JacoInterface : public Interface
+{
+
+  float x();
+  void set_x(const float new_x);
+  int maxlenof_x() const;
+  float y();
+  void set_y(const float new_y);
+  int maxlenof_y() const;
+  float z();
+  void set_z(const float new_z);
+  int maxlenof_z() const;
+  float euler1();
+  void set_euler1(const float new_euler1);
+  int maxlenof_euler1() const;
+  float euler2();
+  void set_euler2(const float new_euler2);
+  int maxlenof_euler2() const;
+  float euler3();
+  void set_euler3(const float new_euler3);
+  int maxlenof_euler3() const;
+  float angles(int index);
+  void set_angles(unsigned int index, const float new_angles);
+  int maxlenof_angles() const;
+  float finger1();
+  void set_finger1(const float new_finger1);
+  int maxlenof_finger1() const;
+  float finger2();
+  void set_finger2(const float new_finger2);
+  int maxlenof_finger2() const;
+  float finger3();
+  void set_finger3(const float new_finger3);
+  int maxlenof_finger3() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  int maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  int maxlenof_final() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}
