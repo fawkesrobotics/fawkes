@@ -60,11 +60,11 @@ class KinovaInfoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-   fawkes::JacoArm         *__arm;
-   fawkes::JacoInterface   *__if_jaco;
+  fawkes::JacoArm         *__arm;
+  fawkes::JacoInterface   *__if_jaco;
 
-   fawkes::position_cart_t      __cpos;
-   fawkes::position_ang_t       __apos;
+  fawkes::position_cart_t      __cpos;
+  fawkes::position_ang_t       __apos;
 };
 
 

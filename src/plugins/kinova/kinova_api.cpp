@@ -37,7 +37,8 @@
 
 #define CMD_GET_CART_POS        104
 #define CMD_GET_ANG_POS         105
-
+#define CMD_START_API_CTRL      302
+#define CMD_STOP_API_CTRL       303
 
 #define USB_CMD(ep,msg)         \
   (libusb_interrupt_transfer(__lusb_devh, ep, msg.data, INTR_LENGTH, &transferred, 1000))
@@ -105,6 +106,10 @@ JacoArm::~JacoArm()
   } else {printf("NOT INITIALIZED \n");}
 }
 
+
+/* /================================================\
+ *   USB connection establishment (private)
+ * \================================================/*/
 void
 JacoArm::_init_libusb()
 {
@@ -175,6 +180,67 @@ JacoArm::_claim_interface()
   } else {printf("DONE \n");}
 }
 
+
+
+/* /================================================\
+ *   Generic USB data transfer commands (private)
+ * \================================================/*/
+/** Perform an outgoing and then ingoing command.*/
+int
+JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
+{
+  int r, transferred;
+
+  //printf("\n cmd_out_in send message: \n");
+  //print_message(msg);
+  r = USB_CMD(EP_OUT, msg);
+  if( r < 0 ) {
+    fprintf(stderr, "intr error %d\n", r);
+    return r;
+  } else if( transferred < INTR_LENGTH ) {
+    fprintf(stderr, "short write (%d)\n", r);
+    return -1;
+  }
+  //printf("sent interrupt, transferred %i \n", transferred);
+
+  msg.header.CommandSize = cmd_size_in;
+
+  //printf("\n cmd_out_in send modified message: \n");
+  //print_message(msg);
+  r = USB_CMD_IN(msg);
+  if( r < 0 ) {
+    fprintf(stderr, "intr error %d\n", r);
+    return r;
+  } else if( transferred < INTR_LENGTH ) {
+    fprintf(stderr, "short read (%d)\n", r);
+    return -1;
+  }
+  //printf("sent interrupt %04x, transfered %i \n", *((uint16_t *) msg.data), transferred);
+
+  return 1;
+}
+
+int
+JacoArm::_cmd_out(short cmd)
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, cmd, 8)
+
+  int r, transferred;
+  r = USB_CMD(EP_OUT, msg);
+  if( r < 0 ) {
+    fprintf(stderr, "intr error %d\n", r);
+  } else if( transferred < INTR_LENGTH ) {
+    fprintf(stderr, "short write (%d)\n", r);
+    r = -1;
+  }
+  return r;
+}
+
+
+/* /================================================\
+ *   Jaco specific commands (private)
+ * \================================================/*/
 int
 JacoArm::_get_cart_pos(position_cart_t &pos)
 {
@@ -201,50 +267,11 @@ JacoArm::_get_ang_pos(position_ang_t &pos)
   return r;
 }
 
-/** Perform an outgoing and then ingoing command.*/
-int
-JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
-{
-  int r, transferred;
-
-  //printf("\n cmd_out_in send message: \n");
-  //print_message(msg);
-  r = USB_CMD(EP_OUT, msg);
-  if (r < 0) {
-    fprintf(stderr, "intr error %d\n", r);
-    return r;
-  }
-  if (transferred < INTR_LENGTH) {
-    fprintf(stderr, "short write (%d)\n", r);
-    return -1;
-  }
-  //printf("sent interrupt, transferred %i \n", transferred);
-
-  msg.header.CommandSize = cmd_size_in;
-
-  //printf("\n cmd_out_in send modified message: \n");
-  //print_message(msg);
-  r = USB_CMD_IN(msg);
-  if (r < 0) {
-    fprintf(stderr, "intr error %d\n", r);
-    return r;
-  }
-  if (transferred < INTR_LENGTH) {
-    fprintf(stderr, "short read (%d)\n", r);
-    return -1;
-  }
-
-  //printf("sent interrupt %04x, transfered %i \n", *((uint16_t *) msg.data), transferred);
-
-  return 1;
-}
 
 
-
-
-
-
-
+/* /================================================\
+ *   public methods
+ * \================================================/*/
 void
 JacoArm::print_message(message_t &msg)
 {
@@ -281,5 +308,23 @@ JacoArm::get_ang_pos() {
   }
 
   return pos;
+}
+
+void
+JacoArm::start_api_ctrl()
+{
+  int r = _cmd_out(CMD_START_API_CTRL);
+  if( r < 0 ) {
+    throw fawkes::Exception("Kinova_API: Could not start API control! libusb error code: %i.", r);
+  }
+}
+
+void
+JacoArm::stop_api_ctrl()
+{
+  int r = _cmd_out(CMD_STOP_API_CTRL);
+  if( r < 0 ) {
+    throw fawkes::Exception("Kinova_API: Could not stop API control! libusb error code: %i.", r);
+  }
 }
 } // end of namespace fawkes
