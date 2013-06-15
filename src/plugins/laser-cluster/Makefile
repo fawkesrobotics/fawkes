@@ -21,6 +21,8 @@ include $(BUILDSYSDIR)/ros.mk
 include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
+PRESUBDIRS = interfaces
+
 REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
 
 CFLAGS += -Wno-unknown-pragmas
@@ -30,7 +32,7 @@ CFLAGS += -Wno-unknown-pragmas
 
 LIBS_laser_cluster = fawkescore fawkesutils fawkesaspects fvutils \
 			fawkestf fawkesinterface fawkesblackboard \
-			Position3DInterface SwitchInterface
+			Position3DInterface SwitchInterface LaserClusterInterface
 OBJS_laser_cluster = laser-cluster-plugin.o laser-cluster-thread.o
 
 OBJS_all    = $(OBJS_laser_cluster)

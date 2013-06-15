@@ -48,6 +48,7 @@
 
 #include <interfaces/Position3DInterface.h>
 #include <interfaces/SwitchInterface.h>
+#include <interfaces/LaserClusterInterface.h>
 
 #include <iostream>
 #include <limits>
@@ -126,6 +127,8 @@ LaserClusterThread::init()
   cfg_cluster_switch_tolerance_ = config->get_float(CFG_PREFIX"cluster_switch_tolerance");
   cfg_offset_x_               = config->get_float(CFG_PREFIX"offset_x");
 
+  current_max_x_ = cfg_cluster_max_x_;
+
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
@@ -139,6 +142,9 @@ LaserClusterThread::init()
 
     switch_if_ = NULL;
     switch_if_ = blackboard->open_for_writing<SwitchInterface>("laser-cluster");
+
+    config_if_ = NULL;
+    config_if_ = blackboard->open_for_writing<LaserClusterInterface>("laser-cluster");
 
     bool autostart = true;
     try {
@@ -217,6 +223,21 @@ LaserClusterThread::loop()
     switch_if_->msgq_pop();
   }
 
+  while (! config_if_->msgq_empty()) {
+    if (LaserClusterInterface::SetMaxXMessage *msg = config_if_->msgq_first_safe(msg))
+    {
+      if (msg->max_x() <= 0.0) {
+	logger->log_info(name(), "Got cluster max X zero, setting config default %f",
+			 cfg_cluster_max_x_);
+	current_max_x_ = cfg_cluster_max_x_;
+      } else {
+	current_max_x_ = msg->max_x();
+      }
+    }
+
+    config_if_->msgq_pop();
+  }
+
   if (! switch_if_->is_enabled()) {
     //TimeWait::wait(250000);
     set_position(cluster_pos_if_, false);
@@ -242,7 +263,7 @@ LaserClusterThread::loop()
     // Erase non-finite points
     pcl::PassThrough<PointType> passthrough;
     passthrough.setFilterFieldName("x");
-    passthrough.setFilterLimits(0.0, cfg_cluster_max_x_);
+    passthrough.setFilterLimits(0.0, current_max_x_);
     passthrough.setInputCloud(input_);
     passthrough.filter(*noline_cloud);
   }

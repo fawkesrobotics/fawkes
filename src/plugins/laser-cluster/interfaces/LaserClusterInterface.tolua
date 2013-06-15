@@ -1,0 +1,55 @@
+$#include <interfaces/LaserClusterInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class LaserClusterInterface : public Interface
+{
+
+  class SetMaxXMessage : public Message
+  {
+    SetMaxXMessage(float ini_max_x);
+    SetMaxXMessage();
+    ~SetMaxXMessage();
+
+    float max_x();
+    void set_max_x(const float new_max_x);
+    int maxlenof_max_x() const;
+  };
+
+  float max_x();
+  void set_max_x(const float new_max_x);
+  int maxlenof_max_x() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

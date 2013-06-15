@@ -44,6 +44,7 @@ namespace fawkes {
 #ifdef USE_TIMETRACKER
   class TimeTracker;
 #endif
+  class LaserClusterInterface;
 }
 
 class LaserClusterThread
@@ -95,6 +96,7 @@ class LaserClusterThread
   fawkes::Position3DInterface *cluster_pos_if_;
 
   fawkes::SwitchInterface *switch_if_;
+  fawkes::LaserClusterInterface *config_if_;
 
   bool         cfg_line_removal_;
   float        cfg_depth_filter_min_x_;
@@ -113,6 +115,8 @@ class LaserClusterThread
   float        cfg_cluster_max_y_;
   float        cfg_cluster_switch_tolerance_;
   float        cfg_offset_x_;
+
+  float        current_max_x_;
 
   unsigned int loop_count_;
 
