@@ -135,6 +135,7 @@ LoggerFactory::instance(const char *type, const char *as)
  * to one list with exclamation marks. The list is not pre-processed, so if you
  * mention a logger twice this logger is added twice.
  * @param as logger argument string
+ * @param default_ll default log level for multi logger
  * @return multi logger instance with requested loggers
  * @exception UnknownLoggerTypeException thrown if any of the loggers was unknown.
  */
