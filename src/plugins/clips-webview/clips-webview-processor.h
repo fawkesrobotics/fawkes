@@ -26,6 +26,9 @@
 #include <core/utils/lockptr.h>
 #include <webview/request_processor.h>
 
+#include <string>
+#include <list>
+
 namespace fawkes {
   class Logger;
 }
@@ -44,12 +47,19 @@ class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
 
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
+  void add_error(const char *str);
+
+ private:
+  void retract_fact(long int index);
+
  private:
   fawkes::LockPtr<CLIPS::Environment> clips_;
   fawkes::Logger       *logger_;
 
   const char           *baseurl_;
   size_t                baseurl_len_;
+
+  std::list<std::string> errors_;
 };
 
 #endif
