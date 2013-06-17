@@ -186,7 +186,12 @@ function HSM:add_transitions(trans)
 	 local to    = assert(self.states[t[2]],
 			      "Destination state does not exist for transition "
 				 .. trans_string)
-	 local cond  = t[3] or t.cond
+
+	 local cond = t[3] or t.cond
+	 if type(t.precond) ~= "boolean" and
+	    type(t.precond_only) ~= "boolean" then
+	    cond = cond or t.precond or t.precond_only
+	 end
 	 assert(cond or t.timeout,
 		"You must have a condition or a timeout for transition "
 		   .. trans_string)
