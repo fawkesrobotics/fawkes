@@ -64,22 +64,17 @@ ROSWebviewRequestProcessor::~ROSWebviewRequestProcessor()
 }
 
 fawkes::WebReply *
-ROSWebviewRequestProcessor::process_request(const char *url,
-					    const char *method,
-					    const char *version,
-					    const char *upload_data,
-					    size_t *upload_data_size,
-					    void **session_data)
+ROSWebviewRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  logger->log_debug(__logcomp.c_str(), "Processing %s", url);
+  //logger->log_debug(__logcomp.c_str(), "Processing %s", url);
 
   webview_msgs::ProcessRequest srv;
-  srv.request.url = url;
-  srv.request.method = method;
-  srv.request.version = version;
-  srv.request.upload_data =
-    std::vector<uint8_t>((uint8_t *)upload_data,
-			 (uint8_t *)&upload_data[*upload_data_size]);
+  srv.request.url = request->url();
+  //srv.request.method = method;
+  //srv.request.version = version;
+  //srv.request.upload_data =
+  //  std::vector<uint8_t>((uint8_t *)upload_data,
+  //			 (uint8_t *)&upload_data[*upload_data_size]);
 
   if (! __srv_client.exists()) {
     return new WebErrorPageReply(WebReply::HTTP_GONE,
