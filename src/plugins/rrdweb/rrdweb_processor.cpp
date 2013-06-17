@@ -46,7 +46,6 @@ using namespace fawkes;
 RRDWebRequestProcessor::RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager,
 					       fawkes::Logger *logger,
 					       const char *baseurl)
-  : WebRequestProcessor(/* handle session data */ false)
 {
   __rrd_man = rrd_manager;
   __logger  = logger;
@@ -62,16 +61,11 @@ RRDWebRequestProcessor::~RRDWebRequestProcessor()
 }
 
 WebReply *
-RRDWebRequestProcessor::process_request(const char *url,
-					const char *method,
-					const char *version,
-					const char *upload_data,
-					size_t *upload_data_size,
-					void **session_data)
+RRDWebRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, url, __baseurl_len) == 0 ) {
+  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = std::string(url).substr(__baseurl_len);
+    std::string subpath = request->url().substr(__baseurl_len);
 
     const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
     RWLockVector<RRDGraphDefinition *>::const_iterator g;
@@ -97,7 +91,7 @@ RRDWebRequestProcessor::process_request(const char *url,
 			 "href=\"/static/css/rrdweb.css\" />\n");
       *r += "<h2>RRD Graphs</h2>\n";
 
-      std::string subpath = std::string(url).substr(__baseurl_len);
+      std::string subpath = request->url().substr(__baseurl_len);
 
       unsigned int i = 0;
       *r += "<table class=\"rrdgrid\">";
