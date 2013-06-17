@@ -345,7 +345,9 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 #endif
 
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
-      MHD_post_process(request->pp_, upload_data, *upload_data_size);
+      if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
+	request->set_raw_post_data(upload_data, *upload_data_size);
+      }
       if (0 != *upload_data_size) {
 	*upload_data_size = 0;
 	return MHD_YES;

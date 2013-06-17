@@ -110,11 +110,18 @@ class WebRequest {
    */
   void set_post_value(const char *key, const char *data, size_t size);
 
+
+  /** Get raw post data.
+   * @return raw port data or empty string if none. Note that this is not necesarily
+   * a printable string (or zero-terminated) */
+  const std::string &  raw_post_data() const { return post_raw_data_; }
+
  protected:
   /** Set cookie map.
    * @param cookies cookies map
    */
   void set_cookies(const std::map<std::string, std::string> &cookies) { cookies_ = cookies; }
+  void set_raw_post_data(const char *data, size_t data_size);
 
  private:
   MHD_PostProcessor *pp_;
@@ -123,6 +130,7 @@ class WebRequest {
   Method      method_;
   std::map<std::string, std::string> cookies_;
   std::map<std::string, std::string> post_values_;
+  std::string                        post_raw_data_;
 
 };
 
