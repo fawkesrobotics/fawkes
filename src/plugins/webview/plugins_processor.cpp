@@ -43,7 +43,7 @@ using namespace fawkes;
  * @param manager PluginManager instance
  */
 WebviewPluginsRequestProcessor::WebviewPluginsRequestProcessor(const char *baseurl,
-						       PluginManager *manager)
+							       PluginManager *manager)
 {
   __baseurl     = strdup(baseurl);
   __baseurl_len = strlen(__baseurl);
@@ -59,16 +59,11 @@ WebviewPluginsRequestProcessor::~WebviewPluginsRequestProcessor()
 
 
 WebReply *
-WebviewPluginsRequestProcessor::process_request(const char *url,
-						const char *method,
-						const char *version,
-						const char *upload_data,
-						size_t *upload_data_size,
-						void **session_data)
+WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, url, __baseurl_len) == 0 ) {
+  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = std::string(url).substr(__baseurl_len);
+    std::string subpath = request->url().substr(__baseurl_len);
 
     if (subpath.find("/load/") == 0) {
       std::string plugin_name = subpath.substr(std::string("/load/").length());
@@ -83,7 +78,7 @@ WebviewPluginsRequestProcessor::process_request(const char *url,
 	  *r += std::string(*i) + "<br/>\n";
 	}
 	r->append_body("<p><a href=\"%s\">Back to overview</a> - "
-		       "<a href=\"%s\">Retry</a></p>", __baseurl, url);
+		       "<a href=\"%s\">Retry</a></p>", __baseurl, request->url().c_str());
 	return r;
       }
     } else if (subpath.find("/unload/") == 0) {
@@ -100,7 +95,7 @@ WebviewPluginsRequestProcessor::process_request(const char *url,
 	  *r += std::string(*i) + "<br/>\n";
 	}
 	r->append_body("<p><a href=\"%s\">Back to overview</a> - "
-		       "<a href=\"%s\">Retry</a></p>", __baseurl, url);
+		       "<a href=\"%s\">Retry</a></p>", __baseurl, request->url().c_str());
 	return r;
       }
     } else {

@@ -46,7 +46,7 @@ using namespace fawkes;
  * @param blackboard BlackBoard instance
  */
 WebviewBlackBoardRequestProcessor::WebviewBlackBoardRequestProcessor(const char *baseurl,
-							     BlackBoard *blackboard)
+								     BlackBoard *blackboard)
 {
   __baseurl     = strdup(baseurl);
   __baseurl_len = strlen(__baseurl);
@@ -66,16 +66,11 @@ WebviewBlackBoardRequestProcessor::~WebviewBlackBoardRequestProcessor()
 
 
 WebReply *
-WebviewBlackBoardRequestProcessor::process_request(const char *url,
-					       const char *method,
-					       const char *version,
-					       const char *upload_data,
-					       size_t *upload_data_size,
-					       void **session_data)
+WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, url, __baseurl_len) == 0 ) {
+  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = std::string(url).substr(__baseurl_len);
+    std::string subpath = request->url().substr(__baseurl_len);
 
     WebPageReply *r = new WebPageReply("BlackBoard");
     r->set_html_header("  <link type=\"text/css\" href=\"/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
