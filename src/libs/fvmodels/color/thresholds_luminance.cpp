@@ -33,13 +33,17 @@ namespace firevision {
 }
 #endif
 
-/** @class ColorModelThresholds <fvmodels/color/thresholds.h>
+/** @class ColorModelLuminance <fvmodels/color/thresholds_luminance.h>
  * Really simple thresholds-based model with some hard-coded thresholds. Was
  * just for initial development of color models.
  */
 
-ColorModelLuminance::ColorModelLuminance(const unsigned int threshold_white_low) {
-	threshold_white_low_ = threshold_white_low;
+/** Constructor.
+ * @param threshold_white_low minimum luminance value to mark color
+ */
+ColorModelLuminance::ColorModelLuminance(const unsigned int threshold_white_low)
+{
+  threshold_white_low_ = threshold_white_low;
 }
 
 color_t

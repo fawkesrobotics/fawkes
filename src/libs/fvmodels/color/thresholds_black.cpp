@@ -20,29 +20,38 @@ namespace firevision
 }
 #endif
 
-/** @class ColorModelThresholds <fvmodels/color/thresholds.h>
+/** @class ColorModelBlack <fvmodels/color/thresholds_black.h>
  * Really simple thresholds-based model with variable thresholds. 
  * just for initial development of color models.
  */
 
+/** Constructor.
+ * @param threshold maximum luminance value
+ */
+ColorModelBlack::ColorModelBlack(unsigned int threshold)
+{
+  threshold_ = threshold;
+}
+
 color_t
 ColorModelBlack::determine(unsigned int y,
-				unsigned int u,
-				unsigned int v) const
+			   unsigned int u,
+			   unsigned int v) const
 {
-	if ( y <= this->thrashold 
-		&& u >= 90 && u <= 150 
-		&& v >= 90 && v <= 150) {
-		return C_BLACK;
-	} else {
-		return C_OTHER;
-	}
+  if ( y <= this->threshold_
+       && u >= 90 && u <= 150
+       && v >= 90 && v <= 150)
+  {
+    return C_BLACK;
+  } else {
+    return C_OTHER;
+  }
 }
 
 const char *
 ColorModelBlack::get_name()
 {
-	return "ColorModelBlack";
+  return "ColorModelBlack";
 }
 
 } // end namespace firevision

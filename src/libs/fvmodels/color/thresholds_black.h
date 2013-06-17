@@ -25,14 +25,11 @@ namespace firevision {
 
 class ColorModelBlack : public ColorModel
 {
-private:
-	unsigned int thrashold;
+ private:
+  unsigned int threshold_;
  public:
 
-	ColorModelBlack(unsigned int threshold)
-	{
-		this->thrashold = threshold;
-	}
+  ColorModelBlack(unsigned int threshold);
 
   color_t       determine(unsigned int y,
 			  unsigned int u,
