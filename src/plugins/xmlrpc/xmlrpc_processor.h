@@ -42,12 +42,7 @@ class XmlRpcRequestProcessor : public fawkes::WebRequestProcessor
   XmlRpcRequestProcessor(fawkes::Logger *logger);
   virtual ~XmlRpcRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const char *url,
-					     const char *method,
-					     const char *version,
-					     const char *upload_data,
-					     size_t *upload_data_size,
-					     void **session_data);
+  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
   xmlrpc_c::registry *  registry();
 

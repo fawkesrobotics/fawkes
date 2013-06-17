@@ -43,7 +43,6 @@ using namespace fawkes;
  * @param logger logger to report problems
  */
 XmlRpcRequestProcessor::XmlRpcRequestProcessor(fawkes::Logger *logger)
-  : WebRequestProcessor(/* handle session data */ true)
 {
   __logger = logger;
   __xmlrpc_registry = new xmlrpc_c::registry();
@@ -67,44 +66,15 @@ XmlRpcRequestProcessor::registry()
 
 
 WebReply *
-XmlRpcRequestProcessor::process_request(const char *url,
-					const char *method,
-					const char *version,
-					const char *upload_data,
-					size_t *upload_data_size,
-					void **session_data)
+XmlRpcRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( *session_data == NULL ) {
-    std::string *c = new std::string(upload_data ? upload_data : "");
-    *upload_data_size = 0;
-    *session_data = c;
-    return NULL;
-  } else {
-    if (*upload_data_size > 0) {
-      std::string *c = (std::string *)*session_data;
-      if ( (c->length() + *upload_data_size) > MAX_REQUEST_LENGTH ) {
-	delete c;
-	*session_data = NULL;
-	return new WebErrorPageReply(WebErrorPageReply::HTTP_REQUEST_ENTITY_TOO_LARGE);
-      }
-
-      *c += upload_data;
-      *upload_data_size = 0;
-      return NULL;
-    }
-  }
-
-  std::string *call = (std::string *)*session_data;
-  *session_data = NULL;
-
-  if (strcmp(method, "POST") != 0) {
+  if (request->method() != WebRequest::METHOD_POST) {
     return new WebErrorPageReply(WebErrorPageReply::HTTP_METHOD_NOT_ALLOWED);
   } else {
     std::string response = "";
-    __xmlrpc_registry->processCall(*call, &response);
+    __xmlrpc_registry->processCall(request->raw_post_data(), &response);
     //__logger->log_debug("XmlRpcRequestProcessor", "Call: %s  reponse: %s",
-    //		call->c_str(), response.c_str());
-    delete call;
+    //		          request->raw_post_data().c_str(), response.c_str());
     return new StaticWebReply(WebReply::HTTP_OK, response);
   }
 }
