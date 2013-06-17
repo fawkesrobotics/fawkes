@@ -23,7 +23,8 @@
 #ifndef __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
 
-#include "reply.h"
+#include <webview/reply.h>
+#include <webview/request.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -33,18 +34,11 @@ namespace fawkes {
 class WebRequestProcessor
 {
  public:
-  WebRequestProcessor(bool handles_session_data = false);
+  WebRequestProcessor();
   virtual ~WebRequestProcessor();
-  virtual WebReply * process_request(const char *url,
-				     const char *method,
-				     const char *version,
-				     const char *upload_data,
-				     size_t *upload_data_size,
-				     void **session_data)               = 0;
+  virtual WebReply * process_request(const WebRequest *request) = 0;
 
-  bool handles_session_data() const;
  private:
-  bool  __handles_session_data;
 
 };
 
