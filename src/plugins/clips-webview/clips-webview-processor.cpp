@@ -48,7 +48,6 @@ using namespace fawkes;
  */
 ClipsWebRequestProcessor::ClipsWebRequestProcessor(fawkes::LockPtr<CLIPS::Environment> &clips,
 						   fawkes::Logger *logger, const char *baseurl)
-  : WebRequestProcessor(/* handle session data */ false)
 {
   clips_  = clips;
   logger_ = logger;
@@ -61,19 +60,15 @@ ClipsWebRequestProcessor::ClipsWebRequestProcessor(fawkes::LockPtr<CLIPS::Enviro
 /** Destructor. */
 ClipsWebRequestProcessor::~ClipsWebRequestProcessor()
 {
+  EnvDeleteRouter(clips_->cobj(), (char *)"webview-reqproc");
 }
 
 WebReply *
-ClipsWebRequestProcessor::process_request(const char *url,
-					  const char *method,
-					  const char *version,
-					  const char *upload_data,
-					  size_t *upload_data_size,
-					  void **session_data)
+ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(baseurl_, url, baseurl_len_) == 0 ) {
+  if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = std::string(url).substr(baseurl_len_);
+    std::string subpath = request->url().substr(baseurl_len_);
 
     WebPageReply *r = new WebPageReply("Clips Graphs");
     *r += "<h2>CLIPS Facts</h2>\n";

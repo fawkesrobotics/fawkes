@@ -42,12 +42,7 @@ class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
 
   virtual ~ClipsWebRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const char *url,
-					     const char *method,
-					     const char *version,
-					     const char *upload_data,
-					     size_t *upload_data_size,
-					     void **session_data);
+  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
   fawkes::LockPtr<CLIPS::Environment> clips_;
