@@ -180,6 +180,11 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
 		       "  <script type=\"text/javascript\" src=\"/static/js/"
 		       "jquery-ui.custom.min.js\"></script>\n");
 
+    *r +=
+      "<style type=\"text/css\">\n"
+      "  tr:hover { background-color: #eeeeee; }\n"
+      "</style>";
+
     *r += "<h2>CLIPS Facts</h2>\n";
 
     *r += "<table>";
