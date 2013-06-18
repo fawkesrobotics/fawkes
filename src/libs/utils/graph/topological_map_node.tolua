@@ -55,6 +55,9 @@ class TopologicalMapNode
   vector<string> & reachable_nodes();
 
   bool has_property(string property);
+  float property_as_float(string prop);
+  int property_as_int(string prop);
+  bool property_as_bool(string prop);
 };
 
 }
