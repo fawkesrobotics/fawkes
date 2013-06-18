@@ -102,6 +102,12 @@ WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *reques
       WebPageReply *r = new WebPageReply("Plugins");
       *r += "<h2>Fawkes Plugins</h2>\n";
 
+    *r +=
+      "<style type=\"text/css\">\n"
+      "  tr:hover { background-color: #eeeeee; }\n"
+      "  :link:hover, :visited:hover { background-color: #bb0000; color: white; }\n"
+      "</style>";
+
       *r += "<table>\n";
       *r += "<tr><th>Name</th><th>Description</th><th>Loaded</th><th>Action</th></tr>\n";
 
