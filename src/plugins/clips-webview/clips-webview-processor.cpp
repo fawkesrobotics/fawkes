@@ -183,6 +183,7 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
     *r +=
       "<style type=\"text/css\">\n"
       "  tr:hover { background-color: #eeeeee; }\n"
+      "  :link:hover, :visited:hover { background-color: #bb0000; color: white; }\n"
       "</style>";
 
     *r += "<h2>CLIPS Facts</h2>\n";
