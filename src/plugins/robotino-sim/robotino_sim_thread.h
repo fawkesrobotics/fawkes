@@ -34,10 +34,12 @@
 #include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/transport/transport.hh>
 
+//simulated interfaces
+#include "interfaces/sim_robotinosensorinterface.h"
+#include "interfaces/sim_motorinterface.h"
+
 namespace fawkes {
-  class MotorInterface;
   class BatteryInterface;
-  class RobotinoSensorInterface;
 }
 
 class RobotinoSimThread
@@ -58,25 +60,11 @@ class RobotinoSimThread
  private:
   //Publisher to send messages to gazebo
   gazebo::transport::PublisherPtr stringPub;
-  gazebo::transport::PublisherPtr motorMovePub;
-
-  //Suscribers to recieve messages from gazebo
-  gazebo::transport::SubscriberPtr gyroSub;
-
-  //Handler functions for incoming messages
-  void OnGyroMsg(ConstVector3dPtr &msg);
 
   //provided interfaces
-  fawkes::BatteryInterface        *batt_if_;
-  fawkes::RobotinoSensorInterface *sens_if_;
-  fawkes::MotorInterface         *motor_if_;
-  
-  //Helper variables:
-  //motorMovements last sent to gazebo
-  float vx, vy, vomega;
+  SimRobotinoSensorInterface *if_robotinoSensorInterface;
+  SimMotorInterface *if_motorInterface;
 
-  //Helper functions:
-  void sendMotorMove();
 };
 
 #endif

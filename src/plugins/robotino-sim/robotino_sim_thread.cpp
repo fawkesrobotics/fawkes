@@ -27,10 +27,7 @@
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
-
-#include <interfaces/MotorInterface.h>
-#include <interfaces/BatteryInterface.h>
-#include <interfaces/RobotinoSensorInterface.h>
+#include <aspect/logging.h>
 
 
 using namespace fawkes;
@@ -53,78 +50,41 @@ RobotinoSimThread::RobotinoSimThread()
 void
 RobotinoSimThread::init()
 {
-  //Open interfaces
-  motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
-  batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
-  sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
-
   //get a connection to gazebo (copied from gazeboscene)
   logger->log_debug(name(), "Creating Gazebo publishers");
   stringPub = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/String/");
-  motorMovePub = gazebonode->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
 
-  logger->log_debug(name(), "Try Suscribing");
-  gyroSub = gazebonode->Subscribe(std::string("~/RobotinoSim/Gyro/"), &RobotinoSimThread::OnGyroMsg, this);
-
-  //stringPub->WaitForConnection();
-  logger->log_debug(name(), "Gazebo publishers created and connected");
-  
   if(stringPub->HasConnections())
   {
-    logger->log_info(name(), "Try sending messages");
     //Hello world message
     msgs::Header helloMessage;
     helloMessage.set_str_id("Hello Gazebo-World!!!");
     stringPub->Publish(helloMessage);
+
   }
+
+  //Loading interfaces to simulate
+  if_robotinoSensorInterface = new SimRobotinoSensorInterface(stringPub, logger, blackboard, gazebonode);
+  if_motorInterface = new SimMotorInterface(stringPub, logger, blackboard, gazebonode);
+  if_robotinoSensorInterface->init();
+  if_motorInterface->init();
+
 }
 
 void
 RobotinoSimThread::finalize()
 {
-  blackboard->close(motor_if_);
-  blackboard->close(batt_if_);
-  blackboard->close(sens_if_);
+  //finalize simulated interfaces
+  if_robotinoSensorInterface->finalize();
+  if_motorInterface->finalize();
+
   //reset?
   stringPub.reset();
-  motorMovePub.reset();
 }
 
 void
 RobotinoSimThread::loop()
 {
-  sendMotorMove();
-}
-
-void RobotinoSimThread::OnGyroMsg(ConstVector3dPtr &msg)
-{
-  float yaw = msg->z();
-  sens_if_->set_gyro_available(true);
-  sens_if_->set_gyro_angle(yaw);
-  sens_if_->write();
-}
-
-void RobotinoSimThread::sendMotorMove()
-{
-  if(motorMovePub->HasConnections() && !motor_if_->msgq_empty())
-  {
-    if (MotorInterface::TransRotMessage *msg =
-	motor_if_->msgq_first_safe(msg))
-    {
-      //send command only if changed
-      //TODO: send if there is a new connection
-      if(msg->vx() != vx || msg->vy() != vy || msg->omega() != vomega)
-      {
-	vx = msg->vx();
-	vy = msg->vy();
-	vomega = msg->omega();
-	msgs::Vector3d motorMove;
-	motorMove.set_x(vx);
-	motorMove.set_y(vy);
-	motorMove.set_z(vomega);
-	motorMovePub->Publish(motorMove);
-      }    
-    }
-    motor_if_->msgq_pop();
-  }
+  if_robotinoSensorInterface->loop();
+  if_motorInterface->loop();
 }

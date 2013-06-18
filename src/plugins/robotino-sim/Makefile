@@ -25,7 +25,7 @@ LIBS_robotino_sim = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
 	       BatteryInterface RobotinoSensorInterface MotorInterface \
 	       Position3DInterface fawkesgazeboaspect
-OBJS_robotino_sim = robotino_sim_plugin.o robotino_sim_thread.o
+OBJS_robotino_sim = robotino_sim_plugin.o robotino_sim_thread.o interfaces/sim_robotinosensorinterface.o interfaces/sim_motorinterface.o
 
 OBJS_all    = $(OBJS_robotino_sim)
 
