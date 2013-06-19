@@ -73,29 +73,18 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
     std::string subpath = request->url().substr(__baseurl_len);
 
     WebPageReply *r = new WebPageReply("BlackBoard");
-    r->set_html_header("  <link type=\"text/css\" href=\"/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
-		       "  <script type=\"text/javascript\" src=\"/static/js/jquery.min.js\"></script>\n"
-		       "  <script type=\"text/javascript\" src=\"/static/js/jquery-ui.custom.min.js\"></script>\n");
+    r->set_html_header("  <link type=\"text/css\" href=\""
+		       "/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
+		       "  <link type=\"text/css\" href=\""
+		       "/static/css/blackboard.css\" rel=\"stylesheet\" />\n");
 
-    *r += "<script type=\"text/javascript\">\n"
-      "  $(function(){\n"
-      "    $(\"#blackboard-interfaces-title\").click(function(){\n"
-      "	     if ( $(\"#blackboard-interfaces\").is(\":visible\") ) {\n"
-      "        $(\"#blackboard-interfaces\").hide(\"blind\");\n"
-      "        $(\"#blackboard-interfaces-icon\").attr(\"src\", \"/static/images/icon-triangle-e.png\");\n"
-      "      } else {\n"
-      "	       $(\"#blackboard-interfaces\").show(\"blind\");\n"
-      "        $(\"#blackboard-interfaces-icon\").attr(\"src\", \"/static/images/icon-triangle-s.png\");\n"
-      "      }\n"
-      "    });\n"
-      "    $(\"#blackboard-interfaces\").hide();\n"
-      "  });\n"
-      "</script>\n"
-      "<div id=\"blackboard-box\">\n"
-      "  <div><a id=\"blackboard-interfaces-title\" href=\"#\"><img id=\"blackboard-interfaces-icon\" "
-      "class=\"blackboard-interfaces-icon\" src=\"/static/images/icon-triangle-e.png\" />"
-      "BlackBoard Interfaces</a></div>\n"
-      "  <div id=\"blackboard-interfaces\">\n";
+
+    if (subpath.find("/view/") != 0) {
+      *r += "<h2>Select Interface</h2>\n"
+	"<div id=\"blackboard-interfaces-mainpart\">\n";
+    } else {
+      *r +=  "  <div id=\"blackboard-interfaces\">\n";
+    }
 
     bool found_some = false;
     InterfaceInfoList *iil = __blackboard->list_all();
@@ -114,19 +103,21 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 
     if (found_some) {
       *r += "</table>\n";
-    } else {
-      *r += "<b>No interfaces found.</b>\n";
     }
 
     *r += "  </div>\n"
       "</div>\n";
+
+    if (! found_some) {
+      *r += "<p><b>No interfaces found.</b></p>\n";
+    }
 
     if (subpath.find("/view/") == 0) {
       std::string iuid = subpath.substr(subpath.find_first_not_of("/", std::string("/view/").length()));
       std::string iftype = iuid.substr(0, iuid.find("::"));
       std::string ifname = iuid.substr(iuid.find("::") + 2);
 
-      r->append_body("<h2>Interface: %s</h2>\n", iuid.c_str());
+      r->append_body("<h2>Showing %s</h2>\n", iuid.c_str());
       if (__interfaces.find(iuid) == __interfaces.end()) {
 	try {
 	  Interface *iface = __blackboard->open_for_reading(iftype.c_str(), ifname.c_str());
@@ -209,6 +200,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	r->append_body("<p><a href=\"%s\">Clear detailed</a></p>\n", __baseurl);
       }
     }
+
 
 
     return r;
