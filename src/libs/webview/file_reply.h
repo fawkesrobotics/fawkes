@@ -35,15 +35,19 @@ class DynamicFileWebReply : public DynamicWebReply
 {
  public:
   DynamicFileWebReply(const char *filename);
+  DynamicFileWebReply(FILE *file, bool close_when_done = true);
   virtual ~DynamicFileWebReply();
 
   virtual size_t size();
   virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
 
  private:
+  void determine_file_size();
+
+ private:
   FILE   *__file;
   size_t  __size;
-  
+  bool    __close_when_done;
 };
 
 } // end namespace fawkes
