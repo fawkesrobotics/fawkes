@@ -28,6 +28,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <cerrno>
 
 #include <gvc.h>
 #include <gvcjob.h>
@@ -71,16 +72,22 @@ WebviewTfRequestProcessor::process_request(const fawkes::WebRequest *request)
     if (subpath == "/graph.png") {
       std::string graph = transformer_->all_frames_as_dot(true);
 
+      FILE *f = tmpfile();
+      if (NULL == f) {
+	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+				     "Cannot open temp file: %s", strerror(errno));
+      }
+
       GVC_t* gvc = gvContext(); 
       Agraph_t* G = agmemread((char *)graph.c_str());
       gvLayout(gvc, G, (char *)"dot");
-      gvRenderFilename(gvc, G, "png", "/tmp/test.png");
+      gvRender(gvc, G, "png", f);
       gvFreeLayout(gvc, G);
       agclose(G);    
       gvFreeContext(gvc);
 
       try {
-	DynamicFileWebReply *freply = new DynamicFileWebReply("/tmp/test.png");
+	DynamicFileWebReply *freply = new DynamicFileWebReply(f);
 	return freply;
       } catch (fawkes::Exception &e) {
 	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, *(e.begin()));
