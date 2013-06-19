@@ -29,7 +29,9 @@
 namespace fawkes {
 
 std::string filetype_file(const char *filename);
+std::string filetype_file(int fd);
 std::string mimetype_file(const char *filename);
+std::string mimetype_file(int fd);
 
 }
 
