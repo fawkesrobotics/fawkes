@@ -25,6 +25,9 @@
 #include "blackboard_processor.h"
 #include "startpage_processor.h"
 #include "plugins_processor.h"
+#ifdef HAVE_TF
+#  include "tf_processor.h"
+#endif
 #include "service_browse_handler.h"
 #include "header_generator.h"
 #include "footer_generator.h"
@@ -51,6 +54,10 @@ const char *WebviewThread::STATIC_URL_PREFIX = "/static";
 const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
 /** Prefix for the WebPluginsRequestProcessor. */
 const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
+#ifdef HAVE_TF
+/** Prefix for the WebTfRequestProcessor. */
+const char *WebviewThread::TF_URL_PREFIX = "/tf";
+#endif
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -169,12 +176,21 @@ WebviewThread::init()
   __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
   __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
   __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
+#ifdef HAVE_TF
+  __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
+#endif
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
   webview_url_manager->register_baseurl(PLUGINS_URL_PREFIX, __plugins_processor);
+#ifdef HAVE_TF
+  webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
+#endif
 
   webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
+#ifdef HAVE_TF
+  webview_nav_manager->add_nav_entry(TF_URL_PREFIX, "TF");
+#endif
   webview_nav_manager->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
@@ -208,6 +224,9 @@ WebviewThread::finalize()
   delete __blackboard_processor;
   delete __startpage_processor;
   delete __plugins_processor;
+#ifdef HAVE_TF
+  delete __tf_processor;
+#endif
   delete __footer_gen;
   delete __header_gen;
   __dispatcher = NULL;
