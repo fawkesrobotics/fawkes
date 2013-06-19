@@ -39,8 +39,6 @@ ifneq ($(PKGCONFIG),)
   endif
 endif
 
-HAVE_TF=0
-
 ifeq ($(HAVE_LIBMICROHTTPD),1)
   LIBS_webview = crypt fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
