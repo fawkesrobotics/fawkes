@@ -322,7 +322,7 @@ function FSM:trans(next_state, ...)
       self.current  = next_state
       local init_ok, state_or_err =
 	 xpcall(function() return next_state:do_init() end, debug.traceback)
-      if ok then
+      if init_ok then
 	 return self:trans(state_or_err)
       elseif next_state == self.states[self.fail_state] then
 	 -- ouch, we're fucked
