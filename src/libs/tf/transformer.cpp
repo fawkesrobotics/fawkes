@@ -928,6 +928,96 @@ Transformer::get_frame_id_mappings() const
 }
 
 
+/** Get DOT graph of all frames.
+ * @param print_time true to add the time of the transform as graph label
+ * @param time if not NULL will be assigned the time of the graph generation
+ * @return string representation of DOT graph
+ */
+std::string
+Transformer::all_frames_as_dot(bool print_time, fawkes::Time *time) const
+{
+  MutexLocker lock(frame_mutex_);
+
+  fawkes::Time current_time;
+  if (time)  *time = current_time;
+
+  std::stringstream mstream;
+  mstream << std::fixed; //fixed point notation
+  mstream.precision(3); //3 decimal places
+  mstream << "digraph { graph [fontsize=14";
+  if (print_time) {
+    mstream << ", label=\"\\nRecorded at time: "
+	    << current_time.str() << " (" << current_time.in_sec() << ")\"";
+  }
+  mstream << "]; node [fontsize=12]; edge [fontsize=12]; " << std::endl;
+
+  TransformStorage temp;
+
+  if (frames_.size() == 1)
+    mstream <<"\"no tf data recieved\"";
+
+  mstream.precision(3);
+  mstream.setf(std::ios::fixed, std::ios::floatfield);
+    
+  //  for (std::vector< TimeCache*>::iterator  it = frames_.begin(); it != frames_.end(); ++it)
+  for (unsigned int cnt = 1; cnt < frames_.size(); ++cnt) //one referenced for 0 is no frame
+  {
+    TimeCache *cache = get_frame(cnt);
+
+    unsigned int frame_id_num;
+    if(cache->get_data(fawkes::Time(0,0), temp)) {
+      frame_id_num = temp.frame_id;
+    } else {
+      frame_id_num = 0;
+    }
+    if (frame_id_num != 0) {
+      std::string authority = "no recorded authority";
+      std::map<unsigned int, std::string>::const_iterator it = frame_authority_.find(cnt);
+      if (it != frame_authority_.end())
+	authority = it->second;
+
+      double rate = cache->get_list_length() /
+	std::max((cache->get_latest_timestamp().in_sec() -
+		  cache->get_oldest_timestamp().in_sec()), 0.0001);
+
+      mstream << "\"" << frameIDs_reverse[frame_id_num] << "\"" << " -> "
+              << "\"" << frameIDs_reverse[cnt] << "\"" << "[label=\""
+	      //<< "Broadcaster: " << authority << "\\n"
+              << "Average rate: " << rate << " Hz\\n"
+              << "Most recent transform: "
+	      << (current_time - cache->get_latest_timestamp()).in_sec() << " sec old \\n"
+              << "Buffer length: "
+	      << (cache->get_latest_timestamp() - cache->get_oldest_timestamp()).in_sec()
+	      << " sec\\n"
+              <<"\"];" <<std::endl;
+    }
+  }
+
+  /* That's how ROS TF does it
+  if (print_time) {
+    for (unsigned int cnt = 1; cnt < frames_.size(); cnt ++) //one referenced for 0 is no frame
+    {
+      unsigned int frame_id_num;
+      if(  get_frame(cnt)->get_data(fawkes::Time(0,0), temp)) {
+	frame_id_num = temp.frame_id;
+      } else {
+	frame_id_num = 0;
+      }
+
+      if(frameIDs_reverse[frame_id_num] == "NO_PARENT") {
+	mstream << "edge [style=invis];" << std::endl;
+	mstream << " subgraph cluster_legend { \n"
+		<< "\"Recorded at time: " << current_time.in_sec()
+		<< " (" << current_time.str() << ")" << "\"[ shape=plaintext ] ;\n "
+	      << "}" << "->" << "\"" << frameIDs_reverse[cnt]<<"\";" << std::endl;
+      }
+    }
+  }
+  */
+  mstream << "}";
+  return mstream.str();
+}
+
 /** Lookup transform.
  * @param target_frame target frame ID
  * @param source_frame source frame ID
