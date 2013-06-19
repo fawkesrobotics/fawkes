@@ -465,7 +465,7 @@ Transformer::walk_to_top_parent(F& f, fawkes::Time time,
       if (error_string)
       {
         std::stringstream ss;
-        //ss << "The tf tree is invalid because it contains a loop." << std::endl
+        ss << "The tf tree is invalid because it contains a loop." << std::endl;
         //   << allFramesAsString() << std::endl;
         *error_string = ss.str();
       }
@@ -493,7 +493,11 @@ Transformer::walk_to_top_parent(F& f, fawkes::Time time,
         std::stringstream ss;
         ss << "Looking up transform from frame [" << lookup_frame_string(source_id) <<
           "] to frame [" << lookup_frame_string(target_id) << "] failed";
-        *error_string = ss.str();
+	if (*error_string != "") {
+	  *error_string += "; " + ss.str();
+	} else {
+	  *error_string = ss.str();
+	}
       }
 
       return EXTRAPOLATION_ERROR;
@@ -621,12 +625,12 @@ Transformer::get_latest_common_time(CompactFrameID target_id, CompactFrameID sou
     ++depth;
     if (depth > MAX_GRAPH_DEPTH) {
       if (error_string) {
-        /*
         std::stringstream ss;
-        ss<<"The tf tree is invalid because it contains a loop." << std::endl
+        ss<<"The tf tree is invalid because it contains a loop." << std::endl;
+        /*
           << allFramesAsString() << std::endl;
-        *error_string = ss.str();
         */
+        *error_string = ss.str();
       }
       return LOOKUP_ERROR;
     }

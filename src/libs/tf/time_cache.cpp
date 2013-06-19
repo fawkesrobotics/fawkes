@@ -220,6 +220,7 @@ TimeCache::find_closest(TransformStorage*& one, TransformStorage*& two,
 {
   //No values stored
   if (storage_.empty()) {
+    if (error_str) *error_str = "Transform cache storage is empty";
     return 0;
   }
 
