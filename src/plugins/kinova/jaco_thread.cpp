@@ -92,4 +92,5 @@ KinovaJacoThread::finalize()
 void
 KinovaJacoThread::loop()
 {
+  __if_jaco->write();
 }

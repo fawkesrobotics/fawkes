@@ -107,6 +107,4 @@ KinovaInfoThread::loop()
   } else {
     __if_jaco->set_connected(false);
   }
-
-  __if_jaco->write();
 }
