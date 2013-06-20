@@ -23,6 +23,8 @@
 #include "jaco_thread.h"
 #include "kinova_api.h"
 
+#include <interfaces/JacoInterface.h>
+
 using namespace fawkes;
 
 /** @class KinovaJacoThread "jaco_thread.h"
@@ -39,6 +41,7 @@ KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread)
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
   __arm = NULL;
+  __if_jaco = NULL;
   __info_thread = info_thread;
 }
 
@@ -61,11 +64,28 @@ KinovaJacoThread::init()
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
   }
+
+
+  try {
+    // open interface for writing
+    __if_jaco = blackboard->open_for_writing<JacoInterface>("JacoArm");
+
+    // set interface in other threads
+    __info_thread->set_interface(__if_jaco);
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
+  }
 }
 
 void
 KinovaJacoThread::finalize()
 {
+  try {
+    blackboard->close(__if_jaco);
+  } catch(fawkes::Exception& e) {
+    logger->log_warn(name(), "Could not close JacoInterface interface. Er:%s", e.what());
+  }
+
   delete __arm;
 }
 

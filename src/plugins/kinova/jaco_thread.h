@@ -56,7 +56,8 @@ class KinovaJacoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm *__arm;
+  fawkes::JacoArm        *__arm;
+  fawkes::JacoInterface  *__if_jaco;
 
   KinovaInfoThread   *__info_thread;
 };

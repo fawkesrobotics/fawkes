@@ -55,6 +55,7 @@ class KinovaInfoThread
 
   virtual void register_arm(fawkes::JacoArm *arm);
   virtual void unregister_arm();
+  virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

@@ -54,21 +54,11 @@ KinovaInfoThread::~KinovaInfoThread()
 void
 KinovaInfoThread::init()
 {
-  try {
-    __if_jaco = blackboard->open_for_writing<JacoInterface>("JacoArm");
-  } catch(fawkes::Exception &e) {
-    logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
-  }
 }
 
 void
 KinovaInfoThread::finalize()
 {
-  try {
-    blackboard->close(__if_jaco);
-  } catch(fawkes::Exception& e) {
-    logger->log_warn(name(), "Could not close JacoInterface interface. Er:%s", e.what());
-  }
 }
 
 void
@@ -82,9 +72,15 @@ KinovaInfoThread::unregister_arm() {
 }
 
 void
+KinovaInfoThread::set_interface(JacoInterface *if_jaco)
+{
+  __if_jaco = if_jaco;
+}
+
+void
 KinovaInfoThread::loop()
 {
-  if(__arm != NULL) {
+  if(__arm != NULL && __if_jaco != NULL) {
     __if_jaco->set_connected(true);
 
     try {
