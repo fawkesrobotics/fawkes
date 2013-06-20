@@ -89,9 +89,9 @@ KinovaInfoThread::loop()
 
     try {
       __cpos = __arm->get_cart_pos();
-      __if_jaco->set_x(__cpos.Position[0]);
-      __if_jaco->set_y(__cpos.Position[1]);
-      __if_jaco->set_z(__cpos.Position[2]);
+      __if_jaco->set_x(-__cpos.Position[1]);
+      __if_jaco->set_y( __cpos.Position[0]);
+      __if_jaco->set_z( __cpos.Position[2]);
 
       __if_jaco->set_euler1(__cpos.Rotation[0]);
       __if_jaco->set_euler2(__cpos.Rotation[1]);
