@@ -21,37 +21,29 @@
 #ifndef __SIM_MOTOR_INTERFACE_H_
 #define __SIM_MOTOR_INTERFACE_H_
 
-#include <logging/logger.h>
-#include <blackboard/blackboard.h>
+#include "sim_interface.h"
 
-//from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
-#include <gazebo/msgs/MessageTypes.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/transport/Node.hh>
+
 
 namespace fawkes {
   class MotorInterface;
 }
 
-class SimMotorInterface
+class SimMotorInterface: public SimInterface
 {
  public:
-SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode);
+ SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode)
+   : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimMotorInterface")
+  {};
+  ~SimMotorInterface() {};
 
-  void init();
-  void loop();
-  void finalize();
+  virtual void init();
+  virtual void loop();
+  virtual void finalize();
  
- private:
-  //Name for the logger
-  const char* name = "SimMotorInterface";
-  fawkes::Logger *logger;
-  fawkes::BlackBoard *blackboard;
-  gazebo::transport::NodePtr gazebonode;
 
-  //Publisher to send control-messages to gazebo
-  gazebo::transport::PublisherPtr controlPub;
+ private:
+  //Publisher to send messages to gazebo
   gazebo::transport::PublisherPtr motorMovePub;
 
   //provided interfaces

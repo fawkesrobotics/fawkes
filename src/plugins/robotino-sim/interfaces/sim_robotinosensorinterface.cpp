@@ -34,20 +34,6 @@
 using namespace fawkes;
 using namespace gazebo;
 
-/** @class SimRobotinoSensorInterface "sim_robotinosensorinterface.cpp"
- * Thread to simulate the RobotinoSensorInterface
- * @author Frederik Zwilling
- */
-
-/** Constructor. */
-
-SimRobotinoSensorInterface::SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode)
-{
-  this->controlPub = controlPublisher;
-  this->logger = logger;
-  this->blackboard = blackboard;
-  this->gazebonode = gazebonode;
-}
 
 void SimRobotinoSensorInterface::init()
 {

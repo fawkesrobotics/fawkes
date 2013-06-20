@@ -23,12 +23,17 @@
 
 #include <tf/types.h>
 #include <stdio.h>
+#include <list>
+
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
 #include <aspect/logging.h>
 
+
+#include "interfaces/sim_robotinosensorinterface.h"
+#include "interfaces/sim_motorinterface.h"
 
 using namespace fawkes;
 using namespace gazebo;
@@ -64,19 +69,25 @@ RobotinoSimThread::init()
   }
 
   //Loading interfaces to simulate
-  if_robotinoSensorInterface = new SimRobotinoSensorInterface(stringPub, logger, blackboard, gazebonode);
-  if_motorInterface = new SimMotorInterface(stringPub, logger, blackboard, gazebonode);
-  if_robotinoSensorInterface->init();
-  if_motorInterface->init();
+interfaces_list.insert((SimInterface*) new SimRobotinoSensorInterface(stringPub, logger, blackboard, gazebonode));
+  interfaces_list.insert((SimInterface*) new SimMotorInterface(stringPub, logger, blackboard, gazebonode));
 
+  //initialize interfaces to simulate
+  for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)
+  {
+    (*it)->init();
+  }
 }
 
 void
 RobotinoSimThread::finalize()
 {
-  //finalize simulated interfaces
-  if_robotinoSensorInterface->finalize();
-  if_motorInterface->finalize();
+  //finalize and delete all simulated interfaces
+  for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)
+  {
+    (*it)->finalize();
+    //TODO: delete
+  }
 
   //reset?
   stringPub.reset();
@@ -85,6 +96,8 @@ RobotinoSimThread::finalize()
 void
 RobotinoSimThread::loop()
 {
-  if_robotinoSensorInterface->loop();
-  if_motorInterface->loop();
+  for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)
+  {
+    (*it)->loop();
+  }
 }

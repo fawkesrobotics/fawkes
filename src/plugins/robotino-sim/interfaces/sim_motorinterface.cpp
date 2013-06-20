@@ -34,20 +34,6 @@
 using namespace fawkes;
 using namespace gazebo;
 
-/** @class SimMotorInterface "sim_motorinterface.cpp"
- * Thread to simulate the MotorInterface
- * @author Frederik Zwilling
- */
-
-/** Constructor. */
-
-SimMotorInterface::SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode)
-{
-  this->controlPub = controlPublisher;
-  this->logger = logger;
-  this->blackboard = blackboard;
-  this->gazebonode = gazebonode;
-}
 
 void SimMotorInterface::init()
 {

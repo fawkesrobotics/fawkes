@@ -21,38 +21,26 @@
 #ifndef __SIM_ROBOTINO_SENSOR_INTERFACE_H_
 #define __SIM_ROBOTINO_SENSOR_INTERFACE_H_
 
-#include <logging/logger.h>
-#include <blackboard/blackboard.h>
+#include "sim_interface.h"
 
-//from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
-#include <gazebo/msgs/MessageTypes.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/transport/Node.hh>
+
 
 namespace fawkes {
   class RobotinoSensorInterface;
 }
 
-class SimRobotinoSensorInterface
+class SimRobotinoSensorInterface: public SimInterface
 {
  public:
-SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode);
+SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode)
+  : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimRobotinoSensorInterface")
+  {};
 
-  void init();
-  void loop();
-  void finalize();
+  virtual void init();
+  virtual void loop();
+  virtual void finalize();
  
  private:
-  //Name for the logger
-  const char* name = "SimRobotinoSensorInterface";
-  fawkes::Logger *logger;
-  fawkes::BlackBoard *blackboard;
-  gazebo::transport::NodePtr gazebonode;
-
-  //Publisher to send control-messages to gazebo
-  gazebo::transport::PublisherPtr controlPub;
-
   //Suscribers to recieve messages from gazebo
   gazebo::transport::SubscriberPtr gyroSub;
 

@@ -21,6 +21,8 @@
 #ifndef __PLUGINS_ROBOTINO_SIM_THREAD_H_
 #define __PLUGINS_ROBOTINO_SIM_THREAD_H_
 
+#include <list>
+
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
@@ -35,8 +37,7 @@
 #include <gazebo/transport/transport.hh>
 
 //simulated interfaces
-#include "interfaces/sim_robotinosensorinterface.h"
-#include "interfaces/sim_motorinterface.h"
+#include "interfaces/sim_interface.h"
 
 namespace fawkes {
   class BatteryInterface;
@@ -62,9 +63,7 @@ class RobotinoSimThread
   gazebo::transport::PublisherPtr stringPub;
 
   //provided interfaces
-  SimRobotinoSensorInterface *if_robotinoSensorInterface;
-  SimMotorInterface *if_motorInterface;
-
+  std::list<SimInterface*> interfaces_list;
 };
 
 #endif
