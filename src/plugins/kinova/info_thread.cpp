@@ -93,6 +93,10 @@ KinovaInfoThread::loop()
       __if_jaco->set_y(__cpos.Position[1]);
       __if_jaco->set_z(__cpos.Position[2]);
 
+      __if_jaco->set_euler1(__cpos.Rotation[0]);
+      __if_jaco->set_euler2(__cpos.Rotation[1]);
+      __if_jaco->set_euler3(__cpos.Rotation[2]);
+
       __if_jaco->set_finger1(__cpos.FingerPosition[0]);
       __if_jaco->set_finger2(__cpos.FingerPosition[1]);
       __if_jaco->set_finger3(__cpos.FingerPosition[2]);
