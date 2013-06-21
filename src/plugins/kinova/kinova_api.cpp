@@ -35,8 +35,11 @@
 #define EP_OUT          (2 | LIBUSB_ENDPOINT_OUT)
 #define INTR_LENGTH	64
 
+#define CMD_CTRL_ANG            47
+#define CMD_CTRL_CART           49
 #define CMD_GET_CART_POS        104
 #define CMD_GET_ANG_POS         105
+#define CMD_ERASE_TRAJECTORIES  301
 #define CMD_START_API_CTRL      302
 #define CMD_STOP_API_CTRL       303
 #define CMD_SEND_BASIC_TRAJ     308
@@ -48,6 +51,7 @@
 #define USB_CMD_OUT(msg)        (USB_CMD(EP_OUT,msg))
 
 #define USB_MSG(msg,pid,pquant,cmdid,cmdsize) { \
+  memset(&(msg.data), 0, 64);                      \
   msg.header.IdPacket = pid;                    \
   msg.header.PacketQuantity = pquant;           \
   msg.header.CommandId = cmdid;                 \
@@ -191,10 +195,11 @@ int
 JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
 {
   int r, transferred;
+  short exp = msg.header.CommandId;
 
   //printf("\n cmd_out_in send message: \n");
   //print_message(msg);
-  r = USB_CMD(EP_OUT, msg);
+  r = USB_CMD_OUT(msg);
   if( r < 0 ) {
     fprintf(stderr, "intr error %d\n", r);
     return r;
@@ -218,7 +223,10 @@ JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
   }
   //printf("sent interrupt %04x, transfered %i \n", *((uint16_t *) msg.data), transferred);
 
-  return 1;
+  if( exp != msg.header.CommandId)
+    throw fawkes::Exception("Kinova_API: Got CMD_ID %i, expected %i!", msg.header.CommandId, exp);
+
+  return 0;
 }
 
 int
@@ -246,7 +254,7 @@ int
 JacoArm::_get_cart_pos(position_t &pos)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 8)
+  USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 1)
 
   int r = _cmd_out_in(msg, sizeof(pos));
   if( r >= 0 )
@@ -259,7 +267,7 @@ int
 JacoArm::_get_ang_pos(position_t &pos)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 8)
+  USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 1)
 
   int r = _cmd_out_in(msg, sizeof(pos));
   if( r >= 0 )
@@ -272,18 +280,10 @@ int
 JacoArm::_send_basic_traj(basic_traj_t &traj)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_SEND_BASIC_TRAJ, sizeof(traj))
-  memcpy(msg.data, &traj, sizeof(traj));
+  USB_MSG(msg, 1, 1, CMD_SEND_BASIC_TRAJ, 48)
+  memcpy(&(msg.body), &traj, 48);
 
-  int r, transferred;
-  r = USB_CMD(EP_OUT, msg);
-  if( r < 0 ) {
-    fprintf(stderr, "intr error %d\n", r);
-  } else if( transferred < INTR_LENGTH ) {
-    fprintf(stderr, "short write (%d)\n", r);
-    r = -1;
-  }
-  return r;
+  return _cmd_out_in(msg, 48);
 }
 
 
@@ -296,9 +296,9 @@ JacoArm::print_message(message_t &msg)
   message_header_t h = msg.header;
   float *b = msg.body;
   printf("header: %i  %i  %i  %i \n", h.IdPacket, h.PacketQuantity, h.CommandId, h.CommandSize);
-  printf("body (7 rows, 8 colums, each entry 4 Byte float) \n");
-  for(unsigned int i=0; i<7; ++i) {
-    for(unsigned int j=0; j<8; ++j) {
+  printf("body (2 rows, 7 colums, each entry 4 Byte float) \n");
+  for(unsigned int i=0; i<2; ++i) {
+    for(unsigned int j=0; j<7; ++j) {
       printf("%f   ", *b);
       ++b;
     }
@@ -331,28 +331,59 @@ JacoArm::get_ang_pos() {
 void
 JacoArm::start_api_ctrl()
 {
-  int r = _cmd_out(CMD_START_API_CTRL);
-  if( r < 0 ) {
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_START_API_CTRL, 0)
+  int r = _cmd_out_in(msg, 0);
+  if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not start API control! libusb error code: %i.", r);
-  }
 }
 
 void
 JacoArm::stop_api_ctrl()
 {
-  int r = _cmd_out(CMD_STOP_API_CTRL);
-  if( r < 0 ) {
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_STOP_API_CTRL, 0)
+  int r = _cmd_out_in(msg, 0);
+  if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not stop API control! libusb error code: %i.", r);
-  }
+}
+
+void
+JacoArm::erase_trajectories()
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_ERASE_TRAJECTORIES, 0)
+  int r = _cmd_out_in(msg, 0);
+  if( r < 0 )
+    throw fawkes::Exception("Kinova_API: Could not erase trajectories! libusb error code: %i.", r);
+}
+
+void
+JacoArm::set_control_ang()
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_CTRL_ANG, 0)
+  int r = _cmd_out_in(msg, 0);
+  if( r < 0 )
+    throw fawkes::Exception("Kinova_API: Could not set angular control! libusb error code: %i.", r);
+}
+
+void
+JacoArm::set_control_cart()
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_CTRL_CART, 0)
+  int r = _cmd_out_in(msg, 0);
+  if( r < 0 )
+    throw fawkes::Exception("Kinova_API: Could not set cartesian control! libusb error code: %i.", r);
 }
 
 void
 JacoArm::set_target(basic_traj_t &traj)
 {
   int r = _send_basic_traj(traj);
-  if( r < 0 ) {
+  if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not send basic trajectory! libusb error code: %i.", r);
-  }
 }
 
 void
@@ -372,8 +403,8 @@ void
 JacoArm::set_target_ang(float joints[], float fingers[])
 {
   basic_traj_t traj;
-  memcpy(&traj.target, joints, 6);
-  memcpy(traj.target.FingerPosition, fingers, 3);
+  memcpy(&traj.target, joints, 24);
+  memcpy(traj.target.FingerPosition, fingers, 12);
   traj.time_delay = 0;
   traj.hand_mode = MODE_POSITION;
   traj.pos_type = POSITION_ANGULAR;

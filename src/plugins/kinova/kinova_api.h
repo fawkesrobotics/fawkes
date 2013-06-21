@@ -46,6 +46,11 @@ class JacoArm
   void start_api_ctrl();
   void stop_api_ctrl();
 
+  void erase_trajectories();
+
+  void set_control_ang();
+  void set_control_cart();
+
   void set_target(basic_traj_t &traj);
   void set_target_cart(float x, float y, float z, float euler_1, float euler_2, float euler_3, float finger_1, float finger_2, float finger_3);
   void set_target_cart(float coord[], float fingers[3]);
