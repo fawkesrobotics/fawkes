@@ -39,7 +39,7 @@ using namespace fawkes;
  */
 KinovaInfoThread::KinovaInfoThread()
   : Thread("KinovaInfoThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
   __arm = NULL;
   __if_jaco = NULL;
@@ -80,31 +80,32 @@ KinovaInfoThread::set_interface(JacoInterface *if_jaco)
 void
 KinovaInfoThread::loop()
 {
-  if(__arm != NULL && __if_jaco != NULL) {
-    __if_jaco->set_connected(true);
-
-    try {
-      __cpos = __arm->get_cart_pos();
-      __if_jaco->set_x(-__cpos.Position[1]);
-      __if_jaco->set_y( __cpos.Position[0]);
-      __if_jaco->set_z( __cpos.Position[2]);
-
-      __if_jaco->set_euler1(__cpos.Rotation[0]);
-      __if_jaco->set_euler2(__cpos.Rotation[1]);
-      __if_jaco->set_euler3(__cpos.Rotation[2]);
-
-      __if_jaco->set_finger1(__cpos.FingerPosition[0]);
-      __if_jaco->set_finger2(__cpos.FingerPosition[1]);
-      __if_jaco->set_finger3(__cpos.FingerPosition[2]);
-
-      __apos = __arm->get_ang_pos();
-      __if_jaco->set_joints(__apos.Joints);
-
-    } catch(fawkes::Exception &e) {
-      logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
-    }
-
-  } else {
+  if(__arm == NULL || __if_jaco == NULL) {
     __if_jaco->set_connected(false);
+    return;
+  }
+
+
+  __if_jaco->set_connected(true);
+
+  try {
+    __cpos = __arm->get_cart_pos();
+    __if_jaco->set_x(-__cpos.Position[1]);
+    __if_jaco->set_y( __cpos.Position[0]);
+    __if_jaco->set_z( __cpos.Position[2]);
+
+    __if_jaco->set_euler1(__cpos.Rotation[0]);
+    __if_jaco->set_euler2(__cpos.Rotation[1]);
+    __if_jaco->set_euler3(__cpos.Rotation[2]);
+
+    __if_jaco->set_finger1(__cpos.FingerPosition[0]);
+    __if_jaco->set_finger2(__cpos.FingerPosition[1]);
+    __if_jaco->set_finger3(__cpos.FingerPosition[2]);
+
+    __apos = __arm->get_ang_pos();
+    __if_jaco->set_joints(__apos.Joints);
+
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
   }
 }
