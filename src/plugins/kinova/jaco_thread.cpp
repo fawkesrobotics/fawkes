@@ -97,6 +97,10 @@ void
 KinovaJacoThread::loop()
 {
   while( ! __if_jaco->msgq_empty() ) {
+    Message *m = __if_jaco->msgq_first(m);
+    __if_jaco->set_msgid(m->id());
+    __if_jaco->set_final(false);
+    __if_jaco->write();
 
     if( __if_jaco->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
       JacoInterface::CartesianGotoMessage *msg = __if_jaco->msgq_first(msg);
