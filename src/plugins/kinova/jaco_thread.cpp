@@ -36,13 +36,14 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread)
+KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread)
   : Thread("KinovaJacoThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __arm = NULL;
   __if_jaco = NULL;
   __info_thread = info_thread;
+  __goto_thread = goto_thread;
 }
 
 
@@ -58,8 +59,9 @@ KinovaJacoThread::init()
     // create new JacoArm object (connects to arm via libusb)
     __arm = new JacoArm();
 
-    // register arm in KinovaInfoThread
+    // register arm in other threads
     __info_thread->register_arm(__arm);
+    __goto_thread->register_arm(__arm);
 
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
@@ -72,6 +74,8 @@ KinovaJacoThread::init()
 
     // set interface in other threads
     __info_thread->set_interface(__if_jaco);
+    __goto_thread->set_interface(__if_jaco);
+
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
   }
@@ -92,5 +96,45 @@ KinovaJacoThread::finalize()
 void
 KinovaJacoThread::loop()
 {
+  while( ! __if_jaco->msgq_empty() ) {
+
+    if( __if_jaco->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
+      JacoInterface::CartesianGotoMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
+                        msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+      __goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
+      JacoInterface::AngularGotoMessage *msg = __if_jaco->msgq_first(msg);
+
+      logger->log_debug(name(), "AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
+                        msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+      __goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::OpenGripperMessage>() ) {
+      JacoInterface::OpenGripperMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "OpenGripperMessage rcvd");
+
+      __goto_thread->open_gripper();
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::CloseGripperMessage>() ) {
+      JacoInterface::CloseGripperMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "CloseGripperMessage rcvd");
+
+      __goto_thread->close_gripper();
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::StopMessage>() ) {
+      JacoInterface::StopMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "StopMessage rcvd");
+
+      __goto_thread->stop();
+
+    } else {
+      logger->log_warn(name(), "Unknown message received");
+    }
+
+    __if_jaco->msgq_pop();
+  }
+
   __if_jaco->write();
 }

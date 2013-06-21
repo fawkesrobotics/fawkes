@@ -66,6 +66,166 @@ class JacoInterface : public Interface
 
  public:
   /* messages */
+  class StopMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopMessage_data_t;
+#pragma pack(pop)
+
+    StopMessage_data_t *data;
+
+   public:
+    StopMessage();
+    ~StopMessage();
+
+    StopMessage(const StopMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class CartesianGotoMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float x; /**< X-coordinate of target */
+      float y; /**< Y-coordinate of target */
+      float z; /**< Z-coordinate of target */
+      float e1; /**< 1st Euler angle of target rotation */
+      float e2; /**< 2nd Euler angle of target rotation */
+      float e3; /**< 3rd Euler angle of target rotation */
+    } CartesianGotoMessage_data_t;
+#pragma pack(pop)
+
+    CartesianGotoMessage_data_t *data;
+
+   public:
+    CartesianGotoMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_e1, const float ini_e2, const float ini_e3);
+    CartesianGotoMessage();
+    ~CartesianGotoMessage();
+
+    CartesianGotoMessage(const CartesianGotoMessage *m);
+    /* Methods */
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float z() const;
+    void set_z(const float new_z);
+    size_t maxlenof_z() const;
+    float e1() const;
+    void set_e1(const float new_e1);
+    size_t maxlenof_e1() const;
+    float e2() const;
+    void set_e2(const float new_e2);
+    size_t maxlenof_e2() const;
+    float e3() const;
+    void set_e3(const float new_e3);
+    size_t maxlenof_e3() const;
+    virtual Message * clone() const;
+  };
+
+  class AngularGotoMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float j1; /**< Angular value of 1st joint */
+      float j2; /**< Angular value of 2nd joint */
+      float j3; /**< Angular value of 3rd joint */
+      float j4; /**< Angular value of 4th joint */
+      float j5; /**< Angular value of 5th joint */
+      float j6; /**< Angular value of 6th joint */
+    } AngularGotoMessage_data_t;
+#pragma pack(pop)
+
+    AngularGotoMessage_data_t *data;
+
+   public:
+    AngularGotoMessage(const float ini_j1, const float ini_j2, const float ini_j3, const float ini_j4, const float ini_j5, const float ini_j6);
+    AngularGotoMessage();
+    ~AngularGotoMessage();
+
+    AngularGotoMessage(const AngularGotoMessage *m);
+    /* Methods */
+    float j1() const;
+    void set_j1(const float new_j1);
+    size_t maxlenof_j1() const;
+    float j2() const;
+    void set_j2(const float new_j2);
+    size_t maxlenof_j2() const;
+    float j3() const;
+    void set_j3(const float new_j3);
+    size_t maxlenof_j3() const;
+    float j4() const;
+    void set_j4(const float new_j4);
+    size_t maxlenof_j4() const;
+    float j5() const;
+    void set_j5(const float new_j5);
+    size_t maxlenof_j5() const;
+    float j6() const;
+    void set_j6(const float new_j6);
+    size_t maxlenof_j6() const;
+    virtual Message * clone() const;
+  };
+
+  class OpenGripperMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } OpenGripperMessage_data_t;
+#pragma pack(pop)
+
+    OpenGripperMessage_data_t *data;
+
+   public:
+    OpenGripperMessage();
+    ~OpenGripperMessage();
+
+    OpenGripperMessage(const OpenGripperMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class CloseGripperMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } CloseGripperMessage_data_t;
+#pragma pack(pop)
+
+    CloseGripperMessage_data_t *data;
+
+   public:
+    CloseGripperMessage();
+    ~CloseGripperMessage();
+
+    CloseGripperMessage(const CloseGripperMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   JacoInterface();

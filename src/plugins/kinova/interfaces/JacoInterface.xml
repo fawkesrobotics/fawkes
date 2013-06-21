@@ -27,4 +27,35 @@
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
   </data>
+
+  <message name="Stop">
+    <comment>Stop movement.</comment>
+  </message>
+
+  <message name="CartesianGoto">
+    <commment>Move arm to cartesian coordinates</commment>
+    <field type="float" name="x">X-coordinate of target</field>
+    <field type="float" name="y">Y-coordinate of target</field>
+    <field type="float" name="z">Z-coordinate of target</field>
+    <field type="float" name="e1">1st Euler angle of target rotation</field>
+    <field type="float" name="e2">2nd Euler angle of target rotation</field>
+    <field type="float" name="e3">3rd Euler angle of target rotation</field>
+  </message>
+
+  <message name="AngularGoto">
+    <comment>Move arm to given angular position</comment>
+    <field type="float" name="j1">Angular value of 1st joint</field>
+    <field type="float" name="j2">Angular value of 2nd joint</field>
+    <field type="float" name="j3">Angular value of 3rd joint</field>
+    <field type="float" name="j4">Angular value of 4th joint</field>
+    <field type="float" name="j5">Angular value of 5th joint</field>
+    <field type="float" name="j6">Angular value of 6th joint</field>
+  </message>
+
+  <message name="OpenGripper">
+    <comment>Open Gripper.</comment>
+  </message>
+  <message name="CloseGripper">
+    <comment>Close Gripper.</comment>
+  </message>
 </interface>

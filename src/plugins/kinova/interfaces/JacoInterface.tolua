@@ -4,6 +4,79 @@ namespace fawkes {
 class JacoInterface : public Interface
 {
 
+  class StopMessage : public Message
+  {
+    StopMessage();
+    ~StopMessage();
+
+  };
+
+  class CartesianGotoMessage : public Message
+  {
+    CartesianGotoMessage(float ini_x, float ini_y, float ini_z, float ini_e1, float ini_e2, float ini_e3);
+    CartesianGotoMessage();
+    ~CartesianGotoMessage();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float z();
+    void set_z(const float new_z);
+    int maxlenof_z() const;
+    float e1();
+    void set_e1(const float new_e1);
+    int maxlenof_e1() const;
+    float e2();
+    void set_e2(const float new_e2);
+    int maxlenof_e2() const;
+    float e3();
+    void set_e3(const float new_e3);
+    int maxlenof_e3() const;
+  };
+
+  class AngularGotoMessage : public Message
+  {
+    AngularGotoMessage(float ini_j1, float ini_j2, float ini_j3, float ini_j4, float ini_j5, float ini_j6);
+    AngularGotoMessage();
+    ~AngularGotoMessage();
+
+    float j1();
+    void set_j1(const float new_j1);
+    int maxlenof_j1() const;
+    float j2();
+    void set_j2(const float new_j2);
+    int maxlenof_j2() const;
+    float j3();
+    void set_j3(const float new_j3);
+    int maxlenof_j3() const;
+    float j4();
+    void set_j4(const float new_j4);
+    int maxlenof_j4() const;
+    float j5();
+    void set_j5(const float new_j5);
+    int maxlenof_j5() const;
+    float j6();
+    void set_j6(const float new_j6);
+    int maxlenof_j6() const;
+  };
+
+  class OpenGripperMessage : public Message
+  {
+    OpenGripperMessage();
+    ~OpenGripperMessage();
+
+  };
+
+  class CloseGripperMessage : public Message
+  {
+    CloseGripperMessage();
+    ~CloseGripperMessage();
+
+  };
+
   bool is_connected();
   void set_connected(const bool new_connected);
   int maxlenof_connected() const;

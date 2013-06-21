@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  jaco_thread.h - Kinova plugin Jaco thread
+ *  goto_thread.h - Kinova plugin Jaco movement thread
  *
- *  Created: Tue Jun 04 13:13:20 2013
+ *  Created: Thu Jun 20 15:04:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
  *
  ****************************************************************************/
@@ -20,11 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_JACO_THREAD_H_
-#define __PLUGINS_KINOVA_JACO_THREAD_H_
+#ifndef __PLUGINS_KINOVA_KINOVA_GOTO_THREAD_H_
+#define __PLUGINS_KINOVA_KINOVA_GOTO_THREAD_H_
 
-#include "info_thread.h"
-#include "goto_thread.h"
+#include "types.h"
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -36,9 +35,10 @@
 
 namespace fawkes {
   class JacoArm;
+  class JacoInterface;
 }
 
-class KinovaJacoThread
+class KinovaGotoThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -46,22 +46,41 @@ class KinovaJacoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread);
-  virtual ~KinovaJacoThread();
+  KinovaGotoThread();
+  virtual ~KinovaGotoThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
 
+  virtual void register_arm(fawkes::JacoArm *arm);
+  virtual void unregister_arm();
+  virtual void set_interface(fawkes::JacoInterface *if_jaco);
+
+  virtual void set_target(float x, float y, float z, float e1, float e2, float e3, float f1=0.f, float f2=0.f, float f3=0.f);
+  virtual void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float f1=0.f, float f2=0.f, float f3=0.f);
+  virtual void open_gripper();
+  virtual void close_gripper();
+  virtual void stop();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm        *__arm;
-  fawkes::JacoInterface  *__if_jaco;
+  fawkes::JacoArm         *__arm;
+  fawkes::JacoInterface   *__if_jaco;
 
-  KinovaInfoThread   *__info_thread;
-  KinovaGotoThread   *__goto_thread;
+  float __x, __y, __z;
+  float __e1, __e2, __e3;
+  float __f1, __f2, __f3;
+  float __joints[6];
+  float __finger_last[4]; // 3 positions + 1 counter
+
+  bool __new_target;
+  bool __target_angular;
+  bool __final;
+
+  void check_final();
 };
 
 

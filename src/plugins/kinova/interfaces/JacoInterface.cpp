@@ -61,7 +61,12 @@ JacoInterface::JacoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
-  unsigned char tmp_hash[] = {0x3, 0x15, 0x3d, 0x5a, 0xc0, 0xce, 0xc4, 0x41, 0xd6, 0x68, 0x32, 0xe1, 0x86, 0x5b, 0xce, 0x90};
+  add_messageinfo("StopMessage");
+  add_messageinfo("CartesianGotoMessage");
+  add_messageinfo("AngularGotoMessage");
+  add_messageinfo("OpenGripperMessage");
+  add_messageinfo("CloseGripperMessage");
+  unsigned char tmp_hash[] = {0xc0, 0xd, 0xa, 0x74, 0x61, 0x47, 0xad, 0x7e, 0x86, 0x33, 00, 0x4a, 0x32, 0x49, 0x5f, 0x44};
   set_hash(tmp_hash);
 }
 
@@ -511,8 +516,20 @@ JacoInterface::set_final(const bool new_final)
 Message *
 JacoInterface::create_message(const char *type) const
 {
-  throw UnknownTypeException("The given type '%s' does not match any known "
-                             "message type for this interface type.", type);
+  if ( strncmp("StopMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StopMessage();
+  } else if ( strncmp("CartesianGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new CartesianGotoMessage();
+  } else if ( strncmp("AngularGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new AngularGotoMessage();
+  } else if ( strncmp("OpenGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new OpenGripperMessage();
+  } else if ( strncmp("CloseGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new CloseGripperMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
 }
 
 
@@ -537,6 +554,664 @@ JacoInterface::enum_tostring(const char *enumtype, int val) const
 }
 
 /* =========== messages =========== */
+/** @class JacoInterface::StopMessage <interfaces/JacoInterface.h>
+ * StopMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+JacoInterface::StopMessage::StopMessage() : Message("StopMessage")
+{
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+JacoInterface::StopMessage::~StopMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::StopMessage::clone() const
+{
+  return new JacoInterface::StopMessage(this);
+}
+/** @class JacoInterface::CartesianGotoMessage <interfaces/JacoInterface.h>
+ * CartesianGotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_z initial value for z
+ * @param ini_e1 initial value for e1
+ * @param ini_e2 initial value for e2
+ * @param ini_e3 initial value for e3
+ */
+JacoInterface::CartesianGotoMessage::CartesianGotoMessage(const float ini_x, const float ini_y, const float ini_z, const float ini_e1, const float ini_e2, const float ini_e3) : Message("CartesianGotoMessage")
+{
+  data_size = sizeof(CartesianGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CartesianGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->x = ini_x;
+  data->y = ini_y;
+  data->z = ini_z;
+  data->e1 = ini_e1;
+  data->e2 = ini_e2;
+  data->e3 = ini_e3;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "e1", 1, &data->e1);
+  add_fieldinfo(IFT_FLOAT, "e2", 1, &data->e2);
+  add_fieldinfo(IFT_FLOAT, "e3", 1, &data->e3);
+}
+/** Constructor */
+JacoInterface::CartesianGotoMessage::CartesianGotoMessage() : Message("CartesianGotoMessage")
+{
+  data_size = sizeof(CartesianGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CartesianGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
+  add_fieldinfo(IFT_FLOAT, "e1", 1, &data->e1);
+  add_fieldinfo(IFT_FLOAT, "e2", 1, &data->e2);
+  add_fieldinfo(IFT_FLOAT, "e3", 1, &data->e3);
+}
+
+/** Destructor */
+JacoInterface::CartesianGotoMessage::~CartesianGotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::CartesianGotoMessage::CartesianGotoMessage(const CartesianGotoMessage *m) : Message("CartesianGotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CartesianGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get x value.
+ * X-coordinate of target
+ * @return x value
+ */
+float
+JacoInterface::CartesianGotoMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::CartesianGotoMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * X-coordinate of target
+ * @param new_x new x value
+ */
+void
+JacoInterface::CartesianGotoMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Y-coordinate of target
+ * @return y value
+ */
+float
+JacoInterface::CartesianGotoMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::CartesianGotoMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * Y-coordinate of target
+ * @param new_y new y value
+ */
+void
+JacoInterface::CartesianGotoMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get z value.
+ * Z-coordinate of target
+ * @return z value
+ */
+float
+JacoInterface::CartesianGotoMessage::z() const
+{
+  return data->z;
+}
+
+/** Get maximum length of z value.
+ * @return length of z value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::CartesianGotoMessage::maxlenof_z() const
+{
+  return 1;
+}
+
+/** Set z value.
+ * Z-coordinate of target
+ * @param new_z new z value
+ */
+void
+JacoInterface::CartesianGotoMessage::set_z(const float new_z)
+{
+  data->z = new_z;
+}
+
+/** Get e1 value.
+ * 1st Euler angle of target rotation
+ * @return e1 value
+ */
+float
+JacoInterface::CartesianGotoMessage::e1() const
+{
+  return data->e1;
+}
+
+/** Get maximum length of e1 value.
+ * @return length of e1 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::CartesianGotoMessage::maxlenof_e1() const
+{
+  return 1;
+}
+
+/** Set e1 value.
+ * 1st Euler angle of target rotation
+ * @param new_e1 new e1 value
+ */
+void
+JacoInterface::CartesianGotoMessage::set_e1(const float new_e1)
+{
+  data->e1 = new_e1;
+}
+
+/** Get e2 value.
+ * 2nd Euler angle of target rotation
+ * @return e2 value
+ */
+float
+JacoInterface::CartesianGotoMessage::e2() const
+{
+  return data->e2;
+}
+
+/** Get maximum length of e2 value.
+ * @return length of e2 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::CartesianGotoMessage::maxlenof_e2() const
+{
+  return 1;
+}
+
+/** Set e2 value.
+ * 2nd Euler angle of target rotation
+ * @param new_e2 new e2 value
+ */
+void
+JacoInterface::CartesianGotoMessage::set_e2(const float new_e2)
+{
+  data->e2 = new_e2;
+}
+
+/** Get e3 value.
+ * 3rd Euler angle of target rotation
+ * @return e3 value
+ */
+float
+JacoInterface::CartesianGotoMessage::e3() const
+{
+  return data->e3;
+}
+
+/** Get maximum length of e3 value.
+ * @return length of e3 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::CartesianGotoMessage::maxlenof_e3() const
+{
+  return 1;
+}
+
+/** Set e3 value.
+ * 3rd Euler angle of target rotation
+ * @param new_e3 new e3 value
+ */
+void
+JacoInterface::CartesianGotoMessage::set_e3(const float new_e3)
+{
+  data->e3 = new_e3;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::CartesianGotoMessage::clone() const
+{
+  return new JacoInterface::CartesianGotoMessage(this);
+}
+/** @class JacoInterface::AngularGotoMessage <interfaces/JacoInterface.h>
+ * AngularGotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_j1 initial value for j1
+ * @param ini_j2 initial value for j2
+ * @param ini_j3 initial value for j3
+ * @param ini_j4 initial value for j4
+ * @param ini_j5 initial value for j5
+ * @param ini_j6 initial value for j6
+ */
+JacoInterface::AngularGotoMessage::AngularGotoMessage(const float ini_j1, const float ini_j2, const float ini_j3, const float ini_j4, const float ini_j5, const float ini_j6) : Message("AngularGotoMessage")
+{
+  data_size = sizeof(AngularGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AngularGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->j1 = ini_j1;
+  data->j2 = ini_j2;
+  data->j3 = ini_j3;
+  data->j4 = ini_j4;
+  data->j5 = ini_j5;
+  data->j6 = ini_j6;
+  add_fieldinfo(IFT_FLOAT, "j1", 1, &data->j1);
+  add_fieldinfo(IFT_FLOAT, "j2", 1, &data->j2);
+  add_fieldinfo(IFT_FLOAT, "j3", 1, &data->j3);
+  add_fieldinfo(IFT_FLOAT, "j4", 1, &data->j4);
+  add_fieldinfo(IFT_FLOAT, "j5", 1, &data->j5);
+  add_fieldinfo(IFT_FLOAT, "j6", 1, &data->j6);
+}
+/** Constructor */
+JacoInterface::AngularGotoMessage::AngularGotoMessage() : Message("AngularGotoMessage")
+{
+  data_size = sizeof(AngularGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AngularGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "j1", 1, &data->j1);
+  add_fieldinfo(IFT_FLOAT, "j2", 1, &data->j2);
+  add_fieldinfo(IFT_FLOAT, "j3", 1, &data->j3);
+  add_fieldinfo(IFT_FLOAT, "j4", 1, &data->j4);
+  add_fieldinfo(IFT_FLOAT, "j5", 1, &data->j5);
+  add_fieldinfo(IFT_FLOAT, "j6", 1, &data->j6);
+}
+
+/** Destructor */
+JacoInterface::AngularGotoMessage::~AngularGotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::AngularGotoMessage::AngularGotoMessage(const AngularGotoMessage *m) : Message("AngularGotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AngularGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get j1 value.
+ * Angular value of 1st joint
+ * @return j1 value
+ */
+float
+JacoInterface::AngularGotoMessage::j1() const
+{
+  return data->j1;
+}
+
+/** Get maximum length of j1 value.
+ * @return length of j1 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::AngularGotoMessage::maxlenof_j1() const
+{
+  return 1;
+}
+
+/** Set j1 value.
+ * Angular value of 1st joint
+ * @param new_j1 new j1 value
+ */
+void
+JacoInterface::AngularGotoMessage::set_j1(const float new_j1)
+{
+  data->j1 = new_j1;
+}
+
+/** Get j2 value.
+ * Angular value of 2nd joint
+ * @return j2 value
+ */
+float
+JacoInterface::AngularGotoMessage::j2() const
+{
+  return data->j2;
+}
+
+/** Get maximum length of j2 value.
+ * @return length of j2 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::AngularGotoMessage::maxlenof_j2() const
+{
+  return 1;
+}
+
+/** Set j2 value.
+ * Angular value of 2nd joint
+ * @param new_j2 new j2 value
+ */
+void
+JacoInterface::AngularGotoMessage::set_j2(const float new_j2)
+{
+  data->j2 = new_j2;
+}
+
+/** Get j3 value.
+ * Angular value of 3rd joint
+ * @return j3 value
+ */
+float
+JacoInterface::AngularGotoMessage::j3() const
+{
+  return data->j3;
+}
+
+/** Get maximum length of j3 value.
+ * @return length of j3 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::AngularGotoMessage::maxlenof_j3() const
+{
+  return 1;
+}
+
+/** Set j3 value.
+ * Angular value of 3rd joint
+ * @param new_j3 new j3 value
+ */
+void
+JacoInterface::AngularGotoMessage::set_j3(const float new_j3)
+{
+  data->j3 = new_j3;
+}
+
+/** Get j4 value.
+ * Angular value of 4th joint
+ * @return j4 value
+ */
+float
+JacoInterface::AngularGotoMessage::j4() const
+{
+  return data->j4;
+}
+
+/** Get maximum length of j4 value.
+ * @return length of j4 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::AngularGotoMessage::maxlenof_j4() const
+{
+  return 1;
+}
+
+/** Set j4 value.
+ * Angular value of 4th joint
+ * @param new_j4 new j4 value
+ */
+void
+JacoInterface::AngularGotoMessage::set_j4(const float new_j4)
+{
+  data->j4 = new_j4;
+}
+
+/** Get j5 value.
+ * Angular value of 5th joint
+ * @return j5 value
+ */
+float
+JacoInterface::AngularGotoMessage::j5() const
+{
+  return data->j5;
+}
+
+/** Get maximum length of j5 value.
+ * @return length of j5 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::AngularGotoMessage::maxlenof_j5() const
+{
+  return 1;
+}
+
+/** Set j5 value.
+ * Angular value of 5th joint
+ * @param new_j5 new j5 value
+ */
+void
+JacoInterface::AngularGotoMessage::set_j5(const float new_j5)
+{
+  data->j5 = new_j5;
+}
+
+/** Get j6 value.
+ * Angular value of 6th joint
+ * @return j6 value
+ */
+float
+JacoInterface::AngularGotoMessage::j6() const
+{
+  return data->j6;
+}
+
+/** Get maximum length of j6 value.
+ * @return length of j6 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::AngularGotoMessage::maxlenof_j6() const
+{
+  return 1;
+}
+
+/** Set j6 value.
+ * Angular value of 6th joint
+ * @param new_j6 new j6 value
+ */
+void
+JacoInterface::AngularGotoMessage::set_j6(const float new_j6)
+{
+  data->j6 = new_j6;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::AngularGotoMessage::clone() const
+{
+  return new JacoInterface::AngularGotoMessage(this);
+}
+/** @class JacoInterface::OpenGripperMessage <interfaces/JacoInterface.h>
+ * OpenGripperMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+JacoInterface::OpenGripperMessage::OpenGripperMessage() : Message("OpenGripperMessage")
+{
+  data_size = sizeof(OpenGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+JacoInterface::OpenGripperMessage::~OpenGripperMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::OpenGripperMessage::OpenGripperMessage(const OpenGripperMessage *m) : Message("OpenGripperMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::OpenGripperMessage::clone() const
+{
+  return new JacoInterface::OpenGripperMessage(this);
+}
+/** @class JacoInterface::CloseGripperMessage <interfaces/JacoInterface.h>
+ * CloseGripperMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+JacoInterface::CloseGripperMessage::CloseGripperMessage() : Message("CloseGripperMessage")
+{
+  data_size = sizeof(CloseGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CloseGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+JacoInterface::CloseGripperMessage::~CloseGripperMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::CloseGripperMessage::CloseGripperMessage(const CloseGripperMessage *m) : Message("CloseGripperMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CloseGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::CloseGripperMessage::clone() const
+{
+  return new JacoInterface::CloseGripperMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -544,6 +1219,26 @@ JacoInterface::enum_tostring(const char *enumtype, int val) const
 bool
 JacoInterface::message_valid(const Message *message) const
 {
+  const StopMessage *m0 = dynamic_cast<const StopMessage *>(message);
+  if ( m0 != NULL ) {
+    return true;
+  }
+  const CartesianGotoMessage *m1 = dynamic_cast<const CartesianGotoMessage *>(message);
+  if ( m1 != NULL ) {
+    return true;
+  }
+  const AngularGotoMessage *m2 = dynamic_cast<const AngularGotoMessage *>(message);
+  if ( m2 != NULL ) {
+    return true;
+  }
+  const OpenGripperMessage *m3 = dynamic_cast<const OpenGripperMessage *>(message);
+  if ( m3 != NULL ) {
+    return true;
+  }
+  const CloseGripperMessage *m4 = dynamic_cast<const CloseGripperMessage *>(message);
+  if ( m4 != NULL ) {
+    return true;
+  }
   return false;
 }
 

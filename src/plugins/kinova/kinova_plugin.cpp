@@ -24,6 +24,7 @@
 
 #include "info_thread.h"
 #include "jaco_thread.h"
+#include "goto_thread.h"
 
 using namespace fawkes;
 
@@ -41,7 +42,11 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
 {
   KinovaInfoThread *info_thread = new KinovaInfoThread();
   thread_list.push_back(info_thread);
-  thread_list.push_back(new KinovaJacoThread(info_thread));
+
+  KinovaGotoThread *goto_thread = new KinovaGotoThread();
+  thread_list.push_back(goto_thread);
+
+  thread_list.push_back(new KinovaJacoThread(info_thread, goto_thread));
 }
 
 
