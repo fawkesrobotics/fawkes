@@ -34,9 +34,9 @@ namespace fawkes {
 typedef enum position_type_enum {
   POSITION_NO_MOVEMENT  = 0, // No Movements
   POSITION_CARTESIAN    = 1, // Cartesian Position Control
-  POSITION_ANGULAR      = 2, // Position Angular Control
+  POSITION_ANGULAR      = 2, // Angular Position Control
   SPEED_CARTESIAN       = 7, // Cartesian speed control
-  SPEED_ANGULAR         = 8, // Cartesian Angular control
+  SPEED_ANGULAR         = 8, // Angular speed control
   TIME_DELAY            = 12 // Insert Delay
 } position_type_t;
 
