@@ -7,6 +7,30 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
+; Examples:
+; 1. Find the node closest to a position ?pos (with extended comment)
+;    ?pos is multifield with two float cordinates like this: (?x ?y)
+;  ; the node of the final result
+;  (navgraph-node (name ?n1) (pos $?pos1))
+;  ; make sure there is no other node ?n2 (at ?pos2)  closer to ?pos than ?n1 with ?pos1
+;  (not (navgraph-node (name ?n2&~?n1) (pos $?pos2&:(navgraph-closer ?pos ?pos1 ?pos2))))
+
+; 2. Find the node closest to and different from node ?n (with extended comment)
+;  ; the node to be closest to, the "M1" constraint is arbitrary and for the sake of
+;  ; this example, choose the node by any criterion relevant to your application
+;  (navgraph-node (name ?n&"M1") (pos $?pos))
+;  ; the node of the final result
+;  (navgraph-node (name ?n1&~?n) (pos $?pos1))
+;  ; make sure there is no other node ?n2 (at ?pos2)  closer to ?pos than ?n1 with ?pos1
+;  (not (navgraph-node (name ?n2&~?n1&~?n) (pos $?pos2&:(navgraph-closer ?pos ?pos1 ?pos2))))
+
+; 3. Check for the closest node ?n1 to another node M1 with property "orientation"
+;  (navgraph-node (name ?n&"M1") (pos $?pos))
+;  (navgraph-node (name ?n1&~?n) (pos $?pos1)
+;		 (properties $?props&:(navgraph-has-property ?props "orientation")))
+;  (not (navgraph-node (name ?n2&~?n1&~?n) (pos $?pos2&:(navgraph-closer ?pos ?pos1 ?pos2))
+;		      (properties $?props2&:(navgraph-has-property ?props2 "orientation"))))
+
 (deftemplate navgraph
   (slot name (type STRING))
   (slot root (type STRING))
