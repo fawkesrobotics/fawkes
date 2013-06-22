@@ -93,6 +93,7 @@ public:
   float        cfg_resend_interval_; 
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
+  bool         cfg_log_graph_;
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
