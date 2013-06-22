@@ -172,6 +172,9 @@ class Transformer
   CompactFrameID            lookup_or_insert_frame_number(const std::string &frameid_str);
   std::string               lookup_frame_string(unsigned int frame_id_num) const;
   std::vector<std::string>  get_frame_id_mappings() const;
+  std::string               all_frames_as_dot(bool print_time = false,
+					      fawkes::Time *time = 0) const;
+
 
  protected:
   /// Flag to mark the transformer as disabled

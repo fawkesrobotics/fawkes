@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  file_reply.h - Web request file reply
+ *  tf_processor.h - Web request processor for TF data
  *
- *  Created: Thu Oct 23 13:47:33 2008
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Jun 19 17:44:36 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,36 +20,35 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_FILE_REPLY_H_
-#define __LIBS_WEBVIEW_FILE_REPLY_H_
+#ifndef __PLUGINS_WEBVIEW_TF_PROCESSOR_H_
+#define __PLUGINS_WEBVIEW_TF_PROCESSOR_H_
 
-#include <webview/reply.h>
-#include <cstdio>
+#include <webview/request_processor.h>
+
+#include <tf/transformer.h>
+
+#include <map>
+#include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
+  class BlackBoard;
+  class Interface;
 }
-#endif
 
-class DynamicFileWebReply : public DynamicWebReply
+class WebviewTfRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
-  DynamicFileWebReply(const char *filename);
-  DynamicFileWebReply(FILE *file, bool close_when_done = true);
-  virtual ~DynamicFileWebReply();
+  WebviewTfRequestProcessor(const char *baseurl,
+			    fawkes::tf::Transformer *transformer);
+  virtual ~WebviewTfRequestProcessor();
 
-  virtual size_t size();
-  virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
-
- private:
-  void determine_file_size();
+  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  FILE   *__file;
-  size_t  __size;
-  bool    __close_when_done;
+  char *baseurl_;
+  size_t baseurl_len_;
+  fawkes::tf::Transformer *transformer_;
+
 };
-
-} // end namespace fawkes
 
 #endif

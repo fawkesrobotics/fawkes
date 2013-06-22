@@ -45,12 +45,44 @@ namespace fawkes {
  * @param filename path and name of the file to transmit
  */
 DynamicFileWebReply::DynamicFileWebReply(const char *filename)
-  : DynamicWebReply(WebReply::HTTP_OK)
+  : DynamicWebReply(WebReply::HTTP_OK), __close_when_done(true)
 {
   if (access(filename, R_OK) != 0 || ((__file = fopen(filename, "r")) == NULL)) {
     throw fawkes::CouldNotOpenFileException(filename, errno);
   }
 
+  determine_file_size();
+
+  add_header("Content-type", fawkes::mimetype_file(filename));
+}
+
+/** Constructor.
+ * @param file file handle of file to transmit
+ * @param close_when_done true to close file after transmission is completed
+ */
+DynamicFileWebReply::DynamicFileWebReply(FILE *file, bool close_when_done)
+  : DynamicWebReply(WebReply::HTTP_OK),
+    __file(file), __close_when_done(close_when_done)
+{
+  fseek(__file, 0, SEEK_SET);
+  determine_file_size();
+  try {    
+    add_header("Content-type", fawkes::mimetype_file(dup(fileno(__file))));
+  } catch (Exception &e) {} // ignored
+  fseek(__file, 0, SEEK_SET);
+}
+
+/** Destructor. */
+DynamicFileWebReply::~DynamicFileWebReply()
+{
+  if (__close_when_done)  fclose(__file);
+  __file = NULL;
+}
+
+
+void
+DynamicFileWebReply::determine_file_size()
+{
   struct stat sbuf;
   fstat(fileno(__file), &sbuf);
 
@@ -58,14 +90,6 @@ DynamicFileWebReply::DynamicFileWebReply(const char *filename)
     throw fawkes::Exception("Cannot send directory\n");
   }
   __size = sbuf.st_size;
-
-  add_header("Content-type", fawkes::mimetype_file(filename));
-}
-
-/** Destructor. */
-DynamicFileWebReply::~DynamicFileWebReply()
-{
-  fclose(__file);
 }
 
 size_t
