@@ -561,8 +561,8 @@ NavGraphThread::log_graph()
     logger->log_info(name(), "Node %s @ (%f,%f)",
 		     n->name().c_str(), n->x(), n->y());
 
-    std::map<std::string, std::string> &props = n->properties();
-    std::map<std::string, std::string>::iterator p;
+    const std::map<std::string, std::string> &props = n->properties();
+    std::map<std::string, std::string>::const_iterator p;
     for (p = props.begin(); p != props.end(); ++p) {
       logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
     }
