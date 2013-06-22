@@ -52,14 +52,9 @@ WebviewStartPageRequestProcessor::~WebviewStartPageRequestProcessor()
 
 
 WebReply *
-WebviewStartPageRequestProcessor::process_request(const char *url,
-						  const char *method,
-						  const char *version,
-						  const char *upload_data,
-						  size_t *upload_data_size,
-						  void **session_data)
+WebviewStartPageRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp("/", url, 1) == 0 ) {
+  if ( strncmp("/", request->url().c_str(), 1) == 0 ) {
 
     WebPageReply *r = new WebPageReply("Fawkes", "<h1>Welcome to Fawkes.</h1>\n");
 

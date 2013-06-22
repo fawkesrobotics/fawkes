@@ -181,7 +181,7 @@ CLIPSAspectIniFin::new_env(const char *log_component_name)
     SetEnvironmentContext(env, cm);
 
     EnvAddRouterWithContext(env, (char *)"fawkeslog",
-                            /* exclusive */ 50,
+                            /* exclusive */ 30,
                             log_router_query,
                             log_router_print,
                             /* getc */   NULL,

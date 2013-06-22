@@ -48,8 +48,8 @@ using namespace fawkes;
  * @param logger logger
  */
 WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(const char *baseurl,
-						     const char *htdocs_dir,
-						     fawkes::Logger *logger)
+							     const char *htdocs_dir,
+							     fawkes::Logger *logger)
 {
   __logger         = logger;
   __baseurl        = strdup(baseurl);
@@ -68,16 +68,11 @@ WebviewStaticRequestProcessor::~WebviewStaticRequestProcessor()
 
 
 WebReply *
-WebviewStaticRequestProcessor::process_request(const char *url,
-					   const char *method,
-					   const char *version,
-					   const char *upload_data,
-					   size_t *upload_data_size,
-					   void **session_data)
+WebviewStaticRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, url, __baseurl_len) == 0 ) {
+  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
     // It is in our URL prefix range
-    std::string file_path = std::string(__htdocs_dir) + std::string(url).substr(__baseurl_len);
+    std::string file_path = std::string(__htdocs_dir) + request->url().substr(__baseurl_len);
 
     char rf[PATH_MAX];
     char *realfile = realpath(file_path.c_str(), rf);
@@ -104,7 +99,7 @@ WebviewStaticRequestProcessor::process_request(const char *url,
 	} catch (fawkes::Exception &e) {
 	  __logger->log_error("WebStaticReqProc",
 			      "Cannot fulfill request for file %s,"
-			      " exception follows", url);
+			      " exception follows", request->url().c_str());
 	  __logger->log_error("WebStaticReqProc", e);
 	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
 				       *(e.begin()));
@@ -118,7 +113,7 @@ WebviewStaticRequestProcessor::process_request(const char *url,
   } else {
     // wrong base url, why the heck are we called!?
     __logger->log_error("WebStaticReqProc", "Called for invalid base url "
-			"(url: %s, baseurl: %s)", url, __baseurl);
+			"(url: %s, baseurl: %s)", request->url().c_str(), __baseurl);
     return NULL;
   }
 }

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  rrdweb_processor.h - RRD web request processor
+ *  clips-webview-processor.h - CLIPS introspection via webview
  *
- *  Created: Tue Dec 21 01:11:01 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 15 20:15:18 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,32 +20,46 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRDWEB_RRDEWB_PROCESSOR_H_
-#define __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
+#ifndef __PLUGINS_CLIPS_WEBVIEW_CLIPS_WEBVIEW_PROCESSOR_H_
+#define __PLUGINS_CLIPS_WEBVIEW_CLIPS_WEBVIEW_PROCESSOR_H_
 
+#include <core/utils/lockptr.h>
 #include <webview/request_processor.h>
 
+#include <string>
+#include <list>
+
 namespace fawkes {
-  class RRDManager;
   class Logger;
 }
 
-class RRDWebRequestProcessor : public fawkes::WebRequestProcessor
+namespace CLIPS {
+  class Environment;
+}
+
+class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
-  RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager, fawkes::Logger *logger,
-			 const char *__baseurl);
+  ClipsWebRequestProcessor(fawkes::LockPtr<CLIPS::Environment> &clips, fawkes::Logger *logger,
+			   const char *baseurl);
 
-  virtual ~RRDWebRequestProcessor();
+  virtual ~ClipsWebRequestProcessor();
 
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
- private:
-  fawkes::RRDManager   *__rrd_man;
-  fawkes::Logger       *__logger;
+  void add_error(const char *str);
 
-  const char           *__baseurl;
-  size_t                __baseurl_len;
+ private:
+  void retract_fact(long int index);
+
+ private:
+  fawkes::LockPtr<CLIPS::Environment> clips_;
+  fawkes::Logger       *logger_;
+
+  const char           *baseurl_;
+  size_t                baseurl_len_;
+
+  std::list<std::string> errors_;
 };
 
 #endif

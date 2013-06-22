@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  request_processor.h - Web request processor
+ *  clips-webview-plugin.cpp - CLIPS introspection via webview
  *
- *  Created: Mon Oct 13 21:58:49 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 15 19:53:25 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,28 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_REQUEST_PROCESSOR_H_
+#include "clips-webview-thread.h"
+#include <core/plugin.h>
 
-#include <webview/reply.h>
-#include <webview/request.h>
+using namespace fawkes;
 
-namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
-
-class WebRequestProcessor
+/** CLIPS webview plugin.
+ * @author Tim Niemueller
+ */
+class ClipsWebviewPlugin : public fawkes::Plugin
 {
  public:
-  WebRequestProcessor();
-  virtual ~WebRequestProcessor();
-  virtual WebReply * process_request(const WebRequest *request) = 0;
-
- private:
-
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  ClipsWebviewPlugin(Configuration *config) : Plugin(config)
+  {
+    std::string cfg_clips_env = config->get_string("/clips-webview/env-name");
+    thread_list.push_back(new ClipsWebviewThread(cfg_clips_env));
+  }
 };
 
-} // end namespace fawkes
 
-#endif
+PLUGIN_DESCRIPTION("CLIPS introspection via webview")
+EXPORT_PLUGIN(ClipsWebviewPlugin)

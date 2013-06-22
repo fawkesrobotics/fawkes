@@ -38,6 +38,8 @@
 #include <cstring>
 #include <cstdlib>
 
+#include <microhttpd.h>
+
 #define UNAUTHORIZED_REPLY						\
   "<html>\n"								\
   " <head><title>Access denied</title></head>\n"			\
@@ -245,6 +247,42 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection)
 }
 
 
+/// @cond INTERNALS
+/** Iterator over key-value pairs where the value
+ * maybe made available in increments and/or may
+ * not be zero-terminated.  Used for processing
+ * POST data.
+ *
+ * @param cls user-specified closure
+ * @param kind type of the value
+ * @param key 0-terminated key for the value
+ * @param filename name of the uploaded file, NULL if not known
+ * @param content_type mime-type of the data, NULL if not known
+ * @param transfer_encoding encoding of the data, NULL if not known
+ * @param data pointer to size bytes of data at the
+ *              specified offset
+ * @param off offset of data in the overall value
+ * @param size number of bytes in data available
+ * @return MHD_YES to continue iterating,
+ *         MHD_NO to abort the iteration
+ */
+static int
+post_iterator(void *cls, enum MHD_ValueKind kind, const char *key,
+	     const char *filename, const char *content_type,
+	     const char *transfer_encoding, const char *data, uint64_t off,
+	     size_t size)
+{
+  WebRequest *request = static_cast<WebRequest *>(cls);
+
+  // Cannot handle files, yet
+  if (filename)  return MHD_NO;
+
+  request->set_post_value(key, data+off, size);
+
+  return MHD_YES;
+}
+/// @endcond
+
 /** Process request callback for libmicrohttpd.
  * @param connection libmicrohttpd connection instance
  * @param url URL, may contain escape sequences
@@ -265,11 +303,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 				      void **session_data)
 {
   std::string surl = url;
-  static int dummy;
   int ret;
-
-  if ((0 != strcmp(method, "GET")) && (0 != strcmp(method, "POST")))
-    return MHD_NO; /* unexpected method */
 
   MutexLocker lock(__url_manager->mutex());
   WebRequestProcessor *proc = __url_manager->find_processor(surl);
@@ -280,25 +314,22 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     std::string urls = urlc;
     free(urlc);
 
-    if (! proc->handles_session_data()) {
-      if ( *session_data == NULL) {
-	// The first time only the headers are valid,
-	// do not respond in the first round...
-	*session_data = &dummy;
-	return MHD_YES;
+    WebRequest *request;
+
+    if ( *session_data == NULL) {
+      // The first time only the headers are valid,
+      // do not respond in the first round...
+      request = new WebRequest(url, method, connection);
+      *session_data = request;
+
+      if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
+	request->pp_ =
+	  MHD_create_post_processor(connection, 1024, &post_iterator, request);
       }
-      *session_data = NULL; /* clear context pointer */
+
+      return MHD_YES;
     } else {
-      if ( *session_data == NULL) {
-	WebReply *reply = proc->process_request(urls.c_str(), method, version,
-						upload_data, upload_data_size,
-						session_data);
-	if ((reply != NULL) || (*session_data == NULL)) {
-	  return MHD_NO;
-	} else {
-	  return MHD_YES;
-	}
-      }
+      request = static_cast<WebRequest *>(*session_data);
     }
 
 #if MHD_VERSION >= 0x00090400
@@ -313,9 +344,19 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     }
 #endif
 
-    WebReply *reply = proc->process_request(urls.c_str(), method, version,
-					    upload_data, upload_data_size,
-					    session_data);
+    if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
+      if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
+	request->set_raw_post_data(upload_data, *upload_data_size);
+      }
+      if (0 != *upload_data_size) {
+	*upload_data_size = 0;
+	return MHD_YES;
+      }
+      MHD_destroy_post_processor(request->pp_);
+      request->pp_ = NULL;
+    }
+
+    WebReply *reply = proc->process_request(request);
     if ( reply ) {
       StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
       DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
@@ -337,12 +378,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 	delete reply;
       }
     } else {
-      if (proc->handles_session_data()) {
-	return MHD_YES;
-      } else {
-	WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-	ret = queue_static_reply(connection, &ereply);
-      }
+      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+      ret = queue_static_reply(connection, &ereply);
     }
   } else {
     if (surl == "/") {

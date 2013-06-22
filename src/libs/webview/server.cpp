@@ -22,6 +22,7 @@
 
 #include <webview/server.h>
 #include <webview/request_dispatcher.h>
+#include <webview/request.h>
 #include <core/exception.h>
 #include <core/exceptions/system.h>
 #include <logging/logger.h>
@@ -36,6 +37,17 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+/// @cond INTERNALS
+static void
+request_completed_callback(void *cls, struct MHD_Connection *connection, void **con_cls,
+			   enum MHD_RequestTerminationCode toe)
+{
+  WebRequest *request = static_cast<WebRequest *>(*con_cls);
+  delete request;
+}
+/// @endcond
+
 
 /** @class WebServer <webview/server.h>
  * Encapsulation of the libmicrohttpd webserver.
@@ -65,6 +77,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
+			      MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
 			      MHD_OPTION_END);
 
   if ( __daemon == NULL ) {
@@ -97,6 +110,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
+			      MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
 			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
 			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
 			      MHD_OPTION_END);

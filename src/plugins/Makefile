@@ -22,7 +22,8 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  katana pantilt roomba nao robotino \
 	  perception amcl \
 	  skiller luaagent worldmodel laserht laser-filter laser-pointclouds \
-	  static_transforms navgraph clips clips-agent clips-protobuf \
+	  static_transforms navgraph \
+	  clips clips-agent clips-protobuf clips-webview \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc \
 	  readylogagent
@@ -36,4 +37,5 @@ amcl perception robotino: ros
 mongodb_log: mongodb
 mongodb: rrd
 clips-agent clips-protobuf: clips
+clips-webview: clips webview
 
