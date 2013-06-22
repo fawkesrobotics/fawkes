@@ -120,8 +120,8 @@ function PPGOTO:loop()
 end
 
 function PPGOTO:reset()
-   --printf("ppgoto: sending stop");
-   --ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
+   printf("ppgoto: sending stop");
+   ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
 end
 
 
