@@ -14,8 +14,7 @@
 
 (deftemplate navgraph-node
   (slot name (type STRING))
-  (slot x (type FLOAT))
-  (slot y (type FLOAT))
+  (multislot pos (type FLOAT) (cardinality 2 2))
   (multislot properties (type STRING))
 )
 

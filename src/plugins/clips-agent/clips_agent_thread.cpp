@@ -411,7 +411,7 @@ ClipsAgentThread::clips_navgraph_load(std::string filename)
       for (auto p : properties) {
 	props_string += " \"" + p.first + "\" \"" + p.second + "\"";
       }
-      clips->assert_fact_f("(navgraph-node (name \"%s\") (x %f) (y %f) (properties %s))",
+      clips->assert_fact_f("(navgraph-node (name \"%s\") (pos %f %f) (properties %s))",
 			   n.name().c_str(), n.x(), n.y(), props_string.c_str());
     }
 
