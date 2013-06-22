@@ -154,6 +154,42 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y,
   }
 }
 
+/** Get node closest to another node with a certain property.
+ * @param node_name the name of the node from which to start
+ * @param property property the node must have to be considered,
+ * empty string to not check for any property
+ * @return node closest to the given point in the global frame, or an
+ * invalid node if such a node cannot be found. The node will obviously
+ * not be the node with the name @p node_name.
+ */
+TopologicalMapNode
+TopologicalMapGraph::closest_node_to(std::string node_name,
+				     std::string property)
+{
+  TopologicalMapNode n = node(node_name);
+  std::vector<TopologicalMapNode> nodes = search_nodes(property);
+
+  float min_dist = HUGE;
+
+  std::vector<TopologicalMapNode>::iterator i;
+  std::vector<TopologicalMapNode>::iterator elem = nodes.begin();
+  for (i = nodes.begin(); i != nodes.end(); ++i) {
+    float dx   = i->x() - n.x();
+    float dy   = i->y() - n.y();
+    float dist = sqrtf(dx * dx + dy * dy);
+    if ((sqrtf(dx * dx + dy * dy) < min_dist) && (i->name() != node_name)) {
+      min_dist = dist;
+      elem = i;
+    }
+  }
+
+  if (elem == nodes.end()) {
+    return TopologicalMapNode();
+  } else {
+    return *elem;
+  }
+}
+
 
 /** Check if a certain node exists.
  * @param name name of the node to look for
