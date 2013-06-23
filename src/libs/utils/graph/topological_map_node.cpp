@@ -34,6 +34,7 @@ namespace fawkes {
 
 /** Constructor for invalid node. */
 TopologicalMapNode::TopologicalMapNode()
+  : unconnected_(false)
 {
 }
 
@@ -46,6 +47,7 @@ TopologicalMapNode::TopologicalMapNode()
  */
 TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y,
                                        std::map<std::string, std::string> properties)
+  : unconnected_(false)
 {
   name_ = name;
   x_ = x;
@@ -60,6 +62,7 @@ TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y,
  * @param y y coordinate in global frame of node
  */
 TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y)
+  : unconnected_(false)
 {
   name_ = name;
   x_ = x;
@@ -93,6 +96,21 @@ void
 TopologicalMapNode::set_name(std::string name)
 {
   name_ = name;
+}
+
+/** Set unconnected state of the node.
+ * A node must be marked as unconnected explicitly or otherwise it is an
+ * error that the graph will report as an error. On other hand, unconnected
+ * nodes may not have any connection. By default nodes are expected to
+ * have at least one connection (behaving as though this function had been
+ * called with "false").
+ * @param unconnected true to make this node a unconnected node,
+ * false otherwise
+ */
+void
+TopologicalMapNode::set_unconnected(bool unconnected)
+{
+  unconnected_ = unconnected;
 }
 
 
