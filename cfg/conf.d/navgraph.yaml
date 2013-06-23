@@ -20,18 +20,22 @@ plugins/navgraph:
   # Max. distance between actual and target positions to deem the target
   # reached. This value is for intermediate nodes on a path; m
   # The value can be overwritten per node in the graph file.
-  travel-tolerance: 0.25
+  travel_tolerance: 0.25
 
   # Max. distance between actual and target positions to deem the target
   # reached. This value is for the last node on a path; m
   # The value can be overwritten per node in the graph file.
-  target-tolerance: 0.25
+  target_tolerance: 0.15
+
+  # Max. distance between actual and target orientation to deem the target
+  # reached. This value is for the last node on a path; rad
+  orientation_tolerance: 0.2
 
   # Visualize graph and current actions?
   visualization: true
 
   # Interval in which the resend the goto command; sec
-  resend_interval: 0.25
+  resend_interval: 6.0
 
   # Time to keep moving after the target tolerance has been reached; sec
   target_time: 2.5
