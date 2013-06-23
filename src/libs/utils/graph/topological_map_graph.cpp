@@ -367,9 +367,19 @@ TopologicalMapGraph::assert_connected()
     TopologicalMapNode &n = q.front();
     traversed.insert(n.name());
 
-    std::vector<std::string> reachable = n.reachable_nodes();
-    std::vector<std::string>::iterator r;
+    const std::vector<std::string> & reachable = n.reachable_nodes();
+
+    if (n.unconnected() && !reachable.empty()) {
+      throw Exception("Node %s is marked unconnected but nodes are reachable from it",
+		      n.name().c_str());
+    }
+    std::vector<std::string>::const_iterator r;
     for (r = reachable.begin(); r != reachable.end(); ++r) {
+      TopologicalMapNode target(node(*r));
+      if (target.unconnected()) {
+	throw Exception("Node %s is marked unconnected but is reachable from node %s\n",
+			target.name().c_str(), n.name().c_str());
+      }
       if (traversed.find(*r) == traversed.end()) q.push(node(*r));
     }
     q.pop();
@@ -386,13 +396,42 @@ TopologicalMapGraph::assert_connected()
 			traversed.begin(), traversed.end(),
 			std::inserter(nodediff, nodediff.begin()));
 
-    std::set<std::string>::iterator d = nodediff.begin();
-    std::string unconnected = *d;
-    for (++d; d != nodediff.end(); ++d) {
-      unconnected += ", " + *d;
+    // the nodes might be unconnected, in which case it is not
+    // an error that they were mentioned. But it might still be
+    // a problem if there was a *directed* outgoing edge from the
+    // unconnected node, which we couldn't have spotted earlier
+    std::set<std::string>::const_iterator ud = nodediff.begin();
+    while (ud != nodediff.end()) {
+      TopologicalMapNode udnode(node(*ud));
+      if (udnode.unconnected()) {
+	// it's ok to be in the disconnected set, but check if it has any
+	// reachable nodes which is forbidden
+	if (! udnode.reachable_nodes().empty()) {
+	  throw Exception("Node %s is marked unconnected but nodes are reachable from it",
+			  ud->c_str());
+	}
+#if __cplusplus > 201100L || defined(__GXX_EXPERIMENTAL_CXX0X__)
+	ud = nodediff.erase(ud);
+#else
+	std::set<std::string>::const_iterator delit = ud;
+	++ud;
+	nodediff.erase(delit);
+#endif
+      } else {
+	++ud;
+      }
     }
-    throw Exception("The graph is not fully connected, cannot reach (%s) from '%s' for example",
-		    unconnected.c_str(), nodes_[0].name().c_str());
+
+    if (! nodediff.empty()) {
+      std::set<std::string>::iterator d = nodediff.begin();
+      std::string disconnected = *d;
+      for (++d; d != nodediff.end(); ++d) {
+	disconnected += ", " + *d;
+      }
+      throw Exception("The graph is not fully connected, "
+		      "cannot reach (%s) from '%s' for example",
+		      disconnected.c_str(), nodes_[0].name().c_str());
+    }
   }
 }
 
