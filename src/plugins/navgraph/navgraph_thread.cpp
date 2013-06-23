@@ -555,14 +555,28 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
 void
 NavGraphThread::log_graph()
 {
-  std::vector<TopologicalMapNode> nodes = graph_->nodes();
-  std::vector<TopologicalMapNode>::iterator n;
+  const std::vector<TopologicalMapNode> & nodes = graph_->nodes();
+  std::vector<TopologicalMapNode>::const_iterator n;
   for (n = nodes.begin(); n != nodes.end(); ++n) {
-    logger->log_info(name(), "Node %s @ (%f,%f)",
-		     n->name().c_str(), n->x(), n->y());
+    logger->log_info(name(), "Node %s @ (%f,%f)%s",
+		     n->name().c_str(), n->x(), n->y(),
+		     n->unconnected() ? " UNCONNECTED" : "");
 
-    std::map<std::string, std::string> &props = n->properties();
-    std::map<std::string, std::string>::iterator p;
+    const std::map<std::string, std::string> &props = n->properties();
+    std::map<std::string, std::string>::const_iterator p;
+    for (p = props.begin(); p != props.end(); ++p) {
+      logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
+    }
+  }
+
+  std::vector<TopologicalMapEdge> edges = graph_->edges();
+  std::vector<TopologicalMapEdge>::iterator e;
+  for (e = edges.begin(); e != edges.end(); ++e) {
+    logger->log_info(name(), "Edge %10s --%s %s",
+		     e->from().c_str(), e->is_directed() ? ">" : "-", e->to().c_str());
+
+    const std::map<std::string, std::string> &props = e->properties();
+    std::map<std::string, std::string>::const_iterator p;
     for (p = props.begin(); p != props.end(); ++p) {
       logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
     }
