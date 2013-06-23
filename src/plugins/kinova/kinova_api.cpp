@@ -42,6 +42,7 @@
 #define CMD_ERASE_TRAJECTORIES  301
 #define CMD_START_API_CTRL      302
 #define CMD_STOP_API_CTRL       303
+#define CMD_JOYSTICK            305
 #define CMD_SEND_BASIC_TRAJ     308
 
 #define USB_CMD(ep,msg)         \
@@ -49,9 +50,8 @@
 
 #define USB_CMD_IN(msg)         (USB_CMD(EP_IN,msg))
 #define USB_CMD_OUT(msg)        (USB_CMD(EP_OUT,msg))
-
 #define USB_MSG(msg,pid,pquant,cmdid,cmdsize) { \
-  memset(&(msg.data), 0, 64);                      \
+  memset(msg.data, 0, sizeof(msg));             \
   msg.header.IdPacket = pid;                    \
   msg.header.PacketQuantity = pquant;           \
   msg.header.CommandId = cmdid;                 \
@@ -233,7 +233,7 @@ int
 JacoArm::_cmd_out(short cmd)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, cmd, 8)
+  USB_MSG(msg, 1, 1, cmd, 8);
 
   int r, transferred;
   r = USB_CMD(EP_OUT, msg);
@@ -254,7 +254,7 @@ int
 JacoArm::_get_cart_pos(position_t &pos)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 1)
+  USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 1);
 
   int r = _cmd_out_in(msg, sizeof(pos));
   if( r >= 0 )
@@ -267,7 +267,7 @@ int
 JacoArm::_get_ang_pos(position_t &pos)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 1)
+  USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 1);
 
   int r = _cmd_out_in(msg, sizeof(pos));
   if( r >= 0 )
@@ -280,7 +280,7 @@ int
 JacoArm::_send_basic_traj(basic_traj_t &traj)
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_SEND_BASIC_TRAJ, 48)
+  USB_MSG(msg, 1, 1, CMD_SEND_BASIC_TRAJ, 48);
   memcpy(&(msg.body), &traj, 48);
 
   return _cmd_out_in(msg, 48);
@@ -313,7 +313,6 @@ JacoArm::get_cart_pos() {
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get cartesian position! libusb error code: %i.", r);
   }
-
   return pos;
 }
 
@@ -324,7 +323,6 @@ JacoArm::get_ang_pos() {
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get angular position! libusb error code: %i.", r);
   }
-
   return pos;
 }
 
@@ -332,7 +330,7 @@ void
 JacoArm::start_api_ctrl()
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_START_API_CTRL, 0)
+  USB_MSG(msg, 1, 1, CMD_START_API_CTRL, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not start API control! libusb error code: %i.", r);
@@ -342,7 +340,7 @@ void
 JacoArm::stop_api_ctrl()
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_STOP_API_CTRL, 0)
+  USB_MSG(msg, 1, 1, CMD_STOP_API_CTRL, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not stop API control! libusb error code: %i.", r);
@@ -352,7 +350,7 @@ void
 JacoArm::erase_trajectories()
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_ERASE_TRAJECTORIES, 0)
+  USB_MSG(msg, 1, 1, CMD_ERASE_TRAJECTORIES, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not erase trajectories! libusb error code: %i.", r);
@@ -362,7 +360,7 @@ void
 JacoArm::set_control_ang()
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_CTRL_ANG, 0)
+  USB_MSG(msg, 1, 1, CMD_CTRL_ANG, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not set angular control! libusb error code: %i.", r);
@@ -372,10 +370,35 @@ void
 JacoArm::set_control_cart()
 {
   message_t msg;
-  USB_MSG(msg, 1, 1, CMD_CTRL_CART, 0)
+  USB_MSG(msg, 1, 1, CMD_CTRL_CART, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
     throw fawkes::Exception("Kinova_API: Could not set cartesian control! libusb error code: %i.", r);
+}
+
+void
+JacoArm::push_joystick_button(unsigned short id)
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_JOYSTICK, 56);
+
+  unsigned short *buttons = (unsigned short*)msg.body;
+  buttons[id] = 1;
+
+  int r = _cmd_out_in(msg, 56);
+  if( r < 0 )
+    throw fawkes::Exception("Kinova_API: Could not send joystick command! libusb error code: %i.", r);
+}
+
+void
+JacoArm::release_joystick()
+{
+  message_t msg;
+  USB_MSG(msg, 1, 1, CMD_JOYSTICK, 56);
+
+  int r = _cmd_out_in(msg, 56);
+  if( r < 0 )
+    throw fawkes::Exception("Kinova_API: Could not release joystick! libusb error code: %i.", r);
 }
 
 void

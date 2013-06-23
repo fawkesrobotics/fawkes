@@ -57,6 +57,9 @@ class JacoArm
   void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float finger_1, float finger_2, float finger_3);
   void set_target_ang(float joints[], float fingers[3]);
 
+  void push_joystick_button(unsigned short id);
+  void release_joystick();
+
  private:
   static libusb_context  *__lusb_ctx;
 

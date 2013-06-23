@@ -65,6 +65,8 @@ typedef struct basic_traj_struct {
   position_type_t pos_type;
 } basic_traj_t;
 
+typedef unsigned short joystick_button_t[16];
+
 typedef struct message_header_struct {
   short IdPacket;
   short PacketQuantity;
