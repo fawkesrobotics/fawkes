@@ -120,6 +120,7 @@ TopologicalMapGraph::root_node() const
 
 
 /** Get node closest to a specified point with a certain property.
+ * This search does *NOT* consider unconnected nodes.
  * @param pos_x X coordinate in global (map) frame
  * @param pos_y X coordinate in global (map) frame
  * @param property property the node must have to be considered,
@@ -128,7 +129,38 @@ TopologicalMapGraph::root_node() const
  * invalid node if such a node cannot be found
  */
 TopologicalMapNode
-TopologicalMapGraph::closest_node(float pos_x, float pos_y,
+TopologicalMapGraph::closest_node(float pos_x, float pos_y, std::string property)
+{
+  return closest_node(pos_x, pos_y, false, property);
+}
+
+/** Get node closest to another node with a certain property.
+ * This search does *NOT* consider unconnected nodes.
+ * @param node_name the name of the node from which to start
+ * @param property property the node must have to be considered,
+ * empty string to not check for any property
+ * @return node closest to the given point in the global frame, or an
+ * invalid node if such a node cannot be found. The node will obviously
+ * not be the node with the name @p node_name.
+ */
+TopologicalMapNode
+TopologicalMapGraph::closest_node_to(std::string node_name, std::string property)
+{
+  return closest_node_to(node_name, false, property);
+}
+
+/** Get node closest to a specified point with a certain property.
+ * @param pos_x X coordinate in global (map) frame
+ * @param pos_y X coordinate in global (map) frame
+ * @param consider_unconnected consider unconnected node for the search
+ * of the closest node
+ * @param property property the node must have to be considered,
+ * empty string to not check for any property
+ * @return node closest to the given point in the global frame, or an
+ * invalid node if such a node cannot be found
+ */
+TopologicalMapNode
+TopologicalMapGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
                                   std::string property)
 {
   std::vector<TopologicalMapNode> nodes = search_nodes(property);
@@ -138,6 +170,8 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y,
   std::vector<TopologicalMapNode>::iterator i;
   std::vector<TopologicalMapNode>::iterator elem = nodes.begin();
   for (i = nodes.begin(); i != nodes.end(); ++i) {
+    if (! consider_unconnected && i->unconnected())  continue;
+
     float dx   = i->x() - pos_x;
     float dy   = i->y() - pos_y;
     float dist = sqrtf(dx * dx + dy * dy);
@@ -156,6 +190,8 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y,
 
 /** Get node closest to another node with a certain property.
  * @param node_name the name of the node from which to start
+ * @param consider_unconnected consider unconnected node for the search
+ * of the closest node
  * @param property property the node must have to be considered,
  * empty string to not check for any property
  * @return node closest to the given point in the global frame, or an
@@ -163,7 +199,7 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y,
  * not be the node with the name @p node_name.
  */
 TopologicalMapNode
-TopologicalMapGraph::closest_node_to(std::string node_name,
+TopologicalMapGraph::closest_node_to(std::string node_name, bool consider_unconnected,
 				     std::string property)
 {
   TopologicalMapNode n = node(node_name);
@@ -174,6 +210,8 @@ TopologicalMapGraph::closest_node_to(std::string node_name,
   std::vector<TopologicalMapNode>::iterator i;
   std::vector<TopologicalMapNode>::iterator elem = nodes.begin();
   for (i = nodes.begin(); i != nodes.end(); ++i) {
+    if (! consider_unconnected && i->unconnected())  continue;
+
     float dx   = i->x() - n.x();
     float dy   = i->y() - n.y();
     float dist = sqrtf(dx * dx + dy * dy);

@@ -54,6 +54,12 @@ class TopologicalMapGraph
   TopologicalMapNode closest_node_to(std::string node_name,
 				     std::string property = "");
 
+  TopologicalMapNode closest_node(float pos_x, float pos_y, bool consider_unconnected,
+                                  std::string property = "");
+  
+  TopologicalMapNode closest_node_to(std::string node_name, bool consider_unconnected,
+				     std::string property = "");
+
   std::vector<TopologicalMapNode> search_nodes(std::string property);
 
   std::vector<std::string>  reachable_nodes(std::string node_name) const;
