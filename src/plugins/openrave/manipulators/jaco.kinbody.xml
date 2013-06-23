@@ -150,18 +150,17 @@
 
 
   <!-- Gripper -->
-  <!-- Gripper_Base
+  <!-- HandRoll
        This is just a basic plate (temporary?), where the gripper will be mounted on. We use this plate to apply
        necessary translations/rotations to this and have less transformations for the other gripper parts.
   -->
-  <Body name="GripperBase" type="dynamic">
+  <Body name="HandRoll" type="dynamic">
     <offsetfrom>WristRoll</offsetfrom>
     <Translation>0.034284455 0 0.065859824</Translation>
     <RotationAxis>0 1 0 55</RotationAxis>
-    <Geom type="cylinder">
-      <Radius>0.029</Radius>
-      <Height>0.001</Height>
-      <RotationAxis>1 0 0 90</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_hand_roll_joint2.stl</Data>
+      <Render>jaco_hand_roll_joint2.stl</Render>
       <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
     </Geom>
 
@@ -174,6 +173,59 @@
   </Body>
 
 
+<!--
+  <Body name="HandIK" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>0 0 0.188</Translation>
+    <Geom type="Box">
+      <Extents>0.1 0.01 0.0001</Extents>
+    </Geom>
+  </Body>
+-->
+
+  <!-- HandFinger
+       The 3 fingers. The position is estimated, but the IK position should be correct
+       (188mm from HandRoll)
+  -->
+  <Body name="FingerSingle" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>-0.04 0 0.115</Translation>
+    <RotationAxis>0 1 0 8</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_finger_joint.stl</Data>
+      <Render>jaco_finger_joint.stl</Render>
+      <RotationAxis>0 0 0 180</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+  <Body name="FingerDualLeft" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>0.037 -0.021 0.115</Translation>
+    <RotationAxis>0 1 0 8</RotationAxis>
+    <RotationAxis>0 0 1 165</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_finger_joint.stl</Data>
+      <Render>jaco_finger_joint.stl</Render>
+      <RotationAxis>0 0 0 180</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+  <Body name="FingerDualRight" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>0.037 0.021 0.115</Translation>
+    <RotationAxis>0 1 0 8</RotationAxis>
+    <RotationAxis>0 0 1 195</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_finger_joint.stl</Data>
+      <Render>jaco_finger_joint.stl</Render>
+      <RotationAxis>0 0 0 180</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+
+
   <!-- Joints
        All joints are "circular", which means they have no rotation limit.
   -->
@@ -184,7 +236,7 @@
     <weight>1</weight>
     <limitsdeg>-180 180</limitsdeg>
     <Anchor>0 0 -0.118</Anchor>
-    <axis>0 0 1</axis>
+    <axis>0 0 -1</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
@@ -206,7 +258,7 @@
     <offsetfrom>ElbowPitch</offsetfrom>
     <weight>1</weight>
     <limitsdeg>-180 180</limitsdeg>
-    <axis>1 0 0</axis>
+    <axis>-1 0 0</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
@@ -217,7 +269,7 @@
     <offsetfrom>ElbowRoll</offsetfrom>
     <weight>1</weight>
     <limitsdeg>-180 180</limitsdeg>
-    <axis>0 0 1</axis>
+    <axis>0 0 -1</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
@@ -228,19 +280,45 @@
     <offsetfrom>WristRoll</offsetfrom>
     <weight>1</weight>
     <limitsdeg>-180 180</limitsdeg>
-    <axis>0 0 1</axis>
+    <axis>0 0 -1</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
 
-  <Joint name="j_GripperBase" type="hinge" circular="true">
+  <Joint name="j_HandRoll" type="hinge" circular="true">
     <Body>WristRoll</Body>
-    <Body>GripperBase</Body>
-    <offsetfrom>GripperBase</offsetfrom>
+    <Body>HandRoll</Body>
+    <offsetfrom>HandRoll</offsetfrom>
     <weight>1</weight>
     <limitsdeg>-180 180</limitsdeg>
-    <axis>0 0 1</axis>
+    <axis>0 0 -1</axis>
     <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <!-- Gripper Joints -->
+  <Joint name="j_FingerSingle" type="hinge" enable="false">
+    <Body>HandRoll</Body>
+    <Body>FingerSingle</Body>
+    <offsetfrom>FingerSingle</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>0 0</limitsdeg>
+    <resolution>1</resolution>
+  </Joint>
+  <Joint name="j_FingerDualLeft" type="hinge" enable="false">
+    <Body>HandRoll</Body>
+    <Body>FingerDualLeft</Body>
+    <offsetfrom>FingerDualLeft</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>0 0</limitsdeg>
+    <resolution>1</resolution>
+  </Joint>
+  <Joint name="j_FingerDualRight" type="hinge" enable="false">
+    <Body>HandRoll</Body>
+    <Body>FingerDualRight</Body>
+    <offsetfrom>FingerDualRight</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>0 0</limitsdeg>
     <resolution>1</resolution>
   </Joint>
 
