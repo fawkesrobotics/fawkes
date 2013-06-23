@@ -25,7 +25,7 @@ LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesop
 OBJS_openrave = openrave_plugin.o openrave_thread.o message_handler_thread.o
 
 LIBS_libfawkesopenrave = m fawkescore fawkesutils $(LIBS_OPENRAVE)
-OBJS_libfawkesopenrave = environment.o robot.o manipulator.o manipulators/katana6M180.o manipulators/neuronics_katana.o
+OBJS_libfawkesopenrave = environment.o robot.o manipulator.o manipulators/katana6M180.o manipulators/neuronics_katana.o manipulators/kinova_jaco.o
 
 OBJS_all    = $(OBJS_openrave) $(OBJS_libfawkesopenrave)
 
