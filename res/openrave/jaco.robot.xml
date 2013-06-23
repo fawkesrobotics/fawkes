@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Robot name="jaco_robot">
+
+  <Robot prefix="arm_" file="jaco.kinbody.xml" name="jaco_arm">
+    <RotationAxis>0 0 1 90</RotationAxis>
+  </Robot>
+
+
+  <Manipulator name="fingertip">
+    <base>arm_Base</base>
+    <effector>arm_HandRoll</effector>
+    <translation>0 0 0.188</translation>
+    <RotationAxis>0 0 1 -90</RotationAxis>
+    <joints>arm_j_FingerSingle</joints>
+    <closingdirection>-1</closingdirection>
+    <direction>0 0 1</direction>
+  </Manipulator>
+
+</Robot>
