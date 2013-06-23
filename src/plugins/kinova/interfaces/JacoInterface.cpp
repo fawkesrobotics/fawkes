@@ -66,7 +66,9 @@ JacoInterface::JacoInterface() : Interface()
   add_messageinfo("AngularGotoMessage");
   add_messageinfo("OpenGripperMessage");
   add_messageinfo("CloseGripperMessage");
-  unsigned char tmp_hash[] = {0xc0, 0xd, 0xa, 0x74, 0x61, 0x47, 0xad, 0x7e, 0x86, 0x33, 00, 0x4a, 0x32, 0x49, 0x5f, 0x44};
+  add_messageinfo("JoystickPushMessage");
+  add_messageinfo("JoystickReleaseMessage");
+  unsigned char tmp_hash[] = {0x99, 0x32, 0x65, 0x34, 0xc0, 0xa3, 0xfe, 0xa7, 0x7b, 0x37, 0x1d, 0x56, 0x79, 0xe3, 0xd9, 0xb9};
   set_hash(tmp_hash);
 }
 
@@ -526,6 +528,10 @@ JacoInterface::create_message(const char *type) const
     return new OpenGripperMessage();
   } else if ( strncmp("CloseGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new CloseGripperMessage();
+  } else if ( strncmp("JoystickPushMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new JoystickPushMessage();
+  } else if ( strncmp("JoystickReleaseMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new JoystickReleaseMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1212,6 +1218,142 @@ JacoInterface::CloseGripperMessage::clone() const
 {
   return new JacoInterface::CloseGripperMessage(this);
 }
+/** @class JacoInterface::JoystickPushMessage <interfaces/JacoInterface.h>
+ * JoystickPushMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_button initial value for button
+ */
+JacoInterface::JoystickPushMessage::JoystickPushMessage(const uint32_t ini_button) : Message("JoystickPushMessage")
+{
+  data_size = sizeof(JoystickPushMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (JoystickPushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->button = ini_button;
+  add_fieldinfo(IFT_UINT32, "button", 1, &data->button);
+}
+/** Constructor */
+JacoInterface::JoystickPushMessage::JoystickPushMessage() : Message("JoystickPushMessage")
+{
+  data_size = sizeof(JoystickPushMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (JoystickPushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT32, "button", 1, &data->button);
+}
+
+/** Destructor */
+JacoInterface::JoystickPushMessage::~JoystickPushMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::JoystickPushMessage::JoystickPushMessage(const JoystickPushMessage *m) : Message("JoystickPushMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (JoystickPushMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get button value.
+ * Button ID to push.
+ * @return button value
+ */
+uint32_t
+JacoInterface::JoystickPushMessage::button() const
+{
+  return data->button;
+}
+
+/** Get maximum length of button value.
+ * @return length of button value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::JoystickPushMessage::maxlenof_button() const
+{
+  return 1;
+}
+
+/** Set button value.
+ * Button ID to push.
+ * @param new_button new button value
+ */
+void
+JacoInterface::JoystickPushMessage::set_button(const uint32_t new_button)
+{
+  data->button = new_button;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::JoystickPushMessage::clone() const
+{
+  return new JacoInterface::JoystickPushMessage(this);
+}
+/** @class JacoInterface::JoystickReleaseMessage <interfaces/JacoInterface.h>
+ * JoystickReleaseMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+JacoInterface::JoystickReleaseMessage::JoystickReleaseMessage() : Message("JoystickReleaseMessage")
+{
+  data_size = sizeof(JoystickReleaseMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (JoystickReleaseMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+JacoInterface::JoystickReleaseMessage::~JoystickReleaseMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::JoystickReleaseMessage::JoystickReleaseMessage(const JoystickReleaseMessage *m) : Message("JoystickReleaseMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (JoystickReleaseMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::JoystickReleaseMessage::clone() const
+{
+  return new JacoInterface::JoystickReleaseMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1237,6 +1379,14 @@ JacoInterface::message_valid(const Message *message) const
   }
   const CloseGripperMessage *m4 = dynamic_cast<const CloseGripperMessage *>(message);
   if ( m4 != NULL ) {
+    return true;
+  }
+  const JoystickPushMessage *m5 = dynamic_cast<const JoystickPushMessage *>(message);
+  if ( m5 != NULL ) {
+    return true;
+  }
+  const JoystickReleaseMessage *m6 = dynamic_cast<const JoystickReleaseMessage *>(message);
+  if ( m6 != NULL ) {
     return true;
   }
   return false;

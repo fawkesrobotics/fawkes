@@ -226,6 +226,55 @@ class JacoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class JoystickPushMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t button; /**< Button ID to push. */
+    } JoystickPushMessage_data_t;
+#pragma pack(pop)
+
+    JoystickPushMessage_data_t *data;
+
+   public:
+    JoystickPushMessage(const uint32_t ini_button);
+    JoystickPushMessage();
+    ~JoystickPushMessage();
+
+    JoystickPushMessage(const JoystickPushMessage *m);
+    /* Methods */
+    uint32_t button() const;
+    void set_button(const uint32_t new_button);
+    size_t maxlenof_button() const;
+    virtual Message * clone() const;
+  };
+
+  class JoystickReleaseMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } JoystickReleaseMessage_data_t;
+#pragma pack(pop)
+
+    JoystickReleaseMessage_data_t *data;
+
+   public:
+    JoystickReleaseMessage();
+    ~JoystickReleaseMessage();
+
+    JoystickReleaseMessage(const JoystickReleaseMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   JacoInterface();

@@ -133,6 +133,21 @@ KinovaJacoThread::loop()
 
       __goto_thread->stop();
 
+    } else if( __if_jaco->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
+      JacoInterface::JoystickPushMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "JoystickPush %u rcvd", msg->button());
+
+      __arm->start_api_ctrl();
+      __arm->push_joystick_button(msg->button());
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::JoystickReleaseMessage>() ) {
+      JacoInterface::JoystickReleaseMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "JoystickRelease rcvd");
+
+      __arm->start_api_ctrl();
+      __arm->release_joystick();
+      __if_jaco->set_final(true);
+
     } else {
       logger->log_warn(name(), "Unknown message received");
     }

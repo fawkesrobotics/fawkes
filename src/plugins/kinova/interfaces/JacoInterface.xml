@@ -58,4 +58,13 @@
   <message name="CloseGripper">
     <comment>Close Gripper.</comment>
   </message>
+
+  <message name="JoystickPush">
+    <comment>Push and hold(!) a joystick button</comment>
+    <field type="uint32" name="button">Button ID to push.</field>
+  </message>
+  <message name="JoystickRelease">
+    <comment>Release any joystick button. Stick included.</comment>
+  </message>
+
 </interface>

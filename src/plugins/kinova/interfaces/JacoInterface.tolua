@@ -77,6 +77,24 @@ class JacoInterface : public Interface
 
   };
 
+  class JoystickPushMessage : public Message
+  {
+    JoystickPushMessage(unsigned int ini_button);
+    JoystickPushMessage();
+    ~JoystickPushMessage();
+
+    unsigned int button();
+    void set_button(const unsigned int new_button);
+    int maxlenof_button() const;
+  };
+
+  class JoystickReleaseMessage : public Message
+  {
+    JoystickReleaseMessage();
+    ~JoystickReleaseMessage();
+
+  };
+
   bool is_connected();
   void set_connected(const bool new_connected);
   int maxlenof_connected() const;
