@@ -1215,7 +1215,6 @@ unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, C
               [&](const OldCentroid &old)->bool {
                 for (CentroidMap::const_iterator it = tmp_centroids.begin(); it != tmp_centroids.end(); it++) {
                   if (pcl::distances::l2(it->second, old.getCentroid()) < cfg_centroid_min_distance_) {
-                    logger->log_debug(name(), "remove old centroid %u; too close to %u", old.getId(), it->first);
                     free_ids_.push_back(old.getId());
                     return true;
                   }
