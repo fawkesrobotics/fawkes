@@ -40,6 +40,7 @@ skillenv.skill_module(...)
 --- Check if arm motion is final.
 -- @return true if motion is final, false otherwise
 function jc_arm_is_final(state)
+   jacoarm:read()
    return state.fsm.vars.msgid == jacoarm:msgid() and
           jacoarm:is_final()
 end
@@ -47,6 +48,7 @@ end
 --- Check if kinova plugin skipped our message
 -- @return true if kinova plugin skipped our message, false otherwise
 function jc_next_msg(state)
+   jacoarm:read()
    return  jacoarm:msgid() > state.fsm.vars.msgid
 end
 
@@ -57,6 +59,8 @@ fsm:define_states{
    closure={jacoarm=jacoarm},
 
    {"INIT", JumpState},
+   {"MODE_READY", JumpState},
+   {"MODE_RETRACT", JumpState},
    {"GOTO_HOME", JumpState},
    {"GOTO_RETRACT", JumpState},
    {"STOP", JumpState},
@@ -67,18 +71,26 @@ fsm:define_states{
 -- Transitions
 fsm:add_transitions{
    {"INIT", "FAILED", precond_only="not jacoarm:has_writer()", desc="no writer"},
+   {"INIT", "MODE_READY", precond_only="vars.mode == 'init'", desc="initialize arm"},
+   {"INIT", "MODE_RETRACT", precond_only="vars.mode == 'retract'", desc="initialize arm"},
    {"INIT", "GOTO_HOME", precond_only="vars.pos == 'home'", desc="goto home pos"},
    {"INIT", "GOTO_RETRACT", precond_only="vars.pos == 'retract'", desc="goto retract pos"},
    {"INIT", "STOP", precond_only="vars.pos == 'stop'", desc="stop"},
    {"INIT", "GOTO", precond_only="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", desc="goto parms"},
    {"INIT", "GRIPPER", precond_only="vars.gripper == 'open' or vars.gripper == 'close'", desc="move gripper"},
 
+   {"MODE_READY", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
+   {"MODE_READY", "FAILED", cond=jc_next_msg, desc="next msg"},
+
+   {"MODE_RETRACT", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
+   {"MODE_RETRACT", "FAILED", cond=jc_next_msg, desc="next msg"},
 
    {"GOTO_HOME", "GOTO", cond=true, desc="params set"},
    {"GOTO_RETRACT", "GOTO", cond=true, desc="params set"},
 
    {"GRIPPER", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
    {"GRIPPER", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"GRIPPER", "FAILED", cond="self.error", desc="bad error!!"},
 
    {"STOP", "FINAL", cond=jc_arm_is_final, desc="stopped"},
    {"STOP", "FAILED", cond=jc_next_msg, desc="next msg"},
@@ -87,6 +99,15 @@ fsm:add_transitions{
    {"GOTO", "FINAL", cond=jc_arm_is_final, desc="goto final"},
    {"GOTO", "FAILED", cond=jc_next_msg, desc="next msg"}
 }
+function MODE_READY:init()
+   local m = jacoarm.CalibrateMessage:new()
+   self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+end
+
+function MODE_RETRACT:init()
+   local m = jacoarm.RetractMessage:new()
+   self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+end
 
 function GOTO_HOME:init()
    self.fsm.vars.x = 0.234982
@@ -121,12 +142,15 @@ function GOTO_RETRACT:init()
 end
 
 function GRIPPER:init()
+   self.error = false
    if self.fsm.vars.gripper == "open" then
       local m = jacoarm.OpenGripperMessage:new()
       self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
    elseif self.fsm.vars.gripper =="close" then
       local m = jacoarm.CloseGripperMessage:new()
       self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+   else
+     self.error = true
    end
 end
 
