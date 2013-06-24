@@ -4,6 +4,20 @@ namespace fawkes {
 class JacoInterface : public Interface
 {
 
+  class CalibrateMessage : public Message
+  {
+    CalibrateMessage();
+    ~CalibrateMessage();
+
+  };
+
+  class RetractMessage : public Message
+  {
+    RetractMessage();
+    ~RetractMessage();
+
+  };
+
   class StopMessage : public Message
   {
     StopMessage();
@@ -98,6 +112,9 @@ class JacoInterface : public Interface
   bool is_connected();
   void set_connected(const bool new_connected);
   int maxlenof_connected() const;
+  bool is_initialized();
+  void set_initialized(const bool new_initialized);
+  int maxlenof_initialized() const;
   float x();
   void set_x(const float new_x);
   int maxlenof_x() const;

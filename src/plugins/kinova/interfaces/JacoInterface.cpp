@@ -49,6 +49,7 @@ JacoInterface::JacoInterface() : Interface()
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_BOOL, "connected", 1, &data->connected);
+  add_fieldinfo(IFT_BOOL, "initialized", 1, &data->initialized);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "z", 1, &data->z);
@@ -61,6 +62,8 @@ JacoInterface::JacoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
+  add_messageinfo("CalibrateMessage");
+  add_messageinfo("RetractMessage");
   add_messageinfo("StopMessage");
   add_messageinfo("CartesianGotoMessage");
   add_messageinfo("AngularGotoMessage");
@@ -68,7 +71,7 @@ JacoInterface::JacoInterface() : Interface()
   add_messageinfo("CloseGripperMessage");
   add_messageinfo("JoystickPushMessage");
   add_messageinfo("JoystickReleaseMessage");
-  unsigned char tmp_hash[] = {0x99, 0x32, 0x65, 0x34, 0xc0, 0xa3, 0xfe, 0xa7, 0x7b, 0x37, 0x1d, 0x56, 0x79, 0xe3, 0xd9, 0xb9};
+  unsigned char tmp_hash[] = {0xfe, 0xf4, 0x9c, 0xf2, 0x79, 0x25, 0x11, 0x30, 0x27, 0x2f, 0x15, 0x24, 0x4f, 0x64, 0xee, 0x76};
   set_hash(tmp_hash);
 }
 
@@ -106,6 +109,37 @@ void
 JacoInterface::set_connected(const bool new_connected)
 {
   data->connected = new_connected;
+  data_changed = true;
+}
+
+/** Get initialized value.
+ * Checks if Jaco arm has been initialized once after switched on.
+ * @return initialized value
+ */
+bool
+JacoInterface::is_initialized() const
+{
+  return data->initialized;
+}
+
+/** Get maximum length of initialized value.
+ * @return length of initialized value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::maxlenof_initialized() const
+{
+  return 1;
+}
+
+/** Set initialized value.
+ * Checks if Jaco arm has been initialized once after switched on.
+ * @param new_initialized new initialized value
+ */
+void
+JacoInterface::set_initialized(const bool new_initialized)
+{
+  data->initialized = new_initialized;
   data_changed = true;
 }
 
@@ -518,7 +552,11 @@ JacoInterface::set_final(const bool new_final)
 Message *
 JacoInterface::create_message(const char *type) const
 {
-  if ( strncmp("StopMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+  if ( strncmp("CalibrateMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new CalibrateMessage();
+  } else if ( strncmp("RetractMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new RetractMessage();
+  } else if ( strncmp("StopMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new StopMessage();
   } else if ( strncmp("CartesianGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new CartesianGotoMessage();
@@ -560,6 +598,98 @@ JacoInterface::enum_tostring(const char *enumtype, int val) const
 }
 
 /* =========== messages =========== */
+/** @class JacoInterface::CalibrateMessage <interfaces/JacoInterface.h>
+ * CalibrateMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+JacoInterface::CalibrateMessage::CalibrateMessage() : Message("CalibrateMessage")
+{
+  data_size = sizeof(CalibrateMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+JacoInterface::CalibrateMessage::~CalibrateMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::CalibrateMessage::CalibrateMessage(const CalibrateMessage *m) : Message("CalibrateMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CalibrateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::CalibrateMessage::clone() const
+{
+  return new JacoInterface::CalibrateMessage(this);
+}
+/** @class JacoInterface::RetractMessage <interfaces/JacoInterface.h>
+ * RetractMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+JacoInterface::RetractMessage::RetractMessage() : Message("RetractMessage")
+{
+  data_size = sizeof(RetractMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RetractMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+JacoInterface::RetractMessage::~RetractMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::RetractMessage::RetractMessage(const RetractMessage *m) : Message("RetractMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RetractMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::RetractMessage::clone() const
+{
+  return new JacoInterface::RetractMessage(this);
+}
 /** @class JacoInterface::StopMessage <interfaces/JacoInterface.h>
  * StopMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1361,32 +1491,40 @@ JacoInterface::JoystickReleaseMessage::clone() const
 bool
 JacoInterface::message_valid(const Message *message) const
 {
-  const StopMessage *m0 = dynamic_cast<const StopMessage *>(message);
+  const CalibrateMessage *m0 = dynamic_cast<const CalibrateMessage *>(message);
   if ( m0 != NULL ) {
     return true;
   }
-  const CartesianGotoMessage *m1 = dynamic_cast<const CartesianGotoMessage *>(message);
+  const RetractMessage *m1 = dynamic_cast<const RetractMessage *>(message);
   if ( m1 != NULL ) {
     return true;
   }
-  const AngularGotoMessage *m2 = dynamic_cast<const AngularGotoMessage *>(message);
+  const StopMessage *m2 = dynamic_cast<const StopMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const OpenGripperMessage *m3 = dynamic_cast<const OpenGripperMessage *>(message);
+  const CartesianGotoMessage *m3 = dynamic_cast<const CartesianGotoMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const CloseGripperMessage *m4 = dynamic_cast<const CloseGripperMessage *>(message);
+  const AngularGotoMessage *m4 = dynamic_cast<const AngularGotoMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const JoystickPushMessage *m5 = dynamic_cast<const JoystickPushMessage *>(message);
+  const OpenGripperMessage *m5 = dynamic_cast<const OpenGripperMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const JoystickReleaseMessage *m6 = dynamic_cast<const JoystickReleaseMessage *>(message);
+  const CloseGripperMessage *m6 = dynamic_cast<const CloseGripperMessage *>(message);
   if ( m6 != NULL ) {
+    return true;
+  }
+  const JoystickPushMessage *m7 = dynamic_cast<const JoystickPushMessage *>(message);
+  if ( m7 != NULL ) {
+    return true;
+  }
+  const JoystickReleaseMessage *m8 = dynamic_cast<const JoystickReleaseMessage *>(message);
+  if ( m8 != NULL ) {
     return true;
   }
   return false;

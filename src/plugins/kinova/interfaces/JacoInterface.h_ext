@@ -45,6 +45,7 @@ class JacoInterface : public Interface
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     bool connected; /**< Is JacoArm connected/ready? */
+    bool initialized; /**< Checks if Jaco arm has been initialized once after switched on. */
     float x; /**< X-Coordinate of tool translation. */
     float y; /**< Y-Coordinate op tool translation. */
     float z; /**< Z-Coordinate of tool translation. */
@@ -66,6 +67,50 @@ class JacoInterface : public Interface
 
  public:
   /* messages */
+  class CalibrateMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } CalibrateMessage_data_t;
+#pragma pack(pop)
+
+    CalibrateMessage_data_t *data;
+
+   public:
+    CalibrateMessage();
+    ~CalibrateMessage();
+
+    CalibrateMessage(const CalibrateMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class RetractMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } RetractMessage_data_t;
+#pragma pack(pop)
+
+    RetractMessage_data_t *data;
+
+   public:
+    RetractMessage();
+    ~RetractMessage();
+
+    RetractMessage(const RetractMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   class StopMessage : public Message
   {
    private:
@@ -285,6 +330,9 @@ class JacoInterface : public Interface
   bool is_connected() const;
   void set_connected(const bool new_connected);
   size_t maxlenof_connected() const;
+  bool is_initialized() const;
+  void set_initialized(const bool new_initialized);
+  size_t maxlenof_initialized() const;
   float x() const;
   void set_x(const float new_x);
   size_t maxlenof_x() const;

@@ -7,6 +7,7 @@
     </comment>
 
     <field type="bool" name="connected">Is JacoArm connected/ready?</field>
+    <field type="bool" name="initialized">Checks if Jaco arm has been initialized once after switched on.</field>
 
     <field type="float" name="x">X-Coordinate of tool translation.</field>
     <field type="float" name="y">Y-Coordinate op tool translation.</field>
@@ -27,6 +28,14 @@
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
   </data>
+
+  <message name="Calibrate">
+    <comment>Stop movement.</comment>
+  </message>
+
+  <message name="Retract">
+    <comment>Stop movement.</comment>
+  </message>
 
   <message name="Stop">
     <comment>Stop movement.</comment>
