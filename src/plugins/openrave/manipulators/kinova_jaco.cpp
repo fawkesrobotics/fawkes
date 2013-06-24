@@ -68,13 +68,13 @@ OpenRaveManipulatorKinovaJaco::angle_OR_to_device(unsigned int number, float ang
 
   switch( number ) {
     case 0:
-      _angle = 1.5*M_PI + rad2deg(angle);
+      _angle = rad2deg(1.5*M_PI + angle);
       break;
     case 1:
-      _angle = M_PI + rad2deg(angle);
+      _angle = rad2deg(M_PI + angle);
       break;
     case 2:
-      _angle = M_PI + rad2deg(angle);
+      _angle = rad2deg(M_PI + angle);
       break;
     case 3:
       _angle = rad2deg(angle);
@@ -83,7 +83,7 @@ OpenRaveManipulatorKinovaJaco::angle_OR_to_device(unsigned int number, float ang
       _angle = rad2deg(angle);
       break;
     case 5:
-      _angle = rad2deg(angle) + M_PI;
+      _angle = rad2deg(M_PI + angle);
       break;
 
     default:
