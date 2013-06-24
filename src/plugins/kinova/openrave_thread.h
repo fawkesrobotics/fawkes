@@ -61,6 +61,7 @@ class JacoOpenraveThread
   virtual void unregister_arm();
   virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
+  std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 

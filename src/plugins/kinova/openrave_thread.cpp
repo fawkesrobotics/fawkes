@@ -91,6 +91,35 @@ JacoOpenraveThread::set_interface(JacoInterface *if_jaco)
   __if_jaco = if_jaco;
 }
 
+std::vector<float>
+JacoOpenraveThread::set_target(float x, float y, float z, float e1, float e2, float e3)
+{
+  std::vector<float> v;
+
+  try {
+    std::vector<dReal> joints;
+    // get IK from openrave
+    bool success = __OR_robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
+
+    if( !success ) {
+      logger->log_warn(name(), "Initiating goto failed, no IK solution found");
+      return v;
+    }
+    logger->log_debug(name(), "IK successful!");
+
+    // get target IK valoues
+    __OR_robot->get_target().manip->get_angles(joints);
+    //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
+    __OR_manip->set_angles(joints);
+    __OR_manip->get_angles_device(v);
+
+  } catch( openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
+  }
+
+  return v;
+}
+
 void
 JacoOpenraveThread::init()
 {
@@ -101,7 +130,6 @@ JacoOpenraveThread::init()
 
 
   try {
-    //__OR_robot = openrave->add_robot("../fawkes/res/openrave/jaco.robot.xml", false);
     __OR_robot = openrave->add_robot(__cfg_OR_robot_file, false);
 
     __OR_manip = new OpenRaveManipulatorKinovaJaco(6, 6);
@@ -148,29 +176,26 @@ JacoOpenraveThread::loop()
     return;
 
 #ifdef HAVE_OPENRAVE
+//*
   try {
-    jaco_position_t pos = __arm->get_ang_pos();
     std::vector<dReal> joints;
-    joints.push_back(pos.Joints[0]);
-    joints.push_back(pos.Joints[1]);
-    joints.push_back(pos.Joints[2]);
-    joints.push_back(pos.Joints[3]);
-    joints.push_back(pos.Joints[4]);
-    joints.push_back(pos.Joints[5]);
+    joints.push_back(__if_jaco->joints(0));
+    joints.push_back(__if_jaco->joints(1));
+    joints.push_back(__if_jaco->joints(2));
+    joints.push_back(__if_jaco->joints(3));
+    joints.push_back(__if_jaco->joints(4));
+    joints.push_back(__if_jaco->joints(5));
 
-    std::vector<dReal> v;
+    // get target IK values in openrave format
     __OR_manip->set_angles_device(joints);
-
-    __OR_manip->get_angles(v);
-    logger->log_debug(name(), "OR angles: %f  %f  %f  %f  %f  %f",
-      v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
+    __OR_manip->get_angles(joints);
 
     //EnvironmentMutex::scoped_lock lock(__OR_env->get_env_ptr()->GetMutex());
-    __OR_robot->get_robot_ptr()->SetActiveDOFValues(v);
-    usleep(2000);
+    __OR_robot->get_robot_ptr()->SetActiveDOFValues(joints);
+    //usleep(2000);
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
+//*/
 #endif
-
 }
