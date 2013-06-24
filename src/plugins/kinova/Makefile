@@ -17,15 +17,16 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/openrave/openrave.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_kinova = fawkescore fawkesaspects fawkesblackboard fawkesinterface JacoInterface
+LIBS_kinova = fawkescore fawkesaspects fawkesblackboard fawkesinterface JacoInterface fawkesopenrave fawkesopenraveaspect
 OBJS_kinova = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 ifeq ($(HAVE_LIBUSB),1)
-  CFLAGS  += $(CFLAGS_LIBUSB)
-  LDFLAGS += $(LDFLAGS_LIBUSB)
+  CFLAGS  += $(CFLAGS_LIBUSB) $(CFLAGS_OPENRAVE)
+  LDFLAGS += $(LDFLAGS_LIBUSB) $(LDFLAGS_OPENRAVE)
   PLUGINS_all = $(PLUGINDIR)/kinova.so
 else
   WARN_TARGETS += warning_libusb

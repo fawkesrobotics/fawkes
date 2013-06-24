@@ -59,8 +59,13 @@ class KinovaGotoThread
 
   virtual void set_target(float x, float y, float z, float e1, float e2, float e3, float f1=0.f, float f2=0.f, float f3=0.f);
   virtual void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float f1=0.f, float f2=0.f, float f3=0.f);
+
+  virtual void pos_ready();
+  virtual void pos_retract();
+
   virtual void open_gripper();
   virtual void close_gripper();
+
   virtual void stop();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -77,8 +82,10 @@ class KinovaGotoThread
   float __finger_last[4]; // 3 positions + 1 counter
 
   bool __new_target;
-  bool __target_angular;
+  fawkes::jaco_target_type_t __target_type;
   bool __final;
+
+  unsigned int __wait_status_check;
 
   void check_final();
 };

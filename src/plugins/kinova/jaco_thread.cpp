@@ -36,7 +36,9 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread)
+KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread,
+                                   KinovaGotoThread *goto_thread,
+                                   JacoOpenraveThread *openrave_thread)
   : Thread("KinovaJacoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
@@ -44,6 +46,7 @@ KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThre
   __if_jaco = NULL;
   __info_thread = info_thread;
   __goto_thread = goto_thread;
+  __openrave_thread = openrave_thread;
 }
 
 
@@ -62,6 +65,7 @@ KinovaJacoThread::init()
     // register arm in other threads
     __info_thread->register_arm(__arm);
     __goto_thread->register_arm(__arm);
+    __openrave_thread->register_arm(__arm);
 
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
@@ -79,6 +83,16 @@ KinovaJacoThread::init()
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
   }
+
+  //check if we need to calibrate arm
+  jaco_retract_mode_t mode = __arm->get_status();
+  if( mode == MODE_NOINIT ) {
+    __if_jaco->set_initialized(false);
+    //__goto_thread->pos_ready();
+  } else {
+    __if_jaco->set_initialized(true);
+  }
+  __if_jaco->write();
 }
 
 void
@@ -102,7 +116,25 @@ KinovaJacoThread::loop()
     __if_jaco->set_final(false);
     __if_jaco->write();
 
-    if( __if_jaco->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
+    if( __if_jaco->msgq_first_is<JacoInterface::StopMessage>() ) {
+      JacoInterface::StopMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "StopMessage rcvd");
+
+      __goto_thread->stop();
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::CalibrateMessage>() ) {
+      JacoInterface::CalibrateMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "CalibrateMessage rcvd");
+
+      __goto_thread->pos_ready();
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::RetractMessage>() ) {
+      JacoInterface::RetractMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "RetractMessage rcvd");
+
+      __goto_thread->pos_retract();
+
+    } else if( __if_jaco->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
       JacoInterface::CartesianGotoMessage *msg = __if_jaco->msgq_first(msg);
       logger->log_debug(name(), "CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
                         msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
@@ -126,12 +158,6 @@ KinovaJacoThread::loop()
       logger->log_debug(name(), "CloseGripperMessage rcvd");
 
       __goto_thread->close_gripper();
-
-    } else if( __if_jaco->msgq_first_is<JacoInterface::StopMessage>() ) {
-      JacoInterface::StopMessage *msg = __if_jaco->msgq_first(msg);
-      logger->log_debug(name(), "StopMessage rcvd");
-
-      __goto_thread->stop();
 
     } else if( __if_jaco->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
       JacoInterface::JoystickPushMessage *msg = __if_jaco->msgq_first(msg);

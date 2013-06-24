@@ -25,6 +25,7 @@
 #include "info_thread.h"
 #include "jaco_thread.h"
 #include "goto_thread.h"
+#include "openrave_thread.h"
 
 using namespace fawkes;
 
@@ -46,7 +47,10 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
   KinovaGotoThread *goto_thread = new KinovaGotoThread();
   thread_list.push_back(goto_thread);
 
-  thread_list.push_back(new KinovaJacoThread(info_thread, goto_thread));
+  JacoOpenraveThread *openrave_thread = new JacoOpenraveThread();
+  thread_list.push_back(openrave_thread);
+
+  thread_list.push_back(new KinovaJacoThread(info_thread, goto_thread, openrave_thread));
 }
 
 

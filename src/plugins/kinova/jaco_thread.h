@@ -25,6 +25,7 @@
 
 #include "info_thread.h"
 #include "goto_thread.h"
+#include "openrave_thread.h"
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -46,7 +47,7 @@ class KinovaJacoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread);
+  KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread, JacoOpenraveThread *openrave_thread);
   virtual ~KinovaJacoThread();
 
   virtual void init();
@@ -62,6 +63,7 @@ class KinovaJacoThread
 
   KinovaInfoThread   *__info_thread;
   KinovaGotoThread   *__goto_thread;
+  JacoOpenraveThread *__openrave_thread;
 };
 
 

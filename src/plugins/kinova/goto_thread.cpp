@@ -24,6 +24,7 @@
 #include "kinova_api.h"
 
 #include <interfaces/JacoInterface.h>
+#include <utils/math/angle.h>
 
 #include <stdio.h>
 #include <cstring>
@@ -49,8 +50,9 @@ KinovaGotoThread::KinovaGotoThread()
   __if_jaco = NULL;
 
   __new_target = false;
-  __target_angular = false;
   __final = true;
+
+  __wait_status_check = 0; //wait loops to check for jaco_retract_mode_t again
 }
 
 
@@ -106,7 +108,7 @@ KinovaGotoThread::set_target(float x, float y, float z,
     __f3 = __if_jaco->finger3();
   }
   __new_target = true;
-  __target_angular = false;
+  __target_type = TARGET_CARTESIAN;
 }
 
 void
@@ -132,46 +134,65 @@ KinovaGotoThread::set_target_ang(float j1, float j2, float j3,
   }
 
   __new_target = true;
-  __target_angular = true;
+  __target_type = TARGET_ANGULAR;
 }
+
+void
+KinovaGotoThread::pos_ready()
+{
+  __new_target = true;
+  __target_type = TARGET_READY;
+}
+
+void
+KinovaGotoThread::pos_retract()
+{
+  __new_target = true;
+  __target_type = TARGET_RETRACT;
+}
+
 
 void
 KinovaGotoThread::open_gripper()
 {
-  __x  = __if_jaco->x();
-  __y  = __if_jaco->y();
-  __z  = __if_jaco->z();
-  __e1 = __if_jaco->euler1();
-  __e2 = __if_jaco->euler2();
-  __e3 = __if_jaco->euler3();
+  __joints[0] = __if_jaco->joints(0);
+  __joints[1] = __if_jaco->joints(1);
+  __joints[2] = __if_jaco->joints(2);
+  __joints[3] = __if_jaco->joints(3);
+  __joints[4] = __if_jaco->joints(4);
+  __joints[5] = __if_jaco->joints(5);
+
   __f1 = 0.25f;
   __f2 = 0.25f;
   __f3 = 0.25f;
 
   __new_target = true;
+  __target_type = TARGET_ANGULAR;
 }
 
 void
 KinovaGotoThread::close_gripper()
 {
-  __x  = __if_jaco->x();
-  __y  = __if_jaco->y();
-  __z  = __if_jaco->z();
-  __e1 = __if_jaco->euler1();
-  __e2 = __if_jaco->euler2();
-  __e3 = __if_jaco->euler3();
+  __joints[0] = __if_jaco->joints(0);
+  __joints[1] = __if_jaco->joints(1);
+  __joints[2] = __if_jaco->joints(2);
+  __joints[3] = __if_jaco->joints(3);
+  __joints[4] = __if_jaco->joints(4);
+  __joints[5] = __if_jaco->joints(5);
+
   __f1 = 52.f;
   __f2 = 52.f;
   __f3 = 52.f;
 
   __new_target = true;
+  __target_type = TARGET_ANGULAR;
 }
 
 void
 KinovaGotoThread::stop()
 {
   try {
-    __arm->stop_api_ctrl();
+    __arm->release_joystick();
 
     __final = true;
     __new_target = false;
@@ -185,35 +206,118 @@ void
 KinovaGotoThread::check_final()
 {
   __final = true;
-  if( __target_angular) {
-    for( unsigned int i=0; i<6; ++i ) {
-      __final &= (std::abs(__joints[i] - __if_jaco->joints(i)) < 1.0);
+  bool check_fingers = false;
+
+  logger->log_debug(name(), "check final");
+  switch( __target_type ) {
+    case TARGET_ANGULAR:
+      logger->log_debug(name(), "check final for TARGET ANGULAR");
+      for( unsigned int i=0; i<6; ++i ) {
+        __final &= (std::abs(__joints[i] - __if_jaco->joints(i)) < 1.0);
+      }
+      check_fingers = true;
+      break;
+
+    case TARGET_READY:
+      logger->log_debug(name(), "check final for TARGET READY");
+      if( __wait_status_check == 0 ) {
+        logger->log_debug(name(), "check final for TARGET READY now");
+        //__wait_status_check = 0;
+        jaco_retract_mode_t mode = __arm->get_status();
+        logger->log_debug(name(), "current mode: %u", mode);
+        ++__wait_status_check;
+        __final = (mode == MODE_READY_STANDBY);
+
+        if( __final )
+          __arm->release_joystick();
+        else if( mode == MODE_READY_TO_RETRACT ) {
+          __arm->release_joystick();
+          __arm->push_joystick_button(2);
+        }
+      } else {
+        logger->log_debug(name(), "check final for TARGET READY not yet");
+        __final = false;
+        if( __wait_status_check >= 10 )
+          __wait_status_check = 0;
+        else
+          ++__wait_status_check;
+      }
+      break;
+
+    case TARGET_RETRACT:
+      logger->log_debug(name(), "check final for TARGET RETRACT");
+      if( __wait_status_check == 0 ) {
+        logger->log_debug(name(), "check final for TARGET RETRACT now");
+        //__wait_status_check = 0;
+        jaco_retract_mode_t mode = __arm->get_status();
+        logger->log_debug(name(), "current mode: %u", mode);
+        ++__wait_status_check;
+        __final = (mode == MODE_RETRACT_STANDBY);
+        if( __final )
+          __arm->release_joystick();
+      } else {
+        logger->log_debug(name(), "check final for TARGET RETRACT");
+        __final = false;
+        if( __wait_status_check >= 10 )
+          __wait_status_check = 0;
+        else
+          ++__wait_status_check;
+      }
+      break;
+
+
+    default: //TARGET_CARTESIAN
+      logger->log_debug(name(), "check final for TARGET CARTESIAN");
+      /*
+      logger->log_debug(name(), "target: %f  %f  %f  |  %f  %f  %f", __x, __y, __z, __e1, __e2, __e3);
+      logger->log_debug(name(), "if_jac: %f  %f  %f  |  %f  %f  %f", __if_jaco->x(), __if_jaco->y(), __if_jaco->z(),
+                                                                   __if_jaco->euler1(), __if_jaco->euler2(), __if_jaco->euler3());
+      logger->log_debug(name(), "diff  : %f  %f  %f  |  %f  %f  %f",
+                        angle_distance(__x , __if_jaco->x()),
+                        angle_distance(__y , __if_jaco->y()),
+                        angle_distance(__z , __if_jaco->z()),
+                        angle_distance(__e1 , __if_jaco->euler1()),
+                        angle_distance(__e2 , __if_jaco->euler2()),
+                        angle_distance(__e3 , __if_jaco->euler3()) );
+
+      //*/
+      __final &= (std::abs(angle_distance(__x , __if_jaco->x())) < 0.01);
+      __final &= (std::abs(angle_distance(__y , __if_jaco->y())) < 0.01);
+      __final &= (std::abs(angle_distance(__z , __if_jaco->z())) < 0.01);
+      __final &= (std::abs(angle_distance(__e1 , __if_jaco->euler1())) < 0.1);
+      __final &= (std::abs(angle_distance(__e2 , __if_jaco->euler2())) < 0.1);
+      __final &= (std::abs(angle_distance(__e3 , __if_jaco->euler3())) < 0.1);
+/*
+      __final &= (std::abs(__x - __if_jaco->x()) < 0.01);
+      __final &= (std::abs(__y - __if_jaco->y()) < 0.01);
+      __final &= (std::abs(__z - __if_jaco->z()) < 0.01);
+      __final &= (std::abs(__e1 - __if_jaco->euler1()) < 0.1);
+      __final &= (std::abs(__e2 - __if_jaco->euler2()) < 0.1);
+      __final &= (std::abs(__e3 - __if_jaco->euler3()) < 0.1);
+*/
+      check_fingers = true;
+      break;
+  }
+
+  logger->log_debug(name(), "check final: %u", __final);
+
+  if( check_fingers && __final ) {
+    logger->log_debug(name(), "check fingeres for final");
+
+    // also check fingeres
+    if( __finger_last[0] == __if_jaco->finger1() &&
+        __finger_last[1] == __if_jaco->finger2() &&
+        __finger_last[2] == __if_jaco->finger3() ) {
+      __finger_last[3] += 1;
+    } else {
+      __finger_last[0] = __if_jaco->finger1();
+      __finger_last[1] = __if_jaco->finger2();
+      __finger_last[2] = __if_jaco->finger3();
+      __finger_last[3] = 0; // counter
     }
-  } else {
-    __final &= (std::abs(__x - __if_jaco->x()) < 0.01);
-    __final &= (std::abs(__y - __if_jaco->y()) < 0.01);
-    __final &= (std::abs(__z - __if_jaco->z()) < 0.01);
-    __final &= (std::abs(__e1 - __if_jaco->euler1()) < 0.01);
-    __final &= (std::abs(__e2 - __if_jaco->euler2()) < 0.01);
-    __final &= (std::abs(__e3 - __if_jaco->euler3()) < 0.01);
+
+    __final &= __finger_last[3] > 30;
   }
-
-  if( !__final )
-    return;
-
-  // also check fingeres
-  if( __finger_last[0] == __if_jaco->finger1() &&
-      __finger_last[1] == __if_jaco->finger2() &&
-      __finger_last[2] == __if_jaco->finger3() ) {
-    __finger_last[3] += 1;
-  } else {
-    __finger_last[0] = __if_jaco->finger1();
-    __finger_last[1] = __if_jaco->finger2();
-    __finger_last[2] = __if_jaco->finger3();
-    __finger_last[3] = 0; // counter
-  }
-
-  __final &= __finger_last[3] > 5;
 }
 
 void
@@ -231,24 +335,105 @@ KinovaGotoThread::loop()
     __finger_last[2] = __if_jaco->finger3();
     __finger_last[3] = 0; // counter
 
+    logger->log_debug(name(), "loop: set final=false");
+    __final = false;
+    __new_target = false;
+
     // process new target
     try {
-      __arm->stop_api_ctrl(); // stop old movement
-      usleep(500);
+      __arm->release_joystick(); // stop old movement
       __arm->start_api_ctrl();
-      if( __target_angular ) {
-        __arm->set_control_ang();
-        usleep(500);
-        float fing[3] = {__f1, __f2, __f3};
-        __arm->set_target_ang(__joints, fing);
-      } else {
-        __arm->set_control_cart();
-        usleep(500);
-        __arm->set_target_cart(__y, -__x, __z, __e1, __e2, __e3, __f1, __f2, __f3);
-      }
 
-      __final = false;
-      __new_target = false;
+      switch( __target_type ) {
+        case TARGET_ANGULAR:
+          logger->log_debug(name(), "target_type: TARGET_ANGULAR");
+          { __arm->set_control_ang();
+            usleep(500);
+            float fing[3] = {__f1, __f2, __f3};
+            __arm->set_target_ang(__joints, fing);
+            break;
+          }
+
+        case TARGET_READY:
+          { logger->log_debug(name(), "loop: target_type: TARGET_READY");
+            jaco_retract_mode_t mode = __arm->get_status();
+            __wait_status_check = 0;
+            logger->log_debug(name(), "loop: current mode: %u", mode);
+            switch( mode ) {
+              case MODE_RETRACT_TO_READY:
+                logger->log_debug(name(), "loop: 2 buttons needed");
+                __arm->push_joystick_button(2);
+                __arm->release_joystick();
+                __arm->push_joystick_button(2);
+                break;
+
+              case MODE_NORMAL_TO_READY:
+              case MODE_READY_TO_RETRACT:
+              case MODE_RETRACT_STANDBY:
+              case MODE_NORMAL:
+              case MODE_NOINIT:
+                logger->log_debug(name(), "loop: 1 button needed");
+                __arm->push_joystick_button(2);
+                break;
+
+              case MODE_ERROR:
+                logger->log_error(name(), "some error occured!!");
+                break;
+
+              case MODE_READY_STANDBY:
+                logger->log_debug(name(), "loop: no action. error?");
+                __final = true;
+                break;
+            }
+            break;
+          }
+
+
+        case TARGET_RETRACT:
+          { logger->log_debug(name(), "target_type: TARGET_RETRACT");
+            jaco_retract_mode_t mode = __arm->get_status();
+            __wait_status_check = 0;
+            logger->log_debug(name(), "loop: current mode: %u", mode);
+            switch( mode ) {
+              case MODE_READY_TO_RETRACT:
+                logger->log_debug(name(), "loop: 2 buttons needed");
+                __arm->push_joystick_button(2);
+                __arm->release_joystick();
+                __arm->push_joystick_button(2);
+                break;
+
+              case MODE_READY_STANDBY:
+              case MODE_RETRACT_TO_READY:
+                logger->log_debug(name(), "loop: 1 button needed");
+                __arm->push_joystick_button(2);
+                break;
+
+              case MODE_NORMAL_TO_READY:
+              case MODE_NORMAL:
+              case MODE_NOINIT:
+                logger->log_warn(name(), "loop: cannot go from NORMAL/NOINIT to RETRACT");
+                __final = true;
+                break;
+
+              case MODE_ERROR:
+                logger->log_error(name(), "some error occured!!");
+                break;
+
+              case MODE_RETRACT_STANDBY:
+                logger->log_debug(name(), "loop: no action. error?");
+                __final = true;
+                break;
+            }
+            break;
+          }
+
+        default: //TARGET_CARTESIAN
+          logger->log_debug(name(), "target_type: TARGET_CARTESIAN");
+          __arm->set_control_cart();
+          usleep(500);
+          __arm->set_target_cart(__y, -__x, __z, __e1, __e2, __e3, __f1, __f2, __f3);
+          break;
+      }
 
     } catch( Exception &e ) {
       logger->log_warn(name(), "Error sending command to arm. Ex:%s", e.what());
@@ -257,10 +442,14 @@ KinovaGotoThread::loop()
   } else if( !__final ) {
     // check for final position
     check_final();
-  }
 
-  if( __final )
-    __arm->stop_api_ctrl(); // need to do this to be able to send a command next time
+    /*
+    if( __final ) {
+      __arm->stop_api_ctrl(); // need to do this to be able to send a command next time
+      usleep(500);
+    }
+    //*/
+  }
 
   __if_jaco->set_final(__final);
 }
