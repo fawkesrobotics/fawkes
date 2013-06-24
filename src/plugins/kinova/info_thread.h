@@ -64,8 +64,8 @@ class KinovaInfoThread
   fawkes::JacoArm         *__arm;
   fawkes::JacoInterface   *__if_jaco;
 
-  fawkes::position_t    __cpos;
-  fawkes::position_t    __apos;
+  fawkes::jaco_position_t    __cpos;
+  fawkes::jaco_position_t    __apos;
 };
 
 
