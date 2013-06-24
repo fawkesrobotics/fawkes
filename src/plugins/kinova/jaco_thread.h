@@ -61,6 +61,11 @@ class KinovaJacoThread
   fawkes::JacoArm        *__arm;
   fawkes::JacoInterface  *__if_jaco;
 
+  bool  __cfg_auto_init;
+  bool  __cfg_auto_calib;
+
+  bool __initialized;
+
   KinovaInfoThread   *__info_thread;
   KinovaGotoThread   *__goto_thread;
   JacoOpenraveThread *__openrave_thread;

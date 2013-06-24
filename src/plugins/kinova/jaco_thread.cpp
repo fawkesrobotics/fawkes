@@ -47,6 +47,7 @@ KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread,
   __info_thread = info_thread;
   __goto_thread = goto_thread;
   __openrave_thread = openrave_thread;
+  __initialized = false;
 }
 
 
@@ -58,6 +59,9 @@ KinovaJacoThread::~KinovaJacoThread()
 void
 KinovaJacoThread::init()
 {
+  __cfg_auto_init       = config->get_bool("/hardware/jaco/auto_initialize");
+  __cfg_auto_calib      = config->get_bool("/hardware/jaco/auto_calibrate");
+
   try {
     // create new JacoArm object (connects to arm via libusb)
     __arm = new JacoArm();
@@ -85,14 +89,23 @@ KinovaJacoThread::init()
     logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
   }
 
-  //check if we need to calibrate arm
+  //check if we need to initialize arm
   jaco_retract_mode_t mode = __arm->get_status();
   if( mode == MODE_NOINIT ) {
-    __if_jaco->set_initialized(false);
-    //__goto_thread->pos_ready();
+    __initialized = false;
+    if( __cfg_auto_init ) {
+      logger->log_debug(name(), "Initializing arm, wait until finished");
+      __if_jaco->set_final(false);
+      __goto_thread->pos_ready();
+    }
+
   } else {
-    __if_jaco->set_initialized(true);
+    __initialized = true;
+    if( __cfg_auto_calib )
+      __goto_thread->pos_ready();
   }
+
+  __if_jaco->set_initialized(__initialized);
   __if_jaco->write();
 }
 
@@ -111,6 +124,14 @@ KinovaJacoThread::finalize()
 void
 KinovaJacoThread::loop()
 {
+  if( !__initialized && __cfg_auto_init ) {
+    logger->log_debug(name(), "wait for arm to calibrate");
+    __initialized = __if_jaco->is_final();
+    __if_jaco->write();
+    return;
+  }
+  __if_jaco->set_initialized(__initialized);
+
   while( ! __if_jaco->msgq_empty() ) {
     Message *m = __if_jaco->msgq_first(m);
     __if_jaco->set_msgid(m->id());
