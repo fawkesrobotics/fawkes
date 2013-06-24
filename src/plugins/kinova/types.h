@@ -31,23 +31,40 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-typedef enum position_type_enum {
+typedef enum jaco_position_type_enum {
   POSITION_NO_MOVEMENT  = 0, // No Movements
   POSITION_CARTESIAN    = 1, // Cartesian Position Control
   POSITION_ANGULAR      = 2, // Angular Position Control
   SPEED_CARTESIAN       = 7, // Cartesian speed control
   SPEED_ANGULAR         = 8, // Angular speed control
   TIME_DELAY            = 12 // Insert Delay
-} position_type_t;
+} jaco_position_type_t;
 
-typedef enum hand_mode_enum {
+typedef enum jaco_hand_mode_enum {
   NO_MOVEMENT   = 0, // Finger movements disabled
   MODE_POSITION = 1, // Finger position control
   MODE_SPEED    = 2  // Finger Speed Control
-} hand_mode_t;
+} jaco_hand_mode_t;
 
+typedef enum jaco_retract_mode_enum {
+  MODE_NORMAL_TO_READY  = 0, /**< Transition mode indicating that Jaco is in NORMAL state and waiting to go in READY state. */
+  MODE_READY_STANDBY    = 1, /**< Transition mode indicating that Jaco is in READY state and waiting to go in STANDBY state. */
+  MODE_READY_TO_RETRACT = 2, /**< Transition mode indicating that Jaco is in READY state and waiting to go in RETRACTED state. */
+  MODE_RETRACT_STANDBY  = 3, /**< Transition mode indicating that Jaco is in RETRACT state and waiting to go in STANDBY state. */
+  MODE_RETRACT_TO_READY = 4, /**< Transition mode indicating that Jaco is in RETRACT state and waiting to go in READY state. */
+  MODE_NORMAL           = 5, /**< Transition mode indicating that Jaco is in NORMAL state. */
+  MODE_NOINIT           = 6, /**< Transition mode indicating that Jaco is in NO INIT state and waiting to go in READY state. */
+  MODE_ERROR            = 25000 /**< This value indicate an error. Most of the time, it is because you received a value that is not part of the enum. */
+} jaco_retract_mode_t;
 
-typedef struct position_struct {
+typedef enum jaco_target_type_enum {
+  TARGET_CARTESIAN,
+  TARGET_ANGULAR,
+  TARGET_READY,
+  TARGET_RETRACT
+} jaco_target_type_t;
+
+typedef struct jaco_position_struct {
   union {
     float Joints[6];
     struct {
@@ -56,33 +73,33 @@ typedef struct position_struct {
     };
   };
   float FingerPosition[3];
-} position_t;
+} jaco_position_t;
 
-typedef struct basic_traj_struct {
-  position_t target;
+typedef struct jaco_basic_traj_struct {
+  jaco_position_t target;
   float time_delay;
-  hand_mode_t hand_mode;
-  position_type_t pos_type;
-} basic_traj_t;
+  jaco_hand_mode_t hand_mode;
+  jaco_position_type_t pos_type;
+} jaco_basic_traj_t;
 
-typedef unsigned short joystick_button_t[16];
+typedef unsigned short jaco_joystick_button_t[16];
 
-typedef struct message_header_struct {
-  short IdPacket;
-  short PacketQuantity;
-  short CommandId;
-  short CommandSize;
-} message_header_t;
+typedef struct jaco_message_header_struct {
+  unsigned short IdPacket;
+  unsigned short PacketQuantity;
+  unsigned short CommandId;
+  unsigned short CommandSize;
+} jaco_message_header_t;
 
-typedef struct message_struct {
+typedef struct jaco_message_struct {
   union {
     unsigned char data[64];
     struct {
-      message_header_t header; //8 Byte
+      jaco_message_header_t header; //8 Byte
       float body[14]; //56 Byte
     };
   };
-} message_t;
+} jaco_message_t;
 
 
 } // end namespace firevision

@@ -38,11 +38,14 @@ class JacoArm
   JacoArm();
   virtual ~JacoArm();
 
-  void print_message(message_t &msg);
+  void print_message(jaco_message_t &msg);
 
-  position_t get_cart_pos();
-  position_t get_ang_pos();
+  // getter; receiving commands
+  jaco_position_t get_cart_pos();
+  jaco_position_t get_ang_pos();
+  jaco_retract_mode_t get_status();
 
+  // setter; sending command
   void start_api_ctrl();
   void stop_api_ctrl();
 
@@ -51,7 +54,7 @@ class JacoArm
   void set_control_ang();
   void set_control_cart();
 
-  void set_target(basic_traj_t &traj);
+  void set_target(jaco_basic_traj_t &traj);
   void set_target_cart(float x, float y, float z, float euler_1, float euler_2, float euler_3, float finger_1, float finger_2, float finger_3);
   void set_target_cart(float coord[], float fingers[3]);
   void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float finger_1, float finger_2, float finger_3);
@@ -70,13 +73,13 @@ class JacoArm
   void _claim_interface();
 
   // generic USB data transfer methods
-  int _cmd_out_in(message_t &msg, int cmd_size_in);
+  int _cmd_out_in(jaco_message_t &msg, int cmd_size_in);
   int _cmd_out(short cmd);
 
   // Jaco specific commands
-  int _get_cart_pos(position_t &pos);
-  int _get_ang_pos(position_t &pos);
-  int _send_basic_traj(basic_traj_t &traj);
+  int _get_cart_pos(jaco_position_t &pos);
+  int _get_ang_pos(jaco_position_t &pos);
+  int _send_basic_traj(jaco_basic_traj_t &traj);
 };
 
 } // end of namespace fawkes

@@ -37,8 +37,8 @@
 
 #define CMD_CTRL_ANG            47
 #define CMD_CTRL_CART           49
-#define CMD_GET_CART_POS        104
-#define CMD_GET_ANG_POS         105
+#define CMD_GET_CART_POS        44 //104
+#define CMD_GET_ANG_POS         15 //15
 #define CMD_ERASE_TRAJECTORIES  301
 #define CMD_START_API_CTRL      302
 #define CMD_STOP_API_CTRL       303
@@ -192,10 +192,10 @@ JacoArm::_claim_interface()
  * \================================================/*/
 /** Perform an outgoing and then ingoing command.*/
 int
-JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
+JacoArm::_cmd_out_in(jaco_message_t &msg, int cmd_size_in)
 {
   int r, transferred;
-  short exp = msg.header.CommandId;
+  unsigned short exp = msg.header.CommandId;
 
   //printf("\n cmd_out_in send message: \n");
   //print_message(msg);
@@ -232,7 +232,7 @@ JacoArm::_cmd_out_in(message_t &msg, int cmd_size_in)
 int
 JacoArm::_cmd_out(short cmd)
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, cmd, 8);
 
   int r, transferred;
@@ -251,35 +251,45 @@ JacoArm::_cmd_out(short cmd)
  *   Jaco specific commands (private)
  * \================================================/*/
 int
-JacoArm::_get_cart_pos(position_t &pos)
+JacoArm::_get_cart_pos(jaco_position_t &pos)
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_GET_CART_POS, 1);
 
   int r = _cmd_out_in(msg, sizeof(pos));
-  if( r >= 0 )
-    memcpy(&pos, msg.body, sizeof(pos));
+  if( r < 0 )
+    return r;
+
+  //memcpy(&pos, msg.body, sizeof(msg.header.CommandSize));
+  memcpy(pos.Position, msg.body + 2, sizeof(pos.Position));
+  memcpy(pos.Rotation, msg.body + 8, sizeof(pos.Rotation));
+
+  USB_MSG(msg, 1, 1, 105, 1);
+  r = _cmd_out_in(msg, sizeof(pos));
+  if( r >= 0 ) {
+    memcpy(pos.FingerPosition, msg.body + 6, sizeof(pos.FingerPosition));
+  }
 
   return r;
 }
 
 int
-JacoArm::_get_ang_pos(position_t &pos)
+JacoArm::_get_ang_pos(jaco_position_t &pos)
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_GET_ANG_POS, 1);
 
-  int r = _cmd_out_in(msg, sizeof(pos));
+  int r = _cmd_out_in(msg, sizeof(pos.Joints));
   if( r >= 0 )
-    memcpy(&pos, msg.body, sizeof(pos));
+    memcpy(pos.Joints, msg.body, sizeof(pos.Joints));
 
   return r;
 }
 
 int
-JacoArm::_send_basic_traj(basic_traj_t &traj)
+JacoArm::_send_basic_traj(jaco_basic_traj_t &traj)
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_SEND_BASIC_TRAJ, 48);
   memcpy(&(msg.body), &traj, 48);
 
@@ -291,24 +301,25 @@ JacoArm::_send_basic_traj(basic_traj_t &traj)
  *   public methods
  * \================================================/*/
 void
-JacoArm::print_message(message_t &msg)
+JacoArm::print_message(jaco_message_t &msg)
 {
-  message_header_t h = msg.header;
+  jaco_message_header_t h = msg.header;
   float *b = msg.body;
-  printf("header: %i  %i  %i  %i \n", h.IdPacket, h.PacketQuantity, h.CommandId, h.CommandSize);
-  printf("body (2 rows, 7 colums, each entry 4 Byte float) \n");
+  printf("h: %i  %i  %i  %i \n", h.IdPacket, h.PacketQuantity, h.CommandId, h.CommandSize);
+  printf("b: ");
   for(unsigned int i=0; i<2; ++i) {
     for(unsigned int j=0; j<7; ++j) {
       printf("%f   ", *b);
       ++b;
     }
-    printf("\n");
+    printf("\n   ");
   }
 }
 
-position_t
-JacoArm::get_cart_pos() {
-  position_t pos;
+jaco_position_t
+JacoArm::get_cart_pos()
+{
+  jaco_position_t pos;
   int r = _get_cart_pos(pos);
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get cartesian position! libusb error code: %i.", r);
@@ -316,9 +327,10 @@ JacoArm::get_cart_pos() {
   return pos;
 }
 
-position_t
-JacoArm::get_ang_pos() {
-  position_t pos;
+jaco_position_t
+JacoArm::get_ang_pos()
+{
+  jaco_position_t pos;
   int r = _get_ang_pos(pos);
   if( r < 0 ) {
     throw fawkes::Exception("Kinova_API: Could not get angular position! libusb error code: %i.", r);
@@ -326,10 +338,32 @@ JacoArm::get_ang_pos() {
   return pos;
 }
 
+jaco_retract_mode_t
+JacoArm::get_status()
+{
+  jaco_message_t msg;
+  jaco_retract_mode_t mode = MODE_ERROR;
+  int r;
+
+  for( unsigned int i=1; i<=19; ++i ) {
+    USB_MSG(msg, i, 1, 200, 1);
+    r = _cmd_out_in(msg, 56);
+    if( r < 0 ) {
+      throw fawkes::Exception("Kinova_API: Could not get status! libusb error code: %i.", r);
+      return MODE_ERROR;
+    }
+
+    if( i==2 )
+      memcpy(&mode, msg.data+8+52, sizeof(mode));
+  }
+
+  return mode;
+}
+
 void
 JacoArm::start_api_ctrl()
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_START_API_CTRL, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
@@ -339,7 +373,7 @@ JacoArm::start_api_ctrl()
 void
 JacoArm::stop_api_ctrl()
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_STOP_API_CTRL, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
@@ -349,7 +383,7 @@ JacoArm::stop_api_ctrl()
 void
 JacoArm::erase_trajectories()
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_ERASE_TRAJECTORIES, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
@@ -359,7 +393,7 @@ JacoArm::erase_trajectories()
 void
 JacoArm::set_control_ang()
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_CTRL_ANG, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
@@ -369,7 +403,7 @@ JacoArm::set_control_ang()
 void
 JacoArm::set_control_cart()
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_CTRL_CART, 0);
   int r = _cmd_out_in(msg, 0);
   if( r < 0 )
@@ -379,7 +413,7 @@ JacoArm::set_control_cart()
 void
 JacoArm::push_joystick_button(unsigned short id)
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_JOYSTICK, 56);
 
   unsigned short *buttons = (unsigned short*)msg.body;
@@ -393,7 +427,7 @@ JacoArm::push_joystick_button(unsigned short id)
 void
 JacoArm::release_joystick()
 {
-  message_t msg;
+  jaco_message_t msg;
   USB_MSG(msg, 1, 1, CMD_JOYSTICK, 56);
 
   int r = _cmd_out_in(msg, 56);
@@ -402,7 +436,7 @@ JacoArm::release_joystick()
 }
 
 void
-JacoArm::set_target(basic_traj_t &traj)
+JacoArm::set_target(jaco_basic_traj_t &traj)
 {
   int r = _send_basic_traj(traj);
   if( r < 0 )
@@ -412,7 +446,7 @@ JacoArm::set_target(basic_traj_t &traj)
 void
 JacoArm::set_target_cart(float coord[], float fingers[])
 {
-  basic_traj_t traj;
+  jaco_basic_traj_t traj;
   memcpy(&traj.target, coord, 6);
   memcpy(traj.target.FingerPosition, fingers, 3);
   traj.time_delay = 0;
@@ -425,7 +459,7 @@ JacoArm::set_target_cart(float coord[], float fingers[])
 void
 JacoArm::set_target_ang(float joints[], float fingers[])
 {
-  basic_traj_t traj;
+  jaco_basic_traj_t traj;
   memcpy(&traj.target, joints, 24);
   memcpy(traj.target.FingerPosition, fingers, 12);
   traj.time_delay = 0;
@@ -438,7 +472,7 @@ JacoArm::set_target_ang(float joints[], float fingers[])
 void
 JacoArm::set_target_cart(float x, float y, float z, float euler_1, float euler_2, float euler_3, float finger_1, float finger_2, float finger_3)
 {
-  basic_traj_t traj;
+  jaco_basic_traj_t traj;
   traj.target.Position[0] = x;
   traj.target.Position[1] = y;
   traj.target.Position[2] = z;
@@ -458,7 +492,7 @@ JacoArm::set_target_cart(float x, float y, float z, float euler_1, float euler_2
 void
 JacoArm::set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float finger_1, float finger_2, float finger_3)
 {
-  basic_traj_t traj;
+  jaco_basic_traj_t traj;
   traj.target.Joints[0] = j1;
   traj.target.Joints[1] = j2;
   traj.target.Joints[2] = j3;
