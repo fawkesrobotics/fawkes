@@ -152,7 +152,7 @@ JacoOpenraveThread::init()
     throw;
   }
 
-  if( true )
+  if( __cfg_OR_use_viewer )
     openrave->start_viewer();
 #endif
 }
