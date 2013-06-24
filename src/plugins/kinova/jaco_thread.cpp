@@ -79,6 +79,7 @@ KinovaJacoThread::init()
     // set interface in other threads
     __info_thread->set_interface(__if_jaco);
     __goto_thread->set_interface(__if_jaco);
+    __openrave_thread->set_interface(__if_jaco);
 
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
@@ -138,7 +139,14 @@ KinovaJacoThread::loop()
       JacoInterface::CartesianGotoMessage *msg = __if_jaco->msgq_first(msg);
       logger->log_debug(name(), "CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
                         msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+    #ifdef HAVE_OPENRAVE
+      logger->log_debug(name(), "CartesianGotoMessage is being passed to openrave");
+      std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+      if( v.size() == 6 )
+        __goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
+    #else
       __goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+    #endif
 
     } else if( __if_jaco->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
       JacoInterface::AngularGotoMessage *msg = __if_jaco->msgq_first(msg);
