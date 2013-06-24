@@ -213,7 +213,7 @@ KinovaGotoThread::check_final()
     case TARGET_ANGULAR:
       logger->log_debug(name(), "check final for TARGET ANGULAR");
       for( unsigned int i=0; i<6; ++i ) {
-        __final &= (std::abs(__joints[i] - __if_jaco->joints(i)) < 1.0);
+        __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints[i] - __if_jaco->joints(i)))) < 0.01);
       }
       check_fingers = true;
       break;
@@ -299,7 +299,7 @@ KinovaGotoThread::check_final()
       break;
   }
 
-  logger->log_debug(name(), "check final: %u", __final);
+  //logger->log_debug(name(), "check final: %u", __final);
 
   if( check_fingers && __final ) {
     logger->log_debug(name(), "check fingeres for final");
