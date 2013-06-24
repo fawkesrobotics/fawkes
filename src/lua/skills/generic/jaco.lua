@@ -110,14 +110,14 @@ function MODE_RETRACT:init()
 end
 
 function GOTO_HOME:init()
-   self.fsm.vars.x = 0.234982
-   self.fsm.vars.y = 0.201018
-   self.fsm.vars.z = 0.435909
-   self.fsm.vars.e1 = -1.518357
-   self.fsm.vars.e2 = 0.472125
-   self.fsm.vars.e3 = -3.177326
+   self.fsm.vars.x = 282.522400
+   self.fsm.vars.y = 154.470856
+   self.fsm.vars.z = 44.191490
+   self.fsm.vars.e1 = 230.081223
+   self.fsm.vars.e2 = 83.242500
+   self.fsm.vars.e3 = 77.796173
 
-   self.fsm.vars.type = "cart"
+   self.fsm.vars.type = "ang"
 end
 
 function GOTO_RETRACT:init()
@@ -163,9 +163,9 @@ function GOTO:init()
    local x, y, z = self.fsm.vars.x, self.fsm.vars.y, self.fsm.vars.z
 
    jacoarm:read()
-   local e1             = self.fsm.vars.e1      or jacoarm:euler1()
-   local e2             = self.fsm.vars.e2      or jacoarm:euler2()
-   local e3             = self.fsm.vars.e3      or jacoarm:euler3()
+   local e1             = self.fsm.vars.e1      or math.pi/2 + math.atan2(y,x)
+   local e2             = self.fsm.vars.e2      or math.pi/2
+   local e3             = self.fsm.vars.e3      or 0
    --printf("goto: "..x.."  "..y.."  "..z.."  "..e1.."  "..e2.."  "..e3)
 
    local m
