@@ -25,19 +25,19 @@
 
 #include <interfaces/JacoInterface.h>
 
-#include <plugins/openrave/environment.h>
-#include <plugins/openrave/robot.h>
-#include <plugins/openrave/manipulator.h>
-#include <plugins/openrave/manipulators/kinova_jaco.h>
-
 #include <cmath>
-
-
 #include <stdio.h>
 #include <cstring>
 
+#ifdef HAVE_OPENRAVE
+ #include <plugins/openrave/environment.h>
+ #include <plugins/openrave/robot.h>
+ #include <plugins/openrave/manipulator.h>
+ #include <plugins/openrave/manipulators/kinova_jaco.h>
+ using namespace OpenRAVE;
+#endif
+
 using namespace fawkes;
-using namespace OpenRAVE;
 
 /** @class JacoOpenraveThread "jaco_thread.h"
  * Jaco Arm control thread.
@@ -53,19 +53,25 @@ JacoOpenraveThread::JacoOpenraveThread()
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __arm = NULL;
+  __if_jaco = NULL;
+#ifdef HAVE_OPENRAVE
   __OR_env   = NULL;
   __OR_robot = NULL;
   __OR_manip = NULL;
-  cnt = 0;
+
+  __cfg_OR_auto_load_ik = false;
+#endif
 }
 
 
 /** Destructor. */
 JacoOpenraveThread::~JacoOpenraveThread()
 {
+#ifdef HAVE_OPENRAVE
   __OR_env   = NULL;
   __OR_robot = NULL;
   __OR_manip = NULL;
+#endif
 }
 
 void
@@ -75,23 +81,28 @@ JacoOpenraveThread::register_arm(JacoArm *arm)
 }
 
 void
+JacoOpenraveThread::unregister_arm() {
+  __arm = NULL;
+}
+
+void
+JacoOpenraveThread::set_interface(JacoInterface *if_jaco)
+{
+  __if_jaco = if_jaco;
+}
+
+void
 JacoOpenraveThread::init()
 {
-  logger->log_debug(name(), "init()");
+#ifdef HAVE_OPENRAVE
+  __cfg_OR_use_viewer    = config->get_bool("/hardware/jaco/openrave/use_viewer");
+  __cfg_OR_robot_file    = config->get_string("/hardware/jaco/openrave/robot_file");
+  __cfg_OR_auto_load_ik  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
 
-  /*
-  try {
-    // open interface for reading
-    __if_jaco = blackboard->open_for_reading<JacoInterface>("JacoArm");
-    logger->log_debug(name(), "Interfaces openede for writing");
-
-  } catch(fawkes::Exception &e) {
-    logger->log_error(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
-  }
-  //*/
 
   try {
-    __OR_robot = openrave->add_robot("../fawkes/res/openrave/jaco.robot.xml", false);
+    //__OR_robot = openrave->add_robot("../fawkes/res/openrave/jaco.robot.xml", false);
+    __OR_robot = openrave->add_robot(__cfg_OR_robot_file, false);
 
     __OR_manip = new OpenRaveManipulatorKinovaJaco(6, 6);
     __OR_manip->add_motor(0,0);
@@ -102,11 +113,9 @@ JacoOpenraveThread::init()
     __OR_manip->add_motor(5,5);
 
     // Set manipulator and offsets.
-    // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
-    // offsetX: katana.kinbody is setup 0.0725 on +x axis
     openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
 
-    if( false ) {
+    if( __cfg_OR_auto_load_ik ) {
       openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_Transform6D);
     }
 
@@ -117,25 +126,19 @@ JacoOpenraveThread::init()
 
   if( true )
     openrave->start_viewer();
-
-  logger->log_debug(name(), "init() done");
+#endif
 }
 
 void
 JacoOpenraveThread::finalize()
 {
-  /*
-  try {
-    blackboard->close(__if_jaco);
-  } catch(fawkes::Exception& e) {
-    logger->log_warn(name(), "Could not close JacoInterface interface. Er:%s", e.what());
-  }
-  //*/
+#ifdef HAVE_OPENRAVE
   delete(__OR_robot);
   __OR_robot = NULL;
 
   delete(__OR_manip);
   __OR_manip = NULL;
+#endif
 }
 
 void
@@ -144,7 +147,7 @@ JacoOpenraveThread::loop()
   if( __arm == NULL )
     return;
 
-//*
+#ifdef HAVE_OPENRAVE
   try {
     jaco_position_t pos = __arm->get_ang_pos();
     std::vector<dReal> joints;
@@ -168,6 +171,6 @@ JacoOpenraveThread::loop()
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
-  //*/
+#endif
 
 }

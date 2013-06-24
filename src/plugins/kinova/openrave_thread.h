@@ -28,9 +28,9 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
-#include <plugins/openrave/aspect/openrave.h>
-
-#include <openrave/openrave.h>
+#ifdef HAVE_OPENRAVE
+ #include <plugins/openrave/aspect/openrave.h>
+#endif
 
 #include <string>
 
@@ -44,8 +44,10 @@ class JacoOpenraveThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::OpenRaveAspect
+#ifdef HAVE_OPENRAVE
+  public fawkes::OpenRaveAspect,
+#endif
+  public fawkes::BlackBoardAspect
 {
  public:
   JacoOpenraveThread();
@@ -56,20 +58,25 @@ class JacoOpenraveThread
   virtual void loop();
 
   virtual void register_arm(fawkes::JacoArm *arm);
+  virtual void unregister_arm();
+  virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm *__arm;
+  fawkes::JacoArm       *__arm;
+  fawkes::JacoInterface *__if_jaco;
 
+#ifdef HAVE_OPENRAVE
   fawkes::OpenRaveEnvironment*		__OR_env;
   fawkes::OpenRaveRobot*		__OR_robot;
   fawkes::OpenRaveManipulator*		__OR_manip;
 
-  unsigned int cnt;
-
-  fawkes::JacoInterface   *__if_jaco;
+  bool          __cfg_OR_use_viewer;
+  std::string   __cfg_OR_robot_file;
+  bool          __cfg_OR_auto_load_ik;
+#endif
 };
 
 
