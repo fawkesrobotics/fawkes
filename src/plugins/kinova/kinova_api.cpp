@@ -26,8 +26,6 @@
 #include <stdio.h>
 #include <cstring>
 
-//#include <libusb.h>
-
 #define VENDOR_ID       0x22CD
 #define PRODUCT_ID      0x0000
 
@@ -90,6 +88,8 @@ JacoArm::JacoArm() :
   _get_device_handle();
 
   _claim_interface();
+
+  __lock = false;
 }
 
 /** Destructor. */
@@ -199,12 +199,22 @@ JacoArm::_cmd_out_in(jaco_message_t &msg, int cmd_size_in)
 
   //printf("\n cmd_out_in send message: \n");
   //print_message(msg);
+  while(__lock) {
+#ifdef __USE_GNU
+    pthread_yield();
+#else
+    usleep(0);
+#endif
+  }
+  __lock = true;
   r = USB_CMD_OUT(msg);
   if( r < 0 ) {
     fprintf(stderr, "intr error %d\n", r);
+    __lock = false;
     return r;
   } else if( transferred < INTR_LENGTH ) {
     fprintf(stderr, "short write (%d)\n", r);
+    __lock = false;
     return -1;
   }
   //printf("sent interrupt, transferred %i \n", transferred);
@@ -216,9 +226,11 @@ JacoArm::_cmd_out_in(jaco_message_t &msg, int cmd_size_in)
   r = USB_CMD_IN(msg);
   if( r < 0 ) {
     fprintf(stderr, "intr error %d\n", r);
+    __lock = false;
     return r;
   } else if( transferred < INTR_LENGTH ) {
     fprintf(stderr, "short read (%d)\n", r);
+    __lock = false;
     return -1;
   }
   //printf("sent interrupt %04x, transfered %i \n", *((uint16_t *) msg.data), transferred);
@@ -226,6 +238,7 @@ JacoArm::_cmd_out_in(jaco_message_t &msg, int cmd_size_in)
   if( exp != msg.header.CommandId)
     throw fawkes::Exception("Kinova_API: Got CMD_ID %i, expected %i!", msg.header.CommandId, exp);
 
+  __lock = false;
   return 0;
 }
 
