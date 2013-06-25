@@ -19,6 +19,11 @@ clips-agent:
   # each loop. This can be used to trigger loop events in CLIPS.
   assert-time-each-loop: false
 
+  # If set to true will force the acquisition of the skiller control.
+  # This is particularly useful to kick an SkillGUI which is holding
+  # the lock just due to an oversight.
+  steal-skiller-control: true
+
   # Directory where to look for CLIPS files
   clips-dirs: ["@BASEDIR@/src/clips-agents", "@BASEDIR@/testagent"]
   
