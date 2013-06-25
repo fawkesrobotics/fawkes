@@ -193,17 +193,27 @@ class SkillerInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool steal_control; /**< 
+      If set to true steal the control from someone else who has it
+      atm. Use this with caution. But sometimes it is necessary to
+      ensure a successful operation, e.g. if the agent tries to
+      acquire control.
+     */
     } AcquireControlMessage_data_t;
 #pragma pack(pop)
 
     AcquireControlMessage_data_t *data;
 
    public:
+    AcquireControlMessage(const bool ini_steal_control);
     AcquireControlMessage();
     ~AcquireControlMessage();
 
     AcquireControlMessage(const AcquireControlMessage *m);
     /* Methods */
+    bool is_steal_control() const;
+    void set_steal_control(const bool new_steal_control);
+    size_t maxlenof_steal_control() const;
     virtual Message * clone() const;
   };
 

@@ -62,7 +62,7 @@ SkillerInterface::SkillerInterface() : Interface()
   add_messageinfo("StopExecMessage");
   add_messageinfo("AcquireControlMessage");
   add_messageinfo("ReleaseControlMessage");
-  unsigned char tmp_hash[] = {0x7c, 0x85, 0xf3, 0x24, 0xea, 0x55, 0x50, 0xa1, 0x6c, 0xdb, 0xdc, 0x4b, 0x40, 0xba, 0xa1, 0xda};
+  unsigned char tmp_hash[] = {0x36, 0x80, 0x24, 0x37, 0x4d, 0x96, 0x6e, 0xb4, 0xf9, 0x73, 0xb0, 0x83, 0x4b, 0xb5, 0xa5, 0xd1};
   set_hash(tmp_hash);
 }
 
@@ -608,6 +608,19 @@ SkillerInterface::StopExecMessage::clone() const
  */
 
 
+/** Constructor with initial values.
+ * @param ini_steal_control initial value for steal_control
+ */
+SkillerInterface::AcquireControlMessage::AcquireControlMessage(const bool ini_steal_control) : Message("AcquireControlMessage")
+{
+  data_size = sizeof(AcquireControlMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->steal_control = ini_steal_control;
+  add_fieldinfo(IFT_BOOL, "steal_control", 1, &data->steal_control);
+}
 /** Constructor */
 SkillerInterface::AcquireControlMessage::AcquireControlMessage() : Message("AcquireControlMessage")
 {
@@ -616,6 +629,7 @@ SkillerInterface::AcquireControlMessage::AcquireControlMessage() : Message("Acqu
   memset(data_ptr, 0, data_size);
   data      = (AcquireControlMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "steal_control", 1, &data->steal_control);
 }
 
 /** Destructor */
@@ -637,6 +651,46 @@ SkillerInterface::AcquireControlMessage::AcquireControlMessage(const AcquireCont
 }
 
 /* Methods */
+/** Get steal_control value.
+ * 
+      If set to true steal the control from someone else who has it
+      atm. Use this with caution. But sometimes it is necessary to
+      ensure a successful operation, e.g. if the agent tries to
+      acquire control.
+    
+ * @return steal_control value
+ */
+bool
+SkillerInterface::AcquireControlMessage::is_steal_control() const
+{
+  return data->steal_control;
+}
+
+/** Get maximum length of steal_control value.
+ * @return length of steal_control value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerInterface::AcquireControlMessage::maxlenof_steal_control() const
+{
+  return 1;
+}
+
+/** Set steal_control value.
+ * 
+      If set to true steal the control from someone else who has it
+      atm. Use this with caution. But sometimes it is necessary to
+      ensure a successful operation, e.g. if the agent tries to
+      acquire control.
+    
+ * @param new_steal_control new steal_control value
+ */
+void
+SkillerInterface::AcquireControlMessage::set_steal_control(const bool new_steal_control)
+{
+  data->steal_control = new_steal_control;
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.

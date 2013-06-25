@@ -49,9 +49,13 @@ class SkillerInterface : public Interface
 
   class AcquireControlMessage : public Message
   {
+    AcquireControlMessage(bool ini_steal_control);
     AcquireControlMessage();
     ~AcquireControlMessage();
 
+    bool is_steal_control();
+    void set_steal_control(const bool new_steal_control);
+    int maxlenof_steal_control() const;
   };
 
   class ReleaseControlMessage : public Message
