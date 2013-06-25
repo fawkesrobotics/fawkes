@@ -149,8 +149,8 @@ function GRIPPER:init()
       self.fsm.vars.gripper.f2 ~= nil and
       self.fsm.vars.gripper.f3 ~= nil then
       f1 = self.fsm.vars.gripper.f1
-      f1 = self.fsm.vars.gripper.f2
-      f1 = self.fsm.vars.gripper.f3
+      f2 = self.fsm.vars.gripper.f2
+      f3 = self.fsm.vars.gripper.f3
    elseif type(self.fsm.vars.gripper) == "number" then
       f1 = self.fsm.vars.gripper
       f2 = self.fsm.vars.gripper
