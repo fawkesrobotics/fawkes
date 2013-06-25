@@ -176,17 +176,12 @@ KinovaJacoThread::loop()
                         msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
       __goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
 
-    } else if( __if_jaco->msgq_first_is<JacoInterface::OpenGripperMessage>() ) {
-      JacoInterface::OpenGripperMessage *msg = __if_jaco->msgq_first(msg);
-      logger->log_debug(name(), "OpenGripperMessage rcvd");
+    } else if( __if_jaco->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
+      JacoInterface::MoveGripperMessage *msg = __if_jaco->msgq_first(msg);
+      logger->log_debug(name(), "MoveGripperMessage rcvd. f1:%f  f2:%f  f3:%f",
+                        msg->finger1(), msg->finger2(), msg->finger3());
 
-      __goto_thread->open_gripper();
-
-    } else if( __if_jaco->msgq_first_is<JacoInterface::CloseGripperMessage>() ) {
-      JacoInterface::CloseGripperMessage *msg = __if_jaco->msgq_first(msg);
-      logger->log_debug(name(), "CloseGripperMessage rcvd");
-
-      __goto_thread->close_gripper();
+      __goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
 
     } else if( __if_jaco->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
       JacoInterface::JoystickPushMessage *msg = __if_jaco->msgq_first(msg);

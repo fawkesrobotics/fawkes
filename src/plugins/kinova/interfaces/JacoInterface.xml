@@ -61,11 +61,11 @@
     <field type="float" name="j6">Angular value of 6th joint</field>
   </message>
 
-  <message name="OpenGripper">
-    <comment>Open Gripper.</comment>
-  </message>
-  <message name="CloseGripper">
-    <comment>Close Gripper.</comment>
+  <message name="MoveGripper">
+    <comment>Move fingers on gripper.</comment>
+    <field type="float" name="finger1">Value of finger 1. Range [0,60]</field>
+    <field type="float" name="finger2">Value of finger 2. Range [0,60]</field>
+    <field type="float" name="finger3">Value of finger 3. Range [0,60]</field>
   </message>
 
   <message name="JoystickPush">

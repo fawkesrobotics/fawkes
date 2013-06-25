@@ -77,18 +77,21 @@ class JacoInterface : public Interface
     int maxlenof_j6() const;
   };
 
-  class OpenGripperMessage : public Message
+  class MoveGripperMessage : public Message
   {
-    OpenGripperMessage();
-    ~OpenGripperMessage();
+    MoveGripperMessage(float ini_finger1, float ini_finger2, float ini_finger3);
+    MoveGripperMessage();
+    ~MoveGripperMessage();
 
-  };
-
-  class CloseGripperMessage : public Message
-  {
-    CloseGripperMessage();
-    ~CloseGripperMessage();
-
+    float finger1();
+    void set_finger1(const float new_finger1);
+    int maxlenof_finger1() const;
+    float finger2();
+    void set_finger2(const float new_finger2);
+    int maxlenof_finger2() const;
+    float finger3();
+    void set_finger3(const float new_finger3);
+    int maxlenof_finger3() const;
   };
 
   class JoystickPushMessage : public Message

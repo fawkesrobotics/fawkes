@@ -67,11 +67,10 @@ JacoInterface::JacoInterface() : Interface()
   add_messageinfo("StopMessage");
   add_messageinfo("CartesianGotoMessage");
   add_messageinfo("AngularGotoMessage");
-  add_messageinfo("OpenGripperMessage");
-  add_messageinfo("CloseGripperMessage");
+  add_messageinfo("MoveGripperMessage");
   add_messageinfo("JoystickPushMessage");
   add_messageinfo("JoystickReleaseMessage");
-  unsigned char tmp_hash[] = {0xfe, 0xf4, 0x9c, 0xf2, 0x79, 0x25, 0x11, 0x30, 0x27, 0x2f, 0x15, 0x24, 0x4f, 0x64, 0xee, 0x76};
+  unsigned char tmp_hash[] = {0x9d, 0x13, 0xd0, 0x57, 0xac, 0x94, 0x3, 0xfe, 0x1b, 0x70, 0x46, 0x37, 0x4, 0x24, 0x57, 0xf6};
   set_hash(tmp_hash);
 }
 
@@ -562,10 +561,8 @@ JacoInterface::create_message(const char *type) const
     return new CartesianGotoMessage();
   } else if ( strncmp("AngularGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new AngularGotoMessage();
-  } else if ( strncmp("OpenGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new OpenGripperMessage();
-  } else if ( strncmp("CloseGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new CloseGripperMessage();
+  } else if ( strncmp("MoveGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new MoveGripperMessage();
   } else if ( strncmp("JoystickPushMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new JoystickPushMessage();
   } else if ( strncmp("JoystickReleaseMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1256,25 +1253,47 @@ JacoInterface::AngularGotoMessage::clone() const
 {
   return new JacoInterface::AngularGotoMessage(this);
 }
-/** @class JacoInterface::OpenGripperMessage <interfaces/JacoInterface.h>
- * OpenGripperMessage Fawkes BlackBoard Interface Message.
+/** @class JacoInterface::MoveGripperMessage <interfaces/JacoInterface.h>
+ * MoveGripperMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
-/** Constructor */
-JacoInterface::OpenGripperMessage::OpenGripperMessage() : Message("OpenGripperMessage")
+/** Constructor with initial values.
+ * @param ini_finger1 initial value for finger1
+ * @param ini_finger2 initial value for finger2
+ * @param ini_finger3 initial value for finger3
+ */
+JacoInterface::MoveGripperMessage::MoveGripperMessage(const float ini_finger1, const float ini_finger2, const float ini_finger3) : Message("MoveGripperMessage")
 {
-  data_size = sizeof(OpenGripperMessage_data_t);
+  data_size = sizeof(MoveGripperMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data      = (MoveGripperMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  data->finger1 = ini_finger1;
+  data->finger2 = ini_finger2;
+  data->finger3 = ini_finger3;
+  add_fieldinfo(IFT_FLOAT, "finger1", 1, &data->finger1);
+  add_fieldinfo(IFT_FLOAT, "finger2", 1, &data->finger2);
+  add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
+}
+/** Constructor */
+JacoInterface::MoveGripperMessage::MoveGripperMessage() : Message("MoveGripperMessage")
+{
+  data_size = sizeof(MoveGripperMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (MoveGripperMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "finger1", 1, &data->finger1);
+  add_fieldinfo(IFT_FLOAT, "finger2", 1, &data->finger2);
+  add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
 }
 
 /** Destructor */
-JacoInterface::OpenGripperMessage::~OpenGripperMessage()
+JacoInterface::MoveGripperMessage::~MoveGripperMessage()
 {
   free(data_ptr);
 }
@@ -1282,71 +1301,115 @@ JacoInterface::OpenGripperMessage::~OpenGripperMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-JacoInterface::OpenGripperMessage::OpenGripperMessage(const OpenGripperMessage *m) : Message("OpenGripperMessage")
+JacoInterface::MoveGripperMessage::MoveGripperMessage(const MoveGripperMessage *m) : Message("MoveGripperMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (OpenGripperMessage_data_t *)data_ptr;
+  data      = (MoveGripperMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
+/** Get finger1 value.
+ * Value of finger 1. Range [0,60]
+ * @return finger1 value
+ */
+float
+JacoInterface::MoveGripperMessage::finger1() const
+{
+  return data->finger1;
+}
+
+/** Get maximum length of finger1 value.
+ * @return length of finger1 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::MoveGripperMessage::maxlenof_finger1() const
+{
+  return 1;
+}
+
+/** Set finger1 value.
+ * Value of finger 1. Range [0,60]
+ * @param new_finger1 new finger1 value
+ */
+void
+JacoInterface::MoveGripperMessage::set_finger1(const float new_finger1)
+{
+  data->finger1 = new_finger1;
+}
+
+/** Get finger2 value.
+ * Value of finger 2. Range [0,60]
+ * @return finger2 value
+ */
+float
+JacoInterface::MoveGripperMessage::finger2() const
+{
+  return data->finger2;
+}
+
+/** Get maximum length of finger2 value.
+ * @return length of finger2 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::MoveGripperMessage::maxlenof_finger2() const
+{
+  return 1;
+}
+
+/** Set finger2 value.
+ * Value of finger 2. Range [0,60]
+ * @param new_finger2 new finger2 value
+ */
+void
+JacoInterface::MoveGripperMessage::set_finger2(const float new_finger2)
+{
+  data->finger2 = new_finger2;
+}
+
+/** Get finger3 value.
+ * Value of finger 3. Range [0,60]
+ * @return finger3 value
+ */
+float
+JacoInterface::MoveGripperMessage::finger3() const
+{
+  return data->finger3;
+}
+
+/** Get maximum length of finger3 value.
+ * @return length of finger3 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::MoveGripperMessage::maxlenof_finger3() const
+{
+  return 1;
+}
+
+/** Set finger3 value.
+ * Value of finger 3. Range [0,60]
+ * @param new_finger3 new finger3 value
+ */
+void
+JacoInterface::MoveGripperMessage::set_finger3(const float new_finger3)
+{
+  data->finger3 = new_finger3;
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.
  * @return clone of this message
  */
 Message *
-JacoInterface::OpenGripperMessage::clone() const
+JacoInterface::MoveGripperMessage::clone() const
 {
-  return new JacoInterface::OpenGripperMessage(this);
-}
-/** @class JacoInterface::CloseGripperMessage <interfaces/JacoInterface.h>
- * CloseGripperMessage Fawkes BlackBoard Interface Message.
- * 
-    
- */
-
-
-/** Constructor */
-JacoInterface::CloseGripperMessage::CloseGripperMessage() : Message("CloseGripperMessage")
-{
-  data_size = sizeof(CloseGripperMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (CloseGripperMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-}
-
-/** Destructor */
-JacoInterface::CloseGripperMessage::~CloseGripperMessage()
-{
-  free(data_ptr);
-}
-
-/** Copy constructor.
- * @param m message to copy from
- */
-JacoInterface::CloseGripperMessage::CloseGripperMessage(const CloseGripperMessage *m) : Message("CloseGripperMessage")
-{
-  data_size = m->data_size;
-  data_ptr  = malloc(data_size);
-  memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (CloseGripperMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-}
-
-/* Methods */
-/** Clone this message.
- * Produces a message of the same type as this message and copies the
- * data to the new message.
- * @return clone of this message
- */
-Message *
-JacoInterface::CloseGripperMessage::clone() const
-{
-  return new JacoInterface::CloseGripperMessage(this);
+  return new JacoInterface::MoveGripperMessage(this);
 }
 /** @class JacoInterface::JoystickPushMessage <interfaces/JacoInterface.h>
  * JoystickPushMessage Fawkes BlackBoard Interface Message.
@@ -1511,20 +1574,16 @@ JacoInterface::message_valid(const Message *message) const
   if ( m4 != NULL ) {
     return true;
   }
-  const OpenGripperMessage *m5 = dynamic_cast<const OpenGripperMessage *>(message);
+  const MoveGripperMessage *m5 = dynamic_cast<const MoveGripperMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const CloseGripperMessage *m6 = dynamic_cast<const CloseGripperMessage *>(message);
+  const JoystickPushMessage *m6 = dynamic_cast<const JoystickPushMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const JoystickPushMessage *m7 = dynamic_cast<const JoystickPushMessage *>(message);
+  const JoystickReleaseMessage *m7 = dynamic_cast<const JoystickReleaseMessage *>(message);
   if ( m7 != NULL ) {
-    return true;
-  }
-  const JoystickReleaseMessage *m8 = dynamic_cast<const JoystickReleaseMessage *>(message);
-  if ( m8 != NULL ) {
     return true;
   }
   return false;

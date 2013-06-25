@@ -227,7 +227,7 @@ class JacoInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class OpenGripperMessage : public Message
+  class MoveGripperMessage : public Message
   {
    private:
 #pragma pack(push,4)
@@ -235,39 +235,30 @@ class JacoInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    } OpenGripperMessage_data_t;
+      float finger1; /**< Value of finger 1. Range [0,60] */
+      float finger2; /**< Value of finger 2. Range [0,60] */
+      float finger3; /**< Value of finger 3. Range [0,60] */
+    } MoveGripperMessage_data_t;
 #pragma pack(pop)
 
-    OpenGripperMessage_data_t *data;
+    MoveGripperMessage_data_t *data;
 
    public:
-    OpenGripperMessage();
-    ~OpenGripperMessage();
+    MoveGripperMessage(const float ini_finger1, const float ini_finger2, const float ini_finger3);
+    MoveGripperMessage();
+    ~MoveGripperMessage();
 
-    OpenGripperMessage(const OpenGripperMessage *m);
+    MoveGripperMessage(const MoveGripperMessage *m);
     /* Methods */
-    virtual Message * clone() const;
-  };
-
-  class CloseGripperMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    } CloseGripperMessage_data_t;
-#pragma pack(pop)
-
-    CloseGripperMessage_data_t *data;
-
-   public:
-    CloseGripperMessage();
-    ~CloseGripperMessage();
-
-    CloseGripperMessage(const CloseGripperMessage *m);
-    /* Methods */
+    float finger1() const;
+    void set_finger1(const float new_finger1);
+    size_t maxlenof_finger1() const;
+    float finger2() const;
+    void set_finger2(const float new_finger2);
+    size_t maxlenof_finger2() const;
+    float finger3() const;
+    void set_finger3(const float new_finger3);
+    size_t maxlenof_finger3() const;
     virtual Message * clone() const;
   };
 

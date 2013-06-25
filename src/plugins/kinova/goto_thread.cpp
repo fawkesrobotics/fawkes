@@ -153,7 +153,7 @@ KinovaGotoThread::pos_retract()
 
 
 void
-KinovaGotoThread::open_gripper()
+KinovaGotoThread::move_gripper(float f1, float f2 ,float f3)
 {
   __joints[0] = __if_jaco->joints(0);
   __joints[1] = __if_jaco->joints(1);
@@ -162,31 +162,14 @@ KinovaGotoThread::open_gripper()
   __joints[4] = __if_jaco->joints(4);
   __joints[5] = __if_jaco->joints(5);
 
-  __f1 = 0.25f;
-  __f2 = 0.25f;
-  __f3 = 0.25f;
+  __f1 = f1;
+  __f2 = f2;
+  __f3 = f3;
 
   __new_target = true;
   __target_type = TARGET_ANGULAR;
 }
 
-void
-KinovaGotoThread::close_gripper()
-{
-  __joints[0] = __if_jaco->joints(0);
-  __joints[1] = __if_jaco->joints(1);
-  __joints[2] = __if_jaco->joints(2);
-  __joints[3] = __if_jaco->joints(3);
-  __joints[4] = __if_jaco->joints(4);
-  __joints[5] = __if_jaco->joints(5);
-
-  __f1 = 52.f;
-  __f2 = 52.f;
-  __f3 = 52.f;
-
-  __new_target = true;
-  __target_type = TARGET_ANGULAR;
-}
 
 void
 KinovaGotoThread::stop()
