@@ -191,10 +191,10 @@ KinovaGotoThread::check_final()
   __final = true;
   bool check_fingers = false;
 
-  logger->log_debug(name(), "check final");
+  //logger->log_debug(name(), "check final");
   switch( __target_type ) {
     case TARGET_ANGULAR:
-      logger->log_debug(name(), "check final for TARGET ANGULAR");
+      //logger->log_debug(name(), "check final for TARGET ANGULAR");
       for( unsigned int i=0; i<6; ++i ) {
         __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints[i] - __if_jaco->joints(i)))) < 0.01);
       }
@@ -202,9 +202,9 @@ KinovaGotoThread::check_final()
       break;
 
     case TARGET_READY:
-      logger->log_debug(name(), "check final for TARGET READY");
+      //logger->log_debug(name(), "check final for TARGET READY");
       if( __wait_status_check == 0 ) {
-        logger->log_debug(name(), "check final for TARGET READY now");
+        //logger->log_debug(name(), "check final for TARGET READY now");
         //__wait_status_check = 0;
         jaco_retract_mode_t mode = __arm->get_status();
         logger->log_debug(name(), "current mode: %u", mode);
@@ -218,7 +218,7 @@ KinovaGotoThread::check_final()
           __arm->push_joystick_button(2);
         }
       } else {
-        logger->log_debug(name(), "check final for TARGET READY not yet");
+        //logger->log_debug(name(), "check final for TARGET READY not yet");
         __final = false;
         if( __wait_status_check >= 10 )
           __wait_status_check = 0;
@@ -228,18 +228,17 @@ KinovaGotoThread::check_final()
       break;
 
     case TARGET_RETRACT:
-      logger->log_debug(name(), "check final for TARGET RETRACT");
+      //logger->log_debug(name(), "check final for TARGET RETRACT");
       if( __wait_status_check == 0 ) {
-        logger->log_debug(name(), "check final for TARGET RETRACT now");
-        //__wait_status_check = 0;
+        //logger->log_debug(name(), "check final for TARGET RETRACT now");
         jaco_retract_mode_t mode = __arm->get_status();
-        logger->log_debug(name(), "current mode: %u", mode);
+        //logger->log_debug(name(), "current mode: %u", mode);
         ++__wait_status_check;
         __final = (mode == MODE_RETRACT_STANDBY);
         if( __final )
           __arm->release_joystick();
       } else {
-        logger->log_debug(name(), "check final for TARGET RETRACT");
+        //logger->log_debug(name(), "check final for TARGET RETRACT");
         __final = false;
         if( __wait_status_check >= 10 )
           __wait_status_check = 0;
@@ -250,34 +249,14 @@ KinovaGotoThread::check_final()
 
 
     default: //TARGET_CARTESIAN
-      logger->log_debug(name(), "check final for TARGET CARTESIAN");
-      /*
-      logger->log_debug(name(), "target: %f  %f  %f  |  %f  %f  %f", __x, __y, __z, __e1, __e2, __e3);
-      logger->log_debug(name(), "if_jac: %f  %f  %f  |  %f  %f  %f", __if_jaco->x(), __if_jaco->y(), __if_jaco->z(),
-                                                                   __if_jaco->euler1(), __if_jaco->euler2(), __if_jaco->euler3());
-      logger->log_debug(name(), "diff  : %f  %f  %f  |  %f  %f  %f",
-                        angle_distance(__x , __if_jaco->x()),
-                        angle_distance(__y , __if_jaco->y()),
-                        angle_distance(__z , __if_jaco->z()),
-                        angle_distance(__e1 , __if_jaco->euler1()),
-                        angle_distance(__e2 , __if_jaco->euler2()),
-                        angle_distance(__e3 , __if_jaco->euler3()) );
-
-      //*/
+      //logger->log_debug(name(), "check final for TARGET CARTESIAN");
       __final &= (std::abs(angle_distance(__x , __if_jaco->x())) < 0.01);
       __final &= (std::abs(angle_distance(__y , __if_jaco->y())) < 0.01);
       __final &= (std::abs(angle_distance(__z , __if_jaco->z())) < 0.01);
       __final &= (std::abs(angle_distance(__e1 , __if_jaco->euler1())) < 0.1);
       __final &= (std::abs(angle_distance(__e2 , __if_jaco->euler2())) < 0.1);
       __final &= (std::abs(angle_distance(__e3 , __if_jaco->euler3())) < 0.1);
-/*
-      __final &= (std::abs(__x - __if_jaco->x()) < 0.01);
-      __final &= (std::abs(__y - __if_jaco->y()) < 0.01);
-      __final &= (std::abs(__z - __if_jaco->z()) < 0.01);
-      __final &= (std::abs(__e1 - __if_jaco->euler1()) < 0.1);
-      __final &= (std::abs(__e2 - __if_jaco->euler2()) < 0.1);
-      __final &= (std::abs(__e3 - __if_jaco->euler3()) < 0.1);
-*/
+
       check_fingers = true;
       break;
   }
@@ -285,7 +264,7 @@ KinovaGotoThread::check_final()
   //logger->log_debug(name(), "check final: %u", __final);
 
   if( check_fingers && __final ) {
-    logger->log_debug(name(), "check fingeres for final");
+    //logger->log_debug(name(), "check fingeres for final");
 
     // also check fingeres
     if( __finger_last[0] == __if_jaco->finger1() &&
@@ -299,7 +278,7 @@ KinovaGotoThread::check_final()
       __finger_last[3] = 0; // counter
     }
 
-    __final &= __finger_last[3] > 30;
+    __final &= __finger_last[3] > 10;
   }
 }
 
