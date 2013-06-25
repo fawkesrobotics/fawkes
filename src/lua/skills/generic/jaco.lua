@@ -77,7 +77,7 @@ fsm:add_transitions{
    {"INIT", "GOTO_RETRACT", precond_only="vars.pos == 'retract'", desc="goto retract pos"},
    {"INIT", "STOP", precond_only="vars.pos == 'stop'", desc="stop"},
    {"INIT", "GOTO", precond_only="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", desc="goto parms"},
-   {"INIT", "GRIPPER", precond_only="vars.gripper == 'open' or vars.gripper == 'close'", desc="move gripper"},
+   {"INIT", "GRIPPER", precond_only="vars.gripper", desc="move gripper"},
 
    {"MODE_READY", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
    {"MODE_READY", "FAILED", cond=jc_next_msg, desc="next msg"},
@@ -143,14 +143,29 @@ end
 
 function GRIPPER:init()
    self.error = false
-   if self.fsm.vars.gripper == "open" then
-      local m = jacoarm.OpenGripperMessage:new()
-      self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+   local f1, f2, f3
+   if type(self.fsm.vars.gripper) == "table" and
+      self.fsm.vars.gripper.f1 ~= nil and
+      self.fsm.vars.gripper.f2 ~= nil and
+      self.fsm.vars.gripper.f3 ~= nil then
+      f1 = self.fsm.vars.gripper.f1
+      f1 = self.fsm.vars.gripper.f2
+      f1 = self.fsm.vars.gripper.f3
+   elseif type(self.fsm.vars.gripper) == "number" then
+      f1 = self.fsm.vars.gripper
+      f2 = self.fsm.vars.gripper
+      f3 = self.fsm.vars.gripper
+   elseif self.fsm.vars.gripper == "open" then
+      f1, f2, f3 = 0.25, 0.25, 0.25
    elseif self.fsm.vars.gripper =="close" then
-      local m = jacoarm.CloseGripperMessage:new()
-      self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+      f1, f2, f3 = 52.0, 52.0, 52.0
    else
      self.error = true
+   end
+
+   if not self.error then
+      local m = jacoarm.MoveGripperMessage:new(f1, f2, f3)
+      self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
    end
 end
 
