@@ -143,12 +143,14 @@ LaserPointCloudThread::loop()
       continue;
     }
     if (m->is_360) {
+      m->cloud->header.frame_id = m->interface_typed.as360->frame();
       float *distances = m->interface_typed.as360->distances();
       for (unsigned int i = 0; i < 360; ++i) {
         m->cloud->points[i].x = distances[i] * cos_angles360[i];
         m->cloud->points[i].y = distances[i] * sin_angles360[i];
       }
     } else {
+      m->cloud->header.frame_id = m->interface_typed.as720->frame();
       float *distances = m->interface_typed.as720->distances();
       for (unsigned int i = 0; i < 720; ++i) {
         m->cloud->points[i].x = distances[i] * cos_angles720[i];
