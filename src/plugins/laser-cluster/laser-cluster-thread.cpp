@@ -155,6 +155,7 @@ LaserClusterThread::init()
   } catch (Exception &e) {
     blackboard->close(cluster_pos_if_);
     blackboard->close(switch_if_);
+    blackboard->close(config_if_);
     throw;
   }
 
@@ -193,6 +194,7 @@ LaserClusterThread::finalize()
   
   blackboard->close(cluster_pos_if_);
   blackboard->close(switch_if_);
+  blackboard->close(config_if_);
 
   finput_.reset();
   fclusters_.reset();
@@ -362,8 +364,8 @@ LaserClusterThread::loop()
 
     unsigned int i = 0;
     for (auto cluster : cluster_indices) {
-      Eigen::Vector4f centroid;
-      pcl::compute3DCentroid(*noline_cloud, cluster.indices, centroid);
+      //Eigen::Vector4f centroid;
+      //pcl::compute3DCentroid(*noline_cloud, cluster.indices, centroid);
 
       //logger->log_info(name(), "  Cluster %u with %zu points at (%f, %f, %f)",
       //	         i, cluster.indices.size(), centroid.x(), centroid.y(), centroid.z());
@@ -461,8 +463,8 @@ LaserClusterThread::loop()
 
 void
 LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
-                                    bool is_visible, const Eigen::Vector4f &centroid,
-                                    const Eigen::Quaternionf &attitude)
+				 bool is_visible, const Eigen::Vector4f &centroid,
+				 const Eigen::Quaternionf &attitude)
 {
   tf::Stamped<tf::Pose> baserel_pose;
 
@@ -478,27 +480,35 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
     iface->set_frame(cfg_result_frame_.c_str());
   } catch (tf::TransformException &e) {
-	  logger->log_warn(name(),"Transform exception:");
-	  logger->log_warn(name(),e);
+    logger->log_warn(name(),"Transform exception:");
+    logger->log_warn(name(),e);
     is_visible = false;
   }
 
   int visibility_history = iface->visibility_history();
   if (is_visible) {
-	  //we have to subtract the previously added offset to be
-	  //able to compare against the current centroid
+
+    tf::Vector3 &origin = baserel_pose.getOrigin();
+    tf::Quaternion quat = baserel_pose.getRotation();
+
+    Eigen::Vector4f baserel_centroid;
+    baserel_centroid[0] = origin.x();
+    baserel_centroid[1] = origin.y();
+    baserel_centroid[2] = origin.z();
+    baserel_centroid[3] = 0.;
+    
+    //we have to subtract the previously added offset to be
+    //able to compare against the current centroid
     Eigen::Vector4f last_centroid(iface->translation(0) -cfg_offset_x_, iface->translation(1),
 				  iface->translation(2), 0.);
     bool different_cluster =
-      fabs((last_centroid - centroid).norm()) > cfg_cluster_switch_tolerance_;
+      fabs((last_centroid - baserel_centroid).norm()) > cfg_cluster_switch_tolerance_;
 
     if (! different_cluster && visibility_history >= 0) {
       iface->set_visibility_history(visibility_history + 1);
     } else {
       iface->set_visibility_history(1);
     }
-    tf::Vector3 &origin = baserel_pose.getOrigin();
-    tf::Quaternion quat = baserel_pose.getRotation();
 
     //add the offset and publish
     double translation[3] = { origin.x() + cfg_offset_x_, origin.y(), origin.z() };
