@@ -424,10 +424,17 @@ SkillerExecutionThread::loop()
 
   while ( ! __skiller_if->msgq_empty() ) {
     if ( __skiller_if->msgq_first_is<SkillerInterface::AcquireControlMessage>() ) {
-      Message *m = __skiller_if->msgq_first();
+      SkillerInterface::AcquireControlMessage *m =
+	__skiller_if->msgq_first<SkillerInterface::AcquireControlMessage>();
       if ( excl_ctrl == 0 ) {
 	logger->log_debug("SkillerExecutionThread", "%s is new exclusive controller",
 			  m->sender_thread_name());
+	__skiller_if->set_exclusive_controller(m->sender_id());
+	write_skiller_if = true;
+	excl_ctrl = m->sender_id();
+      } else if ( m->is_steal_control() ) {
+	logger->log_warn("SkillerExecutionThread", "%s steals exclusive control",
+			 m->sender_thread_name());
 	__skiller_if->set_exclusive_controller(m->sender_id());
 	write_skiller_if = true;
 	excl_ctrl = m->sender_id();
