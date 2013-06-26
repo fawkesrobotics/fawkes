@@ -26,9 +26,7 @@
 #include <interfaces/JacoInterface.h>
 #include <utils/math/angle.h>
 
-#include <stdio.h>
-#include <cstring>
-#include <complex>
+#include <unistd.h>
 
 using namespace fawkes;
 
