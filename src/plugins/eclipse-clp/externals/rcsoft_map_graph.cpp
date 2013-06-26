@@ -22,11 +22,15 @@
 #include "rcsoft_map_graph.h"
 
 #include <navgraph/navgraph.h>
+#include <utils/graph/yaml_navgraph.h>
+#include <utils/graph/rcsoft_map_graph.h>
 #include <core/exception.h>
 #include <eclipseclass.h>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+
+#include <fstream>
 
 /** @class fawkes::EclExternalRCSoftMapGraph
  * Wrapper class for using the RCSoftMapGraph in the implementation of
@@ -48,7 +52,18 @@ public:
    */
   void load( const char* file )
   {
-    m_map_graph = new NavGraph( std::string(file) );
+    std::ifstream inf(file);
+    std::string firstword;
+    inf >> firstword;
+    inf.close();
+
+    if (firstword == "%YAML") {
+        m_map_graph = load_yaml_navgraph(file);
+    } else if (firstword == "<Graph>") {
+        m_map_graph = load_rcsoft_graph(file);
+    } else {
+        throw Exception("Unknown graph format");
+    }
   }
 
   /** Query status.
