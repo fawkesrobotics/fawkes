@@ -126,6 +126,7 @@ LaserClusterThread::init()
   cfg_cluster_max_y_         = config->get_float(CFG_PREFIX"cluster_max_y");
   cfg_cluster_switch_tolerance_ = config->get_float(CFG_PREFIX"cluster_switch_tolerance");
   cfg_offset_x_               = config->get_float(CFG_PREFIX"offset_x");
+  cfg_max_num_clusters_      = config->get_uint(CFG_PREFIX"max_num_clusters");
 
   current_max_x_ = cfg_cluster_max_x_;
 
@@ -135,6 +136,20 @@ LaserClusterThread::init()
   try {
     double rotation[4] = {0., 0., 0., 1.};
     cluster_pos_if_ = NULL;
+    cluster_pos_ifs_.resize(cfg_max_num_clusters_, NULL);
+    for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
+      char *tmp;
+      if (asprintf(&tmp, "Laser Cluster %u", i + 1) != -1) {
+        // Copy to get memory freed on exception
+        std::string id = tmp;
+        free(tmp);
+
+	cluster_pos_ifs_[i] =
+	  blackboard->open_for_writing<Position3DInterface>(id.c_str());
+	cluster_pos_ifs_[i]->set_rotation(rotation);
+	cluster_pos_ifs_[i]->write();
+      }
+    }
     cluster_pos_if_ =
       blackboard->open_for_writing<Position3DInterface>("Euclidean Laser Cluster");
     cluster_pos_if_->set_rotation(rotation);
@@ -153,6 +168,9 @@ LaserClusterThread::init()
     switch_if_->set_enabled(autostart);
     switch_if_->write();
   } catch (Exception &e) {
+    for (size_t i = 0; i < cluster_pos_ifs_.size(); ++i) {
+      blackboard->close(cluster_pos_ifs_[i]);
+    }
     blackboard->close(cluster_pos_if_);
     blackboard->close(switch_if_);
     blackboard->close(config_if_);
@@ -192,6 +210,9 @@ LaserClusterThread::finalize()
 
   pcl_manager->remove_pointcloud("laser-cluster");
   
+  for (size_t i = 0; i < cluster_pos_ifs_.size(); ++i) {
+    blackboard->close(cluster_pos_ifs_[i]);
+  }
   blackboard->close(cluster_pos_if_);
   blackboard->close(switch_if_);
   blackboard->close(config_if_);
@@ -242,6 +263,9 @@ LaserClusterThread::loop()
 
   if (! switch_if_->is_enabled()) {
     //TimeWait::wait(250000);
+    for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
+      set_position(cluster_pos_ifs_[i], false);
+    }
     set_position(cluster_pos_if_, false);
     return;
   }
@@ -385,28 +409,21 @@ LaserClusterThread::loop()
     //logger->log_info(name(), "Filter left no points for clustering");
   }
 
+
   if (! cluster_indices.empty()) {
-    double min_angle = std::numeric_limits<double>::max();
-    unsigned int min_index = std::numeric_limits<unsigned int>::max();
-    Eigen::Vector4f min_centroid;
+    std::vector<ClusterInfo> cinfos;
+
     for (unsigned int i = 0; i < cluster_indices.size(); ++i) {
       Eigen::Vector4f centroid;
       pcl::compute3DCentroid(*noline_cloud, cluster_indices[i].indices, centroid);
       if ( (centroid.x() >= cfg_cluster_min_x_) && (centroid.x() <= cfg_cluster_max_x_) &&
 	   (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
       {
-	double abs_angle = fabs(std::atan2(centroid.y(), centroid.x()));
-	//if (min_index != std::numeric_limits<unsigned int>::max()) {
-	  //logger->log_info(name(), "[L %u] (%f,%f,%f)|%f vs. (%f,%f,%f)|%f: %s", loop_count_,
-	  //		   centroid.x(), centroid.y(), centroid.z(), abs_angle,
-	  //		   min_centroid.x(), min_centroid.y(), min_centroid.z(), min_angle,
-	  //		   (abs_angle < min_angle) ? "true" : "false");
-	//}
-	if (abs_angle < min_angle) {
-	  min_index    = i;
-	  min_angle    = abs_angle;
-	  min_centroid = centroid;
-	}
+	ClusterInfo info;
+	info.angle = std::atan2(centroid.y(), centroid.x());
+	info.index = i;
+	info.centroid = centroid;
+	cinfos.push_back(info);
       } else {
 	/*
 	logger->log_info(name(), "[L %u] Cluster %u out of bounds (%f,%f) "
@@ -418,27 +435,39 @@ LaserClusterThread::loop()
       }
     }
 
-    if (min_index != std::numeric_limits<unsigned int>::max()) {
-      //logger->log_debug(name(), "[L %u] Cluster at (%f,%f,%f)", loop_count_,
-      //	       min_centroid.x(), min_centroid.y(), min_centroid.z());
-      set_position(cluster_pos_if_, true, min_centroid);
+    if (! cinfos.empty()) {
+      std::sort(cinfos.begin(), cinfos.end());
 
-      // color points of cluster
-      for (auto ci : cluster_indices[min_index].indices) {
-	ColorPointType &out_point = clusters_->points[ci];
-	out_point.r = cluster_colors[0][0];
-	out_point.g = cluster_colors[0][1];;
-	out_point.b = cluster_colors[0][2];;
+      unsigned int i;
+      for (i = 0; i < std::min(cinfos.size(), (size_t)cfg_max_num_clusters_); ++i) {
+	// color points of cluster
+	for (auto ci : cluster_indices[cinfos[i].index].indices) {
+	  ColorPointType &out_point = clusters_->points[ci];
+	  out_point.r = cluster_colors[0][0];
+	  out_point.g = cluster_colors[0][1];;
+	  out_point.b = cluster_colors[0][2];;
+	}
+
+	set_position(cluster_pos_ifs_[i], true, cinfos[i].centroid);	
       }
-
+      for (unsigned int j = i; j < cfg_max_num_clusters_; ++j) {
+	set_position(cluster_pos_ifs_[j], false);
+      }
+      set_position(cluster_pos_if_, true, cinfos[0].centroid);	
     } else {
       //logger->log_warn(name(), "No acceptable cluster found, %zu clusters",
       //	         cluster_indices.size());
+      for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
+	set_position(cluster_pos_ifs_[i], false);
+      }
       set_position(cluster_pos_if_, false);
     }
   } else {
     //logger->log_warn(name(), "No clusters found, %zu remaining points",
     //	     noline_cloud->points.size());
+    for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
+      set_position(cluster_pos_ifs_[i], false);
+    }
     set_position(cluster_pos_if_, false);
   }
 

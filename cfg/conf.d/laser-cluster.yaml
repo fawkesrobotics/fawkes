@@ -37,6 +37,10 @@ laser-cluster:
   # How much must a cluster detection deviate from the previous to consider
   # this to be a different cluster (and thus restart the visibility history)
   cluster_switch_tolerance: 0.2
+
+  # The maximum number of clusters to publish on the blackboard
+  # The interfaces will be named "Laser Cluster N" for N=1..max_num_clusters
+  max_num_clusters: 3
   
   # The frame in which the result should be published; frame
   result_frame: /base_link
