@@ -134,6 +134,23 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y, std::string property
   return closest_node(pos_x, pos_y, false, property);
 }
 
+
+/** Get node closest to a specified point with a certain property.
+ * This search *does* consider unconnected nodes.
+ * @param pos_x X coordinate in global (map) frame
+ * @param pos_y X coordinate in global (map) frame
+ * @param property property the node must have to be considered,
+ * empty string to not check for any property
+ * @return node closest to the given point in the global frame, or an
+ * invalid node if such a node cannot be found
+ */
+TopologicalMapNode
+TopologicalMapGraph::closest_node_with_unconnected(float pos_x, float pos_y,
+						   std::string property)
+{
+  return closest_node(pos_x, pos_y, true, property);
+}
+
 /** Get node closest to another node with a certain property.
  * This search does *NOT* consider unconnected nodes.
  * @param node_name the name of the node from which to start
@@ -144,9 +161,26 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y, std::string property
  * not be the node with the name @p node_name.
  */
 TopologicalMapNode
-TopologicalMapGraph::closest_node_to(std::string node_name, std::string property)
+TopologicalMapGraph::closest_node_to(std::string node_name,
+						      std::string property)
 {
   return closest_node_to(node_name, false, property);
+}
+
+/** Get node closest to another node with a certain property.
+ * This search *does* consider unconnected nodes.
+ * @param node_name the name of the node from which to start
+ * @param property property the node must have to be considered,
+ * empty string to not check for any property
+ * @return node closest to the given point in the global frame, or an
+ * invalid node if such a node cannot be found. The node will obviously
+ * not be the node with the name @p node_name.
+ */
+TopologicalMapNode
+TopologicalMapGraph::closest_node_to_with_unconnected(std::string node_name,
+						      std::string property)
+{
+  return closest_node_to(node_name, true, property);
 }
 
 /** Get node closest to a specified point with a certain property.

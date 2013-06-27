@@ -46,6 +46,12 @@ class TopologicalMapGraph
   fawkes::TopologicalMapNode          closest_node_to(std::string node_name,
 				 	              string property);
 
+  fawkes::TopologicalMapNode          closest_node_with_unconnected(float pos_x,
+                                        float pos_y, string property);
+
+  fawkes::TopologicalMapNode          closest_node_to_with_unconnected(
+                                        std::string node_name, string property);
+
   vector<fawkes::TopologicalMapNode>  search_nodes(string property);
 };
 
