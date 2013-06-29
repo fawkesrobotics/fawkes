@@ -22,6 +22,7 @@
 
 #include <utils/graph/yaml_navgraph.h>
 #include <utils/search/astar.h>
+#include <utils/math/angle.h>
 #include <tf/utils.h>
 
 #include "search_state.h"
@@ -496,8 +497,11 @@ NavGraphThread::node_reached()
       tolerance = cur_target.property_as_float("target_tolerance");
     }
     if (cur_target.has_property("orientation")) {
-      float ori_tolerance = cfg_orientation_tolerance_; //cur_target.property_as_float("orientation_tolerance");
-      float ori_diff =  fabs( tf::get_yaw( pose.getRotation()) - cur_target.property_as_float("orientation") );
+      float ori_tolerance = cfg_orientation_tolerance_;
+      //cur_target.property_as_float("orientation_tolerance");
+      float ori_diff =
+	fabs( normalize_rad(tf::get_yaw(pose.getRotation())) -
+	      normalize_rad(cur_target.property_as_float("orientation")));
       
       if (tolerance == 0.)  tolerance = default_tolerance;
       
