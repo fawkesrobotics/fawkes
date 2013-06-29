@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "ppgoto"
-fsm                = SkillHSM:new{name=name, start="PPGOTO", debug=false}
+fsm                = SkillHSM:new{name=name, start="PPGOTO", debug=true}
 depends_skills     = nil
 depends_interfaces = {
    {v = "ppnavi", type = "NavigatorInterface"}
@@ -63,9 +63,9 @@ end
 
 function jumpcond_navifail(state)
    return (state.fsm.vars.msgid == 0
-	   or (state.fsm.vars.msgid ~= ppnavi:msgid() and state.wait_start > 20)
-	   or not ppnavi:has_writer()
-	   or state.failed)
+     or (state.fsm.vars.msgid ~= ppnavi:msgid() and state.wait_start > 20)
+     or not ppnavi:has_writer()
+     or state.failed)
 end
 
 function jumpcond_navifinal(state)
@@ -76,12 +76,14 @@ end
 -- States
 fsm:define_states{
    export_to=_M,
+   closure={ppnavi=ppnavi},
 
    {"PPGOTO", JumpState}
 }
 
 -- Transitions
 fsm:add_transitions{
+   {"PPGOTO", "FAILED", cond="not ppnavi:has_writer()", desc="No writer for interface", precond=true},
    {"PPGOTO", "FAILED", cond=jumpcond_paramfail, desc="Invalid/insufficient parameters"},
    {"PPGOTO", "FAILED", cond=jumpcond_navifail, desc="Navigator failure"},
    {"PPGOTO", "FINAL", cond=jumpcond_navifinal, desc="Position reached"}
@@ -89,28 +91,26 @@ fsm:add_transitions{
 }
 
 function PPGOTO:init()
-   if ppnavi:has_writer() then
-      if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil then
-         -- cartesian goto
-         local x = self.fsm.vars.x or self.fsm.vars[1]
-         local y = self.fsm.vars.y or self.fsm.vars[2]
-         local ori = self.fsm.vars.ori or math.atan2(y, x)
-         local m = ppnavi.CartesianGotoMessage:new(x, y, ori)
-         printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
-         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
-      elseif self.fsm.vars.place ~= nil then
-         -- place goto
-         local place = self.fsm.vars.place
-         local m = ppnavi.PlaceGotoMessage:new(place)
-         printf("Sending PlaceGotoMessage(%s)", place)
-         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
-      elseif self.fsm.vars.stop ~= nil then
-         local m = ppnavi.StopMessage:new()
-         printf("Sending StopGotoMessage")
-         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
-      else
-         self.fsm.vars.param_fail = true
-      end
+   if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil then
+      -- cartesian goto
+      local x = self.fsm.vars.x or 0 --self.fsm.vars[1]
+      local y = self.fsm.vars.y or 0 --self.fsm.vars[2]
+      local ori = self.fsm.vars.ori or math.atan2(y, x)
+      local m = ppnavi.CartesianGotoMessage:new(x, y, ori)
+      printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
+      self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
+   elseif self.fsm.vars.place ~= nil then
+      -- place goto
+      local place = self.fsm.vars.place
+      local m = ppnavi.PlaceGotoMessage:new(place)
+      printf("Sending PlaceGotoMessage(%s)", place)
+      self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
+   elseif self.fsm.vars.stop ~= nil then
+      local m = ppnavi.StopMessage:new()
+      printf("Sending StopGotoMessage")
+      self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
+   else
+      self.fsm.vars.param_fail = true
    end
    self.wait_start = 1
 end
