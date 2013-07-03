@@ -29,7 +29,6 @@
 :- export(attach_tktools/0).
 :- export(ensure_attached/0).
 :- reexport remote_tools.
-:- dynamic(attached/0).
 :- log_info("Loading tktools").
 
 :- local initialization(init).
