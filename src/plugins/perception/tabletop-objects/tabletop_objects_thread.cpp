@@ -135,6 +135,7 @@ TabletopObjectsThread::init()
   cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
   cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
   cfg_centroid_min_distance_ = config->get_float(CFG_PREFIX"centroid_min_distance");
+  cfg_centroid_max_height_   = config->get_float(CFG_PREFIX"centroid_max_height");
 
   finput_ = pcl_manager->get_pointcloud<PointType>("openni-pointcloud-xyz");
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -362,7 +363,7 @@ TabletopObjectsThread::loop()
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-  Eigen::Vector4f table_centroid, baserel_table_centroid(0,0,0,0);
+  Eigen::Vector4f baserel_table_centroid(0,0,0,0);
 
   // This will search for the first plane which:
   // 1. has a considerable amount of points (>= some percentage of input points)
@@ -1225,6 +1226,36 @@ unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, C
 
       TIMETRACK_END(ttc_old_centroids_);
     } // !first_run_
+
+    // remove all centroids too high above the table
+    tf::Stamped<tf::Point> sp_baserel_table;
+    tf::Stamped<tf::Point> sp_table(
+        tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
+        fawkes::Time(0, 0), input_->header.frame_id);
+    try {
+      tf_listener->transform_point("/base_link", sp_table, sp_baserel_table);
+      for (CentroidMap::iterator it = tmp_centroids.begin(); it != tmp_centroids.end();) {
+        try {
+          tf::Stamped<tf::Point> sp_baserel_centroid;
+          tf::Stamped<tf::Point> sp_centroid(
+              tf::Point(it->second[0], it->second[1], it->second[2]),
+              fawkes::Time(0, 0), input_->header.frame_id);
+          tf_listener->transform_point("/base_link", sp_centroid, sp_baserel_centroid);
+          float d = sp_baserel_centroid.z() - sp_baserel_table.z();
+          if (d > cfg_centroid_max_height_) {
+            //logger->log_debug(name(), "remove centroid %u, too high (d=%f)", it->first, d);
+            free_ids_.push_back(it->first);
+            tmp_centroids.erase(it++);
+          } else
+            it++;
+        } catch (tf::TransformException &e) {
+          // simply keep the centroid if we can't transform it
+          it++;
+        }
+      }
+    } catch (tf::TransformException &e) {
+      // keep all centroids if transformation of the table fails
+    }
 
     centroids_ = tmp_centroids;
 

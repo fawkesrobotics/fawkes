@@ -84,3 +84,6 @@ perception/tabletop-objects:
 
   # min distance between two centroids, old centroids will be deleted if they are closer
   centroid_min_distance: 0.01
+
+  # max height of a centroid relative to the table
+  centroid_max_height: 0.3

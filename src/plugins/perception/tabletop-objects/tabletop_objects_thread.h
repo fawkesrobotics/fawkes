@@ -149,6 +149,8 @@ class TabletopObjectsThread
   PosIfsVector pos_ifs_;
   fawkes::Position3DInterface *table_pos_if_;
 
+  Eigen::Vector4f table_centroid;
+
   std::list<unsigned int> free_ids_;
 
   fawkes::SwitchInterface *switch_if_;
@@ -174,6 +176,7 @@ class TabletopObjectsThread
   uint cfg_centroid_max_age_;
   float cfg_centroid_max_distance_;
   float cfg_centroid_min_distance_;
+  float cfg_centroid_max_height_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
