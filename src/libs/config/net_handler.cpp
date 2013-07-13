@@ -100,7 +100,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
       size_t data_size = 0;
       void *m = prepare_value_msg<uint32_t>(i->path(), i->is_default(), i->is_list(),
-					    num_values, data_size, (void *&)values);
+					    num_values, data_size, (void**)&values);
       values[0] = i->get_uint();
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -115,7 +115,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       int16_t num_values = i->is_list() ? i->get_list_size() : 1;
       size_t data_size = 0;
       void *m = prepare_value_msg<int32_t>(i->path(), i->is_default(), i->is_list(),
-					    num_values, data_size, (void *&)values);
+					    num_values, data_size, (void**)&values);
       values[0] = i->get_int();
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -130,7 +130,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       int16_t num_values = i->is_list() ? i->get_list_size() : 1;
       size_t data_size = 0;
       void *m = prepare_value_msg<int32_t>(i->path(), i->is_default(), i->is_list(),
-					    num_values, data_size, (void *&)values);
+					    num_values, data_size, (void**)&values);
       values[0] = i->get_bool() ? 1 : 0;
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -145,7 +145,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
       size_t data_size = 0;
       void *m = prepare_value_msg<float>(i->path(), i->is_default(), i->is_list(), num_values,
-					 data_size, (void *&)values);
+					 data_size, (void**)&values);
       values[0] = i->get_float();
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
     } catch (Exception &e) {
