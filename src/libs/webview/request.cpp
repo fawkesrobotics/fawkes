@@ -22,6 +22,10 @@
 
 #include <core/exception.h>
 #include <webview/request.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <unistd.h>
+#include <stdint.h>
 #include <microhttpd.h>
 #include <cstring>
 

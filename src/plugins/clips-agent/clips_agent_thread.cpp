@@ -58,6 +58,7 @@ ClipsAgentThread::init()
   cfg_assert_time_each_loop_ = false;
   cfg_skill_sim_time_ = 2.0;
   cfg_skill_sim_ = false;
+  cfg_steal_skiller_control_ = true;
 
   try {
     cfg_auto_start_ = config->get_bool("/clips-agent/auto-start");
@@ -71,6 +72,9 @@ ClipsAgentThread::init()
   try {
     cfg_skill_sim_time_ =
       config->get_float("/clips-agent/skill-sim-time");
+  } catch (Exception &e) {} // ignore, use default
+  try {
+    cfg_steal_skiller_control_ = config->get_bool("/clips-agent/steal-skiller-control");
   } catch (Exception &e) {} // ignore, use default
 
   cfg_clips_dirs_.clear();
@@ -176,7 +180,7 @@ ClipsAgentThread::loop()
       if (ctrl_recheck_) {
 	logger->log_info(name(), "Acquiring exclusive skiller control");
 	SkillerInterface::AcquireControlMessage *msg =
-	  new SkillerInterface::AcquireControlMessage();
+	  new SkillerInterface::AcquireControlMessage(cfg_steal_skiller_control_);
 	skiller_if_->msgq_enqueue(msg);
 	ctrl_recheck_ = false;
       } else {

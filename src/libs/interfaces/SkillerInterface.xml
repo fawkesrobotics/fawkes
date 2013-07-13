@@ -56,7 +56,14 @@
   </message>
   <message name="AcquireControl">
     <comment>Aquires exclusive control over the skiller. The used ID is the
-      instance serial of the interface where this message was enqueued.</comment>
+      instance serial of the interface where this message was
+    enqueued.</comment>
+    <field type="bool" name="steal_control">
+      If set to true steal the control from someone else who has it
+      atm. Use this with caution. But sometimes it is necessary to
+      ensure a successful operation, e.g. if the agent tries to
+      acquire control.
+    </field>
   </message>
   <message name="ReleaseControl">
     <comment>Releases previously aquired exclusive control.</comment>

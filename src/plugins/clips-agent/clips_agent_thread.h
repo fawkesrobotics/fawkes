@@ -78,6 +78,7 @@ class ClipsAgentThread
   bool        cfg_skill_sim_;
   float       cfg_skill_sim_time_;
   std::vector<std::string> cfg_clips_dirs_;
+  bool        cfg_steal_skiller_control_;
 
   fawkes::SkillerInterface *skiller_if_;
   fawkes::SwitchInterface *switch_if_;
