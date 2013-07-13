@@ -396,7 +396,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
     }
 
     for (unsigned int i = 0; i < num_distances; ++i) {
-      if (distances[i] > 0.0) {
+      if (finite(distances[i]) && distances[i] > 1e-6) {
 	__measurements[i][__cur_measurement] = distances[i];
       }
     }
