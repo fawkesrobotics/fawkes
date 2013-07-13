@@ -23,6 +23,8 @@
 
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
+#include <utils/graph/topological_map_graph.h>
+#include <utils/graph/yaml_navgraph.h>
 #include <interfaces/SwitchInterface.h>
 #include <core/threading/mutex_locker.h>
 
@@ -123,6 +125,9 @@ ClipsAgentThread::init()
   clips->add_function("skill-call-ext", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_skill_call_ext)));
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
   clips->add_function("blackboard-add-interface", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_blackboard_add_interface)));
+  clips->add_function("navgraph-load", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_navgraph_load)));
+
+  clips->load(SRCDIR"/clips/navgraph.clp");
 
   if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
@@ -150,6 +155,7 @@ ClipsAgentThread::finalize()
   clips->remove_function("skill-call-ext");
   clips->remove_function("load-config");
   clips->remove_function("blackboard-add-interface");
+  clips->remove_function("navgraph-load");
 
   if ( ! cfg_skill_sim_ && skiller_if_->has_writer()) {
     SkillerInterface::ReleaseControlMessage *msg =
@@ -382,6 +388,57 @@ ClipsAgentThread::clips_load_config(std::string cfg_prefix)
   }
 }
 
+
+CLIPS::Value
+ClipsAgentThread::clips_navgraph_load(std::string filename)
+{
+  if (filename.empty()) {
+    logger->log_warn(name(), "Cannot load navgraph (file name is empty)");
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+  if (filename[0] != '/') {
+    filename = std::string(CONFDIR) + "/" + filename;
+  }
+
+  try {
+    TopologicalMapGraph *graph = load_yaml_navgraph(filename);
+    TopologicalMapNode root_node                 = graph->root_node();
+    const std::vector<TopologicalMapNode> &nodes = graph->nodes();
+    const std::vector<TopologicalMapEdge> &edges = graph->edges();
+
+    clips->assert_fact_f("(navgraph (name \"%s\") (root \"%s\"))",
+			 graph->name().c_str(), root_node.name().c_str());
+
+    for (auto n : nodes) {
+      std::string props_string;
+      const std::map<std::string, std::string> &properties = n.properties();
+      for (auto p : properties) {
+	props_string += " \"" + p.first + "\" \"" + p.second + "\"";
+      }
+      clips->assert_fact_f("(navgraph-node (name \"%s\") (pos %f %f) (properties %s))",
+			   n.name().c_str(), n.x(), n.y(), props_string.c_str());
+    }
+
+    for (auto e : edges) {
+      std::string props_string;
+      const std::map<std::string, std::string> &properties = e.properties();
+      for (auto p : properties) {
+	props_string += " \"" + p.first + "\" \"" + p.second + "\"";
+      }
+      clips->assert_fact_f("(navgraph-edge (from \"%s\") (to \"%s\") (directed %s) "
+			   "(properties \"%s\"))",
+			   e.from().c_str(), e.to().c_str(),
+			   e.is_directed() ? "TRUE" : "FALSE", props_string.c_str());
+    }
+
+    return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to load navgraph %s, exception follows", filename.c_str());
+    logger->log_warn(name(), e);
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+}
 
 void
 ClipsAgentThread::clips_blackboard_add_interface(std::string type, std::string id)

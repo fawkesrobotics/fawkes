@@ -43,3 +43,6 @@ plugins/navgraph:
   # Monitor graph file and automatically reload on changes?
   monitor_file: true
 
+  # Write graph information to log on (re-)loading?
+  log_graph: false
+

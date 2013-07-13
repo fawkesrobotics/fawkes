@@ -73,6 +73,7 @@ NavGraphThread::init()
   cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
+  cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
 
   cfg_monitor_file_ = false;
   try {
@@ -87,7 +88,9 @@ NavGraphThread::init()
   }
 
   graph_ = load_graph(cfg_graph_file_);
-  log_graph();
+  if (cfg_log_graph_) {
+    log_graph();
+  }
   astar_ = new AStar();
 
   if (cfg_monitor_file_) {
@@ -526,6 +529,7 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
   try {
     TopologicalMapGraph *old_graph = graph_;
     graph_ = load_yaml_navgraph(cfg_graph_file_);
+    if (cfg_log_graph_)  log_graph();
     delete old_graph;
   } catch (Exception &e) {
     logger->log_warn(name(), "Loading new graph failed, exception follows");
