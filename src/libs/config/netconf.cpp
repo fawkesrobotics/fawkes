@@ -732,7 +732,7 @@ NetworkConfiguration::set_value_internal(unsigned int msg_type,
   strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH);
   cd->num_values = num_values;
 
-  void *mdata = ((char *)msg->payload() + sizeof(config_descriptor_t));
+  void *mdata = ((char *)omsg->payload() + sizeof(config_descriptor_t));
   memcpy(mdata, data, data_size);
 
   c->enqueue_and_wait(omsg);
