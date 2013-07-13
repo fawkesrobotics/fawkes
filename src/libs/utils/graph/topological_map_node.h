@@ -58,14 +58,20 @@ class TopologicalMapNode {
   float y() const
   { return y_; }
 
+  /** Check if this node shall be unconnected.
+   * @return true if the node is unconnected, false otherwise */
+  bool unconnected() const
+  { return unconnected_; }
+
   void set_x(float x);
   void set_y(float y);
   void set_name(std::string name);
+  void set_unconnected(bool unconnected);
 
   /** Get all properties.
    * @return property map
    */
-  std::map<std::string, std::string> &  properties()
+  const std::map<std::string, std::string> &  properties() const
   { return properties_; }
 
   /** Check if node has specified property.
@@ -129,6 +135,7 @@ class TopologicalMapNode {
   std::string name_;
   float       x_;
   float       y_;
+  bool        unconnected_;
   std::map<std::string, std::string> properties_;
   std::vector<std::string> reachable_nodes_;
 };

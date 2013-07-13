@@ -64,6 +64,13 @@ operator >> (const YAML::Node& n, TopologicalMapNode &node) {
     throw fawkes::Exception("Failed to parse node: %s", e.what());
   }
 
+#ifdef HAVE_OLD_YAMLCPP
+  if (n.GetTag() == "tag:fawkesrobotics.org,navgraph/unconnected") {
+#else
+  if (n.Tag() == "tag:fawkesrobotics.org,navgraph/unconnected") {
+#endif
+    node.set_unconnected(true);
+  }
 
   bool has_properties = true;
   try {

@@ -61,7 +61,7 @@ class TopologicalMapEdge {
   /** Get all properties.
    * @return property map
    */
-  std::map<std::string, std::string> &  properties()
+  const std::map<std::string, std::string> &  properties() const
   { return properties_; }
 
   /** Check if node has specified property.
