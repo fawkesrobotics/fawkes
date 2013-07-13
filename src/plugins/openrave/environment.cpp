@@ -363,7 +363,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
         for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
           tmp_robot->SetActiveDOFValues((*it));
           const OpenRAVE::Vector &trans = tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
-          float transa[4] = { trans.x, trans.y, trans.z, trans.w };
+          float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
           __graph_handle.push_back(__env->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
@@ -516,7 +516,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
         for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
           tmp_robot->SetActiveDOFValues((*it));
           const OpenRAVE::Vector &trans = tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
-          float transa[4] = { trans.x, trans.y, trans.z, trans.w };
+          float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
           __graph_handle.push_back(__env->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
         }
      } // robot state is restored
