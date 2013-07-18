@@ -85,6 +85,21 @@ gray8_to_yuv422planar_plainc(const unsigned char *src, unsigned char *dst,
   memset(YUV422_PLANAR_U_PLANE(dst, width, height), 128, width * height);
 }
 
+/** 8-Bit gray to YUV422_PACKED
+ */
+void
+gray8_to_yuv422packed_plainc(const unsigned char *src, unsigned char *dst,
+			     unsigned int width, unsigned int height)
+{
+  register unsigned int i=0, j=0;
+  while (i < width * height) {
+    dst[j++] = 128;
+    dst[j++] = src[i++];
+    dst[j++] = 128;
+    dst[j++] = src[i++];
+  }
+}
+
 
 
 /** Copy part of the U anv V planes of a YUV422planar image to another

@@ -104,6 +104,8 @@ void gray8_to_yuy2(const unsigned char *src, unsigned char *dest,
  */
 void gray8_to_yuv422planar_plainc(const unsigned char *src, unsigned char *dst,
 				  unsigned int width, unsigned int height);
+void gray8_to_yuv422packed_plainc(const unsigned char *src, unsigned char *dst,
+				  unsigned int width, unsigned int height);
 
 
 /** Copy part of the U anv V planes of a YUV422planar image to another
