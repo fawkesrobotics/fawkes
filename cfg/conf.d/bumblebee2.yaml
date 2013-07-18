@@ -1,0 +1,52 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/bumblebee2
+---
+bumblebee2:
+  # Can be either triclops or opencv
+  # Note that current triclops versions crash on modern Linux systems
+  # due to an incompatible Boost version
+  stereo-matcher: opencv
+
+  # OpenCV stereo correspondence by block matching parameters
+  opencv-stereo:
+    # *** pre-filtering (normalization of input images)
+    # Filter type, can be xsobel or normalized_response
+    pre-filter-type: xsobel
+
+    # averaging window size: 5x5..21x21
+    pre-filter-size: 5
+
+    # the output of pre-filtering is clipped by [- pre-filter-cap,pre-filter-cap]
+    pre-filter-cap: 35
+
+    # *** correspondence using Sum of Absolute Difference (SAD)
+    # 5x5..21x21
+    sad-window-size: 21
+
+    # minimum disparity (can be negative)
+    min-disparity: 1
+
+    # maximum disparity - minimum disparity (> 0)
+    num-disparities: 64
+
+    # *** post-filtering
+    # the disparity is only computed for pixels
+    # with textured enough neighborhood
+    texture-threshold: 0
+
+    # accept the computed disparity d* only if
+    # SAD(d) >= SAD(d*)*(1 + uniquenessRatio/100.)
+    # for any d != d*+/-1 within the search range.
+    uniqueness-ratio: 5
+
+    # disparity variation window
+    speckle-window-size: 13
+    
+    # acceptable range of variation in window
+    speckle-range: 5
+
+    # if enabled, the results may be more accurate,
+    # at the expense of slower processing
+    try-smaller-windows: true

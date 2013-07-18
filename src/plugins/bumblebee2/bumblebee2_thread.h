@@ -1,0 +1,115 @@
+
+/***************************************************************************
+ *  bumblebee2_thread.h - Acquire data from Bumblebee2 stereo camera
+ *
+ *  Created: Wed Jul 17 13:15:42 2013
+ *  Copyright  2013  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+#ifndef __PLUGINS_PERCEPTION_BUMBLEBEE2_BUMBLEBEE2_THREAD_H_
+#define __PLUGINS_PERCEPTION_BUMBLEBEE2_BUMBLEBEE2_THREAD_H_
+
+// must be first for reliable ROS detection
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
+#include <core/threading/thread.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/blackboard.h>
+#include <aspect/tf.h>
+#include <aspect/pointcloud.h>
+
+namespace fawkes {
+  class SwitchInterface;
+  class Time;
+}
+
+namespace firevision {
+  class Bumblebee2Camera;
+  class SharedMemoryImageBuffer;
+}
+
+class TriclopsStereoProcessorData;
+
+class Bumblebee2Thread
+: public fawkes::Thread,
+  public fawkes::ClockAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::TransformAspect,
+  public fawkes::PointCloudAspect
+{
+ public:
+  Bumblebee2Thread();
+  virtual ~Bumblebee2Thread();
+
+  virtual void init();
+  virtual void loop();
+  virtual void finalize();
+
+ private:
+  void get_triclops_context_from_camera();
+  void deinterlace_green(unsigned char* src, unsigned char* dest, 
+			 unsigned int width, unsigned int height);
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
+ private:
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_xyz_;
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > pcl_xyzrgb_;
+
+  fawkes::SwitchInterface *switch_if_;
+
+  firevision::Bumblebee2Camera *bb2_;
+  TriclopsStereoProcessorData *triclops_;
+
+  unsigned int   width_;
+  unsigned int   height_;
+  unsigned char *buffer_green_;
+  unsigned char *buffer_rgb_;
+  unsigned char *buffer_rgb_left_;
+  unsigned char *buffer_rgb_right_;
+  unsigned char *buffer_yuv_left_;
+  unsigned char *buffer_yuv_right_;
+
+  firevision::SharedMemoryImageBuffer *shm_img_right_;
+  firevision::SharedMemoryImageBuffer *shm_img_left_;
+  firevision::SharedMemoryImageBuffer *shm_img_right_rectified_;
+  firevision::SharedMemoryImageBuffer *shm_img_left_rectified_;
+  firevision::SharedMemoryImageBuffer *shm_img_right_prefiltered_;
+  firevision::SharedMemoryImageBuffer *shm_img_left_prefiltered_;
+  firevision::SharedMemoryImageBuffer *shm_img_disparity_;
+
+#ifdef USE_OPENCV_STEREO
+  int          cfg_bm_pre_filter_type_;
+  unsigned int cfg_bm_pre_filter_size_;
+  unsigned int cfg_bm_pre_filter_cap_;
+  unsigned int cfg_bm_sad_window_size_;
+  int          cfg_bm_min_disparity_;
+  unsigned int cfg_bm_num_disparities_;
+  unsigned int cfg_bm_texture_threshold_;
+  unsigned int cfg_bm_uniqueness_ratio_;
+  unsigned int cfg_bm_speckle_window_size_;
+  unsigned int cfg_bm_speckle_range_;
+  bool         cfg_bm_try_smaller_widows_;
+#endif
+};
+
+#endif
