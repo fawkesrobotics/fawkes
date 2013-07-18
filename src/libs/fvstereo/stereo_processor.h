@@ -50,8 +50,8 @@ class StereoProcessor
 
   virtual unsigned char *  disparity_buffer()                            = 0;
   virtual size_t           disparity_buffer_size() const                 = 0;
-  virtual unsigned char *  yuv_buffer()                                  = 0;
-  virtual unsigned char *  auxiliary_yuv_buffer()                        = 0;
+  virtual unsigned char *  yuv_buffer_right()                            = 0;
+  virtual unsigned char *  yuv_buffer_left()                             = 0;
 };
 
 } // end namespace firevision
