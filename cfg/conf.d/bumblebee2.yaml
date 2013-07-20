@@ -13,40 +13,40 @@ bumblebee2:
   opencv-stereo:
     # *** pre-filtering (normalization of input images)
     # Filter type, can be xsobel or normalized_response
-    pre-filter-type: xsobel
+    pre-filter-type: normalized_response
 
     # averaging window size: 5x5..21x21
-    pre-filter-size: 5
+    pre-filter-size: 15
 
     # the output of pre-filtering is clipped by [- pre-filter-cap,pre-filter-cap]
-    pre-filter-cap: 35
+    pre-filter-cap: 15
 
     # *** correspondence using Sum of Absolute Difference (SAD)
     # 5x5..21x21
-    sad-window-size: 21
+    sad-window-size: 15
 
     # minimum disparity (can be negative)
-    min-disparity: 1
+    min-disparity: 32
 
     # maximum disparity - minimum disparity (> 0)
-    num-disparities: 64
+    num-disparities: 128
 
     # *** post-filtering
     # the disparity is only computed for pixels
     # with textured enough neighborhood
-    texture-threshold: 0
+    texture-threshold: 20
 
     # accept the computed disparity d* only if
     # SAD(d) >= SAD(d*)*(1 + uniquenessRatio/100.)
     # for any d != d*+/-1 within the search range.
-    uniqueness-ratio: 5
+    uniqueness-ratio: 30
 
     # disparity variation window
-    speckle-window-size: 13
+    speckle-window-size: 32
     
     # acceptable range of variation in window
-    speckle-range: 5
+    speckle-range: 32
 
     # if enabled, the results may be more accurate,
     # at the expense of slower processing
-    try-smaller-windows: true
+    try-smaller-windows: false
