@@ -88,6 +88,12 @@ convert(colorspace_t   from,  colorspace_t   to,
     rgb_to_yuv422planar_plainc(src, dst, width, height);
   } else if ( (from == RGB) && (to == YUV422_PACKED) ) {
     rgb_to_yuv422packed_plainc(src, dst, width, height);
+  } else if ( (from == RGB_PLANAR) && (to == YUV422_PACKED) ) {
+    rgb_planar_to_yuv422packed_plainc(src, dst, width, height);
+  } else if ( (from == RGB) && (to == RGB_PLANAR) ) {
+    rgb_to_rgb_planar_plainc(src, dst, width, height);
+  } else if ( (from == RGB_PLANAR) && (to == RGB) ) {
+    rgb_to_rgb_planar_plainc(src, dst, width, height);
   } else if ( (from == BGR) && (to == YUV422_PLANAR) ) {
     bgr_to_yuv422planar_plainc(src, dst, width, height);
   } else if ( (from == GRAY8) && (to == YUY2) ) {

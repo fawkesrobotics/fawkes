@@ -46,6 +46,8 @@ colorspace_by_name(const char *mode)
     return YUY2;
   } else if (strcmp(mode, "YVY2") == 0) {
     return YVY2;
+  } else if (strcmp(mode, "RGB_PLANAR") == 0) {
+    return RGB_PLANAR;
   } else if (strcmp(mode, "BGR") == 0) {
     return BGR;
   } else if (strcmp(mode, "YUV422_PACKED") == 0) {
@@ -136,6 +138,8 @@ colorspace_to_string(colorspace_t colorspace)
     return "CARTESIAN_3D_DOUBLE";
   case CARTESIAN_3D_FLOAT_RGB:
     return "CARTESIAN_3D_FLOAT_RGB";
+  case RGB_PLANAR:
+    return "RGB_PLANAR";
   default:
     return "CS_UNKNOWN";
   }
@@ -154,6 +158,7 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
   switch (cspace) {
   case RGB:
   case BGR:
+  case RGB_PLANAR:
   case YUV444_PACKED:
   case YVU444_PACKED:
     return (width * height * 3);
