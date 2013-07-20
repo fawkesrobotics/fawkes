@@ -20,32 +20,18 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDSYSDIR)/fvconf.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-# the matcher can be either triclops or opencv
-STEREO_MATCHER=opencv
-
-LIBS_bumblebee2 = fawkescore fawkesutils fawkesaspects fvutils fvstereo fvcams \
+LIBS_bumblebee2 = fawkescore fawkesutils fawkesaspects fvutils fvcams \
 		  fawkestf fawkesinterface fawkesblackboard \
-		  SwitchInterface
+		  SwitchInterface \
+		  opencv_core opencv_calib3d
 OBJS_bumblebee2 = bumblebee2_plugin.o bumblebee2_thread.o
 
 OBJS_all    = $(OBJS_bumblebee2)
 
-ifeq ($(HAVE_PCL)$(HAVE_TF)$(HAVE_TRICLOPS),111)
-  CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS_TRICLOPS)
+ifeq ($(HAVE_PCL)$(HAVE_TF)$(HAVE_TRICLOPS)$(HAVE_OPENCV),1111)
+  CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS_TRICLOPS) $(CFLAGS_OPENCV)
   LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) $(LDFLAGS_TRICLOPS)
   PLUGINS_all = $(PLUGINDIR)/bumblebee2.$(SOEXT)
-
-  ifeq ($(STEREO_MATCHER),opencv)
-    ifeq ($(HAVE_OPENCV),1)
-      CFLAGS += $(CFLAGS_OPENCV) -DUSE_OPENCV_STEREO
-      LIBS_bumblebee2 += opencv_core opencv_calib3d
-    else
-      WARN_TARGETS += warning_opencv
-      PLUGINS_all =
-    endif
-  else
-    CFLAGS += -DUSE_TRICLOPS_STEREO
-  endif
 else
   ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl
@@ -55,6 +41,9 @@ else
   endif
   ifneq ($(HAVE_TRICLOPS),1)
     WARN_TARGETS += warning_triclops
+  endif
+  ifneq ($(HAVE_OPENCV),1)
+    WARN_TARGETS += warning_opencv
   endif
 endif
 

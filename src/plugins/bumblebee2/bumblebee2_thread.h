@@ -44,7 +44,12 @@ namespace firevision {
   class SharedMemoryImageBuffer;
 }
 
-class TriclopsStereoProcessorData;
+namespace cv {
+  class Mat;
+}
+
+class TriclopsData;
+class TriclopsColorImage;
 
 class Bumblebee2Thread
 : public fawkes::Thread,
@@ -67,49 +72,78 @@ class Bumblebee2Thread
   void get_triclops_context_from_camera();
   void deinterlace_green(unsigned char* src, unsigned char* dest, 
 			 unsigned int width, unsigned int height);
+  void fill_xyz_xyzrgb(const short int *dispdata,
+		       const TriclopsColorImage *img_right_rect_color,
+		       pcl::PointCloud<pcl::PointXYZ> &pcl_xyz,
+		       pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb);
+  void fill_xyzrgb(const short int *dispdata,
+		   const TriclopsColorImage *img_rect_color,
+		   pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb);
+  void fill_xyz(const short int *dispdata,
+		pcl::PointCloud<pcl::PointXYZ> &pcl_xyz);
+
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
+  typedef enum {
+    STEREO_MATCHER_TRICLOPS,
+    STEREO_MATCHER_OPENCV
+  } StereoMatcher;
+
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_xyz_;
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > pcl_xyzrgb_;
 
   fawkes::SwitchInterface *switch_if_;
 
   firevision::Bumblebee2Camera *bb2_;
-  TriclopsStereoProcessorData *triclops_;
+  TriclopsData *triclops_;
 
   unsigned int   width_;
   unsigned int   height_;
+  float          baseline_;
+  float          focal_length_;
+  float          center_row_;
+  float          center_col_;
+
   unsigned char *buffer_green_;
   unsigned char *buffer_rgb_;
   unsigned char *buffer_rgb_left_;
   unsigned char *buffer_rgb_right_;
   unsigned char *buffer_yuv_left_;
   unsigned char *buffer_yuv_right_;
+  unsigned char *buffer_rgb_planar_left_;
+  unsigned char *buffer_rgb_planar_right_;
 
-  firevision::SharedMemoryImageBuffer *shm_img_right_;
-  firevision::SharedMemoryImageBuffer *shm_img_left_;
-  firevision::SharedMemoryImageBuffer *shm_img_right_rectified_;
-  firevision::SharedMemoryImageBuffer *shm_img_left_rectified_;
-  firevision::SharedMemoryImageBuffer *shm_img_right_prefiltered_;
-  firevision::SharedMemoryImageBuffer *shm_img_left_prefiltered_;
+  firevision::SharedMemoryImageBuffer *shm_img_rgb_right_;
+  firevision::SharedMemoryImageBuffer *shm_img_rgb_left_;
+  firevision::SharedMemoryImageBuffer *shm_img_yuv_right_;
+  firevision::SharedMemoryImageBuffer *shm_img_yuv_left_;
+  firevision::SharedMemoryImageBuffer *shm_img_rectified_right_;
+  firevision::SharedMemoryImageBuffer *shm_img_rectified_left_;
+  firevision::SharedMemoryImageBuffer *shm_img_prefiltered_right_;
+  firevision::SharedMemoryImageBuffer *shm_img_prefiltered_left_;
+  firevision::SharedMemoryImageBuffer *shm_img_rgb_rect_left_;
+  firevision::SharedMemoryImageBuffer *shm_img_rgb_rect_right_;
   firevision::SharedMemoryImageBuffer *shm_img_disparity_;
 
-#ifdef USE_OPENCV_STEREO
-  int          cfg_bm_pre_filter_type_;
-  unsigned int cfg_bm_pre_filter_size_;
-  unsigned int cfg_bm_pre_filter_cap_;
-  unsigned int cfg_bm_sad_window_size_;
-  int          cfg_bm_min_disparity_;
-  unsigned int cfg_bm_num_disparities_;
-  unsigned int cfg_bm_texture_threshold_;
-  unsigned int cfg_bm_uniqueness_ratio_;
-  unsigned int cfg_bm_speckle_window_size_;
-  unsigned int cfg_bm_speckle_range_;
-  bool         cfg_bm_try_smaller_widows_;
-#endif
+  // OpenCV-specific settings
+  int           cfg_bm_pre_filter_type_;
+  unsigned int  cfg_bm_pre_filter_size_;
+  unsigned int  cfg_bm_pre_filter_cap_;
+  unsigned int  cfg_bm_sad_window_size_;
+  int           cfg_bm_min_disparity_;
+  unsigned int  cfg_bm_num_disparities_;
+  unsigned int  cfg_bm_texture_threshold_;
+  unsigned int  cfg_bm_uniqueness_ratio_;
+  unsigned int  cfg_bm_speckle_window_size_;
+  unsigned int  cfg_bm_speckle_range_;
+  bool          cfg_bm_try_smaller_widows_;
+
+  float         disparity_scale_factor_;
+
+  cv::Mat *cv_disparity_;
 };
 
 #endif
