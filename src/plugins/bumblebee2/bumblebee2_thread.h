@@ -128,6 +128,11 @@ class Bumblebee2Thread
   firevision::SharedMemoryImageBuffer *shm_img_rgb_rect_right_;
   firevision::SharedMemoryImageBuffer *shm_img_disparity_;
 
+  std::string   cfg_base_frame_;
+  std::string   cfg_frames_prefix_;
+  float         cfg_frames_interval_;
+  StereoMatcher cfg_stereo_matcher_;
+
   // OpenCV-specific settings
   int           cfg_bm_pre_filter_type_;
   unsigned int  cfg_bm_pre_filter_size_;
@@ -144,6 +149,11 @@ class Bumblebee2Thread
   float         disparity_scale_factor_;
 
   cv::Mat *cv_disparity_;
+
+  fawkes::Time                 *tf_last_publish_;
+  fawkes::tf::StampedTransform *tf_left_;
+  fawkes::tf::StampedTransform *tf_right_;
+
 };
 
 #endif

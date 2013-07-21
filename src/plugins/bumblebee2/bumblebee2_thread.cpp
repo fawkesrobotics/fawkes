@@ -86,6 +86,10 @@ Bumblebee2Thread::init()
 {
   cv_disparity_ = NULL;
 
+  cfg_base_frame_      = config->get_string(CFG_PREFIX"base-frame");
+  cfg_frames_prefix_   = config->get_string(CFG_PREFIX"frames-prefix");
+  cfg_frames_interval_ = config->get_float(CFG_PREFIX"frames-interval");
+
   std::string stereo_matcher = config->get_string(CFG_PREFIX"stereo-matcher");
   if (stereo_matcher == "opencv") {
     cfg_stereo_matcher_ = STEREO_MATCHER_OPENCV;
@@ -180,6 +184,7 @@ Bumblebee2Thread::init()
     throw Exception("Failed to get baseline: %s", triclopsErrorToString(err));
   }
 
+  std::string stereo_frame = cfg_frames_prefix_;
 
   if (cfg_stereo_matcher_ == STEREO_MATCHER_TRICLOPS) {
     triclopsCreateImage3d(triclops_->context, &(triclops_->image_3d));
@@ -196,6 +201,8 @@ Bumblebee2Thread::init()
     triclopsSetTextureValidation(triclops_->context, 0);
 
     disparity_scale_factor_ = 1.0;
+
+    stereo_frame += "right";
 
   } else if (cfg_stereo_matcher_ == STEREO_MATCHER_OPENCV) {
     // *** Read config values
@@ -255,6 +262,8 @@ Bumblebee2Thread::init()
     cv_disparity_ = new cv::Mat(height_, width_, CV_16SC1);
     // OpenCV disparity data is scaled by factor 16, always
     disparity_scale_factor_ = 1.f / 16.f;
+
+    stereo_frame += "left";
   }
 
   pcl_xyz_ = new pcl::PointCloud<pcl::PointXYZ>();
@@ -262,14 +271,14 @@ Bumblebee2Thread::init()
   pcl_xyz_->width    = width_;
   pcl_xyz_->height   = height_;
   pcl_xyz_->points.resize(width_ * height_);
-  pcl_xyz_->header.frame_id = "/kinect/image";
+  pcl_xyz_->header.frame_id = stereo_frame;
 
   pcl_xyzrgb_ = new pcl::PointCloud<pcl::PointXYZRGB>();
   pcl_xyzrgb_->is_dense = false;
   pcl_xyzrgb_->width    = width_;
   pcl_xyzrgb_->height   = height_;
   pcl_xyzrgb_->points.resize(width_ * height_);
-  pcl_xyzrgb_->header.frame_id = "/kinect/image";
+  pcl_xyzrgb_->header.frame_id = stereo_frame;
 
   pcl_manager->add_pointcloud("bumblebee2-xyz",    pcl_xyz_);
   pcl_manager->add_pointcloud("bumblebee2-xyzrgb", pcl_xyzrgb_);
@@ -297,6 +306,16 @@ Bumblebee2Thread::init()
   shm_img_disparity_ =
     new SharedMemoryImageBuffer("bumblebee2-disparity", MONO8, width_, height_);
 
+  tf_last_publish_ = new fawkes::Time(clock);
+  fawkes::Time now(clock);
+  tf::Quaternion q(0, 0, 0, 1);
+  tf::Transform t_left(q, tf::Vector3(0.0, 0.06, 0.018));
+  tf::Transform t_right(q, tf::Vector3(0.0, -0.06, 0.018));
+
+  tf_left_  =
+    new tf::StampedTransform(t_left,  now, cfg_base_frame_, cfg_frames_prefix_ + "left");
+  tf_right_ =
+    new tf::StampedTransform(t_right, now, cfg_base_frame_, cfg_frames_prefix_ + "right");
 }
 
 
@@ -345,6 +364,9 @@ Bumblebee2Thread::deinterlace_green(unsigned char* src, unsigned char* dest,
 void
 Bumblebee2Thread::finalize()
 {
+  delete tf_left_;
+  delete tf_right_;
+
   pcl_manager->remove_pointcloud("bumblebee2-xyz");
   pcl_manager->remove_pointcloud("bumblebee2-xyzrgb");
   pcl_xyz_.reset();
@@ -386,6 +408,21 @@ Bumblebee2Thread::finalize()
 void
 Bumblebee2Thread::loop()
 {
+  fawkes::Time now(clock);
+  if ((now - tf_last_publish_) > cfg_frames_interval_) {
+    tf_last_publish_->stamp();
+
+    // date time stamps slightly into the future so they are valid
+    // for longer and need less frequent updates.
+    fawkes::Time timestamp = now + (cfg_frames_interval_ * 1.1);
+
+    tf_left_->stamp  = timestamp;
+    tf_right_->stamp = timestamp;
+
+    tf_publisher->send_transform(*tf_left_);
+    tf_publisher->send_transform(*tf_right_);
+  }
+
   while (! switch_if_->msgq_empty()) {
     if (SwitchInterface::EnableSwitchMessage *msg =
         switch_if_->msgq_first_safe(msg))
