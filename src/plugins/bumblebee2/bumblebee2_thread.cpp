@@ -28,6 +28,10 @@
 #include <fvcams/bumblebee2.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/conversions.h>
+#ifdef USE_TIMETRACKER
+#  include <utils/time/tracker.h>
+#endif
+#include <utils/time/tracker_macros.h>
 
 #include <interfaces/SwitchInterface.h>
 
@@ -317,6 +321,21 @@ Bumblebee2Thread::init()
     new tf::StampedTransform(t_left,  now, cfg_base_frame_, cfg_frames_prefix_ + "left");
   tf_right_ =
     new tf::StampedTransform(t_right, now, cfg_base_frame_, cfg_frames_prefix_ + "right");
+
+
+#ifdef USE_TIMETRACKER
+  tt_ = new TimeTracker();
+  tt_loopcount_ = 0;
+  ttc_full_loop_    = tt_->add_class("Full Loop");
+  ttc_transforms_   = tt_->add_class("Transforms");
+  ttc_msgproc_      = tt_->add_class("Message Processing");
+  ttc_capture_      = tt_->add_class("Capture");
+  ttc_preprocess_   = tt_->add_class("Pre-processing");
+  ttc_rectify_      = tt_->add_class("Rectification");
+  ttc_stereo_match_ = tt_->add_class("Stereo Match");
+  ttc_pcl_xyzrgb_   = tt_->add_class("PCL XYZRGB");
+  ttc_pcl_xyz_      = tt_->add_class("PCL XYZ");
+#endif
 }
 
 
@@ -403,14 +422,21 @@ Bumblebee2Thread::finalize()
     logger->log_warn(name(), e);
   }
   delete bb2_;
+
+#ifdef USE_TIMETRACKER
+  delete tt_;
+#endif
 }
 
 
 void
 Bumblebee2Thread::loop()
 {
+  TIMETRACK_START(ttc_full_loop_);
+
   fawkes::Time now(clock);
   if ((now - tf_last_publish_) > cfg_frames_interval_) {
+    TIMETRACK_START(ttc_transforms_);
     tf_last_publish_->stamp();
 
     // date time stamps slightly into the future so they are valid
@@ -422,8 +448,10 @@ Bumblebee2Thread::loop()
 
     tf_publisher->send_transform(*tf_left_);
     tf_publisher->send_transform(*tf_right_);
+    TIMETRACK_END(ttc_transforms_);
   }
 
+  TIMETRACK_START(ttc_msgproc_);
   while (! switch_if_->msgq_empty()) {
     if (SwitchInterface::EnableSwitchMessage *msg =
         switch_if_->msgq_first_safe(msg))
@@ -439,15 +467,21 @@ Bumblebee2Thread::loop()
 
     switch_if_->msgq_pop();
   }
+  TIMETRACK_END(ttc_msgproc_);
 
   if (! switch_if_->is_enabled()) {
+    TIMETRACK_ABORT(ttc_full_loop_);
     TimeWait::wait(250000);
     return;
   }
 
+  TIMETRACK_START(ttc_capture_);
+
   // Acquire and process data
   bb2_->capture();
   fawkes::Time capture_ts(clock);
+
+  TIMETRACK_INTER(ttc_capture_, ttc_preprocess_)
 
   bb2_->deinterlace_stereo();
   bb2_->decode_bayer();
@@ -493,6 +527,8 @@ Bumblebee2Thread::loop()
   // Extract green buffer and rectify image
   deinterlace_green(buffer_rgb_, buffer_green_, width_, 6 * height_);
 
+  TIMETRACK_INTER(ttc_preprocess_, ttc_rectify_);
+
   err = triclopsRectify(triclops_->context, &(triclops_->input));
   if (err != TriclopsErrorOk) {
     logger->log_warn(name(), "Rectifying the image failed (%s), skipping loop",
@@ -529,6 +565,8 @@ Bumblebee2Thread::loop()
     shm_img_rectified_left_->set_capture_time(&capture_ts);
     shm_img_rectified_left_->unlock();
   }
+
+  TIMETRACK_INTER(ttc_rectify_, ttc_stereo_match_);
 
   // stereo correspondence matching
   short int *dispdata = NULL;
@@ -596,6 +634,8 @@ Bumblebee2Thread::loop()
     shm_img_disparity_->set_capture_time(&capture_ts);
     shm_img_disparity_->unlock();
   }
+
+  TIMETRACK_END(ttc_stereo_match_);
 
   // 2 is us and the PCL manager of the PointCloudAspect
   bool want_xyzrgb   = (pcl_xyzrgb_.use_count() > 2);
@@ -688,6 +728,18 @@ Bumblebee2Thread::loop()
 
   bb2_->dispose_buffer();
 
+  TIMETRACK_END(ttc_full_loop_);
+
+#ifdef USE_TIMETRACKER
+  if ((++tt_loopcount_ % 30) == 0) {
+    tt_->print_to_stdout();
+  }
+  if (tt_loopcount_ >= 150) {
+    tt_loopcount_ = 0;
+    tt_->reset();
+  }
+#endif
+
 }
 
 
@@ -759,6 +811,7 @@ Bumblebee2Thread::fill_xyzrgb(const short int *dispdata,
 			      const TriclopsColorImage *img_rect_color,
 			      pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb)
 {
+  TIMETRACK_START(ttc_pcl_xyzrgb_);
   float bad_point = std::numeric_limits<float>::quiet_NaN ();
 
   unsigned int idx = 0;
@@ -783,12 +836,14 @@ Bumblebee2Thread::fill_xyzrgb(const short int *dispdata,
       xyzrgb.b = img_rect_color->blue[idx];
     }
   }
+  TIMETRACK_END(ttc_pcl_xyzrgb_);
 }
 
 void
 Bumblebee2Thread::fill_xyz(const short int *dispdata,
 			   pcl::PointCloud<pcl::PointXYZ> &pcl_xyz)
 {
+  TIMETRACK_START(ttc_pcl_xyz_);
   float bad_point = std::numeric_limits<float>::quiet_NaN ();
 
   unsigned int idx = 0;
@@ -810,4 +865,5 @@ Bumblebee2Thread::fill_xyz(const short int *dispdata,
       xyz.z = -((float)h - center_row_) * b_by_d;
     }
   }
+  TIMETRACK_END(ttc_pcl_xyz_);
 }

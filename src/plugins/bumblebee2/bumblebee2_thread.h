@@ -38,6 +38,9 @@
 namespace fawkes {
   class SwitchInterface;
   class Time;
+#ifdef USE_TIMETRACKER
+  class TimeTracker;
+#endif
 }
 
 namespace firevision {
@@ -156,6 +159,19 @@ class Bumblebee2Thread
   fawkes::tf::StampedTransform *tf_left_;
   fawkes::tf::StampedTransform *tf_right_;
 
+#ifdef USE_TIMETRACKER
+  fawkes::TimeTracker  *tt_;
+  unsigned int tt_loopcount_;
+  unsigned int ttc_full_loop_;
+  unsigned int ttc_transforms_;
+  unsigned int ttc_msgproc_;
+  unsigned int ttc_capture_;
+  unsigned int ttc_preprocess_;
+  unsigned int ttc_rectify_;
+  unsigned int ttc_stereo_match_;
+  unsigned int ttc_pcl_xyzrgb_;
+  unsigned int ttc_pcl_xyz_;
+#endif
 };
 
 #endif

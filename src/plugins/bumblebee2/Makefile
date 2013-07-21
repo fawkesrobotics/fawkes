@@ -20,6 +20,9 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDSYSDIR)/fvconf.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
+# Enable to get time tracking data
+# CFLAGS += -DUSE_TIMETRACKER
+
 LIBS_bumblebee2 = fawkescore fawkesutils fawkesaspects fvutils fvcams \
 		  fawkestf fawkesinterface fawkesblackboard \
 		  SwitchInterface \
