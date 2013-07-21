@@ -69,7 +69,8 @@ class TriclopsData
 
 /** Constructor. */
 Bumblebee2Thread::Bumblebee2Thread()
-  : Thread("Bumblebee2Thread", Thread::OPMODE_CONTINUOUS),
+  : Thread("Bumblebee2Thread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     TransformAspect(TransformAspect::ONLY_PUBLISHER, "Bumblebee2")
 {
 }

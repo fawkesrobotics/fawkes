@@ -27,6 +27,7 @@
 #include <pcl/point_types.h>
 
 #include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
@@ -53,6 +54,7 @@ class TriclopsColorImage;
 
 class Bumblebee2Thread
 : public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
