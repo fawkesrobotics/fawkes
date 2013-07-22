@@ -24,6 +24,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 # CFLAGS += -DUSE_TIMETRACKER
 
 PRESUBDIRS = interfaces
+SUBDIRS = calib
 
 LIBS_bumblebee2 = fawkescore fawkesutils fawkesaspects fvutils fvcams \
 		  fawkestf fawkesinterface fawkesblackboard \
