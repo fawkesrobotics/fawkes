@@ -34,6 +34,7 @@
 #include <utils/time/tracker_macros.h>
 
 #include <interfaces/SwitchInterface.h>
+#include <interfaces/OpenCVStereoParamsInterface.h>
 
 #include <triclops.h>
 #include <opencv2/core/core.hpp>
@@ -277,8 +278,32 @@ Bumblebee2Thread::init()
       throw;
     }
 
-    if( cfg_bm_num_disparities_ <= 0 || cfg_bm_num_disparities_ % 16 != 0 ) {
-      throw Exception("Number of disparities must be positive and divisble by 16");
+    try {
+      params_if_ = blackboard->open_for_writing<OpenCVStereoParamsInterface>("bumblebee2");
+      switch (cfg_bm_pre_filter_type_) {
+      case CV_STEREO_BM_NORMALIZED_RESPONSE:
+	params_if_->set_pre_filter_type(OpenCVStereoParamsInterface::PFT_NORMALIZED_RESPONSE);
+	break;
+      case CV_STEREO_BM_XSOBEL:
+	params_if_->set_pre_filter_type(OpenCVStereoParamsInterface::PFT_XSOBEL);
+	break;
+      default:
+	throw Exception("No valid pre filter type set");
+      }
+      params_if_->set_pre_filter_size(cfg_bm_pre_filter_size_);
+      params_if_->set_pre_filter_cap(cfg_bm_pre_filter_cap_);
+      params_if_->set_sad_window_size(cfg_bm_sad_window_size_);
+      params_if_->set_min_disparity(cfg_bm_min_disparity_);
+      params_if_->set_num_disparities(cfg_bm_num_disparities_);
+      params_if_->set_texture_threshold(cfg_bm_texture_threshold_);
+      params_if_->set_uniqueness_ratio(cfg_bm_uniqueness_ratio_);
+      params_if_->set_speckle_window_size(cfg_bm_speckle_window_size_);
+      params_if_->set_speckle_range(cfg_bm_speckle_range_);
+      params_if_->set_try_smaller_windows(cfg_bm_try_smaller_windows_);
+      params_if_->write();
+    } catch (Exception &e) {
+      finalize();
+      throw;
     }
 
     // We don't need this when using OpenCV
@@ -418,6 +443,7 @@ Bumblebee2Thread::finalize()
   pcl_xyzrgb_.reset();
   
   blackboard->close(switch_if_);
+  blackboard->close(params_if_);
 
   delete shm_img_rgb_right_;
   delete shm_img_rgb_left_;
@@ -478,7 +504,93 @@ Bumblebee2Thread::loop()
     TIMETRACK_END(ttc_transforms_);
   }
 
+  bool uses_triclops = (cfg_stereo_matcher_ == STEREO_MATCHER_TRICLOPS);
+  bool uses_opencv   = (cfg_stereo_matcher_ == STEREO_MATCHER_OPENCV);
+
+
   TIMETRACK_START(ttc_msgproc_);
+
+  if (uses_opencv) {
+    while (! params_if_->msgq_empty()) {
+      if (OpenCVStereoParamsInterface::SetPreFilterTypeMessage *msg =
+	  params_if_->msgq_first_safe(msg))
+      {
+	switch (msg->pre_filter_type()) {
+	case OpenCVStereoParamsInterface::PFT_NORMALIZED_RESPONSE:
+	  cfg_bm_pre_filter_type_ = CV_STEREO_BM_NORMALIZED_RESPONSE;
+	  break;
+	case OpenCVStereoParamsInterface::PFT_XSOBEL:
+	  cfg_bm_pre_filter_type_ = CV_STEREO_BM_XSOBEL;
+	  break;
+	}
+	params_if_->set_pre_filter_type(msg->pre_filter_type());
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetPreFilterSizeMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_pre_filter_size_ = msg->pre_filter_size();
+	params_if_->set_pre_filter_size(cfg_bm_pre_filter_size_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetPreFilterCapMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_pre_filter_cap_ = msg->pre_filter_cap();
+	params_if_->set_pre_filter_cap(cfg_bm_pre_filter_cap_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetSADWindowSizeMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_sad_window_size_ = msg->sad_window_size();
+	params_if_->set_sad_window_size(cfg_bm_sad_window_size_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetMinDisparityMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_min_disparity_ = msg->min_disparity();
+	params_if_->set_min_disparity(cfg_bm_min_disparity_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetNumDisparitiesMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_num_disparities_ = msg->num_disparities();
+	params_if_->set_num_disparities(cfg_bm_num_disparities_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetTextureThresholdMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_texture_threshold_ = msg->texture_threshold();
+	params_if_->set_texture_threshold(cfg_bm_texture_threshold_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetUniquenessRatioMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_uniqueness_ratio_ = msg->uniqueness_ratio();
+	params_if_->set_uniqueness_ratio(cfg_bm_uniqueness_ratio_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetSpeckleWindowSizeMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_speckle_window_size_ = msg->speckle_window_size();
+	params_if_->set_speckle_window_size(cfg_bm_speckle_window_size_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetSpeckleRangeMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_speckle_range_ = msg->speckle_range();
+	params_if_->set_speckle_range(cfg_bm_speckle_range_);
+	params_if_->write();
+      } else if (OpenCVStereoParamsInterface::SetTrySmallerWindowsMessage *msg =
+		 params_if_->msgq_first_safe(msg))
+      {
+	cfg_bm_try_smaller_windows_ = msg->is_try_smaller_windows();
+	params_if_->set_try_smaller_windows(cfg_bm_try_smaller_windows_);
+	params_if_->write();
+      }
+
+      params_if_->msgq_pop();
+    }
+  }
+
   while (! switch_if_->msgq_empty()) {
     if (SwitchInterface::EnableSwitchMessage *msg =
         switch_if_->msgq_first_safe(msg))
@@ -545,9 +657,6 @@ Bumblebee2Thread::loop()
     shm_img_yuv_left_->set_capture_time(&capture_ts);
     shm_img_yuv_left_->unlock();
   }
-
-  bool uses_triclops = (cfg_stereo_matcher_ == STEREO_MATCHER_TRICLOPS);
-  bool uses_opencv   = (cfg_stereo_matcher_ == STEREO_MATCHER_OPENCV);
 
   TriclopsError err;
 
@@ -625,7 +734,7 @@ Bumblebee2Thread::loop()
     block_matcher.state->uniquenessRatio   = cfg_bm_uniqueness_ratio_;
     block_matcher.state->speckleWindowSize = cfg_bm_speckle_window_size_;
     block_matcher.state->speckleRange	   = cfg_bm_speckle_range_;
-    block_matcher.state->trySmallerWindows = cfg_bm_try_smaller_widows_ ? 1 : 0;
+    block_matcher.state->trySmallerWindows = cfg_bm_try_smaller_windows_ ? 1 : 0;
 
     block_matcher(img_l, img_r, *cv_disparity_);
 

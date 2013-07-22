@@ -23,9 +23,11 @@ include $(BUILDCONFDIR)/tf/tf.mk
 # Enable to get time tracking data
 # CFLAGS += -DUSE_TIMETRACKER
 
+PRESUBDIRS = interfaces
+
 LIBS_bumblebee2 = fawkescore fawkesutils fawkesaspects fvutils fvcams \
 		  fawkestf fawkesinterface fawkesblackboard \
-		  SwitchInterface \
+		  SwitchInterface OpenCVStereoParamsInterface \
 		  opencv_core opencv_calib3d
 OBJS_bumblebee2 = bumblebee2_plugin.o bumblebee2_thread.o
 

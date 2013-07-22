@@ -37,6 +37,7 @@
 
 namespace fawkes {
   class SwitchInterface;
+  class OpenCVStereoParamsInterface;
   class Time;
 #ifdef USE_TIMETRACKER
   class TimeTracker;
@@ -101,6 +102,7 @@ class Bumblebee2Thread
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > pcl_xyzrgb_;
 
   fawkes::SwitchInterface *switch_if_;
+  fawkes::OpenCVStereoParamsInterface *params_if_;
 
   firevision::Bumblebee2Camera *bb2_;
   TriclopsData *triclops_;
@@ -149,7 +151,7 @@ class Bumblebee2Thread
   unsigned int  cfg_bm_uniqueness_ratio_;
   unsigned int  cfg_bm_speckle_window_size_;
   unsigned int  cfg_bm_speckle_range_;
-  bool          cfg_bm_try_smaller_widows_;
+  bool          cfg_bm_try_smaller_windows_;
 
   float         disparity_scale_factor_;
 
