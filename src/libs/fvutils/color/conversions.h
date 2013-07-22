@@ -93,7 +93,7 @@ convert(colorspace_t   from,  colorspace_t   to,
   } else if ( (from == RGB) && (to == RGB_PLANAR) ) {
     rgb_to_rgb_planar_plainc(src, dst, width, height);
   } else if ( (from == RGB_PLANAR) && (to == RGB) ) {
-    rgb_to_rgb_planar_plainc(src, dst, width, height);
+    rgb_planar_to_rgb_plainc(src, dst, width, height);
   } else if ( (from == BGR) && (to == YUV422_PLANAR) ) {
     bgr_to_yuv422planar_plainc(src, dst, width, height);
   } else if ( (from == GRAY8) && (to == YUY2) ) {
