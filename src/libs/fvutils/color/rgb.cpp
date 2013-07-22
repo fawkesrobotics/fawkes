@@ -176,4 +176,22 @@ void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
   }
 }
 
+/** Convert one channel gray images  to RGB.
+ * This is plain C code without special optimizations.
+ * @param mono8 mono source buffer
+ * @param rgb RGB destination buffer
+ * @param width width in pixels
+ * @param height height in pixels
+ */
+void
+gray8_to_rgb_plainc(const unsigned char *mono8, unsigned char *rgb,
+		    unsigned int width, unsigned int height)
+{
+  for ( unsigned int i = 0; i < width * height; ++i) {
+    *rgb++ = *mono8;
+    *rgb++ = *mono8;
+    *rgb++ = *mono8++;
+  }
+}
+
 } // end namespace firevision
