@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="OpenCVStereoParamsInterface" author="Tim Niemueller" year="2013">
+  <constants>
+    <enum name="PreFilterType">
+      <comment>
+        The type used for the pre-filter to come up with the features
+	for the correspondence matching.
+      </comment>
+      <item name="PFT_NORMALIZED_RESPONSE">Normalized response filter.</item>
+      <item name="PFT_XSOBEL">Sobel filters.</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      Read and set stereo processing parameters of the OpenCV stereo
+      correspondence matching module.
+    </comment>
+
+    <field type="PreFilterType" name="pre_filter_type">Pre-filtering method.</field>
+    <field type="uint32" name="pre_filter_size">
+      Averaging window size: ~5x5..21x21.
+    </field>
+    <field type="uint32" name="pre_filter_cap">
+      The output of pre-filtering is clipped by [-pre_filter_cap,pre_filter_cap].
+    </field>
+    <field type="uint32" name="sad_window_size">
+      Correspondence using Sum of Absolute Difference (SAD) window size (5x5..21x21).
+    </field>
+    <field type="int32" name="min_disparity">Minimum disparity (can be negative).</field>
+    <field type="uint32" name="num_disparities">
+      Number of disparities (maximum disparity - minimum disparity (> 0)).
+    </field>
+    <field type="uint32" name="texture_threshold">
+      The disparity is only computed for pixels with textured enough
+      neighborhood.
+    </field>
+    <field type="uint32" name="uniqueness_ratio">
+      Accept the computed disparity d* only if
+      SAD(d) >= SAD(d*)*(1 + uniquenessRatio/100.)
+      for any d != d*+/-1 within the search range.
+    </field>
+    <field type="uint32" name="speckle_window_size">
+      Disparity variation window size.
+    </field>
+    <field type="uint32" name="speckle_range">
+      Acceptable range of variation in window.
+    </field>
+    <field type="bool" name="try_smaller_windows">
+      If enabled, the results may be more accurate, at the expense of
+      slower processing.
+    </field>
+  </data>
+  <message name="SetPreFilterType">
+    <comment>Set pre-filtering method.</comment>
+    <ref>pre_filter_type</ref>
+  </message>
+  <message name="SetPreFilterSize">
+    <comment>Set pre-filtering window size.</comment>
+    <ref>pre_filter_size</ref>
+  </message>
+  <message name="SetPreFilterCap">
+    <comment>Set pre-filtering capping value.</comment>
+    <ref>pre_filter_cap</ref>
+  </message>
+  <message name="SetSADWindowSize">
+    <comment>Set SAD window size.</comment>
+    <ref>sad_window_size</ref>
+  </message>
+  <message name="SetMinDisparity">
+    <comment>Set minimum disparity value.</comment>
+    <ref>min_disparity</ref>
+  </message>
+  <message name="SetNumDisparities">
+    <comment>Set number of disparities.</comment>
+    <ref>num_disparities</ref>
+  </message>
+  <message name="SetTextureThreshold">
+    <comment>Set texture threshold.</comment>
+    <ref>texture_threshold</ref>
+  </message>
+  <message name="SetUniquenessRatio">
+    <comment>Set uniqueness ratio.</comment>
+    <ref>uniqueness_ratio</ref>
+  </message>
+  <message name="SetSpeckleWindowSize">
+    <comment>Set disparity variation window size.</comment>
+    <ref>speckle_window_size</ref>
+  </message>
+  <message name="SetSpeckleRange">
+    <comment>Set disparity variation range.</comment>
+    <ref>speckle_range</ref>
+  </message>
+  <message name="SetTrySmallerWindows">
+    <comment>Enable or disable smaller windows.</comment>
+    <ref>try_smaller_windows</ref>
+  </message>
+
+</interface>
