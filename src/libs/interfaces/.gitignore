@@ -3,6 +3,7 @@ KatanaInterface.h
 NaoJointPositionInterface.h
 NaoJointStiffnessInterface.h
 NaoSensorInterface.h
+OpenCVStereoParamsInterface.h
 OpenRaveInterface.h
 PanTiltInterface.h
 PclDatabaseMergeInterface.h
