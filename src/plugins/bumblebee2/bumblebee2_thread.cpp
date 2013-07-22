@@ -360,7 +360,7 @@ Bumblebee2Thread::init()
 
     tf_last_publish_ = new fawkes::Time(clock);
     fawkes::Time now(clock);
-    tf::Quaternion q(0, 0, 0, 1);
+    tf::Quaternion q(-M_PI/2.f, 0, -M_PI/2.f);
     tf::Transform t_left(q, tf::Vector3(0.0, 0.06, 0.018));
     tf::Transform t_right(q, tf::Vector3(0.0, -0.06, 0.018));
 
@@ -930,9 +930,9 @@ Bumblebee2Thread::fill_xyz_xyzrgb(const short int *dispdata,
       }
 
       float b_by_d = baseline_/d;
-      xyz.x = xyzrgb.x = focal_length_ * b_by_d;
-      xyz.y = xyzrgb.y = -((float)w - center_col_) * b_by_d;
-      xyz.z = xyzrgb.z = -((float)h - center_row_) * b_by_d;
+      xyz.z = xyzrgb.z = focal_length_ * b_by_d;
+      xyz.x = xyzrgb.x = ((float)w - center_col_) * b_by_d;
+      xyz.y = xyzrgb.y = ((float)h - center_row_) * b_by_d;
 
       xyzrgb.r = img_rect_color->red[idx];
       xyzrgb.g = img_rect_color->green[idx];
@@ -963,9 +963,9 @@ Bumblebee2Thread::fill_xyzrgb(const short int *dispdata,
       }
 
       float b_by_d = baseline_/d;
-      xyzrgb.x = focal_length_ * b_by_d;
-      xyzrgb.y = -((float)w - center_col_) * b_by_d;
-      xyzrgb.z = -((float)h - center_row_) * b_by_d;
+      xyzrgb.z = focal_length_ * b_by_d;
+      xyzrgb.x = ((float)w - center_col_) * b_by_d;
+      xyzrgb.y = ((float)h - center_row_) * b_by_d;
 
       xyzrgb.r = img_rect_color->red[idx];
       xyzrgb.g = img_rect_color->green[idx];
@@ -996,9 +996,9 @@ Bumblebee2Thread::fill_xyz(const short int *dispdata,
       }
 
       float b_by_d = baseline_/d;
-      xyz.x = focal_length_ * b_by_d;
-      xyz.y = -((float)w - center_col_) * b_by_d;
-      xyz.z = -((float)h - center_row_) * b_by_d;
+      xyz.z = focal_length_ * b_by_d;
+      xyz.x = ((float)w - center_col_) * b_by_d;
+      xyz.y = ((float)h - center_row_) * b_by_d;
     }
   }
   TIMETRACK_END(ttc_pcl_xyz_);
