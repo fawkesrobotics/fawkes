@@ -254,8 +254,10 @@ FirewireCamera::start()
 void
 FirewireCamera::stop()
 {
-  dc1394_video_set_transmission(_camera, DC1394_OFF);
-  dc1394_capture_stop(_camera);
+  if (_camera) {
+    dc1394_video_set_transmission(_camera, DC1394_OFF);
+    dc1394_capture_stop(_camera);
+  }
   _started = false;
 }
 
@@ -387,8 +389,8 @@ FirewireCamera::close()
 {
   if ( _started ) stop();
   if ( _opened ) {
-    dc1394_camera_free( _camera );
-    dc1394_free(_dc1394);
+    if (_camera)  dc1394_camera_free( _camera );
+    if (_dc1394)  dc1394_free(_dc1394);
     _camera = NULL;
     _dc1394 = NULL;
     _opened = false;
