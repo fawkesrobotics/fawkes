@@ -89,8 +89,22 @@ Bumblebee2Thread::~Bumblebee2Thread()
 void
 Bumblebee2Thread::init()
 {
+  // prepare for finalize in the case init fails somewhere
+  bb2_ = NULL;
   cv_disparity_ = NULL;
+  tf_left_ = tf_right_ = NULL;
+  switch_if_ = NULL;
+  params_if_ = NULL;
+  shm_img_rgb_right_ = shm_img_rgb_left_ = shm_img_yuv_right_ = shm_img_yuv_left_ = NULL;
+  shm_img_rectified_right_ = shm_img_rectified_left_ = NULL;
+  shm_img_prefiltered_right_ = shm_img_prefiltered_left_ = NULL;
+  shm_img_rgb_rect_left_ = shm_img_rgb_rect_right_ = shm_img_disparity_ = NULL;
+  triclops_ = NULL;
+#ifdef USE_TIMETRACKER
+  tt_ = NULL;
+#endif
 
+  // get config data
   cfg_base_frame_      = config->get_string(CFG_PREFIX"base-frame");
   cfg_frames_prefix_   = config->get_string(CFG_PREFIX"frames-prefix");
   cfg_frames_interval_ = config->get_float(CFG_PREFIX"frames-interval");
@@ -104,6 +118,7 @@ Bumblebee2Thread::init()
     throw Exception("Unknown stereo matcher %s", stereo_matcher.c_str());
   }
 
+  // Open camera
   bb2_ = NULL;
   try {
     bb2_ = new Bumblebee2Camera();
@@ -111,18 +126,17 @@ Bumblebee2Thread::init()
     bb2_->start();
     bb2_->set_image_number(Bumblebee2Camera::RGB_IMAGE);
   } catch (Exception &e) {
-    delete bb2_;
+    finalize();
     throw;
   }
 
+  // Open blackboard interfaces
   try {
-    switch_if_ = NULL;
-    switch_if_ = blackboard->open_for_writing<SwitchInterface>("tabletop-objects");
+    switch_if_ = blackboard->open_for_writing<SwitchInterface>("bumblebee2");
     switch_if_->set_enabled(true);
     switch_if_->write();
   } catch (Exception &e) {
-    blackboard->close(switch_if_);
-    delete bb2_;
+    finalize();
     throw;
   }
 
@@ -157,12 +171,7 @@ Bumblebee2Thread::init()
   try {
     get_triclops_context_from_camera();
   } catch (Exception &e) {
-    bb2_->stop();
-    bb2_->close();
-    delete bb2_;
-    blackboard->close(switch_if_);
-    delete bb2_;
-    delete triclops_;
+    finalize();
     throw;
   }
 
@@ -176,16 +185,19 @@ Bumblebee2Thread::init()
 
   err = triclopsGetImageCenter(triclops_->context, &center_row_, &center_col_);
   if (err != TriclopsErrorOk) {
+    finalize();
     throw Exception("Failed to get image center: %s", triclopsErrorToString(err));
   }
 
   err = triclopsGetFocalLength(triclops_->context, &focal_length_);
   if (err != TriclopsErrorOk) {
+    finalize();
     throw Exception("Failed to get focal length: %s", triclopsErrorToString(err));
   }
 
   err = triclopsGetBaseline(triclops_->context, &baseline_);
   if (err != TriclopsErrorOk) {
+    finalize();
     throw Exception("Failed to get baseline: %s", triclopsErrorToString(err));
   }
 
@@ -212,48 +224,57 @@ Bumblebee2Thread::init()
   } else if (cfg_stereo_matcher_ == STEREO_MATCHER_OPENCV) {
     // *** Read config values
     // pre-filtering (normalization of input images)
-    std::string pre_filter_type = config->get_string(CFG_OPENCV_PREFIX"pre-filter-type");
-    cfg_bm_pre_filter_size_     = config->get_uint(CFG_OPENCV_PREFIX"pre-filter-size");
-    cfg_bm_pre_filter_cap_      = config->get_uint(CFG_OPENCV_PREFIX"pre-filter-cap");
+    try {
+      std::string pre_filter_type = config->get_string(CFG_OPENCV_PREFIX"pre-filter-type");
+      cfg_bm_pre_filter_size_     = config->get_uint(CFG_OPENCV_PREFIX"pre-filter-size");
+      cfg_bm_pre_filter_cap_      = config->get_uint(CFG_OPENCV_PREFIX"pre-filter-cap");
 
-    // correspondence using Sum of Absolute Difference (SAD)
-    cfg_bm_sad_window_size_     = config->get_uint(CFG_OPENCV_PREFIX"sad-window-size");
-    cfg_bm_min_disparity_       = config->get_int(CFG_OPENCV_PREFIX"min-disparity");
-    cfg_bm_num_disparities_     = config->get_uint(CFG_OPENCV_PREFIX"num-disparities");
+      // correspondence using Sum of Absolute Difference (SAD)
+      cfg_bm_sad_window_size_     = config->get_uint(CFG_OPENCV_PREFIX"sad-window-size");
+      cfg_bm_min_disparity_       = config->get_int(CFG_OPENCV_PREFIX"min-disparity");
+      cfg_bm_num_disparities_     = config->get_uint(CFG_OPENCV_PREFIX"num-disparities");
 
-    // post-filtering
-    cfg_bm_texture_threshold_   = config->get_uint(CFG_OPENCV_PREFIX"texture-threshold");
-    cfg_bm_uniqueness_ratio_    = config->get_uint(CFG_OPENCV_PREFIX"uniqueness-ratio");
-    cfg_bm_speckle_window_size_ = config->get_uint(CFG_OPENCV_PREFIX"speckle-window-size");
-    cfg_bm_speckle_range_       = config->get_uint(CFG_OPENCV_PREFIX"speckle-range");
+      // post-filtering
+      cfg_bm_texture_threshold_   = config->get_uint(CFG_OPENCV_PREFIX"texture-threshold");
+      cfg_bm_uniqueness_ratio_    = config->get_uint(CFG_OPENCV_PREFIX"uniqueness-ratio");
+      cfg_bm_speckle_window_size_ = config->get_uint(CFG_OPENCV_PREFIX"speckle-window-size");
+      cfg_bm_speckle_range_       = config->get_uint(CFG_OPENCV_PREFIX"speckle-range");
 
-    cfg_bm_try_smaller_widows_  = config->get_bool(CFG_OPENCV_PREFIX"try-smaller-windows");
+      cfg_bm_try_smaller_windows_ = config->get_bool(CFG_OPENCV_PREFIX"try-smaller-windows");
 
-    // *** check config values
-    if (pre_filter_type == "normalized_response") {
-      cfg_bm_pre_filter_type_ = CV_STEREO_BM_NORMALIZED_RESPONSE;
-    } else if (pre_filter_type == "xsobel") {
-      cfg_bm_pre_filter_type_ = CV_STEREO_BM_XSOBEL;
-    } else {
-      throw Exception("Invalid OpenCV stereo matcher pre filter type");
-    }
+      // *** check config values
+      if (pre_filter_type == "normalized_response") {
+	cfg_bm_pre_filter_type_ = CV_STEREO_BM_NORMALIZED_RESPONSE;
+      } else if (pre_filter_type == "xsobel") {
+	cfg_bm_pre_filter_type_ = CV_STEREO_BM_XSOBEL;
+      } else {
+	throw Exception("Invalid OpenCV stereo matcher pre filter type");
+      }
 
-    if (cfg_bm_pre_filter_size_ < 5 || cfg_bm_pre_filter_size_ > 255 ||
-        cfg_bm_pre_filter_size_ % 2 == 0)
-    {
-      throw Exception("Pre filter size must be odd and be within 5..255");
-    }
+      if (cfg_bm_pre_filter_size_ < 5 || cfg_bm_pre_filter_size_ > 255 ||
+	  cfg_bm_pre_filter_size_ % 2 == 0)
+      {
+	throw Exception("Pre filter size must be odd and be within 5..255");
+      }
+      
+      if( cfg_bm_pre_filter_cap_ < 1 || cfg_bm_pre_filter_cap_ > 63 ) {
+	throw Exception("Pre filter cap must be within 1..63");
+      }
 
-    if( cfg_bm_pre_filter_cap_ < 1 || cfg_bm_pre_filter_cap_ > 63 ) {
-      throw Exception("Pre filter cap must be within 1..63");
-    }
+      if( cfg_bm_sad_window_size_ < 5 || cfg_bm_sad_window_size_ > 255 ||
+	  cfg_bm_sad_window_size_ % 2 == 0 ||
+	  cfg_bm_sad_window_size_ >= std::min(width_, height_))
+      {
+	throw Exception("SAD window size must be odd, be within 5..255 and "
+			"be no larger than image width or height");
+      }
 
-    if( cfg_bm_sad_window_size_ < 5 || cfg_bm_sad_window_size_ > 255 ||
-        cfg_bm_sad_window_size_ % 2 == 0 ||
-        cfg_bm_sad_window_size_ >= std::min(width_, height_))
-    {
-      throw Exception("SAD window size must be odd, be within 5..255 and "
-		      "be no larger than image width or height");
+      if( cfg_bm_num_disparities_ <= 0 || cfg_bm_num_disparities_ % 16 != 0 ) {
+	throw Exception("Number of disparities must be positive and divisble by 16");
+      }
+    } catch (Exception &e) {
+      finalize();
+      throw;
     }
 
     if( cfg_bm_num_disparities_ <= 0 || cfg_bm_num_disparities_ % 16 != 0 ) {
@@ -271,57 +292,61 @@ Bumblebee2Thread::init()
     stereo_frame += "left";
   }
 
-  pcl_xyz_ = new pcl::PointCloud<pcl::PointXYZ>();
-  pcl_xyz_->is_dense = false;
-  pcl_xyz_->width    = width_;
-  pcl_xyz_->height   = height_;
-  pcl_xyz_->points.resize(width_ * height_);
-  pcl_xyz_->header.frame_id = stereo_frame;
+  try {
+    pcl_xyz_ = new pcl::PointCloud<pcl::PointXYZ>();
+    pcl_xyz_->is_dense = false;
+    pcl_xyz_->width    = width_;
+    pcl_xyz_->height   = height_;
+    pcl_xyz_->points.resize(width_ * height_);
+    pcl_xyz_->header.frame_id = stereo_frame;
 
-  pcl_xyzrgb_ = new pcl::PointCloud<pcl::PointXYZRGB>();
-  pcl_xyzrgb_->is_dense = false;
-  pcl_xyzrgb_->width    = width_;
-  pcl_xyzrgb_->height   = height_;
-  pcl_xyzrgb_->points.resize(width_ * height_);
-  pcl_xyzrgb_->header.frame_id = stereo_frame;
+    pcl_xyzrgb_ = new pcl::PointCloud<pcl::PointXYZRGB>();
+    pcl_xyzrgb_->is_dense = false;
+    pcl_xyzrgb_->width    = width_;
+    pcl_xyzrgb_->height   = height_;
+    pcl_xyzrgb_->points.resize(width_ * height_);
+    pcl_xyzrgb_->header.frame_id = stereo_frame;
 
-  pcl_manager->add_pointcloud("bumblebee2-xyz",    pcl_xyz_);
-  pcl_manager->add_pointcloud("bumblebee2-xyzrgb", pcl_xyzrgb_);
+    pcl_manager->add_pointcloud("bumblebee2-xyz",    pcl_xyz_);
+    pcl_manager->add_pointcloud("bumblebee2-xyzrgb", pcl_xyzrgb_);
 
-  shm_img_rgb_right_ =
-    new SharedMemoryImageBuffer("bumblebee2-rgb-right", RGB, width_, height_);
-  shm_img_rgb_left_ =
-    new SharedMemoryImageBuffer("bumblebee2-rgb-left", RGB, width_, height_);
-  shm_img_yuv_right_ =
-    new SharedMemoryImageBuffer("bumblebee2-yuv-right", YUV422_PLANAR, width_, height_);
-  shm_img_yuv_left_ =
-    new SharedMemoryImageBuffer("bumblebee2-yuv-left", YUV422_PLANAR, width_, height_);
-  shm_img_rgb_rect_right_ =
-    new SharedMemoryImageBuffer("bumblebee2-rgb-rectified-right", RGB_PLANAR, width_, height_);
-  shm_img_rgb_rect_left_ =
-    new SharedMemoryImageBuffer("bumblebee2-rgb-rectified-left", RGB_PLANAR, width_, height_);
-  shm_img_rectified_right_ =
-    new SharedMemoryImageBuffer("bumblebee2-rectified-right", MONO8, width_, height_);
-  shm_img_rectified_left_ =
-    new SharedMemoryImageBuffer("bumblebee2-rectified-left", MONO8, width_, height_);
-  shm_img_prefiltered_right_ =
-    new SharedMemoryImageBuffer("bumblebee2-prefiltered-right", MONO8, width_, height_);
-  shm_img_prefiltered_left_ =
-    new SharedMemoryImageBuffer("bumblebee2-prefiltered-left", MONO8, width_, height_);
-  shm_img_disparity_ =
-    new SharedMemoryImageBuffer("bumblebee2-disparity", MONO8, width_, height_);
+    shm_img_rgb_right_ =
+      new SharedMemoryImageBuffer("bumblebee2-rgb-right", RGB, width_, height_);
+    shm_img_rgb_left_ =
+      new SharedMemoryImageBuffer("bumblebee2-rgb-left", RGB, width_, height_);
+    shm_img_yuv_right_ =
+      new SharedMemoryImageBuffer("bumblebee2-yuv-right", YUV422_PLANAR, width_, height_);
+    shm_img_yuv_left_ =
+      new SharedMemoryImageBuffer("bumblebee2-yuv-left", YUV422_PLANAR, width_, height_);
+    shm_img_rgb_rect_right_ =
+      new SharedMemoryImageBuffer("bumblebee2-rgb-rectified-right", RGB_PLANAR, width_, height_);
+    shm_img_rgb_rect_left_ =
+      new SharedMemoryImageBuffer("bumblebee2-rgb-rectified-left", RGB_PLANAR, width_, height_);
+    shm_img_rectified_right_ =
+      new SharedMemoryImageBuffer("bumblebee2-rectified-right", MONO8, width_, height_);
+    shm_img_rectified_left_ =
+      new SharedMemoryImageBuffer("bumblebee2-rectified-left", MONO8, width_, height_);
+    shm_img_prefiltered_right_ =
+      new SharedMemoryImageBuffer("bumblebee2-prefiltered-right", MONO8, width_, height_);
+    shm_img_prefiltered_left_ =
+      new SharedMemoryImageBuffer("bumblebee2-prefiltered-left", MONO8, width_, height_);
+    shm_img_disparity_ =
+      new SharedMemoryImageBuffer("bumblebee2-disparity", MONO8, width_, height_);
 
-  tf_last_publish_ = new fawkes::Time(clock);
-  fawkes::Time now(clock);
-  tf::Quaternion q(0, 0, 0, 1);
-  tf::Transform t_left(q, tf::Vector3(0.0, 0.06, 0.018));
-  tf::Transform t_right(q, tf::Vector3(0.0, -0.06, 0.018));
+    tf_last_publish_ = new fawkes::Time(clock);
+    fawkes::Time now(clock);
+    tf::Quaternion q(0, 0, 0, 1);
+    tf::Transform t_left(q, tf::Vector3(0.0, 0.06, 0.018));
+    tf::Transform t_right(q, tf::Vector3(0.0, -0.06, 0.018));
 
-  tf_left_  =
-    new tf::StampedTransform(t_left,  now, cfg_base_frame_, cfg_frames_prefix_ + "left");
-  tf_right_ =
-    new tf::StampedTransform(t_right, now, cfg_base_frame_, cfg_frames_prefix_ + "right");
-
+    tf_left_  =
+      new tf::StampedTransform(t_left,  now, cfg_base_frame_, cfg_frames_prefix_ + "left");
+    tf_right_ =
+      new tf::StampedTransform(t_right, now, cfg_base_frame_, cfg_frames_prefix_ + "right");
+  } catch (Exception &e) {
+    finalize();
+    throw;
+  }
 
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
@@ -409,19 +434,21 @@ Bumblebee2Thread::finalize()
   delete triclops_;
   delete cv_disparity_;
 
-  free(buffer_green_);
-  free(buffer_yuv_right_);
-  free(buffer_yuv_left_);
-  free(buffer_rgb_planar_right_);
-  free(buffer_rgb_planar_left_);
-  try {
-    bb2_->stop();
-    bb2_->close();
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Stopping camera failed, exception follows");
-    logger->log_warn(name(), e);
+  if (buffer_green_)             free(buffer_green_);
+  if (buffer_yuv_right_)         free(buffer_yuv_right_);
+  if (buffer_yuv_left_)          free(buffer_yuv_left_);
+  if (buffer_rgb_planar_right_)  free(buffer_rgb_planar_right_);
+  if (buffer_rgb_planar_left_)   free(buffer_rgb_planar_left_);
+  if (bb2_) {
+    try {
+      bb2_->stop();
+      bb2_->close();
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Stopping camera failed, exception follows");
+      logger->log_warn(name(), e);
+    }
+    delete bb2_;
   }
-  delete bb2_;
 
 #ifdef USE_TIMETRACKER
   delete tt_;
