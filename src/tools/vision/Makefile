@@ -48,7 +48,9 @@ LIBS_fvstereodecoder = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams \
 		       fvutils
 OBJS_fvstereodecoder = stereodecoder.o
 
-LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) stdc++ fawkescore fawkesutils fvcams fvutils fvstereo
+LIBS_fvtricalcdisp = stdc++ fawkescore fawkesutils fvcams fvutils fvstereo
+CFLAGS_tricalcdisp = $(CFLAGS_TRICLOPS)
+LDFLAGS_fvtricalcdisp = $(LDFLAGS_TRICLOPS)
 OBJS_fvtricalcdisp = tricalcdisp.o
 
 LIBS_fvbb2gettric = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams fvutils
@@ -95,7 +97,7 @@ MANPAGES_all = $(MANDIR)/man1/fvshmem.1 $(MANDIR)/man1/fvcmpp.1 \
 		$(MANDIR)/man1/fvnet.1 $(MANDIR)/man1/fvbb2rectlut.1 \
 		$(MANDIR)/man1/fvconverter.1
 
-ifeq ($(HAVE_TRICLOPS_SDK),1)
+ifeq ($(HAVE_TRICLOPS),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
 else
   ifneq ($(wildcard $(SRCDIR)/tricalcdisp.cpp),)

@@ -22,7 +22,6 @@
 
 #include <fvcams/bumblebee2.h>
 #include <fvutils/system/camargp.h>
-#include <fvstereo/triclops.h>
 
 using namespace std;
 using namespace firevision;
