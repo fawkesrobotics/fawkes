@@ -226,6 +226,16 @@ Bumblebee2Thread::init()
     // *** Read config values
     // pre-filtering (normalization of input images)
     try {
+      std::string algorithm       = config->get_string(CFG_OPENCV_PREFIX"algorithm");
+      if (algorithm == "bm") {
+	cfg_opencv_stereo_algorithm_ = OPENCV_STEREO_BM;
+      } else if (algorithm == "sgbm") {
+	cfg_opencv_stereo_algorithm_ = OPENCV_STEREO_SGBM;
+      } else {
+	finalize();
+	throw Exception("Unknown stereo algorithm '%s', use bm or sgbm", algorithm.c_str());
+      }
+
       std::string pre_filter_type = config->get_string(CFG_OPENCV_PREFIX"pre-filter-type");
       cfg_bm_pre_filter_size_     = config->get_uint(CFG_OPENCV_PREFIX"pre-filter-size");
       cfg_bm_pre_filter_cap_      = config->get_uint(CFG_OPENCV_PREFIX"pre-filter-cap");
@@ -242,6 +252,19 @@ Bumblebee2Thread::init()
       cfg_bm_speckle_range_       = config->get_uint(CFG_OPENCV_PREFIX"speckle-range");
 
       cfg_bm_try_smaller_windows_ = config->get_bool(CFG_OPENCV_PREFIX"try-smaller-windows");
+
+      // SGBM specific values
+      std::string sgbm_p1 = config->get_string(CFG_OPENCV_PREFIX"sgbm-p1");
+      cfg_sgbm_p1_auto_ = (sgbm_p1 == "auto");
+      if (! cfg_sgbm_p1_auto_) {
+	cfg_sgbm_p1_              = config->get_int(CFG_OPENCV_PREFIX"sgbm-p1");
+      }
+      std::string sgbm_p2 = config->get_string(CFG_OPENCV_PREFIX"sgbm-p2");
+      cfg_sgbm_p2_auto_ = (sgbm_p2 == "auto");
+      if (! cfg_sgbm_p2_auto_) {
+	cfg_sgbm_p2_              = config->get_int(CFG_OPENCV_PREFIX"sgbm-p1");
+      }
+      cfg_sgbm_disp_12_max_diff_  = config->get_int(CFG_OPENCV_PREFIX"sgbm-disp12-max-diff");
 
       // *** check config values
       if (pre_filter_type == "normalized_response") {
@@ -736,38 +759,72 @@ Bumblebee2Thread::loop()
     cv::Mat img_l(height_, width_, CV_8UC1, image_left.data);
 
     // Calculate disparity
-    cv::StereoBM block_matcher(cv::StereoBM::BASIC_PRESET,
-			       cfg_bm_num_disparities_, cfg_bm_sad_window_size_);
-    block_matcher.state->preFilterType     = cfg_bm_pre_filter_type_;
-    block_matcher.state->preFilterSize     = cfg_bm_pre_filter_size_;
-    block_matcher.state->preFilterCap      = cfg_bm_pre_filter_cap_;
-    block_matcher.state->minDisparity      = cfg_bm_min_disparity_;
-    block_matcher.state->textureThreshold  = cfg_bm_texture_threshold_;
-    block_matcher.state->uniquenessRatio   = cfg_bm_uniqueness_ratio_;
-    block_matcher.state->speckleWindowSize = cfg_bm_speckle_window_size_;
-    block_matcher.state->speckleRange	   = cfg_bm_speckle_range_;
-    block_matcher.state->trySmallerWindows = cfg_bm_try_smaller_windows_ ? 1 : 0;
+    if (cfg_opencv_stereo_algorithm_ == OPENCV_STEREO_BM) {
+      cv::StereoBM block_matcher(cv::StereoBM::BASIC_PRESET,
+				 cfg_bm_num_disparities_, cfg_bm_sad_window_size_);
+      block_matcher.state->preFilterType     = cfg_bm_pre_filter_type_;
+      block_matcher.state->preFilterSize     = cfg_bm_pre_filter_size_;
+      block_matcher.state->preFilterCap      = cfg_bm_pre_filter_cap_;
+      block_matcher.state->minDisparity      = cfg_bm_min_disparity_;
+      block_matcher.state->textureThreshold  = cfg_bm_texture_threshold_;
+      block_matcher.state->uniquenessRatio   = cfg_bm_uniqueness_ratio_;
+      block_matcher.state->speckleWindowSize = cfg_bm_speckle_window_size_;
+      block_matcher.state->speckleRange	   = cfg_bm_speckle_range_;
+      block_matcher.state->trySmallerWindows = cfg_bm_try_smaller_windows_ ? 1 : 0;
 
-    block_matcher(img_l, img_r, *cv_disparity_);
+      block_matcher(img_l, img_r, *cv_disparity_);
+
+      if (shm_img_prefiltered_right_->num_attached() > 1) {
+	shm_img_prefiltered_right_->lock_for_write();
+	memcpy(shm_img_prefiltered_right_->buffer(),
+	       block_matcher.state->preFilteredImg0->data.ptr,
+	       colorspace_buffer_size(MONO8, width_, height_));
+	shm_img_prefiltered_right_->set_capture_time(&capture_ts);
+	shm_img_prefiltered_right_->unlock();
+      }
+      if (shm_img_prefiltered_left_->num_attached() > 1) {
+	shm_img_prefiltered_left_->lock_for_write();
+	memcpy(shm_img_prefiltered_left_->buffer(),
+	       block_matcher.state->preFilteredImg0->data.ptr,
+	       colorspace_buffer_size(MONO8, width_, height_));
+	shm_img_prefiltered_left_->set_capture_time(&capture_ts);
+	shm_img_prefiltered_left_->unlock();
+      }
+    } else {
+      int cn = img_l.channels();
+
+      cv::StereoSGBM block_matcher;
+      block_matcher.minDisparity = cfg_bm_min_disparity_;
+      block_matcher.numberOfDisparities = cfg_bm_num_disparities_;
+      block_matcher.SADWindowSize = cfg_bm_sad_window_size_;
+      block_matcher.preFilterCap = cfg_bm_pre_filter_cap_;
+      block_matcher.uniquenessRatio = cfg_bm_uniqueness_ratio_;
+      if (cfg_sgbm_p1_auto_) {
+	block_matcher.P1 =  8 * cn * block_matcher.SADWindowSize * block_matcher.SADWindowSize;
+      } else {
+	block_matcher.P1 = cfg_sgbm_p1_;
+      }
+      if (cfg_sgbm_p2_auto_) {
+	block_matcher.P2 = 32 * cn * block_matcher.SADWindowSize * block_matcher.SADWindowSize;
+      } else {
+	block_matcher.P2 = cfg_sgbm_p2_;
+      }
+      if (block_matcher.P1 >= block_matcher.P2) {
+	logger->log_warn(name(), "SGBM P1 >= P2 (%i <= %i), skipping loop",
+			 block_matcher.P1, block_matcher.P2);
+	bb2_->dispose_buffer();
+	return;
+      }
+
+      block_matcher.speckleWindowSize = cfg_bm_speckle_window_size_;
+      block_matcher.speckleRange = cfg_bm_speckle_range_;
+      block_matcher.disp12MaxDiff = 1;
+      block_matcher. fullDP = false;
+
+      block_matcher(img_l, img_r, *cv_disparity_);
+    }
 
     dispdata = (short int *)(cv_disparity_->data);
-
-    if (shm_img_prefiltered_right_->num_attached() > 1) {
-      shm_img_prefiltered_right_->lock_for_write();
-      memcpy(shm_img_prefiltered_right_->buffer(),
-	     block_matcher.state->preFilteredImg0->data.ptr,
-	     colorspace_buffer_size(MONO8, width_, height_));
-      shm_img_prefiltered_right_->set_capture_time(&capture_ts);
-      shm_img_prefiltered_right_->unlock();
-    }
-    if (shm_img_prefiltered_left_->num_attached() > 1) {
-      shm_img_prefiltered_left_->lock_for_write();
-      memcpy(shm_img_prefiltered_left_->buffer(),
-	     block_matcher.state->preFilteredImg0->data.ptr,
-	     colorspace_buffer_size(MONO8, width_, height_));
-      shm_img_prefiltered_left_->set_capture_time(&capture_ts);
-      shm_img_prefiltered_left_->unlock();
-    }
   }
 
   if (shm_img_disparity_->num_attached() > 1) {

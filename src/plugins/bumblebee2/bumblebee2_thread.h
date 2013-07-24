@@ -98,6 +98,11 @@ class Bumblebee2Thread
     STEREO_MATCHER_OPENCV
   } StereoMatcher;
 
+  typedef enum {
+    OPENCV_STEREO_BM,
+    OPENCV_STEREO_SGBM
+  } OpenCVStereoAlgorithm;
+
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_xyz_;
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > pcl_xyzrgb_;
 
@@ -141,6 +146,7 @@ class Bumblebee2Thread
   StereoMatcher cfg_stereo_matcher_;
 
   // OpenCV-specific settings
+  OpenCVStereoAlgorithm cfg_opencv_stereo_algorithm_;
   int           cfg_bm_pre_filter_type_;
   unsigned int  cfg_bm_pre_filter_size_;
   unsigned int  cfg_bm_pre_filter_cap_;
@@ -152,6 +158,12 @@ class Bumblebee2Thread
   unsigned int  cfg_bm_speckle_window_size_;
   unsigned int  cfg_bm_speckle_range_;
   bool          cfg_bm_try_smaller_windows_;
+
+  bool          cfg_sgbm_p1_auto_;
+  bool          cfg_sgbm_p2_auto_;
+  int           cfg_sgbm_p1_;
+  int           cfg_sgbm_p2_;
+  int           cfg_sgbm_disp_12_max_diff_;
 
   float         disparity_scale_factor_;
 

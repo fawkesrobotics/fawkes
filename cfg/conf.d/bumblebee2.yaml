@@ -23,11 +23,16 @@ bumblebee2:
 
   # OpenCV stereo correspondence by block matching parameters
   opencv-stereo:
+    # Which algorithm to use
+    # bm: fast Sum-of-Absolute-Differences block matching
+    # sgbm: semi-global block matching
+    algorithm: bm
+
     # *** pre-filtering (normalization of input images)
-    # Filter type, can be xsobel or normalized_response
+    # Filter type, can be xsobel or normalized_response, only for bm
     pre-filter-type: normalized_response
 
-    # averaging window size: 5x5..21x21
+    # averaging window size: 5x5..21x21, only for bm
     pre-filter-size: 15
 
     # the output of pre-filtering is clipped by [- pre-filter-cap,pre-filter-cap]
@@ -45,7 +50,7 @@ bumblebee2:
 
     # *** post-filtering
     # the disparity is only computed for pixels
-    # with textured enough neighborhood
+    # with textured enough neighborhood, only for bm
     texture-threshold: 20
 
     # accept the computed disparity d* only if
@@ -60,5 +65,23 @@ bumblebee2:
     speckle-range: 32
 
     # if enabled, the results may be more accurate,
-    # at the expense of slower processing
+    # at the expense of slower processing, only for bm
     try-smaller-windows: false
+
+    # P1, P2: Parameters that
+    # control disparity smoothness for SGBM. The larger the values,
+    # the smoother the disparity. P1 is the penalty on the disparity
+    # change by plus or minus 1 between neighbor pixels. P2 is the
+    # penalty on the disparity change by more than 1 between neighbor
+    # pixels. The algorithm requires P2 > P1
+    # If set to auto will use (cn is number of channels in input images)
+    # P1 =  8 * cn * SADWindowSize * SADWindowSize
+    # P2 = 32 * cn * SADWindowSize * SADWindowSize;
+    sgbm-p1: auto
+    sgbm-p2: auto
+
+    # Maximum allowed difference (in integer pixel units) in the
+    # left-right disparity check. Set it to non-positive value to
+    # disable the check, only sgbm
+    sgbm-disp12-max-diff: 1
+
