@@ -677,6 +677,7 @@ Bumblebee2Thread::loop()
   if (err != TriclopsErrorOk) {
     logger->log_warn(name(), "Rectifying the image failed (%s), skipping loop",
 		     triclopsErrorToString(err));
+    bb2_->dispose_buffer();
     return;
   }
 
@@ -686,12 +687,14 @@ Bumblebee2Thread::loop()
   if (err != TriclopsErrorOk) {
     logger->log_warn(name(), "Retrieving right rectified image failed (%s), skipping loop",
 		     triclopsErrorToString(err));
+    bb2_->dispose_buffer();
     return;
   }
   err = triclopsGetImage(triclops_->context, TriImg_RECTIFIED, TriCam_LEFT, &image_left);
   if (err != TriclopsErrorOk) {
     logger->log_warn(name(), "Retrieving left rectified image failed (%s), skipping loop",
 		     triclopsErrorToString(err));
+    bb2_->dispose_buffer();
     return;
   }
 
@@ -719,6 +722,7 @@ Bumblebee2Thread::loop()
     if (err != TriclopsErrorOk) {
       logger->log_warn(name(), "Calculating the disparity image failed (%s), skipping loop",
 		       triclopsErrorToString(err));
+      bb2_->dispose_buffer();
       return;
     }
 
@@ -801,6 +805,7 @@ Bumblebee2Thread::loop()
     if (err != TriclopsErrorOk) {
       logger->log_warn(name(), "Rectifying right color image failed (%s), skipping loop",
 		       triclopsErrorToString(err));
+      bb2_->dispose_buffer();
       return;
     }
     if (shm_img_rgb_rect_right_->num_attached() > 1) {
@@ -831,6 +836,7 @@ Bumblebee2Thread::loop()
     if (err != TriclopsErrorOk) {
       logger->log_warn(name(), "Rectifying left color image failed (%s), skipping loop",
 		       triclopsErrorToString(err));
+      bb2_->dispose_buffer();
       return;
     }
     if (shm_img_rgb_rect_left_->num_attached() > 1) {
@@ -922,7 +928,7 @@ Bumblebee2Thread::fill_xyz_xyzrgb(const short int *dispdata,
 				  pcl::PointCloud<pcl::PointXYZ> &pcl_xyz,
 				  pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb)
 {
-  float bad_point = std::numeric_limits<float>::quiet_NaN ();
+  float bad_point = std::numeric_limits<float>::quiet_NaN();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < height_; ++h) {
