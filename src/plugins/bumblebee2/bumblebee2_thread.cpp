@@ -278,6 +278,14 @@ Bumblebee2Thread::init()
       throw;
     }
 
+    int max_disparity =
+      std::max((unsigned int)16, cfg_bm_min_disparity_ + cfg_bm_num_disparities_);
+    logger->log_debug(name(), "Min Z: %fm  Max Z: %f",
+		      focal_length_ * baseline_ / max_disparity,
+		      (cfg_bm_min_disparity_ == 0)
+		      ? std::numeric_limits<float>::infinity()
+		      : focal_length_ * baseline_ / cfg_bm_min_disparity_);
+
     try {
       params_if_ = blackboard->open_for_writing<OpenCVStereoParamsInterface>("bumblebee2");
       switch (cfg_bm_pre_filter_type_) {
