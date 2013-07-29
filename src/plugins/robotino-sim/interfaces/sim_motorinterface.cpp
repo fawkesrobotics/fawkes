@@ -44,7 +44,10 @@ void SimMotorInterface::init()
 
   //create publisher for messages
   motorMovePub = gazebonode->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
-  
+
+  //suscribe for messages
+  posSub = gazebonode->Subscribe(std::string("~/RobotinoSim/Gps/"), &SimMotorInterface::OnPosMsg, this);
+    
   if(controlPub->HasConnections())
   {
     //Hello message
@@ -84,8 +87,30 @@ void SimMotorInterface::sendMotorMove()
 	motorMove.set_y(vy);
 	motorMove.set_z(vomega);
 	motorMovePub->Publish(motorMove);
+
+	//update interface
+	motor_if_->set_vx(vx);
+	motor_if_->set_vy(vy);
+	motor_if_->set_omega(vomega);
+	//update interface
+	motor_if_->write();
       }    
     }
     motor_if_->msgq_pop();
   }
+}
+
+//what to do if a pos-msg from gazebo arrives
+void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
+{
+  logger->log_debug(name, "Got Position MSG from gazebo");
+  //read out values
+  float x = msg->x();
+  float y = msg->y();
+  float ori = msg->z();
+  motor_if_->set_odometry_position_x(x);
+  motor_if_->set_odometry_position_y(y);
+  motor_if_->set_odometry_orientation(ori);
+  //update interface
+  motor_if_->write();
 }

@@ -46,6 +46,9 @@ class SimMotorInterface: public SimInterface
   //Publisher to send messages to gazebo
   gazebo::transport::PublisherPtr motorMovePub;
 
+  //Suscribers to recieve the robot's position from gazebo for odometry
+  gazebo::transport::SubscriberPtr posSub;
+
   //provided interfaces
   fawkes::MotorInterface *motor_if_;
 
@@ -55,6 +58,9 @@ class SimMotorInterface: public SimInterface
 
   //Helper functions:
   void sendMotorMove();
+
+  //Handler functions for incoming messages
+  void OnPosMsg(ConstVector3dPtr &msg);
 };
 
 #endif
