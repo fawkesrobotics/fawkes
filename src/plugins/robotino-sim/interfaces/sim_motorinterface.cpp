@@ -23,6 +23,7 @@
 
 #include <tf/types.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
@@ -105,12 +106,24 @@ void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
 {
   logger->log_debug(name, "Got Position MSG from gazebo");
   //read out values
-  float x = msg->x();
-  float y = msg->y();
-  float ori = msg->z();
+  float newX = msg->x();
+  float newY = msg->y();
+  float newOri = msg->z();
+
+  //estimate path-length
+  float lengthDriven = sqrt((newX-x) * (newX-x) + (newY-y) * (newY-y));
+
+  //update stored values
+  x = newX;
+  y = newY;
+  ori = newOri;
+  pathLength += lengthDriven;
+
+  //update interface
   motor_if_->set_odometry_position_x(x);
   motor_if_->set_odometry_position_y(y);
   motor_if_->set_odometry_orientation(ori);
-  //update interface
+  motor_if_->set_odometry_path_length(pathLength);
+
   motor_if_->write();
 }

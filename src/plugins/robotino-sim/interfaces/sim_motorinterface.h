@@ -54,7 +54,7 @@ class SimMotorInterface: public SimInterface
 
   //Helper variables:
   //motorMovements last sent to gazebo
-  float vx, vy, vomega;
+  float vx, vy, vomega, x, y, ori, pathLength;
 
   //Helper functions:
   void sendMotorMove();
