@@ -22,6 +22,8 @@
 #define __SIM_MOTOR_INTERFACE_H_
 
 #include "sim_interface.h"
+#include <tf/transform_publisher.h>
+#include <utils/time/clock.h>
 
 
 
@@ -32,9 +34,12 @@ namespace fawkes {
 class SimMotorInterface: public SimInterface
 {
  public:
- SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode)
+ SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode, fawkes::Clock *clock, fawkes::tf::TransformPublisher *tf_publisher)
    : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimMotorInterface")
-  {};
+  {
+    this->clock = clock;
+    this->tf_publisher = tf_publisher;
+  };
   ~SimMotorInterface() {};
 
   virtual void init();
@@ -51,6 +56,10 @@ class SimMotorInterface: public SimInterface
 
   //provided interfaces
   fawkes::MotorInterface *motor_if_;
+  
+  //Needed for publishing the /base_link /odom transform
+  fawkes::Clock *clock;
+  fawkes::tf::TransformPublisher *tf_publisher;
 
   //Helper variables:
   //motorMovements last sent to gazebo

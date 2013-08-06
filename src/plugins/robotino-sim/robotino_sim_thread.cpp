@@ -48,7 +48,8 @@ using namespace gazebo;
 /** Constructor. */
 RobotinoSimThread::RobotinoSimThread()
   : Thread("RobotinoSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Robotino Odometry")
 {
 }
 
@@ -70,7 +71,7 @@ RobotinoSimThread::init()
 
   //Loading interfaces to simulate
   interfaces_list.push_back((SimInterface*) new SimRobotinoSensorInterface(stringPub, logger, blackboard, gazebonode));
-  interfaces_list.push_back((SimInterface*) new SimMotorInterface(stringPub, logger, blackboard, gazebonode));
+  interfaces_list.push_back((SimInterface*) new SimMotorInterface(stringPub, logger, blackboard, gazebonode, clock, tf_publisher));
 
   //initialize interfaces to simulate
   for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)

@@ -24,12 +24,15 @@
 #include <tf/types.h>
 #include <stdio.h>
 #include <math.h>
+#include <utils/math/angle.h>
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
 
 #include <interfaces/MotorInterface.h>
+#include <tf/transform_publisher.h>
+#include <utils/time/clock.h>
 
 
 using namespace fawkes;
@@ -126,4 +129,14 @@ void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
   motor_if_->set_odometry_path_length(pathLength);
 
   motor_if_->write();
+
+  //publish transform (otherwise the transform can not convert /base_link to /odom)
+  fawkes::Time now(clock);
+  tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),
+				 deg2rad(ori)),
+		  tf::Vector3(x / 1000.f,
+			      y / 1000.f,
+			      0));
+
+  tf_publisher->send_transform(t, now, "/odom", "/base_link");
 }
