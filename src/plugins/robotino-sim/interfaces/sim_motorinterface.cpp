@@ -38,6 +38,7 @@
 using namespace fawkes;
 using namespace gazebo;
 
+bool changed(float before, float after, float relativeThreashold);
 
 void SimMotorInterface::init()
 {
@@ -80,8 +81,7 @@ void SimMotorInterface::sendMotorMove()
 	motor_if_->msgq_first_safe(msg))
     {
       //send command only if changed
-      //TODO: send if there is a new connection
-      if(msg->vx() != vx || msg->vy() != vy || msg->omega() != vomega)
+      if(changed(msg->vx(), vx, 0.01) || changed(msg->vy(), vy, 0.01) || changed(msg->omega(), vomega, 0.01))
       {
 	vx = msg->vx();
 	vy = msg->vy();
@@ -139,4 +139,9 @@ void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
 			      0));
 
   tf_publisher->send_transform(t, now, "/odom", "/base_link");
+}
+
+bool changed(float before, float after, float relativeThreashold)
+{
+  return(fabs((before-after)/before) > relativeThreashold);
 }
