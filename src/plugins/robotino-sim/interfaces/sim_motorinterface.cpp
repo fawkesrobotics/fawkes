@@ -69,13 +69,14 @@ void SimMotorInterface::finalize()
 
 void SimMotorInterface::loop()
 {
+  //work off all messages passed to the interface
   workOffMessages();
 }
 
 
 void SimMotorInterface::workOffMessages()
 {
-  if(motorMovePub->HasConnections() && !motor_if_->msgq_empty())
+  while(motorMovePub->HasConnections() && !motor_if_->msgq_empty())
   {
     if (MotorInterface::TransRotMessage *msg =
 	motor_if_->msgq_first_safe(msg))
@@ -116,7 +117,7 @@ void SimMotorInterface::workOffMessages()
 //what to do if a pos-msg from gazebo arrives
 void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
 {
-  logger->log_debug(name, "Got Position MSG from gazebo");
+  logger->log_debug(name, "Got Position MSG from gazebo with ori: %f", msg->z());
   //read out values + substract offset
   float newX = msg->x() - xOffset;
   float newY = msg->y() - yOffset;
@@ -142,10 +143,10 @@ void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
   //publish transform (otherwise the transform can not convert /base_link to /odom)
   fawkes::Time now(clock);
   tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),
-				 deg2rad(ori)),
-		  tf::Vector3(x / 1000.f,
-			      y / 1000.f,
-			      0));
+				 ori),
+		  tf::Vector3(x,
+			      y,
+			      0.0));
 
   tf_publisher->send_transform(t, now, "/odom", "/base_link");
 }
