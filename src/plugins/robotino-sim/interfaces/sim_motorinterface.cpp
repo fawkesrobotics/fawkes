@@ -69,11 +69,11 @@ void SimMotorInterface::finalize()
 
 void SimMotorInterface::loop()
 {
-  sendMotorMove();
+  workOffMessages();
 }
 
 
-void SimMotorInterface::sendMotorMove()
+void SimMotorInterface::workOffMessages()
 {
   if(motorMovePub->HasConnections() && !motor_if_->msgq_empty())
   {
@@ -100,6 +100,15 @@ void SimMotorInterface::sendMotorMove()
 	motor_if_->write();
       }    
     }
+    else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
+      {
+        xOffset += x;
+        yOffset += y;
+        oriOffset += ori;
+	x = 0.0;
+	y = 0.0;
+	ori = 0.0;
+      }
     motor_if_->msgq_pop();
   }
 }
@@ -108,10 +117,10 @@ void SimMotorInterface::sendMotorMove()
 void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
 {
   logger->log_debug(name, "Got Position MSG from gazebo");
-  //read out values
-  float newX = msg->x();
-  float newY = msg->y();
-  float newOri = msg->z();
+  //read out values + substract offset
+  float newX = msg->x() - xOffset;
+  float newY = msg->y() - yOffset;
+  float newOri = msg->z() - oriOffset;
 
   //estimate path-length
   float lengthDriven = sqrt((newX-x) * (newX-x) + (newY-y) * (newY-y));

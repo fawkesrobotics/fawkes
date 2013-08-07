@@ -39,6 +39,10 @@ class SimMotorInterface: public SimInterface
   {
     this->clock = clock;
     this->tf_publisher = tf_publisher;
+
+    xOffset = 0.0;
+    yOffset = 0.0;
+    oriOffset = 0.0;
   };
   ~SimMotorInterface() {};
 
@@ -65,8 +69,11 @@ class SimMotorInterface: public SimInterface
   //motorMovements last sent to gazebo
   float vx, vy, vomega, x, y, ori, pathLength;
 
+  //Odometry offset
+  float xOffset, yOffset, oriOffset;
+
   //Helper functions:
-  void sendMotorMove();
+  void workOffMessages();
 
   //Handler functions for incoming messages
   void OnPosMsg(ConstVector3dPtr &msg);
