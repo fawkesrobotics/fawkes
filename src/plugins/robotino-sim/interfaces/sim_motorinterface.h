@@ -37,12 +37,12 @@ class SimMotorInterface: public SimInterface
  SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode, fawkes::Clock *clock, fawkes::tf::TransformPublisher *tf_publisher)
    : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimMotorInterface")
   {
-    this->clock = clock;
-    this->tf_publisher = tf_publisher;
+    this->clock_ = clock;
+    this->tf_publisher_ = tf_publisher;
 
-    xOffset = 0.0;
-    yOffset = 0.0;
-    oriOffset = 0.0;
+    x_offset_ = 0.0;
+    y_offset_ = 0.0;
+    ori_offset_ = 0.0;
   };
   ~SimMotorInterface() {};
 
@@ -53,30 +53,30 @@ class SimMotorInterface: public SimInterface
 
  private:
   //Publisher to send messages to gazebo
-  gazebo::transport::PublisherPtr motorMovePub;
+  gazebo::transport::PublisherPtr motor_move_pub_;
 
   //Suscribers to recieve the robot's position from gazebo for odometry
-  gazebo::transport::SubscriberPtr posSub;
+  gazebo::transport::SubscriberPtr pos_sub_;
 
   //provided interfaces
   fawkes::MotorInterface *motor_if_;
   
   //Needed for publishing the /base_link /odom transform
-  fawkes::Clock *clock;
-  fawkes::tf::TransformPublisher *tf_publisher;
+  fawkes::Clock *clock_;
+  fawkes::tf::TransformPublisher *tf_publisher_;
 
   //Helper variables:
   //motorMovements last sent to gazebo
-  float vx, vy, vomega, x, y, ori, pathLength;
+  float vx_, vy_, vomega_, x_, y_, ori_, path_length_;
 
   //Odometry offset
-  float xOffset, yOffset, oriOffset;
+  float x_offset_, y_offset_, ori_offset_;
 
   //Helper functions:
-  void workOffMessages();
+  void process_messages();
 
   //Handler functions for incoming messages
-  void OnPosMsg(ConstVector3dPtr &msg);
+  void on_pos_msg(ConstVector3dPtr &msg);
 };
 
 #endif

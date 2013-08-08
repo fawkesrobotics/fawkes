@@ -42,10 +42,10 @@ SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, faw
  
  private:
   //Suscribers to recieve messages from gazebo
-  gazebo::transport::SubscriberPtr gyroSub;
+  gazebo::transport::SubscriberPtr gyro_sub_;
 
   //Handler functions for incoming messages
-  void OnGyroMsg(ConstVector3dPtr &msg);
+  void on_gyro_msg(ConstVector3dPtr &msg);
 
   //provided interfaces
   fawkes::RobotinoSensorInterface *sens_if_;

@@ -37,33 +37,33 @@ using namespace gazebo;
 
 void SimRobotinoSensorInterface::init()
 {
-  logger->log_debug(name, "Initializing Simulation of RobotinoSensorInterface");
+  logger_->log_debug(name_, "Initializing Simulation of RobotinoSensorInterface");
     
   //Open interfaces
-  sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
+  sens_if_ = blackboard_->open_for_writing<RobotinoSensorInterface>("Robotino");
 
   //suscribe for messages
-  gyroSub = gazebonode->Subscribe(std::string("~/RobotinoSim/Gyro/"), &SimRobotinoSensorInterface::OnGyroMsg, this);
+  gyro_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/Gyro/"), &SimRobotinoSensorInterface::on_gyro_msg, this);
   
-  if(controlPub->HasConnections())
+  if(control_pub_->HasConnections())
   {
     //Hello message
     msgs::Header helloMessage;
     helloMessage.set_str_id("Sim thread of RobotinoSensorInterface active");
-    controlPub->Publish(helloMessage);  
+    control_pub_->Publish(helloMessage);  
   }
 }
 
 void SimRobotinoSensorInterface::finalize()
 {
-  blackboard->close(sens_if_);
+  blackboard_->close(sens_if_);
 }
 
 void SimRobotinoSensorInterface::loop()
 {
 }
 
-void SimRobotinoSensorInterface::OnGyroMsg(ConstVector3dPtr &msg)
+void SimRobotinoSensorInterface::on_gyro_msg(ConstVector3dPtr &msg)
 {
   float yaw = msg->z();
   sens_if_->set_gyro_available(true);

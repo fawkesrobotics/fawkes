@@ -62,10 +62,10 @@ class RobotinoSimThread
   virtual void finalize();
  private:
   //Publisher to send messages to gazebo
-  gazebo::transport::PublisherPtr stringPub;
+  gazebo::transport::PublisherPtr string_pub_;
 
   //provided interfaces
-  std::list<SimInterface*> interfaces_list;
+  std::list<SimInterface*> interfaces_list_;
 };
 
 #endif

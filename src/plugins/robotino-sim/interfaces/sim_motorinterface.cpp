@@ -42,113 +42,110 @@ bool changed(float before, float after, float relativeThreashold);
 
 void SimMotorInterface::init()
 {
-  logger->log_debug(name, "Initializing Simulation of MotorInterface");
+  logger_->log_debug(name_, "Initializing Simulation of MotorInterface");
     
   //Open interfaces
-  motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
+  motor_if_ = blackboard_->open_for_writing<MotorInterface>("Robotino");
 
   //create publisher for messages
-  motorMovePub = gazebonode->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
+  motor_move_pub_ = gazebonode_->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
 
   //suscribe for messages
-  posSub = gazebonode->Subscribe(std::string("~/RobotinoSim/Gps/"), &SimMotorInterface::OnPosMsg, this);
+  pos_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/Gps/"), &SimMotorInterface::on_pos_msg, this);
     
-  if(controlPub->HasConnections())
+  if(control_pub_->HasConnections())
   {
     //Hello message
     msgs::Header helloMessage;
     helloMessage.set_str_id("Sim thread of MotorInterface active");
-    controlPub->Publish(helloMessage);  
+    control_pub_->Publish(helloMessage);  
   }
 }
 
 void SimMotorInterface::finalize()
 {
-  blackboard->close(motor_if_);
+  blackboard_->close(motor_if_);
 }
 
 void SimMotorInterface::loop()
 {
   //work off all messages passed to the interface
-  workOffMessages();
+  process_messages();
 }
 
 
-void SimMotorInterface::workOffMessages()
+void SimMotorInterface::process_messages()
 {
-  while(motorMovePub->HasConnections() && !motor_if_->msgq_empty())
+  while(motor_move_pub_->HasConnections() && !motor_if_->msgq_empty())
   {
     if (MotorInterface::TransRotMessage *msg =
 	motor_if_->msgq_first_safe(msg))
     {
       //send command only if changed
-      if(changed(msg->vx(), vx, 0.01) || changed(msg->vy(), vy, 0.01) || changed(msg->omega(), vomega, 0.01))
+      if(changed(msg->vx(), vx_, 0.01) || changed(msg->vy(), vy_, 0.01) || changed(msg->omega(), vomega_, 0.01))
       {
-	vx = msg->vx();
-	vy = msg->vy();
-	vomega = msg->omega();
+	vx_ = msg->vx();
+	vy_ = msg->vy();
+	vomega_ = msg->omega();
 	msgs::Vector3d motorMove;
-	motorMove.set_x(vx);
-	motorMove.set_y(vy);
-	motorMove.set_z(vomega);
-	motorMovePub->Publish(motorMove);
+	motorMove.set_x(vx_);
+	motorMove.set_y(vy_);
+	motorMove.set_z(vomega_);
+	motor_move_pub_->Publish(motorMove);
 
 	//update interface
-	motor_if_->set_vx(vx);
-	motor_if_->set_vy(vy);
-	motor_if_->set_omega(vomega);
+	motor_if_->set_vx(vx_);
+	motor_if_->set_vy(vy_);
+	motor_if_->set_omega(vomega_);
 	//update interface
 	motor_if_->write();
       }    
     }
     else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
       {
-        xOffset += x;
-        yOffset += y;
-        oriOffset += ori;
-	x = 0.0;
-	y = 0.0;
-	ori = 0.0;
+        x_offset_ += x_;
+        y_offset_ += y_;
+        ori_offset_ += ori_;
+	x_ = 0.0;
+	y_ = 0.0;
+	ori_ = 0.0;
       }
     motor_if_->msgq_pop();
   }
 }
 
 //what to do if a pos-msg from gazebo arrives
-void SimMotorInterface::OnPosMsg(ConstVector3dPtr &msg)
+void SimMotorInterface::on_pos_msg(ConstVector3dPtr &msg)
 {
-  logger->log_debug(name, "Got Position MSG from gazebo with ori: %f", msg->z());
+  logger_->log_debug(name_, "Got Position MSG from gazebo with ori: %f", msg->z());
   //read out values + substract offset
-  float newX = msg->x() - xOffset;
-  float newY = msg->y() - yOffset;
-  float newOri = msg->z() - oriOffset;
+  float new_x = msg->x() - x_offset_;
+  float new_y = msg->y() - y_offset_;
+  float new_ori = msg->z() - ori_offset_;
 
   //estimate path-length
-  float lengthDriven = sqrt((newX-x) * (newX-x) + (newY-y) * (newY-y));
+  float length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));
 
   //update stored values
-  x = newX;
-  y = newY;
-  ori = newOri;
-  pathLength += lengthDriven;
+  x_ = new_x;
+  y_ = new_y;
+  ori_ = new_ori;
+  path_length_ += length_driven;
 
   //update interface
-  motor_if_->set_odometry_position_x(x);
-  motor_if_->set_odometry_position_y(y);
-  motor_if_->set_odometry_orientation(ori);
-  motor_if_->set_odometry_path_length(pathLength);
+  motor_if_->set_odometry_position_x(x_);
+  motor_if_->set_odometry_position_y(y_);
+  motor_if_->set_odometry_orientation(ori_);
+  motor_if_->set_odometry_path_length(path_length_);
 
   motor_if_->write();
 
   //publish transform (otherwise the transform can not convert /base_link to /odom)
-  fawkes::Time now(clock);
-  tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),
-				 ori),
-		  tf::Vector3(x,
-			      y,
-			      0.0));
+  fawkes::Time now(clock_);
+  tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),ori_),
+		  tf::Vector3(x_, y_, 0.0));
 
-  tf_publisher->send_transform(t, now, "/odom", "/base_link");
+  tf_publisher_->send_transform(t, now, "/odom", "/base_link");
 }
 
 bool changed(float before, float after, float relativeThreashold)

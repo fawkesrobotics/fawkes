@@ -58,23 +58,23 @@ RobotinoSimThread::init()
 {
   //get a connection to gazebo (copied from gazeboscene)
   logger->log_debug(name(), "Creating Gazebo publishers");
-  stringPub = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/String/");
+  string_pub_ = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/String/");
 
-  if(stringPub->HasConnections())
+  if(string_pub_->HasConnections())
   {
     //Hello world message
     msgs::Header helloMessage;
     helloMessage.set_str_id("Hello Gazebo-World!!!");
-    stringPub->Publish(helloMessage);
+    string_pub_->Publish(helloMessage);
 
   }
 
   //Loading interfaces to simulate
-  interfaces_list.push_back((SimInterface*) new SimRobotinoSensorInterface(stringPub, logger, blackboard, gazebonode));
-  interfaces_list.push_back((SimInterface*) new SimMotorInterface(stringPub, logger, blackboard, gazebonode, clock, tf_publisher));
+  interfaces_list_.push_back((SimInterface*) new SimRobotinoSensorInterface(string_pub_, logger, blackboard, gazebonode));
+  interfaces_list_.push_back((SimInterface*) new SimMotorInterface(string_pub_, logger, blackboard, gazebonode, clock, tf_publisher));
 
   //initialize interfaces to simulate
-  for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)
+  for (std::list<SimInterface*>::iterator it = interfaces_list_.begin(); it != interfaces_list_.end(); it++)
   {
     (*it)->init();
   }
@@ -84,20 +84,20 @@ void
 RobotinoSimThread::finalize()
 {
   //finalize and delete all simulated interfaces
-  for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)
+  for (std::list<SimInterface*>::iterator it = interfaces_list_.begin(); it != interfaces_list_.end(); it++)
   {
     (*it)->finalize();
     //TODO: delete
   }
 
   //reset?
-  stringPub.reset();
+  string_pub_.reset();
 }
 
 void
 RobotinoSimThread::loop()
 {
-  for (std::list<SimInterface*>::iterator it = interfaces_list.begin(); it != interfaces_list.end(); it++)
+  for (std::list<SimInterface*>::iterator it = interfaces_list_.begin(); it != interfaces_list_.end(); it++)
   {
     (*it)->loop();
   }

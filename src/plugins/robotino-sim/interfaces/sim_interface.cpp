@@ -37,8 +37,8 @@
 /*
 SimInterface::SimInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode)
 {
-  this->controlPub = controlPublisher;
-  this->logger = logger;
+  this->control_pub_ = controlPublisher;
+  this->logger_ = logger;
   this->blackboard = blackboard;
   this->gazebonode = gazebonode;
 }

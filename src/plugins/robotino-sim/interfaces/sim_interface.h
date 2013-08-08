@@ -36,11 +36,11 @@ class SimInterface
  public:
   SimInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode, const char* name)
   {
-    this->controlPub = controlPublisher;
-    this->logger = logger;
-    this->blackboard = blackboard;
-    this->gazebonode = gazebonode;
-    this->name = name;
+    this->control_pub_ = controlPublisher;
+    this->logger_ = logger;
+    this->blackboard_ = blackboard;
+    this->gazebonode_ = gazebonode;
+    this->name_ = name;
   };
   ~SimInterface() {};
 
@@ -50,13 +50,13 @@ class SimInterface
  
  protected:
   //Name for the logger
-  const char* name;
-  fawkes::Logger *logger;
-  fawkes::BlackBoard *blackboard;
-  gazebo::transport::NodePtr gazebonode;
+  const char* name_;
+  fawkes::Logger *logger_;
+  fawkes::BlackBoard *blackboard_;
+  gazebo::transport::NodePtr gazebonode_;
 
   //Publisher to send control-messages to gazebo
-  gazebo::transport::PublisherPtr controlPub;
+  gazebo::transport::PublisherPtr control_pub_;
 };
 
 #endif
