@@ -65,6 +65,7 @@ class LaserSimThread
   fawkes::Laser360Interface *laser_if_;
 
   //storage for laser data
+  float  *laser_data_;
 
   //handler function for incoming laser data messages
   void on_laser_data_msg(ConstLaserScanPtr &msg);

@@ -59,11 +59,15 @@ void LaserSimThread::init()
 
   //subscribing to gazebo publisher
   laser_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/LaserSensor/"), &LaserSimThread::on_laser_data_msg, this);
+
+  //initialize laser data
+  laser_data_ = (float *)malloc(sizeof(float) * 360);
 }
 
 void LaserSimThread::finalize()
 {
   blackboard->close(laser_if_);
+  free(laser_data_);
 }
 
 void LaserSimThread::loop()
@@ -72,5 +76,19 @@ void LaserSimThread::loop()
 
 void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
 {
-  logger->log_info(name(), "Got new Laser data.\n");
+  //logger->log_info(name(), "Got new Laser data.\n");
+
+  //calculate start angle
+  int start_index = (msg->angle_min() + 3.141) / 3.141 * 180;
+  
+  int number_beams = msg->ranges_size();
+  //copy laser data
+  for(int i = 0; i < number_beams; i++)
+  {
+    laser_data_[start_index + i] = (float) msg->ranges(i);
+  }
+
+  //write interface
+  laser_if_->set_distances(laser_data_);
+  laser_if_->write();
 }
