@@ -76,7 +76,7 @@ class SimMotorInterface: public SimInterface
   void process_messages();
 
   //Handler functions for incoming messages
-  void on_pos_msg(ConstVector3dPtr &msg);
+  void on_pos_msg(ConstPosePtr &msg);
 };
 
 #endif

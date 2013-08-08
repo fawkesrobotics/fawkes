@@ -115,13 +115,13 @@ void SimMotorInterface::process_messages()
 }
 
 //what to do if a pos-msg from gazebo arrives
-void SimMotorInterface::on_pos_msg(ConstVector3dPtr &msg)
+void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
 {
-  logger_->log_debug(name_, "Got Position MSG from gazebo with ori: %f", msg->z());
+  //logger_->log_debug(name_, "Got Position MSG from gazebo with ori: %f", msg->z());
   //read out values + substract offset
-  float new_x = msg->x() - x_offset_;
-  float new_y = msg->y() - y_offset_;
-  float new_ori = msg->z() - ori_offset_;
+  float new_x = msg->position().x() - x_offset_;
+  float new_y = msg->position().y() - y_offset_;
+  float new_ori = msg->orientation().z() - ori_offset_;
 
   //estimate path-length
   float length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));

@@ -70,19 +70,26 @@ void LocalizationSimThread::loop()
 {
 }
 
-void LocalizationSimThread::on_localization_msg(ConstVector3dPtr &msg)
+void LocalizationSimThread::on_localization_msg(ConstPosePtr &msg)
 {
   //logger->log_info(name(), "Got new Localization data.\n");
 
   //read data from message
-  double x = msg->x();
-  double y = msg->y();
-  double z = msg->z();
+  double x = msg->position().x();
+  double y = msg->position().y();
+  double z = msg->position().z();
+  double roll = msg->orientation().x();
+  double pitch = msg->orientation().y();
+  double yaw = msg->orientation().z();
+  double w = msg->orientation().w();
 
   //write interface
   localization_if_->set_translation(0, x);
   localization_if_->set_translation(1, y);
   localization_if_->set_translation(2, z);
-  //TODO: set orientation
+  localization_if_->set_rotation(0, roll);
+  localization_if_->set_rotation(1, pitch);
+  localization_if_->set_rotation(2, yaw);
+  localization_if_->set_rotation(3, w);
   localization_if_->write();
 }

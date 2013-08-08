@@ -66,7 +66,7 @@ class LocalizationSimThread
   fawkes::Position3DInterface *localization_if_;
 
   //handler function for incoming localization data messages
-  void on_localization_msg(ConstVector3dPtr &msg);
+  void on_localization_msg(ConstPosePtr &msg);
 };
 
 #endif
