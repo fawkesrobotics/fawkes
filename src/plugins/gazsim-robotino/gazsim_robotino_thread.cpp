@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  robotino-sim_thread.cpp - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
  *
@@ -19,7 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "robotino_sim_thread.h"
+#include "gazsim_robotino_thread.h"
 
 #include <tf/types.h>
 #include <stdio.h>

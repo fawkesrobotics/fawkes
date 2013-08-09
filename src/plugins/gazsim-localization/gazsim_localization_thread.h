@@ -1,5 +1,5 @@
 /***************************************************************************
- *  localization_sim_thread.h - Thread provides 
+ *  gazsim_localization_thread.h - Thread provides 
  *     the simulated position of a robot in Gazeo
  *
  *  Created: Thu Aug 08 17:40:10 2013
@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LOCALIZATION_SIM_THREAD_H_
-#define __PLUGINS_LOCALIZATION_SIM_THREAD_H_
+#ifndef __PLUGINS_GAZSIM_LOCALIZATION_THREAD_H_
+#define __PLUGINS_GAZSIM_LOCALIZATION_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>

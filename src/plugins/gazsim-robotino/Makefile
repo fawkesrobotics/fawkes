@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Localization-Sim Plugin
+#               Makefile Build System for Fawkes: Gazsim-Robotino Plugin
 #
-#   Created on Thu Aug 08 17:51:51 2013
+#   Created on Fr 3. Mai 21:34:38 CEST 2013
 #   Copyright (C) 2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #                         Frederik Zwilling
 #
@@ -21,13 +21,13 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-LIBS_localization_sim = fawkescore fawkesutils fawkesaspects fvutils \
+LIBS_gazsim_robotino = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
-	       Position3DInterface \
-	       fawkesgazeboaspect
-OBJS_localization_sim = localization_sim_plugin.o localization_sim_thread.o
+	       BatteryInterface RobotinoSensorInterface MotorInterface \
+	       Position3DInterface fawkesgazeboaspect
+OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o interfaces/sim_interface.o interfaces/sim_robotinosensorinterface.o interfaces/sim_motorinterface.o
 
-OBJS_all    = $(OBJS_localization_sim)
+OBJS_all    = $(OBJS_gazsim_robotino)
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
@@ -35,7 +35,7 @@ ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  PLUGINS_all = $(PLUGINDIR)/localization_sim.so
+  PLUGINS_all = $(PLUGINDIR)/gazsim-robotino.so
 else
   WARN_TARGETS += warning_tf
 endif
@@ -44,7 +44,7 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_tf warning_ros warning_geometry_msgs
 warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Localization-Sim libs" \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Robotino-Sim libs" \
                          "$(TNORMAL) (tf not available)"
 endif
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *  laser_sim_plugin.cpp - Plugin simulates a Hokuyo Laser Range finder in Gazebo
+ *  gazsim_laser_plugin.cpp - Plugin simulates a Hokuyo Laser Range finder in Gazebo
  *
  *  Created: Thu Aug 08 15:44:32 2013
  *  Copyright  2013 Frederik Zwilling
@@ -20,7 +20,7 @@
 
 #include <core/plugin.h>
 
-#include "laser_sim_thread.h"
+#include "gazsim_laser_thread.h"
 
 using namespace fawkes;
 
@@ -29,14 +29,14 @@ using namespace fawkes;
  *
  * @author Frederik Zwilling
  */
-class LaserSimPlugin : public fawkes::Plugin
+class GazsimLaserPlugin : public fawkes::Plugin
 {
  public:
 
   /** Constructor.
    * @param config Fawkes configuration
    */
-  LaserSimPlugin(Configuration *config)
+  GazsimLaserPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new LaserSimThread());
@@ -44,4 +44,4 @@ class LaserSimPlugin : public fawkes::Plugin
 };
 
 PLUGIN_DESCRIPTION("Simulation of the Hokuyo in Gazebo")
-EXPORT_PLUGIN(LaserSimPlugin)
+EXPORT_PLUGIN(GazsimLaserPlugin)

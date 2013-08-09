@@ -1,7 +1,7 @@
 /***************************************************************************
- *  laser_sim_thread.h - Thread simulate the Hokuyo in Gazebo
+ *  robotino-sim_thread.h - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
  *
- *  Created: Thu Aug 08 15:47:12 2013
+ *  Created: Fr 3. Mai 21:20:08 CEST 2013
  *  Copyright  2013  Frederik Zwilling
  ****************************************************************************/
 
@@ -18,8 +18,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_SIM_THREAD_H_
-#define __PLUGINS_LASER_SIM_THREAD_H_
+#ifndef __PLUGINS_GAZSIM_ROBOTINO_THREAD_H_
+#define __PLUGINS_GAZSIM_ROBOTINO_THREAD_H_
+
+#include <list>
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -35,12 +37,14 @@
 #include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/transport/transport.hh>
 
+//simulated interfaces
+#include "interfaces/sim_interface.h"
 
 namespace fawkes {
-  class Laser360Interface;
+  class BatteryInterface;
 }
 
-class LaserSimThread
+class RobotinoSimThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
@@ -51,24 +55,17 @@ class LaserSimThread
   public fawkes::GazeboAspect
 {
  public:
-  LaserSimThread();
+  RobotinoSimThread();
 
   virtual void init();
   virtual void loop();
   virtual void finalize();
-
  private:
-  //Subscriber to receive laser data from gazebo
-  gazebo::transport::SubscriberPtr laser_sub_;
+  //Publisher to send messages to gazebo
+  gazebo::transport::PublisherPtr string_pub_;
 
-  //provided interface
-  fawkes::Laser360Interface *laser_if_;
-
-  //storage for laser data
-  float  *laser_data_;
-
-  //handler function for incoming laser data messages
-  void on_laser_data_msg(ConstLaserScanPtr &msg);
+  //provided interfaces
+  std::list<SimInterface*> interfaces_list_;
 };
 
 #endif

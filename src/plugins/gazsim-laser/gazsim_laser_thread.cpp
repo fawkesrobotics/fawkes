@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  laser_sim_thread.cpp - Thread simulate the Hokuyo in Gazebo
+ *  gazsim_laser_thread.cpp - Thread simulate the Hokuyo in Gazebo
  *
  *  Created: Thu Aug 08 15:51:41 2013
  *  Copyright  2013  Frederik Zwilling
@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "laser_sim_thread.h"
+#include "gazsim_laser_thread.h"
 
 #include <tf/types.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 using namespace fawkes;
 using namespace gazebo;
 
-/** @class LaserSimThread "laser_sim_thread.h"
+/** @class LaserSimThread "gazsim_laser_thread.h"
  * Thread simulates the Hokuyo in Gazebo
  * @author Frederik Zwilling
  */

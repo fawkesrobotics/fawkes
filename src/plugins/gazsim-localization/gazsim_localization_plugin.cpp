@@ -1,7 +1,8 @@
 /***************************************************************************
- *  robotino-sim_plugin.cpp - Plugin simulates the Robotino in Gazebo
+ *  gazsim_localization_plugin.cpp - Plugin provides 
+ *     the simulated position of a robot in Gazeo
  *
- *  Created: Fr 3. Mai 21:13:45 CEST 2013
+ *  Created: Thu Aug 08 17:37:38 2013
  *  Copyright  2013 Frederik Zwilling
  ****************************************************************************/
 
@@ -20,28 +21,28 @@
 
 #include <core/plugin.h>
 
-#include "robotino_sim_thread.h"
+#include "gazsim_localization_thread.h"
 
 using namespace fawkes;
 
-/** Plugin to simulate the Robotino in Gazebo
+/** Plugin provides the simulated position in Gazebo
  *
  *
  * @author Frederik Zwilling
  */
-class RobotinoSimPlugin : public fawkes::Plugin
+class GazsimLocalizationPlugin : public fawkes::Plugin
 {
  public:
 
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RobotinoSimPlugin(Configuration *config)
+  GazsimLocalizationPlugin(Configuration *config)
     : Plugin(config)
   {
-    thread_list.push_back(new RobotinoSimThread());
+    thread_list.push_back(new LocalizationSimThread());
   }
 };
 
-PLUGIN_DESCRIPTION("Simulation of Robotino in Gazebo")
-EXPORT_PLUGIN(RobotinoSimPlugin)
+PLUGIN_DESCRIPTION("Simulation of the Localization in Gazebo")
+EXPORT_PLUGIN(GazsimLocalizationPlugin)

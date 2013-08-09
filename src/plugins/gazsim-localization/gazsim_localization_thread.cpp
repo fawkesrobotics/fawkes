@@ -1,5 +1,5 @@
 /***************************************************************************
- *  localization_sim_thread.h - Thread provides 
+ *  gazsim_localization_thread.h - Thread provides 
  *     the simulated position of a robot in Gazeo
  *
  *  Created: Thu Aug 08 17:45:31 2013
@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "localization_sim_thread.h"
+#include "gazsim_localization_thread.h"
 
 #include <tf/types.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 using namespace fawkes;
 using namespace gazebo;
 
-/** @class LocalizationSimThread "localization_sim_thread.h"
+/** @class LocalizationSimThread "gazsim_localization_thread.h"
  * Thread simulates the Localization in Gazebo
  * @author Frederik Zwilling
  */

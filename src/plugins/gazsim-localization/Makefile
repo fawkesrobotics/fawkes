@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Laser-Sim Plugin
+#               Makefile Build System for Fawkes: Gazsim-Localization Plugin
 #
-#   Created on Thu Aug 08 16:14:24 2013
+#   Created on Thu Aug 08 17:51:51 2013
 #   Copyright (C) 2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #                         Frederik Zwilling
 #
@@ -21,13 +21,13 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-LIBS_laser_sim = fawkescore fawkesutils fawkesaspects fvutils \
+LIBS_gazsim_localization = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
-	       Laser360Interface \
+	       Position3DInterface \
 	       fawkesgazeboaspect
-OBJS_laser_sim = laser_sim_plugin.o laser_sim_thread.o
+OBJS_gazsim_localization = gazsim_localization_plugin.o gazsim_localization_thread.o
 
-OBJS_all    = $(OBJS_laser_sim)
+OBJS_all    = $(OBJS_gazsim_localization)
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
@@ -35,7 +35,7 @@ ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  PLUGINS_all = $(PLUGINDIR)/laser_sim.so
+  PLUGINS_all = $(PLUGINDIR)/gazsim-localization.so
 else
   WARN_TARGETS += warning_tf
 endif
@@ -44,7 +44,7 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_tf warning_ros warning_geometry_msgs
 warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Laser-Sim libs" \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Localization-Sim libs" \
                          "$(TNORMAL) (tf not available)"
 endif
 
