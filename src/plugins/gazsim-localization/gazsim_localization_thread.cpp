@@ -27,7 +27,6 @@
 #include <utils/math/angle.h>
 
 #include <interfaces/Position3DInterface.h>
-#include <tf/transform_publisher.h>
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
@@ -45,8 +44,7 @@ using namespace gazebo;
 /** Constructor. */
 LocalizationSimThread::LocalizationSimThread()
   : Thread("LocalizationSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Localization Transform??????")
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 }
 

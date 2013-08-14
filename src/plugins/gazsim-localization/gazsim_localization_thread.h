@@ -29,7 +29,6 @@
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <plugins/gazebo/aspect/gazebo.h>
-#include <aspect/tf.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
@@ -48,7 +47,6 @@ class LocalizationSimThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::BlockedTimingAspect,
-  public fawkes::TransformAspect,
   public fawkes::GazeboAspect
 {
  public:

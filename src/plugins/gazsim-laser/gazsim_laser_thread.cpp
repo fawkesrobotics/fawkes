@@ -27,7 +27,6 @@
 #include <utils/math/angle.h>
 
 #include <interfaces/Laser360Interface.h>
-#include <tf/transform_publisher.h>
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
@@ -45,8 +44,7 @@ using namespace gazebo;
 /** Constructor. */
 LaserSimThread::LaserSimThread()
   : Thread("LaserSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Laser Transform??????")
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 }
 
