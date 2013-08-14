@@ -62,6 +62,9 @@ void LaserSimThread::init()
 
   //initialize laser data
   laser_data_ = (float *)malloc(sizeof(float) * 360);
+
+  //set frame in the interface
+  laser_if_->set_frame("/base_laser");
 }
 
 void LaserSimThread::finalize()
