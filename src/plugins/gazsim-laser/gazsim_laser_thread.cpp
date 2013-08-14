@@ -82,12 +82,10 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
   //logger->log_info(name(), "Got new Laser data.\n");
 
   //calculate start angle
-  int start_index = (msg->angle_min() + 3.141) / 3.141 * 180;
+  int start_index = (msg->angle_min() + 2* M_PI) / M_PI * 180;
   
   int number_beams = msg->ranges_size();
 
-  //the ranges are turned in the original laser data interface by pi
-  int offset = 180;
 
   //copy laser data
   for(int i = 0; i < number_beams; i++)
@@ -95,11 +93,11 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
     float range = msg->ranges(i);
     if(range < 5.5)
     {
-      laser_data_[(start_index + i + offset) % 360] = range; 
+      laser_data_[(start_index + i) % 360] = range; 
     }
     else
     {
-      laser_data_[(start_index + i + offset) % 360] = NAN;
+      laser_data_[(start_index + i) % 360] = NAN;
     }
 
   }
