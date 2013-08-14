@@ -57,6 +57,9 @@ void LaserSimThread::init()
   //open interface
   laser_if_ = blackboard->open_for_writing<Laser360Interface>("Laser urg"); //not sure if the name is right
 
+  //read config values
+  max_range_ = config->get_float("/gazsim/laser/max_range");
+
   //subscribing to gazebo publisher
   laser_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/LaserSensor/"), &LaserSimThread::on_laser_data_msg, this);
 
@@ -91,7 +94,7 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
   for(int i = 0; i < number_beams; i++)
   {
     float range = msg->ranges(i);
-    if(range < config->get_float("/gazsim/laser/max_range"))
+    if(range < max_range_)
     {
       laser_data_[(start_index + i) % 360] = range; 
     }

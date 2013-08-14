@@ -69,6 +69,9 @@ class LaserSimThread
 
   //handler function for incoming laser data messages
   void on_laser_data_msg(ConstLaserScanPtr &msg);
+
+  //maximal range of the laser sensor
+  float max_range_;  
 };
 
 #endif
