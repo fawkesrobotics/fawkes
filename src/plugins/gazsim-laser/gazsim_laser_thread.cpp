@@ -91,7 +91,7 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
   for(int i = 0; i < number_beams; i++)
   {
     float range = msg->ranges(i);
-    if(range < 5.5)
+    if(range < config->get_float("/gazsim/laser/max_range"))
     {
       laser_data_[(start_index + i) % 360] = range; 
     }
