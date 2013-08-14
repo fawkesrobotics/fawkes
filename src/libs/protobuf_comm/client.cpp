@@ -55,7 +55,7 @@ namespace protobuf_comm {
 
 /** Constructor. */
 ProtobufStreamClient::ProtobufStreamClient()
-  : resolver_(io_service_), socket_(io_service_)
+  : resolver_(io_service_), socket_(io_service_), io_service_work_(io_service_)
 {
   message_register_ = new MessageRegister();
   own_message_register_ = true;
@@ -63,6 +63,7 @@ ProtobufStreamClient::ProtobufStreamClient()
   outbound_active_ = false;
   in_data_size_ = 1024;
   in_data_ = malloc(in_data_size_);
+  run_asio();
 }
 
 /** Constructor.
@@ -71,7 +72,7 @@ ProtobufStreamClient::ProtobufStreamClient()
  * message creation.
  */
 ProtobufStreamClient::ProtobufStreamClient(std::vector<std::string> &proto_path)
-  : resolver_(io_service_), socket_(io_service_)
+  : resolver_(io_service_), socket_(io_service_), io_service_work_(io_service_)
 {
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
@@ -79,6 +80,7 @@ ProtobufStreamClient::ProtobufStreamClient(std::vector<std::string> &proto_path)
   outbound_active_ = false;
   in_data_size_ = 1024;
   in_data_ = malloc(in_data_size_);
+  run_asio();
 }
 
 
@@ -86,13 +88,14 @@ ProtobufStreamClient::ProtobufStreamClient(std::vector<std::string> &proto_path)
  * @param mr message register to use to (de)serialize messages
  */
 ProtobufStreamClient::ProtobufStreamClient(MessageRegister *mr)
-  : resolver_(io_service_), socket_(io_service_),
+  : resolver_(io_service_), socket_(io_service_), io_service_work_(io_service_),
     message_register_(mr), own_message_register_(false)
 {
   connected_ = false;
   outbound_active_ = false;
   in_data_size_ = 1024;
   in_data_ = malloc(in_data_size_);
+  run_asio();
 }
 
 
@@ -101,9 +104,7 @@ ProtobufStreamClient::~ProtobufStreamClient()
 {
   disconnect_nosig();
   io_service_.stop();
-  if (asio_thread_.joinable()) {
-    asio_thread_.join();
-  }
+  asio_thread_.join();
   free(in_data_);
   if (own_message_register_) {
     delete message_register_;
@@ -112,24 +113,9 @@ ProtobufStreamClient::~ProtobufStreamClient()
 
 
 void
-ProtobufStreamClient::io_service_run()
-{
-  std::lock_guard<std::mutex> lock(asio_mutex_);
-  io_service_.run();
-  io_service_.reset();
-}
-
-void
 ProtobufStreamClient::run_asio()
 {
-  if (asio_mutex_.try_lock()) {
-    // thread was running before
-    if (asio_thread_.joinable()) {
-      asio_thread_.join();
-    }
-    asio_mutex_.unlock();
-    asio_thread_ = std::thread(&ProtobufStreamClient::io_service_run, this);
-  }
+  asio_thread_ = std::thread([this]() { this->io_service_.run(); });
 }
 
 
@@ -149,7 +135,6 @@ ProtobufStreamClient::async_connect(const char *host, unsigned short port)
 				      boost::asio::placeholders::error,
 				      boost::asio::placeholders::iterator));
 
-  run_asio();
 }
 
 
@@ -321,7 +306,6 @@ ProtobufStreamClient::send(uint16_t component_id, uint16_t msg_type,
 					 boost::asio::placeholders::error,
 					 boost::asio::placeholders::bytes_transferred,
 					 entry));
-    run_asio();
   }
 }
 

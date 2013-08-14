@@ -115,7 +115,6 @@ class ProtobufStreamClient
  private: // methods
   void disconnect_nosig();
   void run_asio();
-  void io_service_run();
   void handle_resolve(const boost::system::error_code& err,
 		      boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
   void handle_connect(const boost::system::error_code& err);
@@ -131,6 +130,7 @@ class ProtobufStreamClient
   boost::asio::io_service         io_service_;
   boost::asio::ip::tcp::resolver  resolver_;
   boost::asio::ip::tcp::socket    socket_;
+  boost::asio::io_service::work   io_service_work_;
 
   boost::signals2::signal<void (uint16_t, uint16_t,
 				std::shared_ptr<google::protobuf::Message>)>  sig_rcvd_;
