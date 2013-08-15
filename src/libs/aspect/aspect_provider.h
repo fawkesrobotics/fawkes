@@ -3,7 +3,7 @@
  *  aspect_provider.h - Aspect to provide a new aspect for Fawkes
  *
  *  Created: Thu Nov 25 12:05:29 2010 (Thanksgiving)
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -26,6 +26,8 @@
 
 #include <aspect/aspect.h>
 
+#include <list>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -36,15 +38,14 @@ class AspectIniFin;
 class AspectProviderAspect : public virtual Aspect
 {
  public:
-  AspectProviderAspect(const char *aspect_name, AspectIniFin *inifin);
+  AspectProviderAspect(AspectIniFin *inifin);
+  AspectProviderAspect(std::list<AspectIniFin *> aspects);
   virtual ~AspectProviderAspect();
 
-  const char *   aspect_provider_name() const;
-  AspectIniFin * aspect_provider_inifin() const;
+  const std::list<AspectIniFin *> &  aspect_provider_aspects() const;
 
  private:
-  const char   *__aspect_name;
-  AspectIniFin *__aspect_inifin;
+  std::list<AspectIniFin *> __aspect_provider_aspects;
 };
 
 } // end namespace fawkes

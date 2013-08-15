@@ -3,7 +3,7 @@
  *  aspect_provider.h - Aspect to provider a new aspect for Fawkes
  *
  *  Created: Thu Nov 25 12:08:21 2010 (Thanksgiving)
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -22,6 +22,7 @@
  */
 
 #include <aspect/aspect_provider.h>
+#include <aspect/inifins/inifin.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -50,18 +51,24 @@ namespace fawkes {
  */
 
 /** Constructor.
- * This special constructor is needed to define the wakeup point.
- * @param aspect_name Name of the aspect which is provided. The string
- * must exist for the whole lifetime of this AspectProviderAspect instance!
+ * Add a single aspect.
  * @param inifin intializer/finalizer for the aspect. The inifin
  * must exist for the whole lifetime of this AspectProviderAspect instance!
  */
-AspectProviderAspect::AspectProviderAspect(const char *aspect_name,
-					   AspectIniFin *inifin)
+AspectProviderAspect::AspectProviderAspect(AspectIniFin *inifin)
 {
   add_aspect("AspectProviderAspect");
-  __aspect_name   = aspect_name;
-  __aspect_inifin = inifin;
+  __aspect_provider_aspects.push_back(inifin);
+}
+
+/** Constructor.
+ * Add multiple aspects.
+ * @param aspects Map from aspect name to initializer/finalizer
+ */
+AspectProviderAspect::AspectProviderAspect(std::list<AspectIniFin *> aspects)
+{
+  add_aspect("AspectProviderAspect");
+  __aspect_provider_aspects = aspects;
 }
 
 
@@ -74,20 +81,10 @@ AspectProviderAspect::~AspectProviderAspect()
 /** Get name of the provided aspect.
  * @return name of the provided aspect
  */
-const char *
-AspectProviderAspect::aspect_provider_name() const
+const std::list<AspectIniFin *> &
+AspectProviderAspect::aspect_provider_aspects() const
 {
-  return __aspect_name;
-}
-
-
-/** Get initializer/finalizer for the provided aspect.
- * @return initializer/finalizer for the provided aspect
- */
-AspectIniFin *
-AspectProviderAspect::aspect_provider_inifin() const
-{
-  return __aspect_inifin;
+  return __aspect_provider_aspects;
 }
 
 } // end namespace fawkes
