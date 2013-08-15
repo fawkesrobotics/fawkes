@@ -38,7 +38,7 @@ using namespace fawkes;
 ROSNodeThread::ROSNodeThread()
   : Thread("ROSNodeThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
-    AspectProviderAspect("ROSAspect", &ros_aspect_inifin_)
+    AspectProviderAspect(&ros_aspect_inifin_)
 {
 }
 
