@@ -54,6 +54,7 @@ CLIPSThread::init()
   clips_env_mgr_ = new CLIPSEnvManager(logger);
   clips_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
+  clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);
 }
 
 
@@ -75,5 +76,6 @@ CLIPSThread::inifin_list()
   std::list<AspectIniFin *> rv;
   rv.push_back(&clips_aspect_inifin_);
   rv.push_back(&clips_feature_aspect_inifin_);
+  rv.push_back(&clips_manager_aspect_inifin_);
   return rv;
 }
