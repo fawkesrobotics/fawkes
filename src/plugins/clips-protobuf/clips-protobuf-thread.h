@@ -26,10 +26,11 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
-#include <plugins/clips/aspect/clips.h>
+#include <plugins/clips/aspect/clips_feature.h>
 
 #include <vector>
 #include <string>
+#include <map>
 
 namespace protobuf_clips {
   class ClipsProtobufCommunicator;
@@ -39,21 +40,26 @@ class ClipsProtobufThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::CLIPSAspect
+  public fawkes::CLIPSFeatureAspect
 {
  public:
-  ClipsProtobufThread(std::string &env_name);
+  ClipsProtobufThread();
   virtual ~ClipsProtobufThread();
 
   virtual void init();
   virtual void loop();
   virtual void finalize();
 
+  // for CLIPSFeatureAspect
+  virtual void clips_context_init(const std::string &env_name,
+				  fawkes::LockPtr<CLIPS::Environment> &clips);
+  virtual void clips_context_destroyed(const std::string &env_name);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  protobuf_clips::ClipsProtobufCommunicator *pb_comm_;
+  std::map<std::string, protobuf_clips::ClipsProtobufCommunicator *> pb_comms_;
   std::vector<std::string> cfg_proto_dirs_;
 
 };

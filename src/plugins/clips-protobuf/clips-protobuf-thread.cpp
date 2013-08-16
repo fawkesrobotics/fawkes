@@ -31,12 +31,10 @@ using namespace protobuf_clips;
  * @author Tim Niemueller
  */
 
-/** Constructor.
- * @param env_name CLIPS environment name to which to register
- */
-ClipsProtobufThread::ClipsProtobufThread(std::string &env_name)
+/** Constructor. */
+ClipsProtobufThread::ClipsProtobufThread()
   : Thread("ClipsProtobufThread", Thread::OPMODE_WAITFORWAKEUP),
-    CLIPSAspect(env_name.c_str(), /* create */ true, /* excl */ false)
+    CLIPSFeatureAspect("protobuf")
 {
 }
 
@@ -77,17 +75,38 @@ ClipsProtobufThread::init()
     logger->log_warn(name(), e);
   } // ignore, use default
 
-  pb_comm_ = new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_);
-  clips->batch_evaluate(SRCDIR"/clips/protobuf.clp");
 }
 
 
 void
 ClipsProtobufThread::finalize()
 {
-  delete pb_comm_;
+  for (auto pb_comm : pb_comms_) {
+    delete pb_comm.second;
+  }
+  pb_comms_.clear();
 }
 
+
+void
+ClipsProtobufThread::clips_context_init(const std::string &env_name,
+					LockPtr<CLIPS::Environment> &clips)
+{
+  logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
+  pb_comms_[env_name] =
+    new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_);
+  clips->batch_evaluate(SRCDIR"/clips/protobuf.clp");
+}
+
+void
+ClipsProtobufThread::clips_context_destroyed(const std::string &env_name)
+{
+  logger->log_info(name(), "Removing environment %s", env_name.c_str());
+  if (pb_comms_.find(env_name) != pb_comms_.end()) {
+    delete pb_comms_[env_name];
+    pb_comms_.erase(env_name);
+  }
+}
 
 void
 ClipsProtobufThread::loop()

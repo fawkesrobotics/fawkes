@@ -36,8 +36,7 @@ class ClipsProtobufPlugin : public fawkes::Plugin
    */
   ClipsProtobufPlugin(Configuration *config) : Plugin(config)
   {
-    std::string cfg_clips_env = config->get_string("/clips-protobuf/env-name");
-    thread_list.push_back(new ClipsProtobufThread(cfg_clips_env));
+    thread_list.push_back(new ClipsProtobufThread());
   }
 };
 
