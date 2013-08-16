@@ -36,7 +36,7 @@ using namespace fawkes;
 /** Constructor. */
 CLIPSThread::CLIPSThread()
   : Thread("CLIPSThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect(&clips_aspect_inifin_)
+    AspectProviderAspect(inifin_list())
 {
 }
 
@@ -53,6 +53,7 @@ CLIPSThread::init()
   CLIPS::init();
   clips_env_mgr_ = new CLIPSEnvManager(logger);
   clips_aspect_inifin_.set_manager(clips_env_mgr_);
+  clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
 }
 
 
@@ -66,4 +67,13 @@ CLIPSThread::finalize()
 void
 CLIPSThread::loop()
 {
+}
+
+std::list<AspectIniFin *>
+CLIPSThread::inifin_list()
+{
+  std::list<AspectIniFin *> rv;
+  rv.push_back(&clips_aspect_inifin_);
+  rv.push_back(&clips_feature_aspect_inifin_);
+  return rv;
 }

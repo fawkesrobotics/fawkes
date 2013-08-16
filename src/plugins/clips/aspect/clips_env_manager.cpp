@@ -22,9 +22,9 @@
  */
 
 #include <plugins/clips/aspect/clips_env_manager.h>
+#include <plugins/clips/aspect/clips_feature.h>
 #include <logging/logger.h>
 
-#include <clipsmm.h>
 #include <cstring>
 
 extern "C" {
@@ -228,6 +228,13 @@ CLIPSEnvManager::create_env(const std::string &env_name, const std::string &log_
 
   if (clips) {
     envs_[env_name].env = clips;
+
+    // add generic functions
+    add_functions(env_name, clips);
+
+    // assert all currently available features to environment
+    assert_features(clips, true);
+
     return clips;
   } else {
     throw Exception("Failed to initialize CLIPS environment '%s'", env_name.c_str());
@@ -250,7 +257,132 @@ CLIPSEnvManager::destroy_env(const std::string &env_name)
     SetEnvironmentContext(env, NULL);
     delete cm;
 
+    for (auto feat : envs_[env_name].req_feat) {
+      if (features_.find(feat) != features_.end()) {
+	features_[feat]->clips_context_destroyed(env_name);
+      }
+    }
+
     envs_.erase(env_name);
+  }
+}
+
+
+CLIPS::Value
+CLIPSEnvManager::clips_request_feature(std::string env_name, std::string feature_name)
+{
+  logger_->log_debug("ClipsEnvManager", "Environment %s requests feature %s",
+		     env_name.c_str(), feature_name.c_str());
+
+  if (envs_.find(env_name) == envs_.end()) {
+    logger_->log_warn("ClipsEnvManager", "Feature %s request from non-existent environment %s",
+		      feature_name.c_str(), env_name.c_str());
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+  if (features_.find(feature_name) == features_.end()) {
+    logger_->log_warn("ClipsEnvManager", "Environment requested unavailable feature %s",
+		      feature_name.c_str());
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+
+  ClipsEnvData &envd = envs_[env_name];
+  if (std::binary_search(envd.req_feat.begin(), envd.req_feat.end(), feature_name)) {
+    logger_->log_warn("ClipsEnvManager", "Environment %s requested feature %s *again*",
+		      env_name.c_str(), feature_name.c_str());
+    return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+  }
+
+  envd.env.lock();
+  features_[feature_name]->clips_context_init(env_name, envd.env);
+  envd.req_feat.push_back(feature_name);
+  envd.req_feat.sort();
+  envd.env.unlock();
+
+  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+}
+
+void
+CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
+{
+  clips->add_function("ff-feature-request", sigc::slot<CLIPS::Value, std::string>(sigc::bind<0>(sigc::mem_fun(*this, &CLIPSEnvManager::clips_request_feature), env_name)));
+}
+
+void
+CLIPSEnvManager::assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert)
+{
+
+  // deffact so it survives a reset
+  std::string deffact = "(deffact ff-features-available";
+
+  for (auto feat : features_) {
+    deffact += " (ff-feature " + feat.first + ")";
+    if (immediate_assert) {
+      // assert so it is immediately available
+      clips->assert_fact_f("(ff-feature %s)", feat.first.c_str());
+    }
+  }
+  deffact += ")";
+
+  CLIPS::DefaultFacts::pointer old_deffact = clips->get_default_facts("ff-features-available");
+  if (old_deffact)  old_deffact->retract();
+  clips->build(deffact);
+}
+
+
+/** Add a feature by name.
+ * @param feature_name name of the feature by which CLIPS environments
+ * can request the feature.
+ * @param provider the provider used to initialize the feature.
+ */
+void
+CLIPSEnvManager::add_feature(const std::string &feature_name, CLIPSFeatureAspect *provider)
+{
+  if (features_.find(feature_name) != features_.end()) {
+    throw Exception("Feature '%s' has already been registered", feature_name.c_str());
+  }
+
+  features_[feature_name] = provider;
+
+  // assert fact to indicate feature availability to environments
+  for (auto env : envs_) {
+    env.second.env.lock();
+    assert_features(env.second.env, false);
+    // assert so it is immediately available
+    env.second.env->assert_fact_f("(ff-feature %s)", feature_name.c_str());
+    env.second.env.unlock();
+  }
+}
+
+
+/** Assert that a feature can be removed.
+ * The feature will not actually be removed, it will just be checked if this
+ * would work without problem.
+ * @param feature_name name of the feature to assert successful removal
+ * @exception Exception thrown with a descriptive message if the feature
+ * cannot be removed because it is still in use
+ */
+void
+CLIPSEnvManager::assert_can_remove_feature(const std::string &feature_name)
+{
+  for (auto env : envs_) {
+    if (std::binary_search(env.second.req_feat.begin(), env.second.req_feat.end(), feature_name)) {
+      throw Exception("Cannot remove feature %s as environment %s depends on it",
+		      feature_name.c_str(), env.first.c_str());
+    }
+  }
+}
+
+/** Remove a feature by name.
+ * @param feature_name name of the feature to remove
+ * @exception Exception thrown with a descriptive message if the feature
+ * cannot be removed because it is still in use
+ */
+void
+CLIPSEnvManager::remove_feature(const std::string &feature_name)
+{
+  if (features_.find(feature_name) != features_.end()) {
+    assert_can_remove_feature(feature_name);
+    features_.erase(feature_name);
   }
 }
 

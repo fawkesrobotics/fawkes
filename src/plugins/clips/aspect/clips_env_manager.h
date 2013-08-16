@@ -29,9 +29,7 @@
 #include <map>
 #include <list>
 
-namespace CLIPS {
-  class Environment;
-}
+#include <clipsmm.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -39,6 +37,7 @@ namespace fawkes {
 #endif
 
 class Logger;
+class CLIPSFeatureAspect;
 
 class CLIPSEnvManager
 {
@@ -50,22 +49,27 @@ class CLIPSEnvManager
     create_env(const std::string &env_name, const std::string &log_component_name);
   void destroy_env(const std::string &env_name);
 
- public:
+  void add_feature(const std::string &feature_name, CLIPSFeatureAspect *provider);
+  void remove_feature(const std::string &feature_name);
+  void assert_can_remove_feature(const std::string &feature_name);
 
  private:
   LockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
+  void assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert);
+  void add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips);
+  CLIPS::Value clips_request_feature(std::string env_name, std::string feature_name);
 
  private:
   Logger *logger_;
   /// @cond INTERNAL
   typedef struct {
     LockPtr<CLIPS::Environment> env;
-    std::list<std::string>      required_features;
+    std::list<std::string>      req_feat;
   } ClipsEnvData;
   /// @endcond
 
   std::map<std::string, ClipsEnvData > envs_;
-  //std::map<std::string, CLIPSFeatureAspect * > features_;
+  std::map<std::string, CLIPSFeatureAspect * > features_;
 
 };
 
