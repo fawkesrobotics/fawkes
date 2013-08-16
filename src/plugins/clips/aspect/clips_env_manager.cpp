@@ -268,6 +268,20 @@ CLIPSEnvManager::destroy_env(const std::string &env_name)
 }
 
 
+/** Get map of environments.
+ * @return map from environment name to environment lock ptr
+ */
+std::map<std::string, LockPtr<CLIPS::Environment>>
+CLIPSEnvManager::environments() const
+{
+  std::map<std::string, LockPtr<CLIPS::Environment>> rv;
+  for (auto envd : envs_) {
+    rv[envd.first] = envd.second.env;
+  }
+  return rv;
+}
+
+
 CLIPS::Value
 CLIPSEnvManager::clips_request_feature(std::string env_name, std::string feature_name)
 {

@@ -53,6 +53,8 @@ class CLIPSEnvManager
   void remove_feature(const std::string &feature_name);
   void assert_can_remove_feature(const std::string &feature_name);
 
+  std::map<std::string, LockPtr<CLIPS::Environment>> environments() const;
+
  private:
   LockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
   void assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert);
