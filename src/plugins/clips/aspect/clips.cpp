@@ -47,23 +47,16 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param env_name CLIPS environment name, the environment name is unique, if
- * you request an environment already occupied by another the @p exclusive parameter
- * defines whether an error is thrown or if the environment is shared 
- * @param create true to create the CLIPS environment, false to throw an exception if the
- * environment has not already been created. If true, an error is thrown if
- * the environment already exists.
- * @param exclusive require exclusive (non-shared) access to the environment.
- * If any other thread tries to access the environment or if the environment already
- * exists an error is thrown.
+ * @param env_name CLIPS environment name, the environment name is
+ * unique, if you request an environment already occupied by another
+ * the @p exclusive parameter defines whether an error is thrown or if
+ * the environment is shared
  * @param log_component_name a component name that is shown in log
- * messages. It is strongly recommended to set this to something unique.
- * If left out will be set to "CLIPS".
+ * messages. It is strongly recommended to set this to something
+ * unique.  If left out will be set to "CLIPS[env_name]".
  */
-CLIPSAspect::CLIPSAspect(const char *env_name, bool create, bool exclusive,
-			 const char *log_component_name)
+CLIPSAspect::CLIPSAspect(const char *env_name, const char *log_component_name)
   : clips_env_name(env_name),
-    CLIPSAspect_create_(create), CLIPSAspect_exclusive_(exclusive),
     CLIPSAspect_log_component_name_(log_component_name)
 {
   add_aspect("CLIPSAspect");
@@ -97,14 +90,5 @@ CLIPSAspect::finalize_CLIPSAspect()
   clips.clear();
 }
 
-
-/** Get logging component name.
- * @return log component name, might be NULL.
- */
-const char *
-CLIPSAspect::get_CLIPSAspect_log_component_name() const
-{
-  return CLIPSAspect_log_component_name_;
-}
 
 } // end namespace fawkes

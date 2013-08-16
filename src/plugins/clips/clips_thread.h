@@ -49,8 +49,8 @@ class CLIPSThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::CLIPSAspectIniFin __clips_aspect_inifin;
-
+  fawkes::CLIPSAspectIniFin                 clips_aspect_inifin_;
+  fawkes::LockPtr<fawkes::CLIPSEnvManager>  clips_env_mgr_;
 };
 
 #endif

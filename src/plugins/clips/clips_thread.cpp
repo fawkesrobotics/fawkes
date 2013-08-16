@@ -21,6 +21,7 @@
  */
 
 #include "clips_thread.h"
+#include <plugins/clips/aspect/clips_env_manager.h>
 
 #include <clipsmm.h>
 
@@ -50,14 +51,15 @@ void
 CLIPSThread::init()
 {
   CLIPS::init();
-  __clips_aspect_inifin.set_logger(logger);
-  //logger->log_info(name(), "CLIPS initialized");
+  clips_env_mgr_ = new CLIPSEnvManager(logger);
+  clips_aspect_inifin_.set_manager(clips_env_mgr_);
 }
 
 
 void
 CLIPSThread::finalize()
 {
+  clips_env_mgr_.clear();
 }
 
 

@@ -43,23 +43,19 @@ class CLIPSAspect : public virtual Aspect
   friend class CLIPSAspectIniFin;
 
  public:
-  CLIPSAspect(const char *env_name, bool create = true,
-	      bool exclusive = false, const char *log_component_name = 0);
+  CLIPSAspect(const char *env_name, const char *log_component_name = 0);
   virtual ~CLIPSAspect();
 
  protected:
-  const std::string           clips_env_name;
-  LockPtr<CLIPS::Environment> clips;
+  const std::string            clips_env_name;
+  LockPtr<CLIPS::Environment>  clips;
 
  private:
-  const char *  get_CLIPSAspect_log_component_name() const;
   void init_CLIPSAspect(LockPtr<CLIPS::Environment> clips);
   void finalize_CLIPSAspect();
 
  private:
-  bool         CLIPSAspect_create_;
-  bool         CLIPSAspect_exclusive_;
-  const char * CLIPSAspect_log_component_name_;
+  const std::string CLIPSAspect_log_component_name_;
 };
 
 } // end namespace fawkes

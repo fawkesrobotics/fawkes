@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  clips_inifin.h - Fawkes CLIPSAspect initializer/finalizer
+ *  clips_env_manager.h - CLIPS environment manager
  *
- *  Created: Sat Jun 16 14:34:01 2012
- *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Aug 15 18:55:32 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,14 +21,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
-#define __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
+#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
+#define __PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
 
-#include <aspect/inifins/inifin.h>
-#include <plugins/clips/aspect/clips.h>
-
-#include <map>
+#include <core/utils/lockptr.h>
 #include <string>
+#include <map>
+#include <list>
+
+namespace CLIPS {
+  class Environment;
+}
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -36,21 +39,34 @@ namespace fawkes {
 #endif
 
 class Logger;
-class CLIPSEnvManager;
 
-class CLIPSAspectIniFin : public AspectIniFin
+class CLIPSEnvManager
 {
  public:
-  CLIPSAspectIniFin();
-  ~CLIPSAspectIniFin();
+  CLIPSEnvManager(Logger *logger);
+  virtual ~CLIPSEnvManager();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+  LockPtr<CLIPS::Environment>
+    create_env(const std::string &env_name, const std::string &log_component_name);
+  void destroy_env(const std::string &env_name);
 
-  void set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr);
+ public:
 
  private:
-  LockPtr<CLIPSEnvManager> clips_env_mgr_;
+  LockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
+
+ private:
+  Logger *logger_;
+  /// @cond INTERNAL
+  typedef struct {
+    LockPtr<CLIPS::Environment> env;
+    std::list<std::string>      required_features;
+  } ClipsEnvData;
+  /// @endcond
+
+  std::map<std::string, ClipsEnvData > envs_;
+  //std::map<std::string, CLIPSFeatureAspect * > features_;
+
 };
 
 } // end namespace fawkes
