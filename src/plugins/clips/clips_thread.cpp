@@ -35,7 +35,7 @@ using namespace fawkes;
 /** Constructor. */
 CLIPSThread::CLIPSThread()
   : Thread("CLIPSThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect("CLIPSAspect", &__clips_aspect_inifin)
+    AspectProviderAspect(&clips_aspect_inifin_)
 {
 }
 
