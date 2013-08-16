@@ -27,7 +27,7 @@
 #include <aspect/logging.h>
 #include <aspect/webview.h>
 #include <aspect/configurable.h>
-#include <plugins/clips/aspect/clips.h>
+#include <plugins/clips/aspect/clips_manager.h>
 
 #include <vector>
 #include <string>
@@ -39,10 +39,10 @@ class ClipsWebviewThread
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::WebviewAspect,
-  public fawkes::CLIPSAspect
+  public fawkes::CLIPSManagerAspect
 {
  public:
-  ClipsWebviewThread(std::string &env_name);
+  ClipsWebviewThread();
   virtual ~ClipsWebviewThread();
 
   virtual void init();
@@ -56,7 +56,6 @@ class ClipsWebviewThread
   std::vector<std::string> cfg_proto_dirs_;
 
   ClipsWebRequestProcessor *web_proc_;
-
 };
 
 #endif

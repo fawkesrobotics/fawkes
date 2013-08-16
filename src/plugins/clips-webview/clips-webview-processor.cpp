@@ -29,6 +29,7 @@
 #include <webview/error_reply.h>
 #include <webview/redirect_reply.h>
 #include <utils/misc/string_conversions.h>
+#include <plugins/clips/aspect/clips_env_manager.h>
 
 #include <cstring>
 
@@ -70,20 +71,31 @@ clips_router_exit(void *env, int exit_code)
 
 
 /** Constructor.
- * @param clips CLIPS Environment to query for facts
+ * @param clips_env_mgr CLIPS environment manager
  * @param logger logger to report problems
  * @param baseurl base URL of the Clips webrequest processor
  */
-ClipsWebRequestProcessor::ClipsWebRequestProcessor(fawkes::LockPtr<CLIPS::Environment> &clips,
+ClipsWebRequestProcessor::ClipsWebRequestProcessor(fawkes::LockPtr<fawkes::CLIPSEnvManager> &clips_env_mgr,
 						   fawkes::Logger *logger, const char *baseurl)
 {
-  clips_  = clips;
-  logger_ = logger;
+  clips_env_mgr_  = clips_env_mgr;
+  logger_         = logger;
 
-  baseurl_     = baseurl;
-  baseurl_len_ = strlen(baseurl);
+  baseurl_        = baseurl;
+  baseurl_len_    = strlen(baseurl);
+
+}
 
 
+/** Destructor. */
+ClipsWebRequestProcessor::~ClipsWebRequestProcessor()
+{
+}
+
+void
+ClipsWebRequestProcessor::enable_error_log(LockPtr<CLIPS::Environment> &clips)
+{
+  errors_.clear();
   EnvAddRouterWithContext(clips->cobj(), (char *)"webview-reqproc",
 			  /* exclusive */ 40,
 			  clips_router_query,
@@ -94,11 +106,10 @@ ClipsWebRequestProcessor::ClipsWebRequestProcessor(fawkes::LockPtr<CLIPS::Enviro
 			  this);
 }
 
-
-/** Destructor. */
-ClipsWebRequestProcessor::~ClipsWebRequestProcessor()
+void
+ClipsWebRequestProcessor::disable_error_log(LockPtr<CLIPS::Environment> &clips)
 {
-  EnvDeleteRouter(clips_->cobj(), (char *)"webview-reqproc");
+  EnvDeleteRouter(clips->cobj(), (char *)"webview-reqproc");
 }
 
 
@@ -113,9 +124,9 @@ ClipsWebRequestProcessor::add_error(const char *str)
 }
 
 void
-ClipsWebRequestProcessor::retract_fact(long int index)
+ClipsWebRequestProcessor::retract_fact(LockPtr<CLIPS::Environment> &clips, long int index)
 {
-  CLIPS::Fact::pointer fact = clips_->get_facts();
+  CLIPS::Fact::pointer fact = clips->get_facts();
   while (fact) {
     if (fact->index() == index) {
       fact->retract();
@@ -130,17 +141,55 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
   if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = request->url().substr(baseurl_len_);
+    std::string env_name = request->url().substr(baseurl_len_);
+    std::string::size_type slash_pos = env_name.find("/", 1);
+    std::string subpath;
+    if (slash_pos != std::string::npos) {
+      subpath  = env_name.substr(slash_pos);
+      env_name = env_name.substr(1, slash_pos-1);
+    } else if (env_name.length() > 0) {
+      // remove lead slash
+      env_name = env_name.substr(1);
+    }
+
+    std::map<std::string, LockPtr<CLIPS::Environment>> envs =
+      clips_env_mgr_->environments();
+
+    if (envs.find(env_name) == envs.end()) {
+      if (envs.size() == 1) {
+	// if there is only one just redirect
+	return new WebRedirectReply(std::string(baseurl_) + "/" + envs.begin()->first);
+      } else {
+	WebPageReply *r = new WebPageReply("CLIPS - Environment not found");
+	*r += "<h2>Environment " + env_name + " not found</h2>\n";
+	if (! envs.empty()) {
+	  *r += "<p>Choose on of the following existing environments:</p>\n";
+	  *r += "<ul>\n";
+	  for (auto env : envs) {
+	    *r += std::string("<li><a href=\"") + baseurl_ + "/" +
+	      env.first + "\">" + env.first + "</a></li>\n";
+	  }
+	  *r += "</ul>\n";
+	} else {
+	  *r += "<p>No environments have been registered.</p>\n";
+	}
+	return r;
+      }
+    }
+
+    
+    LockPtr<CLIPS::Environment> &clips = envs[env_name];
 
     if (subpath == "/assert") {
-      MutexLocker lock(clips_.objmutex_ptr());
-      errors_.clear();
+      MutexLocker lock(clips.objmutex_ptr());
+      enable_error_log(clips);
       if (! request->post_value("index").empty()) {
 	long int index = StringConversions::to_long(request->post_value("index"));
-	retract_fact(index);
+	retract_fact(clips, index);
       }
 
-      clips_->assert_fact(request->post_value("fact"));
+      clips->assert_fact(request->post_value("fact"));
+      disable_error_log(clips);
       if (! errors_.empty()) {
 	WebPageReply *r = new WebPageReply("CLIPS");
 	*r += "<h2>CLIPS Fact Assertion</h2>\n";
@@ -152,25 +201,26 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
 	*r += "</pre></p>";
 	r->append_body("<p><a href=\"%s\">Back</a></p>", baseurl_);
 
-	r->append_body("<form action=\"%s/assert\" method=\"post\">"
+	r->append_body("<form action=\"%s/%s/assert\" method=\"post\">"
 		       "<input type=\"hidden\" name=\"index\" value=\"%s\">"
 		       "New fact: <input type=\"text\" name=\"fact\" value=\"%s\"/>"
-		       "<input type=\"submit\" value=\"Assert\" />", baseurl_,
+		       "<input type=\"submit\" value=\"Assert\" />",
+		       baseurl_, env_name.c_str(),
 		       request->post_value("index").c_str(),
 		       request->post_value("fact").c_str());
 
 	return r;
       } else {
-	return new WebRedirectReply(baseurl_);
+	return new WebRedirectReply(std::string(baseurl_) + "/" + env_name);
       }
     } else if (subpath.find("/retract") == 0) {
       std::string index_str = subpath.substr(9); // length of "/retract/"
       long int index = StringConversions::to_long(index_str);
-      retract_fact(index);
-      return new WebRedirectReply(baseurl_);
+      retract_fact(clips, index);
+      return new WebRedirectReply(std::string(baseurl_) + "/" + env_name);
     }
 
-    MutexLocker lock(clips_.objmutex_ptr());
+    MutexLocker lock(clips.objmutex_ptr());
 
     WebPageReply *r = new WebPageReply("CLIPS");
     r->set_html_header("  <link type=\"text/css\" href=\"/static/css/jqtheme/"
@@ -184,27 +234,39 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
       "<style type=\"text/css\">\n"
       "  tr:hover { background-color: #eeeeee; }\n"
       "  :link:hover, :visited:hover { background-color: #bb0000; color: white; }\n"
+      "  .envs { margin: 0px; padding: 0px; display: inline; }\n"
+      "  .envs li { display: inline; padding-left: 8px; white-space: no-wrap; }\n"
       "</style>";
+
+    if (envs.size() > 1) {
+      *r += "Environments: <ul class=\"envs\">\n";
+      for (auto env : envs) {
+	*r += std::string("<li><a href=\"") + baseurl_ + "/" +
+	  env.first + "\">" + env.first + "</a></li>\n";
+      }
+      *r += "</ul>\n";
+    }
+
 
     *r += "<h2>CLIPS Facts</h2>\n";
 
     *r += "<table>";
     *r += "<tr><th>Index</th><th>Fact</th><th>Action</th></tr>\n";
 
-    CLIPS::Fact::pointer fact = clips_->get_facts();
+    CLIPS::Fact::pointer fact = clips->get_facts();
     while (fact) {
       CLIPS::Template::pointer tmpl = fact->get_template();
 
       char tmp[16384];
-      OpenStringDestination(clips_->cobj(), (char *)"ProcPPForm", tmp, 16383);
-      PrintFact(clips_->cobj(), (char *)"ProcPPForm",
+      OpenStringDestination(clips->cobj(), (char *)"ProcPPForm", tmp, 16383);
+      PrintFact(clips->cobj(), (char *)"ProcPPForm",
 		(struct fact *)fact->cobj(), FALSE, FALSE);
-      CloseStringDestination(clips_->cobj(), (char *)"ProcPPForm");
+      CloseStringDestination(clips->cobj(), (char *)"ProcPPForm");
 
       r->append_body("<tr><td>f-%li</td><td>%s</td>"
-		     "<td><a href=\"%s/retract/%li\">Retract</a></td>"
+		     "<td><a href=\"%s/%s/retract/%li\">Retract</a></td>"
 		     "</tr>\n",
-		     fact->index(), tmp, baseurl_, fact->index());
+		     fact->index(), tmp, baseurl_, env_name.c_str(), fact->index());
 
       std::string escaped = tmp;
       size_t pos = 0;
@@ -218,10 +280,11 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
 
     *r += "</table>";
 
-    r->append_body("<p><form action=\"%s/assert\" method=\"post\">"
+    r->append_body("<p><form action=\"%s/%s/assert\" method=\"post\">"
 		   "<input type=\"hidden\" name=\"index\" value=\"\">"
 		   "New fact: <input type=\"text\" name=\"fact\" />"
-		   "<input type=\"submit\" value=\"Assert\" /></form></p>", baseurl_);
+		   "<input type=\"submit\" value=\"Assert\" /></form></p>",
+		   baseurl_, env_name.c_str());
 
     return r;
   } else {

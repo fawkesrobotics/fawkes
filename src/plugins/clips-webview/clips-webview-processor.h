@@ -31,6 +31,7 @@
 
 namespace fawkes {
   class Logger;
+  class CLIPSEnvManager;
 }
 
 namespace CLIPS {
@@ -40,7 +41,8 @@ namespace CLIPS {
 class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
-  ClipsWebRequestProcessor(fawkes::LockPtr<CLIPS::Environment> &clips, fawkes::Logger *logger,
+  ClipsWebRequestProcessor(fawkes::LockPtr<fawkes::CLIPSEnvManager> &clips,
+			   fawkes::Logger *logger,
 			   const char *baseurl);
 
   virtual ~ClipsWebRequestProcessor();
@@ -50,10 +52,12 @@ class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
   void add_error(const char *str);
 
  private:
-  void retract_fact(long int index);
+  void retract_fact(fawkes::LockPtr<CLIPS::Environment> &clips, long int index);
+  void enable_error_log(fawkes::LockPtr<CLIPS::Environment> &clips);
+  void disable_error_log(fawkes::LockPtr<CLIPS::Environment> &clips);
 
  private:
-  fawkes::LockPtr<CLIPS::Environment> clips_;
+  fawkes::LockPtr<fawkes::CLIPSEnvManager> clips_env_mgr_;
   fawkes::Logger       *logger_;
 
   const char           *baseurl_;

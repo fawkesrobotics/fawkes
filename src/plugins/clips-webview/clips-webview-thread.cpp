@@ -34,12 +34,9 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor.
- * @param env_name CLIPS environment name to which to register
- */
-ClipsWebviewThread::ClipsWebviewThread(std::string &env_name)
-  : Thread("ClipsWebviewThread", Thread::OPMODE_WAITFORWAKEUP),
-    CLIPSAspect(env_name.c_str(), /* create */ true, /* excl */ false)
+/** Constructor. */
+ClipsWebviewThread::ClipsWebviewThread()
+  : Thread("ClipsWebviewThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -53,35 +50,7 @@ ClipsWebviewThread::~ClipsWebviewThread()
 void
 ClipsWebviewThread::init()
 {
-/*
-  cfg_proto_dirs_.clear();
-  try {
-    cfg_proto_dirs_ = config->get_strings("/clips-webview/proto-dirs");
-    for (size_t i = 0; i < cfg_proto_dirs_.size(); ++i) {
-      std::string::size_type pos;
-      if ((pos = cfg_proto_dirs_[i].find("@BASEDIR@")) != std::string::npos) {
-	cfg_proto_dirs_[i].replace(pos, 9, BASEDIR);
-      }
-      if ((pos = cfg_proto_dirs_[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
-	cfg_proto_dirs_[i].replace(pos, 16, FAWKES_BASEDIR);
-      }
-      if ((pos = cfg_proto_dirs_[i].find("@RESDIR@")) != std::string::npos) {
-	cfg_proto_dirs_[i].replace(pos, 8, RESDIR);
-      }
-      if ((pos = cfg_proto_dirs_[i].find("@CONFDIR@")) != std::string::npos) {
-	cfg_proto_dirs_[i].replace(pos, 9, CONFDIR);
-      }
-      if (cfg_proto_dirs_[i][cfg_proto_dirs_.size()-1] != '/') {
-	cfg_proto_dirs_[i] += "/";
-      }
-      //logger->log_warn(name(), "DIR: %s", cfg_proto_dirs_[i].c_str());
-    }
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to load proto paths from config, exception follows");
-    logger->log_warn(name(), e);
-  } // ignore, use default
-*/
-  web_proc_  = new ClipsWebRequestProcessor(clips, logger, CLIPS_URL_PREFIX);
+  web_proc_  = new ClipsWebRequestProcessor(clips_env_mgr, logger, CLIPS_URL_PREFIX);
   webview_url_manager->register_baseurl(CLIPS_URL_PREFIX, web_proc_);
   webview_nav_manager->add_nav_entry(CLIPS_URL_PREFIX, "CLIPS");
 }
