@@ -1,0 +1,89 @@
+
+/***************************************************************************
+ *  PuckInfo.proto - LLSF Protocol - Puck information
+ *
+ *  Created: Mon Feb 25 11:36:50 2013
+ *  Copyright  2013  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * - Neither the name of the authors nor the names of its contributors
+ *   may be used to endorse or promote products derived from this
+ *   software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package llsf_msgs;
+
+import "Pose2D.proto";
+
+option java_package = "org.robocup_logistics.llsf_msgs";
+option java_outer_classname = "PuckInfoProtos";
+
+// Current state of a puck
+enum PuckState {
+  S0 = 0;
+  S1 = 1;
+  S2 = 2;
+  P1 = 4;
+  P2 = 5;
+  P3 = 6;
+  CONSUMED = 7;
+  FINISHED = 8;
+}
+
+message Puck {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 50;
+  }
+
+  // Puck unique ID
+  required uint32    id = 1;
+  // Current state of the puck
+  required PuckState state = 2;
+
+  // Optional pose information
+  optional Pose2D    pose = 3;
+}
+
+message PuckInfo {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 51;
+  }
+
+  // List of all known pucks
+  repeated Puck pucks = 1;
+}
+
+message SetPucks {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 52;
+  }
+
+  // List of all known pucks
+  repeated uint32 ids = 1;
+}

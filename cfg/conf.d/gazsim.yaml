@@ -10,3 +10,7 @@ gazsim:
     refbox-port: 4444
   laser:
     max_range: 5.5
+  light-front:
+    max-distance: 0.1
+    success-visibility-history: 300
+    fail-visibility-history: -300

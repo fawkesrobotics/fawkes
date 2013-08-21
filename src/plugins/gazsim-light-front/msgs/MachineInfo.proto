@@ -1,0 +1,103 @@
+
+/***************************************************************************
+ *  MachineInfo.proto - LLSF Protocol - Machine Specification message
+ *
+ *  Created: Mon Feb 25 11:36:50 2013
+ *  Copyright  2013  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * - Neither the name of the authors nor the names of its contributors
+ *   may be used to endorse or promote products derived from this
+ *   software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package llsf_msgs;
+
+import "Pose2D.proto";
+import "PuckInfo.proto";
+
+option java_package = "org.robocup_logistics.llsf_msgs";
+option java_outer_classname = "MachineInfoProtos";
+
+enum LightColor {
+  RED = 0;
+  YELLOW = 1;
+  GREEN = 2;
+}
+
+enum LightState {
+  OFF = 0;
+  ON = 1;
+  BLINK = 2;
+}
+
+message LightSpec {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 10;
+  }
+
+  // Color and state of described light
+  required LightColor color = 1;
+  required LightState state = 2;
+}
+
+message Machine {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 12;
+  }
+  // Machine name and type
+  required string    name     = 1;
+  optional string    type     = 2;
+
+  // Required inputs and produced output
+  // Only set for field machines T*
+  repeated PuckState inputs  = 3;
+  optional PuckState output  = 4;
+  // Puck currently in the machine area
+  repeated Puck      loaded_with = 5;
+  // Puck currently under the RFID sensor
+  optional Puck      puck_under_rfid = 6;
+
+  // Current state of the lights
+  repeated LightSpec lights = 7;
+  // Optional pose if known to refbox
+  optional Pose2D    pose = 8;
+  // Only set during exploration phase
+  // Correctly reported?
+  optional bool      correctly_reported = 9;
+}
+
+message MachineInfo {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 13;
+  }
+
+  // List of machines states
+  repeated Machine machines = 1;
+}
