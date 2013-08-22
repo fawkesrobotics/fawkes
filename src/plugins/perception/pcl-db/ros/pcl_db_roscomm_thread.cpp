@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "pcl_db_merge_roscomm_thread.h"
+#include "pcl_db_roscomm_thread.h"
 #include <interfaces/PclDatabaseMergeInterface.h>
 
 #include <core/threading/wait_condition.h>
@@ -31,28 +31,28 @@ using namespace fawkes;
 
 #define CFG_PREFIX "/perception/pcl-db-merge/ros/"
 
-/** @class PointCloudDBMergeROSCommThread "pcl_db_merge_roscomm_thread.h"
+/** @class PointCloudDBROSCommThread "pcl_db_merge_roscomm_thread.h"
  * Thread to merge point clouds from database on request.
  * @author Tim Niemueller
  */
 
 
 /** Constructor. */
-PointCloudDBMergeROSCommThread::PointCloudDBMergeROSCommThread()
-  : Thread("PointCloudDBMergeROSCommThread", Thread::OPMODE_WAITFORWAKEUP),
+PointCloudDBROSCommThread::PointCloudDBROSCommThread()
+  : Thread("PointCloudDBROSCommThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 }
 
 
 /** Destructor. */
-PointCloudDBMergeROSCommThread::~PointCloudDBMergeROSCommThread()
+PointCloudDBROSCommThread::~PointCloudDBROSCommThread()
 {
 }
 
 
 void
-PointCloudDBMergeROSCommThread::init()
+PointCloudDBROSCommThread::init()
 {
   merge_if_ =
     blackboard->open_for_reading<PclDatabaseMergeInterface>("PCL Database Merge");
@@ -64,14 +64,14 @@ PointCloudDBMergeROSCommThread::init()
   srv_record_ = new ros::ServiceServer();
 
   *srv_merge_ = rosnode->advertiseService("/pcl_db_merge/merge",
-					  &PointCloudDBMergeROSCommThread::merge_cb, this);
+					  &PointCloudDBROSCommThread::merge_cb, this);
 
   *srv_record_ = rosnode->advertiseService("/pcl_db_merge/record",
-					   &PointCloudDBMergeROSCommThread::record_cb, this);
+					   &PointCloudDBROSCommThread::record_cb, this);
 }
 
 void
-PointCloudDBMergeROSCommThread::finalize()
+PointCloudDBROSCommThread::finalize()
 {
   srv_merge_->shutdown();
   srv_record_->shutdown();
@@ -86,7 +86,7 @@ PointCloudDBMergeROSCommThread::finalize()
 
 
 void
-PointCloudDBMergeROSCommThread::loop()
+PointCloudDBROSCommThread::loop()
 {
   merge_if_->read();
   if (merge_if_->changed()) {
@@ -103,8 +103,8 @@ PointCloudDBMergeROSCommThread::loop()
 }
 
 bool
-PointCloudDBMergeROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &req,
-					 hybris_c1_msgs::MergePointClouds::Response &resp)
+PointCloudDBROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &req,
+				    hybris_c1_msgs::MergePointClouds::Response &resp)
 {
   PclDatabaseMergeInterface::MergeMessage *mm =
     new PclDatabaseMergeInterface::MergeMessage();
@@ -157,8 +157,8 @@ PointCloudDBMergeROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Reque
 
 
 bool
-PointCloudDBMergeROSCommThread::record_cb(hybris_c1_msgs::RecordData::Request  &req,
-					  hybris_c1_msgs::RecordData::Response &resp)
+PointCloudDBROSCommThread::record_cb(hybris_c1_msgs::RecordData::Request  &req,
+				     hybris_c1_msgs::RecordData::Response &resp)
 {
   logger->log_info(name(), "Recording ordered for %f sec", req.range.toSec());
   ros::Time begin = ros::Time::now();

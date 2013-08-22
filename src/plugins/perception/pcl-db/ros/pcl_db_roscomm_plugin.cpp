@@ -22,25 +22,26 @@
 
 #include <core/plugin.h>
 
-#include "pcl_db_merge_roscomm_thread.h"
+#include "pcl_db_roscomm_thread.h"
 
 using namespace fawkes;
 
 /** Plugin to segment a tabletop via PCL.
  * @author Tim Niemueller
  */
-class PointCloudDBMergeROSCommPlugin : public fawkes::Plugin
+class PointCloudDBROSCommPlugin : public fawkes::Plugin
 {
  public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-  PointCloudDBMergeROSCommPlugin(Configuration *config)
+  PointCloudDBROSCommPlugin(Configuration *config)
     : Plugin(config)
   {
-    thread_list.push_back(new PointCloudDBMergeROSCommThread());
+    thread_list.push_back(new PointCloudDBROSCommThread());
   }
 };
 
-PLUGIN_DESCRIPTION("ROS communication for pcl-db-merge")
-EXPORT_PLUGIN(PointCloudDBMergeROSCommPlugin)
+PLUGIN_DESCRIPTION("ROS communication for pcl-db plugins")
+EXPORT_PLUGIN(PointCloudDBROSCommPlugin)
+

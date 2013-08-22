@@ -42,7 +42,7 @@ namespace ros {
 }
 
 
-class PointCloudDBMergeROSCommThread
+class PointCloudDBROSCommThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -51,8 +51,8 @@ class PointCloudDBMergeROSCommThread
   public fawkes::ROSAspect
 {
  public:
-  PointCloudDBMergeROSCommThread();
-  virtual ~PointCloudDBMergeROSCommThread();
+  PointCloudDBROSCommThread();
+  virtual ~PointCloudDBROSCommThread();
 
   virtual void init();
   virtual void loop();

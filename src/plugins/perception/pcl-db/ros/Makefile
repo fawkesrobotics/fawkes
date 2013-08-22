@@ -1,5 +1,5 @@
 #*****************************************************************************
-#   Makefile to communicate with ROS for pcl-db-merge instructions
+#   Makefile to communicate with ROS for pcl-db-* instructions
 #                            -------------------
 #   Created on Thu Dec 06 13:28:22 2012
 #   Copyright (C) 2012 by Tim Niemueller, AllemaniACs RoboCup Team
@@ -18,19 +18,19 @@ BASEDIR = ../../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/ros.mk
 
-LIBS_pcl_db_merge_roscomm = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
+LIBS_pcl_db_roscomm = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesrosaspect fawkestf  \
 		PclDatabaseMergeInterface
-OBJS_pcl_db_merge_roscomm = pcl_db_merge_roscomm_plugin.o pcl_db_merge_roscomm_thread.o
+OBJS_pcl_db_roscomm = pcl_db_roscomm_plugin.o pcl_db_roscomm_thread.o
 
-OBJS_all    = $(OBJS_pcl_db_merge_roscomm)
+OBJS_all    = $(OBJS_pcl_db_roscomm)
 
 ifeq ($(HAVE_ROS),1)
   ifeq ($(call ros-have-pkg,hybris_c1_msgs),1)
     CFLAGS  += $(CFLAGS_ROS) $(call ros-pkg-cflags,hybris_c1_msgs)
     LDFLAGS += $(LDFLAGS_ROS)
 
-    PLUGINS_all = $(PLUGINDIR)/pcl-db-merge-roscomm.so
+    PLUGINS_all = $(PLUGINDIR)/pcl-db-roscomm.so
   else
     WARN_TARGETS += warning_hybris_c1_msgs
   endif
