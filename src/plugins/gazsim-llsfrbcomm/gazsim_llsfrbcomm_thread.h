@@ -28,8 +28,12 @@
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
+#include <aspect/configurable.h>
+#include <aspect/blocked_timing.h>
 #include <boost/asio.hpp>
 #include <google/protobuf/message.h>
+#include <protobuf_comm/client.h>
+#include <protobuf_comm/message_register.h>
 
 namespace protobuf_comm {
   class ProtobufStreamClient;
@@ -37,6 +41,8 @@ namespace protobuf_comm {
 
 class GazsimLLSFRbCommThread
 : public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect
 {
  public:
@@ -57,6 +63,17 @@ class GazsimLLSFRbCommThread
 
  private:
   protobuf_comm::ProtobufStreamClient *client_;
+  protobuf_comm::MessageRegister      *message_register_;
+
+  //config values
+  std::vector<std::string> proto_dirs_;
+  std::string refbox_host_;
+  unsigned int refbox_port_;
+
+  //helper variables
+  bool disconnected_recently_;
+
+  void create_client();
 };
 
 #endif

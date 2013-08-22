@@ -23,9 +23,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <aspect/blocked_timing.h>
+
 #include "gazsim_llsfrbcomm_thread.h"
 
 #include <protobuf_comm/client.h>
+#include <protobuf_comm/message_register.h>
 
 using namespace fawkes;
 using namespace protobuf_comm;
@@ -40,7 +43,8 @@ using namespace protobuf_comm;
 
 /** Constructor. */
 GazsimLLSFRbCommThread::GazsimLLSFRbCommThread()
-  : Thread("GazsimLLSFRbCommThread", Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("GazsimLLSFRbCommThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 }
 
@@ -55,8 +59,90 @@ void
 GazsimLLSFRbCommThread::init()
 {
   //logger->log_info(name(), "GazsimLLSFRbComm initialized");
-  client_ = new ProtobufStreamClient();
 
+  //read config values
+  refbox_host_ = config->get_string("/gazsim/llsf-rb-comm/refbox-host");
+  refbox_port_ = config->get_uint("/gazsim/llsf-rb-comm/refbox-port");
+  proto_dirs_ = config->get_strings("/gazsim/llsf-rb-comm/proto-dirs");
+  //resolve proto paths
+  try {
+    proto_dirs_ = config->get_strings("/clips-protobuf/proto-dirs");
+    for (size_t i = 0; i < proto_dirs_.size(); ++i) {
+      std::string::size_type pos;
+      if ((pos = proto_dirs_[i].find("@BASEDIR@")) != std::string::npos) {
+	proto_dirs_[i].replace(pos, 9, BASEDIR);
+      }
+      if ((pos = proto_dirs_[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
+	proto_dirs_[i].replace(pos, 16, FAWKES_BASEDIR);
+      }
+      if ((pos = proto_dirs_[i].find("@RESDIR@")) != std::string::npos) {
+	proto_dirs_[i].replace(pos, 8, RESDIR);
+      }
+      if ((pos = proto_dirs_[i].find("@CONFDIR@")) != std::string::npos) {
+	proto_dirs_[i].replace(pos, 9, CONFDIR);
+      }
+      if (proto_dirs_[i][proto_dirs_.size()-1] != '/') {
+	proto_dirs_[i] += "/";
+      }
+    }
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to load proto paths from config, exception follows");
+    logger->log_warn(name(), e);
+  }
+
+  create_client();
+
+  //this invokes the connect in the loop
+  disconnected_recently_ = true;
+}
+
+
+void
+GazsimLLSFRbCommThread::finalize()
+{
+  delete message_register_;
+  delete client_;
+}
+
+
+void
+GazsimLLSFRbCommThread::loop()
+{
+  if(disconnected_recently_)
+  {
+    disconnected_recently_ = false;
+    //connect
+    client_->async_connect(refbox_host_.c_str(), refbox_port_);
+  }
+}
+
+void
+GazsimLLSFRbCommThread::client_connected()
+{
+  logger->log_info(name(), "Connected to Refbox");
+}
+
+void
+GazsimLLSFRbCommThread::client_disconnected(const boost::system::error_code &error)
+{
+  //logger->log_info(name(), "Disconnected");
+  create_client();
+}
+
+void
+GazsimLLSFRbCommThread::client_msg(uint16_t comp_id, uint16_t msg_type,
+			     std::shared_ptr<google::protobuf::Message> msg)
+{
+  //logger->log_info(name(), "Message");
+}
+
+void GazsimLLSFRbCommThread::create_client()
+{
+  //create message register with all messages to listen for
+  message_register_ = new protobuf_comm::MessageRegister(proto_dirs_);
+
+  //create client and register handlers
+  client_ = new ProtobufStreamClient(message_register_);
   client_->signal_connected().connect(
     boost::bind(&GazsimLLSFRbCommThread::client_connected, this));
   client_->signal_disconnected().connect(
@@ -65,36 +151,6 @@ GazsimLLSFRbCommThread::init()
   client_->signal_received().connect(
     boost::bind(&GazsimLLSFRbCommThread::client_msg, this, _1, _2, _3));
 
-  client_->async_connect("localhost", 4444);
-}
-
-
-void
-GazsimLLSFRbCommThread::finalize()
-{
-}
-
-
-void
-GazsimLLSFRbCommThread::loop()
-{
-}
-
-void
-GazsimLLSFRbCommThread::client_connected()
-{
-  logger->log_info(name(), "Connected");
-}
-
-void
-GazsimLLSFRbCommThread::client_disconnected(const boost::system::error_code &error)
-{
-  logger->log_info(name(), "Disconnected");
-}
-
-void
-GazsimLLSFRbCommThread::client_msg(uint16_t comp_id, uint16_t msg_type,
-			     std::shared_ptr<google::protobuf::Message> msg)
-{
-  logger->log_info(name(), "Message");
+  //this invokes the connect in the loop
+  disconnected_recently_ = true;
 }

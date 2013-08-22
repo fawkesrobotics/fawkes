@@ -4,9 +4,9 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gazsim
 ---
 gazsim:
-  comm-adapter:
+  llsf-rb-comm:
     proto-dirs: ["@BASEDIR@/src/agents/llsf2013/msgs"]
-    refbox-host: localhost
+    refbox-host: "localhost"
     refbox-port: 4444
   laser:
     max_range: 5.5
