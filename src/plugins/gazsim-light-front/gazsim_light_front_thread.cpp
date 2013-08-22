@@ -28,9 +28,9 @@
 
 #include <interfaces/RobotinoLightInterface.h>
 #include <interfaces/Position3DInterface.h>
-#include "msgs/Pose2D.pb.h"
-#include "msgs/MachineInfo.pb.h"
-#include "msgs/LightSignals.pb.h"
+#include <protobuf_msgs/Pose2D.pb.h>
+#include <protobuf_msgs/MachineInfo.pb.h>
+#include <protobuf_msgs/LightSignals.pb.h>
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>

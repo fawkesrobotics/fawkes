@@ -22,11 +22,11 @@ include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
 LIBS_gazsim_light_front = fawkescore fawkesutils fawkesaspects fvutils \
-	       fawkestf fawkesinterface fawkesblackboard \
+	       fawkestf fawkesinterface fawkesblackboard protobufmsgs\
 	       Position3DInterface TransformInterface \
 	       SwitchInterface RobotinoLightInterface \
 	       fawkesgazeboaspect
-OBJS_gazsim_light_front = gazsim_light_front_plugin.o gazsim_light_front_thread.o msgs/LightSignals.pb.o msgs/MachineInfo.pb.o msgs/Pose2D.pb.o msgs/Time.pb.o msgs/PuckInfo.pb.o
+OBJS_gazsim_light_front = gazsim_light_front_plugin.o gazsim_light_front_thread.o
 
 OBJS_all    = $(OBJS_gazsim_light_front)
 

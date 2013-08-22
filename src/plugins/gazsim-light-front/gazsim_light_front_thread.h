@@ -31,7 +31,7 @@
 #include <plugins/gazebo/aspect/gazebo.h>
 #include <interfaces/RobotinoLightInterface.h>
 #include <interfaces/Position3DInterface.h>
-#include "msgs/LightSignals.pb.h"
+#include <protobuf_msgs/LightSignals.pb.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
