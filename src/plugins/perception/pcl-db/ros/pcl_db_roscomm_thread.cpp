@@ -21,6 +21,7 @@
 
 #include "pcl_db_roscomm_thread.h"
 #include <interfaces/PclDatabaseMergeInterface.h>
+#include <interfaces/PclDatabaseRetrieveInterface.h>
 
 #include <core/threading/wait_condition.h>
 #include <blackboard/utils/on_update_waker.h>
@@ -58,13 +59,23 @@ PointCloudDBROSCommThread::init()
     blackboard->open_for_reading<PclDatabaseMergeInterface>("PCL Database Merge");
 
   merge_waitcond_ = new WaitCondition();
-  update_waker_ = new BlackBoardOnUpdateWaker(blackboard, merge_if_, this);
+  merge_update_waker_ = new BlackBoardOnUpdateWaker(blackboard, merge_if_, this);
+
+  retrieve_if_ =
+    blackboard->open_for_reading<PclDatabaseRetrieveInterface>("PCL Database Retrieve");
+
+  retrieve_waitcond_ = new WaitCondition();
+  retrieve_update_waker_ = new BlackBoardOnUpdateWaker(blackboard, retrieve_if_, this);
 
   srv_merge_ = new ros::ServiceServer();
+  srv_retrieve_ = new ros::ServiceServer();
   srv_record_ = new ros::ServiceServer();
 
   *srv_merge_ = rosnode->advertiseService("/pcl_db_merge/merge",
 					  &PointCloudDBROSCommThread::merge_cb, this);
+
+  *srv_retrieve_ = rosnode->advertiseService("/pcl_db_merge/retrieve",
+					     &PointCloudDBROSCommThread::retrieve_cb, this);
 
   *srv_record_ = rosnode->advertiseService("/pcl_db_merge/record",
 					   &PointCloudDBROSCommThread::record_cb, this);
@@ -74,14 +85,19 @@ void
 PointCloudDBROSCommThread::finalize()
 {
   srv_merge_->shutdown();
+  srv_retrieve_->shutdown();
   srv_record_->shutdown();
   delete srv_merge_;
+  delete srv_retrieve_;
   delete srv_record_;
 
-  delete update_waker_;
+  delete merge_update_waker_;
+  delete retrieve_update_waker_;
   delete merge_waitcond_;
+  delete retrieve_waitcond_;
 
   blackboard->close(merge_if_);
+  blackboard->close(retrieve_if_);
 }
 
 
@@ -90,14 +106,28 @@ PointCloudDBROSCommThread::loop()
 {
   merge_if_->read();
   if (merge_if_->changed()) {
-    logger->log_info(name(), "Interface has changed");
+    logger->log_info(name(), "Merge interface has changed");
 
     logger->log_info(name(), "%u vs. %u   final: %s",
-		     merge_if_->msgid(), msg_id_, merge_if_->is_final() ? "yes" : "no");
+		     merge_if_->msgid(), merge_msg_id_, merge_if_->is_final() ? "yes" : "no");
 
-    if ((merge_if_->msgid() == msg_id_) && merge_if_->is_final()) {
-      logger->log_info(name(), "Our message ID and final");
+    if ((merge_if_->msgid() == merge_msg_id_) && merge_if_->is_final()) {
+      logger->log_info(name(), "Merge final");
       merge_waitcond_->wake_all();
+    }
+  }
+
+  retrieve_if_->read();
+  if (retrieve_if_->changed()) {
+    logger->log_info(name(), "Retrieve interface has changed");
+
+    logger->log_info(name(), "%u vs. %u   final: %s",
+		     retrieve_if_->msgid(), retrieve_msg_id_,
+		     retrieve_if_->is_final() ? "yes" : "no");
+
+    if ((retrieve_if_->msgid() == retrieve_msg_id_) && retrieve_if_->is_final()) {
+      logger->log_info(name(), "Retrieve final");
+      retrieve_waitcond_->wake_all();
     }
   }
 }
@@ -138,7 +168,7 @@ PointCloudDBROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &
 
   mm->ref();
   merge_if_->msgq_enqueue(mm);
-  msg_id_ = mm->id();
+  merge_msg_id_ = mm->id();
   mm->unref();
 
   // wait for result
@@ -151,6 +181,41 @@ PointCloudDBROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &
   } else {
     resp.ok = false;
     resp.error = merge_if_->error();
+  }
+  return true;
+}
+
+
+bool
+PointCloudDBROSCommThread::retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Request  &req,
+				       hybris_c1_msgs::RetrievePointCloud::Response &resp)
+{
+  PclDatabaseRetrieveInterface::RetrieveMessage *mm =
+    new PclDatabaseRetrieveInterface::RetrieveMessage();
+
+  int64_t timestamp = (int64_t)req.timestamp.sec * 1000L
+    + (int64_t)req.timestamp.nsec / 1000000L;
+
+  logger->log_info(name(), "Restoring %lli from %s", timestamp, req.collection.c_str());
+
+  mm->set_timestamp(timestamp);
+  mm->set_collection(req.collection.c_str());
+
+  mm->ref();
+  retrieve_if_->msgq_enqueue(mm);
+  retrieve_msg_id_ = mm->id();
+  mm->unref();
+
+  // wait for result
+  retrieve_waitcond_->wait();
+
+  // Check result
+  retrieve_if_->read();
+  if (retrieve_if_->is_final() && (std::string("") == retrieve_if_->error())) {
+    resp.ok = true;
+  } else {
+    resp.ok = false;
+    resp.error = retrieve_if_->error();
   }
   return true;
 }

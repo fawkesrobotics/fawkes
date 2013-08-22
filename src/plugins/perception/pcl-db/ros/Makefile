@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/ros.mk
 
 LIBS_pcl_db_roscomm = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesrosaspect fawkestf  \
-		PclDatabaseMergeInterface
+		PclDatabaseMergeInterface PclDatabaseRetrieveInterface
 OBJS_pcl_db_roscomm = pcl_db_roscomm_plugin.o pcl_db_roscomm_thread.o
 
 OBJS_all    = $(OBJS_pcl_db_roscomm)
