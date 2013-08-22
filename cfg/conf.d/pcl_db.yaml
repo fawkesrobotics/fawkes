@@ -1,0 +1,72 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
+---
+perception/pcl-db:
+  # mongodb-log database from which to read data 
+  database-name: "fflog"
+
+  # Maximum age of point clouds restored from database; sec
+  pcl-age-tolerance: 5.0
+
+  # Transform range to restore from database. Must be a list of two elements.
+  # From the time instructed via the blackboard the values are added to determine
+  # the start and end times of the range; sec
+  # Note that if you use the specialized transform logger of mongodb-log you
+  # should set the values to minus and plus double the storage interval, e.g.
+  # if the storage interval is 5 sec, set the range to [-10, 10].
+  transform-range: [-4.0, 4.0]
+
+perception/pcl-db-merge:
+  # Global reference frame to which to transform point clouds
+  # for initial alignment, typically /map or /base_link
+  # Note that this frame's XY plane is the ground support plane
+  global-frame: !frame /map
+
+  # ID of the output point cloud by which it is registered with the PCL manager
+  output-pcl-id: db-merged
+
+  passthrough-filter:
+    axis: z
+    limits: [0.5, 1.2]
+  
+  # Voxel grid leaf size for downsampling; m
+  downsample-leaf-size: 0.01
+
+  # Options related to plane removal
+  plane-removal:
+    # Maximum number of RANSAC segmentation iterations
+    segmentation-max-iterations: 1000
+    # Maximum acceptable distance for a point to be considered part of the table
+    segmentation-distance-threshold: 0.022
+
+  # Options related to ICP fitting of the clouds
+  icp:
+    # Maximum number of RANSAC iterations per ICP alignment iteration
+    ransac-iterations: 5000
+    # Maximum distance between two correspondances; m
+    max-correspondance-distance: 0.1
+
+    # The three convergence/abortion criteria
+    # Maximum number of iterations of ICP alignment
+    max-iterations: 200
+    # Transformation epsilon criterion to assume alignment convergence 
+    transformation-epsilon: 1e-7
+    # Euclidean fitness epsilon criterion to assume alignment convergence 
+    euclidean-fitness-epsilon: 1e7
+
+
+perception/pcl-db-retrieve:
+  # Fixed frame in recorded and current data
+  fixed-frame: !frame /base_link
+
+  # Sensor frame to which to transform output point cloud
+  sensor-frame: !frame /kinect/image
+
+  # ID of the output point cloud by which it is registered with the PCL manager
+  output-pcl-id: db-merged
+
+  # ID of the output point cloud by which it is registered with the PCL manager
+  original-pcl-id: db-original
+
