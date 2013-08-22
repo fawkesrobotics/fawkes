@@ -63,6 +63,21 @@ transform_pointcloud(const pcl::PointCloud<PointT> &cloud_in,
   pcl::transformPointCloud(cloud_in, cloud_out, origin, rotation);
 }
 
+
+/** Apply a rigid transform.
+ * @param cloud_inout input and output point cloud
+ * @param transform a rigid transformation from tf
+ * @note calls the Eigen version
+ */
+template <typename PointT> void 
+transform_pointcloud(pcl::PointCloud<PointT> &cloud_inout, 
+		     const tf::Transform &transform)
+{
+  pcl::PointCloud<PointT> tmp;
+  transform_pointcloud(cloud_inout, tmp, transform);
+  cloud_inout = tmp;
+}
+
 /** Transform a point cloud in a given target TF frame using the given transfomer.
  * @param target_frame the target TF frame the point cloud should be transformed to
  * @param cloud_in input point cloud
