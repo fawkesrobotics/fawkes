@@ -473,7 +473,7 @@ TabletopObjectsThread::loop()
       tf::Stamped<tf::Vector3> baserel_normal;
       tf_listener->transform_vector("/base_link", table_normal, baserel_normal);
       tf::Vector3 z_axis(0, 0, copysign(1.0, baserel_normal.z()));
-
+      table_inclination_ = z_axis.angle(baserel_normal);
       if (fabs(z_axis.angle(baserel_normal)) > cfg_max_z_angle_deviation_) {
         happy_with_plane = false;
         logger->log_warn(name(), "[L %u] table normal (%f,%f,%f) Z angle deviation |%f| > %f, excluding",
