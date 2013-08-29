@@ -14,3 +14,8 @@ gazsim:
     max-distance: 0.1
     success-visibility-history: 300
     fail-visibility-history: -300
+  puck-detection:
+    number-pucks: 20
+    max-distance: 1.5
+    success-visibility-history: 300
+    fail-visibility-history: -300 

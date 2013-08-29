@@ -1,0 +1,13 @@
+package llsf_msgs;
+
+import "Pose2D.proto";
+
+message PuckDetectionResult {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 301;
+  }
+
+  // List of all known pucks
+  repeated Pose2D positions = 1;
+}
