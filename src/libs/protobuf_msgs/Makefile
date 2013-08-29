@@ -34,7 +34,7 @@ warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plugin$(TNORMAL) (protobuf not found)"
 endif
 
-LIBS_libprotobufmsgs = stdc++ fawkescore fawkesutils fawkesnetcomm fawkeslogging
+LIBS_libprotobufmsgs = stdc++
 OBJS_libprotobufmsgs =$(filter-out $(FILTER_OUT) %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 HDRS_libprotobufmsgs = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 

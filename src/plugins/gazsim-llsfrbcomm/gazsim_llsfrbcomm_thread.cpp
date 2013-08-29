@@ -24,11 +24,11 @@
  */
 
 #include <aspect/blocked_timing.h>
-
-#include "gazsim_llsfrbcomm_thread.h"
-
 #include <protobuf_comm/client.h>
 #include <protobuf_comm/message_register.h>
+
+#include "gazsim_llsfrbcomm_thread.h"
+//#include <protobuf_msgs/MachineInfo.pb.h>
 
 using namespace fawkes;
 using namespace protobuf_comm;
@@ -90,10 +90,14 @@ GazsimLLSFRbCommThread::init()
     logger->log_warn(name(), e);
   }
 
+  //prepare client
   create_client();
-
+  client_->async_connect(refbox_host_.c_str(), refbox_port_);
   //this invokes the connect in the loop
   disconnected_recently_ = true;
+
+  //create publisher and subscriber for connection with gazebo node
+  //machine_info_pub_ = gazebonode->Advertise<llsf_msgs::MachineInfo>("~/LLSFRbSim/MachineInfo/");
 }
 
 
@@ -108,12 +112,13 @@ GazsimLLSFRbCommThread::finalize()
 void
 GazsimLLSFRbCommThread::loop()
 {
-  if(disconnected_recently_)
+  /*if(disconnected_recently_)
   {
     disconnected_recently_ = false;
     //connect
+    logger->log_info(name(), "Dong Try");
     client_->async_connect(refbox_host_.c_str(), refbox_port_);
-  }
+    }*/
 }
 
 void
@@ -125,7 +130,7 @@ GazsimLLSFRbCommThread::client_connected()
 void
 GazsimLLSFRbCommThread::client_disconnected(const boost::system::error_code &error)
 {
-  //logger->log_info(name(), "Disconnected");
+  logger->log_info(name(), "Disconnected");
   create_client();
 }
 
@@ -134,6 +139,14 @@ GazsimLLSFRbCommThread::client_msg(uint16_t comp_id, uint16_t msg_type,
 			     std::shared_ptr<google::protobuf::Message> msg)
 {
   //logger->log_info(name(), "Message");
+  //logger->log_info(name(), msg->GetTypeName().c_str());
+  
+  //Filter wanted messages
+  if(msg->GetTypeName() == "llsf_msgs.MachineInfo")
+  {
+    logger->log_info(name(), "Sending MachineInfo to gazebo");
+    //machine_info_pub_->Publish(*msg);
+  }
 }
 
 void GazsimLLSFRbCommThread::create_client()

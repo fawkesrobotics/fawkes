@@ -17,10 +17,13 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/protobuf.mk
 include $(BUILDSYSDIR)/boost.mk
+include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
+include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
+
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_llsfrbcomm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm
+LIBS_gazsim_llsfrbcomm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm #protobufmsgs fawkesgazeboaspect
 OBJS_gazsim_llsfrbcomm = gazsim_llsfrbcomm_plugin.o gazsim_llsfrbcomm_thread.o
 
 OBJS_all = $(OBJS_gazsim_llsfrbcomm)
@@ -30,10 +33,11 @@ HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
   CFLAGS  += $(CFLAGS_PROTOBUF) \
-	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) #$(CFLAGS_GAZEBO)
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
-	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS)) $(LDFLAGS_GAZEBO)
 
+  $(warning LDFLAGS: $(LDFLAGS_GAZEBO))	
   PLUGINS_all = $(PLUGINDIR)/gazsim-llsfrbcomm.so
 else
   WARN_TARGETS += warning_protobuf
@@ -46,6 +50,7 @@ all: $(WARN_TARGETS)
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plugin$(TNORMAL) (protobuf not found)"
 endif
+
 
 include $(BUILDSYSDIR)/base.mk
 

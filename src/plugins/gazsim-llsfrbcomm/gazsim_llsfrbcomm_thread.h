@@ -34,6 +34,12 @@
 #include <google/protobuf/message.h>
 #include <protobuf_comm/client.h>
 #include <protobuf_comm/message_register.h>
+//#include <plugins/gazebo/aspect/gazebo.h>
+
+//from Gazebo
+/* #include <gazebo/transport/TransportTypes.hh> */
+/* #include <gazebo/msgs/MessageTypes.hh> */
+/* #include <gazebo/transport/transport.hh> */
 
 namespace protobuf_comm {
   class ProtobufStreamClient;
@@ -43,6 +49,7 @@ class GazsimLLSFRbCommThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::ConfigurableAspect,
+//public fawkes::GazeboAspect,
   public fawkes::LoggingAspect
 {
  public:
@@ -69,6 +76,9 @@ class GazsimLLSFRbCommThread
   std::vector<std::string> proto_dirs_;
   std::string refbox_host_;
   unsigned int refbox_port_;
+
+  //Publisher and subscriber for the connection to gazebo
+  //  gazebo::transport::PublisherPtr machine_info_pub_;
 
   //helper variables
   bool disconnected_recently_;
