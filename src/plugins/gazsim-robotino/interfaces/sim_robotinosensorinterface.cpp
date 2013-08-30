@@ -45,6 +45,9 @@ void SimRobotinoSensorInterface::init()
   //suscribe for messages
   gyro_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/Gyro/"), &SimRobotinoSensorInterface::on_gyro_msg, this);
   infrared_puck_sensor_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/InfraredPuckSensor/"), &SimRobotinoSensorInterface::on_infrared_puck_sensor_msg, this);
+  gripper_laser_left_sensor_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/GripperLaserSensor/Left/"), &SimRobotinoSensorInterface::on_gripper_laser_left_sensor_msg, this);
+  gripper_laser_right_sensor_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/GripperLaserSensor/Right/"), &SimRobotinoSensorInterface::on_gripper_laser_right_sensor_msg, this);
+
   
   if(control_pub_->HasConnections())
   {
@@ -77,5 +80,23 @@ void SimRobotinoSensorInterface::on_infrared_puck_sensor_msg(ConstFloatPtr &msg)
 {
   float value = msg->value();
   sens_if_->set_distance(8, value);
+  sens_if_->write();
+}
+
+
+void SimRobotinoSensorInterface::on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg)
+{
+  //TODO: lookup vaues in reality, compare threshold
+  float value = msg->value();
+  sens_if_->set_analog_in(4, value);
+  sens_if_->write();
+}
+
+
+void SimRobotinoSensorInterface::on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg)
+{
+  //TODO: lookup vaues in reality, compare threshold
+  float value = msg->value();
+  sens_if_->set_analog_in(0, value);
   sens_if_->write();
 }

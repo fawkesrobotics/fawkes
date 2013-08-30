@@ -46,10 +46,14 @@ SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, faw
   //Suscribers to recieve messages from gazebo
   gazebo::transport::SubscriberPtr gyro_sub_;
   gazebo::transport::SubscriberPtr infrared_puck_sensor_sub_;
+  gazebo::transport::SubscriberPtr gripper_laser_left_sensor_sub_;
+  gazebo::transport::SubscriberPtr gripper_laser_right_sensor_sub_;
 
   //Handler functions for incoming messages
   void on_gyro_msg(ConstVector3dPtr &msg);
   void on_infrared_puck_sensor_msg(ConstFloatPtr &msg);
+  void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
+  void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
 
   //provided interfaces
   fawkes::RobotinoSensorInterface *sens_if_;
