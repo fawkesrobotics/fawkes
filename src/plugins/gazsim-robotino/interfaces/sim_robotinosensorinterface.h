@@ -22,8 +22,10 @@
 #define __SIM_ROBOTINO_SENSOR_INTERFACE_H_
 
 #include "sim_interface.h"
+#include <protobuf_msgs/Float.pb.h>
 
 
+typedef const boost::shared_ptr<gazsim_msgs::Float const> ConstFloatPtr;
 
 namespace fawkes {
   class RobotinoSensorInterface;
@@ -43,9 +45,11 @@ SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, faw
  private:
   //Suscribers to recieve messages from gazebo
   gazebo::transport::SubscriberPtr gyro_sub_;
+  gazebo::transport::SubscriberPtr infrared_puck_sensor_sub_;
 
   //Handler functions for incoming messages
   void on_gyro_msg(ConstVector3dPtr &msg);
+  void on_infrared_puck_sensor_msg(ConstFloatPtr &msg);
 
   //provided interfaces
   fawkes::RobotinoSensorInterface *sens_if_;

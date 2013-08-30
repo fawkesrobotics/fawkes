@@ -29,7 +29,7 @@
 #include <gazebo/transport/transport.hh>
 
 #include <interfaces/RobotinoSensorInterface.h>
-
+#include <protobuf_msgs/Float.pb.h>
 
 using namespace fawkes;
 using namespace gazebo;
@@ -44,6 +44,7 @@ void SimRobotinoSensorInterface::init()
 
   //suscribe for messages
   gyro_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/Gyro/"), &SimRobotinoSensorInterface::on_gyro_msg, this);
+  infrared_puck_sensor_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/InfraredPuckSensor/"), &SimRobotinoSensorInterface::on_infrared_puck_sensor_msg, this);
   
   if(control_pub_->HasConnections())
   {
@@ -68,5 +69,13 @@ void SimRobotinoSensorInterface::on_gyro_msg(ConstVector3dPtr &msg)
   float yaw = msg->z();
   sens_if_->set_gyro_available(true);
   sens_if_->set_gyro_angle(yaw);
+  sens_if_->write();
+}
+
+
+void SimRobotinoSensorInterface::on_infrared_puck_sensor_msg(ConstFloatPtr &msg)
+{
+  float value = msg->value();
+  sens_if_->set_distance(8, value);
   sens_if_->write();
 }

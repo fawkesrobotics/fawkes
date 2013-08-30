@@ -1,0 +1,5 @@
+package gazsim_msgs;
+
+message Float {
+  required float value = 1;
+}
