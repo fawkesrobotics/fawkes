@@ -27,6 +27,7 @@
 #include <string.h>
 #include <sstream>
 
+#include <interfaces/SwitchInterface.h>
 #include <interfaces/Position3DInterface.h>
 #include <protobuf_msgs/Pose2D.pb.h>
 #include <protobuf_msgs/PuckDetectionResult.pb.h>
@@ -72,6 +73,7 @@ std::ostringstream ss;
     map_pos_if_[i] = blackboard->open_for_writing<fawkes::Position3DInterface>
       (ss.str().c_str());
   } 
+  switch_if_ = blackboard->open_for_writing<fawkes::SwitchInterface>("omnivisionSwitch");
 
   //subscribing to gazebo publisher
   puck_positions_sub_ = gazebonode->Subscribe
@@ -85,18 +87,43 @@ void PuckDetectionSimThread::finalize()
   {
     blackboard->close(it->second);
   }
+  blackboard->close(switch_if_);
 }
 
 void PuckDetectionSimThread::loop()
 {
   //the acual work takes place in on_light_signals_msg
 
-  //TODO switch interface
+  //check messages of the switch interface
+  while (!switch_if_->msgq_empty()) {
+    if (SwitchInterface::DisableSwitchMessage *msg =
+	switch_if_->msgq_first_safe(msg)) {
+      switch_if_->set_enabled(false);
+    } else if (SwitchInterface::EnableSwitchMessage *msg =
+	       switch_if_->msgq_first_safe(msg)) {
+      switch_if_->set_enabled(true);
+    }
+    switch_if_->msgq_pop();
+    switch_if_->write();
+  }
 }
 
 void PuckDetectionSimThread::on_puck_positions_msg(ConstPuckDetectionResultPtr &msg)
 {
   //logger->log_info(name(), "Got new Puck Positions.\n");
+
+  //Only do anything if the switch is enabled
+  if(!switch_if_->is_enabled())
+  {
+    std::list<fawkes::Position3DInterface*>::iterator puck;
+    for(std::map<int, Position3DInterface*>::iterator it = map_pos_if_.begin(); it != map_pos_if_.end(); it++)
+    {
+      it->second->set_visibility_history(0);
+      it->second->write();
+    }
+    return;
+  }
+
   for(int i = 0; i < msg->positions_size(); i++)
   {
     int if_index = i + 1; //Pucks are enumerated starting with one

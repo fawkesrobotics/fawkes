@@ -31,6 +31,7 @@
 #include <map>
 #include <plugins/gazebo/aspect/gazebo.h>
 #include <interfaces/Position3DInterface.h>
+#include <interfaces/SwitchInterface.h>
 #include <protobuf_msgs/PuckDetectionResult.pb.h>
 
 //from Gazebo
@@ -67,6 +68,8 @@ class PuckDetectionSimThread
 
   //interfaces to publish the positions
   std::map<int, fawkes::Position3DInterface*> map_pos_if_;
+  //switch interface for enableing/disableing
+  fawkes::SwitchInterface *switch_if_;
 
   //handler function for incoming messages about the machine light signals
   void on_puck_positions_msg(ConstPuckDetectionResultPtr &msg);
