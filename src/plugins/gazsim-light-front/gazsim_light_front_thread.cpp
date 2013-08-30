@@ -61,21 +61,24 @@ void LightFrontSimThread::init()
   logger->log_debug(name(), 
 		    "Initializing Simulation of the Light Front Plugin");
 
+  //read config values
+  max_distance_ = config->get_float("/gazsim/light-front/max-distance");
+  success_visibility_history_ = config->get_int("/gazsim/light-front/success-visibility-history");
+  fail_visibility_history_ = config->get_int("/gazsim/light-front/fail-visibility-history");
+  light_state_if_name_ = config->get_string("/plugins/light_front/light_state_if");
+  light_pos_if_name_ = config->get_string("/plugins/light_front/light_position_if");
+
   //open interfaces
   light_if_ = blackboard->open_for_writing<RobotinoLightInterface>
-    ("/plugins/light_front/light_state");
+    (light_state_if_name_.c_str());
   pose_if_ = blackboard->open_for_reading<fawkes::Position3DInterface>
-    ("/plugins/light_front/light_position_if");
+    (light_pos_if_name_.c_str());
 
   //subscribing to gazebo publisher
   light_signals_sub_ = gazebonode->Subscribe
     (std::string("~/RobotinoSim/MachineVision/"), 
      &LightFrontSimThread::on_light_signals_msg, this);
-
-  //read config values
-  max_distance_ = config->get_float("/gazsim/light-front/max-distance");
-  success_visibility_history_ = config->get_int("/gazsim/light-front/success-visibility-history");
-  fail_visibility_history_ = config->get_int("/gazsim/light-front/fail-visibility-history");
+  localization_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/Gps/"), &LightFrontSimThread::on_localization_msg, this);
 }
 
 void LightFrontSimThread::finalize()
@@ -97,10 +100,15 @@ void LightFrontSimThread::on_light_signals_msg(ConstAllMachineSignalsPtr &msg)
 
   //read cluster position to determine 
   //on which machine the robotino is looking at
+  //(the cluster returns the position relative to the robots pos and ori)
   pose_if_->read();
-  double look_pos_x = pose_if_->translation(0);
-  double look_pos_y = pose_if_->translation(1);
-
+  double rel_x = pose_if_->translation(0);
+  double rel_y = pose_if_->translation(1);
+  double look_pos_x = robot_x_ 
+    + cos(-robot_ori_) * rel_x + sin(-robot_ori_) * rel_y;
+  double look_pos_y = robot_y_ 
+    - sin(-robot_ori_) * rel_x + cos(-robot_ori_) * rel_y;
+  printf("The look pos is %f, %f\n", look_pos_x, look_pos_y);
   //find machine nearest to the look_pos
   double min_distance = 1000.0;
   int index_min = 0;
@@ -130,6 +138,7 @@ void LightFrontSimThread::on_light_signals_msg(ConstAllMachineSignalsPtr &msg)
   else{
     //read out lights
     llsf_msgs::MachineSignal machine = msg->machines(index_min);
+    printf("looking at machine :%s\n", machine.name().c_str());
     for(int i = 0; i < machine.lights_size(); i++)
     {
       llsf_msgs::LightSpec light_spec = machine.lights(i);
@@ -152,4 +161,14 @@ void LightFrontSimThread::on_light_signals_msg(ConstAllMachineSignalsPtr &msg)
     light_if_->set_visibility_history(success_visibility_history_);
   }
   light_if_->write();
+}
+
+void LightFrontSimThread::on_localization_msg(ConstPosePtr &msg)
+{
+  //logger->log_info(name(), "Got new Localization data.\n");
+
+  //read data from message
+  robot_x_ = msg->position().x();
+  robot_y_ = msg->position().y();
+  robot_ori_ = msg->orientation().z();
 }

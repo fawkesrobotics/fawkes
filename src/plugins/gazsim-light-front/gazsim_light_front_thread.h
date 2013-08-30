@@ -32,6 +32,7 @@
 #include <interfaces/RobotinoLightInterface.h>
 #include <interfaces/Position3DInterface.h>
 #include <protobuf_msgs/LightSignals.pb.h>
+#include <string.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
@@ -64,6 +65,9 @@ class LightFrontSimThread
  private:
   //Subscriber to receive light signal data from gazebo
   gazebo::transport::SubscriberPtr light_signals_sub_;
+  //Subscriber to receive localization data from gazebo
+  //(light front works relative, and the light signal msgs are absolute)
+  gazebo::transport::SubscriberPtr localization_sub_;
 
   //interface needed to determine position of the light
   fawkes::Position3DInterface *pose_if_;
@@ -74,12 +78,21 @@ class LightFrontSimThread
   //handler function for incoming messages about the machine light signals
   void on_light_signals_msg(ConstAllMachineSignalsPtr &msg);
 
+  //handler function for incoming localization data messages
+  void on_localization_msg(ConstPosePtr &msg);
+
   //config value for maximal distance before the plugin says 
   //it can not detect any light
   double max_distance_;
 
   int success_visibility_history_;
   int fail_visibility_history_;
+
+  std::string light_pos_if_name_;
+  std::string light_state_if_name_;
+
+  //the robots position in the simulation
+  double robot_x_, robot_y_, robot_ori_;
 };
 
 #endif
