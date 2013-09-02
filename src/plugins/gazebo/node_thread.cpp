@@ -23,7 +23,7 @@
 #include "node_thread.h"
 
 // from Gazebo
-#include <gazebo/transport/Transport.hh>
+#include <gazebo/transport/TransportIface.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/Node.hh>
 #include <gazebo/gazebo_config.h>

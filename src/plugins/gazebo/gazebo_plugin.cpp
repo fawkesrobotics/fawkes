@@ -23,7 +23,7 @@
 #include "node_thread.h"
 
 // from Gazebo
-#include <gazebo/transport/Transport.hh>
+#include <gazebo/transport/TransportIface.hh>
 #include <plugins/gazebo/gazebo_plugin.h>
 
 using namespace fawkes;
