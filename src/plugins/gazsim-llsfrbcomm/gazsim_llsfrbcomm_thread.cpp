@@ -28,7 +28,7 @@
 #include <protobuf_comm/message_register.h>
 
 #include "gazsim_llsfrbcomm_thread.h"
-//#include <protobuf_msgs/MachineInfo.pb.h>
+#include <protobuf_msgs/MachineInfo.pb.h>
 
 using namespace fawkes;
 using namespace protobuf_comm;
@@ -97,7 +97,9 @@ GazsimLLSFRbCommThread::init()
   disconnected_recently_ = true;
 
   //create publisher and subscriber for connection with gazebo node
-  //machine_info_pub_ = gazebonode->Advertise<llsf_msgs::MachineInfo>("~/LLSFRbSim/MachineInfo/");
+  machine_info_pub_ = gazebonode->Advertise<llsf_msgs::MachineInfo>("~/LLSFRbSim/MachineInfo/");
+  place_puck_under_machine_sub_ = gazebonode->Subscribe(std::string("~/LLSFRbSim/PlacePuckUnderMachine/"), &GazsimLLSFRbCommThread::on_puck_place_msg, this);
+  remove_puck_under_machine_sub_ = gazebonode->Subscribe(std::string("~/LLSFRbSim/RemovePuckFromMachine/"), &GazsimLLSFRbCommThread::on_puck_remove_msg, this);
 }
 
 
@@ -144,8 +146,8 @@ GazsimLLSFRbCommThread::client_msg(uint16_t comp_id, uint16_t msg_type,
   //Filter wanted messages
   if(msg->GetTypeName() == "llsf_msgs.MachineInfo")
   {
-    logger->log_info(name(), "Sending MachineInfo to gazebo");
-    //machine_info_pub_->Publish(*msg);
+    //logger->log_info(name(), "Sending MachineInfo to gazebo");
+    machine_info_pub_->Publish(*msg);
   }
 }
 
@@ -166,4 +168,26 @@ void GazsimLLSFRbCommThread::create_client()
 
   //this invokes the connect in the loop
   disconnected_recently_ = true;
+}
+
+void GazsimLLSFRbCommThread::on_puck_place_msg(ConstPlacePuckUnderMachinePtr &msg)
+{
+  logger->log_info(name(), "Sending PPUM to refbox");
+  if(!client_->connected())
+  {
+    return;
+  }
+  llsf_msgs::PlacePuckUnderMachine to_rb = *msg;
+  client_->send(to_rb);
+}
+
+void GazsimLLSFRbCommThread::on_puck_remove_msg(ConstRemovePuckFromMachinePtr &msg)
+{
+  logger->log_info(name(), "Sending RPFM to refbox");
+  if(!client_->connected())
+  {
+    return;
+  }
+  llsf_msgs::RemovePuckFromMachine to_rb = *msg;
+  client_->send(to_rb);
 }
