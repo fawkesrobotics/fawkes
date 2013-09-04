@@ -172,7 +172,7 @@ void GazsimLLSFRbCommThread::create_client()
 
 void GazsimLLSFRbCommThread::on_puck_place_msg(ConstPlacePuckUnderMachinePtr &msg)
 {
-  logger->log_info(name(), "Sending PPUM to refbox");
+  //logger->log_info(name(), "Sending PPUM to refbox");
   if(!client_->connected())
   {
     return;
@@ -183,7 +183,7 @@ void GazsimLLSFRbCommThread::on_puck_place_msg(ConstPlacePuckUnderMachinePtr &ms
 
 void GazsimLLSFRbCommThread::on_puck_remove_msg(ConstRemovePuckFromMachinePtr &msg)
 {
-  logger->log_info(name(), "Sending RPFM to refbox");
+  //logger->log_info(name(), "Sending RPFM to refbox");
   if(!client_->connected())
   {
     return;
