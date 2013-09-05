@@ -137,12 +137,12 @@ void PuckDetectionSimThread::on_puck_positions_msg(ConstPuckDetectionResultPtr &
       map_pos_if_[if_index]->set_translation(2, 0);
       map_pos_if_[if_index]->set_visibility_history(success_visibility_history_);
 
-      map_pos_if_[if_index]->write();
     }
     else
     {
       map_pos_if_[if_index]->set_visibility_history(fail_visibility_history_);
-      map_pos_if_[if_index]->write();
     }
+    map_pos_if_[if_index]->set_frame("/base_link");
+    map_pos_if_[if_index]->write();
   }
 }
