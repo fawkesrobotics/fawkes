@@ -34,8 +34,8 @@ namespace fawkes {
 class SimRobotinoSensorInterface: public SimInterface
 {
  public:
-SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode)
-  : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimRobotinoSensorInterface")
+ SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode, fawkes::Configuration *config)
+  : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimRobotinoSensorInterface", config)
   {};
 
   virtual void init();
@@ -57,6 +57,11 @@ SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, faw
 
   //provided interfaces
   fawkes::RobotinoSensorInterface *sens_if_;
+
+  //config values
+  double gripper_laser_threshold_;
+  double gripper_laser_value_far_;
+  double gripper_laser_value_near_;
 };
 
 #endif

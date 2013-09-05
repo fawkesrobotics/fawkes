@@ -23,6 +23,7 @@
 
 #include <logging/logger.h>
 #include <blackboard/blackboard.h>
+#include <config/config.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
@@ -34,13 +35,14 @@
 class SimInterface
 {
  public:
-  SimInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode, const char* name)
+  SimInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode, const char* name, fawkes::Configuration *config)
   {
     this->control_pub_ = controlPublisher;
     this->logger_ = logger;
     this->blackboard_ = blackboard;
     this->gazebonode_ = gazebonode;
     this->name_ = name;
+    this->config_ = config;
   };
   ~SimInterface() {};
 
@@ -54,6 +56,7 @@ class SimInterface
   fawkes::Logger *logger_;
   fawkes::BlackBoard *blackboard_;
   gazebo::transport::NodePtr gazebonode_;
+  fawkes::Configuration *config_;
 
   //Publisher to send control-messages to gazebo
   gazebo::transport::PublisherPtr control_pub_;

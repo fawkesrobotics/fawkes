@@ -34,8 +34,8 @@ namespace fawkes {
 class SimMotorInterface: public SimInterface
 {
  public:
- SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode, fawkes::Clock *clock, fawkes::tf::TransformPublisher *tf_publisher)
-   : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimMotorInterface")
+ SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode, fawkes::Configuration *config, fawkes::Clock *clock, fawkes::tf::TransformPublisher *tf_publisher)
+   : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimMotorInterface", config)
   {
     this->clock_ = clock;
     this->tf_publisher_ = tf_publisher;

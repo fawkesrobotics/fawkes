@@ -38,6 +38,11 @@ using namespace gazebo;
 void SimRobotinoSensorInterface::init()
 {
   logger_->log_debug(name_, "Initializing Simulation of RobotinoSensorInterface");
+
+  //read config values
+  gripper_laser_threshold_ = config_->get_float("/gazsim/robotino/gripper-laser-threshold");
+  gripper_laser_value_far_ = config_->get_float("/gazsim/robotino/gripper-laser-value-far");
+  gripper_laser_value_near_ = config_->get_float("/gazsim/robotino/gripper-laser-value-near");
     
   //Open interfaces
   sens_if_ = blackboard_->open_for_writing<RobotinoSensorInterface>("Robotino");
@@ -78,6 +83,7 @@ void SimRobotinoSensorInterface::on_gyro_msg(ConstVector3dPtr &msg)
 
 void SimRobotinoSensorInterface::on_infrared_puck_sensor_msg(ConstFloatPtr &msg)
 {
+  //make sure that the config values for fetch_puck are set right
   float value = msg->value();
   sens_if_->set_distance(8, value);
   sens_if_->write();
@@ -86,17 +92,29 @@ void SimRobotinoSensorInterface::on_infrared_puck_sensor_msg(ConstFloatPtr &msg)
 
 void SimRobotinoSensorInterface::on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg)
 {
-  //TODO: lookup vaues in reality, compare threshold
   float value = msg->value();
-  sens_if_->set_analog_in(4, value);
+  if(value < gripper_laser_threshold_)
+  {
+    sens_if_->set_analog_in(4, gripper_laser_value_near_);
+  }
+  else
+  {
+    sens_if_->set_analog_in(4, gripper_laser_value_far_);
+  }
   sens_if_->write();
 }
 
 
 void SimRobotinoSensorInterface::on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg)
 {
-  //TODO: lookup vaues in reality, compare threshold
   float value = msg->value();
-  sens_if_->set_analog_in(0, value);
+  if(value < gripper_laser_threshold_)
+  {
+    sens_if_->set_analog_in(0, gripper_laser_value_near_);
+  }
+  else
+  {
+    sens_if_->set_analog_in(0, gripper_laser_value_far_);
+  }
   sens_if_->write();
 }
