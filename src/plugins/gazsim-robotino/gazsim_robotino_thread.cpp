@@ -69,8 +69,8 @@ RobotinoSimThread::init()
   }
 
   //Loading interfaces to simulate
-  interfaces_list_.push_back((SimInterface*) new SimRobotinoSensorInterface(string_pub_, logger, blackboard, gazebonode));
-  interfaces_list_.push_back((SimInterface*) new SimMotorInterface(string_pub_, logger, blackboard, gazebonode, clock, tf_publisher));
+  interfaces_list_.push_back((SimInterface*) new SimRobotinoSensorInterface(string_pub_, logger, blackboard, gazebonode, config));
+  interfaces_list_.push_back((SimInterface*) new SimMotorInterface(string_pub_, logger, blackboard, gazebonode, config, clock, tf_publisher));
 
   //initialize interfaces to simulate
   for (std::list<SimInterface*>::iterator it = interfaces_list_.begin(); it != interfaces_list_.end(); it++)
