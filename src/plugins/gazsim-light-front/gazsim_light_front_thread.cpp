@@ -105,10 +105,9 @@ void LightFrontSimThread::on_light_signals_msg(ConstAllMachineSignalsPtr &msg)
   double rel_x = pose_if_->translation(0);
   double rel_y = pose_if_->translation(1);
   double look_pos_x = robot_x_ 
-    + cos(-robot_ori_) * rel_x + sin(-robot_ori_) * rel_y;
+    + cos(robot_ori_) * rel_x - sin(robot_ori_) * rel_y;
   double look_pos_y = robot_y_ 
-    - sin(-robot_ori_) * rel_x + cos(-robot_ori_) * rel_y;
-  printf("The look pos is %f, %f\n", look_pos_x, look_pos_y);
+    + sin(robot_ori_) * rel_x + cos(robot_ori_) * rel_y;
   //find machine nearest to the look_pos
   double min_distance = 1000.0;
   int index_min = 0;
@@ -130,7 +129,7 @@ void LightFrontSimThread::on_light_signals_msg(ConstAllMachineSignalsPtr &msg)
   //if the distance is greater than a threashold, no light is determined
   if(min_distance > max_distance_)
   {
-    logger->log_info(name(), "Distance between light pos and machine (%f) is too big.\n", min_distance);
+    //logger->log_info(name(), "Distance between light pos and machine (%f) is too big.\n", min_distance);
     //set ready and visibility history
     light_if_->set_ready(false);
     light_if_->set_visibility_history(fail_visibility_history_);
@@ -138,7 +137,7 @@ void LightFrontSimThread::on_light_signals_msg(ConstAllMachineSignalsPtr &msg)
   else{
     //read out lights
     llsf_msgs::MachineSignal machine = msg->machines(index_min);
-    printf("looking at machine :%s\n", machine.name().c_str());
+    //printf("looking at machine :%s\n", machine.name().c_str());
     for(int i = 0; i < machine.lights_size(); i++)
     {
       llsf_msgs::LightSpec light_spec = machine.lights(i);
