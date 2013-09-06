@@ -43,6 +43,10 @@ bool changed(float before, float after, float relativeThreashold);
 void SimMotorInterface::init()
 {
   logger_->log_debug(name_, "Initializing Simulation of MotorInterface");
+
+  //read config values
+  slippery_wheels_enabled_ = config_->get_bool("gazsim/robotino/slippery-wheels-enabled");
+  slippery_wheels_threshold_ = config_->get_float("gazsim/robotino/slippery-wheels-threshold");
     
   //Open interfaces
   motor_if_ = blackboard_->open_for_writing<MotorInterface>("Robotino");
@@ -161,6 +165,40 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
 
   //estimate path-length
   float length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));
+
+  if(slippery_wheels_enabled_)
+  {
+    //simulate slipping wheels when driving against an obstacle
+    fawkes::Time new_time = clock_->now();
+    double duration = new_time.in_sec() - last_pos_time_.in_sec();
+    last_pos_time_ = new_time;
+
+    double total_speed = sqrt(vx_ * vx_ + vy_ * vy_);
+    if(length_driven < total_speed * duration * slippery_wheels_threshold_)
+    {
+      double speed_abs_x = vx_ * cos(ori_) - vy_ * sin(ori_);
+      double speed_abs_y = vx_ * sin(ori_) + vy_ * cos(ori_);
+      double slipped_x = speed_abs_x * duration * slippery_wheels_threshold_;
+      double slipped_y = speed_abs_y * duration * slippery_wheels_threshold_;
+      //logger_->log_warn(name_, "Its is slippery here!!! (%f, %f)", slipped_x, slipped_y);
+      new_x = x_ + slipped_x;
+      new_y = y_ + slipped_y;
+      //update the offset (otherwise the slippery error would be corrected in the next iteration)
+      x_offset_ -= slipped_x;
+      y_offset_ -= slipped_y;	      
+
+      length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));
+    }
+
+    //simulate slipping wheels when turning against an obstacle
+    if(abs(new_ori - ori_) < vomega_ * duration * slippery_wheels_threshold_)
+    {
+      double slipped_ori = vomega_ * duration * slippery_wheels_threshold_;
+      new_ori = ori_ + slipped_ori;
+      //update the offset (otherwise the slippery error would be corrected in the next iteration)
+      ori_offset_ -= slipped_ori;	
+    }
+  }
 
   //update stored values
   x_ = new_x;

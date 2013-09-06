@@ -4,18 +4,13 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gazsim
 ---
 gazsim:
-  llsf-rb-comm:
-    proto-dirs: ["@BASEDIR@/src/agents/llsf2013/msgs"]
-    refbox-host: "localhost"
-    refbox-port: 4444
   laser:
-    max_range: 5.5
-  light-front:
-    max-distance: 0.1
-    success-visibility-history: 300
-    fail-visibility-history: -300
-  puck-detection:
-    number-pucks: 20
-    max-distance: 1.5
-    success-visibility-history: 300
-    fail-visibility-history: -300 
+    max_range: 5.5 
+  robotino:
+    gripper-laser-threshold: 0.18
+    gripper-laser-value-far: 0.17
+    gripper-laser-value-near: 9.99
+    
+    # does the odometry change if the robotino drives against an obstacle?
+    slippery-wheels-enabled: true
+    slippery-wheels-threshold: 0.8

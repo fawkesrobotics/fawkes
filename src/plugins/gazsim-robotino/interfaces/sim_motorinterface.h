@@ -24,6 +24,7 @@
 #include "sim_interface.h"
 #include <tf/transform_publisher.h>
 #include <utils/time/clock.h>
+#include <utils/time/time.h>
 #include <interfaces/SwitchInterface.h>
 
 
@@ -71,6 +72,7 @@ class SimMotorInterface: public SimInterface
   //Helper variables:
   //motorMovements last sent to gazebo
   float vx_, vy_, vomega_, x_, y_, ori_, path_length_;
+  fawkes::Time last_pos_time_;
 
   //Odometry offset
   float x_offset_, y_offset_, ori_offset_;
@@ -81,6 +83,10 @@ class SimMotorInterface: public SimInterface
 
   //Handler functions for incoming messages
   void on_pos_msg(ConstPosePtr &msg);
+
+  //config values
+  bool slippery_wheels_enabled_;
+  double slippery_wheels_threshold_;
 };
 
 #endif
