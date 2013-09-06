@@ -24,11 +24,13 @@
 #include "sim_interface.h"
 #include <tf/transform_publisher.h>
 #include <utils/time/clock.h>
+#include <interfaces/SwitchInterface.h>
 
 
 
 namespace fawkes {
   class MotorInterface;
+  class SwitchInterface;
 }
 
 class SimMotorInterface: public SimInterface
@@ -60,6 +62,7 @@ class SimMotorInterface: public SimInterface
 
   //provided interfaces
   fawkes::MotorInterface *motor_if_;
+  fawkes::SwitchInterface *switch_if_;
   
   //Needed for publishing the /base_link /odom transform
   fawkes::Clock *clock_;
@@ -74,6 +77,7 @@ class SimMotorInterface: public SimInterface
 
   //Helper functions:
   void process_messages();
+  void send_transroot(double vx, double vy, double omega);
 
   //Handler functions for incoming messages
   void on_pos_msg(ConstPosePtr &msg);

@@ -46,6 +46,11 @@ void SimMotorInterface::init()
     
   //Open interfaces
   motor_if_ = blackboard_->open_for_writing<MotorInterface>("Robotino");
+  switch_if_ = blackboard_->open_for_writing<fawkes::SwitchInterface>("Robotino Motor");
+
+  //enable motor by default
+  switch_if_->set_enabled(true);
+  switch_if_->write();
 
   //create publisher for messages
   motor_move_pub_ = gazebonode_->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
@@ -65,17 +70,50 @@ void SimMotorInterface::init()
 void SimMotorInterface::finalize()
 {
   blackboard_->close(motor_if_);
+  blackboard_->close(switch_if_);
 }
 
 void SimMotorInterface::loop()
 {
-  //work off all messages passed to the interface
+  //work off all messages passed to the interfaces
   process_messages();
 }
 
+void SimMotorInterface::send_transroot(double vx, double vy, double omega)
+{
+  msgs::Vector3d motorMove;
+  motorMove.set_x(vx_);
+  motorMove.set_y(vy_);
+  motorMove.set_z(vomega_);
+  motor_move_pub_->Publish(motorMove);
+}
 
 void SimMotorInterface::process_messages()
 {
+  //check messages of the switch interface
+  while (!switch_if_->msgq_empty()) {
+    if (SwitchInterface::DisableSwitchMessage *msg =
+	switch_if_->msgq_first_safe(msg)) {
+      switch_if_->set_enabled(false);
+      //pause movement
+      send_transroot(0, 0, 0);
+    } else if (SwitchInterface::EnableSwitchMessage *msg =
+	       switch_if_->msgq_first_safe(msg)) {
+      switch_if_->set_enabled(true);
+      //unpause movement
+      send_transroot(vx_, vy_, vomega_);
+    }
+    switch_if_->msgq_pop();
+    switch_if_->write();
+  }
+
+  //do not do anything if the motor is disabled
+  if(!switch_if_->is_enabled())
+  {
+    return;
+  }
+
+  //check messages of the motor interface
   while(motor_move_pub_->HasConnections() && !motor_if_->msgq_empty())
   {
     if (MotorInterface::TransRotMessage *msg =
@@ -87,11 +125,9 @@ void SimMotorInterface::process_messages()
 	vx_ = msg->vx();
 	vy_ = msg->vy();
 	vomega_ = msg->omega();
-	msgs::Vector3d motorMove;
-	motorMove.set_x(vx_);
-	motorMove.set_y(vy_);
-	motorMove.set_z(vomega_);
-	motor_move_pub_->Publish(motorMove);
+	
+	//send message to gazebo
+	send_transroot(vx_, vy_, vomega_);
 
 	//update interface
 	motor_if_->set_vx(vx_);
