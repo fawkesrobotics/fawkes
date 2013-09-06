@@ -24,7 +24,8 @@ include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 LIBS_gazsim_robotino = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
 	       BatteryInterface RobotinoSensorInterface MotorInterface \
-	       Position3DInterface fawkesgazeboaspect protobufmsgs
+	       Position3DInterface fawkesgazeboaspect protobufmsgs \
+	       SwitchInterface
 OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o interfaces/sim_interface.o interfaces/sim_robotinosensorinterface.o interfaces/sim_motorinterface.o
 
 OBJS_all    = $(OBJS_gazsim_robotino)

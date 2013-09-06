@@ -190,14 +190,16 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
       length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));
     }
 
-    //simulate slipping wheels when turning against an obstacle
-    if(abs(new_ori - ori_) < vomega_ * duration * slippery_wheels_threshold_)
-    {
-      double slipped_ori = vomega_ * duration * slippery_wheels_threshold_;
-      new_ori = ori_ + slipped_ori;
-      //update the offset (otherwise the slippery error would be corrected in the next iteration)
-      ori_offset_ -= slipped_ori;	
-    }
+    // removed because of weird amcl results when driving as usual
+    // //simulate slipping wheels when turning against an obstacle
+    // if(abs(new_ori - ori_) < vomega_ * duration * slippery_wheels_threshold_ * 0.5)
+    // {
+    //   double slipped_ori = vomega_ * duration * slippery_wheels_threshold_ * 0.5;
+    //   logger_->log_warn(name_, "Its is slippery here (ori)!!! %f", slipped_ori);
+    //   new_ori = ori_ + slipped_ori;
+    //   //update the offset (otherwise the slippery error would be corrected in the next iteration)
+    //   ori_offset_ -= slipped_ori;	
+    // }
   }
 
   //update stored values
