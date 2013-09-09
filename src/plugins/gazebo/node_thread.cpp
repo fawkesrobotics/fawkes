@@ -57,6 +57,16 @@ GazeboNodeThread::~GazeboNodeThread()
 void
 GazeboNodeThread::init()
 {
+  //read config values
+  if(config->exists("/gazsim/gazebo-communication-channel"))
+  {
+    robot_channel = config->get_string("/gazsim/gazebo-communication-channel");
+  }
+  else
+  {
+    logger->log_warn(name(), "Please start fawkes with the configuration file for the simulation. The Gazebo node will be initialized with the channel \"\".");
+    robot_channel = "";
+  }
   if(gazebo::transport::is_stopped()) {
     gazebo::transport::init();
     gazebo::transport::run();
@@ -67,7 +77,8 @@ GazeboNodeThread::init()
 
   gazebo::transport::NodePtr node(new gazebo::transport::Node());
   __gazebonode = node;
-  __gazebonode->Init();
+  //initialize node (this node only communicates with nodes that were initialized with the same string)
+  __gazebonode->Init(robot_channel.c_str());
   __gazebo_aspect_inifin.set_gazebonode(__gazebonode);
 }
 

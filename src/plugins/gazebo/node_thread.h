@@ -3,7 +3,7 @@
  *  node_thread.h - Gazebo node handle providing thread
  *
  *  Created: Fri Aug 24 11:04:04 2012
- *  Author  Bastian Klingen
+ *  Author  Bastian Klingen, Frederik Zwilling
  *
  ****************************************************************************/
 
@@ -31,6 +31,7 @@
 #include <aspect/aspect_provider.h>
 #include <plugins/gazebo/aspect/gazebo_inifin.h>
 #include <utils/time/time.h>
+#include <string.h>
 
 #include <sys/types.h>
 
@@ -63,6 +64,8 @@ class GazeboNodeThread
   gazebo::transport::NodePtr  __gazebonode;
   fawkes::GazeboAspectIniFin  __gazebo_aspect_inifin;
 
+  //channel of a specified robot for the gazebo node communication
+  std::string robot_channel;
 };
 
 #endif
