@@ -86,7 +86,7 @@ class SimMotorInterface: public SimInterface
 
   //config values
   bool slippery_wheels_enabled_;
-  double slippery_wheels_threshold_;
+  double slippery_wheels_threshold_, moving_speed_factor_, rotation_speed_factor_;
 };
 
 #endif

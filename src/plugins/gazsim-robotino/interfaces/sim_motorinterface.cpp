@@ -45,8 +45,10 @@ void SimMotorInterface::init()
   logger_->log_debug(name_, "Initializing Simulation of MotorInterface");
 
   //read config values
-  slippery_wheels_enabled_ = config_->get_bool("gazsim/robotino/slippery-wheels-enabled");
-  slippery_wheels_threshold_ = config_->get_float("gazsim/robotino/slippery-wheels-threshold");
+  slippery_wheels_enabled_ = config_->get_bool("gazsim/robotino/motor/slippery-wheels-enabled");
+  slippery_wheels_threshold_ = config_->get_float("gazsim/robotino/motor/slippery-wheels-threshold");
+  moving_speed_factor_ = config_->get_float("gazsim/robotino/motor/moving-speed-factor");
+  rotation_speed_factor_ = config_->get_float("gazsim/robotino/motor/rotation-speed-factor");
     
   //Open interfaces
   motor_if_ = blackboard_->open_for_writing<MotorInterface>("Robotino");
@@ -126,9 +128,9 @@ void SimMotorInterface::process_messages()
       //send command only if changed
       if(changed(msg->vx(), vx_, 0.01) || changed(msg->vy(), vy_, 0.01) || changed(msg->omega(), vomega_, 0.01))
       {
-	vx_ = msg->vx();
-	vy_ = msg->vy();
-	vomega_ = msg->omega();
+	vx_ = msg->vx() * moving_speed_factor_;
+	vy_ = msg->vy() * moving_speed_factor_;
+	vomega_ = msg->omega() * rotation_speed_factor_;
 	
 	//send message to gazebo
 	send_transroot(vx_, vy_, vomega_);
