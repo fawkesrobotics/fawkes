@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-/* This code is based on ROS robot_state_publisher with the following copyright
- * and license:
+/* This code is based on ROS robot_state_publisher and ROS geometry
+ * with the following copyright and license:
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2008, Willow Garage, Inc.
@@ -108,11 +108,11 @@ void RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterat
     SegmentPair s(children[i]->second.segment, root, child.getName());
     if (child.getJoint().getType() == KDL::Joint::None){
       segments_fixed_.insert(make_pair(child.getJoint().getName(), s));
-      ROS_DEBUG("Adding fixed segment from %s to %s", root.c_str(), child.getName().c_str());
+      logger->log_debug(name(), "Adding fixed segment from %s to %s", root.c_str(), child.getName().c_str());
     }
     else{
       segments_.insert(make_pair(child.getJoint().getName(), s));
-      ROS_DEBUG("Adding moving segment from %s to %s", root.c_str(), child.getName().c_str());
+      logger->log_debug(name(), "Adding moving segment from %s to %s", root.c_str(), child.getName().c_str());
     }
     add_children(children[i]);
   }
@@ -122,39 +122,54 @@ void RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterat
 // publish moving transforms
 void RobotStatePublisherThread::publish_transforms(const map<string, double>& joint_positions, const Time& time)
 {
-  ROS_DEBUG("Publishing transforms for moving joints");
+  logger->log_debug(name(), "Publishing transforms for moving joints");
   std::vector<tf::StampedTransform> tf_transforms;
   tf::StampedTransform tf_transform;
-  tf_transform.stamp_ = time;
+  tf_transform.stamp = time;
 
   // loop over all joints
   for (map<string, double>::const_iterator jnt=joint_positions.begin(); jnt != joint_positions.end(); jnt++){
     std::map<std::string, SegmentPair>::const_iterator seg = segments_.find(jnt->first);
     if (seg != segments_.end()){
-      tf::transformKDLToTF(seg->second.segment.pose(jnt->second), tf_transform);
-      tf_transform.frame_id_ = seg->second.root;
-      tf_transform.child_frame_id_ = seg->second.tip;
+      transform_kdl_to_tf(seg->second.segment.pose(jnt->second), tf_transform);
+      tf_transform.frame_id = seg->second.root;
+      tf_transform.child_frame_id = seg->second.tip;
       tf_transforms.push_back(tf_transform);
     }
   }
-  tf_broadcaster_.sendTransform(tf_transforms);
+  for (std::vector<tf::StampedTransform>::const_iterator it = tf_transforms.begin();
+      it != tf_transforms.end(); it++) {
+    tf_publisher->send_transform(*it);
+  }
 }
 
 
 // publish fixed transforms
 void RobotStatePublisherThread::publish_fixed_transforms()
 {
-  ROS_DEBUG("Publishing transforms for moving joints");
+  logger->log_debug(name(), "Publishing transforms for moving joints");
   std::vector<tf::StampedTransform> tf_transforms;
   tf::StampedTransform tf_transform;
-  tf_transform.stamp_ = ros::Time::now()+ros::Duration(0.5);  // future publish by 0.5 seconds
+  fawkes::Time now(clock);
+  tf_transform.stamp = now + 0.5;  // future publish by 0.5 seconds
 
   // loop over all fixed segments
   for (map<string, SegmentPair>::const_iterator seg=segments_fixed_.begin(); seg != segments_fixed_.end(); seg++){
-    tf::transformKDLToTF(seg->second.segment.pose(0), tf_transform);
-    tf_transform.frame_id_ = seg->second.root;
-    tf_transform.child_frame_id_ = seg->second.tip;
+    transform_kdl_to_tf(seg->second.segment.pose(0), tf_transform);
+    tf_transform.frame_id = seg->second.root;
+    tf_transform.child_frame_id = seg->second.tip;
     tf_transforms.push_back(tf_transform);
   }
-  tf_broadcaster_.sendTransform(tf_transforms);
+  for (std::vector<tf::StampedTransform>::const_iterator it = tf_transforms.begin();
+      it != tf_transforms.end(); it++) {
+    tf_publisher->send_transform(*it);
+  }
 }
+
+void RobotStatePublisherThread::transform_kdl_to_tf(const KDL::Frame &k, fawkes::tf::Transform &t)
+  {
+    t.setOrigin(tf::Vector3(k.p[0], k.p[1], k.p[2]));
+    t.setBasis(tf::Matrix3x3(k.M.data[0], k.M.data[1], k.M.data[2],
+                           k.M.data[3], k.M.data[4], k.M.data[5],
+                           k.M.data[6], k.M.data[7], k.M.data[8]));
+  }
