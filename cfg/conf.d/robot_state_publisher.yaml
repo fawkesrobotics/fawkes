@@ -1,0 +1,7 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+robot_state_publisher:
+ # path to URDF description of the robot
+ urdf_file: "./res/urdf/caesar.urdf"
+

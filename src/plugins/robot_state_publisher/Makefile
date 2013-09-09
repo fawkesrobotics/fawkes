@@ -20,7 +20,8 @@ include $(BUILDSYSDIR)/ros.mk
 include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-LIBS_robot_state_publisher = fawkescore fawkesutils fawkesaspects fawkesrosaspect fawkestf
+LIBS_robot_state_publisher = fawkescore fawkesutils fawkesaspects fawkesrosaspect fawkestf \
+                             fawkesblackboard fawkesinterface JointInterface
 OBJS_robot_state_publisher = robot_state_publisher_plugin.o robot_state_publisher_thread.o
 OBJS_all = $(OBJS_robot_state_publisher)
 

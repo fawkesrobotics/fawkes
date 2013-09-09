@@ -57,6 +57,12 @@
 
 #include "robot_state_publisher_thread.h"
 #include <kdl/frames_io.hpp>
+#include<kdl_parser/kdl_parser.hpp>
+
+#include <fstream>
+#include <list>
+
+#define CFG_PREFIX "/robot_state_publisher/"
 
 using namespace fawkes;
 using namespace std;
@@ -68,32 +74,72 @@ using namespace std;
 
 /** Constructor. */
 RobotStatePublisherThread::RobotStatePublisherThread()
-: Thread("RobotPublisherThread", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
+: Thread("RobotStatePublisherThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE), // TODO check hook
+  TransformAspect(TransformAspect::ONLY_PUBLISHER, "robot_state_transforms"),
+  BlackBoardInterfaceListener("RobotStatePublisher")
 {
-
 }
 
 void RobotStatePublisherThread::init()
 {
+  cfg_urdf_path_ = config->get_string(CFG_PREFIX"urdf_file");
 
+  string urdf;
+  string line;
+  ifstream urdf_file(cfg_urdf_path_);
+  if (!urdf_file.is_open()) {
+    logger->log_error(name(), "failed to open URDF File %s", cfg_urdf_path_.c_str());
+    throw;
+  }
+  while ( getline(urdf_file, line)) {
+    urdf += line;
+  }
+  urdf_file.close();
+
+  if (!kdl_parser::treeFromString(urdf, tree_)) {
+    logger->log_error(name(), "failed to parse urdf description to tree");
+    throw;
+  }
+  // walk the tree and add segments to segments_
+  add_children(tree_.getRootSegment());
+
+  // publish robot model to ROS
+  ros::param::set("/robot_description", urdf);
+
+  // check for open JointInterfaces
+  std::list<fawkes::JointInterface *> ifs = blackboard->open_multiple_for_reading<JointInterface>();
+  for (std::list<JointInterface *>::iterator it = ifs.begin(); it != ifs.end(); it++) {
+    if (joint_is_in_model((*it)->id())) {
+      ifs_.push_back(*it);
+      bbil_add_data_interface(*it);
+    }
+    else {
+      blackboard->close(*it);
+    }
+  }
+  // watch for creation of new JointInterfaces
+  bbio_add_observed_create("JointInterface");
+  // watch for destruction of JointInterfaces
+  bbio_add_observed_destroy("JointInterface");
+
+  // register to blackboard
+  blackboard->register_listener(this);
+  blackboard->register_observer(this);
 }
 
 void RobotStatePublisherThread::finalize()
 {
-
+  blackboard->unregister_listener(this);
+  blackboard->unregister_observer(this);
+  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
+    blackboard->close(*it);
+  }
 }
 
 void RobotStatePublisherThread::loop()
 {
-
-}
-
-
-RobotStatePublisherThread::RobotStatePublisherThread()
-{
-  // walk the tree and add segments to segments_
-  add_children(tree_.getRootSegment());
+  publish_fixed_transforms();
 }
 
 
@@ -122,7 +168,6 @@ void RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterat
 // publish moving transforms
 void RobotStatePublisherThread::publish_transforms(const map<string, double>& joint_positions, const Time& time)
 {
-  logger->log_debug(name(), "Publishing transforms for moving joints");
   std::vector<tf::StampedTransform> tf_transforms;
   tf::StampedTransform tf_transform;
   tf_transform.stamp = time;
@@ -147,7 +192,6 @@ void RobotStatePublisherThread::publish_transforms(const map<string, double>& jo
 // publish fixed transforms
 void RobotStatePublisherThread::publish_fixed_transforms()
 {
-  logger->log_debug(name(), "Publishing transforms for moving joints");
   std::vector<tf::StampedTransform> tf_transforms;
   tf::StampedTransform tf_transform;
   fawkes::Time now(clock);
@@ -173,3 +217,69 @@ void RobotStatePublisherThread::transform_kdl_to_tf(const KDL::Frame &k, fawkes:
                            k.M.data[3], k.M.data[4], k.M.data[5],
                            k.M.data[6], k.M.data[7], k.M.data[8]));
   }
+
+
+/**
+ * @return true if the joint (represented by the interface) is part of our robot model
+ */
+bool RobotStatePublisherThread::joint_is_in_model(const char *id) {
+  return (segments_.find(id) != segments_.end());
+}
+
+// InterfaceObserver
+void
+RobotStatePublisherThread::bb_interface_created(const char *type, const char *id) throw()
+{
+  if (strncmp(type, "JointInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  if (!joint_is_in_model(id)) return;
+  JointInterface *interface;
+  try {
+    interface = blackboard->open_for_reading<JointInterface>(id);
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
+    return;
+  }
+  logger->log_debug(name(), "Found joint information for %s", interface->id());
+  try {
+    ifs_.push_back(interface);
+    bbil_add_data_interface(interface);
+    blackboard->update_listener(this);
+  } catch (Exception &e) {
+    blackboard->close(interface);
+    logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
+    return;
+  }
+}
+
+void
+RobotStatePublisherThread::bb_interface_destroyed(const char *type, const char *id) throw()
+{
+  if (strncmp(type, "JointInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
+    if ((*it)->id() == id) {
+      bbil_remove_data_interface(*it);
+      blackboard->update_listener(this);
+      blackboard->close(*it);
+      ifs_.erase(it);
+      break;
+    }
+  }
+}
+
+// InterfaceListener
+void
+RobotStatePublisherThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
+{
+  JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
+  if (!jiface) return;
+  jiface->read();
+  std::map<std::string, SegmentPair>::const_iterator seg = segments_.find(jiface->id());
+  if (seg == segments_.end()) return;
+  tf::StampedTransform transform;
+  transform.stamp = fawkes::Time(clock);
+  transform.frame_id = seg->second.root;
+  transform.child_frame_id = seg->second.tip;
+  transform_kdl_to_tf(seg->second.segment.pose(jiface->position()), transform);
+  tf_publisher->send_transform(transform);
+
+}
