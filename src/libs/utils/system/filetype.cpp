@@ -95,9 +95,8 @@ filetype_file(int fd)
   rv = res;
   magic_close( m );
 #else
-  throw fawkes::Exception("Failed to determine file type of %s "
-			  "(libmagic not available at compile time)",
-			  filename);
+  throw fawkes::Exception("Failed to determine file type "
+			  "(libmagic not available at compile time)");
 #endif
 
   return rv;
@@ -176,9 +175,8 @@ mimetype_file(int fd)
 #  endif
   magic_close(m);
 #else
-  throw fawkes::Exception("Failed to determine file type of %s "
-			  "(libmagic not available at compile time)",
-			  filename);
+  throw fawkes::Exception("Failed to determine file type "
+			  "(libmagic not available at compile time)");
 #endif
   return rv;
 }
