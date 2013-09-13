@@ -17,3 +17,13 @@ gazsim:
       slippery-wheels-threshold: 0.8
       moving-speed-factor: 1.0
       rotation-speed-factor: 1.0
+
+  comm:
+    #all peers which need the comm plugin
+    # write down as follows:
+    # adrresses:  ["address_1", "address_2", ...]
+    # send-ports: [send_port_1, send_port_2, ...]
+    # revc-ports: [recv_port_1, recv_port_2, ...]
+    addresses:  []
+    send-ports: []
+    recv-ports: []
