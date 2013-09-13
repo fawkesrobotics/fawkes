@@ -71,6 +71,7 @@ class GazsimCommThread
   //unsigned int send_port_;
   //unsigned int recv_port_;
   std::vector<std::string> proto_dirs_;
+  double package_loss_;
 
   //helper variables
   bool initialized_;

@@ -25,7 +25,7 @@
 #include <aspect/blocked_timing.h>
 #include <protobuf_comm/peer.h>
 #include <protobuf_comm/message_register.h>
-
+#include <stdlib.h>
 #include "gazsim_comm_thread.h"
 
 using namespace fawkes;
@@ -58,6 +58,7 @@ GazsimCommThread::init()
   // send_port_ = config->get_uint("/gazsim/comm/send-port");
   // recv_port_ = config->get_uint("/gazsim/comm/recv-port");
   proto_dirs_ = config->get_strings("/gazsim/proto-dirs");
+  package_loss_ = config->get_float("/gazsim/comm/package-loss");
   addresses_ = config->get_strings("/gazsim/comm/addresses");
   send_ports_ = config->get_uints("/gazsim/comm/send-ports");
   recv_ports_ = config->get_uints("/gazsim/comm/recv-ports");
@@ -126,8 +127,7 @@ GazsimCommThread::receive_msg(boost::asio::ip::udp::endpoint &endpoint,
 		       uint16_t component_id, uint16_t msg_type,
 		       std::shared_ptr<google::protobuf::Message> msg)
 {
-  logger->log_info(name(), "Got Peer Message at port %d", endpoint.port());
-  logger->log_info(name(), msg->GetTypeName().c_str());
+  //logger->log_info(name(), "Got Peer Message from port %d", endpoint.port());
   unsigned int incoming_peer_port = endpoint.port(); //this is suprisingly the send-port
  
   if(!initialized_)
@@ -135,6 +135,12 @@ GazsimCommThread::receive_msg(boost::asio::ip::udp::endpoint &endpoint,
     return;
   }
 
+  //simulate package loss
+  double rnd = ((double) rand()) / ((double) RAND_MAX); //0.0 <= rnd <= 1.0
+  if(rnd < package_loss_)
+  {
+    return;
+  }
   //send message to all other peers
   for(unsigned int i = 0; i < peers_.size(); i++)
   {

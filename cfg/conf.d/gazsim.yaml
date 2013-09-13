@@ -19,6 +19,7 @@ gazsim:
       rotation-speed-factor: 1.0
 
   comm:
+    package-loss: 0.1
     #all peers which need the comm plugin
     # write down as follows:
     # adrresses:  ["address_1", "address_2", ...]
