@@ -61,6 +61,18 @@ void SimMotorInterface::init()
   //create publisher for messages
   motor_move_pub_ = gazebonode_->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
 
+  //make sure variables are 0
+  x_ = 0.0;
+  y_ = 0.0;
+  ori_ = 0.0;
+  vx_ = 0.0;
+  vy_ = 0.0;
+  vomega_ = 0.0;
+  x_offset_ = 0.0;
+  y_offset_ = 0.0;
+  ori_offset_ = 0.0;
+  path_length_ = 0.0;
+	
   //suscribe for messages
   pos_sub_ = gazebonode_->Subscribe(std::string("~/RobotinoSim/Gps/"), &SimMotorInterface::on_pos_msg, this);
     
@@ -146,7 +158,7 @@ void SimMotorInterface::process_messages()
     else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
       {
         x_offset_ += x_;
-        y_offset_ += y_;
+	y_offset_ += y_;
         ori_offset_ += ori_;
 	x_ = 0.0;
 	y_ = 0.0;
@@ -164,15 +176,16 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
   float new_x = msg->position().x() - x_offset_;
   float new_y = msg->position().y() - y_offset_;
   float new_ori = msg->orientation().z() - ori_offset_;
-
+  
   //estimate path-length
   float length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));
-
+  
   if(slippery_wheels_enabled_)
   {
     //simulate slipping wheels when driving against an obstacle
     fawkes::Time new_time = clock_->now();
     double duration = new_time.in_sec() - last_pos_time_.in_sec();
+    
     last_pos_time_ = new_time;
 
     double total_speed = sqrt(vx_ * vx_ + vy_ * vy_);
@@ -182,7 +195,6 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
       double speed_abs_y = vx_ * sin(ori_) + vy_ * cos(ori_);
       double slipped_x = speed_abs_x * duration * slippery_wheels_threshold_;
       double slipped_y = speed_abs_y * duration * slippery_wheels_threshold_;
-      //logger_->log_warn(name_, "Its is slippery here!!! (%f, %f)", slipped_x, slipped_y);
       new_x = x_ + slipped_x;
       new_y = y_ + slipped_y;
       //update the offset (otherwise the slippery error would be corrected in the next iteration)
