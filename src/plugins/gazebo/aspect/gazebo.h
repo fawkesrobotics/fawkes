@@ -3,7 +3,7 @@
  *  gazebo.h - Gazebo aspect for Fawkes
  *
  *  Created: Fri Aug 24 09:25:22 2012
- *  Author Bastian Klingen
+ *  Author Bastian Klingen, Frederik Zwilling
  *
  ****************************************************************************/
 
@@ -44,9 +44,13 @@ class GazeboAspect : public virtual Aspect
 
  protected:
   gazebo::transport::NodePtr gazebonode;
+  gazebo::transport::NodePtr gazebo_world_node;
+  gazebo::transport::PublisherPtr visual_publisher, model_publisher, request_publisher, light_publisher;
 
  private:
-  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode);
+  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node,
+			 gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
+			 gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher);
   void finalize_GazeboAspect();
 };
 

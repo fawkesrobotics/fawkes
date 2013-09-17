@@ -61,7 +61,13 @@ class GazeboNodeThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  //Node for communication to gazebo-robot-plugins
   gazebo::transport::NodePtr  __gazebonode;
+  //Node to control the gazebo world (e.g. spawn visual objects)
+  gazebo::transport::NodePtr  __gazebo_world_node;
+  //Publisher to send Messages:
+  gazebo::transport::PublisherPtr __visual_publisher, __model_publisher, __request_publisher, __light_publisher;
+
   fawkes::GazeboAspectIniFin  __gazebo_aspect_inifin;
 
   //channel of a specified robot for the gazebo node communication

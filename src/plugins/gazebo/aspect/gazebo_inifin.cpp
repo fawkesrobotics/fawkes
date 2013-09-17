@@ -3,7 +3,7 @@
  *  gazebo_inifin.cpp - Fawkes GazeboAspect initializer/finalizer
  *
  *  Created: Fri Aug 24 09:26:04 2012
- *  Author  Bastian Klingen
+ *  Author  Bastian Klingen, Frederik Zwilling (2013)
  *
  ****************************************************************************/
 
@@ -33,7 +33,7 @@ namespace fawkes {
  * GazeboAspect initializer/finalizer.
  * This initializer/finalizer will provide the Gazebo node handle to
  * threads with the GazeboAspect.
- * @author Bastian Klingen
+ * @author Bastian Klingen, Frederik Zwilling
  */
 
 /** Constructor. */
@@ -56,7 +56,8 @@ GazeboAspectIniFin::init(Thread *thread)
     throw CannotInitializeThreadException("Gazebo node handle has not been set.");
   }
 
-  gazebo_thread->init_GazeboAspect(__gazebonode);
+  gazebo_thread->init_GazeboAspect(__gazebonode, __gazebo_world_node, __visual_publisher,
+				   __model_publisher, __request_publisher, __light_publisher);
 }
 
 void
@@ -80,6 +81,31 @@ void
 GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 {
   __gazebonode = gazebonode;
+}
+void
+GazeboAspectIniFin::set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node)
+{
+  __gazebo_world_node = gazebo_world_node;
+}
+void
+GazeboAspectIniFin::set_visual_publisher(gazebo::transport::PublisherPtr publisher)
+{
+  __visual_publisher = publisher;
+}
+void
+GazeboAspectIniFin::set_model_publisher(gazebo::transport::PublisherPtr publisher)
+{
+  __model_publisher = publisher;
+}
+void
+GazeboAspectIniFin::set_request_publisher(gazebo::transport::PublisherPtr publisher)
+{
+  __request_publisher = publisher;
+}
+void
+GazeboAspectIniFin::set_light_publisher(gazebo::transport::PublisherPtr publisher)
+{
+  __light_publisher = publisher;
 }
 
 } // end namespace fawkes

@@ -3,7 +3,7 @@
  *  gazebo_inifin.h - Fawkes GazeboAspect initializer/finalizer
  *
  *  Created: Fri Aug 24 09:26:58 2012
- *  Author  Bastian Klingen
+ *  Author  Bastian Klingen, Frederik Zwilling (2013)
  *
  ****************************************************************************/
 
@@ -43,10 +43,19 @@ class GazeboAspectIniFin : public AspectIniFin
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
+  //setters for the node_thread
   void set_gazebonode(gazebo::transport::NodePtr gazebonode);
+  void set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node);
+  void set_light_publisher(gazebo::transport::PublisherPtr publisher);
+  void set_request_publisher(gazebo::transport::PublisherPtr publisher);
+  void set_model_publisher(gazebo::transport::PublisherPtr publisher);
+  void set_visual_publisher(gazebo::transport::PublisherPtr publisher);
 
  private:
   gazebo::transport::NodePtr __gazebonode;
+  gazebo::transport::NodePtr __gazebo_world_node;
+  gazebo::transport::PublisherPtr __visual_publisher, __model_publisher, __request_publisher, __light_publisher;
+
 };
 
 } // end namespace fawkes
