@@ -69,6 +69,8 @@ GazeboNodeThread::init()
     logger->log_warn(name(), "Please start fawkes with the configuration file for the simulation. The Gazebo node will be initialized with the channel \"\".");
     robot_channel = "";
   }
+  world_name = config->get_string("/gazsim/world-name");
+
   if(gazebo::transport::is_stopped()) {
     gazebo::transport::init();
     gazebo::transport::run();
@@ -87,6 +89,7 @@ GazeboNodeThread::init()
   
   //and the node for world change messages
   __gazebo_world_node = gazebo::transport::NodePtr(new gazebo::transport::Node());
+  __gazebo_world_node->Init(world_name.c_str());
   __gazebo_aspect_inifin.set_gazebo_world_node(__gazebo_world_node);
   //with all possible publishers
   __visual_publisher = __gazebo_world_node->Advertise<gazebo::msgs::Visual>("~/visual", 5);

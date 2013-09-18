@@ -23,6 +23,7 @@
 
 #include <plugins/gazebo/aspect/gazebo_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <stdio.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -57,7 +58,7 @@ GazeboAspectIniFin::init(Thread *thread)
   }
 
   gazebo_thread->init_GazeboAspect(__gazebonode, __gazebo_world_node, __visual_publisher,
-				   __model_publisher, __request_publisher, __light_publisher);
+    __model_publisher, __request_publisher, __light_publisher);
 }
 
 void

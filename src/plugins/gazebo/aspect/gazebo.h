@@ -45,12 +45,16 @@ class GazeboAspect : public virtual Aspect
  protected:
   gazebo::transport::NodePtr gazebonode;
   gazebo::transport::NodePtr gazebo_world_node;
-  gazebo::transport::PublisherPtr visual_publisher, model_publisher, request_publisher, light_publisher;
+  //does not work, I don't know why
+  /* gazebo::transport::PublisherPtr visual_publisher; */
+  /* gazebo::transport::PublisherPtr model_publisher; */
+  /* gazebo::transport::PublisherPtr request_publisher; */
+  /* gazebo::transport::PublisherPtr light_publisher; */
 
  private:
   void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node,
-			 gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
-			 gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher);
+    gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
+    gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher);
   void finalize_GazeboAspect();
 };
 

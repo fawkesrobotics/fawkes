@@ -22,6 +22,7 @@
  */
 
 #include <plugins/gazebo/aspect/gazebo.h>
+#include <stdio.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -64,16 +65,17 @@ GazeboAspect::~GazeboAspect()
  * @param gazebonode Gazebo node handle
  */
 void
-GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node,
-				gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
-				gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher)
+GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::transport::NodePtr gazebo_world_node,
+				 gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
+				 gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher)
 {
   this->gazebonode = gazebonode;
   this->gazebo_world_node = gazebo_world_node;
-  this->visual_publisher = visual_publisher;
-  this->model_publisher = model_publisher;
-  this->request_publisher = request_publisher;
-  this->light_publisher = light_publisher;
+  //does not work, I don't know why
+  // this->visual_publisher = visual_publisher;
+  // this->model_publisher = model_publisher;
+  // this->request_publisher = request_publisher;
+  // this->light_publisher = light_publisher;
 }
 
 /** Finalize Gazebo aspect.

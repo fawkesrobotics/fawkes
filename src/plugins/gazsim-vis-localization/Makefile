@@ -44,7 +44,7 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_tf warning_ros warning_geometry_msgs
 warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Gazsim-Vis-Localization libs" \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Gazsim-Vis-Localizationx libs" \
                          "$(TNORMAL) (tf not available)"
 endif
 

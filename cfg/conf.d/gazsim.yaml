@@ -4,6 +4,9 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gazsim
 ---
 gazsim:
+  world-name: "LLSF"
+  #default robot name
+  robot-name: ""
   laser:
     max_range: 5.5 
   robotino:
@@ -28,3 +31,11 @@ gazsim:
     addresses:  []
     send-ports: []
     recv-ports: []
+  visualization:
+    location-scripts: "model://label/materials/scripts"
+    location-textures: "model://label/materials/textures"
+    label-arrow-name: "label/arrowredup"
+    localization:
+      #parent model::link to attach visuals on
+      parent-name: "ground_plane::link"
+      update-rate: 2.0 #in Hz

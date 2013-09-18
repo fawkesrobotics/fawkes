@@ -71,7 +71,7 @@ class GazeboNodeThread
   fawkes::GazeboAspectIniFin  __gazebo_aspect_inifin;
 
   //channel of a specified robot for the gazebo node communication
-  std::string robot_channel;
+  std::string robot_channel, world_name;
 };
 
 #endif

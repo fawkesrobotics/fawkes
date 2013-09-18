@@ -28,6 +28,9 @@
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <plugins/gazebo/aspect/gazebo.h>
+#include <utils/time/clock.h>
+#include <utils/time/time.h>
+#include <string.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
@@ -58,6 +61,14 @@ class VisLocalizationThread
  private:
   //read pose interface
   fawkes::Position3DInterface *pose_if_;
-};
 
+  //Publisher for visual msgs
+  gazebo::transport::PublisherPtr visual_publisher_;
+
+  double update_rate_;
+  fawkes::Time last_update_time_;
+
+  //config values
+  std::string robot_name_, label_script_name_, location_scripts_, location_textures_, parent_name_, arrow_script_name_;
+};
 #endif
