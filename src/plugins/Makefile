@@ -27,7 +27,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc \
 	  gazebo gazsim-robotino gazsim-laser gazsim-localization gazsim-comm \
-	  gazsim-vis-localization
+	  gazsim-vis-localization gazsim-webcam
 	  # readylogagent
 
 include $(BUILDSYSDIR)/rules.mk

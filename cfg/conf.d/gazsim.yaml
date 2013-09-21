@@ -9,6 +9,15 @@ gazsim:
   robot-name: ""
   laser:
     max_range: 5.5 
+
+  webcam:
+    topic-suffix: "/webcam/link/webcam_sensor/image"
+    width: 320
+    height: 240
+    #Shared Memory Imagebuffer name
+    shm-image-id: "light_front"
+    frame: "/cam_front" #without "" in light_front.yaml?
+    
   robotino:
     gripper-laser-threshold: 0.18
     gripper-laser-value-far: 0.17
