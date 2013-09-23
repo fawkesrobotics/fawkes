@@ -54,12 +54,13 @@ void WebcamSimThread::init()
   logger->log_debug(name(), "Initializing Simulation of the Webcam");
 
   //read config values
+  std::string robot_name = config->get_string("/gazsim/robot-name");
   topic_name_ = ("~/" 
-		 + config->get_string("/gazsim/robot-name")
+		 + robot_name
 		 + config->get_string("/gazsim/webcam/topic-suffix"));
   width_ = config->get_float("/gazsim/webcam/width");
   height_ = config->get_float("/gazsim/webcam/height");
-  shm_id_ = config->get_string("/gazsim/webcam/shm-image-id");
+  shm_id_ = robot_name + "/" + config->get_string("/gazsim/webcam/shm-image-id");
   frame_ = config->get_string("/gazsim/webcam/frame");
 
   format_from_ = firevision::RGB;
@@ -95,7 +96,7 @@ void WebcamSimThread::loop()
 
 void WebcamSimThread::on_webcam_data_msg(ConstImageStampedPtr &msg)
 {
-  logger->log_info(name(), "Got new Webcam data.");
+  //logger->log_info(name(), "Got new Webcam data.");
   //convert image data and write it in the shared memory buffer
   convert(format_from_,  format_to_,
  	  (const unsigned char*) msg->image().data().data(),   buffer_,
