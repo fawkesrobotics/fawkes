@@ -1107,18 +1107,6 @@ TabletopObjectsThread::loop()
   sor.setStddevMulThresh(0.2);
   sor.filter(*cloud_objs_);
 
-  int transforming = 0;
-  tf::StampedTransform trans_to_base, trans_from_base;
-  try {
-    transforming++;
-    tf_listener->lookup_transform(cloud_objs_->header.frame_id, "/base_link",
-        fawkes::Time(0, 0), trans_from_base);
-    tf_listener->lookup_transform("/base_link", cloud_objs_->header.frame_id,
-        fawkes::Time(0, 0), trans_to_base);
-  } catch (Exception &e) {
-    return;
-  }
-
   //OBJECTS
   if (cloud_objs_->points.size() > 0) {
     // Creating the KdTree object for the search method of the extraction
@@ -1157,7 +1145,7 @@ TabletopObjectsThread::loop()
 
         ColorCloudPtr single_cluster(new ColorCloud());
         ColorCloudPtr obj_in_base_frame(new ColorCloud());
-        single_cluster->header.frame_id = clusters_->header.frame_id;
+        single_cluster->header.frame_id = cloud_objs_->header.frame_id;
         single_cluster->width = it->indices.size();
         single_cluster->height = 1;
         single_cluster->points.resize(it->indices.size());
@@ -1183,15 +1171,8 @@ TabletopObjectsThread::loop()
         //*obj_clusters_[obj_i++] = *colored_clusters;
         *obj_clusters_[obj_i++] = *single_cluster;
 
-        Eigen::Affine3f affine_table = Eigen::Translation3f(
-            trans_to_base.getOrigin()[0], trans_to_base.getOrigin()[1],
-            trans_to_base.getOrigin()[2]) * Eigen::Quaternionf(
-            trans_to_base.getRotation().getW(),
-            trans_to_base.getRotation().getX(),
-            trans_to_base.getRotation().getY(),
-            trans_to_base.getRotation().getZ());
-        pcl::transformPointCloud(*single_cluster, *obj_in_base_frame,
-            affine_table);
+	pcl_utils::transform_pointcloud("/base_link", *single_cluster,
+					*obj_in_base_frame, *tf_listener);
 
         pcl::compute3DCentroid(*obj_in_base_frame, centroids[centroid_i]);
 
