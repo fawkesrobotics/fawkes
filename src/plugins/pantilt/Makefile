@@ -30,7 +30,7 @@ endif
 DRIVERS = dirperc robotis sony
 
 LIBS_pantilt = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	       fawkesinterface PanTiltInterface LedInterface
+	       fawkesinterface PanTiltInterface LedInterface JointInterface
 OBJS_pantilt = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(foreach d,$(DRIVERS),$(SRCDIR)/$d/*.cpp )))))
 
 PLUGINS_all = $(PLUGINDIR)/pantilt.so

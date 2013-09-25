@@ -40,6 +40,7 @@
 namespace fawkes {
   class PanTiltInterface;
   class LedInterface;
+  class JointInterface;
   class ReadWriteLock;
   class WaitCondition;
 }
@@ -75,6 +76,8 @@ class PanTiltRX28Thread
  private:
   fawkes::PanTiltInterface *__pantilt_if;
   fawkes::LedInterface     *__led_if;
+  fawkes::JointInterface   *__panjoint_if;
+  fawkes::JointInterface   *__tiltjoint_if;
 
   fawkes::RefPtr<RobotisRX28> __rx28;
 

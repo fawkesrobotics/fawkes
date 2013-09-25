@@ -29,6 +29,7 @@
 #include <core/threading/wait_condition.h>
 #include <interfaces/PanTiltInterface.h>
 #include <interfaces/LedInterface.h>
+#include <interfaces/JointInterface.h>
 
 #include <cstdarg>
 #include <cmath>
@@ -175,6 +176,16 @@ PanTiltRX28Thread::init()
 
   __led_if = blackboard->open_for_writing<LedInterface>(bbid.c_str());
 
+  std::string panid = __ptu_name + " pan";
+  __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
+  __panjoint_if->set_position(__last_pan);
+  __panjoint_if->write();
+
+  std::string tiltid = __ptu_name + " tilt";
+  __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
+  __tiltjoint_if->set_position(__last_tilt);
+  __tiltjoint_if->write();
+
   __wt = new WorkerThread(__ptu_name, logger, __rx28,
 			  __cfg_pan_servo_id, __cfg_tilt_servo_id,
 			  __cfg_pan_min, __cfg_pan_max, __cfg_tilt_min, __cfg_tilt_max,
@@ -187,6 +198,8 @@ PanTiltRX28Thread::init()
   }
 
   bbil_add_message_interface(__pantilt_if);
+  bbil_add_message_interface(__panjoint_if);
+  bbil_add_message_interface(__tiltjoint_if);
   blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
@@ -223,6 +236,8 @@ PanTiltRX28Thread::finalize()
   blackboard->unregister_listener(this);
   blackboard->close(__pantilt_if);
   blackboard->close(__led_if);
+  blackboard->close(__panjoint_if);
+  blackboard->close(__tiltjoint_if);
 
   __wt->cancel();
   __wt->join();
@@ -273,6 +288,12 @@ PanTiltRX28Thread::update_sensor_values()
     __pantilt_if->set_enabled(__wt->is_enabled());
     __pantilt_if->set_final(__wt->is_final());
     __pantilt_if->write();
+
+    __panjoint_if->set_position(pan);
+    __panjoint_if->write();
+
+    __tiltjoint_if->set_position(tilt);
+    __tiltjoint_if->write();
 
 #ifdef HAVE_TF
     // Always publish updated transforms
