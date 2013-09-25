@@ -1238,17 +1238,23 @@ TabletopObjectsThread::loop()
         extract.setInputCloud(obj_in_base_frame);
         extract.setIndices(inliers_cylinder);
         extract.setNegative(false);
-        pcl::PointCloud<ColorPointType>::Ptr cloud_cylinder(
-            new pcl::PointCloud<ColorPointType>());
-        extract.filter(*cloud_cylinder);
+        pcl::PointCloud<ColorPointType>::Ptr
+	  cloud_cylinder_baserel(new pcl::PointCloud<ColorPointType>());
+        extract.filter(*cloud_cylinder_baserel);
+
         cylinder_params[centroid_i][0] = 0;
         cylinder_params[centroid_i][1] = 0;
-        if (cloud_cylinder->points.empty()) {
+        if (cloud_cylinder_baserel->points.empty()) {
           logger->log_debug(name(), "No cylinder inliers!!");
           obj_shape_confidence_[centroid_i] = 0.0;
         } else {
+
+	  if (! tf_listener->frame_exists(cloud_cylinder_baserel->header.frame_id)) {
+	    continue;
+	  }
+
           obj_shape_confidence_[centroid_i]
-              = (double) (cloud_cylinder->points.size())
+              = (double) (cloud_cylinder_baserel->points.size())
                   / (obj_in_base_frame->points.size() * 1.0);
           logger->log_debug(name(), "Cylinder fit confidence = %zu/%zu = %f",
 			    cloud_cylinder_baserel->points.size(),
