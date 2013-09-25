@@ -1,7 +1,7 @@
 %YAML 1.2
 %TAG ! tag:fawkesrobotics.org,cfg/
 ---
-doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/ros
 ---
 ros:
   # Spin the ROS main loop asynchronously from the Fawkes main loop?
