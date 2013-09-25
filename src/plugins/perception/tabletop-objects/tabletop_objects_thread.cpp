@@ -1223,9 +1223,9 @@ TabletopObjectsThread::loop()
         seg.setModelType(pcl::SACMODEL_CYLINDER);
         seg.setMethodType(pcl::SAC_RANSAC);
         seg.setNormalDistanceWeight(0.1);
-        seg.setMaxIterations(10000);
-        seg.setDistanceThreshold(0.035);
-        seg.setRadiusLimits(0, 0.1);
+        seg.setMaxIterations(1000);
+        seg.setDistanceThreshold(0.07);
+        seg.setRadiusLimits(0, 0.12);
 
         seg.setInputCloud(obj_in_base_frame);
         seg.setInputNormals(obj_normals);
