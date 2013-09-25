@@ -30,6 +30,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/pointcloud.h>
+#include <aspect/tf.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
 #include <pcl/point_types.h>
@@ -51,6 +52,7 @@ class PointCloudDBMergeThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::MongoDBAspect,
+  public fawkes::TransformAspect,
   public fawkes::PointCloudAspect
 {
  public:

@@ -24,6 +24,16 @@ perception/pcl-db-merge:
   # Note that this frame's XY plane is the ground support plane
   global-frame: !frame /map
 
+  # The plugin can transform the data into a current sensor frame. For
+  # this, a frame fixed in time relative to the sensor frame (like a
+  # base_link) is required.  The merge result will then be transformed
+  # using historic data into the fixed frame, and afterwards current
+  # data will be used to transform the point cloud into the sensor
+  # frame
+  transform-to-sensor-frame: true
+  fixed-frame: !frame /base_link
+  sensor-frame: !frame /kinect/image
+
   # ID of the output point cloud by which it is registered with the PCL manager
   output-pcl-id: db-merged
 
@@ -58,6 +68,13 @@ perception/pcl-db-merge:
 
 
 perception/pcl-db-retrieve:
+  # The plugin transforms the data into a current sensor frame. For
+  # this, a frame fixed in time relative to the sensor frame (like a
+  # base_link) is required. The point cloud will then be transformed
+  # using historic data into the fixed frame, and afterwards current
+  # data will be used to transform the point cloud into the sensor
+  # frame
+
   # Fixed frame in recorded and current data
   fixed-frame: !frame /base_link
 

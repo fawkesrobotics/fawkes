@@ -26,6 +26,7 @@
 #include "mongodb_tf_transformer.h"
 #include "pcl_db_pipeline.h"
 
+#include <tf/transformer.h>
 #include <pcl_utils/utils.h>
 #include <pcl_utils/transforms.h>
 #include <pcl_utils/comparisons.h>
@@ -78,10 +79,19 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
    */
   PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client,
 			    fawkes::Configuration *config, fawkes::Logger *logger,
+			    fawkes::tf::Transformer *transformer,
 			    typename PointCloudDBPipeline<PointType>::ColorCloudPtr output)
-  : PointCloudDBPipeline<PointType>(mongodb_client, config, logger, output)
+  : PointCloudDBPipeline<PointType>(mongodb_client, config, logger, output),
+    tf_(transformer)
   {
     this->name_ = "PCL_DB_MergePL";
+
+    cfg_transform_to_sensor_frame_ =
+      config->get_bool(CFG_PREFIX_MERGE"transform-to-sensor-frame");
+    if (cfg_transform_to_sensor_frame_) {
+      cfg_fixed_frame_  = config->get_string(CFG_PREFIX_MERGE"fixed-frame");
+      cfg_sensor_frame_ = config->get_string(CFG_PREFIX_MERGE"sensor-frame");
+    }
 
     cfg_global_frame_ =
       config->get_string(CFG_PREFIX_MERGE"global-frame");
@@ -357,7 +367,7 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
     usleep(1000000);
 #endif
 
-    merge_output(pcls);
+    merge_output(pcls, actual_times);
 
     TIMETRACK_END(ttc_output_);
 
@@ -513,14 +523,16 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 #endif
 
   void
-  merge_output(std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds)
+  merge_output(std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds,
+	       std::vector<long long> &actual_times)
   {
     size_t num_points = 0;
     const size_t num_clouds = clouds.size();
     for (unsigned int i = 0; i < num_clouds; ++i) {
       num_points += clouds[i]->points.size();
     }
-    this->output_->header.frame_id = cfg_global_frame_;
+    this->output_->header.frame_id =
+      cfg_transform_to_sensor_frame_ ? cfg_sensor_frame_ : cfg_global_frame_;
     this->output_->points.resize(num_points);
     this->output_->height = 1;
     this->output_->width = num_points;
@@ -544,11 +556,52 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 	op.b = cluster_colors[i][2];
       }
     }
+
+    if (cfg_transform_to_sensor_frame_) {
+      // retrieve transforms
+      fawkes::tf::MongoDBTransformer
+	transformer(this->mongodb_client_, this->cfg_database_name_);
+
+      unsigned int ref_pos = clouds.size() - 1;
+
+      transformer.restore(/* start */  actual_times[ref_pos] + this->cfg_transform_range_[0],
+			  /* end */    actual_times[ref_pos] + this->cfg_transform_range_[1]);
+      this->logger_->log_debug(this->name_,
+			       "Restored transforms for %zu frames for range (%li..%li)",
+			       transformer.get_frame_caches().size(),
+			       /* start */  actual_times[ref_pos] + this->cfg_transform_range_[0],
+			       /* end */    actual_times[ref_pos] + this->cfg_transform_range_[1]);
+
+      fawkes::Time source_time;
+      fawkes::pcl_utils::get_time(clouds[ref_pos], source_time);
+      fawkes::tf::StampedTransform transform_recorded;
+      transformer.lookup_transform(cfg_fixed_frame_, cfg_global_frame_,
+				   source_time, transform_recorded);
+
+      fawkes::tf::StampedTransform transform_current;
+      tf_->lookup_transform(cfg_sensor_frame_, cfg_fixed_frame_, transform_current);
+
+      fawkes::tf::Transform transform = transform_current * transform_recorded;
+
+      try {
+	fawkes::pcl_utils::transform_pointcloud(*(this->output_), transform);
+      } catch (fawkes::Exception &e) {
+	this->logger_->log_warn(this->name_,
+				"Failed to transform point cloud, exception follows");
+	this->logger_->log_warn(this->name_, e);
+      }
+    }
   }
 
 
  private: // members
+
+  fawkes::tf::Transformer *tf_;
+
   std::string  cfg_global_frame_;
+  bool         cfg_transform_to_sensor_frame_;
+  std::string  cfg_sensor_frame_;
+  std::string  cfg_fixed_frame_;
   std::string  cfg_passthrough_filter_axis_;
   float        cfg_passthrough_filter_limits_[2];
   float        cfg_downsample_leaf_size_;

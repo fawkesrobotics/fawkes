@@ -64,12 +64,12 @@ PointCloudDBMergeThread::init()
   
   pl_xyz_ =
     new PointCloudDBMergePipeline<pcl::PointXYZ>(mongodb_client,
-						 config, logger,
+						 config, logger, tf_listener,
 						 output_);
 
   pl_xyzrgb_ =
     new PointCloudDBMergePipeline<pcl::PointXYZRGB>(mongodb_client,
-						    config, logger,
+						    config, logger, tf_listener,
 						    output_);
 
   try {
