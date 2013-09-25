@@ -24,8 +24,8 @@ include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_timesource = fawkescore fawkesutils fawkesaspects fawkesgazeboaspect
-OBJS_gazsim_timesource = gazsim_timesource_plugin.o gazsim_timesource_thread.o
+LIBS_gazsim_timesource = fawkescore fawkesutils fawkesaspects fawkesgazeboaspect protobufmsgs
+OBJS_gazsim_timesource = gazsim_timesource_source.o gazsim_timesource_plugin.o gazsim_timesource_thread.o
 
 OBJS_all = $(OBJS_gazsim_timesource)
 

@@ -30,15 +30,22 @@
 #include <aspect/blocked_timing.h>
 #include <boost/asio.hpp>
 #include <google/protobuf/message.h>
-
 #include <gazebo/physics/physics.hh>
+#include <protobuf_msgs/TimeSync.pb.h>
+#include <plugins/gazebo/aspect/gazebo.h>
+
+#include "gazsim_timesource_source.h"
+
+
+typedef const boost::shared_ptr<gazsim_msgs::TimeSync const> ConstTimeSyncPtr;
 
 class GazsimTimesourceThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect
+  public fawkes::LoggingAspect,
+  public fawkes::GazeboAspect
 {
  public:
   GazsimTimesourceThread();
@@ -49,12 +56,15 @@ class GazsimTimesourceThread
   virtual void finalize();
 
  private:
+  //Timesource to give the fawkes clock
+  fawkes::GazsimTimesource* time_source_;
 
-  //config values
-  std::string world_name_;
+  //subscriber to get time msgs from
+  gazebo::transport::SubscriberPtr time_sync_sub_;
 
-  //world to get the time from
-  //gazebo::physics::WorldPtr world_;
+  //handler
+  void on_time_sync_msg(ConstTimeSyncPtr &msg);
+  
 };
 
 #endif
