@@ -1137,8 +1137,8 @@ TabletopObjectsThread::loop()
       colored_clusters->points.resize(num_points);
       for (it = cluster_indices.begin(); it != cluster_indices.end()
           && centroid_i < MAX_CENTROIDS; ++it, ++centroid_i) {
-        std::cout << "********************Processing obj_" << centroid_i
-            << "********************" << std::endl;
+        logger->log_debug(name(), "********************Processing obj_%u********************",
+			  centroid_i);
 
         //Centroids in cam frame:
         //pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
@@ -1187,18 +1187,17 @@ TabletopObjectsThread::loop()
         obj_dim[2] = fabs(pnt_max->z - pnt_min->z);
         compute_bounding_box_scores(obj_dim, obj_size_scores);
 
-        std::cout << "Computed object dimensions:" << std::endl;
-        std::cout << obj_dim[0] << " " << obj_dim[1] << " " << obj_dim[2]
-            << std::endl;
-        std::cout << "Size similarity to known objects:" << std::endl;
+        logger->log_debug(name(), "Computed object dimensions: %f %f %f",
+			  obj_dim[0], obj_dim[1], obj_dim[2]);
+	logger->log_debug(name(), "Size similarity to known objects:");
         for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-          std::cout << "** Cup " << os << ": " << obj_size_scores[os][0]
-              << " in x, " << obj_size_scores[os][1] << " in y, "
-              << obj_size_scores[os][2] << " in z." << std::endl;
-          obj_likelihoods_[centroid_i][os] = obj_size_scores[os][0]
-              * obj_size_scores[os][1] * obj_size_scores[os][2];
+	  logger->log_debug(name(), "** Cup %i: %f in x, %f in y, %f in z.",
+			    os, obj_size_scores[os][0], obj_size_scores[os][1],
+			    obj_size_scores[os][2]);
+          obj_likelihoods_[centroid_i][os] =
+	    obj_size_scores[os][0] * obj_size_scores[os][1] * obj_size_scores[os][2];
         }
-        std::cout << std::endl;
+	logger->log_debug(name(), "");
 
         //Fit cylinder:
         pcl::NormalEstimation<ColorPointType, pcl::Normal> ne;
@@ -1246,28 +1245,28 @@ TabletopObjectsThread::loop()
         cylinder_params[centroid_i][0] = 0;
         cylinder_params[centroid_i][1] = 0;
         if (cloud_cylinder->points.empty()) {
-          std::cout << "No cylinder inliers!!" << std::endl;
+          logger->log_debug(name(), "No cylinder inliers!!");
           obj_shape_confidence_[centroid_i] = 0.0;
         } else {
           obj_shape_confidence_[centroid_i]
               = (double) (cloud_cylinder->points.size())
                   / (obj_in_base_frame->points.size() * 1.0);
-          std::cout << "Cylinder fit confidence = "
-              << cloud_cylinder->points.size() << "/"
-              << obj_in_base_frame->points.size() << " = "
-              << obj_shape_confidence_[centroid_i] << std::endl;
+          logger->log_debug(name(), "Cylinder fit confidence = %zu/%zu = %f",
+			    cloud_cylinder_baserel->points.size(),
+			    obj_in_base_frame->points.size(),
+			    obj_shape_confidence_[centroid_i]);
 
-          ColorPointType* pnt_min = new ColorPointType();
-          ColorPointType* pnt_max = new ColorPointType();
-          pcl::getMinMax3D(*cloud_cylinder, *pnt_min, *pnt_max);
-          std::cout << "Cylinder hight according to cylinder inliers: "
-              << pnt_max->z - pnt_min->z << std::endl;
-          std::cout << "Cylinder hight according to bounding box: "
-              << obj_dim[2] << std::endl;
-          std::cerr << "Cylinder radius according to cylinder fitting: "
-              << (*coefficients_cylinder).values[6] << std::endl;
-          std::cerr << "Cylinder radius according to bounding box y: "
-              << obj_dim[1] / 2 << std::endl;
+          ColorPointType pnt_min;
+          ColorPointType pnt_max;
+          pcl::getMinMax3D(*cloud_cylinder_baserel, pnt_min, pnt_max);
+          logger->log_debug(name(), "Cylinder hight according to cylinder inliers: %f",
+			    pnt_max.z - pnt_min.z);
+          logger->log_debug(name(), "Cylinder hight according to bounding box: %f",
+			    obj_dim[2]);
+          logger->log_debug(name(), "Cylinder radius according to cylinder fitting: %f",
+			    (*coefficients_cylinder).values[6]);
+          logger->log_debug(name(), "Cylinder radius according to bounding box y: %f",
+			    obj_dim[1] / 2);
           //Cylinder radius:
           //cylinder_params[centroid_i][0] = (*coefficients_cylinder).values[6];
           cylinder_params[centroid_i][0] = obj_dim[1] / 2;
@@ -1278,45 +1277,42 @@ TabletopObjectsThread::loop()
           //cylinder_params[centroid_i][2] = table_inclination_;
 
           //Overriding computed centroids with estimated cylinder center:
-          centroids[centroid_i][0] = pnt_min->x + 0.5 * (pnt_max->x
-              - pnt_min->x);
-          centroids[centroid_i][1] = pnt_min->y + 0.5 * (pnt_max->y
-              - pnt_min->y);
-          centroids[centroid_i][2] = pnt_min->z + 0.5 * (pnt_max->z
-              - pnt_min->z);
+          centroids[centroid_i][0] = pnt_min.x + 0.5 * (pnt_max.x - pnt_min.x);
+          centroids[centroid_i][1] = pnt_min.y + 0.5 * (pnt_max.y - pnt_min.y);
+          centroids[centroid_i][2] = pnt_min.z + 0.5 * (pnt_max.z - pnt_min.z);
         }
 
-        std::cout << std::endl;
+        logger->log_debug(name(), "");
         signed int detected_obj_id = -1;
         double best_confidence = 0.0;
+        logger->log_debug(name(), "Shape similarity = %f",
+			  obj_shape_confidence_[centroid_i]);
         for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-          std::cout << "** Similarity to known cup " << os << ":" << std::endl;
-          std::cout << "Size similarity = "
-              << obj_likelihoods_[centroid_i][os] << std::endl;
-          obj_likelihoods_[centroid_i][os] = 0.5
-              * obj_likelihoods_[centroid_i][os] + (0.5
-              * obj_shape_confidence_[centroid_i]);
-          std::cout << "Overall similarity = "
-              << obj_likelihoods_[centroid_i][os] << std::endl;
+          logger->log_debug(name(), "** Similarity to known cup %i:", os);
+          logger->log_debug(name(), "Size similarity  = %f",
+			    obj_likelihoods_[centroid_i][os]);
+          obj_likelihoods_[centroid_i][os] =
+	    (0.6 * obj_likelihoods_[centroid_i][os]) +
+	    (0.4 * obj_shape_confidence_[centroid_i]);
+          logger->log_debug(name(), "Overall similarity = %f",
+			    obj_likelihoods_[centroid_i][os]);
           if (obj_likelihoods_[centroid_i][os] > best_confidence) {
             best_confidence = obj_likelihoods_[centroid_i][os];
             detected_obj_id = os;
           }
         }
-        std::cout << "********************Object Result********************"
-            << std::endl;
+        logger->log_debug(name(), "********************Object Result********************");
         if (best_confidence > 0.6) {
           best_obj_guess_[centroid_i] = detected_obj_id;
 
-          std::cout << "MATCH FOUND!! -------------------------> Cup number "
-              << detected_obj_id << std::endl;
+          logger->log_debug(name(), "MATCH FOUND!! -------------------------> Cup number %i",
+			    detected_obj_id);
         } else {
           best_obj_guess_[centroid_i] = -1;
-          std::cout << "No match found." << std::endl;
+          logger->log_debug(name(), "No match found.");
         }
 
-        std::cout << "*****************************************************"
-            << std::endl << std::endl;
+        logger->log_debug(name(), "*****************************************************");
       }
 
       *tmp_clusters += *colored_clusters;
