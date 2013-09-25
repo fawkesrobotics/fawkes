@@ -179,11 +179,13 @@ PanTiltRX28Thread::init()
   std::string panid = __ptu_name + " pan";
   __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
   __panjoint_if->set_position(__last_pan);
+  __panjoint_if->set_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
   __panjoint_if->write();
 
   std::string tiltid = __ptu_name + " tilt";
   __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
   __tiltjoint_if->set_position(__last_tilt);
+  __tiltjoint_if->set_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
   __tiltjoint_if->write();
 
   __wt = new WorkerThread(__ptu_name, logger, __rx28,
@@ -290,9 +292,11 @@ PanTiltRX28Thread::update_sensor_values()
     __pantilt_if->write();
 
     __panjoint_if->set_position(pan);
+    __panjoint_if->set_velocity(panvel);
     __panjoint_if->write();
 
     __tiltjoint_if->set_position(tilt);
+    __tiltjoint_if->set_velocity(tiltvel);
     __tiltjoint_if->write();
 
 #ifdef HAVE_TF
