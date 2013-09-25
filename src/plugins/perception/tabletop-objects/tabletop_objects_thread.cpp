@@ -1176,15 +1176,14 @@ TabletopObjectsThread::loop()
 
         pcl::compute3DCentroid(*obj_in_base_frame, centroids[centroid_i]);
 
-        ColorPointType* pnt_min = new ColorPointType();
-        ColorPointType* pnt_max = new ColorPointType();
+        ColorPointType pnt_min, pnt_max;
         Eigen::Vector3f obj_dim;
         std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>
             > obj_size_scores;
-        pcl::getMinMax3D(*obj_in_base_frame, *pnt_min, *pnt_max);
-        obj_dim[0] = fabs(pnt_max->x - pnt_min->x);
-        obj_dim[1] = fabs(pnt_max->y - pnt_min->y);
-        obj_dim[2] = fabs(pnt_max->z - pnt_min->z);
+        pcl::getMinMax3D(*obj_in_base_frame, pnt_min, pnt_max);
+        obj_dim[0] = fabs(pnt_max.x - pnt_min.x);
+        obj_dim[1] = fabs(pnt_max.y - pnt_min.y);
+        obj_dim[2] = fabs(pnt_max.z - pnt_min.z);
         compute_bounding_box_scores(obj_dim, obj_size_scores);
 
         logger->log_debug(name(), "Computed object dimensions: %f %f %f",
