@@ -22,6 +22,10 @@ fawkes:
     # Maximum time a thread may run per loop, 0 to disable; microseconds
     max_thread_time: 66666
 
+    # Uncomment the following to get a debug log file each time you
+    # run fawkes independent of the log level.
+    #loggers: console;file/debug:debug.log
+
     net:
       # Port for Fawkes Network Protocol service; TCP port
       tcp_port: !tcp-port 1910
