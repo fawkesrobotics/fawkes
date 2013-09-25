@@ -220,6 +220,9 @@ class PointCloudDBPipeline
   retrieve_clouds(std::vector<long long> &times, std::vector<long long> &actual_times,
 		  std::string &collection)
   {
+    mongodb_client_->ensureIndex(cfg_database_name_ + collection,
+				 mongo::fromjson("{timestamp:1}"));
+
     const unsigned int num_clouds = times.size();
     std::vector<CloudPtr> pcls(num_clouds);
 
