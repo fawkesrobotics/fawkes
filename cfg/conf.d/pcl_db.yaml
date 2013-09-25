@@ -46,7 +46,7 @@ perception/pcl-db-merge:
     # Maximum number of RANSAC iterations per ICP alignment iteration
     ransac-iterations: 5000
     # Maximum distance between two correspondances; m
-    max-correspondance-distance: 0.1
+    max-correspondance-distance: 0.05
 
     # The three convergence/abortion criteria
     # Maximum number of iterations of ICP alignment
