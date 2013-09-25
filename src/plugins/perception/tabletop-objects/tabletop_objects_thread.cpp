@@ -112,6 +112,7 @@ TabletopObjectsThread::init()
   cfg_max_z_angle_deviation_ = config->get_float(CFG_PREFIX"max_z_angle_deviation");
   cfg_table_min_height_      = config->get_float(CFG_PREFIX"table_min_height");
   cfg_table_max_height_      = config->get_float(CFG_PREFIX"table_max_height");
+  cfg_table_model_enable_    = config->get_bool(CFG_PREFIX"table_model_enable");
   cfg_table_model_length_    = config->get_float(CFG_PREFIX"table_model_length");
   cfg_table_model_width_     = config->get_float(CFG_PREFIX"table_model_width");
   cfg_table_model_step_      = config->get_float(CFG_PREFIX"table_model_step");
@@ -855,10 +856,10 @@ TabletopObjectsThread::loop()
     TIMETRACK_END(ttc_find_edge_);
 
     model_cloud_hull_.reset(new Cloud());
-    if ((pidx1 != std::numeric_limits<size_t>::max()) &&
-	(pidx2 != std::numeric_limits<size_t>::max()) )
+    if ( cfg_table_model_enable_ &&
+	 (pidx1 != std::numeric_limits<size_t>::max()) &&
+	 (pidx2 != std::numeric_limits<size_t>::max()) )
     {
-
       TIMETRACK_START(ttc_transform_);
 
       // Calculate transformation parameters based on determined

@@ -155,6 +155,7 @@ class TabletopObjectsThread
   float cfg_table_cluster_tolerance_;
   float cfg_table_min_height_;
   float cfg_table_max_height_;
+  bool  cfg_table_model_enable_;
   float cfg_table_model_length_;
   float cfg_table_model_width_;
   float cfg_table_model_step_;
