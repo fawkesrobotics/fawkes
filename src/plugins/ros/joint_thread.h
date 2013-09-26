@@ -56,7 +56,6 @@ class RosJointThread
   virtual ~RosJointThread();
 
   virtual void init();
-  virtual void loop();
   virtual void finalize();
 
   virtual void bb_interface_created(const char *type, const char *id) throw();

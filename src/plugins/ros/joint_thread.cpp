@@ -46,8 +46,6 @@ RosJointThread::~RosJointThread()
 {
 }
 
-
-
 void
 RosJointThread::init()
 {
@@ -66,12 +64,6 @@ RosJointThread::init()
   blackboard->register_listener(this);
   blackboard->register_observer(this);
 }
-
-void
-RosJointThread::loop()
-{
-}
-
 
 void
 RosJointThread::finalize()
