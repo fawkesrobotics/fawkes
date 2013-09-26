@@ -37,7 +37,6 @@ using namespace fawkes;
 /** Constructor. */
 RosJointThread::RosJointThread()
   : Thread("RosJointThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
     BlackBoardInterfaceListener("RosJointThread")
 {
 }

@@ -46,7 +46,6 @@ class RosJointThread
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::ROSAspect,
   public fawkes::BlackBoardInterfaceObserver,
