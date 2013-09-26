@@ -33,7 +33,7 @@ linkscripts:
 				else \
 					echo -e "$(INDENT_PRINT)--- Linking bin/$$f -> etc/scripts/$$f"; \
 					rm -f $(BINDIR)/$$f; \
-					ln -s $(BASEDIR)/etc/scripts/$$f $(BINDIR)/$$f; \
+					ln -s ../etc/scripts/$$f $(BINDIR)/$$f; \
 				fi \
 			else \
 				echo -e "$(INDENT_PRINT)$(TYELLOW)--- Omitting etc/scripts/$$f (not executable)$(TNORMAL)"; \
