@@ -76,18 +76,18 @@ void LocalizationSimThread::on_localization_msg(ConstPosePtr &msg)
   double x = msg->position().x();
   double y = msg->position().y();
   double z = msg->position().z();
-  double roll = msg->orientation().x();
-  double pitch = msg->orientation().y();
-  double yaw = msg->orientation().z();
-  double w = msg->orientation().w();
+  double quat_x = msg->orientation().x();
+  double quat_y = msg->orientation().y();
+  double quat_z = msg->orientation().z();
+  double quat_w = msg->orientation().w();
 
   //write interface
   localization_if_->set_translation(0, x);
   localization_if_->set_translation(1, y);
   localization_if_->set_translation(2, z);
-  localization_if_->set_rotation(0, roll);
-  localization_if_->set_rotation(1, pitch);
-  localization_if_->set_rotation(2, yaw);
-  localization_if_->set_rotation(3, w);
+  localization_if_->set_rotation(0, quat_x);
+  localization_if_->set_rotation(1, quat_y);
+  localization_if_->set_rotation(2, quat_z);
+  localization_if_->set_rotation(3, quat_w);
   localization_if_->write();
 }

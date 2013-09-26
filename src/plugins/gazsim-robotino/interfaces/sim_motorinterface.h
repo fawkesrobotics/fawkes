@@ -73,6 +73,7 @@ class SimMotorInterface: public SimInterface
   //motorMovements last sent to gazebo
   float vx_, vy_, vomega_, x_, y_, ori_, path_length_;
   fawkes::Time last_pos_time_;
+  fawkes::Time last_vel_set_time_;
 
   //Odometry offset
   float x_offset_, y_offset_, ori_offset_;

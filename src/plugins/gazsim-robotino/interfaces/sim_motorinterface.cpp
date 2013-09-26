@@ -163,6 +163,7 @@ void SimMotorInterface::process_messages()
 	x_ = 0.0;
 	y_ = 0.0;
 	ori_ = 0.0;
+	last_vel_set_time_ = clock_->now();
       }
     motor_if_->msgq_pop();
   }
@@ -175,7 +176,10 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
   //read out values + substract offset
   float new_x = msg->position().x() - x_offset_;
   float new_y = msg->position().y() - y_offset_;
-  float new_ori = msg->orientation().z() - ori_offset_;
+  //calculate ori from quaternion
+  float new_ori = tf::get_yaw(tf::Quaternion(msg->orientation().x(), msg->orientation().y()
+					  , msg->orientation().z(), msg->orientation().w()));
+  new_ori -= ori_offset_;
   
   //estimate path-length
   float length_driven = sqrt((new_x-x_) * (new_x-x_) + (new_y-y_) * (new_y-y_));
@@ -185,16 +189,20 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
     //simulate slipping wheels when driving against an obstacle
     fawkes::Time new_time = clock_->now();
     double duration = new_time.in_sec() - last_pos_time_.in_sec();
-    
+    //calculate duration since the velocity was last set to filter slipping while accelerating
+    double velocity_set_duration = new_time.in_sec() - last_vel_set_time_.in_sec();
+
     last_pos_time_ = new_time;
+    
 
     double total_speed = sqrt(vx_ * vx_ + vy_ * vy_);
-    if(length_driven < total_speed * duration * slippery_wheels_threshold_)
+    if(length_driven < total_speed * duration * slippery_wheels_threshold_ && velocity_set_duration > duration)
     {
       double speed_abs_x = vx_ * cos(ori_) - vy_ * sin(ori_);
       double speed_abs_y = vx_ * sin(ori_) + vy_ * cos(ori_);
       double slipped_x = speed_abs_x * duration * slippery_wheels_threshold_;
       double slipped_y = speed_abs_y * duration * slippery_wheels_threshold_;
+      logger_->log_info(name_, "Wheels are slipping (%f, %f)", slipped_x, slipped_y);
       new_x = x_ + slipped_x;
       new_y = y_ + slipped_y;
       //update the offset (otherwise the slippery error would be corrected in the next iteration)
