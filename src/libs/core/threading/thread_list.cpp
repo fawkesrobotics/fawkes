@@ -540,8 +540,14 @@ ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
 	can_finalize = false;
       }
     } catch (CannotFinalizeThreadException &e) {
-      cfte.append("Thread '%s' throw an exception while preparing finalization of "
-		  "ThreadList '%s'", (*i)->name(), __name);
+      cfte.append("Thread '%s' threw an exception while preparing finalization of "
+		  "ThreadList '%s' (IGNORED)", (*i)->name(), __name);
+      cfte.append(e);
+      threw_exception = true;
+    } catch (Exception &e) {
+      cfte.append("Thread '%s' threw a generic exception while preparing finalization of "
+		  "ThreadList '%s' (IGNORED)", (*i)->name(), __name);
+      cfte.append(e);
       threw_exception = true;
     }
   }
@@ -640,12 +646,29 @@ ThreadList::set_prepfin_hold(bool hold)
 void
 ThreadList::force_stop(ThreadFinalizer *finalizer)
 {
+  bool caught_exception = false;
+  Exception exc("Forced thread finalization failed");;
   try {
     prepare_finalize(finalizer);
+  } catch (Exception &e) {
+    caught_exception = true;
+    exc.append(e);
+  }
+  try {
     stop();
+  } catch (Exception &e) {
+    caught_exception = true;
+    exc.append(e);
+  }
+  try {
     finalize(finalizer);
   } catch (Exception &e) {
-    // ignored
+    caught_exception = true;
+    exc.append(e);
+  }
+
+  if (caught_exception) {
+    throw exc;
   }
 }
 
