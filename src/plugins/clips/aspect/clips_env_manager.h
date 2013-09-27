@@ -37,7 +37,7 @@ namespace fawkes {
 #endif
 
 class Logger;
-class CLIPSFeatureAspect;
+class CLIPSFeature;
 
 class CLIPSEnvManager
 {
@@ -49,9 +49,9 @@ class CLIPSEnvManager
     create_env(const std::string &env_name, const std::string &log_component_name);
   void destroy_env(const std::string &env_name);
 
-  void add_feature(const std::string &feature_name, CLIPSFeatureAspect *provider);
-  void remove_feature(const std::string &feature_name);
-  void assert_can_remove_feature(const std::string &feature_name);
+  void add_features(const std::list<CLIPSFeature *> &features);
+  void remove_features(const std::list<CLIPSFeature *> &features);
+  void assert_can_remove_features(const std::list<CLIPSFeature *> &features);
 
   std::map<std::string, LockPtr<CLIPS::Environment>> environments() const;
 
@@ -71,7 +71,7 @@ class CLIPSEnvManager
   /// @endcond
 
   std::map<std::string, ClipsEnvData > envs_;
-  std::map<std::string, CLIPSFeatureAspect * > features_;
+  std::map<std::string, CLIPSFeature * > features_;
 
 };
 

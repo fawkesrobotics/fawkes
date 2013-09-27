@@ -38,22 +38,33 @@ namespace fawkes {
 }
 #endif
 
-class CLIPSFeatureAspect : public virtual Aspect
-{
-  friend class CLIPSFeatureAspectIniFin;
+class CLIPSFeature {
+  friend class CLIPSEnvManager;
 
  public:
-  CLIPSFeatureAspect(const char *feature_name);
-  virtual ~CLIPSFeatureAspect();
+  CLIPSFeature(const char *feature_name);
+  virtual ~CLIPSFeature();
 
   virtual void clips_context_init(const std::string &env_name,
 				  fawkes::LockPtr<CLIPS::Environment> &clips) = 0;
   virtual void clips_context_destroyed(const std::string &env_name) = 0;
 
-
  protected:
   const std::string clips_feature_name;	///< CLIPS feature name
 
+};
+
+class CLIPSFeatureAspect : public virtual Aspect
+{
+  friend class CLIPSFeatureAspectIniFin;
+
+ public:
+  CLIPSFeatureAspect(CLIPSFeature *feature);
+  CLIPSFeatureAspect(const std::list<CLIPSFeature *> features);
+  virtual ~CLIPSFeatureAspect();
+
+ private:
+  std::list<CLIPSFeature *> clips_features_;
 };
 
 } // end namespace fawkes

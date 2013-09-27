@@ -344,26 +344,28 @@ CLIPSEnvManager::assert_features(LockPtr<CLIPS::Environment> &clips, bool immedi
 
 
 /** Add a feature by name.
- * @param feature_name name of the feature by which CLIPS environments
- * can request the feature.
- * @param provider the provider used to initialize the feature.
+ * @param features CLIPS feature maintainers to add
  */
 void
-CLIPSEnvManager::add_feature(const std::string &feature_name, CLIPSFeatureAspect *provider)
+CLIPSEnvManager::add_features(const std::list<CLIPSFeature *> &features)
 {
-  if (features_.find(feature_name) != features_.end()) {
-    throw Exception("Feature '%s' has already been registered", feature_name.c_str());
-  }
+  for (auto feat : features) {
+    const std::string &feature_name = feat->clips_feature_name;
 
-  features_[feature_name] = provider;
+    if (features_.find(feature_name) != features_.end()) {
+      throw Exception("Feature '%s' has already been registered", feature_name.c_str());
+    }
 
-  // assert fact to indicate feature availability to environments
-  for (auto env : envs_) {
-    env.second.env.lock();
-    assert_features(env.second.env, false);
-    // assert so it is immediately available
-    env.second.env->assert_fact_f("(ff-feature %s)", feature_name.c_str());
-    env.second.env.unlock();
+    features_[feature_name] = feat;
+
+    // assert fact to indicate feature availability to environments
+    for (auto env : envs_) {
+      env.second.env.lock();
+      assert_features(env.second.env, false);
+      // assert so it is immediately available
+      env.second.env->assert_fact_f("(ff-feature %s)", feature_name.c_str());
+      env.second.env.unlock();
+    }
   }
 }
 
@@ -371,32 +373,42 @@ CLIPSEnvManager::add_feature(const std::string &feature_name, CLIPSFeatureAspect
 /** Assert that a feature can be removed.
  * The feature will not actually be removed, it will just be checked if this
  * would work without problem.
- * @param feature_name name of the feature to assert successful removal
+ * @param features list of features to query for removal
  * @exception Exception thrown with a descriptive message if the feature
  * cannot be removed because it is still in use
  */
 void
-CLIPSEnvManager::assert_can_remove_feature(const std::string &feature_name)
+CLIPSEnvManager::assert_can_remove_features(const std::list<CLIPSFeature *> &features)
 {
-  for (auto env : envs_) {
-    if (std::binary_search(env.second.req_feat.begin(), env.second.req_feat.end(), feature_name)) {
-      throw Exception("Cannot remove feature %s as environment %s depends on it",
-		      feature_name.c_str(), env.first.c_str());
+  for (auto feat : features) {
+    const std::string &feature_name = feat->clips_feature_name;
+
+    for (auto env : envs_) {
+      if (std::binary_search(env.second.req_feat.begin(), env.second.req_feat.end(), feature_name)) {
+	throw Exception("Cannot remove feature %s as environment %s depends on it",
+			feature_name.c_str(), env.first.c_str());
+      }
     }
   }
 }
 
 /** Remove a feature by name.
- * @param feature_name name of the feature to remove
+ * @param features list of features to remove
  * @exception Exception thrown with a descriptive message if the feature
  * cannot be removed because it is still in use
  */
 void
-CLIPSEnvManager::remove_feature(const std::string &feature_name)
+CLIPSEnvManager::remove_features(const std::list<CLIPSFeature *> &features)
 {
-  if (features_.find(feature_name) != features_.end()) {
-    assert_can_remove_feature(feature_name);
-    features_.erase(feature_name);
+  // On plugin unload this would fail because destruction
+  // of threads is forced.
+  //assert_can_remove_features(features);
+  for (auto feat : features) {
+    const std::string &feature_name = feat->clips_feature_name;
+
+    if (features_.find(feature_name) != features_.end()) {
+      features_.erase(feature_name);
+    }
   }
 }
 

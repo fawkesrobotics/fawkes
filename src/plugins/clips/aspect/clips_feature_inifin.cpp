@@ -61,7 +61,7 @@ CLIPSFeatureAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  clips_env_mgr_->add_feature(clips_thread->clips_feature_name, clips_thread);
+  clips_env_mgr_->add_features(clips_thread->clips_features_);
 }
 
 
@@ -72,8 +72,12 @@ CLIPSFeatureAspectIniFin::prepare_finalize(Thread *thread)
   clips_thread = dynamic_cast<CLIPSFeatureAspect *>(thread);
   if (clips_thread == NULL)  return true;
 
-  clips_env_mgr_->assert_can_remove_feature(clips_thread->clips_feature_name);
-  return true;
+  try {
+    clips_env_mgr_->assert_can_remove_features(clips_thread->clips_features_);
+    return true;
+  } catch (Exception &e) {
+    return false;
+  }
 }
 
 void
@@ -87,7 +91,7 @@ CLIPSFeatureAspectIniFin::finalize(Thread *thread)
 					"has not. ", thread->name());
   }
 
-  clips_env_mgr_->remove_feature(clips_thread->clips_feature_name);
+  clips_env_mgr_->remove_features(clips_thread->clips_features_);
 }
 
 
