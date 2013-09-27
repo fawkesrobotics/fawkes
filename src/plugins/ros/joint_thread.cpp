@@ -21,7 +21,6 @@
 
 #include "joint_thread.h"
 
-#include <core/threading/mutex_locker.h>
 #include <ros/this_node.h>
 #include <sensor_msgs/JointState.h>
 

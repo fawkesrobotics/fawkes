@@ -36,7 +36,6 @@
 #include <interfaces/JointInterface.h>
 
 #include <list>
-#include <queue>
 
 // from ROS
 #include <ros/node_handle.h>
