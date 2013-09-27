@@ -47,30 +47,30 @@ class RcdCircleModel: public ShapeModel
  public:
 
   RcdCircleModel(unsigned int max_failures       = 300,
-		 unsigned int min_pixels         =  20,
-		 unsigned int min_interpix_dist  =  10,
-		 unsigned int max_dist_p4        =   2,
-		 unsigned int max_dist_a         =  10,
-		 float        hw_ratio           =   0.6,
-		 float        hollow_rate        =   0.f,
-		 float        max_time           =   0.01
-		 );
+                 unsigned int min_pixels         =  20,
+                 unsigned int min_interpix_dist  =  10,
+                 unsigned int max_dist_p4        =   2,
+                 unsigned int max_dist_a         =  10,
+                 float        hw_ratio           =   0.6,
+                 float        hollow_rate        =   0.f,
+                 float        max_time           =   0.01
+                 );
   virtual ~RcdCircleModel(void);
 
-  std::string	getName(void) const {return std::string("RcdCircleModel");}
-  int		parseImage(unsigned char* buffer, ROI *roi);
-  int		getShapeCount(void) const;
-  Circle*	getShape(int id) const;
-  Circle*	getMostLikelyShape(void) const;
-  
+  std::string   getName(void) const {return std::string("RcdCircleModel");}
+  int           parseImage(unsigned char* buffer, ROI *roi);
+  int           getShapeCount(void) const;
+  Circle*       getShape(int id) const;
+  Circle*       getMostLikelyShape(void) const;
+
  private:
   /** Calculate circle from three points
    */
-  void		calcCircle( const fawkes::point_t& p1,
-			    const fawkes::point_t& p2,
-			    const fawkes::point_t& p3,
-			    center_in_roi_t& center,
-			    float& radius);
+  void          calcCircle( const fawkes::upoint_t& p1,
+                            const fawkes::upoint_t& p2,
+                            const fawkes::upoint_t& p3,
+                            center_in_roi_t& center,
+                            float& radius);
 
 
 
@@ -78,12 +78,12 @@ class RcdCircleModel: public ShapeModel
   int    diff_usec;
   float  f_diff_sec;
 
-  unsigned int	RCD_MAX_FAILURES;
-  unsigned int	RCD_MIN_PIXELS;
-  unsigned int	RCD_MIN_INTERPIX_DIST;
-  unsigned int	RCD_MAX_DIST_P4;
-  unsigned int	RCD_MAX_DIST_A;
-  float		RCD_HW_RATIO;
+  unsigned int  RCD_MAX_FAILURES;
+  unsigned int  RCD_MIN_PIXELS;
+  unsigned int  RCD_MIN_INTERPIX_DIST;
+  unsigned int  RCD_MAX_DIST_P4;
+  unsigned int  RCD_MAX_DIST_A;
+  float         RCD_HW_RATIO;
   float         RCD_MAX_TIME;
   float         RCD_ROI_HOLLOW_RATE;
 

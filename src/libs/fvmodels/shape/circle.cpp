@@ -63,8 +63,8 @@ Circle::Circle(const center_in_roi_t& c, float r, int n)
 void
 Circle::printToStream(std::ostream &stream)
 {
-	stream	<< "center=(" << center.x << "," << center.y << ")"
-		<< "   radius=" << radius << "    count= " << count;
+        stream  << "center=(" << center.x << "," << center.y << ")"
+                << "   radius=" << radius << "    count= " << count;
 }
 
 /** Fit circle.
@@ -72,47 +72,47 @@ Circle::printToStream(std::ostream &stream)
  * @param points points to fit circle through.
  */
 void
-Circle::fitCircle (vector< point_t > &points)
+Circle::fitCircle (vector< upoint_t > &points)
 {
-	// due to fixed width, do not use arrays to save addressing time...
-	double A00=0.0, A01=0.0, A02=0.0;
-	double A10=0.0, A11=0.0, A12=0.0;
-	double A20=0.0, A21=0.0, A22=0.0;
-	double b0 =0.0, b1 =0.0, b2 =0.0;
+        // due to fixed width, do not use arrays to save addressing time...
+        double A00=0.0, A01=0.0, A02=0.0;
+        double A10=0.0, A11=0.0, A12=0.0;
+        double A20=0.0, A21=0.0, A22=0.0;
+        double b0 =0.0, b1 =0.0, b2 =0.0;
 
-	// generating A'A and A'b
-	int count = points.size();
-	for (int i = 0; i < count; i++)
-	{
-		point_t &t = points[i];
-		double x0 = 2.0f * t.x;
-		double y0 = 2.0f * t.y;
-		double b = (double)(t.x * t.x + t.y * t.y);
-		A00 += x0 * x0;
-		A01 += x0 * y0;
-		A02 += x0;
-		A10 += y0 * x0;
-		A11 += y0 * y0;
-		A12 += y0;
-		A20 += x0;
-		A21 += y0;
-		A22 += 1.0;
-		b0  += x0 * b;
-		b1  += y0 * b;
-		b2  += b;
-	}
+        // generating A'A and A'b
+        int count = points.size();
+        for (int i = 0; i < count; i++)
+        {
+                upoint_t &t = points[i];
+                double x0 = 2.0f * t.x;
+                double y0 = 2.0f * t.y;
+                double b = (double)(t.x * t.x + t.y * t.y);
+                A00 += x0 * x0;
+                A01 += x0 * y0;
+                A02 += x0;
+                A10 += y0 * x0;
+                A11 += y0 * y0;
+                A12 += y0;
+                A20 += x0;
+                A21 += y0;
+                A22 += 1.0;
+                b0  += x0 * b;
+                b1  += y0 * b;
+                b2  += b;
+        }
 
-	// solve the resulting 3 by 3 equations
-	double delta =		+ A00 * A11 * A22 + A01 * A12 * A20 + A02 * A10 * A21
-				- A00 * A12 * A21 - A01 * A10 * A22 - A02 * A11 * A20;
-	center.x = (float)( ( 	+ b0 * A11 * A22 + A01 * A12 * b2 + A02 * b1 * A21
-				- b0 * A12 * A21 - A01 * b1 * A22 - A02 * A11 * b2 ) / delta);
-	center.y = (float)( (	+ A00 * b1 * A22 + b0 * A12 * A20 + A02 * A10 * b2
-				- A00 * A12 * b2 - b0 * A10 * A22 - A02 * b1 * A20 ) / delta);
-	radius = (float)sqrt( (	+ A00 * A11 * b2 + A01 * b1 * A20 + b0 * A10 * A21
-			   	- A00 * b1 * A21 - A01 * A10 * b2 - b0 * A11 * A20 ) / delta
-			   	+ center.x * center.x + center.y * center.y);
-	count = points.size();
+        // solve the resulting 3 by 3 equations
+        double delta =          + A00 * A11 * A22 + A01 * A12 * A20 + A02 * A10 * A21
+                                - A00 * A12 * A21 - A01 * A10 * A22 - A02 * A11 * A20;
+        center.x = (float)( (   + b0 * A11 * A22 + A01 * A12 * b2 + A02 * b1 * A21
+                                - b0 * A12 * A21 - A01 * b1 * A22 - A02 * A11 * b2 ) / delta);
+        center.y = (float)( (   + A00 * b1 * A22 + b0 * A12 * A20 + A02 * A10 * b2
+                                - A00 * A12 * b2 - b0 * A10 * A22 - A02 * b1 * A20 ) / delta);
+        radius = (float)sqrt( ( + A00 * A11 * b2 + A01 * b1 * A20 + b0 * A10 * A21
+                                - A00 * b1 * A21 - A01 * A10 * b2 - b0 * A11 * A20 ) / delta
+                                + center.x * center.x + center.y * center.y);
+        count = points.size();
 }
 
 
@@ -132,7 +132,7 @@ Circle::isClose( unsigned int in_roi_x, unsigned int in_roi_y )
   float dist = sqrt( dx * dx + dy * dy );
 
   return ( (dist <= (radius + margin)) &&
-	   (dist >= (radius - margin)) );
+           (dist >= (radius - margin)) );
 
 }
 

@@ -26,7 +26,7 @@
 
 #include <cmath>
 
-using fawkes::point_t;
+using fawkes::upoint_t;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -65,10 +65,10 @@ namespace firevision {
  * @exception Exception thrown if parameters are out of bounds
  */
 ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height,
-			     unsigned int start_x, unsigned int start_y,
-			     unsigned int stop_y, unsigned int offset_y,
+           unsigned int start_x, unsigned int start_y,
+           unsigned int stop_y, unsigned int offset_y,
                              bool distribute_start_x,
-			     float angle_from, float angle_range,
+           float angle_from, float angle_range,
                              unsigned int num_beams)
 {
   if ( start_y < stop_y )  throw fawkes::Exception("start_y < stop_y");
@@ -91,13 +91,13 @@ ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height
 }
 
 
-point_t
+upoint_t
 ScanlineBeams::operator*()
 {
   return coord;
 }
 
-point_t*
+upoint_t*
 ScanlineBeams::operator->()
 {
   return &coord;
@@ -128,7 +128,7 @@ ScanlineBeams::advance()
     // calculate distance in both directions
     dx = x_end - x_start;
     dy = y_end - y_start;
- 
+
     // Calculate sign of the increment
     if(dx < 0) {
       incx = -1;
@@ -136,40 +136,40 @@ ScanlineBeams::advance()
     } else {
       incx = dx ? 1 : 0;
     }
-     
+
     if(dy < 0) {
       incy = -1;
       dy = -dy;
     } else {
       incy = dy ? 1 : 0;
     }
- 
+
     // check which distance is larger
     dist = (dx > dy) ? dx : dy;
-    
+
     // Initialize for loops
     x = x_start;
     y = y_start;
     xerr = dx;
     yerr = dy;
-     
+
     /* Calculate and draw pixels */
     unsigned int offset = 0;
     while ( (x >= 0) && ((unsigned int )x < image_width) && ((unsigned int)y > stop_y) &&
-	    (offset < offset_y) ) {
+      (offset < offset_y) ) {
       ++offset;
-      
+
       xerr += dx;
       yerr += dy;
-     
+
       if(xerr > dist) {
-	xerr -= dist;
-	x += incx;
+  xerr -= dist;
+  x += incx;
       }
-      
+
       if(yerr>dist) {
-	yerr -= dist;
-	y += incy;
+  yerr -= dist;
+  y += incy;
       }
     }
     if ( (y < 0) || (unsigned int)y <= stop_y ) {
@@ -188,7 +188,7 @@ ScanlineBeams::advance()
 
     coord.x = x;
     coord.y = y;
-    
+
     beam_current_pos[next_beam] = coord;
 
     if ( next_beam < last_beam) {
@@ -202,7 +202,7 @@ ScanlineBeams::advance()
 }
 
 
-point_t *
+upoint_t *
 ScanlineBeams::operator++()
 {
   advance();
@@ -210,7 +210,7 @@ ScanlineBeams::operator++()
 }
 
 
-point_t *
+upoint_t *
 ScanlineBeams::operator++(int i)
 {
   tmp_coord.x = coord.x;
@@ -248,7 +248,7 @@ ScanlineBeams::reset()
   for (unsigned int i = 0; i < num_beams; ++i) {
     float diff_y = beam_current_pos[i].y - stop_y;
     float diff_x = diff_y * tan( angle_from + (float)i * angle_between_beams );
-    point_t end_point;
+    upoint_t end_point;
     end_point.y = stop_y;
     end_point.x = (int)roundf(diff_x) + start_x;
     beam_end_pos.push_back(end_point);

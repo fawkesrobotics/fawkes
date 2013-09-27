@@ -68,11 +68,11 @@ const float CornerHorizon::M_PI_HALF = M_PI / 2.f;
  * @param vertical_angle vertical viewing angle in degrees
  */
 CornerHorizon::CornerHorizon(ScanlineModel *model,
-			     float field_length, float field_width, float field_border,
-			     unsigned int image_width, unsigned int image_height,
-			     float camera_height, float camera_ori,
-			     float horizontal_angle, float vertical_angle
-			     )
+           float field_length, float field_width, float field_border,
+           unsigned int image_width, unsigned int image_height,
+           float camera_height, float camera_ori,
+           float horizontal_angle, float vertical_angle
+           )
 {
   this->model = model;
 
@@ -105,14 +105,14 @@ CornerHorizon::~CornerHorizon()
 }
 
 
-point_t
+upoint_t
 CornerHorizon::operator*()
 {
   return coord;
 }
 
 
-point_t*
+upoint_t*
 CornerHorizon::operator->()
 {
   return &coord;
@@ -181,7 +181,7 @@ CornerHorizon::calculate()
 }
 
 
-point_t *
+upoint_t *
 CornerHorizon::operator++()
 {
   if ( ! calculated) {
@@ -209,14 +209,14 @@ CornerHorizon::operator++()
 }
 
 
-point_t *
+upoint_t *
 CornerHorizon::operator++(int)
 {
   if ( ! calculated) {
     calculate();
     calculated = true;
   }
-  memcpy(&tmp_coord, &coord, sizeof(point_t));
+  memcpy(&tmp_coord, &coord, sizeof(upoint_t));
 
   do {
     ++(*model);

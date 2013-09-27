@@ -26,7 +26,7 @@
 
 #include <cstring>
 
-using fawkes::point_t;
+using fawkes::upoint_t;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -49,8 +49,8 @@ namespace firevision {
  * @param horizontal_grid if true x will be increased before y
  */
 ScanlineGrid::ScanlineGrid(unsigned int width, unsigned int height,
-			   unsigned int offset_x, unsigned int offset_y,
-			   ROI* roi, bool horizontal_grid)
+         unsigned int offset_x, unsigned int offset_y,
+         ROI* roi, bool horizontal_grid)
 {
   this->roi = NULL;
   setGridParams(width, height,
@@ -65,13 +65,13 @@ ScanlineGrid::~ScanlineGrid()
 {
 }
 
-point_t
+upoint_t
 ScanlineGrid::operator*()
 {
   return coord;
 }
 
-point_t*
+upoint_t*
 ScanlineGrid::operator->()
 {
   return &coord;
@@ -123,17 +123,17 @@ ScanlineGrid::calc_next_coord()
   }
 }
 
-point_t *
+upoint_t *
 ScanlineGrid::operator++()
 {
   calc_next_coord();
   return &coord;
 }
 
-point_t *
+upoint_t *
 ScanlineGrid::operator++(int)
 {
-  memcpy(&tmp_coord, &coord, sizeof(point_t));
+  memcpy(&tmp_coord, &coord, sizeof(upoint_t));
   calc_next_coord();
   return &tmp_coord;
 }

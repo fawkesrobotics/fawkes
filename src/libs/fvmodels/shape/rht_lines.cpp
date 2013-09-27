@@ -48,7 +48,7 @@ RhtLinesModel::RhtLinesModel(float max_time, int max_iter, unsigned int nr_candi
   RHT_MAX_ITER =  max_iter; // Maximal number of iterations.
 
   RHT_NR_CANDIDATES   = nr_candidates;
-  
+
   RHT_R_SCALE         = r_scale;
 
   RHT_MIN_VOTES       = min_votes;
@@ -71,7 +71,7 @@ RhtLinesModel::~RhtLinesModel(void)
  **************************************************************/
 int
 RhtLinesModel::parseImage( unsigned char *buf,
-			   ROI *roi            )
+         ROI *roi            )
 {
   unsigned char *buffer = roi->get_roi_buffer_start(buf);
 
@@ -87,15 +87,15 @@ RhtLinesModel::parseImage( unsigned char *buf,
   // and store them in the 'pixels' vector.
   unsigned char *line_start = buffer;
   unsigned int     x, y;
-  vector<point_t>  pixels;
+  vector<upoint_t>  pixels;
 
   gettimeofday(&start, NULL);
 
   for (y = 0; y < roi->height; ++y) {
     for (x = 0; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+  upoint_t pt={x, y};
+  pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -105,9 +105,9 @@ RhtLinesModel::parseImage( unsigned char *buf,
   }
 
   // Then perform the RHT algorithm
-  point_t p;
+  upoint_t p;
   float r, phi; // used for line representation
-  vector< point_t >::iterator pos;
+  vector< upoint_t >::iterator pos;
   int num_iter = 0;
   if (pixels.size() == 0) {
     // No edge pixels found => no lines
@@ -123,37 +123,37 @@ RhtLinesModel::parseImage( unsigned char *buf,
       pos = pixels.begin() + ri;
       p = *pos;
       pixels.erase(pos);
-      
+
       for (unsigned int i = 0; i < RHT_NR_CANDIDATES; ++i) {
-	phi = RHT_ANGLE_FROM + i * RHT_ANGLE_INCREMENT;
-	r   = p.x * cos( phi )  +   p.y * sin( phi );
-	
-	int angle = (int)round(fawkes::rad2deg( phi ));
-	
-	accumulator.accumulate( (int)round(r / RHT_R_SCALE),
-				angle,
-				0 );
+  phi = RHT_ANGLE_FROM + i * RHT_ANGLE_INCREMENT;
+  r   = p.x * cos( phi )  +   p.y * sin( phi );
+
+  int angle = (int)round(fawkes::rad2deg( phi ));
+
+  accumulator.accumulate( (int)round(r / RHT_R_SCALE),
+        angle,
+        0 );
       }
-      
+
       gettimeofday(&now, NULL);
 
       diff_sec  = now.tv_sec  - start.tv_sec;
       diff_usec = now.tv_usec - start.tv_usec;
       if (diff_usec < 0) {
-	diff_sec  -= 1;
-	diff_usec += 1000000;
+  diff_sec  -= 1;
+  diff_usec += 1000000;
       }
-      
+
       f_diff_sec = diff_sec + diff_usec / 1000000.f;
 
     } // end if
   } while( ( ++num_iter < RHT_MAX_ITER) &&
-	   ( f_diff_sec < RHT_MAX_TIME) );
+     ( f_diff_sec < RHT_MAX_TIME) );
 
   // Find the most dense region, and decide on the lines
   int max, r_max, phi_max, any_max;
   max = accumulator.getMax(r_max, phi_max, any_max);
-  
+
   roi_width = roi->width;
   roi_height = roi->height;
 
@@ -162,7 +162,7 @@ RhtLinesModel::parseImage( unsigned char *buf,
   l.phi = phi_max;
   l.count = max;
   m_Lines.push_back( l );
- 
+
   return 1;
 }
 
@@ -195,7 +195,7 @@ RhtLinesModel::getMostLikelyShape(void) const
     int cur=0;
     for (unsigned int i=1; i < m_Lines.size(); ++i) {
       if (m_Lines[i].count > m_Lines[cur].count) {
-	cur = i;
+  cur = i;
       }
     }
     return const_cast<LineShape*>(&m_Lines[cur]); // or use const Shape* definition?!...

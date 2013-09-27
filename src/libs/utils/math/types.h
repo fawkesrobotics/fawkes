@@ -34,7 +34,7 @@ namespace fawkes {
 typedef struct {
   unsigned int x;       /**< x coordinate */
   unsigned int y;       /**< y coordinate */
-} point_t;
+} upoint_t;
 
 /** Cartesian coordinates (2D). */
 typedef struct {
@@ -63,7 +63,7 @@ typedef struct {
 
 /** Rectangle (unsigned integers) */
 typedef struct {
-  point_t      start;      /**< start point */
+  upoint_t      start;      /**< start point */
   extent_2d_t  extent;     /**< extent */
 } rectangle_t;
 

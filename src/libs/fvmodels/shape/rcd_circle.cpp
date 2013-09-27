@@ -42,9 +42,9 @@ namespace firevision {
 #define TEST_IF_IS_A_PIXEL(x) ((x)==0)
 #endif // TBY_GRAYSCALE
 
-#define TBY_SQUARED_DIST(x1,y1,x2,y2)			\
+#define TBY_SQUARED_DIST(x1,y1,x2,y2)                   \
   (((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2)))
-#define TBY_RADIUS_DIFF(x1, y1, x2, y2, r)			\
+#define TBY_RADIUS_DIFF(x1, y1, x2, y2, r)                      \
   (((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2))-(r)*(r))
 
 /** @class RcdCircleModel <fvmodels/shape/rcd_circle.h>
@@ -63,14 +63,14 @@ namespace firevision {
  * @param max_time Maximum runtime per loop
  */
 RcdCircleModel::RcdCircleModel(unsigned int max_failures,
-			       unsigned int min_pixels,
-			       unsigned int min_interpix_dist,
-			       unsigned int max_dist_p4,
-			       unsigned int max_dist_a,
-			       float        hw_ratio,
-			       float        hollow_rate,
-			       float        max_time
-			       )
+                               unsigned int min_pixels,
+                               unsigned int min_interpix_dist,
+                               unsigned int max_dist_p4,
+                               unsigned int max_dist_a,
+                               float        hw_ratio,
+                               float        hollow_rate,
+                               float        max_time
+                               )
 {
 
   RCD_MAX_FAILURES       = max_failures;
@@ -91,14 +91,14 @@ RcdCircleModel::~RcdCircleModel(void)
 }
 
 int RcdCircleModel::parseImage( unsigned char* buf,
-				ROI *roi )
+                                ROI *roi )
 {
-  
+
   unsigned char *buffer = roi->get_roi_buffer_start(buf);
   unsigned char *line_start = buffer;
 
   unsigned int     x, y;
-  vector<point_t>  pixels,
+  vector<upoint_t>  pixels,
     remove_list;
   unsigned int     f = 0;       // number of failures
   int              count;       // number of pixels on the circle
@@ -108,10 +108,10 @@ int RcdCircleModel::parseImage( unsigned char* buf,
   // clear all the remembered circles
   m_Circles.clear();
 
-  const unsigned int roi_hollow_top	= (int)(roi->height * ((1.0f - RCD_ROI_HOLLOW_RATE) / 2));
-  const unsigned int roi_hollow_bottom	= roi->height - roi_hollow_top;
-  const unsigned int roi_hollow_left	= (int)(roi->width * ((1.0f - RCD_ROI_HOLLOW_RATE) / 2));
-  const unsigned int roi_hollow_right	= roi->width - roi_hollow_left;
+  const unsigned int roi_hollow_top     = (int)(roi->height * ((1.0f - RCD_ROI_HOLLOW_RATE) / 2));
+  const unsigned int roi_hollow_bottom  = roi->height - roi_hollow_top;
+  const unsigned int roi_hollow_left    = (int)(roi->width * ((1.0f - RCD_ROI_HOLLOW_RATE) / 2));
+  const unsigned int roi_hollow_right   = roi->width - roi_hollow_left;
 
   // First, find all the pixels on the edges,
   // and store them in the 'pixels' vector.
@@ -121,8 +121,8 @@ int RcdCircleModel::parseImage( unsigned char* buf,
 
   // Find the boundary of the ball,
   // following used for ball pixel threshold.
-  unsigned int boundary_right	= 0;
-  unsigned int boundary_bottom	= 0;
+  unsigned int boundary_right   = 0;
+  unsigned int boundary_bottom  = 0;
 
   gettimeofday(&start, NULL);
 
@@ -132,10 +132,10 @@ int RcdCircleModel::parseImage( unsigned char* buf,
   for (y = 0; y < roi_hollow_top; ++y) {
     for (x = 0; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
-	if (x > boundary_right) boundary_right = x;
-	boundary_bottom = y;
+        upoint_t pt={x, y};
+        pixels.push_back(pt);
+        if (x > boundary_right) boundary_right = x;
+        boundary_bottom = y;
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -147,10 +147,10 @@ int RcdCircleModel::parseImage( unsigned char* buf,
   for (y = roi_hollow_top; y < roi_hollow_bottom; ++y) {
     for (x = 0; x < roi_hollow_left; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
-	if (x > boundary_right) boundary_right = x;
-	boundary_bottom = y;
+        upoint_t pt={x, y};
+        pixels.push_back(pt);
+        if (x > boundary_right) boundary_right = x;
+        boundary_bottom = y;
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -158,10 +158,10 @@ int RcdCircleModel::parseImage( unsigned char* buf,
     buffer+=(roi_hollow_right - roi_hollow_left);
     for (x = roi_hollow_right; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
-	if (x > boundary_right) boundary_right = x;
-	boundary_bottom = y;
+        upoint_t pt={x, y};
+        pixels.push_back(pt);
+        if (x > boundary_right) boundary_right = x;
+        boundary_bottom = y;
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -173,8 +173,8 @@ int RcdCircleModel::parseImage( unsigned char* buf,
   for (y = roi_hollow_bottom; y < roi->height; ++y) {
     for (x = 0; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+        upoint_t pt={x, y};
+        pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -184,11 +184,11 @@ int RcdCircleModel::parseImage( unsigned char* buf,
   }
 
   // Then perform the RCD algorithm
-  point_t p[4];
+  upoint_t p[4];
   center_in_roi_t center;
   float radius;
-  vector< point_t >::iterator pos;
-  
+  vector< upoint_t >::iterator pos;
+
   if (pixels.size() < RCD_MIN_PIXELS) {
     return 0;
   }
@@ -205,18 +205,18 @@ int RcdCircleModel::parseImage( unsigned char* buf,
     }
 
     if (TBY_SQUARED_DIST(p[1].x, p[1].y, p[2].x, p[2].y) < RCD_MIN_INTERPIX_DIST ||
-	TBY_SQUARED_DIST(p[2].x, p[2].y, p[0].x, p[0].y) < RCD_MIN_INTERPIX_DIST ||
-	TBY_SQUARED_DIST(p[0].x, p[0].y, p[1].x, p[1].y) < RCD_MIN_INTERPIX_DIST ) {
+        TBY_SQUARED_DIST(p[2].x, p[2].y, p[0].x, p[0].y) < RCD_MIN_INTERPIX_DIST ||
+        TBY_SQUARED_DIST(p[0].x, p[0].y, p[1].x, p[1].y) < RCD_MIN_INTERPIX_DIST ) {
       // there are two points that are too near
       // to each other
       ++f;
-      
+
       // restore all the pixels in remove_list to pixels
       pixels.push_back(p[0]);
       pixels.push_back(p[1]);
       pixels.push_back(p[2]);
       pixels.push_back(p[3]);
-      
+
       remove_list.clear();
 
       gettimeofday(&now, NULL);
@@ -233,13 +233,13 @@ int RcdCircleModel::parseImage( unsigned char* buf,
     dist = (dist >= 0) ? dist : -dist;
     if (radius <= 0 || (unsigned int)dist > RCD_MAX_DIST_P4 ) {
       ++f;
-      
+
       //restore all the pixels
       pixels.push_back(p[0]);
       pixels.push_back(p[1]);
       pixels.push_back(p[2]);
       pixels.push_back(p[3]);
-      
+
       remove_list.clear();
 
       gettimeofday(&now, NULL);
@@ -253,40 +253,40 @@ int RcdCircleModel::parseImage( unsigned char* buf,
       int dist = (int)(r-radius);
       dist = (dist >= 0) ? dist : -dist;
       if ((unsigned int)dist <= RCD_MAX_DIST_A) {
-	pos = pixels.begin() + i;
-	++count;
-	// move this pixel to the remove_list
-	remove_list.push_back(pixels[i]);
-	pixels.erase(pos--); // need "--"? not sure yet!
+        pos = pixels.begin() + i;
+        ++count;
+        // move this pixel to the remove_list
+        remove_list.push_back(pixels[i]);
+        pixels.erase(pos--); // need "--"? not sure yet!
       }
     }
-    
+
     // test if there are enough points on the circle
     // to convince us that this is indeed a circle
-    if ( (float)count > 
-	 ( boundary_right > boundary_bottom ?  boundary_right : boundary_bottom ) * RCD_HW_RATIO ) {
+    if ( (float)count >
+         ( boundary_right > boundary_bottom ?  boundary_right : boundary_bottom ) * RCD_HW_RATIO ) {
       // this is indeed a circle
       if ( radius > TBY_CIRCLE_RADIUS_MIN &&
-	   radius < TBY_CIRCLE_RADIUS_MAX  ) {
-	// only ball of size in the range are saved in the candidate pool.
-	
-	// use least square fitting to reduce error
-	Circle c;
-	c.fitCircle(remove_list);
-	c.count = count;
+           radius < TBY_CIRCLE_RADIUS_MAX  ) {
+        // only ball of size in the range are saved in the candidate pool.
 
-	// save circle
-	m_Circles.push_back(c);
+        // use least square fitting to reduce error
+        Circle c;
+        c.fitCircle(remove_list);
+        c.count = count;
+
+        // save circle
+        m_Circles.push_back(c);
       }
       remove_list.clear();
       ++num_circles;
     } else {
       // not a circle, charge a failure
       ++f;
-      
+
       while(!remove_list.empty()) {
-	pixels.push_back(remove_list.back());
-	remove_list.pop_back();
+        pixels.push_back(remove_list.back());
+        remove_list.pop_back();
       }
       gettimeofday(&now, NULL);
       continue;
@@ -297,14 +297,14 @@ int RcdCircleModel::parseImage( unsigned char* buf,
       diff_sec  = now.tv_sec  - start.tv_sec;
       diff_usec = now.tv_usec - start.tv_usec;
       if (diff_usec < 0) {
-	diff_sec  -= 1;
-	diff_usec += 1000000;
+        diff_sec  -= 1;
+        diff_usec += 1000000;
       }
-      
+
       f_diff_sec = diff_sec + diff_usec / 1000000.f;
 
   } while( (f < RCD_MAX_FAILURES) && (pixels.size() > RCD_MIN_PIXELS) &&
-	   ( f_diff_sec < RCD_MAX_TIME) );
+           ( f_diff_sec < RCD_MAX_TIME) );
 
   return num_circles;
 }
@@ -337,18 +337,18 @@ Circle* RcdCircleModel::getMostLikelyShape(void) const
       return const_cast<Circle*>(&m_Circles[0]); // or use const Shape* def?!...
     default:
       for (unsigned int i=1; i < m_Circles.size(); ++i)
-	if (m_Circles[i].radius > m_Circles[cur].radius)
-	  cur = i;
+        if (m_Circles[i].radius > m_Circles[cur].radius)
+          cur = i;
       return const_cast<Circle*>(&m_Circles[cur]); // or use const Shape* definition?!...
     }
 }
 
 void RcdCircleModel::calcCircle(
-				const point_t& p1,
-				const point_t& p2,
-				const point_t& p3,
-				center_in_roi_t& center,
-				float& radius)
+                                const upoint_t& p1,
+                                const upoint_t& p2,
+                                const upoint_t& p3,
+                                center_in_roi_t& center,
+                                float& radius)
 // Given three points p1, p2, p3,
 // this function calculates the center and radius
 // of the circle that is determined
@@ -363,15 +363,15 @@ void RcdCircleModel::calcCircle(
       radius = -1.0;
       return;
     }
-  center.x =	((float)((x2*x2+y2*y2-x1*x1-y1*y1)*(y3-y1)
-			 -(x3*x3+y3*y3-x1*x1-y1*y1)*(y2-y1))
-		 /div);
-  center.y =	((float)((x2-x1)*(x3*x3+y3*y3-x1*x1-y1*y1)
-			 -(x3-x1)*(x2*x2+y2*y2-x1*x1-y1*y1))
-		 /div);
+  center.x =    ((float)((x2*x2+y2*y2-x1*x1-y1*y1)*(y3-y1)
+                         -(x3*x3+y3*y3-x1*x1-y1*y1)*(y2-y1))
+                 /div);
+  center.y =    ((float)((x2-x1)*(x3*x3+y3*y3-x1*x1-y1*y1)
+                         -(x3-x1)*(x2*x2+y2*y2-x1*x1-y1*y1))
+                 /div);
   dx = center.x - x1;
   dy = center.y - y1;
-  radius	=	(float)sqrt(dx*dx+dy*dy);
+  radius        =       (float)sqrt(dx*dx+dy*dy);
 }
 
 } // end namespace firevision

@@ -53,15 +53,15 @@ class Circle : public Shape
   void setMargin( unsigned int margin );
   bool isClose( unsigned int in_roi_x, unsigned int in_roi_y );
 
-  void fitCircle(std::vector< fawkes::point_t >& points);
+  void fitCircle(std::vector< fawkes::upoint_t >& points);
 
  public:
   /** Center of object in ROI */
-  center_in_roi_t	center;
+  center_in_roi_t center;
   /** Radius of object */
-  float			radius;
+  float     radius;
   /** Number of pixels */
-  int			count;
+  int     count;
   /** Margin around shape */
   unsigned int          margin;
 

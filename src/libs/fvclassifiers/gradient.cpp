@@ -26,7 +26,7 @@
 using std::list;
 using std::iterator;
 
-using fawkes::point_t;
+using fawkes::upoint_t;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -43,15 +43,15 @@ namespace firevision {
  * @param q Qualifier for a single pixel (The qualifier gets deleted by this class)
  * @param threshold minimum rise required for classification
  * @param max_size of an object to be detected (if 0 value will be ignored)
- * @param use_rising_flank 
+ * @param use_rising_flank
  *           if true the classification can start on a rising flank
- * @param use_falling_flank 
+ * @param use_falling_flank
  *           if true the classification can start on a falling flank
  */
-GradientClassifier::GradientClassifier(std::list<ScanlineGrid* >* scanlines, 
-				       Qualifier* q,
-				       unsigned int threshold, unsigned int max_size, 
-				       bool use_rising_flank, bool use_falling_flank)
+GradientClassifier::GradientClassifier(std::list<ScanlineGrid* >* scanlines,
+                                       Qualifier* q,
+                                       unsigned int threshold, unsigned int max_size,
+                                       bool use_rising_flank, bool use_falling_flank)
   : Classifier("GradientClassifier")
 {
   if (!scanlines)
@@ -89,12 +89,12 @@ GradientClassifier::set_threshold(unsigned int threshold, unsigned int max_size)
 }
 
 /** Edge setter.
- * @param use_rising_edge 
+ * @param use_rising_edge
  *           if true the classification can start on a rising edge
- * @param use_falling_edge 
+ * @param use_falling_edge
  *           if true the classification can start on a falling edge
  */
-void 
+void
 GradientClassifier::set_edges(bool use_rising_edge, bool use_falling_edge)
 {
   _use_rising_edge  = use_rising_edge;
@@ -109,7 +109,7 @@ GradientClassifier::set_edges(bool use_rising_edge, bool use_falling_edge)
  * @param height height of buffer in pixels
  */
 void
-GradientClassifier::set_src_buffer(unsigned char *yuv422_planar, 
+GradientClassifier::set_src_buffer(unsigned char *yuv422_planar,
                                    unsigned int width, unsigned int height)
 {
   Classifier::set_src_buffer(yuv422_planar, width, height);
@@ -120,7 +120,7 @@ GradientClassifier::set_src_buffer(unsigned char *yuv422_planar,
 std::list< ROI > *
 GradientClassifier::classify()
 {
-  if (_q->get_buffer() == NULL) 
+  if (_q->get_buffer() == NULL)
   {
     //cout << "GradientClassifier: ERROR, src buffer not set. NOT classifying." << endl;
     return new std::list< ROI >;
@@ -128,7 +128,7 @@ GradientClassifier::classify()
 
   list< ROI > *rv = new list< ROI >;
   int cur_val, cur_diff, direction = 0;
-  point_t cur_pos, edge_start;
+  upoint_t cur_pos, edge_start;
   cur_pos.x = cur_pos.y = edge_start.x = edge_start.y = 0;
 
   unsigned int jumpSize = 0;
@@ -150,134 +150,134 @@ GradientClassifier::classify()
       cur_diff = cur_val - _last_val;
 
       if ((cur_pos.x < _last_pos.x || cur_pos.y < _last_pos.y) //new scan line
-	  || (current.pixel_step && ((cur_pos.x - current.start.x) > _max_size //area found is too big
-				     || (cur_pos.y - current.start.y) > _max_size)))
+          || (current.pixel_step && ((cur_pos.x - current.start.x) > _max_size //area found is too big
+                                     || (cur_pos.y - current.start.y) > _max_size)))
       {
-	current.set_pixel_step(0);
+        current.set_pixel_step(0);
 
-	edge_start.x = edge_start.y = direction = jumpSize  = 0;
+        edge_start.x = edge_start.y = direction = jumpSize  = 0;
       }
 
       int curDir = (cur_diff < 0 ? -1 : (cur_diff > 0 ? 1 : 0));
       switch (curDir)
       {
       case -1:
-	switch (direction)
-	{
-	case -1: //drop continues
-	  jumpSize -= cur_diff;
-	  break;
-	case 0: //new drop
-	  jumpSize = -cur_diff;
-	  edge_start = cur_pos;
-	  break;
-	case 1: 
-	  if (jumpSize < _threshold)//spike reset ramp
-	  {
-	    jumpSize = -cur_diff;
-	    edge_start = cur_pos;
-	  }
-	  else // found edge!
-	  {
-	    if (current.pixel_step) //this is a line end
-	    {
-	      current.set_width(_last_pos.x - current.start.x);
-	      current.set_height(_last_pos.y - current.start.y);
+        switch (direction)
+        {
+        case -1: //drop continues
+          jumpSize -= cur_diff;
+          break;
+        case 0: //new drop
+          jumpSize = -cur_diff;
+          edge_start = cur_pos;
+          break;
+        case 1:
+          if (jumpSize < _threshold)//spike reset ramp
+          {
+            jumpSize = -cur_diff;
+            edge_start = cur_pos;
+          }
+          else // found edge!
+          {
+            if (current.pixel_step) //this is a line end
+            {
+              current.set_width(_last_pos.x - current.start.x);
+              current.set_height(_last_pos.y - current.start.y);
 
-	      rv->push_back(ROI(current));
+              rv->push_back(ROI(current));
 
-	      current.set_pixel_step(0);
-	    }
-	    else if (_use_falling_edge) 
-	    {
-	      current.set_pixel_step(1);
-	      current.set_start(edge_start);
-	    }
-							
-	    edge_start = cur_pos;
-	    jumpSize = -cur_diff;
-	  }
-	  break;
-	}
-	direction = -1;
-	break;
+              current.set_pixel_step(0);
+            }
+            else if (_use_falling_edge)
+            {
+              current.set_pixel_step(1);
+              current.set_start(edge_start);
+            }
+
+            edge_start = cur_pos;
+            jumpSize = -cur_diff;
+          }
+          break;
+        }
+        direction = -1;
+        break;
 
 
       case 0:
-	switch (direction)
-	{
-	case -1: //ramp end
-	case 1:  //ramp end
-	  if (jumpSize >= _threshold) //found edge!
-	  {
-	    if (current.pixel_step) //this is a line end
-	    {
-	      current.set_width(_last_pos.x - current.start.x);
-	      current.set_height(_last_pos.y - current.start.y);
+        switch (direction)
+        {
+        case -1: //ramp end
+        case 1:  //ramp end
+          if (jumpSize >= _threshold) //found edge!
+          {
+            if (current.pixel_step) //this is a line end
+            {
+              current.set_width(_last_pos.x - current.start.x);
+              current.set_height(_last_pos.y - current.start.y);
 
-	      rv->push_back(ROI(current));
+              rv->push_back(ROI(current));
 
-	      current.set_pixel_step(0);
-	    }
-	    else 
-	    {
-	      if ((_use_falling_edge && direction == 1) || (_use_rising_edge && direction == -1))
-	      {
-		current.set_pixel_step(1);
-		current.set_start(edge_start);
-	      }
-	    }
-	  }
-	  break;
+              current.set_pixel_step(0);
+            }
+            else
+            {
+              if ((_use_falling_edge && direction == 1) || (_use_rising_edge && direction == -1))
+              {
+                current.set_pixel_step(1);
+                current.set_start(edge_start);
+              }
+            }
+          }
+          break;
 
-	case 0:
-	  break;
-	}
-	direction = jumpSize = 0;
-	edge_start.x = edge_start.y = 0;
-	break;
+        case 0:
+          break;
+        }
+        direction = jumpSize = 0;
+        edge_start.x = edge_start.y = 0;
+        break;
 
 
       case 1:
-	switch (direction)
-	{
-	case 1: //climb continues
-	  jumpSize += cur_diff;
-	  break;
-	case 0: //new climb
-	  jumpSize = cur_diff;
-	  edge_start = cur_pos;
-	  break;
-	case -1: 
-	  if (jumpSize < _threshold)//spike reset ramp
-	  {
-	    jumpSize = cur_diff;
-	    edge_start = cur_pos;
-	  }
-	  else // found edge!
-	  {
-	    if (current.pixel_step) //this is a line end
-	    {
-	      current.set_width(_last_pos.x - current.start.x);
-	      current.set_height(_last_pos.y - current.start.y);
+        switch (direction)
+        {
+        case 1: //climb continues
+          jumpSize += cur_diff;
+          break;
+        case 0: //new climb
+          jumpSize = cur_diff;
+          edge_start = cur_pos;
+          break;
+        case -1:
+          if (jumpSize < _threshold)//spike reset ramp
+          {
+            jumpSize = cur_diff;
+            edge_start = cur_pos;
+          }
+          else // found edge!
+          {
+            if (current.pixel_step) //this is a line end
+            {
+              current.set_width(_last_pos.x - current.start.x);
+              current.set_height(_last_pos.y - current.start.y);
 
-	      rv->push_back(ROI(current));
+              rv->push_back(ROI(current));
 
-	      current.set_pixel_step(0);
-	    }
-	    else if (_use_rising_edge) 
-	    {
-	      current.set_pixel_step(1);
-	      current.set_start(edge_start);
-	    }
+              current.set_pixel_step(0);
+            }
+            else if (_use_rising_edge)
+            {
+              current.set_pixel_step(1);
+              current.set_start(edge_start);
+            }
 
-	    edge_start = cur_pos;
-	    jumpSize = cur_diff;
-	  }
-	  break;
-	}
-	direction = 1;
-	break;
+            edge_start = cur_pos;
+            jumpSize = cur_diff;
+          }
+          break;
+        }
+        direction = 1;
+        break;
       }
 
 
@@ -285,7 +285,7 @@ GradientClassifier::classify()
       _last_pos = cur_pos;
     }
   } //END: For all scanline models
-	
+
   return rv;
 }
 

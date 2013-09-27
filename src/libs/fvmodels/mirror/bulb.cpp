@@ -74,7 +74,7 @@ Bulb::Bulb(const char *filename)
  * @see SharedMemoryLookupTable
  */
 Bulb::Bulb(const char *filename,
-	   const char *lut_id, bool destroy_on_delete)
+     const char *lut_id, bool destroy_on_delete)
 {
   init();
 
@@ -95,7 +95,7 @@ Bulb::Bulb(const char *filename,
  * @see SharedMemoryLookupTable
  */
 Bulb::Bulb(unsigned int width, unsigned int height,
-	   const char *lut_id, bool destroy_on_delete)
+     const char *lut_id, bool destroy_on_delete)
 {
   init();
 
@@ -212,8 +212,8 @@ Bulb::create()
 
   if ( lut_id != NULL ) {
     shm_lut   = new SharedMemoryLookupTable( lut_id,
-					     width, height, /* depth */ 1,
-					     bytes_per_sample);
+               width, height, /* depth */ 1,
+               bytes_per_sample);
     shm_lut->set_destroy_on_delete( destroy_on_delete );
     lut       = (polar_coord_2d_t *)shm_lut->buffer();
     lut_bytes = shm_lut->data_size();
@@ -321,7 +321,7 @@ Bulb::save(const char *filename)
 
 void
 Bulb::warp2unwarp(unsigned int warp_x, unsigned int warp_y,
-		  unsigned int *unwarp_x, unsigned int *unwarp_y) {
+      unsigned int *unwarp_x, unsigned int *unwarp_y) {
   /*
   // check if image pixel (warp_x, warp_y) maps to something
   if ( this->lut->isNonZero(warp_x, warp_y) ) {
@@ -338,7 +338,7 @@ Bulb::warp2unwarp(unsigned int warp_x, unsigned int warp_y,
 
 void
 Bulb::unwarp2warp(unsigned int unwarp_x, unsigned int unwarp_y,
-		  unsigned int *warp_x, unsigned int *warp_y    )
+      unsigned int *warp_x, unsigned int *warp_y    )
 {
 
 }
@@ -362,7 +362,7 @@ Bulb::isValid()
 
 polar_coord_2d_t
 Bulb::getWorldPointRelative(unsigned int image_x,
-			    unsigned int image_y) const
+          unsigned int image_y) const
 {
   if ( (image_x > width) || (image_y > height) ) {
     polar_coord_2d_t rv;
@@ -381,10 +381,10 @@ Bulb::getWorldPointRelative(unsigned int image_x,
 
 cart_coord_2d_t
 Bulb::getWorldPointGlobal(unsigned int image_x,
-			  unsigned int image_y,
-			  float pose_x,
-			  float pose_y,
-			  float pose_ori        ) const
+        unsigned int image_y,
+        float pose_x,
+        float pose_y,
+        float pose_ori        ) const
 {
 
   cart_coord_2d_t rv;
@@ -407,8 +407,8 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
        pointRelative.phi + pose_ori >  M_PI    ) {
     globalPhi = -( 2*M_PI - (pointRelative.phi + pose_ori) );
   } else if ( pose_ori                     < 0.0   &&
-	      pointRelative.phi          < 0.0   &&
-	      pointRelative.phi + pose_ori < -M_PI    ) {
+        pointRelative.phi          < 0.0   &&
+        pointRelative.phi + pose_ori < -M_PI    ) {
     globalPhi = 2*M_PI - fabs( pointRelative.phi + pose_ori );
   } else {
     globalPhi = pointRelative.phi + pose_ori;
@@ -445,9 +445,9 @@ Bulb::get_lut() const
  */
 void
 Bulb::setWorldPoint(unsigned int image_x,
-		    unsigned int image_y,
-		    float        world_r,
-		    float        world_phi)
+        unsigned int image_y,
+        float        world_r,
+        float        world_phi)
 {
   if (image_x > width) {
     throw Exception("MirrorModel::Bulb::setWorldPoint(): image_x out of bounds");
@@ -465,7 +465,7 @@ Bulb::setWorldPoint(unsigned int image_x,
 
   // update distances
   float dist_new = getDistanceInImage( image_x, image_y,
-				       image_center_x, image_center_y );
+               image_center_x, image_center_y );
   if (dist_new > distance_max) {
     distance_max = dist_new;
   }
@@ -482,10 +482,10 @@ Bulb::reset()
 }
 
 
-point_t
+upoint_t
 Bulb::getCenter() const
 {
-  point_t center;
+  upoint_t center;
 
   center.x = image_center_x;
   center.y = image_center_y;
@@ -496,7 +496,7 @@ Bulb::getCenter() const
 
 void
 Bulb::setCenter(unsigned int image_x,
-		unsigned int image_y  )
+    unsigned int image_y  )
 {
   if (image_x > width) {
     throw Exception("MirrorModel::Bulb::setCenter(): image_x out of bounds");
@@ -549,7 +549,7 @@ Bulb::isValidPoint(unsigned int image_x, unsigned int image_y) const
  */
 bool
 Bulb::isNonZero(unsigned int image_x,
-		unsigned int image_y  ) const
+    unsigned int image_y  ) const
 {
   if (image_x > width) return false;
   if (image_y > height) return false;
@@ -568,7 +568,7 @@ Bulb::numNonZero() const
   for (unsigned int h = 0; h < height; ++h) {
     for (unsigned int w = 0; w < width; ++w) {
       if ( lut[h * width + w].r != 0.0 ) {
-	++num_nonzero;
+  ++num_nonzero;
       }
     }
   }
@@ -585,10 +585,10 @@ Bulb::numNonZero() const
  */
 float
 Bulb::getAngle(unsigned int image_x,
-	       unsigned int image_y  ) const
+         unsigned int image_y  ) const
 {
   return atan2f((float(image_y) - float(image_center_y)),
-		(float(image_x) - float(image_center_x)));
+    (float(image_x) - float(image_center_x)));
 }
 
 
@@ -601,13 +601,13 @@ Bulb::getAngle(unsigned int image_x,
  */
 float
 Bulb::getDistanceInImage(unsigned int image_p1_x, unsigned int image_p1_y,
-			 unsigned int image_p2_x, unsigned int image_p2_y  )
+       unsigned int image_p2_x, unsigned int image_p2_y  )
 {
   float diffX = float(image_p1_x) - float(image_p2_x);
   float diffY = float(image_p1_y) - float(image_p2_y);
 
   return sqrt( diffX * diffX +
-	       diffY * diffY   );
+         diffY * diffY   );
 }
 
 
@@ -651,7 +651,7 @@ Bulb::convertAngleI2W (float angle_in_image) const
       angle_in_image <= M_PI  ) {
     angle_in_image = (-angle_in_image + M_PI);
   } else if (angle_in_image >= -M_PI &&
-	     angle_in_image <= 0.0     ) {
+       angle_in_image <= 0.0     ) {
     angle_in_image = (-angle_in_image - M_PI);
   } else if (angle_in_image > M_PI) {
     // Clip
@@ -659,9 +659,9 @@ Bulb::convertAngleI2W (float angle_in_image) const
   } else if (angle_in_image < -M_PI) {
     // Clip
     angle_in_image = -M_PI;
-  } else {			// should not occurr
+  } else {      // should not occurr
     cout << "Bulb::convertAngleI2W: ERROR! An invalid angle occurred (angle="
-	 << angle_in_image << ")." << endl;
+   << angle_in_image << ")." << endl;
     return 0.0;
   }
 

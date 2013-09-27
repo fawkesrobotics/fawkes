@@ -33,25 +33,25 @@ namespace firevision {
 }
 #endif
 
-class GradientClassifier: public Classifier 
+class GradientClassifier: public Classifier
 {
  public:
   GradientClassifier(std::list<ScanlineGrid* >* scanlines, Qualifier* q,
-		     unsigned int threshold, unsigned int max_size = 0, 
-		     bool use_rising_flank = true, 
-		     bool use_falling_flank = true);
+                     unsigned int threshold, unsigned int max_size = 0,
+                     bool use_rising_flank = true,
+                     bool use_falling_flank = true);
   virtual ~GradientClassifier();
 
   virtual std::list< ROI > * classify();
   virtual void set_src_buffer(unsigned char *yuv422_planar,
-			      unsigned int width, unsigned int height);
+                              unsigned int width, unsigned int height);
 
   virtual void set_threshold(unsigned int threshold, unsigned int max_size = 0);
   virtual void set_edges(bool use_rising_edge, bool use_falling_edge);
 
  private:
   int             _last_val;
-  fawkes::point_t _last_pos;
+  fawkes::upoint_t _last_pos;
 
   unsigned int _threshold;
   unsigned int _max_size;

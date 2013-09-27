@@ -38,12 +38,12 @@ class Histogram
 {
  public:
   Histogram(unsigned int width, unsigned int height,
-	    unsigned int depth = 1, unsigned int num_undos = 1);
+      unsigned int depth = 1, unsigned int num_undos = 1);
   Histogram(HistogramBlock* histogram_block);
   ~Histogram();
 
-  void           operator+=(fawkes::point_t *p);
-  void           operator+=(fawkes::point_t  p);
+  void           operator+=(fawkes::upoint_t *p);
+  void           operator+=(fawkes::upoint_t  p);
 
   unsigned int * get_histogram();
   HistogramBlock* get_histogram_block();

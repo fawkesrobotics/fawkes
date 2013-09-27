@@ -26,7 +26,7 @@
 
 #include <cstdlib>
 
-using fawkes::point_t;
+using fawkes::upoint_t;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -56,7 +56,7 @@ Qualifier::Qualifier()
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-Qualifier::Qualifier(unsigned char* buffer, unsigned int width, 
+Qualifier::Qualifier(unsigned char* buffer, unsigned int width,
                      unsigned int height, colorspace_t colorspace)
 {
   if (!buffer)
@@ -90,7 +90,7 @@ Qualifier::get_buffer()
  * @param height of the image (if 0 the param will be ignored)
  */
 void
-Qualifier::set_buffer(unsigned char* buffer, unsigned int width, 
+Qualifier::set_buffer(unsigned char* buffer, unsigned int width,
                       unsigned int height)
 {
   buffer_ = buffer;
@@ -146,7 +146,7 @@ Qualifier::set_colorspace(colorspace_t colorspace)
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-LumaQualifier::LumaQualifier(unsigned char* buffer, unsigned int width, 
+LumaQualifier::LumaQualifier(unsigned char* buffer, unsigned int width,
                              unsigned int height, colorspace_t colorspace)
  :Qualifier(buffer, width, height, colorspace)
 {
@@ -158,13 +158,13 @@ LumaQualifier::LumaQualifier(unsigned char* buffer, unsigned int width,
  * @return a corresponding int value
  */
 int
-LumaQualifier::get(point_t pixel)
+LumaQualifier::get(upoint_t pixel)
 {
   if (pixel.x >= width_)
     throw fawkes::OutOfBoundsException("LumaQualifier: requested Pixel is out of bounds!", pixel.x, 0, width_);
   if (pixel.y >= height_)
     throw fawkes::OutOfBoundsException("LumaQualifier: requested Pixel is out of bounds!", pixel.y, 0, height_);
-	
+
   return buffer_[pixel.y * width_ + pixel.x];
 }
 
@@ -186,8 +186,8 @@ LumaQualifier::get(point_t pixel)
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-SkyblueQualifier::SkyblueQualifier(unsigned char* buffer, unsigned int width, 
-				   unsigned int height, colorspace_t colorspace)
+SkyblueQualifier::SkyblueQualifier(unsigned char* buffer, unsigned int width,
+           unsigned int height, colorspace_t colorspace)
  :Qualifier(buffer, width, height, colorspace)
 {
 }
@@ -198,7 +198,7 @@ SkyblueQualifier::SkyblueQualifier(unsigned char* buffer, unsigned int width,
  * @return a corresponding int value
  */
 int
-SkyblueQualifier::get(point_t pixel)
+SkyblueQualifier::get(upoint_t pixel)
 {
   if (pixel.x >= width_)
     throw fawkes::OutOfBoundsException("SkyblueQualifier: requested Pixel is out of bounds!", pixel.x, 0, width_);
@@ -233,8 +233,8 @@ SkyblueQualifier::get(point_t pixel)
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-YellowQualifier::YellowQualifier(unsigned char* buffer, unsigned int width, 
-				 unsigned int height, colorspace_t colorspace)
+YellowQualifier::YellowQualifier(unsigned char* buffer, unsigned int width,
+         unsigned int height, colorspace_t colorspace)
  :Qualifier(buffer, width, height, colorspace)
 {
 }
@@ -245,7 +245,7 @@ YellowQualifier::YellowQualifier(unsigned char* buffer, unsigned int width,
  * @return a corresponding int value
  */
 int
-YellowQualifier::get(point_t pixel)
+YellowQualifier::get(upoint_t pixel)
 {
   if (pixel.x >= width_)
     throw fawkes::OutOfBoundsException("YellowQualifier: requested Pixel is out of bounds!", pixel.x, 0, width_);

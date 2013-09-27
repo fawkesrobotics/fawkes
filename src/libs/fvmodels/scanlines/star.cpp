@@ -56,11 +56,11 @@ namespace firevision {
  *               other scanline point (in pixels)
  */
 ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
-			    unsigned int center_x, unsigned int center_y,
-			    unsigned int num_rays, unsigned int radius_incr,
-			    unsigned char* yuv_mask,
-			    unsigned int dead_radius, unsigned int max_radius,
-			    unsigned int margin)
+                            unsigned int center_x, unsigned int center_y,
+                            unsigned int num_rays, unsigned int radius_incr,
+                            unsigned char* yuv_mask,
+                            unsigned int dead_radius, unsigned int max_radius,
+                            unsigned int margin)
 {
   m_image_width = image_width;
   m_image_height = image_height;
@@ -79,7 +79,7 @@ ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
   m_previous_ray = 0;
 
   m_first_on_ray = true;
-  
+
   // -- sanity checks --
   // margin
   if (m_margin > m_radius_incr / 2)
@@ -103,21 +103,21 @@ ScanlineStar::~ScanlineStar()
     }
 }
 
-point_t
+upoint_t
 ScanlineStar::operator*()
 {
   return m_current_point;
 }
 
 
-point_t*
+upoint_t*
 ScanlineStar::operator->()
 {
   return &m_current_point;
 }
 
 
-point_t*
+upoint_t*
 ScanlineStar::operator++()
 {
   advance();
@@ -125,10 +125,10 @@ ScanlineStar::operator++()
 }
 
 
-point_t*
+upoint_t*
 ScanlineStar::operator++(int)
 {
-  memcpy(&m_tmp_point, &m_current_point, sizeof(point_t));
+  memcpy(&m_tmp_point, &m_current_point, sizeof(upoint_t));
   advance();
 
   return &m_tmp_point;
@@ -149,16 +149,16 @@ ScanlineStar::advance()
       ++m_ray_iter;
 
       if ( m_rays.end() == m_ray_iter )
-	{
-	  m_done = true;
-	  return;
-	}
-      
+        {
+          m_done = true;
+          return;
+        }
+
       ++m_ray_index;
       m_point_iter = (*m_ray_iter).second->begin();
       m_first_on_ray = true;
     }
-  
+
   m_current_point = (*m_point_iter).second;
 }
 
@@ -225,7 +225,7 @@ ScanlineStar::skip_current_ray()
       m_done = true;
       return;
     }
-  
+
   ++m_ray_index;
   m_first_on_ray = true;
   m_point_iter = m_ray_iter->second->begin();
@@ -298,83 +298,83 @@ ScanlineStar::generate_scan_points()
       current_ray = new Ray();
 
       while ( !abort_ray )
-	{
-	  // calculate new (potential) scan point
-	  point_t tmp;
-	  tmp.x = m_center.x + (unsigned int) round( sin(angle) * radius );
-	  tmp.y = m_center.y + (unsigned int) round( cos(angle) * radius );
+        {
+          // calculate new (potential) scan point
+          upoint_t tmp;
+          tmp.x = m_center.x + (unsigned int) round( sin(angle) * radius );
+          tmp.y = m_center.y + (unsigned int) round( cos(angle) * radius );
 
-	  YUV_t current;
-	  if ( tmp.x >= m_image_width || tmp.y >= m_image_height )
-	    // outside of the image
-	    {
-	      current = ignore;
-	      abort_ray = true;
-	    }
-	  else
-	    // get mask value
-	    {
-	      current.Y = YUV422_PLANAR_Y_AT(m_mask, m_image_width, tmp.x, tmp.y);
-	      current.U = YUV422_PLANAR_U_AT(m_mask, m_image_width, m_image_height, tmp.x, tmp.y);
-	      current.V = YUV422_PLANAR_V_AT(m_mask, m_image_width, m_image_height, tmp.x, tmp.y);
-	    }
+          YUV_t current;
+          if ( tmp.x >= m_image_width || tmp.y >= m_image_height )
+            // outside of the image
+            {
+              current = ignore;
+              abort_ray = true;
+            }
+          else
+            // get mask value
+            {
+              current.Y = YUV422_PLANAR_Y_AT(m_mask, m_image_width, tmp.x, tmp.y);
+              current.U = YUV422_PLANAR_U_AT(m_mask, m_image_width, m_image_height, tmp.x, tmp.y);
+              current.V = YUV422_PLANAR_V_AT(m_mask, m_image_width, m_image_height, tmp.x, tmp.y);
+            }
 
-	  if ( ignore.Y != current.Y &&
-	       ignore.U != current.U &&
-	       ignore.V != current.V )
-	    // not masked
-	    {
-	      if (0 == m_previous_ray)
-		// no previous values, yet.
-		{
-		  (*current_ray)[radius] = tmp;
-		  m_first_ray = current_ray;
-		}
-	      else
-		{
-		  // calculate distance to last approved point on that radius
-		  float dist_first = 3 * m_margin;
-		  float dist_last = 3 * m_margin;
-		  int diff_x;
-		  int diff_y;
+          if ( ignore.Y != current.Y &&
+               ignore.U != current.U &&
+               ignore.V != current.V )
+            // not masked
+            {
+              if (0 == m_previous_ray)
+                // no previous values, yet.
+                {
+                  (*current_ray)[radius] = tmp;
+                  m_first_ray = current_ray;
+                }
+              else
+                {
+                  // calculate distance to last approved point on that radius
+                  float dist_first = 3 * m_margin;
+                  float dist_last = 3 * m_margin;
+                  int diff_x;
+                  int diff_y;
 
-		  if ( m_first_ray->find(radius) != m_first_ray->end() )
-		    {
-		      diff_x = tmp.x - (*m_first_ray)[radius].x;
-		      diff_y = tmp.y - (*m_first_ray)[radius].y;
-		      dist_first = sqrt(diff_x * diff_x + diff_y * diff_y);
-		    }
-		  if ( m_previous_ray->find(radius) != m_previous_ray->end() )
-		    {
-		      diff_x = tmp.x - (*m_previous_ray)[radius].x;
-		      diff_y = tmp.y - (*m_previous_ray)[radius].y;
-		      dist_last = sqrt(diff_x * diff_x + diff_y * diff_y);
-		    }
-		  
-		  if (dist_first > 2 * m_margin && dist_last > 2 * m_margin)
-		    // approve point (and add it to previous) if dist to last approved point
-		    // on the current radius is larger than twice the margin
-		    {
-		      (*current_ray)[radius] = tmp;
-		    }
-		}
-	    }
-	  
-	  radius += m_radius_incr;
-	  
-	  if (radius > m_max_radius) { abort_ray = true; }
-	}
+                  if ( m_first_ray->find(radius) != m_first_ray->end() )
+                    {
+                      diff_x = tmp.x - (*m_first_ray)[radius].x;
+                      diff_y = tmp.y - (*m_first_ray)[radius].y;
+                      dist_first = sqrt(diff_x * diff_x + diff_y * diff_y);
+                    }
+                  if ( m_previous_ray->find(radius) != m_previous_ray->end() )
+                    {
+                      diff_x = tmp.x - (*m_previous_ray)[radius].x;
+                      diff_y = tmp.y - (*m_previous_ray)[radius].y;
+                      dist_last = sqrt(diff_x * diff_x + diff_y * diff_y);
+                    }
 
-      if ( !current_ray->empty() ) 
-	// there are scanpoints on this ray
-	{ 
-	  m_rays[angle] = current_ray; 
-	  m_previous_ray = current_ray;
-	}
+                  if (dist_first > 2 * m_margin && dist_last > 2 * m_margin)
+                    // approve point (and add it to previous) if dist to last approved point
+                    // on the current radius is larger than twice the margin
+                    {
+                      (*current_ray)[radius] = tmp;
+                    }
+                }
+            }
+
+          radius += m_radius_incr;
+
+          if (radius > m_max_radius) { abort_ray = true; }
+        }
+
+      if ( !current_ray->empty() )
+        // there are scanpoints on this ray
+        {
+          m_rays[angle] = current_ray;
+          m_previous_ray = current_ray;
+        }
       else
-	{
-	  delete current_ray;
-	}
+        {
+          delete current_ray;
+        }
 
       angle += m_angle_incr;
     }

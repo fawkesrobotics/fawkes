@@ -34,9 +34,9 @@ using namespace fawkes;
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 
 #define TBY_SQUARED_DIST(x1,y1,x2,y2) \
-		(((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2)))
+    (((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2)))
 #define TBY_RADIUS_DIFF(x1, y1, x2, y2, r) \
-		(sqrt(((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2))-(r)*(r)))
+    (sqrt(((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2))-(r)*(r)))
 
 
 namespace firevision {
@@ -70,13 +70,13 @@ RhtCircleModel::~RhtCircleModel(void)
  **************************************************************/
 int
 RhtCircleModel::parseImage( unsigned char* buf,
-			    ROI *roi )
+          ROI *roi )
 {
-  
+
   unsigned char *buffer = roi->get_roi_buffer_start(buf);
 
   unsigned int     x, y;
-  vector<point_t>  pixels;
+  vector<upoint_t>  pixels;
   struct timeval   start, end;
 
   // clear the accumulator
@@ -87,26 +87,26 @@ RhtCircleModel::parseImage( unsigned char* buf,
 
   // The following constants are used as stopping criteria
   const int             RHT_MAX_TIME    = 10000; // = 10ms (is given in microseconds)
-  const int		RHT_MAX_ITER	=  1000; // Maximal number of iterations.
+  const int   RHT_MAX_ITER  =  1000; // Maximal number of iterations.
 
   // The following constant is used for eliminating circles with too few votes
-  const float		RHT_MIN_VOTE_RATE = 0.0f;
-  
+  const float   RHT_MIN_VOTE_RATE = 0.0f;
+
   // The following constants are used for RHT accumulator precision
-  const int		RHT_XY_SCALE	= 8;
-  const int		RHT_RADIUS_SCALE= 8;
+  const int   RHT_XY_SCALE  = 8;
+  const int   RHT_RADIUS_SCALE= 8;
 
   // All the pixels with a less distance difference than below
   // are taken into account for circle fitting.
-  const float		RHT_FITTING_DIST_DIFF = 15.0f;
+  const float   RHT_FITTING_DIST_DIFF = 15.0f;
 
   // The following constant is used for the size of the hollow window in the ROI.
-  const float		ROI_HOLLOW_RATE	= 0.70f;
+  const float   ROI_HOLLOW_RATE = 0.70f;
 
-  const unsigned int roi_hollow_top	= (int)(roi->height * ((1.0f - ROI_HOLLOW_RATE) / 2));
-  const unsigned int roi_hollow_bottom	= roi->height - roi_hollow_top;
-  const unsigned int roi_hollow_left	= (int)(roi->width * ((1.0f - ROI_HOLLOW_RATE) / 2));
-  const unsigned int roi_hollow_right	= roi->width - roi_hollow_left;
+  const unsigned int roi_hollow_top = (int)(roi->height * ((1.0f - ROI_HOLLOW_RATE) / 2));
+  const unsigned int roi_hollow_bottom  = roi->height - roi_hollow_top;
+  const unsigned int roi_hollow_left  = (int)(roi->width * ((1.0f - ROI_HOLLOW_RATE) / 2));
+  const unsigned int roi_hollow_right = roi->width - roi_hollow_left;
 
   // First, find all the pixels on the edges,
   // and store them in the 'pixels' vector.
@@ -120,8 +120,8 @@ RhtCircleModel::parseImage( unsigned char* buf,
   for (y = 0; y < roi_hollow_top; ++y) {
     for (x = 0; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+  upoint_t pt={x, y};
+  pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -133,8 +133,8 @@ RhtCircleModel::parseImage( unsigned char* buf,
   for (y = roi_hollow_top; y < roi_hollow_bottom; ++y) {
     for (x = 0; x < roi_hollow_left; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+  upoint_t pt={x, y};
+  pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -142,8 +142,8 @@ RhtCircleModel::parseImage( unsigned char* buf,
     buffer+=(roi_hollow_right - roi_hollow_left);
     for (x = roi_hollow_right; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+  upoint_t pt={x, y};
+  pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -155,8 +155,8 @@ RhtCircleModel::parseImage( unsigned char* buf,
   for (y = roi_hollow_bottom; y < roi->height; ++y) {
     for (x = 0; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+  upoint_t pt={x, y};
+  pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -166,10 +166,10 @@ RhtCircleModel::parseImage( unsigned char* buf,
   }
 
   // Then perform the RHT algorithm
-  point_t p[3];
+  upoint_t p[3];
   center_in_roi_t center;
   float radius;
-  vector< point_t >::iterator pos;
+  vector< upoint_t >::iterator pos;
   int num_iter = 0;
   int num_points = (int) pixels.size();
   if (num_points == 0) {
@@ -178,10 +178,10 @@ RhtCircleModel::parseImage( unsigned char* buf,
   }
 
   while( (num_iter++ < RHT_MAX_ITER) &&
-	 ( ((end.tv_usec - start.tv_usec) < RHT_MAX_TIME) ||
-	   ((end.tv_usec + 1000000 - start.tv_usec) < RHT_MAX_TIME) )
-      	   // this only works if time constraint smaller than 500ms
-	 ) {
+   ( ((end.tv_usec - start.tv_usec) < RHT_MAX_TIME) ||
+     ((end.tv_usec + 1000000 - start.tv_usec) < RHT_MAX_TIME) )
+           // this only works if time constraint smaller than 500ms
+   ) {
 
     // Pick three points, and move them to the remove_list.
     for (int i=0; i < 3; ++i) {
@@ -197,8 +197,8 @@ RhtCircleModel::parseImage( unsigned char* buf,
     // Accumulate this circle to the 3-D space...
     if (radius > RHT_MIN_RADIUS && radius < RHT_MAX_RADIUS) {
       accumulator.accumulate((int)(center.x / RHT_XY_SCALE),
-			     (int)(center.y / RHT_XY_SCALE),
-			     (int)(radius / RHT_RADIUS_SCALE));
+           (int)(center.y / RHT_XY_SCALE),
+           (int)(radius / RHT_RADIUS_SCALE));
     }
 
     gettimeofday(&end, NULL);
@@ -219,7 +219,7 @@ RhtCircleModel::parseImage( unsigned char* buf,
     float c_r = (float)(r_max * RHT_RADIUS_SCALE + RHT_RADIUS_SCALE/2);
 
     // With circle fitting
-    for(vector< point_t >::iterator pos = pixels.begin(); pos != pixels.end(); )
+    for(vector< upoint_t >::iterator pos = pixels.begin(); pos != pixels.end(); )
     {
       if (TBY_RADIUS_DIFF(pos->x, pos->y, center.x, center.y, c_r)
         > RHT_FITTING_DIST_DIFF)
@@ -280,7 +280,7 @@ RhtCircleModel::getMostLikelyShape(void) const
     int cur=0;
     for (unsigned int i=1; i < m_Circles.size(); ++i) {
       if (m_Circles[i].count > m_Circles[cur].count) {
-	cur = i;
+  cur = i;
       }
     }
     return const_cast<Circle*>(&m_Circles[cur]); // or use const Shape* definition?!...
@@ -290,11 +290,11 @@ RhtCircleModel::getMostLikelyShape(void) const
 
 void
 RhtCircleModel::calcCircle(
-			   const point_t& p1,
-			   const point_t& p2,
-			   const point_t& p3,
-			   center_in_roi_t& center,
-			   float& radius)
+         const upoint_t& p1,
+         const upoint_t& p2,
+         const upoint_t& p3,
+         center_in_roi_t& center,
+         float& radius)
   // Given three points p1, p2, p3,
   // this function calculates the center and radius
   // of the circle that is determined
@@ -309,15 +309,15 @@ RhtCircleModel::calcCircle(
       radius = -1.0;
       return;
     }
-  center.x =	((float)((x2*x2+y2*y2-x1*x1-y1*y1)*(y3-y1)
-			 -(x3*x3+y3*y3-x1*x1-y1*y1)*(y2-y1))
-		 /div);
-  center.y =	((float)((x2-x1)*(x3*x3+y3*y3-x1*x1-y1*y1)
-			 -(x3-x1)*(x2*x2+y2*y2-x1*x1-y1*y1))
-		 /div);
+  center.x =  ((float)((x2*x2+y2*y2-x1*x1-y1*y1)*(y3-y1)
+       -(x3*x3+y3*y3-x1*x1-y1*y1)*(y2-y1))
+     /div);
+  center.y =  ((float)((x2-x1)*(x3*x3+y3*y3-x1*x1-y1*y1)
+       -(x3-x1)*(x2*x2+y2*y2-x1*x1-y1*y1))
+     /div);
   dx = center.x - x1;
   dy = center.y - y1;
-  radius	=	(float)sqrt(dx*dx+dy*dy);
+  radius  = (float)sqrt(dx*dx+dy*dy);
 }
 
 } // end namespace firevision
