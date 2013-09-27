@@ -25,8 +25,6 @@
 // TODO check includes
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
-#include <aspect/clock.h>
-#include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <plugins/ros/aspect/ros.h>
@@ -42,9 +40,7 @@
 
 class RosJointThread
 : public fawkes::Thread,
-  public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::ROSAspect,
   public fawkes::BlackBoardInterfaceObserver,
