@@ -99,34 +99,39 @@ PanTiltRX28Thread::init()
   __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
   __cfg_pan_start        = config->get_float((__ptu_cfg_prefix + "pan_start").c_str());
   __cfg_tilt_start       = config->get_float((__ptu_cfg_prefix + "tilt_start").c_str());
+#ifdef HAVE_TF
+  __cfg_publish_transforms=config->get_bool((__ptu_cfg_prefix + "publish_transforms").c_str());
+#endif
 
 #ifdef HAVE_TF
-  float pan_trans_x  =
-    config->get_float((__ptu_cfg_prefix + "pan_trans_x").c_str());
-  float pan_trans_y  =
-    config->get_float((__ptu_cfg_prefix + "pan_trans_y").c_str());
-  float pan_trans_z  =
-    config->get_float((__ptu_cfg_prefix + "pan_trans_z").c_str());
-  float tilt_trans_x =
-    config->get_float((__ptu_cfg_prefix + "tilt_trans_x").c_str());
-  float tilt_trans_y =
-    config->get_float((__ptu_cfg_prefix + "tilt_trans_y").c_str());
-  float tilt_trans_z =
-    config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
+  if (__cfg_publish_transforms) {
+    float pan_trans_x  =
+        config->get_float((__ptu_cfg_prefix + "pan_trans_x").c_str());
+    float pan_trans_y  =
+        config->get_float((__ptu_cfg_prefix + "pan_trans_y").c_str());
+    float pan_trans_z  =
+        config->get_float((__ptu_cfg_prefix + "pan_trans_z").c_str());
+    float tilt_trans_x =
+        config->get_float((__ptu_cfg_prefix + "tilt_trans_x").c_str());
+    float tilt_trans_y =
+        config->get_float((__ptu_cfg_prefix + "tilt_trans_y").c_str());
+    float tilt_trans_z =
+        config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
 
-  
-  std::string frame_id_prefix = std::string("/") + __ptu_name;
-  try {
-    frame_id_prefix =
-      config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
-  } catch (Exception &e) {} // ignore, use default
 
-  __cfg_base_frame = frame_id_prefix + "/base";
-  __cfg_pan_link   = frame_id_prefix + "/pan";
-  __cfg_tilt_link  = frame_id_prefix + "/tilt";
+    std::string frame_id_prefix = std::string("/") + __ptu_name;
+    try {
+      frame_id_prefix =
+          config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
+    } catch (Exception &e) {} // ignore, use default
 
-  __translation_pan.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
-  __translation_tilt.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
+    __cfg_base_frame = frame_id_prefix + "/base";
+    __cfg_pan_link   = frame_id_prefix + "/pan";
+    __cfg_tilt_link  = frame_id_prefix + "/tilt";
+
+    __translation_pan.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
+    __translation_tilt.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
+  }
 #endif
 
   bool pan_servo_found = false, tilt_servo_found = false;
@@ -300,14 +305,16 @@ PanTiltRX28Thread::update_sensor_values()
     __tiltjoint_if->write();
 
 #ifdef HAVE_TF
-    // Always publish updated transforms
-    tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
-    tf::Transform ptr(pr, __translation_pan);
-    tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+    if (__cfg_publish_transforms) {
+      // Always publish updated transforms
+      tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
+      tf::Transform ptr(pr, __translation_pan);
+      tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
 
-    tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
-    tf::Transform ttr(tr, __translation_tilt);
-    tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
+      tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
+      tf::Transform ttr(tr, __translation_tilt);
+      tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
+    }
 #endif
   }
 }

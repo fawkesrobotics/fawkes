@@ -112,6 +112,8 @@ class PanTiltRX28Thread
 
   fawkes::tf::Vector3  __translation_pan;
   fawkes::tf::Vector3  __translation_tilt;
+
+  bool         __cfg_publish_transforms;
 #endif
 
   float         __last_pan;
