@@ -36,6 +36,12 @@ typedef struct {
   unsigned int y;       /**< y coordinate */
 } upoint_t;
 
+/** Point with cartesian coordinates as signed integers. */
+typedef struct {
+  int x;       /**< x coordinate */
+  int y;       /**< y coordinate */
+} point_t;
+
 /** Cartesian coordinates (2D). */
 typedef struct {
   float x;      /**< x coordinate */
