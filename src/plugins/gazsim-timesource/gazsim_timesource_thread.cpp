@@ -67,7 +67,7 @@ void GazsimTimesourceThread::loop()
   //nothing interesting
 }
 
-void GazsimTimesourceThread::on_time_sync_msg(ConstTimeSyncPtr &msg)
+void GazsimTimesourceThread::on_time_sync_msg(ConstSimTimeSyncPtr &msg)
 {
   // logger->log_info(name(), "Got Simulation Time");
   

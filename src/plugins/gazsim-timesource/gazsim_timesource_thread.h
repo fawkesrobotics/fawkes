@@ -31,13 +31,13 @@
 #include <boost/asio.hpp>
 #include <google/protobuf/message.h>
 #include <gazebo/physics/physics.hh>
-#include <protobuf_msgs/TimeSync.pb.h>
+#include <protobuf_msgs/SimTimeSync.pb.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 
 #include "gazsim_timesource_source.h"
 
 
-typedef const boost::shared_ptr<gazsim_msgs::TimeSync const> ConstTimeSyncPtr;
+typedef const boost::shared_ptr<llsf_msgs::SimTimeSync const> ConstSimTimeSyncPtr;
 
 class GazsimTimesourceThread
 : public fawkes::Thread,
@@ -63,7 +63,7 @@ class GazsimTimesourceThread
   gazebo::transport::SubscriberPtr time_sync_sub_;
 
   //handler
-  void on_time_sync_msg(ConstTimeSyncPtr &msg);
+  void on_time_sync_msg(ConstSimTimeSyncPtr &msg);
   
 };
 
