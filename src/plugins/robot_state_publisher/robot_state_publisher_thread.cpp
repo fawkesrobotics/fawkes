@@ -107,16 +107,24 @@ void RobotStatePublisherThread::init()
   // publish robot model to ROS
   ros::param::set("/robot_description", urdf);
 
+  std::map<std::string, SegmentPair> unknown_segments = segments_;
+
   // check for open JointInterfaces
   std::list<fawkes::JointInterface *> ifs = blackboard->open_multiple_for_reading<JointInterface>();
   for (std::list<JointInterface *>::iterator it = ifs.begin(); it != ifs.end(); it++) {
     if (joint_is_in_model((*it)->id())) {
+      logger->log_debug(name(), "Found joint information for %s", (*it)->id());
+      unknown_segments.erase((*it)->id());
       ifs_.push_back(*it);
       bbil_add_data_interface(*it);
     }
     else {
       blackboard->close(*it);
     }
+  }
+  for (map<string, SegmentPair>::const_iterator it = unknown_segments.begin();
+      it != unknown_segments.end(); it++) {
+    logger->log_warn(name(), "No information for joint %s available", it->first.c_str());
   }
   // watch for creation of new JointInterfaces
   bbio_add_observed_create("JointInterface");
@@ -257,6 +265,7 @@ RobotStatePublisherThread::bb_interface_destroyed(const char *type, const char *
   if (strncmp(type, "JointInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
   for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
     if ((*it)->id() == id) {
+      logger->log_warn(name(), "JointInterface %s removed, but part of robot model", id);
       bbil_remove_data_interface(*it);
       blackboard->update_listener(this);
       blackboard->close(*it);
