@@ -172,31 +172,6 @@ void RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterat
   }
 }
 
-
-// publish moving transforms
-void RobotStatePublisherThread::publish_transforms(const map<string, double>& joint_positions, const Time& time)
-{
-  std::vector<tf::StampedTransform> tf_transforms;
-  tf::StampedTransform tf_transform;
-  tf_transform.stamp = time;
-
-  // loop over all joints
-  for (map<string, double>::const_iterator jnt=joint_positions.begin(); jnt != joint_positions.end(); jnt++){
-    std::map<std::string, SegmentPair>::const_iterator seg = segments_.find(jnt->first);
-    if (seg != segments_.end()){
-      transform_kdl_to_tf(seg->second.segment.pose(jnt->second), tf_transform);
-      tf_transform.frame_id = seg->second.root;
-      tf_transform.child_frame_id = seg->second.tip;
-      tf_transforms.push_back(tf_transform);
-    }
-  }
-  for (std::vector<tf::StampedTransform>::const_iterator it = tf_transforms.begin();
-      it != tf_transforms.end(); it++) {
-    tf_publisher->send_transform(*it);
-  }
-}
-
-
 // publish fixed transforms
 void RobotStatePublisherThread::publish_fixed_transforms()
 {

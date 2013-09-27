@@ -130,11 +130,6 @@ public:
   virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
 private:
-  /** Publish transforms to tf
-   * \param joint_positions A map of joint names and joint positions.
-   * \param time The time at which the joint positions were recorded
-   */
-  void publish_transforms(const std::map<std::string, double>& joint_positions, const fawkes::Time& time);
   void publish_fixed_transforms();
 
   void add_children(const KDL::SegmentMap::const_iterator segment);
