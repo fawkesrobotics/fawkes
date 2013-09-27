@@ -171,9 +171,13 @@ ThreadManager::~ThreadManager()
   // stop all threads, we call finalize, and we run through it as long as there are
   // still running threads, after that, we force the thread's death.
   for (__tit = __threads.begin(); __tit != __threads.end(); ++__tit) {
-    __tit->second.force_stop(__finalizer);
+    try {
+      __tit->second.force_stop(__finalizer);
+    } catch (Exception &e) {} // ignore
   }
-  __untimed_threads.force_stop(__finalizer);
+  try {
+    __untimed_threads.force_stop(__finalizer);
+  } catch (Exception &e) {} // ignore
   __threads.clear();
 
   delete __waitcond_timedthreads;
@@ -459,13 +463,24 @@ ThreadManager::force_remove(ThreadList &tl)
 
   tl.lock();
   __threads.mutex()->stopby();
-  tl.force_stop(__finalizer);
+  bool caught_exception = false;
+  Exception exc("Forced removal of thread list %s failed", tl.name());
+  try {
+    tl.force_stop(__finalizer);
+  } catch (Exception &e) {
+    caught_exception = true;
+    exc = e;
+  }
 
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     internal_remove_thread(*i);
   }
 
   tl.unlock();
+
+  if (caught_exception) {
+    throw exc;
+  }
 }
 
 
