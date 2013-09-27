@@ -34,7 +34,7 @@ using namespace protobuf_clips;
 /** Constructor. */
 ClipsProtobufThread::ClipsProtobufThread()
   : Thread("ClipsProtobufThread", Thread::OPMODE_WAITFORWAKEUP),
-    CLIPSFeatureAspect("protobuf")
+    CLIPSFeature("protobuf"), CLIPSFeatureAspect(this)
 {
 }
 

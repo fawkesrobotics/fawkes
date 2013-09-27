@@ -40,6 +40,7 @@ class ClipsProtobufThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+  public fawkes::CLIPSFeature,
   public fawkes::CLIPSFeatureAspect
 {
  public:
@@ -50,7 +51,7 @@ class ClipsProtobufThread
   virtual void loop();
   virtual void finalize();
 
-  // for CLIPSFeatureAspect
+  // for CLIPSFeature
   virtual void clips_context_init(const std::string &env_name,
 				  fawkes::LockPtr<CLIPS::Environment> &clips);
   virtual void clips_context_destroyed(const std::string &env_name);
