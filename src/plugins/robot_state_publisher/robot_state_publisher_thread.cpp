@@ -75,7 +75,7 @@ using namespace std;
 /** Constructor. */
 RobotStatePublisherThread::RobotStatePublisherThread()
 : Thread("RobotStatePublisherThread", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE), // TODO check hook
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
   TransformAspect(TransformAspect::ONLY_PUBLISHER, "robot_state_transforms"),
   BlackBoardInterfaceListener("RobotStatePublisher")
 {
