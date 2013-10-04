@@ -65,7 +65,7 @@ AspectProviderAspect::AspectProviderAspect(AspectIniFin *inifin)
  * Add multiple aspects.
  * @param aspects Map from aspect name to initializer/finalizer
  */
-AspectProviderAspect::AspectProviderAspect(std::list<AspectIniFin *> aspects)
+AspectProviderAspect::AspectProviderAspect(const std::list<AspectIniFin *> aspects)
 {
   add_aspect("AspectProviderAspect");
   __aspect_provider_aspects = aspects;

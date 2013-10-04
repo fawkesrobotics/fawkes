@@ -39,7 +39,7 @@ class AspectProviderAspect : public virtual Aspect
 {
  public:
   AspectProviderAspect(AspectIniFin *inifin);
-  AspectProviderAspect(std::list<AspectIniFin *> aspects);
+  AspectProviderAspect(const std::list<AspectIniFin *> aspects);
   virtual ~AspectProviderAspect();
 
   const std::list<AspectIniFin *> &  aspect_provider_aspects() const;
