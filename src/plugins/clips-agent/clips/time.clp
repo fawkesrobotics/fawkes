@@ -38,7 +38,7 @@
 
 
 ; --- RULES - general housekeeping
-(defrule retract-time
+(defrule time-retract
   (declare (salience ?*PRIORITY-TIME-RETRACT*))
   ?f <- (time $?)
   =>
