@@ -121,7 +121,6 @@ ClipsAgentThread::init()
   switch_if_ = blackboard->open_for_reading<SwitchInterface>("Clips Agent Start");
 
   clips->add_function("get-clips-dirs", sigc::slot<CLIPS::Values>(sigc::mem_fun(*this, &ClipsAgentThread::clips_get_clips_dirs)));
-  clips->add_function("now", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &ClipsAgentThread::clips_now)));
   clips->add_function("skill-call-ext", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_skill_call_ext)));
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
   clips->add_function("navgraph-load", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_navgraph_load)));
@@ -262,16 +261,6 @@ ClipsAgentThread::status_string(SkillerInterface::SkillStatusEnum status)
   case SkillerInterface::S_RUNNING: return "RUNNING";
   default: return "IDLE";
   }
-}
-
-CLIPS::Values
-ClipsAgentThread::clips_now()
-{
-  CLIPS::Values rv;
-  fawkes::Time now(clock);
-  rv.push_back(now.get_sec());
-  rv.push_back(now.get_usec());
-  return rv;
 }
 
 
