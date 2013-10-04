@@ -37,12 +37,13 @@ namespace fawkes {
 #endif
 
 class Logger;
+class Clock;
 class CLIPSFeature;
 
 class CLIPSEnvManager
 {
  public:
-  CLIPSEnvManager(Logger *logger);
+  CLIPSEnvManager(Logger *logger, Clock *clock);
   virtual ~CLIPSEnvManager();
 
   LockPtr<CLIPS::Environment>
@@ -60,9 +61,13 @@ class CLIPSEnvManager
   void assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert);
   void add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips);
   CLIPS::Value clips_request_feature(std::string env_name, std::string feature_name);
+  CLIPS::Values clips_now();
+
 
  private:
   Logger *logger_;
+  Clock  *clock_;
+
   /// @cond INTERNAL
   typedef struct {
     LockPtr<CLIPS::Environment> env;

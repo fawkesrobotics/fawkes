@@ -52,7 +52,7 @@ void
 CLIPSThread::init()
 {
   CLIPS::init();
-  clips_env_mgr_ = new CLIPSEnvManager(logger);
+  clips_env_mgr_ = new CLIPSEnvManager(logger, clock);
   clips_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);

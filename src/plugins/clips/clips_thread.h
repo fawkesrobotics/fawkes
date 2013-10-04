@@ -26,6 +26,7 @@
 #include <core/threading/thread.h>
 #include <aspect/aspect_provider.h>
 #include <aspect/logging.h>
+#include <aspect/clock.h>
 #include <aspect/blackboard.h>
 #include <plugins/clips/aspect/clips_inifin.h>
 #include <plugins/clips/aspect/clips_feature_inifin.h>
@@ -44,6 +45,7 @@ class BlackboardCLIPSFeature;
 class CLIPSThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
+  public fawkes::ClockAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::AspectProviderAspect
 {

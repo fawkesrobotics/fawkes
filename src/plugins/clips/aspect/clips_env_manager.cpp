@@ -24,6 +24,7 @@
 #include <plugins/clips/aspect/clips_env_manager.h>
 #include <plugins/clips/aspect/clips_feature.h>
 #include <logging/logger.h>
+#include <utils/time/time.h>
 
 #include <cstring>
 
@@ -154,10 +155,12 @@ log_router_exit(void *env, int exit_code)
 
 /** Constructor.
  * @param logger logger to log messages from created environments
+ * @param clock clock to get time from for (now)
  */
-CLIPSEnvManager::CLIPSEnvManager(Logger *logger)
+CLIPSEnvManager::CLIPSEnvManager(Logger *logger, Clock *clock)
 {
   logger_ = logger;
+  clock_  = clock;
 }
 
 /** Destructor. */
@@ -315,10 +318,22 @@ CLIPSEnvManager::clips_request_feature(std::string env_name, std::string feature
   return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 }
 
+
+CLIPS::Values
+CLIPSEnvManager::clips_now()
+{
+  CLIPS::Values rv;
+  fawkes::Time now(clock_);
+  rv.push_back(now.get_sec());
+  rv.push_back(now.get_usec());
+  return rv;
+}
+
 void
 CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
 {
   clips->add_function("ff-feature-request", sigc::slot<CLIPS::Value, std::string>(sigc::bind<0>(sigc::mem_fun(*this, &CLIPSEnvManager::clips_request_feature), env_name)));
+  clips->add_function("now", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &CLIPSEnvManager::clips_now)));
 }
 
 void
