@@ -21,6 +21,7 @@
  */
 
 #include "clips_thread.h"
+#include "feature_blackboard.h"
 #include <plugins/clips/aspect/clips_env_manager.h>
 
 #include <clipsmm.h>
@@ -55,6 +56,9 @@ CLIPSThread::init()
   clips_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);
+
+  features_.push_back(new BlackboardCLIPSFeature(logger, blackboard));
+  clips_env_mgr_->add_features(features_);
 }
 
 
@@ -62,6 +66,10 @@ void
 CLIPSThread::finalize()
 {
   clips_env_mgr_.clear();
+
+  for (auto f : features_) {
+    delete f;
+  }
 }
 
 
@@ -70,7 +78,8 @@ CLIPSThread::loop()
 {
 }
 
-std::list<AspectIniFin *>
+
+const std::list<AspectIniFin *>
 CLIPSThread::inifin_list()
 {
   std::list<AspectIniFin *> rv;

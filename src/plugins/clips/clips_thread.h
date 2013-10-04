@@ -26,6 +26,7 @@
 #include <core/threading/thread.h>
 #include <aspect/aspect_provider.h>
 #include <aspect/logging.h>
+#include <aspect/blackboard.h>
 #include <plugins/clips/aspect/clips_inifin.h>
 #include <plugins/clips/aspect/clips_feature_inifin.h>
 #include <plugins/clips/aspect/clips_manager_inifin.h>
@@ -35,11 +36,15 @@ namespace CLIPS {
 }
 namespace fawkes {
   class AspectIniFin;
+  class CLIPSFeature;
 }
+
+class BlackboardCLIPSFeature;
 
 class CLIPSThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect,
   public fawkes::AspectProviderAspect
 {
  public:
@@ -54,13 +59,15 @@ class CLIPSThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::list<fawkes::AspectIniFin *> inifin_list();
+  const std::list<fawkes::AspectIniFin *>  inifin_list();
 
  private:
   fawkes::CLIPSAspectIniFin                 clips_aspect_inifin_;
   fawkes::CLIPSFeatureAspectIniFin          clips_feature_aspect_inifin_;
   fawkes::CLIPSManagerAspectIniFin          clips_manager_aspect_inifin_;
   fawkes::LockPtr<fawkes::CLIPSEnvManager>  clips_env_mgr_;
+
+  std::list<fawkes::CLIPSFeature *> features_;
 };
 
 #endif
