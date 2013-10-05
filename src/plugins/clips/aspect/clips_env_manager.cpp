@@ -242,6 +242,7 @@ CLIPSEnvManager::create_env(const std::string &env_name, const std::string &log_
 
     clips->load(clips_dir_ + "utils.clp");
     clips->load(clips_dir_ + "time.clp");
+    clips->load(clips_dir_ + "path.clp");
 
     return clips;
   } else {
