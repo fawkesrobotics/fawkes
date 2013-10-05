@@ -64,6 +64,13 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
 					   fawkes::LockPtr<CLIPS::Environment> &clips)
 {
   envs_[env_name] = clips;
+  clips->add_function("blackboard-enable-time-read",
+    sigc::slot<void>(
+      sigc::bind<0>(
+        sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_enable_time_read),
+        env_name)
+    )
+  );
   clips->add_function("blackboard-open",
     sigc::slot<void, std::string, std::string>(
       sigc::bind<0>(
@@ -78,16 +85,6 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
 	env_name)
     )
   );
-
-  std::string bb_read_defrule =
-    "(defrule blackboard-read\n"
-    "  (declare (salience 1000))\n"
-    "  (time $?)\n"
-    "  =>\n"
-    "  (blackboard-read)\n"
-    ")";
-  envs_[env_name]->build(bb_read_defrule);
-
 }
 
 void
@@ -102,6 +99,27 @@ BlackboardCLIPSFeature::clips_context_destroyed(const std::string &env_name)
     interfaces_.erase(env_name);
   }
   envs_.erase(env_name);
+}
+
+
+void
+BlackboardCLIPSFeature::clips_blackboard_enable_time_read(std::string env_name)
+{
+  if (envs_.find(env_name) == envs_.end()) {
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(),
+		      "Cannot enable reading for environment %s "
+		     "(not defined)", env_name.c_str());
+    return;
+  }
+
+  std::string bb_read_defrule =
+    "(defrule blackboard-read\n"
+    "  (declare (salience 1000))\n"
+    "  (time $?)\n"
+    "  =>\n"
+    "  (blackboard-read)\n"
+    ")";
+  envs_[env_name]->build(bb_read_defrule);
 }
 
 

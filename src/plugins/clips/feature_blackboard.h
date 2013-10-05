@@ -60,6 +60,7 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
  private: // methods
   void clips_blackboard_open_interface(std::string env_name, std::string type, std::string id);
   void clips_blackboard_read(std::string env_name);
+  void clips_blackboard_enable_time_read(std::string env_name);
 
 };
 
