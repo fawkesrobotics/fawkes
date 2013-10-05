@@ -51,8 +51,13 @@ CLIPSThread::~CLIPSThread()
 void
 CLIPSThread::init()
 {
+  std::string clips_dir = SRCDIR"/clips/";
+  try {
+    clips_dir = config->get_string("/clips/clips-dir");
+  } catch (Exception &e) {} // ignored, use default
+
   CLIPS::init();
-  clips_env_mgr_ = new CLIPSEnvManager(logger, clock);
+  clips_env_mgr_ = new CLIPSEnvManager(logger, clock, clips_dir);
   clips_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);

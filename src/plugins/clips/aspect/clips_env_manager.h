@@ -43,7 +43,7 @@ class CLIPSFeature;
 class CLIPSEnvManager
 {
  public:
-  CLIPSEnvManager(Logger *logger, Clock *clock);
+  CLIPSEnvManager(Logger *logger, Clock *clock, std::string &clips_dir);
   virtual ~CLIPSEnvManager();
 
   LockPtr<CLIPS::Environment>
@@ -68,6 +68,8 @@ class CLIPSEnvManager
   Logger *logger_;
   Clock  *clock_;
 
+  std::string clips_dir_;
+
   /// @cond INTERNAL
   typedef struct {
     LockPtr<CLIPS::Environment> env;
@@ -77,7 +79,6 @@ class CLIPSEnvManager
 
   std::map<std::string, ClipsEnvData > envs_;
   std::map<std::string, CLIPSFeature * > features_;
-
 };
 
 } // end namespace fawkes

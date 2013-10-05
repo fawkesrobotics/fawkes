@@ -156,11 +156,13 @@ log_router_exit(void *env, int exit_code)
 /** Constructor.
  * @param logger logger to log messages from created environments
  * @param clock clock to get time from for (now)
+ * @param clips_dir path where to look for CLIPS files
  */
-CLIPSEnvManager::CLIPSEnvManager(Logger *logger, Clock *clock)
+CLIPSEnvManager::CLIPSEnvManager(Logger *logger, Clock *clock, std::string &clips_dir)
 {
   logger_ = logger;
   clock_  = clock;
+  clips_dir_ = clips_dir;
 }
 
 /** Destructor. */
@@ -237,6 +239,9 @@ CLIPSEnvManager::create_env(const std::string &env_name, const std::string &log_
 
     // assert all currently available features to environment
     assert_features(clips, true);
+
+    clips->load(clips_dir_ + "utils.clp");
+    clips->load(clips_dir_ + "time.clp");
 
     return clips;
   } else {
@@ -328,6 +333,7 @@ CLIPSEnvManager::clips_now()
   rv.push_back(now.get_usec());
   return rv;
 }
+
 
 void
 CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
