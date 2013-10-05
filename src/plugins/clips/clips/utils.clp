@@ -7,6 +7,14 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
+(defglobal
+  ?*DEBUG* = 2  ;debug levels: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
+)
+
+(deffunction debug-set-level (?level)
+  (bind ?*DEBUG* ?level)
+)
+
 (deffunction debug (?level)
   (return (<= ?level ?*DEBUG*))
 )
@@ -33,4 +41,14 @@
 
 (deffunction is-odd-int (?num)
   (return (eq (mod ?num 2) 1))
+)
+
+(deffunction str-replace (?s ?search ?replace)
+  (bind ?i (str-index ?search ?s))
+  (bind ?l (str-length ?search))
+  (if (eq ?i FALSE)
+   then (return ?s)
+   else
+    (return (str-cat (sub-string 1 (- ?i 1) ?s) ?replace (sub-string (+ ?i ?l) (str-length ?s) ?s)))
+  )
 )
