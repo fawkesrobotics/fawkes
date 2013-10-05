@@ -79,31 +79,19 @@ ClipsAgentThread::init()
     cfg_steal_skiller_control_ = config->get_bool("/clips-agent/steal-skiller-control");
   } catch (Exception &e) {} // ignore, use default
 
-  cfg_clips_dirs_.clear();
+
+  std::vector<std::string> clips_dirs;
   try {
-    cfg_clips_dirs_ = config->get_strings("/clips-agent/clips-dirs");
-    for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
+    clips_dirs = config->get_strings("/clips-agent/clips-dirs");
+    for (size_t i = 0; i < clips_dirs.size(); ++i) {
       std::string::size_type pos;
-      if ((pos = cfg_clips_dirs_[i].find("@BASEDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 9, BASEDIR);
+      if (clips_dirs[i][clips_dirs[i].size()-1] != '/') {
+	clips_dirs[i] += "/";
       }
-      if ((pos = cfg_clips_dirs_[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 16, FAWKES_BASEDIR);
-      }
-      if ((pos = cfg_clips_dirs_[i].find("@RESDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 8, RESDIR);
-      }
-      if ((pos = cfg_clips_dirs_[i].find("@CONFDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 9, CONFDIR);
-      }
-      if (cfg_clips_dirs_[i][cfg_clips_dirs_.size()-1] != '/') {
-	cfg_clips_dirs_[i] += "/";
-      }
-      logger->log_warn(name(), "DIR: %s", cfg_clips_dirs_[i].c_str());
+      logger->log_debug(name(), "DIR: %s", clips_dirs[i].c_str());
     }
   } catch (Exception &e) {} // ignore, use default
-
-  cfg_clips_dirs_.insert(cfg_clips_dirs_.begin(), std::string(SRCDIR) + "/clips/");
+  clips_dirs.insert(clips_dirs.begin(), std::string(SRCDIR) + "/clips/");
 
   if (! cfg_skill_sim_) {
     skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
@@ -120,7 +108,16 @@ ClipsAgentThread::init()
 
   switch_if_ = blackboard->open_for_reading<SwitchInterface>("Clips Agent Start");
 
-  clips->add_function("get-clips-dirs", sigc::slot<CLIPS::Values>(sigc::mem_fun(*this, &ClipsAgentThread::clips_get_clips_dirs)));
+  clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") +
+		  FAWKES_BASEDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@RESDIR@\" \"") + RESDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@CONFDIR@\" \"") + CONFDIR + "\")");
+
+  for (size_t i = 0; i < clips_dirs.size(); ++i) {
+    clips->evaluate("(path-add \"" + clips_dirs[i] + "\")");
+  }
+
   clips->add_function("skill-call-ext", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_skill_call_ext)));
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
   clips->add_function("navgraph-load", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_navgraph_load)));
@@ -261,17 +258,6 @@ ClipsAgentThread::status_string(SkillerInterface::SkillStatusEnum status)
   case SkillerInterface::S_RUNNING: return "RUNNING";
   default: return "IDLE";
   }
-}
-
-
-CLIPS::Values
-ClipsAgentThread::clips_get_clips_dirs()
-{
-  CLIPS::Values rv(cfg_clips_dirs_.size(), CLIPS::Value(std::string("")));
-  for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
-    rv[i] = cfg_clips_dirs_[i];
-  }
-  return rv;
 }
 
 

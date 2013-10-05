@@ -64,7 +64,6 @@ class ClipsAgentThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  CLIPS::Values  clips_get_clips_dirs();
   CLIPS::Values  clips_now();
   void           clips_call_skill(std::string skill_name, CLIPS::Values args);
   void           clips_load_config(std::string cfg_prefix);
@@ -77,7 +76,6 @@ class ClipsAgentThread
   bool        cfg_assert_time_each_loop_;
   bool        cfg_skill_sim_;
   float       cfg_skill_sim_time_;
-  std::vector<std::string> cfg_clips_dirs_;
   bool        cfg_steal_skiller_control_;
 
   fawkes::SkillerInterface *skiller_if_;
