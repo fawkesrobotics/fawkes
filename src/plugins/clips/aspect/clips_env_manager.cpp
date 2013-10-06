@@ -244,6 +244,8 @@ CLIPSEnvManager::create_env(const std::string &env_name, const std::string &log_
     clips->load(clips_dir_ + "time.clp");
     clips->load(clips_dir_ + "path.clp");
 
+    clips->evaluate("(path-add \"" + clips_dir_ + "\")");
+
     return clips;
   } else {
     throw Exception("Failed to initialize CLIPS environment '%s'", env_name.c_str());
