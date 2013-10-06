@@ -22,6 +22,7 @@
 
 #include "clips_thread.h"
 #include "feature_blackboard.h"
+#include "feature_config.h"
 #include <plugins/clips/aspect/clips_env_manager.h>
 
 #include <clipsmm.h>
@@ -63,6 +64,7 @@ CLIPSThread::init()
   clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);
 
   features_.push_back(new BlackboardCLIPSFeature(logger, blackboard));
+  features_.push_back(new ConfigCLIPSFeature(logger, config));
   clips_env_mgr_->add_features(features_);
 }
 

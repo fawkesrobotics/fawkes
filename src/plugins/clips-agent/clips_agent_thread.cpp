@@ -124,6 +124,8 @@ ClipsAgentThread::init()
 
   clips->load(SRCDIR"/clips/navgraph.clp");
 
+  clips->evaluate("(ff-feature-request \"config\")");
+
   if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
                       "batch file failed.");

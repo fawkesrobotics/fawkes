@@ -11,10 +11,7 @@
   ?*CONFIG_PREFIX* = "/clips-agent"
 )
 
-
-(path-load config.clp)
 (path-load skills.clp)
-
 
 (defrule load-config
   (agent-init)
