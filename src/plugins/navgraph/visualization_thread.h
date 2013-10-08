@@ -24,6 +24,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/utils/lockptr.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <plugins/ros/aspect/ros.h>
@@ -48,7 +49,7 @@ class NavGraphVisualizationThread
   virtual void loop();
   virtual void finalize();
 
-  void set_graph(fawkes::TopologicalMapGraph *graph);
+  void set_graph(fawkes::LockPtr<fawkes::TopologicalMapGraph> &graph);
   void set_plan(std::vector<fawkes::TopologicalMapNode> plan);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();
@@ -64,7 +65,7 @@ class NavGraphVisualizationThread
   std::string plan_to_;
   std::string plan_from_;
 
-  fawkes::TopologicalMapGraph *graph_;
+  fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
 };
 
 

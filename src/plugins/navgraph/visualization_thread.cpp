@@ -77,7 +77,7 @@ NavGraphVisualizationThread::finalize()
  * @param graph graph to use
  */
 void
-NavGraphVisualizationThread::set_graph(TopologicalMapGraph *graph)
+NavGraphVisualizationThread::set_graph(fawkes::LockPtr<TopologicalMapGraph> &graph)
 {
   graph_ = graph;
   plan_.clear();
