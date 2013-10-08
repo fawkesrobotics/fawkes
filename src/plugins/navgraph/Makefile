@@ -20,6 +20,7 @@ include $(BUILDSYSDIR)/ros.mk
 
 ENABLE_VISUALIZATION = 1
 
+PRESUBDIRS = aspect
 CFLAGS += -std=c++0x
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
