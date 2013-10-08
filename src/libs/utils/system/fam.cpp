@@ -202,7 +202,7 @@ void
 FileAlterationMonitor::watch_file(const char *filepath)
 {
 #ifdef HAVE_INOTIFY
-  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF;
+  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF;
   int iw;
 
   //LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
@@ -344,12 +344,12 @@ FileAlterationMonitor::process_events(int timeout)
 
 	  if ( valid ) {
 	    for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
-	      (*__lit)->fam_event(event->name, event->mask);
+	      (*__lit)->fam_event(event->name ? event->name : "FILE_WATCH", event->mask);
 	    }
 	  }
 
 	  if (event->mask & IN_DELETE_SELF) {
-	    //LibLogger::log_debug("FileAlterationMonitor", "Watched %s has been deleted", event->name);
+	    //printf("Watched %s has been deleted", event->name);
 	    __inotify_watches.erase(event->wd);
 	    inotify_rm_watch(__inotify_fd, event->wd);
 	  }
