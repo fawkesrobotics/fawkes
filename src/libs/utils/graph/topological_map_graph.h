@@ -76,6 +76,8 @@ class TopologicalMapGraph
 
   void calc_reachability();
 
+  TopologicalMapGraph & operator=(const TopologicalMapGraph &g);
+
  private:
   void assert_unique_edges();
   void assert_valid_edges();
