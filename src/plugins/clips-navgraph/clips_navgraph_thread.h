@@ -28,6 +28,7 @@
 #include <aspect/configurable.h>
 #include <plugins/clips/aspect/clips_feature.h>
 #include <plugins/navgraph/aspect/navgraph.h>
+#include <utils/graph/topological_map_graph.h>
 
 #include <vector>
 #include <string>
@@ -39,7 +40,8 @@ class ClipsNavGraphThread
   public fawkes::ConfigurableAspect,
   public fawkes::NavGraphAspect,
   public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect
+  public fawkes::CLIPSFeatureAspect,
+  public fawkes::TopologicalMapGraph::ChangeListener
 {
  public:
   ClipsNavGraphThread();
@@ -54,11 +56,16 @@ class ClipsNavGraphThread
 				  fawkes::LockPtr<CLIPS::Environment> &clips);
   virtual void clips_context_destroyed(const std::string &env_name);
 
+  virtual void graph_changed() throw();
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   void clips_navgraph_load(fawkes::LockPtr<CLIPS::Environment> &clips);
+
+ private:
+  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 
 };
 
