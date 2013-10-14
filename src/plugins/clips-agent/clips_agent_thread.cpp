@@ -83,7 +83,6 @@ ClipsAgentThread::init()
   try {
     clips_dirs = config->get_strings("/clips-agent/clips-dirs");
     for (size_t i = 0; i < clips_dirs.size(); ++i) {
-      std::string::size_type pos;
       if (clips_dirs[i][clips_dirs[i].size()-1] != '/') {
 	clips_dirs[i] += "/";
       }
