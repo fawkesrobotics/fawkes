@@ -68,7 +68,6 @@ class ClipsAgentThread
   void           clips_call_skill(std::string skill_name, CLIPS::Values args);
   void           clips_skill_call_ext(std::string skill_name, std::string skill_string);
   const char *   status_string(fawkes::SkillerInterface::SkillStatusEnum status);
-  CLIPS::Value   clips_navgraph_load(std::string filename);
 
  private:
   bool        cfg_auto_start_;
