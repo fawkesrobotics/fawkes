@@ -119,7 +119,6 @@ ClipsAgentThread::init()
   }
 
   clips->add_function("skill-call-ext", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_skill_call_ext)));
-  clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
   clips->add_function("navgraph-load", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_navgraph_load)));
 
   clips->load(SRCDIR"/clips/navgraph.clp");
@@ -147,10 +146,7 @@ ClipsAgentThread::finalize()
 {
   MutexLocker lock(clips.objmutex_ptr());
 
-  clips->remove_function("get-clips-dirs");
-  clips->remove_function("now");
   clips->remove_function("skill-call-ext");
-  clips->remove_function("load-config");
   clips->remove_function("navgraph-load");
 
   if ( ! cfg_skill_sim_ && skiller_if_->has_writer()) {
@@ -287,44 +283,6 @@ ClipsAgentThread::clips_skill_call_ext(std::string skill_name, std::string skill
   sei.start_time   = clock->now();
   sei.skill_string = skill_string;
   active_skills_[skill_name] = sei;
-}
-
-
-void
-ClipsAgentThread::clips_load_config(std::string cfg_prefix)
-{
-  std::auto_ptr<Configuration::ValueIterator> v(config->search(cfg_prefix.c_str()));
-  while (v->next()) {
-    std::string type = "";
-    std::string value = v->get_as_string();
-
-    if      (v->is_uint())   type = "UINT";
-    else if (v->is_int())    type = "INT";
-    else if (v->is_float())  type = "FLOAT";
-    else if (v->is_bool())   type = "BOOL";
-    else if (v->is_string()) {
-      type = "STRING";
-      if (! v->is_list()) {
-	value = std::string("\"") + value + "\"";
-      }
-    } else {
-      logger->log_warn(name(), "Config value at '%s' of unknown type '%s'",
-		       v->path(), v->type());
-    }
-
-    if (v->is_list()) {
-      logger->log_info(name(), "(confval (path \"%s\") (type %s) (is-list TRUE) (list-value %s))",
-		       v->path(), type.c_str(), value.c_str());
-      clips->assert_fact_f("(confval (path \"%s\") (type %s) (is-list TRUE) (list-value %s))",
-			    v->path(), type.c_str(), value.c_str());
-    } else {
-      //logger_->log_info(name(), "(confval (path \"%s\") (type %s) (value %s))",
-      //       v->path(), type.c_str(), value.c_str());
-      clips->assert_fact_f("(confval (path \"%s\") (type %s) (value %s))",
-			    v->path(), type.c_str(), value.c_str());
-    }
-
-  }
 }
 
 
