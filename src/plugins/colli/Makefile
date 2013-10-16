@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-UTILS = utils/rob
+UTILS = utils/rob drive_realization
 
 LIBS_colli = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
              fawkesinterface MotorInterface Laser360Interface  NavigatorInterface
