@@ -22,9 +22,6 @@
 #ifndef __PLUGINS_COLLI_COLLI_THREAD_H_
 #define __PLUGINS_COLLI_COLLI_THREAD_H_
 
-//~ #include "search/og_laser.h"
-//~ #include "search/astar_search.h"
-
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>

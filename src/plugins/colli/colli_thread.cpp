@@ -23,6 +23,8 @@
 #include "drive_modes/select_drive_mode.h"
 #include "drive_realization/quadratic_motor_instruct.h"
 #include "utils/rob/robo_laser.h"
+//~ #include "search/og_laser.h"
+//~ #include "search/astar_search.h"
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
@@ -248,7 +250,14 @@ ColliThread::loop()
     escape_count = 0;
 
   } else {
-    //TODO: the actual movement stuff :)
+    /* ****************************************************************
+     *
+     *      TODO: the actual movement stuff :)
+     *        this is the code that needs to be copied.
+     *        Might need other methods too that have not been ported
+     *        yet.
+     *
+     ******************************************************************/
   }
 
   logger->log_debug(name(), "I want to realize %f , %f", m_ProposedTranslation, m_ProposedRotation);
