@@ -94,13 +94,16 @@ class NavigatorInterface : public Interface
     final is true. 0 if no error occured, an error code from ERROR_*
     constants otherwise (or a bit-wise combination). */
     float max_velocity; /**< Maximum velocity */
-    float security_distance; /**< Security distance to
-    keep to obstacles */
-    bool escaping_enabled; /**< This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape. */
+    float max_rotation; /**< Maximum rotation velocity */
+    float security_distance; /**< Security distance to keep to obstacles */
+    bool escaping_enabled; /**< This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape. */
     int32_t drive_mode; /**< Current drive mode */
+    bool auto_drive_mode; /**< True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value). */
+    bool stop_at_target; /**< Stop when target is reached? */
+    bool orient_at_target; /**< Adjust orientation when target position is reached? */
   } NavigatorInterface_data_t;
 #pragma pack(pop)
 
@@ -468,6 +471,9 @@ class NavigatorInterface : public Interface
   float max_velocity() const;
   void set_max_velocity(const float new_max_velocity);
   size_t maxlenof_max_velocity() const;
+  float max_rotation() const;
+  void set_max_rotation(const float new_max_rotation);
+  size_t maxlenof_max_rotation() const;
   float security_distance() const;
   void set_security_distance(const float new_security_distance);
   size_t maxlenof_security_distance() const;
@@ -477,6 +483,15 @@ class NavigatorInterface : public Interface
   DriveMode drive_mode() const;
   void set_drive_mode(const DriveMode new_drive_mode);
   size_t maxlenof_drive_mode() const;
+  bool is_auto_drive_mode() const;
+  void set_auto_drive_mode(const bool new_auto_drive_mode);
+  size_t maxlenof_auto_drive_mode() const;
+  bool is_stop_at_target() const;
+  void set_stop_at_target(const bool new_stop_at_target);
+  size_t maxlenof_stop_at_target() const;
+  bool is_orient_at_target() const;
+  void set_orient_at_target(const bool new_orient_at_target);
+  size_t maxlenof_orient_at_target() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

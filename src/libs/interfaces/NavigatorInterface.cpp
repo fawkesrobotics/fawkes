@@ -91,9 +91,13 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
+  add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
   add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+  add_fieldinfo(IFT_BOOL, "auto_drive_mode", 1, &data->auto_drive_mode);
+  add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
+  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
   add_messageinfo("StopMessage");
   add_messageinfo("TurnMessage");
   add_messageinfo("CartesianGotoMessage");
@@ -105,7 +109,9 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
   add_messageinfo("SetDriveModeMessage");
-  unsigned char tmp_hash[] = {0xfb, 0xb8, 0x77, 0x94, 0x41, 0xdb, 0x47, 0xaf, 0xb3, 0xbe, 0x56, 0x14, 0x1f, 0x49, 0x77, 0x7f};
+  add_messageinfo("EnableAutoDriveModeMessage");
+  add_messageinfo("DisableAutoDriveModeMessage");
+  unsigned char tmp_hash[] = {0x7, 0xcf, 0x1e, 0x32, 0x2e, 0x56, 0x15, 0x35, 0x5f, 0xec, 0x88, 0x6e, 0x8e, 0xef, 0x51, 0x26};
   set_hash(tmp_hash);
 }
 
@@ -495,6 +501,37 @@ NavigatorInterface::set_max_velocity(const float new_max_velocity)
   data_changed = true;
 }
 
+/** Get max_rotation value.
+ * Maximum rotation velocity
+ * @return max_rotation value
+ */
+float
+NavigatorInterface::max_rotation() const
+{
+  return data->max_rotation;
+}
+
+/** Get maximum length of max_rotation value.
+ * @return length of max_rotation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_max_rotation() const
+{
+  return 1;
+}
+
+/** Set max_rotation value.
+ * Maximum rotation velocity
+ * @param new_max_rotation new max_rotation value
+ */
+void
+NavigatorInterface::set_max_rotation(const float new_max_rotation)
+{
+  data->max_rotation = new_max_rotation;
+  data_changed = true;
+}
+
 /** Get security_distance value.
  * Security distance to
     keep to obstacles
@@ -593,6 +630,103 @@ void
 NavigatorInterface::set_drive_mode(const DriveMode new_drive_mode)
 {
   data->drive_mode = new_drive_mode;
+  data_changed = true;
+}
+
+/** Get auto_drive_mode value.
+ * True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value).
+ * @return auto_drive_mode value
+ */
+bool
+NavigatorInterface::is_auto_drive_mode() const
+{
+  return data->auto_drive_mode;
+}
+
+/** Get maximum length of auto_drive_mode value.
+ * @return length of auto_drive_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_auto_drive_mode() const
+{
+  return 1;
+}
+
+/** Set auto_drive_mode value.
+ * True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value).
+ * @param new_auto_drive_mode new auto_drive_mode value
+ */
+void
+NavigatorInterface::set_auto_drive_mode(const bool new_auto_drive_mode)
+{
+  data->auto_drive_mode = new_auto_drive_mode;
+  data_changed = true;
+}
+
+/** Get stop_at_target value.
+ * Stop when target is reached?
+ * @return stop_at_target value
+ */
+bool
+NavigatorInterface::is_stop_at_target() const
+{
+  return data->stop_at_target;
+}
+
+/** Get maximum length of stop_at_target value.
+ * @return length of stop_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_stop_at_target() const
+{
+  return 1;
+}
+
+/** Set stop_at_target value.
+ * Stop when target is reached?
+ * @param new_stop_at_target new stop_at_target value
+ */
+void
+NavigatorInterface::set_stop_at_target(const bool new_stop_at_target)
+{
+  data->stop_at_target = new_stop_at_target;
+  data_changed = true;
+}
+
+/** Get orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @return orient_at_target value
+ */
+bool
+NavigatorInterface::is_orient_at_target() const
+{
+  return data->orient_at_target;
+}
+
+/** Get maximum length of orient_at_target value.
+ * @return length of orient_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_orient_at_target() const
+{
+  return 1;
+}
+
+/** Set orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @param new_orient_at_target new orient_at_target value
+ */
+void
+NavigatorInterface::set_orient_at_target(const bool new_orient_at_target)
+{
+  data->orient_at_target = new_orient_at_target;
   data_changed = true;
 }
 
