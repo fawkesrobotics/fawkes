@@ -91,6 +91,7 @@ ColliThread::init()
   logger->log_info(name(), "(init): Initialization done.");
 }
 
+
 void
 ColliThread::finalize()
 {
@@ -112,9 +113,61 @@ ColliThread::finalize()
   logger->log_info(name(), "(finalize): Destructing done.");
 }
 
+
+
+
+/* **************************************************************************** */
+/* **************************************************************************** */
+/* ******************************  L O O P  *********************************** */
+/* **************************************************************************** */
+/* **************************************************************************** */
+
+//
+// ============================================================================ //
+// ============================================================================ //
+//                               BBCLIENT LOOP                                  //
+//                               *************                                  //
+//                                                                              //
+//           The desired structure should be something like this                //
+//           ===================================================                //
+//                                                                              //
+// Update the BB Things                                                         //
+// Update the state machine                                                     //
+//                                                                              //
+// If we are in stop state                                                      //
+//    Do stop                                                                   //
+// Else if we are in orient state                                               //
+//    Do orient                                                                 //
+// else if we are in a drive state                                              //
+//    Update the grid                                                           //
+//    If we are to close to an obstacle                                         //
+//       Escape the obstacle                                                    //
+//       Get Motor settings for escaping                                        //
+//       Set Motor parameters for escaping                                      //
+//    else                                                                      //
+//       Search for a way                                                       //
+//       if we found a way,                                                     //
+//          Translate the way in motor things                                   //
+//          Set Motor parameters for driving                                    //
+//       else                                                                   //
+//          do nothing, because this is an error!                               //
+//          Set Motor parameters for stopping                                   //
+//                                                                              //
+// Translate and Realize the motor commands                                     //
+// Update the BB Things                                                         //
+//                                                                              //
+// ============================================================================ //
+// ============================================================================ //
+//
 void
 ColliThread::loop()
 {
+  // to be on the sure side of life
+  m_ProposedTranslation = 0.0;
+  m_ProposedRotation    = 0.0;
+
+  // Update blackboard data
+  UpdateBB();
 }
 
 
@@ -192,4 +245,23 @@ ColliThread::InitializeModules()
   //~ m_OldX   = m_pMotorInstruct->GetCurrentX();
   //~ m_OldY   = m_pMotorInstruct->GetCurrentY();
   //~ m_OldOri = m_pMotorInstruct->GetCurrentOri();
+}
+
+
+
+
+/* **************************************************************************** */
+/*                          During Runtime                                      */
+/* **************************************************************************** */
+
+
+
+/// Get the newest values from the blackboard
+void
+ColliThread::UpdateBB()
+{
+  m_pLaserScannerObj->read();
+  m_pMopoObj->read();
+  m_pColliTargetObj->write();
+  m_pColliDataObj->write();
 }
