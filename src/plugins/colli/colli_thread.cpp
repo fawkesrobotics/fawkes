@@ -23,6 +23,7 @@
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/NavigatorInterface.h>
+#include <utils/math/common.h>
 
 #include <string>
 
@@ -180,14 +181,14 @@ ColliThread::loop()
   }
 
   // THIS IF FOR CHALLENGE ONLY!!!
-  if ( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
+  if( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
     logger->log_debug(name(), "BEING OVERRIDDEN!");
     m_pColliDataObj->set_final( false );
     m_pColliDataObj->write();
     escape_count = 0;
     return;
 
-  } else if ( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
+  } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
     logger->log_debug(name(), "Moving is not allowed!");
     //~ m_pMotorInstruct->Drive( 0.0, 0.0 );
     m_pColliDataObj->set_final( true );
@@ -195,6 +196,36 @@ ColliThread::loop()
     escape_count = 0;
     return;
   }
+
+
+  // Do only drive, if there is a new (first) target
+  if( ( m_oldTargetX   == m_pColliTargetObj->dest_x() )
+   && ( m_oldTargetY   == m_pColliTargetObj->dest_y() )
+   && ( m_oldTargetOri == m_pColliTargetObj->dest_ori() ) ) {
+
+    m_oldAnglesToTarget.clear();
+    for ( unsigned int i = 0; i < 10; i++ )
+      m_oldAnglesToTarget.push_back( 0.0 );
+
+    m_ProposedTranslation = 0.0;
+    m_ProposedRotation    = 0.0;
+    m_pColliDataObj->set_final( true );
+    //~ m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+
+    escape_count = 0;
+    // Send motor and colli data away.
+    m_pColliDataObj->write();
+
+    return;
+
+  } else {
+    m_oldTargetX   = m_pColliTargetObj->dest_x()   + 1000.0;
+    m_oldTargetY   = m_pColliTargetObj->dest_y()   + 1000.0;
+    m_oldTargetOri = m_pColliTargetObj->dest_ori() + 1.0;
+  }
+
+  // Update state machine
+  UpdateColliStateMachine();
 }
 
 
@@ -291,4 +322,101 @@ ColliThread::UpdateBB()
   m_pMopoObj->read();
   m_pColliTargetObj->write();
   m_pColliDataObj->write();
+}
+
+
+
+void
+ColliThread::UpdateColliStateMachine()
+{
+  // initialize
+  m_ColliStatus = NothingToDo;
+
+  float curPosX = 0;//m_pMotorInstruct->GetCurrentX(); //TODO
+  float curPosY = 0;//m_pMotorInstruct->GetCurrentY(); //TODO
+  float curPosO = 0;//m_pMotorInstruct->GetCurrentOri(); //TODO
+
+  float targetX = m_pColliTargetObj->dest_x();
+  float targetY = m_pColliTargetObj->dest_y();
+  float targetO = m_pColliTargetObj->dest_ori();
+
+  bool  orient = true; // m_pColliTargetObj->OrientAtTarget(); //TODO
+  //  bool  stop_on_target =  m_pColliTargetObj->StopOnTarget();
+
+//   if ( stop_on_target == false )
+//     {
+//       float angle_to_target = atan2( targetY - curPosY,
+//             targetX - curPosX );
+//       std::vector< float > new_angles;
+//       for ( unsigned int i = 0; i < m_oldAnglesToTarget.size(); i++ )
+//  new_angles.push_back( m_oldAnglesToTarget[i] );
+//       m_oldAnglesToTarget.clear();
+
+//       for ( unsigned int i = 0; i < 9; i++ )
+//  m_oldAnglesToTarget.push_back( new_angles[i] );
+
+//       m_oldAnglesToTarget.push_back( angle_to_target );
+
+
+//       // vergleiche die angles mit dem neusten. Wenn wir nen M_PI bekommen, dann fertig
+//       for ( unsigned int i = 0; i < m_oldAnglesToTarget.size()-1; i++ )
+//  {
+//    if ( fabs( normalize_mirror_rad( m_oldAnglesToTarget[m_oldAnglesToTarget.size()-1] -
+//             m_oldAnglesToTarget[i] ) ) > 2.5 )
+//      {
+//        cout << "Detected final stop!" << endl;
+//        if ( orient == true )
+//    {
+//      m_ColliStatus = OrientAtTarget;
+//    }
+//        else
+//    {
+//      m_ColliStatus = NothingToDo;
+//    }
+//        m_oldAnglesToTarget.clear();
+//        for ( unsigned int i = 0; i < 10; i++ )
+//    m_oldAnglesToTarget.push_back( 0.0 );
+//        return;
+//      }
+//  }
+//     }
+
+  // Real driving....
+  if( ( orient == true )
+   && ( sqr( curPosX - targetX ) + sqr( curPosY - targetY ) >= sqr(2.1) ) ) {
+
+   float ori = m_pColliTargetObj->dest_ori();
+
+    float mult = 0.0;
+    //~ if ( m_pMotorInstruct->GetUserDesiredTranslation() > 0 )
+      //~ //  mult =  1.2;
+      //~ mult = 0.8;
+    //~ else if ( m_pMotorInstruct->GetUserDesiredTranslation() < 0 )
+      //~ //  mult = -1.2;
+      //~ mult = -0.8;
+
+    float orientPointX = targetX - ( mult * cos(ori) );
+    float orientPointY = targetY - ( mult * sin(ori) );
+
+    m_TargetPointX = orientPointX;
+    m_TargetPointY = orientPointY;
+    m_ColliStatus = DriveToOrientPoint;
+    return;
+
+  } else if( sqr( curPosX - targetX ) + sqr( curPosY - targetY ) > sqr(0.15) )  { // soll im navigator wegen intercept parametrisierbar sein
+    m_TargetPointX = targetX;
+    m_TargetPointY = targetY;
+    m_ColliStatus = DriveToTarget;
+    return;
+
+  } else if ( (orient == true) && ( fabs( normalize_mirror_rad(curPosO - targetO) ) > 0.1 ) ) {
+    m_ColliStatus = OrientAtTarget;
+    return;
+
+  } else {
+    m_ColliStatus = NothingToDo;
+    return;
+  }
+
+  return;
 }
