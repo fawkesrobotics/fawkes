@@ -1,0 +1,453 @@
+//     A* Collision Avoidance Algorithm by Stefan Jacobs
+//     Copyright (C) 2002  Stefan Jacobs <Stefan_J@gmx.de>
+//
+//     This program is free software; you can redistribute it and/or modify
+//     it under the terms of the GNU General Public License as published by
+//     the Free Software Foundation; either version 2 of the License, or
+//     (at your option) any later version.
+//
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+//
+//     You should have received a copy of the GNU General Public License
+//     along with this program; if not, write to the Free Software
+//     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+
+
+/*
+  ©º°¨¨°º©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©º°¨¨°º©
+  ©                                                                            ©
+  ©                                            ####   ####           .-""-.    ©
+  ©       # #                             #   #    # #    #         /[] _ _\   ©
+  ©       # #                                 #    # #             _|_o_LII|_  ©
+  © ,###, # #  ### ## ## ##   ###  ## ##  #   #    # #       ###  / | ==== | \ ©
+  © #   # # # #   # ## ## #  #   #  ## #  #   ###### #      #     |_| ==== |_| ©
+  © #   # # # ####  #  #  #  #   #  #  #  #   #    # #      ####   ||" ||  ||  ©
+  © #   # # # #     #  #  #  #   #  #  #  #   #    # #    #    #   ||LI  o ||  ©
+  © '###'# # # #### #  #  ##  ### # #  ## ## #      # ####  ###    ||'----'||  ©
+  ©                                                               /__|    |__\ ©
+  ©                                                                            ©
+  ©º°¨¨°º©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©º°¨¨°º©
+*/
+
+
+/* ******************************************************************** */
+/*                                                                      */
+/* $Id: README,v 2.0 2006/04/11 14:01:21 tim Exp $                 */
+/*                                                                      */
+/* Description: Instruction how to use and modify the Colli             */
+/*                                                                      */
+/* Author:   Stefan Jacobs                                              */
+/* Contact:  <Stefan_J@gmx.de>                                          */
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/* last modified: $Date: 2006/04/11 14:01:21 $                          */
+/*            by: $Author: tim $                                    */
+/*                                                                      */
+/* ******************************************************************** */
+
+
+
+INTRODUCTION
+============
+
+
+
+Dear reader!
+------------
+
+I have to mention that the development of this approach to purely reactive
+collision avoidance in autonomous mobile robots lasted about half a year to
+this current state. What it does, and how it works can be read in the
+section 'WHAT_DO_I_DO?'.
+
+The implementation has now arrived to third re-design, and hopefully the
+last one :-). The state and structure of the implementation is described
+in the section 'STRUCTURE'.
+
+The source code should be readable, if you are firm in C++. Also, it should
+be modifyable in many ways, as you will see later in this file in the
+section 'MODIFY'. Feel free to contribute source in the way described there.
+
+Also it should be easy to adapt to new hardware, even sonar sensors
+and stuff like that. Doing so requires reading of 'ADAPTING TO NEW
+HARDWARE - WHAT TO DO?'. Feel free to do so and send me a note
+with what platform you did it, please ;-) (And show me movies of it!!!)
+
+
+WHAT_DO_I_DO?
+=============
+
+
+This is about how the collision avoidance algorithm currently works.
+Available to the colli are the motor and its odometry, the current
+laser range distance readings and a targetobject indicating where
+and how to drive there (including several restrictions).
+
+First thing to mention is that this colli is called 10 times per second,
+so efficiency is the main aim of the development of the code after
+extensibility. The code should be clear structurized, easy read- and
+maintainable. After the description of what component does what I
+describe the current structure which has to be maintained over all
+time to garantee the work and afterwards I describe the modules you
+may extend in you own way and which restrictions apply to them.
+
+To how the colli works:
+First thing it does (you find that in bbclient.cpp) is call a blackboard
+update. In this update the blackboard interfaces and objects are updated
+and filled with the newest values. These interfaces may be found in
+src/interfaces. Next thing following is the occupancy-grid update. The
+whole colli works on the grid filled with 0s and 1s. The laser readings
+are integrated and are integrated to become ellipsen and circles in a
+special way you see in the file og_laser.h/cpp. All laser readings are
+extended in the size of the robot and a factor relative to the current
+speed of the robot. The aim of this approach is to loose paths, if the
+speed is too high, because then the robot itself is in an occupied grid.
+
+Next thing following is the check if the robot itself is in an occupied
+grid cell. If so we first break to a full stop and afterwards the escape
+mode is called to remove itself from the robot. This is done by filling
+two variables, namely the desired values for translation and rotation.
+
+If we are not in escape mode, the next step may follow. We search from
+the roboters position to the target position avoiding obstacles for a
+path. This is done by the search component. This component has an
+abstract interface which has to be fullfilled. Namely this are the
+functions GetLocalTarget and GetLocalTrajec. The first one returns the
+next relative grid point we want to reach to minimize the distance to
+the target and the strict path is not occupied to it, the second one
+returns the collision point that is either on parallel height to the
+localtarget or indicating the next collision point, if we would not
+rotate. How you do calculate this is up on your own. Currently this
+problem is solved using the A* algorithm with manhatten distance as
+heuristic. Plans of size 300 in 10 ms are no problem with this. Finding
+both points is done by raytracing in the occgrid, as you may think.
+If a valid plan was found, the routine UpdatedSuccessful returns a
+true and next step may be called. Else the desired speed values are
+set to zero indicating that if no valid plan exists, we do a stop.
+
+If the Search->Update was successfull, the two routines GetLocalTarget
+and GetLocalTrajec return two valid points. These points and the
+current values are given to the drive-mode selection component. This
+component calculates for the given current values a proposed speed
+vector during the call of m_pDriveMode->Update(). This component has
+an abstract interface which has to be extended if you implement your
+own mode. How this values are calculated is rather equal to me, but
+notice that here the behaviour of the robot is defined. If you do
+something wrong, you get interesting crashes ;-). Afterwards the
+GetProposedTranslation and GetProposedRotation methods of the
+select_drive_mode module are called.
+
+At this point we know, that we either have a target and with it
+proposed settings, or not (then these settings are 0.0 to stop).
+The next call goes to the direct motorinstructor. This component
+has exclusive write rights on the robot and is the only routine to
+actually do it. This routine tries to realize the proposed settings
+only with respect to the physical settings of the robot. This means
+here no longer is any collision avoidance done. It only tries to
+realize the proposed translation and rotation as fast and as smooth
+as possible.
+
+This component also is able to be modified or replaced, as you
+desire. You find an abstract base class in the appopriate directory.
+You just have to implement(again) two 'easy' functions that calculate
+the allowed change. See the description in the base class for more
+detail.
+
+Afterwards only the blackboard is updated, so all other modules
+(the motor and the colli_data_obj) get informed.
+
+
+
+
+STRUCTURE
+=========
+
+The structure of the colli is really easy and observeable:
+
+colli/
+|
+|---- main.cpp         // The main method of the colli
+|
+|---- bbclient.h, cpp  // The blackboard client processes
+|
+|-- search/            // directory of the search component
+|     |
+|     |-- abstract_search.h   // Basic search class you have to derive
+|     |                       //   your search class from.
+|     |-- og_laser.h, cpp     // The grid we search on and put the
+|     |                       //   laser readings in.
+|     |-- astar_state.h       // One state for a*
+|     |-- astar.h, cpp        // A* search algorithm
+|     |-- astar_search.h, cpp // The search algorithm a* on the occ grid
+|
+|-- drive_modes/              // directory containing the drive modes
+|     |
+|     |-- abstract_drive_mode.h    // A base class for an arbitrary drive
+|     |                            //   mode.
+|     |-- select_drive_mode.h, cpp // Here is the interface which selects
+|     |                            //   for each mode the correct object
+|     |-- slow_forward_drive_mode.h, cpp   // An commented example for
+|     |                            //   one drive mode.
+|     |-- ....      // several other drive modes just implemented.
+|
+|-- drive_realization/        // directory containing the drive realization
+      |
+      |-- base_motor_instruct.h         // A base class for an
+      |                                 //   arbitrary drive mode.
+      |-- linear_motor_instruct.h, cpp  // A commented example for
+                                        //   an instruction module.
+
+The program structur is like that:
+
+main()
+CBBClient                     // The blackboard client
+|-MopoObj                     // The motor object
+|-LaserScannerObject          // The laser scanner
+|-ColliTargetObject           // The target for the colli
+|-ColliDataObject             // The colli data for the BB
+|-Laser( LaserScannerObject ) // An easy laser interface
+|-LaserOccGrid( Laser )       // Our OccGrid
+|-Search( LaserOccGrid )      // The search component
+|   |-AStar                   // The search algorithm
+|   |   |-AStarState          // The states for astar
+|-MotorInstruct( MopoObj )    // The motor instruction interface
+|-DriveMode( MotorInstruct,   // The drive mode selection module
+|  Laser, ColliTargetObject )
+|   |-SlowForwardDriveMode    // The drive mode slow only forward
+|   |-SlowBackwardDriveMode   // The drive mode slow only backward
+|   |-SlowBiwardDriveMode     // The drive mode slow both directions
+
+
+
+MODIFY
+======
+
+
+If you want to modify the code, you have many possibilities to do so.
+  First is, you can do what you want. But if you do, you are not allowed
+  to commit the source or redistribute the source without notes, what
+  you changed and what the effects are.
+
+Another, more comfortabel and more convinient way to modify the colli
+  is to use the basic abstract interfaces and to derive your own classes
+  from them. So every user may choose, which module to use. All three
+  components described in STRUCTURE are derived from a basic abstract
+  class that only describes the interface and what it should do. The
+  derived classes only implement these features. If you have a better
+  idea, how to do this, just implement it and try!!! The current state
+  of the implementation was done in the same way, so I just invite you
+  to implement and test, and to see, what changes at what modules have
+  which effect. And if they work better, just write me a short notice
+  and send me teh source, I would be happie to look at it!
+
+
+Following is a more detailed descriptin about what to do while changing
+  modules. I propose changes in the three modules SEARCH, DRIVE_MODES and
+  DRIVE_REALIZATION.Changes in the basic files like 'bbclient' may result
+  in non working code at last and I want to advise against doing so.
+
+
+In SEARCH there is the abstract class defined in 'abstract_search.h'.
+  The virtual functions in it have to be implemented. They are
+  fully documented, what they should do, and I think, currently
+  there is no further improvement than A* possible, but never
+  say never I heared somewhere...
+
+  The functions to implement are:
+
+    void
+    Update( int roboX, int roboY, int targetX, int targetY )
+      Precondition: The occupancygrid has to be updated.
+      Documentation of runtime: roboX, roboY, targetX, targetY are grid
+                                coordinates in the occ-grid.
+      Postcondition: UpdatedSuccessful() has to return true, if the
+                     functions GetLocalTarget and GetLocalTrajec are allowed
+                     to be called. m_LocalTarget and m_LocalTrajec are filled.
+
+    bool
+    UpdatedSuccessful()
+      Precondition: The method Update() has been called. m_LocalTarget,
+                    m_LocalTrajec have to be filled.
+      Documentation: Returns, if a plan was found and the Points are
+                     valid ones.
+
+  If you implemented those, you just have to exchange the types in
+    bbclient.h and .cpp. Should be all, I think to integrate a new search
+    algorithm.
+
+
+
+In DRIVE_MODES there is the abstract class 'abstract_drive_mode'. By
+  looking at the implementation you will see, that you have to implement
+  the function 'Update()'. There are several informations available by
+  the previously done search, there is no need to do escaping an obstacle,
+  just driving. So by deriving a class containing the implementation of
+  this function will give a new drive mode. The file 'select_drive_mode'
+  has to be changed a little bit, too, but that should be obvious to
+  everyone if you look at it.
+
+  The function to implement by deriving from the abstract class
+    is (documentation taken from slow_forward_drive_mode.cpp):
+
+    void
+    Update()
+       /** Calculate here your desired settings. What you desire is checked afterwards to the current
+        *    settings of the physical boundaries, but take care also.
+        *  How you do this is up to you, but be careful, our hardware is expensive!!!!
+        *
+        *  Available are:
+        *     m_TargetX, m_TargetY, m_TargetOri  --> current Target to drive to
+        *     m_RoboX, m_RoboY, m_RoboOri        --> current Robot coordinates
+        *     m_RoboTrans, m_RoboRot             --> current Motor values
+        *
+        *     m_LocalTargetX, m_LocalTargetY     --> our local target found by the search component we want to reach
+        *     m_LocalTrajecX, m_LocalTrajecY     --> The point we would collide with, if we would drive WITHOUT Rotation
+        *
+        *     m_OrientAtTarget                   --> Do we have to orient ourself at the target?
+        *     m_StopAtTarget                     --> Do we have to stop really ON the target?
+        *
+        *  Afterwards filled should be:
+        *     m_ProposedTranslation              --> Desired Translation speed
+        *     m_ProposedRotation                 --> Desired Rotation speed
+        *
+        *  Those values are questioned after an Update() was called.
+        */
+
+   If you implement one of those, you have to integrate it in select_drive_mode.
+     Here the integration is the most easy one. include your header, define, create
+     and destroy the object in the header, constructor and destructor of the select
+     class and add a case distinction for your colli mode. Nothing in the original
+     source has to be changed, there have to be added a few lines....
+
+
+
+In DRIVE_REALIZATION there is the abstract class 'base_motor_instruct'.
+  By looking at the implementation you will see that you have to implement
+  the functions 'CalculateTranslation()' and 'CalculateRotation()'. Those
+  two functions are calculating DIRECT COMMANDS for the motor. Pay
+  attention if you implement those new, because your hardware is expensive,
+  and humans are in danger, mostly you during tests!!! ;-)
+
+  The function to implement by deriving from the abstract class
+    CBaseMotorInstruct are (doc taken from base_motor_instruct.h):
+
+  virtual float
+  CalculateRotation( float currentRotation, float desiredRotation );
+    // calculates rotation speed
+    // is for the smoothness of rotation transitions.
+    // calculate maximum allowed rotation change between proposed and desired values
+
+
+  virtual float
+  CalculateTranslation( float currentTranslation, float desiredTranslation );
+    // calculates translation speed.
+    // is for the smoothness of translation transitions.
+    // calculate maximum allowed translation change between proposed and desired values
+
+
+  If you implement a new drive realization class, you just have to exchange
+    the types in bbclient.h and .cpp, you do NOT have to change something else.
+
+
+
+Last words to modifying the code: Look at the examples. They were created by
+the same way as you have to do that. If you do, what is described above, and
+just exchange or add one component at one time, everything should work fine.
+So you may just test before integrating another components. I advise against
+exchanging more than one class or modifying the structure of the current base
+algorithm in the bbclient. This may result in errors no one can predict, and
+so there is danger.....
+
+
+
+ADAPTING TO NEW HARDWARE - WHAT TO DO?
+======================================
+
+
+SJ - TODO
+
+
+
+
+ACKNOWLEDGEMENTS
+================
+
+
+This approach to purely reactive collision avoidance was developed after
+an idea of Dieter Fox he mentioned at the AAAI 2002 to Alexander Ferrein.
+Alexander proposed this idea, to just implement this 'easy' algorithm,
+and with ideas and encourage from him I developed and implemented this
+source code in about 4 month in the now third design step.
+
+If you want to see the robots driving, just write a mail, ask for a vid,
+visit us, or find another way of contacting us which I am not just
+thinking about, I would be honoured to talk with you about the
+algorithm described here!
+
+
+Yours sincerely,
+  Stefan Jacobs
+
+<Stefan_J@gmx.de>
+in December 2002
+
+
+
+
+
+
+
+
+
+
+TODO. (deprecated):
+======
+
+
++----------> Implementation
+
+(1) Perform door driving again (I think that is because of the reading lengths
+                                in og_laser. Has to be done more intelligent)
+
+(2) Speed reduction (laser reading lengths) in a more general and efficient way.
+
+(3) Drive modes slow_backward and slow_biward.
+
+(4) Orienting at target in a more efficient way
+        (introducing orient state? and an orient point with big reach radius?
+         and reintegrate the control mode for orienting if reached the target)
+
+(5) Implementing intelligent escape drive mode.
+
+(6) Cut, if nothing is to do
+        (so no search is performed, this is because GOLOG is really expensive)
+
+(7) Perhaps implementing faster drive modes.
+        (moderate with max speed of 1.5 and extended laser lengths or so)
+
+(8) Integrating the quadratic drive instructor.
+        (instead of linear increasing functions use quadratic ones, complicated
+         because of difference between acceleration and deceleration)
+
+
++----------> Testing and parameter settings
+
+(13) Colli Feature Freeze!!!
+        (Checking and testing of parameter settings)
+
+(14) Tests with skills
+
+(15) Code Freeze!!! First final Colli V2 version
+
+===================================================================================
+
+
++----------> Documentation
+
+(20) How to extend the colli to other hardware. What to do and how?
