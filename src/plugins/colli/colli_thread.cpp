@@ -22,6 +22,7 @@
 
 #include "drive_modes/select_drive_mode.h"
 #include "drive_realization/quadratic_motor_instruct.h"
+#include "utils/rob/robo_laser.h"
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
@@ -105,7 +106,7 @@ ColliThread::finalize()
   delete m_pSelectDriveMode;
   //~ delete m_pSearch;
   //~ delete m_pLaserOccGrid;
-  //~ delete m_pLaser;
+  delete m_pLaser;
   delete m_pMotorInstruct;
 
   // close all registered bb-interfaces
@@ -301,8 +302,8 @@ void
 ColliThread::InitializeModules()
 {
   // FIRST(!): the laserinterface (uses the laserscanner)
-  //~ m_pLaser = new Laser( m_pLaserScannerObj, m_pXMLConfigFile );
-  //~ m_pLaser->UpdateLaser();
+  m_pLaser = new Laser( m_pLaserScannerObj, logger, config );
+  m_pLaser->UpdateLaser();
 
   // SECOND(!): the occupancy grid (it uses the laser)
   //~ m_pLaserOccGrid = new CLaserOccupancyGrid( m_pLaser );
