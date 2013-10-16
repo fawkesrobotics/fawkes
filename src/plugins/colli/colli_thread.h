@@ -25,7 +25,6 @@
 //~ #include "search/og_laser.h"
 //~ #include "search/astar_search.h"
 //~ #include "drive_modes/select_drive_mode.h"
-//~ #include "drive_realization/quadratic_motor_instruct.h"
 //~ #include "robo_utils/rob/robo_laser.h"
 
 #include <core/threading/thread.h>

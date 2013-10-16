@@ -20,6 +20,8 @@
 
 #include "colli_thread.h"
 
+#include "drive_realization/quadratic_motor_instruct.h"
+
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/NavigatorInterface.h>
@@ -103,7 +105,7 @@ ColliThread::finalize()
   //~ delete m_pSearch;
   //~ delete m_pLaserOccGrid;
   //~ delete m_pLaser;
-  //~ delete m_pMotorInstruct;
+  delete m_pMotorInstruct;
 
   // close all registered bb-interfaces
   blackboard->close( m_pColliDataObj );
@@ -175,7 +177,7 @@ ColliThread::loop()
    || !m_pMopoObj->has_writer()
    || !m_pMopoObj_des->has_writer() ) {
     logger->log_warn(name(), "***** Laser or sim_robot dead!!! --> STOPPING!!!!");
-    //~ m_pMotorInstruct->Drive( 0.0, 0.0 );
+    m_pMotorInstruct->Drive( 0.0, 0.0 );
     m_pColliDataObj->set_final( true );
     m_pColliDataObj->write();
     escape_count = 0;
@@ -192,7 +194,7 @@ ColliThread::loop()
 
   } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
     logger->log_debug(name(), "Moving is not allowed!");
-    //~ m_pMotorInstruct->Drive( 0.0, 0.0 );
+    m_pMotorInstruct->Drive( 0.0, 0.0 );
     m_pColliDataObj->set_final( true );
     m_pColliDataObj->write();
     escape_count = 0;
@@ -212,7 +214,7 @@ ColliThread::loop()
     m_ProposedTranslation = 0.0;
     m_ProposedRotation    = 0.0;
     m_pColliDataObj->set_final( true );
-    //~ m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+    m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
 
     escape_count = 0;
     // Send motor and colli data away.
@@ -250,7 +252,7 @@ ColliThread::loop()
   logger->log_debug(name(), "I want to realize %f , %f", m_ProposedTranslation, m_ProposedRotation);
 
   // Realize drive mode proposal with realization module
-  //~ m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+  m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
 
   // Send motor and colli data away.
   m_pColliDataObj->write();
@@ -316,8 +318,12 @@ ColliThread::InitializeModules()
 
 
   // BEFORE DRIVE MODE: the motorinstruction set
-  //~ m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( m_pMopoObj, m_ColliFrequency );
-  //~ m_pMotorInstruct->SetRecoverEmergencyStop();
+  m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( m_pMopoObj,
+                                                                        m_pMopoObj_des,
+                                                                        m_ColliFrequency,
+                                                                        logger,
+                                                                        config );
+  m_pMotorInstruct->SetRecoverEmergencyStop();
 
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
@@ -330,9 +336,9 @@ ColliThread::InitializeModules()
   m_oldTargetY   = m_pColliTargetObj->dest_y();
   m_oldTargetOri = m_pColliTargetObj->dest_ori();
 
-  //~ m_OldX   = m_pMotorInstruct->GetCurrentX();
-  //~ m_OldY   = m_pMotorInstruct->GetCurrentY();
-  //~ m_OldOri = m_pMotorInstruct->GetCurrentOri();
+  m_OldX   = m_pMotorInstruct->GetCurrentX();
+  m_OldY   = m_pMotorInstruct->GetCurrentY();
+  m_OldOri = m_pMotorInstruct->GetCurrentOri();
 }
 
 
@@ -363,9 +369,9 @@ ColliThread::UpdateColliStateMachine()
   // initialize
   m_ColliStatus = NothingToDo;
 
-  float curPosX = 0;//m_pMotorInstruct->GetCurrentX(); //TODO
-  float curPosY = 0;//m_pMotorInstruct->GetCurrentY(); //TODO
-  float curPosO = 0;//m_pMotorInstruct->GetCurrentOri(); //TODO
+  float curPosX = m_pMotorInstruct->GetCurrentX();
+  float curPosY = m_pMotorInstruct->GetCurrentY();
+  float curPosO = m_pMotorInstruct->GetCurrentOri();
 
   float targetX = m_pColliTargetObj->dest_x();
   float targetY = m_pColliTargetObj->dest_y();
@@ -419,12 +425,12 @@ ColliThread::UpdateColliStateMachine()
    float ori = m_pColliTargetObj->dest_ori();
 
     float mult = 0.0;
-    //~ if ( m_pMotorInstruct->GetUserDesiredTranslation() > 0 )
-      //~ //  mult =  1.2;
-      //~ mult = 0.8;
-    //~ else if ( m_pMotorInstruct->GetUserDesiredTranslation() < 0 )
-      //~ //  mult = -1.2;
-      //~ mult = -0.8;
+    if ( m_pMotorInstruct->GetUserDesiredTranslation() > 0 )
+      //  mult =  1.2;
+      mult = 0.8;
+    else if ( m_pMotorInstruct->GetUserDesiredTranslation() < 0 )
+      //  mult = -1.2;
+      mult = -0.8;
 
     float orientPointX = targetX - ( mult * cos(ori) );
     float orientPointY = targetY - ( mult * sin(ori) );
