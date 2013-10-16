@@ -133,3 +133,27 @@ plugins/colli:
     EscapeForwardDriveModule_MAX_TRANS: 0.3
     # maximum rotational velocity in escape mode
     EscapeForwardDriveModule_MAX_ROT: 0.8
+
+  # default laser_calibration values for ignore-readings! if this node is available, these
+  # values are used.
+  laser_calibration:
+    IgnoreFRStart: 25
+    IgnoreFREnd: 39
+    IgnoreRRStart: 95
+    IgnoreRREnd: 117
+    IgnoreRLStart: 245
+    IgnoreRLEnd: 264
+    IgnoreFLStart: 322
+    IgnoreFLEnd: 335
+
+  # ignore-readings config for caesar. NOTE: these are not used, you need to put them into
+  # the 'laser_calibration' note in order to be active.
+  laser_calibration_caesar:
+    IgnoreFRStart: 28
+    IgnoreFREnd: 35
+    IgnoreRRStart: 96
+    IgnoreRREnd: 110
+    IgnoreRLStart: 250
+    IgnoreRLEnd: 266
+    IgnoreFLStart: 325
+    IgnoreFLEnd: 332
