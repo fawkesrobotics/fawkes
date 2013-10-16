@@ -226,6 +226,32 @@ ColliThread::loop()
 
   // Update state machine
   UpdateColliStateMachine();
+
+  // nothing is to do
+  if (m_ColliStatus == NothingToDo) {
+    //~ m_pLaserOccGrid->ResetOld();
+    m_ProposedTranslation = 0.0;
+    m_ProposedRotation    = 0.0;
+    m_pColliDataObj->set_final( true );
+
+    m_oldTargetX   = m_pColliTargetObj->dest_x();
+    m_oldTargetY   = m_pColliTargetObj->dest_y();
+    m_oldTargetOri = m_pColliTargetObj->dest_ori();
+    //~ m_pLaserOccGrid->ResetOld();
+
+    escape_count = 0;
+
+  } else {
+    //TODO: the actual movement stuff :)
+  }
+
+  logger->log_debug(name(), "I want to realize %f , %f", m_ProposedTranslation, m_ProposedRotation);
+
+  // Realize drive mode proposal with realization module
+  //~ m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+
+  // Send motor and colli data away.
+  m_pColliDataObj->write();
 }
 
 
