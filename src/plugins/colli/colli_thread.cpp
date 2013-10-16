@@ -20,6 +20,7 @@
 
 #include "colli_thread.h"
 
+#include "drive_modes/select_drive_mode.h"
 #include "drive_realization/quadratic_motor_instruct.h"
 
 #include <interfaces/MotorInterface.h>
@@ -101,7 +102,7 @@ ColliThread::finalize()
   logger->log_info(name(), "(finalize): Entering destructing ...");
 
   // delete own modules
-  //~ delete m_pSelectDriveMode;
+  delete m_pSelectDriveMode;
   //~ delete m_pSearch;
   //~ delete m_pLaserOccGrid;
   //~ delete m_pLaser;
@@ -327,7 +328,7 @@ ColliThread::InitializeModules()
 
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
-  //~ m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, m_pColliTargetObj );
+  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, m_pColliTargetObj, logger, config );
 
   // Initialization of colli state machine:
   // Currently nothing is to accomplish
