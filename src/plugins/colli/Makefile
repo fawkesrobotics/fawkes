@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-LIBS_colli = fawkescore fawkesutils fawkesaspects fawkestf \
+LIBS_colli = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
              fawkesinterface MotorInterface Laser360Interface  NavigatorInterface
 OBJS_colli = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 

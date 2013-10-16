@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "colli_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -29,6 +31,7 @@ public:
   ColliPlugin(Configuration *config)
       : Plugin(config)
   {
+    thread_list.push_back(new ColliThread());
   }
 };
 
