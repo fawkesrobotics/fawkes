@@ -168,6 +168,33 @@ ColliThread::loop()
 
   // Update blackboard data
   UpdateBB();
+
+  if( !m_pLaserScannerObj->has_writer()
+   || !m_pMopoObj->has_writer() ) {
+    logger->log_warn(name(), "***** Laser or sim_robot dead!!! --> STOPPING!!!!");
+    //~ m_pMotorInstruct->Drive( 0.0, 0.0 );
+    m_pColliDataObj->set_final( true );
+    m_pColliDataObj->write();
+    escape_count = 0;
+    return;
+  }
+
+  // THIS IF FOR CHALLENGE ONLY!!!
+  if ( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
+    logger->log_debug(name(), "BEING OVERRIDDEN!");
+    m_pColliDataObj->set_final( false );
+    m_pColliDataObj->write();
+    escape_count = 0;
+    return;
+
+  } else if ( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
+    logger->log_debug(name(), "Moving is not allowed!");
+    //~ m_pMotorInstruct->Drive( 0.0, 0.0 );
+    m_pColliDataObj->set_final( true );
+    m_pColliDataObj->write();
+    escape_count = 0;
+    return;
+  }
 }
 
 
