@@ -84,9 +84,11 @@ ColliThread::init()
   RegisterAtBlackboard();
   InitializeModules();
 
-  //~ SetTime( m_ColliFrequency );
-  //TODO: this defines how often the thread should be called! We should integrate that
-  //into the loop() method
+  // adjust the frequency of how often loop() should be processed
+  float fawkes_loop_time_ms = config->get_uint("/fawkes/mainapp/desired_loop_time") / 1000.f;
+  loop_count_trigger_ = m_ColliFrequency / fawkes_loop_time_ms;
+  logger->log_info(name(), "will process 1 loop() after %u main_loops", loop_count_trigger_);
+  loop_count_ = 0;
 
   m_oldTargetX   = m_pColliTargetObj->dest_x();
   m_oldTargetY   = m_pColliTargetObj->dest_y();
@@ -172,6 +174,12 @@ ColliThread::finalize()
 void
 ColliThread::loop()
 {
+  if( ++loop_count_ < loop_count_trigger_ )
+    return;
+
+  // reset loop_count
+  loop_count_ = 0;
+
   // to be on the sure side of life
   m_ProposedTranslation = 0.0;
   m_ProposedRotation    = 0.0;

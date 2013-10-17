@@ -144,6 +144,10 @@ class ColliThread
   bool isRwiRobot;
 
 
+  // manually adjust the frequency on how often the loop should be processed
+  unsigned int loop_count_;
+  unsigned int loop_count_trigger_;
+
 
   /* ************************************************************************ */
   /* PRIVATE METHODS                                                          */
