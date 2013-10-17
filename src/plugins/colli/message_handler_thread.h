@@ -28,8 +28,11 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 
+#include <interfaces/NavigatorInterface.h>
+
 namespace fawkes
 {
+  class MotorInterface;
   class NavigatorInterface;
 }
 
@@ -51,10 +54,20 @@ class ColliMessageHandlerThread
  private:
 
   fawkes::NavigatorInterface* if_navi_;
+  fawkes::NavigatorInterface* if_colli_data_;
+  fawkes::NavigatorInterface* if_colli_target_;
+  fawkes::MotorInterface*     if_motor_;
 
-  float cfg_security_distance_;
-  float cfg_max_velocity_;
-  float cfg_escaping_enabled_;
+  float security_distance_;
+  float max_velocity_;
+  float escaping_enabled_;
+
+  // methods mainly transfered from libmonaco
+  bool colli_final();
+  void colli_stop();
+  void colli_relgoto(float x, float y, float ori, float max_speed = 1.5,
+                     bool escape_allowed = true, float security_distance = 0.2,
+                     fawkes::NavigatorInterface::DriveMode drivemode = fawkes::NavigatorInterface::SlowForward);
 };
 
 #endif
