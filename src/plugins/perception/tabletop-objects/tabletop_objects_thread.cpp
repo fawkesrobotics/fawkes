@@ -1275,6 +1275,7 @@ TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster (
     const uint8_t color[]) {
   ColorCloudPtr result(new ColorCloud());
   result->resize(cluster.size());
+  result->header.frame_id = input_cloud->header.frame_id;
   uint i = 0;
   for (std::vector<int>::const_iterator it = cluster.begin(); it != cluster.end(); ++it, ++i) {
     ColorPointType &p1 = result->points.at(i);
