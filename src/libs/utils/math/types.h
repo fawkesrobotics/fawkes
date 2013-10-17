@@ -37,15 +37,41 @@ typedef struct {
 } upoint_t;
 
 /** Point with cartesian coordinates as signed integers. */
-typedef struct {
+typedef struct point_struct {
   int x;       /**< x coordinate */
   int y;       /**< y coordinate */
+
+  /** Default constructor */
+  point_struct() {}
+
+  /** Constructor.
+   * @param x The x coordinate
+   * @param y The y coordinate
+   */
+  point_struct(int x, int y) {
+    this->x = x;
+    this->y = y;
+  }
+
 } point_t;
 
 /** Cartesian coordinates (2D). */
-typedef struct {
+typedef struct cart_coord_2d_struct {
   float x;      /**< x coordinate */
   float y;      /**< y coordinate */
+
+  /** Default constructor */
+  cart_coord_2d_struct() {}
+
+  /** Constructor.
+   * @param x The x coordinate.
+   * @param y The y coordinate.
+   */
+  cart_coord_2d_struct(float x, float y) {
+    this->x = x;
+    this->y = y;
+  }
+
 } cart_coord_2d_t;
 
 /** Cartesian coordinates (3D). */
