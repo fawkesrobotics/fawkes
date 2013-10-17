@@ -53,15 +53,16 @@ ColliThread::init()
   logger->log_info(name(), "(init): Constructing...");
 
   std::string cfg_prefix = "/plugins/colli/";
+  m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "FREQUENCY").c_str()));
+  m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
+  m_RobocupMode         = config->get_int((cfg_prefix + "ROBOCUP_MODE").c_str());
 
-  m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "Colli_FREQUENCY").c_str()));
-  m_OccGridHeight       = config->get_float((cfg_prefix + "OccGrid_HEIGHT").c_str());
-  m_OccGridWidth        = config->get_float((cfg_prefix + "OccGrid_WIDTH").c_str());
-  m_OccGridCellHeight   = config->get_int((cfg_prefix + "OccGrid_CELL_HEIGHT").c_str());
-  m_OccGridCellWidth    = config->get_int((cfg_prefix + "OccGrid_CELL_WIDTH").c_str());
-  m_MaximumRoboIncrease = config->get_float((cfg_prefix + "Colli_MAX_ROBO_INCREASE").c_str());
+  cfg_prefix += "OccGrid/";
+  m_OccGridHeight       = config->get_float((cfg_prefix + "HEIGHT").c_str());
+  m_OccGridWidth        = config->get_float((cfg_prefix + "WIDTH").c_str());
+  m_OccGridCellHeight   = config->get_int((cfg_prefix + "CELL_HEIGHT").c_str());
+  m_OccGridCellWidth    = config->get_int((cfg_prefix + "CELL_WIDTH").c_str());
 
-  m_RobocupMode         = config->get_int((cfg_prefix + "Colli_ROBOCUP_MODE").c_str());
 
   std::string default_hostname=""; // RCSoft was: =GetBBNames()[0];
   /* As default we use a football player AllemaniACs robot */

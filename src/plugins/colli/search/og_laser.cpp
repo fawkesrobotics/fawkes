@@ -85,18 +85,18 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   std::string cfg_prefix = "/plugins/colli/";
 
   m_pLaser = laser;
-  m_pRoboShape = new RoboShape( cfg_prefix.c_str(), logger, config );
+  m_pRoboShape = new RoboShape( (cfg_prefix + "Roboshape/").c_str(), logger, config );
   m_vOldReadings.clear();
   initGrid();
 
-  m_MaxHistoryLength    = config->get_int((cfg_prefix + "CLaserOccupancyGrid_MAX_HISTORY_LENGTH").c_str());
-  m_MinHistoryLength    = config->get_int((cfg_prefix + "CLaserOccupancyGrid_MIN_HISTORY_LENGTH").c_str());
-  m_InitialHistorySize  = 3*config->get_int((cfg_prefix + "CLaserOccupancyGrid_INITIAL_HISTORY_SIZE").c_str());
-  m_TrigTableResolution = config->get_int((cfg_prefix + "TrigTable_RESOLUTION").c_str());
-  m_MinimumLaserLength  = config->get_float((cfg_prefix + "Laser_MINIMUM_READING_LENGTH").c_str());
-  m_EllipseDistance     = config->get_float((cfg_prefix + "CLaserOccupancyGrid_DISTANCE_ACCOUNT").c_str());
+  m_MaxHistoryLength    = config->get_int((cfg_prefix + "LaserOccupancyGrid/MAX_HISTORY_LENGTH").c_str());
+  m_MinHistoryLength    = config->get_int((cfg_prefix + "LaserOccupancyGrid/MIN_HISTORY_LENGTH").c_str());
+  m_InitialHistorySize  = 3*config->get_int((cfg_prefix + "LaserOccupancyGrid/INITIAL_HISTORY_SIZE").c_str());
+  m_TrigTableResolution = config->get_int((cfg_prefix + "TrigTable/RESOLUTION").c_str());
+  m_MinimumLaserLength  = config->get_float((cfg_prefix + "Laser/MINIMUM_READING_LENGTH").c_str());
+  m_EllipseDistance     = config->get_float((cfg_prefix + "LaserOccupancyGrid/DISTANCE_ACCOUNT").c_str());
 
-  m_RobocupMode         = config->get_int((cfg_prefix + "Colli_ROBOCUP_MODE").c_str());
+  m_RobocupMode         = config->get_int((cfg_prefix + "ROBOCUP_MODE").c_str());
 
   logger->log_debug("CLaserOccupancyGrid", "Generating trigonometry table");
   m_pTrigTable = new TrigTable( m_TrigTableResolution );

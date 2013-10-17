@@ -76,8 +76,8 @@ CFastBiwardDriveModule::CFastBiwardDriveModule( CFastForwardDriveModule*  forwar
 
   m_CountForward = 1;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/CFastDriveModule_MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/CFastDriveModule_MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/FastDriveModule/MAX_TRANS" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/FastDriveModule/MAX_ROT" );
 
   logger_->log_info("CFastBiwardDriveModule", "(Constructor): Exiting...");
 }

@@ -84,12 +84,12 @@ CQuadraticMotorInstruct::CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
 {
   logger_->log_info("CQuadraticMotorInstruct", "(Constructor): Entering");
 
-  string cfg_prefix = "/plugins/colli/";
+  string cfg_prefix = "/plugins/colli/QuadraticMotorInstruct/";
 
-  basic_trans_acc = config_->get_float((cfg_prefix + "CQuadraticMotorInstruct_BASIC_TRANS_ACC").c_str());
-  basic_trans_dec = config_->get_float((cfg_prefix +"CQuadraticMotorInstruct_BASIC_TRANS_DEC").c_str());
-  basic_rot_acc   = config_->get_float((cfg_prefix +"CQuadraticMotorInstruct_BASIC_ROT_ACC").c_str());
-  basic_rot_dec   = config_->get_float((cfg_prefix +"CQuadraticMotorInstruct_BASIC_ROT_DEC").c_str());
+  basic_trans_acc = config_->get_float((cfg_prefix + "BASIC_TRANS_ACC").c_str());
+  basic_trans_dec = config_->get_float((cfg_prefix +"BASIC_TRANS_DEC").c_str());
+  basic_rot_acc   = config_->get_float((cfg_prefix +"BASIC_ROT_ACC").c_str());
+  basic_rot_dec   = config_->get_float((cfg_prefix +"BASIC_ROT_DEC").c_str());
 
   logger_->log_info("CQuadraticMotorInstruct", "(Constructor): Exiting");
 }

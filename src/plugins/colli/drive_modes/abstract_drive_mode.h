@@ -201,8 +201,8 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
 
   // read m_cMaxTransDec and m_cMaxRotDec
-  m_cMaxTransDec = 0.75*config_->get_float("/plugins/colli/CQuadraticMotorInstruct_BASIC_TRANS_DEC");
-  m_cMaxRotDec   = 0.75*config_->get_float("/plugins/colli/CQuadraticMotorInstruct_BASIC_ROT_DEC");
+  m_cMaxTransDec = 0.75*config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_TRANS_DEC");
+  m_cMaxRotDec   = 0.75*config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_ROT_DEC");
 
   logger_->log_info("CAbstractDriveMode", "(Constructor): Exiting...");
 }

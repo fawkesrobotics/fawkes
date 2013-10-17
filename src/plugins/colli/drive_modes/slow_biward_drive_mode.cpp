@@ -75,8 +75,8 @@ CSlowBiwardDriveModule::CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_f
 
   m_CountForward = 1;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/CSlowDriveModule_MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/CSlowDriveModule_MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/SlowDriveModule/MAX_TRANS" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/SlowDriveModule/MAX_ROT" );
 
   logger_->log_info("CSlowBiwardDriveModule", "(Constructor): Exiting...");
 }

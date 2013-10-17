@@ -71,8 +71,8 @@ CSlowBackwardDriveModule::CSlowBackwardDriveModule(Logger* logger, Configuration
   logger_->log_info("CSlowBackwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::SlowBackward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/CSlowDriveModule_MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/CSlowDriveModule_MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/SlowDriveModule/MAX_TRANS" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/SlowDriveModule/MAX_ROT" );
 
   logger_->log_info("CSlowBackwardDriveModule", "(Constructor): Exiting");
 }
