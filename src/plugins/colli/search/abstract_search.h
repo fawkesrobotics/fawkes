@@ -57,6 +57,9 @@
 #ifndef _COLLI_SEARCH_ABSTRACTSEARCH_H_
 #define _COLLI_SEARCH_ABSTRACTSEARCH_H_
 
+#include <logging/logger.h>
+#include <utils/math/types.h>
+
 namespace fawkes
 {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -64,7 +67,6 @@ namespace fawkes
 #endif
 
 class CLaserOccupancyGrid;
-class Logger;
 
 /** This is the basic plan class.
  */
@@ -89,19 +91,19 @@ class CAbstractSearch
   /** return pointer to the local target. do not modify afterwards
    *  precondition: Update has to be called before this is ok here
    */
-  const Point& GetLocalTarget();
+  const point_t& GetLocalTarget();
 
   /** return pointer to the local trajectory point. do not modify afterwards
    *  precondition: Update has to be called before this is ok here
    */
-  const Point& GetLocalTrajec();
+  const point_t& GetLocalTrajec();
 
  protected:
   // the occupancy grid
   CLaserOccupancyGrid * m_pOccGrid;
 
   // the calculated information where to drive to
-  cart_coord_2d_t m_LocalTarget, m_LocalTrajectory;
+  point_t m_LocalTarget, m_LocalTrajectory;
 };
 
 
@@ -119,14 +121,15 @@ inline
 CAbstractSearch::~CAbstractSearch()
 {
 }
-inline const cart_coord_2d_t&
+inline const point_t&
 CAbstractSearch::GetLocalTarget()
 {
   return m_LocalTarget;
 }
 
 
-inline const Point& CAbstractSearch::GetLocalTrajec()
+inline const point_t&
+CAbstractSearch::GetLocalTrajec()
 {
   return m_LocalTrajectory;
 }
