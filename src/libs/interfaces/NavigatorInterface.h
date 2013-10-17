@@ -354,10 +354,8 @@ class NavigatorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      bool escaping_enabled; /**< This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape. */
+      bool escaping_enabled; /**< This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape. */
     } SetEscapingMessage_data_t;
 #pragma pack(pop)
 
@@ -384,8 +382,7 @@ class NavigatorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float security_distance; /**< Security distance to
-    keep to obstacles */
+      float security_distance; /**< Security distance to keep to obstacles */
     } SetSecurityDistanceMessage_data_t;
 #pragma pack(pop)
 

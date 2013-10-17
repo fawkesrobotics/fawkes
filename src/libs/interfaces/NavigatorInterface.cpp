@@ -109,9 +109,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
   add_messageinfo("SetDriveModeMessage");
-  add_messageinfo("EnableAutoDriveModeMessage");
-  add_messageinfo("DisableAutoDriveModeMessage");
-  unsigned char tmp_hash[] = {0x7, 0xcf, 0x1e, 0x32, 0x2e, 0x56, 0x15, 0x35, 0x5f, 0xec, 0x88, 0x6e, 0x8e, 0xef, 0x51, 0x26};
+  unsigned char tmp_hash[] = {0x23, 0x7b, 0xe, 0xf8, 0x78, 0x90, 0x8e, 0x32, 0xfa, 0xcb, 0x14, 0x9a, 0x7e, 0x2e, 0xbf, 0xb8};
   set_hash(tmp_hash);
 }
 
@@ -533,8 +531,7 @@ NavigatorInterface::set_max_rotation(const float new_max_rotation)
 }
 
 /** Get security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @return security_distance value
  */
 float
@@ -554,8 +551,7 @@ NavigatorInterface::maxlenof_security_distance() const
 }
 
 /** Set security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @param new_security_distance new security_distance value
  */
 void
@@ -566,10 +562,8 @@ NavigatorInterface::set_security_distance(const float new_security_distance)
 }
 
 /** Get escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @return escaping_enabled value
  */
 bool
@@ -589,10 +583,8 @@ NavigatorInterface::maxlenof_escaping_enabled() const
 }
 
 /** Set escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @param new_escaping_enabled new escaping_enabled value
  */
 void
@@ -1710,10 +1702,8 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const SetEscapingMess
 
 /* Methods */
 /** Get escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @return escaping_enabled value
  */
 bool
@@ -1733,10 +1723,8 @@ NavigatorInterface::SetEscapingMessage::maxlenof_escaping_enabled() const
 }
 
 /** Set escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @param new_escaping_enabled new escaping_enabled value
  */
 void
@@ -1806,8 +1794,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const
 
 /* Methods */
 /** Get security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @return security_distance value
  */
 float
@@ -1827,8 +1814,7 @@ NavigatorInterface::SetSecurityDistanceMessage::maxlenof_security_distance() con
 }
 
 /** Set security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @param new_security_distance new security_distance value
  */
 void
