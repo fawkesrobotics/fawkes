@@ -25,7 +25,7 @@
 #include "drive_realization/quadratic_motor_instruct.h"
 #include "utils/rob/robo_laser.h"
 #include "search/og_laser.h"
-//~ #include "search/astar_search.h"
+#include "search/astar_search.h"
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
@@ -107,7 +107,7 @@ ColliThread::finalize()
 
   // delete own modules
   delete m_pSelectDriveMode;
-  //~ delete m_pSearch;
+  delete m_pSearch;
   delete m_pLaserOccGrid;
   delete m_pLaser;
   delete m_pMotorInstruct;
@@ -312,8 +312,7 @@ ColliThread::loop()
 
       } else {
         // search for a path
-        /*
-        m_pSearch->Update( (int)m_RoboGridPos.x, (int)m_RoboGridPos.y,
+        m_pSearch->Update( m_RoboGridPos.x, m_RoboGridPos.y,
                            (int)m_TargetGridPos.x, (int)m_TargetGridPos.y );
         if ( m_pSearch->UpdatedSuccessful() ) {
           // path exists
@@ -322,10 +321,10 @@ ColliThread::loop()
 
           // coordinate transformation from grid coordinates to relative robot coordinates
           m_LocalTarget.x = (m_LocalGridTarget.x - m_RoboGridPos.x)*m_pLaserOccGrid->getCellWidth()/100.0;
-          m_LocalTarget.y = (m_LocalGridTarget.y - m_RoboGridPos.y)*m_pLaserOccGrid->getCellHeight()/100.0 );
+          m_LocalTarget.y = (m_LocalGridTarget.y - m_RoboGridPos.y)*m_pLaserOccGrid->getCellHeight()/100.0;
 
           m_LocalTrajec.x = (m_LocalGridTrajec.x - m_RoboGridPos.x)*m_pLaserOccGrid->getCellWidth()/100.0;
-          m_LocalTrajec.y = (m_LocalGridTrajec.y - m_RoboGridPos.y)*m_pLaserOccGrid->getCellHeight()/100.0 );
+          m_LocalTrajec.y = (m_LocalGridTrajec.y - m_RoboGridPos.y)*m_pLaserOccGrid->getCellHeight()/100.0;
 
           // call appopriate drive mode
           m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
@@ -345,7 +344,6 @@ ColliThread::loop()
           m_ProposedRotation    = 0.f;
           m_pLaserOccGrid->ResetOld();
         }
-        */
 
         //TODO: we should not mis-use the NavigatorInterface for these colli-data..
         m_pColliDataObj->set_x( m_LocalTarget.x ); // waypoint X
@@ -424,7 +422,7 @@ ColliThread::InitializeModules()
   m_pLaserOccGrid->setHeight( (int)((m_OccGridHeight*100)/m_pLaserOccGrid->getCellHeight()) );
 
   // THIRD(!): the search component (it uses the occ grid (without the laser)
-  //~ m_pSearch = new CSearch( m_pLaserOccGrid );
+  m_pSearch = new CSearch( m_pLaserOccGrid, logger, config );
 
 
   // BEFORE DRIVE MODE: the motorinstruction set
@@ -614,8 +612,8 @@ ColliThread::UpdateOwnModules()
   float targetContY = (-aX*sin( m_pMotorInstruct->GetCurrentOri() ) + aY*cos( m_pMotorInstruct->GetCurrentOri() ) );
 
   // calculation, where in the grid the target is, thats relative to the motorpos, so add it ;-)
-  float targetGridX = (int)( (targetContX * 100.0) / (float)m_pLaserOccGrid->getCellWidth() );
-  float targetGridY = (int)( (targetContY * 100.0) / (float)m_pLaserOccGrid->getCellHeight() );
+  int targetGridX = (int)( (targetContX * 100.0) / (float)m_pLaserOccGrid->getCellWidth() );
+  int targetGridY = (int)( (targetContY * 100.0) / (float)m_pLaserOccGrid->getCellHeight() );
 
   targetGridX += robopos_x;
   targetGridY += robopos_y;
@@ -708,5 +706,5 @@ ColliThread::UpdateOwnModules()
 bool
 ColliThread::CheckEscape()
 {
-  return ((float)m_pLaserOccGrid->getProb((int)m_RoboGridPos.x,(int)m_RoboGridPos.y) == _COLLI_CELL_OCCUPIED_ );
+  return ((float)m_pLaserOccGrid->getProb(m_RoboGridPos.x,m_RoboGridPos.y) == _COLLI_CELL_OCCUPIED_ );
 }
