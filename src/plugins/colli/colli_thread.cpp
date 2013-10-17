@@ -295,7 +295,7 @@ ColliThread::RegisterAtBlackboard()
 
   m_pColliTargetObj = blackboard->open_for_reading<NavigatorInterface>("Colli target");
 
-  m_pColliDataObj = blackboard->open_for_writing<NavigatorInterface>("Navigator");
+  m_pColliDataObj = blackboard->open_for_writing<NavigatorInterface>("Colli data");
 
   m_pMopoObj->read();
   m_pMopoObj_des->read();
