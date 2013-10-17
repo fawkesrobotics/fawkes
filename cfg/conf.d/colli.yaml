@@ -4,25 +4,13 @@
 plugins/colli:
 
   # Frequency in Hz of how often calli is called (deprecated; this is defined by fawkes main loop)
-  Colli_FREQUENCY: 10
-
-  # Occgrid height in m
-  OccGrid_HEIGHT: 6.5
-
-  # Occgrid width in m
-  OccGrid_WIDTH: 6.5
-
-  # Occgrid cell height in cm
-  OccGrid_CELL_HEIGHT: 5
-
-  # Occgrid cell width in cm
-  OccGrid_CELL_WIDTH: 5
+  FREQUENCY: 10
 
   # The maximum robot increasement of laser readings
-  Colli_MAX_ROBO_INCREASE: 0.04
+  MAX_ROBO_INCREASE: 0.04
 
   # Robocup mode, if set to 1, this means no obstacle increasement
-  Colli_ROBOCUP_MODE: 0
+  ROBOCUP_MODE: 0
 
   # maximum obstacle extension
   ColliMaxCellExtension: 5.0
@@ -61,33 +49,43 @@ plugins/colli:
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
 
-  CQuadraticMotorInstruct:
+  OccGrid:
+    # Occgrid height in m
+    HEIGHT: 6.5
+    # Occgrid width in m
+    WIDTH: 6.5
+    # Occgrid cell height in cm
+    CELL_HEIGHT: 5
+    # Occgrid cell width in cm
+    CELL_WIDTH: 5
+
+  QuadraticMotorInstruct:
     # quadratic motor indtruct basic trans acc
-    CQuadraticMotorInstruct_BASIC_TRANS_ACC: 0.23
+    BASIC_TRANS_ACC: 0.23
     # quadratic motor indtruct basic trans dec
-    CQuadraticMotorInstruct_BASIC_TRANS_DEC: 0.42
+    BASIC_TRANS_DEC: 0.42
     # quadratic motor indtruct basic rot acc
-    CQuadraticMotorInstruct_BASIC_ROT_ACC: 0.23
+    BASIC_ROT_ACC: 0.23
     # quadratic motor indtruct basic rot dec
-    CQuadraticMotorInstruct_BASIC_ROT_DEC: 0.42
+    BASIC_ROT_DEC: 0.42
 
-  CSlowForwardDriveModule:
+  SlowDriveModule:
     # drive mode slow max trans
-    CSlowDriveModule_MAX_TRANS: 1.0
+    MAX_TRANS: 1.0
     # drive mode slow max rot
-    CSlowDriveModule_MAX_ROT: 2.0
+    MAX_ROT: 2.0
 
-  CMediumForwardDriveModule:
+  MediumDriveModule:
     # drive mode medium max trans
-    CMediumDriveModule_MAX_TRANS: 2.0
+    MAX_TRANS: 2.0
     # drive mode medium max rot
-    CMediumDriveModule_MAX_ROT: 6.0
+    MAX_ROT: 6.0
 
-  CFastForwardDriveModule:
+  FastDriveModule:
     # drive mode fast max trans
-    CFastDriveModule_MAX_TRANS: 2.99
+    MAX_TRANS: 2.99
     # drive mode fast max rot
-    CFastDriveModule_MAX_ROT: 7.0
+    MAX_ROT: 7.0
 
   Roboshape:
     # roboshape
@@ -109,30 +107,33 @@ plugins/colli:
     # laser offset from left
     LASER_OFFSET_Y_FROM_LEFT: 0.2
 
-  ColliLaserOccupancyGrid:
+  LaserOccupancyGrid:
     # the max size of the laser reading history for the search
-    ColliLaserOccupancyGrid_MAX_HISTORY_LENGTH: 60
+    MAX_HISTORY_LENGTH: 60
     # the min size of the laser reading history for the search
-    ColliLaserOccupancyGrid_MIN_HISTORY_LENGTH: 15
+    MIN_HISTORY_LENGTH: 15
     # the history vector size with number of saved elements
-    ColliLaserOccupancyGrid_INITIAL_HISTORY_SIZE: 500
-    # Trigonometry Resolution in number of steps per degree
-    TrigTable_RESOLUTION: 2
-    # Minimum laser reading length for that the reading is taken as valid
-    Laser_MINIMUM_READING_LENGTH: 0.02
+    INITIAL_HISTORY_SIZE: 500
     # This is the distance in which laser readings
-    ColliLaserOccupancyGrid_DISTANCE_ACCOUNT: 0.1
-    #if set to 1, this means no obstacle increasement
-    Colli_ROBOCUP_MODE: 0
+    DISTANCE_ACCOUNT: 0.1
 
-  # astar maximum states
-  AStar_MAX_STATES: 15000
+  TrigTable:
+    # Trigonometry Resolution in number of steps per degree
+    RESOLUTION: 2
 
-  CEscapeDriveModule:
+  Laser:
+    # Minimum laser reading length for that the reading is taken as valid
+    MINIMUM_READING_LENGTH: 0.02
+
+  AStar:
+    # astar maximum states
+    MAX_STATES: 15000
+
+  EscapeDriveModule:
     # maximum transalational velocity in escape mode
-    EscapeForwardDriveModule_MAX_TRANS: 0.3
+    MAX_TRANS: 0.3
     # maximum rotational velocity in escape mode
-    EscapeForwardDriveModule_MAX_ROT: 0.8
+    MAX_ROT: 0.8
 
   # default laser_calibration values for ignore-readings! if this node is available, these
   # values are used.
