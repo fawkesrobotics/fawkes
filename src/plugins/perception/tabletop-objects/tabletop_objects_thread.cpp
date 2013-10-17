@@ -1126,6 +1126,7 @@ TabletopObjectsThread::loop()
     //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
 
     ColorCloudPtr colored_clusters(new ColorCloud());
+    colored_clusters->header.frame_id = cloud_objs_->header.frame_id;
     std::vector<pcl::PointIndices>::const_iterator it;
     unsigned int obj_i = 0;
     unsigned int num_points = 0;
