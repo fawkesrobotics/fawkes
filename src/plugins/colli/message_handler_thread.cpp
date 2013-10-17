@@ -42,12 +42,18 @@ ColliMessageHandlerThread::~ColliMessageHandlerThread()
 void
 ColliMessageHandlerThread::init()
 {
+  cfg_security_distance_ = config->get_float("/plugins/colli/security_distance");
+  cfg_max_velocity_      = config->get_float("/plugins/colli/max_velocity");
+  cfg_escaping_enabled_  = config->get_float("/plugins/colli/escaping enabled");
+
+  if_navi_ = blackboard->open_for_writing<NavigatorInterface>("Navigator");
 }
 
 
 void
 ColliMessageHandlerThread::finalize()
 {
+  blackboard->close( if_navi_ );
 }
 
 void

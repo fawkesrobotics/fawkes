@@ -26,6 +26,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
 
 namespace fawkes
 {
@@ -36,7 +37,8 @@ class ColliMessageHandlerThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect
 {
  public:
   ColliMessageHandlerThread();
@@ -47,6 +49,12 @@ class ColliMessageHandlerThread
   virtual void finalize();
 
  private:
+
+  fawkes::NavigatorInterface* if_navi_;
+
+  float cfg_security_distance_;
+  float cfg_max_velocity_;
+  float cfg_escaping_enabled_;
 };
 
 #endif
