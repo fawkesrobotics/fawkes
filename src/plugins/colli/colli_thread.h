@@ -107,12 +107,15 @@ class ColliThread
   /* ************************************************************************ */
   /* PRIVATE VARIABLES THAT HAVE TO BE HANDLED ALL OVER THE MODULE            */
   /* ************************************************************************ */
-  fawkes::cart_coord_2d_t  m_RoboGridPos;        // the robots position in the grid
-  fawkes::cart_coord_2d_t  m_LaserGridPos;       // the laser its position in the grid ( not equal to robopos!!! )
-  fawkes::cart_coord_2d_t  m_TargetGridPos;      // the targets position in the grid
+  fawkes::point_t  m_RoboGridPos;           // the robots position in the grid
+  fawkes::point_t  m_LaserGridPos;          // the laser its position in the grid ( not equal to robopos!!! )
+  fawkes::point_t  m_TargetGridPos;         // the targets position in the grid
 
-  fawkes::cart_coord_2d_t  m_LocalGridTarget, m_LocalTarget;   // the local target (grid/relative)
-  fawkes::cart_coord_2d_t  m_LocalGridTrajec, m_LocalTrajec;   // the local trajec (grid/relative)
+  fawkes::point_t m_LocalGridTarget;        // the local target in grid
+  fawkes::point_t m_LocalGridTrajec;        // the local trajec in grid
+
+  fawkes::cart_coord_2d_t  m_LocalTarget;   // the local target (relative)
+  fawkes::cart_coord_2d_t  m_LocalTrajec;   // the local trajec (relative)
 
   float m_ProposedTranslation;  // the proposed translation that should be realized in MotorInstruct
   float m_ProposedRotation;     // the proposed rotation that should be realized in MotorInstruct
