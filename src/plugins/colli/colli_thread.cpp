@@ -293,13 +293,14 @@ ColliThread::RegisterAtBlackboard()
   // only use the obstacle laser scanner here!
   m_pLaserScannerObj = blackboard->open_for_reading<Laser360Interface>("Laser laser merged");
 
-  m_pColliTargetObj = blackboard->open_for_writing<NavigatorInterface>("Colli local target");
+  m_pColliTargetObj = blackboard->open_for_reading<NavigatorInterface>("Colli target");
 
   m_pColliDataObj = blackboard->open_for_writing<NavigatorInterface>("Navigator");
 
   m_pMopoObj->read();
   m_pMopoObj_des->read();
   m_pLaserScannerObj->read();
+  m_pColliTargetObj->read();
 
   m_pColliDataObj->set_final(true);
   m_pColliDataObj->write();
@@ -368,7 +369,7 @@ ColliThread::UpdateBB()
   m_pLaserScannerObj->read();
   m_pMopoObj->read();
   m_pMopoObj_des->read();
-  m_pColliTargetObj->write();
+  m_pColliTargetObj->read();
   m_pColliDataObj->write();
 }
 
@@ -388,7 +389,7 @@ ColliThread::UpdateColliStateMachine()
   float targetY = m_pColliTargetObj->dest_y();
   float targetO = m_pColliTargetObj->dest_ori();
 
-  bool  orient = true; // m_pColliTargetObj->OrientAtTarget(); //TODO
+  bool  orient = m_pColliTargetObj->is_orient_at_target();
   //  bool  stop_on_target =  m_pColliTargetObj->StopOnTarget();
 
 //   if ( stop_on_target == false )
