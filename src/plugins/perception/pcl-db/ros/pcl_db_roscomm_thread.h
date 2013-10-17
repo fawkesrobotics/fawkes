@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  pcl_db_merge_roscomm_thread.h - ROS communication for pcl-db-merge
+ *  pcl_db_roscomm_thread.h - ROS communication for pcl-db-merge
  *
  *  Created: Thu Dec 06 13:52:27 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2013  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_PCL_DB_MERGE_PCL_DB_MERGE_ROSCOMM_THREAD_H_
-#define __PLUGINS_PERCEPTION_PCL_DB_MERGE_PCL_DB_MERGE_ROSCOMM_THREAD_H_
+#ifndef __PLUGINS_PERCEPTION_PCL_DB_ROS_PCL_DB_ROSCOMM_THREAD_H_
+#define __PLUGINS_PERCEPTION_PCL_DB_ROS_PCL_DB_ROSCOMM_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/configurable.h>
@@ -30,10 +30,12 @@
 #include <plugins/ros/aspect/ros.h>
 
 #include <hybris_c1_msgs/MergePointClouds.h>
+#include <hybris_c1_msgs/RetrievePointCloud.h>
 #include <hybris_c1_msgs/RecordData.h>
 
 namespace fawkes {
   class PclDatabaseMergeInterface;
+  class PclDatabaseRetrieveInterface;
   class BlackBoardOnUpdateWaker;
   class WaitCondition;
 }
@@ -42,7 +44,7 @@ namespace ros {
 }
 
 
-class PointCloudDBMergeROSCommThread
+class PointCloudDBROSCommThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -51,8 +53,8 @@ class PointCloudDBMergeROSCommThread
   public fawkes::ROSAspect
 {
  public:
-  PointCloudDBMergeROSCommThread();
-  virtual ~PointCloudDBMergeROSCommThread();
+  PointCloudDBROSCommThread();
+  virtual ~PointCloudDBROSCommThread();
 
   virtual void init();
   virtual void loop();
@@ -61,6 +63,8 @@ class PointCloudDBMergeROSCommThread
  private:
   bool merge_cb(hybris_c1_msgs::MergePointClouds::Request  &req,
 		hybris_c1_msgs::MergePointClouds::Response &resp);
+  bool retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Request  &req,
+		   hybris_c1_msgs::RetrievePointCloud::Response &resp);
   bool record_cb(hybris_c1_msgs::RecordData::Request  &req,
 		 hybris_c1_msgs::RecordData::Response &resp);
 
@@ -70,14 +74,20 @@ class PointCloudDBMergeROSCommThread
 
  private: // members
   fawkes::PclDatabaseMergeInterface *merge_if_;
+  fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
 
-  fawkes::BlackBoardOnUpdateWaker *update_waker_;
+  fawkes::BlackBoardOnUpdateWaker *merge_update_waker_;
   fawkes::WaitCondition *merge_waitcond_;
 
+  fawkes::BlackBoardOnUpdateWaker *retrieve_update_waker_;
+  fawkes::WaitCondition *retrieve_waitcond_;
+
   ros::ServiceServer *srv_merge_;
+  ros::ServiceServer *srv_retrieve_;
   ros::ServiceServer *srv_record_;
 
-  unsigned int msg_id_;
+  unsigned int merge_msg_id_;
+  unsigned int retrieve_msg_id_;
 };
 
 #endif

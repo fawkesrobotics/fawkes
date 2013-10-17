@@ -6,6 +6,7 @@ NaoSensorInterface.h
 OpenRaveInterface.h
 PanTiltInterface.h
 PclDatabaseMergeInterface.h
+PclDatabaseRetrieveInterface.h
 SkillerDebugInterface.h
 RobotinoSensorInterface.h
 Roomba500Interface.h

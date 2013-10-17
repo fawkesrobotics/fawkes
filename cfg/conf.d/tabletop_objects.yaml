@@ -44,6 +44,15 @@ perception/tabletop-objects:
   # Maximum height of table; m
   table_max_height: 0.9
 
+  # Enable the use of the following table model?
+  # If enabled, the table model of the given size is instantiated and aligned
+  # to the table polygon in the best way possible. If disabled, the convex hull
+  # of the table plane cluster is used.
+  # The outline (either model or convex hull) defines the points considered for
+  # object clustering. Disable the table model if you expect not to stand on the
+  # long side of the table.
+  table_model_enable: false
+  
   # Table model width, i.e. if the robot is standing in front of the
   # longer edge of the table the distance between the close and the far edge; m
   table_model_width: 0.8

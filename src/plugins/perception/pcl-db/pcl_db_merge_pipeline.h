@@ -20,21 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_PCL_DB_MERGE_PCL_DB_MERGE_PIPELINE_H_
-#define __PLUGINS_PERCEPTION_PCL_DB_MERGE_PCL_DB_MERGE_PIPELINE_H_
+#ifndef __PLUGINS_PERCEPTION_PCL_DB_PCL_DB_MERGE_PIPELINE_H_
+#define __PLUGINS_PERCEPTION_PCL_DB_PCL_DB_MERGE_PIPELINE_H_
 
 #include "mongodb_tf_transformer.h"
+#include "pcl_db_pipeline.h"
 
-#include <Eigen/Core>
-
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-
-#include <logging/logger.h>
-#include <config/config.h>
 #include <pcl_utils/utils.h>
 #include <pcl_utils/transforms.h>
-#include <pcl_utils/storage_adapter.h>
 #include <pcl_utils/comparisons.h>
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
@@ -45,7 +38,7 @@
 #define USE_ICP_ALIGNMENT
 // define USE_NDT_ALIGNMENT
 
-#define CFG_PREFIX "/perception/pcl-db-merge/"
+#define CFG_PREFIX_MERGE "/perception/pcl-db-merge/"
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -67,18 +60,6 @@
 #endif
 
 #include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
-
-static const uint8_t cluster_colors[12][3] =
-  { {176, 0, 30}, {0, 0, 255}, {255, 90, 0}, {137, 82, 39}, {56, 23, 90}, {99, 0, 30},
-    {255, 0, 0}, {0, 255, 0}, {255, 255, 0}, {255, 0, 255}, {0, 255, 255}, {27, 117, 196}};
-
-typedef enum {
-  APPLICABLE = 0,
-  TYPE_MISMATCH,
-  NO_POINTCLOUD,
-  QUERY_FAILED
-} ApplicabilityStatus;
 
 /** Point cloud merging pipeline.
  * This class can merge multiple point clouds which are restored from
@@ -86,19 +67,8 @@ typedef enum {
  * @author Tim Niemueller
  */
 template <typename PointType>
-class PointCloudDBMergePipeline
+class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 {
- private:
-  typedef pcl::PointCloud<PointType> Cloud;
-
-  typedef pcl::PointXYZRGB ColorPointType;
-  typedef pcl::PointCloud<ColorPointType> ColorCloud;
-  typedef typename Cloud::Ptr CloudPtr;
-  typedef typename Cloud::ConstPtr CloudConstPtr;
-
-  typedef typename ColorCloud::Ptr ColorCloudPtr;
-  typedef typename ColorCloud::ConstPtr ColorCloudConstPtr;
-
  public:
   /** Constructor.
    * @param mongodb_client MongoDB client
@@ -106,29 +76,19 @@ class PointCloudDBMergePipeline
    * @param logger Logger
    * @param output output point cloud
    */
- PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client,
-			   fawkes::Configuration *config, fawkes::Logger *logger,
-			   ColorCloudPtr output)
-   : mongodb_client_(mongodb_client), config_(config), logger_(logger), output_(output)
+  PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client,
+			    fawkes::Configuration *config, fawkes::Logger *logger,
+			    typename PointCloudDBPipeline<PointType>::ColorCloudPtr output)
+  : PointCloudDBPipeline<PointType>(mongodb_client, config, logger, output)
   {
-    name_ = "PCL_DB_MergePL";
+    this->name_ = "PCL_DB_MergePL";
 
-    cfg_database_name_     = config->get_string(CFG_PREFIX"database-name");
-    cfg_global_frame_      = config->get_string(CFG_PREFIX"global-frame");
-    cfg_pcl_age_tolerance_ =
-      (long)round(config->get_float(CFG_PREFIX"pcl-age-tolerance") * 1000.);
-    std::vector<float> transform_range = config->get_floats(CFG_PREFIX"transform-range");
-    if (transform_range.size() != 2) {
-      throw fawkes::Exception("Transform range must be a list with exactly two elements");
-    }
-    if (transform_range[1] < transform_range[0]) {
-      throw fawkes::Exception("Transform range start cannot be smaller than end");
-    }
-    cfg_transform_range_[0] = (long)round(transform_range[0] * 1000.);
-    cfg_transform_range_[1] = (long)round(transform_range[1] * 1000.);
-    cfg_passthrough_filter_axis_ = config->get_string(CFG_PREFIX"passthrough-filter/axis");
+    cfg_global_frame_ =
+      config->get_string(CFG_PREFIX_MERGE"global-frame");
+    cfg_passthrough_filter_axis_ =
+      config->get_string(CFG_PREFIX_MERGE"passthrough-filter/axis");
     std::vector<float> passthrough_filter_limits =
-      config->get_floats(CFG_PREFIX"passthrough-filter/limits");
+      config->get_floats(CFG_PREFIX_MERGE"passthrough-filter/limits");
     if (passthrough_filter_limits.size() != 2) {
       throw fawkes::Exception("Pasthrough filter limits must be a list "
 			      "with exactly two elements");
@@ -138,30 +98,29 @@ class PointCloudDBMergePipeline
     }
     cfg_passthrough_filter_limits_[0] = passthrough_filter_limits[0];
     cfg_passthrough_filter_limits_[1] = passthrough_filter_limits[1];
-    cfg_downsample_leaf_size_ = config->get_float(CFG_PREFIX"downsample-leaf-size");
+    cfg_downsample_leaf_size_ = config->get_float(CFG_PREFIX_MERGE"downsample-leaf-size");
     cfg_plane_rem_max_iter_ =
-      config->get_float(CFG_PREFIX"plane-removal/segmentation-max-iterations");
+      config->get_float(CFG_PREFIX_MERGE"plane-removal/segmentation-max-iterations");
     cfg_plane_rem_dist_thresh_ =
-      config->get_float(CFG_PREFIX"plane-removal/segmentation-distance-threshold");
+      config->get_float(CFG_PREFIX_MERGE"plane-removal/segmentation-distance-threshold");
     cfg_icp_ransac_iterations_ =
-      config->get_uint(CFG_PREFIX"icp/ransac-iterations");
+      config->get_uint(CFG_PREFIX_MERGE"icp/ransac-iterations");
     cfg_icp_max_correspondance_distance_ =
-      config->get_float(CFG_PREFIX"icp/max-correspondance-distance");
+      config->get_float(CFG_PREFIX_MERGE"icp/max-correspondance-distance");
     cfg_icp_max_iterations_ =
-      config->get_uint(CFG_PREFIX"icp/max-iterations");
+      config->get_uint(CFG_PREFIX_MERGE"icp/max-iterations");
     cfg_icp_transformation_eps_ =
-      config->get_float(CFG_PREFIX"icp/transformation-epsilon");
+      config->get_float(CFG_PREFIX_MERGE"icp/transformation-epsilon");
     cfg_icp_euclidean_fitness_eps_ =
-      config->get_float(CFG_PREFIX"icp/euclidean-fitness-epsilon");
+      config->get_float(CFG_PREFIX_MERGE"icp/euclidean-fitness-epsilon");
 
-    logger_->log_info(name_, "Age Tolerance: %lli  Limits: [%f, %f]  tf range: [%lli, %lli]",
-		      cfg_pcl_age_tolerance_, cfg_passthrough_filter_limits_[0],
-		      cfg_passthrough_filter_limits_[1], cfg_transform_range_[0],
-		      cfg_transform_range_[1]);
+    this->logger_->log_info(this->name_, "Age Tolerance: %lli  "
+			    "Limits: [%f, %f]  tf range: [%lli, %lli]",
+			    this->cfg_pcl_age_tolerance_, cfg_passthrough_filter_limits_[0],
+			    cfg_passthrough_filter_limits_[1], this->cfg_transform_range_[0],
+			    this->cfg_transform_range_[1]);
 
-    mongodb_gridfs_ =
-      new mongo::GridFS(*mongodb_client_, cfg_database_name_);
-      use_alignment_ = true;
+    use_alignment_ = true;
 #ifdef USE_TIMETRACKER
     tt_ = new fawkes::TimeTracker();
     tt_loopcount_ = 0;
@@ -179,75 +138,12 @@ class PointCloudDBMergePipeline
   }
 
   /** Destructor. */
-  ~PointCloudDBMergePipeline()
+  virtual ~PointCloudDBMergePipeline()
   {
-    delete mongodb_gridfs_;
+#ifdef USE_TIMETRACKER
+    delete tt_;
+#endif
   }
-
-  /** Check if this pipeline instance is suitable for the given times.
-   * Retrieves information about the point clouds for the specified
-   * \p times and checks if this pipeline (depending on the template
-   * parameter) is suitable for the processing of these pipelines.
-   * @param times times for which to check the point clouds
-   * @param collection collection from which to retrieve the information
-   * @return applicability status
-   */
-  ApplicabilityStatus
-  applicable(std::vector<long long> &times, std::string &collection)
-  {
-    const unsigned int num_clouds = times.size();
-
-    std::vector<sensor_msgs::PointField> pfields;
-    pcl::for_each_type<typename pcl::traits::fieldList<PointType>::type>
-      (pcl::detail::FieldAdder<PointType>(pfields));
-
-    try {
-      for (unsigned int i = 0; i < num_clouds; ++i) {
-	std::auto_ptr<mongo::DBClientCursor> cursor =
-	  mongodb_client_->query(cfg_database_name_ + "." + collection,
-				 QUERY("timestamp" << mongo::LTE << times[i]
-                           << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
-				 .sort("timestamp", -1),
-				 /* limit */ 1);
-
-	if (cursor->more()) {
-	  mongo::BSONObj p = cursor->next();
-	  mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
-	  std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
-
-	  for (unsigned int i = 0; i < pfields.size(); ++i) {
-	    sensor_msgs::PointField &pf = pfields[i];
-
-	    bool found = false;
-	    for (unsigned int j = 0; j < fields.size(); ++j) {
-	      if ((fields[j]["name"].String() == pf.name) &&
-		  (fields[j]["offset"].Int() == (int)pf.offset) &&
-		  (fields[j]["datatype"].Int() == pf.datatype) &&
-		  (fields[j]["count"].Int() == (int)pf.count) )
-	      {
-		found = true;
-		break;
-	      }
-	    }
-	    if (! found) {
-	      logger_->log_warn(name_, "Type mismatch for pointcloud "
-				"at timestamp %lli", times[i]);
-	      return TYPE_MISMATCH;
-	    }
-	  }
-	} else {
-	  logger_->log_warn(name_, "No pointclouds for timestamp %lli", times[i]);
-	  return NO_POINTCLOUD;
-	}
-      }
-    } catch (mongo::DBException &e) {
-      logger_->log_warn(name_, "MongoDB query failed: %s", e.what());
-      return QUERY_FAILED;
-    }
-
-    return APPLICABLE;
-  }
-
 
   /** Merge point clouds.
    * @param times times for which to retrieve the point clouds.
@@ -261,75 +157,40 @@ class PointCloudDBMergePipeline
 
     std::vector<long long> actual_times(num_clouds);
 
-    output_->points.clear();
-    output_->height = 1;
-    output_->width  = 0;
-    output_->is_dense = false;
+    this->output_->points.clear();
+    this->output_->height = 1;
+    this->output_->width  = 0;
+    this->output_->is_dense = false;
 
-    size_t num_points = 0;
-
-    CloudPtr pcls[num_clouds];
-    CloudPtr non_transformed[num_clouds];
-    CloudPtr non_aligned[num_clouds];
-    CloudPtr non_aligned_downsampled[num_clouds];
-    CloudPtr aligned_downsampled[num_clouds];
-    CloudPtr aligned_downsampled_remplane[num_clouds];
+    std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> pcls(num_clouds);
+    typename PointCloudDBPipeline<PointType>::CloudPtr non_transformed[num_clouds];
+    typename PointCloudDBPipeline<PointType>::CloudPtr non_aligned[num_clouds];
+    typename PointCloudDBPipeline<PointType>::CloudPtr non_aligned_downsampled[num_clouds];
+    typename PointCloudDBPipeline<PointType>::CloudPtr aligned_downsampled[num_clouds];
+    typename PointCloudDBPipeline<PointType>::CloudPtr aligned_downsampled_remplane[num_clouds];
     Eigen::Matrix4f transforms[num_clouds-1];
 
     for (unsigned int i = 0; i < num_clouds; ++i) {
-      non_transformed[i] = CloudPtr(new Cloud());
-      non_aligned[i] = CloudPtr(new Cloud());
-      non_aligned_downsampled[i] = CloudPtr(new Cloud());
-      aligned_downsampled[i] = CloudPtr(new Cloud());
-      aligned_downsampled_remplane[i] = CloudPtr(new Cloud());
+      non_transformed[i] = typename PointCloudDBPipeline<PointType>::CloudPtr(
+        new typename PointCloudDBPipeline<PointType>::Cloud());
+      non_aligned[i] = typename PointCloudDBPipeline<PointType>::CloudPtr(
+        new typename PointCloudDBPipeline<PointType>::Cloud());
+      non_aligned_downsampled[i] = typename PointCloudDBPipeline<PointType>::CloudPtr(
+        new typename PointCloudDBPipeline<PointType>::Cloud());
+      aligned_downsampled[i] = typename PointCloudDBPipeline<PointType>::CloudPtr(
+        new typename PointCloudDBPipeline<PointType>::Cloud());
+      aligned_downsampled_remplane[i] = typename PointCloudDBPipeline<PointType>::CloudPtr(
+        new typename PointCloudDBPipeline<PointType>::Cloud());
     }
 
     TIMETRACK_START(ttc_retrieval_);
 
-    // retrieve point clouds
-    for (unsigned int i = 0; i < num_clouds; ++i) {
-
-      std::auto_ptr<mongo::DBClientCursor> cursor =
-	mongodb_client_->query(cfg_database_name_ + "." + collection,
-			       QUERY("timestamp" << mongo::LTE << times[i]
-                               << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
-			       .sort("timestamp", -1),
-			       /* limit */ 1);
-
-      if (cursor->more()) {
-	mongo::BSONObj p = cursor->next();
-	mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
-	std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
-
-	long long timestamp = p["timestamp"].Long();
-	double age = (double) (times[i] - timestamp) / 1000.;
-	logger_->log_info(name_, "Restoring point cloud at %lli with age %f sec",
-			  timestamp, age);
-
-	// reconstruct point cloud
-	CloudPtr lpcl(new Cloud());
-	pcls[i] = lpcl;
-
-	actual_times[i]       = p["timestamp"].Number();
-	fawkes::Time actual_time((long)actual_times[i]);
-
-	lpcl->header.frame_id = pcldoc["frame_id"].String();
-	lpcl->is_dense        = (pcldoc["is_dense"].Int() != 0);
-	lpcl->width           = pcldoc["width"].Int();
-	lpcl->height          = pcldoc["height"].Int();
-	fawkes::pcl_utils::set_time(lpcl, actual_time);
-	lpcl->points.resize(pcldoc["num_points"].Int());
-
-	read_gridfs_file(&lpcl->points[0], pcldoc.getFieldDotted("data.filename").String());
-
-	num_points += lpcl->points.size();
-
-	*non_transformed[i] = *lpcl;
-
-      } else {
-	logger_->log_warn(name_, "Cannot retrieve document for time %li", times[i]);
-	return;
-      }
+    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, collection);
+    if (pcls.empty()) {
+      this->logger_->log_warn(this->name_, "No point clouds found for desired timestamps");
+      TIMETRACK_ABORT(ttc_retrieval_);
+      TIMETRACK_ABORT(ttc_merge_);
+      return;
     }
 
     TIMETRACK_INTER(ttc_retrieval_, ttc_transform_global_);
@@ -337,24 +198,24 @@ class PointCloudDBMergePipeline
     for (unsigned int i = 0; i < num_clouds; ++i) {
       // retrieve transforms
       fawkes::tf::MongoDBTransformer
-	transformer(mongodb_client_, cfg_database_name_);
+	transformer(this->mongodb_client_, this->cfg_database_name_);
 
-      transformer.restore(/* start */  actual_times[i] + cfg_transform_range_[0],
-			  /* end */    actual_times[i] + cfg_transform_range_[1]);
-      logger_->log_debug(name_, "Restored transforms for %zu frames for range (%li..%li)",
-			 transformer.get_frame_caches().size(),
-			 /* start */  actual_times[i] + cfg_transform_range_[0],
-			 /* end */    actual_times[i] + cfg_transform_range_[1]);
+      transformer.restore(/* start */  actual_times[i] + this->cfg_transform_range_[0],
+			  /* end */    actual_times[i] + this->cfg_transform_range_[1]);
+      this->logger_->log_debug(this->name_, "Restored transforms for %zu frames "
+			       "for range (%li..%li)",
+			       transformer.get_frame_caches().size(),
+			       /* start */  actual_times[i] + this->cfg_transform_range_[0],
+			       /* end */    actual_times[i] + this->cfg_transform_range_[1]);
 
       // transform point clouds to common frame
-      fawkes::Time actual_time((long)actual_times[i]);
       try {
 	fawkes::pcl_utils::transform_pointcloud(cfg_global_frame_, *pcls[i], transformer);
       } catch (fawkes::Exception &e) {
-	logger_->log_warn(name_, "Failed to transform from %s to %s",
-			 pcls[i]->header.frame_id.c_str(),
-			 cfg_global_frame_.c_str());
-	logger_->log_warn(name_, e);
+	this->logger_->log_warn(this->name_, "Failed to transform from %s to %s",
+				pcls[i]->header.frame_id.c_str(),
+				cfg_global_frame_.c_str());
+	this->logger_->log_warn(this->name_, e);
       }
       *non_aligned[i] = *pcls[i];
     }
@@ -383,7 +244,7 @@ class PointCloudDBMergePipeline
 			     cfg_downsample_leaf_size_,
 			     cfg_downsample_leaf_size_);
 
-      CloudPtr filtered_z(new Cloud());
+      typename PointCloudDBPipeline<PointType>::CloudPtr filtered_z(new typename PointCloudDBPipeline<PointType>::Cloud());
 
       for (unsigned int i = 0; i < num_clouds; ++i) {
 
@@ -393,16 +254,16 @@ class PointCloudDBMergePipeline
 
 	downsample.setInputCloud(filtered_z);
 	downsample.filter(*non_aligned_downsampled[i]);
-	logger_->log_info(name_, "Filtered cloud %u contains %zu points",
-			  i, non_aligned_downsampled[i]->points.size ());
+	this->logger_->log_info(this->name_, "Filtered cloud %u contains %zu points",
+				i, non_aligned_downsampled[i]->points.size ());
       }
       TIMETRACK_INTER(ttc_downsample_, ttc_align_1_);
 
       // ALIGN using ICP including table
       for (unsigned int i = 1; i < num_clouds; ++i) {
-	logger_->log_info(name_, "Aligning cloud %u to %u", i, i-1);
+	this->logger_->log_info(this->name_, "Aligning cloud %u to %u", i, i-1);
 	Eigen::Matrix4f transform;
-	CloudConstPtr source, target;
+	typename PointCloudDBPipeline<PointType>::CloudConstPtr source, target;
 
 	source = non_aligned_downsampled[i];
 	target = non_aligned_downsampled[i-1];
@@ -432,23 +293,24 @@ class PointCloudDBMergePipeline
       for (unsigned int i = 0; i < num_clouds; ++i) {
 	*aligned_downsampled_remplane[i] = *aligned_downsampled[i];
 	remove_plane(aligned_downsampled_remplane[i]);
-	logger_->log_info(name_, "Removed plane from cloud %u, %zu of %zu points remain",
-			  i, aligned_downsampled_remplane[i]->points.size(),
-			  aligned_downsampled[i]->points.size());
+	this->logger_->log_info(this->name_, "Removed plane from cloud %u, "
+				"%zu of %zu points remain",
+				i, aligned_downsampled_remplane[i]->points.size(),
+				aligned_downsampled[i]->points.size());
       }
 
       TIMETRACK_INTER(ttc_remove_planes_, ttc_align_2_);
 
       for (unsigned int i = 1; i < num_clouds; ++i) {
 	Eigen::Matrix4f transform;
-	CloudConstPtr source, target;
+	typename PointCloudDBPipeline<PointType>::CloudConstPtr source, target;
 
 	source = aligned_downsampled_remplane[i];
 	target = aligned_downsampled_remplane[i-1];
 	
 	align_icp(source, target, transform);
 
-	Cloud tmp;
+	typename PointCloudDBPipeline<PointType>::Cloud tmp;
 	pcl::transformPointCloud(*aligned_downsampled_remplane[i], tmp, transform);
 	*aligned_downsampled_remplane[i] = tmp;
 
@@ -458,7 +320,7 @@ class PointCloudDBMergePipeline
       TIMETRACK_INTER(ttc_align_2_, ttc_transform_final_);
 
       for (unsigned int i = 1; i < num_clouds; ++i) {
-	Cloud tmp;
+	typename PointCloudDBPipeline<PointType>::Cloud tmp;
 	pcl::transformPointCloud(*pcls[i], tmp, transforms[i-1]);
 	*pcls[i] = tmp;
       }
@@ -475,27 +337,27 @@ class PointCloudDBMergePipeline
     fawkes::Time now;
 
     merge_output(non_transformed, num_clouds);
-    now.stamp(); fawkes::pcl_utils::set_time(output_, now);
+    now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
     merge_output(non_aligned, num_clouds);
-    now.stamp(); fawkes::pcl_utils::set_time(output_, now);
+    now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
     merge_output(non_aligned_downsampled, num_clouds);
-    now.stamp(); fawkes::pcl_utils::set_time(output_, now);
+    now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
     merge_output(aligned_downsampled, num_clouds);
-    now.stamp(); fawkes::pcl_utils::set_time(output_, now);
+    now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
     merge_output(aligned_downsampled_remplane, num_clouds);
-    now.stamp(); fawkes::pcl_utils::set_time(output_, now);
+    now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 #endif
 
-    merge_output(pcls, num_clouds);
+    merge_output(pcls);
 
     TIMETRACK_END(ttc_output_);
 
@@ -508,30 +370,7 @@ class PointCloudDBMergePipeline
   }
 
  private: // methods
-  void read_gridfs_file(void *dataptr, std::string filename)
-  {
-    char *tmp = (char *)dataptr;
-    mongo::GridFile file =
-      mongodb_gridfs_->findFile(filename);
-    if (! file.exists()) {
-      logger_->log_warn(name_, "Grid file does not exist");
-      return;
-    }
-
-    size_t bytes = 0;
-    for (int c = 0; c < file.getNumChunks(); ++c) {
-      mongo::GridFSChunk chunk = file.getChunk(c);
-      int len = 0;
-      const char *chunk_data = chunk.data(len);
-      memcpy(tmp, chunk_data, len);
-      tmp += len;
-      bytes += len;
-      //logger_->log_info(name_, "Read chunk %i of %i bytes", c, len);
-    }
-    //logger_->log_info(name_, "%zu bytes restored", bytes);
-  }
-
-  void remove_plane(CloudPtr &cloud)
+  void remove_plane(typename PointCloudDBPipeline<PointType>::CloudPtr &cloud)
   {
     pcl::SACSegmentation<PointType> tablesegm;
     pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
@@ -551,7 +390,7 @@ class PointCloudDBMergePipeline
     }
 
     pcl::ExtractIndices<PointType> extract;
-    Cloud extracted;
+    typename PointCloudDBPipeline<PointType>::Cloud extracted;
     extract.setNegative(true);
     extract.setInputCloud(cloud);
     extract.setIndices(inliers);
@@ -561,7 +400,8 @@ class PointCloudDBMergePipeline
     pcl::ConvexHull<PointType> convex_hull;
     convex_hull.setDimension(2);
     convex_hull.setInputCloud(cloud);
-    CloudPtr hull(new Cloud());
+    typename PointCloudDBPipeline<PointType>::CloudPtr
+      hull(new typename PointCloudDBPipeline<PointType>::Cloud());
     convex_hull.reconstruct(*hull);
 
     // Use only points above tables
@@ -587,7 +427,8 @@ class PointCloudDBMergePipeline
     above_cond->addComparison(above_comp);
     pcl::ConditionalRemoval<PointType> above_condrem(above_cond);
     above_condrem.setInputCloud(cloud);
-    CloudPtr cloud_above(new Cloud());
+    typename PointCloudDBPipeline<PointType>::CloudPtr
+      cloud_above(new typename PointCloudDBPipeline<PointType>::Cloud());
     above_condrem.filter(*cloud_above);
 
     // Extract only points on the table plane
@@ -608,9 +449,11 @@ class PointCloudDBMergePipeline
 
 
 #ifdef USE_ICP_ALIGNMENT
-  bool align_icp(CloudConstPtr source, CloudConstPtr target, Eigen::Matrix4f &transform)
+  bool align_icp(typename PointCloudDBPipeline<PointType>::CloudConstPtr source,
+		 typename PointCloudDBPipeline<PointType>::CloudConstPtr target,
+		 Eigen::Matrix4f &transform)
   {
-    Cloud final;
+    typename PointCloudDBPipeline<PointType>::Cloud final;
 
     //pcl::console::VERBOSITY_LEVEL old_level = pcl::console::getVerbosityLevel();
     //pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
@@ -630,10 +473,10 @@ class PointCloudDBMergePipeline
     // Set the euclidean distance difference epsilon (criterion 3)
     icp.setEuclideanFitnessEpsilon(cfg_icp_euclidean_fitness_eps_);
 
-    logger_->log_info(name_, "Aligning");
+    this->logger_->log_info(this->name_, "Aligning");
     icp.align(final);
-    logger_->log_info(name_, "Aligning done");
-    //logger_->log_info(name_, "ICP %u -> %u did%s converge, score: %f",
+    this->logger_->log_info(this->name_, "Aligning done");
+    //this->logger_->log_info(this->name_, "ICP %u -> %u did%s converge, score: %f",
     //	       icp.hasConverged() ? "" : " NOT", icp.getFitnessScore());
     transform = icp.getFinalTransformation();
     //score     = icp.getFitnessScore();
@@ -669,25 +512,28 @@ class PointCloudDBMergePipeline
   }
 #endif
 
-  void merge_output(CloudPtr *clouds, unsigned int num_clouds)
+  void
+  merge_output(std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds)
   {
     size_t num_points = 0;
+    const size_t num_clouds = clouds.size();
     for (unsigned int i = 0; i < num_clouds; ++i) {
       num_points += clouds[i]->points.size();
     }
-    output_->header.frame_id = cfg_global_frame_;
-    output_->points.resize(num_points);
-    output_->height = 1;
-    output_->width = num_points;
+    this->output_->header.frame_id = cfg_global_frame_;
+    this->output_->points.resize(num_points);
+    this->output_->height = 1;
+    this->output_->width = num_points;
     size_t out_p = 0;
     for (unsigned int i = 0; i < num_clouds; ++i) {
-      const CloudPtr &lpcl = clouds[i];
+      const typename PointCloudDBPipeline<PointType>::CloudPtr &lpcl = clouds[i];
       const size_t cldn = lpcl->points.size();
       if (cldn == 0)  continue;
 
       for (size_t p = 0; p < cldn; ++p, ++out_p) {
 	const PointType &ip      = lpcl->points[p];
-	ColorPointType &op = output_->points[out_p];
+	typename PointCloudDBPipeline<PointType>::ColorPointType &op =
+	  this->output_->points[out_p];
 
 	op.x = ip.x;
 	op.y = ip.y;
@@ -702,12 +548,7 @@ class PointCloudDBMergePipeline
 
 
  private: // members
-  const char *name_;
-
-  std::string  cfg_database_name_;
   std::string  cfg_global_frame_;
-  long         cfg_pcl_age_tolerance_;
-  long         cfg_transform_range_[2];
   std::string  cfg_passthrough_filter_axis_;
   float        cfg_passthrough_filter_limits_[2];
   float        cfg_downsample_leaf_size_;
@@ -718,14 +559,6 @@ class PointCloudDBMergePipeline
   unsigned int cfg_icp_max_iterations_;
   float        cfg_icp_transformation_eps_;
   float        cfg_icp_euclidean_fitness_eps_;
-
-  mongo::DBClientBase *mongodb_client_;
-  mongo::GridFS *mongodb_gridfs_;
-
-  fawkes::Configuration *config_;
-  fawkes::Logger        *logger_;
-
-  ColorCloudPtr output_;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker *tt_;
@@ -744,17 +577,5 @@ class PointCloudDBMergePipeline
 
   bool use_alignment_;
 };
-
-inline const char *
-to_string(ApplicabilityStatus status)
-{
-  switch (status) {
-  case APPLICABLE:    return "Applicable";
-  case TYPE_MISMATCH: return "PointCloud in database does not match type";
-  case NO_POINTCLOUD: return "For at least one time no pointcloud found";
-  case QUERY_FAILED:  return "MongoDB query failed";
-  default:            return "Unknown error";
-  }
-}
 
 #endif

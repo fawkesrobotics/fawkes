@@ -25,7 +25,7 @@ include $(BASEDIR)/src/plugins/openni/openni.mk
 ENABLE_VISUAL_DEBUGGING = 1
 USE_BASELINK_FRAME = 1
 
-REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
+REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface features
 
 CFLAGS += -Wno-unknown-pragmas
 
