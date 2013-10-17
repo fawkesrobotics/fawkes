@@ -135,6 +135,27 @@ typedef struct arc_struct {
   float end_phi;          /**< The end angle of the arc */
 } arc_t;
 
+/** Defines an ellipse */
+typedef struct ellipse_struct {
+  cart_coord_2d_t center; /**< The center point of the ellipse */
+  float width;            /**< The total width of the ellipse */
+  float height;           /**< The total height of the ellipse */
+
+  /** Constructur.
+   * @param x The x-coordinate of the center of the ellipse
+   * @param y The y-coordinate of the center of the ellipse
+   * @param w The total width of the ellipse
+   * @param h The total height of the ellipse
+   */
+  ellipse_struct(float x, float y, float w, float h) {
+    this->center.x = x;
+    this->center.y = y;
+    this->width = w;
+    this->height = h;
+  }
+
+} ellipse_t;
+
 /** Defines a point with 6-degrees of freedom */
 typedef struct point_6D_struct {
   float x;      /**< The x-coordinate of the point */
