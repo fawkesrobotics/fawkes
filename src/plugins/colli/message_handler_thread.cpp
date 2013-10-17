@@ -1,7 +1,7 @@
 /***************************************************************************
- *  colli_plugin.cpp - Fawkes Colli Plugin
+ *  messag_handler_thread.cpp - Colli Message Handler Thread
  *
- *  Created: Wed Oct 16 18:00:00 2013
+ *  Created: Thu Oct 17 16:58:00 2013
  *  Copyright  2013  AllemaniACs
  *
  ****************************************************************************/
@@ -19,24 +19,39 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "colli_thread.h"
 #include "message_handler_thread.h"
 
-#include <core/plugin.h>
+#include <interfaces/MotorInterface.h>
+#include <interfaces/NavigatorInterface.h>
+
+#include <string>
 
 using namespace fawkes;
+using namespace std;
 
-class ColliPlugin : public fawkes::Plugin
+ColliMessageHandlerThread::ColliMessageHandlerThread()
+  : Thread("ColliMessageHandlerThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
-public:
-  ColliPlugin(Configuration *config)
-      : Plugin(config)
-  {
-    thread_list.push_back(new ColliMessageHandlerThread());
-    thread_list.push_back(new ColliThread());
-  }
-};
+}
 
-PLUGIN_DESCRIPTION("Local locomotion path planning with collision avoidance")
-EXPORT_PLUGIN(ColliPlugin)
+ColliMessageHandlerThread::~ColliMessageHandlerThread()
+{
+}
+
+void
+ColliMessageHandlerThread::init()
+{
+}
+
+
+void
+ColliMessageHandlerThread::finalize()
+{
+}
+
+void
+ColliMessageHandlerThread::loop()
+{
+}
 

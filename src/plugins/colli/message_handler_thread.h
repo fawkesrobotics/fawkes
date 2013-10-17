@@ -1,7 +1,7 @@
 /***************************************************************************
- *  colli_plugin.cpp - Fawkes Colli Plugin
+ *  messag_handler_thread.h - Colli Message Handler Thread
  *
- *  Created: Wed Oct 16 18:00:00 2013
+ *  Created: Thu Oct 17 16:58:00 2013
  *  Copyright  2013  AllemaniACs
  *
  ****************************************************************************/
@@ -19,24 +19,35 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "colli_thread.h"
-#include "message_handler_thread.h"
+#ifndef __PLUGINS_COLLI_MESSAGE_HANDLER_THREAD_H_
+#define __PLUGINS_COLLI_MESSAGE_HANDLER_THREAD_H_
 
-#include <core/plugin.h>
+#include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/logging.h>
+#include <aspect/blackboard.h>
 
-using namespace fawkes;
-
-class ColliPlugin : public fawkes::Plugin
+namespace fawkes
 {
-public:
-  ColliPlugin(Configuration *config)
-      : Plugin(config)
-  {
-    thread_list.push_back(new ColliMessageHandlerThread());
-    thread_list.push_back(new ColliThread());
-  }
+  class NavigatorInterface;
+}
+
+class ColliMessageHandlerThread
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect
+{
+ public:
+  ColliMessageHandlerThread();
+  virtual ~ColliMessageHandlerThread();
+
+  virtual void init();
+  virtual void loop();
+  virtual void finalize();
+
+ private:
 };
 
-PLUGIN_DESCRIPTION("Local locomotion path planning with collision avoidance")
-EXPORT_PLUGIN(ColliPlugin)
+#endif
 
