@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-UTILS = utils/rob utils/geometry utils/occupancygrid drive_realization drive_modes
+UTILS = utils/rob utils/geometry utils/occupancygrid drive_realization drive_modes search
 
 LIBS_colli = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
              fawkesinterface MotorInterface Laser360Interface  NavigatorInterface
