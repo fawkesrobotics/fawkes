@@ -48,11 +48,16 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/transforms.h>
 #include <pcl/common/distances.h>
+#include <pcl/registration/distances.h>
+
+#include <utils/hungarian_method/hungarian.h>
+
 
 #include <interfaces/Position3DInterface.h>
 #include <interfaces/SwitchInterface.h>
 
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 #define CFG_PREFIX "/perception/tabletop-objects/"
@@ -113,6 +118,10 @@ TabletopObjectsThread::init()
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_input_pointcloud_      = config->get_string(CFG_PREFIX"input_pointcloud");
+  cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
+  cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
+  cfg_centroid_min_distance_ = config->get_float(CFG_PREFIX"centroid_min_distance");
+  cfg_centroid_max_height_   = config->get_float(CFG_PREFIX"centroid_max_height");
 
   if (pcl_manager->exists_pointcloud<PointType>(cfg_input_pointcloud_.c_str())) {
     finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
@@ -166,7 +175,6 @@ TabletopObjectsThread::init()
         blackboard->close(pos_ifs_[i]);
       }
     }
-    pos_ifs_.clear();
     throw;
   }
 
@@ -202,6 +210,12 @@ TabletopObjectsThread::init()
 
   last_pcl_time_ = new Time(clock);
 
+  first_run_ = true;
+
+  old_centroids_.clear();
+  for (unsigned int i = 0; i < MAX_CENTROIDS; i++)
+    free_ids_.push_back(i);
+
 #ifdef USE_TIMETRACKER
   tt_ = new TimeTracker();
   tt_loopcount_ = 0;
@@ -223,6 +237,9 @@ TabletopObjectsThread::init()
   ttc_table_to_output_    = tt_->add_class("Table to Output");
   ttc_cluster_objects_    = tt_->add_class("Object Clustering");
   ttc_visualization_      = tt_->add_class("Visualization");
+  ttc_hungarian_          = tt_->add_class("Hungarian Method (centroids)");
+  ttc_old_centroids_      = tt_->add_class("Old Centroid Removal");
+  ttc_obj_extraction_      = tt_->add_class("Object Extraction");
 #endif
 }
 
@@ -240,8 +257,8 @@ TabletopObjectsThread::finalize()
   
   blackboard->close(table_pos_if_);
   blackboard->close(switch_if_);
-  for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    blackboard->close(pos_ifs_[i]);
+  for (PosIfsVector::iterator it = pos_ifs_.begin(); it != pos_ifs_.end(); it++) {
+    blackboard->close(*it);
   }
   pos_ifs_.clear();
 
@@ -371,7 +388,7 @@ TabletopObjectsThread::loop()
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-  Eigen::Vector4f table_centroid, baserel_table_centroid(0,0,0,0);
+  Eigen::Vector4f baserel_table_centroid(0,0,0,0);
 
   // This will search for the first plane which:
   // 1. has a considerable amount of points (>= some percentage of input points)
@@ -1015,86 +1032,35 @@ TabletopObjectsThread::loop()
 
   TIMETRACK_INTER(ttc_polygon_filter_, ttc_table_to_output_);
 
-  ColorCloudPtr tmp_clusters(new ColorCloud());
-  tmp_clusters->header.frame_id = clusters_->header.frame_id;
-  tmp_clusters->points.resize(cloud_proj_->points.size());
-  for (size_t i = 0; i < cloud_proj_->points.size(); ++i) {
-    PointType &p1      = cloud_proj_->points[i];
-    ColorPointType &p2 = tmp_clusters->points[i];
-    p2.x = p1.x;
-    p2.y = p1.y;
-    p2.z = p1.z;
-
-    p2.r = table_color[0];
-    p2.g = table_color[1];
-    p2.b = table_color[2];
-  }
+  std::vector<int> indices(cloud_proj_->points.size());
+  for (uint i = 0; i < indices.size(); i++)
+    indices[i] = i;
+  ColorCloudPtr tmp_clusters = colorize_cluster(cloud_proj_, indices, table_color);
 
   TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_);
 
-  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
-  centroids.resize(MAX_CENTROIDS);
-  unsigned int centroid_i = 0;
+  unsigned int object_count = 0;
 
   if (cloud_objs_->points.size() > 0) {
-    // Creating the KdTree object for the search method of the extraction
-    pcl::search::KdTree<PointType>::Ptr
-      kdtree_cl(new pcl::search::KdTree<PointType>());
-    kdtree_cl->setInputCloud(cloud_objs_);
-
-    std::vector<pcl::PointIndices> cluster_indices;
-    pcl::EuclideanClusterExtraction<PointType> ec;
-    ec.setClusterTolerance(cfg_cluster_tolerance_);
-    ec.setMinClusterSize(cfg_cluster_min_size_);
-    ec.setMaxClusterSize(cfg_cluster_max_size_);
-    ec.setSearchMethod(kdtree_cl);
-    ec.setInputCloud(cloud_objs_);
-    ec.extract(cluster_indices);
-
-    //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
-
-    ColorCloudPtr colored_clusters(new ColorCloud());
-    colored_clusters->header.frame_id = clusters_->header.frame_id;
-    std::vector<pcl::PointIndices>::const_iterator it;
-    unsigned int cci = 0;
-    //unsigned int i = 0;
-    unsigned int num_points = 0;
-    for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
-      num_points += it->indices.size();
-
-    if (num_points > 0) {
-      colored_clusters->points.resize(num_points);
-      for (it = cluster_indices.begin();
-           it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
-           ++it, ++centroid_i)
-      {
-        pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
-
-        std::vector<int>::const_iterator pit;
-        for (pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
-          ColorPointType &p1 = colored_clusters->points[cci++];
-          PointType &p2 = cloud_objs_->points[*pit];
-          p1.x = p2.x;
-          p1.y = p2.y;
-          p1.z = p2.z;
-          p1.r = cluster_colors[centroid_i][0];
-          p1.g = cluster_colors[centroid_i][1];;
-          p1.b = cluster_colors[centroid_i][2];;
-        }
-      }
-
-      *tmp_clusters += *colored_clusters;
-    } else {
+    object_count = cluster_objects(cloud_objs_, tmp_clusters);
+    if (object_count == 0) {
       logger->log_info(name(), "No clustered points found");
     }
   } else {
     logger->log_info(name(), "Filter left no points for clustering");
   }
 
-  for (unsigned int i = 0; i < MAX_CENTROIDS; ++i) {
-    set_position(pos_ifs_[i], i < centroid_i, centroids[i]);
+  // set all pos_ifs not in centroids_ to 'not visible'
+  for (unsigned int i = 0; i < pos_ifs_.size(); i++) {
+    if (!centroids_.count(i)) {
+      set_position(pos_ifs_[i], false);
+    }
   }
-  centroids.resize(centroid_i);
+
+  // set positions of all visible centroids
+  for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+    set_position(pos_ifs_[it->first], true, it->second);
+  }
 
   TIMETRACK_INTER(ttc_cluster_objects_, ttc_visualization_)
 
@@ -1134,7 +1100,7 @@ TabletopObjectsThread::loop()
 
     visthread_->visualize(input_->header.frame_id,
                           table_centroid, normal, hull_vertices, model_vertices,
-                          good_hull_edges, centroids);
+                          good_hull_edges, centroids_);
   }
 #endif
 
@@ -1149,6 +1115,240 @@ TabletopObjectsThread::loop()
 #endif
 }
 
+std::vector<pcl::PointIndices>
+TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
+  TIMETRACK_START(ttc_obj_extraction_);
+  // Creating the KdTree object for the search method of the extraction
+       pcl::search::KdTree<PointType>::Ptr
+       kdtree_cl(new pcl::search::KdTree<PointType>());
+       kdtree_cl->setInputCloud(input);
+
+       std::vector<pcl::PointIndices> cluster_indices;
+       pcl::EuclideanClusterExtraction<PointType> ec;
+       ec.setClusterTolerance(cfg_cluster_tolerance_);
+       ec.setMinClusterSize(cfg_cluster_min_size_);
+       ec.setMaxClusterSize(cfg_cluster_max_size_);
+       ec.setSearchMethod(kdtree_cl);
+       ec.setInputCloud(input);
+       ec.extract(cluster_indices);
+
+       //logger->log_debug(name(), "Found %zu clusters", cluster_indices.size());
+       TIMETRACK_END(ttc_obj_extraction_);
+       return cluster_indices;
+}
+
+bool TabletopObjectsThread::next_id(unsigned int &id) {
+  if (free_ids_.empty()) {
+    logger->log_debug(name(), "free_ids is empty");
+    return false;
+  }
+  id = free_ids_.front();
+  free_ids_.pop_front();
+  return true;
+}
+unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
+  unsigned int object_count = 0;
+  std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
+  std::vector<pcl::PointIndices>::const_iterator it;
+  unsigned int num_points = 0;
+  for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+    num_points += it->indices.size();
+
+  if (num_points > 0) {
+    std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> new_centroids(MAX_CENTROIDS);
+    unsigned int centroid_i = 0;
+    for (it = cluster_indices.begin();
+        it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
+        ++it, ++centroid_i)
+    {
+      // calculate each centroid and save it to the vector centroids
+      pcl::compute3DCentroid(*input_cloud, it->indices, new_centroids[centroid_i]);
+//      *tmp_clusters += *colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
+    }
+    object_count = centroid_i;
+    new_centroids.resize(object_count);
+
+    CentroidMap tmp_centroids;
+    if (first_run_) {
+      // get a new id for every object since we didn't have objects before
+      for (unsigned int i = 0; i < new_centroids.size(); i++) {
+        unsigned int id;
+        if (!next_id(id))
+          break;
+        tmp_centroids[id] = new_centroids[i];
+        *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
+      }
+    }
+    else { // !first_run_
+      TIMETRACK_START(ttc_hungarian_);
+      hungarian_problem_t hp;
+      // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
+      std::vector<unsigned int> obj_ids(centroids_.size());
+      // create cost matrix,
+      // save new centroids in rows, last centroids in columns
+      // distance between new centroid i and last centroid j in cost[i][j]
+      hp.num_rows = new_centroids.size();
+      hp.num_cols = centroids_.size();
+      hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
+      for (int i = 0; i < hp.num_rows; i++)
+        hp.cost[i] = (int*) calloc(hp.num_cols, sizeof(int));
+      for (int row = 0; row < hp.num_rows; row++) { // new centroids
+        unsigned int col = 0;
+        for (CentroidMap::iterator col_it = centroids_.begin();
+            col_it != centroids_.end();
+            col_it++, col++) { // old centroids
+          double distance = pcl::distances::l2(new_centroids[row], col_it->second);
+          hp.cost[row][col] = (int)(distance * 1000);
+          obj_ids[col] = col_it->first;
+        }
+      }
+      HungarianMethod solver;
+      solver.init(hp.cost, hp.num_rows, hp.num_cols, HUNGARIAN_MODE_MINIMIZE_COST);
+      solver.solve();
+      // get assignments
+      int assignment_size;
+      int *assignment = solver.get_assignment(assignment_size);
+      unsigned int id;
+      for (int row = 0; row < assignment_size; row++) {
+        if (row >= hp.num_rows) { // object has disappeared
+          id = obj_ids.at(assignment[row]);
+          old_centroids_.push_back(OldCentroid(id, centroids_.at(id)));
+          continue;
+        }
+        else if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
+          bool assigned = false;
+          // first, check if there is an old centroid close enough
+          for (OldCentroidVector::iterator it = old_centroids_.begin();
+              it != old_centroids_.end(); it++) {
+            if (pcl::distances::l2(new_centroids[row], it->getCentroid()) <= cfg_centroid_max_distance_) {
+              id = it->getId();
+              old_centroids_.erase(it);
+              assigned = true;
+              break;
+            }
+          }
+          if (!assigned) {
+            // we still don't have an id, create as new object
+            if (!next_id(id))
+              continue;
+          }
+        }
+        else { // object has been assigned to an existing id
+          id = obj_ids[assignment[row]];
+          // check if centroid was moved further than cfg_centroid_max_distance_
+          // this can happen if a centroid appears and another one disappears in the same loop
+          // (then, the old centroid is assigned to the new one)
+          if (pcl::distances::l2(centroids_[id], new_centroids[row]) > cfg_centroid_max_distance_) {
+            // save the centroid because we don't use it now
+            old_centroids_.push_back(OldCentroid(id, centroids_[id]));
+            continue;
+          }
+        }
+        tmp_centroids[id] = new_centroids[row];
+        // remove id from old_centroids_ because we don't want the same id twices
+        *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
+      }
+
+      TIMETRACK_INTER(ttc_hungarian_, ttc_old_centroids_)
+
+      // age all old centroids
+      for (OldCentroidVector::iterator it = old_centroids_.begin();
+          it != old_centroids_.end(); it++) {
+        it->age();
+      }
+      // delete centroids which are older than cfg_centroid_max_age_
+      old_centroids_.erase(
+          std::remove_if(old_centroids_.begin(), old_centroids_.end(),
+              [&free_ids_, &cfg_centroid_max_age_](const OldCentroid &centroid)->bool {
+                if (centroid.getAge() > cfg_centroid_max_age_) {
+                  free_ids_.push_back(centroid.getId());
+                  return true;
+                }
+                return false;
+               }
+          ),
+          old_centroids_.end());
+
+
+      // delete old centroids which are too close to current centroids
+      old_centroids_.erase(
+          std::remove_if(old_centroids_.begin(), old_centroids_.end(),
+              [&](const OldCentroid &old)->bool {
+                for (CentroidMap::const_iterator it = tmp_centroids.begin(); it != tmp_centroids.end(); it++) {
+                  if (pcl::distances::l2(it->second, old.getCentroid()) < cfg_centroid_min_distance_) {
+                    free_ids_.push_back(old.getId());
+                    return true;
+                  }
+                }
+                return false;
+          }),
+        old_centroids_.end());
+
+      TIMETRACK_END(ttc_old_centroids_);
+    } // !first_run_
+
+    // remove all centroids too high above the table
+    tf::Stamped<tf::Point> sp_baserel_table;
+    tf::Stamped<tf::Point> sp_table(
+        tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
+        fawkes::Time(0, 0), input_->header.frame_id);
+    try {
+      tf_listener->transform_point("/base_link", sp_table, sp_baserel_table);
+      for (CentroidMap::iterator it = tmp_centroids.begin(); it != tmp_centroids.end();) {
+        try {
+          tf::Stamped<tf::Point> sp_baserel_centroid;
+          tf::Stamped<tf::Point> sp_centroid(
+              tf::Point(it->second[0], it->second[1], it->second[2]),
+              fawkes::Time(0, 0), input_->header.frame_id);
+          tf_listener->transform_point("/base_link", sp_centroid, sp_baserel_centroid);
+          float d = sp_baserel_centroid.z() - sp_baserel_table.z();
+          if (d > cfg_centroid_max_height_) {
+            //logger->log_debug(name(), "remove centroid %u, too high (d=%f)", it->first, d);
+            free_ids_.push_back(it->first);
+            tmp_centroids.erase(it++);
+          } else
+            it++;
+        } catch (tf::TransformException &e) {
+          // simply keep the centroid if we can't transform it
+          it++;
+        }
+      }
+    } catch (tf::TransformException &e) {
+      // keep all centroids if transformation of the table fails
+    }
+
+    centroids_ = tmp_centroids;
+
+    if (object_count > 0)
+      first_run_ = false;
+  }
+  else {
+    logger->log_info(name(), "No clustered points found");
+    return 0;
+  }
+  return object_count;
+}
+
+TabletopObjectsThread::ColorCloudPtr TabletopObjectsThread::colorize_cluster (
+    CloudConstPtr input_cloud,
+    const std::vector<int> &cluster,
+    const uint8_t color[]) {
+  ColorCloudPtr result(new ColorCloud());
+  result->resize(cluster.size());
+  result->header.frame_id = input_cloud->header.frame_id;
+  uint i = 0;
+  for (std::vector<int>::const_iterator it = cluster.begin(); it != cluster.end(); ++it, ++i) {
+    ColorPointType &p1 = result->points.at(i);
+    const PointType &p2 = input_cloud->points.at(*it);
+    p1.x = p2.x;
+    p1.y = p2.y;
+    p1.z = p2.z;
+    p1.r = color[0];
+    p1.g = color[1];
+    p1.b = color[2];
+  }
+  return result;
+}
 
 void
 TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
@@ -1338,7 +1538,6 @@ TabletopObjectsThread::simplify_polygon(CloudPtr polygon, float dist_threshold)
 
   return result;
 }
-
 
 void
 TabletopObjectsThread::convert_colored_input()

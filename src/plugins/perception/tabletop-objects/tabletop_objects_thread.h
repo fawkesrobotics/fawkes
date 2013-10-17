@@ -38,6 +38,9 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/voxel_grid.h>
 
+#include <map>
+#include <list>
+
 namespace fawkes {
   class Position3DInterface;
   class SwitchInterface;
@@ -50,6 +53,25 @@ namespace fawkes {
 #ifdef HAVE_VISUAL_DEBUGGING
 class TabletopVisualizationThreadBase;
 #endif
+
+class OldCentroid {
+public:
+  OldCentroid(const unsigned int &id, const Eigen::Vector4f &centroid)
+  : id_(id), age_(0), centroid_(centroid) { }
+  OldCentroid(const OldCentroid &other)
+  : id_(other.getId()), age_(other.getAge()), centroid_(other.getCentroid()) { }
+  virtual ~OldCentroid() { }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  unsigned int getId() const { return id_; }
+  const Eigen::Vector4f& getCentroid() const { return centroid_; }
+  unsigned int getAge() const { return age_; }
+  void age() { age_++; }
+
+protected:
+  unsigned int id_;
+  unsigned int age_;
+  Eigen::Vector4f centroid_;
+};
 
 class TabletopObjectsThread
 : public fawkes::Thread,
@@ -84,6 +106,12 @@ class TabletopObjectsThread
   typedef ColorCloud::Ptr ColorCloudPtr;
   typedef ColorCloud::ConstPtr ColorCloudConstPtr;
 
+  typedef std::map<unsigned int, Eigen::Vector4f, std::less<unsigned int>,
+      Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
+      CentroidMap;
+  typedef std::list<OldCentroid, Eigen::aligned_allocator<OldCentroid> > OldCentroidVector;
+  typedef std::vector<fawkes::Position3DInterface *> PosIfsVector;
+
  private:
   void set_position(fawkes::Position3DInterface *iface,
                     bool is_visible, const Eigen::Vector4f &centroid = Eigen::Vector4f(0, 0, 0, 0),
@@ -101,6 +129,14 @@ class TabletopObjectsThread
 
   void convert_colored_input();
 
+  std::vector<pcl::PointIndices> extract_object_clusters(CloudConstPtr input);
+
+  ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const std::vector<int> &cluster, const uint8_t color[]);
+
+  unsigned int cluster_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
+
+  bool next_id(unsigned int &id);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
@@ -116,8 +152,12 @@ class TabletopObjectsThread
   pcl::VoxelGrid<PointType> grid_;
   pcl::SACSegmentation<PointType> seg_;
 
-  std::vector<fawkes::Position3DInterface *> pos_ifs_;
+  PosIfsVector pos_ifs_;
   fawkes::Position3DInterface *table_pos_if_;
+
+  Eigen::Vector4f table_centroid;
+
+  std::list<unsigned int> free_ids_;
 
   fawkes::SwitchInterface *switch_if_;
 
@@ -145,6 +185,10 @@ class TabletopObjectsThread
   unsigned int cfg_cluster_max_size_;
   std::string cfg_result_frame_;
   std::string cfg_input_pointcloud_;
+  uint cfg_centroid_max_age_;
+  float cfg_centroid_max_distance_;
+  float cfg_centroid_min_distance_;
+  float cfg_centroid_max_height_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
@@ -152,6 +196,10 @@ class TabletopObjectsThread
   CloudPtr simplified_polygon_;
 
   unsigned int loop_count_;
+
+  CentroidMap centroids_;
+  OldCentroidVector old_centroids_;
+  bool first_run_;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;
@@ -174,11 +222,15 @@ class TabletopObjectsThread
   unsigned int ttc_table_to_output_;
   unsigned int ttc_cluster_objects_;
   unsigned int ttc_visualization_;
+  unsigned int ttc_hungarian_;
+  unsigned int ttc_old_centroids_;
+  unsigned int ttc_obj_extraction_;
 #endif
 
 #ifdef HAVE_VISUAL_DEBUGGING
   TabletopVisualizationThreadBase *visthread_;
 #endif
 };
+
 
 #endif
