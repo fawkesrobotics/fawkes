@@ -1560,11 +1560,9 @@ logger->log_debug(name(), "");
       tf_listener->transform_point("/base_link", sp_table, sp_baserel_table);
       for (CentroidMap::iterator it = tmp_centroids.begin(); it != tmp_centroids.end();) {
         try {
-          tf::Stamped<tf::Point> sp_baserel_centroid;
-          tf::Stamped<tf::Point> sp_centroid(
+          tf::Stamped<tf::Point> sp_baserel_centroid(
               tf::Point(it->second[0], it->second[1], it->second[2]),
-              fawkes::Time(0, 0), input_->header.frame_id);
-          tf_listener->transform_point("/base_link", sp_centroid, sp_baserel_centroid);
+              fawkes::Time(0, 0), "/base_link");
           float d = sp_baserel_centroid.z() - sp_baserel_table.z();
           if (d > cfg_centroid_max_height_) {
             //logger->log_debug(name(), "remove centroid %u, too high (d=%f)", it->first, d);
