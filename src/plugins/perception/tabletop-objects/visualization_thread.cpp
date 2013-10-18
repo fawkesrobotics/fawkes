@@ -200,10 +200,10 @@ TabletopVisualizationThread::loop()
        sphere.scale.x = sphere.scale.y = 0.08;
        sphere.scale.z = 0.09;
        */
-      sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[it->first % MAX_CENTROIDS][0];
-      sphere.scale.z = cylinder_params_[it->first % MAX_CENTROIDS][1];
-      //if (obj_confidence_[it->first % MAX_CENTROIDS] >= 0.5)
-      if (best_obj_guess_[it->first % MAX_CENTROIDS] < 0) {
+      sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[it->first][0];
+      sphere.scale.z = cylinder_params_[it->first][1];
+      //if (obj_confidence_[it->first] >= 0.5)
+      if (best_obj_guess_[it->first] < 0) {
         sphere.color.r = 1.0;
         sphere.color.g = 0.0;
         sphere.color.b = 0.0;
