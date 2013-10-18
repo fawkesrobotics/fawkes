@@ -1437,6 +1437,7 @@ logger->log_debug(name(), "");
         tmp_centroids[id] = new_centroids[i];
         cylinder_params_[id] = cylinder_params[i];
         obj_shape_confidence_[id] = obj_shape_confidence[i];
+        best_obj_guess_[id] = best_obj_guess[i];
 
         *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
@@ -1509,6 +1510,7 @@ logger->log_debug(name(), "");
         tmp_centroids[id] = new_centroids[row];
         cylinder_params_[id] = cylinder_params[row];
         obj_shape_confidence_[id] = obj_shape_confidence[row];
+        best_obj_guess_[id] = best_obj_guess[row];
         // remove id from old_centroids_ because we don't want the same id twices
         *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
       }
