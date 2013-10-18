@@ -1257,13 +1257,14 @@ unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, C
       //Centroids in cam frame:
       //pcl::compute3DCentroid(*cloud_objs_, it->indices, centroids[centroid_i]);
 
-      ColorCloudPtr single_cluster(new ColorCloud());
-      ColorCloudPtr obj_in_base_frame(new ColorCloud());
+      // TODO fix this; we only want to copy the cluster, the color is incorrect
+      ColorCloudPtr single_cluster =
+          colorize_cluster(input_cloud, it->indices, cluster_colors[centroid_i]);
       single_cluster->header.frame_id = input_cloud->header.frame_id;
       single_cluster->width = it->indices.size();
       single_cluster->height = 1;
-      single_cluster->points.resize(it->indices.size());
 
+      ColorCloudPtr obj_in_base_frame(new ColorCloud());
       obj_in_base_frame->header.frame_id = "/base_link";
       obj_in_base_frame->width = it->indices.size();
       obj_in_base_frame->height = 1;
