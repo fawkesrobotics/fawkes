@@ -141,7 +141,7 @@ class TabletopObjectsThread
 
   ColorCloudPtr colorize_cluster(CloudConstPtr input_cloud, const std::vector<int> &cluster, const uint8_t color[]);
 
-  unsigned int cluster_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters);
+  unsigned int cluster_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters, std::vector<ColorCloudPtr> &tmp_obj_clusters);
 
   bool next_id(unsigned int &id);
 

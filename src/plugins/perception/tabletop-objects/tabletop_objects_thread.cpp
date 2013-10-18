@@ -1111,8 +1111,9 @@ TabletopObjectsThread::loop()
   sor.filter(*cloud_objs_);
 
   //OBJECTS
+  std::vector<pcl::PointCloud<ColorPointType>::Ptr> tmp_obj_clusters(MAX_CENTROIDS);
   if (cloud_objs_->points.size() > 0) {
-    object_count = cluster_objects(cloud_objs_, tmp_clusters);
+    object_count = cluster_objects(cloud_objs_, tmp_clusters, tmp_obj_clusters);
     if (object_count == 0) {
       logger->log_info(name(), "No clustered points found");
     }
@@ -1144,6 +1145,15 @@ TabletopObjectsThread::loop()
   pcl_utils::copy_time(input_, fsimplified_polygon_);
 
   for (unsigned int i = 0; i < f_obj_clusters_.size(); i++) {
+    if (centroids_.count(i)) {
+      *obj_clusters_[i] = *tmp_obj_clusters[i];
+    }
+    else {
+      obj_clusters_[i]->clear();
+      // add point to force update
+      // TODO find proper way to update an empty cloud
+//      obj_clusters_[i]->push_back(ColorPointType());
+    }
     pcl_utils::copy_time(input_, f_obj_clusters_[i]);
   }
 
@@ -1223,7 +1233,10 @@ bool TabletopObjectsThread::next_id(unsigned int &id) {
   free_ids_.pop_front();
   return true;
 }
-unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, ColorCloudPtr tmp_clusters) {
+unsigned int
+TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud,
+    ColorCloudPtr tmp_clusters,
+    std::vector<ColorCloudPtr> &tmp_obj_clusters) {
   unsigned int object_count = 0;
   std::vector<pcl::PointIndices> cluster_indices = extract_object_clusters(input_cloud);
   std::vector<pcl::PointIndices>::const_iterator it;
@@ -1239,7 +1252,6 @@ unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, C
 
 
     unsigned int centroid_i = 0;
-    unsigned int obj_i = 0; // can we use centroid_i instead?
 
     std::vector<std::vector<double>> obj_likelihoods_;
     std::vector<double> init_likelihoods;
@@ -1270,7 +1282,8 @@ unsigned int TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud, C
       obj_in_base_frame->height = 1;
       obj_in_base_frame->points.resize(it->indices.size());
 
-      *obj_clusters_[obj_i++] = *single_cluster;
+      // don't add cluster here since the id is wrong
+      //*obj_clusters_[obj_i++] = *single_cluster;
 
 pcl_utils::transform_pointcloud("/base_link", *single_cluster,
         *obj_in_base_frame, *tf_listener);
@@ -1439,7 +1452,10 @@ logger->log_debug(name(), "");
         obj_shape_confidence_[id] = obj_shape_confidence[i];
         best_obj_guess_[id] = best_obj_guess[i];
 
-        *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
+        ColorCloudPtr colorized_cluster =
+            colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
+        *tmp_clusters += *colorized_cluster;
+        tmp_obj_clusters[id] = colorized_cluster;
       }
     }
     else { // !first_run_
@@ -1512,7 +1528,10 @@ logger->log_debug(name(), "");
         obj_shape_confidence_[id] = obj_shape_confidence[row];
         best_obj_guess_[id] = best_obj_guess[row];
         // remove id from old_centroids_ because we don't want the same id twices
-        *tmp_clusters += *colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
+        ColorCloudPtr colorized_cluster =
+            colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
+        *tmp_clusters += *colorized_cluster;
+        tmp_obj_clusters[id] = colorized_cluster;
       }
 
       TIMETRACK_INTER(ttc_hungarian_, ttc_old_centroids_)
