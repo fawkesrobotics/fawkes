@@ -17,6 +17,10 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
+include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/ros.mk
+
+ENABLE_VISUAL_DEBUGGING = 1
 
 UTILS = utils/rob utils/geometry utils/occupancygrid drive_realization drive_modes search
 
@@ -31,15 +35,52 @@ else
   WARN_TARGETS += warning_tf
 endif
 
+ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
+  ifeq ($(HAVE_ROS),1)
+    ifeq ($(call ros-have-pkg,visualization_msgs),1)
+      ifeq ($(call ros-have-pkg,nav_msgs),1)
+        CFLAGS  += -DHAVE_VISUAL_DEBUGGING $(CFLAGS_ROS)
+        CFLAGS  += $(call ros-pkg-cflags,visualization_msgs)
+        CFLAGS  += $(call ros-pkg-cflags,nav_msgs)
+        LDFLAGS += $(LDFLAGS_ROS)
+        LDFLAGS += $(call ros-pkg-lflags,visualization_msgs)
+        LDFLAGS += $(call ros-pkg-lflags,nav_msgs)
+        LIBS_colli += fawkesrosaspect
+      else
+        ENABLE_VISUAL_DEBUGGING = 0
+        WARN_TARGETS += warning_nav_msgs
+      endif
+    else
+      ENABLE_VISUAL_DEBUGGING = 0
+      WARN_TARGETS += warning_visualization_msgs
+    endif
+  else
+    ENABLE_VISUAL_DEBUGGING = 0
+    WARN_TARGETS += warning_ros
+  endif
+endif
+
+ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
+  CFLAGS  += $(call boost-lib-cflags,thread)
+  LDFLAGS += $(call boost-lib-ldflags,thread)
+endif
+
 PLUGINS_all = $(PLUGINDIR)/colli.$(SOEXT)
 OBJS_all    = $(OBJS_colli)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf warning_ros warning_nav_msgs
+.PHONY: warning_tf warning_ros warning_visualization_msgs warning_nav_msgs
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tf support for colli$(TNORMAL) (fawkestf not available)"
+warning_ros:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting visual debugging$(TNORMAL) (ROS not available)"
+warning_visualization_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting visual debugging$(TNORMAL) (ROS package visualization_msgs not available)"
+warning_nav_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting visual debugging$(TNORMAL) (ROS package nav_msgs not available)"
+
 endif
 
 include $(BUILDSYSDIR)/base.mk
