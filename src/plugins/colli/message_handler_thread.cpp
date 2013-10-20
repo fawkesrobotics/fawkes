@@ -90,7 +90,7 @@ ColliMessageHandlerThread::loop()
 
       colli_relgoto(msg->x(), -msg->y(), -msg->orientation(),
                     max_velocity_, escaping_enabled_,
-                    security_distance_, NavigatorInterface::SlowAllowBackward);
+                    security_distance_);
 
       //~ __colli_cmd_sent = true;
 
