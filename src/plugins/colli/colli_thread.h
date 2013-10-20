@@ -58,6 +58,8 @@ namespace fawkes
 
 }
 
+class ColliVisualizationThread;
+
 class ColliThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
@@ -75,7 +77,7 @@ class ColliThread
   virtual void loop();
   virtual void finalize();
 
-
+  virtual void set_vis_thread(ColliVisualizationThread* vis_thread);
  private:
   /* ************************************************************************ */
   /* PRIVATE OBJECT VARIABLES                                                 */
@@ -103,6 +105,7 @@ class ColliThread
   fawkes::CSelectDriveMode*       m_pSelectDriveMode;  // the drive mode selection module
   fawkes::CBaseMotorInstruct*     m_pMotorInstruct;    // the motor instructor module
 
+  ColliVisualizationThread*       vis_thread_;         // the VisualizationThread
 
   /* ************************************************************************ */
   /* PRIVATE VARIABLES THAT HAVE TO BE HANDLED ALL OVER THE MODULE            */

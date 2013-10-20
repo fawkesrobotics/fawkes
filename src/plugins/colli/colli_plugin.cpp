@@ -21,6 +21,9 @@
 
 #include "colli_thread.h"
 #include "message_handler_thread.h"
+#ifdef HAVE_VISUAL_DEBUGGING
+ #include "visualization_thread.h"
+#endif
 
 #include <core/plugin.h>
 
@@ -33,7 +36,14 @@ public:
       : Plugin(config)
   {
     thread_list.push_back(new ColliMessageHandlerThread());
-    thread_list.push_back(new ColliThread());
+    ColliThread* colli_thread = new ColliThread();
+    thread_list.push_back(colli_thread);
+#ifdef HAVE_VISUAL_DEBUGGING
+    ColliVisualizationThread* vis_thread = new ColliVisualizationThread();
+    thread_list.push_back(vis_thread);
+    colli_thread->set_vis_thread( vis_thread );
+#endif
+
   }
 };
 

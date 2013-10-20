@@ -19,6 +19,9 @@
  */
 
 #include "colli_thread.h"
+#ifdef HAVE_VISUAL_DEBUGGING
+ #include "visualization_thread.h"
+#endif
 
 #include "common/defines.h"
 #include "drive_modes/select_drive_mode.h"
@@ -39,7 +42,8 @@ using namespace std;
 
 ColliThread::ColliThread()
   : Thread("ColliThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+    vis_thread_( 0 )
 {
 }
 
@@ -84,6 +88,10 @@ ColliThread::init()
   RegisterAtBlackboard();
   InitializeModules();
 
+#ifdef HAVE_VISUAL_DEBUGGING
+  vis_thread_->setup(m_pLaserOccGrid, m_pSearch, m_pLaser, &m_LaserGridPos);
+#endif
+
   // adjust the frequency of how often loop() should be processed
   float fawkes_loop_time_ms = config->get_uint("/fawkes/mainapp/desired_loop_time") / 1000.f;
   loop_count_trigger_ = m_ColliFrequency / fawkes_loop_time_ms;
@@ -125,7 +133,11 @@ ColliThread::finalize()
   logger->log_info(name(), "(finalize): Destructing done.");
 }
 
-
+void
+ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
+{
+  vis_thread_ = vis_thread;
+}
 
 
 /* **************************************************************************** */
@@ -372,6 +384,12 @@ ColliThread::loop()
 
   // Send motor and colli data away.
   m_pColliDataObj->write();
+
+  // visualize the new information
+#ifdef HAVE_VISUAL_DEBUGGING
+  vis_thread_->wakeup();
+#endif
+
 }
 
 
