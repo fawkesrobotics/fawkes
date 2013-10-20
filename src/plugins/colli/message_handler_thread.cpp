@@ -77,10 +77,12 @@ ColliMessageHandlerThread::loop()
   // process interface messages
   while( !if_navi_->msgq_empty() ) {
     if (if_navi_->msgq_first_is<NavigatorInterface::StopMessage>()) {
+      logger->log_debug(name(), "StopMessage received");
       colli_stop();
 
     } else if (if_navi_->msgq_first_is<NavigatorInterface::CartesianGotoMessage>()) {
       NavigatorInterface::CartesianGotoMessage *msg = if_navi_->msgq_first<NavigatorInterface::CartesianGotoMessage>();
+      logger->log_debug(name(), "CartesianGotoMessage received, x:%f  y:%f  ori:%f", msg->x(), msg->y(), msg->orientation());
       // Converts from Fawkes Coord Sys -> RCSoftX Coord Sys, hence X_f = X_r, Y_f = -Y_r, Ori_f = -Ori_r
       if_navi_->set_msgid(msg->id());
       if_navi_->set_dest_x(msg->x());
@@ -101,6 +103,7 @@ ColliMessageHandlerThread::loop()
 
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::PolarGotoMessage>() ) {
       NavigatorInterface::PolarGotoMessage *msg = if_navi_->msgq_first<NavigatorInterface::PolarGotoMessage>();
+      logger->log_debug(name(), "PolarGotoMessage received, phi:%f  dist:%f", msg->phi(), msg->dist());
       // Converts from Fawkes Coord Sys -> RCSoftX Coord Sys, hence D_f = D_r, Phi_f = - Phi_r, Ori_f = Ori_r
 
       float cart_x = 0, cart_y = 0;
