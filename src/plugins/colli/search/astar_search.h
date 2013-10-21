@@ -80,38 +80,34 @@ typedef struct point_struct point_t;
 class CSearch: public CAbstractSearch
 {
  public:
-  //
+  /** Constructor */
   CSearch( CLaserOccupancyGrid * occGrid , Logger* logger, Configuration* config);
 
-  //
+  /** Destructor */
   virtual ~CSearch();
 
-
-  // update complete plan things
-  // precondition: the occupancy grid has to be updated previously!
+  /** update complete plan things
+   * precondition: the occupancy grid has to be updated previously!
+   */
   void Update( int roboX, int roboY, int targetX, int targetY );
 
-  // returns, if the update was successful or not.
-  // precondition: update had to be called.
+  /** returns, if the update was successful or not.
+   * precondition: update had to be called.
+   */
   bool UpdatedSuccessful();
-
 
  private:
 
-  /** Returns the current, modified waypoint to drive to.
-   */
+  /** Returns the current, modified waypoint to drive to. */
   point_t CalculateLocalTarget();
 
-  /** Adjust the waypoint if it is not the final point.
-   */
+  /** Adjust the waypoint if it is not the final point. */
   point_t AdjustWaypoint( const point_t &local_target );
 
-  /** Returns the current trajectory point to drive to.
-   */
+  /** Returns the current trajectory point to drive to. */
   point_t CalculateLocalTrajectoryPoint( );
 
-  /** Method for checking if an obstacle is between two points.
-   */
+  /** Method for checking if an obstacle is between two points. */
   bool IsObstacleBetween( const point_t &a, const point_t &b, const int maxcount );
 
 
@@ -120,8 +116,8 @@ class CSearch: public CAbstractSearch
   //    VARIABLES
   // --------------------------------- //
 
-  CAStar * m_pAStar;                // the A* search algorithm
-  std::vector< point_t > m_vPlan;    // the local representation of the plan
+  CAStar * m_pAStar;              /**< the A* search algorithm */
+  std::vector< point_t > m_vPlan; /**< the local representation of the plan */
 
   point_t m_RoboPosition, m_TargetPosition;
   bool m_UpdatedSuccessful;
