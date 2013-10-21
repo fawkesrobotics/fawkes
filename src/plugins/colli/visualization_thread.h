@@ -61,8 +61,7 @@ class ColliVisualizationThread
 
   virtual void setup(fawkes::CLaserOccupancyGrid* occ_grid,
                      fawkes::CSearch* search,
-                     fawkes::Laser* laser,
-                     fawkes::point_t* gridpos_laser);
+                     fawkes::Laser* laser);
 
  private:
   fawkes::Mutex mutex_;
@@ -83,8 +82,6 @@ class ColliVisualizationThread
   std::vector<fawkes::point_t> cells_mid_;
   std::vector<fawkes::point_t> cells_far_;
   std::vector<fawkes::point_t> cells_free_;
-
-  fawkes::point_t *gridpos_laser_;
 
 #endif
 };

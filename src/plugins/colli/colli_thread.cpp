@@ -89,7 +89,7 @@ ColliThread::init()
   InitializeModules();
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  vis_thread_->setup(m_pLaserOccGrid, m_pSearch, m_pLaser, &m_LaserGridPos);
+  vis_thread_->setup(m_pLaserOccGrid, m_pSearch, m_pLaser);
 #endif
 
   // adjust the frequency of how often loop() should be processed

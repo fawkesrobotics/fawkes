@@ -46,8 +46,7 @@ ColliVisualizationThread::ColliVisualizationThread()
  : fawkes::Thread("ColliVisualizationThread", Thread::OPMODE_WAITFORWAKEUP),
    occ_grid_( 0 ),
    search_( 0 ),
-   laser_( 0 ),
-   gridpos_laser_( 0 )
+   laser_( 0 )
 {
 }
 
@@ -95,7 +94,7 @@ ColliVisualizationThread::finalize()
 void
 ColliVisualizationThread::loop()
 {
-  if( (occ_grid_ == NULL) || (search_ == NULL) || (laser_ == NULL) || (gridpos_laser_ = NULL) )
+  if( (occ_grid_ == NULL) || (search_ == NULL) || (laser_ == NULL) )
     return;
 
   MutexLocker lock(&mutex_);
@@ -125,11 +124,12 @@ ColliVisualizationThread::loop()
   nav_msgs::GridCells grid_cells_far(grid);
   nav_msgs::GridCells grid_cells_free(grid);
   Probability prob;
+  point_t gridpos_laser = occ_grid_->GetLaserPosition();
   for( int y=0; y < occ_grid_->getHeight(); ++y ) {
     for( int x=0; x < occ_grid_->getWidth(); ++x ) {
       geometry_msgs::Point p;
-      p.x =  (x - gridpos_laser_->x) * grid.cell_width;
-      p.y =  (y - gridpos_laser_->y) * grid.cell_height;
+      p.x =  (x - gridpos_laser.x) * grid.cell_width;
+      p.y =  (y - gridpos_laser.y) * grid.cell_height;
       p.z = 0;
 
       prob = occ_grid_->getProb(x,y);
@@ -161,15 +161,12 @@ ColliVisualizationThread::loop()
 void
 ColliVisualizationThread::setup(CLaserOccupancyGrid* occ_grid,
                                CSearch* search,
-                               Laser* laser,
-                               point_t* gridpos_laser)
+                               Laser* laser)
 {
   MutexLocker lock(&mutex_);
   occ_grid_ = occ_grid;
   search_   = search;
   laser_    = laser;
-
-  gridpos_laser_ = gridpos_laser;
 }
 
 #endif
