@@ -130,7 +130,17 @@ CSearch::UpdatedSuccessful()
   return m_UpdatedSuccessful;
 }
 
+std::vector<point_t>*
+CSearch::GetPlan()
+{
+  return &m_vPlan;
+}
 
+point_t
+CSearch::GetRoboPosition()
+{
+  return m_RoboPosition;
+}
 
 /* **************************************************************************** */
 /* **************************************************************************** */

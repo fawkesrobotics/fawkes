@@ -96,6 +96,12 @@ class CSearch: public CAbstractSearch
    */
   bool UpdatedSuccessful();
 
+  /** Get the current plan */
+  std::vector<point_t>* GetPlan();
+
+  /** Get the robot's position in the grid, used for the plan */
+  point_t GetRoboPosition();
+
  private:
 
   /** Returns the current, modified waypoint to drive to. */
