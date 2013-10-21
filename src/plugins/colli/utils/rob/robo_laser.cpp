@@ -97,7 +97,7 @@ Laser::Laser( Laser360Interface* laser,
 
   string cfg_path = "/plugins/colli/laser_calibration/";
 
-  if( config->exists(cfg_path.c_str()) ) {
+  if( config->exists((cfg_path + "IgnoreFRStart").c_str()) ) {
     // query config file for ignore-readings
     m_IgnoreFRStart = config->get_int((cfg_path + "IgnoreFRStart").c_str());
     m_IgnoreFREnd = config->get_int((cfg_path + "IgnoreFREnd").c_str());
