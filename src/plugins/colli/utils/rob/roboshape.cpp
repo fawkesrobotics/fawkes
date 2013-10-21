@@ -24,6 +24,7 @@
 
 #include <logging/logger.h>
 #include <config/config.h>
+#include <core/exception.h>
 #include <utils/math/angle.h>
 
 #include <cmath>
@@ -38,7 +39,7 @@ namespace fawkes
 // initialize RoboShape
 RoboShape::RoboShape( const char * cfg_prefix,
                       fawkes::Logger* logger,
-                      fawkes::Configuration* config) throw (int)
+                      fawkes::Configuration* config)
 {
   logger_ = logger;
   std::string cfg = cfg_prefix;
@@ -61,8 +62,7 @@ RoboShape::RoboShape( const char * cfg_prefix,
     // go on, everything is fine, cause all are infinity
 
   } else {
-    logger_->log_error("RoboShape", "Error: Initializing Infinity-Values failed! Aborting...");
-    exit(0);
+    throw fawkes::Exception("RoboShape: Initializing Infinity-Values failed!");
   }
 
   m_widthAddFront = config->get_float((cfg + "WIDTH_ADD_FRONT").c_str());
@@ -104,10 +104,7 @@ RoboShape::RoboShape( const char * cfg_prefix,
 
   } else {
     // WRONG FORMAT!!!
-    m_isAngular = false;
-    m_isRound = false;
-    logger_->log_error("RoboShape", "Error: Loading RoboShape from ConfigFile failed! Aborting...");
-    exit(0);
+    throw fawkes::Exception("RoboShape: Loading RoboShape from ConfigFile failed! Invalid config value for ROBOSHAPE");
   }
 
   logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", m_robotToFront);
@@ -180,8 +177,7 @@ RoboShape::GetRobotLengthforRad( float anglerad )
 
   if ( IsRoundRobot() == true ) {
     // TODO
-    logger_->log_error("RoboShape", "GetRobotLengthforRad is NOT IMPLEMENTED YET for round robots");
-    exit(0);
+    throw fawkes::Exception("RoboShape: GetRobotLengthforRad is NOT IMPLEMENTED YET for round robots");
 
   } else if ( IsAngularRobot() == true ) {
 
@@ -222,13 +218,11 @@ RoboShape::GetRobotLengthforRad( float anglerad )
       }
 
     } else {
-      logger_->log_error("RoboShape", "alpha has no valid value");
-      exit(0);
+      throw fawkes::Exception("RoboShape: alpha has no valid value");
     }
 
   } else {
-    logger_->log_error("RoboShape", "Error: Cannot return the robolength for unspecific robot!");
-    exit(0);
+    throw fawkes::Exception("RoboShape: Cannot return the robolength for unspecific robot!");
   }
 }
 
@@ -272,10 +266,9 @@ RoboShape::GetRadius()
 {
   if ( IsRoundRobot() == true )
     return m_radius;
-  else {
+  else
     logger_->log_error("RoboShape", "The Robot is not round!");
-    exit(0);
-  }
+
   return 0.0;
 }
 
@@ -285,10 +278,9 @@ RoboShape::GetCompleteRadius()
   if ( IsRoundRobot() == true )
     return ( std::max( m_radius + m_widthAddFront + m_widthAddBack,
                        m_radius + m_widthAddRight + m_widthAddLeft ) );
-  else {
+  else
     logger_->log_error("RoboShape", "Error: The Robot is not round!");
-    exit(0);
-  }
+
   return 0.0;
 }
 
@@ -298,10 +290,9 @@ RoboShape::GetCompleteWidthX()
 {
   if ( IsAngularRobot() == true )
     return ( m_widthX + m_widthAddFront + m_widthAddBack );
-  else {
+  else
     logger_->log_error("RoboShape", "The Robot is not angular!");
-    exit(0);
-  }
+
   return 0.0;
 }
 
@@ -312,10 +303,9 @@ RoboShape::GetCompleteWidthY()
 {
   if ( IsAngularRobot() == true )
     return ( m_widthY + m_widthAddRight + m_widthAddLeft );
-  else {
-  logger_->log_error("RoboShape", "The Robot is not angular!");
-  exit(0);
-  }
+  else
+    logger_->log_error("RoboShape", "The Robot is not angular!");
+
   return 0.0;
 }
 
@@ -326,10 +316,8 @@ RoboShape::GetWidthX()
   if ( IsAngularRobot() == true )
     return m_widthX;
   else
-    {
-      logger_->log_error("RoboShape", "The Robot is not angular!");
-      exit(0);
-    }
+    logger_->log_error("RoboShape", "The Robot is not angular!");
+
   return 0.0;
 }
 
@@ -340,10 +328,9 @@ RoboShape::GetWidthY()
 {
   if ( IsAngularRobot() == true )
     return m_widthY;
-  else {
+  else
     logger_->log_error("RoboShape", "The Robot is not angular!");
-    exit(0);
-  }
+
   return 0.0;
 }
 
@@ -352,13 +339,7 @@ RoboShape::GetWidthY()
 float
 RoboShape::GetLaserOffsetX()
 {
-  if ( isinf(m_laserOffsetX) == false )
-    return m_laserOffsetX;
-  else {
-    logger_->log_error("RoboShape", "LaserOffsetX is not set!");
-    exit(0);
-  }
-  return 0.0;
+  return m_laserOffsetX;
 }
 
 
@@ -366,13 +347,7 @@ RoboShape::GetLaserOffsetX()
 float
 RoboShape::GetLaserOffsetY()
 {
-  if ( isinf(m_laserOffsetY) == false )
-    return m_laserOffsetY;
-  else  {
-    logger_->log_error("RoboShape", "LaserOffsetY is not set!");
-    exit(0);
-  }
-  return 0.0;
+  return m_laserOffsetY;
 }
 
 } // namespace fawkes

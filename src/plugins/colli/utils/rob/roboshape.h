@@ -51,7 +51,7 @@ class RoboShape
    */
   RoboShape( const char * cfg_prefix,
              fawkes::Logger* logger,
-             fawkes::Configuration* config) throw (int);
+             fawkes::Configuration* config);
 
   /** Destructor.
    */
