@@ -139,6 +139,8 @@ class ColliThread
   float m_MaximumRoboIncrease;                   // maximum increasement of the robots size
   int m_RobocupMode;                             // indicator if robocup or not
 
+  std::string cfg_frame_base_;    /**< The frame of the robot's base */
+  std::string cfg_frame_laser_;   /**< The frame of the laser */
 
   // stop on target stuff
   std::vector< float > m_oldAnglesToTarget;      // the old angles to the target
@@ -146,6 +148,8 @@ class ColliThread
   // Do we  use a RWI Style Robot
   bool isRwiRobot;
 
+  fawkes::cart_coord_2d_t laser_to_base_; /**< The distance from laser to base */
+  bool laser_to_base_valid_;              /**< Do we have a valid distance from laser to base? */
 
   // manually adjust the frequency on how often the loop should be processed
   unsigned int loop_count_;

@@ -61,6 +61,9 @@ ColliThread::init()
   m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
   m_RobocupMode         = config->get_int((cfg_prefix + "ROBOCUP_MODE").c_str());
 
+  cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
+  cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
+
   cfg_prefix += "OccGrid/";
   m_OccGridHeight       = config->get_float((cfg_prefix + "HEIGHT").c_str());
   m_OccGridWidth        = config->get_float((cfg_prefix + "WIDTH").c_str());
@@ -98,6 +101,22 @@ ColliThread::init()
   logger->log_info(name(), "will process 1 loop() after %u main_loops", loop_count_trigger_);
   loop_count_ = 0;
 
+  // get distance from laser to robot base
+  laser_to_base_valid_ = false;
+  tf::Stamped<tf::Point> p_laser;
+  tf::Stamped<tf::Point> p_base( tf::Point(0,0,0), fawkes::Time(0,0), cfg_frame_base_);
+  try {
+    tf_listener->transform_point(cfg_frame_laser_, p_base, p_laser);
+    laser_to_base_.x = p_laser.x();
+    laser_to_base_.y = p_laser.y();
+    logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
+    laser_to_base_valid_ = true;
+  } catch(Exception &e) {
+    logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
+                     cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
+  }
+
+  // store old target
   m_oldTargetX   = m_pColliTargetObj->dest_x();
   m_oldTargetY   = m_pColliTargetObj->dest_y();
   m_oldTargetOri = m_pColliTargetObj->dest_ori();
@@ -191,6 +210,24 @@ ColliThread::loop()
 
   // reset loop_count
   loop_count_ = 0;
+
+  // Do not continue if we don't have a valid transform from base to laser yet
+  if( !laser_to_base_valid_ ) {
+    try {
+      tf::Stamped<tf::Point> p_laser;
+      tf::Stamped<tf::Point> p_base( tf::Point(0,0,0), fawkes::Time(0,0), cfg_frame_base_);
+
+      tf_listener->transform_point(cfg_frame_laser_, p_base, p_laser);
+      laser_to_base_.x = p_laser.x();
+      laser_to_base_.y = p_laser.y();
+      logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
+      laser_to_base_valid_ = true;
+    } catch(Exception &e) {
+      logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
+                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
+      return;
+    }
+  }
 
   // to be on the sure side of life
   m_ProposedTranslation = 0.0;
@@ -601,8 +638,6 @@ ColliThread::UpdateColliStateMachine()
 void
 ColliThread::UpdateOwnModules()
 {
-  float motor_distance = 19.4;
-
   if ( m_RobocupMode == 1 ) {
     // set the cell size according to the current speed
     m_pLaserOccGrid->setCellWidth( (int)m_OccGridCellWidth );
@@ -629,8 +664,8 @@ ColliThread::UpdateOwnModules()
   laserpos_x  = max ( laserpos_x, 10 );
   laserpos_x  = min ( laserpos_x, (int)(m_pLaserOccGrid->getWidth()-10) );
 
-  int robopos_x = laserpos_x + (int)(motor_distance/m_pLaserOccGrid->getCellWidth());
-  int robopos_y = laserpos_y;
+  int robopos_x = laserpos_x + (int)(laser_to_base_.x/m_pLaserOccGrid->getCellWidth());
+  int robopos_y = laserpos_y + (int)(laser_to_base_.y/m_pLaserOccGrid->getCellHeight());
 
   // coordinate transformation for target point
   float aX = m_TargetPointX - m_pMotorInstruct->GetCurrentX();

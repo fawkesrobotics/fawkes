@@ -49,6 +49,11 @@ plugins/colli:
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
 
+  frame:
+    # base_link frame
+    base: !frame /base_link
+    laser: !frame /base_laser
+
   OccGrid:
     # Occgrid height in m
     HEIGHT: 6.5
