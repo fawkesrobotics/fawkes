@@ -65,6 +65,11 @@ RoboShape::RoboShape( const char * cfg_prefix,
     exit(0);
   }
 
+  m_widthAddFront = config->get_float((cfg + "WIDTH_ADD_FRONT").c_str());
+  m_widthAddRight = config->get_float((cfg + "WIDTH_ADD_RIGHT").c_str());
+  m_widthAddBack  = config->get_float((cfg + "WIDTH_ADD_BACK").c_str());
+  m_widthAddLeft  = config->get_float((cfg + "WIDTH_ADD_LEFT").c_str());
+
   int shape = config->get_int((cfg + "ROBOSHAPE").c_str());
   if( shape == 1 ) {
     // ANGULAR
@@ -72,10 +77,6 @@ RoboShape::RoboShape( const char * cfg_prefix,
     m_isRound = false;
     m_widthX        = config->get_float((cfg + "WIDTH_X").c_str());
     m_widthY        = config->get_float((cfg + "WIDTH_Y").c_str());
-    m_widthAddFront = config->get_float((cfg + "WIDTH_ADD_FRONT").c_str());
-    m_widthAddRight = config->get_float((cfg + "WIDTH_ADD_RIGHT").c_str());
-    m_widthAddBack  = config->get_float((cfg + "WIDTH_ADD_BACK").c_str());
-    m_widthAddLeft  = config->get_float((cfg + "WIDTH_ADD_LEFT").c_str());
     m_laserOffsetX  = config->get_float((cfg + "LASER_OFFSET_X_FROM_BACK").c_str());
     m_laserOffsetY  = config->get_float((cfg + "LASER_OFFSET_Y_FROM_LEFT").c_str());
 
@@ -85,20 +86,12 @@ RoboShape::RoboShape( const char * cfg_prefix,
     m_robotToFront = (m_widthX - m_laserOffsetX) + m_widthAddFront;
 
     logger_->log_info("RoboShape", "Shape is angular!");
-    logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", m_robotToFront);
-    logger_->log_info("RoboShape", "|#-->  (m)  is to right: %f", m_robotToRight);
-    logger_->log_info("RoboShape", "|#-->  (m)  is to left : %f", m_robotToLeft);
-    logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", m_robotToBack);
 
   } else if ( shape == 2 ) {
     // ROUND
     m_isAngular = false;
     m_isRound = true;
     m_radius        = config->get_float((cfg + "RADIUS").c_str());
-    m_widthAddFront = config->get_float((cfg + "WIDTH_ADD_FRONT").c_str());
-    m_widthAddRight = config->get_float((cfg + "WIDTH_ADD_RIGHT").c_str());
-    m_widthAddBack  = config->get_float((cfg + "WIDTH_ADD_BACK").c_str());
-    m_widthAddLeft  = config->get_float((cfg + "WIDTH_ADD_LEFT").c_str());
     m_laserOffsetX  = config->get_float((cfg + "LASER_OFFSET_X_FROM_MIDDLE").c_str());
     m_laserOffsetY  = config->get_float((cfg + "LASER_OFFSET_Y_FROM_MIDDLE").c_str());
 
@@ -108,10 +101,6 @@ RoboShape::RoboShape( const char * cfg_prefix,
     m_robotToRight = m_radius + m_laserOffsetY + m_widthAddRight;
 
     logger_->log_info("RoboShape", "Shape is round!");
-    logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", m_robotToFront);
-    logger_->log_info("RoboShape", "|#-->  (m)  is to right: %f", m_robotToRight);
-    logger_->log_info("RoboShape", "|#-->  (m)  is to left : %f", m_robotToLeft);
-    logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", m_robotToBack);
 
   } else {
     // WRONG FORMAT!!!
@@ -120,6 +109,11 @@ RoboShape::RoboShape( const char * cfg_prefix,
     logger_->log_error("RoboShape", "Error: Loading RoboShape from ConfigFile failed! Aborting...");
     exit(0);
   }
+
+  logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", m_robotToFront);
+  logger_->log_info("RoboShape", "|#-->  (m)  is to right: %f", m_robotToRight);
+  logger_->log_info("RoboShape", "|#-->  (m)  is to left : %f", m_robotToLeft);
+  logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", m_robotToBack);
 }
 
 
