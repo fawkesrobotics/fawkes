@@ -152,9 +152,6 @@ class Laser
   float TimeDiff() const;
   // ======================================================= //
 
-  /** Offset of the laser X coordinate behind the motor axle */
-  static const float LASER_X_OFFSET;
-
  protected:
 
   // the number of readings

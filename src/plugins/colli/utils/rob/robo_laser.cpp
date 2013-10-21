@@ -66,8 +66,6 @@ namespace fawkes
 }
 #endif
 
-const float Laser::LASER_X_OFFSET = 0.21;
-
 // Initialize the Laser by giving the Laser_Client to it, and
 // calculating the number of readings we get ( the size of the pos array )
 // and initialize it directly
