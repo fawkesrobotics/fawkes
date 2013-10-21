@@ -150,32 +150,32 @@ CEscapeDriveModule::Update()
 
   if ( dangerFront && dangerBack && turnRightAllowed ) {
     m_ProposedTranslation = 0.0;
-    m_ProposedRotation = m_MaxRotation;
+    m_ProposedRotation = -m_MaxRotation;
     return;
   }
 
   if ( dangerFront && dangerBack && turnLeftAllowed ) {
     m_ProposedTranslation = 0.0;
-    m_ProposedRotation = -m_MaxRotation;
+    m_ProposedRotation = m_MaxRotation;
     return;
   }
 
   if (!dangerFront && dangerBack) {
     m_ProposedTranslation = m_MaxTranslation;
 
-    if ( (turnRightAllowed) && (m_LocalTargetY >= m_RoboY) )
-      m_ProposedRotation =  m_MaxRotation;
-    else if ( (turnLeftAllowed) && (m_LocalTargetY <= m_RoboY) )
-      m_ProposedRotation = -m_MaxRotation;
+    if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
+      m_ProposedRotation =  -m_MaxRotation;
+    else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
+      m_ProposedRotation = m_MaxRotation;
   }
 
   if (dangerFront && !dangerBack) {
     m_ProposedTranslation = -m_MaxTranslation;
 
-    if ( (turnRightAllowed) && (m_LocalTargetY >= m_RoboY) )
-      m_ProposedRotation =  m_MaxRotation;
-    else if ( (turnLeftAllowed) && (m_LocalTargetY <= m_RoboY) )
-      m_ProposedRotation = -m_MaxRotation;
+    if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
+      m_ProposedRotation =  -m_MaxRotation;
+    else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
+      m_ProposedRotation = m_MaxRotation;
   }
 
   if ( !dangerFront && !dangerBack ) {
@@ -185,10 +185,10 @@ CEscapeDriveModule::Update()
     else
       m_ProposedTranslation = -m_MaxTranslation;
 
-    if ( (turnRightAllowed) && (m_LocalTargetY >= m_RoboY) )
-      m_ProposedRotation =  m_MaxRotation;
-    else if ( (turnLeftAllowed) && (m_LocalTargetY <= m_RoboY) )
-      m_ProposedRotation = -m_MaxRotation;
+    if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
+      m_ProposedRotation =  -m_MaxRotation;
+    else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
+      m_ProposedRotation = m_MaxRotation;
   }
 }
 
@@ -231,19 +231,19 @@ CEscapeDriveModule::SortNormalizedReadings()
       m_vFront.push_back( m_vNormalizedReadings[i] );
 
     else if ( (pipe == 1) && !m_pLaser->IsPipe( rad ) && (rad < M_PI_2) )
-      m_vRightFront.push_back( m_vNormalizedReadings[i] );
+      m_vLeftFront.push_back( m_vNormalizedReadings[i] );
 
     else if ( (pipe == 1) && !m_pLaser->IsPipe( rad ) && (rad > M_PI_2) )
-      m_vRightBack.push_back( m_vNormalizedReadings[i] );
+      m_vLeftBack.push_back( m_vNormalizedReadings[i] );
 
     else if ( (pipe == 2) && !m_pLaser->IsPipe( rad ) )
       m_vBack.push_back( m_vNormalizedReadings[i] );
 
     else if ( (pipe == 3) && !m_pLaser->IsPipe( rad ) && (rad > 3*M_PI_2) )
-      m_vLeftFront.push_back( m_vNormalizedReadings[i] );
+      m_vRightFront.push_back( m_vNormalizedReadings[i] );
 
     else if ( (pipe == 3) && !m_pLaser->IsPipe( rad ) && (rad < 3*M_PI_2) )
-      m_vLeftBack.push_back( m_vNormalizedReadings[i] );
+      m_vRightBack.push_back( m_vNormalizedReadings[i] );
 
     else if ( (pipe == 4) && !m_pLaser->IsPipe( rad ) )
       m_vFront.push_back( m_vNormalizedReadings[i] );
