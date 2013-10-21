@@ -106,6 +106,8 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   ellipse_map = new CEllipseMap();
   logger->log_debug("CLaserOccupancyGrid", "Generating ellipse map done");
 
+  m_LaserPosition = point_t(0,0);
+
   logger->log_info("CLaserOccupancyGrid", "(Constructor): Exiting");
 }
 
@@ -157,6 +159,9 @@ void
 CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel,
                                     float xdiff, float ydiff, float oridiff )
 {
+  m_LaserPosition.x = midX;
+  m_LaserPosition.y = midY;
+
   for ( int y = 0; y < m_Height; ++y )
     for ( int x = 0; x < m_Width; ++x )
       m_OccupancyProb[x][y] = _COLLI_CELL_FREE_;
@@ -340,6 +345,12 @@ CLaserOccupancyGrid::integrateObstacle( ellipse_t ellipse )
       m_OccupancyProb[posX][posY] = fast_ellipse[i+2];
     }
   }
+}
+
+point_t
+CLaserOccupancyGrid::GetLaserPosition()
+{
+  return m_LaserPosition;
 }
 
 } // namespace fawkes

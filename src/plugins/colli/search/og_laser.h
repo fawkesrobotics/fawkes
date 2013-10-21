@@ -103,6 +103,9 @@ public:
   /** Reset all old readings and forget about the world state! */
   void ResetOld( int max_age = -1 );
 
+  /** Get the laser's position in the grid */
+  point_t GetLaserPosition();
+
 private:
 
   /** Integrate historical readings to the current occgrid. */
@@ -129,6 +132,8 @@ private:
   CEllipseMap *ellipse_map;  /**< fast ellipse map */
 
   std::vector< float > m_vOldReadings; /**< readings history */
+
+  point_t m_LaserPosition; /**< the laser's position in the grid */
 
   int m_TrigTableResolution; /**< Trigonometry table resolution */
 
