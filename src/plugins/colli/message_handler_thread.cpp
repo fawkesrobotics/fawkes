@@ -90,7 +90,7 @@ ColliMessageHandlerThread::loop()
       if_navi_->set_dest_ori(msg->orientation());
       if_navi_->set_final(false);
 
-      colli_relgoto(msg->x(), -msg->y(), -msg->orientation(),
+      colli_relgoto(msg->x(), msg->y(), msg->orientation(),
                     max_velocity_, escaping_enabled_,
                     security_distance_);
 
@@ -109,7 +109,7 @@ ColliMessageHandlerThread::loop()
       float cart_x = 0, cart_y = 0;
       polar2cart2d(msg->phi(), msg->dist(), &cart_x, &cart_y);
 
-      colli_relgoto(cart_x, -cart_y, -msg->orientation(),
+      colli_relgoto(cart_x, cart_y, msg->orientation(),
                     max_velocity_, escaping_enabled_,
                     security_distance_);
 
