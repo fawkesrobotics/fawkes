@@ -12,15 +12,6 @@ plugins/colli:
   # Robocup mode, if set to 1, this means no obstacle increasement
   ROBOCUP_MODE: 0
 
-  # maximum obstacle extension
-  ColliMaxCellExtension: 5.0
-
-  # maximum old obstacle extension
-  ColliMaxOldCellExtension: 0.25
-
-  # refined obstacle
-  RefObstacle: false
-
   # The id of navigator iface
   Navigator_interface_id: Navigator
 
@@ -28,17 +19,7 @@ plugins/colli:
   Laser_interface_id: Laser
 
   # The id of motor iface
-  Motor_interface_id: Motor Brutus
-
-  # Motor distance from laser in cm
-  #MotorDistance: 19.4
-  MotorDistance: 0
-
-  # If all the cells containing the robot must be considered
-  adjust_robo_pos: false
-
-  # Enable debug outputting
-  enable_debug_output: false
+  Motor_interface_id: Motor
 
   # Default security distance to keep to obstacles
   security_distance: 0.2
