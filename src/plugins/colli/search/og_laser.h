@@ -58,6 +58,7 @@
 #define _COLLI_SEARCH_OG_LASER_H_
 
 #include "../utils/occupancygrid/occupancygrid.h"
+#include <utils/math/types.h>
 
 namespace fawkes
 {
@@ -73,8 +74,6 @@ class CEllipseMap;
 class Logger;
 class Configuration;
 
-typedef struct ellipse_struct ellipse_t;
-
 /** CLaserOccupancyGrid.
  *  This OccGrid is derived by the Occupancy Grid originally from Andreas Strack,
  *    but modified for speed purposes.
@@ -83,15 +82,13 @@ class CLaserOccupancyGrid : public OccupancyGrid
 {
 public:
 
-  // Constructor.
+  /** Constructor. */
   CLaserOccupancyGrid( Laser * laser, Logger* logger, Configuration* config,
                        int width = 150, int height = 150,
                        int cell_width = 5, int cell_height = 5);
 
-
-  // Destructor
+  /** Descturctor. */
   ~CLaserOccupancyGrid();
-
 
   /** Put the laser readings in the occupancy grid
    *  Also, every reading gets a radius according to the relative direction
@@ -103,38 +100,22 @@ public:
   void UpdateOccGrid( int midX, int midY, float inc, float vel,
                       float xdiff, float ydiff, float oridiff );
 
-
-  /**
-   *  Reset all old readings and forget about the world state!
-   */
+  /** Reset all old readings and forget about the world state! */
   void ResetOld( int max_age = -1 );
-
 
 private:
 
-
-  /**
-   *  Integrate historical readings to the current occgrid.
-   */
+  /** Integrate historical readings to the current occgrid. */
   void IntegrateOldReadings( int midX, int midY, float inc, float vel,
                              float xdiff, float ydiff, float oridiff );
 
-
-  /**
-   *  Integrate the current readings to the current occgrid.
-   */
+  /** Integrate the current readings to the current occgrid. */
   void IntegrateNewReadings( int midX, int midY, float inc, float vel );
 
-
-  /**
-   *  Check if the current value is contained in the history.
-   */
+  /** Check if the current value is contained in the history. */
   bool Contained( float p_x, float p_y );
 
-
-  /**
-   * Integrate a single ellipse
-   *
+  /** Integrate a single ellipse
    * @param ellipse the ellipse that is to be integrated
    */
   void integrateObstacle( ellipse_t ellipse );
@@ -142,31 +123,22 @@ private:
   //  void integrateEllipseCell( int centerx, int centery,
   //                         int i, int j, float prob );
 
-  // pointer to the laser
-  Laser * m_pLaser;
+  Laser       *m_pLaser;     /**< pointer to the laser */
+  RoboShape   *m_pRoboShape; /**< my roboshape */
+  TrigTable   *m_pTrigTable; /**< fast trigonometry table */
+  CEllipseMap *ellipse_map;  /**< fast ellipse map */
 
-  // my roboshape
-  RoboShape * m_pRoboShape;
+  std::vector< float > m_vOldReadings; /**< readings history */
 
-  // fast trigonometry table
-  TrigTable * m_pTrigTable;
+  int m_TrigTableResolution; /**< Trigonometry table resolution */
 
-  // History
-  std::vector< float > m_vOldReadings;
-
-  // History concerned constants
+  /** History concerned constants */
   int m_MaxHistoryLength, m_MinHistoryLength, m_InitialHistorySize;
 
-  // Trigonometry table its resolution
-  int m_TrigTableResolution;
-
-  // Laser concerned settings
+  /** Laser concerned settings */
   float m_MinimumLaserLength, m_EllipseDistance;
 
-  int m_RobocupMode;
-
-  CEllipseMap * ellipse_map;
-
+  int m_RobocupMode; /**< robocup mode */
 };
 
 } // namespace fawkes
