@@ -70,6 +70,9 @@ ColliVisualizationThread::init()
 
   pub_cells_free_ = new ros::Publisher();
   *pub_cells_free_ = rosnode->advertise< nav_msgs::GridCells >("colli_cells_free", 1);
+
+  pub_search_path_ = new ros::Publisher();
+  *pub_search_path_ = rosnode->advertise< nav_msgs::GridCells >("colli_search_path", 1);
 }
 
 void
@@ -88,6 +91,9 @@ ColliVisualizationThread::finalize()
   delete pub_cells_far_;
   pub_cells_free_->shutdown();
   delete pub_cells_free_;
+
+  pub_search_path_->shutdown();
+  delete pub_search_path_;
 }
 
 
@@ -155,6 +161,19 @@ ColliVisualizationThread::loop()
   pub_cells_mid_->publish( grid_cells_mid );
   pub_cells_far_->publish( grid_cells_far );
   pub_cells_free_->publish( grid_cells_free );
+
+  // publish path
+  grid.cells.clear();
+  std::vector< point_t >* plan = search_->GetPlan();
+  point_t gridpos_robo = search_->GetRoboPosition();
+  for( std::vector<point_t>::iterator it=plan->begin(); it!=plan->end(); ++it ) {
+    geometry_msgs::Point p;
+    p.x =  ((*it).x - gridpos_robo.x) * grid.cell_width;
+    p.y =  ((*it).y - gridpos_robo.y) * grid.cell_height;
+    p.z = 0;
+    grid.cells.push_back( p );
+  }
+  pub_search_path_->publish( grid );
 
 }
 
