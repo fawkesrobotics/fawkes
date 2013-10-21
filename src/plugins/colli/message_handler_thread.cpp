@@ -86,8 +86,8 @@ ColliMessageHandlerThread::loop()
       // Converts from Fawkes Coord Sys -> RCSoftX Coord Sys, hence X_f = X_r, Y_f = -Y_r, Ori_f = -Ori_r
       if_navi_->set_msgid(msg->id());
       if_navi_->set_dest_x(msg->x());
-      if_navi_->set_dest_y(-msg->y());
-      if_navi_->set_dest_ori(-msg->orientation());
+      if_navi_->set_dest_y(msg->y());
+      if_navi_->set_dest_ori(msg->orientation());
       if_navi_->set_final(false);
 
       colli_relgoto(msg->x(), -msg->y(), -msg->orientation(),
@@ -107,16 +107,17 @@ ColliMessageHandlerThread::loop()
       // Converts from Fawkes Coord Sys -> RCSoftX Coord Sys, hence D_f = D_r, Phi_f = - Phi_r, Ori_f = Ori_r
 
       float cart_x = 0, cart_y = 0;
-      polar2cart2d(-msg->phi(), msg->dist(), &cart_x, &cart_y);
+      polar2cart2d(msg->phi(), msg->dist(), &cart_x, &cart_y);
 
-      colli_relgoto(cart_x, cart_y, -msg->orientation(),
+      colli_relgoto(cart_x, -cart_y, -msg->orientation(),
                     max_velocity_, escaping_enabled_,
                     security_distance_);
 
       if_navi_->set_msgid(msg->id());
       if_navi_->set_dest_x(cart_x);
       if_navi_->set_dest_y(cart_y);
-      if_navi_->set_dest_ori(-msg->orientation());
+      if_navi_->set_dest_ori(msg->orientation());
+      if_navi_->set_dest_dist(msg->dist());
       if_navi_->set_final(false);
 
       //~ __colli_cmd_sent = true;
