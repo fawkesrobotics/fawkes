@@ -60,7 +60,7 @@ ColliThread::init()
   std::string cfg_prefix = "/plugins/colli/";
   m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "FREQUENCY").c_str()));
   m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
-  m_RobocupMode         = config->get_int((cfg_prefix + "ROBOCUP_MODE").c_str());
+  cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
 
   cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
@@ -639,8 +639,8 @@ ColliThread::UpdateColliStateMachine()
 void
 ColliThread::UpdateOwnModules()
 {
-  if ( m_RobocupMode == 1 ) {
-    // set the cell size according to the current speed
+  if ( !cfg_obstacle_inc_ ) {
+    // do not increase cell size
     m_pLaserOccGrid->setCellWidth( (int)m_OccGridCellWidth );
     m_pLaserOccGrid->setCellHeight( (int)m_OccGridCellHeight );
 
@@ -710,7 +710,7 @@ ColliThread::UpdateOwnModules()
   // Robo increasement for robots
   float m_RoboIncrease = 0.0;
 
-  if ( m_RobocupMode == 1 ) {
+  if ( !cfg_obstacle_inc_ ) {
     if ( m_pColliTargetObj->security_distance() > 0.0 ) {
       m_RoboIncrease = m_pColliTargetObj->security_distance();
       logger->log_info(name(),"(UpdateOwnModules ): Setting EXTERN Robot secure distance = %f. ATTENTION TO THE ROBOT!!!!",
@@ -720,7 +720,7 @@ ColliThread::UpdateOwnModules()
     }
 
   } else {
-    // no robocup mode
+    // might need to increase obstacles depending on speed
     if ( m_pColliTargetObj->security_distance() > 0.0 ) {
       m_RoboIncrease = m_pColliTargetObj->security_distance();
       logger->log_info(name(),"(UpdateOwnModules ): Setting EXTERN Robot secure distance = %f. ATTENTION TO THE ROBOT!!!!",

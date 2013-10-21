@@ -109,7 +109,7 @@ private:
   /** Laser concerned settings */
   float m_MinimumLaserLength, m_EllipseDistance;
 
-  int m_RobocupMode; /**< robocup mode */
+  bool cfg_obstacle_inc_ ; /**< increasing obstacles or not */
 };
 
 } // namespace fawkes

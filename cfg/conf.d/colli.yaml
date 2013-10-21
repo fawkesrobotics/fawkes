@@ -9,8 +9,8 @@ plugins/colli:
   # The maximum robot increasement of laser readings
   MAX_ROBO_INCREASE: 0.04
 
-  # Robocup mode, if set to 1, this means no obstacle increasement
-  ROBOCUP_MODE: 0
+  # Define if obstacles should be increased depending on robot's speed
+  obstacle_increasement: true
 
   # The id of navigator iface
   Navigator_interface_id: Navigator

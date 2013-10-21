@@ -137,7 +137,7 @@ class ColliThread
   float m_OccGridHeight, m_OccGridWidth;         // occgrid field sizes
   int m_OccGridCellHeight, m_OccGridCellWidth;   // occgrid cell sizes
   float m_MaximumRoboIncrease;                   // maximum increasement of the robots size
-  int m_RobocupMode;                             // indicator if robocup or not
+  bool cfg_obstacle_inc_;                        // indicator if obstacles should be increased or not
 
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */

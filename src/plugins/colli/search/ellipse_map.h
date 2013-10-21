@@ -37,20 +37,15 @@ namespace fawkes
 class CEllipseMap
 {
  public:
-  //  CEllipseMap( int max_radius_width, int max_radius_height, int robocup_mode );
   CEllipseMap( );
   ~CEllipseMap() { m_mEllipses.clear(); }
 
-  const std::vector< int > GetEllipse( int width, int height, int robocup_mode );
+  const std::vector< int > GetEllipse( int width, int height, bool obstacle_increasement = true );
 
  private:
   std::map< unsigned int, CFastEllipse * > m_mEllipses;
 
 };
-
-
-//inline CEllipseMap::CEllipseMap( int max_radius_width, int max_radius_height,
-//         int robocup_mode )
 
 inline
 CEllipseMap::CEllipseMap()
@@ -73,14 +68,14 @@ CEllipseMap::CEllipseMap()
 
 
 inline const std::vector< int >
-CEllipseMap::GetEllipse( int width, int height, int robocup_mode )
+CEllipseMap::GetEllipse( int width, int height, bool obstacle_increasement )
 {
   unsigned int key = ((unsigned int)width << 16) | (unsigned int)height;
 
   std::map< unsigned int, CFastEllipse * >::iterator p = m_mEllipses.find( key );
   if ( p == m_mEllipses.end() ) {
     // ellipse nicht gefunden!
-    CFastEllipse * ellipse = new CFastEllipse( width, height, robocup_mode );
+    CFastEllipse * ellipse = new CFastEllipse( width, height, obstacle_increasement );
     ellipse->SetKey( key );
     m_mEllipses[ key ] = ellipse;
     return ellipse->GetEllipse();

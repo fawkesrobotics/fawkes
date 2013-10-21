@@ -41,7 +41,7 @@ class CFastEllipse
  public:
   // center 0, 0
   // construct a new ellipse with given values
-  CFastEllipse( int radius_width, int radius_height, int robocup_mode );
+  CFastEllipse( int radius_width, int radius_height, bool obstacle_increasement = true );
   ~CFastEllipse();
 
   // Return the occupied cells with their values
@@ -74,7 +74,7 @@ class CFastEllipse
 
 
 inline
-CFastEllipse::CFastEllipse( int radius_width, int radius_height, int robocup_mode )
+CFastEllipse::CFastEllipse( int radius_width, int radius_height, bool obstacle_increasement )
 {
   float dist = 1000.0;
   float dist_near = 1000.0;
@@ -90,7 +90,7 @@ CFastEllipse::CFastEllipse( int radius_width, int radius_height, int robocup_mod
       dist_middle = sqr((float)x/(float)(radius_width+4)) + sqr((float)y/(float)(radius_height+4));
 
       /*
-      if ( robocup_mode == 1 ) {
+      if ( !obstacle_increasement ) {
         // ignore far distance obstacles
       } else {
         dist_far = sqr((float)x/(float)(radius_width+6)) +  sqr((float)y/(float)(radius_height+6));

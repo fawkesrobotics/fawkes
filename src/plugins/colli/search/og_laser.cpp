@@ -62,7 +62,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   m_MinimumLaserLength  = config->get_float((cfg_prefix + "Laser/MINIMUM_READING_LENGTH").c_str());
   m_EllipseDistance     = config->get_float((cfg_prefix + "LaserOccupancyGrid/DISTANCE_ACCOUNT").c_str());
 
-  m_RobocupMode         = config->get_int((cfg_prefix + "ROBOCUP_MODE").c_str());
+  cfg_obstacle_inc_         = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
 
   logger->log_debug("CLaserOccupancyGrid", "Generating trigonometry table");
   m_pTrigTable = new TrigTable( m_TrigTableResolution );
@@ -294,7 +294,7 @@ CLaserOccupancyGrid::integrateObstacle( ellipse_t ellipse )
   int width = (int)(ellipse.width);
   int height = (int)(ellipse.height);
 
-  std::vector< int > fast_ellipse = ellipse_map->GetEllipse( width, height, m_RobocupMode );
+  std::vector< int > fast_ellipse = ellipse_map->GetEllipse( width, height, cfg_obstacle_inc_ );
 
   int posX = 0;
   int posY = 0;
