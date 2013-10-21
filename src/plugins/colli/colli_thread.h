@@ -145,9 +145,6 @@ class ColliThread
   // stop on target stuff
   std::vector< float > m_oldAnglesToTarget;      // the old angles to the target
 
-  // Do we  use a RWI Style Robot
-  bool isRwiRobot;
-
   fawkes::cart_coord_2d_t laser_to_base_; /**< The distance from laser to base */
   bool laser_to_base_valid_;              /**< Do we have a valid distance from laser to base? */
 

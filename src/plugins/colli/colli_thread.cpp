@@ -71,17 +71,6 @@ ColliThread::init()
   m_OccGridCellHeight   = config->get_int((cfg_prefix + "CELL_HEIGHT").c_str());
   m_OccGridCellWidth    = config->get_int((cfg_prefix + "CELL_WIDTH").c_str());
 
-
-  std::string default_hostname=""; // RCSoft was: =GetBBNames()[0];
-  /* As default we use a football player AllemaniACs robot */
-  if (default_hostname == "carl_rc.informatik.rwth-aachen.de") {
-    isRwiRobot = true;
-    logger->log_info(name(), "(init): Using a RWI Robot so this effects robs position in grid");
-  } else {
-    isRwiRobot = false;
-    logger->log_info(name(), "(init): Using Colli for an AllemaniACs IKEA Style Robot");
-  }
-
   for ( unsigned int i = 0; i < 10; i++ )
     m_oldAnglesToTarget.push_back( 0.0 );
 
@@ -652,15 +641,10 @@ ColliThread::UpdateOwnModules()
                                                   (int)(5*fabs(m_pMotorInstruct->GetMotorDesiredTranslation())+3) ) );
   }
 
-  // Calculate discrete position of the laser whicj is different for RWI Robots
-  int laserpos_x;
-
-  if (isRwiRobot)
-    laserpos_x = 0;
-  else
-    laserpos_x = (int)(m_pLaserOccGrid->getWidth() / 2);
-
+  // Calculate discrete position of the laser
+  int laserpos_x = (int)(m_pLaserOccGrid->getWidth() / 2);
   int laserpos_y = (int)(m_pLaserOccGrid->getHeight() / 2);
+
   laserpos_x -= (int)( m_pMotorInstruct->GetMotorDesiredTranslation()*m_pLaserOccGrid->getWidth() / (2*3.0) );
   laserpos_x  = max ( laserpos_x, 10 );
   laserpos_x  = min ( laserpos_x, (int)(m_pLaserOccGrid->getWidth()-10) );
