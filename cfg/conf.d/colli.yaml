@@ -33,6 +33,7 @@ plugins/colli:
   frame:
     # base_link frame
     base: !frame /base_link
+    # laser frame
     laser: !frame /base_laser
 
   OccGrid:
@@ -46,61 +47,71 @@ plugins/colli:
     CELL_WIDTH: 5
 
   QuadraticMotorInstruct:
-    # quadratic motor indtruct basic trans acc
+    # Basic translation acceleration
     BASIC_TRANS_ACC: 0.23
-    # quadratic motor indtruct basic trans dec
+    # Basic translation deceleration
     BASIC_TRANS_DEC: 0.42
-    # quadratic motor indtruct basic rot acc
+    # Basic rotation acceleration
     BASIC_ROT_ACC: 0.23
-    # quadratic motor indtruct basic rot dec
+    # Basic rotation deceleration
     BASIC_ROT_DEC: 0.42
 
   SlowDriveModule:
-    # drive mode slow max trans
+    # Max translation velocity
     MAX_TRANS: 1.0
-    # drive mode slow max rot
+    # Max rotation velocity
     MAX_ROT: 2.0
 
   MediumDriveModule:
-    # drive mode medium max trans
+    # Max translation velocity
     MAX_TRANS: 2.0
-    # drive mode medium max rot
+    # Max rotation velocity
     MAX_ROT: 6.0
 
   FastDriveModule:
-    # drive mode fast max trans
+    # Max translation velocity
     MAX_TRANS: 2.99
-    # drive mode fast max rot
+    # Max rotation velocity
     MAX_ROT: 7.0
 
+  EscapeDriveModule:
+    # Max translation velocity
+    MAX_TRANS: 0.3
+    # Max rotation velocity
+    MAX_ROT: 0.8
+
   Roboshape:
-    # roboshape
+    # Define the roboshape: 1 is angular (default), 0 is round
     ROBOSHAPE: 1
-    # widthx for angular robot
+    # Width_x for angular robot
     WIDTH_X: 0.38
-    # widthy for angular robot
+    # Width_y for angular robot
     WIDTH_Y: 0.4
-    # roboshape front
+    # Extra extension to front
     WIDTH_ADD_FRONT: 0.2
-    # roboshape right
+    # Extra extension to right
     WIDTH_ADD_RIGHT: 0.02
-    # roboshape back
+    # Extra extension to back
     WIDTH_ADD_BACK: 0.05
-    # roboshape left
+    # Extra extension to left
     WIDTH_ADD_LEFT: 0.02
-    # laser offset from back
+    # The Lasers offset from back, seen from behind left.
     LASER_OFFSET_X_FROM_BACK: 0.062
-    # laser offset from left
+    # The Lasers offset from left, seen from behind left.
     LASER_OFFSET_Y_FROM_LEFT: 0.2
 
   LaserOccupancyGrid:
     # the max size of the laser reading history for the search
+    # Note: This has to be divided by 10 to get seconds
     MAX_HISTORY_LENGTH: 60
     # the min size of the laser reading history for the search
+    # Note: This has to be divided by 10 to get seconds
     MIN_HISTORY_LENGTH: 15
     # the history vector size with number of saved elements
+    # Note: This is the initial size. If the history grows bigger, elements have to be appended
+    #  and this costs time. But to many elements result in page faults ;-)
     INITIAL_HISTORY_SIZE: 500
-    # This is the distance in which laser readings
+    # This is the distance in which laser readings are ignored for putting a new ellipse into the grid
     DISTANCE_ACCOUNT: 0.1
 
   TrigTable:
@@ -112,17 +123,13 @@ plugins/colli:
     MINIMUM_READING_LENGTH: 0.02
 
   AStar:
-    # astar maximum states
+    # maximum number of states the colli uses to search for a path.
+    # The more states the better the search, but the slower the algorithm
     MAX_STATES: 15000
 
-  EscapeDriveModule:
-    # maximum transalational velocity in escape mode
-    MAX_TRANS: 0.3
-    # maximum rotational velocity in escape mode
-    MAX_ROT: 0.8
-
-  # default laser_calibration values for ignore-readings! if this node is available, these
-  # values are used.
+  # default laser_calibration values for ignore-readings! It defines, which laser beams (ot of 360) are
+  # not taken into account in front/back left/righ (if there is a pipe occluding the laser sight).
+  # If this node is available ("laser_calibration"), these values are used.
   laser_calibration:
     IgnoreFRStart: 25
     IgnoreFREnd: 39
@@ -134,7 +141,7 @@ plugins/colli:
     IgnoreFLEnd: 335
 
   # ignore-readings config for caesar. NOTE: these are not used, you need to put them into
-  # the 'laser_calibration' note in order to be active.
+  # the "laser_calibration" node in order to be active.
   laser_calibration_caesar:
     IgnoreFRStart: 28
     IgnoreFREnd: 35
