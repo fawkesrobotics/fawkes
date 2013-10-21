@@ -1,9 +1,9 @@
+
 /***************************************************************************
- *  colli_thread.h - Colli Thread
+ *  colli_thread.h - Fawkes Colli Thread
  *
  *  Created: Wed Oct 16 18:00:00 2013
- *  Copyright  2013  AllemaniACs
- *
+ *  Copyright  2013  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

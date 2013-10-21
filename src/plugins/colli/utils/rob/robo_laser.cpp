@@ -1,48 +1,24 @@
-/*
- ©º°¨¨°º©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©º°¨¨°º©
- ©                                                                            ©
- ©                                            ####   ####           .-""-.    ©
- ©       # #                             #   #    # #    #         /[] _ _\   ©
- ©       # #                                 #    # #             _|_o_LII|_  ©
- © ,###, # #  ### ## ## ##   ###  ## ##  #   #    # #       ###  / | ==== | \ ©
- © #   # # # #   # ## ## #  #   #  ## #  #   ###### #      #     |_| ==== |_| ©
- © #   # # # ####  #  #  #  #   #  #  #  #   #    # #      ####   ||" ||  ||  ©
- © #   # # # #     #  #  #  #   #  #  #  #   #    # #    #    #   ||LI  o ||  ©
- © '###'# # # #### #  #  ##  ### # #  ## ## #      # ####  ###    ||'----'||  ©
- ©                                                               /__|    |__\ ©
- ©                                                                            ©
- ©º°¨¨°º©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©º°¨¨°º©
-*/
 
-/* Written by Stefan Jacobs
- * for module Colli-A*
+/***************************************************************************
+ *  robo_laser.cpp - Provide access to the laser for colli
  *
- * Containing Implementation for laser interface.
+ *  Created: Fri Oct 18 15:16:23 2013
+ *  Copyright  2002  Stefan Jacobs
+ *             2013  Bahram Maleki-Fard
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
-
-/***********************************************************************
- *
- * $Id$
- *
- * description:
- *
- * last modification: $Date$
- *         by author: $Author$
- *
- **********************************************************************/
-
-/*! \file Laser.cpp
-<pre>
-<b>File:</b>          Laser.cpp
-<b>Project:</b>       Collision Avoidance, Gruppe 1
-<b>Authors:</b>       Stefan Jacobs <Stefan_J@gmx.de>, Gruppe 1
-<b>Created:</b>       03/06/2002
-<b>Last Revision:</b> 10/06/2002
-<b>Contents:</b>      Laser Access.
-                       Gets pure Laserdata.
-</pre>
-*/
 
 #include "robo_laser.h"
 

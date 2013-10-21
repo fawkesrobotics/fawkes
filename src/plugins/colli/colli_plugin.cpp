@@ -1,8 +1,9 @@
+
 /***************************************************************************
  *  colli_plugin.cpp - Fawkes Colli Plugin
  *
  *  Created: Wed Oct 16 18:00:00 2013
- *  Copyright  2013  AllemaniACs
+ *  Copyright  2013  Bahram Maleki-Fard
  *
  ****************************************************************************/
 

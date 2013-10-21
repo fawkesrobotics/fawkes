@@ -1,40 +1,27 @@
-/*
- ©º°¨¨°º©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©º°¨¨°º©
- ©                                                                            ©
- ©                                            ####   ####           .-""-.    ©
- ©       # #                             #   #    # #    #         /[] _ _\   ©
- ©       # #                                 #    # #             _|_o_LII|_  ©
- © ,###, # #  ### ## ## ##   ###  ## ##  #   #    # #       ###  / | ==== | \ ©
- © #   # # # #   # ## ## #  #   #  ## #  #   ###### #      #     |_| ==== |_| ©
- © #   # # # ####  #  #  #  #   #  #  #  #   #    # #      ####   ||" ||  ||  ©
- © #   # # # #     #  #  #  #   #  #  #  #   #    # #    #    #   ||LI  o ||  ©
- © '###'# # # #### #  #  ##  ### # #  ## ## #      # ####  ###    ||'----'||  ©
- ©                                                               /__|    |__\ ©
- ©                                                                            ©
- ©º°¨¨°º©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©©º°¨¨°º©º°¨¨°º©
-*/
 
-/* Written by Stefan Jacobs
- * for module Colli-A*
+/***************************************************************************
+ *  robo_laserpoint.h - Class for one laser point
  *
- * Containing Header for one laser point interface.
+ *  Created: Fri Oct 18 15:16:23 2013
+ *  Copyright  2002  Stefan Jacobs
+ *             2013  Bahram Maleki-Fard
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-/***********************************************************************
- *
- * $Id$
- *
- * Description: Contains a class for handling laser scans
- *
- *
- * last modified: $Date$
- *            by: $Author$
- *
- **********************************************************************/
-
-#ifndef _COLLI_UTILS_ROB_ROBO_LASERPOINT_H_
-#define _COLLI_UTILS_ROB_ROBO_LASERPOINT_H_
+#ifndef __PLUGINS_COLLI_UTILS_ROB_ROBO_LASERPOINT_H_
+#define __PLUGINS_COLLI_UTILS_ROB_ROBO_LASERPOINT_H_
 
 #include <vector>
 

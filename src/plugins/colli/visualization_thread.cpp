@@ -1,5 +1,6 @@
+
 /***************************************************************************
- *  visualization_thread.cpp - Visualization colli
+ *  visualization_thread.cpp - Visualization for colli
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2013  Bahram Maleki-Fard
