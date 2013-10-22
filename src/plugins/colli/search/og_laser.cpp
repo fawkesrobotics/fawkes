@@ -41,7 +41,20 @@ namespace fawkes
 }
 #endif
 
-// Constructor
+/** @class CLaserOccupancyGrid <plugins/colli/search/og_laser.h>
+ *  This OccGrid is derived by the Occupancy Grid originally from Andreas Strack,
+ *    but modified for speed purposes.
+ */
+
+/** Constructor.
+ * @param laser The Laser object
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
+ * @param width The width of the grid (in m)
+ * @param height The height of the grid (in m)
+ * @param cell_width The width of a cell (in cm)
+ * @param cell_height The height of a cell (in cm)
+ */
 CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configuration* config,
                                           int width, int height,
                                           int cell_width, int cell_height)
@@ -77,16 +90,16 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   logger->log_info("CLaserOccupancyGrid", "(Constructor): Exiting");
 }
 
-
-
-// Destructor
+/** Descturctor. */
 CLaserOccupancyGrid::~CLaserOccupancyGrid()
 {
   delete m_pTrigTable;
   delete m_pRoboShape;
 }
 
-
+/** Reset all old readings and forget about the world state!
+ * @param max_age The maximum age of for a reading to be considered.
+ */
 void
 CLaserOccupancyGrid::ResetOld( int max_age )
 {
@@ -117,10 +130,17 @@ CLaserOccupancyGrid::ResetOld( int max_age )
 }
 
 
-
-// update the occ grid by putting the laser readings in it.
-// the current robopos is the midx and the midy
-// and the inc variable is the increase of the obstacles
+/** Put the laser readings in the occupancy grid
+ *  Also, every reading gets a radius according to the relative direction
+ *  of this reading to the robot.
+ * @param midX is the current x position of the robot in the grid.
+ * @param midY is the current y position of the robot in the grid.
+ * @param inc is the current constant to increase the obstacles.
+ * @param vel Translation velocity of the motor
+ * @param xdiff The traveled distance on x-axis since previous call
+ * @param ydiff The traveled distance on y-axis since previous call
+ * @param oridiff The rotation around z-axis since previous call
+ */
 void
 CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel,
                                     float xdiff, float ydiff, float oridiff )
@@ -134,6 +154,16 @@ CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel,
 
   IntegrateOldReadings( midX, midY, inc, vel, xdiff, ydiff, oridiff );
   IntegrateNewReadings( midX, midY, inc, vel );
+}
+
+
+/** Get the laser's position in the grid
+ * @return point_t structure containing the laser's position in the grid
+ */
+point_t
+CLaserOccupancyGrid::GetLaserPosition()
+{
+  return m_LaserPosition;
 }
 
 
@@ -311,12 +341,6 @@ CLaserOccupancyGrid::integrateObstacle( ellipse_t ellipse )
       m_OccupancyProb[posX][posY] = fast_ellipse[i+2];
     }
   }
-}
-
-point_t
-CLaserOccupancyGrid::GetLaserPosition()
-{
-  return m_LaserPosition;
 }
 
 } // namespace fawkes

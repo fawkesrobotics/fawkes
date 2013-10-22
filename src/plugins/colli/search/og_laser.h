@@ -40,39 +40,27 @@ class CEllipseMap;
 class Logger;
 class Configuration;
 
-/** CLaserOccupancyGrid.
- *  This OccGrid is derived by the Occupancy Grid originally from Andreas Strack,
- *    but modified for speed purposes.
- */
 class CLaserOccupancyGrid : public OccupancyGrid
 {
-public:
+ public:
 
-  /** Constructor. */
   CLaserOccupancyGrid( Laser * laser, Logger* logger, Configuration* config,
                        int width = 150, int height = 150,
                        int cell_width = 5, int cell_height = 5);
 
-  /** Descturctor. */
   ~CLaserOccupancyGrid();
 
-  /** Put the laser readings in the occupancy grid
-   *  Also, every reading gets a radius according to the relative direction
-   *  of this reading to the robot.
-   *  @param midX is the current point of the robot.
-   *  @param midY is the current point of the robot.
-   *  @param inc is the current constant to increase the obstacles.
-   */
+  ///\brief Put the laser readings in the occupancy grid
   void UpdateOccGrid( int midX, int midY, float inc, float vel,
                       float xdiff, float ydiff, float oridiff );
 
-  /** Reset all old readings and forget about the world state! */
+  ///\brief Reset all old readings and forget about the world state!
   void ResetOld( int max_age = -1 );
 
-  /** Get the laser's position in the grid */
+  ///\brief Get the laser's position in the grid
   point_t GetLaserPosition();
 
-private:
+ private:
 
   /** Integrate historical readings to the current occgrid. */
   void IntegrateOldReadings( int midX, int midY, float inc, float vel,

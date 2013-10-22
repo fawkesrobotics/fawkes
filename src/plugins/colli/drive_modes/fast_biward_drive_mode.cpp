@@ -28,7 +28,17 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CFastBiwardDriveModule <plugins/colli/drive_modes/fast_biward_drive_mode.h>
+ * This is the FastBiward drive-module. It is inherited from  the abstract drive mode
+ * and uses the other both modes.  If the target is in front, it drives forward
+ * to the target, else it drives backward to the target.
+ */
+
+/** Constructor.
+ * @param forward_module The FastForward drive module
+ * @param backward_module The FastBackward drive module
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CFastBiwardDriveModule::CFastBiwardDriveModule( CFastForwardDriveModule*  forward_module,
                                                 CFastBackwardDriveModule* backward_module,

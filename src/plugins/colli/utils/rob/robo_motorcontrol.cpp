@@ -30,6 +30,9 @@ namespace fawkes {
 }
 #endif
 
+/** @class MotorControl <plugins/colli/utils/rob/robo_motorcontrol.cpp>
+ * This class is an interface to the obligatory MotorControl in the BlackBoard.
+ */
 
 MotorControl::MotorControl( fawkes::MotorInterface* motor )
 {

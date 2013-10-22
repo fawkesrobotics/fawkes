@@ -36,7 +36,16 @@ namespace fawkes
 }
 #endif
 
-// initialize RoboShape
+/** @class RoboShape <plugins/colli/utils/rob/roboshape.h>
+ * This is a class containing all roboshape information.
+ * All methods have been implemented but round robots.
+ */
+
+/** Constructor.
+ * @param cfg_prefix The prefix of the config node, where the roboshape values are found
+ * @param logger Pointer to the fawkes logger
+ * @param config Pointer to the fawkes configuration.
+ */
 RoboShape::RoboShape( const char * cfg_prefix,
                       fawkes::Logger* logger,
                       fawkes::Configuration* config)
@@ -114,40 +123,55 @@ RoboShape::RoboShape( const char * cfg_prefix,
 }
 
 
-// destruct RoboShape
+/** Desctructor. */
 RoboShape::~RoboShape()
 {
 }
 
-// return if it is a round robot
+/** Returns if the robot is round.
+ * @return bool indicating if the robot is round.
+ */
 bool
 RoboShape::IsRoundRobot()
 {
   return m_isRound;
 }
 
-// return if it is a angular robot
+/** Returns if the robot is angular.
+ * @return bool indicating if the robot is angular.
+ */
 bool
 RoboShape::IsAngularRobot()
 {
   return m_isAngular;
 }
 
-// returns if the reading is 'in' the robot
+/** Returns, if a reading length is _in_ the robot.
+ * @param anglerad is float containing the angle of the reading in radians.
+ * @param length containing the length of the reading.
+ * @return if the reading is in the robot.
+ */
 bool
 RoboShape::IsRobotReadingforRad( float anglerad, float length )
 {
   return (length < GetRobotLengthforRad( anglerad ));
 }
 
-// returns if the reading is 'in' the robot
+/** Returns, if a reading length is _in_ the robot.
+ * @param angledeg is float containing the angle of the reading in degree.
+ * @param length containing the length of the reading.
+ * @return if the reading is in the robot.
+ */
 bool
 RoboShape::IsRobotReadingforDegree( float angledeg, float length )
 {
   return IsRobotReadingforRad( deg2rad( angledeg ), length );
 }
 
-// return the length of the robot for a specific angle
+/** Returns the robots length for a specific angle.
+ * @param anglerad is the angle in radians.
+ * @return the length in this direction.
+ */
 float
 RoboShape::GetRobotLengthforRad( float anglerad )
 {
@@ -226,15 +250,20 @@ RoboShape::GetRobotLengthforRad( float anglerad )
   }
 }
 
-// return the length of the robot for a specific angle
+/** Returns the robots length for a specific angle.
+ * @param angledeg is the angle in degree.
+ * @return the length in this direction.
+ */
 float
 RoboShape::GetRobotLengthforDegree( float angledeg )
 {
   return GetRobotLengthforRad( deg2rad( angledeg ) );
 }
 
-// return if it is a rod (1), if it is not (0) or unsure(3)
-//  for a specific angle
+/** Returns if there is a rod waiting in this direction.
+ * @param anglerad is an angle in radians.
+ * @return 0 if there is no rod, 1 if there is, and 3 if unsure (for now all rods are unsure).
+ */
 int
 RoboShape::IsRodforRad( float anglerad )
 {
@@ -252,15 +281,19 @@ RoboShape::IsRodforRad( float anglerad )
     return 0;
 }
 
-// return if it is a rod (1), if it is not (0) or unsure(3)
-//  for a specific angle
+/** Returns if there is a rod waiting in this direction.
+ * @param angledeg is an angle in degree.
+ * @return 0 if there is no rod, 1 if there is, and 3 if unsure (for now all rods are unsure).
+ */
 int
 RoboShape::IsRodforDegree( float angledeg )
 {
   return IsRodforRad( deg2rad( angledeg ) );
 }
 
-// return the radius of the round robot if it is round
+/** Returns the radius of the robot if its round.
+ * @return radius of the round robot
+ */
 float
 RoboShape::GetRadius()
 {
@@ -272,6 +305,9 @@ RoboShape::GetRadius()
   return 0.0;
 }
 
+/** Returns the maximum radius of the robot if its round.
+ * @return maximum radius of the round robot
+ */
 float
 RoboShape::GetCompleteRadius()
 {
@@ -283,8 +319,37 @@ RoboShape::GetCompleteRadius()
 
   return 0.0;
 }
+/** Returns the width-x of the angular robot.
+ * @return only the robot x width.
+ */
+float
+RoboShape::GetWidthX()
+{
+  if ( IsAngularRobot() == true )
+    return m_widthX;
+  else
+    logger_->log_error("RoboShape", "The Robot is not angular!");
 
-// returns complete width in x direction
+  return 0.0;
+}
+
+/** Returns the width-y of the angular robot.
+ * @return only the robot y width.
+ */
+float
+RoboShape::GetWidthY()
+{
+  if ( IsAngularRobot() == true )
+    return m_widthY;
+  else
+    logger_->log_error("RoboShape", "The Robot is not angular!");
+
+  return 0.0;
+}
+
+/** Returns the complete x width of the angular robot.
+ * @return the complete x width.
+ */
 float
 RoboShape::GetCompleteWidthX()
 {
@@ -297,7 +362,9 @@ RoboShape::GetCompleteWidthX()
 }
 
 
-// returns complete width in y direction
+/** Returns the complete y width of the angular robot.
+ * @return the complete y width.
+ */
 float
 RoboShape::GetCompleteWidthY()
 {
@@ -309,41 +376,18 @@ RoboShape::GetCompleteWidthY()
   return 0.0;
 }
 
-// returns robowidth in x direction
-float
-RoboShape::GetWidthX()
-{
-  if ( IsAngularRobot() == true )
-    return m_widthX;
-  else
-    logger_->log_error("RoboShape", "The Robot is not angular!");
-
-  return 0.0;
-}
-
-
-// returns robowidth in y direction
-float
-RoboShape::GetWidthY()
-{
-  if ( IsAngularRobot() == true )
-    return m_widthY;
-  else
-    logger_->log_error("RoboShape", "The Robot is not angular!");
-
-  return 0.0;
-}
-
-
-// returns the laseroffset in x direction
+/** Returns the laser offset in x direction of the robot.
+ * @return the laser offset in x direction.
+ */
 float
 RoboShape::GetLaserOffsetX()
 {
   return m_laserOffsetX;
 }
 
-
-// returns the laseroffset in y direction
+/** Returns the laser offset in y direction of the robot.
+ * @return the laser offset in y direction.
+ */
 float
 RoboShape::GetLaserOffsetY()
 {

@@ -39,47 +39,30 @@ class Logger;
 class Configuration;
 
 
-/// This class selects the correct drive mode and calls the appopriate drive component
 class CSelectDriveMode
 {
 public:
 
-  /// laser + target wird hier gebraucht
   CSelectDriveMode( MotorControl* motor,
                     Laser* laser,
                     NavigatorInterface* target,
                     Logger* logger,
                     Configuration* config );
-
-
-  ///
   ~CSelectDriveMode( );
 
-
-  /** Set local target point before update!
-   */
+  ///\brief Set local target point before update!
   void SetLocalTarget( float localTargetX, float localTargetY );
 
-
-  /** Set local trajectory point before update!
-   */
+  ///\brief Set local trajectory point before update!
   void SetLocalTrajec( float localTrajecX, float localTrajecY );
 
-
-  /** Has to be called before the proposed values are called.
-   */
+  ///\brief Has to be called before the proposed values are called.
   void Update( bool escape = false );
 
-
-  /** Returns the proposed translation.
-   *  After an update.
-   */
+  ///\brief Returns the proposed translation. After an update.
   float GetProposedTranslation();
 
-
-  /** Returns the proposed rotation.
-   *  After an update.
-   */
+  ///\brief Returns the proposed rotation. After an update.
   float GetProposedRotation();
 
 private:

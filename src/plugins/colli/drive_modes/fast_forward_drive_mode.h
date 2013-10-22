@@ -35,22 +35,10 @@ class CFastForwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  /** Constructor.
-   */
   CFastForwardDriveModule(Logger* logger, Configuration* config);
-
-
-  /** Destructor. Does nothing, because nothing was created in this module.
-   */
   ~CFastForwardDriveModule();
 
-
-  /** This Routine is called. Afterwards the m_proposedTranslation and
-   *    m_proposedRotation have to be filled. Here they are
-   *    set to zero.
-   */
   virtual void Update();
-
 
  private:
 

@@ -42,9 +42,20 @@ namespace fawkes
 }
 #endif
 
-// Initialize the Laser by giving the Laser_Client to it, and
-// calculating the number of readings we get ( the size of the pos array )
-// and initialize it directly
+/** @class Laser <plugins/colli/utils/rob/robo_laser.h>
+ *  This is a class to access the laserreadings in a
+ *   fast and efficient way.
+ */
+
+/** Constructor. Initializes the Laser and calculates the number of readings
+ * we get ( the size of the pos array ) and initialize it directly.
+ * @param laser The laser-interface containing all the laser readings.
+ * @param logger The fawkes logger.
+ * @param config The fawkes configuration.
+ * @exception (int 1) The number of readings given by the laser are
+ *  smaller or equal 0.... Perhaps the laser is currently offline. Try again!
+ * @exception (int 2) The readings array could not be allocated!
+ */
 Laser::Laser( Laser360Interface* laser,
               Logger* logger,
               Configuration* config) throw (int)
@@ -113,8 +124,7 @@ Laser::Laser( Laser360Interface* laser,
   }
 }
 
-
-// Destruct objects is killing all memory allocation
+/** Desctructor. */
 Laser::~Laser( )
 {
   delete this->newtime;
@@ -122,9 +132,11 @@ Laser::~Laser( )
   delete this->m_pReadings;
 }
 
-
-// Update the laserdata. Call this with the Laser_Clientect in your Loop.
-// -1 is no new data, so nothing is to do; 0 is ok; 1 is error
+/** Updates the laserdata.
+ *  Call this with the Laser_Clientect in your Loop (the laserobject has to be updated
+ *  previously, or you get no new data!).
+ *  @return -1 is no new data, so nothing is to do; 0 is ok;  1 is an error occured;
+ */
 int
 Laser::UpdateLaser( )
 {
@@ -166,74 +178,81 @@ Laser::CalculatePositions()
 /* =========================================================================================== */
 /* GETTER STUFF */
 /* =========================================================================================== */
-
-
-// -------------------------- //
-// LASERREADINGS GETTER       //
-// -------------------------- //
-
-
-// returns laser reading length
+/** Return laser readings length.
+ * @param number is the number of this reading.
+ * @return float is the numbers length.
+ */
 float
 Laser::GetReadingLength( const int number ) const
 {
   return m_pReadings->GetLength( number );
 }
 
-
-// returns laser reading its positions x coordinate
+/** Returns laser readings x coordinate.
+ * @param number is the number of this reading.
+ * @return float is the numbers x coordinate.
+ */
 float
 Laser::GetReadingPosX( const int number ) const
 {
   return m_pReadings->GetPosX(number);
 }
 
-
-// returns laser reading its positions y coordinate
+/** Returns laser readings y coordinate.
+ * @param number is the number of this reading.
+ * @return float is the numbers y coordinate.
+ */
 float
 Laser::GetReadingPosY( const int number ) const
 {
   return m_pReadings->GetPosY(number);
 }
 
-
-// -------------------------- //
-// MISC GETTER                //
-// -------------------------- //
-
-
-// returns number of readings available
+/** Get number of available laser readings
+ * @return number of available readings
+ */
 int
 Laser::GetNumberOfReadings() const
 {
   return m_NumberOfReadings;
 }
 
-
-// returns current laserdata timestamp
-Time
-Laser::GetCurrentTimestamp() const
-{
-  return m_pLaserScannerObj->timestamp();
-}
-
-
-// returns angle for reading
+/** Get angle for reading
+ * @param number Number of the laser reading
+ * @return The angle of the reading in radians
+ */
 float
 Laser::GetRadiansForReading( const int number ) const
 {
   return m_pReadings->GetRadians(number);
 }
 
+/** Get current laserdata timestamp
+ * @return current laserdata timestamp
+ */
+Time
+Laser::GetCurrentTimestamp() const
+{
+  return m_pLaserScannerObj->timestamp();
+}
 
+/** Get the time difference to previous readings
+ * @return time difference to previous readings in seconds
+ */
 float
 Laser::TimeDiff() const
 {
   return ((*newtime - *oldtime).in_sec());
 }
 
-
-// the famous is pipe method
+/** The famous is pipe method
+ * Checks if the laser reading is to be ignored, as it is a "pipe" in the
+ * robot's body construction.
+ * Should become deprecated, laser readings are filtered in a previous step
+ * of another plugin!
+ * @param i Number of the laser readin.
+ * @return true if the reading is blocked by a pipe
+ */
 bool
 Laser::IsPipe( float i ) const
 {
@@ -258,7 +277,14 @@ Laser::IsPipe( float i ) const
   return false;
 }
 
-
+/** The famous is pipe method
+ * Checks if the laser reading is to be ignored, as it is a "pipe" in the
+ * robot's body construction.
+ * Should become deprecated, laser readings are filtered in a previous step
+ * of another plugin!
+ * @param i Number of the laser readin.
+ * @return true if the reading is blocked by a pipe
+ */
 bool
 Laser::IsOnlyPipe( float i ) const
 {

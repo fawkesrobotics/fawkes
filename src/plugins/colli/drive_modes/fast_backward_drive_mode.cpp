@@ -30,7 +30,13 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CFastBackwardDriveModule <plugins/colli/drive_modes/fast_backward_drive_mode.h>
+ * This is the FastBackward drive-module, for fast backward only movements.
+ */
+
+/** Constructor.
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CFastBackwardDriveModule::CFastBackwardDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)

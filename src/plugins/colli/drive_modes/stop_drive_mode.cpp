@@ -28,7 +28,14 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CStopDriveModule <plugins/colli/drive_modes/stop_drive_mode.h>
+ * Stop-Drive-Module. This module is called, if something goes wrong, or is not recognized.
+ * It is a fairly easy one, because it sets all to zero.
+ */
+
+/** Constructor.
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CStopDriveModule::CStopDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)
@@ -39,8 +46,7 @@ CStopDriveModule::CStopDriveModule(Logger* logger, Configuration* config)
 }
 
 
-/** Destruct your local values here.
- */
+/** Destruct your local values here. */
 CStopDriveModule::~CStopDriveModule()
 {
   logger_->log_info("CStopDriveModule", "(Destructor): Entering...");

@@ -33,33 +33,16 @@ namespace fawkes
 }
 #endif
 
-/** This is the slow-biward drive-module. It is inherited from
- *    the abstract drive mode and uses the other both modes.
- *    If the target is in front, it drives forward to the target,
- *    else it drives backward to the target.
- */
 class CSlowBiwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  /** Constructor does set name and gets the two other drive
-   *    modes.
-   */
   CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_forward,
                           CSlowBackwardDriveModule* slow_backward,
                           Logger* logger,
                           Configuration* config);
-
-
-  /** Destructor does nothing, because nothing is created in here.
-   */
   ~CSlowBiwardDriveModule();
 
-
-  /** This Routine is called. Afterwards the m_proposedTranslation and
-   *    m_proposedRotation have to be filled. Here they are
-   *    filled up in between -1 m/s to 1 m/s and M_PI rad/s.
-   */
   void Update();
 
 

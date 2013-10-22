@@ -34,26 +34,33 @@ namespace fawkes
 }
 #endif
 
-class TrigTable
+/** @class TrigTable <plugins/colli/utils/geometry/trig_table.h>
+ * This is a lookup-table with precalculated trigonometry information.
+ * It is supposed to increase the speed for trigonometry calculations.
+ */
+
+ class TrigTable
 {
 
  public:
 
-  /** @param Resolution is the number of steps per degree!
-   *  @doc e.G. TrigTable( 4 ) means 4 steps per each degree.
+  /** Constructor.
+   * @param resolution_per_degree is the number of steps per degree!
+   *   e.G. TrigTable( 4 ) means 4 steps per each degree.
    */
   TrigTable( int resolution_per_degree );
 
-  /** destruct object
-   */
+  /** Desctructor. */
   ~TrigTable();
 
   /** return linear interpolated sinus.
-   */
+   * @param radians The radian angle
+   * @return the sine value corresponding to that angle */
   float GetSin( float radians );
 
   /** return linear interpolated cosinus.
-   */
+   * @param radians The radian angle
+   * @return the cosine value corresponding to that angle */
   float GetCos( float radians );
 
 

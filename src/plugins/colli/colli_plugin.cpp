@@ -30,9 +30,15 @@
 
 using namespace fawkes;
 
+/** Local odometry based path planning with collision avoidance.
+ * @author Bahram Maleki-Fard
+ */
 class ColliPlugin : public fawkes::Plugin
 {
 public:
+  /** Constructor.
+   * @param config The fawkes configuration
+   */
   ColliPlugin(Configuration *config)
       : Plugin(config)
   {

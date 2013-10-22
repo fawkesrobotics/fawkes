@@ -31,21 +31,17 @@ namespace fawkes
 
 class MotorInterface;
 
-/** Class Motor Control.
- *  This class is an interface to the obligatory MotorControl in the
- *    BlackBoard.
- */
 class MotorControl
 {
 
  public:
 
-  /*  This is a constructor, with the motorcontroller object as first
-   *    parameter and a configfile containing several information about
-   *    maximum speeds and accelerations.
-   *  @param motor is a Mopo_Client.
+  /** Constructor.
+   *  @param motor The MotorInterface.
    */
   MotorControl( fawkes::MotorInterface* motor );
+
+  /** Desctructor. */
   ~MotorControl();
 
 
@@ -114,7 +110,6 @@ class MotorControl
   bool GetMovingAllowed();
 
 
-
   /** SetDesiredTranslation.
    *  This method sets the current user desired translation speed.
    *  @param speed is a float containing translation speed in m/s.
@@ -123,7 +118,7 @@ class MotorControl
 
   /** SetDesiredRotation.
    *  This method sets the current user desired rotation speed.
-   *  @param speed is a float containing rotaion speed in rad/s.
+   *  @param ori is a float containing rotaion speed in rad/s.
    */
   void SetDesiredRotation( float ori );
 
@@ -142,6 +137,7 @@ class MotorControl
   /** SendCommand.
    *  This method is the final sending command. Here the blackboard gets
    *    informed about the users desired intentions.
+   * @return true if successful, false otherwise
    */
   bool SendCommand( );
 

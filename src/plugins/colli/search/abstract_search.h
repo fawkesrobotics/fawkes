@@ -34,17 +34,17 @@ namespace fawkes
 
 class CLaserOccupancyGrid;
 
-/** This is the abstract search interpretation class for an arbitrary
+/** @class CAbstractSearch <plugins/colli/search/abstract_search.h>
+ * This is the abstract search interpretation class for an arbitrary
  * search algorithm to find its way through
  * an Occupancy grid from a robopos to a targetpos.
  */
+
 class CAbstractSearch
 {
  public:
-  ///
-  CAbstractSearch( CLaserOccupancyGrid * occGrid, Logger* logger );
 
-  ///
+  CAbstractSearch( CLaserOccupancyGrid * occGrid, Logger* logger );
   virtual ~CAbstractSearch();
 
   /** update complete plan things
@@ -52,7 +52,8 @@ class CAbstractSearch
    */
   virtual void Update( int roboX, int roboY, int targetX, int targetY ) = 0;
 
-  /** Returns after an update, if the update was successful.
+  /** Checks if the update was successful.
+   * @return true if "Update(...)" was successful, fals otherwise.
    */
   virtual bool UpdatedSuccessful() = 0;
 
@@ -67,16 +68,18 @@ class CAbstractSearch
   const point_t& GetLocalTrajec();
 
  protected:
-  // the occupancy grid
-  CLaserOccupancyGrid * m_pOccGrid;
+  CLaserOccupancyGrid * m_pOccGrid; /**< The occupancy grid */
 
-  // the calculated information where to drive to
-  point_t m_LocalTarget, m_LocalTrajectory;
+  point_t m_LocalTarget;      /**< the calculated target where to drive to */
+  point_t m_LocalTrajectory;  /**< the calculated trajectory where to drive to */
 };
 
 
 
-
+/** Constructor.
+ * @param occGrid The laser occupancy-grid
+ * @param logger The fawkes logger
+ */
 inline
 CAbstractSearch::CAbstractSearch( CLaserOccupancyGrid * occGrid, Logger* logger )
 {
@@ -85,17 +88,24 @@ CAbstractSearch::CAbstractSearch( CLaserOccupancyGrid * occGrid, Logger* logger 
   logger->log_info("CAbstractSearch", "(Constructor): Exiting");
 }
 
+/** Destructor. */
 inline
 CAbstractSearch::~CAbstractSearch()
 {
 }
+
+/** Get the local target in the grid.
+ * @return The local target in grid as a point_t struct
+ */
 inline const point_t&
 CAbstractSearch::GetLocalTarget()
 {
   return m_LocalTarget;
 }
 
-
+/** Get the local trajectory in the grid.
+ * @return The local trajectory in grid as a point_t struct
+ */
 inline const point_t&
 CAbstractSearch::GetLocalTrajec()
 {

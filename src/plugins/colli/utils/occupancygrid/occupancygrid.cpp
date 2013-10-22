@@ -27,8 +27,22 @@ namespace fawkes
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-OccupancyGrid::OccupancyGrid(int width, int height,
-                               int cell_width, int cell_height)
+
+/** @class OccupancyGrid <plugins/colli/utils/occupancygrid/occupancygrid.h>
+ * Occupancy Grid class for general use. Many derivated classes
+ * exist, which are usually used instead of this general class.
+ * Note: the coord system is assumed to map x onto width an y onto
+ * height, with x being the first coordinate !
+ */
+
+/** Constructs an empty occupancy grid
+ *
+ * @param width the width of the grid in # of cells
+ * @param height the height of the cells in # of cells
+ * @param cell_width the cell width in cm
+ * @param cell_height the cell height in cm
+ */
+OccupancyGrid::OccupancyGrid(int width, int height, int cell_width, int cell_height)
 {
   m_Width = width;
   m_Height = height;
@@ -38,36 +52,69 @@ OccupancyGrid::OccupancyGrid(int width, int height,
   initGrid();
 }
 
-
+/** Destructor */
 OccupancyGrid::~OccupancyGrid()
 {
   m_OccupancyProb.clear();
 }
 
-void
-OccupancyGrid::setCellWidth(int width)
-{
-  m_CellWidth = width;
-}
-
+/** Get the cell width
+ * @return the cell width in cm
+ */
 int
 OccupancyGrid::getCellWidth()
 {
   return m_CellWidth;
 }
 
-void
-OccupancyGrid::setCellHeight(int height)
-{
-  m_CellHeight = height;
-}
-
+/** Get the cell height
+ * @return the height of the cells in cm
+ */
 int
 OccupancyGrid::getCellHeight()
 {
   return m_CellHeight;
 }
 
+/** Get the width of the grid
+ * @return the width of the grid in # of cells
+ */
+int
+OccupancyGrid::getWidth()
+{
+  return m_Width;
+}
+
+/** Get the height of the grid
+ * @return the height of the grid in # cells
+ */
+int
+OccupancyGrid::getHeight()
+{
+  return m_Height;
+}
+
+/** Resets the cell width
+ * @param width the width of the cells in cm
+ */
+void
+OccupancyGrid::setCellWidth(int width)
+{
+  m_CellWidth = width;
+}
+
+/** Resets the cell height
+ * @param height the height of the cells in cm
+ */
+void
+OccupancyGrid::setCellHeight(int height)
+{
+  m_CellHeight = height;
+}
+
+/** Resets the width of the grid and constructs a new empty grid
+ * @param width the cell width in cm
+ */
 void
 OccupancyGrid::setWidth(int width)
 {
@@ -75,12 +122,9 @@ OccupancyGrid::setWidth(int width)
   initGrid();
 }
 
-int
-OccupancyGrid::getWidth()
-{
-  return m_Width;
-}
-
+/** Resets the height of the grid and constructs a new empty grid
+ * @param height the height of the grid in # of cells
+ */
 void
 OccupancyGrid::setHeight(int height)
 {
@@ -88,13 +132,12 @@ OccupancyGrid::setHeight(int height)
   initGrid();
 }
 
-int
-OccupancyGrid::getHeight()
-{
-  return m_Height;
-}
 
-
+/** Reset the occupancy probability of a cell
+ * @param x the x-position of the cell
+ * @param y the y-position of the cell
+ * @param prob the occupancy probability of cell (x,y)
+ */
 void
 OccupancyGrid::setProb(int x, int y, Probability prob)
 {
@@ -102,6 +145,9 @@ OccupancyGrid::setProb(int x, int y, Probability prob)
     m_OccupancyProb[x][y] = prob;
 }
 
+/** Resets all occupancy probabilities
+ * @param prob the occupancy probability the grid will become filled with
+ */
 void
 OccupancyGrid::fill(Probability prob)
 {
@@ -114,12 +160,33 @@ OccupancyGrid::fill(Probability prob)
   }
 }
 
-//  Probability OccupancyGrid::getProb(int x, int y)
-//  {
-//    return m_OccupancyProb[x][y];
-//  }
+/** Get the occupancy probability of a cell
+ * @param x the x-position of the cell
+ * @param y the y-position of the cell
+ * @return the occupancy probability of cell (x,y)
+ */
+Probability
+OccupancyGrid::getProb(int x, int y)
+{
+  if( (x >= 0) && (x < m_Width) && (y >= 0) && (y < m_Height) ) {
+    return m_OccupancyProb[x][y];
+  } else {
+    return 1;
+  }
+}
 
+/** Operator (), get occupancy probability of a cell
+ * @param x the x-position of the cell
+ * @param y the y-position of the cell
+ * @return the occupancy probability of cell (x,y)
+ */
+Probability&
+OccupancyGrid::operator () (const int x, const int y)
+{
+  return m_OccupancyProb[x][y];
+}
 
+/** Init a new empty grid with the predefined parameters */
 void
 OccupancyGrid::initGrid()
 {

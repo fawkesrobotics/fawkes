@@ -34,6 +34,10 @@ namespace fawkes
 }
 #endif
 
+/** @class CEllipseMap <plugins/colli/search/ellipse_map.h>
+ * This is an implementation of a collection of fast ellipses.
+ */
+
 class CEllipseMap
 {
  public:
@@ -47,6 +51,7 @@ class CEllipseMap
 
 };
 
+/** Constructor. */
 inline
 CEllipseMap::CEllipseMap()
 {
@@ -66,7 +71,12 @@ CEllipseMap::CEllipseMap()
   //     }
 }
 
-
+/** Get the occupied cells that match a given ellipse.
+ * @param width The width of the ellipse
+ * @param height The height of the ellipse
+ * @param obstacle_increasement Enable obstacle increasement?
+ * @return vector with pairwise cell coordinates (x,y), that are occupied by such an ellipse
+ */
 inline const std::vector< int >
 CEllipseMap::GetEllipse( int width, int height, bool obstacle_increasement )
 {

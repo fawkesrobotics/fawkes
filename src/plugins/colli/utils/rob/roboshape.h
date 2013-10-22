@@ -32,140 +32,65 @@ namespace fawkes
 class Logger;
 class Configuration;
 
-/** My RoboShape class.
- *  This is a class containing all roboshape information.
- *   All methods have been implemented but round robots.
- */
 class RoboShape
 {
  public:
-
-  // =============================== //
-  // CLASS METHODS                   //
-  // =============================== //
-
-  /**  This is the constructor. Has to be called with the
-   *   name, of the shape description file.
-   *  @param shapeFileName is the name of the shape
-   *         description file
-   */
   RoboShape( const char * cfg_prefix,
              fawkes::Logger* logger,
              fawkes::Configuration* config);
-
-  /** Destructor.
-   */
   ~RoboShape();
 
-  // =============================== //
-  // CLASS GETTER METHODS            //
-  // =============================== //
-
-  /** Returns if the robot is round.
-   *  @return bool indicating if the robot is round.
-   */
   bool IsRoundRobot( );
-
-  /** Returns if the robot is angular.
-   *  @return bool indicating if the robot is angular.
-   */
   bool IsAngularRobot( );
 
-
-  /** Returns, if a reading length is _in_ the robot.
-   *  @param anglerad is float containing the angle of
-   *      the reading in radians.
-   *  @param length containing the length of the reading.
-   *  @return if the reading is in the robot.
-   */
+  ///\brief Check if the reading is 'in' the robot
   bool IsRobotReadingforRad( float anglerad, float length );
 
-  /** Returns, if a reading length is _in_ the robot.
-   *  @param angledeg is float containing the angle of
-   *      the reading in degree.
-   *  @param length containing the length of the reading.
-   *  @return if the reading is in the robot.
-   */
+  ///\brief Check if the reading is 'in' the robot
   bool IsRobotReadingforDegree( float angledeg, float length );
 
-
-  /** Returns the robots length for a specific angle.
-   *  @param anglerad is the angle in radians.
-   *  @return the length in this direction.
-   */
+  ///\brief return the length of the robot for a specific angle
   float GetRobotLengthforRad( float anglerad );
 
-  /** Returns the robots length for a specific angle.
-   *  @param angledeg is the angle in degree.
-   *  @return the length in this direction.
-   */
+  ///\brief return the length of the robot for a specific angle
   float GetRobotLengthforDegree( float angledeg );
 
-
-  /** Returns if there is a rod waiting in this direction.
-   *  @param anglerad is an angle in radians.
-   *  @return 0 if there is no rod, 1 if there is,
-   *      and 3 if unsure (for now all rods are unsure).
-   */
+  ///\brief Returns if there is a rod waiting in this direction.
   static int IsRodforRad( float anglerad );
 
-  /** Returns if there is a rod waiting in this direction.
-   *  @param angledeg is an angle in degree.
-   *  @return 0 if there is no rod, 1 if there is,
-   *      and 3 if unsure (for now all rods are unsure).
-   */
+  ///\brief Returns if there is a rod waiting in this direction.
   int IsRodforDegree( float angledeg );
 
-  /** Returns the radius of the robot if its round.
-   *  @return radius of the round robot
-   */
+  ///\brief Returns the radius of the robot if its round.
   float GetRadius();
 
-  /** Returns the maximum radius of the robot if its round.
-   *  @return maximumradius of the round robot
-   */
+  ///\brief Returns the maximum radius of the robot if its round.
   float GetCompleteRadius();
 
-  /** Returns the widthx of the angular robot.
-   *  @return only the robot x width.
-   */
+  ///\brief Returns the width-x of the angular robot.
   float GetWidthX();
 
-  /** Returns the widthy of the angular robot.
-   *  @return only the robot y width.
-   */
+  ///\brief Returns the width-y of the angular robot.
   float GetWidthY();
 
-  /** Returns the complete x width of the angular robot.
-   *  @return the complete x width.
-   */
+  ///\brief Returns the complete x width of the angular robot.
   float GetCompleteWidthX();
 
-  /** Returns the complete y width of the angular robot.
-   *  @return the complete y width.
-   */
+  ///\brief Returns the complete x width of the angular robot.
   float GetCompleteWidthY();
 
-  /** Returns the laser offset in x direction of the robot.
-   *  @return the laser offset in x direction.
-   */
+  ///\brief Returns the laser offset in x direction of the robot.
   float GetLaserOffsetX();
 
-  /** Returns the laser offset in y direction of the robot.
-   *  @return the laser offset in y direction.
-   */
+  ///\brief Returns the laser offset in y direction of the robot.
   float GetLaserOffsetY();
 
 
-  // ======================================================= //
+private:
 
 
- private:
-
-  // VARIABLES
-
-  // flag if the robot is round or not
-  bool m_isRound, m_isAngular;
+  bool m_isRound;    /**< flag if the robot is round */
+  bool m_isAngular;  /**< flag if the robot is angular */
 
   // several variables containing information about the robot.
   float m_radius, m_widthX, m_widthY;

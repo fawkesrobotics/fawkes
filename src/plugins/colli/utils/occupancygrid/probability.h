@@ -29,8 +29,13 @@ namespace fawkes
 }
 #endif
 
+/** A probability type. */
 typedef float Probability;
 
+/** Check if the probability value is valid.
+ * @param p The probablity
+ * @return true if valid, false otherwise
+ */
 inline bool
 isProb(Probability p)
 {

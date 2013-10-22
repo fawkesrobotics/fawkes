@@ -38,40 +38,33 @@ namespace fawkes
 
 class MotorInterface;
 
-/** The Basic of a Motorinstructor.
+/** @class CBaseMotorInstruct <plugins/colli/drive_realization/base_motor_instruct.h>
+ * The Basic of a Motorinstructor.
  */
+
 class CBaseMotorInstruct: public MotorControl
 {
  public:
 
-  ///
   CBaseMotorInstruct( fawkes::MotorInterface* motor,
                       float frequency,
                       fawkes::Logger* logger);
 
-  ///
   virtual ~CBaseMotorInstruct();
 
 
-  /** Try to realize the proposed values
-   *    with respect to the maximum allowed values.
-   */
+  ///\brief Try to realize the proposed values with respect to the maximum allowed values.
   void Drive( float proposedTrans, float proposedRot );
 
-
-  /** Executes a soft stop with respect to CalculateTranslation
-   *    and CalculateRotation.
-   */
+  ///\brief Executes a soft stop with respect to CalculateTranslation and CalculateRotation.
   void ExecuteStop( );
 
-protected:
-  fawkes::Logger* logger_;
 
-private:
+ protected:
+  fawkes::Logger* logger_; /**< The fawkes logger */
 
-  //////////////////////////////////////////////////////////////////////
-  // VARIABLES
-  //////////////////////////////////////////////////////////////////////
+
+ private:
 
   float m_execTranslation, m_execRotation;
   float m_desiredTranslation, m_desiredRotation;
@@ -80,26 +73,25 @@ private:
 
   fawkes::Time m_OldTimestamp;
 
-  //////////////////////////////////////////////////////////////////////
-  // METHODS
-  //////////////////////////////////////////////////////////////////////
 
-  // setCommand sets the executable commands and sends them
+  ///\brief setCommand sets the executable commands and sends them
   void SetCommand( );
 
 
-  // calculates rotation speed
-  // has to be implemented in its base classes!
-  // is for the smoothness of rotation transitions.
-  // calculate maximum allowed rotation change between proposed and desired values
+  /** calculates rotation speed
+   * has to be implemented in its base classes!
+   * is for the smoothness of rotation transitions.
+   * calculate maximum allowed rotation change between proposed and desired values
+   */
   virtual float CalculateRotation( float currentRotation, float desiredRotation,
            float time_factor ) = 0;
 
 
-  // calculates translation speed.
-  // has to be implemented in its base classes!
-  // is for the smoothness of translation transitions.
-  // calculate maximum allowed translation change between proposed and desired values
+  /** calculates translation speed.
+   * has to be implemented in its base classes!
+   * is for the smoothness of translation transitions.
+   * calculate maximum allowed translation change between proposed and desired values
+   */
   virtual float CalculateTranslation( float currentTranslation, float desiredTranslation,
               float time_factor ) = 0;
 };
@@ -110,7 +102,11 @@ private:
 /* ********************  BASE IMPLEMENTATION DETAILS  *********************** */
 /* ************************************************************************** */
 
-// Constructor. Initializes all constants and the local pointers.
+/** Constructor. Initializes all constants and the local pointers.
+ * @param motor The MotorInterface with all the motor information
+ * @param frequency The frequency of the colli (should become deprecated!)
+ * @param logger The fawkes logger
+ */
 inline
 CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
                                         float frequency,
@@ -129,8 +125,7 @@ CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
 }
 
 
-
-// Destructor
+/** Desctructor. */
 inline
 CBaseMotorInstruct::~CBaseMotorInstruct()
 {
@@ -139,8 +134,7 @@ CBaseMotorInstruct::~CBaseMotorInstruct()
 }
 
 
-
-// setcommand. Puts the command to the motor.
+/** Sends the drive command to the motor. */
 inline void
 CBaseMotorInstruct::SetCommand()
 {
@@ -180,8 +174,10 @@ CBaseMotorInstruct::SetCommand()
 }
 
 
-
-// Set a drive command with respect to the physical constraints of the robot.
+/** Try to realize the proposed values with respect to the physical constraints of the robot.
+ * @param proposedTrans the proposed translation velocity
+ * @param proposedRot the proposed rotation velocity
+ */
 inline void
 CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
 {
@@ -220,8 +216,9 @@ CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
 }
 
 
-
-// Does execute a stop command if it is called several times
+/** Executes a soft stop with respect to CalculateTranslation and CalculateRotation
+ * if it is called several times
+ */
 inline void
 CBaseMotorInstruct::ExecuteStop()
 {

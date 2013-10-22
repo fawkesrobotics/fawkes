@@ -41,6 +41,11 @@
 using namespace fawkes;
 using namespace std;
 
+/** @class ColliThread "colli_thread.h"
+ * Thread that performs the navigation and collision avoidance algorithms.
+ */
+
+/** Constructor. */
 ColliThread::ColliThread()
   : Thread("ColliThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
@@ -48,6 +53,7 @@ ColliThread::ColliThread()
 {
 }
 
+/** Destructor. */
 ColliThread::~ColliThread()
 {
 }
@@ -144,6 +150,10 @@ ColliThread::finalize()
   logger->log_info(name(), "(finalize): Destructing done.");
 }
 
+/** Set the visualization thread.
+ * By default, it is created by the plugin (colli_plugin.cpp) and passed to the colli_thread.
+ * @param vis_thread Pointer to the visualization-thread
+ */
 void
 ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
 {

@@ -35,17 +35,10 @@ class CSlowBackwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  ///
   CSlowBackwardDriveModule(Logger* logger, Configuration* config);
-
-
-  ///
   ~CSlowBackwardDriveModule();
 
-
-  ///
   void Update();
-
 
 
  private:

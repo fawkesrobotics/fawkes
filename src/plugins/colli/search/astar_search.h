@@ -47,26 +47,20 @@ typedef struct point_struct point_t;
 class CSearch: public CAbstractSearch
 {
  public:
-  /** Constructor */
-  CSearch( CLaserOccupancyGrid * occGrid , Logger* logger, Configuration* config);
 
-  /** Destructor */
+  CSearch( CLaserOccupancyGrid * occGrid , Logger* logger, Configuration* config);
   virtual ~CSearch();
 
-  /** update complete plan things
-   * precondition: the occupancy grid has to be updated previously!
-   */
+  ///\brief update complete plan things
   void Update( int roboX, int roboY, int targetX, int targetY );
 
-  /** returns, if the update was successful or not.
-   * precondition: update had to be called.
-   */
+  ///\brief returns, if the update was successful or not.
   bool UpdatedSuccessful();
 
-  /** Get the current plan */
+  ///\brief Get the current plan
   std::vector<point_t>* GetPlan();
 
-  /** Get the robot's position in the grid, used for the plan */
+  ///\brief Get the robot's position in the grid, used for the plan
   point_t GetRoboPosition();
 
  private:

@@ -31,31 +31,17 @@ namespace fawkes
 }
 #endif
 
-//
 class CMediumForwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  /** Constructor.
-   */
   CMediumForwardDriveModule(Logger* logger, Configuration* config);
-
-
-  /** Destructor. Does nothing, because nothing was created in this module.
-   */
   ~CMediumForwardDriveModule();
 
-
-  /** This Routine is called. Afterwards the m_proposedTranslation and
-   *    m_proposedRotation have to be filled. Here they are
-   *    set to zero.
-   */
   virtual void Update();
 
 
  private:
-
-
 
   float MediumForward_Translation ( float dist_to_target, float dist_to_front, float alpha,
             float trans_0, float rot_0, float rot_1 );

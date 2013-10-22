@@ -36,102 +36,49 @@ class Logger;
 class Configuration;
 class Time;
 
-/** My laser class.
- *  This is a class to access the laserreadings in a
- *   fast and efficient way.
- */
 class Laser
 {
  public:
 
-  // =============================== //
-  // CLASS METHODS                   //
-  // =============================== //
-
-  /** Constructor.
-   *  This is the constructor. Has to be called with the laser
-   *   object.
-   *  \exception (int 1) The number of readings given by the laser are
-   *             smaller or equal 0.... Perhaps the laser is currently
-   *             offline. Try again!
-   *  \exception (int 2) The readings array could not be allocated!
-   *  @param laser is the bbClients Laser_Client.
-   */
   Laser( fawkes::Laser360Interface* laser,
          fawkes::Logger* logger,
          fawkes::Configuration* config) throw (int);
-
-
-  /** Destructor.
-   */
   ~Laser();
 
-
-  // =============================== //
-  // CONTINOUS METHOD                //
-  // =============================== //
-
-  /** Updates the laserdata.
-   *  Call this with the Laser_Clientect in your
-   *   Loop (the laserobject has to be updated
-   *  previously, or you get no new data!).
-   *  @return  -1 is no new data, so nothing is to do;
-   *            0 is ok;
-   *            1 is an error occured;
-   */
+  ///\brief Updates the laserdata.
   int UpdateLaser( );
 
-
-  // ================================================= //
-  // Return the actual readings. Nothing interpolated. //
-  // ================================================= //
-
-  /** Returns a special readings length.
-   *  @param number is the number of this reading.
-   *  @return float is the numbers length.
-   */
+  ///\brief Returns laser readings length.
   float GetReadingLength( const int number ) const;
 
-  /** Returns a special readings x coordinate.
-   *  @param number is the number of this reading.
-   *  @return float is the numbers x coordinate.
-   */
+  ///\brief Returns laser readings x coordinate.
   float GetReadingPosX  ( const int number ) const;
 
-  /** Returns a special readings y coordinate.
-   *  @param number is the number of this reading.
-   *  @return float is the numbers y coordinate.
-   */
+  ///\brief Returns laser readings y coordinate.
   float GetReadingPosY  ( const int number ) const;
 
+  ///\brief Get number of available laser readings
+  int GetNumberOfReadings() const;
+
+  ///\brief Get angle for a laser reading
+  float GetRadiansForReading( const int number ) const;
+
+  ///\brief Get current laserdata timestamp
+  Time GetCurrentTimestamp() const;
+
+  ///\brief Get the time difference to previous readings
+  float TimeDiff() const;
 
   bool IsPipe( float i ) const;
   bool IsOnlyPipe( float i ) const;
 
-  // ================================================= //
-  // RETURN Misc Things                                //
-  // ================================================= //
-
-  // Return the number of readings we got.
-  int GetNumberOfReadings() const;
-
-  // Return the angle in radians for this reading
-  float GetRadiansForReading( const int number ) const;
-
-  // Returns the date of the current laserdata.
-  Time GetCurrentTimestamp() const;
-
-  float TimeDiff() const;
-  // ======================================================= //
 
  protected:
 
-  // the number of readings
-  int m_NumberOfReadings;
-  float m_Resolution;
+  int m_NumberOfReadings; /**< The total number of laser readings */
+  float m_Resolution;     /**< The resolution of the laser readings */
 
-  // our readings
-  LaserPoint * m_pReadings;
+  LaserPoint * m_pReadings; /**< Our readings */
 
  private:
 

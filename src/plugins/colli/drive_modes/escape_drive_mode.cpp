@@ -29,7 +29,15 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CEscapeDriveModule <plugins/colli/drive_modes/escape_drive_mode.h>
+ * Class Escape-Drive-Module. This module is called, if an escape is neccessary.
+ * It should try to maximize distance to the disturbing obstacle.
+ */
+
+/** Constructor.
+ * @param laser The Laser object
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CEscapeDriveModule::CEscapeDriveModule( Laser* laser, Logger* logger, Configuration* config )
  : CAbstractDriveMode(logger, config)

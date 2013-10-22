@@ -29,35 +29,25 @@ namespace fawkes
 }
 #endif
 
-/** AStarState.
+/** @class CAStarState <plugins/colli/search/astar_state.h>
  *  This is the class for an A* State.
  */
+
 class CAStarState
 {
  public:
-  /**  This is the standard constructor. */
+
   CAStarState( );
-
-  /**  This is another standard constuctor, this time parametrized.
-   *   @param x is the x coordinate.
-   *   @param y is the y coordinate.
-   *   @param pastCost is the total left cost.
-   *   @param father is a pointer to the predecessor of this
-   *          AStarState.
-   */
   CAStarState( int x, int y, int pastCost, CAStarState * father );
-
-  /// Destructor.
   ~CAStarState();
 
-  // Coordinates
-  int m_X, m_Y;
+  int m_X;  /**< x coordinate of the state */
+  int m_Y;  /**< y coordinate of the state */
 
-  // Predecessor
-  CAStarState * m_pFather;
+  CAStarState * m_pFather; /**< The predecessor state */
 
-  // Costs
-  int m_PastCost, m_TotalCost;
+  int m_PastCost;  /**< The past cost */
+  int m_TotalCost; /**< The total cost */
 };
 
 
@@ -66,7 +56,7 @@ class CAStarState
 /* ***********************  IMPLEMENTATION DETAILS  ************************* */
 /* ************************************************************************** */
 
-// Standard Constructor
+/**  This is the standard constructor. */
 inline
 CAStarState::CAStarState( )
 {
@@ -76,10 +66,14 @@ CAStarState::CAStarState( )
   m_PastCost = 0;
 }
 
-// Another Constructor
+/**  This is another standard constuctor, this time parametrized.
+ * @param x is the x coordinate.
+ * @param y is the y coordinate.
+ * @param pastCost is the total left cost.
+ * @param father is a pointer to the predecessor of this AStarState.
+ */
 inline
-CAStarState::CAStarState( int x, int y,
-                          int pastCost, CAStarState * father )
+CAStarState::CAStarState( int x, int y, int pastCost, CAStarState * father )
 {
   m_X = x;
   m_Y = y;
@@ -87,7 +81,7 @@ CAStarState::CAStarState( int x, int y,
   m_pFather = father;
 }
 
-// Standard Destructor
+/** Standard Destructor */
 inline
 CAStarState::~CAStarState( )
 {

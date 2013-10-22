@@ -48,16 +48,8 @@ typedef struct point_struct point_t;
 class CAStar
 {
  public:
-  /** Constructor.
-   *  This is the constructor for the AStar Object.
-   *  @param occGrid is a pointer to an COccupancyGrid to search through.
-   *  @param dbg is a pointer to the debug object.
-   */
-  CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config );
 
-  /** Destructor.
-   *  This destructs the AStarObject.
-   */
+  CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config );
   ~CAStar();
 
   /* =========================================== */
@@ -70,9 +62,7 @@ class CAStar
    */
   void Solve( const point_t &RoboPos, const point_t &TargetPos, std::vector<point_t> &solution );
 
-  /** Method, returning the nearest point outside of an obstacle.
-   *  @return a new modified point.
-   */
+  ///\brief Method, returning the nearest point outside of an obstacle.
   point_t RemoveTargetFromObstacle( int targetX, int targetY, int stepX, int stepY );
 
  private:

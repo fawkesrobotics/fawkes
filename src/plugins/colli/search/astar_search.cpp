@@ -41,8 +41,12 @@ namespace fawkes
  * data for the rest of the program.
  */
 
-// Constructor. Constructs the plan, initializes an A* Object and
-//  makes a reference to the OccupancyGrid.
+/** Constructor. Constructs the plan, initializes an A* Object and
+ *  makes a reference to the OccupancyGrid.
+ * @param occGrid The laser occupancy-grid
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration.
+ */
 CSearch::CSearch( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* config)
  : CAbstractSearch( occGrid, logger ),
    logger_( logger )
@@ -52,14 +56,19 @@ CSearch::CSearch( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* 
   logger_->log_info("CSearch", "(Constructor): Exiting");
 }
 
-// Destructor
+/** Destructor */
 CSearch::~CSearch()
 {
   delete m_pAStar;
 }
 
-// Perform an Update by searching in the occgrid for a plan
-//   from robopos to targetpos
+/** Perform an Update by searching in the occgrid for a plan from robopos to targetpos.
+ * precondition: the occupancy grid has to be updated previously!
+ * @param roboX Robot x position in grid
+ * @param roboY Robot y position in grid
+ * @param targetX Target x position in grid
+ * @param targetY Target y position in grid
+   */
 void
 CSearch::Update( int roboX, int roboY, int targetX, int targetY )
 {
@@ -96,19 +105,28 @@ CSearch::Update( int roboX, int roboY, int targetX, int targetY )
 }
 
 
-// Return, if the previous called update performed successfully
+/** Check, if the update was successful or not.
+ * precondition: update had to be called.
+ * @return true, if update was successfule.
+ */
 bool
 CSearch::UpdatedSuccessful()
 {
   return m_UpdatedSuccessful;
 }
 
+/** Get the current plan
+ * @return vector containing all the points in the grid along the plan
+ */
 std::vector<point_t>*
 CSearch::GetPlan()
 {
   return &m_vPlan;
 }
 
+/** Get the robot's position in the grid, used for the plan
+ * @return Robot's position in the grid
+ */
 point_t
 CSearch::GetRoboPosition()
 {

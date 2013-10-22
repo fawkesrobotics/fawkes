@@ -37,7 +37,20 @@ namespace fawkes
 
 using namespace std;
 
+/** @class CQuadraticMotorInstruct <plugins/colli/drive_realization/quadratic_motor_instruct.h>
+ * This module is a class for validity checks of drive
+ * commands and sets those things with respect to the physical
+ * borders of the robot.
+ * For this purpose the two functions CalculateRotation and
+ * CalculateTranslation are implemented quadratically ;-)
+ */
 
+/** Constructor.
+ * @param motor The MotorInterface with all the motor information
+ * @param frequency The frequency of the colli (should become deprecated!)
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
+ */
 CQuadraticMotorInstruct::CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
                                                   float frequency,
                                                   fawkes::Logger* logger,
@@ -67,7 +80,7 @@ CQuadraticMotorInstruct::~CQuadraticMotorInstruct()
 
 
 
-/* Implementation of Calculate Translation Function.
+/** Implementation of Calculate Translation Function.
  * These are dangerous! Take care while modifying. Only a minus sign too few
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
@@ -123,7 +136,7 @@ float CQuadraticMotorInstruct::CalculateTranslation( float currentTranslation,
 
 
 
-/* Implementation of Calculate Rotation Function.
+/** Implementation of Calculate Rotation Function.
  * These are dangerous! Take care while modifying. Only a minus sign too few
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!

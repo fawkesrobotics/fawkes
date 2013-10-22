@@ -29,7 +29,13 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CMediumForwardDriveModule <plugins/colli/drive_modes/medium_forward_drive_mode.h>
+ * This is the MediumForward drive-module, for medium forward only movements.
+ */
+
+/** Constructor.
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CMediumForwardDriveModule::CMediumForwardDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)

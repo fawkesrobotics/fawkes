@@ -50,9 +50,17 @@ namespace fawkes
 }
 #endif
 
-//~ using namespace std;
+/** @class CSelectDriveMode <plugins/colli/drive_modes/select_drive_mode.h>
+ * This class selects the correct drive mode and calls the appopriate drive component
+ */
 
-
+/** Constructor.
+ * @param motor The motor controller object
+ * @param laser the Laser object
+ * @param target The "colli target" NavigatorInterface
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
+ */
 CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
                                     Laser* laser,
                                     NavigatorInterface* target,
@@ -161,14 +169,18 @@ CSelectDriveMode::SetLocalTrajec( float localTrajecX, float localTrajecY )
   m_LocalTrajecY = localTrajecY;
 }
 
-
+/** Returns the proposed translation which was previously calculated in Update()
+ * @return The proposed translation
+ */
 float
 CSelectDriveMode::GetProposedTranslation()
 {
   return m_ProposedTranslation;
 }
 
-
+/** Returns the proposed rotation which was previously calculated in Update()
+ * @return The proposed rotation
+ */
 float
 CSelectDriveMode::GetProposedRotation()
 {

@@ -31,105 +31,56 @@ namespace fawkes
 }
 #endif
 
-/* Reading struct.
- */
+/** Reading struct.*/
 struct Reading
 {
-  float posX, posY, length, rad;
+  float posX;     /**< x position of reading */
+  float posY;     /**< y position of reading */
+  float length;   /**< length of reading */
+  float rad;      /**< angle of reading (in rad) */
 };
 
 class TrigTable;
 
-/** Ths class contains methods for handling scan data.
- */
 class LaserPoint
 {
  public:
 
-  /** Constructor.
-   * @param numberOfReadings is the number of scan-readings the scan should hold.
-   * @param * dbg is the an instance of the Debug-Class.
-   *  \exception (int 1) the could not be instanced.
-   */
   LaserPoint( int numberOfReadings ) throw (int);
-
-
-  /** Destructor.
-   */
   ~LaserPoint();
 
-  /** Returns the number-reading length.
-   *  @param number is the readings number.
-   *  @return float is the length.
-   */
+  ///\brief Returns the number-reading length.
   float  GetLength( int number );
 
-  /** Returns the number-reading x coordinate.
-   *  @param number is the readings number.
-   *  @return float is the x coordinate.
-   */
-  float  GetPosX  ( int number );
-
-  /** Returns the number-reading y coordinate.
-   *  @param number is the readings number.
-   *  @return float is the y coordinate.
-   */
-  float  GetPosY  ( int number );
-
-  /** Returns the number-reading radians.
-   *  @param number is the readings number.
-   *  @return float is the angle in rad.
-   */
+  ///\brief Returns the number-reading radians.
   float  GetRadians  ( int number );
 
+  ///\brief Returns the number-reading x coordinate.
+  float  GetPosX  ( int number );
 
-  /** Sets the number-readings angle.
-   *  @param number is the readings number.
-   *  @param length is the readings angle in rad.
-   */
-  void SetRadians( int number, float radians );
+  ///\brief Returns the number-reading y coordinate.
+  float  GetPosY  ( int number );
 
-  /** Sets the number-readings length.
-   *  @param number is the readings number.
-   *  @param length is the readings length.
-   */
+  ///\brief Sets the number-readings length.
   void  SetLength  ( int number, float length );
 
-  /** Sets the number-readings x coordinate.
-   *  @param number is the readings number.
-   *  @param posX is the readings x coordinate.
-   */
+  ///\brief Sets the number-readings angle.
+  void SetRadians( int number, float radians );
+
+  ///\brief Sets the number-readings x coordinate.
   void  SetPosX  ( int number, float posX);
 
-  /** Computes the number-readings x coordinate by
-   *  the number-readings radians and length and
-   *  finally sets the computed value.
-   *  @param number is the readings number.
-   */
+  ///\brief Computes the number-readings x coordinate by the number-readings
   void  SetPosX  ( int number);
 
-  /** Sets the number-readings x coordinate.
-   *  @param number is the readings number.
-   *  @param posY is the readings y coordinate.
-   */
+  ///\brief Sets the number-readings x coordinate.
   void  SetPosY  ( int number, float posY );
 
-  /** Computes the number-readings y coordinate by
-   *  the number-readings radians and length and
-   *  finally sets the computed value.
-   *  @param number is the readings number.
-   */
+  ///\brief Computes the number-readings x coordinate by the number-readings
   void  SetPosY  ( int number );
 
-  /** Computes the number-readings coordinates by
-   *  the number-readings radians and length and
-   *  finally sets the computed values.
-   *  @param number is the readings number.
-   */
+  ///\brief Computes the number-readings coordinates by the number-readings
   void  SetPos  ( int number );
-
-
-  // ======================================================= //
 
  private:
 

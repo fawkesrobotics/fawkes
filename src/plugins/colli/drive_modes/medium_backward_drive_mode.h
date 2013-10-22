@@ -35,22 +35,10 @@ class CMediumBackwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  /** Constructor.
-   */
   CMediumBackwardDriveModule(Logger* logger, Configuration* config);
-
-
-  /** Destructor. Does nothing, because nothing was created in this module.
-   */
   ~CMediumBackwardDriveModule();
 
-
-  /** This Routine is called. Afterwards the m_proposedTranslation and
-   *    m_proposedRotation have to be filled. Here they are
-   *    set to zero.
-   */
   virtual void Update();
-
 
  private:
 

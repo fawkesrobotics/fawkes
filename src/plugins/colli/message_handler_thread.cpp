@@ -32,12 +32,21 @@
 using namespace fawkes;
 using namespace std;
 
+/** @class ColliMessageHandlerThread "message_handler_thread.h"
+ * This thread receives the messages of the main NavigatorInterface and
+ * transforms them into appropriate commands/targets for the ColliThread.
+ * This also includes setting the DriveMode etc (for now; should be more
+ * adjustable in future releases)
+ */
+
+/** Constructor. */
 ColliMessageHandlerThread::ColliMessageHandlerThread()
   : Thread("ColliMessageHandlerThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
 }
 
+/** Desctructor. */
 ColliMessageHandlerThread::~ColliMessageHandlerThread()
 {
 }

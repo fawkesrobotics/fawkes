@@ -35,36 +35,26 @@ class MotorInterface;
 class Logger;
 class Configuration;
 
-/** This module is a class for validity checks of drive
- * commands and sets those things with respect to the physical
- * borders of the robot.
- * For this purpose the two functions CalculateRotation and
- * CalculateTranslation are implemented quadratically ;-)
- */
+
 class CQuadraticMotorInstruct: public CBaseMotorInstruct
 {
-public:
+ public:
 
-  ///
   CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
                            float frequency,
                            fawkes::Logger* logger,
                            fawkes::Configuration* config );
 
-  ///
   virtual ~CQuadraticMotorInstruct();
 
 
-private:
+ private:
 
-  // implementation of the virtual functions of the base class
-
-
-  /// linear implementation of velocity constraints
+  ///\brief linear implementation of velocity constraints
   float CalculateRotation( float currentRotation, float desiredRotation,
          float time_factor );
 
-  /// linear implementation of velocity constraints
+  ///\brief linear implementation of velocity constraints
   float CalculateTranslation( float currentTranslation, float desiredTranslation,
             float time_factor );
 

@@ -39,35 +39,25 @@ namespace fawkes
 class Logger;
 class Configuration;
 
-/** My RoboShape Colli class.
+/** @class CRoboShape_Colli <plugins/colli/utils/rob/roboshape_colli.h>
  *  This class is mainly the same as the basic class with the difference
  *    that all data is precalculated or estimated.
  */
+
 class CRoboShape_Colli : public RoboShape
 {
  public:
 
-  /// Constructor
-  ///  First param is a file name
-  ///  Second param is the readings per degree constant.
   CRoboShape_Colli( const char * cfg_prefix,
                     Logger* logger,
                     Configuration* config,
                     int readings_per_degree = 1 ) throw (int);
+ ~CRoboShape_Colli();
 
-  /// Destructor
-  ~CRoboShape_Colli();
-
-  /** Returns the robots length for a specific angle.
-   *  @param anglerad is the angle in radians.
-   *  @return the length in this direction.
-   */
+  ///\brief Returns the robots length for a specific angle.
   float GetRobotLengthforRad( float anglerad );
 
-  /** Returns the robots length for a specific angle.
-   *  @param angledeg is the angle in degree.
-   *  @return the length in this direction.
-   */
+  ///\brief Returns the robots length for a specific angle.
   float GetRobotLengthforDegree( float angledeg );
 
  private:
@@ -84,7 +74,12 @@ class CRoboShape_Colli : public RoboShape
 /*                            IMPLEMENTATION DETAILS, DO NOT CARE!                                   */
 /* ************************************************************************************************* */
 
-
+/** Constructor
+ * @param cfg_prefix The prefix of the config node, where the roboshape values are found
+ * @param logger Pointer to the fawkes logger
+ * @param config Pointer to the fawkes configuration.
+ * @param readings_per_degree Readings per degree constant (default=1)
+ */
 inline
 CRoboShape_Colli::CRoboShape_Colli( const char * cfg_prefix,
                                     Logger* logger,
@@ -99,18 +94,27 @@ CRoboShape_Colli::CRoboShape_Colli( const char * cfg_prefix,
   }
 }
 
-inline
+  /** Destructor */
+  inline
 CRoboShape_Colli::~CRoboShape_Colli()
 {
   m_vRobotLength.clear();
 }
 
+/** Returns the robots length for a specific angle.
+ * @param anglerad is the angle in radians.
+ * @return the length in this direction.
+ */
 inline float
 CRoboShape_Colli::GetRobotLengthforRad( float anglerad )
 {
   return (this->GetRobotLengthforDegree( rad2deg( anglerad ) ));
 }
 
+/** Returns the robots length for a specific angle.
+ * @param angledeg is the angle in degree.
+ * @return the length in this direction.
+ */
 inline float
 CRoboShape_Colli::GetRobotLengthforDegree( float angledeg )
 {

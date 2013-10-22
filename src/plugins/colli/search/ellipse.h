@@ -36,30 +36,38 @@ namespace fawkes
 }
 #endif
 
+/** @class CFastEllipse <plugins/colli/search/ellipse.h>
+ * This is an implementation of a a fast ellipse.
+ */
+
 class CFastEllipse
 {
  public:
-  // center 0, 0
-  // construct a new ellipse with given values
+
   CFastEllipse( int radius_width, int radius_height, bool obstacle_increasement = true );
   ~CFastEllipse();
 
-  // Return the occupied cells with their values
+  /** Return the occupied cells with their values
+   * @return vector containing the occupied cells (alternating x and y coordinates)
+   */
   inline const std::vector< int > GetEllipse()
   {
     return m_OccupiedCells;
   }
 
-  inline int GetKey()
-  {
+  /** Get the key
+   * @return The key
+   */
+  inline int GetKey() {
     return m_Key;
   }
 
-  inline void SetKey( int key )
-  {
+  /** Set key.
+   * @param key the new key
+   */
+  inline void SetKey( int key ) {
     m_Key = key;
   }
-
 
  private:
   // the occ cells, size is dividable through 3, 'cause:
@@ -73,6 +81,11 @@ class CFastEllipse
 };
 
 
+/** Constructor.
+ * @param radius_width radius width of the new ellipse
+ * @param radius_height radius height of the new ellipse
+ * @param obstacle_increasement Increase obstacles?
+ */
 inline
 CFastEllipse::CFastEllipse( int radius_width, int radius_height, bool obstacle_increasement )
 {

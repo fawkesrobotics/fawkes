@@ -28,7 +28,17 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CMediumBiwardDriveModule <plugins/colli/drive_modes/medium_biward_drive_mode.h>
+ * This is the MediumBiward drive-module. It is inherited from  the abstract drive mode
+ * and uses the other both modes.  If the target is in front, it drives forward
+ * to the target, else it drives backward to the target.
+ */
+
+/** Constructor.
+ * @param forward_module The MediumForward drive module
+ * @param backward_module The MediumBackward drive module
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CMediumBiwardDriveModule::CMediumBiwardDriveModule( CMediumForwardDriveModule*  forward_module,
                                                     CMediumBackwardDriveModule* backward_module,

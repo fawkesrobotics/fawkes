@@ -35,55 +35,39 @@ namespace fawkes
 }
 #endif
 
-/** Class Escape-Drive-Module. This module is called, if an escape is
- *    neccessary. It should try to maximize distance to the disturbing
- *    obstacle.
- */
 class CEscapeDriveModule : public CAbstractDriveMode
 {
  public:
 
-    /** Constructor. Sets only the drive mode name to "MovingNotAllowed"
-     */
-    CEscapeDriveModule( Laser* laser, Logger* logger, Configuration* config );
+  CEscapeDriveModule( Laser* laser, Logger* logger, Configuration* config );
+  ~CEscapeDriveModule();
 
-
-    /** Destructor. Does nothing, because nothing was created in this module.
-     */
-    ~CEscapeDriveModule();
-
-
-    /** This Routine is called. Afterwards the m_proposedTranslation and
-     *    m_proposedRotation have to be filled. Here they are
-     *    set to zero.
-     */
-    virtual void Update();
-
+  virtual void Update();
 
  private:
 
-    /// our pointer to the laserinterface.... lets escape ;-)
-    Laser*             m_pLaser;
-    CRoboShape_Colli*  m_pRoboShape;
+  /// our pointer to the laserinterface.... lets escape ;-)
+  Laser*             m_pLaser;
+  CRoboShape_Colli*  m_pRoboShape;
 
-    /// Readings without robolength in it
-    std::vector< float > m_vNormalizedReadings;
-    std::vector< float > m_vFront, m_vBack;
-    std::vector< float > m_vLeftFront,  m_vLeftBack;
-    std::vector< float > m_vRightFront, m_vRightBack;
-
-
-    /// absolute values are the maximum values. do not act faster!
-    float m_MaxTranslation;
-    float m_MaxRotation;
+  /// Readings without robolength in it
+  std::vector< float > m_vNormalizedReadings;
+  std::vector< float > m_vFront, m_vBack;
+  std::vector< float > m_vLeftFront,  m_vLeftBack;
+  std::vector< float > m_vRightFront, m_vRightBack;
 
 
-    void FillNormalizedReadings();
-    void SortNormalizedReadings();
+  /// absolute values are the maximum values. do not act faster!
+  float m_MaxTranslation;
+  float m_MaxRotation;
 
-    bool CheckDanger( std::vector< float > readings );
-    bool TurnLeftAllowed();
-    bool TurnRightAllowed();
+
+  void FillNormalizedReadings();
+  void SortNormalizedReadings();
+
+  bool CheckDanger( std::vector< float > readings );
+  bool TurnLeftAllowed();
+  bool TurnRightAllowed();
 };
 
 } // end namespace fawkes

@@ -31,29 +31,13 @@ namespace fawkes
 }
 #endif
 
-
-/** Class Stop-Drive-Module. This module is called, if something goes wrong,
- *    or is not recognized. It is a fairly easy one, because it sets all to
- *    zero.
- */
 class CStopDriveModule : public CAbstractDriveMode
 {
  public:
 
-  /** Constructor. Sets only the drive mode name to "MovingNotAllowed"
-   */
   CStopDriveModule(Logger* logger, Configuration* config);
-
-
-  /** Destructor. Does nothing, because nothing was created in this module.
-   */
   ~CStopDriveModule();
 
-
-  /** This Routine is called. Afterwards the m_proposedTranslation and
-   *    m_proposedRotation have to be filled. Here they are
-   *    set to zero.
-   */
   virtual void Update();
 
 

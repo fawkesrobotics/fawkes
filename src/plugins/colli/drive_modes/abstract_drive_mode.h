@@ -35,114 +35,84 @@ namespace fawkes
 }
 #endif
 
-/** This is the base class which calculates drive modes. Drive modes
- *    are the proposed settings for the drive-realization out of the
- *    found search things.
+/** @class CAbstractDriveMode <plugins/colli/drive_modes/abstract_drive_mode.h>
+ * This is the base class which calculates drive modes. Drive modes are the
+ * proposed settings for the drive-realization out of the found search things.
  */
 class CAbstractDriveMode
 {
-public:
+ public:
 
-  /** Constructor. You have to set the drive mode name out of colli_targetobj.h
-   *    to your derived drive mode.
-   */
   CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configuration* config);
-
-
-  /** Destructor.
-   */
   virtual ~CAbstractDriveMode();
 
-
-  /** Sets the current target.
-   *  Has to be set before Update!
-   */
+  ///\brief Sets the current target.
   void SetCurrentTarget( float targetX, float targetY, float targetOri );
 
-
-  /** Sets the current robo position.
-   *  Has to be set before Update!
-   */
+  ///\brief Sets the current robo position.
   void SetCurrentRoboPos( float roboX, float roboY, float roboOri );
 
-
-  /** Set the local targetpoint found by the search.
-   *  Has to be set before Update!
-   */
-  void SetLocalTarget( float localTargetX, float localTargetY );
-
-
-  /** Set the local trajectory point found by the search.
-   *  Has to be set before Update!
-   */
-  void SetLocalTrajec( float localTrajecX, float localTrajecY );
-
-
-  /** Sets the current robo speed.
-   *  Has to be set before Update!
-   */
+  ///\brief Sets the current robo speed.
   void SetCurrentRoboSpeed( float roboTrans, float roboRot );
 
-
-  /** Set the colli mode values for each drive mode.
-   *  Has to be set before Update!
-   */
+  ///\brief Set the colli mode values for each drive mode.
   void SetCurrentColliMode( bool orient, bool stop );
 
+  ///\brief Set the local targetpoint found by the search.
+  void SetLocalTarget( float localTargetX, float localTargetY );
 
-  /** Has to be implemented and has to calculate
-   *   the proposed settings which are asked for
-   *   afterwards.
-   */
-  virtual void Update() = 0;
+  ///\brief  Set the local trajectory point found by the search.
+  void SetLocalTrajec( float localTrajecX, float localTrajecY );
 
-
-  /** Returns the drive modes name.
-   *  Has to be set in the constructor of your drive mode!
-   */
+  ///\brief Returns the drive modes name.
   NavigatorInterface::DriveMode GetDriveModeName();
 
 
-  /** Returns the proposed translation which
-   *  was calculated previously in
-   *  'Update' which has to be implemented!
-   */
+  ///\brief Calculate the proposed settings which are asked for afterwards.
+  virtual void Update() = 0;
+
+  ///\brief Returns the proposed translation
   float GetProposedTranslation();
 
-
-  /** Returns the proposed rotation which
-   *  was calculated previously in
-   *  'Update' which has to be implemented!
-   */
+  ///\brief Returns the proposed rotatio
   float GetProposedRotation();
 
 
+ protected:
 
-protected:
-
-
+  ///\brief Perform linear interpolation
   float LinInterpol( float x, float left, float right, float bot, float top );
 
+  ///\brief Get velocity that guarantees a stop for a given distance
   float GuaranteeTransStop( float distance, float current_trans, float desired_trans );
 
+  float m_TargetX;    /**< current target x */
+  float m_TargetY;    /**< current target y */
+  float m_TargetOri;  /**< current target ori */
 
-  float m_TargetX, m_TargetY, m_TargetOri;  // current target
-  float m_RoboX, m_RoboY, m_RoboOri;        // current robo pos
-  float m_RoboTrans, m_RoboRot;             // current robo speed
+  float m_RoboX;      /**< current robo pos x */
+  float m_RoboY;      /**< current robo pos y */
+  float m_RoboOri;    /**< current robo ori */
 
-  float m_LocalTargetX, m_LocalTargetY;     // local target
-  float m_LocalTrajecX, m_LocalTrajecY;     // local trajectory
+  float m_RoboTrans;  /**< current robo translation velocity */
+  float m_RoboRot;    /**< current robo rotation velocity */
 
-  bool m_OrientAtTarget;                    // flag if orienting necessary
-  bool m_StopAtTarget;                      // flag if stopping on or after target
+  float m_LocalTargetX;  /**< local target x */
+  float m_LocalTargetY;  /**< local target y */
 
-  float m_ProposedTranslation;       // proposed translation setting for next timestep
-  float m_ProposedRotation;          // proposed rotation setting for next timestep
+  float m_LocalTrajecX;  /**< local trajectory x */
+  float m_LocalTrajecY;  /**< local trajectory y*/
 
-  fawkes::NavigatorInterface::DriveMode m_DriveModeName;        // the drive modes name. your have to set this
+  bool m_OrientAtTarget; /**< flag if orienting necessary */
+  bool m_StopAtTarget;   /**< flag if stopping on or after target */
 
-  fawkes::Logger* logger_;
-  fawkes::Configuration* config_;
+  float m_ProposedTranslation; /**< proposed translation setting for next timestep */
+  float m_ProposedRotation;    /**< proposed rotation setting for next timestep */
+
+  fawkes::NavigatorInterface::DriveMode m_DriveModeName;  /**< the drive mode name */
+
+  fawkes::Logger* logger_;          /**< The fawkes logger */
+  fawkes::Configuration* config_;   /**< The fawkes configuration */
 
 private:
 
@@ -156,7 +126,10 @@ private:
 /* ***********************  IMPLEMENTATION DETAILS  ************************* */
 /* ************************************************************************** */
 
-
+/** Constructor.
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
+ */
 inline
 CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configuration* config)
  : logger_( logger ),
@@ -174,84 +147,146 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
   logger_->log_info("CAbstractDriveMode", "(Constructor): Exiting...");
 }
 
-
-inline CAbstractDriveMode::~CAbstractDriveMode()
+/** Desctructor. */
+inline
+CAbstractDriveMode::~CAbstractDriveMode()
 {
   logger_->log_info("CAbstractDriveMode", "(Destructor): Entering...");
   logger_->log_info("CAbstractDriveMode", "(Destructor): Exiting...");
 }
 
 
-inline float CAbstractDriveMode::GetProposedTranslation()
+/** Returns the proposed translation which was calculated previously in
+ *  'Update()' which has to be implemented!
+ * @return The proposed translation
+ */
+inline float
+CAbstractDriveMode::GetProposedTranslation()
 {
   return m_ProposedTranslation;
 }
 
-
-inline float CAbstractDriveMode::GetProposedRotation()
+/** Returns the proposed rotation which was calculated previously in
+ *  'Update()' which has to be implemented!
+ * @return The proposed rotation
+ */
+inline float
+CAbstractDriveMode::GetProposedRotation()
 {
   return m_ProposedRotation;
 }
 
 
-inline void CAbstractDriveMode::SetCurrentTarget( float targetX, float targetY, float targetOri )
+/** Sets the current target.
+ *  Has to be set before Update!
+ * @param targetX The target x position
+ * @param targetY The target y position
+ * @param targetOri The target orientation
+ */
+inline void
+CAbstractDriveMode::SetCurrentTarget( float targetX, float targetY, float targetOri )
 {
   m_TargetX   = targetX;
   m_TargetY   = targetY;
   m_TargetOri = targetOri;
 }
 
-
-inline void CAbstractDriveMode::SetCurrentRoboPos( float roboX, float roboY, float roboOri )
+/** Sets the current robo position.
+ *  Has to be set before Update!
+ * @param roboX The robot x position
+ * @param roboY The robot y position
+ * @param roboOri The robot orientation
+ */
+inline void
+CAbstractDriveMode::SetCurrentRoboPos( float roboX, float roboY, float roboOri )
 {
   m_RoboX   = roboX;
   m_RoboY   = roboY;
   m_RoboOri = roboOri;
 }
 
-
-inline void CAbstractDriveMode::SetCurrentRoboSpeed( float roboTrans, float roboRot )
+/** Sets the current robo speed.
+ *  Has to be set before Update!
+ * @param roboTrans The robot translation velocity
+ * @param roboRot The robot rotation velocity
+ */
+inline void
+CAbstractDriveMode::SetCurrentRoboSpeed( float roboTrans, float roboRot )
 {
   m_RoboTrans = roboTrans;
   m_RoboRot   = roboRot;
 }
 
-
-inline void CAbstractDriveMode::SetCurrentColliMode( bool orient, bool stop )
+/** Set the colli mode values for each drive mode.
+ *  Has to be set before Update!
+ * @param orient Orient at target after target position reached?
+ * @param stop Stop at target position?
+ */
+inline void
+CAbstractDriveMode::SetCurrentColliMode( bool orient, bool stop )
 {
   m_OrientAtTarget = orient;
   m_StopAtTarget   = stop;
 }
 
 
-inline void CAbstractDriveMode::SetLocalTarget( float localTargetX, float localTargetY )
+/** Set the local targetpoint found by the search.
+ *  Has to be set before Update!
+ * @param localTargetX The local target x position
+ * @param localTargetY The local target y position
+ */
+inline void
+CAbstractDriveMode::SetLocalTarget( float localTargetX, float localTargetY )
 {
   m_LocalTargetX = localTargetX;
   m_LocalTargetY = localTargetY;
 }
 
-
-inline void CAbstractDriveMode::SetLocalTrajec( float localTrajecX, float localTrajecY )
+/** Set the local trajectory point found by the search.
+ *  Has to be set before Update!
+ * @param localTrajecX The local target x trajectory
+ * @param localTrajecY The local target y trajectory
+ */
+inline void
+CAbstractDriveMode::SetLocalTrajec( float localTrajecX, float localTrajecY )
 {
   m_LocalTrajecX = localTrajecX;
   m_LocalTrajecY = localTrajecY;
 }
 
-
-inline fawkes::NavigatorInterface::DriveMode CAbstractDriveMode::GetDriveModeName()
+/** Get the drive mode.
+ *  Has to be set in the constructor of your drive mode!
+ * @return The drive mode
+ */
+inline fawkes::NavigatorInterface::DriveMode
+CAbstractDriveMode::GetDriveModeName()
 {
   return m_DriveModeName;
 }
 
-
-inline float CAbstractDriveMode::LinInterpol( float x, float x1, float x2,
+/** Performs linear interpolation
+ * @param x  x
+ * @param x1 x1
+ * @param x2 x2
+ * @param y1 y1
+ * @param y2 y2
+ * @return interpolated value
+ */
+inline float
+CAbstractDriveMode::LinInterpol( float x, float x1, float x2,
                 float y1, float y2 )
 {
   return ( ((x-x1)*(y2-y1))/(x2-x1) + y1 );
 }
 
-
-inline float CAbstractDriveMode::GuaranteeTransStop( float distance,
+/** Get velocity that guarantees a stop for a given distance
+ * @param distance The distance to stop at
+ * @param current_trans Robot's current translation velocity
+ * @param desired_trans Robot's currently desired translation velocity
+ * @return Proposed translation velocity to stop at given distance
+ */
+inline float
+CAbstractDriveMode::GuaranteeTransStop( float distance,
                  float current_trans,
                  float desired_trans )
 {

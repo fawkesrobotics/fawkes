@@ -28,7 +28,17 @@ namespace fawkes
 }
 #endif
 
-/** Initialize your local values here.
+/** @class CSlowBiwardDriveModule <plugins/colli/drive_modes/slow_biward_drive_mode.h>
+ * This is the SlowBiward drive-module. It is inherited from  the abstract drive mode
+ * and uses the other both modes.  If the target is in front, it drives forward
+ * to the target, else it drives backward to the target.
+ */
+
+/** Constructor.
+ * @param slow_forward The SlowForward drive module
+ * @param slow_backward The SlowBackward drive module
+ * @param logger The fawkes logger
+ * @param config The fawkes configuration
  */
 CSlowBiwardDriveModule::CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_forward,
                                                 CSlowBackwardDriveModule* slow_backward,
