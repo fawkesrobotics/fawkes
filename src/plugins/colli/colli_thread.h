@@ -92,8 +92,7 @@ class ColliThread
    *
    * Point                ->  cart_coord_2d_t     (point with 2 floats)
    */
-  fawkes::MotorInterface*         m_pMopoObj;          // MotorObject, current values
-  fawkes::MotorInterface*         m_pMopoObj_des;      // MotorObject, desired values
+  fawkes::MotorInterface*         m_pMopoObj;          // MotorObject
   fawkes::Laser360Interface*      m_pLaserScannerObj;  // LaserScannerObject
   fawkes::NavigatorInterface*     m_pColliTargetObj;   // TargetObject
   fawkes::NavigatorInterface*     m_pColliDataObj;     // Colli Data Object

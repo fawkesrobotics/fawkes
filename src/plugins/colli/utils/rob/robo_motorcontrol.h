@@ -45,7 +45,7 @@ class MotorControl
    *    maximum speeds and accelerations.
    *  @param motor is a Mopo_Client.
    */
-  MotorControl( fawkes::MotorInterface* motor, fawkes::MotorInterface* motor_des );
+  MotorControl( fawkes::MotorInterface* motor );
   ~MotorControl();
 
 
@@ -154,9 +154,7 @@ class MotorControl
   float m_MotorControlDesiredTranslation; // what translation the next set command realizes
   float m_MotorControlDesiredRotation;    // what rotationtion the next set command realizes
 
-  fawkes::MotorInterface* m_pMopo;      // Interface with current motor-values
-  fawkes::MotorInterface* m_pMopo_des;  // Interface with desired motor-values
-
+  fawkes::MotorInterface* m_pMopo;      // Interface with motor-values
 };
 
 } // namespace fawkes

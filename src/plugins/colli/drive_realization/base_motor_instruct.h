@@ -46,7 +46,6 @@ class CBaseMotorInstruct: public MotorControl
 
   ///
   CBaseMotorInstruct( fawkes::MotorInterface* motor,
-                      fawkes::MotorInterface* motor_des,
                       float frequency,
                       fawkes::Logger* logger);
 
@@ -114,10 +113,9 @@ private:
 // Constructor. Initializes all constants and the local pointers.
 inline
 CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
-                                        fawkes::MotorInterface* motor_des,
                                         float frequency,
                                         fawkes::Logger* logger )
- : MotorControl( motor, motor_des ),
+ : MotorControl( motor ),
    logger_(logger)
 {
   logger_->log_info("CBaseMotorInstruct", "(Constructor): Entering");

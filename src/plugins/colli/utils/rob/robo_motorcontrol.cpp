@@ -31,10 +31,9 @@ namespace fawkes {
 #endif
 
 
-MotorControl::MotorControl( fawkes::MotorInterface* motor, fawkes::MotorInterface* motor_des )
+MotorControl::MotorControl( fawkes::MotorInterface* motor )
 {
   m_pMopo = motor;
-  m_pMopo_des = motor_des;
   SetEmergencyStop();
 }
 
@@ -65,8 +64,8 @@ float MotorControl::GetCurrentOri()
 
 float MotorControl::GetMotorDesiredTranslation()
 {
-  float vx = m_pMopo_des->vx();
-  float vy = m_pMopo_des->vy();
+  float vx = m_pMopo->des_vx();
+  float vy = m_pMopo->des_vy();
   float speed = sqrt(vx*vx + vy*vy);
 
   if ( vx > 0 )
@@ -78,7 +77,7 @@ float MotorControl::GetMotorDesiredTranslation()
 
 float MotorControl::GetMotorDesiredRotation()
 {
-  return m_pMopo_des->omega();
+  return m_pMopo->des_omega();
 }
 
 

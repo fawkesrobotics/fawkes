@@ -39,11 +39,10 @@ using namespace std;
 
 
 CQuadraticMotorInstruct::CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
-                                                  fawkes::MotorInterface* motor_des,
                                                   float frequency,
                                                   fawkes::Logger* logger,
                                                   fawkes::Configuration* config )
- : CBaseMotorInstruct( motor, motor_des, frequency, logger ),
+ : CBaseMotorInstruct( motor, frequency, logger ),
    config_( config )
 {
   logger_->log_info("CQuadraticMotorInstruct", "(Constructor): Entering");

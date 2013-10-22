@@ -137,7 +137,6 @@ ColliThread::finalize()
   blackboard->close( m_pColliTargetObj );
   blackboard->close( m_pLaserScannerObj );
   blackboard->close( m_pMopoObj );
-  blackboard->close( m_pMopoObj_des );
 
   logger->log_info(name(), "(finalize): Destructing done.");
 }
@@ -227,8 +226,7 @@ ColliThread::loop()
   UpdateBB();
 
   if( !m_pLaserScannerObj->has_writer()
-   || !m_pMopoObj->has_writer()
-   || !m_pMopoObj_des->has_writer() ) {
+   || !m_pMopoObj->has_writer() ) {
     logger->log_warn(name(), "***** Laser or sim_robot dead!!! --> STOPPING!!!!");
     m_pMotorInstruct->Drive( 0.0, 0.0 );
     m_pColliDataObj->set_final( true );
@@ -443,7 +441,6 @@ void
 ColliThread::RegisterAtBlackboard()
 {
   m_pMopoObj     = blackboard->open_for_reading<MotorInterface>("Motor");
-  m_pMopoObj_des = blackboard->open_for_reading<MotorInterface>("Motor desired");
 
   // only use the obstacle laser scanner here!
   m_pLaserScannerObj = blackboard->open_for_reading<Laser360Interface>("Laser laser merged");
@@ -453,7 +450,6 @@ ColliThread::RegisterAtBlackboard()
   m_pColliDataObj = blackboard->open_for_writing<NavigatorInterface>("Colli data");
 
   m_pMopoObj->read();
-  m_pMopoObj_des->read();
   m_pLaserScannerObj->read();
   m_pColliTargetObj->read();
 
@@ -486,7 +482,6 @@ ColliThread::InitializeModules()
 
   // BEFORE DRIVE MODE: the motorinstruction set
   m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( m_pMopoObj,
-                                                                        m_pMopoObj_des,
                                                                         m_ColliFrequency,
                                                                         logger,
                                                                         config );
@@ -523,7 +518,6 @@ ColliThread::UpdateBB()
 {
   m_pLaserScannerObj->read();
   m_pMopoObj->read();
-  m_pMopoObj_des->read();
   m_pColliTargetObj->read();
   m_pColliDataObj->write();
 }

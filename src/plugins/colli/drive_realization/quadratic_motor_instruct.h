@@ -47,7 +47,6 @@ public:
 
   ///
   CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
-                           fawkes::MotorInterface* motor_des,
                            float frequency,
                            fawkes::Logger* logger,
                            fawkes::Configuration* config );
