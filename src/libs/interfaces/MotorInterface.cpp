@@ -76,6 +76,9 @@ MotorInterface::MotorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "vx", 1, &data->vx);
   add_fieldinfo(IFT_FLOAT, "vy", 1, &data->vy);
   add_fieldinfo(IFT_FLOAT, "omega", 1, &data->omega);
+  add_fieldinfo(IFT_FLOAT, "des_vx", 1, &data->des_vx);
+  add_fieldinfo(IFT_FLOAT, "des_vy", 1, &data->des_vy);
+  add_fieldinfo(IFT_FLOAT, "des_omega", 1, &data->des_omega);
   add_fieldinfo(IFT_UINT32, "controller", 1, &data->controller);
   add_fieldinfo(IFT_STRING, "controller_thread_name", 64, data->controller_thread_name);
   add_messageinfo("SetMotorStateMessage");
@@ -89,7 +92,7 @@ MotorInterface::MotorInterface() : Interface()
   add_messageinfo("TransRotMessage");
   add_messageinfo("OrbitMessage");
   add_messageinfo("LinTransRotMessage");
-  unsigned char tmp_hash[] = {0x13, 0xbd, 0x9f, 0x7b, 0xb5, 0x3, 0xab, 0xf7, 0x94, 0xa8, 0x7a, 0x1c, 0x5f, 0x70, 0xb3, 0x47};
+  unsigned char tmp_hash[] = {0x62, 0x6c, 0x3f, 0x33, 0x1c, 0x3a, 0x9e, 0x18, 0xd5, 0xee, 0xab, 0x30, 0xfb, 0x10, 0xf0, 0x79};
   set_hash(tmp_hash);
 }
 
@@ -516,6 +519,111 @@ void
 MotorInterface::set_omega(const float new_omega)
 {
   data->omega = new_omega;
+  data_changed = true;
+}
+
+/** Get des_vx value.
+ * 
+      Desired VX of the robot in m/s. Forward.
+    
+ * @return des_vx value
+ */
+float
+MotorInterface::des_vx() const
+{
+  return data->des_vx;
+}
+
+/** Get maximum length of des_vx value.
+ * @return length of des_vx value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_des_vx() const
+{
+  return 1;
+}
+
+/** Set des_vx value.
+ * 
+      Desired VX of the robot in m/s. Forward.
+    
+ * @param new_des_vx new des_vx value
+ */
+void
+MotorInterface::set_des_vx(const float new_des_vx)
+{
+  data->des_vx = new_des_vx;
+  data_changed = true;
+}
+
+/** Get des_vy value.
+ * 
+      Desired VY of the robot in m/s. Left.
+    
+ * @return des_vy value
+ */
+float
+MotorInterface::des_vy() const
+{
+  return data->des_vy;
+}
+
+/** Get maximum length of des_vy value.
+ * @return length of des_vy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_des_vy() const
+{
+  return 1;
+}
+
+/** Set des_vy value.
+ * 
+      Desired VY of the robot in m/s. Left.
+    
+ * @param new_des_vy new des_vy value
+ */
+void
+MotorInterface::set_des_vy(const float new_des_vy)
+{
+  data->des_vy = new_des_vy;
+  data_changed = true;
+}
+
+/** Get des_omega value.
+ * 
+      Desired Rotation speed of the robot in rad/s.
+    
+ * @return des_omega value
+ */
+float
+MotorInterface::des_omega() const
+{
+  return data->des_omega;
+}
+
+/** Get maximum length of des_omega value.
+ * @return length of des_omega value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_des_omega() const
+{
+  return 1;
+}
+
+/** Set des_omega value.
+ * 
+      Desired Rotation speed of the robot in rad/s.
+    
+ * @param new_des_omega new des_omega value
+ */
+void
+MotorInterface::set_des_omega(const float new_des_omega)
+{
+  data->des_omega = new_des_omega;
   data_changed = true;
 }
 

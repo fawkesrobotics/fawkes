@@ -210,6 +210,15 @@ class MotorInterface : public Interface
   float omega();
   void set_omega(const float new_omega);
   int maxlenof_omega() const;
+  float des_vx();
+  void set_des_vx(const float new_des_vx);
+  int maxlenof_des_vx() const;
+  float des_vy();
+  void set_des_vy(const float new_des_vy);
+  int maxlenof_des_vy() const;
+  float des_omega();
+  void set_des_omega(const float new_des_omega);
+  int maxlenof_des_omega() const;
   unsigned int controller();
   void set_controller(const unsigned int new_controller);
   int maxlenof_controller() const;
