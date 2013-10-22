@@ -88,6 +88,15 @@ class MotorInterface : public Interface
     float omega; /**< 
       Rotation speed of the robot in rad/s.
      */
+    float des_vx; /**< 
+      Desired VX of the robot in m/s. Forward.
+     */
+    float des_vy; /**< 
+      Desired VY of the robot in m/s. Left.
+     */
+    float des_omega; /**< 
+      Desired Rotation speed of the robot in rad/s.
+     */
     uint32_t controller; /**< 
      The ID of the controller. The controller ID is the instance serial of the sending
      interface. Only from this interface instance command messages are accepted.
@@ -508,6 +517,15 @@ class MotorInterface : public Interface
   float omega() const;
   void set_omega(const float new_omega);
   size_t maxlenof_omega() const;
+  float des_vx() const;
+  void set_des_vx(const float new_des_vx);
+  size_t maxlenof_des_vx() const;
+  float des_vy() const;
+  void set_des_vy(const float new_des_vy);
+  size_t maxlenof_des_vy() const;
+  float des_omega() const;
+  void set_des_omega(const float new_des_omega);
+  size_t maxlenof_des_omega() const;
   uint32_t controller() const;
   void set_controller(const uint32_t new_controller);
   size_t maxlenof_controller() const;
