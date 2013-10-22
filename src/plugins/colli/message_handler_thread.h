@@ -31,6 +31,8 @@
 
 #include <interfaces/NavigatorInterface.h>
 
+#include <string>
+
 namespace fawkes
 {
   class MotorInterface;
@@ -55,9 +57,12 @@ class ColliMessageHandlerThread
  private:
 
   fawkes::NavigatorInterface* if_navi_;
+  fawkes::MotorInterface*     if_motor_;
   fawkes::NavigatorInterface* if_colli_data_;
   fawkes::NavigatorInterface* if_colli_target_;
-  fawkes::MotorInterface*     if_motor_;
+
+  std::string cfg_iface_navi_;
+  std::string cfg_iface_motor_;
 
   float security_distance_;
   float max_velocity_;

@@ -141,6 +141,9 @@ class ColliThread
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */
 
+  std::string cfg_iface_motor_;   /**< The ID of the MotorInterface */
+  std::string cfg_iface_laser_;   /**< The ID of the LaserInterface */
+
   // stop on target stuff
   std::vector< float > m_oldAnglesToTarget;      // the old angles to the target
 

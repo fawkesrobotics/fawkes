@@ -65,6 +65,9 @@ ColliThread::init()
   cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
 
+  cfg_iface_motor_      = config->get_string((cfg_prefix + "interface/motor").c_str());
+  cfg_iface_laser_      = config->get_string((cfg_prefix + "interface/laser").c_str());
+
   cfg_prefix += "OccGrid/";
   m_OccGridHeight       = config->get_float((cfg_prefix + "HEIGHT").c_str());
   m_OccGridWidth        = config->get_float((cfg_prefix + "WIDTH").c_str());
@@ -440,10 +443,10 @@ ColliThread::loop()
 void
 ColliThread::RegisterAtBlackboard()
 {
-  m_pMopoObj     = blackboard->open_for_reading<MotorInterface>("Motor");
+  m_pMopoObj     = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());
 
   // only use the obstacle laser scanner here!
-  m_pLaserScannerObj = blackboard->open_for_reading<Laser360Interface>("Laser laser merged");
+  m_pLaserScannerObj = blackboard->open_for_reading<Laser360Interface>(cfg_iface_laser_.c_str());
 
   m_pColliTargetObj = blackboard->open_for_reading<NavigatorInterface>("Colli target");
 

@@ -12,15 +12,6 @@ plugins/colli:
   # Define if obstacles should be increased depending on robot's speed
   obstacle_increasement: true
 
-  # The id of navigator iface
-  Navigator_interface_id: Navigator
-
-  # The id of laser iface
-  Laser_interface_id: Laser
-
-  # The id of motor iface
-  Motor_interface_id: Motor
-
   # Default security distance to keep to obstacles
   security_distance: 0.2
 
@@ -29,6 +20,14 @@ plugins/colli:
 
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
+
+  interface:
+    # ID of main navigator interface (this handles the incoming messages)
+    navigator: Navigator
+    # ID of motor interface
+    motor: Motor
+    # ID of laser interface
+    laser: Laser laser merged
 
   frame:
     # base_link frame

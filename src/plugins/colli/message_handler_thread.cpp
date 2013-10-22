@@ -45,14 +45,19 @@ ColliMessageHandlerThread::~ColliMessageHandlerThread()
 void
 ColliMessageHandlerThread::init()
 {
-  security_distance_ = config->get_float("/plugins/colli/security_distance");
-  max_velocity_      = config->get_float("/plugins/colli/max_velocity");
-  escaping_enabled_  = config->get_bool("/plugins/colli/escaping_enabled");
+  std::string cfg_prefix = "/plugins/colli/";
+  security_distance_ = config->get_float((cfg_prefix + "security_distance").c_str());
+  max_velocity_      = config->get_float((cfg_prefix + "max_velocity").c_str());
+  escaping_enabled_  = config->get_bool((cfg_prefix + "escaping_enabled").c_str());
 
-  if_navi_ = blackboard->open_for_writing<NavigatorInterface>("Navigator");
+  cfg_iface_navi_       = config->get_string((cfg_prefix + "interface/navigator").c_str());
+  cfg_iface_motor_      = config->get_string((cfg_prefix + "interface/motor").c_str());
+
+  if_navi_ = blackboard->open_for_writing<NavigatorInterface>(cfg_iface_navi_.c_str());
+  if_motor_ = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());
+
   if_colli_data_ = blackboard->open_for_reading<NavigatorInterface>("Colli data");
   if_colli_target_ = blackboard->open_for_writing<NavigatorInterface>("Colli target");
-  if_motor_ = blackboard->open_for_reading<MotorInterface>("Motor");
 }
 
 
