@@ -266,9 +266,14 @@ ColliThread::loop()
 
     m_ProposedTranslation = 0.0;
     m_ProposedRotation    = 0.0;
-    m_pColliDataObj->set_final( true );
-    m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+    if( abs(m_pMopoObj->vx()) > 0.01f
+     || abs(m_pMopoObj->vy()) > 0.01f
+     || abs(m_pMopoObj->omega()) > 0.01f ) {
+      // only stop movement, if we are moving. otherwise we flood the interface with messages
+      m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+    }
 
+    m_pColliDataObj->set_final( true );
     escape_count = 0;
     // Send motor and colli data away.
     m_pColliDataObj->write();
