@@ -301,14 +301,7 @@ CAbstractDriveMode::GuaranteeTransStop( float distance,
     return desired_trans;
 
   int time_needed_to_distance = (int)( distance / (current_trans/10.0) );
-  int time_needed_to_stop = 0;
-
-  float tmp_trans = 0.0;
-
-  while( tmp_trans < desired_trans ) {
-    ++time_needed_to_stop;
-    tmp_trans += m_cMaxTransDec;
-  }
+  int time_needed_to_stop = (int)( desired_trans / m_cMaxTransDec );
 
   if( time_needed_to_stop >= time_needed_to_distance ) {
     float value = std::max( 0.0, current_trans - (1.0 * m_cMaxTransDec) );
