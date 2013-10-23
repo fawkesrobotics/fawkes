@@ -553,6 +553,9 @@ ColliThread::UpdateColliStateMachine()
   float targetO = m_pColliTargetObj->dest_ori();
 
   bool  orient = m_pColliTargetObj->is_orient_at_target();
+
+  float targetDist = distance(targetX, targetY, curPosX, curPosY);
+
   //  bool  stop_on_target =  m_pColliTargetObj->StopOnTarget();
 
 //   if ( stop_on_target == false )
@@ -594,10 +597,7 @@ ColliThread::UpdateColliStateMachine()
 //     }
 
   // Real driving....
-  if( ( orient == true )
-   && ( sqr( curPosX - targetX ) + sqr( curPosY - targetY ) >= sqr(2.1) ) ) {
-
-   float ori = m_pColliTargetObj->dest_ori();
+  if( orient && ( targetDist >= 2.1 ) ) {
 
     float mult = 0.0;
     if ( m_pMotorInstruct->GetUserDesiredTranslation() > 0 )
@@ -607,21 +607,21 @@ ColliThread::UpdateColliStateMachine()
       //  mult = -1.2;
       mult = -0.8;
 
-    float orientPointX = targetX - ( mult * cos(ori) );
-    float orientPointY = targetY - ( mult * sin(ori) );
+    float orientPointX = targetX - ( mult * cos(targetO) );
+    float orientPointY = targetY - ( mult * sin(targetO) );
 
     m_TargetPointX = orientPointX;
     m_TargetPointY = orientPointY;
     m_ColliStatus = DriveToOrientPoint;
     return;
 
-  } else if( sqr( curPosX - targetX ) + sqr( curPosY - targetY ) > sqr(0.15) )  { // soll im navigator wegen intercept parametrisierbar sein
+  } else if( targetDist > 0.15 )  { // soll im navigator wegen intercept parametrisierbar sein
     m_TargetPointX = targetX;
     m_TargetPointY = targetY;
     m_ColliStatus = DriveToTarget;
     return;
 
-  } else if ( (orient == true) && ( fabs( normalize_mirror_rad(curPosO - targetO) ) > 0.1 ) ) {
+  } else if ( orient && ( fabs( normalize_mirror_rad(curPosO - targetO) ) > 0.1 ) ) {
     m_ColliStatus = OrientAtTarget;
     return;
 
