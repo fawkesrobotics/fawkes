@@ -142,6 +142,7 @@ class ColliThread
   float cfg_min_drive_dist_;      /**< The minimum distance to drive straight to target */
   float cfg_min_drive_rot_dist_;  /**< The minimum distance to drive to AND rotate at target */
   float cfg_min_rot_dist_;        /**< The minimum rotation distance to rotate, when at target */
+  float cfg_target_pre_pos_;      /**< Distance to target pre-position (only if ColliState == DriveToOrientPoint) */
 
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */

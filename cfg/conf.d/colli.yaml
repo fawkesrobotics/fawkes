@@ -33,6 +33,10 @@ plugins/colli:
   # The minimum orientation difference, such that colli rotates (in rad)
   min_rot_distance: 0.1
 
+  # If the target is "far" away (>= min_drive_rot_distance), we approach a pre-position to
+  #  already adjust the orientation a little. This defines the distance to that pre-position.
+  pre_position_distance: 0.8
+
   interface:
     # ID of main navigator interface (this handles the incoming messages)
     navigator: Navigator

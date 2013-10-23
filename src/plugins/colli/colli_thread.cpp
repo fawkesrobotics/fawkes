@@ -72,6 +72,7 @@ ColliThread::init()
   cfg_min_drive_dist_     = config->get_float((cfg_prefix + "min_drive_distance").c_str());
   cfg_min_drive_rot_dist_ = config->get_float((cfg_prefix + "min_drive_rot_distance").c_str());
   cfg_min_rot_dist_       = config->get_float((cfg_prefix + "min_rot_distance").c_str());
+  cfg_target_pre_pos_     = config->get_float((cfg_prefix + "pre_position_distance").c_str());
 
   cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
@@ -602,20 +603,14 @@ ColliThread::UpdateColliStateMachine()
 
   // Real driving....
   if( orient && ( targetDist >= cfg_min_drive_rot_dist_ ) ) {
+    //we approach a point prior to the target, to adjust the orientation a little
+    float pre_pos_dist = cfg_target_pre_pos_;
+    if ( m_pMotorInstruct->GetUserDesiredTranslation() < 0 )
+      pre_pos_dist = -pre_pos_dist;
 
-    float mult = 0.0;
-    if ( m_pMotorInstruct->GetUserDesiredTranslation() > 0 )
-      //  mult =  1.2;
-      mult = 0.8;
-    else if ( m_pMotorInstruct->GetUserDesiredTranslation() < 0 )
-      //  mult = -1.2;
-      mult = -0.8;
+    m_TargetPointX = targetX - ( pre_pos_dist * cos(targetO) );
+    m_TargetPointY = targetY - ( pre_pos_dist * sin(targetO) );
 
-    float orientPointX = targetX - ( mult * cos(targetO) );
-    float orientPointY = targetY - ( mult * sin(targetO) );
-
-    m_TargetPointX = orientPointX;
-    m_TargetPointY = orientPointY;
     m_ColliStatus = DriveToOrientPoint;
     return;
 
