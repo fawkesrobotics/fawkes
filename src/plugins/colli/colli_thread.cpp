@@ -67,6 +67,7 @@ ColliThread::init()
   m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "FREQUENCY").c_str()));
   m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
   cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
+  cfg_min_rot_          = config->get_float((cfg_prefix + "min_rot").c_str());
 
   cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
@@ -366,11 +367,11 @@ ColliThread::loop()
         //m_ProposedRotation    = 1.5*normalize_mirror_rad( m_pColliTargetObj->GetTargetOri() -
         m_ProposedRotation    = 1.0*normalize_mirror_rad( m_pColliTargetObj->dest_ori() -
                                                           m_pMotorInstruct->GetCurrentOri() );
-        // but at least use 0.1 rad/s
+        // need to consider minimum rotation velocity
         if ( m_ProposedRotation > 0.0 )
-          m_ProposedRotation = std::max(  0.1f, m_ProposedRotation );
+          m_ProposedRotation = std::max(  cfg_min_rot_, m_ProposedRotation );
         else
-          m_ProposedRotation = std::min( -0.1f, m_ProposedRotation );
+          m_ProposedRotation = std::min( -cfg_min_rot_, m_ProposedRotation );
 
         m_pLaserOccGrid->ResetOld();
 

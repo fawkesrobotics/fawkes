@@ -21,6 +21,9 @@ plugins/colli:
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
 
+  # The minimum rotation speed (in rad/s). Used for rotating at target
+  min_rot: 0.1
+
   interface:
     # ID of main navigator interface (this handles the incoming messages)
     navigator: Navigator
