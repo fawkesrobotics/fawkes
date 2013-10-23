@@ -67,7 +67,11 @@ ColliThread::init()
   m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "FREQUENCY").c_str()));
   m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
   cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
-  cfg_min_rot_          = config->get_float((cfg_prefix + "min_rot").c_str());
+
+  cfg_min_rot_            = config->get_float((cfg_prefix + "min_rot").c_str());
+  cfg_min_drive_dist_     = config->get_float((cfg_prefix + "min_drive_distance").c_str());
+  cfg_min_drive_rot_dist_ = config->get_float((cfg_prefix + "min_drive_rot_distance").c_str());
+  cfg_min_rot_dist_       = config->get_float((cfg_prefix + "min_rot_distance").c_str());
 
   cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
@@ -597,7 +601,7 @@ ColliThread::UpdateColliStateMachine()
 //     }
 
   // Real driving....
-  if( orient && ( targetDist >= 2.1 ) ) {
+  if( orient && ( targetDist >= cfg_min_drive_rot_dist_ ) ) {
 
     float mult = 0.0;
     if ( m_pMotorInstruct->GetUserDesiredTranslation() > 0 )
@@ -615,13 +619,13 @@ ColliThread::UpdateColliStateMachine()
     m_ColliStatus = DriveToOrientPoint;
     return;
 
-  } else if( targetDist > 0.15 )  { // soll im navigator wegen intercept parametrisierbar sein
+  } else if( targetDist >= cfg_min_drive_dist_ )  { // soll im navigator wegen intercept parametrisierbar sein
     m_TargetPointX = targetX;
     m_TargetPointY = targetY;
     m_ColliStatus = DriveToTarget;
     return;
 
-  } else if ( orient && ( fabs( normalize_mirror_rad(curPosO - targetO) ) > 0.1 ) ) {
+  } else if ( orient && ( fabs( normalize_mirror_rad(curPosO - targetO) ) >= cfg_min_rot_dist_ ) ) {
     m_ColliStatus = OrientAtTarget;
     return;
 

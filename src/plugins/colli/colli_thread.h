@@ -139,6 +139,9 @@ class ColliThread
   bool cfg_obstacle_inc_;                        // indicator if obstacles should be increased or not
 
   float cfg_min_rot_;             /**< The minimum rotation speed. */
+  float cfg_min_drive_dist_;      /**< The minimum distance to drive straight to target */
+  float cfg_min_drive_rot_dist_;  /**< The minimum distance to drive to AND rotate at target */
+  float cfg_min_rot_dist_;        /**< The minimum rotation distance to rotate, when at target */
 
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */

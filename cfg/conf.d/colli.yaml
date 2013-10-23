@@ -24,6 +24,15 @@ plugins/colli:
   # The minimum rotation speed (in rad/s). Used for rotating at target
   min_rot: 0.1
 
+  # The minimum distance to target, such that colli decides to drive straight to target
+  min_drive_distance: 1.5
+
+  # The minimum distance to target, such that colli drives AND orients
+  min_drive_rot_distance: 2.1
+
+  # The minimum orientation difference, such that colli rotates (in rad)
+  min_rot_distance: 0.1
+
   interface:
     # ID of main navigator interface (this handles the incoming messages)
     navigator: Navigator
