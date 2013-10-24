@@ -146,28 +146,18 @@ CBaseMotorInstruct::SetCommand()
 
 
   // Translation borders
-  if ( fabs(m_execTranslation) < 0.05 )
+  if ( fabs(m_execTranslation) < 0.05 ) {
     SetDesiredTranslation( 0.0 );
-  else
-    if ( fabs(m_execTranslation) > 3.0 )
-      if ( m_execTranslation > 0.0 )
-  SetDesiredTranslation( 3.0 );
-      else
-  SetDesiredTranslation( -3.0 );
-    else
-      SetDesiredTranslation( m_execTranslation );
+  } else {
+    SetDesiredTranslation( std::fmin(std::fmax(m_execTranslation, -3.0f), 3.0f) );  //send command within [-3, 3]
+  }
 
   // Rotation borders
-  if ( fabs(m_execRotation) < 0.01 )
+  if ( fabs(m_execRotation) < 0.01 ) {
     SetDesiredRotation( 0.0 );
-  else
-    if ( fabs(m_execRotation) > 2*M_PI )
-      if ( m_execRotation > 0.0 )
-  SetDesiredRotation( 2*M_PI );
-      else
-  SetDesiredRotation( -2*M_PI );
-    else
-      SetDesiredRotation( m_execRotation );
+  } else {
+    SetDesiredRotation( std::fmin(std::fmax(m_execRotation, -2*M_PI), 2*M_PI) );  //send command within [-2*pi, 2*pi]
+  }
 
   // Send the commands to the motor. No controlling afterwards done!!!!
   SendCommand();
