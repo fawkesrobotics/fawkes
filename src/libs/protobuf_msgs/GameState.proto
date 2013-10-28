@@ -1,0 +1,109 @@
+
+/***************************************************************************
+ *  GameState.proto - GameState information
+ *
+ *  Created: Mon Jan 21 12:05:03 2013
+ *  Copyright  2013  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * - Neither the name of the authors nor the names of its contributors
+ *   may be used to endorse or promote products derived from this
+ *   software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package llsf_msgs;
+
+import "Time.proto";
+
+option java_package = "org.robocup_logistics.llsf_msgs";
+option java_outer_classname = "GameStateProtos";
+
+message GameState {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 20;
+  }
+
+  enum State {
+    INIT = 0;
+    WAIT_START = 1;
+    RUNNING = 2;
+    PAUSED = 3;
+  }
+
+  enum Phase {
+    PRE_GAME    = 0;
+    SETUP       = 10;
+    EXPLORATION = 20;
+    PRODUCTION  = 30;
+    POST_GAME   = 40;
+
+    OPEN_CHALLENGE         = 1000;
+    NAVIGATION_CHALLENGE   = 1001;
+    WHACK_A_MOLE_CHALLENGE = 1002;
+  }
+
+  enum RefBoxMode {
+    STANDALONE  = 0;
+    MASTER      = 1;
+    SLAVE       = 2;
+  }
+
+
+  // Time in seconds since game start
+  required Time   game_time = 1;
+
+  // Current game state
+  required State  state = 3;
+  // Current game phase
+  required Phase  phase = 4;
+  // Awarded points
+  optional uint32 points = 5;
+  // Name of the currently playing team
+  optional string team = 6;
+
+  optional RefBoxMode refbox_mode = 7 [default = STANDALONE];
+}
+
+// Request setting of a new game state
+message SetGameState {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 21;
+  }
+  // The new desired state
+  required GameState.State state = 1;
+}
+
+// Request setting of a new game phase
+message SetGamePhase {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 22;
+  }
+  // The new desired phase
+  required GameState.Phase phase = 1;
+}
