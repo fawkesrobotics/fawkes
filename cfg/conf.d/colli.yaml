@@ -53,6 +53,10 @@ plugins/colli:
     # odometry frame
     odometry: !frame /odom
 
+  ros:
+    # subscribe to this topic to be able to set the target via rviz
+    target_topic: /move_base_simple/goal
+
   OccGrid:
     # Occgrid height in m
     HEIGHT: 6.5

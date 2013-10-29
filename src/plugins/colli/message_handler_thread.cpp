@@ -124,8 +124,9 @@ ColliMessageHandlerThread::init()
   if_colli_target_ = blackboard->open_for_writing<NavigatorInterface>("Colli target");
 
 #ifdef HAVE_ROS
+  std::string ros_target_topic = config->get_string((cfg_prefix + "ros/target_topic").c_str());
   sub_ = new ros::Subscriber();
-  *sub_ = rosnode->subscribe("/move_base_simple/goal", 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
+  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
 #endif
 }
 
