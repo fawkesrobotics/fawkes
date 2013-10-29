@@ -61,7 +61,7 @@ ColliMessageHandlerThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::
 {
   //calculate transform
   std::string from = msg->header.frame_id;  //maybe get this as well from the config ?? Should both be /map anyways
-  std::string to = "/odom";  //get real value from config plugins/amcl/odom_frame_id: !frame /robotino_odometry
+  std::string to = cfg_frame_odom_;
 
   float x = msg->pose.position.x;
   float y = msg->pose.position.y;
@@ -114,6 +114,8 @@ ColliMessageHandlerThread::init()
 
   cfg_iface_navi_       = config->get_string((cfg_prefix + "interface/navigator").c_str());
   cfg_iface_motor_      = config->get_string((cfg_prefix + "interface/motor").c_str());
+
+  cfg_frame_odom_       = config->get_string((cfg_prefix + "frame/odometry").c_str());
 
   if_navi_ = blackboard->open_for_writing<NavigatorInterface>(cfg_iface_navi_.c_str());
   if_motor_ = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());

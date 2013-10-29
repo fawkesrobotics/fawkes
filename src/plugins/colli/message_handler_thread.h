@@ -79,6 +79,8 @@ class ColliMessageHandlerThread
   std::string cfg_iface_navi_;
   std::string cfg_iface_motor_;
 
+  std::string cfg_frame_odom_;
+
   float security_distance_;
   float max_velocity_;
   float escaping_enabled_;

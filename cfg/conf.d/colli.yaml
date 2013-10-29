@@ -50,6 +50,8 @@ plugins/colli:
     base: !frame /base_link
     # laser frame
     laser: !frame /base_laser
+    # odometry frame
+    odometry: !frame /odom
 
   OccGrid:
     # Occgrid height in m
