@@ -31,16 +31,16 @@
 #include <aspect/tf.h>
 #ifdef HAVE_ROS
  #include <plugins/ros/aspect/ros.h>
- #include <ros/subscriber.h>
- #include <ros/node_handle.h>
-
-#include "ros/ros.h"
-#include "geometry_msgs/PoseStamped.h"
+ #include <geometry_msgs/PoseStamped.h>
 #endif
 
 #include <interfaces/NavigatorInterface.h>
 
 #include <string>
+
+namespace ros {
+  class Subscriber;
+}
 
 namespace fawkes
 {
@@ -77,9 +77,7 @@ class ColliMessageHandlerThread
   fawkes::NavigatorInterface* if_colli_data_;
   fawkes::NavigatorInterface* if_colli_target_;
 
-#ifdef HAVE_ROS
-  ros::Subscriber sub_;
-#endif
+  ros::Subscriber* sub_;
 
   std::string cfg_iface_navi_;
   std::string cfg_iface_motor_;

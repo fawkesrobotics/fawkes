@@ -27,6 +27,10 @@
 
 #include <utils/math/coord.h>
 
+#ifdef HAVE_ROS
+ #include <ros/ros.h>
+#endif
+
 #include <string>
 
 using namespace fawkes;
@@ -118,7 +122,8 @@ ColliMessageHandlerThread::init()
   if_colli_target_ = blackboard->open_for_writing<NavigatorInterface>("Colli target");
 
 #ifdef HAVE_ROS
-  sub_ = rosnode->subscribe("/move_base_simple/goal", 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
+  sub_ = new ros::Subscriber();
+  *sub_ = rosnode->subscribe("/move_base_simple/goal", 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
 #endif
 }
 
@@ -132,7 +137,8 @@ ColliMessageHandlerThread::finalize()
   blackboard->close( if_motor_ );
 
 #ifdef HAVE_ROS
-  sub_.shutdown();
+  sub_->shutdown();
+  delete(sub_);
 #endif
 }
 
