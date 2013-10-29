@@ -51,6 +51,7 @@ ColliMessageHandlerThread::~ColliMessageHandlerThread()
 {
 }
 
+#ifdef HAVE_ROS
 void
 ColliMessageHandlerThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
@@ -97,6 +98,7 @@ ColliMessageHandlerThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::
   //TODO colli zum bewegen bringen ;) entweder if_navi_ oder if_colli_target oder beides
 
 }
+#endif
 
 void
 ColliMessageHandlerThread::init()
@@ -115,7 +117,9 @@ ColliMessageHandlerThread::init()
   if_colli_data_ = blackboard->open_for_reading<NavigatorInterface>("Colli data");
   if_colli_target_ = blackboard->open_for_writing<NavigatorInterface>("Colli target");
 
+#ifdef HAVE_ROS
   sub_ = rosnode->subscribe("/move_base_simple/goal", 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
+#endif
 }
 
 
@@ -127,7 +131,9 @@ ColliMessageHandlerThread::finalize()
   blackboard->close( if_colli_target_ );
   blackboard->close( if_motor_ );
 
+#ifdef HAVE_ROS
   sub_.shutdown();
+#endif
 }
 
 void

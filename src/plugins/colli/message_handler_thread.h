@@ -28,13 +28,15 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
-#include <plugins/ros/aspect/ros.h>
-#include <ros/subscriber.h>
-#include <ros/node_handle.h>
 #include <aspect/tf.h>
+#ifdef HAVE_ROS
+ #include <plugins/ros/aspect/ros.h>
+ #include <ros/subscriber.h>
+ #include <ros/node_handle.h>
 
 #include "ros/ros.h"
 #include "geometry_msgs/PoseStamped.h"
+#endif
 
 #include <interfaces/NavigatorInterface.h>
 
@@ -55,8 +57,10 @@ class ColliMessageHandlerThread
   public fawkes::LoggingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::TransformAspect,
-  public fawkes::ROSAspect
+#ifdef HAVE_ROS
+  public fawkes::ROSAspect,
+#endif
+  public fawkes::TransformAspect
 {
  public:
   ColliMessageHandlerThread();
@@ -73,7 +77,9 @@ class ColliMessageHandlerThread
   fawkes::NavigatorInterface* if_colli_data_;
   fawkes::NavigatorInterface* if_colli_target_;
 
+#ifdef HAVE_ROS
   ros::Subscriber sub_;
+#endif
 
   std::string cfg_iface_navi_;
   std::string cfg_iface_motor_;
@@ -82,7 +88,10 @@ class ColliMessageHandlerThread
   float max_velocity_;
   float escaping_enabled_;
 
+#ifdef HAVE_ROS
   void callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg);
+#endif
+
   // methods mainly transfered from libmonaco
   bool colli_final();
   void colli_stop();

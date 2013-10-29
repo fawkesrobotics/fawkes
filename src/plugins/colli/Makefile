@@ -35,14 +35,16 @@ else
   WARN_TARGETS += warning_tf
 endif
 
-ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
-  ifeq ($(HAVE_ROS),1)
+ifeq ($(HAVE_ROS),1)
+  CFLAGS  += $(CFLAGS_ROS) -DHAVE_ROS
+  LDFLAGS += $(LDFLAGS_ROS)
+
+  ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
     ifeq ($(call ros-have-pkg,visualization_msgs),1)
       ifeq ($(call ros-have-pkg,nav_msgs),1)
-        CFLAGS  += -DHAVE_VISUAL_DEBUGGING $(CFLAGS_ROS)
+        CFLAGS  += -DHAVE_VISUAL_DEBUGGING
         CFLAGS  += $(call ros-pkg-cflags,visualization_msgs)
         CFLAGS  += $(call ros-pkg-cflags,nav_msgs)
-        LDFLAGS += $(LDFLAGS_ROS)
         LDFLAGS += $(call ros-pkg-lflags,visualization_msgs)
         LDFLAGS += $(call ros-pkg-lflags,nav_msgs)
         LIBS_colli += fawkesrosaspect
@@ -54,10 +56,10 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
       ENABLE_VISUAL_DEBUGGING = 0
       WARN_TARGETS += warning_visualization_msgs
     endif
-  else
-    ENABLE_VISUAL_DEBUGGING = 0
-    WARN_TARGETS += warning_ros
   endif
+else
+  ENABLE_VISUAL_DEBUGGING = 0
+  WARN_TARGETS += warning_ros
 endif
 
 ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
