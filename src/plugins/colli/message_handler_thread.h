@@ -46,9 +46,6 @@ namespace fawkes
 {
   class MotorInterface;
   class NavigatorInterface;
-  namespace tf {
-      class TransformListener;
-    }
 }
 
 class ColliMessageHandlerThread
