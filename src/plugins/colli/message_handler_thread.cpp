@@ -244,9 +244,17 @@ ColliMessageHandlerThread::colli_relgoto(float x, float y, float ori, float max_
 
   colliTargetO += ori;
 
-  if_colli_target_->set_dest_x( colliTargetX );
-  if_colli_target_->set_dest_y( colliTargetY );
-  if_colli_target_->set_dest_ori( colliTargetO );
+  this->colli_goto(colliTargetX, colliTargetY, colliTargetO, max_speed, escape_allowed, security_distance, drivemode);
+}
+
+void
+ColliMessageHandlerThread::colli_goto(float x, float y, float ori, float max_speed,
+                                         bool escape_allowed, float security_distance,
+                                         NavigatorInterface::DriveMode drivemode)
+{
+  if_colli_target_->set_dest_x( x );
+  if_colli_target_->set_dest_y( y );
+  if_colli_target_->set_dest_ori( ori );
 
   if_colli_target_->set_drive_mode( drivemode );
   if_colli_target_->set_stop_at_target( true );
@@ -300,7 +308,8 @@ ColliMessageHandlerThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::
         ori = ori + tf::get_yaw(q);
       }
   }
-  //TODO colli zum bewegen bringen ;) entweder if_navi_ oder if_colli_target oder beides
 
+  //send command
+  this->colli_goto(x, y, ori);
 }
 #endif

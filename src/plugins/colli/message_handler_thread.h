@@ -93,8 +93,12 @@ class ColliMessageHandlerThread
   bool colli_final();
   void colli_stop();
   void colli_relgoto(float x, float y, float ori, float max_speed = 1.5,
-                     bool escape_allowed = true, float security_distance = 0.2,
-                     fawkes::NavigatorInterface::DriveMode drivemode = fawkes::NavigatorInterface::SlowForward);
+                       bool escape_allowed = true, float security_distance = 0.2,
+                       fawkes::NavigatorInterface::DriveMode drivemode = fawkes::NavigatorInterface::SlowForward);
+
+  void colli_goto(float x, float y, float ori, float max_speed = 1.5,
+                       bool escape_allowed = true, float security_distance = 0.2,
+                       fawkes::NavigatorInterface::DriveMode drivemode = fawkes::NavigatorInterface::SlowForward);
 };
 
 #endif
