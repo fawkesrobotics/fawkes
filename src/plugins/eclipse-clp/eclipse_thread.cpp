@@ -47,7 +47,7 @@ using namespace fawkes;
  * @author Daniel Beck
  */
 
-extern "C" int ec_external( dident, int (*) (), dident );
+extern "C" int ec_external( dident, int (*) (...), dident );
 
 EclipseAgentThread* EclipseAgentThread::m_instance = NULL;
 
@@ -113,7 +113,7 @@ EclipseAgentThread::init()
   load_file( agent_path.c_str() );
 
    // register external predicates
-	if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
+       if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate log/2 failed" ); }
 
 }

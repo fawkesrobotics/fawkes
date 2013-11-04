@@ -33,7 +33,7 @@
 #include <cstdio>
 
 int
-p_log()
+p_log(...)
 {
   // log(+LogLevel, +LogString)
 

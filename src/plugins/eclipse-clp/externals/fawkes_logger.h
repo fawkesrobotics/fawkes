@@ -23,6 +23,6 @@
 #ifndef __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_
 #define __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_
 
-extern "C" int p_log();
+extern "C" int p_log(...);
 
 #endif /* __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_ */
