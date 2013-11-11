@@ -90,6 +90,10 @@ void VisLocalizationThread::loop()
     //calculate ori from quaternion in interface
     double* quat = pose_if_->rotation();
     double ori = tf::get_yaw(tf::Quaternion(quat[0], quat[1], quat[2], quat[3]));
+    if(isnan(ori))
+    {
+      ori = 0.0;
+    }
 
     //create label with number
     msgs::Visual msg_number;
