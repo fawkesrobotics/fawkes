@@ -102,12 +102,21 @@ plugins/colli:
     MAX_ROT: 0.8
 
   Roboshape:
-    # Define the roboshape: 1 is angular (default), 0 is round
+    # Define the roboshape: 1 is angular (default), 2 is round
     ROBOSHAPE: 1
     # Width_x for angular robot
     WIDTH_X: 0.38
     # Width_y for angular robot
     WIDTH_Y: 0.4
+    # The Lasers offset from back, seen from behind left. For angular robot
+    LASER_OFFSET_X_FROM_BACK: 0.062
+    # The Lasers offset from left, seen from behind left. For angular robot
+    LASER_OFFSET_Y_FROM_LEFT: 0.2
+#    # For round roboter
+#    RADIUS: 0.3
+#    LASER_OFFSET_X_FROM_MIDDLE: 0.0
+#    LASER_OFFSET_Y_FROM_MIDDLE: 0.0
+
     # Extra extension to front
     WIDTH_ADD_FRONT: 0.2
     # Extra extension to right
@@ -116,10 +125,6 @@ plugins/colli:
     WIDTH_ADD_BACK: 0.05
     # Extra extension to left
     WIDTH_ADD_LEFT: 0.02
-    # The Lasers offset from back, seen from behind left.
-    LASER_OFFSET_X_FROM_BACK: 0.062
-    # The Lasers offset from left, seen from behind left.
-    LASER_OFFSET_Y_FROM_LEFT: 0.2
 
   LaserOccupancyGrid:
     # the max size of the laser reading history for the search
