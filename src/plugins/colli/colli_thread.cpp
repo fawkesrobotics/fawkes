@@ -276,7 +276,6 @@ ColliThread::loop()
   if( ( m_oldTargetX   == m_pColliTargetObj->dest_x() )
    && ( m_oldTargetY   == m_pColliTargetObj->dest_y() )
    && ( m_oldTargetOri == m_pColliTargetObj->dest_ori() ) ) {
-
     m_oldAnglesToTarget.clear();
     for ( unsigned int i = 0; i < 10; i++ )
       m_oldAnglesToTarget.push_back( 0.0 );
@@ -302,7 +301,6 @@ ColliThread::loop()
     m_oldTargetY   = m_pColliTargetObj->dest_y()   + 1000.0;
     m_oldTargetOri = m_pColliTargetObj->dest_ori() + 1.0;
   }
-
   // Update state machine
   UpdateColliStateMachine();
 
@@ -316,6 +314,7 @@ ColliThread::loop()
     m_oldTargetX   = m_pColliTargetObj->dest_x();
     m_oldTargetY   = m_pColliTargetObj->dest_y();
     m_oldTargetOri = m_pColliTargetObj->dest_ori();
+
     m_pLaserOccGrid->ResetOld();
 
     escape_count = 0;
@@ -332,7 +331,6 @@ ColliThread::loop()
 
     // Check, if one of our positions (robo-, laser-gridpos is not valid) => Danger!
     if( CheckEscape() == true || escape_count > 0 ) {
-
       if( m_pMotorInstruct->GetMotorDesiredTranslation() == 0.0
        && m_pMotorInstruct->GetMotorDesiredRotation() == 0.0 ) {
         m_pLaserOccGrid->ResetOld();
@@ -661,8 +659,8 @@ ColliThread::UpdateOwnModules()
   laserpos_x  = max ( laserpos_x, 10 );
   laserpos_x  = min ( laserpos_x, (int)(m_pLaserOccGrid->getWidth()-10) );
 
-  int robopos_x = laserpos_x + (int)(laser_to_base_.x/m_pLaserOccGrid->getCellWidth());
-  int robopos_y = laserpos_y + (int)(laser_to_base_.y/m_pLaserOccGrid->getCellHeight());
+  int robopos_x = laserpos_x + lround( laser_to_base_.x*100 / m_pLaserOccGrid->getCellWidth() );
+  int robopos_y = laserpos_y + lround( laser_to_base_.y*100 / m_pLaserOccGrid->getCellHeight() );
 
   // coordinate transformation for target point
   float aX = m_TargetPointX - m_pMotorInstruct->GetCurrentX();
