@@ -248,5 +248,5 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
 
 bool changed(float before, float after, float relativeThreashold)
 {
-  return(fabs((before-after)/before) > relativeThreashold);
+  return(before == 0.0 || after == 0.0 || fabs((before-after)/before) > relativeThreashold);
 }
