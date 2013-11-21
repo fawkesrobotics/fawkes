@@ -1543,21 +1543,8 @@ logger->log_debug(name(), "");
       }
       // delete centroids which are older than cfg_centroid_max_age_
       delete_old_centroids(old_centroids_, cfg_centroid_max_age_);
-
-
       // delete old centroids which are too close to current centroids
-      old_centroids_.erase(
-          std::remove_if(old_centroids_.begin(), old_centroids_.end(),
-              [&](const OldCentroid &old)->bool {
-                for (CentroidMap::const_iterator it = tmp_centroids.begin(); it != tmp_centroids.end(); it++) {
-                  if (pcl::distances::l2(it->second, old.getCentroid()) < cfg_centroid_min_distance_) {
-                    free_ids_.push_back(old.getId());
-                    return true;
-                  }
-                }
-                return false;
-          }),
-        old_centroids_.end());
+      delete_near_centroids(tmp_centroids, old_centroids_, cfg_centroid_min_distance_);
 
       TIMETRACK_END(ttc_old_centroids_);
     } // !first_run_
@@ -1870,6 +1857,24 @@ void TabletopObjectsThread::delete_old_centroids(OldCentroidVector centroids,
             if (centroid.getAge() > age) {
               free_ids_.push_back(centroid.getId());
               return true;
+            }
+            return false;
+          }), centroids.end());
+}
+
+void TabletopObjectsThread::delete_near_centroids(CentroidMap reference,
+  OldCentroidVector centroids, float min_distance)
+{
+  centroids.erase(
+      std::remove_if(
+          centroids.begin(),
+          centroids.end(),
+          [&](const OldCentroid &old)->bool {
+            for (CentroidMap::const_iterator it = reference.begin(); it != reference.end(); it++) {
+              if (pcl::distances::l2(it->second, old.getCentroid()) < min_distance) {
+                free_ids_.push_back(old.getId());
+                return true;
+              }
             }
             return false;
           }), centroids.end());
