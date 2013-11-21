@@ -144,6 +144,7 @@ class TabletopObjectsThread
   unsigned int cluster_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters, std::vector<ColorCloudPtr> &tmp_obj_clusters);
 
   bool next_id(unsigned int &id);
+  void delete_old_centroids(OldCentroidVector centroids, unsigned int age);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

@@ -1542,17 +1542,7 @@ logger->log_debug(name(), "");
         it->age();
       }
       // delete centroids which are older than cfg_centroid_max_age_
-      old_centroids_.erase(
-          std::remove_if(old_centroids_.begin(), old_centroids_.end(),
-              [&free_ids_, &cfg_centroid_max_age_](const OldCentroid &centroid)->bool {
-                if (centroid.getAge() > cfg_centroid_max_age_) {
-                  free_ids_.push_back(centroid.getId());
-                  return true;
-                }
-                return false;
-               }
-          ),
-          old_centroids_.end());
+      delete_old_centroids(old_centroids_, cfg_centroid_max_age_);
 
 
       // delete old centroids which are too close to current centroids
@@ -1867,6 +1857,22 @@ TabletopObjectsThread::convert_colored_input()
     out.y = in.y;
     out.z = in.z;
   }
+}
+
+void TabletopObjectsThread::delete_old_centroids(OldCentroidVector centroids,
+  unsigned int age)
+{
+  centroids.erase(
+      std::remove_if(
+          centroids.begin(),
+          centroids.end(),
+          [&free_ids_, &age](const OldCentroid &centroid)->bool {
+            if (centroid.getAge() > age) {
+              free_ids_.push_back(centroid.getId());
+              return true;
+            }
+            return false;
+          }), centroids.end());
 }
 
 #ifdef HAVE_VISUAL_DEBUGGING
