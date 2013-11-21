@@ -1550,32 +1550,7 @@ logger->log_debug(name(), "");
     } // !first_run_
 
     // remove all centroids too high above the table
-    tf::Stamped<tf::Point> sp_baserel_table;
-    tf::Stamped<tf::Point> sp_table(
-        tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
-        fawkes::Time(0, 0), input_->header.frame_id);
-    try {
-      tf_listener->transform_point("/base_link", sp_table, sp_baserel_table);
-      for (CentroidMap::iterator it = tmp_centroids.begin(); it != tmp_centroids.end();) {
-        try {
-          tf::Stamped<tf::Point> sp_baserel_centroid(
-              tf::Point(it->second[0], it->second[1], it->second[2]),
-              fawkes::Time(0, 0), "/base_link");
-          float d = sp_baserel_centroid.z() - sp_baserel_table.z();
-          if (d > cfg_centroid_max_height_) {
-            //logger->log_debug(name(), "remove centroid %u, too high (d=%f)", it->first, d);
-            free_ids_.push_back(it->first);
-            tmp_centroids.erase(it++);
-          } else
-            it++;
-        } catch (tf::TransformException &e) {
-          // simply keep the centroid if we can't transform it
-          it++;
-        }
-      }
-    } catch (tf::TransformException &e) {
-      // keep all centroids if transformation of the table fails
-    }
+    remove_high_centroids(table_centroid, tmp_centroids);
 
     centroids_ = tmp_centroids;
 
@@ -1878,6 +1853,37 @@ void TabletopObjectsThread::delete_near_centroids(CentroidMap reference,
             }
             return false;
           }), centroids.end());
+}
+
+void
+TabletopObjectsThread::remove_high_centroids(Eigen::Vector4f table_centroid,
+  CentroidMap centroids) {
+  tf::Stamped<tf::Point> sp_baserel_table;
+  tf::Stamped<tf::Point> sp_table(
+      tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
+      fawkes::Time(0, 0), input_->header.frame_id);
+  try {
+    tf_listener->transform_point("/base_link", sp_table, sp_baserel_table);
+    for (CentroidMap::iterator it = centroids.begin(); it != centroids.end();) {
+      try {
+        tf::Stamped<tf::Point> sp_baserel_centroid(
+            tf::Point(it->second[0], it->second[1], it->second[2]),
+            fawkes::Time(0, 0), "/base_link");
+        float d = sp_baserel_centroid.z() - sp_baserel_table.z();
+        if (d > cfg_centroid_max_height_) {
+          //logger->log_debug(name(), "remove centroid %u, too high (d=%f)", it->first, d);
+          free_ids_.push_back(it->first);
+          centroids.erase(it++);
+        } else
+          it++;
+      } catch (tf::TransformException &e) {
+        // simply keep the centroid if we can't transform it
+        it++;
+      }
+    }
+  } catch (tf::TransformException &e) {
+    // keep all centroids if transformation of the table fails
+  }
 }
 
 #ifdef HAVE_VISUAL_DEBUGGING

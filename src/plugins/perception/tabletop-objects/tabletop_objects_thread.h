@@ -147,7 +147,7 @@ class TabletopObjectsThread
   void delete_old_centroids(OldCentroidVector centroids, unsigned int age);
   void delete_near_centroids(CentroidMap reference, OldCentroidVector centroids,
     float min_distance);
-
+  void remove_high_centroids(Eigen::Vector4f table_centroid, CentroidMap centroids);
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
