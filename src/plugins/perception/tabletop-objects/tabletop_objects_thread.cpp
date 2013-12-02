@@ -1101,15 +1101,15 @@ TabletopObjectsThread::loop()
   TIMETRACK_INTER(ttc_table_to_output_, ttc_cluster_objects_);
 
   unsigned int object_count = 0;
-
-  //TODO: perform statistical outlier removal at this point before clustering.
-  //Outlier removal
-  pcl::StatisticalOutlierRemoval<PointType> sor;
-  sor.setInputCloud(cloud_objs_);
-  sor.setMeanK(5);
-  sor.setStddevMulThresh(0.2);
-  sor.filter(*cloud_objs_);
-
+  if (cloud_objs_->points.size() > 0) {
+    //TODO: perform statistical outlier removal at this point before clustering.
+    //Outlier removal
+    pcl::StatisticalOutlierRemoval<PointType> sor;
+    sor.setInputCloud(cloud_objs_);
+    sor.setMeanK(5);
+    sor.setStddevMulThresh(0.2);
+    sor.filter(*cloud_objs_);
+  }
   //OBJECTS
   std::vector<pcl::PointCloud<ColorPointType>::Ptr> tmp_obj_clusters(MAX_CENTROIDS);
   if (cloud_objs_->points.size() > 0) {
