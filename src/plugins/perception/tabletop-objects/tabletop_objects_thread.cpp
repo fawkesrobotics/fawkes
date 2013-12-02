@@ -1212,12 +1212,17 @@ TabletopObjectsThread::loop()
 std::vector<pcl::PointIndices>
 TabletopObjectsThread::extract_object_clusters(CloudConstPtr input) {
   TIMETRACK_START(ttc_obj_extraction_);
+  std::vector<pcl::PointIndices> cluster_indices;
+  if (input->empty()) {
+    TIMETRACK_ABORT(ttc_obj_extraction_);
+    return cluster_indices;
+  }
   // Creating the KdTree object for the search method of the extraction
+
        pcl::search::KdTree<PointType>::Ptr
        kdtree_cl(new pcl::search::KdTree<PointType>());
        kdtree_cl->setInputCloud(input);
 
-       std::vector<pcl::PointIndices> cluster_indices;
        pcl::EuclideanClusterExtraction<PointType> ec;
        ec.setClusterTolerance(cfg_cluster_tolerance_);
        ec.setMinClusterSize(cfg_cluster_min_size_);
