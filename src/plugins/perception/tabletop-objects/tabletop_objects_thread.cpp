@@ -1552,6 +1552,10 @@ logger->log_debug(name(), "");
   }
   else {
     logger->log_info(name(), "No clustered points found");
+    // save all centroids to old centroids
+    for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+      old_centroids_.push_back(OldCentroid(it->first, it->second));
+    }
   }
   centroids_ = tmp_centroids;
   return object_count;
