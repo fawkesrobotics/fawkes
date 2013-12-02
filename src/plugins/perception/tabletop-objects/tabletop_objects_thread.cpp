@@ -1828,7 +1828,7 @@ void TabletopObjectsThread::delete_old_centroids(OldCentroidVector centroids,
       std::remove_if(
           centroids.begin(),
           centroids.end(),
-          [&free_ids_, &age](const OldCentroid &centroid)->bool {
+          [&](const OldCentroid &centroid)->bool {
             if (centroid.getAge() > age) {
               free_ids_.push_back(centroid.getId());
               return true;
