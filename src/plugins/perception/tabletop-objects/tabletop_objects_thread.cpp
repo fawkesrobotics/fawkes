@@ -1124,6 +1124,20 @@ TabletopObjectsThread::loop()
     logger->log_info(name(), "Filter left no points for clustering");
   }
 
+  TIMETRACK_INTER(ttc_hungarian_, ttc_old_centroids_)
+
+  // age all old centroids
+  for (OldCentroidVector::iterator it = old_centroids_.begin();
+      it != old_centroids_.end(); it++) {
+    it->age();
+  }
+  // delete centroids which are older than cfg_centroid_max_age_
+  delete_old_centroids(old_centroids_, cfg_centroid_max_age_);
+  // delete old centroids which are too close to current centroids
+  delete_near_centroids(centroids_, old_centroids_, cfg_centroid_min_distance_);
+
+  TIMETRACK_END(ttc_old_centroids_);
+
   // set all pos_ifs not in centroids_ to 'not visible'
   for (unsigned int i = 0; i < pos_ifs_.size(); i++) {
     if (!centroids_.count(i)) {
@@ -1534,19 +1548,6 @@ logger->log_debug(name(), "");
         tmp_obj_clusters[id] = colorized_cluster;
       }
 
-      TIMETRACK_INTER(ttc_hungarian_, ttc_old_centroids_)
-
-      // age all old centroids
-      for (OldCentroidVector::iterator it = old_centroids_.begin();
-          it != old_centroids_.end(); it++) {
-        it->age();
-      }
-      // delete centroids which are older than cfg_centroid_max_age_
-      delete_old_centroids(old_centroids_, cfg_centroid_max_age_);
-      // delete old centroids which are too close to current centroids
-      delete_near_centroids(tmp_centroids, old_centroids_, cfg_centroid_min_distance_);
-
-      TIMETRACK_END(ttc_old_centroids_);
     } // !first_run_
 
     // remove all centroids too high above the table
