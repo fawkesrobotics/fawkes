@@ -1258,6 +1258,8 @@ TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud,
   for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     num_points += it->indices.size();
 
+  CentroidMap tmp_centroids;
+
   if (num_points > 0) {
     std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> new_centroids(MAX_CENTROIDS);
     std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> cylinder_params(MAX_CENTROIDS);
@@ -1452,7 +1454,6 @@ logger->log_debug(name(), "");
     object_count = centroid_i;
     new_centroids.resize(object_count);
 
-    CentroidMap tmp_centroids;
     cylinder_params_.clear();
     obj_shape_confidence_.clear();
     if (first_run_) {
@@ -1553,15 +1554,13 @@ logger->log_debug(name(), "");
     // remove all centroids too high above the table
     remove_high_centroids(table_centroid, tmp_centroids);
 
-    centroids_ = tmp_centroids;
-
     if (object_count > 0)
       first_run_ = false;
   }
   else {
     logger->log_info(name(), "No clustered points found");
-    return 0;
   }
+  centroids_ = tmp_centroids;
   return object_count;
 }
 
