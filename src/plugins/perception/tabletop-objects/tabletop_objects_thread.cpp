@@ -1112,16 +1112,9 @@ TabletopObjectsThread::loop()
   }
   //OBJECTS
   std::vector<pcl::PointCloud<ColorPointType>::Ptr> tmp_obj_clusters(MAX_CENTROIDS);
-  if (cloud_objs_->points.size() > 0) {
-    object_count = cluster_objects(cloud_objs_, tmp_clusters, tmp_obj_clusters);
-    if (object_count == 0) {
-      logger->log_info(name(), "No clustered points found");
-    }
-
-    ///////////////////////////////////////////////////////////////
-
-  } else {
-    logger->log_info(name(), "Filter left no points for clustering");
+  object_count = cluster_objects(cloud_objs_, tmp_clusters, tmp_obj_clusters);
+  if (object_count == 0) {
+    logger->log_info(name(), "No clustered points found");
   }
 
   TIMETRACK_INTER(ttc_hungarian_, ttc_old_centroids_)
