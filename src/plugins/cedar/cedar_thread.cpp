@@ -56,6 +56,10 @@ CedarThread::init()
 
   clips->evaluate(std::string("(path-add \"") + SRCDIR + "/clips/\")");
   clips->evaluate(std::string("(path-add \"") + CONFDIR + "/cedar/\")");
+
+  clips->evaluate("(ff-feature-request \"config\")");
+
+  clips->batch_evaluate(SRCDIR"/clips/cedar.clp");
   clips->assert_fact("(cedar-init)");
   clips->refresh_agenda();
   clips->run();
@@ -72,6 +76,9 @@ void
 CedarThread::loop()
 {
   MutexLocker lock(clips.objmutex_ptr());
+  clips->assert_fact("(time (now))");
+  clips->refresh_agenda();
+  clips->run();
 }
 
 
