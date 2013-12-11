@@ -64,3 +64,9 @@
     (return (str-cat (sub-string 1 (- ?i 1) ?s) ?replace (sub-string (+ ?i ?l) (str-length ?s) ?s)))
   )
 )
+
+;; String "greater than" comparison.
+; @param ?a string a to compare
+; @param ?b string b to compare
+; @return true if (str-compare ?a ?b) is greater than thero, false otherwise
+(deffunction string> (?a ?b) (> (str-compare ?a ?b) 0))
