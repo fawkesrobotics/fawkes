@@ -68,9 +68,13 @@ ROSCmdVelThread::finalize()
 void
 ROSCmdVelThread::send_transrot(float vx, float vy, float omega)
 {
-  MotorInterface::TransRotMessage *msg =
-    new MotorInterface::TransRotMessage(vx, vy, omega);
-  motor_if_->msgq_enqueue(msg);
+  if (motor_if_->has_writer()) {
+    MotorInterface::TransRotMessage *msg =
+      new MotorInterface::TransRotMessage(vx, vy, omega);
+    motor_if_->msgq_enqueue(msg);
+  } else {
+    logger->log_warn(name(), "Cannot send transrot, no writer on motor interface");
+  }
 }
 
 void
