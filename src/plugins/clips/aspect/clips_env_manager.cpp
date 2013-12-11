@@ -240,9 +240,9 @@ CLIPSEnvManager::create_env(const std::string &env_name, const std::string &log_
     // assert all currently available features to environment
     assert_features(clips, true);
 
-    clips->load(clips_dir_ + "utils.clp");
-    clips->load(clips_dir_ + "time.clp");
-    clips->load(clips_dir_ + "path.clp");
+    guarded_load(env_name, clips_dir_ + "utils.clp");
+    guarded_load(env_name, clips_dir_ + "time.clp");
+    guarded_load(env_name, clips_dir_ + "path.clp");
 
     clips->evaluate("(path-add \"" + clips_dir_ + "\")");
 
@@ -435,5 +435,29 @@ CLIPSEnvManager::remove_features(const std::list<CLIPSFeature *> &features)
     }
   }
 }
+
+
+void
+CLIPSEnvManager::guarded_load(const std::string &env_name, const std::string &filename)
+{
+  if (envs_.find(env_name) == envs_.end()) {
+    throw Exception("guarded_load: env %s has not been registered", env_name.c_str());
+  }
+
+  LockPtr<CLIPS::Environment> &clips = envs_[env_name].env;
+
+  int load_rv = 0;
+  if ((load_rv = clips->load(filename)) != 1) {
+    if (load_rv == 0) {
+      destroy_env(env_name);
+      throw Exception("%s: cannot find %s", env_name.c_str(), filename.c_str());
+    } else {
+      destroy_env(env_name);
+      throw Exception("%s: CLIPS code error in %s",
+		      env_name.c_str(), filename.c_str());
+    }
+  }
+}
+
 
 } // end namespace fawkes
