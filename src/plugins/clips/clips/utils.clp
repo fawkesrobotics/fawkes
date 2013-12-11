@@ -35,6 +35,18 @@
   (return ?list)
 )
 
+; Set equality, i.e. a in b and b in a.
+(deffunction set-eq (?a ?b)
+  (return (and (subsetp ?a ?b) (subsetp ?b ?a)))
+)
+
+; Get set difference ?a \ ?b, i.e. elements which exist in ?a but not in ?b
+(deffunction set-diff (?a ?b)
+  (bind ?rv (create$))
+  (foreach ?e ?a (if (not (member$ ?e ?b)) then (bind ?rv (append$ ?rv ?e))))
+  (return ?rv)
+)
+
 (deffunction is-even-int (?num)
   (return (eq (mod ?num 2) 0))
 )
