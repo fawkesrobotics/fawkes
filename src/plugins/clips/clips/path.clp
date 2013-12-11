@@ -8,9 +8,18 @@
 ;---------------------------------------------------------------------------
 
 (defglobal
-  ?*FILE-SEARCH-PATH* = (create$)
+  ?*FILE-SEARCH-PATH*   = (create$)
   ?*FF-PATH-SUBST-WHAT* = (create$)
-  ?*FF-PATH-SUBST-BY* = (create$)
+  ?*FF-PATH-SUBST-BY*   = (create$)
+)
+
+; Completely reset path information.
+; This will reset the search path and substitution patterns.
+; By default they will sustain a (reset).
+(deffunction path-reset ()
+  (build (str-cat "(defglobal ?*FILE-SEARCH-PATH*   = (create$)" crlf
+		  "           ?*FF-PATH-SUBST-WHAT* = (create$)" crlf
+		  "           ?*FF-PATH-SUBST-BY*   = (create$))"))
 )
 
 (deffunction path-subst (?path)
@@ -27,13 +36,17 @@
 
 
 (deffunction path-add-subst (?what ?by)
-  (bind ?*FF-PATH-SUBST-WHAT* (append$ ?*FF-PATH-SUBST-WHAT* ?what))
-  (bind ?*FF-PATH-SUBST-BY*   (append$ ?*FF-PATH-SUBST-BY*   ?by))
+  (bind ?new-what (append$ ?*FF-PATH-SUBST-WHAT* ?what))
+  (bind ?new-by   (append$ ?*FF-PATH-SUBST-BY*   ?by))
+
+  (build (str-cat "(defglobal ?*FF-PATH-SUBST-WHAT* = (create$ " (implode$ ?new-what) "))"))
+  (build (str-cat "(defglobal ?*FF-PATH-SUBST-BY*   = (create$ " (implode$ ?new-by) "))"))
 )
 
 (deffunction path-add ($?path)
   (foreach ?p ?path
-    (bind ?*FILE-SEARCH-PATH* (append$ ?*FILE-SEARCH-PATH* (path-subst ?p)))
+    (bind ?new-path (append$ ?*FILE-SEARCH-PATH* (path-subst ?p)))
+    (build (str-cat "(defglobal ?*FILE-SEARCH-PATH* = (create$ " (implode$ ?new-path) "))"))
   )
 )
 
