@@ -53,9 +53,10 @@
 (deffunction path-resolve (?file)
   (foreach ?d ?*FILE-SEARCH-PATH*
     (bind ?fn (str-cat ?d ?file))
-    (printout t "Testing file " ?fn crlf)
+    (printout debug "Trying CLIPS file " ?fn " (looking for " ?file ")" crlf)
     (if (open ?fn file-clips-tmp)
      then
+      (printout debug "Found CLIPS file " ?file " at " ?fn ")" crlf)
       (close file-clips-tmp)
       (return ?fn)
     )
@@ -63,6 +64,22 @@
   (return FALSE)
 )
 
+(deffunction path-string ()
+  (bind ?rv "")
+  (foreach ?d ?*FILE-SEARCH-PATH*
+    (if (> ?d-index 1) then (bind ?rv (str-cat ?rv ":")))
+    (bind ?rv (str-cat ?rv ?d))
+  )
+  (return ?rv)
+)
+
 (deffunction path-load (?file)
-  (load* (path-resolve ?file))
+  (bind ?f (path-resolve ?file))
+  (if ?f
+  then
+    (load* ?f)
+  else
+    (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)
+    (return ?f)
+  )
 )
