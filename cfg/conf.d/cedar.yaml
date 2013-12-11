@@ -1,0 +1,9 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/cedar
+---
+cedar:
+  # Set to true to load ROS related monitoring code.
+  # Requires a ros-model.clp in CONFDIR/cedar defining the system model.
+  use-ros: true

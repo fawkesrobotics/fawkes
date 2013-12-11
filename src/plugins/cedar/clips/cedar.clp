@@ -26,6 +26,18 @@
   (config-load ?*CONFIG_PREFIX*)
 )
 
+(defrule cedar-ros-enable
+  (declare (salience 1000))
+  (cedar-init)
+  (ff-feature ros)
+  (confval (path "/cedar/use-ros") (type BOOL) (value TRUE))
+  =>
+  (printout warn "Enabling ROS monitoring" crlf)
+  (ff-feature-request "ros")
+  (path-load "cedar-ros.clp")
+  (path-load "ros-model.clp")
+)
+
 (defrule cedar-start
   (declare (salience -10000))
   (cedar-init)
