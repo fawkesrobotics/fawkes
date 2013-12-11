@@ -92,8 +92,10 @@ ConfigCLIPSFeature::clips_config_load(std::string env_name, std::string cfg_pref
     if      (v->is_uint())   type = "UINT";
     else if (v->is_int())    type = "INT";
     else if (v->is_float())  type = "FLOAT";
-    else if (v->is_bool())   type = "BOOL";
-    else if (v->is_string()) {
+    else if (v->is_bool()) {
+      type  = "BOOL";
+      value = v->get_bool() ? "TRUE" : "FALSE";
+    } else if (v->is_string()) {
       type = "STRING";
       if (! v->is_list()) {
 	value = std::string("\"") + value + "\"";
