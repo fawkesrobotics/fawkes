@@ -120,7 +120,7 @@ fsm:add_transitions {
 
    --{"START_APPROACH_OBJ", "CHECK_GRABABILITY", cond=true, precond_only=true}, --TODO: skip approach for now
 
-   {"SLOW_DOWN", "TO_APPROACH_OBJ", precond_only=true}, --TODO: max_velocity crashes, so skip for now
+   {"SLOW_DOWN", "TO_APPROACH_OBJ", cond=true, precond_only=true}, --TODO: max_velocity crashes, so skip for now
 
    {"TO_APPROACH_OBJ", "APPROACH_OBJ", timeout=2.0},
 

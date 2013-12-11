@@ -118,7 +118,7 @@ fsm:add_transitions{
    {"DECIDE_MODE", "PARK", precond_only="vars.park"},
    {"DECIDE_MODE", "GRIPPER", precond_only="vars.gripper"},
    {"DECIDE_MODE", "MOVE", precond_only="vars.move and vars.nr and (vars.enc or vars.angle)"},
-   {"DECIDE_MODE", "FAILED", precond_only=true, desc="No valid command"},
+   {"DECIDE_MODE", "FAILED", cond=true, precond_only=true, desc="No valid command"},
 
    {"TURNONOFF", "CHECKERR", cond=true},
    {"CALIBRATE", "CHECKERR", cond=jc_arm_is_final, desc="final"},

@@ -128,7 +128,7 @@ fsm:add_transitions{
    {"DECIDE_MODE", "STOP", precond_only="vars.stop"},
    {"DECIDE_MODE", "PARK", precond_only="vars.park"},
    {"DECIDE_MODE", "SPEED", precond_only="vars.max_speed"},
-   {"DECIDE_MODE", "FAILED", precond_only=true, desc="No valid command"},
+   {"DECIDE_MODE", "FAILED", cond=true, precond_only=true, desc="No valid command"},
    {"CALIBRATE", "CHECKERR", cond=jc_ptu_is_final, desc="final"},
    {"CALIBRATE", "FAILED", cond=jc_next_msg, desc="next msg"},
    {"TURNONOFF", "CHECKERR", cond=true},
@@ -171,7 +171,7 @@ function send_max_speed()
    if fsm.vars.max_speed ~= nil then
       local ptu = ptu_interface(fsm.vars.ptu)
       if fsm.vars.max_speed == "MAX" then
-	 fsm.vars.max_speed = math.min(ptu:max_pan_velocity(), ptu:max_tilt_velocity())
+         fsm.vars.max_speed = math.min(ptu:max_pan_velocity(), ptu:max_tilt_velocity())
       end
       local vm = ptu.SetVelocityMessage:new(fsm.vars.max_speed, fsm.vars.max_speed)
       ptu:msgq_enqueue_copy(vm)

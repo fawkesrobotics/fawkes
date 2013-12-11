@@ -61,7 +61,7 @@ fsm:add_transitions{
    {"INIT", "FAILED", precond_only="not katanaarm:has_writer()", desc="no writer"},
    {"INIT", "FAILED", precond_only="(not vars.x) and (not vars.y) and (not vars.z)", desc="insufficient arguments"},
 
-   {"INIT", "MOVE", precond_only=true, desc="move"}
+   {"INIT", "MOVE", cond=true, precond_only=true, desc="move"}
 }
 
 function MOVE:init()
