@@ -91,17 +91,19 @@ end
 fsm:define_states{
    export_to=_M,
    closure={katanaarm=katanaarm},
-   {"DECIDE_MODE", JumpState},
-   {"TURNONOFF",   JumpState},
-   {"CALIBRATE",   JumpState},
-   {"VELOCITY",    JumpState},
-   {"GOTO",        JumpState},
-   {"GOTO_OBJECT", JumpState},
-   {"STOP",        JumpState},
-   {"PARK",        JumpState},
-   {"GRIPPER",     JumpState},
-   {"MOVE",        JumpState},
-   {"CHECKERR",    JumpState}
+
+   {"DECIDE_MODE",   JumpState},
+   {"TURNONOFF",     JumpState},
+   {"CALIBRATE",     JumpState},
+   {"VELOCITY",      JumpState},
+   {"GOTO",          JumpState},
+   {"GOTO_OBJECT",   JumpState},
+   {"PLANNERPARAMS", JumpState},
+   {"STOP",          JumpState},
+   {"PARK",          JumpState},
+   {"GRIPPER",       JumpState},
+   {"MOVE",          JumpState},
+   {"CHECKERR",      JumpState}
 }
 -- Transitions
 fsm:add_transitions{
@@ -112,6 +114,7 @@ fsm:add_transitions{
    {"DECIDE_MODE", "GOTO", cond="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", precond_only=true,
     desc="goto parms"},
    {"DECIDE_MODE", "GOTO_OBJECT", cond="vars.object ~= nil", precond_only=true, desc="goto obj params"},
+   {"DECIDE_MODE", "PLANNERPARAMS", cond="vars.plannerparams ~= nil", precond_only=true, desc="planner params"},
    {"DECIDE_MODE", "STOP", cond="vars.stop", precond_only=true},
    {"DECIDE_MODE", "PARK", cond="vars.park", precond_only=true},
    {"DECIDE_MODE", "GRIPPER", cond="vars.gripper", precond_only=true},
@@ -123,8 +126,9 @@ fsm:add_transitions{
    {"CALIBRATE", "FAILED", cond=jc_next_msg, desc="next msg"},
    {"VELOCITY", "CHECKERR", cond=true},
    {"GOTO", "CHECKERR", cond=jc_arm_is_final, desc="final"},
-   {"GOTO_OBJECT", "CHECKERR", cond=jc_arm_is_final, desc="final"},
    {"GOTO", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"GOTO_OBJECT", "CHECKERR", cond=jc_arm_is_final, desc="final"},
+   {"PLANNERPARAMS", "CHECKERR", cond=true},
    {"STOP", "CHECKERR", cond=true},
    {"GRIPPER", "CHECKERR", cond=jc_arm_is_final, desc="final"},
    {"GRIPPER", "FAILED", cond=jc_next_msg, desc="next msg"},
