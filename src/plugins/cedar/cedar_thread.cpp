@@ -48,6 +48,14 @@ CedarThread::~CedarThread()
 void
 CedarThread::init()
 {
+  clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") +
+		  FAWKES_BASEDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@RESDIR@\" \"") + RESDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@CONFDIR@\" \"") + CONFDIR + "\")");
+
+  clips->evaluate(std::string("(path-add \"") + SRCDIR + "/clips/\")");
+  clips->evaluate(std::string("(path-add \"") + CONFDIR + "/cedar/\")");
   clips->assert_fact("(cedar-init)");
   clips->refresh_agenda();
   clips->run();
