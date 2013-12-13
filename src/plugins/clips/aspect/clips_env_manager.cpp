@@ -321,6 +321,22 @@ CLIPSEnvManager::clips_request_feature(std::string env_name, std::string feature
   features_[feature_name]->clips_context_init(env_name, envd.env);
   envd.req_feat.push_back(feature_name);
   envd.req_feat.sort();
+
+  // deffact so it survives a reset
+  std::string deffact = "(deffact ff-features-loaded";
+
+  for (auto feat : envd.req_feat) {
+    deffact += " (ff-feature-loaded " + feat + ")";
+  }
+  deffact += ")";
+
+  envd.env->assert_fact_f("(ff-feature-loaded %s)", feature_name.c_str());
+
+  CLIPS::DefaultFacts::pointer old_deffact =
+    envd.env->get_default_facts("ff-features-available");
+  if (old_deffact)  old_deffact->retract();
+  envd.env->build(deffact);
+
   envd.env.unlock();
 
   return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
