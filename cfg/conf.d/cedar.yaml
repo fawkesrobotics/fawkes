@@ -7,3 +7,7 @@ cedar:
   # Set to true to load ROS related monitoring code.
   # Requires a ros-model.clp in CONFDIR/cedar defining the system model.
   use-ros: true
+
+  # Set to true to load Fawkes related monitoring code.
+  # Requires a fawkes-model.clp in CONFDIR/cedar defining the system model.
+  use-fawkes: true

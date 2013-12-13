@@ -59,6 +59,9 @@ class CedarThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  void clips_get_plugin_info();
+
+ private:
   CedarPluginDirectorThread *pdt_;
 };
 

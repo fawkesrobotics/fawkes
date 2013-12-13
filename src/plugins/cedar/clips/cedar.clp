@@ -27,15 +27,25 @@
 )
 
 (defrule cedar-ros-enable
-  (declare (salience 1000))
   (cedar-init)
   (ff-feature ros)
+  (not (ff-feature-loaded ros))
   (confval (path "/cedar/use-ros") (type BOOL) (value TRUE))
   =>
   (printout warn "Enabling ROS monitoring" crlf)
   (ff-feature-request "ros")
   (path-load "cedar-ros.clp")
   (path-load "ros-model.clp")
+)
+
+(defrule cedar-blackboard-enable
+  (cedar-init)
+  (ff-feature blackboard)
+  (confval (path "/cedar/use-fawkes") (type BOOL) (value TRUE))
+  =>
+  (printout warn "Enabling blackboard monitoring" crlf)
+  (ff-feature-request "blackboard")
+  (path-load "cedar-fawkes.clp")
 )
 
 (defrule cedar-start

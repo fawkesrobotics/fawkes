@@ -63,6 +63,19 @@ CedarThread::init()
 
   clips->evaluate("(ff-feature-request \"config\")");
 
+  bool use_fawkes = false;
+  try {
+    use_fawkes = config->get_bool("/cedar/use-fawkes");
+  } catch (Exception &e) {} // ignored, use default
+
+  if (use_fawkes) {
+    clips->add_function("fawkes-get-plugin-info",
+      sigc::slot<void>(
+          sigc::mem_fun(*this, &CedarThread::clips_get_plugin_info)
+      )
+    );
+  }
+
   clips->batch_evaluate(SRCDIR"/clips/cedar.clp");
   clips->assert_fact("(cedar-init)");
   clips->refresh_agenda();
