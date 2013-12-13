@@ -132,6 +132,7 @@ TabletopObjectsThread::init()
   cfg_centroid_max_distance_ = config->get_float(CFG_PREFIX"centroid_max_distance");
   cfg_centroid_min_distance_ = config->get_float(CFG_PREFIX"centroid_min_distance");
   cfg_centroid_max_height_   = config->get_float(CFG_PREFIX"centroid_max_height");
+  cfg_cylinder_fitting_      = config->get_bool(CFG_PREFIX"enable_cylinder_fitting");
 
   if (pcl_manager->exists_pointcloud<PointType>(cfg_input_pointcloud_.c_str())) {
     finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
@@ -1260,17 +1261,14 @@ TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud,
 
   if (num_points > 0) {
     std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> new_centroids(MAX_CENTROIDS);
-    std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> cylinder_params(MAX_CENTROIDS);
-    std::vector<signed int> best_obj_guess(MAX_CENTROIDS);
-    std::vector<double> obj_shape_confidence(MAX_CENTROIDS);
 
 
     unsigned int centroid_i = 0;
 
-    std::vector<std::vector<double>> obj_likelihoods_;
     std::vector<double> init_likelihoods;
     init_likelihoods.resize(NUM_KNOWN_OBJS_ + 1, 0.0);
-    obj_likelihoods_.resize(MAX_CENTROIDS, init_likelihoods);
+    for (uint i = 0; i < MAX_CENTROIDS; i++)
+      obj_likelihoods_[i] = init_likelihoods;
 
     for (it = cluster_indices.begin();
         it != cluster_indices.end() && centroid_i < MAX_CENTROIDS;
@@ -1304,156 +1302,28 @@ pcl_utils::transform_pointcloud("/base_link", *single_cluster,
 
       pcl::compute3DCentroid(*obj_in_base_frame, new_centroids[centroid_i]);
 
-      ColorPointType pnt_min, pnt_max;
-      Eigen::Vector3f obj_dim;
-      std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>
-          > obj_size_scores;
-      pcl::getMinMax3D(*obj_in_base_frame, pnt_min, pnt_max);
-      obj_dim[0] = fabs(pnt_max.x - pnt_min.x);
-      obj_dim[1] = fabs(pnt_max.y - pnt_min.y);
-      obj_dim[2] = fabs(pnt_max.z - pnt_min.z);
-      compute_bounding_box_scores(obj_dim, obj_size_scores);
-
-      logger->log_debug(name(), "Computed object dimensions: %f %f %f",
-      obj_dim[0], obj_dim[1], obj_dim[2]);
-logger->log_debug(name(), "Size similarity to known objects:");
-      for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-  logger->log_debug(name(), "** Cup %i: %f in x, %f in y, %f in z.",
-        os, obj_size_scores[os][0], obj_size_scores[os][1],
-        obj_size_scores[os][2]);
-        obj_likelihoods_[centroid_i][os] =
-    obj_size_scores[os][0] * obj_size_scores[os][1] * obj_size_scores[os][2];
+      if (cfg_cylinder_fitting_) {
+        new_centroids[centroid_i] = fit_cylinder(obj_in_base_frame,
+            new_centroids[centroid_i], centroid_i);
       }
 
-logger->log_debug(name(), "");
-
-      //Fit cylinder:
-      pcl::NormalEstimation<ColorPointType, pcl::Normal> ne;
-      pcl::SACSegmentationFromNormals<ColorPointType, pcl::Normal> seg;
-      pcl::ExtractIndices<ColorPointType> extract;
-      pcl::ExtractIndices < pcl::Normal > extract_normals;
-      pcl::PointCloud<pcl::Normal>::Ptr obj_normals(
-          new pcl::PointCloud<pcl::Normal>);
-      pcl::search::KdTree<ColorPointType>::Ptr tree_cyl(
-          new pcl::search::KdTree<ColorPointType>());
-      pcl::ModelCoefficients::Ptr coefficients_cylinder(
-          new pcl::ModelCoefficients);
-      pcl::PointIndices::Ptr inliers_cylinder(new pcl::PointIndices);
-
-      // Estimate point normals
-      ne.setSearchMethod(tree_cyl);
-      ne.setInputCloud(obj_in_base_frame);
-      ne.setKSearch(10);
-      ne.compute(*obj_normals);
-
-      ///////////////////////////////////////////////////////////////
-      // Create the segmentation object for cylinder segmentation and set all the parameters
-      seg.setOptimizeCoefficients(true);
-      seg.setModelType(pcl::SACMODEL_CYLINDER);
-      seg.setMethodType(pcl::SAC_RANSAC);
-      seg.setNormalDistanceWeight(0.1);
-      seg.setMaxIterations(1000);
-      seg.setDistanceThreshold(0.07);
-      seg.setRadiusLimits(0, 0.12);
-
-      seg.setInputCloud(obj_in_base_frame);
-      seg.setInputNormals(obj_normals);
-
-      // Obtain the cylinder inliers and coefficients
-
-      seg.segment(*inliers_cylinder, *coefficients_cylinder);
-      //std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
-      //Getting max and min z values from cylinder inliers.
-      extract.setInputCloud(obj_in_base_frame);
-      extract.setIndices(inliers_cylinder);
-      extract.setNegative(false);
-      pcl::PointCloud<ColorPointType>::Ptr
-  cloud_cylinder_baserel(new pcl::PointCloud<ColorPointType>());
-      extract.filter(*cloud_cylinder_baserel);
-
-      cylinder_params[centroid_i][0] = 0;
-      cylinder_params[centroid_i][1] = 0;
-      if (cloud_cylinder_baserel->points.empty()) {
-        logger->log_debug(name(), "No cylinder inliers!!");
-        obj_shape_confidence[centroid_i] = 0.0;
-      } else {
-
-  if (! tf_listener->frame_exists(cloud_cylinder_baserel->header.frame_id)) {
-    continue;
-  }
-
-        obj_shape_confidence[centroid_i]
-            = (double) (cloud_cylinder_baserel->points.size())
-                / (obj_in_base_frame->points.size() * 1.0);
-        logger->log_debug(name(), "Cylinder fit confidence = %zu/%zu = %f",
-        cloud_cylinder_baserel->points.size(),
-        obj_in_base_frame->points.size(),
-        obj_shape_confidence[centroid_i]);
-
-        ColorPointType pnt_min;
-        ColorPointType pnt_max;
-        pcl::getMinMax3D(*cloud_cylinder_baserel, pnt_min, pnt_max);
-        logger->log_debug(name(), "Cylinder hight according to cylinder inliers: %f",
-        pnt_max.z - pnt_min.z);
-        logger->log_debug(name(), "Cylinder hight according to bounding box: %f",
-        obj_dim[2]);
-        logger->log_debug(name(), "Cylinder radius according to cylinder fitting: %f",
-        (*coefficients_cylinder).values[6]);
-        logger->log_debug(name(), "Cylinder radius according to bounding box y: %f",
-        obj_dim[1] / 2);
-        //Cylinder radius:
-        //cylinder_params[centroid_i][0] = (*coefficients_cylinder).values[6];
-        cylinder_params[centroid_i][0] = obj_dim[1] / 2;
-        //Cylinder height:
-        //cylinder_params[centroid_i][1] = (pnt_max->z - pnt_min->z);
-        cylinder_params[centroid_i][1] = obj_dim[2];
-
-        //cylinder_params[centroid_i][2] = table_inclination_;
-
-        //Overriding computed centroids with estimated cylinder center:
-        new_centroids[centroid_i][0] = pnt_min.x + 0.5 * (pnt_max.x - pnt_min.x);
-        new_centroids[centroid_i][1] = pnt_min.y + 0.5 * (pnt_max.y - pnt_min.y);
-        new_centroids[centroid_i][2] = pnt_min.z + 0.5 * (pnt_max.z - pnt_min.z);
-      }
-
-      logger->log_debug(name(), "");
-      signed int detected_obj_id = -1;
-      double best_confidence = 0.0;
-      logger->log_debug(name(), "Shape similarity = %f",
-      obj_shape_confidence[centroid_i]);
-      for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-        logger->log_debug(name(), "** Similarity to known cup %i:", os);
-        logger->log_debug(name(), "Size similarity  = %f",
-        obj_likelihoods_[centroid_i][os]);
-        obj_likelihoods_[centroid_i][os] =
-    (0.6 * obj_likelihoods_[centroid_i][os]) +
-    (0.4 * obj_shape_confidence[centroid_i]);
-        logger->log_debug(name(), "Overall similarity = %f",
-        obj_likelihoods_[centroid_i][os]);
-        if (obj_likelihoods_[centroid_i][os] > best_confidence) {
-          best_confidence = obj_likelihoods_[centroid_i][os];
-          detected_obj_id = os;
-        }
-      }
-      logger->log_debug(name(), "********************Object Result********************");
-      if (best_confidence > 0.6) {
-        best_obj_guess[centroid_i] = detected_obj_id;
-
-        logger->log_debug(name(), "MATCH FOUND!! -------------------------> Cup number %i",
-        detected_obj_id);
-      } else {
-        best_obj_guess[centroid_i] = -1;
-        logger->log_debug(name(), "No match found.");
-      }
-
-      logger->log_debug(name(), "*****************************************************");
 
     }
     object_count = centroid_i;
     new_centroids.resize(object_count);
 
+
+    // save cylinder_params, best_obj_guess and obj_shape_confidence
+    // to temporary variables to be able to reassign IDs
+    CentroidMap cylinder_params(cylinder_params_);
+    std::map<uint, signed int> best_obj_guess(best_obj_guess_);
+    std::map<uint, double> obj_shape_confidence(obj_shape_confidence_);
+    std::map<uint, std::vector<double> > obj_likelihoods(obj_likelihoods_);
     cylinder_params_.clear();
+    best_obj_guess_.clear();
     obj_shape_confidence_.clear();
+    obj_likelihoods_.clear();
+
     if (first_run_) {
       // get a new id for every object since we didn't have objects before
       for (unsigned int i = 0; i < new_centroids.size(); i++) {
@@ -1464,6 +1334,7 @@ logger->log_debug(name(), "");
         cylinder_params_[id] = cylinder_params[i];
         obj_shape_confidence_[id] = obj_shape_confidence[i];
         best_obj_guess_[id] = best_obj_guess[i];
+        obj_likelihoods_[id] = obj_likelihoods[i];
 
         ColorCloudPtr colorized_cluster =
             colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
@@ -1540,6 +1411,7 @@ logger->log_debug(name(), "");
         cylinder_params_[id] = cylinder_params[row];
         obj_shape_confidence_[id] = obj_shape_confidence[row];
         best_obj_guess_[id] = best_obj_guess[row];
+        obj_likelihoods_[id] = obj_likelihoods[row];
         // remove id from old_centroids_ because we don't want the same id twices
         ColorCloudPtr colorized_cluster =
             colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
@@ -1886,6 +1758,160 @@ TabletopObjectsThread::remove_high_centroids(Eigen::Vector4f table_centroid,
   } catch (tf::TransformException &e) {
     // keep all centroids if transformation of the table fails
   }
+}
+
+Eigen::Vector4f TabletopObjectsThread::fit_cylinder(
+  ColorCloudConstPtr obj_in_base_frame, Eigen::Vector4f const &centroid,
+  uint const &centroid_i)
+{
+  Eigen::Vector4f new_centroid(centroid);
+  ColorPointType pnt_min, pnt_max;
+  Eigen::Vector3f obj_dim;
+  std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>
+      > obj_size_scores;
+  pcl::getMinMax3D(*obj_in_base_frame, pnt_min, pnt_max);
+  obj_dim[0] = fabs(pnt_max.x - pnt_min.x);
+  obj_dim[1] = fabs(pnt_max.y - pnt_min.y);
+  obj_dim[2] = fabs(pnt_max.z - pnt_min.z);
+  compute_bounding_box_scores(obj_dim, obj_size_scores);
+
+  logger->log_debug(name(), "Computed object dimensions: %f %f %f", obj_dim[0],
+      obj_dim[1], obj_dim[2]);
+  logger->log_debug(name(), "Size similarity to known objects:");
+  for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
+    logger->log_debug(name(), "** Cup %i: %f in x, %f in y, %f in z.", os,
+        obj_size_scores[os][0], obj_size_scores[os][1], obj_size_scores[os][2]);
+    obj_likelihoods_[centroid_i][os] = obj_size_scores[os][0]
+        * obj_size_scores[os][1] * obj_size_scores[os][2];
+  }
+
+  logger->log_debug(name(), "");
+
+  //Fit cylinder:
+  pcl::NormalEstimation < ColorPointType, pcl::Normal > ne;
+  pcl::SACSegmentationFromNormals < ColorPointType, pcl::Normal > seg;
+  pcl::ExtractIndices < ColorPointType > extract;
+  pcl::ExtractIndices < pcl::Normal > extract_normals;
+  pcl::PointCloud<pcl::Normal>::Ptr obj_normals(
+      new pcl::PointCloud<pcl::Normal>);
+  pcl::search::KdTree<ColorPointType>::Ptr tree_cyl(
+      new pcl::search::KdTree<ColorPointType>());
+  pcl::ModelCoefficients::Ptr coefficients_cylinder(new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers_cylinder(new pcl::PointIndices);
+
+  // Estimate point normals
+  ne.setSearchMethod(tree_cyl);
+  ne.setInputCloud(obj_in_base_frame);
+  ne.setKSearch(10);
+  ne.compute(*obj_normals);
+
+  ///////////////////////////////////////////////////////////////
+  // Create the segmentation object for cylinder segmentation and set all the parameters
+  seg.setOptimizeCoefficients(true);
+  seg.setModelType(pcl::SACMODEL_CYLINDER);
+  seg.setMethodType(pcl::SAC_RANSAC);
+  seg.setNormalDistanceWeight(0.1);
+  seg.setMaxIterations(1000);
+  seg.setDistanceThreshold(0.07);
+  seg.setRadiusLimits(0, 0.12);
+
+  seg.setInputCloud(obj_in_base_frame);
+  seg.setInputNormals(obj_normals);
+
+  // Obtain the cylinder inliers and coefficients
+
+  seg.segment(*inliers_cylinder, *coefficients_cylinder);
+  //std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+  //Getting max and min z values from cylinder inliers.
+  extract.setInputCloud(obj_in_base_frame);
+  extract.setIndices(inliers_cylinder);
+  extract.setNegative(false);
+  pcl::PointCloud<ColorPointType>::Ptr cloud_cylinder_baserel(
+      new pcl::PointCloud<ColorPointType>());
+  extract.filter(*cloud_cylinder_baserel);
+
+  cylinder_params_[centroid_i][0] = 0;
+  cylinder_params_[centroid_i][1] = 0;
+  if (cloud_cylinder_baserel->points.empty()) {
+    logger->log_debug(name(), "No cylinder inliers!!");
+    obj_shape_confidence_[centroid_i] = 0.0;
+  }
+  else {
+
+    if (!tf_listener->frame_exists(cloud_cylinder_baserel->header.frame_id)) {
+      return centroid;
+    }
+
+    obj_shape_confidence_[centroid_i] = (double) (cloud_cylinder_baserel->points
+      .size()) / (obj_in_base_frame->points.size() * 1.0);
+    logger->log_debug(name(), "Cylinder fit confidence = %zu/%zu = %f",
+        cloud_cylinder_baserel->points.size(), obj_in_base_frame->points.size(),
+        obj_shape_confidence_[centroid_i]);
+
+    ColorPointType pnt_min;
+    ColorPointType pnt_max;
+    pcl::getMinMax3D(*cloud_cylinder_baserel, pnt_min, pnt_max);
+    logger->log_debug(name(),
+        "Cylinder hight according to cylinder inliers: %f",
+        pnt_max.z - pnt_min.z);
+    logger->log_debug(name(), "Cylinder hight according to bounding box: %f",
+        obj_dim[2]);
+    logger->log_debug(name(),
+        "Cylinder radius according to cylinder fitting: %f",
+        (*coefficients_cylinder).values[6]);
+    logger->log_debug(name(), "Cylinder radius according to bounding box y: %f",
+        obj_dim[1] / 2);
+    //Cylinder radius:
+    //cylinder_params_[centroid_i][0] = (*coefficients_cylinder).values[6];
+    cylinder_params_[centroid_i][0] = obj_dim[1] / 2;
+    //Cylinder height:
+    //cylinder_params_[centroid_i][1] = (pnt_max->z - pnt_min->z);
+    cylinder_params_[centroid_i][1] = obj_dim[2];
+
+    //cylinder_params_[centroid_i][2] = table_inclination_;
+
+    //Overriding computed centroids with estimated cylinder center:
+    new_centroid[0] = pnt_min.x + 0.5 * (pnt_max.x - pnt_min.x);
+    new_centroid[1] = pnt_min.y + 0.5 * (pnt_max.y - pnt_min.y);
+    new_centroid[2] = pnt_min.z + 0.5 * (pnt_max.z - pnt_min.z);
+  }
+
+  logger->log_debug(name(), "");
+  signed int detected_obj_id = -1;
+  double best_confidence = 0.0;
+  logger->log_debug(name(), "Shape similarity = %f",
+      obj_shape_confidence_[centroid_i]);
+  for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
+    logger->log_debug(name(), "** Similarity to known cup %i:", os);
+    logger->log_debug(name(), "Size similarity  = %f",
+        obj_likelihoods_[centroid_i][os]);
+    obj_likelihoods_[centroid_i][os] = (0.6 * obj_likelihoods_[centroid_i][os])
+        + (0.4 * obj_shape_confidence_[centroid_i]);
+    logger->log_debug(name(), "Overall similarity = %f",
+        obj_likelihoods_[centroid_i][os]);
+    if (obj_likelihoods_[centroid_i][os] > best_confidence) {
+      best_confidence = obj_likelihoods_[centroid_i][os];
+      detected_obj_id = os;
+    }
+  }
+  logger->log_debug(name(),
+      "********************Object Result********************");
+  if (best_confidence > 0.6) {
+    best_obj_guess_[centroid_i] = detected_obj_id;
+
+    logger->log_debug(name(),
+        "MATCH FOUND!! -------------------------> Cup number %i",
+        detected_obj_id);
+  }
+  else {
+    best_obj_guess_[centroid_i] = -1;
+    logger->log_debug(name(), "No match found.");
+  }
+
+  logger->log_debug(name(),
+      "*****************************************************");
+
+  return new_centroid;
 }
 
 #ifdef HAVE_VISUAL_DEBUGGING

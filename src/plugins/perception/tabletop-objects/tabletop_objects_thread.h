@@ -148,6 +148,8 @@ class TabletopObjectsThread
   void delete_near_centroids(CentroidMap reference, OldCentroidVector centroids,
     float min_distance);
   void remove_high_centroids(Eigen::Vector4f table_centroid, CentroidMap centroids);
+  Eigen::Vector4f fit_cylinder(ColorCloudConstPtr obj_in_base_frame, Eigen::Vector4f const &centroid, uint const &centroid_i);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
@@ -213,6 +215,7 @@ class TabletopObjectsThread
   float cfg_centroid_max_distance_;
   float cfg_centroid_min_distance_;
   float cfg_centroid_max_height_;
+  bool cfg_cylinder_fitting_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;
@@ -225,6 +228,8 @@ class TabletopObjectsThread
   CentroidMap cylinder_params_;
   OldCentroidVector old_centroids_;
   bool first_run_;
+
+  std::map<uint, std::vector<double>> obj_likelihoods_;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;
