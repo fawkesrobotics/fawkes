@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  cedar_thread.h - CLIPS-based Error Detection, Analysis, and Recovery
+ *  plugin_director_thread.h - CEDAR plugin manager access
  *
- *  Created: Fri Aug 16 18:00:32 2013 +0200
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Dec 13 18:21:18 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,47 +19,37 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CEDAR_CEDAR_THREAD_H_
-#define __PLUGINS_CEDAR_CEDAR_THREAD_H_
+#ifndef __PLUGINS_CEDAR_PLUGIN_DIRECTOR_THREAD_H_
+#define __PLUGINS_CEDAR_PLUGIN_DIRECTOR_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <plugins/clips/aspect/clips.h>
-#include <utils/time/time.h>
+#include <aspect/plugin_director.h>
 
-#include <clipsmm.h>
-
-#include <map>
+#include <list>
 #include <string>
 
-class CedarPluginDirectorThread;
-
-class CedarThread
+class CedarPluginDirectorThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::CLIPSAspect
+  public fawkes::PluginDirectorAspect
 {
+ /** Cedar thread can access private API. */
+ friend class CedarThread;
  public:
-  CedarThread(CedarPluginDirectorThread *pdt);
-  virtual ~CedarThread();
+  CedarPluginDirectorThread();
+  virtual ~CedarPluginDirectorThread();
 
-  virtual void init();
   virtual void loop();
-  virtual void finalize();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  CedarPluginDirectorThread *pdt_;
+  std::list<std::string> get_loaded_plugins()
+  { return plugin_manager->get_loaded_plugins(); }
+
+  std::list<std::pair<std::string, std::string> >  get_available_plugins()
+  { return plugin_manager->get_available_plugins(); }
+
 };
 
 #endif

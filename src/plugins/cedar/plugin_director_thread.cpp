@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  cedar_plugin.cpp - CLIPS-based Error Detection, Analysis, and Recovery
+ *  plugin_director_thread.cpp - CEDAR plugin manager access
  *
- *  Created: Fri Aug 16 18:00:32 2013 +0200
+ *  Created: Fri Dec 13 18:23:33 2013
  *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -19,29 +19,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "cedar_thread.h"
 #include "plugin_director_thread.h"
-#include <core/plugin.h>
 
 using namespace fawkes;
 
-/** CLIPS agent plugin.
+/** @class CedarPluginDirectorThread "plugin_director_thread.h"
+ * Plugin manager access for CEDAR.
  * @author Tim Niemueller
  */
-class CedarPlugin : public fawkes::Plugin
+
+/** Constructor. */
+CedarPluginDirectorThread::CedarPluginDirectorThread()
+  : Thread("CedarPluginDirectorThread", Thread::OPMODE_WAITFORWAKEUP)
 {
- public:
-  /** Constructor.
-   * @param config Fawkes configuration
-   */
-  CedarPlugin(Configuration *config) : Plugin(config)
-  {
-    CedarPluginDirectorThread *pdt = new CedarPluginDirectorThread();
-    thread_list.push_back(pdt);
-    thread_list.push_back(new CedarThread(pdt));
-  }
-};
+}
 
 
-PLUGIN_DESCRIPTION("CLIPS-based Error Detection, Analysis, and Recovery")
-EXPORT_PLUGIN(CedarPlugin)
+/** Destructor. */
+CedarPluginDirectorThread::~CedarPluginDirectorThread()
+{
+}
+
+
+void
+CedarPluginDirectorThread::loop()
+{
+}

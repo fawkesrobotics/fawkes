@@ -18,9 +18,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
 LIBS_cedar = \
-	fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	fawkescore fawkesutils fawkesaspects fawkesplugin fawkesblackboard \
         fawkesinterface fawkesclipsaspect
-OBJS_cedar = cedar_plugin.o cedar_thread.o
+OBJS_cedar = cedar_plugin.o cedar_thread.o plugin_director_thread.o
 
 OBJS_all = $(OBJS_cedar)
 
