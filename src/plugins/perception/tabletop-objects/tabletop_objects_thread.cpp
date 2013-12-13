@@ -133,6 +133,7 @@ TabletopObjectsThread::init()
   cfg_centroid_min_distance_ = config->get_float(CFG_PREFIX"centroid_min_distance");
   cfg_centroid_max_height_   = config->get_float(CFG_PREFIX"centroid_max_height");
   cfg_cylinder_fitting_      = config->get_bool(CFG_PREFIX"enable_cylinder_fitting");
+  cfg_track_objects_         = config->get_bool(CFG_PREFIX"enable_object_tracking");
 
   if (pcl_manager->exists_pointcloud<PointType>(cfg_input_pointcloud_.c_str())) {
     finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
@@ -1313,113 +1314,124 @@ pcl_utils::transform_pointcloud("/base_link", *single_cluster,
     new_centroids.resize(object_count);
 
 
-    // save cylinder_params, best_obj_guess and obj_shape_confidence
-    // to temporary variables to be able to reassign IDs
-    CentroidMap cylinder_params(cylinder_params_);
-    std::map<uint, signed int> best_obj_guess(best_obj_guess_);
-    std::map<uint, double> obj_shape_confidence(obj_shape_confidence_);
-    std::map<uint, std::vector<double> > obj_likelihoods(obj_likelihoods_);
-    cylinder_params_.clear();
-    best_obj_guess_.clear();
-    obj_shape_confidence_.clear();
-    obj_likelihoods_.clear();
+    if (cfg_track_objects_) {
+      // save cylinder_params, best_obj_guess and obj_shape_confidence
+      // to temporary variables to be able to reassign IDs
+      CentroidMap cylinder_params(cylinder_params_);
+      std::map<uint, signed int> best_obj_guess(best_obj_guess_);
+      std::map<uint, double> obj_shape_confidence(obj_shape_confidence_);
+      std::map<uint, std::vector<double> > obj_likelihoods(obj_likelihoods_);
+      cylinder_params_.clear();
+      best_obj_guess_.clear();
+      obj_shape_confidence_.clear();
+      obj_likelihoods_.clear();
 
-    if (first_run_) {
-      // get a new id for every object since we didn't have objects before
-      for (unsigned int i = 0; i < new_centroids.size(); i++) {
+      if (first_run_) {
+        // get a new id for every object since we didn't have objects before
+        for (unsigned int i = 0; i < new_centroids.size(); i++) {
+          unsigned int id;
+          if (!next_id(id))
+            break;
+          tmp_centroids[id] = new_centroids[i];
+          cylinder_params_[id] = cylinder_params[i];
+          obj_shape_confidence_[id] = obj_shape_confidence[i];
+          best_obj_guess_[id] = best_obj_guess[i];
+          obj_likelihoods_[id] = obj_likelihoods[i];
+
+          ColorCloudPtr colorized_cluster = colorize_cluster(input_cloud,
+              cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
+          *tmp_clusters += *colorized_cluster;
+          tmp_obj_clusters[id] = colorized_cluster;
+        }
+      }
+      else { // !first_run_
+        TIMETRACK_START(ttc_hungarian_);
+        hungarian_problem_t hp;
+        // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
+        std::vector<unsigned int> obj_ids(centroids_.size());
+        // create cost matrix,
+        // save new centroids in rows, last centroids in columns
+        // distance between new centroid i and last centroid j in cost[i][j]
+        hp.num_rows = new_centroids.size();
+        hp.num_cols = centroids_.size();
+        hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
+        for (int i = 0; i < hp.num_rows; i++)
+          hp.cost[i] = (int*) calloc(hp.num_cols, sizeof(int));
+        for (int row = 0; row < hp.num_rows; row++) { // new centroids
+          unsigned int col = 0;
+          for (CentroidMap::iterator col_it = centroids_.begin();
+              col_it != centroids_.end();
+              col_it++, col++) { // old centroids
+            double distance = pcl::distances::l2(new_centroids[row], col_it->second);
+            hp.cost[row][col] = (int)(distance * 1000);
+            obj_ids[col] = col_it->first;
+          }
+        }
+        HungarianMethod solver;
+        solver.init(hp.cost, hp.num_rows, hp.num_cols, HUNGARIAN_MODE_MINIMIZE_COST);
+        solver.solve();
+        // get assignments
+        int assignment_size;
+        int *assignment = solver.get_assignment(assignment_size);
         unsigned int id;
-        if (!next_id(id))
-          break;
-        tmp_centroids[id] = new_centroids[i];
-        cylinder_params_[id] = cylinder_params[i];
-        obj_shape_confidence_[id] = obj_shape_confidence[i];
-        best_obj_guess_[id] = best_obj_guess[i];
-        obj_likelihoods_[id] = obj_likelihoods[i];
-
-        ColorCloudPtr colorized_cluster =
-            colorize_cluster(input_cloud, cluster_indices[i].indices, cluster_colors[id % MAX_CENTROIDS]);
-        *tmp_clusters += *colorized_cluster;
-        tmp_obj_clusters[id] = colorized_cluster;
-      }
-    }
-    else { // !first_run_
-      TIMETRACK_START(ttc_hungarian_);
-      hungarian_problem_t hp;
-      // obj_ids: the id of the centroid in column i is saved in obj_ids[i]
-      std::vector<unsigned int> obj_ids(centroids_.size());
-      // create cost matrix,
-      // save new centroids in rows, last centroids in columns
-      // distance between new centroid i and last centroid j in cost[i][j]
-      hp.num_rows = new_centroids.size();
-      hp.num_cols = centroids_.size();
-      hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
-      for (int i = 0; i < hp.num_rows; i++)
-        hp.cost[i] = (int*) calloc(hp.num_cols, sizeof(int));
-      for (int row = 0; row < hp.num_rows; row++) { // new centroids
-        unsigned int col = 0;
-        for (CentroidMap::iterator col_it = centroids_.begin();
-            col_it != centroids_.end();
-            col_it++, col++) { // old centroids
-          double distance = pcl::distances::l2(new_centroids[row], col_it->second);
-          hp.cost[row][col] = (int)(distance * 1000);
-          obj_ids[col] = col_it->first;
-        }
-      }
-      HungarianMethod solver;
-      solver.init(hp.cost, hp.num_rows, hp.num_cols, HUNGARIAN_MODE_MINIMIZE_COST);
-      solver.solve();
-      // get assignments
-      int assignment_size;
-      int *assignment = solver.get_assignment(assignment_size);
-      unsigned int id;
-      for (int row = 0; row < assignment_size; row++) {
-        if (row >= hp.num_rows) { // object has disappeared
-          id = obj_ids.at(assignment[row]);
-          old_centroids_.push_back(OldCentroid(id, centroids_.at(id)));
-          continue;
-        }
-        else if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
-          bool assigned = false;
-          // first, check if there is an old centroid close enough
-          for (OldCentroidVector::iterator it = old_centroids_.begin();
-              it != old_centroids_.end(); it++) {
-            if (pcl::distances::l2(new_centroids[row], it->getCentroid()) <= cfg_centroid_max_distance_) {
-              id = it->getId();
-              old_centroids_.erase(it);
-              assigned = true;
-              break;
-            }
-          }
-          if (!assigned) {
-            // we still don't have an id, create as new object
-            if (!next_id(id))
-              continue;
-          }
-        }
-        else { // object has been assigned to an existing id
-          id = obj_ids[assignment[row]];
-          // check if centroid was moved further than cfg_centroid_max_distance_
-          // this can happen if a centroid appears and another one disappears in the same loop
-          // (then, the old centroid is assigned to the new one)
-          if (pcl::distances::l2(centroids_[id], new_centroids[row]) > cfg_centroid_max_distance_) {
-            // save the centroid because we don't use it now
-            old_centroids_.push_back(OldCentroid(id, centroids_[id]));
+        for (int row = 0; row < assignment_size; row++) {
+          if (row >= hp.num_rows) { // object has disappeared
+            id = obj_ids.at(assignment[row]);
+            old_centroids_.push_back(OldCentroid(id, centroids_.at(id)));
             continue;
           }
+          else if (assignment[row] >= hp.num_cols) { // object is new or has reappeared
+            bool assigned = false;
+            // first, check if there is an old centroid close enough
+            for (OldCentroidVector::iterator it = old_centroids_.begin();
+                it != old_centroids_.end(); it++) {
+              if (pcl::distances::l2(new_centroids[row], it->getCentroid()) <= cfg_centroid_max_distance_) {
+                id = it->getId();
+                old_centroids_.erase(it);
+                assigned = true;
+                break;
+              }
+            }
+            if (!assigned) {
+              // we still don't have an id, create as new object
+              if (!next_id(id))
+                continue;
+            }
+          }
+          else { // object has been assigned to an existing id
+            id = obj_ids[assignment[row]];
+            // check if centroid was moved further than cfg_centroid_max_distance_
+            // this can happen if a centroid appears and another one disappears in the same loop
+            // (then, the old centroid is assigned to the new one)
+            if (pcl::distances::l2(centroids_[id], new_centroids[row]) > cfg_centroid_max_distance_) {
+              // save the centroid because we don't use it now
+              old_centroids_.push_back(OldCentroid(id, centroids_[id]));
+              continue;
+            }
+          }
+          tmp_centroids[id] = new_centroids[row];
+          cylinder_params_[id] = cylinder_params[row];
+          obj_shape_confidence_[id] = obj_shape_confidence[row];
+          best_obj_guess_[id] = best_obj_guess[row];
+          obj_likelihoods_[id] = obj_likelihoods[row];
+          // remove id from old_centroids_ because we don't want the same id twices
+          ColorCloudPtr colorized_cluster =
+              colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
+          *tmp_clusters += *colorized_cluster;
+          tmp_obj_clusters[id] = colorized_cluster;
         }
-        tmp_centroids[id] = new_centroids[row];
-        cylinder_params_[id] = cylinder_params[row];
-        obj_shape_confidence_[id] = obj_shape_confidence[row];
-        best_obj_guess_[id] = best_obj_guess[row];
-        obj_likelihoods_[id] = obj_likelihoods[row];
-        // remove id from old_centroids_ because we don't want the same id twices
-        ColorCloudPtr colorized_cluster =
-            colorize_cluster(input_cloud, cluster_indices[row].indices, cluster_colors[id % MAX_CENTROIDS]);
-        *tmp_clusters += *colorized_cluster;
-        tmp_obj_clusters[id] = colorized_cluster;
-      }
 
-    } // !first_run_
+      } // !first_run_
+    }
+    else { //! cfg_track_objects_
+      for (unsigned int i = 0; i < new_centroids.size(); i++) {
+        tmp_centroids[i] = new_centroids[i];
+        ColorCloudPtr colorized_cluster = colorize_cluster(input_cloud,
+            cluster_indices[i].indices, cluster_colors[i]);
+        *tmp_clusters += *colorized_cluster;
+        tmp_obj_clusters[i] = colorized_cluster;
+      }
+    }
 
     // remove all centroids too high above the table
     remove_high_centroids(table_centroid, tmp_centroids);

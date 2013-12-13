@@ -111,3 +111,5 @@ perception/tabletop-objects:
   centroid_max_height: 0.3
 
   enable_cylinder_fitting: true
+
+  enable_object_tracking: true
