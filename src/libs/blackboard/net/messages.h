@@ -92,6 +92,8 @@ typedef struct {
   uint32_t      has_writer  :  1;		/**< 1 if the interface currently has a
 						 * writer, 0 otherwise */
   uint32_t      num_readers : 31;		/**< number of currently existing readers */
+  int64_t       timestamp_sec;			/**< data or write timestamp, sec part */
+  int64_t       timestamp_usec;			/**< data or write timestamp, usec part */
 } bb_iinfo_msg_t;
 
 
