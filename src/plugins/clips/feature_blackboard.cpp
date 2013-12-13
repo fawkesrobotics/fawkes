@@ -25,6 +25,7 @@
 #include <logging/logger.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/time/time.h>
+#include <interface/interface_info.h>
 
 #include <clipsmm.h>
 
@@ -64,6 +65,7 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
 					   fawkes::LockPtr<CLIPS::Environment> &clips)
 {
   envs_[env_name] = clips;
+  clips->evaluate("(path-load \"blackboard.clp\")");
   clips->add_function("blackboard-enable-time-read",
     sigc::slot<void>(
       sigc::bind<0>(
@@ -82,6 +84,13 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
     sigc::slot<void>(
       sigc::bind<0>(
 	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_read),
+	env_name)
+    )
+  );
+  clips->add_function("blackboard-get-info",
+    sigc::slot<void>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_get_info),
 	env_name)
     )
   );
@@ -294,4 +303,30 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
       envs_[env_name]->assert_fact(fact);
     }
   }
+}
+
+void
+BlackboardCLIPSFeature::clips_blackboard_get_info(std::string env_name)
+{
+  if (envs_.find(env_name) == envs_.end()) {
+    // Environment not registered, big bug
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Environment %s not registered,"
+		      " cannot read interfaces", env_name.c_str());
+    return;
+  }
+
+  fawkes::LockPtr<CLIPS::Environment> &clips = envs_[env_name];
+
+  InterfaceInfoList *iil = blackboard_->list_all();
+
+  for (auto ii : *iil) {
+    const Time *timestamp = ii.timestamp();
+    clips->assert_fact_f("(blackboard-interface-info (id \"%s\") (type \"%s\") "
+			 "(hash \"%s\") (has-writer %s) (num-readers %u) (timestamp %u %u))",
+			 ii.id(), ii.type(), ii.hash_printable().c_str(),
+			 ii.has_writer() ? "TRUE" : "FALSE", ii.num_readers(),
+			 timestamp->get_sec(), timestamp->get_usec());
+  }
+
+  delete iil;
 }
