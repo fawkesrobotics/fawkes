@@ -157,17 +157,20 @@ end
 -- FSM the originating state is assigned to), and self (the originating state).
 -- If the condition is not a string it must be a boolean function getting the
 -- originating state as its only parameter.
+-- <br />
+-- The precond field of the table is also set as a jump condition, but treated
+-- as a preconditoin. Preconditions cause checking of the jump condition
+-- just before entering the state (and before executing its init() method).
+-- Preconditions have the same syntax as the cond field and can be set in addition
+-- to it in the same table.
+-- <br />
+-- Instead of setting the same expression for cond and precond, one can use the
+-- cond_and_precond field of the table instead.
 -- <br /><br />
 -- A timeout field can be set. It is either defined as the number of seconds to
 -- advance to the destination state after entering the originating state, or as
 -- a table with two entries, the first holding the timeout in seconds, and the
 -- second the name of the state to advance to if the timeout runs out.
--- <br /><br />
--- Instead of setting the condition in the cond field, one can set it in the
--- precond field to treat it additionally as a precondition, or set in in the
--- precond_only field, to treat it exclusively as a precondition. Preconditions
--- cause checking of the jump condition already just before entering the state
--- (and before executing its init() method).
 -- <br /><br />
 -- A dotattr string field can be set with dot graph attributes for rendering.
 -- A desc string field can be set to an alternative description of the
@@ -187,12 +190,18 @@ function HSM:add_transitions(trans)
                               "Destination state does not exist for transition "
                                  .. trans_string)
 
-         local cond = t[3] or t.cond
-         if type(t.precond) ~= "boolean" and
-            type(t.precond_only) ~= "boolean" then
-            cond = cond or t.precond or t.precond_only
+         local cond    = t[3] or t.cond
+         local precond = t.precond
+         assert(not (t.cond_and_precond and (cond or t.precond)),
+                "When 'cond_and_precond' field is set, you may not set 'cond' or 'precond'")
+
+         if t.cond_and_precond then
+            --print("cond_and_precond set for "..trans_string.." : "..tostring(t.cond_and_precond))
+            cond    = t.cond_and_precond
+            precond = t.cond_and_precond
          end
-         assert(cond or t.timeout,
+
+         assert(cond or precond or t.timeout,
                 "You must have a condition or a timeout for transition "
                    .. trans_string)
 
@@ -218,13 +227,14 @@ function HSM:add_transitions(trans)
          -- We might have no condition but still a useful transition,
          -- i.e. if a timeout is set
          if cond then
-            local new_t
-            if t.precond_only then
-               new_t = from:add_new_precondition(to, cond, t.desc, t.error)
-            else
-               new_t = from:add_new_transition(to, cond, t.desc, t.error)
-               if t.precond then from:add_precondition(new_t) end
-            end
+            --print("Adding condition for "..trans_string.." : "..tostring(cond))
+            local new_t = from:add_new_transition(to, cond, t.desc, t.error)
+            if t.dotattr then new_t.dotattr = t.dotattr end
+            if t.hide then new_t.hide = true end
+         end
+         if precond then
+            --print("Adding precondition for "..trans_string.." : "..tostring(precond))
+            local new_t = from:add_new_precondition(to, precond, t.desc, t.error)
             if t.dotattr then new_t.dotattr = t.dotattr end
             if t.hide then new_t.hide = true end
          end
