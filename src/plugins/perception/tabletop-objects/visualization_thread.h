@@ -92,6 +92,7 @@ class TabletopVisualizationThread
   bool         cfg_show_cvxhull_line_highlighting_;
   bool         cfg_show_cvxhull_vertex_ids_;
   unsigned int cfg_duration_;
+  bool         cfg_cylinder_fitting_;
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

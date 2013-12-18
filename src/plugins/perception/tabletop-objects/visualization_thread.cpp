@@ -102,6 +102,9 @@ TabletopVisualizationThread::init()
   try {
     cfg_show_cvxhull_vertex_ids_ = config->get_bool(CFG_PREFIX_VIS"show_convex_hull_vertex_ids");
   } catch (Exception &e) {} // ignored, use default
+  try {
+    cfg_cylinder_fitting_ = config->get_bool(CFG_PREFIX"enable_cylinder_fitting");
+  } catch (Exception &e) {} // ignored, use default
 
   vispub_ = new ros::Publisher();
   *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100);
@@ -196,49 +199,66 @@ TabletopVisualizationThread::loop()
       sphere.type = visualization_msgs::Marker::CYLINDER;
       sphere.action = visualization_msgs::Marker::ADD;
 
-      /*
+      if (cfg_cylinder_fitting_) {
+
+        /*
        sphere.scale.x = sphere.scale.y = 0.08;
        sphere.scale.z = 0.09;
-       */
-      sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[it->first][0];
-      sphere.scale.z = cylinder_params_[it->first][1];
-      //if (obj_confidence_[it->first] >= 0.5)
-      if (best_obj_guess_[it->first] < 0) {
-        sphere.color.r = 1.0;
-        sphere.color.g = 0.0;
-        sphere.color.b = 0.0;
-      } else {
-        sphere.color.r = 0.0;
-        sphere.color.g = 1.0;
-        sphere.color.b = 0.0;
-      }
-      /*
+         */
+        sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[it->first][0];
+        sphere.scale.z = cylinder_params_[it->first][1];
+        //if (obj_confidence_[it->first] >= 0.5)
+        if (best_obj_guess_[it->first] < 0) {
+          sphere.color.r = 1.0;
+          sphere.color.g = 0.0;
+          sphere.color.b = 0.0;
+        } else {
+          sphere.color.r = 0.0;
+          sphere.color.g = 1.0;
+          sphere.color.b = 0.0;
+        }
+        /*
        sphere.color.r = (float)cluster_colors[it->first % MAX_CENTROIDS][0] / 255.f;
        sphere.color.g = (float)cluster_colors[it->first % MAX_CENTROIDS][1] / 255.f;
        sphere.color.b = (float)cluster_colors[it->first % MAX_CENTROIDS][2] / 255.f;
-       */
-      sphere.color.a = 1.0;
+         */
+        sphere.color.a = 1.0;
 
-      /*
+        /*
        sphere.pose.position.x = baserel_centroid[0];
        sphere.pose.position.y = baserel_centroid[1];
        sphere.pose.position.z = baserel_centroid[2];
-       */
-      sphere.pose.position.x = centroid[0];
-      sphere.pose.position.y = centroid[1];
-      sphere.pose.position.z = centroid[2];
-      //////////////
-      tf::Quaternion table_quat(tf::Vector3(0, 1, 0), cylinder_params_[2][0]);
-/*
+         */
+        sphere.pose.position.x = centroid[0];
+        sphere.pose.position.y = centroid[1];
+        sphere.pose.position.z = centroid[2];
+        //////////////
+        tf::Quaternion table_quat(tf::Vector3(0, 1, 0), cylinder_params_[2][0]);
+        /*
       sphere.pose.orientation.x = table_quat.getX();
       sphere.pose.orientation.y = table_quat.getY();
       sphere.pose.orientation.z = table_quat.getZ();
       sphere.pose.orientation.w = table_quat.getW();
-*/
-      sphere.pose.orientation.w = 1.;
-      //////////////
-      sphere.lifetime = ros::Duration(cfg_duration_, 0);
-      m.markers.push_back(sphere);
+         */
+        sphere.pose.orientation.w = 1.;
+        //////////////
+        sphere.lifetime = ros::Duration(cfg_duration_, 0);
+        m.markers.push_back(sphere);
+      }
+      else {
+        sphere.pose.position.x = centroid[0];
+        sphere.pose.position.y = centroid[1];
+        sphere.pose.position.z = centroid[2];
+        sphere.pose.orientation.w = 1.;
+        sphere.scale.x = sphere.scale.y = 0.08;
+        sphere.scale.z = 0.09;
+        sphere.color.r = (float)cluster_colors[it->first % MAX_CENTROIDS][0] / 255.f;
+        sphere.color.g = (float)cluster_colors[it->first % MAX_CENTROIDS][1] / 255.f;
+        sphere.color.b = (float)cluster_colors[it->first % MAX_CENTROIDS][2] / 255.f;
+        sphere.color.a = 1.0;
+        sphere.lifetime = ros::Duration(cfg_duration_, 0);
+        m.markers.push_back(sphere);
+      }
     } catch (Exception &e) {
     } // ignored
   }
