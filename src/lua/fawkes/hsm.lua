@@ -198,6 +198,12 @@ function HSM:add_transitions(trans)
          assert(not (t.cond_and_precond and (cond or t.precond)),
                 "When 'cond_and_precond' field is set, you may not set 'cond' or 'precond'")
 
+         if cond and precond == true then
+            print_warn("ATTENTION: You have set the field 'cond' and set 'precond=true' for the transition ".. trans_string.."."
+                        .." This adds a regular condition (cond) and a precondition (precond), which means your cond will be skipped due to 'precond=true'."
+                        .." Please check if this is intended or a remainer of the old condition setting syntax.")
+         end
+
          if t.cond_and_precond then
             --print("cond_and_precond set for "..trans_string.." : "..tostring(t.cond_and_precond))
             cond    = t.cond_and_precond
