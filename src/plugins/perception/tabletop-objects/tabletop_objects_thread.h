@@ -143,12 +143,13 @@ class TabletopObjectsThread
 
   unsigned int cluster_objects(CloudConstPtr input, ColorCloudPtr tmp_clusters, std::vector<ColorCloudPtr> &tmp_obj_clusters);
 
-  bool next_id(unsigned int &id);
+  int next_id();
   void delete_old_centroids(OldCentroidVector centroids, unsigned int age);
   void delete_near_centroids(CentroidMap reference, OldCentroidVector centroids,
     float min_distance);
   void remove_high_centroids(Eigen::Vector4f table_centroid, CentroidMap centroids);
   Eigen::Vector4f fit_cylinder(ColorCloudConstPtr obj_in_base_frame, Eigen::Vector4f const &centroid, uint const &centroid_i);
+  std::map<unsigned int, int> track_objects(std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> new_centroids);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
