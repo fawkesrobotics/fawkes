@@ -102,30 +102,30 @@ function HSM:define_states(states)
    -- export already existing states
    if export_to then
       for name, state in pairs(self.states) do
-	 export_to[name] = state
+         export_to[name] = state
       end
    end
 
    for _, s in ipairs(states) do
       local name, class
       if type(s) == "string" then
-	 name = s
-	 class = JumpState
+         name = s
+         class = JumpState
       else
-	 name  = s[1]
-	 class = s[2]
+         name  = s[1]
+         class = s[2]
       end
       assert(not self.states[name], "HSM[" .. self.name .. "] state with name "
-	     .. tostring(name) .. " already defined")
+             .. tostring(name) .. " already defined")
       assert(class, "HSM[" .. self.name .. "] class instance for state "
-	     .. tostring(name) .. " not defined")
+             .. tostring(name) .. " not defined")
 
       -- Generate base table for new instance
       local o = {}
       -- copy the values, otherwise instances would use the definition table
       if type(s) == "table" then
-	 for k, v in pairs(s) do o[k] = v end
-	 table.remove(o, 1, 2) -- remove positional args
+         for k, v in pairs(s) do o[k] = v end
+         table.remove(o, 1, 2) -- remove positional args
       end
       o.name    = name
       o.fsm     = self
@@ -175,65 +175,65 @@ end
 function HSM:add_transitions(trans)
    for _,t in ipairs(trans) do
       if t[2] then -- Normal from -> to transition
-	 assert(t[1], "Must have an originating state")
-	 assert(not (t[3] and t.cond), "Only one of cond field and third index may be set as condition")
+         assert(t[1], "Must have an originating state")
+         assert(not (t[3] and t.cond), "Only one of cond field and third index may be set as condition")
 
-	 local trans_string = tostring(t[1]) .." -> " .. tostring(t[2])
+         local trans_string = tostring(t[1]) .." -> " .. tostring(t[2])
 
-	 local from  = assert(self.states[t[1]],
-			      "Originating state does not exist for transition "
-				 .. trans_string)
-	 local to    = assert(self.states[t[2]],
-			      "Destination state does not exist for transition "
-				 .. trans_string)
+         local from  = assert(self.states[t[1]],
+                              "Originating state does not exist for transition "
+                                 .. trans_string)
+         local to    = assert(self.states[t[2]],
+                              "Destination state does not exist for transition "
+                                 .. trans_string)
 
-	 local cond = t[3] or t.cond
-	 if type(t.precond) ~= "boolean" and
-	    type(t.precond_only) ~= "boolean" then
-	    cond = cond or t.precond or t.precond_only
-	 end
-	 assert(cond or t.timeout,
-		"You must have a condition or a timeout for transition "
-		   .. trans_string)
+         local cond = t[3] or t.cond
+         if type(t.precond) ~= "boolean" and
+            type(t.precond_only) ~= "boolean" then
+            cond = cond or t.precond or t.precond_only
+         end
+         assert(cond or t.timeout,
+                "You must have a condition or a timeout for transition "
+                   .. trans_string)
 
-	 -- If we only get a time as timeout assume jump to normal to state
-	 if t.timeout then
-	    local timeout_to, timeout_time, timeout_err
-	    if type(t.timeout) == "number" then
-	       timeout_time = t.timeout
-	       timeout_to   = to.name
-	    else
-	       assert(type(t.timeout) == "table", "Timeout must be number or table")
-	       timeout_time = t.timeout.time or t.timeout[1]
-	       timeout_to   = t.timeout.to   or t.timeout[2] or to.name
-	       timeout_err  = t.timeout.error
-	    end
-	    assert(self.states[timeout_to], "Timeout destination state "
-		   .. tostring(timeout_to)
-		   .. " does not exist for transition " .. trans_string)
+         -- If we only get a time as timeout assume jump to normal to state
+         if t.timeout then
+            local timeout_to, timeout_time, timeout_err
+            if type(t.timeout) == "number" then
+               timeout_time = t.timeout
+               timeout_to   = to.name
+            else
+               assert(type(t.timeout) == "table", "Timeout must be number or table")
+               timeout_time = t.timeout.time or t.timeout[1]
+               timeout_to   = t.timeout.to   or t.timeout[2] or to.name
+               timeout_err  = t.timeout.error
+            end
+            assert(self.states[timeout_to], "Timeout destination state "
+                   .. tostring(timeout_to)
+                   .. " does not exist for transition " .. trans_string)
 
-	    from:set_timeout(timeout_time, timeout_to, timeout_err)
-	 end
+            from:set_timeout(timeout_time, timeout_to, timeout_err)
+         end
 
-	 -- We might have no condition but still a useful transition,
-	 -- i.e. if a timeout is set
-	 if cond then
-	    local new_t
-	    if t.precond_only then
-	       new_t = from:add_new_precondition(to, cond, t.desc, t.error)
-	    else
-	       new_t = from:add_new_transition(to, cond, t.desc, t.error)
-	       if t.precond then from:add_precondition(new_t) end
-	    end
-	    if t.dotattr then new_t.dotattr = t.dotattr end
-	    if t.hide then new_t.hide = true end
-	 end
+         -- We might have no condition but still a useful transition,
+         -- i.e. if a timeout is set
+         if cond then
+            local new_t
+            if t.precond_only then
+               new_t = from:add_new_precondition(to, cond, t.desc, t.error)
+            else
+               new_t = from:add_new_transition(to, cond, t.desc, t.error)
+               if t.precond then from:add_precondition(new_t) end
+            end
+            if t.dotattr then new_t.dotattr = t.dotattr end
+            if t.hide then new_t.hide = true end
+         end
 
       else -- default transition
-	 local to = assert(self.states[t[1]], "Destination state " .. tostring(t[1])
-			   .. " does not exist for default transition")
-	 assert(t.cond, "Default transition must have a jump condition")
-	 self:add_default_transition(to.name, t.cond, t.desc)
+         local to = assert(self.states[t[1]], "Destination state " .. tostring(t[1])
+                           .. " does not exist for default transition")
+         assert(t.cond, "Default transition must have a jump condition")
+         self:add_default_transition(to.name, t.cond, t.desc)
       end
    end
 end
@@ -262,7 +262,7 @@ function HSM:new_jump_state(name, transitions, vars, export_to)
    if vars then
       assert(type(vars) == "table", "HSM:new_state: vars parameter must be a table")
       for k,v in pairs(vars) do
-	 o[k] = v
+         o[k] = v
       end
    end
    local s = JumpState:new(o)
@@ -287,7 +287,7 @@ end
 function HSM:add_default_transition(state, jumpcond, description)
    if self.debug then
       printf("%s: Adding default transition -> %s on %s (%s)",
-	     self.name, tostring(state), tostring(jumpcond), tostring(description))
+             self.name, tostring(state), tostring(jumpcond), tostring(description))
    end
    table.insert(self.default_transitions, {state=state, jumpcond=jumpcond, description=description})
    for _,st in pairs(self.states) do
@@ -305,21 +305,21 @@ function HSM:apply_deftrans(state)
       local compto = type(t.state) == "table" and state or state.name
 
       if compto ~= t.state
-	 and state.name ~= self.exit_state and state.name ~= self.fail_state then
+         and state.name ~= self.exit_state and state.name ~= self.fail_state then
 
-	 local exists = false
-	 for _,t2 in ipairs(state.transitions) do
-	    if t2.deftransindex == i then
-	       exists = true
-	       break;
-	    end
-	 end
-	 if not exists then
-	    printf("Adding transition %s -> %s (%s, %s)", state.name, tostring(t.state),
-		   tostring(t.jumpcond), tostring(t.description))
-	    local tr = state:add_new_transition(t.state, t.jumpcond, t.description)
-	    tr.deftransindex = i
-	 end
+         local exists = false
+         for _,t2 in ipairs(state.transitions) do
+            if t2.deftransindex == i then
+               exists = true
+               break;
+            end
+         end
+         if not exists then
+            printf("Adding transition %s -> %s (%s, %s)", state.name, tostring(t.state),
+                   tostring(t.jumpcond), tostring(t.description))
+            local tr = state:add_new_transition(t.state, t.jumpcond, t.description)
+            tr.deftransindex = i
+         end
       end
    end
 end
