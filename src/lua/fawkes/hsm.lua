@@ -179,6 +179,9 @@ function HSM:add_transitions(trans)
    for _,t in ipairs(trans) do
       if t[2] then -- Normal from -> to transition
          assert(t[1], "Must have an originating state")
+         assert(not t.precond_only, "The field 'precond_only' is not supported anymore! Use 'precond' instead"
+                                     .. " to treat is exclusively as a precondition. Do not forget to remote 'cond' then."
+                                     .. " See documentation.")
          assert(not (t[3] and t.cond), "Only one of cond field and third index may be set as condition")
 
          local trans_string = tostring(t[1]) .." -> " .. tostring(t[2])
