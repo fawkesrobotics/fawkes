@@ -25,6 +25,7 @@
 
 #include "common/defines.h"
 #include "utils/rob/robo_laser.h"
+#include "utils/rob/roboshape_colli.h"
 #include "search/og_laser.h"
 #include "search/astar_search.h"
 
@@ -57,6 +58,9 @@ ColliVisualizationThread::init()
   pub_laser_ = new ros::Publisher();
   *pub_laser_ = rosnode->advertise< nav_msgs::GridCells >("colli_laser", 1);
 
+  pub_roboshape_ = new ros::Publisher();
+  *pub_roboshape_ = rosnode->advertise< nav_msgs::GridCells >("colli_roboshape", 1);
+
   pub_cells_occ_ = new ros::Publisher();
   *pub_cells_occ_ = rosnode->advertise< nav_msgs::GridCells >("colli_cells_occupied", 1);
 
@@ -74,6 +78,8 @@ ColliVisualizationThread::init()
 
   pub_search_path_ = new ros::Publisher();
   *pub_search_path_ = rosnode->advertise< nav_msgs::GridCells >("colli_search_path", 1);
+
+  roboshape_ = new CRoboShape_Colli( "/plugins/colli/Roboshape/", logger, config );
 }
 
 void
@@ -81,6 +87,8 @@ ColliVisualizationThread::finalize()
 {
   pub_laser_->shutdown();
   delete pub_laser_;
+  pub_roboshape_->shutdown();
+  delete pub_roboshape_;
 
   pub_cells_occ_->shutdown();
   delete pub_cells_occ_;
@@ -95,6 +103,8 @@ ColliVisualizationThread::finalize()
 
   pub_search_path_->shutdown();
   delete pub_search_path_;
+
+  delete roboshape_;
 }
 
 
@@ -122,6 +132,22 @@ ColliVisualizationThread::loop()
   }
   grid.header.stamp = ros::Time::now();
   pub_laser_->publish(grid);
+
+  // publish roboshape
+  grid.cells.clear();
+  float rad = 0;
+  float radinc = M_PI/180.f;
+  for( unsigned int i=0; i<360; ++i ) {
+    float len = roboshape_->GetRobotLengthforRad( rad );
+    geometry_msgs::Point p;
+    p.x = len * cos(rad);
+    p.y = len * sin(rad);
+    p.z = 0;
+    grid.cells.push_back(p);
+    rad += radinc;
+  }
+  grid.header.stamp = ros::Time::now();
+  pub_roboshape_->publish(grid);
 
   // publish grid cells
   grid.cells.clear();

@@ -28,6 +28,7 @@
 #include <core/threading/mutex.h>
 #include <aspect/tf.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <plugins/ros/aspect/ros.h>
 
 #include <vector>
@@ -40,6 +41,7 @@ namespace fawkes {
   class CLaserOccupancyGrid;
   class CSearch;
   class Laser;
+  class CRoboShape_Colli;
   typedef struct point_struct point_t;
 }
 #endif
@@ -51,6 +53,7 @@ class ColliVisualizationThread
 : public fawkes::Thread,
   public fawkes::TransformAspect,
   public fawkes::ConfigurableAspect,
+  public fawkes::LoggingAspect,
   public fawkes::ROSAspect
 {
  public:
@@ -70,8 +73,11 @@ class ColliVisualizationThread
   fawkes::CLaserOccupancyGrid *occ_grid_;
   fawkes::CSearch             *search_;
   fawkes::Laser               *laser_;
+  fawkes::CRoboShape_Colli    *roboshape_;
 
   ros::Publisher *pub_laser_;
+  ros::Publisher *pub_roboshape_;
+
   ros::Publisher *pub_cells_occ_;
   ros::Publisher *pub_cells_near_;
   ros::Publisher *pub_cells_mid_;
