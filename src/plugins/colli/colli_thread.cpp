@@ -68,6 +68,8 @@ ColliThread::init()
   m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
   cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
 
+  cfg_visualize_idle_   = config->get_bool((cfg_prefix + "visualize_idle").c_str());
+
   cfg_min_rot_            = config->get_float((cfg_prefix + "min_rot").c_str());
   cfg_min_drive_dist_     = config->get_float((cfg_prefix + "min_drive_distance").c_str());
   cfg_min_drive_rot_dist_ = config->get_float((cfg_prefix + "min_drive_rot_distance").c_str());
@@ -244,6 +246,8 @@ ColliThread::loop()
   // Update blackboard data
   UpdateBB();
 
+  // check if we need to abort for some reason
+  bool abort = false;
   if( !m_pLaserScannerObj->has_writer()
    || !m_pMopoObj->has_writer() ) {
     logger->log_warn(name(), "***** Laser or sim_robot dead!!! --> STOPPING!!!!");
@@ -251,16 +255,15 @@ ColliThread::loop()
     m_pColliDataObj->set_final( true );
     m_pColliDataObj->write();
     escape_count = 0;
-    return;
-  }
+    abort = true;
 
-  // THIS IF FOR CHALLENGE ONLY!!!
-  if( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
+    // THIS IF FOR CHALLENGE ONLY!!!
+  } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
     logger->log_debug(name(), "BEING OVERRIDDEN!");
     m_pColliDataObj->set_final( false );
     m_pColliDataObj->write();
     escape_count = 0;
-    return;
+    abort = true;
 
   } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
     logger->log_debug(name(), "Moving is not allowed!");
@@ -268,39 +271,48 @@ ColliThread::loop()
     m_pColliDataObj->set_final( true );
     m_pColliDataObj->write();
     escape_count = 0;
-    return;
-  }
+    abort = true;
 
+    // Do only drive, if there is a new (first) target
+  } else if( ( m_oldTargetX   == m_pColliTargetObj->dest_x() )
+          && ( m_oldTargetY   == m_pColliTargetObj->dest_y() )
+          && ( m_oldTargetOri == m_pColliTargetObj->dest_ori() ) ) {
+      m_oldAnglesToTarget.clear();
+      for ( unsigned int i = 0; i < 10; i++ )
+        m_oldAnglesToTarget.push_back( 0.0 );
 
-  // Do only drive, if there is a new (first) target
-  if( ( m_oldTargetX   == m_pColliTargetObj->dest_x() )
-   && ( m_oldTargetY   == m_pColliTargetObj->dest_y() )
-   && ( m_oldTargetOri == m_pColliTargetObj->dest_ori() ) ) {
-    m_oldAnglesToTarget.clear();
-    for ( unsigned int i = 0; i < 10; i++ )
-      m_oldAnglesToTarget.push_back( 0.0 );
+      m_ProposedTranslation = 0.0;
+      m_ProposedRotation    = 0.0;
+      if( abs(m_pMopoObj->vx()) > 0.01f
+       || abs(m_pMopoObj->vy()) > 0.01f
+       || abs(m_pMopoObj->omega()) > 0.01f ) {
+        // only stop movement, if we are moving. otherwise we flood the interface with messages
+        m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
+      }
 
-    m_ProposedTranslation = 0.0;
-    m_ProposedRotation    = 0.0;
-    if( abs(m_pMopoObj->vx()) > 0.01f
-     || abs(m_pMopoObj->vy()) > 0.01f
-     || abs(m_pMopoObj->omega()) > 0.01f ) {
-      // only stop movement, if we are moving. otherwise we flood the interface with messages
-      m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
-    }
+      m_pColliDataObj->set_final( true );
+      escape_count = 0;
+      // Send motor and colli data away.
+      m_pColliDataObj->write();
 
-    m_pColliDataObj->set_final( true );
-    escape_count = 0;
-    // Send motor and colli data away.
-    m_pColliDataObj->write();
-
-    return;
+      abort = true;
 
   } else {
     m_oldTargetX   = m_pColliTargetObj->dest_x()   + 1000.0;
     m_oldTargetY   = m_pColliTargetObj->dest_y()   + 1000.0;
     m_oldTargetOri = m_pColliTargetObj->dest_ori() + 1.0;
   }
+
+  if( abort ) {
+#ifdef HAVE_VISUAL_DEBUGGING
+    if( cfg_visualize_idle_ ) {
+      UpdateOwnModules();
+      vis_thread_->wakeup();
+    }
+#endif
+    return;
+  }
+
   // Update state machine
   UpdateColliStateMachine();
 
@@ -318,6 +330,11 @@ ColliThread::loop()
     m_pLaserOccGrid->ResetOld();
 
     escape_count = 0;
+
+#ifdef HAVE_VISUAL_DEBUGGING
+    if( cfg_visualize_idle_ )
+      UpdateOwnModules();
+#endif
 
   } else {
     // perform the update of the grid.

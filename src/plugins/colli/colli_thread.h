@@ -138,6 +138,8 @@ class ColliThread
   float m_MaximumRoboIncrease;                   // maximum increasement of the robots size
   bool cfg_obstacle_inc_;                        // indicator if obstacles should be increased or not
 
+  bool  cfg_visualize_idle_;      /**< Defines if visualization should run when robot is idle without a target. */
+
   float cfg_min_rot_;             /**< The minimum rotation speed. */
   float cfg_min_drive_dist_;      /**< The minimum distance to drive straight to target */
   float cfg_min_drive_rot_dist_;  /**< The minimum distance to drive to AND rotate at target */

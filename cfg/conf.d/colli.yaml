@@ -9,6 +9,9 @@ plugins/colli:
   # The maximum robot increasement of laser readings
   MAX_ROBO_INCREASE: 0.04
 
+  # If you want to visualize the data continuously and not just when colli receives a new target, set this to true
+  visualize_idle: false
+
   # Define if obstacles should be increased depending on robot's speed
   obstacle_increasement: true
 
