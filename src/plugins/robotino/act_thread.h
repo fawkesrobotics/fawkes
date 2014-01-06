@@ -81,6 +81,10 @@ class RobotinoActThread
   bool        			  msg_received_;
   bool        			  msg_zero_vel_;
   fawkes::Time 			  last_msg_time_;
+
+  float                          des_vx_;
+  float                          des_vy_;
+  float                          des_omega_;
 };
 
 
