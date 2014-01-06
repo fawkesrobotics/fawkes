@@ -114,9 +114,9 @@ RobotinoActThread::loop()
                              msg->vx() * 1000., msg->vy() * 1000.,
 			     rad2deg(msg->omega()));
 
-        des_vx_    = m1 / 1000;
-        des_vy_    = m2 / 1000;
-        des_omega_ = m3 / 1000;
+        des_vx_    = msg->vx();
+        des_vy_    = msg->vy();
+        des_omega_ = msg->omega();
 
         set_state.speedSetPoint[0] = m1;
         set_state.speedSetPoint[1] = m2;
