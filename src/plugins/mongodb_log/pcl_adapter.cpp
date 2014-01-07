@@ -26,6 +26,9 @@
 #include <pcl/point_types.h>
 #include <pcl/point_representation.h>
 #include <pcl/common/io.h>
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+#  include <pcl/PCLPointField.h>
+#endif
 #include <logging/logger.h>
 #include <aspect/pointcloud/pointcloud_manager.h>
 
@@ -96,14 +99,22 @@ fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &p,
   frame_id = p->header.frame_id;
   is_dense = p->is_dense;
 
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+  std::vector<pcl::PCLPointField> pfields;
+#else
   std::vector<sensor_msgs::PointField> pfields;
+#endif
   pcl::for_each_type<typename pcl::traits::fieldList<PointT>::type>
     (pcl::detail::FieldAdder<PointT>(pfields));
 
   pfi.clear();
   pfi.resize(pfields.size());
   for (unsigned int i = 0; i < pfields.size(); ++i) {
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+    pcl::PCLPointField &pf = pfields[i];
+#else
     sensor_msgs::PointField &pf = pfields[i];
+#endif
     pfi[i] = MongoLogPointCloudAdapter::PointFieldInfo(pf.name, pf.offset,
                                                   pf.datatype, pf.count);
   }

@@ -39,7 +39,11 @@
 #include <list>
 #include <queue>
 
-#include <sensor_msgs/PointCloud2.h>
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+#  include <pcl/PCLPointCloud2.h>
+#else
+#  include <sensor_msgs/PointCloud2.h>
+#endif
 
 namespace fawkes {
   class Mutex;
@@ -76,7 +80,11 @@ class MongoLogPointCloudThread
   /// @cond INTERNALS
   typedef struct {
     std::string		     topic_name;
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+    pcl::PCLPointCloud2      msg;
+#else
     sensor_msgs::PointCloud2 msg;
+#endif
     fawkes::Time             last_sent;
   } PointCloudInfo;
   /// @endcond
