@@ -481,15 +481,25 @@ YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
     throw Exception(errno, "YamlConfig: cannot access file %s", filename.c_str());
   }
 
+#ifdef HAVE_YAMLCPP_0_5
+  std::vector<YAML::Node> docs;
+#else
   std::ifstream fin(filename.c_str());
   YAML::Parser parser;
   YAML::Node doc1, doc2;
+#endif
   bool have_doc1 = false, have_doc2 = false;
 
   try {
+#ifdef HAVE_YAMLCPP_0_5
+    docs = YAML::LoadAllFromFile(filename);
+    have_doc1 = docs.size() > 0;
+    have_doc2 = docs.size() > 1;
+#else
     parser.Load(fin);
     have_doc1 = parser.GetNextDocument(doc1);
     have_doc2 = parser.GetNextDocument(doc2);
+#endif
   } catch (YAML::ParserException &e) {
     throw CouldNotOpenConfigException("Failed to parse %s line %i column %i: %s",
 				      filename.c_str(), e.mark.line, e.mark.column,
@@ -503,11 +513,21 @@ YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
     // empty -> ignore
   } else if (have_doc1 && have_doc2) {
     // we have a meta info and a config document
+#ifdef HAVE_YAMLCPP_0_5
+    read_meta_doc(docs[0], load_queue, host_file);
+    read_config_doc(docs[1], sub_root);
+#else
     read_meta_doc(doc1, load_queue, host_file);
     read_config_doc(doc2, sub_root);
+#endif
+
   } else {
     // only one, assume this to be the config document
+#ifdef HAVE_YAMLCPP_0_5
+    read_config_doc(docs[0], sub_root);
+#else
     read_config_doc(doc1, sub_root);
+#endif
   }
 
   return sub_root;
@@ -618,7 +638,7 @@ YamlConfiguration::fam_event(const char *filename, unsigned int mask)
  * @param path path
  * @return absolute path
  */
-static std::string abs_cfg_path(std::string &path)
+static std::string abs_cfg_path(const std::string &path)
 {
   if (path[0] == '/') {
      return path;
@@ -634,10 +654,15 @@ YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &lo
 {
   try {
     const YAML::Node &includes = doc["include"];
+#ifdef HAVE_YAMLCPP_0_5
+    for (YAML::const_iterator it = includes.begin(); it != includes.end(); ++it) {
+      std::string include = it->as<std::string>();
+#else
     for (YAML::Iterator it = includes.begin(); it != includes.end(); ++it) {
       std::string include;
-      bool ignore_missing = false;
       *it >> include;
+#endif
+      bool ignore_missing = false;
       if (it->Tag() == "tag:fawkesrobotics.org,cfg/ignore-missing") {
 	ignore_missing = true;
       }
@@ -646,8 +671,12 @@ YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &lo
 	if (host_file != "") {
 	  throw Exception("YamlConfig: Only one host-specific file can be specified");
 	}
+#ifdef HAVE_YAMLCPP_0_5
+	host_file = abs_cfg_path(it->Scalar());
+#else
 	it->GetScalar(host_file);
 	host_file = abs_cfg_path(host_file);
+#endif
 	continue;
       }
 
@@ -718,9 +747,14 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
   }
 
   if (doc.Type() == YAML::NodeType::Map) {
+#ifdef HAVE_YAMLCPP_0_5
+    for (YAML::const_iterator it = doc.begin(); it != doc.end(); ++it) {
+      std::string key = it->first.as<std::string>();
+#else
     for (YAML::Iterator it = doc.begin(); it != doc.end(); ++it) {
       std::string key;
       it.first() >> key;
+#endif
       YamlConfigurationNode *in = node;
       if (key.find("/") != std::string::npos) {
 	// we need to split and find the proper insertion node
@@ -739,19 +773,33 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
 
       YamlConfigurationNode *tmp = (*in)[key];
       if (tmp) {
+#ifdef HAVE_YAMLCPP_0_5
+	if (tmp->is_scalar() && it->second.Type() != YAML::NodeType::Scalar)
+#else
 	if (tmp->is_scalar() && it.second().Type() != YAML::NodeType::Scalar)
+#endif
 	{
 	  throw Exception("YamlConfig: scalar %s cannot be overwritten by non-scalar",
 			  tmp->name().c_str());
 	}
+#ifdef HAVE_YAMLCPP_0_5
+	tmp->set_scalar(it->second.Scalar());
+#else
 	std::string s;
 	if (it.second().GetScalar(s)) {
 	  tmp->set_scalar(s);
 	}
+#endif
       } else {
+#ifdef HAVE_YAMLCPP_0_5
+	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it->second);
+	in->add_child(key, tmp);
+	read_config_doc(it->second, tmp);
+#else
 	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it.second());
 	in->add_child(key, tmp);
 	read_config_doc(it.second(), tmp);
+#endif
       }
     }
 
@@ -771,35 +819,41 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
 			"(%u out of allowed range)", p);
       }
     } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/url") {
+#ifdef HAVE_YAMLCPP_0_5
+      std::string scalar = doc.Scalar();
+#else
       std::string scalar;
-      if (doc.GetScalar(scalar)) {
+      doc.GetScalar(scalar);
+#endif
 #ifdef USE_REGEX_CPP
-	if (regex_search(scalar, __url_regex)) {
+      if (regex_search(scalar, __url_regex)) {
 #  if 0
-	  // just for emacs auto-indentation
-	}
+	// just for emacs auto-indentation
+      }
 #  endif
 #else
-	if (regexec(&__url_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
-	  throw Exception("YamlConfig: %s is not a valid URL", scalar.c_str());
-	}
-#endif
+      if (regexec(&__url_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
+	throw Exception("YamlConfig: %s is not a valid URL", scalar.c_str());
       }
+#endif
     } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/frame") {
+#ifdef HAVE_YAMLCPP_0_5
+      std::string scalar = doc.Scalar();
+#else
       std::string scalar;
-      if (doc.GetScalar(scalar)) {
+      doc.GetScalar(scalar);
+#endif
 #ifdef USE_REGEX_CPP
-	if (regex_search(scalar, __frame_regex)) {
+      if (regex_search(scalar, __frame_regex)) {
 #  if 0
-	  // just for emacs auto-indentation
-	}
+	// just for emacs auto-indentation
+      }
 #  endif
 #else
-	if (regexec(&__frame_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
-	  throw Exception("YamlConfig: %s is not a valid frame ID", scalar.c_str());
-	}
-#endif
+      if (regexec(&__frame_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
+	throw Exception("YamlConfig: %s is not a valid frame ID", scalar.c_str());
       }
+#endif
     }
 
   }
