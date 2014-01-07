@@ -516,6 +516,8 @@ TopologicalMapGraph::assert_connected()
 void
 TopologicalMapGraph::calc_reachability()
 {
+  if (nodes_.empty())  return;
+
   assert_unique_nodes();
   assert_unique_edges();
   assert_valid_edges();
