@@ -134,6 +134,11 @@ TabletopObjectsThread::init()
   cfg_centroid_max_height_   = config->get_float(CFG_PREFIX"centroid_max_height");
   cfg_cylinder_fitting_      = config->get_bool(CFG_PREFIX"enable_cylinder_fitting");
   cfg_track_objects_         = config->get_bool(CFG_PREFIX"enable_object_tracking");
+  try {
+    cfg_verbose_cylinder_fitting_ = config->get_bool(CFG_PREFIX"verbose_cylinder_fitting");
+  } catch (const Exception &e) {
+    cfg_verbose_cylinder_fitting_ = false;
+  }
 
   if (pcl_manager->exists_pointcloud<PointType>(cfg_input_pointcloud_.c_str())) {
     finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pointcloud_.c_str());
@@ -1792,16 +1797,18 @@ Eigen::Vector4f TabletopObjectsThread::fit_cylinder(
     ColorPointType pnt_min;
     ColorPointType pnt_max;
     pcl::getMinMax3D(*cloud_cylinder_baserel, pnt_min, pnt_max);
-    logger->log_debug(name(),
-        "Cylinder hight according to cylinder inliers: %f",
-        pnt_max.z - pnt_min.z);
-    logger->log_debug(name(), "Cylinder hight according to bounding box: %f",
-        obj_dim[2]);
-    logger->log_debug(name(),
-        "Cylinder radius according to cylinder fitting: %f",
-        (*coefficients_cylinder).values[6]);
-    logger->log_debug(name(), "Cylinder radius according to bounding box y: %f",
-        obj_dim[1] / 2);
+    if (cfg_verbose_cylinder_fitting_) {
+      logger->log_debug(name(),
+          "Cylinder height according to cylinder inliers: %f",
+          pnt_max.z - pnt_min.z);
+      logger->log_debug(name(), "Cylinder height according to bounding box: %f",
+          obj_dim[2]);
+      logger->log_debug(name(),
+          "Cylinder radius according to cylinder fitting: %f",
+          (*coefficients_cylinder).values[6]);
+      logger->log_debug(name(),
+          "Cylinder radius according to bounding box y: %f", obj_dim[1] / 2);
+    }
     //Cylinder radius:
     //cylinder_params_[centroid_i][0] = (*coefficients_cylinder).values[6];
     cylinder_params_[centroid_i][0] = obj_dim[1] / 2;
@@ -1817,40 +1824,51 @@ Eigen::Vector4f TabletopObjectsThread::fit_cylinder(
     new_centroid[2] = pnt_min.z + 0.5 * (pnt_max.z - pnt_min.z);
   }
 
-  logger->log_debug(name(), "");
   signed int detected_obj_id = -1;
   double best_confidence = 0.0;
-  logger->log_debug(name(), "Shape similarity = %f",
-      obj_shape_confidence_[centroid_i]);
+  if (cfg_verbose_cylinder_fitting_) {
+    logger->log_debug(name(), "Shape similarity = %f",
+        obj_shape_confidence_[centroid_i]);
+  }
   for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
-    logger->log_debug(name(), "** Similarity to known cup %i:", os);
-    logger->log_debug(name(), "Size similarity  = %f",
-        obj_likelihoods_[centroid_i][os]);
-    obj_likelihoods_[centroid_i][os] = (0.6 * obj_likelihoods_[centroid_i][os])
-        + (0.4 * obj_shape_confidence_[centroid_i]);
-    logger->log_debug(name(), "Overall similarity = %f",
-        obj_likelihoods_[centroid_i][os]);
+    if (cfg_verbose_cylinder_fitting_) {
+      logger->log_debug(name(), "** Similarity to known cup %i:", os);
+      logger->log_debug(name(), "Size similarity  = %f",
+          obj_likelihoods_[centroid_i][os]);
+      obj_likelihoods_[centroid_i][os] =
+        (0.6 * obj_likelihoods_[centroid_i][os])
+            + (0.4 * obj_shape_confidence_[centroid_i]);
+      logger->log_debug(name(), "Overall similarity = %f",
+          obj_likelihoods_[centroid_i][os]);
+    }
     if (obj_likelihoods_[centroid_i][os] > best_confidence) {
       best_confidence = obj_likelihoods_[centroid_i][os];
       detected_obj_id = os;
     }
   }
-  logger->log_debug(name(),
-      "********************Object Result********************");
+  if (cfg_verbose_cylinder_fitting_) {
+    logger->log_debug(name(),
+        "********************Object Result********************");
+  }
   if (best_confidence > 0.6) {
     best_obj_guess_[centroid_i] = detected_obj_id;
 
-    logger->log_debug(name(),
-        "MATCH FOUND!! -------------------------> Cup number %i",
-        detected_obj_id);
+    if (cfg_verbose_cylinder_fitting_) {
+      logger->log_debug(name(),
+          "MATCH FOUND!! -------------------------> Cup number %i",
+          detected_obj_id);
+    }
   }
   else {
     best_obj_guess_[centroid_i] = -1;
-    logger->log_debug(name(), "No match found.");
+    if (cfg_verbose_cylinder_fitting_) {
+      logger->log_debug(name(), "No match found.");
+    }
   }
-
-  logger->log_debug(name(),
-      "*****************************************************");
+  if (cfg_verbose_cylinder_fitting_) {
+    logger->log_debug(name(),
+        "*****************************************************");
+  }
 
   return new_centroid;
 }

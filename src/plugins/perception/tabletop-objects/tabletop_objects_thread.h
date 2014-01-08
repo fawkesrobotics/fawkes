@@ -218,6 +218,7 @@ class TabletopObjectsThread
   float cfg_centroid_max_height_;
   bool cfg_cylinder_fitting_;
   bool cfg_track_objects_;
+  bool cfg_verbose_cylinder_fitting_;
 
   fawkes::RefPtr<Cloud> ftable_model_;
   CloudPtr table_model_;

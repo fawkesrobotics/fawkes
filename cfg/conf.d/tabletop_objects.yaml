@@ -112,4 +112,6 @@ perception/tabletop-objects:
 
   enable_cylinder_fitting: true
 
+  verbose_cylinder_fitting: false
+
   enable_object_tracking: true
