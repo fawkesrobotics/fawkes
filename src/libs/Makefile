@@ -64,7 +64,7 @@ fvstereo: fvcams
 ifneq ($(CLASSIFIERS_DEPS),)
 fvclassifiers: $(CLASSIFIERS_DEPS)
 endif
-protobuf_clips: protobuf_comm
+protobuf_clips: core protobuf_comm
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
