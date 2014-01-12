@@ -161,6 +161,11 @@ operator >> (const YAML::Node& n, TopologicalMapEdge &edge) {
 TopologicalMapGraph *
 load_yaml_navgraph(std::string filename)
 {
+  //try to fix use of relative paths
+  if (filename[0] != '/') {
+    filename = std::string(CONFDIR) + "/" + filename;
+  }
+
   std::ifstream fin(filename.c_str());
   YAML::Parser parser(fin);
 
