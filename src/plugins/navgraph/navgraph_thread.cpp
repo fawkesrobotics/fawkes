@@ -502,13 +502,13 @@ NavGraphThread::node_reached()
     if (cur_target.has_property("orientation")) {
       float ori_tolerance = cfg_orientation_tolerance_;
       //cur_target.property_as_float("orientation_tolerance");
-      float ori_diff =
-	fabs( normalize_rad(tf::get_yaw(pose.getRotation())) -
-	      normalize_rad(cur_target.property_as_float("orientation")));
+      float ori_diff  =
+	fabs( angle_distance( normalize_rad(tf::get_yaw(pose.getRotation())),
+			      normalize_rad(cur_target.property_as_float("orientation"))));
       
       if (tolerance == 0.)  tolerance = default_tolerance;
       
-      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose.getRotation() ), ori_diff);
+      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
       return (dist <= tolerance) && (ori_diff <= ori_tolerance);
     }
   }
