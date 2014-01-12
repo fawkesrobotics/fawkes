@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="JointInterface" author="Till Hofmann" year="2013">
+  <data>
+    <comment>
+      Storage for a single joint state.
+    </comment>
+    <field type="float" name="position">
+      The joint's position in rad.
+    </field>
+    <field type="float" name="velocity">
+      The joint's velocity in rad/s.
+    </field>
+  </data>
+</interface>
