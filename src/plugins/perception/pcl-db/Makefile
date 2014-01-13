@@ -38,18 +38,29 @@ LIBS_pcl_db_merge = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		PclDatabaseMergeInterface
 OBJS_pcl_db_merge = pcl_db_merge_plugin.o pcl_db_merge_thread.o mongodb_tf_transformer.o
 
-OBJS_all    = $(OBJS_pcl_db_merge)
+REQUIRED_PCL_LIBS_MERGE = sample_consensus segmentation filters surface registration
 
-REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface registration
+
+LIBS_pcl_db_retrieve = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
+		   fawkesutils fawkeslogging fawkesmongodbaspect fawkestf \
+		   PclDatabaseRetrieveInterface
+OBJS_pcl_db_retrieve = pcl_db_retrieve_plugin.o pcl_db_retrieve_thread.o \
+			mongodb_tf_transformer.o
+
+OBJS_all    = $(OBJS_pcl_db_merge) $(OBJS_pcl_db_retrieve)
+
 
 ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
-  ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS)),1)
-    CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB) \
-	      $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS))
-    LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB) \
-	       $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
+  CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB)
+  LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
 
-    PLUGINS_all = $(PLUGINDIR)/pcl-db-merge.so
+  PLUGINS_all = $(PLUGINDIR)/pcl-db-retrieve.so
+
+  ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS_MERGE)),1)
+    CFLAGS += $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS_MERGE))
+    LDFLAGS_pcl_db_merge +=  $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS_MERGE))
+
+    PLUGINS_all += $(PLUGINDIR)/pcl-db-merge.so
   else
     WARN_TARGETS += warning_pcl_components
   endif
@@ -73,11 +84,11 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_mongodb warning_pcl warning_pcl_components warning_tf
 warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (mongodb[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL plugins$(TNORMAL) (mongodb[-devel] not installed)"
 warning_pcl:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (pcl[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL plugins$(TNORMAL) (pcl[-devel] not installed)"
 warning_pcl_components:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (missing PCL components: $(call pcl-missing-libs,$(REQUIRED_PCL_LIBS)))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (missing PCL components: $(call pcl-missing-libs,$(REQUIRED_PCL_LIBS_MERGE)))"
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (TF framework not available)"
 endif

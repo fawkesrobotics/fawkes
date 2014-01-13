@@ -53,7 +53,7 @@ PointCloudDBMergeThread::init()
   merge_if_ = NULL;
   msg_waker_ = NULL;
 
-  cfg_output_id_     = config->get_string(CFG_PREFIX"output-pcl-id");
+  cfg_output_id_     = config->get_string(CFG_PREFIX_MERGE"output-pcl-id");
 
   foutput_ = new pcl::PointCloud<pcl::PointXYZRGB>();
   //foutput_->header.frame_id = finput_->header.frame_id;
@@ -64,12 +64,12 @@ PointCloudDBMergeThread::init()
   
   pl_xyz_ =
     new PointCloudDBMergePipeline<pcl::PointXYZ>(mongodb_client,
-						 config, logger,
+						 config, logger, tf_listener,
 						 output_);
 
   pl_xyzrgb_ =
     new PointCloudDBMergePipeline<pcl::PointXYZRGB>(mongodb_client,
-						    config, logger,
+						    config, logger, tf_listener,
 						    output_);
 
   try {

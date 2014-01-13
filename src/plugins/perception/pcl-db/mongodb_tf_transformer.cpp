@@ -40,11 +40,17 @@ namespace fawkes {
 /** Constructor.
  * @param mongodb_client MongoDB database client
  * @param database_name name of database to restore transforms from
+ * @param ensure_index if true ensures that the required index on timestamps exists
  */
 MongoDBTransformer::MongoDBTransformer(mongo::DBClientBase *mongodb_client,
-				       std::string database_name)
+				       std::string database_name, bool ensure_index)
   : mongodb_client_(mongodb_client), database_(database_name)
 {
+  if (ensure_index) {
+    mongodb_client_->ensureIndex(database_ + ".tf", mongo::fromjson("{timestamp:1}"));
+    mongodb_client_->ensureIndex(database_ + ".TransformInterface",
+				 mongo::fromjson("{timestamp:1}"));
+  }
 }
 
 

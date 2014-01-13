@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  pcl_db_merge_thread.h - Restore and merge point clouds from MongoDB
+ *  pcl_db_retrieve_thread.h - Restore and retrieve point clouds from MongoDB
  *
- *  Created: Wed Nov 28 10:53:14 2012 (Freiburg)
+ *  Created: Thu Aug 22 12:04:15 2013
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -19,10 +19,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_PCL_DB_MERGE_PCL_DB_MERGE_THREAD_H_
-#define __PLUGINS_PERCEPTION_PCL_DB_MERGE_PCL_DB_MERGE_THREAD_H_
+#ifndef __PLUGINS_PERCEPTION_PCL_DB_RETRIEVE_PCL_DB_RETRIEVE_THREAD_H_
+#define __PLUGINS_PERCEPTION_PCL_DB_RETRIEVE_PCL_DB_RETRIEVE_THREAD_H_
 
-#include "pcl_db_merge_pipeline.h"
+#include "pcl_db_retrieve_pipeline.h"
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -30,32 +30,31 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/pointcloud.h>
+#include <aspect/tf.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 
 namespace fawkes {
-  class PclDatabaseMergeInterface;
+  class PclDatabaseRetrieveInterface;
   class BlackBoardOnMessageWaker;
-#ifdef USE_TIMETRACKER
-  class TimeTracker;
-#endif
 }
 
 
-class PointCloudDBMergeThread
+class PointCloudDBRetrieveThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::MongoDBAspect,
+  public fawkes::TransformAspect,
   public fawkes::PointCloudAspect
 {
  public:
-  PointCloudDBMergeThread();
-  virtual ~PointCloudDBMergeThread();
+  PointCloudDBRetrieveThread();
+  virtual ~PointCloudDBRetrieveThread();
 
   virtual void init();
   virtual void loop();
@@ -66,25 +65,20 @@ class PointCloudDBMergeThread
  protected: virtual void run() { Thread::run(); }
 
  private: // members
-  fawkes::PclDatabaseMergeInterface *merge_if_;
-  fawkes::BlackBoardOnMessageWaker  *msg_waker_;
+  fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
+  fawkes::BlackBoardOnMessageWaker     *msg_waker_;
 
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foutput_;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_;
 
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foriginal_;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr original_;
+
   std::string cfg_output_id_;
+  std::string cfg_original_id_;
 
-  PointCloudDBMergePipeline<pcl::PointXYZ>     *pl_xyz_;
-  PointCloudDBMergePipeline<pcl::PointXYZRGB>  *pl_xyzrgb_;
-
-#ifdef USE_TIMETRACKER
-  fawkes::TimeTracker  *tt_;
-  unsigned int tt_loopcount_;
-  unsigned int ttc_full_loop_;
-  unsigned int ttc_retrieval_;
-  unsigned int ttc_transform_;
-  unsigned int ttc_merge_;
-#endif
+  PointCloudDBRetrievePipeline<pcl::PointXYZ>     *pl_xyz_;
+  PointCloudDBRetrievePipeline<pcl::PointXYZRGB>  *pl_xyzrgb_;
 };
 
 #endif

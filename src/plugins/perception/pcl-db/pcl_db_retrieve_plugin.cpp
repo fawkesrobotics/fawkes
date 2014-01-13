@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  pcl_db_merge_plugin_roscomm.cpp - ROS communication for pcl-db-merge
+ *  pcl_db_retrieve_plugin.cpp - Restore and retrieve PCLs from MongoDB
  *
- *  Created: Thu Dec 06 13:51:31 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Aug 22 12:04:29 2013
+ *  Copyright  2012-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -22,25 +22,25 @@
 
 #include <core/plugin.h>
 
-#include "pcl_db_merge_roscomm_thread.h"
+#include "pcl_db_retrieve_thread.h"
 
 using namespace fawkes;
 
 /** Plugin to segment a tabletop via PCL.
  * @author Tim Niemueller
  */
-class PointCloudDBMergeROSCommPlugin : public fawkes::Plugin
+class PointCloudDBRetrievePlugin : public fawkes::Plugin
 {
  public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-  PointCloudDBMergeROSCommPlugin(Configuration *config)
+  PointCloudDBRetrievePlugin(Configuration *config)
     : Plugin(config)
   {
-    thread_list.push_back(new PointCloudDBMergeROSCommThread());
+    thread_list.push_back(new PointCloudDBRetrieveThread());
   }
 };
 
-PLUGIN_DESCRIPTION("ROS communication for pcl-db-merge")
-EXPORT_PLUGIN(PointCloudDBMergeROSCommPlugin)
+PLUGIN_DESCRIPTION("Retrieve and transform point cloud from MongoDB")
+EXPORT_PLUGIN(PointCloudDBRetrievePlugin)
