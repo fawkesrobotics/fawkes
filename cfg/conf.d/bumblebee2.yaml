@@ -1,0 +1,87 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/bumblebee2
+---
+bumblebee2:
+  # Can be either triclops or opencv
+  # Note that current triclops versions crash on modern Linux systems
+  # due to an incompatible Boost version
+  stereo-matcher: opencv
+
+  # Coordinate frame ID of the basis of the BB2, i.e. the center point
+  # at the lower camera bound (the screw hole)
+  base-frame: /bumblebee2/base
+
+  # Prefix to prepend to coordinate frame IDs the two cameras. The plugin will
+  # append left and right respectively and publish them
+  # at the lower camera bound (the screw hole)
+  frames-prefix: /bumblebee2/
+
+  # Interval in seconds in which to publish the transforms
+  frames-interval: 1.0
+
+  # OpenCV stereo correspondence by block matching parameters
+  opencv-stereo:
+    # Which algorithm to use
+    # bm: fast Sum-of-Absolute-Differences block matching
+    # sgbm: semi-global block matching
+    algorithm: bm
+
+    # *** pre-filtering (normalization of input images)
+    # Filter type, can be xsobel or normalized_response, only for bm
+    pre-filter-type: normalized_response
+
+    # averaging window size: 5x5..21x21, only for bm
+    pre-filter-size: 15
+
+    # the output of pre-filtering is clipped by [- pre-filter-cap,pre-filter-cap]
+    pre-filter-cap: 15
+
+    # *** correspondence using Sum of Absolute Difference (SAD)
+    # 5x5..21x21
+    sad-window-size: 15
+
+    # minimum disparity (can be negative)
+    min-disparity: 32
+
+    # maximum disparity - minimum disparity (> 0)
+    num-disparities: 128
+
+    # *** post-filtering
+    # the disparity is only computed for pixels
+    # with textured enough neighborhood, only for bm
+    texture-threshold: 20
+
+    # accept the computed disparity d* only if
+    # SAD(d) >= SAD(d*)*(1 + uniquenessRatio/100.)
+    # for any d != d*+/-1 within the search range.
+    uniqueness-ratio: 30
+
+    # disparity variation window
+    speckle-window-size: 32
+    
+    # acceptable range of variation in window
+    speckle-range: 32
+
+    # if enabled, the results may be more accurate,
+    # at the expense of slower processing, only for bm
+    try-smaller-windows: false
+
+    # P1, P2: Parameters that
+    # control disparity smoothness for SGBM. The larger the values,
+    # the smoother the disparity. P1 is the penalty on the disparity
+    # change by plus or minus 1 between neighbor pixels. P2 is the
+    # penalty on the disparity change by more than 1 between neighbor
+    # pixels. The algorithm requires P2 > P1
+    # If set to auto will use (cn is number of channels in input images)
+    # P1 =  8 * cn * SADWindowSize * SADWindowSize
+    # P2 = 32 * cn * SADWindowSize * SADWindowSize;
+    sgbm-p1: auto
+    sgbm-p2: auto
+
+    # Maximum allowed difference (in integer pixel units) in the
+    # left-right disparity check. Set it to non-positive value to
+    # disable the check, only sgbm
+    sgbm-disp12-max-diff: 1
+

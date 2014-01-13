@@ -104,14 +104,14 @@ FirewireCamera::~FirewireCamera()
 }
 
 
+/** Open the desired device.
+ * This only opens the device but does not do any initialization.
+ */
 void
-FirewireCamera::open()
+FirewireCamera::open_device()
 {
-  if (_opened) return;
-
   _dc1394 = dc1394_new();
   dc1394camera_list_t *list;
-  dc1394error_t        err;
 
   if ( dc1394_camera_enumerate(_dc1394, &list) != DC1394_SUCCESS ) {
     throw Exception("Could not enumerate cameras");
@@ -142,68 +142,81 @@ FirewireCamera::open()
 	throw Exception("Could not find camera with model %s", _model);
       }
     }
-
-    if ( iso_mode_enabled() ) {
-      dc1394_video_set_transmission(_camera, DC1394_OFF);
-    }
-    // These methods would cleanup the mess left behind by other processes,
-    // but as of now (libdc1394 2.0.0 rc9) this is not supported for the Juju stack
-    dc1394_iso_release_bandwidth(_camera, INT_MAX);
-    for (int channel = 0; channel < 64; ++channel) {
-      dc1394_iso_release_channel(_camera, channel);
-    }
-    // This is rude, but for now needed (Juju)...
-    //dc1394_reset_bus(_camera);
-
-    if (_camera->bmode_capable > 0) {
-      dc1394_video_set_operation_mode(_camera, DC1394_OPERATION_MODE_1394B);
-    }
-    if ( //((err = dc1394_cleanup_iso_channels_and_bandwidth(_camera)) != DC1394_SUCCESS) ||
-         ((err = dc1394_video_set_iso_speed(_camera, _speed)) != DC1394_SUCCESS) ||
-         ((err = dc1394_video_set_mode(_camera, _mode)) != DC1394_SUCCESS) ||
-         ((err = dc1394_video_set_framerate(_camera, _framerate)) != DC1394_SUCCESS) ) {
-      throw Exception("Setting up the camera failed: %s", dc1394_error_get_string(err));
-    }
-
-    if (_format7_mode_enabled) {
-      if (_format7_bpp == 0) {
-	uint32_t rps;
-	dc1394_format7_get_recommended_packet_size(_camera, _mode, &rps);
-	_format7_bpp = rps;
-      }
-
-      if ( ((err = dc1394_format7_set_image_size(_camera, _mode, _format7_width, _format7_height)) != DC1394_SUCCESS) ||
-           ((err = dc1394_format7_set_image_position(_camera, _mode, _format7_startx, _format7_starty)) != DC1394_SUCCESS) ||
-           ((err = dc1394_format7_set_color_coding(_camera, _mode, _format7_coding)) != DC1394_SUCCESS) ||
-           ((err = dc1394_format7_set_packet_size(_camera, _mode, _format7_bpp)) != DC1394_SUCCESS) ) {
-        throw Exception("Could not setup Format7 parameters: %s", dc1394_error_get_string(err));
-      }
-    }
-
-    set_auto_shutter(_auto_shutter);
-    if ( !_auto_shutter && _do_set_shutter ) {
-      set_shutter(_shutter);
-    }
-
-    set_auto_focus(_auto_focus);
-    if ( ! _auto_focus && _do_set_focus ) {
-      set_focus(_focus);
-    }
-
-    set_auto_white_balance(_auto_white_balance);
-    if ( ! _auto_white_balance &&
-	 (_white_balance_ub != 0xFFFFFFFF) &&
-	 (_white_balance_vr != 0xFFFFFFFF) &&
-	 _do_set_white_balance ) {
-      set_white_balance(_white_balance_ub, _white_balance_vr);
-    }
-    
-    if ( !_auto_gain ) {
-      set_gain(_gain);
-    }
-
   } else {
     throw Exception("No cameras connected");
+  }
+
+  _device_opened = true;
+}
+
+void
+FirewireCamera::open()
+{
+  if (_opened) return;
+
+  if (! _device_opened) {
+    open_device();
+  }
+
+  dc1394error_t        err;
+
+  if ( iso_mode_enabled() ) {
+    dc1394_video_set_transmission(_camera, DC1394_OFF);
+  }
+  // These methods would cleanup the mess left behind by other processes,
+  // but as of now (libdc1394 2.0.0 rc9) this is not supported for the Juju stack
+  dc1394_iso_release_bandwidth(_camera, INT_MAX);
+  for (int channel = 0; channel < 64; ++channel) {
+    dc1394_iso_release_channel(_camera, channel);
+  }
+  // This is rude, but for now needed (Juju)...
+  //dc1394_reset_bus(_camera);
+
+  if (_camera->bmode_capable > 0) {
+    dc1394_video_set_operation_mode(_camera, DC1394_OPERATION_MODE_1394B);
+  }
+  if ( //((err = dc1394_cleanup_iso_channels_and_bandwidth(_camera)) != DC1394_SUCCESS) ||
+      ((err = dc1394_video_set_iso_speed(_camera, _speed)) != DC1394_SUCCESS) ||
+      ((err = dc1394_video_set_mode(_camera, _mode)) != DC1394_SUCCESS) ||
+      ((err = dc1394_video_set_framerate(_camera, _framerate)) != DC1394_SUCCESS) ) {
+    throw Exception("Setting up the camera failed: %s", dc1394_error_get_string(err));
+  }
+
+  if (_format7_mode_enabled) {
+    if (_format7_bpp == 0) {
+      uint32_t rps;
+      dc1394_format7_get_recommended_packet_size(_camera, _mode, &rps);
+      _format7_bpp = rps;
+    }
+
+    if ( ((err = dc1394_format7_set_image_size(_camera, _mode, _format7_width, _format7_height)) != DC1394_SUCCESS) ||
+	 ((err = dc1394_format7_set_image_position(_camera, _mode, _format7_startx, _format7_starty)) != DC1394_SUCCESS) ||
+	 ((err = dc1394_format7_set_color_coding(_camera, _mode, _format7_coding)) != DC1394_SUCCESS) ||
+	 ((err = dc1394_format7_set_packet_size(_camera, _mode, _format7_bpp)) != DC1394_SUCCESS) ) {
+      throw Exception("Could not setup Format7 parameters: %s", dc1394_error_get_string(err));
+    }
+  }
+
+  set_auto_shutter(_auto_shutter);
+  if ( !_auto_shutter && _do_set_shutter ) {
+    set_shutter(_shutter);
+  }
+
+  set_auto_focus(_auto_focus);
+  if ( ! _auto_focus && _do_set_focus ) {
+    set_focus(_focus);
+  }
+
+  set_auto_white_balance(_auto_white_balance);
+  if ( ! _auto_white_balance &&
+       (_white_balance_ub != 0xFFFFFFFF) &&
+       (_white_balance_vr != 0xFFFFFFFF) &&
+       _do_set_white_balance ) {
+    set_white_balance(_white_balance_ub, _white_balance_vr);
+  }
+    
+  if ( !_auto_gain ) {
+    set_gain(_gain);
   }
 
   _opened = true;
@@ -241,8 +254,10 @@ FirewireCamera::start()
 void
 FirewireCamera::stop()
 {
-  dc1394_video_set_transmission(_camera, DC1394_OFF);
-  dc1394_capture_stop(_camera);
+  if (_camera) {
+    dc1394_video_set_transmission(_camera, DC1394_OFF);
+    dc1394_capture_stop(_camera);
+  }
   _started = false;
 }
 
@@ -374,8 +389,8 @@ FirewireCamera::close()
 {
   if ( _started ) stop();
   if ( _opened ) {
-    dc1394_camera_free( _camera );
-    dc1394_free(_dc1394);
+    if (_camera)  dc1394_camera_free( _camera );
+    if (_dc1394)  dc1394_free(_dc1394);
     _camera = NULL;
     _dc1394 = NULL;
     _opened = false;

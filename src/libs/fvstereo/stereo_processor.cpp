@@ -95,14 +95,14 @@ namespace firevision {
  * Get disparity buffer size.
  * @return size in bytes of the disparity image buffer
  *
- * @fn virtual unsigned char *  StereoProcessor::yuv_buffer() = 0
+ * @fn virtual unsigned char *  StereoProcessor::yuv_buffer_right() = 0
  * Get YUV-formatted buffer of reference camera.
  * This will return the YUV buffer of the reference image. This is only available
  * after calling calculate_yuv().
  * @return YUV buffer of the reference image
  * 
- * @fn virtual unsigned char *  StereoProcessor::auxiliary_yuv_buffer() = 0
- * Get YUV-formatted buffer of auxiliary camera.
+ * @fn virtual unsigned char *  StereoProcessor::yuv_buffer_left() = 0
+ * Get YUV-formatted buffer of left camera.
  * This will return the YUV buffer of the auxiliary image. This is only available
  * after calling calculate_yuv().
  * @return YUV buffer of the auxiliary image

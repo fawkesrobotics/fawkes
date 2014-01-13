@@ -56,6 +56,7 @@ class FirewireCamera
 
   virtual ~FirewireCamera();
 
+  virtual void open_device();
   virtual void open();
   virtual void start();
   virtual void stop();
@@ -109,9 +110,21 @@ class FirewireCamera
 
   static  void           print_available_fwcams();
 
+  /** Get underlying libdc1394 C handle.
+   * @return libdc1394 handle */
+  dc1394_t * cobj() const
+  { return _dc1394; }
+
+  /** Get underlying libdc1394 camera C handle.
+   * @return libdc1394 camera handle */
+  dc1394camera_t * camera_cobj() const
+  { return _camera; }
+
  protected:
   /** Number of DMA buffers. */
   int  _num_buffers;
+  /** true if device has been opened, false otherwise */
+  bool _device_opened;
   /** true if camera has been opened, false otherwise */
   bool _opened;
   /** true if camera has been started, false otherwise */

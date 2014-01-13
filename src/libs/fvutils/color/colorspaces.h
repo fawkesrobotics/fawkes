@@ -72,7 +72,9 @@ typedef enum {
                                  * (x,y,z, C) tuples, values as float in meters. C is a float
                                  * representing the color as RGB data packed as (r,g,b,I) with
                                  * r, g, b being one unsigned byte each and I is ignored. */
-  COLORSPACE_N          = 26	/**< number of colorspaces */
+
+  RGB_PLANAR            = 26,	/** RGB with three successive planes of R, G, and B each */
+  COLORSPACE_N          = 27	/**< number of colorspaces */
 } colorspace_t;
 
 

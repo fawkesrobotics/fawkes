@@ -49,6 +49,50 @@ rgb_to_rgb_with_alpha_plainc(const unsigned char *rgb, unsigned char *rgb_alpha,
 }
 
 
+/** Convert RGB to planar RGB.
+ * This is plain C code without special optimizations.
+ * @param rgb RGB source buffer
+ * @param rgb_planar planar RGB buffer
+ * @param width width in pixels
+ * @param height height in pixels
+ */
+void
+rgb_to_rgb_planar_plainc(const unsigned char *rgb, unsigned char *rgb_planar,
+			 const unsigned int width, const unsigned int height)
+{
+  register unsigned char *r = rgb_planar;
+  register unsigned char *g = rgb_planar + (width * height);
+  register unsigned char *b = rgb_planar + (width * height * 2);
+  for ( unsigned int i = 0; i < width * height; ++i) {
+    *r++ = *rgb++;
+    *g++ = *rgb++;
+    *b++ = *rgb++;
+  }
+}
+
+
+/** Convert RGB to planar RGB.
+ * This is plain C code without special optimizations.
+ * @param rgb RGB source buffer
+ * @param rgb_planar planar RGB buffer
+ * @param width width in pixels
+ * @param height height in pixels
+ */
+void
+rgb_planar_to_rgb_plainc(const unsigned char *rgb_planar, unsigned char *rgb,
+			 const unsigned int width, const unsigned int height)
+{
+  register const unsigned char *r = rgb_planar;
+  register const unsigned char *g = rgb_planar + (width * height);
+  register const unsigned char *b = rgb_planar + (width * height * 2);
+  for ( unsigned int i = 0; i < width * height; ++i) {
+    *rgb++ = *r++;
+    *rgb++ = *g++;
+    *rgb++ = *b++;
+  }
+}
+
+
 /** Convert RGB to BGR with alpha values.
  * This is plain C code without special optimizations.
  * @param rgb RGB source buffer
@@ -129,6 +173,24 @@ void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
 
 
     i += 1;
+  }
+}
+
+/** Convert one channel gray images  to RGB.
+ * This is plain C code without special optimizations.
+ * @param mono8 mono source buffer
+ * @param rgb RGB destination buffer
+ * @param width width in pixels
+ * @param height height in pixels
+ */
+void
+gray8_to_rgb_plainc(const unsigned char *mono8, unsigned char *rgb,
+		    unsigned int width, unsigned int height)
+{
+  for ( unsigned int i = 0; i < width * height; ++i) {
+    *rgb++ = *mono8;
+    *rgb++ = *mono8;
+    *rgb++ = *mono8++;
   }
 }
 

@@ -100,11 +100,12 @@ ifneq ($(HAVE_FIREWIRE_CAM),1)
     WARN_TARGETS += warning_firewire
   endif
 endif
-ifneq ($(HAVE_V4L1_CAM),1)
-  ifneq ($(HAVE_V4L1_FAIL_REASON),)
-    WARN_TARGETS += warning_v4l1
-  endif
-endif
+# We do no longer warn for V4L1 cam, it's deprecated for some time
+#ifneq ($(HAVE_V4L1_CAM),1)
+#  ifneq ($(HAVE_V4L1_FAIL_REASON),)
+#    WARN_TARGETS += warning_v4l1
+#  endif
+#endif
 ifneq ($(HAVE_V4L2_CAM),1)
   ifneq ($(HAVE_V4L2_FAIL_REASON),)
     WARN_TARGETS += warning_v4l2

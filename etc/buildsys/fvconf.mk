@@ -28,8 +28,9 @@ FVCONFDIR           = $(EXEC_CONFDIR)/firevision
 VISION_INCDIRS      =
 VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 
-# PTGrey Triclops SDK used for Bumblebee2 stereo processing
-TRICLOPS_SDK=$(SYSROOT)/opt/Triclops3.2.0.8-FC3
+# Point Grey Triclops SDK for bumblebee2
+# By default search for pkg-config parameters
+# TRICLOPS_SDK_DIR=...
 
 ifneq ($(wildcard $(SYSROOT)/usr/include/lvsds),)
   HAVE_LEUTRON_CAM    = 1
@@ -120,24 +121,27 @@ ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
 endif
 
 # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
-ifeq ($(ARCH),x86_64)
-  TRICLOPS_SDK_ERR="Triclops SDK not available on 64-bit systems"
+ifneq ($(HAVE_BUMBLEBEE2_CAM),1)
+  TRICLOPS_SDK_ERR="Bumblebee2 camera not available"
 else
-  ifneq ($(HAVE_BUMBLEBEE2_CAM),1)
-    TRICLOPS_SDK_ERR="Bumblebee2 camera not available"
-  else
-    ifneq ($(wildcard $(realpath $(TRICLOPS_SDK)/include/triclops.h)),)
-      ifneq ($(wildcard $(realpath $(TRICLOPS_SDK)/lib/libtriclops.so)),)
+  ifneq ($(PKGCONFIG),)
+    HAVE_TRICLOPS = $(if $(shell $(PKGCONFIG) --exists 'triclops'; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_TRICLOPS),1)
+      CFLAGS_TRICLOPS  = -DHAVE_TRICLOPS $(shell $(PKGCONFIG) --cflags 'triclops')
+      LDFLAGS_TRICLOPS = $(shell $(PKGCONFIG) --libs 'triclops')
+    endif
+  endif
+  ifneq ($(HAVE_TRICLOPS),1)
+    ifneq ($(wildcard $(realpath $(TRICLOPS_SDK_DIR)/include/triclops.h)),)
+      ifneq ($(wildcard $(realpath $(TRICLOPS_SDK_DIR)/lib/libtriclops.so)),)
         HAVE_TRICLOPS_SDK = 1
-        TRICLOPS_SDK_INCDIRS += $(TRICLOPS_SDK)/include
-        TRICLOPS_SDK_LIBDIRS += $(TRICLOPS_SDK)/lib
-        TRICLOPS_SDK_LIBS    += triclops
-        VISION_CFLAGS += -DHAVE_TRICLOPS_SDK
+        CFLAGS_TRICLOPS = -DHAVE_TRICLOPS -I$(TRICLOPS_SDK)/include
+        LDFLAGS_TRICLOPS = -L$(TRICLOPS_SDK)/lib -ltriclops
       else
         TRICLOPS_SDK_ERR = "shared lib not created, use \"make triclops\" in fvstereo"
       endif
     else
-      TRICLOPS_SDK_ERR = "Triclops SDK not installed"
+      TRICLOPS_SDK_ERR = "Triclops library not found"
     endif
   endif
 endif
@@ -256,7 +260,7 @@ VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CT
 ifeq ($(MAKECMDGOALS),printconf)
 VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")\n)
 VISION_CTRL_PRINT    = $(foreach CTRL,$(CTRLS),$(CTRL): $(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),"yes","no")\n)
-VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS_SDK IPP OPENCV SHAPE_MODELS SIFT SURF SIFTPP,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
+VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS IPP OPENCV SHAPE_MODELS SIFT SURF SIFTPP,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
 printconf:
 	$(SILENT)echo "Cameras:"
 	$(SILENT)echo -e " $(VISION_CAM_PRINT)"

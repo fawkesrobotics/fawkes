@@ -231,6 +231,7 @@ convert_line_rgb_to_yuv422packed(const unsigned char *RGB, unsigned char *YUV,
   }
 }
 
+
 /* Convert an RGB buffer to a packed YUV422 buffer, see above for general notes about color space
  * conversion from RGB to YUV
  * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
@@ -259,6 +260,42 @@ rgb_to_yuv422packed_plainc(const unsigned char *RGB, unsigned char *YUV,
 
     RGB2YUV(r1->R, r1->G, r1->B, y1, u1, v1);
     RGB2YUV(r2->R, r2->G, r2->B, y2, u2, v2);
+
+    *p++ = (u1 + u2) / 2;
+    *p++ = y1;
+    *p++ = (v1 + v2) / 2;
+    *p++ = y2;
+
+    i += 2;
+  }
+}
+
+
+void
+rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar, unsigned char *YUV,
+				  unsigned int width, unsigned int height)
+{
+  register const unsigned char *r = rgb_planar;
+  register const unsigned char *g = rgb_planar + (width * height);
+  register const unsigned char *b = rgb_planar + (width * height * 2);
+
+  register unsigned int i = 0;
+  register int y1, y2, u1, u2, v1, v2;
+  register unsigned char *p;
+  register unsigned char r1, r2, g1, g2, b1, b2;
+
+  p = YUV;
+
+  while (i < (width * height)) {
+
+    r1 = *r++;
+    r2 = *r++;
+    g1 = *g++;
+    g2 = *g++;
+    b1 = *b++;
+    b2 = *b++;
+    RGB2YUV(r1, g1, b1, y1, u1, v1);
+    RGB2YUV(r2, g2, b2, y2, u2, v2);
 
     *p++ = (u1 + u2) / 2;
     *p++ = y1;

@@ -683,14 +683,14 @@ TriclopsStereoProcessor::disparity_buffer_size() const
 
 
 unsigned char *
-TriclopsStereoProcessor::yuv_buffer()
+TriclopsStereoProcessor::yuv_buffer_left()
 {
   return buffer_yuv_right;
 }
 
 
 unsigned char *
-TriclopsStereoProcessor::auxiliary_yuv_buffer()
+TriclopsStereoProcessor::yuv_buffer_right()
 {
   return buffer_yuv_left;
 }

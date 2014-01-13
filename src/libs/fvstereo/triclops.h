@@ -84,8 +84,8 @@ class TriclopsStereoProcessor : public StereoProcessor
   virtual void             calculate_yuv(bool both = false);
   virtual unsigned char *  disparity_buffer();
   virtual size_t           disparity_buffer_size() const;
-  virtual unsigned char *  yuv_buffer();
-  virtual unsigned char *  auxiliary_yuv_buffer();
+  virtual unsigned char *  yuv_buffer_right();
+  virtual unsigned char *  yuv_buffer_left();
 
   void    generate_rectification_lut(const char *lut_file);
   bool    verify_rectification_lut(const char *lut_file);

@@ -43,8 +43,10 @@ class Bumblebee2Camera : public FirewireCamera
   static const unsigned int RGB_IMAGE;
 
   Bumblebee2Camera(const CameraArgumentParser *cap);
+  Bumblebee2Camera();
   virtual ~Bumblebee2Camera();
 
+  virtual void open_device();
   virtual void open();
   virtual void close();
   virtual void capture();
@@ -70,6 +72,7 @@ class Bumblebee2Camera : public FirewireCamera
 			   bayer_pattern_t bayer_pattern);
 
  private:
+  void get_sensor_info();
   void get_triclops_context_from_camera();
   void get_bayer_tile();
   void deinterlace_green( unsigned char* src,  unsigned char* dest, 
@@ -79,10 +82,14 @@ class Bumblebee2Camera : public FirewireCamera
   /** Bayer pattern */
   dc1394color_filter_t __bayer_pattern;
 
+  bool _auto_acquire_sensor_info;
+
   unsigned int   __image_num;
   unsigned char *__buffer;
   unsigned char *__buffer_deinterlaced;
   unsigned char *__buffer_rgb;
+
+  bool          _supports_color;
 };
 
 } // end namespace firevision

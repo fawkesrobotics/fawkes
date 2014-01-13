@@ -24,13 +24,13 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-ifneq ($(HAVE_TRICLOPS_SDK),1)
+ifneq ($(HAVE_TRICLOPS),1)
   WARN_TARGETS   += warning_triclops
 endif
-ifeq ($(HAVE_TRICLOPS_SDK),1)
-  INCDIRS += $(TRICLOPS_SDK_INCDIRS)
-  LIBDIRS += $(TRICLOPS_SDK_LIBDIRS)
-  LIBS    += $(TRICLOPS_SDK_LIBS) m fvcams
+ifeq ($(HAVE_TRICLOPS),1)
+  CFLAGS  += $(CFLAGS_TRICLOPS)
+  LDFLAGS += $(LDFLAGS_TRICLOPS)
+  LIBS    += m fvcams
 else
   FILTER_OUT   += triclops.o
 endif

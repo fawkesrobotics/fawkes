@@ -106,6 +106,18 @@ void convert_line_rgb_to_yuv422planar(const unsigned char *RGB, unsigned char *Y
 void rgb_to_yuv422planar_plainc(const unsigned char *RGB, unsigned char *YUV,
 				unsigned int width, unsigned int height);
 
+/* Convert a planar RGB buffer to a packed YUV422 buffer.
+ * See above for general notes about color space
+ * conversion from RGB to YUV
+ * @param RGB unsigned char array that contains the color planes
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
+ */
+void rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar, unsigned char *YUV,
+				       unsigned int width, unsigned int height);
+
 /* Convert a line of a RGB buffer to a line in a packed YUV422 buffer, see above for general
  * notes about color space conversion from RGB to YUV
  * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel

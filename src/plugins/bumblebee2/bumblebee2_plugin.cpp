@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  bb2info.cpp - Print BB2 to stdout
+ *  bumblebee2_plugin.cpp - Acquire data from Bumblebee2 stereo camera
  *
- *  Created: Fri Nov 02 19:03:00 2007
- *  Copyright  2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Jul 17 13:14:37 2013
+ *  Copyright  2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -20,26 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <fvcams/bumblebee2.h>
-#include <fvutils/system/camargp.h>
+#include <core/plugin.h>
 
-using namespace std;
-using namespace firevision;
+#include "bumblebee2_thread.h"
 
-int
-main(int argc, char **argv)
+using namespace fawkes;
+
+/** Plugin to segment a tabletop via PCL.
+ * @author Tim Niemueller
+ */
+class Bumblebee2Plugin : public fawkes::Plugin
 {
+ public:
+  /** Constructor.
+   * @param config Fawkes configuration
+   */
+  Bumblebee2Plugin(Configuration *config)
+    : Plugin(config)
+  {
+    thread_list.push_back(new Bumblebee2Thread());
+  }
+};
 
-  CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
-
-  Bumblebee2Camera *bb2 = new Bumblebee2Camera(cap);
-  bb2->open();
-  bb2->print_info();
-  bb2->close();
-
-  delete bb2;
-  delete cap;
-
-  return 0;
-}
-
+PLUGIN_DESCRIPTION("Data acquisition from Bumblebee2 stereo camera")
+EXPORT_PLUGIN(Bumblebee2Plugin)

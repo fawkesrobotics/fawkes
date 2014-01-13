@@ -57,8 +57,17 @@ typedef struct {
 void rgb_to_rgb_with_alpha_plainc(const unsigned char *rgb, unsigned char *rgb_alpha,
 				  unsigned int width, unsigned int height);
 
+void rgb_to_rgb_planar_plainc(const unsigned char *rgb, unsigned char *rgb_planar,
+			      const unsigned int width, const unsigned int height);
+
+void rgb_planar_to_rgb_plainc(const unsigned char *rgb_planar, unsigned char *rgb,
+			      const unsigned int width, const unsigned int height);
+
 void rgb_to_bgr_with_alpha_plainc(const unsigned char *rgb, unsigned char *bgr_alpha,
 				  unsigned int width, unsigned int height);
+
+void gray8_to_rgb_plainc(const unsigned char *mono8, unsigned char *rgb,
+			 unsigned int width, unsigned int height);
 
 void bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
 		       unsigned int width, unsigned int height);

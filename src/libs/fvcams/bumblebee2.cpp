@@ -100,6 +100,8 @@ const unsigned int Bumblebee2Camera::RGB_IMAGE = 2;
 /** PTGrey proprietary register: Bayer tile mapping information */
 #define PGR_BAYER_TILE_MAPPING_REGISTER (0x1040)
 
+#define PGR_SENSOR_BOARD_INFO_REGISTER  (0x1f28)
+
 /** PTGrey proprietary: config data length */
 #define PGR_REG_CONFIG_LENGTH         	(0x1FFC) 
 
@@ -135,6 +137,9 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
 		   /* num buffers */ 8)
 {
   // Defaults
+
+  _supports_color = true;
+  _auto_acquire_sensor_info = false;
 
   _model = strdup(cap->cam_id().c_str());
   // num_buffers set in constructor call
@@ -172,6 +177,25 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
   __buffer_rgb = NULL;
 }
 
+/** Constructor.
+ * Initialize and use largest possible video mode suitable for stereo
+ * processing.
+ */
+Bumblebee2Camera::Bumblebee2Camera()
+  : FirewireCamera(DC1394_FRAMERATE_30,
+		   DC1394_VIDEO_MODE_FORMAT7_3,
+		   DC1394_ISO_SPEED_400,
+		   /* num buffers */ 8)
+{
+  _auto_acquire_sensor_info = true;
+
+  _model = strdup("Bumblebee2");
+  // num_buffers set in constructor call
+  _format7_coding = DC1394_COLOR_CODING_RAW16;
+  _format7_width  = 640;
+  _format7_height = 480;
+  _format7_startx = _format7_starty = 0;
+}
 
 /** Destructor. */
 Bumblebee2Camera::~Bumblebee2Camera()
@@ -227,6 +251,59 @@ Bumblebee2Camera::verify_guid(uint64_t ver_guid) const
 
 
 void
+Bumblebee2Camera::get_sensor_info()
+{
+  uint32_t value;
+  dc1394error_t err;
+
+  // This register is an advanced PGR register called SENSOR_BOARD_INFO
+  err = dc1394_get_control_register(_camera, PGR_SENSOR_BOARD_INFO_REGISTER, &value );
+  if ( err != DC1394_SUCCESS )
+  {
+    throw Exception("Failed to read sensor borad info register");
+  }
+
+  unsigned char ucSensorInfo = 0xf & value;
+
+  switch( ucSensorInfo )
+  {
+  default:
+    // unknown sensor!
+    throw Exception("Illegal sensor board info detected!");
+  case 0xA:	// color 640x480
+    _supports_color	= true;
+    _format7_height	= 480;
+    _format7_width	= 640;
+    break;
+  case 0xB:	// mono 640x480
+    _supports_color	= false;
+    _format7_height	= 480;
+    _format7_width	= 640;
+    break;
+  case 0xC:	// color 1024x768
+    _supports_color	= true;
+    _format7_height	= 768;
+    _format7_width	= 1024;
+    break;
+  case 0xD:	// mono 1024x768
+    _supports_color	= false;
+    _format7_height	= 768;
+    _format7_width	= 1024;
+    break;
+  case 0xE:	// color 1280x960
+    _supports_color	= true;
+    _format7_height	= 960;
+    _format7_width	= 1280;
+    break;
+  case 0xF:	// mono 1280x960
+    _supports_color	= false;
+    _format7_height	= 960;
+    _format7_width	= 1280;
+    break;
+  }
+}
+
+void
 Bumblebee2Camera::print_info()
 {
   FirewireCamera::print_info();
@@ -239,14 +316,47 @@ Bumblebee2Camera::print_info()
 #endif
 }
 
+
+void
+Bumblebee2Camera::open_device()
+{
+  _dc1394 = dc1394_new();
+  dc1394camera_list_t *list;
+
+  if ( dc1394_camera_enumerate(_dc1394, &list) != DC1394_SUCCESS ) {
+    throw Exception("Could not enumerate cameras");
+  }
+
+  if (list->num > 0) {
+    _camera = NULL;
+    for (unsigned int i = 0; i < list->num; ++i) {
+      dc1394camera_t *tmpcam = dc1394_camera_new(_dc1394, list->ids[i].guid);
+      if ( strncmp("Bumblebee2", tmpcam->model, strlen("Bumblebee2")) == 0) {
+	// found desired camera
+	_camera = tmpcam;
+	break;
+      } else {
+	dc1394_camera_free(tmpcam);
+      }
+    }
+    if ( _camera == NULL ) {
+      throw Exception("Could not find camera with model %s", _model);
+    }
+  } else {
+    throw Exception("No cameras connected");
+  }
+
+  _device_opened = true;
+}
+
 void
 Bumblebee2Camera::open()
 {
-  try {
-    FirewireCamera::open();
-  } catch (Exception &e) {
-    throw;
+  if (_auto_acquire_sensor_info) {
+    open_device();
+    get_sensor_info();
   }
+  FirewireCamera::open();
 
   if ( ! _opened ) {
     throw Exception("Bumblebee2Camera::open: FirewireCamera::open dit not suceed");
