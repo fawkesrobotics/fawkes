@@ -139,7 +139,11 @@ class PointCloudDBPipeline
   {
     const unsigned int num_clouds = times.size();
 
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+    std::vector<pcl::PCLPointField> pfields;
+#else
     std::vector<sensor_msgs::PointField> pfields;
+#endif
     pcl::for_each_type<typename pcl::traits::fieldList<PointType>::type>
       (pcl::detail::FieldAdder<PointType>(pfields));
 
@@ -158,7 +162,11 @@ class PointCloudDBPipeline
 	  std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
 
 	  for (unsigned int i = 0; i < pfields.size(); ++i) {
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+	    pcl::PCLPointField &pf = pfields[i];
+#else
 	    sensor_msgs::PointField &pf = pfields[i];
+#endif
 
 	    bool found = false;
 	    for (unsigned int j = 0; j < fields.size(); ++j) {

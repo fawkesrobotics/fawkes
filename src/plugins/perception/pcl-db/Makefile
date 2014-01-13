@@ -34,7 +34,7 @@ ifeq ($(PCL_USES_OPENMP),1)
 endif
 
 LIBS_pcl_db_merge = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf \
+		fawkesutils fawkeslogging fawkesmongodbaspect fawkestf fawkespcl_utils \
 		PclDatabaseMergeInterface
 OBJS_pcl_db_merge = pcl_db_merge_plugin.o pcl_db_merge_thread.o mongodb_tf_transformer.o
 
@@ -42,7 +42,7 @@ REQUIRED_PCL_LIBS_MERGE = sample_consensus segmentation filters surface registra
 
 
 LIBS_pcl_db_retrieve = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
-		   fawkesutils fawkeslogging fawkesmongodbaspect fawkestf \
+		   fawkesutils fawkeslogging fawkesmongodbaspect fawkestf fawkespcl_utils \
 		   PclDatabaseRetrieveInterface
 OBJS_pcl_db_retrieve = pcl_db_retrieve_plugin.o pcl_db_retrieve_thread.o \
 			mongodb_tf_transformer.o
