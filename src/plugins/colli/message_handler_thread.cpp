@@ -185,6 +185,13 @@ ColliMessageHandlerThread::loop()
       security_distance_ = msg->security_distance();
       if_navi_->set_security_distance(security_distance_);
 
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetDriveModeMessage>() ) {
+      NavigatorInterface::SetDriveModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetDriveModeMessage>();
+
+      logger->log_debug(name(), "setting drive_mode to %f", if_navi_->tostring_DriveMode(msg->drive_mode()));
+      drive_mode_ = msg->drive_mode();
+      if_navi_->set_drive_mode(drive_mode_);
+
     } else {
       logger->log_debug(name(), "Ignoring unhandled Navigator message");
     }
