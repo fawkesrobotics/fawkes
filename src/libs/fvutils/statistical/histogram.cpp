@@ -55,8 +55,8 @@ namespace firevision {
  * @param depth depth of the histogram
  * @param num_undos number of possible undos
  */
-Histogram::Histogram(unsigned int width, unsigned int height, 
-		     unsigned int depth, unsigned int num_undos) 
+Histogram::Histogram(unsigned int width, unsigned int height,
+         unsigned int depth, unsigned int num_undos)
 {
   if ( (width == 0) || (height == 0) || (depth == 0) ) {
     throw Exception("Width or height or depth is zero.");
@@ -75,7 +75,7 @@ Histogram::Histogram(unsigned int width, unsigned int height,
   }
 
   histogram_block = new HistogramBlock(FIREVISION_HISTOGRAM_TYPE_32, H_UNKNOWN,
-				       width, height, depth);
+               width, height, depth);
   histogram = (unsigned int*) histogram_block->data_ptr();
 
   histogram_size = width * height * depth * sizeof(unsigned int);
@@ -91,7 +91,7 @@ Histogram::Histogram(unsigned int width, unsigned int height,
 }
 
 
-/** Constructor. 
+/** Constructor.
  * @param block construct a histogram from the given histogram block
  */
 Histogram::Histogram(HistogramBlock* block)
@@ -105,7 +105,7 @@ Histogram::Histogram(HistogramBlock* block)
   } else {
     dimension = 3;
   }
-  
+
   undo_num = 1;
   undo_current = 0;
 
@@ -138,7 +138,7 @@ Histogram::~Histogram()
  * @param p point
  */
 void
-Histogram::operator+=(point_t *p)
+Histogram::operator+=(upoint_t *p)
 {
   if ( dimension != 2 ) {
     throw Exception("Trying to add 2-dim data to 3-dim histogram");
@@ -160,7 +160,7 @@ Histogram::operator+=(point_t *p)
  * @param p point
  */
 void
-Histogram::operator+=(point_t p)
+Histogram::operator+=(upoint_t p)
 {
   if ( dimension != 2 ) {
     throw Exception("Trying to add 2-dim data to 3-dim histogram");
@@ -243,7 +243,7 @@ Histogram::get_value(unsigned int x, unsigned int y, unsigned int z)
  * @param value value
  */
 void
-Histogram::set_value(unsigned int x, unsigned int y, unsigned int value) 
+Histogram::set_value(unsigned int x, unsigned int y, unsigned int value)
 {
   unsigned int old_value = histogram_block->get_value(x, y);
   histogram_block->set_value(x, y, value);
@@ -272,8 +272,8 @@ Histogram::set_value(unsigned int x, unsigned int y, unsigned int value)
  * @param value value
  */
 void
-Histogram::set_value(unsigned int x, unsigned int y, unsigned int z, unsigned int value) 
-{  
+Histogram::set_value(unsigned int x, unsigned int y, unsigned int z, unsigned int value)
+{
   unsigned int old_value = histogram_block->get_value(x, y, z);
   histogram_block->set_value(x, y, z, value);
 
@@ -306,7 +306,7 @@ Histogram::inc_value(unsigned int x, unsigned int y, unsigned int z)
   histogram_block->set_value(x, y, z, ++old_value);
 
   ++number_of_values;
-  
+
   unsigned int index = z * width * height + y * width + x;
   undo_overlay[undo_current][index] = 1;
 }
@@ -385,8 +385,8 @@ Histogram::print_to_stream(std::ostream &s)
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-// 	cout << histogram[z * width * height + y * width + x] << " ";
-	cout << histogram_block->get_value(x, y, z) << " ";
+//  cout << histogram[z * width * height + y * width + x] << " ";
+  cout << histogram_block->get_value(x, y, z) << " ";
       }
     }
     cout << endl;
@@ -400,7 +400,7 @@ Histogram::print_to_stream(std::ostream &s)
  * @param formatted_output one value per line
  */
 void
-Histogram::save(const char *filename, bool formatted_output) 
+Histogram::save(const char *filename, bool formatted_output)
 {
   HistogramFile histogram_file;
   histogram_file.set_owns_blocks(false);
@@ -416,7 +416,7 @@ Histogram::save(const char *filename, bool formatted_output)
  * @return true on success, false otherwise
  */
 bool
-Histogram::load(const char *filename) 
+Histogram::load(const char *filename)
 {
   HistogramFile histogram_file;
   histogram_file.read(filename);
@@ -461,8 +461,8 @@ Histogram::undo()
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-	unsigned int index = z * width * height + y * width + x;
-	histogram[index] -= undo_overlay[undo_current][index];
+  unsigned int index = z * width * height + y * width + x;
+  histogram[index] -= undo_overlay[undo_current][index];
       }
     }
   }
@@ -512,7 +512,7 @@ Histogram::get_median()
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-	values->push_back( histogram_block->get_value(x, y, z) );
+  values->push_back( histogram_block->get_value(x, y, z) );
       }
     }
   }
@@ -538,14 +538,14 @@ Histogram::get_average()
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-	if ( histogram[z * width * height + y * width + x ] ) {
-	  sum += histogram_block->get_value(x, y, z);
-	  num++;
-	}
+  if ( histogram[z * width * height + y * width + x ] ) {
+    sum += histogram_block->get_value(x, y, z);
+    num++;
+  }
       }
     }
   }
-  
+
   return (sum / num);
 }
 
@@ -560,9 +560,9 @@ Histogram::get_sum() const
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-	if ( histogram[z * width * height + y * width + x ] ) {
-	  sum += histogram_block->get_value(x, y, z);
-	}
+  if ( histogram[z * width * height + y * width + x ] ) {
+    sum += histogram_block->get_value(x, y, z);
+  }
       }
     }
   }

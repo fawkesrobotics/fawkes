@@ -28,7 +28,7 @@
 #include <cmath>
 #include <cstring>
 
-using fawkes::point_t;
+using fawkes::upoint_t;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -57,11 +57,11 @@ namespace firevision {
  * @param dead_radius inner radius to ignore
  */
 ScanlineRadial::ScanlineRadial(unsigned int width, unsigned int height,
-			       unsigned int center_x, unsigned int center_y,
-			       unsigned int radius_increment,
-			       unsigned int step,
-			       unsigned int max_radius, unsigned int dead_radius
-			       )
+                               unsigned int center_x, unsigned int center_y,
+                               unsigned int radius_increment,
+                               unsigned int step,
+                               unsigned int max_radius, unsigned int dead_radius
+                               )
 {
   this->width            = width;
   this->height           = height;
@@ -76,19 +76,19 @@ ScanlineRadial::ScanlineRadial(unsigned int width, unsigned int height,
   reset();
 }
 
-point_t
+upoint_t
 ScanlineRadial::operator*()
 {
   return coord;
 }
 
-point_t*
+upoint_t*
 ScanlineRadial::operator->()
 {
   return &coord;
 }
 
-point_t *
+upoint_t *
 ScanlineRadial::operator++()
 {
 
@@ -111,82 +111,82 @@ ScanlineRadial::operator++()
 
       if ( x < y ) {
 
-	switch (sector) {
-	case 0:
-	  tmp_x = x;
-	  tmp_y = -y;
-	  break;
+        switch (sector) {
+        case 0:
+          tmp_x = x;
+          tmp_y = -y;
+          break;
 
-	case 1:
-	  tmp_x = y;
-	  tmp_y = -x;
-	  break;
+        case 1:
+          tmp_x = y;
+          tmp_y = -x;
+          break;
 
-	case 2:
-	  tmp_x = y;
-	  tmp_y = x;
-	  break;
+        case 2:
+          tmp_x = y;
+          tmp_y = x;
+          break;
 
-	case 3:
-	  tmp_x = x;
-	  tmp_y = y;
-	  break;
+        case 3:
+          tmp_x = x;
+          tmp_y = y;
+          break;
 
-	case 4:
-	  tmp_x = -x;
-	  tmp_y = y;
-	  break;
+        case 4:
+          tmp_x = -x;
+          tmp_y = y;
+          break;
 
-	case 5:
-	  tmp_x = -y;
-	  tmp_y = x;
-	  break;
+        case 5:
+          tmp_x = -y;
+          tmp_y = x;
+          break;
 
-	case 6:
-	  tmp_x = -y;
-	  tmp_y = -x;
-	  break;
+        case 6:
+          tmp_x = -y;
+          tmp_y = -x;
+          break;
 
-	case 7:
-	  tmp_x = -x;
-	  tmp_y = -y;
-	  break;
+        case 7:
+          tmp_x = -x;
+          tmp_y = -y;
+          break;
 
-	default:
-	  tmp_x = 0;
-	  tmp_y = 0;
-	  break;
+        default:
+          tmp_x = 0;
+          tmp_y = 0;
+          break;
 
-	}
+        }
 
-	x += step;
-	y = (int)(sqrt( (float(current_radius * current_radius) - float(x * x)) ) + 0.5);
+        x += step;
+        y = (int)(sqrt( (float(current_radius * current_radius) - float(x * x)) ) + 0.5);
 
-	ok = true;
+        ok = true;
 
       } else {
-	//      cout << "x !< y" << endl;
-	if (sector == 7) {
-	  // Need to go to next circle
-	  current_radius += radius_increment;
-	  x = 0;
-	  y = current_radius;
-	  sector = 0;
-	  if (current_radius >= max_radius) { done = true; ok = true; }
-	} else {
-	  sector += 1;
-	  x = 0;
-	  y = current_radius;
-	}
+        //      cout << "x !< y" << endl;
+        if (sector == 7) {
+          // Need to go to next circle
+          current_radius += radius_increment;
+          x = 0;
+          y = current_radius;
+          sector = 0;
+          if (current_radius >= max_radius) { done = true; ok = true; }
+        } else {
+          sector += 1;
+          x = 0;
+          y = current_radius;
+        }
       }
 
     }
 
     if ( (tmp_x < -(int)center_x) ||
-	 (tmp_x > (int)(width - center_x)) ||
-	 (tmp_y < -(int)center_y) ||
-	 (tmp_y > (int)(height - center_y))
-	 ) {
+         (tmp_x > (int)(width - center_x)) ||
+         (tmp_y < -(int)center_y) ||
+         (tmp_y > (int)(height - center_y))
+         ) {
       coord.x = 0;
       coord.y = 0;
       // out of image, not ok
@@ -202,10 +202,10 @@ ScanlineRadial::operator++()
   return &coord;
 }
 
-point_t *
+upoint_t *
 ScanlineRadial::operator++(int)
 {
-  memcpy(&tmp_coord, &coord, sizeof(point_t));
+  memcpy(&tmp_coord, &coord, sizeof(upoint_t));
   return &tmp_coord;
 }
 
@@ -230,11 +230,11 @@ ScanlineRadial::simpleBubbleSort(unsigned int array[], unsigned int num_elements
 
     for (unsigned int i = 0; i < end-1; ++i) {
       if ( array[i] < array[i+1] ) {
-	tmp        = array[i];
-	array[i]   = array[i+1];
-	array[i+1] = tmp;
-	end -= 1;
-	modified = true;
+        tmp        = array[i];
+        array[i]   = array[i+1];
+        array[i+1] = tmp;
+        end -= 1;
+        modified = true;
       }
     }
 

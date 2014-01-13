@@ -53,7 +53,7 @@ namespace firevision {
 HtLinesModel::HtLinesModel(unsigned int nr_candidates, float angle_from, float angle_range, int r_scale, float min_votes_ratio, int min_votes)
 {
   RHT_NR_CANDIDATES   = nr_candidates;
-  
+
   RHT_R_SCALE         = r_scale;
 
   RHT_MIN_VOTES       = min_votes;
@@ -73,7 +73,7 @@ HtLinesModel::~HtLinesModel(void)
 
 int
 HtLinesModel::parseImage( unsigned char *buf,
-			   ROI *roi            )
+         ROI *roi            )
 {
   unsigned char *buffer = roi->get_roi_buffer_start(buf);
 
@@ -87,13 +87,13 @@ HtLinesModel::parseImage( unsigned char *buf,
   // and store them in the 'pixels' vector.
   unsigned char *line_start = buffer;
   unsigned int     x, y;
-  vector<point_t>  pixels;
+  vector<upoint_t>  pixels;
 
   for (y = 0; y < roi->height; ++y) {
     for (x = 0; x < roi->width; ++x) {
       if (TEST_IF_IS_A_PIXEL(*buffer)) {
-	point_t pt={x, y};
-	pixels.push_back(pt);
+  upoint_t pt={x, y};
+  pixels.push_back(pt);
       }
       // NOTE: this assumes roi->pixel_step == 1
       ++buffer;
@@ -103,9 +103,9 @@ HtLinesModel::parseImage( unsigned char *buf,
   }
 
   // Then perform the RHT algorithm
-  point_t p;
+  upoint_t p;
   float r, phi; // used for line representation
-  vector< point_t >::iterator pos;
+  vector< upoint_t >::iterator pos;
   if (pixels.size() == 0) {
     // No edge pixels found => no lines
     return 0;
@@ -115,16 +115,16 @@ HtLinesModel::parseImage( unsigned char *buf,
   while (pixels.size() > 0) {
     p = pixels.back();
     pixels.pop_back();
-      
+
     for (unsigned int i = 0; i < RHT_NR_CANDIDATES; ++i) {
       phi = RHT_ANGLE_FROM + i * RHT_ANGLE_INCREMENT;
       r   = p.x * cos( phi )  +   p.y * sin( phi );
-	
+
       int angle = (int)round(fawkes::rad2deg( phi ));
-      
+
       accumulator.accumulate( (int)round(r / RHT_R_SCALE),
-			      angle,
-			      0 );
+            angle,
+            0 );
     }
   }
 
@@ -132,7 +132,7 @@ HtLinesModel::parseImage( unsigned char *buf,
   // Find the most dense region, and decide on the lines
   int max, r_max, phi_max, any_max;
   max = accumulator.getMax(r_max, phi_max, any_max);
-  
+
   roi_width = roi->width;
   roi_height = roi->height;
 
@@ -141,7 +141,7 @@ HtLinesModel::parseImage( unsigned char *buf,
   l.phi = phi_max;
   l.count = max;
   m_Lines.push_back( l );
- 
+
   return 1;
 }
 
@@ -174,7 +174,7 @@ HtLinesModel::getMostLikelyShape(void) const
     int cur=0;
     for (unsigned int i=1; i < m_Lines.size(); ++i) {
       if (m_Lines[i].count > m_Lines[cur].count) {
-	cur = i;
+  cur = i;
       }
     }
     return const_cast<LineShape*>(&m_Lines[cur]); // or use const Shape* definition?!...

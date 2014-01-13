@@ -42,16 +42,16 @@ namespace firevision {
  */
 /** Hint about object. */
 typedef enum {
-  H_BALL          = 0,	/**< ball */
-  H_BACKGROUND    = 1,	/**< background */
-  H_ROBOT         = 2,	/**< robot */
-  H_FIELD         = 3,	/**< field */
-  H_GOAL_YELLOW   = 4,	/**< yellow goal */
-  H_GOAL_BLUE     = 5,	/**< blue goal */
-  H_LINE          = 6,	/**< line */
-  H_UNKNOWN       = 7,	/**< unknown */
-  H_ROBOT_OPP     = 8,	/**< opponents robot */
-  H_SIZE              	/**< size of enum (Has to be the last entry) */
+  H_BALL          = 0,  /**< ball */
+  H_BACKGROUND    = 1,  /**< background */
+  H_ROBOT         = 2,  /**< robot */
+  H_FIELD         = 3,  /**< field */
+  H_GOAL_YELLOW   = 4,  /**< yellow goal */
+  H_GOAL_BLUE     = 5,  /**< blue goal */
+  H_LINE          = 6,  /**< line */
+  H_UNKNOWN       = 7,  /**< unknown */
+  H_ROBOT_OPP     = 8,  /**< opponents robot */
+  H_SIZE                /**< size of enum (Has to be the last entry) */
 } hint_t;
 
 
@@ -65,7 +65,7 @@ class ROI {
       unsigned int width, unsigned int height,
       unsigned int image_width, unsigned int image_height);
 
-  void         set_start(fawkes::point_t p);
+  void         set_start(fawkes::upoint_t p);
   void         set_start(unsigned int x, unsigned int y);
 
   void         set_width(unsigned int width);
@@ -115,7 +115,7 @@ class ROI {
 
  public: // Public for quick access
   /** ROI start */
-  fawkes::point_t start;
+  fawkes::upoint_t start;
   /** ROI width */
   unsigned int width;
   /** ROI height */

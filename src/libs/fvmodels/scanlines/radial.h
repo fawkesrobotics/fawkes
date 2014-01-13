@@ -38,15 +38,15 @@ class ScanlineRadial : public ScanlineModel
  public:
 
   ScanlineRadial(unsigned int width, unsigned int height,
-		 unsigned int center_x, unsigned int center_y,
-		 unsigned int radius_increment, unsigned int step,
-		 unsigned int max_radius = 0, unsigned int dead_radius = 0
-		 );
+     unsigned int center_x, unsigned int center_y,
+     unsigned int radius_increment, unsigned int step,
+     unsigned int max_radius = 0, unsigned int dead_radius = 0
+     );
 
-  fawkes::point_t    operator*();
-  fawkes::point_t *  operator->();
-  fawkes::point_t *  operator++();
-  fawkes::point_t *  operator++(int); 
+  fawkes::upoint_t    operator*();
+  fawkes::upoint_t *  operator->();
+  fawkes::upoint_t *  operator++();
+  fawkes::upoint_t *  operator++(int);
 
   bool          finished();
   void          reset();
@@ -75,8 +75,8 @@ class ScanlineRadial : public ScanlineModel
   unsigned int dead_radius;
   bool         auto_max_radius;
 
-  fawkes::point_t coord;
-  fawkes::point_t tmp_coord;
+  fawkes::upoint_t coord;
+  fawkes::upoint_t tmp_coord;
 
   unsigned int sector;
 

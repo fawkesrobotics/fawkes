@@ -65,8 +65,8 @@ ROI::ROI()
  * @param image_height height of full image this ROI belongs to
  */
 ROI::ROI(unsigned int start_x, unsigned int start_y,
-	 unsigned int width, unsigned int height,
-	 unsigned int image_width, unsigned int image_height)
+   unsigned int width, unsigned int height,
+   unsigned int image_width, unsigned int image_height)
 {
   num_hint_points = 1;
   start.x = start_x;
@@ -95,7 +95,7 @@ ROI::ROI(const ROI &roi)
   pixel_step      = roi.pixel_step;
   hint            = roi.hint;
   color           = roi.color;
-  num_hint_points = roi.num_hint_points;  
+  num_hint_points = roi.num_hint_points;
 }
 
 
@@ -113,7 +113,7 @@ ROI::ROI(const ROI *roi)
   pixel_step      = roi->pixel_step;
   hint            = roi->hint;
   color           = roi->color;
-  num_hint_points = roi->num_hint_points;  
+  num_hint_points = roi->num_hint_points;
 }
 
 
@@ -121,7 +121,7 @@ ROI::ROI(const ROI *roi)
  * @param p point
  */
 void
-ROI::set_start(point_t p)
+ROI::set_start(upoint_t p)
 {
   start.x = p.x;
   start.y = p.y;
@@ -326,9 +326,9 @@ bool
 ROI::neighbours(unsigned int x, unsigned int y, unsigned int margin) const
 {
   return ( (static_cast<int>(x) >= static_cast<int>(start.x) - static_cast<int>(margin)) &&
-	   (x <= start.x + width + margin) &&
-	   (static_cast<int>(y) >= static_cast<int>(start.y) - static_cast<int>(margin)) &&
-	   (y <= start.y + height + margin) );
+     (x <= start.x + width + margin) &&
+     (static_cast<int>(y) >= static_cast<int>(start.y) - static_cast<int>(margin)) &&
+     (y <= start.y + height + margin) );
 }
 
 
@@ -343,14 +343,14 @@ bool
 ROI::neighbours(ROI *roi, unsigned int margin) const
 {
   //Testing only x -> y test returns always true
-  bool overlapping_x = neighbours(roi->start.x, start.y, margin) 
-    || neighbours(roi->start.x + roi->width, start.y, margin) 
+  bool overlapping_x = neighbours(roi->start.x, start.y, margin)
+    || neighbours(roi->start.x + roi->width, start.y, margin)
     || roi->neighbours(start.x, roi->start.y, margin)
     || roi->neighbours(start.x + width, roi->start.y, margin);
 
   //Testing only y -> x test returns always true
-  bool overlapping_y = roi->neighbours(roi->start.x, start.y, margin) 
-    || roi->neighbours(roi->start.x, start.y + height, margin) 
+  bool overlapping_y = roi->neighbours(roi->start.x, start.y, margin)
+    || roi->neighbours(roi->start.x, start.y + height, margin)
     || neighbours(start.x, roi->start.y, margin)
     || neighbours(start.x, roi->start.y + roi->height, margin);
 
@@ -462,14 +462,14 @@ ROI::operator==(const ROI &roi) const
 {
   return  (start.x == roi.start.x) &&
           (start.y == roi.start.y) &&
-          (width == roi.width) && 
-          (height == roi.height) && 
-          (image_width == roi.image_width) && 
-          (image_height == roi.image_height) && 
-          (line_step == roi.line_step) && 
-          (pixel_step == roi.pixel_step) && 
-          (hint == roi.hint) && 
-          (color == roi.color) && 
+          (width == roi.width) &&
+          (height == roi.height) &&
+          (image_width == roi.image_width) &&
+          (image_height == roi.image_height) &&
+          (line_step == roi.line_step) &&
+          (pixel_step == roi.pixel_step) &&
+          (hint == roi.hint) &&
+          (color == roi.color) &&
           (num_hint_points == roi.num_hint_points);
 }
 

@@ -43,7 +43,7 @@ namespace firevision {
  * - if ROI is vertically rectangular, we cut off the bottom part
  *   because it is likely to contain reflection
  * - if ball is not close (roi->width <= 100), we tighten the ROI, such that
- *   it only contains the ball.  This helps against reflection. 
+ *   it only contains the ball.  This helps against reflection.
  *   (If ball is close, this does not work, because it takes away too many edge pixels.)
  */
 
@@ -90,68 +90,68 @@ Shrinker::shrink( ROI *roi )
 
   if ( roi->width <= 100 ) {
     /* Ball is not close. Tighten ROI, such that it only contains the ball.
-       This helps against reflection. 
+       This helps against reflection.
        (If ball is close, this does not work, because it takes away too many edge pixels.) */
-	  
+
     unsigned char  *bufferTmp     = roi->get_roi_buffer_start( src );
     unsigned char  *line_startTmp = bufferTmp;
-    fawkes::point_t leftmostPixel = {roi->width, 0};
-    fawkes::point_t topmostPixel  = {0, roi->height};
-	  
+    fawkes::upoint_t leftmostPixel = {roi->width, 0};
+    fawkes::upoint_t topmostPixel  = {0, roi->height};
+
     // find leftmost hint-pixel
     bool pixelFound = false;
     for (x = 0; !pixelFound && (x < roi->width / 2); ++x) {
       for (y = 0; y < roi->height/2; ++y) {
-	if (*bufferTmp > 230) { // if pixel is white or almost white = edge
-	  leftmostPixel.x = x;
-	  leftmostPixel.y = y;
-	  pixelFound = true;
-	}
-	++bufferTmp;
+        if (*bufferTmp > 230) { // if pixel is white or almost white = edge
+          leftmostPixel.x = x;
+          leftmostPixel.y = y;
+          pixelFound = true;
+        }
+        ++bufferTmp;
       } // inner for
       line_startTmp += roi->line_step;
       bufferTmp = line_startTmp;
     } // outer for
-	  
+
     bufferTmp = roi->get_roi_buffer_start( src );
     line_startTmp = bufferTmp;
-	  
+
     // find topmost hint-pixel
     pixelFound = false;
     for (y = 0; !pixelFound && (y < roi->height/2); ++y) {
       for (x = 0; x < roi->width; ++x) {
-	if (*bufferTmp > 230) {
-	  topmostPixel.x = x;
-	  topmostPixel.y = y;
-	  pixelFound = true;
-	}
-	++bufferTmp;
+        if (*bufferTmp > 230) {
+          topmostPixel.x = x;
+          topmostPixel.y = y;
+          pixelFound = true;
+        }
+        ++bufferTmp;
       } // inner for
       /*
       if (pixelFound) {
-	// try to improve x-coordinate (too small)
-	unsigned int x2 = topmostPixel.x;
-	for (unsigned int a = topmostPixel.x + 1; a < roi->width; ++a) {
-	if (TEST_IF_IS_A_PIXEL(*bufferTmp)) {
-	x2 = a;
-	}
-	++bufferTmp;
-	}
-	topmostPixel.x = (topmostPixel.x + x2) / 2;
+        // try to improve x-coordinate (too small)
+        unsigned int x2 = topmostPixel.x;
+        for (unsigned int a = topmostPixel.x + 1; a < roi->width; ++a) {
+        if (TEST_IF_IS_A_PIXEL(*bufferTmp)) {
+        x2 = a;
+        }
+        ++bufferTmp;
+        }
+        topmostPixel.x = (topmostPixel.x + x2) / 2;
       }
       */
       line_startTmp += roi->line_step;
       bufferTmp = line_startTmp;
     } // outer for
-	  
+
     bufferTmp = roi->get_roi_buffer_start( src );
     line_startTmp = bufferTmp;
-	  
+
     // tighten ROI if it makes sense
     if ( (leftmostPixel.x >= topmostPixel.x)  ||
-	 (topmostPixel.y  >= leftmostPixel.y) ||
-	 (2 * (topmostPixel.x - leftmostPixel.x) >= roi->width) ||
-	 (2 * (leftmostPixel.y - topmostPixel.y) >= roi->height) ) {
+         (topmostPixel.y  >= leftmostPixel.y) ||
+         (2 * (topmostPixel.x - leftmostPixel.x) >= roi->width) ||
+         (2 * (leftmostPixel.y - topmostPixel.y) >= roi->height) ) {
       // bad pixels found
     } else {
       // tighten ROI
@@ -161,10 +161,10 @@ Shrinker::shrink( ROI *roi )
       //roi->width = 2 * (topmostPixel.x - leftmostPixel.x);
       roi->height = 2 * (leftmostPixel.y - topmostPixel.y);
       /*
-	if ( roi->width < roi->height ) {
-	// further shrinking
-	roi->height = roi->width;
-	}
+        if ( roi->width < roi->height ) {
+        // further shrinking
+        roi->height = roi->width;
+        }
       */
       //cout << "Shrinker: Shrank region!" << endl;
     }

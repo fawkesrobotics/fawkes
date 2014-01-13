@@ -29,7 +29,7 @@
 
 #include <cstring>
 
-using fawkes::point_t;
+using fawkes::upoint_t;
 
 namespace firevision {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -58,8 +58,8 @@ namespace firevision {
  * @param gap Gap between two points on the line
  */
 ScanlineLineGrid::ScanlineLineGrid(unsigned int width, unsigned int height,
-			   unsigned int offset_hor, unsigned int offset_ver,
-			   ROI* roi, unsigned int gap)
+         unsigned int offset_hor, unsigned int offset_ver,
+         ROI* roi, unsigned int gap)
 {
   __roi = NULL;
   __next_pixel = gap + 1;
@@ -75,13 +75,13 @@ ScanlineLineGrid::~ScanlineLineGrid()
   delete __roi;
 }
 
-point_t
+upoint_t
 ScanlineLineGrid::operator*()
 {
   return *__cur;
 }
 
-point_t*
+upoint_t*
 ScanlineLineGrid::operator->()
 {
   return &*__cur;
@@ -92,7 +92,7 @@ ScanlineLineGrid::calc_coords()
 {
   __point_list.clear();
   bool more_to_come = true;
-  point_t coord;
+  upoint_t coord;
   unsigned int next_px;
 
   if (__offset_hor > 0) //horizontal lines
@@ -158,18 +158,18 @@ ScanlineLineGrid::calc_coords()
   reset();
 }
 
-point_t *
+upoint_t *
 ScanlineLineGrid::operator++()
 {
   if (__cur != __point_list.end()) ++__cur;
   return __cur != __point_list.end() ? &*__cur : &__point_list.back();
 }
 
-point_t *
+upoint_t *
 ScanlineLineGrid::operator++(int)
 {
   if (__cur != __point_list.end()) {
-    point_t *res = &*__cur++;
+    upoint_t *res = &*__cur++;
     return res;
   }
   else return &__point_list.back();

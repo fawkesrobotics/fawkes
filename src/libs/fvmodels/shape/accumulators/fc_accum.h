@@ -6,7 +6,7 @@
  *  Copyright  2005  Hu Yuxiao <Yuxiao.Hu@rwth-aachen.de>
  *
  ****************************************************************************/
-                                                                                
+
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -20,7 +20,7 @@
  *
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
-                                                                                
+
 #ifndef __FIREVISION_MODELS_SHAPE_ACCUMULATORS_FC_ACCUM_H_
 #define __FIREVISION_MODELS_SHAPE_ACCUMULATORS_FC_ACCUM_H_
 
@@ -58,11 +58,11 @@ private:
   ~FittedCircle(void);
 
   void reset(void);
-  float addPoint(const fawkes::point_t&); // add a new point
+  float addPoint(const fawkes::upoint_t&); // add a new point
   // and return the distance from it to the fitted circle
-  void removePoint(const fawkes::point_t&); // remove a point
+  void removePoint(const fawkes::upoint_t&); // remove a point
 
-  float distanceTo(const fawkes::point_t&, bool current = true);
+  float distanceTo(const fawkes::upoint_t&, bool current = true);
 
   void commit(void);
   int getCount(void) const;

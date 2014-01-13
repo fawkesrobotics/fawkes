@@ -41,19 +41,19 @@ class Qualifier
    * @param pixel the pixel of interest
    * @return a corresponding int value
    */
-  virtual int   get(fawkes::point_t pixel) = 0;
+  virtual int   get(fawkes::upoint_t pixel) = 0;
 
   virtual unsigned char* get_buffer();
-  virtual void set_buffer(unsigned char* buffer, unsigned int width = 0, 
-			  unsigned int height = 0);
+  virtual void set_buffer(unsigned char* buffer, unsigned int width = 0,
+        unsigned int height = 0);
 
   virtual colorspace_t get_colorspace();
   virtual void set_colorspace(colorspace_t colorspace);
 
 
  protected:
-  Qualifier(unsigned char* buffer, unsigned int width, 
-	    unsigned int height, colorspace_t colorspace);
+  Qualifier(unsigned char* buffer, unsigned int width,
+      unsigned int height, colorspace_t colorspace);
 
   /** Image buffer */
   unsigned char* buffer_;
@@ -75,11 +75,11 @@ class LumaQualifier: public Qualifier
 {
  public:
   LumaQualifier() {};
-  LumaQualifier(unsigned char* buffer, unsigned int width, 
-		unsigned int height, colorspace_t colorspace);
+  LumaQualifier(unsigned char* buffer, unsigned int width,
+    unsigned int height, colorspace_t colorspace);
   virtual ~LumaQualifier() {};
 
-  virtual int   get(fawkes::point_t pixel);
+  virtual int   get(fawkes::upoint_t pixel);
 };
 
 
@@ -87,15 +87,15 @@ class SkyblueQualifier: public Qualifier
 {
  public:
   SkyblueQualifier() {};
-  SkyblueQualifier(unsigned char* buffer, unsigned int width, 
-		   unsigned int height, colorspace_t colorspace);
+  SkyblueQualifier(unsigned char* buffer, unsigned int width,
+       unsigned int height, colorspace_t colorspace);
   virtual ~SkyblueQualifier() {};
 
-  virtual int   get(fawkes::point_t pixel);
+  virtual int   get(fawkes::upoint_t pixel);
 
 
  private:
-  static const unsigned int threshold_ = 128; 
+  static const unsigned int threshold_ = 128;
 };
 
 
@@ -103,15 +103,15 @@ class YellowQualifier: public Qualifier
 {
  public:
   YellowQualifier() {};
-  YellowQualifier(unsigned char* buffer, unsigned int width, 
-		  unsigned int height, colorspace_t colorspace);
+  YellowQualifier(unsigned char* buffer, unsigned int width,
+      unsigned int height, colorspace_t colorspace);
   virtual ~YellowQualifier() {};
 
-  virtual int   get(fawkes::point_t pixel);
+  virtual int   get(fawkes::upoint_t pixel);
 
 
  private:
-  static const unsigned int threshold_ = 100; 
+  static const unsigned int threshold_ = 100;
 };
 
 } // end namespace firevision

@@ -56,21 +56,21 @@ namespace firevision {
  * @param grow_by grow region by that many pixels
  */
 MultiColorClassifier::MultiColorClassifier(ScanlineModel *scanline_model,
-					   ColorModel *color_model,
-					   unsigned int min_num_points,
-					   unsigned int box_extent,
-					   bool upward,
-					   unsigned int neighbourhood_min_match,
-					   unsigned int grow_by)
+             ColorModel *color_model,
+             unsigned int min_num_points,
+             unsigned int box_extent,
+             bool upward,
+             unsigned int neighbourhood_min_match,
+             unsigned int grow_by)
   : Classifier("MultiColorClassifier")
 {
   if (scanline_model == NULL) {
     throw fawkes::NullPointerException("MultiColorClassifier: scanline_model "
-				       "may not be NULL");
+               "may not be NULL");
   }
   if (color_model == NULL) {
     throw fawkes::NullPointerException("MultiColorClassifier: color_model "
-				       "may not be NULL");
+               "may not be NULL");
   }
 
   modified = false;
@@ -166,7 +166,7 @@ MultiColorClassifier::classify()
 
       if (neighbourhood_min_match) {
         num_what =
-	  consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
+    consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
       }
       if (num_what >= neighbourhood_min_match) {
         bool ok = false;
@@ -212,7 +212,7 @@ MultiColorClassifier::classify()
           r.width = to_x - r.start.x;
           r.height = to_y - r.start.y;
           r.hint = c;
-	  r.color = c;
+    r.color = c;
 
           r.line_step = _width;
           r.pixel_step = 1;
@@ -239,9 +239,9 @@ MultiColorClassifier::classify()
   if (grow_by > 0) {
     for (map_it = rois.begin(); map_it != rois.end(); ++map_it) {
       for (roi_it = map_it->second.begin();
-	   roi_it != map_it->second.end(); ++roi_it)
+     roi_it != map_it->second.end(); ++roi_it)
       {
-	(*roi_it).grow( grow_by );
+  (*roi_it).grow( grow_by );
       }
     }
   }
@@ -254,15 +254,15 @@ MultiColorClassifier::classify()
       ++roi_it2;
 
       while ( roi_it2 != map_it->second.end() ) {
-	if ((roi_it != roi_it2) &&
-	    roi_it->neighbours(&(*roi_it2), scanline_model->get_margin()))
-	{
-	  *roi_it += *roi_it2;
-	  map_it->second.erase(roi_it2);
-	  roi_it2 = map_it->second.begin(); //restart
-	} else {
-	  ++roi_it2;
-	}
+  if ((roi_it != roi_it2) &&
+      roi_it->neighbours(&(*roi_it2), scanline_model->get_margin()))
+  {
+    *roi_it += *roi_it2;
+    map_it->second.erase(roi_it2);
+    roi_it2 = map_it->second.begin(); //restart
+  } else {
+    ++roi_it2;
+  }
       }
     }
   }
@@ -272,9 +272,9 @@ MultiColorClassifier::classify()
     for (roi_it = map_it->second.begin(); roi_it != map_it->second.end(); ++roi_it)
     {
       while ( (roi_it != map_it->second.end()) &&
-	      ((*roi_it).num_hint_points < min_num_points ))
+        ((*roi_it).num_hint_points < min_num_points ))
       {
-	roi_it = map_it->second.erase(roi_it);
+  roi_it = map_it->second.erase(roi_it);
       }
     }
   }
@@ -297,7 +297,7 @@ MultiColorClassifier::classify()
  */
 void
 MultiColorClassifier::get_mass_point_of_color( ROI *roi,
-					       fawkes::point_t *massPoint )
+                 fawkes::upoint_t *massPoint )
 {
   unsigned int nrOfOrangePixels;
   nrOfOrangePixels = 0;

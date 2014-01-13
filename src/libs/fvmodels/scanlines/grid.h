@@ -38,15 +38,15 @@ class ScanlineGrid : public ScanlineModel
 
  public:
 
-	ScanlineGrid(unsigned int width, unsigned int height,
-	       unsigned int offset_x, unsigned int offset_y,
-	       ROI* roi = NULL, bool horizontal_grid = true);
-	virtual ~ScanlineGrid();
+        ScanlineGrid(unsigned int width, unsigned int height,
+               unsigned int offset_x, unsigned int offset_y,
+               ROI* roi = NULL, bool horizontal_grid = true);
+        virtual ~ScanlineGrid();
 
-  fawkes::point_t    operator*();
-  fawkes::point_t *  operator->();
-  fawkes::point_t *  operator++();
-  fawkes::point_t *  operator++(int);
+  fawkes::upoint_t    operator*();
+  fawkes::upoint_t *  operator->();
+  fawkes::upoint_t *  operator++();
+  fawkes::upoint_t *  operator++(int);
 
   bool          finished();
   void          reset();
@@ -60,8 +60,8 @@ class ScanlineGrid : public ScanlineModel
   void setDimensions(unsigned int width, unsigned int height, ROI* roi = NULL);
   void setOffset(unsigned int offset_x, unsigned int offset_y);
   void setGridParams(unsigned int width, unsigned int height,
-		     unsigned int offset_x, unsigned int offset_y,
-		     ROI* roi = NULL, bool horizontal_grid = true);
+                     unsigned int offset_x, unsigned int offset_y,
+                     ROI* roi = NULL, bool horizontal_grid = true);
 
  private:
   unsigned int width;
@@ -74,8 +74,8 @@ class ScanlineGrid : public ScanlineModel
   bool horizontal_grid;
   bool more_to_come;
 
-  fawkes::point_t coord;
-  fawkes::point_t tmp_coord;
+  fawkes::upoint_t coord;
+  fawkes::upoint_t tmp_coord;
 
   void calc_next_coord();
 };

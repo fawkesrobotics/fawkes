@@ -40,7 +40,7 @@ class ROI;
 class ScanlineLineGrid : public ScanlineModel
 {
  private:
-  typedef std::list<fawkes::point_t> point_list_t;
+  typedef std::list<fawkes::upoint_t> point_list_t;
 
  public:
   ScanlineLineGrid(unsigned int width, unsigned int height,
@@ -48,10 +48,10 @@ class ScanlineLineGrid : public ScanlineModel
                    ROI* roi = NULL, unsigned int gap = 0);
   virtual ~ScanlineLineGrid();
 
-  fawkes::point_t operator*();
-  fawkes::point_t * operator->();
-  fawkes::point_t * operator++();
-  fawkes::point_t * operator++(int);
+  fawkes::upoint_t operator*();
+  fawkes::upoint_t * operator->();
+  fawkes::upoint_t * operator++();
+  fawkes::upoint_t * operator++(int);
 
   bool finished();
   void reset();

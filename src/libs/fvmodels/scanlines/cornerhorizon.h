@@ -43,18 +43,18 @@ class CornerHorizon : public ScanlineModel
  public:
 
   CornerHorizon( ScanlineModel *model,
-		 float field_length, float field_width, float field_border,
-		 unsigned int image_width, unsigned int image_height,
-		 float camera_height, float camera_ori,
-		 float horizontal_angle, float vertical_angle
-		 );
+     float field_length, float field_width, float field_border,
+     unsigned int image_width, unsigned int image_height,
+     float camera_height, float camera_ori,
+     float horizontal_angle, float vertical_angle
+     );
 
   virtual ~CornerHorizon();
 
-  fawkes::point_t    operator*();
-  fawkes::point_t *  operator->();
-  fawkes::point_t *  operator++();
-  fawkes::point_t *  operator++(int); 
+  fawkes::upoint_t    operator*();
+  fawkes::upoint_t *  operator->();
+  fawkes::upoint_t *  operator++();
+  fawkes::upoint_t *  operator++(int);
 
   bool          finished();
   void          reset();
@@ -77,7 +77,7 @@ class CornerHorizon : public ScanlineModel
   float field_length;
   float field_width;
   float field_border;
-  
+
   float pose_x;
   float pose_y;
   float pose_ori;
@@ -97,8 +97,8 @@ class CornerHorizon : public ScanlineModel
   float pan_pixel_per_rad;
   float tilt_pixel_per_rad;
 
-  fawkes::point_t coord;
-  fawkes::point_t tmp_coord;
+  fawkes::upoint_t coord;
+  fawkes::upoint_t tmp_coord;
 
   unsigned int horizon;
 

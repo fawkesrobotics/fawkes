@@ -62,7 +62,7 @@ FilterROIDraw::draw_roi(const ROI *roi)
     YUV_t hint_color = ColorObjectMap::get_color(roi->color);
     __drawer->set_buffer(dst, roi->image_width, roi->image_height);
     bool draw_black = false;
-    fawkes::point_t end;
+    fawkes::upoint_t end;
     end.x = std::min(roi->image_width - 1, roi->start.x + roi->width);
     end.y = std::min(roi->image_height - 1, roi->start.y + roi->height);
 

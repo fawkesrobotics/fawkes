@@ -52,19 +52,19 @@ class RhtCircleModel: public ShapeModel
   RhtCircleModel(void);
   virtual ~RhtCircleModel(void);
 
-  std::string	getName(void) const {return std::string("RhtCircleModel");}
-  int		parseImage(unsigned char* buffer, ROI *roi);
-  int		getShapeCount(void) const;
-  Circle*	getShape(int id) const;
-  Circle*	getMostLikelyShape(void) const;
-  
+  std::string   getName(void) const {return std::string("RhtCircleModel");}
+  int           parseImage(unsigned char* buffer, ROI *roi);
+  int           getShapeCount(void) const;
+  Circle*       getShape(int id) const;
+  Circle*       getMostLikelyShape(void) const;
+
  private:
-  void		calcCircle(	// for calculating circles from 3 points
-			   const fawkes::point_t& p1,
-			   const fawkes::point_t& p2,
-			   const fawkes::point_t& p3,
-			   center_in_roi_t& center,
-			   float& radius);
+  void          calcCircle(     // for calculating circles from 3 points
+                           const fawkes::upoint_t& p1,
+                           const fawkes::upoint_t& p2,
+                           const fawkes::upoint_t& p3,
+                           center_in_roi_t& center,
+                           float& radius);
 };
 
 } // end namespace firevision

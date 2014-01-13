@@ -39,16 +39,16 @@ class MultiColorClassifier : public Classifier
 {
  public:
   MultiColorClassifier(ScanlineModel *scanline_model,
-		       ColorModel *color_model,
-		       unsigned int min_num_points=6,
-		       unsigned int box_extent = 50,
-		       bool upward = false,
-		       unsigned int neighbourhood_min_match = 8,
-		       unsigned int grow_by = 10);
+                       ColorModel *color_model,
+                       unsigned int min_num_points=6,
+                       unsigned int box_extent = 50,
+                       bool upward = false,
+                       unsigned int neighbourhood_min_match = 8,
+                       unsigned int grow_by = 10);
 
   virtual std::list< ROI > * classify();
 
-  virtual void get_mass_point_of_color(ROI *roi, fawkes::point_t *massPoint);
+  virtual void get_mass_point_of_color(ROI *roi, fawkes::upoint_t *massPoint);
  private:
   unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
 

@@ -54,9 +54,9 @@ class Bulb : public MirrorModel
   virtual ~Bulb();
 
   virtual void warp2unwarp(unsigned int warp_x, unsigned int warp_y,
-			   unsigned int *unwarp_x, unsigned int *unwarp_y);
+         unsigned int *unwarp_x, unsigned int *unwarp_y);
   virtual void unwarp2warp(unsigned int unwarp_x, unsigned int unwarp_y,
-			   unsigned int *warp_x, unsigned int *warp_y    );
+         unsigned int *warp_x, unsigned int *warp_y    );
 
   virtual const char * getName();
 
@@ -64,24 +64,24 @@ class Bulb : public MirrorModel
 
 
   virtual void setWorldPoint(unsigned int image_x,
-			     unsigned int image_y,
-			     float        world_r,
-			     float        world_phi);
+           unsigned int image_y,
+           float        world_r,
+           float        world_phi);
 
 
   virtual fawkes::polar_coord_2d_t getWorldPointRelative(unsigned int image_x,
-							 unsigned int image_y  ) const;
+               unsigned int image_y  ) const;
 
   virtual fawkes::cart_coord_2d_t getWorldPointGlobal(unsigned int image_x,
-						      unsigned int image_y,
-						      float pose_x, float pose_y,
-						      float pose_ori ) const;
+                  unsigned int image_y,
+                  float pose_x, float pose_y,
+                  float pose_ori ) const;
 
   virtual void reset();
 
-  virtual fawkes::point_t getCenter() const;
-  virtual void setCenter(unsigned int image_x, 
-			 unsigned int image_y  );
+  virtual fawkes::upoint_t getCenter() const;
+  virtual void setCenter(unsigned int image_x,
+       unsigned int image_y  );
   virtual void setOrientation(float angle);
   virtual float getOrientation() const;
 
@@ -89,23 +89,23 @@ class Bulb : public MirrorModel
 
 
   bool isNonZero(unsigned int image_x,
-		 unsigned int image_y  ) const;
+     unsigned int image_y  ) const;
 
   unsigned int numNonZero() const;
 
 
-  float getAngle(unsigned int image_x, 
-		 unsigned int image_y  ) const;
+  float getAngle(unsigned int image_x,
+     unsigned int image_y  ) const;
 
   float getDistanceInImage(unsigned int image_p1_x, unsigned int image_p1_y,
-			   unsigned int image_p2_x, unsigned int image_p2_y  );
+         unsigned int image_p2_x, unsigned int image_p2_y  );
 
   float convertAngleI2W (float angle_in_image) const;
 
 
   void load(const char * filename);
   void save(const char * filename);
-  
+
   static std::string composeFilename(const char * format);
 
   const fawkes::polar_coord_2d_t * get_lut() const;
@@ -114,13 +114,13 @@ class Bulb : public MirrorModel
 
   /** bulb file header. */
   typedef struct {
-    unsigned int width;		/**< width of LUT */
-    unsigned int height;	/**< height of LUT */
-    unsigned int center_x;	/**< x coordinate of mirror center in image */
-    unsigned int center_y;	/**< y coordinate of mirror center in image */
-    float        orientation;	/**< orientation of camera in image */
-    float        dist_min;	/**< minimum distance from mirror center */
-    float        dist_max;	/**< maximum distance from mirror center */
+    unsigned int width;   /**< width of LUT */
+    unsigned int height;  /**< height of LUT */
+    unsigned int center_x;  /**< x coordinate of mirror center in image */
+    unsigned int center_y;  /**< y coordinate of mirror center in image */
+    float        orientation; /**< orientation of camera in image */
+    float        dist_min;  /**< minimum distance from mirror center */
+    float        dist_max;  /**< maximum distance from mirror center */
   } bulb_file_header_t;
 
 
