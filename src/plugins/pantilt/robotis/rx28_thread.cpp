@@ -73,6 +73,8 @@ void
 PanTiltRX28Thread::init()
 {
   __last_pan = __last_tilt = 0.f;
+  float init_pan_velocity = 0.f;
+  float init_tilt_velocity = 0.f;
 
   // Note: due to the use of auto_ptr and RefPtr resources are automatically
   // freed on destruction, therefore no special handling is necessary in init()
@@ -175,8 +177,8 @@ PanTiltRX28Thread::init()
   __pantilt_if->set_tilt_margin(__cfg_tilt_margin);
   __pantilt_if->set_max_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
   __pantilt_if->set_max_tilt_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
-  __pantilt_if->set_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
-  __pantilt_if->set_tilt_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
+  __pantilt_if->set_pan_velocity(init_pan_velocity);
+  __pantilt_if->set_tilt_velocity(init_tilt_velocity);
   __pantilt_if->write();
 
   __led_if = blackboard->open_for_writing<LedInterface>(bbid.c_str());
@@ -184,13 +186,13 @@ PanTiltRX28Thread::init()
   std::string panid = __ptu_name + " pan";
   __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
   __panjoint_if->set_position(__last_pan);
-  __panjoint_if->set_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
+  __panjoint_if->set_velocity(init_pan_velocity);
   __panjoint_if->write();
 
   std::string tiltid = __ptu_name + " tilt";
   __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
   __tiltjoint_if->set_position(__last_tilt);
-  __tiltjoint_if->set_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
+  __tiltjoint_if->set_velocity(init_tilt_velocity);
   __tiltjoint_if->write();
 
   __wt = new WorkerThread(__ptu_name, logger, __rx28,

@@ -77,6 +77,9 @@ PanTiltSonyEviD100PThread::init()
     throw;
   }
 
+  float init_pan_velocity = 0.f;
+  float init_tilt_velocity = 0.f;
+
   // If you have more than one interface: catch exception and close them!
   std::string bbid = "PanTilt " + __ptu_name;
   __pantilt_if = blackboard->open_for_writing<PanTiltInterface>(bbid.c_str());
@@ -91,8 +94,8 @@ PanTiltSonyEviD100PThread::init()
   __cam->get_speed_limits(pan_smin, pan_smax, tilt_smin, tilt_smax);
   __pantilt_if->set_max_pan_velocity(pan_smax);
   __pantilt_if->set_max_tilt_velocity(tilt_smax);
-  __pantilt_if->set_pan_velocity(pan_smax);
-  __pantilt_if->set_tilt_velocity(tilt_smax);
+  __pantilt_if->set_pan_velocity(init_pan_velocity);
+  __pantilt_if->set_tilt_velocity(init_tilt_velocity);
   __pantilt_if->write();
 
   __wt = new WorkerThread(__ptu_name, logger, __cam,
