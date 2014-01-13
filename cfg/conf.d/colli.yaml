@@ -24,6 +24,9 @@ plugins/colli:
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
 
+  # Default drive mode. It's an enum, see NavigatorInterface for details.
+  drive_mode: 2
+
   # The minimum rotation speed (in rad/s). Used for rotating at target
   min_rot: 0.1
 

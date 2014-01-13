@@ -81,10 +81,16 @@ class ColliMessageHandlerThread
 
   std::string cfg_frame_odom_;
 
+  // default parameters, read from config
+  float cfg_security_distance_;
+  float cfg_max_velocity_;
+  float cfg_escaping_enabled_;
+  fawkes::NavigatorInterface::DriveMode cfg_drive_mode_;
+
+  // current parameters, may be set by colli internally, or externally via messages
   float security_distance_;
   float max_velocity_;
   float escaping_enabled_;
-  fawkes::NavigatorInterface::DriveMode default_drive_mode_;
   fawkes::NavigatorInterface::DriveMode drive_mode_;
 
 #ifdef HAVE_ROS
@@ -94,11 +100,8 @@ class ColliMessageHandlerThread
   // methods mainly transfered from libmonaco
   bool colli_final();
   void colli_stop();
-  void colli_relgoto(float x, float y, float ori, float max_speed = 1.5,
-                       bool escape_allowed = true, float security_distance = 0.2);
-
-  void colli_goto(float x, float y, float ori, float max_speed = 1.5,
-                       bool escape_allowed = true, float security_distance = 0.2);
+  void colli_relgoto(float x, float y, float ori);
+  void colli_goto(float x, float y, float ori);
 };
 
 #endif
