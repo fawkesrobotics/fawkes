@@ -33,7 +33,7 @@ CFLAGS += -Wno-unknown-pragmas
 #CFLAGS += -DUSE_TIMETRACKER
 
 LIBS_tabletop_objects = fawkescore fawkesutils fawkesaspects fvutils \
-			fawkestf fawkesinterface fawkesblackboard \
+			fawkestf fawkesinterface fawkesblackboard fawkespcl_utils \
 			Position3DInterface SwitchInterface
 OBJS_tabletop_objects = tabletop_objects_plugin.o tabletop_objects_thread.o
 

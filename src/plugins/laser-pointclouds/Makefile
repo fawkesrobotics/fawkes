@@ -19,7 +19,7 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_laser_pointclouds = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-			 fawkestf \
+			 fawkestf fawkespcl_utils \
 			 fawkesinterface Laser360Interface Laser720Interface
 
 OBJS_laser_pointclouds = laser_pointcloud_plugin.o laser_pointcloud_thread.o

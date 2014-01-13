@@ -49,7 +49,7 @@ void
 RosPointCloudThread::init()
 {
   //__pubman = new RosPointCloudPublisherManager(rosnode);
-  __adapter = new RosPointCloudAdapter(pcl_manager, logger);
+  __adapter = new PointCloudAdapter(pcl_manager, logger);
 
   std::vector<std::string> pcls = pcl_manager->get_pointcloud_list();
 
@@ -70,7 +70,7 @@ RosPointCloudThread::init()
     std::string frame_id;
     unsigned int width, height;
     bool is_dense;
-    RosPointCloudAdapter::V_PointFieldInfo fieldinfo;
+    PointCloudAdapter::V_PointFieldInfo fieldinfo;
     __adapter->get_info(*p, width, height, frame_id, is_dense, fieldinfo);
     pi.msg.header.frame_id = frame_id;
     pi.msg.width = width;

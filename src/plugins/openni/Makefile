@@ -49,12 +49,12 @@ ifeq ($(HAVE_PCL)$(HAVE_TF),11)
   CFLAGS_pointcloud_thread  = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
   CFLAGS_data_plugin        = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
   LDFLAGS_openni_data       = $(LDFLAGS_PCL) $(LDFLAGS_TF)
-  LIBS_openni_data         += fvutils fawkestf
+  LIBS_openni_data         += fvutils fawkestf fawkespcl_utils
 
   CFLAGS_pcl_frombuf_thread = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
   CFLAGS_pcl_frombuf_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
   LDFLAGS_openni_pcl_frombuf = $(LDFLAGS_PCL) $(LDFLAGS_TF)
-  LIBS_openni_pcl_frombuf += fvutils fawkestf
+  LIBS_openni_pcl_frombuf += fvutils fawkestf fawkespcl_utils
 else
   ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl

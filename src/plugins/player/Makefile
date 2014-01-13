@@ -18,6 +18,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/download.mk
 
+CFLAGS += -Wno-cpp
+
 ifeq ($(HAVE_PLAYERCC),1)
   LDFLAGS += $(LDFLAGS_PLAYERCC)
   CFLAGS  += $(CFLAGS_PLAYERCC)

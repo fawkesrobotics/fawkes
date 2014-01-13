@@ -37,8 +37,8 @@ LIBS_ros_tf = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros_tf = tf_plugin.o tf_thread.o
 
 LIBS_ros_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesrosaspect fawkestf
-OBJS_ros_pcl = pcl_plugin.o pcl_thread.o pcl_adapter.o
+	      fawkesinterface fawkesrosaspect fawkestf fawkespcl_utils
+OBJS_ros_pcl = pcl_plugin.o pcl_thread.o
 
 LIBS_ros_images = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	          fawkesinterface fawkesrosaspect fvutils

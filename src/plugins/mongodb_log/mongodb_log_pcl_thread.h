@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_PCL_THREAD_H_
 #define __PLUGINS_MONGODB_LOG_MONGODB_LOG_PCL_THREAD_H_
 
-#include "pcl_adapter.h"
+#include <pcl_utils/pcl_adapter.h>
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -39,7 +39,11 @@
 #include <list>
 #include <queue>
 
-#include <sensor_msgs/PointCloud2.h>
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+#  include <pcl/PCLPointCloud2.h>
+#else
+#  include <sensor_msgs/PointCloud2.h>
+#endif
 
 namespace fawkes {
   class Mutex;
@@ -71,12 +75,16 @@ class MongoLogPointCloudThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  MongoLogPointCloudAdapter *adapter_;
+  PointCloudAdapter *adapter_;
 
   /// @cond INTERNALS
   typedef struct {
     std::string		     topic_name;
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+    pcl::PCLPointCloud2      msg;
+#else
     sensor_msgs::PointCloud2 msg;
+#endif
     fawkes::Time             last_sent;
   } PointCloudInfo;
   /// @endcond

@@ -22,7 +22,7 @@
 #ifndef __PLUGINS_ROS_PCL_THREAD_H_
 #define __PLUGINS_ROS_PCL_THREAD_H_
 
-#include "pcl_adapter.h"
+#include <pcl_utils/pcl_adapter.h>
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -63,7 +63,7 @@ class RosPointCloudThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  RosPointCloudAdapter *__adapter;
+  PointCloudAdapter *__adapter;
 
   /// @cond INTERNALS
   typedef struct {

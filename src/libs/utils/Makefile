@@ -50,6 +50,11 @@ ifeq ($(HAVE_YAMLCPP),1)
     CFLAGS_YAMLCPP += -DHAVE_OLD_YAMLCPP
   endif
 
+  HAVE_YAMLCPP_0_5 = $(if $(shell $(PKGCONFIG) --atleast-version='0.5' 'yaml-cpp'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_YAMLCPP_0_5),1)
+    CFLAGS_YAMLCPP += -DHAVE_YAMLCPP_0_5
+  endif
+
   CFLAGS  += $(CFLAGS_YAMLCPP)
   LDFLAGS += $(LDFLAGS_YAMLCPP)
 else

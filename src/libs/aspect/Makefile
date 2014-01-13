@@ -44,6 +44,7 @@ ifneq ($(HAVE_PCL),1)
 		     $(SRCDIR)/inifins/pointcloud.cpp $(SRCDIR)/pointcloud/pointcloud_manager.cpp))
   WARN_TARGETS += warning_pcl
 else
+  LIBS_libfawkesaspects += fawkespcl_utils
   CFLAGS  += $(CFLAGS_PCL)
   LDFLAGS += $(LDFLAGS_PCL)
 endif

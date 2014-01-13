@@ -25,7 +25,7 @@
 #define __ASPECT_POINTCLOUD_H_
 
 #include <aspect/aspect.h>
-#include <aspect/pointcloud/pointcloud_manager.h>
+#include <pcl_utils/pointcloud_manager.h>
 
 namespace pcl {
   template <typename PointT>
