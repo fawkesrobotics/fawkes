@@ -24,7 +24,7 @@ SUBDIRS=tools
 
 LIBS_mongodb_log = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
-		fawkestf
+		fawkestf fawkespcl_utils
 OBJS_mongodb_log = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 CFLAGS  += $(CFLAGS_MONGODB)

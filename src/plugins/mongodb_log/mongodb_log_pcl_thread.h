@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_PCL_THREAD_H_
 #define __PLUGINS_MONGODB_LOG_MONGODB_LOG_PCL_THREAD_H_
 
-#include "pcl_adapter.h"
+#include <pcl_utils/pcl_adapter.h>
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -75,7 +75,7 @@ class MongoLogPointCloudThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  MongoLogPointCloudAdapter *adapter_;
+  PointCloudAdapter *adapter_;
 
   /// @cond INTERNALS
   typedef struct {

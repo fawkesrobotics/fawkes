@@ -96,7 +96,7 @@ MongoLogPointCloudThread::init()
   gridfs_  = new GridFS(*mongodb_, database_);
   //gridfs_->setChunkSize(cfg_chunk_size_);
 
-  adapter_ = new MongoLogPointCloudAdapter(pcl_manager, logger);
+  adapter_ = new PointCloudAdapter(pcl_manager, logger);
 
   std::vector<std::string> pcls = pcl_manager->get_pointcloud_list();
 
@@ -143,7 +143,7 @@ MongoLogPointCloudThread::init()
     std::string frame_id;
     unsigned int width, height;
     bool is_dense;
-    MongoLogPointCloudAdapter::V_PointFieldInfo fieldinfo;
+    PointCloudAdapter::V_PointFieldInfo fieldinfo;
     adapter_->get_info(*p, width, height, frame_id, is_dense, fieldinfo);
     pi.msg.header.frame_id = frame_id;
     pi.msg.width = width;
@@ -194,57 +194,58 @@ MongoLogPointCloudThread::loop()
   unsigned int num_stored = 0;
   for (p = pcls_.begin(); p != pcls_.end(); ++p) {
     PointCloudInfo &pi = p->second;
-      unsigned int width, height;
-      void *point_data;
-      size_t point_size, num_points;
-      fawkes::Time time;
-      adapter_->get_data(p->first, width, height, time,
-                          &point_data, point_size, num_points);
-      size_t data_size = point_size * num_points;
+    std::string frame_id;
+    unsigned int width, height;
+    void *point_data;
+    size_t point_size, num_points;
+    fawkes::Time time;
+    adapter_->get_data(p->first, frame_id, width, height, time,
+		       &point_data, point_size, num_points);
+    size_t data_size = point_size * num_points;
 
-      if (pi.last_sent != time) {
-        pi.last_sent = time;
+    if (pi.last_sent != time) {
+      pi.last_sent = time;
 
-        fawkes::Time start(clock);
+      fawkes::Time start(clock);
 
-        BSONObjBuilder document;
-        document.append("timestamp", (long long) time.in_msec());
-        BSONObjBuilder subb(document.subobjStart("pointcloud"));
-        subb.append("frame_id", pi.msg.header.frame_id);
-        subb.append("is_dense", pi.msg.is_dense);
-        subb.append("width", width);
-        subb.append("height", height);
-        subb.append("point_size", (unsigned int)point_size);
-        subb.append("num_points", (unsigned int)num_points);
+      BSONObjBuilder document;
+      document.append("timestamp", (long long) time.in_msec());
+      BSONObjBuilder subb(document.subobjStart("pointcloud"));
+      subb.append("frame_id", pi.msg.header.frame_id);
+      subb.append("is_dense", pi.msg.is_dense);
+      subb.append("width", width);
+      subb.append("height", height);
+      subb.append("point_size", (unsigned int)point_size);
+      subb.append("num_points", (unsigned int)num_points);
 
-        std::stringstream name;
-        name << pi.topic_name << "_" << time.in_msec();
-        subb.append("data", gridfs_->storeFile((char*) point_data, data_size, name.str()));
+      std::stringstream name;
+      name << pi.topic_name << "_" << time.in_msec();
+      subb.append("data", gridfs_->storeFile((char*) point_data, data_size, name.str()));
 
-        BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
-        for (unsigned int i = 0; i < pi.msg.fields.size(); i++) {
-          BSONObjBuilder fi(subb2.subobjStart());
-          fi.append("name", pi.msg.fields[i].name);
-          fi.append("offset", pi.msg.fields[i].offset);
-          fi.append("datatype", pi.msg.fields[i].datatype);
-          fi.append("count", pi.msg.fields[i].count);
-          fi.doneFast();
-        }
-        subb2.doneFast();
-        subb.doneFast();
-	collection_ = database_ + "." + pi.topic_name;
-        try {
-          mongodb_->insert(collection_, document.obj());
-	  ++num_stored;
-        } catch (mongo::DBException &e) {
-          logger->log_warn(this->name(), "Failed to insert into %s: %s",
-                           collection_.c_str(), e.what());
-        }
+      BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
+      for (unsigned int i = 0; i < pi.msg.fields.size(); i++) {
+	BSONObjBuilder fi(subb2.subobjStart());
+	fi.append("name", pi.msg.fields[i].name);
+	fi.append("offset", pi.msg.fields[i].offset);
+	fi.append("datatype", pi.msg.fields[i].datatype);
+	fi.append("count", pi.msg.fields[i].count);
+	fi.doneFast();
+      }
+      subb2.doneFast();
+      subb.doneFast();
+      collection_ = database_ + "." + pi.topic_name;
+      try {
+	mongodb_->insert(collection_, document.obj());
+	++num_stored;
+      } catch (mongo::DBException &e) {
+	logger->log_warn(this->name(), "Failed to insert into %s: %s",
+			 collection_.c_str(), e.what());
+      }
 
-    fawkes::Time end(clock);
-    float diff = (end - &start) * 1000.;
-    logger->log_debug(this->name(), "Stored point cloud %s (time %li) in %.1f ms",
-		      p->first.c_str(), time.in_msec(), diff);
+      fawkes::Time end(clock);
+      float diff = (end - &start) * 1000.;
+      logger->log_debug(this->name(), "Stored point cloud %s (time %li) in %.1f ms",
+			p->first.c_str(), time.in_msec(), diff);
 
     } else {
 	logger->log_debug(this->name(), "Point cloud %s did not change",
