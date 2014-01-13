@@ -32,7 +32,7 @@ using namespace fawkes;
 
 #define CFG_PREFIX "/perception/pcl-db-merge/ros/"
 
-/** @class PointCloudDBROSCommThread "pcl_db_merge_roscomm_thread.h"
+/** @class PointCloudDBROSCommThread "pcl_db_roscomm_thread.h"
  * Thread to merge point clouds from database on request.
  * @author Tim Niemueller
  */

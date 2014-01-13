@@ -79,14 +79,21 @@ template <typename PointType>
 class PointCloudDBPipeline
 {
  protected:
+  /** Basic point cloud type. */
   typedef pcl::PointCloud<PointType> Cloud;
 
+  /** Colored point type */
   typedef pcl::PointXYZRGB ColorPointType;
+  /** Type for colored point clouds based on ColorPointType. */
   typedef pcl::PointCloud<ColorPointType> ColorCloud;
+  /** Shared pointer to cloud. */
   typedef typename Cloud::Ptr CloudPtr;
+  /** Shared pointer to constant cloud. */
   typedef typename Cloud::ConstPtr CloudConstPtr;
 
+  /** Shared pointer to colored cloud. */
   typedef typename ColorCloud::Ptr ColorCloudPtr;
+  /** Shared pointer to constant colored cloud. */
   typedef typename ColorCloud::ConstPtr ColorCloudConstPtr;
 
  public:
@@ -199,6 +206,11 @@ class PointCloudDBPipeline
   }
 
  protected: // methods
+  /** Read a file from MongoDB GridFS.
+   * @param dataptr Pointer to buffer to read data to. Make sure it is of
+   * sufficient size.
+   * @param filename name of file to read from GridFS.
+   */
   void
   read_gridfs_file(void *dataptr, std::string filename)
   {
@@ -223,7 +235,15 @@ class PointCloudDBPipeline
     //logger_->log_info(name_, "%zu bytes restored", bytes);
   }
 
-
+  /** Retrieve point clouds from database.
+   * @param times timestamps for when to read the point clouds. The method
+   * will retrieve the point clouds with the minimum difference between the
+   * desired and actual times.
+   * @param actual_times upon return contains the actual times of the point
+   * clouds retrieved based on the desired @p times.
+   * @param collection name of the collection to retrieve data from.
+   * @return vector of shared pointers to retrieved point clouds
+   */
   std::vector<CloudPtr>
   retrieve_clouds(std::vector<long long> &times, std::vector<long long> &actual_times,
 		  std::string &collection)
@@ -280,21 +300,25 @@ class PointCloudDBPipeline
 
 
  protected: // members
-  const char *name_;
+  const char *name_;			/**< Name of the pipeline. */
 
-  std::string  cfg_database_name_;
-  long         cfg_pcl_age_tolerance_;
-  long         cfg_transform_range_[2];
+  std::string  cfg_database_name_;	/**< Database to read fro. */
+  long         cfg_pcl_age_tolerance_;	/**< Age tolerance for retrieved point clouds. */
+  long         cfg_transform_range_[2];	/**< Transform range start and end times. */
 
-  mongo::DBClientBase *mongodb_client_;
-  mongo::GridFS *mongodb_gridfs_;
+  mongo::DBClientBase *mongodb_client_;	/**< MongoDB client to retrieve data. */
+  mongo::GridFS *mongodb_gridfs_;	/**< MongoDB GridFS client to retrieve data. */
 
-  fawkes::Logger        *logger_;
+  fawkes::Logger        *logger_;	/**< Logger for informative messages. */
 
-  ColorCloudPtr output_;
+  ColorCloudPtr output_;		/**< The final (colored) output of the pipeline. */
 
 };
 
+/** Convert applicability status to readable string.
+ * @param status the status to convert
+ * @return readable string for status
+ */
 inline const char *
 to_string(ApplicabilityStatus status)
 {

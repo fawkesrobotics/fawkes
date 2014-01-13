@@ -60,6 +60,10 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
    * @param config configuration
    * @param logger Logger
    * @param output output point cloud
+   * @param transformer TF transformer for point cloud transformations between
+   * coordinate reference frames
+   * @param original input point cloud
+   * @param output output point cloud
    */
   PointCloudDBRetrievePipeline(mongo::DBClientBase *mongodb_client,
 			       fawkes::Configuration *config, fawkes::Logger *logger,
@@ -92,7 +96,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
   }
 
   /** Retrieve point clouds.
-   * @param times times for which to retrieve the point clouds.
+   * @param timestamp time for which to retrieve the point cloud
    * @param collection collection from which to retrieve the data
    */
   void

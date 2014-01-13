@@ -75,6 +75,8 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
    * @param mongodb_client MongoDB client
    * @param config configuration
    * @param logger Logger
+   * @param transformer TF transformer for point cloud transformations between
+   * coordinate reference frames
    * @param output output point cloud
    */
   PointCloudDBMergePipeline(mongo::DBClientBase *mongodb_client,
