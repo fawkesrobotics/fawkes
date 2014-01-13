@@ -85,12 +85,16 @@ class ColliMessageHandlerThread
   float cfg_security_distance_;
   float cfg_max_velocity_;
   float cfg_escaping_enabled_;
+  bool  cfg_stop_at_target_;
+  bool  cfg_orient_at_target_;
   fawkes::NavigatorInterface::DriveMode cfg_drive_mode_;
 
   // current parameters, may be set by colli internally, or externally via messages
   float security_distance_;
   float max_velocity_;
   float escaping_enabled_;
+  bool  stop_at_target_;
+  bool  orient_at_target_;
   fawkes::NavigatorInterface::DriveMode drive_mode_;
 
 #ifdef HAVE_ROS

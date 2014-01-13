@@ -24,6 +24,12 @@ plugins/colli:
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
 
+  # Default behaviour, deciding if colli should stop at target (not used in implementation atm though)
+  stop_at_target: true
+
+  # Default behaviour, deciding if colli should adjust orientation when target is reached
+  orient_at_target: true
+
   # Default drive mode. It's an enum, see NavigatorInterface for details.
   drive_mode: 2
 
