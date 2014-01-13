@@ -84,6 +84,8 @@ class ColliMessageHandlerThread
   float security_distance_;
   float max_velocity_;
   float escaping_enabled_;
+  fawkes::NavigatorInterface::DriveMode default_drive_mode_;
+  fawkes::NavigatorInterface::DriveMode drive_mode_;
 
 #ifdef HAVE_ROS
   void callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg);
@@ -93,12 +95,10 @@ class ColliMessageHandlerThread
   bool colli_final();
   void colli_stop();
   void colli_relgoto(float x, float y, float ori, float max_speed = 1.5,
-                       bool escape_allowed = true, float security_distance = 0.2,
-                       fawkes::NavigatorInterface::DriveMode drivemode = fawkes::NavigatorInterface::SlowForward);
+                       bool escape_allowed = true, float security_distance = 0.2);
 
   void colli_goto(float x, float y, float ori, float max_speed = 1.5,
-                       bool escape_allowed = true, float security_distance = 0.2,
-                       fawkes::NavigatorInterface::DriveMode drivemode = fawkes::NavigatorInterface::SlowForward);
+                       bool escape_allowed = true, float security_distance = 0.2);
 };
 
 #endif

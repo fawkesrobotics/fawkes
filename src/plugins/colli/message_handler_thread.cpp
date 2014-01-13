@@ -59,9 +59,11 @@ void
 ColliMessageHandlerThread::init()
 {
   std::string cfg_prefix = "/plugins/colli/";
-  security_distance_ = config->get_float((cfg_prefix + "security_distance").c_str());
-  max_velocity_      = config->get_float((cfg_prefix + "max_velocity").c_str());
-  escaping_enabled_  = config->get_bool((cfg_prefix + "escaping_enabled").c_str());
+  security_distance_   = config->get_float((cfg_prefix + "security_distance").c_str());
+  max_velocity_        = config->get_float((cfg_prefix + "max_velocity").c_str());
+  escaping_enabled_    = config->get_bool((cfg_prefix + "escaping_enabled").c_str());
+  default_drive_mode_  = (NavigatorInterface::DriveMode)(config->get_int((cfg_prefix + "default_drive_mode").c_str()));
+  logger->log_debug(name(), "Default drive_mode: %i (%s)", default_drive_mode_, if_navi_->tostring_DriveMode(default_drive_mode_));
 
   cfg_iface_navi_       = config->get_string((cfg_prefix + "interface/navigator").c_str());
   cfg_iface_motor_      = config->get_string((cfg_prefix + "interface/motor").c_str());
@@ -79,6 +81,8 @@ ColliMessageHandlerThread::init()
   sub_ = new ros::Subscriber();
   *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
 #endif
+
+  drive_mode_ = default_drive_mode_;
 }
 
 
@@ -228,8 +232,7 @@ ColliMessageHandlerThread::colli_stop()
 
 void
 ColliMessageHandlerThread::colli_relgoto(float x, float y, float ori, float max_speed,
-                                         bool escape_allowed, float security_distance,
-                                         NavigatorInterface::DriveMode drivemode)
+                                         bool escape_allowed, float security_distance)
 {
   // my Pose in motor coordinates
   float colliTargetO = if_motor_->odometry_orientation();
@@ -244,19 +247,18 @@ ColliMessageHandlerThread::colli_relgoto(float x, float y, float ori, float max_
 
   colliTargetO += ori;
 
-  this->colli_goto(colliTargetX, colliTargetY, colliTargetO, max_speed, escape_allowed, security_distance, drivemode);
+  this->colli_goto(colliTargetX, colliTargetY, colliTargetO, max_speed, escape_allowed, security_distance);
 }
 
 void
 ColliMessageHandlerThread::colli_goto(float x, float y, float ori, float max_speed,
-                                         bool escape_allowed, float security_distance,
-                                         NavigatorInterface::DriveMode drivemode)
+                                         bool escape_allowed, float security_distance)
 {
   if_colli_target_->set_dest_x( x );
   if_colli_target_->set_dest_y( y );
   if_colli_target_->set_dest_ori( ori );
 
-  if_colli_target_->set_drive_mode( drivemode );
+  if_colli_target_->set_drive_mode( drive_mode_ );
   if_colli_target_->set_stop_at_target( true );
   if_colli_target_->set_orient_at_target( true );
   if_colli_target_->set_escaping_enabled( escape_allowed );
