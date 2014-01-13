@@ -29,7 +29,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class StorageAdapter <aspect/pointcloud/pointcloud_manager.h>
+/** @class StorageAdapter <pcl_utils/storage_adapter.h>
  * Adapter base class.
  * The adapter base class is required to store point clouds of
  * arbitrary point types.
