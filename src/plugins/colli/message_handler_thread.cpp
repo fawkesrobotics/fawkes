@@ -263,9 +263,12 @@ ColliMessageHandlerThread::colli_goto(float x, float y, float ori)
   if_colli_target_->set_dest_ori( ori );
 
   if_colli_target_->set_drive_mode( drive_mode_ );
+  if_colli_target_->set_security_distance( security_distance_ );
+  if_colli_target_->set_max_velocity( max_velocity_ );
+  if_colli_target_->set_escaping_enabled( escaping_enabled_ );
   if_colli_target_->set_stop_at_target( true );
   if_colli_target_->set_orient_at_target( true );
-  if_colli_target_->set_escaping_enabled( escaping_enabled_ );
+
 
   if_colli_target_->write();
 }
