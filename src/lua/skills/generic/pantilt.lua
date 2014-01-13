@@ -120,15 +120,14 @@ fsm:define_states{
 }
 -- Transitions
 fsm:add_transitions{
-   {"DECIDE_MODE", "FAILED", precond_only="not ptu(vars.ptu):has_writer()", desc="no writer"},
-   {"DECIDE_MODE", "TURNONOFF", precond_only="vars.enable ~= nil", desc="enable parm"},
-   {"DECIDE_MODE", "CALIBRATE", precond_only="vars.calibrate", desc="calib parm"},
-   {"DECIDE_MODE", "GOTO", precond_only="vars.pan ~= nil and vars.tilt ~= nil",
-    desc="goto parms"},
-   {"DECIDE_MODE", "STOP", precond_only="vars.stop"},
-   {"DECIDE_MODE", "PARK", precond_only="vars.park"},
-   {"DECIDE_MODE", "SPEED", precond_only="vars.max_speed"},
-   {"DECIDE_MODE", "FAILED", cond=true, precond_only=true, desc="No valid command"},
+   {"DECIDE_MODE", "FAILED", precond="not ptu(vars.ptu):has_writer()", desc="no writer"},
+   {"DECIDE_MODE", "TURNONOFF", precond="vars.enable ~= nil", desc="enable parm"},
+   {"DECIDE_MODE", "CALIBRATE", precond="vars.calibrate", desc="calib parm"},
+   {"DECIDE_MODE", "GOTO", precond="vars.pan ~= nil and vars.tilt ~= nil", desc="goto parms"},
+   {"DECIDE_MODE", "STOP", precond="vars.stop"},
+   {"DECIDE_MODE", "PARK", precond="vars.park"},
+   {"DECIDE_MODE", "SPEED", precond="vars.max_speed"},
+   {"DECIDE_MODE", "FAILED", precond=true, desc="No valid command"},
    {"CALIBRATE", "CHECKERR", cond=jc_ptu_is_final, desc="final"},
    {"CALIBRATE", "FAILED", cond=jc_next_msg, desc="next msg"},
    {"TURNONOFF", "CHECKERR", cond=true},

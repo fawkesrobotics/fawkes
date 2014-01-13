@@ -133,18 +133,18 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "FAILED", precond="not katanaarm:has_writer()", desc="no writer"},
+   {"INIT", "FAILED", cond_and_precond="not katanaarm:has_writer()", desc="no writer"},
 
    {"DECIDE", "ADD_OBJECT", cond="vars.x and vars.y and vars.z", desc="pose given"},
    {"DECIDE", "FAILED", cond=true, desc="insufficient arguments"},
 
-   {"ADD_OBJECT", "PRE_GRAB_POS", precond="not (vars.new_object and vars.table_height)", desc="no object given"},
+   {"ADD_OBJECT", "PRE_GRAB_POS", cond_and_precond="not (vars.new_object and vars.table_height)", desc="no object given"},
 
    {"TO_APPROACH_OBJ", "REPOSITION_OBJ", timeout = 1.0},
   -- {"TO_APPROACH_OBJ", "APPROACH_OBJ", timeout = 1.0},
    --{"TO_APPROACH_OBJ", "FINAL", timeout = 1.0}, --TODO: skipp approach and stuff
 
-   {"REPOSITION_OBJ", "APPROACH_OBJ", precond="not (vars.object and vars.table_height)", desc="no object given"},
+   {"REPOSITION_OBJ", "APPROACH_OBJ", cond_and_precond="not (vars.object and vars.table_height)", desc="no object given"},
 
    {"APPROACH_OBJ", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
    {"APPROACH_AGAIN", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
@@ -155,7 +155,7 @@ fsm:add_transitions {
 
    {"TO_GRAB", "GRAB", timeout = 2.0},
 
-   {"TO_ATTACH_OBJECT", "FINAL", precond="not (vars.object and vars.table_height)", desc="no object given"},
+   {"TO_ATTACH_OBJECT", "FINAL", cond_and_precond="not (vars.object and vars.table_height)", desc="no object given"},
 }
 
 function INIT:init()

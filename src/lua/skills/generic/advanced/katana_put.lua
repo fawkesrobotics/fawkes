@@ -58,20 +58,20 @@ fsm:define_states{
 
    {"INIT", JumpState},
    {"MOVE", SkillJumpState, skills={{katana}},
-   	    final_to="TO_OPEN_GRIPPER", fail_to="MOVE_WITH_THETA"},
+          final_to="TO_OPEN_GRIPPER", fail_to="MOVE_WITH_THETA"},
    {"MOVE_WITH_THETA", SkillJumpState, skills={{katana}},
-	    final_to="TO_OPEN_GRIPPER", fail_to="FAILED"},
+       final_to="TO_OPEN_GRIPPER", fail_to="FAILED"},
    {"OPEN_GRIPPER", SkillJumpState, skills={{katana}},
-   	    final_to="RELEASE_OBJECT", fail_to="FAILED"},
+          final_to="RELEASE_OBJECT", fail_to="FAILED"},
    {"RELEASE_OBJECT", SkillJumpState, skills={{katana}},
-   	    final_to="FINAL", fail_to="FAILED"},
+          final_to="FINAL", fail_to="FAILED"},
 
    {"TO_OPEN_GRIPPER", JumpState}
 
 }
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "FAILED", precond_only="not katanaarm:has_writer()", desc="no writer"},
+   {"INIT", "FAILED", precond="not katanaarm:has_writer()", desc="no writer"},
 
    {"INIT", "MOVE", cond="vars.x and vars.y and vars.z", desc="move katana"},
    {"INIT", "FAILED", cond=true, desc="insufficient arguments"},
@@ -81,16 +81,16 @@ fsm:add_transitions {
 
 function MOVE:init()
    self.args = {x=self.fsm.vars.x,
-		y=self.fsm.vars.y,
-		z=self.fsm.vars.z}
+      y=self.fsm.vars.y,
+      z=self.fsm.vars.z}
 end
 
 function MOVE_WITH_THETA:init()
    katanaarm:read()
    self.args = {x=self.fsm.vars.x,
-		y=self.fsm.vars.y,
-		z=self.fsm.vars.z,
-		theta=katanaarm:theta()}
+      y=self.fsm.vars.y,
+      z=self.fsm.vars.z,
+      theta=katanaarm:theta()}
 end
 
 function OPEN_GRIPPER:init()
