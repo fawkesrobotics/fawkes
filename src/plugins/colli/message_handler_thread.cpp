@@ -188,11 +188,42 @@ ColliMessageHandlerThread::loop()
       security_distance_ = msg->security_distance();
       if_navi_->set_security_distance(security_distance_);
 
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetStopAtTargetMessage>() ) {
+      NavigatorInterface::SetStopAtTargetMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetStopAtTargetMessage>();
+
+      logger->log_debug(name(), "setting stop_at_target to %u", msg->is_stop_at_target());
+      stop_at_target_ = msg->is_stop_at_target();
+      if_navi_->set_stop_at_target(stop_at_target_);
+
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetOrientAtTargetMessage>() ) {
+      NavigatorInterface::SetOrientAtTargetMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetOrientAtTargetMessage>();
+
+      logger->log_debug(name(), "setting orient_at_target to %u", msg->is_orient_at_target());
+      orient_at_target_ = msg->is_orient_at_target();
+      if_navi_->set_orient_at_target(orient_at_target_);
+
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetDriveModeMessage>() ) {
       NavigatorInterface::SetDriveModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetDriveModeMessage>();
 
       logger->log_debug(name(), "setting drive_mode to %f", if_navi_->tostring_DriveMode(msg->drive_mode()));
       drive_mode_ = msg->drive_mode();
+      if_navi_->set_drive_mode(drive_mode_);
+
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::ResetParametersMessage>() ) {
+
+      logger->log_debug(name(), "resetting colli parameters to default values (from config)");
+      max_velocity_      = cfg_max_velocity_;
+      escaping_enabled_  = cfg_escaping_enabled_;
+      security_distance_ = cfg_security_distance_;
+      stop_at_target_    = cfg_stop_at_target_;
+      orient_at_target_  = cfg_orient_at_target_;
+      drive_mode_        = cfg_drive_mode_;
+
+      if_navi_->set_max_velocity(max_velocity_);
+      if_navi_->set_escaping_enabled(escaping_enabled_);
+      if_navi_->set_security_distance(security_distance_);
+      if_navi_->set_stop_at_target(stop_at_target_);
+      if_navi_->set_orient_at_target(orient_at_target_);
       if_navi_->set_drive_mode(drive_mode_);
 
     } else {
