@@ -3,7 +3,8 @@
  *  pcl_adapter.cpp - PCL exchange publisher manager
  *
  *  Created: Tue Nov 08 00:38:34 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,15 +24,17 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/ros/conversions.h>
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+#  include <pcl/PCLPointField.h>
+#endif
 #include <logging/logger.h>
-#include <aspect/pointcloud/pointcloud_manager.h>
+#include <pcl_utils/pointcloud_manager.h>
 
 using namespace fawkes;
 
 /// @cond INTERNALS
 /** ROS to PCL storage adapter. */
-class RosPointCloudAdapter::StorageAdapter
+class PointCloudAdapter::StorageAdapter
 {
  public:
   /** Constructor.
@@ -48,8 +51,8 @@ class RosPointCloudAdapter::StorageAdapter
 };
 /// @endcond
 
-/** @class RosPointCloudAdapter "pcl_adapter.h"
- * Standalone PCL to ROS adapter class.
+/** @class PointCloudAdapter <pcl_utils/pcl_adapter.h>
+ * Point cloud adapter class.
  * Currently, the standalone PCL comes with sensor_msgs and std_msgs
  * data types which are incompatible with the ones that come with
  * ROS. Hence, to use both in the same plugin, we need to confine the
@@ -66,7 +69,7 @@ class RosPointCloudAdapter::StorageAdapter
  * @param pcl_manager PCL manager
  * @param logger logger
  */
-RosPointCloudAdapter::RosPointCloudAdapter(PointCloudManager *pcl_manager,
+PointCloudAdapter::PointCloudAdapter(PointCloudManager *pcl_manager,
                                            Logger *logger)
   : __pcl_manager(pcl_manager)
 {
@@ -74,7 +77,7 @@ RosPointCloudAdapter::RosPointCloudAdapter(PointCloudManager *pcl_manager,
 
 
 /** Destructor. */
-RosPointCloudAdapter::~RosPointCloudAdapter()
+PointCloudAdapter::~PointCloudAdapter()
 {
   std::map<std::string, StorageAdapter *>::iterator i;
   for (i = __sas.begin(); i != __sas.end(); ++i) {
@@ -96,22 +99,30 @@ static void
 fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &p,
           unsigned int &width, unsigned int &height,
           std::string &frame_id, bool &is_dense,
-          RosPointCloudAdapter::V_PointFieldInfo &pfi)
+          PointCloudAdapter::V_PointFieldInfo &pfi)
 {
   width  = p->width;
   height = p->height;
   frame_id = p->header.frame_id;
   is_dense = p->is_dense;
 
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+  std::vector<pcl::PCLPointField> pfields;
+#else
   std::vector<sensor_msgs::PointField> pfields;
+#endif
   pcl::for_each_type<typename pcl::traits::fieldList<PointT>::type>
     (pcl::detail::FieldAdder<PointT>(pfields));
 
   pfi.clear();
   pfi.resize(pfields.size());
   for (unsigned int i = 0; i < pfields.size(); ++i) {
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+    pcl::PCLPointField &pf = pfields[i];
+#else
     sensor_msgs::PointField &pf = pfields[i];
-    pfi[i] = RosPointCloudAdapter::PointFieldInfo(pf.name, pf.offset,
+#endif
+    pfi[i] = PointCloudAdapter::PointFieldInfo(pf.name, pf.offset,
                                                   pf.datatype, pf.count);
   }
 }
@@ -125,7 +136,7 @@ fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &p,
  * @param pfi upon return contains data type information
  */
 void
-RosPointCloudAdapter::get_info(std::string &id,
+PointCloudAdapter::get_info(std::string &id,
                                unsigned int &width, unsigned int &height,
                                std::string &frame_id, bool &is_dense,
                                V_PointFieldInfo &pfi)
@@ -161,7 +172,7 @@ RosPointCloudAdapter::get_info(std::string &id,
  * @param num_points upon return contains number of points
  */
 void
-RosPointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
+PointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
                                unsigned int &width, unsigned int &height, fawkes::Time &time,
                                void **data_ptr, size_t &point_size, size_t &num_points)
 {
@@ -184,7 +195,7 @@ RosPointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
  * @param id ID of point cloud to close
  */
 void
-RosPointCloudAdapter::close(const std::string &id)
+PointCloudAdapter::close(const std::string &id)
 {
   if (__sas.find(id) != __sas.end()) {
     delete __sas[id];

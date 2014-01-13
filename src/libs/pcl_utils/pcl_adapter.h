@@ -3,7 +3,8 @@
  *  pcl_adapter.h - Thread to exchange point clouds
  *
  *  Created: Tue Nov 08 00:36:10 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *             2012       Bastian Klingen
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROS_PCL_ADAPTER_H_
-#define __PLUGINS_ROS_PCL_ADAPTER_H_
+#ifndef __LIBS_PCL_UTILS_PCL_ADAPTER_H_
+#define __LIBS_PCL_UTILS_PCL_ADAPTER_H_
 
 #include <utils/time/time.h>
 
@@ -34,7 +35,7 @@ namespace fawkes {
   class Logger;
 }
 
-class RosPointCloudAdapter
+class PointCloudAdapter
 {
  public:
   /** Information about the data fields. */
@@ -60,9 +61,9 @@ class RosPointCloudAdapter
   /** Vector of PointFieldInfo. */
   typedef std::vector<PointFieldInfo> V_PointFieldInfo;
 
-  RosPointCloudAdapter(fawkes::PointCloudManager *pcl_manager,
-                       fawkes::Logger *logger);
-  ~RosPointCloudAdapter();
+  PointCloudAdapter(fawkes::PointCloudManager *pcl_manager,
+		    fawkes::Logger *logger);
+  ~PointCloudAdapter();
 
   void get_info(std::string &id,
                 unsigned int &width, unsigned int &height,

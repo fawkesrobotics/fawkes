@@ -24,7 +24,7 @@
 #define __ASPECT_INIFINS_PCL_H_
 
 #include <aspect/inifins/inifin.h>
-#include <aspect/pointcloud/pointcloud_manager.h>
+#include <pcl_utils/pointcloud_manager.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */

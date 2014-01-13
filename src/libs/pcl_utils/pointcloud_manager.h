@@ -3,8 +3,7 @@
  *  pointcloud_manager.h - PointCloud manager for aspect
  *
  *  Created: Sun Nov 06 23:29:36 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,10 +20,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_POINTCLOUD_POINTCLOUD_MANAGER_H_
-#define __ASPECT_POINTCLOUD_POINTCLOUD_MANAGER_H_
+#ifndef __LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
+#define __LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
 
-#include <aspect/aspect.h>
 #include <core/exception.h>
 #include <core/utils/refptr.h>
 #include <core/utils/lock_map.h>

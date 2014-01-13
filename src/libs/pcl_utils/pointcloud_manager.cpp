@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  pointcloud_manager.cpp - PointCloud manager for aspect
+ *  pointcloud_manager.cpp - PointCloud manager
  *
  *  Created: Sun Nov 06 23:49:36 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/pointcloud/pointcloud_manager.h>
+#include <pcl_utils/pointcloud_manager.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -29,7 +28,7 @@ namespace fawkes {
 #endif
 
 
-/** @class PointCloudManager <aspect/pointcloud/pointcloud_manager.h>
+/** @class PointCloudManager <pcl_utils/pointcloud_manager.h>
  * Point Cloud manager.
  * This class manages a number of points clouds and acts as a hub to
  * distribute them.

@@ -45,7 +45,7 @@ netcomm: core utils
 interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
-aspect: core utils blackboard netcomm config plugin webview logging tf
+aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils
 geometry: core
 worldinfo_utils: core netcomm geometry
 lua: core utils blackboard config logging
