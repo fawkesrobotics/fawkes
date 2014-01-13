@@ -3,7 +3,7 @@
 <interface name="NavigatorInterface" author="Martin Liebenberg, Daniel Beck, Tim Niemueller" year="2007-2009">
   <constants>
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
-	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+   the equation f = 2^n holds, for f being the flag value and n a natural number. -->
     <constant type="uint32" value="0" name="ERROR_NONE">No error.</constant>
     <constant type="uint32" value="1" name="ERROR_MOTOR">Cannot
       communicate with motor.</constant>
@@ -16,7 +16,7 @@
     </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
-	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+   the equation f = 2^n holds, for f being the flag value and n a natural number. -->
     <constant type="uint32" value="0" name="FLAG_NONE">No flags set.</constant>
     <constant type="uint32" value="1" name="FLAG_CART_GOTO">
       Navigator component supports cartesian goto commands.
@@ -154,12 +154,22 @@
     <ref>escaping_enabled</ref>
   </message>
   <message name="SetSecurityDistance">
-    <comment>Sets the desired security distance (in meters) for
-    collision avoidance.</comment>
+    <comment>Sets the desired security distance (in meters) for collision avoidance.</comment>
     <ref>security_distance</ref>
   </message>
-  <message name="SetDriveModeMessage">
+  <message name="SetDriveMode">
     <comment>Sets the desired drive modefor collision avoidance.</comment>
     <ref>drive_mode</ref>
+  </message>
+  <message name="SetStopAtTarget">
+    <comment>Decide if robot should explicily stop when the target is reached.</comment>
+    <ref>stop_at_target</ref>
+  </message>
+    <message name="SetOrientAtTarget">
+    <comment>Decide if robot should adjust orientation when target is reached.</comment>
+    <ref>orient_at_target</ref>
+  </message>
+  <message name="ResetParameters">
+    <comment>Reset the settable parameters to default values.</comment>
   </message>
 </interface>

@@ -428,6 +428,82 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetStopAtTargetMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool stop_at_target; /**< Stop when target is reached? */
+    } SetStopAtTargetMessage_data_t;
+#pragma pack(pop)
+
+    SetStopAtTargetMessage_data_t *data;
+
+   public:
+    SetStopAtTargetMessage(const bool ini_stop_at_target);
+    SetStopAtTargetMessage();
+    ~SetStopAtTargetMessage();
+
+    SetStopAtTargetMessage(const SetStopAtTargetMessage *m);
+    /* Methods */
+    bool is_stop_at_target() const;
+    void set_stop_at_target(const bool new_stop_at_target);
+    size_t maxlenof_stop_at_target() const;
+    virtual Message * clone() const;
+  };
+
+  class SetOrientAtTargetMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool orient_at_target; /**< Adjust orientation when target position is reached? */
+    } SetOrientAtTargetMessage_data_t;
+#pragma pack(pop)
+
+    SetOrientAtTargetMessage_data_t *data;
+
+   public:
+    SetOrientAtTargetMessage(const bool ini_orient_at_target);
+    SetOrientAtTargetMessage();
+    ~SetOrientAtTargetMessage();
+
+    SetOrientAtTargetMessage(const SetOrientAtTargetMessage *m);
+    /* Methods */
+    bool is_orient_at_target() const;
+    void set_orient_at_target(const bool new_orient_at_target);
+    size_t maxlenof_orient_at_target() const;
+    virtual Message * clone() const;
+  };
+
+  class ResetParametersMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ResetParametersMessage_data_t;
+#pragma pack(pop)
+
+    ResetParametersMessage_data_t *data;
+
+   public:
+    ResetParametersMessage();
+    ~ResetParametersMessage();
+
+    ResetParametersMessage(const ResetParametersMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   NavigatorInterface();

@@ -170,6 +170,35 @@ class NavigatorInterface : public Interface
     int maxlenof_drive_mode() const;
   };
 
+  class SetStopAtTargetMessage : public Message
+  {
+    SetStopAtTargetMessage(bool ini_stop_at_target);
+    SetStopAtTargetMessage();
+    ~SetStopAtTargetMessage();
+
+    bool is_stop_at_target();
+    void set_stop_at_target(const bool new_stop_at_target);
+    int maxlenof_stop_at_target() const;
+  };
+
+  class SetOrientAtTargetMessage : public Message
+  {
+    SetOrientAtTargetMessage(bool ini_orient_at_target);
+    SetOrientAtTargetMessage();
+    ~SetOrientAtTargetMessage();
+
+    bool is_orient_at_target();
+    void set_orient_at_target(const bool new_orient_at_target);
+    int maxlenof_orient_at_target() const;
+  };
+
+  class ResetParametersMessage : public Message
+  {
+    ResetParametersMessage();
+    ~ResetParametersMessage();
+
+  };
+
   unsigned int flags();
   void set_flags(const unsigned int new_flags);
   int maxlenof_flags() const;

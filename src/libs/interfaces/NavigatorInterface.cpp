@@ -109,7 +109,10 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
   add_messageinfo("SetDriveModeMessage");
-  unsigned char tmp_hash[] = {0x23, 0x7b, 0xe, 0xf8, 0x78, 0x90, 0x8e, 0x32, 0xfa, 0xcb, 0x14, 0x9a, 0x7e, 0x2e, 0xbf, 0xb8};
+  add_messageinfo("SetStopAtTargetMessage");
+  add_messageinfo("SetOrientAtTargetMessage");
+  add_messageinfo("ResetParametersMessage");
+  unsigned char tmp_hash[] = {0x8, 0xe0, 0x75, 0x4f, 0xbd, 0x1e, 0x1f, 0x48, 0xcf, 0x21, 0xe7, 0x97, 0x60, 0x39, 0xaa, 0x2f};
   set_hash(tmp_hash);
 }
 
@@ -748,6 +751,12 @@ NavigatorInterface::create_message(const char *type) const
     return new SetSecurityDistanceMessage();
   } else if ( strncmp("SetDriveModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetDriveModeMessage();
+  } else if ( strncmp("SetStopAtTargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetStopAtTargetMessage();
+  } else if ( strncmp("SetOrientAtTargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetOrientAtTargetMessage();
+  } else if ( strncmp("ResetParametersMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ResetParametersMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1923,6 +1932,232 @@ NavigatorInterface::SetDriveModeMessage::clone() const
 {
   return new NavigatorInterface::SetDriveModeMessage(this);
 }
+/** @class NavigatorInterface::SetStopAtTargetMessage <interfaces/NavigatorInterface.h>
+ * SetStopAtTargetMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_stop_at_target initial value for stop_at_target
+ */
+NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage(const bool ini_stop_at_target) : Message("SetStopAtTargetMessage")
+{
+  data_size = sizeof(SetStopAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetStopAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->stop_at_target = ini_stop_at_target;
+  add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
+}
+/** Constructor */
+NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage() : Message("SetStopAtTargetMessage")
+{
+  data_size = sizeof(SetStopAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetStopAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
+}
+
+/** Destructor */
+NavigatorInterface::SetStopAtTargetMessage::~SetStopAtTargetMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage(const SetStopAtTargetMessage *m) : Message("SetStopAtTargetMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetStopAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get stop_at_target value.
+ * Stop when target is reached?
+ * @return stop_at_target value
+ */
+bool
+NavigatorInterface::SetStopAtTargetMessage::is_stop_at_target() const
+{
+  return data->stop_at_target;
+}
+
+/** Get maximum length of stop_at_target value.
+ * @return length of stop_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetStopAtTargetMessage::maxlenof_stop_at_target() const
+{
+  return 1;
+}
+
+/** Set stop_at_target value.
+ * Stop when target is reached?
+ * @param new_stop_at_target new stop_at_target value
+ */
+void
+NavigatorInterface::SetStopAtTargetMessage::set_stop_at_target(const bool new_stop_at_target)
+{
+  data->stop_at_target = new_stop_at_target;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetStopAtTargetMessage::clone() const
+{
+  return new NavigatorInterface::SetStopAtTargetMessage(this);
+}
+/** @class NavigatorInterface::SetOrientAtTargetMessage <interfaces/NavigatorInterface.h>
+ * SetOrientAtTargetMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_orient_at_target initial value for orient_at_target
+ */
+NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage(const bool ini_orient_at_target) : Message("SetOrientAtTargetMessage")
+{
+  data_size = sizeof(SetOrientAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->orient_at_target = ini_orient_at_target;
+  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+}
+/** Constructor */
+NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage() : Message("SetOrientAtTargetMessage")
+{
+  data_size = sizeof(SetOrientAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+}
+
+/** Destructor */
+NavigatorInterface::SetOrientAtTargetMessage::~SetOrientAtTargetMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage(const SetOrientAtTargetMessage *m) : Message("SetOrientAtTargetMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @return orient_at_target value
+ */
+bool
+NavigatorInterface::SetOrientAtTargetMessage::is_orient_at_target() const
+{
+  return data->orient_at_target;
+}
+
+/** Get maximum length of orient_at_target value.
+ * @return length of orient_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetOrientAtTargetMessage::maxlenof_orient_at_target() const
+{
+  return 1;
+}
+
+/** Set orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @param new_orient_at_target new orient_at_target value
+ */
+void
+NavigatorInterface::SetOrientAtTargetMessage::set_orient_at_target(const bool new_orient_at_target)
+{
+  data->orient_at_target = new_orient_at_target;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetOrientAtTargetMessage::clone() const
+{
+  return new NavigatorInterface::SetOrientAtTargetMessage(this);
+}
+/** @class NavigatorInterface::ResetParametersMessage <interfaces/NavigatorInterface.h>
+ * ResetParametersMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+NavigatorInterface::ResetParametersMessage::ResetParametersMessage() : Message("ResetParametersMessage")
+{
+  data_size = sizeof(ResetParametersMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetParametersMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+NavigatorInterface::ResetParametersMessage::~ResetParametersMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::ResetParametersMessage::ResetParametersMessage(const ResetParametersMessage *m) : Message("ResetParametersMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetParametersMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::ResetParametersMessage::clone() const
+{
+  return new NavigatorInterface::ResetParametersMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1972,6 +2207,18 @@ NavigatorInterface::message_valid(const Message *message) const
   }
   const SetDriveModeMessage *m10 = dynamic_cast<const SetDriveModeMessage *>(message);
   if ( m10 != NULL ) {
+    return true;
+  }
+  const SetStopAtTargetMessage *m11 = dynamic_cast<const SetStopAtTargetMessage *>(message);
+  if ( m11 != NULL ) {
+    return true;
+  }
+  const SetOrientAtTargetMessage *m12 = dynamic_cast<const SetOrientAtTargetMessage *>(message);
+  if ( m12 != NULL ) {
+    return true;
+  }
+  const ResetParametersMessage *m13 = dynamic_cast<const ResetParametersMessage *>(message);
+  if ( m13 != NULL ) {
     return true;
   }
   return false;
