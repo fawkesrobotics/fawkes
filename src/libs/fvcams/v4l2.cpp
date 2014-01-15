@@ -602,6 +602,13 @@ V4L2Camera::select_format()
 
   char fourcc[5] = "    ";
 
+#ifdef HAVE_LIBV4L2
+  if (strcmp(_format, "") == 0) {
+    // no format setup, use YU12 by default when compiled with libv4l
+    strcpy(_format, "YU12");
+  }
+#endif
+
   if (strcmp(_format, ""))
   {
     /* Try to select preferred format */
