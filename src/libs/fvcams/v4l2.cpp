@@ -728,6 +728,7 @@ V4L2Camera::select_format()
     else if (strcmp(_format, "BGR4") == 0) _colorspace = BGR_WITH_ALPHA;
     else if (strcmp(_format, "BA81") == 0) _colorspace = BAYER_MOSAIC_BGGR;
     else if (strcmp(_format, "Y16 ") == 0) _colorspace = MONO16;
+    else if (strcmp(_format, "YU12") == 0) _colorspace = YUV420_PLANAR;
     else _colorspace = CS_UNKNOWN;
   }
 
