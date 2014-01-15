@@ -42,6 +42,8 @@ colorspace_by_name(const char *mode)
     return YUV411_PACKED;
   } else if (strcmp(mode, "YUV411_PLANAR") == 0) {
     return YUV411_PLANAR;
+  } else if (strcmp(mode, "YUV420_PLANAR") == 0) {
+    return YUV420_PLANAR;
   } else if (strcmp(mode, "YUY2") == 0) {
     return YUY2;
   } else if (strcmp(mode, "YVY2") == 0) {
@@ -98,6 +100,8 @@ colorspace_to_string(colorspace_t colorspace)
     return "YUV411_PACKED";
   case YUV411_PLANAR:
     return "YUV411_PLANAR";
+  case YUV420_PLANAR:
+    return "YUV420_PLANAR";
   case YUY2:
     return "YUY2";
   case YVY2:
@@ -169,6 +173,7 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
 
   case YUV411_PACKED:
   case YUV411_PLANAR:
+  case YUV420_PLANAR:
     return (width * height * 3 / 2);
     
   case YUY2:
