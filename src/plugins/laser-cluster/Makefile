@@ -31,7 +31,7 @@ CFLAGS += -Wno-unknown-pragmas
 #CFLAGS += -DUSE_TIMETRACKER
 
 LIBS_laser_cluster = fawkescore fawkesutils fawkesaspects fvutils \
-			fawkestf fawkesinterface fawkesblackboard \
+			fawkestf fawkesinterface fawkesblackboard fawkespcl_utils \
 			Position3DInterface SwitchInterface LaserClusterInterface
 OBJS_laser_cluster = laser-cluster-plugin.o laser-cluster-thread.o
 
