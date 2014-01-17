@@ -68,6 +68,15 @@
     <field type="float" name="omega">
       Rotation speed of the robot in rad/s.
     </field>
+    <field type="float" name="des_vx">
+      Desired VX of the robot in m/s. Forward.
+    </field>
+    <field type="float" name="des_vy">
+      Desired VY of the robot in m/s. Left.
+    </field>
+    <field type="float" name="des_omega">
+      Desired Rotation speed of the robot in rad/s.
+    </field>
     <field type="uint32" name="controller">
      The ID of the controller. The controller ID is the instance serial of the sending
      interface. Only from this interface instance command messages are accepted.
@@ -91,7 +100,7 @@
     <ref>controller_thread_name</ref>
   </message>
   <message name="ResetOdometry">
-    <comment>Resets the the odometry. It sets OdometryDistance, OdometryPositionX, 
+    <comment>Resets the the odometry. It sets OdometryDistance, OdometryPositionX,
       OdometryPositionY and OdometryOrientation to zero.</comment>
   </message>
   <message name="SetOdometry">
@@ -152,13 +161,13 @@
   <message name="OrbitRot">
     <comment>Orbit around a point and rotate the robot whilst doing so. This is
              the superpositioned movement of Orbit and Rot, while the orbiting is
-	     recalculated to make a circle and take the changed rotation into account.</comment>
+       recalculated to make a circle and take the changed rotation into account.</comment>
     <field type="float" name="px">Point's X coordinate to orbit.</field>
     <field type="float" name="py">Point's Y coordinate to orbit.</field>
     <field type="float" name="omega_orbit">Angular speed around point in rad/s.</field>
     <field type="float" name="omega_rot">Angular speed of the robot's rotation in rad/s.</field>
   </message>
-  <message name="TransOrbit"> 
+  <message name="TransOrbit">
     <comment>Translate with the given speed and keep looking at the given point.</comment>
     <field type="float" name="vx">Speed for translation in X direction in m/s.</field>
     <field type="float" name="vy">Speed for translation in Y direction in m/s.</field>
