@@ -74,6 +74,10 @@ RobotinoActThread::init()
   
   msg_received_ = false;
   msg_zero_vel_ = false;
+
+  des_vx_    = 0.;
+  des_vy_    = 0.;
+  des_omega_ = 0.;
   
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
 }
@@ -109,6 +113,10 @@ RobotinoActThread::loop()
         omni_drive_->project(&m1, &m2, &m3,
                              msg->vx() * 1000., msg->vy() * 1000.,
 			     rad2deg(msg->omega()));
+
+        des_vx_    = msg->vx();
+        des_vy_    = msg->vy();
+        des_omega_ = msg->omega();
 
         set_state.speedSetPoint[0] = m1;
         set_state.speedSetPoint[1] = m2;
@@ -160,6 +168,10 @@ RobotinoActThread::loop()
       motor_if_->set_vx(vx / 1000.);
       motor_if_->set_vy(vy / 1000.);
       motor_if_->set_omega(deg2rad(omega));
+
+      motor_if_->set_des_vx(des_vx_);
+      motor_if_->set_des_vy(des_vy_);
+      motor_if_->set_des_omega(des_omega_);
 
       motor_if_->set_odometry_position_x(sensor_state.odometryX / 1000.f);
       motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
